@@ -48,7 +48,7 @@
 {208, DeviceType::BOILER, "Logamax Plus/GB192/Condens GC9000/Greenstar ErP", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {210, DeviceType::BOILER, "Cascade MC400", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {211, DeviceType::BOILER, "EasyControl Adapter", DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{219, DeviceType::BOILER, "Greenstar HIU", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{219, DeviceType::BOILER, "Greenstar HIU", DeviceFlags::EMS_DEVICE_FLAG_HIU},
 {234, DeviceType::BOILER, "Logamax Plus GB122/Condense 2300", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Controllers - 0x09 / 0x10 / 0x50
@@ -97,6 +97,7 @@
 {158, DeviceType::THERMOSTAT, "RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
 {165, DeviceType::THERMOSTAT, "RC100/Moduline 1000/1010", DeviceFlags::EMS_DEVICE_FLAG_RC100}, // 0x18, 0x38
 {172, DeviceType::THERMOSTAT, "Rego 2000/3000", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
+{215, DeviceType::THERMOSTAT, "Comfort RF", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
 {216, DeviceType::THERMOSTAT, "CRF200S", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
 {246, DeviceType::THERMOSTAT, "Comfort+2RF", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
 {253, DeviceType::THERMOSTAT, "Rego 3000/UI800", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
@@ -148,6 +149,9 @@
 
 // Heat Pumps - 0x53
 {248, DeviceType::HEATPUMP, "Hybrid Manager HM200", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+
+// Ventilation - 0x51
+{231, DeviceType::VENTILATION, "Logavent HRV176", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Heatsource - 0x60
 {228, DeviceType::HEATSOURCE, "AM200", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // alternative heatsource

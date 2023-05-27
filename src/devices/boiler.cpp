@@ -86,6 +86,26 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x49D, "HPSettings3", true, MAKE_PF_CB(process_HpSettings3));
     }
 
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_HIU) {
+        register_telegram_type(0x772, "HIUSettings", false, MAKE_PF_CB(process_HIUSettings));
+        register_telegram_type(0x779, "HIUMonitor", false, MAKE_PF_CB(process_HIUMonitor));
+
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &keepWarmTemp_,
+                              DeviceValueType::UINT,
+                              FL_(keepWarmTemp),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_keepWarmTemp));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &setReturnTemp_,
+                              DeviceValueType::UINT,
+                              FL_(setReturnTemp),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_returnTemp));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &cwFlowRate_, DeviceValueType::USHORT, FL_(cwFlowRate), DeviceValueUOM::LMIN);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &netFlowTemp_, DeviceValueType::USHORT, FL_(netFlowTemp), DeviceValueUOM::DEGREES);
+    }
+
     /*
     * Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
     * thermostat always overwrites settings in boiler
@@ -1291,28 +1311,36 @@ void Boiler::process_HpInput(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hpInput[3].state, 5);
 }
 
-// Heatpump inputs settings- type 0x486
+// Heatpump inputs settings- type 0x486 (https://github.com/emsesp/EMS-ESP32/issues/600)
 // Boiler(0x08) -> All(0x00), ?(0x0486), data: 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 // Boiler(0x08) -> All(0x00), ?(0x0486), data: 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 01 00 00 00 00 00 (offset 25)
 // Boiler(0x08) -> All(0x00), ?(0x0486), data: 00 00 (offset 51)
 void Boiler::process_HpInConfig(std::shared_ptr<const Telegram> telegram) {
-    char option[12];
-    for (uint8_t i = 0; i < 2; i++) {
-        for (uint8_t j = 0; j < 11; j++) {
+    char option[16];
+    // inputs 1,2,3 <inv>[<evu1><evu2><evu3><comp><aux><cool><heat><dhw><pv><prot><pres><mod>]
+    uint8_t index[] = {0, 3, 6, 9, 12, 15, 18, 21, 24, 39, 36, 30, 27};
+    for (uint8_t i = 0; i < 3; i++) {
+        for (uint8_t j = 0; j < 12; j++) {
             option[j] = hpInput[i].option[j] - '0';
-            telegram->read_value(option[j], j * 4 + i);
-            option[j] = option[j] ? '1' : '0';
+            telegram->read_value(option[j], index[j] + i);
+            option[j] = option[j] == 1 ? '1' : '0';
         }
-        option[11] = '\0'; // terminate string
-        has_update(hpInput[i].option, option, 12);
+        option[12] = atoi(&hpInput[i].option[12]);
+        telegram->read_value(option[12], 27 + i); // modulation
+        Helpers::smallitoa(&option[12], (uint16_t)option[12]);
+        has_update(hpInput[i].option, option, 16);
     }
+    // input 4 <inv>[<comp><aux><cool><heat><dhw><pv><prot><pres><mod>]
+    uint8_t index4[] = {42, 43, 44, 45, 46, 47, 52, 50, 49, 48};
     for (uint8_t j = 0; j < 9; j++) {
         option[j] = hpInput[3].option[j] - '0';
-        telegram->read_value(option[j], 42 + j);
-        option[j] = option[j] ? '1' : '0';
+        telegram->read_value(option[j], index4[j]);
+        option[j] = option[j] == 1 ? '1' : '0';
     }
-    option[9] = '\0'; // terminate string
-    has_update(hpInput[3].option, option, 12);
+    option[9] = atoi(&hpInput[3].option[9]);
+    telegram->read_value(option[9], 48); // modulation
+    Helpers::smallitoa(&option[9], (uint16_t)option[9]);
+    has_update(hpInput[3].option, option, 13);
 }
 
 // Boiler(0x08) -W-> Me(0x0B), HpHeaterConfig(0x0485)
@@ -1560,6 +1588,39 @@ void Boiler::process_HpSettings3(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, elHeatStep1_, 7);
     has_update(telegram, elHeatStep2_, 8);
     has_update(telegram, elHeatStep3_, 9);
+}
+
+// HIU unit
+
+// boiler(0x08) -B-> All(0x00), ?(0x0779), data: 06 05 01 01 AD 02 EF FF FF 00 00 7F FF
+void Boiler::process_HIUMonitor(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, netFlowTemp_, 5); // is * 10
+    has_update(telegram, cwFlowRate_, 9);  // is * 10
+}
+
+// Boiler(0x08) -W-> ME(0x0x), ?(0x0772), data: 00 00 00 00 00
+void Boiler::process_HIUSettings(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, keepWarmTemp_, 1);
+    has_update(telegram, setReturnTemp_, 2);
+}
+
+// HIU Settings
+bool Boiler::set_keepWarmTemp(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2temperature(value, v)) {
+        return false;
+    }
+    write_command(0x772, 1, v, 0x772);
+    return true;
+}
+
+bool Boiler::set_returnTemp(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2temperature(value, v)) {
+        return false;
+    }
+    write_command(0x772, 2, v, 0x772);
+    return true;
 }
 
 /*
@@ -2303,38 +2364,41 @@ bool Boiler::set_emergency_ops(const char * value, const int8_t id) {
 }
 
 bool Boiler::set_HpInLogic(const char * value, const int8_t id) {
-    if (id == 0 || id > 4) {
+    if (id == 0 || id > 4 || strlen(value) > 15) {
         return false;
     }
     bool v;
-    if (Helpers::value2bool(value, v)) {
+    if (strlen(value) == 1 && Helpers::value2bool(value, v)) {
         write_command(0x486, id == 4 ? 42 : id - 1, v ? 1 : 0, 0x486);
         return true;
     }
-    if (strlen(value) == 11 && id != 4) {
-        uint8_t v[11];
-        for (uint8_t i = 0; i < 11; i++) {
-            v[i] = value[i] - '0';
-            if (v[i] > 1) {
-                return false;
+    char option[] = {"xxxxxxxxxxxxxxx"};
+    strncpy(option, value, strlen(value)); // copy without termination
+    // inputs 1,2,3 <inv>[<evu1><evu2><evu3><comp><aux><cool><heat><dhw><pv><prot><pres><mod>]
+    if (id < 4) {
+        uint8_t index[] = {0, 3, 6, 9, 12, 15, 18, 21, 24, 39, 36, 30};
+        for (uint8_t i = 0; i < 12; i++) {
+            if (option[i] == '0' || option[i] == '1') {
+                write_command(0x486, index[i] + id - 1, option[i] - '0');
             }
-            write_command(0x486, i * 3 + id - 1, v[i]);
+        }
+        if (option[12] >= '0' && option[12] <= '9') {
+            write_command(0x486, 27, (uint8_t)atoi(&option[12]));
         }
         return true;
     }
-    // input 4
-    if (strlen(value) == 8 && id == 4) {
-        uint8_t v[11];
-        for (uint8_t i = 0; i < 8; i++) {
-            v[i] = value[i] - '0';
-            if (v[i] > 1) {
-                return false;
-            }
-            write_command(0x486, 42 + i, v[i]);
+
+    // input 4: <inv>[<comp><aux><cool><heat><dhw><pv><prot><pres><mod>]
+    uint8_t index4[] = {42, 43, 44, 45, 46, 47, 52, 50, 49};
+    for (uint8_t i = 0; i < 9; i++) {
+        if (option[i] == '0' || option[i] == '1') {
+            write_command(0x486, index4[i], option[i] - '0');
         }
-        return true;
     }
-    return false;
+    if (option[9] >= '0' && option[9] <= '9') {
+        write_command(0x486, 48, (uint8_t)atoi(&option[9]));
+    }
+    return true;
 }
 
 bool Boiler::set_maxHeat(const char * value, const int8_t id) {

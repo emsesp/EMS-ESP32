@@ -49,7 +49,7 @@ void WebEntity::read(WebEntity & webEntity, JsonObject & root) {
         ei["uom"]        = entityItem.uom;
         ei["value_type"] = entityItem.value_type;
         ei["writeable"]  = entityItem.writeable;
-        EMSESP::webEntityService.render_value(ei, entityItem, true);
+        EMSESP::webEntityService.render_value(ei, entityItem, true, true);
     }
 }
 
@@ -114,7 +114,7 @@ bool WebEntityService::command_setvalue(const char * value, const std::string na
                 if (!Helpers::value2bool(value, v)) {
                     return false;
                 }
-                EMSESP::send_write_request(entityItem.type_id, entityItem.device_id, entityItem.offset, v ? 0xFF : 0, 0);
+                EMSESP::send_write_request(entityItem.type_id, entityItem.device_id, entityItem.offset, v ? entityItem.type_id > 0xFF ? 1 : 0xFF : 0, 0);
             } else {
                 float f;
                 if (!Helpers::value2float(value, f)) {
@@ -143,13 +143,15 @@ bool WebEntityService::command_setvalue(const char * value, const std::string na
 }
 
 // output of a single value
-void WebEntityService::render_value(JsonObject & output, EntityItem entity, const bool useVal) {
+void WebEntityService::render_value(JsonObject & output, EntityItem entity, const bool useVal, const bool web) {
     char        payload[12];
     std::string name = useVal ? "value" : entity.name;
     switch (entity.value_type) {
     case DeviceValueType::BOOL:
         if ((uint8_t)entity.value != EMS_VALUE_BOOL_NOTSET) {
-            if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+            if (web) {
+                output[name] = Helpers::render_boolean(payload, (uint8_t)entity.value, true);
+            } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
                 output[name] = (uint8_t)entity.value ? true : false;
             } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
                 output[name] = (uint8_t)entity.value ? 1 : 0;
@@ -330,7 +332,7 @@ void WebEntityService::publish(const bool force) {
     // EMSESP::logger().debug("publish %d custom entities", output.size());
 }
 
-// count only entities with valid value
+// count only entities with valid value or command to show in dashboard
 uint8_t WebEntityService::count_entities() {
     EMSESP::webEntityService.read([&](WebEntity & webEntity) { entityItems = &webEntity.entityItems; });
     if (entityItems->size() == 0) {
@@ -339,11 +341,12 @@ uint8_t WebEntityService::count_entities() {
 
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE);
     JsonObject          output = doc.to<JsonObject>();
-
+    uint8_t             count  = 0;
     for (const EntityItem & entity : *entityItems) {
         render_value(output, entity);
+        count += (output.containsKey(entity.name) || entity.writeable) ? 1 : 0;
     }
-    return output.size();
+    return count;
 }
 
 // send to dashboard, msgpack don't like serialized, use number
@@ -352,7 +355,7 @@ void WebEntityService::generate_value_web(JsonObject & output) {
 
     output["label"] = (std::string) "Custom Entities";
     JsonArray data  = output.createNestedArray("data");
-
+    uint8_t   index = 0;
     for (const EntityItem & entity : *entityItems) {
         JsonObject obj = data.createNestedObject(); // create the object, we know there is a value
         obj["id"]      = "00" + entity.name;
@@ -364,7 +367,7 @@ void WebEntityService::generate_value_web(JsonObject & output) {
         switch (entity.value_type) {
         case DeviceValueType::BOOL: {
             char s[12];
-            obj["v"]    = Helpers::render_boolean(s, (uint8_t)entity.value);
+            obj["v"]    = Helpers::render_boolean(s, (uint8_t)entity.value, true);
             JsonArray l = obj.createNestedArray("l");
             l.add(Helpers::render_boolean(s, false, true));
             l.add(Helpers::render_boolean(s, true, true));
@@ -398,6 +401,11 @@ void WebEntityService::generate_value_web(JsonObject & output) {
             break;
         default:
             break;
+        }
+        if (!obj.containsKey("v") && !obj.containsKey("c")) {
+            data.remove(index);
+        } else {
+            index++;
         }
     }
 }

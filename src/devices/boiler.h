@@ -208,7 +208,7 @@ class Boiler : public EMSdevice {
     // Inputs
     struct {
         uint8_t state;
-        char    option[12]; // logic, block_comp, block_dhw, block_heat, block_cool, overheat_protect, evu_blocktime1,2,3, block_heater, Solar
+        char    option[16]; // logic, block_comp, block_dhw, block_heat, block_cool, overheat_protect, evu_blocktime1,2,3, block_heater, Solar, brine lowpressure, brine pump modulation
     } hpInput[4];
 
     // Heater limits
@@ -251,6 +251,12 @@ class Boiler : public EMSdevice {
     uint8_t elHeatStep1_;
     uint8_t elHeatStep2_;
     uint8_t elHeatStep3_;
+
+    // HIU
+    uint16_t cwFlowRate_;  // cold water flow rate *10
+    uint16_t netFlowTemp_; // heat network flow temperature *10
+    uint8_t  keepWarmTemp_;
+    uint8_t setReturnTemp_;
 
     /*
   // Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
@@ -306,6 +312,12 @@ class Boiler : public EMSdevice {
     void process_HpDhwSettings(std::shared_ptr<const Telegram> telegram);
     void process_HpSettings2(std::shared_ptr<const Telegram> telegram);
     void process_HpSettings3(std::shared_ptr<const Telegram> telegram);
+    // HIU
+    void process_HIUSettings(std::shared_ptr<const Telegram> telegram);
+    void process_HIUMonitor(std::shared_ptr<const Telegram> telegram);
+
+    bool set_keepWarmTemp(const char * value, const int8_t id);
+    bool set_returnTemp(const char * value, const int8_t id);
 
     // commands - none of these use the additional id parameter
     bool        set_ww_mode(const char * value, const int8_t id);

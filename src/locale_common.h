@@ -99,6 +99,7 @@ MAKE_WORD(pump)
 MAKE_WORD(heatsource)
 MAKE_WORD(scheduler)
 MAKE_WORD(custom)
+MAKE_WORD(ventilation)
 
 // brands
 MAKE_WORD_CUSTOM(bosch, "Bosch")
@@ -192,6 +193,10 @@ MAKE_NOTRANSLATION(3kW, "3 kW")
 MAKE_NOTRANSLATION(4kW, "4 kW")
 MAKE_NOTRANSLATION(6kW, "6 kW")
 MAKE_NOTRANSLATION(9kW, "9 kW")
+MAKE_NOTRANSLATION(L1, "L1")
+MAKE_NOTRANSLATION(L2, "L2")
+MAKE_NOTRANSLATION(L3, "L3")
+MAKE_NOTRANSLATION(L4, "L4")
 
 // templates - this are not translated and will be saved under options_single
 MAKE_NOTRANSLATION(tpl_datetime, "< NTP | dd.mm.yyyy-hh:mm:ss-day(0-6)-dst(0/1) >")
@@ -342,6 +347,9 @@ MAKE_ENUM(enum_bufBypass, FL_(no), FL_(mixer), FL_(valve))
 MAKE_ENUM(enum_blockMode, FL_(off), FL_(auto), FL_(blocking))
 MAKE_ENUM(enum_bufConfig, FL_(off), FL_(monovalent), FL_(bivalent))
 MAKE_ENUM(enum_blockTerm, FL_(n_o), FL_(n_c))
+
+// Ventilation
+MAKE_ENUM(enum_ventMode, FL_(auto), FL_(off), FL_(L1), FL_(L2), FL_(L3), FL_(L4), FL_(demand), FL_(sleep), FL_(intense), FL_(bypass), FL_(partymode), FL_(fireplace))
 
 #pragma GCC diagnostic pop
 

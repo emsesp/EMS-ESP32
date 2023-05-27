@@ -49,8 +49,9 @@ MAKE_WORD_TRANSLATION(pump_device, "Pump Module", "Pumpenmodul", "Pump Module", 
 MAKE_WORD_TRANSLATION(heatsource_device, "Heatsource", "Heizquelle", "Heatsource",  "Värmekälla", "Źródło ciepła", "Varmekilde", "", "Isı Kaynağı") // TODO translate
 MAKE_WORD_TRANSLATION(sensors_device, "Sensors", "Sensoren", "Sensoren", "Sensorer", "Czujniki", "Sensorer", "Capteurs", "Sensör Cihazı")
 MAKE_WORD_TRANSLATION(unknown_device, "Unknown", "Unbekannt", "Onbekend", "Okänt", "Nieznane urządzenie", "Ukjent", "Inconnu", "") // TODO translate
-MAKE_WORD_TRANSLATION(custom_device, "Custom", "", "", "", "Niestandardowe", "", "", "") // TODO translate
+MAKE_WORD_TRANSLATION(custom_device, "Custom", "Nutzerdefiniert", "", "", "Niestandardowe", "", "", "") // TODO translate
 MAKE_WORD_TRANSLATION(custom_device_name, "User defined entities", "Nutzer deklarierte Entitäten", "", "", "Encje zdefiniowane przez użytkownika", "", "", "") // TODO translate
+MAKE_WORD_TRANSLATION(ventilation_device, "Ventilation", "Lüftung", "", "", "", "", "", "") // TODO translate
 
 // commands
 // TODO translate
@@ -61,8 +62,8 @@ MAKE_WORD_TRANSLATION(send_cmd, "send a telegram", "Sende EMS-Telegramm", "", ""
 MAKE_WORD_TRANSLATION(setiovalue_cmd, "set io value", "Setze Wertevorgabe", "", "", "ustaw wartość", "sett en io verdi", "", "Giriş/Çıkış değerlerini ayarla") // TODO translate
 MAKE_WORD_TRANSLATION(changeloglevel_cmd, "change log level", "Ändere Sysloglevel", "", "", "zmień poziom log-u", "endre loggnivå", "", "Kayıt seviyesini değiştir") // TODO translate
 MAKE_WORD_TRANSLATION(fetch_cmd, "refresh all EMS values", "Lese alle EMS-Werte neu", "", "", "odśwież wszystkie wartości EMS", "oppfrisk alle EMS verdier", "", "Bütün EMS değerlerini yenile") // TODO translate
-MAKE_WORD_TRANSLATION(restart_cmd, "restart EMS-ESP", "Neustart", "", "", "uruchom ponownie EMS-ESP", "restart EMS-ESP", "", "EMS-ESPyi yeniden başlat") // TODO translate
-MAKE_WORD_TRANSLATION(watch_cmd, "watch incoming telegrams", "Watch auf eingehende Telegramme", "", "", "obserwuj przychodzące telegramy", "se innkommende telegrammer", "", "Gelen telegramları ") // TODO translate
+MAKE_WORD_TRANSLATION(restart_cmd, "restart EMS-ESP", "Neustart", "", "", "uruchom ponownie EMS-ESP", "restart EMS-ESP", "redémarrer EMS-ESP", "EMS-ESPyi yeniden başlat") // TODO translate
+MAKE_WORD_TRANSLATION(watch_cmd, "watch incoming telegrams", "Watch auf eingehende Telegramme", "", "", "obserwuj przyczodzące telegramy", "se innkommende telegrammer", "", "Gelen telegramları ") // TODO translate
 MAKE_WORD_TRANSLATION(publish_cmd, "publish all to MQTT", "Publiziere MQTT", "", "", "opublikuj wszystko na MQTT", "Publiser alt til MQTT", "", "Hepsini MQTTye gönder") // TODO translate
 MAKE_WORD_TRANSLATION(system_info_cmd, "show system status", "Zeige System-Status", "", "", "pokaż status systemu", "vis system status", "", "Sistem Durumunu Göster") // TODO translate
 MAKE_WORD_TRANSLATION(schedule_cmd, "enable schedule item", "Aktiviere Zeitplan", "", "", "aktywuj wybrany harmonogram", "", "", "") // TODO translate
@@ -266,10 +267,17 @@ MAKE_WORD_TRANSLATION(close, "close", "geschlossen", "Gesloten", "Stängd", "zam
 MAKE_WORD_TRANSLATION(cyl1, "cyl 1", "Zyl_1", "Cil 1", "Cyl 1", "cyl 1", "cyl 1", "cyl 1", "cly 1")
 MAKE_WORD_TRANSLATION(cyl2, "cyl 2", "Zyl_2", "Cil 2", "Cyl 2", "cyl 2", "cyl 2", "cyl 2", "cly 1")
 
-// Entity translations
+// ventilation
+MAKE_WORD_TRANSLATION(demand, "demand", "Bedarf")
+MAKE_WORD_TRANSLATION(intense, "intense", "Intensiv")
+MAKE_WORD_TRANSLATION(sleep, "sleep", "Einschlafen")
+MAKE_WORD_TRANSLATION(partymode, "party", "Party")
+MAKE_WORD_TRANSLATION(fireplace, "fireplace", "Kamin")
+
 // MQTT Discovery - this is special device entity for 'climate'
 MAKE_TRANSLATION(haclimate, "haclimate", "Discovery current room temperature", "Discovery Temperatur", "", "", "termostat w HA", "HA Avlest temp", "", "") // TODO translate
 
+// Entity translations
 // Boiler
 MAKE_TRANSLATION(wwtapactivated, "wwtapactivated", "turn on/off", "Durchlauferhitzer aktiv", "zet aan/uit", "på/av", "system przygotowywania", "Varmtvann active", "ecs activée", "")
 MAKE_TRANSLATION(reset, "reset", "Reset", "Reset", "Reset", "Nollställ", "kasowanie komunikatu", "nullstill", "reset", "")
@@ -486,6 +494,11 @@ MAKE_TRANSLATION(blockMode, "blockmode", "config htg. blocking mode", "Konfig. S
 MAKE_TRANSLATION(blockTerm, "blockterm", "config of block terminal", "Konfig. Sperrterminal", "Configuratie blookerterminal", "Konfiguration Blockeringsterminal", "konfiguracja terminala blokującego", "konfigurasjon blokkeringsterminal", "config. du bloque terminal", "")
 MAKE_TRANSLATION(blockHyst, "blockhyst", "hyst. for boiler block", "Hysterese Sperrmodus", "Hysterese blokeerterminal", "Hysteres Blockeringsmodul", "tryb blokowania histerezy", "hystrese blokkeringsmodus", "hyst. Blocage chaudière", "")
 MAKE_TRANSLATION(releaseWait, "releasewait", "boiler release wait time", "Wartezeit Kessel-Freigabe", "Wachttijd ketel vrijgave", "Väntetid Frisläppning", "czas oczekiwania na zwolnienie kotła", "kjele frigjøringsventetid", "temps attente libération chaudière", "")
+
+// HIU
+MAKE_TRANSLATION(netFlowTemp, "netflowtemp", "heat network flow temp")
+MAKE_TRANSLATION(cwFlowRate, "cwflowrate", "cold water flow rate")
+MAKE_TRANSLATION(keepWarmTemp, "keepwarmtemp", "keep warm temperature")
 
 // the following are dhw for the boiler and automatically tagged with 'dhw'
 MAKE_TRANSLATION(wwSelTemp, "wwseltemp", "selected temperature", "gewählte Temperatur", "Geselecteerd temperatuur", "Vald Temperatur", "temperatura wyższa/komfort", "valgt temperatur", "température sélectionnée", "")
@@ -752,6 +765,16 @@ MAKE_TRANSLATION(status, "status", "status", "Status", "Status", "Status", "stat
 
 // RF sensor, id 0x40, telegram 0x435
 MAKE_TRANSLATION(RFTemp, "rftemp", "RF room temperature sensor", "RF Raumtemperatur Sensor", "RF ruimtetemperatuur sensor", "RF Rumsgivare Temp", "bezprzewodowy czujnik temperatury pomieszczenia", "RF romsgiver temp", "capteur de température de pièce RF", "")
+
+// ventilation
+MAKE_TRANSLATION(outFresh, "outfresh", "outdoor fresh air", "Außenlufttemp.")
+MAKE_TRANSLATION(inFresh, "infresh", "indoor fresh air", "Zulufttemp.")
+MAKE_TRANSLATION(outEx, "outexhaust", "outdoor exhaust air", "Fortlufttemp.")
+MAKE_TRANSLATION(inEx, "inexhaust", "indoor exhaust air", "Ablufttemp.")
+MAKE_TRANSLATION(ventMode, "ventmode", "ventilation mode", "Belüftungsmodus")
+MAKE_TRANSLATION(ventInSpeed, "ventinspeed", "in blower speed", "Zuluft-Drehzahl")
+MAKE_TRANSLATION(ventOutSpeed, "ventoutspeed", "out blower speed", "Abluft-Drehzahl")
+MAKE_TRANSLATION(airquality, "airquality", "air quality (voc)", "Luftqualität (VOC)")
 
 /*
 // unknown fields to track (SM10), only for testing

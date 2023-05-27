@@ -137,6 +137,8 @@ const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
         return F_(heatsource);
     case DeviceType::CUSTOM:
         return F_(custom);
+    case DeviceType::VENTILATION:
+        return F_(ventilation);
     default:
         return Helpers::translated_word(FL_(unknown), true);
     }
@@ -170,6 +172,8 @@ const char * EMSdevice::device_type_2_device_name_translated() {
         return Helpers::translated_word(FL_(pump_device));
     case DeviceType::HEATSOURCE:
         return Helpers::translated_word(FL_(heatsource_device));
+    case DeviceType::VENTILATION:
+        return Helpers::translated_word(FL_(ventilation_device));
     default:
         break;
     }
@@ -233,6 +237,9 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
     }
     if (!strcmp(lowtopic, F_(custom))) {
         return DeviceType::CUSTOM;
+    }
+    if (!strcmp(lowtopic, F_(ventilation))) {
+        return DeviceType::VENTILATION;
     }
 
     return DeviceType::UNKNOWN;

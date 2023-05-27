@@ -657,10 +657,15 @@ void System::network_init(bool refresh) {
 
     last_system_check_ = 0; // force the LED to go from fast flash to pulse
 
-    // no ethernet present
-    if (phy_type_ == PHY_type::PHY_TYPE_NONE) {
+    bool disableEth;
+    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
+        disableEth = settings.ssid.length() > 0;
+    });
+
+    // no ethernet present or disabled
+    if (phy_type_ == PHY_type::PHY_TYPE_NONE || disableEth) {
         return;
-    }
+    }    // no ethernet present
 
     // configure Ethernet
     int            mdc      = 23;            // Pin# of the I²C clock signal for the Ethernet PHY - hardcoded
