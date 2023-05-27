@@ -57,8 +57,5 @@ def buildWeb():
     finally:
         os.chdir("..")
 
-
-if (len(BUILD_TARGETS) == 0 or "upload" in BUILD_TARGETS):
+if not (env.IsCleanTarget()):
     buildWeb()
-else:
-    print("Skipping build web interface for target(s): " + ", ".join(BUILD_TARGETS))
