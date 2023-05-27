@@ -56,7 +56,7 @@ class Command {
     struct CmdFunction {
         uint8_t              device_type_; // DeviceType::
         uint8_t              device_id_;
-        uint8_t              flags_; // mqtt flags for command subscriptions
+        uint8_t              flags_;       // mqtt flags for command subscriptions
         const char *         cmd_;
         cmd_function_p       cmdfunction_;
         cmd_json_function_p  cmdfunction_json_;

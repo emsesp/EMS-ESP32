@@ -85,7 +85,7 @@ StateUpdateResult WebScheduler::update(JsonObject & root, WebScheduler & webSche
 
             // calculated elapsed minutes
             si.elapsed_min = Helpers::string2minutes(si.time);
-            si.retry_cnt   = 0xFF; // no startup retries
+            si.retry_cnt   = 0xFF;                    // no startup retries
 
             webScheduler.scheduleItems.push_back(si); // add to list
             if (!webScheduler.scheduleItems.back().name.empty()) {

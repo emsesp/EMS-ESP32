@@ -685,9 +685,9 @@ void Solar::process_SM100Monitor(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, cylBottomTemp2_, 16);    // is *10 - TS5: Temperature sensor 2 cylinder, bottom, or swimming pool
     has_update(telegram, heatExchangerTemp_, 20); // is *10 - TS6: Heat exchanger temperature sensor
 
-    has_update(telegram, collector2Temp_, 6); // is *10 - TS7: Temperature sensor for collector array 2
-    has_update(telegram, cylMiddleTemp_, 8);  // is *10 - TS14: cylinder middle temperature
-    has_update(telegram, retHeatAssist_, 10); // is *10 - TS15: return temperature heating assistance
+    has_update(telegram, collector2Temp_, 6);     // is *10 - TS7: Temperature sensor for collector array 2
+    has_update(telegram, cylMiddleTemp_, 8);      // is *10 - TS14: cylinder middle temperature
+    has_update(telegram, retHeatAssist_, 10);     // is *10 - TS15: return temperature heating assistance
 }
 
 // SM100wwTemperature - 0x07D6
@@ -749,8 +749,8 @@ void Solar::process_SM100Monitor2(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram->read_value(heatCntFlowTemp_, 0)); // is *10
     has_update(telegram->read_value(heatCntRetTemp_, 2));  // is *10
     has_update(telegram->read_value(heatCnt_, 12));
-    has_update(telegram->read_value(swapRetTemp_, 6));  // is *10
-    has_update(telegram->read_value(swapFlowTemp_, 8)); // is *10
+    has_update(telegram->read_value(swapRetTemp_, 6));     // is *10
+    has_update(telegram->read_value(swapFlowTemp_, 8));    // is *10
 }
 
 #pragma GCC diagnostic push
@@ -879,7 +879,7 @@ void Solar::process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram) 
     has_update(telegram, collectorTemp_, 4); // Collector Temperature
     has_update(telegram, cylBottomTemp_, 6); // Temperature Bottom of Solar Boiler cyl
     uint16_t Wh = energyLastHour_ / 10;
-    telegram->read_value(Wh, 2); // Solar Energy produced in last hour only ushort, is not * 10
+    telegram->read_value(Wh, 2);             // Solar Energy produced in last hour only ushort, is not * 10
     if (energyLastHour_ != Wh * 10) {
         energyLastHour_ = Wh * 10;
         has_update(&energyLastHour_);

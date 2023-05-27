@@ -214,7 +214,7 @@ void TemperatureSensor::loop() {
                     // LOG_DEBUG("Adding %d sensor(s) from first scan", firstscan_);
                 } else if ((scancnt_ <= 0) && (firstscan_ != sensors_.size())) { // check 2 times for no change of sensor #
                     scancnt_ = SCAN_START;
-                    sensors_.clear(); // restart scanning and clear to get correct numbering
+                    sensors_.clear();                                            // restart scanning and clear to get correct numbering
                 }
                 state_ = State::IDLE;
             }

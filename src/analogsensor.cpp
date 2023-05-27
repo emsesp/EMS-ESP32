@@ -260,7 +260,7 @@ void AnalogSensor::measure() {
     for (auto & sensor : sensors_) {
         if (sensor.type() == AnalogType::DIGITAL_IN || sensor.type() == AnalogType::COUNTER || sensor.type() == AnalogType::TIMER
             || sensor.type() == AnalogType::RATE) {
-            auto old_value       = sensor.value(); // remember current value before reading
+            auto old_value       = sensor.value();     // remember current value before reading
             auto current_reading = digitalRead(sensor.gpio());
             if (sensor.poll_ != current_reading) {     // check for pinchange
                 sensor.polltime_ = uuid::get_uptime(); // remember time of pinchange
@@ -274,7 +274,7 @@ void AnalogSensor::measure() {
                 } else if (!sensor.poll_) { // falling edge
                     if (sensor.type() == AnalogType::COUNTER) {
                         sensor.set_value(old_value + sensor.factor());
-                    } else if (sensor.type() == AnalogType::RATE) { // dafault uom: Hz (1/sec) with factor 1
+                    } else if (sensor.type() == AnalogType::RATE) {  // dafault uom: Hz (1/sec) with factor 1
                         sensor.set_value(sensor.factor() * 1000 / (sensor.polltime_ - sensor.last_polltime_));
                     } else if (sensor.type() == AnalogType::TIMER) { // default seconds with factor 1
                         sensor.set_value(sensor.factor() * (sensor.polltime_ - sensor.last_polltime_) / 1000);
@@ -676,7 +676,7 @@ bool AnalogSensor::command_info(const char * value, const int8_t id, JsonObject 
             dataSensor["value"] = sensor.value();
         } else if (id == 0) { // output values command
             output[sensor.name()] = sensor.value();
-        } else { // if someone wants gpio numbers
+        } else {              // if someone wants gpio numbers
             char gpio_str[9];
             snprintf(gpio_str, sizeof(gpio_str), "gpio_%02d", sensor.gpio());
             output[gpio_str] = sensor.value();
