@@ -148,7 +148,7 @@ const DashboardDevices: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: minmax(0, 1fr) 150px 40px;
+        --data-table-library_grid-template-columns: minmax(0, 1fr) minmax(150px, auto) 40px;
         height: auto;
         max-height: 100%;
         overflow-y: scroll;

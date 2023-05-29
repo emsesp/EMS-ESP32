@@ -96,7 +96,7 @@ const DashboardSensors: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: 80px repeat(1, minmax(0, 1fr)) 120px 100px;
+        --data-table-library_grid-template-columns: 80px repeat(1, minmax(0, 1fr)) 120px 110px;
       `
     }
   ]);
