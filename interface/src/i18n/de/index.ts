@@ -47,12 +47,14 @@ const de: Translation = {
   RESET: 'Zurücksetzen',
   APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
   UPDATE: 'Update', // TODO translate
+  EXECUTE: 'Execute', // TODO translate
   REMOVE: 'Entfernen',
   PROBLEM_UPDATING: 'Problem beim Aktualisieren',
   PROBLEM_LOADING: 'Problem beim Laden',
   ACCESS_DENIED: 'Zugriff abgelehnt',
   ANALOG_SENSOR: 'Analogsensor',
   ANALOG_SENSORS: 'Analogsensoren',
+  SETTINGS: 'Einstellungen',
   UPDATED_OF: '{0} Aktualisiert',
   UPDATE_OF: '{0} Aktualisieren',
   REMOVED_OF: '{0} Entfernt',
@@ -171,7 +173,6 @@ const de: Translation = {
   HELP_INFORMATION_4: 'Bitte laden Sie die System-Details und hängen Sie sie an das Support-Issue an. ',
   HELP_INFORMATION_5: 'EMS-ESP ist ein freies Open-Source Projekt. Bitte unterstützen Sie die zukünftige Entwicklung mit einem "Star" auf Github!',
   SUPPORT_INFO: 'Support Info',
-  UPLOAD_OF: '{0} Hochladen',
   UPLOAD: 'Hochladen',
   DOWNLOAD: '{{H|h|h}}erunterladen',
   ABORTED: 'abgebrochen',

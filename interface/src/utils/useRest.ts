@@ -55,7 +55,7 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
         if (response.status === 202) {
           setRestartNeeded(true);
         } else {
-          toast.success(LL.UPDATED_OF(LL.SETTINGS_OF('')));
+          toast.success(LL.UPDATED_OF(LL.SETTINGS()));
         }
       } catch (error) {
         const message = extractErrorMessage(error, LL.PROBLEM_UPDATING());

@@ -71,7 +71,7 @@ const SettingsCustomizationDialog = ({ open, onClose, onSave, selectedItem }: Se
         </Box>
         <Box color="warning.main" mt={1} mb={2}>
           <Typography variant="body2">
-            {LL.DEFAULT(1) + ' ' + LL.ENTITY_NAME()}:&nbsp;{editItem.n}
+            {LL.DEFAULT(1) + ' ' + LL.ENTITY_NAME(1)}:&nbsp;{editItem.n}
           </Typography>
         </Box>
         <Box mb={3}>
@@ -124,7 +124,7 @@ const SettingsCustomizationDialog = ({ open, onClose, onSave, selectedItem }: Se
           {LL.CANCEL()}
         </Button>
         <Button startIcon={<DoneIcon />} variant="outlined" onClick={save} color="primary">
-          {LL.UPDATE()}
+          {LL.UPDATE(0)}
         </Button>
       </DialogActions>
     </Dialog>

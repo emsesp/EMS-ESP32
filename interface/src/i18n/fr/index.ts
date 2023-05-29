@@ -47,12 +47,14 @@ const fr: Translation = {
   RESET: 'Réinitialiser',
   APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
   UPDATE: 'Update', // TODO translate
+  EXECUTE: 'Execute', // TODO translate
   REMOVE: 'Enlever',
   PROBLEM_UPDATING: 'Problème lors de la mise à jour',
   PROBLEM_LOADING: 'Problème lors du chargement',
   ACCESS_DENIED: 'Accès refusé',
   ANALOG_SENSOR: 'Capteur analogique',
   ANALOG_SENSORS: 'Capteurs analogiques',
+  SETTINGS: 'Paramètres',
   UPDATED_OF: '{0} mis à jour',
   UPDATE_OF: 'Mise à jour de {0}',
   REMOVED_OF: '{0} enlevé',
@@ -171,7 +173,6 @@ const fr: Translation = {
   HELP_INFORMATION_4: 'n\'oubliez pas de télécharger et de joindre les informations relatives à votre système pour obtenir une réponse plus rapide lorsque vous signalez un problème',
   HELP_INFORMATION_5: 'EMS-ESP est un projet libre et open-source. Merci de soutenir son développement futur en lui donnant une étoile sur Github !',
   SUPPORT_INFO: 'Information de support',
-  UPLOAD_OF: 'Upload de {0}',
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
   ABORTED: 'annulé',

@@ -119,7 +119,7 @@ const DashboarDevicesDialog = ({
       }}
     >
       <DialogTitle>
-        {selectedItem.v === '' && selectedItem.c ? LL.RUN_COMMAND() : writeable ? LL.CHANGE_VALUE() : LL.VALUE(1)}
+        {selectedItem.v === '' && selectedItem.c ? LL.RUN_COMMAND() : writeable ? LL.CHANGE_VALUE() : LL.VALUE(0)}
       </DialogTitle>
       <DialogContent dividers>
         <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
@@ -130,7 +130,7 @@ const DashboarDevicesDialog = ({
             {editItem.l ? (
               <TextField
                 name="v"
-                label={LL.VALUE(1)}
+                label={LL.VALUE(0)}
                 value={editItem.v}
                 disabled={!writeable}
                 autoFocus
@@ -148,7 +148,7 @@ const DashboarDevicesDialog = ({
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="v"
-                label={LL.VALUE(1)}
+                label={LL.VALUE(0)}
                 value={Math.round(editItem.v * 10) / 10}
                 autoFocus
                 disabled={!writeable}
@@ -164,7 +164,7 @@ const DashboarDevicesDialog = ({
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="v"
-                label={LL.VALUE(1)}
+                label={LL.VALUE(0)}
                 value={editItem.v}
                 disabled={!writeable}
                 autoFocus
@@ -189,7 +189,7 @@ const DashboarDevicesDialog = ({
               {LL.CANCEL()}
             </Button>
             <Button startIcon={<WarningIcon color="warning" />} variant="contained" onClick={save} color="info">
-              {LL.UPDATE()}
+              {selectedItem.v === '' && selectedItem.c ? LL.EXECUTE() : LL.UPDATE()}
             </Button>
           </>
         ) : (

@@ -139,7 +139,7 @@ const SystemLog: FC = () => {
         } else {
           setOrigData(response.data);
           setDirtyFlags([]);
-          toast.success(LL.UPDATED_OF(LL.SETTINGS_OF('')));
+          toast.success(LL.UPDATED_OF(LL.SETTINGS()));
         }
       } catch (error) {
         toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));

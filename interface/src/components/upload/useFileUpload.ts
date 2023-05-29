@@ -60,7 +60,7 @@ const useFileUpload = ({ upload }: MediaUploadOptions) => {
         toast.warning(LL.UPLOAD() + ' ' + LL.ABORTED());
       } else {
         resetUploadingStates();
-        toast.error(extractErrorMessage(error, LL.UPLOAD() + ' ' + LL.FAILED()));
+        toast.error(extractErrorMessage(error, LL.UPLOAD() + ' ' + LL.FAILED(0)));
       }
     }
   };

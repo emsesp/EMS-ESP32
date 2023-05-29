@@ -182,7 +182,7 @@ MAKE_WORD_TRANSLATION(disinfecting, "disinfecting", "Desinfizieren", "Desinfecte
 MAKE_WORD_TRANSLATION(no_heat, "no heat", "keine Wärme", "Geen warmte", "Ingen värme", "brak ciepła", "ingen varme", "pas de chauffage", "ısınma yok")
 MAKE_WORD_TRANSLATION(heatrequest, "heat request", "Wärmeanforderung", "Verwarmignsverzoek", "Värmeförfrågan", "zapotrzebowanie na ciepło", "varmeforespørsel", "demande de chauffage", "ısınma ihtiyacı")
 MAKE_WORD_TRANSLATION(valve, "valve", "Ventil", "Klep", "Ventil", "zawór", "ventil", "valve", "vana")
-MAKE_WORD_TRANSLATION(proportional, "proportional", "", "", "", "", "proposjonal", "", "") // TODO translate
+MAKE_WORD_TRANSLATION(proportional, "proportional", "", "", "", "proporcjonalny", "proposjonal", "", "") // TODO translate
 MAKE_WORD_TRANSLATION(deltaP1, "deltaP-1", "", "", "", "", "deltaP-1", "", "") // TODO translate
 MAKE_WORD_TRANSLATION(deltaP2, "deltaP-2", "", "", "", "", "deltaP-2", "", "") // TODO translate
 MAKE_WORD_TRANSLATION(deltaP3, "deltaP-3", "", "", "", "", "deltaP-3", "", "") // TODO translate
@@ -331,7 +331,7 @@ MAKE_TRANSLATION(maintenanceType, "maintenance", "maintenance scheduled", "Wartu
 MAKE_TRANSLATION(maintenanceTime, "maintenancetime", "time to next maintenance", "Wartung in", "Onderhoud in", "Tid till nästa underhall", "czas do kolejnego przeglądu", "vedlikeholdstid", "durée avant la prochaine maintenance", "")
 MAKE_TRANSLATION(emergencyOps, "emergencyops", "emergency operation", "Notoperation", "Noodoperatie", "Nöddrift", "praca w trybie awaryjnym", "nøddrift", "opération d'urgence", "")
 MAKE_TRANSLATION(emergencyTemp, "emergencytemp", "emergency temperature", "Nottemperatur", "Noodtemperatuur", "Nöddrift temperatur", "temperatura w trybie awaryjnym", "nødtemperatur", "température d'urgence", "")
-MAKE_TRANSLATION(pumpMode, "pumpmode", "boiler pump mode", "Kesselpumpen Modus", "", "", "", "pumpemodus", "", "") // TODO translate
+MAKE_TRANSLATION(pumpMode, "pumpmode", "boiler pump mode", "Kesselpumpen Modus", "", "", "tryb pracy pompy kotła", "pumpemodus", "", "") // TODO translate
 
 // heatpump/compress specific
 MAKE_TRANSLATION(upTimeControl, "uptimecontrol", "total operating time heat", "Betriebszeit Heizen gesamt", "Totale bedrijfstijd", "Total tid uppvärmning", "łączny czas generowania ciepła", "total driftstid", "durée totale de fonctionnement chauffage", "") // TODO translate
@@ -473,7 +473,7 @@ MAKE_TRANSLATION(valveReturn, "valvereturn", "return valve", "Rückfluss-Ventil"
 MAKE_TRANSLATION(aPumpMod, "apumpmod", "alternative hs pump modulation", "Alternativer WE Pumpenmodulation", "Alternatieve warmtebron pomp modulatie", "Alternativ Pumpmodulering Värmekälla", "modulacja pompy alternatywnego źródła ciepła", "alternativ pumpemodulering varmekilde", "modulation alternative pompe hs", "")
 MAKE_TRANSLATION(heatSource, "heatsource", "alternative heating active", "Alternativer Wärmeerzeuger aktiv", "Alternatieve warmtebron aktief", "Alternativ Värmekälla aktiv", "aktywne alternatywne źródło ciepła", "alternativ varmekilde aktiv", "chauffage alternatif actif", "")
 MAKE_TRANSLATION(aPump, "apump", "alternative hs pump", "Alternativer WE Pumpe", "Alternatieve warmtebron pomp", "Alternativ Pump Värmekälla", "pompy alternatywnego źródła ciepła", "alternativ pumpe varmekilde", "alternative pompe hs", "")
-MAKE_TRANSLATION(burner, "burner", "burner", "Brenner", "", "", "palnik", "", "") // TODO translate
+MAKE_TRANSLATION(burner, "burner", "burner", "Brenner", "", "", "palnik", "", "", "") // TODO translate
 MAKE_TRANSLATION(heatRequest, "heatrequest", "heat request", "Wärmeanforderung", "", "", "zapotrzebowanie na ciepło", "varmeforespørsel", "", "") // TODO translate
 MAKE_TRANSLATION(blockRemain, "blockremain", "remaining blocktime", "verbleibende Blockzeit", "", "", "czas do końca blokady", "gjenstående blokkeringstid", "", "") // TODO translate
 MAKE_TRANSLATION(blockRemainWw, "blockremainww", "remaining blocktime dhw", "verbleibende Blockzeit WW", "", "", "czas do końca blokady c.w.u.", "gjenværende blokkeringstid bereder", "", "") // TODO translate
