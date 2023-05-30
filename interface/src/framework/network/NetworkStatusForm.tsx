@@ -78,7 +78,7 @@ const NetworkStatusForm: FC = () => {
       case NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED:
         return LL.CONNECTED(0) + ' (Ethernet)';
       case NetworkConnectionStatus.WIFI_STATUS_CONNECT_FAILED:
-        return LL.CONNECTED(1) + ' ' + LL.FAILED();
+        return LL.CONNECTED(1) + ' ' + LL.FAILED(0);
       case NetworkConnectionStatus.WIFI_STATUS_CONNECTION_LOST:
         return LL.CONNECTED(1) + ' ' + LL.LOST();
       case NetworkConnectionStatus.WIFI_STATUS_DISCONNECTED:

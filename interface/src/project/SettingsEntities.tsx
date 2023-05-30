@@ -53,7 +53,7 @@ const SettingsEntities: FC = () => {
 
   const entity_theme = useTheme({
     Table: `
-      --data-table-library_grid-template-columns: repeat(1, minmax(60px, 1fr)) 80px 80px 80px 80px;
+      --data-table-library_grid-template-columns: repeat(1, minmax(60px, 1fr)) minmax(80px, auto) 80px 80px 80px;
     `,
     BaseRow: `
       font-size: 14px;

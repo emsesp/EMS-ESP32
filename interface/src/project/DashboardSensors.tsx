@@ -96,7 +96,7 @@ const DashboardSensors: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: 80px repeat(1, minmax(0, 1fr)) 120px 100px;
+        --data-table-library_grid-template-columns: 80px repeat(1, minmax(0, 1fr)) 120px 110px;
       `
     }
   ]);
@@ -236,11 +236,11 @@ const DashboardSensors: FC = () => {
         offset: ts.o
       });
       if (response.status === 204) {
-        toast.error(LL.UPLOAD_OF(LL.SENSOR()) + ' ' + LL.FAILED());
+        toast.error(LL.UPDATE_OF(LL.SENSOR(2)) + ' ' + LL.FAILED(1));
       } else if (response.status === 403) {
         toast.error(LL.ACCESS_DENIED());
       } else {
-        toast.success(LL.UPDATED_OF(LL.SENSOR()));
+        toast.success(LL.UPDATED_OF(LL.SENSOR(1)));
       }
     } catch (error) {
       toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
@@ -293,11 +293,11 @@ const DashboardSensors: FC = () => {
       });
 
       if (response.status === 204) {
-        toast.error(LL.UPDATE_OF(LL.ANALOG_SENSOR()) + ' ' + LL.FAILED());
+        toast.error(LL.UPDATE_OF(LL.ANALOG_SENSOR(5)) + ' ' + LL.FAILED(1));
       } else if (response.status === 403) {
         toast.error(LL.ACCESS_DENIED());
       } else {
-        toast.success(LL.UPDATED_OF(LL.ANALOG_SENSOR()));
+        toast.success(LL.UPDATED_OF(LL.ANALOG_SENSOR(2)));
       }
     } catch (error) {
       toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
@@ -431,7 +431,7 @@ const DashboardSensors: FC = () => {
       {sensorData?.analog_enabled === true && (
         <>
           <Typography sx={{ pt: 4, pb: 1 }} variant="h6" color="secondary">
-            {LL.ANALOG_SENSORS()}
+            {LL.ANALOG_SENSORS(0)}
           </Typography>
           <RenderAnalogSensors />
           {selectedAnalogSensor && (
@@ -460,7 +460,7 @@ const DashboardSensors: FC = () => {
             startIcon={<AddCircleOutlineOutlinedIcon />}
             onClick={addAnalogSensor}
           >
-            {LL.ADD(0) + ' ' + LL.ANALOG_SENSOR()}
+            {LL.ADD(0) + ' ' + LL.ANALOG_SENSOR(1)}
           </Button>
         </Box>
       </ButtonRow>

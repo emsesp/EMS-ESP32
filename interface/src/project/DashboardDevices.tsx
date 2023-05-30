@@ -148,7 +148,7 @@ const DashboardDevices: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: minmax(0, 1fr) 150px 40px;
+        --data-table-library_grid-template-columns: minmax(0, 1fr) minmax(150px, auto) 40px;
         height: auto;
         max-height: 100%;
         overflow-y: scroll;
@@ -318,7 +318,7 @@ const DashboardDevices: FC = () => {
 
   const handleDownloadCsv = () => {
     const columns = [
-      { accessor: (dv: any) => dv.id.slice(2), name: LL.ENTITY_NAME() },
+      { accessor: (dv: any) => dv.id.slice(2), name: LL.ENTITY_NAME(0) },
       {
         accessor: (dv: any) => (typeof dv.v === 'number' ? new Intl.NumberFormat().format(dv.v) : dv.v),
         name: LL.VALUE(0)
@@ -515,7 +515,7 @@ const DashboardDevices: FC = () => {
 
           <Grid item xs>
             <Typography sx={{ ml: 1 }} variant="subtitle2" color="primary">
-              {shown_data.length + ' ' + LL.ENTITIES()}
+              {shown_data.length + ' ' + LL.ENTITIES(shown_data.length)}
               <IconButton onClick={() => setShowDeviceInfo(true)}>
                 <InfoOutlinedIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
               </IconButton>
@@ -553,7 +553,7 @@ const DashboardDevices: FC = () => {
                       endIcon={getSortIcon(dv_sort.state, 'NAME')}
                       onClick={() => dv_sort.fns.onToggleSort({ sortKey: 'NAME' })}
                     >
-                      {LL.ENTITY_NAME()}
+                      {LL.ENTITY_NAME(0)}
                     </Button>
                   </HeaderCell>
                   <HeaderCell resize>

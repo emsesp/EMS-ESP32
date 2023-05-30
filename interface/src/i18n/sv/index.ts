@@ -47,12 +47,14 @@ const sv: Translation = {
   RESET: 'Nollställ',
   APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
   UPDATE: 'Update', // TODO translate
+  EXECUTE: 'Execute', // TODO translate
   REMOVE: 'Ta bort',
   PROBLEM_UPDATING: 'Problem vid uppdatering',
   PROBLEM_LOADING: 'Problem vid hämtning',
   ACCESS_DENIED: 'Åtkomst Nekad',
   ANALOG_SENSOR: 'Analog Sensor',
   ANALOG_SENSORS: 'Analoga Sensorer',
+  SETTINGS: 'Inställningar',
   UPDATED_OF: '{0} Uppdaterad',
   UPDATE_OF: '{0} Uppdatera',
   REMOVED_OF: '{0} Raderad',
@@ -171,7 +173,6 @@ const sv: Translation = {
   HELP_INFORMATION_4: 'Bifoga din systeminformation för snabbare hantering när du rapporterar ett problem',
   HELP_INFORMATION_5: 'EMS-ESP är gratis och är öppen källkod. Bidra till utvecklingen genom att ge oss en stjärna på GitHub!',
   SUPPORT_INFO: 'Supportinfo',
-  UPLOAD_OF: '{0} Uppladdning',
   UPLOAD: 'Uppladdning',
   DOWNLOAD: '{{N|n|n}}edladdning',
   ABORTED: 'Avbruten',

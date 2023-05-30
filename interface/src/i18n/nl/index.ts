@@ -47,12 +47,14 @@ const nl: Translation = {
   RESET: 'Reset',
   APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
   UPDATE: 'Update', // TODO translate
+  EXECUTE: 'Execute', // TODO translate
   REMOVE: 'Verwijderen',
   PROBLEM_UPDATING: 'Probleem met updaten',
   PROBLEM_LOADING: 'Probleem met laden',
   ACCESS_DENIED: 'Toegang geweigerd',
   ANALOG_SENSOR: 'Analoge sensor',
   ANALOG_SENSORS: 'Analoge Sensoren',
+  SETTINGS: 'Instellingen',
   UPDATED_OF: '{0} Bijgewerkt',
   UPDATE_OF: '{0} Bijwerken',
   REMOVED_OF: '{0} Verwijderd',
@@ -171,7 +173,6 @@ const nl: Translation = {
   HELP_INFORMATION_4: 'zorg dat je ook je systeem details zijn toevoeged voor een sneller antwoord',
   HELP_INFORMATION_5: 'EMS-ESP is een gratis en open source project. Steun ons met een Star op Github!',
   SUPPORT_INFO: 'Support Info',
-  UPLOAD_OF: '{0} Upload',
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
   ABORTED: 'afgebroken',

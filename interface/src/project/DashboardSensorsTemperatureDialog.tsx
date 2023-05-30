@@ -74,7 +74,7 @@ const DashboardSensorsTemperatureDialog = ({
       <DialogContent dividers>
         <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
           <Typography variant="body2">
-            {LL.ID_OF(LL.SENSOR())}: {editItem.id}
+            {LL.ID_OF(LL.SENSOR(0))}: {editItem.id}
           </Typography>
         </Box>
         <Grid container spacing={1}>

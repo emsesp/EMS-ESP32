@@ -79,7 +79,7 @@ const DashboardSensorsAnalogDialog = ({
   return (
     <Dialog open={open} onClose={close}>
       <DialogTitle>
-        {creating ? LL.ADD(1) + ' ' + LL.NEW(1) : LL.EDIT()}&nbsp;{LL.ANALOG_SENSOR()}
+        {creating ? LL.ADD(1) + ' ' + LL.NEW(0) : LL.EDIT()}&nbsp;{LL.ANALOG_SENSOR(0)}
       </DialogTitle>
       <DialogContent dividers>
         <Grid container spacing={2}>
