@@ -42,6 +42,7 @@ const NTPSettingsForm: FC = () => {
     };
 
     const changeTimeZone = (event: React.ChangeEvent<HTMLInputElement>) => {
+      updateFormValue(event);
       setData({
         ...data,
         tz_label: event.target.value,
