@@ -34,10 +34,10 @@ class Ventilation : public EMSdevice {
     int16_t  inEx_;
     int16_t  outEx_;
     uint16_t voc_;
-    uint8_t  bypass_;
-    uint16_t filterRemain_;
-    uint8_t  ventInSpeed_;
-    uint8_t  ventOutSpeed_;
+    // uint8_t  bypass_;
+    // uint16_t filterRemain_;
+    uint8_t ventInSpeed_;
+    uint8_t ventOutSpeed_;
 
     // handlers: 0x056B 0x0575 0x0583 0x0585 0x0586 0x0587 0x0588 0x058D 0x058E 0x058F 0x0590 0x05CF 0x05D9 0x05E3
     void process_SetMessage(std::shared_ptr<const Telegram> telegram);
