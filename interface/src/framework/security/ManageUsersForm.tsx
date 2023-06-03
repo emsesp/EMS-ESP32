@@ -1,22 +1,24 @@
+import CancelIcon from '@mui/icons-material/Cancel';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import SaveIcon from '@mui/icons-material/Save';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
+import WarningIcon from '@mui/icons-material/Warning';
 import { Button, IconButton, Box } from '@mui/material';
 
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
 import { useContext, useState } from 'react';
 
+import { unstable_useBlocker as useBlocker } from 'react-router-dom';
 import GenerateToken from './GenerateToken';
 import UserForm from './UserForm';
 import type { FC } from 'react';
 import type { SecuritySettings, User } from 'types';
 import * as SecurityApi from 'api/security';
-import { ButtonRow, FormLoader, MessageBox, SectionContent } from 'components';
+import { ButtonRow, FormLoader, MessageBox, SectionContent, BlockNavigation } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import { useRest } from 'utils';
@@ -30,9 +32,11 @@ const ManageUsersForm: FC = () => {
 
   const [user, setUser] = useState<User>();
   const [creating, setCreating] = useState<boolean>(false);
+  const [changed, setChanged] = useState<number>(0);
   const [generatingToken, setGeneratingToken] = useState<string>();
   const authenticatedContext = useContext(AuthenticatedContext);
 
+  const blocker = useBlocker(changed !== 0);
   const { LL } = useI18nContext();
 
   const table_theme = useTheme({
@@ -85,6 +89,7 @@ const ManageUsersForm: FC = () => {
     const removeUser = (toRemove: User) => {
       const users = data.users.filter((u) => u.username !== toRemove.username);
       setData({ ...data, users });
+      setChanged(changed + 1);
     };
 
     const createUser = () => {
@@ -110,6 +115,7 @@ const ManageUsersForm: FC = () => {
         const users = [...data.users.filter((u) => u.username !== user.username), user];
         setData({ ...data, users });
         setUser(undefined);
+        setChanged(changed + 1);
       }
     };
 
@@ -124,6 +130,12 @@ const ManageUsersForm: FC = () => {
     const onSubmit = async () => {
       await saveData();
       await authenticatedContext.refresh();
+      setChanged(0);
+    };
+
+    const onCancelSubmit = () => {
+      loadData();
+      setChanged(0);
     };
 
     const user_table = data.users.map((u) => ({ ...u, id: u.username }));
@@ -172,16 +184,30 @@ const ManageUsersForm: FC = () => {
 
         <Box display="flex" flexWrap="wrap">
           <Box flexGrow={1} sx={{ '& button': { mt: 2 } }}>
-            <Button
-              startIcon={<SaveIcon />}
-              disabled={saving || noAdminConfigured()}
-              variant="outlined"
-              color="primary"
-              type="submit"
-              onClick={onSubmit}
-            >
-              {LL.UPDATE()}
-            </Button>
+            {changed !== 0 && (
+              <ButtonRow>
+                <Button
+                  startIcon={<CancelIcon />}
+                  disabled={saving}
+                  variant="outlined"
+                  color="primary"
+                  type="submit"
+                  onClick={onCancelSubmit}
+                >
+                  {LL.CANCEL()}
+                </Button>
+                <Button
+                  startIcon={<WarningIcon color="warning" />}
+                  disabled={saving || noAdminConfigured()}
+                  variant="contained"
+                  color="info"
+                  type="submit"
+                  onClick={onSubmit}
+                >
+                  {LL.APPLY_CHANGES(changed)}
+                </Button>
+              </ButtonRow>
+            )}
           </Box>
 
           <Box flexWrap="nowrap" whiteSpace="nowrap">
@@ -208,6 +234,7 @@ const ManageUsersForm: FC = () => {
 
   return (
     <SectionContent title={LL.MANAGE_USERS()} titleGutter>
+      {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>
   );
