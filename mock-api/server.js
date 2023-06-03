@@ -1837,6 +1837,11 @@ let emsesp_schedule = {
 
 // CUSTOMIZATIONS
 
+const emsesp_deviceentities_1 = [{}];
+const emsesp_deviceentities_3 = [{}];
+const emsesp_deviceentities_5 = [{}];
+const emsesp_deviceentities_6 = [{}];
+
 const emsesp_deviceentities_2 = [
   {
     v: '(0)',
@@ -2145,9 +2150,7 @@ rest_server.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
   const id = req.body.id;
   console.log('send back device data for ' + id);
   let data = {};
-  if (id === 7) {
-    data = emsesp_devicedata_7;
-  }
+
   if (id === 1) {
     data = emsesp_devicedata_1;
   }
@@ -2166,6 +2169,9 @@ rest_server.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
   if (id === 6) {
     data = emsesp_devicedata_6;
   }
+  if (id === 7) {
+    data = emsesp_devicedata_7;
+  }
   if (id === 99) {
     data = emsesp_devicedata_99;
   }
@@ -2177,9 +2183,6 @@ rest_server.post(EMSESP_DEVICEENTITIES_ENDPOINT, (req, res) => {
   const id = req.body.id;
   let data = null;
 
-  if (id === 7) {
-    data = emsesp_deviceentities_7;
-  }
   if (id === 1) {
     data = emsesp_deviceentities_1;
   }
@@ -2197,6 +2200,9 @@ rest_server.post(EMSESP_DEVICEENTITIES_ENDPOINT, (req, res) => {
   }
   if (id === 6) {
     data = emsesp_deviceentities_6;
+  }
+  if (id === 7) {
+    data = emsesp_deviceentities_7;
   }
 
   res.write(msgpack.encode(data), 'binary');
@@ -2329,11 +2335,7 @@ rest_server.post(EMSESP_WRITE_ENTITIES_ENDPOINT, (req, res) => {
 rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, (req, res) => {
   const devicevalue = req.body.devicevalue;
   const id = req.body.id;
-  if (id === 7) {
-    console.log('Write device value for: ' + JSON.stringify(devicevalue));
-    objIndex = emsesp_devicedata_7.data.findIndex((obj) => obj.c == devicevalue.c);
-    emsesp_devicedata_7.data[objIndex] = devicevalue;
-  }
+
   if (id === 1) {
     console.log('Write device value for: ' + JSON.stringify(devicevalue));
     objIndex = emsesp_devicedata_1.data.findIndex((obj) => obj.c == devicevalue.c);
@@ -2363,6 +2365,11 @@ rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, (req, res) => {
     console.log('Write device value for: ' + JSON.stringify(devicevalue));
     objIndex = emsesp_devicedata_6.data.findIndex((obj) => obj.c == devicevalue.c);
     emsesp_devicedata_6.data[objIndex] = devicevalue;
+  }
+  if (id === 7) {
+    console.log('Write device value for: ' + JSON.stringify(devicevalue));
+    objIndex = emsesp_devicedata_7.data.findIndex((obj) => obj.c == devicevalue.c);
+    emsesp_devicedata_7.data[objIndex] = devicevalue;
   }
   if (id === 99) {
     console.log('Write device value for: ' + JSON.stringify(devicevalue));
