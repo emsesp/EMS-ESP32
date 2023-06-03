@@ -33,8 +33,8 @@ MqttSettingsService::MqttSettingsService(AsyncWebServer * server, FS * fs, Secur
     , _retainedPassword(nullptr)
     , _reconfigureMqtt(false)
     , _disconnectedAt(0)
-    , _disconnectReason(AsyncMqttClientDisconnectReason::TCP_DISCONNECTED)
-    , _mqttClient() {
+    , _disconnectReason(espMqttClientTypes::DisconnectReason::TCP_DISCONNECTED)
+    , _mqttClient(espMqttClientTypes::UseInternalTask::NO) {
     WiFi.onEvent(std::bind(&MqttSettingsService::WiFiEvent, this, _1, _2));
     _mqttClient.onConnect(std::bind(&MqttSettingsService::onMqttConnect, this, _1));
     _mqttClient.onDisconnect(std::bind(&MqttSettingsService::onMqttDisconnect, this, _1));
@@ -51,12 +51,13 @@ void MqttSettingsService::begin() {
 void MqttSettingsService::loop() {
     if (_reconfigureMqtt || (_disconnectedAt && (uint32_t)(uuid::get_uptime() - _disconnectedAt) >= MQTT_RECONNECTION_DELAY)) {
         // reconfigure MQTT client
-        configureMqtt();
-
-        // clear the reconnection flags
+        _disconnectedAt = uuid::get_uptime();
+        if (configureMqtt()) {
+            _disconnectedAt = 0;
+        }
         _reconfigureMqtt = false;
-        _disconnectedAt  = 0;
     }
+    _mqttClient.loop();
 }
 
 bool MqttSettingsService::isEnabled() {
@@ -71,22 +72,27 @@ const char * MqttSettingsService::getClientId() {
     return _mqttClient.getClientId();
 }
 
-AsyncMqttClientDisconnectReason MqttSettingsService::getDisconnectReason() {
+espMqttClientTypes::DisconnectReason MqttSettingsService::getDisconnectReason() {
     return _disconnectReason;
 }
 
-AsyncMqttClient * MqttSettingsService::getMqttClient() {
+espMqttClient * MqttSettingsService::getMqttClient() {
     return &_mqttClient;
 }
 
 void MqttSettingsService::onMqttConnect(bool sessionPresent) {
+    // _disconnectedAt = 0;
+    emsesp::EMSESP::mqtt_.on_connect();
     // emsesp::EMSESP::logger().info("Connected to MQTT, %s", (sessionPresent) ? ("with persistent session") : ("without persistent session"));
 }
 
-void MqttSettingsService::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
+void MqttSettingsService::onMqttDisconnect(espMqttClientTypes::DisconnectReason reason) {
     // emsesp::EMSESP::logger().info("Disconnected from MQTT reason: %d", (uint8_t)reason);
     _disconnectReason = reason;
-    _disconnectedAt   = uuid::get_uptime();
+    if (!_disconnectedAt) {
+        _disconnectedAt = uuid::get_uptime();
+    }
+    emsesp::EMSESP::mqtt_.on_disconnect(reason);
 }
 
 void MqttSettingsService::onConfigUpdated() {
@@ -121,7 +127,7 @@ void MqttSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     }
 }
 
-void MqttSettingsService::configureMqtt() {
+bool MqttSettingsService::configureMqtt() {
     // disconnect if connected
     _mqttClient.disconnect();
     // only connect if WiFi is connected and MQTT is enabled
@@ -137,11 +143,11 @@ void MqttSettingsService::configureMqtt() {
         _mqttClient.setClientId(retainCstr(_state.clientId.c_str(), &_retainedClientId));
         _mqttClient.setKeepAlive(_state.keepAlive);
         _mqttClient.setCleanSession(_state.cleanSession);
-        _mqttClient.setMaxTopicLength(FACTORY_MQTT_MAX_TOPIC_LENGTH); // hardcode. We don't take this from the settings anymore.
-        _mqttClient.connect();
+        return _mqttClient.connect();
         // } else {
         // emsesp::EMSESP::logger().info("Error configuring MQTT client");
     }
+    return false;
 }
 
 void MqttSettings::read(MqttSettings & settings, JsonObject & root) {

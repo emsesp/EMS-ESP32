@@ -1297,6 +1297,9 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 LOG_ERROR("Last Tx write rejected by host");
                 txservice_.send_poll(); // close the bus
             }
+        } else if (tx_state == Telegram::Operation::TX_READ && length == 1) {
+            EMSbus::tx_state(Telegram::Operation::TX_READ); // reset Tx wait state
+            return;
         } else if (tx_state == Telegram::Operation::TX_READ) {
             // got a telegram with data in it. See if the src/dest matches that from the last one we sent and continue to process it
             uint8_t src  = data[0];

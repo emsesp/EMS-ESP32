@@ -23,7 +23,7 @@
 
 namespace emsesp {
 
-AsyncMqttClient * Mqtt::mqttClient_;
+espMqttClient * Mqtt::mqttClient_;
 
 // static parameters we make global
 std::string Mqtt::mqtt_base_;
@@ -461,30 +461,6 @@ void Mqtt::start() {
     // add the 'publish' command ('call system publish' in console or via API)
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), System::command_publish, FL_(publish_cmd));
 
-    mqttClient_->onConnect([this](bool sessionPresent) { on_connect(); });
-
-    mqttClient_->onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
-        // only show the error once, not every 2 seconds
-        if (!connecting_ && first_connect_attempted_) {
-            return;
-        }
-        first_connect_attempted_ = true;
-        connecting_              = false;
-        if (reason == AsyncMqttClientDisconnectReason::TCP_DISCONNECTED) {
-            LOG_WARNING("MQTT disconnected: TCP");
-        } else if (reason == AsyncMqttClientDisconnectReason::MQTT_IDENTIFIER_REJECTED) {
-            LOG_WARNING("MQTT disconnected: Identifier Rejected");
-        } else if (reason == AsyncMqttClientDisconnectReason::MQTT_SERVER_UNAVAILABLE) {
-            LOG_WARNING("MQTT disconnected: Server unavailable");
-        } else if (reason == AsyncMqttClientDisconnectReason::MQTT_MALFORMED_CREDENTIALS) {
-            LOG_WARNING("MQTT disconnected: Malformed credentials");
-        } else if (reason == AsyncMqttClientDisconnectReason::MQTT_NOT_AUTHORIZED) {
-            LOG_WARNING("MQTT disconnected: Not authorized");
-        } else {
-            LOG_WARNING("MQTT disconnected: code %d", reason);
-        }
-    });
-
     // create last will topic with the base prefixed. It has to be static because asyncmqttclient destroys the reference
     static char will_topic[MQTT_TOPIC_MAX_SIZE];
     if (!mqtt_base_.empty()) {
@@ -493,9 +469,10 @@ void Mqtt::start() {
 
     mqttClient_->setWill(will_topic, 1, true, "offline"); // with qos 1, retain true
 
-    mqttClient_->onMessage([this](const char * topic, const char * payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
-        on_message(topic, payload, len); // receiving mqtt
-    });
+    mqttClient_->onMessage(
+        [this](const espMqttClientTypes::MessageProperties & properties, const char * topic, const uint8_t * payload, size_t len, size_t index, size_t total) {
+            on_message(topic, (const char *)payload, len); // receiving mqtt
+        });
 
     mqttClient_->onPublish([this](uint16_t packetId) {
         on_publish(packetId); // publish
@@ -554,6 +531,30 @@ bool Mqtt::get_publish_onchange(uint8_t device_type) {
         return true;
     }
     return false;
+}
+void Mqtt::on_disconnect(espMqttClientTypes::DisconnectReason reason) {
+    // only show the error once, not every 2 seconds
+    if (!connecting_) {
+        return;
+    }
+    connecting_ = false;
+    if (reason == espMqttClientTypes::DisconnectReason::TCP_DISCONNECTED) {
+        LOG_WARNING("MQTT disconnected: TCP");
+    } else if (reason == espMqttClientTypes::DisconnectReason::MQTT_UNACCEPTABLE_PROTOCOL_VERSION) {
+        LOG_WARNING("MQTT disconnected: Unacceptable protocol version");
+    } else if (reason == espMqttClientTypes::DisconnectReason::MQTT_IDENTIFIER_REJECTED) {
+        LOG_WARNING("MQTT disconnected: Identifier Rejected");
+    } else if (reason == espMqttClientTypes::DisconnectReason::MQTT_SERVER_UNAVAILABLE) {
+        LOG_WARNING("MQTT disconnected: Server unavailable");
+    } else if (reason == espMqttClientTypes::DisconnectReason::MQTT_MALFORMED_CREDENTIALS) {
+        LOG_WARNING("MQTT disconnected: Malformed credentials");
+    } else if (reason == espMqttClientTypes::DisconnectReason::MQTT_NOT_AUTHORIZED) {
+        LOG_WARNING("MQTT disconnected: Not authorized");
+    } else if (reason == espMqttClientTypes::DisconnectReason::TLS_BAD_FINGERPRINT) {
+        LOG_WARNING("MQTT disconnected: Server fingerprint invalid");
+    } else {
+        LOG_WARNING("MQTT disconnected: code %d", reason);
+    }
 }
 
 // MQTT onConnect - when an MQTT connect is established
@@ -680,7 +681,7 @@ void Mqtt::queue_message(const uint8_t operation, const std::string & topic, con
 #ifndef EMSESP_STANDALONE
     // anything below 60MB available free heap is dangerously low, so we stop adding to prevent a crash
     // instead of doing a mqtt_messages_.pop_front()
-    if (mqtt_messages_.size() >= MAX_MQTT_MESSAGES || ESP.getFreeHeap() < (60 * 1024)) {
+    if (mqtt_messages_.size() >= MAX_MQTT_MESSAGES || (!emsesp::EMSESP::system_.PSram() && ESP.getFreeHeap() < (60 * 1024))) {
         LOG_WARNING("Queue overflow (queue count=%d, topic=%s)", mqtt_messages_.size(), topic.c_str());
         mqtt_publish_fails_++;
         return; // don't add to top of queue
@@ -857,7 +858,8 @@ void Mqtt::process_queue() {
 
     // else try and publish it
     // this is where the *real* publish happens
-    uint16_t packet_id = mqttClient_->publish(topic, mqtt_qos_, message->retain, message->payload.c_str(), message->payload.size(), false, mqtt_message.id_);
+    // uint16_t packet_id = mqttClient_->publish(topic, mqtt_qos_, message->retain, message->payload.c_str(), message->payload.size(), false, mqtt_message.id_);
+    uint16_t packet_id = mqttClient_->publish(topic, mqtt_qos_, message->retain, message->payload.c_str());
     lasttopic_         = topic;
     lastpayload_       = message->payload;
 

@@ -19,7 +19,7 @@
 #ifndef EMSESP_MQTT_H_
 #define EMSESP_MQTT_H_
 
-#include <AsyncMqttClient.h>
+#include <espMqttClient.h>
 
 #include "helpers.h"
 #include "system.h"
@@ -76,6 +76,7 @@ class Mqtt {
     static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 128; // fixed, not a user setting anymore
 
     static void on_connect();
+    static void on_disconnect(espMqttClientTypes::DisconnectReason reason);
 
     static void subscribe(const uint8_t device_type, const std::string & topic, mqtt_sub_function_p cb);
     static void subscribe(const std::string & topic);
@@ -129,7 +130,7 @@ class Mqtt {
 #endif
     }
 
-    static AsyncMqttClient * client() {
+    static espMqttClient * client() {
         return mqttClient_;
     }
 
@@ -266,7 +267,7 @@ class Mqtt {
   private:
     static uuid::log::Logger logger_;
 
-    static AsyncMqttClient * mqttClient_;
+    static espMqttClient * mqttClient_;
     static uint32_t          mqtt_message_id_;
 
     static constexpr uint32_t MQTT_PUBLISH_WAIT      = 100; // delay in ms between sending publishes, to account for large payloads
@@ -305,8 +306,6 @@ class Mqtt {
     uint32_t last_publish_sensor_     = 0;
     uint32_t last_publish_heartbeat_  = 0;
     uint32_t last_publish_queue_      = 0;
-
-    bool first_connect_attempted_ = false;
 
     static bool     connecting_;
     static bool     initialized_;

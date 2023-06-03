@@ -1706,13 +1706,13 @@ void EMSdevice::mqtt_ha_entity_config_create() {
             Mqtt::publish_ha_sensor_config(dv, name(), brand_to_char(), false, create_device_config);
             dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);
             create_device_config = false; // only create the main config once
-        }
-
 #ifndef EMSESP_STANDALONE
-        if (ESP.getFreeHeap() < (65 * 1024)) {
-            break;
-        }
+            // always create minimum one config
+            if (ESP.getMaxAllocHeap() < (6 * 1024) || (!emsesp::EMSESP::system_.PSram() && ESP.getFreeHeap() < (65 * 1024))) {
+                break;
+            }
 #endif
+        }
     }
 
     ha_config_done(!create_device_config);
