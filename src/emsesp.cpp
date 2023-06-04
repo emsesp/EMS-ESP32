@@ -597,6 +597,7 @@ void EMSESP::publish_other_values() {
     publish_device_values(EMSdevice::DeviceType::SWITCH);
     publish_device_values(EMSdevice::DeviceType::HEATPUMP);
     publish_device_values(EMSdevice::DeviceType::HEATSOURCE);
+    publish_device_values(EMSdevice::DeviceType::VENTILATION);
     // other devices without values yet
     // publish_device_values(EMSdevice::DeviceType::GATEWAY);
     // publish_device_values(EMSdevice::DeviceType::CONNECT);

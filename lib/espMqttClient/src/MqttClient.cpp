@@ -577,7 +577,7 @@ void MqttClient::_onPubrec() {
     while (it) {
         // PUBRECs come in the order PUBs are sent. So we only check the first PUB packet in outbox
         // if it doesn't match the ID, return
-        if ((it.get()->packet.packetType()) == PacketType.PUBLISH) {
+        if ((it.get()->packet.packetType()) == PacketType.PUBLISH || (it.get()->packet.packetType()) == PacketType.PUBREL) {
             if (it.get()->packet.packetId() == idToMatch) {
                 if (!_addPacket(PacketType.PUBREL, idToMatch)) {
                     emc_log_e("Could not create PUBREL packet");
@@ -707,7 +707,9 @@ uint16_t MqttClient::getQueue() const {
     espMqttClientInternals::Outbox<OutgoingPacket>::Iterator it    = _outbox.front();
     uint16_t                                                 count = 0;
     while (it) {
-        ++count;
+        if (it.get()->packet.packetType() == PacketType.PUBLISH) {
+            ++count;
+        }
         ++it;
     }
     EMC_SEMAPHORE_GIVE();
