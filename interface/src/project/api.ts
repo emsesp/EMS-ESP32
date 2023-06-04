@@ -1,3 +1,4 @@
+import { unpack } from '../api/unpack';
 import type {
   BoardProfile,
   BoardProfileName,
@@ -15,10 +16,28 @@ import type {
   WriteAnalogSensor,
   SensorData,
   Schedule,
-  Entities
+  Entities,
+  DeviceValue
 } from './types';
 import type { AxiosPromise } from 'axios';
-import { AXIOS, AXIOS_API, AXIOS_BIN } from 'api/endpoints';
+import { AXIOS, AXIOS_API, AXIOS_BIN, alovaInstance } from 'api/endpoints';
+
+export const readCoreData = () => alovaInstance.Get<CoreData>(`/coreData`);
+
+// uses msgpack
+export const readDeviceData = (id: number) =>
+  alovaInstance.Get<DeviceData>('/deviceData', {
+    params: { id },
+    responseType: 'arraybuffer',
+    transformData(data) {
+      return unpack(data);
+    }
+  });
+
+export const writeDeviceValue = (id: number, devicevalue: DeviceValue) =>
+  alovaInstance.Post('/writeDeviceValue', { id, devicevalue });
+
+// TODO to change to alova
 
 export function restart(): AxiosPromise<void> {
   return AXIOS.post('/restart');
@@ -29,9 +48,10 @@ export function readSettings(): AxiosPromise<Settings> {
 }
 
 export function writeSettings(settings: Settings): AxiosPromise<Settings> {
-  return AXIOS.post('/settings', settings);
+  return AXIOS.post('/settings', settings); // call command
 }
 
+// TODO change to GET
 export function getBoardProfile(boardProfile: BoardProfileName): AxiosPromise<BoardProfile> {
   return AXIOS.post('/boardProfile', boardProfile);
 }
@@ -40,36 +60,25 @@ export function readStatus(): AxiosPromise<Status> {
   return AXIOS.get('/status');
 }
 
-export function readCoreData(): AxiosPromise<CoreData> {
-  return AXIOS.get('/coreData');
-}
-
 export function readDevices(): AxiosPromise<Devices> {
   return AXIOS.get('/devices');
 }
 
 export function scanDevices(): AxiosPromise<void> {
-  return AXIOS.post('/scanDevices');
-}
-
-export function readDeviceData(unique_id: UniqueID): AxiosPromise<DeviceData> {
-  return AXIOS_BIN.post('/deviceData', unique_id);
+  return AXIOS.post('/scanDevices'); // call command
 }
 
 export function readSensorData(): AxiosPromise<SensorData> {
   return AXIOS.get('/sensorData');
 }
 
+// TODO change to GET
 export function readDeviceEntities(unique_id: UniqueID): AxiosPromise<DeviceEntity[]> {
   return AXIOS_BIN.post('/deviceEntities', unique_id);
 }
 
 export function writeCustomEntities(customEntities: CustomEntities): AxiosPromise<void> {
   return AXIOS.post('/customEntities', customEntities);
-}
-
-export function writeDeviceValue(dv: WriteDeviceValue): AxiosPromise<void> {
-  return AXIOS.post('/writeDeviceValue', dv);
 }
 
 export function writeTemperatureSensor(ts: WriteTemperatureSensor): AxiosPromise<void> {
@@ -81,11 +90,11 @@ export function writeAnalogSensor(as: WriteAnalogSensor): AxiosPromise<void> {
 }
 
 export function resetCustomizations(): AxiosPromise<void> {
-  return AXIOS.post('/resetCustomizations');
+  return AXIOS.post('/resetCustomizations'); // command
 }
 
 export function API(apiCall: APIcall): AxiosPromise<void> {
-  return AXIOS_API.post('/', apiCall);
+  return AXIOS_API.post('/', apiCall); // command
 }
 
 export function getSettings(): AxiosPromise<void> {

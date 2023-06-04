@@ -13,8 +13,10 @@ import {
   FormHelperText,
   Grid,
   Box,
-  Typography
+  Typography,
+  CircularProgress
 } from '@mui/material';
+import { green } from '@mui/material/colors';
 import { useState, useEffect } from 'react';
 
 import { DeviceValueUOM, DeviceValueUOM_s } from './types';
@@ -22,7 +24,7 @@ import type { DeviceValue } from './types';
 import type Schema from 'async-validator';
 
 import type { ValidateFieldsError } from 'async-validator';
-import { ValidatedTextField } from 'components';
+import { ButtonRow, ValidatedTextField } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import { updateValue } from 'utils';
 
@@ -35,6 +37,7 @@ type DashboardDevicesDialogProps = {
   selectedItem: DeviceValue;
   writeable: boolean;
   validator: Schema;
+  progress: boolean;
 };
 
 const DashboarDevicesDialog = ({
@@ -43,7 +46,8 @@ const DashboarDevicesDialog = ({
   onSave,
   selectedItem,
   writeable,
-  validator
+  validator,
+  progress
 }: DashboardDevicesDialogProps) => {
   const { LL } = useI18nContext();
   const [editItem, setEditItem] = useState<DeviceValue>(selectedItem);
@@ -184,14 +188,32 @@ const DashboarDevicesDialog = ({
 
       <DialogActions>
         {writeable ? (
-          <>
+          <Box
+            sx={{
+              '& button, & a, & .MuiCard-root': {
+                mx: 0.6
+              },
+              position: 'relative'
+            }}
+          >
             <Button startIcon={<CancelIcon />} variant="outlined" onClick={close} color="secondary">
               {LL.CANCEL()}
             </Button>
             <Button startIcon={<WarningIcon color="warning" />} variant="contained" onClick={save} color="info">
               {selectedItem.v === '' && selectedItem.c ? LL.EXECUTE() : LL.UPDATE()}
             </Button>
-          </>
+            {progress && (
+              <CircularProgress
+                size={24}
+                sx={{
+                  color: green[500],
+                  position: 'absolute',
+                  right: '20%',
+                  marginTop: '6px'
+                }}
+              />
+            )}
+          </Box>
         ) : (
           <Button variant="outlined" onClick={close} color="secondary">
             {LL.CLOSE()}

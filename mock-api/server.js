@@ -11,6 +11,9 @@ rest_server.use(compression());
 rest_server.use(express.static(path.join(__dirname, '../interface/build')));
 rest_server.use(express.json());
 
+// FOR TESTING
+const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+
 // endpoints
 const API_ENDPOINT_ROOT = '/api/';
 const REST_ENDPOINT_ROOT = '/rest/';
@@ -2146,8 +2149,9 @@ rest_server.post(EMSESP_SCANDEVICES_ENDPOINT, (req, res) => {
 rest_server.get(EMSESP_STATUS_ENDPOINT, (req, res) => {
   res.json(status);
 });
-rest_server.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
-  const id = req.body.id;
+
+rest_server.get(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
+  const id = Number(req.query.id);
   console.log('send back device data for ' + id);
   let data = {};
 
@@ -2204,7 +2208,6 @@ rest_server.post(EMSESP_DEVICEENTITIES_ENDPOINT, (req, res) => {
   if (id === 7) {
     data = emsesp_deviceentities_7;
   }
-
   res.write(msgpack.encode(data), 'binary');
   res.end(null, 'binary');
 });
@@ -2332,50 +2335,46 @@ rest_server.post(EMSESP_WRITE_ENTITIES_ENDPOINT, (req, res) => {
   res.sendStatus(200);
 });
 
-rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, (req, res) => {
+rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, async (req, res) => {
   const devicevalue = req.body.devicevalue;
   const id = req.body.id;
+  console.log('Write device value for id : ' + id);
+  console.log(' devicedata: ' + JSON.stringify(devicevalue));
 
   if (id === 1) {
-    console.log('Write device value for: ' + JSON.stringify(devicevalue));
     objIndex = emsesp_devicedata_1.data.findIndex((obj) => obj.c == devicevalue.c);
     emsesp_devicedata_1.data[objIndex] = devicevalue;
   }
   if (id === 2) {
-    console.log('Write device value for: ' + JSON.stringify(devicevalue));
     objIndex = emsesp_devicedata_2.data.findIndex((obj) => obj.c == devicevalue.c);
     emsesp_devicedata_2.data[objIndex] = devicevalue;
   }
   if (id === 3) {
-    console.log('Write device value for: ' + JSON.stringify(devicevalue));
     objIndex = emsesp_devicedata_3.data.findIndex((obj) => obj.c == devicevalue.c);
     emsesp_devicedata_3.data[objIndex] = devicevalue;
   }
   if (id === 4) {
-    console.log('Write device value for: ' + JSON.stringify(devicevalue));
     objIndex = emsesp_devicedata_4.data.findIndex((obj) => obj.c == devicevalue.c);
     emsesp_devicedata_4.data[objIndex] = devicevalue;
   }
   if (id === 5) {
-    console.log('Write device value for: ' + JSON.stringify(devicevalue));
     objIndex = emsesp_devicedata_5.data.findIndex((obj) => obj.c == devicevalue.c);
     emsesp_devicedata_5.data[objIndex] = devicevalue;
   }
   if (id === 6) {
-    console.log('Write device value for: ' + JSON.stringify(devicevalue));
     objIndex = emsesp_devicedata_6.data.findIndex((obj) => obj.c == devicevalue.c);
     emsesp_devicedata_6.data[objIndex] = devicevalue;
   }
   if (id === 7) {
-    console.log('Write device value for: ' + JSON.stringify(devicevalue));
     objIndex = emsesp_devicedata_7.data.findIndex((obj) => obj.c == devicevalue.c);
     emsesp_devicedata_7.data[objIndex] = devicevalue;
   }
   if (id === 99) {
-    console.log('Write device value for: ' + JSON.stringify(devicevalue));
     objIndex = emsesp_devicedata_99.data.findIndex((obj) => obj.c == devicevalue.c);
     emsesp_devicedata_99.data[objIndex] = devicevalue;
   }
+
+  // await delay(2000); // wait 2 seconds to show spinner
 
   res.sendStatus(200);
 });

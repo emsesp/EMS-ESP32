@@ -30,6 +30,7 @@ import { useRowSelect } from '@table-library/react-table-library/select';
 import { useSort, SortToggleType } from '@table-library/react-table-library/sort';
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
+import { useRequest } from 'alova';
 import { useState, useContext, useEffect, useCallback, useLayoutEffect } from 'react';
 
 import { IconContext } from 'react-icons';
@@ -54,16 +55,44 @@ const DashboardDevices: FC = () => {
   const [size, setSize] = useState([0, 0]);
   const { me } = useContext(AuthenticatedContext);
   const { LL } = useI18nContext();
-  const [deviceData, setDeviceData] = useState<DeviceData>({ data: [] });
   const [selectedDeviceValue, setSelectedDeviceValue] = useState<DeviceValue>();
   const [onlyFav, setOnlyFav] = useState(false);
   const [deviceValueDialogOpen, setDeviceValueDialogOpen] = useState(false);
   const [showDeviceInfo, setShowDeviceInfo] = useState<boolean>(false);
   const [selectedDevice, setSelectedDevice] = useState<number>();
-  const [coreData, setCoreData] = useState<CoreData>({
-    connected: true,
-    devices: []
+
+  // TODO remove
+  // const [deviceData, setDeviceData] = useState<DeviceData>({ data: [] });
+  // const [coreData, setCoreData] = useState<CoreData>({
+  //   connected: true,
+  //   devices: []
+  // });
+
+  const { data: coreData, send: readCoreData } = useRequest(() => EMSESP.readCoreData(), {
+    initialData: {
+      connected: true,
+      devices: []
+    },
+    force: true,
+    immediate: false
   });
+
+  // TODO prevent firing when page is loaded
+  const { data: deviceData, send: readDeviceData } = useRequest((id) => EMSESP.readDeviceData(id), {
+    initialData: {
+      data: []
+    },
+    force: true,
+    immediate: false
+  });
+
+  // TODO prevent firing when page is loaded
+  const { loading: submitting, send: writeDeviceValue } = useRequest(
+    (id: number, deviceValue: DeviceValue) => EMSESP.writeDeviceValue(id, deviceValue),
+    {
+      immediate: false
+    }
+  );
 
   useLayoutEffect(() => {
     function updateSize() {
@@ -212,19 +241,21 @@ const DashboardDevices: FC = () => {
     }
   );
 
-  const fetchDeviceData = async (id: number) => {
-    try {
-      setDeviceData((await EMSESP.readDeviceData({ id })).data);
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-    }
-  };
+  // TODO remove
+  // const fetchDeviceData = async (id: number) => {
+  // try {
+  //   setDeviceData((await EMSESP.readDeviceData({ id })).data);
+  // } catch (error) {
+  //   toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
+  // }
+  // };
 
-  function onSelectChange(action: any, state: any) {
-    setDeviceData({ data: [] });
+  async function onSelectChange(action: any, state: any) {
+    // TODO check if still needed
+    // setDeviceData({ data: [] });
     setSelectedDevice(state.id);
     if (action.type === 'ADD_BY_ID_EXCLUSIVELY') {
-      void fetchDeviceData(state.id);
+      await readDeviceData(state.id);
     }
   }
 
@@ -257,27 +288,29 @@ const DashboardDevices: FC = () => {
     };
   }, [escFunction]);
 
-  const fetchCoreData = useCallback(async () => {
-    try {
-      setSelectedDevice(undefined);
-      setCoreData((await EMSESP.readCoreData()).data);
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-    }
-  }, [LL]);
+  // TODO remove
+  // const fetchCoreData = useCallback(async () => {
+  //   try {
+  //     setSelectedDevice(undefined);
+  //     setCoreData((await EMSESP.readCoreData()).data);
+  //   } catch (error) {
+  //     toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
+  //   }
+  // }, [LL]);
 
-  useEffect(() => {
-    void fetchCoreData();
-  }, [fetchCoreData]);
+  // TODO remove
+  // useEffect(() => {
+  //   void fetchCoreData2();
+  // }, [fetchCoreData2]);
 
   const refreshData = () => {
     if (deviceValueDialogOpen) {
       return;
     }
     if (selectedDevice) {
-      void fetchDeviceData(selectedDevice);
+      void readDeviceData(selectedDevice);
     } else {
-      void fetchCoreData();
+      void readCoreData();
     }
   };
 
@@ -348,25 +381,32 @@ const DashboardDevices: FC = () => {
 
   const deviceValueDialogSave = async (dv: DeviceValue) => {
     const selectedDeviceID = Number(device_select.state.id);
-    try {
-      const response = await EMSESP.writeDeviceValue({
-        id: selectedDeviceID,
-        devicevalue: dv
-      });
-      if (response.status === 204) {
-        toast.error(LL.WRITE_CMD_FAILED());
-      } else if (response.status === 403) {
-        toast.error(LL.ACCESS_DENIED());
-      } else {
-        toast.success(LL.WRITE_CMD_SENT());
-      }
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
-    } finally {
-      setDeviceValueDialogOpen(false);
-      await fetchDeviceData(selectedDeviceID);
-      setSelectedDeviceValue(undefined);
-    }
+    // TODO For all Push, do error handling?
+    const response = await writeDeviceValue(selectedDeviceID, dv);
+    console.log(response);
+    setDeviceValueDialogOpen(false);
+    await readDeviceData(selectedDeviceID);
+    setSelectedDeviceValue(undefined);
+
+    // try {
+    //   const response = await EMSESP.writeDeviceValue({
+    //     id: selectedDeviceID,
+    //     devicevalue: dv
+    //   });
+    //   if (response.status === 204) {
+    //     toast.error(LL.WRITE_CMD_FAILED());
+    //   } else if (response.status === 403) {
+    //     toast.error(LL.ACCESS_DENIED());
+    //   } else {
+    //     toast.success(LL.WRITE_CMD_SENT());
+    //   }
+    // } catch (error) {
+    //   toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
+    // } finally {
+    //   setDeviceValueDialogOpen(false);
+    //   await readDeviceData(selectedDeviceID);
+    //   setSelectedDeviceValue(undefined);
+    // }
   };
 
   const renderDeviceDetails = () => {
@@ -457,7 +497,7 @@ const DashboardDevices: FC = () => {
   };
 
   const renderDeviceData = () => {
-    if (!selectedDevice) {
+    if (!selectedDevice || deviceData.data === undefined) {
       return;
     }
 
@@ -612,6 +652,7 @@ const DashboardDevices: FC = () => {
             !hasMask(selectedDeviceValue.id, DeviceEntityMask.DV_READONLY)
           }
           validator={deviceValueItemValidation(selectedDeviceValue)}
+          progress={submitting}
         />
       )}
       <ButtonRow>

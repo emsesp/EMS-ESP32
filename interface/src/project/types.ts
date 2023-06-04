@@ -156,6 +156,7 @@ export interface CustomEntities {
   entity_ids: string[];
 }
 
+// TODO can be removed?
 export interface UniqueID {
   id: number;
 }
@@ -279,6 +280,7 @@ export interface APIcall {
   id: any;
 }
 
+// TODO can be removed?
 export interface WriteDeviceValue {
   id: number;
   devicevalue: DeviceValue;
