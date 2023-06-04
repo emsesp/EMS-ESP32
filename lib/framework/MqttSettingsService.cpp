@@ -118,7 +118,7 @@ void MqttSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     case ARDUINO_EVENT_ETH_DISCONNECTED:
         if (_state.enabled) {
             // emsesp::EMSESP::logger().info("Network connection dropped, stopping MQTT client");
-            _mqttClient.disconnect();
+            _mqttClient.disconnect(true);
         }
         break;
 
@@ -129,7 +129,7 @@ void MqttSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
 
 bool MqttSettingsService::configureMqtt() {
     // disconnect if connected
-    _mqttClient.disconnect();
+    _mqttClient.disconnect(true);
     // only connect if WiFi is connected and MQTT is enabled
     if (_state.enabled && emsesp::EMSESP::system_.network_connected() && !_state.host.isEmpty()) {
         // emsesp::EMSESP::logger().info("Configuring MQTT client");
