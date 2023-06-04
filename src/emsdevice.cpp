@@ -1130,7 +1130,7 @@ void EMSdevice::getCustomEntities(std::vector<std::string> & entity_ids) {
     for (const auto & dv : devicevalues_) {
         char name[100];
         name[0] = '\0';
-        if (dv.has_tag()) {
+        if (dv.tag >= DeviceValueTAG::TAG_HC1) {
             // prefix tag
             strcpy(name, tag_to_mqtt(dv.tag));
             strcat(name, "/");
