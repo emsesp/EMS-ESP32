@@ -493,7 +493,7 @@ void EMSESP::publish_all_loop() {
     }
 
     // wait for free queue before sending next message, HA-messages are also queued
-    if (!Mqtt::is_empty()) {
+    if (Mqtt::publish_queued() > 0) {
         return;
     }
 

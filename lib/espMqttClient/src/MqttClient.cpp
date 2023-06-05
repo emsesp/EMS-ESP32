@@ -707,9 +707,7 @@ uint16_t MqttClient::getQueue() const {
     espMqttClientInternals::Outbox<OutgoingPacket>::Iterator it    = _outbox.front();
     uint16_t                                                 count = 0;
     while (it) {
-        if (it.get()->packet.packetType() == PacketType.PUBLISH) {
-            ++count;
-        }
+        ++count;
         ++it;
     }
     EMC_SEMAPHORE_GIVE();
