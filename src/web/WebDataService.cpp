@@ -265,7 +265,7 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
 #endif
                 }
 
-                response->setCode((return_code == CommandRet::OK) ? 200 : 204);
+                response->setCode((return_code == CommandRet::OK) ? 200 : 400); // bad request
                 response->setLength();
                 request->send(response);
                 return;
@@ -297,14 +297,14 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
                 EMSESP::logger().debug("Write command successful");
 #endif
             }
-            response->setCode((return_code == CommandRet::OK) ? 200 : 204);
+            response->setCode((return_code == CommandRet::OK) ? 200 : 400); // bad request
             response->setLength();
             request->send(response);
             return;
         }
     }
 
-    AsyncWebServerResponse * response = request->beginResponse(204); // Write command failed
+    AsyncWebServerResponse * response = request->beginResponse(400); // bad request
     request->send(response);
 }
 
@@ -327,7 +327,7 @@ void WebDataService::write_temperature_sensor(AsyncWebServerRequest * request, J
         ok = EMSESP::temperaturesensor_.update(id, name, offset10);
     }
 
-    AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 204);
+    AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 400); // bad request
     request->send(response);
 }
 
@@ -347,7 +347,7 @@ void WebDataService::write_analog_sensor(AsyncWebServerRequest * request, JsonVa
         ok                  = EMSESP::analogsensor_.update(gpio, name, offset, factor, uom, type, deleted);
     }
 
-    AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 204);
+    AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 400); // bad request
     request->send(response);
 }
 

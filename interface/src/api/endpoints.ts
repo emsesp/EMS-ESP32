@@ -1,9 +1,9 @@
 import { xhrRequestAdapter } from '@alova/adapter-xhr';
 import { createAlova } from 'alova';
-import GlobalFetch from 'alova/GlobalFetch';
+// import GlobalFetch from 'alova/GlobalFetch';
 import ReactHook from 'alova/react';
 import axios from 'axios';
-import { unpack } from './unpack';
+import { unpack } from '../api/unpack';
 
 import type { AxiosPromise, CancelToken, AxiosProgressEvent } from 'axios';
 
@@ -31,32 +31,26 @@ export const alovaInstance = createAlova({
       method.config.headers.token = 'Bearer ' + localStorage.getItem(ACCESS_TOKEN);
     }
   },
-  responsed: (response) => response.data
 
-  // TODO add error handling for Push?
+  responded: {
+    onSuccess: async (response, method) => {
+      if (response.status === 400) {
+        throw new Error('Invalid command');
+      }
+      if (response.status >= 400) {
+        throw new Error(response.statusText);
+      }
+      const data = await response.data;
+      if (response.data instanceof ArrayBuffer) {
+        return unpack(data);
+      }
+      return data;
+    },
 
-  // return JSON.stringify(response.data);
-
-  // responded: {
-  //   // When using the GlobalFetch request adapter, the first parameter receives the Response object
-  //   // The second parameter is the method instance of the current request, you can use it to synchronize the configuration information before and after the request
-  //   onSuccess: async (response, method) => {
-  //     if (response.status >= 400) {
-  //       throw new Error(response.statusText);
-  //     }
-  //     console.log('response', response);
-  //     const json = await response.json();
-  //     // The parsed response data will be passed to the transformData hook function of the method instance, and these functions will be explained later
-  //     return json;
-  //   },
-
-  //   // Interceptor for request failure
-  //   // This interceptor will be entered when the request is wrong.
-  //   // The second parameter is the method instance of the current request, you can use it to synchronize the configuration information before and after the request
-  //   onError: (error, method) => {
-  //     alert(error.message);
-  //   }
-  // }
+    onError: (error) => {
+      alert(error.message);
+    }
+  }
 });
 
 export const AXIOS = axios.create({

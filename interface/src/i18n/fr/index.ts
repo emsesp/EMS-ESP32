@@ -51,7 +51,7 @@ const fr: Translation = {
   REMOVE: 'Enlever',
   PROBLEM_UPDATING: 'Problème lors de la mise à jour',
   PROBLEM_LOADING: 'Problème lors du chargement',
-  ACCESS_DENIED: 'Accès refusé',
+  HTTP_ERROR: 'Error {0}', // TODO translate
   ANALOG_SENSOR: 'Capteur analogique',
   ANALOG_SENSORS: 'Capteurs analogiques',
   SETTINGS: 'Paramètres',
@@ -71,7 +71,6 @@ const fr: Translation = {
   TEMP_SENSOR: 'Capteur de température',
   TEMP_SENSORS: 'Capteurs de température',
   WRITE_CMD_SENT: 'Envoyer la commande sent', // TODO translate
-  WRITE_CMD_FAILED: 'Envoyer la commande failed', // TODO translate
   EMS_BUS_WARNING: 'Bus EMS déconnecté. Si ce message persiste après quelques secondes, vérifiez les paramètres et la configuration de la carte.',
   EMS_BUS_SCANNING: 'Scan des appareils EMS...',
   CONNECTED: 'Connecté',

@@ -238,7 +238,8 @@ const DashboardSensors: FC = () => {
       if (response.status === 204) {
         toast.error(LL.UPDATE_OF(LL.SENSOR(2)) + ' ' + LL.FAILED(1));
       } else if (response.status === 403) {
-        toast.error(LL.ACCESS_DENIED());
+        // TODO fix
+        toast.error(LL.HTTP_ERROR('poep'));
       } else {
         toast.success(LL.UPDATED_OF(LL.SENSOR(1)));
       }
@@ -295,7 +296,8 @@ const DashboardSensors: FC = () => {
       if (response.status === 204) {
         toast.error(LL.UPDATE_OF(LL.ANALOG_SENSOR(5)) + ' ' + LL.FAILED(1));
       } else if (response.status === 403) {
-        toast.error(LL.ACCESS_DENIED());
+        // TODO fix
+        toast.error(LL.HTTP_ERROR('poep'));
       } else {
         toast.success(LL.UPDATED_OF(LL.ANALOG_SENSOR(2)));
       }

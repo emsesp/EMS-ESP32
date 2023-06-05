@@ -51,7 +51,7 @@ const tr: Translation = {
   REMOVE: 'Kaldır',
   PROBLEM_UPDATING: 'Güncelleme Sorunu',
   PROBLEM_LOADING: 'Yükleme Sorunu',
-  ACCESS_DENIED: 'Erişim Reddedildi',
+  HTTP_ERROR: 'Error {0}', // TODO translate
   ANALOG_SENSOR: 'Analog Sensör',
   ANALOG_SENSORS: 'Analog Sensörler',
   SETTINGS: 'Ayarlar',
@@ -71,7 +71,6 @@ const tr: Translation = {
   TEMP_SENSOR: 'Sıcaklık Sensörü',
   TEMP_SENSORS: 'Sıcaklık Sensörleri',
   WRITE_CMD_SENT: 'Yazma komutu gönderildi',
-  WRITE_CMD_FAILED: 'Yazma komutu başarısız oldu',
   EMS_BUS_WARNING: 'EMS hat bağlantısı kesildi. Eğer bu uyarı birkaç saniye sonra devam ediyorsa lütfen ayarları ve kart tipini kontrol edin',
   EMS_BUS_SCANNING: 'EMS cihazları aranıyor...',
   CONNECTED: 'Bağlandı',

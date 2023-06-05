@@ -49,6 +49,8 @@ import { ButtonRow, SectionContent, MessageBox } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 
 import { useI18nContext } from 'i18n/i18n-react';
+
+// TODO what to do with extractErrorMessage?
 import { extractErrorMessage } from 'utils';
 
 const DashboardDevices: FC = () => {
@@ -60,13 +62,6 @@ const DashboardDevices: FC = () => {
   const [deviceValueDialogOpen, setDeviceValueDialogOpen] = useState(false);
   const [showDeviceInfo, setShowDeviceInfo] = useState<boolean>(false);
   const [selectedDevice, setSelectedDevice] = useState<number>();
-
-  // TODO remove
-  // const [deviceData, setDeviceData] = useState<DeviceData>({ data: [] });
-  // const [coreData, setCoreData] = useState<CoreData>({
-  //   connected: true,
-  //   devices: []
-  // });
 
   const { data: coreData, send: readCoreData } = useRequest(() => EMSESP.readCoreData(), {
     initialData: {
@@ -88,6 +83,7 @@ const DashboardDevices: FC = () => {
   const { loading: submitting, send: writeDeviceValue } = useRequest(
     (id: number, deviceValue: DeviceValue) => EMSESP.writeDeviceValue(id, deviceValue),
     {
+      // } = useRequest((data) => alovaInstance.Post('/writeDeviceValue', data), {
       immediate: false
     }
   );
@@ -239,15 +235,6 @@ const DashboardDevices: FC = () => {
     }
   );
 
-  // TODO remove
-  // const fetchDeviceData = async (id: number) => {
-  // try {
-  //   setDeviceData((await EMSESP.readDeviceData({ id })).data);
-  // } catch (error) {
-  //   toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-  // }
-  // };
-
   async function onSelectChange(action: any, state: any) {
     setSelectedDevice(state.id);
     if (action.type === 'ADD_BY_ID_EXCLUSIVELY') {
@@ -283,21 +270,6 @@ const DashboardDevices: FC = () => {
       document.removeEventListener('keydown', escFunction);
     };
   }, [escFunction]);
-
-  // TODO remove
-  // const fetchCoreData = useCallback(async () => {
-  //   try {
-  //     setSelectedDevice(undefined);
-  //     setCoreData((await EMSESP.readCoreData()).data);
-  //   } catch (error) {
-  //     toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-  //   }
-  // }, [LL]);
-
-  // TODO remove
-  // useEffect(() => {
-  //   void fetchCoreData2();
-  // }, [fetchCoreData2]);
 
   const refreshData = () => {
     if (deviceValueDialogOpen) {
@@ -375,34 +347,20 @@ const DashboardDevices: FC = () => {
     };
   });
 
-  const deviceValueDialogSave = async (dv: DeviceValue) => {
-    const selectedDeviceID = Number(device_select.state.id);
-    // TODO For all Push, do error handling?
-    const response = await writeDeviceValue(selectedDeviceID, dv);
-    console.log(response);
-    setDeviceValueDialogOpen(false);
-    await readDeviceData(selectedDeviceID);
-    setSelectedDeviceValue(undefined);
-
-    // try {
-    //   const response = await EMSESP.writeDeviceValue({
-    //     id: selectedDeviceID,
-    //     devicevalue: dv
-    //   });
-    //   if (response.status === 204) {
-    //     toast.error(LL.WRITE_CMD_FAILED());
-    //   } else if (response.status === 403) {
-    //     toast.error(LL.ACCESS_DENIED());
-    //   } else {
-    //     toast.success(LL.WRITE_CMD_SENT());
-    //   }
-    // } catch (error) {
-    //   toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
-    // } finally {
-    //   setDeviceValueDialogOpen(false);
-    //   await readDeviceData(selectedDeviceID);
-    //   setSelectedDeviceValue(undefined);
-    // }
+  const deviceValueDialogSave = async (devicevalue: DeviceValue) => {
+    const id = Number(device_select.state.id);
+    await writeDeviceValue({ id, devicevalue })
+      .then(() => {
+        toast.success(LL.WRITE_CMD_SENT());
+      })
+      .catch((error) => {
+        toast.error(LL.HTTP_ERROR(error));
+      })
+      .finally(async () => {
+        setDeviceValueDialogOpen(false);
+        await readDeviceData(id);
+        setSelectedDeviceValue(undefined);
+      });
   };
 
   const renderDeviceDetails = () => {

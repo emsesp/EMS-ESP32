@@ -51,7 +51,7 @@ const no: Translation = {
   REMOVE: 'Fjern',
   PROBLEM_UPDATING: 'Problem med oppdatering',
   PROBLEM_LOADING: 'Problem med opplasting',
-  ACCESS_DENIED: 'Tilgang nektet',
+  HTTP_ERROR: 'Error {0}', // TODO translate
   ANALOG_SENSOR: 'Analog Sensor',
   ANALOG_SENSORS: 'Analoge Sensorer',
   SETTINGS: 'Innstillinger',
@@ -71,7 +71,6 @@ const no: Translation = {
   TEMP_SENSOR: 'Temperatursensor',
   TEMP_SENSORS: 'Temperaturesensorer',
   WRITE_CMD_SENT: 'Skriv kommando sent',
-  WRITE_CMD_FAILED: 'Skriv kommando som har feilet',
   EMS_BUS_WARNING: 'EMS bussen koblet ned. Hvis denne advarselen fortsetter etter noen f¨sekunder sjekk instillinger og  prosessorkort',
   EMS_BUS_SCANNING: 'Søker etter EMS enheter...',
   CONNECTED: 'Tilkoblet',

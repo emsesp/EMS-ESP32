@@ -1,4 +1,3 @@
-import { unpack } from '../api/unpack';
 import type {
   BoardProfile,
   BoardProfileName,
@@ -23,14 +22,10 @@ import { AXIOS, AXIOS_API, AXIOS_BIN, alovaInstance } from 'api/endpoints';
 
 export const readCoreData = () => alovaInstance.Get<CoreData>(`/coreData`);
 
-// uses msgpack
 export const readDeviceData = (id: number) =>
   alovaInstance.Get<DeviceData>('/deviceData', {
     params: { id },
-    responseType: 'arraybuffer',
-    transformData(data) {
-      return unpack(data);
-    }
+    responseType: 'arraybuffer' // uses msgpack
   });
 
 export const writeDeviceValue = (id: number, devicevalue: DeviceValue) =>

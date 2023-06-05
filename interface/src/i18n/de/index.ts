@@ -51,7 +51,7 @@ const de: Translation = {
   REMOVE: 'Entfernen',
   PROBLEM_UPDATING: 'Problem beim Aktualisieren',
   PROBLEM_LOADING: 'Problem beim Laden',
-  ACCESS_DENIED: 'Zugriff abgelehnt',
+  HTTP_ERROR: 'Error {0}', // TODO translate
   ANALOG_SENSOR: 'Analogsensor',
   ANALOG_SENSORS: 'Analogsensoren',
   SETTINGS: 'Einstellungen',
@@ -71,7 +71,6 @@ const de: Translation = {
   TEMP_SENSOR: 'Temperatursensor',
   TEMP_SENSORS: 'Temperatursensoren',
   WRITE_CMD_SENT: 'Befehl schreiben wurde gesendet',
-  WRITE_CMD_FAILED: 'Befehl schreiben failed', // TODO translate
   EMS_BUS_WARNING: 'EMS-Bus getrennt. Wenn diese Warnung nach einigen Sekunden immer noch besteht, überprüfen Sie bitte die Einstellungen und das Board-Profil',
   EMS_BUS_SCANNING: 'Suche nach EMS Geräten...',
   CONNECTED: 'Verbunden',

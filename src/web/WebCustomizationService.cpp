@@ -171,7 +171,7 @@ void WebCustomizationService::reset_customization(AsyncWebServerRequest * reques
         return;
     }
     // failed
-    AsyncWebServerResponse * response = request->beginResponse(204); // no content error
+    AsyncWebServerResponse * response = request->beginResponse(400); // bad request
     request->send(response);
 #endif
 }

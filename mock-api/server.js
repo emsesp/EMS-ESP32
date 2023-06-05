@@ -2375,7 +2375,7 @@ rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, async (req, res) => {
   }
 
   // await delay(2000); // wait 2 seconds to show spinner
-
+  // res.sendStatus(400); // bad request
   res.sendStatus(200);
 });
 

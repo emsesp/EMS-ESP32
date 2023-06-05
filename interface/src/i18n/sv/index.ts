@@ -51,7 +51,7 @@ const sv: Translation = {
   REMOVE: 'Ta bort',
   PROBLEM_UPDATING: 'Problem vid uppdatering',
   PROBLEM_LOADING: 'Problem vid hämtning',
-  ACCESS_DENIED: 'Åtkomst Nekad',
+  HTTP_ERROR: 'Error {0}', // TODO translate
   ANALOG_SENSOR: 'Analog Sensor',
   ANALOG_SENSORS: 'Analoga Sensorer',
   SETTINGS: 'Inställningar',
@@ -71,7 +71,6 @@ const sv: Translation = {
   TEMP_SENSOR: 'Temperatursensor',
   TEMP_SENSORS: 'Temperatursensorer',
   WRITE_CMD_SENT: 'Skrivkommandon skickade',
-  WRITE_CMD_FAILED: 'Skrivkommandon misslyckade',
   EMS_BUS_WARNING: 'EMS-buss nedkopplad. Om denna varning kvarstår efter några sekunder, kontrollera inställningar och enhets-profil.',
   EMS_BUS_SCANNING: 'Söker efter EMS-enheter...',
   CONNECTED: 'Ansluten',
