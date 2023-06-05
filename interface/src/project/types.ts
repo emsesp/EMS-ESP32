@@ -132,6 +132,7 @@ export interface DeviceValue {
   x?: number; // max, optional
 }
 
+// TODO can be refacvtored to DeviceValue[]?
 export interface DeviceData {
   data: DeviceValue[];
 }

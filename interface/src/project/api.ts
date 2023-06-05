@@ -11,7 +11,6 @@ import type {
   DeviceEntity,
   UniqueID,
   CustomEntities,
-  WriteDeviceValue,
   WriteTemperatureSensor,
   WriteAnalogSensor,
   SensorData,
@@ -37,7 +36,9 @@ export const readDeviceData = (id: number) =>
 export const writeDeviceValue = (id: number, devicevalue: DeviceValue) =>
   alovaInstance.Post('/writeDeviceValue', { id, devicevalue });
 
-// TODO to change to alova
+//
+// TODO change below to use alova
+//
 
 export function restart(): AxiosPromise<void> {
   return AXIOS.post('/restart');

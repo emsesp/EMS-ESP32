@@ -43,7 +43,7 @@ import { formatValue } from './deviceValue';
 
 import { DeviceValueUOM_s, DeviceEntityMask, DeviceType } from './types';
 import { deviceValueItemValidation } from './validators';
-import type { Device, CoreData, DeviceData, DeviceValue } from './types';
+import type { Device, DeviceValue } from './types';
 import type { FC } from 'react';
 import { ButtonRow, SectionContent, MessageBox } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
@@ -74,10 +74,9 @@ const DashboardDevices: FC = () => {
       devices: []
     },
     force: true,
-    immediate: false
+    immediate: true
   });
 
-  // TODO prevent firing when page is loaded
   const { data: deviceData, send: readDeviceData } = useRequest((id) => EMSESP.readDeviceData(id), {
     initialData: {
       data: []
@@ -86,7 +85,6 @@ const DashboardDevices: FC = () => {
     immediate: false
   });
 
-  // TODO prevent firing when page is loaded
   const { loading: submitting, send: writeDeviceValue } = useRequest(
     (id: number, deviceValue: DeviceValue) => EMSESP.writeDeviceValue(id, deviceValue),
     {
@@ -251,8 +249,6 @@ const DashboardDevices: FC = () => {
   // };
 
   async function onSelectChange(action: any, state: any) {
-    // TODO check if still needed
-    // setDeviceData({ data: [] });
     setSelectedDevice(state.id);
     if (action.type === 'ADD_BY_ID_EXCLUSIVELY') {
       await readDeviceData(state.id);

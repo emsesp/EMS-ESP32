@@ -1,5 +1,5 @@
 import { xhrRequestAdapter } from '@alova/adapter-xhr';
-import { createAlova, useRequest } from 'alova';
+import { createAlova } from 'alova';
 import GlobalFetch from 'alova/GlobalFetch';
 import ReactHook from 'alova/react';
 import axios from 'axios';
