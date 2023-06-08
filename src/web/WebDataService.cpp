@@ -32,6 +32,12 @@ WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securi
                                                                AuthenticationPredicates::IS_ADMIN))
     , _write_analog_handler(WRITE_ANALOG_SENSOR_SERVICE_PATH,
                             securityManager->wrapCallback(std::bind(&WebDataService::write_analog_sensor, this, _1, _2), AuthenticationPredicates::IS_ADMIN)) {
+    // TODO Get for /deviceData
+    server->on(DEVICE_DATA_SERVICE_PATH,
+               HTTP_GET,
+               securityManager->wrapRequest(std::bind(&WebDataService::device_data2, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+
+
     server->on(CORE_DATA_SERVICE_PATH,
                HTTP_GET,
                securityManager->wrapRequest(std::bind(&WebDataService::core_data, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
@@ -88,7 +94,6 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
             obj["d"]       = emsdevice->device_id();                            // deviceid
             obj["p"]       = emsdevice->product_id();                           // productid
             obj["v"]       = emsdevice->version();                              // version
-            // obj["e"]       = emsdevice->count_entities();                       // number of entities (device values)
         }
     }
 
@@ -103,7 +108,6 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
         obj["d"]       = 0;                                                 // deviceid
         obj["p"]       = 0;                                                 // productid
         obj["v"]       = 0;                                                 // version
-        // obj["e"]       = EMSESP::webEntityService.count_entities();         // number of entities (device values)
     }
 
     root["connected"] = EMSESP::bus_status() != 2;
@@ -171,6 +175,63 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
 
 // The unique_id is the unique record ID from the Web table to identify which device to load
 // Compresses the JSON using MsgPack https://msgpack.org/index.html
+void WebDataService::device_data2(AsyncWebServerRequest * request) {
+    uint8_t id;
+    if (request->hasParam(F_(id))) {
+        // TODO get id
+        id = Helpers::atoint(request->getParam(F_(id))->value().c_str());
+
+        size_t buffer   = EMSESP_JSON_SIZE_XXXXLARGE;
+        auto * response = new MsgpackAsyncJsonResponse(false, buffer);
+
+        // check size
+        while (!response->getSize()) {
+            delete response;
+            buffer -= 1024;
+            response = new MsgpackAsyncJsonResponse(false, buffer);
+        }
+
+        for (const auto & emsdevice : EMSESP::emsdevices) {
+            if (emsdevice->unique_id() == id) {
+                // wait max 2.5 sec for updated data (post_send_delay is 2 sec)
+                for (uint16_t i = 0; i < (emsesp::TxService::POST_SEND_DELAY + 500) && EMSESP::wait_validate(); i++) {
+                    delay(1);
+                }
+                EMSESP::wait_validate(0); // reset in case of timeout
+#ifndef EMSESP_STANDALONE
+                JsonObject output = response->getRoot();
+                emsdevice->generate_values_web(output);
+#endif
+
+#if defined(EMSESP_DEBUG)
+                size_t length = response->setLength();
+                EMSESP::logger().debug("Dashboard buffer used: %d", length);
+#else
+                response->setLength();
+#endif
+                request->send(response);
+                return;
+            }
+        }
+
+#ifndef EMSESP_STANDALONE
+        if (id == 99) {
+            JsonObject output = response->getRoot();
+            EMSESP::webEntityService.generate_value_web(output);
+            response->setLength();
+            request->send(response);
+            return;
+        }
+#endif
+    }
+
+    // invalid
+    AsyncWebServerResponse * response = request->beginResponse(400);
+    request->send(response);
+}
+
+// The unique_id is the unique record ID from the Web table to identify which device to load
+// Compresses the JSON using MsgPack https://msgpack.org/index.html
 void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
         size_t buffer   = EMSESP_JSON_SIZE_XXXXLARGE;
@@ -217,7 +278,6 @@ void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & 
     AsyncWebServerResponse * response = request->beginResponse(200);
     request->send(response);
 }
-
 
 // takes a command and its data value from a specific EMS Device, from the Web
 // assumes the service has been checked for admin authentication

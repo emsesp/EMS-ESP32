@@ -45,8 +45,15 @@ class WebDataService {
     void core_data(AsyncWebServerRequest * request);
     void sensor_data(AsyncWebServerRequest * request);
 
+    // TODO make it a Get
+    void device_data2(AsyncWebServerRequest * request);
+
+
     // POST
+    // TODO probably can be removed
     void device_data(AsyncWebServerRequest * request, JsonVariant & json);
+
+
     void write_device_value(AsyncWebServerRequest * request, JsonVariant & json);
     void write_temperature_sensor(AsyncWebServerRequest * request, JsonVariant & json);
     void write_analog_sensor(AsyncWebServerRequest * request, JsonVariant & json);

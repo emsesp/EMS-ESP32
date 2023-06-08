@@ -51,6 +51,10 @@ export function writeSettings(settings: Settings): AxiosPromise<Settings> {
 export function getBoardProfile(boardProfile: BoardProfileName): AxiosPromise<BoardProfile> {
   return AXIOS.post('/boardProfile', boardProfile);
 }
+// TODO change to GET
+export function readDeviceEntities(unique_id: UniqueID): AxiosPromise<DeviceEntity[]> {
+  return AXIOS_BIN.post('/deviceEntities', unique_id);
+}
 
 export function readStatus(): AxiosPromise<Status> {
   return AXIOS.get('/status');
@@ -66,11 +70,6 @@ export function scanDevices(): AxiosPromise<void> {
 
 export function readSensorData(): AxiosPromise<SensorData> {
   return AXIOS.get('/sensorData');
-}
-
-// TODO change to GET
-export function readDeviceEntities(unique_id: UniqueID): AxiosPromise<DeviceEntity[]> {
-  return AXIOS_BIN.post('/deviceEntities', unique_id);
 }
 
 export function writeCustomEntities(customEntities: CustomEntities): AxiosPromise<void> {

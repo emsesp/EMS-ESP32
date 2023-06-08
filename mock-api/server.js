@@ -396,6 +396,7 @@ const emsesp_coredata = {
       tn: 'Boiler',
       b: 'Nefit',
       n: 'GBx72/Trendline/Cerapur/Greenstar Si/27i',
+      // n: 'Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i',
       d: 8,
       p: 123,
       v: '06.01'

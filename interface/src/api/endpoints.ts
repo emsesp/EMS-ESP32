@@ -33,7 +33,7 @@ export const alovaInstance = createAlova({
   },
 
   responded: {
-    onSuccess: async (response, method) => {
+    onSuccess: async (response) => {
       if (response.status === 400) {
         throw new Error('Invalid command');
       }
