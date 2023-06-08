@@ -50,9 +50,6 @@ import { AuthenticatedContext } from 'contexts/authentication';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
-// TODO what to do with extractErrorMessage?
-import { extractErrorMessage } from 'utils';
-
 const DashboardDevices: FC = () => {
   const [size, setSize] = useState([0, 0]);
   const { me } = useContext(AuthenticatedContext);
@@ -83,7 +80,6 @@ const DashboardDevices: FC = () => {
   const { loading: submitting, send: writeDeviceValue } = useRequest(
     (id: number, deviceValue: DeviceValue) => EMSESP.writeDeviceValue(id, deviceValue),
     {
-      // } = useRequest((data) => alovaInstance.Post('/writeDeviceValue', data), {
       immediate: false
     }
   );
@@ -171,7 +167,7 @@ const DashboardDevices: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: minmax(0, 1fr) minmax(150px, auto) 40px;
+        --data-table-library_grid-template-columns: minmax(200px, auto) minmax(150px, auto) 40px;
         height: auto;
         max-height: 100%;
         overflow-y: scroll;
@@ -494,20 +490,11 @@ const DashboardDevices: FC = () => {
         }}
       >
         <Box sx={{ border: '1px solid #177ac9' }}>
-          <Grid container justifyContent="space-between">
-            <Box color="warning.main" ml={1}>
-              <Typography noWrap variant="h6">
-                {coreData.devices[deviceIndex].n}
-              </Typography>
-            </Box>
-            <Grid item zeroMinWidth justifyContent="flex-end">
-              <IconButton onClick={resetDeviceSelect}>
-                <CancelIcon color="info" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
-              </IconButton>
-            </Grid>
-          </Grid>
+          <Typography noWrap variant="subtitle1" color="warning.main" sx={{ mx: 1 }}>
+            {coreData.devices[deviceIndex].n}
+          </Typography>
 
-          <Grid item xs>
+          <Grid container justifyContent="space-between">
             <Typography sx={{ ml: 1 }} variant="subtitle2" color="primary">
               {shown_data.length + ' ' + LL.ENTITIES(shown_data.length)}
               <IconButton onClick={() => setShowDeviceInfo(true)}>
@@ -527,6 +514,11 @@ const DashboardDevices: FC = () => {
                 <RefreshIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
               </IconButton>
             </Typography>
+            <Grid item zeroMinWidth justifyContent="flex-end">
+              <IconButton onClick={resetDeviceSelect}>
+                <CancelIcon color="info" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+              </IconButton>
+            </Grid>
           </Grid>
         </Box>
 
