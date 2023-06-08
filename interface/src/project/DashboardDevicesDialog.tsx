@@ -24,7 +24,7 @@ import type { DeviceValue } from './types';
 import type Schema from 'async-validator';
 
 import type { ValidateFieldsError } from 'async-validator';
-import { ButtonRow, ValidatedTextField } from 'components';
+import { ValidatedTextField } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import { updateValue } from 'utils';
 
@@ -119,7 +119,8 @@ const DashboarDevicesDialog = ({
       sx={{
         '& .MuiDialog-paper': {
           borderRadius: '12px'
-        }
+        },
+        backdropFilter: 'blur(1px)'
       }}
     >
       <DialogTitle>
