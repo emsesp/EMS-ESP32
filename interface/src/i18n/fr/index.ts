@@ -51,7 +51,6 @@ const fr: Translation = {
   REMOVE: 'Enlever',
   PROBLEM_UPDATING: 'Problème lors de la mise à jour',
   PROBLEM_LOADING: 'Problème lors du chargement',
-  HTTP_ERROR: 'Error {0}', // TODO translate
   ANALOG_SENSOR: 'Capteur analogique',
   ANALOG_SENSORS: 'Capteurs analogiques',
   SETTINGS: 'Paramètres',

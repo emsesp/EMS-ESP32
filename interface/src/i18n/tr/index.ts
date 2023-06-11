@@ -51,7 +51,6 @@ const tr: Translation = {
   REMOVE: 'Kaldır',
   PROBLEM_UPDATING: 'Güncelleme Sorunu',
   PROBLEM_LOADING: 'Yükleme Sorunu',
-  HTTP_ERROR: 'Error {0}', // TODO translate
   ANALOG_SENSOR: 'Analog Sensör',
   ANALOG_SENSORS: 'Analog Sensörler',
   SETTINGS: 'Ayarlar',

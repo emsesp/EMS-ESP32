@@ -280,13 +280,6 @@ export interface APIcall {
   entity: string;
   id: any;
 }
-
-// TODO can be removed?
-export interface WriteDeviceValue {
-  id: number;
-  devicevalue: DeviceValue;
-}
-
 export interface WriteAnalogSensor {
   id: number;
   gpio: number;

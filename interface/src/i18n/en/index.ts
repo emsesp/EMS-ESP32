@@ -51,7 +51,6 @@ const en: Translation = {
   REMOVE: 'Remove',
   PROBLEM_UPDATING: 'Problem updating',
   PROBLEM_LOADING: 'Problem loading',
-  HTTP_ERROR: 'Error {0}',
   ANALOG_SENSOR: 'Analog Sensor',
   ANALOG_SENSORS: 'Analog Sensors',
   SETTINGS: 'Settings',

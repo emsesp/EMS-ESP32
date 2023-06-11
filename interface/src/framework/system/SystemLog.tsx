@@ -49,6 +49,8 @@ const levelLabel = (level: LogLevel) => {
 const SystemLog: FC = () => {
   const { LL } = useI18nContext();
 
+  // TODO missing update!
+
   const { loadData, data, setData, origData, dirtyFlags, blocker, setDirtyFlags, setOrigData } = useRest<LogSettings>({
     read: SystemApi.readLogSettings
   });

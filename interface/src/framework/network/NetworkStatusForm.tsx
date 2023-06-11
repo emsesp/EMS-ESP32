@@ -59,6 +59,8 @@ const IPs = (status: NetworkStatus) => {
 };
 
 const NetworkStatusForm: FC = () => {
+  // TODO missing update!
+
   const { loadData, data, errorMessage } = useRest<NetworkStatus>({ read: NetworkApi.readNetworkStatus });
 
   const { LL } = useI18nContext();

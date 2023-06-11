@@ -21,7 +21,6 @@
 
 // GET
 #define CORE_DATA_SERVICE_PATH "/rest/coreData"
-#define SCAN_DEVICES_SERVICE_PATH "/rest/scanDevices"
 #define DEVICE_DATA_SERVICE_PATH "/rest/deviceData"
 #define SENSOR_DATA_SERVICE_PATH "/rest/sensorData"
 
@@ -29,6 +28,7 @@
 #define WRITE_DEVICE_VALUE_SERVICE_PATH "/rest/writeDeviceValue"
 #define WRITE_TEMPERATURE_SENSOR_SERVICE_PATH "/rest/writeTemperatureSensor"
 #define WRITE_ANALOG_SENSOR_SERVICE_PATH "/rest/writeAnalogSensor"
+#define SCAN_DEVICES_SERVICE_PATH "/rest/scanDevices"
 
 namespace emsesp {
 
@@ -44,22 +44,15 @@ class WebDataService {
     // GET
     void core_data(AsyncWebServerRequest * request);
     void sensor_data(AsyncWebServerRequest * request);
-
-    // TODO make it a Get
-    void device_data2(AsyncWebServerRequest * request);
-
+    void device_data(AsyncWebServerRequest * request);
 
     // POST
-    // TODO probably can be removed
-    void device_data(AsyncWebServerRequest * request, JsonVariant & json);
-
-
     void write_device_value(AsyncWebServerRequest * request, JsonVariant & json);
     void write_temperature_sensor(AsyncWebServerRequest * request, JsonVariant & json);
     void write_analog_sensor(AsyncWebServerRequest * request, JsonVariant & json);
-    void scan_devices(AsyncWebServerRequest * request);
+    void scan_devices(AsyncWebServerRequest * request); // command
 
-    AsyncCallbackJsonWebHandler _device_data_handler, _write_value_handler, _write_temperature_handler, _write_analog_handler;
+    AsyncCallbackJsonWebHandler _write_value_handler, _write_temperature_handler, _write_analog_handler;
 };
 
 } // namespace emsesp

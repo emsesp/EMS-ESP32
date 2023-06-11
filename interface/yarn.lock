@@ -1288,10 +1288,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^20.2.5":
-  version: 20.2.5
-  resolution: "@types/node@npm:20.2.5"
-  checksum: 1c3db8a4ceb5e5d12e7cb140e37c14a16ce013084c6d65579b91cefbe0ecaca57d85093d968172b11c3d1d95bcbc5d972b08aa3dc3935206fb39bc6c10751102
+"@types/node@npm:^20.3.0":
+  version: 20.3.0
+  resolution: "@types/node@npm:20.3.0"
+  checksum: f717d92c29c4877db394b604771b3734216f013312f93252f72c2018aabe8083be905fbcf0644c859938c8183b6e0245faaeaab94c9e78268b87a449bc6ef4aa
   languageName: node
   linkType: hard
 
@@ -1368,14 +1368,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:^18.2.9":
-  version: 18.2.9
-  resolution: "@types/react@npm:18.2.9"
+"@types/react@npm:^18.2.11":
+  version: 18.2.11
+  resolution: "@types/react@npm:18.2.11"
   dependencies:
     "@types/prop-types": "*"
     "@types/scheduler": "*"
     csstype: ^3.0.2
-  checksum: 5935a8cb8efc2804dbb0f85989970f654fb4117274b6d2836baa58d5e9dbfc09fd9d60e1f23a8d0fca70ad75e9f0e074790947899be40525cbe62f7ac58adcc6
+  checksum: 9360d7be13195050eb16598796056123ee9d30470e7073a914300fed9282585d0dd0638bb5ff65843e308c3ac213d25b3388e8186f3134490c758f18f11f3bd8
   languageName: node
   linkType: hard
 
@@ -1536,8 +1536,8 @@ __metadata:
     "@mui/material": ^5.13.4
     "@table-library/react-table-library": 4.1.4
     "@types/lodash-es": ^4.17.7
-    "@types/node": ^20.2.5
-    "@types/react": ^18.2.9
+    "@types/node": ^20.3.0
+    "@types/react": ^18.2.11
     "@types/react-dom": ^18.2.4
     "@types/react-router-dom": ^5.3.3
     "@typescript-eslint/eslint-plugin": ^5.59.9
@@ -1567,9 +1567,9 @@ __metadata:
     react-dom: latest
     react-dropzone: ^14.2.3
     react-icons: ^4.9.0
-    react-router-dom: ^6.12.0
+    react-router-dom: ^6.12.1
     react-toastify: ^9.1.3
-    rollup-plugin-visualizer: ^5.9.0
+    rollup-plugin-visualizer: ^5.9.2
     sockette: ^2.0.6
     terser: ^5.17.7
     typesafe-i18n: ^5.24.3
@@ -4807,27 +4807,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-dom@npm:^6.12.0":
-  version: 6.12.0
-  resolution: "react-router-dom@npm:6.12.0"
+"react-router-dom@npm:^6.12.1":
+  version: 6.12.1
+  resolution: "react-router-dom@npm:6.12.1"
   dependencies:
     "@remix-run/router": 1.6.3
-    react-router: 6.12.0
+    react-router: 6.12.1
   peerDependencies:
     react: ">=16.8"
     react-dom: ">=16.8"
-  checksum: 910b23ae3555e7baff97038c478b8fa65d5b54856c74e789c529850c002850a961329b692a8f1f4643100f46075918d2b55cbf3c7f87f85588387148010600f5
+  checksum: 4de0d4159a9dd2de0477d7608e9055262ebdd5dc41fc918b44b38170cc8ed407fa7dbb73bdb85e9469614502ad4772523b8a7f32c2609e62973feb41b70d871b
   languageName: node
   linkType: hard
 
-"react-router@npm:6.12.0":
-  version: 6.12.0
-  resolution: "react-router@npm:6.12.0"
+"react-router@npm:6.12.1":
+  version: 6.12.1
+  resolution: "react-router@npm:6.12.1"
   dependencies:
     "@remix-run/router": 1.6.3
   peerDependencies:
     react: ">=16.8"
-  checksum: b7cee04f5edbf48f1aa0303107514a3a9dc2b6f94a7a753fbf4eb8dde1d3eb67940204ff0b8b907c5b09f69c716dd958a6187346b1c35ccf19162d74e77d99af
+  checksum: 33a39eca122f3519f1aa91d8e6585fab669b3b06b621aa624f7db1ffda6b84676facd57028652f2fba7325a208abef906a5ba6c91d55d5a5d29993583d82dd61
   languageName: node
   linkType: hard
 
@@ -5030,9 +5030,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup-plugin-visualizer@npm:^5.9.0":
-  version: 5.9.0
-  resolution: "rollup-plugin-visualizer@npm:5.9.0"
+"rollup-plugin-visualizer@npm:^5.9.2":
+  version: 5.9.2
+  resolution: "rollup-plugin-visualizer@npm:5.9.2"
   dependencies:
     open: ^8.4.0
     picomatch: ^2.3.1
@@ -5045,7 +5045,7 @@ __metadata:
       optional: true
   bin:
     rollup-plugin-visualizer: dist/bin/cli.js
-  checksum: dc706e09c78124b2e05b58779c757e488c76e679b92795f8538f8efffa61845339d75a7f767d5a9eeb5d7e4fd76a835dd93ebf17315bf8a0a0e5fc85a4f59ab5
+  checksum: e6280bed797084e9f9ee06726e46706e32854fc7647c5c5bcec68a9be8ca8e6fbf7f8a0b2f76255e9df72e84135a7d57eb2662b6cfd68496a1ef60fa33597eaf
   languageName: node
   linkType: hard
 

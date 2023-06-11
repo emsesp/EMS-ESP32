@@ -1,6 +1,5 @@
 import { xhrRequestAdapter } from '@alova/adapter-xhr';
 import { createAlova } from 'alova';
-// import GlobalFetch from 'alova/GlobalFetch';
 import ReactHook from 'alova/react';
 import axios from 'axios';
 import { unpack } from '../api/unpack';
@@ -23,21 +22,21 @@ export const EVENT_SOURCE_ROOT = location.protocol + '//' + location.host + ES_B
 export const alovaInstance = createAlova({
   baseURL: '/rest/',
   statesHook: ReactHook,
+  timeout: 50000,
   requestAdapter: xhrRequestAdapter(),
-  // requestAdapter: GlobalFetch(),
   beforeRequest(method) {
-    // TODO check if bearer works
     if (localStorage.getItem(ACCESS_TOKEN)) {
-      method.config.headers.token = 'Bearer ' + localStorage.getItem(ACCESS_TOKEN);
+      method.config.headers.Authorization = 'Bearer ' + localStorage.getItem(ACCESS_TOKEN);
     }
   },
 
   responded: {
     onSuccess: async (response) => {
-      if (response.status === 400) {
+      if (response.status == 202) {
+        throw new Error('Reboot required');
+      } else if (response.status === 400) {
         throw new Error('Invalid command');
-      }
-      if (response.status >= 400) {
+      } else if (response.status >= 400) {
         throw new Error(response.statusText);
       }
       const data = await response.data;

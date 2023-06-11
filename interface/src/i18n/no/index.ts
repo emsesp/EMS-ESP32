@@ -51,7 +51,6 @@ const no: Translation = {
   REMOVE: 'Fjern',
   PROBLEM_UPDATING: 'Problem med oppdatering',
   PROBLEM_LOADING: 'Problem med opplasting',
-  HTTP_ERROR: 'Error {0}', // TODO translate
   ANALOG_SENSOR: 'Analog Sensor',
   ANALOG_SENSORS: 'Analoge Sensorer',
   SETTINGS: 'Innstillinger',

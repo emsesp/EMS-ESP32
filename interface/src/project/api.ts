@@ -14,8 +14,7 @@ import type {
   WriteAnalogSensor,
   SensorData,
   Schedule,
-  Entities,
-  DeviceValue
+  Entities
 } from './types';
 import type { AxiosPromise } from 'axios';
 import { AXIOS, AXIOS_API, AXIOS_BIN, alovaInstance } from 'api/endpoints';
@@ -28,8 +27,11 @@ export const readDeviceData = (id: number) =>
     responseType: 'arraybuffer' // uses msgpack
   });
 
-export const writeDeviceValue = (id: number, devicevalue: DeviceValue) =>
-  alovaInstance.Post('/writeDeviceValue', { id, devicevalue });
+export const writeDeviceValue = (data: any) => alovaInstance.Post('/writeDeviceValue', data);
+
+// SettingsApplication
+export const readSettings = () => alovaInstance.Get<Settings>('/settings');
+export const writeSettings = (data: any) => alovaInstance.Post('/settings', data);
 
 //
 // TODO change below to use alova
@@ -37,14 +39,6 @@ export const writeDeviceValue = (id: number, devicevalue: DeviceValue) =>
 
 export function restart(): AxiosPromise<void> {
   return AXIOS.post('/restart');
-}
-
-export function readSettings(): AxiosPromise<Settings> {
-  return AXIOS.get('/settings');
-}
-
-export function writeSettings(settings: Settings): AxiosPromise<Settings> {
-  return AXIOS.post('/settings', settings); // call command
 }
 
 // TODO change to GET

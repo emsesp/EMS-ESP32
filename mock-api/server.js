@@ -2128,8 +2128,8 @@ rest_server.get(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
 rest_server.post(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
   settings = req.body;
   console.log('Write settings: ' + JSON.stringify(settings));
-  res.status(202).json(settings); // restart needed
-  // res.status(200).json(settings); // no restart needed
+  // res.status(202).json(settings); // restart needed
+  res.status(200).json(settings); // no restart needed
 });
 rest_server.get(EMSESP_CORE_DATA_ENDPOINT, (req, res) => {
   console.log('send back core data...');
@@ -2337,6 +2337,7 @@ rest_server.post(EMSESP_WRITE_ENTITIES_ENDPOINT, (req, res) => {
 });
 
 rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, async (req, res) => {
+  console.log(req.body);
   const devicevalue = req.body.devicevalue;
   const id = req.body.id;
   console.log('Write device value for id : ' + id);

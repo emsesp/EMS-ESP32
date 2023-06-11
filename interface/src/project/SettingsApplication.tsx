@@ -23,7 +23,7 @@ import {
 
 import RestartMonitor from 'framework/system/RestartMonitor';
 import { useI18nContext } from 'i18n/i18n-react';
-import { numberValue, extractErrorMessage, updateValueDirty, useRest } from 'utils';
+import { numberValue, extractErrorMessage, updateValueDirty, useRest2 } from 'utils';
 import { validate } from 'validators';
 
 export function boardProfileSelectItems() {
@@ -47,7 +47,7 @@ const SettingsApplication: FC = () => {
     blocker,
     errorMessage,
     restartNeeded
-  } = useRest<Settings>({
+  } = useRest2<Settings>({
     read: EMSESP.readSettings,
     update: EMSESP.writeSettings
   });
@@ -60,6 +60,12 @@ const SettingsApplication: FC = () => {
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
   const [processingBoard, setProcessingBoard] = useState<boolean>(false);
 
+  //  TODO remove - just for testing loaddata
+  // useEffect(() => {
+  //   void loadData();
+  // }, []);
+
+  // TODO replace with Alova!
   const updateBoardProfile = async (boardProfile: string) => {
     setProcessingBoard(true);
     try {

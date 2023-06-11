@@ -51,7 +51,6 @@ const pl: BaseTranslation = {
   REMOVE: 'Usuń',
   PROBLEM_UPDATING: 'Problem z uaktualnieniem!',
   PROBLEM_LOADING: 'Problem z załadowaniem!',
-  HTTP_ERROR: 'Error {0}', // TODO translate
   ANALOG_SENSOR: '{{u|u||ustawienia u|ustawień u}}rządzeni{{a podłączonego do EMS-ESP|e||a podłączonego do EMS-ESP|a podłączonego do EMS-ESP}}',
   ANALOG_SENSORS: 'Urządzenia podłączone do EMS-ESP',
   SETTINGS: 'ustawienia',

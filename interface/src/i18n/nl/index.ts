@@ -51,7 +51,6 @@ const nl: Translation = {
   REMOVE: 'Verwijderen',
   PROBLEM_UPDATING: 'Probleem met updaten',
   PROBLEM_LOADING: 'Probleem met laden',
-  HTTP_ERROR: 'Error {0}', // TODO translate
   ANALOG_SENSOR: 'Analoge sensor',
   ANALOG_SENSORS: 'Analoge Sensoren',
   SETTINGS: 'Instellingen',

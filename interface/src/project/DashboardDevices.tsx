@@ -69,7 +69,7 @@ const DashboardDevices: FC = () => {
     immediate: true
   });
 
-  const { data: deviceData, send: readDeviceData } = useRequest((id) => EMSESP.readDeviceData(id), {
+  const { data: deviceData, send: readDeviceData } = useRequest((data) => EMSESP.readDeviceData(data), {
     initialData: {
       data: []
     },
@@ -77,12 +77,9 @@ const DashboardDevices: FC = () => {
     immediate: false
   });
 
-  const { loading: submitting, send: writeDeviceValue } = useRequest(
-    (id: number, deviceValue: DeviceValue) => EMSESP.writeDeviceValue(id, deviceValue),
-    {
-      immediate: false
-    }
-  );
+  const { loading: submitting, send: writeDeviceValue } = useRequest((data) => EMSESP.writeDeviceValue(data), {
+    immediate: false
+  });
 
   useLayoutEffect(() => {
     function updateSize() {
@@ -350,7 +347,7 @@ const DashboardDevices: FC = () => {
         toast.success(LL.WRITE_CMD_SENT());
       })
       .catch((error) => {
-        toast.error(LL.HTTP_ERROR(error));
+        toast.error(error.message);
       })
       .finally(async () => {
         setDeviceValueDialogOpen(false);

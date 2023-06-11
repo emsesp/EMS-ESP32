@@ -51,7 +51,6 @@ const sv: Translation = {
   REMOVE: 'Ta bort',
   PROBLEM_UPDATING: 'Problem vid uppdatering',
   PROBLEM_LOADING: 'Problem vid hämtning',
-  HTTP_ERROR: 'Error {0}', // TODO translate
   ANALOG_SENSOR: 'Analog Sensor',
   ANALOG_SENSORS: 'Analoga Sensorer',
   SETTINGS: 'Inställningar',

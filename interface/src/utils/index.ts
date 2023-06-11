@@ -4,4 +4,6 @@ export * from './route';
 export * from './submit';
 export * from './time';
 export * from './useRest';
+// TODO remove
+export * from './useRest2';
 export * from './props';

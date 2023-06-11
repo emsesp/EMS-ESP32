@@ -3,6 +3,7 @@ import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import { Avatar, Button, Divider, List, ListItem, ListItemAvatar, ListItemText, useTheme } from '@mui/material';
+import { useRequest } from 'alova';
 import type { Theme } from '@mui/material';
 import type { FC } from 'react';
 
@@ -12,7 +13,6 @@ import { ButtonRow, FormLoader, SectionContent } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
 import { APNetworkStatus } from 'types';
-import { useRest } from 'utils';
 
 export const apStatusHighlight = ({ status }: APStatus, theme: Theme) => {
   switch (status) {
@@ -28,7 +28,8 @@ export const apStatusHighlight = ({ status }: APStatus, theme: Theme) => {
 };
 
 const APStatusForm: FC = () => {
-  const { loadData, data, errorMessage } = useRest<APStatus>({ read: APApi.readAPStatus });
+  // TODO missing update!
+  const { data: data, send: loadData, error } = useRequest(APApi.readAPStatus());
 
   const { LL } = useI18nContext();
 
@@ -49,7 +50,7 @@ const APStatusForm: FC = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
     }
 
     return (

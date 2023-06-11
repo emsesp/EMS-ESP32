@@ -1,11 +1,9 @@
-import { AXIOS } from './endpoints';
+import { AXIOS, alovaInstance } from './endpoints';
 import type { AxiosPromise } from 'axios';
 
 import type { APSettings, APStatus } from 'types';
 
-export function readAPStatus(): AxiosPromise<APStatus> {
-  return AXIOS.get('/apStatus');
-}
+export const readAPStatus = () => alovaInstance.Get<APStatus>('/apStatus');
 
 export function readAPSettings(): AxiosPromise<APSettings> {
   return AXIOS.get('/apSettings');

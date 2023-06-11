@@ -64,6 +64,8 @@ const showQuality = (stat: Stat) => {
 };
 
 const DashboardStatus: FC = () => {
+  // TODO missing update!
+
   const { loadData, data, errorMessage } = useRest<Status>({ read: EMSESP.readStatus });
 
   const { LL } = useI18nContext();
