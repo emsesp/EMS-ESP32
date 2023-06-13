@@ -26,7 +26,6 @@ export const mqttStatusHighlight = ({ enabled, connected }: MqttStatus, theme: T
 
 export const mqttPublishHighlight = ({ mqtt_fails }: MqttStatus, theme: Theme) => {
   if (mqtt_fails === 0) return theme.palette.success.main;
-
   if (mqtt_fails < 10) return theme.palette.warning.main;
 
   return theme.palette.error.main;
@@ -39,8 +38,7 @@ export const mqttQueueHighlight = ({ mqtt_queued }: MqttStatus, theme: Theme) =>
 };
 
 const MqttStatusForm: FC = () => {
-  // TODO missing update!
-
+  // TODO replace with   const { data: data, send: loadData, error } = useRequest(APApi.readAPStatus());
   const { loadData, data, errorMessage } = useRest<MqttStatus>({ read: MqttApi.readMqttStatus });
 
   const { LL } = useI18nContext();

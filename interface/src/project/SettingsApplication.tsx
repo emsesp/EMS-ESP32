@@ -2,6 +2,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Checkbox, MenuItem, Grid, Typography, Divider, InputAdornment, TextField } from '@mui/material';
+import { useRequest } from 'alova';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 
@@ -23,7 +24,7 @@ import {
 
 import RestartMonitor from 'framework/system/RestartMonitor';
 import { useI18nContext } from 'i18n/i18n-react';
-import { numberValue, extractErrorMessage, updateValueDirty, useRest2 } from 'utils';
+import { numberValue, updateValueDirty, useRest2 } from 'utils';
 import { validate } from 'validators';
 
 export function boardProfileSelectItems() {
@@ -39,7 +40,7 @@ const SettingsApplication: FC = () => {
     loadData,
     saveData,
     saving,
-    setData,
+    updateDataValue,
     data,
     origData,
     dirtyFlags,
@@ -51,45 +52,48 @@ const SettingsApplication: FC = () => {
     read: EMSESP.readSettings,
     update: EMSESP.writeSettings
   });
+
   const [restarting, setRestarting] = useState<boolean>();
 
   const { LL } = useI18nContext();
 
-  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, setData);
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, updateDataValue);
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
-  const [processingBoard, setProcessingBoard] = useState<boolean>(false);
 
-  //  TODO remove - just for testing loaddata
-  // useEffect(() => {
-  //   void loadData();
-  // }, []);
+  const {
+    loading: processingBoard,
+    send: readBoardProfile,
+    onSuccess: onSuccessBoardProfile
+  } = useRequest((boardProfile) => EMSESP.getBoardProfile(boardProfile), {
+    immediate: false
+  });
 
-  // TODO replace with Alova!
-  const updateBoardProfile = async (boardProfile: string) => {
-    setProcessingBoard(true);
-    try {
-      const response = await EMSESP.getBoardProfile({ board_profile: boardProfile });
-      if (data) {
-        setData({
-          ...data,
-          board_profile: boardProfile,
-          led_gpio: response.data.led_gpio,
-          dallas_gpio: response.data.dallas_gpio,
-          rx_gpio: response.data.rx_gpio,
-          tx_gpio: response.data.tx_gpio,
-          pbutton_gpio: response.data.pbutton_gpio,
-          phy_type: response.data.phy_type,
-          eth_power: response.data.eth_power,
-          eth_phy_addr: response.data.eth_phy_addr,
-          eth_clock_mode: response.data.eth_clock_mode
-        });
-      }
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
-    } finally {
-      setProcessingBoard(false);
-    }
+  const { send: restartCommand } = useRequest(EMSESP.restart(), {
+    immediate: false
+  });
+
+  onSuccessBoardProfile((event) => {
+    const response = event.data as unknown as Settings;
+    updateDataValue({
+      ...data,
+      board_profile: response.board_profile,
+      led_gpio: response.led_gpio,
+      dallas_gpio: response.dallas_gpio,
+      rx_gpio: response.rx_gpio,
+      tx_gpio: response.tx_gpio,
+      pbutton_gpio: response.pbutton_gpio,
+      phy_type: response.phy_type,
+      eth_power: response.eth_power,
+      eth_phy_addr: response.eth_phy_addr,
+      eth_clock_mode: response.eth_clock_mode
+    });
+  });
+
+  const updateBoardProfile = async (board_profile: string) => {
+    await readBoardProfile(board_profile).catch((error) => {
+      toast.error(error.message);
+    });
   };
 
   const content = () => {
@@ -101,9 +105,10 @@ const SettingsApplication: FC = () => {
       try {
         setFieldErrors(undefined);
         await validate(createSettingsValidator(data), data);
-        await saveData();
       } catch (errors: any) {
         setFieldErrors(errors);
+      } finally {
+        await saveData();
       }
     };
 
@@ -111,7 +116,7 @@ const SettingsApplication: FC = () => {
       const boardProfile = event.target.value;
       updateFormValue(event);
       if (boardProfile === 'CUSTOM') {
-        setData({
+        updateDataValue({
           ...data,
           board_profile: boardProfile
         });
@@ -122,12 +127,10 @@ const SettingsApplication: FC = () => {
 
     const restart = async () => {
       await validateAndSubmit();
-      try {
-        await EMSESP.restart();
-        setRestarting(true);
-      } catch (error) {
-        toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
-      }
+      await restartCommand().catch((error) => {
+        toast.error(error.message);
+      });
+      setRestarting(true);
     };
 
     return (

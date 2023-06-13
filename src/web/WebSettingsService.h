@@ -122,11 +122,10 @@ class WebSettingsService : public StatefulService<WebSettings> {
     void save();
 
   private:
-    HttpEndpoint<WebSettings>   _httpEndpoint;
-    FSPersistence<WebSettings>  _fsPersistence;
-    AsyncCallbackJsonWebHandler _boardProfileHandler;
+    HttpEndpoint<WebSettings>  _httpEndpoint;
+    FSPersistence<WebSettings> _fsPersistence;
 
-    void board_profile(AsyncWebServerRequest * request, JsonVariant & json);
+    void board_profile(AsyncWebServerRequest * request);
 
     void onUpdate();
 };

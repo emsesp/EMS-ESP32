@@ -23,14 +23,13 @@ export const updateValue =
   };
 
 export const updateValueDirty =
-  <S>(origData: any, dirtyFlags: any, setDirtyFlags: any, updateEntity: any) =>
-  // <S>(origData: any, dirtyFlags: any, setDirtyFlags: any, updateEntity: UpdateEntity<S>) =>
+  (origData: any, dirtyFlags: any, setDirtyFlags: any, updateDataValue: any) =>
   (event: React.ChangeEvent<HTMLInputElement>) => {
     const updated_value = extractEventValue(event);
     const name = event.target.name;
 
     // TODO not sure how this is even working!!
-    updateEntity((prevState) => ({
+    updateDataValue((prevState) => ({
       ...prevState,
       [name]: updated_value
     }));
@@ -38,9 +37,9 @@ export const updateValueDirty =
     const arr: string[] = dirtyFlags;
 
     // TODO remove comments
-    // console.log('updating ' + name + ' to ' + updated_value); // TODO remove
-    // console.log('dirtyFlags:', dirtyFlags); // TODO remove
-    // console.log('binding.ts origData:', origData); // TODO remove
+    // console.log('updating ' + name + ' to ' + updated_value);
+    // console.log('dirtyFlags:', dirtyFlags);
+    // console.log('binding.ts origData:', origData);
 
     if (origData[name] !== updated_value) {
       if (!arr.includes(name)) {

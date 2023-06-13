@@ -16,7 +16,7 @@ void WiFiScanner::scanNetworks(AsyncWebServerRequest * request) {
         WiFi.scanDelete();
         WiFi.scanNetworks(true);
     }
-    request->send(202);
+    request->send(202); // special code to indicate scan in progress
 }
 
 void WiFiScanner::listNetworks(AsyncWebServerRequest * request) {
@@ -36,7 +36,7 @@ void WiFiScanner::listNetworks(AsyncWebServerRequest * request) {
         response->setLength();
         request->send(response);
     } else if (numNetworks == -1) {
-        request->send(202);
+        request->send(202); // special code to indicate scan in progress
     } else {
         scanNetworks(request);
     }

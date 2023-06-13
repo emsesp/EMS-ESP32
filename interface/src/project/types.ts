@@ -131,8 +131,6 @@ export interface DeviceValue {
   m?: number; // min, optional
   x?: number; // max, optional
 }
-
-// TODO can be refacvtored to DeviceValue[]?
 export interface DeviceData {
   data: DeviceValue[];
 }
@@ -150,16 +148,6 @@ export interface DeviceEntity {
   o_cn?: string; // original cn before edits
   o_mi?: number; // original min value
   o_ma?: number; // original max value
-}
-
-export interface CustomEntities {
-  id: number;
-  entity_ids: string[];
-}
-
-// TODO can be removed?
-export interface UniqueID {
-  id: number;
 }
 
 export enum DeviceValueUOM {
@@ -257,10 +245,6 @@ export const BOARD_PROFILES: BoardProfiles = {
   S2MINI: 'Wemos S2 Mini',
   S3MINI: 'Liligo S3'
 };
-
-export interface BoardProfileName {
-  board_profile: string;
-}
 
 export interface BoardProfile {
   board_profile: string;

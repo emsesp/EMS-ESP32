@@ -52,8 +52,8 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
         const response = await update(toSave);
         setOrigData(response.data);
         setData(response.data);
-        if (response.status === 202) {
-          setRestartNeeded(true);
+        if (response.status === 205) {
+          setRestartNeeded(true); // reboot required
         } else {
           toast.success(LL.UPDATED_OF(LL.SETTINGS()));
         }

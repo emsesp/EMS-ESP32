@@ -32,10 +32,10 @@ export const alovaInstance = createAlova({
 
   responded: {
     onSuccess: async (response) => {
-      if (response.status == 202) {
+      if (response.status == 205) {
         throw new Error('Reboot required');
       } else if (response.status === 400) {
-        throw new Error('Invalid command');
+        throw new Error('Request Failed');
       } else if (response.status >= 400) {
         throw new Error(response.statusText);
       }
@@ -114,8 +114,7 @@ export const AXIOS_BIN = axios.create({
   transformResponse: [(data) => unpack(data)]
 });
 
-// TODO replace with alova
-// TODO see https://alova.js.org/next-step/download-upload-progress
+// TODO replace upload with alova, see https://alova.js.org/next-step/download-upload-progress
 export interface FileUploadConfig {
   cancelToken?: CancelToken;
   onUploadProgress?: (progressEvent: AxiosProgressEvent) => void;

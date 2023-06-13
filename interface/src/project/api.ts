@@ -1,86 +1,63 @@
 import type {
-  BoardProfile,
-  BoardProfileName,
   APIcall,
   Settings,
   Status,
   CoreData,
   Devices,
-  DeviceData,
   DeviceEntity,
-  UniqueID,
-  CustomEntities,
   WriteTemperatureSensor,
   WriteAnalogSensor,
   SensorData,
   Schedule,
-  Entities
+  Entities,
+  DeviceData
 } from './types';
 import type { AxiosPromise } from 'axios';
-import { AXIOS, AXIOS_API, AXIOS_BIN, alovaInstance } from 'api/endpoints';
+import { AXIOS, AXIOS_API, alovaInstance } from 'api/endpoints';
 
+// DashboardDevices
 export const readCoreData = () => alovaInstance.Get<CoreData>(`/coreData`);
-
 export const readDeviceData = (id: number) =>
   alovaInstance.Get<DeviceData>('/deviceData', {
     params: { id },
     responseType: 'arraybuffer' // uses msgpack
   });
-
 export const writeDeviceValue = (data: any) => alovaInstance.Post('/writeDeviceValue', data);
 
 // SettingsApplication
 export const readSettings = () => alovaInstance.Get<Settings>('/settings');
 export const writeSettings = (data: any) => alovaInstance.Post('/settings', data);
+export const getBoardProfile = (boardProfile: string) =>
+  alovaInstance.Get('/boardProfile', {
+    params: { boardProfile }
+  });
+export const restart = () => alovaInstance.Post('/restart');
 
-//
-// TODO change below to use alova
-//
+// SettingsCustomization
+export const readDeviceEntities = (id: number) =>
+  alovaInstance.Get<DeviceEntity[]>('/deviceEntities', {
+    params: { id },
+    responseType: 'arraybuffer',
+    transformData(rawData: any) {
+      return rawData.map((de: DeviceEntity) => ({ ...de, o_m: de.m, o_cn: de.cn, o_mi: de.mi, o_ma: de.ma }));
+    }
+  });
+export const readDevices = () => alovaInstance.Get<Devices>('/devices');
+export const resetCustomizations = () => alovaInstance.Post('/resetCustomizations');
+export const writeCustomEntities = (data: any) => alovaInstance.Post('/customEntities', data);
 
-export function restart(): AxiosPromise<void> {
-  return AXIOS.post('/restart');
-}
+// DashboardSensors
+export const readSensorData = () => alovaInstance.Get<SensorData>('/sensorData');
+export const writeTemperatureSensor = (ts: WriteTemperatureSensor) => alovaInstance.Post('/writeTemperatureSensor', ts);
+export const writeAnalogSensor = (as: WriteAnalogSensor) => alovaInstance.Post('/writeAnalogSensor', as);
 
-// TODO change to GET
-export function getBoardProfile(boardProfile: BoardProfileName): AxiosPromise<BoardProfile> {
-  return AXIOS.post('/boardProfile', boardProfile);
-}
-// TODO change to GET
-export function readDeviceEntities(unique_id: UniqueID): AxiosPromise<DeviceEntity[]> {
-  return AXIOS_BIN.post('/deviceEntities', unique_id);
-}
+// TODO think about naming, get... and not get etc...
 
-export function readStatus(): AxiosPromise<Status> {
-  return AXIOS.get('/status');
-}
+// DashboardStatus
+export const readStatus = () => alovaInstance.Get<Status>('/status');
+export const scanDevices = () => alovaInstance.Post('/scanDevices');
 
-export function readDevices(): AxiosPromise<Devices> {
-  return AXIOS.get('/devices');
-}
-
-export function scanDevices(): AxiosPromise<void> {
-  return AXIOS.post('/scanDevices'); // call command
-}
-
-export function readSensorData(): AxiosPromise<SensorData> {
-  return AXIOS.get('/sensorData');
-}
-
-export function writeCustomEntities(customEntities: CustomEntities): AxiosPromise<void> {
-  return AXIOS.post('/customEntities', customEntities);
-}
-
-export function writeTemperatureSensor(ts: WriteTemperatureSensor): AxiosPromise<void> {
-  return AXIOS.post('/writeTemperatureSensor', ts);
-}
-
-export function writeAnalogSensor(as: WriteAnalogSensor): AxiosPromise<void> {
-  return AXIOS.post('/writeAnalogSensor', as);
-}
-
-export function resetCustomizations(): AxiosPromise<void> {
-  return AXIOS.post('/resetCustomizations'); // command
-}
+// ALOVA goes here....
 
 export function API(apiCall: APIcall): AxiosPromise<void> {
   return AXIOS_API.post('/', apiCall); // command

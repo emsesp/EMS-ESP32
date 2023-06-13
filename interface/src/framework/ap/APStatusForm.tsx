@@ -28,7 +28,6 @@ export const apStatusHighlight = ({ status }: APStatus, theme: Theme) => {
 };
 
 const APStatusForm: FC = () => {
-  // TODO missing update!
   const { data: data, send: loadData, error } = useRequest(APApi.readAPStatus());
 
   const { LL } = useI18nContext();

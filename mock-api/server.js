@@ -480,7 +480,7 @@ const emsesp_sensordata = {
     { id: '28-233D-9497-0C03', n: 'Dallas 1', t: 25.7, o: 1.2, u: 1 },
     { id: '28-243D-7437-1E3A', n: 'Dallas 2 outside', t: 26.1, o: 0, u: 1 },
     { id: '28-243E-7437-1E3B', n: 'Zolder', t: 27.1, o: 0, u: 16 },
-    { id: '28-183D-1892-0C33', n: 'Roof', o: 2, u: 1 }
+    { id: '28-183D-1892-0C33', n: 'Roof', o: 2, u: 1 } // no temperature
   ],
   // as: [],
   as: [
@@ -512,94 +512,14 @@ const status = {
 };
 
 // Dashboard data
-// 7 - Nefit Trendline boiler
 // 1 - RC35 thermo
 // 2 - RC20 thermo
 // 3 - Buderus GB125 boiler
 // 4 - RC100 themo
 // 5 - Mixer MM10
 // 6 - Solar SM10
+// 7 - Nefit Trendline boiler
 // 99 - Custom
-
-const emsesp_devicedata_7 = {
-  data: [
-    { v: '', u: 0, id: '08reset', c: 'reset', l: ['-', 'maintenance', 'error'] },
-    { v: 'off', u: 0, id: '08heating active' },
-    { v: 'off', u: 0, id: '04tapwater active' },
-    { v: 5, u: 1, id: '04selected flow temperature', c: 'selflowtemp' },
-    { v: 0, u: 3, id: '0Eburner selected max power', c: 'selburnpow' },
-    { v: 0, u: 3, id: '00heating pump modulation' },
-    { v: 53.4, u: 1, id: '00current flow temperature' },
-    { v: 52.7, u: 1, id: '00return temperature' },
-    { v: 1.3, u: 10, id: '00system pressure' },
-    { v: 54.9, u: 1, id: '00actual boiler temperature' },
-    { v: 'off', u: 0, id: '00gas' },
-    { v: 'off', u: 0, id: '00gas stage 2' },
-    { v: 0, u: 9, id: '00flame current' },
-    { v: 'off', u: 0, id: '00heating pump' },
-    { v: 'off', u: 0, id: '00fan' },
-    { v: 'off', u: 0, id: '00ignition' },
-    { v: 'off', u: 0, id: '00oil preheating' },
-    { v: 'on', u: 0, id: '00heating activated', c: 'heatingactivated', l: ['off', 'on'] },
-    { v: 80, u: 1, id: '00heating temperature', c: 'heatingtemp' },
-    { v: 70, u: 3, id: '00burner pump max power', c: 'pumpmodmax' },
-    { v: 30, u: 3, id: '00burner pump min power', c: 'pumpmodmin' },
-    { v: 1, u: 8, id: '00pump delay', c: 'pumpdelay' },
-    { v: 10, u: 8, id: '00burner min period', c: 'burnminperiod' },
-    { v: 0, u: 3, id: '00burner min power', c: 'burnminpower' },
-    { v: 50, u: 3, id: '00burner max power', c: 'burnmaxpower' },
-    { v: -6, u: 2, id: '00hysteresis on temperature', c: 'boilhyston' },
-    { v: 6, u: 2, id: '00hysteresis off temperature', c: 'boilhystoff' },
-    { v: 0, u: 1, id: '00set flow temperature' },
-    { v: 0, u: 3, id: '00burner set power' },
-    { v: 0, u: 3, id: '00burner current power' },
-    { v: 326323, u: 0, id: '00burner starts' },
-    { v: 553437, u: 8, id: '00total burner operating time' },
-    { v: 451286, u: 8, id: '00total heat operating time' },
-    { v: 4672173, u: 8, id: '00total UBA operating time' },
-    { v: '1C(210) 06.06.2020 12:07 (0 min)', u: 0, id: '00last error code' },
-    { v: '0H', u: 0, id: '00service code' },
-    { v: 203, u: 0, id: '00service code number' },
-    { v: 'H00', u: 0, id: '00maintenance message' },
-    { v: 'manual', u: 0, id: '00maintenance scheduled', c: 'maintenance', l: ['off', 'time', 'date', 'manual'] },
-    { v: 6000, u: 7, id: '00time to next maintenance', c: 'maintenancetime' },
-    { v: '01.01.2012', u: 0, id: '00next maintenance date', c: 'maintenancedate', o: 'Format: < dd.mm.yyyy >' },
-    { v: 'on', u: 0, id: '00dhw turn on/off', c: 'wwtapactivated', l: ['off', 'on'] },
-    { v: 62, u: 1, id: '00dhw set temperature' },
-    { v: 60, u: 1, id: '00dhw selected temperature', c: 'wwseltemp' },
-    { v: 'flow', u: 0, id: '00dhw type' },
-    { v: 'hot', u: 0, id: '00dhw comfort', c: 'wwcomfort', l: ['hot', 'eco', 'intelligent'] },
-    { v: 40, u: 2, id: '00dhw flow temperature offset', c: 'wwflowtempoffset' },
-    { v: 100, u: 3, id: '00dhw max power', c: 'wwmaxpower' },
-    { v: 'off', u: 0, id: '00dhw circulation pump available', c: 'wwcircpump', l: ['off', 'on'] },
-    { v: '3-way valve', u: 0, id: '00dhw charging type' },
-    { v: -5, u: 2, id: '00dhw hysteresis on temperature', c: 'wwhyston' },
-    { v: 0, u: 2, id: '00dhw hysteresis off temperature', c: 'wwhystoff' },
-    { v: 70, u: 1, id: '00dhw disinfection temperature', c: 'wwdisinfectiontemp' },
-    {
-      v: 'off',
-      u: 0,
-      id: '00dhw circulation pump mode',
-      c: 'wwcircmode',
-      l: ['off', '1x3min', '2x3min', '3x3min', '4x3min', '5x3min', '6x3min', 'continuous']
-    },
-    { v: 'off', u: 0, id: '00dhw circulation active', c: 'wwcirc', l: ['off', 'on'] },
-    { v: 47.3, u: 1, id: '00dhw current intern temperature' },
-    { v: 0, u: 4, id: '00dhw current tap water flow' },
-    { v: 47.3, u: 1, id: '00dhw storage intern temperature' },
-    { v: 'on', u: 0, id: '00dhw activated', c: 'wwactivated', l: ['off', 'on'] },
-    { v: 'off', u: 0, id: '00dhw one time charging', c: 'wwonetime', l: ['off', 'on'] },
-    { v: 'off', u: 0, id: '00dhw disinfecting', c: 'wwdisinfecting', l: ['off', 'on'] },
-    { v: 'off', u: 0, id: '00dhw charging' },
-    { v: 'off', u: 0, id: '00dhw recharging' },
-    { v: 'on', u: 0, id: '00dhw temperature ok' },
-    { v: 'off', u: 0, id: '00dhw active' },
-    { v: 'on', u: 0, id: '00dhw 3way valve active' },
-    { v: 0, u: 3, id: '00dhw set pump power' },
-    { v: 288768, u: 0, id: '00dhw starts' },
-    { v: 102151, u: 8, id: '00dhw active time' }
-  ]
-};
 
 const emsesp_devicedata_1 = {
   data: [
@@ -1768,6 +1688,86 @@ const emsesp_devicedata_6 = {
   ]
 };
 
+const emsesp_devicedata_7 = {
+  data: [
+    { v: '', u: 0, id: '08reset', c: 'reset', l: ['-', 'maintenance', 'error'] },
+    { v: 'off', u: 0, id: '08heating active' },
+    { v: 'off', u: 0, id: '04tapwater active' },
+    { v: 5, u: 1, id: '04selected flow temperature', c: 'selflowtemp' },
+    { v: 0, u: 3, id: '0Eburner selected max power', c: 'selburnpow' },
+    { v: 0, u: 3, id: '00heating pump modulation' },
+    { v: 53.4, u: 1, id: '00current flow temperature' },
+    { v: 52.7, u: 1, id: '00return temperature' },
+    { v: 1.3, u: 10, id: '00system pressure' },
+    { v: 54.9, u: 1, id: '00actual boiler temperature' },
+    { v: 'off', u: 0, id: '00gas' },
+    { v: 'off', u: 0, id: '00gas stage 2' },
+    { v: 0, u: 9, id: '00flame current' },
+    { v: 'off', u: 0, id: '00heating pump' },
+    { v: 'off', u: 0, id: '00fan' },
+    { v: 'off', u: 0, id: '00ignition' },
+    { v: 'off', u: 0, id: '00oil preheating' },
+    { v: 'on', u: 0, id: '00heating activated', c: 'heatingactivated', l: ['off', 'on'] },
+    { v: 80, u: 1, id: '00heating temperature', c: 'heatingtemp' },
+    { v: 70, u: 3, id: '00burner pump max power', c: 'pumpmodmax' },
+    { v: 30, u: 3, id: '00burner pump min power', c: 'pumpmodmin' },
+    { v: 1, u: 8, id: '00pump delay', c: 'pumpdelay' },
+    { v: 10, u: 8, id: '00burner min period', c: 'burnminperiod' },
+    { v: 0, u: 3, id: '00burner min power', c: 'burnminpower' },
+    { v: 50, u: 3, id: '00burner max power', c: 'burnmaxpower' },
+    { v: -6, u: 2, id: '00hysteresis on temperature', c: 'boilhyston' },
+    { v: 6, u: 2, id: '00hysteresis off temperature', c: 'boilhystoff' },
+    { v: 0, u: 1, id: '00set flow temperature' },
+    { v: 0, u: 3, id: '00burner set power' },
+    { v: 0, u: 3, id: '00burner current power' },
+    { v: 326323, u: 0, id: '00burner starts' },
+    { v: 553437, u: 8, id: '00total burner operating time' },
+    { v: 451286, u: 8, id: '00total heat operating time' },
+    { v: 4672173, u: 8, id: '00total UBA operating time' },
+    { v: '1C(210) 06.06.2020 12:07 (0 min)', u: 0, id: '00last error code' },
+    { v: '0H', u: 0, id: '00service code' },
+    { v: 203, u: 0, id: '00service code number' },
+    { v: 'H00', u: 0, id: '00maintenance message' },
+    { v: 'manual', u: 0, id: '00maintenance scheduled', c: 'maintenance', l: ['off', 'time', 'date', 'manual'] },
+    { v: 6000, u: 7, id: '00time to next maintenance', c: 'maintenancetime' },
+    { v: '01.01.2012', u: 0, id: '00next maintenance date', c: 'maintenancedate', o: 'Format: < dd.mm.yyyy >' },
+    { v: 'on', u: 0, id: '00dhw turn on/off', c: 'wwtapactivated', l: ['off', 'on'] },
+    { v: 62, u: 1, id: '00dhw set temperature' },
+    { v: 60, u: 1, id: '00dhw selected temperature', c: 'wwseltemp' },
+    { v: 'flow', u: 0, id: '00dhw type' },
+    { v: 'hot', u: 0, id: '00dhw comfort', c: 'wwcomfort', l: ['hot', 'eco', 'intelligent'] },
+    { v: 40, u: 2, id: '00dhw flow temperature offset', c: 'wwflowtempoffset' },
+    { v: 100, u: 3, id: '00dhw max power', c: 'wwmaxpower' },
+    { v: 'off', u: 0, id: '00dhw circulation pump available', c: 'wwcircpump', l: ['off', 'on'] },
+    { v: '3-way valve', u: 0, id: '00dhw charging type' },
+    { v: -5, u: 2, id: '00dhw hysteresis on temperature', c: 'wwhyston' },
+    { v: 0, u: 2, id: '00dhw hysteresis off temperature', c: 'wwhystoff' },
+    { v: 70, u: 1, id: '00dhw disinfection temperature', c: 'wwdisinfectiontemp' },
+    {
+      v: 'off',
+      u: 0,
+      id: '00dhw circulation pump mode',
+      c: 'wwcircmode',
+      l: ['off', '1x3min', '2x3min', '3x3min', '4x3min', '5x3min', '6x3min', 'continuous']
+    },
+    { v: 'off', u: 0, id: '00dhw circulation active', c: 'wwcirc', l: ['off', 'on'] },
+    { v: 47.3, u: 1, id: '00dhw current intern temperature' },
+    { v: 0, u: 4, id: '00dhw current tap water flow' },
+    { v: 47.3, u: 1, id: '00dhw storage intern temperature' },
+    { v: 'on', u: 0, id: '00dhw activated', c: 'wwactivated', l: ['off', 'on'] },
+    { v: 'off', u: 0, id: '00dhw one time charging', c: 'wwonetime', l: ['off', 'on'] },
+    { v: 'off', u: 0, id: '00dhw disinfecting', c: 'wwdisinfecting', l: ['off', 'on'] },
+    { v: 'off', u: 0, id: '00dhw charging' },
+    { v: 'off', u: 0, id: '00dhw recharging' },
+    { v: 'on', u: 0, id: '00dhw temperature ok' },
+    { v: 'off', u: 0, id: '00dhw active' },
+    { v: 'on', u: 0, id: '00dhw 3way valve active' },
+    { v: 0, u: 3, id: '00dhw set pump power' },
+    { v: 288768, u: 0, id: '00dhw starts' },
+    { v: 102151, u: 8, id: '00dhw active time' }
+  ]
+};
+
 const emsesp_devicedata_99 = {
   data: [
     {
@@ -2026,7 +2026,7 @@ rest_server.get(LIST_NETWORKS_ENDPOINT, (req, res) => {
   res.json(list_networks);
 });
 rest_server.get(SCAN_NETWORKS_ENDPOINT, (req, res) => {
-  res.sendStatus(202);
+  res.sendStatus(202); // reboot required
 });
 
 // AP
@@ -2100,6 +2100,7 @@ rest_server.get(VERIFY_AUTHORIZATION_ENDPOINT, (req, res) => {
   res.json(verify_authentication);
 });
 rest_server.post(RESTART_ENDPOINT, (req, res) => {
+  console.log('command: restart');
   res.sendStatus(200);
 });
 rest_server.post(FACTORY_RESET_ENDPOINT, (req, res) => {
@@ -2128,7 +2129,7 @@ rest_server.get(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
 rest_server.post(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
   settings = req.body;
   console.log('Write settings: ' + JSON.stringify(settings));
-  // res.status(202).json(settings); // restart needed
+  // res.status(205).json(settings); // restart needed
   res.status(200).json(settings); // no restart needed
 });
 rest_server.get(EMSESP_CORE_DATA_ENDPOINT, (req, res) => {
@@ -2184,8 +2185,9 @@ rest_server.get(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
   res.end(null, 'binary');
 });
 
-rest_server.post(EMSESP_DEVICEENTITIES_ENDPOINT, (req, res) => {
-  const id = req.body.id;
+rest_server.get(EMSESP_DEVICEENTITIES_ENDPOINT, (req, res) => {
+  const id = Number(req.query.id);
+  console.log('deviceentities for device ' + id + ' received');
   let data = null;
 
   if (id === 1) {
@@ -2233,6 +2235,7 @@ function updateMask(entity, de, dd) {
     }
 
     // find in dd, either looking for fullname or custom name
+    // console.log('looking for ' + fullname + ' in ' + dd.data);
     dd_objIndex = dd.data.findIndex((obj) => obj.id.slice(2) === fullname);
     if (dd_objIndex !== -1) {
       let changed = new Boolean(false);
@@ -2432,10 +2435,12 @@ rest_server.post(EMSESP_WRITE_ANALOG_ENDPOINT, (req, res) => {
   res.sendStatus(200);
 });
 
-rest_server.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
-  const board_profile = req.body.board_profile;
+rest_server.get(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
+  const board_profile = req.query.boardProfile;
 
+  // default values
   const data = {
+    board_profile: board_profile,
     led_gpio: settings.led_gpio,
     dallas_gpio: settings.dallas_gpio,
     rx_gpio: settings.rx_gpio,
@@ -2559,9 +2564,10 @@ rest_server.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.eth_clock_mode = 0;
   }
 
-  console.log('boardProfile POST. Sending back, profile: ' + board_profile + ', ' + 'data: ' + JSON.stringify(data));
+  console.log('boardProfile GET. Sending back, profile: ' + board_profile + ', ' + 'data: ' + JSON.stringify(data));
 
-  res.send(data);
+  // res.sendStatus(400); // send back an error, for testing
+  res.json(data);
 });
 
 // EMS-ESP API specific

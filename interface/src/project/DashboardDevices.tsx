@@ -69,7 +69,7 @@ const DashboardDevices: FC = () => {
     immediate: true
   });
 
-  const { data: deviceData, send: readDeviceData } = useRequest((data) => EMSESP.readDeviceData(data), {
+  const { data: deviceData, send: readDeviceData } = useRequest((id) => EMSESP.readDeviceData(id), {
     initialData: {
       data: []
     },
@@ -444,7 +444,7 @@ const DashboardDevices: FC = () => {
   };
 
   const renderDeviceData = () => {
-    if (!selectedDevice || deviceData.data === undefined) {
+    if (!selectedDevice) {
       return;
     }
 

@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import { Body, Cell, Header, HeaderCell, HeaderRow, Row, Table } from '@table-library/react-table-library/table';
 import { useTheme as tableTheme } from '@table-library/react-table-library/theme';
+import { useRequest } from 'alova';
 import { useContext, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
@@ -32,7 +33,6 @@ import type { FC } from 'react';
 import { ButtonRow, FormLoader, SectionContent } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
-import { extractErrorMessage, useRest } from 'utils';
 
 export const isConnected = ({ status }: Status) => status !== busConnectionStatus.BUS_STATUS_OFFLINE;
 
@@ -64,9 +64,7 @@ const showQuality = (stat: Stat) => {
 };
 
 const DashboardStatus: FC = () => {
-  // TODO missing update!
-
-  const { loadData, data, errorMessage } = useRest<Status>({ read: EMSESP.readStatus });
+  const { data: data, send: loadData, error } = useRequest(EMSESP.readStatus, { force: true });
 
   const { LL } = useI18nContext();
 
@@ -74,6 +72,10 @@ const DashboardStatus: FC = () => {
   const [confirmScan, setConfirmScan] = useState<boolean>(false);
 
   const { me } = useContext(AuthenticatedContext);
+
+  const { send: scanDevices } = useRequest(EMSESP.scanDevices, {
+    immediate: false
+  });
 
   const stats_theme = tableTheme({
     Table: `
@@ -160,14 +162,23 @@ const DashboardStatus: FC = () => {
   };
 
   const scan = async () => {
-    try {
-      await EMSESP.scanDevices();
-      toast.info(LL.SCANNING() + '...');
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
-    } finally {
-      setConfirmScan(false);
-    }
+    await scanDevices()
+      .then(() => {
+        toast.info(LL.SCANNING() + '...');
+      })
+      .catch((err) => {
+        toast.error(err.message);
+      });
+    setConfirmScan(false);
+
+    // try {
+    //   await EMSESP.scanDevices();
+    //   toast.info(LL.SCANNING() + '...');
+    // } catch (error) {
+    //   toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
+    // } finally {
+    //   setConfirmScan(false);
+    // }
   };
 
   const renderScanDialog = () => (
@@ -187,7 +198,7 @@ const DashboardStatus: FC = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
     }
 
     return (

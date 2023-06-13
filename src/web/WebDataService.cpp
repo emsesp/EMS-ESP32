@@ -327,6 +327,7 @@ void WebDataService::write_temperature_sensor(AsyncWebServerRequest * request, J
         if (EMSESP::system_.fahrenheit()) {
             offset10 = offset / 0.18;
         }
+
         ok = EMSESP::temperaturesensor_.update(id, name, offset10);
     }
 

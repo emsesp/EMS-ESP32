@@ -52,9 +52,9 @@ export const ntpStatusHighlight = ({ status }: NTPStatus, theme: Theme) => {
 };
 
 const NTPStatusForm: FC = () => {
-  // TODO missing update!
-
+  // TODO replace with   const { data: data, send: loadData, error } = useRequest(APApi.readAPStatus());
   const { loadData, data, errorMessage } = useRest<NTPStatus>({ read: NTPApi.readNTPStatus });
+
   const [localTime, setLocalTime] = useState<string>('');
   const [settingTime, setSettingTime] = useState<boolean>(false);
   const [processing, setProcessing] = useState<boolean>(false);

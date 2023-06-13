@@ -7,14 +7,15 @@ import type { AlovaXHRRequestConfig, AlovaXHRResponse, AlovaXHRResponseHeaders }
 
 import { useI18nContext } from 'i18n/i18n-react';
 
-export interface RestRequestOptions<D> {
+export interface RestRequestOptions2<D> {
   read: () => Method<any, any, any, any, any, AlovaXHRResponse<any>, AlovaXHRResponseHeaders>;
   update: (
     value: D
   ) => Method<any, unknown, unknown, unknown, AlovaXHRRequestConfig, AlovaXHRResponse<any>, AlovaXHRResponseHeaders>;
 }
 
-export const useRest2 = <D>({ read, update }: RestRequestOptions<D>) => {
+// TODO rename back to useRest
+export const useRest2 = <D>({ read, update }: RestRequestOptions2<D>) => {
   const { LL } = useI18nContext();
 
   const [errorMessage, setErrorMessage] = useState<string>();
@@ -32,12 +33,8 @@ export const useRest2 = <D>({ read, update }: RestRequestOptions<D>) => {
     onSuccess: onWriteSuccess
   } = useRequest((newData: D) => update(newData), { immediate: false });
 
-  const setData = (new_data: D) => {
-    console.log('SET DATA'); // TODO remove console
-    console.log('new_data:', new_data); // TODO remove console
-    updateData({
-      data: new_data
-    });
+  const updateDataValue = (new_data: D) => {
+    updateData({ data: new_data });
   };
 
   onWriteSuccess(() => {
@@ -46,7 +43,7 @@ export const useRest2 = <D>({ read, update }: RestRequestOptions<D>) => {
   });
 
   onReadComplete((event) => {
-    setOrigData(event.data); // make a copy
+    setOrigData(event.data);
   });
 
   const loadData = async () => {
@@ -62,7 +59,6 @@ export const useRest2 = <D>({ read, update }: RestRequestOptions<D>) => {
     if (!data) {
       return;
     }
-    console.log('SAVE DATA'); // TODO remove console
     setRestartNeeded(false);
     setErrorMessage(undefined);
     await writeData(data).catch((error) => {
@@ -79,7 +75,7 @@ export const useRest2 = <D>({ read, update }: RestRequestOptions<D>) => {
     loadData,
     saveData,
     saving,
-    setData,
+    updateDataValue,
     data,
     origData,
     dirtyFlags,

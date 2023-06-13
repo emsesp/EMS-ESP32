@@ -5,6 +5,7 @@ import type { APSettings, APStatus } from 'types';
 
 export const readAPStatus = () => alovaInstance.Get<APStatus>('/apStatus');
 
+// TODO change AXIOS to Alova
 export function readAPSettings(): AxiosPromise<APSettings> {
   return AXIOS.get('/apSettings');
 }
