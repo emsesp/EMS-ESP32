@@ -6,9 +6,6 @@ import { unpack } from '../api/unpack';
 
 import type { AxiosPromise, CancelToken, AxiosProgressEvent } from 'axios';
 
-export const WS_BASE_URL = '/ws/';
-export const ES_BASE_URL = '/es/';
-
 export const REST_BASE_URL = '/rest/';
 export const API_BASE_URL = '/api/';
 
@@ -16,13 +13,14 @@ export const ACCESS_TOKEN = 'access_token';
 
 const location = window.location;
 const webProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+export const WS_BASE_URL = '/ws/';
+export const ES_BASE_URL = '/es/';
 export const WEB_SOCKET_ROOT = webProtocol + '//' + location.host + WS_BASE_URL;
 export const EVENT_SOURCE_ROOT = location.protocol + '//' + location.host + ES_BASE_URL;
 
 export const alovaInstance = createAlova({
-  baseURL: '/rest/',
   statesHook: ReactHook,
-  timeout: 50000,
+  timeout: 5000,
   requestAdapter: xhrRequestAdapter(),
   beforeRequest(method) {
     if (localStorage.getItem(ACCESS_TOKEN)) {

@@ -292,7 +292,7 @@ export interface ScheduleItem {
   time: string;
   cmd: string;
   value: string;
-  name?: string; // optional
+  name: string; // optional
   o_id?: number;
   o_active?: boolean;
   o_deleted?: boolean;
@@ -301,10 +301,6 @@ export interface ScheduleItem {
   o_cmd?: string;
   o_value?: string;
   o_name?: string;
-}
-
-export interface Schedule {
-  schedule: ScheduleItem[];
 }
 
 export enum ScheduleFlag {

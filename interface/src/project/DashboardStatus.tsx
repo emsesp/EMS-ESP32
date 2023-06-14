@@ -170,15 +170,6 @@ const DashboardStatus: FC = () => {
         toast.error(err.message);
       });
     setConfirmScan(false);
-
-    // try {
-    //   await EMSESP.scanDevices();
-    //   toast.info(LL.SCANNING() + '...');
-    // } catch (error) {
-    //   toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
-    // } finally {
-    //   setConfirmScan(false);
-    // }
   };
 
   const renderScanDialog = () => (

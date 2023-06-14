@@ -28,7 +28,7 @@ export const apStatusHighlight = ({ status }: APStatus, theme: Theme) => {
 };
 
 const APStatusForm: FC = () => {
-  const { data: data, send: loadData, error } = useRequest(APApi.readAPStatus());
+  const { data: data, send: loadData, error } = useRequest(APApi.readAPStatus);
 
   const { LL } = useI18nContext();
 

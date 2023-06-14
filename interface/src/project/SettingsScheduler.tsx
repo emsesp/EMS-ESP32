@@ -6,6 +6,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Typography, Divider, Stack, Button } from '@mui/material';
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
+import { updateState, useRequest } from 'alova';
 import { useState, useEffect, useCallback } from 'react';
 import { unstable_useBlocker as useBlocker } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -19,23 +20,30 @@ import type { FC } from 'react';
 import { ButtonRow, FormLoader, SectionContent, BlockNavigation } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
-import { extractErrorMessage } from 'utils';
 
 const SettingsScheduler: FC = () => {
   const { LL, locale } = useI18nContext();
   const [numChanges, setNumChanges] = useState<number>(0);
   const blocker = useBlocker(numChanges !== 0);
-  const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
   const [selectedScheduleItem, setSelectedScheduleItem] = useState<ScheduleItem>();
   const [dow, setDow] = useState<string[]>([]);
-  const [errorMessage, setErrorMessage] = useState<string>();
   const [creating, setCreating] = useState<boolean>(false);
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+
+  const {
+    data: schedule,
+    send: fetchSchedule,
+    error
+  } = useRequest(EMSESP.readSchedule, {
+    initialData: []
+  });
+
+  const { send: writeSchedule } = useRequest((data) => EMSESP.writeSchedule(data), { immediate: false });
 
   function hasScheduleChanged(si: ScheduleItem) {
     return (
       si.id !== si.o_id ||
-      (si?.name || '') !== (si?.o_name || '') ||
+      (si.name || '') !== (si.o_name || '') ||
       si.active !== si.o_active ||
       si.deleted !== si.o_deleted ||
       si.flags !== si.o_flags ||
@@ -46,10 +54,13 @@ const SettingsScheduler: FC = () => {
   }
 
   useEffect(() => {
-    if (schedule) {
-      setNumChanges(schedule ? schedule.filter((si) => hasScheduleChanged(si)).length : 0);
-    }
-  }, [schedule]);
+    const formatter = new Intl.DateTimeFormat(locale, { weekday: 'short', timeZone: 'UTC' });
+    const days = [1, 2, 3, 4, 5, 6, 7].map((day) => {
+      const dd = day < 10 ? `0${day}` : day;
+      return new Date(`2017-01-${dd}T00:00:00+00:00`);
+    });
+    setDow(days.map((date) => formatter.format(date)));
+  }, [locale]);
 
   const schedule_theme = useTheme({
     Table: `
@@ -96,63 +107,30 @@ const SettingsScheduler: FC = () => {
     `
   });
 
-  const fetchSchedule = useCallback(async () => {
-    try {
-      const response = await EMSESP.readSchedule();
-      setSchedule(
-        response.data.schedule.map((si) => ({
-          ...si,
-          o_id: si.id,
-          o_active: si.active,
-          o_deleted: si.deleted,
-          o_flags: si.flags,
-          o_time: si.time,
-          o_cmd: si.cmd,
-          o_value: si.value,
-          o_name: si.name
-        }))
-      );
-    } catch (error) {
-      setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-    }
-  }, [LL]);
-
-  useEffect(() => {
-    const formatter = new Intl.DateTimeFormat(locale, { weekday: 'short', timeZone: 'UTC' });
-    const days = [1, 2, 3, 4, 5, 6, 7].map((day) => {
-      const dd = day < 10 ? `0${day}` : day;
-      return new Date(`2017-01-${dd}T00:00:00+00:00`);
-    });
-    setDow(days.map((date) => formatter.format(date)));
-    void fetchSchedule();
-  }, [locale, fetchSchedule]);
-
   const saveSchedule = async () => {
-    if (schedule) {
-      try {
-        const response = await EMSESP.writeSchedule({
-          schedule: schedule
-            .filter((si) => !si.deleted)
-            .map((condensed_si) => ({
-              id: condensed_si.id,
-              active: condensed_si.active,
-              flags: condensed_si.flags,
-              time: condensed_si.time,
-              cmd: condensed_si.cmd,
-              value: condensed_si.value,
-              name: condensed_si.name
-            }))
-        });
-        if (response.status === 200) {
-          toast.success(LL.SCHEDULE_UPDATED());
-        } else {
-          toast.error(LL.PROBLEM_UPDATING());
-        }
+    await writeSchedule(
+      schedule
+        .filter((si) => !si.deleted)
+        .map((condensed_si) => ({
+          id: condensed_si.id,
+          active: condensed_si.active,
+          flags: condensed_si.flags,
+          time: condensed_si.time,
+          cmd: condensed_si.cmd,
+          value: condensed_si.value,
+          name: condensed_si.name
+        }))
+    )
+      .then(() => {
+        toast.success(LL.SCHEDULE_UPDATED());
+      })
+      .catch((err) => {
+        toast.error(err.message);
+      })
+      .finally(async () => {
         await fetchSchedule();
-      } catch (error) {
-        toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
-      }
-    }
+        setNumChanges(0);
+      });
   };
 
   const editScheduleItem = useCallback((si: ScheduleItem) => {
@@ -167,11 +145,14 @@ const SettingsScheduler: FC = () => {
 
   const onDialogSave = (updatedItem: ScheduleItem) => {
     setDialogOpen(false);
-    if (schedule && creating) {
-      setSchedule([...schedule.filter((si) => creating || si.o_id !== updatedItem.o_id), updatedItem]);
-    } else {
-      setSchedule(schedule?.map((si) => (si.id === updatedItem.id ? { ...si, ...updatedItem } : si)));
-    }
+
+    updateState('schedule', (data) => {
+      const new_data = creating
+        ? [...data.filter((si) => creating || si.o_id !== updatedItem.o_id), updatedItem]
+        : data.map((si) => (si.id === updatedItem.id ? { ...si, ...updatedItem } : si));
+      setNumChanges(new_data.filter((si) => hasScheduleChanged(si)).length);
+      return new_data;
+    });
   };
 
   const addScheduleItem = () => {
@@ -191,7 +172,7 @@ const SettingsScheduler: FC = () => {
 
   const renderSchedule = () => {
     if (!schedule) {
-      return <FormLoader errorMessage={errorMessage} />;
+      return <FormLoader onRetry={fetchSchedule} errorMessage={error?.message} />;
     }
 
     const dayBox = (si: ScheduleItem, flag: number) => (

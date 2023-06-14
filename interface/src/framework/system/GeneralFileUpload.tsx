@@ -1,5 +1,6 @@
 import DownloadIcon from '@mui/icons-material/GetApp';
 import { Typography, Button, Box } from '@mui/material';
+import { useRequest } from 'alova';
 import { toast } from 'react-toastify';
 import type { FileUploadConfig } from 'api/endpoints';
 import type { AxiosPromise } from 'axios';
@@ -9,7 +10,6 @@ import { SingleUpload, useFileUpload } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
 import * as EMSESP from 'project/api';
-import { extractErrorMessage } from 'utils';
 
 interface UploadFileProps {
   uploadGeneralFile: (file: File, config?: FileUploadConfig) => AxiosPromise<void>;
@@ -17,6 +17,19 @@ interface UploadFileProps {
 
 const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
   const [uploadFile, cancelUpload, uploading, uploadProgress, md5] = useFileUpload({ upload: uploadGeneralFile });
+
+  const { send: getSettings, onSuccess: onSuccessGetSettings } = useRequest(EMSESP.getSettings(), {
+    immediate: false
+  });
+  const { send: getCustomizations, onSuccess: onSuccessgetCustomizations } = useRequest(EMSESP.getCustomizations(), {
+    immediate: false
+  });
+  const { send: getEntities, onSuccess: onSuccessGetEntities } = useRequest(EMSESP.getEntities(), {
+    immediate: false
+  });
+  const { send: getSchedule, onSuccess: onSuccessGetSchedule } = useRequest(EMSESP.getSchedule(), {
+    immediate: false
+  });
 
   const { LL } = useI18nContext();
 
@@ -35,56 +48,41 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
     toast.info(LL.DOWNLOAD_SUCCESSFUL());
   };
 
+  onSuccessGetSettings((event) => {
+    saveFile(event.data, 'settings');
+  });
+  onSuccessgetCustomizations((event) => {
+    saveFile(event.data, 'customizations');
+  });
+  onSuccessGetEntities((event) => {
+    saveFile(event.data, 'entities');
+  });
+  onSuccessGetSchedule((event) => {
+    saveFile(event.data, 'schedule');
+  });
+
   const downloadSettings = async () => {
-    try {
-      const response = await EMSESP.getSettings();
-      if (response.status !== 200) {
-        toast.error(LL.PROBLEM_LOADING());
-      } else {
-        saveFile(response.data, 'settings');
-      }
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-    }
+    await getSettings().catch((error) => {
+      toast.error(error.message);
+    });
   };
 
   const downloadCustomizations = async () => {
-    try {
-      const response = await EMSESP.getCustomizations();
-      if (response.status !== 200) {
-        toast.error(LL.PROBLEM_LOADING());
-      } else {
-        saveFile(response.data, 'customizations');
-      }
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-    }
+    await getCustomizations().catch((error) => {
+      toast.error(error.message);
+    });
   };
 
   const downloadEntities = async () => {
-    try {
-      const response = await EMSESP.getEntities();
-      if (response.status !== 200) {
-        toast.error(LL.PROBLEM_LOADING());
-      } else {
-        saveFile(response.data, 'entities');
-      }
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-    }
+    await getEntities().catch((error) => {
+      toast.error(error.message);
+    });
   };
 
   const downloadSchedule = async () => {
-    try {
-      const response = await EMSESP.getSchedule();
-      if (response.status !== 200) {
-        toast.error(LL.PROBLEM_LOADING());
-      } else {
-        saveFile(response.data, 'schedule');
-      }
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-    }
+    await getSchedule().catch((error) => {
+      toast.error(error.message);
+    });
   };
 
   return (

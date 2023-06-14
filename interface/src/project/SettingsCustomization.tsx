@@ -61,7 +61,7 @@ const SettingsCustomization: FC = () => {
     immediate: false
   });
 
-  const { data: devices } = useRequest(EMSESP.readDevices());
+  const { data: devices } = useRequest(EMSESP.readDevices);
 
   const { send: writeCustomEntities } = useRequest((data) => EMSESP.writeCustomEntities(data), { immediate: false });
 
@@ -236,8 +236,9 @@ const SettingsCustomization: FC = () => {
   };
 
   const maskDisabled = (set: boolean) => {
+    // TODO fix update!
     updateDeviceEntities(
-      deviceEntities?.map(function (de) {
+      deviceEntities.map(function (de) {
         if ((de.m & selectedFilters || !selectedFilters) && de.id.toLowerCase().includes(search.toLowerCase())) {
           return {
             ...de,
@@ -329,7 +330,6 @@ const SettingsCustomization: FC = () => {
           }
         }
       );
-      // does this work or use onSuccess hook?
       setOriginalSettings(deviceEntities);
     }
   };

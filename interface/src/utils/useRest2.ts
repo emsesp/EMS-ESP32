@@ -3,15 +3,11 @@ import { useState } from 'react';
 import { unstable_useBlocker as useBlocker } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-import type { AlovaXHRRequestConfig, AlovaXHRResponse, AlovaXHRResponseHeaders } from '@alova/adapter-xhr';
-
 import { useI18nContext } from 'i18n/i18n-react';
 
 export interface RestRequestOptions2<D> {
-  read: () => Method<any, any, any, any, any, AlovaXHRResponse<any>, AlovaXHRResponseHeaders>;
-  update: (
-    value: D
-  ) => Method<any, unknown, unknown, unknown, AlovaXHRRequestConfig, AlovaXHRResponse<any>, AlovaXHRResponseHeaders>;
+  read: () => Method<any, any, any, any, any, any, any>;
+  update: (value: D) => Method<any, any, any, any, any, any, any>;
 }
 
 // TODO rename back to useRest

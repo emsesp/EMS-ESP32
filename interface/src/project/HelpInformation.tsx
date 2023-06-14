@@ -4,6 +4,7 @@ import DownloadIcon from '@mui/icons-material/GetApp';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import MenuBookIcon from '@mui/icons-material/MenuBookTwoTone';
 import { Typography, Button, Box, List, ListItem, ListItemText, Link, ListItemAvatar } from '@mui/material';
+import { useRequest } from 'alova';
 import { toast } from 'react-toastify';
 import * as EMSESP from './api';
 import type { FC } from 'react';
@@ -11,16 +12,19 @@ import type { FC } from 'react';
 import { SectionContent } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
-import { extractErrorMessage } from 'utils';
 
 const HelpInformation: FC = () => {
   const { LL } = useI18nContext();
 
-  const saveFile = (json: any, endpoint: string) => {
+  const { send: API, onSuccess: onSuccessAPI } = useRequest((data) => EMSESP.API(data), {
+    immediate: false
+  });
+
+  onSuccessAPI((event) => {
     const a = document.createElement('a');
-    const filename = 'emsesp_' + endpoint + '.txt';
+    const filename = 'emsesp_info.txt';
     a.href = URL.createObjectURL(
-      new Blob([JSON.stringify(json, null, 2)], {
+      new Blob([JSON.stringify(event.data, null, 2)], {
         type: 'text/plain'
       })
     );
@@ -29,23 +33,12 @@ const HelpInformation: FC = () => {
     a.click();
     document.body.removeChild(a);
     toast.info(LL.DOWNLOAD_SUCCESSFUL());
-  };
+  });
 
-  const callAPI = async (endpoint: string) => {
-    try {
-      const response = await EMSESP.API({
-        device: 'system',
-        entity: endpoint,
-        id: 0
-      });
-      if (response.status !== 200) {
-        toast.error(LL.PROBLEM_LOADING());
-      } else {
-        saveFile(response.data, endpoint);
-      }
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-    }
+  const callAPI = async () => {
+    await API({ device: 'system', entity: 'info', id: 0 }).catch((error) => {
+      toast.error(error.message);
+    });
   };
 
   return (
@@ -96,7 +89,7 @@ const HelpInformation: FC = () => {
               size="small"
               variant="outlined"
               color="primary"
-              onClick={() => callAPI('info')}
+              onClick={() => callAPI()}
             >
               {LL.SUPPORT_INFO()}
             </Button>

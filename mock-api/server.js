@@ -1798,8 +1798,9 @@ let emsesp_entities = {
 };
 
 // SCHEDULE
-let emsesp_schedule = {
-  schedule: [
+let emsesp_schedule =
+  // schedule: [
+  [
     {
       id: 1,
       active: true,
@@ -1836,11 +1837,9 @@ let emsesp_schedule = {
       value: '',
       name: 'auto_restart'
     }
-  ]
-};
+  ];
 
 // CUSTOMIZATIONS
-
 const emsesp_deviceentities_1 = [{}];
 const emsesp_deviceentities_3 = [{}];
 const emsesp_deviceentities_5 = [{}];
@@ -2327,7 +2326,7 @@ rest_server.post(EMSESP_CUSTOM_ENTITIES_ENDPOINT, (req, res) => {
 
 rest_server.post(EMSESP_WRITE_SCHEDULE_ENDPOINT, (req, res) => {
   console.log('write schedule');
-  console.log(req.body.schedule);
+  console.log(req.body);
   emsesp_schedule = req.body;
   res.sendStatus(200);
 });
@@ -2625,6 +2624,7 @@ rest_server.post(API_ENDPOINT_ROOT, (req, res) => {
   if (req.body.device === 'system') {
     if (req.body.entity === 'info') {
       console.log('sending system info: ' + JSON.stringify(emsesp_info));
+      res.json(emsesp_info);
     } else if (req.body.entity === 'settings') {
       console.log('sending system settings: ' + JSON.stringify(settings));
       res.json(settings);
@@ -2652,25 +2652,37 @@ rest_server.get(SYSTEM_INFO_ENDPOINT, (req, res) => {
 
 const GET_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'getSettings';
 rest_server.get(GET_SETTINGS_ENDPOINT, (req, res) => {
-  console.log('System Settings:');
+  console.log('getSettings:');
   res.json(settings);
 });
 
 const GET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'getCustomizations';
 rest_server.get(GET_CUSTOMIZATIONS_ENDPOINT, (req, res) => {
-  console.log('Customization');
+  console.log('getCustomization');
   // not implemented yet
   res.sendStatus(200);
 });
 
-const GET_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
+const GET_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'getEntities';
+rest_server.get(GET_ENTITIES_ENDPOINT, (req, res) => {
+  console.log('getEntities');
+  res.json(emsesp_entities);
+});
+
+const GET_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'getSchedule';
 rest_server.get(GET_SCHEDULE_ENDPOINT, (req, res) => {
+  console.log('getSchedule');
+  res.json(emsesp_schedule);
+});
+
+const SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
+rest_server.get(SCHEDULE_ENDPOINT, (req, res) => {
   console.log('Sending Schedule data');
   res.json(emsesp_schedule);
 });
 
-const GET_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'entities';
-rest_server.get(GET_ENTITIES_ENDPOINT, (req, res) => {
+const ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'entities';
+rest_server.get(ENTITIES_ENDPOINT, (req, res) => {
   console.log('Sending Entities data');
   res.json(emsesp_entities);
 });
