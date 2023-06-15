@@ -2,6 +2,7 @@ import { AXIOS } from './endpoints';
 import type { AxiosPromise } from 'axios';
 import type { NTPSettings, NTPStatus, Time } from 'types';
 
+// TODO move to Alova
 export function readNTPStatus(): AxiosPromise<NTPStatus> {
   return AXIOS.get('/ntpStatus');
 }

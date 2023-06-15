@@ -28,18 +28,12 @@ export const updateValueDirty =
     const updated_value = extractEventValue(event);
     const name = event.target.name;
 
-    // TODO not sure how this is even working!!
     updateDataValue((prevState) => ({
       ...prevState,
       [name]: updated_value
     }));
 
     const arr: string[] = dirtyFlags;
-
-    // TODO remove comments
-    // console.log('updating ' + name + ' to ' + updated_value);
-    // console.log('dirtyFlags:', dirtyFlags);
-    // console.log('binding.ts origData:', origData);
 
     if (origData[name] !== updated_value) {
       if (!arr.includes(name)) {

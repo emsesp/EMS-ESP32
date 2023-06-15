@@ -4,7 +4,8 @@ import WarningIcon from '@mui/icons-material/Warning';
 import { Button, Typography, Box } from '@mui/material';
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
-import { useState, useEffect, useCallback } from 'react';
+import { updateState, useRequest } from 'alova';
+import { useState, useCallback } from 'react';
 import { unstable_useBlocker as useBlocker } from 'react-router-dom';
 
 import { toast } from 'react-toastify';
@@ -18,17 +19,24 @@ import type { FC } from 'react';
 import { ButtonRow, FormLoader, SectionContent, BlockNavigation } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
-import { extractErrorMessage } from 'utils';
 
 const SettingsEntities: FC = () => {
   const { LL } = useI18nContext();
   const [numChanges, setNumChanges] = useState<number>(0);
   const blocker = useBlocker(numChanges !== 0);
-  const [entities, setEntities] = useState<EntityItem[]>();
   const [selectedEntityItem, setSelectedEntityItem] = useState<EntityItem>();
-  const [errorMessage, setErrorMessage] = useState<string>();
   const [creating, setCreating] = useState<boolean>(false);
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+
+  const {
+    data: entities,
+    send: fetchEntities,
+    error
+  } = useRequest(EMSESP.readEntities, {
+    initialData: []
+  });
+
+  const { send: writeEntities } = useRequest((data) => EMSESP.writeEntities(data), { immediate: false });
 
   function hasEntityChanged(ei: EntityItem) {
     return (
@@ -44,12 +52,6 @@ const SettingsEntities: FC = () => {
       ei.deleted !== ei.o_deleted
     );
   }
-
-  useEffect(() => {
-    if (entities) {
-      setNumChanges(entities ? entities.filter((ei) => hasEntityChanged(ei)).length : 0);
-    }
-  }, [entities]);
 
   const entity_theme = useTheme({
     Table: `
@@ -105,62 +107,32 @@ const SettingsEntities: FC = () => {
     `
   });
 
-  const fetchEntities = useCallback(async () => {
-    try {
-      const response = await EMSESP.readEntities();
-      setEntities(
-        response.data.entities.map((ei) => ({
-          ...ei,
-          o_id: ei.id,
-          o_device_id: ei.device_id,
-          o_type_id: ei.type_id,
-          o_offset: ei.offset,
-          o_factor: ei.factor,
-          o_uom: ei.uom,
-          o_value_type: ei.value_type,
-          o_name: ei.name,
-          o_writeable: ei.writeable,
-          o_deleted: ei.deleted
-        }))
-      );
-    } catch (error) {
-      setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-    }
-  }, [LL]);
-
-  useEffect(() => {
-    void fetchEntities();
-  }, [fetchEntities]);
-
   const saveEntities = async () => {
-    if (entities) {
-      try {
-        const response = await EMSESP.writeEntities({
-          entities: entities
-            .filter((ei) => !ei.deleted)
-            .map((condensed_ei) => ({
-              id: condensed_ei.id,
-              name: condensed_ei.name,
-              device_id: condensed_ei.device_id,
-              type_id: condensed_ei.type_id,
-              offset: condensed_ei.offset,
-              factor: condensed_ei.factor,
-              uom: condensed_ei.uom,
-              writeable: condensed_ei.writeable,
-              value_type: condensed_ei.value_type
-            }))
-        });
-
-        if (response.status === 200) {
-          toast.success(LL.ENTITIES_UPDATED());
-        } else {
-          toast.error(LL.PROBLEM_UPDATING());
-        }
+    await writeEntities(
+      entities
+        .filter((ei) => !ei.deleted)
+        .map((condensed_ei) => ({
+          id: condensed_ei.id,
+          name: condensed_ei.name,
+          device_id: condensed_ei.device_id,
+          type_id: condensed_ei.type_id,
+          offset: condensed_ei.offset,
+          factor: condensed_ei.factor,
+          uom: condensed_ei.uom,
+          writeable: condensed_ei.writeable,
+          value_type: condensed_ei.value_type
+        }))
+    )
+      .then(() => {
+        toast.success(LL.ENTITIES_UPDATED());
+      })
+      .catch((err) => {
+        toast.error(err.message);
+      })
+      .finally(async () => {
         await fetchEntities();
-      } catch (error) {
-        toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
-      }
-    }
+        setNumChanges(0);
+      });
   };
 
   const editEntityItem = useCallback((ei: EntityItem) => {
@@ -175,11 +147,14 @@ const SettingsEntities: FC = () => {
 
   const onDialogSave = (updatedItem: EntityItem) => {
     setDialogOpen(false);
-    if (entities && creating) {
-      setEntities([...entities.filter((ei) => creating || ei.o_id !== updatedItem.o_id), updatedItem]);
-    } else {
-      setEntities(entities?.map((ei) => (ei.id === updatedItem.id ? { ...ei, ...updatedItem } : ei)));
-    }
+
+    updateState('entities', (data) => {
+      const new_data = creating
+        ? [...data.filter((ei) => creating || ei.o_id !== updatedItem.o_id), updatedItem]
+        : data.map((ei) => (ei.id === updatedItem.id ? { ...ei, ...updatedItem } : ei));
+      setNumChanges(new_data.filter((ei) => hasEntityChanged(ei)).length);
+      return new_data;
+    });
   };
 
   const addEntityItem = () => {
@@ -215,7 +190,7 @@ const SettingsEntities: FC = () => {
 
   const renderEntity = () => {
     if (!entities) {
-      return <FormLoader errorMessage={errorMessage} />;
+      return <FormLoader onRetry={fetchEntities} errorMessage={error?.message} />;
     }
 
     return (

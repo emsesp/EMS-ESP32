@@ -1780,22 +1780,21 @@ const emsesp_devicedata_99 = {
 };
 
 // CUSTOM ENTITIES
-let emsesp_entities = {
+let emsesp_entities = [
   // entities: []
-  entities: [
-    {
-      id: 0,
-      device_id: 8,
-      type_id: 24,
-      offset: 0,
-      factor: 1,
-      name: 'boiler_flowtemp',
-      uom: 1,
-      value_type: 1,
-      writeable: true
-    }
-  ]
-};
+  // entities: [
+  {
+    id: 0,
+    device_id: 8,
+    type_id: 24,
+    offset: 0,
+    factor: 1,
+    name: 'boiler_flowtemp',
+    uom: 1,
+    value_type: 1,
+    writeable: true
+  }
+];
 
 // SCHEDULE
 let emsesp_schedule =
@@ -2333,7 +2332,7 @@ rest_server.post(EMSESP_WRITE_SCHEDULE_ENDPOINT, (req, res) => {
 
 rest_server.post(EMSESP_WRITE_ENTITIES_ENDPOINT, (req, res) => {
   console.log('write entities');
-  console.log(req.body.entities);
+  console.log(req.body);
   emsesp_entities = req.body;
   res.sendStatus(200);
 });

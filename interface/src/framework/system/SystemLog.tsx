@@ -49,7 +49,7 @@ const levelLabel = (level: LogLevel) => {
 const SystemLog: FC = () => {
   const { LL } = useI18nContext();
 
-  // TODO replace with   const { data: data, send: loadData, error } = useRequest(APApi.readAPStatus());
+  // TODO replace with   const { data: data, send: loadData, error } = useRequest(APApi.readAPStatus);
   const { loadData, data, setData, origData, dirtyFlags, blocker, setDirtyFlags, setOrigData } = useRest<LogSettings>({
     read: SystemApi.readLogSettings
   });

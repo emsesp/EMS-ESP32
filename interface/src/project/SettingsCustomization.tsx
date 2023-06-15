@@ -65,11 +65,7 @@ const SettingsCustomization: FC = () => {
 
   const { send: writeCustomEntities } = useRequest((data) => EMSESP.writeCustomEntities(data), { immediate: false });
 
-  const {
-    send: readDeviceEntities,
-    update: updateDeviceEntities,
-    onSuccess: onSuccess
-  } = useRequest((data) => EMSESP.readDeviceEntities(data), {
+  const { send: readDeviceEntities, onSuccess: onSuccess } = useRequest((data) => EMSESP.readDeviceEntities(data), {
     initialData: [],
     immediate: false,
     force: true
@@ -236,8 +232,7 @@ const SettingsCustomization: FC = () => {
   };
 
   const maskDisabled = (set: boolean) => {
-    // TODO fix update!
-    updateDeviceEntities(
+    setDeviceEntities(
       deviceEntities.map(function (de) {
         if ((de.m & selectedFilters || !selectedFilters) && de.id.toLowerCase().includes(search.toLowerCase())) {
           return {

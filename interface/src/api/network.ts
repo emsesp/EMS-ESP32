@@ -3,6 +3,7 @@ import type { AxiosPromise } from 'axios';
 
 import type { WiFiNetworkList, NetworkSettings, NetworkStatus } from 'types';
 
+// TODO move to alova
 export function readNetworkStatus(): AxiosPromise<NetworkStatus> {
   return AXIOS.get('/networkStatus');
 }

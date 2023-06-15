@@ -2,6 +2,7 @@ import { AXIOS } from './endpoints';
 import type { AxiosPromise } from 'axios';
 import type { MqttSettings, MqttStatus } from 'types';
 
+// TODO move to alova
 export function readMqttStatus(): AxiosPromise<MqttStatus> {
   return AXIOS.get('/mqttStatus');
 }

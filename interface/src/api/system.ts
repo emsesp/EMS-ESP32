@@ -4,6 +4,7 @@ import type { AxiosPromise } from 'axios';
 
 import type { OTASettings, SystemStatus, LogSettings, LogEntries } from 'types';
 
+// TODO move to Alova
 export function readSystemStatus(timeout?: number): AxiosPromise<SystemStatus> {
   return AXIOS.get('/systemStatus', { timeout });
 }

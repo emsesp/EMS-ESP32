@@ -90,7 +90,7 @@ export const schedulerItemValidation = () =>
   new Schema({
     name: [
       {
-        // TODO name must be unique - add check
+        // TODO validator: add check for unique name
         required: true,
         type: 'string',
         pattern: /^[a-zA-Z0-9_\\.]{0,15}$/,

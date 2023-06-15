@@ -10,10 +10,10 @@ import type {
   SensorData,
   Entities,
   DeviceData,
-  ScheduleItem
+  ScheduleItem,
+  EntityItem
 } from './types';
-import type { AxiosPromise } from 'axios';
-import { AXIOS, alovaInstance } from 'api/endpoints';
+import { alovaInstance } from 'api/endpoints';
 
 // DashboardDevices
 export const readCoreData = () => alovaInstance.Get<CoreData>(`/rest/coreData`);
@@ -33,19 +33,6 @@ export const getBoardProfile = (boardProfile: string) =>
   });
 export const restart = () => alovaInstance.Post('/rest/restart');
 
-// SettingsCustomization
-export const readDeviceEntities = (id: number) =>
-  alovaInstance.Get<DeviceEntity[]>('/rest/deviceEntities', {
-    params: { id },
-    responseType: 'arraybuffer',
-    transformData(data: any) {
-      return data.map((de: DeviceEntity) => ({ ...de, o_m: de.m, o_cn: de.cn, o_mi: de.mi, o_ma: de.ma }));
-    }
-  });
-export const readDevices = () => alovaInstance.Get<Devices>('/rest/devices');
-export const resetCustomizations = () => alovaInstance.Post('/rest/resetCustomizations');
-export const writeCustomEntities = (data: any) => alovaInstance.Post('/rest/customEntities', data);
-
 // DashboardSensors
 export const readSensorData = () => alovaInstance.Get<SensorData>('/rest/sensorData');
 export const writeTemperatureSensor = (ts: WriteTemperatureSensor) =>
@@ -64,6 +51,19 @@ export const getSettings = () => alovaInstance.Get('/rest/getSettings');
 export const getCustomizations = () => alovaInstance.Get('/rest/getCustomizations');
 export const getEntities = () => alovaInstance.Get<Entities>('/rest/getEntities');
 export const getSchedule = () => alovaInstance.Get('/rest/getSchedule');
+
+// SettingsCustomization
+export const readDeviceEntities = (id: number) =>
+  alovaInstance.Get<DeviceEntity[]>('/rest/deviceEntities', {
+    params: { id },
+    responseType: 'arraybuffer',
+    transformData(data: any) {
+      return data.map((de: DeviceEntity) => ({ ...de, o_m: de.m, o_cn: de.cn, o_mi: de.mi, o_ma: de.ma }));
+    }
+  });
+export const readDevices = () => alovaInstance.Get<Devices>('/rest/devices');
+export const resetCustomizations = () => alovaInstance.Post('/rest/resetCustomizations');
+export const writeCustomEntities = (data: any) => alovaInstance.Post('/rest/customEntities', data);
 
 // SettingsScheduler
 export const readSchedule = () =>
@@ -86,10 +86,23 @@ export const readSchedule = () =>
 export const writeSchedule = (data: any) => alovaInstance.Post('/rest/schedule', data);
 
 // SettingsCustomization
-// TODO move last Entities* to Alova
-export function readEntities(): AxiosPromise<Entities> {
-  return AXIOS.get('/entities');
-}
-export function writeEntities(entities: Entities): AxiosPromise<void> {
-  return AXIOS.post('/entities', entities);
-}
+export const readEntities = () =>
+  alovaInstance.Get<EntityItem[]>('/rest/entities', {
+    name: 'entities',
+    transformData(data: any) {
+      return data.map((ei: EntityItem) => ({
+        ...ei,
+        o_id: ei.id,
+        o_device_id: ei.device_id,
+        o_type_id: ei.type_id,
+        o_offset: ei.offset,
+        o_factor: ei.factor,
+        o_uom: ei.uom,
+        o_value_type: ei.value_type,
+        o_name: ei.name,
+        o_writeable: ei.writeable,
+        o_deleted: ei.deleted
+      }));
+    }
+  });
+export const writeEntities = (data: any) => alovaInstance.Post('/rest/entities', data);

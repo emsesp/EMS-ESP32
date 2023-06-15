@@ -38,7 +38,7 @@ export const mqttQueueHighlight = ({ mqtt_queued }: MqttStatus, theme: Theme) =>
 };
 
 const MqttStatusForm: FC = () => {
-  // TODO replace with   const { data: data, send: loadData, error } = useRequest(APApi.readAPStatus());
+  // TODO replace with   const { data: data, send: loadData, error } = useRequest(APApi.readAPStatus);
   const { loadData, data, errorMessage } = useRest<MqttStatus>({ read: MqttApi.readMqttStatus });
 
   const { LL } = useI18nContext();
