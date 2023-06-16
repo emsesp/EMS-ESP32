@@ -67,8 +67,7 @@ const SettingsCustomization: FC = () => {
 
   const { send: readDeviceEntities, onSuccess: onSuccess } = useRequest((data) => EMSESP.readDeviceEntities(data), {
     initialData: [],
-    immediate: false,
-    force: true
+    immediate: false
   });
 
   const setOriginalSettings = (data: DeviceEntity[]) => {

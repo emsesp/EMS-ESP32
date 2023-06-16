@@ -64,16 +64,13 @@ const DashboardDevices: FC = () => {
     initialData: {
       connected: true,
       devices: []
-    },
-    force: true,
-    immediate: true
+    }
   });
 
   const { data: deviceData, send: readDeviceData } = useRequest((id) => EMSESP.readDeviceData(id), {
     initialData: {
       data: []
     },
-    force: true,
     immediate: false
   });
 

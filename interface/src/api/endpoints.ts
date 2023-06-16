@@ -18,6 +18,14 @@ export const EVENT_SOURCE_ROOT = 'http://' + host + '/es/';
 export const alovaInstance = createAlova({
   statesHook: ReactHook,
   timeout: 3000,
+  localCache: {
+    GET: {
+      mode: 'placeholder',
+      // expire: 60 * 10 * 1000
+      // see https://alova.js.org/learning/response-cache/#cache-replaceholder-mode
+      expire: 2000
+    }
+  },
   requestAdapter: xhrRequestAdapter(),
   beforeRequest(method) {
     if (localStorage.getItem(ACCESS_TOKEN)) {

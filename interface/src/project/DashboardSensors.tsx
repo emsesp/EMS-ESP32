@@ -39,9 +39,7 @@ const DashboardSensors: FC = () => {
       ts: [],
       as: [],
       analog_enabled: false
-    },
-    force: true,
-    immediate: true
+    }
   });
 
   const { send: writeTemperatureSensor } = useRequest((data) => EMSESP.writeTemperatureSensor(data), {

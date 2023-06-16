@@ -74,7 +74,7 @@ const SettingsApplication: FC = () => {
   });
 
   onSuccessBoardProfile((event) => {
-    const response = event.data as unknown as Settings;
+    const response = event.data as Settings;
     updateDataValue({
       ...data,
       board_profile: response.board_profile,

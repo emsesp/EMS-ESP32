@@ -1,6 +1,7 @@
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
 import { Button, Checkbox, MenuItem } from '@mui/material';
+import { updateState } from 'alova';
 import { useState } from 'react';
 import { selectedTimeZone, timeZoneSelectItems, TIME_ZONES } from './TZ';
 import type { ValidateFieldsError } from 'async-validator';
@@ -17,20 +18,30 @@ import {
   BlockNavigation
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
-import { updateValueDirty, useRest } from 'utils';
+import { updateValueDirty, useRest2 } from 'utils';
 import { validate } from 'validators';
 import { NTP_SETTINGS_VALIDATOR } from 'validators/ntp';
 
 const NTPSettingsForm: FC = () => {
-  const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, blocker, saveData, errorMessage } =
-    useRest<NTPSettings>({
-      read: NTPApi.readNTPSettings,
-      update: NTPApi.updateNTPSettings
-    });
+  const {
+    loadData,
+    saving,
+    data,
+    updateDataValue,
+    origData,
+    dirtyFlags,
+    setDirtyFlags,
+    blocker,
+    saveData,
+    errorMessage
+  } = useRest2<NTPSettings>({
+    read: NTPApi.readNTPSettings,
+    update: NTPApi.updateNTPSettings
+  });
 
   const { LL } = useI18nContext();
 
-  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, setData);
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, updateDataValue);
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
@@ -51,11 +62,12 @@ const NTPSettingsForm: FC = () => {
 
     const changeTimeZone = (event: React.ChangeEvent<HTMLInputElement>) => {
       updateFormValue(event);
-      setData({
-        ...data,
+
+      updateState('ntpSettings', (settings) => ({
+        ...settings,
         tz_label: event.target.value,
         tz_format: TIME_ZONES[event.target.value]
-      });
+      }));
     };
 
     return (

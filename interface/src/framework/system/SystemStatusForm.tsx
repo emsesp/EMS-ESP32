@@ -28,6 +28,7 @@ import {
   Typography
 } from '@mui/material';
 
+import { useRequest } from 'alova';
 import axios from 'axios';
 import { useContext, useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
@@ -39,7 +40,7 @@ import * as SystemApi from 'api/system';
 import { ButtonRow, FormLoader, SectionContent, MessageBox } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
-import { extractErrorMessage, useRest } from 'utils';
+import { extractErrorMessage } from 'utils';
 
 export const VERSIONCHECK_ENDPOINT = 'https://api.github.com/repos/emsesp/EMS-ESP32/releases/latest';
 export const VERSIONCHECK_DEV_ENDPOINT = 'https://api.github.com/repos/emsesp/EMS-ESP32/releases/tags/latest';
@@ -53,8 +54,7 @@ const SystemStatusForm: FC = () => {
   const { LL } = useI18nContext();
   const [restarting, setRestarting] = useState<boolean>();
 
-  // TODO replace with   const { data: data, send: loadData, error } = useRequest(APApi.readAPStatus);
-  const { loadData, data, errorMessage } = useRest<SystemStatus>({ read: SystemApi.readSystemStatus });
+  const { data: data, send: loadData, error } = useRequest(SystemApi.readSystemStatus);
 
   const { me } = useContext(AuthenticatedContext);
   const [confirmRestart, setConfirmRestart] = useState<boolean>(false);

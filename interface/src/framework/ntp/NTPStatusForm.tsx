@@ -21,6 +21,7 @@ import {
   useTheme,
   Typography
 } from '@mui/material';
+import { useRequest } from 'alova';
 import { useContext, useState } from 'react';
 import { toast } from 'react-toastify';
 import type { Theme } from '@mui/material';
@@ -33,7 +34,7 @@ import { AuthenticatedContext } from 'contexts/authentication';
 
 import { useI18nContext } from 'i18n/i18n-react';
 import { NTPSyncStatus } from 'types';
-import { extractErrorMessage, formatDateTime, formatLocalDateTime, useRest } from 'utils';
+import { formatDateTime, formatLocalDateTime } from 'utils';
 
 export const isNtpActive = ({ status }: NTPStatus) => status === NTPSyncStatus.NTP_ACTIVE;
 export const isNtpEnabled = ({ status }: NTPStatus) => status !== NTPSyncStatus.NTP_DISABLED;
@@ -52,8 +53,7 @@ export const ntpStatusHighlight = ({ status }: NTPStatus, theme: Theme) => {
 };
 
 const NTPStatusForm: FC = () => {
-  // TODO replace with   const { data: data, send: loadData, error } = useRequest(APApi.readAPStatus);
-  const { loadData, data, errorMessage } = useRest<NTPStatus>({ read: NTPApi.readNTPStatus });
+  const { data: data, send: loadData, error } = useRequest(NTPApi.readNTPStatus);
 
   const [localTime, setLocalTime] = useState<string>('');
   const [settingTime, setSettingTime] = useState<boolean>(false);
@@ -61,6 +61,12 @@ const NTPStatusForm: FC = () => {
   const { me } = useContext(AuthenticatedContext);
 
   const { LL } = useI18nContext();
+
+  const { send: updateTime } = useRequest((local_time) => NTPApi.updateTime(local_time), {
+    immediate: false
+  });
+
+  NTPApi.updateTime;
 
   const updateLocalTime = (event: React.ChangeEvent<HTMLInputElement>) => setLocalTime(event.target.value);
 
@@ -86,18 +92,19 @@ const NTPStatusForm: FC = () => {
 
   const configureTime = async () => {
     setProcessing(true);
-    try {
-      await NTPApi.updateTime({
-        local_time: formatLocalDateTime(new Date(localTime))
+
+    await updateTime({ local_time: formatLocalDateTime(new Date(localTime)) })
+      .then(async () => {
+        toast.success(LL.TIME_SET());
+        setSettingTime(false);
+        await loadData();
+      })
+      .catch(() => {
+        toast.error(LL.PROBLEM_UPDATING());
+      })
+      .finally(() => {
+        setProcessing(false);
       });
-      toast.success(LL.TIME_SET());
-      setSettingTime(false);
-      await loadData();
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
-    } finally {
-      setProcessing(false);
-    }
   };
 
   const renderSetTimeDialog = () => (
@@ -138,7 +145,7 @@ const NTPStatusForm: FC = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
     }
 
     return (

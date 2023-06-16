@@ -20,7 +20,7 @@ import {
 
 import { useI18nContext } from 'i18n/i18n-react';
 import { APProvisionMode } from 'types';
-import { numberValue, updateValueDirty, useRest } from 'utils';
+import { numberValue, updateValueDirty, useRest2 } from 'utils';
 
 import { createAPSettingsValidator, validate } from 'validators';
 
@@ -28,17 +28,27 @@ export const isAPEnabled = ({ provision_mode }: APSettings) =>
   provision_mode === APProvisionMode.AP_MODE_ALWAYS || provision_mode === APProvisionMode.AP_MODE_DISCONNECTED;
 
 const APSettingsForm: FC = () => {
-  const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, blocker, saveData, errorMessage } =
-    useRest<APSettings>({
-      read: APApi.readAPSettings,
-      update: APApi.updateAPSettings
-    });
+  const {
+    loadData,
+    saving,
+    data,
+    updateDataValue,
+    origData,
+    dirtyFlags,
+    setDirtyFlags,
+    blocker,
+    saveData,
+    errorMessage
+  } = useRest2<APSettings>({
+    read: APApi.readAPSettings,
+    update: APApi.updateAPSettings
+  });
 
   const { LL } = useI18nContext();
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, setData);
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, updateDataValue);
 
   const content = () => {
     if (!data) {

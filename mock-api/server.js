@@ -2002,10 +2002,11 @@ rest_server.get(FETCH_LOG_ENDPOINT, (req, res) => {
 rest_server.get(LOG_SETTINGS_ENDPOINT, (req, res) => {
   res.json(log_settings);
 });
+// TODO do we need to send back here a res.SendStatus(200) ?
 rest_server.post(LOG_SETTINGS_ENDPOINT, (req, res) => {
   log_settings = req.body;
   console.log(JSON.stringify(log_settings));
-  res.json(log_settings);
+  res.sendStatus(200);
 });
 
 // NETWORK
@@ -2018,7 +2019,8 @@ rest_server.get(NETWORK_SETTINGS_ENDPOINT, (req, res) => {
 rest_server.post(NETWORK_SETTINGS_ENDPOINT, (req, res) => {
   network_settings = req.body;
   console.log(JSON.stringify(network_settings));
-  res.json(network_settings);
+  // TODO do we need to send back here a res.SendStatus(200) ?
+  res.sendStatus(200);
 });
 rest_server.get(LIST_NETWORKS_ENDPOINT, (req, res) => {
   res.json(list_networks);
@@ -2032,12 +2034,13 @@ rest_server.get(AP_SETTINGS_ENDPOINT, (req, res) => {
   res.json(ap_settings);
 });
 rest_server.get(AP_STATUS_ENDPOINT, (req, res) => {
+  console.log('get apStatus', ap_status);
   res.json(ap_status);
 });
 rest_server.post(AP_SETTINGS_ENDPOINT, (req, res) => {
-  ap_status = req.body;
-  console.log(JSON.stringify(ap_settings));
-  res.json(ap_settings);
+  ap_settings = req.body;
+  console.log('post apSettings', ap_settings);
+  res.sendStatus(200);
 });
 
 // OTA
@@ -2048,6 +2051,7 @@ rest_server.post(OTA_SETTINGS_ENDPOINT, (req, res) => {
   ota_settings = req.body;
   console.log(JSON.stringify(ota_settings));
   res.json(ota_settings);
+  // TODO do we need to send back a   res.sendStatus(200); ?
 });
 
 // MQTT
@@ -2058,6 +2062,7 @@ rest_server.post(MQTT_SETTINGS_ENDPOINT, (req, res) => {
   mqtt_settings = req.body;
   console.log(JSON.stringify(mqtt_settings));
   res.json(mqtt_settings);
+  // TODO do we need to send back a   res.sendStatus(200); ?
 });
 rest_server.get(MQTT_STATUS_ENDPOINT, (req, res) => {
   res.json(mqtt_status);
@@ -2070,6 +2075,8 @@ rest_server.get(NTP_SETTINGS_ENDPOINT, (req, res) => {
 rest_server.post(NTP_SETTINGS_ENDPOINT, (req, res) => {
   ntp_settings = req.body;
   console.log(JSON.stringify(ntp_settings));
+  // TODO do we need to send back a   res.sendStatus(200); ?
+
   res.json(ntp_settings);
 });
 rest_server.get(NTP_STATUS_ENDPOINT, (req, res) => {
@@ -2089,6 +2096,8 @@ rest_server.get(SECURITY_SETTINGS_ENDPOINT, (req, res) => {
 rest_server.post(SECURITY_SETTINGS_ENDPOINT, (req, res) => {
   security_settings = req.body;
   console.log(JSON.stringify(security_settings));
+  // TODO do we need to send back a   res.sendStatus(200); ?
+
   res.json(security_settings);
 });
 rest_server.get(FEATURES_ENDPOINT, (req, res) => {
@@ -2109,6 +2118,8 @@ rest_server.post(UPLOAD_FILE_ENDPOINT, (req, res) => {
 });
 rest_server.post(SIGN_IN_ENDPOINT, (req, res) => {
   console.log('Signed in as ' + req.body.username);
+  // TODO do we need to send back a   res.sendStatus(200); ?
+
   res.json(signin);
 });
 rest_server.get(GENERATE_TOKEN_ENDPOINT, (req, res) => {
@@ -2127,8 +2138,8 @@ rest_server.get(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
 rest_server.post(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
   settings = req.body;
   console.log('Write settings: ' + JSON.stringify(settings));
-  // res.status(205).json(settings); // restart needed
-  res.status(200).json(settings); // no restart needed
+  // res.sendStatus(205); // restart needed
+  res.sendStatus(200); // no restart needed
 });
 rest_server.get(EMSESP_CORE_DATA_ENDPOINT, (req, res) => {
   console.log('send back core data...');

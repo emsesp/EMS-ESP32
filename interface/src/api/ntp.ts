@@ -1,20 +1,11 @@
-import { AXIOS } from './endpoints';
-import type { AxiosPromise } from 'axios';
+import { alovaInstance } from './endpoints';
 import type { NTPSettings, NTPStatus, Time } from 'types';
 
-// TODO move to Alova
-export function readNTPStatus(): AxiosPromise<NTPStatus> {
-  return AXIOS.get('/ntpStatus');
-}
+export const readNTPStatus = () => alovaInstance.Get<NTPStatus>('/rest/ntpStatus');
+export const readNTPSettings = () =>
+  alovaInstance.Get<NTPSettings>('/rest/ntpSettings', {
+    name: 'ntpSettings'
+  });
+export const updateNTPSettings = (data: NTPSettings) => alovaInstance.Post<NTPSettings>('/rest/ntpSettings', data);
 
-export function readNTPSettings(): AxiosPromise<NTPSettings> {
-  return AXIOS.get('/ntpSettings');
-}
-
-export function updateNTPSettings(ntpSettings: NTPSettings): AxiosPromise<NTPSettings> {
-  return AXIOS.post('/ntpSettings', ntpSettings);
-}
-
-export function updateTime(time: Time): AxiosPromise<Time> {
-  return AXIOS.post('/time', time);
-}
+export const updateTime = (data: Time) => alovaInstance.Post<Time>('/rest/time', data);

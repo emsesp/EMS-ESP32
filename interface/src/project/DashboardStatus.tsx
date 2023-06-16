@@ -64,7 +64,7 @@ const showQuality = (stat: Stat) => {
 };
 
 const DashboardStatus: FC = () => {
-  const { data: data, send: loadData, error } = useRequest(EMSESP.readStatus, { force: true });
+  const { data: data, send: loadData, error } = useRequest(EMSESP.readStatus);
 
   const { LL } = useI18nContext();
 

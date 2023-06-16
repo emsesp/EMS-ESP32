@@ -1,13 +1,20 @@
-import { AXIOS, AXIOS_BIN, startUploadFile } from './endpoints';
+import { AXIOS, AXIOS_BIN, alovaInstance, startUploadFile } from './endpoints';
 import type { FileUploadConfig } from './endpoints';
 import type { AxiosPromise } from 'axios';
 
 import type { OTASettings, SystemStatus, LogSettings, LogEntries } from 'types';
 
 // TODO move to Alova
-export function readSystemStatus(timeout?: number): AxiosPromise<SystemStatus> {
-  return AXIOS.get('/systemStatus', { timeout });
-}
+// TODO fix this next!
+
+export const readSystemStatus = (timeout?: number) =>
+  alovaInstance.Get<SystemStatus>('/rest/systemStatus', {
+    params: { timeout }
+  });
+
+// export function readSystemStatus(timeout?: number): AxiosPromise<SystemStatus> {
+//   return AXIOS.get('/systemStatus', { timeout });
+// }
 
 export function restart(): AxiosPromise<void> {
   return AXIOS.post('/restart');
