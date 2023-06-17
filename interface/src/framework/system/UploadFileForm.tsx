@@ -15,6 +15,7 @@ const UploadFileForm: FC = () => {
   const { LL } = useI18nContext();
 
   const uploadFile = useRef(async (file: File, config?: FileUploadConfig) => {
+    // TODO fileupload move to alova
     const response = await SystemApi.uploadFile(file, config);
     if (response.status === 200) {
       setRestarting(true);

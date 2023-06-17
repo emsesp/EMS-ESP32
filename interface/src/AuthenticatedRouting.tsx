@@ -33,7 +33,7 @@ const AuthenticatedRouting: FC = () => {
   );
 
   useEffect(() => {
-    // TODO how to replace AXIOS.interceptors.response.use ???
+    // TODO replace AXIOS.interceptors.response.use ???
     const axiosHandlerId = AXIOS.interceptors.response.use((response) => response, handleApiResponseError);
     return () => AXIOS.interceptors.response.eject(axiosHandlerId);
   }, [handleApiResponseError]);

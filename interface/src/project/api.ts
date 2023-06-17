@@ -31,7 +31,6 @@ export const getBoardProfile = (boardProfile: string) =>
   alovaInstance.Get('/rest/boardProfile', {
     params: { boardProfile }
   });
-export const restart = () => alovaInstance.Post('/rest/restart');
 
 // DashboardSensors
 export const readSensorData = () => alovaInstance.Get<SensorData>('/rest/sensorData');
@@ -70,7 +69,7 @@ export const readSchedule = () =>
   alovaInstance.Get<ScheduleItem[]>('/rest/schedule', {
     name: 'schedule',
     transformData(data: any) {
-      return data.map((si: ScheduleItem) => ({
+      return data.schedule.map((si: ScheduleItem) => ({
         ...si,
         o_id: si.id,
         o_active: si.active,
@@ -85,12 +84,12 @@ export const readSchedule = () =>
   });
 export const writeSchedule = (data: any) => alovaInstance.Post('/rest/schedule', data);
 
-// SettingsCustomization
+// SettingsEntities
 export const readEntities = () =>
   alovaInstance.Get<EntityItem[]>('/rest/entities', {
     name: 'entities',
     transformData(data: any) {
-      return data.map((ei: EntityItem) => ({
+      return data.entities.map((ei: EntityItem) => ({
         ...ei,
         o_id: ei.id,
         o_device_id: ei.device_id,

@@ -18,6 +18,9 @@ const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 const API_ENDPOINT_ROOT = '/api/';
 const REST_ENDPOINT_ROOT = '/rest/';
 
+// network poll
+let countWifiScanPoll = 0;
+
 // LOG
 const LOG_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'logSettings';
 log_settings = {
@@ -27,7 +30,7 @@ log_settings = {
 };
 
 const FETCH_LOG_ENDPOINT = REST_ENDPOINT_ROOT + 'fetchLog';
-const fetch_log = {
+let fetch_log = {
   events: [
     {
       t: '000+00:00:00.001',
@@ -1780,26 +1783,26 @@ const emsesp_devicedata_99 = {
 };
 
 // CUSTOM ENTITIES
-let emsesp_entities = [
+let emsesp_entities = {
   // entities: []
-  // entities: [
-  {
-    id: 0,
-    device_id: 8,
-    type_id: 24,
-    offset: 0,
-    factor: 1,
-    name: 'boiler_flowtemp',
-    uom: 1,
-    value_type: 1,
-    writeable: true
-  }
-];
+  entities: [
+    {
+      id: 0,
+      device_id: 8,
+      type_id: 24,
+      offset: 0,
+      factor: 1,
+      name: 'boiler_flowtemp',
+      uom: 1,
+      value_type: 1,
+      writeable: true
+    }
+  ]
+};
 
 // SCHEDULE
-let emsesp_schedule =
-  // schedule: [
-  [
+let emsesp_schedule = {
+  schedule: [
     {
       id: 1,
       active: true,
@@ -1836,7 +1839,8 @@ let emsesp_schedule =
       value: '',
       name: 'auto_restart'
     }
-  ];
+  ]
+};
 
 // CUSTOMIZATIONS
 const emsesp_deviceentities_1 = [{}];
@@ -1993,16 +1997,13 @@ const emsesp_deviceentities_4 = [
 ];
 
 // LOG
-rest_server.get(FETCH_LOG_ENDPOINT, (req, res) => {
-  const encoded = msgpack.encode(fetch_log);
-  console.log('fetchlog');
-  res.write(encoded, 'binary');
-  res.end(null, 'binary');
+rest_server.post(FETCH_LOG_ENDPOINT, (req, res) => {
+  console.log('command: fetchLog');
+  res.sendStatus(200);
 });
 rest_server.get(LOG_SETTINGS_ENDPOINT, (req, res) => {
   res.json(log_settings);
 });
-// TODO do we need to send back here a res.SendStatus(200) ?
 rest_server.post(LOG_SETTINGS_ENDPOINT, (req, res) => {
   log_settings = req.body;
   console.log(JSON.stringify(log_settings));
@@ -2019,14 +2020,21 @@ rest_server.get(NETWORK_SETTINGS_ENDPOINT, (req, res) => {
 rest_server.post(NETWORK_SETTINGS_ENDPOINT, (req, res) => {
   network_settings = req.body;
   console.log(JSON.stringify(network_settings));
-  // TODO do we need to send back here a res.SendStatus(200) ?
   res.sendStatus(200);
 });
 rest_server.get(LIST_NETWORKS_ENDPOINT, (req, res) => {
+  countWifiScanPoll = 0; // stop the poll
   res.json(list_networks);
 });
 rest_server.get(SCAN_NETWORKS_ENDPOINT, (req, res) => {
-  res.sendStatus(202); // reboot required
+  console.log('scan networks');
+  if (countWifiScanPoll++ === 2) {
+    console.log('done, have list');
+    res.sendStatus(200); // ready to send list
+  } else {
+    console.log('...waiting #' + countWifiScanPoll);
+    res.sendStatus(202); // waiting....
+  }
 });
 
 // AP
@@ -2050,8 +2058,7 @@ rest_server.get(OTA_SETTINGS_ENDPOINT, (req, res) => {
 rest_server.post(OTA_SETTINGS_ENDPOINT, (req, res) => {
   ota_settings = req.body;
   console.log(JSON.stringify(ota_settings));
-  res.json(ota_settings);
-  // TODO do we need to send back a   res.sendStatus(200); ?
+  res.sendStatus(200);
 });
 
 // MQTT
@@ -2061,8 +2068,7 @@ rest_server.get(MQTT_SETTINGS_ENDPOINT, (req, res) => {
 rest_server.post(MQTT_SETTINGS_ENDPOINT, (req, res) => {
   mqtt_settings = req.body;
   console.log(JSON.stringify(mqtt_settings));
-  res.json(mqtt_settings);
-  // TODO do we need to send back a   res.sendStatus(200); ?
+  res.sendStatus(200);
 });
 rest_server.get(MQTT_STATUS_ENDPOINT, (req, res) => {
   res.json(mqtt_status);
@@ -2075,9 +2081,7 @@ rest_server.get(NTP_SETTINGS_ENDPOINT, (req, res) => {
 rest_server.post(NTP_SETTINGS_ENDPOINT, (req, res) => {
   ntp_settings = req.body;
   console.log(JSON.stringify(ntp_settings));
-  // TODO do we need to send back a   res.sendStatus(200); ?
-
-  res.json(ntp_settings);
+  res.sendStatus(200);
 });
 rest_server.get(NTP_STATUS_ENDPOINT, (req, res) => {
   res.json(ntp_status);
@@ -2096,9 +2100,7 @@ rest_server.get(SECURITY_SETTINGS_ENDPOINT, (req, res) => {
 rest_server.post(SECURITY_SETTINGS_ENDPOINT, (req, res) => {
   security_settings = req.body;
   console.log(JSON.stringify(security_settings));
-  // TODO do we need to send back a   res.sendStatus(200); ?
-
-  res.json(security_settings);
+  res.sendStatus(200);
 });
 rest_server.get(FEATURES_ENDPOINT, (req, res) => {
   res.json(features);
@@ -2118,9 +2120,7 @@ rest_server.post(UPLOAD_FILE_ENDPOINT, (req, res) => {
 });
 rest_server.post(SIGN_IN_ENDPOINT, (req, res) => {
   console.log('Signed in as ' + req.body.username);
-  // TODO do we need to send back a   res.sendStatus(200); ?
-
-  res.json(signin);
+  res.json(signin); // watch out, this has a return value
 });
 rest_server.get(GENERATE_TOKEN_ENDPOINT, (req, res) => {
   res.json(generate_token);
@@ -2693,7 +2693,7 @@ rest_server.get(SCHEDULE_ENDPOINT, (req, res) => {
 
 const ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'entities';
 rest_server.get(ENTITIES_ENDPOINT, (req, res) => {
-  console.log('Sending Entities data');
+  console.log('Sending Custom Entities data');
   res.json(emsesp_entities);
 });
 
@@ -2734,5 +2734,5 @@ rest_server.get(ES_LOG_ENDPOINT, function (req, res) {
       log_index = 0;
     }
     fetch_log.events.push(data); // append to buffer
-  }, 1000);
+  }, 3000);
 });

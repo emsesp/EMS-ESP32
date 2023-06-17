@@ -6,6 +6,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Typography, Divider, Stack, Button } from '@mui/material';
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
+// eslint-disable-next-line import/named
 import { updateState, useRequest } from 'alova';
 import { useState, useEffect, useCallback } from 'react';
 import { unstable_useBlocker as useBlocker } from 'react-router-dom';
@@ -108,8 +109,8 @@ const SettingsScheduler: FC = () => {
   });
 
   const saveSchedule = async () => {
-    await writeSchedule(
-      schedule
+    await writeSchedule({
+      schedule: schedule
         .filter((si) => !si.deleted)
         .map((condensed_si) => ({
           id: condensed_si.id,
@@ -120,7 +121,7 @@ const SettingsScheduler: FC = () => {
           value: condensed_si.value,
           name: condensed_si.name
         }))
-    )
+    })
       .then(() => {
         toast.success(LL.SCHEDULE_UPDATED());
       })

@@ -1,52 +1,27 @@
-import { AXIOS, AXIOS_BIN, alovaInstance, startUploadFile } from './endpoints';
+import { alovaInstance, startUploadFile } from './endpoints';
 import type { FileUploadConfig } from './endpoints';
 import type { AxiosPromise } from 'axios';
 
-import type { OTASettings, SystemStatus, LogSettings, LogEntries } from 'types';
-
-// TODO move to Alova
-// TODO fix this next!
+import type { OTASettings, SystemStatus, LogSettings } from 'types';
 
 export const readSystemStatus = (timeout?: number) =>
   alovaInstance.Get<SystemStatus>('/rest/systemStatus', {
     params: { timeout }
   });
 
-// export function readSystemStatus(timeout?: number): AxiosPromise<SystemStatus> {
-//   return AXIOS.get('/systemStatus', { timeout });
-// }
+// commands
+export const restart = () => alovaInstance.Post('/rest/restart');
+export const partition = () => alovaInstance.Post('/rest/partition');
+export const factoryReset = () => alovaInstance.Post('/rest/factoryReset');
 
-export function restart(): AxiosPromise<void> {
-  return AXIOS.post('/restart');
-}
+// OTA
+export const readOTASettings = () => alovaInstance.Get<OTASettings>(`/rest/otaSettings`);
+export const updateOTASettings = (data: any) => alovaInstance.Post('/rest/otaSettings', data);
 
-export function partition(): AxiosPromise<void> {
-  return AXIOS.post('/partition');
-}
-
-export function factoryReset(): AxiosPromise<void> {
-  return AXIOS.post('/factoryReset');
-}
-
-export function readOTASettings(): AxiosPromise<OTASettings> {
-  return AXIOS.get('/otaSettings');
-}
-
-export function updateOTASettings(otaSettings: OTASettings): AxiosPromise<OTASettings> {
-  return AXIOS.post('/otaSettings', otaSettings);
-}
+// SystemLog
+export const readLogSettings = () => alovaInstance.Get<LogSettings>(`/rest/logSettings`);
+export const updateLogSettings = (data: any) => alovaInstance.Post('/rest/logSettings', data);
+export const fetchLog = () => alovaInstance.Post('/rest/fetchLog');
 
 export const uploadFile = (file: File, config?: FileUploadConfig): AxiosPromise<void> =>
   startUploadFile('/uploadFile', file, config);
-
-export function readLogSettings(): AxiosPromise<LogSettings> {
-  return AXIOS.get('/logSettings');
-}
-
-export function updateLogSettings(logSettings: LogSettings): AxiosPromise<LogSettings> {
-  return AXIOS.post('/logSettings', logSettings);
-}
-
-export function readLogEntries(): AxiosPromise<LogEntries> {
-  return AXIOS_BIN.get('/fetchLog');
-}

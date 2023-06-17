@@ -9,6 +9,7 @@ import { useI18nContext } from 'i18n/i18n-react';
 import { extractErrorMessage } from 'utils';
 
 interface MediaUploadOptions {
+  // TODO fileupload move to alova
   upload: (file: File, config?: FileUploadConfig) => AxiosPromise<void>;
 }
 

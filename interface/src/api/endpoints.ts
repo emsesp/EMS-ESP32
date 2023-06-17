@@ -17,7 +17,7 @@ export const EVENT_SOURCE_ROOT = 'http://' + host + '/es/';
 
 export const alovaInstance = createAlova({
   statesHook: ReactHook,
-  timeout: 3000,
+  // timeout: 3000,
   localCache: {
     GET: {
       mode: 'placeholder',
@@ -35,7 +35,9 @@ export const alovaInstance = createAlova({
 
   responded: {
     onSuccess: async (response) => {
-      if (response.status == 205) {
+      if (response.status === 202) {
+        throw new Error('Wait');
+      } else if (response.status === 205) {
         throw new Error('Reboot required');
       } else if (response.status === 400) {
         throw new Error('Request Failed');
@@ -117,7 +119,7 @@ export const AXIOS_BIN = axios.create({
   transformResponse: [(data) => unpack(data)]
 });
 
-// TODO replace upload with alova, see https://alova.js.org/next-step/download-upload-progress
+// TODO replace fileupload with alova, see https://alova.js.org/next-step/download-upload-progress
 export interface FileUploadConfig {
   cancelToken?: CancelToken;
   onUploadProgress?: (progressEvent: AxiosProgressEvent) => void;

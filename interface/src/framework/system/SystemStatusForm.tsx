@@ -35,12 +35,11 @@ import { toast } from 'react-toastify';
 import RestartMonitor from './RestartMonitor';
 import type { FC } from 'react';
 
-import type { SystemStatus, Version } from 'types';
+import type { Version } from 'types';
 import * as SystemApi from 'api/system';
 import { ButtonRow, FormLoader, SectionContent, MessageBox } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
-import { extractErrorMessage } from 'utils';
 
 export const VERSIONCHECK_ENDPOINT = 'https://api.github.com/repos/emsesp/EMS-ESP32/releases/latest';
 export const VERSIONCHECK_DEV_ENDPOINT = 'https://api.github.com/repos/emsesp/EMS-ESP32/releases/tags/latest';
@@ -52,9 +51,6 @@ function formatNumber(num: number) {
 
 const SystemStatusForm: FC = () => {
   const { LL } = useI18nContext();
-  const [restarting, setRestarting] = useState<boolean>();
-
-  const { data: data, send: loadData, error } = useRequest(SystemApi.readSystemStatus);
 
   const { me } = useContext(AuthenticatedContext);
   const [confirmRestart, setConfirmRestart] = useState<boolean>(false);
@@ -63,6 +59,21 @@ const SystemStatusForm: FC = () => {
   const [showingVersion, setShowingVersion] = useState<boolean>(false);
   const [latestVersion, setLatestVersion] = useState<Version>();
   const [latestDevVersion, setLatestDevVersion] = useState<Version>();
+  const [restarting, setRestarting] = useState<boolean>();
+
+  const { send: restartCommand } = useRequest(SystemApi.restart(), {
+    immediate: false
+  });
+
+  const { send: factoryResetCommand } = useRequest(SystemApi.factoryReset(), {
+    immediate: false
+  });
+
+  const { send: partitionCommand } = useRequest(SystemApi.partition(), {
+    immediate: false
+  });
+
+  const { data: data, send: loadData, error } = useRequest(SystemApi.readSystemStatus);
 
   useEffect(() => {
     void axios.get(VERSIONCHECK_ENDPOINT).then((response) => {
@@ -83,30 +94,47 @@ const SystemStatusForm: FC = () => {
 
   const restart = async () => {
     setProcessing(true);
-    try {
-      const response = await SystemApi.restart();
-      if (response.status === 200) {
+    await restartCommand()
+      .then(() => {
         setRestarting(true);
-      }
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-    } finally {
-      setConfirmRestart(false);
-      setProcessing(false);
-    }
+      })
+      .catch((err) => {
+        toast.error(err.message);
+      })
+      .finally(() => {
+        setConfirmRestart(false);
+        setProcessing(false);
+      });
+  };
+
+  const factoryReset = async () => {
+    setProcessing(true);
+    await factoryResetCommand()
+      .then(() => {
+        setRestarting(true);
+      })
+      .catch((err) => {
+        toast.error(err.message);
+      })
+      .finally(() => {
+        setConfirmFactoryReset(false);
+        setProcessing(false);
+      });
   };
 
   const partition = async () => {
     setProcessing(true);
-    try {
-      await SystemApi.partition();
-      setRestarting(true);
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-    } finally {
-      setConfirmRestart(false);
-      setProcessing(false);
-    }
+    await partitionCommand()
+      .then(() => {
+        setRestarting(true);
+      })
+      .catch((err) => {
+        toast.error(err.message);
+      })
+      .finally(() => {
+        setConfirmRestart(false);
+        setProcessing(false);
+      });
   };
 
   const renderRestartDialog = () => (
@@ -201,19 +229,6 @@ const SystemStatusForm: FC = () => {
     </Dialog>
   );
 
-  const factoryReset = async () => {
-    setProcessing(true);
-    try {
-      await SystemApi.factoryReset();
-      setRestarting(true);
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
-    } finally {
-      setConfirmFactoryReset(false);
-      setProcessing(false);
-    }
-  };
-
   const renderFactoryResetDialog = () => (
     <Dialog open={confirmFactoryReset} onClose={() => setConfirmFactoryReset(false)}>
       <DialogTitle>{LL.FACTORY_RESET()}</DialogTitle>
@@ -243,7 +258,7 @@ const SystemStatusForm: FC = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
     }
 
     return (

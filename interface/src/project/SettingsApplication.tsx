@@ -12,6 +12,7 @@ import { createSettingsValidator } from './validators';
 import type { Settings } from './types';
 import type { ValidateFieldsError } from 'async-validator';
 import type { FC } from 'react';
+import * as SystemApi from 'api/system';
 import {
   SectionContent,
   FormLoader,
@@ -69,7 +70,7 @@ const SettingsApplication: FC = () => {
     immediate: false
   });
 
-  const { send: restartCommand } = useRequest(EMSESP.restart(), {
+  const { send: restartCommand } = useRequest(SystemApi.restart(), {
     immediate: false
   });
 

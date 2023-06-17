@@ -4,6 +4,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import { Button, Typography, Box } from '@mui/material';
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
+// eslint-disable-next-line import/named
 import { updateState, useRequest } from 'alova';
 import { useState, useCallback } from 'react';
 import { unstable_useBlocker as useBlocker } from 'react-router-dom';
@@ -108,8 +109,8 @@ const SettingsEntities: FC = () => {
   });
 
   const saveEntities = async () => {
-    await writeEntities(
-      entities
+    await writeEntities({
+      entities: entities
         .filter((ei) => !ei.deleted)
         .map((condensed_ei) => ({
           id: condensed_ei.id,
@@ -122,7 +123,7 @@ const SettingsEntities: FC = () => {
           writeable: condensed_ei.writeable,
           value_type: condensed_ei.value_type
         }))
-    )
+    })
       .then(() => {
         toast.success(LL.ENTITIES_UPDATED());
       })

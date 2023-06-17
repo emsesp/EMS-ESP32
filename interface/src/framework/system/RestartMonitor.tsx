@@ -1,3 +1,4 @@
+import { useRequest } from 'alova';
 import { useRef, useState, useEffect } from 'react';
 import type { FC } from 'react';
 
@@ -16,10 +17,14 @@ const RestartMonitor: FC = () => {
 
   const { LL } = useI18nContext();
 
+  const { send: readSystemStatus } = useRequest((timeout) => SystemApi.readSystemStatus(timeout), {
+    immediate: false
+  });
+
   const timeoutAt = useRef(new Date().getTime() + RESTART_TIMEOUT);
   const poll = useRef(async () => {
     try {
-      await SystemApi.readSystemStatus(POLL_TIMEOUT);
+      await readSystemStatus(POLL_TIMEOUT);
       document.location.href = '/fileUpdated';
     } catch (error) {
       if (new Date().getTime() < timeoutAt.current) {

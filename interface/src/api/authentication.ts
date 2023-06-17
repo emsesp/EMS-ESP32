@@ -9,10 +9,11 @@ import type { Me, SignInRequest, SignInResponse } from 'types';
 export const SIGN_IN_PATHNAME = 'loginPathname';
 export const SIGN_IN_SEARCH = 'loginSearch';
 
-// TODO move to Alova
+// TODO move verifyAuthorization to Alova
 export function verifyAuthorization(): AxiosPromise<void> {
   return AXIOS.get('/verifyAuthorization');
 }
+// TODO move signIn to Alova
 export function signIn(request: SignInRequest): AxiosPromise<SignInResponse> {
   return AXIOS.post('/signIn', request);
 }

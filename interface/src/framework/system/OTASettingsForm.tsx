@@ -18,21 +18,31 @@ import {
 } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
-import { numberValue, updateValueDirty, useRest } from 'utils';
+import { numberValue, updateValueDirty, useRest2 } from 'utils';
 
 import { validate } from 'validators';
 import { OTA_SETTINGS_VALIDATOR } from 'validators/system';
 
 const OTASettingsForm: FC = () => {
-  const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, blocker, saveData, errorMessage } =
-    useRest<OTASettings>({
-      read: SystemApi.readOTASettings,
-      update: SystemApi.updateOTASettings
-    });
+  const {
+    loadData,
+    saveData,
+    saving,
+    updateDataValue,
+    data,
+    origData,
+    dirtyFlags,
+    setDirtyFlags,
+    blocker,
+    errorMessage
+  } = useRest2<OTASettings>({
+    read: SystemApi.readOTASettings,
+    update: SystemApi.updateOTASettings
+  });
 
   const { LL } = useI18nContext();
 
-  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, setData);
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, updateDataValue);
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 

@@ -35,6 +35,7 @@ import * as EMSESP from './api';
 import { DeviceEntityMask } from './types';
 import type { DeviceShort, DeviceEntity } from './types';
 import type { FC } from 'react';
+import * as SystemApi from 'api/system';
 import { ButtonRow, SectionContent, MessageBox, BlockNavigation } from 'components';
 
 import RestartMonitor from 'framework/system/RestartMonitor';
@@ -78,7 +79,7 @@ const SettingsCustomization: FC = () => {
     setOriginalSettings(event.data);
   });
 
-  const { send: restartCommand } = useRequest(EMSESP.restart(), {
+  const { send: restartCommand } = useRequest(SystemApi.restart(), {
     immediate: false
   });
 

@@ -18,6 +18,7 @@ import {
   InputAdornment,
   TextField
 } from '@mui/material';
+// eslint-disable-next-line import/named
 import { updateState, useRequest } from 'alova';
 import { useContext, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
@@ -29,6 +30,7 @@ import type { FC } from 'react';
 
 import type { NetworkSettings } from 'types';
 import * as NetworkApi from 'api/network';
+import * as SystemApi from 'api/system';
 import {
   BlockFormControlLabel,
   ButtonRow,
@@ -40,7 +42,7 @@ import {
   BlockNavigation
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
-import * as EMSESP from 'project/api';
+
 import { numberValue, updateValueDirty, useRest2 } from 'utils';
 
 import { validate } from 'validators';
@@ -71,7 +73,7 @@ const WiFiSettingsForm: FC = () => {
     update: NetworkApi.updateNetworkSettings
   });
 
-  const { send: restartCommand } = useRequest(EMSESP.restart(), {
+  const { send: restartCommand } = useRequest(SystemApi.restart(), {
     immediate: false
   });
 
