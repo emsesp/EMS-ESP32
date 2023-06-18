@@ -35,9 +35,10 @@ export const alovaInstance = createAlova({
 
   responded: {
     onSuccess: async (response) => {
-      if (response.status === 202) {
-        throw new Error('Wait');
-      } else if (response.status === 205) {
+      // if (response.status === 202) {
+      //   throw new Error('Wait'); // wifi scan in progress
+      // } else
+      if (response.status === 205) {
         throw new Error('Reboot required');
       } else if (response.status === 400) {
         throw new Error('Request Failed');

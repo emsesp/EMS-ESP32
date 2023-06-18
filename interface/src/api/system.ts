@@ -4,10 +4,8 @@ import type { AxiosPromise } from 'axios';
 
 import type { OTASettings, SystemStatus, LogSettings } from 'types';
 
-export const readSystemStatus = (timeout?: number) =>
-  alovaInstance.Get<SystemStatus>('/rest/systemStatus', {
-    params: { timeout }
-  });
+// SystemStatus - also used to ping in Restart monitor
+export const readSystemStatus = () => alovaInstance.Get<SystemStatus>('/rest/systemStatus');
 
 // commands
 export const restart = () => alovaInstance.Post('/rest/restart');
@@ -23,5 +21,6 @@ export const readLogSettings = () => alovaInstance.Get<LogSettings>(`/rest/logSe
 export const updateLogSettings = (data: any) => alovaInstance.Post('/rest/logSettings', data);
 export const fetchLog = () => alovaInstance.Post('/rest/fetchLog');
 
+// TODO fileupload move to Alova
 export const uploadFile = (file: File, config?: FileUploadConfig): AxiosPromise<void> =>
   startUploadFile('/uploadFile', file, config);

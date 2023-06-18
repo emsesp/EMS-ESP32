@@ -1,8 +1,8 @@
 import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
 import { Button } from '@mui/material';
-import { useRequest } from 'alova';
-import { useState, useCallback, useRef } from 'react';
-import { toast } from 'react-toastify';
+// eslint-disable-next-line import/named
+import { updateState, useRequest } from 'alova';
+import { useState, useRef } from 'react';
 
 import WiFiNetworkSelector from './WiFiNetworkSelector';
 import type { FC } from 'react';
@@ -15,48 +15,37 @@ const NUM_POLLS = 10;
 const POLLING_FREQUENCY = 1000;
 
 const WiFiNetworkScanner: FC = () => {
-  const { LL } = useI18nContext();
-
   const pollCount = useRef(0);
+  const { LL } = useI18nContext();
   const [errorMessage, setErrorMessage] = useState<string>();
 
-  const { data: networkList, send: getNetworkList } = useRequest(NetworkApi.listNetworks, {
+  const { send: scanNetworks, onComplete: onCompleteScanNetworks } = useRequest(NetworkApi.scanNetworks); // is called on page load to start network scan
+  const {
+    data: networkList,
+    send: getNetworkList,
+    onSuccess: onSuccessNetworkList
+  } = useRequest(NetworkApi.listNetworks, {
     immediate: false
   });
 
-  const {
-    send: scanNetworks,
-    onSuccess: onSuccessScanNetworks,
-    onError: onErrorScanNetworks
-  } = useRequest(NetworkApi.scanNetworks);
-
-  const finishedWithError = useCallback((message: string) => {
-    toast.error(message);
-    setErrorMessage(message);
-    pollCount.current = 0;
-  }, []);
-
-  onErrorScanNetworks((event) => {
-    console.log('onErrorScanNetworks'); // TODO fix
-    if (event.error?.message === 'Wait') {
-      // 202
-      console.log('not ready...: ', event.error?.message); // TODO fix
+  onSuccessNetworkList((event) => {
+    if (!event.data) {
       const completedPollCount = pollCount.current + 1;
       if (completedPollCount < NUM_POLLS) {
         pollCount.current = completedPollCount;
-        setTimeout(scanNetworks, POLLING_FREQUENCY);
+        setTimeout(getNetworkList, POLLING_FREQUENCY);
       } else {
-        finishedWithError(LL.PROBLEM_LOADING());
+        setErrorMessage(LL.PROBLEM_LOADING());
+        pollCount.current = 0;
       }
-    } else {
-      finishedWithError(LL.PROBLEM_LOADING());
     }
   });
 
-  onSuccessScanNetworks(() => {
-    console.log('onCompleteScanNetworks'); // TODO fix
+  onCompleteScanNetworks(() => {
     pollCount.current = 0;
-    void getNetworkList(); // fetch the list
+    setErrorMessage(undefined);
+    updateState('listNetworks', () => undefined);
+    void getNetworkList();
   });
 
   const renderNetworkScanner = () => {

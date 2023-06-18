@@ -3,7 +3,7 @@ import type { AxiosPromise } from 'axios';
 
 import type { SecuritySettings, Token } from 'types';
 
-// TODO move to Alova
+// TODO move these 3 to Alova
 export function readSecuritySettings(): AxiosPromise<SecuritySettings> {
   return AXIOS.get('/securitySettings');
 }

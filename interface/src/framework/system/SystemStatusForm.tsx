@@ -73,7 +73,7 @@ const SystemStatusForm: FC = () => {
     immediate: false
   });
 
-  const { data: data, send: loadData, error } = useRequest(SystemApi.readSystemStatus);
+  const { data: data, send: loadData, error } = useRequest(SystemApi.readSystemStatus, { force: true });
 
   useEffect(() => {
     void axios.get(VERSIONCHECK_ENDPOINT).then((response) => {

@@ -184,9 +184,7 @@ const SettingsEntities: FC = () => {
   }
 
   function showHex(value: number, digit: number) {
-    return digit === 4
-      ? '0x' + ('000' + value.toString(16).toUpperCase()).slice(-4)
-      : '0x' + ('0' + value.toString(16).toUpperCase()).slice(-2);
+    return '0x' + value.toString(16).toUpperCase().padStart(digit, '0');
   }
 
   const renderEntity = () => {
@@ -212,7 +210,7 @@ const SettingsEntities: FC = () => {
                 <Row key={ei.name} item={ei} onClick={() => editEntityItem(ei)}>
                   <Cell>{ei.name}</Cell>
                   <Cell>{showHex(ei.device_id as number, 2)}</Cell>
-                  <Cell>{showHex(ei.type_id as number, 4)}</Cell>
+                  <Cell>{showHex(ei.type_id as number, 3)}</Cell>
                   <Cell>{ei.offset}</Cell>
                   <Cell>{formatValue(ei.value, ei.uom)}</Cell>
                 </Row>

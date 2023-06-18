@@ -271,7 +271,8 @@ const FACTORY_RESET_ENDPOINT = REST_ENDPOINT_ROOT + 'factoryReset';
 const UPLOAD_FILE_ENDPOINT = REST_ENDPOINT_ROOT + 'uploadFile';
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn';
 const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken';
-const system_status = {
+
+let system_status = {
   emsesp_version: '3.6.0-demo',
   esp_platform: 'ESP32',
   max_alloc_heap: 89,
@@ -2023,18 +2024,19 @@ rest_server.post(NETWORK_SETTINGS_ENDPOINT, (req, res) => {
   res.sendStatus(200);
 });
 rest_server.get(LIST_NETWORKS_ENDPOINT, (req, res) => {
-  countWifiScanPoll = 0; // stop the poll
-  res.json(list_networks);
-});
-rest_server.get(SCAN_NETWORKS_ENDPOINT, (req, res) => {
-  console.log('scan networks');
-  if (countWifiScanPoll++ === 2) {
+  if (countWifiScanPoll++ === 4) {
     console.log('done, have list');
-    res.sendStatus(200); // ready to send list
+    res.json(list_networks); // send list
   } else {
     console.log('...waiting #' + countWifiScanPoll);
-    res.sendStatus(202); // waiting....
+    res.sendStatus(200); // waiting....
   }
+});
+// TODO should be a post as its a command?
+rest_server.get(SCAN_NETWORKS_ENDPOINT, (req, res) => {
+  console.log('start scan networks');
+  countWifiScanPoll = 0; // stop the poll
+  res.sendStatus(200); // always 202, poll for list
 });
 
 // AP
@@ -2092,6 +2094,9 @@ rest_server.post(TIME_ENDPOINT, (req, res) => {
 
 // SYSTEM
 rest_server.get(SYSTEM_STATUS_ENDPOINT, (req, res) => {
+  console.log('get systemStatus');
+  // create some random data to see if caching works
+  system_status.fs_used = Math.floor(Math.random() * (Math.floor(200) - 100) + 100);
   res.json(system_status);
 });
 rest_server.get(SECURITY_SETTINGS_ENDPOINT, (req, res) => {

@@ -8,7 +8,6 @@ import { FormLoader } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
 const RESTART_TIMEOUT = 2 * 60 * 1000;
-const POLL_TIMEOUT = 2000;
 const POLL_INTERVAL = 5000;
 
 const RestartMonitor: FC = () => {
@@ -17,14 +16,15 @@ const RestartMonitor: FC = () => {
 
   const { LL } = useI18nContext();
 
-  const { send: readSystemStatus } = useRequest((timeout) => SystemApi.readSystemStatus(timeout), {
+  const { send: readSystemStatus } = useRequest(SystemApi.readSystemStatus(), {
+    force: true,
     immediate: false
   });
 
   const timeoutAt = useRef(new Date().getTime() + RESTART_TIMEOUT);
   const poll = useRef(async () => {
     try {
-      await readSystemStatus(POLL_TIMEOUT);
+      await readSystemStatus();
       document.location.href = '/fileUpdated';
     } catch (error) {
       if (new Date().getTime() < timeoutAt.current) {

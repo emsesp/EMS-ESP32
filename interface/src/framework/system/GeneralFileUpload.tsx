@@ -12,7 +12,7 @@ import { useI18nContext } from 'i18n/i18n-react';
 import * as EMSESP from 'project/api';
 
 interface UploadFileProps {
-  // TODO fileupload upload move to alova
+  // TODO fileupload move to alova
   uploadGeneralFile: (file: File, config?: FileUploadConfig) => AxiosPromise<void>;
 }
 
