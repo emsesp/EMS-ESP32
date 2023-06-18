@@ -56,6 +56,9 @@ const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
           setMe(undefined);
           setInitialized(true);
         });
+    } else {
+      setMe(undefined);
+      setInitialized(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

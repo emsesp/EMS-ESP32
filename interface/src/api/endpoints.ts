@@ -49,13 +49,11 @@ export const alovaInstance = createAlova({
       return data;
     },
 
-    // TODO handle errors
+    // TODO how best to handle alova http errors like 401
     // Interceptor for request failure
     // This interceptor will be entered when the request is wrong.
     // The second parameter is the method instance of the current request, you can use it to synchronize the configuration information before and after the request
-    onError: (error, method) => {
-      console.log('error:', error); // TODO fix me
-      console.log('method:', method); // TODO fix me
+    onError: (error) => {
       alert(error.message);
     }
   }

@@ -29,13 +29,11 @@ import {
 } from '@mui/material';
 
 import { useRequest } from 'alova';
-import axios from 'axios';
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState } from 'react';
 import { toast } from 'react-toastify';
 import RestartMonitor from './RestartMonitor';
 import type { FC } from 'react';
 
-import type { Version } from 'types';
 import * as SystemApi from 'api/system';
 import { ButtonRow, FormLoader, SectionContent, MessageBox } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
@@ -71,6 +69,7 @@ const SystemStatusForm: FC = () => {
     immediate: false
   });
 
+  // fetch versions from GH on load
   const { data: latestVersion } = useRequest(SystemApi.getStableVersion);
   const { data: latestDevVersion } = useRequest(SystemApi.getDevVersion);
 
