@@ -18,7 +18,7 @@ import {
 } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
-import { numberValue, updateValueDirty, useRest2 } from 'utils';
+import { numberValue, updateValueDirty, useRest } from 'utils';
 
 import { validate } from 'validators';
 import { OTA_SETTINGS_VALIDATOR } from 'validators/system';
@@ -35,7 +35,7 @@ const OTASettingsForm: FC = () => {
     setDirtyFlags,
     blocker,
     errorMessage
-  } = useRest2<OTASettings>({
+  } = useRest<OTASettings>({
     read: SystemApi.readOTASettings,
     update: SystemApi.updateOTASettings
   });

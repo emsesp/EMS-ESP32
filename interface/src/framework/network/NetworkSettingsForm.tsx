@@ -43,7 +43,7 @@ import {
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
-import { numberValue, updateValueDirty, useRest2 } from 'utils';
+import { numberValue, updateValueDirty, useRest } from 'utils';
 
 import { validate } from 'validators';
 import { createNetworkSettingsValidator } from 'validators/network';
@@ -68,7 +68,7 @@ const WiFiSettingsForm: FC = () => {
     saveData,
     errorMessage,
     restartNeeded
-  } = useRest2<NetworkSettings>({
+  } = useRest<NetworkSettings>({
     read: NetworkApi.readNetworkSettings,
     update: NetworkApi.updateNetworkSettings
   });

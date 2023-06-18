@@ -2024,11 +2024,11 @@ rest_server.post(NETWORK_SETTINGS_ENDPOINT, (req, res) => {
   res.sendStatus(200);
 });
 rest_server.get(LIST_NETWORKS_ENDPOINT, (req, res) => {
-  if (countWifiScanPoll++ === 4) {
-    console.log('done, have list');
+  if (countWifiScanPoll++ === 3) {
+    // console.log('done, have list');
     res.json(list_networks); // send list
   } else {
-    console.log('...waiting #' + countWifiScanPoll);
+    // console.log('...waiting #' + countWifiScanPoll);
     res.sendStatus(200); // waiting....
   }
 });
@@ -2124,6 +2124,7 @@ rest_server.post(UPLOAD_FILE_ENDPOINT, (req, res) => {
   res.sendStatus(200);
 });
 rest_server.post(SIGN_IN_ENDPOINT, (req, res) => {
+  // res.sendStatus(401); // test bad user
   console.log('Signed in as ' + req.body.username);
   res.json(signin); // watch out, this has a return value
 });

@@ -16,7 +16,7 @@ import { SectionContent, FormLoader, BlockFormControlLabel, BlockNavigation } fr
 
 import { useI18nContext } from 'i18n/i18n-react';
 import { LogLevel } from 'types';
-import { updateValueDirty, useRest2 } from 'utils';
+import { updateValueDirty, useRest } from 'utils';
 
 export const LOG_EVENTSOURCE_URL = EVENT_SOURCE_ROOT + 'log';
 
@@ -52,7 +52,7 @@ const SystemLog: FC = () => {
   const { LL } = useI18nContext();
 
   const { loadData, data, updateDataValue, origData, dirtyFlags, setDirtyFlags, blocker, saveData, errorMessage } =
-    useRest2<LogSettings>({
+    useRest<LogSettings>({
       read: SystemApi.readLogSettings,
       update: SystemApi.updateLogSettings
     });

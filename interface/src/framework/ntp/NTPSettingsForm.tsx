@@ -19,7 +19,7 @@ import {
   BlockNavigation
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
-import { updateValueDirty, useRest2 } from 'utils';
+import { updateValueDirty, useRest } from 'utils';
 import { validate } from 'validators';
 import { NTP_SETTINGS_VALIDATOR } from 'validators/ntp';
 
@@ -35,7 +35,7 @@ const NTPSettingsForm: FC = () => {
     blocker,
     saveData,
     errorMessage
-  } = useRest2<NTPSettings>({
+  } = useRest<NTPSettings>({
     read: NTPApi.readNTPSettings,
     update: NTPApi.updateNTPSettings
   });

@@ -21,22 +21,23 @@ const AuthenticatedRouting: FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const handleApiResponseError = useCallback(
-    (error: AxiosError) => {
-      if (error.response && error.response.status === 401) {
-        AuthenticationApi.storeLoginRedirect(location);
-        navigate('/unauthorized');
-      }
-      return Promise.reject(error);
-    },
-    [location, navigate]
-  );
+  // TODO fix this - how to redirect on a 401
+  // const handleApiResponseError = useCallback(
+  //   (error: AxiosError) => {
+  //     if (error.response && error.response.status === 401) {
+  //       AuthenticationApi.storeLoginRedirect(location);
+  //       navigate('/unauthorized');
+  //     }
+  //     return Promise.reject(error);
+  //   },
+  //   [location, navigate]
+  // );
 
-  useEffect(() => {
-    // TODO replace AXIOS.interceptors.response.use ???
-    const axiosHandlerId = AXIOS.interceptors.response.use((response) => response, handleApiResponseError);
-    return () => AXIOS.interceptors.response.eject(axiosHandlerId);
-  }, [handleApiResponseError]);
+  // useEffect(() => {
+  //   // TODO replace AXIOS.interceptors.response.use ???
+  //   const axiosHandlerId = AXIOS.interceptors.response.use((response) => response, handleApiResponseError);
+  //   return () => AXIOS.interceptors.response.eject(axiosHandlerId);
+  // }, [handleApiResponseError]);
 
   return (
     <Layout>

@@ -20,7 +20,7 @@ import {
 
 import { useI18nContext } from 'i18n/i18n-react';
 import { APProvisionMode } from 'types';
-import { numberValue, updateValueDirty, useRest2 } from 'utils';
+import { numberValue, updateValueDirty, useRest } from 'utils';
 
 import { createAPSettingsValidator, validate } from 'validators';
 
@@ -39,7 +39,7 @@ const APSettingsForm: FC = () => {
     blocker,
     saveData,
     errorMessage
-  } = useRest2<APSettings>({
+  } = useRest<APSettings>({
     read: APApi.readAPSettings,
     update: APApi.updateAPSettings
   });

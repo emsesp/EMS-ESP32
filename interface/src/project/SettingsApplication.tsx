@@ -25,7 +25,7 @@ import {
 
 import RestartMonitor from 'framework/system/RestartMonitor';
 import { useI18nContext } from 'i18n/i18n-react';
-import { numberValue, updateValueDirty, useRest2 } from 'utils';
+import { numberValue, updateValueDirty, useRest } from 'utils';
 import { validate } from 'validators';
 
 export function boardProfileSelectItems() {
@@ -49,7 +49,7 @@ const SettingsApplication: FC = () => {
     blocker,
     errorMessage,
     restartNeeded
-  } = useRest2<Settings>({
+  } = useRest<Settings>({
     read: EMSESP.readSettings,
     update: EMSESP.writeSettings
   });

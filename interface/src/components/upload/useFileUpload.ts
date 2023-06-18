@@ -6,7 +6,6 @@ import type { FileUploadConfig } from 'api/endpoints';
 import type { AxiosPromise, CancelTokenSource, AxiosProgressEvent } from 'axios';
 
 import { useI18nContext } from 'i18n/i18n-react';
-import { extractErrorMessage } from 'utils';
 
 interface MediaUploadOptions {
   // TODO fileupload move to alova
@@ -40,6 +39,7 @@ const useFileUpload = ({ upload }: MediaUploadOptions) => {
     [uploadCancelToken]
   );
 
+  // TODO fileupload move to alova
   const uploadFile = async (images: File[]) => {
     try {
       const cancelToken = axios.CancelToken.source();
@@ -61,7 +61,7 @@ const useFileUpload = ({ upload }: MediaUploadOptions) => {
         toast.warning(LL.UPLOAD() + ' ' + LL.ABORTED());
       } else {
         resetUploadingStates();
-        toast.error(extractErrorMessage(error, LL.UPLOAD() + ' ' + LL.FAILED(0)));
+        toast.error(LL.UPLOAD() + ' ' + LL.FAILED(0));
       }
     }
   };

@@ -17,7 +17,7 @@ import {
   BlockNavigation
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
-import { numberValue, updateValueDirty, useRest2 } from 'utils';
+import { numberValue, updateValueDirty, useRest } from 'utils';
 
 import { createMqttSettingsValidator, validate } from 'validators';
 
@@ -33,7 +33,7 @@ const MqttSettingsForm: FC = () => {
     blocker,
     saveData,
     errorMessage
-  } = useRest2<MqttSettings>({
+  } = useRest<MqttSettings>({
     read: MqttApi.readMqttSettings,
     update: MqttApi.updateMqttSettings
   });

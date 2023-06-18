@@ -4,10 +4,7 @@ import ReactHook from 'alova/react';
 import axios from 'axios';
 import { unpack } from '../api/unpack';
 
-// TODO axios can be removed
 import type { AxiosPromise, CancelToken, AxiosProgressEvent } from 'axios';
-export const REST_BASE_URL = '/rest/';
-export const API_BASE_URL = '/api/';
 
 export const ACCESS_TOKEN = 'access_token';
 
@@ -52,14 +49,26 @@ export const alovaInstance = createAlova({
       return data;
     },
 
-    onError: (error) => {
+    // TODO handle errors
+    // Interceptor for request failure
+    // This interceptor will be entered when the request is wrong.
+    // The second parameter is the method instance of the current request, you can use it to synchronize the configuration information before and after the request
+    onError: (error, method) => {
+      console.log('error:', error); // TODO fix me
+      console.log('method:', method); // TODO fix me
       alert(error.message);
     }
   }
 });
 
+export const alovaInstanceGH = createAlova({
+  baseURL: 'https://api.github.com/repos/emsesp/EMS-ESP32',
+  statesHook: ReactHook,
+  requestAdapter: xhrRequestAdapter()
+});
+
 export const AXIOS = axios.create({
-  baseURL: REST_BASE_URL,
+  baseURL: '/rest/',
   headers: {
     'Content-Type': 'application/json'
   },
@@ -78,49 +87,8 @@ export const AXIOS = axios.create({
   ]
 });
 
-export const AXIOS_API = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  transformRequest: [
-    (data, headers) => {
-      if (headers) {
-        if (localStorage.getItem(ACCESS_TOKEN)) {
-          headers.Authorization = 'Bearer ' + localStorage.getItem(ACCESS_TOKEN);
-        }
-        if (headers['Content-Type'] !== 'application/json') {
-          return data;
-        }
-      }
-      return JSON.stringify(data);
-    }
-  ]
-});
-
-export const AXIOS_BIN = axios.create({
-  baseURL: REST_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  responseType: 'arraybuffer',
-  transformRequest: [
-    (data, headers) => {
-      if (headers) {
-        if (localStorage.getItem(ACCESS_TOKEN)) {
-          headers.Authorization = 'Bearer ' + localStorage.getItem(ACCESS_TOKEN);
-        }
-        if (headers['Content-Type'] !== 'application/json') {
-          return data;
-        }
-      }
-      return JSON.stringify(data);
-    }
-  ],
-  transformResponse: [(data) => unpack(data)]
-});
-
-// TODO replace fileupload with alova, see https://alova.js.org/next-step/download-upload-progress
+// TODO fileupload move to alova
+// see https://alova.js.org/next-step/download-upload-progress
 export interface FileUploadConfig {
   cancelToken?: CancelToken;
   onUploadProgress?: (progressEvent: AxiosProgressEvent) => void;

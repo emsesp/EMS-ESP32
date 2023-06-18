@@ -57,8 +57,6 @@ const SystemStatusForm: FC = () => {
   const [confirmFactoryReset, setConfirmFactoryReset] = useState<boolean>(false);
   const [processing, setProcessing] = useState<boolean>(false);
   const [showingVersion, setShowingVersion] = useState<boolean>(false);
-  const [latestVersion, setLatestVersion] = useState<Version>();
-  const [latestDevVersion, setLatestDevVersion] = useState<Version>();
   const [restarting, setRestarting] = useState<boolean>();
 
   const { send: restartCommand } = useRequest(SystemApi.restart(), {
@@ -73,24 +71,10 @@ const SystemStatusForm: FC = () => {
     immediate: false
   });
 
-  const { data: data, send: loadData, error } = useRequest(SystemApi.readSystemStatus, { force: true });
+  const { data: latestVersion } = useRequest(SystemApi.getStableVersion);
+  const { data: latestDevVersion } = useRequest(SystemApi.getDevVersion);
 
-  useEffect(() => {
-    void axios.get(VERSIONCHECK_ENDPOINT).then((response) => {
-      setLatestVersion({
-        version: response.data.name,
-        url: response.data.assets[1].browser_download_url,
-        changelog: response.data.assets[0].browser_download_url
-      });
-    });
-    void axios.get(VERSIONCHECK_DEV_ENDPOINT).then((response) => {
-      setLatestDevVersion({
-        version: response.data.name.split(/\s+/).splice(-1),
-        url: response.data.assets[1].browser_download_url,
-        changelog: response.data.assets[0].browser_download_url
-      });
-    });
-  }, []);
+  const { data: data, send: loadData, error } = useRequest(SystemApi.readSystemStatus, { force: true });
 
   const restart = async () => {
     setProcessing(true);
