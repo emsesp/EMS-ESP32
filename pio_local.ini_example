@@ -49,6 +49,7 @@ platform = espressif32
 board_build.partitions = esp32_partition_debug.csv
 upload_protocol = esptool
 build_type = debug
+monitor_raw = no
 monitor_filters = esp32_exception_decoder
 debug_tool = esp-prog
 debug_init_break = tbreak setup
