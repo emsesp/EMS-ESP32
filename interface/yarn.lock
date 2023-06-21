@@ -12,6 +12,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@alova/scene-react@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@alova/scene-react@npm:1.1.0"
+  checksum: e1b956a5ea1f0b93f7e60896bb43aa124106e7b527dbdcd77cf200975b2b403240a91c050a43d43c083941f91f106d50ceb91dc0ef0a97feabd91a3945568b43
+  languageName: node
+  linkType: hard
+
 "@ampproject/remapping@npm:^2.2.0":
   version: 2.2.0
   resolution: "@ampproject/remapping@npm:2.2.0"
@@ -1530,6 +1537,7 @@ __metadata:
   resolution: "EMS-ESP@workspace:."
   dependencies:
     "@alova/adapter-xhr": ^1.0.0
+    "@alova/scene-react": ^1.1.0
     "@emotion/react": ^11.11.1
     "@emotion/styled": ^11.11.0
     "@mui/icons-material": ^5.11.16
