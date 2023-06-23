@@ -178,6 +178,7 @@ MAKE_WORD_TRANSLATION(layeredbuffer, "layered buffer", "Schichtspeicher", "Gelaa
 MAKE_WORD_TRANSLATION(maintenance, "maintenance", "Wartung", "Onderhoud", "Underhåll", "przegląd", "vedlikehold", "maintenance", "bakım")
 MAKE_WORD_TRANSLATION(heating, "heating", "Heizen", "Verwarmen", "Uppvärmning", "ogrzewanie", "oppvarming", "chauffage", "ısıtma")
 MAKE_WORD_TRANSLATION(cooling, "cooling", "Kühlen", "Koelen", "Kyler", "chłodzenie", "kjøling", "refroidissement", "soğuma")
+MAKE_WORD_TRANSLATION(heatandcool, "heating&cooling", "Heizen&Kühlen", "Verwarmen&Koelen", "Uppvärmning&Kyler") // TODO translate
 MAKE_WORD_TRANSLATION(disinfecting, "disinfecting", "Desinfizieren", "Desinfecteren", "Desinficerar", "dezynfekcja termiczna", "desinfisering", "désinfection", "dezenfeksiyon")
 MAKE_WORD_TRANSLATION(no_heat, "no heat", "keine Wärme", "Geen warmte", "Ingen värme", "brak ciepła", "ingen varme", "pas de chauffage", "ısınma yok")
 MAKE_WORD_TRANSLATION(heatrequest, "heat request", "Wärmeanforderung", "Verwarmignsverzoek", "Värmeförfrågan", "zapotrzebowanie na ciepło", "varmeforespørsel", "demande de chauffage", "ısınma ihtiyacı")
@@ -574,7 +575,6 @@ MAKE_TRANSLATION(mixingvalves, "mixingvalves", "mixing valves", "Mischventile", 
 MAKE_TRANSLATION(pvEnableWw, "pvenableww", "enable raise dhw", "aktiviere Anhebung WW", "", "", "podwyższenie c.w.u. z PV", "aktivere hevet temperatur bereder", "", "") // TODO translate
 MAKE_TRANSLATION(pvRaiseHeat, "pvraiseheat", "raise heating with PV", "Anhebung Heizen mit PV", "", "", "podwyższenie grzania z PV", "heve varmen med solpanel", "", "") // TODO translate
 MAKE_TRANSLATION(pvLowerCool, "pvlowercool", "lower cooling with PV", "Kühlabsenkung mit PV", "", "", "obniżenie chłodzenia z PV", "nedre kjøling solpanel", "", "") // TODO translate
-
 // thermostat ww
 MAKE_TRANSLATION(wwMode, "wwmode", "mode", "Modus", "Modus", "Läge", "tryb pracy", "modus", "mode", "")
 MAKE_TRANSLATION(wwSetTempLow, "wwsettemplow", "set low temperature", "untere Solltemperatur", "Onderste streeftemperatuur", "Nedre Börvärde", "zadana temperatura obniżona", "nedre settverdi", "réglage température basse", "")
@@ -648,6 +648,11 @@ MAKE_TRANSLATION(nofrostmode1, "nofrostmode1", "nofrost mode", "Frostschutz", "V
 MAKE_TRANSLATION(reducehours, "reducehours", "duration for nighttemp", "Dauer Nachttemp.", "Duur nachtverlaging", "Timmar Nattsänkning", "czas trwania trybu nocnego", "timer nattsenkning", "durée température nuit", "")
 MAKE_TRANSLATION(reduceminutes, "reduceminutes", "remaining time for nightmode", "Restzeit Nachttemp.", "Resterende tijd nachtverlaging", "Återstående Tid Nattläge", "czas do końca trybu nocnego", "gjenværende tid i nattstilling", "temps restant mode nuit", "")
 MAKE_TRANSLATION(switchonoptimization, "switchonoptimization", "switch-on optimization", "Einschaltoptimierung", "Inschakeloptimalisering", "Växlingsoptimering", "optymalizacja załączania", "slå på optimalisering", "optimisation mise en marche", "")
+
+MAKE_TRANSLATION(hpmode, "hpmode", "HP Mode", "WP Modus")
+MAKE_TRANSLATION(dewoffset, "dewoffset", "dew point offset", "Taupunkt Differenz")
+MAKE_TRANSLATION(roomtempdiff, "roomtempdiff", "room temp difference", "Raumtemperatur Differenz")
+MAKE_TRANSLATION(hpminflowtemp, "hpminflowtemp", "HP min. flow temp.", "WP minimale Vorlauftemperatur")
 
 // heatpump
 MAKE_TRANSLATION(airHumidity, "airhumidity", "relative air humidity", "relative Luftfeuchte", "Relatieve luchtvochtigheid", "Relativ Luftfuktighet", "wilgotność względna w pomieszczeniu", "luftfuktighet", "humidité relative air", "")
