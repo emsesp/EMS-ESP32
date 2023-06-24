@@ -36,7 +36,8 @@ const SettingsScheduler: FC = () => {
     send: fetchSchedule,
     error
   } = useRequest(EMSESP.readSchedule, {
-    initialData: []
+    initialData: [],
+    force: true
   });
 
   const { send: writeSchedule } = useRequest((data) => EMSESP.writeSchedule(data), { immediate: false });
@@ -142,6 +143,12 @@ const SettingsScheduler: FC = () => {
 
   const onDialogClose = () => {
     setDialogOpen(false);
+  };
+
+  const onDialogCancel = async () => {
+    await fetchSchedule().then(() => {
+      setNumChanges(0);
+    });
   };
 
   const onDialogSave = (updatedItem: ScheduleItem) => {
@@ -252,7 +259,7 @@ const SettingsScheduler: FC = () => {
           onClose={onDialogClose}
           onSave={onDialogSave}
           selectedItem={selectedScheduleItem}
-          validator={schedulerItemValidation()}
+          validator={schedulerItemValidation(schedule, selectedScheduleItem)}
           dow={dow}
         />
       )}
@@ -261,7 +268,7 @@ const SettingsScheduler: FC = () => {
         <Box flexGrow={1}>
           {numChanges !== 0 && (
             <ButtonRow>
-              <Button startIcon={<CancelIcon />} variant="outlined" onClick={fetchSchedule} color="secondary">
+              <Button startIcon={<CancelIcon />} variant="outlined" onClick={onDialogCancel} color="secondary">
                 {LL.CANCEL()}
               </Button>
               <Button

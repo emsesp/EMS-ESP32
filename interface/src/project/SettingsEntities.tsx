@@ -34,7 +34,8 @@ const SettingsEntities: FC = () => {
     send: fetchEntities,
     error
   } = useRequest(EMSESP.readEntities, {
-    initialData: []
+    initialData: [],
+    force: true
   });
 
   const { send: writeEntities } = useRequest((data) => EMSESP.writeEntities(data), { immediate: false });
@@ -146,6 +147,12 @@ const SettingsEntities: FC = () => {
     setDialogOpen(false);
   };
 
+  const onDialogCancel = async () => {
+    await fetchEntities().then(() => {
+      setNumChanges(0);
+    });
+  };
+
   const onDialogSave = (updatedItem: EntityItem) => {
     setDialogOpen(false);
 
@@ -246,7 +253,7 @@ const SettingsEntities: FC = () => {
         <Box flexGrow={1}>
           {numChanges > 0 && (
             <ButtonRow>
-              <Button startIcon={<CancelIcon />} variant="outlined" onClick={fetchEntities} color="secondary">
+              <Button startIcon={<CancelIcon />} variant="outlined" onClick={onDialogCancel} color="secondary">
                 {LL.CANCEL()}
               </Button>
               <Button
