@@ -2113,8 +2113,9 @@ rest_server.get(FEATURES_ENDPOINT, (req, res) => {
 rest_server.get(VERIFY_AUTHORIZATION_ENDPOINT, (req, res) => {
   res.json(verify_authentication);
 });
-rest_server.post(RESTART_ENDPOINT, (req, res) => {
+rest_server.post(RESTART_ENDPOINT, async (req, res) => {
   console.log('command: restart');
+  // await delay(1000);
   res.sendStatus(200);
 });
 rest_server.post(FACTORY_RESET_ENDPOINT, (req, res) => {
