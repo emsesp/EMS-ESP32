@@ -14,7 +14,7 @@ export const EVENT_SOURCE_ROOT = 'http://' + host + '/es/';
 
 export const alovaInstance = createAlova({
   statesHook: ReactHook,
-  timeout: 2000,
+  timeout: 3000,
   localCache: {
     GET: {
       mode: 'placeholder',
