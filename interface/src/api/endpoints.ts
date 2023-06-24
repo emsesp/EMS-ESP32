@@ -14,11 +14,10 @@ export const EVENT_SOURCE_ROOT = 'http://' + host + '/es/';
 
 export const alovaInstance = createAlova({
   statesHook: ReactHook,
-  // timeout: 3000,
+  timeout: 2000,
   localCache: {
     GET: {
       mode: 'placeholder',
-      // expire: 60 * 10 * 1000
       // see https://alova.js.org/learning/response-cache/#cache-replaceholder-mode
       expire: 2000
     }
@@ -47,15 +46,13 @@ export const alovaInstance = createAlova({
         return unpack(data);
       }
       return data;
-    },
-
-    // TODO how best to handle alova http errors like 401
-    // Interceptor for request failure
-    // This interceptor will be entered when the request is wrong.
-    // The second parameter is the method instance of the current request, you can use it to synchronize the configuration information before and after the request
-    onError: (error) => {
-      alert(error.message);
     }
+
+    // Interceptor for request failure. This interceptor will be entered when the request is wrong.
+    // TODO how best to handle http errors like 401 (unauthorized) but I think this is handled correctly in AppRouting?
+    // onError: (error, method) => {
+    //   alert(error.message);
+    // }
   }
 });
 
