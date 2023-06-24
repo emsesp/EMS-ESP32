@@ -216,8 +216,7 @@ void WebLogService::setValues(AsyncWebServerRequest * request, JsonVariant & jso
 
     auto && body = json.as<JsonObject>();
 
-    // TODO refactor into one load and one save
-
+    // TODO refactor into one load and one save method
     uuid::log::Level level = body["level"];
     log_level(level);
 

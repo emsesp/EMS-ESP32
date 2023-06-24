@@ -164,7 +164,7 @@ void Shower::set_shower_state(bool state, bool force) {
         doc["object_id"] = str;
 
         char stat_t[50];
-        snprintf(stat_t, sizeof(stat_t), "%s/shower_active", Mqtt::base().c_str()); // use base path
+        snprintf(stat_t, sizeof(stat_t), "%s/shower_active", Mqtt::basename().c_str());
         doc["stat_t"] = stat_t;
 
         if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
@@ -181,7 +181,7 @@ void Shower::set_shower_state(bool state, bool force) {
 
         JsonObject dev = doc.createNestedObject("dev");
         JsonArray  ids = dev.createNestedArray("ids");
-        ids.add("ems-esp");
+        ids.add(Mqtt::basename());
 
         // add "availability" section
         Mqtt::add_avty_to_doc(stat_t, doc.as<JsonObject>());
