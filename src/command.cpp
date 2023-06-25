@@ -602,6 +602,19 @@ void Command::show_all(uuid::console::Shell & shell) {
     shell.print(COLOR_RESET);
     show(shell, EMSdevice::DeviceType::SYSTEM, true);
 
+    // show Custom
+    if (EMSESP::webEntityService.has_commands()) {
+        shell.print(COLOR_BOLD_ON);
+        shell.print(COLOR_YELLOW);
+        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::CUSTOM));
+        shell.println(COLOR_RESET);
+        shell.printf("  info:                 %slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
+        shell.println(COLOR_RESET);
+        shell.printf("  commands:             %slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
+        shell.print(COLOR_RESET);
+        show(shell, EMSdevice::DeviceType::CUSTOM, true);
+    }
+
     // show scheduler
     if (EMSESP::webSchedulerService.has_commands()) {
         shell.print(COLOR_BOLD_ON);

@@ -83,10 +83,12 @@ StateUpdateResult WebEntity::update(JsonObject & root, WebEntity & webEntity) {
                 entityItem.value = EMS_VALUE_DEFAULT_SHORT;
             } else if (entityItem.value_type == DeviceValueType::USHORT) {
                 entityItem.value = EMS_VALUE_DEFAULT_USHORT;
-            } else { // if (entityItem.value_type == DeviceValueType::ULONG || entityItem.valuetype == DeviceValueType::TIME) {
+            } else { // if (entityItem.value_type == DeviceValueType::ULONG || entityItem.value_type == DeviceValueType::TIME) {
                 entityItem.value = EMS_VALUE_DEFAULT_ULONG;
             }
-
+            if (entityItem.factor == 0) {
+                entityItem.factor = 1;
+            }
             webEntity.entityItems.push_back(entityItem); // add to list
 
             if (entityItem.writeable) {
@@ -108,13 +110,13 @@ StateUpdateResult WebEntity::update(JsonObject & root, WebEntity & webEntity) {
 bool WebEntityService::command_setvalue(const char * value, const std::string name) {
     EMSESP::webEntityService.read([&](WebEntity & webEntity) { entityItems = &webEntity.entityItems; });
     for (EntityItem & entityItem : *entityItems) {
-        if (entityItem.name == name) {
+        if (Helpers::toLower(entityItem.name) == Helpers::toLower(name)) {
             if (entityItem.value_type == DeviceValueType::BOOL) {
                 bool v;
                 if (!Helpers::value2bool(value, v)) {
                     return false;
                 }
-                EMSESP::send_write_request(entityItem.type_id, entityItem.device_id, entityItem.offset, v ? entityItem.type_id > 0xFF ? 1 : 0xFF : 0, 0);
+                EMSESP::send_write_request(entityItem.type_id, entityItem.device_id, entityItem.offset, v ? 0xFF : 0, 0);
             } else {
                 float f;
                 if (!Helpers::value2float(value, f)) {
@@ -226,6 +228,7 @@ bool WebEntityService::get_value_info(JsonObject & output, const char * cmd) {
         if (Helpers::toLower(entity.name) == Helpers::toLower(command_s)) {
             output["name"]      = entity.name;
             output["uom"]       = EMSdevice::uom_to_string(entity.uom);
+            output["type"]      = entity.value_type == DeviceValueType::BOOL ? "boolean" : F_(number);
             output["readable"]  = true;
             output["writeable"] = entity.writeable;
             output["visible"]   = true;
@@ -311,19 +314,47 @@ void WebEntityService::publish(const bool force) {
             config["name"]    = entityItem.name.c_str();
 
             char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-            snprintf(topic, sizeof(topic), "sensor/%s/custom_%s/config", Mqtt::basename().c_str(), entityItem.name.c_str());
-            //char command_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-            // snprintf(command_topic, sizeof(command_topic), "%s/custom/%s", Mqtt::basename().c_str(), entityItem.name.c_str());
-            // config["cmd_t"] = command_topic;
-
+            if (entityItem.writeable) {
+                if (entityItem.value_type == DeviceValueType::BOOL) {
+                    snprintf(topic, sizeof(topic), "switch/%s/custom_%s/config", Mqtt::basename().c_str(), entityItem.name.c_str());
+                } else if (Mqtt::discovery_type() == Mqtt::discoveryType::HOMEASSISTANT) {
+                    snprintf(topic, sizeof(topic), "number/%s/custom_%s/config", Mqtt::basename().c_str(), entityItem.name.c_str());
+                } else {
+                    snprintf(topic, sizeof(topic), "sensor/%s/custom_%s/config", Mqtt::basename().c_str(), entityItem.name.c_str());
+                }
+                char command_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+                snprintf(command_topic, sizeof(command_topic), "%s/custom/%s", Mqtt::basename().c_str(), entityItem.name.c_str());
+                config["cmd_t"] = command_topic;
+            } else {
+                if (entityItem.value_type == DeviceValueType::BOOL) {
+                    snprintf(topic, sizeof(topic), "binary_sensor/%s/custom_%s/config", Mqtt::basename().c_str(), entityItem.name.c_str());
+                } else {
+                    snprintf(topic, sizeof(topic), "sensor/%s/custom_%s/config", Mqtt::basename().c_str(), entityItem.name.c_str());
+                }
+            }
+            if (entityItem.value_type == DeviceValueType::BOOL) {
+                // applies to both Binary Sensor (read only) and a Switch (for a command)
+                if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+                    config["pl_on"]  = true;
+                    config["pl_off"] = false;
+                } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+                    config["pl_on"]  = 1;
+                    config["pl_off"] = 0;
+                } else {
+                    char result[12];
+                    config["pl_on"]  = Helpers::render_boolean(result, true);
+                    config["pl_off"] = Helpers::render_boolean(result, false);
+                }
+            }
             JsonObject dev = config.createNestedObject("dev");
             JsonArray  ids = dev.createNestedArray("ids");
             ids.add("ems-esp");
 
             // add "availability" section
             Mqtt::add_avty_to_doc(stat_t, config.as<JsonObject>(), val_cond);
-            Mqtt::queue_ha(topic, config.as<JsonObject>());
-            ha_registered_ = true;
+            if (Mqtt::queue_ha(topic, config.as<JsonObject>())) {
+                ha_registered_ = true;
+            }
         }
     }
     if (output.size() > 0) {
@@ -349,6 +380,15 @@ uint8_t WebEntityService::count_entities() {
     return count;
 }
 
+uint8_t WebEntityService::has_commands() {
+    EMSESP::webEntityService.read([&](WebEntity & webEntity) { entityItems = &webEntity.entityItems; });
+    uint8_t count = 0;
+    for (const EntityItem & entity : *entityItems) {
+        count += entity.writeable ? 1 : 0;
+    }
+    return count;
+}
+
 // send to dashboard, msgpack don't like serialized, use number
 void WebEntityService::generate_value_web(JsonObject & output) {
     EMSESP::webEntityService.read([&](WebEntity & webEntity) { entityItems = &webEntity.entityItems; });
@@ -362,6 +402,10 @@ void WebEntityService::generate_value_web(JsonObject & output) {
         obj["u"]       = entity.uom;
         if (entity.writeable) {
             obj["c"] = entity.name;
+            if (entity.value_type != DeviceValueType::BOOL) {
+                char s[10];
+                obj["s"] = Helpers::render_value(s, entity.factor, 1);
+            }
         }
 
         switch (entity.value_type) {
