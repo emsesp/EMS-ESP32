@@ -94,6 +94,7 @@ class Thermostat : public EMSdevice {
         uint8_t roomtempdiff;
         uint8_t hpminflowtemp;
         uint8_t hpmode;
+        uint8_t cooling;
 
         uint8_t hc_num() const {
             return hc_num_;
@@ -565,6 +566,7 @@ class Thermostat : public EMSdevice {
     bool set_dewoffset(const char * value, const int8_t id);
     bool set_hpminflowtemp(const char * value, const int8_t id);
     bool set_hpmode(const char * value, const int8_t id);
+    bool set_cooling(const char * value, const int8_t id);
 };
 
 } // namespace emsesp
