@@ -1657,18 +1657,16 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                 // check for value outside min/max range and adapt the limits to avoid HA complains
                 // Should this also check for api output?
                 if ((output_target == OUTPUT_TARGET::MQTT) && (dv.min != 0 || dv.max != 0)) {
-                    if (json[name].is<float>() || json[name].is<int>()) {
-                        int v = json[name];
-                        if (fahrenheit) {
-                            v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
-                        }
-                        if (v < dv.min) {
-                            dv.min = v;
-                            dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
-                        } else if (v > dv.max) {
-                            dv.max = v;
-                            dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
-                        }
+                    int v = Helpers::atoint(json[name]);
+                    if (fahrenheit) {
+                        v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
+                    }
+                    if (v < dv.min) {
+                        dv.min = v;
+                        dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
+                    } else if (v > dv.max) {
+                        dv.max = v;
+                        dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
                     }
                 }
             }
