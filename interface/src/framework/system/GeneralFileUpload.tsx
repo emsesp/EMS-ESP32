@@ -2,10 +2,9 @@ import DownloadIcon from '@mui/icons-material/GetApp';
 import { Typography, Button, Box } from '@mui/material';
 import { useRequest } from 'alova';
 import { toast } from 'react-toastify';
-import type { FileUploadConfig } from 'api/endpoints';
-import type { AxiosPromise } from 'axios';
 import type { FC } from 'react';
 
+import * as SystemApi from 'api/system';
 import { SingleUpload, useFileUpload } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
@@ -13,11 +12,20 @@ import * as EMSESP from 'project/api';
 
 interface UploadFileProps {
   // TODO fileupload move to alova
-  uploadGeneralFile: (file: File, config?: FileUploadConfig) => AxiosPromise<void>;
+  // uploadGeneralFile: (file: File, config?: FileUploadConfig) => AxiosPromise<void>;
+  uploadGeneralFile: (file: File) => Promise<void>;
 }
 
 const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
-  const [uploadFile, cancelUpload, uploading, uploadProgress, md5] = useFileUpload({ upload: uploadGeneralFile });
+  const { LL } = useI18nContext();
+
+  // TODO remove these
+  const md5 = '';
+  const cancelUpload = () => {};
+  const uploading = false;
+
+  // const [uploadFile, cancelUpload, uploading, uploadProgress, md5] = useFileUpload({ upload: uploadGeneralFile });
+  // const [uploadFile, cancelUpload, uploading, md5] = useFileUpload({ upload: uploadGeneralFile });
 
   const { send: getSettings, onSuccess: onSuccessGetSettings } = useRequest(EMSESP.getSettings(), {
     immediate: false
@@ -32,8 +40,23 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
     immediate: false
   });
 
-  const { LL } = useI18nContext();
+  const {
+    loading: isUploading,
+    uploading: progress,
+    send: sendUpload
+  } = useRequest(SystemApi.uploadFile, {
+    immediate: false,
+    force: true
+  });
 
+  const uploadFile = async (files: File[]) => {
+    // TODO remove debug
+    console.log('useFileUpload.ts:uploadFile:' + files[0].name, files[0].size);
+    await sendUpload(files[0]);
+  };
+
+  // TODO see if refactor like https://alova.js.org/extension/alova-adapter-xhr/#download
+  // And use revoke
   const saveFile = (json: any, endpoint: string) => {
     const a = document.createElement('a');
     const filename = 'emsesp_' + endpoint + '.json';
@@ -103,9 +126,11 @@ const GeneralFileUpload: FC<UploadFileProps> = ({ uploadGeneralFile }) => {
           <Typography variant="body2">{'MD5: ' + md5}</Typography>
         </Box>
       )}
-      <SingleUpload onDrop={uploadFile} onCancel={cancelUpload} uploading={uploading} progress={uploadProgress} />
-
-      {!uploading && (
+      {/* TODO fix this hardcoded isUploading */}
+      <SingleUpload onDrop={uploadFile} onCancel={cancelUpload} isUploading={isUploading} progress={progress} />
+      {console.log(progress)}
+      {/* <SingleUpload onDrop={uploadFile} onCancel={cancelUpload} isUploading={false} progress={uploading} /> */}
+      {!isUploading && (
         <>
           <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
             {LL.DOWNLOAD(0)}

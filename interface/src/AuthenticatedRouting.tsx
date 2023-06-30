@@ -1,15 +1,10 @@
-// import { useCallback, useEffect } from 'react';
 import { Navigate, Routes, Route } from 'react-router-dom';
 import Dashboard from './project/Dashboard';
 import Help from './project/Help';
 import Settings from './project/Settings';
-// import type { AxiosError } from 'axios';
 import type { FC } from 'react';
 
-// import * as AuthenticationApi from 'api/authentication';
-// import { AXIOS } from 'api/endpoints';
 import { Layout, RequireAdmin } from 'components';
-
 import AccessPoint from 'framework/ap/AccessPoint';
 import Mqtt from 'framework/mqtt/Mqtt';
 import NetworkConnection from 'framework/network/NetworkConnection';
@@ -18,10 +13,9 @@ import Security from 'framework/security/Security';
 import System from 'framework/system/System';
 
 const AuthenticatedRouting: FC = () => (
+  // TODO not sure if this is needed, to redirect on 401. If so add incerceptor to Alova
   // const location = useLocation();
   // const navigate = useNavigate();
-
-  // TODO not sure if this is needed, to redirect on 401. If so add incerceptor to Alova
   // const handleApiResponseError = useCallback(
   //   (error: AxiosError) => {
   //     if (error.response && error.response.status === 401) {
@@ -32,7 +26,6 @@ const AuthenticatedRouting: FC = () => (
   //   },
   //   [location, navigate]
   // );
-
   // useEffect(() => {
   //   const axiosHandlerId = AXIOS.interceptors.response.use((response) => response, handleApiResponseError);
   //   return () => AXIOS.interceptors.response.eject(axiosHandlerId);
@@ -68,4 +61,5 @@ const AuthenticatedRouting: FC = () => (
     </Routes>
   </Layout>
 );
+
 export default AuthenticatedRouting;

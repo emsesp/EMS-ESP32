@@ -1,7 +1,7 @@
+import { useRequest } from 'alova';
 import { useRef, useState } from 'react';
 import GeneralFileUpload from './GeneralFileUpload';
 import RestartMonitor from './RestartMonitor';
-import type { FileUploadConfig } from 'api/endpoints';
 import type { FC } from 'react';
 
 import * as SystemApi from 'api/system';
@@ -14,13 +14,25 @@ const UploadFileForm: FC = () => {
 
   const { LL } = useI18nContext();
 
-  const uploadFile = useRef(async (file: File, config?: FileUploadConfig) => {
+  const {
+    loading,
+    data,
+    uploading,
+    send: sendUpload
+  } = useRequest(SystemApi.uploadFile, {
+    immediate: false
+  });
+
+  const uploadFile = useRef(async (file: File) => {
     // TODO fileupload move to alova
-    const response = await SystemApi.uploadFile(file, config);
-    if (response.status === 200) {
-      setRestarting(true);
-    }
-    return response;
+    console.log('UploadFileForm.tsx: uploadFile duplicate!!!'); // TODO do we need this function??? duplicate?
+    await sendUpload(file);
+
+    // const response = await SystemApi.uploadFile(file);
+    // if (response.status === 200) {
+    //   setRestarting(true);
+    // }
+    // return response;
   });
 
   return (

@@ -4,7 +4,7 @@ import { Box, Button, LinearProgress, Typography, useTheme } from '@mui/material
 import { Fragment } from 'react';
 import { useDropzone } from 'react-dropzone';
 import type { Theme } from '@mui/material';
-import type { AxiosProgressEvent } from 'axios';
+import type { Progress } from 'alova';
 import type { FC } from 'react';
 import type { DropzoneState } from 'react-dropzone';
 
@@ -26,11 +26,13 @@ const getBorderColor = (theme: Theme, props: DropzoneState) => {
 export interface SingleUploadProps {
   onDrop: (acceptedFiles: File[]) => void;
   onCancel: () => void;
-  uploading: boolean;
-  progress?: AxiosProgressEvent;
+  isUploading: boolean;
+  progress?: Progress;
+  // TODO remove
+  // progress?: AxiosProgressEvent;
 }
 
-const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, uploading, progress }) => {
+const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, isUploading, progress }) => {
   const dropzoneState = useDropzone({
     onDrop,
     accept: {
@@ -38,7 +40,7 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, uploading, prog
       'application/json': ['.json'],
       'text/plain': ['.md5']
     },
-    disabled: uploading,
+    disabled: isUploading,
     multiple: false
   });
   const { getRootProps, getInputProps } = dropzoneState;
@@ -46,8 +48,11 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, uploading, prog
 
   const { LL } = useI18nContext();
 
+  // TODO remove debug
+  console.log('progress', progress?.loaded);
+
   const progressText = () => {
-    if (uploading) {
+    if (isUploading) {
       if (progress?.total) {
         return LL.UPLOADING() + ': ' + Math.round((progress.loaded * 100) / progress.total) + '%';
       }
@@ -68,7 +73,7 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, uploading, prog
           color: theme.palette.grey[400],
           transition: 'border .24s ease-in-out',
           width: '100%',
-          cursor: uploading ? 'default' : 'pointer',
+          cursor: isUploading ? 'default' : 'pointer',
           borderColor: getBorderColor(theme, dropzoneState)
         }
       })}
@@ -77,7 +82,7 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, uploading, prog
       <Box flexDirection="column" display="flex" alignItems="center">
         <CloudUploadIcon fontSize="large" />
         <Typography variant="h6">{progressText()}</Typography>
-        {uploading && (
+        {isUploading && (
           <Fragment>
             <Box width="100%" p={2}>
               <LinearProgress

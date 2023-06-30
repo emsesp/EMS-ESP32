@@ -1,10 +1,7 @@
 import { xhrRequestAdapter } from '@alova/adapter-xhr';
 import { createAlova } from 'alova';
 import ReactHook from 'alova/react';
-import axios from 'axios';
 import { unpack } from '../api/unpack';
-
-import type { AxiosPromise, CancelToken, AxiosProgressEvent } from 'axios';
 
 export const ACCESS_TOKEN = 'access_token';
 
@@ -14,11 +11,10 @@ export const EVENT_SOURCE_ROOT = 'http://' + host + '/es/';
 
 export const alovaInstance = createAlova({
   statesHook: ReactHook,
-  timeout: 3000,
+  // timeout: 3000, // timeout not used because of uploading firmware
   localCache: {
     GET: {
-      mode: 'placeholder',
-      // see https://alova.js.org/learning/response-cache/#cache-replaceholder-mode
+      mode: 'placeholder', // see https://alova.js.org/learning/response-cache/#cache-replaceholder-mode
       expire: 2000
     }
   },
@@ -61,42 +57,3 @@ export const alovaInstanceGH = createAlova({
   statesHook: ReactHook,
   requestAdapter: xhrRequestAdapter()
 });
-
-export const AXIOS = axios.create({
-  baseURL: '/rest/',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  transformRequest: [
-    (data, headers) => {
-      if (headers) {
-        if (localStorage.getItem(ACCESS_TOKEN)) {
-          headers.Authorization = 'Bearer ' + localStorage.getItem(ACCESS_TOKEN);
-        }
-        if (headers['Content-Type'] !== 'application/json') {
-          return data;
-        }
-      }
-      return JSON.stringify(data);
-    }
-  ]
-});
-
-// TODO fileupload move to alova
-// see https://alova.js.org/next-step/download-upload-progress
-export interface FileUploadConfig {
-  cancelToken?: CancelToken;
-  onUploadProgress?: (progressEvent: AxiosProgressEvent) => void;
-}
-
-export const startUploadFile = (url: string, file: File, config?: FileUploadConfig): AxiosPromise<void> => {
-  const formData = new FormData();
-  formData.append('file', file);
-
-  return AXIOS.post(url, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    },
-    ...(config || {})
-  });
-};

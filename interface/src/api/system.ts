@@ -1,7 +1,4 @@
-import { alovaInstance, alovaInstanceGH, startUploadFile } from './endpoints';
-import type { FileUploadConfig } from './endpoints';
-import type { AxiosPromise } from 'axios';
-
+import { alovaInstance, alovaInstanceGH } from './endpoints';
 import type { OTASettings, SystemStatus, LogSettings, Version } from 'types';
 
 // SystemStatus - also used to ping in Restart monitor
@@ -32,6 +29,7 @@ export const getStableVersion = () =>
       };
     }
   });
+
 export const getDevVersion = () =>
   alovaInstanceGH.Get<Version>('releases/tags/latest', {
     transformData(reponse: any) {
@@ -43,6 +41,10 @@ export const getDevVersion = () =>
     }
   });
 
-// TODO fileupload move to alova
-export const uploadFile = (file: File, config?: FileUploadConfig): AxiosPromise<void> =>
-  startUploadFile('/uploadFile', file, config);
+export const uploadFile = (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return alovaInstance.Post('/rest/uploadFile', formData, {
+    enableUpload: true
+  });
+};

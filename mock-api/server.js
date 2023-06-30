@@ -2,17 +2,43 @@ const express = require('express');
 const compression = require('compression');
 const path = require('path');
 const msgpack = require('@msgpack/msgpack');
+const multer = require('multer'); // https://www.npmjs.com/package/multer#readme
 
 // REST API
 const rest_server = express();
 const port = 3080;
 
 rest_server.use(compression());
-rest_server.use(express.static(path.join(__dirname, '../interface/build')));
-rest_server.use(express.json());
+// rest_server.use(express.static(path.join(__dirname, '../interface/build')));
+// rest_server.use(express.json());
 
-// FOR TESTING
+// uploads
+const upload = multer({ dest: '../mock-api/uploads' });
+function progress_middleware(req, res, next) {
+  let progress = 0;
+  const file_size = req.headers['content-length'];
+
+  // set event listener
+  req.on('data', async (chunk) => {
+    progress += chunk.length;
+    const percentage = (progress / file_size) * 100;
+    console.log(`Progress: ${Math.round(percentage)}%`);
+    // await delay(1000); // slow it down
+    delay_blocking(200); // slow it down
+  });
+  next(); // invoke next middleware which is multer
+}
+
+// delays
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+function delay_blocking(milliseconds) {
+  var start = new Date().getTime();
+  for (var i = 0; i < 1e7; i++) {
+    if (new Date().getTime() - start > milliseconds) {
+      break;
+    }
+  }
+}
 
 // endpoints
 const API_ENDPOINT_ROOT = '/api/';
@@ -2119,11 +2145,19 @@ rest_server.post(RESTART_ENDPOINT, async (req, res) => {
   res.sendStatus(200);
 });
 rest_server.post(FACTORY_RESET_ENDPOINT, (req, res) => {
+  console.log('command: reset');
   res.sendStatus(200);
 });
-rest_server.post(UPLOAD_FILE_ENDPOINT, (req, res) => {
-  res.sendStatus(200);
+
+rest_server.post(UPLOAD_FILE_ENDPOINT, progress_middleware, upload.single('file'), (req, res) => {
+  console.log('command: uploadFile completed.');
+  console.log(req.file);
+  if (req.file) {
+    return res.sendStatus(200);
+  }
+  return res.sendStatus(400);
 });
+
 rest_server.post(SIGN_IN_ENDPOINT, (req, res) => {
   // res.sendStatus(401); // test bad user
   console.log('Signed in as ' + req.body.username);
@@ -2669,7 +2703,7 @@ rest_server.get(SYSTEM_INFO_ENDPOINT, (req, res) => {
 
 const GET_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'getSettings';
 rest_server.get(GET_SETTINGS_ENDPOINT, (req, res) => {
-  console.log('getSettings:');
+  console.log('getSettings');
   res.json(settings);
 });
 
