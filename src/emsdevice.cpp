@@ -1616,7 +1616,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                                      : (dv.uom == DeviceValueUOM::DEGREES)   ? 2
                                      : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1
                                                                              : 0;
-                char    val[10];
+                char    val[10]    = {'\0'};
                 if (dv.type == DeviceValueType::INT) {
                     json[name] = serialized(Helpers::render_value(val, *(int8_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
                 } else if (dv.type == DeviceValueType::UINT) {
@@ -1645,7 +1645,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                                  Helpers::translated_word(FL_(minutes)));
                         json[name] = time_s;
                     } else {
-                        json[name] = time_value;
+                        json[name] = serialized(Helpers::render_value(val, time_value, 1));
                     }
                 }
 
@@ -1657,7 +1657,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                 // check for value outside min/max range and adapt the limits to avoid HA complains
                 // Should this also check for api output?
                 if ((output_target == OUTPUT_TARGET::MQTT) && (dv.min != 0 || dv.max != 0)) {
-                    int v = Helpers::atoint(json[name]);
+                    int v = Helpers::atoint(val);
                     if (fahrenheit) {
                         v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
                     }
