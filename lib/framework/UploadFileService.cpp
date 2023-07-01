@@ -42,12 +42,12 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
             return;
         } else {
             md5[0] = '\0';
-            return; // not support file type
+            return; // unsupported file type
         }
 
         if (is_firmware) {
             // Check firmware header, 0xE9 magic offset 0 indicates esp bin, chip offset 12: esp32:0, S2:2, C3:5
-#if CONFIG_IDF_TARGET_ESP32 // ESP32/PICO-D4
+#if CONFIG_IDF_TARGET_ESP32                // ESP32/PICO-D4
             if (len > 12 && (data[0] != 0xE9 || data[12] != 0)) {
                 handleError(request, 503); // service unavailable
                 return;
@@ -76,7 +76,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
                 }
                 request->onDisconnect(UploadFileService::handleEarlyDisconnect); // success, let's make sure we end the update if the client hangs up
             } else {
-                handleError(request, 507); // failed to begin, send an error response Insufficient Storage
+                handleError(request, 507);                                       // failed to begin, send an error response Insufficient Storage
                 return;
             }
         } else {
@@ -115,7 +115,7 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
     }
 
     // check if it was a firmware upgrade
-    // if no error, send the success response
+    // if no error, send the success response as a JSON
     if (is_firmware && !request->_tempObject) {
         request->onDisconnect(RestartService::restartNow);
         AsyncWebServerResponse * response = request->beginResponse(200);
@@ -123,8 +123,13 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
         return;
     }
     if (strlen(md5) == 32) {
-        AsyncWebServerResponse * response = request->beginResponse(201, "text/plain", md5); // created
+        auto *     response = new AsyncJsonResponse(false, 256);
+        JsonObject root     = response->getRoot();
+        root["md5"]         = md5;
+        response->setLength();
         request->send(response);
+        // AsyncWebServerResponse * response = request->beginResponse(201, "text/plain", md5); // created
+        // request->send(response);
         return;
     }
 

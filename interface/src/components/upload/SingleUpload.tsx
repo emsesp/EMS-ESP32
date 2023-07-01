@@ -26,13 +26,12 @@ const getBorderColor = (theme: Theme, props: DropzoneState) => {
 export interface SingleUploadProps {
   onDrop: (acceptedFiles: File[]) => void;
   onCancel: () => void;
-  isUploading: boolean;
-  progress?: Progress;
-  // TODO remove
-  // progress?: AxiosProgressEvent;
+  progress: Progress;
 }
 
-const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, isUploading, progress }) => {
+const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, progress }) => {
+  const isUploading = progress.total > 0;
+
   const dropzoneState = useDropzone({
     onDrop,
     accept: {
@@ -43,20 +42,16 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, isUploading, pr
     disabled: isUploading,
     multiple: false
   });
+
   const { getRootProps, getInputProps } = dropzoneState;
   const theme = useTheme();
-
   const { LL } = useI18nContext();
-
-  // TODO remove debug
-  console.log('progress', progress?.loaded);
 
   const progressText = () => {
     if (isUploading) {
-      if (progress?.total) {
+      if (progress.total) {
         return LL.UPLOADING() + ': ' + Math.round((progress.loaded * 100) / progress.total) + '%';
       }
-      return LL.UPLOADING() + `\u2026`;
     }
     return LL.UPLOAD_DROP_TEXT();
   };
@@ -86,8 +81,8 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, isUploading, pr
           <Fragment>
             <Box width="100%" p={2}>
               <LinearProgress
-                variant={!progress || progress.total ? 'determinate' : 'indeterminate'}
-                value={!progress ? 0 : progress.total ? Math.round((progress.loaded * 100) / progress.total) : 0}
+                variant="determinate"
+                value={progress.total === 0 ? 0 : Math.round((progress.loaded * 100) / progress.total)}
               />
             </Box>
             <Button startIcon={<CancelIcon />} variant="outlined" color="secondary" onClick={onCancel}>

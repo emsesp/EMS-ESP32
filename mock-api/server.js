@@ -24,7 +24,7 @@ function progress_middleware(req, res, next) {
     const percentage = (progress / file_size) * 100;
     console.log(`Progress: ${Math.round(percentage)}%`);
     // await delay(1000); // slow it down
-    delay_blocking(200); // slow it down
+    delay_blocking(100); // slow it down
   });
   next(); // invoke next middleware which is multer
 }
@@ -2151,18 +2151,21 @@ rest_server.post(FACTORY_RESET_ENDPOINT, (req, res) => {
 
 rest_server.post(UPLOAD_FILE_ENDPOINT, progress_middleware, upload.single('file'), (req, res) => {
   console.log('command: uploadFile completed.');
-  console.log(req.file);
   if (req.file) {
-    return res.sendStatus(200);
+    const filename = req.file.originalname;
+    const ext = filename.substring(filename.lastIndexOf('.') + 1);
+    console.log(req.file);
+    console.log('ext: ' + ext);
+
+    if (ext === 'bin') {
+      return res.sendStatus(200);
+    } else if (ext === 'md5') {
+      return res.json({ md5: 'ef4304fc4d9025a58dcf25d71c882d2c' });
+    }
   }
   return res.sendStatus(400);
 });
 
-rest_server.post(SIGN_IN_ENDPOINT, (req, res) => {
-  // res.sendStatus(401); // test bad user
-  console.log('Signed in as ' + req.body.username);
-  res.json(signin); // watch out, this has a return value
-});
 rest_server.get(GENERATE_TOKEN_ENDPOINT, (req, res) => {
   res.json(generate_token);
 });

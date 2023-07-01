@@ -45,7 +45,7 @@ export const scanDevices = () => alovaInstance.Post('/rest/scanDevices');
 // HelpInformation
 export const API = (apiCall: APIcall) => alovaInstance.Post('/api', apiCall);
 
-// GeneralFileUpload
+// UploadFileForm
 export const getSettings = () => alovaInstance.Get('/rest/getSettings');
 export const getCustomizations = () => alovaInstance.Get('/rest/getCustomizations');
 export const getEntities = () => alovaInstance.Get<Entities>('/rest/getEntities');
