@@ -653,6 +653,7 @@ MAKE_TRANSLATION(hpmode, "hpmode", "HP Mode", "WP Modus")
 MAKE_TRANSLATION(dewoffset, "dewoffset", "dew point offset", "Taupunkt Differenz")
 MAKE_TRANSLATION(roomtempdiff, "roomtempdiff", "room temp difference", "Raumtemperatur Differenz")
 MAKE_TRANSLATION(hpminflowtemp, "hpminflowtemp", "HP min. flow temp.", "WP minimale Vorlauftemperatur")
+MAKE_TRANSLATION(hpcooling, "cooling", "cooling", "Kühlen", "Koelen", "Kyler", "chłodzenie", "kjøling", "refroidissement", "soğuma")
 
 // heatpump
 MAKE_TRANSLATION(airHumidity, "airhumidity", "relative air humidity", "relative Luftfeuchte", "Relatieve luchtvochtigheid", "Relativ Luftfuktighet", "wilgotność względna w pomieszczeniu", "luftfuktighet", "humidité relative air", "")

@@ -4193,7 +4193,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->noreducetemp, DeviceValueType::INT, FL_(noreducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_noreducetemp));
         register_device_value(tag, &hc->reducetemp, DeviceValueType::INT, FL_(reducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_reducetemp));
         register_device_value(tag, &hc->wwprio, DeviceValueType::BOOL, FL_(wwprio), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwprio));
-        register_device_value(tag, &hc->cooling, DeviceValueType::BOOL, FL_(cooling), DeviceValueUOM::NONE, MAKE_CF_CB(set_cooling));
+        register_device_value(tag, &hc->cooling, DeviceValueType::BOOL, FL_(hpcooling), DeviceValueUOM::NONE, MAKE_CF_CB(set_cooling));
 
         register_device_value(tag, &hc->hpmode, DeviceValueType::ENUM, FL_(enum_hpmode), FL_(hpmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_hpmode));
         register_device_value(tag, &hc->dewoffset, DeviceValueType::UINT, FL_(dewoffset), DeviceValueUOM::K, MAKE_CF_CB(set_dewoffset));
