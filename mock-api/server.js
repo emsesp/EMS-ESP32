@@ -24,7 +24,7 @@ function progress_middleware(req, res, next) {
     const percentage = (progress / file_size) * 100;
     console.log(`Progress: ${Math.round(percentage)}%`);
     // await delay(1000); // slow it down
-    delay_blocking(100); // slow it down
+    delay_blocking(200); // slow it down
   });
   next(); // invoke next middleware which is multer
 }
@@ -2058,7 +2058,6 @@ rest_server.get(LIST_NETWORKS_ENDPOINT, (req, res) => {
     res.sendStatus(200); // waiting....
   }
 });
-// TODO should be a post as its a command?
 rest_server.get(SCAN_NETWORKS_ENDPOINT, (req, res) => {
   console.log('start scan networks');
   countWifiScanPoll = 0; // stop the poll

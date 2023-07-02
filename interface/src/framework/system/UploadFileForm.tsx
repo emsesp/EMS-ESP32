@@ -34,7 +34,7 @@ const UploadFileForm: FC = () => {
     uploading: progress,
     send: sendUpload,
     onSuccess: onSuccessUpload,
-    abort
+    abort: cancelUpload
   } = useRequest(SystemApi.uploadFile, {
     immediate: false,
     force: true
@@ -49,14 +49,14 @@ const UploadFileForm: FC = () => {
     }
   });
 
-  const cancelUpload = () => {
-    console.log('aborting upload...'); // TODO remove debug
-    abort();
-    toast.warning(LL.UPLOAD() + ' ' + LL.ABORTED());
-  };
-
   const startUpload = async (files: File[]) => {
-    await sendUpload(files[0]);
+    await sendUpload(files[0]).catch((err) => {
+      if (err.message === 'The user aborted a request') {
+        toast.warning(LL.UPLOAD() + ' ' + LL.ABORTED());
+      } else {
+        toast.warning(err.message);
+      }
+    });
   };
 
   const saveFile = (json: any, endpoint: string) => {
