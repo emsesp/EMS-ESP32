@@ -18,15 +18,25 @@ const SecuritySettingsForm: FC = () => {
   const { LL } = useI18nContext();
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
-  const { loadData, saving, data, setData, origData, dirtyFlags, blocker, setDirtyFlags, saveData, errorMessage } =
-    useRest<SecuritySettings>({
-      read: SecurityApi.readSecuritySettings,
-      update: SecurityApi.updateSecuritySettings
-    });
+  const {
+    loadData,
+    saving,
+    data,
+    updateDataValue,
+    origData,
+    dirtyFlags,
+    setDirtyFlags,
+    blocker,
+    saveData,
+    errorMessage
+  } = useRest<SecuritySettings>({
+    read: SecurityApi.readSecuritySettings,
+    update: SecurityApi.updateSecuritySettings
+  });
 
   const authenticatedContext = useContext(AuthenticatedContext);
 
-  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, setData);
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, updateDataValue);
 
   const content = () => {
     if (!data) {

@@ -25,7 +25,7 @@ import { useRest } from 'utils';
 import { createUserValidator } from 'validators';
 
 const ManageUsersForm: FC = () => {
-  const { loadData, saving, data, setData, saveData, errorMessage } = useRest<SecuritySettings>({
+  const { loadData, saveData, saving, data, updateDataValue, errorMessage } = useRest<SecuritySettings>({
     read: SecurityApi.readSecuritySettings,
     update: SecurityApi.updateSecuritySettings
   });
@@ -88,7 +88,7 @@ const ManageUsersForm: FC = () => {
 
     const removeUser = (toRemove: User) => {
       const users = data.users.filter((u) => u.username !== toRemove.username);
-      setData({ ...data, users });
+      updateDataValue({ ...data, users });
       setChanged(changed + 1);
     };
 
@@ -113,7 +113,7 @@ const ManageUsersForm: FC = () => {
     const doneEditingUser = () => {
       if (user) {
         const users = [...data.users.filter((u) => u.username !== user.username), user];
-        setData({ ...data, users });
+        updateDataValue({ ...data, users });
         setUser(undefined);
         setChanged(changed + 1);
       }

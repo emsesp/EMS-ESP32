@@ -10,16 +10,14 @@ import {
   TextField,
   Button
 } from '@mui/material';
-import { useCallback, useState, useEffect } from 'react';
+import { useRequest } from 'alova';
+import { useEffect } from 'react';
 
-import { toast } from 'react-toastify';
 import type { FC } from 'react';
-import type { Token } from 'types';
 import * as SecurityApi from 'api/security';
 import { MessageBox } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
-import { extractErrorMessage } from 'utils';
 
 interface GenerateTokenProps {
   username?: string;
@@ -27,24 +25,18 @@ interface GenerateTokenProps {
 }
 
 const GenerateToken: FC<GenerateTokenProps> = ({ username, onClose }) => {
-  const [token, setToken] = useState<Token>();
+  const { LL } = useI18nContext();
   const open = !!username;
 
-  const { LL } = useI18nContext();
-
-  const getToken = useCallback(async () => {
-    try {
-      setToken((await SecurityApi.generateToken(username)).data);
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
-    }
-  }, [username, LL]);
+  const { data: token, send: generateToken } = useRequest(SecurityApi.generateToken(username), {
+    immediate: false
+  });
 
   useEffect(() => {
     if (open) {
-      void getToken();
+      void generateToken();
     }
-  }, [open, getToken]);
+  }, [open, generateToken]);
 
   return (
     <Dialog onClose={onClose} aria-labelledby="generate-token-dialog-title" open={!!username} fullWidth maxWidth="sm">

@@ -1,82 +1,52 @@
 import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
 import { Button } from '@mui/material';
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { toast } from 'react-toastify';
+// eslint-disable-next-line import/named
+import { updateState, useRequest } from 'alova';
+import { useState, useRef } from 'react';
 
 import WiFiNetworkSelector from './WiFiNetworkSelector';
 import type { FC } from 'react';
-import type { WiFiNetwork, WiFiNetworkList } from 'types';
 import * as NetworkApi from 'api/network';
 import { ButtonRow, FormLoader, SectionContent } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
 const NUM_POLLS = 10;
-const POLLING_FREQUENCY = 500;
-
-const compareNetworks = (network1: WiFiNetwork, network2: WiFiNetwork) => {
-  if (network1.rssi < network2.rssi) return 1;
-  if (network1.rssi > network2.rssi) return -1;
-  return 0;
-};
+const POLLING_FREQUENCY = 1000;
 
 const WiFiNetworkScanner: FC = () => {
-  const { LL } = useI18nContext();
-
   const pollCount = useRef(0);
-  const [networkList, setNetworkList] = useState<WiFiNetworkList>();
+  const { LL } = useI18nContext();
   const [errorMessage, setErrorMessage] = useState<string>();
 
-  const finishedWithError = useCallback((message: string) => {
-    toast.error(message);
-    setNetworkList(undefined);
-    setErrorMessage(message);
-  }, []);
+  const { send: scanNetworks, onComplete: onCompleteScanNetworks } = useRequest(NetworkApi.scanNetworks); // is called on page load to start network scan
+  const {
+    data: networkList,
+    send: getNetworkList,
+    onSuccess: onSuccessNetworkList
+  } = useRequest(NetworkApi.listNetworks, {
+    immediate: false
+  });
 
-  const pollNetworkList = useCallback(async () => {
-    try {
-      const response = await NetworkApi.listNetworks();
-      if (response.status === 202) {
-        const completedPollCount = pollCount.current + 1;
-        if (completedPollCount < NUM_POLLS) {
-          pollCount.current = completedPollCount;
-          setTimeout(pollNetworkList, POLLING_FREQUENCY);
-        } else {
-          finishedWithError(LL.PROBLEM_LOADING());
-        }
+  onSuccessNetworkList((event) => {
+    if (!event.data) {
+      const completedPollCount = pollCount.current + 1;
+      if (completedPollCount < NUM_POLLS) {
+        pollCount.current = completedPollCount;
+        setTimeout(getNetworkList, POLLING_FREQUENCY);
       } else {
-        const newNetworkList = response.data;
-        newNetworkList.networks.sort(compareNetworks);
-        setNetworkList(newNetworkList);
-      }
-    } catch (error) {
-      if (error.response) {
-        finishedWithError(LL.PROBLEM_LOADING() + ' ' + error.response?.data.message);
-      } else {
-        finishedWithError(LL.PROBLEM_LOADING());
+        setErrorMessage(LL.PROBLEM_LOADING());
+        pollCount.current = 0;
       }
     }
-  }, [finishedWithError, LL]);
+  });
 
-  const startNetworkScan = useCallback(async () => {
+  onCompleteScanNetworks(() => {
     pollCount.current = 0;
-    setNetworkList(undefined);
     setErrorMessage(undefined);
-    try {
-      await NetworkApi.scanNetworks();
-      setTimeout(pollNetworkList, POLLING_FREQUENCY);
-    } catch (error) {
-      if (error.response) {
-        finishedWithError(LL.PROBLEM_LOADING() + ' ' + error.response?.data.message);
-      } else {
-        finishedWithError(LL.PROBLEM_LOADING());
-      }
-    }
-  }, [finishedWithError, pollNetworkList, LL]);
-
-  useEffect(() => {
-    void startNetworkScan();
-  }, [startNetworkScan]);
+    updateState('listNetworks', () => undefined);
+    void getNetworkList();
+  });
 
   const renderNetworkScanner = () => {
     if (!networkList) {
@@ -93,7 +63,7 @@ const WiFiNetworkScanner: FC = () => {
           startIcon={<PermScanWifiIcon />}
           variant="outlined"
           color="secondary"
-          onClick={startNetworkScan}
+          onClick={scanNetworks}
           disabled={!errorMessage && !networkList}
         >
           {LL.SCAN_AGAIN()}&hellip;

@@ -1,7 +1,7 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020-2023  Paul Derbyshire
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -24,25 +24,16 @@ namespace emsesp {
 
 WebLogService::WebLogService(AsyncWebServer * server, SecurityManager * securityManager)
     : events_(EVENT_SOURCE_LOG_PATH)
-    , setValues_(LOG_SETTINGS_PATH, std::bind(&WebLogService::setValues, this, _1, _2), 256) { // for POSTS
-
+    , setValues_(LOG_SETTINGS_PATH, std::bind(&WebLogService::setValues, this, _1, _2), 256) {
     events_.setFilter(securityManager->filterRequest(AuthenticationPredicates::IS_ADMIN));
 
-    server->addHandler(&events_);
-    server->on(EVENT_SOURCE_LOG_PATH, HTTP_GET, std::bind(&WebLogService::forbidden, this, _1));
+    server->on(LOG_SETTINGS_PATH, HTTP_GET, std::bind(&WebLogService::getValues, this, _1)); // get settings
 
-    // for bring back the whole log
-    server->on(FETCH_LOG_PATH, HTTP_GET, std::bind(&WebLogService::fetchLog, this, _1));
+    // for bring back the whole log - is a command, hence a POST
+    server->on(FETCH_LOG_PATH, HTTP_POST, std::bind(&WebLogService::fetchLog, this, _1));
 
-    // get when page is loaded
-    server->on(LOG_SETTINGS_PATH, HTTP_GET, std::bind(&WebLogService::getValues, this, _1));
-
-    // for setting a level
     server->addHandler(&setValues_);
-}
-
-void WebLogService::forbidden(AsyncWebServerRequest * request) {
-    request->send(403);
+    server->addHandler(&events_);
 }
 
 // start the log service with INFO level
@@ -211,6 +202,7 @@ void WebLogService::transmit(const QueuedLogMessage & message) {
 }
 
 // send the complete log buffer to the API, not filtering on log level
+// done by resetting the pointer
 void WebLogService::fetchLog(AsyncWebServerRequest * request) {
     log_message_id_tail_ = 0;
     request->send(200);
@@ -224,6 +216,7 @@ void WebLogService::setValues(AsyncWebServerRequest * request, JsonVariant & jso
 
     auto && body = json.as<JsonObject>();
 
+    // TODO refactor into one load and one save method
     uuid::log::Level level = body["level"];
     log_level(level);
 

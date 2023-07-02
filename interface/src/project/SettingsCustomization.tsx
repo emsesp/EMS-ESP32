@@ -21,6 +21,7 @@ import {
 } from '@mui/material';
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
+import { useRequest } from 'alova';
 import { useState, useEffect, useCallback } from 'react';
 import { unstable_useBlocker as useBlocker } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -32,13 +33,13 @@ import SettingsCustomizationDialog from './SettingsCustomizationDialog';
 import * as EMSESP from './api';
 
 import { DeviceEntityMask } from './types';
-import type { DeviceShort, Devices, DeviceEntity } from './types';
+import type { DeviceShort, DeviceEntity } from './types';
 import type { FC } from 'react';
-import { ButtonRow, FormLoader, SectionContent, MessageBox, BlockNavigation } from 'components';
+import * as SystemApi from 'api/system';
+import { ButtonRow, SectionContent, MessageBox, BlockNavigation } from 'components';
 
 import RestartMonitor from 'framework/system/RestartMonitor';
 import { useI18nContext } from 'i18n/i18n-react';
-import { extractErrorMessage } from 'utils';
 
 export const APIURL = window.location.origin + '/api/';
 
@@ -46,17 +47,41 @@ const SettingsCustomization: FC = () => {
   const { LL } = useI18nContext();
   const [numChanges, setNumChanges] = useState<number>(0);
   const blocker = useBlocker(numChanges !== 0);
+
   const [restarting, setRestarting] = useState<boolean>(false);
   const [restartNeeded, setRestartNeeded] = useState<boolean>(false);
-  const [deviceEntities, setDeviceEntities] = useState<DeviceEntity[]>();
-  const [devices, setDevices] = useState<Devices>();
-  const [errorMessage, setErrorMessage] = useState<string>();
+  const [deviceEntities, setDeviceEntities] = useState<DeviceEntity[]>([]);
   const [selectedDevice, setSelectedDevice] = useState<number>(-1);
   const [confirmReset, setConfirmReset] = useState<boolean>(false);
   const [selectedFilters, setSelectedFilters] = useState<number>(0);
   const [search, setSearch] = useState('');
   const [selectedDeviceEntity, setSelectedDeviceEntity] = useState<DeviceEntity>();
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+
+  const { send: resetCustomizations } = useRequest(EMSESP.resetCustomizations(), {
+    immediate: false
+  });
+
+  const { data: devices } = useRequest(EMSESP.readDevices);
+
+  const { send: writeCustomEntities } = useRequest((data) => EMSESP.writeCustomEntities(data), { immediate: false });
+
+  const { send: readDeviceEntities, onSuccess: onSuccess } = useRequest((data) => EMSESP.readDeviceEntities(data), {
+    initialData: [],
+    immediate: false
+  });
+
+  const setOriginalSettings = (data: DeviceEntity[]) => {
+    setDeviceEntities(data.map((de) => ({ ...de, o_m: de.m, o_cn: de.cn, o_mi: de.mi, o_ma: de.ma })));
+  };
+
+  onSuccess((event) => {
+    setOriginalSettings(event.data);
+  });
+
+  const { send: restartCommand } = useRequest(SystemApi.restart(), {
+    immediate: false
+  });
 
   const entities_theme = useTheme({
     Table: `
@@ -131,7 +156,7 @@ const SettingsCustomization: FC = () => {
   }
 
   useEffect(() => {
-    if (deviceEntities) {
+    if (deviceEntities.length) {
       setNumChanges(
         deviceEntities
           .filter((de) => hasEntityChanged(de))
@@ -148,29 +173,11 @@ const SettingsCustomization: FC = () => {
     }
   }, [deviceEntities]);
 
-  const fetchDevices = useCallback(async () => {
-    try {
-      setDevices((await EMSESP.readDevices()).data);
-    } catch (error) {
-      setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-    }
-  }, [LL]);
-
-  useEffect(() => {
-    void fetchDevices();
-  }, [fetchDevices]);
-
-  const setOriginalSettings = (data: DeviceEntity[]) => {
-    setDeviceEntities(data.map((de) => ({ ...de, o_m: de.m, o_cn: de.cn, o_mi: de.mi, o_ma: de.ma })));
-  };
-
-  const fetchDeviceEntities = async (unique_id: number) => {
-    try {
-      const new_deviceEntities = (await EMSESP.readDeviceEntities({ id: unique_id })).data;
-      setOriginalSettings(new_deviceEntities);
-    } catch (error) {
-      setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-    }
+  const restart = async () => {
+    await restartCommand().catch((error) => {
+      toast.error(error.message);
+    });
+    setRestarting(true);
   };
 
   function formatValue(value: any) {
@@ -226,7 +233,7 @@ const SettingsCustomization: FC = () => {
 
   const maskDisabled = (set: boolean) => {
     setDeviceEntities(
-      deviceEntities?.map(function (de) {
+      deviceEntities.map(function (de) {
         if ((de.m & selectedFilters || !selectedFilters) && de.id.toLowerCase().includes(search.toLowerCase())) {
           return {
             ...de,
@@ -246,28 +253,19 @@ const SettingsCustomization: FC = () => {
       const selected_device = parseInt(event.target.value, 10);
       setSelectedDevice(selected_device);
       setNumChanges(0);
-      void fetchDeviceEntities(devices?.devices[selected_device].i);
+      void readDeviceEntities(devices?.devices[selected_device].i);
       setRestartNeeded(false);
     }
   };
 
   const resetCustomization = async () => {
     try {
-      await EMSESP.resetCustomizations();
+      await resetCustomizations();
       toast.info(LL.CUSTOMIZATIONS_RESTART());
     } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
+      toast.error(error.message);
     } finally {
       setConfirmReset(false);
-    }
-  };
-
-  const restart = async () => {
-    try {
-      await EMSESP.restart();
-      setRestarting(true);
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
     }
   };
 
@@ -300,7 +298,7 @@ const SettingsCustomization: FC = () => {
   const saveCustomization = async () => {
     if (devices && deviceEntities && selectedDevice !== -1) {
       const masked_entities = deviceEntities
-        .filter((de) => hasEntityChanged(de))
+        .filter((de: DeviceEntity) => hasEntityChanged(de))
         .map(
           (new_de) =>
             new_de.m.toString(16).padStart(2, '0') +
@@ -318,72 +316,56 @@ const SettingsCustomization: FC = () => {
         return;
       }
 
-      try {
-        const response = await EMSESP.writeCustomEntities({
-          id: devices?.devices[selectedDevice].i,
-          entity_ids: masked_entities
-        });
-        if (response.status === 200) {
-          toast.success(LL.CUSTOMIZATIONS_SAVED());
-        } else if (response.status === 201) {
-          setRestartNeeded(true);
-        } else {
-          toast.error(LL.PROBLEM_UPDATING());
+      await writeCustomEntities({ id: devices?.devices[selectedDevice].i, entity_ids: masked_entities }).catch(
+        (error) => {
+          if (error.message === 'Reboot required') {
+            setRestartNeeded(true);
+          } else {
+            toast.error(error.message);
+          }
         }
-      } catch (error) {
-        toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
-      }
+      );
       setOriginalSettings(deviceEntities);
     }
   };
 
-  const renderDeviceList = () => {
-    if (!devices) {
-      return <FormLoader errorMessage={errorMessage} />;
-    }
-
-    return (
-      <>
-        <Box mb={2} color="warning.main">
-          <Typography variant="body2">{LL.CUSTOMIZATIONS_HELP_1()}.</Typography>
-          <Typography variant="body2" mt={1}>
-            <OptionIcon type="favorite" isSet={true} />={LL.CUSTOMIZATIONS_HELP_2()}&nbsp;&nbsp;
-            <OptionIcon type="readonly" isSet={true} />={LL.CUSTOMIZATIONS_HELP_3()}&nbsp;&nbsp;
-            <OptionIcon type="api_mqtt_exclude" isSet={true} />={LL.CUSTOMIZATIONS_HELP_4()}&nbsp;&nbsp;
-            <OptionIcon type="web_exclude" isSet={true} />={LL.CUSTOMIZATIONS_HELP_5()}&nbsp;&nbsp;
-            <OptionIcon type="deleted" isSet={true} />={LL.CUSTOMIZATIONS_HELP_6()}
-          </Typography>
-        </Box>
-        <TextField
-          name="device"
-          label={LL.EMS_DEVICE()}
-          variant="outlined"
-          fullWidth
-          value={selectedDevice}
-          disabled={numChanges !== 0}
-          onChange={changeSelectedDevice}
-          margin="normal"
-          select
-        >
-          <MenuItem disabled key={0} value={-1}>
-            {LL.SELECT_DEVICE()}...
+  const renderDeviceList = () => (
+    <>
+      <Box mb={2} color="warning.main">
+        <Typography variant="body2">{LL.CUSTOMIZATIONS_HELP_1()}.</Typography>
+        <Typography variant="body2" mt={1}>
+          <OptionIcon type="favorite" isSet={true} />={LL.CUSTOMIZATIONS_HELP_2()}&nbsp;&nbsp;
+          <OptionIcon type="readonly" isSet={true} />={LL.CUSTOMIZATIONS_HELP_3()}&nbsp;&nbsp;
+          <OptionIcon type="api_mqtt_exclude" isSet={true} />={LL.CUSTOMIZATIONS_HELP_4()}&nbsp;&nbsp;
+          <OptionIcon type="web_exclude" isSet={true} />={LL.CUSTOMIZATIONS_HELP_5()}&nbsp;&nbsp;
+          <OptionIcon type="deleted" isSet={true} />={LL.CUSTOMIZATIONS_HELP_6()}
+        </Typography>
+      </Box>
+      <TextField
+        name="device"
+        label={LL.EMS_DEVICE()}
+        variant="outlined"
+        fullWidth
+        value={selectedDevice}
+        disabled={numChanges !== 0}
+        onChange={changeSelectedDevice}
+        margin="normal"
+        select
+      >
+        <MenuItem disabled key={0} value={-1}>
+          {LL.SELECT_DEVICE()}...
+        </MenuItem>
+        {devices.devices.map((device: DeviceShort, index) => (
+          <MenuItem key={index} value={index}>
+            {device.s}
           </MenuItem>
-          {devices.devices.map((device: DeviceShort, index) => (
-            <MenuItem key={index} value={index}>
-              {device.s}
-            </MenuItem>
-          ))}
-        </TextField>
-      </>
-    );
-  };
+        ))}
+      </TextField>
+    </>
+  );
 
   const renderDeviceData = () => {
-    if (!deviceEntities) {
-      return;
-    }
-
-    if (devices?.devices.length === 0 || deviceEntities[0].id === '') {
+    if (deviceEntities.length === 0) {
       return;
     }
 
@@ -521,7 +503,7 @@ const SettingsCustomization: FC = () => {
       <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
         {LL.DEVICE_ENTITIES()}
       </Typography>
-      {renderDeviceList()}
+      {devices && renderDeviceList()}
       {renderDeviceData()}
       {restartNeeded && (
         <MessageBox my={2} level="warning" message={LL.RESTART_TEXT()}>
@@ -539,7 +521,7 @@ const SettingsCustomization: FC = () => {
                   startIcon={<CancelIcon />}
                   variant="outlined"
                   color="secondary"
-                  onClick={() => devices && fetchDeviceEntities(devices.devices[selectedDevice].i)}
+                  onClick={() => devices && readDeviceEntities(devices.devices[selectedDevice].i)}
                 >
                   {LL.CANCEL()}
                 </Button>

@@ -28,17 +28,27 @@ export const isAPEnabled = ({ provision_mode }: APSettings) =>
   provision_mode === APProvisionMode.AP_MODE_ALWAYS || provision_mode === APProvisionMode.AP_MODE_DISCONNECTED;
 
 const APSettingsForm: FC = () => {
-  const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, blocker, saveData, errorMessage } =
-    useRest<APSettings>({
-      read: APApi.readAPSettings,
-      update: APApi.updateAPSettings
-    });
+  const {
+    loadData,
+    saving,
+    data,
+    updateDataValue,
+    origData,
+    dirtyFlags,
+    setDirtyFlags,
+    blocker,
+    saveData,
+    errorMessage
+  } = useRest<APSettings>({
+    read: APApi.readAPSettings,
+    update: APApi.updateAPSettings
+  });
 
   const { LL } = useI18nContext();
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, setData);
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, updateDataValue);
 
   const content = () => {
     if (!data) {

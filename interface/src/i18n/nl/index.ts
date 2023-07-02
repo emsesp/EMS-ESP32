@@ -51,7 +51,6 @@ const nl: Translation = {
   REMOVE: 'Verwijderen',
   PROBLEM_UPDATING: 'Probleem met updaten',
   PROBLEM_LOADING: 'Probleem met laden',
-  ACCESS_DENIED: 'Toegang geweigerd',
   ANALOG_SENSOR: 'Analoge sensor',
   ANALOG_SENSORS: 'Analoge Sensoren',
   SETTINGS: 'Instellingen',
@@ -71,7 +70,6 @@ const nl: Translation = {
   TEMP_SENSOR: 'Temperatuur sensor',
   TEMP_SENSORS: 'Temperatuur Sensoren',
   WRITE_CMD_SENT: 'Schrijf commando sent', // TODO translate
-  WRITE_CMD_FAILED: 'Schrijf commando failed', // TODO translate
   EMS_BUS_WARNING: 'EMS bus niet gevonden. Als deze waarschuwing blijft staan na een paar seconden dan loop de instellingen na en in het bijzonder het apparaat type profiel na.',
   EMS_BUS_SCANNING: 'Scannen naar EMS apparaten...',
   CONNECTED: 'Verbonden',

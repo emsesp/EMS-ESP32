@@ -24,9 +24,9 @@
 // GET
 #define DEVICES_SERVICE_PATH "/rest/devices"
 #define EMSESP_CUSTOMIZATION_SERVICE_PATH "/rest/customization"
+#define DEVICE_ENTITIES_PATH "/rest/deviceEntities"
 
 // POST
-#define DEVICE_ENTITIES_PATH "/rest/deviceEntities"
 #define CUSTOM_ENTITIES_PATH "/rest/customEntities"
 #define RESET_CUSTOMIZATION_SERVICE_PATH "/rest/resetCustomizations"
 
@@ -91,13 +91,13 @@ class WebCustomizationService : public StatefulService<WebCustomization> {
 
     // GET
     void devices(AsyncWebServerRequest * request);
+    void device_entities(AsyncWebServerRequest * request);
 
     // POST
     void custom_entities(AsyncWebServerRequest * request, JsonVariant & json);
-    void device_entities(AsyncWebServerRequest * request, JsonVariant & json);
-    void reset_customization(AsyncWebServerRequest * request);
+    void reset_customization(AsyncWebServerRequest * request); // command
 
-    AsyncCallbackJsonWebHandler _masked_entities_handler, _device_entities_handler;
+    AsyncCallbackJsonWebHandler _masked_entities_handler;
 };
 
 } // namespace emsesp

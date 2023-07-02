@@ -7,7 +7,8 @@ import { Button, Typography, Box } from '@mui/material';
 import { useSort, SortToggleType } from '@table-library/react-table-library/sort';
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
-import { useState, useContext, useCallback, useEffect } from 'react';
+import { useRequest } from 'alova';
+import { useState, useContext, useEffect } from 'react';
 
 import { toast } from 'react-toastify';
 
@@ -17,23 +18,37 @@ import * as EMSESP from './api';
 
 import { DeviceValueUOM, DeviceValueUOM_s, AnalogTypeNames } from './types';
 import { temperatureSensorItemValidation, analogSensorItemValidation } from './validators';
-import type { SensorData, TemperatureSensor, AnalogSensor } from './types';
+import type { TemperatureSensor, AnalogSensor } from './types';
 import type { FC } from 'react';
 import { ButtonRow, SectionContent } from 'components';
 
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
-import { extractErrorMessage } from 'utils';
 
 const DashboardSensors: FC = () => {
   const { LL } = useI18nContext();
   const { me } = useContext(AuthenticatedContext);
-  const [sensorData, setSensorData] = useState<SensorData>({ ts: [], as: [], analog_enabled: false });
   const [selectedTemperatureSensor, setSelectedTemperatureSensor] = useState<TemperatureSensor>();
   const [selectedAnalogSensor, setSelectedAnalogSensor] = useState<AnalogSensor>();
   const [temperatureDialogOpen, setTemperatureDialogOpen] = useState<boolean>(false);
   const [analogDialogOpen, setAnalogDialogOpen] = useState<boolean>(false);
   const [creating, setCreating] = useState<boolean>(false);
+
+  const { data: sensorData, send: fetchSensorData } = useRequest(() => EMSESP.readSensorData(), {
+    initialData: {
+      ts: [],
+      as: [],
+      analog_enabled: false
+    }
+  });
+
+  const { send: writeTemperatureSensor } = useRequest((data) => EMSESP.writeTemperatureSensor(data), {
+    immediate: false
+  });
+
+  const { send: writeAnalogSensor } = useRequest((data) => EMSESP.writeAnalogSensor(data), {
+    immediate: false
+  });
 
   const isAdmin = me.admin;
 
@@ -100,20 +115,6 @@ const DashboardSensors: FC = () => {
       `
     }
   ]);
-
-  const fetchSensorData = useCallback(async () => {
-    if (!analogDialogOpen && !temperatureDialogOpen) {
-      try {
-        setSensorData((await EMSESP.readSensorData()).data);
-      } catch (error) {
-        toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-      }
-    }
-  }, [LL, analogDialogOpen, temperatureDialogOpen]);
-
-  useEffect(() => {
-    void fetchSensorData();
-  }, [fetchSensorData]);
 
   const getSortIcon = (state: any, sortKey: any) => {
     if (state.sortKey === sortKey && state.reverse) {
@@ -229,26 +230,18 @@ const DashboardSensors: FC = () => {
   };
 
   const onTemperatureDialogSave = async (ts: TemperatureSensor) => {
-    try {
-      const response = await EMSESP.writeTemperatureSensor({
-        id: ts.id,
-        name: ts.n,
-        offset: ts.o
-      });
-      if (response.status === 204) {
-        toast.error(LL.UPDATE_OF(LL.SENSOR(2)) + ' ' + LL.FAILED(1));
-      } else if (response.status === 403) {
-        toast.error(LL.ACCESS_DENIED());
-      } else {
+    await writeTemperatureSensor({ id: ts.id, name: ts.n, offset: ts.o })
+      .then(() => {
         toast.success(LL.UPDATED_OF(LL.SENSOR(1)));
-      }
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
-    } finally {
-      setTemperatureDialogOpen(false);
-      setSelectedTemperatureSensor(undefined);
-      await fetchSensorData();
-    }
+      })
+      .catch(() => {
+        toast.error(LL.UPDATE_OF(LL.SENSOR(2)) + ' ' + LL.FAILED(1));
+      })
+      .finally(async () => {
+        setTemperatureDialogOpen(false);
+        setSelectedTemperatureSensor(undefined);
+        await fetchSensorData();
+      });
   };
 
   const updateAnalogSensor = (as: AnalogSensor) => {
@@ -280,32 +273,27 @@ const DashboardSensors: FC = () => {
   };
 
   const onAnalogDialogSave = async (as: AnalogSensor) => {
-    try {
-      const response = await EMSESP.writeAnalogSensor({
-        id: as.id,
-        gpio: as.g,
-        name: as.n,
-        offset: as.o,
-        factor: as.f,
-        uom: as.u,
-        type: as.t,
-        deleted: as.d
-      });
-
-      if (response.status === 204) {
-        toast.error(LL.UPDATE_OF(LL.ANALOG_SENSOR(5)) + ' ' + LL.FAILED(1));
-      } else if (response.status === 403) {
-        toast.error(LL.ACCESS_DENIED());
-      } else {
+    await writeAnalogSensor({
+      id: as.id,
+      gpio: as.g,
+      name: as.n,
+      offset: as.o,
+      factor: as.f,
+      uom: as.u,
+      type: as.t,
+      deleted: as.d
+    })
+      .then(() => {
         toast.success(LL.UPDATED_OF(LL.ANALOG_SENSOR(2)));
-      }
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
-    } finally {
-      setAnalogDialogOpen(false);
-      setSelectedAnalogSensor(undefined);
-      await fetchSensorData();
-    }
+      })
+      .catch(() => {
+        toast.error(LL.UPDATE_OF(LL.ANALOG_SENSOR(5)) + ' ' + LL.FAILED(1));
+      })
+      .finally(async () => {
+        setAnalogDialogOpen(false);
+        setSelectedAnalogSensor(undefined);
+        await fetchSensorData();
+      });
   };
 
   const RenderTemperatureSensors = () => (
@@ -431,7 +419,7 @@ const DashboardSensors: FC = () => {
       {sensorData?.analog_enabled === true && (
         <>
           <Typography sx={{ pt: 4, pb: 1 }} variant="h6" color="secondary">
-            {LL.ANALOG_SENSORS(0)}
+            {LL.ANALOG_SENSORS()}
           </Typography>
           <RenderAnalogSensors />
           {selectedAnalogSensor && (

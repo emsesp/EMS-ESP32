@@ -536,7 +536,7 @@ void Mqtt::ha_status() {
     doc["uniq_id"] = uniq;
     doc["obj_id"]  = uniq;
 
-    doc["stat_t"]   = mqtt_base_ + "/status";
+    doc["stat_t"]   = mqtt_basename_ + "/status";
     doc["name"]     = "EMS-ESP status";
     doc["pl_on"]    = "online";
     doc["pl_off"]   = "offline";
@@ -548,7 +548,7 @@ void Mqtt::ha_status() {
     // doc["json_attr_t"] = "~/heartbeat"; // store also as HA attributes
 
     JsonObject dev = doc.createNestedObject("dev");
-    dev["name"]    = "EMS-ESP";
+    dev["name"]    = Mqtt::basename(); // take basename
     dev["sw"]      = "v" + std::string(EMSESP_APP_VERSION);
     dev["mf"]      = "proddy";
     dev["mdl"]     = "EMS-ESP";
@@ -556,7 +556,7 @@ void Mqtt::ha_status() {
     dev["cu"] = "http://" + (EMSESP::system_.ethernet_connected() ? ETH.localIP().toString() : WiFi.localIP().toString());
 #endif
     JsonArray ids = dev.createNestedArray("ids");
-    ids.add("ems-esp");
+    ids.add(Mqtt::basename());
 
     char topic[MQTT_TOPIC_MAX_SIZE];
     snprintf(topic, sizeof(topic), "binary_sensor/%s/system_status/config", mqtt_basename_.c_str());
@@ -715,13 +715,13 @@ bool Mqtt::publish_ha_sensor_config(DeviceValue & dv, const char * model, const 
     JsonArray ids = dev_json.createNestedArray("ids");
     char      ha_device[40];
     auto      device_type_name = EMSdevice::device_type_2_device_name(dv.device_type);
-    snprintf(ha_device, sizeof(ha_device), "ems-esp-%s", device_type_name);
+    snprintf(ha_device, sizeof(ha_device), "%s-%s", Mqtt::basename().c_str(), device_type_name);
     ids.add(ha_device);
 
     if (create_device_config) {
         auto cap_name = strdup(device_type_name);
         Helpers::CharToUpperUTF8(cap_name); // capitalize first letter
-        dev_json["name"]       = std::string("EMS-ESP ") + cap_name;
+        dev_json["name"]       = Mqtt::basename() + " " + cap_name;
         dev_json["mf"]         = brand;
         dev_json["mdl"]        = model;
         dev_json["via_device"] = "ems-esp";
@@ -760,7 +760,7 @@ bool Mqtt::publish_system_ha_sensor_config(uint8_t type, const char * name, cons
     JsonObject                                 dev_json = doc.createNestedObject("dev");
 
     JsonArray ids = dev_json.createNestedArray("ids");
-    ids.add("ems-esp");
+    ids.add(Mqtt::basename());
 
     return publish_ha_sensor_config(
         type, DeviceValueTAG::TAG_HEARTBEAT, name, name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, 0, dev_json);
@@ -1212,7 +1212,10 @@ bool Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
 
     JsonObject dev = doc.createNestedObject("dev");
     JsonArray  ids = dev.createNestedArray("ids");
-    ids.add("ems-esp-thermostat");
+
+    char ha_device[40];
+    snprintf(ha_device, sizeof(ha_device), "%s-thermostat", Mqtt::basename().c_str());
+    ids.add(ha_device);
 
     // add "availability" section
     add_avty_to_doc(topic_t, doc.as<JsonObject>(), seltemp_cond, has_roomtemp ? currtemp_cond : nullptr, hc_mode_cond);
