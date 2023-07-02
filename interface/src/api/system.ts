@@ -1,7 +1,7 @@
 import { alovaInstance, alovaInstanceGH } from './endpoints';
 import type { OTASettings, SystemStatus, LogSettings, Version } from 'types';
 
-// SystemStatus - also used to ping in Restart monitor
+// SystemStatus - also used to ping in Restart monitor for pinging
 export const readSystemStatus = () => alovaInstance.Get<SystemStatus>('/rest/systemStatus');
 
 // commands
@@ -45,6 +45,7 @@ export const uploadFile = (file: File) => {
   const formData = new FormData();
   formData.append('file', file);
   return alovaInstance.Post('/rest/uploadFile', formData, {
+    timeout: 60000, // override timeout for uploading firmware - 1 minute
     enableUpload: true
   });
 };
