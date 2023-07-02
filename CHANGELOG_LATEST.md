@@ -23,6 +23,7 @@ There are breaking changes in 3.6.0. Please read carefully before applying the u
 - Ventilation device [#1172](https://github.com/emsesp/EMS-ESP32/issues/1172)
 - Turn ETH off on wifi connect [#1167](https://github.com/emsesp/EMS-ESP32/issues/1167)
 - Support for multiple EMS-ESPs with HA [#1196](https://github.com/emsesp/EMS-ESP32/issues/1196)
+- Italian translation [#1199](https://github.com/emsesp/EMS-ESP32/issues/1199)
 
 ## Fixed
 
@@ -42,3 +43,4 @@ There are breaking changes in 3.6.0. Please read carefully before applying the u
 - Retry timeout for Mqtt-QOS1/2 10seconds
 - Optimize WebUI rendering when using Dialog Boxes [#1116](https://github.com/emsesp/EMS-ESP32/issues/1116)
 - Optimize Web libraries to reduce bundle size (3.6.x) [#1112](https://github.com/emsesp/EMS-ESP32/issues/1112)
+- Use [espMqttClient](https://github.com/bertmelis/espMqttClient) with integrated queue [#1178](https://github.com/emsesp/EMS-ESP32/issues/1178)
