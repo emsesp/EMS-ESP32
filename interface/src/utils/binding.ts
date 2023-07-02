@@ -1,5 +1,3 @@
-type UpdateEntity<S> = (state: (prevState: Readonly<S>) => S) => void;
-
 export const numberValue = (value: number) => (isNaN(value) ? '' : value.toString());
 
 export const extractEventValue = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -13,6 +11,8 @@ export const extractEventValue = (event: React.ChangeEvent<HTMLInputElement>) =>
   }
 };
 
+type UpdateEntity<S> = (state: (prevState: Readonly<S>) => S) => void;
+
 export const updateValue =
   <S>(updateEntity: UpdateEntity<S>) =>
   (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,11 +23,12 @@ export const updateValue =
   };
 
 export const updateValueDirty =
-  <S>(origData: any, dirtyFlags: any, setDirtyFlags: any, updateEntity: UpdateEntity<S>) =>
+  (origData: any, dirtyFlags: any, setDirtyFlags: any, updateDataValue: any) =>
   (event: React.ChangeEvent<HTMLInputElement>) => {
     const updated_value = extractEventValue(event);
     const name = event.target.name;
-    updateEntity((prevState) => ({
+
+    updateDataValue((prevState) => ({
       ...prevState,
       [name]: updated_value
     }));

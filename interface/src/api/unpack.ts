@@ -968,7 +968,6 @@ currentExtensions[0x69] = (data) => {
   if (!referenceMap) referenceMap = new Map();
   const token = src[position];
   let target;
-  // TODO: handle Maps, Sets, and other types that can cycle; this is complicated, because you potentially need to read
   // ahead past references to record structure definitions
   if ((token >= 0x90 && token < 0xa0) || token == 0xdc || token == 0xdd) target = [];
   else target = {};
@@ -1041,7 +1040,6 @@ currentExtensions[0xff] = (data) => {
         ((data[3] & 0x3) * 0x100000000 + data[4] * 0x1000000 + (data[5] << 16) + (data[6] << 8) + data[7]) * 1000
     );
   else if (data.length == 12)
-    // TODO: Implement support for negative
     return new Date(
       ((data[0] << 24) + (data[1] << 16) + (data[2] << 8) + data[3]) / 1000000 +
         ((data[4] & 0x80 ? -0x1000000000000 : 0) +
@@ -1070,7 +1068,6 @@ function saveState(callback) {
   const savedReferenceMap = referenceMap;
   const savedBundledStrings = bundledStrings;
 
-  // TODO: We may need to revisit this if we do more external calls to user code (since it could be slow)
   const savedSrc = new Uint8Array(src.slice(0, srcEnd)); // we copy the data in case it changes while external data is processed
   const savedStructures = currentStructures;
   const savedStructuresContents = currentStructures.slice(0, currentStructures.length);

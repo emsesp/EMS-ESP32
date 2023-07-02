@@ -42,10 +42,6 @@ export interface LogEntry {
   m: string;
 }
 
-export interface LogEntries {
-  events: LogEntry[];
-}
-
 export interface LogSettings {
   level: number;
   max_messages: number;

@@ -1,5 +1,5 @@
 import Schema from 'async-validator';
-import type { AnalogSensor, DeviceValue, Settings } from './types';
+import type { AnalogSensor, DeviceValue, ScheduleItem, Settings } from './types';
 import type { InternalRuleItem } from 'async-validator';
 import { IP_OR_HOSTNAME_VALIDATOR } from 'validators/shared';
 
@@ -86,14 +86,26 @@ export const createSettingsValidator = (settings: Settings) =>
     })
   });
 
-export const schedulerItemValidation = () =>
+export const uniqueNameValidator = (schedule: ScheduleItem[], o_name?: string) => ({
+  validator(rule: InternalRuleItem, name: string, callback: (error?: string) => void) {
+    if ((o_name === undefined || o_name !== name) && schedule.find((si) => si.name === name)) {
+      callback('Name already in use');
+    } else {
+      callback();
+    }
+  }
+});
+
+export const schedulerItemValidation = (schedule: ScheduleItem[], scheduleItem: ScheduleItem) =>
   new Schema({
     name: [
       {
+        required: true,
         type: 'string',
         pattern: /^[a-zA-Z0-9_\\.]{0,15}$/,
         message: "Must be <15 characters: alpha numeric, '_' or '.'"
-      }
+      },
+      ...[uniqueNameValidator(schedule, scheduleItem.o_name)]
     ],
     cmd: [
       { required: true, message: 'Command is required' },

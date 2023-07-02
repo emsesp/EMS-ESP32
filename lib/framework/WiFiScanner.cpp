@@ -12,11 +12,12 @@ WiFiScanner::WiFiScanner(AsyncWebServer * server, SecurityManager * securityMana
 };
 
 void WiFiScanner::scanNetworks(AsyncWebServerRequest * request) {
+    request->send(202); // special code to indicate scan in progress
+
     if (WiFi.scanComplete() != -1) {
         WiFi.scanDelete();
         WiFi.scanNetworks(true);
     }
-    request->send(202);
 }
 
 void WiFiScanner::listNetworks(AsyncWebServerRequest * request) {
@@ -36,7 +37,7 @@ void WiFiScanner::listNetworks(AsyncWebServerRequest * request) {
         response->setLength();
         request->send(response);
     } else if (numNetworks == -1) {
-        request->send(202);
+        request->send(202); // special code to indicate scan in progress
     } else {
         scanNetworks(request);
     }

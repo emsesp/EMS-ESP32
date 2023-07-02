@@ -58,8 +58,8 @@ const SettingsEntitiesDialog = ({
       // convert to hex strings straight away
       setEditItem({
         ...selectedItem,
-        device_id: selectedItem.device_id.toString(16).toUpperCase().slice(-2),
-        type_id: selectedItem.type_id.toString(16).toUpperCase().slice(-4)
+        device_id: selectedItem.device_id.toString(16).toUpperCase(),
+        type_id: selectedItem.type_id.toString(16).toUpperCase()
       });
     }
   }, [open, selectedItem]);

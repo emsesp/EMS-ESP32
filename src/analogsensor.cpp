@@ -479,7 +479,7 @@ void AnalogSensor::publish_values(const bool force) {
                 StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
 
                 char stat_t[50];
-                snprintf(stat_t, sizeof(stat_t), "%s/analogsensor_data", Mqtt::base().c_str()); // use base path
+                snprintf(stat_t, sizeof(stat_t), "%s/analogsensor_data", Mqtt::basename().c_str()); // use basename
                 config["stat_t"] = stat_t;
 
                 char val_obj[50];
@@ -570,7 +570,7 @@ void AnalogSensor::publish_values(const bool force) {
 
                 JsonObject dev = config.createNestedObject("dev");
                 JsonArray  ids = dev.createNestedArray("ids");
-                ids.add("ems-esp");
+                ids.add(Mqtt::basename());
 
                 // add "availability" section
                 Mqtt::add_avty_to_doc(stat_t, config.as<JsonObject>(), val_cond);

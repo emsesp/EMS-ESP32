@@ -18,6 +18,8 @@ import {
   InputAdornment,
   TextField
 } from '@mui/material';
+// eslint-disable-next-line import/named
+import { updateState, useRequest } from 'alova';
 import { useContext, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import RestartMonitor from '../system/RestartMonitor';
@@ -28,6 +30,7 @@ import type { FC } from 'react';
 
 import type { NetworkSettings } from 'types';
 import * as NetworkApi from 'api/network';
+import * as SystemApi from 'api/system';
 import {
   BlockFormControlLabel,
   ButtonRow,
@@ -39,7 +42,7 @@ import {
   BlockNavigation
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
-import * as EMSESP from 'project/api';
+
 import { numberValue, updateValueDirty, useRest } from 'utils';
 
 import { validate } from 'validators';
@@ -52,11 +55,12 @@ const WiFiSettingsForm: FC = () => {
 
   const [initialized, setInitialized] = useState(false);
   const [restarting, setRestarting] = useState(false);
+
   const {
     loadData,
     saving,
     data,
-    setData,
+    updateDataValue,
     origData,
     dirtyFlags,
     setDirtyFlags,
@@ -69,13 +73,17 @@ const WiFiSettingsForm: FC = () => {
     update: NetworkApi.updateNetworkSettings
   });
 
+  const { send: restartCommand } = useRequest(SystemApi.restart(), {
+    immediate: false
+  });
+
   useEffect(() => {
     if (!initialized && data) {
       if (selectedNetwork) {
-        setData({
+        updateState('networkSettings', (current_data) => ({
           ssid: selectedNetwork.ssid,
           password: '',
-          hostname: data?.hostname,
+          hostname: current_data?.hostname,
           static_ip_config: false,
           enableIPv6: false,
           bandwidth20: false,
@@ -84,13 +92,13 @@ const WiFiSettingsForm: FC = () => {
           enableMDNS: true,
           enableCORS: false,
           CORSOrigin: '*'
-        });
+        }));
       }
       setInitialized(true);
     }
-  }, [initialized, setInitialized, data, setData, selectedNetwork]);
+  }, [initialized, setInitialized, data, selectedNetwork]);
 
-  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, setData);
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, updateDataValue);
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
@@ -112,12 +120,10 @@ const WiFiSettingsForm: FC = () => {
     };
 
     const restart = async () => {
-      try {
-        await EMSESP.restart();
-        setRestarting(true);
-      } catch (error) {
-        toast.error(LL.PROBLEM_UPDATING());
-      }
+      await restartCommand().catch((error) => {
+        toast.error(error.message);
+      });
+      setRestarting(true);
     };
 
     return (

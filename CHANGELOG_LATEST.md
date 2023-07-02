@@ -22,6 +22,7 @@ There are breaking changes in 3.6.0. Please read carefully before applying the u
 - AM200 code 10 [#1161](https://github.com/emsesp/EMS-ESP32/issues/1161)
 - Ventilation device [#1172](https://github.com/emsesp/EMS-ESP32/issues/1172)
 - Turn ETH off on wifi connect [#1167](https://github.com/emsesp/EMS-ESP32/issues/1167)
+- Support for multiple EMS-ESPs with HA [#1196](https://github.com/emsesp/EMS-ESP32/issues/1196)
 
 ## Fixed
 

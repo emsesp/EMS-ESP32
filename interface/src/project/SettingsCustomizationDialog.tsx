@@ -124,7 +124,7 @@ const SettingsCustomizationDialog = ({ open, onClose, onSave, selectedItem }: Se
           {LL.CANCEL()}
         </Button>
         <Button startIcon={<DoneIcon />} variant="outlined" onClick={save} color="primary">
-          {LL.UPDATE(0)}
+          {LL.UPDATE()}
         </Button>
       </DialogActions>
     </Dialog>

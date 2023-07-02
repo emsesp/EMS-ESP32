@@ -50,7 +50,7 @@ void WebScheduler::read(WebScheduler & webScheduler, JsonObject & root) {
     }
 }
 
-// call on initialization and also when the Scheduile web page is updated
+// call on initialization and also when the Scheduile web page is saved
 // this loads the data into the internal class
 StateUpdateResult WebScheduler::update(JsonObject & root, WebScheduler & webScheduler) {
 #ifdef EMSESP_STANDALONE
@@ -237,7 +237,7 @@ void WebSchedulerService::publish(const bool force) {
             if (Mqtt::ha_enabled() && force) {
                 StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
                 char                                        stat_t[50];
-                snprintf(stat_t, sizeof(stat_t), "%s/scheduler_data", Mqtt::base().c_str());
+                snprintf(stat_t, sizeof(stat_t), "%s/scheduler_data", Mqtt::basename().c_str());
                 config["stat_t"] = stat_t;
 
                 char val_obj[50];
@@ -272,7 +272,7 @@ void WebSchedulerService::publish(const bool force) {
 
                 JsonObject dev = config.createNestedObject("dev");
                 JsonArray  ids = dev.createNestedArray("ids");
-                ids.add("ems-esp");
+                ids.add(Mqtt::basename());
 
                 // add "availability" section
                 Mqtt::add_avty_to_doc(stat_t, config.as<JsonObject>(), val_cond);

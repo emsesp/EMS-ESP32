@@ -28,18 +28,16 @@ import {
   Typography
 } from '@mui/material';
 
-import axios from 'axios';
-import { useContext, useState, useEffect } from 'react';
+import { useRequest } from 'alova';
+import { useContext, useState } from 'react';
 import { toast } from 'react-toastify';
 import RestartMonitor from './RestartMonitor';
 import type { FC } from 'react';
 
-import type { SystemStatus, Version } from 'types';
 import * as SystemApi from 'api/system';
 import { ButtonRow, FormLoader, SectionContent, MessageBox } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
-import { extractErrorMessage, useRest } from 'utils';
 
 export const VERSIONCHECK_ENDPOINT = 'https://api.github.com/repos/emsesp/EMS-ESP32/releases/latest';
 export const VERSIONCHECK_DEV_ENDPOINT = 'https://api.github.com/repos/emsesp/EMS-ESP32/releases/tags/latest';
@@ -51,61 +49,75 @@ function formatNumber(num: number) {
 
 const SystemStatusForm: FC = () => {
   const { LL } = useI18nContext();
-  const [restarting, setRestarting] = useState<boolean>();
-
-  const { loadData, data, errorMessage } = useRest<SystemStatus>({ read: SystemApi.readSystemStatus });
 
   const { me } = useContext(AuthenticatedContext);
   const [confirmRestart, setConfirmRestart] = useState<boolean>(false);
   const [confirmFactoryReset, setConfirmFactoryReset] = useState<boolean>(false);
   const [processing, setProcessing] = useState<boolean>(false);
   const [showingVersion, setShowingVersion] = useState<boolean>(false);
-  const [latestVersion, setLatestVersion] = useState<Version>();
-  const [latestDevVersion, setLatestDevVersion] = useState<Version>();
+  const [restarting, setRestarting] = useState<boolean>();
 
-  useEffect(() => {
-    void axios.get(VERSIONCHECK_ENDPOINT).then((response) => {
-      setLatestVersion({
-        version: response.data.name,
-        url: response.data.assets[1].browser_download_url,
-        changelog: response.data.assets[0].browser_download_url
-      });
-    });
-    void axios.get(VERSIONCHECK_DEV_ENDPOINT).then((response) => {
-      setLatestDevVersion({
-        version: response.data.name.split(/\s+/).splice(-1),
-        url: response.data.assets[1].browser_download_url,
-        changelog: response.data.assets[0].browser_download_url
-      });
-    });
-  }, []);
+  const { send: restartCommand } = useRequest(SystemApi.restart(), {
+    immediate: false
+  });
+
+  const { send: factoryResetCommand } = useRequest(SystemApi.factoryReset(), {
+    immediate: false
+  });
+
+  const { send: partitionCommand } = useRequest(SystemApi.partition(), {
+    immediate: false
+  });
+
+  // fetch versions from GH on load
+  const { data: latestVersion } = useRequest(SystemApi.getStableVersion);
+  const { data: latestDevVersion } = useRequest(SystemApi.getDevVersion);
+
+  const { data: data, send: loadData, error } = useRequest(SystemApi.readSystemStatus, { force: true });
 
   const restart = async () => {
     setProcessing(true);
-    try {
-      const response = await SystemApi.restart();
-      if (response.status === 200) {
+    await restartCommand()
+      .then(() => {
         setRestarting(true);
-      }
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-    } finally {
-      setConfirmRestart(false);
-      setProcessing(false);
-    }
+      })
+      .catch((err) => {
+        toast.error(err.message);
+      })
+      .finally(() => {
+        setConfirmRestart(false);
+        setProcessing(false);
+      });
+  };
+
+  const factoryReset = async () => {
+    setProcessing(true);
+    await factoryResetCommand()
+      .then(() => {
+        setRestarting(true);
+      })
+      .catch((err) => {
+        toast.error(err.message);
+      })
+      .finally(() => {
+        setConfirmFactoryReset(false);
+        setProcessing(false);
+      });
   };
 
   const partition = async () => {
     setProcessing(true);
-    try {
-      await SystemApi.partition();
-      setRestarting(true);
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-    } finally {
-      setConfirmRestart(false);
-      setProcessing(false);
-    }
+    await partitionCommand()
+      .then(() => {
+        setRestarting(true);
+      })
+      .catch((err) => {
+        toast.error(err.message);
+      })
+      .finally(() => {
+        setConfirmRestart(false);
+        setProcessing(false);
+      });
   };
 
   const renderRestartDialog = () => (
@@ -200,19 +212,6 @@ const SystemStatusForm: FC = () => {
     </Dialog>
   );
 
-  const factoryReset = async () => {
-    setProcessing(true);
-    try {
-      await SystemApi.factoryReset();
-      setRestarting(true);
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
-    } finally {
-      setConfirmFactoryReset(false);
-      setProcessing(false);
-    }
-  };
-
   const renderFactoryResetDialog = () => (
     <Dialog open={confirmFactoryReset} onClose={() => setConfirmFactoryReset(false)}>
       <DialogTitle>{LL.FACTORY_RESET()}</DialogTitle>
@@ -242,7 +241,7 @@ const SystemStatusForm: FC = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
     }
 
     return (

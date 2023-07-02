@@ -22,17 +22,27 @@ import { numberValue, updateValueDirty, useRest } from 'utils';
 import { createMqttSettingsValidator, validate } from 'validators';
 
 const MqttSettingsForm: FC = () => {
-  const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, blocker, saveData, errorMessage } =
-    useRest<MqttSettings>({
-      read: MqttApi.readMqttSettings,
-      update: MqttApi.updateMqttSettings
-    });
+  const {
+    loadData,
+    saving,
+    data,
+    updateDataValue,
+    origData,
+    dirtyFlags,
+    setDirtyFlags,
+    blocker,
+    saveData,
+    errorMessage
+  } = useRest<MqttSettings>({
+    read: MqttApi.readMqttSettings,
+    update: MqttApi.updateMqttSettings
+  });
 
   const { LL } = useI18nContext();
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, setData);
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, updateDataValue);
 
   const content = () => {
     if (!data) {

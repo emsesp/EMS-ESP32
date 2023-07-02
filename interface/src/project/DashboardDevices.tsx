@@ -30,6 +30,7 @@ import { useRowSelect } from '@table-library/react-table-library/select';
 import { useSort, SortToggleType } from '@table-library/react-table-library/sort';
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
+import { useRequest } from 'alova';
 import { useState, useContext, useEffect, useCallback, useLayoutEffect } from 'react';
 
 import { IconContext } from 'react-icons';
@@ -42,27 +43,39 @@ import { formatValue } from './deviceValue';
 
 import { DeviceValueUOM_s, DeviceEntityMask, DeviceType } from './types';
 import { deviceValueItemValidation } from './validators';
-import type { Device, CoreData, DeviceData, DeviceValue } from './types';
+import type { Device, DeviceValue } from './types';
 import type { FC } from 'react';
 import { ButtonRow, SectionContent, MessageBox } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 
 import { useI18nContext } from 'i18n/i18n-react';
-import { extractErrorMessage } from 'utils';
 
 const DashboardDevices: FC = () => {
   const [size, setSize] = useState([0, 0]);
   const { me } = useContext(AuthenticatedContext);
   const { LL } = useI18nContext();
-  const [deviceData, setDeviceData] = useState<DeviceData>({ data: [] });
   const [selectedDeviceValue, setSelectedDeviceValue] = useState<DeviceValue>();
   const [onlyFav, setOnlyFav] = useState(false);
   const [deviceValueDialogOpen, setDeviceValueDialogOpen] = useState(false);
   const [showDeviceInfo, setShowDeviceInfo] = useState<boolean>(false);
   const [selectedDevice, setSelectedDevice] = useState<number>();
-  const [coreData, setCoreData] = useState<CoreData>({
-    connected: true,
-    devices: []
+
+  const { data: coreData, send: readCoreData } = useRequest(() => EMSESP.readCoreData(), {
+    initialData: {
+      connected: true,
+      devices: []
+    }
+  });
+
+  const { data: deviceData, send: readDeviceData } = useRequest((id) => EMSESP.readDeviceData(id), {
+    initialData: {
+      data: []
+    },
+    immediate: false
+  });
+
+  const { loading: submitting, send: writeDeviceValue } = useRequest((data) => EMSESP.writeDeviceValue(data), {
+    immediate: false
   });
 
   useLayoutEffect(() => {
@@ -148,7 +161,7 @@ const DashboardDevices: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: minmax(0, 1fr) minmax(150px, auto) 40px;
+        --data-table-library_grid-template-columns: minmax(200px, auto) minmax(150px, auto) 40px;
         height: auto;
         max-height: 100%;
         overflow-y: scroll;
@@ -212,19 +225,10 @@ const DashboardDevices: FC = () => {
     }
   );
 
-  const fetchDeviceData = async (id: number) => {
-    try {
-      setDeviceData((await EMSESP.readDeviceData({ id })).data);
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-    }
-  };
-
-  function onSelectChange(action: any, state: any) {
-    setDeviceData({ data: [] });
+  async function onSelectChange(action: any, state: any) {
     setSelectedDevice(state.id);
     if (action.type === 'ADD_BY_ID_EXCLUSIVELY') {
-      void fetchDeviceData(state.id);
+      await readDeviceData(state.id);
     }
   }
 
@@ -257,27 +261,14 @@ const DashboardDevices: FC = () => {
     };
   }, [escFunction]);
 
-  const fetchCoreData = useCallback(async () => {
-    try {
-      setSelectedDevice(undefined);
-      setCoreData((await EMSESP.readCoreData()).data);
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-    }
-  }, [LL]);
-
-  useEffect(() => {
-    void fetchCoreData();
-  }, [fetchCoreData]);
-
   const refreshData = () => {
     if (deviceValueDialogOpen) {
       return;
     }
     if (selectedDevice) {
-      void fetchDeviceData(selectedDevice);
+      void readDeviceData(selectedDevice);
     } else {
-      void fetchCoreData();
+      void readCoreData();
     }
   };
 
@@ -346,27 +337,20 @@ const DashboardDevices: FC = () => {
     };
   });
 
-  const deviceValueDialogSave = async (dv: DeviceValue) => {
-    const selectedDeviceID = Number(device_select.state.id);
-    try {
-      const response = await EMSESP.writeDeviceValue({
-        id: selectedDeviceID,
-        devicevalue: dv
-      });
-      if (response.status === 204) {
-        toast.error(LL.WRITE_CMD_FAILED());
-      } else if (response.status === 403) {
-        toast.error(LL.ACCESS_DENIED());
-      } else {
+  const deviceValueDialogSave = async (devicevalue: DeviceValue) => {
+    const id = Number(device_select.state.id);
+    await writeDeviceValue({ id, devicevalue })
+      .then(() => {
         toast.success(LL.WRITE_CMD_SENT());
-      }
-    } catch (error) {
-      toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
-    } finally {
-      setDeviceValueDialogOpen(false);
-      await fetchDeviceData(selectedDeviceID);
-      setSelectedDeviceValue(undefined);
-    }
+      })
+      .catch((error) => {
+        toast.error(error.message);
+      })
+      .finally(async () => {
+        setDeviceValueDialogOpen(false);
+        await readDeviceData(id);
+        setSelectedDeviceValue(undefined);
+      });
   };
 
   const renderDeviceDetails = () => {
@@ -500,20 +484,11 @@ const DashboardDevices: FC = () => {
         }}
       >
         <Box sx={{ border: '1px solid #177ac9' }}>
-          <Grid container justifyContent="space-between">
-            <Box color="warning.main" ml={1}>
-              <Typography noWrap variant="h6">
-                {coreData.devices[deviceIndex].n}
-              </Typography>
-            </Box>
-            <Grid item zeroMinWidth justifyContent="flex-end">
-              <IconButton onClick={resetDeviceSelect}>
-                <CancelIcon color="info" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
-              </IconButton>
-            </Grid>
-          </Grid>
+          <Typography noWrap variant="subtitle1" color="warning.main" sx={{ mx: 1 }}>
+            {coreData.devices[deviceIndex].n}
+          </Typography>
 
-          <Grid item xs>
+          <Grid container justifyContent="space-between">
             <Typography sx={{ ml: 1 }} variant="subtitle2" color="primary">
               {shown_data.length + ' ' + LL.ENTITIES(shown_data.length)}
               <IconButton onClick={() => setShowDeviceInfo(true)}>
@@ -533,6 +508,11 @@ const DashboardDevices: FC = () => {
                 <RefreshIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
               </IconButton>
             </Typography>
+            <Grid item zeroMinWidth justifyContent="flex-end">
+              <IconButton onClick={resetDeviceSelect}>
+                <CancelIcon color="info" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+              </IconButton>
+            </Grid>
           </Grid>
         </Box>
 
@@ -612,6 +592,7 @@ const DashboardDevices: FC = () => {
             !hasMask(selectedDeviceValue.id, DeviceEntityMask.DV_READONLY)
           }
           validator={deviceValueItemValidation(selectedDeviceValue)}
+          progress={submitting}
         />
       )}
       <ButtonRow>

@@ -511,7 +511,7 @@ void TemperatureSensor::publish_values(const bool force) {
                 config["dev_cla"] = "temperature";
 
                 char stat_t[50];
-                snprintf(stat_t, sizeof(stat_t), "%s/temperaturesensor_data", Mqtt::base().c_str()); // use base path
+                snprintf(stat_t, sizeof(stat_t), "%s/temperaturesensor_data", Mqtt::basename().c_str());
                 config["stat_t"] = stat_t;
 
                 config["unit_of_meas"] = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
@@ -543,7 +543,7 @@ void TemperatureSensor::publish_values(const bool force) {
 
                 JsonObject dev = config.createNestedObject("dev");
                 JsonArray  ids = dev.createNestedArray("ids");
-                ids.add("ems-esp");
+                ids.add(Mqtt::basename());
 
                 // add "availability" section
                 Mqtt::add_avty_to_doc(stat_t, config.as<JsonObject>(), val_cond);
