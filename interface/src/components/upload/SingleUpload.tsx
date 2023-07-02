@@ -26,11 +26,12 @@ const getBorderColor = (theme: Theme, props: DropzoneState) => {
 export interface SingleUploadProps {
   onDrop: (acceptedFiles: File[]) => void;
   onCancel: () => void;
+  isUploading: boolean;
   progress: Progress;
 }
 
-const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, progress }) => {
-  const isUploading = progress.total > 0;
+const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, isUploading, progress }) => {
+  const uploading = isUploading && progress.total > 0;
 
   const dropzoneState = useDropzone({
     onDrop,
@@ -48,7 +49,7 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, progress }) => 
   const { LL } = useI18nContext();
 
   const progressText = () => {
-    if (isUploading) {
+    if (uploading) {
       if (progress.total) {
         return LL.UPLOADING() + ': ' + Math.round((progress.loaded * 100) / progress.total) + '%';
       }
@@ -68,7 +69,7 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, progress }) => 
           color: theme.palette.grey[400],
           transition: 'border .24s ease-in-out',
           width: '100%',
-          cursor: isUploading ? 'default' : 'pointer',
+          cursor: uploading ? 'default' : 'pointer',
           borderColor: getBorderColor(theme, dropzoneState)
         }
       })}
@@ -77,7 +78,7 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, progress }) => 
       <Box flexDirection="column" display="flex" alignItems="center">
         <CloudUploadIcon fontSize="large" />
         <Typography variant="h6">{progressText()}</Typography>
-        {isUploading && (
+        {uploading && (
           <Fragment>
             <Box width="100%" p={2}>
               <LinearProgress

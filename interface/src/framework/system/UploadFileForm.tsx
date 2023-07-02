@@ -45,7 +45,6 @@ const UploadFileForm: FC = () => {
       setMd5(data.md5);
       toast.success(LL.UPLOAD() + ' MD5 ' + LL.SUCCESSFUL());
     } else {
-      toast.success(LL.UPLOAD() + ' ' + LL.SUCCESSFUL());
       setRestarting(true);
     }
   });
@@ -123,7 +122,7 @@ const UploadFileForm: FC = () => {
           <Typography variant="body2">{'MD5: ' + md5}</Typography>
         </Box>
       )}
-      <SingleUpload onDrop={startUpload} onCancel={cancelUpload} progress={progress} />
+      <SingleUpload onDrop={startUpload} onCancel={cancelUpload} isUploading={isUploading} progress={progress} />
       {!isUploading && (
         <>
           <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
