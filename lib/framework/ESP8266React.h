@@ -59,7 +59,7 @@ class ESP8266React {
         return &_mqttSettingsService;
     }
 
-    AsyncMqttClient * getMqttClient() {
+    espMqttClient * getMqttClient() {
         return _mqttSettingsService.getMqttClient();
     }
 

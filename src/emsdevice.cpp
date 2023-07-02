@@ -1616,7 +1616,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                                      : (dv.uom == DeviceValueUOM::DEGREES)   ? 2
                                      : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1
                                                                              : 0;
-                char    val[10];
+                char    val[10]    = {'\0'};
                 if (dv.type == DeviceValueType::INT) {
                     json[name] = serialized(Helpers::render_value(val, *(int8_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
                 } else if (dv.type == DeviceValueType::UINT) {
@@ -1645,7 +1645,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                                  Helpers::translated_word(FL_(minutes)));
                         json[name] = time_s;
                     } else {
-                        json[name] = time_value;
+                        json[name] = serialized(Helpers::render_value(val, time_value, 1));
                     }
                 }
 
@@ -1657,18 +1657,16 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                 // check for value outside min/max range and adapt the limits to avoid HA complains
                 // Should this also check for api output?
                 if ((output_target == OUTPUT_TARGET::MQTT) && (dv.min != 0 || dv.max != 0)) {
-                    if (json[name].is<float>() || json[name].is<int>()) {
-                        int v = json[name];
-                        if (fahrenheit) {
-                            v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
-                        }
-                        if (v < dv.min) {
-                            dv.min = v;
-                            dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
-                        } else if (v > dv.max) {
-                            dv.max = v;
-                            dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
-                        }
+                    int v = Helpers::atoint(val);
+                    if (fahrenheit) {
+                        v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
+                    }
+                    if (v < dv.min) {
+                        dv.min = v;
+                        dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
+                    } else if (v > dv.max) {
+                        dv.max = v;
+                        dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
                     }
                 }
             }
@@ -1689,30 +1687,33 @@ void EMSdevice::mqtt_ha_entity_config_create() {
     for (auto & dv : devicevalues_) {
         if (!strcmp(dv.short_name, FL_(haclimate)[0]) && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE) && dv.has_state(DeviceValueState::DV_ACTIVE)) {
             if (*(int8_t *)(dv.value_p) == 1 && (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) || dv.has_state(DeviceValueState::DV_HA_CLIMATE_NO_RT))) {
-                dv.remove_state(DeviceValueState::DV_HA_CLIMATE_NO_RT);
-                dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);
-                Mqtt::publish_ha_climate_config(dv.tag, true, false, dv.min, dv.max); // roomTemp
+                if (Mqtt::publish_ha_climate_config(dv.tag, true, false, dv.min, dv.max)) { // roomTemp
+                    dv.remove_state(DeviceValueState::DV_HA_CLIMATE_NO_RT);
+                    dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);
+                }
             } else if (*(int8_t *)(dv.value_p) == 0
                        && (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) || !dv.has_state(DeviceValueState::DV_HA_CLIMATE_NO_RT))) {
-                dv.add_state(DeviceValueState::DV_HA_CLIMATE_NO_RT);
-                dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);
-                Mqtt::publish_ha_climate_config(dv.tag, false, false, dv.min, dv.max); // no roomTemp
+                if (Mqtt::publish_ha_climate_config(dv.tag, false, false, dv.min, dv.max)) { // no roomTemp
+                    dv.add_state(DeviceValueState::DV_HA_CLIMATE_NO_RT);
+                    dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);
+                }
             }
         }
 
         if (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) && (dv.type != DeviceValueType::CMD) && dv.has_state(DeviceValueState::DV_ACTIVE)
             && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE)) {
             // create_device_config is only done once for the EMS device. It can added to any entity, so we take the first
-            Mqtt::publish_ha_sensor_config(dv, name(), brand_to_char(), false, create_device_config);
-            dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);
-            create_device_config = false; // only create the main config once
-        }
-
+            if (Mqtt::publish_ha_sensor_config(dv, name(), brand_to_char(), false, create_device_config)) {
+                dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);
+                create_device_config = false; // only create the main config once
+            }
 #ifndef EMSESP_STANDALONE
-        if (ESP.getFreeHeap() < (65 * 1024)) {
-            break;
-        }
+            // always create minimum one config
+            if (ESP.getMaxAllocHeap() < (6 * 1024) || (!emsesp::EMSESP::system_.PSram() && ESP.getFreeHeap() < (65 * 1024))) {
+                break;
+            }
 #endif
+        }
     }
 
     ha_config_done(!create_device_config);

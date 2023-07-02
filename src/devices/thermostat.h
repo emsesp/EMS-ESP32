@@ -89,6 +89,12 @@ class Thermostat : public EMSdevice {
         uint16_t reduceminutes; // remaining minutes to night->day
         // FW100 temperature
         uint8_t roomsensor; // 1-intern, 2-extern, 3-autoselect the lower value
+        // hp
+        uint8_t dewoffset;
+        uint8_t roomtempdiff;
+        uint8_t hpminflowtemp;
+        uint8_t hpmode;
+        uint8_t cooling;
 
         uint8_t hc_num() const {
             return hc_num_;
@@ -170,6 +176,8 @@ class Thermostat : public EMSdevice {
     std::vector<uint16_t> summer_typeids;
     std::vector<uint16_t> summer2_typeids;
     std::vector<uint16_t> curve_typeids;
+    std::vector<uint16_t> hp_typeids;
+    std::vector<uint16_t> hpmode_typeids;
 
     // standard for all thermostats
     char     status_[20];    // online or offline
@@ -392,6 +400,8 @@ class Thermostat : public EMSdevice {
     void process_RemoteTemp(std::shared_ptr<const Telegram> telegram);
     void process_RemoteHumidity(std::shared_ptr<const Telegram> telegram);
     void process_RemoteCorrection(std::shared_ptr<const Telegram> telegram);
+    void process_HPSet(std::shared_ptr<const Telegram> telegram);
+    void process_HPMode(std::shared_ptr<const Telegram> telegram);
 
     // internal helper functions
     bool set_mode_n(const uint8_t mode, const uint8_t hc_num);
@@ -551,6 +561,12 @@ class Thermostat : public EMSdevice {
     bool set_pvEnableWw(const char * value, const int8_t id);
     bool set_pvRaiseHeat(const char * value, const int8_t id);
     bool set_pvLowerCool(const char * value, const int8_t id);
+
+    bool set_roomtempdiff(const char * value, const int8_t id);
+    bool set_dewoffset(const char * value, const int8_t id);
+    bool set_hpminflowtemp(const char * value, const int8_t id);
+    bool set_hpmode(const char * value, const int8_t id);
+    bool set_cooling(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

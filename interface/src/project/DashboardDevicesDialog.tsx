@@ -98,12 +98,12 @@ const DashboarDevicesDialog = ({
     }
 
     let helperText = '<';
-    if (dv.u !== DeviceValueUOM.NONE) {
+    if (dv.s) {
       helperText += 'n';
-      if (dv.m && dv.x) {
+      if (dv.m !== undefined && dv.x !== undefined) {
+
         helperText += ' between ' + dv.m + ' and ' + dv.x;
-      }
-      if (dv.s) {
+      } else {
         helperText += ' , step ' + dv.s;
       }
     } else {
@@ -149,7 +149,7 @@ const DashboarDevicesDialog = ({
                   </MenuItem>
                 ))}
               </TextField>
-            ) : editItem.u !== DeviceValueUOM.NONE ? (
+            ) : editItem.s || editItem.u !== DeviceValueUOM.NONE ? (
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="v"
@@ -160,7 +160,7 @@ const DashboarDevicesDialog = ({
                 type="number"
                 sx={{ width: '30ch' }}
                 onChange={updateFormValue}
-                inputProps={editItem.u ? { min: editItem.m, max: editItem.x, step: editItem.s } : {}}
+                inputProps={editItem.s ? { min: editItem.m, max: editItem.x, step: editItem.s } : {}}
                 InputProps={{
                   startAdornment: <InputAdornment position="start">{setUom(editItem.u)}</InputAdornment>
                 }}

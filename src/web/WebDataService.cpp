@@ -245,7 +245,7 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
                 // the data could be in any format, but we need string
                 // authenticated is always true
                 JsonVariant data        = dv["v"]; // the value in any format
-                uint8_t     return_code = CommandRet::OK;
+                uint8_t     return_code = CommandRet::NOT_FOUND;
                 uint8_t     device_type = emsdevice->device_type();
                 if (data.is<const char *>()) {
                     return_code = Command::call(device_type, cmd, data.as<const char *>(), true, id, output);
@@ -282,16 +282,16 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
             auto *      response    = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
             JsonObject  output      = response->getRoot();
             JsonVariant data        = dv["v"]; // the value in any format
-            uint8_t     return_code = CommandRet::OK;
+            uint8_t     return_code = CommandRet::NOT_FOUND;
             uint8_t     device_type = EMSdevice::DeviceType::CUSTOM;
-            if (data.is<int>()) {
+            if (data.is<const char *>()) {
+                return_code = Command::call(device_type, cmd, data.as<const char *>(), true, id, output);
+            } else if (data.is<int>()) {
                 char s[10];
                 return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int16_t>(), 0), true, id, output);
             } else if (data.is<float>()) {
                 char s[10];
                 return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<float>(), 1), true, id, output);
-            } else if (data.is<bool>()) {
-                return_code = Command::call(device_type, cmd, data.as<bool>() ? "true" : "false", true, id, output);
             }
             if (return_code != CommandRet::OK) {
                 EMSESP::logger().err("Write command failed %s (%s)", (const char *)output["message"], Command::return_code_string(return_code).c_str());
