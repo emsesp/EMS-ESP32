@@ -2165,6 +2165,11 @@ rest_server.post(UPLOAD_FILE_ENDPOINT, progress_middleware, upload.single('file'
   return res.sendStatus(400);
 });
 
+rest_server.post(SIGN_IN_ENDPOINT, (req, res) => {
+  console.log('Signed in');
+  res.json(signin);
+});
+
 rest_server.get(GENERATE_TOKEN_ENDPOINT, (req, res) => {
   res.json(generate_token);
 });
