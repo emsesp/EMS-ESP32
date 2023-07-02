@@ -1444,9 +1444,10 @@ void EMSESP::start() {
     bool factory_settings = false;
 #endif
 
-    esp8266React.begin();  // loads core system services settings (network, mqtt, ap, ntp etc)
-    webLogService.begin(); // start web log service. now we can start capturing logs to the web log
+    esp8266React.begin();                                        // loads core system services settings (network, mqtt, ap, ntp etc)
+    webLogService.begin();                                       // start web log service. now we can start capturing logs to the web log
 
+    LOG_INFO("Starting EMS-ESP version %s", EMSESP_APP_VERSION); // welcome message
     LOG_DEBUG("System is running in Debug mode");
     LOG_INFO("Last system reset reason Core0: %s, Core1: %s", system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
 
@@ -1481,17 +1482,12 @@ void EMSESP::start() {
 #endif
     }
 
-    // start all the EMS-ESP services
-    mqtt_.start();   // mqtt init
-
-    system_.start(); // starts commands, led, adc, button, network, syslog & uart
-
-    LOG_INFO(("Starting EMS-ESP version %s (hostname: %s)"), EMSESP_APP_VERSION, system_.hostname().c_str()); // welcome message
-
-    shower_.start();                                                                                          // initialize shower timer and shower alert
-    temperaturesensor_.start();                                                                               // Temperature external sensors
-    analogsensor_.start();                                                                                    // Analog external sensors
-    webLogService.start();                                                                                    // apply settings to weblog service
+    mqtt_.start();              // mqtt init
+    system_.start();            // starts commands, led, adc, button, network (sets hostname), syslog & uart
+    shower_.start();            // initialize shower timer and shower alert
+    temperaturesensor_.start(); // Temperature external sensors
+    analogsensor_.start();      // Analog external sensors
+    webLogService.start();      // apply settings to weblog service
 
     // Load our library of known devices into stack mem. Names are stored in Flash memory
     device_library_ = {
