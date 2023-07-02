@@ -1,5 +1,5 @@
-import { useRetriableRequest } from '@alova/scene-react';
-import { useState } from 'react';
+import { useRequest } from 'alova';
+import { useRef, useState, useEffect } from 'react';
 import type { FC } from 'react';
 
 import * as SystemApi from 'api/system';
@@ -7,26 +7,34 @@ import { FormLoader } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
+const RESTART_TIMEOUT = 2 * 60 * 1000;
+const POLL_INTERVAL = 3000;
+
 const RestartMonitor: FC = () => {
   const [failed, setFailed] = useState<boolean>(false);
-
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout>();
   const { LL } = useI18nContext();
+  const { send } = useRequest(SystemApi.readSystemStatus, { force: true });
+  const timeoutAt = useRef(new Date().getTime() + RESTART_TIMEOUT);
 
-  // eslint-disable-next-line @typescript-eslint/unbound-method
-  const { onFail, onSuccess } = useRetriableRequest(SystemApi.readSystemStatus(), {
-    retry: 10,
-    backoff: {
-      delay: 1500
+  const poll = useRef(async () => {
+    try {
+      await send();
+      document.location.href = '/';
+    } catch (error) {
+      if (new Date().getTime() < timeoutAt.current) {
+        setTimeoutId(setTimeout(poll.current, POLL_INTERVAL));
+      } else {
+        setFailed(true);
+      }
     }
   });
 
-  onFail(() => {
-    setFailed(true);
-  });
+  useEffect(() => {
+    void poll.current();
+  }, []);
 
-  onSuccess(() => {
-    document.location.href = '/fileUpdated';
-  });
+  useEffect(() => () => timeoutId && clearTimeout(timeoutId), [timeoutId]);
 
   return <FormLoader message={LL.APPLICATION_RESTARTING() + '...'} errorMessage={failed ? 'Timed out' : undefined} />;
 };
