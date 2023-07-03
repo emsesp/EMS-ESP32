@@ -112,7 +112,7 @@ const ManageUsersForm: FC = () => {
 
     const doneEditingUser = () => {
       if (user) {
-        const users = [...data.users.filter((u) => u.username !== user.username), user];
+        const users = [...data.users.filter((u: { username: string }) => u.username !== user.username), user];
         updateDataValue({ ...data, users });
         setUser(undefined);
         setChanged(changed + 1);
@@ -133,8 +133,8 @@ const ManageUsersForm: FC = () => {
       setChanged(0);
     };
 
-    const onCancelSubmit = () => {
-      loadData();
+    const onCancelSubmit = async () => {
+      await loadData();
       setChanged(0);
     };
 
