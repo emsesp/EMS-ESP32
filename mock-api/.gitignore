@@ -5,3 +5,5 @@
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+uploads/*
+!uploads/README.md
