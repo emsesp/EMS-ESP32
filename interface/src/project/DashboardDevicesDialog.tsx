@@ -101,7 +101,6 @@ const DashboarDevicesDialog = ({
     if (dv.s) {
       helperText += 'n';
       if (dv.m !== undefined && dv.x !== undefined) {
-
         helperText += ' between ' + dv.m + ' and ' + dv.x;
       } else {
         helperText += ' , step ' + dv.s;

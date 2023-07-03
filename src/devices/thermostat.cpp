@@ -1170,9 +1170,9 @@ void Thermostat::process_HPSet(std::shared_ptr<const Telegram> telegram) {
     if (hc == nullptr) {
         return;
     }
-    has_update(telegram, hc->dewoffset, 0);    // 7-35°C
-    has_update(telegram, hc->roomtempdiff, 3); // 1-10K
-    has_update(telegram, hc->hpminflowtemp, 4);  // 2-10K
+    has_update(telegram, hc->dewoffset, 0);     // 7-35°C
+    has_update(telegram, hc->roomtempdiff, 3);  // 1-10K
+    has_update(telegram, hc->hpminflowtemp, 4); // 2-10K
 }
 
 // type 0x41 - data from the RC30 thermostat(0x10) - 14 bytes long

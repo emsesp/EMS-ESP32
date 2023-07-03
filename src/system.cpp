@@ -60,8 +60,15 @@ const char * const languages[] = {EMSESP_LOCALE_EN};
 #elif defined(EMSESP_DE_ONLY)
 const char * const languages[] = {EMSESP_LOCALE_DE};
 #else
-const char * const languages[] =
-    {EMSESP_LOCALE_EN, EMSESP_LOCALE_DE, EMSESP_LOCALE_NL, EMSESP_LOCALE_SV, EMSESP_LOCALE_PL, EMSESP_LOCALE_NO, EMSESP_LOCALE_FR, EMSESP_LOCALE_TR, EMSESP_LOCALE_IT};
+const char * const languages[] = {EMSESP_LOCALE_EN,
+                                  EMSESP_LOCALE_DE,
+                                  EMSESP_LOCALE_NL,
+                                  EMSESP_LOCALE_SV,
+                                  EMSESP_LOCALE_PL,
+                                  EMSESP_LOCALE_NO,
+                                  EMSESP_LOCALE_FR,
+                                  EMSESP_LOCALE_TR,
+                                  EMSESP_LOCALE_IT};
 #endif
 
 static constexpr uint8_t NUM_LANGUAGES = sizeof(languages) / sizeof(const char *);

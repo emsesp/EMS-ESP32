@@ -45,7 +45,7 @@ class Ventilation : public EMSdevice {
     void process_ModeMessage(std::shared_ptr<const Telegram> telegram);   // 0x56B
     void process_BlowerMessage(std::shared_ptr<const Telegram> telegram); // 0x56B
     void process_VOCMessage(std::shared_ptr<const Telegram> telegram);    // 0x56B
-    void process_BypassMessage(std::shared_ptr<const Telegram> telegram);    // 0x56B
+    void process_BypassMessage(std::shared_ptr<const Telegram> telegram); // 0x56B
 
     bool set_ventMode(const char * value, const int8_t id);
     bool set_bypass(const char * value, const int8_t id);
