@@ -1107,7 +1107,6 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // add "availability" section
     add_avty_to_doc(stat_t, doc.as<JsonObject>(), val_cond);
 
-    // TODO queue it or send it directly via publish?
     return queue_ha(topic, doc.as<JsonObject>());
 }
 

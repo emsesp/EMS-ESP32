@@ -78,7 +78,6 @@ const LayoutAuthMenu: FC = () => {
           <GBflag style={{ width: 16, verticalAlign: 'middle' }} />
           &nbsp;EN
         </MenuItem>
-        <Divider />
         <MenuItem key="de" value="de">
           <DEflag style={{ width: 16, verticalAlign: 'middle' }} />
           &nbsp;DE

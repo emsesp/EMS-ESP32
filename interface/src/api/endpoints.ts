@@ -11,7 +11,7 @@ export const EVENT_SOURCE_ROOT = 'http://' + host + '/es/';
 
 export const alovaInstance = createAlova({
   statesHook: ReactHook,
-  timeout: 2000, // timeout not used because of uploading firmware
+  timeout: 3000, // 3 seconds but throwing a timeout error
   localCache: null,
   // localCache: {
   //   GET: {

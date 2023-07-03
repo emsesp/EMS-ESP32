@@ -9,8 +9,8 @@ const rest_server = express();
 const port = 3080;
 
 rest_server.use(compression());
-// rest_server.use(express.static(path.join(__dirname, '../interface/build')));
-// rest_server.use(express.json());
+rest_server.use(express.static(path.join(__dirname, '../interface/build')));
+rest_server.use(express.json());
 
 // uploads
 const upload = multer({ dest: '../mock-api/uploads' });
@@ -2165,6 +2165,11 @@ rest_server.post(UPLOAD_FILE_ENDPOINT, progress_middleware, upload.single('file'
   return res.sendStatus(400);
 });
 
+rest_server.post(SIGN_IN_ENDPOINT, (req, res) => {
+  console.log('Signed in');
+  res.json(signin);
+});
+
 rest_server.get(GENERATE_TOKEN_ENDPOINT, (req, res) => {
   res.json(generate_token);
 });
@@ -2392,7 +2397,6 @@ rest_server.post(EMSESP_WRITE_ENTITIES_ENDPOINT, (req, res) => {
 });
 
 rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, async (req, res) => {
-  console.log(req.body);
   const devicevalue = req.body.devicevalue;
   const id = req.body.id;
   console.log('Write device value for id : ' + id);
@@ -2431,8 +2435,9 @@ rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, async (req, res) => {
     emsesp_devicedata_99.data[objIndex] = devicevalue;
   }
 
-  // await delay(2000); // wait 2 seconds to show spinner
+  await delay(1000); // wait to show spinner
   // res.sendStatus(400); // bad request
+
   res.sendStatus(200);
 });
 
