@@ -378,7 +378,6 @@ const SettingsApplication: FC = () => {
             select
           >
             <MenuItem value="en">English (EN)</MenuItem>
-            <Divider />
             <MenuItem value="de">Deutsch (DE)</MenuItem>
             <MenuItem value="fr">Français (FR)</MenuItem>
             <MenuItem value="it">Italiano (IT)</MenuItem>
