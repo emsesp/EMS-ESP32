@@ -50,9 +50,9 @@ MAKE_WORD_TRANSLATION(pump_device, "Pump Module", "Pumpenmodul", "Pump Module", 
 MAKE_WORD_TRANSLATION(heatsource_device, "Heatsource", "Heizquelle", "Heatsource",  "Värmekälla", "Źródło ciepła", "Varmekilde", "", "Isı Kaynağı", "Fonte di calore") // TODO translate
 MAKE_WORD_TRANSLATION(sensors_device, "Sensors", "Sensoren", "Sensoren", "Sensorer", "Czujniki", "Sensorer", "Capteurs", "Sensör Cihazı", "Sensori")
 MAKE_WORD_TRANSLATION(unknown_device, "Unknown", "Unbekannt", "Onbekend", "Okänt", "Nieznane urządzenie", "Ukjent", "Inconnu", "", "Sconosciuto") // TODO translate
-MAKE_WORD_TRANSLATION(custom_device, "Custom", "Nutzerdefiniert", "", "", "Niestandardowe", "", "", "", "") // TODO translate
+MAKE_WORD_TRANSLATION(custom_device, "Custom", "Nutzerdefiniert", "", "", "Niestandardowe", "", "", "", "Personalizzato") // TODO translate
 MAKE_WORD_TRANSLATION(custom_device_name, "User defined entities", "Nutzer deklarierte Entitäten", "", "", "Encje zdefiniowane przez użytkownika", "", "", "", "Entità definita da utente") // TODO translate
-MAKE_WORD_TRANSLATION(ventilation_device, "Ventilation", "Lüftung", "", "", "", "", "", "", "") // TODO translate
+MAKE_WORD_TRANSLATION(ventilation_device, "Ventilation", "Lüftung", "", "", "", "", "", "", "Ventilazione") // TODO translate
 
 // commands
 // TODO translate
@@ -250,7 +250,7 @@ MAKE_WORD_TRANSLATION(fast, "fast", "schnell", "snel", "snabb", "szybkie", "hurt
 MAKE_WORD_TRANSLATION(slow, "slow", "langsam", "langzaam", "långsam", "powolne", "langsom", "lent", "yavaş", "lento")
 MAKE_WORD_TRANSLATION(internal_temperature, "internal temperature", "Interne Temperatur", "Interne Temperatuur", "Interntemperatur", "temperatura wewnętrzna", "interntemperatur", "température interne", "oda sıcaklığı", "temperatura interna")
 MAKE_WORD_TRANSLATION(internal_setpoint, "internal setpoint", "Interner Sollwert", "Interne Streeftemperatuur", "Internt börvärde", "nastawa wewnętrzna", "internt settpunkt", "consigne interne", "istenen oda sıcaklığı", "setpoint interno")
-MAKE_WORD_TRANSLATION(external_temperature, "external temperature", "Externe Temperatur", "Externe Temperatuur", "Extern temperatur", "temperatura zewnętrzna", "ekstern temperatur", "température externe","", "temperatura esterna") // TODO translate
+MAKE_WORD_TRANSLATION(external_temperature, "external temperature", "Externe Temperatur", "Externe Temperatuur", "Extern temperatur", "temperatura zewnętrzna", "ekstern temperatur", "température externe", "", "temperatura esterna") // TODO translate
 MAKE_WORD_TRANSLATION(burner_temperature, "burner temperature", "Brennertemperatur", "Brander Temperuur", "Brännartemperatur", "temperatura palnika", "brennertemperatur", "température du brûleur", "kazan sıcaklığı", "temperatura bruciatore")
 MAKE_WORD_TRANSLATION(ww_temperature, "ww temperature", "Wassertemperatur", "Watertemperatuur", "Vattentemperatur", "temperatura c.w.u.", "vanntemperatur", "température de l'eau", "Kullanım suyu sıcaklığı", "temperatura acqua")
 MAKE_WORD_TRANSLATION(smoke_temperature, "smoke temperature", "Abgastemperatur", "Buitentemperatuur", "Rökgastemperatur", "temperatura dymu", "røykgasstemperatur", "température des gaz d'échappement", "baca gazı sıcaklığı", "temperatura fumo")
@@ -270,16 +270,16 @@ MAKE_WORD_TRANSLATION(cyl1, "cyl 1", "Zyl_1", "Cil 1", "Cyl 1", "cyl 1", "cyl 1"
 MAKE_WORD_TRANSLATION(cyl2, "cyl 2", "Zyl_2", "Cil 2", "Cyl 2", "cyl 2", "cyl 2", "cyl 2", "cly 1", "Cil 2")
 
 // ventilation
-MAKE_WORD_TRANSLATION(demand, "demand", "Bedarf")
-MAKE_WORD_TRANSLATION(intense, "intense", "Intensiv")
-MAKE_WORD_TRANSLATION(sleep, "sleep", "Einschlafen")
-MAKE_WORD_TRANSLATION(partymode, "party", "Party")
-MAKE_WORD_TRANSLATION(fireplace, "fireplace", "Kamin")
+MAKE_WORD_TRANSLATION(demand, "demand", "Bedarf", "", "", "", "", "", "", "richiesta")
+MAKE_WORD_TRANSLATION(intense, "intense", "Intensiv", "", "", "", "", "", "", "intensivo")
+MAKE_WORD_TRANSLATION(sleep, "sleep", "Einschlafen", "", "", "", "", "", "", "notturno")
+MAKE_WORD_TRANSLATION(partymode, "party", "Party", "", "", "", "", "", "", "festa")
+MAKE_WORD_TRANSLATION(fireplace, "fireplace", "Kamin", "", "", "", "", "", "", "camino")
 
 // MQTT Discovery - this is special device entity for 'climate'
 MAKE_TRANSLATION(haclimate, "haclimate", "Discovery current room temperature", "Discovery Temperatur", "", "", "termostat w HA", "HA Avlest temp", "", "", "verifica temperatura ambiente attuale") // TODO translate
 
-// Entity translations
+// Entity translations: tag, en, de, nl, sv, pl, no, fr, tr, it
 // Boiler
 MAKE_TRANSLATION(wwtapactivated, "wwtapactivated", "turn on/off", "Durchlauferhitzer aktiv", "zet aan/uit", "på/av", "system przygotowywania", "Varmtvann active", "ecs activée", "", "commuta on/off")
 MAKE_TRANSLATION(reset, "reset", "Reset", "Reset", "Reset", "Nollställ", "kasowanie komunikatu", "nullstill", "reset", "", "Reset")
@@ -498,9 +498,9 @@ MAKE_TRANSLATION(blockHyst, "blockhyst", "hyst. for boiler block", "Hysterese Sp
 MAKE_TRANSLATION(releaseWait, "releasewait", "boiler release wait time", "Wartezeit Kessel-Freigabe", "Wachttijd ketel vrijgave", "Väntetid Frisläppning", "czas oczekiwania na zwolnienie kotła", "kjele frigjøringsventetid", "temps attente libération chaudière", "", "tempo di attesa sblocco caldaia")
 
 // HIU
-MAKE_TRANSLATION(netFlowTemp, "netflowtemp", "heat network flow temp")
-MAKE_TRANSLATION(cwFlowRate, "cwflowrate", "cold water flow rate")
-MAKE_TRANSLATION(keepWarmTemp, "keepwarmtemp", "keep warm temperature")
+MAKE_TRANSLATION(netFlowTemp, "netflowtemp", "heat network flow temp", "", "", "", "", "", "", "", "temperatura di mandata della rete di riscaldamento")
+MAKE_TRANSLATION(cwFlowRate, "cwflowrate", "cold water flow rate", "", "", "", "", "", "", "", "portata acqua fredda")
+MAKE_TRANSLATION(keepWarmTemp, "keepwarmtemp", "keep warm temperature", "", "", "", "", "", "", "", "mantenere la temperatura calda")
 
 // the following are dhw for the boiler and automatically tagged with 'dhw'
 MAKE_TRANSLATION(wwSelTemp, "wwseltemp", "selected temperature", "gewählte Temperatur", "Geselecteerd temperatuur", "Vald Temperatur", "temperatura wyższa/komfort", "valgt temperatur", "température sélectionnée", "", "temperatura selezionata")
@@ -515,7 +515,7 @@ MAKE_TRANSLATION(wwComfort1, "wwcomfort1", "comfort mode", "Komfort-Modus", "Com
 MAKE_TRANSLATION(wwFlowTempOffset, "wwflowtempoffset", "flow temperature offset", "Vorlauftemperaturanhebung", "Aanvoertemperatuur offset", "Flödestemperatur förskjutning", "korekta temperatury wypływu", "turtemperaturforskyvning", "offset température flux", "", "aumento della temperatura di ritorno")
 MAKE_TRANSLATION(wwMaxPower, "wwmaxpower", "max power", "max Leistung", "Maximaal vermogen", "Max Effekt", "moc maksymalna", "maks effekt", "puissance max", "", "potenza massima")
 MAKE_TRANSLATION(wwCircPump, "wwcircpump", "circulation pump available", "Zirkulationspumpe vorhanden", "Circulatiepomp aanwezig", "Cirkulationspump tillgänglig", "pompa cyrkulacji zainstalowana", "sirkulasjonspumpe tilgjengelig", "pompe circulation disponible", "", "pompa circolazione disponibile")
-MAKE_TRANSLATION(wwChargeType, "wwchargetype", "charging type", "Speicher-Ladungstyp", "Buffer laadtype", "Laddningstyp", "sposób grzania zasobnika", "varmetype", "type chargement", "", "")
+MAKE_TRANSLATION(wwChargeType, "wwchargetype", "charging type", "Speicher-Ladungstyp", "Buffer laadtype", "Laddningstyp", "sposób grzania zasobnika", "varmetype", "type chargement", "", "tipo caricamento") // TODO translate
 MAKE_TRANSLATION(wwDisinfectionTemp, "wwdisinfectiontemp", "disinfection temperature", "Desinfektionstemperatur", "Desinfectietemperatuur", "Desinfektionstemperatur", "temperatura dezynfekcji termicznej", "desinfeksjonstemperatur", "température désinfection", "", "temperatura disinfezione") // TODO translate
 MAKE_TRANSLATION(wwCircMode, "wwcircmode", "circulation pump mode", "Zirkulationspumpen-Modus", "Modus circulatiepomp", "Läge Cirkulationspump", "tryb pracy cyrkulacji", "sikulasjonspumpemodus", "mode pompe circulation", "", "modalità pompa circolazione")
 MAKE_TRANSLATION(wwCirc, "wwcirc", "circulation active", "Zirkulation aktiv", "Circulatiepomp actief", "Cirkulation aktiv", "pompa cyrkulacji", "sirkulasjon aktiv", "circulation active", "", "circolazione attiva")
@@ -577,7 +577,7 @@ MAKE_TRANSLATION(pvEnableWw, "pvenableww", "enable raise dhw", "aktiviere Anhebu
 MAKE_TRANSLATION(pvRaiseHeat, "pvraiseheat", "raise heating with PV", "Anhebung Heizen mit PV", "", "", "podwyższenie grzania z PV", "heve varmen med solpanel", "", "", "Aumentare il riscaldamento con il solare") // TODO translate
 MAKE_TRANSLATION(pvLowerCool, "pvlowercool", "lower cooling with PV", "Kühlabsenkung mit PV", "", "", "obniżenie chłodzenia z PV", "nedre kjøling solpanel", "", "", "Riduzione del raffreddamento con il solare") // TODO translate
 // thermostat ww
-MAKE_TRANSLATION(wwMode, "wwmode", "mode", "Modus", "Modus", "Läge", "tryb pracy", "modus", "mode", "", "Modus")
+MAKE_TRANSLATION(wwMode, "wwmode", "mode", "Modus", "Modus", "Läge", "tryb pracy", "modus", "mode", "", "modalità")
 MAKE_TRANSLATION(wwSetTempLow, "wwsettemplow", "set low temperature", "untere Solltemperatur", "Onderste streeftemperatuur", "Nedre Börvärde", "zadana temperatura obniżona", "nedre settverdi", "réglage température basse", "", "imposta bassa temperatura")
 MAKE_TRANSLATION(wwWhenModeOff, "wwwhenmodeoff", "when thermostat mode off", "bei Thermostatmodus AUS", "Als Thermostaat op UIT", "när Termostatläge är AV", "gdy wyłączono na termostacie", "når modus er av", "lorsque mode thermostat off", "", "quando termostato modalita OFF")
 MAKE_TRANSLATION(wwExtra1, "wwextra1", "circuit 1 extra", "Kreis 1 Extra", "Circuit 1 extra", "Krets 1 Extra", "obieg dodatkowy 1", "ekstra krets 1", "circuit 1 extra", "", "Circuito 1 extra")
@@ -594,7 +594,7 @@ MAKE_TRANSLATION(wwDailyHeatTime, "wwdailyheattime", "daily heating time", "täg
 // thermostat hc
 MAKE_TRANSLATION(selRoomTemp, "seltemp", "selected room temperature", "Sollwert Raumtemperatur", "Streeftemperatuur kamer", "Vald Rumstemperatur", "zadana temperatura w pomieszczeniu", "valgt rumstemperatur", "température ambiante sélectionnée", "", "temperatura ambiente selezionata")
 MAKE_TRANSLATION(roomTemp, "currtemp", "current room temperature", "aktuelle Raumtemperatur", "Huidige kamertemperatuur", "Aktuell Rumstemperatur", "temperatura w pomieszczeniu", "gjeldende romstemperatur", "température ambiante actuelle", "", "temperatura ambiente attuale")
-MAKE_TRANSLATION(mode, "mode", "mode", "Modus", "Modus", "Läge", "sposób sterowania", "modus", "mode", "", "Modus")
+MAKE_TRANSLATION(mode, "mode", "mode", "Modus", "Modus", "Läge", "sposób sterowania", "modus", "mode", "", "modalità")
 MAKE_TRANSLATION(modetype, "modetype", "mode type", "Modus Typ", "Type modus", "Typ av läge", "aktualny tryb pracy", "modusrype", "type mode", "", "tipo di modalita")
 MAKE_TRANSLATION(fastheatup, "fastheatup", "fast heatup", "schnelles Aufheizen", "Snel opwarmen", "Snabb Uppvärmning", "szybkie nagrzewanie", "rask oppvarming", "chauffage rapide", "", "riscaldamento rapido")
 MAKE_TRANSLATION(daytemp, "daytemp", "day temperature", "Tagestemperatur", "temperatuur dag", "Dagstemperatur", "temperatura w dzień", "dagtemperatur", "température jour", "", "temperatura giornaliera")
@@ -650,10 +650,10 @@ MAKE_TRANSLATION(reducehours, "reducehours", "duration for nighttemp", "Dauer Na
 MAKE_TRANSLATION(reduceminutes, "reduceminutes", "remaining time for nightmode", "Restzeit Nachttemp.", "Resterende tijd nachtverlaging", "Återstående Tid Nattläge", "czas do końca trybu nocnego", "gjenværende tid i nattstilling", "temps restant mode nuit", "", "temperatura notturna residua")
 MAKE_TRANSLATION(switchonoptimization, "switchonoptimization", "switch-on optimization", "Einschaltoptimierung", "Inschakeloptimalisering", "Växlingsoptimering", "optymalizacja załączania", "slå på optimalisering", "optimisation mise en marche", "", "ottimizzazione all'accensione")
 
-MAKE_TRANSLATION(hpmode, "hpmode", "HP Mode", "WP Modus")
-MAKE_TRANSLATION(dewoffset, "dewoffset", "dew point offset", "Taupunkt Differenz")
-MAKE_TRANSLATION(roomtempdiff, "roomtempdiff", "room temp difference", "Raumtemperatur Differenz")
-MAKE_TRANSLATION(hpminflowtemp, "hpminflowtemp", "HP min. flow temp.", "WP minimale Vorlauftemperatur")
+MAKE_TRANSLATION(hpmode, "hpmode", "HP Mode", "WP Modus", "", "", "", "", "", "", "Modalità Termopompa")
+MAKE_TRANSLATION(dewoffset, "dewoffset", "dew point offset", "Taupunkt Differenz", "", "", "", "", "", "", "differenza del punto di rugiada")
+MAKE_TRANSLATION(roomtempdiff, "roomtempdiff", "room temp difference", "Raumtemperatur Differenz", "", "", "", "", "", "", "differenza temperatura ambiente")
+MAKE_TRANSLATION(hpminflowtemp, "hpminflowtemp", "HP min. flow temp.", "WP minimale Vorlauftemperatur", "", "", "", "", "", "", "temperatura minima di mandata")
 MAKE_TRANSLATION(hpcooling, "cooling", "cooling", "Kühlen", "Koelen", "Kyler", "chłodzenie", "kjøling", "refroidissement", "soğuma", "raffreddamento")
 
 // heatpump
@@ -750,7 +750,7 @@ MAKE_TRANSLATION(solarPump2Mode, "pump2mode", "pump 2 mode", "Pumpe 2 Modus", "M
 MAKE_TRANSLATION(solarPump2Kick, "pump2kick", "pump kick 2", "Pumpe 2 Startboost", "Startboost pomp 2", "Pump 2 Kollektorfunktion", "wspomaganie startu pompy 2", "startboost pumpe 2", "démarrage boost pompe 2", "", "avvio forzato pompa 2")
 
 // telegram 0x035F
-MAKE_TRANSLATION(cylPriority, "cylpriority", "cylinder priority", "Speicher Priorität", "Prioriteit boiler", "Cylinderprioritering", "priorytet cylindra", "berederprioritering", "priorité de cylindre", "", "")
+MAKE_TRANSLATION(cylPriority, "cylpriority", "cylinder priority", "Speicher Priorität", "Prioriteit boiler", "Cylinderprioritering", "priorytet cylindra", "berederprioritering", "priorité de cylindre", "", "priorità vaso accumulo")
 
 // telegram 0x380
 MAKE_TRANSLATION(climateZone, "climatezone", "climate zone", "Klimazone", "klimaatzone", "Klimatzon", "strefa klimatyczna", "klimasone", "zone de climat", "", "zona clima")
@@ -767,21 +767,21 @@ MAKE_TRANSLATION(swapFlowTemp, "swapflowtemp", "swap flow temperature (TS14)", "
 MAKE_TRANSLATION(swapRetTemp, "swaprettemp", "swap return temperature (TS15)", "Austausch Rücklauf-Temperatur (TS15)", "Retourtemperatuur verwisselaar (TS15)", "Växlingstemperatur Returflöde (TS15)", "temperatura powrotu wymiennika", "veksler returledningstemperatur (TS15)", "température retour échangeur (TS15)", "", "Scambiare la temperatura di ritorno (TS15)")
 
 // switch
-MAKE_TRANSLATION(activated, "activated", "activated", "Aktiviert", "Geactiveerd", "Aktiverad", "aktywowany", "aktivert", "activé", "", "ativato")
+MAKE_TRANSLATION(activated, "activated", "activated", "Aktiviert", "Geactiveerd", "Aktiverad", "aktywowany", "aktivert", "activé", "", "attivato")
 MAKE_TRANSLATION(status, "status", "status", "Status", "Status", "Status", "status", "status", "statut", "", "Stato")
 
 // RF sensor, id 0x40, telegram 0x435
 MAKE_TRANSLATION(RFTemp, "rftemp", "RF room temperature sensor", "RF Raumtemperatur Sensor", "RF ruimtetemperatuur sensor", "RF Rumsgivare Temp", "bezprzewodowy czujnik temperatury pomieszczenia", "RF romsgiver temp", "capteur de température de pièce RF", "", "Sensore di temperatura ambiente RF")
 
 // ventilation
-MAKE_TRANSLATION(outFresh, "outfresh", "outdoor fresh air", "Außenlufttemp.", "", "", "", "", "", "", "") // TODO translate
-MAKE_TRANSLATION(inFresh, "infresh", "indoor fresh air", "Zulufttemp.", "", "", "", "", "", "", "") // TODO translate
-MAKE_TRANSLATION(outEx, "outexhaust", "outdoor exhaust air", "Fortlufttemp.", "", "", "", "", "", "", "") // TODO translate
-MAKE_TRANSLATION(inEx, "inexhaust", "indoor exhaust air", "Ablufttemp.", "", "", "", "", "", "", "") // TODO translate
-MAKE_TRANSLATION(ventMode, "ventmode", "ventilation mode", "Belüftungsmodus", "", "", "", "", "", "", "") // TODO translate
-MAKE_TRANSLATION(ventInSpeed, "ventinspeed", "in blower speed", "Zuluft-Drehzahl", "", "", "", "", "", "", "") // TODO translate
-MAKE_TRANSLATION(ventOutSpeed, "ventoutspeed", "out blower speed", "Abluft-Drehzahl", "", "", "", "", "", "", "") // TODO translate
-MAKE_TRANSLATION(airquality, "airquality", "air quality (voc)", "Luftqualität (VOC)", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(outFresh, "outfresh", "outdoor fresh air", "Außenlufttemp.", "", "", "", "", "", "", "aria fresca esterna") // TODO translate
+MAKE_TRANSLATION(inFresh, "infresh", "indoor fresh air", "Zulufttemp.", "", "", "", "", "", "", "aria fresca interna") // TODO translate
+MAKE_TRANSLATION(outEx, "outexhaust", "outdoor exhaust air", "Fortlufttemp.", "", "", "", "", "", "", "aria di scarico esterna") // TODO translate
+MAKE_TRANSLATION(inEx, "inexhaust", "indoor exhaust air", "Ablufttemp.", "", "", "", "", "", "", "aria di scarico interna") // TODO translate
+MAKE_TRANSLATION(ventMode, "ventmode", "ventilation mode", "Belüftungsmodus", "", "", "", "", "", "", "modalità di ventilazione") // TODO translate
+MAKE_TRANSLATION(ventInSpeed, "ventinspeed", "in blower speed", "Zuluft-Drehzahl", "", "", "", "", "", "", "velocità aria di alimentazione") // TODO translate
+MAKE_TRANSLATION(ventOutSpeed, "ventoutspeed", "out blower speed", "Abluft-Drehzahl", "", "", "", "", "", "", "velocità aria di scarico") // TODO translate
+MAKE_TRANSLATION(airquality, "airquality", "air quality (voc)", "Luftqualität (VOC)", "", "", "", "", "", "", "qualità aria (VOC)") // TODO translate
 
 /*
 // unknown fields to track (SM10), only for testing

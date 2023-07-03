@@ -9,7 +9,7 @@ the LICENSE file.
 #pragma once
 
 #ifndef EMC_TX_TIMEOUT
-#define EMC_TX_TIMEOUT 5000
+#define EMC_TX_TIMEOUT 2000
 #endif
 
 #ifndef EMC_RX_BUFFER_SIZE
@@ -29,7 +29,7 @@ the LICENSE file.
 #endif
 
 #ifndef EMC_MIN_FREE_MEMORY
-#define EMC_MIN_FREE_MEMORY 4096
+#define EMC_MIN_FREE_MEMORY 16384
 #endif
 
 #ifndef EMC_ESP8266_MULTITHREADING
