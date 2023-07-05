@@ -117,13 +117,13 @@ const SignIn: FC = () => {
             }
           }}
         >
-          <Button size="small" variant={locale === 'en' ? 'contained' : 'outlined'} onClick={() => selectLocale('en')}>
-            <GBflag style={{ width: 24 }} />
-            &nbsp;EN
-          </Button>
           <Button size="small" variant={locale === 'de' ? 'contained' : 'outlined'} onClick={() => selectLocale('de')}>
             <DEflag style={{ width: 24 }} />
             &nbsp;DE
+          </Button>
+          <Button size="small" variant={locale === 'en' ? 'contained' : 'outlined'} onClick={() => selectLocale('en')}>
+            <GBflag style={{ width: 24 }} />
+            &nbsp;EN
           </Button>
           <Button size="small" variant={locale === 'fr' ? 'contained' : 'outlined'} onClick={() => selectLocale('fr')}>
             <FRflag style={{ width: 24 }} />
