@@ -1161,7 +1161,7 @@ void Thermostat::process_HPMode(std::shared_ptr<const Telegram> telegram) {
     if (hc == nullptr) {
         return;
     }
-    has_update(telegram, hc->hpmode, 0);
+    has_update(telegram, hc->hpmode, 5);
 }
 
 // 0x467 ff HP settings
@@ -1170,9 +1170,9 @@ void Thermostat::process_HPSet(std::shared_ptr<const Telegram> telegram) {
     if (hc == nullptr) {
         return;
     }
-    has_update(telegram, hc->dewoffset, 0);     // 7-35°C
+    has_update(telegram, hc->dewoffset, 4);     // 7-35°C
     has_update(telegram, hc->roomtempdiff, 3);  // 1-10K
-    has_update(telegram, hc->hpminflowtemp, 4); // 2-10K
+    has_update(telegram, hc->hpminflowtemp, 0); // 2-10K
 }
 
 // type 0x41 - data from the RC30 thermostat(0x10) - 14 bytes long
@@ -1546,7 +1546,7 @@ bool Thermostat::set_hpmode(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, v, FL_(enum_hpmode))) {
         return false;
     }
-    write_command(hpmode_typeids[hc->hc()], 0, v, hpmode_typeids[hc->hc()]);
+    write_command(hpmode_typeids[hc->hc()], 5, v, hpmode_typeids[hc->hc()]);
     return true;
 }
 
