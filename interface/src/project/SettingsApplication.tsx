@@ -377,8 +377,8 @@ const SettingsApplication: FC = () => {
             margin="normal"
             select
           >
-            <MenuItem value="en">English (EN)</MenuItem>
             <MenuItem value="de">Deutsch (DE)</MenuItem>
+            <MenuItem value="en">English (EN)</MenuItem>
             <MenuItem value="fr">Français (FR)</MenuItem>
             <MenuItem value="it">Italiano (IT)</MenuItem>
             <MenuItem value="nl">Nederlands (NL)</MenuItem>

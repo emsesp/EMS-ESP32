@@ -74,13 +74,13 @@ const LayoutAuthMenu: FC = () => {
         size="small"
         select
       >
-        <MenuItem key="en" value="en">
-          <GBflag style={{ width: 16, verticalAlign: 'middle' }} />
-          &nbsp;EN
-        </MenuItem>
         <MenuItem key="de" value="de">
           <DEflag style={{ width: 16, verticalAlign: 'middle' }} />
           &nbsp;DE
+        </MenuItem>
+        <MenuItem key="en" value="en">
+          <GBflag style={{ width: 16, verticalAlign: 'middle' }} />
+          &nbsp;EN
         </MenuItem>
         <MenuItem key="fr" value="fr">
           <FRflag style={{ width: 16, verticalAlign: 'middle' }} />
