@@ -1556,7 +1556,7 @@ __metadata:
     terser: ^5.18.2
     typesafe-i18n: ^5.24.3
     typescript: ^5.1.6
-    vite: ^4.4.1
+    vite: ^4.4.2
     vite-plugin-svgr: ^3.2.0
     vite-tsconfig-paths: ^4.2.0
   languageName: unknown
@@ -5957,9 +5957,9 @@ react@latest:
   languageName: node
   linkType: hard
 
-"vite@npm:^4.4.1":
-  version: 4.4.1
-  resolution: "vite@npm:4.4.1"
+"vite@npm:^4.4.2":
+  version: 4.4.2
+  resolution: "vite@npm:4.4.2"
   dependencies:
     esbuild: ^0.18.10
     fsevents: ~2.3.2
@@ -5993,7 +5993,7 @@ react@latest:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 28e616abc86038aa73d856b77525193bd77d6ac7fe49f699a3b2a93586613d5f109f07c9917c294faa23b939d07e181c55f9a33392109d278550cc0c87a2d5a3
+  checksum: 8c505f45cc28a67a31a6b944d1a319c63f6cda98e1e38c6da46e604f7981cdb3fb08c022d4887a190dd88f9d0d6155e992f2206f0cacb301103f5eec53182c3b
   languageName: node
   linkType: hard
 
