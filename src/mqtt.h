@@ -111,7 +111,7 @@ class Mqtt {
 #endif
     }
 
-    static espMqttClient * client() {
+    static MqttClient * client() {
         return mqttClient_;
     }
 
@@ -229,8 +229,8 @@ class Mqtt {
   private:
     static uuid::log::Logger logger_;
 
-    static espMqttClient * mqttClient_;
-    static uint32_t        mqtt_message_id_;
+    static MqttClient * mqttClient_;
+    static uint32_t     mqtt_message_id_;
 
     static bool queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, const bool retain);
     static bool queue_publish_message(const std::string & topic, const std::string & payload, const bool retain);

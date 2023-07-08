@@ -324,8 +324,8 @@ const it: Translation = {
   ENTITIES_UPDATED: 'Entità aggiornate',
   WRITEABLE: 'Scrivibile',
   SHOWING: 'Visualizza',
-  SEARCH: 'Ricerca'
-
+  SEARCH: 'Ricerca',
+  CERT: 'TSL root certificate (leave blank to disable TSL)' // TODO translate
 };
 
 export default it;

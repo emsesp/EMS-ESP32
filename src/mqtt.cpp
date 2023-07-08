@@ -23,7 +23,7 @@
 
 namespace emsesp {
 
-espMqttClient * Mqtt::mqttClient_;
+MqttClient * Mqtt::mqttClient_;
 
 // static parameters we make global
 std::string Mqtt::mqtt_base_;
@@ -387,9 +387,9 @@ void Mqtt::start() {
         snprintf(will_topic, MQTT_TOPIC_MAX_SIZE, "status");
     }
 
-    mqttClient_->setWill(will_topic, 1, true, "offline"); // with qos 1, retain true
+    EMSESP::esp8266React.setWill(will_topic); // with qos 1, retain true
 
-    mqttClient_->onMessage(
+    EMSESP::esp8266React.onMessage(
         [this](const espMqttClientTypes::MessageProperties & properties, const char * topic, const uint8_t * payload, size_t len, size_t index, size_t total) {
             on_message(topic, (const char *)payload, len); // receiving mqtt
         });

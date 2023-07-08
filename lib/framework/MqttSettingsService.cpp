@@ -2,7 +2,7 @@
 
 #include "../../src/emsesp_stub.hpp" // proddy added
 
-using namespace std::placeholders; // for `_1` etc
+using namespace std::placeholders;   // for `_1` etc
 
 /**
  * Retains a copy of the cstr provided in the pointer provided using dynamic allocation.
@@ -34,10 +34,8 @@ MqttSettingsService::MqttSettingsService(AsyncWebServer * server, FS * fs, Secur
     , _reconfigureMqtt(false)
     , _disconnectedAt(0)
     , _disconnectReason(espMqttClientTypes::DisconnectReason::TCP_DISCONNECTED)
-    , _mqttClient(espMqttClientTypes::UseInternalTask::NO) {
+    , _mqttClient(nullptr) {
     WiFi.onEvent(std::bind(&MqttSettingsService::WiFiEvent, this, _1, _2));
-    _mqttClient.onConnect(std::bind(&MqttSettingsService::onMqttConnect, this, _1));
-    _mqttClient.onDisconnect(std::bind(&MqttSettingsService::onMqttDisconnect, this, _1));
     addUpdateHandler([&](const String & originId) { onConfigUpdated(); }, false);
 }
 
@@ -46,18 +44,27 @@ MqttSettingsService::~MqttSettingsService() {
 
 void MqttSettingsService::begin() {
     _fsPersistence.readFromFS();
+    if (_mqttClient != nullptr) {
+        delete _mqttClient;
+    }
+    if (_state.rootCA.length() > 0) {
+        _mqttClient = static_cast<MqttClient *>(new espMqttClientSecure(espMqttClientTypes::UseInternalTask::NO));
+        static_cast<espMqttClientSecure *>(_mqttClient)->onConnect(std::bind(&MqttSettingsService::onMqttConnect, this, _1));
+        static_cast<espMqttClientSecure *>(_mqttClient)->onDisconnect(std::bind(&MqttSettingsService::onMqttDisconnect, this, _1));
+    } else {
+        _mqttClient = static_cast<MqttClient *>(new espMqttClient(espMqttClientTypes::UseInternalTask::NO));
+        static_cast<espMqttClient *>(_mqttClient)->onConnect(std::bind(&MqttSettingsService::onMqttConnect, this, _1));
+        static_cast<espMqttClient *>(_mqttClient)->onDisconnect(std::bind(&MqttSettingsService::onMqttDisconnect, this, _1));
+    }
 }
 
 void MqttSettingsService::loop() {
     if (_reconfigureMqtt || (_disconnectedAt && (uint32_t)(uuid::get_uptime() - _disconnectedAt) >= MQTT_RECONNECTION_DELAY)) {
         // reconfigure MQTT client
-        _disconnectedAt = uuid::get_uptime();
-        if (configureMqtt()) {
-            _disconnectedAt = 0;
-        }
+        _disconnectedAt  = configureMqtt() ? 0 : uuid::get_uptime();
         _reconfigureMqtt = false;
     }
-    _mqttClient.loop();
+    _mqttClient->loop();
 }
 
 bool MqttSettingsService::isEnabled() {
@@ -65,19 +72,35 @@ bool MqttSettingsService::isEnabled() {
 }
 
 bool MqttSettingsService::isConnected() {
-    return _mqttClient.connected();
+    return _mqttClient->connected();
 }
 
 const char * MqttSettingsService::getClientId() {
-    return _mqttClient.getClientId();
+    return _mqttClient->getClientId();
+}
+
+void MqttSettingsService::setWill(const char * topic) {
+    if (_state.rootCA.length() > 0) {
+        static_cast<espMqttClientSecure *>(_mqttClient)->setWill(topic, 1, true, "offline");
+    } else {
+        static_cast<espMqttClient *>(_mqttClient)->setWill(topic, 1, true, "offline");
+    }
+}
+
+void MqttSettingsService::onMessage(espMqttClientTypes::OnMessageCallback callback) {
+    if (_state.rootCA.length() > 0) {
+        static_cast<espMqttClientSecure *>(_mqttClient)->onMessage(callback);
+    } else {
+        static_cast<espMqttClient *>(_mqttClient)->onMessage(callback);
+    }
 }
 
 espMqttClientTypes::DisconnectReason MqttSettingsService::getDisconnectReason() {
     return _disconnectReason;
 }
 
-espMqttClient * MqttSettingsService::getMqttClient() {
-    return &_mqttClient;
+MqttClient * MqttSettingsService::getMqttClient() {
+    return _mqttClient;
 }
 
 void MqttSettingsService::onMqttConnect(bool sessionPresent) {
@@ -118,7 +141,7 @@ void MqttSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     case ARDUINO_EVENT_ETH_DISCONNECTED:
         if (_state.enabled) {
             // emsesp::EMSESP::logger().info("Network connection dropped, stopping MQTT client");
-            _mqttClient.disconnect(true);
+            _mqttClient->disconnect(true);
         }
         break;
 
@@ -128,29 +151,53 @@ void MqttSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
 }
 
 bool MqttSettingsService::configureMqtt() {
+    if (_mqttClient == nullptr) {
+        begin();
+    }
     // disconnect if connected
-    _mqttClient.disconnect(true);
+    _mqttClient->disconnect(true);
     // only connect if WiFi is connected and MQTT is enabled
-    if (_state.enabled && emsesp::EMSESP::system_.network_connected() && !_state.host.isEmpty()) {
-        // emsesp::EMSESP::logger().info("Configuring MQTT client");
-        _mqttClient.setServer(retainCstr(_state.host.c_str(), &_retainedHost), _state.port);
-        if (_state.username.length() > 0) {
-            _mqttClient.setCredentials(retainCstr(_state.username.c_str(), &_retainedUsername),
-                                       retainCstr(_state.password.length() > 0 ? _state.password.c_str() : nullptr, &_retainedPassword));
+    if (_state.enabled && !_state.host.isEmpty()) {
+        _reconfigureMqtt = false;
+        if (_state.rootCA.length() > 0) {
+            // static_cast<espMqttClientSecure *>(_mqttClient)->setInsecure();
+            String cert = "-----BEGIN CERTIFICATE-----\n" + _state.rootCA + "-----END CERTIFICATE-----\n";
+            static_cast<espMqttClientSecure *>(_mqttClient)->setCACert(retainCstr(cert.c_str(), &_retainedRootCA));
+            static_cast<espMqttClientSecure *>(_mqttClient)->setServer(retainCstr(_state.host.c_str(), &_retainedHost), _state.port);
+            if (_state.username.length() > 0) {
+                static_cast<espMqttClientSecure *>(_mqttClient)
+                    ->setCredentials(retainCstr(_state.username.c_str(), &_retainedUsername),
+                                     retainCstr(_state.password.length() > 0 ? _state.password.c_str() : nullptr, &_retainedPassword));
+            } else {
+                static_cast<espMqttClientSecure *>(_mqttClient)->setCredentials(retainCstr(nullptr, &_retainedUsername), retainCstr(nullptr, &_retainedPassword));
+            }
+            static_cast<espMqttClientSecure *>(_mqttClient)->setClientId(retainCstr(_state.clientId.c_str(), &_retainedClientId));
+            static_cast<espMqttClientSecure *>(_mqttClient)->setKeepAlive(_state.keepAlive);
+            static_cast<espMqttClientSecure *>(_mqttClient)->setCleanSession(_state.cleanSession);
+            return _mqttClient->connect();
         } else {
-            _mqttClient.setCredentials(retainCstr(nullptr, &_retainedUsername), retainCstr(nullptr, &_retainedPassword));
+            // emsesp::EMSESP::logger().info("Configuring MQTT client");
+            static_cast<espMqttClient *>(_mqttClient)->setServer(retainCstr(_state.host.c_str(), &_retainedHost), _state.port);
+            if (_state.username.length() > 0) {
+                static_cast<espMqttClient *>(_mqttClient)
+                    ->setCredentials(retainCstr(_state.username.c_str(), &_retainedUsername),
+                                     retainCstr(_state.password.length() > 0 ? _state.password.c_str() : nullptr, &_retainedPassword));
+            } else {
+                static_cast<espMqttClient *>(_mqttClient)->setCredentials(retainCstr(nullptr, &_retainedUsername), retainCstr(nullptr, &_retainedPassword));
+            }
+            static_cast<espMqttClient *>(_mqttClient)->setClientId(retainCstr(_state.clientId.c_str(), &_retainedClientId));
+            static_cast<espMqttClient *>(_mqttClient)->setKeepAlive(_state.keepAlive);
+            static_cast<espMqttClient *>(_mqttClient)->setCleanSession(_state.cleanSession);
+            return _mqttClient->connect();
+            // } else {
+            // emsesp::EMSESP::logger().info("Error configuring MQTT client");
         }
-        _mqttClient.setClientId(retainCstr(_state.clientId.c_str(), &_retainedClientId));
-        _mqttClient.setKeepAlive(_state.keepAlive);
-        _mqttClient.setCleanSession(_state.cleanSession);
-        return _mqttClient.connect();
-        // } else {
-        // emsesp::EMSESP::logger().info("Error configuring MQTT client");
     }
     return false;
 }
 
 void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
+    root["rootCA"]        = settings.rootCA;
     root["enabled"]       = settings.enabled;
     root["host"]          = settings.host;
     root["port"]          = settings.port;
@@ -182,9 +229,11 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
 }
 
 StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & settings) {
-    MqttSettings newSettings = {};
-    bool         changed     = false;
+    MqttSettings newSettings   = {};
+    bool         changed       = false;
+    bool         restartNeeded = false;
 
+    newSettings.rootCA       = root["rootCA"] | "";
     newSettings.enabled      = root["enabled"] | FACTORY_MQTT_ENABLED;
     newSettings.host         = root["host"] | FACTORY_MQTT_HOST;
     newSettings.port         = root["port"] | FACTORY_MQTT_PORT;
@@ -300,11 +349,20 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
         emsesp::EMSESP::mqtt_.set_publish_time_heartbeat(newSettings.publish_time_heartbeat);
     }
 
+    if (newSettings.rootCA != settings.rootCA) {
+        changed       = true;
+        restartNeeded = true;
+    }
+
     // save the new settings
     settings = newSettings;
 
     if (changed) {
         emsesp::EMSESP::mqtt_.reset_mqtt();
+    }
+
+    if (restartNeeded) {
+        return StateUpdateResult::CHANGED_RESTART; // tell WebUI that a restart is needed
     }
 
     return StateUpdateResult::CHANGED;

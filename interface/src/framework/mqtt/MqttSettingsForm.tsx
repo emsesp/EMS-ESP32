@@ -1,12 +1,17 @@
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import { Button, Checkbox, MenuItem, Grid, Typography, InputAdornment, TextField } from '@mui/material';
 import { useState } from 'react';
 import type { ValidateFieldsError } from 'async-validator';
 import type { FC } from 'react';
+import { toast } from 'react-toastify';
+import RestartMonitor from '../system/RestartMonitor';
+import { useRequest } from 'alova';
 
 import type { MqttSettings } from 'types';
 import * as MqttApi from 'api/mqtt';
+import * as SystemApi from 'api/system';
 import {
   BlockFormControlLabel,
   ButtonRow,
@@ -14,6 +19,7 @@ import {
   SectionContent,
   ValidatedPasswordField,
   ValidatedTextField,
+  MessageBox,
   BlockNavigation
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
@@ -32,15 +38,21 @@ const MqttSettingsForm: FC = () => {
     setDirtyFlags,
     blocker,
     saveData,
-    errorMessage
+    errorMessage,
+    restartNeeded
   } = useRest<MqttSettings>({
     read: MqttApi.readMqttSettings,
     update: MqttApi.updateMqttSettings
   });
 
+  const { send: restartCommand } = useRequest(SystemApi.restart(), {
+    immediate: false
+  });
+
   const { LL } = useI18nContext();
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
+  const [restarting, setRestarting] = useState(false);
 
   const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, updateDataValue);
 
@@ -57,6 +69,13 @@ const MqttSettingsForm: FC = () => {
       } catch (errors: any) {
         setFieldErrors(errors);
       }
+    };
+
+    const restart = async () => {
+      await restartCommand().catch((error) => {
+        toast.error(error.message);
+      });
+      setRestarting(true);
     };
 
     return (
@@ -167,6 +186,17 @@ const MqttSettingsForm: FC = () => {
               <MenuItem value={1}>1</MenuItem>
               <MenuItem value={2}>2</MenuItem>
             </TextField>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <ValidatedPasswordField
+              name="rootCA"
+              label={LL.CERT()}
+              fullWidth
+              variant="outlined"
+              value={data.rootCA}
+              onChange={updateFormValue}
+              margin="normal"
+            />
           </Grid>
         </Grid>
         <BlockFormControlLabel
@@ -400,7 +430,15 @@ const MqttSettingsForm: FC = () => {
           </Grid>
         </Grid>
 
-        {dirtyFlags && dirtyFlags.length !== 0 && (
+        {restartNeeded && (
+          <MessageBox my={2} level="warning" message={LL.RESTART_TEXT()}>
+            <Button startIcon={<PowerSettingsNewIcon />} variant="contained" color="error" onClick={restart}>
+              {LL.RESTART()}
+            </Button>
+          </MessageBox>
+        )}
+
+        {!restartNeeded && dirtyFlags && dirtyFlags.length !== 0 && (
           <ButtonRow>
             <Button
               startIcon={<CancelIcon />}
@@ -431,7 +469,7 @@ const MqttSettingsForm: FC = () => {
   return (
     <SectionContent title={LL.SETTINGS_OF('MQTT')} titleGutter>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
-      {content()}
+      {restarting ? <RestartMonitor /> : content()}
     </SectionContent>
   );
 };

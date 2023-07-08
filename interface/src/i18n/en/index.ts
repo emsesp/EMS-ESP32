@@ -282,7 +282,7 @@ const en: Translation = {
   SCAN_AGAIN: 'Scan again',
   NETWORK_SCANNER: 'Network Scanner',
   NETWORK_NO_WIFI: 'No WiFi networks found',
-  NETWORK_BLANK_SSID: 'leave blank to disable WiFi',
+  NETWORK_BLANK_SSID: 'leave blank to disable WiFi and enable ETH',
   TX_POWER: 'Tx Power',
   HOSTNAME: 'Hostname',
   NETWORK_DISABLE_SLEEP: 'Disable WiFi Sleep Mode',
@@ -322,8 +322,8 @@ const en: Translation = {
   ENTITIES_UPDATED: 'Entities Updated',
   WRITEABLE: 'Writeable',
   SHOWING: 'Showing',
-  SEARCH: 'Search'
-
+  SEARCH: 'Search',
+  CERT: 'TSL root certificate (leave blank to disable TSL)'
 };
 
 export default en;
