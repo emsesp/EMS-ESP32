@@ -7,7 +7,7 @@ export const scanNetworks = () => alovaInstance.Get('/rest/scanNetworks');
 export const listNetworks = () =>
   alovaInstance.Get<WiFiNetworkList>('/rest/listNetworks', {
     name: 'listNetworks',
-    timeout: 20000, // timeout 20 seconds
+    timeout: 20000 // timeout 20 seconds
   });
 export const readNetworkSettings = () =>
   alovaInstance.Get<NetworkSettings>('/rest/networkSettings', { name: 'networkSettings' });
