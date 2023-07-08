@@ -42,7 +42,9 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
             return;
         } else {
             md5[0] = '\0';
-            return; // unsupported file type
+            handleError(request, 406); // Not Acceptable - unsupported file type
+            request->client()->abort();
+            return;
         }
 
         if (is_firmware) {
@@ -122,18 +124,17 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
         request->send(response);
         return;
     }
+
     if (strlen(md5) == 32) {
         auto *     response = new AsyncJsonResponse(false, 256);
         JsonObject root     = response->getRoot();
         root["md5"]         = md5;
         response->setLength();
         request->send(response);
-        // AsyncWebServerResponse * response = request->beginResponse(201, "text/plain", md5); // created
-        // request->send(response);
         return;
     }
 
-    handleError(request, 403); // send the forbidden response
+    handleError(request, 406); // send the forbidden response
 }
 
 void UploadFileService::handleError(AsyncWebServerRequest * request, int code) {
@@ -143,9 +144,9 @@ void UploadFileService::handleError(AsyncWebServerRequest * request, int code) {
     }
 
     // send the error code to the client and record the error code in the temp object
-    request->_tempObject              = new int(code);
     AsyncWebServerResponse * response = request->beginResponse(code);
     request->send(response);
+    handleEarlyDisconnect();
 }
 
 void UploadFileService::handleEarlyDisconnect() {
