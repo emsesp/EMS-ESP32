@@ -46,8 +46,7 @@ export const alovaInstance = createAlova({
     }
 
     // Interceptor for request failure. This interceptor will be entered when the request is wrong.
-    // TODO how best to handle http errors like 401 (unauthorized)
-    // but I think this is handled correctly in AppRouting? See AuthenticatedRouting()
+    // http errors like 401 (unauthorized) are handled either in the methods or AuthenticatedRouting()
     // onError: (error, method) => {
     //   alert(error.message);
     // }
