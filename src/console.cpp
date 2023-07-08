@@ -620,12 +620,12 @@ void EMSESPShell::stopped() {
 // show welcome banner
 void EMSESPShell::display_banner() {
     println();
-    printfln("┌───────────────────────────────────────┐");
+    printfln("┌────────────────────────────────────────┐");
     printfln("│ %sEMS-ESP version %-12s%s          │", COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_BOLD_OFF);
-    printfln("│ %s%shttps://github.com/emsesp/EMS-ESP32%s   │", COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
-    printfln("│                                       │");
-    printfln("│ type %shelp%s to show available commands  │", COLOR_UNDERLINE, COLOR_RESET);
-    printfln("└───────────────────────────────────────┘");
+    printfln("│ %s%shttps://github.com/emsesp/EMS-ESP32%s    │", COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
+    printfln("│                                        │");
+    printfln("│ type %shelp%s to show available commands   │", COLOR_UNDERLINE, COLOR_RESET);
+    printfln("└────────────────────────────────────────┘");
     println();
 
     // set console name
@@ -640,16 +640,16 @@ std::string EMSESPShell::hostname_text() {
 }
 
 std::string EMSESPShell::context_text() {
-    auto shell_context = static_cast<ShellContext>(context());
+    return std::string{};
 
-    if (shell_context == ShellContext::MAIN) {
-        return std::string{};
-        // return std::string{'/'};
-        // } else if (shell_context == ShellContext::FILESYSTEM) {
-        // 	return "/fs");
-    } else {
-        return std::string{};
-    }
+    // auto shell_context = static_cast<ShellContext>(context());
+    // if (shell_context == ShellContext::MAIN) {
+    //     return std::string{'/'};
+    // } else if (shell_context == ShellContext::FILESYSTEM) {
+    //         return "/fs");
+    // } else {
+    //         return std::string{};
+    // }
 }
 
 // when in su (admin) show # as the prompt suffix
