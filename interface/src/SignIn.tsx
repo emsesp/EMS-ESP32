@@ -55,7 +55,7 @@ const SignIn: FC = () => {
   const signIn = async () => {
     await callSignIn(signInRequest).catch((event) => {
       if (event.message === 'Unauthorized') {
-        toast.warn(LL.INVALID_LOGIN());
+        toast.warning(LL.INVALID_LOGIN());
       } else {
         toast.error(LL.ERROR() + ' ' + event.message);
       }
