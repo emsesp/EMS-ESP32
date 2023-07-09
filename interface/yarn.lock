@@ -1554,7 +1554,7 @@ __metadata:
     jwt-decode: ^3.1.2
     lodash-es: ^4.17.21
     mime-types: ^2.1.35
-    nodemon: ^3.0.0
+    nodemon: ^3.0.1
     npm-run-all: ^4.1.5
     prettier: ^3.0.0
     react: latest
@@ -4374,9 +4374,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodemon@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "nodemon@npm:3.0.0"
+"nodemon@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "nodemon@npm:3.0.1"
   dependencies:
     chokidar: ^3.5.2
     debug: ^3.2.7
@@ -4390,7 +4390,7 @@ __metadata:
     undefsafe: ^2.0.5
   bin:
     nodemon: bin/nodemon.js
-  checksum: 7c28b942f8e47368fe1ea55f69a3d275d1762d1c77f08316befee4c5b5d5a230efd55cde3126c9427c253b97ba103a371fe96d46651b9852327ed1345c765830
+  checksum: 471a218227949b38926de78237004c91e226b63ee06f433cf85c2f1c1f8b6bfbef9bceaa8d27786e7cfb539eb84da357d01741884d08a3ae172bebecd0f1de5b
   languageName: node
   linkType: hard
 
