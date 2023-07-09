@@ -1,9 +1,9 @@
+import { text } from 'stream/consumers';
 import DownloadIcon from '@mui/icons-material/GetApp';
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, styled, Button, Checkbox, MenuItem, Grid, TextField } from '@mui/material';
-// eslint-disable-next-line import/named
 import { useRequest } from 'alova';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import type { FC } from 'react';
 
@@ -58,8 +58,7 @@ const SystemLog: FC = () => {
     });
 
   // called on page load to reset pointer and fetch all log entries
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { send: fetchLog } = useRequest(SystemApi.fetchLog());
+  useRequest(SystemApi.fetchLog());
   const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
   const [lastIndex, setLastIndex] = useState<number>(0);
 
@@ -108,13 +107,23 @@ const SystemLog: FC = () => {
     await saveData();
   };
 
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (logEntries.length) {
+      ref.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end'
+      });
+    }
+  }, [logEntries.length]);
+
   useEffect(() => {
     const es = new EventSource(addAccessTokenParameter(LOG_EVENTSOURCE_URL));
     es.onmessage = onMessage;
     es.onerror = () => {
       es.close();
       toast.error('EventSource failed');
-      // window.location.reload();
     };
 
     return () => {
@@ -217,6 +226,7 @@ const SystemLog: FC = () => {
               <span>{e.m}</span>
             </LogEntryLine>
           ))}
+          <div ref={ref} />
         </Box>
       </>
     );
