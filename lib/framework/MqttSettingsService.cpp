@@ -161,7 +161,7 @@ bool MqttSettingsService::configureMqtt() {
         _reconfigureMqtt = false;
         if (_state.rootCA.length() > 0) {
             // static_cast<espMqttClientSecure *>(_mqttClient)->setInsecure();
-            String cert = "-----BEGIN CERTIFICATE-----\n" + _state.rootCA + "-----END CERTIFICATE-----\n";
+            String cert = "-----BEGIN CERTIFICATE-----\n" + _state.rootCA + "\n-----END CERTIFICATE-----\n";
             static_cast<espMqttClientSecure *>(_mqttClient)->setCACert(retainCstr(cert.c_str(), &_retainedRootCA));
             static_cast<espMqttClientSecure *>(_mqttClient)->setServer(retainCstr(_state.host.c_str(), &_retainedHost), _state.port);
             if (_state.username.length() > 0) {
