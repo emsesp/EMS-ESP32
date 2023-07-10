@@ -2782,5 +2782,5 @@ rest_server.get(ES_LOG_ENDPOINT, function (req, res) {
       log_index = 0;
     }
     fetch_log.events.push(data); // append to buffer
-  }, 3000);
+  }, 300);
 });

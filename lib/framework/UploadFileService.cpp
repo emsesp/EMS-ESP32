@@ -43,7 +43,6 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
         } else {
             md5[0] = '\0';
             handleError(request, 406); // Not Acceptable - unsupported file type
-            request->client()->abort();
             return;
         }
 
@@ -134,7 +133,7 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
         return;
     }
 
-    handleError(request, 406); // send the forbidden response
+    handleError(request, 500);
 }
 
 void UploadFileService::handleError(AsyncWebServerRequest * request, int code) {
@@ -146,7 +145,13 @@ void UploadFileService::handleError(AsyncWebServerRequest * request, int code) {
     // send the error code to the client and record the error code in the temp object
     AsyncWebServerResponse * response = request->beginResponse(code);
     request->send(response);
-    handleEarlyDisconnect();
+
+    // check for invalid extension and immediately kill the connection, which will through an error
+    // that is caught by the web code. Unfortunately the http error code is not sent to the client on fast network connections
+    if (code == 406) {
+        request->client()->close(true);
+        handleEarlyDisconnect();
+    }
 }
 
 void UploadFileService::handleEarlyDisconnect() {
