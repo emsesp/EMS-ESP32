@@ -13,7 +13,6 @@ import Security from 'framework/security/Security';
 import System from 'framework/system/System';
 
 const AuthenticatedRouting: FC = () => (
-  // TODO not sure if this is needed, to redirect on 401. If so add incerceptor to Alova
   // const location = useLocation();
   // const navigate = useNavigate();
   // const handleApiResponseError = useCallback(

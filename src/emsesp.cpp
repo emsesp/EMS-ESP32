@@ -951,7 +951,7 @@ bool EMSESP::device_exists(const uint8_t device_id) {
 // for each associated EMS device go and get its system information
 void EMSESP::show_devices(uuid::console::Shell & shell) {
     if (emsdevices.empty()) {
-        shell.printfln("No EMS devices detected. Try using 'scan devices' from the ems menu.");
+        shell.printfln("No EMS devices detected");
         shell.println();
         return;
     }
