@@ -138,7 +138,7 @@ class MqttSettingsService : public StatefulService<MqttSettings> {
     espMqttClientTypes::DisconnectReason _disconnectReason;
 
     // the MQTT client instance
-    MqttClient * _mqttClient = nullptr;
+    MqttClient * _mqttClient;
 
     void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
     void onMqttConnect(bool sessionPresent);
