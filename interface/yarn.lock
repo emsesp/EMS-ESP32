@@ -1566,7 +1566,7 @@ __metadata:
     rollup-plugin-visualizer: ^5.9.2
     sockette: ^2.0.6
     terser: ^5.18.2
-    typesafe-i18n: ^5.24.3
+    typesafe-i18n: ^5.24.4
     typescript: ^5.1.6
     vite: ^4.4.2
     vite-plugin-svgr: ^3.2.0
@@ -5809,14 +5809,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typesafe-i18n@npm:^5.24.3":
-  version: 5.24.3
-  resolution: "typesafe-i18n@npm:5.24.3"
+"typesafe-i18n@npm:^5.24.4":
+  version: 5.24.4
+  resolution: "typesafe-i18n@npm:5.24.4"
   peerDependencies:
     typescript: ">=3.5.1"
   bin:
     typesafe-i18n: cli/typesafe-i18n.mjs
-  checksum: 1f887c1c9ec1fbd78fe4ad08e81a10bf3661f81d61337a210b15c99a43ed3f7bee5602351694ac86ab2aabb4c5ef595edc9d2e4fa8dc3c6873ba9eaa8001bfab
+  checksum: d464ddc2b6f1f53e840d0e69a2e5c48bfa487180ce1cff4cd6ca489b016c861ef77242b49d05e2ddc35fc41d0d8d2c9816799dde0f4910ca0159c2f1f1499a2a
   languageName: node
   linkType: hard
 
