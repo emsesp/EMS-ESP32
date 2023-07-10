@@ -277,7 +277,7 @@ char * Helpers::render_value(char * result, const double value, const int8_t for
 // format: 0=no division, other divide by the value given and render with a decimal point
 char * Helpers::render_value(char * result, const int32_t value, const int8_t format, const uint8_t fahrenheit) {
     int32_t new_value = fahrenheit ? format ? value * 1.8 + 32 * format * (fahrenheit - 1) : value * 1.8 + 32 * (fahrenheit - 1) : value;
-    char    s[10]     = {0};
+    char    s[13]     = {0};
     // just print it if no conversion required (format = 0)
     if (!format) {
         strlcpy(result, itoa(new_value, s, 10), sizeof(s)); // format is 0
