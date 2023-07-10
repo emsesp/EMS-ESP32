@@ -49,8 +49,7 @@ void MqttSettingsService::begin() {
     }
     if (_state.rootCA.length() > 0) {
         _mqttClient = static_cast<MqttClient *>(new espMqttClientSecure(espMqttClientTypes::UseInternalTask::NO));
-        // use setInsecure() if there is no internet connection to verify the rootCA
-        // static_cast<espMqttClientSecure *>(_mqttClient)->setInsecure();
+        static_cast<espMqttClientSecure *>(_mqttClient)->setInsecure();
         String cert = "-----BEGIN CERTIFICATE-----\n" + _state.rootCA + "\n-----END CERTIFICATE-----\n";
         static_cast<espMqttClientSecure *>(_mqttClient)->setCACert(retainCstr(cert.c_str(), &_retainedRootCA));
         static_cast<espMqttClientSecure *>(_mqttClient)->onConnect(std::bind(&MqttSettingsService::onMqttConnect, this, _1));
