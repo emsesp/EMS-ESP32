@@ -4,6 +4,7 @@ import { ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
 
 import { localStorageDetector } from 'typesafe-i18n/detectors';
+import { FeaturesLoader } from './contexts/features';
 import type { FC } from 'react';
 import AppRouting from 'AppRouting';
 import CustomTheme from 'CustomTheme';
@@ -26,7 +27,9 @@ const App: FC = () => {
   return (
     <TypesafeI18n locale={detectedLocale}>
       <CustomTheme>
-        <AppRouting />
+        <FeaturesLoader>
+          <AppRouting />
+        </FeaturesLoader>
         <ToastContainer
           position="bottom-left"
           autoClose={3000}
