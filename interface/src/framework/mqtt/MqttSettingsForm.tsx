@@ -1,13 +1,13 @@
 import CancelIcon from '@mui/icons-material/Cancel';
-import WarningIcon from '@mui/icons-material/Warning';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import WarningIcon from '@mui/icons-material/Warning';
 import { Button, Checkbox, MenuItem, Grid, Typography, InputAdornment, TextField } from '@mui/material';
+import { useRequest } from 'alova';
 import { useState } from 'react';
-import type { ValidateFieldsError } from 'async-validator';
-import type { FC } from 'react';
 import { toast } from 'react-toastify';
 import RestartMonitor from '../system/RestartMonitor';
-import { useRequest } from 'alova';
+import type { ValidateFieldsError } from 'async-validator';
+import type { FC } from 'react';
 
 import type { MqttSettings } from 'types';
 import * as MqttApi from 'api/mqtt';
@@ -187,17 +187,19 @@ const MqttSettingsForm: FC = () => {
               <MenuItem value={2}>2</MenuItem>
             </TextField>
           </Grid>
-          <Grid item xs={12} sm={6}>
-            <ValidatedPasswordField
-              name="rootCA"
-              label={LL.CERT()}
-              fullWidth
-              variant="outlined"
-              value={data.rootCA}
-              onChange={updateFormValue}
-              margin="normal"
-            />
-          </Grid>
+          {data.rootCA !== undefined && (
+            <Grid item xs={12} sm={6}>
+              <ValidatedPasswordField
+                name="rootCA"
+                label={LL.CERT()}
+                fullWidth
+                variant="outlined"
+                value={data.rootCA}
+                onChange={updateFormValue}
+                margin="normal"
+              />
+            </Grid>
+          )}
         </Grid>
         <BlockFormControlLabel
           control={<Checkbox name="clean_session" checked={data.clean_session} onChange={updateFormValue} />}
