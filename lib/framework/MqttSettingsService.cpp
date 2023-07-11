@@ -44,11 +44,21 @@ MqttSettingsService::~MqttSettingsService() {
 
 void MqttSettingsService::begin() {
     _fsPersistence.readFromFS();
+    startClient();
+}
+
+void MqttSettingsService::startClient() {
+    static bool isSecure = false;
     if (_mqttClient != nullptr) {
+        // do we need to change the client?
+        if ((isSecure && _state.rootCA.length() > 0) || (!isSecure && _state.rootCA.length() == 0)) {
+            return;
+        }
         delete _mqttClient;
     }
 #if CONFIG_IDF_TARGET_ESP32S3
     if (_state.rootCA.length() > 0) {
+        isSecure    = true;
         _mqttClient = static_cast<MqttClient *>(new espMqttClientSecure(espMqttClientTypes::UseInternalTask::NO));
         if (_state.rootCA == "insecure") {
             static_cast<espMqttClientSecure *>(_mqttClient)->setInsecure();
@@ -61,6 +71,7 @@ void MqttSettingsService::begin() {
         return;
     }
 #endif
+    isSecure    = false;
     _mqttClient = static_cast<MqttClient *>(new espMqttClient(espMqttClientTypes::UseInternalTask::NO));
     static_cast<espMqttClient *>(_mqttClient)->onConnect(std::bind(&MqttSettingsService::onMqttConnect, this, _1));
     static_cast<espMqttClient *>(_mqttClient)->onDisconnect(std::bind(&MqttSettingsService::onMqttDisconnect, this, _1));
@@ -134,6 +145,7 @@ void MqttSettingsService::onConfigUpdated() {
     _disconnectedAt  = 0;
 
     // added by proddy
+    startClient();
     emsesp::EMSESP::mqtt_.start(); // reload EMS-ESP MQTT settings
 }
 
@@ -238,9 +250,8 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
 }
 
 StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & settings) {
-    MqttSettings newSettings   = {};
-    bool         changed       = false;
-    bool         restartNeeded = false;
+    MqttSettings newSettings = {};
+    bool         changed     = false;
 
 #if CONFIG_IDF_TARGET_ESP32S3
     newSettings.rootCA = root["rootCA"] | "";
@@ -367,9 +378,11 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.rootCA.replace("-----BEGIN CERTIFICATE-----", "");
     newSettings.rootCA.replace("-----END CERTIFICATE-----", "");
     newSettings.rootCA.replace(" ", "");
+    if (newSettings.rootCA.length() == 0 && newSettings.port > 8800) {
+        newSettings.rootCA = "insecure";
+    }
     if (newSettings.rootCA != settings.rootCA) {
-        changed       = true;
-        restartNeeded = true;
+        changed = true;
     }
 #endif
     // save the new settings
@@ -377,10 +390,6 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
 
     if (changed) {
         emsesp::EMSESP::mqtt_.reset_mqtt();
-    }
-
-    if (restartNeeded) {
-        return StateUpdateResult::CHANGED_RESTART; // tell WebUI that a restart is needed
     }
 
     return StateUpdateResult::CHANGED;

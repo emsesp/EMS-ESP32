@@ -106,6 +106,7 @@ class MqttSettingsService : public StatefulService<MqttSettings> {
     ~MqttSettingsService();
 
     void                                 begin();
+    void                                 startClient();
     void                                 loop();
     bool                                 isEnabled();
     bool                                 isConnected();
