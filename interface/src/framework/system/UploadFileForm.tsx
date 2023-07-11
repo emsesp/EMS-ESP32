@@ -54,7 +54,7 @@ const UploadFileForm: FC = () => {
       if (err.message === 'The user aborted a request') {
         toast.warning(LL.UPLOAD() + ' ' + LL.ABORTED());
       } else if (err.message === 'Network Error') {
-        toast.warning('Invalid file extension');
+        toast.warning('Invalid file extension or incompatible bin file');
       } else {
         toast.error(err.message);
       }
