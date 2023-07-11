@@ -33,8 +33,12 @@ export const networkSecurityMode = ({ encryption_type }: WiFiNetwork) => {
       return 'WPA2 Enterprise';
     case WiFiEncryptionType.WIFI_AUTH_OPEN:
       return 'None';
+    case WiFiEncryptionType.WIFI_AUTH_WPA3_PSK:
+      return 'WPA3';
+    case WiFiEncryptionType.WIFI_AUTH_WPA2_WPA3_PSK:
+      return 'WPA2/WPA3';
     default:
-      return 'Unknown';
+      return 'Unknown: ' + encryption_type;
   }
 };
 
