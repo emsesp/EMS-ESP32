@@ -9,15 +9,17 @@ import * as FeaturesApi from 'api/features';
 const FeaturesLoader: FC<RequiredChildrenProps> = (props) => {
   const { data: features } = useRequest(FeaturesApi.readFeatures);
 
-  return (
-    <FeaturesContext.Provider
-      value={{
-        features
-      }}
-    >
-      {props.children}
-    </FeaturesContext.Provider>
-  );
+  if (features) {
+    return (
+      <FeaturesContext.Provider
+        value={{
+          features
+        }}
+      >
+        {props.children}
+      </FeaturesContext.Provider>
+    );
+  }
 };
 
 export default FeaturesLoader;
