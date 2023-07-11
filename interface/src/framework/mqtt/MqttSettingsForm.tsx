@@ -1,8 +1,7 @@
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
 import { Button, Checkbox, MenuItem, Grid, Typography, InputAdornment, TextField } from '@mui/material';
-import { useContext, useState } from 'react';
-import { FeaturesContext } from '../../contexts/features';
+import { useState } from 'react';
 import type { ValidateFieldsError } from 'async-validator';
 import type { FC } from 'react';
 
@@ -40,7 +39,6 @@ const MqttSettingsForm: FC = () => {
   });
 
   const { LL } = useI18nContext();
-  const { features } = useContext(FeaturesContext);
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
@@ -171,9 +169,6 @@ const MqttSettingsForm: FC = () => {
             </TextField>
           </Grid>
         </Grid>
-
-        {/* TODO here */}
-        <div>{JSON.stringify(features, null, 2)}</div>
 
         <BlockFormControlLabel
           control={<Checkbox name="clean_session" checked={data.clean_session} onChange={updateFormValue} />}
