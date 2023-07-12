@@ -24,6 +24,7 @@ export interface MqttSettings {
   host: string;
   port: number;
   base: string;
+  rootCA?: string;
   username: string;
   password: string;
   client_id: string;

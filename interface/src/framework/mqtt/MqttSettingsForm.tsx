@@ -168,6 +168,19 @@ const MqttSettingsForm: FC = () => {
               <MenuItem value={2}>2</MenuItem>
             </TextField>
           </Grid>
+          {data.rootCA !== undefined && (
+            <Grid item xs={12} sm={6}>
+              <ValidatedPasswordField
+                name="rootCA"
+                label={LL.CERT()}
+                fullWidth
+                variant="outlined"
+                value={data.rootCA}
+                onChange={updateFormValue}
+                margin="normal"
+              />
+            </Grid>
+          )}
         </Grid>
 
         <BlockFormControlLabel

@@ -63,6 +63,7 @@ class MqttSettings {
     bool     enabled;
     String   host;
     uint16_t port;
+    String   rootCA;
 
     // username and password
     String username;
@@ -105,12 +106,15 @@ class MqttSettingsService : public StatefulService<MqttSettings> {
     ~MqttSettingsService();
 
     void                                 begin();
+    void                                 startClient();
     void                                 loop();
     bool                                 isEnabled();
     bool                                 isConnected();
     const char *                         getClientId();
     espMqttClientTypes::DisconnectReason getDisconnectReason();
-    espMqttClient *                      getMqttClient();
+    MqttClient *                         getMqttClient();
+    void                                 setWill(const char * topic);
+    void                                 onMessage(espMqttClientTypes::OnMessageCallback callback);
 
   protected:
     void onConfigUpdated();
@@ -125,6 +129,7 @@ class MqttSettingsService : public StatefulService<MqttSettings> {
     char * _retainedClientId;
     char * _retainedUsername;
     char * _retainedPassword;
+    char * _retainedRootCA;
 
     // variable to help manage connection
     bool          _reconfigureMqtt;
@@ -134,7 +139,7 @@ class MqttSettingsService : public StatefulService<MqttSettings> {
     espMqttClientTypes::DisconnectReason _disconnectReason;
 
     // the MQTT client instance
-    espMqttClient _mqttClient;
+    MqttClient * _mqttClient;
 
     void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
     void onMqttConnect(bool sessionPresent);

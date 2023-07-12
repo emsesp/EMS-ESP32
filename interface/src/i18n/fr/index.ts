@@ -282,7 +282,7 @@ const fr: Translation = {
   SCAN_AGAIN: 'Rescanner',
   NETWORK_SCANNER: 'Scan réseau',
   NETWORK_NO_WIFI: 'Pas de réseau WiFi trouvé',
-  NETWORK_BLANK_SSID: 'laisser vide pour désactiver le WiFi',
+  NETWORK_BLANK_SSID: 'laisser vide pour désactiver le WiFi', // and enable ETH // TODO translate
   TX_POWER: 'Puissance Tx',
   HOSTNAME: 'Nom d\'hôte',
   NETWORK_DISABLE_SLEEP: 'Désactiver le mode veille du WiFi',
@@ -322,7 +322,8 @@ const fr: Translation = {
   ENTITIES_UPDATED: 'Entities Updated', // TODO translate
   WRITEABLE: 'Writeable', // TODO translate
   SHOWING: 'Showing', // TODO translate
-  SEARCH: 'Search' // TODO translate
+  SEARCH: 'Search', // TODO translate
+  CERT: 'TSL root certificate (leave blank to disable TSL)' // TODO translate
 };
 
 export default fr;
