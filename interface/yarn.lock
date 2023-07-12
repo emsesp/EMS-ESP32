@@ -1541,7 +1541,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^6.0.0
     "@typescript-eslint/parser": ^6.0.0
     "@vitejs/plugin-react-swc": ^3.3.2
-    alova: ^2.9.1
+    alova: ^2.9.2
     async-validator: ^4.2.5
     eslint: ^8.44.0
     eslint-config-airbnb: ^19.0.4
@@ -1645,10 +1645,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"alova@npm:^2.9.1":
-  version: 2.9.1
-  resolution: "alova@npm:2.9.1"
-  checksum: 7a064e94486a2b8e372ff53bf937efcdf291353c03c2bc036e39be539eb3bb82862010b5ffd40fd3e10d3e4031ad5ab355b88277561e521f57d80317a1304b94
+"alova@npm:^2.9.2":
+  version: 2.9.2
+  resolution: "alova@npm:2.9.2"
+  checksum: 9f2c462303bbf2a82b265c258be9a2c1f9cde4f1591c06b51a3994f50860e250d507b83bbf79ae2c26f79d82c2d1770aba707fa542c6a68df4ce6b93d5a402cf
   languageName: node
   linkType: hard
 
