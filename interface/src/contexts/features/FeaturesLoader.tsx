@@ -5,10 +5,9 @@ import type { FC } from 'react';
 
 import type { RequiredChildrenProps } from 'utils';
 import * as FeaturesApi from 'api/features';
-import { ApplicationError, LoadingSpinner } from 'components';
 
 const FeaturesLoader: FC<RequiredChildrenProps> = (props) => {
-  const { data: features, error } = useRequest(FeaturesApi.readFeatures);
+  const { data: features } = useRequest(FeaturesApi.readFeatures);
 
   if (features) {
     return (
@@ -21,12 +20,6 @@ const FeaturesLoader: FC<RequiredChildrenProps> = (props) => {
       </FeaturesContext.Provider>
     );
   }
-
-  if (error) {
-    return <ApplicationError message={error?.message} />;
-  }
-
-  return <LoadingSpinner height="100vh" />;
 };
 
 export default FeaturesLoader;

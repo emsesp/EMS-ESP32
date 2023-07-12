@@ -182,6 +182,7 @@ const MqttSettingsForm: FC = () => {
             </Grid>
           )}
         </Grid>
+
         <BlockFormControlLabel
           control={<Checkbox name="clean_session" checked={data.clean_session} onChange={updateFormValue} />}
           label={LL.MQTT_CLEAN_SESSION()}

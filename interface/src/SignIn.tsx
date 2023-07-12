@@ -3,6 +3,7 @@ import { Box, Fab, Paper, Typography, Button } from '@mui/material';
 import { useRequest } from 'alova';
 import { useContext, useState } from 'react';
 import { toast } from 'react-toastify';
+import { FeaturesContext } from './contexts/features';
 import type { ValidateFieldsError } from 'async-validator';
 
 import type { Locales } from 'i18n/i18n-types';
@@ -32,6 +33,8 @@ const SignIn: FC = () => {
   const authenticationContext = useContext(AuthenticationContext);
 
   const { LL, setLocale, locale } = useContext(I18nContext);
+
+  const { features } = useContext(FeaturesContext);
 
   const [signInRequest, setSignInRequest] = useState<SignInRequest>({
     username: '',
@@ -107,6 +110,7 @@ const SignIn: FC = () => {
         })}
       >
         <Typography variant="h4">{PROJECT_NAME}</Typography>
+        <Typography variant="subtitle2">{features.version}</Typography>
         <Box
           mt={2}
           mb={2}
