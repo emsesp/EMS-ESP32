@@ -98,6 +98,18 @@ bool System::command_send(const char * value, const int8_t id) {
     return EMSESP::txservice_.send_raw(value); // ignore id
 }
 
+bool System::command_response(const char * value, const int8_t id, JsonObject & output) {
+    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
+    if (DeserializationError::Ok == deserializeJson(doc, Mqtt::get_response())) {
+        for (JsonPair p : doc.as<JsonObject>()) {
+            output[p.key()] = p.value();
+        }
+    } else {
+        output["response"] = Mqtt::get_response();
+    }
+    return true;
+}
+
 // fetch device values
 bool System::command_fetch(const char * value, const int8_t id) {
     std::string value_s;
@@ -753,6 +765,7 @@ void System::commands_init() {
     // these commands will return data in JSON format
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info, FL_(system_info_cmd));
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(commands), System::command_commands, FL_(commands_cmd));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F("response"), System::command_response, FL_(commands_response));
 
     // MQTT subscribe "ems-esp/system/#"
     Mqtt::subscribe(EMSdevice::DeviceType::SYSTEM, "system/#", nullptr); // use empty function callback

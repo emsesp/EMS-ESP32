@@ -364,3 +364,17 @@ export const enum DeviceType {
   CUSTOM,
   UNKNOWN
 }
+
+// matches emsdevicevalue.h
+export const enum DeviceValueType {
+  BOOL,
+  INT,
+  UINT,
+  SHORT,
+  USHORT,
+  ULONG,
+  TIME, // same as ULONG (32 bits)
+  ENUM,
+  STRING,
+  CMD
+}

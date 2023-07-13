@@ -410,14 +410,16 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                               if (arguments.size() == 4) {
                                   uint16_t offset = Helpers::hextoint(arguments[2].c_str());
                                   uint8_t  length = Helpers::hextoint(arguments.back().c_str());
-                                  to_app(shell).send_read_request(type_id, device_id, offset, length);
+                                  to_app(shell).send_read_request(type_id, device_id, offset, length, true);
                               } else if (arguments.size() == 3) {
                                   uint16_t offset = Helpers::hextoint(arguments.back().c_str());
-                                  to_app(shell).send_read_request(type_id, device_id, offset, EMS_MAX_TELEGRAM_LENGTH);
+                                  to_app(shell).send_read_request(type_id, device_id, offset, EMS_MAX_TELEGRAM_LENGTH, true);
                               } else {
                                   // send with length to send immediately and trigger publish read_id
-                                  to_app(shell).send_read_request(type_id, device_id, 0, EMS_MAX_TELEGRAM_LENGTH);
+                                  to_app(shell).send_read_request(type_id, device_id, 0, EMS_MAX_TELEGRAM_LENGTH, true);
                               }
+                              to_app(shell).set_read_id(type_id);
+
                           });
 
     commands->add_command(ShellContext::MAIN,

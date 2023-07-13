@@ -37,6 +37,7 @@ class EntityItem {
     double      factor;
     bool        writeable;
     uint32_t    value;
+    std::string data;
 };
 
 class WebEntity {

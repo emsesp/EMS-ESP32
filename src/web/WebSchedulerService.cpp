@@ -316,7 +316,7 @@ bool WebSchedulerService::command(const char * cmd, const char * data) {
 
     if (return_code == CommandRet::OK) {
         EMSESP::logger().debug("Scheduled command %s with data %s successfully", cmd, data);
-        if (strlen(data) == 0 && Mqtt::enabled() && Mqtt::send_response() && output.size()) {
+        if (strlen(data) == 0 && output.size()) {
             Mqtt::queue_publish("response", output);
         }
         return true;

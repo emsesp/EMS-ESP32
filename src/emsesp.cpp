@@ -76,6 +76,7 @@ uint8_t  EMSESP::watch_            = 0;             // trace off
 uint16_t EMSESP::read_id_          = WATCH_ID_NONE;
 bool     EMSESP::read_next_        = false;
 uint16_t EMSESP::publish_id_       = 0;
+uint16_t EMSESP::response_id_      = 0;
 bool     EMSESP::tap_water_active_ = false; // for when Boiler states we having running warm water. used in Shower()
 uint32_t EMSESP::last_fetch_       = 0;
 uint8_t  EMSESP::publish_all_idx_  = 0;
@@ -847,10 +848,11 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
 // returns false if there are none found
 bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     // if watching or reading...
-    if ((telegram->type_id == read_id_) && (telegram->dest == txservice_.ems_bus_id())) {
-        LOG_INFO("%s", pretty_telegram(telegram).c_str());
-        if (Mqtt::send_response()) {
+    if ((telegram->type_id == read_id_ || telegram->type_id == response_id_) && (telegram->dest == txservice_.ems_bus_id())) {
+        LOG_NOTICE("%s", pretty_telegram(telegram).c_str());
+        if (telegram->type_id == response_id_) {
             publish_response(telegram);
+            response_id_ = 0;
         }
 
         if (!read_next_) {
@@ -1233,8 +1235,8 @@ bool EMSESP::command_info(uint8_t device_type, JsonObject & output, const int8_t
 }
 
 // send a read request, passing it into to the Tx Service, with optional offset and length
-void EMSESP::send_read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t length) {
-    txservice_.read_request(type_id, dest, offset, length);
+void EMSESP::send_read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t length, const bool front) {
+    txservice_.read_request(type_id, dest, offset, length, front);
 }
 
 // sends write request
