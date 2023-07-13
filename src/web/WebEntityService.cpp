@@ -115,7 +115,7 @@ bool WebEntityService::command_setvalue(const char * value, const std::string na
                 strlcpy(telegram, value, sizeof(telegram));
                 uint8_t data[EMS_MAX_TELEGRAM_LENGTH];
                 uint8_t count = 0;
-                char * p = strtok(telegram, " ,"); // delimiter
+                char *  p     = strtok(telegram, " ,"); // delimiter
                 while (p != nullptr) {
                     data[count++] = (uint8_t)strtol(p, 0, 16);
                     p             = strtok(nullptr, " ,");
@@ -244,12 +244,22 @@ bool WebEntityService::get_value_info(JsonObject & output, const char * cmd) {
     }
     for (const auto & entity : *entityItems) {
         if (Helpers::toLower(entity.name) == Helpers::toLower(command_s)) {
-            output["name"]      = entity.name;
-            output["uom"]       = EMSdevice::uom_to_string(entity.uom);
-            output["type"]      = entity.value_type == DeviceValueType::BOOL ? "boolean" : F_(number);
+            output["name"] = entity.name;
+            if (entity.uom > 0) {
+                output["uom"] = EMSdevice::uom_to_string(entity.uom);
+            }
+            output["type"]      = entity.value_type == DeviceValueType::BOOL ? "boolean" : entity.value_type == DeviceValueType::STRING ? "string" : F_(number);
             output["readable"]  = true;
             output["writeable"] = entity.writeable;
             output["visible"]   = true;
+            output["device_id"] = entity.device_id;
+            output["type_id"]   = entity.type_id;
+            output["offset"]    = entity.offset;
+            if (entity.value_type != DeviceValueType::BOOL && entity.value_type != DeviceValueType::STRING) {
+                output["factor"] = entity.factor;
+            } else if (entity.value_type == DeviceValueType::STRING) {
+                output["bytes"] = (uint8_t)entity.factor;
+            }
             render_value(output, entity, true);
             if (attribute_s) {
                 if (output.containsKey(attribute_s)) {
