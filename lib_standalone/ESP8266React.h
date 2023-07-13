@@ -112,6 +112,11 @@ class ESP8266React {
         return _mqttClient;
     }
 
+    void setWill(const char * will_topic) {
+    }
+    void onMessage(espMqttClientTypes::OnMessageCallback callback) {
+    }
+
     StatefulService<DummySettings> * getNetworkSettingsService() {
         return &_settings;
     }

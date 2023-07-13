@@ -35,7 +35,7 @@
 #include <iostream>
 
 // #define IPAddress std::string
-#define IPAddress String
+// #define IPAddress String
 
 #define ICACHE_FLASH_ATTR
 #define ICACHE_RAM_ATTR
@@ -171,7 +171,13 @@ extern NativeConsole Serial;
 extern ETHClass      ETH;
 extern WiFiClass     WiFi;
 
-unsigned long millis();
+// unsigned long millis();
+
+#if defined(__linux__)
+#include <chrono> // NOLINT [build/c++11]
+#include <thread> // NOLINT [build/c++11] for yield()
+#define millis() std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count()
+#endif
 
 int64_t esp_timer_get_time();
 

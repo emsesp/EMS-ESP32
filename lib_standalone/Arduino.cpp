@@ -51,9 +51,9 @@ int main(int argc __attribute__((unused)), char * argv[] __attribute__((unused))
     return 0;
 }
 
-unsigned long millis() {
-    return __millis;
-}
+// unsigned long millis() {
+//     return __millis;
+// }
 
 int64_t esp_timer_get_time() {
     return __millis;
