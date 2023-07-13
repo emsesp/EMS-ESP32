@@ -563,6 +563,17 @@ void AnalogSensor::publish_values(const bool force) {
                     // config["step"]  = sensor.factor();
                 } else if (sensor.type() == AnalogType::DIGITAL_IN) {
                     snprintf(topic, sizeof(topic), "binary_sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), sensor.gpio());
+                    if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+                        config["pl_on"]  = true;
+                        config["pl_off"] = false;
+                    } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+                        config["pl_on"]  = 1;
+                        config["pl_off"] = 0;
+                    } else {
+                        char result[12];
+                        config["pl_on"]  = Helpers::render_boolean(result, true);
+                        config["pl_off"] = Helpers::render_boolean(result, false);
+                    }
                 } else {
                     snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), sensor.gpio());
                     config["stat_cla"] = "measurement";
@@ -575,9 +586,7 @@ void AnalogSensor::publish_values(const bool force) {
                 // add "availability" section
                 Mqtt::add_avty_to_doc(stat_t, config.as<JsonObject>(), val_cond);
 
-                Mqtt::queue_ha(topic, config.as<JsonObject>());
-
-                sensor.ha_registered = true;
+                sensor.ha_registered = Mqtt::queue_ha(topic, config.as<JsonObject>());
             }
         }
     }

@@ -1,4 +1,5 @@
 #include <UploadFileService.h>
+#include <esp_ota_ops.h>
 
 using namespace std::placeholders; // for `_1` etc
 
@@ -70,7 +71,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
             }
 #endif
             // it's firmware - initialize the ArduinoOTA updater
-            if (Update.begin()) {
+            if (Update.begin(fsize - sizeof(esp_image_header_t))) {
                 if (strlen(md5) == 32) {
                     Update.setMD5(md5);
                     md5[0] = '\0';
@@ -88,7 +89,9 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
 
     if (!is_firmware) {
         if (len) {
-            request->_tempFile.write(data, len); // stream the incoming chunk to the opened file
+            if (len != request->_tempFile.write(data, len)) { // stream the incoming chunk to the opened file
+                handleError(request, 507);                    // 507-Insufficient Storage
+            }
         }
     } else {
         // if we haven't delt with an error, continue with the firmware update

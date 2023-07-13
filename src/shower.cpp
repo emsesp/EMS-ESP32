@@ -148,8 +148,6 @@ void Shower::set_shower_state(bool state, bool force) {
 
     // send out HA MQTT Discovery config topic
     if ((Mqtt::ha_enabled()) && (!ha_configdone_ || force)) {
-        ha_configdone_ = true;
-
         StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> doc;
 
         doc["name"] = "Shower Active";
@@ -189,7 +187,7 @@ void Shower::set_shower_state(bool state, bool force) {
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         snprintf(topic, sizeof(topic), "binary_sensor/%s/shower_active/config", Mqtt::basename().c_str());
 
-        Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
+        ha_configdone_ = Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
     }
 }
 
