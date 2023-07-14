@@ -172,14 +172,14 @@ void MqttSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
 }
 
 bool MqttSettingsService::configureMqtt() {
-    // disconnect if connected
+    // disconnect if already connected
     if (_mqttClient->connected()) {
-        emsesp::EMSESP::logger().info("Disconneting to configure");
+        emsesp::EMSESP::logger().info("Disconnecting to configure");
         _mqttClient->disconnect(true);
     }
+
     // only connect if WiFi is connected and MQTT is enabled
     if (_state.enabled && emsesp::EMSESP::system_.network_connected() && !_state.host.isEmpty()) {
-        // if (_state.enabled && !_state.host.isEmpty()) {
         _reconfigureMqtt = false;
 #if CONFIG_IDF_TARGET_ESP32S3
         if (_state.rootCA.length() > 0) {
@@ -212,6 +212,8 @@ bool MqttSettingsService::configureMqtt() {
         static_cast<espMqttClient *>(_mqttClient)->setCleanSession(_state.cleanSession);
         return _mqttClient->connect();
     }
+    emsesp::EMSESP::logger().info("Connecting to MQTT broker...");
+
     return false;
 }
 
