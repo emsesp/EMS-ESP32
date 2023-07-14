@@ -28,7 +28,7 @@
 
 #include <uuid/log.h>
 
-// forward declarators
+// forward declarator
 // used to bind EMS-ESP functions to external frameworks
 namespace emsesp {
 class EMSESP {

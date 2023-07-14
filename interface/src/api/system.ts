@@ -21,22 +21,22 @@ export const fetchLog = () => alovaInstance.Post('/rest/fetchLog');
 // Get versions from github
 export const getStableVersion = () =>
   alovaInstanceGH.Get<Version>('releases/latest', {
-    transformData(reponse: any) {
+    transformData(response: any) {
       return {
-        version: reponse.data.name,
-        url: reponse.data.assets[1].browser_download_url,
-        changelog: reponse.data.assets[0].browser_download_url
+        version: response.data.name,
+        url: response.data.assets[1].browser_download_url,
+        changelog: response.data.assets[0].browser_download_url
       };
     }
   });
 
 export const getDevVersion = () =>
   alovaInstanceGH.Get<Version>('releases/tags/latest', {
-    transformData(reponse: any) {
+    transformData(response: any) {
       return {
-        version: reponse.data.name.split(/\s+/).splice(-1),
-        url: reponse.data.assets[1].browser_download_url,
-        changelog: reponse.data.assets[0].browser_download_url
+        version: response.data.name.split(/\s+/).splice(-1),
+        url: response.data.assets[1].browser_download_url,
+        changelog: response.data.assets[0].browser_download_url
       };
     }
   });
