@@ -21,6 +21,10 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#include <iostream>
+#include <thread>
+#include <atomic>
+
 #include <string>
 
 #include <Network.h>
@@ -43,12 +47,28 @@ static unsigned long __millis = 0;
 static bool          __output_pins[256];
 static int           __output_level[256];
 
+std::atomic_bool exitProgram(false);
+
+void ClientLoop(void * arg) {
+    (void)arg;
+    for (;;) {
+        loop();
+        if (exitProgram)
+            break;
+    }
+}
+
 int main(int argc __attribute__((unused)), char * argv[] __attribute__((unused))) {
     setup();
-    while (millis() <= 10 * 1000) {
-        loop();
+    std::thread t = std::thread(ClientLoop, nullptr);
+    // while (millis() <= 10 * 1000) {
+    while (1) {
+        if (exitProgram)
+            break;
+        std::this_thread::yield();
     }
-    return 0;
+    t.join();
+    return EXIT_SUCCESS;
 }
 
 // unsigned long millis() {
@@ -64,6 +84,7 @@ void delay(unsigned long millis) {
 }
 
 void yield(void) {
+    std::this_thread::yield();
 }
 
 int snprintf_P(char * str, size_t size, const char * format, ...) {

@@ -101,7 +101,10 @@ class ESP8266React {
         : _settings(server, fs, nullptr)
         , _securitySettingsService(server, fs){};
 
-    void begin(){};
+    void begin() {
+        // initialize mqtt
+        _mqttClient = new espMqttClient();
+    };
     void loop(){};
 
     SecurityManager * getSecurityManager() {

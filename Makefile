@@ -23,7 +23,7 @@ LIBRARIES :=
 
 CPPCHECK = cppcheck
 # CHECKFLAGS = -q --force --std=c++17
-CHECKFLAGS = -q --force --std=c++11
+CHECKFLAGS = -q --force --std=c++11 -pthread
 
 #----------------------------------------------------------------------
 # Languages Standard
@@ -37,7 +37,7 @@ CXX_STANDARD := -std=c++11
 # Defined Symbols
 #----------------------------------------------------------------------
 DEFINES += -DARDUINOJSON_ENABLE_STD_STRING=1 -DARDUINOJSON_ENABLE_PROGMEM=1 -DARDUINOJSON_ENABLE_ARDUINO_STRING -DARDUINOJSON_USE_DOUBLE=0
-DEFINES += -DEMSESP_DEBUG -DEMSESP_STANDALONE -DEMSESP_TEST -D__linux__
+DEFINES += -DEMSESP_DEBUG -DEMSESP_STANDALONE -DEMSESP_TEST -D__linux__ -DEMC_RX_BUFFER_SIZE=1500
 DEFINES += $(ARGS)
 
 DEFAULTS = -DEMSESP_DEFAULT_LOCALE=\"en\" -DEMSESP_DEFAULT_TX_MODE=8 -DEMSESP_DEFAULT_VERSION=\"3.6.0-dev\" -DEMSESP_DEFAULT_BOARD_PROFILE=\"S32\"

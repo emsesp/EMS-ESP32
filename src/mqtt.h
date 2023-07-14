@@ -104,11 +104,7 @@ class Mqtt {
 #endif
 
     static bool connected() {
-#if defined(EMSESP_STANDALONE)
-        return true;
-#else
         return mqttClient_->connected();
-#endif
     }
 
     static MqttClient * client() {

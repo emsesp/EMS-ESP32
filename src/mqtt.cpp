@@ -393,12 +393,6 @@ void Mqtt::start() {
         [this](const espMqttClientTypes::MessageProperties & properties, const char * topic, const uint8_t * payload, size_t len, size_t index, size_t total) {
             on_message(topic, (const char *)payload, len); // receiving mqtt
         });
-
-    /*
-    mqttClient_->onPublish([this](uint16_t packetId) {
-        on_publish(packetId); // publish
-    });
-    */
 }
 
 void Mqtt::set_publish_time_boiler(uint16_t publish_time) {
@@ -588,9 +582,10 @@ void Mqtt::ha_status() {
 // add sub or pub task to the queue.
 // the base is not included in the topic
 bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, const bool retain) {
-    if (topic.empty()) {
-        return false;
+    if (!mqtt_enabled_ || topic.empty()) {
+        return false; // quit, not using MQTT
     }
+
     uint16_t packet_id = 0;
     char     fulltopic[MQTT_TOPIC_MAX_SIZE];
 
