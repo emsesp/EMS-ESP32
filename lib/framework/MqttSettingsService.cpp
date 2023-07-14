@@ -212,7 +212,6 @@ bool MqttSettingsService::configureMqtt() {
         static_cast<espMqttClient *>(_mqttClient)->setCleanSession(_state.cleanSession);
         return _mqttClient->connect();
     }
-    emsesp::EMSESP::logger().info("Connecting to MQTT broker...");
 
     return false;
 }
