@@ -1139,8 +1139,8 @@ void Thermostat::process_RC300Settings(std::shared_ptr<const Telegram> telegram)
 // 0x2CC - e.g. wwprio for  RC310 hcx parameter
 void Thermostat::process_RC300Set2(std::shared_ptr<const Telegram> telegram) {
     // typeids are not in a raw.  hc:0x2CC, hc2: 0x2CE  for RC310
-    // telegram is either offset 3 with data lenght of 1 and values 0/1 (radiators) - 10 0B FF 03 01 CC 01 F6
-    // or offset 0 with data lenght of 6 bytes - offset 3 values are 0x00 or 0xFF - 10 0B FF 00 01 CE FF 13 0A FF 1E 00 20
+    // telegram is either offset 3 with data length of 1 and values 0/1 (radiators) - 10 0B FF 03 01 CC 01 F6
+    // or offset 0 with data length of 6 bytes - offset 3 values are 0x00 or 0xFF - 10 0B FF 00 01 CE FF 13 0A FF 1E 00 20
 
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
     if (hc == nullptr) {
@@ -2727,7 +2727,7 @@ bool Thermostat::set_controlmode(const char * value, const int8_t id) {
     return false;
 }
 
-// sets the thermostat time for nightmode for RC10, telegrm 0xB0
+// sets the thermostat time for nightmode for RC10, telegram 0xB0
 bool Thermostat::set_reducehours(const char * value, const int8_t id) {
     uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
     std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
