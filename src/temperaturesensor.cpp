@@ -528,7 +528,7 @@ void TemperatureSensor::publish_values(const bool force) {
                 config["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else -55}}";
 
                 char uniq_s[70];
-                if (Mqtt::entity_format() == Mqtt::entitiyFormat::MULTI_SHORT) {
+                if (Mqtt::entity_format() == Mqtt::entityFormat::MULTI_SHORT) {
                     snprintf(uniq_s, sizeof(uniq_s), "%s_temperaturesensor_%s", Mqtt::basename().c_str(), sensor.id().c_str());
                 } else {
                     snprintf(uniq_s, sizeof(uniq_s), "temperaturesensor_%s", sensor.id().c_str());

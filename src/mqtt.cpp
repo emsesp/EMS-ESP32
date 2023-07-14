@@ -312,7 +312,7 @@ void Mqtt::show_topic_handlers(uuid::console::Shell & shell, const uint8_t devic
 
 // called when an MQTT Publish ACK is received
 void Mqtt::on_publish(uint16_t packetId) const {
-    LOG_DEBUG("Packet %d sent successfull", packetId);
+    LOG_DEBUG("Packet %d sent successful", packetId);
 }
 
 // called when MQTT settings have changed via the Web forms
@@ -390,12 +390,6 @@ void Mqtt::start() {
         [this](const espMqttClientTypes::MessageProperties & properties, const char * topic, const uint8_t * payload, size_t len, size_t index, size_t total) {
             on_message(topic, (const char *)payload, len); // receiving mqtt
         });
-
-    /*
-    mqttClient_->onPublish([this](uint16_t packetId) {
-        on_publish(packetId); // publish
-    });
-    */
 }
 
 void Mqtt::set_publish_time_boiler(uint16_t publish_time) {
@@ -524,7 +518,7 @@ void Mqtt::ha_status() {
     StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> doc;
 
     char uniq[70];
-    if (Mqtt::entity_format() == entitiyFormat::MULTI_SHORT) {
+    if (Mqtt::entity_format() == entityFormat::MULTI_SHORT) {
         snprintf(uniq, sizeof(uniq), "%s_system_status", mqtt_basename_.c_str());
     } else {
         strcpy(uniq, "system_status");
@@ -591,9 +585,10 @@ bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, con
             return true;
         }
     }
-    if (!enabled() || topic.empty()) {
-        return false;
+    if (!mqtt_enabled_ || topic.empty()) {
+        return false; // quit, not using MQTT
     }
+
     uint16_t packet_id = 0;
     char     fulltopic[MQTT_TOPIC_MAX_SIZE];
 
@@ -801,10 +796,10 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // build unique identifier also used as object_id which also becomes the Entity ID in HA
     char uniq_id[80];
-    if (Mqtt::entity_format() == entitiyFormat::MULTI_SHORT) {
+    if (Mqtt::entity_format() == entityFormat::MULTI_SHORT) {
         // prefix base name to each uniq_id and use the shortname
         snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
-    } else if (Mqtt::entity_format() == entitiyFormat::SINGLE_SHORT) {
+    } else if (Mqtt::entity_format() == entityFormat::SINGLE_SHORT) {
         // shortname, no mqtt base. This is the default version.
         snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, entity_with_tag);
     } else {
@@ -1168,7 +1163,7 @@ bool Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
 
     snprintf(name_s, sizeof(name_s), "Hc%d", hc_num);
 
-    if (Mqtt::entity_format() == entitiyFormat::MULTI_SHORT) {
+    if (Mqtt::entity_format() == entityFormat::MULTI_SHORT) {
         snprintf(uniq_id_s, sizeof(uniq_id_s), "%s_thermostat_hc%d", mqtt_basename_.c_str(), hc_num); // add basename
     } else {
         snprintf(uniq_id_s, sizeof(uniq_id_s), "thermostat_hc%d", hc_num);                            // backward compatible with v3.4

@@ -153,7 +153,7 @@ void Shower::set_shower_state(bool state, bool force) {
         doc["name"] = "Shower Active";
 
         char str[70];
-        if (Mqtt::entity_format() == Mqtt::entitiyFormat::MULTI_SHORT) {
+        if (Mqtt::entity_format() == Mqtt::entityFormat::MULTI_SHORT) {
             snprintf(str, sizeof(str), "%s_shower_active", Mqtt::basename().c_str());
         } else {
             snprintf(str, sizeof(str), "shower_active"); // v3.4 compatible

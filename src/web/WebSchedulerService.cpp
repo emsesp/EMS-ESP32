@@ -50,7 +50,7 @@ void WebScheduler::read(WebScheduler & webScheduler, JsonObject & root) {
     }
 }
 
-// call on initialization and also when the Scheduile web page is saved
+// call on initialization and also when the Schedule web page is saved
 // this loads the data into the internal class
 StateUpdateResult WebScheduler::update(JsonObject & root, WebScheduler & webScheduler) {
 #ifdef EMSESP_STANDALONE
