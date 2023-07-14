@@ -30,7 +30,7 @@ WebEntityService::WebEntityService(AsyncWebServer * server, FS * fs, SecurityMan
 // load the settings when the service starts
 void WebEntityService::begin() {
     _fsPersistence.readFromFS();
-    EMSESP::logger().info("Starting custom entity service");
+    EMSESP::logger().info("Starting Custom entity service");
 }
 
 // this creates the entity file, saving it to the FS
