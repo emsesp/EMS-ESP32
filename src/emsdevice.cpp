@@ -1645,7 +1645,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                                  Helpers::translated_word(FL_(minutes)));
                         json[name] = time_s;
                     } else {
-                        json[name] = serialized(Helpers::render_value(val, time_value, 1));
+                        json[name] = serialized(Helpers::render_value(val, time_value, 0));
                     }
                 }
 

@@ -222,7 +222,7 @@ const SettingsEntitiesDialog = ({
                 fullWidth
                 margin="normal"
                 type="number"
-                inputProps={{ min: '1', max: '28', step: '1' }}
+                inputProps={{ min: '1', max: '27', step: '1' }}
               />
             </Grid>
           )}

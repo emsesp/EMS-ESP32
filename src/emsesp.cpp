@@ -849,12 +849,13 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
 bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     // if watching or reading...
     if ((telegram->type_id == read_id_ || telegram->type_id == response_id_) && (telegram->dest == txservice_.ems_bus_id())) {
+        // show log for read and response
         LOG_NOTICE("%s", pretty_telegram(telegram).c_str());
         if (telegram->type_id == response_id_) {
             publish_response(telegram);
             response_id_ = 0;
         }
-
+        // check if read is finished or gives more parts
         if (!read_next_) {
             read_id_ = WATCH_ID_NONE;
         }
@@ -1315,7 +1316,8 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 tx_successful = true;
 
                 // if telegram is longer read next part with offset +25 for ems+ or +27 for ems1.0
-                if ((length >= 31) && (txservice_.read_next_tx(data[3], length) == read_id_)) {
+                // not for response to raw send commands
+                if ((response_id_ == 0) && (length >= 31) && (txservice_.read_next_tx(data[3], length) == read_id_)) {
                     read_next_ = true;
                 }
             }

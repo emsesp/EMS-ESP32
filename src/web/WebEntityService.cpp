@@ -252,8 +252,8 @@ bool WebEntityService::get_value_info(JsonObject & output, const char * cmd) {
             output["readable"]  = true;
             output["writeable"] = entity.writeable;
             output["visible"]   = true;
-            output["device_id"] = entity.device_id;
-            output["type_id"]   = entity.type_id;
+            output["device_id"] = Helpers::hextoa(entity.device_id);
+            output["type_id"]   = Helpers::hextoa(entity.type_id);
             output["offset"]    = entity.offset;
             if (entity.value_type != DeviceValueType::BOOL && entity.value_type != DeviceValueType::STRING) {
                 output["factor"] = entity.factor;

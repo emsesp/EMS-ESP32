@@ -1277,12 +1277,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash-es@npm:^4.17.7":
-  version: 4.17.7
-  resolution: "@types/lodash-es@npm:4.17.7"
+"@types/lodash-es@npm:^4.17.8":
+  version: 4.17.8
+  resolution: "@types/lodash-es@npm:4.17.8"
   dependencies:
     "@types/lodash": "*"
-  checksum: c3ecfcff9f6864efa1a5f0d3ec457db17536f05a3a7a1a3f1fb1052042ed3e9747b12cd1eddab14fbbe98aef7aec131aaaf71c2f4611725cb15dd42b9651a64d
+  checksum: 950771d406c842814dd22217adba5e01bd06b3c21e97900d3c3816f38580e132894400b5d83a7962645fa284d8478614bdcc50755255ad15024311b7b8ed8520
   languageName: node
   linkType: hard
 
@@ -1293,10 +1293,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^20.4.1":
-  version: 20.4.1
-  resolution: "@types/node@npm:20.4.1"
-  checksum: 000b001bc4a2bd96fde75c4e20358c6232b94228a6712989bd14cee652474f1084774a88552a82b3dac98fc49750313a76d5d3d773a6b616a041c2bad55590f3
+"@types/node@npm:^20.4.2":
+  version: 20.4.2
+  resolution: "@types/node@npm:20.4.2"
+  checksum: ca506e089737d54effabda5d6534fdf9fdbe22adbcc4864a170feea390389f38cbae6abcf89c2b1ce5c3e4ffc450b35341509a7619f850babf43106009f01b2d
   languageName: node
   linkType: hard
 
@@ -1314,12 +1314,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:^18.2.6":
-  version: 18.2.6
-  resolution: "@types/react-dom@npm:18.2.6"
+"@types/react-dom@npm:^18.2.7":
+  version: 18.2.7
+  resolution: "@types/react-dom@npm:18.2.7"
   dependencies:
     "@types/react": "*"
-  checksum: bd734ca04c52b3c96891a7f9c1139486807dac7a2449fb72e8f8e23018bc6eeeb87a490a105cb39d05ccb7ddf80ed7a441e5bd3e5866c6f6ae8870cd723599e8
+  checksum: bd090f5e1b13765fbc191d9eb720dd152d26c20558221963009189c4636ce11e4c1c976e4cde4a74335f997a2be651af27d3727474a8091424101a83a71eebfb
   languageName: node
   linkType: hard
 
@@ -1362,7 +1362,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:^18.2.14":
+"@types/react@npm:*":
   version: 18.2.14
   resolution: "@types/react@npm:18.2.14"
   dependencies:
@@ -1370,6 +1370,17 @@ __metadata:
     "@types/scheduler": "*"
     csstype: ^3.0.2
   checksum: a728a90e242fb41c233729fa46885cc47aca7df2035ed803f83bf0b582dde81143d465ecbf04a056bc6404f0f746f219d7043245ebd99baf83a178bbbb856c76
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:^18.2.15":
+  version: 18.2.15
+  resolution: "@types/react@npm:18.2.15"
+  dependencies:
+    "@types/prop-types": "*"
+    "@types/scheduler": "*"
+    csstype: ^3.0.2
+  checksum: d1999bd8a565704a9885e3b7a44d93d8d70beb0aae7b3c66139d98832b6dddf82da790519ac9c6502d57504af1cb729c6edb3bf506fe14386a364618884ed0a2
   languageName: node
   linkType: hard
 
@@ -1524,10 +1535,10 @@ __metadata:
     "@preact/compat": ^17.1.2
     "@preact/preset-vite": ^2.5.0
     "@table-library/react-table-library": 4.1.4
-    "@types/lodash-es": ^4.17.7
-    "@types/node": ^20.4.1
-    "@types/react": ^18.2.14
-    "@types/react-dom": ^18.2.6
+    "@types/lodash-es": ^4.17.8
+    "@types/node": ^20.4.2
+    "@types/react": ^18.2.15
+    "@types/react-dom": ^18.2.7
     "@types/react-router-dom": ^5.3.3
     "@typescript-eslint/eslint-plugin": ^6.0.0
     "@typescript-eslint/parser": ^6.0.0
@@ -1535,7 +1546,7 @@ __metadata:
     async-validator: ^4.2.5
     eslint: ^8.44.0
     eslint-config-airbnb: ^19.0.4
-    eslint-config-airbnb-typescript: ^17.0.0
+    eslint-config-airbnb-typescript: ^17.1.0
     eslint-config-prettier: ^8.8.0
     eslint-import-resolver-typescript: ^3.5.5
     eslint-plugin-autofix: ^1.1.0
@@ -2608,17 +2619,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-airbnb-typescript@npm:^17.0.0":
-  version: 17.0.0
-  resolution: "eslint-config-airbnb-typescript@npm:17.0.0"
+"eslint-config-airbnb-typescript@npm:^17.1.0":
+  version: 17.1.0
+  resolution: "eslint-config-airbnb-typescript@npm:17.1.0"
   dependencies:
     eslint-config-airbnb-base: ^15.0.0
   peerDependencies:
-    "@typescript-eslint/eslint-plugin": ^5.13.0
-    "@typescript-eslint/parser": ^5.0.0
+    "@typescript-eslint/eslint-plugin": ^5.13.0 || ^6.0.0
+    "@typescript-eslint/parser": ^5.0.0 || ^6.0.0
     eslint: ^7.32.0 || ^8.2.0
     eslint-plugin-import: ^2.25.3
-  checksum: 9a8ce73c5a52ff1f82842ff95fca9313bb826ade8733d2dc25aa65781969282a5825fb5ac1b89c9d2e18da439aa3dc03486c2c405158559d0b1400e08593557e
+  checksum: 46d1753d660fe4225ccd89e91dd9f812db490326dfb835cfb786ab0b9a4ca25a39171a838661233b8f6f9a19294aaedaa962e19df915066beb80e7422749f7f1
   languageName: node
   linkType: hard
 
