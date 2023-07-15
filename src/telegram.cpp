@@ -513,6 +513,11 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
         } else if (dest & 0x80) {
             operation = Telegram::Operation::TX_READ;
             EMSESP::set_response_id(type_id);
+            // trigger read of all parts of telegram if requested length is more than 32
+            // compatibility to earlier versions
+            if (message_data[0] >= 32) {
+                EMSESP::set_read_id(type_id);
+            }
         } else {
             operation   = Telegram::Operation::TX_WRITE;
             validate_id = type_id;
