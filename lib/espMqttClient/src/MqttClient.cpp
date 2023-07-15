@@ -197,7 +197,7 @@ const char * MqttClient::getClientId() const {
 }
 
 void MqttClient::loop() {
-    switch (_state) {
+    switch ((State)_state) { // TOOD modified by proddy for EMS-ESP compiling on osx
     case State::disconnected:
 #if defined(ARDUINO_ARCH_ESP32)
         if (_useInternalTask == espMqttClientTypes::UseInternalTask::YES) {

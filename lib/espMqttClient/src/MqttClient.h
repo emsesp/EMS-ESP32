@@ -123,8 +123,7 @@ class MqttClient {
 #elif defined(ARDUINO_ARCH_ESP8266) && EMC_ESP8266_MULTITHREADING
     std::atomic<bool> _xSemaphore = false;
 #elif defined(__linux__)
-    //  added mutable to compile EMS-ESP standalone
-    mutable std::mutex mtx;
+    mutable std::mutex mtx; // TOOD modified by proddy for EMS-ESP
 #endif
 
     uint8_t _rxBuffer[EMC_RX_BUFFER_SIZE];

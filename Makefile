@@ -30,7 +30,7 @@ CHECKFLAGS = -q --force --std=c++11
 #----------------------------------------------------------------------
 C_STANDARD   := -std=c17
 # CXX_STANDARD := -std=c++17
-CXX_STANDARD := -std=gnu++17
+CXX_STANDARD := -std=gnu++11
 
 # C_STANDARD   := -std=c11
 # CXX_STANDARD := -std=c++11
