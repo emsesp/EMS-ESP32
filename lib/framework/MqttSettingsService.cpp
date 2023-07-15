@@ -2,7 +2,7 @@
 
 #include "../../src/emsesp_stub.hpp"
 
-using namespace std::placeholders;   // for `_1` etc
+using namespace std::placeholders; // for `_1` etc
 
 /**
  * Retains a copy of the cstr provided in the pointer provided using dynamic allocation.
