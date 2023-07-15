@@ -1,7 +1,7 @@
 #include <NTPSettingsService.h>
 #include <esp_sntp.h>
 
-#include "../../src/emsesp_stub.hpp" // proddy added
+#include "../../src/emsesp_stub.hpp"
 
 using namespace std::placeholders; // for `_1` etc
 

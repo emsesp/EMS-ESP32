@@ -1,6 +1,6 @@
 #include <MqttSettingsService.h>
 
-#include "../../src/emsesp_stub.hpp" // proddy added
+#include "../../src/emsesp_stub.hpp"
 
 using namespace std::placeholders;   // for `_1` etc
 
@@ -144,7 +144,6 @@ void MqttSettingsService::onConfigUpdated() {
     _reconfigureMqtt = true;
     _disconnectedAt  = 0;
 
-    // added by proddy
     startClient();
     emsesp::EMSESP::mqtt_.start(); // reload EMS-ESP MQTT settings
 }
@@ -231,7 +230,6 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
     root["clean_session"] = settings.cleanSession;
     root["entity_format"] = settings.entity_format;
 
-    // added by proddy for EMS-ESP
     root["publish_time_boiler"]     = settings.publish_time_boiler;
     root["publish_time_thermostat"] = settings.publish_time_thermostat;
     root["publish_time_solar"]      = settings.publish_time_solar;

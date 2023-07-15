@@ -1,7 +1,7 @@
 #include <SystemStatus.h>
 #include <esp_ota_ops.h>
 
-#include "../../src/emsesp_stub.hpp" // proddy added
+#include "../../src/emsesp_stub.hpp"
 
 using namespace std::placeholders; // for `_1` etc
 
@@ -39,7 +39,7 @@ void SystemStatus::systemStatus(AsyncWebServerRequest * request) {
     const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, NULL);
     if (partition != NULL) { // factory partition found
         root["has_loader"] = true;
-    } else { // check for not empty, smaller OTA partition
+    } else {                 // check for not empty, smaller OTA partition
         partition = esp_ota_get_next_update_partition(NULL);
         if (partition) {
             uint64_t buffer;

@@ -1,7 +1,7 @@
 #include <FeaturesService.h>
-#include "../../src/emsesp_stub.hpp" // proddy added
+#include "../../src/emsesp_stub.hpp"
 
-using namespace std::placeholders;   // for `_1` etc
+using namespace std::placeholders; // for `_1` etc
 
 FeaturesService::FeaturesService(AsyncWebServer * server) {
     server->on(FEATURES_SERVICE_PATH, HTTP_GET, std::bind(&FeaturesService::features, this, _1));
