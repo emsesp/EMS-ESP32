@@ -625,25 +625,36 @@ void EMSESP::publish_sensor_values(const bool time, const bool force) {
 
 // MQTT publish a telegram as raw data to the topic 'response'
 void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
-    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
+    static char *  buffer = nullptr;
+    static uint8_t offset;
+    if (buffer == nullptr) {
+        offset    = telegram->offset; // store offset from first part
+        buffer    = new char[768];    // max 256 hex-codes, 255 spaces, 1 termination
+        buffer[0] = '\0';
+    }
+    strlcat(buffer, Helpers::data_to_hex(telegram->message_data, telegram->message_length).c_str(), 768);
+    if (response_id_ != 0) {
+        strlcat(buffer, " ", 768);
+        return;
+    }
+    DynamicJsonDocument doc(EMSESP_JSON_SIZE_LARGE);
+    char                s[10];
+    doc["src"]    = Helpers::hextoa(s, telegram->src);
+    doc["dest"]   = Helpers::hextoa(s, telegram->dest);
+    doc["type"]   = Helpers::hextoa(s, telegram->type_id);
+    doc["offset"] = Helpers::hextoa(s, offset);
+    doc["data"]   = buffer;
 
-    char buffer[100];
-    doc["src"]    = Helpers::hextoa(buffer, telegram->src);
-    doc["dest"]   = Helpers::hextoa(buffer, telegram->dest);
-    doc["type"]   = Helpers::hextoa(buffer, telegram->type_id);
-    doc["offset"] = Helpers::hextoa(buffer, telegram->offset);
-    strlcpy(buffer, Helpers::data_to_hex(telegram->message_data, telegram->message_length).c_str(), sizeof(buffer)); // telegram is without crc
-    doc["data"] = buffer;
-
-    if (telegram->message_length <= 4) {
+    if (telegram->message_length <= 4 && strlen(buffer) <= 11) {
         uint32_t value = 0;
         for (uint8_t i = 0; i < telegram->message_length; i++) {
             value = (value << 8) + telegram->message_data[i];
         }
         doc["value"] = value;
     }
-
     Mqtt::queue_publish("response", doc.as<JsonObject>());
+    delete[] buffer;
+    buffer = nullptr;
 }
 
 // builds json with the detail of each value, for a specific EMS device type or the temperature sensor
@@ -852,11 +863,10 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
         // show log for read and response
         LOG_NOTICE("%s", pretty_telegram(telegram).c_str());
         if (telegram->type_id == response_id_) {
-            publish_response(telegram);
-            response_id_ = 0;
             if (!read_next_) {
                 response_id_ = 0;
             }
+            publish_response(telegram);
         }
         // check if read is finished or gives more parts
         if (!read_next_) {

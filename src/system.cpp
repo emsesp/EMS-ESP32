@@ -99,7 +99,7 @@ bool System::command_send(const char * value, const int8_t id) {
 }
 
 bool System::command_response(const char * value, const int8_t id, JsonObject & output) {
-    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
+    DynamicJsonDocument doc(EMSESP_JSON_SIZE_LARGE);
     if (DeserializationError::Ok == deserializeJson(doc, Mqtt::get_response())) {
         for (JsonPair p : doc.as<JsonObject>()) {
             output[p.key()] = p.value();
