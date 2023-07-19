@@ -38,7 +38,7 @@ bool ClientPosix::connect(IPAddress ip, uint16_t port) {
   memset(&_host, 0, sizeof(_host));
   _host.sin_family = AF_INET;
   _host.sin_addr.s_addr = htonl(uint32_t(ip));
-  _host.sin_port = ::htons(port);
+  _host.sin_port = htons(port); // modified by proddy for EMS-ESP compiling standalone
 
   int ret = ::connect(_sockfd, (struct sockaddr *)&_host, sizeof(_host));
 

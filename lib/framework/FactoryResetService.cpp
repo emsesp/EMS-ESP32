@@ -18,10 +18,7 @@ void FactoryResetService::handleRequest(AsyncWebServerRequest * request) {
  * Delete function assumes that all files are stored flat, within the config directory.
  */
 void FactoryResetService::factoryReset() {
-    /* 
-   * Based on LittleFS. Modified by proddy
-   * Could be replaced with fs.rmdir(FS_CONFIG_DIRECTORY) in IDF 4.2
-   */
+    // TODO Could be replaced with fs.rmdir(FS_CONFIG_DIRECTORY) in IDF 4.2
     File root = fs->open(FS_CONFIG_DIRECTORY);
     File file;
     while (file = root.openNextFile()) {

@@ -365,7 +365,7 @@ bool SyslogService::can_transmit() {
 #endif
 
     if (!emsesp::EMSESP::system_.network_connected()) {
-        return false; // added by proddy. Check Ethernet
+        return false;
     }
 
     const uint64_t now           = uuid::get_uptime_ms();

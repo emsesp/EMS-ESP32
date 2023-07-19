@@ -76,7 +76,7 @@ class MqttSettings {
     uint16_t keepAlive;
     bool     cleanSession;
 
-    // proddy EMS-ESP specific
+    // EMS-ESP specific
     String   base;
     uint16_t publish_time_boiler;
     uint16_t publish_time_thermostat;
