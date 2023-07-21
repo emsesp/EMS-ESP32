@@ -102,8 +102,8 @@ void loop();
  */
 uint64_t get_uptime_ms();
 
-uint32_t get_uptime();     // added by proddy for EMS-ESP
-uint32_t get_uptime_sec(); // added by proddy for EMS-ESP
+uint32_t get_uptime();     
+uint32_t get_uptime_sec(); 
 
 void set_uptime();
 

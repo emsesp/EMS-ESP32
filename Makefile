@@ -23,15 +23,17 @@ LIBRARIES :=
 
 CPPCHECK = cppcheck
 # CHECKFLAGS = -q --force --std=c++17
-CHECKFLAGS = -q --force --std=c++11 -pthread
+CHECKFLAGS = -q --force --std=c++11
 
 #----------------------------------------------------------------------
 # Languages Standard
 #----------------------------------------------------------------------
-# C_STANDARD   := -std=c17
+C_STANDARD   := -std=c17
 # CXX_STANDARD := -std=c++17
-C_STANDARD   := -std=c11
-CXX_STANDARD := -std=c++11
+CXX_STANDARD := -std=gnu++11
+
+# C_STANDARD   := -std=c11
+# CXX_STANDARD := -std=c++11
 
 #----------------------------------------------------------------------
 # Defined Symbols
@@ -79,7 +81,7 @@ CPPFLAGS  += -g3
 CPPFLAGS  += -Os
 
 CFLAGS    += $(CPPFLAGS)
-CFLAGS    += -Wall -Wextra -Werror -Wswitch-enum -Wno-unused-parameter
+CFLAGS    += -Wall -Wextra -Werror -Wswitch-enum -Wno-unused-parameter -Wno-inconsistent-missing-override -Wno-missing-braces -Wno-unused-lambda-capture
 
 CXXFLAGS  += $(CFLAGS) -MMD
 

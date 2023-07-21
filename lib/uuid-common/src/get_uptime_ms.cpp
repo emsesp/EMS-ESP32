@@ -22,7 +22,6 @@
 
 namespace uuid {
 
-// added by proddy for EMS-ESP
 static uint64_t now_millis = 0;
 
 // returns system uptime in seconds

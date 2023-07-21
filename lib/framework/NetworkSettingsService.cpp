@@ -69,7 +69,7 @@ void NetworkSettingsService::manageSTA() {
                 esp_wifi_set_bandwidth((wifi_interface_t)ESP_IF_WIFI_STA, WIFI_BW_HT40);
             }
             if (networkSettings.nosleep) {
-                WiFi.setSleep(false); // turn off sleep - WIFI_PS_NONE
+                WiFi.setSleep(false);                                 // turn off sleep - WIFI_PS_NONE
             }
             WiFi.begin(_state.ssid.c_str(), _state.password.c_str()); // attempt to connect to the network
             esp_wifi_set_max_tx_power(networkSettings.tx_power * 4);  // set power after wifi is startet for C3

@@ -211,13 +211,18 @@ void Mqtt::incoming(const char * topic, const char * payload) {
 // received an MQTT message that we subscribed too
 // topic is the full path
 // payload is json or a single string and converted to a json with key 'value'
-void Mqtt::on_message(const char * topic, const char * payload, size_t len) const {
+void Mqtt::on_message(const char * topic, const char * message, size_t len) const {
+    // This causes a compile error "error: variable-sized object may not be initialized"
+    // so commenting out and assuming with the new mqtt lib it's always null terminated
+
+    /*
     // sometimes the payload is not terminated correctly, so make a copy
     // convert payload to a null-terminated char string
     char message[len + 2] = {'\0'};
     if (payload != nullptr) {
         strlcpy(message, payload, len + 1);
     }
+    */
 
 #if defined(EMSESP_DEBUG)
     if (len) {

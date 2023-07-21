@@ -247,7 +247,7 @@ class Mqtt {
 
     static std::vector<MQTTSubFunction> mqtt_subfunctions_; // list of mqtt subscribe callbacks for all devices
 
-    uint32_t last_mqtt_poll_          = 0;
+    // uint32_t last_mqtt_poll_          = 0;
     uint32_t last_publish_boiler_     = 0;
     uint32_t last_publish_thermostat_ = 0;
     uint32_t last_publish_solar_      = 0;
@@ -255,7 +255,7 @@ class Mqtt {
     uint32_t last_publish_other_      = 0;
     uint32_t last_publish_sensor_     = 0;
     uint32_t last_publish_heartbeat_  = 0;
-    uint32_t last_publish_queue_      = 0;
+    // uint32_t last_publish_queue_      = 0;
 
     static bool     connecting_;
     static bool     initialized_;

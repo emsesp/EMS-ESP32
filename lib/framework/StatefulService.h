@@ -19,7 +19,7 @@
 
 enum class StateUpdateResult {
     CHANGED = 0,     // The update changed the state and propagation should take place if required
-    CHANGED_RESTART, // a restart of the device is needed - added by proddy
+    CHANGED_RESTART, // a restart of the device is needed
     UNCHANGED,       // The state was unchanged, propagation should not take place
     ERROR            // There was a problem updating the state, propagation should not take place
 };
