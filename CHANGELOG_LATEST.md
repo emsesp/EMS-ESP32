@@ -66,4 +66,5 @@ There are breaking changes between 3.5.x and earlier versions of 3.6.0. Please r
 - Use [espMqttClient](https://github.com/bertmelis/espMqttClient) with integrated queue [#1178](https://github.com/emsesp/EMS-ESP32/issues/1178)
 - Move Sensors from Web dashboard to it's own tab enhancement [#1170](https://github.com/emsesp/EMS-ESP32/issues/1170)
 - Optimize WebUI dashboard data [#1169](https://github.com/emsesp/EMS-ESP32/issues/1169)
-- Response to `system/send`` raw reads gives combined data for telegrams with more parts
+- Replace React core library with Preact to save on memory footprint
+- Response to `system/send` raw reads gives combined data for telegrams with more parts
