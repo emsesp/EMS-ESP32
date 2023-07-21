@@ -172,18 +172,25 @@ bool WebSchedulerService::get_value_info(JsonObject & output, const char * cmd) 
     JsonVariant data;
     for (const ScheduleItem & scheduleItem : *scheduleItems) {
         if (Helpers::toLower(scheduleItem.name) == Helpers::toLower(command_s)) {
+            output["name"] = scheduleItem.name;
+            output["type"] = "boolean";
             if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                output[scheduleItem.name] = scheduleItem.active;
+                output["value"] = scheduleItem.active;
             } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-                output[scheduleItem.name] = scheduleItem.active ? 1 : 0;
+                output["value"] = scheduleItem.active ? 1 : 0;
             } else {
                 char result[12];
-                output[scheduleItem.name] = Helpers::render_boolean(result, scheduleItem.active);
+                output["value"] = Helpers::render_boolean(result, scheduleItem.active);
             }
-            data = output[scheduleItem.name];
+            output["command"]   = scheduleItem.cmd;
+            output["cmd_data"]  = scheduleItem.value;
+            output["readable"]  = true;
+            output["writeable"] = true;
+            output["visible"]   = true;
         }
     }
-    if (attribute_s && !strcmp(attribute_s, "value")) {
+    if (attribute_s && output.containsKey(attribute_s)) {
+        data = output[attribute_s];
         output.clear();
         output["api_data"] = data;
     }
