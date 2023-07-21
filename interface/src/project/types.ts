@@ -243,7 +243,8 @@ export const BOARD_PROFILES: BoardProfiles = {
   OLIMEXPOE: 'Olimex ESP32-POE',
   C3MINI: 'Wemos C3 Mini',
   S2MINI: 'Wemos S2 Mini',
-  S3MINI: 'Liligo S3'
+  S3MINI: 'Liligo S3',
+  S32S3: 'BBQKees Gateway S3'
 };
 
 export interface BoardProfile {

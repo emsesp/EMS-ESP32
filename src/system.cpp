@@ -1450,6 +1450,8 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
         data = {15, 7, 11, 12, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0};    // Lolin S2 Mini
     } else if (board_profile == "S3MINI") {
         data = {17, 18, 8, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0};     // Liligo S3
+    } else if (board_profile == "S32S3") {
+        data = {2, 18, 5, 17, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0};     // BBQKees Gateway S3
     } else if (board_profile == "CUSTOM") {
         // send back current values
         data = {(int8_t)EMSESP::system_.led_gpio_,

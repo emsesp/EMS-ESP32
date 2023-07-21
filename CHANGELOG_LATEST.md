@@ -36,6 +36,9 @@ There are breaking changes between 3.5.x and earlier versions of 3.6.0. Please r
 - Support Buderus AM200 [#1161](https://github.com/emsesp/EMS-ESP32/issues/1161)
 - Custom telegram handler [#1155](https://github.com/emsesp/EMS-ESP32/issues/1155)
 - Added support for TLS in MQTT (ESP32-S3 only) [#1178](https://github.com/emsesp/EMS-ESP32/issues/1178)
+- Boardprofile BBQKees Gateway S3
+- Custom entity type RAW [#1212](https://github.com/emsesp/EMS-ESP32/discussions/1212)
+- API command response [#1212](https://github.com/emsesp/EMS-ESP32/discussions/1212)
 
 ## Fixed
 
@@ -46,6 +49,7 @@ There are breaking changes between 3.5.x and earlier versions of 3.6.0. Please r
 - thermostat modetype is not changing when mode changes (e.g. to night) bugSomething isn't working [#1098](https://github.com/emsesp/EMS-ESP32/issues/1098)
 - NTP: cant apply changed timezone [#1182](https://github.com/emsesp/EMS-ESP32/issues/1182)
 - Missing Status of VS1 for Buderus SM200 enhancement [#1034](https://github.com/emsesp/EMS-ESP32/issues/1034)
+- Allowed gpios for S3
 
 ## Changed
 
@@ -62,3 +66,4 @@ There are breaking changes between 3.5.x and earlier versions of 3.6.0. Please r
 - Use [espMqttClient](https://github.com/bertmelis/espMqttClient) with integrated queue [#1178](https://github.com/emsesp/EMS-ESP32/issues/1178)
 - Move Sensors from Web dashboard to it's own tab enhancement [#1170](https://github.com/emsesp/EMS-ESP32/issues/1170)
 - Optimize WebUI dashboard data [#1169](https://github.com/emsesp/EMS-ESP32/issues/1169)
+- Response to `system/send`` raw reads gives combined data for telegrams with more parts
