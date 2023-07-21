@@ -91,7 +91,8 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 #elif CONFIG_IDF_TARGET_ESP32S2
     settings.board_profile = root["board_profile"] | "S2MINI";
 #elif CONFIG_IDF_TARGET_ESP32S3
-    settings.board_profile = root["board_profile"] | "S3MINI";
+    // settings.board_profile = root["board_profile"] | "S3MINI";
+    settings.board_profile = root["board_profile"] | "S32S3"; // BBQKees Gateway S3
 #elif CONFIG_IDF_TARGET_ESP32
     settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
 #endif

@@ -201,12 +201,8 @@ class Mqtt {
         ha_climate_reset_ = reset;
     }
 
-    static bool send_response() {
-        return send_response_;
-    }
-
-    static void send_response(bool send_response) {
-        send_response_ = send_response;
+    static std::string get_response() {
+        return lastresponse_;
     }
 
     void set_qos(uint8_t mqtt_qos) const {
@@ -270,6 +266,7 @@ class Mqtt {
 
     static std::string lasttopic_;
     static std::string lastpayload_;
+    static std::string lastresponse_;
 
     // settings, copied over
     static std::string mqtt_base_;

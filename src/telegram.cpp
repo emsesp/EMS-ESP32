@@ -512,11 +512,16 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
             operation = Telegram::Operation::NONE; // do not check reply/ack for other ids
         } else if (dest & 0x80) {
             operation = Telegram::Operation::TX_READ;
+            EMSESP::set_response_id(type_id);
+            // trigger read of all parts of telegram if requested length is more than 32
+            // compatibility to earlier versions
+            if (message_data[0] >= 32) {
+                EMSESP::set_read_id(type_id);
+            }
         } else {
             operation   = Telegram::Operation::TX_WRITE;
             validate_id = type_id;
         }
-        EMSESP::set_read_id(type_id);
     }
 
     auto telegram = std::make_shared<Telegram>(operation, src, dest, type_id, offset, message_data, message_length); // operation is TX_WRITE or TX_READ
@@ -546,16 +551,14 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
 }
 
 // send a Tx telegram to request data from an EMS device
-void TxService::read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t length) {
+void TxService::read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t length, const bool front) {
     LOG_DEBUG("Tx read request to device 0x%02X for type ID 0x%02X", dest, type_id);
 
     uint8_t message_data = (type_id > 0xFF) ? (EMS_MAX_TELEGRAM_MESSAGE_LENGTH - 2) : EMS_MAX_TELEGRAM_MESSAGE_LENGTH;
-    // if length set, publish result and set telegram to front
-    if (length) {
+    if (length > 0 && length < message_data) {
         message_data = length;
-        EMSESP::set_read_id(type_id);
     }
-    add(Telegram::Operation::TX_READ, dest, type_id, offset, &message_data, 1, 0, length != 0);
+    add(Telegram::Operation::TX_READ, dest, type_id, offset, &message_data, 1, 0, front);
 }
 
 // Send a raw telegram to the bus, telegram is a text string of hex values
@@ -566,32 +569,16 @@ bool TxService::send_raw(const char * telegram_data) {
 
     // since the telegram data is a const, make a copy. add 1 to grab the \0 EOS
     char telegram[EMS_MAX_TELEGRAM_LENGTH * 3];
-    for (uint8_t i = 0; i < strlen(telegram_data); i++) {
-        telegram[i] = telegram_data[i];
-    }
-    telegram[strlen(telegram_data)] = '\0'; // make sure its terminated
+    strlcpy(telegram, telegram_data, sizeof(telegram));
 
     uint8_t count = 0;
-    char *  p;
-    char    value[10] = {0};
-
     uint8_t data[EMS_MAX_TELEGRAM_LENGTH];
 
-    // get first value, which should be the src
-    if ((p = strtok(telegram, " ,"))) { // delimiter
-        strlcpy(value, p, sizeof(value));
-        data[0] = (uint8_t)strtol(value, 0, 16);
-    } else {
-        return false;
-    }
-
-    // and iterate until end
-    while (p != 0) {
-        if ((p = strtok(nullptr, " ,"))) {
-            strlcpy(value, p, sizeof(value));
-            auto val      = (uint8_t)strtol(value, 0, 16);
-            data[++count] = val;
-        }
+    // get values
+    char * p = strtok(telegram, " ,"); // delimiter
+    while (p != nullptr) {
+        data[count++] = (uint8_t)strtol(p, 0, 16);
+        p             = strtok(nullptr, " ,");
     }
 
     // check valid length
@@ -599,7 +586,7 @@ bool TxService::send_raw(const char * telegram_data) {
         return false;
     }
 
-    add(Telegram::Operation::TX_RAW, data, count + 1, 0, true); // add to top/front of Tx queue
+    add(Telegram::Operation::TX_RAW, data, count, 0, true); // add to top/front of Tx queue
     return true;
 }
 

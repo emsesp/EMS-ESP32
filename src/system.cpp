@@ -98,6 +98,18 @@ bool System::command_send(const char * value, const int8_t id) {
     return EMSESP::txservice_.send_raw(value); // ignore id
 }
 
+bool System::command_response(const char * value, const int8_t id, JsonObject & output) {
+    DynamicJsonDocument doc(EMSESP_JSON_SIZE_LARGE);
+    if (DeserializationError::Ok == deserializeJson(doc, Mqtt::get_response())) {
+        for (JsonPair p : doc.as<JsonObject>()) {
+            output[p.key()] = p.value();
+        }
+    } else {
+        output["response"] = Mqtt::get_response();
+    }
+    return true;
+}
+
 // fetch device values
 bool System::command_fetch(const char * value, const int8_t id) {
     std::string value_s;
@@ -753,6 +765,7 @@ void System::commands_init() {
     // these commands will return data in JSON format
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info, FL_(system_info_cmd));
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(commands), System::command_commands, FL_(commands_cmd));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F("response"), System::command_response, FL_(commands_response));
 
     // MQTT subscribe "ems-esp/system/#"
     Mqtt::subscribe(EMSdevice::DeviceType::SYSTEM, "system/#", nullptr); // use empty function callback
@@ -1437,6 +1450,8 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
         data = {15, 7, 11, 12, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0};    // Lolin S2 Mini
     } else if (board_profile == "S3MINI") {
         data = {17, 18, 8, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0};     // Liligo S3
+    } else if (board_profile == "S32S3") {
+        data = {2, 18, 5, 17, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0};     // BBQKees Gateway S3
     } else if (board_profile == "CUSTOM") {
         // send back current values
         data = {(int8_t)EMSESP::system_.led_gpio_,

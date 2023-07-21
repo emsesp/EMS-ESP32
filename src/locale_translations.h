@@ -69,6 +69,7 @@ MAKE_WORD_TRANSLATION(publish_cmd, "publish all to MQTT", "Publiziere MQTT", "",
 MAKE_WORD_TRANSLATION(system_info_cmd, "show system status", "Zeige System-Status", "", "", "pokaż status systemu", "vis system status", "", "Sistem Durumunu Göster", "visualizza stati di sistema") // TODO translate
 MAKE_WORD_TRANSLATION(schedule_cmd, "enable schedule item", "Aktiviere Zeitplan", "", "", "aktywuj wybrany harmonogram", "", "", "", "abilitare l'elemento programmato") // TODO translate
 MAKE_WORD_TRANSLATION(entity_cmd, "set custom value on ems", "Sende eigene Entitäten zu EMS", "", "", "wyślij własną wartość na EMS", "", "", "", "imposta valori personalizzati su EMS") // TODO translate
+MAKE_WORD_TRANSLATION(commands_response, "get response") // TODO translate
 
 // tags
 MAKE_WORD_TRANSLATION(tag_boiler_data_ww, "dhw", "WW", "dhw", "VV", "CWU", "dhw", "ecs", "SKS", "dhw")

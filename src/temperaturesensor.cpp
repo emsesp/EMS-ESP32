@@ -555,9 +555,7 @@ void TemperatureSensor::publish_values(const bool force) {
 
                 snprintf(topic, sizeof(topic), "sensor/%s/temperaturesensor_%s/config", Mqtt::basename().c_str(), sensorid.c_str());
 
-                Mqtt::queue_ha(topic, config.as<JsonObject>());
-
-                sensor.ha_registered = true;
+                sensor.ha_registered = Mqtt::queue_ha(topic, config.as<JsonObject>());
             }
         }
     }

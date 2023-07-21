@@ -68,10 +68,8 @@ const MqttStatusForm: FC = () => {
         return 'Malformed credentials';
       case MqttDisconnectReason.MQTT_NOT_AUTHORIZED:
         return 'Not authorized';
-      case MqttDisconnectReason.ESP8266_NOT_ENOUGH_SPACE:
-        return 'Device out of memory';
       case MqttDisconnectReason.TLS_BAD_FINGERPRINT:
-        return 'Server fingerprint invalid';
+        return 'TSL fingerprint invalid';
       default:
         return 'Unknown';
     }

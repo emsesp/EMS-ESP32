@@ -58,8 +58,9 @@ uint8_t  Mqtt::connectcount_       = 0;
 uint32_t Mqtt::mqtt_message_id_    = 0;
 char     will_topic_[Mqtt::MQTT_TOPIC_MAX_SIZE]; // because MQTT library keeps only char pointer
 
-std::string Mqtt::lasttopic_   = "";
-std::string Mqtt::lastpayload_ = "";
+std::string Mqtt::lasttopic_    = "";
+std::string Mqtt::lastpayload_  = "";
+std::string Mqtt::lastresponse_ = "";
 
 // Home Assistant specific
 // icons from https://materialdesignicons.com used with the UOMs (unit of measurements)
@@ -289,14 +290,10 @@ void Mqtt::on_message(const char * topic, const char * message, size_t len) cons
             snprintf(error, sizeof(error), "Call failed with error code (%s)", Command::return_code_string(return_code).c_str());
         }
         LOG_ERROR(error);
-        if (send_response_) {
-            Mqtt::queue_publish("response", error);
-        }
+        Mqtt::queue_publish("response", error);
     } else {
         // all good, send back json output from call
-        if (send_response_) {
-            Mqtt::queue_publish("response", output);
-        }
+        Mqtt::queue_publish("response", output);
     }
 }
 
@@ -478,7 +475,7 @@ void Mqtt::on_disconnect(espMqttClientTypes::DisconnectReason reason) {
     }
 }
 
-// MQTT onConnect - when an MQTT connect is established
+// MQTT on_connect - when an MQTT connect is established
 void Mqtt::on_connect() {
     if (connecting_) {
         return; // prevent duplicated connections
@@ -587,6 +584,12 @@ void Mqtt::ha_status() {
 // add sub or pub task to the queue.
 // the base is not included in the topic
 bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, const bool retain) {
+    if (topic == "response" && operation == Operation::PUBLISH) {
+        lastresponse_ = payload;
+        if (!send_response_) {
+            return true;
+        }
+    }
     if (!mqtt_enabled_ || topic.empty()) {
         return false; // quit, not using MQTT
     }
@@ -621,9 +624,6 @@ bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, con
 
 // add MQTT message to queue, payload is a string
 bool Mqtt::queue_publish_message(const std::string & topic, const std::string & payload, const bool retain) {
-    if (!enabled()) {
-        return false;
-    };
     return queue_message(Operation::PUBLISH, topic, payload, retain);
 }
 
@@ -672,8 +672,9 @@ bool Mqtt::queue_publish_retain(const std::string & topic, const JsonObject & pa
 }
 
 bool Mqtt::queue_publish_retain(const char * topic, const JsonObject & payload, const bool retain) {
-    if (enabled() && payload.size()) {
+    if (payload.size()) {
         std::string payload_text;
+        payload_text.reserve(measureJson(payload) + 1);
         serializeJson(payload, payload_text); // convert json to string
         return queue_publish_message(topic, payload_text, retain);
     }
@@ -682,10 +683,6 @@ bool Mqtt::queue_publish_retain(const char * topic, const JsonObject & payload, 
 
 // publish empty payload to remove the topic
 bool Mqtt::queue_remove_topic(const char * topic) {
-    if (!enabled()) {
-        return false;
-    }
-
     if (ha_enabled_) {
         return queue_publish_message(Mqtt::discovery_prefix() + topic, "", true); // publish with retain to remove from broker
     } else {
