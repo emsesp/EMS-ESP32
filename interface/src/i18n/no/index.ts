@@ -282,7 +282,7 @@ const no: Translation = {
   SCAN_AGAIN: 'Søk igjen',
   NETWORK_SCANNER: 'Nettverk Scanner',
   NETWORK_NO_WIFI: 'Ingen trådløse nett funnet',
-  NETWORK_BLANK_SSID: 'la feltet være blankt for å deaktivisere trådløst nettverk', // and enable ETH // TODO translate
+  NETWORK_BLANK_SSID: 'la feltet være blankt for å deaktivisere trådløst nettverk', // TODO translate
   TX_POWER: 'Tx Effekt',
   HOSTNAME: 'Hostname',
   NETWORK_DISABLE_SLEEP: 'Hindre at trådløst nettverk går i Sleep Mode',
