@@ -95,6 +95,7 @@ class Thermostat : public EMSdevice {
         uint8_t hpminflowtemp;
         uint8_t hpmode;
         uint8_t cooling;
+        uint8_t coolingon;
 
         uint8_t hc_num() const {
             return hc_num_;

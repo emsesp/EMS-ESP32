@@ -976,6 +976,7 @@ void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) 
     }
     has_update(telegram, hc->targetflowtemp, 4);
     has_update(telegram, hc->curroominfl, 27);
+    has_update(telegram, hc->coolingon, 32);
 
     add_ha_climate(hc);
 }
@@ -4194,6 +4195,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->reducetemp, DeviceValueType::INT, FL_(reducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_reducetemp));
         register_device_value(tag, &hc->wwprio, DeviceValueType::BOOL, FL_(wwprio), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwprio));
         register_device_value(tag, &hc->cooling, DeviceValueType::BOOL, FL_(hpcooling), DeviceValueUOM::NONE, MAKE_CF_CB(set_cooling));
+        register_device_value(tag, &hc->coolingon, DeviceValueType::BOOL, FL_(coolingOn), DeviceValueUOM::NONE);
 
         register_device_value(tag, &hc->hpmode, DeviceValueType::ENUM, FL_(enum_hpmode), FL_(hpmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_hpmode));
         register_device_value(tag, &hc->dewoffset, DeviceValueType::UINT, FL_(dewoffset), DeviceValueUOM::K, MAKE_CF_CB(set_dewoffset), 2, 10);
