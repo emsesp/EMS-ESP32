@@ -28,5 +28,18 @@
     "utility": "cpp",
     "string": "cpp",
     "string_view": "cpp"
-  }
+  },
+  "todo-tree.filtering.excludeGlobs": [
+    "**/vendor/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/bower_components/**",
+    "**/build/**",
+    "**/.vscode/**",
+    "**/.github/**",
+    "**/_output/**",
+    "**/*.min.*",
+    "**/*.map",
+    "**/ArduinoJson/**"
+  ]
 }
