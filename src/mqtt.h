@@ -230,7 +230,7 @@ class Mqtt {
     static void queue_unsubscribe_message(const std::string & topic);
 
     void on_publish(uint16_t packetId) const;
-    void on_message(const char * topic, const char * payload, size_t len) const;
+    void on_message(const char * topic, const uint8_t * payload, size_t len) const;
 
     // function handlers for MQTT subscriptions
     struct MQTTSubFunction {

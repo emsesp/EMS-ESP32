@@ -365,6 +365,7 @@ MAKE_TRANSLATION(auxElecHeatNrgConsPool, "auxelecheatnrgconspool", "aux elec. he
 MAKE_TRANSLATION(hpCompOn, "hpcompon", "hp compressor", "WP Kompressor", "WP compressor", "VP Kompressor", "sprężarka pompy ciepła", "vp kompressor", "compresseur pompe à chaleur", "", "compressore pompa calore")
 MAKE_TRANSLATION(hpHeatingOn, "hpheatingon", "hp heating", "WP Heizen", "WP verwarmingsbedrijf", "VP Uppvärmning", "pompa ciepła, ogrzewanie", "vp oppvarmning", "chauffe pompe à chaleur", "riscaldamento pompa calore")
 MAKE_TRANSLATION(hpCoolingOn, "hpcoolingon", "hp cooling", "WP Kühlen", "WP koelbedrijf", "VP Kyla", "pompa ciepła, chłodzenie", "vp kjøling", "refroidissement pompe à chaleur", "raffreddamento pompa calore")
+MAKE_TRANSLATION(coolingOn, "coolingon", "cooling", "Kühlen", "koelbedrijf", "Kyla", "chłodzenie", "kjøling", "refroidissement", "calore")
 MAKE_TRANSLATION(hpWwOn, "hpwwon", "hp dhw", "WP Warmwasser", "WP warmwaterbedrijf", "VP Varmvatten", "pompa ciepła, c.w.u.", "vp varmvatten", "eau chaude pompe à chaleur", "acqua calda pompa calore")
 MAKE_TRANSLATION(hpPoolOn, "hppoolon", "hp pool", "WP Pool", "WP zwembadbedrijf", "VP Pool", "pompa ciepła, podgrzewanie basenu", "vp basseng", "pompe à chaleur piscine", "pompa calore piscina")
 MAKE_TRANSLATION(hpBrinePumpSpd, "hpbrinepumpspd", "brine pump speed", "Solepumpen-Geschw.", "Snelheid pekelpomp", "Hastighet Brine-pump", "wysterowanie pompy glikolu", "hastighet brine-pumpe", "vitesse pompe à saumure", "", "velocità pompa sbrinamento")
