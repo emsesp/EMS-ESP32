@@ -203,7 +203,7 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
 // simulate receiving a MQTT message, used only for testing
 void Mqtt::incoming(const char * topic, const char * payload) {
     if (payload != nullptr) {
-        on_message(topic, payload, strlen(payload));
+        on_message(topic, (const uint8_t *) payload, strlen(payload));
     }
 }
 #endif
@@ -211,15 +211,13 @@ void Mqtt::incoming(const char * topic, const char * payload) {
 // received an MQTT message that we subscribed too
 // topic is the full path
 // payload is json or a single string and converted to a json with key 'value'
-void Mqtt::on_message(const char * topic, const char * payload, size_t len) const {
-    // the payload is not terminated correctly, so make a copy
+void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) const {
+    // the payload is not terminated
     // convert payload to a null-terminated char string
+    // see https://www.emelis.net/espMqttClient/#code-samples
     char message[len + 1];
-    if (payload != nullptr) {
-        strlcpy(message, payload, len + 1);
-    } else {
-        message[0] = '\0';
-    }
+    memcpy(message, payload, len);
+    message[len] = '\0';
 
 #if defined(EMSESP_DEBUG)
     if (len) {
@@ -390,7 +388,7 @@ void Mqtt::start() {
 
     EMSESP::esp8266React.onMessage(
         [this](const espMqttClientTypes::MessageProperties & properties, const char * topic, const uint8_t * payload, size_t len, size_t index, size_t total) {
-            on_message(topic, (const char *)payload, len); // receiving mqtt
+            on_message(topic, payload, len); // receiving mqtt
         });
 }
 
