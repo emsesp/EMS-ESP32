@@ -1505,6 +1505,10 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                     output["api_data"] = data;
                     return true;
                 } else {
+                    char error[100];
+                    snprintf(error, sizeof(error), "cannot find attribute %s in entity %s", attribute_s, command_s);
+                    output.clear();
+                    output["message"] = error;
                     return false;
                 }
             }
@@ -1513,6 +1517,9 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
         }
     }
 
+    char error[100];
+    snprintf(error, sizeof(error), "cannot find values for entity '%s'", cmd);
+    json["message"] = error;
     return false;
 }
 

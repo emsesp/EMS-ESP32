@@ -250,9 +250,7 @@ void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) c
         if ((!strcmp(topic, full_topic)) && (mf.mqtt_subfunction_)) {
             if (!(mf.mqtt_subfunction_)(message)) {
                 LOG_ERROR("error: invalid payload %s for this topic %s", message, topic);
-                if (send_response_) {
-                    Mqtt::queue_publish("response", "error: invalid data");
-                }
+                Mqtt::queue_publish("response", "error: invalid data");
             }
             return;
         }
