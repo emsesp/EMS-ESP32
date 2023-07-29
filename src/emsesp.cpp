@@ -1324,7 +1324,6 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
             if (txservice_.is_last_tx(src, dest)) {
                 LOG_DEBUG("Last Tx read successful");
                 txservice_.increment_telegram_read_count();
-                txservice_.send_poll(); // close the bus
                 txservice_.reset_retry_count();
                 tx_successful = true;
 
@@ -1332,6 +1331,9 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 // not for response to raw send commands
                 if ((response_id_ == 0 || read_id_ > 0) && (length >= 31) && (txservice_.read_next_tx(data[3], length) == read_id_)) {
                     read_next_ = true;
+                    txservice_.send();
+                } else {
+                    txservice_.send_poll(); // close the bus
                 }
             }
         }
