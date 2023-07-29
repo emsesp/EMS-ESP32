@@ -860,13 +860,14 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
 bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     // if watching or reading...
     if ((telegram->type_id == read_id_ || telegram->type_id == response_id_) && (telegram->dest == txservice_.ems_bus_id())) {
-        // show log for read and response
-        LOG_NOTICE("%s", pretty_telegram(telegram).c_str());
         if (telegram->type_id == response_id_) {
             if (!read_next_) {
                 response_id_ = 0;
             }
             publish_response(telegram);
+        } else {
+            // show log only for read and not for response
+            LOG_NOTICE("%s", pretty_telegram(telegram).c_str());
         }
         // check if read is finished or gives more parts
         if (!read_next_) {
