@@ -860,13 +860,16 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
 bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     // if watching or reading...
     if ((telegram->type_id == read_id_ || telegram->type_id == response_id_) && (telegram->dest == txservice_.ems_bus_id())) {
-        // show log for read and response
-        LOG_NOTICE("%s", pretty_telegram(telegram).c_str());
         if (telegram->type_id == response_id_) {
+            if (!trace_raw_) {
+                LOG_TRACE("%s", pretty_telegram(telegram).c_str());
+            }
             if (!read_next_) {
                 response_id_ = 0;
             }
             publish_response(telegram);
+        } else {
+            LOG_NOTICE("%s", pretty_telegram(telegram).c_str());
         }
         // check if read is finished or gives more parts
         if (!read_next_) {
@@ -1324,14 +1327,16 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
             if (txservice_.is_last_tx(src, dest)) {
                 LOG_DEBUG("Last Tx read successful");
                 txservice_.increment_telegram_read_count();
-                txservice_.send_poll(); // close the bus
                 txservice_.reset_retry_count();
                 tx_successful = true;
 
                 // if telegram is longer read next part with offset +25 for ems+ or +27 for ems1.0
-                // not for response to raw send commands
+                // not for response to raw send commands without read_id set
                 if ((response_id_ == 0 || read_id_ > 0) && (length >= 31) && (txservice_.read_next_tx(data[3], length) == read_id_)) {
                     read_next_ = true;
+                    txservice_.send();
+                } else {
+                    txservice_.send_poll(); // close the bus
                 }
             }
         }
