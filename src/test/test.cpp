@@ -613,7 +613,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         Mqtt::ha_enabled(false);
         Mqtt::nested_format(1);
-        Mqtt::send_response(false);
+        // Mqtt::send_response(false);
 
         run_test("boiler");
         // run_test("thermostat");
@@ -633,7 +633,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         Mqtt::ha_enabled(true);
         Mqtt::nested_format(1);
-        Mqtt::send_response(false);
+        // Mqtt::send_response(false);
 
         run_test("boiler");
         run_test("thermostat");
@@ -703,7 +703,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Testing custom entities");
 
         Mqtt::ha_enabled(true);
-        Mqtt::send_response(false);
+        // Mqtt::send_response(false);
 
         run_test("thermostat");
 
@@ -734,7 +734,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Testing masked entities");
 
         Mqtt::ha_enabled(true);
-        Mqtt::send_response(false);
+        // Mqtt::send_response(false);
 
         run_test("boiler");
 
@@ -759,7 +759,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Testing device value lost");
 
         Mqtt::ha_enabled(true);
-        Mqtt::send_response(false);
+        // Mqtt::send_response(false);
 
         run_test("boiler");
 
@@ -780,7 +780,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Testing API getting values");
         Mqtt::ha_enabled(false);
         Mqtt::nested_format(1);
-        Mqtt::send_response(false);
+        // Mqtt::send_response(false);
         // EMSESP::bool_format(BOOL_FORMAT_10); // BOOL_FORMAT_10_STR
         EMSESP::system_.bool_format(BOOL_FORMAT_TRUEFALSE); // BOOL_FORMAT_TRUEFALSE_STR
 
@@ -813,7 +813,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Testing MQTT incoming changes");
         Mqtt::ha_enabled(false);
         Mqtt::nested_format(1);
-        Mqtt::send_response(false);
+        // Mqtt::send_response(false);
         EMSESP::system_.bool_format(BOOL_FORMAT_10); // BOOL_FORMAT_10_STR
         // EMSESP::bool_format(BOOL_FORMAT_TRUEFALSE); // BOOL_FORMAT_TRUEFALSE_STR
 
@@ -851,7 +851,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // Mqtt::ha_enabled(false);
 
         Mqtt::nested_format(1);
-        Mqtt::send_response(true);
+        // Mqtt::send_response(true);
 
         run_test("boiler");
         run_test("thermostat");
@@ -1001,14 +1001,14 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::mqtt_.incoming("ems-esp/thermostat/hc2/mode", "auto");
         EMSESP::mqtt_.incoming("ems-esp/thermostat/wwc3/mode", "auto");
         EMSESP::mqtt_.incoming("ems-esp/boiler/wwcircpump", "off");
-        EMSESP::mqtt_.incoming("ems-esp/thermostat/seltemp");    // empty payload, sends reponse
+        EMSESP::mqtt_.incoming("ems-esp/thermostat/seltemp");    // empty payload
         EMSESP::mqtt_.incoming("ems-esp/thermostat_hc1", "22");  // HA only
         EMSESP::mqtt_.incoming("ems-esp/thermostat_hc1", "off"); // HA only
         EMSESP::mqtt_.incoming("ems-esp/system/send", "11 12 13");
-        EMSESP::mqtt_.incoming("ems-esp/boiler/syspress");       // empty payload, sends reponse
-        EMSESP::mqtt_.incoming("ems-esp/thermostat/mode");       // empty payload, sends reponse
+        EMSESP::mqtt_.incoming("ems-esp/boiler/syspress");       // empty payload
+        EMSESP::mqtt_.incoming("ems-esp/thermostat/mode");       // empty payload
         EMSESP::mqtt_.incoming("ems-esp/system/publish");
-        EMSESP::mqtt_.incoming("ems-esp/thermostat/seltemp");    // empty payload, sends reponse
+        EMSESP::mqtt_.incoming("ems-esp/thermostat/seltemp");    // empty payload
 
         EMSESP::mqtt_.incoming("ems-esp/boiler/wwseltemp", "59");
         EMSESP::mqtt_.incoming("ems-esp/boiler/wwseltemp");
@@ -1022,7 +1022,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         // check extended MQTT base
         Mqtt::base("home/cellar/heating");
-        EMSESP::mqtt_.incoming("home/cellar/heating/thermostat/mode"); // empty payload, sends reponse
+        EMSESP::mqtt_.incoming("home/cellar/heating/thermostat/mode"); // empty payload
 
         // Web API TESTS
         AsyncWebServerRequest request;

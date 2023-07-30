@@ -282,7 +282,7 @@ const sv: Translation = {
   SCAN_AGAIN: 'Sök igen',
   NETWORK_SCANNER: 'Hittade nätverk',
   NETWORK_NO_WIFI: 'Inga WiFi-nätverk hittades',
-  NETWORK_BLANK_SSID: 'lämna blankt för att inaktivera WiFi',
+  NETWORK_BLANK_SSID: 'lämna blankt för att inaktivera WiFi', // and enable ETH // TODO translate
   TX_POWER: 'Tx Effekt',
   HOSTNAME: 'Värdnamn',
   NETWORK_DISABLE_SLEEP: 'Inaktivera sömnläge',
@@ -322,8 +322,8 @@ const sv: Translation = {
   ENTITIES_UPDATED: 'Entities Updated', // TODO translate
   WRITEABLE: 'Writeable', // TODO translate
   SHOWING: 'Showing', // TODO translate
-  SEARCH: 'Search' // TODO translate
-
+  SEARCH: 'Search', // TODO translate
+  CERT: 'TSL root certificate (leave blank to disable TSL)' // TODO translate
 };
 
 export default sv;

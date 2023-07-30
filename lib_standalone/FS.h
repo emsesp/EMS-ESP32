@@ -61,11 +61,11 @@ class File : public Stream {
     bool seek(uint32_t pos) {
         return seek(pos, SeekSet);
     }
-    size_t       position() const;
-    size_t       size() const;
-    bool         setBufferSize(size_t size);
-    void         close();
-                 operator bool() const;
+    size_t position() const;
+    size_t size() const;
+    bool   setBufferSize(size_t size);
+    void   close();
+    operator bool() const;
     time_t       getLastWrite();
     const char * path() const;
     const char * name() const;

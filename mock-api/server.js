@@ -323,12 +323,8 @@ security_settings = {
   ]
 };
 const features = {
-  project: true,
-  security: true,
-  mqtt: true,
-  ntp: true,
-  ota: true,
-  upload_firmware: true
+  version: 'v3.6.0-demo',
+  platform: 'ESP32-S3'
 };
 const verify_authentication = { access_token: '1234' };
 const signin = {
@@ -2782,5 +2778,5 @@ rest_server.get(ES_LOG_ENDPOINT, function (req, res) {
       log_index = 0;
     }
     fetch_log.events.push(data); // append to buffer
-  }, 3000);
+  }, 300);
 });

@@ -117,7 +117,7 @@ class EMSESP {
     static bool        process_telegram(std::shared_ptr<const Telegram> telegram);
     static std::string pretty_telegram(std::shared_ptr<const Telegram> telegram);
 
-    static void send_read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset = 0, const uint8_t length = 0);
+    static void send_read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset = 0, const uint8_t length = 0, const bool front = false);
     static void send_write_request(const uint16_t type_id,
                                    const uint8_t  dest,
                                    const uint8_t  offset,
@@ -174,6 +174,10 @@ class EMSESP {
     }
     static void set_read_id(uint16_t id) {
         read_id_ = id;
+    }
+
+    static void set_response_id(uint16_t id) {
+        response_id_ = id;
     }
 
     static bool wait_validate() {
@@ -259,6 +263,7 @@ class EMSESP {
     static uint16_t read_id_;
     static bool     read_next_;
     static uint16_t publish_id_;
+    static uint16_t response_id_;
     static bool     tap_water_active_;
     static uint8_t  publish_all_idx_;
     static uint8_t  unique_id_count_;

@@ -282,7 +282,7 @@ const no: Translation = {
   SCAN_AGAIN: 'Søk igjen',
   NETWORK_SCANNER: 'Nettverk Scanner',
   NETWORK_NO_WIFI: 'Ingen trådløse nett funnet',
-  NETWORK_BLANK_SSID: 'la feltet være blankt for å deaktivisere trådløst nettverk',
+  NETWORK_BLANK_SSID: 'la feltet være blankt for å deaktivisere trådløst nettverk', // TODO translate
   TX_POWER: 'Tx Effekt',
   HOSTNAME: 'Hostname',
   NETWORK_DISABLE_SLEEP: 'Hindre at trådløst nettverk går i Sleep Mode',
@@ -322,8 +322,8 @@ const no: Translation = {
   ENTITIES_UPDATED: 'Entities Updated', // TODO translate
   WRITEABLE: 'Writeable', // TODO translate
   SHOWING: 'Showing', // TODO translate
-  SEARCH: 'Search' // TODO translate
-  
+  SEARCH: 'Search', // TODO translate
+  CERT: 'TSL root certificate (leave blank to disable TSL)' // TODO translate
 };
 
 export default no;

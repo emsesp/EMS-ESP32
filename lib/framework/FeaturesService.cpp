@@ -1,4 +1,5 @@
 #include <FeaturesService.h>
+#include "../../src/emsesp_stub.hpp"
 
 using namespace std::placeholders; // for `_1` etc
 
@@ -9,36 +10,10 @@ FeaturesService::FeaturesService(AsyncWebServer * server) {
 void FeaturesService::features(AsyncWebServerRequest * request) {
     AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_FEATURES_SIZE);
     JsonObject          root     = response->getRoot();
-#if FT_ENABLED(FT_PROJECT)
-    root["project"] = true;
-#else
-    root["project"]         = false;
-#endif
-#if FT_ENABLED(FT_SECURITY)
-    root["security"] = true;
-#else
-    root["security"]        = false;
-#endif
-#if FT_ENABLED(FT_MQTT)
-    root["mqtt"] = true;
-#else
-    root["mqtt"]            = false;
-#endif
-#if FT_ENABLED(FT_NTP)
-    root["ntp"] = true;
-#else
-    root["ntp"]             = false;
-#endif
-#if FT_ENABLED(FT_OTA)
-    root["ota"] = true;
-#else
-    root["ota"]             = false;
-#endif
-#if FT_ENABLED(FT_UPLOAD_FIRMWARE)
-    root["upload_firmware"] = true;
-#else
-    root["upload_firmware"] = false;
-#endif
+
+    root["version"]  = EMSESP_APP_VERSION;
+    root["platform"] = EMSESP_PLATFORM;
+
     response->setLength();
     request->send(response);
 }

@@ -23,7 +23,7 @@
 
 namespace emsesp {
 
-espMqttClient * Mqtt::mqttClient_;
+MqttClient * Mqtt::mqttClient_;
 
 // static parameters we make global
 std::string Mqtt::mqtt_base_;
@@ -58,8 +58,9 @@ uint8_t  Mqtt::connectcount_       = 0;
 uint32_t Mqtt::mqtt_message_id_    = 0;
 char     will_topic_[Mqtt::MQTT_TOPIC_MAX_SIZE]; // because MQTT library keeps only char pointer
 
-std::string Mqtt::lasttopic_   = "";
-std::string Mqtt::lastpayload_ = "";
+std::string Mqtt::lasttopic_    = "";
+std::string Mqtt::lastpayload_  = "";
+std::string Mqtt::lastresponse_ = "";
 
 // Home Assistant specific
 // icons from https://materialdesignicons.com used with the UOMs (unit of measurements)
@@ -202,7 +203,7 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
 // simulate receiving a MQTT message, used only for testing
 void Mqtt::incoming(const char * topic, const char * payload) {
     if (payload != nullptr) {
-        on_message(topic, payload, strlen(payload));
+        on_message(topic, (const uint8_t *) payload, strlen(payload));
     }
 }
 #endif
@@ -210,13 +211,13 @@ void Mqtt::incoming(const char * topic, const char * payload) {
 // received an MQTT message that we subscribed too
 // topic is the full path
 // payload is json or a single string and converted to a json with key 'value'
-void Mqtt::on_message(const char * topic, const char * payload, size_t len) const {
-    // sometimes the payload is not terminated correctly, so make a copy
+void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) const {
+    // the payload is not terminated
     // convert payload to a null-terminated char string
-    char message[len + 2] = {'\0'};
-    if (payload != nullptr) {
-        strlcpy(message, payload, len + 1);
-    }
+    // see https://www.emelis.net/espMqttClient/#code-samples
+    char message[len + 1];
+    memcpy(message, payload, len);
+    message[len] = '\0';
 
 #if defined(EMSESP_DEBUG)
     if (len) {
@@ -249,9 +250,7 @@ void Mqtt::on_message(const char * topic, const char * payload, size_t len) cons
         if ((!strcmp(topic, full_topic)) && (mf.mqtt_subfunction_)) {
             if (!(mf.mqtt_subfunction_)(message)) {
                 LOG_ERROR("error: invalid payload %s for this topic %s", message, topic);
-                if (send_response_) {
-                    Mqtt::queue_publish("response", "error: invalid data");
-                }
+                Mqtt::queue_publish("response", "error: invalid data");
             }
             return;
         }
@@ -284,14 +283,10 @@ void Mqtt::on_message(const char * topic, const char * payload, size_t len) cons
             snprintf(error, sizeof(error), "Call failed with error code (%s)", Command::return_code_string(return_code).c_str());
         }
         LOG_ERROR(error);
-        if (send_response_) {
-            Mqtt::queue_publish("response", error);
-        }
+        Mqtt::queue_publish("response", error);
     } else {
         // all good, send back json output from call
-        if (send_response_) {
-            Mqtt::queue_publish("response", output);
-        }
+        Mqtt::queue_publish("response", output);
     }
 }
 
@@ -315,7 +310,7 @@ void Mqtt::show_topic_handlers(uuid::console::Shell & shell, const uint8_t devic
 
 // called when an MQTT Publish ACK is received
 void Mqtt::on_publish(uint16_t packetId) const {
-    LOG_DEBUG("Packet %d sent successfull", packetId);
+    LOG_DEBUG("Packet %d sent successful", packetId);
 }
 
 // called when MQTT settings have changed via the Web forms
@@ -387,18 +382,12 @@ void Mqtt::start() {
         snprintf(will_topic, MQTT_TOPIC_MAX_SIZE, "status");
     }
 
-    mqttClient_->setWill(will_topic, 1, true, "offline"); // with qos 1, retain true
+    EMSESP::esp8266React.setWill(will_topic); // with qos 1, retain true
 
-    mqttClient_->onMessage(
+    EMSESP::esp8266React.onMessage(
         [this](const espMqttClientTypes::MessageProperties & properties, const char * topic, const uint8_t * payload, size_t len, size_t index, size_t total) {
-            on_message(topic, (const char *)payload, len); // receiving mqtt
+            on_message(topic, payload, len); // receiving mqtt
         });
-
-    /*
-    mqttClient_->onPublish([this](uint16_t packetId) {
-        on_publish(packetId); // publish
-    });
-    */
 }
 
 void Mqtt::set_publish_time_boiler(uint16_t publish_time) {
@@ -479,7 +468,7 @@ void Mqtt::on_disconnect(espMqttClientTypes::DisconnectReason reason) {
     }
 }
 
-// MQTT onConnect - when an MQTT connect is established
+// MQTT on_connect - when an MQTT connect is established
 void Mqtt::on_connect() {
     if (connecting_) {
         return; // prevent duplicated connections
@@ -527,7 +516,7 @@ void Mqtt::ha_status() {
     StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> doc;
 
     char uniq[70];
-    if (Mqtt::entity_format() == entitiyFormat::MULTI_SHORT) {
+    if (Mqtt::entity_format() == entityFormat::MULTI_SHORT) {
         snprintf(uniq, sizeof(uniq), "%s_system_status", mqtt_basename_.c_str());
     } else {
         strcpy(uniq, "system_status");
@@ -588,9 +577,16 @@ void Mqtt::ha_status() {
 // add sub or pub task to the queue.
 // the base is not included in the topic
 bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, const bool retain) {
-    if (topic.empty()) {
-        return false;
+    if (topic == "response" && operation == Operation::PUBLISH) {
+        lastresponse_ = payload;
+        if (!send_response_) {
+            return true;
+        }
     }
+    if (!mqtt_enabled_ || topic.empty()) {
+        return false; // quit, not using MQTT
+    }
+
     uint16_t packet_id = 0;
     char     fulltopic[MQTT_TOPIC_MAX_SIZE];
 
@@ -621,9 +617,6 @@ bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, con
 
 // add MQTT message to queue, payload is a string
 bool Mqtt::queue_publish_message(const std::string & topic, const std::string & payload, const bool retain) {
-    if (!enabled()) {
-        return false;
-    };
     return queue_message(Operation::PUBLISH, topic, payload, retain);
 }
 
@@ -672,8 +665,9 @@ bool Mqtt::queue_publish_retain(const std::string & topic, const JsonObject & pa
 }
 
 bool Mqtt::queue_publish_retain(const char * topic, const JsonObject & payload, const bool retain) {
-    if (enabled() && payload.size()) {
+    if (payload.size()) {
         std::string payload_text;
+        payload_text.reserve(measureJson(payload) + 1);
         serializeJson(payload, payload_text); // convert json to string
         return queue_publish_message(topic, payload_text, retain);
     }
@@ -682,10 +676,6 @@ bool Mqtt::queue_publish_retain(const char * topic, const JsonObject & payload, 
 
 // publish empty payload to remove the topic
 bool Mqtt::queue_remove_topic(const char * topic) {
-    if (!enabled()) {
-        return false;
-    }
-
     if (ha_enabled_) {
         return queue_publish_message(Mqtt::discovery_prefix() + topic, "", true); // publish with retain to remove from broker
     } else {
@@ -804,10 +794,10 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // build unique identifier also used as object_id which also becomes the Entity ID in HA
     char uniq_id[80];
-    if (Mqtt::entity_format() == entitiyFormat::MULTI_SHORT) {
+    if (Mqtt::entity_format() == entityFormat::MULTI_SHORT) {
         // prefix base name to each uniq_id and use the shortname
         snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
-    } else if (Mqtt::entity_format() == entitiyFormat::SINGLE_SHORT) {
+    } else if (Mqtt::entity_format() == entityFormat::SINGLE_SHORT) {
         // shortname, no mqtt base. This is the default version.
         snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, entity_with_tag);
     } else {
@@ -1171,7 +1161,7 @@ bool Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
 
     snprintf(name_s, sizeof(name_s), "Hc%d", hc_num);
 
-    if (Mqtt::entity_format() == entitiyFormat::MULTI_SHORT) {
+    if (Mqtt::entity_format() == entityFormat::MULTI_SHORT) {
         snprintf(uniq_id_s, sizeof(uniq_id_s), "%s_thermostat_hc%d", mqtt_basename_.c_str(), hc_num); // add basename
     } else {
         snprintf(uniq_id_s, sizeof(uniq_id_s), "thermostat_hc%d", hc_num);                            // backward compatible with v3.4

@@ -65,7 +65,6 @@ void Shell::display_prompt() {
         std::string context  = context_text();
 
         print(prompt_prefix());
-        // colors added by proddy
         if (!hostname.empty()) {
             print(COLOR_BRIGHT_GREEN);
             print(COLOR_BOLD_ON);
@@ -78,7 +77,6 @@ void Shell::display_prompt() {
             print(COLOR_BOLD_ON);
             print(context);
             print(COLOR_RESET);
-            // print(' ');
         }
         print(prompt_suffix());
         print(' ');

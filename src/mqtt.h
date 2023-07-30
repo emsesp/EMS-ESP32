@@ -36,7 +36,7 @@ using mqtt_sub_function_p = std::function<bool(const char * message)>;
 class Mqtt {
   public:
     enum discoveryType : uint8_t { HOMEASSISTANT, DOMOTICZ };
-    enum entitiyFormat : uint8_t { SINGLE_LONG, SINGLE_SHORT, MULTI_SHORT };
+    enum entityFormat : uint8_t { SINGLE_LONG, SINGLE_SHORT, MULTI_SHORT };
 
     void loop();
     void start();
@@ -104,14 +104,10 @@ class Mqtt {
 #endif
 
     static bool connected() {
-#if defined(EMSESP_STANDALONE)
-        return true;
-#else
         return mqttClient_->connected();
-#endif
     }
 
-    static espMqttClient * client() {
+    static MqttClient * client() {
         return mqttClient_;
     }
 
@@ -205,12 +201,8 @@ class Mqtt {
         ha_climate_reset_ = reset;
     }
 
-    static bool send_response() {
-        return send_response_;
-    }
-
-    static void send_response(bool send_response) {
-        send_response_ = send_response;
+    static std::string get_response() {
+        return lastresponse_;
     }
 
     void set_qos(uint8_t mqtt_qos) const {
@@ -229,8 +221,8 @@ class Mqtt {
   private:
     static uuid::log::Logger logger_;
 
-    static espMqttClient * mqttClient_;
-    static uint32_t        mqtt_message_id_;
+    static MqttClient * mqttClient_;
+    static uint32_t     mqtt_message_id_;
 
     static bool queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, const bool retain);
     static bool queue_publish_message(const std::string & topic, const std::string & payload, const bool retain);
@@ -238,7 +230,7 @@ class Mqtt {
     static void queue_unsubscribe_message(const std::string & topic);
 
     void on_publish(uint16_t packetId) const;
-    void on_message(const char * topic, const char * payload, size_t len) const;
+    void on_message(const char * topic, const uint8_t * payload, size_t len) const;
 
     // function handlers for MQTT subscriptions
     struct MQTTSubFunction {
@@ -255,7 +247,7 @@ class Mqtt {
 
     static std::vector<MQTTSubFunction> mqtt_subfunctions_; // list of mqtt subscribe callbacks for all devices
 
-    uint32_t last_mqtt_poll_          = 0;
+    // uint32_t last_mqtt_poll_          = 0;
     uint32_t last_publish_boiler_     = 0;
     uint32_t last_publish_thermostat_ = 0;
     uint32_t last_publish_solar_      = 0;
@@ -263,7 +255,7 @@ class Mqtt {
     uint32_t last_publish_other_      = 0;
     uint32_t last_publish_sensor_     = 0;
     uint32_t last_publish_heartbeat_  = 0;
-    uint32_t last_publish_queue_      = 0;
+    // uint32_t last_publish_queue_      = 0;
 
     static bool     connecting_;
     static bool     initialized_;
@@ -274,6 +266,7 @@ class Mqtt {
 
     static std::string lasttopic_;
     static std::string lastpayload_;
+    static std::string lastresponse_;
 
     // settings, copied over
     static std::string mqtt_base_;

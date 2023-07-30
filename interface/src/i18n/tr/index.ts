@@ -282,7 +282,7 @@ const tr: Translation = {
   SCAN_AGAIN: 'Tekrar tara',
   NETWORK_SCANNER: 'Ağ Tarayıcısı',
   NETWORK_NO_WIFI: 'Hiçbir Kablosuz Ağ bulunamadı',
-  NETWORK_BLANK_SSID: 'Kablosuz ağı devre dışı bırakmak için boş bırakın',
+  NETWORK_BLANK_SSID: 'Kablosuz ağı devre dışı bırakmak için boş bırakın', // TODO translate
   TX_POWER: 'Aktarım gücü',
   HOSTNAME: 'Ana Makine Adı',
   NETWORK_DISABLE_SLEEP: 'Kablosuz uyku modunu devre dışına al',
@@ -322,8 +322,8 @@ const tr: Translation = {
   ENTITIES_UPDATED: 'Entities Updated', // TODO translate
   WRITEABLE: 'Writeable', // TODO translate
   SHOWING: 'Showing', // TODO translate
-  SEARCH: 'Search' // TODO translate
-
+  SEARCH: 'Search', // TODO translate
+  CERT: 'TSL root certificate (leave blank to disable TSL)' // TODO translate
 };
 
 export default tr;

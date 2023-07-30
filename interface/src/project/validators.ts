@@ -8,7 +8,7 @@ export const GPIO_VALIDATOR = {
     if (
       value &&
       (value === 1 ||
-        (value >= 10 && value <= 12) ||
+        (value >= 6 && value <= 12) ||
         (value >= 14 && value <= 15) ||
         value === 20 ||
         value === 24 ||
@@ -43,6 +43,23 @@ export const GPIO_VALIDATORS2 = {
   }
 };
 
+export const GPIO_VALIDATORS3 = {
+  validator(rule: InternalRuleItem, value: number, callback: (error?: string) => void) {
+    if (
+      value &&
+      ((value >= 19 && value <= 20) ||
+        (value >= 22 && value <= 37) ||
+        (value >= 39 && value <= 42) ||
+        value > 48 ||
+        value < 0)
+    ) {
+      callback('Must be an valid GPIO port');
+    } else {
+      callback();
+    }
+  }
+};
+
 export const createSettingsValidator = (settings: Settings) =>
   new Schema({
     ...(settings.board_profile === 'CUSTOM' &&
@@ -68,6 +85,14 @@ export const createSettingsValidator = (settings: Settings) =>
         pbutton_gpio: [{ required: true, message: 'Button GPIO is required' }, GPIO_VALIDATORS2],
         tx_gpio: [{ required: true, message: 'Tx GPIO is required' }, GPIO_VALIDATORS2],
         rx_gpio: [{ required: true, message: 'Rx GPIO is required' }, GPIO_VALIDATORS2]
+      }),
+    ...(settings.board_profile === 'CUSTOM' &&
+      settings.platform === 'ESP32-S3' && {
+        led_gpio: [{ required: true, message: 'LED GPIO is required' }, GPIO_VALIDATORS3],
+        dallas_gpio: [{ required: true, message: 'GPIO is required' }, GPIO_VALIDATORS3],
+        pbutton_gpio: [{ required: true, message: 'Button GPIO is required' }, GPIO_VALIDATORS3],
+        tx_gpio: [{ required: true, message: 'Tx GPIO is required' }, GPIO_VALIDATORS3],
+        rx_gpio: [{ required: true, message: 'Rx GPIO is required' }, GPIO_VALIDATORS3]
       }),
     ...(settings.syslog_enabled && {
       syslog_host: [{ required: true, message: 'Host is required' }, IP_OR_HOSTNAME_VALIDATOR],

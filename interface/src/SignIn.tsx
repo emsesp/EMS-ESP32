@@ -3,6 +3,7 @@ import { Box, Fab, Paper, Typography, Button } from '@mui/material';
 import { useRequest } from 'alova';
 import { useContext, useState } from 'react';
 import { toast } from 'react-toastify';
+import { FeaturesContext } from './contexts/features';
 import type { ValidateFieldsError } from 'async-validator';
 
 import type { Locales } from 'i18n/i18n-types';
@@ -33,6 +34,8 @@ const SignIn: FC = () => {
 
   const { LL, setLocale, locale } = useContext(I18nContext);
 
+  const { features } = useContext(FeaturesContext);
+
   const [signInRequest, setSignInRequest] = useState<SignInRequest>({
     username: '',
     password: ''
@@ -55,7 +58,7 @@ const SignIn: FC = () => {
   const signIn = async () => {
     await callSignIn(signInRequest).catch((event) => {
       if (event.message === 'Unauthorized') {
-        toast.warn(LL.INVALID_LOGIN());
+        toast.warning(LL.INVALID_LOGIN());
       } else {
         toast.error(LL.ERROR() + ' ' + event.message);
       }
@@ -107,6 +110,7 @@ const SignIn: FC = () => {
         })}
       >
         <Typography variant="h4">{PROJECT_NAME}</Typography>
+        <Typography variant="subtitle2">{features.version}</Typography>
         <Box
           mt={2}
           mb={2}
@@ -117,13 +121,13 @@ const SignIn: FC = () => {
             }
           }}
         >
-          <Button size="small" variant={locale === 'en' ? 'contained' : 'outlined'} onClick={() => selectLocale('en')}>
-            <GBflag style={{ width: 24 }} />
-            &nbsp;EN
-          </Button>
           <Button size="small" variant={locale === 'de' ? 'contained' : 'outlined'} onClick={() => selectLocale('de')}>
             <DEflag style={{ width: 24 }} />
             &nbsp;DE
+          </Button>
+          <Button size="small" variant={locale === 'en' ? 'contained' : 'outlined'} onClick={() => selectLocale('en')}>
+            <GBflag style={{ width: 24 }} />
+            &nbsp;EN
           </Button>
           <Button size="small" variant={locale === 'fr' ? 'contained' : 'outlined'} onClick={() => selectLocale('fr')}>
             <FRflag style={{ width: 24 }} />

@@ -197,7 +197,7 @@ const char * MqttClient::getClientId() const {
 }
 
 void MqttClient::loop() {
-    switch (_state) {
+    switch ((State)_state) { // modified by proddy for EMS-ESP compiling standalone
     case State::disconnected:
 #if defined(ARDUINO_ARCH_ESP32)
         if (_useInternalTask == espMqttClientTypes::UseInternalTask::YES) {
@@ -332,8 +332,8 @@ int MqttClient::_sendPacket() {
     EMC_SEMAPHORE_TAKE();
     OutgoingPacket * packet = _outbox.getCurrent();
 
-    int32_t wantToWrite = 0;
-    int32_t written     = 0;
+    size_t wantToWrite = 0;
+    size_t written     = 0;
     if (packet && (wantToWrite == written)) {
         // mixing signed with unsigned here but safe because of MQTT packet size limits
         wantToWrite = packet->packet.available(_bytesSent);
@@ -341,12 +341,7 @@ int MqttClient::_sendPacket() {
             EMC_SEMAPHORE_GIVE();
             return 0;
         }
-        written = _transport->write(packet->packet.data(_bytesSent), wantToWrite);
-        if (written < 0) {
-            emc_log_w("Write error, check connection");
-            EMC_SEMAPHORE_GIVE();
-            return -1;
-        }
+        written             = _transport->write(packet->packet.data(_bytesSent), wantToWrite);
         packet->timeSent    = millis();
         _lastClientActivity = millis();
         _bytesSent += written;
@@ -707,7 +702,9 @@ uint16_t MqttClient::getQueue() const {
     espMqttClientInternals::Outbox<OutgoingPacket>::Iterator it    = _outbox.front();
     uint16_t                                                 count = 0;
     while (it) {
+        // if (it.get()->packet.packetType() == PacketType.PUBLISH) {
         ++count;
+        // }
         ++it;
     }
     EMC_SEMAPHORE_GIVE();

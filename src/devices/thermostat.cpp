@@ -976,6 +976,7 @@ void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) 
     }
     has_update(telegram, hc->targetflowtemp, 4);
     has_update(telegram, hc->curroominfl, 27);
+    has_update(telegram, hc->coolingon, 32);
 
     add_ha_climate(hc);
 }
@@ -1139,8 +1140,8 @@ void Thermostat::process_RC300Settings(std::shared_ptr<const Telegram> telegram)
 // 0x2CC - e.g. wwprio for  RC310 hcx parameter
 void Thermostat::process_RC300Set2(std::shared_ptr<const Telegram> telegram) {
     // typeids are not in a raw.  hc:0x2CC, hc2: 0x2CE  for RC310
-    // telegram is either offset 3 with data lenght of 1 and values 0/1 (radiators) - 10 0B FF 03 01 CC 01 F6
-    // or offset 0 with data lenght of 6 bytes - offset 3 values are 0x00 or 0xFF - 10 0B FF 00 01 CE FF 13 0A FF 1E 00 20
+    // telegram is either offset 3 with data length of 1 and values 0/1 (radiators) - 10 0B FF 03 01 CC 01 F6
+    // or offset 0 with data length of 6 bytes - offset 3 values are 0x00 or 0xFF - 10 0B FF 00 01 CE FF 13 0A FF 1E 00 20
 
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
     if (hc == nullptr) {
@@ -1161,7 +1162,7 @@ void Thermostat::process_HPMode(std::shared_ptr<const Telegram> telegram) {
     if (hc == nullptr) {
         return;
     }
-    has_update(telegram, hc->hpmode, 0);
+    has_update(telegram, hc->hpmode, 5);
 }
 
 // 0x467 ff HP settings
@@ -1170,9 +1171,9 @@ void Thermostat::process_HPSet(std::shared_ptr<const Telegram> telegram) {
     if (hc == nullptr) {
         return;
     }
-    has_update(telegram, hc->dewoffset, 0);     // 7-35°C
+    has_update(telegram, hc->dewoffset, 4);     // 7-35°C
     has_update(telegram, hc->roomtempdiff, 3);  // 1-10K
-    has_update(telegram, hc->hpminflowtemp, 4); // 2-10K
+    has_update(telegram, hc->hpminflowtemp, 0); // 2-10K
 }
 
 // type 0x41 - data from the RC30 thermostat(0x10) - 14 bytes long
@@ -1546,7 +1547,7 @@ bool Thermostat::set_hpmode(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, v, FL_(enum_hpmode))) {
         return false;
     }
-    write_command(hpmode_typeids[hc->hc()], 0, v, hpmode_typeids[hc->hc()]);
+    write_command(hpmode_typeids[hc->hc()], 5, v, hpmode_typeids[hc->hc()]);
     return true;
 }
 
@@ -2727,7 +2728,7 @@ bool Thermostat::set_controlmode(const char * value, const int8_t id) {
     return false;
 }
 
-// sets the thermostat time for nightmode for RC10, telegrm 0xB0
+// sets the thermostat time for nightmode for RC10, telegram 0xB0
 bool Thermostat::set_reducehours(const char * value, const int8_t id) {
     uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
     std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
@@ -4194,9 +4195,10 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->reducetemp, DeviceValueType::INT, FL_(reducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_reducetemp));
         register_device_value(tag, &hc->wwprio, DeviceValueType::BOOL, FL_(wwprio), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwprio));
         register_device_value(tag, &hc->cooling, DeviceValueType::BOOL, FL_(hpcooling), DeviceValueUOM::NONE, MAKE_CF_CB(set_cooling));
+        register_device_value(tag, &hc->coolingon, DeviceValueType::BOOL, FL_(coolingOn), DeviceValueUOM::NONE);
 
         register_device_value(tag, &hc->hpmode, DeviceValueType::ENUM, FL_(enum_hpmode), FL_(hpmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_hpmode));
-        register_device_value(tag, &hc->dewoffset, DeviceValueType::UINT, FL_(dewoffset), DeviceValueUOM::K, MAKE_CF_CB(set_dewoffset));
+        register_device_value(tag, &hc->dewoffset, DeviceValueType::UINT, FL_(dewoffset), DeviceValueUOM::K, MAKE_CF_CB(set_dewoffset), 2, 10);
         register_device_value(tag, &hc->roomtempdiff, DeviceValueType::UINT, FL_(roomtempdiff), DeviceValueUOM::K, MAKE_CF_CB(set_roomtempdiff));
         register_device_value(tag, &hc->hpminflowtemp, DeviceValueType::UINT, FL_(hpminflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_hpminflowtemp));
 

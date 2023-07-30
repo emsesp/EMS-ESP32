@@ -1,21 +1,21 @@
 import { defineConfig, type PluginOption } from 'vite';
-import react from '@vitejs/plugin-react-swc';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 import svgrPlugin from 'vite-plugin-svgr';
 import { visualizer } from 'rollup-plugin-visualizer';
 import ProgmemGenerator from './progmem-generator';
+import preact from '@preact/preset-vite';
 
 export default defineConfig(({ command, mode }) => {
   if (mode === 'hosted') {
     return {
       // hosted, ignore all errors, output to dist
-      plugins: [react(), viteTsconfigPaths(), svgrPlugin(), visualizer({ gzipSize: true }) as PluginOption]
+      plugins: [preact(), viteTsconfigPaths(), svgrPlugin(), visualizer({ gzipSize: true }) as PluginOption]
     };
   } else {
     // normal build
     return {
       plugins: [
-        react(),
+        preact(),
         viteTsconfigPaths(),
         svgrPlugin(),
         ProgmemGenerator({ outputPath: '../lib/framework/WWWData.h', bytesPerLine: 20 })
@@ -26,7 +26,25 @@ export default defineConfig(({ command, mode }) => {
         chunkSizeWarningLimit: 1024,
         sourcemap: false,
         manifest: false,
-        minify: mode === 'development' ? false : 'terser'
+        minify: mode === 'development' ? false : 'terser',
+        rollupOptions: {
+          /**
+           * Ignore "use client" waning since we are not using SSR
+           */
+          onwarn(warning, warn) {
+            if (warning.code === 'MODULE_LEVEL_DIRECTIVE' && warning.message.includes(`"use client"`)) {
+              return;
+            }
+            warn(warning);
+          }
+        }
+      },
+
+      onwarn(warning, warn) {
+        if (warning.code === 'MODULE_LEVEL_DIRECTIVE') {
+          return;
+        }
+        warn(warning);
       },
 
       server: {

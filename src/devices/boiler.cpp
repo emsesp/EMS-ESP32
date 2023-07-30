@@ -590,7 +590,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(tempDiffHeat),
                               DeviceValueUOM::K,
                               MAKE_CF_CB(set_tempDiffHeat),
-                              3,
+                              2,
                               10);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &tempDiffCool_,
@@ -599,7 +599,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(tempDiffCool),
                               DeviceValueUOM::K,
                               MAKE_CF_CB(set_tempDiffCool),
-                              3,
+                              2,
                               10);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &vp_cooling_, DeviceValueType::BOOL, FL_(vp_cooling), DeviceValueUOM::NONE, MAKE_CF_CB(set_vp_cooling));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatCable_, DeviceValueType::BOOL, FL_(heatCable), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatCable));

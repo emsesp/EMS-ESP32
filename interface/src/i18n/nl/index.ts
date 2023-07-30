@@ -282,7 +282,7 @@ const nl: Translation = {
   SCAN_AGAIN: 'Opnieuw scannen',
   NETWORK_SCANNER: 'Netwerk Scanner',
   NETWORK_NO_WIFI: 'Geen WiFi networken gevonden',
-  NETWORK_BLANK_SSID: 'laat leeg om WiFi uit te schakelen',
+  NETWORK_BLANK_SSID: 'laat leeg om WiFi uit te schakelen', // and enable ETH // TODO translate
   TX_POWER: 'Tx Vermogen',
   HOSTNAME: 'Hostname',
   NETWORK_DISABLE_SLEEP: 'WiFi Sleep Mode uitzetten',
@@ -322,7 +322,8 @@ const nl: Translation = {
   ENTITIES_UPDATED: 'Entiteiten bijgewerkt',
   WRITEABLE: 'Beschrijfbare',
   SHOWING: 'Tonen',
-  SEARCH: 'Zoek'
+  SEARCH: 'Zoek',
+  CERT: 'TSL root certificate (leave blank to disable TSL)' // TODO translate
 };
 
 export default nl;

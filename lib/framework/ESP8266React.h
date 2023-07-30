@@ -59,8 +59,15 @@ class ESP8266React {
         return &_mqttSettingsService;
     }
 
-    espMqttClient * getMqttClient() {
+    MqttClient * getMqttClient() {
         return _mqttSettingsService.getMqttClient();
+    }
+
+    void setWill(const char * will_topic) {
+        _mqttSettingsService.setWill(will_topic);
+    }
+    void onMessage(espMqttClientTypes::OnMessageCallback callback) {
+        _mqttSettingsService.onMessage(callback);
     }
 
     void factoryReset() {
