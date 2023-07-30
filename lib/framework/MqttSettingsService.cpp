@@ -1,6 +1,6 @@
 #include <MqttSettingsService.h>
 
-#include "../../src/emsesp_stub.hpp" // proddy added
+#include "../../src/emsesp_stub.hpp"
 
 using namespace std::placeholders; // for `_1` etc
 
@@ -33,11 +33,9 @@ MqttSettingsService::MqttSettingsService(AsyncWebServer * server, FS * fs, Secur
     , _retainedPassword(nullptr)
     , _reconfigureMqtt(false)
     , _disconnectedAt(0)
-    , _disconnectReason(AsyncMqttClientDisconnectReason::TCP_DISCONNECTED)
-    , _mqttClient() {
+    , _disconnectReason(espMqttClientTypes::DisconnectReason::TCP_DISCONNECTED)
+    , _mqttClient(nullptr) {
     WiFi.onEvent(std::bind(&MqttSettingsService::WiFiEvent, this, _1, _2));
-    _mqttClient.onConnect(std::bind(&MqttSettingsService::onMqttConnect, this, _1));
-    _mqttClient.onDisconnect(std::bind(&MqttSettingsService::onMqttDisconnect, this, _1));
     addUpdateHandler([&](const String & originId) { onConfigUpdated(); }, false);
 }
 
@@ -46,17 +44,46 @@ MqttSettingsService::~MqttSettingsService() {
 
 void MqttSettingsService::begin() {
     _fsPersistence.readFromFS();
+    startClient();
+}
+
+void MqttSettingsService::startClient() {
+    static bool isSecure = false;
+    if (_mqttClient != nullptr) {
+        // do we need to change the client?
+        if ((isSecure && _state.rootCA.length() > 0) || (!isSecure && _state.rootCA.length() == 0)) {
+            return;
+        }
+        delete _mqttClient;
+    }
+#if CONFIG_IDF_TARGET_ESP32S3
+    if (_state.rootCA.length() > 0) {
+        isSecure    = true;
+        _mqttClient = static_cast<MqttClient *>(new espMqttClientSecure(espMqttClientTypes::UseInternalTask::NO));
+        if (_state.rootCA == "insecure") {
+            static_cast<espMqttClientSecure *>(_mqttClient)->setInsecure();
+        } else {
+            String certificate = "-----BEGIN CERTIFICATE-----\n" + _state.rootCA + "\n-----END CERTIFICATE-----\n";
+            static_cast<espMqttClientSecure *>(_mqttClient)->setCACert(retainCstr(certificate.c_str(), &_retainedRootCA));
+        }
+        static_cast<espMqttClientSecure *>(_mqttClient)->onConnect(std::bind(&MqttSettingsService::onMqttConnect, this, _1));
+        static_cast<espMqttClientSecure *>(_mqttClient)->onDisconnect(std::bind(&MqttSettingsService::onMqttDisconnect, this, _1));
+        return;
+    }
+#endif
+    isSecure    = false;
+    _mqttClient = static_cast<MqttClient *>(new espMqttClient(espMqttClientTypes::UseInternalTask::NO));
+    static_cast<espMqttClient *>(_mqttClient)->onConnect(std::bind(&MqttSettingsService::onMqttConnect, this, _1));
+    static_cast<espMqttClient *>(_mqttClient)->onDisconnect(std::bind(&MqttSettingsService::onMqttDisconnect, this, _1));
 }
 
 void MqttSettingsService::loop() {
     if (_reconfigureMqtt || (_disconnectedAt && (uint32_t)(uuid::get_uptime() - _disconnectedAt) >= MQTT_RECONNECTION_DELAY)) {
         // reconfigure MQTT client
-        configureMqtt();
-
-        // clear the reconnection flags
+        _disconnectedAt  = configureMqtt() ? 0 : uuid::get_uptime();
         _reconfigureMqtt = false;
-        _disconnectedAt  = 0;
     }
+    _mqttClient->loop();
 }
 
 bool MqttSettingsService::isEnabled() {
@@ -64,36 +91,60 @@ bool MqttSettingsService::isEnabled() {
 }
 
 bool MqttSettingsService::isConnected() {
-    return _mqttClient.connected();
+    return _mqttClient->connected();
 }
 
 const char * MqttSettingsService::getClientId() {
-    return _mqttClient.getClientId();
+    return _mqttClient->getClientId();
 }
 
-AsyncMqttClientDisconnectReason MqttSettingsService::getDisconnectReason() {
+void MqttSettingsService::setWill(const char * topic) {
+#if CONFIG_IDF_TARGET_ESP32S3
+    if (_state.rootCA.length() > 0) {
+        static_cast<espMqttClientSecure *>(_mqttClient)->setWill(topic, 1, true, "offline");
+        return;
+    }
+#endif
+    static_cast<espMqttClient *>(_mqttClient)->setWill(topic, 1, true, "offline");
+}
+
+void MqttSettingsService::onMessage(espMqttClientTypes::OnMessageCallback callback) {
+#if CONFIG_IDF_TARGET_ESP32S3
+    if (_state.rootCA.length() > 0) {
+        static_cast<espMqttClientSecure *>(_mqttClient)->onMessage(callback);
+        return;
+    }
+#endif
+    static_cast<espMqttClient *>(_mqttClient)->onMessage(callback);
+}
+
+espMqttClientTypes::DisconnectReason MqttSettingsService::getDisconnectReason() {
     return _disconnectReason;
 }
 
-AsyncMqttClient * MqttSettingsService::getMqttClient() {
-    return &_mqttClient;
+MqttClient * MqttSettingsService::getMqttClient() {
+    return _mqttClient;
 }
 
 void MqttSettingsService::onMqttConnect(bool sessionPresent) {
+    // _disconnectedAt = 0;
+    emsesp::EMSESP::mqtt_.on_connect();
     // emsesp::EMSESP::logger().info("Connected to MQTT, %s", (sessionPresent) ? ("with persistent session") : ("without persistent session"));
 }
 
-void MqttSettingsService::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
-    // emsesp::EMSESP::logger().info("Disconnected from MQTT reason: %d", (uint8_t)reason);
+void MqttSettingsService::onMqttDisconnect(espMqttClientTypes::DisconnectReason reason) {
     _disconnectReason = reason;
-    _disconnectedAt   = uuid::get_uptime();
+    if (!_disconnectedAt) {
+        _disconnectedAt = uuid::get_uptime();
+    }
+    emsesp::EMSESP::mqtt_.on_disconnect(reason);
 }
 
 void MqttSettingsService::onConfigUpdated() {
     _reconfigureMqtt = true;
     _disconnectedAt  = 0;
 
-    // added by proddy
+    startClient();
     emsesp::EMSESP::mqtt_.start(); // reload EMS-ESP MQTT settings
 }
 
@@ -104,15 +155,13 @@ void MqttSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     case ARDUINO_EVENT_ETH_GOT_IP6:
     case ARDUINO_EVENT_WIFI_STA_GOT_IP6:
         if (_state.enabled) {
-            // emsesp::EMSESP::logger().info("IPv4 Network connection found, starting MQTT client");
             onConfigUpdated();
         }
         break;
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
     case ARDUINO_EVENT_ETH_DISCONNECTED:
         if (_state.enabled) {
-            // emsesp::EMSESP::logger().info("Network connection dropped, stopping MQTT client");
-            _mqttClient.disconnect();
+            _mqttClient->disconnect(true);
         }
         break;
 
@@ -121,30 +170,55 @@ void MqttSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     }
 }
 
-void MqttSettingsService::configureMqtt() {
-    // disconnect if connected
-    _mqttClient.disconnect();
+bool MqttSettingsService::configureMqtt() {
+    // disconnect if already connected
+    if (_mqttClient->connected()) {
+        emsesp::EMSESP::logger().info("Disconnecting to configure");
+        _mqttClient->disconnect(true);
+    }
+
     // only connect if WiFi is connected and MQTT is enabled
     if (_state.enabled && emsesp::EMSESP::system_.network_connected() && !_state.host.isEmpty()) {
-        // emsesp::EMSESP::logger().info("Configuring MQTT client");
-        _mqttClient.setServer(retainCstr(_state.host.c_str(), &_retainedHost), _state.port);
-        if (_state.username.length() > 0) {
-            _mqttClient.setCredentials(retainCstr(_state.username.c_str(), &_retainedUsername),
-                                       retainCstr(_state.password.length() > 0 ? _state.password.c_str() : nullptr, &_retainedPassword));
-        } else {
-            _mqttClient.setCredentials(retainCstr(nullptr, &_retainedUsername), retainCstr(nullptr, &_retainedPassword));
+        _reconfigureMqtt = false;
+#if CONFIG_IDF_TARGET_ESP32S3
+        if (_state.rootCA.length() > 0) {
+            // emsesp::EMSESP::logger().info("Start secure MQTT with rootCA");
+            static_cast<espMqttClientSecure *>(_mqttClient)->setServer(retainCstr(_state.host.c_str(), &_retainedHost), _state.port);
+            if (_state.username.length() > 0) {
+                static_cast<espMqttClientSecure *>(_mqttClient)
+                    ->setCredentials(retainCstr(_state.username.c_str(), &_retainedUsername),
+                                     retainCstr(_state.password.length() > 0 ? _state.password.c_str() : nullptr, &_retainedPassword));
+            } else {
+                static_cast<espMqttClientSecure *>(_mqttClient)->setCredentials(retainCstr(nullptr, &_retainedUsername), retainCstr(nullptr, &_retainedPassword));
+            }
+            static_cast<espMqttClientSecure *>(_mqttClient)->setClientId(retainCstr(_state.clientId.c_str(), &_retainedClientId));
+            static_cast<espMqttClientSecure *>(_mqttClient)->setKeepAlive(_state.keepAlive);
+            static_cast<espMqttClientSecure *>(_mqttClient)->setCleanSession(_state.cleanSession);
+            return _mqttClient->connect();
         }
-        _mqttClient.setClientId(retainCstr(_state.clientId.c_str(), &_retainedClientId));
-        _mqttClient.setKeepAlive(_state.keepAlive);
-        _mqttClient.setCleanSession(_state.cleanSession);
-        _mqttClient.setMaxTopicLength(FACTORY_MQTT_MAX_TOPIC_LENGTH); // hardcode. We don't take this from the settings anymore.
-        _mqttClient.connect();
-        // } else {
-        // emsesp::EMSESP::logger().info("Error configuring MQTT client");
+#endif
+        // emsesp::EMSESP::logger().info("Configuring MQTT client");
+        static_cast<espMqttClient *>(_mqttClient)->setServer(retainCstr(_state.host.c_str(), &_retainedHost), _state.port);
+        if (_state.username.length() > 0) {
+            static_cast<espMqttClient *>(_mqttClient)
+                ->setCredentials(retainCstr(_state.username.c_str(), &_retainedUsername),
+                                 retainCstr(_state.password.length() > 0 ? _state.password.c_str() : nullptr, &_retainedPassword));
+        } else {
+            static_cast<espMqttClient *>(_mqttClient)->setCredentials(retainCstr(nullptr, &_retainedUsername), retainCstr(nullptr, &_retainedPassword));
+        }
+        static_cast<espMqttClient *>(_mqttClient)->setClientId(retainCstr(_state.clientId.c_str(), &_retainedClientId));
+        static_cast<espMqttClient *>(_mqttClient)->setKeepAlive(_state.keepAlive);
+        static_cast<espMqttClient *>(_mqttClient)->setCleanSession(_state.cleanSession);
+        return _mqttClient->connect();
     }
+
+    return false;
 }
 
 void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
+#if CONFIG_IDF_TARGET_ESP32S3
+    root["rootCA"] = settings.rootCA;
+#endif
     root["enabled"]       = settings.enabled;
     root["host"]          = settings.host;
     root["port"]          = settings.port;
@@ -156,7 +230,6 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
     root["clean_session"] = settings.cleanSession;
     root["entity_format"] = settings.entity_format;
 
-    // added by proddy for EMS-ESP
     root["publish_time_boiler"]     = settings.publish_time_boiler;
     root["publish_time_thermostat"] = settings.publish_time_thermostat;
     root["publish_time_solar"]      = settings.publish_time_solar;
@@ -179,6 +252,9 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     MqttSettings newSettings = {};
     bool         changed     = false;
 
+#if CONFIG_IDF_TARGET_ESP32S3
+    newSettings.rootCA = root["rootCA"] | "";
+#endif
     newSettings.enabled      = root["enabled"] | FACTORY_MQTT_ENABLED;
     newSettings.host         = root["host"] | FACTORY_MQTT_HOST;
     newSettings.port         = root["port"] | FACTORY_MQTT_PORT;
@@ -294,6 +370,20 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
         emsesp::EMSESP::mqtt_.set_publish_time_heartbeat(newSettings.publish_time_heartbeat);
     }
 
+#if CONFIG_IDF_TARGET_ESP32S3
+    // strip down to certificate only
+    newSettings.rootCA.replace("\r", "");
+    newSettings.rootCA.replace("\n", "");
+    newSettings.rootCA.replace("-----BEGIN CERTIFICATE-----", "");
+    newSettings.rootCA.replace("-----END CERTIFICATE-----", "");
+    newSettings.rootCA.replace(" ", "");
+    if (newSettings.rootCA.length() == 0 && newSettings.port > 8800) {
+        newSettings.rootCA = "insecure";
+    }
+    if (newSettings.rootCA != settings.rootCA) {
+        changed = true;
+    }
+#endif
     // save the new settings
     settings = newSettings;
 

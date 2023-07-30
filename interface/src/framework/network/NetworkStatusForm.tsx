@@ -6,6 +6,7 @@ import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import SettingsInputComponentIcon from '@mui/icons-material/SettingsInputComponent';
 import WifiIcon from '@mui/icons-material/Wifi';
 import { Avatar, Button, Divider, List, ListItem, ListItemAvatar, ListItemText, useTheme } from '@mui/material';
+import { useRequest } from 'alova';
 import type { Theme } from '@mui/material';
 import type { FC } from 'react';
 
@@ -15,7 +16,6 @@ import { ButtonRow, FormLoader, SectionContent } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
 import { NetworkConnectionStatus } from 'types';
-import { useRest } from 'utils';
 
 const isConnected = ({ status }: NetworkStatus) =>
   status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED ||
@@ -59,7 +59,7 @@ const IPs = (status: NetworkStatus) => {
 };
 
 const NetworkStatusForm: FC = () => {
-  const { loadData, data, errorMessage } = useRest<NetworkStatus>({ read: NetworkApi.readNetworkStatus });
+  const { data: data, send: loadData, error } = useRequest(NetworkApi.readNetworkStatus);
 
   const { LL } = useI18nContext();
 
@@ -90,7 +90,7 @@ const NetworkStatusForm: FC = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
     }
 
     return (

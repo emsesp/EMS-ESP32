@@ -26,12 +26,11 @@ using namespace std::placeholders; // for `_1` etc
 
 WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(WebSettings::read, WebSettings::update, this, server, EMSESP_SETTINGS_SERVICE_PATH, securityManager)
-    , _fsPersistence(WebSettings::read, WebSettings::update, this, fs, EMSESP_SETTINGS_FILE)
-    , _boardProfileHandler(EMSESP_BOARD_PROFILE_SERVICE_PATH,
-                           securityManager->wrapCallback(std::bind(&WebSettingsService::board_profile, this, _1, _2), AuthenticationPredicates::IS_ADMIN)) {
-    _boardProfileHandler.setMethod(HTTP_POST);
-    _boardProfileHandler.setMaxContentLength(256);
-    server->addHandler(&_boardProfileHandler);
+    , _fsPersistence(WebSettings::read, WebSettings::update, this, fs, EMSESP_SETTINGS_FILE) {
+    // GET
+    server->on(EMSESP_BOARD_PROFILE_SERVICE_PATH,
+               HTTP_GET,
+               securityManager->wrapRequest(std::bind(&WebSettingsService::board_profile, this, _1), AuthenticationPredicates::IS_ADMIN));
 
     addUpdateHandler([&](const String & originId) { onUpdate(); }, false);
 }
@@ -92,7 +91,8 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 #elif CONFIG_IDF_TARGET_ESP32S2
     settings.board_profile = root["board_profile"] | "S2MINI";
 #elif CONFIG_IDF_TARGET_ESP32S3
-    settings.board_profile = root["board_profile"] | "S3MINI";
+    // settings.board_profile = root["board_profile"] | "S3MINI";
+    settings.board_profile = root["board_profile"] | "S32S3"; // BBQKees Gateway S3
 #elif CONFIG_IDF_TARGET_ESP32
     settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
 #endif
@@ -342,29 +342,29 @@ void WebSettingsService::save() {
 }
 
 // build the json profile to send back
-void WebSettingsService::board_profile(AsyncWebServerRequest * request, JsonVariant & json) {
-    if (json.is<JsonObject>()) {
+void WebSettingsService::board_profile(AsyncWebServerRequest * request) {
+    if (request->hasParam("boardProfile")) {
+        std::string board_profile = request->getParam("boardProfile")->value().c_str();
+
         auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_MEDIUM);
         JsonObject root     = response->getRoot();
 
-        if (json.containsKey("board_profile")) {
-            String              board_profile = json["board_profile"];
-            std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
-            (void)System::load_board_profile(data, board_profile.c_str());
-            root["led_gpio"]       = data[0];
-            root["dallas_gpio"]    = data[1];
-            root["rx_gpio"]        = data[2];
-            root["tx_gpio"]        = data[3];
-            root["pbutton_gpio"]   = data[4];
-            root["phy_type"]       = data[5];
-            root["eth_power"]      = data[6];
-            root["eth_phy_addr"]   = data[7];
-            root["eth_clock_mode"] = data[8];
+        std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
+        (void)System::load_board_profile(data, board_profile);
+        root["board_profile"]  = board_profile;
+        root["led_gpio"]       = data[0];
+        root["dallas_gpio"]    = data[1];
+        root["rx_gpio"]        = data[2];
+        root["tx_gpio"]        = data[3];
+        root["pbutton_gpio"]   = data[4];
+        root["phy_type"]       = data[5];
+        root["eth_power"]      = data[6];
+        root["eth_phy_addr"]   = data[7];
+        root["eth_clock_mode"] = data[8];
 
-            response->setLength();
-            request->send(response);
-            return;
-        }
+        response->setLength();
+        request->send(response);
+        return;
     }
 
     AsyncWebServerResponse * response = request->beginResponse(200);

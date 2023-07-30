@@ -46,7 +46,7 @@ EMS-ESP is a project owned and maintained by [proddy](https://github.com/proddy)
 - [esp8266-react](https://github.com/rjwats/esp8266-react) by @rjwats for the framework that provides the core of the Web UI
 - [uuid-\*](https://github.com/nomis/mcu-uuid-console) from @nomis. The console, syslog, telnet and logging are based off these open source libraries
 - [ArduinoJson](https://github.com/bblanchon/ArduinoJson) for all the JSON
-- [AsyncMqttClient](https://github.com/marvinroger/async-mqtt-client) for the MQTT client, with custom modifications from @bertmelis and @proddy
+- [espMqttClient](https://github.com/bertmelis/espMqttClient) for the MQTT client, with custom modifications from @MichaelDvP and @proddy
 - ESPAsyncWebServer and AsyncTCP for the Web server and TCP backends, with custom modifications for performance
 
 ## **License**

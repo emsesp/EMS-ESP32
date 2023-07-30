@@ -1,44 +1,51 @@
-import { AXIOS, AXIOS_BIN, startUploadFile } from './endpoints';
-import type { FileUploadConfig } from './endpoints';
-import type { AxiosPromise } from 'axios';
+import { alovaInstance, alovaInstanceGH } from './endpoints';
+import type { OTASettings, SystemStatus, LogSettings, Version } from 'types';
 
-import type { OTASettings, SystemStatus, LogSettings, LogEntries } from 'types';
+// SystemStatus - also used to ping in Restart monitor for pinging
+export const readSystemStatus = () => alovaInstance.Get<SystemStatus>('/rest/systemStatus');
 
-export function readSystemStatus(timeout?: number): AxiosPromise<SystemStatus> {
-  return AXIOS.get('/systemStatus', { timeout });
-}
+// commands
+export const restart = () => alovaInstance.Post('/rest/restart');
+export const partition = () => alovaInstance.Post('/rest/partition');
+export const factoryReset = () => alovaInstance.Post('/rest/factoryReset');
 
-export function restart(): AxiosPromise<void> {
-  return AXIOS.post('/restart');
-}
+// OTA
+export const readOTASettings = () => alovaInstance.Get<OTASettings>(`/rest/otaSettings`);
+export const updateOTASettings = (data: any) => alovaInstance.Post('/rest/otaSettings', data);
 
-export function partition(): AxiosPromise<void> {
-  return AXIOS.post('/partition');
-}
+// SystemLog
+export const readLogSettings = () => alovaInstance.Get<LogSettings>(`/rest/logSettings`);
+export const updateLogSettings = (data: any) => alovaInstance.Post('/rest/logSettings', data);
+export const fetchLog = () => alovaInstance.Post('/rest/fetchLog');
 
-export function factoryReset(): AxiosPromise<void> {
-  return AXIOS.post('/factoryReset');
-}
+// Get versions from github
+export const getStableVersion = () =>
+  alovaInstanceGH.Get<Version>('releases/latest', {
+    transformData(response: any) {
+      return {
+        version: response.data.name,
+        url: response.data.assets[1].browser_download_url,
+        changelog: response.data.assets[0].browser_download_url
+      };
+    }
+  });
 
-export function readOTASettings(): AxiosPromise<OTASettings> {
-  return AXIOS.get('/otaSettings');
-}
+export const getDevVersion = () =>
+  alovaInstanceGH.Get<Version>('releases/tags/latest', {
+    transformData(response: any) {
+      return {
+        version: response.data.name.split(/\s+/).splice(-1),
+        url: response.data.assets[1].browser_download_url,
+        changelog: response.data.assets[0].browser_download_url
+      };
+    }
+  });
 
-export function updateOTASettings(otaSettings: OTASettings): AxiosPromise<OTASettings> {
-  return AXIOS.post('/otaSettings', otaSettings);
-}
-
-export const uploadFile = (file: File, config?: FileUploadConfig): AxiosPromise<void> =>
-  startUploadFile('/uploadFile', file, config);
-
-export function readLogSettings(): AxiosPromise<LogSettings> {
-  return AXIOS.get('/logSettings');
-}
-
-export function updateLogSettings(logSettings: LogSettings): AxiosPromise<LogSettings> {
-  return AXIOS.post('/logSettings', logSettings);
-}
-
-export function readLogEntries(): AxiosPromise<LogEntries> {
-  return AXIOS_BIN.get('/fetchLog');
-}
+export const uploadFile = (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return alovaInstance.Post('/rest/uploadFile', formData, {
+    timeout: 60000, // override timeout for uploading firmware - 1 minute
+    enableUpload: true
+  });
+};

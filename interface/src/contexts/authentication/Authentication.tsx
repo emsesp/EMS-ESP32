@@ -1,3 +1,4 @@
+import { useRequest } from 'alova';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -18,6 +19,10 @@ const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
 
   const [initialized, setInitialized] = useState<boolean>(false);
   const [me, setMe] = useState<Me>();
+
+  const { send: verifyAuthorization } = useRequest(AuthenticationApi.verifyAuthorization(), {
+    immediate: false
+  });
 
   const signIn = (accessToken: string) => {
     try {
@@ -42,18 +47,20 @@ const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
   const refresh = useCallback(async () => {
     const accessToken = AuthenticationApi.getStorage().getItem(ACCESS_TOKEN);
     if (accessToken) {
-      try {
-        await AuthenticationApi.verifyAuthorization();
-        setMe(AuthenticationApi.decodeMeJWT(accessToken));
-        setInitialized(true);
-      } catch (error) {
-        setMe(undefined);
-        setInitialized(true);
-      }
+      await verifyAuthorization()
+        .then(() => {
+          setMe(AuthenticationApi.decodeMeJWT(accessToken));
+          setInitialized(true);
+        })
+        .catch(() => {
+          setMe(undefined);
+          setInitialized(true);
+        });
     } else {
       setMe(undefined);
       setInitialized(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <functional>
+#include <IPAddress.h>
 
 #define WiFiMode_t wifi_mode_t
 #define WIFI_OFF WIFI_MODE_NULL

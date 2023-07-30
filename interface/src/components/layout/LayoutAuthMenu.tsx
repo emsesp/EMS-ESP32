@@ -22,6 +22,7 @@ import { AuthenticatedContext } from 'contexts/authentication';
 import { ReactComponent as DEflag } from 'i18n/DE.svg';
 import { ReactComponent as FRflag } from 'i18n/FR.svg';
 import { ReactComponent as GBflag } from 'i18n/GB.svg';
+import { ReactComponent as ITflag } from 'i18n/IT.svg';
 import { ReactComponent as NLflag } from 'i18n/NL.svg';
 import { ReactComponent as NOflag } from 'i18n/NO.svg';
 import { ReactComponent as PLflag } from 'i18n/PL.svg';
@@ -73,18 +74,21 @@ const LayoutAuthMenu: FC = () => {
         size="small"
         select
       >
-        <MenuItem key="en" value="en">
-          <GBflag style={{ width: 16, verticalAlign: 'middle' }} />
-          &nbsp;EN
-        </MenuItem>
-        <Divider />
         <MenuItem key="de" value="de">
           <DEflag style={{ width: 16, verticalAlign: 'middle' }} />
           &nbsp;DE
         </MenuItem>
+        <MenuItem key="en" value="en">
+          <GBflag style={{ width: 16, verticalAlign: 'middle' }} />
+          &nbsp;EN
+        </MenuItem>
         <MenuItem key="fr" value="fr">
           <FRflag style={{ width: 16, verticalAlign: 'middle' }} />
           &nbsp;FR
+        </MenuItem>
+        <MenuItem key="it" value="it">
+          <ITflag style={{ width: 16, verticalAlign: 'middle' }} />
+          &nbsp;IT
         </MenuItem>
         <MenuItem key="nl" value="nl">
           <NLflag style={{ width: 16, verticalAlign: 'middle' }} />

@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 
-import { DeviceValueUOM_s } from './types';
+import { DeviceValueUOM_s, DeviceValueType } from './types';
 import type { EntityItem } from './types';
 import type Schema from 'async-validator';
 import type { ValidateFieldsError } from 'async-validator';
@@ -58,8 +58,8 @@ const SettingsEntitiesDialog = ({
       // convert to hex strings straight away
       setEditItem({
         ...selectedItem,
-        device_id: selectedItem.device_id.toString(16).toUpperCase().slice(-2),
-        type_id: selectedItem.type_id.toString(16).toUpperCase().slice(-4)
+        device_id: selectedItem.device_id.toString(16).toUpperCase(),
+        type_id: selectedItem.type_id.toString(16).toUpperCase()
       });
     }
   }, [open, selectedItem]);
@@ -166,17 +166,18 @@ const SettingsEntitiesDialog = ({
               fullWidth
               select
             >
-              <MenuItem value={0}>BOOL</MenuItem>
-              <MenuItem value={1}>INT</MenuItem>
-              <MenuItem value={2}>UINT</MenuItem>
-              <MenuItem value={3}>SHORT</MenuItem>
-              <MenuItem value={4}>USHORT</MenuItem>
-              <MenuItem value={5}>ULONG</MenuItem>
-              <MenuItem value={6}>TIME</MenuItem>
+              <MenuItem value={DeviceValueType.BOOL}>BOOL</MenuItem>
+              <MenuItem value={DeviceValueType.INT}>INT</MenuItem>
+              <MenuItem value={DeviceValueType.UINT}>UINT</MenuItem>
+              <MenuItem value={DeviceValueType.SHORT}>SHORT</MenuItem>
+              <MenuItem value={DeviceValueType.USHORT}>USHORT</MenuItem>
+              <MenuItem value={DeviceValueType.ULONG}>ULONG</MenuItem>
+              <MenuItem value={DeviceValueType.TIME}>TIME</MenuItem>
+              <MenuItem value={DeviceValueType.STRING}>RAW</MenuItem>
             </TextField>
           </Grid>
 
-          {editItem.value_type !== 0 && (
+          {editItem.value_type !== DeviceValueType.BOOL && editItem.value_type !== DeviceValueType.STRING && (
             <>
               <Grid item xs={4}>
                 <TextField
@@ -209,6 +210,21 @@ const SettingsEntitiesDialog = ({
                 </TextField>
               </Grid>
             </>
+          )}
+          {editItem.value_type === DeviceValueType.STRING && (
+            <Grid item xs={4}>
+              <TextField
+                name="factor"
+                label="Bytes"
+                value={editItem.factor}
+                variant="outlined"
+                onChange={updateFormValue}
+                fullWidth
+                margin="normal"
+                type="number"
+                inputProps={{ min: '1', max: '27', step: '1' }}
+              />
+            </Grid>
           )}
         </Grid>
       </DialogContent>

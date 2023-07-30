@@ -45,13 +45,12 @@ const de: Translation = {
   CHANGE_VALUE: 'Wert ändern',
   CANCEL: 'Abbrechen',
   RESET: 'Zurücksetzen',
-  APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
-  UPDATE: 'Update', // TODO translate
-  EXECUTE: 'Execute', // TODO translate
+  APPLY_CHANGES: 'Änderungen anwenden ({0})',
+  UPDATE: 'Update',
+  EXECUTE: 'Ausführen',
   REMOVE: 'Entfernen',
   PROBLEM_UPDATING: 'Problem beim Aktualisieren',
   PROBLEM_LOADING: 'Problem beim Laden',
-  ACCESS_DENIED: 'Zugriff abgelehnt',
   ANALOG_SENSOR: 'Analogsensor',
   ANALOG_SENSORS: 'Analogsensoren',
   SETTINGS: 'Einstellungen',
@@ -71,7 +70,6 @@ const de: Translation = {
   TEMP_SENSOR: 'Temperatursensor',
   TEMP_SENSORS: 'Temperatursensoren',
   WRITE_CMD_SENT: 'Befehl schreiben wurde gesendet',
-  WRITE_CMD_FAILED: 'Befehl schreiben failed', // TODO translate
   EMS_BUS_WARNING: 'EMS-Bus getrennt. Wenn diese Warnung nach einigen Sekunden immer noch besteht, überprüfen Sie bitte die Einstellungen und das Board-Profil',
   EMS_BUS_SCANNING: 'Suche nach EMS Geräten...',
   CONNECTED: 'Verbunden',
@@ -182,7 +180,7 @@ const de: Translation = {
   LOG_OF: '{0} Log',
   STATUS_OF: '{0} Status',
   UPLOAD_DOWNLOAD: 'Hoch-/Herunterladen',
-  VERSION_ON: 'You are currently on', // TODO translate
+  VERSION_ON: 'Sie verwenden derzeit',
   SYSTEM_APPLY_FIRMWARE: 'um die neue Firmware anzuwenden',
   CLOSE: 'Schließen',
   USE: 'Verwenden Sie',
@@ -242,7 +240,7 @@ const de: Translation = {
   MQTT_PUBLISH_TEXT_2: 'Veröffentliche als Kommando-Topic (ioBroker)',
   MQTT_PUBLISH_TEXT_3: 'Aktiviere `MQTT Discovery`',
   MQTT_PUBLISH_TEXT_4: 'Prefix für die `Discovery`-Topics',
-  MQTT_PUBLISH_TEXT_5: 'Discovery type', // TODO translate
+  MQTT_PUBLISH_TEXT_5: 'Discovery Typ',
   MQTT_PUBLISH_INTERVALS: 'Veröffentlichungs-Intervalle',
   MQTT_INT_BOILER: 'Boiler und Wärmepumpen',
   MQTT_INT_THERMOSTATS: 'Thermostate',
@@ -284,7 +282,7 @@ const de: Translation = {
   SCAN_AGAIN: 'Erneute Suche',
   NETWORK_SCANNER: 'Netzwerk Suche',
   NETWORK_NO_WIFI: 'Keine WiFi Netzwerke gefunden',
-  NETWORK_BLANK_SSID: 'Freilassen um WiFi zu deaktivieren',
+  NETWORK_BLANK_SSID: 'Freilassen um WiFi zu deaktivieren und ETH zu aktivieren',
   TX_POWER: 'Tx Leistung',
   HOSTNAME: 'Hostname',
   NETWORK_DISABLE_SLEEP: 'Deaktiviere WiFi Schlafmodus',
@@ -321,10 +319,11 @@ const de: Translation = {
   SCHEDULE_TIMER_3: 'jede Stunde',
   CUSTOM_ENTITIES: 'Individuelle Entitäten',
   ENTITIES_HELP_1: 'Abfrage von Werten auf dem EMS-Bus',
-  ENTITIES_UPDATED: 'Entities Updated', // TODO translate
+  ENTITIES_UPDATED: 'Entitäten gespeichert',
   WRITEABLE: 'Schreibbar',
-  SHOWING: 'Showing', // TODO translate
-  SEARCH: 'Search' // TODO translate
+  SHOWING: 'Anzeigen von',
+  SEARCH: 'Suche',
+  CERT: 'TSL Zertifikat (Freilassen um TSL zu deaktivieren)'
 };
 
 export default de;

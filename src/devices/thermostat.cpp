@@ -136,6 +136,8 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         summer_typeids  = {0x02AF, 0x02B0, 0x02B1, 0x02B2, 0x02B3, 0x02B4, 0x02B5, 0x02B6};
         curve_typeids   = {0x029B, 0x029C, 0x029D, 0x029E, 0x029F, 0x02A0, 0x02A1, 0x02A2};
         summer2_typeids = {0x0471, 0x0472, 0x0473, 0x0474, 0x0475, 0x0476, 0x0477, 0x0478};
+        hp_typeids      = {0x0467, 0x0468, 0x0469, 0x046A};
+        hpmode_typeids  = {0x0291, 0x0292, 0x0293, 0x0294};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
             register_telegram_type(monitor_typeids[i], "RC300Monitor", false, MAKE_PF_CB(process_RC300Monitor));
             register_telegram_type(set_typeids[i], "RC300Set", false, MAKE_PF_CB(process_RC300Set));
@@ -145,6 +147,8 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         }
         for (uint8_t i = 0; i < set2_typeids.size(); i++) {
             register_telegram_type(set2_typeids[i], "RC300Set2", false, MAKE_PF_CB(process_RC300Set2));
+            register_telegram_type(hp_typeids[i], "HPSet", false, MAKE_PF_CB(process_HPSet));
+            register_telegram_type(hpmode_typeids[i], "HPMode", true, MAKE_PF_CB(process_HPMode));
         }
         register_telegram_type(0x2F5, "RC300WWmode", true, MAKE_PF_CB(process_RC300WWmode));
         register_telegram_type(0x31B, "RC300WWtemp", true, MAKE_PF_CB(process_RC300WWtemp));
@@ -306,6 +310,25 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
         }
     }
 
+    // not found, search heatpump message types
+    if (hc_num == 0) {
+        for (uint8_t i = 0; i < hp_typeids.size(); i++) {
+            if (hp_typeids[i] == telegram->type_id) {
+                hc_num = i + 1;
+                break;
+            }
+        }
+    }
+
+    if (hc_num == 0) {
+        for (uint8_t i = 0; i < hpmode_typeids.size(); i++) {
+            if (hpmode_typeids[i] == telegram->type_id) {
+                hc_num = i + 1;
+                break;
+            }
+        }
+    }
+
     // not found, search device-id types for remote thermostats
     if (hc_num == 0 && telegram->src >= 0x18 && telegram->src <= 0x1F) {
         hc_num  = telegram->src - 0x17;
@@ -382,6 +405,9 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
     }
     if (summer2_typeids.size()) {
         toggle_fetch(summer2_typeids[hc_num - 1], toggle_);
+    }
+    if (hp_typeids.size()) {
+        toggle_fetch(hp_typeids[hc_num - 1], toggle_);
     }
 
     return new_hc; // return back point to new HC object
@@ -950,6 +976,7 @@ void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) 
     }
     has_update(telegram, hc->targetflowtemp, 4);
     has_update(telegram, hc->curroominfl, 27);
+    has_update(telegram, hc->coolingon, 32);
 
     add_ha_climate(hc);
 }
@@ -993,6 +1020,7 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hc->reducetemp, 9);
     has_update(telegram, hc->noreducetemp, 12);
     has_update(telegram, hc->remoteseltemp, 17); // see https://github.com/emsesp/EMS-ESP32/issues/590
+    has_update(telegram, hc->cooling, 28);
 }
 
 // types 0x2AF ff
@@ -1112,8 +1140,8 @@ void Thermostat::process_RC300Settings(std::shared_ptr<const Telegram> telegram)
 // 0x2CC - e.g. wwprio for  RC310 hcx parameter
 void Thermostat::process_RC300Set2(std::shared_ptr<const Telegram> telegram) {
     // typeids are not in a raw.  hc:0x2CC, hc2: 0x2CE  for RC310
-    // telegram is either offset 3 with data lenght of 1 and values 0/1 (radiators) - 10 0B FF 03 01 CC 01 F6
-    // or offset 0 with data lenght of 6 bytes - offset 3 values are 0x00 or 0xFF - 10 0B FF 00 01 CE FF 13 0A FF 1E 00 20
+    // telegram is either offset 3 with data length of 1 and values 0/1 (radiators) - 10 0B FF 03 01 CC 01 F6
+    // or offset 0 with data length of 6 bytes - offset 3 values are 0x00 or 0xFF - 10 0B FF 00 01 CE FF 13 0A FF 1E 00 20
 
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
     if (hc == nullptr) {
@@ -1126,6 +1154,26 @@ void Thermostat::process_RC300Set2(std::shared_ptr<const Telegram> telegram) {
 void Thermostat::process_RC300Floordry(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, floordrystatus_, 0);
     has_update(telegram, floordrytemp_, 1);
+}
+
+// 0x291 ff.  HP mode
+void Thermostat::process_HPMode(std::shared_ptr<const Telegram> telegram) {
+    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    if (hc == nullptr) {
+        return;
+    }
+    has_update(telegram, hc->hpmode, 5);
+}
+
+// 0x467 ff HP settings
+void Thermostat::process_HPSet(std::shared_ptr<const Telegram> telegram) {
+    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    if (hc == nullptr) {
+        return;
+    }
+    has_update(telegram, hc->dewoffset, 4);     // 7-35°C
+    has_update(telegram, hc->roomtempdiff, 3);  // 1-10K
+    has_update(telegram, hc->hpminflowtemp, 0); // 2-10K
 }
 
 // type 0x41 - data from the RC30 thermostat(0x10) - 14 bytes long
@@ -1446,6 +1494,62 @@ void Thermostat::process_RCErrorMessage(std::shared_ptr<const Telegram> telegram
  * *** settings ***
  *
  */
+
+// hp mode RC300
+bool Thermostat::set_roomtempdiff(const char * value, const int8_t id) {
+    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    if (hc == nullptr) {
+        return false;
+    }
+    int v;
+    if (Helpers::value2number(value, v)) {
+        write_command(hp_typeids[hc->hc()], 3, v, hp_typeids[hc->hc()]);
+        return true;
+    }
+    return false;
+}
+bool Thermostat::set_dewoffset(const char * value, const int8_t id) {
+    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    if (hc == nullptr) {
+        return false;
+    }
+    int v;
+    if (Helpers::value2number(value, v)) {
+        write_command(hp_typeids[hc->hc()], 4, v, hp_typeids[hc->hc()]);
+        return true;
+    }
+    return false;
+}
+
+bool Thermostat::set_hpminflowtemp(const char * value, const int8_t id) {
+    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    if (hc == nullptr) {
+        return false;
+    }
+    int v;
+    if (Helpers::value2temperature(value, v)) {
+        write_command(hp_typeids[hc->hc()], 0, v, hp_typeids[hc->hc()]);
+        return true;
+    }
+    return false;
+}
+
+bool Thermostat::set_hpmode(const char * value, const int8_t id) {
+    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    if (hc == nullptr) {
+        return false;
+    }
+    uint8_t v;
+    if (!Helpers::value2enum(value, v, FL_(enum_hpmode))) {
+        return false;
+    }
+    write_command(hpmode_typeids[hc->hc()], 5, v, hpmode_typeids[hc->hc()]);
+    return true;
+}
 
 // 0xBB Hybrid pump
 bool Thermostat::set_hybridStrategy(const char * value, const int8_t id) {
@@ -1868,6 +1972,20 @@ bool Thermostat::set_wwprio(const char * value, const int8_t id) {
     return true;
 }
 
+// set cooling
+bool Thermostat::set_cooling(const char * value, const int8_t id) {
+    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit((id == -1) ? AUTO_HEATING_CIRCUIT : id);
+    if (hc == nullptr) {
+        return false;
+    }
+
+    bool b;
+    if (!Helpers::value2bool(value, b)) {
+        return false;
+    }
+    write_command(set_typeids[hc->hc()], 28, b ? 0x01 : 0x00, set_typeids[hc->hc()]);
+    return true;
+}
 
 // sets the thermostat ww circulation working mode, where mode is a string
 bool Thermostat::set_wwcircmode(const char * value, const int8_t id) {
@@ -2610,7 +2728,7 @@ bool Thermostat::set_controlmode(const char * value, const int8_t id) {
     return false;
 }
 
-// sets the thermostat time for nightmode for RC10, telegrm 0xB0
+// sets the thermostat time for nightmode for RC10, telegram 0xB0
 bool Thermostat::set_reducehours(const char * value, const int8_t id) {
     uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
     std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
@@ -4076,6 +4194,14 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->noreducetemp, DeviceValueType::INT, FL_(noreducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_noreducetemp));
         register_device_value(tag, &hc->reducetemp, DeviceValueType::INT, FL_(reducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_reducetemp));
         register_device_value(tag, &hc->wwprio, DeviceValueType::BOOL, FL_(wwprio), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwprio));
+        register_device_value(tag, &hc->cooling, DeviceValueType::BOOL, FL_(hpcooling), DeviceValueUOM::NONE, MAKE_CF_CB(set_cooling));
+        register_device_value(tag, &hc->coolingon, DeviceValueType::BOOL, FL_(coolingOn), DeviceValueUOM::NONE);
+
+        register_device_value(tag, &hc->hpmode, DeviceValueType::ENUM, FL_(enum_hpmode), FL_(hpmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_hpmode));
+        register_device_value(tag, &hc->dewoffset, DeviceValueType::UINT, FL_(dewoffset), DeviceValueUOM::K, MAKE_CF_CB(set_dewoffset), 2, 10);
+        register_device_value(tag, &hc->roomtempdiff, DeviceValueType::UINT, FL_(roomtempdiff), DeviceValueUOM::K, MAKE_CF_CB(set_roomtempdiff));
+        register_device_value(tag, &hc->hpminflowtemp, DeviceValueType::UINT, FL_(hpminflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_hpminflowtemp));
+
         break;
     case EMS_DEVICE_FLAG_CRF:
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode5), FL_(mode), DeviceValueUOM::NONE);
@@ -4242,7 +4368,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               MAKE_CF_CB(set_tempautotemp),
                               0,
                               30);
-        register_device_value(tag, &hc->noreducetemp, DeviceValueType::INT, FL_(noreducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_noreducetemp), -30, 10);
+        register_device_value(tag, &hc->noreducetemp, DeviceValueType::INT, FL_(noreducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_noreducetemp), -31, 10);
         register_device_value(tag, &hc->reducetemp, DeviceValueType::INT, FL_(reducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_reducetemp), -20, 10);
         register_device_value(tag, &hc->vacreducetemp, DeviceValueType::INT, FL_(vacreducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_vacreducetemp), -20, 10);
         register_device_value(

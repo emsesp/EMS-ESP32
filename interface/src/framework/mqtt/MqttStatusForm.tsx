@@ -4,6 +4,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import ReportIcon from '@mui/icons-material/Report';
 import SpeakerNotesOffIcon from '@mui/icons-material/SpeakerNotesOff';
 import { Avatar, Button, Divider, List, ListItem, ListItemAvatar, ListItemText, useTheme } from '@mui/material';
+import { useRequest } from 'alova';
 import type { Theme } from '@mui/material';
 import type { FC } from 'react';
 
@@ -12,7 +13,6 @@ import * as MqttApi from 'api/mqtt';
 import { ButtonRow, FormLoader, SectionContent } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import { MqttDisconnectReason } from 'types';
-import { useRest } from 'utils';
 
 export const mqttStatusHighlight = ({ enabled, connected }: MqttStatus, theme: Theme) => {
   if (!enabled) {
@@ -26,7 +26,6 @@ export const mqttStatusHighlight = ({ enabled, connected }: MqttStatus, theme: T
 
 export const mqttPublishHighlight = ({ mqtt_fails }: MqttStatus, theme: Theme) => {
   if (mqtt_fails === 0) return theme.palette.success.main;
-
   if (mqtt_fails < 10) return theme.palette.warning.main;
 
   return theme.palette.error.main;
@@ -39,7 +38,7 @@ export const mqttQueueHighlight = ({ mqtt_queued }: MqttStatus, theme: Theme) =>
 };
 
 const MqttStatusForm: FC = () => {
-  const { loadData, data, errorMessage } = useRest<MqttStatus>({ read: MqttApi.readMqttStatus });
+  const { data: data, send: loadData, error } = useRequest(MqttApi.readMqttStatus);
 
   const { LL } = useI18nContext();
 
@@ -69,10 +68,8 @@ const MqttStatusForm: FC = () => {
         return 'Malformed credentials';
       case MqttDisconnectReason.MQTT_NOT_AUTHORIZED:
         return 'Not authorized';
-      case MqttDisconnectReason.ESP8266_NOT_ENOUGH_SPACE:
-        return 'Device out of memory';
       case MqttDisconnectReason.TLS_BAD_FINGERPRINT:
-        return 'Server fingerprint invalid';
+        return 'TSL fingerprint invalid';
       default:
         return 'Unknown';
     }
@@ -80,7 +77,7 @@ const MqttStatusForm: FC = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
     }
 
     const renderConnectionStatus = () => (

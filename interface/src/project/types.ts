@@ -131,7 +131,6 @@ export interface DeviceValue {
   m?: number; // min, optional
   x?: number; // max, optional
 }
-
 export interface DeviceData {
   data: DeviceValue[];
 }
@@ -149,15 +148,6 @@ export interface DeviceEntity {
   o_cn?: string; // original cn before edits
   o_mi?: number; // original min value
   o_ma?: number; // original max value
-}
-
-export interface CustomEntities {
-  id: number;
-  entity_ids: string[];
-}
-
-export interface UniqueID {
-  id: number;
 }
 
 export enum DeviceValueUOM {
@@ -253,12 +243,9 @@ export const BOARD_PROFILES: BoardProfiles = {
   OLIMEXPOE: 'Olimex ESP32-POE',
   C3MINI: 'Wemos C3 Mini',
   S2MINI: 'Wemos S2 Mini',
-  S3MINI: 'Liligo S3'
+  S3MINI: 'Liligo S3',
+  S32S3: 'BBQKees Gateway S3'
 };
-
-export interface BoardProfileName {
-  board_profile: string;
-}
 
 export interface BoardProfile {
   board_profile: string;
@@ -278,12 +265,6 @@ export interface APIcall {
   entity: string;
   id: any;
 }
-
-export interface WriteDeviceValue {
-  id: number;
-  devicevalue: DeviceValue;
-}
-
 export interface WriteAnalogSensor {
   id: number;
   gpio: number;
@@ -312,7 +293,7 @@ export interface ScheduleItem {
   time: string;
   cmd: string;
   value: string;
-  name?: string; // optional
+  name: string; // optional
   o_id?: number;
   o_active?: boolean;
   o_deleted?: boolean;
@@ -321,10 +302,6 @@ export interface ScheduleItem {
   o_cmd?: string;
   o_value?: string;
   o_name?: string;
-}
-
-export interface Schedule {
-  schedule: ScheduleItem[];
 }
 
 export enum ScheduleFlag {
@@ -387,4 +364,18 @@ export const enum DeviceType {
   HEATSOURCE,
   CUSTOM,
   UNKNOWN
+}
+
+// matches emsdevicevalue.h
+export const enum DeviceValueType {
+  BOOL,
+  INT,
+  UINT,
+  SHORT,
+  USHORT,
+  ULONG,
+  TIME, // same as ULONG (32 bits)
+  ENUM,
+  STRING,
+  CMD
 }

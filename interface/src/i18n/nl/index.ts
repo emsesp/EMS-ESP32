@@ -45,13 +45,12 @@ const nl: Translation = {
   CHANGE_VALUE: 'Wijzig waarde',
   CANCEL: 'Annuleren',
   RESET: 'Reset',
-  APPLY_CHANGES: 'Apply Changes ({0})', // TODO translate
-  UPDATE: 'Update', // TODO translate
-  EXECUTE: 'Execute', // TODO translate
+  APPLY_CHANGES: 'Aanpassen ({0})',
+  UPDATE: 'Update',
+  EXECUTE: 'Uitvoeren',
   REMOVE: 'Verwijderen',
   PROBLEM_UPDATING: 'Probleem met updaten',
   PROBLEM_LOADING: 'Probleem met laden',
-  ACCESS_DENIED: 'Toegang geweigerd',
   ANALOG_SENSOR: 'Analoge sensor',
   ANALOG_SENSORS: 'Analoge Sensoren',
   SETTINGS: 'Instellingen',
@@ -70,8 +69,7 @@ const nl: Translation = {
   SENSOR: 'Sensor',
   TEMP_SENSOR: 'Temperatuur sensor',
   TEMP_SENSORS: 'Temperatuur Sensoren',
-  WRITE_CMD_SENT: 'Schrijf commando sent', // TODO translate
-  WRITE_CMD_FAILED: 'Schrijf commando failed', // TODO translate
+  WRITE_CMD_SENT: 'Schrijf commando gestuurd',
   EMS_BUS_WARNING: 'EMS bus niet gevonden. Als deze waarschuwing blijft staan na een paar seconden dan loop de instellingen na en in het bijzonder het apparaat type profiel na.',
   EMS_BUS_SCANNING: 'Scannen naar EMS apparaten...',
   CONNECTED: 'Verbonden',
@@ -158,7 +156,7 @@ const nl: Translation = {
   CUSTOMIZATIONS_HELP_3: 'Zet schrijfacties uit',
   CUSTOMIZATIONS_HELP_4: 'Uitsluiten van MQTT en API',
   CUSTOMIZATIONS_HELP_5: 'verberg van het Dashboard',
-  CUSTOMIZATIONS_HELP_6: 'remove from memory', // TODO translate
+  CUSTOMIZATIONS_HELP_6: 'verwijderen van memory',
   SELECT_DEVICE: 'Selecteer een apparaat',
   SET_ALL: 'Alles aanzetten',
   OPTIONS: 'Opties',
@@ -182,7 +180,7 @@ const nl: Translation = {
   LOG_OF: '{0} Log',
   STATUS_OF: '{0} Status',
   UPLOAD_DOWNLOAD: 'Upload/Download',
-  VERSION_ON: 'You are currently on', // TODO translate
+  VERSION_ON: 'U bevindt zich momenteel op',
   SYSTEM_APPLY_FIRMWARE: 'om de nieuwe firmware te activeren',
   CLOSE: 'Sluiten',
   USE: 'Gebruik',
@@ -208,7 +206,7 @@ const nl: Translation = {
   COMPACT: 'Compact',
   ENABLE_OTA: 'Acitveer OTA Updates',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Download alle custom instellingen',
-  DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
+  DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events',
   DOWNLOAD_SETTINGS_TEXT: 'Download de applicatie settings. Wees voorzichting met het delen van dit bestand want het bevat o.a. de wachtwoorden in plain text',
   UPLOAD_TEXT: 'Upload een nieuwe firmware (.bin) file, instellingen of custom instellingen (.json) bestand hieronder',
   UPLOADING: 'Uploading',
@@ -242,7 +240,7 @@ const nl: Translation = {
   MQTT_PUBLISH_TEXT_2: 'Publiceer naar commando topics (ioBroker)',
   MQTT_PUBLISH_TEXT_3: 'Activeer MQTT Discovery',
   MQTT_PUBLISH_TEXT_4: 'Prefix voor de Discovery topics',
-  MQTT_PUBLISH_TEXT_5: 'Discovery type', // TODO translate
+  MQTT_PUBLISH_TEXT_5: 'Discovery type',
   MQTT_PUBLISH_INTERVALS: 'Publicatie intervallen',
   MQTT_INT_BOILER: 'CV ketels en warmtepompen',
   MQTT_INT_THERMOSTATS: 'Thermostaten',
@@ -251,10 +249,10 @@ const nl: Translation = {
   MQTT_INT_HEARTBEAT: 'Heartbeat',
   MQTT_QUEUE: 'MQTT Queue',
   DEFAULT: 'Default',
-  MQTT_ENTITY_FORMAT: 'Entity ID format', // TODO translate
-  MQTT_ENTITY_FORMAT_0: 'Single instance, long name (v3.4)', // TODO translate
-  MQTT_ENTITY_FORMAT_1: 'Single instance, short name', // TODO translate
-  MQTT_ENTITY_FORMAT_2: 'Multiple instances, short name', // TODO translate
+  MQTT_ENTITY_FORMAT: 'Entity ID formaat',
+  MQTT_ENTITY_FORMAT_0: 'Eén instantie, lange naam (v3.4)',
+  MQTT_ENTITY_FORMAT_1: 'Eén instantie, korte naam',
+  MQTT_ENTITY_FORMAT_2: 'Meerdere instanties, korte naam',
   MQTT_CLEAN_SESSION: 'Clean Session aan',
   MQTT_RETAIN_FLAG: 'Retain flag aan',
   INACTIVE: 'Inactief',
@@ -284,7 +282,7 @@ const nl: Translation = {
   SCAN_AGAIN: 'Opnieuw scannen',
   NETWORK_SCANNER: 'Netwerk Scanner',
   NETWORK_NO_WIFI: 'Geen WiFi networken gevonden',
-  NETWORK_BLANK_SSID: 'laat leeg om WiFi uit te schakelen',
+  NETWORK_BLANK_SSID: 'laat leeg om WiFi uit te schakelen', // and enable ETH // TODO translate
   TX_POWER: 'Tx Vermogen',
   HOSTNAME: 'Hostname',
   NETWORK_DISABLE_SLEEP: 'WiFi Sleep Mode uitzetten',
@@ -305,27 +303,27 @@ const nl: Translation = {
   ENTITY: 'Entiteit',
   MIN: 'min',
   MAX: 'max',
-  BLOCK_NAVIGATE_1: 'You have unsaved changes', // TODO translate
-  BLOCK_NAVIGATE_2: 'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?', // TODO translate
-  STAY: 'Stay', // TODO translate
-  LEAVE: 'Leave', // TODO translate
-  SCHEDULER: 'Scheduler', // TODO translate
-  SCHEDULER_HELP_1: 'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT.', // TODO translate
-  SCHEDULER_HELP_2: 'Use 00:00 to trigger once on start-up', // TODO translate
-  SCHEDULE: 'Schedule', // TODO translate
-  TIME: 'Time', // TODO translate
-  TIMER: 'Timer', // TODO translate
-  SCHEDULE_UPDATED: 'Schedule updated', // TODO translate
-  SCHEDULE_TIMER_1: 'on startup', // TODO translate
-  SCHEDULE_TIMER_2: 'every minute', // TODO translate
-  SCHEDULE_TIMER_3: 'every hour', // TODO translate
-  CUSTOM_ENTITIES: 'Custom Entities', // TODO translate
-  ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus', // TODO translate
-  ENTITIES_UPDATED: 'Entities Updated', // TODO translate
-  WRITEABLE: 'Writeable', // TODO translate
-  SHOWING: 'Showing', // TODO translate
-  SEARCH: 'Zoek'
-  
+  BLOCK_NAVIGATE_1: 'U hebt niet-opgeslagen wijzigingen',
+  BLOCK_NAVIGATE_2: 'Als u naar een andere pagina navigeert, gaan uw niet-opgeslagen wijzigingen verloren. Weet je zeker dat je deze pagina wilt verlaten?',
+  STAY: 'Blijven',
+  LEAVE: 'Verlaten',
+  SCHEDULER: 'Scheduler',
+  SCHEDULER_HELP_1: 'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT.',
+  SCHEDULER_HELP_2: 'Gebruik 00:00 om eenmaal te activeren bij het opstarten',
+  SCHEDULE: 'Schedule',
+  TIME: 'Tijd',
+  TIMER: 'Timer',
+  SCHEDULE_UPDATED: 'Schema bijgewerkt',
+  SCHEDULE_TIMER_1: 'bij het opstarten',
+  SCHEDULE_TIMER_2: 'elke minuut',
+  SCHEDULE_TIMER_3: 'elke huur',
+  CUSTOM_ENTITIES: 'Aangepaste Entiteiten',
+  ENTITIES_HELP_1: 'Aangepaste entiteiten ophalen uit de EMS-bus',
+  ENTITIES_UPDATED: 'Entiteiten bijgewerkt',
+  WRITEABLE: 'Beschrijfbare',
+  SHOWING: 'Tonen',
+  SEARCH: 'Zoek',
+  CERT: 'TSL root certificate (leave blank to disable TSL)' // TODO translate
 };
 
 export default nl;

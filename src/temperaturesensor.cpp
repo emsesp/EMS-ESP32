@@ -511,7 +511,7 @@ void TemperatureSensor::publish_values(const bool force) {
                 config["dev_cla"] = "temperature";
 
                 char stat_t[50];
-                snprintf(stat_t, sizeof(stat_t), "%s/temperaturesensor_data", Mqtt::base().c_str()); // use base path
+                snprintf(stat_t, sizeof(stat_t), "%s/temperaturesensor_data", Mqtt::basename().c_str());
                 config["stat_t"] = stat_t;
 
                 config["unit_of_meas"] = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
@@ -528,7 +528,7 @@ void TemperatureSensor::publish_values(const bool force) {
                 config["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else -55}}";
 
                 char uniq_s[70];
-                if (Mqtt::entity_format() == Mqtt::entitiyFormat::MULTI_SHORT) {
+                if (Mqtt::entity_format() == Mqtt::entityFormat::MULTI_SHORT) {
                     snprintf(uniq_s, sizeof(uniq_s), "%s_temperaturesensor_%s", Mqtt::basename().c_str(), sensor.id().c_str());
                 } else {
                     snprintf(uniq_s, sizeof(uniq_s), "temperaturesensor_%s", sensor.id().c_str());
@@ -543,7 +543,7 @@ void TemperatureSensor::publish_values(const bool force) {
 
                 JsonObject dev = config.createNestedObject("dev");
                 JsonArray  ids = dev.createNestedArray("ids");
-                ids.add("ems-esp");
+                ids.add(Mqtt::basename());
 
                 // add "availability" section
                 Mqtt::add_avty_to_doc(stat_t, config.as<JsonObject>(), val_cond);
@@ -555,9 +555,7 @@ void TemperatureSensor::publish_values(const bool force) {
 
                 snprintf(topic, sizeof(topic), "sensor/%s/temperaturesensor_%s/config", Mqtt::basename().c_str(), sensorid.c_str());
 
-                Mqtt::queue_ha(topic, config.as<JsonObject>());
-
-                sensor.ha_registered = true;
+                sensor.ha_registered = Mqtt::queue_ha(topic, config.as<JsonObject>());
             }
         }
     }

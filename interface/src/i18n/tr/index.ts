@@ -51,7 +51,6 @@ const tr: Translation = {
   REMOVE: 'Kaldır',
   PROBLEM_UPDATING: 'Güncelleme Sorunu',
   PROBLEM_LOADING: 'Yükleme Sorunu',
-  ACCESS_DENIED: 'Erişim Reddedildi',
   ANALOG_SENSOR: 'Analog Sensör',
   ANALOG_SENSORS: 'Analog Sensörler',
   SETTINGS: 'Ayarlar',
@@ -71,7 +70,6 @@ const tr: Translation = {
   TEMP_SENSOR: 'Sıcaklık Sensörü',
   TEMP_SENSORS: 'Sıcaklık Sensörleri',
   WRITE_CMD_SENT: 'Yazma komutu gönderildi',
-  WRITE_CMD_FAILED: 'Yazma komutu başarısız oldu',
   EMS_BUS_WARNING: 'EMS hat bağlantısı kesildi. Eğer bu uyarı birkaç saniye sonra devam ediyorsa lütfen ayarları ve kart tipini kontrol edin',
   EMS_BUS_SCANNING: 'EMS cihazları aranıyor...',
   CONNECTED: 'Bağlandı',
@@ -284,7 +282,7 @@ const tr: Translation = {
   SCAN_AGAIN: 'Tekrar tara',
   NETWORK_SCANNER: 'Ağ Tarayıcısı',
   NETWORK_NO_WIFI: 'Hiçbir Kablosuz Ağ bulunamadı',
-  NETWORK_BLANK_SSID: 'Kablosuz ağı devre dışı bırakmak için boş bırakın',
+  NETWORK_BLANK_SSID: 'Kablosuz ağı devre dışı bırakmak için boş bırakın', // TODO translate
   TX_POWER: 'Aktarım gücü',
   HOSTNAME: 'Ana Makine Adı',
   NETWORK_DISABLE_SLEEP: 'Kablosuz uyku modunu devre dışına al',
@@ -324,8 +322,8 @@ const tr: Translation = {
   ENTITIES_UPDATED: 'Entities Updated', // TODO translate
   WRITEABLE: 'Writeable', // TODO translate
   SHOWING: 'Showing', // TODO translate
-  SEARCH: 'Search' // TODO translate
-
+  SEARCH: 'Search', // TODO translate
+  CERT: 'TSL root certificate (leave blank to disable TSL)' // TODO translate
 };
 
 export default tr;

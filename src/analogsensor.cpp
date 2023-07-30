@@ -479,7 +479,7 @@ void AnalogSensor::publish_values(const bool force) {
                 StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
 
                 char stat_t[50];
-                snprintf(stat_t, sizeof(stat_t), "%s/analogsensor_data", Mqtt::base().c_str()); // use base path
+                snprintf(stat_t, sizeof(stat_t), "%s/analogsensor_data", Mqtt::basename().c_str()); // use basename
                 config["stat_t"] = stat_t;
 
                 char val_obj[50];
@@ -498,7 +498,7 @@ void AnalogSensor::publish_values(const bool force) {
                 config["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else " + sample_val + "}}";
 
                 char uniq_s[70];
-                if (Mqtt::entity_format() == Mqtt::entitiyFormat::MULTI_SHORT) {
+                if (Mqtt::entity_format() == Mqtt::entityFormat::MULTI_SHORT) {
                     snprintf(uniq_s, sizeof(uniq_s), "%s_analogsensor_%02d", Mqtt::basename().c_str(), sensor.gpio());
                 } else {
                     snprintf(uniq_s, sizeof(uniq_s), "analogsensor_%02d", sensor.gpio());
@@ -563,6 +563,17 @@ void AnalogSensor::publish_values(const bool force) {
                     // config["step"]  = sensor.factor();
                 } else if (sensor.type() == AnalogType::DIGITAL_IN) {
                     snprintf(topic, sizeof(topic), "binary_sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), sensor.gpio());
+                    if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+                        config["pl_on"]  = true;
+                        config["pl_off"] = false;
+                    } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+                        config["pl_on"]  = 1;
+                        config["pl_off"] = 0;
+                    } else {
+                        char result[12];
+                        config["pl_on"]  = Helpers::render_boolean(result, true);
+                        config["pl_off"] = Helpers::render_boolean(result, false);
+                    }
                 } else {
                     snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), sensor.gpio());
                     config["stat_cla"] = "measurement";
@@ -570,14 +581,12 @@ void AnalogSensor::publish_values(const bool force) {
 
                 JsonObject dev = config.createNestedObject("dev");
                 JsonArray  ids = dev.createNestedArray("ids");
-                ids.add("ems-esp");
+                ids.add(Mqtt::basename());
 
                 // add "availability" section
                 Mqtt::add_avty_to_doc(stat_t, config.as<JsonObject>(), val_cond);
 
-                Mqtt::queue_ha(topic, config.as<JsonObject>());
-
-                sensor.ha_registered = true;
+                sensor.ha_registered = Mqtt::queue_ha(topic, config.as<JsonObject>());
             }
         }
     }

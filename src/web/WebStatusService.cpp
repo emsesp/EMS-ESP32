@@ -229,7 +229,7 @@ const char * WebStatusService::disconnectReason(uint8_t code) {
 #ifndef EMSESP_STANDALONE
     switch (code) {
     case WIFI_REASON_UNSPECIFIED:              // = 1,
-        return "unspecifiied";
+        return "unspecified";
     case WIFI_REASON_AUTH_EXPIRE:              // = 2,
         return "auth expire";
     case WIFI_REASON_AUTH_LEAVE:               // = 3,
@@ -239,9 +239,9 @@ const char * WebStatusService::disconnectReason(uint8_t code) {
     case WIFI_REASON_ASSOC_TOOMANY:            // = 5,
         return "assoc too many";
     case WIFI_REASON_NOT_AUTHED:               // = 6,
-        return "not authed";
+        return "not authenticated";
     case WIFI_REASON_NOT_ASSOCED:              // = 7,
-        return "not assoced";
+        return "not assoc";
     case WIFI_REASON_ASSOC_LEAVE:              // = 8,
         return "assoc leave";
     case WIFI_REASON_ASSOC_NOT_AUTHED:         // = 9,

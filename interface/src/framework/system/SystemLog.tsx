@@ -1,11 +1,12 @@
 import DownloadIcon from '@mui/icons-material/GetApp';
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, styled, Button, Checkbox, MenuItem, Grid, TextField } from '@mui/material';
-import { useState, useEffect, useCallback } from 'react';
+import { useRequest } from 'alova';
+import { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import type { FC } from 'react';
 
-import type { LogSettings, LogEntry, LogEntries } from 'types';
+import type { LogSettings, LogEntry } from 'types';
 import { addAccessTokenParameter } from 'api/authentication';
 import { EVENT_SOURCE_ROOT } from 'api/endpoints';
 import * as SystemApi from 'api/system';
@@ -14,7 +15,7 @@ import { SectionContent, FormLoader, BlockFormControlLabel, BlockNavigation } fr
 
 import { useI18nContext } from 'i18n/i18n-react';
 import { LogLevel } from 'types';
-import { useRest, updateValueDirty, extractErrorMessage } from 'utils';
+import { updateValueDirty, useRest } from 'utils';
 
 export const LOG_EVENTSOURCE_URL = EVENT_SOURCE_ROOT + 'log';
 
@@ -49,13 +50,18 @@ const levelLabel = (level: LogLevel) => {
 const SystemLog: FC = () => {
   const { LL } = useI18nContext();
 
-  const { loadData, data, setData, origData, dirtyFlags, blocker, setDirtyFlags, setOrigData } = useRest<LogSettings>({
-    read: SystemApi.readLogSettings
-  });
+  const { loadData, data, updateDataValue, origData, dirtyFlags, setDirtyFlags, blocker, saveData, errorMessage } =
+    useRest<LogSettings>({
+      read: SystemApi.readLogSettings,
+      update: SystemApi.updateLogSettings
+    });
 
-  const [errorMessage, setErrorMessage] = useState<string>();
-  const [logEntries, setLogEntries] = useState<LogEntries>({ events: [] });
+  // called on page load to reset pointer and fetch all log entries
+  useRequest(SystemApi.fetchLog());
+  const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
   const [lastIndex, setLastIndex] = useState<number>(0);
+
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, updateDataValue);
 
   const paddedLevelLabel = (level: LogLevel) => {
     const label = levelLabel(level);
@@ -72,11 +78,9 @@ const SystemLog: FC = () => {
     return data?.compact ? label : label.padEnd(7, '\xa0');
   };
 
-  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, setData);
-
   const onDownload = () => {
     let result = '';
-    for (const i of logEntries.events) {
+    for (const i of logEntries) {
       result += i.t + ' ' + levelLabel(i.l) + ' ' + i.i + ': [' + i.n + '] ' + i.m + '\n';
     }
     const a = document.createElement('a');
@@ -93,57 +97,38 @@ const SystemLog: FC = () => {
       const logentry = JSON.parse(rawData as string) as LogEntry;
       if (logentry.i > lastIndex) {
         setLastIndex(logentry.i);
-        setLogEntries((old) => ({ events: [...old.events, logentry] }));
+        setLogEntries((log) => [...log, logentry]);
       }
     }
   };
 
-  const fetchLog = useCallback(async () => {
-    try {
-      await SystemApi.readLogEntries();
-    } catch (error) {
-      setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-    }
-  }, [LL]);
+  const saveSettings = async () => {
+    await saveData();
+  };
+
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    void fetchLog();
-  }, [fetchLog]);
+    if (logEntries.length) {
+      ref.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end'
+      });
+    }
+  }, [logEntries.length]);
 
   useEffect(() => {
     const es = new EventSource(addAccessTokenParameter(LOG_EVENTSOURCE_URL));
     es.onmessage = onMessage;
     es.onerror = () => {
       es.close();
-      window.location.reload();
+      toast.error('EventSource failed');
     };
 
     return () => {
       es.close();
     };
   });
-
-  const saveSettings = async () => {
-    if (data) {
-      try {
-        const response = await SystemApi.updateLogSettings({
-          level: data.level,
-          max_messages: data.max_messages,
-          compact: data.compact
-        });
-
-        if (response.status !== 200) {
-          toast.error(LL.PROBLEM_UPDATING());
-        } else {
-          setOrigData(response.data);
-          setDirtyFlags([]);
-          toast.success(LL.UPDATED_OF(LL.SETTINGS()));
-        }
-      } catch (error) {
-        toast.error(extractErrorMessage(error, LL.PROBLEM_UPDATING()));
-      }
-    }
-  };
 
   const content = () => {
     if (!data) {
@@ -230,17 +215,17 @@ const SystemLog: FC = () => {
             p: 1
           }}
         >
-          {logEntries &&
-            logEntries.events.map((e) => (
-              <LogEntryLine key={e.i}>
-                <span>{e.t}</span>
-                {data.compact && <span>{paddedLevelLabel(e.l)} </span>}
-                {!data.compact && <span>{paddedLevelLabel(e.l)}&nbsp;</span>}
-                <span>{paddedIDLabel(e.i)} </span>
-                <span>{paddedNameLabel(e.n)} </span>
-                <span>{e.m}</span>
-              </LogEntryLine>
-            ))}
+          {logEntries.map((e) => (
+            <LogEntryLine key={e.i}>
+              <span>{e.t}</span>
+              {data.compact && <span>{paddedLevelLabel(e.l)} </span>}
+              {!data.compact && <span>{paddedLevelLabel(e.l)}&nbsp;</span>}
+              <span>{paddedIDLabel(e.i)} </span>
+              <span>{paddedNameLabel(e.n)} </span>
+              <span>{e.m}</span>
+            </LogEntryLine>
+          ))}
+          <div ref={ref} />
         </Box>
       </>
     );

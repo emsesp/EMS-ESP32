@@ -2,6 +2,7 @@ const express = require('express');
 const compression = require('compression');
 const path = require('path');
 const msgpack = require('@msgpack/msgpack');
+const multer = require('multer'); // https://www.npmjs.com/package/multer#readme
 
 // REST API
 const rest_server = express();
@@ -11,9 +12,40 @@ rest_server.use(compression());
 rest_server.use(express.static(path.join(__dirname, '../interface/build')));
 rest_server.use(express.json());
 
+// uploads
+const upload = multer({ dest: '../mock-api/uploads' });
+function progress_middleware(req, res, next) {
+  let progress = 0;
+  const file_size = req.headers['content-length'];
+
+  // set event listener
+  req.on('data', async (chunk) => {
+    progress += chunk.length;
+    const percentage = (progress / file_size) * 100;
+    console.log(`Progress: ${Math.round(percentage)}%`);
+    // await delay(1000); // slow it down
+    delay_blocking(200); // slow it down
+  });
+  next(); // invoke next middleware which is multer
+}
+
+// delays
+const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+function delay_blocking(milliseconds) {
+  var start = new Date().getTime();
+  for (var i = 0; i < 1e7; i++) {
+    if (new Date().getTime() - start > milliseconds) {
+      break;
+    }
+  }
+}
+
 // endpoints
 const API_ENDPOINT_ROOT = '/api/';
 const REST_ENDPOINT_ROOT = '/rest/';
+
+// network poll
+let countWifiScanPoll = 0;
 
 // LOG
 const LOG_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'logSettings';
@@ -24,7 +56,7 @@ log_settings = {
 };
 
 const FETCH_LOG_ENDPOINT = REST_ENDPOINT_ROOT + 'fetchLog';
-const fetch_log = {
+let fetch_log = {
   events: [
     {
       t: '000+00:00:00.001',
@@ -265,7 +297,8 @@ const FACTORY_RESET_ENDPOINT = REST_ENDPOINT_ROOT + 'factoryReset';
 const UPLOAD_FILE_ENDPOINT = REST_ENDPOINT_ROOT + 'uploadFile';
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn';
 const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken';
-const system_status = {
+
+let system_status = {
   emsesp_version: '3.6.0-demo',
   esp_platform: 'ESP32',
   max_alloc_heap: 89,
@@ -290,12 +323,8 @@ security_settings = {
   ]
 };
 const features = {
-  project: true,
-  security: true,
-  mqtt: true,
-  ntp: true,
-  ota: true,
-  upload_firmware: true
+  version: 'v3.6.0-demo',
+  platform: 'ESP32-S3'
 };
 const verify_authentication = { access_token: '1234' };
 const signin = {
@@ -393,6 +422,7 @@ const emsesp_coredata = {
       tn: 'Boiler',
       b: 'Nefit',
       n: 'GBx72/Trendline/Cerapur/Greenstar Si/27i',
+      // n: 'Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i',
       d: 8,
       p: 123,
       v: '06.01'
@@ -476,7 +506,7 @@ const emsesp_sensordata = {
     { id: '28-233D-9497-0C03', n: 'Dallas 1', t: 25.7, o: 1.2, u: 1 },
     { id: '28-243D-7437-1E3A', n: 'Dallas 2 outside', t: 26.1, o: 0, u: 1 },
     { id: '28-243E-7437-1E3B', n: 'Zolder', t: 27.1, o: 0, u: 16 },
-    { id: '28-183D-1892-0C33', n: 'Roof', o: 2, u: 1 }
+    { id: '28-183D-1892-0C33', n: 'Roof', o: 2, u: 1 } // no temperature
   ],
   // as: [],
   as: [
@@ -508,94 +538,14 @@ const status = {
 };
 
 // Dashboard data
-// 7 - Nefit Trendline boiler
 // 1 - RC35 thermo
 // 2 - RC20 thermo
 // 3 - Buderus GB125 boiler
 // 4 - RC100 themo
 // 5 - Mixer MM10
 // 6 - Solar SM10
+// 7 - Nefit Trendline boiler
 // 99 - Custom
-
-const emsesp_devicedata_7 = {
-  data: [
-    { v: '', u: 0, id: '08reset', c: 'reset', l: ['-', 'maintenance', 'error'] },
-    { v: 'off', u: 0, id: '08heating active' },
-    { v: 'off', u: 0, id: '04tapwater active' },
-    { v: 5, u: 1, id: '04selected flow temperature', c: 'selflowtemp' },
-    { v: 0, u: 3, id: '0Eburner selected max power', c: 'selburnpow' },
-    { v: 0, u: 3, id: '00heating pump modulation' },
-    { v: 53.4, u: 1, id: '00current flow temperature' },
-    { v: 52.7, u: 1, id: '00return temperature' },
-    { v: 1.3, u: 10, id: '00system pressure' },
-    { v: 54.9, u: 1, id: '00actual boiler temperature' },
-    { v: 'off', u: 0, id: '00gas' },
-    { v: 'off', u: 0, id: '00gas stage 2' },
-    { v: 0, u: 9, id: '00flame current' },
-    { v: 'off', u: 0, id: '00heating pump' },
-    { v: 'off', u: 0, id: '00fan' },
-    { v: 'off', u: 0, id: '00ignition' },
-    { v: 'off', u: 0, id: '00oil preheating' },
-    { v: 'on', u: 0, id: '00heating activated', c: 'heatingactivated', l: ['off', 'on'] },
-    { v: 80, u: 1, id: '00heating temperature', c: 'heatingtemp' },
-    { v: 70, u: 3, id: '00burner pump max power', c: 'pumpmodmax' },
-    { v: 30, u: 3, id: '00burner pump min power', c: 'pumpmodmin' },
-    { v: 1, u: 8, id: '00pump delay', c: 'pumpdelay' },
-    { v: 10, u: 8, id: '00burner min period', c: 'burnminperiod' },
-    { v: 0, u: 3, id: '00burner min power', c: 'burnminpower' },
-    { v: 50, u: 3, id: '00burner max power', c: 'burnmaxpower' },
-    { v: -6, u: 2, id: '00hysteresis on temperature', c: 'boilhyston' },
-    { v: 6, u: 2, id: '00hysteresis off temperature', c: 'boilhystoff' },
-    { v: 0, u: 1, id: '00set flow temperature' },
-    { v: 0, u: 3, id: '00burner set power' },
-    { v: 0, u: 3, id: '00burner current power' },
-    { v: 326323, u: 0, id: '00burner starts' },
-    { v: 553437, u: 8, id: '00total burner operating time' },
-    { v: 451286, u: 8, id: '00total heat operating time' },
-    { v: 4672173, u: 8, id: '00total UBA operating time' },
-    { v: '1C(210) 06.06.2020 12:07 (0 min)', u: 0, id: '00last error code' },
-    { v: '0H', u: 0, id: '00service code' },
-    { v: 203, u: 0, id: '00service code number' },
-    { v: 'H00', u: 0, id: '00maintenance message' },
-    { v: 'manual', u: 0, id: '00maintenance scheduled', c: 'maintenance', l: ['off', 'time', 'date', 'manual'] },
-    { v: 6000, u: 7, id: '00time to next maintenance', c: 'maintenancetime' },
-    { v: '01.01.2012', u: 0, id: '00next maintenance date', c: 'maintenancedate', o: 'Format: < dd.mm.yyyy >' },
-    { v: 'on', u: 0, id: '00dhw turn on/off', c: 'wwtapactivated', l: ['off', 'on'] },
-    { v: 62, u: 1, id: '00dhw set temperature' },
-    { v: 60, u: 1, id: '00dhw selected temperature', c: 'wwseltemp' },
-    { v: 'flow', u: 0, id: '00dhw type' },
-    { v: 'hot', u: 0, id: '00dhw comfort', c: 'wwcomfort', l: ['hot', 'eco', 'intelligent'] },
-    { v: 40, u: 2, id: '00dhw flow temperature offset', c: 'wwflowtempoffset' },
-    { v: 100, u: 3, id: '00dhw max power', c: 'wwmaxpower' },
-    { v: 'off', u: 0, id: '00dhw circulation pump available', c: 'wwcircpump', l: ['off', 'on'] },
-    { v: '3-way valve', u: 0, id: '00dhw charging type' },
-    { v: -5, u: 2, id: '00dhw hysteresis on temperature', c: 'wwhyston' },
-    { v: 0, u: 2, id: '00dhw hysteresis off temperature', c: 'wwhystoff' },
-    { v: 70, u: 1, id: '00dhw disinfection temperature', c: 'wwdisinfectiontemp' },
-    {
-      v: 'off',
-      u: 0,
-      id: '00dhw circulation pump mode',
-      c: 'wwcircmode',
-      l: ['off', '1x3min', '2x3min', '3x3min', '4x3min', '5x3min', '6x3min', 'continuous']
-    },
-    { v: 'off', u: 0, id: '00dhw circulation active', c: 'wwcirc', l: ['off', 'on'] },
-    { v: 47.3, u: 1, id: '00dhw current intern temperature' },
-    { v: 0, u: 4, id: '00dhw current tap water flow' },
-    { v: 47.3, u: 1, id: '00dhw storage intern temperature' },
-    { v: 'on', u: 0, id: '00dhw activated', c: 'wwactivated', l: ['off', 'on'] },
-    { v: 'off', u: 0, id: '00dhw one time charging', c: 'wwonetime', l: ['off', 'on'] },
-    { v: 'off', u: 0, id: '00dhw disinfecting', c: 'wwdisinfecting', l: ['off', 'on'] },
-    { v: 'off', u: 0, id: '00dhw charging' },
-    { v: 'off', u: 0, id: '00dhw recharging' },
-    { v: 'on', u: 0, id: '00dhw temperature ok' },
-    { v: 'off', u: 0, id: '00dhw active' },
-    { v: 'on', u: 0, id: '00dhw 3way valve active' },
-    { v: 0, u: 3, id: '00dhw set pump power' },
-    { v: 288768, u: 0, id: '00dhw starts' },
-    { v: 102151, u: 8, id: '00dhw active time' }
-  ]
-};
 
 const emsesp_devicedata_1 = {
   data: [
@@ -1764,6 +1714,86 @@ const emsesp_devicedata_6 = {
   ]
 };
 
+const emsesp_devicedata_7 = {
+  data: [
+    { v: '', u: 0, id: '08reset', c: 'reset', l: ['-', 'maintenance', 'error'] },
+    { v: 'off', u: 0, id: '08heating active' },
+    { v: 'off', u: 0, id: '04tapwater active' },
+    { v: 5, u: 1, id: '04selected flow temperature', c: 'selflowtemp' },
+    { v: 0, u: 3, id: '0Eburner selected max power', c: 'selburnpow' },
+    { v: 0, u: 3, id: '00heating pump modulation' },
+    { v: 53.4, u: 1, id: '00current flow temperature' },
+    { v: 52.7, u: 1, id: '00return temperature' },
+    { v: 1.3, u: 10, id: '00system pressure' },
+    { v: 54.9, u: 1, id: '00actual boiler temperature' },
+    { v: 'off', u: 0, id: '00gas' },
+    { v: 'off', u: 0, id: '00gas stage 2' },
+    { v: 0, u: 9, id: '00flame current' },
+    { v: 'off', u: 0, id: '00heating pump' },
+    { v: 'off', u: 0, id: '00fan' },
+    { v: 'off', u: 0, id: '00ignition' },
+    { v: 'off', u: 0, id: '00oil preheating' },
+    { v: 'on', u: 0, id: '00heating activated', c: 'heatingactivated', l: ['off', 'on'] },
+    { v: 80, u: 1, id: '00heating temperature', c: 'heatingtemp' },
+    { v: 70, u: 3, id: '00burner pump max power', c: 'pumpmodmax' },
+    { v: 30, u: 3, id: '00burner pump min power', c: 'pumpmodmin' },
+    { v: 1, u: 8, id: '00pump delay', c: 'pumpdelay' },
+    { v: 10, u: 8, id: '00burner min period', c: 'burnminperiod' },
+    { v: 0, u: 3, id: '00burner min power', c: 'burnminpower' },
+    { v: 50, u: 3, id: '00burner max power', c: 'burnmaxpower' },
+    { v: -6, u: 2, id: '00hysteresis on temperature', c: 'boilhyston' },
+    { v: 6, u: 2, id: '00hysteresis off temperature', c: 'boilhystoff' },
+    { v: 0, u: 1, id: '00set flow temperature' },
+    { v: 0, u: 3, id: '00burner set power' },
+    { v: 0, u: 3, id: '00burner current power' },
+    { v: 326323, u: 0, id: '00burner starts' },
+    { v: 553437, u: 8, id: '00total burner operating time' },
+    { v: 451286, u: 8, id: '00total heat operating time' },
+    { v: 4672173, u: 8, id: '00total UBA operating time' },
+    { v: '1C(210) 06.06.2020 12:07 (0 min)', u: 0, id: '00last error code' },
+    { v: '0H', u: 0, id: '00service code' },
+    { v: 203, u: 0, id: '00service code number' },
+    { v: 'H00', u: 0, id: '00maintenance message' },
+    { v: 'manual', u: 0, id: '00maintenance scheduled', c: 'maintenance', l: ['off', 'time', 'date', 'manual'] },
+    { v: 6000, u: 7, id: '00time to next maintenance', c: 'maintenancetime' },
+    { v: '01.01.2012', u: 0, id: '00next maintenance date', c: 'maintenancedate', o: 'Format: < dd.mm.yyyy >' },
+    { v: 'on', u: 0, id: '00dhw turn on/off', c: 'wwtapactivated', l: ['off', 'on'] },
+    { v: 62, u: 1, id: '00dhw set temperature' },
+    { v: 60, u: 1, id: '00dhw selected temperature', c: 'wwseltemp' },
+    { v: 'flow', u: 0, id: '00dhw type' },
+    { v: 'hot', u: 0, id: '00dhw comfort', c: 'wwcomfort', l: ['hot', 'eco', 'intelligent'] },
+    { v: 40, u: 2, id: '00dhw flow temperature offset', c: 'wwflowtempoffset' },
+    { v: 100, u: 3, id: '00dhw max power', c: 'wwmaxpower' },
+    { v: 'off', u: 0, id: '00dhw circulation pump available', c: 'wwcircpump', l: ['off', 'on'] },
+    { v: '3-way valve', u: 0, id: '00dhw charging type' },
+    { v: -5, u: 2, id: '00dhw hysteresis on temperature', c: 'wwhyston' },
+    { v: 0, u: 2, id: '00dhw hysteresis off temperature', c: 'wwhystoff' },
+    { v: 70, u: 1, id: '00dhw disinfection temperature', c: 'wwdisinfectiontemp' },
+    {
+      v: 'off',
+      u: 0,
+      id: '00dhw circulation pump mode',
+      c: 'wwcircmode',
+      l: ['off', '1x3min', '2x3min', '3x3min', '4x3min', '5x3min', '6x3min', 'continuous']
+    },
+    { v: 'off', u: 0, id: '00dhw circulation active', c: 'wwcirc', l: ['off', 'on'] },
+    { v: 47.3, u: 1, id: '00dhw current intern temperature' },
+    { v: 0, u: 4, id: '00dhw current tap water flow' },
+    { v: 47.3, u: 1, id: '00dhw storage intern temperature' },
+    { v: 'on', u: 0, id: '00dhw activated', c: 'wwactivated', l: ['off', 'on'] },
+    { v: 'off', u: 0, id: '00dhw one time charging', c: 'wwonetime', l: ['off', 'on'] },
+    { v: 'off', u: 0, id: '00dhw disinfecting', c: 'wwdisinfecting', l: ['off', 'on'] },
+    { v: 'off', u: 0, id: '00dhw charging' },
+    { v: 'off', u: 0, id: '00dhw recharging' },
+    { v: 'on', u: 0, id: '00dhw temperature ok' },
+    { v: 'off', u: 0, id: '00dhw active' },
+    { v: 'on', u: 0, id: '00dhw 3way valve active' },
+    { v: 0, u: 3, id: '00dhw set pump power' },
+    { v: 288768, u: 0, id: '00dhw starts' },
+    { v: 102151, u: 8, id: '00dhw active time' }
+  ]
+};
+
 const emsesp_devicedata_99 = {
   data: [
     {
@@ -1836,7 +1866,6 @@ let emsesp_schedule = {
 };
 
 // CUSTOMIZATIONS
-
 const emsesp_deviceentities_1 = [{}];
 const emsesp_deviceentities_3 = [{}];
 const emsesp_deviceentities_5 = [{}];
@@ -1991,11 +2020,9 @@ const emsesp_deviceentities_4 = [
 ];
 
 // LOG
-rest_server.get(FETCH_LOG_ENDPOINT, (req, res) => {
-  const encoded = msgpack.encode(fetch_log);
-  console.log('fetchlog');
-  res.write(encoded, 'binary');
-  res.end(null, 'binary');
+rest_server.post(FETCH_LOG_ENDPOINT, (req, res) => {
+  console.log('command: fetchLog');
+  res.sendStatus(200);
 });
 rest_server.get(LOG_SETTINGS_ENDPOINT, (req, res) => {
   res.json(log_settings);
@@ -2003,7 +2030,7 @@ rest_server.get(LOG_SETTINGS_ENDPOINT, (req, res) => {
 rest_server.post(LOG_SETTINGS_ENDPOINT, (req, res) => {
   log_settings = req.body;
   console.log(JSON.stringify(log_settings));
-  res.json(log_settings);
+  res.sendStatus(200);
 });
 
 // NETWORK
@@ -2016,13 +2043,21 @@ rest_server.get(NETWORK_SETTINGS_ENDPOINT, (req, res) => {
 rest_server.post(NETWORK_SETTINGS_ENDPOINT, (req, res) => {
   network_settings = req.body;
   console.log(JSON.stringify(network_settings));
-  res.json(network_settings);
+  res.sendStatus(200);
 });
 rest_server.get(LIST_NETWORKS_ENDPOINT, (req, res) => {
-  res.json(list_networks);
+  if (countWifiScanPoll++ === 3) {
+    // console.log('done, have list');
+    res.json(list_networks); // send list
+  } else {
+    // console.log('...waiting #' + countWifiScanPoll);
+    res.sendStatus(200); // waiting....
+  }
 });
 rest_server.get(SCAN_NETWORKS_ENDPOINT, (req, res) => {
-  res.sendStatus(202);
+  console.log('start scan networks');
+  countWifiScanPoll = 0; // stop the poll
+  res.sendStatus(200); // always 202, poll for list
 });
 
 // AP
@@ -2030,12 +2065,13 @@ rest_server.get(AP_SETTINGS_ENDPOINT, (req, res) => {
   res.json(ap_settings);
 });
 rest_server.get(AP_STATUS_ENDPOINT, (req, res) => {
+  console.log('get apStatus', ap_status);
   res.json(ap_status);
 });
 rest_server.post(AP_SETTINGS_ENDPOINT, (req, res) => {
-  ap_status = req.body;
-  console.log(JSON.stringify(ap_settings));
-  res.json(ap_settings);
+  ap_settings = req.body;
+  console.log('post apSettings', ap_settings);
+  res.sendStatus(200);
 });
 
 // OTA
@@ -2045,7 +2081,7 @@ rest_server.get(OTA_SETTINGS_ENDPOINT, (req, res) => {
 rest_server.post(OTA_SETTINGS_ENDPOINT, (req, res) => {
   ota_settings = req.body;
   console.log(JSON.stringify(ota_settings));
-  res.json(ota_settings);
+  res.sendStatus(200);
 });
 
 // MQTT
@@ -2055,7 +2091,7 @@ rest_server.get(MQTT_SETTINGS_ENDPOINT, (req, res) => {
 rest_server.post(MQTT_SETTINGS_ENDPOINT, (req, res) => {
   mqtt_settings = req.body;
   console.log(JSON.stringify(mqtt_settings));
-  res.json(mqtt_settings);
+  res.sendStatus(200);
 });
 rest_server.get(MQTT_STATUS_ENDPOINT, (req, res) => {
   res.json(mqtt_status);
@@ -2068,7 +2104,7 @@ rest_server.get(NTP_SETTINGS_ENDPOINT, (req, res) => {
 rest_server.post(NTP_SETTINGS_ENDPOINT, (req, res) => {
   ntp_settings = req.body;
   console.log(JSON.stringify(ntp_settings));
-  res.json(ntp_settings);
+  res.sendStatus(200);
 });
 rest_server.get(NTP_STATUS_ENDPOINT, (req, res) => {
   res.json(ntp_status);
@@ -2079,6 +2115,9 @@ rest_server.post(TIME_ENDPOINT, (req, res) => {
 
 // SYSTEM
 rest_server.get(SYSTEM_STATUS_ENDPOINT, (req, res) => {
+  console.log('get systemStatus');
+  // create some random data to see if caching works
+  system_status.fs_used = Math.floor(Math.random() * (Math.floor(200) - 100) + 100);
   res.json(system_status);
 });
 rest_server.get(SECURITY_SETTINGS_ENDPOINT, (req, res) => {
@@ -2087,7 +2126,7 @@ rest_server.get(SECURITY_SETTINGS_ENDPOINT, (req, res) => {
 rest_server.post(SECURITY_SETTINGS_ENDPOINT, (req, res) => {
   security_settings = req.body;
   console.log(JSON.stringify(security_settings));
-  res.json(security_settings);
+  res.sendStatus(200);
 });
 rest_server.get(FEATURES_ENDPOINT, (req, res) => {
   res.json(features);
@@ -2095,19 +2134,38 @@ rest_server.get(FEATURES_ENDPOINT, (req, res) => {
 rest_server.get(VERIFY_AUTHORIZATION_ENDPOINT, (req, res) => {
   res.json(verify_authentication);
 });
-rest_server.post(RESTART_ENDPOINT, (req, res) => {
+rest_server.post(RESTART_ENDPOINT, async (req, res) => {
+  console.log('command: restart');
+  // await delay(1000);
   res.sendStatus(200);
 });
 rest_server.post(FACTORY_RESET_ENDPOINT, (req, res) => {
+  console.log('command: reset');
   res.sendStatus(200);
 });
-rest_server.post(UPLOAD_FILE_ENDPOINT, (req, res) => {
-  res.sendStatus(200);
+
+rest_server.post(UPLOAD_FILE_ENDPOINT, progress_middleware, upload.single('file'), (req, res) => {
+  console.log('command: uploadFile completed.');
+  if (req.file) {
+    const filename = req.file.originalname;
+    const ext = filename.substring(filename.lastIndexOf('.') + 1);
+    console.log(req.file);
+    console.log('ext: ' + ext);
+
+    if (ext === 'bin') {
+      return res.sendStatus(200);
+    } else if (ext === 'md5') {
+      return res.json({ md5: 'ef4304fc4d9025a58dcf25d71c882d2c' });
+    }
+  }
+  return res.sendStatus(400);
 });
+
 rest_server.post(SIGN_IN_ENDPOINT, (req, res) => {
-  console.log('Signed in as ' + req.body.username);
+  console.log('Signed in');
   res.json(signin);
 });
+
 rest_server.get(GENERATE_TOKEN_ENDPOINT, (req, res) => {
   res.json(generate_token);
 });
@@ -2124,8 +2182,8 @@ rest_server.get(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
 rest_server.post(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
   settings = req.body;
   console.log('Write settings: ' + JSON.stringify(settings));
-  res.status(202).json(settings); // restart needed
-  // res.status(200).json(settings); // no restart needed
+  // res.sendStatus(205); // restart needed
+  res.sendStatus(200); // no restart needed
 });
 rest_server.get(EMSESP_CORE_DATA_ENDPOINT, (req, res) => {
   console.log('send back core data...');
@@ -2146,8 +2204,9 @@ rest_server.post(EMSESP_SCANDEVICES_ENDPOINT, (req, res) => {
 rest_server.get(EMSESP_STATUS_ENDPOINT, (req, res) => {
   res.json(status);
 });
-rest_server.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
-  const id = req.body.id;
+
+rest_server.get(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
+  const id = Number(req.query.id);
   console.log('send back device data for ' + id);
   let data = {};
 
@@ -2179,8 +2238,9 @@ rest_server.post(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
   res.end(null, 'binary');
 });
 
-rest_server.post(EMSESP_DEVICEENTITIES_ENDPOINT, (req, res) => {
-  const id = req.body.id;
+rest_server.get(EMSESP_DEVICEENTITIES_ENDPOINT, (req, res) => {
+  const id = Number(req.query.id);
+  console.log('deviceentities for device ' + id + ' received');
   let data = null;
 
   if (id === 1) {
@@ -2204,7 +2264,6 @@ rest_server.post(EMSESP_DEVICEENTITIES_ENDPOINT, (req, res) => {
   if (id === 7) {
     data = emsesp_deviceentities_7;
   }
-
   res.write(msgpack.encode(data), 'binary');
   res.end(null, 'binary');
 });
@@ -2229,6 +2288,7 @@ function updateMask(entity, de, dd) {
     }
 
     // find in dd, either looking for fullname or custom name
+    // console.log('looking for ' + fullname + ' in ' + dd.data);
     dd_objIndex = dd.data.findIndex((obj) => obj.id.slice(2) === fullname);
     if (dd_objIndex !== -1) {
       let changed = new Boolean(false);
@@ -2320,62 +2380,59 @@ rest_server.post(EMSESP_CUSTOM_ENTITIES_ENDPOINT, (req, res) => {
 
 rest_server.post(EMSESP_WRITE_SCHEDULE_ENDPOINT, (req, res) => {
   console.log('write schedule');
-  console.log(req.body.schedule);
+  console.log(req.body);
   emsesp_schedule = req.body;
   res.sendStatus(200);
 });
 
 rest_server.post(EMSESP_WRITE_ENTITIES_ENDPOINT, (req, res) => {
   console.log('write entities');
-  console.log(req.body.entities);
+  console.log(req.body);
   emsesp_entities = req.body;
   res.sendStatus(200);
 });
 
-rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, (req, res) => {
+rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, async (req, res) => {
   const devicevalue = req.body.devicevalue;
   const id = req.body.id;
+  console.log('Write device value for id : ' + id);
+  console.log(' devicedata: ' + JSON.stringify(devicevalue));
 
   if (id === 1) {
-    console.log('Write device value for: ' + JSON.stringify(devicevalue));
     objIndex = emsesp_devicedata_1.data.findIndex((obj) => obj.c == devicevalue.c);
     emsesp_devicedata_1.data[objIndex] = devicevalue;
   }
   if (id === 2) {
-    console.log('Write device value for: ' + JSON.stringify(devicevalue));
     objIndex = emsesp_devicedata_2.data.findIndex((obj) => obj.c == devicevalue.c);
     emsesp_devicedata_2.data[objIndex] = devicevalue;
   }
   if (id === 3) {
-    console.log('Write device value for: ' + JSON.stringify(devicevalue));
     objIndex = emsesp_devicedata_3.data.findIndex((obj) => obj.c == devicevalue.c);
     emsesp_devicedata_3.data[objIndex] = devicevalue;
   }
   if (id === 4) {
-    console.log('Write device value for: ' + JSON.stringify(devicevalue));
     objIndex = emsesp_devicedata_4.data.findIndex((obj) => obj.c == devicevalue.c);
     emsesp_devicedata_4.data[objIndex] = devicevalue;
   }
   if (id === 5) {
-    console.log('Write device value for: ' + JSON.stringify(devicevalue));
     objIndex = emsesp_devicedata_5.data.findIndex((obj) => obj.c == devicevalue.c);
     emsesp_devicedata_5.data[objIndex] = devicevalue;
   }
   if (id === 6) {
-    console.log('Write device value for: ' + JSON.stringify(devicevalue));
     objIndex = emsesp_devicedata_6.data.findIndex((obj) => obj.c == devicevalue.c);
     emsesp_devicedata_6.data[objIndex] = devicevalue;
   }
   if (id === 7) {
-    console.log('Write device value for: ' + JSON.stringify(devicevalue));
     objIndex = emsesp_devicedata_7.data.findIndex((obj) => obj.c == devicevalue.c);
     emsesp_devicedata_7.data[objIndex] = devicevalue;
   }
   if (id === 99) {
-    console.log('Write device value for: ' + JSON.stringify(devicevalue));
     objIndex = emsesp_devicedata_99.data.findIndex((obj) => obj.c == devicevalue.c);
     emsesp_devicedata_99.data[objIndex] = devicevalue;
   }
+
+  await delay(1000); // wait to show spinner
+  // res.sendStatus(400); // bad request
 
   res.sendStatus(200);
 });
@@ -2431,10 +2488,12 @@ rest_server.post(EMSESP_WRITE_ANALOG_ENDPOINT, (req, res) => {
   res.sendStatus(200);
 });
 
-rest_server.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
-  const board_profile = req.body.board_profile;
+rest_server.get(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
+  const board_profile = req.query.boardProfile;
 
+  // default values
   const data = {
+    board_profile: board_profile,
     led_gpio: settings.led_gpio,
     dallas_gpio: settings.dallas_gpio,
     rx_gpio: settings.rx_gpio,
@@ -2558,9 +2617,10 @@ rest_server.post(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
     data.eth_clock_mode = 0;
   }
 
-  console.log('boardProfile POST. Sending back, profile: ' + board_profile + ', ' + 'data: ' + JSON.stringify(data));
+  console.log('boardProfile GET. Sending back, profile: ' + board_profile + ', ' + 'data: ' + JSON.stringify(data));
 
-  res.send(data);
+  // res.sendStatus(400); // send back an error, for testing
+  res.json(data);
 });
 
 // EMS-ESP API specific
@@ -2618,6 +2678,7 @@ rest_server.post(API_ENDPOINT_ROOT, (req, res) => {
   if (req.body.device === 'system') {
     if (req.body.entity === 'info') {
       console.log('sending system info: ' + JSON.stringify(emsesp_info));
+      res.json(emsesp_info);
     } else if (req.body.entity === 'settings') {
       console.log('sending system settings: ' + JSON.stringify(settings));
       res.json(settings);
@@ -2645,26 +2706,38 @@ rest_server.get(SYSTEM_INFO_ENDPOINT, (req, res) => {
 
 const GET_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'getSettings';
 rest_server.get(GET_SETTINGS_ENDPOINT, (req, res) => {
-  console.log('System Settings:');
+  console.log('getSettings');
   res.json(settings);
 });
 
 const GET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'getCustomizations';
 rest_server.get(GET_CUSTOMIZATIONS_ENDPOINT, (req, res) => {
-  console.log('Customization');
+  console.log('getCustomization');
   // not implemented yet
   res.sendStatus(200);
 });
 
-const GET_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
+const GET_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'getEntities';
+rest_server.get(GET_ENTITIES_ENDPOINT, (req, res) => {
+  console.log('getEntities');
+  res.json(emsesp_entities);
+});
+
+const GET_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'getSchedule';
 rest_server.get(GET_SCHEDULE_ENDPOINT, (req, res) => {
+  console.log('getSchedule');
+  res.json(emsesp_schedule);
+});
+
+const SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
+rest_server.get(SCHEDULE_ENDPOINT, (req, res) => {
   console.log('Sending Schedule data');
   res.json(emsesp_schedule);
 });
 
-const GET_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'entities';
-rest_server.get(GET_ENTITIES_ENDPOINT, (req, res) => {
-  console.log('Sending Entities data');
+const ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'entities';
+rest_server.get(ENTITIES_ENDPOINT, (req, res) => {
+  console.log('Sending Custom Entities data');
   res.json(emsesp_entities);
 });
 
@@ -2705,5 +2778,5 @@ rest_server.get(ES_LOG_ENDPOINT, function (req, res) {
       log_index = 0;
     }
     fetch_log.events.push(data); // append to buffer
-  }, 1000);
+  }, 300);
 });

@@ -51,7 +51,6 @@ const sv: Translation = {
   REMOVE: 'Ta bort',
   PROBLEM_UPDATING: 'Problem vid uppdatering',
   PROBLEM_LOADING: 'Problem vid hämtning',
-  ACCESS_DENIED: 'Åtkomst Nekad',
   ANALOG_SENSOR: 'Analog Sensor',
   ANALOG_SENSORS: 'Analoga Sensorer',
   SETTINGS: 'Inställningar',
@@ -71,7 +70,6 @@ const sv: Translation = {
   TEMP_SENSOR: 'Temperatursensor',
   TEMP_SENSORS: 'Temperatursensorer',
   WRITE_CMD_SENT: 'Skrivkommandon skickade',
-  WRITE_CMD_FAILED: 'Skrivkommandon misslyckade',
   EMS_BUS_WARNING: 'EMS-buss nedkopplad. Om denna varning kvarstår efter några sekunder, kontrollera inställningar och enhets-profil.',
   EMS_BUS_SCANNING: 'Söker efter EMS-enheter...',
   CONNECTED: 'Ansluten',
@@ -284,7 +282,7 @@ const sv: Translation = {
   SCAN_AGAIN: 'Sök igen',
   NETWORK_SCANNER: 'Hittade nätverk',
   NETWORK_NO_WIFI: 'Inga WiFi-nätverk hittades',
-  NETWORK_BLANK_SSID: 'lämna blankt för att inaktivera WiFi',
+  NETWORK_BLANK_SSID: 'lämna blankt för att inaktivera WiFi', // and enable ETH // TODO translate
   TX_POWER: 'Tx Effekt',
   HOSTNAME: 'Värdnamn',
   NETWORK_DISABLE_SLEEP: 'Inaktivera sömnläge',
@@ -324,8 +322,8 @@ const sv: Translation = {
   ENTITIES_UPDATED: 'Entities Updated', // TODO translate
   WRITEABLE: 'Writeable', // TODO translate
   SHOWING: 'Showing', // TODO translate
-  SEARCH: 'Search' // TODO translate
-
+  SEARCH: 'Search', // TODO translate
+  CERT: 'TSL root certificate (leave blank to disable TSL)' // TODO translate
 };
 
 export default sv;

@@ -51,7 +51,6 @@ const fr: Translation = {
   REMOVE: 'Enlever',
   PROBLEM_UPDATING: 'Problème lors de la mise à jour',
   PROBLEM_LOADING: 'Problème lors du chargement',
-  ACCESS_DENIED: 'Accès refusé',
   ANALOG_SENSOR: 'Capteur analogique',
   ANALOG_SENSORS: 'Capteurs analogiques',
   SETTINGS: 'Paramètres',
@@ -71,7 +70,6 @@ const fr: Translation = {
   TEMP_SENSOR: 'Capteur de température',
   TEMP_SENSORS: 'Capteurs de température',
   WRITE_CMD_SENT: 'Envoyer la commande sent', // TODO translate
-  WRITE_CMD_FAILED: 'Envoyer la commande failed', // TODO translate
   EMS_BUS_WARNING: 'Bus EMS déconnecté. Si ce message persiste après quelques secondes, vérifiez les paramètres et la configuration de la carte.',
   EMS_BUS_SCANNING: 'Scan des appareils EMS...',
   CONNECTED: 'Connecté',
@@ -284,7 +282,7 @@ const fr: Translation = {
   SCAN_AGAIN: 'Rescanner',
   NETWORK_SCANNER: 'Scan réseau',
   NETWORK_NO_WIFI: 'Pas de réseau WiFi trouvé',
-  NETWORK_BLANK_SSID: 'laisser vide pour désactiver le WiFi',
+  NETWORK_BLANK_SSID: 'laisser vide pour désactiver le WiFi', // and enable ETH // TODO translate
   TX_POWER: 'Puissance Tx',
   HOSTNAME: 'Nom d\'hôte',
   NETWORK_DISABLE_SLEEP: 'Désactiver le mode veille du WiFi',
@@ -324,7 +322,8 @@ const fr: Translation = {
   ENTITIES_UPDATED: 'Entities Updated', // TODO translate
   WRITEABLE: 'Writeable', // TODO translate
   SHOWING: 'Showing', // TODO translate
-  SEARCH: 'Search' // TODO translate
+  SEARCH: 'Search', // TODO translate
+  CERT: 'TSL root certificate (leave blank to disable TSL)' // TODO translate
 };
 
 export default fr;

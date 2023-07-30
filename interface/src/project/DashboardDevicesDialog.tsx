@@ -13,8 +13,10 @@ import {
   FormHelperText,
   Grid,
   Box,
-  Typography
+  Typography,
+  CircularProgress
 } from '@mui/material';
+import { green } from '@mui/material/colors';
 import { useState, useEffect } from 'react';
 
 import { DeviceValueUOM, DeviceValueUOM_s } from './types';
@@ -35,6 +37,7 @@ type DashboardDevicesDialogProps = {
   selectedItem: DeviceValue;
   writeable: boolean;
   validator: Schema;
+  progress: boolean;
 };
 
 const DashboarDevicesDialog = ({
@@ -43,7 +46,8 @@ const DashboarDevicesDialog = ({
   onSave,
   selectedItem,
   writeable,
-  validator
+  validator,
+  progress
 }: DashboardDevicesDialogProps) => {
   const { LL } = useI18nContext();
   const [editItem, setEditItem] = useState<DeviceValue>(selectedItem);
@@ -94,12 +98,11 @@ const DashboarDevicesDialog = ({
     }
 
     let helperText = '<';
-    if (dv.u !== DeviceValueUOM.NONE) {
+    if (dv.s) {
       helperText += 'n';
-      if (dv.m && dv.x) {
+      if (dv.m !== undefined && dv.x !== undefined) {
         helperText += ' between ' + dv.m + ' and ' + dv.x;
-      }
-      if (dv.s) {
+      } else {
         helperText += ' , step ' + dv.s;
       }
     } else {
@@ -115,7 +118,8 @@ const DashboarDevicesDialog = ({
       sx={{
         '& .MuiDialog-paper': {
           borderRadius: '12px'
-        }
+        },
+        backdropFilter: 'blur(1px)'
       }}
     >
       <DialogTitle>
@@ -144,7 +148,7 @@ const DashboarDevicesDialog = ({
                   </MenuItem>
                 ))}
               </TextField>
-            ) : editItem.u !== DeviceValueUOM.NONE ? (
+            ) : editItem.s || editItem.u !== DeviceValueUOM.NONE ? (
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="v"
@@ -155,7 +159,7 @@ const DashboarDevicesDialog = ({
                 type="number"
                 sx={{ width: '30ch' }}
                 onChange={updateFormValue}
-                inputProps={editItem.u ? { min: editItem.m, max: editItem.x, step: editItem.s } : {}}
+                inputProps={editItem.s ? { min: editItem.m, max: editItem.x, step: editItem.s } : {}}
                 InputProps={{
                   startAdornment: <InputAdornment position="start">{setUom(editItem.u)}</InputAdornment>
                 }}
@@ -184,14 +188,32 @@ const DashboarDevicesDialog = ({
 
       <DialogActions>
         {writeable ? (
-          <>
+          <Box
+            sx={{
+              '& button, & a, & .MuiCard-root': {
+                mx: 0.6
+              },
+              position: 'relative'
+            }}
+          >
             <Button startIcon={<CancelIcon />} variant="outlined" onClick={close} color="secondary">
               {LL.CANCEL()}
             </Button>
             <Button startIcon={<WarningIcon color="warning" />} variant="contained" onClick={save} color="info">
               {selectedItem.v === '' && selectedItem.c ? LL.EXECUTE() : LL.UPDATE()}
             </Button>
-          </>
+            {progress && (
+              <CircularProgress
+                size={24}
+                sx={{
+                  color: green[500],
+                  position: 'absolute',
+                  right: '20%',
+                  marginTop: '6px'
+                }}
+              />
+            )}
+          </Box>
         ) : (
           <Button variant="outlined" onClick={close} color="secondary">
             {LL.CLOSE()}

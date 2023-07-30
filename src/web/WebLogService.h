@@ -58,7 +58,6 @@ class WebLogService : public uuid::log::Handler {
         const std::shared_ptr<const uuid::log::Message> content_; // Log message content
     };
 
-    void forbidden(AsyncWebServerRequest * request);
     void transmit(const QueuedLogMessage & message);
     void fetchLog(AsyncWebServerRequest * request);
     void getValues(AsyncWebServerRequest * request);

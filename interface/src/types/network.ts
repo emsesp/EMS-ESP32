@@ -15,7 +15,9 @@ export enum WiFiEncryptionType {
   WIFI_AUTH_WPA_PSK = 2,
   WIFI_AUTH_WPA2_PSK = 3,
   WIFI_AUTH_WPA_WPA2_PSK = 4,
-  WIFI_AUTH_WPA2_ENTERPRISE = 5
+  WIFI_AUTH_WPA2_ENTERPRISE = 5,
+  WIFI_AUTH_WPA3_PSK = 6,
+  WIFI_AUTH_WPA2_WPA3_PSK = 7
 }
 
 export interface NetworkStatus {

@@ -23,15 +23,18 @@ namespace emsesp {
 using namespace std::placeholders; // for `_1` etc
 
 WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securityManager)
-    : _device_data_handler(DEVICE_DATA_SERVICE_PATH,
-                           securityManager->wrapCallback(std::bind(&WebDataService::device_data, this, _1, _2), AuthenticationPredicates::IS_AUTHENTICATED))
-    , _write_value_handler(WRITE_DEVICE_VALUE_SERVICE_PATH,
+    : _write_value_handler(WRITE_DEVICE_VALUE_SERVICE_PATH,
                            securityManager->wrapCallback(std::bind(&WebDataService::write_device_value, this, _1, _2), AuthenticationPredicates::IS_ADMIN))
     , _write_temperature_handler(WRITE_TEMPERATURE_SENSOR_SERVICE_PATH,
                                  securityManager->wrapCallback(std::bind(&WebDataService::write_temperature_sensor, this, _1, _2),
                                                                AuthenticationPredicates::IS_ADMIN))
     , _write_analog_handler(WRITE_ANALOG_SENSOR_SERVICE_PATH,
                             securityManager->wrapCallback(std::bind(&WebDataService::write_analog_sensor, this, _1, _2), AuthenticationPredicates::IS_ADMIN)) {
+    // GET's
+    server->on(DEVICE_DATA_SERVICE_PATH,
+               HTTP_GET,
+               securityManager->wrapRequest(std::bind(&WebDataService::device_data, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+
     server->on(CORE_DATA_SERVICE_PATH,
                HTTP_GET,
                securityManager->wrapRequest(std::bind(&WebDataService::core_data, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
@@ -40,13 +43,10 @@ WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securi
                HTTP_GET,
                securityManager->wrapRequest(std::bind(&WebDataService::sensor_data, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
 
+    // POST's
     server->on(SCAN_DEVICES_SERVICE_PATH,
                HTTP_POST,
                securityManager->wrapRequest(std::bind(&WebDataService::scan_devices, this, _1), AuthenticationPredicates::IS_ADMIN));
-
-    _device_data_handler.setMethod(HTTP_POST);
-    _device_data_handler.setMaxContentLength(256);
-    server->addHandler(&_device_data_handler);
 
     _write_value_handler.setMethod(HTTP_POST);
     _write_value_handler.setMaxContentLength(256);
@@ -88,7 +88,6 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
             obj["d"]       = emsdevice->device_id();                            // deviceid
             obj["p"]       = emsdevice->product_id();                           // productid
             obj["v"]       = emsdevice->version();                              // version
-            // obj["e"]       = emsdevice->count_entities();                       // number of entities (device values)
         }
     }
 
@@ -103,7 +102,6 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
         obj["d"]       = 0;                                                 // deviceid
         obj["p"]       = 0;                                                 // productid
         obj["v"]       = 0;                                                 // version
-        // obj["e"]       = EMSESP::webEntityService.count_entities();         // number of entities (device values)
     }
 
     root["connected"] = EMSESP::bus_status() != 2;
@@ -171,17 +169,23 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
 
 // The unique_id is the unique record ID from the Web table to identify which device to load
 // Compresses the JSON using MsgPack https://msgpack.org/index.html
-void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & json) {
-    if (json.is<JsonObject>()) {
+void WebDataService::device_data(AsyncWebServerRequest * request) {
+    uint8_t id;
+    if (request->hasParam(F_(id))) {
+        id = Helpers::atoint(request->getParam(F_(id))->value().c_str()); // get id from url
+
         size_t buffer   = EMSESP_JSON_SIZE_XXXXLARGE;
         auto * response = new MsgpackAsyncJsonResponse(false, buffer);
+
+        // check size
         while (!response->getSize()) {
             delete response;
             buffer -= 1024;
             response = new MsgpackAsyncJsonResponse(false, buffer);
         }
+
         for (const auto & emsdevice : EMSESP::emsdevices) {
-            if (emsdevice->unique_id() == json["id"]) {
+            if (emsdevice->unique_id() == id) {
                 // wait max 2.5 sec for updated data (post_send_delay is 2 sec)
                 for (uint16_t i = 0; i < (emsesp::TxService::POST_SEND_DELAY + 500) && EMSESP::wait_validate(); i++) {
                     delay(1);
@@ -202,8 +206,9 @@ void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & 
                 return;
             }
         }
+
 #ifndef EMSESP_STANDALONE
-        if (json["id"] == 99) {
+        if (id == 99) {
             JsonObject output = response->getRoot();
             EMSESP::webEntityService.generate_value_web(output);
             response->setLength();
@@ -213,13 +218,11 @@ void WebDataService::device_data(AsyncWebServerRequest * request, JsonVariant & 
 #endif
     }
 
-    // invalid but send ok
-    AsyncWebServerResponse * response = request->beginResponse(200);
+    // invalid
+    AsyncWebServerResponse * response = request->beginResponse(400);
     request->send(response);
 }
 
-
-// takes a command and its data value from a specific EMS Device, from the Web
 // assumes the service has been checked for admin authentication
 void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
@@ -242,7 +245,7 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
                 // the data could be in any format, but we need string
                 // authenticated is always true
                 JsonVariant data        = dv["v"]; // the value in any format
-                uint8_t     return_code = CommandRet::OK;
+                uint8_t     return_code = CommandRet::NOT_FOUND;
                 uint8_t     device_type = emsdevice->device_type();
                 if (data.is<const char *>()) {
                     return_code = Command::call(device_type, cmd, data.as<const char *>(), true, id, output);
@@ -265,7 +268,7 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
 #endif
                 }
 
-                response->setCode((return_code == CommandRet::OK) ? 200 : 204);
+                response->setCode((return_code == CommandRet::OK) ? 200 : 400); // bad request
                 response->setLength();
                 request->send(response);
                 return;
@@ -279,16 +282,16 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
             auto *      response    = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
             JsonObject  output      = response->getRoot();
             JsonVariant data        = dv["v"]; // the value in any format
-            uint8_t     return_code = CommandRet::OK;
+            uint8_t     return_code = CommandRet::NOT_FOUND;
             uint8_t     device_type = EMSdevice::DeviceType::CUSTOM;
-            if (data.is<int>()) {
+            if (data.is<const char *>()) {
+                return_code = Command::call(device_type, cmd, data.as<const char *>(), true, id, output);
+            } else if (data.is<int>()) {
                 char s[10];
                 return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int16_t>(), 0), true, id, output);
             } else if (data.is<float>()) {
                 char s[10];
                 return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<float>(), 1), true, id, output);
-            } else if (data.is<bool>()) {
-                return_code = Command::call(device_type, cmd, data.as<bool>() ? "true" : "false", true, id, output);
             }
             if (return_code != CommandRet::OK) {
                 EMSESP::logger().err("Write command failed %s (%s)", (const char *)output["message"], Command::return_code_string(return_code).c_str());
@@ -297,14 +300,14 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
                 EMSESP::logger().debug("Write command successful");
 #endif
             }
-            response->setCode((return_code == CommandRet::OK) ? 200 : 204);
+            response->setCode((return_code == CommandRet::OK) ? 200 : 400); // bad request
             response->setLength();
             request->send(response);
             return;
         }
     }
 
-    AsyncWebServerResponse * response = request->beginResponse(204); // Write command failed
+    AsyncWebServerResponse * response = request->beginResponse(400); // bad request
     request->send(response);
 }
 
@@ -324,10 +327,11 @@ void WebDataService::write_temperature_sensor(AsyncWebServerRequest * request, J
         if (EMSESP::system_.fahrenheit()) {
             offset10 = offset / 0.18;
         }
+
         ok = EMSESP::temperaturesensor_.update(id, name, offset10);
     }
 
-    AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 204);
+    AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 400); // bad request
     request->send(response);
 }
 
@@ -347,7 +351,7 @@ void WebDataService::write_analog_sensor(AsyncWebServerRequest * request, JsonVa
         ok                  = EMSESP::analogsensor_.update(gpio, name, offset, factor, uom, type, deleted);
     }
 
-    AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 204);
+    AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 400); // bad request
     request->send(response);
 }
 

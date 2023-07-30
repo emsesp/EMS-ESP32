@@ -1,6 +1,28 @@
 ArduinoJson: change log
 =======================
 
+v6.21.3 (2023-07-23)
+-------
+
+* Fix compatibility with the Blynk libary (issue #1914)
+* Fix double lookup in `to<JsonVariant>()`
+* Fix double call to `size()` in `serializeMsgPack()`
+* Include `ARDUINOJSON_SLOT_OFFSET_SIZE` in the namespace name
+* Show a link to the documentation when user passes an unsupported input type
+
+v6.21.2 (2023-04-12)
+-------
+
+* Fix compatibility with the Zephyr Project (issue #1905)
+* Allow using PROGMEM outside of Arduino (issue #1903)
+* Set default for `ARDUINOJSON_ENABLE_PROGMEM` to `1` on AVR
+
+v6.21.1 (2023-03-27)
+-------
+
+* Double speed of `DynamicJsonDocument::garbageCollect()`
+* Fix compatibility with GCC 5.2 (issue #1897)
+
 v6.21.0 (2023-03-14)
 -------
 

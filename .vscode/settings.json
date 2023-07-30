@@ -9,7 +9,7 @@
   },
   "eslint.nodePath": "interface/.yarn/sdks",
   "eslint.workingDirectories": ["interface"],
-  "prettier.prettierPath": "interface/.yarn/sdks/prettier/index.js",
+  "prettier.prettierPath": "",
   "typescript.tsdk": "interface/.yarn/sdks/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "files.associations": {
@@ -28,5 +28,18 @@
     "utility": "cpp",
     "string": "cpp",
     "string_view": "cpp"
-  }
+  },
+  "todo-tree.filtering.excludeGlobs": [
+    "**/vendor/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/bower_components/**",
+    "**/build/**",
+    "**/.vscode/**",
+    "**/.github/**",
+    "**/_output/**",
+    "**/*.min.*",
+    "**/*.map",
+    "**/ArduinoJson/**"
+  ]
 }

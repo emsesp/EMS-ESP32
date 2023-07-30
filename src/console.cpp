@@ -410,14 +410,16 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                               if (arguments.size() == 4) {
                                   uint16_t offset = Helpers::hextoint(arguments[2].c_str());
                                   uint8_t  length = Helpers::hextoint(arguments.back().c_str());
-                                  to_app(shell).send_read_request(type_id, device_id, offset, length);
+                                  to_app(shell).send_read_request(type_id, device_id, offset, length, true);
                               } else if (arguments.size() == 3) {
                                   uint16_t offset = Helpers::hextoint(arguments.back().c_str());
-                                  to_app(shell).send_read_request(type_id, device_id, offset, EMS_MAX_TELEGRAM_LENGTH);
+                                  to_app(shell).send_read_request(type_id, device_id, offset, EMS_MAX_TELEGRAM_LENGTH, true);
                               } else {
                                   // send with length to send immediately and trigger publish read_id
-                                  to_app(shell).send_read_request(type_id, device_id, 0, EMS_MAX_TELEGRAM_LENGTH);
+                                  to_app(shell).send_read_request(type_id, device_id, 0, EMS_MAX_TELEGRAM_LENGTH, true);
                               }
+                              to_app(shell).set_read_id(type_id);
+
                           });
 
     commands->add_command(ShellContext::MAIN,
@@ -620,12 +622,12 @@ void EMSESPShell::stopped() {
 // show welcome banner
 void EMSESPShell::display_banner() {
     println();
-    printfln("┌───────────────────────────────────────┐");
+    printfln("┌────────────────────────────────────────┐");
     printfln("│ %sEMS-ESP version %-12s%s          │", COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_BOLD_OFF);
-    printfln("│ %s%shttps://github.com/emsesp/EMS-ESP32%s   │", COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
-    printfln("│                                       │");
-    printfln("│ type %shelp%s to show available commands  │", COLOR_UNDERLINE, COLOR_RESET);
-    printfln("└───────────────────────────────────────┘");
+    printfln("│ %s%shttps://github.com/emsesp/EMS-ESP32%s    │", COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
+    printfln("│                                        │");
+    printfln("│ type %shelp%s to show available commands   │", COLOR_UNDERLINE, COLOR_RESET);
+    printfln("└────────────────────────────────────────┘");
     println();
 
     // set console name
@@ -640,16 +642,16 @@ std::string EMSESPShell::hostname_text() {
 }
 
 std::string EMSESPShell::context_text() {
-    auto shell_context = static_cast<ShellContext>(context());
+    return std::string{};
 
-    if (shell_context == ShellContext::MAIN) {
-        return std::string{};
-        // return std::string{'/'};
-        // } else if (shell_context == ShellContext::FILESYSTEM) {
-        // 	return "/fs");
-    } else {
-        return std::string{};
-    }
+    // auto shell_context = static_cast<ShellContext>(context());
+    // if (shell_context == ShellContext::MAIN) {
+    //     return std::string{'/'};
+    // } else if (shell_context == ShellContext::FILESYSTEM) {
+    //         return "/fs");
+    // } else {
+    //         return std::string{};
+    // }
 }
 
 // when in su (admin) show # as the prompt suffix

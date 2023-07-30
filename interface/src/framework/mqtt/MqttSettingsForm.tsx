@@ -22,17 +22,27 @@ import { numberValue, updateValueDirty, useRest } from 'utils';
 import { createMqttSettingsValidator, validate } from 'validators';
 
 const MqttSettingsForm: FC = () => {
-  const { loadData, saving, data, setData, origData, dirtyFlags, setDirtyFlags, blocker, saveData, errorMessage } =
-    useRest<MqttSettings>({
-      read: MqttApi.readMqttSettings,
-      update: MqttApi.updateMqttSettings
-    });
+  const {
+    loadData,
+    saving,
+    data,
+    updateDataValue,
+    origData,
+    dirtyFlags,
+    setDirtyFlags,
+    blocker,
+    saveData,
+    errorMessage
+  } = useRest<MqttSettings>({
+    read: MqttApi.readMqttSettings,
+    update: MqttApi.updateMqttSettings
+  });
 
   const { LL } = useI18nContext();
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, setData);
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, updateDataValue);
 
   const content = () => {
     if (!data) {
@@ -158,7 +168,21 @@ const MqttSettingsForm: FC = () => {
               <MenuItem value={2}>2</MenuItem>
             </TextField>
           </Grid>
+          {data.rootCA !== undefined && (
+            <Grid item xs={12} sm={6}>
+              <ValidatedPasswordField
+                name="rootCA"
+                label={LL.CERT()}
+                fullWidth
+                variant="outlined"
+                value={data.rootCA}
+                onChange={updateFormValue}
+                margin="normal"
+              />
+            </Grid>
+          )}
         </Grid>
+
         <BlockFormControlLabel
           control={<Checkbox name="clean_session" checked={data.clean_session} onChange={updateFormValue} />}
           label={LL.MQTT_CLEAN_SESSION()}

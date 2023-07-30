@@ -76,6 +76,7 @@ uint8_t  EMSESP::watch_            = 0;             // trace off
 uint16_t EMSESP::read_id_          = WATCH_ID_NONE;
 bool     EMSESP::read_next_        = false;
 uint16_t EMSESP::publish_id_       = 0;
+uint16_t EMSESP::response_id_      = 0;
 bool     EMSESP::tap_water_active_ = false; // for when Boiler states we having running warm water. used in Shower()
 uint32_t EMSESP::last_fetch_       = 0;
 uint8_t  EMSESP::publish_all_idx_  = 0;
@@ -493,7 +494,7 @@ void EMSESP::publish_all_loop() {
     }
 
     // wait for free queue before sending next message, HA-messages are also queued
-    if (!Mqtt::is_empty()) {
+    if (Mqtt::publish_queued() > 0) {
         return;
     }
 
@@ -597,6 +598,7 @@ void EMSESP::publish_other_values() {
     publish_device_values(EMSdevice::DeviceType::SWITCH);
     publish_device_values(EMSdevice::DeviceType::HEATPUMP);
     publish_device_values(EMSdevice::DeviceType::HEATSOURCE);
+    publish_device_values(EMSdevice::DeviceType::VENTILATION);
     // other devices without values yet
     // publish_device_values(EMSdevice::DeviceType::GATEWAY);
     // publish_device_values(EMSdevice::DeviceType::CONNECT);
@@ -623,25 +625,36 @@ void EMSESP::publish_sensor_values(const bool time, const bool force) {
 
 // MQTT publish a telegram as raw data to the topic 'response'
 void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
-    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
+    static char *  buffer = nullptr;
+    static uint8_t offset;
+    if (buffer == nullptr) {
+        offset    = telegram->offset; // store offset from first part
+        buffer    = new char[768];    // max 256 hex-codes, 255 spaces, 1 termination
+        buffer[0] = '\0';
+    }
+    strlcat(buffer, Helpers::data_to_hex(telegram->message_data, telegram->message_length).c_str(), 768);
+    if (response_id_ != 0) {
+        strlcat(buffer, " ", 768);
+        return;
+    }
+    DynamicJsonDocument doc(EMSESP_JSON_SIZE_LARGE);
+    char                s[10];
+    doc["src"]    = Helpers::hextoa(s, telegram->src);
+    doc["dest"]   = Helpers::hextoa(s, telegram->dest);
+    doc["type"]   = Helpers::hextoa(s, telegram->type_id);
+    doc["offset"] = Helpers::hextoa(s, offset);
+    doc["data"]   = buffer;
 
-    char buffer[100];
-    doc["src"]    = Helpers::hextoa(buffer, telegram->src);
-    doc["dest"]   = Helpers::hextoa(buffer, telegram->dest);
-    doc["type"]   = Helpers::hextoa(buffer, telegram->type_id);
-    doc["offset"] = Helpers::hextoa(buffer, telegram->offset);
-    strlcpy(buffer, Helpers::data_to_hex(telegram->message_data, telegram->message_length).c_str(), sizeof(buffer)); // telegram is without crc
-    doc["data"] = buffer;
-
-    if (telegram->message_length <= 4) {
+    if (telegram->message_length <= 4 && strlen(buffer) <= 11) {
         uint32_t value = 0;
         for (uint8_t i = 0; i < telegram->message_length; i++) {
             value = (value << 8) + telegram->message_data[i];
         }
         doc["value"] = value;
     }
-
     Mqtt::queue_publish("response", doc.as<JsonObject>());
+    delete[] buffer;
+    buffer = nullptr;
 }
 
 // builds json with the detail of each value, for a specific EMS device type or the temperature sensor
@@ -846,12 +859,19 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
 // returns false if there are none found
 bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     // if watching or reading...
-    if ((telegram->type_id == read_id_) && (telegram->dest == txservice_.ems_bus_id())) {
-        LOG_INFO("%s", pretty_telegram(telegram).c_str());
-        if (Mqtt::send_response()) {
+    if ((telegram->type_id == read_id_ || telegram->type_id == response_id_) && (telegram->dest == txservice_.ems_bus_id())) {
+        if (telegram->type_id == response_id_) {
+            if (!trace_raw_) {
+                LOG_TRACE("%s", pretty_telegram(telegram).c_str());
+            }
+            if (!read_next_) {
+                response_id_ = 0;
+            }
             publish_response(telegram);
+        } else {
+            LOG_NOTICE("%s", pretty_telegram(telegram).c_str());
         }
-
+        // check if read is finished or gives more parts
         if (!read_next_) {
             read_id_ = WATCH_ID_NONE;
         }
@@ -950,7 +970,7 @@ bool EMSESP::device_exists(const uint8_t device_id) {
 // for each associated EMS device go and get its system information
 void EMSESP::show_devices(uuid::console::Shell & shell) {
     if (emsdevices.empty()) {
-        shell.printfln("No EMS devices detected. Try using 'scan devices' from the ems menu.");
+        shell.printfln("No EMS devices detected");
         shell.println();
         return;
     }
@@ -1232,8 +1252,8 @@ bool EMSESP::command_info(uint8_t device_type, JsonObject & output, const int8_t
 }
 
 // send a read request, passing it into to the Tx Service, with optional offset and length
-void EMSESP::send_read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t length) {
-    txservice_.read_request(type_id, dest, offset, length);
+void EMSESP::send_read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t length, const bool front) {
+    txservice_.read_request(type_id, dest, offset, length, front);
 }
 
 // sends write request
@@ -1297,6 +1317,9 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 LOG_ERROR("Last Tx write rejected by host");
                 txservice_.send_poll(); // close the bus
             }
+        } else if (tx_state == Telegram::Operation::TX_READ && length == 1) {
+            EMSbus::tx_state(Telegram::Operation::TX_READ); // reset Tx wait state
+            return;
         } else if (tx_state == Telegram::Operation::TX_READ) {
             // got a telegram with data in it. See if the src/dest matches that from the last one we sent and continue to process it
             uint8_t src  = data[0];
@@ -1304,13 +1327,16 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
             if (txservice_.is_last_tx(src, dest)) {
                 LOG_DEBUG("Last Tx read successful");
                 txservice_.increment_telegram_read_count();
-                txservice_.send_poll(); // close the bus
                 txservice_.reset_retry_count();
                 tx_successful = true;
 
                 // if telegram is longer read next part with offset +25 for ems+ or +27 for ems1.0
-                if ((length >= 31) && (txservice_.read_next_tx(data[3], length) == read_id_)) {
+                // not for response to raw send commands without read_id set
+                if ((response_id_ == 0 || read_id_ > 0) && (length >= 31) && (txservice_.read_next_tx(data[3], length) == read_id_)) {
                     read_next_ = true;
+                    txservice_.send();
+                } else {
+                    txservice_.send_poll(); // close the bus
                 }
             }
         }
@@ -1444,9 +1470,10 @@ void EMSESP::start() {
     bool factory_settings = false;
 #endif
 
-    esp8266React.begin();  // loads core system services settings (network, mqtt, ap, ntp etc)
-    webLogService.begin(); // start web log service. now we can start capturing logs to the web log
+    esp8266React.begin();                                        // loads core system services settings (network, mqtt, ap, ntp etc)
+    webLogService.begin();                                       // start web log service. now we can start capturing logs to the web log
 
+    LOG_INFO("Starting EMS-ESP version %s", EMSESP_APP_VERSION); // welcome message
     LOG_DEBUG("System is running in Debug mode");
     LOG_INFO("Last system reset reason Core0: %s, Core1: %s", system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
 
@@ -1481,17 +1508,12 @@ void EMSESP::start() {
 #endif
     }
 
-    // start all the EMS-ESP services
-    mqtt_.start();   // mqtt init
-
-    system_.start(); // starts commands, led, adc, button, network, syslog & uart
-
-    LOG_INFO(("Starting EMS-ESP version %s (hostname: %s)"), EMSESP_APP_VERSION, system_.hostname().c_str()); // welcome message
-
-    shower_.start();                                                                                          // initialize shower timer and shower alert
-    temperaturesensor_.start();                                                                               // Temperature external sensors
-    analogsensor_.start();                                                                                    // Analog external sensors
-    webLogService.start();                                                                                    // apply settings to weblog service
+    mqtt_.start();              // mqtt init
+    system_.start();            // starts commands, led, adc, button, network (sets hostname), syslog & uart
+    shower_.start();            // initialize shower timer and shower alert
+    temperaturesensor_.start(); // Temperature external sensors
+    analogsensor_.start();      // Analog external sensors
+    webLogService.start();      // apply settings to weblog service
 
     // Load our library of known devices into stack mem. Names are stored in Flash memory
     device_library_ = {

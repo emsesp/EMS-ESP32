@@ -37,6 +37,7 @@ class EntityItem {
     double      factor;
     bool        writeable;
     uint32_t    value;
+    std::string data;
 };
 
 class WebEntity {
@@ -60,6 +61,7 @@ class WebEntityService : public StatefulService<WebEntity> {
     void    fetch();
     void    render_value(JsonObject & output, EntityItem entity, const bool useVal = false, const bool web = false);
     uint8_t count_entities();
+    uint8_t has_commands();
     void    generate_value_web(JsonObject & output);
 
 

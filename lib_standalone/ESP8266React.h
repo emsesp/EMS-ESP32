@@ -6,7 +6,7 @@
 #include <ArduinoJson.h>
 #include <AsyncJson.h>
 
-#include <AsyncMqttClient.h>
+#include <espMqttClient.h>
 #include <ESPAsyncWebServer.h>
 
 #include <list>
@@ -101,15 +101,23 @@ class ESP8266React {
         : _settings(server, fs, nullptr)
         , _securitySettingsService(server, fs){};
 
-    void begin(){};
+    void begin() {
+        // initialize mqtt
+        _mqttClient = new espMqttClient();
+    };
     void loop(){};
 
     SecurityManager * getSecurityManager() {
         return &_securitySettingsService;
     }
 
-    AsyncMqttClient * getMqttClient() {
+    espMqttClient * getMqttClient() {
         return _mqttClient;
+    }
+
+    void setWill(const char * will_topic) {
+    }
+    void onMessage(espMqttClientTypes::OnMessageCallback callback) {
     }
 
     StatefulService<DummySettings> * getNetworkSettingsService() {
@@ -132,7 +140,7 @@ class ESP8266React {
     DummySettingsService    _settings;
     SecuritySettingsService _securitySettingsService;
 
-    AsyncMqttClient * _mqttClient;
+    espMqttClient * _mqttClient;
 };
 
 class EMSESPSettingsService {

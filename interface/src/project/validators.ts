@@ -1,5 +1,5 @@
 import Schema from 'async-validator';
-import type { AnalogSensor, DeviceValue, Settings } from './types';
+import type { AnalogSensor, DeviceValue, ScheduleItem, Settings } from './types';
 import type { InternalRuleItem } from 'async-validator';
 import { IP_OR_HOSTNAME_VALIDATOR } from 'validators/shared';
 
@@ -8,7 +8,7 @@ export const GPIO_VALIDATOR = {
     if (
       value &&
       (value === 1 ||
-        (value >= 10 && value <= 12) ||
+        (value >= 6 && value <= 12) ||
         (value >= 14 && value <= 15) ||
         value === 20 ||
         value === 24 ||
@@ -43,6 +43,23 @@ export const GPIO_VALIDATORS2 = {
   }
 };
 
+export const GPIO_VALIDATORS3 = {
+  validator(rule: InternalRuleItem, value: number, callback: (error?: string) => void) {
+    if (
+      value &&
+      ((value >= 19 && value <= 20) ||
+        (value >= 22 && value <= 37) ||
+        (value >= 39 && value <= 42) ||
+        value > 48 ||
+        value < 0)
+    ) {
+      callback('Must be an valid GPIO port');
+    } else {
+      callback();
+    }
+  }
+};
+
 export const createSettingsValidator = (settings: Settings) =>
   new Schema({
     ...(settings.board_profile === 'CUSTOM' &&
@@ -69,6 +86,14 @@ export const createSettingsValidator = (settings: Settings) =>
         tx_gpio: [{ required: true, message: 'Tx GPIO is required' }, GPIO_VALIDATORS2],
         rx_gpio: [{ required: true, message: 'Rx GPIO is required' }, GPIO_VALIDATORS2]
       }),
+    ...(settings.board_profile === 'CUSTOM' &&
+      settings.platform === 'ESP32-S3' && {
+        led_gpio: [{ required: true, message: 'LED GPIO is required' }, GPIO_VALIDATORS3],
+        dallas_gpio: [{ required: true, message: 'GPIO is required' }, GPIO_VALIDATORS3],
+        pbutton_gpio: [{ required: true, message: 'Button GPIO is required' }, GPIO_VALIDATORS3],
+        tx_gpio: [{ required: true, message: 'Tx GPIO is required' }, GPIO_VALIDATORS3],
+        rx_gpio: [{ required: true, message: 'Rx GPIO is required' }, GPIO_VALIDATORS3]
+      }),
     ...(settings.syslog_enabled && {
       syslog_host: [{ required: true, message: 'Host is required' }, IP_OR_HOSTNAME_VALIDATOR],
       syslog_port: [
@@ -86,14 +111,26 @@ export const createSettingsValidator = (settings: Settings) =>
     })
   });
 
-export const schedulerItemValidation = () =>
+export const uniqueNameValidator = (schedule: ScheduleItem[], o_name?: string) => ({
+  validator(rule: InternalRuleItem, name: string, callback: (error?: string) => void) {
+    if ((o_name === undefined || o_name !== name) && schedule.find((si) => si.name === name)) {
+      callback('Name already in use');
+    } else {
+      callback();
+    }
+  }
+});
+
+export const schedulerItemValidation = (schedule: ScheduleItem[], scheduleItem: ScheduleItem) =>
   new Schema({
     name: [
       {
+        required: true,
         type: 'string',
         pattern: /^[a-zA-Z0-9_\\.]{0,15}$/,
         message: "Must be <15 characters: alpha numeric, '_' or '.'"
-      }
+      },
+      ...[uniqueNameValidator(schedule, scheduleItem.o_name)]
     ],
     cmd: [
       { required: true, message: 'Command is required' },

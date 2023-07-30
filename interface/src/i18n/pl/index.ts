@@ -51,7 +51,6 @@ const pl: BaseTranslation = {
   REMOVE: 'Usuń',
   PROBLEM_UPDATING: 'Problem z uaktualnieniem!',
   PROBLEM_LOADING: 'Problem z załadowaniem!',
-  ACCESS_DENIED: 'Brak dostępu!',
   ANALOG_SENSOR: '{{u|u||ustawienia u|ustawień u}}rządzeni{{a podłączonego do EMS-ESP|e||a podłączonego do EMS-ESP|a podłączonego do EMS-ESP}}',
   ANALOG_SENSORS: 'Urządzenia podłączone do EMS-ESP',
   SETTINGS: 'ustawienia',
@@ -71,7 +70,6 @@ const pl: BaseTranslation = {
   TEMP_SENSOR: 'czujnika temperatury',
   TEMP_SENSORS: 'Czujniki temperatury 1-Wire®',
   WRITE_CMD_SENT: 'Komenda zapisu została wysłana.',
-  WRITE_CMD_FAILED: 'Komenda zapisu nie powiodła się!',
   EMS_BUS_WARNING: 'Brak połączenia z magistralą EMS. Jeśli ten błąd występuje dłużej niż kilka sekund, sprawdź ustawienia oraz profil płytki interfejsu.',
   EMS_BUS_SCANNING: 'Trwa skanowanie urządzeń na magistrali EMS...',
   CONNECTED: '{{połączono|połączenie|}}',
@@ -284,7 +282,7 @@ const pl: BaseTranslation = {
   SCAN_AGAIN: 'Skanuj ponownie',
   NETWORK_SCANNER: 'Skaner sieci WiFi',
   NETWORK_NO_WIFI: 'Brak sieci WiFi w zasięgu',
-  NETWORK_BLANK_SSID: 'pozostaw puste aby wyłączyć WiFi',
+  NETWORK_BLANK_SSID: 'pozostaw puste aby wyłączyć WiFi', // and enable ETH // TODO translate
   TX_POWER: 'Moc nadawania',
   HOSTNAME: 'Nazwa w sieci',
   NETWORK_DISABLE_SLEEP: 'Wyłącz tryb uśpienia WiFi',
@@ -324,8 +322,8 @@ const pl: BaseTranslation = {
   ENTITIES_UPDATED: 'Niestandardowe encje zostały uaktualnione.',
   WRITEABLE: 'zapisywalna',
   SHOWING: 'Wyświetlane',
-  SEARCH: 'Szukaj'
-
+  SEARCH: 'Szukaj',
+  CERT: 'TSL root certificate (leave blank to disable TSL)' // TODO translate
 };
 
 export default pl;

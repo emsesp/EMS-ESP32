@@ -1,7 +1,9 @@
 import ForwardIcon from '@mui/icons-material/Forward';
 import { Box, Fab, Paper, Typography, Button } from '@mui/material';
+import { useRequest } from 'alova';
 import { useContext, useState } from 'react';
 import { toast } from 'react-toastify';
+import { FeaturesContext } from './contexts/features';
 import type { ValidateFieldsError } from 'async-validator';
 
 import type { Locales } from 'i18n/i18n-types';
@@ -16,6 +18,7 @@ import { AuthenticationContext } from 'contexts/authentication';
 import { ReactComponent as DEflag } from 'i18n/DE.svg';
 import { ReactComponent as FRflag } from 'i18n/FR.svg';
 import { ReactComponent as GBflag } from 'i18n/GB.svg';
+import { ReactComponent as ITflag } from 'i18n/IT.svg';
 import { ReactComponent as NLflag } from 'i18n/NL.svg';
 import { ReactComponent as NOflag } from 'i18n/NO.svg';
 import { ReactComponent as PLflag } from 'i18n/PL.svg';
@@ -23,13 +26,15 @@ import { ReactComponent as SVflag } from 'i18n/SV.svg';
 import { ReactComponent as TRflag } from 'i18n/TR.svg';
 import { I18nContext } from 'i18n/i18n-react';
 import { loadLocaleAsync } from 'i18n/i18n-util.async';
-import { extractErrorMessage, onEnterCallback, updateValue } from 'utils';
+import { onEnterCallback, updateValue } from 'utils';
 import { SIGN_IN_REQUEST_VALIDATOR, validate } from 'validators';
 
 const SignIn: FC = () => {
   const authenticationContext = useContext(AuthenticationContext);
 
   const { LL, setLocale, locale } = useContext(I18nContext);
+
+  const { features } = useContext(FeaturesContext);
 
   const [signInRequest, setSignInRequest] = useState<SignInRequest>({
     username: '',
@@ -38,22 +43,27 @@ const SignIn: FC = () => {
   const [processing, setProcessing] = useState<boolean>(false);
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
+  const { send: callSignIn, onSuccess } = useRequest((request: SignInRequest) => AuthenticationApi.signIn(request), {
+    immediate: false
+  });
+
+  onSuccess((response) => {
+    if (response.data) {
+      authenticationContext.signIn(response.data.access_token);
+    }
+  });
+
   const updateLoginRequestValue = updateValue(setSignInRequest);
 
   const signIn = async () => {
-    try {
-      const { data: loginResponse } = await AuthenticationApi.signIn(signInRequest);
-      authenticationContext.signIn(loginResponse.access_token);
-    } catch (error) {
-      if (error.response) {
-        if (error.response?.status === 401) {
-          toast.warn(LL.INVALID_LOGIN());
-        }
+    await callSignIn(signInRequest).catch((event) => {
+      if (event.message === 'Unauthorized') {
+        toast.warning(LL.INVALID_LOGIN());
       } else {
-        toast.error(extractErrorMessage(error, LL.ERROR()));
+        toast.error(LL.ERROR() + ' ' + event.message);
       }
       setProcessing(false);
-    }
+    });
   };
 
   const validateAndSignIn = async () => {
@@ -100,6 +110,7 @@ const SignIn: FC = () => {
         })}
       >
         <Typography variant="h4">{PROJECT_NAME}</Typography>
+        <Typography variant="subtitle2">{features.version}</Typography>
         <Box
           mt={2}
           mb={2}
@@ -110,17 +121,21 @@ const SignIn: FC = () => {
             }
           }}
         >
-          <Button size="small" variant={locale === 'en' ? 'contained' : 'outlined'} onClick={() => selectLocale('en')}>
-            <GBflag style={{ width: 24 }} />
-            &nbsp;EN
-          </Button>
           <Button size="small" variant={locale === 'de' ? 'contained' : 'outlined'} onClick={() => selectLocale('de')}>
             <DEflag style={{ width: 24 }} />
             &nbsp;DE
           </Button>
+          <Button size="small" variant={locale === 'en' ? 'contained' : 'outlined'} onClick={() => selectLocale('en')}>
+            <GBflag style={{ width: 24 }} />
+            &nbsp;EN
+          </Button>
           <Button size="small" variant={locale === 'fr' ? 'contained' : 'outlined'} onClick={() => selectLocale('fr')}>
             <FRflag style={{ width: 24 }} />
             &nbsp;FR
+          </Button>
+          <Button size="small" variant={locale === 'it' ? 'contained' : 'outlined'} onClick={() => selectLocale('it')}>
+            <ITflag style={{ width: 24 }} />
+            &nbsp;IT
           </Button>
           <Button size="small" variant={locale === 'nl' ? 'contained' : 'outlined'} onClick={() => selectLocale('nl')}>
             <NLflag style={{ width: 24 }} />
