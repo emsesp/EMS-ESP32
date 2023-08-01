@@ -21,7 +21,7 @@
 - Native support for Home Assistant, Domoticz and openHAB via [MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/)
 - Can run standalone as an independent WiFi Access Point or join an existing WiFi network
 - Easy first-time configuration via a web Captive Portal
-- Support for more than [110 EMS devices](https://emsesp.github.io/docs/#/Supported-EMS-Devices) (boilers, thermostats, solar modules, mixer modules, heat pumps, gateways, switches, heat sources)
+- Support for more than [110+ EMS devices](https://emsesp.github.io/docs/All-Devices/) (boilers, thermostats, solar modules, mixer modules, heat pumps, gateways, switches, heat sources)
 
 ## **Documentation**
 
