@@ -54,7 +54,7 @@ export const alovaInstance = createAlova({
 });
 
 export const alovaInstanceGH = createAlova({
-  baseURL: 'https://api.github.com/repos/emsesp/EMS-ESP32',
+  baseURL: 'https://api.github.com/repos/emsesp/EMS-ESP32/releases',
   statesHook: ReactHook,
   requestAdapter: xhrRequestAdapter()
 });

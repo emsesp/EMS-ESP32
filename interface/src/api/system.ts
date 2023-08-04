@@ -1,5 +1,5 @@
 import { alovaInstance, alovaInstanceGH } from './endpoints';
-import type { OTASettings, SystemStatus, LogSettings, Version } from 'types';
+import type { OTASettings, SystemStatus, LogSettings } from 'types';
 
 // SystemStatus - also used to ping in Restart monitor for pinging
 export const readSystemStatus = () => alovaInstance.Get<SystemStatus>('/rest/systemStatus');
@@ -20,24 +20,15 @@ export const fetchLog = () => alovaInstance.Post('/rest/fetchLog');
 
 // Get versions from github
 export const getStableVersion = () =>
-  alovaInstanceGH.Get<Version>('releases/latest', {
+  alovaInstanceGH.Get('latest', {
     transformData(response: any) {
-      return {
-        version: response.data.name,
-        url: response.data.assets[1].browser_download_url,
-        changelog: response.data.assets[0].browser_download_url
-      };
+      return response.data.name.substring(1);
     }
   });
-
 export const getDevVersion = () =>
-  alovaInstanceGH.Get<Version>('releases/tags/latest', {
+  alovaInstanceGH.Get('tags/latest', {
     transformData(response: any) {
-      return {
-        version: response.data.name.split(/\s+/).splice(-1),
-        url: response.data.assets[1].browser_download_url,
-        changelog: response.data.assets[0].browser_download_url
-      };
+      return response.data.name.split(/\s+/).splice(-1)[0].substring(1);
     }
   });
 

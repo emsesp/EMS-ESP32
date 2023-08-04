@@ -180,7 +180,7 @@ const nl: Translation = {
   LOG_OF: '{0} Log',
   STATUS_OF: '{0} Status',
   UPLOAD_DOWNLOAD: 'Upload/Download',
-  VERSION_ON: 'U bevindt zich momenteel op',
+  VERSION_ON: 'U bevindt zich momenteel op versie',
   SYSTEM_APPLY_FIRMWARE: 'om de nieuwe firmware te activeren',
   CLOSE: 'Sluiten',
   USE: 'Gebruik',

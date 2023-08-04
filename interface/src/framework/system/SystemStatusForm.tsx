@@ -23,25 +23,21 @@ import {
   List,
   ListItem,
   ListItemAvatar,
-  ListItemText,
-  Link,
-  Typography
+  ListItemText
 } from '@mui/material';
 
 import { useRequest } from 'alova';
 import { useContext, useState } from 'react';
 import { toast } from 'react-toastify';
+import { FeaturesContext } from '../../contexts/features';
 import RestartMonitor from './RestartMonitor';
+import SystemStatusVersionDialog from './SystemStatusVersionDialog';
 import type { FC } from 'react';
 
 import * as SystemApi from 'api/system';
-import { ButtonRow, FormLoader, SectionContent, MessageBox } from 'components';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
-
-export const VERSIONCHECK_ENDPOINT = 'https://api.github.com/repos/emsesp/EMS-ESP32/releases/latest';
-export const VERSIONCHECK_DEV_ENDPOINT = 'https://api.github.com/repos/emsesp/EMS-ESP32/releases/tags/latest';
-export const uploadURL = window.location.origin + '/system/upload';
 
 function formatNumber(num: number) {
   return new Intl.NumberFormat().format(num);
@@ -54,8 +50,10 @@ const SystemStatusForm: FC = () => {
   const [confirmRestart, setConfirmRestart] = useState<boolean>(false);
   const [confirmFactoryReset, setConfirmFactoryReset] = useState<boolean>(false);
   const [processing, setProcessing] = useState<boolean>(false);
-  const [showingVersion, setShowingVersion] = useState<boolean>(false);
   const [restarting, setRestarting] = useState<boolean>();
+  const [versionDialogOpen, setVersionDialogOpen] = useState<boolean>(false);
+
+  const { features } = useContext(FeaturesContext);
 
   const { send: restartCommand } = useRequest(SystemApi.restart(), {
     immediate: false
@@ -68,10 +66,6 @@ const SystemStatusForm: FC = () => {
   const { send: partitionCommand } = useRequest(SystemApi.partition(), {
     immediate: false
   });
-
-  // fetch versions from GH on load
-  const { data: latestVersion } = useRequest(SystemApi.getStableVersion);
-  const { data: latestDevVersion } = useRequest(SystemApi.getDevVersion);
 
   const { data: data, send: loadData, error } = useRequest(SystemApi.readSystemStatus, { force: true });
 
@@ -158,60 +152,6 @@ const SystemStatusForm: FC = () => {
     </Dialog>
   );
 
-  const renderVersionDialog = () => (
-    <Dialog open={showingVersion} onClose={() => setShowingVersion(false)}>
-      <DialogTitle>{LL.VERSION_CHECK(1)}</DialogTitle>
-      <DialogContent dividers>
-        <MessageBox my={0} level="info" message={LL.VERSION_ON() + ' v' + data?.emsesp_version} />
-        {latestVersion && (
-          <Box mt={2} mb={2}>
-            {LL.THE_LATEST()}&nbsp;<u>{LL.OFFICIAL()}</u>&nbsp;{LL.RELEASE_IS()}&nbsp;<b>{latestVersion.version}</b>
-            &nbsp;(
-            <Link target="_blank" href={latestVersion.changelog} color="primary">
-              {LL.RELEASE_NOTES()}
-            </Link>
-            )&nbsp;(
-            <Link target="_blank" href={latestVersion.url} color="primary">
-              {LL.DOWNLOAD(1)}
-            </Link>
-            )
-          </Box>
-        )}
-
-        {latestDevVersion && (
-          <Box mt={2} mb={2}>
-            {LL.THE_LATEST()}&nbsp;<u>{LL.DEVELOPMENT()}</u>&nbsp;{LL.RELEASE_IS()}&nbsp;
-            <b>{latestDevVersion.version}</b>
-            &nbsp;(
-            <Link target="_blank" href={latestDevVersion.changelog} color="primary">
-              {LL.RELEASE_NOTES()}
-            </Link>
-            )&nbsp;(
-            <Link target="_blank" href={latestDevVersion.url} color="primary">
-              {LL.DOWNLOAD(1)}
-            </Link>
-            )
-          </Box>
-        )}
-
-        <Box color="warning.main" p={0} pl={0} pr={0} mt={4} mb={0}>
-          <Typography variant="body2">
-            {LL.USE()}&nbsp;
-            <Link href={uploadURL} color="primary">
-              {LL.UPLOAD()}
-            </Link>
-            &nbsp;{LL.SYSTEM_APPLY_FIRMWARE()}
-          </Typography>
-        </Box>
-      </DialogContent>
-      <DialogActions>
-        <Button variant="outlined" onClick={() => setShowingVersion(false)} color="secondary">
-          {LL.CLOSE()}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-
   const renderFactoryResetDialog = () => (
     <Dialog open={confirmFactoryReset} onClose={() => setConfirmFactoryReset(false)}>
       <DialogTitle>{LL.FACTORY_RESET()}</DialogTitle>
@@ -253,12 +193,10 @@ const SystemStatusForm: FC = () => {
                 <BuildIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary={LL.EMS_ESP_VER()} secondary={'v' + data.emsesp_version} />
-            {latestVersion && (
-              <Button color="primary" onClick={() => setShowingVersion(true)}>
-                {LL.VERSION_CHECK(0)}
-              </Button>
-            )}
+            <ListItemText primary={LL.EMS_ESP_VER()} secondary={data.emsesp_version} />
+            <Button color="primary" onClick={() => setVersionDialogOpen(true)}>
+              {LL.VERSION_CHECK(0)}
+            </Button>
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
@@ -386,7 +324,6 @@ const SystemStatusForm: FC = () => {
             </Box>
           )}
         </Box>
-        {renderVersionDialog()}
         {renderRestartDialog()}
         {renderFactoryResetDialog()}
       </>
@@ -396,6 +333,14 @@ const SystemStatusForm: FC = () => {
   return (
     <SectionContent title={LL.STATUS_OF(LL.SYSTEM(1))} titleGutter>
       {restarting ? <RestartMonitor /> : content()}
+      {data && (
+        <SystemStatusVersionDialog
+          open={versionDialogOpen}
+          onClose={() => setVersionDialogOpen(false)}
+          version={data.emsesp_version}
+          platform={features.platform}
+        />
+      )}
     </SectionContent>
   );
 };
