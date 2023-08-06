@@ -1044,7 +1044,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@prefresh/vite@npm:^2.2.8":
+"@prefresh/vite@npm:^2.2.8, @prefresh/vite@npm:^2.4.1":
   version: 2.4.1
   resolution: "@prefresh/vite@npm:2.4.1"
   dependencies:
@@ -1324,10 +1324,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^20.4.7":
-  version: 20.4.7
-  resolution: "@types/node@npm:20.4.7"
-  checksum: 95c0179ca0c1e3c96f3613276f98c7f620ee035f5d871e3045bc39e76fb77f4330b03b79335d8d254e88c8deb1143fcaa2fb4ad576d857c31f389282fe56a0f1
+"@types/node@npm:^20.4.8":
+  version: 20.4.8
+  resolution: "@types/node@npm:20.4.8"
+  checksum: 8b0c090a10f67ecb4ae9cbf0da4889570e8cf242f02eb4341d1011e9e552b32cc0de569079c2e8c6a43524e2b88df6ee30075249c8b63e72638d462a246bf71c
   languageName: node
   linkType: hard
 
@@ -1553,10 +1553,11 @@ __metadata:
     "@mui/material": ^5.14.3
     "@preact/compat": ^17.1.2
     "@preact/preset-vite": ^2.5.0
+    "@prefresh/vite": ^2.4.1
     "@table-library/react-table-library": 4.1.4
     "@types/babel__core": ^7
     "@types/lodash-es": ^4.17.8
-    "@types/node": ^20.4.7
+    "@types/node": ^20.4.8
     "@types/react": ^18.2.18
     "@types/react-dom": ^18.2.7
     "@types/react-router-dom": ^5.3.3
@@ -1567,7 +1568,7 @@ __metadata:
     eslint: ^8.46.0
     eslint-config-airbnb: ^19.0.4
     eslint-config-airbnb-typescript: ^17.1.0
-    eslint-config-prettier: ^8.10.0
+    eslint-config-prettier: ^9.0.0
     eslint-import-resolver-typescript: ^3.5.5
     eslint-plugin-autofix: ^1.1.0
     eslint-plugin-import: ^2.28.0
@@ -2709,14 +2710,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-prettier@npm:^8.10.0":
-  version: 8.10.0
-  resolution: "eslint-config-prettier@npm:8.10.0"
+"eslint-config-prettier@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "eslint-config-prettier@npm:9.0.0"
   peerDependencies:
     eslint: ">=7.0.0"
   bin:
     eslint-config-prettier: bin/cli.js
-  checksum: 19f8c497d9bdc111a17a61b25ded97217be3755bbc4714477dfe535ed539dddcaf42ef5cf8bb97908b058260cf89a3d7c565cb0be31096cbcd39f4c2fa5fe43c
+  checksum: bc1f661915845c631824178942e5d02f858fe6d0ea796f0050d63e0f681927b92696e81139dd04714c08c3e7de580fd079c66162e40070155ba79eaee78ab5d0
   languageName: node
   linkType: hard
 

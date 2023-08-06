@@ -1,5 +1,5 @@
 import ForwardIcon from '@mui/icons-material/Forward';
-import { Box, Fab, Paper, Typography, Button } from '@mui/material';
+import { Box, Paper, Typography, MenuItem, TextField, Button } from '@mui/material';
 import { useRequest } from 'alova';
 import { useContext, useState } from 'react';
 import { toast } from 'react-toastify';
@@ -7,12 +7,12 @@ import { FeaturesContext } from './contexts/features';
 import type { ValidateFieldsError } from 'async-validator';
 
 import type { Locales } from 'i18n/i18n-types';
-import type { FC } from 'react';
+import type { ChangeEventHandler, FC } from 'react';
 import type { SignInRequest } from 'types';
 import * as AuthenticationApi from 'api/authentication';
 import { PROJECT_NAME } from 'api/env';
 
-import { ValidatedTextField } from 'components';
+import { ValidatedPasswordField, ValidatedTextField } from 'components';
 import { AuthenticationContext } from 'contexts/authentication';
 
 import { ReactComponent as DEflag } from 'i18n/DE.svg';
@@ -82,7 +82,8 @@ const SignIn: FC = () => {
 
   const submitOnEnter = onEnterCallback(signIn);
 
-  const selectLocale = async (loc: Locales) => {
+  const onLocaleSelected: ChangeEventHandler<HTMLInputElement> = async ({ target }) => {
+    const loc = target.value as Locales;
     localStorage.setItem('lang', loc);
     await loadLocaleAsync(loc);
     setLocale(loc);
@@ -111,82 +112,79 @@ const SignIn: FC = () => {
       >
         <Typography variant="h4">{PROJECT_NAME}</Typography>
         <Typography variant="subtitle2">{features.version}</Typography>
-        <Box
-          mt={2}
-          mb={2}
-          sx={{
-            '& button, & a, & .MuiCard-root': {
-              mt: 1,
-              mx: 1
-            }
-          }}
-        >
-          <Button size="small" variant={locale === 'de' ? 'contained' : 'outlined'} onClick={() => selectLocale('de')}>
-            <DEflag style={{ width: 24 }} />
+
+        <TextField name="locale" variant="outlined" value={locale} onChange={onLocaleSelected} size="small" select>
+          <MenuItem key="de" value="de">
+            <DEflag style={{ width: 16, verticalAlign: 'middle' }} />
             &nbsp;DE
-          </Button>
-          <Button size="small" variant={locale === 'en' ? 'contained' : 'outlined'} onClick={() => selectLocale('en')}>
-            <GBflag style={{ width: 24 }} />
+          </MenuItem>
+          <MenuItem key="en" value="en">
+            <GBflag style={{ width: 16, verticalAlign: 'middle' }} />
             &nbsp;EN
-          </Button>
-          <Button size="small" variant={locale === 'fr' ? 'contained' : 'outlined'} onClick={() => selectLocale('fr')}>
-            <FRflag style={{ width: 24 }} />
+          </MenuItem>
+          <MenuItem key="fr" value="fr">
+            <FRflag style={{ width: 16, verticalAlign: 'middle' }} />
             &nbsp;FR
-          </Button>
-          <Button size="small" variant={locale === 'it' ? 'contained' : 'outlined'} onClick={() => selectLocale('it')}>
-            <ITflag style={{ width: 24 }} />
+          </MenuItem>
+          <MenuItem key="it" value="it">
+            <ITflag style={{ width: 16, verticalAlign: 'middle' }} />
             &nbsp;IT
-          </Button>
-          <Button size="small" variant={locale === 'nl' ? 'contained' : 'outlined'} onClick={() => selectLocale('nl')}>
-            <NLflag style={{ width: 24 }} />
+          </MenuItem>
+          <MenuItem key="nl" value="nl">
+            <NLflag style={{ width: 16, verticalAlign: 'middle' }} />
             &nbsp;NL
-          </Button>
-          <Button size="small" variant={locale === 'no' ? 'contained' : 'outlined'} onClick={() => selectLocale('no')}>
-            <NOflag style={{ width: 24 }} />
+          </MenuItem>
+          <MenuItem key="no" value="no">
+            <NOflag style={{ width: 16, verticalAlign: 'middle' }} />
             &nbsp;NO
-          </Button>
-          <Button size="small" variant={locale === 'pl' ? 'contained' : 'outlined'} onClick={() => selectLocale('pl')}>
-            <PLflag style={{ width: 24 }} />
+          </MenuItem>
+          <MenuItem key="pl" value="pl">
+            <PLflag style={{ width: 16, verticalAlign: 'middle' }} />
             &nbsp;PL
-          </Button>
-          <Button size="small" variant={locale === 'sv' ? 'contained' : 'outlined'} onClick={() => selectLocale('sv')}>
-            <SVflag style={{ width: 24 }} />
+          </MenuItem>
+          <MenuItem key="sv" value="sv">
+            <SVflag style={{ width: 16, verticalAlign: 'middle' }} />
             &nbsp;SV
-          </Button>
-          <Button size="small" variant={locale === 'tr' ? 'contained' : 'outlined'} onClick={() => selectLocale('tr')}>
-            <TRflag style={{ width: 24 }} />
+          </MenuItem>
+          <MenuItem key="tr" value="tr">
+            <TRflag style={{ width: 16, verticalAlign: 'middle' }} />
             &nbsp;TR
-          </Button>
+          </MenuItem>
+        </TextField>
+
+        <Box display="flex" flexDirection="column" alignItems="center">
+          <ValidatedTextField
+            fieldErrors={fieldErrors}
+            disabled={processing}
+            sx={{
+              width: 200
+            }}
+            name="username"
+            label={LL.USERNAME(0)}
+            value={signInRequest.username}
+            onChange={updateLoginRequestValue}
+            margin="normal"
+            variant="outlined"
+          />
+          <ValidatedPasswordField
+            fieldErrors={fieldErrors}
+            disabled={processing}
+            sx={{
+              width: 200
+            }}
+            name="password"
+            label={LL.PASSWORD()}
+            value={signInRequest.password}
+            onChange={updateLoginRequestValue}
+            onKeyDown={submitOnEnter}
+            variant="outlined"
+          />
         </Box>
 
-        <ValidatedTextField
-          fieldErrors={fieldErrors}
-          disabled={processing}
-          name="username"
-          label={LL.USERNAME(0)}
-          value={signInRequest.username}
-          onChange={updateLoginRequestValue}
-          margin="normal"
-          variant="outlined"
-          fullWidth
-        />
-        <ValidatedTextField
-          fieldErrors={fieldErrors}
-          disabled={processing}
-          type="password"
-          name="password"
-          label={LL.PASSWORD()}
-          value={signInRequest.password}
-          onChange={updateLoginRequestValue}
-          onKeyDown={submitOnEnter}
-          margin="normal"
-          variant="outlined"
-          fullWidth
-        />
-        <Fab variant="extended" color="primary" sx={{ mt: 2 }} onClick={validateAndSignIn} disabled={processing}>
+        <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={validateAndSignIn} disabled={processing}>
           <ForwardIcon sx={{ mr: 1 }} />
           {LL.SIGN_IN()}
-        </Fab>
+        </Button>
       </Paper>
     </Box>
   );
