@@ -45,6 +45,7 @@ import { DeviceValueUOM_s, DeviceEntityMask, DeviceType } from './types';
 import { deviceValueItemValidation } from './validators';
 import type { Device, DeviceValue } from './types';
 import type { FC } from 'react';
+import { dialogStyle } from 'CustomTheme';
 import { ButtonRow, SectionContent, MessageBox } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 
@@ -361,7 +362,7 @@ const DashboardDevices: FC = () => {
       }
 
       return (
-        <Dialog open={showDeviceInfo} onClose={() => setShowDeviceInfo(false)}>
+        <Dialog sx={dialogStyle} open={showDeviceInfo} onClose={() => setShowDeviceInfo(false)}>
           <DialogTitle>{LL.DEVICE_DETAILS()}</DialogTitle>
           <DialogContent dividers>
             <List dense={true}>

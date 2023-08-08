@@ -14,6 +14,7 @@ import { useRequest } from 'alova';
 import { useEffect } from 'react';
 
 import type { FC } from 'react';
+import { dialogStyle } from 'CustomTheme';
 import * as SecurityApi from 'api/security';
 import { MessageBox } from 'components';
 
@@ -39,8 +40,8 @@ const GenerateToken: FC<GenerateTokenProps> = ({ username, onClose }) => {
   }, [open, generateToken]);
 
   return (
-    <Dialog onClose={onClose} aria-labelledby="generate-token-dialog-title" open={!!username} fullWidth maxWidth="sm">
-      <DialogTitle id="generate-token-dialog-title">{LL.ACCESS_TOKEN_FOR() + ' ' + username}</DialogTitle>
+    <Dialog sx={dialogStyle} onClose={onClose} open={!!username} fullWidth maxWidth="sm">
+      <DialogTitle>{LL.ACCESS_TOKEN_FOR() + ' ' + username}</DialogTitle>
       <DialogContent dividers>
         {token ? (
           <>

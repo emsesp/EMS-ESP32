@@ -3,6 +3,7 @@ import type { FC } from 'react';
 
 import type { unstable_Blocker as Blocker } from 'react-router-dom';
 
+import { dialogStyle } from 'CustomTheme';
 import { useI18nContext } from 'i18n/i18n-react';
 
 interface BlockNavigationProps {
@@ -13,7 +14,7 @@ const BlockNavigation: FC<BlockNavigationProps> = ({ blocker }) => {
   const { LL } = useI18nContext();
 
   return (
-    <Dialog open={blocker.state === 'blocked'}>
+    <Dialog sx={dialogStyle} open={blocker.state === 'blocked'}>
       <DialogTitle>{LL.BLOCK_NAVIGATE_1()}</DialogTitle>
       <DialogContent dividers>{LL.BLOCK_NAVIGATE_2()}</DialogContent>
       <DialogActions>
