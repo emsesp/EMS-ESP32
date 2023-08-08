@@ -35,7 +35,7 @@ import { useState, useContext, useEffect, useCallback, useLayoutEffect } from 'r
 
 import { IconContext } from 'react-icons';
 import { toast } from 'react-toastify';
-import DashboarDevicesDialog from './DashboardDevicesDialog';
+import DashboardDevicesDialog from './DashboardDevicesDialog';
 import DeviceIcon from './DeviceIcon';
 
 import * as EMSESP from './api';
@@ -581,7 +581,7 @@ const DashboardDevices: FC = () => {
       {renderDeviceData()}
       {renderDeviceDetails()}
       {selectedDeviceValue && (
-        <DashboarDevicesDialog
+        <DashboardDevicesDialog
           open={deviceValueDialogOpen}
           onClose={deviceValueDialogClose}
           onSave={deviceValueDialogSave}
