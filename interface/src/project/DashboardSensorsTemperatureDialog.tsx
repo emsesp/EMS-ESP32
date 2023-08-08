@@ -18,6 +18,7 @@ import { useState, useEffect } from 'react';
 import type { TemperatureSensor } from './types';
 import type Schema from 'async-validator';
 import type { ValidateFieldsError } from 'async-validator';
+import { dialogStyle } from 'CustomTheme';
 import { ValidatedTextField } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
@@ -67,7 +68,7 @@ const DashboardSensorsTemperatureDialog = ({
   };
 
   return (
-    <Dialog open={open} onClose={close}>
+    <Dialog sx={dialogStyle} open={open} onClose={close}>
       <DialogTitle>
         {LL.EDIT()}&nbsp;{LL.TEMP_SENSOR()}
       </DialogTitle>

@@ -310,7 +310,7 @@ const MqttSettingsForm: FC = () => {
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="publish_time_heartbeat"
-              label={LL.MQTT_INT_HEARTBEAT()}
+              label="Heartbeat"
               InputProps={{
                 endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
               }}

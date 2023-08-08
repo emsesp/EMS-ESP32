@@ -35,6 +35,7 @@ import * as EMSESP from './api';
 import { DeviceEntityMask } from './types';
 import type { DeviceShort, DeviceEntity } from './types';
 import type { FC } from 'react';
+import { dialogStyle } from 'CustomTheme';
 import * as SystemApi from 'api/system';
 import { ButtonRow, SectionContent, MessageBox, BlockNavigation } from 'components';
 
@@ -484,7 +485,7 @@ const SettingsCustomization: FC = () => {
   };
 
   const renderResetDialog = () => (
-    <Dialog open={confirmReset} onClose={() => setConfirmReset(false)}>
+    <Dialog sx={dialogStyle} open={confirmReset} onClose={() => setConfirmReset(false)}>
       <DialogTitle>{LL.RESET(1)}</DialogTitle>
       <DialogContent dividers>{LL.CUSTOMIZATIONS_RESET()}</DialogContent>
       <DialogActions>

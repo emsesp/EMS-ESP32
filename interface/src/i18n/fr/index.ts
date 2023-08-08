@@ -246,7 +246,6 @@ const fr: Translation = {
   MQTT_INT_THERMOSTATS: 'Thermostats',
   MQTT_INT_SOLAR: 'Modules solaires',
   MQTT_INT_MIXER: 'Modules mélangeurs',
-  MQTT_INT_HEARTBEAT: 'Battements',
   MQTT_QUEUE: 'Queue MQTT',
   DEFAULT: 'Défaut',
   MQTT_ENTITY_FORMAT: 'Entity ID format', // TODO translate

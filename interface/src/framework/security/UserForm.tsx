@@ -9,6 +9,7 @@ import type { ValidateFieldsError } from 'async-validator';
 import type { FC } from 'react';
 
 import type { User } from 'types';
+import { dialogStyle } from 'CustomTheme';
 import { BlockFormControlLabel, ValidatedPasswordField, ValidatedTextField } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import { updateValue } from 'utils';
@@ -51,7 +52,7 @@ const UserForm: FC<UserFormProps> = ({ creating, validator, user, setUser, onDon
   };
 
   return (
-    <Dialog onClose={onCancelEditing} open={!!user} fullWidth maxWidth="sm">
+    <Dialog sx={dialogStyle} onClose={onCancelEditing} open={!!user} fullWidth maxWidth="sm">
       {user && (
         <>
           <DialogTitle id="user-form-dialog-title">

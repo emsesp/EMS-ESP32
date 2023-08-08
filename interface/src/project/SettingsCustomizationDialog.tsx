@@ -18,6 +18,7 @@ import EntityMaskToggle from './EntityMaskToggle';
 import { DeviceEntityMask } from './types';
 import type { DeviceEntity } from './types';
 
+import { dialogStyle } from 'CustomTheme';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import { updateValue } from 'utils';
@@ -63,7 +64,7 @@ const SettingsCustomizationDialog = ({ open, onClose, onSave, selectedItem }: Se
   };
 
   return (
-    <Dialog open={open} onClose={close}>
+    <Dialog sx={dialogStyle} open={open} onClose={close}>
       <DialogTitle>{LL.EDIT() + ' ' + LL.ENTITY()}</DialogTitle>
       <DialogContent dividers>
         <Box color="warning.main">

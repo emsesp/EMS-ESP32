@@ -1,6 +1,7 @@
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Link, Typography } from '@mui/material';
 import { useRequest } from 'alova';
 import { useCallback, useEffect } from 'react';
+import { dialogStyle } from 'CustomTheme';
 import * as SystemApi from 'api/system';
 
 import MessageBox from 'components/MessageBox';
@@ -49,7 +50,7 @@ const SystemStatusVersionDialog = ({ open, onClose, version, platform }: SystemS
   const getBinURL = (v: string) => 'EMS-ESP-' + v.replaceAll('.', '_') + '-' + platform.replaceAll('-', '_') + '.bin';
 
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog sx={dialogStyle} open={open} onClose={onClose}>
       <DialogTitle>{LL.VERSION_CHECK(1)}</DialogTitle>
       <DialogContent dividers>
         <MessageBox my={0} level="info" message={LL.VERSION_ON() + ' ' + version + ' (' + platform + ')'} />
