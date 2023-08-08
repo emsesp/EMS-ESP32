@@ -50,11 +50,11 @@
     "typescript": "^5.1.6"
   },
   "devDependencies": {
-    "@babel/core": "^7.22.9",
+    "@babel/core": "^7.22.10",
     "@preact/preset-vite": "^2.5.0",
     "@types/babel__core": "^7",
-    "@typescript-eslint/eslint-plugin": "^6.2.1",
-    "@typescript-eslint/parser": "^6.2.1",
+    "@typescript-eslint/eslint-plugin": "^6.3.0",
+    "@typescript-eslint/parser": "^6.3.0",
     "eslint": "^8.46.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-airbnb-typescript": "^17.1.0",
@@ -71,7 +71,7 @@
     "prettier": "^3.0.1",
     "rollup-plugin-visualizer": "^5.9.2",
     "terser": "^5.19.2",
-    "vite": "^4.4.8",
+    "vite": "^4.4.9",
     "vite-plugin-svgr": "^3.2.0",
     "vite-tsconfig-paths": "^4.2.0"
   },
