@@ -1511,7 +1511,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:^18.2.18":
+"@types/react@npm:*":
   version: 18.2.18
   resolution: "@types/react@npm:18.2.18"
   dependencies:
@@ -1519,6 +1519,17 @@ __metadata:
     "@types/scheduler": "*"
     csstype: ^3.0.2
   checksum: 2f544da491f7fcfa91ef172945b9b0f3ed9aff48bdf644f557cdfbef363b5891e1b1b06f3510c8f361c72523b835ed72ef0320a0d03cddbdcc37ff198c212900
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:^18.2.19":
+  version: 18.2.19
+  resolution: "@types/react@npm:18.2.19"
+  dependencies:
+    "@types/prop-types": "*"
+    "@types/scheduler": "*"
+    csstype: ^3.0.2
+  checksum: 8ebea4e6e154b32135e54d8ead9ec2d7c99bdeb0b5d51b4a01dfcb0a6eaf0cea566463148abff8755b29e2aea8c3e66dc09e6cfface2161f46fc9a023823ffd3
   languageName: node
   linkType: hard
 
@@ -1676,7 +1687,7 @@ __metadata:
     "@types/babel__core": ^7
     "@types/lodash-es": ^4.17.8
     "@types/node": ^20.4.8
-    "@types/react": ^18.2.18
+    "@types/react": ^18.2.19
     "@types/react-dom": ^18.2.7
     "@types/react-router-dom": ^5.3.3
     "@typescript-eslint/eslint-plugin": ^6.3.0

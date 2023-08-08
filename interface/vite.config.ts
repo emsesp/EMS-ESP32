@@ -18,9 +18,9 @@ export default defineConfig(({ command, mode }) => {
       plugins: [
         preact(),
         viteTsconfigPaths(),
-        svgrPlugin()
+        svgrPlugin(),
         // prefresh()
-        // ProgmemGenerator({ outputPath: '../lib/framework/WWWData.h', bytesPerLine: 20 })
+        ProgmemGenerator({ outputPath: '../lib/framework/WWWData.h', bytesPerLine: 20 })
       ],
 
       build: {
