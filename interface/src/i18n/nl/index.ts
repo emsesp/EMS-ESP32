@@ -193,7 +193,7 @@ const nl: Translation = {
   DEVELOPMENT: 'development',
   RELEASE_IS: 'release is',
   RELEASE_NOTES: 'release notes',
-  EMS_ESP_VER: 'EMS-ESP Version',
+  EMS_ESP_VER: 'EMS-ESP Versie',
   PLATFORM: 'Apparaat (Platform / SDK)',
   UPTIME: 'Systeem Uptime',
   CPU_FREQ: 'CPU Frequency',
@@ -246,7 +246,6 @@ const nl: Translation = {
   MQTT_INT_THERMOSTATS: 'Thermostaten',
   MQTT_INT_SOLAR: 'Solar Modules',
   MQTT_INT_MIXER: 'Mixer Modules',
-  MQTT_INT_HEARTBEAT: 'Heartbeat',
   MQTT_QUEUE: 'MQTT Queue',
   DEFAULT: 'Default',
   MQTT_ENTITY_FORMAT: 'Entity ID formaat',
@@ -282,7 +281,7 @@ const nl: Translation = {
   SCAN_AGAIN: 'Opnieuw scannen',
   NETWORK_SCANNER: 'Netwerk Scanner',
   NETWORK_NO_WIFI: 'Geen WiFi networken gevonden',
-  NETWORK_BLANK_SSID: 'laat leeg om WiFi uit te schakelen', // and enable ETH // TODO translate
+  NETWORK_BLANK_SSID: 'laat leeg om WiFi uit te schakelen',
   TX_POWER: 'Tx Vermogen',
   HOSTNAME: 'Hostname',
   NETWORK_DISABLE_SLEEP: 'WiFi Sleep Mode uitzetten',
@@ -323,7 +322,7 @@ const nl: Translation = {
   WRITEABLE: 'Beschrijfbare',
   SHOWING: 'Tonen',
   SEARCH: 'Zoek',
-  CERT: 'TSL root certificate (leave blank to disable TSL)' // TODO translate
+  CERT: 'TSL rootcertificaat (laat leeg om TSL uit te schakelen)'
 };
 
 export default nl;

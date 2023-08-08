@@ -246,7 +246,6 @@ const pl: BaseTranslation = {
   MQTT_INT_THERMOSTATS: 'Termostaty',
   MQTT_INT_SOLAR: 'Panele solarne',
   MQTT_INT_MIXER: 'Mieszacze',
-  MQTT_INT_HEARTBEAT: '"Heartbeat" (aktywność)',
   MQTT_QUEUE: 'Kolejka MQTT',
   DEFAULT: '{{Pozostałe|Domyślna|}}',
   MQTT_ENTITY_FORMAT: 'Format "Entity ID"',
