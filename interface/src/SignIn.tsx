@@ -157,7 +157,7 @@ const SignIn: FC = () => {
             fieldErrors={fieldErrors}
             disabled={processing}
             sx={{
-              width: 200
+              width: 240
             }}
             name="username"
             label={LL.USERNAME(0)}
@@ -170,7 +170,7 @@ const SignIn: FC = () => {
             fieldErrors={fieldErrors}
             disabled={processing}
             sx={{
-              width: 200
+              width: 240
             }}
             name="password"
             label={LL.PASSWORD()}
