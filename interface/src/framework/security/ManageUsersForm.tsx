@@ -161,15 +161,14 @@ const ManageUsersForm: FC = () => {
                       <IconButton
                         size="small"
                         disabled={!authenticatedContext.me.admin}
-                        aria-label="Generate Token"
                         onClick={() => generateToken(u.username)}
                       >
                         <VpnKeyIcon />
                       </IconButton>
-                      <IconButton size="small" aria-label="Delete" onClick={() => removeUser(u)}>
+                      <IconButton size="small" onClick={() => removeUser(u)}>
                         <DeleteIcon />
                       </IconButton>
-                      <IconButton size="small" aria-label="Edit" onClick={() => editUser(u)}>
+                      <IconButton size="small" onClick={() => editUser(u)}>
                         <EditIcon />
                       </IconButton>
                     </Cell>

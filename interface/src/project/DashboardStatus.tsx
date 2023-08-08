@@ -30,6 +30,7 @@ import type { Theme } from '@mui/material';
 
 import type { Translation } from 'i18n/i18n-types';
 import type { FC } from 'react';
+import { dialogStyle } from 'CustomTheme';
 import { ButtonRow, FormLoader, SectionContent } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
@@ -173,7 +174,7 @@ const DashboardStatus: FC = () => {
   };
 
   const renderScanDialog = () => (
-    <Dialog open={confirmScan} onClose={() => setConfirmScan(false)}>
+    <Dialog sx={dialogStyle} open={confirmScan} onClose={() => setConfirmScan(false)}>
       <DialogTitle>{LL.SCAN_DEVICES()}</DialogTitle>
       <DialogContent dividers>{LL.EMS_SCAN()}</DialogContent>
       <DialogActions>

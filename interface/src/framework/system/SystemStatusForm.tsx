@@ -34,6 +34,7 @@ import RestartMonitor from './RestartMonitor';
 import SystemStatusVersionDialog from './SystemStatusVersionDialog';
 import type { FC } from 'react';
 
+import { dialogStyle } from 'CustomTheme';
 import * as SystemApi from 'api/system';
 import { ButtonRow, FormLoader, SectionContent } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
@@ -115,7 +116,7 @@ const SystemStatusForm: FC = () => {
   };
 
   const renderRestartDialog = () => (
-    <Dialog open={confirmRestart} onClose={() => setConfirmRestart(false)}>
+    <Dialog sx={dialogStyle} open={confirmRestart} onClose={() => setConfirmRestart(false)}>
       <DialogTitle>{LL.RESTART()}</DialogTitle>
       <DialogContent dividers>{LL.RESTART_CONFIRM()}</DialogContent>
       <DialogActions>
@@ -153,7 +154,7 @@ const SystemStatusForm: FC = () => {
   );
 
   const renderFactoryResetDialog = () => (
-    <Dialog open={confirmFactoryReset} onClose={() => setConfirmFactoryReset(false)}>
+    <Dialog sx={dialogStyle} open={confirmFactoryReset} onClose={() => setConfirmFactoryReset(false)}>
       <DialogTitle>{LL.FACTORY_RESET()}</DialogTitle>
       <DialogContent dividers>{LL.SYSTEM_FACTORY_TEXT_DIALOG()}</DialogContent>
       <DialogActions>

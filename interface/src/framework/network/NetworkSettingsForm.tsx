@@ -142,7 +142,7 @@ const WiFiSettingsForm: FC = () => {
                 secondary={'Security: ' + networkSecurityMode(selectedNetwork) + ', Ch: ' + selectedNetwork.channel}
               />
               <ListItemSecondaryAction>
-                <IconButton aria-label="Manual Config" onClick={deselectNetwork}>
+                <IconButton onClick={deselectNetwork}>
                   <DeleteIcon />
                 </IconButton>
               </ListItemSecondaryAction>

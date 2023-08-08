@@ -25,6 +25,7 @@ import type { ScheduleItem } from './types';
 import type Schema from 'async-validator';
 import type { ValidateFieldsError } from 'async-validator';
 
+import { dialogStyle } from 'CustomTheme';
 import { BlockFormControlLabel, ValidatedTextField } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
@@ -129,7 +130,7 @@ const SettingsSchedulerDialog = ({
   const isTimer = editItem.flags === ScheduleFlag.SCHEDULE_TIMER;
 
   return (
-    <Dialog open={open} onClose={close}>
+    <Dialog sx={dialogStyle} open={open} onClose={close}>
       <DialogTitle>
         {creating ? LL.ADD(1) + ' ' + LL.NEW(0) : LL.EDIT()}&nbsp;{LL.SCHEDULE(1)}
       </DialogTitle>

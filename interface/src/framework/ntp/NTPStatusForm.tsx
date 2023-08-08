@@ -28,6 +28,7 @@ import type { Theme } from '@mui/material';
 import type { FC } from 'react';
 
 import type { NTPStatus } from 'types';
+import { dialogStyle } from 'CustomTheme';
 import * as NTPApi from 'api/ntp';
 import { ButtonRow, FormLoader, SectionContent } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
@@ -108,7 +109,7 @@ const NTPStatusForm: FC = () => {
   };
 
   const renderSetTimeDialog = () => (
-    <Dialog open={settingTime} onClose={() => setSettingTime(false)}>
+    <Dialog sx={dialogStyle} open={settingTime} onClose={() => setSettingTime(false)}>
       <DialogTitle>{LL.SET_TIME(1)}</DialogTitle>
       <DialogContent dividers>
         <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>

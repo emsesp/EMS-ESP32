@@ -16,7 +16,6 @@ import {
   Typography,
   CircularProgress
 } from '@mui/material';
-import { green } from '@mui/material/colors';
 import { useState, useEffect } from 'react';
 
 import { DeviceValueUOM, DeviceValueUOM_s } from './types';
@@ -24,11 +23,22 @@ import type { DeviceValue } from './types';
 import type Schema from 'async-validator';
 
 import type { ValidateFieldsError } from 'async-validator';
+import { dialogStyle } from 'CustomTheme';
 import { ValidatedTextField } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import { updateValue } from 'utils';
 
 import { validate } from 'validators';
+
+// const dialogStyle = {
+//   '& .MuiDialog-paper': {
+//     borderRadius: '8px',
+//     borderColor: '#565656',
+//     borderStyle: 'solid',
+//     borderWidth: '1px'
+//   },
+//   backdropFilter: 'blur(1px)'
+// };
 
 type DashboardDevicesDialogProps = {
   open: boolean;
@@ -40,7 +50,7 @@ type DashboardDevicesDialogProps = {
   progress: boolean;
 };
 
-const DashboarDevicesDialog = ({
+const DashboardDevicesDialog = ({
   open,
   onClose,
   onSave,
@@ -112,16 +122,7 @@ const DashboarDevicesDialog = ({
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={close}
-      sx={{
-        '& .MuiDialog-paper': {
-          borderRadius: '12px'
-        },
-        backdropFilter: 'blur(1px)'
-      }}
-    >
+    <Dialog sx={dialogStyle} open={open} onClose={close}>
       <DialogTitle>
         {selectedItem.v === '' && selectedItem.c ? LL.RUN_COMMAND() : writeable ? LL.CHANGE_VALUE() : LL.VALUE(0)}
       </DialogTitle>
@@ -206,7 +207,7 @@ const DashboarDevicesDialog = ({
               <CircularProgress
                 size={24}
                 sx={{
-                  color: green[500],
+                  color: '#4caf50',
                   position: 'absolute',
                   right: '20%',
                   marginTop: '6px'
@@ -224,4 +225,4 @@ const DashboarDevicesDialog = ({
   );
 };
 
-export default DashboarDevicesDialog;
+export default DashboardDevicesDialog;
