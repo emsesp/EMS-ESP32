@@ -27,6 +27,9 @@ const SystemStatusVersionDialog = ({ open, onClose, version, platform }: SystemS
   const STABLE_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/';
   const DEV_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/latest/';
 
+  const STABLE_RELNOTES_URL = 'https://github.com/emsesp/EMS-ESP32/blob/main/CHANGELOG.md';
+  const DEV_RELNOTES_URL = 'https://github.com/emsesp/EMS-ESP32/blob/dev/CHANGELOG_LATEST.md';
+
   const uploadURL = window.location.origin + '/system/upload';
 
   const connected = latestVersion && latestDevVersion;
@@ -54,7 +57,7 @@ const SystemStatusVersionDialog = ({ open, onClose, version, platform }: SystemS
           <Box mt={2} mb={2}>
             {LL.THE_LATEST()}&nbsp;<b>{LL.OFFICIAL()}</b>&nbsp;{LL.RELEASE_IS()}&nbsp;<b>{latestVersion}</b>
             &nbsp;(
-            <Link target="_blank" href={STABLE_URL + 'v' + latestVersion + '/CHANGELOG.md'} color="primary">
+            <Link target="_blank" href={STABLE_RELNOTES_URL} color="primary">
               {LL.RELEASE_NOTES()}
             </Link>
             )&nbsp;(
@@ -73,7 +76,7 @@ const SystemStatusVersionDialog = ({ open, onClose, version, platform }: SystemS
             {LL.THE_LATEST()}&nbsp;<b>{LL.DEVELOPMENT()}</b>&nbsp;{LL.RELEASE_IS()}&nbsp;
             <b>{latestDevVersion}</b>
             &nbsp;(
-            <Link target="_blank" href={DEV_URL + 'CHANGELOG_LATEST.md'} color="primary">
+            <Link target="_blank" href={DEV_RELNOTES_URL} color="primary">
               {LL.RELEASE_NOTES()}
             </Link>
             )&nbsp;(
