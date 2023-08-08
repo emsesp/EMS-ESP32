@@ -324,6 +324,7 @@ security_settings = {
 };
 const features = {
   version: 'v3.6.0-demo',
+  // platform: 'ESP32'
   platform: 'ESP32-S3'
 };
 const verify_authentication = { access_token: '1234' };

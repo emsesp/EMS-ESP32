@@ -47,9 +47,3 @@ export interface LogSettings {
   max_messages: number;
   compact: false;
 }
-
-export interface Version {
-  version: string;
-  url: string;
-  changelog: string;
-}

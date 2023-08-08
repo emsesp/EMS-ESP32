@@ -180,7 +180,7 @@ const en: Translation = {
   LOG_OF: '{0} Log',
   STATUS_OF: '{0} Status',
   UPLOAD_DOWNLOAD: 'Upload/Download',
-  VERSION_ON: 'You are currently on',
+  VERSION_ON: 'You are currently on version',
   SYSTEM_APPLY_FIRMWARE: 'to apply the new firmware',
   CLOSE: 'Close',
   USE: 'Use',
