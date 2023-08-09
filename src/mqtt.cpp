@@ -203,7 +203,7 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
 // simulate receiving a MQTT message, used only for testing
 void Mqtt::incoming(const char * topic, const char * payload) {
     if (payload != nullptr) {
-        on_message(topic, (const uint8_t *) payload, strlen(payload));
+        on_message(topic, (const uint8_t *)payload, strlen(payload));
     }
 }
 #endif
@@ -526,7 +526,7 @@ void Mqtt::ha_status() {
     doc["obj_id"]  = uniq;
 
     doc["stat_t"]   = mqtt_basename_ + "/status";
-    doc["name"]     = "EMS-ESP status";
+    doc["name"]     = "system status";
     doc["pl_on"]    = "online";
     doc["pl_off"]   = "offline";
     doc["stat_cla"] = "measurement";

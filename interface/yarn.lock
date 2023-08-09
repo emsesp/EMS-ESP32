@@ -1335,9 +1335,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@table-library/react-table-library@npm:4.1.6":
-  version: 4.1.6
-  resolution: "@table-library/react-table-library@npm:4.1.6"
+"@table-library/react-table-library@npm:4.1.7":
+  version: 4.1.7
+  resolution: "@table-library/react-table-library@npm:4.1.7"
   dependencies:
     clsx: 1.1.1
     react-virtualized-auto-sizer: 1.0.7
@@ -1346,7 +1346,7 @@ __metadata:
     "@emotion/react": ">= 11"
     react: ">=16.8.0"
     react-dom: ">=16.8.0"
-  checksum: 148b33000353068d2f40ce4e18d5c3314e4d66840822f83abbdc5c3cd9c82c297f28eea3df0ea2231308c56cc5fe34c5d4ab69be38a066cd4fd18e25214a76c0
+  checksum: a084cea10d0d66dce02585268211a9a21872b8be077fbfc38abf09b5df8e1a248639c607831bb992ff64e565cf7497bcb44fa79fbaf9c51a53ee3ed308b4123e
   languageName: node
   linkType: hard
 
@@ -1442,10 +1442,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^20.4.8":
-  version: 20.4.8
-  resolution: "@types/node@npm:20.4.8"
-  checksum: 8b0c090a10f67ecb4ae9cbf0da4889570e8cf242f02eb4341d1011e9e552b32cc0de569079c2e8c6a43524e2b88df6ee30075249c8b63e72638d462a246bf71c
+"@types/node@npm:^20.4.9":
+  version: 20.4.9
+  resolution: "@types/node@npm:20.4.9"
+  checksum: e7b84b1d204bf77674bb1a500861b296128694a34cd6040e2e87ac7fb7e81d28e94c2482b44a92b378fe4f095661ab0114a4261dbc7e11e3699a600aba8d8cc6
   languageName: node
   linkType: hard
 
@@ -1683,10 +1683,10 @@ __metadata:
     "@preact/compat": ^17.1.2
     "@preact/preset-vite": ^2.5.0
     "@prefresh/vite": ^2.4.1
-    "@table-library/react-table-library": 4.1.6
+    "@table-library/react-table-library": 4.1.7
     "@types/babel__core": ^7
     "@types/lodash-es": ^4.17.8
-    "@types/node": ^20.4.8
+    "@types/node": ^20.4.9
     "@types/react": ^18.2.19
     "@types/react-dom": ^18.2.7
     "@types/react-router-dom": ^5.3.3
