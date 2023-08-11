@@ -4,7 +4,6 @@ import svgrPlugin from 'vite-plugin-svgr';
 import { visualizer } from 'rollup-plugin-visualizer';
 import ProgmemGenerator from './progmem-generator';
 import preact from '@preact/preset-vite';
-// import prefresh from '@prefresh/vite';
 
 export default defineConfig(({ command, mode }) => {
   if (mode === 'hosted') {
@@ -19,7 +18,6 @@ export default defineConfig(({ command, mode }) => {
         preact(),
         viteTsconfigPaths(),
         svgrPlugin(),
-        // prefresh()
         ProgmemGenerator({ outputPath: '../lib/framework/WWWData.h', bytesPerLine: 20 })
       ],
 
@@ -52,6 +50,9 @@ export default defineConfig(({ command, mode }) => {
       server: {
         open: true,
         port: 3000,
+        watch: {
+          usePolling: true
+        },
         proxy: {
           '/rest': 'http://localhost:3080',
           '/api': {
@@ -69,6 +70,3 @@ export default defineConfig(({ command, mode }) => {
     };
   }
 });
-function prefresh(): PluginOption {
-  throw new Error('Function not implemented.');
-}
