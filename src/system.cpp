@@ -1016,12 +1016,13 @@ bool System::check_restore() {
             std::string settings_type = input["type"];
             if (settings_type == "settings") {
                 // It's a settings file. Parse each section separately. If it's system related it will require a reboot
-                reboot_required = saveSettings(NETWORK_SETTINGS_FILE, "Network Settings", input);
-                reboot_required |= saveSettings(AP_SETTINGS_FILE, "AP Settings", input);
-                reboot_required |= saveSettings(MQTT_SETTINGS_FILE, "MQTT Settings", input);
-                reboot_required |= saveSettings(NTP_SETTINGS_FILE, "NTP Settings", input);
-                reboot_required |= saveSettings(SECURITY_SETTINGS_FILE, "Security Settings", input);
+                reboot_required = saveSettings(NETWORK_SETTINGS_FILE, "Network", input);
+                reboot_required |= saveSettings(AP_SETTINGS_FILE, "AP", input);
+                reboot_required |= saveSettings(MQTT_SETTINGS_FILE, "MQTT", input);
+                reboot_required |= saveSettings(NTP_SETTINGS_FILE, "NTP", input);
+                reboot_required |= saveSettings(SECURITY_SETTINGS_FILE, "Security", input);
                 reboot_required |= saveSettings(EMSESP_SETTINGS_FILE, "Settings", input);
+                reboot_required |= saveSettings(OTA_SETTINGS_FILE, "OTA", input);
             } else if (settings_type == "customizations") {
                 // it's a customization file, just replace it and there's no need to reboot
                 saveSettings(EMSESP_CUSTOMIZATION_FILE, "Customizations", input);
