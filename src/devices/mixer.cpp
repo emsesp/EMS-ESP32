@@ -347,7 +347,9 @@ bool Mixer::set_pump(const char * value, const int8_t id) {
         return false;
     }
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_MM10) {
-        write_command(0xAC, 1, b ? 0x64 : 0, 0xAB);
+        // AC telegram can only be written with offset 0
+        uint8_t dat[2] = {flowSetTemp_, b ? (uint8_t)0x64 : (uint8_t)0};
+        write_command(0xAC, 0, dat, sizeof(dat), 0xAB);
         return true;
     }
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_IPM) {
