@@ -3,3 +3,4 @@ build/
 dist/
 .prettierrc
 .yarn/
+.typesafe-i18n.json
