@@ -28,7 +28,7 @@
     "@prefresh/vite": "^2.4.1",
     "@table-library/react-table-library": "4.1.7",
     "@types/lodash-es": "^4.17.8",
-    "@types/node": "^20.4.9",
+    "@types/node": "^20.4.10",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
     "@types/react-router-dom": "^5.3.3",
