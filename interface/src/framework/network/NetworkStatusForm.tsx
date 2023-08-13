@@ -1,20 +1,21 @@
-import { FC } from 'react';
-import { Avatar, Button, Divider, List, ListItem, ListItemAvatar, ListItemText, Theme, useTheme } from '@mui/material';
-
-import SettingsInputComponentIcon from '@mui/icons-material/SettingsInputComponent';
-import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
-import WifiIcon from '@mui/icons-material/Wifi';
 import DnsIcon from '@mui/icons-material/Dns';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import RouterIcon from '@mui/icons-material/Router';
+import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
+import SettingsInputComponentIcon from '@mui/icons-material/SettingsInputComponent';
+import WifiIcon from '@mui/icons-material/Wifi';
+import { Avatar, Button, Divider, List, ListItem, ListItemAvatar, ListItemText, useTheme } from '@mui/material';
+import { useRequest } from 'alova';
+import type { Theme } from '@mui/material';
+import type { FC } from 'react';
 
-import { ButtonRow, FormLoader, SectionContent } from '../../components';
-import { NetworkConnectionStatus, NetworkStatus } from '../../types';
-import * as NetworkApi from '../../api/network';
-import { useRest } from '../../utils';
+import type { NetworkStatus } from 'types';
+import * as NetworkApi from 'api/network';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
+import { NetworkConnectionStatus } from 'types';
 
 const isConnected = ({ status }: NetworkStatus) =>
   status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED ||
@@ -58,7 +59,7 @@ const IPs = (status: NetworkStatus) => {
 };
 
 const NetworkStatusForm: FC = () => {
-  const { loadData, data, errorMessage } = useRest<NetworkStatus>({ read: NetworkApi.readNetworkStatus });
+  const { data: data, send: loadData, error } = useRequest(NetworkApi.readNetworkStatus);
 
   const { LL } = useI18nContext();
 
@@ -77,7 +78,7 @@ const NetworkStatusForm: FC = () => {
       case NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED:
         return LL.CONNECTED(0) + ' (Ethernet)';
       case NetworkConnectionStatus.WIFI_STATUS_CONNECT_FAILED:
-        return LL.CONNECTED(1) + ' ' + LL.FAILED();
+        return LL.CONNECTED(1) + ' ' + LL.FAILED(0);
       case NetworkConnectionStatus.WIFI_STATUS_CONNECTION_LOST:
         return LL.CONNECTED(1) + ' ' + LL.LOST();
       case NetworkConnectionStatus.WIFI_STATUS_DISCONNECTED:
@@ -89,7 +90,7 @@ const NetworkStatusForm: FC = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
     }
 
     return (

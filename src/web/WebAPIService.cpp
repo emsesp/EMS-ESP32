@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,8 @@ WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * security
     server->on(GET_CUSTOMIZATIONS_PATH,
                HTTP_GET,
                securityManager->wrapRequest(std::bind(&WebAPIService::getCustomizations, this, _1), AuthenticationPredicates::IS_ADMIN));
+    server->on(GET_SCHEDULE_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&WebAPIService::getSchedule, this, _1), AuthenticationPredicates::IS_ADMIN));
+    server->on(GET_ENTITIES_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&WebAPIService::getEntities, this, _1), AuthenticationPredicates::IS_ADMIN));
 }
 
 // HTTP GET
@@ -100,8 +102,11 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
         }
     }
 
+    // capture current heap memory before allocating the large return buffer
+    emsesp::EMSESP::system_.refreshHeapMem();
+
     // output json buffer
-    size_t buffer   = EMSESP_JSON_SIZE_XXLARGE_DYN;
+    size_t buffer   = EMSESP_JSON_SIZE_XXXLARGE;
     auto * response = new PrettyAsyncJsonResponse(false, buffer);
     while (!response->getSize()) {
         delete response;
@@ -123,7 +128,6 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
         emsesp::EMSESP::logger().err(error);
         api_fails_++;
     } else {
-        // emsesp::EMSESP::logger().debug("API command called successfully");
         // if there was no json output from the call, default to the output message 'OK'.
         if (!output.size()) {
             output["message"] = "OK";
@@ -189,6 +193,30 @@ void WebAPIService::getCustomizations(AsyncWebServerRequest * request) {
     root["type"] = "customizations";
 
     System::extractSettings(EMSESP_CUSTOMIZATION_FILE, "Customizations", root);
+
+    response->setLength();
+    request->send(response);
+}
+
+void WebAPIService::getSchedule(AsyncWebServerRequest * request) {
+    auto *     response = new AsyncJsonResponse(false, FS_BUFFER_SIZE);
+    JsonObject root     = response->getRoot();
+
+    root["type"] = "schedule";
+
+    System::extractSettings(EMSESP_SCHEDULER_FILE, "Schedule", root);
+
+    response->setLength();
+    request->send(response);
+}
+
+void WebAPIService::getEntities(AsyncWebServerRequest * request) {
+    auto *     response = new AsyncJsonResponse(false, FS_BUFFER_SIZE);
+    JsonObject root     = response->getRoot();
+
+    root["type"] = "entities";
+
+    System::extractSettings(EMSESP_ENTITY_FILE, "Entities", root);
 
     response->setLength();
     request->send(response);

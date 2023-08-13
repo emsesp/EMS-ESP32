@@ -1,5 +1,16 @@
-import { FC, useContext, useState, useEffect } from 'react';
-import { useSnackbar } from 'notistack';
+import AppsIcon from '@mui/icons-material/Apps';
+import BuildIcon from '@mui/icons-material/Build';
+import CancelIcon from '@mui/icons-material/Cancel';
+import DevicesIcon from '@mui/icons-material/Devices';
+import FolderIcon from '@mui/icons-material/Folder';
+import MemoryIcon from '@mui/icons-material/Memory';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import SdCardAlertIcon from '@mui/icons-material/SdCardAlert';
+import SdStorageIcon from '@mui/icons-material/SdStorage';
+import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
+import ShowChartIcon from '@mui/icons-material/ShowChart';
+import TimerIcon from '@mui/icons-material/Timer';
 import {
   Avatar,
   Box,
@@ -12,40 +23,22 @@ import {
   List,
   ListItem,
   ListItemAvatar,
-  ListItemText,
-  Link,
-  Typography
+  ListItemText
 } from '@mui/material';
 
-import DevicesIcon from '@mui/icons-material/Devices';
-import ShowChartIcon from '@mui/icons-material/ShowChart';
-import MemoryIcon from '@mui/icons-material/Memory';
-import AppsIcon from '@mui/icons-material/Apps';
-import SdStorageIcon from '@mui/icons-material/SdStorage';
-import SdCardAlertIcon from '@mui/icons-material/SdCardAlert';
-import FolderIcon from '@mui/icons-material/Folder';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
-import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
-import BuildIcon from '@mui/icons-material/Build';
-import TimerIcon from '@mui/icons-material/Timer';
-import CancelIcon from '@mui/icons-material/Cancel';
-
-import { ButtonRow, FormLoader, SectionContent, MessageBox } from '../../components';
-import { SystemStatus, Version } from '../../types';
-import * as SystemApi from '../../api/system';
-import { extractErrorMessage, useRest } from '../../utils';
-
-import { AuthenticatedContext } from '../../contexts/authentication';
-
-import axios from 'axios';
+import { useRequest } from 'alova';
+import { useContext, useState } from 'react';
+import { toast } from 'react-toastify';
+import { FeaturesContext } from '../../contexts/features';
 import RestartMonitor from './RestartMonitor';
+import SystemStatusVersionDialog from './SystemStatusVersionDialog';
+import type { FC } from 'react';
 
-import { useI18nContext } from '../../i18n/i18n-react';
-
-export const VERSIONCHECK_ENDPOINT = 'https://api.github.com/repos/emsesp/EMS-ESP32/releases/latest';
-export const VERSIONCHECK_DEV_ENDPOINT = 'https://api.github.com/repos/emsesp/EMS-ESP32/releases/tags/latest';
-export const uploadURL = window.location.origin + '/system/upload';
+import { dialogStyle } from 'CustomTheme';
+import * as SystemApi from 'api/system';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
+import { AuthenticatedContext } from 'contexts/authentication';
+import { useI18nContext } from 'i18n/i18n-react';
 
 function formatNumber(num: number) {
   return new Intl.NumberFormat().format(num);
@@ -53,66 +46,77 @@ function formatNumber(num: number) {
 
 const SystemStatusForm: FC = () => {
   const { LL } = useI18nContext();
-  const [restarting, setRestarting] = useState<boolean>();
-
-  const { loadData, data, errorMessage } = useRest<SystemStatus>({ read: SystemApi.readSystemStatus });
 
   const { me } = useContext(AuthenticatedContext);
   const [confirmRestart, setConfirmRestart] = useState<boolean>(false);
   const [confirmFactoryReset, setConfirmFactoryReset] = useState<boolean>(false);
   const [processing, setProcessing] = useState<boolean>(false);
-  const { enqueueSnackbar } = useSnackbar();
-  const [showingVersion, setShowingVersion] = useState<boolean>(false);
-  const [latestVersion, setLatestVersion] = useState<Version>();
-  const [latestDevVersion, setLatestDevVersion] = useState<Version>();
+  const [restarting, setRestarting] = useState<boolean>();
+  const [versionDialogOpen, setVersionDialogOpen] = useState<boolean>(false);
 
-  useEffect(() => {
-    axios.get(VERSIONCHECK_ENDPOINT).then((response) => {
-      setLatestVersion({
-        version: response.data.name,
-        url: response.data.assets[1].browser_download_url,
-        changelog: response.data.assets[0].browser_download_url
-      });
-    });
-    axios.get(VERSIONCHECK_DEV_ENDPOINT).then((response) => {
-      setLatestDevVersion({
-        version: response.data.name.split(/\s+/).splice(-1),
-        url: response.data.assets[1].browser_download_url,
-        changelog: response.data.assets[0].browser_download_url
-      });
-    });
-  }, []);
+  const { features } = useContext(FeaturesContext);
+
+  const { send: restartCommand } = useRequest(SystemApi.restart(), {
+    immediate: false
+  });
+
+  const { send: factoryResetCommand } = useRequest(SystemApi.factoryReset(), {
+    immediate: false
+  });
+
+  const { send: partitionCommand } = useRequest(SystemApi.partition(), {
+    immediate: false
+  });
+
+  const { data: data, send: loadData, error } = useRequest(SystemApi.readSystemStatus, { force: true });
 
   const restart = async () => {
     setProcessing(true);
-    try {
-      const response = await SystemApi.restart();
-      if (response.status === 200) {
+    await restartCommand()
+      .then(() => {
         setRestarting(true);
-      }
-    } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
-    } finally {
-      setConfirmRestart(false);
-      setProcessing(false);
-    }
+      })
+      .catch((err) => {
+        toast.error(err.message);
+      })
+      .finally(() => {
+        setConfirmRestart(false);
+        setProcessing(false);
+      });
+  };
+
+  const factoryReset = async () => {
+    setProcessing(true);
+    await factoryResetCommand()
+      .then(() => {
+        setRestarting(true);
+      })
+      .catch((err) => {
+        toast.error(err.message);
+      })
+      .finally(() => {
+        setConfirmFactoryReset(false);
+        setProcessing(false);
+      });
   };
 
   const partition = async () => {
     setProcessing(true);
-    try {
-      await SystemApi.partition();
-      setRestarting(true);
-    } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
-    } finally {
-      setConfirmRestart(false);
-      setProcessing(false);
-    }
+    await partitionCommand()
+      .then(() => {
+        setRestarting(true);
+      })
+      .catch((err) => {
+        toast.error(err.message);
+      })
+      .finally(() => {
+        setConfirmRestart(false);
+        setProcessing(false);
+      });
   };
 
   const renderRestartDialog = () => (
-    <Dialog open={confirmRestart} onClose={() => setConfirmRestart(false)}>
+    <Dialog sx={dialogStyle} open={confirmRestart} onClose={() => setConfirmRestart(false)}>
       <DialogTitle>{LL.RESTART()}</DialogTitle>
       <DialogContent dividers>{LL.RESTART_CONFIRM()}</DialogContent>
       <DialogActions>
@@ -131,7 +135,6 @@ const SystemStatusForm: FC = () => {
           onClick={restart}
           disabled={processing}
           color="primary"
-          autoFocus
         >
           {LL.RESTART()}
         </Button>
@@ -150,77 +153,8 @@ const SystemStatusForm: FC = () => {
     </Dialog>
   );
 
-  const renderVersionDialog = () => {
-    return (
-      <Dialog open={showingVersion} onClose={() => setShowingVersion(false)}>
-        <DialogTitle>{LL.VERSION_CHECK(1)}</DialogTitle>
-        <DialogContent dividers>
-          <MessageBox my={0} level="info" message={LL.SYSTEM_VERSION_RUNNING() + ' ' + data?.emsesp_version} />
-          {latestVersion && (
-            <Box mt={2} mb={2}>
-              {LL.THE_LATEST()}&nbsp;<u>{LL.OFFICIAL()}</u>&nbsp;{LL.VERSION_IS()}&nbsp;<b>{latestVersion.version}</b>
-              &nbsp;(
-              <Link target="_blank" href={latestVersion.changelog} color="primary">
-                {LL.RELEASE_NOTES()}
-              </Link>
-              )&nbsp;(
-              <Link target="_blank" href={latestVersion.url} color="primary">
-                {LL.DOWNLOAD(1)}
-              </Link>
-              )
-            </Box>
-          )}
-
-          {latestDevVersion && (
-            <Box mt={2} mb={2}>
-              {LL.THE_LATEST()}&nbsp;<u>{LL.DEVELOPMENT()}</u>&nbsp;{LL.VERSION_IS()}&nbsp;
-              <b>{latestDevVersion.version}</b>
-              &nbsp;(
-              <Link target="_blank" href={latestDevVersion.changelog} color="primary">
-                {LL.RELEASE_NOTES()}
-              </Link>
-              )&nbsp;(
-              <Link target="_blank" href={latestDevVersion.url} color="primary">
-                {LL.DOWNLOAD(1)}
-              </Link>
-              )
-            </Box>
-          )}
-
-          <Box color="warning.main" p={0} pl={0} pr={0} mt={4} mb={0}>
-            <Typography variant="body2">
-              {LL.USE()}&nbsp;
-              <Link href={uploadURL} color="primary">
-                {LL.UPLOAD()}
-              </Link>
-              &nbsp;{LL.SYSTEM_APPLY_FIRMWARE()}
-            </Typography>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="outlined" onClick={() => setShowingVersion(false)} color="secondary">
-            {LL.CLOSE()}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    );
-  };
-
-  const factoryReset = async () => {
-    setProcessing(true);
-    try {
-      await SystemApi.factoryReset();
-      setRestarting(true);
-    } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
-    } finally {
-      setConfirmFactoryReset(false);
-      setProcessing(false);
-    }
-  };
-
   const renderFactoryResetDialog = () => (
-    <Dialog open={confirmFactoryReset} onClose={() => setConfirmFactoryReset(false)}>
+    <Dialog sx={dialogStyle} open={confirmFactoryReset} onClose={() => setConfirmFactoryReset(false)}>
       <DialogTitle>{LL.FACTORY_RESET()}</DialogTitle>
       <DialogContent dividers>{LL.SYSTEM_FACTORY_TEXT_DIALOG()}</DialogContent>
       <DialogActions>
@@ -238,7 +172,6 @@ const SystemStatusForm: FC = () => {
           variant="outlined"
           onClick={factoryReset}
           disabled={processing}
-          autoFocus
           color="error"
         >
           {LL.FACTORY_RESET()}
@@ -249,7 +182,7 @@ const SystemStatusForm: FC = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
     }
 
     return (
@@ -261,12 +194,10 @@ const SystemStatusForm: FC = () => {
                 <BuildIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary={LL.EMS_ESP_VER()} secondary={'v' + data.emsesp_version} />
-            {latestVersion && (
-              <Button color="primary" onClick={() => setShowingVersion(true)}>
-                {LL.VERSION_CHECK(0)}
-              </Button>
-            )}
+            <ListItemText primary={LL.EMS_ESP_VER()} secondary={data.emsesp_version} />
+            <Button color="primary" onClick={() => setVersionDialogOpen(true)}>
+              {LL.VERSION_CHECK(0)}
+            </Button>
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
@@ -394,7 +325,6 @@ const SystemStatusForm: FC = () => {
             </Box>
           )}
         </Box>
-        {renderVersionDialog()}
         {renderRestartDialog()}
         {renderFactoryResetDialog()}
       </>
@@ -404,6 +334,14 @@ const SystemStatusForm: FC = () => {
   return (
     <SectionContent title={LL.STATUS_OF(LL.SYSTEM(1))} titleGutter>
       {restarting ? <RestartMonitor /> : content()}
+      {data && (
+        <SystemStatusVersionDialog
+          open={versionDialogOpen}
+          onClose={() => setVersionDialogOpen(false)}
+          version={data.emsesp_version}
+          platform={features.platform}
+        />
+      )}
     </SectionContent>
   );
 };

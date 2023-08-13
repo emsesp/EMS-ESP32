@@ -1,7 +1,7 @@
 
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -145,12 +145,12 @@ class DeviceValue {
         DV_NUMOP_MUL15  = -15
     };
 
-    uint8_t               device_type;    // EMSdevice::DeviceType
-    uint8_t               tag;            // DeviceValueTAG::*
-    void *                value_p;        // pointer to variable of any type
-    uint8_t               type;           // DeviceValueType::*
-    const char * const ** options;        // options as a flash char array
-    const char * const *  options_single; // options are not translated
+    uint8_t               device_type;     // EMSdevice::DeviceType
+    uint8_t               tag;             // DeviceValueTAG::*
+    void *                value_p;         // pointer to variable of any type
+    uint8_t               type;            // DeviceValueType::*
+    const char * const ** options;         // options as a flash char array
+    const char * const *  options_single;  // options are not translated
     int8_t                numeric_operator;
     uint8_t               options_size;    // number of options in the char array, calculated
     const char * const    short_name;      // used in MQTT and API
@@ -179,6 +179,7 @@ class DeviceValue {
                 uint8_t               state);
 
     bool hasValue() const;
+    bool has_tag() const;
     bool get_min_max(int16_t & dv_set_min, uint16_t & dv_set_max);
 
     void               set_custom_minmax();
@@ -205,7 +206,7 @@ class DeviceValue {
     static const char *         DeviceValueUOM_s[];
     static const char * const * DeviceValueTAG_s[];
     static const char * const   DeviceValueTAG_mqtt[];
-    static size_t               tag_count; // # tags
+    static uint8_t              NUM_TAGS; // # tags
 };
 
 }; // namespace emsesp

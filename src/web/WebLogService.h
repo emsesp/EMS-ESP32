@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,7 +58,6 @@ class WebLogService : public uuid::log::Handler {
         const std::shared_ptr<const uuid::log::Message> content_; // Log message content
     };
 
-    void forbidden(AsyncWebServerRequest * request);
     void transmit(const QueuedLogMessage & message);
     void fetchLog(AsyncWebServerRequest * request);
     void getValues(AsyncWebServerRequest * request);
@@ -67,7 +66,7 @@ class WebLogService : public uuid::log::Handler {
 
     void setValues(AsyncWebServerRequest * request, JsonVariant & json);
 
-    AsyncCallbackJsonWebHandler setValues_; // for POSTs
+    AsyncCallbackJsonWebHandler setValues_;                                // for POSTs
 
     uint64_t                     last_transmit_        = 0;                // Last transmit time
     size_t                       maximum_log_messages_ = MAX_LOG_MESSAGES; // Maximum number of log messages to buffer before they are output

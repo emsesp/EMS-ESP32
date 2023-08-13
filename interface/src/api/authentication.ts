@@ -1,29 +1,16 @@
-import { AxiosPromise } from 'axios';
-import * as H from 'history';
 import jwtDecode from 'jwt-decode';
-import { Path } from 'react-router-dom';
+import { ACCESS_TOKEN, alovaInstance } from './endpoints';
+import type * as H from 'history';
+import type { Path } from 'react-router-dom';
 
-import { Features, Me, SignInRequest, SignInResponse } from '../types';
-
-import { ACCESS_TOKEN, AXIOS } from './endpoints';
-import { PROJECT_PATH } from './env';
+import type { Me, SignInRequest, SignInResponse } from 'types';
 
 export const SIGN_IN_PATHNAME = 'loginPathname';
 export const SIGN_IN_SEARCH = 'loginSearch';
 
-export const getDefaultRoute = (features: Features) => (features.project ? `/${PROJECT_PATH}` : '/wifi');
+export const verifyAuthorization = () => alovaInstance.Get('/rest/verifyAuthorization');
+export const signIn = (request: SignInRequest) => alovaInstance.Post<SignInResponse>('/rest/signIn', request);
 
-export function verifyAuthorization(): AxiosPromise<void> {
-  return AXIOS.get('/verifyAuthorization');
-}
-
-export function signIn(request: SignInRequest): AxiosPromise<SignInResponse> {
-  return AXIOS.post('/signIn', request);
-}
-
-/**
- * Fallback to sessionStorage if localStorage is absent. WebView may not have local storage enabled.
- */
 export function getStorage() {
   return localStorage || sessionStorage;
 }
@@ -40,18 +27,18 @@ export function clearLoginRedirect() {
   getStorage().removeItem(SIGN_IN_SEARCH);
 }
 
-export function fetchLoginRedirect(features: Features): Partial<Path> {
+export function fetchLoginRedirect(): Partial<Path> {
   const signInPathname = getStorage().getItem(SIGN_IN_PATHNAME);
   const signInSearch = getStorage().getItem(SIGN_IN_SEARCH);
   clearLoginRedirect();
   return {
-    pathname: signInPathname || getDefaultRoute(features),
+    pathname: signInPathname || `/dashboard`,
     search: (signInPathname && signInSearch) || undefined
   };
 }
 
 export const clearAccessToken = () => localStorage.removeItem(ACCESS_TOKEN);
-export const decodeMeJWT = (accessToken: string): Me => jwtDecode(accessToken) as Me;
+export const decodeMeJWT = (accessToken: string): Me => jwtDecode(accessToken);
 
 export function addAccessTokenParameter(url: string) {
   const accessToken = getStorage().getItem(ACCESS_TOKEN);

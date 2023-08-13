@@ -1,43 +1,39 @@
-import { FC, useState, useContext, useEffect } from 'react';
-import { useSnackbar } from 'notistack';
+import CancelIcon from '@mui/icons-material/Cancel';
+import DeviceHubIcon from '@mui/icons-material/DeviceHub';
+import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import {
   Avatar,
-  Button,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
   Box,
+  Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Theme,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
   useTheme
 } from '@mui/material';
-
-import { Table } from '@table-library/react-table-library/table';
+import { Body, Cell, Header, HeaderCell, HeaderRow, Row, Table } from '@table-library/react-table-library/table';
 import { useTheme as tableTheme } from '@table-library/react-table-library/theme';
-import { Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
-
-import DeviceHubIcon from '@mui/icons-material/DeviceHub';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
-import CancelIcon from '@mui/icons-material/Cancel';
-import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
-
-import { AuthenticatedContext } from '../contexts/authentication';
-
-import { ButtonRow, FormLoader, SectionContent } from '../components';
-
-import { Status, busConnectionStatus, Stat } from './types';
-
-import { extractErrorMessage, useRest } from '../utils';
+import { useRequest } from 'alova';
+import { useContext, useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 
 import * as EMSESP from './api';
+import { busConnectionStatus } from './types';
+import type { Stat, Status } from './types';
+import type { Theme } from '@mui/material';
 
-import type { Translation } from '../i18n/i18n-types';
-import { useI18nContext } from '../i18n/i18n-react';
+import type { Translation } from 'i18n/i18n-types';
+import type { FC } from 'react';
+import { dialogStyle } from 'CustomTheme';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
+import { AuthenticatedContext } from 'contexts/authentication';
+import { useI18nContext } from 'i18n/i18n-react';
 
 export const isConnected = ({ status }: Status) => status !== busConnectionStatus.BUS_STATUS_OFFLINE;
 
@@ -69,33 +65,18 @@ const showQuality = (stat: Stat) => {
 };
 
 const DashboardStatus: FC = () => {
-  const { loadData, data, errorMessage } = useRest<Status>({ read: EMSESP.readStatus });
+  const { data: data, send: loadData, error } = useRequest(EMSESP.readStatus);
 
   const { LL } = useI18nContext();
 
   const theme = useTheme();
   const [confirmScan, setConfirmScan] = useState<boolean>(false);
-  const { enqueueSnackbar } = useSnackbar();
 
   const { me } = useContext(AuthenticatedContext);
 
-  const showName = (id: any) => {
-    let name: keyof Translation['STATUS_NAMES'] = id;
-    return LL.STATUS_NAMES[name]();
-  };
-
-  const busStatus = ({ status }: Status) => {
-    switch (status) {
-      case busConnectionStatus.BUS_STATUS_CONNECTED:
-        return LL.CONNECTED(0);
-      case busConnectionStatus.BUS_STATUS_TX_ERRORS:
-        return LL.TX_ISSUES();
-      case busConnectionStatus.BUS_STATUS_OFFLINE:
-        return LL.DISCONNECTED();
-      default:
-        return 'Unknown';
-    }
-  };
+  const { send: scanDevices } = useRequest(EMSESP.scanDevices, {
+    immediate: false
+  });
 
   const stats_theme = tableTheme({
     Table: `
@@ -110,8 +91,7 @@ const DashboardStatus: FC = () => {
       color: #90CAF9;
 
       .th {
-        height: 42px;
-        font-weight: 500;
+        height: 36px;
         border-bottom: 1px solid #565656;
       }
     `,
@@ -141,18 +121,11 @@ const DashboardStatus: FC = () => {
     return () => {
       clearInterval(timer);
     };
-    // eslint-disable-next-line
-  }, []);
+  });
 
-  const scan = async () => {
-    try {
-      await EMSESP.scanDevices();
-      enqueueSnackbar(LL.SCANNING() + '...', { variant: 'info' });
-    } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
-    } finally {
-      setConfirmScan(false);
-    }
+  const showName = (id: any) => {
+    const name: keyof Translation['STATUS_NAMES'] = id;
+    return LL.STATUS_NAMES[name]();
   };
 
   const formatDurationSec = (duration_sec: number) => {
@@ -175,15 +148,40 @@ const DashboardStatus: FC = () => {
     return formatted;
   };
 
+  const busStatus = () => {
+    if (data) {
+      switch (data.status) {
+        case busConnectionStatus.BUS_STATUS_CONNECTED:
+          return LL.CONNECTED(0) + ' (' + formatDurationSec(data.uptime) + ')';
+        case busConnectionStatus.BUS_STATUS_TX_ERRORS:
+          return LL.TX_ISSUES();
+        case busConnectionStatus.BUS_STATUS_OFFLINE:
+          return LL.DISCONNECTED();
+      }
+    }
+    return 'Unknown';
+  };
+
+  const scan = async () => {
+    await scanDevices()
+      .then(() => {
+        toast.info(LL.SCANNING() + '...');
+      })
+      .catch((err) => {
+        toast.error(err.message);
+      });
+    setConfirmScan(false);
+  };
+
   const renderScanDialog = () => (
-    <Dialog open={confirmScan} onClose={() => setConfirmScan(false)}>
+    <Dialog sx={dialogStyle} open={confirmScan} onClose={() => setConfirmScan(false)}>
       <DialogTitle>{LL.SCAN_DEVICES()}</DialogTitle>
       <DialogContent dividers>{LL.EMS_SCAN()}</DialogContent>
       <DialogActions>
         <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => setConfirmScan(false)} color="secondary">
           {LL.CANCEL()}
         </Button>
-        <Button startIcon={<PermScanWifiIcon />} variant="outlined" onClick={scan} color="primary" autoFocus>
+        <Button startIcon={<PermScanWifiIcon />} variant="outlined" onClick={scan} color="primary">
           {LL.SCAN()}
         </Button>
       </DialogActions>
@@ -192,7 +190,7 @@ const DashboardStatus: FC = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
     }
 
     return (
@@ -204,10 +202,7 @@ const DashboardStatus: FC = () => {
                 <DirectionsBusIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText
-              primary={LL.EMS_BUS_STATUS()}
-              secondary={busStatus(data) + ' (' + formatDurationSec(data.uptime) + ')'}
-            />
+            <ListItemText primary={LL.EMS_BUS_STATUS()} secondary={busStatus()} />
           </ListItem>
           <ListItem>
             <ListItemAvatar>
@@ -226,13 +221,13 @@ const DashboardStatus: FC = () => {
               }
             />
           </ListItem>
-          <Box m={3}></Box>
+          <Box m={3} />
           <Table data={{ nodes: data.stats }} theme={stats_theme} layout={{ custom: true }}>
             {(tableList: any) => (
               <>
                 <Header>
                   <HeaderRow>
-                    <HeaderCell resize></HeaderCell>
+                    <HeaderCell resize />
                     <HeaderCell stiff>{LL.SUCCESS()}</HeaderCell>
                     <HeaderCell stiff>{LL.FAIL()}</HeaderCell>
                     <HeaderCell stiff>{LL.QUALITY()}</HeaderCell>

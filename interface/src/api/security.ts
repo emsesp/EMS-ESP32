@@ -1,17 +1,13 @@
-import { AxiosPromise } from 'axios';
+import { alovaInstance } from './endpoints';
 
-import { SecuritySettings, Token } from '../types';
+import type { SecuritySettings, Token } from 'types';
 
-import { AXIOS } from './endpoints';
+export const readSecuritySettings = () => alovaInstance.Get<SecuritySettings>('/rest/securitySettings');
 
-export function readSecuritySettings(): AxiosPromise<SecuritySettings> {
-  return AXIOS.get('/securitySettings');
-}
+export const updateSecuritySettings = (securitySettings: SecuritySettings) =>
+  alovaInstance.Post('/rest/securitySettings', securitySettings);
 
-export function updateSecuritySettings(securitySettings: SecuritySettings): AxiosPromise<SecuritySettings> {
-  return AXIOS.post('/securitySettings', securitySettings);
-}
-
-export function generateToken(username?: string): AxiosPromise<Token> {
-  return AXIOS.get('/generateToken', { params: { username } });
-}
+export const generateToken = (username?: string) =>
+  alovaInstance.Get<Token>('/rest/generateToken', {
+    params: { username }
+  });

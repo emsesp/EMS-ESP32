@@ -1,21 +1,19 @@
 {
-    "name": "api",
-    "version": "1.0.0",
-    "private": "true",
-    "description": "mock api for EMS-ESP",
-    "main": "server.js",
-    "scripts": {
-        "dev": "nodemon ./server.js localhost 3080",
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "author": "proddy",
-    "license": "ISC",
-    "dependencies": {
-        "@msgpack/msgpack": "^2.8.0",
-        "compression": "^1.7.4",
-        "express": "^4.18.2",
-        "express-sse": "^0.5.3",
-        "nodemon": "^2.0.21",
-        "ws": "^8.13.0"
-    }
+  "name": "api",
+  "version": "1.0.0",
+  "description": "mock api for EMS-ESP",
+  "author": "proddy",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon ./server.js localhost 3080",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@msgpack/msgpack": "^2.8.0",
+    "compression": "^1.7.4",
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
+    "nodemon": "^3.0.1"
+  },
+  "packageManager": "yarn@3.4.1"
 }

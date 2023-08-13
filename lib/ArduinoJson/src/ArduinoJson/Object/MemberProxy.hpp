@@ -1,27 +1,27 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2022, Benoit BLANCHON
+// Copyright © 2014-2023, Benoit BLANCHON
 // MIT License
 
 #pragma once
 
 #include <ArduinoJson/Variant/VariantRefBase.hpp>
 
-namespace ARDUINOJSON_NAMESPACE {
+ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
 // A proxy class to get or set a member of an object.
 // https://arduinojson.org/v6/api/jsonobject/subscript/
 template <typename TUpstream, typename TStringRef>
 class MemberProxy
-    : public VariantRefBase<MemberProxy<TUpstream, TStringRef> >,
-      public VariantOperators<MemberProxy<TUpstream, TStringRef> > {
+    : public VariantRefBase<MemberProxy<TUpstream, TStringRef>>,
+      public VariantOperators<MemberProxy<TUpstream, TStringRef>> {
   friend class VariantAttorney;
 
  public:
   FORCE_INLINE MemberProxy(TUpstream upstream, TStringRef key)
-      : _upstream(upstream), _key(key) {}
+      : upstream_(upstream), key_(key) {}
 
   MemberProxy(const MemberProxy& src)
-      : _upstream(src._upstream), _key(src._key) {}
+      : upstream_(src.upstream_), key_(src.key_) {}
 
   FORCE_INLINE MemberProxy& operator=(const MemberProxy& src) {
     this->set(src);
@@ -42,23 +42,23 @@ class MemberProxy
 
  private:
   FORCE_INLINE MemoryPool* getPool() const {
-    return VariantAttorney::getPool(_upstream);
+    return VariantAttorney::getPool(upstream_);
   }
 
   FORCE_INLINE VariantData* getData() const {
-    return variantGetMember(VariantAttorney::getData(_upstream),
-                            adaptString(_key));
+    return variantGetMember(VariantAttorney::getData(upstream_),
+                            adaptString(key_));
   }
 
   FORCE_INLINE VariantData* getOrCreateData() const {
-    return variantGetOrAddMember(VariantAttorney::getOrCreateData(_upstream),
-                                 adaptString(_key),
-                                 VariantAttorney::getPool(_upstream));
+    return variantGetOrAddMember(VariantAttorney::getOrCreateData(upstream_),
+                                 adaptString(key_),
+                                 VariantAttorney::getPool(upstream_));
   }
 
  private:
-  TUpstream _upstream;
-  TStringRef _key;
+  TUpstream upstream_;
+  TStringRef key_;
 };
 
-}  // namespace ARDUINOJSON_NAMESPACE
+ARDUINOJSON_END_PRIVATE_NAMESPACE

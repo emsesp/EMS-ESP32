@@ -1,8 +1,8 @@
-import { FC } from 'react';
+import { CircularProgress, Box, Typography } from '@mui/material';
+import type { Theme } from '@mui/material';
+import type { FC } from 'react';
 
-import { CircularProgress, Box, Typography, Theme } from '@mui/material';
-
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 interface LoadingSpinnerProps {
   height?: number | string;

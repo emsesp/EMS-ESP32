@@ -115,7 +115,7 @@ class HttpPostEndpoint {
         response->setLength();
 
         if (outcome == StateUpdateResult::CHANGED_RESTART) {
-            response->setCode(202); // added by proddy
+            response->setCode(205); // reboot required
         }
         request->send(response);
     }

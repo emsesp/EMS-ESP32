@@ -1,96 +1,107 @@
-import { AxiosPromise } from 'axios';
-import { AXIOS, AXIOS_API, AXIOS_BIN } from '../api/endpoints';
-
-import {
-  BoardProfile,
-  BoardProfileName,
+import type {
   APIcall,
   Settings,
   Status,
   CoreData,
   Devices,
-  DeviceData,
   DeviceEntity,
-  UniqueID,
-  CustomEntities,
-  WriteValue,
-  WriteSensor,
-  WriteAnalog,
-  SensorData
+  WriteTemperatureSensor,
+  WriteAnalogSensor,
+  SensorData,
+  Entities,
+  DeviceData,
+  ScheduleItem,
+  EntityItem
 } from './types';
+import { alovaInstance } from 'api/endpoints';
 
-export function restart(): AxiosPromise<void> {
-  return AXIOS.post('/restart');
-}
+// DashboardDevices
+export const readCoreData = () => alovaInstance.Get<CoreData>(`/rest/coreData`);
+export const readDeviceData = (id: number) =>
+  alovaInstance.Get<DeviceData>('/rest/deviceData', {
+    params: { id },
+    responseType: 'arraybuffer' // uses msgpack
+  });
+export const writeDeviceValue = (data: any) => alovaInstance.Post('/rest/writeDeviceValue', data);
 
-export function readSettings(): AxiosPromise<Settings> {
-  return AXIOS.get('/settings');
-}
+// SettingsApplication
+export const readSettings = () => alovaInstance.Get<Settings>('/rest/settings');
+export const writeSettings = (data: any) => alovaInstance.Post('/rest/settings', data);
+export const getBoardProfile = (boardProfile: string) =>
+  alovaInstance.Get('/rest/boardProfile', {
+    params: { boardProfile }
+  });
 
-export function writeSettings(settings: Settings): AxiosPromise<Settings> {
-  return AXIOS.post('/settings', settings);
-}
+// DashboardSensors
+export const readSensorData = () => alovaInstance.Get<SensorData>('/rest/sensorData');
+export const writeTemperatureSensor = (ts: WriteTemperatureSensor) =>
+  alovaInstance.Post('/rest/writeTemperatureSensor', ts);
+export const writeAnalogSensor = (as: WriteAnalogSensor) => alovaInstance.Post('/rest/writeAnalogSensor', as);
 
-export function getBoardProfile(boardProfile: BoardProfileName): AxiosPromise<BoardProfile> {
-  return AXIOS.post('/boardProfile', boardProfile);
-}
+// DashboardStatus
+export const readStatus = () => alovaInstance.Get<Status>('/rest/status');
+export const scanDevices = () => alovaInstance.Post('/rest/scanDevices');
 
-export function readStatus(): AxiosPromise<Status> {
-  return AXIOS.get('/status');
-}
+// HelpInformation
+export const API = (apiCall: APIcall) => alovaInstance.Post('/api', apiCall);
 
-export function readCoreData(): AxiosPromise<CoreData> {
-  return AXIOS.get('/coreData');
-}
+// UploadFileForm
+export const getSettings = () => alovaInstance.Get('/rest/getSettings');
+export const getCustomizations = () => alovaInstance.Get('/rest/getCustomizations');
+export const getEntities = () => alovaInstance.Get<Entities>('/rest/getEntities');
+export const getSchedule = () => alovaInstance.Get('/rest/getSchedule');
 
-export function readDevices(): AxiosPromise<Devices> {
-  return AXIOS.get('/devices');
-}
+// SettingsCustomization
+export const readDeviceEntities = (id: number) =>
+  alovaInstance.Get<DeviceEntity[]>('/rest/deviceEntities', {
+    params: { id },
+    responseType: 'arraybuffer',
+    transformData(data: any) {
+      return data.map((de: DeviceEntity) => ({ ...de, o_m: de.m, o_cn: de.cn, o_mi: de.mi, o_ma: de.ma }));
+    }
+  });
+export const readDevices = () => alovaInstance.Get<Devices>('/rest/devices');
+export const resetCustomizations = () => alovaInstance.Post('/rest/resetCustomizations');
+export const writeCustomEntities = (data: any) => alovaInstance.Post('/rest/customEntities', data);
 
-export function scanDevices(): AxiosPromise<void> {
-  return AXIOS.post('/scanDevices');
-}
+// SettingsScheduler
+export const readSchedule = () =>
+  alovaInstance.Get<ScheduleItem[]>('/rest/schedule', {
+    name: 'schedule',
+    transformData(data: any) {
+      return data.schedule.map((si: ScheduleItem) => ({
+        ...si,
+        o_id: si.id,
+        o_active: si.active,
+        o_deleted: si.deleted,
+        o_flags: si.flags,
+        o_time: si.time,
+        o_cmd: si.cmd,
+        o_value: si.value,
+        o_name: si.name
+      }));
+    }
+  });
+export const writeSchedule = (data: any) => alovaInstance.Post('/rest/schedule', data);
 
-export function readDeviceData(unique_id: UniqueID): AxiosPromise<DeviceData> {
-  return AXIOS_BIN.post('/deviceData', unique_id);
-}
-
-export function readSensorData(): AxiosPromise<SensorData> {
-  return AXIOS.get('/sensorData');
-}
-
-export function readDeviceEntities(unique_id: UniqueID): AxiosPromise<DeviceEntity[]> {
-  return AXIOS_BIN.post('/deviceEntities', unique_id);
-}
-
-export function writeCustomEntities(customEntities: CustomEntities): AxiosPromise<void> {
-  return AXIOS.post('/customEntities', customEntities);
-}
-
-export function writeValue(writevalue: WriteValue): AxiosPromise<void> {
-  return AXIOS.post('/writeValue', writevalue);
-}
-
-export function writeSensor(writesensor: WriteSensor): AxiosPromise<void> {
-  return AXIOS.post('/writeSensor', writesensor);
-}
-
-export function writeAnalog(writeanalog: WriteAnalog): AxiosPromise<void> {
-  return AXIOS.post('/writeAnalog', writeanalog);
-}
-
-export function resetCustomizations(): AxiosPromise<void> {
-  return AXIOS.post('/resetCustomizations');
-}
-
-export function API(apiCall: APIcall): AxiosPromise<void> {
-  return AXIOS_API.post('/', apiCall);
-}
-
-export function getSettings(): AxiosPromise<void> {
-  return AXIOS.get('/getSettings');
-}
-
-export function getCustomizations(): AxiosPromise<void> {
-  return AXIOS.get('/getCustomizations');
-}
+// SettingsEntities
+export const readEntities = () =>
+  alovaInstance.Get<EntityItem[]>('/rest/entities', {
+    name: 'entities',
+    transformData(data: any) {
+      return data.entities.map((ei: EntityItem) => ({
+        ...ei,
+        o_id: ei.id,
+        o_device_id: ei.device_id,
+        o_type_id: ei.type_id,
+        o_offset: ei.offset,
+        o_factor: ei.factor,
+        o_uom: ei.uom,
+        o_value_type: ei.value_type,
+        o_name: ei.name,
+        o_writeable: ei.writeable,
+        o_deleted: ei.deleted
+      }));
+    }
+  });
+export const writeEntities = (data: any) => alovaInstance.Post('/rest/entities', data);

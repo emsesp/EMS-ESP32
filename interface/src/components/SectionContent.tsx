@@ -1,8 +1,7 @@
-import { FC } from 'react';
-
 import { Paper, Divider } from '@mui/material';
+import type { FC } from 'react';
 
-import { RequiredChildrenProps } from '../utils';
+import type { RequiredChildrenProps } from 'utils';
 
 interface SectionContentProps extends RequiredChildrenProps {
   title: string;

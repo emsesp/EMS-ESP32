@@ -1,4 +1,4 @@
-import { FC, useCallback, useState, useEffect } from 'react';
+import CloseIcon from '@mui/icons-material/Close';
 import {
   Dialog,
   DialogTitle,
@@ -10,16 +10,15 @@ import {
   TextField,
   Button
 } from '@mui/material';
+import { useRequest } from 'alova';
+import { useEffect } from 'react';
 
-import CloseIcon from '@mui/icons-material/Close';
+import type { FC } from 'react';
+import { dialogStyle } from 'CustomTheme';
+import * as SecurityApi from 'api/security';
+import { MessageBox } from 'components';
 
-import { extractErrorMessage } from '../../utils';
-import { useSnackbar } from 'notistack';
-import { MessageBox } from '../../components';
-import * as SecurityApi from '../../api/security';
-import { Token } from '../../types';
-
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 interface GenerateTokenProps {
   username?: string;
@@ -27,30 +26,22 @@ interface GenerateTokenProps {
 }
 
 const GenerateToken: FC<GenerateTokenProps> = ({ username, onClose }) => {
-  const [token, setToken] = useState<Token>();
+  const { LL } = useI18nContext();
   const open = !!username;
 
-  const { LL } = useI18nContext();
-
-  const { enqueueSnackbar } = useSnackbar();
-
-  const getToken = useCallback(async () => {
-    try {
-      setToken((await SecurityApi.generateToken(username)).data);
-    } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
-    }
-  }, [username, enqueueSnackbar, LL]);
+  const { data: token, send: generateToken } = useRequest(SecurityApi.generateToken(username), {
+    immediate: false
+  });
 
   useEffect(() => {
     if (open) {
-      getToken();
+      void generateToken();
     }
-  }, [open, getToken]);
+  }, [open, generateToken]);
 
   return (
-    <Dialog onClose={onClose} aria-labelledby="generate-token-dialog-title" open={!!username} fullWidth maxWidth="sm">
-      <DialogTitle id="generate-token-dialog-title">{LL.ACCESS_TOKEN_FOR() + ' ' + username}</DialogTitle>
+    <Dialog sx={dialogStyle} onClose={onClose} open={!!username} fullWidth maxWidth="sm">
+      <DialogTitle>{LL.ACCESS_TOKEN_FOR() + ' ' + username}</DialogTitle>
       <DialogContent dividers>
         {token ? (
           <>

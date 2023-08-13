@@ -1,16 +1,15 @@
-import { FC, useContext } from 'react';
+import { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
+import type { FC } from 'react';
 
-import * as AuthenticationApi from '../../api/authentication';
-import { AuthenticationContext } from '../../contexts/authentication';
-import { RequiredChildrenProps } from '../../utils';
-import { FeaturesContext } from '../../contexts/features';
+import type { RequiredChildrenProps } from 'utils';
+import * as AuthenticationApi from 'api/authentication';
+import { AuthenticationContext } from 'contexts/authentication';
 
 const RequireUnauthenticated: FC<RequiredChildrenProps> = ({ children }) => {
-  const { features } = useContext(FeaturesContext);
   const authenticationContext = useContext(AuthenticationContext);
 
-  return authenticationContext.me ? <Navigate to={AuthenticationApi.fetchLoginRedirect(features)} /> : <>{children}</>;
+  return authenticationContext.me ? <Navigate to={AuthenticationApi.fetchLoginRedirect()} /> : <>{children}</>;
 };
 
 export default RequireUnauthenticated;

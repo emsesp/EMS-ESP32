@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -148,11 +148,11 @@ void RxService::add(uint8_t * data, uint8_t length) {
     // validate the CRC. if it fails then increment the number of corrupt/incomplete telegrams and only report to console/syslog
     uint8_t crc = calculate_crc(data, length - 1);
     if (data[length - 1] != crc) {
-        if ((data[0] & 0x7F) != ems_bus_id()) { // do not count echos as errors
+        if ((data[0] & 0x7F) != ems_bus_id()) {                                               // do not count echos as errors
             telegram_error_count_++;
             LOG_WARNING("Incomplete Rx: %s", Helpers::data_to_hex(data, length - 1).c_str()); // exclude CRC
         } else {
-            LOG_TRACE("Incomplete Rx: %s", Helpers::data_to_hex(data, length - 1).c_str()); // exclude CRC
+            LOG_TRACE("Incomplete Rx: %s", Helpers::data_to_hex(data, length - 1).c_str());   // exclude CRC
         }
         return;
     }
@@ -211,9 +211,7 @@ void RxService::add(uint8_t * data, uint8_t length) {
         LOG_TRACE("Rx: %s", Helpers::data_to_hex(data, length).c_str());
     }
 
-#ifdef EMSESP_DEBUG
-    LOG_DEBUG("[DEBUG] New Rx telegram, message length %d", message_length);
-#endif
+    LOG_DEBUG("New Rx telegram, message length %d", message_length);
 
     // if we don't have a type_id exit,
     // do not exit on empty message, it is checked for toggle fetch
@@ -349,7 +347,7 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
             telegram_raw[5] = (telegram->type_id >> 8) - 1; // type, 1st byte, high-byte, subtract 0x100
             telegram_raw[6] = telegram->type_id & 0xFF;     // type, 2nd byte, low-byte
             message_p       = 7;
-            copy_data       = false; // there are no more data values after the type_id when reading on EMS+
+            copy_data       = false;                        // there are no more data values after the type_id when reading on EMS+
         }
     } else {
         // EMS 1.0
@@ -398,11 +396,11 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
     if (status == EMS_TX_STATUS_ERR) {
         LOG_ERROR("Failed to transmit Tx via UART.");
         if (telegram->operation == Telegram::Operation::TX_READ) {
-            increment_telegram_read_fail_count(); // another Tx fail
+            increment_telegram_read_fail_count();  // another Tx fail
         } else {
             increment_telegram_write_fail_count(); // another Tx fail
         }
-        tx_state(Telegram::Operation::NONE); // nothing send, tx not in wait state
+        tx_state(Telegram::Operation::NONE);       // nothing send, tx not in wait state
         return;
     }
 
@@ -443,9 +441,7 @@ void TxService::add(const uint8_t  operation,
                     const bool     front) {
     auto telegram = std::make_shared<Telegram>(operation, ems_bus_id(), dest, type_id, offset, message_data, message_length);
 
-#ifdef EMSESP_DEBUG
-    LOG_DEBUG("[DEBUG] New Tx [#%d] telegram, length %d", tx_telegram_id_, message_length);
-#endif
+    LOG_DEBUG("New Tx [#%d] telegram, length %d", tx_telegram_id_, message_length);
 
     // if the queue is full, make room by removing the last one
     if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
@@ -460,7 +456,7 @@ void TxService::add(const uint8_t  operation,
     if (front) {
         tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram), false, validateid); // add to front of queue
     } else {
-        tx_telegrams_.emplace_back(tx_telegram_id_++, std::move(telegram), false, validateid); // add to back of queue
+        tx_telegrams_.emplace_back(tx_telegram_id_++, std::move(telegram), false, validateid);  // add to back of queue
     }
     if (validateid != 0) {
         EMSESP::wait_validate(validateid);
@@ -507,9 +503,7 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
 
     // if we don't have a type_id or empty data block, exit
     if ((type_id == 0) || (message_length == 0)) {
-#ifdef EMSESP_DEBUG
-        LOG_DEBUG("[DEBUG] Tx telegram type %d failed, length %d", type_id, message_length);
-#endif
+        LOG_DEBUG("Tx telegram type %d failed, length %d", type_id, message_length);
         return;
     }
 
@@ -518,11 +512,16 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
             operation = Telegram::Operation::NONE; // do not check reply/ack for other ids
         } else if (dest & 0x80) {
             operation = Telegram::Operation::TX_READ;
+            EMSESP::set_response_id(type_id);
+            // trigger read of all parts of telegram if requested length is more than 32
+            // compatibility to earlier versions
+            if (message_data[0] >= 32) {
+                EMSESP::set_read_id(type_id);
+            }
         } else {
             operation   = Telegram::Operation::TX_WRITE;
             validate_id = type_id;
         }
-        EMSESP::set_read_id(type_id);
     }
 
     auto telegram = std::make_shared<Telegram>(operation, src, dest, type_id, offset, message_data, message_length); // operation is TX_WRITE or TX_READ
@@ -537,9 +536,7 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
         tx_telegrams_.pop_front();
     }
 
-#ifdef EMSESP_DEBUG
-    LOG_DEBUG("[DEBUG] New Tx [#%d] telegram, length %d", tx_telegram_id_, message_length);
-#endif
+    LOG_DEBUG("New Tx [#%d] telegram, length %d", tx_telegram_id_, message_length);
 
     if (front) {
         // tx_telegrams_.push_front(qtxt); // add to front of queue
@@ -554,16 +551,14 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
 }
 
 // send a Tx telegram to request data from an EMS device
-void TxService::read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t length) {
+void TxService::read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t length, const bool front) {
     LOG_DEBUG("Tx read request to device 0x%02X for type ID 0x%02X", dest, type_id);
 
     uint8_t message_data = (type_id > 0xFF) ? (EMS_MAX_TELEGRAM_MESSAGE_LENGTH - 2) : EMS_MAX_TELEGRAM_MESSAGE_LENGTH;
-    // if length set, publish result and set telegram to front
-    if (length) {
+    if (length > 0 && length < message_data) {
         message_data = length;
-        EMSESP::set_read_id(type_id);
     }
-    add(Telegram::Operation::TX_READ, dest, type_id, offset, &message_data, 1, 0, length != 0);
+    add(Telegram::Operation::TX_READ, dest, type_id, offset, &message_data, 1, 0, front);
 }
 
 // Send a raw telegram to the bus, telegram is a text string of hex values
@@ -574,32 +569,16 @@ bool TxService::send_raw(const char * telegram_data) {
 
     // since the telegram data is a const, make a copy. add 1 to grab the \0 EOS
     char telegram[EMS_MAX_TELEGRAM_LENGTH * 3];
-    for (uint8_t i = 0; i < strlen(telegram_data); i++) {
-        telegram[i] = telegram_data[i];
-    }
-    telegram[strlen(telegram_data)] = '\0'; // make sure its terminated
+    strlcpy(telegram, telegram_data, sizeof(telegram));
 
     uint8_t count = 0;
-    char *  p;
-    char    value[10] = {0};
-
     uint8_t data[EMS_MAX_TELEGRAM_LENGTH];
 
-    // get first value, which should be the src
-    if ((p = strtok(telegram, " ,"))) { // delimiter
-        strlcpy(value, p, sizeof(value));
-        data[0] = (uint8_t)strtol(value, 0, 16);
-    } else {
-        return false;
-    }
-
-    // and iterate until end
-    while (p != 0) {
-        if ((p = strtok(nullptr, " ,"))) {
-            strlcpy(value, p, sizeof(value));
-            auto val      = (uint8_t)strtol(value, 0, 16);
-            data[++count] = val;
-        }
+    // get values
+    char * p = strtok(telegram, " ,"); // delimiter
+    while (p != nullptr) {
+        data[count++] = (uint8_t)strtol(p, 0, 16);
+        p             = strtok(nullptr, " ,");
     }
 
     // check valid length
@@ -607,7 +586,7 @@ bool TxService::send_raw(const char * telegram_data) {
         return false;
     }
 
-    add(Telegram::Operation::TX_RAW, data, count + 1, 0, true); // add to top/front of Tx queue
+    add(Telegram::Operation::TX_RAW, data, count, 0, true); // add to top/front of Tx queue
     return true;
 }
 
@@ -616,14 +595,14 @@ bool TxService::send_raw(const char * telegram_data) {
 void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const uint8_t length) {
     // have we reached the limit? if so, reset count and give up
     if (++retry_count_ > MAXIMUM_TX_RETRIES) {
-        reset_retry_count();      // give up
-        EMSESP::wait_validate(0); // do not wait for validation
+        reset_retry_count();                  // give up
+        EMSESP::wait_validate(0);             // do not wait for validation
         if (operation == Telegram::Operation::TX_READ) {
             if (telegram_last_->offset > 0) { // ignore errors for higher offsets
                 LOG_DEBUG("Last Tx Read operation failed after %d retries. Ignoring request: %s", MAXIMUM_TX_RETRIES, telegram_last_->to_string().c_str());
                 return;
             }
-            increment_telegram_read_fail_count(); // another Tx fail
+            increment_telegram_read_fail_count();  // another Tx fail
         } else {
             increment_telegram_write_fail_count(); // another Tx fail
         }
@@ -639,13 +618,11 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
         return;
     }
 
-#ifdef EMSESP_DEBUG
-    LOG_DEBUG("[DEBUG] Last Tx %s operation failed. Retry #%d. sent message: %s, received: %s",
+    LOG_DEBUG("Last Tx %s operation failed. Retry #%d. sent message: %s, received: %s",
               (operation == Telegram::Operation::TX_WRITE) ? ("Write") : ("Read"),
               retry_count_,
               telegram_last_->to_string().c_str(),
               Helpers::data_to_hex(data, length - 1).c_str());
-#endif
 
     // add to the top of the queue
     if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {

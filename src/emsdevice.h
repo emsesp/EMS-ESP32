@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,15 +47,17 @@ class EMSdevice {
     // static functions, used outside the class like in console.cpp, command.cpp, emsesp.cpp, mqtt.cpp
     static const char * device_type_2_device_name(const uint8_t device_type);
     static uint8_t      device_name_2_device_type(const char * topic);
-    static std::string  uom_to_string(uint8_t uom);
-    static std::string  tag_to_string(uint8_t tag, const bool translate = true);
-    static std::string  tag_to_mqtt(uint8_t tag);
-    static uint8_t      decode_brand(uint8_t value);
+
+    static const char * tag_to_string(uint8_t tag, const bool translate = true);
+    static const char * uom_to_string(uint8_t uom);
+    static const char * tag_to_mqtt(uint8_t tag);
+
+    static uint8_t decode_brand(uint8_t value);
 
     const char * device_type_name();                     // returns short non-translated device type name
     const char * device_type_2_device_name_translated(); // returns translated device type name
 
-    bool has_tag(const uint8_t tag) const;
+    bool has_tags(const uint8_t tag) const;
     bool has_cmd(const char * cmd, const int8_t id) const;
 
     inline uint8_t device_id() const {
@@ -153,7 +155,7 @@ class EMSdevice {
         }
     }
 
-    inline void has_enumupdate(std::shared_ptr<const Telegram> telegram, uint8_t & value, const uint8_t index, uint8_t s = 0) {
+    inline void has_enumupdate(std::shared_ptr<const Telegram> telegram, uint8_t & value, const uint8_t index, int8_t s = 0) {
         if (telegram->read_enumvalue(value, index, s)) {
             has_update_ = true;
             publish_value((void *)&value);
@@ -176,7 +178,7 @@ class EMSdevice {
         }
     }
 
-    const std::string brand_to_string();
+    const char *      brand_to_char();
     const std::string to_string();
     const std::string to_string_short();
 
@@ -290,7 +292,7 @@ class EMSdevice {
 
     void mqtt_ha_entity_config_create();
 
-    std::string telegram_type_name(std::shared_ptr<const Telegram> telegram) const;
+    const char * telegram_type_name(std::shared_ptr<const Telegram> telegram);
 
     void fetch_values();
     void toggle_fetch(uint16_t telegram_id, bool toggle);
@@ -317,9 +319,10 @@ class EMSdevice {
     };
 
     enum DeviceType : uint8_t {
-        SYSTEM = 0,   // this is us (EMS-ESP)
-        DALLASSENSOR, // for internal dallas sensors
-        ANALOGSENSOR, // for internal analog sensors
+        SYSTEM = 0,        // this is us (EMS-ESP)
+        TEMPERATURESENSOR, // for internal temperature sensors
+        ANALOGSENSOR,      // for internal analog sensors
+        SCHEDULER,
         BOILER,
         THERMOSTAT,
         MIXER,
@@ -333,6 +336,8 @@ class EMSdevice {
         PUMP,
         GENERIC,
         HEATSOURCE,
+        CUSTOM,
+        VENTILATION,
         UNKNOWN
     };
 
@@ -376,6 +381,7 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_HT3      = 3;
     static constexpr uint8_t EMS_DEVICE_FLAG_HEATPUMP = 4;
     static constexpr uint8_t EMS_DEVICE_FLAG_HYBRID   = 5;
+    static constexpr uint8_t EMS_DEVICE_FLAG_HIU      = 6;
 
     // Solar Module
     static constexpr uint8_t EMS_DEVICE_FLAG_SM10  = 1;
@@ -408,7 +414,17 @@ class EMSdevice {
     uint8_t count_entities();
     bool    has_entities() const;
 
-#if defined(EMSESP_STANDALONE_DUMP)
+    /*
+    void reserve_device_values(uint8_t elements) {
+        devicevalues_.reserve(elements);
+    }
+
+    void reserve_telegram_functions(uint8_t elements) {
+        telegram_functions_.reserve(elements);
+    }
+    */
+
+#if defined(EMSESP_STANDALONE)
     void dump_value_info();
 #endif
 
@@ -422,15 +438,15 @@ class EMSdevice {
     uint8_t      flags_ = 0;
     uint8_t      brand_ = Brand::NO_BRAND;
 
-    bool ha_config_done_     = false;
-    bool has_update_         = false;
+    bool ha_config_done_ = false;
+    bool has_update_     = false;
 
     struct TelegramFunction {
-        uint16_t           telegram_type_id_;   // it's type_id
-        const char *       telegram_type_name_; // e.g. RC20Message
-        bool               fetch_;              // if this type_id be queried automatically
-        bool               received_;
-        process_function_p process_function_;
+        const uint16_t           telegram_type_id_;   // it's type_id
+        const char *             telegram_type_name_; // e.g. RC20Message
+        bool                     fetch_;              // if this type_id be queried automatically
+        bool                     received_;
+        const process_function_p process_function_;
 
         TelegramFunction(uint16_t telegram_type_id, const char * telegram_type_name, bool fetch, bool received, const process_function_p process_function)
             : telegram_type_id_(telegram_type_id)
@@ -441,13 +457,9 @@ class EMSdevice {
         }
     };
 
-#ifdef EMSESP_STANDALONE
-    void debug_print_dv(const char * shortname);
-#endif
-
     std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
 
-    std::vector<DeviceValue> devicevalues_; // all the device values
+    std::vector<DeviceValue> devicevalues_;            // all the device values
 
     std::vector<uint16_t> handlers_ignored_;
 };

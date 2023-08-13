@@ -1,105 +1,60 @@
-import axios, { AxiosPromise, CancelToken, AxiosProgressEvent } from 'axios';
+import { xhrRequestAdapter } from '@alova/adapter-xhr';
+import { createAlova } from 'alova';
+import ReactHook from 'alova/react';
+import { unpack } from '../api/unpack';
 
-import { decode } from '@msgpack/msgpack';
-
-export const WS_BASE_URL = '/ws/';
-export const API_BASE_URL = '/rest/';
-export const ES_BASE_URL = '/es/';
-export const EMSESP_API_BASE_URL = '/api/';
 export const ACCESS_TOKEN = 'access_token';
-export const WEB_SOCKET_ROOT = calculateWebSocketRoot(WS_BASE_URL);
-export const EVENT_SOURCE_ROOT = calculateEventSourceRoot(ES_BASE_URL);
 
-export const AXIOS = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  transformRequest: [
-    (data, headers) => {
-      if (headers) {
-        if (localStorage.getItem(ACCESS_TOKEN)) {
-          headers.Authorization = 'Bearer ' + localStorage.getItem(ACCESS_TOKEN);
-        }
-        if (headers['Content-Type'] !== 'application/json') {
-          return data;
-        }
-      }
-      return JSON.stringify(data);
+const host = window.location.host;
+export const WEB_SOCKET_ROOT = 'ws://' + host + '/ws/';
+export const EVENT_SOURCE_ROOT = 'http://' + host + '/es/';
+
+export const alovaInstance = createAlova({
+  statesHook: ReactHook,
+  timeout: 3000, // 3 seconds but throwing a timeout error
+  localCache: null,
+  // localCache: {
+  //   GET: {
+  //     mode: 'placeholder', // see https://alova.js.org/learning/response-cache/#cache-replaceholder-mode
+  //     expire: 2000
+  //   }
+  // },
+  requestAdapter: xhrRequestAdapter(),
+  beforeRequest(method) {
+    if (localStorage.getItem(ACCESS_TOKEN)) {
+      method.config.headers.Authorization = 'Bearer ' + localStorage.getItem(ACCESS_TOKEN);
     }
-  ]
+  },
+
+  responded: {
+    onSuccess: async (response) => {
+      // if (response.status === 202) {
+      //   throw new Error('Wait'); // wifi scan in progress
+      // } else
+      if (response.status === 205) {
+        throw new Error('Reboot required');
+      } else if (response.status === 400) {
+        throw new Error('Request Failed');
+      } else if (response.status >= 400) {
+        throw new Error(response.statusText);
+      }
+      const data = await response.data;
+      if (response.data instanceof ArrayBuffer) {
+        return unpack(data);
+      }
+      return data;
+    }
+
+    // Interceptor for request failure. This interceptor will be entered when the request is wrong.
+    // http errors like 401 (unauthorized) are handled either in the methods or AuthenticatedRouting()
+    // onError: (error, method) => {
+    //   alert(error.message);
+    // }
+  }
 });
 
-export const AXIOS_API = axios.create({
-  baseURL: EMSESP_API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  transformRequest: [
-    (data, headers) => {
-      if (headers) {
-        if (localStorage.getItem(ACCESS_TOKEN)) {
-          headers.Authorization = 'Bearer ' + localStorage.getItem(ACCESS_TOKEN);
-        }
-        if (headers['Content-Type'] !== 'application/json') {
-          return data;
-        }
-      }
-      return JSON.stringify(data);
-    }
-  ]
+export const alovaInstanceGH = createAlova({
+  baseURL: 'https://api.github.com/repos/emsesp/EMS-ESP32/releases',
+  statesHook: ReactHook,
+  requestAdapter: xhrRequestAdapter()
 });
-
-export const AXIOS_BIN = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  responseType: 'arraybuffer',
-  transformRequest: [
-    (data, headers) => {
-      if (headers) {
-        if (localStorage.getItem(ACCESS_TOKEN)) {
-          headers.Authorization = 'Bearer ' + localStorage.getItem(ACCESS_TOKEN);
-        }
-        if (headers['Content-Type'] !== 'application/json') {
-          return data;
-        }
-      }
-      return JSON.stringify(data);
-    }
-  ],
-  transformResponse: [
-    (data) => {
-      return decode(data);
-    }
-  ]
-});
-
-function calculateWebSocketRoot(webSocketPath: string) {
-  const location = window.location;
-  const webProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-  return webProtocol + '//' + location.host + webSocketPath;
-}
-
-function calculateEventSourceRoot(endpointPath: string) {
-  const location = window.location;
-  return location.protocol + '//' + location.host + endpointPath;
-}
-
-export interface FileUploadConfig {
-  cancelToken?: CancelToken;
-  onUploadProgress?: (progressEvent: AxiosProgressEvent) => void;
-}
-
-export const startUploadFile = (url: string, file: File, config?: FileUploadConfig): AxiosPromise<void> => {
-  const formData = new FormData();
-  formData.append('file', file);
-
-  return AXIOS.post(url, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    },
-    ...(config || {})
-  });
-};

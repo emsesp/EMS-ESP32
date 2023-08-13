@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 namespace emsesp {
 
-AsyncMqttClient * Mqtt::mqttClient_;
+MqttClient * Mqtt::mqttClient_;
 
 // static parameters we make global
 std::string Mqtt::mqtt_base_;
@@ -42,34 +42,36 @@ uint8_t     Mqtt::entity_format_;
 bool        Mqtt::ha_enabled_;
 uint8_t     Mqtt::nested_format_;
 std::string Mqtt::discovery_prefix_;
+uint8_t     Mqtt::discovery_type_;
 bool        Mqtt::send_response_;
 bool        Mqtt::publish_single_;
 bool        Mqtt::publish_single2cmd_;
 
-std::deque<Mqtt::QueuedMqttMessage> Mqtt::mqtt_messages_;
-std::vector<Mqtt::MQTTSubFunction>  Mqtt::mqtt_subfunctions_;
+std::vector<Mqtt::MQTTSubFunction> Mqtt::mqtt_subfunctions_;
 
 uint32_t Mqtt::mqtt_publish_fails_ = 0;
 bool     Mqtt::connecting_         = false;
 bool     Mqtt::initialized_        = false;
 bool     Mqtt::ha_climate_reset_   = false;
+uint16_t Mqtt::queuecount_         = 0;
 uint8_t  Mqtt::connectcount_       = 0;
 uint32_t Mqtt::mqtt_message_id_    = 0;
 char     will_topic_[Mqtt::MQTT_TOPIC_MAX_SIZE]; // because MQTT library keeps only char pointer
 
-std::string Mqtt::lasttopic_   = "";
-std::string Mqtt::lastpayload_ = "";
+std::string Mqtt::lasttopic_    = "";
+std::string Mqtt::lastpayload_  = "";
+std::string Mqtt::lastresponse_ = "";
 
 // Home Assistant specific
 // icons from https://materialdesignicons.com used with the UOMs (unit of measurements)
-MAKE_PSTR_WORD(measurement)
-MAKE_PSTR_WORD(total_increasing)
-MAKE_PSTR(icondegrees, "mdi:coolant-temperature") // DeviceValueUOM::DEGREES
-MAKE_PSTR(iconpercent, "mdi:percent-outline")     // DeviceValueUOM::PERCENT
-MAKE_PSTR(iconkb, "mdi:memory")                   // DeviceValueUOM::KB
-MAKE_PSTR(iconlmin, "mdi:water-boiler")           // DeviceValueUOM::LMIN
-MAKE_PSTR(iconua, "mdi:lightning-bolt-circle")    // DeviceValueUOM::UA
-MAKE_PSTR(iconnum, "mdi:counter")                 // DeviceValueUOM::NONE
+MAKE_WORD(measurement)
+MAKE_WORD(total_increasing)
+MAKE_WORD_CUSTOM(icondegrees, "mdi:coolant-temperature") // DeviceValueUOM::DEGREES
+MAKE_WORD_CUSTOM(iconpercent, "mdi:percent-outline")     // DeviceValueUOM::PERCENT
+MAKE_WORD_CUSTOM(iconkb, "mdi:memory")                   // DeviceValueUOM::KB
+MAKE_WORD_CUSTOM(iconlmin, "mdi:water-boiler")           // DeviceValueUOM::LMIN
+MAKE_WORD_CUSTOM(iconua, "mdi:lightning-bolt-circle")    // DeviceValueUOM::UA
+MAKE_WORD_CUSTOM(iconnum, "mdi:counter")                 // DeviceValueUOM::NONE
 
 uuid::log::Logger Mqtt::logger_{F_(mqtt), uuid::log::Facility::DAEMON};
 
@@ -94,7 +96,7 @@ void Mqtt::subscribe(const uint8_t device_type, const std::string & topic, mqtt_
     // We store the original topic string without base
     mqtt_subfunctions_.emplace_back(device_type, std::move(topic), std::move(cb));
 
-    if (!enabled()) {
+    if (!enabled() || !connected()) {
         return;
     }
 
@@ -116,14 +118,7 @@ void Mqtt::resubscribe() {
     }
 
     for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
-        bool found = false;
-        for (const auto & message : mqtt_messages_) {
-            found |= ((message.content_->operation == Operation::SUBSCRIBE) && (mqtt_subfunction.topic_ == message.content_->topic));
-        }
-
-        if (!found) {
-            queue_subscribe_message(mqtt_subfunction.topic_);
-        }
+        queue_subscribe_message(mqtt_subfunction.topic_);
     }
 }
 
@@ -136,24 +131,19 @@ void Mqtt::loop() {
 
     uint32_t currentMillis = uuid::get_uptime();
 
-    // publish top item from MQTT queue to stop flooding
-    if ((uint32_t)(currentMillis - last_mqtt_poll_) > MQTT_PUBLISH_WAIT) {
-        last_mqtt_poll_ = currentMillis;
-        process_queue();
-    }
-
     // send heartbeat
     if ((currentMillis - last_publish_heartbeat_ > publish_time_heartbeat_)) {
         last_publish_heartbeat_ = currentMillis;
         EMSESP::system_.send_heartbeat(); // send heartbeat
     }
 
-    // dallas publish on change
+    // temperature and analog sensor publish on change
     if (!publish_time_sensor_) {
         EMSESP::publish_sensor_values(false);
     }
 
-    if (!mqtt_messages_.empty()) {
+    queuecount_ = mqttClient_->getQueue();
+    if (queuecount_ > 0) {
         return;
     }
 
@@ -181,6 +171,7 @@ void Mqtt::loop() {
         if (publish_time_other_ && (currentMillis - last_publish_other_ > publish_time_other_)) {
         last_publish_other_ = (currentMillis / publish_time_other_) * publish_time_other_;
         EMSESP::publish_other_values(); // switch and heatpump
+        EMSESP::webSchedulerService.publish();
     } else
 
         if (publish_time_sensor_ && (currentMillis - last_publish_sensor_ > publish_time_sensor_)) {
@@ -195,6 +186,7 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
     shell.printfln("MQTT Entity ID format is %d", entity_format_);
 
     shell.printfln("MQTT publish errors: %lu", mqtt_publish_fails_);
+    shell.printfln("MQTT queue: %d", queuecount_);
     shell.println();
 
     // show subscriptions
@@ -204,55 +196,14 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
     }
     shell.println();
 
-    // show queues
-    if (mqtt_messages_.empty()) {
-        shell.printfln("MQTT queue is empty");
-        shell.println();
-        return;
-    }
-
-    shell.printfln("MQTT queue (%d/%d messages):", mqtt_messages_.size(), MAX_MQTT_MESSAGES);
-
-    for (const auto & message : mqtt_messages_) {
-        auto content = message.content_;
-        char topic[MQTT_TOPIC_MAX_SIZE];
-
-        // prefix base, only if it's not a discovery topic
-        if (content->topic.compare(0, discovery_prefix().size(), discovery_prefix()) == 0) {
-            snprintf(topic, sizeof(topic), "%s/%s", mqtt_base_.c_str(), content->topic.c_str());
-        } else {
-            snprintf(topic, sizeof(topic), "%s", content->topic.c_str());
-        }
-
-        if (content->operation == Operation::PUBLISH) {
-            // Publish messages
-            if (message.retry_count_ == 0) {
-                if (message.packet_id_ == 0) {
-                    shell.printfln(" [%02d] (Pub) topic=%s payload=%s", message.id_, topic, content->payload.c_str());
-                } else {
-                    shell.printfln(" [%02d] (Pub) topic=%s payload=%s (pid %d)", message.id_, topic, content->payload.c_str(), message.packet_id_);
-                }
-            } else {
-                shell.printfln(" [%02d] (Pub) topic=%s payload=%s (pid %d, retry #%d)",
-                               message.id_,
-                               topic,
-                               content->payload.c_str(),
-                               message.packet_id_,
-                               message.retry_count_);
-            }
-        } else {
-            // Subscribe messages
-            shell.printfln(" [%02d] (Sub) topic=%s", message.id_, topic);
-        }
-    }
     shell.println();
 }
 
-#if defined(EMSESP_DEBUG)
+#if defined(EMSESP_TEST)
 // simulate receiving a MQTT message, used only for testing
 void Mqtt::incoming(const char * topic, const char * payload) {
     if (payload != nullptr) {
-        on_message(topic, payload, strlen(payload));
+        on_message(topic, (const uint8_t *)payload, strlen(payload));
     }
 }
 #endif
@@ -260,13 +211,13 @@ void Mqtt::incoming(const char * topic, const char * payload) {
 // received an MQTT message that we subscribed too
 // topic is the full path
 // payload is json or a single string and converted to a json with key 'value'
-void Mqtt::on_message(const char * topic, const char * payload, size_t len) const {
-    // sometimes the payload is not terminated correctly, so make a copy
+void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) const {
+    // the payload is not terminated
     // convert payload to a null-terminated char string
-    char message[len + 2];
-    if (payload != nullptr) {
-        strlcpy(message, payload, len + 1);
-    }
+    // see https://www.emelis.net/espMqttClient/#code-samples
+    char message[len + 1];
+    memcpy(message, payload, len);
+    message[len] = '\0';
 
 #if defined(EMSESP_DEBUG)
     if (len) {
@@ -299,17 +250,15 @@ void Mqtt::on_message(const char * topic, const char * payload, size_t len) cons
         if ((!strcmp(topic, full_topic)) && (mf.mqtt_subfunction_)) {
             if (!(mf.mqtt_subfunction_)(message)) {
                 LOG_ERROR("error: invalid payload %s for this topic %s", message, topic);
-                if (send_response_) {
-                    Mqtt::publish("response", "error: invalid data");
-                }
+                Mqtt::queue_publish("response", "error: invalid data");
             }
             return;
         }
     }
 
-    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL>     input_doc;
-    StaticJsonDocument<EMSESP_JSON_SIZE_LARGE_DYN> output_doc;
-    JsonObject                                     input, output;
+    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> input_doc;
+    DynamicJsonDocument                        output_doc(EMSESP_JSON_SIZE_XLARGE);
+    JsonObject                                 input, output;
 
     // convert payload into a json doc
     // if the payload doesn't not contain the key 'value' or 'data', treat the whole payload as the 'value'
@@ -334,14 +283,10 @@ void Mqtt::on_message(const char * topic, const char * payload, size_t len) cons
             snprintf(error, sizeof(error), "Call failed with error code (%s)", Command::return_code_string(return_code).c_str());
         }
         LOG_ERROR(error);
-        if (send_response_) {
-            Mqtt::publish("response", error);
-        }
+        Mqtt::queue_publish("response", error);
     } else {
         // all good, send back json output from call
-        if (send_response_) {
-            Mqtt::publish("response", output);
-        }
+        Mqtt::queue_publish("response", output);
     }
 }
 
@@ -364,46 +309,12 @@ void Mqtt::show_topic_handlers(uuid::console::Shell & shell, const uint8_t devic
 }
 
 // called when an MQTT Publish ACK is received
-// its a poor man's QOS we assume the ACK represents the last Publish sent
-// check if ACK matches the last Publish we sent, if not report an error. Only if qos is 1 or 2
-// and always remove from queue
 void Mqtt::on_publish(uint16_t packetId) const {
-    // find the MQTT message in the queue and remove it
-    if (mqtt_messages_.empty()) {
-#if defined(EMSESP_DEBUG)
-        LOG_DEBUG("[DEBUG] No message stored for ACK pid %d", packetId);
-#endif
-        return;
-    }
-
-    auto mqtt_message = mqtt_messages_.front();
-
-    // if the last published failed, don't bother checking it. wait for the next retry
-    if (mqtt_message.packet_id_ == 0) {
-#if defined(EMSESP_DEBUG)
-        LOG_DEBUG("[DEBUG] ACK for failed message pid 0");
-#endif
-        return;
-    }
-
-    if (mqtt_message.packet_id_ != packetId) {
-        LOG_ERROR("Mismatch, expecting PID %d, got %d", mqtt_message.packet_id_, packetId);
-        mqtt_publish_fails_++; // increment error count
-    }
-
-#if defined(EMSESP_DEBUG)
-    LOG_DEBUG("[DEBUG] ACK pid %d", packetId);
-#endif
-
-    mqtt_messages_.pop_front(); // always remove from queue, regardless if there was a successful ACK
+    LOG_DEBUG("Packet %d sent successful", packetId);
 }
 
 // called when MQTT settings have changed via the Web forms
 void Mqtt::reset_mqtt() {
-    if (!mqtt_enabled_) {
-        mqtt_messages_.clear();
-    }
-
     if (!mqttClient_) {
         return;
     }
@@ -426,6 +337,7 @@ void Mqtt::load_settings() {
         send_response_      = mqttSettings.send_response;
         discovery_prefix_   = mqttSettings.discovery_prefix.c_str();
         entity_format_      = mqttSettings.entity_format;
+        discovery_type_     = mqttSettings.discovery_type;
 
         // convert to milliseconds
         publish_time_boiler_     = mqttSettings.publish_time_boiler * 1000;
@@ -453,45 +365,29 @@ void Mqtt::start() {
     }
 
     // if already initialized, don't do it again
+    // also to prevent duplicated loading from MqttSettingsService::onConfigUpdated()
     if (initialized_) {
         return;
     }
     initialized_ = true;
 
-    mqttClient_->onConnect([this](bool sessionPresent) { on_connect(); });
-
-    mqttClient_->onDisconnect([this](AsyncMqttClientDisconnectReason reason) {
-        if (!connecting_) {
-            return;
-        }
-        connecting_ = false;
-        if (reason == AsyncMqttClientDisconnectReason::TCP_DISCONNECTED) {
-            LOG_WARNING("MQTT disconnected: TCP");
-        } else if (reason == AsyncMqttClientDisconnectReason::MQTT_IDENTIFIER_REJECTED) {
-            LOG_WARNING("MQTT disconnected: Identifier Rejected");
-        } else if (reason == AsyncMqttClientDisconnectReason::MQTT_SERVER_UNAVAILABLE) {
-            LOG_WARNING("MQTT disconnected: Server unavailable");
-        } else if (reason == AsyncMqttClientDisconnectReason::MQTT_MALFORMED_CREDENTIALS) {
-            LOG_WARNING("MQTT disconnected: Malformed credentials");
-        } else if (reason == AsyncMqttClientDisconnectReason::MQTT_NOT_AUTHORIZED) {
-            LOG_WARNING("MQTT disconnected: Not authorized");
-        } else {
-            LOG_WARNING("MQTT disconnected: code %d", reason);
-        }
-    });
+    // add the 'publish' command ('call system publish' in console or via API)
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), System::command_publish, FL_(publish_cmd));
 
     // create last will topic with the base prefixed. It has to be static because asyncmqttclient destroys the reference
     static char will_topic[MQTT_TOPIC_MAX_SIZE];
-    snprintf(will_topic, MQTT_TOPIC_MAX_SIZE, "%s/status", mqtt_base_.c_str());
-    mqttClient_->setWill(will_topic, 1, true, "offline"); // with qos 1, retain true
+    if (!mqtt_base_.empty()) {
+        snprintf(will_topic, MQTT_TOPIC_MAX_SIZE, "%s/status", mqtt_base_.c_str());
+    } else {
+        snprintf(will_topic, MQTT_TOPIC_MAX_SIZE, "status");
+    }
 
-    mqttClient_->onMessage([this](const char * topic, const char * payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
-        on_message(topic, payload, len); // receiving mqtt
-    });
+    EMSESP::esp8266React.setWill(will_topic); // with qos 1, retain true
 
-    mqttClient_->onPublish([this](uint16_t packetId) {
-        on_publish(packetId); // publish
-    });
+    EMSESP::esp8266React.onMessage(
+        [this](const espMqttClientTypes::MessageProperties & properties, const char * topic, const uint8_t * payload, size_t len, size_t index, size_t total) {
+            on_message(topic, payload, len); // receiving mqtt
+        });
 }
 
 void Mqtt::set_publish_time_boiler(uint16_t publish_time) {
@@ -547,8 +443,32 @@ bool Mqtt::get_publish_onchange(uint8_t device_type) {
     }
     return false;
 }
+void Mqtt::on_disconnect(espMqttClientTypes::DisconnectReason reason) {
+    // only show the error once, not every 2 seconds
+    if (!connecting_) {
+        return;
+    }
+    connecting_ = false;
+    if (reason == espMqttClientTypes::DisconnectReason::TCP_DISCONNECTED) {
+        LOG_WARNING("MQTT disconnected: TCP");
+    } else if (reason == espMqttClientTypes::DisconnectReason::MQTT_UNACCEPTABLE_PROTOCOL_VERSION) {
+        LOG_WARNING("MQTT disconnected: Unacceptable protocol version");
+    } else if (reason == espMqttClientTypes::DisconnectReason::MQTT_IDENTIFIER_REJECTED) {
+        LOG_WARNING("MQTT disconnected: Identifier Rejected");
+    } else if (reason == espMqttClientTypes::DisconnectReason::MQTT_SERVER_UNAVAILABLE) {
+        LOG_WARNING("MQTT disconnected: Server unavailable");
+    } else if (reason == espMqttClientTypes::DisconnectReason::MQTT_MALFORMED_CREDENTIALS) {
+        LOG_WARNING("MQTT disconnected: Malformed credentials");
+    } else if (reason == espMqttClientTypes::DisconnectReason::MQTT_NOT_AUTHORIZED) {
+        LOG_WARNING("MQTT disconnected: Not authorized");
+    } else if (reason == espMqttClientTypes::DisconnectReason::TLS_BAD_FINGERPRINT) {
+        LOG_WARNING("MQTT disconnected: Server fingerprint invalid");
+    } else {
+        LOG_WARNING("MQTT disconnected: code %d", reason);
+    }
+}
 
-// MQTT onConnect - when an MQTT connect is established
+// MQTT on_connect - when an MQTT connect is established
 void Mqtt::on_connect() {
     if (connecting_) {
         return; // prevent duplicated connections
@@ -558,6 +478,7 @@ void Mqtt::on_connect() {
 
     connecting_ = true;
     connectcount_++; // count # reconnects. not currently used.
+    queuecount_ = 0;
 
     load_settings(); // reload MQTT settings - in case they have changes
 
@@ -583,28 +504,19 @@ void Mqtt::on_connect() {
     resubscribe();
 
     // publish to the last will topic (see Mqtt::start() function) to say we're alive
-    publish_retain("status", "online", true); // with retain on
+    queue_publish_retain("status", "online", true); // with retain on
 
-    mqtt_publish_fails_ = 0; // reset fail count to 0
-
-    /*
-    // for debugging only
-    LOG_INFO("Queue size: %d", mqtt_messages_.size());
-    for (const auto & message : mqtt_messages_) {
-        auto content = message.content_;
-        LOG_INFO(" [%02d] (%d) topic=%s payload=%s", message.id_, content->operation, content->topic.c_str(), content->payload.c_str());
-    }
-    */
+    mqtt_publish_fails_ = 0;                        // reset fail count to 0
 }
 
 // Home Assistant Discovery - the main master Device called EMS-ESP
 // e.g. homeassistant/sensor/ems-esp/status/config
 // all the values from the heartbeat payload will be added as attributes to the entity state
 void Mqtt::ha_status() {
-    StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
+    StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> doc;
 
     char uniq[70];
-    if (Mqtt::entity_format() == 2) {
+    if (Mqtt::entity_format() == entityFormat::MULTI_SHORT) {
         snprintf(uniq, sizeof(uniq), "%s_system_status", mqtt_basename_.c_str());
     } else {
         strcpy(uniq, "system_status");
@@ -613,8 +525,8 @@ void Mqtt::ha_status() {
     doc["uniq_id"] = uniq;
     doc["obj_id"]  = uniq;
 
-    doc["stat_t"]   = mqtt_base_ + "/status";
-    doc["name"]     = "EMS-ESP status";
+    doc["stat_t"]   = mqtt_basename_ + "/status";
+    doc["name"]     = "system status";
     doc["pl_on"]    = "online";
     doc["pl_off"]   = "offline";
     doc["stat_cla"] = "measurement";
@@ -625,33 +537,35 @@ void Mqtt::ha_status() {
     // doc["json_attr_t"] = "~/heartbeat"; // store also as HA attributes
 
     JsonObject dev = doc.createNestedObject("dev");
-    dev["name"]    = "EMS-ESP";
+    dev["name"]    = Mqtt::basename(); // take basename
     dev["sw"]      = "v" + std::string(EMSESP_APP_VERSION);
     dev["mf"]      = "proddy";
     dev["mdl"]     = "EMS-ESP";
 #ifndef EMSESP_STANDALONE
     dev["cu"] = "http://" + (EMSESP::system_.ethernet_connected() ? ETH.localIP().toString() : WiFi.localIP().toString());
 #endif
-
     JsonArray ids = dev.createNestedArray("ids");
-    ids.add("ems-esp");
+    ids.add(Mqtt::basename());
 
     char topic[MQTT_TOPIC_MAX_SIZE];
     snprintf(topic, sizeof(topic), "binary_sensor/%s/system_status/config", mqtt_basename_.c_str());
-    Mqtt::publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
+    Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
-    // create the sensors - must match the MQTT payload keys
-    // these are all from the heartbeat MQTT topic
-    if (!EMSESP::system_.ethernet_connected()) {
+// create the sensors - must match the MQTT payload keys
+// these are all from the heartbeat MQTT topic
+#ifndef EMSESP_STANDALONE
+    if (!EMSESP::system_.ethernet_connected() || WiFi.isConnected()) {
         publish_system_ha_sensor_config(DeviceValueType::INT, "WiFi RSSI", "rssi", DeviceValueUOM::DBM);
         publish_system_ha_sensor_config(DeviceValueType::INT, "WiFi strength", "wifistrength", DeviceValueUOM::PERCENT);
     }
+#endif
 
     publish_system_ha_sensor_config(DeviceValueType::STRING, "EMS Bus", "bus_status", DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::STRING, "Uptime", "uptime", DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::INT, "Uptime (sec)", "uptime_sec", DeviceValueUOM::SECONDS);
     publish_system_ha_sensor_config(DeviceValueType::BOOL, "NTP status", "ntp_status", DeviceValueUOM::CONNECTIVITY);
     publish_system_ha_sensor_config(DeviceValueType::INT, "Free memory", "freemem", DeviceValueUOM::KB);
+    publish_system_ha_sensor_config(DeviceValueType::INT, "Max Alloc", "max_alloc", DeviceValueUOM::KB);
     publish_system_ha_sensor_config(DeviceValueType::INT, "MQTT fails", "mqttfails", DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::INT, "Rx received", "rxreceived", DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::INT, "Rx fails", "rxfails", DeviceValueUOM::NONE);
@@ -661,259 +575,143 @@ void Mqtt::ha_status() {
 }
 
 // add sub or pub task to the queue.
-// returns a pointer to the message created
 // the base is not included in the topic
-std::shared_ptr<const MqttMessage> Mqtt::queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, bool retain) {
-    if (topic.empty()) {
-        return nullptr;
-    }
-
-    // take the topic and prefix the base, unless its for HA
-    std::shared_ptr<MqttMessage> message;
-    message = std::make_shared<MqttMessage>(operation, topic, payload, retain);
-
-#if defined(EMSESP_DEBUG)
-    if (operation == Operation::PUBLISH) {
-        if (message->payload.empty()) {
-            LOG_INFO("[DEBUG] Adding to queue: (publish) topic='%s' empty payload", message->topic.c_str());
-        } else {
-            LOG_INFO("[DEBUG] Adding to queue: (publish) topic='%s' payload=%s", message->topic.c_str(), message->payload.c_str());
+bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, const std::string & payload, const bool retain) {
+    if (topic == "response" && operation == Operation::PUBLISH) {
+        lastresponse_ = payload;
+        if (!send_response_) {
+            return true;
         }
-    } else {
-        LOG_INFO("[DEBUG] Adding to queue: (subscribe) topic='%s'", message->topic.c_str());
     }
-#endif
+    if (!mqtt_enabled_ || topic.empty()) {
+        return false; // quit, not using MQTT
+    }
 
-    // if the queue is full, make room but removing the last one
-    if (mqtt_messages_.size() >= MAX_MQTT_MESSAGES || ESP.getFreeHeap() < (60 * 1024)) {
-        mqtt_messages_.pop_front();
-        LOG_WARNING("Queue overflow, removing one message");
+    uint16_t packet_id = 0;
+    char     fulltopic[MQTT_TOPIC_MAX_SIZE];
+
+    if (topic.find(discovery_prefix_) == 0) {
+        strlcpy(fulltopic, topic.c_str(), sizeof(fulltopic)); // leave topic as it is
+    } else {
+        // it's a discovery topic, added the mqtt base to the topic path
+        snprintf(fulltopic, sizeof(fulltopic), "%s/%s", mqtt_base_.c_str(), topic.c_str()); // uses base
+    }
+
+    if (operation == Operation::PUBLISH) {
+        packet_id = mqttClient_->publish(fulltopic, mqtt_qos_, retain, payload.c_str());
+        mqtt_message_id_++;
+        LOG_DEBUG("Publishing topic '%s', pid %d", fulltopic, packet_id);
+    } else if (operation == Operation::SUBSCRIBE) {
+        packet_id = mqttClient_->subscribe(fulltopic, mqtt_qos_);
+        LOG_DEBUG("Subscribing to topic '%s', pid %d", fulltopic, packet_id);
+    } else if (operation == Operation::UNSUBSCRIBE) {
+        packet_id = mqttClient_->unsubscribe(fulltopic);
+        LOG_DEBUG("Unsubscribing to topic '%s', pid %d", fulltopic, packet_id);
+    }
+    if (packet_id == 0) {
+        LOG_WARNING("%s failed: %s", operation == Operation::PUBLISH ? "Publish" : operation == Operation::SUBSCRIBE ? "Subscribe" : "Unsubscribe", fulltopic);
         mqtt_publish_fails_++;
     }
-    mqtt_messages_.emplace_back(mqtt_message_id_++, std::move(message));
-
-    return mqtt_messages_.back().content_; // this is because the message has been moved
+    return (packet_id != 0);
 }
 
 // add MQTT message to queue, payload is a string
-std::shared_ptr<const MqttMessage> Mqtt::queue_publish_message(const std::string & topic, const std::string & payload, bool retain) {
-    if (!enabled()) {
-        return nullptr;
-    };
+bool Mqtt::queue_publish_message(const std::string & topic, const std::string & payload, const bool retain) {
     return queue_message(Operation::PUBLISH, topic, payload, retain);
 }
 
 // add MQTT subscribe message to queue
-std::shared_ptr<const MqttMessage> Mqtt::queue_subscribe_message(const std::string & topic) {
-    return queue_message(Operation::SUBSCRIBE, topic, "", false); // no payload
+void Mqtt::queue_subscribe_message(const std::string & topic) {
+    queue_message(Operation::SUBSCRIBE, topic, "", false); // no payload
 }
 
 // add MQTT unsubscribe message to queue
-std::shared_ptr<const MqttMessage> Mqtt::queue_unsubscribe_message(const std::string & topic) {
-    return queue_message(Operation::UNSUBSCRIBE, topic, "", false); // no payload
+void Mqtt::queue_unsubscribe_message(const std::string & topic) {
+    queue_message(Operation::UNSUBSCRIBE, topic, "", false); // no payload
 }
 
 // MQTT Publish, using a user's retain flag
-void Mqtt::publish(const std::string & topic, const std::string & payload) {
-    queue_publish_message(topic, payload, mqtt_retain_);
+bool Mqtt::queue_publish(const std::string & topic, const std::string & payload) {
+    return queue_publish_message(topic, payload, mqtt_retain_);
 }
 
 // MQTT Publish, using a user's retain flag - except for char * strings
-void Mqtt::publish(const char * topic, const char * payload) {
-    queue_publish_message((topic), payload, mqtt_retain_);
+bool Mqtt::queue_publish(const char * topic, const char * payload) {
+    return queue_publish_message((topic), payload, mqtt_retain_);
 }
 
 // MQTT Publish, using a specific retain flag, topic is a flash string
-void Mqtt::publish(const char * topic, const std::string & payload) {
-    queue_publish_message((topic), payload, mqtt_retain_);
+bool Mqtt::queue_publish(const char * topic, const std::string & payload) {
+    return queue_publish_message((topic), payload, mqtt_retain_);
 }
 
-void Mqtt::publish(const char * topic, const JsonObject & payload) {
-    publish_retain(topic, payload, mqtt_retain_);
+bool Mqtt::queue_publish(const char * topic, const JsonObject & payload) {
+    return queue_publish_retain(topic, payload, mqtt_retain_);
 }
 
 // publish json doc, only if its not empty
-void Mqtt::publish(const std::string & topic, const JsonObject & payload) {
-    publish_retain(topic, payload, mqtt_retain_);
+bool Mqtt::queue_publish(const std::string & topic, const JsonObject & payload) {
+    return queue_publish_retain(topic, payload, mqtt_retain_);
 }
 
 // MQTT Publish, using a specific retain flag, topic is a flash string, forcing retain flag
-void Mqtt::publish_retain(const char * topic, const std::string & payload, bool retain) {
-    queue_publish_message((topic), payload, retain);
+bool Mqtt::queue_publish_retain(const char * topic, const std::string & payload, const bool retain) {
+    return queue_publish_message((topic), payload, retain);
 }
 
 // publish json doc, only if its not empty, using the retain flag
-void Mqtt::publish_retain(const std::string & topic, const JsonObject & payload, bool retain) {
-    publish_retain(topic.c_str(), payload, retain);
+bool Mqtt::queue_publish_retain(const std::string & topic, const JsonObject & payload, const bool retain) {
+    return queue_publish_retain(topic.c_str(), payload, retain);
 }
 
-void Mqtt::publish_retain(const char * topic, const JsonObject & payload, bool retain) {
-    if (enabled() && payload.size()) {
+bool Mqtt::queue_publish_retain(const char * topic, const JsonObject & payload, const bool retain) {
+    if (payload.size()) {
         std::string payload_text;
+        payload_text.reserve(measureJson(payload) + 1);
         serializeJson(payload, payload_text); // convert json to string
-        queue_publish_message(topic, payload_text, retain);
+        return queue_publish_message(topic, payload_text, retain);
     }
+    return false;
 }
 
 // publish empty payload to remove the topic
-void Mqtt::publish_ha(const char * topic) {
-    if (!enabled()) {
-        return;
+bool Mqtt::queue_remove_topic(const char * topic) {
+    if (ha_enabled_) {
+        return queue_publish_message(Mqtt::discovery_prefix() + topic, "", true); // publish with retain to remove from broker
+    } else {
+        return queue_publish_message(topic, "", true);                            // publish with retain to remove from broker
     }
-
-    std::string fulltopic = Mqtt::discovery_prefix() + topic;
-#if defined(EMSESP_DEBUG)
-    LOG_DEBUG("[DEBUG] Publishing empty HA topic=%s", fulltopic.c_str());
-#endif
-
-    queue_publish_message(fulltopic, "", true); // publish with retain to remove from broker
 }
 
-// publish a Home Assistant config topic and payload, with retain flag off.
-void Mqtt::publish_ha(const char * topic, const JsonObject & payload) {
+// queue a Home Assistant config topic and payload, with retain flag off.
+bool Mqtt::queue_ha(const char * topic, const JsonObject & payload) {
     if (!enabled()) {
-        return;
+        return false;
     }
 
     std::string payload_text;
     payload_text.reserve(measureJson(payload) + 1);
-    serializeJson(payload, payload_text); // convert json to string
+    serializeJson(payload, payload_text);                                               // convert json to string
 
-    std::string fulltopic = Mqtt::discovery_prefix() + topic;
-#if defined(EMSESP_STANDALONE)
-    LOG_DEBUG("Publishing HA topic=%s, payload=%s", fulltopic.c_str(), payload_text.c_str());
-#elif defined(EMSESP_DEBUG)
-    LOG_DEBUG("[debug] Publishing HA topic=%s, payload=%s", fulltopic.c_str(), payload_text.c_str());
-#endif
-
-    // queue messages if the MQTT connection is not yet established. to ensure we don't miss messages
-    queue_publish_message(fulltopic, payload_text, true); // with retain true
-}
-
-// take top from queue and perform the publish or subscribe action
-// assumes there is an MQTT connection
-void Mqtt::process_queue() {
-    if (mqtt_messages_.empty()) {
-        return;
-    }
-
-    // fetch first from queue and create the full topic name
-    auto mqtt_message = mqtt_messages_.front();
-    auto message      = mqtt_message.content_;
-    char topic[MQTT_TOPIC_MAX_SIZE];
-
-    if (message->topic.find(discovery_prefix_) == 0) {
-        strlcpy(topic, message->topic.c_str(), sizeof(topic)); // leave topic as it is
-    } else {
-        // it's a discovery topic, added the mqtt base to the topic path
-        snprintf(topic, MQTT_TOPIC_MAX_SIZE, "%s/%s", mqtt_base_.c_str(), message->topic.c_str()); // uses base
-    }
-
-    // if this has already been published and we're waiting for an ACK, don't publish again
-    // it will have a real packet ID
-    if (mqtt_message.packet_id_ > 0) {
-#if defined(EMSESP_DEBUG)
-        LOG_DEBUG("[DEBUG] Waiting for QOS-ACK");
-#endif
-        // if we don't get the ack within 10 minutes, republish with new packet_id
-        if (uuid::get_uptime_sec() - last_publish_queue_ < 600) {
-            return;
-        }
-    }
-    last_publish_queue_ = uuid::get_uptime_sec();
-
-    // if we're subscribing...
-    if (message->operation == Operation::SUBSCRIBE) {
-        LOG_DEBUG("Subscribing to topic '%s'", topic);
-        uint16_t packet_id = mqttClient_->subscribe(topic, mqtt_qos_);
-        if (!packet_id) {
-            if (++mqtt_messages_.front().retry_count_ < MQTT_PUBLISH_MAX_RETRY) {
-                return;
-            }
-            LOG_ERROR("Error subscribing to topic '%s'", topic);
-            mqtt_publish_fails_++; // increment failure counter
-        }
-
-        mqtt_messages_.pop_front(); // remove the message from the queue
-
-        return;
-    }
-
-    // if we're unsubscribing...
-    if (message->operation == Operation::UNSUBSCRIBE) {
-        LOG_DEBUG("Subscribing to topic '%s'", topic);
-        uint16_t packet_id = mqttClient_->unsubscribe(topic);
-        if (!packet_id) {
-            if (++mqtt_messages_.front().retry_count_ < MQTT_PUBLISH_MAX_RETRY) {
-                return;
-            }
-            LOG_ERROR("Error unsubscribing to topic '%s'", topic);
-            mqtt_publish_fails_++; // increment failure counter
-        }
-
-        mqtt_messages_.pop_front(); // remove the message from the queue
-
-        return;
-    }
-
-    // else try and publish it
-    uint16_t packet_id = mqttClient_->publish(topic, mqtt_qos_, message->retain, message->payload.c_str(), message->payload.size(), false, mqtt_message.id_);
-    lasttopic_         = topic;
-    lastpayload_       = message->payload;
-    LOG_DEBUG("Publishing topic %s (#%02d, retain=%d, retry=%d, size=%d, pid=%d)",
-              topic,
-              mqtt_message.id_,
-              message->retain,
-              mqtt_message.retry_count_ + 1,
-              message->payload.size(),
-              packet_id);
-#if defined(EMSESP_DEBUG)
-    LOG_DEBUG("Payload:%s", message->payload.c_str()); // extra message for #784
-#endif
-    if (packet_id == 0) {
-        // it failed. if we retried n times, give up. remove from queue
-        if (mqtt_message.retry_count_ == (MQTT_PUBLISH_MAX_RETRY - 1)) {
-            LOG_ERROR("Failed to publish to %s after %d attempts", topic, mqtt_message.retry_count_ + 1);
-            mqtt_publish_fails_++;      // increment failure counter
-            mqtt_messages_.pop_front(); // delete
-            return;
-        } else {
-            // update the record
-            mqtt_messages_.front().retry_count_++;
-            LOG_DEBUG("Failed to publish to %s. Trying again, #%d", topic, mqtt_message.retry_count_ + 1);
-            return; // leave on queue for next time so it gets republished
-        }
-    }
-
-    // if we have ACK set with QOS 1 or 2, leave on queue and let the ACK process remove it
-    // but add the packet_id so we can check it later
-    if (mqtt_qos_ != 0) {
-        mqtt_messages_.front().packet_id_ = packet_id;
-#if defined(EMSESP_DEBUG)
-        LOG_DEBUG("[DEBUG] Setting packetID for ACK to %d", packet_id);
-#endif
-        return;
-    }
-
-    mqtt_messages_.pop_front(); // remove the message from the queue
+    return queue_publish_message(Mqtt::discovery_prefix() + topic, payload_text, true); // with retain true
 }
 
 // create's a ha sensor config topic from a device value object
 // and also takes a flag (create_device_config) used to also create the main HA device config. This is only needed for one entity
-void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model, const std::string & brand, const bool remove, const bool create_device_config) {
-    StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> dev_json;
+bool Mqtt::publish_ha_sensor_config(DeviceValue & dv, const char * model, const char * brand, const bool remove, const bool create_device_config) {
+    StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> dev_json;
 
     // always create the ids
     JsonArray ids = dev_json.createNestedArray("ids");
     char      ha_device[40];
     auto      device_type_name = EMSdevice::device_type_2_device_name(dv.device_type);
-    snprintf(ha_device, sizeof(ha_device), "ems-esp-%s", device_type_name);
+    snprintf(ha_device, sizeof(ha_device), "%s-%s", Mqtt::basename().c_str(), device_type_name);
     ids.add(ha_device);
 
     if (create_device_config) {
         auto cap_name = strdup(device_type_name);
         Helpers::CharToUpperUTF8(cap_name); // capitalize first letter
-        dev_json["name"]       = std::string("EMS-ESP ") + cap_name;
+        dev_json["name"]       = Mqtt::basename() + " " + cap_name;
         dev_json["mf"]         = brand;
         dev_json["mdl"]        = model;
         dev_json["via_device"] = "ems-esp";
@@ -929,41 +727,42 @@ void Mqtt::publish_ha_sensor_config(DeviceValue & dv, const std::string & model,
     // unless the entity has been marked as read-only and so it'll default to using the sensor/ type
     bool has_cmd = dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY);
 
-    publish_ha_sensor_config(dv.type,
-                             dv.tag,
-                             dv.get_fullname().c_str(),
-                             (dv.fullname ? dv.fullname[0] : nullptr), // EN name
-                             dv.device_type,
-                             dv.short_name,
-                             dv.uom,
-                             remove,
-                             has_cmd,
-                             dv.options,
-                             dv.options_size,
-                             dv_set_min,
-                             dv_set_max,
-                             dv.numeric_operator,
-                             dev_json.as<JsonObject>());
+    return publish_ha_sensor_config(dv.type,
+                                    dv.tag,
+                                    dv.get_fullname().c_str(),
+                                    (dv.fullname ? dv.fullname[0] : nullptr), // EN name
+                                    dv.device_type,
+                                    dv.short_name,
+                                    dv.uom,
+                                    remove,
+                                    has_cmd,
+                                    dv.options,
+                                    dv.options_size,
+                                    dv_set_min,
+                                    dv_set_max,
+                                    dv.numeric_operator,
+                                    dev_json.as<JsonObject>());
 }
 
 // publish HA sensor for System using the heartbeat tag
-void Mqtt::publish_system_ha_sensor_config(uint8_t type, const char * name, const char * entity, const uint8_t uom) {
-    StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG> doc;
-    JsonObject                                     dev_json = doc.createNestedObject("dev");
+bool Mqtt::publish_system_ha_sensor_config(uint8_t type, const char * name, const char * entity, const uint8_t uom) {
+    StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> doc;
+    JsonObject                                 dev_json = doc.createNestedObject("dev");
 
     JsonArray ids = dev_json.createNestedArray("ids");
-    ids.add("ems-esp");
+    ids.add(Mqtt::basename());
 
-    publish_ha_sensor_config(type, DeviceValueTAG::TAG_HEARTBEAT, name, name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, 0, dev_json);
+    return publish_ha_sensor_config(
+        type, DeviceValueTAG::TAG_HEARTBEAT, name, name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, 0, dev_json);
 }
 
 // MQTT discovery configs
 // entity must match the key/value pair in the *_data topic
 // note: some extra string copying done here, it looks messy but does help with heap fragmentation issues
-void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdevice::DeviceValueType
+bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdevice::DeviceValueType
                                     uint8_t               tag,         // EMSdevice::DeviceValueTAG
                                     const char * const    fullname,    // fullname, already translated
-                                    const char * const    en_name,     // original name
+                                    const char * const    en_name,     // original name in english
                                     const uint8_t         device_type, // EMSdevice::DeviceType
                                     const char * const    entity,      // same as shortname
                                     const uint8_t         uom,         // EMSdevice::DeviceValueUOM (0=NONE)
@@ -977,26 +776,28 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
                                     const JsonObject &    dev_json) {
     // ignore if name (fullname) is empty
     if (!fullname || !en_name) {
-        return;
+        return false;
     }
 
     // create the device name
     auto device_name = EMSdevice::device_type_2_device_name(device_type);
 
-    // create entity by add the hc/wwc tag if present, separating with a _
+    bool has_tag = ((tag < DeviceValue::NUM_TAGS) && (tag != DeviceValue::DeviceValueTAG::TAG_NONE) && strlen(DeviceValue::DeviceValueTAG_s[tag][0]));
+
+    // create entity by add the hc/wwc tag if present, separating with an _
     char entity_with_tag[50];
     if (tag >= DeviceValueTAG::TAG_HC1) {
-        snprintf(entity_with_tag, sizeof(entity_with_tag), "%s_%s", EMSdevice::tag_to_mqtt(tag).c_str(), entity);
+        snprintf(entity_with_tag, sizeof(entity_with_tag), "%s_%s", EMSdevice::tag_to_mqtt(tag), entity);
     } else {
         snprintf(entity_with_tag, sizeof(entity_with_tag), "%s", entity);
     }
 
-    // build unique identifier also used as object_id and becomes the Entity ID in HA
+    // build unique identifier also used as object_id which also becomes the Entity ID in HA
     char uniq_id[80];
-    if (Mqtt::entity_format() == 2) {
+    if (Mqtt::entity_format() == entityFormat::MULTI_SHORT) {
         // prefix base name to each uniq_id and use the shortname
         snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
-    } else if (Mqtt::entity_format() == 1) {
+    } else if (Mqtt::entity_format() == entityFormat::SINGLE_SHORT) {
         // shortname, no mqtt base. This is the default version.
         snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, entity_with_tag);
     } else {
@@ -1005,15 +806,15 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         char uniq_s[60];
         strlcpy(uniq_s, en_name, sizeof(uniq_s));
         Helpers::replace_char(uniq_s, ' ', '_');
-        if (EMSdevice::tag_to_string(tag).empty()) {
-            snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, Helpers::toLower(uniq_s).c_str());
+        Helpers::replace_char(uniq_s, '+', '2'); //changes 'eco+_switch_off' to 'eco2_switch_off' (HA ignores '+')
+        if (has_tag) {
+            snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", device_name, DeviceValue::DeviceValueTAG_s[tag][0], Helpers::toLower(uniq_s).c_str());
         } else {
-            snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", device_name, EMSdevice::tag_to_string(tag, false).c_str(), Helpers::toLower(uniq_s).c_str());
+            snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, Helpers::toLower(uniq_s).c_str());
         }
     }
 
     // build a config topic that will be prefix onto a HA type (e.g. number, switch)
-    // e.g. homeassistant/number/ems-esp/thermostat_hc1_manualtemp
     char config_topic[70];
     snprintf(config_topic, sizeof(config_topic), "%s/%s_%s/config", mqtt_basename_.c_str(), device_name, entity_with_tag);
 
@@ -1030,9 +831,15 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         case DeviceValueType::SHORT:
         case DeviceValueType::USHORT:
         case DeviceValueType::ULONG:
-            // number - https://www.home-assistant.io/integrations/number.mqtt
-            // https://developers.home-assistant.io/docs/core/entity/number
-            snprintf(topic, sizeof(topic), "number/%s", config_topic);
+            if (discovery_type() == discoveryType::HOMEASSISTANT) {
+                // Home Assistant
+                // number - https://www.home-assistant.io/integrations/number.mqtt
+                snprintf(topic, sizeof(topic), "number/%s", config_topic);
+            } else {
+                // Domoticz
+                // Does not support number, use sensor
+                snprintf(topic, sizeof(topic), "sensor/%s", config_topic);
+            }
             break;
         case DeviceValueType::BOOL:
             // switch - https://www.home-assistant.io/integrations/switch.mqtt
@@ -1053,28 +860,27 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         if (type == DeviceValueType::BOOL) {
             snprintf(topic, sizeof(topic), "binary_sensor/%s", config_topic); // binary sensor (for booleans)
         } else {
-            snprintf(topic, sizeof(topic), "sensor/%s", config_topic); // normal HA sensor
+            snprintf(topic, sizeof(topic), "sensor/%s", config_topic);        // normal HA sensor
         }
     }
 
     // if we're asking to remove this topic, send an empty payload and exit
     // https://github.com/emsesp/EMS-ESP32/issues/196
     if (remove) {
-        LOG_DEBUG("Removing HA config for %s", uniq_id);
-        publish_ha(topic);
-        return;
+        LOG_DEBUG("Queuing removing topic %s", topic);
+        return queue_remove_topic(topic);
     }
 
     // build the payload
-    DynamicJsonDocument doc(EMSESP_JSON_SIZE_HA_CONFIG);
+    StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> doc;
     doc["uniq_id"] = uniq_id;
-    doc["obj_id"]  = uniq_id; // same as unique_id
+    doc["obj_id"]  = uniq_id;             // same as unique_id
 
     const char * ic_ha  = "ic";           // icon - only set this if there is no device class
     const char * sc_ha  = "stat_cla";     // state class
     const char * uom_ha = "unit_of_meas"; // unit of measure
 
-    char sample_val[30] = "0"; // sample, correct(!) entity value, used only to prevent warning/error in HA if real value is not published yet
+    char sample_val[30] = "0";            // sample, correct(!) entity value, used only to prevent warning/error in HA if real value is not published yet
 
     // handle commands, which are device entities that are writable
     // we add the command topic parameter
@@ -1083,7 +889,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         // command topic back to EMS-ESP
         char command_topic[MQTT_TOPIC_MAX_SIZE];
         if (tag >= DeviceValueTAG::TAG_HC1) {
-            snprintf(command_topic, sizeof(command_topic), "%s/%s/%s/%s", mqtt_basename_.c_str(), device_name, EMSdevice::tag_to_mqtt(tag).c_str(), entity);
+            snprintf(command_topic, sizeof(command_topic), "%s/%s/%s/%s", mqtt_basename_.c_str(), device_name, EMSdevice::tag_to_mqtt(tag), entity);
         } else {
             snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", mqtt_basename_.c_str(), device_name, entity);
         }
@@ -1091,7 +897,7 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
         // for enums, add options
         if (type == DeviceValueType::ENUM) {
-            JsonArray option_list = doc.createNestedArray("ops"); //options
+            JsonArray option_list = doc.createNestedArray("ops"); // options
             for (uint8_t i = 0; i < options_size; i++) {
                 option_list.add(Helpers::translated_word(options[i]));
             }
@@ -1140,12 +946,13 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     char   ha_name[70];
     char * F_name = strdup(fullname);
     Helpers::CharToUpperUTF8(F_name); // capitalize first letter
-    if (EMSdevice::tag_to_string(tag).empty()) {
-        snprintf(ha_name, sizeof(ha_name), "%s", F_name); // no tag
+    if (has_tag) {
+        // exclude heartbeat tag
+        snprintf(ha_name, sizeof(ha_name), "%s %s", EMSdevice::tag_to_string(tag), F_name);
     } else {
-        snprintf(ha_name, sizeof(ha_name), "%s %s", EMSdevice::tag_to_string(tag).c_str(), F_name);
+        snprintf(ha_name, sizeof(ha_name), "%s", F_name); // no tag
     }
-    free(F_name); // very important!
+    free(F_name);                                         // very important!
     doc["name"] = ha_name;
 
     // value template
@@ -1153,8 +960,8 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     char val_obj[100];
     char val_cond[200];
     if (is_nested() && tag >= DeviceValueTAG::TAG_HC1) {
-        snprintf(val_obj, sizeof(val_obj), "value_json.%s.%s", EMSdevice::tag_to_mqtt(tag).c_str(), entity);
-        snprintf(val_cond, sizeof(val_cond), "value_json.%s is defined and %s is defined", EMSdevice::tag_to_mqtt(tag).c_str(), val_obj);
+        snprintf(val_obj, sizeof(val_obj), "value_json.%s.%s", EMSdevice::tag_to_mqtt(tag), entity);
+        snprintf(val_cond, sizeof(val_cond), "value_json.%s is defined and %s is defined", EMSdevice::tag_to_mqtt(tag), val_obj);
     } else {
         snprintf(val_obj, sizeof(val_obj), "value_json.%s", entity);
         snprintf(val_cond, sizeof(val_cond), "%s is defined", val_obj);
@@ -1177,7 +984,6 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             doc["pl_off"] = Helpers::render_boolean(result, false);
             snprintf(sample_val, sizeof(sample_val), "'%s'", Helpers::render_boolean(result, false));
         }
-        doc[sc_ha] = F_(measurement); //do we want this???
     } else {
         // always set the uom, using the standards except for hours/minutes/seconds
         // using HA specific codes from https://github.com/home-assistant/core/blob/dev/homeassistant/const.py
@@ -1188,11 +994,9 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         } else if (uom == DeviceValueUOM::SECONDS) {
             doc[uom_ha] = "s";
         } else if (uom != DeviceValueUOM::NONE) {
-            // default
-            doc[uom_ha] = EMSdevice::uom_to_string(uom);
+            doc[uom_ha] = EMSdevice::uom_to_string(uom); // default
         }
     }
-
     doc["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else " + sample_val + "}}";
 
     // this next section is adding the state class, device class and sometimes the icon
@@ -1293,10 +1097,10 @@ void Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // add "availability" section
     add_avty_to_doc(stat_t, doc.as<JsonObject>(), val_cond);
 
-    publish_ha(topic, doc.as<JsonObject>());
+    return queue_ha(topic, doc.as<JsonObject>());
 }
 
-void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp, const bool remove, const int16_t min, const uint16_t max) {
+bool Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp, const bool remove, const int16_t min, const uint16_t max) {
     uint8_t hc_num = tag - DeviceValueTAG::TAG_HC1 + 1;
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
@@ -1305,8 +1109,8 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     char seltemp_s[30];
     char currtemp_s[30];
     char hc_mode_cond[80];
-    char seltemp_cond[80];
-    char currtemp_cond[170];
+    char seltemp_cond[100];
+    char currtemp_cond[100];
     char mode_str_tpl[400];
     char name_s[10];
     char uniq_id_s[60];
@@ -1317,8 +1121,7 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
 
     snprintf(topic, sizeof(topic), "climate/%s/thermostat_hc%d/config", mqtt_basename_.c_str(), hc_num);
     if (remove) {
-        publish_ha(topic); // publish empty payload with retain flag
-        return;
+        return queue_remove_topic(topic); // publish empty payload with retain flag
     }
 
     if (Mqtt::is_nested()) {
@@ -1327,6 +1130,7 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
         snprintf(hc_mode_cond, sizeof(hc_mode_cond), "value_json.hc%d is undefined or %s is undefined", hc_num, hc_mode_s);
         snprintf(seltemp_s, sizeof(seltemp_s), "value_json.hc%d.seltemp", hc_num);
         snprintf(seltemp_cond, sizeof(seltemp_cond), "value_json.hc%d is defined and %s is defined", hc_num, seltemp_s);
+
         if (has_roomtemp) {
             snprintf(currtemp_s, sizeof(currtemp_s), "value_json.hc%d.currtemp", hc_num);
             snprintf(currtemp_cond, sizeof(currtemp_cond), "value_json.hc%d is defined and %s is defined", hc_num, currtemp_s);
@@ -1338,6 +1142,7 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
         snprintf(hc_mode_cond, sizeof(hc_mode_cond), "%s is undefined", hc_mode_s);
         snprintf(seltemp_s, sizeof(seltemp_s), "value_json.seltemp");
         snprintf(seltemp_cond, sizeof(seltemp_cond), "%s is defined", seltemp_s);
+
         if (has_roomtemp) {
             snprintf(currtemp_s, sizeof(currtemp_s), "value_json.currtemp");
             snprintf(currtemp_cond, sizeof(currtemp_cond), "%s is defined", currtemp_s);
@@ -1356,16 +1161,16 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
 
     snprintf(name_s, sizeof(name_s), "Hc%d", hc_num);
 
-    if (Mqtt::entity_format() == 2) {
+    if (Mqtt::entity_format() == entityFormat::MULTI_SHORT) {
         snprintf(uniq_id_s, sizeof(uniq_id_s), "%s_thermostat_hc%d", mqtt_basename_.c_str(), hc_num); // add basename
     } else {
-        snprintf(uniq_id_s, sizeof(uniq_id_s), "thermostat_hc%d", hc_num); // backward compatible with v3.4
+        snprintf(uniq_id_s, sizeof(uniq_id_s), "thermostat_hc%d", hc_num);                            // backward compatible with v3.4
     }
 
     snprintf(temp_cmd_s, sizeof(temp_cmd_s), "~/thermostat/hc%d/seltemp", hc_num);
-    snprintf(mode_cmd_s, sizeof(temp_cmd_s), "~/thermostat/hc%d/mode", hc_num);
+    snprintf(mode_cmd_s, sizeof(mode_cmd_s), "~/thermostat/hc%d/mode", hc_num);
 
-    StaticJsonDocument<EMSESP_JSON_SIZE_HA_CONFIG + 512> doc;
+    StaticJsonDocument<EMSESP_JSON_SIZE_XLARGE> doc; // 1024 is not enough
 
     doc["~"]             = mqtt_base_;
     doc["uniq_id"]       = uniq_id_s;
@@ -1376,30 +1181,35 @@ void Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     doc["temp_cmd_t"]    = temp_cmd_s;
     doc["temp_stat_t"]   = topic_t;
     doc["temp_stat_tpl"] = (std::string) "{{" + seltemp_s + " if " + seltemp_cond + " else 0}}";
+
     if (has_roomtemp) {
         doc["curr_temp_t"]   = topic_t;
         doc["curr_temp_tpl"] = (std::string) "{{" + currtemp_s + " if " + currtemp_cond + " else 0}}";
     }
 
-    doc["min_temp"]  = Helpers::render_value(min_s, min, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
-    doc["max_temp"]  = Helpers::render_value(max_s, max, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
-    doc["temp_step"] = "0.5";
+    doc["min_temp"]   = Helpers::render_value(min_s, min, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
+    doc["max_temp"]   = Helpers::render_value(max_s, max, 0, EMSESP::system_.fahrenheit() ? 2 : 0);
+    doc["temp_step"]  = "0.5";
+    doc["mode_cmd_t"] = mode_cmd_s;
 
     // the HA climate component only responds to auto, heat and off
-    doc["mode_cmd_t"] = mode_cmd_s;
-    JsonArray modes   = doc.createNestedArray("modes");
+    JsonArray modes = doc.createNestedArray("modes");
+
     modes.add("auto");
     modes.add("heat");
     modes.add("off");
 
     JsonObject dev = doc.createNestedObject("dev");
     JsonArray  ids = dev.createNestedArray("ids");
-    ids.add("ems-esp-thermostat");
+
+    char ha_device[40];
+    snprintf(ha_device, sizeof(ha_device), "%s-thermostat", Mqtt::basename().c_str());
+    ids.add(ha_device);
 
     // add "availability" section
     add_avty_to_doc(topic_t, doc.as<JsonObject>(), seltemp_cond, has_roomtemp ? currtemp_cond : nullptr, hc_mode_cond);
 
-    publish_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
+    return queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 }
 
 // based on the device and tag, create the MQTT topic name (without the basename)
@@ -1414,7 +1224,7 @@ std::string Mqtt::tag_to_topic(uint8_t device_type, uint8_t tag) {
     std::string topic = EMSdevice::device_type_2_device_name(device_type);
 
     // if there is a tag add it
-    if (!EMSdevice::tag_to_mqtt(tag).empty() && ((tag == DeviceValueTAG::TAG_BOILER_DATA_WW) || (!is_nested() && tag >= DeviceValueTAG::TAG_HC1))) {
+    if ((tag == DeviceValueTAG::TAG_BOILER_DATA_WW) || (!is_nested() && tag >= DeviceValueTAG::TAG_HC1)) {
         return topic + "_data_" + EMSdevice::tag_to_mqtt(tag);
     } else {
         return topic + "_data";
@@ -1435,11 +1245,11 @@ void Mqtt::add_avty_to_doc(const char * state_t, const JsonObject & doc, const c
     avty_json["val_tpl"] = tpl;
     avty.add(avty_json);
     avty_json.clear();
-
     avty_json["t"] = state_t;
     snprintf(tpl, sizeof(tpl), tpl_draft, cond1 == nullptr ? "value is defined" : cond1);
     avty_json["val_tpl"] = tpl;
     avty.add(avty_json);
+
     if (cond2 != nullptr) {
         avty_json.clear();
         avty_json["t"] = state_t;
@@ -1447,6 +1257,7 @@ void Mqtt::add_avty_to_doc(const char * state_t, const JsonObject & doc, const c
         avty_json["val_tpl"] = tpl;
         avty.add(avty_json);
     }
+
     if (negcond != nullptr) {
         avty_json.clear();
         avty_json["t"] = state_t;
@@ -1457,5 +1268,6 @@ void Mqtt::add_avty_to_doc(const char * state_t, const JsonObject & doc, const c
 
     doc["avty_mode"] = "all";
 }
+
 
 } // namespace emsesp

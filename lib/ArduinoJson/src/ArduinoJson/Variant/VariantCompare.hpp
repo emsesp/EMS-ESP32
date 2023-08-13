@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2022, Benoit BLANCHON
+// Copyright © 2014-2023, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -10,7 +10,7 @@
 #include <ArduinoJson/Strings/StringAdapters.hpp>
 #include <ArduinoJson/Variant/Visitor.hpp>
 
-namespace ARDUINOJSON_NAMESPACE {
+ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
 class CollectionData;
 
@@ -22,7 +22,7 @@ struct Comparer;
 template <typename T>
 struct Comparer<T, typename enable_if<IsString<T>::value>::type>
     : ComparerBase {
-  T rhs;
+  T rhs;  // TODO: store adapted string?
 
   explicit Comparer(T value) : rhs(value) {}
 
@@ -75,20 +75,18 @@ struct NullComparer : ComparerBase {
   }
 };
 
-#if ARDUINOJSON_HAS_NULLPTR
 template <>
 struct Comparer<decltype(nullptr), void> : NullComparer {
   explicit Comparer(decltype(nullptr)) : NullComparer() {}
 };
-#endif
 
 struct ArrayComparer : ComparerBase {
-  const CollectionData* _rhs;
+  const CollectionData* rhs_;
 
-  explicit ArrayComparer(const CollectionData& rhs) : _rhs(&rhs) {}
+  explicit ArrayComparer(const CollectionData& rhs) : rhs_(&rhs) {}
 
   CompareResult visitArray(const CollectionData& lhs) {
-    if (JsonArrayConst(&lhs) == JsonArrayConst(_rhs))
+    if (JsonArrayConst(&lhs) == JsonArrayConst(rhs_))
       return COMPARE_RESULT_EQUAL;
     else
       return COMPARE_RESULT_DIFFER;
@@ -96,12 +94,12 @@ struct ArrayComparer : ComparerBase {
 };
 
 struct ObjectComparer : ComparerBase {
-  const CollectionData* _rhs;
+  const CollectionData* rhs_;
 
-  explicit ObjectComparer(const CollectionData& rhs) : _rhs(&rhs) {}
+  explicit ObjectComparer(const CollectionData& rhs) : rhs_(&rhs) {}
 
   CompareResult visitObject(const CollectionData& lhs) {
-    if (JsonObjectConst(&lhs) == JsonObjectConst(_rhs))
+    if (JsonObjectConst(&lhs) == JsonObjectConst(rhs_))
       return COMPARE_RESULT_EQUAL;
     else
       return COMPARE_RESULT_DIFFER;
@@ -109,15 +107,15 @@ struct ObjectComparer : ComparerBase {
 };
 
 struct RawComparer : ComparerBase {
-  const char* _rhsData;
-  size_t _rhsSize;
+  const char* rhsData_;
+  size_t rhsSize_;
 
   explicit RawComparer(const char* rhsData, size_t rhsSize)
-      : _rhsData(rhsData), _rhsSize(rhsSize) {}
+      : rhsData_(rhsData), rhsSize_(rhsSize) {}
 
   CompareResult visitRawJson(const char* lhsData, size_t lhsSize) {
-    size_t size = _rhsSize < lhsSize ? _rhsSize : lhsSize;
-    int n = memcmp(lhsData, _rhsData, size);
+    size_t size = rhsSize_ < lhsSize ? rhsSize_ : lhsSize;
+    int n = memcmp(lhsData, rhsData_, size);
     if (n < 0)
       return COMPARE_RESULT_LESS;
     else if (n > 0)
@@ -193,17 +191,17 @@ struct VariantComparer : ComparerBase {
 };
 
 template <typename T>
-struct Comparer<
-    T, typename enable_if<is_convertible<T, JsonVariantConst>::value>::type>
+struct Comparer<T, typename enable_if<is_convertible<
+                       T, ArduinoJson::JsonVariantConst>::value>::type>
     : VariantComparer {
   explicit Comparer(const T& value)
       : VariantComparer(VariantAttorney::getData(value)) {}
 };
 
 template <typename T>
-CompareResult compare(JsonVariantConst lhs, const T& rhs) {
+CompareResult compare(ArduinoJson::JsonVariantConst lhs, const T& rhs) {
   Comparer<T> comparer(rhs);
   return variantAccept(VariantAttorney::getData(lhs), comparer);
 }
 
-}  // namespace ARDUINOJSON_NAMESPACE
+ARDUINOJSON_END_PRIVATE_NAMESPACE

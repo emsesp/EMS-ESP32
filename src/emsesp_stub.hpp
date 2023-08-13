@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 
 #include "system.h"
 #include "mqtt.h"
-#include "dallassensor.h"
+#include "temperaturesensor.h"
 #include "version.h"
 #include "default_settings.h"
 
@@ -28,14 +28,14 @@
 
 #include <uuid/log.h>
 
-// forward declarators
+// forward declarator
 // used to bind EMS-ESP functions to external frameworks
 namespace emsesp {
 class EMSESP {
   public:
-    static Mqtt         mqtt_;
-    static System       system_;
-    static DallasSensor dallassensor_;
+    static Mqtt              mqtt_;
+    static System            system_;
+    static TemperatureSensor temperaturesensor_;
 
     static uuid::log::Logger logger();
     static ESP8266React      esp8266React;

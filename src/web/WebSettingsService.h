@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,6 @@ class WebSettings {
     String   locale;
     uint8_t  tx_mode;
     uint8_t  ems_bus_id;
-    bool     boiler_heatingoff;
     bool     shower_timer;
     bool     shower_alert;
     uint8_t  shower_alert_trigger;
@@ -80,7 +79,7 @@ class WebSettings {
         UART    = (1 << 0), // 1
         SYSLOG  = (1 << 1), // 2
         ADC     = (1 << 2), // 4 - analog
-        DALLAS  = (1 << 3), // 8
+        SENSOR  = (1 << 3), // 8
         SHOWER  = (1 << 4), // 16
         LED     = (1 << 5), // 32
         BUTTON  = (1 << 6), // 64
@@ -123,11 +122,10 @@ class WebSettingsService : public StatefulService<WebSettings> {
     void save();
 
   private:
-    HttpEndpoint<WebSettings>   _httpEndpoint;
-    FSPersistence<WebSettings>  _fsPersistence;
-    AsyncCallbackJsonWebHandler _boardProfileHandler;
+    HttpEndpoint<WebSettings>  _httpEndpoint;
+    FSPersistence<WebSettings> _fsPersistence;
 
-    void board_profile(AsyncWebServerRequest * request, JsonVariant & json);
+    void board_profile(AsyncWebServerRequest * request);
 
     void onUpdate();
 };

@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -170,7 +170,7 @@ void Mixer::process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> teleg
 void Mixer::process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, flowTempHc_, 0); // is * 10
     has_bitupdate(telegram, pumpStatus_, 2, 0);
-    has_update(telegram, status_, 11); // temp status
+    has_update(telegram, status_, 11);    // temp status
 }
 
 // Mixer IPM - 0x010C
@@ -220,7 +220,7 @@ void Mixer::process_MMStatusMessage(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, flowTempHc_, 1);       // is * 10
     has_bitupdate(telegram, pumpStatus_, 3, 2); // is 0 or 0x64 (100%), check only bit 2
     has_update(telegram, flowSetTemp_, 0);
-    has_update(telegram, status_, 4); // valve status -100 to 100
+    has_update(telegram, status_, 4);           // valve status -100 to 100
 }
 
 /*
@@ -347,7 +347,9 @@ bool Mixer::set_pump(const char * value, const int8_t id) {
         return false;
     }
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_MM10) {
-        write_command(0xAC, 1, b ? 0x64 : 0, 0xAB);
+        // AC telegram can only be written with offset 0
+        uint8_t dat[2] = {flowSetTemp_, b ? (uint8_t)0x64 : (uint8_t)0};
+        write_command(0xAC, 0, dat, sizeof(dat), 0xAB);
         return true;
     }
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_IPM) {

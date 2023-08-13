@@ -1,10 +1,11 @@
-import { FC, useState } from 'react';
-
-import { IconButton, InputAdornment } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import { IconButton, InputAdornment } from '@mui/material';
+import { useState } from 'react';
 
-import ValidatedTextField, { ValidatedTextFieldProps } from './ValidatedTextField';
+import ValidatedTextField from './ValidatedTextField';
+import type { ValidatedTextFieldProps } from './ValidatedTextField';
+import type { FC } from 'react';
 
 type ValidatedPasswordFieldProps = Omit<ValidatedTextFieldProps, 'type'>;
 
@@ -19,11 +20,7 @@ const ValidatedPasswordField: FC<ValidatedPasswordFieldProps> = ({ InputProps, .
         ...InputProps,
         endAdornment: (
           <InputAdornment position="end">
-            <IconButton
-              aria-label="toggle password visibility"
-              onClick={() => setShowPassword(!showPassword)}
-              edge="end"
-            >
+            <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
               {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
             </IconButton>
           </InputAdornment>

@@ -6,7 +6,7 @@
 #include <ArduinoJson.h>
 #include <AsyncJson.h>
 
-#include <AsyncMqttClient.h>
+#include <espMqttClient.h>
 #include <ESPAsyncWebServer.h>
 
 #include <list>
@@ -37,6 +37,7 @@ class DummySettings {
     bool     enabled            = true;
     uint8_t  nested_format      = 1; // 1=nested 2=single
     String   discovery_prefix   = "homeassistant";
+    uint8_t  discovery_type     = 0; // HA
     bool     ha_enabled         = true;
     String   base               = "ems-esp";
     bool     publish_single     = false;
@@ -100,15 +101,23 @@ class ESP8266React {
         : _settings(server, fs, nullptr)
         , _securitySettingsService(server, fs){};
 
-    void begin(){};
+    void begin() {
+        // initialize mqtt
+        _mqttClient = new espMqttClient();
+    };
     void loop(){};
 
     SecurityManager * getSecurityManager() {
         return &_securitySettingsService;
     }
 
-    AsyncMqttClient * getMqttClient() {
+    espMqttClient * getMqttClient() {
         return _mqttClient;
+    }
+
+    void setWill(const char * will_topic) {
+    }
+    void onMessage(espMqttClientTypes::OnMessageCallback callback) {
     }
 
     StatefulService<DummySettings> * getNetworkSettingsService() {
@@ -131,7 +140,7 @@ class ESP8266React {
     DummySettingsService    _settings;
     SecuritySettingsService _securitySettingsService;
 
-    AsyncMqttClient * _mqttClient;
+    espMqttClient * _mqttClient;
 };
 
 class EMSESPSettingsService {

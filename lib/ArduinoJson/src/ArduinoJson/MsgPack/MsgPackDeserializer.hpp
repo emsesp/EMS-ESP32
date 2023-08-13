@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2022, Benoit BLANCHON
+// Copyright © 2014-2023, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -11,38 +11,39 @@
 #include <ArduinoJson/Polyfills/type_traits.hpp>
 #include <ArduinoJson/Variant/VariantData.hpp>
 
-namespace ARDUINOJSON_NAMESPACE {
+ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
 template <typename TReader, typename TStringStorage>
 class MsgPackDeserializer {
  public:
   MsgPackDeserializer(MemoryPool* pool, TReader reader,
                       TStringStorage stringStorage)
-      : _pool(pool),
-        _reader(reader),
-        _stringStorage(stringStorage),
-        _foundSomething(false) {}
+      : pool_(pool),
+        reader_(reader),
+        stringStorage_(stringStorage),
+        foundSomething_(false) {}
 
   template <typename TFilter>
   DeserializationError parse(VariantData& variant, TFilter filter,
-                             NestingLimit nestingLimit) {
+                             DeserializationOption::NestingLimit nestingLimit) {
     DeserializationError::Code err;
     err = parseVariant(&variant, filter, nestingLimit);
-    return _foundSomething ? err : DeserializationError::EmptyInput;
+    return foundSomething_ ? err : DeserializationError::EmptyInput;
   }
 
  private:
   template <typename TFilter>
-  DeserializationError::Code parseVariant(VariantData* variant, TFilter filter,
-                                          NestingLimit nestingLimit) {
+  DeserializationError::Code parseVariant(
+      VariantData* variant, TFilter filter,
+      DeserializationOption::NestingLimit nestingLimit) {
     DeserializationError::Code err;
 
-    uint8_t code = 0;
+    uint8_t code = 0;  // TODO: why do we need to initialize this variable?
     err = readByte(code);
     if (err)
       return err;
 
-    _foundSomething = true;
+    foundSomething_ = true;
 
     bool allowValue = filter.allowValue();
 
@@ -223,7 +224,7 @@ class MsgPackDeserializer {
   }
 
   DeserializationError::Code readByte(uint8_t& value) {
-    int c = _reader.read();
+    int c = reader_.read();
     if (c < 0)
       return DeserializationError::IncompleteInput;
     value = static_cast<uint8_t>(c);
@@ -231,7 +232,7 @@ class MsgPackDeserializer {
   }
 
   DeserializationError::Code readBytes(uint8_t* p, size_t n) {
-    if (_reader.readBytes(reinterpret_cast<char*>(p), n) == n)
+    if (reader_.readBytes(reinterpret_cast<char*>(p), n) == n)
       return DeserializationError::Ok;
     return DeserializationError::IncompleteInput;
   }
@@ -243,7 +244,7 @@ class MsgPackDeserializer {
 
   DeserializationError::Code skipBytes(size_t n) {
     for (; n; --n) {
-      if (_reader.read() < 0)
+      if (reader_.read() < 0)
         return DeserializationError::IncompleteInput;
     }
     return DeserializationError::Ok;
@@ -370,14 +371,14 @@ class MsgPackDeserializer {
     if (err)
       return err;
 
-    variant->setString(_stringStorage.save());
+    variant->setString(stringStorage_.save());
     return DeserializationError::Ok;
   }
 
   DeserializationError::Code readString(size_t n) {
     DeserializationError::Code err;
 
-    _stringStorage.startString();
+    stringStorage_.startString();
     for (; n; --n) {
       uint8_t c;
 
@@ -385,18 +386,19 @@ class MsgPackDeserializer {
       if (err)
         return err;
 
-      _stringStorage.append(static_cast<char>(c));
+      stringStorage_.append(static_cast<char>(c));
     }
 
-    if (!_stringStorage.isValid())
+    if (!stringStorage_.isValid())
       return DeserializationError::NoMemory;
 
     return DeserializationError::Ok;
   }
 
   template <typename TSize, typename TFilter>
-  DeserializationError::Code readArray(VariantData* variant, TFilter filter,
-                                       NestingLimit nestingLimit) {
+  DeserializationError::Code readArray(
+      VariantData* variant, TFilter filter,
+      DeserializationOption::NestingLimit nestingLimit) {
     DeserializationError::Code err;
     TSize size;
 
@@ -408,9 +410,9 @@ class MsgPackDeserializer {
   }
 
   template <typename TFilter>
-  DeserializationError::Code readArray(VariantData* variant, size_t n,
-                                       TFilter filter,
-                                       NestingLimit nestingLimit) {
+  DeserializationError::Code readArray(
+      VariantData* variant, size_t n, TFilter filter,
+      DeserializationOption::NestingLimit nestingLimit) {
     DeserializationError::Code err;
 
     if (nestingLimit.reached())
@@ -418,7 +420,13 @@ class MsgPackDeserializer {
 
     bool allowArray = filter.allowArray();
 
-    CollectionData* array = allowArray ? &variant->toArray() : 0;
+    CollectionData* array;
+    if (allowArray) {
+      ARDUINOJSON_ASSERT(variant != 0);
+      array = &variant->toArray();
+    } else {
+      array = 0;
+    }
 
     TFilter memberFilter = filter[0U];
 
@@ -426,7 +434,8 @@ class MsgPackDeserializer {
       VariantData* value;
 
       if (memberFilter.allow()) {
-        value = array->addElement(_pool);
+        ARDUINOJSON_ASSERT(array != 0);
+        value = array->addElement(pool_);
         if (!value)
           return DeserializationError::NoMemory;
       } else {
@@ -442,8 +451,9 @@ class MsgPackDeserializer {
   }
 
   template <typename TSize, typename TFilter>
-  DeserializationError::Code readObject(VariantData* variant, TFilter filter,
-                                        NestingLimit nestingLimit) {
+  DeserializationError::Code readObject(
+      VariantData* variant, TFilter filter,
+      DeserializationOption::NestingLimit nestingLimit) {
     DeserializationError::Code err;
     TSize size;
 
@@ -455,33 +465,39 @@ class MsgPackDeserializer {
   }
 
   template <typename TFilter>
-  DeserializationError::Code readObject(VariantData* variant, size_t n,
-                                        TFilter filter,
-                                        NestingLimit nestingLimit) {
+  DeserializationError::Code readObject(
+      VariantData* variant, size_t n, TFilter filter,
+      DeserializationOption::NestingLimit nestingLimit) {
     DeserializationError::Code err;
 
     if (nestingLimit.reached())
       return DeserializationError::TooDeep;
 
-    CollectionData* object = filter.allowObject() ? &variant->toObject() : 0;
+    CollectionData* object;
+    if (filter.allowObject()) {
+      ARDUINOJSON_ASSERT(variant != 0);
+      object = &variant->toObject();
+    } else {
+      object = 0;
+    }
 
     for (; n; --n) {
       err = readKey();
       if (err)
         return err;
 
-      JsonString key = _stringStorage.str();
+      JsonString key = stringStorage_.str();
       TFilter memberFilter = filter[key.c_str()];
       VariantData* member;
 
       if (memberFilter.allow()) {
-        ARDUINOJSON_ASSERT(object);
+        ARDUINOJSON_ASSERT(object != 0);
 
         // Save key in memory pool.
         // This MUST be done before adding the slot.
-        key = _stringStorage.save();
+        key = stringStorage_.save();
 
-        VariantSlot* slot = object->addSlot(_pool);
+        VariantSlot* slot = object->addSlot(pool_);
         if (!slot)
           return DeserializationError::NoMemory;
 
@@ -538,125 +554,32 @@ class MsgPackDeserializer {
     return skipBytes(size + 1U);
   }
 
-  MemoryPool* _pool;
-  TReader _reader;
-  TStringStorage _stringStorage;
-  bool _foundSomething;
+  MemoryPool* pool_;
+  TReader reader_;
+  TStringStorage stringStorage_;
+  bool foundSomething_;
 };
 
+ARDUINOJSON_END_PRIVATE_NAMESPACE
+
+ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
+
 // Parses a MessagePack input and puts the result in a JsonDocument.
 // https://arduinojson.org/v6/api/msgpack/deserializemsgpack/
-template <typename TString>
-DeserializationError deserializeMsgPack(
-    JsonDocument& doc, const TString& input,
-    NestingLimit nestingLimit = NestingLimit()) {
-  return deserialize<MsgPackDeserializer>(doc, input, nestingLimit,
-                                          AllowAllFilter());
-}
-
-// Parses a MessagePack input, filters, and puts the result in a JsonDocument.
-// https://arduinojson.org/v6/api/msgpack/deserializemsgpack/
-template <typename TString>
-DeserializationError deserializeMsgPack(
-    JsonDocument& doc, const TString& input, Filter filter,
-    NestingLimit nestingLimit = NestingLimit()) {
-  return deserialize<MsgPackDeserializer>(doc, input, nestingLimit, filter);
-}
-
-// Parses a MessagePack input, filters, and puts the result in a JsonDocument.
-// https://arduinojson.org/v6/api/msgpack/deserializemsgpack/
-template <typename TString>
-DeserializationError deserializeMsgPack(JsonDocument& doc, const TString& input,
-                                        NestingLimit nestingLimit,
-                                        Filter filter) {
-  return deserialize<MsgPackDeserializer>(doc, input, nestingLimit, filter);
+template <typename... Args>
+DeserializationError deserializeMsgPack(JsonDocument& doc, Args&&... args) {
+  using namespace detail;
+  return deserialize<MsgPackDeserializer>(doc, detail::forward<Args>(args)...);
 }
 
 // Parses a MessagePack input and puts the result in a JsonDocument.
 // https://arduinojson.org/v6/api/msgpack/deserializemsgpack/
-template <typename TStream>
-DeserializationError deserializeMsgPack(
-    JsonDocument& doc, TStream& input,
-    NestingLimit nestingLimit = NestingLimit()) {
-  return deserialize<MsgPackDeserializer>(doc, input, nestingLimit,
-                                          AllowAllFilter());
-}
-
-// Parses a MessagePack input, filters, and puts the result in a JsonDocument.
-// https://arduinojson.org/v6/api/msgpack/deserializemsgpack/
-template <typename TStream>
-DeserializationError deserializeMsgPack(
-    JsonDocument& doc, TStream& input, Filter filter,
-    NestingLimit nestingLimit = NestingLimit()) {
-  return deserialize<MsgPackDeserializer>(doc, input, nestingLimit, filter);
-}
-
-// Parses a MessagePack input, filters, and puts the result in a JsonDocument.
-// https://arduinojson.org/v6/api/msgpack/deserializemsgpack/
-template <typename TStream>
-DeserializationError deserializeMsgPack(JsonDocument& doc, TStream& input,
-                                        NestingLimit nestingLimit,
-                                        Filter filter) {
-  return deserialize<MsgPackDeserializer>(doc, input, nestingLimit, filter);
-}
-
-// Parses a MessagePack input and puts the result in a JsonDocument.
-// https://arduinojson.org/v6/api/msgpack/deserializemsgpack/
-template <typename TChar>
-DeserializationError deserializeMsgPack(
-    JsonDocument& doc, TChar* input,
-    NestingLimit nestingLimit = NestingLimit()) {
-  return deserialize<MsgPackDeserializer>(doc, input, nestingLimit,
-                                          AllowAllFilter());
-}
-
-// Parses a MessagePack input, filters, and puts the result in a JsonDocument.
-// https://arduinojson.org/v6/api/msgpack/deserializemsgpack/
-template <typename TChar>
-DeserializationError deserializeMsgPack(
-    JsonDocument& doc, TChar* input, Filter filter,
-    NestingLimit nestingLimit = NestingLimit()) {
-  return deserialize<MsgPackDeserializer>(doc, input, nestingLimit, filter);
-}
-
-// Parses a MessagePack input, filters, and puts the result in a JsonDocument.
-// https://arduinojson.org/v6/api/msgpack/deserializemsgpack/
-template <typename TChar>
+template <typename TChar, typename... Args>
 DeserializationError deserializeMsgPack(JsonDocument& doc, TChar* input,
-                                        NestingLimit nestingLimit,
-                                        Filter filter) {
-  return deserialize<MsgPackDeserializer>(doc, input, nestingLimit, filter);
+                                        Args&&... args) {
+  using namespace detail;
+  return deserialize<MsgPackDeserializer>(doc, input,
+                                          detail::forward<Args>(args)...);
 }
 
-// Parses a MessagePack input and puts the result in a JsonDocument.
-// https://arduinojson.org/v6/api/msgpack/deserializemsgpack/
-template <typename TChar>
-DeserializationError deserializeMsgPack(
-    JsonDocument& doc, TChar* input, size_t inputSize,
-    NestingLimit nestingLimit = NestingLimit()) {
-  return deserialize<MsgPackDeserializer>(doc, input, inputSize, nestingLimit,
-                                          AllowAllFilter());
-}
-
-// Parses a MessagePack input, filters, and puts the result in a JsonDocument.
-// https://arduinojson.org/v6/api/msgpack/deserializemsgpack/
-template <typename TChar>
-DeserializationError deserializeMsgPack(
-    JsonDocument& doc, TChar* input, size_t inputSize, Filter filter,
-    NestingLimit nestingLimit = NestingLimit()) {
-  return deserialize<MsgPackDeserializer>(doc, input, inputSize, nestingLimit,
-                                          filter);
-}
-
-// Parses a MessagePack input, filters, and puts the result in a JsonDocument.
-// https://arduinojson.org/v6/api/msgpack/deserializemsgpack/
-template <typename TChar>
-DeserializationError deserializeMsgPack(JsonDocument& doc, TChar* input,
-                                        size_t inputSize,
-                                        NestingLimit nestingLimit,
-                                        Filter filter) {
-  return deserialize<MsgPackDeserializer>(doc, input, inputSize, nestingLimit,
-                                          filter);
-}
-
-}  // namespace ARDUINOJSON_NAMESPACE
+ARDUINOJSON_END_PUBLIC_NAMESPACE

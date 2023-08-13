@@ -1,6 +1,9 @@
-import { FC, useContext, useState } from 'react';
-import { useSnackbar } from 'notistack';
-
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import CancelIcon from '@mui/icons-material/Cancel';
+import DnsIcon from '@mui/icons-material/Dns';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import SwapVerticalCircleIcon from '@mui/icons-material/SwapVerticalCircle';
+import UpdateIcon from '@mui/icons-material/Update';
 import {
   Avatar,
   Box,
@@ -15,24 +18,24 @@ import {
   ListItemAvatar,
   ListItemText,
   TextField,
-  Theme,
   useTheme,
   Typography
 } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import SwapVerticalCircleIcon from '@mui/icons-material/SwapVerticalCircle';
-import UpdateIcon from '@mui/icons-material/Update';
-import DnsIcon from '@mui/icons-material/Dns';
-import CancelIcon from '@mui/icons-material/Cancel';
+import { useRequest } from 'alova';
+import { useContext, useState } from 'react';
+import { toast } from 'react-toastify';
+import type { Theme } from '@mui/material';
+import type { FC } from 'react';
 
-import * as NTPApi from '../../api/ntp';
-import { NTPStatus, NTPSyncStatus } from '../../types';
-import { ButtonRow, FormLoader, SectionContent } from '../../components';
-import { extractErrorMessage, formatDateTime, formatLocalDateTime, useRest } from '../../utils';
-import { AuthenticatedContext } from '../../contexts/authentication';
+import type { NTPStatus } from 'types';
+import { dialogStyle } from 'CustomTheme';
+import * as NTPApi from 'api/ntp';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
+import { AuthenticatedContext } from 'contexts/authentication';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
+import { NTPSyncStatus } from 'types';
+import { formatDateTime, formatLocalDateTime } from 'utils';
 
 export const isNtpActive = ({ status }: NTPStatus) => status === NTPSyncStatus.NTP_ACTIVE;
 export const isNtpEnabled = ({ status }: NTPStatus) => status !== NTPSyncStatus.NTP_DISABLED;
@@ -51,14 +54,20 @@ export const ntpStatusHighlight = ({ status }: NTPStatus, theme: Theme) => {
 };
 
 const NTPStatusForm: FC = () => {
-  const { loadData, data, errorMessage } = useRest<NTPStatus>({ read: NTPApi.readNTPStatus });
+  const { data: data, send: loadData, error } = useRequest(NTPApi.readNTPStatus);
+
   const [localTime, setLocalTime] = useState<string>('');
   const [settingTime, setSettingTime] = useState<boolean>(false);
   const [processing, setProcessing] = useState<boolean>(false);
-  const { enqueueSnackbar } = useSnackbar();
   const { me } = useContext(AuthenticatedContext);
 
   const { LL } = useI18nContext();
+
+  const { send: updateTime } = useRequest((local_time) => NTPApi.updateTime(local_time), {
+    immediate: false
+  });
+
+  NTPApi.updateTime;
 
   const updateLocalTime = (event: React.ChangeEvent<HTMLInputElement>) => setLocalTime(event.target.value);
 
@@ -72,7 +81,7 @@ const NTPStatusForm: FC = () => {
   const ntpStatus = ({ status }: NTPStatus) => {
     switch (status) {
       case NTPSyncStatus.NTP_DISABLED:
-        return LL.DISABLED(0);
+        return LL.NOT_ENABLED();
       case NTPSyncStatus.NTP_INACTIVE:
         return LL.INACTIVE(0);
       case NTPSyncStatus.NTP_ACTIVE:
@@ -84,22 +93,23 @@ const NTPStatusForm: FC = () => {
 
   const configureTime = async () => {
     setProcessing(true);
-    try {
-      await NTPApi.updateTime({
-        local_time: formatLocalDateTime(new Date(localTime))
+
+    await updateTime({ local_time: formatLocalDateTime(new Date(localTime)) })
+      .then(async () => {
+        toast.success(LL.TIME_SET());
+        setSettingTime(false);
+        await loadData();
+      })
+      .catch(() => {
+        toast.error(LL.PROBLEM_UPDATING());
+      })
+      .finally(() => {
+        setProcessing(false);
       });
-      enqueueSnackbar(LL.TIME_SET(), { variant: 'success' });
-      setSettingTime(false);
-      loadData();
-    } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
-    } finally {
-      setProcessing(false);
-    }
   };
 
   const renderSetTimeDialog = () => (
-    <Dialog open={settingTime} onClose={() => setSettingTime(false)}>
+    <Dialog sx={dialogStyle} open={settingTime} onClose={() => setSettingTime(false)}>
       <DialogTitle>{LL.SET_TIME(1)}</DialogTitle>
       <DialogContent dividers>
         <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
@@ -127,9 +137,8 @@ const NTPStatusForm: FC = () => {
           onClick={configureTime}
           disabled={processing}
           color="primary"
-          autoFocus
         >
-          {LL.SAVE()}
+          {LL.UPDATE()}
         </Button>
       </DialogActions>
     </Dialog>
@@ -137,7 +146,7 @@ const NTPStatusForm: FC = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
     }
 
     return (

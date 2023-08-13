@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,10 +33,12 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
     , _fsPersistence(WebCustomization::read, WebCustomization::update, this, fs, EMSESP_CUSTOMIZATION_FILE)
     , _masked_entities_handler(CUSTOM_ENTITIES_PATH,
                                securityManager->wrapCallback(std::bind(&WebCustomizationService::custom_entities, this, _1, _2),
-                                                             AuthenticationPredicates::IS_AUTHENTICATED))
-    , _device_entities_handler(DEVICE_ENTITIES_PATH,
-                               securityManager->wrapCallback(std::bind(&WebCustomizationService::device_entities, this, _1, _2),
                                                              AuthenticationPredicates::IS_AUTHENTICATED)) {
+    server->on(DEVICE_ENTITIES_PATH,
+               HTTP_GET,
+               securityManager->wrapRequest(std::bind(&WebCustomizationService::device_entities, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+
+
     server->on(DEVICES_SERVICE_PATH,
                HTTP_GET,
                securityManager->wrapRequest(std::bind(&WebCustomizationService::devices, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
@@ -49,25 +51,21 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
     _masked_entities_handler.setMaxContentLength(2048);
     _masked_entities_handler.setMaxJsonBufferSize(2048);
     server->addHandler(&_masked_entities_handler);
-
-    _device_entities_handler.setMethod(HTTP_POST);
-    _device_entities_handler.setMaxContentLength(256);
-    server->addHandler(&_device_entities_handler);
 }
 
 // this creates the customization file, saving it to the FS
 void WebCustomization::read(WebCustomization & settings, JsonObject & root) {
-    // Dallas Sensor customization
-    JsonArray sensorsJson = root.createNestedArray("sensors");
+    // Temperature Sensor customization
+    JsonArray sensorsJson = root.createNestedArray("ts");
     for (const SensorCustomization & sensor : settings.sensorCustomizations) {
         JsonObject sensorJson = sensorsJson.createNestedObject();
-        sensorJson["id"]      = sensor.id;     // is
+        sensorJson["id"]      = sensor.id;     // ID of chip
         sensorJson["name"]    = sensor.name;   // n
         sensorJson["offset"]  = sensor.offset; // o
     }
 
     // Analog Sensor customization
-    JsonArray analogJson = root.createNestedArray("analogs");
+    JsonArray analogJson = root.createNestedArray("as");
     for (const AnalogCustomization & sensor : settings.analogCustomizations) {
         JsonObject sensorJson = analogJson.createNestedObject();
         sensorJson["gpio"]    = sensor.gpio;   // g
@@ -98,7 +96,7 @@ void WebCustomization::read(WebCustomization & settings, JsonObject & root) {
 StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization & settings) {
 #ifdef EMSESP_STANDALONE
     // invoke some fake data for testing
-    const char * json = "{\"sensors\":[],\"analogs\":[],\"masked_entities\":[{\"product_id\":123,\"device_id\":8,\"entity_ids\":[\"08heatingactive|my custom "
+    const char * json = "{\"ts\":[],\"as\":[],\"masked_entities\":[{\"product_id\":123,\"device_id\":8,\"entity_ids\":[\"08heatingactive|my custom "
                         "name for heating active\",\"08tapwateractive\"]}]}";
 
     StaticJsonDocument<500> doc;
@@ -111,10 +109,10 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
     Serial.println(COLOR_RESET);
 #endif
 
-    // Dallas Sensor customization
+    // Temperature Sensor customization
     settings.sensorCustomizations.clear();
-    if (root["sensors"].is<JsonArray>()) {
-        for (const JsonObject sensorJson : root["sensors"].as<JsonArray>()) {
+    if (root["ts"].is<JsonArray>()) {
+        for (const JsonObject sensorJson : root["ts"].as<JsonArray>()) {
             // create each of the sensor, overwriting any previous settings
             auto sensor   = SensorCustomization();
             sensor.id     = sensorJson["id"].as<std::string>();
@@ -126,8 +124,8 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
 
     // Analog Sensor customization
     settings.analogCustomizations.clear();
-    if (root["analogs"].is<JsonArray>()) {
-        for (const JsonObject analogJson : root["analogs"].as<JsonArray>()) {
+    if (root["as"].is<JsonArray>()) {
+        for (const JsonObject analogJson : root["as"].as<JsonArray>()) {
             // create each of the sensor, overwriting any previous settings
             auto sensor   = AnalogCustomization();
             sensor.gpio   = analogJson["gpio"];
@@ -165,20 +163,20 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
 void WebCustomizationService::reset_customization(AsyncWebServerRequest * request) {
 #ifndef EMSESP_STANDALONE
     if (LittleFS.remove(EMSESP_CUSTOMIZATION_FILE)) {
-        AsyncWebServerResponse * response = request->beginResponse(200); // OK
+        AsyncWebServerResponse * response = request->beginResponse(205); // restart needed
         request->send(response);
         EMSESP::system_.restart_requested(true);
         return;
     }
     // failed
-    AsyncWebServerResponse * response = request->beginResponse(204); // no content error
+    AsyncWebServerResponse * response = request->beginResponse(400); // bad request
     request->send(response);
 #endif
 }
 
 // send back a list of devices used in the customization web page
 void WebCustomizationService::devices(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE_DYN);
+    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE);
     JsonObject root     = response->getRoot();
 
     // list is already sorted by device type
@@ -199,17 +197,21 @@ void WebCustomizationService::devices(AsyncWebServerRequest * request) {
 }
 
 // send back list of device entities
-void WebCustomizationService::device_entities(AsyncWebServerRequest * request, JsonVariant & json) {
-    if (json.is<JsonObject>()) {
-        size_t buffer   = EMSESP_JSON_SIZE_XXXLARGE_DYN;
+void WebCustomizationService::device_entities(AsyncWebServerRequest * request) {
+    uint8_t id;
+    if (request->hasParam(F_(id))) {
+        id = Helpers::atoint(request->getParam(F_(id))->value().c_str()); // get id from url
+
+        size_t buffer   = EMSESP_JSON_SIZE_XXXXLARGE;
         auto * response = new MsgpackAsyncJsonResponse(true, buffer);
+
         while (!response->getSize()) {
             delete response;
             buffer -= 1024;
             response = new MsgpackAsyncJsonResponse(true, buffer);
         }
         for (const auto & emsdevice : EMSESP::emsdevices) {
-            if (emsdevice->unique_id() == json["id"]) {
+            if (emsdevice->unique_id() == id) {
 #ifndef EMSESP_STANDALONE
                 JsonArray output = response->getRoot();
                 emsdevice->generate_values_web_customization(output);
@@ -319,7 +321,7 @@ void WebCustomizationService::custom_entities(AsyncWebServerRequest * request, J
         }
     }
 
-    AsyncWebServerResponse * response = request->beginResponse(need_reboot ? 201 : 200); // OK
+    AsyncWebServerResponse * response = request->beginResponse(need_reboot ? 205 : 200); // reboot or just OK
     request->send(response);
 }
 

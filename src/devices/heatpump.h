@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ class Heatpump : public EMSdevice {
     uint8_t heatDrainPan_;
     uint8_t heatCable_;
 
-    // HM200 temperature
+    // HM200 temperatures
     int16_t flowTemp_;   // TH1
     int16_t retTemp_;    // TH2
     int16_t sysRetTemp_; // TH3
@@ -84,7 +84,6 @@ class Heatpump : public EMSdevice {
     bool set_energyPriceEl(const char * value, const int8_t id);
     bool set_energyPricePV(const char * value, const int8_t id);
     bool set_switchOverTemp(const char * value, const int8_t id);
-
     bool set_airPurgeMode(const char * value, const int8_t id);
     bool set_heatPumpOutput(const char * value, const int8_t id);
     bool set_coolingCircuit(const char * value, const int8_t id);

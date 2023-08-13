@@ -15,9 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifdef EMSESP_STANDALONE
+
 #include <Arduino.h>
 #include <stdio.h>
 #include <stdarg.h>
+
+#include <iostream>
+#include <thread>
+#include <atomic>
 
 #include <string>
 
@@ -41,35 +47,44 @@ static unsigned long __millis = 0;
 static bool          __output_pins[256];
 static int           __output_level[256];
 
-int main(int argc __attribute__((unused)), char * argv[] __attribute__((unused))) {
-    memset(__output_pins, 0, sizeof(__output_pins));
-    memset(__output_level, 0, sizeof(__output_level));
+std::atomic_bool exitProgram(false);
 
-    setup();
-    loop(); // run once
-
-    static unsigned long __cycles = 0;
-
-    while (millis() <= 10 * 1000 && __cycles++ <= 10 * 1000) {
+void ClientLoop(void * arg) {
+    (void)arg;
+    for (;;) {
         loop();
+        if (exitProgram)
+            break;
     }
-
-    return 0;
 }
 
-unsigned long millis() {
-    return __millis;
+int main(int argc __attribute__((unused)), char * argv[] __attribute__((unused))) {
+    setup();
+    std::thread t = std::thread(ClientLoop, nullptr);
+    // while (millis() <= 10 * 1000) {
+    while (1) {
+        if (exitProgram)
+            break;
+        std::this_thread::yield();
+    }
+    t.join();
+    return EXIT_SUCCESS;
 }
+
+// unsigned long millis() {
+//     return __millis;
+// }
 
 int64_t esp_timer_get_time() {
     return __millis;
 }
 
 void delay(unsigned long millis) {
-    // __millis += millis;
+    __millis += millis;
 }
 
 void yield(void) {
+    std::this_thread::yield();
 }
 
 int snprintf_P(char * str, size_t size, const char * format, ...) {
@@ -133,3 +148,5 @@ double ledcSetup(uint8_t chan, double freq, uint8_t bit_num) {
 };
 void ledcAttachPin(uint8_t pin, uint8_t chan){};
 void ledcWrite(uint8_t chan, uint32_t duty){};
+
+#endif

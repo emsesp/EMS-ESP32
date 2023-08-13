@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -89,6 +89,13 @@ class Thermostat : public EMSdevice {
         uint16_t reduceminutes; // remaining minutes to night->day
         // FW100 temperature
         uint8_t roomsensor; // 1-intern, 2-extern, 3-autoselect the lower value
+        // hp
+        uint8_t dewoffset;
+        uint8_t roomtempdiff;
+        uint8_t hpminflowtemp;
+        uint8_t hpmode;
+        uint8_t cooling;
+        uint8_t coolingon;
 
         uint8_t hc_num() const {
             return hc_num_;
@@ -170,6 +177,8 @@ class Thermostat : public EMSdevice {
     std::vector<uint16_t> summer_typeids;
     std::vector<uint16_t> summer2_typeids;
     std::vector<uint16_t> curve_typeids;
+    std::vector<uint16_t> hp_typeids;
+    std::vector<uint16_t> hpmode_typeids;
 
     // standard for all thermostats
     char     status_[20];    // online or offline
@@ -247,9 +256,9 @@ class Thermostat : public EMSdevice {
     static constexpr uint16_t EMS_TYPE_RCOutdoorTemp = 0xA3; // is an automatic thermostat broadcast, outdoor external temp
 
     // Type offsets
-    static constexpr uint8_t EMS_OFFSET_RC10StatusMessage_setpoint = 1; // setpoint temp
-    static constexpr uint8_t EMS_OFFSET_RC10StatusMessage_curr     = 2; // current temp
-    static constexpr uint8_t EMS_OFFSET_RC10Set_temp               = 4; // position of thermostat setpoint temperature
+    static constexpr uint8_t EMS_OFFSET_RC10StatusMessage_setpoint = 1;  // setpoint temp
+    static constexpr uint8_t EMS_OFFSET_RC10StatusMessage_curr     = 2;  // current temp
+    static constexpr uint8_t EMS_OFFSET_RC10Set_temp               = 4;  // position of thermostat setpoint temperature
 
     static constexpr uint8_t EMS_OFFSET_RC20StatusMessage_setpoint = 1;  // setpoint temp
     static constexpr uint8_t EMS_OFFSET_RC20StatusMessage_curr     = 2;  // current temp
@@ -258,9 +267,9 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_OFFSET_RC20Set_temp_auto          = 28; // position of thermostat setpoint temperature
     static constexpr uint8_t EMS_OFFSET_RC20Set_temp_manual        = 29; // position of thermostat setpoint temperature
 
-    static constexpr uint8_t EMS_OFFSET_RC20_2_Set_mode       = 3; // ES72 - see https://github.com/emsesp/EMS-ESP/issues/334
-    static constexpr uint8_t EMS_OFFSET_RC20_2_Set_temp_night = 1; // ES72
-    static constexpr uint8_t EMS_OFFSET_RC20_2_Set_temp_day   = 2; // ES72
+    static constexpr uint8_t EMS_OFFSET_RC20_2_Set_mode       = 3;       // ES72 - see https://github.com/emsesp/EMS-ESP/issues/334
+    static constexpr uint8_t EMS_OFFSET_RC20_2_Set_temp_night = 1;       // ES72
+    static constexpr uint8_t EMS_OFFSET_RC20_2_Set_temp_day   = 2;       // ES72
 
     static constexpr uint8_t EMS_OFFSET_RC30StatusMessage_setpoint = 1;  // setpoint temp
     static constexpr uint8_t EMS_OFFSET_RC30StatusMessage_curr     = 2;  // current temp
@@ -299,8 +308,8 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_OFFSET_RC35Set_temp_summer        = 22;
     static constexpr uint8_t EMS_OFFSET_RC35Set_temp_nofrost       = 23;
 
-    static constexpr uint8_t EMS_OFFSET_EasyStatusMessage_setpoint = 10; // setpoint temp
-    static constexpr uint8_t EMS_OFFSET_EasyStatusMessage_curr     = 8;  // current temp
+    static constexpr uint8_t EMS_OFFSET_EasyStatusMessage_setpoint = 10;       // setpoint temp
+    static constexpr uint8_t EMS_OFFSET_EasyStatusMessage_curr     = 8;        // current temp
 
     static constexpr uint8_t EMS_OFFSET_RCPLUSStatusMessage_mode         = 10; // thermostat mode (auto, manual)
     static constexpr uint8_t EMS_OFFSET_RCPLUSStatusMessage_setpoint     = 3;  // setpoint temp
@@ -392,6 +401,8 @@ class Thermostat : public EMSdevice {
     void process_RemoteTemp(std::shared_ptr<const Telegram> telegram);
     void process_RemoteHumidity(std::shared_ptr<const Telegram> telegram);
     void process_RemoteCorrection(std::shared_ptr<const Telegram> telegram);
+    void process_HPSet(std::shared_ptr<const Telegram> telegram);
+    void process_HPMode(std::shared_ptr<const Telegram> telegram);
 
     // internal helper functions
     bool set_mode_n(const uint8_t mode, const uint8_t hc_num);
@@ -551,6 +562,12 @@ class Thermostat : public EMSdevice {
     bool set_pvEnableWw(const char * value, const int8_t id);
     bool set_pvRaiseHeat(const char * value, const int8_t id);
     bool set_pvLowerCool(const char * value, const int8_t id);
+
+    bool set_roomtempdiff(const char * value, const int8_t id);
+    bool set_dewoffset(const char * value, const int8_t id);
+    bool set_hpminflowtemp(const char * value, const int8_t id);
+    bool set_hpmode(const char * value, const int8_t id);
+    bool set_cooling(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

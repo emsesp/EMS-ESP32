@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2022, Benoit BLANCHON
+// Copyright © 2014-2023, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -8,20 +8,20 @@
 #include <ArduinoJson/Strings/JsonString.hpp>
 #include <ArduinoJson/Strings/StringAdapter.hpp>
 
-namespace ARDUINOJSON_NAMESPACE {
+ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
 class JsonStringAdapter : public SizedRamString {
  public:
   JsonStringAdapter(const JsonString& s)
-      : SizedRamString(s.c_str(), s.size()), _linked(s.isLinked()) {}
+      : SizedRamString(s.c_str(), s.size()), linked_(s.isLinked()) {}
 
   StringStoragePolicy::LinkOrCopy storagePolicy() const {
-    StringStoragePolicy::LinkOrCopy policy = {_linked};
+    StringStoragePolicy::LinkOrCopy policy = {linked_};
     return policy;
   }
 
  private:
-  bool _linked;
+  bool linked_;
 };
 
 template <>
@@ -33,4 +33,4 @@ struct StringAdapter<JsonString> {
   }
 };
 
-}  // namespace ARDUINOJSON_NAMESPACE
+ARDUINOJSON_END_PRIVATE_NAMESPACE

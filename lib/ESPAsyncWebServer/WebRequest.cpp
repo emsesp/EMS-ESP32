@@ -898,26 +898,26 @@ String AsyncWebServerRequest::urlDecode(const String& text) const {
 }
 
 
-const __FlashStringHelper *AsyncWebServerRequest::methodToString() const {
-  if(_method == HTTP_ANY) return F("ANY");
-  else if(_method & HTTP_GET) return F("GET");
-  else if(_method & HTTP_POST) return F("POST");
-  else if(_method & HTTP_DELETE) return F("DELETE");
-  else if(_method & HTTP_PUT) return F("PUT");
-  else if(_method & HTTP_PATCH) return F("PATCH");
-  else if(_method & HTTP_HEAD) return F("HEAD");
-  else if(_method & HTTP_OPTIONS) return F("OPTIONS");
-  return F("UNKNOWN");
+const char *AsyncWebServerRequest::methodToString() const {
+  if(_method == HTTP_ANY) return ("ANY");
+  else if(_method & HTTP_GET) return ("GET");
+  else if(_method & HTTP_POST) return ("POST");
+  else if(_method & HTTP_DELETE) return ("DELETE");
+  else if(_method & HTTP_PUT) return ("PUT");
+  else if(_method & HTTP_PATCH) return ("PATCH");
+  else if(_method & HTTP_HEAD) return ("HEAD");
+  else if(_method & HTTP_OPTIONS) return ("OPTIONS");
+  return ("UNKNOWN");
 }
 
-const __FlashStringHelper *AsyncWebServerRequest::requestedConnTypeToString() const {
+const char *AsyncWebServerRequest::requestedConnTypeToString() const {
   switch (_reqconntype) {
-    case RCT_NOT_USED: return F("RCT_NOT_USED");
-    case RCT_DEFAULT:  return F("RCT_DEFAULT");
-    case RCT_HTTP:     return F("RCT_HTTP");
-    case RCT_WS:       return F("RCT_WS");
-    case RCT_EVENT:    return F("RCT_EVENT");
-    default:           return F("ERROR");
+    case RCT_NOT_USED: return ("RCT_NOT_USED");
+    case RCT_DEFAULT:  return ("RCT_DEFAULT");
+    case RCT_HTTP:     return ("RCT_HTTP");
+    case RCT_WS:       return ("RCT_WS");
+    case RCT_EVENT:    return ("RCT_EVENT");
+    default:           return ("ERROR");
   }
 }
 

@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ class Command {
     struct CmdFunction {
         uint8_t              device_type_; // DeviceType::
         uint8_t              device_id_;
-        uint8_t              flags_; // mqtt flags for command subscriptions
+        uint8_t              flags_;       // mqtt flags for command subscriptions
         const char *         cmd_;
         cmd_function_p       cmdfunction_;
         cmd_json_function_p  cmdfunction_json_;
@@ -107,7 +107,7 @@ class Command {
                     const char * const * description,
                     uint8_t              flags = CommandFlag::MQTT_SUB_FLAG_DEFAULT);
 
-    // same for system/dallas/analog devices
+    // same for system/temperature/analog devices
     static void add(const uint8_t        device_type,
                     const char *         cmd,
                     const cmd_function_p cb,

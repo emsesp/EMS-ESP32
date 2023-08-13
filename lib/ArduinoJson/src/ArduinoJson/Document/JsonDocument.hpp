@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2022, Benoit BLANCHON
+// Copyright © 2014-2023, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -12,14 +12,17 @@
 #include <ArduinoJson/Variant/JsonVariantConst.hpp>
 #include <ArduinoJson/Variant/VariantTo.hpp>
 
-namespace ARDUINOJSON_NAMESPACE {
+ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 
 // A JSON document.
 // https://arduinojson.org/v6/api/jsondocument/
-class JsonDocument : public VariantOperators<const JsonDocument&> {
-  friend class VariantAttorney;
+class JsonDocument : public detail::VariantOperators<const JsonDocument&> {
+  friend class detail::VariantAttorney;
 
  public:
+  JsonDocument(const JsonDocument&) = delete;
+  JsonDocument& operator=(const JsonDocument&) = delete;
+
   // Casts the root to the specified type.
   // https://arduinojson.org/v6/api/jsondocument/as/
   template <typename T>
@@ -37,8 +40,8 @@ class JsonDocument : public VariantOperators<const JsonDocument&> {
   // Empties the document and resets the memory pool
   // https://arduinojson.org/v6/api/jsondocument/clear/
   void clear() {
-    _pool.clear();
-    _data.init();
+    pool_.clear();
+    data_.setNull();
   }
 
   // Returns true if the root is of the specified type.
@@ -64,31 +67,31 @@ class JsonDocument : public VariantOperators<const JsonDocument&> {
   // Returns the number of used bytes in the memory pool.
   // https://arduinojson.org/v6/api/jsondocument/memoryusage/
   size_t memoryUsage() const {
-    return _pool.size();
+    return pool_.size();
   }
 
   // Returns trues if the memory pool was too small.
   // https://arduinojson.org/v6/api/jsondocument/overflowed/
   bool overflowed() const {
-    return _pool.overflowed();
+    return pool_.overflowed();
   }
 
   // Returns the depth (nesting level) of the array.
   // https://arduinojson.org/v6/api/jsondocument/nesting/
   size_t nesting() const {
-    return variantNesting(&_data);
+    return variantNesting(&data_);
   }
 
   // Returns the capacity of the memory pool.
   // https://arduinojson.org/v6/api/jsondocument/capacity/
   size_t capacity() const {
-    return _pool.capacity();
+    return pool_.capacity();
   }
 
   // Returns the number of elements in the root array or object.
   // https://arduinojson.org/v6/api/jsondocument/size/
   size_t size() const {
-    return _data.size();
+    return data_.size();
   }
 
   // Copies the specified document.
@@ -100,15 +103,16 @@ class JsonDocument : public VariantOperators<const JsonDocument&> {
   // Replaces the root with the specified value.
   // https://arduinojson.org/v6/api/jsondocument/set/
   template <typename T>
-  typename enable_if<!is_base_of<JsonDocument, T>::value, bool>::type set(
-      const T& src) {
+  typename detail::enable_if<!detail::is_base_of<JsonDocument, T>::value,
+                             bool>::type
+  set(const T& src) {
     return to<JsonVariant>().set(src);
   }
 
   // Clears the document and converts it to the specified type.
   // https://arduinojson.org/v6/api/jsondocument/to/
   template <typename T>
-  typename VariantTo<T>::type to() {
+  typename detail::VariantTo<T>::type to() {
     clear();
     return getVariant().template to<T>();
   }
@@ -157,69 +161,71 @@ class JsonDocument : public VariantOperators<const JsonDocument&> {
   // https://arduinojson.org/v6/api/jsondocument/containskey/
   template <typename TChar>
   bool containsKey(TChar* key) const {
-    return _data.getMember(adaptString(key)) != 0;
+    return data_.getMember(detail::adaptString(key)) != 0;
   }
 
   // Returns true if the root object contains the specified key.
   // https://arduinojson.org/v6/api/jsondocument/containskey/
   template <typename TString>
   bool containsKey(const TString& key) const {
-    return _data.getMember(adaptString(key)) != 0;
+    return data_.getMember(detail::adaptString(key)) != 0;
   }
 
   // Gets or sets a root object's member.
   // https://arduinojson.org/v6/api/jsondocument/subscript/
   template <typename TString>
-  FORCE_INLINE typename enable_if<IsString<TString>::value,
-                                  MemberProxy<JsonDocument&, TString> >::type
+  FORCE_INLINE typename detail::enable_if<
+      detail::IsString<TString>::value,
+      detail::MemberProxy<JsonDocument&, TString>>::type
   operator[](const TString& key) {
-    return MemberProxy<JsonDocument&, TString>(*this, key);
+    return {*this, key};
   }
 
   // Gets or sets a root object's member.
   // https://arduinojson.org/v6/api/jsondocument/subscript/
   template <typename TChar>
-  FORCE_INLINE typename enable_if<IsString<TChar*>::value,
-                                  MemberProxy<JsonDocument&, TChar*> >::type
+  FORCE_INLINE typename detail::enable_if<
+      detail::IsString<TChar*>::value,
+      detail::MemberProxy<JsonDocument&, TChar*>>::type
   operator[](TChar* key) {
-    return MemberProxy<JsonDocument&, TChar*>(*this, key);
+    return {*this, key};
   }
 
   // Gets a root object's member.
   // https://arduinojson.org/v6/api/jsondocument/subscript/
   template <typename TString>
-  FORCE_INLINE
-      typename enable_if<IsString<TString>::value, JsonVariantConst>::type
-      operator[](const TString& key) const {
-    return JsonVariantConst(_data.getMember(adaptString(key)));
+  FORCE_INLINE typename detail::enable_if<detail::IsString<TString>::value,
+                                          JsonVariantConst>::type
+  operator[](const TString& key) const {
+    return JsonVariantConst(data_.getMember(detail::adaptString(key)));
   }
 
   // Gets a root object's member.
   // https://arduinojson.org/v6/api/jsondocument/subscript/
   template <typename TChar>
-  FORCE_INLINE
-      typename enable_if<IsString<TChar*>::value, JsonVariantConst>::type
-      operator[](TChar* key) const {
-    return JsonVariantConst(_data.getMember(adaptString(key)));
+  FORCE_INLINE typename detail::enable_if<detail::IsString<TChar*>::value,
+                                          JsonVariantConst>::type
+  operator[](TChar* key) const {
+    return JsonVariantConst(data_.getMember(detail::adaptString(key)));
   }
 
   // Gets or sets a root array's element.
   // https://arduinojson.org/v6/api/jsondocument/subscript/
-  FORCE_INLINE ElementProxy<JsonDocument&> operator[](size_t index) {
-    return ElementProxy<JsonDocument&>(*this, index);
+  FORCE_INLINE detail::ElementProxy<JsonDocument&> operator[](size_t index) {
+    return {*this, index};
   }
 
   // Gets a root array's member.
   // https://arduinojson.org/v6/api/jsondocument/subscript/
   FORCE_INLINE JsonVariantConst operator[](size_t index) const {
-    return JsonVariantConst(_data.getElement(index));
+    return JsonVariantConst(data_.getElement(index));
   }
 
   // Appends a new (null) element to the root array.
   // Returns a reference to the new element.
   // https://arduinojson.org/v6/api/jsondocument/add/
   FORCE_INLINE JsonVariant add() {
-    return JsonVariant(&_pool, _data.addElement(&_pool));
+    return JsonVariant(&pool_, data_.addElement(&pool_));
   }
 
   // Appends a value to the root array.
@@ -240,25 +246,26 @@ class JsonDocument : public VariantOperators<const JsonDocument&> {
   // ⚠️ Doesn't release the memory associated with the removed element.
   // https://arduinojson.org/v6/api/jsondocument/remove/
   FORCE_INLINE void remove(size_t index) {
-    _data.remove(index);
+    data_.remove(index);
   }
 
   // Removes a member of the root object.
   // ⚠️ Doesn't release the memory associated with the removed element.
   // https://arduinojson.org/v6/api/jsondocument/remove/
   template <typename TChar>
-  FORCE_INLINE typename enable_if<IsString<TChar*>::value>::type remove(
-      TChar* key) {
-    _data.remove(adaptString(key));
+  FORCE_INLINE typename detail::enable_if<detail::IsString<TChar*>::value>::type
+  remove(TChar* key) {
+    data_.remove(detail::adaptString(key));
   }
 
   // Removes a member of the root object.
   // ⚠️ Doesn't release the memory associated with the removed element.
   // https://arduinojson.org/v6/api/jsondocument/remove/
   template <typename TString>
-  FORCE_INLINE typename enable_if<IsString<TString>::value>::type remove(
-      const TString& key) {
-    _data.remove(adaptString(key));
+  FORCE_INLINE
+      typename detail::enable_if<detail::IsString<TString>::value>::type
+      remove(const TString& key) {
+    data_.remove(detail::adaptString(key));
   }
 
   FORCE_INLINE operator JsonVariant() {
@@ -270,54 +277,44 @@ class JsonDocument : public VariantOperators<const JsonDocument&> {
   }
 
  protected:
-  JsonDocument() : _pool(0, 0) {
-    _data.init();
-  }
+  JsonDocument() : pool_(0, 0) {}
 
-  JsonDocument(MemoryPool pool) : _pool(pool) {
-    _data.init();
-  }
+  JsonDocument(detail::MemoryPool pool) : pool_(pool) {}
 
-  JsonDocument(char* buf, size_t capa) : _pool(buf, capa) {
-    _data.init();
-  }
+  JsonDocument(char* buf, size_t capa) : pool_(buf, capa) {}
 
   ~JsonDocument() {}
 
-  void replacePool(MemoryPool pool) {
-    _pool = pool;
+  void replacePool(detail::MemoryPool pool) {
+    pool_ = pool;
   }
 
   JsonVariant getVariant() {
-    return JsonVariant(&_pool, &_data);
+    return JsonVariant(&pool_, &data_);
   }
 
   JsonVariantConst getVariant() const {
-    return JsonVariantConst(&_data);
+    return JsonVariantConst(&data_);
   }
 
-  MemoryPool _pool;
-  VariantData _data;
-
- private:
-  JsonDocument(const JsonDocument&);
-  JsonDocument& operator=(const JsonDocument&);
+  detail::MemoryPool pool_;
+  detail::VariantData data_;
 
  protected:
-  MemoryPool* getPool() {
-    return &_pool;
+  detail::MemoryPool* getPool() {
+    return &pool_;
   }
 
-  VariantData* getData() {
-    return &_data;
+  detail::VariantData* getData() {
+    return &data_;
   }
 
-  const VariantData* getData() const {
-    return &_data;
+  const detail::VariantData* getData() const {
+    return &data_;
   }
 
-  VariantData* getOrCreateData() {
-    return &_data;
+  detail::VariantData* getOrCreateData() {
+    return &data_;
   }
 };
 
@@ -325,4 +322,4 @@ inline void convertToJson(const JsonDocument& src, JsonVariant dst) {
   dst.set(src.as<JsonVariantConst>());
 }
 
-}  // namespace ARDUINOJSON_NAMESPACE
+ARDUINOJSON_END_PUBLIC_NAMESPACE

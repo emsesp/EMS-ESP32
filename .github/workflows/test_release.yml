@@ -1,0 +1,58 @@
+name: 'test-release'
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'dev2'
+
+jobs:
+  pre-release:
+    name: 'Automatic test-release build'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Get EMS-ESP source code and version
+        id: build_info
+        run: |
+          version=`grep -E '^#define EMSESP_APP_VERSION' ./src/version.h | awk -F'"' '{print $2}'`
+          echo "VERSION=$version" >> $GITHUB_OUTPUT
+
+      - name: Install PlatformIO
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U platformio
+
+      - name: Build WebUI
+        run: |
+          cd interface
+          yarn install
+          yarn run typesafe-i18n --no-watch
+          sed -i "s/= 'pl'/= 'en'/" ./src/i18n/i18n-util.ts
+          yarn run build
+
+      - name: Build firmware
+        run: |
+          platformio run -e ci
+
+      - name: Build S3 firmware
+        run: |
+          platformio run -e ci_s3
+
+      - name: Create a GH Release
+        id: 'automatic_releases'
+        uses: 'marvinpinto/action-automatic-releases@latest'
+        with:
+          repo_token: '${{ secrets.GITHUB_TOKEN }}'
+          title: Test Build v${{steps.build_info.outputs.VERSION}}
+          automatic_release_tag: 'test'
+          prerelease: true
+          files: |
+            CHANGELOG_LATEST.md
+            ./build/firmware/*.*

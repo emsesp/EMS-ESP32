@@ -1,70 +1,85 @@
-import { useCallback, useEffect, useState } from 'react';
-import { useSnackbar } from 'notistack';
-import { AxiosPromise } from 'axios';
+import { useRequest, type Method } from 'alova';
+import { useState } from 'react';
+import { unstable_useBlocker as useBlocker } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
-import { extractErrorMessage } from '.';
+import { useI18nContext } from 'i18n/i18n-react';
 
-import { useI18nContext } from '../i18n/i18n-react';
-
-export interface RestRequestOptions<D> {
-  read: () => AxiosPromise<D>;
-  update?: (value: D) => AxiosPromise<D>;
+export interface RestRequestOptions2<D> {
+  read: () => Method<any, any, any, any, any, any, any>;
+  update: (value: D) => Method<any, any, any, any, any, any, any>;
 }
 
-export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
+export const useRest = <D>({ read, update }: RestRequestOptions2<D>) => {
   const { LL } = useI18nContext();
 
-  const { enqueueSnackbar } = useSnackbar();
-
-  const [saving, setSaving] = useState<boolean>(false);
-  const [data, setData] = useState<D>();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [restartNeeded, setRestartNeeded] = useState<boolean>(false);
+  const [origData, setOrigData] = useState<D>();
 
-  const loadData = useCallback(async () => {
-    setData(undefined);
+  const [dirtyFlags, setDirtyFlags] = useState<string[]>([]);
+  const blocker = useBlocker(dirtyFlags.length !== 0);
+
+  const { data: data, send: readData, update: updateData, onComplete: onReadComplete } = useRequest(read());
+
+  const {
+    loading: saving,
+    send: writeData,
+    onSuccess: onWriteSuccess
+  } = useRequest((newData: D) => update(newData), { immediate: false });
+
+  const updateDataValue = (new_data: D) => {
+    updateData({ data: new_data });
+  };
+
+  onWriteSuccess(() => {
+    toast.success(LL.UPDATED_OF(LL.SETTINGS()));
+    setDirtyFlags([]);
+  });
+
+  onReadComplete((event) => {
+    setOrigData(event.data);
+  });
+
+  const loadData = async () => {
+    setDirtyFlags([]);
     setErrorMessage(undefined);
-    try {
-      setData((await read()).data);
-    } catch (error) {
-      const message = extractErrorMessage(error, LL.PROBLEM_LOADING());
-      enqueueSnackbar(message, { variant: 'error' });
-      setErrorMessage(message);
+    await readData().catch((error) => {
+      toast.error(error.message);
+      setErrorMessage(error.message);
+    });
+  };
+
+  const saveData = async () => {
+    if (!data) {
+      return;
     }
-  }, [read, enqueueSnackbar, LL]);
-
-  const save = useCallback(
-    async (toSave: D) => {
-      if (!update) {
-        return;
+    setRestartNeeded(false);
+    setErrorMessage(undefined);
+    setDirtyFlags([]);
+    setOrigData(data);
+    await writeData(data).catch((error) => {
+      if (error.message === 'Reboot required') {
+        setRestartNeeded(true);
+      } else {
+        toast.error(error.message);
+        setErrorMessage(error.message);
       }
-      setSaving(true);
-      setRestartNeeded(false);
-      setErrorMessage(undefined);
-      try {
-        const response = await update(toSave);
-        setData(response.data);
-        if (response.status === 202) {
-          setRestartNeeded(true);
-        } else {
-          enqueueSnackbar(LL.SETTINGS_OF('') + ' ' + LL.SAVED(), { variant: 'success' });
-        }
-      } catch (error) {
-        const message = extractErrorMessage(error, LL.PROBLEM_UPDATING());
-        enqueueSnackbar(message, { variant: 'error' });
-        setErrorMessage(message);
-      } finally {
-        setSaving(false);
-      }
-    },
-    [update, enqueueSnackbar, LL]
-  );
+    });
+  };
 
-  const saveData = () => data && save(data);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  return { loadData, saveData, saving, setData, data, errorMessage, restartNeeded } as const;
+  return {
+    loadData,
+    saveData,
+    saving,
+    updateDataValue,
+    data,
+    origData,
+    dirtyFlags,
+    setDirtyFlags,
+    setOrigData,
+    blocker,
+    errorMessage,
+    restartNeeded
+  } as const;
 };

@@ -1,9 +1,5 @@
-import { AxiosPromise } from 'axios';
+import { alovaInstance } from './endpoints';
 
-import { Features } from '../types';
+import type { Features } from 'types';
 
-import { AXIOS } from './endpoints';
-
-export function readFeatures(): AxiosPromise<Features> {
-  return AXIOS.get('/features');
-}
+export const readFeatures = () => alovaInstance.Get<Features>('/rest/features');

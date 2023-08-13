@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2022, Benoit BLANCHON
+// Copyright © 2014-2023, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -9,20 +9,20 @@
 #include <ArduinoJson/Serialization/measure.hpp>
 #include <ArduinoJson/Serialization/serialize.hpp>
 
-namespace ARDUINOJSON_NAMESPACE {
+ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
 template <typename TWriter>
 class PrettyJsonSerializer : public JsonSerializer<TWriter> {
   typedef JsonSerializer<TWriter> base;
 
  public:
-  PrettyJsonSerializer(TWriter writer) : base(writer), _nesting(0) {}
+  PrettyJsonSerializer(TWriter writer) : base(writer), nesting_(0) {}
 
   size_t visitArray(const CollectionData& array) {
     const VariantSlot* slot = array.head();
     if (slot) {
       base::write("[\r\n");
-      _nesting++;
+      nesting_++;
       while (slot != 0) {
         indent();
         slot->data()->accept(*this);
@@ -30,7 +30,7 @@ class PrettyJsonSerializer : public JsonSerializer<TWriter> {
         slot = slot->next();
         base::write(slot ? ",\r\n" : "\r\n");
       }
-      _nesting--;
+      nesting_--;
       indent();
       base::write("]");
     } else {
@@ -43,7 +43,7 @@ class PrettyJsonSerializer : public JsonSerializer<TWriter> {
     const VariantSlot* slot = object.head();
     if (slot) {
       base::write("{\r\n");
-      _nesting++;
+      nesting_++;
       while (slot != 0) {
         indent();
         base::visitString(slot->key());
@@ -53,7 +53,7 @@ class PrettyJsonSerializer : public JsonSerializer<TWriter> {
         slot = slot->next();
         base::write(slot ? ",\r\n" : "\r\n");
       }
-      _nesting--;
+      nesting_--;
       indent();
       base::write("}");
     } else {
@@ -64,17 +64,22 @@ class PrettyJsonSerializer : public JsonSerializer<TWriter> {
 
  private:
   void indent() {
-    for (uint8_t i = 0; i < _nesting; i++)
+    for (uint8_t i = 0; i < nesting_; i++)
       base::write(ARDUINOJSON_TAB);
   }
 
-  uint8_t _nesting;
+  uint8_t nesting_;
 };
+
+ARDUINOJSON_END_PRIVATE_NAMESPACE
+
+ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 
 // Produces JsonDocument to create a prettified JSON document.
 // https://arduinojson.org/v6/api/json/serializejsonpretty/
 template <typename TDestination>
 size_t serializeJsonPretty(JsonVariantConst source, TDestination& destination) {
+  using namespace ArduinoJson::detail;
   return serialize<PrettyJsonSerializer>(source, destination);
 }
 
@@ -82,13 +87,15 @@ size_t serializeJsonPretty(JsonVariantConst source, TDestination& destination) {
 // https://arduinojson.org/v6/api/json/serializejsonpretty/
 inline size_t serializeJsonPretty(JsonVariantConst source, void* buffer,
                                   size_t bufferSize) {
+  using namespace ArduinoJson::detail;
   return serialize<PrettyJsonSerializer>(source, buffer, bufferSize);
 }
 
 // Computes the length of the document that serializeJsonPretty() produces.
 // https://arduinojson.org/v6/api/json/measurejsonpretty/
 inline size_t measureJsonPretty(JsonVariantConst source) {
+  using namespace ArduinoJson::detail;
   return measure<PrettyJsonSerializer>(source);
 }
 
-}  // namespace ARDUINOJSON_NAMESPACE
+ARDUINOJSON_END_PUBLIC_NAMESPACE

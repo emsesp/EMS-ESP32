@@ -31,7 +31,7 @@ void RestartService::partition(AsyncWebServerRequest * request) {
     uint64_t buffer;
     esp_partition_read(ota_partition, 0, &buffer, 8);
     if (buffer == 0xFFFFFFFFFFFFFFFF) { // partition empty
-        request->send(400); // bad request
+        request->send(400);             // bad request
         return;
     }
     esp_ota_set_boot_partition(ota_partition);

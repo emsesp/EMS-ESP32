@@ -1,14 +1,15 @@
-import { FC } from 'react';
+import { Tab } from '@mui/material';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
-import { Tab } from '@mui/material';
-
-import { RouterTabs, useRouterTab, useLayoutTitle } from '../components';
-
-import { useI18nContext } from '../i18n/i18n-react';
-
+import DashboardDevices from './DashboardDevices';
+import DashboardSensors from './DashboardSensors';
 import DashboardStatus from './DashboardStatus';
-import DashboardData from './DashboardData';
+
+import type { FC } from 'react';
+
+import { RouterTabs, useRouterTab, useLayoutTitle } from 'components';
+
+import { useI18nContext } from 'i18n/i18n-react';
 
 const Dashboard: FC = () => {
   const { routerTab } = useRouterTab();
@@ -19,13 +20,15 @@ const Dashboard: FC = () => {
   return (
     <>
       <RouterTabs value={routerTab}>
-        <Tab value="data" label={LL.DEVICES_SENSORS()} />
+        <Tab value="devices" label={LL.DEVICES()} />
+        <Tab value="sensors" label={LL.SENSORS()} />
         <Tab value="status" label="Status" />
       </RouterTabs>
       <Routes>
-        <Route path="data" element={<DashboardData />} />
+        <Route path="devices" element={<DashboardDevices />} />
+        <Route path="sensors" element={<DashboardSensors />} />
         <Route path="status" element={<DashboardStatus />} />
-        <Route path="/*" element={<Navigate replace to="data" />} />
+        <Route path="/*" element={<Navigate replace to="devices" />} />
       </Routes>
     </>
   );

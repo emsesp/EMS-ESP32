@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,17 +46,11 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         if (!strncmp(path, Mqtt::base().c_str(), Mqtt::base().length())) {
             char new_path[Mqtt::MQTT_TOPIC_MAX_SIZE];
             strlcpy(new_path, path, sizeof(new_path));
-            p.parse(new_path + Mqtt::base().length() + 1); // re-parse the stripped path
+            p.parse(new_path + Mqtt::base().length() + 1);                  // re-parse the stripped path
         } else {
             return message(CommandRet::ERROR, "unrecognized path", output); // error
         }
     }
-
-#ifdef EMSESP_DEBUG
-#if defined(EMSESP_USE_SERIAL)
-    // Serial.println(p.path().c_str()); // dump paths, for debugging
-#endif
-#endif
 
     // re-calculate new path
     // if there is only a path (URL) and no body then error!
@@ -151,6 +145,40 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         data = input["value"];
     }
 
+    // check if data is entity like device/hc/name/value
+    if (data.is<const char *>()) {
+        const char * d = data.as<const char *>();
+        if (strlen(d)) {
+            char * device_end = (char *)strchr(d, '/');
+            if (device_end != nullptr) {
+                char         device_s[15] = {'\0'};
+                const char * device_p     = device_s;
+                const char * data_p       = nullptr;
+                strlcpy(device_s, d, device_end - d + 1);
+                data_p      = device_end + 1;
+                int8_t id_d = -1;
+                data_p      = parse_command_string(data_p, id_d);
+                if (data_p == nullptr) {
+                    return CommandRet::INVALID;
+                }
+                char data_s[40];
+                strlcpy(data_s, Helpers::toLower(data_p).c_str(), 30);
+                if (strstr(data_s, "/value") == nullptr) {
+                    strcat(data_s, "/value");
+                }
+                uint8_t device_type = EMSdevice::device_name_2_device_type(device_p);
+                if (CommandRet::OK != Command::call(device_type, data_s, "", true, id_d, output)) {
+                    return CommandRet::INVALID;
+                }
+                if (!output.containsKey("api_data")) {
+                    return CommandRet::INVALID;
+                }
+                data = output["api_data"];
+                output.clear();
+            }
+        }
+    }
+
     // call the command based on the type
     uint8_t return_code = CommandRet::ERROR;
     if (data.is<const char *>()) {
@@ -166,7 +194,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     } else if (data.isNull()) {
         return_code = Command::call(device_type, command_p, "", is_admin, id_n, output); // empty, will do a query instead
     } else {
-        return message(CommandRet::ERROR, "cannot parse command", output); // can't process
+        return message(CommandRet::ERROR, "cannot parse command", output);               // can't process
     }
     return return_code;
 }
@@ -231,11 +259,14 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
         id = command[2] - '1' + DeviceValueTAG::TAG_HS1 - DeviceValueTAG::TAG_HC1 + 1; //20;
         command += 3;
     }
+
     // remove separator
     if (command[0] == '/' || command[0] == '.' || command[0] == '_') {
         command++;
     }
+
     free(lowerCmd);
+
     // return null for empty command
     if (command[0] == '\0') {
         return nullptr;
@@ -273,9 +304,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     // except for system commands as this is a special device without any queryable entities (device values)
     if ((device_type > EMSdevice::DeviceType::SYSTEM) && (!value || !strlen(value))) {
         if (!cf || !cf->cmdfunction_json_) {
-#if defined(EMSESP_DEBUG)
-            LOG_DEBUG("[DEBUG] Calling %s command '%s' to retrieve attributes", dname, cmd);
-#endif
+            LOG_DEBUG("Calling %s command '%s' to retrieve attributes", dname, cmd);
             return EMSESP::get_device_value_info(output, cmd, id, device_type) ? CommandRet::OK : CommandRet::ERROR; // entity = cmd
         }
     }
@@ -350,7 +379,8 @@ void Command::add(const uint8_t device_type, const uint8_t device_id, const char
     cmdfunctions_.emplace_back(device_type, device_id, flags, cmd, cb, nullptr, description); // callback for json is nullptr
 }
 
-// same for system/dallas/analog devices with device_id 0
+// add a command with no json output
+// system/temperature/analog devices uses device_id 0
 void Command::add(const uint8_t device_type, const char * cmd, const cmd_function_p cb, const char * const * description, uint8_t flags) {
     add(device_type, 0, cmd, cb, description, flags);
 }
@@ -415,7 +445,9 @@ bool Command::list(const uint8_t device_type, JsonObject & output) {
         for (const auto & cf : cmdfunctions_) {
             if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN) && cf.description_ && (cl == std::string(cf.cmd_))) {
                 if (cf.has_flags(CommandFlag::MQTT_SUB_FLAG_WW)) {
-                    output[cl] = EMSdevice::tag_to_string(DeviceValueTAG::TAG_DEVICE_DATA_WW) + " " + Helpers::translated_word(cf.description_);
+                    char s[100];
+                    snprintf(s, sizeof(s), "%s %s", EMSdevice::tag_to_string(DeviceValueTAG::TAG_DEVICE_DATA_WW), Helpers::translated_word(cf.description_));
+                    output[cl] = s;
                 } else {
                     output[cl] = Helpers::translated_word(cf.description_);
                 }
@@ -503,8 +535,16 @@ bool Command::device_has_commands(const uint8_t device_type) {
         return true; // we always have System
     }
 
-    if (device_type == EMSdevice::DeviceType::DALLASSENSOR) {
-        return (EMSESP::dallassensor_.have_sensors());
+    if (device_type == EMSdevice::DeviceType::SCHEDULER) {
+        return EMSESP::webSchedulerService.has_commands();
+    }
+
+    if (device_type == EMSdevice::DeviceType::CUSTOM) {
+        return (EMSESP::webEntityService.count_entities() != 0);
+    }
+
+    if (device_type == EMSdevice::DeviceType::TEMPERATURESENSOR) {
+        return (EMSESP::temperaturesensor_.have_sensors());
     }
 
     if (device_type == EMSdevice::DeviceType::ANALOGSENSOR) {
@@ -529,8 +569,11 @@ bool Command::device_has_commands(const uint8_t device_type) {
 void Command::show_devices(uuid::console::Shell & shell) {
     shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM));
 
-    if (EMSESP::dallassensor_.have_sensors()) {
-        shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::DALLASSENSOR));
+    if (EMSESP::webSchedulerService.has_commands()) {
+        shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SCHEDULER));
+    }
+    if (EMSESP::temperaturesensor_.have_sensors()) {
+        shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::TEMPERATURESENSOR));
     }
     if (EMSESP::analogsensor_.have_sensors()) {
         shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::ANALOGSENSOR));
@@ -559,13 +602,39 @@ void Command::show_all(uuid::console::Shell & shell) {
     shell.print(COLOR_RESET);
     show(shell, EMSdevice::DeviceType::SYSTEM, true);
 
-    // show sensors
-    if (EMSESP::dallassensor_.have_sensors()) {
+    // show Custom
+    if (EMSESP::webEntityService.has_commands()) {
         shell.print(COLOR_BOLD_ON);
         shell.print(COLOR_YELLOW);
-        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::DALLASSENSOR));
+        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::CUSTOM));
+        shell.println(COLOR_RESET);
+        shell.printf("  info:                 %slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
+        shell.println(COLOR_RESET);
+        shell.printf("  commands:             %slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
         shell.print(COLOR_RESET);
-        show(shell, EMSdevice::DeviceType::DALLASSENSOR, true);
+        show(shell, EMSdevice::DeviceType::CUSTOM, true);
+    }
+
+    // show scheduler
+    if (EMSESP::webSchedulerService.has_commands()) {
+        shell.print(COLOR_BOLD_ON);
+        shell.print(COLOR_YELLOW);
+        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SCHEDULER));
+        shell.println(COLOR_RESET);
+        shell.printf("  info:                 %slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
+        shell.println(COLOR_RESET);
+        shell.printf("  commands:             %slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
+        shell.print(COLOR_RESET);
+        show(shell, EMSdevice::DeviceType::SCHEDULER, true);
+    }
+
+    // show sensors
+    if (EMSESP::temperaturesensor_.have_sensors()) {
+        shell.print(COLOR_BOLD_ON);
+        shell.print(COLOR_YELLOW);
+        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::TEMPERATURESENSOR));
+        shell.print(COLOR_RESET);
+        show(shell, EMSdevice::DeviceType::TEMPERATURESENSOR, true);
     }
     if (EMSESP::analogsensor_.have_sensors()) {
         shell.print(COLOR_BOLD_ON);

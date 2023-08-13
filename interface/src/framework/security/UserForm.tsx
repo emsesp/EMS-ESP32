@@ -1,18 +1,19 @@
-import { FC, useState, useEffect } from 'react';
-import Schema, { ValidateFieldsError } from 'async-validator';
-
 import CancelIcon from '@mui/icons-material/Cancel';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import SaveIcon from '@mui/icons-material/Save';
 
 import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { useState, useEffect } from 'react';
+import type Schema from 'async-validator';
+import type { ValidateFieldsError } from 'async-validator';
+import type { FC } from 'react';
 
-import { BlockFormControlLabel, ValidatedPasswordField, ValidatedTextField } from '../../components';
-import { User } from '../../types';
-import { updateValue } from '../../utils';
-import { validate } from '../../validators';
-
-import { useI18nContext } from '../../i18n/i18n-react';
+import type { User } from 'types';
+import { dialogStyle } from 'CustomTheme';
+import { BlockFormControlLabel, ValidatedPasswordField, ValidatedTextField } from 'components';
+import { useI18nContext } from 'i18n/i18n-react';
+import { updateValue } from 'utils';
+import { validate } from 'validators';
 
 interface UserFormProps {
   creating: boolean;
@@ -51,7 +52,7 @@ const UserForm: FC<UserFormProps> = ({ creating, validator, user, setUser, onDon
   };
 
   return (
-    <Dialog onClose={onCancelEditing} open={!!user} fullWidth maxWidth="sm">
+    <Dialog sx={dialogStyle} onClose={onCancelEditing} open={!!user} fullWidth maxWidth="sm">
       {user && (
         <>
           <DialogTitle id="user-form-dialog-title">
@@ -93,9 +94,8 @@ const UserForm: FC<UserFormProps> = ({ creating, validator, user, setUser, onDon
               variant="outlined"
               onClick={validateAndDone}
               color="primary"
-              autoFocus
             >
-              {creating ? LL.ADD(0) : LL.SAVE()}
+              {creating ? LL.ADD(0) : LL.UPDATE()}
             </Button>
           </DialogActions>
         </>

@@ -4,7 +4,7 @@
 #include <StatefulService.h>
 #include <HttpEndpoint.h>
 #include <FSPersistence.h>
-#include <AsyncMqttClient.h>
+#include <espMqttClient.h>
 #include <ESPUtils.h>
 
 #include <uuid/common.h>
@@ -63,6 +63,7 @@ class MqttSettings {
     bool     enabled;
     String   host;
     uint16_t port;
+    String   rootCA;
 
     // username and password
     String username;
@@ -75,7 +76,7 @@ class MqttSettings {
     uint16_t keepAlive;
     bool     cleanSession;
 
-    // proddy EMS-ESP specific
+    // EMS-ESP specific
     String   base;
     uint16_t publish_time_boiler;
     uint16_t publish_time_thermostat;
@@ -89,6 +90,7 @@ class MqttSettings {
     bool     ha_enabled;
     uint8_t  nested_format;
     String   discovery_prefix;
+    uint8_t  discovery_type;
     bool     publish_single;
     bool     publish_single2cmd;
     bool     send_response;
@@ -103,13 +105,16 @@ class MqttSettingsService : public StatefulService<MqttSettings> {
     MqttSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
     ~MqttSettingsService();
 
-    void                            begin();
-    void                            loop();
-    bool                            isEnabled();
-    bool                            isConnected();
-    const char *                    getClientId();
-    AsyncMqttClientDisconnectReason getDisconnectReason();
-    AsyncMqttClient *               getMqttClient();
+    void                                 begin();
+    void                                 startClient();
+    void                                 loop();
+    bool                                 isEnabled();
+    bool                                 isConnected();
+    const char *                         getClientId();
+    espMqttClientTypes::DisconnectReason getDisconnectReason();
+    MqttClient *                         getMqttClient();
+    void                                 setWill(const char * topic);
+    void                                 onMessage(espMqttClientTypes::OnMessageCallback callback);
 
   protected:
     void onConfigUpdated();
@@ -119,26 +124,27 @@ class MqttSettingsService : public StatefulService<MqttSettings> {
     FSPersistence<MqttSettings> _fsPersistence;
 
     // Pointers to hold retained copies of the mqtt client connection strings.
-    // This is required as AsyncMqttClient holds references to the supplied connection strings.
+    // This is required as espMqttClient holds references to the supplied connection strings.
     char * _retainedHost;
     char * _retainedClientId;
     char * _retainedUsername;
     char * _retainedPassword;
+    char * _retainedRootCA;
 
     // variable to help manage connection
     bool          _reconfigureMqtt;
     unsigned long _disconnectedAt;
 
     // connection status
-    AsyncMqttClientDisconnectReason _disconnectReason;
+    espMqttClientTypes::DisconnectReason _disconnectReason;
 
     // the MQTT client instance
-    AsyncMqttClient _mqttClient;
+    MqttClient * _mqttClient;
 
     void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
     void onMqttConnect(bool sessionPresent);
-    void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
-    void configureMqtt();
+    void onMqttDisconnect(espMqttClientTypes::DisconnectReason reason);
+    bool configureMqtt();
 };
 
 #endif

@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -212,10 +212,11 @@ void Heatpump::process_HPSettings(std::shared_ptr<const Telegram> telegram) {
 // Broadcast (0x099C), data: 00 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 76 00 00
 //                     data: 00 2B 00 03 04 13 00 00 00 00 00 02 02 02 (offset 24)
 void Heatpump::process_HPComp(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram, hpCompSpd_, 51);
+    has_update(telegram, hpCompSpd_, 15);
 }
 
 // 0x999 HPFunctionTest
+// HPFunctionTest(0x0999), data: 00 00 00 32 00 00 00 00 00 00 00
 void Heatpump::process_HPFunctionTest(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, airPurgeMode_, 0);
     has_update(telegram, heatPumpOutput_, 2);

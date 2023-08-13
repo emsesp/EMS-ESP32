@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,12 +26,11 @@ using namespace std::placeholders; // for `_1` etc
 
 WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(WebSettings::read, WebSettings::update, this, server, EMSESP_SETTINGS_SERVICE_PATH, securityManager)
-    , _fsPersistence(WebSettings::read, WebSettings::update, this, fs, EMSESP_SETTINGS_FILE)
-    , _boardProfileHandler(EMSESP_BOARD_PROFILE_SERVICE_PATH,
-                           securityManager->wrapCallback(std::bind(&WebSettingsService::board_profile, this, _1, _2), AuthenticationPredicates::IS_ADMIN)) {
-    _boardProfileHandler.setMethod(HTTP_POST);
-    _boardProfileHandler.setMaxContentLength(256);
-    server->addHandler(&_boardProfileHandler);
+    , _fsPersistence(WebSettings::read, WebSettings::update, this, fs, EMSESP_SETTINGS_FILE) {
+    // GET
+    server->on(EMSESP_BOARD_PROFILE_SERVICE_PATH,
+               HTTP_GET,
+               securityManager->wrapRequest(std::bind(&WebSettingsService::board_profile, this, _1), AuthenticationPredicates::IS_ADMIN));
 
     addUpdateHandler([&](const String & originId) { onUpdate(); }, false);
 }
@@ -47,7 +46,6 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["syslog_mark_interval"]  = settings.syslog_mark_interval;
     root["syslog_host"]           = settings.syslog_host;
     root["syslog_port"]           = settings.syslog_port;
-    root["boiler_heatingoff"]     = settings.boiler_heatingoff;
     root["shower_timer"]          = settings.shower_timer;
     root["shower_alert"]          = settings.shower_alert;
     root["shower_alert_coldshot"] = settings.shower_alert_coldshot;
@@ -93,7 +91,8 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 #elif CONFIG_IDF_TARGET_ESP32S2
     settings.board_profile = root["board_profile"] | "S2MINI";
 #elif CONFIG_IDF_TARGET_ESP32S3
-    settings.board_profile = root["board_profile"] | "S3MINI";
+    // settings.board_profile = root["board_profile"] | "S3MINI";
+    settings.board_profile = root["board_profile"] | "S32S3"; // BBQKees Gateway S3
 #elif CONFIG_IDF_TARGET_ESP32
     settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
 #endif
@@ -167,7 +166,7 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 #ifndef EMSESP_STANDALONE
     String old_syslog_host = settings.syslog_host;
     settings.syslog_host   = root["syslog_host"] | EMSESP_DEFAULT_SYSLOG_HOST;
-    if (!old_syslog_host.equals(settings.syslog_host)) {
+    if (old_syslog_host != settings.syslog_host) {
         add_flags(ChangeFlags::SYSLOG);
     }
 #endif
@@ -177,13 +176,13 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.pbutton_gpio = root["pbutton_gpio"] | default_pbutton_gpio;
     check_flag(prev, settings.pbutton_gpio, ChangeFlags::BUTTON);
 
-    // dallas
+    // temperaturesensor
     prev                 = settings.dallas_gpio;
     settings.dallas_gpio = root["dallas_gpio"] | default_dallas_gpio;
-    check_flag(prev, settings.dallas_gpio, ChangeFlags::DALLAS);
+    check_flag(prev, settings.dallas_gpio, ChangeFlags::SENSOR);
     prev                     = settings.dallas_parasite;
     settings.dallas_parasite = root["dallas_parasite"] | EMSESP_DEFAULT_DALLAS_PARASITE;
-    check_flag(prev, settings.dallas_parasite, ChangeFlags::DALLAS);
+    check_flag(prev, settings.dallas_parasite, ChangeFlags::SENSOR);
 
     // shower
     prev                  = settings.shower_timer;
@@ -238,7 +237,7 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     check_flag(prev, settings.ems_bus_id, ChangeFlags::RESTART);
 
     prev               = settings.low_clock;
-    settings.low_clock = root["low_clock"] | false;
+    settings.low_clock = root["low_clock"];
     check_flag(prev, settings.low_clock, ChangeFlags::RESTART);
 
     //
@@ -247,32 +246,38 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     prev                 = settings.bool_format;
     settings.bool_format = root["bool_format"] | EMSESP_DEFAULT_BOOL_FORMAT;
     EMSESP::system_.bool_format(settings.bool_format);
-    if (Mqtt::ha_enabled())
+    if (Mqtt::ha_enabled()) {
         check_flag(prev, settings.bool_format, ChangeFlags::MQTT);
+    }
 
     prev                 = settings.enum_format;
     settings.enum_format = root["enum_format"] | EMSESP_DEFAULT_ENUM_FORMAT;
     EMSESP::system_.enum_format(settings.enum_format);
-    if (Mqtt::ha_enabled())
+    if (Mqtt::ha_enabled()) {
         check_flag(prev, settings.enum_format, ChangeFlags::MQTT);
+    }
+
+    String old_locale = settings.locale;
+    settings.locale   = root["locale"] | EMSESP_DEFAULT_LOCALE;
+    EMSESP::system_.locale(settings.locale);
+    if (Mqtt::ha_enabled() && old_locale != settings.locale) {
+        add_flags(ChangeFlags::MQTT);
+    }
 
     //
     // without checks or necessary restarts...
     //
-    settings.locale = root["locale"] | EMSESP_DEFAULT_LOCALE;
-    EMSESP::system_.locale(settings.locale);
 
     settings.trace_raw = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
     EMSESP::trace_raw(settings.trace_raw);
 
-    settings.notoken_api       = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
-    settings.solar_maxflow     = root["solar_maxflow"] | EMSESP_DEFAULT_SOLAR_MAXFLOW;
-    settings.boiler_heatingoff = root["boiler_heatingoff"] | EMSESP_DEFAULT_BOILER_HEATINGOFF;
+    settings.notoken_api   = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
+    settings.solar_maxflow = root["solar_maxflow"] | EMSESP_DEFAULT_SOLAR_MAXFLOW;
 
-    settings.fahrenheit = root["fahrenheit"] | false;
+    settings.fahrenheit = root["fahrenheit"];
     EMSESP::system_.fahrenheit(settings.fahrenheit);
 
-    settings.readonly_mode = root["readonly_mode"] | false;
+    settings.readonly_mode = root["readonly_mode"];
     EMSESP::system_.readonly_mode(settings.readonly_mode);
 
     settings.bool_dashboard = root["bool_dashboard"] | EMSESP_DEFAULT_BOOL_FORMAT;
@@ -296,8 +301,8 @@ void WebSettingsService::onUpdate() {
         EMSESP::shower_.start();
     }
 
-    if (WebSettings::has_flags(WebSettings::ChangeFlags::DALLAS)) {
-        EMSESP::dallassensor_.start();
+    if (WebSettings::has_flags(WebSettings::ChangeFlags::SENSOR)) {
+        EMSESP::temperaturesensor_.start();
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::UART)) {
@@ -337,29 +342,29 @@ void WebSettingsService::save() {
 }
 
 // build the json profile to send back
-void WebSettingsService::board_profile(AsyncWebServerRequest * request, JsonVariant & json) {
-    if (json.is<JsonObject>()) {
+void WebSettingsService::board_profile(AsyncWebServerRequest * request) {
+    if (request->hasParam("boardProfile")) {
+        std::string board_profile = request->getParam("boardProfile")->value().c_str();
+
         auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_MEDIUM);
         JsonObject root     = response->getRoot();
 
-        if (json.containsKey("board_profile")) {
-            String              board_profile = json["board_profile"];
-            std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
-            (void)System::load_board_profile(data, board_profile.c_str());
-            root["led_gpio"]       = data[0];
-            root["dallas_gpio"]    = data[1];
-            root["rx_gpio"]        = data[2];
-            root["tx_gpio"]        = data[3];
-            root["pbutton_gpio"]   = data[4];
-            root["phy_type"]       = data[5];
-            root["eth_power"]      = data[6];
-            root["eth_phy_addr"]   = data[7];
-            root["eth_clock_mode"] = data[8];
+        std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
+        (void)System::load_board_profile(data, board_profile);
+        root["board_profile"]  = board_profile;
+        root["led_gpio"]       = data[0];
+        root["dallas_gpio"]    = data[1];
+        root["rx_gpio"]        = data[2];
+        root["tx_gpio"]        = data[3];
+        root["pbutton_gpio"]   = data[4];
+        root["phy_type"]       = data[5];
+        root["eth_power"]      = data[6];
+        root["eth_phy_addr"]   = data[7];
+        root["eth_clock_mode"] = data[8];
 
-            response->setLength();
-            request->send(response);
-            return;
-        }
+        response->setLength();
+        request->send(response);
+        return;
     }
 
     AsyncWebServerResponse * response = request->beginResponse(200);

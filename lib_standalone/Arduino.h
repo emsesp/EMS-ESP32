@@ -24,14 +24,18 @@
 #include <cstdint>
 #include <cstring>
 #include <string>
+
 #include <algorithm> // for count_if
 
-#include "WString.h"
+#include <Print.h>
+#include <Printable.h>
+#include <Stream.h>
+#include <WString.h>
 
 #include <iostream>
 
 // #define IPAddress std::string
-#define IPAddress String
+// #define IPAddress String
 
 #define ICACHE_FLASH_ATTR
 #define ICACHE_RAM_ATTR
@@ -86,135 +90,94 @@ int vsnprintf_P(char * str, size_t size, const char * format, va_list ap);
 
 class Print;
 
-class Printable {
-  public:
-    virtual size_t printTo(Print & print) const = 0;
-};
-
-class Print {
-  public:
-    virtual size_t write(uint8_t c)                           = 0;
-    virtual size_t write(const uint8_t * buffer, size_t size) = 0;
-    size_t         print(char c) {
-                return write((uint8_t)c);
-    }
-    size_t print(const char * data) {
-        return write(reinterpret_cast<const uint8_t *>(data), strlen(data));
-    }
-    size_t print(const __FlashStringHelper * data) {
-        return print(reinterpret_cast<const char *>(data));
-    }
-    size_t print(const Printable & printable) {
-        return printable.printTo(*this);
-    }
-    size_t print(int value) {
-        return print(std::to_string(value).c_str());
-    }
-    size_t print(unsigned int value) {
-        return print(std::to_string(value).c_str());
-    }
-    size_t print(long value) {
-        return print(std::to_string(value).c_str());
-    }
-    size_t print(unsigned long value) {
-        return print(std::to_string(value).c_str());
-    }
-    size_t println() {
-        return print("\r\n");
-    }
-    size_t println(const char * data) {
-        return print(data) + println();
-    }
-    size_t println(const __FlashStringHelper * data) {
-        return print(reinterpret_cast<const char *>(data)) + println();
-    }
-    size_t println(const Printable & printable) {
-        return printable.printTo(*this) + println();
-    }
-    size_t println(int value) {
-        return print(std::to_string(value).c_str()) + println();
-    }
-    size_t println(unsigned int value) {
-        return print(std::to_string(value).c_str()) + println();
-    }
-    size_t println(long value) {
-        return print(std::to_string(value).c_str()) + println();
-    }
-    size_t println(unsigned long value) {
-        return print(std::to_string(value).c_str()) + println();
-    }
-
-    virtual void flush(){};
-
-    size_t print(const String & str) {
-        return print(str.c_str());
-    }
-};
-
-class Stream : public Print {
-  public:
-    virtual int available() = 0;
-    virtual int read()      = 0;
-    virtual int peek()      = 0;
-};
-
 class NativeConsole : public Stream {
   public:
     void begin(unsigned long baud __attribute__((unused))) {
     }
 
     int available() override {
-        if (peek() >= 0) {
+        if (peek_ != -1)
             return 1;
-        } else {
-            return 0;
-        }
+
+        struct timeval timeout;
+        fd_set         rfds;
+
+        FD_ZERO(&rfds);
+        FD_SET(STDIN_FILENO, &rfds);
+
+        timeout.tv_sec  = 0;
+        timeout.tv_usec = 1000;
+
+        return ::select(STDIN_FILENO + 1, &rfds, NULL, NULL, &timeout) > 0 ? 1 : 0;
     }
 
     int read() override {
-        peek();
-
-        if (peek_) {
-            peek_ = false;
-            return peek_data_;
-        } else {
-            return -1;
+        if (peek_ != -1) {
+            uint8_t c = peek_;
+            peek_     = -1;
+            return c;
         }
+
+        if (available() > 0) {
+            uint8_t c;
+            int     ret = ::read(STDIN_FILENO, &c, 1);
+
+            if (ret == 0) {
+                /* Ctrl+D */
+                return '\x04';
+            } else if (ret == 1) {
+                /* Remap Ctrl+Z to Ctrl-\ */
+                if (c == '\x1A')
+                    c = '\x1C';
+                return c;
+            } else {
+                exit(1);
+            }
+        }
+
+        return -1;
     }
 
     int peek() override {
-        if (!peek_) {
-            int ret = ::read(STDIN_FILENO, &peek_data_, 1);
-            peek_   = ret > 0;
-        }
+        if (peek_ == -1)
+            peek_ = read();
 
-        if (peek_) {
-            return peek_data_;
-        } else {
-            return -1;
-        }
+        return peek_;
     }
 
     size_t write(uint8_t c) override {
-        return ::write(STDOUT_FILENO, &c, 1);
+        if (::write(STDOUT_FILENO, &c, 1) == 1) {
+            return 1;
+        } else {
+            exit(1);
+        }
     }
 
     size_t write(const uint8_t * buffer, size_t size) override {
-        return ::write(STDOUT_FILENO, buffer, size);
+        if (::write(STDOUT_FILENO, buffer, size) == (ssize_t)size) {
+            return size;
+        } else {
+            exit(1);
+        }
     }
 
   private:
-    bool          peek_ = false;
-    unsigned char peek_data_;
+    int peek_ = -1;
 };
 
-#include <Network.h>
+#include "Network.h"
 
 extern NativeConsole Serial;
 extern ETHClass      ETH;
 extern WiFiClass     WiFi;
 
-unsigned long millis();
+// unsigned long millis();
+
+#if defined(__linux__)
+#include <chrono> // NOLINT [build/c++11]
+#include <thread> // NOLINT [build/c++11] for yield()
+#define millis() std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count()
+#endif
 
 int64_t esp_timer_get_time();
 

@@ -1,16 +1,6 @@
-import { AxiosPromise } from 'axios';
-import { MqttSettings, MqttStatus } from '../types';
+import { alovaInstance } from './endpoints';
+import type { MqttSettings, MqttStatus } from 'types';
 
-import { AXIOS } from './endpoints';
-
-export function readMqttStatus(): AxiosPromise<MqttStatus> {
-  return AXIOS.get('/mqttStatus');
-}
-
-export function readMqttSettings(): AxiosPromise<MqttSettings> {
-  return AXIOS.get('/mqttSettings');
-}
-
-export function updateMqttSettings(mqttSettings: MqttSettings): AxiosPromise<MqttSettings> {
-  return AXIOS.post('/mqttSettings', mqttSettings);
-}
+export const readMqttStatus = () => alovaInstance.Get<MqttStatus>('/rest/mqttStatus');
+export const readMqttSettings = () => alovaInstance.Get<MqttSettings>('/rest/mqttSettings');
+export const updateMqttSettings = (data: MqttSettings) => alovaInstance.Post<MqttSettings>('/rest/mqttSettings', data);

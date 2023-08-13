@@ -1,16 +1,7 @@
-import { AxiosPromise } from 'axios';
+import { alovaInstance } from './endpoints';
 
-import { APSettings, APStatus } from '../types';
-import { AXIOS } from './endpoints';
+import type { APSettings, APStatus } from 'types';
 
-export function readAPStatus(): AxiosPromise<APStatus> {
-  return AXIOS.get('/apStatus');
-}
-
-export function readAPSettings(): AxiosPromise<APSettings> {
-  return AXIOS.get('/apSettings');
-}
-
-export function updateAPSettings(apSettings: APSettings): AxiosPromise<APSettings> {
-  return AXIOS.post('/apSettings', apSettings);
-}
+export const readAPStatus = () => alovaInstance.Get<APStatus>('/rest/apStatus');
+export const readAPSettings = () => alovaInstance.Get<APSettings>('/rest/apSettings');
+export const updateAPSettings = (data: APSettings) => alovaInstance.Post<APSettings>('/rest/apSettings', data);

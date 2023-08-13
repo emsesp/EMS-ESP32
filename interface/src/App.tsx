@@ -1,61 +1,51 @@
-import { FC, createRef, createContext, useContext, useEffect, useState, RefObject } from 'react';
-import { SnackbarProvider } from 'notistack';
+import { useEffect, useState } from 'react';
+import { ToastContainer, Slide } from 'react-toastify';
 
-import { IconButton } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-
-import { FeaturesLoader } from './contexts/features';
-
-import CustomTheme from './CustomTheme';
-import AppRouting from './AppRouting';
+import 'react-toastify/dist/ReactToastify.min.css';
 
 import { localStorageDetector } from 'typesafe-i18n/detectors';
-import TypesafeI18n from './i18n/i18n-react';
-import { detectLocale } from './i18n/i18n-util';
-import { loadLocaleAsync } from './i18n/i18n-util.async';
+import { FeaturesLoader } from './contexts/features';
+import type { FC } from 'react';
+import AppRouting from 'AppRouting';
+import CustomTheme from 'CustomTheme';
+
+import TypesafeI18n from 'i18n/i18n-react';
+import { detectLocale } from 'i18n/i18n-util';
+import { loadLocaleAsync } from 'i18n/i18n-util.async';
 
 const detectedLocale = detectLocale(localStorageDetector);
 
 const App: FC = () => {
-  const notistackRef: RefObject<any> = createRef();
-
-  const onClickDismiss = (key: string | number | undefined) => () => {
-    notistackRef.current.closeSnackbar(key);
-  };
-
-  const ColorModeContext = createContext({ toggleColorMode: () => {} });
-
-  const colorMode = useContext(ColorModeContext);
-
   const [wasLoaded, setWasLoaded] = useState(false);
 
   useEffect(() => {
-    loadLocaleAsync(detectedLocale).then(() => setWasLoaded(true));
+    void loadLocaleAsync(detectedLocale).then(() => setWasLoaded(true));
   }, []);
 
   if (!wasLoaded) return null;
 
   return (
-    <ColorModeContext.Provider value={colorMode}>
-      <TypesafeI18n locale={detectedLocale}>
-        <CustomTheme>
-          <SnackbarProvider
-            maxSnack={3}
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-            ref={notistackRef}
-            action={(key) => (
-              <IconButton onClick={onClickDismiss(key)} size="small">
-                <CloseIcon />
-              </IconButton>
-            )}
-          >
-            <FeaturesLoader>
-              <AppRouting />
-            </FeaturesLoader>
-          </SnackbarProvider>
-        </CustomTheme>
-      </TypesafeI18n>
-    </ColorModeContext.Provider>
+    <TypesafeI18n locale={detectedLocale}>
+      <CustomTheme>
+        <FeaturesLoader>
+          <AppRouting />
+        </FeaturesLoader>
+        <ToastContainer
+          position="bottom-left"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick={true}
+          rtl={false}
+          pauseOnFocusLoss={false}
+          draggable={false}
+          pauseOnHover={false}
+          transition={Slide}
+          closeButton={false}
+          theme="light"
+        />
+      </CustomTheme>
+    </TypesafeI18n>
   );
 };
 

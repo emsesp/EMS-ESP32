@@ -1,12 +1,13 @@
-import Schema, { InternalRuleItem, ValidateOption } from 'async-validator';
+import type { InternalRuleItem, ValidateOption } from 'async-validator';
+import type Schema from 'async-validator';
 
 export const validate = <T extends object>(
   validator: Schema,
   source: Partial<T>,
   options?: ValidateOption
-): Promise<T> => {
-  return new Promise((resolve, reject) => {
-    validator.validate(source, options ? options : {}, (errors, fieldErrors) => {
+): Promise<T> =>
+  new Promise((resolve, reject) => {
+    void validator.validate(source, options ? options : {}, (errors, fieldErrors) => {
       if (errors) {
         reject(fieldErrors);
       } else {
@@ -14,7 +15,6 @@ export const validate = <T extends object>(
       }
     });
   });
-};
 
 //  updated to support both IPv4 and IPv6
 const IP_ADDRESS_REGEXP =

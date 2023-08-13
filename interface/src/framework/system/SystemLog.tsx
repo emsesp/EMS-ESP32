@@ -1,39 +1,25 @@
-import { FC, useState, useEffect, useCallback, useLayoutEffect } from 'react';
-
-import { Box, styled, Button, Checkbox, MenuItem, Grid, Slider, FormLabel } from '@mui/material';
-
-import * as SystemApi from '../../api/system';
-import { addAccessTokenParameter } from '../../api/authentication';
-
-import { SectionContent, FormLoader, BlockFormControlLabel, ValidatedTextField } from '../../components';
-
-import { LogSettings, LogEntry, LogEntries, LogLevel } from '../../types';
-import { updateValue, useRest, extractErrorMessage } from '../../utils';
-
 import DownloadIcon from '@mui/icons-material/GetApp';
+import WarningIcon from '@mui/icons-material/Warning';
+import { Box, styled, Button, Checkbox, MenuItem, Grid, TextField } from '@mui/material';
+import { useRequest } from 'alova';
+import { useState, useEffect, useRef } from 'react';
+import { toast } from 'react-toastify';
+import type { FC } from 'react';
 
-import { useSnackbar } from 'notistack';
+import type { LogSettings, LogEntry } from 'types';
+import { addAccessTokenParameter } from 'api/authentication';
+import { EVENT_SOURCE_ROOT } from 'api/endpoints';
+import * as SystemApi from 'api/system';
 
-import { EVENT_SOURCE_ROOT } from '../../api/endpoints';
+import { SectionContent, FormLoader, BlockFormControlLabel, BlockNavigation } from 'components';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
+import { LogLevel } from 'types';
+import { updateValueDirty, useRest } from 'utils';
 
 export const LOG_EVENTSOURCE_URL = EVENT_SOURCE_ROOT + 'log';
 
-const useWindowSize = () => {
-  const [size, setSize] = useState([0, 0]);
-  useLayoutEffect(() => {
-    function updateSize() {
-      setSize([window.innerWidth, window.innerHeight]);
-    }
-    window.addEventListener('resize', updateSize);
-    updateSize();
-    return () => window.removeEventListener('resize', updateSize);
-  }, []);
-  return size;
-};
-
-const LogEntryLine = styled('div')(({ theme }) => ({
+const LogEntryLine = styled('div')(() => ({
   color: '#bbbbbb',
   fontFamily: 'monospace',
   fontSize: '14px',
@@ -54,8 +40,6 @@ const levelLabel = (level: LogLevel) => {
       return 'NOTICE';
     case LogLevel.INFO:
       return 'INFO';
-    case LogLevel.DEBUG:
-      return 'DEBUG';
     case LogLevel.TRACE:
       return 'TRACE';
     default:
@@ -64,17 +48,20 @@ const levelLabel = (level: LogLevel) => {
 };
 
 const SystemLog: FC = () => {
-  useWindowSize();
-
   const { LL } = useI18nContext();
 
-  const { loadData, data, setData } = useRest<LogSettings>({
-    read: SystemApi.readLogSettings
-  });
+  const { loadData, data, updateDataValue, origData, dirtyFlags, setDirtyFlags, blocker, saveData, errorMessage } =
+    useRest<LogSettings>({
+      read: SystemApi.readLogSettings,
+      update: SystemApi.updateLogSettings
+    });
 
-  const [errorMessage, setErrorMessage] = useState<string>();
-  const [logEntries, setLogEntries] = useState<LogEntries>({ events: [] });
+  // called on page load to reset pointer and fetch all log entries
+  useRequest(SystemApi.fetchLog());
+  const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
   const [lastIndex, setLastIndex] = useState<number>(0);
+
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, updateDataValue);
 
   const paddedLevelLabel = (level: LogLevel) => {
     const label = levelLabel(level);
@@ -91,53 +78,9 @@ const SystemLog: FC = () => {
     return data?.compact ? label : label.padEnd(7, '\xa0');
   };
 
-  const updateFormValue = updateValue(setData);
-
-  const { enqueueSnackbar } = useSnackbar();
-
-  const reloadPage = () => {
-    window.location.reload();
-  };
-
-  const sendSettings = async (new_max_messages: number, new_level: number) => {
-    if (data) {
-      try {
-        const response = await SystemApi.updateLogSettings({
-          level: new_level,
-          max_messages: new_max_messages,
-          compact: data.compact
-        });
-        if (response.status !== 200) {
-          enqueueSnackbar(LL.PROBLEM_UPDATING(), { variant: 'error' });
-        }
-      } catch (error) {
-        enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_UPDATING()), { variant: 'error' });
-      }
-    }
-  };
-
-  const changeLevel = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (data) {
-      setData({
-        ...data,
-        level: parseInt(event.target.value)
-      });
-      sendSettings(data.max_messages, parseInt(event.target.value));
-    }
-  };
-
-  const changeMaxMessages = (event: Event, value: number | number[]) => {
-    if (data) {
-      setData({
-        ...data,
-        max_messages: value as number
-      });
-    }
-  };
-
   const onDownload = () => {
     let result = '';
-    for (let i of logEntries.events) {
+    for (const i of logEntries) {
       result += i.t + ' ' + levelLabel(i.l) + ' ' + i.i + ': [' + i.n + '] ' + i.m + '\n';
     }
     const a = document.createElement('a');
@@ -154,35 +97,38 @@ const SystemLog: FC = () => {
       const logentry = JSON.parse(rawData as string) as LogEntry;
       if (logentry.i > lastIndex) {
         setLastIndex(logentry.i);
-        setLogEntries((old) => ({ events: [...old.events, logentry] }));
+        setLogEntries((log) => [...log, logentry]);
       }
     }
   };
 
-  const fetchLog = useCallback(async () => {
-    try {
-      await SystemApi.readLogEntries();
-    } catch (error) {
-      setErrorMessage(extractErrorMessage(error, LL.PROBLEM_LOADING()));
-    }
-  }, [LL]);
+  const saveSettings = async () => {
+    await saveData();
+  };
+
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetchLog();
-  }, [fetchLog]);
+    if (logEntries.length) {
+      ref.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end'
+      });
+    }
+  }, [logEntries.length]);
 
   useEffect(() => {
     const es = new EventSource(addAccessTokenParameter(LOG_EVENTSOURCE_URL));
     es.onmessage = onMessage;
     es.onerror = () => {
       es.close();
-      reloadPage();
+      toast.error('EventSource failed');
     };
+
     return () => {
       es.close();
     };
-    // eslint-disable-next-line
-  }, []);
+  });
 
   const content = () => {
     if (!data) {
@@ -192,14 +138,14 @@ const SystemLog: FC = () => {
     return (
       <>
         <Grid container spacing={3} direction="row" justifyContent="flex-start" alignItems="center">
-          <Grid item xs={4}>
-            <ValidatedTextField
+          <Grid item xs={2}>
+            <TextField
               name="level"
               label={LL.LOG_LEVEL()}
               value={data.level}
               fullWidth
               variant="outlined"
-              onChange={changeLevel}
+              onChange={updateFormValue}
               margin="normal"
               select
             >
@@ -208,28 +154,25 @@ const SystemLog: FC = () => {
               <MenuItem value={4}>WARNING</MenuItem>
               <MenuItem value={5}>NOTICE</MenuItem>
               <MenuItem value={6}>INFO</MenuItem>
-              <MenuItem value={7}>DEBUG</MenuItem>
               <MenuItem value={9}>ALL</MenuItem>
-            </ValidatedTextField>
+            </TextField>
           </Grid>
-          <Grid item xs={3}>
-            <FormLabel>{LL.BUFFER_SIZE()}</FormLabel>
-            <Slider
-              value={data.max_messages}
-              valueLabelDisplay="auto"
+          <Grid item xs={2}>
+            <TextField
               name="max_messages"
-              marks={[
-                { value: 25, label: '25' },
-                { value: 50, label: '50' },
-                { value: 75, label: '75' },
-                { value: 100, label: '100' }
-              ]}
-              step={25}
-              min={25}
-              max={100}
-              onChange={changeMaxMessages}
-              onChangeCommitted={() => sendSettings(data.max_messages, data.level)}
-            />
+              label={LL.BUFFER_SIZE()}
+              value={data.max_messages}
+              fullWidth
+              variant="outlined"
+              onChange={updateFormValue}
+              margin="normal"
+              select
+            >
+              <MenuItem value={25}>25</MenuItem>
+              <MenuItem value={50}>50</MenuItem>
+              <MenuItem value={75}>75</MenuItem>
+              <MenuItem value={100}>100</MenuItem>
+            </TextField>
           </Grid>
           <Grid item>
             <BlockFormControlLabel
@@ -237,16 +180,33 @@ const SystemLog: FC = () => {
               label={LL.COMPACT()}
             />
           </Grid>
-          <Grid item>
+          <Box
+            sx={{
+              '& button, & a, & .MuiCard-root': {
+                mt: 3,
+                mx: 0.6
+              }
+            }}
+          >
             <Button startIcon={<DownloadIcon />} variant="outlined" color="secondary" onClick={onDownload}>
               {LL.EXPORT()}
             </Button>
-          </Grid>
+            {dirtyFlags && dirtyFlags.length !== 0 && (
+              <Button
+                startIcon={<WarningIcon color="warning" />}
+                variant="contained"
+                color="info"
+                onClick={saveSettings}
+              >
+                {LL.APPLY_CHANGES(dirtyFlags.length)}
+              </Button>
+            )}
+          </Box>
         </Grid>
         <Box
           sx={{
             backgroundColor: 'black',
-            overflow: 'scroll',
+            overflowY: 'scroll',
             position: 'absolute',
             right: 18,
             bottom: 18,
@@ -255,17 +215,17 @@ const SystemLog: FC = () => {
             p: 1
           }}
         >
-          {logEntries &&
-            logEntries.events.map((e) => (
-              <LogEntryLine key={e.i}>
-                <span>{e.t}</span>
-                {data.compact && <span>{paddedLevelLabel(e.l)} </span>}
-                {!data.compact && <span>{paddedLevelLabel(e.l)}&nbsp;</span>}
-                <span>{paddedIDLabel(e.i)} </span>
-                <span>{paddedNameLabel(e.n)} </span>
-                <span>{e.m}</span>
-              </LogEntryLine>
-            ))}
+          {logEntries.map((e) => (
+            <LogEntryLine key={e.i}>
+              <span>{e.t}</span>
+              {data.compact && <span>{paddedLevelLabel(e.l)} </span>}
+              {!data.compact && <span>{paddedLevelLabel(e.l)}&nbsp;</span>}
+              <span>{paddedIDLabel(e.i)} </span>
+              <span>{paddedNameLabel(e.n)} </span>
+              <span>{e.m}</span>
+            </LogEntryLine>
+          ))}
+          <div ref={ref} />
         </Box>
       </>
     );
@@ -273,6 +233,7 @@ const SystemLog: FC = () => {
 
   return (
     <SectionContent title={LL.LOG_OF(LL.SYSTEM(2))} titleGutter id="log-window">
+      {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>
   );

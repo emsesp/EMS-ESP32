@@ -1,11 +1,10 @@
-import { FC } from 'react';
-
-import { Box, Button, CircularProgress, Typography } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import { Box, Button, CircularProgress, Typography } from '@mui/material';
+import type { FC } from 'react';
 
-import { MessageBox } from '..';
+import { MessageBox } from 'components';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 interface FormLoaderProps {
   message?: string;

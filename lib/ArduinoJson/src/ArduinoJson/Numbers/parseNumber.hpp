@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2022, Benoit BLANCHON
+// Copyright © 2014-2023, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -13,7 +13,7 @@
 #include <ArduinoJson/Variant/Converter.hpp>
 #include <ArduinoJson/Variant/VariantData.hpp>
 
-namespace ARDUINOJSON_NAMESPACE {
+ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
 template <typename A, typename B>
 struct choose_largest : conditional<(sizeof(A) > sizeof(B)), A, B> {};
@@ -137,7 +137,7 @@ inline bool parseNumber(const char* s, VariantData& result) {
     return false;
 
   JsonFloat final_result =
-      traits::make_float(static_cast<JsonFloat>(mantissa), exponent);
+      make_float(static_cast<JsonFloat>(mantissa), exponent);
 
   result.setFloat(is_negative ? -final_result : final_result);
   return true;
@@ -146,8 +146,7 @@ inline bool parseNumber(const char* s, VariantData& result) {
 template <typename T>
 inline T parseNumber(const char* s) {
   VariantData value;
-  value.init();  // VariantData is a POD, so it has no constructor
   parseNumber(s, value);
   return Converter<T>::fromJson(JsonVariantConst(&value));
 }
-}  // namespace ARDUINOJSON_NAMESPACE
+ARDUINOJSON_END_PRIVATE_NAMESPACE

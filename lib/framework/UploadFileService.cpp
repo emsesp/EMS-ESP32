@@ -1,4 +1,5 @@
 #include <UploadFileService.h>
+#include <esp_ota_ops.h>
 
 using namespace std::placeholders; // for `_1` etc
 
@@ -29,14 +30,6 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
         std::string extension = fname.substr(position + 1);
         size_t      fsize     = request->contentLength();
 
-#ifdef EMSESP_DEBUG
-#if defined(EMSESP_USE_SERIAL)
-        Serial.println();
-        Serial.printf("Received filename: %s, len: %d, index: %d, ext: %s, fsize: %d", filename.c_str(), len, index, extension.c_str(), fsize);
-        Serial.println();
-#endif
-#endif
-
         is_firmware = false;
         if ((extension == "bin") && (fsize > 1000000)) {
             is_firmware = true;
@@ -50,12 +43,13 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
             return;
         } else {
             md5[0] = '\0';
-            return; // not support file type
+            handleError(request, 406); // Not Acceptable - unsupported file type
+            return;
         }
 
         if (is_firmware) {
             // Check firmware header, 0xE9 magic offset 0 indicates esp bin, chip offset 12: esp32:0, S2:2, C3:5
-#if CONFIG_IDF_TARGET_ESP32 // ESP32/PICO-D4
+#if CONFIG_IDF_TARGET_ESP32                // ESP32/PICO-D4
             if (len > 12 && (data[0] != 0xE9 || data[12] != 0)) {
                 handleError(request, 503); // service unavailable
                 return;
@@ -71,23 +65,20 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
                 return;
             }
 #elif CONFIG_IDF_TARGET_ESP32S3
-            if (len > 12 && (data[0] != 0xE9 || data[12] != 3)) {
+            if (len > 12 && (data[0] != 0xE9 || data[12] != 9)) {
                 handleError(request, 503); // service unavailable
                 return;
             }
 #endif
             // it's firmware - initialize the ArduinoOTA updater
-            if (Update.begin()) {
+            if (Update.begin(fsize - sizeof(esp_image_header_t))) {
                 if (strlen(md5) == 32) {
                     Update.setMD5(md5);
                     md5[0] = '\0';
                 }
                 request->onDisconnect(UploadFileService::handleEarlyDisconnect); // success, let's make sure we end the update if the client hangs up
             } else {
-#if defined(EMSESP_USE_SERIAL)
-                Update.printError(Serial);
-#endif
-                handleError(request, 507); // failed to begin, send an error response Insufficient Storage
+                handleError(request, 507);                                       // failed to begin, send an error response Insufficient Storage
                 return;
             }
         } else {
@@ -98,22 +89,18 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
 
     if (!is_firmware) {
         if (len) {
-            request->_tempFile.write(data, len); // stream the incoming chunk to the opened file
+            if (len != request->_tempFile.write(data, len)) { // stream the incoming chunk to the opened file
+                handleError(request, 507);                    // 507-Insufficient Storage
+            }
         }
     } else {
         // if we haven't delt with an error, continue with the firmware update
         if (!request->_tempObject) {
             if (Update.write(data, len) != len) {
-#if defined(EMSESP_USE_SERIAL)
-                Update.printError(Serial);
-#endif
                 handleError(request, 500);
             }
             if (final) {
                 if (!Update.end(true)) {
-#if defined(EMSESP_USE_SERIAL)
-                    Update.printError(Serial);
-#endif
                     handleError(request, 500);
                 }
             }
@@ -132,20 +119,24 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
     }
 
     // check if it was a firmware upgrade
-    // if no error, send the success response
+    // if no error, send the success response as a JSON
     if (is_firmware && !request->_tempObject) {
         request->onDisconnect(RestartService::restartNow);
         AsyncWebServerResponse * response = request->beginResponse(200);
         request->send(response);
         return;
     }
+
     if (strlen(md5) == 32) {
-        AsyncWebServerResponse * response = request->beginResponse(201, "text/plain", md5); // created
+        auto *     response = new AsyncJsonResponse(false, 256);
+        JsonObject root     = response->getRoot();
+        root["md5"]         = md5;
+        response->setLength();
         request->send(response);
         return;
     }
 
-    handleError(request, 403); // send the forbidden response
+    handleError(request, 500);
 }
 
 void UploadFileService::handleError(AsyncWebServerRequest * request, int code) {
@@ -155,9 +146,15 @@ void UploadFileService::handleError(AsyncWebServerRequest * request, int code) {
     }
 
     // send the error code to the client and record the error code in the temp object
-    request->_tempObject              = new int(code);
     AsyncWebServerResponse * response = request->beginResponse(code);
     request->send(response);
+
+    // check for invalid extension and immediately kill the connection, which will through an error
+    // that is caught by the web code. Unfortunately the http error code is not sent to the client on fast network connections
+    if (code == 406) {
+        request->client()->close(true);
+        handleEarlyDisconnect();
+    }
 }
 
 void UploadFileService::handleEarlyDisconnect() {

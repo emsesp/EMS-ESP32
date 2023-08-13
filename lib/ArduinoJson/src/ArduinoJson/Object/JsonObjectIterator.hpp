@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2022, Benoit BLANCHON
+// Copyright © 2014-2023, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -7,113 +7,117 @@
 #include <ArduinoJson/Object/JsonPair.hpp>
 #include <ArduinoJson/Variant/SlotFunctions.hpp>
 
-namespace ARDUINOJSON_NAMESPACE {
+ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 
 class JsonPairPtr {
  public:
-  JsonPairPtr(MemoryPool* pool, VariantSlot* slot) : _pair(pool, slot) {}
+  JsonPairPtr(detail::MemoryPool* pool, detail::VariantSlot* slot)
+      : pair_(pool, slot) {}
 
   const JsonPair* operator->() const {
-    return &_pair;
+    return &pair_;
   }
 
   const JsonPair& operator*() const {
-    return _pair;
+    return pair_;
   }
 
  private:
-  JsonPair _pair;
+  JsonPair pair_;
 };
 
 class JsonObjectIterator {
   friend class JsonObject;
 
  public:
-  JsonObjectIterator() : _slot(0) {}
+  JsonObjectIterator() : slot_(0) {}
 
-  explicit JsonObjectIterator(MemoryPool* pool, VariantSlot* slot)
-      : _pool(pool), _slot(slot) {}
+  explicit JsonObjectIterator(detail::MemoryPool* pool,
+                              detail::VariantSlot* slot)
+      : pool_(pool), slot_(slot) {}
 
   JsonPair operator*() const {
-    return JsonPair(_pool, _slot);
+    return JsonPair(pool_, slot_);
   }
   JsonPairPtr operator->() {
-    return JsonPairPtr(_pool, _slot);
+    return JsonPairPtr(pool_, slot_);
   }
 
   bool operator==(const JsonObjectIterator& other) const {
-    return _slot == other._slot;
+    return slot_ == other.slot_;
   }
 
   bool operator!=(const JsonObjectIterator& other) const {
-    return _slot != other._slot;
+    return slot_ != other.slot_;
   }
 
   JsonObjectIterator& operator++() {
-    _slot = _slot->next();
+    slot_ = slot_->next();
     return *this;
   }
 
   JsonObjectIterator& operator+=(size_t distance) {
-    _slot = _slot->next(distance);
+    slot_ = slot_->next(distance);
     return *this;
   }
 
  private:
-  MemoryPool* _pool;
-  VariantSlot* _slot;
+  detail::MemoryPool* pool_;
+  detail::VariantSlot* slot_;
 };
 
 class JsonPairConstPtr {
  public:
-  JsonPairConstPtr(const VariantSlot* slot) : _pair(slot) {}
+  JsonPairConstPtr(const detail::VariantSlot* slot) : pair_(slot) {}
 
   const JsonPairConst* operator->() const {
-    return &_pair;
+    return &pair_;
   }
 
   const JsonPairConst& operator*() const {
-    return _pair;
+    return pair_;
   }
 
  private:
-  JsonPairConst _pair;
+  JsonPairConst pair_;
 };
 
 class JsonObjectConstIterator {
   friend class JsonObject;
 
  public:
-  JsonObjectConstIterator() : _slot(0) {}
+  JsonObjectConstIterator() : slot_(0) {}
 
-  explicit JsonObjectConstIterator(const VariantSlot* slot) : _slot(slot) {}
+  explicit JsonObjectConstIterator(const detail::VariantSlot* slot)
+      : slot_(slot) {}
 
   JsonPairConst operator*() const {
-    return JsonPairConst(_slot);
+    return JsonPairConst(slot_);
   }
   JsonPairConstPtr operator->() {
-    return JsonPairConstPtr(_slot);
+    return JsonPairConstPtr(slot_);
   }
 
   bool operator==(const JsonObjectConstIterator& other) const {
-    return _slot == other._slot;
+    return slot_ == other.slot_;
   }
 
   bool operator!=(const JsonObjectConstIterator& other) const {
-    return _slot != other._slot;
+    return slot_ != other.slot_;
   }
 
   JsonObjectConstIterator& operator++() {
-    _slot = _slot->next();
+    slot_ = slot_->next();
     return *this;
   }
 
   JsonObjectConstIterator& operator+=(size_t distance) {
-    _slot = _slot->next(distance);
+    slot_ = slot_->next(distance);
     return *this;
   }
 
  private:
-  const VariantSlot* _slot;
+  const detail::VariantSlot* slot_;
 };
-}  // namespace ARDUINOJSON_NAMESPACE
+
+ARDUINOJSON_END_PUBLIC_NAMESPACE

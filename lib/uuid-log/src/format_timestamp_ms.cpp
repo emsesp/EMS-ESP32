@@ -20,6 +20,7 @@
 
 #include <Arduino.h>
 
+#include <array>
 #include <cstdint>
 #include <string>
 
@@ -45,7 +46,7 @@ std::string format_timestamp_ms(uint64_t timestamp_ms, unsigned int days_width) 
 
     milliseconds = timestamp_ms;
 
-    static std::vector<char> text(10 + 1 /* days */ + 2 + 1 /* hours */ + 2 + 1 /* minutes */ + 2 + 1 /* seconds */ + 3 /* milliseconds */ + 1);
+    std::array<char, 12 + 1 /* days */ + 2 + 1 /* hours */ + 2 + 1 /* minutes */ + 2 + 1 /* seconds */ + 3 /* milliseconds */ + 1> text;
 
     snprintf(text.data(), text.size(), ("%0*lu+%02u:%02u:%02u.%03u"), std::min(days_width, 10U), days, hours, minutes, seconds, milliseconds);
 

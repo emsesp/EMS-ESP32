@@ -5,32 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# [3.5.1] March 11 2023
-
-## Added
-
-- Detect old Tado thermostat, device-id 0x19, no entities
-- Some more HM200 entities [#500](https://github.com/emsesp/EMS-ESP32/issues/500)
-- Add entity to force heating off (for systems without thermostat) [#951](https://github.com/emsesp/EMS-ESP32/issues/951)
-
-## Fixed
-
-- HA-discovery for analog sensor commands [#1035](https://github.com/emsesp/EMS-ESP32/issues/1035)
-
-## Changed
-
-- Use byte 0 for detection RC30 active heatingcircuit [#786](https://github.com/emsesp/EMS-ESP32/issues/786)
-- Write repeated selflowtemp if tx-queue is empty without verify [#954](https://github.com/emsesp/EMS-ESP32/issues/954)
-- HA discovery recreate after disconnect by device [#1067](https://github.com/emsesp/EMS-ESP32/issues/1067)
-- File upload: check flash size (overflow) instead of filesize
-
-
 # [3.5.0] February 6 2023
 
 ## **IMPORTANT! BREAKING CHANGES**
 
 - When upgrading to v3.5 for the first time from v3.4 on a BBQKees Gateway board you will need to use the [EMS-EPS Flasher](https://github.com/emsesp/EMS-ESP-Flasher/releases) to correctly re-partition the flash. Make sure you backup the settings and customizations from the WebUI (System->Upload/Download) and restore after the upgrade.
-- Support for multiple EMS-ESPs [#759] has been added as an optional setting for MQTT. When enabled, which is now the default, all MQTT Discovery Entity IDs will include the MQTT base name and the shortname of the EMS-ESP device entity. For example what was previously `sensor.boiler_actual_boiler_temperature` will now become `sensor.ems_esp_boiler_boiltemp`. If you still want to use the old format and retain the history and script compatibility in Home Assistant then set this back to the old format.
 
 ## Added
 
@@ -122,6 +101,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix memory leak in api [#524](https://github.com/emsesp/EMS-ESP32/issues/524)
 
 ## Changed
+
+- Controller data in web-ui only for IVT [#522](https://github.com/emsesp/EMS-ESP32/issues/522)
+- Rename hidden `climate` to a more explaining name [#523](https://github.com/emsesp/EMS-ESP32/issues/523)
+- Minor changes to the Customizations web page [#527](https://github.com/emsesp/EMS-ESP32/pull/527)
 
 # [3.4.0] May 23 2022
 
@@ -229,7 +212,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added pool data to telegrams 0x494 & 0x495 [#102](https://github.com/emsesp/EMS-ESP32/issues/102)
 - Add RC300 second summermode telegram [#108](https://github.com/emsesp/EMS-ESP32/issues/108)
 - Add support for the RC25 thermostat [#106](https://github.com/emsesp/EMS-ESP32/issues/106)
-- Add new command 'entities' for a device, e.g. http://ems-esp/api/boiler/entities to show the shortname, description and HA Entity name (if HA enabled) [#116](https://github.com/emsesp/EMS-ESP32/issues/116)
+- Add new command 'entities' for a device, e.g. <http://ems-esp/api/boiler/entities> to show the shortname, description and HA Entity name (if HA enabled) [#116](https://github.com/emsesp/EMS-ESP32/issues/116)
 - Support for Junkers program and remote (fb10/fb110) temperature
 - Home Assistant `state_class` attribute for Wh, kWh, W and KW [#129](https://github.com/emsesp/EMS-ESP32/issues/129)
 - Add current room influence for RC300 [#136](https://github.com/emsesp/EMS-ESP32/issues/136)
@@ -451,4 +434,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - some names of mqtt-tags like in v2.2.1
 - new ESP32 partition side to allow for smoother OTA and fallback
 - Network Gateway IP is optional (#682)emsesp/EMS-ESP
-- moved to a new GitHub repo https://github.com/emsesp/EMS-ESP32
+- moved to a new GitHub repo <https://github.com/emsesp/EMS-ESP32>

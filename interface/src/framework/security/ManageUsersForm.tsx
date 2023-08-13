@@ -1,41 +1,42 @@
-import { FC, useContext, useState } from 'react';
-
-import { Button, IconButton, Box } from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
-import DeleteIcon from '@mui/icons-material/Delete';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import EditIcon from '@mui/icons-material/Edit';
+import CancelIcon from '@mui/icons-material/Cancel';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
+import WarningIcon from '@mui/icons-material/Warning';
+import { Button, IconButton, Box } from '@mui/material';
 
-import { Table } from '@table-library/react-table-library/table';
+import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
-import { Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
+import { useContext, useState } from 'react';
 
-import * as SecurityApi from '../../api/security';
-import { SecuritySettings, User } from '../../types';
-import { ButtonRow, FormLoader, MessageBox, SectionContent } from '../../components';
-import { createUserValidator } from '../../validators';
-import { useRest } from '../../utils';
-import { AuthenticatedContext } from '../../contexts/authentication';
-
-import { useI18nContext } from '../../i18n/i18n-react';
-
+import { unstable_useBlocker as useBlocker } from 'react-router-dom';
 import GenerateToken from './GenerateToken';
 import UserForm from './UserForm';
+import type { FC } from 'react';
+import type { SecuritySettings, User } from 'types';
+import * as SecurityApi from 'api/security';
+import { ButtonRow, FormLoader, MessageBox, SectionContent, BlockNavigation } from 'components';
+import { AuthenticatedContext } from 'contexts/authentication';
+import { useI18nContext } from 'i18n/i18n-react';
+import { useRest } from 'utils';
+import { createUserValidator } from 'validators';
 
 const ManageUsersForm: FC = () => {
-  const { loadData, saving, data, setData, saveData, errorMessage } = useRest<SecuritySettings>({
+  const { loadData, saveData, saving, data, updateDataValue, errorMessage } = useRest<SecuritySettings>({
     read: SecurityApi.readSecuritySettings,
     update: SecurityApi.updateSecuritySettings
   });
 
   const [user, setUser] = useState<User>();
   const [creating, setCreating] = useState<boolean>(false);
+  const [changed, setChanged] = useState<number>(0);
   const [generatingToken, setGeneratingToken] = useState<string>();
   const authenticatedContext = useContext(AuthenticatedContext);
 
+  const blocker = useBlocker(changed !== 0);
   const { LL } = useI18nContext();
 
   const table_theme = useTheme({
@@ -51,8 +52,7 @@ const ManageUsersForm: FC = () => {
       color: #90CAF9;
       .th {
         padding: 8px;
-        height: 42px;
-        font-weight: 500;
+        height: 36px;
         border-bottom: 1px solid #565656;
       }
     `,
@@ -62,7 +62,6 @@ const ManageUsersForm: FC = () => {
         border-top: 1px solid #565656;
         border-bottom: 1px solid #565656;
       }
-
       &:nth-of-type(odd) .td {
         background-color: #303030;
       }
@@ -89,7 +88,8 @@ const ManageUsersForm: FC = () => {
 
     const removeUser = (toRemove: User) => {
       const users = data.users.filter((u) => u.username !== toRemove.username);
-      setData({ ...data, users });
+      updateDataValue({ ...data, users });
+      setChanged(changed + 1);
     };
 
     const createUser = () => {
@@ -112,9 +112,10 @@ const ManageUsersForm: FC = () => {
 
     const doneEditingUser = () => {
       if (user) {
-        const users = [...data.users.filter((u) => u.username !== user.username), user];
-        setData({ ...data, users });
+        const users = [...data.users.filter((u: { username: string }) => u.username !== user.username), user];
+        updateDataValue({ ...data, users });
         setUser(undefined);
+        setChanged(changed + 1);
       }
     };
 
@@ -128,7 +129,13 @@ const ManageUsersForm: FC = () => {
 
     const onSubmit = async () => {
       await saveData();
-      authenticatedContext.refresh();
+      await authenticatedContext.refresh();
+      setChanged(0);
+    };
+
+    const onCancelSubmit = async () => {
+      await loadData();
+      setChanged(0);
     };
 
     const user_table = data.users.map((u) => ({ ...u, id: u.username }));
@@ -154,15 +161,14 @@ const ManageUsersForm: FC = () => {
                       <IconButton
                         size="small"
                         disabled={!authenticatedContext.me.admin}
-                        aria-label="Generate Token"
                         onClick={() => generateToken(u.username)}
                       >
                         <VpnKeyIcon />
                       </IconButton>
-                      <IconButton size="small" aria-label="Delete" onClick={() => removeUser(u)}>
+                      <IconButton size="small" onClick={() => removeUser(u)}>
                         <DeleteIcon />
                       </IconButton>
-                      <IconButton size="small" aria-label="Edit" onClick={() => editUser(u)}>
+                      <IconButton size="small" onClick={() => editUser(u)}>
                         <EditIcon />
                       </IconButton>
                     </Cell>
@@ -177,16 +183,30 @@ const ManageUsersForm: FC = () => {
 
         <Box display="flex" flexWrap="wrap">
           <Box flexGrow={1} sx={{ '& button': { mt: 2 } }}>
-            <Button
-              startIcon={<SaveIcon />}
-              disabled={saving || noAdminConfigured()}
-              variant="outlined"
-              color="primary"
-              type="submit"
-              onClick={onSubmit}
-            >
-              {LL.SAVE()}
-            </Button>
+            {changed !== 0 && (
+              <ButtonRow>
+                <Button
+                  startIcon={<CancelIcon />}
+                  disabled={saving}
+                  variant="outlined"
+                  color="primary"
+                  type="submit"
+                  onClick={onCancelSubmit}
+                >
+                  {LL.CANCEL()}
+                </Button>
+                <Button
+                  startIcon={<WarningIcon color="warning" />}
+                  disabled={saving || noAdminConfigured()}
+                  variant="contained"
+                  color="info"
+                  type="submit"
+                  onClick={onSubmit}
+                >
+                  {LL.APPLY_CHANGES(changed)}
+                </Button>
+              </ButtonRow>
+            )}
           </Box>
 
           <Box flexWrap="nowrap" whiteSpace="nowrap">
@@ -213,6 +233,7 @@ const ManageUsersForm: FC = () => {
 
   return (
     <SectionContent title={LL.MANAGE_USERS()} titleGutter>
+      {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>
   );

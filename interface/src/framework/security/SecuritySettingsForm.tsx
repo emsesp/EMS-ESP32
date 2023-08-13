@@ -1,29 +1,42 @@
-import { FC, useContext, useState } from 'react';
-import { ValidateFieldsError } from 'async-validator';
-
+import CancelIcon from '@mui/icons-material/Cancel';
+import WarningIcon from '@mui/icons-material/Warning';
 import { Button } from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
+import { useContext, useState } from 'react';
+import type { ValidateFieldsError } from 'async-validator';
+import type { FC } from 'react';
 
-import * as SecurityApi from '../../api/security';
-import { SecuritySettings } from '../../types';
-import { ButtonRow, FormLoader, MessageBox, SectionContent, ValidatedPasswordField } from '../../components';
-import { SECURITY_SETTINGS_VALIDATOR, validate } from '../../validators';
-import { updateValue, useRest } from '../../utils';
-import { AuthenticatedContext } from '../../contexts/authentication';
+import type { SecuritySettings } from 'types';
+import * as SecurityApi from 'api/security';
+import { ButtonRow, FormLoader, MessageBox, SectionContent, ValidatedPasswordField, BlockNavigation } from 'components';
+import { AuthenticatedContext } from 'contexts/authentication';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
+import { updateValueDirty, useRest } from 'utils';
+import { SECURITY_SETTINGS_VALIDATOR, validate } from 'validators';
 
 const SecuritySettingsForm: FC = () => {
   const { LL } = useI18nContext();
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
-  const { loadData, saving, data, setData, saveData, errorMessage } = useRest<SecuritySettings>({
+  const {
+    loadData,
+    saving,
+    data,
+    updateDataValue,
+    origData,
+    dirtyFlags,
+    setDirtyFlags,
+    blocker,
+    saveData,
+    errorMessage
+  } = useRest<SecuritySettings>({
     read: SecurityApi.readSecuritySettings,
     update: SecurityApi.updateSecuritySettings
   });
 
   const authenticatedContext = useContext(AuthenticatedContext);
-  const updateFormValue = updateValue(setData);
+
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, updateDataValue);
 
   const content = () => {
     if (!data) {
@@ -54,24 +67,37 @@ const SecuritySettingsForm: FC = () => {
           margin="normal"
         />
         <MessageBox level="info" message={LL.SU_TEXT()} mt={1} />
-        <ButtonRow>
-          <Button
-            startIcon={<SaveIcon />}
-            disabled={saving}
-            variant="outlined"
-            color="primary"
-            type="submit"
-            onClick={validateAndSubmit}
-          >
-            {LL.SAVE()}
-          </Button>
-        </ButtonRow>
+        {dirtyFlags && dirtyFlags.length !== 0 && (
+          <ButtonRow>
+            <Button
+              startIcon={<CancelIcon />}
+              disabled={saving}
+              variant="outlined"
+              color="primary"
+              type="submit"
+              onClick={loadData}
+            >
+              {LL.CANCEL()}
+            </Button>
+            <Button
+              startIcon={<WarningIcon color="warning" />}
+              disabled={saving}
+              variant="contained"
+              color="info"
+              type="submit"
+              onClick={validateAndSubmit}
+            >
+              {LL.APPLY_CHANGES(dirtyFlags.length)}
+            </Button>
+          </ButtonRow>
+        )}
       </>
     );
   };
 
   return (
     <SectionContent title={LL.SETTINGS_OF(LL.SECURITY(1))} titleGutter>
+      {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>
   );

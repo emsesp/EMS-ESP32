@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
 {115, DeviceType::BOILER, "Topline/GB162", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {121, DeviceType::BOILER, "Cascade MCM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {122, DeviceType::BOILER, "Proline", DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{123, DeviceType::BOILER, "GBx72/Trendline/Cerapur/Greenstar Si/27i-30i", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{123, DeviceType::BOILER, "GBx72/Trendline/Cerapur/Greenstar Si", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {131, DeviceType::BOILER, "GB212", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {132, DeviceType::BOILER, "GC7000F", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {133, DeviceType::BOILER, "Logano GB125/KB195i/Logamatic MC110", DeviceFlags::EMS_DEVICE_FLAG_NONE},
@@ -48,6 +48,7 @@
 {208, DeviceType::BOILER, "Logamax Plus/GB192/Condens GC9000/Greenstar ErP", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {210, DeviceType::BOILER, "Cascade MC400", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {211, DeviceType::BOILER, "EasyControl Adapter", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{219, DeviceType::BOILER, "Greenstar HIU", DeviceFlags::EMS_DEVICE_FLAG_HIU},
 {234, DeviceType::BOILER, "Logamax Plus GB122/Condense 2300", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Controllers - 0x09 / 0x10 / 0x50
@@ -96,9 +97,10 @@
 {158, DeviceType::THERMOSTAT, "RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
 {165, DeviceType::THERMOSTAT, "RC100/Moduline 1000/1010", DeviceFlags::EMS_DEVICE_FLAG_RC100}, // 0x18, 0x38
 {172, DeviceType::THERMOSTAT, "Rego 2000/3000", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
+{215, DeviceType::THERMOSTAT, "Comfort RF", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
 {216, DeviceType::THERMOSTAT, "CRF200S", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
 {246, DeviceType::THERMOSTAT, "Comfort+2RF", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
-{253, DeviceType::THERMOSTAT, "Rego 3000", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
+{253, DeviceType::THERMOSTAT, "Rego 3000/UI800", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
 
 // Thermostat - Sieger - 0x10 / 0x17
 { 66, DeviceType::THERMOSTAT, "ES72/RC20", DeviceFlags::EMS_DEVICE_FLAG_RC20_N}, // 0x17 or remote
@@ -121,7 +123,7 @@
 // Thermostat remote - 0x38
 {  3, DeviceType::THERMOSTAT, "RT800", DeviceFlags::EMS_DEVICE_FLAG_RC100H},
 {200, DeviceType::THERMOSTAT, "RC100H", DeviceFlags::EMS_DEVICE_FLAG_RC100H},
-{249, DeviceType::THERMOSTAT, "TR120RF", DeviceFlags::EMS_DEVICE_FLAG_RC100H},
+{249, DeviceType::THERMOSTAT, "TR120RF/CR20RF", DeviceFlags::EMS_DEVICE_FLAG_RC100H},
 
 // Solar Modules - 0x30 (for solar), 0x2A, 0x41 (for ww)
 { 73, DeviceType::SOLAR, "SM10", DeviceFlags::EMS_DEVICE_FLAG_SM10},
@@ -147,6 +149,9 @@
 
 // Heat Pumps - 0x53
 {248, DeviceType::HEATPUMP, "Hybrid Manager HM200", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+
+// Ventilation - 0x51
+{231, DeviceType::VENTILATION, "Logavent HRV176", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Heatsource - 0x60
 {228, DeviceType::HEATSOURCE, "AM200", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // alternative heatsource

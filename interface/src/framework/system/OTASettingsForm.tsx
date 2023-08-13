@@ -1,36 +1,48 @@
-import { FC, useState } from 'react';
-
+import CancelIcon from '@mui/icons-material/Cancel';
+import WarningIcon from '@mui/icons-material/Warning';
 import { Button, Checkbox } from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
+import { useState } from 'react';
+import type { ValidateFieldsError } from 'async-validator';
+import type { FC } from 'react';
 
-import * as SystemApi from '../../api/system';
+import type { OTASettings } from 'types';
+import * as SystemApi from 'api/system';
 import {
   BlockFormControlLabel,
   ButtonRow,
   FormLoader,
   SectionContent,
   ValidatedPasswordField,
-  ValidatedTextField
-} from '../../components';
+  ValidatedTextField,
+  BlockNavigation
+} from 'components';
 
-import { OTASettings } from '../../types';
-import { numberValue, updateValue, useRest } from '../../utils';
+import { useI18nContext } from 'i18n/i18n-react';
+import { numberValue, updateValueDirty, useRest } from 'utils';
 
-import { ValidateFieldsError } from 'async-validator';
-import { validate } from '../../validators';
-import { OTA_SETTINGS_VALIDATOR } from '../../validators/system';
-
-import { useI18nContext } from '../../i18n/i18n-react';
+import { validate } from 'validators';
+import { OTA_SETTINGS_VALIDATOR } from 'validators/system';
 
 const OTASettingsForm: FC = () => {
-  const { loadData, saving, data, setData, saveData, errorMessage } = useRest<OTASettings>({
+  const {
+    loadData,
+    saveData,
+    saving,
+    updateDataValue,
+    data,
+    origData,
+    dirtyFlags,
+    setDirtyFlags,
+    blocker,
+    errorMessage
+  } = useRest<OTASettings>({
     read: SystemApi.readOTASettings,
     update: SystemApi.updateOTASettings
   });
 
   const { LL } = useI18nContext();
 
-  const updateFormValue = updateValue(setData);
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, updateDataValue);
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
@@ -43,7 +55,7 @@ const OTASettingsForm: FC = () => {
       try {
         setFieldErrors(undefined);
         await validate(OTA_SETTINGS_VALIDATOR, data);
-        saveData();
+        await saveData();
       } catch (errors: any) {
         setFieldErrors(errors);
       }
@@ -76,24 +88,37 @@ const OTASettingsForm: FC = () => {
           onChange={updateFormValue}
           margin="normal"
         />
-        <ButtonRow>
-          <Button
-            startIcon={<SaveIcon />}
-            disabled={saving}
-            variant="outlined"
-            color="primary"
-            type="submit"
-            onClick={validateAndSubmit}
-          >
-            {LL.SAVE()}
-          </Button>
-        </ButtonRow>
+        {dirtyFlags && dirtyFlags.length !== 0 && (
+          <ButtonRow>
+            <Button
+              startIcon={<CancelIcon />}
+              disabled={saving}
+              variant="outlined"
+              color="primary"
+              type="submit"
+              onClick={loadData}
+            >
+              {LL.CANCEL()}
+            </Button>
+            <Button
+              startIcon={<WarningIcon color="warning" />}
+              disabled={saving}
+              variant="contained"
+              color="info"
+              type="submit"
+              onClick={validateAndSubmit}
+            >
+              {LL.APPLY_CHANGES(dirtyFlags.length)}
+            </Button>
+          </ButtonRow>
+        )}
       </>
     );
   };
 
   return (
     <SectionContent title={LL.SETTINGS_OF('OTA')} titleGutter>
+      {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>
   );

@@ -1,33 +1,30 @@
-import { FC } from 'react';
-
-import { Typography, Button, Box, List, ListItem, ListItemText, Link, ListItemAvatar } from '@mui/material';
-
-import { SectionContent } from '../components';
-
-import { useSnackbar } from 'notistack';
-
 import CommentIcon from '@mui/icons-material/CommentTwoTone';
-import MenuBookIcon from '@mui/icons-material/MenuBookTwoTone';
-import GitHubIcon from '@mui/icons-material/GitHub';
-import DownloadIcon from '@mui/icons-material/GetApp';
 import EastIcon from '@mui/icons-material/East';
-
-import { extractErrorMessage } from '../utils';
-
-import { useI18nContext } from '../i18n/i18n-react';
-
+import DownloadIcon from '@mui/icons-material/GetApp';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import MenuBookIcon from '@mui/icons-material/MenuBookTwoTone';
+import { Typography, Button, Box, List, ListItem, ListItemText, Link, ListItemAvatar } from '@mui/material';
+import { useRequest } from 'alova';
+import { toast } from 'react-toastify';
 import * as EMSESP from './api';
+import type { FC } from 'react';
+
+import { SectionContent } from 'components';
+
+import { useI18nContext } from 'i18n/i18n-react';
 
 const HelpInformation: FC = () => {
   const { LL } = useI18nContext();
 
-  const { enqueueSnackbar } = useSnackbar();
+  const { send: API, onSuccess: onSuccessAPI } = useRequest((data) => EMSESP.API(data), {
+    immediate: false
+  });
 
-  const saveFile = (json: any, endpoint: string) => {
+  onSuccessAPI((event) => {
     const a = document.createElement('a');
-    const filename = 'emsesp_' + endpoint + '.txt';
+    const filename = 'emsesp_info.txt';
     a.href = URL.createObjectURL(
-      new Blob([JSON.stringify(json, null, 2)], {
+      new Blob([JSON.stringify(event.data, null, 2)], {
         type: 'text/plain'
       })
     );
@@ -35,24 +32,13 @@ const HelpInformation: FC = () => {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    enqueueSnackbar(LL.DOWNLOAD_SUCCESSFUL(), { variant: 'info' });
-  };
+    toast.info(LL.DOWNLOAD_SUCCESSFUL());
+  });
 
-  const callAPI = async (endpoint: string) => {
-    try {
-      const response = await EMSESP.API({
-        device: 'system',
-        entity: endpoint,
-        id: 0
-      });
-      if (response.status !== 200) {
-        enqueueSnackbar(LL.PROBLEM_LOADING(), { variant: 'error' });
-      } else {
-        saveFile(response.data, endpoint);
-      }
-    } catch (error) {
-      enqueueSnackbar(extractErrorMessage(error, LL.PROBLEM_LOADING()), { variant: 'error' });
-    }
+  const callAPI = async () => {
+    await API({ device: 'system', entity: 'info', id: 0 }).catch((error) => {
+      toast.error(error.message);
+    });
   };
 
   return (
@@ -103,7 +89,7 @@ const HelpInformation: FC = () => {
               size="small"
               variant="outlined"
               color="primary"
-              onClick={() => callAPI('info')}
+              onClick={() => callAPI()}
             >
               {LL.SUPPORT_INFO()}
             </Button>

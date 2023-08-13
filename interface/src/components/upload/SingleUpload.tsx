@@ -1,14 +1,14 @@
-import { FC, Fragment } from 'react';
-import { useDropzone, DropzoneState } from 'react-dropzone';
-
-import { AxiosProgressEvent } from 'axios';
-
-import { Box, Button, LinearProgress, Theme, Typography, useTheme } from '@mui/material';
-
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CancelIcon from '@mui/icons-material/Cancel';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { Box, Button, LinearProgress, Typography, useTheme } from '@mui/material';
+import { Fragment } from 'react';
+import { useDropzone } from 'react-dropzone';
+import type { Theme } from '@mui/material';
+import type { Progress } from 'alova';
+import type { FC } from 'react';
+import type { DropzoneState } from 'react-dropzone';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
 
 const getBorderColor = (theme: Theme, props: DropzoneState) => {
   if (props.isDragAccept) {
@@ -26,11 +26,13 @@ const getBorderColor = (theme: Theme, props: DropzoneState) => {
 export interface SingleUploadProps {
   onDrop: (acceptedFiles: File[]) => void;
   onCancel: () => void;
-  uploading: boolean;
-  progress?: AxiosProgressEvent;
+  isUploading: boolean;
+  progress: Progress;
 }
 
-const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, uploading, progress }) => {
+const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, isUploading, progress }) => {
+  const uploading = isUploading && progress.total > 0;
+
   const dropzoneState = useDropzone({
     onDrop,
     accept: {
@@ -38,20 +40,19 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, uploading, prog
       'application/json': ['.json'],
       'text/plain': ['.md5']
     },
-    disabled: uploading,
+    disabled: isUploading,
     multiple: false
   });
+
   const { getRootProps, getInputProps } = dropzoneState;
   const theme = useTheme();
-
   const { LL } = useI18nContext();
 
   const progressText = () => {
     if (uploading) {
-      if (progress?.total) {
+      if (progress.total) {
         return LL.UPLOADING() + ': ' + Math.round((progress.loaded * 100) / progress.total) + '%';
       }
-      return LL.UPLOADING() + `\u2026`;
     }
     return LL.UPLOAD_DROP_TEXT();
   };
@@ -81,8 +82,8 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, uploading, prog
           <Fragment>
             <Box width="100%" p={2}>
               <LinearProgress
-                variant={!progress || progress.total ? 'determinate' : 'indeterminate'}
-                value={!progress ? 0 : progress.total ? Math.round((progress.loaded * 100) / progress.total) : 0}
+                variant="determinate"
+                value={progress.total === 0 ? 0 : Math.round((progress.loaded * 100) / progress.total)}
               />
             </Box>
             <Button startIcon={<CancelIcon />} variant="outlined" color="secondary" onClick={onCancel}>

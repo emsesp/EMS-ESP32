@@ -1,13 +1,11 @@
-import { FC } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
-
 import { Tab } from '@mui/material';
-
-import { RouterTabs, useRouterTab, useLayoutTitle } from '../components';
-
-import { useI18nContext } from '../i18n/i18n-react';
-
+import { Navigate, Route, Routes } from 'react-router-dom';
 import HelpInformation from './HelpInformation';
+import type { FC } from 'react';
+
+import { RouterTabs, useRouterTab, useLayoutTitle } from 'components';
+
+import { useI18nContext } from 'i18n/i18n-react';
 
 const Help: FC = () => {
   const { LL } = useI18nContext();

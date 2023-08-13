@@ -1,7 +1,7 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
- * 
+ * Copyright 2020-2023  Paul Derbyshire
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -21,14 +21,14 @@
 
 // GET
 #define CORE_DATA_SERVICE_PATH "/rest/coreData"
-#define SCAN_DEVICES_SERVICE_PATH "/rest/scanDevices"
 #define DEVICE_DATA_SERVICE_PATH "/rest/deviceData"
 #define SENSOR_DATA_SERVICE_PATH "/rest/sensorData"
 
 // POST
-#define WRITE_VALUE_SERVICE_PATH "/rest/writeValue"
-#define WRITE_SENSOR_SERVICE_PATH "/rest/writeSensor"
-#define WRITE_ANALOG_SERVICE_PATH "/rest/writeAnalog"
+#define WRITE_DEVICE_VALUE_SERVICE_PATH "/rest/writeDeviceValue"
+#define WRITE_TEMPERATURE_SENSOR_SERVICE_PATH "/rest/writeTemperatureSensor"
+#define WRITE_ANALOG_SENSOR_SERVICE_PATH "/rest/writeAnalogSensor"
+#define SCAN_DEVICES_SERVICE_PATH "/rest/scanDevices"
 
 namespace emsesp {
 
@@ -44,15 +44,15 @@ class WebDataService {
     // GET
     void core_data(AsyncWebServerRequest * request);
     void sensor_data(AsyncWebServerRequest * request);
+    void device_data(AsyncWebServerRequest * request);
 
     // POST
-    void device_data(AsyncWebServerRequest * request, JsonVariant & json);
-    void write_value(AsyncWebServerRequest * request, JsonVariant & json);
-    void write_sensor(AsyncWebServerRequest * request, JsonVariant & json);
-    void write_analog(AsyncWebServerRequest * request, JsonVariant & json);
-    void scan_devices(AsyncWebServerRequest * request);
+    void write_device_value(AsyncWebServerRequest * request, JsonVariant & json);
+    void write_temperature_sensor(AsyncWebServerRequest * request, JsonVariant & json);
+    void write_analog_sensor(AsyncWebServerRequest * request, JsonVariant & json);
+    void scan_devices(AsyncWebServerRequest * request); // command
 
-    AsyncCallbackJsonWebHandler _device_data_handler, _write_value_handler, _write_sensor_handler, _write_analog_handler;
+    AsyncCallbackJsonWebHandler _write_value_handler, _write_temperature_handler, _write_analog_handler;
 };
 
 } // namespace emsesp

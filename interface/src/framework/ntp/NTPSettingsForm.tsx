@@ -1,28 +1,48 @@
-import { FC, useState } from 'react';
-import { ValidateFieldsError } from 'async-validator';
-
+import CancelIcon from '@mui/icons-material/Cancel';
+import WarningIcon from '@mui/icons-material/Warning';
 import { Button, Checkbox, MenuItem } from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
-
-import { validate } from '../../validators';
-import { BlockFormControlLabel, ButtonRow, FormLoader, SectionContent, ValidatedTextField } from '../../components';
-import { NTPSettings } from '../../types';
-import { updateValue, useRest } from '../../utils';
-import * as NTPApi from '../../api/ntp';
+// eslint-disable-next-line import/named
+import { updateState } from 'alova';
+import { useState } from 'react';
 import { selectedTimeZone, timeZoneSelectItems, TIME_ZONES } from './TZ';
-import { NTP_SETTINGS_VALIDATOR } from '../../validators/ntp';
+import type { ValidateFieldsError } from 'async-validator';
+import type { FC } from 'react';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import type { NTPSettings } from 'types';
+import * as NTPApi from 'api/ntp';
+import {
+  BlockFormControlLabel,
+  ButtonRow,
+  FormLoader,
+  SectionContent,
+  ValidatedTextField,
+  BlockNavigation
+} from 'components';
+import { useI18nContext } from 'i18n/i18n-react';
+import { updateValueDirty, useRest } from 'utils';
+import { validate } from 'validators';
+import { NTP_SETTINGS_VALIDATOR } from 'validators/ntp';
 
 const NTPSettingsForm: FC = () => {
-  const { loadData, saving, data, setData, saveData, errorMessage } = useRest<NTPSettings>({
+  const {
+    loadData,
+    saving,
+    data,
+    updateDataValue,
+    origData,
+    dirtyFlags,
+    setDirtyFlags,
+    blocker,
+    saveData,
+    errorMessage
+  } = useRest<NTPSettings>({
     read: NTPApi.readNTPSettings,
     update: NTPApi.updateNTPSettings
   });
 
   const { LL } = useI18nContext();
 
-  const updateFormValue = updateValue(setData);
+  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, updateDataValue);
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
@@ -35,18 +55,20 @@ const NTPSettingsForm: FC = () => {
       try {
         setFieldErrors(undefined);
         await validate(NTP_SETTINGS_VALIDATOR, data);
-        saveData();
+        await saveData();
       } catch (errors: any) {
         setFieldErrors(errors);
       }
     };
 
     const changeTimeZone = (event: React.ChangeEvent<HTMLInputElement>) => {
-      setData({
-        ...data,
+      updateFormValue(event);
+
+      updateState('ntpSettings', (settings) => ({
+        ...settings,
         tz_label: event.target.value,
         tz_format: TIME_ZONES[event.target.value]
-      });
+      }));
     };
 
     return (
@@ -79,24 +101,37 @@ const NTPSettingsForm: FC = () => {
           <MenuItem disabled>{LL.TIME_ZONE()}...</MenuItem>
           {timeZoneSelectItems()}
         </ValidatedTextField>
-        <ButtonRow>
-          <Button
-            startIcon={<SaveIcon />}
-            disabled={saving}
-            variant="outlined"
-            color="primary"
-            type="submit"
-            onClick={validateAndSubmit}
-          >
-            {LL.SAVE()}
-          </Button>
-        </ButtonRow>
+        {dirtyFlags && dirtyFlags.length !== 0 && (
+          <ButtonRow>
+            <Button
+              startIcon={<CancelIcon />}
+              disabled={saving}
+              variant="outlined"
+              color="primary"
+              type="submit"
+              onClick={loadData}
+            >
+              {LL.CANCEL()}
+            </Button>
+            <Button
+              startIcon={<WarningIcon color="warning" />}
+              disabled={saving}
+              variant="contained"
+              color="info"
+              type="submit"
+              onClick={validateAndSubmit}
+            >
+              {LL.APPLY_CHANGES(dirtyFlags.length)}
+            </Button>
+          </ButtonRow>
+        )}
       </>
     );
   };
 
   return (
     <SectionContent title={LL.SETTINGS_OF('NTP')} titleGutter>
+      {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>
   );

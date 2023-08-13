@@ -1,7 +1,7 @@
 #include <NTPSettingsService.h>
 #include <esp_sntp.h>
 
-#include "../../src/emsesp_stub.hpp" // proddy added
+#include "../../src/emsesp_stub.hpp"
 
 using namespace std::placeholders; // for `_1` etc
 
@@ -49,7 +49,7 @@ void NTPSettingsService::WiFiEvent(WiFiEvent_t event) {
 void NTPSettingsService::configureNTP() {
     emsesp::EMSESP::system_.ntp_connected(false);
     if (connected_ && _state.enabled) {
-        emsesp::EMSESP::logger().info("Starting NTP");
+        emsesp::EMSESP::logger().info("Starting NTP service");
         sntp_set_sync_interval(3600000); // one hour
         sntp_set_time_sync_notification_cb(ntp_received);
         configTzTime(_state.tzFormat.c_str(), _state.server.c_str());

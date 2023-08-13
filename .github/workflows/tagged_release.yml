@@ -1,23 +1,21 @@
-name: "tagged-release"
+name: 'tagged-release'
 
 on:
   push:
     tags:
-      - "v*"
+      - 'v*'
 
 jobs:
   tagged-release:
-
-    name: "Tagged Release"
+    name: 'Tagged Release'
     runs-on: ubuntu-latest
 
     steps:
-
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+      - uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '18'
 
       - name: Install PlatformIO
         run: |
@@ -29,19 +27,19 @@ jobs:
       - name: Build WebUI
         run: |
           cd interface
-          npm ci
-          npx typesafe-i18n --no-watch
+          yarn install
+          yarn run typesafe-i18n --no-watch
           sed -i "s/= 'pl'/= 'en'/" ./src/i18n/i18n-util.ts
-          npm run build
+          yarn run build
 
       - name: Build firmware
         run: |
           platformio run -e ci
 
       - name: Release
-        uses: "marvinpinto/action-automatic-releases@latest"
+        uses: 'marvinpinto/action-automatic-releases@latest'
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          repo_token: '${{ secrets.GITHUB_TOKEN }}'
           prerelease: false
           files: |
             CHANGELOG.md

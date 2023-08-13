@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -277,7 +277,7 @@ char * Helpers::render_value(char * result, const double value, const int8_t for
 // format: 0=no division, other divide by the value given and render with a decimal point
 char * Helpers::render_value(char * result, const int32_t value, const int8_t format, const uint8_t fahrenheit) {
     int32_t new_value = fahrenheit ? format ? value * 1.8 + 32 * format * (fahrenheit - 1) : value * 1.8 + 32 * (fahrenheit - 1) : value;
-    char    s[10]     = {0};
+    char    s[13]     = {0};
     // just print it if no conversion required (format = 0)
     if (!format) {
         strlcpy(result, itoa(new_value, s, 10), sizeof(s)); // format is 0
@@ -385,7 +385,7 @@ std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
         *p++ = buffer[1];
         *p++ = ' '; // space
     }
-    *--p = '\0'; // null terminate just in case, loosing the trailing space
+    *--p = '\0';    // null terminate just in case, loosing the trailing space
 
     return std::string(str);
 }
@@ -442,7 +442,6 @@ int Helpers::atoint(const char * value) {
 
 // rounds a number to 2 decimal places
 // example: round2(3.14159) -> 3.14
-// From mvdp:
 //  The conversion to Fahrenheit is different for absolute temperatures and relative temperatures like hysteresis.
 //  fahrenheit=0 - off, no conversion
 //  fahrenheit=1 - relative, 1.8t
@@ -647,7 +646,7 @@ bool Helpers::value2enum(const char * value, uint8_t & value_ui, const char * co
     std::string s_on  = Helpers::translated_word(FL_(on));
     std::string s_off = Helpers::translated_word(FL_(off));
 
-    // stops when a nullptr is found, which is the end delimeter of a MAKE_PSTR_LIST()
+    // stops when a nullptr is found, which is the end delimeter of a MAKE_TRANSLATION()
     // could use count_items() to avoid buffer over-run but this works
     for (value_ui = 0; strs[value_ui]; value_ui++) {
         std::string enum_str = toLower((strs[value_ui]));
@@ -682,39 +681,49 @@ std::string Helpers::toUpper(std::string const & s) {
 // capitalizes one UTF-8 character in char array
 // works with Latin1 (1 byte), Polish amd some other (2 bytes) characters
 // TODO add special characters that occur in other supported languages
+#if defined(EMSESP_STANDALONE)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtype-limits"
+#endif
 void Helpers::CharToUpperUTF8(char * c) {
+    auto p   = (c + 1); // pointer to 2nd char of 2-byte unicode char
+    char p_v = *p;      // value of 2nd char in 2-byte unicode char
+
     switch (*c) {
-    case 0xC3:
+    case (char)0xC3:
         // grave, acute, circumflex, diaeresis, etc.
-        if ((*(c + 1) >= 0xA0) && (*(c + 1) <= 0xBE)) {
-            *(c + 1) -= 0x20;
+        if ((p_v >= (char)0xA0) && (p_v <= (char)0xBE)) {
+            *p -= 0x20;
         }
         break;
-    case 0xC4:
-        switch (*(c + 1)) {
-        case 0x85: //ą (0xC4,0x85) -> Ą (0xC4,0x84)
-        case 0x87: //ć (0xC4,0x87) -> Ć (0xC4,0x86)
-        case 0x99: //ę (0xC4,0x99) -> Ę (0xC4,0x98)
-            *(c + 1) -= 1;
+    case (char)0xC4:
+        switch (p_v) {
+        case (char)0x85: //ą (0xC4,0x85) -> Ą (0xC4,0x84)
+        case (char)0x87: //ć (0xC4,0x87) -> Ć (0xC4,0x86)
+        case (char)0x99: //ę (0xC4,0x99) -> Ę (0xC4,0x98)
+            *p -= 1;
             break;
         }
         break;
-    case 0xC5:
-        switch (*(c + 1)) {
-        case 0x82: //ł (0xC5,0x82) -> Ł (0xC5,0x81)
-        case 0x84: //ń (0xC5,0x84) -> Ń (0xC5,0x83)
-        case 0x9B: //ś (0xC5,0x9B) -> Ś (0xC5,0x9A)
-        case 0xBA: //ź (0xC5,0xBA) -> Ź (0xC5,0xB9)
-        case 0xBC: //ż (0xC5,0xBC) -> Ż (0xC5,0xBB)
-            *(c + 1) -= 1;
+    case (char)0xC5:
+        switch (p_v) {
+        case (char)0x82: //ł (0xC5,0x82) -> Ł (0xC5,0x81)
+        case (char)0x84: //ń (0xC5,0x84) -> Ń (0xC5,0x83)
+        case (char)0x9B: //ś (0xC5,0x9B) -> Ś (0xC5,0x9A)
+        case (char)0xBA: //ź (0xC5,0xBA) -> Ź (0xC5,0xB9)
+        case (char)0xBC: //ż (0xC5,0xBC) -> Ż (0xC5,0xBB)
+            *p -= 1;
             break;
         }
         break;
     default:
-        *c = toupper(*c); //works on Latin1 letters
+        *c = toupper(*c); // works on Latin1 letters
         break;
     }
 }
+#if defined(EMSESP_STANDALONE)
+#pragma GCC diagnostic pop
+#endif
 
 // replace char in char string
 void Helpers::replace_char(char * str, char find, char replace) {
@@ -772,6 +781,57 @@ const char * Helpers::translated_word(const char * const * strings, const bool f
         index = language_index;
     }
     return strings[index];
+}
+
+uint16_t Helpers::string2minutes(const std::string & str) {
+    uint8_t  i     = 0;
+    uint16_t res   = 0;
+    uint16_t tmp   = 0;
+    uint8_t  state = 0;
+
+    while (str[i] != '\0') {
+        // If we got a digit
+        if (str[i] >= '0' && str[i] <= '9') {
+            tmp = tmp * 10 + str[i] - '0';
+        }
+        // Or if we got a colon
+        else if (str[i] == ':') {
+            // If we were reading the hours
+            if (state == 0) {
+                res = 60 * tmp;
+            }
+            // Or if we were reading the minutes
+            else if (state == 1) {
+                if (tmp > 60) {
+                    return 0;
+                }
+                Serial.print("*");
+                Serial.print(tmp);
+                Serial.println("*");
+
+                res += tmp;
+            }
+            // Or we got an extra colon
+            else {
+                return 0;
+            }
+
+            state++;
+            tmp = 0;
+        }
+
+        // Or we got something wrong
+        else {
+            return 0;
+        }
+        i++;
+    }
+
+    if (state == 1 && tmp < 60) {
+        return res + tmp;
+    } else {
+        return 0; // Or if we were not, something is wrong in the given string
+    }
 }
 
 } // namespace emsesp

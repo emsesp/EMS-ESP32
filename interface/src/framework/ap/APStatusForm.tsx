@@ -1,17 +1,18 @@
-import { FC } from 'react';
-
-import { Avatar, Button, Divider, List, ListItem, ListItemAvatar, ListItemText, Theme, useTheme } from '@mui/material';
-import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
-import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import ComputerIcon from '@mui/icons-material/Computer';
+import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
+import { Avatar, Button, Divider, List, ListItem, ListItemAvatar, ListItemText, useTheme } from '@mui/material';
+import { useRequest } from 'alova';
+import type { Theme } from '@mui/material';
+import type { FC } from 'react';
 
-import * as APApi from '../../api/ap';
-import { APNetworkStatus, APStatus } from '../../types';
-import { ButtonRow, FormLoader, SectionContent } from '../../components';
-import { useRest } from '../../utils';
+import type { APStatus } from 'types';
+import * as APApi from 'api/ap';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
 
-import { useI18nContext } from '../../i18n/i18n-react';
+import { useI18nContext } from 'i18n/i18n-react';
+import { APNetworkStatus } from 'types';
 
 export const apStatusHighlight = ({ status }: APStatus, theme: Theme) => {
   switch (status) {
@@ -27,7 +28,7 @@ export const apStatusHighlight = ({ status }: APStatus, theme: Theme) => {
 };
 
 const APStatusForm: FC = () => {
-  const { loadData, data, errorMessage } = useRest<APStatus>({ read: APApi.readAPStatus });
+  const { data: data, send: loadData, error } = useRequest(APApi.readAPStatus);
 
   const { LL } = useI18nContext();
 
@@ -48,7 +49,7 @@ const APStatusForm: FC = () => {
 
   const content = () => {
     if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
+      return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
     }
 
     return (

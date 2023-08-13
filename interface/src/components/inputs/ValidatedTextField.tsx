@@ -1,7 +1,7 @@
-import { FC } from 'react';
-import { ValidateFieldsError } from 'async-validator';
-
-import { FormHelperText, TextField, TextFieldProps } from '@mui/material';
+import { FormHelperText, TextField } from '@mui/material';
+import type { TextFieldProps } from '@mui/material';
+import type { ValidateFieldsError } from 'async-validator';
+import type { FC } from 'react';
 
 interface ValidatedFieldProps {
   fieldErrors?: ValidateFieldsError;

@@ -1,29 +1,28 @@
-import { FC, useContext, useEffect } from 'react';
-import { Navigate, Routes, Route, useLocation } from 'react-router-dom';
-import { useSnackbar, VariantType } from 'notistack';
+import { useContext, useEffect } from 'react';
 
-import { useI18nContext } from './i18n/i18n-react';
+import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
 
-import { Authentication, AuthenticationContext } from './contexts/authentication';
-import { FeaturesContext } from './contexts/features';
-import { RequireAuthenticated, RequireUnauthenticated } from './components';
+import { toast } from 'react-toastify';
+import type { FC } from 'react';
 
-import SignIn from './SignIn';
-import AuthenticatedRouting from './AuthenticatedRouting';
+import AuthenticatedRouting from 'AuthenticatedRouting';
+import SignIn from 'SignIn';
+import { RequireAuthenticated, RequireUnauthenticated } from 'components';
+
+import { Authentication, AuthenticationContext } from 'contexts/authentication';
+import { useI18nContext } from 'i18n/i18n-react';
 
 interface SecurityRedirectProps {
   message: string;
-  variant?: VariantType;
   signOut?: boolean;
 }
 
-const RootRedirect: FC<SecurityRedirectProps> = ({ message, variant, signOut }) => {
+const RootRedirect: FC<SecurityRedirectProps> = ({ message, signOut }) => {
   const authenticationContext = useContext(AuthenticationContext);
-  const { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
     signOut && authenticationContext.signOut(false);
-    enqueueSnackbar(message, { variant });
-  }, [message, variant, signOut, authenticationContext, enqueueSnackbar]);
+    toast.success(message);
+  }, [message, signOut, authenticationContext]);
   return <Navigate to="/" />;
 };
 
@@ -42,7 +41,6 @@ export const RemoveTrailingSlashes = () => {
 };
 
 const AppRouting: FC = () => {
-  const { features } = useContext(FeaturesContext);
   const { LL } = useI18nContext();
 
   return (
@@ -50,17 +48,15 @@ const AppRouting: FC = () => {
       <RemoveTrailingSlashes />
       <Routes>
         <Route path="/unauthorized" element={<RootRedirect message={LL.PLEASE_SIGNIN()} signOut />} />
-        <Route path="/fileUpdated" element={<RootRedirect message={LL.UPLOAD_SUCCESSFUL()} variant="success" />} />
-        {features.security && (
-          <Route
-            path="/"
-            element={
-              <RequireUnauthenticated>
-                <SignIn />
-              </RequireUnauthenticated>
-            }
-          />
-        )}
+        <Route path="/fileUpdated" element={<RootRedirect message={LL.UPLOAD_SUCCESSFUL()} />} />
+        <Route
+          path="/"
+          element={
+            <RequireUnauthenticated>
+              <SignIn />
+            </RequireUnauthenticated>
+          }
+        />
         <Route
           path="/*"
           element={
