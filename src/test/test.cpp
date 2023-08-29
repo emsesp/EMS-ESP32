@@ -266,7 +266,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Testing adding a general boiler & thermostat...");
         run_test("general");
         // shell.invoke_command("show devices");
-        // shell.invoke_command("show values");
+        shell.invoke_command("show values");
         shell.invoke_command("call system publish");
         // shell.invoke_command("show mqtt");
         ok = true;
@@ -277,6 +277,21 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Testing memory by adding lots of devices and entities...");
         run_test("memory");
         shell.invoke_command("show values");
+        ok = true;
+    }
+
+    if (command == "coldshot") {
+        shell.printfln("Testing coldshot...");
+        run_test("general");
+
+#ifdef EMSESP_STANDALONE
+        AsyncWebServerRequest request;
+        request.method(HTTP_GET);
+        request.url("/api/boiler/coldshot");
+        EMSESP::webAPIService.webAPIService_get(&request);
+#else
+        shell.invoke_command("call boiler coldshot");
+#endif
         ok = true;
     }
 
@@ -1005,10 +1020,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::mqtt_.incoming("ems-esp/thermostat_hc1", "22");  // HA only
         EMSESP::mqtt_.incoming("ems-esp/thermostat_hc1", "off"); // HA only
         EMSESP::mqtt_.incoming("ems-esp/system/send", "11 12 13");
-        EMSESP::mqtt_.incoming("ems-esp/boiler/syspress");       // empty payload
-        EMSESP::mqtt_.incoming("ems-esp/thermostat/mode");       // empty payload
+        EMSESP::mqtt_.incoming("ems-esp/boiler/syspress"); // empty payload
+        EMSESP::mqtt_.incoming("ems-esp/thermostat/mode"); // empty payload
         EMSESP::mqtt_.incoming("ems-esp/system/publish");
-        EMSESP::mqtt_.incoming("ems-esp/thermostat/seltemp");    // empty payload
+        EMSESP::mqtt_.incoming("ems-esp/thermostat/seltemp"); // empty payload
 
         EMSESP::mqtt_.incoming("ems-esp/boiler/wwseltemp", "59");
         EMSESP::mqtt_.incoming("ems-esp/boiler/wwseltemp");
@@ -1204,7 +1219,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         uart_telegram("30 00 FF 0A 02 6A 04");                                                 // SM100 pump on  1
         uart_telegram("30 00 FF 00 02 64 00 00 00 04 00 00 FF 00 00 1E 0B 09 64 00 00 00 00"); // SM100 modulation
 
-        uart_telegram("30 00 FF 0A 02 6A 03");                                                 // SM100 pump off  0
+        uart_telegram("30 00 FF 0A 02 6A 03"); // SM100 pump off  0
 
         shell.invoke_command("show");
         ok = true;
@@ -1446,7 +1461,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.invoke_command("call");
         shell.invoke_command("call system info");
 
-        EMSESP::mqtt_.incoming("ems-esp/system", "{\"cmd\":\"info\"}");                    // this should fail
+        EMSESP::mqtt_.incoming("ems-esp/system", "{\"cmd\":\"info\"}"); // this should fail
 
         EMSESP::mqtt_.incoming("ems-esp/thermostat", "{\"cmd\":\"temp\",\"data\":23.45}"); // this should work just fine
         EMSESP::mqtt_.incoming("ems-esp/thermostat", "{\"cmd\":\"TeMP\",\"data\":23.45}"); // test mix cased cmd
@@ -1559,7 +1574,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // EMSESP::mqtt_.incoming(system_topic, "{\"cmd\":\"pin\",\"id\":12,\"data\":\"1\"}");
 
         EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"wwmode\",\"data\":\"auto\"}");
-        EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"mode\",\"data\":\"typo\",\"id\":2}");        // invalid mode
+        EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"mode\",\"data\":\"typo\",\"id\":2}"); // invalid mode
         EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"mode\",\"data\":\"auto\",\"id\":2}");
         EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"mode\",\"data\":\"auto\",\"hc\":2}");        // hc as number
         EMSESP::mqtt_.incoming(thermostat_topic, "{\"cmd\":\"seltemp\",\"data\":19.5,\"hc\":1}");         // data as number
