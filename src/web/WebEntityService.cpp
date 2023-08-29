@@ -219,8 +219,8 @@ bool WebEntityService::get_value_info(JsonObject & output, const char * cmd) {
         return false;
     }
     if (Helpers::toLower(cmd) == "commands") {
-        output["info"]     = "lists all values";
-        output["commands"] = "lists all commands";
+        output["info"]     = "list all values";
+        output["commands"] = "list all commands";
         for (const auto & entity : *entityItems) {
             output[entity.name] = "custom entitiy";
         }
