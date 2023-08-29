@@ -9,3 +9,5 @@
 ## Fixed
 
 ## Changed
+
+- set EMC_MIN_FREE_MEMORY to 40960

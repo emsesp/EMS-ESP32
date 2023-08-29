@@ -29,7 +29,7 @@ the LICENSE file.
 #endif
 
 #ifndef EMC_MIN_FREE_MEMORY
-#define EMC_MIN_FREE_MEMORY 16384
+#define EMC_MIN_FREE_MEMORY 40960
 #endif
 
 #ifndef EMC_ESP8266_MULTITHREADING
