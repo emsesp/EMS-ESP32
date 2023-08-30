@@ -46,7 +46,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         if (!strncmp(path, Mqtt::base().c_str(), Mqtt::base().length())) {
             char new_path[Mqtt::MQTT_TOPIC_MAX_SIZE];
             strlcpy(new_path, path, sizeof(new_path));
-            p.parse(new_path + Mqtt::base().length() + 1);                  // re-parse the stripped path
+            p.parse(new_path + Mqtt::base().length() + 1); // re-parse the stripped path
         } else {
             return message(CommandRet::ERROR, "unrecognized path", output); // error
         }
@@ -194,7 +194,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     } else if (data.isNull()) {
         return_code = Command::call(device_type, command_p, "", is_admin, id_n, output); // empty, will do a query instead
     } else {
-        return message(CommandRet::ERROR, "cannot parse command", output);               // can't process
+        return message(CommandRet::ERROR, "cannot parse command", output); // can't process
     }
     return return_code;
 }
@@ -301,9 +301,14 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     auto cf = find_command(device_type, device_id, cmd);
 
     // check if its a call to and end-point to a device
-    // except for system commands as this is a special device without any queryable entities (device values)
-    if ((device_type > EMSdevice::DeviceType::SYSTEM) && (!value || !strlen(value))) {
-        if (!cf || !cf->cmdfunction_json_) {
+    // this is used to fetch the attributes of the device entity, or call a command directly
+    bool single_command = (!value || !strlen(value));
+    if (single_command) {
+        // exception 1: anything that is from System
+        // exception 2: boiler coldshot command
+        bool get_attributes = (!cf || !cf->cmdfunction_json_) && (device_type > EMSdevice::DeviceType::SYSTEM) && (strcmp(cmd, F_(coldshot)) != 0);
+
+        if (get_attributes) {
             LOG_DEBUG("Calling %s command '%s' to retrieve attributes", dname, cmd);
             return EMSESP::get_device_value_info(output, cmd, id, device_type) ? CommandRet::OK : CommandRet::ERROR; // entity = cmd
         }
@@ -344,7 +349,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 
         // check if read-only. This also checks for valid tags (e.g. heating circuits)
         if (cf->cmdfunction_) {
-            if (EMSESP::cmd_is_readonly(device_type, device_id, cmd, id)) {
+            if (!single_command && EMSESP::cmd_is_readonly(device_type, device_id, cmd, id)) {
                 return_code = CommandRet::INVALID; // readonly or invalid hc
             } else {
                 return_code = ((cf->cmdfunction_)(value, id)) ? CommandRet::OK : CommandRet::ERROR;
@@ -593,7 +598,7 @@ void Command::show_devices(uuid::console::Shell & shell) {
 // output list of all commands to console
 // calls show with verbose mode set
 void Command::show_all(uuid::console::Shell & shell) {
-    shell.println("Available commands (*=do not need authorization): ");
+    shell.println("Available commands (*=authorization not required): ");
 
     // show system first
     shell.print(COLOR_BOLD_ON);

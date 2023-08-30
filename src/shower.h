@@ -30,6 +30,9 @@ class Shower {
 
     void set_shower_state(bool state, bool force = false);
 
+    // commands
+    static bool command_coldshot(const char * value, const int8_t id);
+
   private:
     static uuid::log::Logger logger_;
 
@@ -46,9 +49,9 @@ class Shower {
     uint32_t shower_alert_coldshot_; // default 10 seconds for cold water before turning back hot water
     bool     ha_configdone_ = false; // for HA MQTT Discovery
     bool     shower_state_;
-    uint32_t timer_start_;           // ms
-    uint32_t timer_pause_;           // ms
-    uint32_t duration_;              // ms
+    uint32_t timer_start_; // ms
+    uint32_t timer_pause_; // ms
+    uint32_t duration_;    // ms
 
     // cold shot
     uint32_t alert_timer_start_; // ms

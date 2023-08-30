@@ -137,6 +137,9 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                   Test::run_test(shell, arguments[0].c_str(), arguments[1].c_str());
                               }
                           });
+    commands->add_command(ShellContext::MAIN, CommandFlags::USER, string_vector{"t"}, [=](Shell & shell, const std::vector<std::string> & arguments) {
+        Test::run_test(shell, "default");
+    });
 #endif
 
     commands->add_command(ShellContext::MAIN, CommandFlags::USER, string_vector{F_(su)}, [=](Shell & shell, const std::vector<std::string> & arguments) {
@@ -419,7 +422,6 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                   to_app(shell).send_read_request(type_id, device_id, 0, EMS_MAX_TELEGRAM_LENGTH, true);
                               }
                               to_app(shell).set_read_id(type_id);
-
                           });
 
     commands->add_command(ShellContext::MAIN,
@@ -433,11 +435,11 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                               if (!arguments.empty()) {
                                   // get raw/pretty
                                   if (arguments[0] == (F_(raw))) {
-                                      to_app(shell).watch(to_app(shell).WATCH_RAW);     // raw
+                                      to_app(shell).watch(to_app(shell).WATCH_RAW); // raw
                                   } else if (arguments[0] == (FL_(on)[0])) {
-                                      to_app(shell).watch(to_app(shell).WATCH_ON);      // on
+                                      to_app(shell).watch(to_app(shell).WATCH_ON); // on
                                   } else if (arguments[0] == (FL_(off)[0])) {
-                                      to_app(shell).watch(to_app(shell).WATCH_OFF);     // off
+                                      to_app(shell).watch(to_app(shell).WATCH_OFF); // off
                                   } else if (arguments[0] == (FL_(unknown)[0])) {
                                       to_app(shell).watch(to_app(shell).WATCH_UNKNOWN); // unknown
                                       watch_id = WATCH_ID_NONE;
@@ -445,7 +447,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                       watch_id = Helpers::hextoint(arguments[0].c_str());
                                       if (watch_id > 0
                                           && ((to_app(shell).watch() == to_app(shell).WATCH_OFF) || (to_app(shell).watch() == to_app(shell).WATCH_UNKNOWN))) {
-                                          to_app(shell).watch(to_app(shell).WATCH_ON);  // on
+                                          to_app(shell).watch(to_app(shell).WATCH_ON); // on
                                       } else if (watch_id == 0) {
                                           to_app(shell).watch(to_app(shell).WATCH_OFF); // off
                                           return;
@@ -480,7 +482,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                               } else if (watch == to_app(shell).WATCH_RAW) {
                                   shell.printfln("Watching incoming telegrams, displayed as raw bytes"); // WATCH_RAW
                               } else {
-                                  shell.printfln("Watching unknown telegrams");                          // WATCH_UNKNOWN
+                                  shell.printfln("Watching unknown telegrams"); // WATCH_UNKNOWN
                               }
 
                               watch_id = to_app(shell).watch_id();
@@ -623,7 +625,7 @@ void EMSESPShell::stopped() {
 void EMSESPShell::display_banner() {
     println();
     printfln("┌────────────────────────────────────────┐");
-    printfln("│ %sEMS-ESP version %-12s%s          │", COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_BOLD_OFF);
+    printfln("│ %sEMS-ESP version %-12s%s           │", COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_BOLD_OFF);
     printfln("│ %s%shttps://github.com/emsesp/EMS-ESP32%s    │", COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
     printfln("│                                        │");
     printfln("│ type %shelp%s to show available commands   │", COLOR_UNDERLINE, COLOR_RESET);

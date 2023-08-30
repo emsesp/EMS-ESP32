@@ -41,5 +41,6 @@
     "**/*.min.*",
     "**/*.map",
     "**/ArduinoJson/**"
-  ]
+  ],
+  "cSpell.enableFiletypes": ["!cpp"]
 }
