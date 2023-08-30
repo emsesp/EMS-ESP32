@@ -506,7 +506,7 @@ void Mqtt::on_connect() {
     // publish to the last will topic (see Mqtt::start() function) to say we're alive
     queue_publish_retain("status", "online", true); // with retain on
 
-    mqtt_publish_fails_ = 0;                        // reset fail count to 0
+    // mqtt_publish_fails_ = 0; // reset fail count to 0
 }
 
 // Home Assistant Discovery - the main master Device called EMS-ESP
