@@ -15,7 +15,8 @@ the LICENSE file.
   #include "esp_task_wdt.h"
   #define EMC_SEMAPHORE_TAKE() xSemaphoreTake(_xSemaphore, portMAX_DELAY)
   #define EMC_SEMAPHORE_GIVE() xSemaphoreGive(_xSemaphore)
-  #define EMC_GET_FREE_MEMORY() std::max(ESP.getMaxAllocHeap(), ESP.getMaxAllocPsram())
+  // #define EMC_GET_FREE_MEMORY() std::max(ESP.getMaxAllocHeap(), ESP.getMaxAllocPsram())
+  #define EMC_GET_FREE_MEMORY() ESP.getMaxAllocHeap()
   #define EMC_YIELD() vTaskDelay(1)
   #define EMC_GENERATE_CLIENTID(x) snprintf(x, EMC_CLIENTID_LENGTH, "esp32%06llx", ESP.getEfuseMac());
 #elif defined(ARDUINO_ARCH_ESP8266)
