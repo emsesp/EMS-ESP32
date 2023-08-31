@@ -70,6 +70,7 @@ MAKE_WORD_TRANSLATION(system_info_cmd, "show system status", "Zeige System-Statu
 MAKE_WORD_TRANSLATION(schedule_cmd, "enable schedule item", "Aktiviere Zeitplan", "activeer tijdschema item", "", "aktywuj wybrany harmonogram", "", "", "program öğesini etkinleştir", "abilitare l'elemento programmato") // TODO translate
 MAKE_WORD_TRANSLATION(entity_cmd, "set custom value on ems", "Sende eigene Entitäten zu EMS", "verstuur custom waarde naar EMS", "", "wyślij własną wartość na EMS", "", "", "", "imposta valori personalizzati su EMS") // TODO translate
 MAKE_WORD_TRANSLATION(commands_response, "get response", "Hole Antwort", "Verzoek om antwoord", "", "", "", "", "") // TODO translate
+MAKE_WORD_TRANSLATION(coldshot_cmd, "send a cold shot of water", "", "", "", "", "", "", "", "") // TODO translate
 
 // tags
 MAKE_WORD_TRANSLATION(tag_boiler_data_ww, "dhw", "WW", "dhw", "VV", "CWU", "dhw", "ecs", "SKS", "dhw")

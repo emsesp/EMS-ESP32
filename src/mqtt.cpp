@@ -278,9 +278,13 @@ void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) c
     if (return_code != CommandRet::OK) {
         char error[100];
         if (output.size()) {
-            snprintf(error, sizeof(error), "Call failed with error: %s (%s)", (const char *)output["message"], Command::return_code_string(return_code).c_str());
+            snprintf(error,
+                     sizeof(error),
+                     "MQTT command failed with error: %s (%s)",
+                     (const char *)output["message"],
+                     Command::return_code_string(return_code).c_str());
         } else {
-            snprintf(error, sizeof(error), "Call failed with error code (%s)", Command::return_code_string(return_code).c_str());
+            snprintf(error, sizeof(error), "MQTT command failed with error code (%s)", Command::return_code_string(return_code).c_str());
         }
         LOG_ERROR(error);
         Mqtt::queue_publish("response", error);
@@ -679,7 +683,7 @@ bool Mqtt::queue_remove_topic(const char * topic) {
     if (ha_enabled_) {
         return queue_publish_message(Mqtt::discovery_prefix() + topic, "", true); // publish with retain to remove from broker
     } else {
-        return queue_publish_message(topic, "", true);                            // publish with retain to remove from broker
+        return queue_publish_message(topic, "", true); // publish with retain to remove from broker
     }
 }
 
@@ -691,7 +695,7 @@ bool Mqtt::queue_ha(const char * topic, const JsonObject & payload) {
 
     std::string payload_text;
     payload_text.reserve(measureJson(payload) + 1);
-    serializeJson(payload, payload_text);                                               // convert json to string
+    serializeJson(payload, payload_text); // convert json to string
 
     return queue_publish_message(Mqtt::discovery_prefix() + topic, payload_text, true); // with retain true
 }
@@ -860,7 +864,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         if (type == DeviceValueType::BOOL) {
             snprintf(topic, sizeof(topic), "binary_sensor/%s", config_topic); // binary sensor (for booleans)
         } else {
-            snprintf(topic, sizeof(topic), "sensor/%s", config_topic);        // normal HA sensor
+            snprintf(topic, sizeof(topic), "sensor/%s", config_topic); // normal HA sensor
         }
     }
 
@@ -874,13 +878,13 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // build the payload
     StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> doc;
     doc["uniq_id"] = uniq_id;
-    doc["obj_id"]  = uniq_id;             // same as unique_id
+    doc["obj_id"]  = uniq_id; // same as unique_id
 
     const char * ic_ha  = "ic";           // icon - only set this if there is no device class
     const char * sc_ha  = "stat_cla";     // state class
     const char * uom_ha = "unit_of_meas"; // unit of measure
 
-    char sample_val[30] = "0";            // sample, correct(!) entity value, used only to prevent warning/error in HA if real value is not published yet
+    char sample_val[30] = "0"; // sample, correct(!) entity value, used only to prevent warning/error in HA if real value is not published yet
 
     // handle commands, which are device entities that are writable
     // we add the command topic parameter
@@ -952,7 +956,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     } else {
         snprintf(ha_name, sizeof(ha_name), "%s", F_name); // no tag
     }
-    free(F_name);                                         // very important!
+    free(F_name); // very important!
     doc["name"] = ha_name;
 
     // value template
@@ -1164,7 +1168,7 @@ bool Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     if (Mqtt::entity_format() == entityFormat::MULTI_SHORT) {
         snprintf(uniq_id_s, sizeof(uniq_id_s), "%s_thermostat_hc%d", mqtt_basename_.c_str(), hc_num); // add basename
     } else {
-        snprintf(uniq_id_s, sizeof(uniq_id_s), "thermostat_hc%d", hc_num);                            // backward compatible with v3.4
+        snprintf(uniq_id_s, sizeof(uniq_id_s), "thermostat_hc%d", hc_num); // backward compatible with v3.4
     }
 
     snprintf(temp_cmd_s, sizeof(temp_cmd_s), "~/thermostat/hc%d/seltemp", hc_num);
