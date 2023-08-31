@@ -114,7 +114,7 @@ const NetworkStatusForm: FC = () => {
                     <SettingsInputAntennaIcon />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary="SSID" secondary={data.ssid} />
+                <ListItemText primary="SSID (RSSI)" secondary={data.ssid + ' (' + data.rssi + ' dBm)'} />
               </ListItem>
               <Divider variant="inset" component="li" />
             </>

@@ -1339,12 +1339,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash-es@npm:^4.17.8":
-  version: 4.17.8
-  resolution: "@types/lodash-es@npm:4.17.8"
+"@types/lodash-es@npm:^4.17.9":
+  version: 4.17.9
+  resolution: "@types/lodash-es@npm:4.17.9"
   dependencies:
     "@types/lodash": "*"
-  checksum: 950771d406c842814dd22217adba5e01bd06b3c21e97900d3c3816f38580e132894400b5d83a7962645fa284d8478614bdcc50755255ad15024311b7b8ed8520
+  checksum: 9fe82df0ec14e2aad50a1bf6488c4457e3378fcc77f5806fbc8035904ef0848b70e50037b13d9bddb66d3a30b425d2998a4a438a5024efe7431b63fde0920378
   languageName: node
   linkType: hard
 
@@ -1586,7 +1586,7 @@ __metadata:
     "@prefresh/vite": ^2.4.1
     "@table-library/react-table-library": 4.1.7
     "@types/babel__core": ^7
-    "@types/lodash-es": ^4.17.8
+    "@types/lodash-es": ^4.17.9
     "@types/node": ^20.5.7
     "@types/react": ^18.2.21
     "@types/react-dom": ^18.2.7

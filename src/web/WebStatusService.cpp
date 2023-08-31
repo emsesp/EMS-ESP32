@@ -166,9 +166,9 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
     if (Mqtt::enabled()) {
         statJson       = statsJson.createNestedObject();
         statJson["id"] = 5;
-        statJson["s"]  = Mqtt::publish_count();
+        statJson["s"]  = Mqtt::publish_count() - Mqtt::publish_fails();
         statJson["f"]  = Mqtt::publish_fails();
-        statJson["q"]  = Mqtt::publish_count() == 0 ? 100 : 100 - (uint8_t)((100 * Mqtt::publish_fails()) / (Mqtt::publish_count() + Mqtt::publish_fails()));
+        statJson["q"]  = Mqtt::publish_count() == 0 ? 100 : 100 - (uint8_t)((100 * Mqtt::publish_fails()) / Mqtt::publish_count());
     }
 
     statJson       = statsJson.createNestedObject();

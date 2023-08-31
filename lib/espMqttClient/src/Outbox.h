@@ -163,6 +163,16 @@ class Outbox {
     return false;
   }
 
+  size_t size() const {
+    Node* n = _first;
+    size_t count = 0;
+    while (n) {
+      n = n->next;
+      ++count;
+    }
+    return count;
+  }
+
  private:
   Node* _first;
   Node* _last;

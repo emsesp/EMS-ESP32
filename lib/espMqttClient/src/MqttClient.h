@@ -65,7 +65,7 @@ class MqttClient {
     uint16_t     publish(const char * topic, uint8_t qos, bool retain, espMqttClientTypes::PayloadCallback callback, size_t length);
     void         clearQueue(bool deleteSessionData = false); // Not MQTT compliant and may cause unpredictable results when `deleteSessionData` = true!
     const char * getClientId() const;
-    uint16_t     getQueue() const;
+    size_t       queueSize(); // No const because of mutex
     void         loop();
 
   protected:
@@ -131,8 +131,9 @@ class MqttClient {
         uint32_t                       timeSent;
         espMqttClientInternals::Packet packet;
         template <typename... Args>
-        OutgoingPacket(uint32_t t, espMqttClientTypes::Error error, Args &&... args)
-            : timeSent(t)
+        OutgoingPacket(uint32_t t, espMqttClientTypes::Error & error, Args &&... args)
+            : // NOLINT(runtime/references)
+            timeSent(t)
             , packet(error, std::forward<Args>(args)...) {
         }
     };
@@ -150,18 +151,26 @@ class MqttClient {
     bool _addPacket(Args &&... args) {
         espMqttClientTypes::Error                                error(espMqttClientTypes::Error::SUCCESS);
         espMqttClientInternals::Outbox<OutgoingPacket>::Iterator it = _outbox.emplace(0, error, std::forward<Args>(args)...);
-        if (it && error == espMqttClientTypes::Error::SUCCESS)
+        if (it && error == espMqttClientTypes::Error::SUCCESS) {
             return true;
-        return false;
+        } else {
+            if (it)
+                _outbox.remove(it);
+            return false;
+        }
     }
 
     template <typename... Args>
     bool _addPacketFront(Args &&... args) {
         espMqttClientTypes::Error                                error(espMqttClientTypes::Error::SUCCESS);
         espMqttClientInternals::Outbox<OutgoingPacket>::Iterator it = _outbox.emplaceFront(0, error, std::forward<Args>(args)...);
-        if (it && error == espMqttClientTypes::Error::SUCCESS)
+        if (it && error == espMqttClientTypes::Error::SUCCESS) {
             return true;
-        return false;
+        } else {
+            if (it)
+                _outbox.remove(it);
+            return false;
+        }
     }
 
     void _checkOutbox();

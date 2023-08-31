@@ -124,6 +124,8 @@ void Mqtt::resubscribe() {
 
 // Main MQTT loop - sends out top item on publish queue
 void Mqtt::loop() {
+    queuecount_ = mqttClient_->queueSize();
+
     // exit if MQTT is not enabled or if there is no network connection
     if (!connected()) {
         return;
@@ -142,7 +144,7 @@ void Mqtt::loop() {
         EMSESP::publish_sensor_values(false);
     }
 
-    queuecount_ = mqttClient_->getQueue();
+    // wait for empty queue before sending scheduled device messages
     if (queuecount_ > 0) {
         return;
     }
@@ -482,7 +484,7 @@ void Mqtt::on_connect() {
 
     connecting_ = true;
     connectcount_++; // count # reconnects. not currently used.
-    queuecount_ = 0;
+    queuecount_ = mqttClient_->queueSize();
 
     load_settings(); // reload MQTT settings - in case they have changes
 
@@ -510,7 +512,7 @@ void Mqtt::on_connect() {
     // publish to the last will topic (see Mqtt::start() function) to say we're alive
     queue_publish_retain("status", "online", true); // with retain on
 
-    mqtt_publish_fails_ = 0; // reset fail count to 0
+    // mqtt_publish_fails_ = 0; // reset fail count to 0
 }
 
 // Home Assistant Discovery - the main master Device called EMS-ESP
@@ -590,14 +592,23 @@ bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, con
     if (!mqtt_enabled_ || topic.empty()) {
         return false; // quit, not using MQTT
     }
+    // check free mem
+    if (ESP.getFreeHeap() < 60 * 1204) {
+        if (operation == Operation::PUBLISH) {
+            mqtt_message_id_++;
+            mqtt_publish_fails_++;
+        }
+        LOG_DEBUG("%s failed: low memory", operation == Operation::PUBLISH ? "Publish" : operation == Operation::SUBSCRIBE ? "Subscribe" : "Unsubscribe");
+        return false; // quit
+    }
 
     uint16_t packet_id = 0;
     char     fulltopic[MQTT_TOPIC_MAX_SIZE];
 
     if (topic.find(discovery_prefix_) == 0) {
-        strlcpy(fulltopic, topic.c_str(), sizeof(fulltopic)); // leave topic as it is
+        strlcpy(fulltopic, topic.c_str(), sizeof(fulltopic)); // leave discovery topic as it is
     } else {
-        // it's a discovery topic, added the mqtt base to the topic path
+        // it's not a discovery topic, added the mqtt base to the topic path
         snprintf(fulltopic, sizeof(fulltopic), "%s/%s", mqtt_base_.c_str(), topic.c_str()); // uses base
     }
 
