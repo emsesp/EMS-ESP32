@@ -103,7 +103,7 @@ bool MqttClient::disconnected() const {
 }
 
 bool MqttClient::connect() {
-    bool result = true;
+    bool result = false;
     if (_state == State::disconnected) {
         EMC_SEMAPHORE_TAKE();
         if (_addPacketFront(_cleanSession,
@@ -116,19 +116,21 @@ bool MqttClient::connect() {
                             _willPayloadLength,
                             (uint16_t)(_keepAlive / 1000), // 32b to 16b doesn't overflow because it comes from 16b orignally
                             _clientId)) {
+            result = true;
+            _state = State::connectingTcp1;
 #if defined(ARDUINO_ARCH_ESP32)
             if (_useInternalTask == espMqttClientTypes::UseInternalTask::YES) {
                 vTaskResume(_taskHandle);
             }
 #endif
-            _state = State::connectingTcp1;
         } else {
             EMC_SEMAPHORE_GIVE();
             emc_log_e("Could not create CONNECT packet");
             _onError(0, Error::OUT_OF_MEMORY);
-            result = false;
         }
         EMC_SEMAPHORE_GIVE();
+    } else if (_state <= State::connected) { // already connected or connecting
+        result = true;
     }
     return result;
 }
@@ -194,6 +196,14 @@ void MqttClient::clearQueue(bool deleteSessionData) {
 
 const char * MqttClient::getClientId() const {
     return _clientId;
+}
+
+size_t MqttClient::queueSize() {
+    size_t ret = 0;
+    EMC_SEMAPHORE_TAKE();
+    ret = _outbox.size();
+    EMC_SEMAPHORE_GIVE();
+    return ret;
 }
 
 void MqttClient::loop() {
@@ -335,7 +345,6 @@ int MqttClient::_sendPacket() {
     size_t wantToWrite = 0;
     size_t written     = 0;
     if (packet && (wantToWrite == written)) {
-        // mixing signed with unsigned here but safe because of MQTT packet size limits
         wantToWrite = packet->packet.available(_bytesSent);
         if (wantToWrite == 0) {
             EMC_SEMAPHORE_GIVE();
@@ -630,9 +639,6 @@ void MqttClient::_onPubcomp() {
         // if it doesn't match the ID, return
         if ((it.get()->packet.packetType()) == PacketType.PUBREL) {
             if (it.get()->packet.packetId() == idToMatch) {
-                // if (!_addPacket(PacketType.PUBCOMP, idToMatch)) {
-                //     emc_log_e("Could not create PUBCOMP packet");
-                // }
                 callback = true;
                 _outbox.remove(it);
                 break;
@@ -695,20 +701,6 @@ void MqttClient::_onUnsuback() {
     } else {
         emc_log_w("received UNSUBACK without UNSUB");
     }
-}
-
-uint16_t MqttClient::getQueue() const {
-    EMC_SEMAPHORE_TAKE();
-    espMqttClientInternals::Outbox<OutgoingPacket>::Iterator it    = _outbox.front();
-    uint16_t                                                 count = 0;
-    while (it) {
-        // if (it.get()->packet.packetType() == PacketType.PUBLISH) {
-        ++count;
-        // }
-        ++it;
-    }
-    EMC_SEMAPHORE_GIVE();
-    return count;
 }
 
 void MqttClient::_clearQueue(int clearData) {

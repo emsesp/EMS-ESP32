@@ -100,7 +100,7 @@ Packet::Packet(espMqttClientTypes::Error& error,
   (password ? 2 + strlen(password) : 0);
 
   // allocate memory
-  if (!_allocate(remainingLength)) {
+  if (!_allocate(remainingLength, false)) {
     error = espMqttClientTypes::Error::OUT_OF_MEMORY;
     return;
   }
@@ -300,8 +300,8 @@ Packet::Packet(espMqttClientTypes::Error& error, MQTTPacketType type)
 }
 
 
-bool Packet::_allocate(size_t remainingLength) {
-  if (EMC_GET_FREE_MEMORY() < EMC_MIN_FREE_MEMORY) {
+bool Packet::_allocate(size_t remainingLength, bool check) {
+  if (check && EMC_GET_FREE_MEMORY() < EMC_MIN_FREE_MEMORY) {
     emc_log_w("Packet buffer not allocated: low memory");
     return false;
   }

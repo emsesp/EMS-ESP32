@@ -124,7 +124,7 @@ void Mqtt::resubscribe() {
 
 // Main MQTT loop - sends out top item on publish queue
 void Mqtt::loop() {
-    queuecount_ = mqttClient_->getQueue();
+    queuecount_ = mqttClient_->queueSize();
 
     // exit if MQTT is not enabled or if there is no network connection
     if (!connected()) {
@@ -484,7 +484,7 @@ void Mqtt::on_connect() {
 
     connecting_ = true;
     connectcount_++; // count # reconnects. not currently used.
-    queuecount_ = mqttClient_->getQueue();
+    queuecount_ = mqttClient_->queueSize();
 
     load_settings(); // reload MQTT settings - in case they have changes
 
@@ -606,9 +606,9 @@ bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, con
     char     fulltopic[MQTT_TOPIC_MAX_SIZE];
 
     if (topic.find(discovery_prefix_) == 0) {
-        strlcpy(fulltopic, topic.c_str(), sizeof(fulltopic)); // leave topic as it is
+        strlcpy(fulltopic, topic.c_str(), sizeof(fulltopic)); // leave discovery topic as it is
     } else {
-        // it's a discovery topic, added the mqtt base to the topic path
+        // it's not a discovery topic, added the mqtt base to the topic path
         snprintf(fulltopic, sizeof(fulltopic), "%s/%s", mqtt_base_.c_str(), topic.c_str()); // uses base
     }
 
