@@ -31,6 +31,7 @@ WebEntityService::WebEntityService(AsyncWebServer * server, FS * fs, SecurityMan
 void WebEntityService::begin() {
     _fsPersistence.readFromFS();
     EMSESP::logger().info("Starting Custom entity service");
+    Mqtt::subscribe(EMSdevice::DeviceType::CUSTOM, "custom/#", nullptr); // use empty function callback
 }
 
 // this creates the entity file, saving it to the FS

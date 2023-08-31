@@ -31,6 +31,7 @@ WebSchedulerService::WebSchedulerService(AsyncWebServer * server, FS * fs, Secur
 void WebSchedulerService::begin() {
     _fsPersistence.readFromFS();
     EMSESP::logger().info("Starting Scheduler service");
+    Mqtt::subscribe(EMSdevice::DeviceType::SCHEDULER, "scheduler/#", nullptr); // use empty function callback
 }
 
 // this creates the scheduler file, saving it to the FS
