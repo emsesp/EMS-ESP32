@@ -131,10 +131,9 @@ class MqttClient {
         uint32_t                       timeSent;
         espMqttClientInternals::Packet packet;
         template <typename... Args>
-        OutgoingPacket(uint32_t t, espMqttClientTypes::Error & error, Args &&... args)
-            : timeSent(t)
-            , packet(error, std::forward<Args>(args)...) {
-        }
+        OutgoingPacket(uint32_t t, espMqttClientTypes::Error& error, Args&&... args) :  // NOLINT(runtime/references)
+            timeSent(t),
+            packet(error, std::forward<Args>(args)...) {}
     };
     espMqttClientInternals::Outbox<OutgoingPacket> _outbox;
     size_t                                         _bytesSent;
@@ -150,18 +149,26 @@ class MqttClient {
     bool _addPacket(Args &&... args) {
         espMqttClientTypes::Error                                error(espMqttClientTypes::Error::SUCCESS);
         espMqttClientInternals::Outbox<OutgoingPacket>::Iterator it = _outbox.emplace(0, error, std::forward<Args>(args)...);
-        if (it && error == espMqttClientTypes::Error::SUCCESS)
+        if (it && error == espMqttClientTypes::Error::SUCCESS) {
             return true;
-        return false;
+        } else {
+            if (it)
+                _outbox.remove(it);
+            return false;
+        }
     }
 
     template <typename... Args>
     bool _addPacketFront(Args &&... args) {
         espMqttClientTypes::Error                                error(espMqttClientTypes::Error::SUCCESS);
         espMqttClientInternals::Outbox<OutgoingPacket>::Iterator it = _outbox.emplaceFront(0, error, std::forward<Args>(args)...);
-        if (it && error == espMqttClientTypes::Error::SUCCESS)
+        if (it && error == espMqttClientTypes::Error::SUCCESS) {
             return true;
-        return false;
+        } else {
+            if (it)
+                _outbox.remove(it);
+            return false;
+        }
     }
 
     void _checkOutbox();
