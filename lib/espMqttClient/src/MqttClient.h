@@ -131,7 +131,7 @@ class MqttClient {
         uint32_t                       timeSent;
         espMqttClientInternals::Packet packet;
         template <typename... Args>
-        OutgoingPacket(uint32_t t, espMqttClientTypes::Error error, Args &&... args)
+        OutgoingPacket(uint32_t t, espMqttClientTypes::Error & error, Args &&... args)
             : timeSent(t)
             , packet(error, std::forward<Args>(args)...) {
         }
