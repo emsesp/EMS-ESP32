@@ -6,8 +6,12 @@
 
 ## Added
 
+- rssi in Network Status Page
+
 ## Fixed
+
+- issue in espMqttClient on low mem
 
 ## Changed
 
-- set EMC_MIN_FREE_MEMORY to 40960
+- mqtt free mem check 60k
