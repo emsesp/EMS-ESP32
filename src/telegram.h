@@ -48,8 +48,8 @@ static constexpr int16_t  EMS_VALUE_SHORT_NOTSET  = 0x7D00;     // 32000: for 2-
 static constexpr uint32_t EMS_VALUE_ULONG_NOTSET  = 0x00FFFFFF; // for 3-byte longs
 static constexpr uint32_t EMS_VALUE_ULLONG_NOTSET = 0xFFFFFFFF; // for 4-byte longs
 
-static constexpr uint8_t EMS_MAX_TELEGRAM_LENGTH         = 32;  // max length of a complete EMS telegram
-static constexpr uint8_t EMS_MAX_TELEGRAM_MESSAGE_LENGTH = 27;  // max length of message block, assuming EMS1.0
+static constexpr uint8_t EMS_MAX_TELEGRAM_LENGTH         = 32; // max length of a complete EMS telegram
+static constexpr uint8_t EMS_MAX_TELEGRAM_MESSAGE_LENGTH = 27; // max length of message block, assuming EMS1.0
 
 #define EMS_VALUE_DEFAULT_INT EMS_VALUE_INT_NOTSET
 #define EMS_VALUE_DEFAULT_UINT EMS_VALUE_UINT_NOTSET
@@ -232,13 +232,13 @@ class EMSbus {
   private:
     static constexpr uint32_t EMS_BUS_TIMEOUT = 30000; // timeout in ms before recognizing the ems bus is offline (30 seconds)
 
-    static uint32_t last_bus_activity_;                // timestamp of last time a valid Rx came in
-    static uint32_t bus_uptime_start_;                 // timestamp of first time we connected to the bus
-    static bool     bus_connected_;                    // start assuming the bus hasn't been connected
-    static uint8_t  ems_mask_;                         // unset=0xFF, buderus=0x00, junkers/ht3=0x80
-    static uint8_t  ems_bus_id_;                       // the bus id, which configurable and stored in settings
-    static uint8_t  tx_mode_;                          // local copy of the tx mode
-    static uint8_t  tx_state_;                         // state of the Tx line (NONE or waiting on a TX_READ or TX_WRITE)
+    static uint32_t last_bus_activity_; // timestamp of last time a valid Rx came in
+    static uint32_t bus_uptime_start_;  // timestamp of first time we connected to the bus
+    static bool     bus_connected_;     // start assuming the bus hasn't been connected
+    static uint8_t  ems_mask_;          // unset=0xFF, buderus=0x00, junkers/ht3=0x80
+    static uint8_t  ems_bus_id_;        // the bus id, which configurable and stored in settings
+    static uint8_t  tx_mode_;           // local copy of the tx mode
+    static uint8_t  tx_state_;          // state of the Tx line (NONE or waiting on a TX_READ or TX_WRITE)
 };
 
 class RxService : public EMSbus {
@@ -433,17 +433,17 @@ class TxService : public EMSbus {
   private:
     std::deque<QueuedTxTelegram> tx_telegrams_; // the Tx queue
 
-    uint32_t telegram_read_count_       = 0;    // # Tx successful reads
-    uint32_t telegram_write_count_      = 0;    // # Tx successful writes
-    uint32_t telegram_read_fail_count_  = 0;    // # Tx unsuccessful transmits
-    uint32_t telegram_write_fail_count_ = 0;    // # Tx unsuccessful transmits
+    uint32_t telegram_read_count_       = 0; // # Tx successful reads
+    uint32_t telegram_write_count_      = 0; // # Tx successful writes
+    uint32_t telegram_read_fail_count_  = 0; // # Tx unsuccessful transmits
+    uint32_t telegram_write_fail_count_ = 0; // # Tx unsuccessful transmits
 
     std::shared_ptr<Telegram> telegram_last_;
     uint16_t                  telegram_last_post_send_query_; // which type ID to query after a successful send, to read back the values just written
     uint8_t                   retry_count_  = 0;              // count for # Tx retries
     uint32_t                  delayed_send_ = 0;              // manage delay for post send query
 
-    uint8_t tx_telegram_id_ = 0;                              // queue counter
+    uint8_t tx_telegram_id_ = 0; // queue counter
 
     void send_telegram(const QueuedTxTelegram & tx_telegram);
 };

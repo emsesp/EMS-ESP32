@@ -66,7 +66,7 @@ class WebLogService : public uuid::log::Handler {
 
     void setValues(AsyncWebServerRequest * request, JsonVariant & json);
 
-    AsyncCallbackJsonWebHandler setValues_;                                // for POSTs
+    AsyncCallbackJsonWebHandler setValues_; // for POSTs
 
     uint64_t                     last_transmit_        = 0;                // Last transmit time
     size_t                       maximum_log_messages_ = MAX_LOG_MESSAGES; // Maximum number of log messages to buffer before they are output

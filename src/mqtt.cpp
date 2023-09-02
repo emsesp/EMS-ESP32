@@ -592,7 +592,8 @@ bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, con
     if (!mqtt_enabled_ || topic.empty()) {
         return false; // quit, not using MQTT
     }
-    // check free mem
+// check free mem
+#ifndef EMSESP_STANDALONE
     if (ESP.getFreeHeap() < 60 * 1204) {
         if (operation == Operation::PUBLISH) {
             mqtt_message_id_++;
@@ -601,6 +602,7 @@ bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, con
         LOG_DEBUG("%s failed: low memory", operation == Operation::PUBLISH ? "Publish" : operation == Operation::SUBSCRIBE ? "Subscribe" : "Unsubscribe");
         return false; // quit
     }
+#endif
 
     uint16_t packet_id = 0;
     char     fulltopic[MQTT_TOPIC_MAX_SIZE];

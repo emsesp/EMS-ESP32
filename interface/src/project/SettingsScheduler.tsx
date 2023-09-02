@@ -1,6 +1,6 @@
 import AddIcon from '@mui/icons-material/Add';
 import CancelIcon from '@mui/icons-material/Cancel';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CircleIcon from '@mui/icons-material/Circle';
 import WarningIcon from '@mui/icons-material/Warning';
 
 import { Box, Typography, Divider, Stack, Button } from '@mui/material';
@@ -216,7 +216,11 @@ const SettingsScheduler: FC = () => {
               {tableList.map((si: ScheduleItem) => (
                 <Row key={si.id} item={si} onClick={() => editScheduleItem(si)}>
                   <Cell stiff>
-                    {si.active && <CheckCircleIcon sx={{ color: '#79D200', fontSize: 16, verticalAlign: 'middle' }} />}
+                    {si.active ? (
+                      <CircleIcon color="success" sx={{ fontSize: 16, verticalAlign: 'middle' }} />
+                    ) : (
+                      <CircleIcon color="error" sx={{ fontSize: 16, verticalAlign: 'middle' }} />
+                    )}
                   </Cell>
                   <Cell stiff>
                     <Stack spacing={1} direction="row">
