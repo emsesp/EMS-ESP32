@@ -1,8 +1,10 @@
 # Changelog
 
-# [3.7.0]
+# [3.6.1]
 
 ## **IMPORTANT! BREAKING CHANGES**
+
+- shower_data MQTT topic shows duration is seconds (was previously an English string)
 
 ## Added
 
@@ -15,3 +17,4 @@
 ## Changed
 
 - mqtt free mem check 60k
+- small cosmetic changes to Searching in Customization web page
