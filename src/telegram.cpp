@@ -148,11 +148,11 @@ void RxService::add(uint8_t * data, uint8_t length) {
     // validate the CRC. if it fails then increment the number of corrupt/incomplete telegrams and only report to console/syslog
     uint8_t crc = calculate_crc(data, length - 1);
     if (data[length - 1] != crc) {
-        if ((data[0] & 0x7F) != ems_bus_id()) {                                               // do not count echos as errors
+        if ((data[0] & 0x7F) != ems_bus_id()) { // do not count echos as errors
             telegram_error_count_++;
             LOG_WARNING("Incomplete Rx: %s", Helpers::data_to_hex(data, length - 1).c_str()); // exclude CRC
         } else {
-            LOG_TRACE("Incomplete Rx: %s", Helpers::data_to_hex(data, length - 1).c_str());   // exclude CRC
+            LOG_TRACE("Incomplete Rx: %s", Helpers::data_to_hex(data, length - 1).c_str()); // exclude CRC
         }
         return;
     }
@@ -347,7 +347,7 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
             telegram_raw[5] = (telegram->type_id >> 8) - 1; // type, 1st byte, high-byte, subtract 0x100
             telegram_raw[6] = telegram->type_id & 0xFF;     // type, 2nd byte, low-byte
             message_p       = 7;
-            copy_data       = false;                        // there are no more data values after the type_id when reading on EMS+
+            copy_data       = false; // there are no more data values after the type_id when reading on EMS+
         }
     } else {
         // EMS 1.0
@@ -396,11 +396,11 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
     if (status == EMS_TX_STATUS_ERR) {
         LOG_ERROR("Failed to transmit Tx via UART.");
         if (telegram->operation == Telegram::Operation::TX_READ) {
-            increment_telegram_read_fail_count();  // another Tx fail
+            increment_telegram_read_fail_count(); // another Tx fail
         } else {
             increment_telegram_write_fail_count(); // another Tx fail
         }
-        tx_state(Telegram::Operation::NONE);       // nothing send, tx not in wait state
+        tx_state(Telegram::Operation::NONE); // nothing send, tx not in wait state
         return;
     }
 
@@ -456,7 +456,7 @@ void TxService::add(const uint8_t  operation,
     if (front) {
         tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram), false, validateid); // add to front of queue
     } else {
-        tx_telegrams_.emplace_back(tx_telegram_id_++, std::move(telegram), false, validateid);  // add to back of queue
+        tx_telegrams_.emplace_back(tx_telegram_id_++, std::move(telegram), false, validateid); // add to back of queue
     }
     if (validateid != 0) {
         EMSESP::wait_validate(validateid);
@@ -595,14 +595,14 @@ bool TxService::send_raw(const char * telegram_data) {
 void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const uint8_t length) {
     // have we reached the limit? if so, reset count and give up
     if (++retry_count_ > MAXIMUM_TX_RETRIES) {
-        reset_retry_count();                  // give up
-        EMSESP::wait_validate(0);             // do not wait for validation
+        reset_retry_count();      // give up
+        EMSESP::wait_validate(0); // do not wait for validation
         if (operation == Telegram::Operation::TX_READ) {
             if (telegram_last_->offset > 0) { // ignore errors for higher offsets
                 LOG_DEBUG("Last Tx Read operation failed after %d retries. Ignoring request: %s", MAXIMUM_TX_RETRIES, telegram_last_->to_string().c_str());
                 return;
             }
-            increment_telegram_read_fail_count();  // another Tx fail
+            increment_telegram_read_fail_count(); // another Tx fail
         } else {
             increment_telegram_write_fail_count(); // another Tx fail
         }

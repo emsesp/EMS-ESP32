@@ -156,7 +156,7 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
             if (sensor.type() != AnalogSensor::AnalogType::NOTUSED) {
                 obj["v"] = Helpers::transformNumFloat(sensor.value(), 0); // is optional and is a float
             } else {
-                obj["v"] = 0;                                             // must have a value for web sorting to work
+                obj["v"] = 0; // must have a value for web sorting to work
             }
         }
     }

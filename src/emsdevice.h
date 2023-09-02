@@ -459,7 +459,7 @@ class EMSdevice {
 
     std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
 
-    std::vector<DeviceValue> devicevalues_;            // all the device values
+    std::vector<DeviceValue> devicevalues_; // all the device values
 
     std::vector<uint16_t> handlers_ignored_;
 };

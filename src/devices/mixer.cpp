@@ -170,7 +170,7 @@ void Mixer::process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> teleg
 void Mixer::process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, flowTempHc_, 0); // is * 10
     has_bitupdate(telegram, pumpStatus_, 2, 0);
-    has_update(telegram, status_, 11);    // temp status
+    has_update(telegram, status_, 11); // temp status
 }
 
 // Mixer IPM - 0x010C
@@ -220,7 +220,7 @@ void Mixer::process_MMStatusMessage(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, flowTempHc_, 1);       // is * 10
     has_bitupdate(telegram, pumpStatus_, 3, 2); // is 0 or 0x64 (100%), check only bit 2
     has_update(telegram, flowSetTemp_, 0);
-    has_update(telegram, status_, 4);           // valve status -100 to 100
+    has_update(telegram, status_, 4); // valve status -100 to 100
 }
 
 /*

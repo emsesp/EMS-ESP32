@@ -163,7 +163,7 @@ class EMSESP {
     }
 
     static void watch(uint8_t watch) {
-        watch_ = watch;    // 0=off, 1=on, 2=raw
+        watch_ = watch; // 0=off, 1=on, 2=raw
         if (watch == WATCH_OFF) {
             watch_id_ = 0; // reset watch id if watch is disabled
         }

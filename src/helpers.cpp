@@ -385,7 +385,7 @@ std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
         *p++ = buffer[1];
         *p++ = ' '; // space
     }
-    *--p = '\0';    // null terminate just in case, loosing the trailing space
+    *--p = '\0'; // null terminate just in case, loosing the trailing space
 
     return std::string(str);
 }
