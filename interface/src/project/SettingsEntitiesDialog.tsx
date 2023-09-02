@@ -148,7 +148,7 @@ const SettingsEntitiesDialog = ({
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="offset"
-              label="Offset"
+              label={LL.OFFSET()}
               margin="normal"
               fullWidth
               type="number"
@@ -159,7 +159,7 @@ const SettingsEntitiesDialog = ({
           <Grid item xs={4}>
             <TextField
               name="value_type"
-              label="Value Type"
+              label={LL.VALUE(1) + ' ' + LL.TYPE(1)}
               value={editItem.value_type}
               variant="outlined"
               onChange={updateFormValue}

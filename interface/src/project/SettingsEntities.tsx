@@ -13,7 +13,7 @@ import { toast } from 'react-toastify';
 
 import SettingsEntitiesDialog from './SettingsEntitiesDialog';
 import * as EMSESP from './api';
-import { DeviceValueUOM_s } from './types';
+import { DeviceValueTypeNames, DeviceValueUOM_s } from './types';
 import { entityItemValidation } from './validators';
 import type { EntityItem } from './types';
 import type { FC } from 'react';
@@ -57,7 +57,7 @@ const SettingsEntities: FC = () => {
 
   const entity_theme = useTheme({
     Table: `
-      --data-table-library_grid-template-columns: repeat(1, minmax(60px, 1fr)) minmax(80px, auto) 80px 80px 80px;
+      --data-table-library_grid-template-columns: repeat(1, minmax(60px, 1fr)) minmax(80px, auto) 80px 80px 80px 90px;
     `,
     BaseRow: `
       font-size: 14px;
@@ -79,6 +79,9 @@ const SettingsEntities: FC = () => {
         text-align: center;
       }
       &:nth-of-type(5) {
+        text-align: center;
+      }
+      &:nth-of-type(6) {
         text-align: center;
       }
     `,
@@ -208,8 +211,9 @@ const SettingsEntities: FC = () => {
                 <HeaderCell>{LL.NAME(0)}</HeaderCell>
                 <HeaderCell stiff>{LL.ID_OF(LL.DEVICE())}</HeaderCell>
                 <HeaderCell stiff>{LL.ID_OF(LL.TYPE(1))}</HeaderCell>
-                <HeaderCell stiff>Offset</HeaderCell>
-                <HeaderCell stiff>{LL.VALUE(0)}</HeaderCell>
+                <HeaderCell stiff>{LL.OFFSET()}</HeaderCell>
+                <HeaderCell stiff>{LL.VALUE(1) + ' ' + LL.TYPE(1)}</HeaderCell>
+                <HeaderCell stiff>{LL.VALUE(1)}</HeaderCell>
               </HeaderRow>
             </Header>
             <Body>
@@ -219,6 +223,7 @@ const SettingsEntities: FC = () => {
                   <Cell>{showHex(ei.device_id as number, 2)}</Cell>
                   <Cell>{showHex(ei.type_id as number, 3)}</Cell>
                   <Cell>{ei.offset}</Cell>
+                  <Cell>{DeviceValueTypeNames[ei.value_type]}</Cell>
                   <Cell>{formatValue(ei.value, ei.uom)}</Cell>
                 </Row>
               ))}
