@@ -160,6 +160,9 @@ void AnalogSensor::reload() {
 #endif
             sensor.polltime_ = 0;
             sensor.poll_     = digitalRead(sensor.gpio());
+            if (double_t val = EMSESP::nvs_.getDouble(sensor.name().c_str(), 0)) {
+                sensor.set_value(val);
+            }
             publish_sensor(sensor);
         } else if (sensor.type() == AnalogType::TIMER || sensor.type() == AnalogType::RATE) {
             LOG_DEBUG("Adding analog Timer/Rate sensor on GPIO %02d", sensor.gpio());
@@ -274,6 +277,7 @@ void AnalogSensor::measure() {
                 } else if (!sensor.poll_) { // falling edge
                     if (sensor.type() == AnalogType::COUNTER) {
                         sensor.set_value(old_value + sensor.factor());
+                        EMSESP::nvs_.putDouble(sensor.name().c_str(), sensor.value());
                     } else if (sensor.type() == AnalogType::RATE) { // dafault uom: Hz (1/sec) with factor 1
                         sensor.set_value(sensor.factor() * 1000 / (sensor.polltime_ - sensor.last_polltime_));
                     } else if (sensor.type() == AnalogType::TIMER) { // default seconds with factor 1
@@ -315,10 +319,14 @@ bool AnalogSensor::update(uint8_t gpio, const std::string & name, double offset,
                     found_sensor = true; // found the record
                     // see if it's marked for deletion
                     if (deleted) {
+                        EMSESP::nvs_.remove(AnalogCustomization.name.c_str());
                         LOG_DEBUG("Removing analog sensor GPIO %02d", gpio);
                         settings.analogCustomizations.remove(AnalogCustomization);
                     } else {
                         // update existing record
+                        if (name != AnalogCustomization.name) {
+                            EMSESP::nvs_.remove(AnalogCustomization.name.c_str());
+                        }
                         AnalogCustomization.name   = name;
                         AnalogCustomization.offset = offset;
                         AnalogCustomization.factor = factor;
