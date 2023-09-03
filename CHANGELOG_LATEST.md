@@ -9,10 +9,15 @@
 ## Added
 
 - rssi in Network Status Page
+- boiler nominal power from telegram 0x04
+- boiler energy for heating and dhw stored in nvs
+- analogsensor counter value stored in nvs
 
 ## Fixed
 
 - issue in espMqttClient on low mem
+- mqtt subscription to scheduler and custom
+- HA configuration for scheduler and custom
 
 ## Changed
 
