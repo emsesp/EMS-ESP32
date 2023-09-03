@@ -36,6 +36,7 @@
 #ifndef EMSESP_STANDALONE
 #include <uuid/telnet.h>
 #endif
+#include <Preferences.h>
 
 #include <ESP8266React.h>
 
@@ -225,6 +226,7 @@ class EMSESP {
     static Shower            shower_;
     static RxService         rxservice_;
     static TxService         txservice_;
+    static Preferences       nvs_;
 
     // web controllers
     static ESP8266React            esp8266React;

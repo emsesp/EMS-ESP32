@@ -155,6 +155,22 @@ class EMSdevice {
         }
     }
 
+    inline void has_update(uint16_t & value, uint16_t newvalue) {
+        if (value != newvalue) {
+            value       = newvalue;
+            has_update_ = true;
+            publish_value((void *)&value);
+        }
+    }
+
+    inline void has_update(uint32_t & value, uint32_t newvalue) {
+        if (value != newvalue) {
+            value       = newvalue;
+            has_update_ = true;
+            publish_value((void *)&value);
+        }
+    }
+
     inline void has_enumupdate(std::shared_ptr<const Telegram> telegram, uint8_t & value, const uint8_t index, int8_t s = 0) {
         if (telegram->read_enumvalue(value, index, s)) {
             has_update_ = true;

@@ -1,6 +1,8 @@
 #include <RestartService.h>
 #include <esp_ota_ops.h>
 
+#include "../../src/emsesp_stub.hpp"
+
 using namespace std::placeholders; // for `_1` etc
 
 RestartService::RestartService(AsyncWebServer * server, SecurityManager * securityManager) {
@@ -11,6 +13,7 @@ RestartService::RestartService(AsyncWebServer * server, SecurityManager * securi
 }
 
 void RestartService::restart(AsyncWebServerRequest * request) {
+    emsesp::EMSESP::system_.store_boiler_energy();
     request->onDisconnect(RestartService::restartNow);
     request->send(200);
 }
@@ -19,6 +22,7 @@ void RestartService::partition(AsyncWebServerRequest * request) {
     const esp_partition_t * factory_partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, NULL);
     if (factory_partition) {
         esp_ota_set_boot_partition(factory_partition);
+        emsesp::EMSESP::system_.store_boiler_energy();
         request->onDisconnect(RestartService::restartNow);
         request->send(200);
         return;
@@ -35,6 +39,7 @@ void RestartService::partition(AsyncWebServerRequest * request) {
         return;
     }
     esp_ota_set_boot_partition(ota_partition);
+    emsesp::EMSESP::system_.store_boiler_energy();
     request->onDisconnect(RestartService::restartNow);
     request->send(200);
 }

@@ -931,7 +931,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                 }
                 // handle INTs
                 // add min and max values and steps, as integer values
-                else {
+                else if (dv.type != DeviceValueType::ULONG) {
                     if (dv.numeric_operator > 0) {
                         obj["s"] = (float)1 / dv.numeric_operator;
                     } else if (dv.numeric_operator < 0) {
@@ -1030,7 +1030,7 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
         obj["m"] = dv.state >> 4; // send back the mask state. We're only interested in the high nibble
         obj["w"] = dv.has_cmd;    // if writable
 
-        if (dv.has_cmd && (obj["v"].is<float>() || obj["v"].is<int>())) {
+        if (dv.has_cmd && dv.type != DeviceValueType::ULONG && (obj["v"].is<float>() || obj["v"].is<int>())) {
             // set the min and max values if there are any and if entity has a value
             int16_t  dv_set_min;
             uint16_t dv_set_max;
@@ -1767,6 +1767,11 @@ const char * EMSdevice::telegram_type_name(std::shared_ptr<const Telegram> teleg
 bool EMSdevice::handle_telegram(std::shared_ptr<const Telegram> telegram) {
     for (auto & tf : telegram_functions_) {
         if (tf.telegram_type_id_ == telegram->type_id) {
+            // for telegram desitnation only read telegram
+            if (telegram->dest == device_id_ && telegram->message_length > 0) {
+                tf.process_function_(telegram);
+                return true;
+            }
             // if the data block is empty and we have not received data before, assume that this telegram
             // is not recognized by the bus master. So remove it from the automatic fetch list
             if (telegram->message_length == 0 && telegram->offset == 0 && !tf.received_) {

@@ -69,6 +69,7 @@ System            EMSESP::system_;            // core system services
 TemperatureSensor EMSESP::temperaturesensor_; // Temperature sensors
 AnalogSensor      EMSESP::analogsensor_;      // Analog sensors
 Shower            EMSESP::shower_;            // Shower logic
+Preferences       EMSESP::nvs_;               // NV Storage
 
 // static/common variables
 uint16_t EMSESP::watch_id_         = WATCH_ID_NONE; // for when log is TRACE. 0 means no trace set
@@ -1485,6 +1486,7 @@ void EMSESP::start() {
         system_.system_restart();
     };
 
+    nvs_.begin("ems-esp");
     webSettingsService.begin(); // load EMS-ESP Application settings...
 
     // do any system upgrades

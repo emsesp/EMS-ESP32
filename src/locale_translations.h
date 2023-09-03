@@ -500,6 +500,10 @@ MAKE_TRANSLATION(blockTerm, "blockterm", "config of block terminal", "Konfig. Sp
 MAKE_TRANSLATION(blockHyst, "blockhyst", "hyst. for boiler block", "Hysterese Sperrmodus", "Hysterese blokeerterminal", "Hysteres Blockeringsmodul", "tryb blokowania histerezy", "hystrese blokkeringsmodus", "hyst. Blocage chaudière", "kazan blok geçikmesi", "modalità blocco isteresi")
 MAKE_TRANSLATION(releaseWait, "releasewait", "boiler release wait time", "Wartezeit Kessel-Freigabe", "Wachttijd ketel vrijgave", "Väntetid Frisläppning", "czas oczekiwania na zwolnienie kotła", "kjele frigjøringsventetid", "temps attente libération chaudière", "kazan tahliyesi bekleme süresi", "tempo di attesa sblocco caldaia")
 
+// energy
+MAKE_TRANSLATION(nrgHeat, "nrgheat", "energy heating", "Energie Heizen", "", "", "", "", "", "", "")
+MAKE_TRANSLATION(nrgWw, "nrgww", "energy dhw", "Energie Warmwasser", "", "", "", "", "", "", "")
+MAKE_TRANSLATION(nomPower, "nompower", "nominal Power", "Brennerleistung", "", "", "", "", "", "", "")
 // HIU
 MAKE_TRANSLATION(netFlowTemp, "netflowtemp", "heat network flow temp", "System Vorlauftemperatur", "Netto aanvoertemperatuur", "", "", "", "", "", "temperatura di mandata della rete di riscaldamento")
 MAKE_TRANSLATION(cwFlowRate, "cwflowrate", "cold water flow rate", "Kaltwasser Durchfluss", "Stroomsnelheid koud water ", "", "", "", "", "", "portata acqua fredda")

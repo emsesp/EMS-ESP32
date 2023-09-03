@@ -231,9 +231,14 @@ bool System::command_watch(const char * value, const int8_t id) {
     return false;
 }
 
+void System::store_boiler_energy() {
+    Command::call(EMSdevice::DeviceType::BOILER, "nompower", "-1"); // trigger a write
+}
+
 // restart EMS-ESP
 void System::system_restart() {
     LOG_INFO("Restarting EMS-ESP...");
+    store_boiler_energy();
     Shell::loop_all();
     delay(1000); // wait a second
 #ifndef EMSESP_STANDALONE

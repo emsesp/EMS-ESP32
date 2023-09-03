@@ -750,7 +750,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(
         DeviceValueTAG::TAG_BOILER_DATA_WW, &wwMaxPower_, DeviceValueType::UINT, FL_(wwMaxPower), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_ww_maxpower), 0, 254);
     register_device_value(
-        DeviceValueTAG::TAG_BOILER_DATA_WW, &wwMaxTemp_, DeviceValueType::UINT, FL_(wwMaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_ww_maxtemp), 0, 70);
+        DeviceValueTAG::TAG_BOILER_DATA_WW, &wwMaxTemp_, DeviceValueType::UINT, FL_(wwMaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_ww_maxtemp), 0, 80);
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
                           &wwCircPump_,
                           DeviceValueType::BOOL,
@@ -849,6 +849,31 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     EMSESP::send_read_request(0x15, device_id); // read maintenance data on start (only published on change)
     EMSESP::send_read_request(0x1C, device_id); // read maintenance status on start (only published on change)
     EMSESP::send_read_request(0xC2, device_id); // read last errorcode on start (only published on errors)
+
+    register_telegram_type(0x04, "UBAFactory", true, MAKE_PF_CB(process_UBAFactory));
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nomPower_, DeviceValueType::UINT, FL_(nomPower), DeviceValueUOM::KW, MAKE_CF_CB(set_nomPower));
+
+    if (model() != EMS_DEVICE_FLAG_HEATPUMP) {
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgHeat_, DeviceValueType::ULONG, FL_(nrgHeat), DeviceValueUOM::KWH, MAKE_CF_CB(set_nrgHeat));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgWw_, DeviceValueType::ULONG, FL_(nrgWw), DeviceValueUOM::KWH, MAKE_CF_CB(set_nrgWw));
+
+        nrgHeatF_ = EMSESP::nvs_.getDouble(FL_(nrgHeat)[0], 0);
+        nrgWwF_   = EMSESP::nvs_.getDouble(FL_(nrgWw)[0], 0);
+        // update/publish the values
+        has_update(nrgHeat_, (uint32_t)nrgHeatF_);
+        has_update(nrgWw_, (uint32_t)nrgWwF_);
+    }
+}
+
+void Boiler::store_energy() {
+    // only write if something is changed
+    if (nrgHeatF_ != EMSESP::nvs_.getDouble(FL_(nrgHeat)[0]) || nrgWwF_ != EMSESP::nvs_.getDouble(FL_(nrgWw)[0])
+        || nomPower_ != EMSESP::nvs_.getUChar(FL_(nomPower)[0])) {
+        EMSESP::nvs_.putDouble(FL_(nrgHeat)[0], nrgHeatF_);
+        EMSESP::nvs_.putDouble(FL_(nrgWw)[0], nrgWwF_);
+        EMSESP::nvs_.putUChar(FL_(nomPower)[0], nomPower_);
+        LOG_DEBUG("energy values stored");
+    }
 }
 
 // Check if hot tap water or heating is active
@@ -893,6 +918,62 @@ void Boiler::check_active() {
         char s[12];
         Mqtt::queue_publish(F_(tapwater_active), Helpers::render_boolean(s, b));
         EMSESP::tap_water_active(b); // let EMS-ESP know, used in the Shower class
+    }
+
+    // calculate energy for boiler 0x08 from stored modulation an time in units of 0.01 Wh
+    if (model() != EMS_DEVICE_FLAG_HEATPUMP) {
+        // remember values from last call
+        static uint32_t powLastReadTime_ = uuid::get_uptime();
+        static uint8_t  heatBurnPow      = 0;
+        static uint8_t  wwBurnPow        = 0;
+        static uint8_t  lastSaveHour     = 0;
+        if (nrgHeat_ > (uint32_t)nrgHeatF_) {
+            nrgHeatF_ = nrgHeat_;
+        }
+        if (nrgWw_ > (uint32_t)nrgWwF_) {
+            nrgWwF_ = nrgWw_;
+        }
+        // 0.01 Wh = 0.01 Ws / 3600  = (% * kW * ms) / 3600
+        nrgHeatF_ += (double_t)(((uint32_t)heatBurnPow * nomPower_ * (uuid::get_uptime() - powLastReadTime_)) / 3600) / 100000UL;
+        nrgWwF_ += (double_t)(((uint32_t)wwBurnPow * nomPower_ * (uuid::get_uptime() - powLastReadTime_)) / 3600) / 100000UL;
+        has_update(nrgHeat_, (uint32_t)(nrgHeatF_));
+        has_update(nrgWw_, (uint32_t)(nrgWwF_));
+        // check for store values
+        time_t now = time(nullptr);
+        tm *   tm_ = localtime(&now);
+        if (tm_->tm_hour != lastSaveHour) {
+            lastSaveHour = tm_->tm_hour;
+            store_energy();
+        } else if (curBurnPow_ == 0 && (heatBurnPow + wwBurnPow) > 0) { // on burner switch off
+            store_energy();
+        }
+        // store new modulation and time
+        heatBurnPow      = heatingActive_ ? curBurnPow_ : 0;
+        wwBurnPow        = tapwaterActive_ ? curBurnPow_ : 0;
+        powLastReadTime_ = uuid::get_uptime();
+    }
+}
+
+// 0x04
+//  boiler(0x08) -W-> Me(0x0B), ?(0x04), data: 13 96 09 81 00 64 64 35 05 64 5A 22 00 00 00 00 00 00 00 00 B7
+// offset 4 - nominal Power kW, could be zero, 5 - min. Burner, 6 - max. Burner
+void Boiler::process_UBAFactory(std::shared_ptr<const Telegram> telegram) {
+    uint8_t nomPower = nomPower_;
+    if (!telegram->read_value(nomPower, 4)) {
+        return;
+    }
+    if (nomPower == 0 || nomPower == 255) {
+        nomPower = EMSESP::nvs_.getUChar(FL_(nomPower)[0], 0);
+    }
+    if (nomPower != nomPower_ || nomPower == 255) {
+        if (nomPower == 255) {
+            nomPower_ = nomPower = 0;
+            store_energy();
+            has_update(&nomPower_);
+        }
+        has_update(nomPower_, nomPower);
+        toggle_fetch(telegram->type_id, false); // only read once
+        // LOG_DEBUG("nominal power set to %d", nomPower_);
     }
 }
 
@@ -2637,6 +2718,37 @@ bool Boiler::set_wwAltOpPrio(const char * value, const int8_t id) {
     int v;
     if (Helpers::value2number(value, v)) {
         write_command(0x484, id, v, 0x484);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_nrgHeat(const char * value, const int8_t id) {
+    int v;
+    if (Helpers::value2number(value, v)) {
+        nrgHeatF_ = nrgHeat_ = v;
+        store_energy();
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_nrgWw(const char * value, const int8_t id) {
+    int v;
+    if (Helpers::value2number(value, v)) {
+        nrgWwF_ = nrgWw_ = v;
+        store_energy();
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_nomPower(const char * value, const int8_t id) {
+    int v;
+    if (Helpers::value2number(value, v)) {
+        nomPower_ = v > 0 ? v : nomPower_;
+        store_energy();
+        has_update(&nomPower_);
         return true;
     }
     return false;
