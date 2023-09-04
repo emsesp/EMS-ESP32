@@ -847,7 +847,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         case DeviceValueType::UINT:
         case DeviceValueType::SHORT:
         case DeviceValueType::USHORT:
-        case DeviceValueType::ULONG:
+        // case DeviceValueType::ULONG:
             if (discovery_type() == discoveryType::HOMEASSISTANT) {
                 // Home Assistant
                 // number - https://www.home-assistant.io/integrations/number.mqtt
@@ -865,6 +865,10 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         case DeviceValueType::ENUM:
             // select - https://www.home-assistant.io/integrations/select.mqtt
             snprintf(topic, sizeof(topic), "select/%s", config_topic);
+            break;
+        case DeviceValueType::ULONG:
+            snprintf(topic, sizeof(topic), "sensor/%s", config_topic);
+            set_ha_classes = true;
             break;
         default:
             // plain old sensor
