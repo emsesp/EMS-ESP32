@@ -871,8 +871,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         }
         store_energy();
         // update/publish the values
-        has_update(nrgHeat_, (uint32_t)nrgHeatF_);
-        has_update(nrgWw_, (uint32_t)nrgWwF_);
+        has_update(nrgHeat_, (uint32_t)(nrgHeatF_ + 0.5));
+        has_update(nrgWw_, (uint32_t)(nrgWwF_ + 0.5));
         has_update(&nomPower_);
     }
 }
@@ -942,8 +942,8 @@ void Boiler::check_active() {
         // resolution needed: 0.01 Wh = 0.01 Ws / 3600  = (% * kW * ms) / 3600
         nrgHeatF_ += (double_t)(((uint32_t)heatBurnPow * nomPower_ * (uuid::get_uptime() - powLastReadTime_)) / 3600) / 100000UL;
         nrgWwF_ += (double_t)(((uint32_t)wwBurnPow * nomPower_ * (uuid::get_uptime() - powLastReadTime_)) / 3600) / 100000UL;
-        has_update(nrgHeat_, (uint32_t)(nrgHeatF_));
-        has_update(nrgWw_, (uint32_t)(nrgWwF_));
+        has_update(nrgHeat_, (uint32_t)(nrgHeatF_ + 0.5));
+        has_update(nrgWw_, (uint32_t)(nrgWwF_ + 0.5));
         // check for store values
         time_t now = time(nullptr);
         tm *   tm_ = localtime(&now);
