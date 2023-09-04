@@ -488,7 +488,7 @@ void EMSdevice::add_device_value(uint8_t               tag,              // to b
                                  uint8_t               uom,              // unit of measure from DeviceValueUOM
                                  const cmd_function_p  f,                // command function pointer
                                  int16_t               min,              // min allowed value
-                                 uint16_t              max               // max allowed value
+                                 uint32_t              max               // max allowed value
 ) {
     // initialize the device value depending on it's type
     // ignoring DeviceValueType::CMD and DeviceValueType::TIME
@@ -605,7 +605,7 @@ void EMSdevice::register_device_value(uint8_t              tag,
                                       uint8_t              uom,
                                       const cmd_function_p f,
                                       int16_t              min,
-                                      uint16_t             max) {
+                                      uint32_t             max) {
     // create a multi-list from the options
     add_device_value(tag, value_p, type, nullptr, options_single, 0, name, uom, f, min, max);
 };
@@ -628,7 +628,7 @@ void EMSdevice::register_device_value(uint8_t              tag,
                                       uint8_t              uom,
                                       const cmd_function_p f,
                                       int16_t              min,
-                                      uint16_t             max) {
+                                      uint32_t             max) {
     add_device_value(tag, value_p, type, nullptr, nullptr, numeric_operator, name, uom, f, min, max);
 }
 
@@ -645,7 +645,7 @@ void EMSdevice::register_device_value(uint8_t              tag,
                                       uint8_t              uom,
                                       const cmd_function_p f,
                                       int16_t              min,
-                                      uint16_t             max) {
+                                      uint32_t             max) {
     add_device_value(tag, value_p, type, nullptr, nullptr, 0, name, uom, f, min, max);
 };
 
@@ -660,7 +660,7 @@ void EMSdevice::register_device_value(uint8_t               tag,
                                       uint8_t               uom,
                                       const cmd_function_p  f,
                                       int16_t               min,
-                                      uint16_t              max) {
+                                      uint32_t              max) {
     add_device_value(tag, value_p, type, options, nullptr, 0, name, uom, f, min, max);
 }
 
@@ -931,7 +931,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                 }
                 // handle INTs
                 // add min and max values and steps, as integer values
-                else if (dv.type != DeviceValueType::ULONG) {
+                else {
                     if (dv.numeric_operator > 0) {
                         obj["s"] = (float)1 / dv.numeric_operator;
                     } else if (dv.numeric_operator < 0) {
@@ -939,7 +939,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                     }
 
                     int16_t  dv_set_min;
-                    uint16_t dv_set_max;
+                    uint32_t dv_set_max;
                     if (dv.get_min_max(dv_set_min, dv_set_max)) {
                         obj["m"] = dv_set_min;
                         obj["x"] = dv_set_max;
@@ -1030,10 +1030,10 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
         obj["m"] = dv.state >> 4; // send back the mask state. We're only interested in the high nibble
         obj["w"] = dv.has_cmd;    // if writable
 
-        if (dv.has_cmd && dv.type != DeviceValueType::ULONG && (obj["v"].is<float>() || obj["v"].is<int>())) {
+        if (dv.has_cmd && (obj["v"].is<float>() || obj["v"].is<int>())) {
             // set the min and max values if there are any and if entity has a value
             int16_t  dv_set_min;
-            uint16_t dv_set_max;
+            uint32_t dv_set_max;
             if (dv.get_min_max(dv_set_min, dv_set_max)) {
                 obj["mi"] = dv_set_min;
                 obj["ma"] = dv_set_max;
@@ -1059,7 +1059,7 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
     });
 }
 
-void EMSdevice::set_climate_minmax(uint8_t tag, int16_t min, uint16_t max) {
+void EMSdevice::set_climate_minmax(uint8_t tag, int16_t min, uint32_t max) {
     for (auto & dv : devicevalues_) {
         if (dv.tag == tag && (strcmp(dv.short_name, FL_(haclimate[0])) == 0)) {
             if (dv.min != min || dv.max != max) {
@@ -1236,7 +1236,7 @@ void EMSdevice::dump_value_info() {
 
             // min/max range
             int16_t  dv_set_min;
-            uint16_t dv_set_max;
+            uint32_t dv_set_max;
             if (dv.get_min_max(dv_set_min, dv_set_max)) {
                 Serial.print(" (>=");
                 Serial.print(dv_set_min);
@@ -1473,7 +1473,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
             // set the min and max only for commands
             if (dv.has_cmd) {
                 int16_t  dv_set_min;
-                uint16_t dv_set_max;
+                uint32_t dv_set_max;
                 if (dv.get_min_max(dv_set_min, dv_set_max)) {
                     json["min"] = dv_set_min;
                     json["max"] = dv_set_max;

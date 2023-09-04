@@ -737,7 +737,7 @@ bool Mqtt::publish_ha_sensor_config(DeviceValue & dv, const char * model, const 
 
     // calculate the min and max
     int16_t  dv_set_min;
-    uint16_t dv_set_max;
+    uint32_t dv_set_max;
     (void)dv.get_min_max(dv_set_min, dv_set_max);
 
     // determine if we're creating the command topics which we use special HA configs
@@ -788,7 +788,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
                                     const char * const ** options,
                                     uint8_t               options_size,
                                     const int16_t         dv_set_min,
-                                    const int16_t         dv_set_max,
+                                    const uint32_t        dv_set_max,
                                     const int8_t          num_op,
                                     const JsonObject &    dev_json) {
     // ignore if name (fullname) is empty
@@ -1117,7 +1117,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     return queue_ha(topic, doc.as<JsonObject>());
 }
 
-bool Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp, const bool remove, const int16_t min, const uint16_t max) {
+bool Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp, const bool remove, const int16_t min, const uint32_t max) {
     uint8_t hc_num = tag - DeviceValueTAG::TAG_HC1 + 1;
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];

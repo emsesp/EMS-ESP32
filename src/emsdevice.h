@@ -206,7 +206,7 @@ class EMSdevice {
     void   list_device_entries(JsonObject & output) const;
     void   add_handlers_ignored(const uint16_t handler);
 
-    void set_climate_minmax(uint8_t tag, int16_t min, uint16_t max);
+    void set_climate_minmax(uint8_t tag, int16_t min, uint32_t max);
     void setCustomEntity(const std::string & entity_id);
     void getCustomEntities(std::vector<std::string> & entity_ids);
 
@@ -232,7 +232,7 @@ class EMSdevice {
                           uint8_t               uom,
                           const cmd_function_p  f,
                           int16_t               min,
-                          uint16_t              max);
+                          uint32_t              max);
 
     void register_device_value(uint8_t               tag,
                                void *                value_p,
@@ -242,7 +242,7 @@ class EMSdevice {
                                uint8_t               uom,
                                const cmd_function_p  f,
                                int16_t               min,
-                               uint16_t              max);
+                               uint32_t              max);
 
     void
     register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const ** options, const char * const * name, uint8_t uom, const cmd_function_p f);
@@ -265,7 +265,7 @@ class EMSdevice {
                                uint8_t              uom,
                                const cmd_function_p f,
                                int16_t              min,
-                               uint16_t             max);
+                               uint32_t             max);
 
     // single list of options
     void register_device_value(uint8_t              tag,
@@ -285,14 +285,14 @@ class EMSdevice {
                                uint8_t              uom,
                                const cmd_function_p f,
                                int16_t              min,
-                               uint16_t             max);
+                               uint32_t             max);
 
     // no options, optional function f
     void register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const * name, uint8_t uom, const cmd_function_p f = nullptr);
 
     // no options, with min/max
     void
-    register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const * name, uint8_t uom, const cmd_function_p f, int16_t min, uint16_t max);
+    register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const * name, uint8_t uom, const cmd_function_p f, int16_t min, uint32_t max);
 
     void write_command(const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid) const;
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid) const;

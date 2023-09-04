@@ -13,7 +13,7 @@ RestartService::RestartService(AsyncWebServer * server, SecurityManager * securi
 }
 
 void RestartService::restart(AsyncWebServerRequest * request) {
-    emsesp::EMSESP::system_.store_boiler_energy();
+    emsesp::EMSESP::system_.store_nvs_values();
     request->onDisconnect(RestartService::restartNow);
     request->send(200);
 }
@@ -22,7 +22,7 @@ void RestartService::partition(AsyncWebServerRequest * request) {
     const esp_partition_t * factory_partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, NULL);
     if (factory_partition) {
         esp_ota_set_boot_partition(factory_partition);
-        emsesp::EMSESP::system_.store_boiler_energy();
+        emsesp::EMSESP::system_.store_nvs_values();
         request->onDisconnect(RestartService::restartNow);
         request->send(200);
         return;
@@ -39,7 +39,7 @@ void RestartService::partition(AsyncWebServerRequest * request) {
         return;
     }
     esp_ota_set_boot_partition(ota_partition);
-    emsesp::EMSESP::system_.store_boiler_energy();
+    emsesp::EMSESP::system_.store_nvs_values();
     request->onDisconnect(RestartService::restartNow);
     request->send(200);
 }

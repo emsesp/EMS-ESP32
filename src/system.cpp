@@ -231,14 +231,15 @@ bool System::command_watch(const char * value, const int8_t id) {
     return false;
 }
 
-void System::store_boiler_energy() {
+void System::store_nvs_values() {
     Command::call(EMSdevice::DeviceType::BOILER, "nompower", "-1"); // trigger a write
+    EMSESP::analogsensor_.store_counters();
 }
 
 // restart EMS-ESP
 void System::system_restart() {
     LOG_INFO("Restarting EMS-ESP...");
-    store_boiler_energy();
+    store_nvs_values();
     Shell::loop_all();
     delay(1000); // wait a second
 #ifndef EMSESP_STANDALONE

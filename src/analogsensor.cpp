@@ -277,8 +277,8 @@ void AnalogSensor::measure() {
                 } else if (!sensor.poll_) { // falling edge
                     if (sensor.type() == AnalogType::COUNTER) {
                         sensor.set_value(old_value + sensor.factor());
-                        EMSESP::nvs_.putDouble(sensor.name().c_str(), sensor.value());
-                    } else if (sensor.type() == AnalogType::RATE) { // dafault uom: Hz (1/sec) with factor 1
+                        // EMSESP::nvs_.putDouble(sensor.name().c_str(), sensor.value());
+                    } else if (sensor.type() == AnalogType::RATE) { // default uom: Hz (1/sec) with factor 1
                         sensor.set_value(sensor.factor() * 1000 / (sensor.polltime_ - sensor.last_polltime_));
                     } else if (sensor.type() == AnalogType::TIMER) { // default seconds with factor 1
                         sensor.set_value(sensor.factor() * (sensor.polltime_ - sensor.last_polltime_) / 1000);
@@ -291,6 +291,25 @@ void AnalogSensor::measure() {
                 sensorreads_++;
                 changed_ = true;
                 publish_sensor(sensor);
+            }
+        }
+    }
+    // store counter-values only every hour to reduce flash wear
+    static uint8_t lastSaveHour = 0;
+    time_t         now          = time(nullptr);
+    tm *           tm_          = localtime(&now);
+    if (tm_->tm_hour != lastSaveHour) {
+        lastSaveHour = tm_->tm_hour;
+        store_counters();
+    }
+}
+
+// store counters to NVS, called every hour, on restart and update
+void AnalogSensor::store_counters() {
+    for (auto & sensor : sensors_) {
+        if (sensor.type() == AnalogType::COUNTER) {
+            if (sensor.value() != EMSESP::nvs_.getDouble(sensor.name().c_str())) {
+                EMSESP::nvs_.putDouble(sensor.name().c_str(), sensor.value());
             }
         }
     }

@@ -850,18 +850,30 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     EMSESP::send_read_request(0x1C, device_id); // read maintenance status on start (only published on change)
     EMSESP::send_read_request(0xC2, device_id); // read last errorcode on start (only published on errors)
 
-    register_telegram_type(0x04, "UBAFactory", true, MAKE_PF_CB(process_UBAFactory));
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nomPower_, DeviceValueType::UINT, FL_(nomPower), DeviceValueUOM::KW, MAKE_CF_CB(set_nomPower));
 
     if (model() != EMS_DEVICE_FLAG_HEATPUMP) {
+        register_telegram_type(0x04, "UBAFactory", true, MAKE_PF_CB(process_UBAFactory));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nomPower_, DeviceValueType::UINT, FL_(nomPower), DeviceValueUOM::KW, MAKE_CF_CB(set_nomPower));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgHeat_, DeviceValueType::ULONG, FL_(nrgHeat), DeviceValueUOM::KWH, MAKE_CF_CB(set_nrgHeat));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgWw_, DeviceValueType::ULONG, FL_(nrgWw), DeviceValueUOM::KWH, MAKE_CF_CB(set_nrgWw));
 
         nrgHeatF_ = EMSESP::nvs_.getDouble(FL_(nrgHeat)[0], 0);
         nrgWwF_   = EMSESP::nvs_.getDouble(FL_(nrgWw)[0], 0);
+        nomPower_ = EMSESP::nvs_.getUChar(FL_(nomPower)[0], 0);
+        if (nrgHeatF_ < 0 || nrgHeatF_ >= EMS_VALUE_ULONG_NOTSET) {
+            nrgHeatF_ = 0;
+        }
+        if (nrgWwF_ < 0 || nrgWwF_ >= EMS_VALUE_ULONG_NOTSET) {
+            nrgWwF_ = 0;
+        }
+        if (nomPower_ == EMS_VALUE_UINT_NOTSET) {
+            nomPower_ = 0;
+        }
+        store_energy();
         // update/publish the values
         has_update(nrgHeat_, (uint32_t)nrgHeatF_);
         has_update(nrgWw_, (uint32_t)nrgWwF_);
+        has_update(&nomPower_);
     }
 }
 
@@ -927,13 +939,7 @@ void Boiler::check_active() {
         static uint8_t  heatBurnPow      = 0;
         static uint8_t  wwBurnPow        = 0;
         static uint8_t  lastSaveHour     = 0;
-        if (nrgHeat_ > (uint32_t)nrgHeatF_) {
-            nrgHeatF_ = nrgHeat_;
-        }
-        if (nrgWw_ > (uint32_t)nrgWwF_) {
-            nrgWwF_ = nrgWw_;
-        }
-        // 0.01 Wh = 0.01 Ws / 3600  = (% * kW * ms) / 3600
+        // resolution needed: 0.01 Wh = 0.01 Ws / 3600  = (% * kW * ms) / 3600
         nrgHeatF_ += (double_t)(((uint32_t)heatBurnPow * nomPower_ * (uuid::get_uptime() - powLastReadTime_)) / 3600) / 100000UL;
         nrgWwF_ += (double_t)(((uint32_t)wwBurnPow * nomPower_ * (uuid::get_uptime() - powLastReadTime_)) / 3600) / 100000UL;
         has_update(nrgHeat_, (uint32_t)(nrgHeatF_));
@@ -962,19 +968,10 @@ void Boiler::process_UBAFactory(std::shared_ptr<const Telegram> telegram) {
     if (!telegram->read_value(nomPower, 4)) {
         return;
     }
-    if (nomPower == 0 || nomPower == 255) {
-        nomPower = EMSESP::nvs_.getUChar(FL_(nomPower)[0], 0);
-    }
-    if (nomPower != nomPower_ || nomPower == 255) {
-        if (nomPower == 255) {
-            nomPower_ = nomPower = 0;
-            store_energy();
-            has_update(&nomPower_);
-        }
+    if (nomPower > 0) {
         has_update(nomPower_, nomPower);
-        toggle_fetch(telegram->type_id, false); // only read once
-        // LOG_DEBUG("nominal power set to %d", nomPower_);
     }
+    toggle_fetch(telegram->type_id, false); // only read once
 }
 
 // 0x18
@@ -2723,35 +2720,43 @@ bool Boiler::set_wwAltOpPrio(const char * value, const int8_t id) {
     return false;
 }
 
+// energy counters. Setting an invalid value does not update, but trigger a store.
 bool Boiler::set_nrgHeat(const char * value, const int8_t id) {
     int v;
-    if (Helpers::value2number(value, v)) {
-        nrgHeatF_ = nrgHeat_ = v;
-        store_energy();
-        return true;
+    if (!Helpers::value2number(value, v)) {
+        return false;
     }
-    return false;
+    if (v >= 0 && v < EMS_VALUE_ULONG_NOTSET) {
+        nrgHeatF_ = v;
+        has_update(nrgHeat_, (uint32_t)nrgHeatF_);
+    }
+    store_energy();
+    return true;
 }
 
 bool Boiler::set_nrgWw(const char * value, const int8_t id) {
     int v;
-    if (Helpers::value2number(value, v)) {
-        nrgWwF_ = nrgWw_ = v;
-        store_energy();
-        return true;
+    if (!Helpers::value2number(value, v)) {
+        return false;
     }
-    return false;
+    if (v >= 0 && v < EMS_VALUE_ULONG_NOTSET) {
+        nrgWwF_ = v;
+        has_update(nrgWw_, (uint32_t)nrgWwF_);
+    }
+    store_energy();
+    return true;
 }
 
 bool Boiler::set_nomPower(const char * value, const int8_t id) {
     int v;
-    if (Helpers::value2number(value, v)) {
-        nomPower_ = v > 0 ? v : nomPower_;
-        store_energy();
-        has_update(&nomPower_);
-        return true;
+    if (!Helpers::value2number(value, v)) {
+        return false;
     }
-    return false;
+    if (v > 0 && v < EMS_VALUE_UINT_NOTSET) {
+        has_update(nomPower_, (uint8_t)v);
+    }
+    store_energy();
+    return true;
 }
 
 } // namespace emsesp

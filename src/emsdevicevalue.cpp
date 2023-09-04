@@ -36,7 +36,7 @@ DeviceValue::DeviceValue(uint8_t               device_type,
                          uint8_t               uom,
                          bool                  has_cmd,
                          int16_t               min,
-                         uint16_t              max,
+                         uint32_t              max,
                          uint8_t               state)
     : device_type(device_type)
     , tag(tag)
@@ -261,7 +261,7 @@ bool DeviceValue::has_tag() const {
 // converts to signed int, which means rounding to an whole integer
 // returns false if there is no min/max needed
 // Types BOOL, ENUM, STRING and CMD are not used
-bool DeviceValue::get_min_max(int16_t & dv_set_min, uint16_t & dv_set_max) {
+bool DeviceValue::get_min_max(int16_t & dv_set_min, uint32_t & dv_set_max) {
     uint8_t fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (uom == DeviceValueUOM::DEGREES) ? 2 : (uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 
     // if we have individual limits set already, just do the conversion
@@ -340,7 +340,7 @@ bool DeviceValue::get_custom_min(int16_t & val) {
 }
 
 // extract custom max from custom_fullname
-bool DeviceValue::get_custom_max(uint16_t & val) {
+bool DeviceValue::get_custom_max(uint32_t & val) {
     auto    max_pos    = custom_fullname.find('<');
     bool    has_max    = (max_pos != std::string::npos);
     uint8_t fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (uom == DeviceValueUOM::DEGREES) ? 2 : (uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
