@@ -854,16 +854,16 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     if (model() != EMS_DEVICE_FLAG_HEATPUMP) {
         register_telegram_type(0x04, "UBAFactory", true, MAKE_PF_CB(process_UBAFactory));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nomPower_, DeviceValueType::UINT, FL_(nomPower), DeviceValueUOM::KW, MAKE_CF_CB(set_nomPower));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgHeat_, DeviceValueType::ULONG, FL_(nrgHeat), DeviceValueUOM::KWH, MAKE_CF_CB(set_nrgHeat));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgWw_, DeviceValueType::ULONG, FL_(nrgWw), DeviceValueUOM::KWH, MAKE_CF_CB(set_nrgWw));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgHeat_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgHeat), DeviceValueUOM::KWH, MAKE_CF_CB(set_nrgHeat), 0, 10000000UL);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgWw_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgWw), DeviceValueUOM::KWH, MAKE_CF_CB(set_nrgWw), 0, 10000000UL);
 
         nrgHeatF_ = EMSESP::nvs_.getDouble(FL_(nrgHeat)[0], 0);
         nrgWwF_   = EMSESP::nvs_.getDouble(FL_(nrgWw)[0], 0);
         nomPower_ = EMSESP::nvs_.getUChar(FL_(nomPower)[0], 0);
-        if (nrgHeatF_ < 0 || nrgHeatF_ >= EMS_VALUE_ULONG_NOTSET) {
+        if (nrgHeatF_ < 0 || nrgHeatF_ >= EMS_VALUE_ULLONG_NOTSET) {
             nrgHeatF_ = 0;
         }
-        if (nrgWwF_ < 0 || nrgWwF_ >= EMS_VALUE_ULONG_NOTSET) {
+        if (nrgWwF_ < 0 || nrgWwF_ >= EMS_VALUE_ULLONG_NOTSET) {
             nrgWwF_ = 0;
         }
         if (nomPower_ == EMS_VALUE_UINT_NOTSET) {
@@ -939,9 +939,9 @@ void Boiler::check_active() {
         static uint8_t  heatBurnPow      = 0;
         static uint8_t  wwBurnPow        = 0;
         static uint8_t  lastSaveHour     = 0;
-        // resolution needed: 0.01 Wh = 0.01 Ws / 3600  = (% * kW * ms) / 3600
-        nrgHeatF_ += (double_t)(((uint32_t)heatBurnPow * nomPower_ * (uuid::get_uptime() - powLastReadTime_)) / 3600) / 100000UL;
-        nrgWwF_ += (double_t)(((uint32_t)wwBurnPow * nomPower_ * (uuid::get_uptime() - powLastReadTime_)) / 3600) / 100000UL;
+        // store in units of 0.01 kWh, resolution needed: 0.01 Wh = 0.01 Ws / 3600  = (% * kW * ms) / 3600
+        nrgHeatF_ += ((double)((uint32_t)heatBurnPow * nomPower_ * (uuid::get_uptime() - powLastReadTime_)) / 3600) / 1000UL;
+        nrgWwF_ += ((double)((uint32_t)wwBurnPow * nomPower_ * (uuid::get_uptime() - powLastReadTime_)) / 3600) / 1000UL;
         has_update(nrgHeat_, (uint32_t)(nrgHeatF_ + 0.5));
         has_update(nrgWw_, (uint32_t)(nrgWwF_ + 0.5));
         // check for store values
@@ -1014,7 +1014,9 @@ void Boiler::process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram) {
 
     has_update(telegram, serviceCodeNumber_, 20);
 
-    check_active(); // do a quick check to see if the hot water or heating is active
+    if (telegram->offset <= 4 && telegram->offset + telegram->message_length > 5) {
+        check_active(); // do a quick check to see if the hot water or heating is active
+    }
 }
 
 /*
@@ -1153,7 +1155,9 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
         boilerState_ |= state & 0x04 ? 0x02 : 0;
     }
 
-    check_active(); // do a quick check to see if the hot water or heating is active
+    if (telegram->offset <= 10 && telegram->offset + telegram->message_length > 11) {
+        check_active(); // do a quick check to see if the hot water or heating is active
+    }
 }
 
 /*
@@ -2722,26 +2726,26 @@ bool Boiler::set_wwAltOpPrio(const char * value, const int8_t id) {
 
 // energy counters. Setting an invalid value does not update, but trigger a store.
 bool Boiler::set_nrgHeat(const char * value, const int8_t id) {
-    int v;
-    if (!Helpers::value2number(value, v)) {
+    float v;
+    if (!Helpers::value2float(value, v)) {
         return false;
     }
-    if (v >= 0 && v < EMS_VALUE_ULONG_NOTSET) {
-        nrgHeatF_ = v;
-        has_update(nrgHeat_, (uint32_t)nrgHeatF_);
+    if (v >= 0) {
+        nrgHeatF_ = v * 100;
+        has_update(nrgHeat_, (uint32_t)(nrgHeatF_ + 0.5));
     }
     store_energy();
     return true;
 }
 
 bool Boiler::set_nrgWw(const char * value, const int8_t id) {
-    int v;
-    if (!Helpers::value2number(value, v)) {
+    float v;
+    if (!Helpers::value2float(value, v)) {
         return false;
     }
-    if (v >= 0 && v < EMS_VALUE_ULONG_NOTSET) {
-        nrgWwF_ = v;
-        has_update(nrgWw_, (uint32_t)nrgWwF_);
+    if (v >= 0) {
+        nrgWwF_ = v * 100;
+        has_update(nrgWw_, (uint32_t)(nrgWwF_ + 0.5));
     }
     store_energy();
     return true;

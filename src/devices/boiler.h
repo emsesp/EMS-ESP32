@@ -260,8 +260,8 @@ class Boiler : public EMSdevice {
     uint8_t  setReturnTemp_;
 
     // special
-    double_t nrgHeatF_;
-    double_t nrgWwF_;
+    double   nrgHeatF_;
+    double   nrgWwF_;
     uint32_t nrgHeat_;
     uint32_t nrgWw_;
     uint8_t  nomPower_;
