@@ -968,7 +968,8 @@ void Boiler::process_UBAFactory(std::shared_ptr<const Telegram> telegram) {
     if (!telegram->read_value(nomPower, 4)) {
         return;
     }
-    if (nomPower > 0) {
+    // Update nominal Power only if not already set in nvs and we have a valid value
+    if (nomPower > 0 && nomPower_ == 0) {
         has_update(nomPower_, nomPower);
     }
     toggle_fetch(telegram->type_id, false); // only read once
