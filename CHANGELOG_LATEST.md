@@ -18,3 +18,4 @@
 
 - mqtt free mem check 60k
 - small cosmetic changes to Searching in Customization web page
+- update to espressif32@6.4.0
