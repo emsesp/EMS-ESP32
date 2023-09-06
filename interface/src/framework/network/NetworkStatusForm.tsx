@@ -38,6 +38,15 @@ const networkStatusHighlight = ({ status }: NetworkStatus, theme: Theme) => {
   }
 };
 
+const networkQualityHighlight = ({ rssi }: NetworkStatus, theme: Theme) => {
+  if (rssi <= -85) {
+    return theme.palette.error.main;
+  } else if (rssi <= -75) {
+    return theme.palette.warning.main;
+  }
+  return theme.palette.success.main;
+};
+
 export const isWiFi = ({ status }: NetworkStatus) => status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED;
 export const isEthernet = ({ status }: NetworkStatus) => status === NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED;
 
@@ -110,7 +119,7 @@ const NetworkStatusForm: FC = () => {
             <>
               <ListItem>
                 <ListItemAvatar>
-                  <Avatar>
+                  <Avatar sx={{ bgcolor: networkQualityHighlight(data, theme) }}>
                     <SettingsInputAntennaIcon />
                   </Avatar>
                 </ListItemAvatar>
