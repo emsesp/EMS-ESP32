@@ -1783,7 +1783,7 @@ __metadata:
     react: latest
     react-dom: latest
     react-dropzone: ^14.2.3
-    react-icons: ^4.10.1
+    react-icons: ^4.11.0
     react-router-dom: ^6.15.0
     react-toastify: ^9.1.3
     rollup-plugin-visualizer: ^5.9.2
@@ -5144,12 +5144,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-icons@npm:^4.10.1":
-  version: 4.10.1
-  resolution: "react-icons@npm:4.10.1"
+"react-icons@npm:^4.11.0":
+  version: 4.11.0
+  resolution: "react-icons@npm:4.11.0"
   peerDependencies:
     react: "*"
-  checksum: aa4ecd390751bf61fc7967c2256eace1351c4af9a941ea4459464ac5cae012fe99970430ab659ad38a633ca55b0392d9ea5624ab3953c0bc86e1809199d6e2e2
+  checksum: 95e837e11ece80cc39ef1beac026d10f96cd7e567afc718e717517beb35b82dd59307a758c10b3a449dc15d6682d6551ecc630b2821d9365819af921fa279a73
   languageName: node
   linkType: hard
 

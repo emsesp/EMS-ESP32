@@ -18,6 +18,7 @@ default_envs = esp32_4M
 ; default_envs = esp32_16M
 ; default_envs = lolin_s3
 ; default_envs = standalone
+; default_envs =  debug
 
 [env:esp32_4M]
 ; if using OTA enter your details below
@@ -33,6 +34,8 @@ upload_port = /dev/ttyUSB*
 ; override arduino espressif core
 platform = espressif32 ; take latest
 ; platform = espressif32@5.3.0
+; platform = espressif32@6.3.2
+; platform = espressif32@6.4.0
 
 extra_scripts =
   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
@@ -52,13 +55,21 @@ extra_scripts =
 ; options for debugging are: EMSESP_DEBUG EMSESP_UART_DEBUG EMSESP_DEBUG_SENSOR
 [env:debug]
 board = esp32dev
+framework = arduino
 platform = espressif32
 board_build.partitions = esp32_partition_debug.csv
+; board_build.partitions = esp32_partition_4M.csv
+board_upload.flash_size = 4MB
+board_build.filesystem = littlefs
 upload_protocol = esptool
 build_type = debug
 monitor_raw = no
 monitor_filters = esp32_exception_decoder
 debug_tool = esp-prog
 debug_init_break = tbreak setup
-build_flags = ${factory_settings.build_flags} -DONEWIRE_CRC16=0 -DNO_GLOBAL_ARDUINOOTA -DARDUINOJSON_ENABLE_STD_STRING=1 -DESP32=1 -DARDUINO_ARCH_ESP32=1
-extra_scripts = pre:scripts/build_interface.py
+build_flags = ${factory_settings.build_flags} -DEMSESP_EN_ONLY -DCORE_DEBUG_LEVEL=5 -DONEWIRE_CRC16=0 -DNO_GLOBAL_ARDUINOOTA -DARDUINOJSON_ENABLE_STD_STRING=1 -DESP32=1 -DARDUINO_ARCH_ESP32=1
+upload_port = /dev/ttyUSB0
+extra_scripts =
+  ; pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+  scripts/rename_fw.py
+  ; post:scripts/app-tls-size.py

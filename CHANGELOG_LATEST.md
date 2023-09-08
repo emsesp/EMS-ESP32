@@ -1,26 +1,22 @@
 # Changelog
 
-# [3.6.1]
+## [3.6.1]
 
 ## **IMPORTANT! BREAKING CHANGES**
 
-- shower_data MQTT topic shows duration is seconds (was previously an English string)
+- `shower_data` MQTT topic shows duration is seconds (was previously a full english sentence)
 
 ## Added
 
-- rssi in Network Status Page
-- boiler nominal power from telegram 0x04
-- boiler energy for heating and dhw stored in nvs
-- analogsensor counter value stored in nvs
+- show WiFi rssi in Network Status Page
 
 ## Fixed
 
-- issue in espMqttClient on low mem
-- mqtt subscription to scheduler and custom
-- HA configuration for scheduler and custom
+- Issue in espMqttClient causing a memory leak when MQTT broker is disconnected due to network unavailability [#1264](https://github.com/emsesp/EMS-ESP32/issues/1264)
+- Using MQTT enum values correctly formatted in MQTT Discovery [#1280](https://github.com/emsesp/EMS-ESP32/issues/1280)
 
 ## Changed
 
-- mqtt free mem check 60k
+- mqtt free mem check set to 60 kb
 - small cosmetic changes to Searching in Customization web page
-- update to espressif32@6.4.0
+- updated to espressif32@6.4.0
