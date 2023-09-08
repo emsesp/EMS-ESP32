@@ -1,10 +1,11 @@
 import LockIcon from '@mui/icons-material/Lock';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import WifiIcon from '@mui/icons-material/Wifi';
-import { Avatar, Badge, List, ListItem, ListItemAvatar, ListItemIcon, ListItemText } from '@mui/material';
+import { Avatar, Badge, List, ListItem, ListItemAvatar, ListItemIcon, ListItemText, useTheme } from '@mui/material';
 import { useContext } from 'react';
 
 import { WiFiConnectionContext } from './WiFiConnectionContext';
+import type { Theme } from '@mui/material';
 import type { FC } from 'react';
 import type { WiFiNetwork, WiFiNetworkList } from 'types';
 import { MessageBox } from 'components';
@@ -42,8 +43,18 @@ export const networkSecurityMode = ({ encryption_type }: WiFiNetwork) => {
   }
 };
 
+const networkQualityHighlight = ({ rssi }: WiFiNetwork, theme: Theme) => {
+  if (rssi <= -85) {
+    return theme.palette.error.main;
+  } else if (rssi <= -75) {
+    return theme.palette.warning.main;
+  }
+  return theme.palette.success.main;
+};
+
 const WiFiNetworkSelector: FC<WiFiNetworkSelectorProps> = ({ networkList }) => {
   const { LL } = useI18nContext();
+  const theme = useTheme();
 
   const wifiConnectionContext = useContext(WiFiConnectionContext);
 
@@ -57,8 +68,8 @@ const WiFiNetworkSelector: FC<WiFiNetworkSelectorProps> = ({ networkList }) => {
         secondary={'Security: ' + networkSecurityMode(network) + ', Ch: ' + network.channel}
       />
       <ListItemIcon>
-        <Badge badgeContent={network.rssi + 'db'}>
-          <WifiIcon />
+        <Badge badgeContent={network.rssi + 'dBm'}>
+          <WifiIcon sx={{ color: networkQualityHighlight(network, theme) }} />
         </Badge>
       </ListItemIcon>
     </ListItem>

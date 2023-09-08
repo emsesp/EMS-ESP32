@@ -8,7 +8,7 @@
 
 ## Added
 
-- show WiFi rssi in Network Status Page
+- show WiFi rssi in Network Status Page, show quality as color
 
 ## Fixed
 
