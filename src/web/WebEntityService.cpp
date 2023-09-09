@@ -61,6 +61,7 @@ StateUpdateResult WebEntity::update(JsonObject & root, WebEntity & webEntity) {
         Command::erase_command(EMSdevice::DeviceType::CUSTOM, entityItem.name.c_str());
     }
     webEntity.entityItems.clear();
+    EMSESP::webEntityService.ha_reset();
 
     if (root["entities"].is<JsonArray>()) {
         for (const JsonObject ei : root["entities"].as<JsonArray>()) {
@@ -319,7 +320,8 @@ void WebEntityService::publish(const bool force) {
     }
 
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE);
-    JsonObject          output = doc.to<JsonObject>();
+    JsonObject          output     = doc.to<JsonObject>();
+    bool                ha_created = ha_registered_;
     for (const EntityItem & entityItem : *entityItems) {
         render_value(output, entityItem);
         // create HA config
@@ -383,11 +385,10 @@ void WebEntityService::publish(const bool force) {
 
             // add "availability" section
             Mqtt::add_avty_to_doc(stat_t, config.as<JsonObject>(), val_cond);
-            if (Mqtt::queue_ha(topic, config.as<JsonObject>())) {
-                ha_registered_ = true;
-            }
+            ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
         }
     }
+    ha_registered_ = ha_created;
     if (output.size() > 0) {
         Mqtt::queue_publish("custom_data", output);
     }

@@ -58,6 +58,9 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
     bool has_commands();
     bool command_setvalue(const char * value, const std::string name);
     bool get_value_info(JsonObject & output, const char * cmd);
+    void ha_reset() {
+        ha_registered_ = false;
+    }
 
 // make all functions public so we can test in the debug and standalone mode
 #ifndef EMSESP_STANDALONE
@@ -69,6 +72,7 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
     FSPersistence<WebScheduler> _fsPersistence;
 
     std::list<ScheduleItem> * scheduleItems; // pointer to the list of schedule events
+    bool                      ha_registered_ = false;
 };
 
 } // namespace emsesp
