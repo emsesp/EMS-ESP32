@@ -220,6 +220,12 @@ void WebSchedulerService::publish_single(const char * name, const bool state) {
 
 // publish to Mqtt
 void WebSchedulerService::publish(const bool force) {
+    if (force) {
+        ha_registered_ = false;
+    }
+    if (!Mqtt::enabled()) {
+        return;
+    }
     EMSESP::webSchedulerService.read([&](WebScheduler & webScheduler) { scheduleItems = &webScheduler.scheduleItems; });
     if (scheduleItems->size() == 0) {
         return;

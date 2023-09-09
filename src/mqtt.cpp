@@ -922,9 +922,9 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             if (EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX) {
                 // use index numbers
                 for (uint8_t i = 0; i < options_size; i++) {
-                    option_list.add(i);
+                    option_list.add(Helpers::itoa(i)); // as a string
                 }
-                snprintf(sample_val, sizeof(sample_val), "0");
+                snprintf(sample_val, sizeof(sample_val), "'0'");
             } else {
                 // use strings
                 for (uint8_t i = 0; i < options_size; i++) {
