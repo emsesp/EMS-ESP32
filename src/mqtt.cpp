@@ -1271,19 +1271,19 @@ void Mqtt::add_avty_to_doc(const char * state_t, const JsonObject & doc, const c
     StaticJsonDocument<512> avty_json;
 
     snprintf(tpl, sizeof(tpl), "%s/status", mqtt_base_.c_str());
-    avty_json["topic"] = tpl;
+    avty_json["t"] = tpl;
     snprintf(tpl, sizeof(tpl), tpl_draft, "value == 'online'");
     avty_json["val_tpl"] = tpl;
     avty.add(avty_json);
     avty_json.clear();
-    avty_json["topic"] = state_t;
+    avty_json["t"] = state_t;
     snprintf(tpl, sizeof(tpl), tpl_draft, cond1 == nullptr ? "value is defined" : cond1);
     avty_json["val_tpl"] = tpl;
     avty.add(avty_json);
 
     if (cond2 != nullptr) {
         avty_json.clear();
-        avty_json["topic"] = state_t;
+        avty_json["t"] = state_t;
         snprintf(tpl, sizeof(tpl), tpl_draft, cond2);
         avty_json["val_tpl"] = tpl;
         avty.add(avty_json);
@@ -1291,7 +1291,7 @@ void Mqtt::add_avty_to_doc(const char * state_t, const JsonObject & doc, const c
 
     if (negcond != nullptr) {
         avty_json.clear();
-        avty_json["topic"] = state_t;
+        avty_json["t"] = state_t;
         snprintf(tpl, sizeof(tpl), "{{'offline' if %s else 'online'}}", negcond);
         avty_json["val_tpl"] = tpl;
         avty.add(avty_json);
