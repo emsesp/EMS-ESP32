@@ -6,6 +6,10 @@ NetworkSettingsService::NetworkSettingsService(AsyncWebServer * server, FS * fs,
     : _httpEndpoint(NetworkSettings::read, NetworkSettings::update, this, server, NETWORK_SETTINGS_SERVICE_PATH, securityManager)
     , _fsPersistence(NetworkSettings::read, NetworkSettings::update, this, fs, NETWORK_SETTINGS_FILE)
     , _lastConnectionAttempt(0) {
+    addUpdateHandler([&](const String & originId) { reconfigureWiFiConnection(); }, false);
+}
+
+void NetworkSettingsService::begin() {
     // We want the device to come up in opmode=0 (WIFI_OFF), when erasing the flash this is not the default.
     // If needed, we save opmode=0 before disabling persistence so the device boots with WiFi disabled in the future.
     if (WiFi.getMode() != WIFI_OFF) {
@@ -21,10 +25,6 @@ NetworkSettingsService::NetworkSettingsService(AsyncWebServer * server, FS * fs,
 
     WiFi.onEvent(std::bind(&NetworkSettingsService::WiFiEvent, this, _1));
 
-    addUpdateHandler([&](const String & originId) { reconfigureWiFiConnection(); }, false);
-}
-
-void NetworkSettingsService::begin() {
     _fsPersistence.readFromFS();
     reconfigureWiFiConnection();
 }

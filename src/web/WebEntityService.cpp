@@ -31,6 +31,7 @@ WebEntityService::WebEntityService(AsyncWebServer * server, FS * fs, SecurityMan
 void WebEntityService::begin() {
     _fsPersistence.readFromFS();
     EMSESP::logger().info("Starting Custom entity service");
+    Mqtt::subscribe(EMSdevice::DeviceType::CUSTOM, "custom/#", nullptr); // use empty function callback
 }
 
 // this creates the entity file, saving it to the FS
@@ -60,6 +61,7 @@ StateUpdateResult WebEntity::update(JsonObject & root, WebEntity & webEntity) {
         Command::erase_command(EMSdevice::DeviceType::CUSTOM, entityItem.name.c_str());
     }
     webEntity.entityItems.clear();
+    EMSESP::webEntityService.ha_reset();
 
     if (root["entities"].is<JsonArray>()) {
         for (const JsonObject ei : root["entities"].as<JsonArray>()) {
@@ -219,8 +221,8 @@ bool WebEntityService::get_value_info(JsonObject & output, const char * cmd) {
         return false;
     }
     if (Helpers::toLower(cmd) == "commands") {
-        output["info"]     = "lists all values";
-        output["commands"] = "lists all commands";
+        output["info"]     = "list all values";
+        output["commands"] = "list all commands";
         for (const auto & entity : *entityItems) {
             output[entity.name] = "custom entitiy";
         }
@@ -318,7 +320,8 @@ void WebEntityService::publish(const bool force) {
     }
 
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE);
-    JsonObject          output = doc.to<JsonObject>();
+    JsonObject          output     = doc.to<JsonObject>();
+    bool                ha_created = ha_registered_;
     for (const EntityItem & entityItem : *entityItems) {
         render_value(output, entityItem);
         // create HA config
@@ -382,11 +385,10 @@ void WebEntityService::publish(const bool force) {
 
             // add "availability" section
             Mqtt::add_avty_to_doc(stat_t, config.as<JsonObject>(), val_cond);
-            if (Mqtt::queue_ha(topic, config.as<JsonObject>())) {
-                ha_registered_ = true;
-            }
+            ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
         }
     }
+    ha_registered_ = ha_created;
     if (output.size() > 0) {
         Mqtt::queue_publish("custom_data", output);
     }

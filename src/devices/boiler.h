@@ -87,9 +87,9 @@ class Boiler : public EMSdevice {
     uint32_t wwWorkM_;              // DHW minutes
     int8_t   wwHystOn_;
     int8_t   wwHystOff_;
-    uint8_t  wwTapActivated_;    // maintenance-mode to switch DHW off
-    uint16_t wwMixerTemp_;       // mixing temperature
-    uint16_t wwCylMiddleTemp_;   // Cyl middle temperature (TS3)
+    uint8_t  wwTapActivated_;  // maintenance-mode to switch DHW off
+    uint16_t wwMixerTemp_;     // mixing temperature
+    uint16_t wwCylMiddleTemp_; // Cyl middle temperature (TS3)
     uint16_t wwSolarTemp_;
     uint8_t  wwAlternatingOper_; // alternating operation on/off
     uint8_t  wwAltOpPrioHeat_;   // alternating operation, prioritize heat time

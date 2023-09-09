@@ -26,11 +26,12 @@
 
 namespace emsesp {
 
+// #define EMSESP_DEBUG_DEFAULT "general"
+
 // #define EMSESP_DEBUG_DEFAULT "thermostat"
 // #define EMSESP_DEBUG_DEFAULT "solar"
 // #define EMSESP_DEBUG_DEFAULT "web"
 // #define EMSESP_DEBUG_DEFAULT "mqtt"
-#define EMSESP_DEBUG_DEFAULT "general"
 // #define EMSESP_DEBUG_DEFAULT "boiler"
 // #define EMSESP_DEBUG_DEFAULT "mqtt2"
 // #define EMSESP_DEBUG_DEFAULT "mqtt_nested"
@@ -53,6 +54,7 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "custom"
 // #define EMSESP_DEBUG_DEFAULT "entity_dump"
 // #define EMSESP_DEBUG_DEFAULT "memory"
+#define EMSESP_DEBUG_DEFAULT "coldshot"
 
 class Test {
   public:

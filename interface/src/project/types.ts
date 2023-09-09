@@ -379,3 +379,16 @@ export const enum DeviceValueType {
   STRING,
   CMD
 }
+
+export const DeviceValueTypeNames = [
+  'BOOL',
+  'INT',
+  'UINT',
+  'SHORT',
+  'USHORT',
+  'ULONG',
+  'TIME',
+  'ENUM',
+  'STRING',
+  'CMD'
+];

@@ -1,17 +1,21 @@
 # testing EMS-ESP API
-# use with https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+# use with "REST Client" extension in Visual Studio Code
+# https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+
+@host = http://ems-esp.local
+@host_dev = http://ems-esp2.local
 
 @token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiYWRtaW4iOnRydWV9.2bHpWya2C7Q12WjNUBD6_7N3RCD7CMl-EGhyQVzFdDg
 
-GET http://ems-esp.local/api/system/info
+GET {{host}}/api/system/info
 
 ###
 
-GET http://ems-esp.local/api/thermostat/seltemp
+GET {{host}}/api/thermostat/seltemp
 
 ###
 
-POST http://ems-esp.local/api/thermostat/seltemp
+POST {{host}}/api/thermostat/seltemp
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
@@ -21,7 +25,7 @@ Authorization: Bearer {{token}}
 
 ###
 
-POST http://ems-esp.local/api/thermostat
+POST {{host}}/api/thermostat
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
@@ -32,12 +36,61 @@ Authorization: Bearer {{token}}
 
 ###
 
-POST http://10.10.10.134/api
+POST {{host}}/api
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiYWRtaW4iOnRydWV9.2bHpWya2C7Q12WjNUBD6_7N3RCD7CMl-EGhyQVzFdDg
+Authorization: Bearer {{token}}
 
 {
     "device" : "boiler",
     "entity" : "wwtapactivated",
     "value" : "on"
 }
+
+###
+
+GET {{host}}/api/system/restart
+Authorization: Bearer {{token}}
+
+###
+
+GET {{host}}/api/boiler/coldshot
+Authorization: Bearer {{token}}
+
+###
+
+GET {{host}}/api/temperaturesensor/info
+
+###
+
+#
+# Test on dev
+#
+
+GET {{host_dev}}/api/system/info
+
+# Run a test. EMS-ESP must be compiled with -DEMSESP_TEST
+# Use this to load up a dummy thermostat and boiler with data
+
+###
+
+GET {{host_dev}}/api?device=system&cmd=test&data=general
+
+###
+
+GET {{host_dev}}/api/boiler/info
+
+###
+GET {{host_dev}}/api/boiler/values
+
+###
+
+GET {{host_dev}}/api/analogsensor/info
+
+###
+
+GET {{host_dev}}/api/boiler/coldshot
+Authorization: Bearer {{token}}
+
+###
+GET {{host_dev}}/api/system/commands
+

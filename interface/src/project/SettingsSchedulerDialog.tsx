@@ -1,6 +1,5 @@
 import AddIcon from '@mui/icons-material/Add';
 import CancelIcon from '@mui/icons-material/Cancel';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DoneIcon from '@mui/icons-material/Done';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
 
@@ -184,11 +183,6 @@ const SettingsSchedulerDialog = ({
             control={<Checkbox checked={editItem.active} onChange={updateFormValue} name="active" />}
             label={LL.ACTIVE()}
           />
-          {editItem.active && (
-            <Grid item sx={{ mt: 1 }}>
-              <CheckCircleIcon sx={{ color: '#79D200', fontSize: 16, verticalAlign: 'middle' }} />
-            </Grid>
-          )}
         </Grid>
         <Grid container>
           <TextField

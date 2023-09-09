@@ -31,6 +31,7 @@ WebSchedulerService::WebSchedulerService(AsyncWebServer * server, FS * fs, Secur
 void WebSchedulerService::begin() {
     _fsPersistence.readFromFS();
     EMSESP::logger().info("Starting Scheduler service");
+    Mqtt::subscribe(EMSdevice::DeviceType::SCHEDULER, "scheduler/#", nullptr); // use empty function callback
 }
 
 // this creates the scheduler file, saving it to the FS
@@ -70,6 +71,7 @@ StateUpdateResult WebScheduler::update(JsonObject & root, WebScheduler & webSche
         Command::erase_command(EMSdevice::DeviceType::SCHEDULER, scheduleItem.name.c_str());
     }
     webScheduler.scheduleItems.clear();
+    EMSESP::webSchedulerService.ha_reset();
 
     if (root["schedule"].is<JsonArray>()) {
         for (const JsonObject schedule : root["schedule"].as<JsonArray>()) {
@@ -85,7 +87,7 @@ StateUpdateResult WebScheduler::update(JsonObject & root, WebScheduler & webSche
 
             // calculated elapsed minutes
             si.elapsed_min = Helpers::string2minutes(si.time);
-            si.retry_cnt   = 0xFF;                    // no startup retries
+            si.retry_cnt   = 0xFF; // no startup retries
 
             webScheduler.scheduleItems.push_back(si); // add to list
             if (!webScheduler.scheduleItems.back().name.empty()) {
@@ -218,6 +220,12 @@ void WebSchedulerService::publish_single(const char * name, const bool state) {
 
 // publish to Mqtt
 void WebSchedulerService::publish(const bool force) {
+    if (force) {
+        ha_registered_ = false;
+    }
+    if (!Mqtt::enabled()) {
+        return;
+    }
     EMSESP::webSchedulerService.read([&](WebScheduler & webScheduler) { scheduleItems = &webScheduler.scheduleItems; });
     if (scheduleItems->size() == 0) {
         return;
@@ -229,6 +237,7 @@ void WebSchedulerService::publish(const bool force) {
     }
 
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE);
+    bool                ha_created = ha_registered_;
     for (const ScheduleItem & scheduleItem : *scheduleItems) {
         if (!scheduleItem.name.empty() && !doc.containsKey(scheduleItem.name)) {
             if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
@@ -241,7 +250,7 @@ void WebSchedulerService::publish(const bool force) {
             }
 
             // create HA config
-            if (Mqtt::ha_enabled() && force) {
+            if (Mqtt::ha_enabled() && !ha_registered_) {
                 StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
                 char                                        stat_t[50];
                 snprintf(stat_t, sizeof(stat_t), "%s/scheduler_data", Mqtt::basename().c_str());
@@ -283,10 +292,11 @@ void WebSchedulerService::publish(const bool force) {
 
                 // add "availability" section
                 Mqtt::add_avty_to_doc(stat_t, config.as<JsonObject>(), val_cond);
-                Mqtt::queue_ha(topic, config.as<JsonObject>());
+                ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
             }
         }
     }
+    ha_registered_ = ha_created;
     if (doc.size() > 0) {
         Mqtt::queue_publish("scheduler_data", doc.as<JsonObject>());
     }

@@ -661,8 +661,8 @@ void Thermostat::process_RC20Set_2(std::shared_ptr<const Telegram> telegram) {
         return;
     }
     has_update(telegram, hc->heatingtype, 0);
-    has_update(telegram, hc->nighttemp, 1);       // is * 2,
-    has_update(telegram, hc->daytemp, 2);         // is * 2,
+    has_update(telegram, hc->nighttemp, 1); // is * 2,
+    has_update(telegram, hc->daytemp, 2);   // is * 2,
     has_update(telegram, hc->mode, 3);
     has_enumupdate(telegram, hc->program, 11, 1); // 1 .. 9 predefined programs
     has_update(telegram, hc->tempautotemp, 13);
@@ -798,8 +798,8 @@ void Thermostat::process_RC35wwSettings(std::shared_ptr<const Telegram> telegram
     has_update(telegram, wwDisinfecting_, 4); // 0-off, 0xFF on
     has_update(telegram, wwDisinfectDay_, 5); // 0-6 Day of week, 7 every day
     has_update(telegram, wwDisinfectHour_, 6);
-    has_update(telegram, wwMaxTemp_, 8);      // Limiter 60 degrees
-    has_update(telegram, wwOneTimeKey_, 9);   // 0-off, 0xFF on
+    has_update(telegram, wwMaxTemp_, 8);    // Limiter 60 degrees
+    has_update(telegram, wwOneTimeKey_, 9); // 0-off, 0xFF on
 }
 
 // Settings WW 0x3A - RC30
@@ -951,7 +951,7 @@ void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) 
         return;
     }
 
-    has_update(telegram, hc->roomTemp, 0);    // is * 10
+    has_update(telegram, hc->roomTemp, 0); // is * 10
     has_bitupdate(telegram, hc->modetype, 10, 1);
     has_bitupdate(telegram, hc->mode, 10, 0); // bit 1, mode (auto=1 or manual=0)
 
@@ -1013,8 +1013,8 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     }
     has_update(hc->tempautotemp, tat);
 
-    has_update(telegram, hc->manualtemp, 10);       // is * 2
-    has_enumupdate(telegram, hc->program, 11, 1);   // timer program 1 or 2
+    has_update(telegram, hc->manualtemp, 10);     // is * 2
+    has_enumupdate(telegram, hc->program, 11, 1); // timer program 1 or 2
 
     has_enumupdate(telegram, hc->reducemode, 5, 1); // 1-outdoor temp threshold, 2-room temp threshold, 3-reduced mode
     has_update(telegram, hc->reducetemp, 9);
@@ -1097,7 +1097,7 @@ void Thermostat::process_RC300WWtemp(std::shared_ptr<const Telegram> telegram) {
 // RC300WWmode(0x2F5), data: 01 FF 04 00 00 00 08 05 00 08 04 00 00 00 00 00 00 00 00 00 01
 void Thermostat::process_RC300WWmode(std::shared_ptr<const Telegram> telegram) {
     // circulation pump see: https://github.com/Th3M3/buderus_ems-wiki/blob/master/Einstellungen%20der%20Bedieneinheit%20RC310.md
-    has_update(telegram, wwCircPump_, 1);        // FF=off, 0=on ?
+    has_update(telegram, wwCircPump_, 1); // FF=off, 0=on ?
 
     has_update(telegram, wwMode_, 2);            // 0=off, 1=low, 2=high, 3=auto, 4=own prog
     has_update(telegram, wwCircMode_, 3);        // 0=off, 1=on, 2=auto, 4=own?
@@ -1207,11 +1207,11 @@ void Thermostat::process_RC30Set(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, mixingvalves_, 17);        // Number of Mixing Valves: (0x00=0, 0x01=1, 0x02=2)
     has_update(telegram, brightness_, 18);          // Screen brightness 0F=dark F1=light
     has_update(telegram, hc->mode, 23);
-    has_update(telegram, hc->nofrosttemp, 24);      // Set Temperature when mode is Off / 10 (e.g.: 0x0F = 7.5 degrees Celsius)
-    has_update(telegram, heatingpid_, 25);          // PID setting 00=1 01=2 02=3
-    has_update(telegram, preheating_, 26);          // Preheating in the clock program: (0x00 = off, 0xFF = on)
-    has_update(telegram, hc->tempautotemp, 28);     // is * 2
-    has_update(telegram, hc->manualtemp, 29);       // manualtemp is * 2
+    has_update(telegram, hc->nofrosttemp, 24);  // Set Temperature when mode is Off / 10 (e.g.: 0x0F = 7.5 degrees Celsius)
+    has_update(telegram, heatingpid_, 25);      // PID setting 00=1 01=2 02=3
+    has_update(telegram, preheating_, 26);      // Preheating in the clock program: (0x00 = off, 0xFF = on)
+    has_update(telegram, hc->tempautotemp, 28); // is * 2
+    has_update(telegram, hc->manualtemp, 29);   // manualtemp is * 2
 }
 
 // type 0x40 (HC1) - for reading the operating mode from the RC30 thermostat (0x10)
@@ -1274,13 +1274,13 @@ void Thermostat::process_RC35Set(std::shared_ptr<const Telegram> telegram) {
         return;
     }
 
-    has_update(telegram, hc->heatingtype, 0);     // 0- off, 1-radiator, 2-convector, 3-floor
-    has_update(telegram, hc->nighttemp, 1);       // is * 2
-    has_update(telegram, hc->daytemp, 2);         // is * 2
-    has_update(telegram, hc->holidaytemp, 3);     // is * 2
-    has_update(telegram, hc->roominfluence, 4);   // is * 1
-    has_update(telegram, hc->offsettemp, 6);      // is * 2
-    has_update(telegram, hc->mode, 7);            // night, day, auto
+    has_update(telegram, hc->heatingtype, 0);   // 0- off, 1-radiator, 2-convector, 3-floor
+    has_update(telegram, hc->nighttemp, 1);     // is * 2
+    has_update(telegram, hc->daytemp, 2);       // is * 2
+    has_update(telegram, hc->holidaytemp, 3);   // is * 2
+    has_update(telegram, hc->roominfluence, 4); // is * 1
+    has_update(telegram, hc->offsettemp, 6);    // is * 2
+    has_update(telegram, hc->mode, 7);          // night, day, auto
 
     has_update(telegram, hc->wwprio, 21);         // 0xFF for on
     has_update(telegram, hc->summertemp, 22);     // is * 1
@@ -1291,10 +1291,10 @@ void Thermostat::process_RC35Set(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hc->control, 26);        // 0-off, 1-RC20 (remote), 2-RC35
     has_update(telegram, hc->controlmode, 33);    // 0-outdoortemp, 1-roomtemp
     has_update(telegram, hc->tempautotemp, 37);
-    has_update(telegram, hc->noreducetemp, 38);   // outdoor temperature for no reduce
-    has_update(telegram, hc->reducetemp, 39);     // temperature for off/reduce
-    has_update(telegram, hc->vacreducetemp, 40);  // temperature for off/reduce in vacations
-    has_update(telegram, hc->vacreducemode, 41);  // vacations reduce mode
+    has_update(telegram, hc->noreducetemp, 38);  // outdoor temperature for no reduce
+    has_update(telegram, hc->reducetemp, 39);    // temperature for off/reduce
+    has_update(telegram, hc->vacreducetemp, 40); // temperature for off/reduce in vacations
+    has_update(telegram, hc->vacreducemode, 41); // vacations reduce mode
     has_update(telegram, hc->minflowtemp, 16);
 
     // RC35 stores values for floorheating in different position
@@ -1416,7 +1416,7 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
 
     bool   ivtclock     = (telegram->message_data[0] & 0x80) == 0x80; // dont sync ivt-clock, #439
     bool   junkersclock = model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS;
-    time_t ttime        = mktime(tm_);                                // thermostat time
+    time_t ttime        = mktime(tm_); // thermostat time
     // correct thermostat clock if we have valid ntp time, and could write the command
     if (!ivtclock && !junkersclock && tset_ && EMSESP::system_.ntp_connected() && !EMSESP::system_.readonly_mode() && has_command(&dateTime_)) {
         double difference = difftime(now, ttime);
@@ -1426,7 +1426,7 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
         }
     }
 #ifndef EMSESP_STANDALONE
-    if (!tset_ && tm_->tm_year > 110) {  // emsesp clock not set, but thermostat clock
+    if (!tset_ && tm_->tm_year > 110) { // emsesp clock not set, but thermostat clock
         if (ivtclock) {
             tm_->tm_isdst = -1;          // determine dst
             ttime         = mktime(tm_); // thermostat time
@@ -2302,7 +2302,7 @@ bool Thermostat::set_datetime(const char * value, const int8_t id) {
         data[6] = (tm_->tm_wday + 6) % 7; // Bosch counts from Mo, time from Su
         data[7] = tm_->tm_isdst + 2;      // set DST and flag for ext. clock
         if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
-            data[6]++;                    // Junkers use 1-7;
+            data[6]++; // Junkers use 1-7;
             data[7] = 0;
         }
     } else if (dt.length() == 23) {
@@ -2500,7 +2500,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
         if (mode == HeatingCircuit::Mode::AUTO) {
             set_mode_value = 0xFF; // special value for auto
         } else {
-            set_mode_value = 0;    // everything else, like manual/day etc..
+            set_mode_value = 0; // everything else, like manual/day etc..
         }
         break;
     case EMSdevice::EMS_DEVICE_FLAG_JUNKERS:
@@ -3121,7 +3121,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             offset = 0x0A; // manual offset
             break;
         case HeatingCircuit::Mode::TEMPAUTO:
-            offset = 0x08;  // auto offset
+            offset = 0x08; // auto offset
             if (temperature == -1) {
                 factor = 1; // to write 0xFF
             }

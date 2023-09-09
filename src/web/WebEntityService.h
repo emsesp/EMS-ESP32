@@ -63,6 +63,9 @@ class WebEntityService : public StatefulService<WebEntity> {
     uint8_t count_entities();
     uint8_t has_commands();
     void    generate_value_web(JsonObject & output);
+    void    ha_reset() {
+        ha_registered_ = false;
+    }
 
 
   private:

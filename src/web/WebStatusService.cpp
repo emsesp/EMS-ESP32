@@ -166,9 +166,9 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
     if (Mqtt::enabled()) {
         statJson       = statsJson.createNestedObject();
         statJson["id"] = 5;
-        statJson["s"]  = Mqtt::publish_count();
+        statJson["s"]  = Mqtt::publish_count() - Mqtt::publish_fails();
         statJson["f"]  = Mqtt::publish_fails();
-        statJson["q"]  = Mqtt::publish_count() == 0 ? 100 : 100 - (uint8_t)((100 * Mqtt::publish_fails()) / (Mqtt::publish_count() + Mqtt::publish_fails()));
+        statJson["q"]  = Mqtt::publish_count() == 0 ? 100 : 100 - (uint8_t)((100 * Mqtt::publish_fails()) / Mqtt::publish_count());
     }
 
     statJson       = statsJson.createNestedObject();
@@ -228,61 +228,61 @@ void WebStatusService::mDNS_start() const {
 const char * WebStatusService::disconnectReason(uint8_t code) {
 #ifndef EMSESP_STANDALONE
     switch (code) {
-    case WIFI_REASON_UNSPECIFIED:              // = 1,
+    case WIFI_REASON_UNSPECIFIED: // = 1,
         return "unspecified";
-    case WIFI_REASON_AUTH_EXPIRE:              // = 2,
+    case WIFI_REASON_AUTH_EXPIRE: // = 2,
         return "auth expire";
-    case WIFI_REASON_AUTH_LEAVE:               // = 3,
+    case WIFI_REASON_AUTH_LEAVE: // = 3,
         return "auth leave";
-    case WIFI_REASON_ASSOC_EXPIRE:             // = 4,
+    case WIFI_REASON_ASSOC_EXPIRE: // = 4,
         return "assoc expired";
-    case WIFI_REASON_ASSOC_TOOMANY:            // = 5,
+    case WIFI_REASON_ASSOC_TOOMANY: // = 5,
         return "assoc too many";
-    case WIFI_REASON_NOT_AUTHED:               // = 6,
+    case WIFI_REASON_NOT_AUTHED: // = 6,
         return "not authenticated";
-    case WIFI_REASON_NOT_ASSOCED:              // = 7,
+    case WIFI_REASON_NOT_ASSOCED: // = 7,
         return "not assoc";
-    case WIFI_REASON_ASSOC_LEAVE:              // = 8,
+    case WIFI_REASON_ASSOC_LEAVE: // = 8,
         return "assoc leave";
-    case WIFI_REASON_ASSOC_NOT_AUTHED:         // = 9,
+    case WIFI_REASON_ASSOC_NOT_AUTHED: // = 9,
         return "assoc not authed";
-    case WIFI_REASON_DISASSOC_PWRCAP_BAD:      // = 10,
+    case WIFI_REASON_DISASSOC_PWRCAP_BAD: // = 10,
         return "disassoc powerCAP bad";
-    case WIFI_REASON_DISASSOC_SUPCHAN_BAD:     // = 11,
+    case WIFI_REASON_DISASSOC_SUPCHAN_BAD: // = 11,
         return "disassoc supchan bad";
-    case WIFI_REASON_IE_INVALID:               // = 13,
+    case WIFI_REASON_IE_INVALID: // = 13,
         return "IE invalid";
-    case WIFI_REASON_MIC_FAILURE:              // = 14,
+    case WIFI_REASON_MIC_FAILURE: // = 14,
         return "MIC failure";
-    case WIFI_REASON_4WAY_HANDSHAKE_TIMEOUT:   // = 15,
+    case WIFI_REASON_4WAY_HANDSHAKE_TIMEOUT: // = 15,
         return "4way handshake timeout";
     case WIFI_REASON_GROUP_KEY_UPDATE_TIMEOUT: // = 16,
         return "group key-update timeout";
-    case WIFI_REASON_IE_IN_4WAY_DIFFERS:       // = 17,
+    case WIFI_REASON_IE_IN_4WAY_DIFFERS: // = 17,
         return "IE in 4way differs";
-    case WIFI_REASON_GROUP_CIPHER_INVALID:     // = 18,
+    case WIFI_REASON_GROUP_CIPHER_INVALID: // = 18,
         return "group cipher invalid";
-    case WIFI_REASON_PAIRWISE_CIPHER_INVALID:  // = 19,
+    case WIFI_REASON_PAIRWISE_CIPHER_INVALID: // = 19,
         return "pairwise cipher invalid";
-    case WIFI_REASON_AKMP_INVALID:             // = 20,
+    case WIFI_REASON_AKMP_INVALID: // = 20,
         return "AKMP invalid";
-    case WIFI_REASON_UNSUPP_RSN_IE_VERSION:    // = 21,
+    case WIFI_REASON_UNSUPP_RSN_IE_VERSION: // = 21,
         return "unsupported RSN_IE version";
-    case WIFI_REASON_INVALID_RSN_IE_CAP:       // = 22,
+    case WIFI_REASON_INVALID_RSN_IE_CAP: // = 22,
         return "invalid RSN_IE_CAP";
-    case WIFI_REASON_802_1X_AUTH_FAILED:       // = 23,
+    case WIFI_REASON_802_1X_AUTH_FAILED: // = 23,
         return "802 X1 auth failed";
-    case WIFI_REASON_CIPHER_SUITE_REJECTED:    // = 24,
+    case WIFI_REASON_CIPHER_SUITE_REJECTED: // = 24,
         return "cipher suite rejected";
-    case WIFI_REASON_BEACON_TIMEOUT:           // = 200,
+    case WIFI_REASON_BEACON_TIMEOUT: // = 200,
         return "beacon timeout";
-    case WIFI_REASON_NO_AP_FOUND:              // = 201,
+    case WIFI_REASON_NO_AP_FOUND: // = 201,
         return "no AP found";
-    case WIFI_REASON_AUTH_FAIL:                // = 202,
+    case WIFI_REASON_AUTH_FAIL: // = 202,
         return "auth fail";
-    case WIFI_REASON_ASSOC_FAIL:               // = 203,
+    case WIFI_REASON_ASSOC_FAIL: // = 203,
         return "assoc fail";
-    case WIFI_REASON_HANDSHAKE_TIMEOUT:        // = 204,
+    case WIFI_REASON_HANDSHAKE_TIMEOUT: // = 204,
         return "handshake timeout";
     default:
         return "unknown";

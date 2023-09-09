@@ -520,7 +520,7 @@ void EMSdevice::add_device_value(uint8_t               tag,              // to b
     // get fullname, getting translation if it exists
     const char * const * fullname;
     if (Helpers::count_items(name) == 1) {
-        fullname = nullptr;  // no translations available, use empty
+        fullname = nullptr; // no translations available, use empty
     } else {
         fullname = &name[1]; // translations start at index 1
     }
@@ -1311,7 +1311,7 @@ void EMSdevice::dump_value_info() {
                     if (dv.type == DeviceValueType::BOOL) {
                         snprintf(entityid, sizeof(entityid), "binary_sensor.%s", entity_with_tag); // binary sensor (for booleans)
                     } else {
-                        snprintf(entityid, sizeof(entityid), "sensor.%s", entity_with_tag);        // normal HA sensor
+                        snprintf(entityid, sizeof(entityid), "sensor.%s", entity_with_tag); // normal HA sensor
                     }
                 }
 
@@ -1767,6 +1767,11 @@ const char * EMSdevice::telegram_type_name(std::shared_ptr<const Telegram> teleg
 bool EMSdevice::handle_telegram(std::shared_ptr<const Telegram> telegram) {
     for (auto & tf : telegram_functions_) {
         if (tf.telegram_type_id_ == telegram->type_id) {
+            // for telegram desitnation only read telegram
+            if (telegram->dest == device_id_ && telegram->message_length > 0) {
+                tf.process_function_(telegram);
+                return true;
+            }
             // if the data block is empty and we have not received data before, assume that this telegram
             // is not recognized by the bus master. So remove it from the automatic fetch list
             if (telegram->message_length == 0 && telegram->offset == 0 && !tf.received_) {

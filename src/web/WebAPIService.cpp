@@ -121,9 +121,9 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     if (return_code != CommandRet::OK) {
         char error[100];
         if (output.size()) {
-            snprintf(error, sizeof(error), "Call failed with error: %s (%s)", (const char *)output["message"], Command::return_code_string(return_code).c_str());
+            snprintf(error, sizeof(error), "API failed with error: %s (%s)", (const char *)output["message"], Command::return_code_string(return_code).c_str());
         } else {
-            snprintf(error, sizeof(error), "Call failed with error code (%s)", Command::return_code_string(return_code).c_str());
+            snprintf(error, sizeof(error), "API failed with error code (%s)", Command::return_code_string(return_code).c_str());
         }
         emsesp::EMSESP::logger().err(error);
         api_fails_++;

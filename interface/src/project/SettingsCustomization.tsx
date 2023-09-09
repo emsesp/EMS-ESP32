@@ -86,7 +86,7 @@ const SettingsCustomization: FC = () => {
 
   const entities_theme = useTheme({
     Table: `
-      --data-table-library_grid-template-columns: 150px repeat(1, minmax(80px, 1fr)) 45px minmax(45px, auto) minmax(120px, auto);
+      --data-table-library_grid-template-columns: 156px repeat(1, minmax(80px, 1fr)) 45px minmax(45px, auto) minmax(120px, auto);
     `,
     BaseRow: `
       font-size: 14px;
@@ -192,17 +192,9 @@ const SettingsCustomization: FC = () => {
     return value;
   }
 
-  function formatName(de: DeviceEntity) {
-    return (
-      <>
-        {de.n && (de.n[0] === '!' ? LL.COMMAND(1) + ': ' + de.n.slice(1) : de.cn && de.cn !== '' ? de.cn : de.n) + ' '}(
-        <Link target="_blank" href={APIURL + devices?.devices[selectedDevice].tn + '/' + de.id}>
-          {de.id}
-        </Link>
-        )
-      </>
-    );
-  }
+  const formatName = (de: DeviceEntity, withShortname: boolean) =>
+    (de.n && de.n[0] === '!' ? LL.COMMAND(1) + ': ' + de.n.slice(1) : de.cn && de.cn !== '' ? de.cn : de.n) +
+    (withShortname ? ' ' + de.id : '');
 
   const getMaskNumber = (newMask: string[]) => {
     let new_mask = 0;
@@ -232,10 +224,13 @@ const SettingsCustomization: FC = () => {
     return new_masks;
   };
 
+  const filter_entity = (de: DeviceEntity) =>
+    (de.m & selectedFilters || !selectedFilters) && formatName(de, true).includes(search.toLocaleLowerCase());
+
   const maskDisabled = (set: boolean) => {
     setDeviceEntities(
       deviceEntities.map(function (de) {
-        if ((de.m & selectedFilters || !selectedFilters) && de.id.toLowerCase().includes(search.toLowerCase())) {
+        if (filter_entity(de)) {
           return {
             ...de,
             m: set
@@ -353,7 +348,7 @@ const SettingsCustomization: FC = () => {
         margin="normal"
         select
       >
-        <MenuItem disabled key={0} value={-1}>
+        <MenuItem disabled key={-1} value={-1}>
           {LL.SELECT_DEVICE()}...
         </MenuItem>
         {devices.devices.map((device: DeviceShort, index) => (
@@ -370,9 +365,7 @@ const SettingsCustomization: FC = () => {
       return;
     }
 
-    const shown_data = deviceEntities.filter(
-      (de) => (de.m & selectedFilters || !selectedFilters) && de.id.toLowerCase().includes(search.toLowerCase())
-    );
+    const shown_data = deviceEntities.filter((de) => filter_entity(de));
 
     return (
       <>
@@ -470,7 +463,13 @@ const SettingsCustomization: FC = () => {
                     <Cell stiff>
                       <EntityMaskToggle onUpdate={updateDeviceEntity} de={de} />
                     </Cell>
-                    <Cell>{formatName(de)}</Cell>
+                    <Cell>
+                      {formatName(de, false)}&nbsp;(
+                      <Link target="_blank" href={APIURL + devices?.devices[selectedDevice].tn + '/' + de.id}>
+                        {de.id}
+                      </Link>
+                      )
+                    </Cell>
                     <Cell>{!(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.mi)}</Cell>
                     <Cell>{!(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.ma)}</Cell>
                     <Cell>{formatValue(de.v)}</Cell>

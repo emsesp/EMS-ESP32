@@ -256,9 +256,9 @@ class Thermostat : public EMSdevice {
     static constexpr uint16_t EMS_TYPE_RCOutdoorTemp = 0xA3; // is an automatic thermostat broadcast, outdoor external temp
 
     // Type offsets
-    static constexpr uint8_t EMS_OFFSET_RC10StatusMessage_setpoint = 1;  // setpoint temp
-    static constexpr uint8_t EMS_OFFSET_RC10StatusMessage_curr     = 2;  // current temp
-    static constexpr uint8_t EMS_OFFSET_RC10Set_temp               = 4;  // position of thermostat setpoint temperature
+    static constexpr uint8_t EMS_OFFSET_RC10StatusMessage_setpoint = 1; // setpoint temp
+    static constexpr uint8_t EMS_OFFSET_RC10StatusMessage_curr     = 2; // current temp
+    static constexpr uint8_t EMS_OFFSET_RC10Set_temp               = 4; // position of thermostat setpoint temperature
 
     static constexpr uint8_t EMS_OFFSET_RC20StatusMessage_setpoint = 1;  // setpoint temp
     static constexpr uint8_t EMS_OFFSET_RC20StatusMessage_curr     = 2;  // current temp
@@ -267,9 +267,9 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_OFFSET_RC20Set_temp_auto          = 28; // position of thermostat setpoint temperature
     static constexpr uint8_t EMS_OFFSET_RC20Set_temp_manual        = 29; // position of thermostat setpoint temperature
 
-    static constexpr uint8_t EMS_OFFSET_RC20_2_Set_mode       = 3;       // ES72 - see https://github.com/emsesp/EMS-ESP/issues/334
-    static constexpr uint8_t EMS_OFFSET_RC20_2_Set_temp_night = 1;       // ES72
-    static constexpr uint8_t EMS_OFFSET_RC20_2_Set_temp_day   = 2;       // ES72
+    static constexpr uint8_t EMS_OFFSET_RC20_2_Set_mode       = 3; // ES72 - see https://github.com/emsesp/EMS-ESP/issues/334
+    static constexpr uint8_t EMS_OFFSET_RC20_2_Set_temp_night = 1; // ES72
+    static constexpr uint8_t EMS_OFFSET_RC20_2_Set_temp_day   = 2; // ES72
 
     static constexpr uint8_t EMS_OFFSET_RC30StatusMessage_setpoint = 1;  // setpoint temp
     static constexpr uint8_t EMS_OFFSET_RC30StatusMessage_curr     = 2;  // current temp
@@ -308,8 +308,8 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_OFFSET_RC35Set_temp_summer        = 22;
     static constexpr uint8_t EMS_OFFSET_RC35Set_temp_nofrost       = 23;
 
-    static constexpr uint8_t EMS_OFFSET_EasyStatusMessage_setpoint = 10;       // setpoint temp
-    static constexpr uint8_t EMS_OFFSET_EasyStatusMessage_curr     = 8;        // current temp
+    static constexpr uint8_t EMS_OFFSET_EasyStatusMessage_setpoint = 10; // setpoint temp
+    static constexpr uint8_t EMS_OFFSET_EasyStatusMessage_curr     = 8;  // current temp
 
     static constexpr uint8_t EMS_OFFSET_RCPLUSStatusMessage_mode         = 10; // thermostat mode (auto, manual)
     static constexpr uint8_t EMS_OFFSET_RCPLUSStatusMessage_setpoint     = 3;  // setpoint temp

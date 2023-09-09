@@ -1,4 +1,5 @@
 import CancelIcon from '@mui/icons-material/Cancel';
+import CloseIcon from '@mui/icons-material/Close';
 import DoneIcon from '@mui/icons-material/Done';
 
 import {
@@ -67,15 +68,34 @@ const SettingsCustomizationDialog = ({ open, onClose, onSave, selectedItem }: Se
     <Dialog sx={dialogStyle} open={open} onClose={close}>
       <DialogTitle>{LL.EDIT() + ' ' + LL.ENTITY()}</DialogTitle>
       <DialogContent dividers>
-        <Box color="warning.main">
-          <Typography variant="body2">{editItem.id}</Typography>
-        </Box>
-        <Box color="warning.main" mt={1} mb={2}>
-          <Typography variant="body2">
-            {LL.DEFAULT(1) + ' ' + LL.ENTITY_NAME(1)}:&nbsp;{editItem.n}
+        <Grid container direction="row">
+          <Typography variant="body2" color="warning.main">
+            {LL.ENTITY() + ' ID'}:&nbsp;
           </Typography>
-        </Box>
-        <Box mb={3}>
+          <Typography variant="body2">{editItem.id}</Typography>
+        </Grid>
+
+        <Grid container direction="row">
+          <Typography variant="body2" color="warning.main">
+            {LL.DEFAULT(1) + ' ' + LL.ENTITY_NAME(1)}:&nbsp;
+          </Typography>
+          <Typography variant="body2">{editItem.n}</Typography>
+        </Grid>
+
+        <Grid container direction="row">
+          <Typography variant="body2" color="warning.main">
+            {LL.WRITEABLE()}:&nbsp;
+          </Typography>
+          <Typography variant="body2">
+            {editItem.w ? (
+              <DoneIcon color="success" sx={{ fontSize: 16 }} />
+            ) : (
+              <CloseIcon color="error" sx={{ fontSize: 16 }} />
+            )}
+          </Typography>
+        </Grid>
+
+        <Box mt={1} mb={2}>
           <EntityMaskToggle onUpdate={updateDeviceEntity} de={editItem} />
         </Box>
         <Grid container spacing={1}>

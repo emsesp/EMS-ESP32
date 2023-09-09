@@ -132,7 +132,7 @@ class TemperatureSensor {
     static constexpr uint8_t TYPE_DS18B20 = 0x28;
     static constexpr uint8_t TYPE_DS18S20 = 0x10;
     static constexpr uint8_t TYPE_DS1822  = 0x22;
-    static constexpr uint8_t TYPE_DS1825  = 0x3B;      // also DS1826
+    static constexpr uint8_t TYPE_DS1825  = 0x3B; // also DS1826
 
     static constexpr uint32_t READ_INTERVAL_MS = 5000; // 5 seconds
     static constexpr uint32_t CONVERSION_MS    = 1000; // 1 seconds

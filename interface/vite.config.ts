@@ -50,9 +50,9 @@ export default defineConfig(({ command, mode }) => {
       server: {
         open: true,
         port: 3000,
-        watch: {
-          usePolling: true
-        },
+        // watch: {
+        //   usePolling: true
+        // },
         proxy: {
           '/rest': 'http://localhost:3080',
           '/api': {

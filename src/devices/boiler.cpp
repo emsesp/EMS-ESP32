@@ -980,13 +980,13 @@ void Boiler::process_UBASettingsWW(std::shared_ptr<const Telegram> telegram) {
 //  Boiler(0x08) -> Me(0x0B), UBAParameterWW(0x33), data: 08 FF 30 FB FF 28 FF 07 46 00 00
 void Boiler::process_UBAParameterWW(std::shared_ptr<const Telegram> telegram) {
     // has_bitupdate(telegram, wwEquipt_,0,3);  //  8=boiler has ww
-    has_update(telegram, wwActivated_, 1);         // 0xFF means on
+    has_update(telegram, wwActivated_, 1); // 0xFF means on
     has_update(telegram, wwSelTemp_, 2);
-    has_update(telegram, wwHystOn_, 3);            // Hyst on (default -5)
-    has_update(telegram, wwHystOff_, 4);           // Hyst off (default -1)
-    has_update(telegram, wwFlowTempOffset_, 5);    // default 40
-    has_update(telegram, wwCircPump_, 6);          // 0xFF means on
-    has_update(telegram, wwCircMode_, 7);          // 0=off, 1=1x3min 6=6x3min 7=continuous
+    has_update(telegram, wwHystOn_, 3);         // Hyst on (default -5)
+    has_update(telegram, wwHystOff_, 4);        // Hyst off (default -1)
+    has_update(telegram, wwFlowTempOffset_, 5); // default 40
+    has_update(telegram, wwCircPump_, 6);       // 0xFF means on
+    has_update(telegram, wwCircMode_, 7);       // 0=off, 1=1x3min 6=6x3min 7=continuous
     has_update(telegram, wwDisinfectionTemp_, 8);
     has_bitupdate(telegram, wwChargeType_, 10, 0); // 0 = charge pump, 0xff = 3-way valve
 
@@ -1089,7 +1089,7 @@ void Boiler::process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, outdoorTemp_, 0);
     has_update(telegram, boilTemp_, 2);
     has_update(telegram, exhaustTemp_, 4);
-    has_update(telegram, switchTemp_, 25);      // only if there is a mixer module present
+    has_update(telegram, switchTemp_, 25); // only if there is a mixer module present
     has_update(telegram, heatingPumpMod_, 9);
     has_update(telegram, burnStarts_, 10, 3);   // force to 3 bytes
     has_update(telegram, burnWorkMin_, 13, 3);  // force to 3 bytes
@@ -1414,7 +1414,7 @@ void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
     // data: displaycode(2), errornumber(2), year, month, hour, day, minute, duration(2), src-addr
     if (telegram->message_data[4] & 0x80) { // valid date
 
-        static uint32_t lastCodeDate_ = 0;  // last code date
+        static uint32_t lastCodeDate_ = 0; // last code date
         char            code[3]       = {0};
         uint16_t        codeNo        = EMS_VALUE_SHORT_NOTSET;
         code[0]                       = telegram->message_data[0];
@@ -1530,12 +1530,12 @@ void Boiler::process_HpSilentMode(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, wwAltOpPrioWw_, 3);   // range 30-120 minutes on Buderus WSW196i
     has_update(telegram, silentMode_, 10);     // enum off-auto-on
     has_update(telegram, minTempSilent_, 11);
-    has_update(telegram, hpHystHeat_, 37);     // is / 5
-    has_update(telegram, hpHystCool_, 35);     // is / 5, maybe offset swapped with pool
-    has_update(telegram, hpHystPool_, 33);     // is / 5
+    has_update(telegram, hpHystHeat_, 37); // is / 5
+    has_update(telegram, hpHystCool_, 35); // is / 5, maybe offset swapped with pool
+    has_update(telegram, hpHystPool_, 33); // is / 5
     has_update(telegram, hpCircPumpWw_, 46);
-    has_update(telegram, silentFrom_, 52);     // in steps of 15 min
-    has_update(telegram, silentTo_, 53);       // in steps of 15 min
+    has_update(telegram, silentFrom_, 52); // in steps of 15 min
+    has_update(telegram, silentTo_, 53);   // in steps of 15 min
 }
 
 // Boiler(0x08) -B-> All(0x00), ?(0x0488), data: 8E 00 00 00 00 00 01 03
@@ -1556,7 +1556,7 @@ void Boiler::process_HpAdditionalHeater(std::shared_ptr<const Telegram> telegram
     has_update(telegram, manDefrost_, 0); // off/on
     has_update(telegram, auxHeaterOnly_, 1);
     has_update(telegram, auxHeaterOff_, 2);
-    has_update(telegram, auxHeatMode_, 4);     // eco/comfort
+    has_update(telegram, auxHeatMode_, 4); // eco/comfort
     has_update(telegram, tempParMode_, 5);
     has_update(telegram, auxMaxLimit_, 14);    // is * 10
     has_update(telegram, auxLimitStart_, 15);  // is * 10
@@ -2131,6 +2131,7 @@ bool Boiler::set_tapwarmwater_activated(const char * value, const int8_t id) {
         wwTapActivated_ = 1;
     }
 
+    // LOG_INFO("calling EMS_TYPE_UBAFunctionTest with %d", v);
     write_command(EMS_TYPE_UBAFunctionTest, 0, message_data, sizeof(message_data), 0);
 
     return true;

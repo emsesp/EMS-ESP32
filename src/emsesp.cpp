@@ -341,7 +341,7 @@ void EMSESP::dump_all_values(uuid::console::Shell & shell) {
                         if (device.product_id == 160) { // MM100
                             device_id = 0x28;           // wwc
                         } else {
-                            device_id = 0x20;           // hc
+                            device_id = 0x20; // hc
                         }
                     } else {
                         device_id = 0x20; // should cover all the other device types
@@ -926,7 +926,7 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
                     if (telegram->type_id == publish_id_) {
                         publish_id_ = 0;
                     }
-                    emsdevice->has_update(false);                        // reset flag
+                    emsdevice->has_update(false); // reset flag
                     if (!Mqtt::publish_single()) {
                         publish_device_values(emsdevice->device_type()); // publish to MQTT if we explicitly have too
                     }
@@ -939,6 +939,8 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
                 emsdevice->add_handlers_ignored(telegram->type_id);
             }
             break;
+        } else if (emsdevice->is_device_id(telegram->dest)) {
+            emsdevice->handle_telegram(telegram);
         }
     }
 
@@ -1118,7 +1120,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
             name        = "Modem";
             device_type = DeviceType::CONNECT;
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_CONVERTER) {
-            name = "Converter";    // generic
+            name = "Converter"; // generic
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_CLOCK) {
             name        = "Clock"; // generic
             device_type = DeviceType::CONTROLLER;
@@ -1390,7 +1392,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 #endif
         Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data); // check if there is a message for the roomcontroller
 
-        rxservice_.add(data, length);                                    // add to RxQueue
+        rxservice_.add(data, length); // add to RxQueue
     }
 }
 
@@ -1470,8 +1472,8 @@ void EMSESP::start() {
     bool factory_settings = false;
 #endif
 
-    esp8266React.begin();                                        // loads core system services settings (network, mqtt, ap, ntp etc)
-    webLogService.begin();                                       // start web log service. now we can start capturing logs to the web log
+    esp8266React.begin();  // loads core system services settings (network, mqtt, ap, ntp etc)
+    webLogService.begin(); // start web log service. now we can start capturing logs to the web log
 
     LOG_INFO("Starting EMS-ESP version %s", EMSESP_APP_VERSION); // welcome message
     LOG_DEBUG("System is running in Debug mode");
@@ -1491,7 +1493,7 @@ void EMSESP::start() {
         system_.system_restart();
     };
 
-    system_.reload_settings();       // ... and store some of the settings locally
+    system_.reload_settings(); // ... and store some of the settings locally
 
     webCustomizationService.begin(); // load the customizations
     webSchedulerService.begin();     // load the scheduler events

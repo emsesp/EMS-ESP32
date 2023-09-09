@@ -214,7 +214,7 @@ void TemperatureSensor::loop() {
                     // LOG_DEBUG("Adding %d sensor(s) from first scan", firstscan_);
                 } else if ((scancnt_ <= 0) && (firstscan_ != sensors_.size())) { // check 2 times for no change of sensor #
                     scancnt_ = SCAN_START;
-                    sensors_.clear();                                            // restart scanning and clear to get correct numbering
+                    sensors_.clear(); // restart scanning and clear to get correct numbering
                 }
                 state_ = State::IDLE;
             }
@@ -576,7 +576,7 @@ TemperatureSensor::Sensor::Sensor(const uint8_t addr[])
              (unsigned int)(internal_id_ >> 48) & 0xFF,
              (unsigned int)(internal_id_ >> 32) & 0xFFFF,
              (unsigned int)(internal_id_ >> 16) & 0xFFFF,
-             (unsigned int)(internal_id_)&0xFFFF);
+             (unsigned int)(internal_id_) & 0xFFFF);
     id_     = std::string(id_s);
     name_   = std::string{}; // name (alias) is empty
     offset_ = 0;             // 0 degrees offset
