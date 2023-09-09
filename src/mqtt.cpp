@@ -920,7 +920,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
                 for (uint8_t i = 0; i < options_size; i++) {
                     option_list.add(Helpers::itoa(i)); // as a string
                 }
-                snprintf(sample_val, sizeof(sample_val), "0");
+                snprintf(sample_val, sizeof(sample_val), "'0'");
             } else {
                 // use strings
                 for (uint8_t i = 0; i < options_size; i++) {
