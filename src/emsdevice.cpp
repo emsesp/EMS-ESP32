@@ -1767,6 +1767,11 @@ const char * EMSdevice::telegram_type_name(std::shared_ptr<const Telegram> teleg
 bool EMSdevice::handle_telegram(std::shared_ptr<const Telegram> telegram) {
     for (auto & tf : telegram_functions_) {
         if (tf.telegram_type_id_ == telegram->type_id) {
+            // for telegram desitnation only read telegram
+            if (telegram->dest == device_id_ && telegram->message_length > 0) {
+                tf.process_function_(telegram);
+                return true;
+            }
             // if the data block is empty and we have not received data before, assume that this telegram
             // is not recognized by the bus master. So remove it from the automatic fetch list
             if (telegram->message_length == 0 && telegram->offset == 0 && !tf.received_) {

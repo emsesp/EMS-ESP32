@@ -939,6 +939,8 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
                 emsdevice->add_handlers_ignored(telegram->type_id);
             }
             break;
+        } else if (emsdevice->is_device_id(telegram->dest)) {
+            emsdevice->handle_telegram(telegram);
         }
     }
 
