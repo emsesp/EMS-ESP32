@@ -1583,8 +1583,8 @@ Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,bo
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,mintempsilent,min outside temp for silent mode,int (>=-126<=126),C,true,number.boiler_min_outside_temp_for_silent_mode,number.boiler_mintempsilent
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,tempparmode,outside temp parallel mode,int (>=-126<=126),C,true,number.boiler_outside_temp_parallel_mode,number.boiler_tempparmode
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,auxheatmix,aux heater mixing valve,int (>=-100<=100),%,false,sensor.boiler_aux_heater_mixing_valve,sensor.boiler_auxheatmix
-Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,tempdiffheat,temp diff TC3/TC0 heat,uint (>=3<=10),K,true,number.boiler_temp_diff_TC3/TC0_heat,number.boiler_tempdiffheat
-Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,tempdiffcool,temp diff TC3/TC0 cool,uint (>=3<=10),K,true,number.boiler_temp_diff_TC3/TC0_cool,number.boiler_tempdiffcool
+Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,tempdiffheat,temp diff TC3/TC0 heat,uint (>=2<=10),K,true,number.boiler_temp_diff_TC3/TC0_heat,number.boiler_tempdiffheat
+Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,tempdiffcool,temp diff TC3/TC0 cool,uint (>=2<=10),K,true,number.boiler_temp_diff_TC3/TC0_cool,number.boiler_tempdiffcool
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,vpcooling,valve/pump cooling,boolean, ,true,switch.boiler_valve/pump_cooling,switch.boiler_vpcooling
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,heatcable,heating cable,boolean, ,true,switch.boiler_heating_cable,switch.boiler_heatcable
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,vc0valve,VC0 valve,boolean, ,true,switch.boiler_VC0_valve,switch.boiler_vc0valve
@@ -1768,8 +1768,8 @@ Geo 5xx,boiler,173,silentto,silent mode to,uint (>=0<=3810),minutes,true,number.
 Geo 5xx,boiler,173,mintempsilent,min outside temp for silent mode,int (>=-126<=126),C,true,number.boiler_min_outside_temp_for_silent_mode,number.boiler_mintempsilent
 Geo 5xx,boiler,173,tempparmode,outside temp parallel mode,int (>=-126<=126),C,true,number.boiler_outside_temp_parallel_mode,number.boiler_tempparmode
 Geo 5xx,boiler,173,auxheatmix,aux heater mixing valve,int (>=-100<=100),%,false,sensor.boiler_aux_heater_mixing_valve,sensor.boiler_auxheatmix
-Geo 5xx,boiler,173,tempdiffheat,temp diff TC3/TC0 heat,uint (>=3<=10),K,true,number.boiler_temp_diff_TC3/TC0_heat,number.boiler_tempdiffheat
-Geo 5xx,boiler,173,tempdiffcool,temp diff TC3/TC0 cool,uint (>=3<=10),K,true,number.boiler_temp_diff_TC3/TC0_cool,number.boiler_tempdiffcool
+Geo 5xx,boiler,173,tempdiffheat,temp diff TC3/TC0 heat,uint (>=2<=10),K,true,number.boiler_temp_diff_TC3/TC0_heat,number.boiler_tempdiffheat
+Geo 5xx,boiler,173,tempdiffcool,temp diff TC3/TC0 cool,uint (>=2<=10),K,true,number.boiler_temp_diff_TC3/TC0_cool,number.boiler_tempdiffcool
 Geo 5xx,boiler,173,vpcooling,valve/pump cooling,boolean, ,true,switch.boiler_valve/pump_cooling,switch.boiler_vpcooling
 Geo 5xx,boiler,173,heatcable,heating cable,boolean, ,true,switch.boiler_heating_cable,switch.boiler_heatcable
 Geo 5xx,boiler,173,vc0valve,VC0 valve,boolean, ,true,switch.boiler_VC0_valve,switch.boiler_vc0valve
@@ -2635,8 +2635,9 @@ UI800,thermostat,4,noreducetemp,no reduce below temperature,int (>=-126<=126),C,
 UI800,thermostat,4,reducetemp,off/reduce switch temperature,int (>=-126<=126),C,true,number.thermostat_hc1_off/reduce_switch_temperature,number.thermostat_hc1_reducetemp
 UI800,thermostat,4,wwprio,dhw priority,boolean, ,true,switch.thermostat_hc1_dhw_priority,switch.thermostat_hc1_wwprio
 UI800,thermostat,4,cooling,cooling,boolean, ,true,switch.thermostat_hc1_cooling,switch.thermostat_hc1_cooling
+UI800,thermostat,4,coolingon,cooling,boolean, ,false,binary_sensor.thermostat_hc1_cooling,binary_sensor.thermostat_hc1_coolingon
 UI800,thermostat,4,hpmode,HP Mode,enum [heating\|cooling\|heating&cooling], ,true,select.thermostat_hc1_HP_Mode,select.thermostat_hc1_hpmode
-UI800,thermostat,4,dewoffset,dew point offset,uint (>=0<=254),K,true,number.thermostat_hc1_dew_point_offset,number.thermostat_hc1_dewoffset
+UI800,thermostat,4,dewoffset,dew point offset,uint (>=2<=10),K,true,number.thermostat_hc1_dew_point_offset,number.thermostat_hc1_dewoffset
 UI800,thermostat,4,roomtempdiff,room temp difference,uint (>=0<=254),K,true,number.thermostat_hc1_room_temp_difference,number.thermostat_hc1_roomtempdiff
 UI800,thermostat,4,hpminflowtemp,HP min. flow temp.,uint (>=0<=254),C,true,number.thermostat_hc1_HP_min._flow_temp.,number.thermostat_hc1_hpminflowtemp
 RC10,thermostat,65,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode
@@ -2987,8 +2988,9 @@ RC200/CW100,thermostat,157,noreducetemp,no reduce below temperature,int (>=-126<
 RC200/CW100,thermostat,157,reducetemp,off/reduce switch temperature,int (>=-126<=126),C,true,number.thermostat_hc1_off/reduce_switch_temperature,number.thermostat_hc1_reducetemp
 RC200/CW100,thermostat,157,wwprio,dhw priority,boolean, ,true,switch.thermostat_hc1_dhw_priority,switch.thermostat_hc1_wwprio
 RC200/CW100,thermostat,157,cooling,cooling,boolean, ,true,switch.thermostat_hc1_cooling,switch.thermostat_hc1_cooling
+RC200/CW100,thermostat,157,coolingon,cooling,boolean, ,false,binary_sensor.thermostat_hc1_cooling,binary_sensor.thermostat_hc1_coolingon
 RC200/CW100,thermostat,157,hpmode,HP Mode,enum [heating\|cooling\|heating&cooling], ,true,select.thermostat_hc1_HP_Mode,select.thermostat_hc1_hpmode
-RC200/CW100,thermostat,157,dewoffset,dew point offset,uint (>=0<=254),K,true,number.thermostat_hc1_dew_point_offset,number.thermostat_hc1_dewoffset
+RC200/CW100,thermostat,157,dewoffset,dew point offset,uint (>=2<=10),K,true,number.thermostat_hc1_dew_point_offset,number.thermostat_hc1_dewoffset
 RC200/CW100,thermostat,157,roomtempdiff,room temp difference,uint (>=0<=254),K,true,number.thermostat_hc1_room_temp_difference,number.thermostat_hc1_roomtempdiff
 RC200/CW100,thermostat,157,hpminflowtemp,HP min. flow temp.,uint (>=0<=254),C,true,number.thermostat_hc1_HP_min._flow_temp.,number.thermostat_hc1_hpminflowtemp
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode
@@ -3057,8 +3059,9 @@ RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,noreducetem
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,reducetemp,off/reduce switch temperature,int (>=-126<=126),C,true,number.thermostat_hc1_off/reduce_switch_temperature,number.thermostat_hc1_reducetemp
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,wwprio,dhw priority,boolean, ,true,switch.thermostat_hc1_dhw_priority,switch.thermostat_hc1_wwprio
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,cooling,cooling,boolean, ,true,switch.thermostat_hc1_cooling,switch.thermostat_hc1_cooling
+RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,coolingon,cooling,boolean, ,false,binary_sensor.thermostat_hc1_cooling,binary_sensor.thermostat_hc1_coolingon
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,hpmode,HP Mode,enum [heating\|cooling\|heating&cooling], ,true,select.thermostat_hc1_HP_Mode,select.thermostat_hc1_hpmode
-RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,dewoffset,dew point offset,uint (>=0<=254),K,true,number.thermostat_hc1_dew_point_offset,number.thermostat_hc1_dewoffset
+RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,dewoffset,dew point offset,uint (>=2<=10),K,true,number.thermostat_hc1_dew_point_offset,number.thermostat_hc1_dewoffset
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,roomtempdiff,room temp difference,uint (>=0<=254),K,true,number.thermostat_hc1_room_temp_difference,number.thermostat_hc1_roomtempdiff
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,hpminflowtemp,HP min. flow temp.,uint (>=0<=254),C,true,number.thermostat_hc1_HP_min._flow_temp.,number.thermostat_hc1_hpminflowtemp
 RC100/Moduline 1000/1010,thermostat,165,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode
@@ -3127,8 +3130,9 @@ RC100/Moduline 1000/1010,thermostat,165,noreducetemp,no reduce below temperature
 RC100/Moduline 1000/1010,thermostat,165,reducetemp,off/reduce switch temperature,int (>=-126<=126),C,true,number.thermostat_hc1_off/reduce_switch_temperature,number.thermostat_hc1_reducetemp
 RC100/Moduline 1000/1010,thermostat,165,wwprio,dhw priority,boolean, ,true,switch.thermostat_hc1_dhw_priority,switch.thermostat_hc1_wwprio
 RC100/Moduline 1000/1010,thermostat,165,cooling,cooling,boolean, ,true,switch.thermostat_hc1_cooling,switch.thermostat_hc1_cooling
+RC100/Moduline 1000/1010,thermostat,165,coolingon,cooling,boolean, ,false,binary_sensor.thermostat_hc1_cooling,binary_sensor.thermostat_hc1_coolingon
 RC100/Moduline 1000/1010,thermostat,165,hpmode,HP Mode,enum [heating\|cooling\|heating&cooling], ,true,select.thermostat_hc1_HP_Mode,select.thermostat_hc1_hpmode
-RC100/Moduline 1000/1010,thermostat,165,dewoffset,dew point offset,uint (>=0<=254),K,true,number.thermostat_hc1_dew_point_offset,number.thermostat_hc1_dewoffset
+RC100/Moduline 1000/1010,thermostat,165,dewoffset,dew point offset,uint (>=2<=10),K,true,number.thermostat_hc1_dew_point_offset,number.thermostat_hc1_dewoffset
 RC100/Moduline 1000/1010,thermostat,165,roomtempdiff,room temp difference,uint (>=0<=254),K,true,number.thermostat_hc1_room_temp_difference,number.thermostat_hc1_roomtempdiff
 RC100/Moduline 1000/1010,thermostat,165,hpminflowtemp,HP min. flow temp.,uint (>=0<=254),C,true,number.thermostat_hc1_HP_min._flow_temp.,number.thermostat_hc1_hpminflowtemp
 Rego 2000/3000,thermostat,172,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode
@@ -3197,8 +3201,9 @@ Rego 2000/3000,thermostat,172,noreducetemp,no reduce below temperature,int (>=-1
 Rego 2000/3000,thermostat,172,reducetemp,off/reduce switch temperature,int (>=-126<=126),C,true,number.thermostat_hc1_off/reduce_switch_temperature,number.thermostat_hc1_reducetemp
 Rego 2000/3000,thermostat,172,wwprio,dhw priority,boolean, ,true,switch.thermostat_hc1_dhw_priority,switch.thermostat_hc1_wwprio
 Rego 2000/3000,thermostat,172,cooling,cooling,boolean, ,true,switch.thermostat_hc1_cooling,switch.thermostat_hc1_cooling
+Rego 2000/3000,thermostat,172,coolingon,cooling,boolean, ,false,binary_sensor.thermostat_hc1_cooling,binary_sensor.thermostat_hc1_coolingon
 Rego 2000/3000,thermostat,172,hpmode,HP Mode,enum [heating\|cooling\|heating&cooling], ,true,select.thermostat_hc1_HP_Mode,select.thermostat_hc1_hpmode
-Rego 2000/3000,thermostat,172,dewoffset,dew point offset,uint (>=0<=254),K,true,number.thermostat_hc1_dew_point_offset,number.thermostat_hc1_dewoffset
+Rego 2000/3000,thermostat,172,dewoffset,dew point offset,uint (>=2<=10),K,true,number.thermostat_hc1_dew_point_offset,number.thermostat_hc1_dewoffset
 Rego 2000/3000,thermostat,172,roomtempdiff,room temp difference,uint (>=0<=254),K,true,number.thermostat_hc1_room_temp_difference,number.thermostat_hc1_roomtempdiff
 Rego 2000/3000,thermostat,172,hpminflowtemp,HP min. flow temp.,uint (>=0<=254),C,true,number.thermostat_hc1_HP_min._flow_temp.,number.thermostat_hc1_hpminflowtemp
 Comfort RF,thermostat,215,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode
@@ -3294,8 +3299,9 @@ Rego 3000/UI800,thermostat,253,noreducetemp,no reduce below temperature,int (>=-
 Rego 3000/UI800,thermostat,253,reducetemp,off/reduce switch temperature,int (>=-126<=126),C,true,number.thermostat_hc1_off/reduce_switch_temperature,number.thermostat_hc1_reducetemp
 Rego 3000/UI800,thermostat,253,wwprio,dhw priority,boolean, ,true,switch.thermostat_hc1_dhw_priority,switch.thermostat_hc1_wwprio
 Rego 3000/UI800,thermostat,253,cooling,cooling,boolean, ,true,switch.thermostat_hc1_cooling,switch.thermostat_hc1_cooling
+Rego 3000/UI800,thermostat,253,coolingon,cooling,boolean, ,false,binary_sensor.thermostat_hc1_cooling,binary_sensor.thermostat_hc1_coolingon
 Rego 3000/UI800,thermostat,253,hpmode,HP Mode,enum [heating\|cooling\|heating&cooling], ,true,select.thermostat_hc1_HP_Mode,select.thermostat_hc1_hpmode
-Rego 3000/UI800,thermostat,253,dewoffset,dew point offset,uint (>=0<=254),K,true,number.thermostat_hc1_dew_point_offset,number.thermostat_hc1_dewoffset
+Rego 3000/UI800,thermostat,253,dewoffset,dew point offset,uint (>=2<=10),K,true,number.thermostat_hc1_dew_point_offset,number.thermostat_hc1_dewoffset
 Rego 3000/UI800,thermostat,253,roomtempdiff,room temp difference,uint (>=0<=254),K,true,number.thermostat_hc1_room_temp_difference,number.thermostat_hc1_roomtempdiff
 Rego 3000/UI800,thermostat,253,hpminflowtemp,HP min. flow temp.,uint (>=0<=254),C,true,number.thermostat_hc1_HP_min._flow_temp.,number.thermostat_hc1_hpminflowtemp
 ES72/RC20,thermostat,66,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode
