@@ -299,7 +299,7 @@ const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn';
 const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken';
 
 let system_status = {
-  emsesp_version: '3.7.0-demo',
+  emsesp_version: '3.x-demo',
   esp_platform: 'ESP32',
   max_alloc_heap: 89,
   psram_size: 0,
@@ -2627,7 +2627,7 @@ rest_server.get(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
 // EMS-ESP API specific
 const emsesp_info = {
   System: {
-    version: '3.7.0',
+    version: '3.6.2',
     uptime: '001+06:40:34.018',
     'uptime (seconds)': 110434,
     freemem: 131,
