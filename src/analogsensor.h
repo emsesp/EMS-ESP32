@@ -23,10 +23,6 @@
 #include "mqtt.h"
 #include "console.h"
 
-#ifndef EMSESP_STANDALONE
-#include "driver/adc.h"
-#endif
-
 #include <uuid/log.h>
 
 namespace emsesp {

@@ -217,23 +217,24 @@ void WebEntityService::render_value(JsonObject & output, EntityItem entity, cons
 // process json output for info/commands and value_info
 bool WebEntityService::get_value_info(JsonObject & output, const char * cmd) {
     EMSESP::webEntityService.read([&](WebEntity & webEntity) { entityItems = &webEntity.entityItems; });
-    if (entityItems->size() == 0) {
-        return false;
-    }
-    if (Helpers::toLower(cmd) == "commands") {
-        output["info"]     = "list all values";
-        output["commands"] = "list all commands";
+    if (Helpers::toLower(cmd) == F_(commands)) {
+        output[F_(info)]     = Helpers::translated_word(FL_(info_cmd));
+        output[F_(commands)] = Helpers::translated_word(FL_(commands_cmd));
         for (const auto & entity : *entityItems) {
             output[entity.name] = "custom entitiy";
         }
         return true;
     }
-    if (strlen(cmd) == 0 || Helpers::toLower(cmd) == "values" || Helpers::toLower(cmd) == "info") {
+    if (strlen(cmd) == 0 || Helpers::toLower(cmd) == F_(values) || Helpers::toLower(cmd) == F_(info)) {
         // list all names
         for (const EntityItem & entity : *entityItems) {
             render_value(output, entity);
         }
         return (output.size() != 0);
+    }
+    if (entityItems->size() == 0) {
+        output["message"] = "no custom entities";
+        return false;
     }
     char command_s[30];
     strlcpy(command_s, cmd, sizeof(command_s));
