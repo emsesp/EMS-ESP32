@@ -65,7 +65,9 @@ const SettingsCustomization: FC = () => {
 
   const { data: devices } = useRequest(EMSESP.readDevices);
 
-  const { send: writeCustomEntities } = useRequest((data) => EMSESP.writeCustomEntities(data), { immediate: false });
+  const { send: writeCustomizationEntities } = useRequest((data) => EMSESP.writeCustomizationEntities(data), {
+    immediate: false
+  });
 
   const { send: readDeviceEntities, onSuccess: onSuccess } = useRequest((data) => EMSESP.readDeviceEntities(data), {
     initialData: [],
@@ -312,7 +314,7 @@ const SettingsCustomization: FC = () => {
         return;
       }
 
-      await writeCustomEntities({ id: devices?.devices[selectedDevice].i, entity_ids: masked_entities }).catch(
+      await writeCustomizationEntities({ id: devices?.devices[selectedDevice].i, entity_ids: masked_entities }).catch(
         (error) => {
           if (error.message === 'Reboot required') {
             setRestartNeeded(true);

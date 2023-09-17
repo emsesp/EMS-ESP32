@@ -32,13 +32,13 @@ ESP8266React            EMSESP::esp8266React(&webServer, &dummyFS);
 WebSettingsService      EMSESP::webSettingsService      = WebSettingsService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
 WebCustomizationService EMSESP::webCustomizationService = WebCustomizationService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
 WebSchedulerService     EMSESP::webSchedulerService     = WebSchedulerService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
-WebEntityService        EMSESP::webEntityService        = WebEntityService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
+WebCustomEntityService  EMSESP::webCustomEntityService  = WebCustomEntityService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
 #else
 ESP8266React            EMSESP::esp8266React(&webServer, &LittleFS);
 WebSettingsService      EMSESP::webSettingsService      = WebSettingsService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
 WebCustomizationService EMSESP::webCustomizationService = WebCustomizationService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
 WebSchedulerService     EMSESP::webSchedulerService     = WebSchedulerService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
-WebEntityService        EMSESP::webEntityService        = WebEntityService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
+WebCustomEntityService  EMSESP::webCustomEntityService  = WebCustomEntityService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
 #endif
 
 WebStatusService EMSESP::webStatusService = WebStatusService(&webServer, EMSESP::esp8266React.getSecurityManager());
@@ -481,7 +481,7 @@ void EMSESP::publish_all(bool force) {
         publish_device_values(EMSdevice::DeviceType::MIXER);
         publish_other_values(); // switch and heat pump, ...
         webSchedulerService.publish();
-        webEntityService.publish();
+        webCustomEntityService.publish();
         publish_sensor_values(true); // includes temperature and analog sensors
         system_.send_heartbeat();
     }
@@ -514,7 +514,7 @@ void EMSESP::publish_all_loop() {
     case 5:
         publish_other_values(); // switch and heat pump
         webSchedulerService.publish(true);
-        webEntityService.publish(true);
+        webCustomEntityService.publish(true);
         break;
     case 6:
         publish_sensor_values(true, true);
@@ -605,7 +605,7 @@ void EMSESP::publish_other_values() {
     // publish_device_values(EMSdevice::DeviceType::ALERT);
     // publish_device_values(EMSdevice::DeviceType::PUMP);
     // publish_device_values(EMSdevice::DeviceType::GENERIC);
-    webEntityService.publish();
+    webCustomEntityService.publish();
 }
 
 // publish both the temperature and analog sensor values
@@ -657,7 +657,8 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
     buffer = nullptr;
 }
 
-// builds json with the detail of each value, for a specific EMS device type or the temperature sensor
+// builds json with the detail of each value,
+// for a specific EMS device type or the sensors, scheduler and custom entities
 bool EMSESP::get_device_value_info(JsonObject & root, const char * cmd, const int8_t id, const uint8_t devicetype) {
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice->device_type() == devicetype) {
@@ -684,7 +685,7 @@ bool EMSESP::get_device_value_info(JsonObject & root, const char * cmd, const in
 
     // own entities
     if (devicetype == DeviceType::CUSTOM) {
-        return EMSESP::webEntityService.get_value_info(root, cmd);
+        return EMSESP::webCustomEntityService.get_value_info(root, cmd);
     }
 
     char error[100];
@@ -895,7 +896,7 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     }
 
     // Check for custom entities reding this telegram
-    webEntityService.get_value(telegram);
+    webCustomEntityService.get_value(telegram);
 
     // check for common types, like the Version(0x02)
     if (telegram->type_id == EMSdevice::EMS_TYPE_VERSION) {
@@ -1414,7 +1415,7 @@ void EMSESP::scheduled_fetch_values() {
                     return;
                 }
             }
-            webEntityService.fetch();
+            webCustomEntityService.fetch();
             no = 0;
         }
     }
@@ -1497,7 +1498,7 @@ void EMSESP::start() {
 
     webCustomizationService.begin(); // load the customizations
     webSchedulerService.begin();     // load the scheduler events
-    webEntityService.begin();        // load the custom telegram reads
+    webCustomEntityService.begin();  // load the custom telegram reads
 
     // start telnet service if it's enabled
     // default idle is 10 minutes, default write timeout is 0 (automatic)
