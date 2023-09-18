@@ -225,16 +225,16 @@ bool WebEntityService::get_value_info(JsonObject & output, const char * cmd) {
         }
         return true;
     }
+    if (entityItems->size() == 0) {
+        output["message"] = "no entries";
+        return true;
+    }
     if (strlen(cmd) == 0 || Helpers::toLower(cmd) == F_(values) || Helpers::toLower(cmd) == F_(info)) {
         // list all names
         for (const EntityItem & entity : *entityItems) {
             render_value(output, entity);
         }
         return (output.size() != 0);
-    }
-    if (entityItems->size() == 0) {
-        output["message"] = "no custom entities";
-        return false;
     }
     char command_s[30];
     strlcpy(command_s, cmd, sizeof(command_s));

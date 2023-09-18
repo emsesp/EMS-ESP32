@@ -363,7 +363,8 @@ bool TemperatureSensor::command_commands(const char * value, const int8_t id, Js
 // returns false if there are no sensors
 bool TemperatureSensor::command_info(const char * value, const int8_t id, JsonObject & output) {
     if (sensors_.empty()) {
-        return false;
+        output["message"] = "no entries";
+        return true;
     }
 
     for (const auto & sensor : sensors_) {
@@ -389,6 +390,7 @@ bool TemperatureSensor::command_info(const char * value, const int8_t id, JsonOb
 // called from emsesp.cpp, similar to the emsdevice->get_value_info
 bool TemperatureSensor::get_value_info(JsonObject & output, const char * cmd, const int8_t id) {
     if (sensors_.empty()) {
+        output["message"] = "no entries";
         return false;
     }
     // make a copy of the string command for parsing
@@ -576,7 +578,7 @@ TemperatureSensor::Sensor::Sensor(const uint8_t addr[])
              (unsigned int)(internal_id_ >> 48) & 0xFF,
              (unsigned int)(internal_id_ >> 32) & 0xFFFF,
              (unsigned int)(internal_id_ >> 16) & 0xFFFF,
-             (unsigned int)(internal_id_) & 0xFFFF);
+             (unsigned int)(internal_id_)&0xFFFF);
     id_     = std::string(id_s);
     name_   = std::string{}; // name (alias) is empty
     offset_ = 0;             // 0 degrees offset
