@@ -30,17 +30,19 @@
 class NetworkSettings {
   public:
     // core wifi configuration
-    String ssid;
-    String password;
-    String hostname;
-    bool   staticIPConfig;
-    bool   enableIPv6;
-    bool   bandwidth20;
-    int8_t tx_power;
-    bool   nosleep;
-    bool   enableMDNS;
-    bool   enableCORS;
-    String CORSOrigin;
+    String  ssid;
+    String  bssid;
+    String  password;
+    String  hostname;
+    uint8_t channel;
+    bool    staticIPConfig;
+    bool    enableIPv6;
+    bool    bandwidth20;
+    int8_t  tx_power;
+    bool    nosleep;
+    bool    enableMDNS;
+    bool    enableCORS;
+    String  CORSOrigin;
 
     // optional configuration for static IP address
     IPAddress localIP;
@@ -52,6 +54,8 @@ class NetworkSettings {
     static void read(NetworkSettings & settings, JsonObject & root) {
         // connection settings
         root["ssid"]             = settings.ssid;
+        root["bssid"]            = settings.bssid;
+        root["channel"]          = settings.channel;
         root["password"]         = settings.password;
         root["hostname"]         = settings.hostname;
         root["static_ip_config"] = settings.staticIPConfig;
@@ -75,6 +79,8 @@ class NetworkSettings {
         auto enableCORS         = settings.enableCORS;
         auto CORSOrigin         = settings.CORSOrigin;
         settings.ssid           = root["ssid"] | FACTORY_WIFI_SSID;
+        settings.bssid          = root["bssid"] | "";
+        settings.channel        = root["channel"] | 0;
         settings.password       = root["password"] | FACTORY_WIFI_PASSWORD;
         settings.hostname       = root["hostname"] | FACTORY_WIFI_HOSTNAME;
         settings.staticIPConfig = root["static_ip_config"] | false;
