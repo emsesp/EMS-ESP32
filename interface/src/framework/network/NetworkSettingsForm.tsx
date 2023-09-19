@@ -83,7 +83,6 @@ const WiFiSettingsForm: FC = () => {
         updateState('networkSettings', (current_data) => ({
           ssid: selectedNetwork.ssid,
           bssid: selectedNetwork.bssid,
-          channel: selectedNetwork.channel,
           password: current_data ? current_data.password : '',
           hostname: current_data?.hostname,
           static_ip_config: false,
@@ -178,22 +177,11 @@ const WiFiSettingsForm: FC = () => {
         <ValidatedTextField
           fieldErrors={fieldErrors}
           name="bssid"
-          label={'BSSID (leave blank for SSID only)'}
+          label={'BSSID (' + LL.NETWORK_BLANK_BSSID() + ')'}
           fullWidth
           variant="outlined"
           value={data.bssid}
           onChange={updateFormValue}
-          margin="normal"
-        />
-        <ValidatedTextField
-          fieldErrors={fieldErrors}
-          name="channel"
-          label="Channel (0=auto)"
-          fullWidth
-          variant="outlined"
-          value={numberValue(data.channel)}
-          onChange={updateFormValue}
-          type="number"
           margin="normal"
         />
         {(!selectedNetwork || !isNetworkOpen(selectedNetwork)) && (

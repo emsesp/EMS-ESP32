@@ -282,6 +282,7 @@ const no: Translation = {
   NETWORK_SCANNER: 'Nettverk Scanner',
   NETWORK_NO_WIFI: 'Ingen trådløse nett funnet',
   NETWORK_BLANK_SSID: 'la feltet være blankt for å deaktivisere trådløst nettverk', // TODO translate
+  NETWORK_BLANK_BSSID: 'leave blank to use only SSID', // TODO translate
   TX_POWER: 'Tx Effekt',
   HOSTNAME: 'Hostname',
   NETWORK_DISABLE_SLEEP: 'Hindre at trådløst nettverk går i Sleep Mode',

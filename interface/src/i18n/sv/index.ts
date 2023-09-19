@@ -282,6 +282,7 @@ const sv: Translation = {
   NETWORK_SCANNER: 'Hittade nätverk',
   NETWORK_NO_WIFI: 'Inga WiFi-nätverk hittades',
   NETWORK_BLANK_SSID: 'lämna blankt för att inaktivera WiFi', // and enable ETH // TODO translate
+  NETWORK_BLANK_BSSID: 'leave blank to use only SSID', // TODO translate
   TX_POWER: 'Tx Effekt',
   HOSTNAME: 'Värdnamn',
   NETWORK_DISABLE_SLEEP: 'Inaktivera sömnläge',

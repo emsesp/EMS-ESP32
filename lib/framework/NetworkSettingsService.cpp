@@ -78,9 +78,9 @@ void NetworkSettingsService::manageSTA() {
             for (uint8_t i = 0; i < 6; i++) {
                 mac1[i] = (uint8_t)mac[i];
             }
-            WiFi.begin(_state.ssid.c_str(), _state.password.c_str(), _state.channel, mac1);
+            WiFi.begin(_state.ssid.c_str(), _state.password.c_str(), 0, mac1);
         } else {
-            WiFi.begin(_state.ssid.c_str(), _state.password.c_str(), _state.channel);
+            WiFi.begin(_state.ssid.c_str(), _state.password.c_str());
         }
 
         // set power after wifi is startet, fixed value for C3_V1

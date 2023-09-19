@@ -18,9 +18,5 @@ export const createNetworkSettingsValidator = (networkSettings: NetworkSettings)
     tx_power: [
       { required: true, message: 'Tx Power is required' },
       { type: 'number', min: 0, max: 20, message: 'Tx Power must be between 0 and 20dBm' }
-    ],
-    channel: [
-      { required: true, message: 'Channel is required' },
-      { type: 'number', min: 0, max: 13, message: 'Channel must be between 0 and 13' }
     ]
   });
