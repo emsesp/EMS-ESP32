@@ -300,7 +300,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     // see if there is a command registered
     auto cf = find_command(device_type, device_id, cmd);
 
-    // check if its a call to and end-point to a device
+    // check if its a call to an end-point of a device
     // this is used to fetch the attributes of the device entity, or call a command directly
     bool single_command = (!value || !strlen(value));
     if (single_command) {
@@ -546,8 +546,9 @@ bool Command::device_has_commands(const uint8_t device_type) {
     }
 
     if (device_type == EMSdevice::DeviceType::CUSTOM) {
-        return true; // we always have info
-        // return (EMSESP::webEntityService.count_entities() != 0);
+        // if there are no custom entities, don't error but return a message
+        return true;
+        // return (EMSESP::webCustomEntityService.count_entities() != 0);
     }
 
     if (device_type == EMSdevice::DeviceType::TEMPERATURESENSOR) {
@@ -612,7 +613,7 @@ void Command::show_all(uuid::console::Shell & shell) {
     show(shell, EMSdevice::DeviceType::SYSTEM, true);
 
     // show Custom
-    // if (EMSESP::webEntityService.has_commands()) {
+    // if (EMSESP::webCustomEntityService.has_commands()) {
         shell.print(COLOR_BOLD_ON);
         shell.print(COLOR_YELLOW);
         shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::CUSTOM));

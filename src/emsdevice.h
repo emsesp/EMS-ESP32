@@ -207,8 +207,8 @@ class EMSdevice {
     void   add_handlers_ignored(const uint16_t handler);
 
     void set_climate_minmax(uint8_t tag, int16_t min, uint32_t max);
-    void setCustomEntity(const std::string & entity_id);
-    void getCustomEntities(std::vector<std::string> & entity_ids);
+    void setCustomizationEntity(const std::string & entity_id);
+    void getCustomizationEntities(std::vector<std::string> & entity_ids);
 
     void register_telegram_type(const uint16_t telegram_type_id, const char * telegram_type_name, bool fetch, const process_function_p cb);
     bool handle_telegram(std::shared_ptr<const Telegram> telegram);

@@ -1074,7 +1074,7 @@ void EMSdevice::set_climate_minmax(uint8_t tag, int16_t min, uint32_t max) {
 
 // set mask per device entity based on the id which is prefixed with the 2 char hex mask value
 // returns true if the entity has a mask set (not 0 the default)
-void EMSdevice::setCustomEntity(const std::string & entity_id) {
+void EMSdevice::setCustomizationEntity(const std::string & entity_id) {
     for (auto & dv : devicevalues_) {
         char entity_name[70];
         if (dv.tag < DeviceValueTAG::TAG_HC1) {
@@ -1126,7 +1126,7 @@ void EMSdevice::setCustomEntity(const std::string & entity_id) {
 }
 
 // populate a string vector with entities that have masks set or have a custom name
-void EMSdevice::getCustomEntities(std::vector<std::string> & entity_ids) {
+void EMSdevice::getCustomizationEntities(std::vector<std::string> & entity_ids) {
     for (const auto & dv : devicevalues_) {
         char name[100];
         name[0] = '\0';

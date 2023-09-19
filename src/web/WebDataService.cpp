@@ -92,7 +92,7 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
     }
 
     // add any custom entities
-    if (EMSESP::webEntityService.count_entities()) {
+    if (EMSESP::webCustomEntityService.count_entities()) {
         JsonObject obj = devices.createNestedObject();
         obj["id"]      = 99;                                                // the last unique id
         obj["tn"]      = Helpers::translated_word(FL_(custom_device));      // translated device type name
@@ -210,7 +210,7 @@ void WebDataService::device_data(AsyncWebServerRequest * request) {
 #ifndef EMSESP_STANDALONE
         if (id == 99) {
             JsonObject output = response->getRoot();
-            EMSESP::webEntityService.generate_value_web(output);
+            EMSESP::webCustomEntityService.generate_value_web(output);
             response->setLength();
             request->send(response);
             return;

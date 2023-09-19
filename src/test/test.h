@@ -54,7 +54,9 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "custom"
 // #define EMSESP_DEBUG_DEFAULT "entity_dump"
 // #define EMSESP_DEBUG_DEFAULT "memory"
-#define EMSESP_DEBUG_DEFAULT "coldshot"
+// #define EMSESP_DEBUG_DEFAULT "coldshot"
+#define EMSESP_DEBUG_DEFAULT "custom_entities"
+
 
 class Test {
   public:

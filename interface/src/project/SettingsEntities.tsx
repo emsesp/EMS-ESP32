@@ -33,12 +33,12 @@ const SettingsEntities: FC = () => {
     data: entities,
     send: fetchEntities,
     error
-  } = useRequest(EMSESP.readEntities, {
+  } = useRequest(EMSESP.readCustomEntities, {
     initialData: [],
     force: true
   });
 
-  const { send: writeEntities } = useRequest((data) => EMSESP.writeEntities(data), { immediate: false });
+  const { send: writeEntities } = useRequest((data) => EMSESP.writeCustomEntities(data), { immediate: false });
 
   function hasEntityChanged(ei: EntityItem) {
     return (

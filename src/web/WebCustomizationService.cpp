@@ -31,8 +31,8 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
                     securityManager,
                     AuthenticationPredicates::IS_AUTHENTICATED)
     , _fsPersistence(WebCustomization::read, WebCustomization::update, this, fs, EMSESP_CUSTOMIZATION_FILE)
-    , _masked_entities_handler(CUSTOM_ENTITIES_PATH,
-                               securityManager->wrapCallback(std::bind(&WebCustomizationService::custom_entities, this, _1, _2),
+    , _masked_entities_handler(CUSTOMIZATION_ENTITIES_PATH,
+                               securityManager->wrapCallback(std::bind(&WebCustomizationService::customization_entities, this, _1, _2),
                                                              AuthenticationPredicates::IS_AUTHENTICATED)) {
     server->on(DEVICE_ENTITIES_PATH,
                HTTP_GET,
@@ -54,10 +54,10 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
 }
 
 // this creates the customization file, saving it to the FS
-void WebCustomization::read(WebCustomization & settings, JsonObject & root) {
+void WebCustomization::read(WebCustomization & customizations, JsonObject & root) {
     // Temperature Sensor customization
     JsonArray sensorsJson = root.createNestedArray("ts");
-    for (const SensorCustomization & sensor : settings.sensorCustomizations) {
+    for (const SensorCustomization & sensor : customizations.sensorCustomizations) {
         JsonObject sensorJson = sensorsJson.createNestedObject();
         sensorJson["id"]      = sensor.id;     // ID of chip
         sensorJson["name"]    = sensor.name;   // n
@@ -66,7 +66,7 @@ void WebCustomization::read(WebCustomization & settings, JsonObject & root) {
 
     // Analog Sensor customization
     JsonArray analogJson = root.createNestedArray("as");
-    for (const AnalogCustomization & sensor : settings.analogCustomizations) {
+    for (const AnalogCustomization & sensor : customizations.analogCustomizations) {
         JsonObject sensorJson = analogJson.createNestedObject();
         sensorJson["gpio"]    = sensor.gpio;   // g
         sensorJson["name"]    = sensor.name;   // n
@@ -78,7 +78,7 @@ void WebCustomization::read(WebCustomization & settings, JsonObject & root) {
 
     // Masked entities customization
     JsonArray masked_entitiesJson = root.createNestedArray("masked_entities");
-    for (const EntityCustomization & entityCustomization : settings.entityCustomizations) {
+    for (const EntityCustomization & entityCustomization : customizations.entityCustomizations) {
         JsonObject entityJson    = masked_entitiesJson.createNestedObject();
         entityJson["product_id"] = entityCustomization.product_id;
         entityJson["device_id"]  = entityCustomization.device_id;
@@ -93,24 +93,22 @@ void WebCustomization::read(WebCustomization & settings, JsonObject & root) {
 
 // call on initialization and also when the page is saved via web UI
 // this loads the data into the internal class
-StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization & settings) {
+StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization & customizations) {
 #ifdef EMSESP_STANDALONE
     // invoke some fake data for testing
-    const char * json = "{\"ts\":[],\"as\":[],\"masked_entities\":[{\"product_id\":123,\"device_id\":8,\"entity_ids\":[\"08heatingactive|my custom "
-                        "name for heating active\",\"08tapwateractive\"]}]}";
-
+    const char *            json = "{\"ts\":[],\"as\":[],\"masked_entities\":[{\"product_id\":123,\"device_id\":8,\"entity_ids\":[\"08heatingactive|my custom "
+                                   "name for heating active\",\"08tapwateractive\"]}]}";
     StaticJsonDocument<500> doc;
     deserializeJson(doc, json);
     root = doc.as<JsonObject>();
-
     Serial.println(COLOR_BRIGHT_MAGENTA);
-    Serial.print("Using custom file: ");
+    Serial.print(" Using fake customization file: ");
     serializeJson(root, Serial);
     Serial.println(COLOR_RESET);
 #endif
 
     // Temperature Sensor customization
-    settings.sensorCustomizations.clear();
+    customizations.sensorCustomizations.clear();
     if (root["ts"].is<JsonArray>()) {
         for (const JsonObject sensorJson : root["ts"].as<JsonArray>()) {
             // create each of the sensor, overwriting any previous settings
@@ -118,12 +116,12 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
             sensor.id     = sensorJson["id"].as<std::string>();
             sensor.name   = sensorJson["name"].as<std::string>();
             sensor.offset = sensorJson["offset"];
-            settings.sensorCustomizations.push_back(sensor); // add to list
+            customizations.sensorCustomizations.push_back(sensor); // add to list
         }
     }
 
     // Analog Sensor customization
-    settings.analogCustomizations.clear();
+    customizations.analogCustomizations.clear();
     if (root["as"].is<JsonArray>()) {
         for (const JsonObject analogJson : root["as"].as<JsonArray>()) {
             // create each of the sensor, overwriting any previous settings
@@ -134,12 +132,12 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
             sensor.factor = analogJson["factor"];
             sensor.uom    = analogJson["uom"];
             sensor.type   = analogJson["type"];
-            settings.analogCustomizations.push_back(sensor); // add to list
+            customizations.analogCustomizations.push_back(sensor); // add to list
         }
     }
 
     // load array of entities id's with masks, building up the object class
-    settings.entityCustomizations.clear();
+    customizations.entityCustomizations.clear();
     if (root["masked_entities"].is<JsonArray>()) {
         for (const JsonObject masked_entities : root["masked_entities"].as<JsonArray>()) {
             auto new_entry       = EntityCustomization();
@@ -152,7 +150,7 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
                 }
             }
 
-            settings.entityCustomizations.push_back(new_entry); // save the new object
+            customizations.entityCustomizations.push_back(new_entry); // save the new object
         }
     }
 
@@ -236,7 +234,7 @@ void WebCustomizationService::device_entities(AsyncWebServerRequest * request) {
 // takes a list of updated entities with new masks from the web UI
 // saves it in the customization service
 // and updates the entity list real-time
-void WebCustomizationService::custom_entities(AsyncWebServerRequest * request, JsonVariant & json) {
+void WebCustomizationService::customization_entities(AsyncWebServerRequest * request, JsonVariant & json) {
     bool need_reboot = false;
     if (json.is<JsonObject>()) {
         // find the device using the unique_id
@@ -256,7 +254,7 @@ void WebCustomizationService::custom_entities(AsyncWebServerRequest * request, J
                             entity_ids.push_back(id_s);
                             need_reboot = true;
                         } else {
-                            emsdevice->setCustomEntity(id_s);
+                            emsdevice->setCustomizationEntity(id_s);
                         }
                         // emsesp::EMSESP::logger().info(id.as<const char *>());
                     }
@@ -287,7 +285,7 @@ void WebCustomizationService::custom_entities(AsyncWebServerRequest * request, J
                         }
                     });
                     // get list of entities that have masks set or a custom fullname
-                    emsdevice->getCustomEntities(entity_ids);
+                    emsdevice->getCustomizationEntities(entity_ids);
 
                     // Save the list to the customization file
                     EMSESP::webCustomizationService.update(

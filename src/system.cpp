@@ -1037,7 +1037,7 @@ bool System::check_restore() {
                 saveSettings(EMSESP_SCHEDULER_FILE, "Schedule", input);
             } else if (settings_type == "entities") {
                 // it's a entity file, just replace it and there's no need to reboot
-                saveSettings(EMSESP_ENTITY_FILE, "Entities", input);
+                saveSettings(EMSESP_CUSTOMENTITY_FILE, "Entities", input);
             } else {
                 LOG_ERROR("Unrecognized file uploaded");
             }

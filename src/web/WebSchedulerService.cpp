@@ -57,12 +57,13 @@ StateUpdateResult WebScheduler::update(JsonObject & root, WebScheduler & webSche
 #ifdef EMSESP_STANDALONE
     // invoke some fake data for testing
     const char * json =
-        "{[{\"id\":1,\"active\":true,\"flags\":31,\"time\": \"07:30\",\"cmd\": \"hc1/mode\",\"value\": \"day\",\"name\": \"turn on central heating\"}]}";
+        "{\"schedule\": [{\"id\":1,\"active\":true,\"flags\":31,\"time\": \"07:30\",\"cmd\": \"hc1mode\",\"value\": \"day\",\"name\": \"turn on "
+        "central heating\"}]}";
     StaticJsonDocument<500> doc;
     deserializeJson(doc, json);
     root = doc.as<JsonObject>();
     Serial.println(COLOR_BRIGHT_MAGENTA);
-    Serial.print("Using custom file: ");
+    Serial.print(" Using fake scheduler file: ");
     serializeJson(root, Serial);
     Serial.println(COLOR_RESET);
 #endif

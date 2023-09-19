@@ -62,7 +62,7 @@ export const readDeviceEntities = (id: number) =>
   });
 export const readDevices = () => alovaInstance.Get<Devices>('/rest/devices');
 export const resetCustomizations = () => alovaInstance.Post('/rest/resetCustomizations');
-export const writeCustomEntities = (data: any) => alovaInstance.Post('/rest/customEntities', data);
+export const writeCustomizationEntities = (data: any) => alovaInstance.Post('/rest/customizationEntities', data);
 
 // SettingsScheduler
 export const readSchedule = () =>
@@ -85,8 +85,8 @@ export const readSchedule = () =>
 export const writeSchedule = (data: any) => alovaInstance.Post('/rest/schedule', data);
 
 // SettingsEntities
-export const readEntities = () =>
-  alovaInstance.Get<EntityItem[]>('/rest/entities', {
+export const readCustomEntities = () =>
+  alovaInstance.Get<EntityItem[]>('/rest/customentities', {
     name: 'entities',
     transformData(data: any) {
       return data.entities.map((ei: EntityItem) => ({
@@ -104,4 +104,4 @@ export const readEntities = () =>
       }));
     }
   });
-export const writeEntities = (data: any) => alovaInstance.Post('/rest/entities', data);
+export const writeCustomEntities = (data: any) => alovaInstance.Post('/rest/customentities', data);
