@@ -927,12 +927,9 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
                     if (telegram->type_id == publish_id_) {
                         publish_id_ = 0;
                     }
-                    // dont publish if not connected and don't reset flag, so publish is done after reconnect
-                    if (Mqtt::connected()) {
-                        emsdevice->has_update(false); // reset flag
-                        if (!Mqtt::publish_single()) {
-                            publish_device_values(emsdevice->device_type()); // publish to MQTT if we explicitly have too
-                        }
+                    emsdevice->has_update(false); // reset flag
+                    if (!Mqtt::publish_single()) {
+                        publish_device_values(emsdevice->device_type()); // publish to MQTT if we explicitly have too
                     }
                 }
             }

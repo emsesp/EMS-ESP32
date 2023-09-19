@@ -626,7 +626,7 @@ void AnalogSensor::publish_values(const bool force) {
 bool AnalogSensor::get_value_info(JsonObject & output, const char * cmd, const int8_t id) const {
     if (sensors_.empty()) {
         output["message"] = "no entries";
-        return false;
+        return true;
     }
     // make a copy of the string command for parsing
     char command_s[30];

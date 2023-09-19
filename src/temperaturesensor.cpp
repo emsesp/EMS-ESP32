@@ -391,7 +391,7 @@ bool TemperatureSensor::command_info(const char * value, const int8_t id, JsonOb
 bool TemperatureSensor::get_value_info(JsonObject & output, const char * cmd, const int8_t id) {
     if (sensors_.empty()) {
         output["message"] = "no entries";
-        return false;
+        return true;
     }
     // make a copy of the string command for parsing
     char command_s[30];

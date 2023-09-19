@@ -269,11 +269,13 @@ bool WebEntityService::get_value_info(JsonObject & output, const char * cmd) {
                     JsonVariant data = output[attribute_s];
                     output.clear();
                     output["api_data"] = data;
+                    return true;
                 } else {
                     char error[100];
                     snprintf(error, sizeof(error), "cannot find attribute %s in entity %s", attribute_s, command_s);
                     output.clear();
                     output["message"] = error;
+                    return false;
                 }
             }
         }
