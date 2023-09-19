@@ -540,25 +540,21 @@ bool Command::device_has_commands(const uint8_t device_type) {
         return true; // we always have System
     }
 
+    // if there are no entries to scheduler/custom/temperaturesensor/analogsensor, don't error but return a message
     if (device_type == EMSdevice::DeviceType::SCHEDULER) {
-        return true; // we always have info
-        // return EMSESP::webSchedulerService.has_commands();
+        return true;
     }
 
     if (device_type == EMSdevice::DeviceType::CUSTOM) {
-        // if there are no custom entities, don't error but return a message
         return true;
-        // return (EMSESP::webCustomEntityService.count_entities() != 0);
     }
 
     if (device_type == EMSdevice::DeviceType::TEMPERATURESENSOR) {
-        return true; // we always have info
-        // return (EMSESP::temperaturesensor_.have_sensors());
+        return true;
     }
 
     if (device_type == EMSdevice::DeviceType::ANALOGSENSOR) {
         return EMSESP::system_.analog_enabled();
-        // return (EMSESP::analogsensor_.have_sensors());
     }
 
     for (const auto & emsdevice : EMSESP::emsdevices) {
@@ -580,10 +576,10 @@ void Command::show_devices(uuid::console::Shell & shell) {
     shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM));
 
     // if (EMSESP::webSchedulerService.has_commands()) {
-        shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SCHEDULER));
+    shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SCHEDULER));
     // }
     // if (EMSESP::temperaturesensor_.have_sensors()) {
-        shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::TEMPERATURESENSOR));
+    shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::TEMPERATURESENSOR));
     // }
     if (EMSESP::analogsensor_.analog_enabled()) {
         shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::ANALOGSENSOR));
@@ -613,39 +609,34 @@ void Command::show_all(uuid::console::Shell & shell) {
     show(shell, EMSdevice::DeviceType::SYSTEM, true);
 
     // show Custom
-    // if (EMSESP::webCustomEntityService.has_commands()) {
-        shell.print(COLOR_BOLD_ON);
-        shell.print(COLOR_YELLOW);
-        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::CUSTOM));
-        shell.println(COLOR_RESET);
-        shell.printf("  info:                 %slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
-        shell.println(COLOR_RESET);
-        shell.printf("  commands:             %slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
-        shell.print(COLOR_RESET);
-        show(shell, EMSdevice::DeviceType::CUSTOM, true);
-    // }
+    shell.print(COLOR_BOLD_ON);
+    shell.print(COLOR_YELLOW);
+    shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::CUSTOM));
+    shell.println(COLOR_RESET);
+    shell.printf("  info:                 %slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
+    shell.println(COLOR_RESET);
+    shell.printf("  commands:             %slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
+    shell.print(COLOR_RESET);
+    show(shell, EMSdevice::DeviceType::CUSTOM, true);
 
     // show scheduler
-    // if (EMSESP::webSchedulerService.has_commands()) {
-        shell.print(COLOR_BOLD_ON);
-        shell.print(COLOR_YELLOW);
-        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SCHEDULER));
-        shell.println(COLOR_RESET);
-        shell.printf("  info:                 %slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
-        shell.println(COLOR_RESET);
-        shell.printf("  commands:             %slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
-        shell.print(COLOR_RESET);
-        show(shell, EMSdevice::DeviceType::SCHEDULER, true);
-    // }
+    shell.print(COLOR_BOLD_ON);
+    shell.print(COLOR_YELLOW);
+    shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SCHEDULER));
+    shell.println(COLOR_RESET);
+    shell.printf("  info:                 %slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
+    shell.println(COLOR_RESET);
+    shell.printf("  commands:             %slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
+    shell.print(COLOR_RESET);
+    show(shell, EMSdevice::DeviceType::SCHEDULER, true);
 
     // show sensors
-    // if (EMSESP::temperaturesensor_.have_sensors()) {
-        shell.print(COLOR_BOLD_ON);
-        shell.print(COLOR_YELLOW);
-        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::TEMPERATURESENSOR));
-        shell.print(COLOR_RESET);
-        show(shell, EMSdevice::DeviceType::TEMPERATURESENSOR, true);
-    // }
+    shell.print(COLOR_BOLD_ON);
+    shell.print(COLOR_YELLOW);
+    shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::TEMPERATURESENSOR));
+    shell.print(COLOR_RESET);
+    show(shell, EMSdevice::DeviceType::TEMPERATURESENSOR, true);
+
     if (EMSESP::analogsensor_.analog_enabled()) {
         shell.print(COLOR_BOLD_ON);
         shell.print(COLOR_YELLOW);
