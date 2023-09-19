@@ -144,7 +144,7 @@ bool WebSchedulerService::get_value_info(JsonObject & output, const char * cmd) 
         return true;
     }
     if (scheduleItems->size() == 0) {
-        output["message"] = "no entries";
+        // output["message"] = "no entries";
         return true;
     }
     if (strlen(cmd) == 0 || Helpers::toLower(cmd) == F_(values) || Helpers::toLower(cmd) == F_(info)) {
