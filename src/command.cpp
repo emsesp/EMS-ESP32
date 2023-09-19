@@ -574,13 +574,9 @@ bool Command::device_has_commands(const uint8_t device_type) {
 // list sensors and EMS devices
 void Command::show_devices(uuid::console::Shell & shell) {
     shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM));
-
-    // if (EMSESP::webSchedulerService.has_commands()) {
+    shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::CUSTOM));
     shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SCHEDULER));
-    // }
-    // if (EMSESP::temperaturesensor_.have_sensors()) {
     shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::TEMPERATURESENSOR));
-    // }
     if (EMSESP::analogsensor_.analog_enabled()) {
         shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::ANALOGSENSOR));
     }
