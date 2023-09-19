@@ -17,15 +17,15 @@
  */
 #include "../telegram.h"
 
-#ifndef WebEntityService_h
-#define WebEntityService_h
+#ifndef WebCustomEntityService_h
+#define WebCustomEntityService_h
 
-#define EMSESP_ENTITY_FILE "/config/emsespEntity.json"
-#define EMSESP_ENTITY_SERVICE_PATH "/rest/entities" // GET and POST
+#define EMSESP_CUSTOMENTITY_FILE "/config/emsespEntity.json"
+#define EMSESP_CUSTOMENTITY_SERVICE_PATH "/rest/customentities" // GET and POST
 
 namespace emsesp {
 
-class EntityItem {
+class CustomEntityItem {
   public:
     uint8_t     id;
     uint8_t     device_id;
@@ -40,26 +40,26 @@ class EntityItem {
     std::string data;
 };
 
-class WebEntity {
+class WebCustomEntity {
   public:
-    std::list<EntityItem> entityItems;
+    std::list<CustomEntityItem> customEntityItems;
 
-    static void              read(WebEntity & webEntity, JsonObject & root);
-    static StateUpdateResult update(JsonObject & root, WebEntity & webEntity);
+    static void              read(WebCustomEntity & webEntity, JsonObject & root);
+    static StateUpdateResult update(JsonObject & root, WebCustomEntity & webEntity);
 };
 
-class WebEntityService : public StatefulService<WebEntity> {
+class WebCustomEntityService : public StatefulService<WebCustomEntity> {
   public:
-    WebEntityService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
+    WebCustomEntityService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
 
     void    begin();
-    void    publish_single(const EntityItem & entity);
+    void    publish_single(const CustomEntityItem & entity);
     void    publish(const bool force = false);
     bool    command_setvalue(const char * value, const std::string name);
     bool    get_value_info(JsonObject & output, const char * cmd);
     bool    get_value(std::shared_ptr<const Telegram> telegram);
     void    fetch();
-    void    render_value(JsonObject & output, EntityItem entity, const bool useVal = false, const bool web = false);
+    void    render_value(JsonObject & output, CustomEntityItem entity, const bool useVal = false, const bool web = false);
     uint8_t count_entities();
     uint8_t has_commands();
     void    generate_value_web(JsonObject & output);
@@ -69,11 +69,11 @@ class WebEntityService : public StatefulService<WebEntity> {
 
 
   private:
-    HttpEndpoint<WebEntity>  _httpEndpoint;
-    FSPersistence<WebEntity> _fsPersistence;
+    HttpEndpoint<WebCustomEntity>  _httpEndpoint;
+    FSPersistence<WebCustomEntity> _fsPersistence;
 
-    std::list<EntityItem> * entityItems; // pointer to the list of entity items
-    bool                    ha_registered_ = false;
+    std::list<CustomEntityItem> * customEntityItems; // pointer to the list of entity items
+    bool                          ha_registered_ = false;
 };
 
 } // namespace emsesp

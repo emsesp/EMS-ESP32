@@ -280,6 +280,21 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         ok = true;
     }
 
+    if (command == "custom_entities") {
+        shell.printfln("custom entities...");
+        run_test("general");
+
+#ifdef EMSESP_STANDALONE
+        AsyncWebServerRequest request;
+        request.method(HTTP_GET);
+        request.url("/api/custom");
+        request.url("/api/custom/boiler_flowtemp");
+        request.url("/api/custom/boiler_flowtemp2");
+        EMSESP::webAPIService.webAPIService_get(&request);
+#endif
+        ok = true;
+    }
+
     if (command == "coldshot") {
         shell.printfln("Testing coldshot...");
         run_test("general");
@@ -734,7 +749,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
             if (emsdevice->unique_id() == 1) { // thermostat
                 std::string a = "00hc1/seltemp|new name>5<52";
-                emsdevice->setCustomEntity(a);
+                emsdevice->setCustomizationEntity(a);
                 break;
             }
         }
@@ -760,7 +775,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice->unique_id() == 1) { // boiler
                 std::string a = "07wwseltemp";
-                emsdevice->setCustomEntity(a);
+                emsdevice->setCustomizationEntity(a);
                 break;
             }
         }
