@@ -55,7 +55,8 @@ class Mqtt {
     enum Operation : uint8_t { PUBLISH, SUBSCRIBE, UNSUBSCRIBE };
     enum NestedFormat : uint8_t { NESTED = 1, SINGLE };
 
-    static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 128; // fixed, not a user setting anymore
+    static constexpr uint8_t  MQTT_TOPIC_MAX_SIZE = 128; // fixed, not a user setting anymore
+    static constexpr uint16_t MQTT_QUEUE_MAX_SIZE = 300;
 
     static void on_connect();
     static void on_disconnect(espMqttClientTypes::DisconnectReason reason);

@@ -594,12 +594,20 @@ bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, con
     }
 // check free mem
 #ifndef EMSESP_STANDALONE
-    if (ESP.getFreeHeap() < 60 * 1204) {
+    if (ESP.getFreeHeap() < 60 * 1204 || ESP.getMaxAllocHeap() < 40 * 1024) {
         if (operation == Operation::PUBLISH) {
             mqtt_message_id_++;
             mqtt_publish_fails_++;
         }
-        LOG_DEBUG("%s failed: low memory", operation == Operation::PUBLISH ? "Publish" : operation == Operation::SUBSCRIBE ? "Subscribe" : "Unsubscribe");
+        LOG_WARNING("%s failed: low memory", operation == Operation::PUBLISH ? "Publish" : operation == Operation::SUBSCRIBE ? "Subscribe" : "Unsubscribe");
+        return false; // quit
+    }
+    if (queuecount_ >= MQTT_QUEUE_MAX_SIZE) {
+        if (operation == Operation::PUBLISH) {
+            mqtt_message_id_++;
+            mqtt_publish_fails_++;
+        }
+        LOG_WARNING("%s failed: queue full", operation == Operation::PUBLISH ? "Publish" : operation == Operation::SUBSCRIBE ? "Subscribe" : "Unsubscribe");
         return false; // quit
     }
 #endif
