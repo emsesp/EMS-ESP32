@@ -594,12 +594,20 @@ bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, con
     }
 // check free mem
 #ifndef EMSESP_STANDALONE
-    if (ESP.getFreeHeap() < 60 * 1204) {
+    if (ESP.getFreeHeap() < 60 * 1204 || ESP.getMaxAllocHeap() < 40 * 1024) {
         if (operation == Operation::PUBLISH) {
             mqtt_message_id_++;
             mqtt_publish_fails_++;
         }
-        LOG_DEBUG("%s failed: low memory", operation == Operation::PUBLISH ? "Publish" : operation == Operation::SUBSCRIBE ? "Subscribe" : "Unsubscribe");
+        LOG_WARNING("%s failed: low memory", operation == Operation::PUBLISH ? "Publish" : operation == Operation::SUBSCRIBE ? "Subscribe" : "Unsubscribe");
+        return false; // quit
+    }
+    if (queuecount_ >= MQTT_QUEUE_MAX_SIZE) {
+        if (operation == Operation::PUBLISH) {
+            mqtt_message_id_++;
+            mqtt_publish_fails_++;
+        }
+        LOG_WARNING("%s failed: queue full", operation == Operation::PUBLISH ? "Publish" : operation == Operation::SUBSCRIBE ? "Subscribe" : "Unsubscribe");
         return false; // quit
     }
 #endif
@@ -737,7 +745,7 @@ bool Mqtt::publish_ha_sensor_config(DeviceValue & dv, const char * model, const 
 
     // calculate the min and max
     int16_t  dv_set_min;
-    uint16_t dv_set_max;
+    uint32_t dv_set_max;
     (void)dv.get_min_max(dv_set_min, dv_set_max);
 
     // determine if we're creating the command topics which we use special HA configs
@@ -788,7 +796,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
                                     const char * const ** options,
                                     uint8_t               options_size,
                                     const int16_t         dv_set_min,
-                                    const int16_t         dv_set_max,
+                                    const uint32_t        dv_set_max,
                                     const int8_t          num_op,
                                     const JsonObject &    dev_json) {
     // ignore if name (fullname) is empty
@@ -847,7 +855,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         case DeviceValueType::UINT:
         case DeviceValueType::SHORT:
         case DeviceValueType::USHORT:
-        case DeviceValueType::ULONG:
+        // case DeviceValueType::ULONG:
             if (discovery_type() == discoveryType::HOMEASSISTANT) {
                 // Home Assistant
                 // number - https://www.home-assistant.io/integrations/number.mqtt
@@ -865,6 +873,10 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         case DeviceValueType::ENUM:
             // select - https://www.home-assistant.io/integrations/select.mqtt
             snprintf(topic, sizeof(topic), "select/%s", config_topic);
+            break;
+        case DeviceValueType::ULONG:
+            snprintf(topic, sizeof(topic), "sensor/%s", config_topic);
+            set_ha_classes = true;
             break;
         default:
             // plain old sensor
@@ -1127,7 +1139,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     return queue_ha(topic, doc.as<JsonObject>());
 }
 
-bool Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp, const bool remove, const int16_t min, const uint16_t max) {
+bool Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp, const bool remove, const int16_t min, const uint32_t max) {
     uint8_t hc_num = tag - DeviceValueTAG::TAG_HC1 + 1;
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];

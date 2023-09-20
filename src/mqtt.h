@@ -55,7 +55,8 @@ class Mqtt {
     enum Operation : uint8_t { PUBLISH, SUBSCRIBE, UNSUBSCRIBE };
     enum NestedFormat : uint8_t { NESTED = 1, SINGLE };
 
-    static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 128; // fixed, not a user setting anymore
+    static constexpr uint8_t  MQTT_TOPIC_MAX_SIZE = 128; // fixed, not a user setting anymore
+    static constexpr uint16_t MQTT_QUEUE_MAX_SIZE = 300;
 
     static void on_connect();
     static void on_disconnect(espMqttClientTypes::DisconnectReason reason);
@@ -87,12 +88,12 @@ class Mqtt {
                                          const char * const ** options,
                                          uint8_t               options_size,
                                          const int16_t         dv_set_min,
-                                         const int16_t         dv_set_max,
+                                         const uint32_t        dv_set_max,
                                          const int8_t          num_op,
                                          const JsonObject &    dev_json);
 
     static bool publish_system_ha_sensor_config(uint8_t type, const char * name, const char * entity, const uint8_t uom);
-    static bool publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp, const bool remove = false, const int16_t min = 5, const uint16_t max = 30);
+    static bool publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp, const bool remove = false, const int16_t min = 5, const uint32_t max = 30);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
     static void show_mqtt(uuid::console::Shell & shell);

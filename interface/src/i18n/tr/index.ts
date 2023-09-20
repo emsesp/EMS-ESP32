@@ -282,6 +282,7 @@ const tr: Translation = {
   NETWORK_SCANNER: 'Ağ Tarayıcısı',
   NETWORK_NO_WIFI: 'Hiçbir Kablosuz Ağ bulunamadı',
   NETWORK_BLANK_SSID: 'Kablosuz ağı devre dışı bırakmak için boş bırakın', // TODO translate
+  NETWORK_BLANK_BSSID: 'leave blank to use only SSID', // TODO translate
   TX_POWER: 'Aktarım gücü',
   HOSTNAME: 'Ana Makine Adı',
   NETWORK_DISABLE_SLEEP: 'Kablosuz uyku modunu devre dışına al',

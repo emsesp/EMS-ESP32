@@ -282,6 +282,7 @@ const pl: BaseTranslation = {
   NETWORK_SCANNER: 'Skaner sieci WiFi',
   NETWORK_NO_WIFI: 'Brak sieci WiFi w zasięgu',
   NETWORK_BLANK_SSID: 'pozostaw puste aby wyłączyć WiFi', // and enable ETH // TODO translate
+  NETWORK_BLANK_BSSID: 'leave blank to use only SSID', // TODO translate
   TX_POWER: 'Moc nadawania',
   HOSTNAME: 'Nazwa w sieci',
   NETWORK_DISABLE_SLEEP: 'Wyłącz tryb uśpienia WiFi',

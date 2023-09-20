@@ -65,7 +65,9 @@ const WiFiNetworkSelector: FC<WiFiNetworkSelectorProps> = ({ networkList }) => {
       </ListItemAvatar>
       <ListItemText
         primary={network.ssid}
-        secondary={'Security: ' + networkSecurityMode(network) + ', Ch: ' + network.channel}
+        secondary={
+          'Security: ' + networkSecurityMode(network) + ', Ch: ' + network.channel + ', bssid: ' + network.bssid
+        }
       />
       <ListItemIcon>
         <Badge badgeContent={network.rssi + 'dBm'}>

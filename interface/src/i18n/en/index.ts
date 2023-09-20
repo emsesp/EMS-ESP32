@@ -282,6 +282,7 @@ const en: Translation = {
   NETWORK_SCANNER: 'Network Scanner',
   NETWORK_NO_WIFI: 'No WiFi networks found',
   NETWORK_BLANK_SSID: 'leave blank to disable WiFi and enable ETH',
+  NETWORK_BLANK_BSSID: 'leave blank to use only SSID',
   TX_POWER: 'Tx Power',
   HOSTNAME: 'Hostname',
   NETWORK_DISABLE_SLEEP: 'Disable WiFi Sleep Mode',

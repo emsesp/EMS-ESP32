@@ -160,6 +160,9 @@ void AnalogSensor::reload() {
 #endif
             sensor.polltime_ = 0;
             sensor.poll_     = digitalRead(sensor.gpio());
+            if (double_t val = EMSESP::nvs_.getDouble(sensor.name().c_str(), 0)) {
+                sensor.set_value(val);
+            }
             publish_sensor(sensor);
         } else if (sensor.type() == AnalogType::TIMER || sensor.type() == AnalogType::RATE) {
             LOG_DEBUG("Adding analog Timer/Rate sensor on GPIO %02d", sensor.gpio());
@@ -274,7 +277,8 @@ void AnalogSensor::measure() {
                 } else if (!sensor.poll_) { // falling edge
                     if (sensor.type() == AnalogType::COUNTER) {
                         sensor.set_value(old_value + sensor.factor());
-                    } else if (sensor.type() == AnalogType::RATE) { // dafault uom: Hz (1/sec) with factor 1
+                        // EMSESP::nvs_.putDouble(sensor.name().c_str(), sensor.value());
+                    } else if (sensor.type() == AnalogType::RATE) { // default uom: Hz (1/sec) with factor 1
                         sensor.set_value(sensor.factor() * 1000 / (sensor.polltime_ - sensor.last_polltime_));
                     } else if (sensor.type() == AnalogType::TIMER) { // default seconds with factor 1
                         sensor.set_value(sensor.factor() * (sensor.polltime_ - sensor.last_polltime_) / 1000);
@@ -287,6 +291,25 @@ void AnalogSensor::measure() {
                 sensorreads_++;
                 changed_ = true;
                 publish_sensor(sensor);
+            }
+        }
+    }
+    // store counter-values only every hour to reduce flash wear
+    static uint8_t lastSaveHour = 0;
+    time_t         now          = time(nullptr);
+    tm *           tm_          = localtime(&now);
+    if (tm_->tm_hour != lastSaveHour) {
+        lastSaveHour = tm_->tm_hour;
+        store_counters();
+    }
+}
+
+// store counters to NVS, called every hour, on restart and update
+void AnalogSensor::store_counters() {
+    for (auto & sensor : sensors_) {
+        if (sensor.type() == AnalogType::COUNTER) {
+            if (sensor.value() != EMSESP::nvs_.getDouble(sensor.name().c_str())) {
+                EMSESP::nvs_.putDouble(sensor.name().c_str(), sensor.value());
             }
         }
     }
@@ -315,10 +338,14 @@ bool AnalogSensor::update(uint8_t gpio, const std::string & name, double offset,
                     found_sensor = true; // found the record
                     // see if it's marked for deletion
                     if (deleted) {
+                        EMSESP::nvs_.remove(AnalogCustomization.name.c_str());
                         LOG_DEBUG("Removing analog sensor GPIO %02d", gpio);
                         settings.analogCustomizations.remove(AnalogCustomization);
                     } else {
                         // update existing record
+                        if (name != AnalogCustomization.name) {
+                            EMSESP::nvs_.remove(AnalogCustomization.name.c_str());
+                        }
                         AnalogCustomization.name   = name;
                         AnalogCustomization.offset = offset;
                         AnalogCustomization.factor = factor;
@@ -598,7 +625,7 @@ void AnalogSensor::publish_values(const bool force) {
 // searches by name
 bool AnalogSensor::get_value_info(JsonObject & output, const char * cmd, const int8_t id) const {
     if (sensors_.empty()) {
-        return false;
+        return true;
     }
     // make a copy of the string command for parsing
     char command_s[30];
@@ -656,10 +683,10 @@ bool AnalogSensor::get_value_info(JsonObject & output, const char * cmd, const i
 }
 
 // creates JSON doc from values
-// returns false if there are no sensors
+// returns true if there are no sensors
 bool AnalogSensor::command_info(const char * value, const int8_t id, JsonObject & output) const {
     if (sensors_.empty()) {
-        return false;
+        return true;
     }
 
     for (const auto & sensor : sensors_) {

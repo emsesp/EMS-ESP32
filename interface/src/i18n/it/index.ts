@@ -284,6 +284,7 @@ const it: Translation = {
   NETWORK_SCANNER: 'Scansione Rete',
   NETWORK_NO_WIFI: 'Nessuana rete WiFi trovata',
   NETWORK_BLANK_SSID: 'lasciare vuoto per disattivare WiFi',
+  NETWORK_BLANK_BSSID: 'leave blank to use only SSID', // TODO translate
   TX_POWER: 'Potenza Tx',
   HOSTNAME: 'Nome ospite',
   NETWORK_DISABLE_SLEEP: 'Disabilita la modalità sospensione Wi-Fi',

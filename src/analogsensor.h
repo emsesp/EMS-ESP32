@@ -23,10 +23,6 @@
 #include "mqtt.h"
 #include "console.h"
 
-#ifndef EMSESP_STANDALONE
-#include "driver/adc.h"
-#endif
-
 #include <uuid/log.h>
 
 namespace emsesp {
@@ -158,6 +154,7 @@ class AnalogSensor {
 
     bool update(uint8_t gpio, const std::string & name, double offset, double factor, uint8_t uom, int8_t type, bool deleted = false);
     bool get_value_info(JsonObject & output, const char * cmd, const int8_t id) const;
+    void store_counters();
 
 #if defined(EMSESP_TEST)
     void test();

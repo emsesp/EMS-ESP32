@@ -133,12 +133,9 @@ bool WebSchedulerService::command_setvalue(const char * value, const std::string
 // process json output for info/commands and value_info
 bool WebSchedulerService::get_value_info(JsonObject & output, const char * cmd) {
     EMSESP::webSchedulerService.read([&](WebScheduler & webScheduler) { scheduleItems = &webScheduler.scheduleItems; });
-    if (scheduleItems->size() == 0) {
-        return false;
-    }
-    if (Helpers::toLower(cmd) == "commands") {
-        output["info"]     = "lists all values";
-        output["commands"] = "lists all commands";
+    if (Helpers::toLower(cmd) == F_(commands)) {
+        output[F_(info)]     = Helpers::translated_word(FL_(info_cmd));
+        output[F_(commands)] = Helpers::translated_word(FL_(commands_cmd));
         for (const ScheduleItem & scheduleItem : *scheduleItems) {
             if (!scheduleItem.name.empty()) {
                 output[scheduleItem.name] = "activate schedule";
@@ -146,7 +143,10 @@ bool WebSchedulerService::get_value_info(JsonObject & output, const char * cmd) 
         }
         return true;
     }
-    if (strlen(cmd) == 0 || Helpers::toLower(cmd) == "values" || Helpers::toLower(cmd) == "info") {
+    if (scheduleItems->size() == 0) {
+        return true;
+    }
+    if (strlen(cmd) == 0 || Helpers::toLower(cmd) == F_(values) || Helpers::toLower(cmd) == F_(info)) {
         // list all names
         for (const ScheduleItem & scheduleItem : *scheduleItems) {
             if (!scheduleItem.name.empty()) {

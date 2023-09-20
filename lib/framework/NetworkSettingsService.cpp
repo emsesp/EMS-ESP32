@@ -22,6 +22,8 @@ void NetworkSettingsService::begin() {
 
     WiFi.mode(WIFI_MODE_MAX);
     WiFi.mode(WIFI_MODE_NULL);
+    WiFi.setScanMethod(WIFI_ALL_CHANNEL_SCAN);     // default is FAST_SCAN
+    WiFi.setSortMethod(WIFI_CONNECT_AP_BY_SIGNAL); // is default, no need to set
 
     WiFi.onEvent(std::bind(&NetworkSettingsService::WiFiEvent, this, _1));
 
@@ -58,25 +60,36 @@ void NetworkSettingsService::manageSTA() {
         if (_state.staticIPConfig) {
             WiFi.config(_state.localIP, _state.gatewayIP, _state.subnetMask, _state.dnsIP1, _state.dnsIP2); // configure for static IP
         }
-
         WiFi.setHostname(_state.hostname.c_str()); // set hostname
 
         // www.esp32.com/viewtopic.php?t=12055
-        read([&](NetworkSettings & networkSettings) {
-            if (networkSettings.bandwidth20) {
-                esp_wifi_set_bandwidth((wifi_interface_t)ESP_IF_WIFI_STA, WIFI_BW_HT20);
-            } else {
-                esp_wifi_set_bandwidth((wifi_interface_t)ESP_IF_WIFI_STA, WIFI_BW_HT40);
+        if (_state.bandwidth20) {
+            esp_wifi_set_bandwidth((wifi_interface_t)ESP_IF_WIFI_STA, WIFI_BW_HT20);
+        } else {
+            esp_wifi_set_bandwidth((wifi_interface_t)ESP_IF_WIFI_STA, WIFI_BW_HT40);
+        }
+        if (_state.nosleep) {
+            WiFi.setSleep(false); // turn off sleep - WIFI_PS_NONE
+        }
+        // attempt to connect to the network
+        uint mac[6];
+        if (!_state.bssid.isEmpty() && sscanf(_state.bssid.c_str(), "%X:%X:%X:%X:%X:%X", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]) == 6) {
+            uint8_t mac1[6];
+            for (uint8_t i = 0; i < 6; i++) {
+                mac1[i] = (uint8_t)mac[i];
             }
-            if (networkSettings.nosleep) {
-                WiFi.setSleep(false);                                 // turn off sleep - WIFI_PS_NONE
-            }
-            WiFi.begin(_state.ssid.c_str(), _state.password.c_str()); // attempt to connect to the network
-            esp_wifi_set_max_tx_power(networkSettings.tx_power * 4);  // set power after wifi is startet for C3
-        });
+            WiFi.begin(_state.ssid.c_str(), _state.password.c_str(), 0, mac1);
+        } else {
+            WiFi.begin(_state.ssid.c_str(), _state.password.c_str());
+        }
+
+        // set power after wifi is startet, fixed value for C3_V1
 #ifdef BOARD_C3_MINI_V1
         // v1 needs this value, see https://github.com/emsesp/EMS-ESP32/pull/620#discussion_r993173979
         WiFi.setTxPower(WIFI_POWER_8_5dBm); // https://www.wemos.cc/en/latest/c3/c3_mini_1_0_0.html#about-wifi
+#else
+        // esp_wifi_set_max_tx_power(_state.tx_power * 4);
+        WiFi.setTxPower((wifi_power_t)(_state.tx_power * 4));
 #endif
     }
 }
@@ -89,4 +102,8 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event) {
             _stopping              = false;
         }
     }
+    // wait 3 seconds before reconnecting
+    // if (event == ARDUINO_EVENT_WIFI_STA_DISCONNECTED) {
+    //     _lastConnectionAttempt = millis();
+    // }
 }

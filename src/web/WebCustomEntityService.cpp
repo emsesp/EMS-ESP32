@@ -239,24 +239,20 @@ void WebCustomEntityService::render_value(JsonObject & output, CustomEntityItem 
 // process json output for info/commands and value_info
 bool WebCustomEntityService::get_value_info(JsonObject & output, const char * cmd) {
     EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
-
-    // if no entries, return a message instead of an error
-    // https://github.com/emsesp/EMS-ESP32/issues/1297
-    if (customEntityItems->size() == 0) {
-        output["message"] = "no entries";
-        return true;
-    }
-
-    if (Helpers::toLower(cmd) == "commands") {
-        output["info"]     = "list all values";
-        output["commands"] = "list all commands";
+    if (Helpers::toLower(cmd) == F_(commands)) {
+        output[F_(info)]     = Helpers::translated_word(FL_(info_cmd));
+        output[F_(commands)] = Helpers::translated_word(FL_(commands_cmd));
         for (const auto & entity : *customEntityItems) {
             output[entity.name] = "custom entitiy";
         }
         return true;
     }
-
-    if (strlen(cmd) == 0 || Helpers::toLower(cmd) == "values" || Helpers::toLower(cmd) == "info") {
+    // if no entries, return empty json
+    // https://github.com/emsesp/EMS-ESP32/issues/1297
+    if (customEntityItems->size() == 0) {
+        return true;
+    }
+    if (strlen(cmd) == 0 || Helpers::toLower(cmd) == F_(values) || Helpers::toLower(cmd) == F_(info)) {
         // list all names
         for (const CustomEntityItem & entity : *customEntityItems) {
             render_value(output, entity);
@@ -298,11 +294,13 @@ bool WebCustomEntityService::get_value_info(JsonObject & output, const char * cm
                     JsonVariant data = output[attribute_s];
                     output.clear();
                     output["api_data"] = data;
+                    return true;
                 } else {
                     char error[100];
                     snprintf(error, sizeof(error), "cannot find attribute %s in entity %s", attribute_s, command_s);
                     output.clear();
                     output["message"] = error;
+                    return false;
                 }
             }
         }
