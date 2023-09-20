@@ -8,12 +8,13 @@
 
 - power entities
 - optional input of BSSID for AP connection
-- message "no entries" in info of scheduler/custom/analogsnesor/temperaturesensor
+- return empty json if no entries in scheduler/custom/analogsnesor/temperaturesensor
 
 ## Fixed
 
 - wifi full scan to get strongest AP
+- add missing dhw tags
 
 ## Changed
 
-- dont queue publish on change messages, but keep changed flag to send after reconnect
+- mqtt queue max 300 messages, check heap and maxAlloc
