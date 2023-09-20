@@ -481,7 +481,6 @@ class Boiler : public EMSdevice {
     bool set_nrgHeat(const char * value, const int8_t id);
     bool set_nrgWw(const char * value, const int8_t id);
     bool set_nomPower(const char * value, const int8_t id);
-
 };
 
 } // namespace emsesp

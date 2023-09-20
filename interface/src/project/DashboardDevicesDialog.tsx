@@ -30,16 +30,6 @@ import { updateValue } from 'utils';
 
 import { validate } from 'validators';
 
-// const dialogStyle = {
-//   '& .MuiDialog-paper': {
-//     borderRadius: '8px',
-//     borderColor: '#565656',
-//     borderStyle: 'solid',
-//     borderWidth: '1px'
-//   },
-//   backdropFilter: 'blur(1px)'
-// };
-
 type DashboardDevicesDialogProps = {
   open: boolean;
   onClose: () => void;
@@ -124,7 +114,7 @@ const DashboardDevicesDialog = ({
   return (
     <Dialog sx={dialogStyle} open={open} onClose={close}>
       <DialogTitle>
-        {selectedItem.v === '' && selectedItem.c ? LL.RUN_COMMAND() : writeable ? LL.CHANGE_VALUE() : LL.VALUE(0)}
+        {selectedItem.v === '' && selectedItem.c ? LL.RUN_COMMAND() : writeable ? LL.CHANGE_VALUE() : LL.VALUE(1)}
       </DialogTitle>
       <DialogContent dividers>
         <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
