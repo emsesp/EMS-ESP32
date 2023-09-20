@@ -247,10 +247,9 @@ bool WebCustomEntityService::get_value_info(JsonObject & output, const char * cm
         }
         return true;
     }
-    // if no entries, return a message instead of an error
+    // if no entries, return empty json
     // https://github.com/emsesp/EMS-ESP32/issues/1297
     if (customEntityItems->size() == 0) {
-        // output["message"] = "no entries";
         return true;
     }
     if (strlen(cmd) == 0 || Helpers::toLower(cmd) == F_(values) || Helpers::toLower(cmd) == F_(info)) {

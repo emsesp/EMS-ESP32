@@ -1869,7 +1869,7 @@ __metadata:
     react-toastify: ^9.1.3
     rollup-plugin-visualizer: ^5.9.2
     sockette: ^2.0.6
-    terser: ^5.19.4
+    terser: ^5.20.0
     typesafe-i18n: ^5.26.2
     typescript: ^5.2.2
     vite: ^4.4.9
@@ -6056,9 +6056,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"terser@npm:^5.19.4":
-  version: 5.19.4
-  resolution: "terser@npm:5.19.4"
+"terser@npm:^5.20.0":
+  version: 5.20.0
+  resolution: "terser@npm:5.20.0"
   dependencies:
     "@jridgewell/source-map": ^0.3.3
     acorn: ^8.8.2
@@ -6066,7 +6066,7 @@ __metadata:
     source-map-support: ~0.5.20
   bin:
     terser: bin/terser
-  checksum: 39c6687609f5b9061f2fb82bee02d2f9d7756fcb5bd50c67da1482f52cf5977e03e0c5df5cb4ce17e549428024c8859075137c461ec4a9ae8cf91a505759255a
+  checksum: ab70d1009fc9d39b89b3fbe5be12d55ade4574df0978de53e046ce109f45d5623fcbbddcb70453e1d95d4967338dab9e41bcff94c1ec636a27c52ef7f6db3936
   languageName: node
   linkType: hard
 
