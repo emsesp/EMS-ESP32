@@ -103,7 +103,7 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event) {
         }
     }
     // wait 3 seconds before reconnecting
-    if (event == ARDUINO_EVENT_WIFI_STA_DISCONNECTED) {
-        _lastConnectionAttempt = millis();
-    }
+    // if (event == ARDUINO_EVENT_WIFI_STA_DISCONNECTED) {
+    //     _lastConnectionAttempt = millis();
+    // }
 }
