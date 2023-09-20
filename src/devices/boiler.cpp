@@ -342,7 +342,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueNumOp::DV_NUMOP_DIV60,
                               FL_(upTimeCompCooling),
                               DeviceValueUOM::MINUTES);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
                               &upTimeCompWw_,
                               DeviceValueType::TIME,
                               DeviceValueNumOp::DV_NUMOP_DIV60,
@@ -362,7 +362,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgConsTotal_, DeviceValueType::ULONG, FL_(nrgConsTotal), DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgConsCompTotal_, DeviceValueType::ULONG, FL_(nrgConsCompTotal), DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgConsCompHeating_, DeviceValueType::ULONG, FL_(nrgConsCompHeating), DeviceValueUOM::KWH);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgConsCompWw_, DeviceValueType::ULONG, FL_(nrgConsCompWw), DeviceValueUOM::KWH);
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW, &nrgConsCompWw_, DeviceValueType::ULONG, FL_(nrgConsCompWw), DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgConsCompCooling_, DeviceValueType::ULONG, FL_(nrgConsCompCooling), DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgConsCompPool_, DeviceValueType::ULONG, FL_(nrgConsCompPool), DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &auxElecHeatNrgConsTotal_, DeviceValueType::ULONG, FL_(auxElecHeatNrgConsTotal), DeviceValueUOM::KWH);
@@ -371,11 +371,11 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueType::ULONG,
                               FL_(auxElecHeatNrgConsHeating),
                               DeviceValueUOM::KWH);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &auxElecHeatNrgConsWW_, DeviceValueType::ULONG, FL_(auxElecHeatNrgConsWW), DeviceValueUOM::KWH);
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW, &auxElecHeatNrgConsWW_, DeviceValueType::ULONG, FL_(auxElecHeatNrgConsWW), DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &auxElecHeatNrgConsPool_, DeviceValueType::ULONG, FL_(auxElecHeatNrgConsPool), DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgSuppTotal_, DeviceValueType::ULONG, FL_(nrgSuppTotal), DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgSuppHeating_, DeviceValueType::ULONG, FL_(nrgSuppHeating), DeviceValueUOM::KWH);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgSuppWw_, DeviceValueType::ULONG, FL_(nrgSuppWw), DeviceValueUOM::KWH);
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW, &nrgSuppWw_, DeviceValueType::ULONG, FL_(nrgSuppWw), DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgSuppCooling_, DeviceValueType::ULONG, FL_(nrgSuppCooling), DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgSuppPool_, DeviceValueType::ULONG, FL_(nrgSuppPool), DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpPower_, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpPower), DeviceValueUOM::KW);
@@ -383,7 +383,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpActivity_, DeviceValueType::ENUM, FL_(enum_hpactivity), FL_(hpActivity), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpHeatingOn_, DeviceValueType::BOOL, FL_(hpHeatingOn), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpCoolingOn_, DeviceValueType::BOOL, FL_(hpCoolingOn), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpWwOn_, DeviceValueType::BOOL, FL_(hpWwOn), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW, &hpWwOn_, DeviceValueType::BOOL, FL_(hpWwOn), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpPoolOn_, DeviceValueType::BOOL, FL_(hpPoolOn), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpBrinePumpSpd_, DeviceValueType::UINT, FL_(hpBrinePumpSpd), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpSwitchValve_, DeviceValueType::BOOL, FL_(hpSwitchValve), DeviceValueUOM::NONE);
@@ -466,7 +466,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(maxHeatHeat),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_maxHeatHeat));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
                               &maxHeatDhw_,
                               DeviceValueType::ENUM,
                               FL_(enum_maxHeat),
@@ -855,7 +855,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x04, "UBAFactory", true, MAKE_PF_CB(process_UBAFactory));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nomPower_, DeviceValueType::UINT, FL_(nomPower), DeviceValueUOM::KW, MAKE_CF_CB(set_nomPower));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgHeat_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgHeat), DeviceValueUOM::KWH, MAKE_CF_CB(set_nrgHeat), 0, 10000000UL);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgWw_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgWw), DeviceValueUOM::KWH, MAKE_CF_CB(set_nrgWw), 0, 10000000UL);
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW, &nrgWw_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgWw), DeviceValueUOM::KWH, MAKE_CF_CB(set_nrgWw), 0, 10000000UL);
 
         nrgHeatF_ = EMSESP::nvs_.getDouble(FL_(nrgHeat)[0], 0);
         nrgWwF_   = EMSESP::nvs_.getDouble(FL_(nrgWw)[0], 0);
