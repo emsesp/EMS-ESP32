@@ -855,7 +855,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         case DeviceValueType::UINT:
         case DeviceValueType::SHORT:
         case DeviceValueType::USHORT:
-        // case DeviceValueType::ULONG:
+            // case DeviceValueType::ULONG:
             if (discovery_type() == discoveryType::HOMEASSISTANT) {
                 // Home Assistant
                 // number - https://www.home-assistant.io/integrations/number.mqtt

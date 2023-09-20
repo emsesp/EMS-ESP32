@@ -327,7 +327,7 @@ bool DeviceValue::get_custom_min(int16_t & val) {
     bool    has_min    = (min_pos != std::string::npos);
     uint8_t fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (uom == DeviceValueUOM::DEGREES) ? 2 : (uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
     if (has_min) {
-        int v = Helpers::atoint(custom_fullname.substr(min_pos + 1).c_str());
+        uint32_t v = Helpers::atoint(custom_fullname.substr(min_pos + 1).c_str());
         if (fahrenheit) {
             v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
         }

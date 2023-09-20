@@ -1671,7 +1671,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                     if (v < dv.min) {
                         dv.min = v;
                         dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
-                    } else if (v > dv.max) {
+                    } else if ((uint32_t)v > dv.max) {
                         dv.max = v;
                         dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
                     }
