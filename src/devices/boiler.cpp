@@ -980,15 +980,23 @@ void Boiler::check_active() {
 //  boiler(0x08) -W-> Me(0x0B), ?(0x04), data: 13 96 09 81 00 64 64 35 05 64 5A 22 00 00 00 00 00 00 00 00 B7
 // offset 4 - nominal Power kW, could be zero, 5 - min. Burner, 6 - max. Burner
 void Boiler::process_UBAFactory(std::shared_ptr<const Telegram> telegram) {
-    uint8_t nomPower = nomPower_;
-    if (!telegram->read_value(nomPower, 4)) {
+    // check for all wanted info in telegram
+    if (telegram->offset > 4 || telegram->offset + telegram->message_length < 7) {
         return;
     }
-    // Update nominal Power only if not already set in nvs and we have a valid value
+    toggle_fetch(telegram->type_id, false); // only read once
+    uint8_t min, max, nomPower;
+    telegram->read_value(nomPower, 4);
+    telegram->read_value(min, 5);
+    telegram->read_value(max, 6);
+    // set the value only if no nvs-value is set
     if (nomPower > 0 && nomPower_ == 0) {
         has_update(nomPower_, nomPower);
     }
-    toggle_fetch(telegram->type_id, false); // only read once
+    set_minmax(&burnMinPower_, 0, max);
+    set_minmax(&burnMaxPower_, min, max);
+    set_minmax(&wwMaxPower_, min, max);
+    set_minmax(&selBurnPow_, 0, max);
 }
 
 // 0x18
