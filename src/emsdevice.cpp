@@ -713,6 +713,17 @@ bool EMSdevice::has_command(const void * value_p) const {
     return false;
 }
 
+// set min and max
+void EMSdevice::set_minmax(const void * value_p, int16_t min, uint32_t max) {
+    for (auto & dv : devicevalues_) {
+        if (dv.value_p == value_p) {
+            dv.min = min;
+            dv.max = max;
+            return;
+        }
+    }
+}
+
 // publish a single value on change
 void EMSdevice::publish_value(void * value_p) const {
     if (!Mqtt::publish_single() || value_p == nullptr) {
@@ -1671,7 +1682,7 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                     if (v < dv.min) {
                         dv.min = v;
                         dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
-                    } else if ((uint32_t)v > dv.max) {
+                    } else if (v > 0 && (uint32_t)v > dv.max) {
                         dv.max = v;
                         dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
                     }
