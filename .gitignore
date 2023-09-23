@@ -53,8 +53,9 @@ interface/src/i18n/i18n-util.async.ts
 # sonar
 .scannerwork/
 sonar/
-build_wrapper_output_directory/
+bw-output/
 
 # entity dump results
 # dump_entities.csv
 # dump_entities.xls*
+
