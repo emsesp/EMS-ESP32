@@ -843,6 +843,8 @@ void Thermostat::process_RC35wwTimer(std::shared_ptr<const Telegram> telegram) {
     if (telegram->type_id != 0x38) {
         return;
     }
+
+    // TODO: should this be >= 87 to avoid out of bounds?
     if (telegram->message_length + telegram->offset >= 92 && telegram->offset <= 87) {
         char data[sizeof(wwVacation_)];
         snprintf(data,
