@@ -12,7 +12,7 @@ jobs:
     # if: github.repository_owner == 'emsesp'
     # if: github.repository == 'emsesp/EMS-ESP32'
     env:
-      BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory
+      BUILD_WRAPPER_OUT_DIR: bw-output
     steps:
       - uses: actions/checkout@v3
         with:

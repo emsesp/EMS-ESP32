@@ -34,8 +34,7 @@
 
 #include <iostream>
 
-// #define IPAddress std::string
-// #define IPAddress String
+typedef double double_t;
 
 #define ICACHE_FLASH_ATTR
 #define ICACHE_RAM_ATTR
