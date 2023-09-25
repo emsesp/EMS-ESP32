@@ -2,7 +2,7 @@
 # This is an example file to run sonar from a Linux command line
 # Run from the root of the project like `./scripts/run_sonar.sh`
 # Follow the setup in Sonar for your prpject and make sure chmod 755 +x on all the files
-# and make sure you set the token in the shell like export SONAR_TOKEN="eed5ee77e74042a275fed6f653c372452d5a21d0"
+# and make sure you set the token in the shell like export SONAR_TOKEN="xxxxx"
 
 make clean
 ~/sonar/build-wrapper-linux-x86-64 --out-dir bw-output make all
