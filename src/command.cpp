@@ -550,11 +550,11 @@ bool Command::device_has_commands(const uint8_t device_type) {
     }
 
     if (device_type == EMSdevice::DeviceType::TEMPERATURESENSOR) {
-        return true;
+        return EMSESP::sensor_enabled();
     }
 
     if (device_type == EMSdevice::DeviceType::ANALOGSENSOR) {
-        return EMSESP::system_.analog_enabled();
+        return EMSESP::analog_enabled();
     }
 
     for (const auto & emsdevice : EMSESP::emsdevices) {
@@ -576,8 +576,10 @@ void Command::show_devices(uuid::console::Shell & shell) {
     shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM));
     shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::CUSTOM));
     shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SCHEDULER));
-    shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::TEMPERATURESENSOR));
-    if (EMSESP::analogsensor_.analog_enabled()) {
+    if (EMSESP::sensor_enabled()) {
+        shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::TEMPERATURESENSOR));
+    }
+    if (EMSESP::analog_enabled()) {
         shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::ANALOGSENSOR));
     }
 
@@ -627,13 +629,15 @@ void Command::show_all(uuid::console::Shell & shell) {
     show(shell, EMSdevice::DeviceType::SCHEDULER, true);
 
     // show sensors
-    shell.print(COLOR_BOLD_ON);
-    shell.print(COLOR_YELLOW);
-    shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::TEMPERATURESENSOR));
-    shell.print(COLOR_RESET);
-    show(shell, EMSdevice::DeviceType::TEMPERATURESENSOR, true);
+    if (EMSESP::sensor_enabled()) {
+        shell.print(COLOR_BOLD_ON);
+        shell.print(COLOR_YELLOW);
+        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::TEMPERATURESENSOR));
+        shell.print(COLOR_RESET);
+        show(shell, EMSdevice::DeviceType::TEMPERATURESENSOR, true);
+    }
 
-    if (EMSESP::analogsensor_.analog_enabled()) {
+    if (EMSESP::analog_enabled()) {
         shell.print(COLOR_BOLD_ON);
         shell.print(COLOR_YELLOW);
         shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::ANALOGSENSOR));
