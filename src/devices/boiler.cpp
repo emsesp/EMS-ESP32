@@ -2341,7 +2341,9 @@ bool Boiler::set_reset(const char * value, const int8_t id) {
         return false;
     }
 
-    if (num == 1) {
+    if (num == 0) {
+        return true; // dash
+    } else if (num == 1) {
         // LOG_INFO("Reset boiler maintenance message");
         write_command(0x05, 0x08, 0xFF, 0x1C);
         has_update(&reset_);
