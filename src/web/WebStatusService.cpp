@@ -148,7 +148,7 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
     statJson["f"]  = EMSESP::txservice_.telegram_write_fail_count();
     statJson["q"]  = EMSESP::txservice_.write_quality();
 
-    if (EMSESP::temperaturesensor_.sensor_enabled()) {
+    if (EMSESP::sensor_enabled()) {
         statJson       = statsJson.createNestedObject();
         statJson["id"] = 3;
         statJson["s"]  = EMSESP::temperaturesensor_.reads();
@@ -175,8 +175,9 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
     statJson["id"] = 6;
     statJson["s"]  = WebAPIService::api_count(); // + WebAPIService::api_fails();
     statJson["f"]  = WebAPIService::api_fails();
-    statJson["q"] =
-        WebAPIService::api_count() == 0 ? 100 : 100 - (uint8_t)((100 * WebAPIService::api_fails()) / (WebAPIService::api_count() + WebAPIService::api_fails()));
+    statJson["q"]  = (WebAPIService::api_count() + WebAPIService::api_fails()) == 0
+                         ? 100
+                         : 100 - (uint8_t)((100 * WebAPIService::api_fails()) / (WebAPIService::api_count() + WebAPIService::api_fails()));
 
 #ifndef EMSESP_STANDALONE
     if (EMSESP::system_.syslog_enabled()) {
@@ -184,7 +185,7 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
         statJson["id"] = 7;
         statJson["s"]  = EMSESP::system_.syslog_count();
         statJson["f"]  = EMSESP::system_.syslog_fails();
-        statJson["q"]  = EMSESP::system_.syslog_count() == 0
+        statJson["q"]  = (EMSESP::system_.syslog_count() + EMSESP::system_.syslog_fails()) == 0
                              ? 100
                              : 100 - (uint8_t)((100 * EMSESP::system_.syslog_fails()) / (EMSESP::system_.syslog_count() + EMSESP::system_.syslog_fails()));
     }

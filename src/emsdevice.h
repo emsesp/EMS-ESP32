@@ -155,6 +155,22 @@ class EMSdevice {
         }
     }
 
+    inline void has_update(uint16_t & value, uint16_t newvalue) {
+        if (value != newvalue) {
+            value       = newvalue;
+            has_update_ = true;
+            publish_value((void *)&value);
+        }
+    }
+
+    inline void has_update(uint32_t & value, uint32_t newvalue) {
+        if (value != newvalue) {
+            value       = newvalue;
+            has_update_ = true;
+            publish_value((void *)&value);
+        }
+    }
+
     inline void has_enumupdate(std::shared_ptr<const Telegram> telegram, uint8_t & value, const uint8_t index, int8_t s = 0) {
         if (telegram->read_enumvalue(value, index, s)) {
             has_update_ = true;
@@ -190,9 +206,9 @@ class EMSdevice {
     void   list_device_entries(JsonObject & output) const;
     void   add_handlers_ignored(const uint16_t handler);
 
-    void set_climate_minmax(uint8_t tag, int16_t min, uint16_t max);
-    void setCustomEntity(const std::string & entity_id);
-    void getCustomEntities(std::vector<std::string> & entity_ids);
+    void set_climate_minmax(uint8_t tag, int16_t min, uint32_t max);
+    void setCustomizationEntity(const std::string & entity_id);
+    void getCustomizationEntities(std::vector<std::string> & entity_ids);
 
     void register_telegram_type(const uint16_t telegram_type_id, const char * telegram_type_name, bool fetch, const process_function_p cb);
     bool handle_telegram(std::shared_ptr<const Telegram> telegram);
@@ -216,7 +232,7 @@ class EMSdevice {
                           uint8_t               uom,
                           const cmd_function_p  f,
                           int16_t               min,
-                          uint16_t              max);
+                          uint32_t              max);
 
     void register_device_value(uint8_t               tag,
                                void *                value_p,
@@ -226,7 +242,7 @@ class EMSdevice {
                                uint8_t               uom,
                                const cmd_function_p  f,
                                int16_t               min,
-                               uint16_t              max);
+                               uint32_t              max);
 
     void
     register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const ** options, const char * const * name, uint8_t uom, const cmd_function_p f);
@@ -249,7 +265,7 @@ class EMSdevice {
                                uint8_t              uom,
                                const cmd_function_p f,
                                int16_t              min,
-                               uint16_t             max);
+                               uint32_t             max);
 
     // single list of options
     void register_device_value(uint8_t              tag,
@@ -269,14 +285,14 @@ class EMSdevice {
                                uint8_t              uom,
                                const cmd_function_p f,
                                int16_t              min,
-                               uint16_t             max);
+                               uint32_t             max);
 
     // no options, optional function f
     void register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const * name, uint8_t uom, const cmd_function_p f = nullptr);
 
     // no options, with min/max
     void
-    register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const * name, uint8_t uom, const cmd_function_p f, int16_t min, uint16_t max);
+    register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const * name, uint8_t uom, const cmd_function_p f, int16_t min, uint32_t max);
 
     void write_command(const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid) const;
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid) const;
@@ -287,6 +303,7 @@ class EMSdevice {
     bool is_readable(const void * value_p) const;
     bool is_readonly(const std::string & cmd, const int8_t id) const;
     bool has_command(const void * value_p) const;
+    void set_minmax(const void * value_p, int16_t min, uint32_t max);
     void publish_value(void * value_p) const;
     void publish_all_values();
 

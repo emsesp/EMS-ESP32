@@ -36,6 +36,7 @@
 #ifndef EMSESP_STANDALONE
 #include <uuid/telnet.h>
 #endif
+#include <Preferences.h>
 
 #include <ESP8266React.h>
 
@@ -46,7 +47,7 @@
 #include "web/WebSchedulerService.h"
 #include "web/WebAPIService.h"
 #include "web/WebLogService.h"
-#include "web/WebEntityService.h"
+#include "web/WebCustomEntityService.h"
 
 #include "emsdevicevalue.h"
 #include "emsdevice.h"
@@ -225,6 +226,7 @@ class EMSESP {
     static Shower            shower_;
     static RxService         rxservice_;
     static TxService         txservice_;
+    static Preferences       nvs_;
 
     // web controllers
     static ESP8266React            esp8266React;
@@ -235,7 +237,7 @@ class EMSESP {
     static WebLogService           webLogService;
     static WebCustomizationService webCustomizationService;
     static WebSchedulerService     webSchedulerService;
-    static WebEntityService        webEntityService;
+    static WebCustomEntityService  webCustomEntityService;
 
   private:
     static std::string device_tostring(const uint8_t device_id);

@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# [3.6.1] September 9 2023
+## [3.6.1] September 9 2023
 
 ## **IMPORTANT! BREAKING CHANGES**
 
@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 
-- show WiFi rssi in Network Status Page, show quality as color
+- Show WiFi rssi in Network Status Page, show quality as color
 
 ## Fixed
 
@@ -22,9 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Changed
 
-- mqtt free mem check set to 60 kb
-- small cosmetic changes to Searching in Customization web page
-- updated to espressif32@6.4.0
+- MQTT free mem check set to 60 kb
+- Small cosmetic changes to Searching in Customization web page
+- Updated to espressif32@6.4.0
 
 # [3.6.0] August 13 2023
 
@@ -36,7 +36,7 @@ There are breaking changes between 3.5.x and earlier versions of 3.6.0. Please r
 
 ## Added
 
-- Workaround for better Domoticz MQTT intergration? [#904](https://github.com/emsesp/EMS-ESP32/issues/904)
+- Workaround for better Domoticz MQTT integration? [#904](https://github.com/emsesp/EMS-ESP32/issues/904)
 - Show MAC address without connecting to network enhancement [#933](https://github.com/emsesp/EMS-ESP32/issues/933)
 - Warn user in WebUI of unsaved changes [#911](https://github.com/emsesp/EMS-ESP32/issues/911)
 - Detect old Tado thermostat, device-id 0x19, no entities
@@ -202,7 +202,7 @@ There are breaking changes between 3.5.x and earlier versions of 3.6.0. Please r
 
 - WebUI optimizations, updated look&feel and better performance [#124](https://github.com/emsesp/EMS-ESP32/issues/124)
 - Auto refresh of WebUI after successful firmware upload [#178](https://github.com/emsesp/EMS-ESP32/issues/178)
-- New Customization Service in WebUI. First feature is the ability to enable/disabled Enitites (device values) from EMS devices [#206](https://github.com/emsesp/EMS-ESP32/issues/206)
+- New Customization Service in WebUI. First feature is the ability to enable/disabled Entities (device values) from EMS devices [#206](https://github.com/emsesp/EMS-ESP32/issues/206)
 - Option to disable Telnet Console [#209](https://github.com/emsesp/EMS-ESP32/issues/209)
 - Added Hide SSID, Max Clients and Preferred Channel to Access Point
 - Merged in MichaelDvP's changes like Fahrenheit conversion, publish single (for IOBroker) and a few other critical optimizations

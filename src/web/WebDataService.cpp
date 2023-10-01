@@ -92,7 +92,7 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
     }
 
     // add any custom entities
-    if (EMSESP::webEntityService.count_entities()) {
+    if (EMSESP::webCustomEntityService.count_entities()) {
         JsonObject obj = devices.createNestedObject();
         obj["id"]      = 99;                                                // the last unique id
         obj["tn"]      = Helpers::translated_word(FL_(custom_device));      // translated device type name
@@ -210,7 +210,7 @@ void WebDataService::device_data(AsyncWebServerRequest * request) {
 #ifndef EMSESP_STANDALONE
         if (id == 99) {
             JsonObject output = response->getRoot();
-            EMSESP::webEntityService.generate_value_web(output);
+            EMSESP::webCustomEntityService.generate_value_web(output);
             response->setLength();
             request->send(response);
             return;
@@ -251,7 +251,7 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
                     return_code = Command::call(device_type, cmd, data.as<const char *>(), true, id, output);
                 } else if (data.is<int>()) {
                     char s[10];
-                    return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int16_t>(), 0), true, id, output);
+                    return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int>(), 0), true, id, output);
                 } else if (data.is<float>()) {
                     char s[10];
                     return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<float>(), 1), true, id, output);
@@ -288,7 +288,7 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
                 return_code = Command::call(device_type, cmd, data.as<const char *>(), true, id, output);
             } else if (data.is<int>()) {
                 char s[10];
-                return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int16_t>(), 0), true, id, output);
+                return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int>(), 0), true, id, output);
             } else if (data.is<float>()) {
                 char s[10];
                 return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<float>(), 1), true, id, output);

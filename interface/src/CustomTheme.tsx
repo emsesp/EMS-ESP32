@@ -26,6 +26,9 @@ const theme = responsiveFontSizes(
       },
       info: {
         main: '#607d8b' // blueGrey[500]
+      },
+      text: {
+        disabled: '#eee' // white
       }
     }
   })

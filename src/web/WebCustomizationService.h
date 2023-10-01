@@ -27,7 +27,7 @@
 #define DEVICE_ENTITIES_PATH "/rest/deviceEntities"
 
 // POST
-#define CUSTOM_ENTITIES_PATH "/rest/customEntities"
+#define CUSTOMIZATION_ENTITIES_PATH "/rest/customizationEntities"
 #define RESET_CUSTOMIZATION_SERVICE_PATH "/rest/resetCustomizations"
 
 namespace emsesp {
@@ -71,8 +71,8 @@ class WebCustomization {
     std::list<SensorCustomization> sensorCustomizations; // for sensor names and offsets
     std::list<AnalogCustomization> analogCustomizations; // for analog sensors
     std::list<EntityCustomization> entityCustomizations; // for a list of entities that have a special mask set
-    static void                    read(WebCustomization & settings, JsonObject & root);
-    static StateUpdateResult       update(JsonObject & root, WebCustomization & settings);
+    static void                    read(WebCustomization & customizations, JsonObject & root);
+    static StateUpdateResult       update(JsonObject & root, WebCustomization & customizations);
 };
 
 class WebCustomizationService : public StatefulService<WebCustomization> {
@@ -94,7 +94,7 @@ class WebCustomizationService : public StatefulService<WebCustomization> {
     void device_entities(AsyncWebServerRequest * request);
 
     // POST
-    void custom_entities(AsyncWebServerRequest * request, JsonVariant & json);
+    void customization_entities(AsyncWebServerRequest * request, JsonVariant & json);
     void reset_customization(AsyncWebServerRequest * request); // command
 
     AsyncCallbackJsonWebHandler _masked_entities_handler;

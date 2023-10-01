@@ -42,7 +42,7 @@ DEFINES += -DARDUINOJSON_ENABLE_STD_STRING=1 -DARDUINOJSON_ENABLE_PROGMEM=1 -DAR
 DEFINES += -DEMSESP_DEBUG -DEMSESP_STANDALONE -DEMSESP_TEST -D__linux__ -DEMC_RX_BUFFER_SIZE=1500
 DEFINES += $(ARGS)
 
-DEFAULTS = -DEMSESP_DEFAULT_LOCALE=\"en\" -DEMSESP_DEFAULT_TX_MODE=8 -DEMSESP_DEFAULT_VERSION=\"3.7.0-dev\" -DEMSESP_DEFAULT_BOARD_PROFILE=\"S32\"
+DEFAULTS = -DEMSESP_DEFAULT_LOCALE=\"en\" -DEMSESP_DEFAULT_TX_MODE=8 -DEMSESP_DEFAULT_VERSION=\"3.6.0-dev\" -DEMSESP_DEFAULT_BOARD_PROFILE=\"S32\"
 
 #----------------------------------------------------------------------
 # Sources & Files
@@ -81,7 +81,7 @@ CPPFLAGS  += -g3
 CPPFLAGS  += -Os
 
 CFLAGS    += $(CPPFLAGS)
-CFLAGS    += -Wall -Wextra -Werror -Wswitch-enum -Wno-unused-parameter -Wno-inconsistent-missing-override -Wno-missing-braces -Wno-unused-lambda-capture
+CFLAGS    += -Wall -Wextra -Werror -Wswitch-enum -Wno-unused-parameter -Wno-inconsistent-missing-override -Wno-missing-braces -Wno-unused-lambda-capture -Wno-sign-compare
 
 CXXFLAGS  += $(CFLAGS) -MMD
 

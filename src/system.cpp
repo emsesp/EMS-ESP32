@@ -231,9 +231,15 @@ bool System::command_watch(const char * value, const int8_t id) {
     return false;
 }
 
+void System::store_nvs_values() {
+    Command::call(EMSdevice::DeviceType::BOILER, "nompower", "-1"); // trigger a write
+    EMSESP::analogsensor_.store_counters();
+}
+
 // restart EMS-ESP
 void System::system_restart() {
     LOG_INFO("Restarting EMS-ESP...");
+    store_nvs_values();
     Shell::loop_all();
     delay(1000); // wait a second
 #ifndef EMSESP_STANDALONE
@@ -1031,7 +1037,7 @@ bool System::check_restore() {
                 saveSettings(EMSESP_SCHEDULER_FILE, "Schedule", input);
             } else if (settings_type == "entities") {
                 // it's a entity file, just replace it and there's no need to reboot
-                saveSettings(EMSESP_ENTITY_FILE, "Entities", input);
+                saveSettings(EMSESP_CUSTOMENTITY_FILE, "Entities", input);
             } else {
                 LOG_ERROR("Unrecognized file uploaded");
             }

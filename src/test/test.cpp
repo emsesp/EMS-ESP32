@@ -280,6 +280,21 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         ok = true;
     }
 
+    if (command == "custom_entities") {
+        shell.printfln("custom entities...");
+        run_test("general");
+
+#ifdef EMSESP_STANDALONE
+        AsyncWebServerRequest request;
+        request.method(HTTP_GET);
+        request.url("/api/custom");
+        request.url("/api/custom/boiler_flowtemp");
+        request.url("/api/custom/boiler_flowtemp2");
+        EMSESP::webAPIService.webAPIService_get(&request);
+#endif
+        ok = true;
+    }
+
     if (command == "coldshot") {
         shell.printfln("Testing coldshot...");
         run_test("general");
@@ -734,7 +749,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
             if (emsdevice->unique_id() == 1) { // thermostat
                 std::string a = "00hc1/seltemp|new name>5<52";
-                emsdevice->setCustomEntity(a);
+                emsdevice->setCustomizationEntity(a);
                 break;
             }
         }
@@ -760,7 +775,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice->unique_id() == 1) { // boiler
                 std::string a = "07wwseltemp";
-                emsdevice->setCustomEntity(a);
+                emsdevice->setCustomizationEntity(a);
                 break;
             }
         }
@@ -1030,7 +1045,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         EMSESP::mqtt_.incoming("ems-esp/thermostat", "{\"cmd\":\"mode\",\"data\":\"heat\",\"id\":1}");
 
-        // MQTT bad tests
+        // MQTT bad tests - these should all fail
         EMSESP::mqtt_.incoming("ems-esp/thermostate/mode", "auto");     // unknown device
         EMSESP::mqtt_.incoming("ems-esp/thermostat/modee", "auto");     // unknown command
         EMSESP::mqtt_.incoming("ems-esp/thermostat/mode/auto", "auto"); // invalid, not allowed
@@ -1109,18 +1124,25 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         request.url("/rest/writeDeviceValue");
         EMSESP::webDataService.write_device_value(&request, json);
 
-        // write value from web - testing hc9/seltemp - should fail!
-        char data7[] = "{\"id\":2,\"devicevalue\":{\"v\":\"55\",\"u\":1,\"n\":\"hc2 selected room temperature\",\"c\":\"hc9/seltemp\"}";
+        // call reset command
+        char data7[] = "{\"device\":\"boiler\", \"cmd\":\"reset\",\"value\":\"error\"}";
         deserializeJson(doc, data7);
+        json = doc.as<JsonVariant>();
+        request.url("/api");
+        EMSESP::webAPIService.webAPIService_post(&request, json);
+
+        emsesp::EMSESP::logger().warning("* these next ones should fail *");
+
+        // write value from web - testing hc9/seltemp - should fail!
+        char data8[] = "{\"id\":2,\"devicevalue\":{\"v\":\"55\",\"u\":1,\"n\":\"hc2 selected room temperature\",\"c\":\"hc9/seltemp\"}";
+        deserializeJson(doc, data8);
         json = doc.as<JsonVariant>();
         request.url("/rest/writeDeviceValue");
         EMSESP::webDataService.write_device_value(&request, json);
 
-        // emsesp::EMSESP::logger().notice("*");
-
-        // should fail
-        char data8[] = "{}";
-        deserializeJson(doc, data8);
+        // should fail!
+        char data9[] = "{}";
+        deserializeJson(doc, data9);
         json = doc.as<JsonVariant>();
         request.url("/api/thermostat/mode/auto");
         EMSESP::webAPIService.webAPIService_post(&request, json);

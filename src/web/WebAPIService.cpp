@@ -127,11 +127,6 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
         }
         emsesp::EMSESP::logger().err(error);
         api_fails_++;
-    } else {
-        // if there was no json output from the call, default to the output message 'OK'.
-        if (!output.size()) {
-            output["message"] = "OK";
-        }
     }
 
     // if we're returning single values, just sent as plain text
@@ -216,7 +211,7 @@ void WebAPIService::getEntities(AsyncWebServerRequest * request) {
 
     root["type"] = "entities";
 
-    System::extractSettings(EMSESP_ENTITY_FILE, "Entities", root);
+    System::extractSettings(EMSESP_CUSTOMENTITY_FILE, "Entities", root);
 
     response->setLength();
     request->send(response);

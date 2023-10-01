@@ -37,6 +37,7 @@ export interface NetworkStatus {
 
 export interface NetworkSettings {
   ssid: string;
+  bssid: string;
   password: string;
   hostname: string;
   static_ip_config: boolean;

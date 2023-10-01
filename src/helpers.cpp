@@ -345,7 +345,7 @@ char * Helpers::render_value(char * result, const uint32_t value, const int8_t f
     }
     result[0]          = '\0';
     uint32_t new_value = fahrenheit ? format ? value * 1.8 + 32 * format * (fahrenheit - 1) : value * 1.8 + 32 * (fahrenheit - 1) : value;
-    char     s[10]     = {0};
+    char     s[14]     = {0};
 
 #ifndef EMSESP_STANDALONE
     if (!format) {
@@ -354,6 +354,9 @@ char * Helpers::render_value(char * result, const uint32_t value, const int8_t f
         strlcpy(result, ltoa(new_value / format, s, 10), sizeof(s));
         strlcat(result, ".", sizeof(s));
         strlcat(result, itoa(((new_value % format) * 10) / format, s, 10), sizeof(s));
+        if (format == 100) {
+            strlcat(result, itoa(new_value % 10, s, 10), sizeof(s));
+        }
     } else {
         strlcpy(result, ltoa(new_value * format * -1, s, 10), sizeof(s));
     }

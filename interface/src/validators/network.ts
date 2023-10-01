@@ -5,6 +5,7 @@ import type { NetworkSettings } from 'types';
 export const createNetworkSettingsValidator = (networkSettings: NetworkSettings) =>
   new Schema({
     ssid: [{ type: 'string', max: 32, message: 'SSID must be 32 characters or less' }],
+    bssid: [{ type: 'string', max: 17, message: 'BSSID must be 17 characters or empty' }],
     password: { type: 'string', max: 64, message: 'Password must be 64 characters or less' },
     hostname: [{ required: true, message: 'Hostname is required' }, HOSTNAME_VALIDATOR],
     ...(networkSettings.static_ip_config && {

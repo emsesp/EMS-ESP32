@@ -36,6 +36,7 @@ class Boiler : public EMSdevice {
     }
 
     void check_active();
+    void store_energy();
 
     uint8_t boilerState_ = EMS_VALUE_UINT_NOTSET; // Boiler state flag - FOR INTERNAL USE
 
@@ -258,6 +259,13 @@ class Boiler : public EMSdevice {
     uint8_t  keepWarmTemp_;
     uint8_t  setReturnTemp_;
 
+    // special
+    double   nrgHeatF_;
+    double   nrgWwF_;
+    uint32_t nrgHeat_;
+    uint32_t nrgWw_;
+    uint8_t  nomPower_;
+
     /*
   // Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
   // thermostat always overwrites settings in boiler
@@ -272,6 +280,7 @@ class Boiler : public EMSdevice {
     uint8_t tempDiffBoiler_;  // relative temperature degrees
   */
 
+    void process_UBAFactory(std::shared_ptr<const Telegram> telegram);
     void process_UBAParameterWW(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram);
     void process_UBATotalUptime(std::shared_ptr<const Telegram> telegram);
@@ -468,6 +477,10 @@ class Boiler : public EMSdevice {
     bool set_delayBoiler(const char * value, const int8_t id);
     bool set_tempDiffBoiler(const char * value, const int8_t id);
     */
+
+    bool set_nrgHeat(const char * value, const int8_t id);
+    bool set_nrgWw(const char * value, const int8_t id);
+    bool set_nomPower(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

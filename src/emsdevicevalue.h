@@ -159,7 +159,7 @@ class DeviceValue {
     uint8_t               uom;             // DeviceValueUOM::*
     bool                  has_cmd;         // true if there is a Console/MQTT command which matches the short_name
     int16_t               min;             // min range
-    uint16_t              max;             // max range
+    uint32_t              max;             // max range
     uint8_t               state;           // DeviceValueState::*
 
     DeviceValue(uint8_t               device_type,
@@ -175,16 +175,16 @@ class DeviceValue {
                 uint8_t               uom,
                 bool                  has_cmd,
                 int16_t               min,
-                uint16_t              max,
+                uint32_t              max,
                 uint8_t               state);
 
     bool hasValue() const;
     bool has_tag() const;
-    bool get_min_max(int16_t & dv_set_min, uint16_t & dv_set_max);
+    bool get_min_max(int16_t & dv_set_min, uint32_t & dv_set_max);
 
     void               set_custom_minmax();
     bool               get_custom_min(int16_t & val);
-    bool               get_custom_max(uint16_t & val);
+    bool               get_custom_max(uint32_t & val);
     std::string        get_custom_fullname() const;
     std::string        get_fullname() const;
     static std::string get_name(std::string & entity);

@@ -129,8 +129,6 @@ bool MqttClient::connect() {
             _onError(0, Error::OUT_OF_MEMORY);
         }
         EMC_SEMAPHORE_GIVE();
-    } else if (_state <= State::connected) { // already connected or connecting
-        result = true;
     }
     return result;
 }

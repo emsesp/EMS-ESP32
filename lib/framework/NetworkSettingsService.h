@@ -31,6 +31,7 @@ class NetworkSettings {
   public:
     // core wifi configuration
     String ssid;
+    String bssid;
     String password;
     String hostname;
     bool   staticIPConfig;
@@ -52,6 +53,7 @@ class NetworkSettings {
     static void read(NetworkSettings & settings, JsonObject & root) {
         // connection settings
         root["ssid"]             = settings.ssid;
+        root["bssid"]            = settings.bssid;
         root["password"]         = settings.password;
         root["hostname"]         = settings.hostname;
         root["static_ip_config"] = settings.staticIPConfig;
@@ -75,6 +77,7 @@ class NetworkSettings {
         auto enableCORS         = settings.enableCORS;
         auto CORSOrigin         = settings.CORSOrigin;
         settings.ssid           = root["ssid"] | FACTORY_WIFI_SSID;
+        settings.bssid          = root["bssid"] | "";
         settings.password       = root["password"] | FACTORY_WIFI_PASSWORD;
         settings.hostname       = root["hostname"] | FACTORY_WIFI_HOSTNAME;
         settings.staticIPConfig = root["static_ip_config"] | false;

@@ -300,7 +300,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     // see if there is a command registered
     auto cf = find_command(device_type, device_id, cmd);
 
-    // check if its a call to and end-point to a device
+    // check if its a call to an end-point of a device
     // this is used to fetch the attributes of the device entity, or call a command directly
     bool single_command = (!value || !strlen(value));
     if (single_command) {
@@ -315,58 +315,56 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     }
 
     // check if we have a matching command
-    if (cf) {
-        // check permissions
-        if (cf->has_flags(CommandFlag::ADMIN_ONLY) && !is_admin) {
-            output["message"] = "authentication failed";
-            return CommandRet::NOT_ALLOWED; // command not allowed
-        }
-
-        auto description = Helpers::translated_word(cf->description_);
-        char info_s[100];
-        if (strlen(description)) {
-            snprintf(info_s, sizeof(info_s), "'%s/%s' (%s)", dname, cmd, description);
-        } else {
-            snprintf(info_s, sizeof(info_s), "'%s/%s'", dname, cmd);
-        }
-
-        std::string ro = EMSESP::system_.readonly_mode() ? "[readonly] " : "";
-
-        if ((value == nullptr) || (strlen(value) == 0)) {
-            LOG_DEBUG(("%sCalling command %s"), ro.c_str(), info_s);
-        } else {
-            if (id > 0) {
-                LOG_DEBUG(("%sCalling command %s with value %s and id %d on device 0x%02X"), ro.c_str(), info_s, value, id, device_id);
-            } else {
-                LOG_DEBUG(("%sCalling command %s with value %s"), ro.c_str(), info_s, value);
-            }
-        }
-
-        // call the function based on type
-        if (cf->cmdfunction_json_) {
-            return_code = ((cf->cmdfunction_json_)(value, id, output)) ? CommandRet::OK : CommandRet::ERROR;
-        }
-
-        // check if read-only. This also checks for valid tags (e.g. heating circuits)
-        if (cf->cmdfunction_) {
-            if (!single_command && EMSESP::cmd_is_readonly(device_type, device_id, cmd, id)) {
-                return_code = CommandRet::INVALID; // readonly or invalid hc
-            } else {
-                return_code = ((cf->cmdfunction_)(value, id)) ? CommandRet::OK : CommandRet::ERROR;
-            }
-        }
-
-        // report back
-        if (return_code != CommandRet::OK) {
-            return message(return_code, "callback function failed", output);
-        }
-
-        return return_code;
+    if (!cf) {
+        // we didn't find the command, report error
+        LOG_DEBUG("Command failed: invalid command '%s'", cmd ? cmd : "");
+        return message(CommandRet::NOT_FOUND, "invalid command", output);
     }
 
-    // we didn't find the command and its not an endpoint, report error
-    LOG_DEBUG("Command failed: invalid command '%s'", cmd ? cmd : "");
-    return message(CommandRet::NOT_FOUND, "invalid command", output);
+    // check permissions and abort if not authorized
+    if (cf->has_flags(CommandFlag::ADMIN_ONLY) && !is_admin) {
+        output["message"] = "authentication failed";
+        return CommandRet::NOT_ALLOWED; // command not allowed
+    }
+
+    // build up the log string for reporting back
+    // We send the log message as Warning so it appears in the log (debug is only enabled when compiling with DEBUG)
+    std::string ro          = EMSESP::system_.readonly_mode() ? "[readonly] " : "";
+    auto        description = Helpers::translated_word(cf->description_);
+    char        info_s[100];
+    if (strlen(description)) {
+        snprintf(info_s, sizeof(info_s), "'%s/%s' (%s)", dname, cmd, description);
+    } else {
+        snprintf(info_s, sizeof(info_s), "'%s/%s'", dname, cmd);
+    }
+    if ((value == nullptr) || (strlen(value) == 0)) {
+        LOG_WARNING(("%sCalling command %s"), ro.c_str(), info_s);
+    } else {
+        if (id > 0) {
+            LOG_WARNING(("%sCalling command %s with value %s and id %d on device 0x%02X"), ro.c_str(), info_s, value, id, device_id);
+        } else {
+            LOG_WARNING(("%sCalling command %s with value %s"), ro.c_str(), info_s, value);
+        }
+    }
+
+    // call the function based on type, either with a json package or no parameters
+    if (cf->cmdfunction_json_) {
+        // JSON
+        return_code = ((cf->cmdfunction_json_)(value, id, output)) ? CommandRet::OK : CommandRet::ERROR;
+    } else if (cf->cmdfunction_) {
+        // Normal command
+        if (!single_command && EMSESP::cmd_is_readonly(device_type, device_id, cmd, id)) {
+            return_code = CommandRet::INVALID; // error on readonly or invalid hc
+        } else {
+            return_code = ((cf->cmdfunction_)(value, id)) ? CommandRet::OK : CommandRet::ERROR;
+        }
+    }
+
+    // report back. If not OK show output from error, other return the HTTP code
+    if (return_code != CommandRet::OK) {
+        return message(return_code, "callback function failed", output);
+    }
+    return return_code;
 }
 
 // add a command to the list, which does not return json
@@ -540,20 +538,21 @@ bool Command::device_has_commands(const uint8_t device_type) {
         return true; // we always have System
     }
 
+    // if there are no entries to scheduler/custom/temperaturesensor/analogsensor, don't error but return a message
     if (device_type == EMSdevice::DeviceType::SCHEDULER) {
-        return EMSESP::webSchedulerService.has_commands();
+        return true;
     }
 
     if (device_type == EMSdevice::DeviceType::CUSTOM) {
-        return (EMSESP::webEntityService.count_entities() != 0);
+        return true;
     }
 
     if (device_type == EMSdevice::DeviceType::TEMPERATURESENSOR) {
-        return (EMSESP::temperaturesensor_.have_sensors());
+        return EMSESP::sensor_enabled();
     }
 
     if (device_type == EMSdevice::DeviceType::ANALOGSENSOR) {
-        return (EMSESP::analogsensor_.have_sensors());
+        return EMSESP::analog_enabled();
     }
 
     for (const auto & emsdevice : EMSESP::emsdevices) {
@@ -573,14 +572,12 @@ bool Command::device_has_commands(const uint8_t device_type) {
 // list sensors and EMS devices
 void Command::show_devices(uuid::console::Shell & shell) {
     shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM));
-
-    if (EMSESP::webSchedulerService.has_commands()) {
-        shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SCHEDULER));
-    }
-    if (EMSESP::temperaturesensor_.have_sensors()) {
+    shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::CUSTOM));
+    shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SCHEDULER));
+    if (EMSESP::sensor_enabled()) {
         shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::TEMPERATURESENSOR));
     }
-    if (EMSESP::analogsensor_.have_sensors()) {
+    if (EMSESP::analog_enabled()) {
         shell.printf("%s ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::ANALOGSENSOR));
     }
 
@@ -608,40 +605,37 @@ void Command::show_all(uuid::console::Shell & shell) {
     show(shell, EMSdevice::DeviceType::SYSTEM, true);
 
     // show Custom
-    if (EMSESP::webEntityService.has_commands()) {
-        shell.print(COLOR_BOLD_ON);
-        shell.print(COLOR_YELLOW);
-        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::CUSTOM));
-        shell.println(COLOR_RESET);
-        shell.printf("  info:                 %slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
-        shell.println(COLOR_RESET);
-        shell.printf("  commands:             %slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
-        shell.print(COLOR_RESET);
-        show(shell, EMSdevice::DeviceType::CUSTOM, true);
-    }
+    shell.print(COLOR_BOLD_ON);
+    shell.print(COLOR_YELLOW);
+    shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::CUSTOM));
+    shell.println(COLOR_RESET);
+    shell.printf("  info:                 %slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
+    shell.println(COLOR_RESET);
+    shell.printf("  commands:             %slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
+    shell.print(COLOR_RESET);
+    show(shell, EMSdevice::DeviceType::CUSTOM, true);
 
     // show scheduler
-    if (EMSESP::webSchedulerService.has_commands()) {
-        shell.print(COLOR_BOLD_ON);
-        shell.print(COLOR_YELLOW);
-        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SCHEDULER));
-        shell.println(COLOR_RESET);
-        shell.printf("  info:                 %slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
-        shell.println(COLOR_RESET);
-        shell.printf("  commands:             %slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
-        shell.print(COLOR_RESET);
-        show(shell, EMSdevice::DeviceType::SCHEDULER, true);
-    }
+    shell.print(COLOR_BOLD_ON);
+    shell.print(COLOR_YELLOW);
+    shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SCHEDULER));
+    shell.println(COLOR_RESET);
+    shell.printf("  info:                 %slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
+    shell.println(COLOR_RESET);
+    shell.printf("  commands:             %slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
+    shell.print(COLOR_RESET);
+    show(shell, EMSdevice::DeviceType::SCHEDULER, true);
 
     // show sensors
-    if (EMSESP::temperaturesensor_.have_sensors()) {
+    if (EMSESP::sensor_enabled()) {
         shell.print(COLOR_BOLD_ON);
         shell.print(COLOR_YELLOW);
         shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::TEMPERATURESENSOR));
         shell.print(COLOR_RESET);
         show(shell, EMSdevice::DeviceType::TEMPERATURESENSOR, true);
     }
-    if (EMSESP::analogsensor_.have_sensors()) {
+
+    if (EMSESP::analog_enabled()) {
         shell.print(COLOR_BOLD_ON);
         shell.print(COLOR_YELLOW);
         shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::ANALOGSENSOR));
