@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 
-- show WiFi rssi in Network Status Page, show quality as color
+- Show WiFi rssi in Network Status Page, show quality as color
 
 ## Fixed
 
@@ -22,9 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Changed
 
-- mqtt free mem check set to 60 kb
-- small cosmetic changes to Searching in Customization web page
-- updated to espressif32@6.4.0
+- MQTT free mem check set to 60 kb
+- Small cosmetic changes to Searching in Customization web page
+- Updated to espressif32@6.4.0
 
 # [3.6.0] August 13 2023
 

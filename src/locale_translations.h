@@ -284,7 +284,7 @@ MAKE_TRANSLATION(haclimate, "haclimate", "Discovery current room temperature", "
 // Entity translations: tag, mqtt, en, de, nl, sv, pl, no, fr, tr, it
 // Boiler
 MAKE_TRANSLATION(wwtapactivated, "wwtapactivated", "turn on/off", "Durchlauferhitzer aktiv", "zet aan/uit", "på/av", "system przygotowywania", "Varmtvann active", "ecs activée", "aç/kapa", "commuta on/off")
-MAKE_TRANSLATION(reset, "reset", "Reset", "Reset", "Reset", "Nollställ", "kasowanie komunikatu", "nullstill", "reset", "Sıfırla", "Reset")
+MAKE_TRANSLATION(reset, "reset", "reset", "Reset", "Reset", "Nollställ", "kasowanie komunikatu", "nullstill", "reset", "Sıfırla", "Reset")
 MAKE_TRANSLATION(oilPreHeat, "oilpreheat", "oil preheating", "Ölvorwärmung", "Olie voorverwarming", "Förvärmning olja", "podgrzewanie oleju", "oljeforvarming", "préchauffage de l'huile", "Yakıt Ön ısıtma devrede", "preriscaldamento olio")
 MAKE_TRANSLATION(heatingActive, "heatingactive", "heating active", "Heizen aktiv", "Verwarming actief", "Uppvärmning aktiv", "c.o. aktywne", "oppvarming aktiv", "chauffage actif", "ısıtma devrede", "riscaldamento attivo")
 MAKE_TRANSLATION(tapwaterActive, "tapwateractive", "tapwater active", "Warmwasser aktiv", "Warm water actief", "Varmvatten aktiv", "c.w.u. aktywne", "varmtvann aktiv", "eau chaude active", "sıcak kullanım suyu devrede", "acqua calda attiva")
