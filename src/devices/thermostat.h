@@ -210,6 +210,7 @@ class Thermostat : public EMSdevice {
     uint8_t floordrytemp_;
     uint8_t dewtemperature_;
     uint8_t humidity_;
+    uint8_t battery_;
 
     uint8_t wwExtra1_; // wwExtra active for wwSystem 1
     uint8_t wwExtra2_;
@@ -401,6 +402,7 @@ class Thermostat : public EMSdevice {
     void process_RemoteTemp(std::shared_ptr<const Telegram> telegram);
     void process_RemoteHumidity(std::shared_ptr<const Telegram> telegram);
     void process_RemoteCorrection(std::shared_ptr<const Telegram> telegram);
+    void process_RemoteBattery(std::shared_ptr<const Telegram> telegram);
     void process_HPSet(std::shared_ptr<const Telegram> telegram);
     void process_HPMode(std::shared_ptr<const Telegram> telegram);
 

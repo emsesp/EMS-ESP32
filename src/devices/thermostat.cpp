@@ -31,11 +31,17 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         register_telegram_type(0x0435, "RFTemp", false, MAKE_PF_CB(process_RemoteTemp));
         return;
     }
-    // remote thermostats with humidity: RC100H remote
+    // remote thermostats with humidity: RC100H remote, each thermostat is for one hc
     if (device_id >= 0x38 && device_id <= 0x3F) {
-        register_telegram_type(0x042B, "RemoteTemp", false, MAKE_PF_CB(process_RemoteTemp));
-        register_telegram_type(0x047B, "RemoteHumidity", false, MAKE_PF_CB(process_RemoteHumidity));
-        register_telegram_type(0x0273, "RemoteCorrection", true, MAKE_PF_CB(process_RemoteCorrection));
+        // reserve_telegram_functions(3);
+        register_telegram_type(0x042B + device_id - 0x38, "RemoteTemp", false, MAKE_PF_CB(process_RemoteTemp));
+        register_telegram_type(0x047B + device_id - 0x38, "RemoteHumidity", false, MAKE_PF_CB(process_RemoteHumidity));
+        register_telegram_type(0x0273 + device_id - 0x38, "RemoteCorrection", true, MAKE_PF_CB(process_RemoteCorrection));
+        register_telegram_type(0x0A6A + device_id - 0x38, "RemoteBattery", true, MAKE_PF_CB(process_RemoteBattery));
+        // maybe fixed type for these telegrams?
+        // register_telegram_type(0x0273, "RemoteCorrection", true, MAKE_PF_CB(process_RemoteCorrection));
+        // register_telegram_type(0x0A6B, "RemoteBattery", true, MAKE_PF_CB(process_RemoteBattery));
+
         register_device_values(); // register device values for common values (not heating circuit)
         return;                   // no values to add
     }
@@ -689,7 +695,7 @@ void Thermostat::process_RemoteTemp(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, tempsensor1_, 0);
 }
 
-// 0x47B - for reading humidity from the RC100H remote thermostat (0x38, 0x39, ..)
+// 0x47B, ff - for reading humidity from the RC100H remote thermostat (0x38, 0x39, ..)
 // e.g. "38 10 FF 00 03 7B 08 24 00 4B"
 void Thermostat::process_RemoteHumidity(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, dewtemperature_, 0);
@@ -697,8 +703,14 @@ void Thermostat::process_RemoteHumidity(std::shared_ptr<const Telegram> telegram
 }
 
 // 0x273 - for reading temperaturcorrection from the RC100H remote thermostat (0x38, 0x39, ..)
+// Thermostat(0x38) -> Me(0x0B), RemoteCorrection(0x0273), data: 0A 00
 void Thermostat::process_RemoteCorrection(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, ibaCalIntTemperature_, 0);
+}
+
+// 0xA6A - for reading battery from the RC100H remote thermostat (0x38, 0x39, ..)
+void Thermostat::process_RemoteBattery(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, battery_, 1);
 }
 
 // type 0x0165, ff
@@ -1381,16 +1393,12 @@ void Thermostat::process_RC35Timer(std::shared_ptr<const Telegram> telegram) {
 
 // process_RCTime - type 0x06 - date and time from a thermostat - 14 bytes long
 void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
-    if (telegram->offset > 0 || telegram->message_length < 5) {
+    if (telegram->offset > 0 || telegram->message_length < 8) {
         return;
     }
 
     if (flags() == EMS_DEVICE_FLAG_EASY) {
         return; // not supported
-    }
-
-    if (telegram->message_length < 7) {
-        return;
     }
 
     if ((telegram->message_data[7] & 0x0C) && has_command(&dateTime_)) { // date and time not valid
@@ -3448,6 +3456,7 @@ void Thermostat::register_device_values() {
                               FL_(ibaCalIntTemperature),
                               DeviceValueUOM::DEGREES_R,
                               MAKE_CF_CB(set_calinttemp));
+        register_device_value(tag, &battery_, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(battery), DeviceValueUOM::PERCENT);
         return;
     }
 
