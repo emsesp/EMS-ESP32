@@ -46,10 +46,6 @@
 #include "../rom/rtc.h"
 #endif
 #endif
-#if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
-#include <Adafruit_NeoPixel.h>
-Adafruit_NeoPixel pixels(1, 7, NEO_GRB + NEO_KHZ800);
-#endif
 
 namespace emsesp {
 
@@ -234,6 +230,7 @@ bool System::command_watch(const char * value, const int8_t id) {
 void System::store_nvs_values() {
     Command::call(EMSdevice::DeviceType::BOILER, "nompower", "-1"); // trigger a write
     EMSESP::analogsensor_.store_counters();
+    EMSESP::nvs_.end();
 }
 
 // restart EMS-ESP
@@ -503,12 +500,7 @@ void System::led_init(bool refresh) {
     if ((led_gpio_ != 0) && is_valid_gpio(led_gpio_)) {
 #if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
         // rgb LED WS2812B, use Adafruit Neopixel
-        // Adafruit_NeoPixel pixels(1, 7, NEO_GRB + NEO_KHZ800);
-        pixels.begin();
-        pixels.setPin(led_gpio_);
-        // pixels.setBrightness(0);
-        // pixels.Color(0, 0, 0, 0);
-        // pixels.show();
+        neopixelWrite(led_gpio_, 0, 0, 0);
 #else
         pinMode(led_gpio_, OUTPUT);       // 0 means disabled
         digitalWrite(led_gpio_, !LED_ON); // start with LED off
@@ -682,6 +674,7 @@ void System::network_init(bool refresh) {
 
     last_system_check_ = 0; // force the LED to go from fast flash to pulse
 
+#if CONFIG_IDF_TARGET_ESP32
     bool disableEth;
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) { disableEth = settings.ssid.length() > 0; });
 
@@ -704,6 +697,7 @@ void System::network_init(bool refresh) {
     auto clock_mode = (eth_clock_mode_t)eth_clock_mode_;
 
     eth_present_ = ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode);
+#endif
 }
 
 // check health of system, done every 5 seconds
@@ -734,8 +728,7 @@ void System::system_check() {
                 // everything is healthy, show LED permanently on or off depending on setting
                 if (led_gpio_) {
 #if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
-                    pixels.setPixelColor(0, 0, hide_led_ ? 0 : 128, 0);
-                    pixels.show();
+                    neopixelWrite(led_gpio_, 0, hide_led_ ? 0 : 128, 0);
 #else
                     digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
 #endif
@@ -744,8 +737,7 @@ void System::system_check() {
                 // turn off LED so we're ready to the flashes
                 if (led_gpio_) {
 #if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
-                    pixels.setPixelColor(0, 0, 0, 0);
-                    pixels.show();
+                    neopixelWrite(led_gpio_, 0, 0, 0);
 #else
                     digitalWrite(led_gpio_, !LED_ON);
 #endif
@@ -809,8 +801,7 @@ void System::led_monitor() {
             led_long_timer_ = uuid::get_uptime();
             led_flash_step_ = 0;
 #if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
-            pixels.setPixelColor(0, 0, 0, 0);
-            pixels.show();
+            neopixelWrite(led_gpio_, 0, 0, 0);
 #else
             digitalWrite(led_gpio_, !LED_ON); // LED off
 #endif
@@ -823,19 +814,18 @@ void System::led_monitor() {
 #if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
             if (led_flash_step_ == 3) {
                 if ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
-                    pixels.setPixelColor(0, 128, 0, 0); // red
+                    neopixelWrite(led_gpio_, 128, 0, 0); // red
                 } else if ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS) {
-                    pixels.setPixelColor(0, 0, 0, 128); // blue
+                    neopixelWrite(led_gpio_, 0, 0, 128); // blue
                 }
             }
             if (led_flash_step_ == 5 && (healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
-                pixels.setPixelColor(0, 128, 0, 0); // red
+                neopixelWrite(led_gpio_, 128, 0, 0); // red
             }
             if ((led_flash_step_ == 7) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)
                 && ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS)) {
-                pixels.setPixelColor(0, 0, 0, 128); // blue
+                neopixelWrite(led_gpio_, 0, 0, 128); // blue
             }
-            pixels.show();
 #else
 
             if ((led_flash_step_ == 3)
@@ -860,8 +850,7 @@ void System::led_monitor() {
             // turn the led off after the flash, on even number count
             if (led_on_) {
 #if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
-                pixels.setPixelColor(0, 0, 0, 0);
-                pixels.show();
+                neopixelWrite(led_gpio_, 0, 0, 0);
 #else
                 digitalWrite(led_gpio_, !LED_ON); // LED off
 #endif
@@ -1069,7 +1058,7 @@ bool System::check_upgrade(bool factory_settings) {
         missing_version = (settingsVersion.empty() || (settingsVersion.length() < 5));
         if (missing_version) {
             LOG_DEBUG("No version information found (%s)", settingsVersion.c_str());
-            settingsVersion = "3.5.0"; // this was the last stable version
+            settingsVersion = "3.6.2"; // this was the last stable version
         }
     }
 
