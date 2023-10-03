@@ -34,6 +34,7 @@ class Ventilation : public EMSdevice {
     int16_t  inEx_;
     int16_t  outEx_;
     uint16_t voc_;
+    uint8_t  humidity_;
     uint8_t  bypass_;
     // uint16_t filterRemain_;
     uint8_t ventInSpeed_;

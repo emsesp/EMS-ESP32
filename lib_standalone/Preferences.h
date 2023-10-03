@@ -19,6 +19,9 @@ class Preferences {
         return true;
     }
 
+    void end() {
+    }
+
     bool remove(const char * key) {
         return true;
     }

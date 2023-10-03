@@ -101,11 +101,13 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 // unknown, check for ethernet, use default E32/S32
 // data is led, dallas, rx, tx, pbutton, phy, eth_power, eth_addr, eth_clock
 #ifndef EMSESP_STANDALONE
-        if (ETH.begin(1, 16, 23, 18, ETH_PHY_LAN8720)) {
+#if CONFIG_IDF_TARGET_ESP32
+        if (ETH.begin((eth_phy_type_t)1, 16, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_IN)) {
             // BBQKees Gateway E32
             data                   = {EMSESP_DEFAULT_LED_GPIO, 4, 5, 17, 33, PHY_type::PHY_TYPE_LAN8720, 16, 1, 0};
             settings.board_profile = "E32";
         } else
+#endif
 #endif
         {
             // BBQKees Gateway S32

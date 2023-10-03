@@ -665,10 +665,10 @@ MAKE_TRANSLATION(roomtempdiff, "roomtempdiff", "room temp difference", "Raumtemp
 MAKE_TRANSLATION(hpminflowtemp, "hpminflowtemp", "HP min. flow temp.", "WP minimale Vorlauftemperatur", "Minimale aanvoertemperatuur WP", "", "", "", "", "yüksek güç minimum akış sıcaklığı", "temperatura minima di mandata") // TODO translate
 MAKE_TRANSLATION(hpcooling, "cooling", "cooling", "Kühlen", "Koelen", "Kyler", "chłodzenie", "kjøling", "refroidissement", "soğuma", "raffreddamento")
 
-// heatpump
+// heatpump and RC100H
 MAKE_TRANSLATION(airHumidity, "airhumidity", "relative air humidity", "relative Luftfeuchte", "Relatieve luchtvochtigheid", "Relativ Luftfuktighet", "wilgotność względna w pomieszczeniu", "luftfuktighet", "humidité relative air", "havadaki bağıl nem", "umidità relativa aria")
 MAKE_TRANSLATION(dewTemperature, "dewtemperature", "dew point temperature", "Taupunkttemperatur", "Dauwpunttemperatuur", "Daggpunkt", "punkt rosy w pomieszczeniu", "duggtemperatur", "température point rosée", "çiğ noktası sıcaklığı", "temperatura del punto di rugiada")
-
+MAKE_TRANSLATION(battery, "battery", "battery", "Batterie", "", "", "", "", "", "", "")
 // mixer
 MAKE_TRANSLATION(flowSetTemp, "flowsettemp", "setpoint flow temperature", "Sollwert Vorlauftemperatur", "Streefwaarde aanvoertemperatuur", "Vald flödestemperatur", "zadana temperatura zasilania", "valgt turtemperatur", "consigne température flux", "akış sıcaklığı ayarı", "Setpoint temperatura di mandata")
 MAKE_TRANSLATION(flowTempHc, "flowtemphc", "flow temperature (TC1)", "Vorlauftemperatur HK (TC1)", "Aanvoertemperatuut circuit (TC1)", "Flödestemperatur (TC1)", "temperatura zasilania (TC1)", "turtemperatur (TC1)", "température flux (TC1)", "akış sıcaklığı (TC1)", "temperatura di mandata (TC1)")
