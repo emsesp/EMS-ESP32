@@ -1735,10 +1735,10 @@ __metadata:
     react-toastify: ^9.1.3
     rollup-plugin-visualizer: ^5.9.2
     sockette: ^2.0.6
-    terser: ^5.20.0
+    terser: ^5.21.0
     typesafe-i18n: ^5.26.2
     typescript: ^5.2.2
-    vite: ^4.4.9
+    vite: ^4.4.10
     vite-plugin-svgr: ^4.1.0
     vite-tsconfig-paths: ^4.2.1
   languageName: unknown
@@ -5976,9 +5976,9 @@ react@latest:
   languageName: node
   linkType: hard
 
-"terser@npm:^5.20.0":
-  version: 5.20.0
-  resolution: "terser@npm:5.20.0"
+"terser@npm:^5.21.0":
+  version: 5.21.0
+  resolution: "terser@npm:5.21.0"
   dependencies:
     "@jridgewell/source-map": ^0.3.3
     acorn: ^8.8.2
@@ -5986,7 +5986,7 @@ react@latest:
     source-map-support: ~0.5.20
   bin:
     terser: bin/terser
-  checksum: ab70d1009fc9d39b89b3fbe5be12d55ade4574df0978de53e046ce109f45d5623fcbbddcb70453e1d95d4967338dab9e41bcff94c1ec636a27c52ef7f6db3936
+  checksum: f14ee816b668e014a2a37f4d00c2d9038374be56f0a141d4eb386b316c5645f49bb038a6b78f75353e9745d622dc66a1d6368aea5b08d46489b57dbf195f761c
   languageName: node
   linkType: hard
 
@@ -6262,9 +6262,9 @@ react@latest:
   languageName: node
   linkType: hard
 
-"vite@npm:^4.4.9":
-  version: 4.4.9
-  resolution: "vite@npm:4.4.9"
+"vite@npm:^4.4.10":
+  version: 4.4.10
+  resolution: "vite@npm:4.4.10"
   dependencies:
     esbuild: ^0.18.10
     fsevents: ~2.3.2
@@ -6298,7 +6298,7 @@ react@latest:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 80dbc632fd75b5866567c8fd605115c9d5718654dbf173f509cfd55c53f39dfbee24f62660e57fd5b11eb93f469a65abdbe6bae880ec8392bb70a5d0d7b6e6a9
+  checksum: d1359f147eb84aad9922460848184f14295e76f335ab03f90a585886ff070e1a7c74996022b3bb07da0a3130c9829565b5556e6eb1d0db12a8aad26f3694d445
   languageName: node
   linkType: hard
 
