@@ -103,9 +103,9 @@ void Shower::loop() {
 
                         // char s[50];
                         // snprintf(s, 50, "%02u:%02u:%02u", (uint8_t)(duration_ / 3600000UL), (uint8_t)(duration_ / 60000UL), (uint8_t)((duration_ / 1000UL) % 60));
-                        doc["duration"] = (uint8_t)(duration_ / 1000UL); // seconds
+                        doc["duration"] = (duration_ / 1000UL); // seconds
                         Mqtt::queue_publish("shower_data", doc.as<JsonObject>());
-                        LOG_INFO("finished with duration %d", duration_);
+                        LOG_INFO("finished with duration %lu seconds", duration_);
                     }
                 }
 
