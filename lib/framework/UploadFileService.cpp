@@ -1,5 +1,6 @@
 #include <UploadFileService.h>
 #include <esp_ota_ops.h>
+#include <esp_app_format.h>
 
 #include "../../src/emsesp_stub.hpp"
 

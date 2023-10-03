@@ -251,7 +251,7 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
                     return_code = Command::call(device_type, cmd, data.as<const char *>(), true, id, output);
                 } else if (data.is<int>()) {
                     char s[10];
-                    return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int>(), 0), true, id, output);
+                    return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int32_t>(), 0), true, id, output);
                 } else if (data.is<float>()) {
                     char s[10];
                     return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<float>(), 1), true, id, output);
@@ -288,7 +288,7 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
                 return_code = Command::call(device_type, cmd, data.as<const char *>(), true, id, output);
             } else if (data.is<int>()) {
                 char s[10];
-                return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int>(), 0), true, id, output);
+                return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int32_t>(), 0), true, id, output);
             } else if (data.is<float>()) {
                 char s[10];
                 return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<float>(), 1), true, id, output);

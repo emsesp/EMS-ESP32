@@ -213,15 +213,23 @@ void AnalogSensor::reload() {
             publish_sensor(sensor);
         } else if (sensor.type() >= AnalogType::PWM_0) {
             LOG_DEBUG("Adding PWM output sensor on GPIO %02d", sensor.gpio());
-            uint channel = sensor.type() - AnalogType::PWM_0;
+#if ESP_IDF_VERSION_MAJOR >= 5
+            ledcAttach(sensor.gpio(), sensor.factor(), 13);
+#else
+            uint8_t channel = sensor.type() - AnalogType::PWM_0;
             ledcSetup(channel, sensor.factor(), 13);
             ledcAttachPin(sensor.gpio(), channel);
+#endif
             if (sensor.offset() > 100) {
                 sensor.set_offset(100);
             } else if (sensor.offset() < 0) {
                 sensor.set_offset(0);
             }
+#if ESP_IDF_VERSION_MAJOR >= 5
+            ledcWrite(sensor.gpio(), (uint32_t)(sensor.offset() * 8191 / 100));
+#else
             ledcWrite(channel, (uint32_t)(sensor.offset() * 8191 / 100));
+#endif
             sensor.set_value(sensor.offset());
             sensor.set_uom(DeviceValueUOM::PERCENT);
             publish_sensor(sensor);
@@ -798,7 +806,6 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                     return true;
                 }
             } else if (sensor.type() >= AnalogType::PWM_0) {
-                uint8_t channel = sensor.type() - AnalogType::PWM_0;
                 if (val > 100) {
                     val = 100;
                 } else if (val < 0) {
@@ -806,7 +813,12 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                 }
                 sensor.set_offset(val);
                 sensor.set_value(val);
+#if ESP_IDF_VERSION_MAJOR >= 5
+                ledcWrite(sensor.gpio(), (uint32_t)(sensor.offset() * 8191 / 100));
+#else
+                uint8_t channel = sensor.type() - AnalogType::PWM_0;
                 ledcWrite(channel, (uint32_t)(val * 8191 / 100));
+#endif
                 publish_sensor(sensor);
                 return true;
             }

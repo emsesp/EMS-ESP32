@@ -21,6 +21,9 @@ default_envs = esp32_4M
 ; default_envs =  debug
 
 [env:esp32_4M]
+; update to arduino 3, IDF 5
+platform = https://github.com/Jason2866/platform-espressif32.git#Arduino/IDF5
+;
 ; if using OTA enter your details below
 ;  upload_protocol = espota
 ;  upload_flags =
