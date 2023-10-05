@@ -156,6 +156,18 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           DeviceValueNumOp::DV_NUMOP_DIV10,
                           FL_(exhaustTemp),
                           DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &heatblock_,
+                          DeviceValueType::USHORT,
+                          DeviceValueNumOp::DV_NUMOP_DIV10,
+                          FL_(heatblock),
+                          DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &headertemp_,
+                          DeviceValueType::USHORT,
+                          DeviceValueNumOp::DV_NUMOP_DIV10,
+                          FL_(headertemp),
+                          DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &burnGas_, DeviceValueType::BOOL, FL_(burnGas), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &burnGas2_, DeviceValueType::BOOL, FL_(burnGas2), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &flameCurr_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(flameCurr), DeviceValueUOM::UA);
@@ -1158,6 +1170,8 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram, sysPress_, 21);
 
     //has_update(telegram, temperatur_, 13); // unknown temperature
+    has_update(telegram, heatblock_, 23);  // see #1317
+    has_update(telegram, headertemp_, 25); // see #1317
     //has_update(telegram, temperatur_, 27); // unknown temperature
 
     has_update(telegram, exhaustTemp_, 31);

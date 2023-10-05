@@ -145,6 +145,8 @@ class Boiler : public EMSdevice {
     uint16_t serviceCodeNumber_; // error/service code
     uint8_t  emergencyOps_;
     uint8_t  emergencyTemp_;
+    uint16_t headertemp_; // see #1317
+    uint16_t heatblock_;  // see #1317
 
     // info
     uint32_t upTimeControl_;             // Operating time control
