@@ -126,6 +126,7 @@ const fr: Translation = {
   BYPASS_TOKEN: 'Contourner l\'autorisation du jeton d\'accès sur les appels API',
   READONLY: 'Activer le mode lecture uniquement (bloque toutes les commandes EMS sortantes en écriture Tx)',
   UNDERCLOCK_CPU: 'Underclock du CPU',
+  HEATINGOFF: 'Start boiler with forced heating off', // TODO translate
   ENABLE_SHOWER_TIMER: 'Activer la minuterie de la douche',
   ENABLE_SHOWER_ALERT: 'Activer les alertes de durée de douche',
   TRIGGER_TIME: 'Durée avant déclenchement',

@@ -88,13 +88,16 @@ class Boiler : public EMSdevice {
     uint32_t wwWorkM_;              // DHW minutes
     int8_t   wwHystOn_;
     int8_t   wwHystOff_;
-    uint8_t  wwTapActivated_;  // maintenance-mode to switch DHW off
     uint16_t wwMixerTemp_;     // mixing temperature
     uint16_t wwCylMiddleTemp_; // Cyl middle temperature (TS3)
     uint16_t wwSolarTemp_;
     uint8_t  wwAlternatingOper_; // alternating operation on/off
     uint8_t  wwAltOpPrioHeat_;   // alternating operation, prioritize heat time
     uint8_t  wwAltOpPrioWw_;     // alternating operation, prioritize dhw time
+
+    // special function
+    uint8_t forceHeatingOff_;
+    uint8_t wwTapActivated_; // maintenance-mode to switch DHW off
 
     // main
     uint8_t  reset_;            // for reset command
@@ -470,6 +473,8 @@ class Boiler : public EMSdevice {
     inline bool set_wwAltOpPrioWw(const char * value, const int8_t id) {
         return set_wwAltOpPrio(value, 3);
     }
+    bool set_forceHeatingOff(const char * value, const int8_t id);
+
     /*
     bool set_hybridStrategy(const char * value, const int8_t id);
     bool set_switchOverTemp(const char * value, const int8_t id);
