@@ -126,6 +126,7 @@ const nl: Translation = {
   BYPASS_TOKEN: 'API Access Token authenticatie uitschakelen',
   READONLY: 'Activeer read-only modus (blokkeert alle outgaande EMS Tx schrijf commandos)',
   UNDERCLOCK_CPU: 'Underclock CPU snelheid',
+  HEATINGOFF: 'Start boiler with forced heating off', // TODO translate
   ENABLE_SHOWER_TIMER: 'Activeer Douche Timer (tijdmeting)',
   ENABLE_SHOWER_ALERT: 'Activeer Douchemelding',
   TRIGGER_TIME: 'Trigger tijd',

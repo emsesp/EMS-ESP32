@@ -126,6 +126,7 @@ const sv: Translation = {
   BYPASS_TOKEN: 'Inaktivera Token-autensiering för API-anrop',
   READONLY: 'Aktivera read-only (blockerar alla utgående skrivkommandon mot EMS-bussen)',
   UNDERCLOCK_CPU: 'Nedklocka Processorhastighet',
+  HEATINGOFF: 'Start boiler with forced heating off', // TODO translate
   ENABLE_SHOWER_TIMER: 'Aktivera Dusch-timer',
   ENABLE_SHOWER_ALERT: 'Aktivera Dusch-varning',
   TRIGGER_TIME: 'Aktiveringstid',

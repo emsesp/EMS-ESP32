@@ -128,6 +128,7 @@ const it: Translation = {
   BYPASS_TOKEN: 'Ignora autorizzazione del token di accesso sulle chiamate API',
   READONLY: 'Abilita modalità sola-lettura (blocca tutti i comandi di scrittura EMS Tx in uscita)',
   UNDERCLOCK_CPU: 'Abbassa velocità della CPU',
+  HEATINGOFF: 'Avviamento caldaia con riscaldamento forzato spento',
   ENABLE_SHOWER_TIMER: 'Abilita timer doccia',
   ENABLE_SHOWER_ALERT: 'Abilita avviso doccia',
   TRIGGER_TIME: 'Tempo di avvio',

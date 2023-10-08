@@ -126,6 +126,7 @@ const en: Translation = {
   BYPASS_TOKEN: 'Bypass Access Token authorization on API calls',
   READONLY: 'Enable read-only mode (blocks all outgoing EMS Tx Write commands)',
   UNDERCLOCK_CPU: 'Underclock CPU speed',
+  HEATINGOFF: 'Start boiler with forced heating off',
   ENABLE_SHOWER_TIMER: 'Enable Shower Timer',
   ENABLE_SHOWER_ALERT: 'Enable Shower Alert',
   TRIGGER_TIME: 'Trigger Time',

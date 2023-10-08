@@ -283,6 +283,7 @@ MAKE_TRANSLATION(haclimate, "haclimate", "Discovery current room temperature", "
 
 // Entity translations: tag, mqtt, en, de, nl, sv, pl, no, fr, tr, it
 // Boiler
+MAKE_TRANSLATION(forceHeatingOff, "heatingoff", "force heating off", "Heizen abschalten", "", "", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(wwtapactivated, "wwtapactivated", "turn on/off", "Durchlauferhitzer aktiv", "zet aan/uit", "på/av", "system przygotowywania", "Varmtvann active", "ecs activée", "aç/kapa", "commuta on/off")
 MAKE_TRANSLATION(reset, "reset", "reset", "Reset", "Reset", "Nollställ", "kasowanie komunikatu", "nullstill", "reset", "Sıfırla", "Reset")
 MAKE_TRANSLATION(oilPreHeat, "oilpreheat", "oil preheating", "Ölvorwärmung", "Olie voorverwarming", "Förvärmning olja", "podgrzewanie oleju", "oljeforvarming", "préchauffage de l'huile", "Yakıt Ön ısıtma devrede", "preriscaldamento olio")
@@ -336,6 +337,8 @@ MAKE_TRANSLATION(maintenanceTime, "maintenancetime", "time to next maintenance",
 MAKE_TRANSLATION(emergencyOps, "emergencyops", "emergency operation", "Notoperation", "Noodoperatie", "Nöddrift", "praca w trybie awaryjnym", "nøddrift", "opération d'urgence", "acil durum çalışması", "operazione di emergenza")
 MAKE_TRANSLATION(emergencyTemp, "emergencytemp", "emergency temperature", "Nottemperatur", "Noodtemperatuur", "Nöddrift temperatur", "temperatura w trybie awaryjnym", "nødtemperatur", "température d'urgence", "acil durum sıcaklığı", "temperatura di emergenza")
 MAKE_TRANSLATION(pumpMode, "pumpmode", "boiler pump mode", "Kesselpumpen Modus", "Ketelpomp modus", "", "tryb pracy pompy kotła", "pumpemodus", "", "pompa modu", "modalità pompa caldaia") // TODO translate
+MAKE_TRANSLATION(headertemp, "headertemp", "low loss header", "Hydr. Weiche", "open verdeler", "", "", "", " bouteille de déc. hydr.", "isı bloğu gidiş suyu sıc.", "comp. idr.") // TODO translate
+MAKE_TRANSLATION(heatblock, "heatblock", "heating block", "Wärmezelle", "Aanvoertemp. warmtecel", "", "", "", "départ corps de chauffe", "Hid.denge kabı sıcaklığı", "mandata scamb. pr.") // TODO translate
 
 // heatpump/compress specific
 MAKE_TRANSLATION(upTimeControl, "uptimecontrol", "total operating time heat", "Betriebszeit Heizen gesamt", "Totale bedrijfstijd", "Total tid uppvärmning", "łączny czas generowania ciepła", "total driftstid", "durée totale de fonctionnement chauffage", "ısınma toplam işletme süresi", "Tempo di funzionamento totale riscaldamento")

@@ -42,7 +42,7 @@
 {170, DeviceType::BOILER, "Logano GB212", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {172, DeviceType::BOILER, "Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i", DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
 {173, DeviceType::BOILER, "Geo 5xx", DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
-{195, DeviceType::BOILER, "Condens 5000i/Greenstar 8000/GC9800IW", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{195, DeviceType::BOILER, "Condens 5000i/Greenstar 8000/GC9800IW/GB192i.2", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {203, DeviceType::BOILER, "Logamax U122/Cerapur", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {206, DeviceType::BOILER, "Ecomline Excellent", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {208, DeviceType::BOILER, "Logamax Plus/GB192/Condens GC9000/Greenstar ErP", DeviceFlags::EMS_DEVICE_FLAG_NONE},
@@ -81,7 +81,7 @@
 {203, DeviceType::THERMOSTAT, "EasyControl CT200", DeviceFlags::EMS_DEVICE_FLAG_EASY | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18, cannot write
 
 // Thermostat - Buderus/Nefit/Bosch specific - 0x17 / 0x10 / 0x18 / 0x19-0x1B for hc2-4 / 0x38
-{  4, DeviceType::THERMOSTAT, "UI800", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
+{  4, DeviceType::THERMOSTAT, "UI800/BC400", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
 { 65, DeviceType::THERMOSTAT, "RC10", DeviceFlags::EMS_DEVICE_FLAG_RC20_N},// 0x17
 { 67, DeviceType::THERMOSTAT, "RC30", DeviceFlags::EMS_DEVICE_FLAG_RC30_N},// 0x10 - based on RC35
 { 77, DeviceType::THERMOSTAT, "RC20/Moduline 300", DeviceFlags::EMS_DEVICE_FLAG_RC20},// 0x17
