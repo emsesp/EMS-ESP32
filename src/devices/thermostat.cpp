@@ -698,8 +698,9 @@ void Thermostat::process_RemoteTemp(std::shared_ptr<const Telegram> telegram) {
 // 0x47B, ff - for reading humidity from the RC100H remote thermostat (0x38, 0x39, ..)
 // e.g. "38 10 FF 00 03 7B 08 24 00 4B"
 void Thermostat::process_RemoteHumidity(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram, dewtemperature_, 0);
+    // has_update(telegram, dewtemperature_, 0); // this is int8
     has_update(telegram, humidity_, 1);
+    has_update(telegram, dewtemperature_, 2); // this is int16
 }
 
 // 0x273 - for reading temperaturcorrection from the RC100H remote thermostat (0x38, 0x39, ..)
@@ -1764,8 +1765,8 @@ bool Thermostat::set_remotetemp(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_remotehum(const char * value, const int8_t id) {
-    float f;
-    if (!Helpers::value2float(value, f)) {
+    int h;
+    if (!Helpers::value2number(value, h)) {
         return false;
     }
 
@@ -1775,10 +1776,10 @@ bool Thermostat::set_remotehum(const char * value, const int8_t id) {
         return false;
     }
 
-    if (f > 100 || f < 0) {
-        hc->remotehum = EMS_VALUE_SHORT_NOTSET;
+    if (h > 100 || h < 0) {
+        hc->remotehum = EMS_VALUE_UINT_NOTSET;
     } else {
-        hc->remotehum = (int16_t)(f * 10);
+        hc->remotehum = h;
     }
 
     if (model() == EMSdevice::EMS_DEVICE_FLAG_RC300) {
@@ -3478,8 +3479,8 @@ void Thermostat::register_device_values() {
         // each device controls only one hc, so we tag the values
         uint8_t tag = DeviceValueTAG::TAG_HC1 + device_id() - 0x38;
         register_device_value(tag, &tempsensor1_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(remotetemp), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &dewtemperature_, DeviceValueType::INT, FL_(dewTemperature), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &humidity_, DeviceValueType::INT, FL_(airHumidity), DeviceValueUOM::PERCENT);
+        register_device_value(tag, &dewtemperature_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(dewTemperature), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &humidity_, DeviceValueType::UINT, FL_(airHumidity), DeviceValueUOM::PERCENT);
         register_device_value(tag,
                               &ibaCalIntTemperature_,
                               DeviceValueType::INT,
@@ -4253,10 +4254,9 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               101);
         register_device_value(tag,
                               &hc->remotehum,
-                              DeviceValueType::SHORT,
-                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              DeviceValueType::UINT,
                               FL_(remotehum),
-                              DeviceValueUOM::DEGREES,
+                              DeviceValueUOM::PERCENT,
                               MAKE_CF_CB(set_remotehum),
                               -1,
                               101);

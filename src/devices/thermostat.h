@@ -37,7 +37,7 @@ class Thermostat : public EMSdevice {
         int16_t selTemp;
         int16_t roomTemp;
         int16_t remotetemp; // for readback
-        int16_t remotehum; // for readback
+        uint8_t remotehum;  // for readback
         uint8_t tempautotemp;
         int8_t  remoteseltemp;
         uint8_t mode;
@@ -209,7 +209,7 @@ class Thermostat : public EMSdevice {
     int16_t dampedoutdoortemp2_;
     uint8_t floordrystatus_;
     uint8_t floordrytemp_;
-    uint8_t dewtemperature_;
+    int16_t dewtemperature_;
     uint8_t humidity_;
     uint8_t battery_;
 

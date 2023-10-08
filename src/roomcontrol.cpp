@@ -24,7 +24,7 @@ namespace emsesp {
 bool     Roomctrl::switch_off_[HCS] = {false, false, false, false};
 uint32_t Roomctrl::rc_time_[HCS]    = {0, 0, 0, 0};
 int16_t  Roomctrl::remotetemp_[HCS] = {EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET};
-int16_t  Roomctrl::remotehum_[HCS]  = {EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET};
+uint8_t  Roomctrl::remotehum_[HCS]  = {EMS_VALUE_UINT_NOTSET, EMS_VALUE_UINT_NOTSET, EMS_VALUE_UINT_NOTSET, EMS_VALUE_UINT_NOTSET};
 uint8_t  Roomctrl::sendcnt[]        = {0, 0, 0, 0};
 uint8_t  Roomctrl::type_            = RC20;
 
@@ -46,7 +46,7 @@ void Roomctrl::set_remotetemp(const uint8_t type, const uint8_t hc, const int16_
     remotetemp_[hc] = temp;
 }
 
-void Roomctrl::set_remotehum(const uint8_t type, const uint8_t hc, const int16_t hum) {
+void Roomctrl::set_remotehum(const uint8_t type, const uint8_t hc, const int8_t hum) {
     if (hc >= HCS || (type != RC20 && type != FB10 && type != RC100H && type != SENSOR)) {
         return;
     }
@@ -227,19 +227,23 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
     }
 }
 
+// send telegram 0x047B only for RC100H
 void Roomctrl::humidity(uint8_t addr, uint8_t dst, uint8_t hc) {
     uint8_t data[10];
-    data[0] = addr;
-    data[1] = dst;
+    data[0]      = addr;
+    data[1]      = dst;
+    uint16_t dew = calc_dew(remotetemp_[hc], remotehum_[hc]);
     if (type_ == RC100H) { // RC100H, telegram 47B
-        data[2] = 0xFF;
-        data[3] = 0;
-        data[4] = 3;
-        data[5] = 0x7B;
-        data[6] = (uint8_t)(remotehum_[hc] >> 8);
-        data[7] = (uint8_t)(remotehum_[hc] & 0xFF);
-        data[8] = EMSbus::calculate_crc(data, 8); // apppend CRC
-        EMSuart::transmit(data, 9);
+        data[2]  = 0xFF;
+        data[3]  = 0;
+        data[4]  = 3;
+        data[5]  = 0x7B;
+        data[6]  = (uint8_t)((dew + 5) / 10);
+        data[7]  = remotehum_[hc];
+        data[8]  = (uint8_t)(dew << 8);
+        data[9]  = (uint8_t)(dew & 0xFF);
+        data[10] = EMSbus::calculate_crc(data, 10); // apppend CRC
+        EMSuart::transmit(data, 11);
     }
 }
 
@@ -251,5 +255,15 @@ void Roomctrl::nack_write() {
     data[0] = TxService::TX_WRITE_FAIL;
     EMSuart::transmit(data, 1);
 }
+
+uint16_t Roomctrl::calc_dew(uint16_t temp, uint8_t humi) {
+    const float k2 = 17.62;
+    const float k3 = 243.12;
+    const float t  = (float)temp / 10;
+    const float h  = (float)humi / 100;
+    uint16_t    dt = (10 * k3 * (((k2 * t) / (k3 + t)) + log(h)) / (((k2 * k3) / (k3 + t)) - log(h)));
+    return dt;
+}
+
 
 } // namespace emsesp

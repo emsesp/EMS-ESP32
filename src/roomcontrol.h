@@ -27,7 +27,7 @@ class Roomctrl {
     static void send(const uint8_t addr);
     static void check(const uint8_t addr, const uint8_t * data);
     static void set_remotetemp(const uint8_t type, const uint8_t hc, const int16_t temp);
-    static void set_remotehum(const uint8_t type, const uint8_t hc, const int16_t hum);
+    static void set_remotehum(const uint8_t type, const uint8_t hc, const int8_t hum);
     enum : uint8_t { RC20 = 113, FB10 = 109, RC100H = 200, SENSOR = 0x40 };
 
   private:
@@ -35,17 +35,18 @@ class Roomctrl {
     static constexpr uint32_t SEND_INTERVAL = 60000; // 1 minute
     static constexpr uint8_t  HCS           = 4;     // max 4 heating circuits
 
-    static uint8_t get_hc(const uint8_t addr);
-    static void version(uint8_t addr, uint8_t dst);
-    static void unknown(uint8_t addr, uint8_t dst, uint8_t type, uint8_t offset);
-    static void temperature(uint8_t addr, uint8_t dst, uint8_t hc);
-    static void humidity(uint8_t addr, uint8_t dst, uint8_t hc);
-    static void nack_write();
+    static uint8_t  get_hc(const uint8_t addr);
+    static void     version(uint8_t addr, uint8_t dst);
+    static void     unknown(uint8_t addr, uint8_t dst, uint8_t type, uint8_t offset);
+    static void     temperature(uint8_t addr, uint8_t dst, uint8_t hc);
+    static void     humidity(uint8_t addr, uint8_t dst, uint8_t hc);
+    static void     nack_write();
+    static uint16_t calc_dew(uint16_t temp, uint8_t hum);
 
     static bool     switch_off_[HCS];
     static uint32_t rc_time_[HCS];
     static int16_t  remotetemp_[HCS];
-    static int16_t  remotehum_[HCS];
+    static uint8_t  remotehum_[HCS];
     static uint8_t  sendcnt[HCS];
     static uint8_t  type_; // type is product-id 113 for RC20 or 109 for Junkers FB10
 };
