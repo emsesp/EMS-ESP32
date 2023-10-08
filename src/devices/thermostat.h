@@ -37,6 +37,7 @@ class Thermostat : public EMSdevice {
         int16_t selTemp;
         int16_t roomTemp;
         int16_t remotetemp; // for readback
+        int16_t remotehum; // for readback
         uint8_t tempautotemp;
         int8_t  remoteseltemp;
         uint8_t mode;
@@ -426,6 +427,7 @@ class Thermostat : public EMSdevice {
     bool set_vacreducemode(const char * value, const int8_t id);
     bool set_nofrostmode(const char * value, const int8_t id);
     bool set_remotetemp(const char * value, const int8_t id);
+    bool set_remotehum(const char * value, const int8_t id);
     bool set_roominfl_factor(const char * value, const int8_t id);
     bool set_reducemode(const char * value, const int8_t id);
     bool set_switchtime1(const char * value, const int8_t id);
