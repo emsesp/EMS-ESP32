@@ -229,7 +229,7 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
 
 // send telegram 0x047B only for RC100H
 void Roomctrl::humidity(uint8_t addr, uint8_t dst, uint8_t hc) {
-    uint8_t data[10];
+    uint8_t data[11];
     data[0]      = addr;
     data[1]      = dst;
     uint16_t dew = calc_dew(remotetemp_[hc], remotehum_[hc]);
