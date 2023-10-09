@@ -338,12 +338,12 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
         snprintf(info_s, sizeof(info_s), "'%s/%s'", dname, cmd);
     }
     if ((value == nullptr) || (strlen(value) == 0)) {
-        LOG_WARNING(("%sCalling command %s"), ro.c_str(), info_s);
+        LOG_DEBUG(("%sCalling command %s"), ro.c_str(), info_s);
     } else {
         if (id > 0) {
-            LOG_WARNING(("%sCalling command %s with value %s and id %d on device 0x%02X"), ro.c_str(), info_s, value, id, device_id);
+            LOG_DEBUG(("%sCalling command %s with value %s and id %d on device 0x%02X"), ro.c_str(), info_s, value, id, device_id);
         } else {
-            LOG_WARNING(("%sCalling command %s with value %s"), ro.c_str(), info_s, value);
+            LOG_DEBUG(("%sCalling command %s with value %s"), ro.c_str(), info_s, value);
         }
     }
 
