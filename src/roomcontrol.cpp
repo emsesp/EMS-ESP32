@@ -118,11 +118,11 @@ void Roomctrl::send(const uint8_t addr) {
 /**
  * check if there is a message for the remote room controller
  */
-void Roomctrl::check(const uint8_t addr, const uint8_t * data) {
+void Roomctrl::check(const uint8_t addr, const uint8_t * data, const uint8_t length) {
     uint8_t hc = get_hc(addr & 0x7F);
 
     // check address, reply only on addresses 0x18..0x1B
-    if (hc >= HCS) {
+    if (hc >= HCS || length < 5) {
         return;
     }
     // no reply if the temperature is not set
@@ -138,18 +138,22 @@ void Roomctrl::check(const uint8_t addr, const uint8_t * data) {
     // empty message back if temperature not set or unknown message type
     if (data[2] == EMSdevice::EMS_TYPE_VERSION) {
         version(addr, data[0]);
-    } else if (remotetemp_[hc] == EMS_VALUE_SHORT_NOTSET) {
+    } else if (length == 5 && remotetemp_[hc] == EMS_VALUE_SHORT_NOTSET) {
         unknown(addr, data[0], data[2], data[3]);
+    } else if (length == 7 && remotetemp_[hc] == EMS_VALUE_SHORT_NOTSET) {
+        unknown(addr, data[0], data[3], data[5], data[6]);
     } else if (data[2] == 0xAF && data[3] == 0) {
         temperature(addr, data[0], hc);
-    } else if (data[2] == 0xFF && data[3] == 0 && data[5] == 0 && data[6] == 0x23) { // Junkers
+    } else if (length == 7 && data[2] == 0xFF && data[3] == 0 && data[5] == 0 && data[6] == 0x23) { // Junkers
         temperature(addr, data[0], hc);
-    } else if (data[2] == 0xFF && data[3] == 0 && data[5] == 3 && data[6] == 0x2B) { // EMS+ temperature
+    } else if (length == 7 && data[2] == 0xFF && data[3] == 0 && data[5] == 3 && data[6] == 0x2B) { // EMS+ temperature
         temperature(addr, data[0], hc);
-    } else if (data[2] == 0xFF && data[3] == 0 && data[5] == 3 && data[6] == 0x7B && remotehum_[hc] != EMS_VALUE_SHORT_NOTSET) { // EMS+ humidity
+    } else if (length == 7 && data[2] == 0xFF && data[3] == 0 && data[5] == 3 && data[6] == 0x7B && remotehum_[hc] != EMS_VALUE_SHORT_NOTSET) { // EMS+ humidity
         humidity(addr, data[0], hc);
-    } else {
+    } else if (length == 5) { // ems query
         unknown(addr, data[0], data[2], data[3]);
+    } else if (length == 7 && data[2] == 0xFF) { // ems+ query
+        unknown(addr, data[0], data[3], data[5], data[6]);
     }
 }
 
@@ -180,6 +184,18 @@ void Roomctrl::unknown(uint8_t addr, uint8_t dst, uint8_t type, uint8_t offset) 
     data[3] = offset;
     data[4] = EMSbus::calculate_crc(data, 4); // apppend CRC
     EMSuart::transmit(data, 5);
+}
+
+void Roomctrl::unknown(uint8_t addr, uint8_t dst, uint8_t offset, uint8_t typeh, uint8_t typel) {
+    uint8_t data[10];
+    data[0] = addr;
+    data[1] = dst;
+    data[2] = 0xFF;
+    data[3] = offset;
+    data[4] = typeh;
+    data[5] = typel;
+    data[6] = EMSbus::calculate_crc(data, 6); // apppend CRC
+    EMSuart::transmit(data, 7);
 }
 
 /**

@@ -25,7 +25,7 @@ namespace emsesp {
 class Roomctrl {
   public:
     static void send(const uint8_t addr);
-    static void check(const uint8_t addr, const uint8_t * data);
+    static void check(const uint8_t addr, const uint8_t * data, const uint8_t length);
     static void set_remotetemp(const uint8_t type, const uint8_t hc, const int16_t temp);
     static void set_remotehum(const uint8_t type, const uint8_t hc, const int8_t hum);
     enum : uint8_t { RC20 = 113, FB10 = 109, RC100H = 200, SENSOR = 0x40 };
@@ -38,6 +38,7 @@ class Roomctrl {
     static uint8_t  get_hc(const uint8_t addr);
     static void     version(uint8_t addr, uint8_t dst);
     static void     unknown(uint8_t addr, uint8_t dst, uint8_t type, uint8_t offset);
+    static void     unknown(uint8_t addr, uint8_t dst, uint8_t offset, uint8_t typeh, uint8_t typel);
     static void     temperature(uint8_t addr, uint8_t dst, uint8_t hc);
     static void     humidity(uint8_t addr, uint8_t dst, uint8_t hc);
     static void     nack_write();
