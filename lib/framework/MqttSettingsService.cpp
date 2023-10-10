@@ -154,7 +154,7 @@ void MqttSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     case ARDUINO_EVENT_ETH_GOT_IP:
     case ARDUINO_EVENT_ETH_GOT_IP6:
     case ARDUINO_EVENT_WIFI_STA_GOT_IP6:
-        if (_state.enabled) {
+        if (_state.enabled && !_mqttClient->connected()) {
             onConfigUpdated();
         }
         break;
