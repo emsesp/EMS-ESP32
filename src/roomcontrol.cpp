@@ -51,7 +51,7 @@ void Roomctrl::set_remotehum(const uint8_t type, const uint8_t hc, const int8_t 
         return;
     }
     type_ = type;
-    if (remotehum_[hc] != EMS_VALUE_SHORT_NOTSET && hum == EMS_VALUE_SHORT_NOTSET) {
+    if (remotehum_[hc] != EMS_VALUE_UINT_NOTSET && hum == EMS_VALUE_UINT_NOTSET) {
         switch_off_[hc] = true;
     }
     if (remotehum_[hc] != hum) {
@@ -84,29 +84,35 @@ void Roomctrl::send(const uint8_t addr) {
         return;
     }
     // no reply if the temperature is not set
-    if (remotetemp_[hc] == EMS_VALUE_SHORT_NOTSET && !switch_off_[hc]) {
+    if (!switch_off_[hc] && remotetemp_[hc] == EMS_VALUE_SHORT_NOTSET && remotehum_[hc] == EMS_VALUE_UINT_NOTSET) {
         return;
     }
 
     if (uuid::get_uptime() - rc_time_[hc] > SEND_INTERVAL) { // send every minute
-        if (type_ == FB10 || type_ == RC100H) {
-            if (sendcnt[hc] == 1) {
+        if (type_ == RC100H) {
+            if (sendcnt[hc] == 1) { // second telegram for humidity
+                if (switch_off_[hc]) {
+                    remotehum_[hc] = EMS_VALUE_UINT_NOTSET;
+                }
                 rc_time_[hc] = uuid::get_uptime();
                 humidity(addr, 0x10, hc);
                 sendcnt[hc] = 0;
-            } else {
-                if (remotehum_[hc] != EMS_VALUE_SHORT_NOTSET) {
+            } else { // temperature telegram
+                if (remotehum_[hc] != EMS_VALUE_UINT_NOTSET) {
                     sendcnt[hc] = 1;
                 } else {
                     rc_time_[hc] = uuid::get_uptime();
                 }
                 temperature(addr, 0x10, hc); // send to master-thermostat (https://github.com/emsesp/EMS-ESP32/issues/336)
             }
-        } else {
+        } else if (type_ == FB10) {
+            rc_time_[hc] = uuid::get_uptime();
+            temperature(addr, 0x10, hc); // send to master-thermostat (https://github.com/emsesp/EMS-ESP32/issues/336)
+        } else { // type==RC20
             rc_time_[hc] = uuid::get_uptime();
             temperature(addr, 0x00, hc); // send to all
         }
-        if (remotehum_[hc] == EMS_VALUE_SHORT_NOTSET) {
+        if (remotehum_[hc] == EMS_VALUE_UINT_NOTSET) {
             switch_off_[hc] = false;
         }
     } else {
@@ -148,7 +154,7 @@ void Roomctrl::check(const uint8_t addr, const uint8_t * data, const uint8_t len
         temperature(addr, data[0], hc);
     } else if (length == 7 && data[2] == 0xFF && data[3] == 0 && data[5] == 3 && data[6] == 0x2B) { // EMS+ temperature
         temperature(addr, data[0], hc);
-    } else if (length == 7 && data[2] == 0xFF && data[3] == 0 && data[5] == 3 && data[6] == 0x7B && remotehum_[hc] != EMS_VALUE_SHORT_NOTSET) { // EMS+ humidity
+    } else if (length == 7 && data[2] == 0xFF && data[3] == 0 && data[5] == 3 && data[6] == 0x7B && remotehum_[hc] != EMS_VALUE_UINT_NOTSET) { // EMS+ humidity
         humidity(addr, data[0], hc);
     } else if (length == 5) { // ems query
         unknown(addr, data[0], data[2], data[3]);
@@ -254,7 +260,7 @@ void Roomctrl::humidity(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[3]  = 0;
         data[4]  = 3;
         data[5]  = 0x7B;
-        data[6]  = (uint8_t)((dew + 5) / 10);
+        data[6]  = dew == EMS_VALUE_SHORT_NOTSET ? EMS_VALUE_INT_NOTSET : (uint8_t)((dew + 5) / 10);
         data[7]  = remotehum_[hc];
         data[8]  = (uint8_t)(dew << 8);
         data[9]  = (uint8_t)(dew & 0xFF);
@@ -272,12 +278,15 @@ void Roomctrl::nack_write() {
     EMSuart::transmit(data, 1);
 }
 
-uint16_t Roomctrl::calc_dew(uint16_t temp, uint8_t humi) {
+int16_t Roomctrl::calc_dew(int16_t temp, uint8_t humi) {
+    if (humi == EMS_VALUE_UINT_NOTSET || temp == EMS_VALUE_SHORT_NOTSET) {
+        return EMS_VALUE_SHORT_NOTSET;
+    }
     const float k2 = 17.62;
     const float k3 = 243.12;
     const float t  = (float)temp / 10;
     const float h  = (float)humi / 100;
-    uint16_t    dt = (10 * k3 * (((k2 * t) / (k3 + t)) + log(h)) / (((k2 * k3) / (k3 + t)) - log(h)));
+    int16_t     dt = (10 * k3 * (((k2 * t) / (k3 + t)) + log(h)) / (((k2 * k3) / (k3 + t)) - log(h)));
     return dt;
 }
 

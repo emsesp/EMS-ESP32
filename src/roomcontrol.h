@@ -35,14 +35,14 @@ class Roomctrl {
     static constexpr uint32_t SEND_INTERVAL = 60000; // 1 minute
     static constexpr uint8_t  HCS           = 4;     // max 4 heating circuits
 
-    static uint8_t  get_hc(const uint8_t addr);
-    static void     version(uint8_t addr, uint8_t dst);
-    static void     unknown(uint8_t addr, uint8_t dst, uint8_t type, uint8_t offset);
-    static void     unknown(uint8_t addr, uint8_t dst, uint8_t offset, uint8_t typeh, uint8_t typel);
-    static void     temperature(uint8_t addr, uint8_t dst, uint8_t hc);
-    static void     humidity(uint8_t addr, uint8_t dst, uint8_t hc);
-    static void     nack_write();
-    static uint16_t calc_dew(uint16_t temp, uint8_t hum);
+    static uint8_t get_hc(const uint8_t addr);
+    static void    version(uint8_t addr, uint8_t dst);
+    static void    unknown(uint8_t addr, uint8_t dst, uint8_t type, uint8_t offset);
+    static void    unknown(uint8_t addr, uint8_t dst, uint8_t offset, uint8_t typeh, uint8_t typel);
+    static void    temperature(uint8_t addr, uint8_t dst, uint8_t hc);
+    static void    humidity(uint8_t addr, uint8_t dst, uint8_t hc);
+    static void    nack_write();
+    static int16_t calc_dew(int16_t temp, uint8_t hum);
 
     static bool     switch_off_[HCS];
     static uint32_t rc_time_[HCS];
