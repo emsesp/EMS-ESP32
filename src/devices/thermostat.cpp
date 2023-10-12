@@ -1144,6 +1144,7 @@ void Thermostat::process_RC300OutdoorTemp(std::shared_ptr<const Telegram> telegr
 }
 
 // 0x240 RC300 parameter
+// RC300Settings(0x240), data: 26 00 03 00 00 00 00 00 FF 01 F6 06 FF 00 00 00 00 00 00 00 00 00 00
 void Thermostat::process_RC300Settings(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, ibaCalIntTemperature_, 7);
     has_update(telegram, ibaDamping_, 8);
@@ -1176,6 +1177,7 @@ void Thermostat::process_HPMode(std::shared_ptr<const Telegram> telegram) {
     if (hc == nullptr) {
         return;
     }
+    has_update(telegram, hc->control, 3);
     has_update(telegram, hc->hpmode, 5);
 }
 
@@ -1871,6 +1873,11 @@ bool Thermostat::set_control(const char * value, const int8_t id) {
     if (model() == EMS_DEVICE_FLAG_JUNKERS && !has_flags(EMS_DEVICE_FLAG_JUNKERS_OLD)) {
         if (Helpers::value2enum(value, ctrl, FL_(enum_j_control))) {
             write_command(set_typeids[hc->hc()], 1, ctrl);
+            return true;
+        }
+    } else if (model() == EMS_DEVICE_FLAG_RC300 || model() == EMS_DEVICE_FLAG_RC100) {
+        if (Helpers::value2enum(value, ctrl, FL_(enum_control1))) {
+            write_command(hpmode_typeids[hc->hc()], 3, ctrl);
             return true;
         }
     } else if (Helpers::value2enum(value, ctrl, FL_(enum_control))) {
@@ -4243,6 +4250,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->dewoffset, DeviceValueType::UINT, FL_(dewoffset), DeviceValueUOM::K, MAKE_CF_CB(set_dewoffset), 2, 10);
         register_device_value(tag, &hc->roomtempdiff, DeviceValueType::UINT, FL_(roomtempdiff), DeviceValueUOM::K, MAKE_CF_CB(set_roomtempdiff));
         register_device_value(tag, &hc->hpminflowtemp, DeviceValueType::UINT, FL_(hpminflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_hpminflowtemp));
+        register_device_value(tag, &hc->control, DeviceValueType::ENUM, FL_(enum_control1), FL_(control), DeviceValueUOM::NONE, MAKE_CF_CB(set_control));
         register_device_value(tag,
                               &hc->remotetemp,
                               DeviceValueType::SHORT,
