@@ -34,7 +34,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_telegram_type(0x10, "UBAErrorMessage1", false, MAKE_PF_CB(process_UBAErrorMessage));
     register_telegram_type(0x11, "UBAErrorMessage2", false, MAKE_PF_CB(process_UBAErrorMessage));
     register_telegram_type(0xC2, "UBAErrorMessage3", false, MAKE_PF_CB(process_UBAErrorMessage2));
-    register_telegram_type(0x14, "UBATotalUptime", true, MAKE_PF_CB(process_UBATotalUptime));
+    register_telegram_type(0x14, "UBATotalUptime", false, MAKE_PF_CB(process_UBATotalUptime));
     register_telegram_type(0x15, "UBAMaintenanceData", false, MAKE_PF_CB(process_UBAMaintenanceData));
     register_telegram_type(0x1C, "UBAMaintenanceStatus", false, MAKE_PF_CB(process_UBAMaintenanceStatus));
 
@@ -127,7 +127,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           MAKE_CF_CB(set_forceHeatingOff));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatingActive_, DeviceValueType::BOOL, FL_(heatingActive), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &tapwaterActive_, DeviceValueType::BOOL, FL_(tapwaterActive), DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &selFlowTemp_, DeviceValueType::UINT, FL_(selFlowTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flow_temp));
+    register_device_value(
+        DeviceValueTAG::TAG_DEVICE_DATA, &selFlowTemp_, DeviceValueType::UINT, FL_(selFlowTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flow_temp), 0, 90);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatingPumpMod_, DeviceValueType::UINT, FL_(heatingPumpMod), DeviceValueUOM::PERCENT);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &outdoorTemp_,
@@ -186,23 +187,23 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           FL_(heatingActivated),
                           DeviceValueUOM::NONE,
                           MAKE_CF_CB(set_heating_activated));
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                          &heatingTemp_,
-                          DeviceValueType::UINT,
-                          FL_(heatingTemp),
-                          DeviceValueUOM::DEGREES,
-                          MAKE_CF_CB(set_heating_temp));
+    register_device_value(
+        DeviceValueTAG::TAG_DEVICE_DATA, &heatingTemp_, DeviceValueType::UINT, FL_(heatingTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_heating_temp), 0, 90);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pumpModMax_, DeviceValueType::UINT, FL_(pumpModMax), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_max_pump));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pumpModMin_, DeviceValueType::UINT, FL_(pumpModMin), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_min_pump));
     register_device_value(
         DeviceValueTAG::TAG_DEVICE_DATA, &pumpMode_, DeviceValueType::ENUM, FL_(enum_pumpMode), FL_(pumpMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_pumpMode));
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pumpDelay_, DeviceValueType::UINT, FL_(pumpDelay), DeviceValueUOM::MINUTES, MAKE_CF_CB(set_pump_delay));
+    register_device_value(
+        DeviceValueTAG::TAG_DEVICE_DATA, &pumpDelay_, DeviceValueType::UINT, FL_(pumpDelay), DeviceValueUOM::MINUTES, MAKE_CF_CB(set_pump_delay), 0, 60);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &burnMinPeriod_,
                           DeviceValueType::UINT,
                           FL_(burnMinPeriod),
                           DeviceValueUOM::MINUTES,
-                          MAKE_CF_CB(set_burn_period));
+                          MAKE_CF_CB(set_burn_period),
+                          0,
+                          120);
+
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &burnMinPower_,
                           DeviceValueType::UINT,
@@ -211,8 +212,10 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           MAKE_CF_CB(set_min_power));
     register_device_value(
         DeviceValueTAG::TAG_DEVICE_DATA, &burnMaxPower_, DeviceValueType::UINT, FL_(burnMaxPower), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_max_power), 0, 254);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &boilHystOn_, DeviceValueType::INT, FL_(boilHystOn), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_hyst_on));
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &boilHystOff_, DeviceValueType::INT, FL_(boilHystOff), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_hyst_off));
+    register_device_value(
+        DeviceValueTAG::TAG_DEVICE_DATA, &boilHystOn_, DeviceValueType::INT, FL_(boilHystOn), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_hyst_on), -20, 0);
+    register_device_value(
+        DeviceValueTAG::TAG_DEVICE_DATA, &boilHystOff_, DeviceValueType::INT, FL_(boilHystOff), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_hyst_off), 0, 20);
     register_device_value(
         DeviceValueTAG::TAG_DEVICE_DATA, &boil2HystOn_, DeviceValueType::INT, FL_(boil2HystOn), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_hyst2_on), -20, 0);
     register_device_value(
@@ -787,7 +790,9 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           DeviceValueType::UINT,
                           FL_(wwDisinfectionTemp),
                           DeviceValueUOM::DEGREES,
-                          MAKE_CF_CB(set_ww_disinfect_temp));
+                          MAKE_CF_CB(set_ww_disinfect_temp),
+                          60,
+                          80);
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
                           &wwCircMode_,
                           DeviceValueType::ENUM,
@@ -965,7 +970,9 @@ void Boiler::check_active() {
         tapwaterActive_ = val;
         char s[12];
         Mqtt::queue_publish(F_(tapwater_active), Helpers::render_boolean(s, b));
-        EMSESP::tap_water_active(b); // let EMS-ESP know, used in the Shower class
+        if (flowsensor) {
+            EMSESP::tap_water_active(b); // let EMS-ESP know, used in the Shower class
+        }
     }
 
     if (!Helpers::hasValue(forceHeatingOff_, EMS_VALUE_BOOL)) {
@@ -1030,8 +1037,7 @@ void Boiler::process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, curFlowTemp_, 1);
     has_update(telegram, selBurnPow_, 3); // burn power max setting
     has_update(telegram, curBurnPow_, 4);
-    has_update(telegram, boilerState_, 5);
-
+    has_update(telegram, boilerState_, 5); // bits 0-heat, 1-dhw, 2-service, 3-flame, 4-preheat, 5-lock-Err, 6-block-err, 7-maint
     has_bitupdate(telegram, burnGas_, 7, 0);
     has_bitupdate(telegram, burnGas2_, 7, 1);
     has_bitupdate(telegram, fanWork_, 7, 2);
@@ -1099,7 +1105,7 @@ void Boiler::process_UBAParameters(std::shared_ptr<const Telegram> telegram) {
 }
 
 /*
- * UBASettingsWW - type 0x26 - max power on offset 7, #740
+ * UBASettingsWW - type 0x26 - max power on offset 7, https://github.com/emsesp/EMS-ESP/issues/740
  * Boiler(0x08) -> Me(0x0B), ?(0x26), data: 01 05 00 0F 00 1E 58 5A
  */
 void Boiler::process_UBASettingsWW(std::shared_ptr<const Telegram> telegram) {
@@ -1162,7 +1168,7 @@ void Boiler::process_UBAMonitorWW(std::shared_ptr<const Telegram> telegram) {
 /*
  * UBAMonitorFastPlus - type 0xE4 - central heating monitor EMS+
  * temperatures at 7 and 23 always identical
-+ * Bosch Logamax Plus GB122: issue #620
++ * Bosch Logamax Plus GB122: https://github.com/emsesp/EMS-ESP/issues/620
 + * 88 00 E4 00 00 2D 2D 00 00 C9 34 02 21 64 3D 05 02 01 DE 00 00 00 00 03 62 14 00 02 21 00 00 00 00 00 00 00 2B 2B 83
 + * GB125/Logamatic MC110: issue #650: add retTemp & sysPress
 + * 08 00 E4 00 10 20 2D 48 00 C8 38 02 37 3C 27 03 00 00 00 00 00 01 7B 01 8F 11 00 02 37 80 00 02 1B 80 00 7F FF 80 00
@@ -1176,15 +1182,32 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram, selBurnPow_, 9);
     has_update(telegram, curFlowTemp_, 7);
     has_update(telegram, flameCurr_, 19);
-    has_update(telegram, retTemp_, 17); // can be 0 if no sensor, handled in export_values
-    has_update(telegram, sysPress_, 21);
+    uint16_t rettemp = retTemp_;
+    telegram->read_value(rettemp, 17); // 0 means no sensor
+    if (rettemp == 0) {
+        rettemp = EMS_VALUE_USHORT_NOTSET;
+    }
+    has_update(retTemp_, rettemp);
+
+    uint8_t syspress = sysPress_;
+    telegram->read_value(syspress, 21); // 0 means no sensor
+    if (syspress == 0) {
+        sysPress_ = EMS_VALUE_UINT_NOTSET;
+    }
+    has_update(sysPress_, syspress);
 
     //has_update(telegram, temperatur_, 13); // unknown temperature
     has_update(telegram, heatblock_, 23);  // see #1317
     has_update(telegram, headertemp_, 25); // see #1317
     //has_update(telegram, temperatur_, 27); // unknown temperature
 
-    has_update(telegram, exhaustTemp_, 31);
+    //  exhaustTemp here and in e5. Only set nonzero value
+    uint16_t exTemp = 0;
+    if (telegram->read_value(exTemp, 31)) {
+        if (exTemp) {
+            has_update(exhaustTemp_, exTemp);
+        }
+    }
 
     // read 3 char service code / installation status as appears on the display
     if ((telegram->message_length > 3) && (telegram->offset == 0)) {
@@ -1257,14 +1280,21 @@ void Boiler::process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram
     has_bitupdate(telegram, ignWork_, 2, 3);
     has_bitupdate(telegram, heatingPump_, 2, 5);
     has_bitupdate(telegram, wwCirc_, 2, 7);
-    // has_update(telegram, exhaustTemp_, 6);   // Disabled until verified as valid location, see #1147.
+    // temperature measurements at offset 4 unknown, see https://github.com/emsesp/EMS-ESP/issues/620
+
+    //  exhaustTemp here and in e4. Only set nonzero value, see #1147, #1150, #1326
+    uint16_t exTemp = 0;
+    if (telegram->read_value(exTemp, 6)) {
+        if (exTemp) {
+            has_update(exhaustTemp_, exTemp);
+        }
+    }
     has_update(telegram, burnStarts_, 10, 3);   // force to 3 bytes
     has_update(telegram, burnWorkMin_, 13, 3);  // force to 3 bytes
     has_update(telegram, burn2WorkMin_, 16, 3); // force to 3 bytes
     has_update(telegram, heatWorkMin_, 19, 3);  // force to 3 bytes
     has_update(telegram, heatStarts_, 22, 3);   // force to 3 bytes
     has_update(telegram, heatingPumpMod_, 25);
-    // temperature measurements at 4, see #620
 
     if (forceHeatingOff_ == EMS_VALUE_BOOL_ON && telegram->dest == 0) {
         uint8_t data[] = {0, 0, 0, 0};
@@ -1562,45 +1592,46 @@ void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
         return;
     }
     // data: displaycode(2), errornumber(2), year, month, hour, day, minute, duration(2), src-addr
-    if (telegram->message_data[4] & 0x80) { // valid date
-
-        static uint32_t lastCodeDate_ = 0; // last code date
-        char            code[3]       = {0};
-        uint16_t        codeNo        = EMS_VALUE_SHORT_NOTSET;
-        code[0]                       = telegram->message_data[0];
-        code[1]                       = telegram->message_data[1];
-        code[2]                       = 0;
-        telegram->read_value(codeNo, 2);
-        uint16_t year     = (telegram->message_data[4] & 0x7F) + 2000;
-        uint8_t  month    = telegram->message_data[5];
-        uint8_t  day      = telegram->message_data[7];
-        uint8_t  hour     = telegram->message_data[6];
-        uint8_t  min      = telegram->message_data[8];
-        uint32_t date     = (year - 2000) * 535680UL + month * 44640UL + day * 1440UL + hour * 60 + min;
-        uint16_t duration = EMS_VALUE_SHORT_NOTSET;
-        telegram->read_value(duration, 9);
-        // store only the newest code from telegrams 10 and 11
-        if (date > lastCodeDate_) {
-            lastCodeDate_ = date;
-            snprintf(lastCode_, sizeof(lastCode_), "%s(%d) %02d.%02d.%d %02d:%02d (%d min)", code, codeNo, day, month, year, hour, min, duration);
-            has_update(lastCode_);
-        }
+    static uint32_t lastCodeDate_ = 0; // last code date
+    char            code[3]       = {0};
+    uint16_t        codeNo        = EMS_VALUE_SHORT_NOTSET;
+    code[0]                       = telegram->message_data[0];
+    code[1]                       = telegram->message_data[1];
+    code[2]                       = 0;
+    telegram->read_value(codeNo, 2);
+    uint16_t year     = (telegram->message_data[4] & 0x7F) + 2000;
+    uint8_t  month    = telegram->message_data[5];
+    uint8_t  day      = telegram->message_data[7];
+    uint8_t  hour     = telegram->message_data[6];
+    uint8_t  min      = telegram->message_data[8];
+    uint16_t duration = telegram->message_data[9];
+    uint32_t date     = (year - 2000) * 535680UL + month * 44640UL + day * 1440UL + hour * 60 + min + duration;
+    // store only the newest code from telegrams 10 and 11
+    if (date > lastCodeDate_ && lastCodeDate_) {
+        lastCodeDate_ = date;
+        snprintf(lastCode_, sizeof(lastCode_), "%s(%d) %02d.%02d.%d %02d:%02d (%d min)", code, codeNo, day, month, year, hour, min, duration);
+        has_update(lastCode_);
+    } else if (!lastCodeDate_) { // no publish for first read
+        lastCodeDate_ = 1;
     }
 }
 
 // 0xC2, without clock in system it stores 3 bytes uptime in 11 and 16, with clock date in 10-14, and 15-19
 // date is marked with 0x80 to year-field
+// also C6, C7 https://github.com/emsesp/EMS-ESP32/issues/938#issuecomment-1425813815
 void Boiler::process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram) {
     if (telegram->offset > 0 || telegram->message_length < 20) {
         return;
     }
 
-    char     code[sizeof(lastCode_)] = {0};
-    uint16_t codeNo                  = EMS_VALUE_SHORT_NOTSET;
-    code[0]                          = telegram->message_data[5];
-    code[1]                          = telegram->message_data[6];
-    code[2]                          = telegram->message_data[7];
-    code[3]                          = 0;
+    static uint32_t lastCodeDate_           = 0; // last code date
+    uint32_t        date                    = 0;
+    char            code[sizeof(lastCode_)] = {0};
+    uint16_t        codeNo                  = EMS_VALUE_SHORT_NOTSET;
+    code[0]                                 = telegram->message_data[5];
+    code[1]                                 = telegram->message_data[6];
+    code[2]                                 = telegram->message_data[7];
+    code[3]                                 = 0;
     telegram->read_value(codeNo, 8);
 
     // check for valid date, https://github.com/emsesp/EMS-ESP32/issues/204
@@ -1617,6 +1648,7 @@ void Boiler::process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram) 
         uint8_t  end_min     = telegram->message_data[19];
 
         if (telegram->message_data[15] & 0x80) { //valid end date
+            date = (end_year - 2000) * 535680UL + end_month * 44640UL + end_day * 1440UL + end_hour * 60 + end_min;
             snprintf(&code[3],
                      sizeof(code) - 3,
                      "(%d) %02d.%02d.%04d %02d:%02d - %02d.%02d.%04d %02d:%02d",
@@ -1632,6 +1664,7 @@ void Boiler::process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram) 
                      end_hour,
                      end_min);
         } else { // no valid end date means error still persists
+            date = (start_year - 2000) * 535680UL + start_month * 44640UL + start_day * 1440UL + start_hour * 60 + start_min;
             snprintf(&code[3], sizeof(code) - 3, "(%d) %02d.%02d.%04d %02d:%02d - now", codeNo, start_day, start_month, start_year, start_hour, start_min);
         }
     } else { // no clock, the uptime is stored https://github.com/emsesp/EMS-ESP32/issues/121
@@ -1639,9 +1672,15 @@ void Boiler::process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram) 
         uint32_t endtime   = 0;
         telegram->read_value(starttime, 11, 3);
         telegram->read_value(endtime, 16, 3);
-        snprintf(&code[3], sizeof(code) - 3, "(%d) @uptime %d - %d min", codeNo, starttime, endtime);
+        snprintf(&code[3], sizeof(code) - 3, "(%d) @uptime %lu - %lu min", codeNo, starttime, endtime);
+        date = starttime;
     }
-    has_update(lastCode_, code, sizeof(lastCode_));
+    if (date > lastCodeDate_ && lastCodeDate_) {
+        lastCodeDate_ = date;
+        has_update(lastCode_, code, sizeof(lastCode_));
+    } else if (!lastCodeDate_) {
+        lastCodeDate_ = 1;
+    }
 }
 
 // 0x15 maintenance data
@@ -1923,7 +1962,8 @@ bool Boiler::set_flow_temp(const char * value, const int8_t id) {
         return false;
     }
 
-    //  no write/verify if there is no change, see https://github.com/emsesp/EMS-ESP32/issues/654
+    // no verify if value is unchanged, put it  to end of tx-queue, no priority
+    // see https://github.com/emsesp/EMS-ESP32/issues/654, https://github.com/emsesp/EMS-ESP32/issues/954
     if (v == selFlowTemp_) {
         EMSESP::txservice_.add(Telegram::Operation::TX_WRITE, device_id(), EMS_TYPE_UBASetPoints, 0, (uint8_t *)&v, 1, 0, false);
         return true;
