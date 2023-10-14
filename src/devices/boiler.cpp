@@ -34,7 +34,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_telegram_type(0x10, "UBAErrorMessage1", false, MAKE_PF_CB(process_UBAErrorMessage));
     register_telegram_type(0x11, "UBAErrorMessage2", false, MAKE_PF_CB(process_UBAErrorMessage));
     register_telegram_type(0xC2, "UBAErrorMessage3", false, MAKE_PF_CB(process_UBAErrorMessage2));
-    register_telegram_type(0x14, "UBATotalUptime", false, MAKE_PF_CB(process_UBATotalUptime));
+    register_telegram_type(0x14, "UBATotalUptime", true, MAKE_PF_CB(process_UBATotalUptime));
     register_telegram_type(0x15, "UBAMaintenanceData", false, MAKE_PF_CB(process_UBAMaintenanceData));
     register_telegram_type(0x1C, "UBAMaintenanceStatus", false, MAKE_PF_CB(process_UBAMaintenanceStatus));
 
@@ -1200,14 +1200,7 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram, heatblock_, 23);  // see #1317
     has_update(telegram, headertemp_, 25); // see #1317
     //has_update(telegram, temperatur_, 27); // unknown temperature
-
-    //  exhaustTemp here and in e5. Only set nonzero value
-    uint16_t exTemp = 0;
-    if (telegram->read_value(exTemp, 31)) {
-        if (exTemp) {
-            has_update(exhaustTemp_, exTemp);
-        }
-    }
+    has_update(telegram, exhaustTemp_, 31);
 
     // read 3 char service code / installation status as appears on the display
     if ((telegram->message_length > 3) && (telegram->offset == 0)) {
@@ -1281,14 +1274,7 @@ void Boiler::process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram
     has_bitupdate(telegram, heatingPump_, 2, 5);
     has_bitupdate(telegram, wwCirc_, 2, 7);
     // temperature measurements at offset 4 unknown, see https://github.com/emsesp/EMS-ESP/issues/620
-
-    //  exhaustTemp here and in e4. Only set nonzero value, see #1147, #1150, #1326
-    uint16_t exTemp = 0;
-    if (telegram->read_value(exTemp, 6)) {
-        if (exTemp) {
-            has_update(exhaustTemp_, exTemp);
-        }
-    }
+    // exhaustTemp was offset 6, now in e4. See #1147, #1150, #1326
     has_update(telegram, burnStarts_, 10, 3);   // force to 3 bytes
     has_update(telegram, burnWorkMin_, 13, 3);  // force to 3 bytes
     has_update(telegram, burn2WorkMin_, 16, 3); // force to 3 bytes
