@@ -104,6 +104,13 @@ void Shower::loop() {
                         // char s[50];
                         // snprintf(s, 50, "%02u:%02u:%02u", (uint8_t)(duration_ / 3600000UL), (uint8_t)(duration_ / 60000UL), (uint8_t)((duration_ / 1000UL) % 60));
                         doc["duration"] = (duration_ / 1000UL); // seconds
+                        time_t now = time(nullptr);
+                        if (now > 1576800000) { // year 2020
+                            tm *   tm_ = localtime(&now);
+                            char dt[20];
+                            strftime(dt, sizeof(dt), "%T", tm_);
+                            doc["time"] = dt;
+                        }
                         Mqtt::queue_publish("shower_data", doc.as<JsonObject>());
                         LOG_INFO("finished with duration %lu seconds", duration_ / 1000UL);
                     }
