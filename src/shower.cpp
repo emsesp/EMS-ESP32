@@ -107,8 +107,8 @@ void Shower::loop() {
                         time_t now = time(nullptr);
                         if (now > 1576800000) { // year 2020
                             tm *   tm_ = localtime(&now);
-                            char dt[20];
-                            strftime(dt, sizeof(dt), "%T", tm_);
+                            char dt[25];
+                            strftime(dt, sizeof(dt), "%FT%T%z", tm_);
                             doc["time"] = dt;
                         }
                         Mqtt::queue_publish("shower_data", doc.as<JsonObject>());
