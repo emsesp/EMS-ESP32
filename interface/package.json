@@ -22,13 +22,13 @@
     "@alova/adapter-xhr": "^1.0.1",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
-    "@mui/icons-material": "^5.14.12",
-    "@mui/material": "^5.14.12",
+    "@mui/icons-material": "^5.14.13",
+    "@mui/material": "^5.14.13",
     "@table-library/react-table-library": "4.1.7",
     "@types/lodash-es": "^4.17.9",
-    "@types/node": "^20.8.3",
-    "@types/react": "^18.2.25",
-    "@types/react-dom": "^18.2.11",
+    "@types/node": "^20.8.6",
+    "@types/react": "^18.2.28",
+    "@types/react-dom": "^18.2.13",
     "@types/react-router-dom": "^5.3.3",
     "alova": "^2.13.1",
     "async-validator": "^4.2.5",
@@ -47,12 +47,12 @@
     "typescript": "^5.2.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.23.0",
+    "@babel/core": "^7.23.2",
     "@preact/compat": "^17.1.2",
-    "@preact/preset-vite": "^2.5.0",
+    "@preact/preset-vite": "^2.6.0",
     "@types/babel__core": "^7",
-    "@typescript-eslint/eslint-plugin": "^6.7.4",
-    "@typescript-eslint/parser": "^6.7.4",
+    "@typescript-eslint/eslint-plugin": "^6.7.5",
+    "@typescript-eslint/parser": "^6.7.5",
     "eslint": "^8.51.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-airbnb-typescript": "^17.1.0",
@@ -73,5 +73,5 @@
     "vite-plugin-svgr": "^4.1.0",
     "vite-tsconfig-paths": "^4.2.1"
   },
-  "packageManager": "yarn@3.4.1"
+  "packageManager": "yarn@4.0.0-rc.53"
 }
