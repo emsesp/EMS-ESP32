@@ -82,5 +82,4 @@ void NTPSettingsService::configureTime(AsyncWebServerRequest * request, JsonVari
 void NTPSettingsService::ntp_received(struct timeval * tv) {
     // emsesp::EMSESP::logger().info("NTP sync to %d sec", tv->tv_sec);
     emsesp::EMSESP::system_.ntp_connected(true);
-    emsesp::EMSESP::system_.send_info_mqtt("connected", true); // send info topic with NTP time
 }

@@ -32,9 +32,6 @@ void NetworkSettingsService::begin() {
 }
 
 void NetworkSettingsService::reconfigureWiFiConnection() {
-    // reset last connection attempt to force loop to reconnect immediately
-    _lastConnectionAttempt = 0;
-
     // disconnect and de-configure wifi
     if (WiFi.disconnect(true)) {
         _stopping = true;
@@ -91,6 +88,8 @@ void NetworkSettingsService::manageSTA() {
         // esp_wifi_set_max_tx_power(_state.tx_power * 4);
         WiFi.setTxPower((wifi_power_t)(_state.tx_power * 4));
 #endif
+    } else { // not connected but STA-mode active => disconnect
+        reconfigureWiFiConnection();
     }
 }
 
@@ -102,8 +101,8 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event) {
             _stopping              = false;
         }
     }
-    // wait 3 seconds before reconnecting
-    // if (event == ARDUINO_EVENT_WIFI_STA_DISCONNECTED) {
-    //     _lastConnectionAttempt = millis();
-    // }
+    if (!_stopping
+        && (event == ARDUINO_EVENT_WIFI_STA_LOST_IP || event == ARDUINO_EVENT_WIFI_STA_DISCONNECTED || event == ARDUINO_EVENT_WIFI_STA_AUTHMODE_CHANGE)) {
+        reconfigureWiFiConnection();
+    }
 }

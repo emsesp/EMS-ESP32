@@ -59,7 +59,7 @@ void MqttSettingsService::startClient() {
 #if CONFIG_IDF_TARGET_ESP32S3
     if (_state.rootCA.length() > 0) {
         isSecure    = true;
-        _mqttClient = static_cast<MqttClient *>(new espMqttClientSecure(espMqttClientTypes::UseInternalTask::NO));
+        _mqttClient = static_cast<MqttClient *>(new espMqttClientSecure(espMqttClientTypes::UseInternalTask::YES));
         if (_state.rootCA == "insecure") {
             static_cast<espMqttClientSecure *>(_mqttClient)->setInsecure();
         } else {
@@ -72,7 +72,7 @@ void MqttSettingsService::startClient() {
     }
 #endif
     isSecure    = false;
-    _mqttClient = static_cast<MqttClient *>(new espMqttClient(espMqttClientTypes::UseInternalTask::NO));
+    _mqttClient = static_cast<MqttClient *>(new espMqttClient(espMqttClientTypes::UseInternalTask::YES));
     static_cast<espMqttClient *>(_mqttClient)->onConnect(std::bind(&MqttSettingsService::onMqttConnect, this, _1));
     static_cast<espMqttClient *>(_mqttClient)->onDisconnect(std::bind(&MqttSettingsService::onMqttDisconnect, this, _1));
 }
@@ -83,7 +83,7 @@ void MqttSettingsService::loop() {
         _disconnectedAt  = configureMqtt() ? 0 : uuid::get_uptime();
         _reconfigureMqtt = false;
     }
-    _mqttClient->loop();
+    // _mqttClient->loop(); // done by mqtt task
 }
 
 bool MqttSettingsService::isEnabled() {
@@ -154,7 +154,7 @@ void MqttSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     case ARDUINO_EVENT_ETH_GOT_IP:
     case ARDUINO_EVENT_ETH_GOT_IP6:
     case ARDUINO_EVENT_WIFI_STA_GOT_IP6:
-        if (_state.enabled) {
+        if (_state.enabled && !_mqttClient->connected()) {
             onConfigUpdated();
         }
         break;
@@ -217,7 +217,7 @@ bool MqttSettingsService::configureMqtt() {
 
 void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
 #if CONFIG_IDF_TARGET_ESP32S3
-    root["rootCA"] = settings.rootCA;
+    // root["rootCA"] = settings.rootCA;
 #endif
     root["enabled"]       = settings.enabled;
     root["host"]          = settings.host;
@@ -253,7 +253,7 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     bool         changed     = false;
 
 #if CONFIG_IDF_TARGET_ESP32S3
-    newSettings.rootCA = root["rootCA"] | "";
+    // newSettings.rootCA = root["rootCA"] | "";
 #endif
     newSettings.enabled      = root["enabled"] | FACTORY_MQTT_ENABLED;
     newSettings.host         = root["host"] | FACTORY_MQTT_HOST;

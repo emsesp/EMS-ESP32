@@ -8,6 +8,10 @@ the LICENSE file.
 
 #pragma once
 
+#if CONFIG_IDF_TARGET_ESP32S3
+// #define EMC_CLIENT_SECURE
+#endif
+
 #ifndef EMC_TX_TIMEOUT
 #define EMC_TX_TIMEOUT 2000
 #endif
