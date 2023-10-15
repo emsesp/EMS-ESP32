@@ -79,7 +79,7 @@ class System {
     bool check_restore();
     bool heartbeat_json(JsonObject & output);
     void send_heartbeat();
-    void send_info_mqtt(const char * event_str, bool send_ntp = false);
+    void send_info_mqtt();
 
     bool syslog_enabled() {
         return syslog_enabled_;
@@ -179,6 +179,10 @@ class System {
 
     void ethernet_connected(bool b) {
         ethernet_connected_ = b;
+    }
+
+    void has_ipv6(bool b) {
+        has_ipv6_ = b;
     }
 
     void ntp_connected(bool b);
@@ -297,6 +301,7 @@ class System {
 
     bool upload_status_      = false; // true if we're in the middle of a OTA firmware upload
     bool ethernet_connected_ = false;
+    bool has_ipv6_           = false;
 
     bool     ntp_connected_  = false;
     uint32_t ntp_last_check_ = 0;

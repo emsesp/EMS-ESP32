@@ -541,19 +541,26 @@ void System::loop() {
 
     led_monitor();  // check status and report back using the LED
     system_check(); // check system health
+    send_info_mqtt();
 #endif
 }
 
 // send MQTT info topic appended with the version information as JSON, as a retained flag
-void System::send_info_mqtt(const char * event_str, bool send_ntp) {
-    // use dynamic json because it is called from NTP-callback from lwip task with small stack
-    DynamicJsonDocument doc = DynamicJsonDocument(EMSESP_JSON_SIZE_MEDIUM);
-    doc["event"]            = event_str;
-    doc["version"]          = EMSESP_APP_VERSION;
+void System::send_info_mqtt() {
+    static uint8_t _connection = 0;
+    uint8_t        connection  = (ethernet_connected() ? 1 : 0) + ((WiFi.status() == WL_CONNECTED) ? 2 : 0) + (ntp_connected_ ? 4 : 0) + (has_ipv6_ ? 8 : 0);
+    // check if connection status has changed
+    if (!Mqtt::connected() || connection == _connection) {
+        return;
+    }
+    _connection = connection;
+    StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> doc;
+    doc["event"]   = "connected";
+    doc["version"] = EMSESP_APP_VERSION;
 
     // if NTP is enabled send the boot_time in local time in ISO 8601 format (eg: 2022-11-15 20:46:38)
     // https://github.com/emsesp/EMS-ESP32/issues/751
-    if (send_ntp) {
+    if (ntp_connected_) {
         char   time_string[25];
         time_t now = time(nullptr) - uuid::get_uptime_sec();
         strftime(time_string, 25, "%FT%T%z", localtime(&now));
@@ -1200,6 +1207,9 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     }
 #endif
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
+        if (WiFi.status() == WL_CONNECTED && !settings.bssid.isEmpty()) {
+            node["BSSID"] = "set";
+        }
         node["static ip config"] = settings.staticIPConfig;
         node["enable IPv6"]      = settings.enableIPv6;
         node["low bandwidth"]    = settings.bandwidth20;
