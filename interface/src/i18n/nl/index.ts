@@ -231,7 +231,7 @@ const nl: Translation = {
   BROKER: 'Broker',
   CLIENT: 'Client',
   BASE_TOPIC: 'Base',
-  OPTIONAL: 'Optioneel',
+  OPTIONAL: 'optioneel',
   FORMATTING: 'Formatteren',
   MQTT_FORMAT: 'Topic/Payload Formattering',
   MQTT_NEST_1: 'Genest in 1 topic',
