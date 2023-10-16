@@ -1,3 +1,5 @@
+name: 'github-releases-to-discord'
+
 on:
   release:
     types: [published]
