@@ -231,7 +231,7 @@ const sv: Translation = {
   BROKER: 'Broker',
   CLIENT: 'Client',
   BASE_TOPIC: 'Base',
-  OPTIONAL: 'Valfritt',
+  OPTIONAL: 'valfritt',
   FORMATTING: 'Formatering',
   MQTT_FORMAT: 'Topic/Payload Format',
   MQTT_NEST_1: 'Nestlat i en topic.',

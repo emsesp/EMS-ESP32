@@ -233,7 +233,7 @@ const it: Translation = {
   BROKER: 'Broker',
   CLIENT: 'Cliente',
   BASE_TOPIC: 'Base',
-  OPTIONAL: 'Opzionale',
+  OPTIONAL: 'opzionale',
   FORMATTING: 'Formattazione',
   MQTT_FORMAT: 'Formato Topic/Payload ',
   MQTT_NEST_1: 'Inserito in un singolo argomento',

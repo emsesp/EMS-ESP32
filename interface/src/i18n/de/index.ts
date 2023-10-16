@@ -231,7 +231,7 @@ const de: Translation = {
   BROKER: 'Broker',
   CLIENT: 'Client',
   BASE_TOPIC: 'Base',
-  OPTIONAL: 'Optional',
+  OPTIONAL: 'Optional', // TODO translate
   FORMATTING: 'Formattierung',
   MQTT_FORMAT: 'Topic/Payload Format',
   MQTT_NEST_1: 'Eingebettet in einem Gesamttopic',
