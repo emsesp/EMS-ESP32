@@ -243,7 +243,7 @@ bool DeviceValue::hasValue() const {
         has_value = Helpers::hasValue(*(uint32_t *)(value_p));
         break;
     case DeviceValueType::CMD:
-        has_value = false; // commands don't have values!
+        has_value = true; // we count command as an actual entity
         break;
     default:
         break;

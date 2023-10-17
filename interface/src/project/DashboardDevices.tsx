@@ -1,8 +1,8 @@
-import CancelIcon from '@mui/icons-material/Cancel';
 import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
 import DownloadIcon from '@mui/icons-material/GetApp';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
@@ -26,6 +26,7 @@ import {
   Grid,
   Typography
 } from '@mui/material';
+
 import { useRowSelect } from '@table-library/react-table-library/select';
 import { useSort, SortToggleType } from '@table-library/react-table-library/sort';
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
@@ -135,7 +136,7 @@ const DashboardDevices: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: 40px repeat(1, minmax(0, 1fr)) 130px;
+        --data-table-library_grid-template-columns: 40px repeat(1, minmax(0, 1fr));
       `,
       BaseRow: `
         .td {
@@ -417,7 +418,6 @@ const DashboardDevices: FC = () => {
               <HeaderRow>
                 <HeaderCell stiff />
                 <HeaderCell resize>{LL.DESCRIPTION()}</HeaderCell>
-                <HeaderCell stiff>{LL.TYPE(0)}</HeaderCell>
               </HeaderRow>
             </Header>
             <Body>
@@ -426,8 +426,10 @@ const DashboardDevices: FC = () => {
                   <Cell stiff>
                     <DeviceIcon type_id={device.t} />
                   </Cell>
-                  <Cell>{device.n}</Cell>
-                  <Cell stiff>{device.tn}</Cell>
+                  <Cell>
+                    {device.n}
+                    <span style={{ color: 'lightblue' }}>&nbsp;&nbsp;({device.e})</span>
+                  </Cell>
                 </Row>
               ))}
             </Body>
@@ -485,8 +487,8 @@ const DashboardDevices: FC = () => {
         }}
       >
         <Box sx={{ border: '1px solid #177ac9' }}>
-          <Typography noWrap variant="subtitle1" color="warning.main" sx={{ mx: 1 }}>
-            {coreData.devices[deviceIndex].n}
+          <Typography noWrap variant="subtitle1" color="warning.main" sx={{ ml: 1 }}>
+            {coreData.devices[deviceIndex].tn}&nbsp;&#124;&nbsp;{coreData.devices[deviceIndex].n}
           </Typography>
 
           <Grid container justifyContent="space-between">
@@ -511,7 +513,7 @@ const DashboardDevices: FC = () => {
             </Typography>
             <Grid item zeroMinWidth justifyContent="flex-end">
               <IconButton onClick={resetDeviceSelect}>
-                <CancelIcon color="info" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+                <HighlightOffIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
               </IconButton>
             </Grid>
           </Grid>
