@@ -78,7 +78,7 @@ export default defineConfig(({ command, mode }) => {
       ],
 
       build: {
-        target: 'es2022',
+        // target: 'es2022',
         outDir: 'dist',
         reportCompressedSize: false,
         chunkSizeWarningLimit: 1024,
@@ -94,11 +94,11 @@ export default defineConfig(({ command, mode }) => {
             sequences: true
           },
           mangle: {
-            toplevel: true,
-            module: true,
-            properties: {
-              regex: /^_/
-            }
+            // toplevel: true
+            // module: true
+            // properties: {
+            //   regex: /^_/
+            // }
           },
           ecma: 5,
           enclose: false,

@@ -125,20 +125,21 @@ class Telegram {
         uint8_t num_bytes = (!s) ? sizeof(Value) : s;
         // check for out of bounds, if so don't modify the value
         auto msg_size = (index - this->offset + num_bytes - 1);
-        // TODO remove
-        Serial.print(" index: ");
-        Serial.print(index);
-        Serial.print(" offset: ");
-        Serial.print(offset);
-        Serial.print(" index: ");
-        Serial.print(" message_length: ");
-        Serial.print(this->message_length);
-        Serial.print(" msg_size: ");
-        Serial.print(msg_size);
-        Serial.println();
+
+#ifdef EMSESP_DEBUG
+// Serial.print(" index: ");
+// Serial.print(index);
+// Serial.print(" offset: ");
+// Serial.print(offset);
+// Serial.print(" index: ");
+// Serial.print(" message_length: ");
+// Serial.print(this->message_length);
+// Serial.print(" msg_size: ");
+// Serial.print(msg_size);
+// Serial.println();
+#endif
 
         if ((index < this->offset) || (msg_size >= this->message_length) || (msg_size > EMS_MAX_TELEGRAM_MESSAGE_LENGTH)) {
-            Serial.println("Rejedcting!"); // TODO: remove
             return false;
         }
 

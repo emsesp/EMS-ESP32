@@ -26,7 +26,7 @@
 
 namespace emsesp {
 
-// #define EMSESP_DEBUG_DEFAULT "general"
+#define EMSESP_DEBUG_DEFAULT "general"
 
 // #define EMSESP_DEBUG_DEFAULT "thermostat"
 // #define EMSESP_DEBUG_DEFAULT "solar"
@@ -56,7 +56,7 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "memory"
 // #define EMSESP_DEBUG_DEFAULT "coldshot"
 // #define EMSESP_DEBUG_DEFAULT "custom_entities"
-#define EMSESP_DEBUG_DEFAULT "heat_exchange"
+// #define EMSESP_DEBUG_DEFAULT "heat_exchange"
 
 
 class Test {
