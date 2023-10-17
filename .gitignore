@@ -36,6 +36,8 @@ stats.html
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+yarn.lock
+interface/analyse.html
 
 # scripts
 test.sh
@@ -59,4 +61,3 @@ bw-output/
 # dump_entities.csv
 # dump_entities.xls*
 
-yarn.lock

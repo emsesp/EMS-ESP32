@@ -7,12 +7,12 @@ import { visualizer } from 'rollup-plugin-visualizer';
 export default defineConfig(({ command, mode }) => {
   // standalone build for development - runs the server
   if (command === 'serve') {
-    console.log('Building for standalone');
+    console.log('Preparing for standalone build with server, mode=' + mode);
     return {
-      plugins: [preact(), viteTsconfigPaths(), visualizer()],
+      plugins: [preact(), viteTsconfigPaths()],
       server: {
         open: true,
-        port: mode === 'production' ? 4173 : 3000,
+        port: mode == 'production' ? 4173 : 3000,
         proxy: {
           '/rest': 'http://localhost:3080',
           '/api': {
@@ -32,7 +32,7 @@ export default defineConfig(({ command, mode }) => {
 
   // production build, both for hosted and building the firmware
   if (command === 'build') {
-    console.log('Building for production, mode ' + mode);
+    console.log('Preparing for production build, mode is ' + mode);
     return {
       plugins: [
         preact(),
@@ -67,39 +67,38 @@ export default defineConfig(({ command, mode }) => {
             }
           }),
           enforce: 'pre'
-        }
+        },
+        visualizer({
+          template: 'treemap', // or sunburst
+          open: false,
+          gzipSize: true,
+          brotliSize: true,
+          filename: 'analyse.html' // will be saved in project's root
+        })
       ],
 
       build: {
-        outDir: mode === 'hosted' ? 'dist' : 'build',
+        target: 'es2022',
+        outDir: 'dist',
         reportCompressedSize: false,
         chunkSizeWarningLimit: 1024,
         sourcemap: false,
         manifest: false,
         minify: 'terser',
         terserOptions: {
-          parse: {
-            // parse options
-          },
           compress: {
-            // compress options
             passes: 4,
             arrows: true,
             drop_console: true,
+            drop_debugger: true,
             sequences: true
           },
           mangle: {
-            // mangle options
-            eval: true,
+            toplevel: true,
+            module: true,
             properties: {
-              // mangle property options
+              regex: /^_/
             }
-          },
-          format: {
-            // format options (can also use `output` for backwards compatibility)
-          },
-          sourceMap: {
-            // source map options
           },
           ecma: 5,
           enclose: false,
@@ -111,6 +110,7 @@ export default defineConfig(({ command, mode }) => {
           safari10: false,
           toplevel: false
         },
+
         rollupOptions: {
           // Ignore "use client" waning since we are not using SSR
           onwarn(warning, warn) {

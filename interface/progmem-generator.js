@@ -6,7 +6,7 @@ var mime = require('mime-types');
 const ARDUINO_INCLUDES = '#include <Arduino.h>\n\n';
 const INDENT = '  ';
 const outputPath = '../lib/framework/WWWData.h';
-const sourcePath = './build';
+const sourcePath = './dist';
 const bytesPerLine = 20;
 var totalSize = 0;
 

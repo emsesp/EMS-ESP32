@@ -28,9 +28,9 @@ jobs:
         run: |
           cd interface
           yarn install
-          yarn run typesafe-i18n --no-watch
+          yarn typesafe-i18n --no-watch
           sed -i "s/= 'pl'/= 'en'/" ./src/i18n/i18n-util.ts
-          yarn run build
+          yarn build
 
       - name: Build firmware
         run: |
