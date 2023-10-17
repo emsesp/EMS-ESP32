@@ -1538,7 +1538,6 @@ __metadata:
     alova: "npm:^2.13.1"
     async-validator: "npm:^4.2.5"
     concurrently: "npm:^8.2.1"
-    dev: "npm:^0.1.3"
     eslint: "npm:^8.51.0"
     eslint-config-airbnb: "npm:^19.0.4"
     eslint-config-airbnb-typescript: "npm:^17.1.0"
@@ -1998,15 +1997,6 @@ __metadata:
     os-filter-obj: "npm:^2.0.0"
     pify: "npm:^4.0.1"
   checksum: eed64a0738aef196a15af87ad28f71d5bb28070d6df8e25544c26ba7a5c7a774987d502760050e774c1fa6d32c8c9318217053b61bdeb7f361883ad2cc75b9a7
-  languageName: node
-  linkType: hard
-
-"bindings@npm:^1.3.1":
-  version: 1.5.0
-  resolution: "bindings@npm:1.5.0"
-  dependencies:
-    file-uri-to-path: "npm:1.0.0"
-  checksum: 593d5ae975ffba15fbbb4788fe5abd1e125afbab849ab967ab43691d27d6483751805d98cb92f7ac24a2439a8a8678cd0131c535d5d63de84e383b0ce2786133
   languageName: node
   linkType: hard
 
@@ -2769,17 +2759,6 @@ __metadata:
   version: 2.0.3
   resolution: "dequal@npm:2.0.3"
   checksum: 6ff05a7561f33603df87c45e389c9ac0a95e3c056be3da1a0c4702149e3a7f6fe5ffbb294478687ba51a9e95f3a60e8b6b9005993acd79c292c7d15f71964b6b
-  languageName: node
-  linkType: hard
-
-"dev@npm:^0.1.3":
-  version: 0.1.3
-  resolution: "dev@npm:0.1.3"
-  dependencies:
-    inotify: "npm:>= 0.1.6"
-  bin:
-    node-dev: ./node-dev.sh
-  checksum: 48cdddfef366062db728cd2b57b9f2e56a83b1e3e1455a761e1bd4f883f0eaec96953b7296e67415d3002af0a33481c3aca23a1e7cda0fc5882d3809db792d5f
   languageName: node
   linkType: hard
 
@@ -4019,13 +3998,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"file-uri-to-path@npm:1.0.0":
-  version: 1.0.0
-  resolution: "file-uri-to-path@npm:1.0.0"
-  checksum: b648580bdd893a008c92c7ecc96c3ee57a5e7b6c4c18a9a09b44fb5d36d79146f8e442578bc0e173dc027adf3987e254ba1dfd6e3ec998b7c282873010502144
-  languageName: node
-  linkType: hard
-
 "filename-reserved-regex@npm:^2.0.0":
   version: 2.0.0
   resolution: "filename-reserved-regex@npm:2.0.0"
@@ -4908,18 +4880,6 @@ __metadata:
   version: 1.3.8
   resolution: "ini@npm:1.3.8"
   checksum: 314ae176e8d4deb3def56106da8002b462221c174ddb7ce0c49ee72c8cd1f9044f7b10cc555a7d8850982c3b9ca96fc212122749f5234bc2b6fb05fb942ed566
-  languageName: node
-  linkType: hard
-
-"inotify@npm:>= 0.1.6":
-  version: 1.4.6
-  resolution: "inotify@npm:1.4.6"
-  dependencies:
-    bindings: "npm:^1.3.1"
-    nan: "npm:^2.12.1"
-    node-gyp: "npm:latest"
-  checksum: 6453def0e3a921562c2a26ed6268028ab96f02c546578b6d25dfc95ef044eeb0f9f30c8e84a67c910c172fb2039a037964c1a06b9e7c3791519b2782541a8c37
-  conditions: os=linux
   languageName: node
   linkType: hard
 
@@ -6022,15 +5982,6 @@ __metadata:
   version: 2.1.3
   resolution: "ms@npm:2.1.3"
   checksum: aa92de608021b242401676e35cfa5aa42dd70cbdc082b916da7fb925c542173e36bce97ea3e804923fe92c0ad991434e4a38327e15a1b5b5f945d66df615ae6d
-  languageName: node
-  linkType: hard
-
-"nan@npm:^2.12.1":
-  version: 2.18.0
-  resolution: "nan@npm:2.18.0"
-  dependencies:
-    node-gyp: "npm:latest"
-  checksum: 5520e22c64e2b5b495b1d765d6334c989b848bbe1502fec89c5857cabcc7f9f0474563377259e7574bff1c8a041d3b90e9ffa1f5e15502ffddee7b2550cc26a0
   languageName: node
   linkType: hard
 
