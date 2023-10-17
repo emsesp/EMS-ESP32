@@ -716,7 +716,6 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     uint8_t offset = telegram->offset;
 
     // find name for src and dest by looking up known devices
-
     std::string src_name("");
     std::string dest_name("");
     std::string type_name("");

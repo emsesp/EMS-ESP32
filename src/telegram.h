@@ -113,7 +113,8 @@ class Telegram {
         return (val != value);
     }
 
-    // read a value from a telegram. We always store the value, regardless if its garbage
+    // read a value from a telegram if its not out of bounds.
+    // Then we update the value, regardless if its garbage
     template <typename Value>
     // assuming negative numbers are stored as 2's-complement
     // https://medium.com/@LeeJulija/how-integers-are-stored-in-memory-using-twos-complement-5ba04d61a56c
@@ -124,7 +125,20 @@ class Telegram {
         uint8_t num_bytes = (!s) ? sizeof(Value) : s;
         // check for out of bounds, if so don't modify the value
         auto msg_size = (index - this->offset + num_bytes - 1);
+        // TODO remove
+        Serial.print(" index: ");
+        Serial.print(index);
+        Serial.print(" offset: ");
+        Serial.print(offset);
+        Serial.print(" index: ");
+        Serial.print(" message_length: ");
+        Serial.print(this->message_length);
+        Serial.print(" msg_size: ");
+        Serial.print(msg_size);
+        Serial.println();
+
         if ((index < this->offset) || (msg_size >= this->message_length) || (msg_size > EMS_MAX_TELEGRAM_MESSAGE_LENGTH)) {
+            Serial.println("Rejedcting!"); // TODO: remove
             return false;
         }
 
