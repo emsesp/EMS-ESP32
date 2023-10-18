@@ -171,7 +171,6 @@ const nl: Translation = {
   HELP_INFORMATION_3: 'Om een nieuwe feature te vragen of een bug te rapporteren',
   HELP_INFORMATION_4: 'zorg dat je ook je systeem details zijn toevoeged voor een sneller antwoord',
   HELP_INFORMATION_5: 'EMS-ESP is een gratis en open source project. Steun ons met een Star op Github!',
-  SUPPORT_INFO: 'Support Info',
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
   ABORTED: 'afgebroken',

@@ -53,9 +53,9 @@ import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 
 const DashboardDevices: FC = () => {
-  const [size, setSize] = useState([0, 0]);
   const { me } = useContext(AuthenticatedContext);
   const { LL } = useI18nContext();
+  const [size, setSize] = useState([0, 0]);
   const [selectedDeviceValue, setSelectedDeviceValue] = useState<DeviceValue>();
   const [onlyFav, setOnlyFav] = useState(false);
   const [deviceValueDialogOpen, setDeviceValueDialogOpen] = useState(false);
@@ -485,6 +485,7 @@ const DashboardDevices: FC = () => {
           bottom: 0,
           top: 128,
           zIndex: 'modal',
+          maxHeight: () => size[1] - 189,
           border: '1px solid #177ac9'
         }}
       >

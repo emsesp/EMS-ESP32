@@ -2162,7 +2162,7 @@ rest_server.post(UPLOAD_FILE_ENDPOINT, progress_middleware, upload.single('file'
     console.log(req.file);
     console.log('ext: ' + ext);
 
-    if (ext === 'bin') {
+    if (ext === 'bin' || ext === 'json') {
       return res.sendStatus(200);
     } else if (ext === 'md5') {
       return res.json({ md5: 'ef4304fc4d9025a58dcf25d71c882d2c' });

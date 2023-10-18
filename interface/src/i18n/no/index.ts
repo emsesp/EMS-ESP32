@@ -171,7 +171,6 @@ const no: Translation = {
   HELP_INFORMATION_3: 'For å be om en ny funksjon eller melde feil',
   HELP_INFORMATION_4: 'husk å laste ned og legg ved din systeminformasjon for en raskere respons når du rapporterer et problem',
   HELP_INFORMATION_5: 'EMS-ESP er gratis og åpen kildekode. Bidra til utviklingen ved å gi oss en stjerne på GitHub!',
-  SUPPORT_INFO: 'Supportinfo',
   UPLOAD: 'Opplasning',
   DOWNLOAD: '{{N|n|n}}edlasting',
   ABORTED: 'avbrutt',
