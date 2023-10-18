@@ -1282,7 +1282,7 @@ void Boiler::process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram, heatStarts_, 22, 3);   // force to 3 bytes
     has_update(telegram, heatingPumpMod_, 25);
 
-    if (forceHeatingOff_ == EMS_VALUE_BOOL_ON && telegram->dest == 0) {
+    if (forceHeatingOff_ == EMS_VALUE_BOOL_ON && telegram->dest == 0 && telegram->offset == 0 && telegram->message_length > 10) {
         uint8_t data[] = {0, 0, 0, 0};
         write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
     }
