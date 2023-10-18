@@ -78,37 +78,27 @@ espMqttClientSecure::espMqttClientSecure(uint8_t priority, uint8_t core)
 }
 
 espMqttClientSecure& espMqttClientSecure::setInsecure() {
-#if defined(EMC_CLIENT_SECURE)
   _client.client.setInsecure();
-#endif
   return *this;
 }
 
 espMqttClientSecure& espMqttClientSecure::setCACert(const char* rootCA) {
-#if defined(EMC_CLIENT_SECURE)
   _client.client.setCACert(rootCA);
-#endif
   return *this;
 }
 
 espMqttClientSecure& espMqttClientSecure::setCertificate(const char* clientCa) {
-#if defined(EMC_CLIENT_SECURE)
   _client.client.setCertificate(clientCa);
-#endif
   return *this;
 }
 
 espMqttClientSecure& espMqttClientSecure::setPrivateKey(const char* privateKey) {
-#if defined(EMC_CLIENT_SECURE)
   _client.client.setPrivateKey(privateKey);
-#endif
   return *this;
 }
 
 espMqttClientSecure& espMqttClientSecure::setPreSharedKey(const char* pskIdent, const char* psKey) {
-#if defined(EMC_CLIENT_SECURE)
   _client.client.setPreSharedKey(pskIdent, psKey);
-#endif
   return *this;
 }
 
