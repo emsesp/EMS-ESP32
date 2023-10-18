@@ -136,7 +136,7 @@ const DashboardDevices: FC = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: 40px repeat(1, minmax(0, 1fr));
+        --data-table-library_grid-template-columns: 40px repeat(1, minmax(0, 1fr)) 130px;
       `,
       BaseRow: `
         .td {
@@ -418,6 +418,7 @@ const DashboardDevices: FC = () => {
               <HeaderRow>
                 <HeaderCell stiff />
                 <HeaderCell resize>{LL.DESCRIPTION()}</HeaderCell>
+                <HeaderCell stiff>{LL.TYPE(0)}</HeaderCell>
               </HeaderRow>
             </Header>
             <Body>
@@ -430,6 +431,7 @@ const DashboardDevices: FC = () => {
                     {device.n}
                     <span style={{ color: 'lightblue' }}>&nbsp;&nbsp;({device.e})</span>
                   </Cell>
+                  <Cell stiff>{device.tn}</Cell>
                 </Row>
               ))}
             </Body>
@@ -482,8 +484,8 @@ const DashboardDevices: FC = () => {
           right: 16,
           bottom: 0,
           top: 128,
-          maxHeight: () => size[1] - 210,
-          zIndex: 'modal'
+          zIndex: 'modal',
+          border: '1px solid #177ac9'
         }}
       >
         <Box sx={{ border: '1px solid #177ac9' }}>

@@ -1265,12 +1265,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash-es@npm:^4.17.9":
-  version: 4.17.9
-  resolution: "@types/lodash-es@npm:4.17.9"
+"@types/lodash-es@npm:^4.17.10":
+  version: 4.17.10
+  resolution: "@types/lodash-es@npm:4.17.10"
   dependencies:
     "@types/lodash": "npm:*"
-  checksum: 5e3a8a74134e67c37f1b8eb4a2897c88038f1b1bd7f508feec9e5561b52787d7efcc30c18981e9c6edec2b894f127b60312a431d98b84e12e785bea9cb5d1d40
+  checksum: a6c68872425418491d693186238e22c9da0e88bdf7ffe2b26e5436a19027ffedabeaec162e336b3722d5c43411866e859beae76a1a8f737bb5b115d5a574f758
   languageName: node
   linkType: hard
 
@@ -1288,12 +1288,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^20.8.6":
+"@types/node@npm:*":
   version: 20.8.6
   resolution: "@types/node@npm:20.8.6"
   dependencies:
     undici-types: "npm:~5.25.1"
   checksum: cdfe0a2d90005323bbaf8fa4002607af98d49016c81898cd7f574d9ec6fc980580ea1b97f7b6ecaa8614be8004cd03898766e99e1869428ba6ed3bcd66a15354
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^20.8.7":
+  version: 20.8.7
+  resolution: "@types/node@npm:20.8.7"
+  dependencies:
+    undici-types: "npm:~5.25.1"
+  checksum: a347ac7e6a9748ffff018ca01142ba625e774cb0b53785abb58b16a5a8468cc9b7656686dbe4c39c2f3fc477439994ee8aeae9b80ced86f320598bafaf83f802
   languageName: node
   linkType: hard
 
@@ -1350,7 +1359,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:^18.2.28":
+"@types/react@npm:*":
   version: 18.2.28
   resolution: "@types/react@npm:18.2.28"
   dependencies:
@@ -1358,6 +1367,17 @@ __metadata:
     "@types/scheduler": "npm:*"
     csstype: "npm:^3.0.2"
   checksum: 213828dae911f15c02fc313b9173b42e71fb128ec03561ac8d2e5260a706bfd9c78bcacf0cd0a2d40fb7c2deccdae6316d99f0a5fe0a40928dc9d3b4f5199a3c
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:^18.2.29":
+  version: 18.2.29
+  resolution: "@types/react@npm:18.2.29"
+  dependencies:
+    "@types/prop-types": "npm:*"
+    "@types/scheduler": "npm:*"
+    csstype: "npm:^3.0.2"
+  checksum: c261e4e2ec18a7244c959cb40ac2f43b0fa7f0b40fcce615243402fc61699cbebf6f2eae2632b8a0f0a2775a1ca735279b15543349cafa276c064b591712b85b
   languageName: node
   linkType: hard
 
@@ -1528,9 +1548,9 @@ __metadata:
     "@preact/compat": "npm:^17.1.2"
     "@preact/preset-vite": "npm:^2.6.0"
     "@table-library/react-table-library": "npm:4.1.7"
-    "@types/lodash-es": "npm:^4.17.9"
-    "@types/node": "npm:^20.8.6"
-    "@types/react": "npm:^18.2.28"
+    "@types/lodash-es": "npm:^4.17.10"
+    "@types/node": "npm:^20.8.7"
+    "@types/react": "npm:^18.2.29"
     "@types/react-dom": "npm:^18.2.13"
     "@types/react-router-dom": "npm:^5.3.3"
     "@typescript-eslint/eslint-plugin": "npm:^6.8.0"
@@ -1566,7 +1586,7 @@ __metadata:
     terser: "npm:^5.22.0"
     typesafe-i18n: "npm:^5.26.2"
     typescript: "npm:^5.2.2"
-    vite: "npm:^4.4.11"
+    vite: "npm:^4.5.0"
     vite-plugin-imagemin: "npm:^0.6.1"
     vite-tsconfig-paths: "npm:^4.2.1"
   languageName: unknown
@@ -8298,9 +8318,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^4.4.11":
-  version: 4.4.11
-  resolution: "vite@npm:4.4.11"
+"vite@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "vite@npm:4.5.0"
   dependencies:
     esbuild: "npm:^0.18.10"
     fsevents: "npm:~2.3.2"
@@ -8334,7 +8354,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 325e2955fe939bc5706aab2aa46498d98adace1df4d11f42cf4539754b886798b6bf7c247c94d23fb6cf3a569e56bad4a11561bf25e8e6dcc8c0e2f73ecc5e5b
+  checksum: b262ea4880ba7de8a77b0a665c771561ae3cb7f0d6c5b90e65298039755192550bf90cb96a2910d564506e2d499aa20e9becd330b835c34d414249083ac6e40c
   languageName: node
   linkType: hard
 
