@@ -10,7 +10,6 @@ the LICENSE file.
 
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
 
-#include "../Config.h"
 #include <WiFiClientSecure.h>  // includes IPAddress
 
 #include "Transport.h"

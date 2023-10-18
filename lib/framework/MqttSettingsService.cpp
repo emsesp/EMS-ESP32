@@ -83,7 +83,7 @@ void MqttSettingsService::loop() {
         _disconnectedAt  = configureMqtt() ? 0 : uuid::get_uptime();
         _reconfigureMqtt = false;
     }
-    _mqttClient->loop(); // done by mqtt task
+    _mqttClient->loop();
 }
 
 bool MqttSettingsService::isEnabled() {
@@ -217,7 +217,7 @@ bool MqttSettingsService::configureMqtt() {
 
 void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
 #if CONFIG_IDF_TARGET_ESP32S3
-    // root["rootCA"] = settings.rootCA;
+    root["rootCA"] = settings.rootCA;
 #endif
     root["enabled"]       = settings.enabled;
     root["host"]          = settings.host;
@@ -253,7 +253,7 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     bool         changed     = false;
 
 #if CONFIG_IDF_TARGET_ESP32S3
-    // newSettings.rootCA = root["rootCA"] | "";
+    newSettings.rootCA = root["rootCA"] | "";
 #endif
     newSettings.enabled      = root["enabled"] | FACTORY_MQTT_ENABLED;
     newSettings.host         = root["host"] | FACTORY_MQTT_HOST;
