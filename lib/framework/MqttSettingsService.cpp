@@ -59,7 +59,7 @@ void MqttSettingsService::startClient() {
 #if CONFIG_IDF_TARGET_ESP32S3
     if (_state.rootCA.length() > 0) {
         isSecure    = true;
-        _mqttClient = static_cast<MqttClient *>(new espMqttClientSecure(espMqttClientTypes::UseInternalTask::YES));
+        _mqttClient = static_cast<MqttClient *>(new espMqttClientSecure(espMqttClientTypes::UseInternalTask::NO));
         if (_state.rootCA == "insecure") {
             static_cast<espMqttClientSecure *>(_mqttClient)->setInsecure();
         } else {
@@ -72,7 +72,7 @@ void MqttSettingsService::startClient() {
     }
 #endif
     isSecure    = false;
-    _mqttClient = static_cast<MqttClient *>(new espMqttClient(espMqttClientTypes::UseInternalTask::YES));
+    _mqttClient = static_cast<MqttClient *>(new espMqttClient(espMqttClientTypes::UseInternalTask::NO));
     static_cast<espMqttClient *>(_mqttClient)->onConnect(std::bind(&MqttSettingsService::onMqttConnect, this, _1));
     static_cast<espMqttClient *>(_mqttClient)->onDisconnect(std::bind(&MqttSettingsService::onMqttDisconnect, this, _1));
 }
@@ -83,7 +83,7 @@ void MqttSettingsService::loop() {
         _disconnectedAt  = configureMqtt() ? 0 : uuid::get_uptime();
         _reconfigureMqtt = false;
     }
-    // _mqttClient->loop(); // done by mqtt task
+    _mqttClient->loop(); // done by mqtt task
 }
 
 bool MqttSettingsService::isEnabled() {
