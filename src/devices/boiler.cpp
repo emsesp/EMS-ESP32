@@ -1002,7 +1002,7 @@ void Boiler::check_active() {
             store_energy();
         }
         // store new modulation and time
-        heatBurnPow      = heatingActive_ ? curBurnPow_ : 0;
+        heatBurnPow      = heatingActive_ && !tapwaterActive_ ? curBurnPow_ : 0;
         wwBurnPow        = tapwaterActive_ ? curBurnPow_ : 0;
         powLastReadTime_ = uuid::get_uptime();
     }
