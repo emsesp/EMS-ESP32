@@ -36,6 +36,8 @@ stats.html
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+yarn.lock
+interface/analyse.html
 
 # scripts
 test.sh

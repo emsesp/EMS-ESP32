@@ -205,11 +205,11 @@ MAKE_NOTRANSLATION(L3, "L3")
 MAKE_NOTRANSLATION(L4, "L4")
 
 // templates - this are not translated and will be saved under options_single
-MAKE_NOTRANSLATION(tpl_datetime, "< NTP | dd.mm.yyyy-hh:mm:ss-day(0-6)-dst(0/1) >")
+MAKE_NOTRANSLATION(tpl_datetime, "NTP | dd.mm.yyyy-hh:mm:ss-day(0-6)-dst(0/1)")
 MAKE_NOTRANSLATION(tpl_switchtime, "<nn> [ not_set | day hh:mm on|off ]")
 MAKE_NOTRANSLATION(tpl_switchtime1, "<nn> [ not_set | day hh:mm Tn ]")
-MAKE_NOTRANSLATION(tpl_holidays, "< dd.mm.yyyy-dd.mm.yyyy >")
-MAKE_NOTRANSLATION(tpl_date, "< dd.mm.yyyy >")
+MAKE_NOTRANSLATION(tpl_holidays, "dd.mm.yyyy-dd.mm.yyyy")
+MAKE_NOTRANSLATION(tpl_date, "dd.mm.yyyy")
 MAKE_NOTRANSLATION(tpl_input, "<inv>[<evu1><evu2><evu3><comp><aux><cool><heat><dhw><pv>]")
 MAKE_NOTRANSLATION(tpl_input4, "<inv>[<comp><aux><cool><heat><dhw><pv>]")
 

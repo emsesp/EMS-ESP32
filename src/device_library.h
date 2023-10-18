@@ -49,7 +49,7 @@
 {208, DeviceType::BOILER, "Logamax Plus/GB192/Condens GC9000/Greenstar ErP", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {210, DeviceType::BOILER, "Cascade MC400", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {211, DeviceType::BOILER, "EasyControl Adapter", DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{219, DeviceType::BOILER, "Greenstar HIU", DeviceFlags::EMS_DEVICE_FLAG_HIU},
+{219, DeviceType::BOILER, "Greenstar HIU/Logamax kompakt WS170", DeviceFlags::EMS_DEVICE_FLAG_HIU},
 {234, DeviceType::BOILER, "Logamax Plus GB122/Condense 2300", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Controllers - 0x09 / 0x10 / 0x50

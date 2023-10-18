@@ -941,14 +941,15 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                     }
                 }
                 // handle INTs
-                // add min and max values and steps, as integer values
                 else {
+                    // add step if it's not 1
                     if (dv.numeric_operator > 0) {
                         obj["s"] = (float)1 / dv.numeric_operator;
                     } else if (dv.numeric_operator < 0) {
                         obj["s"] = (float)(-1) * dv.numeric_operator;
                     }
 
+                    // add min and max values, if available
                     int16_t  dv_set_min;
                     uint32_t dv_set_max;
                     if (dv.get_min_max(dv_set_min, dv_set_max)) {

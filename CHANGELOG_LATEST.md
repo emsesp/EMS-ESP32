@@ -16,6 +16,8 @@
 ## Fixed
 
 - remove command `remoteseltemp`, thermostat accept it only from remote thermostat
+- shower_data MQTT payload contains the timestamp [#1329](https://github.com/emsesp/EMS-ESP32/issues/1329)
+- fixed helper text in Web Device Entity dialog box for numerical ranges
 
 ## Changed
 

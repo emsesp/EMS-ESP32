@@ -38,7 +38,9 @@ class Shower {
 
     static constexpr uint32_t SHOWER_PAUSE_TIME   = 15000;  // in ms. 15 seconds, max time if water is switched off & on during a shower
     static constexpr uint32_t SHOWER_MIN_DURATION = 120000; // in ms. 2 minutes, before recognizing its a shower
-    static constexpr uint32_t SHOWER_OFFSET_TIME  = 5000;   // in ms. 5 seconds grace time, to calibrate actual time under the shower
+    // static constexpr uint32_t SHOWER_MIN_DURATION = 5000; // for testing in ms. 5 seconds
+
+    static constexpr uint32_t SHOWER_OFFSET_TIME = 5000; // in ms. 5 seconds grace time, to calibrate actual time under the shower
 
     void shower_alert_start();
     void shower_alert_stop();

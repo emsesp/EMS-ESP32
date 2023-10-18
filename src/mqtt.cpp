@@ -532,7 +532,7 @@ void Mqtt::ha_status() {
     doc["obj_id"]  = uniq;
 
     doc["stat_t"]   = mqtt_basename_ + "/status";
-    doc["name"]     = "system status";
+    doc["name"]     = "System status";
     doc["pl_on"]    = "online";
     doc["pl_off"]   = "offline";
     doc["stat_cla"] = "measurement";
@@ -855,14 +855,11 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         case DeviceValueType::UINT:
         case DeviceValueType::SHORT:
         case DeviceValueType::USHORT:
-            // case DeviceValueType::ULONG:
             if (discovery_type() == discoveryType::HOMEASSISTANT) {
-                // Home Assistant
                 // number - https://www.home-assistant.io/integrations/number.mqtt
                 snprintf(topic, sizeof(topic), "number/%s", config_topic);
             } else {
-                // Domoticz
-                // Does not support number, use sensor
+                // Domoticz does not support number, use sensor
                 snprintf(topic, sizeof(topic), "sensor/%s", config_topic);
             }
             break;
@@ -1126,9 +1123,8 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     }
 
     // add category "diagnostic" for system entities
-    if (device_type == EMSdevice::DeviceType::SYSTEM) {
-        doc["ent_cat"] = "diagnostic";
-    }
+    // config for writeable entities, like switches. diagnostic for read only sensors.
+    doc["ent_cat"] = (has_cmd) ? "config" : "diagnostic";
 
     // add the dev json object to the end
     doc["dev"] = dev_json;

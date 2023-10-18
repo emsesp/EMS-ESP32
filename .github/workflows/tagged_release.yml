@@ -13,6 +13,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
       - uses: actions/setup-node@v3
         with:
           node-version: '18'
@@ -28,9 +30,10 @@ jobs:
         run: |
           cd interface
           yarn install
-          yarn run typesafe-i18n --no-watch
+          yarn typesafe-i18n --no-watch
           sed -i "s/= 'pl'/= 'en'/" ./src/i18n/i18n-util.ts
-          yarn run build
+          yarn build
+          yarn webUI
 
       - name: Build firmware
         run: |

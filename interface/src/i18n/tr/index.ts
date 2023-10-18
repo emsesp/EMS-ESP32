@@ -231,7 +231,7 @@ const tr: Translation = {
   BROKER: 'Aracı',
   CLIENT: 'İstemci',
   BASE_TOPIC: 'Merkez',
-  OPTIONAL: 'Seçenekli',
+  OPTIONAL: 'seçenekli',
   FORMATTING: 'Biçimlendiriliyor',
   MQTT_FORMAT: 'Konu/Mesaj Biçimi',
   MQTT_NEST_1: 'Tek konu üzerine yerleşmiş',

@@ -269,6 +269,7 @@ mqtt_settings = {
   publish_time_sensor: 10,
   publish_time_heartbeat: 60,
   mqtt_qos: 0,
+  rootCA: '',
   mqtt_retain: false,
   ha_enabled: true,
   nested_format: 1,
@@ -569,7 +570,7 @@ const emsesp_devicedata_1 = {
       c: 'intoffset',
       m: -5,
       x: 5,
-      s: '0.1'
+      s: 0.1
     },
     {
       v: -11,
@@ -578,7 +579,7 @@ const emsesp_devicedata_1 = {
       c: 'minexttemp',
       m: -30,
       x: 0,
-      s: '1'
+      s: 1
     },
     {
       v: 29.5,
@@ -658,7 +659,7 @@ const emsesp_devicedata_1 = {
       c: 'wwdisinfecthour',
       m: 0,
       x: 23,
-      s: '1'
+      s: 1
     },
     {
       v: 60,
@@ -667,7 +668,7 @@ const emsesp_devicedata_1 = {
       c: 'wwmaxtemp',
       m: 60,
       x: 80,
-      s: '1'
+      s: 1
     },
     {
       v: 'on',
@@ -695,14 +696,14 @@ const emsesp_devicedata_1 = {
       u: 0,
       id: '00dhw holiday dates',
       c: 'wwholidays',
-      h: '< dd.mm.yyyy-dd.mm.yyyy >'
+      h: 'dd.mm.yyyy-dd.mm.yyyy'
     },
     {
       v: '01.01.2019-12.01.2019',
       u: 0,
       id: '00dhw vacation dates',
       c: 'wwvacations',
-      h: '< dd.mm.yyyy-dd.mm.yyyy >'
+      h: 'dd.mm.yyyy-dd.mm.yyyy'
     },
     {
       v: 21,
@@ -711,7 +712,7 @@ const emsesp_devicedata_1 = {
       c: 'hc2/seltemp',
       m: 0,
       x: 30,
-      s: '0.5'
+      s: 0.5
     },
     {
       v: 'auto',
@@ -732,7 +733,7 @@ const emsesp_devicedata_1 = {
       c: 'hc2/daytemp',
       m: 5,
       x: 30,
-      s: '0.5'
+      s: 0.5
     },
     {
       v: 17,
@@ -741,7 +742,7 @@ const emsesp_devicedata_1 = {
       c: 'hc2/nighttemp',
       m: 5,
       x: 30,
-      s: '0.5'
+      s: 0.5
     },
     {
       v: 58,
@@ -750,7 +751,7 @@ const emsesp_devicedata_1 = {
       c: 'hc2/designtemp',
       m: 30,
       x: 90,
-      s: '1'
+      s: 1
     },
     {
       v: 0,
@@ -759,7 +760,7 @@ const emsesp_devicedata_1 = {
       c: 'hc2/offsettemp',
       m: -5,
       x: 5,
-      s: '0.5'
+      s: 0.5
     },
     {
       v: 15,
@@ -768,7 +769,7 @@ const emsesp_devicedata_1 = {
       c: 'hc2/holidaytemp',
       m: 5,
       x: 30,
-      s: '0.5'
+      s: 0.5
     },
     {
       v: 34,
@@ -782,7 +783,7 @@ const emsesp_devicedata_1 = {
       c: 'hc2/summertemp',
       m: 9,
       x: 25,
-      s: '1'
+      s: 1
     },
     {
       v: 'winter',
@@ -801,7 +802,7 @@ const emsesp_devicedata_1 = {
       c: 'hc2/nofrosttemp',
       m: -20,
       x: 10,
-      s: '1'
+      s: 1
     },
     {
       v: 'outdoor',
@@ -817,7 +818,7 @@ const emsesp_devicedata_1 = {
       c: 'hc2/roominfluence',
       m: 0,
       x: 10,
-      s: '1'
+      s: 1
     },
     {
       v: 15,
@@ -826,7 +827,7 @@ const emsesp_devicedata_1 = {
       c: 'hc2/minflowtemp',
       m: 5,
       x: 70,
-      s: '1'
+      s: 1
     },
     {
       v: 85,
@@ -835,7 +836,7 @@ const emsesp_devicedata_1 = {
       c: 'hc2/maxflowtemp',
       m: 30,
       x: 90,
-      s: '1'
+      s: 1
     },
     {
       v: 0,
@@ -844,7 +845,7 @@ const emsesp_devicedata_1 = {
       c: 'hc2/flowtempoffset',
       m: 0,
       x: 20,
-      s: '1'
+      s: 1
     },
     {
       v: 'radiator',
@@ -879,14 +880,14 @@ const emsesp_devicedata_1 = {
       u: 0,
       id: '00hc2 holiday dates',
       c: 'hc2/holidays',
-      h: '< dd.mm.yyyy-dd.mm.yyyy >'
+      h: 'dd.mm.yyyy-dd.mm.yyyy'
     },
     {
       v: '01.01.2020-12.01.2020',
       u: 0,
       id: '00hc2 vacation dates',
       c: 'hc2/vacations',
-      h: '< dd.mm.yyyy-dd.mm.yyyy >'
+      h: 'dd.mm.yyyy-dd.mm.yyyy'
     },
     {
       v: 'own 1',
@@ -902,7 +903,7 @@ const emsesp_devicedata_1 = {
       c: 'hc2/pause',
       m: 0,
       x: 99,
-      s: '1'
+      s: 1
     },
     {
       v: 0,
@@ -911,7 +912,7 @@ const emsesp_devicedata_1 = {
       c: 'hc2/party',
       m: 0,
       x: 99,
-      s: '1'
+      s: 1
     },
     {
       v: 0,
@@ -920,7 +921,7 @@ const emsesp_devicedata_1 = {
       c: 'hc2/tempautotemp',
       m: 0,
       x: 30,
-      s: '0.5'
+      s: 0.5
     },
     {
       v: -20,
@@ -929,7 +930,7 @@ const emsesp_devicedata_1 = {
       c: 'hc2/noreducetemp',
       m: -30,
       x: 10,
-      s: '1'
+      s: 1
     },
     {
       v: 8,
@@ -938,7 +939,7 @@ const emsesp_devicedata_1 = {
       c: 'hc2/reducetemp',
       m: -20,
       x: 10,
-      s: '1'
+      s: 1
     },
     {
       v: 5,
@@ -947,7 +948,7 @@ const emsesp_devicedata_1 = {
       c: 'hc2/vacreducetemp',
       m: -20,
       x: 10,
-      s: '1'
+      s: 1
     },
     {
       v: 'outdoor',
@@ -1039,7 +1040,7 @@ const emsesp_devicedata_3 = {
       c: 'selflowtemp',
       m: 0,
       x: 90,
-      s: '1'
+      s: 1
     },
     {
       v: 30.7,
@@ -1142,7 +1143,7 @@ const emsesp_devicedata_3 = {
       c: 'heatingtemp',
       m: 0,
       x: 90,
-      s: '1'
+      s: 1
     },
     {
       v: 100,
@@ -1151,7 +1152,7 @@ const emsesp_devicedata_3 = {
       c: 'pumpmodmax',
       m: 0,
       x: 100,
-      s: '1'
+      s: 1
     },
     {
       v: 100,
@@ -1160,7 +1161,7 @@ const emsesp_devicedata_3 = {
       c: 'pumpmodmin',
       m: 0,
       x: 100,
-      s: '1'
+      s: 1
     },
     {
       v: 'deltaP-2',
@@ -1176,7 +1177,7 @@ const emsesp_devicedata_3 = {
       c: 'pumpdelay',
       m: 0,
       x: 60,
-      s: '1'
+      s: 1
     },
     {
       v: 15,
@@ -1185,7 +1186,7 @@ const emsesp_devicedata_3 = {
       c: 'burnminperiod',
       m: 0,
       x: 120,
-      s: '1'
+      s: 1
     },
     {
       v: 0,
@@ -1194,7 +1195,7 @@ const emsesp_devicedata_3 = {
       c: 'burnminpower',
       m: 0,
       x: 100,
-      s: '1'
+      s: 1
     },
     {
       v: 100,
@@ -1203,7 +1204,7 @@ const emsesp_devicedata_3 = {
       c: 'burnmaxpower',
       m: 0,
       x: 254,
-      s: '1'
+      s: 1
     },
     {
       v: -8,
@@ -1212,7 +1213,7 @@ const emsesp_devicedata_3 = {
       c: 'boilhyston',
       m: -20,
       x: 0,
-      s: '1'
+      s: 1
     },
     {
       v: 15,
@@ -1221,7 +1222,7 @@ const emsesp_devicedata_3 = {
       c: 'boilhystoff',
       m: 0,
       x: 20,
-      s: '1'
+      s: 1
     },
     {
       v: -8,
@@ -1230,7 +1231,7 @@ const emsesp_devicedata_3 = {
       c: 'boil2hyston',
       m: -20,
       x: 0,
-      s: '1'
+      s: 1
     },
     {
       v: 8,
@@ -1239,7 +1240,7 @@ const emsesp_devicedata_3 = {
       c: 'boil2hystoff',
       m: 0,
       x: 20,
-      s: '1'
+      s: 1
     },
     {
       v: 34,
@@ -1258,7 +1259,7 @@ const emsesp_devicedata_3 = {
       c: 'selburnpow',
       m: 0,
       x: 254,
-      s: '1'
+      s: 1
     },
     {
       v: 0,
@@ -1319,14 +1320,14 @@ const emsesp_devicedata_3 = {
       c: 'maintenancetime',
       m: 0,
       x: 31999,
-      s: '1'
+      s: 1
     },
     {
       v: '30.06.2023',
       u: 0,
       id: '00next maintenance date',
       c: 'maintenancedate',
-      h: '< dd.mm.yyyy >'
+      h: 'dd.mm.yyyy'
     },
     {
       v: 46,
@@ -1340,7 +1341,7 @@ const emsesp_devicedata_3 = {
       c: 'wwseltemp',
       m: 0,
       x: 254,
-      s: '1'
+      s: 1
     },
     {
       v: 'buffer',
@@ -1361,7 +1362,7 @@ const emsesp_devicedata_3 = {
       c: 'wwflowtempoffset',
       m: 0,
       x: 100,
-      s: '1'
+      s: 1
     },
     {
       v: 'on',
@@ -1382,7 +1383,7 @@ const emsesp_devicedata_3 = {
       c: 'wwhyston',
       m: -126,
       x: 126,
-      s: '1'
+      s: 1
     },
     {
       v: -1,
@@ -1391,7 +1392,7 @@ const emsesp_devicedata_3 = {
       c: 'wwhystoff',
       m: -126,
       x: 126,
-      s: '1'
+      s: 1
     },
     {
       v: 70,
@@ -1400,7 +1401,7 @@ const emsesp_devicedata_3 = {
       c: 'wwdisinfectiontemp',
       m: 0,
       x: 254,
-      s: '1'
+      s: 1
     },
     {
       v: 'continuous',
@@ -1538,7 +1539,7 @@ const emsesp_devicedata_5 = {
       c: 'hc2/flowsettemp',
       m: 0,
       x: 254,
-      s: '1'
+      s: 1
     },
     {
       v: 'off',
@@ -1561,7 +1562,7 @@ const emsesp_devicedata_5 = {
       c: 'hc2/valvesettime',
       m: 10,
       x: 120,
-      s: '10'
+      s: 10
     }
   ]
 };
@@ -1595,7 +1596,7 @@ const emsesp_devicedata_6 = {
       c: 'cylmaxtemp',
       m: 0,
       x: 254,
-      s: '1'
+      s: 1
     },
     {
       v: 'off',
@@ -1619,7 +1620,7 @@ const emsesp_devicedata_6 = {
       c: 'pumpminmod',
       m: 0,
       x: 100,
-      s: '1'
+      s: 1
     },
     {
       v: 10,
@@ -1628,7 +1629,7 @@ const emsesp_devicedata_6 = {
       c: 'turnondiff',
       m: 0,
       x: 254,
-      s: '1'
+      s: 1
     },
     {
       v: 5,
@@ -1637,7 +1638,7 @@ const emsesp_devicedata_6 = {
       c: 'turnoffdiff',
       m: 0,
       x: 254,
-      s: '1'
+      s: 1
     },
     {
       v: 899,
@@ -1656,7 +1657,7 @@ const emsesp_devicedata_6 = {
       c: 'maxflow',
       m: 0,
       x: 25,
-      s: '0.1'
+      s: 0.1
     },
     {
       v: 37,
@@ -1665,7 +1666,7 @@ const emsesp_devicedata_6 = {
       c: 'wwmintemp',
       m: 0,
       x: 254,
-      s: '1'
+      s: 1
     },
     {
       v: 'on',
@@ -1681,7 +1682,7 @@ const emsesp_devicedata_6 = {
       c: 'setting3',
       m: 0,
       x: 254,
-      s: '1'
+      s: 1
     },
     {
       v: 2,
@@ -1690,7 +1691,7 @@ const emsesp_devicedata_6 = {
       c: 'setting4',
       m: 0,
       x: 254,
-      s: '1'
+      s: 1
     },
     {
       v: 0,
@@ -1757,7 +1758,7 @@ const emsesp_devicedata_7 = {
     { v: 'H00', u: 0, id: '00maintenance message' },
     { v: 'manual', u: 0, id: '00maintenance scheduled', c: 'maintenance', l: ['off', 'time', 'date', 'manual'] },
     { v: 6000, u: 7, id: '00time to next maintenance', c: 'maintenancetime' },
-    { v: '01.01.2012', u: 0, id: '00next maintenance date', c: 'maintenancedate', o: 'Format: < dd.mm.yyyy >' },
+    { v: '01.01.2012', u: 0, id: '00next maintenance date', c: 'maintenancedate', h: 'dd.mm.yyyy' },
     { v: 'on', u: 0, id: '00dhw turn on/off', c: 'wwtapactivated', l: ['off', 'on'] },
     { v: 62, u: 1, id: '00dhw set temperature' },
     { v: 60, u: 1, id: '00dhw selected temperature', c: 'wwseltemp' },
