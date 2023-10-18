@@ -24,7 +24,7 @@
  */
 
 // Boilers - 0x08
-{  8, DeviceType::BOILER, "CS6800i", DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
+{  8, DeviceType::BOILER, "CS6800i/WLW176i", DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
 { 64, DeviceType::BOILER, "BK13/BK15/Smartline/GB1x2", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 72, DeviceType::BOILER, "GB125/GB135/MC10", DeviceFlags::EMS_DEVICE_FLAG_EMS},
 { 81, DeviceType::BOILER, "Cascade CM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
