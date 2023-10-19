@@ -1,13 +1,10 @@
-import CancelIcon from '@mui/icons-material/Cancel';
 import DownloadIcon from '@mui/icons-material/GetApp';
-import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
-import { Typography, Button, Box, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { Typography, Button, Box } from '@mui/material';
 import { useRequest } from 'alova';
 import { useState, type FC } from 'react';
 import { toast } from 'react-toastify';
 import RestartMonitor from './RestartMonitor';
 
-import { dialogStyle } from 'CustomTheme';
 import * as SystemApi from 'api/system';
 import { SectionContent, SingleUpload } from 'components';
 
@@ -17,7 +14,6 @@ import * as EMSESP from 'project/api';
 const UploadFileForm: FC = () => {
   const { LL } = useI18nContext();
   const [restarting, setRestarting] = useState<boolean>();
-  const [confirmRestart, setConfirmRestart] = useState<boolean>(false);
   const [md5, setMd5] = useState<string>();
 
   const { send: getSettings, onSuccess: onSuccessGetSettings } = useRequest(EMSESP.getSettings(), {
@@ -33,10 +29,6 @@ const UploadFileForm: FC = () => {
     immediate: false
   });
   const { send: getInfo, onSuccess: onSuccessGetInfo } = useRequest((data) => EMSESP.API(data), {
-    immediate: false
-  });
-
-  const { send: restartCommand } = useRequest(SystemApi.restart(), {
     immediate: false
   });
 
@@ -56,7 +48,7 @@ const UploadFileForm: FC = () => {
       setMd5(data.md5);
       toast.success(LL.UPLOAD() + ' MD5 ' + LL.SUCCESSFUL());
     } else {
-      setConfirmRestart(true);
+      setRestarting(true);
     }
   });
 
@@ -70,19 +62,6 @@ const UploadFileForm: FC = () => {
         toast.error(err.message);
       }
     });
-  };
-
-  const restart = async () => {
-    await restartCommand()
-      .then(() => {
-        setRestarting(true);
-      })
-      .catch((err) => {
-        toast.error(err.message);
-      })
-      .finally(() => {
-        setConfirmRestart(false);
-      });
   };
 
   const saveFile = (json: any, endpoint: string) => {
@@ -144,33 +123,17 @@ const UploadFileForm: FC = () => {
     });
   };
 
-  const renderRestartDialog = () => (
-    <Dialog sx={dialogStyle} open={confirmRestart} onClose={() => setConfirmRestart(false)}>
-      <DialogTitle>{LL.UPLOAD() + ' ' + LL.SUCCESSFUL()}</DialogTitle>
-      <DialogContent dividers>{LL.RESTART_TEXT()}</DialogContent>
-      <DialogActions>
-        <Button
-          startIcon={<CancelIcon />}
-          variant="outlined"
-          onClick={() => setConfirmRestart(false)}
-          color="secondary"
-        >
-          {LL.CANCEL()}
-        </Button>
-        <Button startIcon={<PowerSettingsNewIcon />} variant="outlined" onClick={restart} color="primary">
-          {LL.RESTART()}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-
   const content = () => (
     <>
       <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
         {LL.UPLOAD()}
       </Typography>
       <Box mb={2} color="warning.main">
-        <Typography variant="body2">{LL.UPLOAD_TEXT()} </Typography>
+        <Typography variant="body2">
+          {LL.UPLOAD_TEXT()}
+          <br />
+          {LL.RESTART_TEXT()}.
+        </Typography>
       </Box>
       {md5 && (
         <Box mb={2}>
@@ -226,7 +189,6 @@ const UploadFileForm: FC = () => {
           </Button>
         </>
       )}
-      {renderRestartDialog()}
     </>
   );
   return (
