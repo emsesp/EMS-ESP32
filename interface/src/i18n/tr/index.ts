@@ -171,7 +171,6 @@ const tr: Translation = {
   HELP_INFORMATION_3: 'Yeni bir özellik talep etmek yada hata bildirmek için',
   HELP_INFORMATION_4: 'Bir sorun bildirirken daha hızlı bir dönüş için sistem bilginizi indirip eklemeyi unutmayın',
   HELP_INFORMATION_5: 'EMS-ESP ücretsiz ve açık kaynaklı bir projedir. Lütfen geliştirmeyi desteklemek için Githubda projeye yıldız verin!',
-  SUPPORT_INFO: 'Destek Bilgisi',
   UPLOAD: 'Yükleme',
   DOWNLOAD: '{{İ|i|i}}İndirme',
   ABORTED: 'iptal edildi',

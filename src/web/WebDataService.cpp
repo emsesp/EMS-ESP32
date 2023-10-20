@@ -88,6 +88,7 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
             obj["d"]       = emsdevice->device_id();                            // deviceid
             obj["p"]       = emsdevice->product_id();                           // productid
             obj["v"]       = emsdevice->version();                              // version
+            obj["e"]       = emsdevice->count_entities();                       // number of entities
         }
     }
 
@@ -102,6 +103,7 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
         obj["d"]       = 0;                                                 // deviceid
         obj["p"]       = 0;                                                 // productid
         obj["v"]       = 0;                                                 // version
+        obj["e"]       = EMSESP::webCustomEntityService.count_entities();   // number of custom entities
     }
 
     root["connected"] = EMSESP::bus_status() != 2;

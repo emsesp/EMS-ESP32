@@ -1,12 +1,8 @@
 import CommentIcon from '@mui/icons-material/CommentTwoTone';
 import EastIcon from '@mui/icons-material/East';
-import DownloadIcon from '@mui/icons-material/GetApp';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import MenuBookIcon from '@mui/icons-material/MenuBookTwoTone';
-import { Typography, Button, Box, List, ListItem, ListItemText, Link, ListItemAvatar } from '@mui/material';
-import { useRequest } from 'alova';
-import { toast } from 'react-toastify';
-import * as EMSESP from './api';
+import { Typography, Box, List, ListItem, ListItemText, Link, ListItemAvatar } from '@mui/material';
 import type { FC } from 'react';
 
 import { SectionContent } from 'components';
@@ -16,30 +12,7 @@ import { useI18nContext } from 'i18n/i18n-react';
 const HelpInformation: FC = () => {
   const { LL } = useI18nContext();
 
-  const { send: API, onSuccess: onSuccessAPI } = useRequest((data) => EMSESP.API(data), {
-    immediate: false
-  });
-
-  onSuccessAPI((event) => {
-    const a = document.createElement('a');
-    const filename = 'emsesp_info.txt';
-    a.href = URL.createObjectURL(
-      new Blob([JSON.stringify(event.data, null, 2)], {
-        type: 'text/plain'
-      })
-    );
-    a.setAttribute('download', filename);
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    toast.info(LL.DOWNLOAD_SUCCESSFUL());
-  });
-
-  const callAPI = async () => {
-    await API({ device: 'system', entity: 'info', id: 0 }).catch((error) => {
-      toast.error(error.message);
-    });
-  };
+  const uploadURL = window.location.origin + '/system/upload';
 
   return (
     <SectionContent title={LL.SUPPORT_INFORMATION()} titleGutter>
@@ -83,17 +56,11 @@ const HelpInformation: FC = () => {
               {LL.CLICK_HERE()}
             </Link>
             <br />
-            <i>({LL.HELP_INFORMATION_4()}</i>&nbsp;&nbsp;
-            <Button
-              startIcon={<DownloadIcon />}
-              size="small"
-              variant="outlined"
-              color="primary"
-              onClick={() => callAPI()}
-            >
-              {LL.SUPPORT_INFO()}
-            </Button>
-            &nbsp;)
+            <i>({LL.HELP_INFORMATION_4()}</i>&nbsp;
+            <Link href={uploadURL} color="primary">
+              {LL.UPLOAD()}
+            </Link>
+            )
           </ListItemText>
         </ListItem>
       </List>
