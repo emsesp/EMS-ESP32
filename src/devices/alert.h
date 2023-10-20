@@ -26,6 +26,18 @@ namespace emsesp {
 class Alert : public EMSdevice {
   public:
     Alert(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand);
+
+  private:
+    void process_EM100SetMessage(std::shared_ptr<const Telegram> telegram);
+    void process_EM100MonitorMessage(std::shared_ptr<const Telegram> telegram);
+    void process_EM100TempMessage(std::shared_ptr<const Telegram> telegram);
+
+    int16_t headerTemp_; // T0
+    int16_t input_;      // IO1
+    uint8_t errorState_; // OE1
+    uint8_t errorPump_;  // IE0
+    uint8_t outPower_;   // IO1
+    uint8_t dip_;        // dip switch
 };
 
 } // namespace emsesp

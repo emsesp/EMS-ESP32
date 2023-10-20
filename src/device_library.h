@@ -101,7 +101,7 @@
 {215, DeviceType::THERMOSTAT, "Comfort RF", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
 {216, DeviceType::THERMOSTAT, "CRF200S", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
 {246, DeviceType::THERMOSTAT, "Comfort+2RF", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
-{253, DeviceType::THERMOSTAT, "Rego 3000/UI800", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
+{253, DeviceType::THERMOSTAT, "Rego 3000/UI800/BC400", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
 
 // Thermostat - Sieger - 0x10 / 0x17
 { 66, DeviceType::THERMOSTAT, "ES72/RC20", DeviceFlags::EMS_DEVICE_FLAG_RC20_N}, // 0x17 or remote
@@ -169,8 +169,8 @@
 // Switches - 0x11
 { 71, DeviceType::SWITCH, "WM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
-// PM10 Pump module - 0x15
-{ 243, DeviceType::PUMP, "PM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+// EM10/EM100 module - 0x15
+{ 243, DeviceType::ALERT, "EM10/EM100", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // EM10 error contact and analog flowtemp control- 0x12
 { 74, DeviceType::ALERT, "EM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
