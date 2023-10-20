@@ -1,8 +1,8 @@
-import CancelIcon from '@mui/icons-material/Cancel';
 import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
 import DownloadIcon from '@mui/icons-material/GetApp';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
@@ -26,6 +26,7 @@ import {
   Grid,
   Typography
 } from '@mui/material';
+
 import { useRowSelect } from '@table-library/react-table-library/select';
 import { useSort, SortToggleType } from '@table-library/react-table-library/sort';
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
@@ -52,9 +53,9 @@ import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 
 const DashboardDevices: FC = () => {
-  const [size, setSize] = useState([0, 0]);
   const { me } = useContext(AuthenticatedContext);
   const { LL } = useI18nContext();
+  const [size, setSize] = useState([0, 0]);
   const [selectedDeviceValue, setSelectedDeviceValue] = useState<DeviceValue>();
   const [onlyFav, setOnlyFav] = useState(false);
   const [deviceValueDialogOpen, setDeviceValueDialogOpen] = useState(false);
@@ -426,7 +427,10 @@ const DashboardDevices: FC = () => {
                   <Cell stiff>
                     <DeviceIcon type_id={device.t} />
                   </Cell>
-                  <Cell>{device.n}</Cell>
+                  <Cell>
+                    {device.n}
+                    <span style={{ color: 'lightblue' }}>&nbsp;&nbsp;({device.e})</span>
+                  </Cell>
                   <Cell stiff>{device.tn}</Cell>
                 </Row>
               ))}
@@ -480,13 +484,14 @@ const DashboardDevices: FC = () => {
           right: 16,
           bottom: 0,
           top: 128,
-          maxHeight: () => size[1] - 210,
-          zIndex: 'modal'
+          zIndex: 'modal',
+          maxHeight: () => size[1] - 189,
+          border: '1px solid #177ac9'
         }}
       >
         <Box sx={{ border: '1px solid #177ac9' }}>
-          <Typography noWrap variant="subtitle1" color="warning.main" sx={{ mx: 1 }}>
-            {coreData.devices[deviceIndex].n}
+          <Typography noWrap variant="subtitle1" color="warning.main" sx={{ ml: 1 }}>
+            {coreData.devices[deviceIndex].tn}&nbsp;&#124;&nbsp;{coreData.devices[deviceIndex].n}
           </Typography>
 
           <Grid container justifyContent="space-between">
@@ -511,7 +516,7 @@ const DashboardDevices: FC = () => {
             </Typography>
             <Grid item zeroMinWidth justifyContent="flex-end">
               <IconButton onClick={resetDeviceSelect}>
-                <CancelIcon color="info" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+                <HighlightOffIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
               </IconButton>
             </Grid>
           </Grid>

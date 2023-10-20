@@ -427,7 +427,8 @@ const emsesp_coredata = {
       // n: 'Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i',
       d: 8,
       p: 123,
-      v: '06.01'
+      v: '06.01',
+      e: 69
     },
     {
       id: 3,
@@ -437,7 +438,8 @@ const emsesp_coredata = {
       n: 'GB125/GB135/MC10',
       d: 8,
       p: 123,
-      v: '06.01'
+      v: '06.01',
+      e: 73
     },
     {
       id: 1,
@@ -447,7 +449,8 @@ const emsesp_coredata = {
       n: 'RC35',
       d: 24,
       p: 86,
-      v: '04.01'
+      v: '04.01',
+      e: 57
     },
     {
       id: 2,
@@ -457,7 +460,8 @@ const emsesp_coredata = {
       n: 'RC20/Moduline 300',
       d: 23,
       p: 77,
-      v: '03.03'
+      v: '03.03',
+      e: 6
     },
     {
       id: 4,
@@ -467,7 +471,8 @@ const emsesp_coredata = {
       n: 'RC100/Moduline 1000/1010',
       d: 16,
       p: 165,
-      v: '04.01'
+      v: '04.01',
+      e: 3
     },
     {
       id: 5,
@@ -477,7 +482,8 @@ const emsesp_coredata = {
       n: 'MM10',
       d: 32,
       p: 69,
-      v: '01.01'
+      v: '01.01',
+      e: 6
     },
     {
       id: 6,
@@ -487,7 +493,8 @@ const emsesp_coredata = {
       n: 'SM10',
       d: 48,
       p: 73,
-      v: '01.02'
+      v: '01.02',
+      e: 22
     },
     {
       id: 99,
@@ -497,7 +504,8 @@ const emsesp_coredata = {
       n: 'User defined entities',
       d: 1,
       p: 1,
-      v: ''
+      v: '',
+      e: 1
     }
   ]
 };
@@ -2154,7 +2162,7 @@ rest_server.post(UPLOAD_FILE_ENDPOINT, progress_middleware, upload.single('file'
     console.log(req.file);
     console.log('ext: ' + ext);
 
-    if (ext === 'bin') {
+    if (ext === 'bin' || ext === 'json') {
       return res.sendStatus(200);
     } else if (ext === 'md5') {
       return res.json({ md5: 'ef4304fc4d9025a58dcf25d71c882d2c' });

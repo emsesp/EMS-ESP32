@@ -69,6 +69,7 @@ export interface Device {
   d: number; // deviceid
   p: number; // productid
   v: string; // version
+  e: number; // entities
 }
 
 export interface TemperatureSensor {
