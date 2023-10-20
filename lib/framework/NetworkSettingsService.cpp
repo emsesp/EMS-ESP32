@@ -79,15 +79,16 @@ void NetworkSettingsService::manageSTA() {
         } else {
             WiFi.begin(_state.ssid.c_str(), _state.password.c_str());
         }
-
         // set power after wifi is startet, fixed value for C3_V1
+        if (WiFi.isConnected()) {
 #ifdef BOARD_C3_MINI_V1
-        // v1 needs this value, see https://github.com/emsesp/EMS-ESP32/pull/620#discussion_r993173979
-        WiFi.setTxPower(WIFI_POWER_8_5dBm); // https://www.wemos.cc/en/latest/c3/c3_mini_1_0_0.html#about-wifi
+            // v1 needs this value, see https://github.com/emsesp/EMS-ESP32/pull/620#discussion_r993173979
+            WiFi.setTxPower(WIFI_POWER_8_5dBm); // https://www.wemos.cc/en/latest/c3/c3_mini_1_0_0.html#about-wifi
 #else
-        // esp_wifi_set_max_tx_power(_state.tx_power * 4);
-        WiFi.setTxPower((wifi_power_t)(_state.tx_power * 4));
+            // esp_wifi_set_max_tx_power(_state.tx_power * 4);
+            WiFi.setTxPower((wifi_power_t)(_state.tx_power * 4));
 #endif
+        }
     } else { // not connected but STA-mode active => disconnect
         reconfigureWiFiConnection();
     }
@@ -101,8 +102,7 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event) {
             _stopping              = false;
         }
     }
-    if (!_stopping
-        && (event == ARDUINO_EVENT_WIFI_STA_LOST_IP || event == ARDUINO_EVENT_WIFI_STA_DISCONNECTED || event == ARDUINO_EVENT_WIFI_STA_AUTHMODE_CHANGE)) {
+    if (!_stopping && (event == ARDUINO_EVENT_WIFI_STA_LOST_IP || event == ARDUINO_EVENT_WIFI_STA_DISCONNECTED)) {
         reconfigureWiFiConnection();
     }
 }

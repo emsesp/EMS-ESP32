@@ -970,14 +970,21 @@ void Boiler::check_active() {
         tapwaterActive_ = val;
         char s[12];
         Mqtt::queue_publish(F_(tapwater_active), Helpers::render_boolean(s, b));
-        if (flowsensor) {
-            EMSESP::tap_water_active(b); // let EMS-ESP know, used in the Shower class
-        }
+        // if (flowsensor) {
+        EMSESP::tap_water_active(b); // let EMS-ESP know, used in the Shower class
+        // }
     }
 
+    // check forceheatingoff option
     if (!Helpers::hasValue(forceHeatingOff_, EMS_VALUE_BOOL)) {
         EMSESP::webSettingsService.read([&](WebSettings & settings) { forceHeatingOff_ = (settings.boiler_heatingoff || selFlowTemp_ == 0) ? 1 : 0; });
         has_update(&forceHeatingOff_);
+    }
+    static uint32_t lastSendHeatingOff = 0;
+    if (forceHeatingOff_ == EMS_VALUE_BOOL_ON && (uuid::get_uptime_sec() - lastSendHeatingOff) >= 60) {
+        lastSendHeatingOff = uuid::get_uptime_sec();
+        uint8_t data[] = {0, 0, 0, 0};
+        write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
     }
 
     // calculate energy for boiler 0x08 from stored modulation an time in units of 0.01 Wh
@@ -1246,11 +1253,6 @@ void Boiler::process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, burn2WorkMin_, 16, 3); // force to 3 bytes
     has_update(telegram, heatWorkMin_, 19, 3);  // force to 3 bytes
     has_update(telegram, heatStarts_, 22, 3);   // force to 3 bytes
-
-    if (forceHeatingOff_ == EMS_VALUE_BOOL_ON && telegram->dest == 0) {
-        uint8_t data[] = {0, 0, 0, 0};
-        write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
-    }
 }
 
 /*
@@ -1281,11 +1283,6 @@ void Boiler::process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram, heatWorkMin_, 19, 3);  // force to 3 bytes
     has_update(telegram, heatStarts_, 22, 3);   // force to 3 bytes
     has_update(telegram, heatingPumpMod_, 25);
-
-    if (forceHeatingOff_ == EMS_VALUE_BOOL_ON && telegram->dest == 0 && telegram->offset == 0 && telegram->message_length > 10) {
-        uint8_t data[] = {0, 0, 0, 0};
-        write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
-    }
 }
 
 /*
@@ -1537,7 +1534,7 @@ void Boiler::process_UBASetPoints(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, wwSetPumpPower_, 2); // ww pump speed/power?
 
     // overwrite other settings on receive?
-    if (forceHeatingOff_ == EMS_VALUE_BOOL_ON && telegram->dest == 0x08) {
+    if (forceHeatingOff_ == EMS_VALUE_BOOL_ON && telegram->dest == 0x08 && (setFlowTemp_ + setBurnPow_ + wwSetPumpPower_) != 0) {
         uint8_t data[] = {0, 0, 0, 0};
         write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
     }
