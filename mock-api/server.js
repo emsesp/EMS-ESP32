@@ -1816,7 +1816,7 @@ const emsesp_devicedata_99 = {
 };
 
 // CUSTOM ENTITIES
-let emsesp_entities = {
+let emsesp_customentities = {
   // entities: []
   entities: [
     {
@@ -1876,10 +1876,10 @@ let emsesp_schedule = {
 };
 
 // CUSTOMIZATIONS
-const emsesp_deviceentities_1 = [{}];
-const emsesp_deviceentities_3 = [{}];
-const emsesp_deviceentities_5 = [{}];
-const emsesp_deviceentities_6 = [{}];
+const emsesp_deviceentities_1 = [{ v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }];
+const emsesp_deviceentities_3 = [{ v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }];
+const emsesp_deviceentities_5 = [{ v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }];
+const emsesp_deviceentities_6 = [{ v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }];
 
 const emsesp_deviceentities_2 = [
   {
@@ -2205,6 +2205,7 @@ rest_server.get(EMSESP_SENSOR_DATA_ENDPOINT, (req, res) => {
   res.json(emsesp_sensordata);
 });
 rest_server.get(EMSESP_DEVICES_ENDPOINT, (req, res) => {
+  console.log('send back list of devices...');
   res.json(emsesp_devices);
 });
 rest_server.post(EMSESP_SCANDEVICES_ENDPOINT, (req, res) => {
@@ -2398,7 +2399,7 @@ rest_server.post(EMSESP_WRITE_SCHEDULE_ENDPOINT, (req, res) => {
 rest_server.post(EMSESP_WRITE_ENTITIES_ENDPOINT, (req, res) => {
   console.log('write entities');
   console.log(req.body);
-  emsesp_entities = req.body;
+  emsesp_customentities = req.body;
   res.sendStatus(200);
 });
 
@@ -2730,7 +2731,7 @@ rest_server.get(GET_CUSTOMIZATIONS_ENDPOINT, (req, res) => {
 const GET_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'getEntities';
 rest_server.get(GET_ENTITIES_ENDPOINT, (req, res) => {
   console.log('getEntities');
-  res.json(emsesp_entities);
+  res.json(emsesp_customentities);
 });
 
 const GET_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'getSchedule';
@@ -2745,10 +2746,10 @@ rest_server.get(SCHEDULE_ENDPOINT, (req, res) => {
   res.json(emsesp_schedule);
 });
 
-const ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'entities';
+const ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customentities';
 rest_server.get(ENTITIES_ENDPOINT, (req, res) => {
   console.log('Sending Custom Entities data');
-  res.json(emsesp_entities);
+  res.json(emsesp_customentities);
 });
 
 // start server
