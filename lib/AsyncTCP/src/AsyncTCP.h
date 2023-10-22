@@ -27,6 +27,7 @@
 #include "sdkconfig.h"
 #include <functional>
 extern "C" {
+#include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 #include "lwip/pbuf.h"
 #include "lwip/ip_addr.h"
@@ -36,7 +37,11 @@ extern "C" {
 //If core is not defined, then we are running in Arduino or PIO
 #ifndef CONFIG_ASYNC_TCP_RUNNING_CORE
 #define CONFIG_ASYNC_TCP_RUNNING_CORE -1 //any available core
-#define CONFIG_ASYNC_TCP_USE_WDT 1       //if enabled, adds between 33us and 200us per event
+#define CONFIG_ASYNC_TCP_USE_WDT 0       //if enabled, adds between 33us and 200us per event
+#endif
+
+#ifndef CONFIG_ASYNC_TCP_TASK_PRIORITY
+#define CONFIG_ASYNC_TCP_TASK_PRIORITY 15
 #endif
 
 class AsyncClient;
@@ -102,6 +107,8 @@ class AsyncClient {
 
     void setNoDelay(bool nodelay);
     bool getNoDelay();
+
+    void setKeepAlive(uint32_t ms, uint8_t cnt);
 
     uint32_t   getRemoteAddress();
     ip6_addr_t getRemoteAddress6();

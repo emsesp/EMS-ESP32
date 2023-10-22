@@ -102,8 +102,18 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(setReturnTemp),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_returnTemp));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &cwFlowRate_, DeviceValueType::USHORT, FL_(cwFlowRate), DeviceValueUOM::LMIN);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &netFlowTemp_, DeviceValueType::USHORT, FL_(netFlowTemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &cwFlowRate_,
+                              DeviceValueType::USHORT,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(cwFlowRate),
+                              DeviceValueUOM::LMIN);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &netFlowTemp_,
+                              DeviceValueType::USHORT,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(netFlowTemp),
+                              DeviceValueUOM::DEGREES);
     }
 
     /*
