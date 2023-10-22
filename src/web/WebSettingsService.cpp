@@ -101,17 +101,33 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     if (!System::load_board_profile(data, settings.board_profile.c_str())) {
 // unknown, check for ethernet, use default E32/S32
 // data is led, dallas, rx, tx, pbutton, phy, eth_power, eth_addr, eth_clock
-#ifndef EMSESP_STANDALONE
-#if CONFIG_IDF_TARGET_ESP32
-        if (ETH.begin((eth_phy_type_t)1, 16, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_IN)) {
-            // BBQKees Gateway E32
-            data                   = {EMSESP_DEFAULT_LED_GPIO, 4, 5, 17, 33, PHY_type::PHY_TYPE_LAN8720, 16, 1, 0};
+#if CONFIG_IDF_TARGET_ESP32 && !defined(EMSESP_STANDALONE)
+        switch (EMSESP::nvs_.getUChar("boot")) {
+        case 0:
+            if (ETH.begin((eth_phy_type_t)1, 16, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_IN)) {
+                EMSESP::nvs_.putUChar("boot", 2); // set to E32
+                ESP.restart();
+            }
+            EMSESP::nvs_.putUChar("boot", 1); // next test for E32V2
+            ESP.restart();
+        case 1:
+            if (ETH.begin((eth_phy_type_t)0, 15, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_OUT)) {
+                EMSESP::nvs_.putUChar("boot", 3); // set to E32V2
+                ESP.restart();
+            }
+            EMSESP::nvs_.putUChar("boot", 4); // set to S32
+            ESP.restart();
+        case 2:
             settings.board_profile = "E32";
-        } else
-#endif
-#endif
-        {
-            // BBQKees Gateway S32
+            data                   = {EMSESP_DEFAULT_LED_GPIO, 4, 5, 17, 33, PHY_type::PHY_TYPE_LAN8720, 16, 1, 0};
+            break;
+        case 3:
+            settings.board_profile = "E32V2";
+            data                   = {EMSESP_DEFAULT_LED_GPIO, 14, 4, 5, 0, PHY_type::PHY_TYPE_LAN8720, 15, 0, 1}; // BBQKees Gateway E32 V2
+            break;
+        case 4:
+        default:
+            settings.board_profile = "S32";
             data                   = {EMSESP_DEFAULT_LED_GPIO,
                                       EMSESP_DEFAULT_DALLAS_GPIO,
                                       EMSESP_DEFAULT_RX_GPIO,
@@ -121,8 +137,21 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
                                       0,
                                       0,
                                       0};
-            settings.board_profile = "S32";
+            break;
         }
+#else
+        // BBQKees Gateway S32
+        data                   = {EMSESP_DEFAULT_LED_GPIO,
+                                  EMSESP_DEFAULT_DALLAS_GPIO,
+                                  EMSESP_DEFAULT_RX_GPIO,
+                                  EMSESP_DEFAULT_TX_GPIO,
+                                  EMSESP_DEFAULT_PBUTTON_GPIO,
+                                  EMSESP_DEFAULT_PHY_TYPE,
+                                  0,
+                                  0,
+                                  0};
+        settings.board_profile = "S32";
+#endif
         EMSESP::logger().info("No board profile found. Re-setting to %s", settings.board_profile.c_str());
     } else {
         EMSESP::logger().info("Loading board profile %s", settings.board_profile.c_str());

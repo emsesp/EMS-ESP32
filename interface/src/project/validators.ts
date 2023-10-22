@@ -8,8 +8,7 @@ export const GPIO_VALIDATOR = {
     if (
       value &&
       (value === 1 ||
-        (value >= 6 && value <= 12) ||
-        (value >= 14 && value <= 15) ||
+        (value >= 6 && value <= 11) ||
         value === 20 ||
         value === 24 ||
         (value >= 28 && value <= 31) ||

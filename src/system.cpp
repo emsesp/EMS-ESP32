@@ -391,7 +391,7 @@ void System::wifi_tweak() {
 // and https://nodemcu.readthedocs.io/en/dev-esp32/modules/gpio/
 bool System::is_valid_gpio(uint8_t pin) {
 #if CONFIG_IDF_TARGET_ESP32 || EMSESP_STANDALONE
-    if ((pin == 1) || (pin >= 6 && pin <= 12) || (pin >= 14 && pin <= 15) || (pin == 20) || (pin == 24) || (pin >= 28 && pin <= 31) || (pin > 40)) {
+    if ((pin == 1) || (pin >= 6 && pin <= 11) || (pin == 20) || (pin == 24) || (pin >= 28 && pin <= 31) || (pin > 40)) {
 #elif CONFIG_IDF_TARGET_ESP32S2
     if ((pin >= 19 && pin <= 20) || (pin >= 22 && pin <= 32) || (pin > 40)) {
 #elif CONFIG_IDF_TARGET_ESP32C3
@@ -1440,6 +1440,8 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
         data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // BBQKees Gateway S32
     } else if (board_profile == "E32") {
         data = {2, 4, 5, 17, 33, PHY_type::PHY_TYPE_LAN8720, 16, 1, 0}; // BBQKees Gateway E32
+    } else if (board_profile == "E32V2") {
+        data = {2, 14, 4, 5, 0, PHY_type::PHY_TYPE_LAN8720, 15, 0, 1}; // BBQKees Gateway E32 V2
     } else if (board_profile == "MH-ET") {
         data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // MH-ET Live D1 Mini
     } else if (board_profile == "NODEMCU") {
