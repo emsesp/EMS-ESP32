@@ -1,6 +1,7 @@
 import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
+import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import DownloadIcon from '@mui/icons-material/GetApp';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -35,6 +36,7 @@ import { useRequest } from 'alova';
 import { useState, useContext, useEffect, useCallback, useLayoutEffect } from 'react';
 
 import { IconContext } from 'react-icons';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import DashboardDevicesDialog from './DashboardDevicesDialog';
 import DeviceIcon from './DeviceIcon';
@@ -61,6 +63,8 @@ const DashboardDevices: FC = () => {
   const [deviceValueDialogOpen, setDeviceValueDialogOpen] = useState(false);
   const [showDeviceInfo, setShowDeviceInfo] = useState<boolean>(false);
   const [selectedDevice, setSelectedDevice] = useState<number>();
+
+  const navigate = useNavigate();
 
   const { data: coreData, send: readCoreData } = useRequest(() => EMSESP.readCoreData(), {
     initialData: {
@@ -264,13 +268,16 @@ const DashboardDevices: FC = () => {
   }, [escFunction]);
 
   const refreshData = () => {
-    if (deviceValueDialogOpen) {
-      return;
+    if (!deviceValueDialogOpen) {
+      selectedDevice ? void readDeviceData(selectedDevice) : void readCoreData();
     }
-    if (selectedDevice) {
-      void readDeviceData(selectedDevice);
+  };
+
+  const customize = () => {
+    if (selectedDevice == 99) {
+      navigate('/settings/customentities');
     } else {
-      void readCoreData();
+      navigate('/settings/customization', { state: selectedDevice });
     }
   };
 
@@ -496,9 +503,18 @@ const DashboardDevices: FC = () => {
 
           <Grid container justifyContent="space-between">
             <Typography sx={{ ml: 1 }} variant="subtitle2" color="primary">
-              {shown_data.length + ' ' + LL.ENTITIES(shown_data.length)}
+              {LL.SHOWING() +
+                ' ' +
+                shown_data.length +
+                '/' +
+                coreData.devices[deviceIndex].e +
+                ' ' +
+                LL.ENTITIES(shown_data.length)}
               <IconButton onClick={() => setShowDeviceInfo(true)}>
                 <InfoOutlinedIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+              </IconButton>
+              <IconButton onClick={customize}>
+                <FormatListNumberedIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
               </IconButton>
               <IconButton onClick={handleDownloadCsv}>
                 <DownloadIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />

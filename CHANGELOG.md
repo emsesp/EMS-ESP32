@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Power entities
 - Optional input of BSSID for AP connection
-- Return empty json if no entries in scheduler/custom/analogsnesor/temperaturesensor
+- Return empty json if no entries in scheduler/custom/analogsensor/temperaturesensor
 
 ## Fixed
 
