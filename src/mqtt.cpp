@@ -633,10 +633,12 @@ bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, con
         packet_id = mqttClient_->unsubscribe(fulltopic);
         LOG_DEBUG("Unsubscribing to topic '%s', pid %d", fulltopic, packet_id);
     }
+#ifndef EMSESP_STANDALONE
     if (packet_id == 0) {
         LOG_WARNING("%s failed: %s", operation == Operation::PUBLISH ? "Publish" : operation == Operation::SUBSCRIBE ? "Subscribe" : "Unsubscribe", fulltopic);
         mqtt_publish_fails_++;
     }
+#endif
     return (packet_id != 0);
 }
 
