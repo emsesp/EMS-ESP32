@@ -175,7 +175,8 @@ export enum DeviceValueUOM {
   M3,
   L,
   KMIN,
-  K
+  K,
+  VOLTS
 }
 
 export const DeviceValueUOM_s = [
@@ -201,7 +202,8 @@ export const DeviceValueUOM_s = [
   'm³',
   'l',
   'K*min',
-  'K'
+  'K',
+  'V'
 ];
 
 export enum AnalogType {
@@ -238,6 +240,7 @@ type BoardProfiles = {
 export const BOARD_PROFILES: BoardProfiles = {
   S32: 'BBQKees Gateway S32',
   E32: 'BBQKees Gateway E32',
+  E32V2: 'BBQKees Gateway E32 V2',
   NODEMCU: 'NodeMCU 32S',
   'MH-ET': 'MH-ET Live D1 Mini',
   LOLIN: 'Lolin D32',

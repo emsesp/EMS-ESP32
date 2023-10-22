@@ -207,6 +207,8 @@ class Boiler : public EMSdevice {
     int16_t  hpTl2_;
     int16_t  hpPl1_;
     int16_t  hpPh1_;
+    int16_t  hpTa4_;
+    int16_t  hpTw1_;
 
     // Pool unit
     int8_t poolSetTemp_;

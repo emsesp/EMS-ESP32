@@ -102,8 +102,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(setReturnTemp),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_returnTemp));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &cwFlowRate_, DeviceValueType::USHORT, FL_(cwFlowRate), DeviceValueUOM::LMIN);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &netFlowTemp_, DeviceValueType::USHORT, FL_(netFlowTemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &cwFlowRate_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(cwFlowRate), DeviceValueUOM::LMIN);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &netFlowTemp_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(netFlowTemp), DeviceValueUOM::DEGREES);
     }
 
     /*
@@ -433,6 +433,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTl2_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTl2), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpPl1_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpPl1), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpPh1_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpPh1), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTa4_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTa4), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTw1_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTw1), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &poolSetTemp_,
                               DeviceValueType::UINT,
@@ -1446,6 +1448,8 @@ void Boiler::process_HpTemperatures(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hpTr6_, 0);
     has_update(telegram, hpTr7_, 30);
     has_update(telegram, hpTl2_, 12);
+    has_update(telegram, hpTa4_, 22);
+    has_update(telegram, hpTw1_, 24);
     has_update(telegram, hpPl1_, 26);
     has_update(telegram, hpPh1_, 28);
     has_update(telegram, hpBrineIn_, 8);
