@@ -323,7 +323,8 @@ const DashboardDevices: FC = () => {
         accessor: (dv: any) => (typeof dv.v === 'number' ? new Intl.NumberFormat().format(dv.v) : dv.v),
         name: LL.VALUE(0)
       },
-      { accessor: (dv: any) => DeviceValueUOM_s[dv.u], name: 'UoM' }
+      { accessor: (dv: any) => DeviceValueUOM_s[dv.u], name: 'UoM' },
+      { accessor: (dv: any) => (dv.c ? '1' : '0'), name: 'writeable' }
     ];
 
     const deviceIndex = coreData.devices.findIndex((d) => d.id === device_select.state.id);
