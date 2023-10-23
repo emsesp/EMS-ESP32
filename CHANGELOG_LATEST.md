@@ -8,10 +8,11 @@
 
 - humidity for ventilation devices
 - telegrams for RC100H, hc2, etc. (seen on discord, not tested)
-- names for BC400, GB192i, read temperatures for low loss header and heatblock [#1317](https://github.com/emsesp/EMS-ESP32/discussions/1317)
+- names for BC400, GB192i.2, read temperatures for low loss header and heatblock [#1317](https://github.com/emsesp/EMS-ESP32/discussions/1317)
 - option for `forceheatingoff` [#1262](https://github.com/emsesp/EMS-ESP32/issues/1262)
 - remote thermostat emulation for RC3xx
 - publish time for shower
+- autodetect board_profile, store in nvs, add telnet command option, add E32V2
 
 ## Fixed
 
