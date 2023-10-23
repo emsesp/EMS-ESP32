@@ -989,7 +989,7 @@ void Boiler::check_active() {
 
     // check forceheatingoff option
     if (!Helpers::hasValue(forceHeatingOff_, EMS_VALUE_BOOL)) {
-        EMSESP::webSettingsService.read([&](WebSettings & settings) { forceHeatingOff_ = (settings.boiler_heatingoff || selFlowTemp_ == 0) ? 1 : 0; });
+        EMSESP::webSettingsService.read([&](WebSettings & settings) { forceHeatingOff_ = settings.boiler_heatingoff ? EMS_VALUE_BOOL_ON : 0; });
         has_update(&forceHeatingOff_);
     }
     static uint32_t lastSendHeatingOff = 0;
