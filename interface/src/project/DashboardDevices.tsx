@@ -295,49 +295,50 @@ const DashboardDevices: FC = () => {
     return sc;
   };
 
-  const makeCsvData = (columns: any, data: any) =>
-    data.reduce(
-      (csvString: any, rowItem: any) =>
-        csvString + columns.map(({ accessor }: any) => escapeCsvCell(accessor(rowItem))).join(';') + '\r\n',
-      columns.map(({ name }: any) => escapeCsvCell(name)).join(';') + '\r\n'
-    );
-
-  const downloadAsCsv = (columns: any, data: any, filename: string) => {
-    const csvData = makeCsvData(columns, data);
-    const csvFile = new Blob([csvData], { type: 'text/csv;charset:utf-8' });
-    const downloadLink = document.createElement('a');
-
-    downloadLink.download = filename;
-    downloadLink.href = window.URL.createObjectURL(csvFile);
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
-  };
-
   const hasMask = (id: string, mask: number) => (parseInt(id.slice(0, 2), 16) & mask) === mask;
 
   const handleDownloadCsv = () => {
-    const columns = [
-      { accessor: (dv: any) => dv.id.slice(2), name: LL.ENTITY_NAME(0) },
-      {
-        accessor: (dv: any) => (typeof dv.v === 'number' ? new Intl.NumberFormat().format(dv.v) : dv.v),
-        name: LL.VALUE(0)
-      },
-      { accessor: (dv: any) => DeviceValueUOM_s[dv.u], name: 'UoM' },
-      { accessor: (dv: any) => (dv.c ? '1' : '0'), name: 'writeable' }
-    ];
-
     const deviceIndex = coreData.devices.findIndex((d) => d.id === device_select.state.id);
     if (deviceIndex === -1) {
       return;
     }
     const filename = coreData.devices[deviceIndex].tn + '_' + coreData.devices[deviceIndex].n;
 
-    downloadAsCsv(
-      columns,
-      onlyFav ? deviceData.data.filter((dv) => hasMask(dv.id, DeviceEntityMask.DV_FAVORITE)) : deviceData.data,
-      filename
+    const columns = [
+      { accessor: (dv: DeviceValue) => dv.id.slice(2), name: LL.ENTITY_NAME(0) },
+      {
+        accessor: (dv: DeviceValue) => (typeof dv.v === 'number' ? new Intl.NumberFormat().format(dv.v) : dv.v),
+        name: LL.VALUE(1)
+      },
+      { accessor: (dv: DeviceValue) => DeviceValueUOM_s[dv.u].replace(/[^a-zA-Z0-9]/g, ''), name: 'UoM' },
+      {
+        accessor: (dv: DeviceValue) => (dv.c && !hasMask(dv.id, DeviceEntityMask.DV_READONLY) ? 'yes' : 'no'),
+        name: LL.WRITEABLE()
+      },
+      {
+        accessor: (dv: DeviceValue) =>
+          dv.h ? dv.h : dv.l ? dv.l.join(' | ') : dv.m !== undefined && dv.x !== undefined ? dv.m + ', ' + dv.x : '',
+        name: 'Range'
+      }
+    ];
+
+    const data = onlyFav
+      ? deviceData.data.filter((dv) => hasMask(dv.id, DeviceEntityMask.DV_FAVORITE))
+      : deviceData.data;
+
+    const csvData = data.reduce(
+      (csvString: any, rowItem: any) =>
+        csvString + columns.map(({ accessor }: any) => escapeCsvCell(accessor(rowItem))).join(';') + '\r\n',
+      columns.map(({ name }: any) => escapeCsvCell(name)).join(';') + '\r\n'
     );
+
+    const csvFile = new Blob([csvData], { type: 'text/csv;charset:utf-8' });
+    const downloadLink = document.createElement('a');
+    downloadLink.download = filename;
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
   };
 
   useEffect(() => {
