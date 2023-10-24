@@ -385,7 +385,7 @@ void System::wifi_tweak() {
 }
 
 // check for valid ESP32 pins. This is very dependent on which ESP32 board is being used.
-// Typically you can't use 1, 6-11, 12, 14, 15, 20, 24, 28-31 and 40+
+// Typically you can't use 1, 6-11, 20, 24, 28-31 and 40+
 // we allow 0 as it has a special function on the NodeMCU apparently
 // See https://diyprojects.io/esp32-how-to-use-gpio-digital-io-arduino-code/#.YFpVEq9KhjG
 // and https://nodemcu.readthedocs.io/en/dev-esp32/modules/gpio/
@@ -475,15 +475,16 @@ void System::button_init(bool refresh) {
         reload_settings();
     }
 
-    if (is_valid_gpio(pbutton_gpio_)) {
-        if (!myPButton_.init(pbutton_gpio_, HIGH)) {
-            LOG_DEBUG("Multi-functional button not detected");
-        } else {
-            LOG_DEBUG("Multi-functional button enabled");
-        }
-    } else {
+    if (!is_valid_gpio(pbutton_gpio_)) {
         LOG_WARNING("Invalid button GPIO. Check config.");
+        myPButton_.init(255, HIGH); // disable
+        return;
     }
+    if (!myPButton_.init(pbutton_gpio_, HIGH)) {
+        LOG_WARNING("Multi-functional button not detected");
+        return;
+    }
+    LOG_DEBUG("Multi-functional button enabled");
 
     myPButton_.onClick(BUTTON_Debounce, button_OnClick);
     myPButton_.onDblClick(BUTTON_DblClickDelay, button_OnDblClick);
@@ -1064,7 +1065,7 @@ bool System::check_upgrade(bool factory_settings) {
         // see if we're missing a version, will be < 3.5.0b13 from Dec 23 2022
         missing_version = (settingsVersion.empty() || (settingsVersion.length() < 5));
         if (missing_version) {
-            LOG_DEBUG("No version information found (%s)", settingsVersion.c_str());
+            LOG_WARNING("No version information found (%s)", settingsVersion.c_str());
             settingsVersion = "3.6.2"; // this was the last stable version
         }
     }
@@ -1441,7 +1442,7 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
     } else if (board_profile == "E32") {
         data = {2, 4, 5, 17, 33, PHY_type::PHY_TYPE_LAN8720, 16, 1, 0}; // BBQKees Gateway E32
     } else if (board_profile == "E32V2") {
-        data = {2, 14, 4, 5, 0, PHY_type::PHY_TYPE_LAN8720, 15, 0, 1}; // BBQKees Gateway E32 V2
+        data = {2, 14, 4, 5, 12, PHY_type::PHY_TYPE_LAN8720, 15, 0, 1}; // BBQKees Gateway E32 V2
     } else if (board_profile == "MH-ET") {
         data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // MH-ET Live D1 Mini
     } else if (board_profile == "NODEMCU") {

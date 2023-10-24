@@ -112,11 +112,10 @@ class HttpPostEndpoint {
         AsyncJsonResponse * response = new AsyncJsonResponse(false, _bufferSize);
         jsonObject                   = response->getRoot().to<JsonObject>();
         _statefulService->read(jsonObject, _stateReader);
-        response->setLength();
-
         if (outcome == StateUpdateResult::CHANGED_RESTART) {
             response->setCode(205); // reboot required
         }
+        response->setLength();
         request->send(response);
     }
 };

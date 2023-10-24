@@ -36,8 +36,7 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
 
     switch (event) {
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
-        EMSESP::logger().warning("WiFi disconnected. Reason code=%s", disconnectReason(info.wifi_sta_disconnected.reason)); // IDF 4.0
-        // WiFi.disconnect(true); // this is done in NetworkSettingsService
+        EMSESP::logger().warning("WiFi disconnected. Reason: %s (%d)", disconnectReason(info.wifi_sta_disconnected.reason), info.wifi_sta_disconnected.reason); // IDF 4.0
         EMSESP::system_.has_ipv6(false);
         break;
 
@@ -282,6 +281,16 @@ const char * WebStatusService::disconnectReason(uint8_t code) {
         return "assoc fail";
     case WIFI_REASON_HANDSHAKE_TIMEOUT: // = 204,
         return "handshake timeout";
+    case WIFI_REASON_CONNECTION_FAIL: // 205,
+        return "connection fail";
+    case WIFI_REASON_AP_TSF_RESET: // 206,
+        return "AP tsf reset";
+    case WIFI_REASON_ROAMING: // 207,
+        return "roaming";
+    case WIFI_REASON_ASSOC_COMEBACK_TIME_TOO_LONG: // 208,
+        return "assoc comeback time too long";
+    case WIFI_REASON_SA_QUERY_TIMEOUT: // 209,
+        return "sa query timeout";
     default:
         return "unknown";
     }

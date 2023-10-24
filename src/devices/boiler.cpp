@@ -1100,6 +1100,10 @@ void Boiler::process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram) {
  */
 void Boiler::process_UBATotalUptime(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, UBAuptime_, 0, 3); // force to 3 bytes
+    // if broadcasted there is no need to fetch
+    if (telegram->dest == 0) {
+        toggle_fetch(0x14, false);
+    }
 }
 
 /*

@@ -28,10 +28,16 @@ void NetworkSettingsService::begin() {
     WiFi.onEvent(std::bind(&NetworkSettingsService::WiFiEvent, this, _1));
 
     _fsPersistence.readFromFS();
-    reconfigureWiFiConnection();
+    // reconfigureWiFiConnection();
+    _lastConnectionAttempt = 0;
+    _stopping              = false;
 }
 
 void NetworkSettingsService::reconfigureWiFiConnection() {
+    // do not disconnect for switching to eth, restart is needed
+    if (WiFi.isConnected() && _state.ssid.length() == 0) {
+        return;
+    }
     // disconnect and de-configure wifi
     if (WiFi.disconnect(true)) {
         _stopping = true;
