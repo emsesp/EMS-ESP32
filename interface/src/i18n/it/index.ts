@@ -325,7 +325,7 @@ const it: Translation = {
   WRITEABLE: 'Scrivibile',
   SHOWING: 'Visualizza',
   SEARCH: 'Ricerca',
-  CERT: 'TSL root certificate (leave blank to disable TSL)' // TODO translate
+  CERT: 'TLS root certificate (leave blank to disable TLS)' // TODO translate
 };
 
 export default it;
