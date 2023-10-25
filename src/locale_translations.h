@@ -505,9 +505,13 @@ MAKE_TRANSLATION(blockHyst, "blockhyst", "hyst. for boiler block", "Hysterese Sp
 MAKE_TRANSLATION(releaseWait, "releasewait", "boiler release wait time", "Wartezeit Kessel-Freigabe", "Wachttijd ketel vrijgave", "Väntetid Frisläppning", "czas oczekiwania na zwolnienie kotła", "kjele frigjøringsventetid", "temps attente libération chaudière", "kazan tahliyesi bekleme süresi", "tempo di attesa sblocco caldaia")
 
 // energy
+MAKE_TRANSLATION(nrgTotal, "nrgtotal", "total energy", "Energie gesamt", "", "", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(nrgHeat, "nrgheat", "energy heating", "Energie Heizen", "", "", "", "", "",  "ısıtma enerjisi", "") // TODO translate
-MAKE_TRANSLATION(nrgWw, "nrgww", "energy dhw", "Energie Warmwasser", "", "", "", "", "",  "sıcak kullanım suyu enerjisi", "") // TODO translate
+MAKE_TRANSLATION(nrgWw, "nrgww", "energy", "Energie", "", "", "", "", "",  "sıcak kullanım suyu enerjisi", "") // TODO translate
 MAKE_TRANSLATION(nomPower, "nompower", "nominal Power", "Brennerleistung", "", "", "", "", "",  "nominal güç", "") // TODO translate
+MAKE_TRANSLATION(meterTotal, "metertotal", "meter total", "Messung gesamt", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(meterComp, "metercomp", "meter compressor", "Messung Kompressor", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(meterEHeat, "metereheat", "meter e-heater", "Messung E-Heizer", "", "", "", "", "", "", "") // TODO translate
 
 // HIU
 MAKE_TRANSLATION(netFlowTemp, "netflowtemp", "heat network flow temp", "System Vorlauftemperatur", "Netto aanvoertemperatuur", "", "", "", "", "ısıtma şebekesi akış derecesi", "temperatura di mandata della rete di riscaldamento") // TODO translate

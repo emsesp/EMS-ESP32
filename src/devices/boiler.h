@@ -209,6 +209,12 @@ class Boiler : public EMSdevice {
     int16_t  hpPh1_;
     int16_t  hpTa4_;
     int16_t  hpTw1_;
+    uint32_t nrgTotal_;
+    uint32_t nrgWw_;
+    uint32_t nrgHeat_;
+    uint32_t meterTotal_;
+    uint32_t meterComp_;
+    uint32_t meterEHeat_;
 
     // Pool unit
     int8_t poolSetTemp_;
@@ -267,11 +273,9 @@ class Boiler : public EMSdevice {
     uint8_t  setReturnTemp_;
 
     // special
-    double   nrgHeatF_;
-    double   nrgWwF_;
-    uint32_t nrgHeat_;
-    uint32_t nrgWw_;
-    uint8_t  nomPower_;
+    double  nrgHeatF_; // double calcutate for nrgHeat
+    double  nrgWwF_;   // double calcutate for nrgWw
+    uint8_t nomPower_;
 
     /*
   // Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
@@ -328,6 +332,8 @@ class Boiler : public EMSdevice {
     void process_HpDhwSettings(std::shared_ptr<const Telegram> telegram);
     void process_HpSettings2(std::shared_ptr<const Telegram> telegram);
     void process_HpSettings3(std::shared_ptr<const Telegram> telegram);
+    void process_HpEnergy(std::shared_ptr<const Telegram> telegram);
+    void process_HpMeters(std::shared_ptr<const Telegram> telegram);
     // HIU
     void process_HIUSettings(std::shared_ptr<const Telegram> telegram);
     void process_HIUMonitor(std::shared_ptr<const Telegram> telegram);
