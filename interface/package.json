@@ -23,11 +23,11 @@
     "@babel/core": "^7.23.2",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
-    "@mui/icons-material": "^5.14.14",
-    "@mui/material": "^5.14.14",
+    "@mui/icons-material": "^5.14.15",
+    "@mui/material": "^5.14.15",
     "@table-library/react-table-library": "4.1.7",
     "@types/lodash-es": "^4.17.10",
-    "@types/node": "^20.8.7",
+    "@types/node": "^20.8.8",
     "@types/react": "^18.2.31",
     "@types/react-dom": "^18.2.14",
     "@types/react-router-dom": "^5.3.3",
@@ -50,8 +50,8 @@
   "devDependencies": {
     "@preact/compat": "^17.1.2",
     "@preact/preset-vite": "^2.6.0",
-    "@typescript-eslint/eslint-plugin": "^6.8.0",
-    "@typescript-eslint/parser": "^6.8.0",
+    "@typescript-eslint/eslint-plugin": "^6.9.0",
+    "@typescript-eslint/parser": "^6.9.0",
     "concurrently": "^8.2.2",
     "eslint": "^8.52.0",
     "eslint-config-airbnb": "^19.0.4",
@@ -72,5 +72,5 @@
     "vite-plugin-imagemin": "^0.6.1",
     "vite-tsconfig-paths": "^4.2.1"
   },
-  "packageManager": "yarn@4.0.0-rc.53"
+  "packageManager": "yarn@4.0.0"
 }
