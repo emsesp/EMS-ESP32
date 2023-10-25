@@ -472,6 +472,7 @@ void Mqtt::on_disconnect(espMqttClientTypes::DisconnectReason reason) {
     } else {
         LOG_WARNING("MQTT disconnected: code %d", reason);
     }
+    mqttClient_->clearQueue(true);
 }
 
 // MQTT on_connect - when an MQTT connect is established
@@ -589,7 +590,7 @@ bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, con
             return true;
         }
     }
-    if (!mqtt_enabled_ || topic.empty()) {
+    if (!mqtt_enabled_ || topic.empty() || !connected()) {
         return false; // quit, not using MQTT
     }
 // check free mem
