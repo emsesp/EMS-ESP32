@@ -323,7 +323,7 @@ const en: Translation = {
   WRITEABLE: 'Writeable',
   SHOWING: 'Showing',
   SEARCH: 'Search',
-  CERT: 'TSL root certificate (leave blank to disable TSL)'
+  CERT: 'TLS root certificate (leave blank to disable TLS)'
 };
 
 export default en;

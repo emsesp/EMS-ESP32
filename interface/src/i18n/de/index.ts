@@ -323,7 +323,7 @@ const de: Translation = {
   WRITEABLE: 'Schreibbar',
   SHOWING: 'Anzeigen von',
   SEARCH: 'Suche',
-  CERT: 'TSL Zertifikat (Freilassen um TSL zu deaktivieren)'
+  CERT: 'TLS Zertifikat (Freilassen um TLS zu deaktivieren)'
 };
 
 export default de;
