@@ -323,7 +323,7 @@ const nl: Translation = {
   WRITEABLE: 'Beschrijfbare',
   SHOWING: 'Tonen',
   SEARCH: 'Zoek',
-  CERT: 'TSL rootcertificaat (laat leeg om TSL uit te schakelen)'
+  CERT: 'TLS rootcertificaat (laat leeg om TLS uit te schakelen)'
 };
 
 export default nl;

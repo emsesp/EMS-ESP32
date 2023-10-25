@@ -323,7 +323,7 @@ const pl: BaseTranslation = {
   WRITEABLE: 'zapisywalna',
   SHOWING: 'Wyświetlane',
   SEARCH: 'Szukaj',
-  CERT: 'TSL root certificate (leave blank to disable TSL)' // TODO translate
+  CERT: 'TLS root certificate (leave blank to disable TLS)' // TODO translate
 };
 
 export default pl;
