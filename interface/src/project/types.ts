@@ -364,7 +364,7 @@ export const enum DeviceType {
   CONTROLLER,
   CONNECT,
   ALERT,
-  PUMP,
+  EXTENSION,
   GENERIC,
   HEATSOURCE,
   CUSTOM,

@@ -350,7 +350,7 @@ class EMSdevice {
         CONTROLLER,
         CONNECT,
         ALERT,
-        PUMP,
+        EXTENSION,
         GENERIC,
         HEATSOURCE,
         CUSTOM,
@@ -375,7 +375,7 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_ID_CLOCK          = 0x0F;
     static constexpr uint8_t EMS_DEVICE_ID_SWITCH         = 0x11; // Switch WM10
     static constexpr uint8_t EMS_DEVICE_ID_ALERT          = 0x12; // Error module EM10
-    static constexpr uint8_t EMS_DEVICE_ID_PUMP           = 0x15; // Pump module PM10
+    static constexpr uint8_t EMS_DEVICE_ID_EXTENSION      = 0x15; // Extension module EM1000, Pump module PM10
     static constexpr uint8_t EMS_DEVICE_ID_MODEM          = 0x48;
     static constexpr uint8_t EMS_DEVICE_ID_RFSENSOR       = 0x40; // RF sensor only sending, no reply
     static constexpr uint8_t EMS_DEVICE_ID_RFBASE         = 0x50;

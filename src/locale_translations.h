@@ -46,7 +46,8 @@ MAKE_WORD_TRANSLATION(controller_device, "Controller Module", "Kontrollmodul", "
 MAKE_WORD_TRANSLATION(switch_device, "Switch Module", "Schaltmodul", "Switch Module",  "Relämodul", "Moduł przełączający", "Switch modul", "", "Anahtar", "Modulo Switch") // TODO translate
 MAKE_WORD_TRANSLATION(gateway_device, "Gateway Module", "Gateway Modul", "Gateway Module",  "Gateway", "Moduł IP", "Gateway", "", "Ağ Geçidi", "Modulo Gateway") // TODO translate
 MAKE_WORD_TRANSLATION(alert_device, "Alert Module", "Alarmmodul", "Alert Module",  "Larmmodul", "Moduł alarmowy", "Alarmmodul", "", "Alarm Cihazı", "Module Avviso") // TODO translate
-MAKE_WORD_TRANSLATION(pump_device, "Pump Module", "Pumpenmodul", "Pump Module",  "Pumpmodul", "Moduł pompy", "Pumpemodul", "", "Pompa", "Module Pompa") // TODO translate
+//MAKE_WORD_TRANSLATION(pump_device, "Pump Module", "Pumpenmodul", "Pump Module",  "Pumpmodul", "Moduł pompy", "Pumpemodul", "", "Pompa", "Module Pompa") // TODO translate
+MAKE_WORD_TRANSLATION(extension_device, "Extension Module", "Erweiterungsnmodul", "Module",  "Modul", "Moduł", "Modul", "", "", "Module") // TODO translate
 MAKE_WORD_TRANSLATION(heatsource_device, "Heatsource", "Heizquelle", "Heatsource",  "Värmekälla", "Źródło ciepła", "Varmekilde", "", "Isı Kaynağı", "Fonte di calore") // TODO translate
 MAKE_WORD_TRANSLATION(sensors_device, "Sensors", "Sensoren", "Sensoren", "Sensorer", "Czujniki", "Sensorer", "Capteurs", "Sensör Cihazı", "Sensori")
 MAKE_WORD_TRANSLATION(unknown_device, "Unknown", "Unbekannt", "Onbekend", "Okänt", "Nieznane urządzenie", "Ukjent", "Inconnu", "Bilinmeyen", "Sconosciuto")

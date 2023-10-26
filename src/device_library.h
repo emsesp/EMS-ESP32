@@ -169,8 +169,8 @@
 // Switches - 0x11
 { 71, DeviceType::SWITCH, "WM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
-// EM10/EM100 module - 0x15
-{ 243, DeviceType::ALERT, "EM10/EM100", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+// EM10/100 extension module, pump module - 0x15
+{ 243, DeviceType::EXTENSION, "EM10/EM100", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // EM10 error contact and analog flowtemp control- 0x12
 { 74, DeviceType::ALERT, "EM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
