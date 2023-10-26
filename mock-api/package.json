@@ -4,6 +4,7 @@
   "description": "mock api for EMS-ESP",
   "author": "proddy",
   "main": "server.js",
+  "license": "MIT",
   "scripts": {
     "dev": "node --watch ./server.js localhost 3080",
     "test": "echo \"Error: no test specified\" && exit 1"
