@@ -78,7 +78,7 @@
 
 // Thermostat - not currently supporting write operations, like the Easy/100 types - 0x18
 {202, DeviceType::THERMOSTAT, "Logamatic TC100/Moduline Easy", DeviceFlags::EMS_DEVICE_FLAG_EASY | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18, cannot write
-{203, DeviceType::THERMOSTAT, "EasyControl CT200", DeviceFlags::EMS_DEVICE_FLAG_EASY | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18, cannot write
+{203, DeviceType::THERMOSTAT, "EasyControl/CT200", DeviceFlags::EMS_DEVICE_FLAG_EASY | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18, cannot write
 
 // Thermostat - Buderus/Nefit/Bosch specific - 0x17 / 0x10 / 0x18 / 0x19-0x1B for hc2-4 / 0x38
 {  4, DeviceType::THERMOSTAT, "UI800/BC400", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
