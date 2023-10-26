@@ -7,6 +7,7 @@ NetworkSettingsService::NetworkSettingsService(AsyncWebServer * server, FS * fs,
     , _fsPersistence(NetworkSettings::read, NetworkSettings::update, this, fs, NETWORK_SETTINGS_FILE)
     , _lastConnectionAttempt(0) {
     addUpdateHandler([&](const String & originId) { reconfigureWiFiConnection(); }, false);
+    WiFi.onEvent(std::bind(&NetworkSettingsService::WiFiEvent, this, _1));
 }
 
 void NetworkSettingsService::begin() {
@@ -22,15 +23,12 @@ void NetworkSettingsService::begin() {
 
     WiFi.mode(WIFI_MODE_MAX);
     WiFi.mode(WIFI_MODE_NULL);
-    WiFi.setScanMethod(WIFI_ALL_CHANNEL_SCAN);     // default is FAST_SCAN
-    WiFi.setSortMethod(WIFI_CONNECT_AP_BY_SIGNAL); // is default, no need to set
+    // WiFi.setScanMethod(WIFI_ALL_CHANNEL_SCAN);     // default is FAST_SCAN, connect issues in 2.0.14
+    // WiFi.setSortMethod(WIFI_CONNECT_AP_BY_SIGNAL); // is default, no need to set
 
-    WiFi.onEvent(std::bind(&NetworkSettingsService::WiFiEvent, this, _1));
 
     _fsPersistence.readFromFS();
     // reconfigureWiFiConnection();
-    _lastConnectionAttempt = 0;
-    _stopping              = false;
 }
 
 void NetworkSettingsService::reconfigureWiFiConnection() {
@@ -108,7 +106,7 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event) {
             _stopping              = false;
         }
     }
-    if (!_stopping && (event == ARDUINO_EVENT_WIFI_STA_LOST_IP || event == ARDUINO_EVENT_WIFI_STA_DISCONNECTED)) {
-        reconfigureWiFiConnection();
-    }
+    // if (!_stopping && (event == ARDUINO_EVENT_WIFI_STA_LOST_IP || event == ARDUINO_EVENT_WIFI_STA_DISCONNECTED)) {
+    //     reconfigureWiFiConnection();
+    // }
 }
