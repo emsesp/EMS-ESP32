@@ -41,7 +41,15 @@ extern "C" {
 #endif
 
 #ifndef CONFIG_ASYNC_TCP_TASK_PRIORITY
-#define CONFIG_ASYNC_TCP_TASK_PRIORITY 15
+#define CONFIG_ASYNC_TCP_TASK_PRIORITY 5
+#endif
+
+#ifndef CONFIG_ASYNC_TCP_STACK
+#define CONFIG_ASYNC_TCP_STACK 8192
+#endif
+
+#ifndef CONFIG_ASYNC_TCP_QUEUE
+#define CONFIG_ASYNC_TCP_QUEUE 128
 #endif
 
 class AsyncClient;
