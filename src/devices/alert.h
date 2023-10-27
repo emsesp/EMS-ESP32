@@ -28,30 +28,10 @@ class Alert : public EMSdevice {
     Alert(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand);
 
   private:
-    void process_EM100SetMessage(std::shared_ptr<const Telegram> telegram);
-    void process_EM100MonitorMessage(std::shared_ptr<const Telegram> telegram);
-    void process_EM100TempMessage(std::shared_ptr<const Telegram> telegram);
-    void process_EM100InputMessage(std::shared_ptr<const Telegram> telegram);
-    void process_EM100ConfigMessage(std::shared_ptr<const Telegram> telegram);
+    void process_UBASetPoints(std::shared_ptr<const Telegram> telegram);
 
-    bool set_minV(const char * value, const int8_t id);
-    bool set_maxV(const char * value, const int8_t id);
-    bool set_minT(const char * value, const int8_t id);
-    bool set_maxT(const char * value, const int8_t id);
-
-
-    int16_t headerTemp_; // T0
-    int16_t input_;      // IO1
-    uint8_t errorState_; // OE1
-    uint8_t errorPump_;  // IE0
-    uint8_t outPower_;   // IO1
-    uint8_t setPower_;   // request
-    uint8_t setPoint_;
-    uint8_t dip_; // dip switch
-    uint8_t minV_;
-    uint8_t maxV_;
-    uint8_t minT_;
-    uint8_t maxT_;
+    uint8_t setFlowTemp_; // boiler setpoint temp
+    uint8_t setBurnPow_;  // Burner power %
 };
 
 } // namespace emsesp
