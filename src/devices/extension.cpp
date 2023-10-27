@@ -37,7 +37,7 @@ Extension::Extension(uint8_t device_type, uint8_t device_id, uint8_t product_id,
                           FL_(flowTempVf),
                           DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &input_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(input), DeviceValueUOM::VOLTS);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &outPower_, DeviceValueType::BOOL, FL_(outPower), DeviceValueUOM::NONE);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &outPower_, DeviceValueType::UINT, FL_(outPower), DeviceValueUOM::PERCENT);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setPower_, DeviceValueType::UINT, FL_(setPower), DeviceValueUOM::PERCENT);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setPoint_, DeviceValueType::UINT, FL_(setPoint), DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
