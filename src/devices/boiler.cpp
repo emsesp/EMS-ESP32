@@ -285,9 +285,6 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgTotal_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgTotal), DeviceValueUOM::KWH);
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW, &nrgWw_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgWw), DeviceValueUOM::KWH);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgHeat_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgHeat), DeviceValueUOM::KWH);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &meterTotal_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(meterTotal), DeviceValueUOM::KWH);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &meterComp_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(meterComp), DeviceValueUOM::KWH);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &meterEHeat_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(meterEHeat), DeviceValueUOM::KWH);
 
     /*
     * Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
@@ -362,6 +359,24 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
 
     // heatpump info
     if (model() == EMS_DEVICE_FLAG_HEATPUMP) {
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &meterTotal_,
+                              DeviceValueType::ULONG,
+                              DeviceValueNumOp::DV_NUMOP_DIV100,
+                              FL_(meterTotal),
+                              DeviceValueUOM::KWH);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &meterComp_,
+                              DeviceValueType::ULONG,
+                              DeviceValueNumOp::DV_NUMOP_DIV100,
+                              FL_(meterComp),
+                              DeviceValueUOM::KWH);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &meterEHeat_,
+                              DeviceValueType::ULONG,
+                              DeviceValueNumOp::DV_NUMOP_DIV100,
+                              FL_(meterEHeat),
+                              DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &upTimeControl_,
                               DeviceValueType::TIME,
@@ -1019,6 +1034,7 @@ void Boiler::check_active() {
         nrgWwF_ += ((double)((uint32_t)wwBurnPow * nomPower_ * (uuid::get_uptime() - powLastReadTime_)) / 3600) / 1000UL;
         has_update(nrgHeat_, (uint32_t)(nrgHeatF_ + 0.5));
         has_update(nrgWw_, (uint32_t)(nrgWwF_ + 0.5));
+        has_update(nrgTotal_, (uint32_t)(nrgHeatF_ + nrgWwF_ + 0.5));
         // check for store values
         time_t now = time(nullptr);
         tm *   tm_ = localtime(&now);
