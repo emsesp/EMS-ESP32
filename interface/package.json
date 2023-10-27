@@ -35,7 +35,7 @@
     "alova": "^2.13.1",
     "async-validator": "^4.2.5",
     "history": "^5.3.0",
-    "jwt-decode": "^3.1.2",
+    "jwt-decode": "^4.0.0",
     "lodash-es": "^4.17.21",
     "mime-types": "^2.1.35",
     "react": "latest",
