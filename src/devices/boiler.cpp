@@ -93,6 +93,26 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x779, "HIUMonitor", false, MAKE_PF_CB(process_HIUMonitor));
 
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &netFlowTemp_,
+                              DeviceValueType::USHORT,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(netFlowTemp),
+                              DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &retTemp_,
+                              DeviceValueType::USHORT,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(retTemp),
+                              DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatValve_, DeviceValueType::UINT, FL_(heatValve), DeviceValueUOM::PERCENT);
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW, &wwValve_, DeviceValueType::UINT, FL_(wwValve), DeviceValueUOM::PERCENT);
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
+                              &wwCurFlow_,
+                              DeviceValueType::UINT,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(wwCurFlow),
+                              DeviceValueUOM::LMIN);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &keepWarmTemp_,
                               DeviceValueType::UINT,
                               FL_(keepWarmTemp),
@@ -104,18 +124,6 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(setReturnTemp),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_returnTemp));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &cwFlowRate_,
-                              DeviceValueType::USHORT,
-                              DeviceValueNumOp::DV_NUMOP_DIV10,
-                              FL_(cwFlowRate),
-                              DeviceValueUOM::LMIN);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &netFlowTemp_,
-                              DeviceValueType::USHORT,
-                              DeviceValueNumOp::DV_NUMOP_DIV10,
-                              FL_(netFlowTemp),
-                              DeviceValueUOM::DEGREES);
     }
 
     /*
@@ -215,7 +223,6 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           MAKE_CF_CB(set_burn_period),
                           0,
                           120);
-
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &burnMinPower_,
                           DeviceValueType::UINT,
@@ -282,10 +289,6 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           MAKE_CF_CB(set_emergency_temp),
                           15,
                           70);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgTotal_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgTotal), DeviceValueUOM::KWH);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW, &nrgWw_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgWw), DeviceValueUOM::KWH);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgHeat_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgHeat), DeviceValueUOM::KWH);
-
     /*
     * Hybrid heatpump with telegram 0xBB is readable and writeable in boiler and thermostat
     * thermostat always overwrites settings in boiler
@@ -359,6 +362,19 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
 
     // heatpump info
     if (model() == EMS_DEVICE_FLAG_HEATPUMP) {
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &nrgTotal_,
+                              DeviceValueType::ULONG,
+                              DeviceValueNumOp::DV_NUMOP_DIV100,
+                              FL_(nrgTotal),
+                              DeviceValueUOM::KWH);
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW, &nrgWw_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgWw), DeviceValueUOM::KWH);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &nrgHeat_,
+                              DeviceValueType::ULONG,
+                              DeviceValueNumOp::DV_NUMOP_DIV100,
+                              FL_(nrgHeat),
+                              DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &meterTotal_,
                               DeviceValueType::ULONG,
@@ -911,6 +927,12 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     if (model() != EMS_DEVICE_FLAG_HEATPUMP) {
         register_telegram_type(0x04, "UBAFactory", true, MAKE_PF_CB(process_UBAFactory));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nomPower_, DeviceValueType::UINT, FL_(nomPower), DeviceValueUOM::KW, MAKE_CF_CB(set_nomPower));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &nrgTotal_,
+                              DeviceValueType::ULONG,
+                              DeviceValueNumOp::DV_NUMOP_DIV100,
+                              FL_(nrgTotal),
+                              DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &nrgHeat_,
                               DeviceValueType::ULONG,
@@ -1808,8 +1830,8 @@ void Boiler::process_HpSettings3(std::shared_ptr<const Telegram> telegram) {
 // boiler(0x08) -W-> Me(0x0B), ?(0x04AE), data: 00 00 00 00 00 00 00 00 (offset 24)
 void Boiler::process_HpEnergy(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, nrgTotal_, 0);
-    has_update(telegram, nrgWw_, 4);
-    has_update(telegram, nrgHeat_, 12);
+    has_update(telegram, nrgHeat_, 4);
+    has_update(telegram, nrgWw_, 12);
 }
 
 // boiler(0x08) -W-> Me(0x0B), ?(0x04AF), data: 00 00 48 B2 00 00 48 55 00 00 00 5D 00 00 01 78 00 00 00 00 00 00 07 61
@@ -1825,8 +1847,11 @@ void Boiler::process_HpMeters(std::shared_ptr<const Telegram> telegram) {
 
 // boiler(0x08) -B-> All(0x00), ?(0x0779), data: 06 05 01 01 AD 02 EF FF FF 00 00 7F FF
 void Boiler::process_HIUMonitor(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, retTemp_, 3);     // is * 10
     has_update(telegram, netFlowTemp_, 5); // is * 10
-    has_update(telegram, cwFlowRate_, 9);  // is * 10
+    has_update(telegram, heatValve_, 7);   // is %
+    has_update(telegram, wwValve_, 8);     // is %
+    has_update(telegram, wwCurFlow_, 10);  // is * 10 (for HIU 16 bit at offset 9, use 8 bit for compatibility to other boilers)
 }
 
 // Boiler(0x08) -W-> ME(0x0x), ?(0x0772), data: 00 00 00 00 00

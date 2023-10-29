@@ -68,7 +68,7 @@ class Boiler : public EMSdevice {
     uint8_t  wwCirc_;               // DHW circulation on/off
     uint16_t wwCurTemp_;            // DHW current temperature
     uint16_t wwCurTemp2_;           // DHW current temperature storage
-    uint8_t  wwCurFlow_;            // DHW current flow temp in l/min
+    uint8_t  wwCurFlow_;            // DHW current flow in l/min
     uint16_t wwStorageTemp1_;       // DHW storage temp 1
     uint16_t wwStorageTemp2_;       // DHW storage temp 2
     uint8_t  wwActivated_;          // DHW activated
@@ -267,10 +267,12 @@ class Boiler : public EMSdevice {
     uint8_t elHeatStep3_;
 
     // HIU
-    uint16_t cwFlowRate_;  // cold water flow rate *10
+    // uint16_t cwFlowRate_;  // cold water flow rate *10
     uint16_t netFlowTemp_; // heat network flow temperature *10
     uint8_t  keepWarmTemp_;
     uint8_t  setReturnTemp_;
+    uint8_t  heatValve_;
+    uint8_t  wwValve_;
 
     // special
     double  nrgHeatF_; // double calcutate for nrgHeat

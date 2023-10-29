@@ -516,8 +516,10 @@ MAKE_TRANSLATION(meterEHeat, "metereheat", "meter e-heater", "Messung E-Heizer",
 
 // HIU
 MAKE_TRANSLATION(netFlowTemp, "netflowtemp", "heat network flow temp", "System Vorlauftemperatur", "Netto aanvoertemperatuur", "", "", "", "", "ısıtma şebekesi akış derecesi", "temperatura di mandata della rete di riscaldamento") // TODO translate
-MAKE_TRANSLATION(cwFlowRate, "cwflowrate", "cold water flow rate", "Kaltwasser Durchfluss", "Stroomsnelheid koud water ", "", "", "", "",  "soğuk su akış hızı", "portata acqua fredda") // TODO translate
+// MAKE_TRANSLATION(cwFlowRate, "cwflowrate", "cold water flow rate", "Kaltwasser Durchfluss", "Stroomsnelheid koud water ", "", "", "", "",  "soğuk su akış hızı", "portata acqua fredda") // TODO translate
 MAKE_TRANSLATION(keepWarmTemp, "keepwarmtemp", "keep warm temperature","Warmhaltetemperatur", "Warmhoudtemperatuur", "", "", "", "",  "sıcaklığı koruma derecesi", "mantenere la temperatura calda") // TODO translate
+MAKE_TRANSLATION(heatValve, "heatvalve", "heating valve", "Ventil Heizen", "", "", "", "", "",  "", "") // TODO translate
+MAKE_TRANSLATION(wwValve, "wwvalve", "valve", "Ventil", "", "", "", "", "",  "", "") // TODO translate
 
 // the following are dhw for the boiler and automatically tagged with 'dhw'
 MAKE_TRANSLATION(wwSelTemp, "wwseltemp", "selected temperature", "gewählte Temperatur", "Geselecteerd temperatuur", "Vald Temperatur", "temperatura wyższa/komfort", "valgt temperatur", "température sélectionnée", "seçili sıcaklık", "temperatura selezionata")
