@@ -1,6 +1,7 @@
 # testing EMS-ESP API
-# use with "REST Client" extension in Visual Studio Code
-# https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+# to be used with "REST Client" extension in Visual Studio Code (https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
+# Open this file in VSC, modify the token, go to the API call and click on 'Send Request' (or Ctrl+Alt+R)
+# The response will be shown in the right panel
 
 @host = http://ems-esp.local
 @host_dev = http://ems-esp2.local
