@@ -1,4 +1,4 @@
-import jwtDecode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import { ACCESS_TOKEN, alovaInstance } from './endpoints';
 import type * as H from 'history';
 import type { Path } from 'react-router-dom';
