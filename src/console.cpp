@@ -279,13 +279,16 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::ADMIN,
                           string_vector{F_(set), F_(board_profile)},
-                          string_vector{F_(name_mandatory)},
+                          string_vector{F_(name_mandatory), F_(nvs_optional)},
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
                               std::string         board_profile = Helpers::toUpper(arguments.front());
                               if (!to_app(shell).system_.load_board_profile(data, board_profile)) {
-                                  shell.println("Invalid board profile (S32, E32, MH-ET, NODEMCU, OLIMEX, OLIMEXPOE, C3MINI, S2MINI, S3MINI, CUSTOM)");
+                                  shell.println("Invalid board profile (S32, E32, E32V2, MH-ET, NODEMCU, OLIMEX, OLIMEXPOE, C3MINI, S2MINI, S3MINI, CUSTOM)");
                                   return;
+                              }
+                              if (arguments.size() == 2 && Helpers::toLower(arguments.back()) == "nvs") {
+                                  to_app(shell).nvs_.putString("boot", board_profile.c_str());
                               }
                               to_app(shell).webSettingsService.update(
                                   [&](WebSettings & settings) {
@@ -360,7 +363,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::ADMIN,
-                          string_vector{F_(scan), F_(devices)},
+                          string_vector{F_(scan)},
                           string_vector{F_(deep_optional)},
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               if (arguments.size() == 0) {
@@ -368,29 +371,11 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                               } else {
                                   shell.printfln("Performing a deep scan...");
                                   to_app(shell).clear_all_devices();
-                                  std::vector<uint8_t> Device_Ids;
-
-                                  Device_Ids.push_back(0x08); // Boilers - 0x08
-                                  Device_Ids.push_back(0x38); // HeatPump - 0x38
-                                  Device_Ids.push_back(0x30); // Solar Module - 0x30
-                                  Device_Ids.push_back(0x09); // Controllers - 0x09
-                                  Device_Ids.push_back(0x02); // Connect - 0x02
-                                  Device_Ids.push_back(0x48); // Gateway - 0x48
-                                  Device_Ids.push_back(0x20); // Mixer Devices - 0x20
-                                  Device_Ids.push_back(0x21); // Mixer Devices - 0x21
-                                  Device_Ids.push_back(0x22); // Mixer Devices - 0x22
-                                  Device_Ids.push_back(0x23); // Mixer Devices - 0x23
-                                  Device_Ids.push_back(0x28); // Mixer Devices WW- 0x28
-                                  Device_Ids.push_back(0x29); // Mixer Devices WW- 0x29
-                                  Device_Ids.push_back(0x10); // Thermostats - 0x10
-                                  Device_Ids.push_back(0x17); // Thermostats - 0x17
-                                  Device_Ids.push_back(0x18); // Thermostat remote - 0x18
-                                  Device_Ids.push_back(0x19); // Thermostat remote - 0x19
-                                  Device_Ids.push_back(0x1A); // Thermostat remote - 0x1A
-                                  Device_Ids.push_back(0x1B); // Thermostat remote - 0x1B
-                                  Device_Ids.push_back(0x11); // Switches - 0x11
-
+                                  // device IDs taken from device_library.h
                                   // send the read command with Version command
+                                  const std::vector<uint8_t> Device_Ids = {0x02, 0x08, 0x09, 0x10, 0x11, 0x12, 0x15, 0x17, 0x18, 0x19, 0x1A,
+                                                                           0x1B, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29,
+                                                                           0x2A, 0x30, 0x38, 0x40, 0x41, 0x48, 0x50, 0x51, 0x60};
                                   for (const uint8_t device_id : Device_Ids) {
                                       to_app(shell).send_read_request(EMSdevice::EMS_TYPE_VERSION, device_id);
                                   }

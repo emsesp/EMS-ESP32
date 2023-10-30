@@ -385,13 +385,13 @@ void System::wifi_tweak() {
 }
 
 // check for valid ESP32 pins. This is very dependent on which ESP32 board is being used.
-// Typically you can't use 1, 6-11, 12, 14, 15, 20, 24, 28-31 and 40+
+// Typically you can't use 1, 6-11, 20, 24, 28-31 and 40+
 // we allow 0 as it has a special function on the NodeMCU apparently
 // See https://diyprojects.io/esp32-how-to-use-gpio-digital-io-arduino-code/#.YFpVEq9KhjG
 // and https://nodemcu.readthedocs.io/en/dev-esp32/modules/gpio/
 bool System::is_valid_gpio(uint8_t pin) {
 #if CONFIG_IDF_TARGET_ESP32 || EMSESP_STANDALONE
-    if ((pin == 1) || (pin >= 6 && pin <= 12) || (pin >= 14 && pin <= 15) || (pin == 20) || (pin == 24) || (pin >= 28 && pin <= 31) || (pin > 40)) {
+    if ((pin == 1) || (pin >= 6 && pin <= 11) || (pin == 20) || (pin == 24) || (pin >= 28 && pin <= 31) || (pin > 40)) {
 #elif CONFIG_IDF_TARGET_ESP32S2
     if ((pin >= 19 && pin <= 20) || (pin >= 22 && pin <= 32) || (pin > 40)) {
 #elif CONFIG_IDF_TARGET_ESP32C3
@@ -475,15 +475,16 @@ void System::button_init(bool refresh) {
         reload_settings();
     }
 
-    if (is_valid_gpio(pbutton_gpio_)) {
-        if (!myPButton_.init(pbutton_gpio_, HIGH)) {
-            LOG_DEBUG("Multi-functional button not detected");
-        } else {
-            LOG_DEBUG("Multi-functional button enabled");
-        }
-    } else {
+    if (!is_valid_gpio(pbutton_gpio_)) {
         LOG_WARNING("Invalid button GPIO. Check config.");
+        myPButton_.init(255, HIGH); // disable
+        return;
     }
+    if (!myPButton_.init(pbutton_gpio_, HIGH)) {
+        LOG_WARNING("Multi-functional button not detected");
+        return;
+    }
+    LOG_DEBUG("Multi-functional button enabled");
 
     myPButton_.onClick(BUTTON_Debounce, button_OnClick);
     myPButton_.onDblClick(BUTTON_DblClickDelay, button_OnDblClick);
@@ -541,19 +542,26 @@ void System::loop() {
 
     led_monitor();  // check status and report back using the LED
     system_check(); // check system health
+    send_info_mqtt();
 #endif
 }
 
 // send MQTT info topic appended with the version information as JSON, as a retained flag
-void System::send_info_mqtt(const char * event_str, bool send_ntp) {
-    // use dynamic json because it is called from NTP-callback from lwip task with small stack
-    DynamicJsonDocument doc = DynamicJsonDocument(EMSESP_JSON_SIZE_MEDIUM);
-    doc["event"]            = event_str;
-    doc["version"]          = EMSESP_APP_VERSION;
+void System::send_info_mqtt() {
+    static uint8_t _connection = 0;
+    uint8_t        connection  = (ethernet_connected() ? 1 : 0) + ((WiFi.status() == WL_CONNECTED) ? 2 : 0) + (ntp_connected_ ? 4 : 0) + (has_ipv6_ ? 8 : 0);
+    // check if connection status has changed
+    if (!Mqtt::connected() || connection == _connection) {
+        return;
+    }
+    _connection = connection;
+    StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> doc;
+    doc["event"]   = "connected";
+    doc["version"] = EMSESP_APP_VERSION;
 
     // if NTP is enabled send the boot_time in local time in ISO 8601 format (eg: 2022-11-15 20:46:38)
     // https://github.com/emsesp/EMS-ESP32/issues/751
-    if (send_ntp) {
+    if (ntp_connected_) {
         char   time_string[25];
         time_t now = time(nullptr) - uuid::get_uptime_sec();
         strftime(time_string, 25, "%FT%T%z", localtime(&now));
@@ -1057,7 +1065,7 @@ bool System::check_upgrade(bool factory_settings) {
         // see if we're missing a version, will be < 3.5.0b13 from Dec 23 2022
         missing_version = (settingsVersion.empty() || (settingsVersion.length() < 5));
         if (missing_version) {
-            LOG_DEBUG("No version information found (%s)", settingsVersion.c_str());
+            LOG_WARNING("No version information found (%s)", settingsVersion.c_str());
             settingsVersion = "3.6.2"; // this was the last stable version
         }
     }
@@ -1200,6 +1208,9 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     }
 #endif
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
+        if (WiFi.status() == WL_CONNECTED && !settings.bssid.isEmpty()) {
+            node["BSSID"] = "set";
+        }
         node["static ip config"] = settings.staticIPConfig;
         node["enable IPv6"]      = settings.enableIPv6;
         node["low bandwidth"]    = settings.bandwidth20;
@@ -1430,6 +1441,8 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
         data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // BBQKees Gateway S32
     } else if (board_profile == "E32") {
         data = {2, 4, 5, 17, 33, PHY_type::PHY_TYPE_LAN8720, 16, 1, 0}; // BBQKees Gateway E32
+    } else if (board_profile == "E32V2") {
+        data = {2, 14, 4, 5, 12, PHY_type::PHY_TYPE_LAN8720, 15, 0, 1}; // BBQKees Gateway E32 V2
     } else if (board_profile == "MH-ET") {
         data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // MH-ET Live D1 Mini
     } else if (board_profile == "NODEMCU") {

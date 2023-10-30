@@ -69,7 +69,7 @@ const MqttStatusForm: FC = () => {
       case MqttDisconnectReason.MQTT_NOT_AUTHORIZED:
         return 'Not authorized';
       case MqttDisconnectReason.TLS_BAD_FINGERPRINT:
-        return 'TSL fingerprint invalid';
+        return 'TLS fingerprint invalid';
       default:
         return 'Unknown';
     }

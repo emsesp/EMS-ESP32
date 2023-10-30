@@ -131,8 +131,8 @@ const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
         return F_(gateway);
     case DeviceType::ALERT:
         return F_(alert);
-    case DeviceType::PUMP:
-        return F_(pump);
+    case DeviceType::EXTENSION:
+        return F_(extension);
     case DeviceType::HEATSOURCE:
         return F_(heatsource);
     case DeviceType::CUSTOM:
@@ -168,8 +168,8 @@ const char * EMSdevice::device_type_2_device_name_translated() {
         return Helpers::translated_word(FL_(gateway_device));
     case DeviceType::ALERT:
         return Helpers::translated_word(FL_(alert_device));
-    case DeviceType::PUMP:
-        return Helpers::translated_word(FL_(pump_device));
+    case DeviceType::EXTENSION:
+        return Helpers::translated_word(FL_(extension_device));
     case DeviceType::HEATSOURCE:
         return Helpers::translated_word(FL_(heatsource_device));
     case DeviceType::VENTILATION:
@@ -229,8 +229,8 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
     if (!strcmp(lowtopic, F_(alert))) {
         return DeviceType::ALERT;
     }
-    if (!strcmp(lowtopic, F_(pump))) {
-        return DeviceType::PUMP;
+    if (!strcmp(lowtopic, F_(extension))) {
+        return DeviceType::EXTENSION;
     }
     if (!strcmp(lowtopic, F_(heatsource))) {
         return DeviceType::HEATSOURCE;
@@ -941,14 +941,15 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                     }
                 }
                 // handle INTs
-                // add min and max values and steps, as integer values
                 else {
+                    // add step if it's not 1
                     if (dv.numeric_operator > 0) {
                         obj["s"] = (float)1 / dv.numeric_operator;
                     } else if (dv.numeric_operator < 0) {
                         obj["s"] = (float)(-1) * dv.numeric_operator;
                     }
 
+                    // add min and max values, if available
                     int16_t  dv_set_min;
                     uint32_t dv_set_max;
                     if (dv.get_min_max(dv_set_min, dv_set_max)) {

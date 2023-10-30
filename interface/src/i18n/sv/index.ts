@@ -171,7 +171,6 @@ const sv: Translation = {
   HELP_INFORMATION_3: 'Önska en ny funktion eller rapportera en bugg',
   HELP_INFORMATION_4: 'Bifoga din systeminformation för snabbare hantering när du rapporterar ett problem',
   HELP_INFORMATION_5: 'EMS-ESP är gratis och är öppen källkod. Bidra till utvecklingen genom att ge oss en stjärna på GitHub!',
-  SUPPORT_INFO: 'Supportinfo',
   UPLOAD: 'Uppladdning',
   DOWNLOAD: '{{N|n|n}}edladdning',
   ABORTED: 'Avbruten',
@@ -231,7 +230,7 @@ const sv: Translation = {
   BROKER: 'Broker',
   CLIENT: 'Client',
   BASE_TOPIC: 'Base',
-  OPTIONAL: 'Valfritt',
+  OPTIONAL: 'valfritt',
   FORMATTING: 'Formatering',
   MQTT_FORMAT: 'Topic/Payload Format',
   MQTT_NEST_1: 'Nestlat i en topic.',
@@ -324,7 +323,7 @@ const sv: Translation = {
   WRITEABLE: 'Writeable', // TODO translate
   SHOWING: 'Showing', // TODO translate
   SEARCH: 'Search', // TODO translate
-  CERT: 'TSL root certificate (leave blank to disable TSL)' // TODO translate
+  CERT: 'TLS root certificate (leave blank to disable TLS)' // TODO translate
 };
 
 export default sv;

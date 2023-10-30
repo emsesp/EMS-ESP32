@@ -1,6 +1,6 @@
 import { useRequest } from 'alova';
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { redirect } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { AuthenticationContext } from './context';
 import type { FC } from 'react';
@@ -14,8 +14,6 @@ import { useI18nContext } from 'i18n/i18n-react';
 
 const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
   const { LL } = useI18nContext();
-
-  const navigate = useNavigate();
 
   const [initialized, setInitialized] = useState<boolean>(false);
   const [me, setMe] = useState<Me>();
@@ -36,11 +34,12 @@ const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
     }
   };
 
-  const signOut = (redirect: boolean) => {
+  const signOut = (doRedirect: boolean) => {
     AuthenticationApi.clearAccessToken();
     setMe(undefined);
-    if (redirect) {
-      navigate('/');
+    if (doRedirect) {
+      // navigate('/');
+      redirect('/');
     }
   };
 

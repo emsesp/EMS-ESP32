@@ -171,7 +171,6 @@ const en: Translation = {
   HELP_INFORMATION_3: 'To request a feature or report a bug',
   HELP_INFORMATION_4: 'remember to download and attach your system information for a faster response when reporting an issue',
   HELP_INFORMATION_5: 'EMS-ESP is a free and open-source project. Please support its future development by giving it a star on Github!',
-  SUPPORT_INFO: 'Support Info',
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
   ABORTED: 'aborted',
@@ -231,7 +230,7 @@ const en: Translation = {
   BROKER: 'Broker',
   CLIENT: 'Client',
   BASE_TOPIC: 'Base',
-  OPTIONAL: 'Optional',
+  OPTIONAL: 'optional',
   FORMATTING: 'Formatting',
   MQTT_FORMAT: 'Topic/Payload Format',
   MQTT_NEST_1: 'Nested in a single topic',
@@ -324,7 +323,7 @@ const en: Translation = {
   WRITEABLE: 'Writeable',
   SHOWING: 'Showing',
   SEARCH: 'Search',
-  CERT: 'TSL root certificate (leave blank to disable TSL)'
+  CERT: 'TLS root certificate (leave blank to disable TLS)'
 };
 
 export default en;

@@ -171,7 +171,6 @@ const pl: BaseTranslation = {
   HELP_INFORMATION_3: 'Aby zaproponować nową funkcjonalność lub zgłosić problem',
   HELP_INFORMATION_4: 'Zgłaszając problem, nie zapomnij dołączyć informacji o swoim systemie!',
   HELP_INFORMATION_5: 'EMS-ESP jest darmowym projektem typu open-source. Aby go wesprzeć, rozważ przyznanie nam gwiazdki na Github!',
-  SUPPORT_INFO: 'Pobierz informacje',
   UPLOAD: 'Wysyłanie',
   DOWNLOAD: '{{P|p||P}}obier{{anie|z||z}}',
   ABORTED: 'zostało przerwane!',
@@ -324,7 +323,7 @@ const pl: BaseTranslation = {
   WRITEABLE: 'zapisywalna',
   SHOWING: 'Wyświetlane',
   SEARCH: 'Szukaj',
-  CERT: 'TSL root certificate (leave blank to disable TSL)' // TODO translate
+  CERT: 'TLS root certificate (leave blank to disable TLS)' // TODO translate
 };
 
 export default pl;

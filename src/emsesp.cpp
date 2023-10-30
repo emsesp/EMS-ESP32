@@ -600,11 +600,11 @@ void EMSESP::publish_other_values() {
     publish_device_values(EMSdevice::DeviceType::HEATPUMP);
     publish_device_values(EMSdevice::DeviceType::HEATSOURCE);
     publish_device_values(EMSdevice::DeviceType::VENTILATION);
+    publish_device_values(EMSdevice::DeviceType::EXTENSION);
     // other devices without values yet
     // publish_device_values(EMSdevice::DeviceType::GATEWAY);
     // publish_device_values(EMSdevice::DeviceType::CONNECT);
     // publish_device_values(EMSdevice::DeviceType::ALERT);
-    // publish_device_values(EMSdevice::DeviceType::PUMP);
     // publish_device_values(EMSdevice::DeviceType::GENERIC);
     webCustomEntityService.publish();
 }
@@ -716,7 +716,6 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     uint8_t offset = telegram->offset;
 
     // find name for src and dest by looking up known devices
-
     std::string src_name("");
     std::string dest_name("");
     std::string type_name("");
@@ -1292,7 +1291,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     uint8_t first_value = data[0];
     if (((first_value & 0x7F) == txservice_.ems_bus_id()) && (length > 1)) {
         // if we ask ourself at roomcontrol for version e.g. 0B 98 02 00 20
-        Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data);
+        Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data, length);
 #ifdef EMSESP_UART_DEBUG
         // get_uptime is only updated once per loop, does not give the right time
         LOG_TRACE("[UART_DEBUG] Echo after %d ms: %s", ::millis() - rx_time_, Helpers::data_to_hex(data, length).c_str());
@@ -1392,7 +1391,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 #ifdef EMSESP_UART_DEBUG
         LOG_TRACE("[UART_DEBUG] Reply after %d ms: %s", ::millis() - rx_time_, Helpers::data_to_hex(data, length).c_str());
 #endif
-        Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data); // check if there is a message for the roomcontroller
+        Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data, length); // check if there is a message for the roomcontroller
 
         rxservice_.add(data, length); // add to RxQueue
     }

@@ -46,6 +46,7 @@ PButton::PButton() {
     longPressHappened_  = false; // whether or not the hold event happened already
     vLongPressHappened_ = false; // whether or not the long hold event happened already
     buttonBusy_         = false; // idle
+    pin_                = 255;   // undefined
 }
 
 bool PButton::init(uint8_t pin, bool pullMode) {
@@ -83,7 +84,7 @@ void PButton::onVLongPress(uint16_t t, buttonEventHandler handler) {
 }
 
 bool PButton::check(void) {
-    if (!enabled_) {
+    if (!enabled_ || pin_ == 255) {
         return false;
     }
 

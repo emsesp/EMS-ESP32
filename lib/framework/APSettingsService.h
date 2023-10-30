@@ -134,12 +134,14 @@ class APSettingsService : public StatefulService<APSettings> {
     // for the management delay loop
     volatile unsigned long _lastManaged;
     volatile boolean       _reconfigureAp;
+    uint8_t                _connected;
 
     void reconfigureAP();
     void manageAP();
     void startAP();
     void stopAP();
     void handleDNS();
+    void WiFiEvent(WiFiEvent_t event);
 };
 
 #endif

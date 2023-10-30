@@ -113,7 +113,7 @@ void Shower::loop() {
                             doc["timestamp"] = dt;
                         }
                         Mqtt::queue_publish("shower_data", doc.as<JsonObject>());
-                        LOG_INFO("finished with duration %lu seconds", duration_);
+                        LOG_INFO("finished with duration %lu seconds", duration_ / 1000UL);
                     }
                 }
 

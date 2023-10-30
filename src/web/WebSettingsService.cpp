@@ -99,30 +99,31 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 #endif
 
     if (!System::load_board_profile(data, settings.board_profile.c_str())) {
-// unknown, check for ethernet, use default E32/S32
-// data is led, dallas, rx, tx, pbutton, phy, eth_power, eth_addr, eth_clock
-#ifndef EMSESP_STANDALONE
-#if CONFIG_IDF_TARGET_ESP32
-        if (ETH.begin((eth_phy_type_t)1, 16, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_IN)) {
-            // BBQKees Gateway E32
-            data                   = {EMSESP_DEFAULT_LED_GPIO, 4, 5, 17, 33, PHY_type::PHY_TYPE_LAN8720, 16, 1, 0};
-            settings.board_profile = "E32";
-        } else
-#endif
-#endif
-        {
-            // BBQKees Gateway S32
-            data                   = {EMSESP_DEFAULT_LED_GPIO,
-                                      EMSESP_DEFAULT_DALLAS_GPIO,
-                                      EMSESP_DEFAULT_RX_GPIO,
-                                      EMSESP_DEFAULT_TX_GPIO,
-                                      EMSESP_DEFAULT_PBUTTON_GPIO,
-                                      EMSESP_DEFAULT_PHY_TYPE,
-                                      0,
-                                      0,
-                                      0};
-            settings.board_profile = "S32";
+        // unknown, check for NVS or scan for ethernet, use default E32/E32V2/S32
+#if CONFIG_IDF_TARGET_ESP32 && !defined(EMSESP_STANDALONE)
+        settings.board_profile = EMSESP::nvs_.getString("boot");
+        if (!System::load_board_profile(data, settings.board_profile.c_str())) {
+            if (settings.board_profile == "") { // empty: new test
+                if (ETH.begin((eth_phy_type_t)1, 16, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_IN)) {
+                    EMSESP::nvs_.putString("boot", "E32");
+                } else {
+                    EMSESP::nvs_.putString("boot", "Test");
+                }
+            } else if (settings.board_profile == "Test") {
+                if (ETH.begin((eth_phy_type_t)0, 15, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_OUT)) {
+                    EMSESP::nvs_.putString("boot", "E32V2");
+                } else {
+                    EMSESP::nvs_.putString("boot", "S32");
+                }
+            } else {
+                EMSESP::nvs_.putString("boot", "S32");
+            }
+            ESP.restart();
         }
+#else
+        settings.board_profile = "S32";
+        System::load_board_profile(data, settings.board_profile.c_str());
+#endif
         EMSESP::logger().info("No board profile found. Re-setting to %s", settings.board_profile.c_str());
     } else {
         EMSESP::logger().info("Loading board profile %s", settings.board_profile.c_str());

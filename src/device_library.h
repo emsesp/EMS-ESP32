@@ -24,6 +24,7 @@
  */
 
 // Boilers - 0x08
+{  8, DeviceType::BOILER, "CS6800i/WLW176i", DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
 { 64, DeviceType::BOILER, "BK13/BK15/Smartline/GB1x2", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 72, DeviceType::BOILER, "GB125/GB135/MC10", DeviceFlags::EMS_DEVICE_FLAG_EMS},
 { 81, DeviceType::BOILER, "Cascade CM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
@@ -48,7 +49,7 @@
 {208, DeviceType::BOILER, "Logamax Plus/GB192/Condens GC9000/Greenstar ErP", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {210, DeviceType::BOILER, "Cascade MC400", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {211, DeviceType::BOILER, "EasyControl Adapter", DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{219, DeviceType::BOILER, "Greenstar HIU", DeviceFlags::EMS_DEVICE_FLAG_HIU},
+{219, DeviceType::BOILER, "Greenstar HIU/Logamax kompakt WS170", DeviceFlags::EMS_DEVICE_FLAG_HIU},
 {234, DeviceType::BOILER, "Logamax Plus GB122/Condense 2300", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Controllers - 0x09 / 0x10 / 0x50
@@ -78,7 +79,7 @@
 
 // Thermostat - not currently supporting write operations, like the Easy/100 types - 0x18
 {202, DeviceType::THERMOSTAT, "Logamatic TC100/Moduline Easy", DeviceFlags::EMS_DEVICE_FLAG_EASY | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18, cannot write
-{203, DeviceType::THERMOSTAT, "EasyControl CT200", DeviceFlags::EMS_DEVICE_FLAG_EASY | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18, cannot write
+{203, DeviceType::THERMOSTAT, "EasyControl/CT200", DeviceFlags::EMS_DEVICE_FLAG_EASY | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18, cannot write
 
 // Thermostat - Buderus/Nefit/Bosch specific - 0x17 / 0x10 / 0x18 / 0x19-0x1B for hc2-4 / 0x38
 {  4, DeviceType::THERMOSTAT, "UI800/BC400", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
@@ -100,7 +101,7 @@
 {215, DeviceType::THERMOSTAT, "Comfort RF", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
 {216, DeviceType::THERMOSTAT, "CRF200S", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
 {246, DeviceType::THERMOSTAT, "Comfort+2RF", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
-{253, DeviceType::THERMOSTAT, "Rego 3000/UI800", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
+{253, DeviceType::THERMOSTAT, "Rego 3000/UI800/WSW196i/BC400", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
 
 // Thermostat - Sieger - 0x10 / 0x17
 { 66, DeviceType::THERMOSTAT, "ES72/RC20", DeviceFlags::EMS_DEVICE_FLAG_RC20_N}, // 0x17 or remote
@@ -168,8 +169,8 @@
 // Switches - 0x11
 { 71, DeviceType::SWITCH, "WM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
-// PM10 Pump module - 0x15
-{ 243, DeviceType::PUMP, "PM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+// EM10/100 extension module, pump module - 0x15
+{ 243, DeviceType::EXTENSION, "EM10/EM100", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // EM10 error contact and analog flowtemp control- 0x12
 { 74, DeviceType::ALERT, "EM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
