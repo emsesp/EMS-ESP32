@@ -114,7 +114,7 @@ const DashboardDevicesDialog = ({
             {editItem.l ? (
               <TextField
                 name="v"
-                label={LL.VALUE(0)}
+                label={LL.VALUE(1)}
                 value={editItem.v}
                 disabled={!writeable}
                 autoFocus
@@ -132,7 +132,7 @@ const DashboardDevicesDialog = ({
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="v"
-                label={LL.VALUE(0)}
+                label={LL.VALUE(1)}
                 value={Math.round(editItem.v * 10) / 10}
                 autoFocus
                 disabled={!writeable}
@@ -148,7 +148,7 @@ const DashboardDevicesDialog = ({
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="v"
-                label={LL.VALUE(0)}
+                label={LL.VALUE(1)}
                 value={editItem.v}
                 disabled={!writeable}
                 autoFocus
