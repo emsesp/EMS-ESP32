@@ -238,6 +238,7 @@ type BoardProfiles = {
 export const BOARD_PROFILES: BoardProfiles = {
   S32: 'BBQKees Gateway S32',
   E32: 'BBQKees Gateway E32',
+  S32S3: 'BBQKees Gateway S3',
   NODEMCU: 'NodeMCU 32S',
   'MH-ET': 'MH-ET Live D1 Mini',
   LOLIN: 'Lolin D32',
@@ -245,8 +246,7 @@ export const BOARD_PROFILES: BoardProfiles = {
   OLIMEXPOE: 'Olimex ESP32-POE',
   C3MINI: 'Wemos C3 Mini',
   S2MINI: 'Wemos S2 Mini',
-  S3MINI: 'Liligo S3',
-  S32S3: 'BBQKees Gateway S3'
+  S3MINI: 'Liligo S3'
 };
 
 export interface BoardProfile {
