@@ -111,9 +111,11 @@ void Shower::loop() {
                             char dt[25];
                             strftime(dt, sizeof(dt), "%FT%T%z", tm_);
                             doc["timestamp"] = dt;
+                            LOG_INFO("shower finished (duration %s)", dt);
+                        } else {
+                            LOG_INFO("shower finished (duration %lu s)", duration_ / 1000UL);
                         }
                         Mqtt::queue_publish("shower_data", doc.as<JsonObject>());
-                        LOG_INFO("finished with duration %lu seconds", duration_ / 1000UL);
                     }
                 }
 
