@@ -1099,10 +1099,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@remix-run/router@npm:1.10.0":
-  version: 1.10.0
-  resolution: "@remix-run/router@npm:1.10.0"
-  checksum: 61f5e6374f2d0edd177a61c8a44715290d9197a61362505fb0784f948a39e8353d9604ce3747151f837fc7b950e1fbd71bc797b161643325c545037ffbedd134
+"@remix-run/router@npm:1.11.0":
+  version: 1.11.0
+  resolution: "@remix-run/router@npm:1.11.0"
+  checksum: 629ec578b9dfd3c5cb5de64a0798dd7846ec5ba0351aa66f42b1c65efb43da8f30366be59b825303648965b0df55b638c110949b24ef94fd62e98117fdfb0c0f
   languageName: node
   linkType: hard
 
@@ -1576,11 +1576,11 @@ __metadata:
     react-dom: "npm:latest"
     react-dropzone: "npm:^14.2.3"
     react-icons: "npm:^4.11.0"
-    react-router-dom: "npm:^6.17.0"
+    react-router-dom: "npm:^6.18.0"
     react-toastify: "npm:^9.1.3"
     rollup-plugin-visualizer: "npm:^5.9.2"
     sockette: "npm:^2.0.6"
-    terser: "npm:^5.23.0"
+    terser: "npm:^5.24.0"
     typesafe-i18n: "npm:^5.26.2"
     typescript: "npm:^5.2.2"
     vite: "npm:^4.5.0"
@@ -6828,27 +6828,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-dom@npm:^6.17.0":
-  version: 6.17.0
-  resolution: "react-router-dom@npm:6.17.0"
+"react-router-dom@npm:^6.18.0":
+  version: 6.18.0
+  resolution: "react-router-dom@npm:6.18.0"
   dependencies:
-    "@remix-run/router": "npm:1.10.0"
-    react-router: "npm:6.17.0"
+    "@remix-run/router": "npm:1.11.0"
+    react-router: "npm:6.18.0"
   peerDependencies:
     react: ">=16.8"
     react-dom: ">=16.8"
-  checksum: fc881346af12cdfc4f709c6ca91090d5ed62362154a398a0e8c2b19daabee1fbc8a3ddd0ab727e743ea4268b87f3b2ebc3251c730e2c190ee3ab286059f523e5
+  checksum: b0e72603d73172b6c6662afe2faed326753d5bbd9905aa560e3dade7996fc13d19e34e3ed668d2849efd685e2db2f711129c84b1439870e92c9cc91ddc343cf5
   languageName: node
   linkType: hard
 
-"react-router@npm:6.17.0":
-  version: 6.17.0
-  resolution: "react-router@npm:6.17.0"
+"react-router@npm:6.18.0":
+  version: 6.18.0
+  resolution: "react-router@npm:6.18.0"
   dependencies:
-    "@remix-run/router": "npm:1.10.0"
+    "@remix-run/router": "npm:1.11.0"
   peerDependencies:
     react: ">=16.8"
-  checksum: 5c589c67b53cc1a210bd08285392e951a2c3d51a2502806f68d9ce604307944239b0a3b766d8390b484d707ace3068af858e999a1c242662b917ddcd4ab3c453
+  checksum: a00c8f347b7ffee575f4a7731782e688e3fca458ca5bd970fb41cef66a6851853caa24464155ab438d5879f367b1223a539642a405a865913ffe7e63e53b1245
   languageName: node
   linkType: hard
 
@@ -7912,9 +7912,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"terser@npm:^5.23.0":
-  version: 5.23.0
-  resolution: "terser@npm:5.23.0"
+"terser@npm:^5.24.0":
+  version: 5.24.0
+  resolution: "terser@npm:5.24.0"
   dependencies:
     "@jridgewell/source-map": "npm:^0.3.3"
     acorn: "npm:^8.8.2"
@@ -7922,7 +7922,7 @@ __metadata:
     source-map-support: "npm:~0.5.20"
   bin:
     terser: bin/terser
-  checksum: 0a9ffc843cf9ee529b3cb85c4e961fd61dc1d484c462372a7158099c3147c28d8bfe9d57e49d4d7594a9c7deed0a7f28a30f79a9161152bd89791fe986e834f0
+  checksum: bd7ba6bfef58f8c179592894923c8c933d980e17287d3f2a9927550be853d1601beebb724cf015929599b32945641c44f9c3db8dd242c7933af3830bcb853510
   languageName: node
   linkType: hard
 
