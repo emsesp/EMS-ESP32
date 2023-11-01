@@ -89,7 +89,7 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     std::vector<int8_t> data; //  // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
     settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
     if ((String)EMSESP_DEFAULT_BOARD_PROFILE != "default" && EMSESP::nvs_.getString("boot") == "") {
-        EMSESP::nvs_.putString("boot", EMSESP_DEFAULT_BOARD_PROFILE);
+        EMSESP::nvs_.putString("boot", (const char *)EMSESP_DEFAULT_BOARD_PROFILE);
     }
     /*
 #if CONFIG_IDF_TARGET_ESP32C3
