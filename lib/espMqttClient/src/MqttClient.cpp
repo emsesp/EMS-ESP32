@@ -14,12 +14,8 @@ using espMqttClientTypes::DisconnectReason;
 using espMqttClientTypes::Error;
 
 MqttClient::MqttClient(espMqttClientTypes::UseInternalTask useInternalTask, uint8_t priority, uint8_t core)
-#if defined(ARDUINO_ARCH_ESP32)
     : _useInternalTask(useInternalTask)
     , _transport(nullptr)
-#else
-    : _transport(nullptr)
-#endif
     , _onConnectCallback(nullptr)
     , _onDisconnectCallback(nullptr)
     , _onSubscribeCallback(nullptr)
@@ -153,8 +149,8 @@ uint16_t MqttClient::publish(const char * topic, uint8_t qos, bool retain, const
 #endif
         return 0;
     }
-    uint16_t packetId = (qos > 0) ? _getNextPacketId() : 1;
     EMC_SEMAPHORE_TAKE();
+    uint16_t packetId = (qos > 0) ? _getNextPacketId() : 1;
     if (!_addPacket(packetId, topic, payload, length, qos, retain)) {
         emc_log_e("Could not create PUBLISH packet");
         _onError(packetId, Error::OUT_OF_MEMORY);
@@ -177,8 +173,8 @@ uint16_t MqttClient::publish(const char * topic, uint8_t qos, bool retain, espMq
 #endif
         return 0;
     }
-    uint16_t packetId = (qos > 0) ? _getNextPacketId() : 1;
     EMC_SEMAPHORE_TAKE();
+    uint16_t packetId = (qos > 0) ? _getNextPacketId() : 1;
     if (!_addPacket(packetId, topic, callback, length, qos, retain)) {
         emc_log_e("Could not create PUBLISH packet");
         _onError(packetId, Error::OUT_OF_MEMORY);
@@ -320,12 +316,9 @@ void MqttClient::_loop(MqttClient * c) {
 #endif
 
 uint16_t MqttClient::_getNextPacketId() {
-    uint16_t packetId = 0;
-    EMC_SEMAPHORE_TAKE();
-    // cppcheck-suppress knownConditionTrueFalse
-    packetId = (++_packetId == 0) ? ++_packetId : _packetId;
-    EMC_SEMAPHORE_GIVE();
-    return packetId;
+    ++_packetId;
+    if (_packetId == 0) ++_packetId;
+    return _packetId;
 }
 
 void MqttClient::_checkOutbox() {
@@ -340,10 +333,9 @@ int MqttClient::_sendPacket() {
     EMC_SEMAPHORE_TAKE();
     OutgoingPacket * packet = _outbox.getCurrent();
 
-    size_t wantToWrite = 0;
     size_t written     = 0;
-    if (packet && (wantToWrite == written)) {
-        wantToWrite = packet->packet.available(_bytesSent);
+    if (packet) {
+        size_t wantToWrite = packet->packet.available(_bytesSent);
         if (wantToWrite == 0) {
             EMC_SEMAPHORE_GIVE();
             return 0;
