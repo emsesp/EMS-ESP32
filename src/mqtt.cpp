@@ -848,10 +848,11 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     bool set_ha_classes = false; // set to true if we want to set the state class and device class
 
-    // create the topic, depending on the type and whether the device entity is writable (a command)
+    // create the topic
+    // depending on the type and whether the device entity is writable (a command)
     // https://developers.home-assistant.io/docs/core/entity
     char topic[MQTT_TOPIC_MAX_SIZE];
-    // if it's a command then we can use Number, Switch, Select. Otherwise stick to Sensor
+    // if it's a command then we can use Number, Switch, Select or Text. Otherwise stick to Sensor
     if (has_cmd) {
         switch (type) {
         case DeviceValueType::INT:
@@ -876,6 +877,10 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             break;
         case DeviceValueType::ULONG:
             snprintf(topic, sizeof(topic), "sensor/%s", config_topic);
+            set_ha_classes = true;
+            break;
+        case DeviceValueType::STRING:
+            snprintf(topic, sizeof(topic), "text/%s", config_topic); // e.g. set_datetime, set_holiday, set_wwswitchtime
             set_ha_classes = true;
             break;
         default:
@@ -911,12 +916,10 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     char sample_val[30] = "0"; // sample, correct(!) entity value, used only to prevent warning/error in HA if real value is not published yet
 
-    // handle commands, which are device entities that are writable
-    // we add the command topic parameter
-    // note: there is no way to handle strings in HA so datetimes (e.g. set_datetime, set_holiday, set_wwswitchtime etc) are excluded
+    // we add the command topic parameter for commands
     if (has_cmd) {
-        // command topic back to EMS-ESP
         char command_topic[MQTT_TOPIC_MAX_SIZE];
+        // add command topic
         if (tag >= DeviceValueTAG::TAG_HC1) {
             snprintf(command_topic, sizeof(command_topic), "%s/%s/%s/%s", mqtt_basename_.c_str(), device_name, EMSdevice::tag_to_mqtt(tag), entity);
         } else {
@@ -924,7 +927,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         }
         doc["cmd_t"] = command_topic;
 
-        // for enums, add options
+        // extend for enums, add options
         if (type == DeviceValueType::ENUM) {
             JsonArray option_list = doc.createNestedArray("ops"); // options
             if (EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX) {
@@ -942,7 +945,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             }
 
         } else if (type != DeviceValueType::STRING && type != DeviceValueType::BOOL) {
-            // Must be Numeric....
+            // For numeric's add the range
             doc["mode"] = "box"; // auto, slider or box
             if (num_op > 0) {
                 doc["step"] = 1.0 / num_op;
