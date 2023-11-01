@@ -113,7 +113,8 @@ class Boiler : public EMSdevice {
     uint16_t switchTemp_;       // Switch temperature
     uint8_t  sysPress_;         // System pressure
     uint16_t boilTemp_;         // Boiler temperature
-    uint16_t exhaustTemp_;      // Exhaust temperature
+    uint16_t exhaustTemp_;      // Exhaust temperature published
+    uint16_t exhaustTemp1_;     // read from E4
     uint8_t  burnGas_;          // Gas on/off
     uint8_t  burnGas2_;         // Gas stage 2 on/off
     uint16_t flameCurr_;        // Flame current in micro amps
