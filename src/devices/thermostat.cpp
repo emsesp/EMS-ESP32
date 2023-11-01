@@ -237,15 +237,23 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
     // look through the Monitor and Set arrays to see if there is a match
     uint8_t hc_num  = 0;
     bool    toggle_ = false;
-    // search monitor message types
-    for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-        if (monitor_typeids[i] == telegram->type_id) {
-            hc_num  = i + 1;
-            toggle_ = true;
-            break;
-        }
+
+    // search device-id types for remote thermostats first, they have only a single typeid for all hcs
+    if (telegram->src >= 0x18 && telegram->src <= 0x1F) {
+        hc_num  = telegram->src - 0x17;
+        toggle_ = true;
     }
 
+    // not found, search monitor message types
+    if (hc_num == 0) {
+        for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
+            if (monitor_typeids[i] == telegram->type_id) {
+                hc_num  = i + 1;
+                toggle_ = true;
+                break;
+            }
+        }
+    }
     // not found, search status message/set types
     if (hc_num == 0) {
         for (uint8_t i = 0; i < set_typeids.size(); i++) {
@@ -333,12 +341,6 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
                 break;
             }
         }
-    }
-
-    // not found, search device-id types for remote thermostats
-    if (hc_num == 0 && telegram->src >= 0x18 && telegram->src <= 0x1F) {
-        hc_num  = telegram->src - 0x17;
-        toggle_ = true;
     }
 
     // not found, search device-id types for remote thermostats
@@ -4223,13 +4225,8 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               MAKE_CF_CB(set_tempautotemp),
                               -1,
                               30);
-        register_device_value(tag,
-                              &hc->remoteseltemp,
-                              DeviceValueType::INT,
-                              DeviceValueNumOp::DV_NUMOP_DIV2,
-                              FL_(remoteseltemp),
-                              DeviceValueUOM::DEGREES);
-                              // a command is only accepted from the remote device, not from ems-esp.
+        register_device_value(tag, &hc->remoteseltemp, DeviceValueType::INT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(remoteseltemp), DeviceValueUOM::DEGREES);
+        // a command is only accepted from the remote device, not from ems-esp.
         register_device_value(tag, &hc->fastHeatup, DeviceValueType::UINT, FL_(fastheatup), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_fastheatup));
         register_device_value(tag,
                               &hc->switchonoptimization,
@@ -4258,14 +4255,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               MAKE_CF_CB(set_remotetemp),
                               -1,
                               101);
-        register_device_value(tag,
-                              &hc->remotehum,
-                              DeviceValueType::UINT,
-                              FL_(remotehum),
-                              DeviceValueUOM::PERCENT,
-                              MAKE_CF_CB(set_remotehum),
-                              -1,
-                              101);
+        register_device_value(tag, &hc->remotehum, DeviceValueType::UINT, FL_(remotehum), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_remotehum), -1, 101);
 
         break;
     case EMS_DEVICE_FLAG_CRF:
