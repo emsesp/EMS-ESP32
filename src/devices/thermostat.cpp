@@ -83,27 +83,34 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
 
         // RC20
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC20) {
-        monitor_typeids = {0x91};
-        set_typeids     = {0xA8};
-        curve_typeids   = {0x90};
-        timer_typeids   = {0x8F};
-        for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], "RC20Monitor", false, MAKE_PF_CB(process_RC20Monitor));
-            register_telegram_type(set_typeids[i], "RC20Set", false, MAKE_PF_CB(process_RC20Set));
-            register_telegram_type(curve_typeids[i], "RC20Temp", false, MAKE_PF_CB(process_RC20Temp));
-            register_telegram_type(timer_typeids[i], "RC20Timer", false, MAKE_PF_CB(process_RC20Timer));
+        if (device_id == 0x17) { // master
+            monitor_typeids = {0x91};
+            set_typeids     = {0xA8};
+            curve_typeids   = {0x90};
+            timer_typeids   = {0x8F};
+            for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
+                register_telegram_type(monitor_typeids[i], "RC20Monitor", false, MAKE_PF_CB(process_RC20Monitor));
+                register_telegram_type(set_typeids[i], "RC20Set", false, MAKE_PF_CB(process_RC20Set));
+                register_telegram_type(curve_typeids[i], "RC20Temp", false, MAKE_PF_CB(process_RC20Temp));
+                register_telegram_type(timer_typeids[i], "RC20Timer", false, MAKE_PF_CB(process_RC20Timer));
+            }
+        } else {
+            // remote thermostat uses only 0xAF
+            register_telegram_type(0xAF, "RC20Remote", false, MAKE_PF_CB(process_RC20Remote));
         }
-        // remote thermostat uses only 0xAF
-        register_telegram_type(0xAF, "RC20Remote", false, MAKE_PF_CB(process_RC20Remote));
         // RC20 newer
     } else if ((model == EMSdevice::EMS_DEVICE_FLAG_RC20_N) || (model == EMSdevice::EMS_DEVICE_FLAG_RC25)) {
-        monitor_typeids = {0xAE};
-        set_typeids     = {0xAD};
-        for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
-            register_telegram_type(monitor_typeids[i], "RC20Monitor", false, MAKE_PF_CB(process_RC20Monitor_2));
-            register_telegram_type(set_typeids[i], "RC20Set", false, MAKE_PF_CB(process_RC20Set_2));
+        if (device_id == 0x17) { // master
+            monitor_typeids = {0xAE};
+            set_typeids     = {0xAD};
+            for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
+                register_telegram_type(monitor_typeids[i], "RC20Monitor", false, MAKE_PF_CB(process_RC20Monitor_2));
+                register_telegram_type(set_typeids[i], "RC20Set", false, MAKE_PF_CB(process_RC20Set_2));
+            }
+        } else {
+            // remote thermostat uses only 0xAF
+            register_telegram_type(0xAF, "RC20Remote", false, MAKE_PF_CB(process_RC20Remote));
         }
-        register_telegram_type(0xAF, "RC20Remote", false, MAKE_PF_CB(process_RC20Remote));
         // RC30
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC30) {
         monitor_typeids = {0x41};
