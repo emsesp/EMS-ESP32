@@ -22,6 +22,8 @@ namespace emsesp {
 
 using namespace std::placeholders; // for `_1` etc
 
+bool WebCustomization::_start = true;
+
 WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(WebCustomization::read,
                     WebCustomization::update,
@@ -132,10 +134,13 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
             sensor.factor = analogJson["factor"];
             sensor.uom    = analogJson["uom"];
             sensor.type   = analogJson["type"];
+            if (_start && sensor.type == EMSESP::analogsensor_.AnalogType::DIGITAL_OUT && sensor.uom > DeviceValue::DeviceValueUOM::NONE) {
+                sensor.offset = sensor.uom - 1;
+            }
             customizations.analogCustomizations.push_back(sensor); // add to list
         }
     }
-
+    _start = false;
     // load array of entities id's with masks, building up the object class
     customizations.entityCustomizations.clear();
     if (root["masked_entities"].is<JsonArray>()) {
@@ -203,7 +208,7 @@ void WebCustomizationService::device_entities(AsyncWebServerRequest * request) {
         size_t buffer   = EMSESP_JSON_SIZE_XXXXLARGE;
         auto * response = new MsgpackAsyncJsonResponse(true, buffer);
 
-        while (!response->getSize()) {
+        while (!response) {
             delete response;
             buffer -= 1024;
             response = new MsgpackAsyncJsonResponse(true, buffer);
@@ -259,7 +264,7 @@ void WebCustomizationService::customization_entities(AsyncWebServerRequest * req
                         // emsesp::EMSESP::logger().info(id.as<const char *>());
                     }
                     // add deleted entities from file
-                    EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
+                    read([&](WebCustomization & settings) {
                         for (EntityCustomization entityCustomization : settings.entityCustomizations) {
                             if (entityCustomization.device_id == device_id) {
                                 for (std::string entity_id : entityCustomization.entity_ids) {
@@ -288,7 +293,7 @@ void WebCustomizationService::customization_entities(AsyncWebServerRequest * req
                     emsdevice->getCustomizationEntities(entity_ids);
 
                     // Save the list to the customization file
-                    EMSESP::webCustomizationService.update(
+                    update(
                         [&](WebCustomization & settings) {
                             // see if we already have a mask list for this device, if so remove it
                             for (auto it = settings.entityCustomizations.begin(); it != settings.entityCustomizations.end();) {

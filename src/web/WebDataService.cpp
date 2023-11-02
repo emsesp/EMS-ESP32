@@ -93,7 +93,8 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
     }
 
     // add any custom entities
-    if (EMSESP::webCustomEntityService.count_entities()) {
+    uint8_t customEntities = EMSESP::webCustomEntityService.count_entities();
+    if (customEntities) {
         JsonObject obj = devices.createNestedObject();
         obj["id"]      = 99;                                                // the last unique id
         obj["tn"]      = Helpers::translated_word(FL_(custom_device));      // translated device type name
@@ -103,7 +104,7 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
         obj["d"]       = 0;                                                 // deviceid
         obj["p"]       = 0;                                                 // productid
         obj["v"]       = 0;                                                 // version
-        obj["e"]       = EMSESP::webCustomEntityService.count_entities();   // number of custom entities
+        obj["e"]       = customEntities;                                    // number of custom entities
     }
 
     root["connected"] = EMSESP::bus_status() != 2;
@@ -163,7 +164,8 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
         }
     }
 
-    root["analog_enabled"] = EMSESP::analogsensor_.analog_enabled();
+    root["analog_enabled"] = EMSESP::analog_enabled();
+    root["platform"]       = EMSESP_PLATFORM;
 
     response->setLength();
     request->send(response);
@@ -180,7 +182,7 @@ void WebDataService::device_data(AsyncWebServerRequest * request) {
         auto * response = new MsgpackAsyncJsonResponse(false, buffer);
 
         // check size
-        while (!response->getSize()) {
+        while (!response) {
             delete response;
             buffer -= 1024;
             response = new MsgpackAsyncJsonResponse(false, buffer);

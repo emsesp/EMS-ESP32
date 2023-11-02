@@ -188,12 +188,12 @@ export const isGPIOUniqueValidator = (sensors: AnalogSensor[]) => ({
   }
 });
 
-export const analogSensorItemValidation = (sensors: AnalogSensor[], creating: boolean) =>
+export const analogSensorItemValidation = (sensors: AnalogSensor[], creating: boolean, platform: string) =>
   new Schema({
     n: [{ required: true, message: 'Name is required' }],
     g: [
       { required: true, message: 'GPIO is required' },
-      GPIO_VALIDATOR,
+      platform === 'ESP32-S3' ? GPIO_VALIDATORS3 : platform === 'ESP32-C3' ? GPIO_VALIDATORC3 : GPIO_VALIDATOR,
       ...(creating ? [isGPIOUniqueValidator(sensors)] : [])
     ]
   });

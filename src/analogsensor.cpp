@@ -57,7 +57,9 @@ void AnalogSensor::start() {
         [&](const char * value, const int8_t id, JsonObject & output) { return command_commands(value, id, output); },
         FL_(commands_cmd));
 
-    Mqtt::subscribe(EMSdevice::DeviceType::ANALOGSENSOR, "analogsensor/#", nullptr); // use empty function callback
+    char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+    snprintf(topic, sizeof(topic), "%s/#", F_(analogsensor));
+    Mqtt::subscribe(EMSdevice::DeviceType::ANALOGSENSOR, topic, nullptr); // use empty function callback
 }
 
 // load settings from the customization file, sorts them and initializes the GPIOs
@@ -206,10 +208,9 @@ void AnalogSensor::reload() {
             } else
 #endif
             {
-                digitalWrite(sensor.gpio(), sensor.offset() > 0 ? 1 : 0);
+                digitalWrite(sensor.gpio(), sensor.offset() * sensor.factor() > 0 ? 1 : 0);
                 sensor.set_value(digitalRead(sensor.gpio()));
             }
-            sensor.set_uom(0); // no uom, just for safe measures
             publish_sensor(sensor);
         } else if (sensor.type() >= AnalogType::PWM_0) {
             LOG_DEBUG("Adding PWM output sensor on GPIO %02d", sensor.gpio());
@@ -434,15 +435,15 @@ void AnalogSensor::remove_ha_topic(const int8_t type, const uint8_t gpio) const 
 #else
     if (type == AnalogType::DIGITAL_OUT) {
 #endif
-        snprintf(topic, sizeof(topic), "switch/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), gpio);
+        snprintf(topic, sizeof(topic), "switch/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), gpio);
     } else if (type == AnalogType::DIGITAL_OUT) { // DAC
-        snprintf(topic, sizeof(topic), "number/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), gpio);
+        snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), gpio);
     } else if (type >= AnalogType::PWM_0) {
-        snprintf(topic, sizeof(topic), "number/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), gpio);
+        snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), gpio);
     } else if (type == AnalogType::DIGITAL_IN) {
-        snprintf(topic, sizeof(topic), "binary_sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), gpio);
+        snprintf(topic, sizeof(topic), "binary_sensor/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), gpio);
     } else {
-        snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), gpio);
+        snprintf(topic, sizeof(topic), "sensor/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), gpio);
     }
     Mqtt::queue_remove_topic(topic);
 }
@@ -514,7 +515,7 @@ void AnalogSensor::publish_values(const bool force) {
                 StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
 
                 char stat_t[50];
-                snprintf(stat_t, sizeof(stat_t), "%s/analogsensor_data", Mqtt::basename().c_str()); // use basename
+                snprintf(stat_t, sizeof(stat_t), "%s/%s_data", Mqtt::basename().c_str(), F_(analogsensor)); // use base path
                 config["stat_t"] = stat_t;
 
                 char val_obj[50];
@@ -534,9 +535,9 @@ void AnalogSensor::publish_values(const bool force) {
 
                 char uniq_s[70];
                 if (Mqtt::entity_format() == Mqtt::entityFormat::MULTI_SHORT) {
-                    snprintf(uniq_s, sizeof(uniq_s), "%s_analogsensor_%02d", Mqtt::basename().c_str(), sensor.gpio());
+                    snprintf(uniq_s, sizeof(uniq_s), "%s_%s_%02d", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
                 } else {
-                    snprintf(uniq_s, sizeof(uniq_s), "analogsensor_%02d", sensor.gpio());
+                    snprintf(uniq_s, sizeof(uniq_s), "%s_%02d", F_(analogsensor), sensor.gpio());
                 }
 
                 config["obj_id"]  = uniq_s;
@@ -559,8 +560,8 @@ void AnalogSensor::publish_values(const bool force) {
 #else
                 if (sensor.type() == AnalogType::DIGITAL_OUT) {
 #endif
-                    snprintf(topic, sizeof(topic), "switch/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), sensor.gpio());
-                    snprintf(command_topic, sizeof(command_topic), "%s/analogsensor/%s", Mqtt::basename().c_str(), sensor.name().c_str());
+                    snprintf(topic, sizeof(topic), "switch/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
+                    snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::basename().c_str(), F_(analogsensor), sensor.name().c_str());
                     config["cmd_t"] = command_topic;
                     if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
                         config["pl_on"]  = true;
@@ -574,30 +575,30 @@ void AnalogSensor::publish_values(const bool force) {
                         config["pl_off"] = Helpers::render_boolean(result, false);
                     }
                 } else if (sensor.type() == AnalogType::DIGITAL_OUT) { // DAC
-                    snprintf(topic, sizeof(topic), "number/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), sensor.gpio());
-                    snprintf(command_topic, sizeof(command_topic), "%s/analogsensor/%s", Mqtt::basename().c_str(), sensor.name().c_str());
+                    snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
+                    snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::basename().c_str(), F_(analogsensor), sensor.name().c_str());
                     config["cmd_t"] = command_topic;
                     config["min"]   = 0;
                     config["max"]   = 255;
                     config["mode"]  = "box"; // auto, slider or box
                     config["step"]  = 1;
                 } else if (sensor.type() >= AnalogType::PWM_0) {
-                    snprintf(topic, sizeof(topic), "number/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), sensor.gpio());
-                    snprintf(command_topic, sizeof(command_topic), "%s/analogsensor/%s", Mqtt::basename().c_str(), sensor.name().c_str());
+                    snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
+                    snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::basename().c_str(), F_(analogsensor), sensor.name().c_str());
                     config["cmd_t"] = command_topic;
                     config["min"]   = 0;
                     config["max"]   = 100;
                     config["mode"]  = "box"; // auto, slider or box
                     config["step"]  = 0.1;
                 } else if (sensor.type() == AnalogType::COUNTER) {
-                    snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), sensor.gpio());
-                    snprintf(command_topic, sizeof(command_topic), "%s/analogsensor/%s", Mqtt::basename().c_str(), sensor.name().c_str());
+                    snprintf(topic, sizeof(topic), "sensor/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
+                    snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::basename().c_str(), F_(analogsensor), sensor.name().c_str());
                     config["cmd_t"]    = command_topic;
                     config["stat_cla"] = "total_increasing";
                     // config["mode"]  = "box"; // auto, slider or box
                     // config["step"]  = sensor.factor();
                 } else if (sensor.type() == AnalogType::DIGITAL_IN) {
-                    snprintf(topic, sizeof(topic), "binary_sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), sensor.gpio());
+                    snprintf(topic, sizeof(topic), "binary_sensor/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
                     if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
                         config["pl_on"]  = true;
                         config["pl_off"] = false;
@@ -610,7 +611,7 @@ void AnalogSensor::publish_values(const bool force) {
                         config["pl_off"] = Helpers::render_boolean(result, false);
                     }
                 } else {
-                    snprintf(topic, sizeof(topic), "sensor/%s/analogsensor_%02d/config", Mqtt::basename().c_str(), sensor.gpio());
+                    snprintf(topic, sizeof(topic), "sensor/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
                     config["stat_cla"] = "measurement";
                 }
 
@@ -626,7 +627,9 @@ void AnalogSensor::publish_values(const bool force) {
         }
     }
 
-    Mqtt::queue_publish("analogsensor_data", doc.as<JsonObject>());
+    char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+    snprintf(topic, sizeof(topic), "%s_data", F_(analogsensor));
+    Mqtt::queue_publish(topic, doc.as<JsonObject>());
 }
 
 // called from emsesp.cpp, similar to the emsdevice->get_value_info
@@ -702,6 +705,7 @@ bool AnalogSensor::command_info(const char * value, const int8_t id, JsonObject 
             JsonObject dataSensor = output.createNestedObject(sensor.name());
             dataSensor["gpio"]    = sensor.gpio();
             dataSensor["type"]    = F_(number);
+            dataSensor["value"]   = sensor.value();
             dataSensor["analog"]  = FL_(list_sensortype)[sensor.type()];
             if (sensor.type() == AnalogType::ADC) {
                 dataSensor["uom"]    = EMSdevice::uom_to_string(sensor.uom());
@@ -717,7 +721,6 @@ bool AnalogSensor::command_info(const char * value, const int8_t id, JsonObject 
                 dataSensor["uom"]       = EMSdevice::uom_to_string(sensor.uom());
                 dataSensor["frequency"] = sensor.factor();
             }
-            dataSensor["value"] = sensor.value();
         } else if (id == 0) { // output values command
             output[sensor.name()] = sensor.value();
         } else { // if someone wants gpio numbers
@@ -763,6 +766,7 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
     }
     for (auto & sensor : sensors_) {
         if (sensor.gpio() == gpio) {
+            double oldoffset = sensor.offset();
             if (sensor.type() == AnalogType::COUNTER) {
                 if (val < 0 || value[0] == '+') { // sign corrects values
                     sensor.set_offset(sensor.value() + val);
@@ -771,11 +775,8 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                     sensor.set_offset(val);
                     sensor.set_value(val);
                 }
-                publish_sensor(sensor);
-                return true;
             } else if (sensor.type() == AnalogType::ADC) {
                 sensor.set_offset(val);
-                return true;
             } else if (sensor.type() == AnalogType::DIGITAL_OUT) {
                 uint8_t v = val;
 #if CONFIG_IDF_TARGET_ESP32
@@ -784,8 +785,6 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                     sensor.set_value(v);
                     pinMode(sensor.gpio(), OUTPUT);
                     dacWrite(sensor.gpio(), sensor.offset());
-                    publish_sensor(sensor);
-                    return true;
                 } else
 #elif CONFIG_IDF_TARGET_ESP32S2
                 if ((sensor.gpio() == 23 || sensor.gpio() == 24) && v <= 255) {
@@ -801,9 +800,7 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                     sensor.set_offset(v);
                     sensor.set_value(v);
                     pinMode(sensor.gpio(), OUTPUT);
-                    digitalWrite(sensor.gpio(), sensor.offset() > 0 ? 1 : 0);
-                    publish_sensor(sensor);
-                    return true;
+                    digitalWrite(sensor.gpio(), sensor.offset() * sensor.factor() > 0 ? 1 : 0);
                 }
             } else if (sensor.type() >= AnalogType::PWM_0) {
                 if (val > 100) {
@@ -819,9 +816,18 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                 uint8_t channel = sensor.type() - AnalogType::PWM_0;
                 ledcWrite(channel, (uint32_t)(val * 8191 / 100));
 #endif
-                publish_sensor(sensor);
-                return true;
+            } else {
+                return false;
             }
+            if (oldoffset != sensor.offset()) {
+                // don't save state of digital out if fixed value on reboot is selected
+                if (sensor.type() != AnalogType::DIGITAL_OUT || sensor.uom() == 0) {
+                    update(sensor.gpio(), sensor.name(), sensor.offset(), sensor.factor(), sensor.uom(), sensor.type(), false);
+                }
+                publish_sensor(sensor);
+                changed_ = true;
+            }
+            return true;
         }
     }
     return false;
