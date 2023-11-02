@@ -1595,7 +1595,10 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                     }
                 }
             }
-
+            // do not overwrite
+            if (json.containsKey(name)) {
+                continue;
+            }
             // handle Booleans
             if (dv.type == DeviceValueType::BOOL && Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
                 // see how to render the value depending on the setting
