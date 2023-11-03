@@ -209,7 +209,7 @@ void AnalogSensor::reload() {
 #endif
             {
                 digitalWrite(sensor.gpio(), sensor.offset() * sensor.factor() > 0 ? 1 : 0);
-                sensor.set_value(digitalRead(sensor.gpio()));
+                sensor.set_value(sensor.offset());
             }
             publish_sensor(sensor);
         } else if (sensor.type() >= AnalogType::PWM_0) {
@@ -820,10 +820,7 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                 return false;
             }
             if (oldoffset != sensor.offset()) {
-                // don't save state of digital out if fixed value on reboot is selected
-                if (sensor.type() != AnalogType::DIGITAL_OUT || sensor.uom() == 0) {
-                    update(sensor.gpio(), sensor.name(), sensor.offset(), sensor.factor(), sensor.uom(), sensor.type(), false);
-                }
+                update(sensor.gpio(), sensor.name(), sensor.offset(), sensor.factor(), sensor.uom(), sensor.type(), false);
                 publish_sensor(sensor);
                 changed_ = true;
             }
