@@ -881,7 +881,6 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             break;
         case DeviceValueType::STRING:
             snprintf(topic, sizeof(topic), "text/%s", config_topic); // e.g. set_datetime, set_holiday, set_wwswitchtime
-            set_ha_classes = true;
             break;
         default:
             // plain old sensor
@@ -1130,7 +1129,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // add category "diagnostic" for system entities
     // config for writeable entities, like switches. diagnostic for read only sensors.
-    doc["ent_cat"] = (has_cmd) ? "config" : "diagnostic";
+    doc["ent_cat"] = (has_cmd && !set_ha_classes) ? "config" : "diagnostic";
 
     // add the dev json object to the end
     doc["dev"] = dev_json;
