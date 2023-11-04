@@ -220,8 +220,6 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &cylPumpMod_, DeviceValueType::UINT, FL_(cylPumpMod), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &valveStatus_, DeviceValueType::BOOL, FL_(valveStatus), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &vs1Status_, DeviceValueType::BOOL, FL_(vs1Status), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &cylHeated_, DeviceValueType::BOOL, FL_(cylHeated), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &collectorShutdown_, DeviceValueType::BOOL, FL_(collectorShutdown), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &collectorMaxTemp_,
                               DeviceValueType::UINT,

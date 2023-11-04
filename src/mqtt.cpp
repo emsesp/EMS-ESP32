@@ -171,7 +171,7 @@ void Mqtt::loop() {
         EMSESP::publish_device_values(EMSdevice::DeviceType::MIXER);
     } else
 
-        if (publish_time_water_ && (currentMillis - last_publish_mixer_ > publish_time_water_)) {
+        if (publish_time_water_ && (currentMillis - last_publish_water_ > publish_time_water_)) {
         last_publish_water_ = (currentMillis / publish_time_water_) * publish_time_water_;
         EMSESP::publish_device_values(EMSdevice::DeviceType::WATER);
     } else
@@ -180,6 +180,7 @@ void Mqtt::loop() {
         last_publish_other_ = (currentMillis / publish_time_other_) * publish_time_other_;
         EMSESP::publish_other_values(); // switch and heatpump
         EMSESP::webSchedulerService.publish();
+        EMSESP::webCustomEntityService.publish();
     } else
 
         if (publish_time_sensor_ && (currentMillis - last_publish_sensor_ > publish_time_sensor_)) {

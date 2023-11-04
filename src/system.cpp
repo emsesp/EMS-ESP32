@@ -1276,6 +1276,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         node["publish time thermostat"] = settings.publish_time_thermostat;
         node["publish time solar"]      = settings.publish_time_solar;
         node["publish time mixer"]      = settings.publish_time_mixer;
+        node["publish time water"]      = settings.publish_time_water;
         node["publish time other"]      = settings.publish_time_other;
         node["publish time sensor"]     = settings.publish_time_sensor;
         node["publish single"]          = settings.publish_single;
