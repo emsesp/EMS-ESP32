@@ -54,6 +54,8 @@ MAKE_WORD_TRANSLATION(unknown_device, "Unknown", "Unbekannt", "Onbekend", "Okän
 MAKE_WORD_TRANSLATION(custom_device, "Custom", "Nutzerdefiniert", "Aangepast", "", "Niestandardowe", "", "", "Özel", "Personalizzato") // TODO translate
 MAKE_WORD_TRANSLATION(custom_device_name, "User defined entities", "Nutzer deklarierte Entitäten", "Gebruiker gedefineerd", "", "Encje zdefiniowane przez użytkownika", "", "", "Kullanıcı tarafından tanımlanmış varlıklar", "Entità definita da utente") // TODO translate
 MAKE_WORD_TRANSLATION(ventilation_device, "Ventilation", "Lüftung", "Ventilatie", "", "", "", "", "Havalandırma", "Ventilazione") // TODO translate
+MAKE_WORD_TRANSLATION(water_device, "Water Module", "Wassermodul", "", "", "", "", "", "", "") // TODO translate
+MAKE_WORD_TRANSLATION(pool_device, "Pool Module", "Poolmodul", "", "", "", "", "", "", "") // TODO translate
 
 // commands
 // TODO translate
@@ -687,10 +689,6 @@ MAKE_TRANSLATION(pumpStatus, "pumpstatus", "pump status (PC1)", "Pumpenstatus HK
 MAKE_TRANSLATION(mixerStatus, "valvestatus", "mixing valve actuator (VC1)", "Mischerventil Position (VC1)", "positie mixerklep (VC1)", "Shuntventil Status (VC1)", "siłownik zaworu mieszającego (VC1)", "shuntventil status (VC1)", "actionnement vanne mélangeur (VC1)", "karışım vanası aktüatörü (VC1)", "posizione valvola miscela (VC1)")
 MAKE_TRANSLATION(flowTempVf, "flowtempvf", "flow temperature in header (T0/Vf)", "Vorlauftemperatur am Verteiler (T0/Vf)", "aanvoertemperatuur verdeler (T0/Vf)", "Flödestemperatur Fördelare (T0/Vf)", "temperatura zasilania na rozdzielaczu (T0/Vf)", "turtemperatur ved fordeleren (T0/Vf)", "température départ collecteur (T0/Vf)", "başlıkta akış sıcaklığı", "Temperatura di mandata al distributore (T0/Vf)")
 MAKE_TRANSLATION(mixerSetTime, "valvesettime", "time to set valve", "Zeit zum Einstellen des Ventils", "Inschakeltijd mengklep", "Inställningstid Ventil", "czas na ustawienie zaworu", "instillningstid ventil", "délai activation vanne", "vana ayar zamanı", "ritardo attivazione valvola")
-// mixer prefixed with wwc
-MAKE_TRANSLATION(wwPumpStatus, "pumpstatus", "pump status in assigned wwc (PC1)", "Pumpenstatus des wwk (PC1)", "Pompstatus in WW circuit (PC1)", "Pumpstatus i VV-krets (PC1)", "stan pompy w obwodzie c.w.u. (PC1)", "Pumpestatus i VV-krets (PC1)", "état pompe wwc (PC1)", "Kullanım suyu devresindeki(PC1) pompa durumu", "stato pompa assegnato nel ciruito WW (PC1)")
-MAKE_TRANSLATION(wwTempStatus, "wwtempstatus", "temperature switch in assigned wwc (MC1)", "Temperaturschalter des wwk (MC1)", "Temperatuurschakeling in WW circuit (MC1)", "Temperaturventil i VV-krets (MC1)", "temperatura w obwodzie c.w.u. (MC1)", "temperaturventil i VV-krets (MC1)", "température bascule wwc (MC1).", "atanmış sıcak su devresinde sıcaklık", "interruttore di temperatura del wwk (MC1)")
-MAKE_TRANSLATION(wwTemp, "wwtemp", "current temperature", "aktuelle Temperatur", "huidige temperatuur", "Aktuell Temperatur", "temperatura c.w.u.", "aktuell temperatur", "température actuelle", "güncel sıcaklık", "temperatura attuale")
 // mixer pool
 MAKE_TRANSLATION(poolSetTemp, "poolsettemp", "pool set temperature", "Pool Solltemperatur", "Streeftemperatuur zwembad", "Pool Temperatur Börvärde", "zadana temperatura basenu", "valgt temp basseng", "température consigne piscine", "hedef havuz sıcaklığı", "temperatura nominale piscina")
 MAKE_TRANSLATION(poolTemp, "pooltemp", "pool temperature", "Pool Temperatur", "Zwembadtemperatuur", "Pooltemperatur", "temperatura basenu", "bassengtemperatur", "température piscine", "havuz sıcaklığı", "temperatura piscina")
@@ -737,10 +735,12 @@ MAKE_TRANSLATION(energyToday, "energytoday", "total energy today", "Energie heut
 
 // solar ww
 MAKE_TRANSLATION(wwTemp1, "wwtemp1", "temperature 1", "Temperatur 1", "Temperatuur 1", "Temperatur 1", "temperatura 1", "temperatur 1", "température 1", "sıcaklık 1", "Temperatura 1")
-MAKE_TRANSLATION(wwTemp3, "wwtemp3", "temperature 3", "Temperatur 3", "Temperatuur 2", "Temperatur 2", "temperatura 2", "Temperatur 3", "température 3", "sıcaklık 3", "Temperatura 3")
-MAKE_TRANSLATION(wwTemp4, "wwtemp4", "temperature 4", "Temperatur 4", "Temperatuur 3", "Temperatur 3", "temperatura 3", "Temperatur 4", "température 4", "sıcaklık 4", "Temperatura 4")
-MAKE_TRANSLATION(wwTemp5, "wwtemp5", "temperature 5", "Temperatur 5", "Temperatuur 5", "Temperatur 4", "temperatura 4", "Temperatur 5", "température 5", "sıcaklık 5", "Temperatura 5")
-MAKE_TRANSLATION(wwTemp7, "wwtemp7", "temperature 7", "Temperatur 7", "Temperatuur 7", "Temperatur 5", "temperatura 5", "Temperatur 7", "température 7", "sıcaklık 7", "Temperatura 7")
+MAKE_TRANSLATION(wwTemp2, "wwtemp2", "temperature 2", "Temperatur 2", "Temperatuur 2", "Temperatur 2", "temperatura 2", "temperatur 2", "température 2", "sıcaklık 2", "Temperatura 2")
+MAKE_TRANSLATION(wwTemp3, "wwtemp3", "temperature 3", "Temperatur 3", "Temperatuur 3", "Temperatur 3", "temperatura 3", "Temperatur 3", "température 3", "sıcaklık 3", "Temperatura 3")
+MAKE_TRANSLATION(wwTemp4, "wwtemp4", "temperature 4", "Temperatur 4", "Temperatuur 4", "Temperatur 4", "temperatura 4", "Temperatur 4", "température 4", "sıcaklık 4", "Temperatura 4")
+MAKE_TRANSLATION(wwTemp5, "wwtemp5", "temperature 5", "Temperatur 5", "Temperatuur 5", "Temperatur 5", "temperatura 5", "Temperatur 5", "température 5", "sıcaklık 5", "Temperatura 5")
+MAKE_TRANSLATION(wwTemp6, "wwtemp6", "temperature 1", "Temperatur 6", "Temperatuur 6", "Temperatur 6", "temperatura 6", "temperatur 6", "température 6", "sıcaklık 6", "Temperatura 6")
+MAKE_TRANSLATION(wwTemp7, "wwtemp7", "temperature 7", "Temperatur 7", "Temperatuur 7", "Temperatur 7", "temperatura 7", "Temperatur 7", "température 7", "sıcaklık 7", "Temperatura 7")
 MAKE_TRANSLATION(wwPump, "wwpump", "pump", "Pumpe", "Pomp", "Pump", "pompa", "pumpe", "pompe", "pompa", "Pompa")
 // solar ww and mixer wwc
 MAKE_TRANSLATION(wwMinTemp, "wwmintemp", "minimum temperature", "minimale Temperatur", "Minimale temperatuur", "Min Temperatur", "temperatura minimalna", "min temperatur", "température min", "minimum sıcaklık", "temperatura minima")
@@ -753,6 +753,9 @@ MAKE_TRANSLATION(wwFlow, "wwflow", "flow rate", "Volumenstrom", "Doorstroomsnelh
 // extra mixer ww
 MAKE_TRANSLATION(wwRequiredTemp, "wwrequiredtemp", "required temperature", "benötigte Temperatur", "Benodigde temperatuur", "Nödvändig Temperatur", "temperatura wymagana", "nødvendig temperatur", "température requise", "gerekli sıcaklık", "temperatura richiesta")
 MAKE_TRANSLATION(wwDiffTemp, "wwdifftemp", "start differential temperature", "Start Differential Temperatur", "Start differentiele temperatuur", "Start Differentialtemperatur", "start temperatury różnicowej", "start differensialtemperatur", "température différentielle de départ", "diferansiyel sıcaklık", "avvia temperatura differenziale")
+MAKE_TRANSLATION(wwPumpStatus, "pumpstatus", "pump status in assigned wwc (PC1)", "Pumpenstatus des wwk (PC1)", "Pompstatus in WW circuit (PC1)", "Pumpstatus i VV-krets (PC1)", "stan pompy w obwodzie c.w.u. (PC1)", "Pumpestatus i VV-krets (PC1)", "état pompe wwc (PC1)", "Kullanım suyu devresindeki(PC1) pompa durumu", "stato pompa assegnato nel ciruito WW (PC1)")
+MAKE_TRANSLATION(wwTempStatus, "wwtempstatus", "temperature switch in assigned wwc (MC1)", "Temperaturschalter des wwk (MC1)", "Temperatuurschakeling in WW circuit (MC1)", "Temperaturventil i VV-krets (MC1)", "temperatura w obwodzie c.w.u. (MC1)", "temperaturventil i VV-krets (MC1)", "température bascule wwc (MC1).", "atanmış sıcak su devresinde sıcaklık", "interruttore di temperatura del wwk (MC1)")
+MAKE_TRANSLATION(wwTemp, "wwtemp", "current temperature", "aktuelle Temperatur", "huidige temperatuur", "Aktuell Temperatur", "temperatura c.w.u.", "aktuell temperatur", "température actuelle", "güncel sıcaklık", "temperatura attuale")
 
 // SM100
 MAKE_TRANSLATION(heatTransferSystem, "heattransfersystem", "heattransfer system", "Wärmeübertragungs-System", "Warmteoverdrachtssysteem", "Värmeöverföringssystem", "system wymiany ciepła", "varmeoverføringssystem", "système de transfert de chaleur", "ıs transfer sistemi", "sistema di trasferimento del calore")

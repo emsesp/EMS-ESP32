@@ -384,6 +384,21 @@ const MqttSettingsForm: FC = () => {
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <TextField
+              name="publish_time_water"
+              label={LL.MQTT_INT_WATER()}
+              InputProps={{
+                endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+              }}
+              fullWidth
+              variant="outlined"
+              value={numberValue(data.publish_time_water)}
+              type="number"
+              onChange={updateFormValue}
+              margin="normal"
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <TextField
               name="publish_time_sensor"
               label={LL.TEMP_SENSORS()}
               InputProps={{

@@ -34,6 +34,7 @@ uint32_t    Mqtt::publish_time_boiler_;
 uint32_t    Mqtt::publish_time_thermostat_;
 uint32_t    Mqtt::publish_time_solar_;
 uint32_t    Mqtt::publish_time_mixer_;
+uint32_t    Mqtt::publish_time_water_;
 uint32_t    Mqtt::publish_time_sensor_;
 uint32_t    Mqtt::publish_time_other_;
 uint32_t    Mqtt::publish_time_heartbeat_;
@@ -168,6 +169,11 @@ void Mqtt::loop() {
         if (publish_time_mixer_ && (currentMillis - last_publish_mixer_ > publish_time_mixer_)) {
         last_publish_mixer_ = (currentMillis / publish_time_mixer_) * publish_time_mixer_;
         EMSESP::publish_device_values(EMSdevice::DeviceType::MIXER);
+    } else
+
+        if (publish_time_water_ && (currentMillis - last_publish_mixer_ > publish_time_water_)) {
+        last_publish_water_ = (currentMillis / publish_time_water_) * publish_time_water_;
+        EMSESP::publish_device_values(EMSdevice::DeviceType::WATER);
     } else
 
         if (publish_time_other_ && (currentMillis - last_publish_other_ > publish_time_other_)) {
@@ -330,6 +336,7 @@ void Mqtt::reset_mqtt() {
     }
 }
 
+// load the settings from service
 void Mqtt::load_settings() {
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & mqttSettings) {
         mqtt_base_          = mqttSettings.base.c_str(); // Convert String to std::string
@@ -350,6 +357,7 @@ void Mqtt::load_settings() {
         publish_time_thermostat_ = mqttSettings.publish_time_thermostat * 1000;
         publish_time_solar_      = mqttSettings.publish_time_solar * 1000;
         publish_time_mixer_      = mqttSettings.publish_time_mixer * 1000;
+        publish_time_water_      = mqttSettings.publish_time_water * 1000;
         publish_time_other_      = mqttSettings.publish_time_other * 1000;
         publish_time_sensor_     = mqttSettings.publish_time_sensor * 1000;
         publish_time_heartbeat_  = mqttSettings.publish_time_heartbeat * 1000;
@@ -361,6 +369,7 @@ void Mqtt::load_settings() {
     std::replace(mqtt_basename_.begin(), mqtt_basename_.end(), '/', '_');
 }
 
+// start mqtt
 void Mqtt::start() {
     mqttClient_ = EMSESP::esp8266React.getMqttClient();
 
@@ -412,6 +421,10 @@ void Mqtt::set_publish_time_mixer(uint16_t publish_time) {
     publish_time_mixer_ = publish_time * 1000; // convert to milliseconds
 }
 
+void Mqtt::set_publish_time_water(uint16_t publish_time) {
+    publish_time_water_ = publish_time * 1000; // convert to milliseconds
+}
+
 void Mqtt::set_publish_time_other(uint16_t publish_time) {
     publish_time_other_ = publish_time * 1000; // convert to milliseconds
 }
@@ -442,6 +455,10 @@ bool Mqtt::get_publish_onchange(uint8_t device_type) {
         }
     } else if (device_type == EMSdevice::DeviceType::MIXER) {
         if (!publish_time_mixer_) {
+            return true;
+        }
+    } else if (device_type == EMSdevice::DeviceType::WATER) {
+        if (!publish_time_water_) {
             return true;
         }
     } else if (!publish_time_other_) {

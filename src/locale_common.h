@@ -102,6 +102,8 @@ MAKE_WORD(heatsource)
 MAKE_WORD(scheduler)
 MAKE_WORD(custom)
 MAKE_WORD(ventilation)
+MAKE_WORD(water)
+MAKE_WORD(pool)
 
 // brands
 MAKE_WORD_CUSTOM(bosch, "Bosch")

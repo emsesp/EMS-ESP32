@@ -142,7 +142,7 @@
 {160, DeviceType::MIXER, "MM100", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
 {161, DeviceType::MIXER, "MM200", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
 {193, DeviceType::MIXER, "MZ100", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
-{204, DeviceType::MIXER, "MP100", DeviceFlags::EMS_DEVICE_FLAG_MP}, // pool
+{204, DeviceType::POOL, "MP100", DeviceFlags::EMS_DEVICE_FLAG_MP}, // pool
 
 // Heat Pumps - 0x38? This is a thermostat like RC100H
 // also prod-id of wifi module and wireless base

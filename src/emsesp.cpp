@@ -480,6 +480,7 @@ void EMSESP::publish_all(bool force) {
         publish_device_values(EMSdevice::DeviceType::THERMOSTAT);
         publish_device_values(EMSdevice::DeviceType::SOLAR);
         publish_device_values(EMSdevice::DeviceType::MIXER);
+        publish_device_values(EMSdevice::DeviceType::WATER);
         publish_other_values(); // switch and heat pump, ...
         webSchedulerService.publish();
         webCustomEntityService.publish();
@@ -513,14 +514,17 @@ void EMSESP::publish_all_loop() {
         publish_device_values(EMSdevice::DeviceType::MIXER);
         break;
     case 5:
+        publish_device_values(EMSdevice::DeviceType::WATER);
+        break;
+    case 6:
         publish_other_values(); // switch and heat pump
         webSchedulerService.publish(true);
         webCustomEntityService.publish(true);
         break;
-    case 6:
+    case 7:
         publish_sensor_values(true, true);
         break;
-    case 7:
+    case 8:
         if (Mqtt::ha_enabled()) {
             Mqtt::ha_status();
         }
@@ -602,6 +606,7 @@ void EMSESP::publish_other_values() {
     publish_device_values(EMSdevice::DeviceType::VENTILATION);
     publish_device_values(EMSdevice::DeviceType::EXTENSION);
     publish_device_values(EMSdevice::DeviceType::ALERT);
+    publish_device_values(EMSdevice::DeviceType::POOL);
     // other devices without values yet
     // publish_device_values(EMSdevice::DeviceType::GATEWAY);
     // publish_device_values(EMSdevice::DeviceType::CONNECT);
@@ -1080,7 +1085,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     auto device_type = device_p->device_type;
     auto flags       = device_p->flags;
 
-    // check for integrated modules with same product id
+    // check for integrated modules with same product id, but different function (device_id)
     if (device_type == DeviceType::HEATPUMP) {
         if (device_id == EMSdevice::EMS_DEVICE_ID_MODEM) {
             device_type = DeviceType::GATEWAY;
@@ -1089,6 +1094,9 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
             device_type = DeviceType::CONNECT;
             name        = "Wireless sensor base";
         }
+    }
+    if (device_id >= EMSdevice::EMS_DEVICE_ID_DHW1 && device_id <= EMSdevice::EMS_DEVICE_ID_DHW8) {
+        device_type = DeviceType::WATER;
     }
 
     // empty reply to version, read a generic device from database

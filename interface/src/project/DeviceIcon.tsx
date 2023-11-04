@@ -2,8 +2,8 @@ import { AiOutlineControl, AiOutlineGateway, AiOutlineAlert } from 'react-icons/
 import { CgSmartHomeBoiler } from 'react-icons/cg';
 
 import { FaSolarPanel } from 'react-icons/fa';
-import { GiHeatHaze } from 'react-icons/gi';
-import { MdThermostatAuto, MdOutlineSensors, MdOutlineExtension, MdOutlineDevices } from 'react-icons/md';
+import { GiHeatHaze, GiTap } from 'react-icons/gi';
+import { MdThermostatAuto, MdOutlineSensors, MdOutlineExtension, MdOutlineDevices, MdOutlinePool } from 'react-icons/md';
 import { TiFlowSwitch } from 'react-icons/ti';
 import { VscVmConnect } from 'react-icons/vsc';
 import { DeviceType } from './types';
@@ -40,6 +40,10 @@ const DeviceIcon: FC<DeviceIconProps> = ({ type_id }) => {
       return <AiOutlineAlert />;
     case DeviceType.EXTENSION:
       return <MdOutlineDevices />;
+    case DeviceType.WATER:
+      return <GiTap />;
+    case DeviceType.POOL:
+      return <MdOutlinePool />;
     case DeviceType.CUSTOM:
       return <MdOutlineExtension />;
     default:

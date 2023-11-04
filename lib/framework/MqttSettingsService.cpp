@@ -234,6 +234,7 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
     root["publish_time_thermostat"] = settings.publish_time_thermostat;
     root["publish_time_solar"]      = settings.publish_time_solar;
     root["publish_time_mixer"]      = settings.publish_time_mixer;
+    root["publish_time_water"]      = settings.publish_time_water;
     root["publish_time_other"]      = settings.publish_time_other;
     root["publish_time_sensor"]     = settings.publish_time_sensor;
     root["publish_time_heartbeat"]  = settings.publish_time_heartbeat;
@@ -271,6 +272,7 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.publish_time_thermostat = root["publish_time_thermostat"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_solar      = root["publish_time_solar"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_mixer      = root["publish_time_mixer"] | EMSESP_DEFAULT_PUBLISH_TIME;
+    newSettings.publish_time_water      = root["publish_time_water"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_other      = root["publish_time_other"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_sensor     = root["publish_time_sensor"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_heartbeat  = root["publish_time_heartbeat"] | EMSESP_DEFAULT_PUBLISH_HEARTBEAT;
@@ -356,6 +358,10 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
 
     if (newSettings.publish_time_mixer != settings.publish_time_mixer) {
         emsesp::EMSESP::mqtt_.set_publish_time_mixer(newSettings.publish_time_mixer);
+    }
+
+    if (newSettings.publish_time_water != settings.publish_time_water) {
+        emsesp::EMSESP::mqtt_.set_publish_time_water(newSettings.publish_time_water);
     }
 
     if (newSettings.publish_time_other != settings.publish_time_other) {

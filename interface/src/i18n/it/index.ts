@@ -248,6 +248,7 @@ const it: Translation = {
   MQTT_INT_THERMOSTATS: 'Termostati',
   MQTT_INT_SOLAR: 'Moduli solari',
   MQTT_INT_MIXER: 'Moduli Mixer',
+  MQTT_INT_WATER: 'Moduli Acqua',
   MQTT_QUEUE: 'Coda MQTT',
   DEFAULT: 'Predefinito',
   MQTT_ENTITY_FORMAT: 'Formato ID entità',

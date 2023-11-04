@@ -355,6 +355,7 @@ export const enum DeviceType {
   TEMPERATURESENSOR,
   ANALOGSENSOR,
   SCHEDULER,
+  CUSTOM,
   BOILER,
   THERMOSTAT,
   MIXER,
@@ -368,7 +369,9 @@ export const enum DeviceType {
   EXTENSION,
   GENERIC,
   HEATSOURCE,
-  CUSTOM,
+  VENTILATION,
+  WATER,
+  POOL,
   UNKNOWN
 }
 

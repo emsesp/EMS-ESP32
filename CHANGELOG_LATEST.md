@@ -4,6 +4,8 @@
 
 ## **IMPORTANT! BREAKING CHANGES**
 
+- move dhw functions from mixer/solar to water
+
 ## Added
 
 - humidity for ventilation devices
@@ -16,6 +18,7 @@
 - heatpump high res energy counters [#1348, #1349. #1350](https://github.com/emsesp/EMS-ESP32/issues/1348)
 - optional bssid in network settings
 - extension module EM100 [#1315](https://github.com/emsesp/EMS-ESP32/discussions/1315)
+- digital_out with new options for polarity and startup state
 
 ## Fixed
 

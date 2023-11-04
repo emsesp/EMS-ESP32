@@ -246,6 +246,7 @@ const sv: Translation = {
   MQTT_INT_THERMOSTATS: 'Termostater',
   MQTT_INT_SOLAR: 'Solpaneler',
   MQTT_INT_MIXER: 'Blandningsventiler',
+  MQTT_INT_WATER: 'Water Modules', // TODO translate
   MQTT_QUEUE: 'MQTT-kö',
   DEFAULT: 'Standard',
   MQTT_ENTITY_FORMAT: 'Entitets-ID format',

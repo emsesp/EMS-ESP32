@@ -107,6 +107,8 @@ const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
         return F_(system);
     case DeviceType::SCHEDULER:
         return F_(scheduler);
+    case DeviceType::CUSTOM:
+        return F_(custom);
     case DeviceType::BOILER:
         return F_(boiler);
     case DeviceType::THERMOSTAT:
@@ -135,10 +137,12 @@ const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
         return F_(extension);
     case DeviceType::HEATSOURCE:
         return F_(heatsource);
-    case DeviceType::CUSTOM:
-        return F_(custom);
     case DeviceType::VENTILATION:
         return F_(ventilation);
+    case DeviceType::WATER:
+        return F_(water);
+    case DeviceType::POOL:
+        return F_(pool);
     default:
         return Helpers::translated_word(FL_(unknown), true);
     }
@@ -174,6 +178,10 @@ const char * EMSdevice::device_type_2_device_name_translated() {
         return Helpers::translated_word(FL_(heatsource_device));
     case DeviceType::VENTILATION:
         return Helpers::translated_word(FL_(ventilation_device));
+    case DeviceType::WATER:
+        return Helpers::translated_word(FL_(water_device));
+    case DeviceType::POOL:
+        return Helpers::translated_word(FL_(pool_device));
     default:
         break;
     }
@@ -240,6 +248,12 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
     }
     if (!strcmp(lowtopic, F_(ventilation))) {
         return DeviceType::VENTILATION;
+    }
+    if (!strcmp(lowtopic, F_(water))) {
+        return DeviceType::WATER;
+    }
+    if (!strcmp(lowtopic, F_(pool))) {
+        return DeviceType::POOL;
     }
 
     return DeviceType::UNKNOWN;
