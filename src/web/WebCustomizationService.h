@@ -73,6 +73,9 @@ class WebCustomization {
     std::list<EntityCustomization> entityCustomizations; // for a list of entities that have a special mask set
     static void                    read(WebCustomization & customizations, JsonObject & root);
     static StateUpdateResult       update(JsonObject & root, WebCustomization & customizations);
+
+  private:
+    static bool _start;
 };
 
 class WebCustomizationService : public StatefulService<WebCustomization> {

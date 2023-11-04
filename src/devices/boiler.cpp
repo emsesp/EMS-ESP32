@@ -1269,8 +1269,10 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram, heatblock_, 23);  // see #1317
     has_update(telegram, headertemp_, 25); // see #1317
     //has_update(telegram, temperatur_, 27); // unknown temperature
-    has_update(telegram, exhaustTemp_, 31);
-
+    telegram->read_value(exhaustTemp1_ , 31);
+    if (Helpers::hasValue(exhaustTemp1_)) {
+        has_update(exhaustTemp_, exhaustTemp1_);
+    }
     // read 3 char service code / installation status as appears on the display
     if ((telegram->message_length > 3) && (telegram->offset == 0)) {
         char serviceCode[4] = {0};
@@ -1338,7 +1340,10 @@ void Boiler::process_UBAMonitorSlowPlus(std::shared_ptr<const Telegram> telegram
     has_bitupdate(telegram, heatingPump_, 2, 5);
     has_bitupdate(telegram, wwCirc_, 2, 7);
     // temperature measurements at offset 4 unknown, see https://github.com/emsesp/EMS-ESP/issues/620
-    // exhaustTemp was offset 6, now in e4. See #1147, #1150, #1326
+    // exhaust is in E4/31, but not always published, but this goes to zero if burner stops
+    if (!Helpers::hasValue(exhaustTemp1_)) {
+        has_update(telegram, exhaustTemp_, 6);
+    }
     has_update(telegram, burnStarts_, 10, 3);   // force to 3 bytes
     has_update(telegram, burnWorkMin_, 13, 3);  // force to 3 bytes
     has_update(telegram, burn2WorkMin_, 16, 3); // force to 3 bytes

@@ -323,7 +323,14 @@ const de: Translation = {
   WRITEABLE: 'Schreibbar',
   SHOWING: 'Anzeigen von',
   SEARCH: 'Suche',
-  CERT: 'TLS Zertifikat (Freilassen um TLS zu deaktivieren)'
+  CERT: 'TLS Zertifikat (Freilassen um TLS zu deaktivieren)',
+  ON: 'An',
+  OFF: 'Aus',
+  POLARITY: 'Polarität',
+  ACTIVEHIGH: 'Aktiv Positiv',
+  ACTIVELOW: 'Aktiv Negativ',
+  UNCHANGED: 'Unverändert',
+  ALWAYS: 'Immer'
 };
 
 export default de;

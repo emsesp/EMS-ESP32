@@ -102,6 +102,7 @@ export interface SensorData {
   ts: TemperatureSensor[];
   as: AnalogSensor[];
   analog_enabled: boolean;
+  platform: string;
 }
 
 export interface CoreData {

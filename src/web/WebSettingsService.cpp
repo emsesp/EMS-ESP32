@@ -87,6 +87,11 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 
     // load default GPIO configuration based on board profile
     std::vector<int8_t> data; //  // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
+    settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
+    if ((String)EMSESP_DEFAULT_BOARD_PROFILE != "default" && EMSESP::nvs_.getString("boot") == "") {
+        EMSESP::nvs_.putString("boot", (const char *)EMSESP_DEFAULT_BOARD_PROFILE);
+    }
+    /*
 #if CONFIG_IDF_TARGET_ESP32C3
     settings.board_profile = root["board_profile"] | "C3MINI";
 #elif CONFIG_IDF_TARGET_ESP32S2
@@ -97,12 +102,12 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 #elif CONFIG_IDF_TARGET_ESP32
     settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
 #endif
-
+*/
     if (!System::load_board_profile(data, settings.board_profile.c_str())) {
         // unknown, check for NVS or scan for ethernet, use default E32/E32V2/S32
-#if CONFIG_IDF_TARGET_ESP32 && !defined(EMSESP_STANDALONE)
         settings.board_profile = EMSESP::nvs_.getString("boot");
         if (!System::load_board_profile(data, settings.board_profile.c_str())) {
+#if CONFIG_IDF_TARGET_ESP32 && !defined(EMSESP_STANDALONE)
             if (settings.board_profile == "") { // empty: new test
                 if (ETH.begin((eth_phy_type_t)1, 16, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_IN)) {
                     EMSESP::nvs_.putString("boot", "E32");
@@ -119,11 +124,11 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
                 EMSESP::nvs_.putString("boot", "S32");
             }
             ESP.restart();
-        }
 #else
-        settings.board_profile = "S32";
-        System::load_board_profile(data, settings.board_profile.c_str());
+            settings.board_profile = "S32";
+            System::load_board_profile(data, settings.board_profile.c_str());
 #endif
+        }
         EMSESP::logger().info("No board profile found. Re-setting to %s", settings.board_profile.c_str());
     } else {
         EMSESP::logger().info("Loading board profile %s", settings.board_profile.c_str());

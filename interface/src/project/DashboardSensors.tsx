@@ -16,7 +16,7 @@ import DashboardSensorsAnalogDialog from './DashboardSensorsAnalogDialog';
 import DashboardSensorsTemperatureDialog from './DashboardSensorsTemperatureDialog';
 import * as EMSESP from './api';
 
-import { DeviceValueUOM, DeviceValueUOM_s, AnalogTypeNames } from './types';
+import { DeviceValueUOM, DeviceValueUOM_s, AnalogTypeNames, AnalogType } from './types';
 import { temperatureSensorItemValidation, analogSensorItemValidation } from './validators';
 import type { TemperatureSensor, AnalogSensor } from './types';
 import type { FC } from 'react';
@@ -38,7 +38,8 @@ const DashboardSensors: FC = () => {
     initialData: {
       ts: [],
       as: [],
-      analog_enabled: false
+      analog_enabled: false,
+      platform: 'ESP32'
     }
   });
 
@@ -391,7 +392,11 @@ const DashboardSensors: FC = () => {
                 <Cell stiff>{a.g}</Cell>
                 <Cell>{a.n}</Cell>
                 <Cell stiff>{AnalogTypeNames[a.t]} </Cell>
-                <Cell stiff>{a.t ? formatValue(a.v, a.u) : ''}</Cell>
+                {a.t === AnalogType.DIGITAL_OUT || a.t === AnalogType.DIGITAL_IN ? (
+                  <Cell stiff>{a.v ? LL.ON() : LL.OFF()}</Cell>
+                ) : (
+                  <Cell stiff>{a.t ? formatValue(a.v, a.u) : ''}</Cell>
+                )}
               </Row>
             ))}
           </Body>
@@ -402,18 +407,22 @@ const DashboardSensors: FC = () => {
 
   return (
     <SectionContent title={LL.SENSOR_DATA()} titleGutter>
-      <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="secondary">
-        {LL.TEMP_SENSORS()}
-      </Typography>
-      <RenderTemperatureSensors />
-      {selectedTemperatureSensor && (
-        <DashboardSensorsTemperatureDialog
-          open={temperatureDialogOpen}
-          onClose={onTemperatureDialogClose}
-          onSave={onTemperatureDialogSave}
-          selectedItem={selectedTemperatureSensor}
-          validator={temperatureSensorItemValidation()}
-        />
+      {sensorData.ts.length > 0 && (
+        <>
+          <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="secondary">
+            {LL.TEMP_SENSORS()}
+          </Typography>
+          <RenderTemperatureSensors />
+          {selectedTemperatureSensor && (
+            <DashboardSensorsTemperatureDialog
+              open={temperatureDialogOpen}
+              onClose={onTemperatureDialogClose}
+              onSave={onTemperatureDialogSave}
+              selectedItem={selectedTemperatureSensor}
+              validator={temperatureSensorItemValidation()}
+            />
+          )}
+        </>
       )}
 
       {sensorData?.analog_enabled === true && (
@@ -429,7 +438,7 @@ const DashboardSensors: FC = () => {
               onSave={onAnalogDialogSave}
               creating={creating}
               selectedItem={selectedAnalogSensor}
-              validator={analogSensorItemValidation(sensorData.as, creating)}
+              validator={analogSensorItemValidation(sensorData.as, creating, sensorData.platform)}
             />
           )}
         </>
@@ -442,14 +451,16 @@ const DashboardSensors: FC = () => {
               {LL.REFRESH()}
             </Button>
           </Box>
-          <Button
-            variant="outlined"
-            color="primary"
-            startIcon={<AddCircleOutlineOutlinedIcon />}
-            onClick={addAnalogSensor}
-          >
-            {LL.ADD(0) + ' ' + LL.ANALOG_SENSOR(1)}
-          </Button>
+          {sensorData?.analog_enabled === true && (
+            <Button
+              variant="outlined"
+              color="primary"
+              startIcon={<AddCircleOutlineOutlinedIcon />}
+              onClick={addAnalogSensor}
+            >
+              {LL.ADD(0) + ' ' + LL.ANALOG_SENSOR(1)}
+            </Button>
+          )}
         </Box>
       </ButtonRow>
     </SectionContent>
