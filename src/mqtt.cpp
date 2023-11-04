@@ -753,7 +753,8 @@ bool Mqtt::publish_ha_sensor_config(DeviceValue & dv, const char * model, const 
 
     // determine if we're creating the command topics which we use special HA configs
     // unless the entity has been marked as read-only and so it'll default to using the sensor/ type
-    bool has_cmd = dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY);
+    // or we're dealing with Energy sensors that must have "diagnostic" as an entity category (e.g. negheat & nrgww)
+    bool has_cmd = dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY) && (dv.uom != DeviceValueUOM::KWH);
 
     return publish_ha_sensor_config(dv.type,
                                     dv.tag,
@@ -1080,11 +1081,11 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             } else {
                 doc[sc_ha] = F_(measurement);
             }
-            doc[dc_ha] = "energy"; // no icon needed
+            doc[dc_ha] = "energy";
             break;
         case DeviceValueUOM::KWH:
             doc[sc_ha] = F_(total_increasing);
-            doc[dc_ha] = "energy"; // no icon needed
+            doc[dc_ha] = "energy";
             break;
         case DeviceValueUOM::UA:
             doc[ic_ha] = F_(iconua);
@@ -1128,8 +1129,9 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         }
     }
 
-    // add category "diagnostic" for system entities
-    // config for writeable entities, like switches. diagnostic for read only sensors.
+    // add category
+    // "config" for writeable entities, like switch, number, text, select
+    // "diagnostic" for read only sensors
     doc["ent_cat"] = (has_cmd) ? "config" : "diagnostic";
 
     // add the dev json object to the end
