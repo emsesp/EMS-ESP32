@@ -1370,14 +1370,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:^18.2.34":
-  version: 18.2.34
-  resolution: "@types/react@npm:18.2.34"
+"@types/react@npm:^18.2.35":
+  version: 18.2.35
+  resolution: "@types/react@npm:18.2.35"
   dependencies:
     "@types/prop-types": "npm:*"
     "@types/scheduler": "npm:*"
     csstype: "npm:^3.0.2"
-  checksum: 6d16f86b384e829edc3710b1dd9ec4eb1d6b26bc079c5cf605bd0cbf77ae6224f15c76949afadb7f53df4544cfe4025c1111fbe36732cd7f660a320fbc2e5866
+  checksum: 3c8c752d21856f74ddb96b9dd13cdd70c0ce1522808f20511f0220f392ea727fae9388db4da3ebe317d9bac98a0d930566d4277b22e92c1cad414429739e1d76
   languageName: node
   linkType: hard
 
@@ -1558,7 +1558,7 @@ __metadata:
     "@types/imagemin": "npm:^8.0.3"
     "@types/lodash-es": "npm:^4.17.10"
     "@types/node": "npm:^20.8.10"
-    "@types/react": "npm:^18.2.34"
+    "@types/react": "npm:^18.2.35"
     "@types/react-dom": "npm:^18.2.14"
     "@types/react-router-dom": "npm:^5.3.3"
     "@typescript-eslint/eslint-plugin": "npm:^6.9.1"
