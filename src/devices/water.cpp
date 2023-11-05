@@ -39,11 +39,11 @@ Water::Water(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         register_telegram_type(0x07E0, "SM100wwStatus2", true, MAKE_PF_CB(process_SM100wwStatus2));
         // device values...
         register_device_value(tag, &wwTemp_1_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp1), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &wwTemp_2_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp2), DeviceValueUOM::DEGREES);
+        // register_device_value(tag, &wwTemp_2_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp2), DeviceValueUOM::DEGREES);
         register_device_value(tag, &wwTemp_3_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp3), DeviceValueUOM::DEGREES);
         register_device_value(tag, &wwTemp_4_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp4), DeviceValueUOM::DEGREES);
         register_device_value(tag, &wwTemp_5_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp5), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &wwTemp_6_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp6), DeviceValueUOM::DEGREES);
+        // register_device_value(tag, &wwTemp_6_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp6), DeviceValueUOM::DEGREES);
         register_device_value(tag, &wwTemp_7_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp7), DeviceValueUOM::DEGREES);
         register_device_value(tag, &wwPump_, DeviceValueType::BOOL, FL_(wwPump), DeviceValueUOM::NONE);
         register_device_value(tag, &wwMaxTemp_, DeviceValueType::UINT, FL_(wwMaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwMaxTemp));
