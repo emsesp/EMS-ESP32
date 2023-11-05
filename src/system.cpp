@@ -153,6 +153,9 @@ bool System::command_publish(const char * value, const int8_t id) {
         } else if (value_s == (F_(mixer))) {
             EMSESP::publish_device_values(EMSdevice::DeviceType::MIXER);
             return true;
+        } else if (value_s == (F_(water))) {
+            EMSESP::publish_device_values(EMSdevice::DeviceType::WATER);
+            return true;
         } else if (value_s == "other") {
             EMSESP::publish_other_values(); // switch and heat pump
             return true;
