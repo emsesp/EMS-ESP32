@@ -470,10 +470,10 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpPower_, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpPower), DeviceValueUOM::KW);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpCompOn_, DeviceValueType::BOOL, FL_(hpCompOn), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpActivity_, DeviceValueType::ENUM, FL_(enum_hpactivity), FL_(hpActivity), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpHeatingOn_, DeviceValueType::BOOL, FL_(hpHeatingOn), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpCoolingOn_, DeviceValueType::BOOL, FL_(hpCoolingOn), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW, &hpWwOn_, DeviceValueType::BOOL, FL_(hpWwOn), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpPoolOn_, DeviceValueType::BOOL, FL_(hpPoolOn), DeviceValueUOM::NONE);
+        // register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpHeatingOn_, DeviceValueType::BOOL, FL_(hpHeatingOn), DeviceValueUOM::NONE);
+        // register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpCoolingOn_, DeviceValueType::BOOL, FL_(hpCoolingOn), DeviceValueUOM::NONE);
+        // register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW, &hpWwOn_, DeviceValueType::BOOL, FL_(hpWwOn), DeviceValueUOM::NONE);
+        // register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpPoolOn_, DeviceValueType::BOOL, FL_(hpPoolOn), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpBrinePumpSpd_, DeviceValueType::UINT, FL_(hpBrinePumpSpd), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpSwitchValve_, DeviceValueType::BOOL, FL_(hpSwitchValve), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpCompSpd_, DeviceValueType::UINT, FL_(hpCompSpd), DeviceValueUOM::PERCENT);
@@ -511,7 +511,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(poolSetTemp),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_pool_temp));
-        // register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpInput[0].state, DeviceValueType::BOOL, FL_(hpInput1), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpInput[0].state, DeviceValueType::BOOL, FL_(hpInput1), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &hpInput[0].option,
                               DeviceValueType::STRING,
@@ -519,7 +519,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(hpIn1Opt),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_HpIn1Logic));
-        // register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpInput[1].state, DeviceValueType::BOOL, FL_(hpInput2), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpInput[1].state, DeviceValueType::BOOL, FL_(hpInput2), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &hpInput[1].option,
                               DeviceValueType::STRING,
@@ -527,7 +527,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(hpIn2Opt),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_HpIn2Logic));
-        // register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpInput[2].state, DeviceValueType::BOOL, FL_(hpInput3), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpInput[2].state, DeviceValueType::BOOL, FL_(hpInput3), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &hpInput[2].option,
                               DeviceValueType::STRING,
@@ -535,7 +535,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(hpIn3Opt),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_HpIn3Logic));
-        // register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpInput[3].state, DeviceValueType::BOOL, FL_(hpInput4), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpInput[3].state, DeviceValueType::BOOL, FL_(hpInput4), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &hpInput[3].option,
                               DeviceValueType::STRING,
@@ -1515,10 +1515,10 @@ void Boiler::process_HpPower(std::shared_ptr<const Telegram> telegram) {
     has_bitupdate(telegram, hpSwitchValve_, 0, 4);
     has_update(telegram, hpActivity_, 7);
 
-    has_update(hpHeatingOn_, hpActivity_ == 1 ? 0xFF : 0);
-    has_update(hpCoolingOn_, hpActivity_ == 2 ? 0xFF : 0);
-    has_update(hpWwOn_, hpActivity_ == 3 ? 0xFF : 0);
-    has_update(hpPoolOn_, hpActivity_ == 4 ? 0xFF : 0);
+    // has_update(hpHeatingOn_, hpActivity_ == 1 ? 0xFF : 0);
+    // has_update(hpCoolingOn_, hpActivity_ == 2 ? 0xFF : 0);
+    // has_update(hpWwOn_, hpActivity_ == 3 ? 0xFF : 0);
+    // has_update(hpPoolOn_, hpActivity_ == 4 ? 0xFF : 0);
 }
 
 // Heatpump temperatures - type 0x48F
