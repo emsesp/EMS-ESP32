@@ -263,6 +263,7 @@ class Boiler : public EMSdevice {
     uint8_t primePump_;
     uint8_t primePumpMod_;
     uint8_t hp3wayValve_;
+    uint8_t hp4wayValve_;
     uint8_t elHeatStep1_;
     uint8_t elHeatStep2_;
     uint8_t elHeatStep3_;

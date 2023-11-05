@@ -343,6 +343,7 @@ MAKE_ENUM(enum_lowNoiseMode, FL_(off), FL_(reduced_output), FL_(switchoff), FL_(
 // heat pump
 MAKE_ENUM(enum_hpactivity, FL_(none), FL_(heating), FL_(cooling), FL_(hot_water), FL_(pool), FL_(unknown), FL_(defrost))
 MAKE_ENUM(enum_silentMode, FL_(off), FL_(auto), FL_(on))
+MAKE_ENUM(enum_4way, FL_(heat_ww), FL_(cool_defrost))
 
 // solar
 MAKE_ENUM(enum_solarmode, FL_(constant), FL_(pwm), FL_(analog))
