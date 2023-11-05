@@ -29,7 +29,7 @@
     "@types/imagemin": "^8.0.3",
     "@types/lodash-es": "^4.17.10",
     "@types/node": "^20.8.10",
-    "@types/react": "^18.2.34",
+    "@types/react": "^18.2.35",
     "@types/react-dom": "^18.2.14",
     "@types/react-router-dom": "^5.3.3",
     "alova": "^2.13.1",
