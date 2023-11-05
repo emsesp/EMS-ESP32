@@ -108,7 +108,7 @@ void Roomctrl::send(const uint8_t addr) {
         } else if (type_ == FB10) {
             rc_time_[hc] = uuid::get_uptime();
             temperature(addr, 0x10, hc); // send to master-thermostat (https://github.com/emsesp/EMS-ESP32/issues/336)
-        } else { // type==RC20
+        } else {                         // type==RC20
             rc_time_[hc] = uuid::get_uptime();
             temperature(addr, 0x00, hc); // send to all
         }
