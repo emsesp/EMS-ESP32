@@ -1300,6 +1300,7 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
         telegram->read_value(serviceCode[0], 1);
         serviceCode[0] = (serviceCode[0] == (char)0xF0) ? '~' : serviceCode[0];
         telegram->read_value(serviceCode[1], 2);
+        serviceCode[1] = (serviceCode[1] == (char)0xF0) ? '~' : serviceCode[1];
         telegram->read_value(serviceCode[2], 3);
         serviceCode[3] = '\0';
         has_update(serviceCode_, serviceCode, sizeof(serviceCode_));
