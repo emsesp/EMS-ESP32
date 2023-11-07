@@ -53,10 +53,11 @@ class Boiler : public EMSdevice {
 
     // ww
     uint8_t  wwSetTemp_;            // DHW set temperature
-    uint8_t  wwSelTemp_;            // DHW selected temperature
-    uint8_t  wwSelTempLow_;         // DHW lower selected temperature
+    uint8_t  wwSelTemp_;            // DHW selected temperature (comfort)
+    uint8_t  wwSelTempLow_;         // DHW lower selected temperature (eco)
     uint8_t  wwSelTempOff_;         // DHW selected temperature for off position
     uint8_t  wwSelTempSingle_;      // DHW single charge temperature
+    uint8_t  wwSelTempEcoplus_;     // DHW ECO+ temperature
     uint8_t  wwType_;               // 0-off, 1-flow, 2-flowbuffer, 3-buffer, 4-layered buffer
     uint8_t  wwComfort_;            // WW comfort mode
     uint8_t  wwComfort1_;           // WW comfort mode RC310
@@ -356,6 +357,7 @@ class Boiler : public EMSdevice {
     bool        set_ww_circulation_mode(const char * value, const int8_t id);
     bool        set_ww_temp(const char * value, const int8_t id);
     bool        set_ww_temp_low(const char * value, const int8_t id);
+    bool        set_ww_temp_eco(const char * value, const int8_t id);
     bool        set_ww_temp_single(const char * value, const int8_t id);
     bool        set_ww_disinfect_temp(const char * value, const int8_t id);
     bool        set_ww_maxpower(const char * value, const int8_t id);

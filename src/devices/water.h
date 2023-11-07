@@ -40,6 +40,7 @@ class Water : public EMSdevice {
     uint16_t wwTemp_5_;
     uint16_t wwTemp_6_;
     uint16_t wwTemp_7_;
+    uint16_t wwTemp_8_;
 
     // SM100wwStatus - 0x07AA
     uint8_t wwPump_;

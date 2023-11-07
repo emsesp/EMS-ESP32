@@ -52,7 +52,7 @@ Water::Water(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         register_device_value(tag, &wwDailyTemp_, DeviceValueType::UINT, FL_(wwDailyTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwDailyTemp));
         register_device_value(tag, &wwDisinfectionTemp_, DeviceValueType::UINT, FL_(wwDisinfectionTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwDisinfectionTemp));
         register_device_value(tag, &wwCirc_, DeviceValueType::BOOL, FL_(wwCirc), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCirc));
-        register_device_value(tag, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode), FL_(wwCircMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCircMode));
+        register_device_value(tag, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_freq), FL_(wwCircMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCircMode));
         register_device_value(tag, &wwKeepWarm_, DeviceValueType::BOOL, FL_(wwKeepWarm), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwKeepWarm));
         register_device_value(tag, &wwStatus2_, DeviceValueType::ENUM, FL_(enum_wwStatus2), FL_(wwStatus2), DeviceValueUOM::NONE);
         register_device_value(tag, &wwPumpMod_, DeviceValueType::UINT, FL_(wwPumpMod), DeviceValueUOM::PERCENT);
@@ -100,12 +100,13 @@ Water::Water(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
 // Solar Module(0x2A) -> (0x00), (0x7D6), data: 01 C1 00 00 02 5B 01 AF 01 AD 80 00 01 90
 void Water::process_SM100wwTemperature(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, wwTemp_1_, 0);  // is *10
-    has_update(telegram, wwTemp_2_, 2);  // is *10
-    has_update(telegram, wwTemp_3_, 4);  // is *10
-    has_update(telegram, wwTemp_4_, 6);  // is *10
+    has_update(telegram, wwTemp_2_, 2);  // is *10 always zero
+    has_update(telegram, wwTemp_3_, 4);  // is *10 TS21
+    has_update(telegram, wwTemp_4_, 6);  // is *10 cold water
     has_update(telegram, wwTemp_5_, 8);  // is *10
-    has_update(telegram, wwTemp_6_, 10); // is *10
+    has_update(telegram, wwTemp_6_, 10); // is *10 always unset 8000
     has_update(telegram, wwTemp_7_, 12); // is *10
+    has_update(telegram, wwTemp_8_, 14); // is *10, return temp TS22
 }
 
 // SM100wwStatus - 0x07AA
