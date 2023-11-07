@@ -36,7 +36,9 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
 
     switch (event) {
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
-        EMSESP::logger().warning("WiFi disconnected. Reason: %s (%d)", disconnectReason(info.wifi_sta_disconnected.reason), info.wifi_sta_disconnected.reason); // IDF 4.0
+        EMSESP::logger().warning("WiFi disconnected. Reason: %s (%d)",
+                                 disconnectReason(info.wifi_sta_disconnected.reason),
+                                 info.wifi_sta_disconnected.reason); // IDF 4.0
         EMSESP::system_.has_ipv6(false);
         break;
 

@@ -769,7 +769,8 @@ bool Mqtt::publish_ha_sensor_config(DeviceValue & dv, const char * model, const 
 
     // determine if we're creating the command topics which we use special HA configs
     // unless the entity has been marked as read-only and so it'll default to using the sensor/ type
-    bool has_cmd = dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY);
+    // or we're dealing with Energy sensors that must have "diagnostic" as an entity category (e.g. negheat & nrgww)
+    bool has_cmd = dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY) && (dv.uom != DeviceValueUOM::KWH);
 
     return publish_ha_sensor_config(dv.type,
                                     dv.tag,
@@ -862,7 +863,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     char config_topic[70];
     snprintf(config_topic, sizeof(config_topic), "%s/%s_%s/config", mqtt_basename_.c_str(), device_name, entity_with_tag);
 
-    bool set_ha_classes = false; // set to true if we want to set the state class and device class
+    bool readonly_sensors = true;
 
     // create the topic
     // depending on the type and whether the device entity is writable (a command)
@@ -875,42 +876,41 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         case DeviceValueType::UINT:
         case DeviceValueType::SHORT:
         case DeviceValueType::USHORT:
+        case DeviceValueType::ULONG:
+            // number - https://www.home-assistant.io/integrations/number.mqtt
+            // Domoticz does not support number, use sensor
             if (discovery_type() == discoveryType::HOMEASSISTANT) {
-                // number - https://www.home-assistant.io/integrations/number.mqtt
                 snprintf(topic, sizeof(topic), "number/%s", config_topic);
+                readonly_sensors = false;
             } else {
-                // Domoticz does not support number, use sensor
                 snprintf(topic, sizeof(topic), "sensor/%s", config_topic);
             }
             break;
         case DeviceValueType::BOOL:
             // switch - https://www.home-assistant.io/integrations/switch.mqtt
             snprintf(topic, sizeof(topic), "switch/%s", config_topic);
+            readonly_sensors = false;
             break;
         case DeviceValueType::ENUM:
             // select - https://www.home-assistant.io/integrations/select.mqtt
             snprintf(topic, sizeof(topic), "select/%s", config_topic);
-            break;
-        case DeviceValueType::ULONG:
-            snprintf(topic, sizeof(topic), "sensor/%s", config_topic);
-            set_ha_classes = true;
+            readonly_sensors = false;
             break;
         case DeviceValueType::STRING:
+            // text - https://www.home-assistant.io/integrations/text.mqtt
             snprintf(topic, sizeof(topic), "text/%s", config_topic); // e.g. set_datetime, set_holiday, set_wwswitchtime
+            readonly_sensors = false;
             break;
         default:
-            // plain old sensor
-            snprintf(topic, sizeof(topic), "sensor/%s", config_topic);
+            // plain old sensor, and make read-only
             break;
         }
-    } else {
-        set_ha_classes = true; // these are Read only sensors. We can set the device class and state class
-        // plain old read only device entity
-        if (type == DeviceValueType::BOOL) {
-            snprintf(topic, sizeof(topic), "binary_sensor/%s", config_topic); // binary sensor (for booleans)
-        } else {
-            snprintf(topic, sizeof(topic), "sensor/%s", config_topic); // normal HA sensor
-        }
+    }
+
+    // For read-only sensors there are either sensor or binary_sensor
+    // for both we also set the device class and state class
+    if (readonly_sensors) {
+        snprintf(topic, sizeof(topic), (type == DeviceValueType::BOOL) ? "binary_sensor/%s" : "sensor/%s", config_topic); // binary sensor (for booleans)
     }
 
     // if we're asking to remove this topic, send an empty payload and exit
@@ -926,13 +926,15 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     doc["obj_id"]  = uniq_id; // same as unique_id
 
     const char * ic_ha  = "ic";           // icon - only set this if there is no device class
-    const char * sc_ha  = "stat_cla";     // state class
     const char * uom_ha = "unit_of_meas"; // unit of measure
 
     char sample_val[30] = "0"; // sample, correct(!) entity value, used only to prevent warning/error in HA if real value is not published yet
 
     // we add the command topic parameter for commands
     if (has_cmd) {
+        // add category
+        doc["ent_cat"] = "config"; // for writeable entities, like switch, number, text, select
+
         char command_topic[MQTT_TOPIC_MAX_SIZE];
         // add command topic
         if (tag >= DeviceValueTAG::TAG_HC1) {
@@ -1054,12 +1056,16 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             doc[uom_ha] = EMSdevice::uom_to_string(uom); // default
         }
     }
+
     doc["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else " + sample_val + "}}";
 
-    // this next section is adding the state class, device class and sometimes the icon
-    // used for Sensor and Binary Sensor Entities in HA
-    if (set_ha_classes) {
-        const char * dc_ha = "dev_cla"; // device class
+    // Add the state class, device class and sometimes the icon. Used only for read-only sensors Sensor and Binary Sensor
+    if (readonly_sensors) {
+        // first set the catagory
+        doc["ent_cat"] = "diagnostic";
+
+        const char * dc_ha = "dev_cla";  // device class
+        const char * sc_ha = "stat_cla"; // state class
 
         switch (uom) {
         case DeviceValueUOM::DEGREES:
@@ -1095,11 +1101,11 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             } else {
                 doc[sc_ha] = F_(measurement);
             }
-            doc[dc_ha] = "energy"; // no icon needed
+            doc[dc_ha] = "energy";
             break;
         case DeviceValueUOM::KWH:
             doc[sc_ha] = F_(total_increasing);
-            doc[dc_ha] = "energy"; // no icon needed
+            doc[dc_ha] = "energy";
             break;
         case DeviceValueUOM::UA:
             doc[ic_ha] = F_(iconua);
@@ -1143,15 +1149,8 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         }
     }
 
-    // add category "diagnostic" for system entities
-    // config for writeable entities, like switches. diagnostic for read only sensors.
-    doc["ent_cat"] = (has_cmd && !set_ha_classes) ? "config" : "diagnostic";
-
-    // add the dev json object to the end
-    doc["dev"] = dev_json;
-
-    // add "availability" section
-    add_avty_to_doc(stat_t, doc.as<JsonObject>(), val_cond);
+    doc["dev"] = dev_json;                                   // add the dev json object to the end
+    add_avty_to_doc(stat_t, doc.as<JsonObject>(), val_cond); // add "availability" section
 
     return queue_ha(topic, doc.as<JsonObject>());
 }
@@ -1324,6 +1323,5 @@ void Mqtt::add_avty_to_doc(const char * state_t, const JsonObject & doc, const c
 
     doc["avty_mode"] = "all";
 }
-
 
 } // namespace emsesp
