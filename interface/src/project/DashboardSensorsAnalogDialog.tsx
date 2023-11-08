@@ -137,7 +137,7 @@ const DashboardSensorsAnalogDialog = ({
             <Grid item xs={4}>
               <TextField
                 name="o"
-                label={LL.VALUE(1)}
+                label={LL.OFFSET()}
                 value={numberValue(editItem.o)}
                 fullWidth
                 type="number"
@@ -182,7 +182,7 @@ const DashboardSensorsAnalogDialog = ({
             <Grid item xs={4}>
               <TextField
                 name="o"
-                label={LL.VALUE(1)}
+                label={LL.VALUE(0)}
                 value={numberValue(editItem.o)}
                 fullWidth
                 type="number"

@@ -372,10 +372,10 @@ MAKE_TRANSLATION(auxElecHeatNrgConsPool, "auxelecheatnrgconspool", "aux elec. he
 
 MAKE_TRANSLATION(hpCompOn, "hpcompon", "hp compressor", "WP Kompressor", "WP compressor", "VP Kompressor", "sprężarka pompy ciepła", "vp kompressor", "compresseur pompe à chaleur", "hp ısı pompası", "compressore pompa calore")
 MAKE_TRANSLATION(coolingOn, "coolingon", "cooling", "Kühlen", "koelbedrijf", "Kyla", "chłodzenie", "kjøling", "refroidissement", "hp sıcak kullanım suyu", "") // TODO translate
-MAKE_TRANSLATION(hpHeatingOn, "hpheatingon", "hp heating", "WP Heizen", "WP verwarmingsbedrijf", "VP Uppvärmning", "pompa ciepła, ogrzewanie", "vp oppvarmning", "", "hp ısınıyor", "riscaldamento pompa calore") // TODO translate
-MAKE_TRANSLATION(hpCoolingOn, "hpcoolingon", "hp cooling", "WP Kühlen", "WP koelbedrijf", "VP Kyla", "pompa ciepła, chłodzenie", "vp kjøling", "", "hp soğuyor", "raffreddamento pompa calore") // TODO translate
-MAKE_TRANSLATION(hpWwOn, "hpwwon", "hp", "WP", "WP", "VP", "pompa ciepła", "vp", "pompe à chaleur", "hp", "pompa calore")
-MAKE_TRANSLATION(hpPoolOn, "hppoolon", "hp pool", "WP Pool", "WP zwembadbedrijf", "VP Pool", "pompa ciepła, podgrzewanie basenu", "vp basseng", "", "tuzlu su pompası hızı", "pompa calore piscina")
+// MAKE_TRANSLATION(hpHeatingOn, "hpheatingon", "hp heating", "WP Heizen", "WP verwarmingsbedrijf", "VP Uppvärmning", "pompa ciepła, ogrzewanie", "vp oppvarmning", "", "hp ısınıyor", "riscaldamento pompa calore") // TODO translate
+// MAKE_TRANSLATION(hpCoolingOn, "hpcoolingon", "hp cooling", "WP Kühlen", "WP koelbedrijf", "VP Kyla", "pompa ciepła, chłodzenie", "vp kjøling", "", "hp soğuyor", "raffreddamento pompa calore") // TODO translate
+// MAKE_TRANSLATION(hpWwOn, "hpwwon", "hp", "WP", "WP", "VP", "pompa ciepła", "vp", "pompe à chaleur", "hp", "pompa calore")
+// MAKE_TRANSLATION(hpPoolOn, "hppoolon", "hp pool", "WP Pool", "WP zwembadbedrijf", "VP Pool", "pompa ciepła, podgrzewanie basenu", "vp basseng", "", "tuzlu su pompası hızı", "pompa calore piscina")
 MAKE_TRANSLATION(hpBrinePumpSpd, "hpbrinepumpspd", "brine pump speed", "Solepumpen-Geschw.", "Snelheid pekelpomp", "Hastighet Brine-pump", "wysterowanie pompy glikolu", "hastighet brine-pumpe", "vitesse pompe à saumure", "ısı pompası hızı", "velocità pompa sbrinamento")
 MAKE_TRANSLATION(hpCompSpd, "hpcompspd", "compressor speed", "Kompressor-Geschw.", "Snelheid compressor", "Kompressorhastighet", "wysterowanie sprężarki", "kompressorhastighet", "vitesse du compresseur", "sirkülasyon pompası hızı", "velocità compressore")
 MAKE_TRANSLATION(hpCircSpd, "hpcircspd", "circulation pump speed", "Zirkulationspumpen-Geschw.", "Snelheid circulatiepomp", "Hastighet Cirkulationspump", "wysterowanie pompy obiegu grzewczego", "hastighet sirkulationspumpe", "vitesse pompe à circulation", "evaporatör tuzlu su giişi", "velocità pompa circolazione")

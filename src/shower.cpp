@@ -195,7 +195,7 @@ void Shower::set_shower_state(bool state, bool force) {
         doc["uniq_id"]   = str;
         doc["object_id"] = str;
 
-        snprintf(stat_t, sizeof(stat_t), "%s/shower_active", Mqtt::basename().c_str());
+        snprintf(stat_t, sizeof(stat_t), "%s/shower_active", Mqtt::base().c_str());
         doc["stat_t"] = stat_t;
 
         if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
@@ -229,7 +229,7 @@ void Shower::set_shower_state(bool state, bool force) {
         doc["uniq_id"]   = str;
         doc["object_id"] = str;
 
-        snprintf(stat_t, sizeof(stat_t), "%s/shower_data", Mqtt::basename().c_str());
+        snprintf(stat_t, sizeof(stat_t), "%s/shower_data", Mqtt::base().c_str());
         doc["stat_t"] = stat_t;
 
         doc["name"]         = "Shower Duration";
@@ -258,7 +258,7 @@ void Shower::set_shower_state(bool state, bool force) {
         doc["uniq_id"]   = str;
         doc["object_id"] = str;
 
-        snprintf(stat_t, sizeof(stat_t), "%s/shower_data", Mqtt::basename().c_str());
+        snprintf(stat_t, sizeof(stat_t), "%s/shower_data", Mqtt::base().c_str());
         doc["stat_t"] = stat_t;
 
         doc["name"]    = "Shower Timestamp";
