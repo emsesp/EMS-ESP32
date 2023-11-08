@@ -445,6 +445,7 @@ void TxService::add(const uint8_t  operation,
 
     // if the queue is full, make room by removing the last one
     if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
+        LOG_WARNING("Tx queue overflow, skip one message");
         if (tx_telegrams_.front().telegram_->operation == Telegram::Operation::TX_WRITE) {
             telegram_write_fail_count_++;
         } else {
@@ -528,6 +529,7 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
 
     // if the queue is full, make room by removing the last one
     if (tx_telegrams_.size() >= MAX_TX_TELEGRAMS) {
+        LOG_WARNING("Tx queue overflow, skip one message");
         if (tx_telegrams_.front().telegram_->operation == Telegram::Operation::TX_WRITE) {
             telegram_write_fail_count_++;
         } else {
