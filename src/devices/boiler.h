@@ -53,10 +53,11 @@ class Boiler : public EMSdevice {
 
     // ww
     uint8_t  wwSetTemp_;            // DHW set temperature
-    uint8_t  wwSelTemp_;            // DHW selected temperature
-    uint8_t  wwSelTempLow_;         // DHW lower selected temperature
+    uint8_t  wwSelTemp_;            // DHW selected temperature (comfort)
+    uint8_t  wwSelTempLow_;         // DHW lower selected temperature (eco)
     uint8_t  wwSelTempOff_;         // DHW selected temperature for off position
     uint8_t  wwSelTempSingle_;      // DHW single charge temperature
+    uint8_t  wwSelTempEcoplus_;     // DHW ECO+ temperature
     uint8_t  wwType_;               // 0-off, 1-flow, 2-flowbuffer, 3-buffer, 4-layered buffer
     uint8_t  wwComfort_;            // WW comfort mode
     uint8_t  wwComfort1_;           // WW comfort mode RC310
@@ -192,10 +193,10 @@ class Boiler : public EMSdevice {
     uint16_t hpBrineOut_;
     uint8_t  hpSwitchValve_;
     uint8_t  hpActivity_;
-    uint8_t  hpHeatingOn_;
-    uint8_t  hpCoolingOn_;
-    uint8_t  hpWwOn_;
-    uint8_t  hpPoolOn_;
+    // uint8_t  hpHeatingOn_;
+    // uint8_t  hpCoolingOn_;
+    // uint8_t  hpWwOn_;
+    // uint8_t  hpPoolOn_;
     int16_t  hpTc0_;
     int16_t  hpTc1_;
     int16_t  hpTc3_;
@@ -263,6 +264,7 @@ class Boiler : public EMSdevice {
     uint8_t primePump_;
     uint8_t primePumpMod_;
     uint8_t hp3wayValve_;
+    uint8_t hp4wayValve_;
     uint8_t elHeatStep1_;
     uint8_t elHeatStep2_;
     uint8_t elHeatStep3_;
@@ -355,6 +357,7 @@ class Boiler : public EMSdevice {
     bool        set_ww_circulation_mode(const char * value, const int8_t id);
     bool        set_ww_temp(const char * value, const int8_t id);
     bool        set_ww_temp_low(const char * value, const int8_t id);
+    bool        set_ww_temp_eco(const char * value, const int8_t id);
     bool        set_ww_temp_single(const char * value, const int8_t id);
     bool        set_ww_disinfect_temp(const char * value, const int8_t id);
     bool        set_ww_maxpower(const char * value, const int8_t id);
