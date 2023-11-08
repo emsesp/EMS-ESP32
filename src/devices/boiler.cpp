@@ -797,6 +797,12 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           FL_(wwSelTempLow),
                           DeviceValueUOM::DEGREES,
                           MAKE_CF_CB(set_ww_temp_low));
+    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
+                          &wwSelTempEcoplus_,
+                          DeviceValueType::UINT,
+                          FL_(wwSelTempEco),
+                          DeviceValueUOM::DEGREES,
+                          MAKE_CF_CB(set_ww_temp_eco));
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW, &wwSelTempOff_, DeviceValueType::UINT, FL_(wwSelTempOff), DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
                           &wwSelTempSingle_,
@@ -1416,6 +1422,7 @@ void Boiler::process_UBAParameterWWPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram, wwSelTempLow_, 18);
     has_update(telegram, wwMaxTemp_, 20);
     has_update(telegram, wwChargeOptimization_, 25);
+    has_update(telegram, wwSelTempEcoplus_, 27);
 
     uint8_t wwComfort1 = EMS_VALUE_UINT_NOTSET;
     if (telegram->read_value(wwComfort1, 13)) {
@@ -2020,6 +2027,17 @@ bool Boiler::set_ww_temp_low(const char * value, const int8_t id) {
     }
 
     write_command(EMS_TYPE_UBAParameterWWPlus, 18, v, EMS_TYPE_UBAParameterWWPlus);
+    return true;
+}
+
+// Set the eco+ dhw temperature 0xEA
+bool Boiler::set_ww_temp_eco(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2temperature(value, v)) {
+        return false;
+    }
+
+    write_command(EMS_TYPE_UBAParameterWWPlus, 27, v, EMS_TYPE_UBAParameterWWPlus);
     return true;
 }
 
