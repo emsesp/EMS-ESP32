@@ -173,7 +173,6 @@ void Mqtt::loop() {
         if (publish_time_other_ && (currentMillis - last_publish_other_ > publish_time_other_)) {
         last_publish_other_ = (currentMillis / publish_time_other_) * publish_time_other_;
         EMSESP::publish_other_values(); // switch and heatpump
-        EMSESP::webSchedulerService.publish();
     } else
 
         if (publish_time_sensor_ && (currentMillis - last_publish_sensor_ > publish_time_sensor_)) {
@@ -330,6 +329,7 @@ void Mqtt::reset_mqtt() {
     }
 }
 
+// load the settings from service
 void Mqtt::load_settings() {
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & mqttSettings) {
         mqtt_base_          = mqttSettings.base.c_str(); // Convert String to std::string
@@ -361,6 +361,7 @@ void Mqtt::load_settings() {
     std::replace(mqtt_basename_.begin(), mqtt_basename_.end(), '/', '_');
 }
 
+// start mqtt
 void Mqtt::start() {
     mqttClient_ = EMSESP::esp8266React.getMqttClient();
 
