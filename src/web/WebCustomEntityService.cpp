@@ -358,7 +358,7 @@ void WebCustomEntityService::publish(const bool force) {
         if (Mqtt::ha_enabled() && !ha_registered_) {
             StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
             char                                        stat_t[50];
-            snprintf(stat_t, sizeof(stat_t), "%s/custom_data", Mqtt::basename().c_str());
+            snprintf(stat_t, sizeof(stat_t), "%s/custom_data", Mqtt::base().c_str());
             config["stat_t"] = stat_t;
 
             char val_obj[50];

@@ -18,6 +18,7 @@ Writeable Text entities have moved from type `sensor` to `text` in Home Assistan
 ## Fixed
 
 - fixed helper text in Web Device Entity dialog box for numerical ranges
+- MQTT base with paths not working in HA [#1393](https://github.com/emsesp/EMS-ESP32/issues/1393)
 
 ## Changed
 

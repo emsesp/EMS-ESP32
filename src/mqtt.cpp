@@ -194,7 +194,7 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
     // show subscriptions
     shell.printfln("MQTT topic subscriptions:");
     for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
-        shell.printfln(" %s/%s", mqtt_base_.c_str(), mqtt_subfunction.topic_.c_str());
+        shell.printfln(" %s/%s", Mqtt::base().c_str(), mqtt_subfunction.topic_.c_str());
     }
     shell.println();
 
@@ -247,7 +247,7 @@ void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) c
     for (const auto & mf : mqtt_subfunctions_) {
         // add the base back
         char full_topic[MQTT_TOPIC_MAX_SIZE];
-        snprintf(full_topic, sizeof(full_topic), "%s/%s", mqtt_base_.c_str(), mf.topic_.c_str());
+        snprintf(full_topic, sizeof(full_topic), "%s/%s", Mqtt::base().c_str(), mf.topic_.c_str());
 
         if ((!strcmp(topic, full_topic)) && (mf.mqtt_subfunction_)) {
             if (!(mf.mqtt_subfunction_)(message)) {
@@ -355,8 +355,8 @@ void Mqtt::load_settings() {
         publish_time_heartbeat_  = mqttSettings.publish_time_heartbeat * 1000;
     });
 
-    // create basename from base
-    // by taking the MQTT base path and replacing all / with underscores
+    // create basename from the mqtt base
+    // and replacing all / with underscores, in case it's a path
     mqtt_basename_ = mqtt_base_;
     std::replace(mqtt_basename_.begin(), mqtt_basename_.end(), '/', '_');
 }
@@ -382,8 +382,8 @@ void Mqtt::start() {
 
     // create last will topic with the base prefixed. It has to be static because asyncmqttclient destroys the reference
     static char will_topic[MQTT_TOPIC_MAX_SIZE];
-    if (!mqtt_base_.empty()) {
-        snprintf(will_topic, MQTT_TOPIC_MAX_SIZE, "%s/status", mqtt_base_.c_str());
+    if (!Mqtt::base().empty()) {
+        snprintf(will_topic, MQTT_TOPIC_MAX_SIZE, "%s/status", Mqtt::base().c_str());
     } else {
         snprintf(will_topic, MQTT_TOPIC_MAX_SIZE, "status");
     }
@@ -524,7 +524,7 @@ void Mqtt::ha_status() {
 
     char uniq[70];
     if (Mqtt::entity_format() == entityFormat::MULTI_SHORT) {
-        snprintf(uniq, sizeof(uniq), "%s_system_status", mqtt_basename_.c_str());
+        snprintf(uniq, sizeof(uniq), "%s_system_status", Mqtt::basename().c_str());
     } else {
         strcpy(uniq, "system_status");
     }
@@ -532,7 +532,7 @@ void Mqtt::ha_status() {
     doc["uniq_id"] = uniq;
     doc["obj_id"]  = uniq;
 
-    doc["stat_t"]   = mqtt_basename_ + "/status";
+    doc["stat_t"]   = Mqtt::base() + "/status";
     doc["name"]     = "System status";
     doc["pl_on"]    = "online";
     doc["pl_off"]   = "offline";
@@ -544,7 +544,7 @@ void Mqtt::ha_status() {
     // doc["json_attr_t"] = "~/heartbeat"; // store also as HA attributes
 
     JsonObject dev = doc.createNestedObject("dev");
-    dev["name"]    = Mqtt::basename(); // take basename
+    dev["name"]    = Mqtt::basename();
     dev["sw"]      = "v" + std::string(EMSESP_APP_VERSION);
     dev["mf"]      = "proddy";
     dev["mdl"]     = "EMS-ESP";
@@ -620,7 +620,7 @@ bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, con
         strlcpy(fulltopic, topic.c_str(), sizeof(fulltopic)); // leave discovery topic as it is
     } else {
         // it's not a discovery topic, added the mqtt base to the topic path
-        snprintf(fulltopic, sizeof(fulltopic), "%s/%s", mqtt_base_.c_str(), topic.c_str()); // uses base
+        snprintf(fulltopic, sizeof(fulltopic), "%s/%s", Mqtt::base().c_str(), topic.c_str());
     }
 
     if (operation == Operation::PUBLISH) {
@@ -982,7 +982,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // state topic
     char stat_t[MQTT_TOPIC_MAX_SIZE];
-    snprintf(stat_t, sizeof(stat_t), "%s/%s", mqtt_basename_.c_str(), tag_to_topic(device_type, tag).c_str());
+    snprintf(stat_t, sizeof(stat_t), "%s/%s", Mqtt::base().c_str(), tag_to_topic(device_type, tag).c_str());
     doc["stat_t"] = stat_t;
 
     // friendly name = <tag> <name>
@@ -1158,7 +1158,7 @@ bool Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     char min_s[10];
     char max_s[10];
 
-    snprintf(topic, sizeof(topic), "climate/%s/thermostat_hc%d/config", mqtt_basename_.c_str(), hc_num);
+    snprintf(topic, sizeof(topic), "climate/%s/thermostat_hc%d/config", Mqtt::basename().c_str(), hc_num);
     if (remove) {
         return queue_remove_topic(topic); // publish empty payload with retain flag
     }
@@ -1201,7 +1201,7 @@ bool Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     snprintf(name_s, sizeof(name_s), "Hc%d", hc_num);
 
     if (Mqtt::entity_format() == entityFormat::MULTI_SHORT) {
-        snprintf(uniq_id_s, sizeof(uniq_id_s), "%s_thermostat_hc%d", mqtt_basename_.c_str(), hc_num); // add basename
+        snprintf(uniq_id_s, sizeof(uniq_id_s), "%s_thermostat_hc%d", Mqtt::basename().c_str(), hc_num); // add basename
     } else {
         snprintf(uniq_id_s, sizeof(uniq_id_s), "thermostat_hc%d", hc_num); // backward compatible with v3.4
     }
@@ -1211,7 +1211,7 @@ bool Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
 
     StaticJsonDocument<EMSESP_JSON_SIZE_XLARGE> doc; // 1024 is not enough
 
-    doc["~"]             = mqtt_base_;
+    doc["~"]             = Mqtt::base();
     doc["uniq_id"]       = uniq_id_s;
     doc["obj_id"]        = uniq_id_s; // same as uniq_id
     doc["name"]          = name_s;
@@ -1278,7 +1278,7 @@ void Mqtt::add_avty_to_doc(const char * state_t, const JsonObject & doc, const c
 
     StaticJsonDocument<512> avty_json;
 
-    snprintf(tpl, sizeof(tpl), "%s/status", mqtt_base_.c_str());
+    snprintf(tpl, sizeof(tpl), "%s/status", Mqtt::base().c_str());
     avty_json["t"] = tpl;
     snprintf(tpl, sizeof(tpl), tpl_draft, "value == 'online'");
     avty_json["val_tpl"] = tpl;
