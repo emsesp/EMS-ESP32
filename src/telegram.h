@@ -33,8 +33,8 @@
 
 #include "helpers.h"
 
-#define MAX_RX_TELEGRAMS 10 // size of Rx queue
-#define MAX_TX_TELEGRAMS 50 // size of Tx queue
+#define MAX_RX_TELEGRAMS 10  // size of Rx queue
+#define MAX_TX_TELEGRAMS 100 // size of Tx queue
 
 // default values for null values
 static constexpr uint8_t  EMS_VALUE_BOOL          = 0xFF;       // used to mark that something is a boolean
