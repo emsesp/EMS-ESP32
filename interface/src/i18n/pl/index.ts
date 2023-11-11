@@ -126,7 +126,7 @@ const pl: BaseTranslation = {
   BYPASS_TOKEN: 'Pomiń autoryzację tokenem w wywołaniach API',
   READONLY: 'Tryb pracy "tylko do odczytu" (blokuje wszystkie komendy zapisu na magistralę EMS)',
   UNDERCLOCK_CPU: 'Obniż taktowanie CPU',
-  HEATINGOFF: 'Start boiler with forced heating off', // TODO translate
+  HEATINGOFF: 'Uruchom boiler z wymuszonym wyłączonym grzaniem', 
   ENABLE_SHOWER_TIMER: 'Aktywuj minutnik prysznica',
   ENABLE_SHOWER_ALERT: 'Aktywuj alarm prysznica',
   TRIGGER_TIME: 'Wyzwalaj po czasie',
@@ -281,15 +281,15 @@ const pl: BaseTranslation = {
   SCAN_AGAIN: 'Skanuj ponownie',
   NETWORK_SCANNER: 'Skaner sieci WiFi',
   NETWORK_NO_WIFI: 'Brak sieci WiFi w zasięgu',
-  NETWORK_BLANK_SSID: 'pozostaw puste aby wyłączyć WiFi', // and enable ETH // TODO translate
-  NETWORK_BLANK_BSSID: 'leave blank to use only SSID', // TODO translate
+  NETWORK_BLANK_SSID: 'pozostaw puste aby wyłączyć WiFi i włączyć ETH',
+  NETWORK_BLANK_BSSID: 'pozostaw puste aby używać tylko SSID',
   TX_POWER: 'Moc nadawania',
   HOSTNAME: 'Nazwa w sieci',
   NETWORK_DISABLE_SLEEP: 'Wyłącz tryb uśpienia WiFi',
   NETWORK_LOW_BAND: 'Używaj mniejszej szerokości pasma WiFi (20MHz)',
   NETWORK_USE_DNS: 'Włącz wsparcie dla mDNS',
   NETWORK_ENABLE_CORS: 'Włącz wsparcie dla CORS',
-  NETWORK_CORS_ORIGIN: 'CORS origin',
+  NETWORK_CORS_ORIGIN: 'CORS Origin',
   NETWORK_ENABLE_IPV6: 'Włącz wsparcie dla IPv6',
   NETWORK_FIXED_IP: 'Użyj stałego adresu IP',
   NETWORK_GATEWAY: 'Brama',
@@ -323,14 +323,14 @@ const pl: BaseTranslation = {
   WRITEABLE: 'zapisywalna',
   SHOWING: 'Wyświetlane',
   SEARCH: 'Szukaj',
-  CERT: 'TLS root certificate (leave blank to disable TLS)', // TODO translate
-  ON: 'On', // TODO translate
-  OFF: 'Off', // TODO translate
-  POLARITY: 'Polarity', // TODO translate
-  ACTIVEHIGH: 'Active High', // TODO translate
-  ACTIVELOW: 'Active Low', // TODO translate
-  UNCHANGED: 'Unchanged', // TODO translate
-  ALWAYS: 'Always' // TODO translate
+  CERT: 'Certyfikat główny TLS (pozostaw puste zby wyłączyć TLS)',
+  ON: 'włączony', 
+  OFF: 'wyłączony',
+  POLARITY: 'Typ przekaźnika',
+  ACTIVEHIGH: 'Wyzwalany stanem wysokim', 
+  ACTIVELOW: 'Wyzwalany stanem niskim', 
+  UNCHANGED: 'Zachowaj stan', 
+  ALWAYS: 'Zawsze' 
 };
 
 export default pl;
