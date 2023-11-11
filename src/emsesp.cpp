@@ -481,7 +481,7 @@ void EMSESP::publish_all(bool force) {
         publish_device_values(EMSdevice::DeviceType::SOLAR);
         publish_device_values(EMSdevice::DeviceType::MIXER);
         publish_device_values(EMSdevice::DeviceType::WATER);
-        publish_other_values(); // switch and heat pump, ...
+        publish_other_values();      // switch and heat pump, ...
         publish_sensor_values(true); // includes temperature and analog sensors
         system_.send_heartbeat();
     }
