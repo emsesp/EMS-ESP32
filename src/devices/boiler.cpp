@@ -98,12 +98,6 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(netFlowTemp),
                               DeviceValueUOM::DEGREES);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &retTemp_,
-                              DeviceValueType::USHORT,
-                              DeviceValueNumOp::DV_NUMOP_DIV10,
-                              FL_(retTemp),
-                              DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatValve_, DeviceValueType::UINT, FL_(heatValve), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW, &wwValve_, DeviceValueType::UINT, FL_(wwValve), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
@@ -1279,11 +1273,10 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram, curFlowTemp_, 7);
     has_update(telegram, flameCurr_, 19);
     uint16_t rettemp = retTemp_;
-    telegram->read_value(rettemp, 17); // 0 means no sensor
-    if (rettemp == 0) {
-        rettemp = EMS_VALUE_USHORT_NOTSET;
+    telegram->read_value(rettemp, 17); // 0 means no sensor, HIU read it in 0x779
+    if (rettemp != 0) {
+        has_update(retTemp_, rettemp);
     }
-    has_update(retTemp_, rettemp);
 
     uint8_t syspress = sysPress_;
     telegram->read_value(syspress, 21); // 0 means no sensor
