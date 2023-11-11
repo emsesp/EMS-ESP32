@@ -345,15 +345,6 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                   "local");
                           });
 
-    commands->add_command(ShellContext::MAIN, CommandFlags::USER, string_vector{F_(set)}, [](Shell & shell, const std::vector<std::string> & arguments) {
-        to_app(shell).webSettingsService.read([&](WebSettings & settings) {
-            shell.printfln("Language: %s", settings.locale.c_str());
-            shell.printfln(F_(tx_mode_fmt), settings.tx_mode);
-            shell.printfln(F_(bus_id_fmt), settings.ems_bus_id);
-            shell.printfln(F_(board_profile_fmt), settings.board_profile.c_str());
-        });
-    });
-
     //
     // EMS device commands
     //
