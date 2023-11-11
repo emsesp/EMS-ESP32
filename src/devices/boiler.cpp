@@ -1273,8 +1273,8 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram, curFlowTemp_, 7);
     has_update(telegram, flameCurr_, 19);
     uint16_t rettemp = retTemp_;
-    telegram->read_value(rettemp, 17); // 0 means no sensor, HIU have it in 0x779
-    if (rettemp != 0) {
+    telegram->read_value(rettemp, 17); // 0 means no sensor, HIU read it in 0x779
+    if (rettemp != 0 && rettemp !=0x8000) {
         has_update(retTemp_, rettemp);
     }
 
