@@ -615,7 +615,8 @@ void AnalogSensor::publish_values(const bool force) {
                 }
 
                 JsonObject dev = config.createNestedObject("dev");
-                JsonArray  ids = dev.createNestedArray("ids");
+                dev["name"]    = name;
+                JsonArray ids  = dev.createNestedArray("ids");
                 ids.add(Mqtt::basename());
 
                 // add "availability" section

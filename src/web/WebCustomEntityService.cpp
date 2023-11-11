@@ -410,7 +410,8 @@ void WebCustomEntityService::publish(const bool force) {
                 }
             }
             JsonObject dev = config.createNestedObject("dev");
-            JsonArray  ids = dev.createNestedArray("ids");
+            dev["name"]    = Mqtt::basename();
+            JsonArray ids  = dev.createNestedArray("ids");
             ids.add(Mqtt::basename());
 
             // add "availability" section
