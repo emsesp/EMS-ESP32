@@ -65,7 +65,7 @@
     "eslint-plugin-prettier": "alpha",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "preact": "^10.18.2",
+    "preact": "^10.19.1",
     "prettier": "^3.0.3",
     "rollup-plugin-visualizer": "^5.9.2",
     "terser": "^5.24.0",
