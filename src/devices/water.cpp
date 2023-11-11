@@ -37,18 +37,18 @@ Water::Water(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         register_telegram_type(0x07A6, "SM100wwParam", true, MAKE_PF_CB(process_SM100wwParam));
         register_telegram_type(0x07AE, "SM100wwKeepWarm", true, MAKE_PF_CB(process_SM100wwKeepWarm));
         register_telegram_type(0x07E0, "SM100wwStatus2", true, MAKE_PF_CB(process_SM100wwStatus2));
+        register_telegram_type(0x07AD, "SM100ValveStatus", false, MAKE_PF_CB(process_SM100ValveStatus));
         // device values...
-        register_device_value(tag, &wwTemp_1_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp1), DeviceValueUOM::DEGREES);
-        // register_device_value(tag, &wwTemp_2_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp2), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &wwTemp_3_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp3), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &wwTemp_4_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp4), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &wwTemp_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &wwTemp2_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwStorageTemp1), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &wwColdTemp_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwColdTemp), DeviceValueUOM::DEGREES);
         register_device_value(tag, &wwTemp_5_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp5), DeviceValueUOM::DEGREES);
-        // register_device_value(tag, &wwTemp_6_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp6), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &wwTemp_7_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp7), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &wwRetTemp_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(retTemp), DeviceValueUOM::DEGREES);
         register_device_value(tag, &wwPump_, DeviceValueType::BOOL, FL_(wwPump), DeviceValueUOM::NONE);
         register_device_value(tag, &wwMaxTemp_, DeviceValueType::UINT, FL_(wwMaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwMaxTemp));
         register_device_value(tag, &wwSelTemp_, DeviceValueType::UINT, FL_(wwSelTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwSelTemp));
         register_device_value(tag, &wwRedTemp_, DeviceValueType::UINT, FL_(wwRedTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwRedTemp));
+        register_device_value(tag, &wwHotTemp_, DeviceValueType::UINT, FL_(wwHotTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwHotTemp));
         register_device_value(tag, &wwDailyTemp_, DeviceValueType::UINT, FL_(wwDailyTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwDailyTemp));
         register_device_value(tag, &wwDisinfectionTemp_, DeviceValueType::UINT, FL_(wwDisinfectionTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwDisinfectionTemp));
         register_device_value(tag, &wwCirc_, DeviceValueType::BOOL, FL_(wwCirc), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCirc));
@@ -56,7 +56,8 @@ Water::Water(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         register_device_value(tag, &wwKeepWarm_, DeviceValueType::BOOL, FL_(wwKeepWarm), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwKeepWarm));
         register_device_value(tag, &wwStatus2_, DeviceValueType::ENUM, FL_(enum_wwStatus2), FL_(wwStatus2), DeviceValueUOM::NONE);
         register_device_value(tag, &wwPumpMod_, DeviceValueType::UINT, FL_(wwPumpMod), DeviceValueUOM::PERCENT);
-        register_device_value(tag, &wwFlow_, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwFlow), DeviceValueUOM::LMIN);
+        register_device_value(tag, &wwFlow_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwFlow), DeviceValueUOM::LMIN);
+        register_device_value(tag, &wwRetValve_, DeviceValueType::BOOL, FL_(valveReturn), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwKeepWarm));
 
     } else if (device_id >= EMSdevice::EMS_DEVICE_ID_DHW1 && device_id <= EMSdevice::EMS_DEVICE_ID_DHW2) {
         wwc_ = device_id - EMSdevice::EMS_DEVICE_ID_DHW1;
@@ -64,7 +65,7 @@ Water::Water(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         register_telegram_type(0x313 + wwc_, "MMPLUSConfigMessage_WWC", true, MAKE_PF_CB(process_MMPLUSConfigMessage_WWC));
         // register_telegram_type(0x33B + type_offset, "MMPLUSSetMessage_WWC", true, MAKE_PF_CB(process_MMPLUSSetMessage_WWC));
         // device values...
-        register_device_value(tag, &wwFlowTemp_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &wwTemp_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp), DeviceValueUOM::DEGREES);
         register_device_value(tag, &wwStatus_, DeviceValueType::INT, FL_(wwTempStatus), DeviceValueUOM::NONE);
         register_device_value(tag, &wwPump_, DeviceValueType::BOOL, FL_(wwPump), DeviceValueUOM::NONE);
         register_device_value(tag, &wwMaxTemp_, DeviceValueType::UINT, FL_(wwMaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwMaxTemp));
@@ -83,8 +84,8 @@ Water::Water(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         // register_telegram_type(0x10D, "wwNTCStatus", false, MAKE_PF_CB(process_wwNTCStatus));
         // device values...
         register_device_value(tag, &wwSelTemp_, DeviceValueType::UINT, FL_(wwSelTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwSelTemp));
-        register_device_value(tag, &wwTemp_1_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp1), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &wwTemp_2_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp2), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &wwTemp_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &wwTemp2_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwCurTemp2), DeviceValueUOM::DEGREES);
         register_device_value(tag, &HydrTemp_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hydrTemp), DeviceValueUOM::DEGREES);
         register_device_value(tag, &wwPump_, DeviceValueType::BOOL, FL_(wwPump), DeviceValueUOM::NONE);
         register_device_value(tag, &wwFlowTempOffset_, DeviceValueType::UINT, FL_(wwFlowTempOffset), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_wwFlowTempOffset));
@@ -99,14 +100,14 @@ Water::Water(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
 // SM100wwTemperature - 0x07D6
 // Solar Module(0x2A) -> (0x00), (0x7D6), data: 01 C1 00 00 02 5B 01 AF 01 AD 80 00 01 90
 void Water::process_SM100wwTemperature(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram, wwTemp_1_, 0);  // is *10
-    has_update(telegram, wwTemp_2_, 2);  // is *10 always zero
-    has_update(telegram, wwTemp_3_, 4);  // is *10 TS21
-    has_update(telegram, wwTemp_4_, 6);  // is *10 cold water
-    has_update(telegram, wwTemp_5_, 8);  // is *10
-    has_update(telegram, wwTemp_6_, 10); // is *10 always unset 8000
-    has_update(telegram, wwTemp_7_, 12); // is *10
-    has_update(telegram, wwTemp_8_, 14); // is *10, return temp TS22
+    has_update(telegram, wwTemp_, 0);     // is *10 TS17
+    has_update(telegram, wwFlow_, 2);     // is *10 l/min
+    has_update(telegram, wwTemp2_, 4);    // is *10 TS21
+    has_update(telegram, wwColdTemp_, 6); // is *10 cold water
+    has_update(telegram, wwTemp_5_, 8);   // is *10
+    // has_update(telegram, wwTemp_6_, 10);  // is *10 always unset 8000
+    // has_update(telegram, wwTemp_7_, 12); // is *10, same as wwTemp_1_
+    has_update(telegram, wwRetTemp_, 14); // is *10, return temp TS22
 }
 
 // SM100wwStatus - 0x07AA
@@ -118,10 +119,11 @@ void Water::process_SM100wwStatus(std::shared_ptr<const Telegram> telegram) {
 // SM100wwParam - 0x07A6, Solar Module(0x2A) -> (0x00)
 // data: FF 05 0F 5F 00 01 3C 3C 3C 3C 28 12 46 01 3C 1E 03 07 3C 00 0F 00 05
 void Water::process_SM100wwParam(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, wwDailyTemp_, 6);
+    has_update(telegram, wwHotTemp_, 7);
     has_update(telegram, wwMaxTemp_, 8);
     has_update(telegram, wwSelTemp_, 9);
     has_update(telegram, wwRedTemp_, 10);
-    has_update(telegram, wwDailyTemp_, 6);
     has_update(telegram, wwDisinfectionTemp_, 12);
     // (daily heating time thermostat 2F5, offset 9, offset 8 on/off)
 }
@@ -139,6 +141,12 @@ void Water::process_SM100wwKeepWarm(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, wwKeepWarm_, 0);
 }
 
+// SM100ValveStatus - 0x7AD, valveStatus
+// Thermostat(0x10) -> Solar(0x2A), ?(0x7AD), data:
+void Water::process_SM100ValveStatus(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, wwRetValve_, 1);
+}
+
 /*
 // SM100ww? - 0x7E0, some kind of status
 // data: 00 00 46 00 00 01 06 0E 06 0E 00 00 00 00 00 03 03 03 03
@@ -146,7 +154,7 @@ void Water::process_SM100wwKeepWarm(std::shared_ptr<const Telegram> telegram) {
 // status2 = 03:"no heat", 06:"heat request", 08:"disinfecting", 09:"hold"
 */
 void Water::process_SM100wwStatus2(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram, wwFlow_, 7);
+    // has_update(telegram, wwFlow_, 7); // single byte, wrong see #1387
     has_update(telegram, wwStatus2_, 8);
     has_update(telegram, wwPumpMod_, 9);
 }
@@ -168,7 +176,7 @@ void Water::process_SM100wwCommand(std::shared_ptr<const Telegram> telegram) {
 // e.g. A9 00 FF 00 02 32 02 6C 00 3C 00 3C 3C 46 02 03 03 00 3C // on 0x28
 //      A8 00 FF 00 02 31 02 35 00 3C 00 3C 3C 46 02 03 03 00 3C // in 0x29
 void Water::process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram, wwFlowTemp_, 0); // is * 10
+    has_update(telegram, wwTemp_, 0); // is * 10
     has_bitupdate(telegram, wwPump_, 2, 0);
     has_update(telegram, wwStatus_, 11); // temp status
 }
@@ -200,8 +208,8 @@ void Water::process_MMPLUSSetMessage_WWC(std::shared_ptr<const Telegram> telegra
 // Mixer(0x41) -> All(0x00), UBAMonitorWW(0x34), data: 37 02 1E 02 1E 00 00 00 00
 void Water::process_IPMMonitorWW(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, wwSelTemp_, 0);
-    has_update(telegram, wwTemp_1_, 1);
-    has_update(telegram, wwTemp_2_, 3);
+    has_update(telegram, wwTemp_, 1);
+    has_update(telegram, wwTemp2_, 3);
     has_bitupdate(telegram, wwPump_, 5, 3);
 }
 
@@ -271,6 +279,15 @@ bool Water::set_wwRedTemp(const char * value, const int8_t id) {
     } else { // SM100
         write_command(0x7A6, 10, (uint8_t)temperature, 0x7A6);
     }
+    return true;
+}
+
+bool Water::set_wwHotTemp(const char * value, const int8_t id) {
+    int temperature;
+    if (!Helpers::value2temperature(value, temperature)) {
+        return false;
+    }
+    write_command(0x7A6, 7, (uint8_t)temperature, 0x7A6);
     return true;
 }
 

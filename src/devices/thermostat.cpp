@@ -976,7 +976,7 @@ void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) 
 
     has_update(telegram, hc->roomTemp, 0); // is * 10
     has_bitupdate(telegram, hc->modetype, 10, 1);
-    has_bitupdate(telegram, hc->mode, 10, 0); // bit 1, mode (auto=1 or manual=0)
+    // has_bitupdate(telegram, hc->mode, 10, 0); // bit 1, mode (auto=1 or manual=0)
 
     // if manual, take the current setpoint temp at pos 6
     // if auto, take the next setpoint temp at pos 7
@@ -1023,6 +1023,7 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
 
     // check why mode is both in the Monitor and Set for the RC300. It'll be read twice!
     // has_update(telegram, hc->mode, 0); // Auto = xFF, Manual = x00 eg. 10 00 FF 08 01 B9 FF
+    has_update(telegram, hc->mode, 21); // 0-off, 1-manual, 2-auto
     has_update(telegram, hc->daytemp, 2);   // is * 2
     has_update(telegram, hc->nighttemp, 4); // is * 2
 
@@ -2552,13 +2553,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
         break;
     case EMSdevice::EMS_DEVICE_FLAG_RC300:
     case EMSdevice::EMS_DEVICE_FLAG_RC100:
-        offset          = EMS_OFFSET_RCPLUSSet_mode;
-        validate_typeid = monitor_typeids[hc_p];
-        if (mode == HeatingCircuit::Mode::AUTO) {
-            set_mode_value = 0xFF; // special value for auto
-        } else {
-            set_mode_value = 0; // everything else, like manual/day etc..
-        }
+        offset = EMS_OFFSET_RCPLUSSet_mode;
         break;
     case EMSdevice::EMS_DEVICE_FLAG_JUNKERS:
         if (has_flags(EMS_DEVICE_FLAG_JUNKERS_OLD)) {

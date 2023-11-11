@@ -33,14 +33,15 @@ class Water : public EMSdevice {
     uint8_t wwc_;
 
     // SM100wwTemperature - 0x07D6
-    uint16_t wwTemp_1_;
-    uint16_t wwTemp_2_;
-    uint16_t wwTemp_3_;
-    uint16_t wwTemp_4_;
+    uint16_t wwTemp_;
+    uint16_t wwFlow_;
+    uint16_t wwTemp2_;
+    uint16_t wwColdTemp_;
     uint16_t wwTemp_5_;
-    uint16_t wwTemp_6_;
-    uint16_t wwTemp_7_;
-    uint16_t wwTemp_8_;
+    uint16_t wwRetTemp_;
+
+    // SM100ValveStatus - 0x07AD
+    uint8_t wwRetValve_; // VS5
 
     // SM100wwStatus - 0x07AA
     uint8_t wwPump_;
@@ -51,6 +52,7 @@ class Water : public EMSdevice {
     uint8_t wwRedTemp_;
     uint8_t wwDailyTemp_;
     uint8_t wwDisinfectionTemp_;
+    uint8_t wwHotTemp_;
 
     // SM100wwKeepWarm - 0x07AE
     uint8_t wwKeepWarm_;
@@ -60,13 +62,11 @@ class Water : public EMSdevice {
     uint8_t wwCircMode_;
 
     // SM100wwStatus2 - 0x07E0
-    uint8_t wwFlow_;
     uint8_t wwPumpMod_;
     uint8_t wwStatus2_;
 
     // mixer
     uint8_t  wwStatus_;
-    uint16_t wwFlowTemp_;
     int8_t   wwDiffTemp_;
     uint8_t  wwRequiredTemp_;
 
@@ -84,6 +84,7 @@ class Water : public EMSdevice {
     void process_SM100wwCirc(std::shared_ptr<const Telegram> telegram);
     void process_SM100wwParam(std::shared_ptr<const Telegram> telegram);
     void process_SM100wwKeepWarm(std::shared_ptr<const Telegram> telegram);
+    void process_SM100ValveStatus(std::shared_ptr<const Telegram> telegram);
 
     void process_MMPLUSStatusMessage_WWC(std::shared_ptr<const Telegram> telegram);
     void process_MMPLUSSetMessage_WWC(std::shared_ptr<const Telegram> telegram);
@@ -97,6 +98,7 @@ class Water : public EMSdevice {
     bool set_wwSelTemp(const char * value, const int8_t id);
     bool set_wwMaxTemp(const char * value, const int8_t id);
     bool set_wwRedTemp(const char * value, const int8_t id);
+    bool set_wwHotTemp(const char * value, const int8_t id);
     bool set_wwCirc(const char * value, const int8_t id);
     bool set_wwCircMode(const char * value, const int8_t id);
     bool set_wwKeepWarm(const char * value, const int8_t id);
