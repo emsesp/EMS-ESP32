@@ -275,11 +275,17 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     bool ok = false;
 
     if (command == "general") {
-        shell.printfln("Testing adding a general boiler & thermostat...");
+        shell.printfln("Testing adding a boiler, thermostat and sensors...");
         run_test("general");
+
+        // add sensors
+        emsesp::EMSESP::analogsensor_.test();
+        emsesp::EMSESP::temperaturesensor_.test();
+
         // shell.invoke_command("show devices");
         shell.invoke_command("show values");
-        shell.invoke_command("call system publish");
+        shell.invoke_command("call system values");
+        // shell.invoke_command("call system publish");
         // shell.invoke_command("show mqtt");
         ok = true;
     }
