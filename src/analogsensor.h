@@ -156,6 +156,9 @@ class AnalogSensor {
     bool get_value_info(JsonObject & output, const char * cmd, const int8_t id) const;
     void store_counters();
 
+    bool command_info(const char * value, const int8_t id, JsonObject & output) const;
+
+
 #if defined(EMSESP_TEST)
     void test();
 #endif
@@ -169,7 +172,6 @@ class AnalogSensor {
     void remove_ha_topic(const int8_t type, const uint8_t id) const;
     bool command_setvalue(const char * value, const int8_t gpio);
     void measure();
-    bool command_info(const char * value, const int8_t id, JsonObject & output) const;
     bool command_commands(const char * value, const int8_t id, JsonObject & output);
 
     std::vector<Sensor> sensors_; // our list of sensors
