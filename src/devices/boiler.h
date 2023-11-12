@@ -154,6 +154,7 @@ class Boiler : public EMSdevice {
     uint16_t heatblock_;  // see #1317
 
     // info
+    uint32_t upTimeTotal_;               // Operating time
     uint32_t upTimeControl_;             // Operating time control
     uint32_t upTimeCompHeating_;         // Operating time compressor heating
     uint32_t upTimeCompCooling_;         // Operating time compressor cooling
