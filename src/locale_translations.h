@@ -450,6 +450,7 @@ MAKE_TRANSLATION(elHeatStep3, "elheatstep3", "el. heater step 3", "El. Heizer St
 MAKE_TRANSLATION(wwAlternatingOper, "wwalternatingop", "alternating operation", "Wechselbetrieb", "Wisselbedrijf ww", "", "praca naprzemienna", "alternativ drift", "", "sıcak kullanım suyu alternatif işletim", "funzionamento alternato") // TODO translate
 MAKE_TRANSLATION(wwAltOpPrioHeat, "wwaltopprioheat", "prioritise heating during dhw", "Heizen bevorzugt vor WW", "Proriteit verwarming boven ww", "", "czas na ogrzewanie w trakcie c.w.u", "prioritert oppvarmning", "", "sıcak kullanım suyu esnasında ısıtmayı öne al", "dare la priorità al riscaldamento durante l'ACS") // TODO translate
 MAKE_TRANSLATION(wwAltOpPrioWw, "wwaltopprioww", "prioritise dhw during heating", "WW bevorzugt vor Heizen", "Prioriteit ww boven verwarming", "", "czas na c.w.u w trakcie ogrzewania", "prioritert varmtvann", "", "ısıtma esnasında sıcak kullanım suyunu öne al", "dare priorità all'acqua calda durante il riscaldamento") // TODO translate
+MAKE_TRANSLATION(hpEA0, "hpea0", "condensate reservoir heating (EA0)", "Heizung Kondensatwanne (EA0)", "", "", "", "", "", "", "") // TODO translate
 
 // hybrid heatpump
 MAKE_TRANSLATION(hybridStrategy, "hybridstrategy", "hybrid control strategy", "Hybrid Strategie", "Hybride strategie", "Hybrid kontrollstrategi", "strategia sterowania hybrydowego", "hybrid kontrollstrategi", "stratégie contrôle hybride", "hibrit kontrol stratejisi", "strategia comtrollo ibrido")

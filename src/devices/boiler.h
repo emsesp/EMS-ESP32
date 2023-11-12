@@ -217,6 +217,7 @@ class Boiler : public EMSdevice {
     uint32_t meterTotal_;
     uint32_t meterComp_;
     uint32_t meterEHeat_;
+    uint8_t  hpEA0_;
 
     // Pool unit
     int8_t poolSetTemp_;
