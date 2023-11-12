@@ -718,6 +718,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(elHeatStep3),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_elHeatStep3));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpEA0_, DeviceValueType::BOOL, FL_(hpEA0), DeviceValueUOM::NONE);
         // heatpump DHW settings
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
                               &wwAlternatingOper_,
@@ -771,7 +772,6 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(hpCircPumpWw),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_hpCircPumpWw));
-        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW, &hpEA0_, DeviceValueType::BOOL, FL_(hpEA0), DeviceValueUOM::NONE);
     }
 
     // dhw - DEVICE_DATA_ww topic
