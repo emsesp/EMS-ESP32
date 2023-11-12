@@ -14,6 +14,7 @@ Writeable Text entities have moved from type `sensor` to `text` in Home Assistan
 - option for `forceheatingoff` [#1262](https://github.com/emsesp/EMS-ESP32/issues/1262)
 - shower_data MQTT payload contains the timestamp [#1329](https://github.com/emsesp/EMS-ESP32/issues/1329)
 - HA discovery for writeable text entities [#1337](https://github.com/emsesp/EMS-ESP32/pull/1377)
+- Added 'system values' command that dumps all the EMS device values, plus sensors and any custom entities
 
 ## Fixed
 
