@@ -399,6 +399,12 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(meterEHeat),
                               DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &upTimeTotal_,
+                              DeviceValueType::TIME,
+                              DeviceValueNumOp::DV_NUMOP_DIV60,
+                              FL_(upTimeTotal),
+                              DeviceValueUOM::MINUTES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &upTimeControl_,
                               DeviceValueType::TIME,
                               DeviceValueNumOp::DV_NUMOP_DIV60,
@@ -1489,6 +1495,7 @@ void Boiler::process_UBAInformation(std::shared_ptr<const Telegram> telegram) {
  * 08 00 FF 31 03 94 00 00 00 00 00 00 00 38
  */
 void Boiler::process_UBAEnergySupplied(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, upTimeTotal_, 0);
     has_update(telegram, nrgSuppTotal_, 4);
     has_update(telegram, nrgSuppHeating_, 12);
     has_update(telegram, nrgSuppWw_, 8);
