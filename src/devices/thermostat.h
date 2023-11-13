@@ -41,6 +41,7 @@ class Thermostat : public EMSdevice {
         uint8_t tempautotemp;
         int8_t  remoteseltemp;
         uint8_t mode;
+        uint8_t mode_new;
         uint8_t modetype;
         uint8_t summermode;
         uint8_t holidaymode;
@@ -317,7 +318,8 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_OFFSET_RCPLUSStatusMessage_setpoint     = 3;  // setpoint temp
     static constexpr uint8_t EMS_OFFSET_RCPLUSStatusMessage_curr         = 0;  // current temp
     static constexpr uint8_t EMS_OFFSET_RCPLUSStatusMessage_currsetpoint = 6;  // target setpoint temp
-    static constexpr uint8_t EMS_OFFSET_RCPLUSSet_mode                   = 21; // operation mode(0-off, 1-manual, 2-auto)
+    static constexpr uint8_t EMS_OFFSET_RCPLUSSet_mode                   = 0;  // operation mode(Auto=0xFF, Manual=0x00)
+    static constexpr uint8_t EMS_OFFSET_RCPLUSSet_mode_new               = 21; // operation mode(0-off, 1-manual, 2-auto)
     static constexpr uint8_t EMS_OFFSET_RCPLUSSet_temp_comfort3          = 1;  // comfort3 level
     static constexpr uint8_t EMS_OFFSET_RCPLUSSet_temp_comfort2          = 2;  // comfort2 level
     static constexpr uint8_t EMS_OFFSET_RCPLUSSet_temp_comfort1          = 3;  // comfort1 level
