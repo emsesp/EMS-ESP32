@@ -1021,8 +1021,14 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     // has_update(telegram, hc->selTemp, 8, 1);  // single byte conversion, value is * 2 - auto?
     // has_update(telegram, hc->selTemp, 10, 1); // single byte conversion, value is * 2 - manual
 
-    // check why mode is both in the Monitor and Set for the RC300. It'll be read twice!
-    // has_update(telegram, hc->mode, 0); // Auto = xFF, Manual = x00 eg. 10 00 FF 08 01 B9 FF
+    telegram->read_value(hc->mode_new, 21); // 0-off, 1-manual, 2-auto
+    if (Helpers::hasValue(hc->mode_new)) {
+        has_update(hc->mode, hc->mode_new);
+    } else {
+        uint8_t mode = EMS_VALUE_UINT_NOTSET;
+        telegram->read_value(mode, 0);
+        has_update(hc->mode, mode == 0xFF ? 2 : 1);
+    }
     has_update(telegram, hc->daytemp, 2);   // is * 2
     has_update(telegram, hc->nighttemp, 4); // is * 2
 
@@ -2552,12 +2558,11 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
         break;
     case EMSdevice::EMS_DEVICE_FLAG_RC300:
     case EMSdevice::EMS_DEVICE_FLAG_RC100:
-        offset          = EMS_OFFSET_RCPLUSSet_mode;
-        validate_typeid = monitor_typeids[hc_p];
-        if (mode == HeatingCircuit::Mode::AUTO) {
-            set_mode_value = 0xFF; // special value for auto
+        if (Helpers::hasValue(hc->mode_new)) {
+            offset = EMS_OFFSET_RCPLUSSet_mode;
         } else {
-            set_mode_value = 0; // everything else, like manual/day etc..
+            offset = 0;
+            set_mode_value = set_mode_value == 2 ? 0xFF : 0;
         }
         break;
     case EMSdevice::EMS_DEVICE_FLAG_JUNKERS:
@@ -3599,7 +3604,7 @@ void Thermostat::register_device_values() {
                               &wwDisinfectHour_,
                               DeviceValueType::UINT,
                               DeviceValueNumOp::DV_NUMOP_MUL15,
-                              FL_(wwDisinfectTime),
+                              FL_(wwDisinfectHour),
                               DeviceValueUOM::MINUTES,
                               MAKE_CF_CB(set_wwDisinfectHour),
                               0,
