@@ -387,32 +387,30 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
                 // print line
                 for (JsonPair p : json) {
                     std::string key = p.key().c_str(); // this will be fullname and the shortname in brackets
-                    shell.printf("  %s: ", key.c_str());
-                    JsonVariant data = p.value();
-                    shell.print(COLOR_BRIGHT_GREEN);
-                    shell.print(data.as<std::string>());
 
                     // extract the shortname from the key, which is in brackets
-                    std::size_t first_bracket = key.find_first_of('(');
+                    std::size_t first_bracket = key.find_last_of('(');
                     std::size_t last_bracket  = key.find_last_of(')');
                     std::string shortname     = key.substr(first_bracket + 1, last_bracket - first_bracket - 1);
+                    std::string uom           = emsdevice->get_value_uom(key.substr(first_bracket + 1, last_bracket - first_bracket - 1));
 
-                    // if there is a uom print it
-                    std::string uom = emsdevice->get_value_uom(shortname);
-                    if (uom == "°C" && EMSESP::system_.fahrenheit()) {
-                        uom = "°F";
-                    }
-                    if (!uom.empty()) {
-                        shell.print(' ');
-                        shell.print(uom);
-                    }
-
-                    shell.print(COLOR_RESET);
-                    shell.println();
+                    shell.printfln("  %s: %s%s %s%s", key.c_str(), COLOR_BRIGHT_GREEN, p.value().as<std::string>().c_str(), uom.c_str(), COLOR_RESET);
                 }
                 shell.println();
             }
         }
+    }
+
+    // show any custom entities
+    if (webCustomEntityService.count_entities() > 0) {
+        shell.printfln("Custom entities:");
+        StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> custom_doc; // use max size
+        JsonObject                                  custom_output = custom_doc.to<JsonObject>();
+        webCustomEntityService.show_values(custom_output);
+        for (JsonPair p : custom_output) {
+            shell.printfln("  %s: %s%s%s", p.key().c_str(), COLOR_BRIGHT_GREEN, p.value().as<std::string>().c_str(), COLOR_RESET);
+        }
+        shell.println();
     }
 }
 
