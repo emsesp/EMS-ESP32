@@ -284,7 +284,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         // shell.invoke_command("show devices");
         shell.invoke_command("show values");
-        shell.invoke_command("call system values");
+        shell.invoke_command("call system allvalues");
         // shell.invoke_command("call system publish");
         // shell.invoke_command("show mqtt");
         ok = true;

@@ -70,7 +70,7 @@ MAKE_WORD_TRANSLATION(schedule_cmd, "enable schedule item", "Aktiviere Zeitplan"
 MAKE_WORD_TRANSLATION(entity_cmd, "set custom value on EMS", "Sende eigene Entitäten zu EMS", "verstuur custom waarde naar EMS", "", "wyślij własną wartość na EMS", "", "", "emp üzerinde özel değer ayarla", "imposta valori personalizzati su EMS") // TODO translate
 MAKE_WORD_TRANSLATION(commands_response, "get response","Hole Antwort","Verzoek om antwoord", "", "", "", "gelen cevap", "") // TODO translate
 MAKE_WORD_TRANSLATION(coldshot_cmd, "send a cold shot of water", "", "", "", "", "", "", "soğuk su gönder", "") // TODO translate
-MAKE_WORD_TRANSLATION(values_cmd, "show all values", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_WORD_TRANSLATION(allvalues_cmd, "output all values", "", "", "", "", "", "", "", "") // TODO translate
 
 // tags
 MAKE_WORD_TRANSLATION(tag_boiler_data_ww, "dhw", "WW", "dhw", "VV", "CWU", "dhw", "ecs", "SKS", "dhw")

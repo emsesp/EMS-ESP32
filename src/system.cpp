@@ -106,9 +106,9 @@ bool System::command_response(const char * value, const int8_t id, JsonObject & 
     return true;
 }
 
-// output all the EMS devices and their values, plus the sensors and any custom things
-// basically dump everything we know about
-bool System::command_values(const char * value, const int8_t id, JsonObject & output) {
+// output all the EMS devices and their values, plus the sensors and any custom entities
+// not scheduler as these are records with no output data
+bool System::command_allvalues(const char * value, const int8_t id, JsonObject & output) {
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXXLARGE);
     JsonObject          device_output;
 
@@ -794,7 +794,7 @@ void System::commands_init() {
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info, FL_(system_info_cmd));
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(commands), System::command_commands, FL_(commands_cmd));
     Command::add(EMSdevice::DeviceType::SYSTEM, F("response"), System::command_response, FL_(commands_response));
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(values), System::command_values, FL_(values_cmd));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F("allvalues"), System::command_allvalues, FL_(allvalues_cmd));
 
 
     // MQTT subscribe "ems-esp/system/#"
