@@ -1808,7 +1808,8 @@ bool EMSdevice::handle_telegram(std::shared_ptr<const Telegram> telegram) {
 #if defined(EMSESP_DEBUG)
                 EMSESP::logger().debug("This telegram (%s) is not recognized by the EMS bus", tf.telegram_type_name_);
 #endif
-                tf.fetch_ = false;
+                // test if this causes issue: https://github.com/emsesp/EMS-ESP32/issues/1420
+                // tf.fetch_ = false;
                 return false;
             }
             if (telegram->message_length > 0) {
