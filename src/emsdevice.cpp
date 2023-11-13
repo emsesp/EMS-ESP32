@@ -347,6 +347,16 @@ bool EMSdevice::is_fetch(uint16_t telegram_id) const {
     return false;
 }
 
+// get received status of telegramID
+bool EMSdevice::is_received(uint16_t telegram_id) const {
+    for (const auto & tf : telegram_functions_) {
+        if (tf.telegram_type_id_ == telegram_id) {
+            return tf.received_;
+        }
+    }
+    return false;
+}
+
 // check for a tag to create a nest
 bool EMSdevice::has_tags(const uint8_t tag) const {
     for (const auto & dv : devicevalues_) {

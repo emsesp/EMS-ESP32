@@ -990,7 +990,7 @@ void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) 
     // summermode is bit 4 for boilers and bit 6 for heatpumps: 0:winter, 1:summer
     telegram->read_value(hc->statusbyte, 2);
     // use summertemp or hpoperatingstate, https://github.com/emsesp/EMS-ESP32/issues/747, #550, #503
-    if ((hc->statusbyte & 1) || !is_fetch(summer2_typeids[hc->hc()])) {
+    if ((hc->statusbyte & 1) || !is_received(summer2_typeids[hc->hc()])) {
         has_update(hc->summermode, hc->statusbyte & 0x50 ? 1 : 0);
         has_update(hc->hpoperatingstate, EMS_VALUE_UINT_NOTSET);
     } else {
@@ -1022,7 +1022,7 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     // has_update(telegram, hc->selTemp, 10, 1); // single byte conversion, value is * 2 - manual
 
     telegram->read_value(hc->mode_new, 21); // 0-off, 1-manual, 2-auto
-    if (Helpers::hasValue(hc->mode_new)) {
+    if (hc->mode_new < 3) {
         has_update(hc->mode, hc->mode_new);
     } else {
         uint8_t mode = EMS_VALUE_UINT_NOTSET;
@@ -1063,7 +1063,7 @@ void Thermostat::process_RC300Summer(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hc->roominfluence, 0);
     has_update(telegram, hc->roominfl_factor, 1); // is * 10
     has_update(telegram, hc->offsettemp, 2);
-    if (!is_fetch(summer2_typeids[hc->hc()])) {
+    if (!is_received(summer2_typeids[hc->hc()])) {
         has_update(telegram, hc->summertemp, 6);
         has_update(telegram, hc->summersetmode, 7);
     }
@@ -2616,7 +2616,7 @@ bool Thermostat::set_summermode(const char * value, const int8_t id) {
 
     uint8_t set;
 
-    if (is_fetch(summer2_typeids[hc->hc()])) {
+    if (is_received(summer2_typeids[hc->hc()])) {
         if ((hc->statusbyte & 1) && Helpers::value2enum(value, set, FL_(enum_summermode))) {
             write_command(summer2_typeids[hc->hc()], 0, set, summer2_typeids[hc->hc()]);
             return true;
@@ -3169,7 +3169,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
         validate_typeid = set_typeids[hc->hc()];
         switch (mode) {
         case HeatingCircuit::Mode::SUMMER:
-            if (is_fetch(summer2_typeids[hc->hc()])) {
+            if (is_received(summer2_typeids[hc->hc()])) {
                 offset     = 0x01;
                 set_typeid = summer2_typeids[hc->hc()];
             } else {
