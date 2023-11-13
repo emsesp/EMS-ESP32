@@ -3604,7 +3604,7 @@ void Thermostat::register_device_values() {
                               &wwDisinfectHour_,
                               DeviceValueType::UINT,
                               DeviceValueNumOp::DV_NUMOP_MUL15,
-                              FL_(wwDisinfectHour),
+                              FL_(wwDisinfectTime),
                               DeviceValueUOM::MINUTES,
                               MAKE_CF_CB(set_wwDisinfectHour),
                               0,
