@@ -52,21 +52,22 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
   public:
     WebCustomEntityService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
 
-    void    begin();
-    void    publish_single(const CustomEntityItem & entity);
-    void    publish(const bool force = false);
-    bool    command_setvalue(const char * value, const std::string name);
-    bool    get_value_info(JsonObject & output, const char * cmd);
-    bool    get_value(std::shared_ptr<const Telegram> telegram);
-    void    fetch();
-    void    render_value(JsonObject & output, CustomEntityItem entity, const bool useVal = false, const bool web = false);
+    void begin();
+    void publish_single(const CustomEntityItem & entity);
+    void publish(const bool force = false);
+    bool command_setvalue(const char * value, const std::string name);
+    bool get_value_info(JsonObject & output, const char * cmd);
+    bool get_value(std::shared_ptr<const Telegram> telegram);
+    void fetch();
+    void render_value(JsonObject & output, CustomEntityItem entity, const bool useVal = false, const bool web = false, const bool add_uom = false);
+    void show_values(JsonObject & output);
+    void generate_value_web(JsonObject & output);
+
     uint8_t count_entities();
     uint8_t has_commands();
-    void    generate_value_web(JsonObject & output);
     void    ha_reset() {
         ha_registered_ = false;
     }
-
 
   private:
     HttpEndpoint<WebCustomEntity>  _httpEndpoint;

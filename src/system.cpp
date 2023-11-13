@@ -106,6 +106,35 @@ bool System::command_response(const char * value, const int8_t id, JsonObject & 
     return true;
 }
 
+// output all the EMS devices and their values, plus the sensors and any custom entities
+// not scheduler as these are records with no output data
+bool System::command_allvalues(const char * value, const int8_t id, JsonObject & output) {
+    DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXXLARGE);
+    JsonObject          device_output;
+
+    for (const auto & device_class : EMSFactory::device_handlers()) {
+        for (const auto & emsdevice : EMSESP::emsdevices) {
+            if (emsdevice->device_type() == device_class.first) {
+                std::string title = emsdevice->device_type_2_device_name_translated() + std::string(" ") + emsdevice->to_string();
+                device_output     = output.createNestedObject(title);
+                emsesp::EMSdevice::export_values(emsdevice->device_type(), device_output, id, EMSdevice::OUTPUT_TARGET::API_VERBOSE);
+            }
+        }
+    }
+
+    // Custom entities
+    device_output = output.createNestedObject("Custom Entities");
+    EMSESP::webCustomEntityService.get_value_info(device_output, "");
+
+    // Sensors
+    device_output = output.createNestedObject("Analog Sensors");
+    EMSESP::analogsensor_.command_info(nullptr, 0, device_output);
+    device_output = output.createNestedObject("Temperature Sensors");
+    EMSESP::temperaturesensor_.command_info(nullptr, 0, device_output);
+
+    return true;
+}
+
 // fetch device values
 bool System::command_fetch(const char * value, const int8_t id) {
     std::string value_s;
@@ -756,6 +785,7 @@ void System::commands_init() {
     // restart and watch (and test) are also exposed as Console commands
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), System::command_restart, FL_(restart_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), System::command_watch, FL_(watch_cmd));
+
 #if defined(EMSESP_TEST)
     Command::add(EMSdevice::DeviceType::SYSTEM, ("test"), System::command_test, FL_(test_cmd));
 #endif
@@ -764,6 +794,8 @@ void System::commands_init() {
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info, FL_(system_info_cmd));
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(commands), System::command_commands, FL_(commands_cmd));
     Command::add(EMSdevice::DeviceType::SYSTEM, F("response"), System::command_response, FL_(commands_response));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F("allvalues"), System::command_allvalues, FL_(allvalues_cmd));
+
 
     // MQTT subscribe "ems-esp/system/#"
     Mqtt::subscribe(EMSdevice::DeviceType::SYSTEM, "system/#", nullptr); // use empty function callback

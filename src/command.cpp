@@ -504,7 +504,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
                 }
                 shell.print(cl);
                 // pad with spaces
-                while (i++ < 22) {
+                while (i++ < 30) {
                     shell.print(' ');
                 }
                 shell.print(COLOR_BRIGHT_CYAN);
@@ -515,7 +515,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
                 shell.print(Helpers::translated_word(cf.description_));
                 if (!cf.has_flags(CommandFlag::ADMIN_ONLY)) {
                     shell.print(' ');
-                    shell.print(COLOR_BRIGHT_RED);
+                    shell.print(COLOR_BRIGHT_GREEN);
                     shell.print('*');
                 }
                 shell.print(COLOR_RESET);
@@ -595,7 +595,7 @@ void Command::show_devices(uuid::console::Shell & shell) {
 // output list of all commands to console
 // calls show with verbose mode set
 void Command::show_all(uuid::console::Shell & shell) {
-    shell.println("Available commands (*=authorization not required): ");
+    shell.printfln("Showing all available commands (%s*%s=authentication not required):", COLOR_BRIGHT_GREEN, COLOR_RESET);
 
     // show system first
     shell.print(COLOR_BOLD_ON);
@@ -609,9 +609,9 @@ void Command::show_all(uuid::console::Shell & shell) {
     shell.print(COLOR_YELLOW);
     shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::CUSTOM));
     shell.println(COLOR_RESET);
-    shell.printf("  info:                 %slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
+    shell.printf("  info:\t\t\t\t%slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
     shell.println(COLOR_RESET);
-    shell.printf("  commands:             %slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
+    shell.printf("  commands:\t\t\t%slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
     shell.print(COLOR_RESET);
     show(shell, EMSdevice::DeviceType::CUSTOM, true);
 
@@ -620,9 +620,9 @@ void Command::show_all(uuid::console::Shell & shell) {
     shell.print(COLOR_YELLOW);
     shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SCHEDULER));
     shell.println(COLOR_RESET);
-    shell.printf("  info:                 %slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
+    shell.printf("  info:\t\t\t\t%slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
     shell.println(COLOR_RESET);
-    shell.printf("  commands:             %slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
+    shell.printf("  commands:\t\t\t%slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
     shell.print(COLOR_RESET);
     show(shell, EMSdevice::DeviceType::SCHEDULER, true);
 

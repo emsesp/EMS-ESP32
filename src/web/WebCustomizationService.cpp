@@ -97,7 +97,7 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
 #ifdef EMSESP_STANDALONE
     // invoke some fake data for testing
     const char *            json = "{\"ts\":[],\"as\":[],\"masked_entities\":[{\"product_id\":123,\"device_id\":8,\"entity_ids\":[\"08heatingactive|my custom "
-                                   "name for heating active\",\"08tapwateractive\"]}]}";
+                                   "name for heating active (HS1)\",\"08tapwateractive\"]}]}";
     StaticJsonDocument<500> doc;
     deserializeJson(doc, json);
     root = doc.as<JsonObject>();

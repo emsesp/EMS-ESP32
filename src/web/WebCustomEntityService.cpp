@@ -182,7 +182,8 @@ bool WebCustomEntityService::command_setvalue(const char * value, const std::str
 }
 
 // output of a single value
-void WebCustomEntityService::render_value(JsonObject & output, CustomEntityItem entity, const bool useVal, const bool web) {
+// if add_uom is true it will add the UOM string to the value
+void WebCustomEntityService::render_value(JsonObject & output, CustomEntityItem entity, const bool useVal, const bool web, const bool add_uom) {
     char        payload[12];
     std::string name = useVal ? "value" : entity.name;
     switch (entity.value_type) {
@@ -201,28 +202,33 @@ void WebCustomEntityService::render_value(JsonObject & output, CustomEntityItem 
         break;
     case DeviceValueType::INT:
         if ((int8_t)entity.value != EMS_VALUE_INT_NOTSET) {
-            output[name] = serialized(Helpers::render_value(payload, entity.factor * (int8_t)entity.value, 2));
+            std::string v = Helpers::render_value(payload, entity.factor * (int8_t)entity.value, 2);
+            output[name]  = add_uom ? serialized(v + ' ' + EMSdevice::uom_to_string(entity.uom)) : serialized(v);
         }
         break;
     case DeviceValueType::UINT:
         if ((uint8_t)entity.value != EMS_VALUE_UINT_NOTSET) {
-            output[name] = serialized(Helpers::render_value(payload, entity.factor * (uint8_t)entity.value, 2));
+            std::string v = Helpers::render_value(payload, entity.factor * (uint8_t)entity.value, 2);
+            output[name]  = add_uom ? serialized(v + ' ' + EMSdevice::uom_to_string(entity.uom)) : serialized(v);
         }
         break;
     case DeviceValueType::SHORT:
         if ((int16_t)entity.value != EMS_VALUE_SHORT_NOTSET) {
-            output[name] = serialized(Helpers::render_value(payload, entity.factor * (int16_t)entity.value, 2));
+            std::string v = Helpers::render_value(payload, entity.factor * (int16_t)entity.value, 2);
+            output[name]  = add_uom ? serialized(v + ' ' + EMSdevice::uom_to_string(entity.uom)) : serialized(v);
         }
         break;
     case DeviceValueType::USHORT:
         if ((uint16_t)entity.value != EMS_VALUE_USHORT_NOTSET) {
-            output[name] = serialized(Helpers::render_value(payload, entity.factor * (uint16_t)entity.value, 2));
+            std::string v = Helpers::render_value(payload, entity.factor * (uint16_t)entity.value, 2);
+            output[name]  = add_uom ? serialized(v + ' ' + EMSdevice::uom_to_string(entity.uom)) : serialized(v);
         }
         break;
     case DeviceValueType::ULONG:
     case DeviceValueType::TIME:
         if (entity.value != EMS_VALUE_ULONG_NOTSET) {
-            output[name] = serialized(Helpers::render_value(payload, entity.factor * entity.value, 2));
+            std::string v = Helpers::render_value(payload, entity.factor * entity.value, 2);
+            output[name]  = add_uom ? serialized(v + ' ' + EMSdevice::uom_to_string(entity.uom)) : serialized(v);
         }
         break;
     case DeviceValueType::STRING:
@@ -236,6 +242,15 @@ void WebCustomEntityService::render_value(JsonObject & output, CustomEntityItem 
     }
 }
 
+// display all custom entities
+// adding each one, with UOM to a json object string
+void WebCustomEntityService::show_values(JsonObject & output) {
+    for (const CustomEntityItem & entity : *customEntityItems) {
+        render_value(output, entity, false, false, true); // with add_uom
+    }
+}
+
+
 // process json output for info/commands and value_info
 bool WebCustomEntityService::get_value_info(JsonObject & output, const char * cmd) {
     EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
@@ -247,11 +262,13 @@ bool WebCustomEntityService::get_value_info(JsonObject & output, const char * cm
         }
         return true;
     }
+
     // if no entries, return empty json
     // https://github.com/emsesp/EMS-ESP32/issues/1297
     if (customEntityItems->size() == 0) {
         return true;
     }
+
     if (strlen(cmd) == 0 || Helpers::toLower(cmd) == F_(values) || Helpers::toLower(cmd) == F_(info)) {
         // list all names
         for (const CustomEntityItem & entity : *customEntityItems) {
