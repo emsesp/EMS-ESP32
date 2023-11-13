@@ -348,15 +348,6 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                   "local");
                           });
 
-    commands->add_command(ShellContext::MAIN, CommandFlags::USER, string_vector{F_(set)}, [](Shell & shell, const std::vector<std::string> & arguments) {
-        to_app(shell).webSettingsService.read([&](WebSettings & settings) {
-            shell.printfln("Language: %s", settings.locale.c_str());
-            shell.printfln(F_(tx_mode_fmt), settings.tx_mode);
-            shell.printfln(F_(bus_id_fmt), settings.ems_bus_id);
-            shell.printfln(F_(board_profile_fmt), settings.board_profile.c_str());
-        });
-    });
-
     //
     // EMS device commands
     //
@@ -609,12 +600,13 @@ void EMSESPShell::stopped() {
 // show welcome banner
 void EMSESPShell::display_banner() {
     println();
-    printfln("┌────────────────────────────────────────┐");
-    printfln("│ %sEMS-ESP version %-12s%s           │", COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_BOLD_OFF);
-    printfln("│ %s%shttps://github.com/emsesp/EMS-ESP32%s    │", COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
-    printfln("│                                        │");
-    printfln("│ type %shelp%s to show available commands   │", COLOR_UNDERLINE, COLOR_RESET);
-    printfln("└────────────────────────────────────────┘");
+    printfln("┌───────────────────────────────────────┐");
+    printfln("│ %sEMS-ESP version %-12s%s          │", COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_BOLD_OFF);
+    printfln("│ %s%shttps://github.com/emsesp/EMS-ESP32%s   │", COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
+    printfln("│                                       │");
+    printfln("│ type %shelp%s to show available commands  │", COLOR_UNDERLINE, COLOR_RESET);
+    printfln("│ use %ssu%s to access Admin commands       │", COLOR_UNDERLINE, COLOR_RESET);
+    printfln("└───────────────────────────────────────┘");
     println();
 
     // set console name

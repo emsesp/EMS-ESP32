@@ -827,29 +827,9 @@ void EMSdevice::publish_value(void * value_p) const {
 }
 
 // looks up the UOM for a given key from the device value table
-// key is the fullname
-std::string EMSdevice::get_value_uom(const char * key) const {
-    // the key may have a TAG string prefixed at the beginning. If so, remove it
-    char new_key[80];
-    strlcpy(new_key, key, sizeof(new_key));
-    char * key_p = new_key;
-
-    for (uint8_t i = 0; i < DeviceValue::NUM_TAGS; i++) {
-        auto tag = Helpers::translated_word(DeviceValue::DeviceValueTAG_s[i]);
-        if (tag) {
-            std::string key2   = key; // copy string to a std::string so we can use the find function
-            uint8_t     length = strlen(tag);
-            if ((key2.find(tag) != std::string::npos) && (key[length] == ' ')) {
-                key_p += length + 1; // remove the tag
-                break;
-            }
-        }
-    }
-
-    // look up key in our device value list
+std::string EMSdevice::get_value_uom(const std::string & shortname) const {
     for (const auto & dv : devicevalues_) {
-        auto fullname = dv.get_fullname();
-        if ((!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && !fullname.empty()) && (fullname == key_p)) {
+        if ((!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE)) && (dv.short_name == shortname)) {
             // ignore TIME since "minutes" is already added to the string value
             if ((dv.uom == DeviceValueUOM::NONE) || (dv.uom == DeviceValueUOM::MINUTES)) {
                 break;
@@ -859,6 +839,43 @@ std::string EMSdevice::get_value_uom(const char * key) const {
     }
 
     return std::string{}; // not found
+}
+
+bool EMSdevice::export_values(uint8_t device_type, JsonObject & output, const int8_t id, const uint8_t output_target) {
+    bool    has_value = false;
+    uint8_t tag;
+    if (id >= 1 && id <= (1 + DeviceValueTAG::TAG_HS16 - DeviceValueTAG::TAG_HC1)) {
+        tag = DeviceValueTAG::TAG_HC1 + id - 1; // this sets also WWC and HS
+    } else if (id == -1 || id == 0) {
+        tag = DeviceValueTAG::TAG_NONE;
+    } else {
+        return false;
+    }
+
+    if (id > 0 || output_target == EMSdevice::OUTPUT_TARGET::API_VERBOSE) {
+        for (const auto & emsdevice : EMSESP::emsdevices) {
+            if (emsdevice && (emsdevice->device_type() == device_type)) {
+                has_value |= emsdevice->generate_values(output, tag, (id < 1), output_target); // use nested for id -1 and 0
+            }
+        }
+        return has_value;
+    }
+
+    // for nested output add for each tag
+    for (tag = DeviceValueTAG::TAG_BOILER_DATA_WW; tag <= DeviceValueTAG::TAG_HS16; tag++) {
+        JsonObject output_hc    = output;
+        bool       nest_created = false;
+        for (const auto & emsdevice : EMSESP::emsdevices) {
+            if (emsdevice && (emsdevice->device_type() == device_type)) {
+                if (!nest_created && emsdevice->has_tags(tag)) {
+                    output_hc    = output.createNestedObject(EMSdevice::tag_to_mqtt(tag));
+                    nest_created = true;
+                }
+                has_value |= emsdevice->generate_values(output_hc, tag, true, output_target); // use nested for id -1 and 0
+            }
+        }
+    }
+    return has_value;
 }
 
 // prepare array of device values used for the WebUI

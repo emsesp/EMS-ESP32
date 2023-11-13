@@ -4,8 +4,7 @@
 
 ## **IMPORTANT! BREAKING CHANGES**
 
-- move dhw functions from mixer/solar to water
-Writeable Text entities have moved from type `sensor` to `text` in Home Assistant to make them also editable within an HA dashboard. Examples are `datetime`, `holidays`, `switchtime`, `vacations`, `maintenancedate`...). You will need to manually remove any old discovery topics from your MQTT broker using an application like MQTT Explorer.
+Writeable Text entities have moved from type `sensor` to `text` in Home Assistant to make them also editable within an HA dashboard. Examples are `datetime`, `holidays`, `switchtime`, `vacations`, `maintenancedate`... You will need to manually remove any old discovery topics from your MQTT broker using an application like MQTT Explorer.
 
 ## Added
 
@@ -21,6 +20,7 @@ Writeable Text entities have moved from type `sensor` to `text` in Home Assistan
 - optional bssid in network settings
 - extension module EM100 [#1315](https://github.com/emsesp/EMS-ESP32/discussions/1315)
 - digital_out with new options for polarity and startup state
+- Added 'system allvalues' command that dumps all the EMS device values, plus sensors and any custom entities
 
 ## Fixed
 

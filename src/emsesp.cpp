@@ -386,27 +386,31 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
 
                 // print line
                 for (JsonPair p : json) {
-                    const char * key = p.key().c_str();
-                    shell.printf("  %s: ", key);
-                    JsonVariant data = p.value();
-                    shell.print(COLOR_BRIGHT_GREEN);
-                    shell.print(data.as<std::string>());
-                    // if there is a uom print it
-                    std::string uom = emsdevice->get_value_uom(key);
-                    if (uom == "°C" && EMSESP::system_.fahrenheit()) {
-                        uom = "°F";
-                    }
-                    if (!uom.empty()) {
-                        shell.print(' ');
-                        shell.print(uom);
-                    }
+                    std::string key = p.key().c_str(); // this will be fullname and the shortname in brackets
 
-                    shell.print(COLOR_RESET);
-                    shell.println();
+                    // extract the shortname from the key, which is in brackets
+                    std::size_t first_bracket = key.find_last_of('(');
+                    std::size_t last_bracket  = key.find_last_of(')');
+                    std::string shortname     = key.substr(first_bracket + 1, last_bracket - first_bracket - 1);
+                    std::string uom           = emsdevice->get_value_uom(key.substr(first_bracket + 1, last_bracket - first_bracket - 1));
+
+                    shell.printfln("  %s: %s%s %s%s", key.c_str(), COLOR_BRIGHT_GREEN, p.value().as<std::string>().c_str(), uom.c_str(), COLOR_RESET);
                 }
                 shell.println();
             }
         }
+    }
+
+    // show any custom entities
+    if (webCustomEntityService.count_entities() > 0) {
+        shell.printfln("Custom entities:");
+        StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> custom_doc; // use max size
+        JsonObject                                  custom_output = custom_doc.to<JsonObject>();
+        webCustomEntityService.show_values(custom_output);
+        for (JsonPair p : custom_output) {
+            shell.printfln("  %s: %s%s%s", p.key().c_str(), COLOR_BRIGHT_GREEN, p.value().as<std::string>().c_str(), COLOR_RESET);
+        }
+        shell.println();
     }
 }
 
@@ -1174,14 +1178,17 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
         device_type,
         F_(info),
         [device_type](const char * value, const int8_t id, JsonObject & output) {
-            return command_info(device_type, output, id, EMSdevice::OUTPUT_TARGET::API_VERBOSE);
+            return EMSdevice::export_values(device_type, output, id, EMSdevice::OUTPUT_TARGET::API_VERBOSE);
         },
         FL_(info_cmd));
     Command::add(
         device_type,
         F_(values),
         [device_type](const char * value, const int8_t id, JsonObject & output) {
-            return command_info(device_type, output, id, EMSdevice::OUTPUT_TARGET::API_SHORTNAMES); // HIDDEN command showing short names, used in e.g. /api/boiler
+            return EMSdevice::export_values(device_type,
+                                            output,
+                                            id,
+                                            EMSdevice::OUTPUT_TARGET::API_SHORTNAMES); // HIDDEN command showing short names, used in e.g. /api/boiler
         },
         nullptr,
         CommandFlag::HIDDEN); // this command is hidden
@@ -1220,43 +1227,6 @@ bool EMSESP::command_entities(uint8_t device_type, JsonObject & output, const in
 // list all available commands, return as json
 bool EMSESP::command_commands(uint8_t device_type, JsonObject & output, const int8_t id) {
     return Command::list(device_type, output);
-}
-
-// export all values for a specific device
-bool EMSESP::command_info(uint8_t device_type, JsonObject & output, const int8_t id, const uint8_t output_target) {
-    bool    has_value = false;
-    uint8_t tag;
-    if (id >= 1 && id <= (1 + DeviceValueTAG::TAG_HS16 - DeviceValueTAG::TAG_HC1)) {
-        tag = DeviceValueTAG::TAG_HC1 + id - 1; // this sets also WWC and HS
-    } else if (id == -1 || id == 0) {
-        tag = DeviceValueTAG::TAG_NONE;
-    } else {
-        return false;
-    }
-
-    if (id > 0 || output_target == EMSdevice::OUTPUT_TARGET::API_VERBOSE) {
-        for (const auto & emsdevice : emsdevices) {
-            if (emsdevice && (emsdevice->device_type() == device_type)) {
-                has_value |= emsdevice->generate_values(output, tag, (id < 1), output_target); // use nested for id -1 and 0
-            }
-        }
-        return has_value;
-    }
-    // for nested output add for each tag
-    for (tag = DeviceValueTAG::TAG_BOILER_DATA_WW; tag <= DeviceValueTAG::TAG_HS16; tag++) {
-        JsonObject output_hc    = output;
-        bool       nest_created = false;
-        for (const auto & emsdevice : emsdevices) {
-            if (emsdevice && (emsdevice->device_type() == device_type)) {
-                if (!nest_created && emsdevice->has_tags(tag)) {
-                    output_hc    = output.createNestedObject(EMSdevice::tag_to_mqtt(tag));
-                    nest_created = true;
-                }
-                has_value |= emsdevice->generate_values(output_hc, tag, true, output_target); // use nested for id -1 and 0
-            }
-        }
-    }
-    return has_value;
 }
 
 // send a read request, passing it into to the Tx Service, with optional offset and length
