@@ -25,6 +25,7 @@ REGISTER_FACTORY(Extension, EMSdevice::DeviceType::EXTENSION);
 Extension::Extension(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     register_telegram_type(0x935, "EM100SetMessage", true, MAKE_PF_CB(process_EM100SetMessage));
+    register_telegram_type(0x936, "EM100OutMessage", false, MAKE_PF_CB(process_EM100OutMessage));
     register_telegram_type(0x937, "EM100TempMessage", false, MAKE_PF_CB(process_EM100TempMessage));
     register_telegram_type(0x938, "EM100InputMessage", false, MAKE_PF_CB(process_EM100InputMessage));
     register_telegram_type(0x939, "EM100MonitorMessage", false, MAKE_PF_CB(process_EM100MonitorMessage));
@@ -36,7 +37,7 @@ Extension::Extension(uint8_t device_type, uint8_t device_id, uint8_t product_id,
                           DeviceValueNumOp::DV_NUMOP_DIV10,
                           FL_(flowTempVf),
                           DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &input_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(input), DeviceValueUOM::VOLTS);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &input_, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(input), DeviceValueUOM::VOLTS);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &outPower_, DeviceValueType::UINT, FL_(outPower), DeviceValueUOM::PERCENT);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setPower_, DeviceValueType::UINT, FL_(setPower), DeviceValueUOM::PERCENT);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setPoint_, DeviceValueType::UINT, FL_(setPoint), DeviceValueUOM::DEGREES);
@@ -61,7 +62,8 @@ Extension::Extension(uint8_t device_type, uint8_t device_id, uint8_t product_id,
 }
 
 
-// 0x935 needs fetch
+// extension(0x15) -W-> Me(0x0B), EM100SetMessage(0x0935), data: 00 00 64 50 14
+// need to be fetched
 void Extension::process_EM100SetMessage(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, minV_, 1); // Input for off, is / 10
     has_update(telegram, maxV_, 2); // Input for 100%, is / 10
@@ -69,18 +71,22 @@ void Extension::process_EM100SetMessage(std::shared_ptr<const Telegram> telegram
     has_update(telegram, maxT_, 4); // max temp
 }
 
-// alert(0x15) -B-> All(0x00), ?(0x093A), data: 00 00 00 00 00 00 00 00 00 03 01
+// extension(0x15) -B-> All(0x00), ?(0x0936), data: 00 00 00 00 28 00 (offset 1)
+void Extension::process_EM100OutMessage(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, outPower_, 5); // power monitor %
+}
+
+// extension(0x15) -B-> All(0x00), ?(0x093A), data: 00 00 00 00 00 00 00 00 00 03 01
 void Extension::process_EM100ConfigMessage(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, dip_, 9);
 }
 
-// alert(0x15) -B-> All(0x00), ?(0x0938), data: 01 62
+// extension(0x15) -B-> All(0x00), ?(0x0938), data: 01 62
 void Extension::process_EM100InputMessage(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram, outPower_, 0); // IO1
     has_update(telegram, input_, 1);
 }
 
-// alert(0x15) -B-> All(0x00), ?(0x0939), data: 64 4E 00 00
+// extension(0x15) -B-> All(0x00), ?(0x0939), data: 64 4E 00 00
 void Extension::process_EM100MonitorMessage(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, setPower_, 0); // percent
     has_update(telegram, setPoint_, 1); // °C
@@ -88,7 +94,7 @@ void Extension::process_EM100MonitorMessage(std::shared_ptr<const Telegram> tele
     // has_update(telegram, errorPump_, 3);  // IE0
 }
 
-// alert(0x15) -B-> All(0x00), ?(0x0937), data: 80 00
+// extension(0x15) -B-> All(0x00), ?(0x0937), data: 80 00
 void Extension::process_EM100TempMessage(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, headerTemp_, 0);
 }
