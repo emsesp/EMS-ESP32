@@ -29,6 +29,7 @@ class Extension : public EMSdevice {
 
   private:
     void process_EM100SetMessage(std::shared_ptr<const Telegram> telegram);
+    void process_EM100OutMessage(std::shared_ptr<const Telegram> telegram);
     void process_EM100MonitorMessage(std::shared_ptr<const Telegram> telegram);
     void process_EM100TempMessage(std::shared_ptr<const Telegram> telegram);
     void process_EM100InputMessage(std::shared_ptr<const Telegram> telegram);
@@ -41,7 +42,7 @@ class Extension : public EMSdevice {
 
 
     int16_t headerTemp_; // T0
-    int16_t input_;      // IO1
+    uint8_t input_;      // IO1
     uint8_t errorState_; // OE1
     uint8_t errorPump_;  // IE0
     uint8_t outPower_;   // IO1

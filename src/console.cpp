@@ -530,7 +530,14 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
             if (return_code == CommandRet::OK && json.size()) {
                 if (json.containsKey("api_data")) {
                     JsonVariant data = json["api_data"];
-                    shell.println(data.as<const char *>());
+                    if (data.is<int>()) {
+                        shell.printfln("%d", data.as<int>());
+                    } else if (data.is<float>()) {
+                        char s[10];
+                        shell.println(Helpers::render_value(s, data.as<float>(), 1));
+                    } else {
+                        shell.println(data.as<const char *>());
+                    }
                     return;
                 }
                 serializeJsonPretty(doc, shell);

@@ -976,7 +976,8 @@ void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) 
 
     has_update(telegram, hc->roomTemp, 0); // is * 10
     has_bitupdate(telegram, hc->modetype, 10, 1);
-    // has_bitupdate(telegram, hc->mode, 10, 0); // bit 1, mode (auto=1 or manual=0)
+    // auto status, read mode in settings
+    // has_bitupdate(telegram, hc->mode, 10, 0); // bit 0, mode (auto=1 or manual=0)
 
     // if manual, take the current setpoint temp at pos 6
     // if auto, take the next setpoint temp at pos 7
@@ -1022,12 +1023,13 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     // has_update(telegram, hc->selTemp, 10, 1); // single byte conversion, value is * 2 - manual
 
     telegram->read_value(hc->mode_new, 21); // 0-off, 1-manual, 2-auto
-    if (hc->mode_new < 3) {
+    if (hc->mode_new <= 2) {
         has_update(hc->mode, hc->mode_new);
     } else {
-        uint8_t mode = EMS_VALUE_UINT_NOTSET;
-        telegram->read_value(mode, 0);
-        has_update(hc->mode, mode == 0xFF ? 2 : 1);
+        uint8_t mode = hc->mode == 2 ? 0xFF : 0; // auto : manual
+        if (telegram->read_value(mode, 0)) {
+            has_update(hc->mode, mode == 0xFF ? 2 : 1);
+        }
     }
     has_update(telegram, hc->daytemp, 2);   // is * 2
     has_update(telegram, hc->nighttemp, 4); // is * 2
