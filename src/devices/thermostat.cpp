@@ -2919,7 +2919,7 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
         min_on = 0;
         max_on = 1;
     }
-    if (no > 41 || time > 0x90 || ((on < min_on || on > max_on) && on != 7)) {
+    if (no > 41 || time > 0x90 || day > 7 || ((on < min_on || on > max_on) && on != 7)) {
         // LOG_WARNING("Setting switchtime: Invalid data: %s", value);
         // LOG_WARNING("Setting switchtime: Invalid data: %02d.%1d.0x%02X.%1d", no, day, time, on);
         return false;
