@@ -228,17 +228,23 @@ void WebDataService::device_data(AsyncWebServerRequest * request) {
 // assumes the service has been checked for admin authentication
 void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
-        JsonObject dv        = json["devicevalue"];
-        uint8_t    unique_id = json["id"];
+        uint8_t      unique_id = json["id"]; // unique ID
+        const char * cmd       = json["c"];  // the command
+        JsonVariant  data      = json["v"];  // the value in any format
+
+        // quit on bad values
+        if (strlen(cmd) == 0 || data.isNull()) {
+            AsyncWebServerResponse * response = request->beginResponse(400); // bad request
+            request->send(response);
+            return;
+        }
 
         // using the unique ID from the web find the real device type
-        // id is the selected device
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice->unique_id() == unique_id) {
                 // parse the command as it could have a hc or wwc prefixed, e.g. hc2/seltemp
-                const char * cmd = dv["c"];                                // the command
-                int8_t       id  = -1;                                     // default
-                cmd              = Command::parse_command_string(cmd, id); // extract hc or wwc
+                int8_t id = -1;                                     // default
+                cmd       = Command::parse_command_string(cmd, id); // extract hc or wwc
 
                 // create JSON for output
                 auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
@@ -246,9 +252,8 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
 
                 // the data could be in any format, but we need string
                 // authenticated is always true
-                JsonVariant data        = dv["v"]; // the value in any format
-                uint8_t     return_code = CommandRet::NOT_FOUND;
-                uint8_t     device_type = emsdevice->device_type();
+                uint8_t return_code = CommandRet::NOT_FOUND;
+                uint8_t device_type = emsdevice->device_type();
                 if (data.is<const char *>()) {
                     return_code = Command::call(device_type, cmd, data.as<const char *>(), true, id, output);
                 } else if (data.is<int>()) {
@@ -276,16 +281,16 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
                 return;
             }
         }
+
+        // special check for custom entities (which have a unique id of 99)
         if (unique_id == 99) {
             // parse the command as it could have a hc or wwc prefixed, e.g. hc2/seltemp
-            const char * cmd        = dv["c"];
-            int8_t       id         = -1;
-            cmd                     = Command::parse_command_string(cmd, id);
-            auto *      response    = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
-            JsonObject  output      = response->getRoot();
-            JsonVariant data        = dv["v"]; // the value in any format
-            uint8_t     return_code = CommandRet::NOT_FOUND;
-            uint8_t     device_type = EMSdevice::DeviceType::CUSTOM;
+            int8_t id              = -1;
+            cmd                    = Command::parse_command_string(cmd, id);
+            auto *     response    = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
+            JsonObject output      = response->getRoot();
+            uint8_t    return_code = CommandRet::NOT_FOUND;
+            uint8_t    device_type = EMSdevice::DeviceType::CUSTOM;
             if (data.is<const char *>()) {
                 return_code = Command::call(device_type, cmd, data.as<const char *>(), true, id, output);
             } else if (data.is<int>()) {
@@ -302,6 +307,7 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
                 EMSESP::logger().debug("Write command successful");
 #endif
             }
+
             response->setCode((return_code == CommandRet::OK) ? 200 : 400); // bad request
             response->setLength();
             request->send(response);
@@ -309,6 +315,7 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
         }
     }
 
+    // if we reach here, fail
     AsyncWebServerResponse * response = request->beginResponse(400); // bad request
     request->send(response);
 }
