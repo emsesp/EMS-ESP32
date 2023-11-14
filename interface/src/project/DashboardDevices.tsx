@@ -350,7 +350,7 @@ const DashboardDevices: FC = () => {
 
   const deviceValueDialogSave = async (devicevalue: DeviceValue) => {
     const id = Number(device_select.state.id);
-    await writeDeviceValue({ id, devicevalue })
+    await writeDeviceValue({ id, c: devicevalue.c, v: devicevalue.v })
       .then(() => {
         toast.success(LL.WRITE_CMD_SENT());
       })
