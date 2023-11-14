@@ -34,6 +34,7 @@ namespace emsesp {
 
 static QueueHandle_t uart_queue;
 uint8_t              tx_mode_ = 0xFF;
+uint32_t             inverse_mask = 0;
 
 /*
 * receive task, wait for break and call incoming_telegram
@@ -82,8 +83,15 @@ void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t 
             .flow_ctrl  = UART_HW_FLOWCTRL_DISABLE,
             .source_clk = UART_SCLK_APB,
         };
+#if defined(EMSUART_RX_INVERT)
+        inverse_mask |= UART_SIGNAL_RXD_INV;
+#endif
+#if defined(EMSUART_TX_INVERT)
+        inverse_mask |= UART_SIGNAL_TXD_INV;
+#endif
         uart_param_config(EMSUART_NUM, &uart_config);
         uart_set_pin(EMSUART_NUM, tx_gpio, rx_gpio, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+        uart_set_line_inverse(EMSUART_NUM, inverse_mask);
         uart_driver_install(EMSUART_NUM, 129, 0, (EMS_MAXBUFFERSIZE + 1) * 2, &uart_queue, 0); // buffer must be > fifo
         uart_set_rx_full_threshold(EMSUART_NUM, 1);
         uart_set_rx_timeout(EMSUART_NUM, 0); // disable
@@ -136,9 +144,9 @@ uint16_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
             uart_write_bytes(EMSUART_NUM, &buf[i], 1);
             delayMicroseconds(EMSUART_TX_WAIT_PLUS);
         }
-        uart_set_line_inverse(EMSUART_NUM, UART_SIGNAL_TXD_INV);
+        uart_set_line_inverse(EMSUART_NUM, UART_SIGNAL_TXD_INV ^ inverse_mask);
         delayMicroseconds(EMSUART_TX_BRK_PLUS);
-        uart_set_line_inverse(EMSUART_NUM, 0);
+        uart_set_line_inverse(EMSUART_NUM, inverse_mask);
         return EMS_TX_STATUS_OK;
     }
 
@@ -147,9 +155,9 @@ uint16_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
             uart_write_bytes(EMSUART_NUM, &buf[i], 1);
             delayMicroseconds(EMSUART_TX_WAIT_HT3);
         }
-        uart_set_line_inverse(EMSUART_NUM, UART_SIGNAL_TXD_INV);
+        uart_set_line_inverse(EMSUART_NUM, UART_SIGNAL_TXD_INV ^ inverse_mask);
         delayMicroseconds(EMSUART_TX_BRK_HT3);
-        uart_set_line_inverse(EMSUART_NUM, 0);
+        uart_set_line_inverse(EMSUART_NUM, inverse_mask);
         return EMS_TX_STATUS_OK;
     }
 
@@ -164,9 +172,9 @@ uint16_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
             uart_get_buffered_data_len(EMSUART_NUM, &rx1);
         } while ((rx1 == rx0) && (--timeoutcnt));
     }
-    uart_set_line_inverse(EMSUART_NUM, UART_SIGNAL_TXD_INV);
+    uart_set_line_inverse(EMSUART_NUM, UART_SIGNAL_TXD_INV ^ inverse_mask);
     delayMicroseconds(EMSUART_TX_BRK_EMS);
-    uart_set_line_inverse(EMSUART_NUM, 0);
+    uart_set_line_inverse(EMSUART_NUM, inverse_mask);
     return EMS_TX_STATUS_OK;
 }
 

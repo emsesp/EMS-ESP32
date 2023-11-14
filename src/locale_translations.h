@@ -57,7 +57,6 @@ MAKE_WORD_TRANSLATION(ventilation_device, "Ventilation", "Lüftung", "Ventilatie
 
 
 // commands
-// TODO translate
 MAKE_WORD_TRANSLATION(info_cmd, "lists all values", "Liste aller Werte", "lijst van alle waardes", "", "wyświetl wszystkie wartości", "Viser alle verdier", "", "Tüm değerleri listele", "elenca tutti i valori") // TODO translate
 MAKE_WORD_TRANSLATION(commands_cmd, "lists all commands", "Liste aller Kommandos", "lijst van alle commando's", "", "wyświetl wszystkie komendy", "Viser alle kommandoer", "", "Tüm komutları listele", "elencaa tutti i comandi") // TODO translate
 MAKE_WORD_TRANSLATION(entities_cmd, "lists all entities", "Liste aller Entitäten", "lijst van alle entiteiten", "", "wyświetl wszsytkie encje", "Viser alle enheter", "", "Tüm varlıkları listele", "elenca tutte le entità") // TODO translate
@@ -73,6 +72,7 @@ MAKE_WORD_TRANSLATION(schedule_cmd, "enable schedule item", "Aktiviere Zeitplan"
 MAKE_WORD_TRANSLATION(entity_cmd, "set custom value on ems", "Sende eigene Entitäten zu EMS", "verstuur custom waarde naar EMS", "", "wyślij własną wartość na EMS", "", "", "emp üzerinde özel değer ayarla", "imposta valori personalizzati su EMS") // TODO translate
 MAKE_WORD_TRANSLATION(commands_response, "get response","Hole Antwort","Verzoek om antwoord", "", "", "", "uzyskaj odpowiedź", "", "", "gelen cevap", "") // TODO translate
 MAKE_WORD_TRANSLATION(coldshot_cmd, "send a cold shot of water", "", "", "", "uruchom tryśnięcie zimnej wody", "", "", "soğuk su gönder", "") // TODO translate
+MAKE_WORD_TRANSLATION(allvalues_cmd, "output all values", "", "", "", "", "", "", "", "") // TODO translate
 
 // tags
 MAKE_WORD_TRANSLATION(tag_boiler_data_ww, "dhw", "WW", "dhw", "VV", "CWU", "dhw", "ecs", "SKS", "dhw")
