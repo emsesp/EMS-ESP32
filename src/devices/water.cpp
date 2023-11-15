@@ -54,11 +54,12 @@ Water::Water(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         register_device_value(tag, &wwDisinfectionTemp_, DeviceValueType::UINT, FL_(wwDisinfectionTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwDisinfectionTemp));
         register_device_value(tag, &wwCirc_, DeviceValueType::BOOL, FL_(wwCirc), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCirc));
         register_device_value(tag, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_freq), FL_(wwCircMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCircMode));
+        register_device_value(tag, &wwCircTc_, DeviceValueType::BOOL, FL_(wwCircTc), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCircTc));
         register_device_value(tag, &wwKeepWarm_, DeviceValueType::BOOL, FL_(wwKeepWarm), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwKeepWarm));
         register_device_value(tag, &wwStatus2_, DeviceValueType::ENUM, FL_(enum_wwStatus2), FL_(wwStatus2), DeviceValueUOM::NONE);
         register_device_value(tag, &wwPumpMod_, DeviceValueType::UINT, FL_(wwPumpMod), DeviceValueUOM::PERCENT);
         register_device_value(tag, &wwFlow_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwFlow), DeviceValueUOM::LMIN);
-        register_device_value(tag, &wwRetValve_, DeviceValueType::BOOL, FL_(valveReturn), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwKeepWarm));
+        register_device_value(tag, &wwRetValve_, DeviceValueType::UINT, FL_(valveReturn), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_wwRetValve));
         register_device_value(tag, &wwDeltaTRet_, DeviceValueType::UINT, FL_(deltaTRet), DeviceValueUOM::K, MAKE_CF_CB(set_wwDeltaTRet));
         register_device_value(tag, &errorDisp_, DeviceValueType::ENUM, FL_(enum_errorDisp), FL_(errorDisp), DeviceValueUOM::NONE, MAKE_CF_CB(set_errorDisp));
 
@@ -78,7 +79,6 @@ Water::Water(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         register_device_value(tag, &wwRequiredTemp_, DeviceValueType::UINT, FL_(wwRequiredTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwRequiredTemp));
         register_device_value(tag, &wwCirc_, DeviceValueType::BOOL, FL_(wwCirc), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCirc));
         register_device_value(tag, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode), FL_(wwCircMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCircMode));
-        register_device_value(tag, &wwCircTc_, DeviceValueType::BOOL, FL_(wwCircTc), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCircTc));
     } else if (device_id == 0x40) { // flags == EMSdevice::EMS_DEVICE_FLAG_IPM, special DHW pos 10
         wwc_ = 0;
         tag  = DeviceValueTAG::TAG_WWC1;
@@ -425,6 +425,15 @@ bool Water::set_wwHystOff(const char * value, const int8_t id) {
         return false;
     }
     write_command(0x33, 4, n, 0x33);
+    return true;
+}
+
+bool Water::set_wwRetValve(const char * value, const int8_t id) {
+    int n;
+    if (!Helpers::value2number(value, n)) {
+        return false;
+    }
+    write_command(0x7AD, 1, n, 0x7AD);
     return true;
 }
 

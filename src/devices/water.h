@@ -120,6 +120,7 @@ class Water : public EMSdevice {
     bool set_wwHystOff(const char * value, const int8_t id);
 
     bool set_wwDeltaTRet(const char * value, const int8_t id);
+    bool set_wwRetValve(const char * value, const int8_t id);
     bool set_errorDisp(const char * value, const int8_t id);
 };
 
