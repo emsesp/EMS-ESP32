@@ -2563,7 +2563,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
         if (Helpers::hasValue(hc->mode_new)) {
             offset = EMS_OFFSET_RCPLUSSet_mode_new;
         } else {
-            offset = EMS_OFFSET_RCPLUSSet_mode;
+            offset         = EMS_OFFSET_RCPLUSSet_mode;
             set_mode_value = set_mode_value == 2 ? 0xFF : 0;
         }
         break;
