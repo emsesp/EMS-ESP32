@@ -19,6 +19,7 @@ Writeable Text entities have moved from type `sensor` to `text` in Home Assistan
 - heatpump high res energy counters [#1348, #1349. #1350](https://github.com/emsesp/EMS-ESP32/issues/1348)
 - optional bssid in network settings
 - extension module EM100 [#1315](https://github.com/emsesp/EMS-ESP32/discussions/1315)
+- digital_out with new options for polarity and startup state
 - Added 'system allvalues' command that dumps all the EMS device values, plus sensors and any custom entities
 
 ## Fixed
