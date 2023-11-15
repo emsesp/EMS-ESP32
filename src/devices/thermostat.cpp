@@ -976,7 +976,8 @@ void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) 
 
     has_update(telegram, hc->roomTemp, 0); // is * 10
     has_bitupdate(telegram, hc->modetype, 10, 1);
-    has_bitupdate(telegram, hc->mode, 10, 0); // bit 1, mode (auto=1 or manual=0)
+    // auto status, read mode in settings
+    // has_bitupdate(telegram, hc->mode, 10, 0); // bit 0, mode (auto=1 or manual=0)
 
     // if manual, take the current setpoint temp at pos 6
     // if auto, take the next setpoint temp at pos 7
@@ -990,7 +991,7 @@ void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) 
     // summermode is bit 4 for boilers and bit 6 for heatpumps: 0:winter, 1:summer
     telegram->read_value(hc->statusbyte, 2);
     // use summertemp or hpoperatingstate, https://github.com/emsesp/EMS-ESP32/issues/747, #550, #503
-    if ((hc->statusbyte & 1) || !is_fetch(summer2_typeids[hc->hc()])) {
+    if ((hc->statusbyte & 1) || !is_received(summer2_typeids[hc->hc()])) {
         has_update(hc->summermode, hc->statusbyte & 0x50 ? 1 : 0);
         has_update(hc->hpoperatingstate, EMS_VALUE_UINT_NOTSET);
     } else {
@@ -1021,8 +1022,15 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     // has_update(telegram, hc->selTemp, 8, 1);  // single byte conversion, value is * 2 - auto?
     // has_update(telegram, hc->selTemp, 10, 1); // single byte conversion, value is * 2 - manual
 
-    // check why mode is both in the Monitor and Set for the RC300. It'll be read twice!
-    // has_update(telegram, hc->mode, 0); // Auto = xFF, Manual = x00 eg. 10 00 FF 08 01 B9 FF
+    telegram->read_value(hc->mode_new, 21); // 0-off, 1-manual, 2-auto
+    if (hc->mode_new <= 2) {
+        has_update(hc->mode, hc->mode_new);
+    } else {
+        uint8_t mode = hc->mode == 2 ? 0xFF : 0; // auto : manual
+        if (telegram->read_value(mode, 0)) {
+            has_update(hc->mode, mode == 0xFF ? 2 : 1);
+        }
+    }
     has_update(telegram, hc->daytemp, 2);   // is * 2
     has_update(telegram, hc->nighttemp, 4); // is * 2
 
@@ -1057,7 +1065,7 @@ void Thermostat::process_RC300Summer(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hc->roominfluence, 0);
     has_update(telegram, hc->roominfl_factor, 1); // is * 10
     has_update(telegram, hc->offsettemp, 2);
-    if (!is_fetch(summer2_typeids[hc->hc()])) {
+    if (!is_received(summer2_typeids[hc->hc()])) {
         has_update(telegram, hc->summertemp, 6);
         has_update(telegram, hc->summersetmode, 7);
     }
@@ -2552,12 +2560,11 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
         break;
     case EMSdevice::EMS_DEVICE_FLAG_RC300:
     case EMSdevice::EMS_DEVICE_FLAG_RC100:
-        offset          = EMS_OFFSET_RCPLUSSet_mode;
-        validate_typeid = monitor_typeids[hc_p];
-        if (mode == HeatingCircuit::Mode::AUTO) {
-            set_mode_value = 0xFF; // special value for auto
+        if (Helpers::hasValue(hc->mode_new)) {
+            offset = EMS_OFFSET_RCPLUSSet_mode_new;
         } else {
-            set_mode_value = 0; // everything else, like manual/day etc..
+            offset = EMS_OFFSET_RCPLUSSet_mode;
+            set_mode_value = set_mode_value == 2 ? 0xFF : 0;
         }
         break;
     case EMSdevice::EMS_DEVICE_FLAG_JUNKERS:
@@ -2611,7 +2618,7 @@ bool Thermostat::set_summermode(const char * value, const int8_t id) {
 
     uint8_t set;
 
-    if (is_fetch(summer2_typeids[hc->hc()])) {
+    if (is_received(summer2_typeids[hc->hc()])) {
         if ((hc->statusbyte & 1) && Helpers::value2enum(value, set, FL_(enum_summermode))) {
             write_command(summer2_typeids[hc->hc()], 0, set, summer2_typeids[hc->hc()]);
             return true;
@@ -2912,7 +2919,7 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
         min_on = 0;
         max_on = 1;
     }
-    if (no > 41 || time > 0x90 || ((on < min_on || on > max_on) && on != 7)) {
+    if (no > 41 || time > 0x90 || day > 7 || ((on < min_on || on > max_on) && on != 7)) {
         // LOG_WARNING("Setting switchtime: Invalid data: %s", value);
         // LOG_WARNING("Setting switchtime: Invalid data: %02d.%1d.0x%02X.%1d", no, day, time, on);
         return false;
@@ -3164,7 +3171,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
         validate_typeid = set_typeids[hc->hc()];
         switch (mode) {
         case HeatingCircuit::Mode::SUMMER:
-            if (is_fetch(summer2_typeids[hc->hc()])) {
+            if (is_received(summer2_typeids[hc->hc()])) {
                 offset     = 0x01;
                 set_typeid = summer2_typeids[hc->hc()];
             } else {

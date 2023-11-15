@@ -37,9 +37,8 @@ bool Test::run_test(const char * command, int8_t id) {
 
         // simulate HansRemmerswaal's setup - see https://github.com/emsesp/EMS-ESP32/issues/859
         add_device(0x08, 172); // 176 entities - boiler: Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i
-
-        // add_device(0x10, 158); // 62 entities - thermostat: RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410
-        // add_device(0x38, 200); // 4 entities - thermostat: RC100H
+        add_device(0x10, 158); // 62 entities - thermostat: RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410
+        add_device(0x38, 200); // 4 entities - thermostat: RC100H
 
         return true;
     }
@@ -47,8 +46,12 @@ bool Test::run_test(const char * command, int8_t id) {
     if (strcmp(command, "general") == 0) {
         EMSESP::logger().info("Testing general. Adding a Boiler and Thermostat");
 
+        // System::test_set_all_active(true); // uncomment if we want to show all entities and give them fake values
+
         add_device(0x08, 123); // Nefit Trendline
         add_device(0x18, 157); // Bosch CR100
+
+        // add_device(0x10, 158); // RC300 - there's no data here
 
         // add some data
         // Boiler -> Me, UBAMonitorFast(0x18), telegram: 08 00 18 00 00 02 5A 73 3D 0A 10 65 40 02 1A 80 00 01 E1 01 76 0E 3D 48 00 C9 44 02 00 (#data=25)
@@ -275,11 +278,17 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     bool ok = false;
 
     if (command == "general") {
-        shell.printfln("Testing adding a general boiler & thermostat...");
+        shell.printfln("Testing adding a boiler, thermostat and sensors...");
         run_test("general");
+
+        // add sensors
+        emsesp::EMSESP::analogsensor_.test();
+        emsesp::EMSESP::temperaturesensor_.test();
+
         // shell.invoke_command("show devices");
         shell.invoke_command("show values");
-        shell.invoke_command("call system publish");
+        shell.invoke_command("call system allvalues");
+        // shell.invoke_command("call system publish");
         // shell.invoke_command("show mqtt");
         ok = true;
     }

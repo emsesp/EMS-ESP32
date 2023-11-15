@@ -123,7 +123,6 @@ MAKE_WORD_CUSTOM(EMSESP, "EMS-ESP")
 MAKE_WORD_CUSTOM(host_fmt, "Host: %s")
 MAKE_WORD_CUSTOM(port_fmt, "Port: %d")
 MAKE_WORD_CUSTOM(hostname_fmt, "Hostname: %s")
-MAKE_WORD_CUSTOM(board_profile_fmt, "Board Profile: %s")
 MAKE_WORD_CUSTOM(mark_interval_fmt, "Mark interval: %lus")
 MAKE_WORD_CUSTOM(wifi_ssid_fmt, "WiFi SSID: %s")
 MAKE_WORD_CUSTOM(wifi_password_fmt, "WiFi Password: %S")
@@ -303,7 +302,7 @@ MAKE_ENUM(enum_summer, FL_(winter), FL_(summer))
 MAKE_ENUM(enum_operatingstate, FL_(heating), FL_(off), FL_(cooling))
 MAKE_ENUM(enum_hpmode, FL_(heating), FL_(cooling), FL_(heatandcool))
 
-MAKE_ENUM(enum_mode, FL_(manual), FL_(auto))                        // RC100, RC300, RC310
+MAKE_ENUM(enum_mode, FL_(off), FL_(manual), FL_(auto))              // RC100, RC300, RC310
 MAKE_ENUM(enum_mode2, FL_(off), FL_(manual), FL_(auto))             // RC20, RC30
 MAKE_ENUM(enum_mode3, FL_(night), FL_(day), FL_(auto))              // RC35, RC30_N, RC25, RC20_N
 MAKE_ENUM(enum_mode4, FL_(nofrost), FL_(eco), FL_(heat), FL_(auto)) // JUNKERS

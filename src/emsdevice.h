@@ -47,12 +47,13 @@ class EMSdevice {
     // static functions, used outside the class like in console.cpp, command.cpp, emsesp.cpp, mqtt.cpp
     static const char * device_type_2_device_name(const uint8_t device_type);
     static uint8_t      device_name_2_device_type(const char * topic);
-
     static const char * tag_to_string(uint8_t tag, const bool translate = true);
     static const char * uom_to_string(uint8_t uom);
     static const char * tag_to_mqtt(uint8_t tag);
+    static uint8_t      decode_brand(uint8_t value);
+    static bool         export_values(uint8_t device_type, JsonObject & output, const int8_t id, const uint8_t output_target);
 
-    static uint8_t decode_brand(uint8_t value);
+    // non static
 
     const char * device_type_name();                     // returns short non-translated device type name
     const char * device_type_2_device_name_translated(); // returns translated device type name
@@ -213,9 +214,10 @@ class EMSdevice {
     void register_telegram_type(const uint16_t telegram_type_id, const char * telegram_type_name, bool fetch, const process_function_p cb);
     bool handle_telegram(std::shared_ptr<const Telegram> telegram);
 
-    std::string get_value_uom(const char * key) const;
-    bool        get_value_info(JsonObject & root, const char * cmd, const int8_t id);
-    void        get_dv_info(JsonObject & json);
+    std::string get_value_uom(const std::string & shortname) const;
+
+    bool get_value_info(JsonObject & root, const char * cmd, const int8_t id);
+    void get_dv_info(JsonObject & json);
 
     enum OUTPUT_TARGET : uint8_t { API_VERBOSE, API_SHORTNAMES, MQTT, CONSOLE };
     bool generate_values(JsonObject & output, const uint8_t tag_filter, const bool nested, const uint8_t output_target);
@@ -314,6 +316,7 @@ class EMSdevice {
     void fetch_values();
     void toggle_fetch(uint16_t telegram_id, bool toggle);
     bool is_fetch(uint16_t telegram_id) const;
+    bool is_received(uint16_t telegram_id) const;
     bool has_telegram_id(uint16_t id) const;
     void ha_config_clear();
 

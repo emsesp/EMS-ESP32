@@ -211,7 +211,8 @@ void Shower::set_shower_state(bool state, bool force) {
         }
 
         JsonObject dev = doc.createNestedObject("dev");
-        JsonArray  ids = dev.createNestedArray("ids");
+        dev["name"]    = "EMS-ESP";
+        JsonArray ids  = dev.createNestedArray("ids");
         ids.add(Mqtt::basename());
 
         Mqtt::add_avty_to_doc(stat_t, doc.as<JsonObject>()); // add "availability" section
@@ -240,7 +241,8 @@ void Shower::set_shower_state(bool state, bool force) {
         doc["ent_cat"]      = "diagnostic";
 
         JsonObject dev2 = doc.createNestedObject("dev");
-        JsonArray  ids2 = dev2.createNestedArray("ids");
+        dev2["name"]    = "EMS-ESP";
+        JsonArray ids2  = dev2.createNestedArray("ids");
         ids2.add(Mqtt::basename());
 
         Mqtt::add_avty_to_doc(stat_t, doc.as<JsonObject>(), "value_json.duration is defined"); // add "availability" section
@@ -266,7 +268,8 @@ void Shower::set_shower_state(bool state, bool force) {
         doc["ent_cat"] = "diagnostic";
 
         JsonObject dev3 = doc.createNestedObject("dev");
-        JsonArray  ids3 = dev3.createNestedArray("ids");
+        dev3["name"]    = "EMS-ESP";
+        JsonArray ids3  = dev3.createNestedArray("ids");
         ids3.add(Mqtt::basename());
 
         Mqtt::add_avty_to_doc(stat_t, doc.as<JsonObject>(), "value_json.timestamp is defined"); // add "availability" section

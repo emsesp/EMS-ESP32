@@ -730,21 +730,24 @@ bool Mqtt::queue_ha(const char * topic, const JsonObject & payload) {
 bool Mqtt::publish_ha_sensor_config(DeviceValue & dv, const char * model, const char * brand, const bool remove, const bool create_device_config) {
     StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> dev_json;
 
-    // always create the ids
+    // always create the ids (discovery indentifiers)
+    // with the name always
+    // and the manufacturer and model if we're creating the device config for the first entity
     JsonArray ids = dev_json.createNestedArray("ids");
     char      ha_device[40];
     auto      device_type_name = EMSdevice::device_type_2_device_name(dv.device_type);
     snprintf(ha_device, sizeof(ha_device), "%s-%s", Mqtt::basename().c_str(), device_type_name);
     ids.add(ha_device);
 
+    auto cap_name = strdup(device_type_name);
+    Helpers::CharToUpperUTF8(cap_name); // capitalize first letter
+    dev_json["name"] = Mqtt::basename() + " " + cap_name;
+    free(cap_name);
+
     if (create_device_config) {
-        auto cap_name = strdup(device_type_name);
-        Helpers::CharToUpperUTF8(cap_name); // capitalize first letter
-        dev_json["name"]       = Mqtt::basename() + " " + cap_name;
         dev_json["mf"]         = brand;
         dev_json["mdl"]        = model;
         dev_json["via_device"] = "ems-esp";
-        free(cap_name);
     }
 
     // calculate the min and max
@@ -779,7 +782,8 @@ bool Mqtt::publish_system_ha_sensor_config(uint8_t type, const char * name, cons
     StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> doc;
     JsonObject                                 dev_json = doc.createNestedObject("dev");
 
-    JsonArray ids = dev_json.createNestedArray("ids");
+    dev_json["name"] = Mqtt::basename();
+    JsonArray ids    = dev_json.createNestedArray("ids");
     ids.add(Mqtt::basename());
 
     return publish_ha_sensor_config(
@@ -1245,6 +1249,9 @@ bool Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     char ha_device[40];
     snprintf(ha_device, sizeof(ha_device), "%s-thermostat", Mqtt::basename().c_str());
     ids.add(ha_device);
+
+    // device name must be different to the entity name, take the ids value we just created
+    dev["name"] = ha_device;
 
     // add "availability" section
     add_avty_to_doc(topic_t, doc.as<JsonObject>(), seltemp_cond, has_roomtemp ? currtemp_cond : nullptr, hc_mode_cond);
