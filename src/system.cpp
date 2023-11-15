@@ -112,14 +112,10 @@ bool System::command_allvalues(const char * value, const int8_t id, JsonObject &
     DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXXLARGE);
     JsonObject          device_output;
 
-    for (const auto & device_class : EMSFactory::device_handlers()) {
-        for (const auto & emsdevice : EMSESP::emsdevices) {
-            if (emsdevice->device_type() == device_class.first) {
-                std::string title = emsdevice->device_type_2_device_name_translated() + std::string(" ") + emsdevice->to_string();
-                device_output     = output.createNestedObject(title);
-                emsesp::EMSdevice::export_values(emsdevice->device_type(), device_output, id, EMSdevice::OUTPUT_TARGET::API_VERBOSE);
-            }
-        }
+    for (const auto & emsdevice : EMSESP::emsdevices) {
+        std::string title = emsdevice->device_type_2_device_name_translated() + std::string(" ") + emsdevice->to_string();
+        device_output     = output.createNestedObject(title);
+        emsesp::EMSdevice::export_values(emsdevice->unique_id(), device_output, id, EMSdevice::OUTPUT_TARGET::API_VERBOSE);
     }
 
     // Custom entities

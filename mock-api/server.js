@@ -2404,42 +2404,45 @@ rest_server.post(EMSESP_WRITE_ENTITIES_ENDPOINT, (req, res) => {
 });
 
 rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, async (req, res) => {
-  const devicevalue = req.body.devicevalue;
+  const command = req.body.c;
+  const value = req.body.v;
   const id = req.body.id;
   console.log('Write device value for id : ' + id);
-  console.log(' devicedata: ' + JSON.stringify(devicevalue));
+  console.log(' data: ' + JSON.stringify(req.body));
 
   if (id === 1) {
-    objIndex = emsesp_devicedata_1.data.findIndex((obj) => obj.c == devicevalue.c);
-    emsesp_devicedata_1.data[objIndex] = devicevalue;
+    objIndex = emsesp_devicedata_1.data.findIndex((obj) => obj.c == command);
+    emsesp_devicedata_1.data[objIndex].v = value;
   }
   if (id === 2) {
-    objIndex = emsesp_devicedata_2.data.findIndex((obj) => obj.c == devicevalue.c);
-    emsesp_devicedata_2.data[objIndex] = devicevalue;
+    objIndex = emsesp_devicedata_2.data.findIndex((obj) => obj.c == command);
+    emsesp_devicedata_2.data[objIndex].v = value;
   }
   if (id === 3) {
-    objIndex = emsesp_devicedata_3.data.findIndex((obj) => obj.c == devicevalue.c);
-    emsesp_devicedata_3.data[objIndex] = devicevalue;
+    objIndex = emsesp_devicedata_3.data.findIndex((obj) => obj.c == command);
+    emsesp_devicedata_3.data[objIndex].v = value;
   }
   if (id === 4) {
-    objIndex = emsesp_devicedata_4.data.findIndex((obj) => obj.c == devicevalue.c);
-    emsesp_devicedata_4.data[objIndex] = devicevalue;
+    objIndex = emsesp_devicedata_4.data.findIndex((obj) => obj.c == command);
+    emsesp_devicedata_4.data[objIndex].v = value;
   }
   if (id === 5) {
-    objIndex = emsesp_devicedata_5.data.findIndex((obj) => obj.c == devicevalue.c);
-    emsesp_devicedata_5.data[objIndex] = devicevalue;
+    objIndex = emsesp_devicedata_5.data.findIndex((obj) => obj.c == command);
+    emsesp_devicedata_5.data[objIndex].v = value;
   }
   if (id === 6) {
-    objIndex = emsesp_devicedata_6.data.findIndex((obj) => obj.c == devicevalue.c);
-    emsesp_devicedata_6.data[objIndex] = devicevalue;
+    objIndex = emsesp_devicedata_6.data.findIndex((obj) => obj.c == command);
+    emsesp_devicedata_6.data[objIndex].v = value;
   }
   if (id === 7) {
-    objIndex = emsesp_devicedata_7.data.findIndex((obj) => obj.c == devicevalue.c);
-    emsesp_devicedata_7.data[objIndex] = devicevalue;
+    objIndex = emsesp_devicedata_7.data.findIndex((obj) => obj.c == command);
+    emsesp_devicedata_7.data[objIndex].v = value;
   }
+
+  // custom entities
   if (id === 99) {
-    objIndex = emsesp_devicedata_99.data.findIndex((obj) => obj.c == devicevalue.c);
-    emsesp_devicedata_99.data[objIndex] = devicevalue;
+    objIndex = emsesp_devicedata_99.data.findIndex((obj) => obj.c == command);
+    emsesp_devicedata_99.data[objIndex].v = value;
   }
 
   await delay(1000); // wait to show spinner
