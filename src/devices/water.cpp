@@ -33,6 +33,7 @@ Water::Water(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         register_telegram_type(0x07D6, "SM100wwTemperature", false, MAKE_PF_CB(process_SM100wwTemperature));
         register_telegram_type(0x07AA, "SM100wwStatus", false, MAKE_PF_CB(process_SM100wwStatus));
         register_telegram_type(0x07AB, "SM100wwCommand", false, MAKE_PF_CB(process_SM100wwCommand));
+        register_telegram_type(0x07AC, "SM100wwParam1", false, MAKE_PF_CB(process_SM100wwParam2));
         register_telegram_type(0x07A5, "SM100wwCirc", true, MAKE_PF_CB(process_SM100wwCirc));
         register_telegram_type(0x07A6, "SM100wwParam", true, MAKE_PF_CB(process_SM100wwParam));
         register_telegram_type(0x07AE, "SM100wwKeepWarm", true, MAKE_PF_CB(process_SM100wwKeepWarm));
@@ -58,6 +59,8 @@ Water::Water(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         register_device_value(tag, &wwPumpMod_, DeviceValueType::UINT, FL_(wwPumpMod), DeviceValueUOM::PERCENT);
         register_device_value(tag, &wwFlow_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwFlow), DeviceValueUOM::LMIN);
         register_device_value(tag, &wwRetValve_, DeviceValueType::BOOL, FL_(valveReturn), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwKeepWarm));
+        register_device_value(tag, &wwDeltaTRet_, DeviceValueType::UINT, FL_(deltaTRet), DeviceValueUOM::K, MAKE_CF_CB(set_wwDeltaTRet));
+        register_device_value(tag, &errorDisp_, DeviceValueType::ENUM, FL_(enum_errorDisp), FL_(errorDisp), DeviceValueUOM::NONE, MAKE_CF_CB(set_errorDisp));
 
     } else if (device_id >= EMSdevice::EMS_DEVICE_ID_DHW1 && device_id <= EMSdevice::EMS_DEVICE_ID_DHW2) {
         wwc_ = device_id - EMSdevice::EMS_DEVICE_ID_DHW1;
@@ -75,6 +78,7 @@ Water::Water(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         register_device_value(tag, &wwRequiredTemp_, DeviceValueType::UINT, FL_(wwRequiredTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwRequiredTemp));
         register_device_value(tag, &wwCirc_, DeviceValueType::BOOL, FL_(wwCirc), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCirc));
         register_device_value(tag, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode), FL_(wwCircMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCircMode));
+        register_device_value(tag, &wwCircTc_, DeviceValueType::BOOL, FL_(wwCircTc), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCircTc));
     } else if (device_id == 0x40) { // flags == EMSdevice::EMS_DEVICE_FLAG_IPM, special DHW pos 10
         wwc_ = 0;
         tag  = DeviceValueTAG::TAG_WWC1;
@@ -126,6 +130,11 @@ void Water::process_SM100wwParam(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, wwRedTemp_, 10);
     has_update(telegram, wwDisinfectionTemp_, 12);
     // (daily heating time thermostat 2F5, offset 9, offset 8 on/off)
+    has_update(telegram, errorDisp_, 19);
+}
+// SM100wwParam2 - 0x07AC, Solar Module(0x2A) -> (0x00)
+void Water::process_SM100wwParam2(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, wwDeltaTRet_, 1);
 }
 
 // SM100wwCirc - 0x07A5
@@ -133,6 +142,7 @@ void Water::process_SM100wwParam(std::shared_ptr<const Telegram> telegram) {
 void Water::process_SM100wwCirc(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, wwCirc_, 0);
     has_update(telegram, wwCircMode_, 3);
+    has_update(telegram, wwCircTc_, 4); // time controled on/off
 }
 
 // SM100wwKeepWarm - 0x7AE, keepWarm
@@ -345,6 +355,16 @@ bool Water::set_wwCircMode(const char * value, const int8_t id) {
     return true;
 }
 
+// set time controled mode on/off
+bool Water::set_wwCircTc(const char * value, const int8_t id) {
+    bool b;
+    if (!Helpers::value2bool(value, b)) {
+        return false;
+    }
+    write_command(0x33B + wwc_, 4, b ? 0x01 : 0x00, 0x33B + wwc_);
+    return true;
+}
+
 bool Water::set_wwKeepWarm(const char * value, const int8_t id) {
     bool b;
     if (!Helpers::value2bool(value, b)) {
@@ -407,4 +427,23 @@ bool Water::set_wwHystOff(const char * value, const int8_t id) {
     write_command(0x33, 4, n, 0x33);
     return true;
 }
+
+bool Water::set_errorDisp(const char * value, const int8_t id) {
+    uint8_t n;
+    if (!Helpers::value2enum(value, n, FL_(enum_errorDisp))) {
+        return false;
+    }
+    write_command(0x7A6, 19, n, 0x7A6);
+    return true;
+}
+
+bool Water::set_wwDeltaTRet(const char * value, const int8_t id) {
+    int n;
+    if (!Helpers::value2number(value, n)) {
+        return false;
+    }
+    write_command(0x7AC, 1, n, 0x7AC);
+    return true;
+}
+
 } // namespace emsesp

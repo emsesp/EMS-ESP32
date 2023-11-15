@@ -46,6 +46,9 @@ class Water : public EMSdevice {
     // SM100wwStatus - 0x07AA
     uint8_t wwPump_;
 
+    // SM100wwParam2 - 0x07AC
+    uint8_t wwDeltaTRet_;
+
     // SM100wwParam - 0x07A6
     uint8_t wwMaxTemp_;
     uint8_t wwSelTemp_;
@@ -53,6 +56,7 @@ class Water : public EMSdevice {
     uint8_t wwDailyTemp_;
     uint8_t wwDisinfectionTemp_;
     uint8_t wwHotTemp_;
+    uint8_t errorDisp_; // error display off/normal/inverted
 
     // SM100wwKeepWarm - 0x07AE
     uint8_t wwKeepWarm_;
@@ -60,6 +64,7 @@ class Water : public EMSdevice {
     // SM100wwCirc - 0x07A5
     uint8_t wwCirc_;
     uint8_t wwCircMode_;
+    uint8_t wwCircTc_;
 
     // SM100wwStatus2 - 0x07E0
     uint8_t wwPumpMod_;
@@ -83,6 +88,7 @@ class Water : public EMSdevice {
     void process_SM100wwCommand(std::shared_ptr<const Telegram> telegram);
     void process_SM100wwCirc(std::shared_ptr<const Telegram> telegram);
     void process_SM100wwParam(std::shared_ptr<const Telegram> telegram);
+    void process_SM100wwParam2(std::shared_ptr<const Telegram> telegram);
     void process_SM100wwKeepWarm(std::shared_ptr<const Telegram> telegram);
     void process_SM100ValveStatus(std::shared_ptr<const Telegram> telegram);
 
@@ -101,6 +107,7 @@ class Water : public EMSdevice {
     bool set_wwHotTemp(const char * value, const int8_t id);
     bool set_wwCirc(const char * value, const int8_t id);
     bool set_wwCircMode(const char * value, const int8_t id);
+    bool set_wwCircTc(const char * value, const int8_t id);
     bool set_wwKeepWarm(const char * value, const int8_t id);
     bool set_wwDisinfectionTemp(const char * value, const int8_t id);
     bool set_wwDailyTemp(const char * value, const int8_t id);
@@ -111,6 +118,9 @@ class Water : public EMSdevice {
     bool set_wwFlowTempOffset(const char * value, const int8_t id);
     bool set_wwHystOn(const char * value, const int8_t id);
     bool set_wwHystOff(const char * value, const int8_t id);
+
+    bool set_wwDeltaTRet(const char * value, const int8_t id);
+    bool set_errorDisp(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

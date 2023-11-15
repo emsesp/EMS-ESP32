@@ -166,6 +166,7 @@ MAKE_WORD_TRANSLATION(intern, "intern", "intern", "intern", "intern", "wewnętrz
 MAKE_WORD_TRANSLATION(lower, "lower", "niedirger", "lager", "lägre", "mniejszy", "nedre", "inférieur", "daha düşük", "basso")
 MAKE_WORD_TRANSLATION(error, "error", "Fehler", "error", "Fel", "błąd", "feil", "erreur", "Hata", "errore")
 MAKE_WORD_TRANSLATION(na, "n/a", "n/a", "n/a", "n/a", "nd.", "n/a", "n/c", "mevcut değil", "n/a")
+MAKE_WORD_TRANSLATION(inverted, "inverted", "invertiert", "", "", "", "", "", "", "")
 
 // boiler
 MAKE_WORD_TRANSLATION(time, "time", "Zeit", "tijd", "Tid", "godzina", "tid", "heure", "zaman", "ora")
@@ -746,6 +747,9 @@ MAKE_TRANSLATION(wwTemp5, "wwtemp5", "temperature 5", "Temperatur 5", "Temperatu
 MAKE_TRANSLATION(wwTemp6, "wwtemp6", "temperature 6", "Temperatur 6", "Temperatuur 6", "Temperatur 6", "temperatura 6", "temperatur 6", "température 6", "sıcaklık 6", "Temperatura 6")
 // MAKE_TRANSLATION(wwTemp7, "wwtemp7", "temperature 7", "Temperatur 7", "Temperatuur 7", "Temperatur 7", "temperatura 7", "Temperatur 7", "température 7", "sıcaklık 7", "Temperatura 7")
 MAKE_TRANSLATION(wwPump, "wwpump", "pump", "Pumpe", "Pomp", "Pump", "pompa", "pumpe", "pompe", "pompa", "Pompa")
+MAKE_TRANSLATION(wwCircTc, "wwcirctc", "circulation time controled", "zeitgesteuerte Zirkulation", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(errorDisp, "errordisp", "error display", "Fehleranzeige", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(deltaTRet, "deltatret", "temp. diff. return valve", "Temperaturdifferenz Rücklaufventil", "", "", "", "", "", "", "") // TODO translate
 // solar ww and mixer wwc
 MAKE_TRANSLATION(wwMinTemp, "wwmintemp", "minimum temperature", "minimale Temperatur", "Minimale temperatuur", "Min Temperatur", "temperatura minimalna", "min temperatur", "température min", "minimum sıcaklık", "temperatura minima")
 MAKE_TRANSLATION(wwRedTemp, "wwredtemp", "reduced temperature", "reduzierte Temperatur", "Gereduceerde temperatuur", "Reducerad Temperatur", "temperatura zredukowana", "reducert temperatur", "température réduite", "düşürülmüş sıcaklık", "temperatura ridotta")

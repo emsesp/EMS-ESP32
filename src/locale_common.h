@@ -364,6 +364,9 @@ MAKE_ENUM(enum_blockTerm, FL_(n_o), FL_(n_c))
 // Ventilation
 MAKE_ENUM(enum_ventMode, FL_(auto), FL_(off), FL_(L1), FL_(L2), FL_(L3), FL_(L4), FL_(demand), FL_(sleep), FL_(intense), FL_(bypass), FL_(partymode), FL_(fireplace))
 
+// water
+MAKE_ENUM(enum_errorDisp, FL_(off), FL_(normal), FL_(inverted))
+
 #pragma GCC diagnostic pop
 
 // clang-format on
