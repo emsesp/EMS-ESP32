@@ -7,7 +7,7 @@ import { useTheme } from '@table-library/react-table-library/theme';
 // eslint-disable-next-line import/named
 import { updateState, useRequest } from 'alova';
 import { useState, useCallback } from 'react';
-import { unstable_useBlocker as useBlocker } from 'react-router-dom';
+import { useBlocker } from 'react-router-dom';
 
 import { toast } from 'react-toastify';
 
@@ -189,8 +189,8 @@ const SettingsEntities: FC = () => {
     return value === undefined || uom === undefined
       ? ''
       : typeof value === 'number'
-      ? new Intl.NumberFormat().format(value) + (uom === 0 ? '' : ' ' + DeviceValueUOM_s[uom])
-      : value;
+        ? new Intl.NumberFormat().format(value) + (uom === 0 ? '' : ' ' + DeviceValueUOM_s[uom])
+        : value;
   }
 
   function showHex(value: number, digit: number) {
