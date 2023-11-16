@@ -827,7 +827,7 @@ std::string EMSdevice::get_value_uom(const std::string & shortname) const {
     return std::string{}; // not found
 }
 
-bool EMSdevice::export_values(uint8_t unique_id, JsonObject & output, const int8_t id, const uint8_t output_target) {
+bool EMSdevice::export_values(uint8_t device_type, JsonObject & output, const int8_t id, const uint8_t output_target) {
     bool    has_value = false;
     uint8_t tag;
     if (id >= 1 && id <= (1 + DeviceValueTAG::TAG_HS16 - DeviceValueTAG::TAG_HC1)) {
@@ -840,7 +840,7 @@ bool EMSdevice::export_values(uint8_t unique_id, JsonObject & output, const int8
 
     if (id > 0 || output_target == EMSdevice::OUTPUT_TARGET::API_VERBOSE) {
         for (const auto & emsdevice : EMSESP::emsdevices) {
-            if (emsdevice->unique_id() == unique_id) {
+            if (emsdevice && (emsdevice->device_type() == device_type)) {
                 has_value |= emsdevice->generate_values(output, tag, (id < 1), output_target); // use nested for id -1 and 0
             }
         }
@@ -852,7 +852,7 @@ bool EMSdevice::export_values(uint8_t unique_id, JsonObject & output, const int8
         JsonObject output_hc    = output;
         bool       nest_created = false;
         for (const auto & emsdevice : EMSESP::emsdevices) {
-            if (emsdevice->unique_id() == unique_id) {
+            if (emsdevice && (emsdevice->device_type() == device_type)) {
                 if (!nest_created && emsdevice->has_tags(tag)) {
                     output_hc    = output.createNestedObject(EMSdevice::tag_to_mqtt(tag));
                     nest_created = true;

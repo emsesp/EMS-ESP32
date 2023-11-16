@@ -51,7 +51,7 @@ void Roomctrl::set_remotehum(const uint8_t type, const uint8_t hc, const int8_t 
         return;
     }
     type_ = type;
-    if (remotehum_[hc] != EMS_VALUE_UINT_NOTSET && hum == EMS_VALUE_UINT_NOTSET) {
+    if (remotehum_[hc] != EMS_VALUE_UINT_NOTSET && (uint8_t)hum == EMS_VALUE_UINT_NOTSET) {
         switch_off_[hc] = true;
     }
     if (remotehum_[hc] != hum) {
