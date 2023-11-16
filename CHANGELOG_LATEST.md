@@ -16,11 +16,11 @@ Writeable Text entities have moved from type `sensor` to `text` in Home Assistan
 - shower_data MQTT payload contains the timestamp [#1329](https://github.com/emsesp/EMS-ESP32/issues/1329)
 - HA discovery for writeable text entities [#1337](https://github.com/emsesp/EMS-ESP32/pull/1377)
 - autodetect board_profile, store in nvs, add telnet command option, add E32V2
-- heatpump high res energy counters [#1348, #1349. #1350](https://github.com/emsesp/EMS-ESP32/issues/1348)
+- heat pump high res energy counters [#1348, #1349. #1350](https://github.com/emsesp/EMS-ESP32/issues/1348)
 - optional bssid in network settings
 - extension module EM100 [#1315](https://github.com/emsesp/EMS-ESP32/discussions/1315)
 - digital_out with new options for polarity and startup state
-- Added 'system allvalues' command that dumps all the EMS device values, plus sensors and any custom entities
+- added 'system allvalues' command that dumps all the EMS device values, plus sensors and any custom entities
 
 ## Fixed
 

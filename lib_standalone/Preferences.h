@@ -42,7 +42,7 @@ class Preferences {
     }
 
     double getDouble(const char * key, double defaultValue = NAN) {
-        return NAN;
+        return 0;
     }
 
     size_t putString(const char * key, const char * value) {

@@ -115,7 +115,7 @@ bool System::command_allvalues(const char * value, const int8_t id, JsonObject &
     for (const auto & emsdevice : EMSESP::emsdevices) {
         std::string title = emsdevice->device_type_2_device_name_translated() + std::string(" ") + emsdevice->to_string();
         device_output     = output.createNestedObject(title);
-        emsesp::EMSdevice::export_values(emsdevice->unique_id(), device_output, id, EMSdevice::OUTPUT_TARGET::API_VERBOSE);
+        emsdevice->generate_values(device_output, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::API_VERBOSE); // use nested for id -1 and 0
     }
 
     // Custom entities

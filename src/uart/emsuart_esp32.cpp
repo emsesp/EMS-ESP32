@@ -33,7 +33,7 @@
 namespace emsesp {
 
 static QueueHandle_t uart_queue;
-uint8_t              tx_mode_ = 0xFF;
+uint8_t              tx_mode_     = 0xFF;
 uint32_t             inverse_mask = 0;
 
 /*

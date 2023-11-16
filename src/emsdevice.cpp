@@ -854,7 +854,7 @@ bool EMSdevice::export_values(uint8_t device_type, JsonObject & output, const in
 
     if (id > 0 || output_target == EMSdevice::OUTPUT_TARGET::API_VERBOSE) {
         for (const auto & emsdevice : EMSESP::emsdevices) {
-            if (emsdevice->device_type() == device_type) {
+            if (emsdevice && (emsdevice->device_type() == device_type)) {
                 has_value |= emsdevice->generate_values(output, tag, (id < 1), output_target); // use nested for id -1 and 0
             }
         }
@@ -866,7 +866,7 @@ bool EMSdevice::export_values(uint8_t device_type, JsonObject & output, const in
         JsonObject output_hc    = output;
         bool       nest_created = false;
         for (const auto & emsdevice : EMSESP::emsdevices) {
-            if (emsdevice->device_type() == device_type) {
+            if (emsdevice && (emsdevice->device_type() == device_type)) {
                 if (!nest_created && emsdevice->has_tags(tag)) {
                     output_hc    = output.createNestedObject(EMSdevice::tag_to_mqtt(tag));
                     nest_created = true;
@@ -1835,7 +1835,7 @@ bool EMSdevice::handle_telegram(std::shared_ptr<const Telegram> telegram) {
 #if defined(EMSESP_DEBUG)
                 EMSESP::logger().debug("This telegram (%s) is not recognized by the EMS bus", tf.telegram_type_name_);
 #endif
-                // test if this causes issue: https://github.com/emsesp/EMS-ESP32/issues/1420
+                // removing fetch causes issue: https://github.com/emsesp/EMS-ESP32/issues/1420
                 // tf.fetch_ = false;
                 return false;
             }
