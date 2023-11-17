@@ -1,7 +1,7 @@
-const { readdirSync, existsSync, unlinkSync, readFileSync, createWriteStream } = require('fs');
-const { resolve, relative, sep } = require('path');
-var zlib = require('zlib');
-var mime = require('mime-types');
+import { readdirSync, existsSync, unlinkSync, readFileSync, createWriteStream } from 'fs';
+import { resolve, relative, sep } from 'path';
+import zlib from 'zlib';
+import mime from 'mime-types';
 
 const ARDUINO_INCLUDES = '#include <Arduino.h>\n\n';
 const INDENT = '  ';
