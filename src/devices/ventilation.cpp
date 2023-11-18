@@ -46,6 +46,7 @@ Ventilation::Ventilation(uint8_t device_type, uint8_t device_id, uint8_t product
     register_device_value(
         DeviceValueTAG::TAG_DEVICE_DATA, &mode_, DeviceValueType::ENUM, FL_(enum_ventMode), FL_(ventMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_ventMode));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &voc_, DeviceValueType::USHORT, FL_(airquality), DeviceValueUOM::NONE);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &humidity_, DeviceValueType::UINT, FL_(airHumidity), DeviceValueUOM::PERCENT);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &bypass_, DeviceValueType::BOOL, FL_(bypass), DeviceValueUOM::NONE, MAKE_CF_CB(set_bypass));
 }
 
@@ -75,6 +76,7 @@ void Ventilation::process_BlowerMessage(std::shared_ptr<const Telegram> telegram
 // message 0x05D9, data: 03 9C FF
 void Ventilation::process_VOCMessage(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, voc_, 0);
+    has_update(telegram, humidity_, 2);
 }
 
 // message 0x56B

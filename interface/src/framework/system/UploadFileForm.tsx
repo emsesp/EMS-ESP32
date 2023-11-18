@@ -13,7 +13,7 @@ import * as EMSESP from 'project/api';
 
 const UploadFileForm: FC = () => {
   const { LL } = useI18nContext();
-  const [restarting, setRestarting] = useState<boolean>(false);
+  const [restarting, setRestarting] = useState<boolean>();
   const [md5, setMd5] = useState<string>();
 
   const { send: getSettings, onSuccess: onSuccessGetSettings } = useRequest(EMSESP.getSettings(), {
@@ -26,6 +26,9 @@ const UploadFileForm: FC = () => {
     immediate: false
   });
   const { send: getSchedule, onSuccess: onSuccessGetSchedule } = useRequest(EMSESP.getSchedule(), {
+    immediate: false
+  });
+  const { send: getInfo, onSuccess: onSuccessGetInfo } = useRequest((data) => EMSESP.API(data), {
     immediate: false
   });
 
@@ -86,6 +89,9 @@ const UploadFileForm: FC = () => {
   onSuccessGetSchedule((event) => {
     saveFile(event.data, 'schedule');
   });
+  onSuccessGetInfo((event) => {
+    saveFile(event.data, 'info');
+  });
 
   const downloadSettings = async () => {
     await getSettings().catch((error) => {
@@ -111,13 +117,23 @@ const UploadFileForm: FC = () => {
     });
   };
 
+  const downloadInfo = async () => {
+    await getInfo({ device: 'system', entity: 'info', id: 0 }).catch((error) => {
+      toast.error(error.message);
+    });
+  };
+
   const content = () => (
     <>
       <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
         {LL.UPLOAD()}
       </Typography>
       <Box mb={2} color="warning.main">
-        <Typography variant="body2">{LL.UPLOAD_TEXT()} </Typography>
+        <Typography variant="body2">
+          {LL.UPLOAD_TEXT()}
+          <br />
+          {LL.RESTART_TEXT()}.
+        </Typography>
       </Box>
       {md5 && (
         <Box mb={2}>
@@ -140,7 +156,7 @@ const UploadFileForm: FC = () => {
           </Button>
           <Box color="warning.main">
             <Typography mt={2} mb={1} variant="body2">
-              {LL.DOWNLOAD_CUSTOMIZATION_TEXT()}{' '}
+              {LL.DOWNLOAD_CUSTOMIZATION_TEXT()}
             </Typography>
           </Box>
           <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={downloadCustomizations}>
@@ -157,11 +173,19 @@ const UploadFileForm: FC = () => {
           </Button>
           <Box color="warning.main">
             <Typography mt={2} mb={1} variant="body2">
-              {LL.DOWNLOAD_SCHEDULE_TEXT()}{' '}
+              {LL.DOWNLOAD_SCHEDULE_TEXT()}
             </Typography>
           </Box>
           <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={downloadSchedule}>
             {LL.SCHEDULE(0)}
+          </Button>
+          <Box color="warning.main">
+            <Typography mt={2} mb={1} variant="body2">
+              {LL.DOWNLOAD(0)}&nbsp;{LL.SUPPORT_INFORMATION()}
+            </Typography>
+          </Box>
+          <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={downloadInfo}>
+            {LL.SUPPORT_INFORMATION()}
           </Button>
         </>
       )}

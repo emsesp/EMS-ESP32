@@ -8,8 +8,7 @@ export const GPIO_VALIDATOR = {
     if (
       value &&
       (value === 1 ||
-        (value >= 6 && value <= 12) ||
-        (value >= 14 && value <= 15) ||
+        (value >= 6 && value <= 11) ||
         value === 20 ||
         value === 24 ||
         (value >= 28 && value <= 31) ||
@@ -189,12 +188,12 @@ export const isGPIOUniqueValidator = (sensors: AnalogSensor[]) => ({
   }
 });
 
-export const analogSensorItemValidation = (sensors: AnalogSensor[], creating: boolean) =>
+export const analogSensorItemValidation = (sensors: AnalogSensor[], creating: boolean, platform: string) =>
   new Schema({
     n: [{ required: true, message: 'Name is required' }],
     g: [
       { required: true, message: 'GPIO is required' },
-      GPIO_VALIDATOR,
+      platform === 'ESP32-S3' ? GPIO_VALIDATORS3 : platform === 'ESP32-C3' ? GPIO_VALIDATORC3 : GPIO_VALIDATOR,
       ...(creating ? [isGPIOUniqueValidator(sensors)] : [])
     ]
   });

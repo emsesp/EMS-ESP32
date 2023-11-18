@@ -126,6 +126,7 @@ const tr: Translation = {
   BYPASS_TOKEN: 'API bağlantılarında Erişim Jeton onaylamasını geç',
   READONLY: 'Salt okunur modu devreye al (bütün giden EMS Tx Yazma komutlarını engeller)',
   UNDERCLOCK_CPU: 'İşlemci hızını düşür',
+  HEATINGOFF: 'Start boiler with forced heating off', // TODO translate
   ENABLE_SHOWER_TIMER: 'Duş Sayacını Devreye Al',
   ENABLE_SHOWER_ALERT: 'Duş Alarmını Devreye Al',
   TRIGGER_TIME: 'Tetikleme Zamanı',
@@ -170,7 +171,6 @@ const tr: Translation = {
   HELP_INFORMATION_3: 'Yeni bir özellik talep etmek yada hata bildirmek için',
   HELP_INFORMATION_4: 'Bir sorun bildirirken daha hızlı bir dönüş için sistem bilginizi indirip eklemeyi unutmayın',
   HELP_INFORMATION_5: 'EMS-ESP ücretsiz ve açık kaynaklı bir projedir. Lütfen geliştirmeyi desteklemek için Githubda projeye yıldız verin!',
-  SUPPORT_INFO: 'Destek Bilgisi',
   UPLOAD: 'Yükleme',
   DOWNLOAD: '{{İ|i|i}}İndirme',
   ABORTED: 'iptal edildi',
@@ -230,7 +230,7 @@ const tr: Translation = {
   BROKER: 'Aracı',
   CLIENT: 'İstemci',
   BASE_TOPIC: 'Merkez',
-  OPTIONAL: 'Seçenekli',
+  OPTIONAL: 'seçenekli',
   FORMATTING: 'Biçimlendiriliyor',
   MQTT_FORMAT: 'Konu/Mesaj Biçimi',
   MQTT_NEST_1: 'Tek konu üzerine yerleşmiş',
@@ -323,7 +323,14 @@ const tr: Translation = {
   WRITEABLE: 'Writeable', // TODO translate
   SHOWING: 'Showing', // TODO translate
   SEARCH: 'Search', // TODO translate
-  CERT: 'TSL root certificate (leave blank to disable TSL)' // TODO translate
+  CERT: 'TLS root certificate (leave blank to disable TLS)', // TODO translate
+  ON: 'On', // TODO translate
+  OFF: 'Off', // TODO translate
+  POLARITY: 'Polarity', // TODO translate
+  ACTIVEHIGH: 'Active High', // TODO translate
+  ACTIVELOW: 'Active Low', // TODO translate
+  UNCHANGED: 'Unchanged', // TODO translate
+  ALWAYS: 'Always' // TODO translate
 };
 
 export default tr;

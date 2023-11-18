@@ -7,6 +7,7 @@ export interface Settings {
   syslog_mark_interval: number;
   syslog_host: string;
   syslog_port: number;
+  boiler_heatingoff: boolean;
   shower_timer: boolean;
   shower_alert: boolean;
   shower_alert_coldshot: number;
@@ -68,6 +69,7 @@ export interface Device {
   d: number; // deviceid
   p: number; // productid
   v: string; // version
+  e: number; // entities
 }
 
 export interface TemperatureSensor {
@@ -100,6 +102,7 @@ export interface SensorData {
   ts: TemperatureSensor[];
   as: AnalogSensor[];
   analog_enabled: boolean;
+  platform: string;
 }
 
 export interface CoreData {
@@ -173,7 +176,8 @@ export enum DeviceValueUOM {
   M3,
   L,
   KMIN,
-  K
+  K,
+  VOLTS
 }
 
 export const DeviceValueUOM_s = [
@@ -199,7 +203,8 @@ export const DeviceValueUOM_s = [
   'm³',
   'l',
   'K*min',
-  'K'
+  'K',
+  'V'
 ];
 
 export enum AnalogType {
@@ -235,7 +240,9 @@ type BoardProfiles = {
 
 export const BOARD_PROFILES: BoardProfiles = {
   S32: 'BBQKees Gateway S32',
+  S32S3: 'BBQKees Gateway S3',
   E32: 'BBQKees Gateway E32',
+  E32V2: 'BBQKees Gateway E32 V2',
   NODEMCU: 'NodeMCU 32S',
   'MH-ET': 'MH-ET Live D1 Mini',
   LOLIN: 'Lolin D32',
@@ -243,8 +250,7 @@ export const BOARD_PROFILES: BoardProfiles = {
   OLIMEXPOE: 'Olimex ESP32-POE',
   C3MINI: 'Wemos C3 Mini',
   S2MINI: 'Wemos S2 Mini',
-  S3MINI: 'Liligo S3',
-  S32S3: 'BBQKees Gateway S3'
+  S3MINI: 'Liligo S3'
 };
 
 export interface BoardProfile {
@@ -359,7 +365,7 @@ export const enum DeviceType {
   CONTROLLER,
   CONNECT,
   ALERT,
-  PUMP,
+  EXTENSION,
   GENERIC,
   HEATSOURCE,
   CUSTOM,

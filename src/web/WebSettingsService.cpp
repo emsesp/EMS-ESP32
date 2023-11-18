@@ -46,6 +46,7 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
     root["syslog_mark_interval"]  = settings.syslog_mark_interval;
     root["syslog_host"]           = settings.syslog_host;
     root["syslog_port"]           = settings.syslog_port;
+    root["boiler_heatingoff"]     = settings.boiler_heatingoff;
     root["shower_timer"]          = settings.shower_timer;
     root["shower_alert"]          = settings.shower_alert;
     root["shower_alert_coldshot"] = settings.shower_alert_coldshot;
@@ -86,6 +87,11 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 
     // load default GPIO configuration based on board profile
     std::vector<int8_t> data; //  // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
+    settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
+    if ((String)EMSESP_DEFAULT_BOARD_PROFILE != "default" && EMSESP::nvs_.getString("boot") == "") {
+        EMSESP::nvs_.putString("boot", (const char *)EMSESP_DEFAULT_BOARD_PROFILE);
+    }
+    /*
 #if CONFIG_IDF_TARGET_ESP32C3
     settings.board_profile = root["board_profile"] | "C3MINI";
 #elif CONFIG_IDF_TARGET_ESP32S2
@@ -96,29 +102,32 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
 #elif CONFIG_IDF_TARGET_ESP32
     settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
 #endif
-
+*/
     if (!System::load_board_profile(data, settings.board_profile.c_str())) {
-// unknown, check for ethernet, use default E32/S32
-// data is led, dallas, rx, tx, pbutton, phy, eth_power, eth_addr, eth_clock
-#ifndef EMSESP_STANDALONE
-        if (ETH.begin(1, 16, 23, 18, ETH_PHY_LAN8720)) {
-            // BBQKees Gateway E32
-            data                   = {EMSESP_DEFAULT_LED_GPIO, 4, 5, 17, 33, PHY_type::PHY_TYPE_LAN8720, 16, 1, 0};
-            settings.board_profile = "E32";
-        } else
-#endif
-        {
-            // BBQKees Gateway S32
-            data                   = {EMSESP_DEFAULT_LED_GPIO,
-                                      EMSESP_DEFAULT_DALLAS_GPIO,
-                                      EMSESP_DEFAULT_RX_GPIO,
-                                      EMSESP_DEFAULT_TX_GPIO,
-                                      EMSESP_DEFAULT_PBUTTON_GPIO,
-                                      EMSESP_DEFAULT_PHY_TYPE,
-                                      0,
-                                      0,
-                                      0};
+        // unknown, check for NVS or scan for ethernet, use default E32/E32V2/S32
+        settings.board_profile = EMSESP::nvs_.getString("boot");
+        if (!System::load_board_profile(data, settings.board_profile.c_str())) {
+#if CONFIG_IDF_TARGET_ESP32 && !defined(EMSESP_STANDALONE)
+            if (settings.board_profile == "") { // empty: new test
+                if (ETH.begin((eth_phy_type_t)1, 16, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_IN)) {
+                    EMSESP::nvs_.putString("boot", "E32");
+                } else {
+                    EMSESP::nvs_.putString("boot", "Test");
+                }
+            } else if (settings.board_profile == "Test") {
+                if (ETH.begin((eth_phy_type_t)0, 15, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_OUT)) {
+                    EMSESP::nvs_.putString("boot", "E32V2");
+                } else {
+                    EMSESP::nvs_.putString("boot", "S32");
+                }
+            } else {
+                EMSESP::nvs_.putString("boot", "S32");
+            }
+            ESP.restart();
+#else
             settings.board_profile = "S32";
+            System::load_board_profile(data, settings.board_profile.c_str());
+#endif
         }
         EMSESP::logger().info("No board profile found. Re-setting to %s", settings.board_profile.c_str());
     } else {
@@ -271,8 +280,9 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.trace_raw = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
     EMSESP::trace_raw(settings.trace_raw);
 
-    settings.notoken_api   = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
-    settings.solar_maxflow = root["solar_maxflow"] | EMSESP_DEFAULT_SOLAR_MAXFLOW;
+    settings.notoken_api       = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
+    settings.solar_maxflow     = root["solar_maxflow"] | EMSESP_DEFAULT_SOLAR_MAXFLOW;
+    settings.boiler_heatingoff = root["boiler_heatingoff"] | EMSESP_DEFAULT_BOILER_HEATINGOFF;
 
     settings.fahrenheit = root["fahrenheit"];
     EMSESP::system_.fahrenheit(settings.fahrenheit);

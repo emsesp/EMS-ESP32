@@ -7,13 +7,43 @@ APSettingsService::APSettingsService(AsyncWebServer * server, FS * fs, SecurityM
     , _fsPersistence(APSettings::read, APSettings::update, this, fs, AP_SETTINGS_FILE)
     , _dnsServer(nullptr)
     , _lastManaged(0)
-    , _reconfigureAp(false) {
+    , _reconfigureAp(false)
+    , _connected(0) {
     addUpdateHandler([&](const String & originId) { reconfigureAP(); }, false);
+    WiFi.onEvent(std::bind(&APSettingsService::WiFiEvent, this, _1));
 }
 
 void APSettingsService::begin() {
     _fsPersistence.readFromFS();
-    reconfigureAP();
+    // disabled for delayed start, first try station mode
+    // reconfigureAP();
+}
+
+// wait 10 sec on STA disconnect before starting AP
+void APSettingsService::WiFiEvent(WiFiEvent_t event) {
+    uint8_t was_connected = _connected;
+    switch (event) {
+    case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
+        _connected &= ~1;
+        break;
+    case ARDUINO_EVENT_ETH_DISCONNECTED:
+        _connected &= ~2;
+        break;
+    case ARDUINO_EVENT_WIFI_STA_GOT_IP:
+    case ARDUINO_EVENT_WIFI_STA_GOT_IP6:
+        _connected |= 1;
+        break;
+    case ARDUINO_EVENT_ETH_GOT_IP:
+    case ARDUINO_EVENT_ETH_GOT_IP6:
+        _connected |= 2;
+        break;
+    default:
+        break;
+    }
+    // wait 10 sec before starting AP
+    if (was_connected && !_connected) {
+        _lastManaged = uuid::get_uptime();
+    }
 }
 
 void APSettingsService::reconfigureAP() {
@@ -33,13 +63,12 @@ void APSettingsService::loop() {
 }
 
 void APSettingsService::manageAP() {
-    WiFiMode_t currentWiFiMode   = WiFi.getMode();
-    bool       network_connected = (emsesp::EMSESP::system_.ethernet_connected() || (WiFi.status() == WL_CONNECTED));
-    if (_state.provisionMode == AP_MODE_ALWAYS || (_state.provisionMode == AP_MODE_DISCONNECTED && !network_connected)) {
+    WiFiMode_t currentWiFiMode = WiFi.getMode();
+    if (_state.provisionMode == AP_MODE_ALWAYS || (_state.provisionMode == AP_MODE_DISCONNECTED && !_connected)) {
         if (_reconfigureAp || currentWiFiMode == WIFI_OFF || currentWiFiMode == WIFI_STA) {
             startAP();
         }
-    } else if ((currentWiFiMode == WIFI_AP || currentWiFiMode == WIFI_AP_STA) && (_reconfigureAp || !WiFi.softAPgetStationNum())) {
+    } else if ((currentWiFiMode == WIFI_AP || currentWiFiMode == WIFI_AP_STA) && _connected && (_reconfigureAp || !WiFi.softAPgetStationNum())) {
         stopAP();
     }
     _reconfigureAp = false;

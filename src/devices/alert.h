@@ -26,6 +26,12 @@ namespace emsesp {
 class Alert : public EMSdevice {
   public:
     Alert(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand);
+
+  private:
+    void process_UBASetPoints(std::shared_ptr<const Telegram> telegram);
+
+    uint8_t setFlowTemp_; // boiler setpoint temp
+    uint8_t setBurnPow_;  // Burner power %
 };
 
 } // namespace emsesp

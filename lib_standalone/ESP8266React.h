@@ -63,6 +63,7 @@ class DummySettings {
     String jwtSecret      = "ems-esp";
     String ssid           = "ems-esp";
     String password       = "ems-esp";
+    String bssid          = "";
     String localIP        = "";
     String gatewayIP      = "";
     String subnetMask     = "";

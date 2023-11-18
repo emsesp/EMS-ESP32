@@ -37,9 +37,8 @@ bool Test::run_test(const char * command, int8_t id) {
 
         // simulate HansRemmerswaal's setup - see https://github.com/emsesp/EMS-ESP32/issues/859
         add_device(0x08, 172); // 176 entities - boiler: Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i
-
-        // add_device(0x10, 158); // 62 entities - thermostat: RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410
-        // add_device(0x38, 200); // 4 entities - thermostat: RC100H
+        add_device(0x10, 158); // 62 entities - thermostat: RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410
+        add_device(0x38, 200); // 4 entities - thermostat: RC100H
 
         return true;
     }
@@ -47,8 +46,12 @@ bool Test::run_test(const char * command, int8_t id) {
     if (strcmp(command, "general") == 0) {
         EMSESP::logger().info("Testing general. Adding a Boiler and Thermostat");
 
+        // System::test_set_all_active(true); // uncomment if we want to show all entities and give them fake values
+
         add_device(0x08, 123); // Nefit Trendline
         add_device(0x18, 157); // Bosch CR100
+
+        // add_device(0x10, 158); // RC300 - there's no data here
 
         // add some data
         // Boiler -> Me, UBAMonitorFast(0x18), telegram: 08 00 18 00 00 02 5A 73 3D 0A 10 65 40 02 1A 80 00 01 E1 01 76 0E 3D 48 00 C9 44 02 00 (#data=25)
@@ -73,6 +76,18 @@ bool Test::run_test(const char * command, int8_t id) {
 // so only including the full set in standalone, otherwise a limited selection of basic tests
 //
 #ifdef EMSESP_STANDALONE
+
+    if (strcmp(command, "heat_exchange") == 0) {
+        EMSESP::logger().info("Testing heating exchange...");
+
+        add_device(0x08, 219); // Greenstar HIU/Logamax kompakt WS170
+
+        // [emsesp] boiler(0x08) -W-> Me(0x0B), UBAMonitorFastPlus(0xE4), data: 00 01 35 00 00 00 00 00 00 00 00 80 00 00 00 00 00 00 00 80 00 (offset 6)
+        uart_telegram({0x08, 0x00, 0xE4, 0x00, //
+                       00,   01,   0x35, 00,   00, 00, 00, 00, 00, 00, 00, 0x80, 00, 00, 00, 00, 00, 00, 00, 0x80, 00});
+
+        return true;
+    }
 
     if (strcmp(command, "2thermostats") == 0) {
         EMSESP::logger().info("Testing with multiple thermostats...");
@@ -263,11 +278,17 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     bool ok = false;
 
     if (command == "general") {
-        shell.printfln("Testing adding a general boiler & thermostat...");
+        shell.printfln("Testing adding a boiler, thermostat and sensors...");
         run_test("general");
+
+        // add sensors
+        emsesp::EMSESP::analogsensor_.test();
+        emsesp::EMSESP::temperaturesensor_.test();
+
         // shell.invoke_command("show devices");
         shell.invoke_command("show values");
-        shell.invoke_command("call system publish");
+        shell.invoke_command("call system allvalues");
+        // shell.invoke_command("call system publish");
         // shell.invoke_command("show mqtt");
         ok = true;
     }
@@ -493,16 +514,24 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Testing RC310...");
         run_test("310");
         shell.invoke_command("show devices");
-        shell.invoke_command("show");
+        shell.invoke_command("show values");
         shell.invoke_command("call system publish");
         shell.invoke_command("show mqtt");
+        ok = true;
+    }
+
+    if (command == "heat_exchange") {
+        shell.printfln("Testing heat exchange...");
+        run_test("heat_exchange");
+        shell.invoke_command("show devices");
+        shell.invoke_command("show values");
         ok = true;
     }
 
     if (command == "2thermostats") {
         shell.printfln("Testing multiple thermostats...");
         run_test("2thermostats");
-        shell.invoke_command("show");
+        shell.invoke_command("show values");
         shell.invoke_command("show devices");
         ok = true;
     }
@@ -571,7 +600,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         run_test("boiler");
         shell.invoke_command("show devices");
-        shell.invoke_command("show");
+        shell.invoke_command("show values");
         shell.invoke_command("call boiler info");
         shell.invoke_command("call system publish");
 
@@ -610,7 +639,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // HC1
         uart_telegram({0x90, 0x00, 0xFF, 0x00, 0x00, 0x6F, 0x01, 0x02, 0x00, 0xCF, 0x00, 0xE6});
 
-        shell.invoke_command("show");
+        shell.invoke_command("show values");
         shell.invoke_command("show devices");
         ok = true;
     }
@@ -653,7 +682,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         uart_telegram(
             {0x08, 0x0B, 0xC2, 0, 0x08, 0xAC, 00, 0x10, 0x31, 0x48, 0x30, 0x31, 0x15, 0x80, 0x95, 0x0B, 0x0E, 0x10, 0x38, 00, 0x7F, 0xFF, 0xFF, 0xFF});
 
-        // shell.invoke_command("show");
+        // shell.invoke_command("show values");
 
         ok = true;
     }
@@ -686,12 +715,12 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // Mqtt::nested_format(0);
 
         emsesp::EMSESP::temperaturesensor_.test();
-        shell.invoke_command("show");
+        shell.invoke_command("show values");
         shell.invoke_command("call system publish");
 
         // rename
         EMSESP::temperaturesensor_.update("01-0203-0405-0607", "testtemperature", 2);
-        shell.invoke_command("show");
+        shell.invoke_command("show values");
         shell.invoke_command("call system publish");
         ok = true;
     }
@@ -704,14 +733,14 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // Mqtt::nested_format(0);
 
         emsesp::EMSESP::analogsensor_.test();
-        shell.invoke_command("show");
+        shell.invoke_command("show values");
         // shell.invoke_command("call system publish");
         // shell.invoke_command("show mqtt");
 
         // rename
         // bool update(uint8_t id, const std::string & name, int16_t offset, float factor, uint8_t uom, uint8_t type);
         EMSESP::analogsensor_.update(36, "analogtest", 2, 0.7, 17, 1);
-        shell.invoke_command("show");
+        shell.invoke_command("show values");
         // shell.invoke_command("call system publish");
         ok = true;
     }
@@ -1174,7 +1203,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Testing adding a thermostat FW120...");
 
         run_test("thermostat");
-        shell.invoke_command("show");
+        shell.invoke_command("show values");
         shell.invoke_command("call system publish");
 
         EMSESP::mqtt_.incoming("ems-esp/thermostat_hc1", "heat");
@@ -1243,7 +1272,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         uart_telegram("30 00 FF 0A 02 6A 03"); // SM100 pump off  0
 
-        shell.invoke_command("show");
+        shell.invoke_command("show values");
         ok = true;
     }
 
@@ -1676,7 +1705,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // check for error "No telegram type handler found for ID 0x255 (src 0x20)"
         uart_telegram({0xA0, 0x00, 0xFF, 0x00, 0x01, 0x55, 0x00, 0x1A});
 
-        shell.invoke_command("show");
+        shell.invoke_command("show values");
         shell.invoke_command("call mixer info");
         shell.invoke_command("call system publish");
         shell.invoke_command("show mqtt");

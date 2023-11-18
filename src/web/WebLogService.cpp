@@ -174,17 +174,21 @@ char * WebLogService::messagetime(char * out, const uint64_t t, const size_t buf
         strlcpy(out, uuid::log::format_timestamp_ms(t, 3).c_str(), bufsize);
     } else {
         time_t t1 = time_offset_ + t / 1000ULL;
-        strftime(out, bufsize, "%F %T", localtime(&t1));
-        snprintf(out, bufsize, "%s.%03d", out, (uint16_t)(t % 1000));
+        char   timestr[bufsize];
+        strftime(timestr, bufsize, "%F %T", localtime(&t1));
+        snprintf(out, bufsize, "%s.%03d", timestr, (uint16_t)(t % 1000));
     }
     return out;
 }
 
 // send to web eventsource
 void WebLogService::transmit(const QueuedLogMessage & message) {
-    StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> jsonDocument;
-    JsonObject                                  logEvent = jsonDocument.to<JsonObject>();
-    char                                        time_string[25];
+    DynamicJsonDocument jsonDocument(EMSESP_JSON_SIZE_LARGE);
+    if (jsonDocument.capacity() == 0) {
+        return;
+    }
+    JsonObject logEvent = jsonDocument.to<JsonObject>();
+    char       time_string[25];
 
     logEvent["t"] = messagetime(time_string, message.content_->uptime_ms, sizeof(time_string));
     logEvent["l"] = message.content_->level;

@@ -4,7 +4,7 @@
 #include <time.h>
 
 #include <WiFi.h>
-#include <lwip/apps/sntp.h>
+#include <esp_sntp.h>
 
 #include <ArduinoJson.h>
 #include <ESPAsyncWebServer.h>

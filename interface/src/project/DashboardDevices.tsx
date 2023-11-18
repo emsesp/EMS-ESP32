@@ -1,8 +1,9 @@
-import CancelIcon from '@mui/icons-material/Cancel';
 import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
+import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import DownloadIcon from '@mui/icons-material/GetApp';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
@@ -26,6 +27,7 @@ import {
   Grid,
   Typography
 } from '@mui/material';
+
 import { useRowSelect } from '@table-library/react-table-library/select';
 import { useSort, SortToggleType } from '@table-library/react-table-library/sort';
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
@@ -34,6 +36,7 @@ import { useRequest } from 'alova';
 import { useState, useContext, useEffect, useCallback, useLayoutEffect } from 'react';
 
 import { IconContext } from 'react-icons';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import DashboardDevicesDialog from './DashboardDevicesDialog';
 import DeviceIcon from './DeviceIcon';
@@ -52,14 +55,16 @@ import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 
 const DashboardDevices: FC = () => {
-  const [size, setSize] = useState([0, 0]);
   const { me } = useContext(AuthenticatedContext);
   const { LL } = useI18nContext();
+  const [size, setSize] = useState([0, 0]);
   const [selectedDeviceValue, setSelectedDeviceValue] = useState<DeviceValue>();
   const [onlyFav, setOnlyFav] = useState(false);
   const [deviceValueDialogOpen, setDeviceValueDialogOpen] = useState(false);
   const [showDeviceInfo, setShowDeviceInfo] = useState<boolean>(false);
   const [selectedDevice, setSelectedDevice] = useState<number>();
+
+  const navigate = useNavigate();
 
   const { data: coreData, send: readCoreData } = useRequest(() => EMSESP.readCoreData(), {
     initialData: {
@@ -263,13 +268,16 @@ const DashboardDevices: FC = () => {
   }, [escFunction]);
 
   const refreshData = () => {
-    if (deviceValueDialogOpen) {
-      return;
+    if (!deviceValueDialogOpen) {
+      selectedDevice ? void readDeviceData(selectedDevice) : void readCoreData();
     }
-    if (selectedDevice) {
-      void readDeviceData(selectedDevice);
+  };
+
+  const customize = () => {
+    if (selectedDevice == 99) {
+      navigate('/settings/customentities');
     } else {
-      void readCoreData();
+      navigate('/settings/customization', { state: selectedDevice });
     }
   };
 
@@ -287,48 +295,50 @@ const DashboardDevices: FC = () => {
     return sc;
   };
 
-  const makeCsvData = (columns: any, data: any) =>
-    data.reduce(
-      (csvString: any, rowItem: any) =>
-        csvString + columns.map(({ accessor }: any) => escapeCsvCell(accessor(rowItem))).join(';') + '\r\n',
-      columns.map(({ name }: any) => escapeCsvCell(name)).join(';') + '\r\n'
-    );
-
-  const downloadAsCsv = (columns: any, data: any, filename: string) => {
-    const csvData = makeCsvData(columns, data);
-    const csvFile = new Blob([csvData], { type: 'text/csv;charset:utf-8' });
-    const downloadLink = document.createElement('a');
-
-    downloadLink.download = filename;
-    downloadLink.href = window.URL.createObjectURL(csvFile);
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
-  };
-
   const hasMask = (id: string, mask: number) => (parseInt(id.slice(0, 2), 16) & mask) === mask;
 
   const handleDownloadCsv = () => {
-    const columns = [
-      { accessor: (dv: any) => dv.id.slice(2), name: LL.ENTITY_NAME(0) },
-      {
-        accessor: (dv: any) => (typeof dv.v === 'number' ? new Intl.NumberFormat().format(dv.v) : dv.v),
-        name: LL.VALUE(0)
-      },
-      { accessor: (dv: any) => DeviceValueUOM_s[dv.u], name: 'UoM' }
-    ];
-
     const deviceIndex = coreData.devices.findIndex((d) => d.id === device_select.state.id);
     if (deviceIndex === -1) {
       return;
     }
     const filename = coreData.devices[deviceIndex].tn + '_' + coreData.devices[deviceIndex].n;
 
-    downloadAsCsv(
-      columns,
-      onlyFav ? deviceData.data.filter((dv) => hasMask(dv.id, DeviceEntityMask.DV_FAVORITE)) : deviceData.data,
-      filename
+    const columns = [
+      { accessor: (dv: DeviceValue) => dv.id.slice(2), name: LL.ENTITY_NAME(0) },
+      {
+        accessor: (dv: DeviceValue) => (typeof dv.v === 'number' ? new Intl.NumberFormat().format(dv.v) : dv.v),
+        name: LL.VALUE(1)
+      },
+      { accessor: (dv: DeviceValue) => DeviceValueUOM_s[dv.u].replace(/[^a-zA-Z0-9]/g, ''), name: 'UoM' },
+      {
+        accessor: (dv: DeviceValue) => (dv.c && !hasMask(dv.id, DeviceEntityMask.DV_READONLY) ? 'yes' : 'no'),
+        name: LL.WRITEABLE()
+      },
+      {
+        accessor: (dv: DeviceValue) =>
+          dv.h ? dv.h : dv.l ? dv.l.join(' | ') : dv.m !== undefined && dv.x !== undefined ? dv.m + ', ' + dv.x : '',
+        name: 'Range'
+      }
+    ];
+
+    const data = onlyFav
+      ? deviceData.data.filter((dv) => hasMask(dv.id, DeviceEntityMask.DV_FAVORITE))
+      : deviceData.data;
+
+    const csvData = data.reduce(
+      (csvString: any, rowItem: any) =>
+        csvString + columns.map(({ accessor }: any) => escapeCsvCell(accessor(rowItem))).join(';') + '\r\n',
+      columns.map(({ name }: any) => escapeCsvCell(name)).join(';') + '\r\n'
     );
+
+    const csvFile = new Blob([csvData], { type: 'text/csv;charset:utf-8' });
+    const downloadLink = document.createElement('a');
+    downloadLink.download = filename;
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
   };
 
   useEffect(() => {
@@ -340,7 +350,7 @@ const DashboardDevices: FC = () => {
 
   const deviceValueDialogSave = async (devicevalue: DeviceValue) => {
     const id = Number(device_select.state.id);
-    await writeDeviceValue({ id, devicevalue })
+    await writeDeviceValue({ id, c: devicevalue.c, v: devicevalue.v })
       .then(() => {
         toast.success(LL.WRITE_CMD_SENT());
       })
@@ -426,7 +436,10 @@ const DashboardDevices: FC = () => {
                   <Cell stiff>
                     <DeviceIcon type_id={device.t} />
                   </Cell>
-                  <Cell>{device.n}</Cell>
+                  <Cell>
+                    {device.n}
+                    <span style={{ color: 'lightblue' }}>&nbsp;&nbsp;({device.e})</span>
+                  </Cell>
                   <Cell stiff>{device.tn}</Cell>
                 </Row>
               ))}
@@ -480,20 +493,30 @@ const DashboardDevices: FC = () => {
           right: 16,
           bottom: 0,
           top: 128,
-          maxHeight: () => size[1] - 210,
-          zIndex: 'modal'
+          zIndex: 'modal',
+          maxHeight: () => size[1] - 189,
+          border: '1px solid #177ac9'
         }}
       >
         <Box sx={{ border: '1px solid #177ac9' }}>
-          <Typography noWrap variant="subtitle1" color="warning.main" sx={{ mx: 1 }}>
-            {coreData.devices[deviceIndex].n}
+          <Typography noWrap variant="subtitle1" color="warning.main" sx={{ ml: 1 }}>
+            {coreData.devices[deviceIndex].tn}&nbsp;&#124;&nbsp;{coreData.devices[deviceIndex].n}
           </Typography>
 
           <Grid container justifyContent="space-between">
             <Typography sx={{ ml: 1 }} variant="subtitle2" color="primary">
-              {shown_data.length + ' ' + LL.ENTITIES(shown_data.length)}
+              {LL.SHOWING() +
+                ' ' +
+                shown_data.length +
+                '/' +
+                coreData.devices[deviceIndex].e +
+                ' ' +
+                LL.ENTITIES(shown_data.length)}
               <IconButton onClick={() => setShowDeviceInfo(true)}>
                 <InfoOutlinedIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+              </IconButton>
+              <IconButton onClick={customize}>
+                <FormatListNumberedIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
               </IconButton>
               <IconButton onClick={handleDownloadCsv}>
                 <DownloadIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
@@ -511,7 +534,7 @@ const DashboardDevices: FC = () => {
             </Typography>
             <Grid item zeroMinWidth justifyContent="flex-end">
               <IconButton onClick={resetDeviceSelect}>
-                <CancelIcon color="info" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+                <HighlightOffIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
               </IconButton>
             </Grid>
           </Grid>

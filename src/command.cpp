@@ -317,12 +317,13 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     // check if we have a matching command
     if (!cf) {
         // we didn't find the command, report error
-        LOG_DEBUG("Command failed: invalid command '%s'", cmd ? cmd : "");
+        LOG_WARNING("Command failed: invalid command '%s'", cmd ? cmd : "");
         return message(CommandRet::NOT_FOUND, "invalid command", output);
     }
 
     // check permissions and abort if not authorized
     if (cf->has_flags(CommandFlag::ADMIN_ONLY) && !is_admin) {
+        LOG_WARNING("Command failed: authentication failed");
         output["message"] = "authentication failed";
         return CommandRet::NOT_ALLOWED; // command not allowed
     }
@@ -338,12 +339,12 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
         snprintf(info_s, sizeof(info_s), "'%s/%s'", dname, cmd);
     }
     if ((value == nullptr) || (strlen(value) == 0)) {
-        LOG_WARNING(("%sCalling command %s"), ro.c_str(), info_s);
+        LOG_DEBUG(("%sCalling command %s"), ro.c_str(), info_s);
     } else {
         if (id > 0) {
-            LOG_WARNING(("%sCalling command %s with value %s and id %d on device 0x%02X"), ro.c_str(), info_s, value, id, device_id);
+            LOG_INFO(("%sCalling command %s with value %s and id %d on device 0x%02X"), ro.c_str(), info_s, value, id, device_id);
         } else {
-            LOG_WARNING(("%sCalling command %s with value %s"), ro.c_str(), info_s, value);
+            LOG_INFO(("%sCalling command %s with value %s"), ro.c_str(), info_s, value);
         }
     }
 
@@ -362,6 +363,11 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 
     // report back. If not OK show output from error, other return the HTTP code
     if (return_code != CommandRet::OK) {
+        if (value == nullptr) {
+            LOG_ERROR("Command '%s' failed with code: %d", cmd, return_code);
+        } else {
+            LOG_ERROR("Command '%s:%s' failed with code: %d", cmd, value, return_code);
+        }
         return message(return_code, "callback function failed", output);
     }
     return return_code;
@@ -504,7 +510,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
                 }
                 shell.print(cl);
                 // pad with spaces
-                while (i++ < 22) {
+                while (i++ < 30) {
                     shell.print(' ');
                 }
                 shell.print(COLOR_BRIGHT_CYAN);
@@ -515,7 +521,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
                 shell.print(Helpers::translated_word(cf.description_));
                 if (!cf.has_flags(CommandFlag::ADMIN_ONLY)) {
                     shell.print(' ');
-                    shell.print(COLOR_BRIGHT_RED);
+                    shell.print(COLOR_BRIGHT_GREEN);
                     shell.print('*');
                 }
                 shell.print(COLOR_RESET);
@@ -595,7 +601,7 @@ void Command::show_devices(uuid::console::Shell & shell) {
 // output list of all commands to console
 // calls show with verbose mode set
 void Command::show_all(uuid::console::Shell & shell) {
-    shell.println("Available commands (*=authorization not required): ");
+    shell.printfln("Showing all available commands (%s*%s=authentication not required):", COLOR_BRIGHT_GREEN, COLOR_RESET);
 
     // show system first
     shell.print(COLOR_BOLD_ON);
@@ -609,9 +615,9 @@ void Command::show_all(uuid::console::Shell & shell) {
     shell.print(COLOR_YELLOW);
     shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::CUSTOM));
     shell.println(COLOR_RESET);
-    shell.printf("  info:                 %slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
+    shell.printf("  info:\t\t\t\t%slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
     shell.println(COLOR_RESET);
-    shell.printf("  commands:             %slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
+    shell.printf("  commands:\t\t\t%slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
     shell.print(COLOR_RESET);
     show(shell, EMSdevice::DeviceType::CUSTOM, true);
 
@@ -620,9 +626,9 @@ void Command::show_all(uuid::console::Shell & shell) {
     shell.print(COLOR_YELLOW);
     shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SCHEDULER));
     shell.println(COLOR_RESET);
-    shell.printf("  info:                 %slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
+    shell.printf("  info:\t\t\t\t%slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
     shell.println(COLOR_RESET);
-    shell.printf("  commands:             %slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_RED);
+    shell.printf("  commands:\t\t\t%slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
     shell.print(COLOR_RESET);
     show(shell, EMSdevice::DeviceType::SCHEDULER, true);
 

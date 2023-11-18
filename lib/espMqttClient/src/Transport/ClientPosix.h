@@ -43,7 +43,7 @@ class ClientPosix : public Transport {
 
  protected:
   int _sockfd;
-  struct sockaddr_in _host;
+  sockaddr_in _host;
 };
 
 }  // namespace espMqttClientInternals

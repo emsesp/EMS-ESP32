@@ -63,7 +63,9 @@ void TemperatureSensor::start() {
         [&](const char * value, const int8_t id, JsonObject & output) { return command_commands(value, id, output); },
         FL_(commands_cmd));
 
-    Mqtt::subscribe(EMSdevice::DeviceType::TEMPERATURESENSOR, "temperaturesensor/#", nullptr); // use empty function callback
+    char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+    snprintf(topic, sizeof(topic), "%s/#", F_(temperaturesensor));
+    Mqtt::subscribe(EMSdevice::DeviceType::TEMPERATURESENSOR, topic, nullptr); // use empty function callback
 }
 
 // load settings
@@ -511,7 +513,7 @@ void TemperatureSensor::publish_values(const bool force) {
                 config["dev_cla"] = "temperature";
 
                 char stat_t[50];
-                snprintf(stat_t, sizeof(stat_t), "%s/temperaturesensor_data", Mqtt::basename().c_str());
+                snprintf(stat_t, sizeof(stat_t), "%s/%s_data", Mqtt::base().c_str(), F_(temperaturesensor)); // use base path
                 config["stat_t"] = stat_t;
 
                 config["unit_of_meas"] = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
@@ -529,9 +531,9 @@ void TemperatureSensor::publish_values(const bool force) {
 
                 char uniq_s[70];
                 if (Mqtt::entity_format() == Mqtt::entityFormat::MULTI_SHORT) {
-                    snprintf(uniq_s, sizeof(uniq_s), "%s_temperaturesensor_%s", Mqtt::basename().c_str(), sensor.id().c_str());
+                    snprintf(uniq_s, sizeof(uniq_s), "%s_%s_%s", Mqtt::basename().c_str(), F_(temperaturesensor), sensor.id().c_str());
                 } else {
-                    snprintf(uniq_s, sizeof(uniq_s), "temperaturesensor_%s", sensor.id().c_str());
+                    snprintf(uniq_s, sizeof(uniq_s), "%s_%s", F_(temperaturesensor), sensor.id().c_str());
                 }
 
                 config["obj_id"]  = uniq_s;
@@ -542,7 +544,8 @@ void TemperatureSensor::publish_values(const bool force) {
                 config["name"] = name;
 
                 JsonObject dev = config.createNestedObject("dev");
-                JsonArray  ids = dev.createNestedArray("ids");
+                dev["name"]    = Mqtt::basename();
+                JsonArray ids  = dev.createNestedArray("ids");
                 ids.add(Mqtt::basename());
 
                 // add "availability" section
@@ -553,14 +556,16 @@ void TemperatureSensor::publish_values(const bool force) {
                 std::string sensorid = sensor.id();
                 std::replace(sensorid.begin(), sensorid.end(), '-', '_');
 
-                snprintf(topic, sizeof(topic), "sensor/%s/temperaturesensor_%s/config", Mqtt::basename().c_str(), sensorid.c_str());
+                snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(temperaturesensor), sensorid.c_str());
 
                 sensor.ha_registered = Mqtt::queue_ha(topic, config.as<JsonObject>());
             }
         }
     }
 
-    Mqtt::queue_publish("temperaturesensor_data", doc.as<JsonObject>());
+    char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+    snprintf(topic, sizeof(topic), "%s_data", F_(temperaturesensor));
+    Mqtt::queue_publish(topic, doc.as<JsonObject>());
 }
 
 
@@ -576,7 +581,7 @@ TemperatureSensor::Sensor::Sensor(const uint8_t addr[])
              (unsigned int)(internal_id_ >> 48) & 0xFF,
              (unsigned int)(internal_id_ >> 32) & 0xFFFF,
              (unsigned int)(internal_id_ >> 16) & 0xFFFF,
-             (unsigned int)(internal_id_)&0xFFFF);
+             (unsigned int)(internal_id_) & 0xFFFF);
     id_     = std::string(id_s);
     name_   = std::string{}; // name (alias) is empty
     offset_ = 0;             // 0 degrees offset

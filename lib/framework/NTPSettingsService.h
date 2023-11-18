@@ -5,7 +5,7 @@
 #include <FSPersistence.h>
 
 #include <time.h>
-#include <lwip/apps/sntp.h>
+#include <esp_sntp.h>
 
 #ifndef FACTORY_NTP_ENABLED
 #define FACTORY_NTP_ENABLED true

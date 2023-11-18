@@ -254,7 +254,7 @@ void WebSchedulerService::publish(const bool force) {
             if (Mqtt::ha_enabled() && !ha_registered_) {
                 StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
                 char                                        stat_t[50];
-                snprintf(stat_t, sizeof(stat_t), "%s/scheduler_data", Mqtt::basename().c_str());
+                snprintf(stat_t, sizeof(stat_t), "%s/scheduler_data", Mqtt::base().c_str());
                 config["stat_t"] = stat_t;
 
                 char val_obj[50];
@@ -273,7 +273,7 @@ void WebSchedulerService::publish(const bool force) {
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
                 char command_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
                 snprintf(topic, sizeof(topic), "switch/%s/scheduler_%s/config", Mqtt::basename().c_str(), scheduleItem.name.c_str());
-                snprintf(command_topic, sizeof(command_topic), "%s/scheduler/%s", Mqtt::basename().c_str(), scheduleItem.name.c_str());
+                snprintf(command_topic, sizeof(command_topic), "%s/scheduler/%s", Mqtt::base().c_str(), scheduleItem.name.c_str());
                 config["cmd_t"] = command_topic;
                 if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
                     config["pl_on"]  = true;
@@ -288,7 +288,8 @@ void WebSchedulerService::publish(const bool force) {
                 }
 
                 JsonObject dev = config.createNestedObject("dev");
-                JsonArray  ids = dev.createNestedArray("ids");
+                dev["name"]    = Mqtt::basename();
+                JsonArray ids  = dev.createNestedArray("ids");
                 ids.add(Mqtt::basename());
 
                 // add "availability" section

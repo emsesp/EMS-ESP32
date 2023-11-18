@@ -97,6 +97,7 @@ MAKE_WORD(analogsensor)
 MAKE_WORD(temperaturesensor)
 MAKE_WORD(alert)
 MAKE_WORD(pump)
+MAKE_WORD(extension)
 MAKE_WORD(heatsource)
 MAKE_WORD(scheduler)
 MAKE_WORD(custom)
@@ -122,7 +123,6 @@ MAKE_WORD_CUSTOM(EMSESP, "EMS-ESP")
 MAKE_WORD_CUSTOM(host_fmt, "Host: %s")
 MAKE_WORD_CUSTOM(port_fmt, "Port: %d")
 MAKE_WORD_CUSTOM(hostname_fmt, "Hostname: %s")
-MAKE_WORD_CUSTOM(board_profile_fmt, "Board Profile: %s")
 MAKE_WORD_CUSTOM(mark_interval_fmt, "Mark interval: %lus")
 MAKE_WORD_CUSTOM(wifi_ssid_fmt, "WiFi SSID: %s")
 MAKE_WORD_CUSTOM(wifi_password_fmt, "WiFi Password: %S")
@@ -141,6 +141,7 @@ MAKE_WORD_CUSTOM(n_mandatory, "<n>")
 MAKE_WORD_CUSTOM(sensorid_optional, "[sensor ID]")
 MAKE_WORD_CUSTOM(id_optional, "[id|hc]")
 MAKE_WORD_CUSTOM(data_optional, "[data]")
+MAKE_WORD_CUSTOM(nvs_optional, "[nvs]")
 MAKE_WORD_CUSTOM(offset_optional, "[offset]")
 MAKE_WORD_CUSTOM(length_optional, "[length]")
 MAKE_WORD_CUSTOM(typeid_mandatory, "<type ID>")
@@ -167,6 +168,11 @@ MAKE_NOTRANSLATION(rc3x, "RC3x")
 MAKE_NOTRANSLATION(rc20, "RC20")
 MAKE_NOTRANSLATION(fb10, "FB10")
 MAKE_NOTRANSLATION(fb100, "FB100")
+MAKE_NOTRANSLATION(rc310, "RC310")
+MAKE_NOTRANSLATION(rc200, "RC200")
+MAKE_NOTRANSLATION(rc100, "RC100")
+MAKE_NOTRANSLATION(rc100h, "RC100H")
+MAKE_NOTRANSLATION(tc100, "TC100")
 MAKE_NOTRANSLATION(dash, "-")
 MAKE_NOTRANSLATION(BLANK, "")
 MAKE_NOTRANSLATION(pwm, "pwm")
@@ -200,11 +206,11 @@ MAKE_NOTRANSLATION(L3, "L3")
 MAKE_NOTRANSLATION(L4, "L4")
 
 // templates - this are not translated and will be saved under options_single
-MAKE_NOTRANSLATION(tpl_datetime, "< NTP | dd.mm.yyyy-hh:mm:ss-day(0-6)-dst(0/1) >")
+MAKE_NOTRANSLATION(tpl_datetime, "NTP | dd.mm.yyyy-hh:mm:ss-day(0-6)-dst(0/1)")
 MAKE_NOTRANSLATION(tpl_switchtime, "<nn> [ not_set | day hh:mm on|off ]")
 MAKE_NOTRANSLATION(tpl_switchtime1, "<nn> [ not_set | day hh:mm Tn ]")
-MAKE_NOTRANSLATION(tpl_holidays, "< dd.mm.yyyy-dd.mm.yyyy >")
-MAKE_NOTRANSLATION(tpl_date, "< dd.mm.yyyy >")
+MAKE_NOTRANSLATION(tpl_holidays, "dd.mm.yyyy-dd.mm.yyyy")
+MAKE_NOTRANSLATION(tpl_date, "dd.mm.yyyy")
 MAKE_NOTRANSLATION(tpl_input, "<inv>[<evu1><evu2><evu3><comp><aux><cool><heat><dhw><pv>]")
 MAKE_NOTRANSLATION(tpl_input4, "<inv>[<comp><aux><cool><heat><dhw><pv>]")
 
@@ -240,6 +246,7 @@ MAKE_WORD_CUSTOM(uom_m3, "m³")
 MAKE_WORD_CUSTOM(uom_l, "l")
 MAKE_WORD_CUSTOM(uom_kmin, "K*min")
 MAKE_WORD_CUSTOM(uom_k, "K")
+MAKE_WORD_CUSTOM(uom_volts, "V")
 
 // MQTT topics and prefixes
 MAKE_WORD_CUSTOM(heating_active, "heating_active")
@@ -295,7 +302,7 @@ MAKE_ENUM(enum_summer, FL_(winter), FL_(summer))
 MAKE_ENUM(enum_operatingstate, FL_(heating), FL_(off), FL_(cooling))
 MAKE_ENUM(enum_hpmode, FL_(heating), FL_(cooling), FL_(heatandcool))
 
-MAKE_ENUM(enum_mode, FL_(manual), FL_(auto))                        // RC100, RC300, RC310
+MAKE_ENUM(enum_mode, FL_(off), FL_(manual), FL_(auto))              // RC100, RC300, RC310
 MAKE_ENUM(enum_mode2, FL_(off), FL_(manual), FL_(auto))             // RC20, RC30
 MAKE_ENUM(enum_mode3, FL_(night), FL_(day), FL_(auto))              // RC35, RC30_N, RC25, RC20_N
 MAKE_ENUM(enum_mode4, FL_(nofrost), FL_(eco), FL_(heat), FL_(auto)) // JUNKERS
@@ -319,6 +326,7 @@ MAKE_ENUM(enum_controlmode2, FL_(outdoor), FL_(room))
 MAKE_ENUM(enum_control, FL_(off), FL_(rc20), FL_(rc3x))
 MAKE_ENUM(enum_j_control, FL_(off), FL_(fb10), FL_(fb100))
 MAKE_ENUM(enum_roomsensor, FL_(extern), FL_(intern), FL_(auto))
+MAKE_ENUM(enum_control1, FL_(rc310), FL_(rc200), FL_(rc100), FL_(rc100h), FL_(tc100))
 
 MAKE_ENUM(enum_switchmode, FL_(off), FL_(eco), FL_(comfort), FL_(heat))
 
@@ -332,6 +340,7 @@ MAKE_ENUM(enum_lowNoiseMode, FL_(off), FL_(reduced_output), FL_(switchoff), FL_(
 // heat pump
 MAKE_ENUM(enum_hpactivity, FL_(none), FL_(heating), FL_(cooling), FL_(hot_water), FL_(pool), FL_(unknown), FL_(defrost))
 MAKE_ENUM(enum_silentMode, FL_(off), FL_(auto), FL_(on))
+MAKE_ENUM(enum_4way, FL_(cool_defrost), FL_(heat_ww))
 
 // solar
 MAKE_ENUM(enum_solarmode, FL_(constant), FL_(pwm), FL_(analog))

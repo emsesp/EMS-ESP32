@@ -498,8 +498,8 @@ function createStructureReader(structure, firstId) {
               key === '__proto__'
                 ? '__proto_:r()'
                 : validName.test(key)
-                ? key + ':r()'
-                : '[' + JSON.stringify(key) + ']:r()'
+                  ? key + ':r()'
+                  : '[' + JSON.stringify(key) + ']:r()'
             )
             .join(',') +
           '})}'

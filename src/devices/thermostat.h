@@ -37,9 +37,11 @@ class Thermostat : public EMSdevice {
         int16_t selTemp;
         int16_t roomTemp;
         int16_t remotetemp; // for readback
+        uint8_t remotehum;  // for readback
         uint8_t tempautotemp;
         int8_t  remoteseltemp;
         uint8_t mode;
+        uint8_t mode_new = EMS_VALUE_UINT_NOTSET; // not initialized by register_value
         uint8_t modetype;
         uint8_t summermode;
         uint8_t holidaymode;
@@ -208,8 +210,9 @@ class Thermostat : public EMSdevice {
     int16_t dampedoutdoortemp2_;
     uint8_t floordrystatus_;
     uint8_t floordrytemp_;
-    uint8_t dewtemperature_;
+    int16_t dewtemperature_;
     uint8_t humidity_;
+    uint8_t battery_;
 
     uint8_t wwExtra1_; // wwExtra active for wwSystem 1
     uint8_t wwExtra2_;
@@ -316,6 +319,7 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_OFFSET_RCPLUSStatusMessage_curr         = 0;  // current temp
     static constexpr uint8_t EMS_OFFSET_RCPLUSStatusMessage_currsetpoint = 6;  // target setpoint temp
     static constexpr uint8_t EMS_OFFSET_RCPLUSSet_mode                   = 0;  // operation mode(Auto=0xFF, Manual=0x00)
+    static constexpr uint8_t EMS_OFFSET_RCPLUSSet_mode_new               = 21; // operation mode(0-off, 1-manual, 2-auto)
     static constexpr uint8_t EMS_OFFSET_RCPLUSSet_temp_comfort3          = 1;  // comfort3 level
     static constexpr uint8_t EMS_OFFSET_RCPLUSSet_temp_comfort2          = 2;  // comfort2 level
     static constexpr uint8_t EMS_OFFSET_RCPLUSSet_temp_comfort1          = 3;  // comfort1 level
@@ -401,6 +405,7 @@ class Thermostat : public EMSdevice {
     void process_RemoteTemp(std::shared_ptr<const Telegram> telegram);
     void process_RemoteHumidity(std::shared_ptr<const Telegram> telegram);
     void process_RemoteCorrection(std::shared_ptr<const Telegram> telegram);
+    void process_RemoteBattery(std::shared_ptr<const Telegram> telegram);
     void process_HPSet(std::shared_ptr<const Telegram> telegram);
     void process_HPMode(std::shared_ptr<const Telegram> telegram);
 
@@ -424,6 +429,7 @@ class Thermostat : public EMSdevice {
     bool set_vacreducemode(const char * value, const int8_t id);
     bool set_nofrostmode(const char * value, const int8_t id);
     bool set_remotetemp(const char * value, const int8_t id);
+    bool set_remotehum(const char * value, const int8_t id);
     bool set_roominfl_factor(const char * value, const int8_t id);
     bool set_reducemode(const char * value, const int8_t id);
     bool set_switchtime1(const char * value, const int8_t id);

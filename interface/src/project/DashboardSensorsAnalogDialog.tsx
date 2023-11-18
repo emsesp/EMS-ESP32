@@ -89,7 +89,6 @@ const DashboardSensorsAnalogDialog = ({
               fieldErrors={fieldErrors}
               name="g"
               label="GPIO"
-              disabled={!creating}
               value={numberValue(editItem.g)}
               type="number"
               variant="outlined"
@@ -124,60 +123,60 @@ const DashboardSensorsAnalogDialog = ({
             </TextField>
           </Grid>
           {editItem.t >= AnalogType.COUNTER && editItem.t <= AnalogType.RATE && (
-            <>
-              <Grid item xs={4}>
-                <TextField name="u" label={LL.UNIT()} value={editItem.u} fullWidth select onChange={updateFormValue}>
-                  {DeviceValueUOM_s.map((val, i) => (
-                    <MenuItem key={i} value={i}>
-                      {val}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
-              {editItem.t === AnalogType.ADC && (
-                <Grid item xs={4}>
-                  <TextField
-                    name="o"
-                    label={LL.OFFSET()}
-                    value={numberValue(editItem.o)}
-                    fullWidth
-                    type="number"
-                    variant="outlined"
-                    onChange={updateFormValue}
-                    inputProps={{ min: '0', max: '3300', step: '1' }}
-                    InputProps={{
-                      startAdornment: <InputAdornment position="start">mV</InputAdornment>
-                    }}
-                  />
-                </Grid>
-              )}
-              {editItem.t === AnalogType.COUNTER && (
-                <Grid item xs={4}>
-                  <TextField
-                    name="o"
-                    label={LL.STARTVALUE()}
-                    value={numberValue(editItem.o)}
-                    fullWidth
-                    type="number"
-                    variant="outlined"
-                    onChange={updateFormValue}
-                    inputProps={{ step: '0.001' }}
-                  />
-                </Grid>
-              )}
-              <Grid item xs={4}>
-                <TextField
-                  name="f"
-                  label={LL.FACTOR()}
-                  value={numberValue(editItem.f)}
-                  fullWidth
-                  type="number"
-                  variant="outlined"
-                  onChange={updateFormValue}
-                  inputProps={{ step: '0.001' }}
-                />
-              </Grid>
-            </>
+            <Grid item xs={4}>
+              <TextField name="u" label={LL.UNIT()} value={editItem.u} fullWidth select onChange={updateFormValue}>
+                {DeviceValueUOM_s.map((val, i) => (
+                  <MenuItem key={i} value={i}>
+                    {val}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+          )}
+          {editItem.t === AnalogType.ADC && (
+            <Grid item xs={4}>
+              <TextField
+                name="o"
+                label={LL.OFFSET()}
+                value={numberValue(editItem.o)}
+                fullWidth
+                type="number"
+                variant="outlined"
+                onChange={updateFormValue}
+                inputProps={{ min: '0', max: '3300', step: '1' }}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">mV</InputAdornment>
+                }}
+              />
+            </Grid>
+          )}
+          {editItem.t === AnalogType.COUNTER && (
+            <Grid item xs={4}>
+              <TextField
+                name="o"
+                label={LL.STARTVALUE()}
+                value={numberValue(editItem.o)}
+                fullWidth
+                type="number"
+                variant="outlined"
+                onChange={updateFormValue}
+                inputProps={{ step: '0.001' }}
+              />
+            </Grid>
+          )}
+          {editItem.t >= AnalogType.COUNTER && editItem.t <= AnalogType.RATE && (
+            <Grid item xs={4}>
+              <TextField
+                name="f"
+                label={LL.FACTOR()}
+                value={numberValue(editItem.f)}
+                fullWidth
+                type="number"
+                variant="outlined"
+                onChange={updateFormValue}
+                inputProps={{ step: '0.001' }}
+              />
+            </Grid>
           )}
           {editItem.t === AnalogType.DIGITAL_OUT && (editItem.g === 25 || editItem.g === 26) && (
             <Grid item xs={4}>
@@ -194,20 +193,55 @@ const DashboardSensorsAnalogDialog = ({
             </Grid>
           )}
           {editItem.t === AnalogType.DIGITAL_OUT && editItem.g !== 25 && editItem.g !== 26 && (
-            <Grid item xs={4}>
-              <TextField
-                name="o"
-                label={LL.VALUE(0)}
-                value={numberValue(editItem.o)}
-                fullWidth
-                type="number"
-                variant="outlined"
-                onChange={updateFormValue}
-                inputProps={{ min: '0', max: '1', step: '1' }}
-              />
-            </Grid>
+            <>
+              <Grid item xs={4}>
+                <TextField
+                  name="o"
+                  label={LL.VALUE(0)}
+                  value={numberValue(editItem.o)}
+                  fullWidth
+                  select
+                  variant="outlined"
+                  onChange={updateFormValue}
+                >
+                  <MenuItem value={0}>{LL.OFF()}</MenuItem>
+                  <MenuItem value={1}>{LL.ON()}</MenuItem>
+                </TextField>
+              </Grid>
+              <Grid item xs={4}>
+                <TextField
+                  name="f"
+                  label={LL.POLARITY()}
+                  value={editItem.f}
+                  fullWidth
+                  select
+                  onChange={updateFormValue}
+                >
+                  <MenuItem value={1}>{LL.ACTIVEHIGH()}</MenuItem>
+                  <MenuItem value={-1}>{LL.ACTIVELOW()}</MenuItem>
+                </TextField>
+              </Grid>
+              <Grid item xs={4}>
+                <TextField
+                  name="u"
+                  label={LL.STARTVALUE()}
+                  value={editItem.u}
+                  fullWidth
+                  select
+                  onChange={updateFormValue}
+                >
+                  <MenuItem value={0}>{LL.UNCHANGED()}</MenuItem>
+                  <MenuItem value={1}>
+                    {LL.ALWAYS()}&nbsp;{LL.OFF()}
+                  </MenuItem>
+                  <MenuItem value={2}>
+                    {LL.ALWAYS()}&nbsp;{LL.ON()}
+                  </MenuItem>
+                </TextField>
+              </Grid>
+            </>
           )}
-          {editItem.t >= AnalogType.PWM_0 && (
+          {(editItem.t === AnalogType.PWM_0 || editItem.t === AnalogType.PWM_1 || editItem.t === AnalogType.PWM_2) && (
             <>
               <Grid item xs={4}>
                 <TextField

@@ -89,27 +89,16 @@ const DashboardDevicesDialog = ({
     }
   };
 
-  const showHelperText = (dv: DeviceValue) => {
-    if (dv.h) {
-      return dv.h;
-    }
-    if (dv.l) {
-      return '[ ' + dv.l.join(' | ') + ' ]';
-    }
-
-    let helperText = '<';
-    if (dv.s) {
-      helperText += 'n';
-      if (dv.m !== undefined && dv.x !== undefined) {
-        helperText += ' between ' + dv.m + ' and ' + dv.x;
-      } else {
-        helperText += ' , step ' + dv.s;
-      }
-    } else {
-      helperText += 'text';
-    }
-    return helperText + '>';
-  };
+  const showHelperText = (dv: DeviceValue) =>
+    dv.h ? (
+      dv.h
+    ) : dv.l ? (
+      dv.l.join(' | ')
+    ) : dv.m !== undefined && dv.x !== undefined ? (
+      <>
+        {dv.m}&nbsp;&rarr;&nbsp;{dv.x}
+      </>
+    ) : undefined;
 
   return (
     <Dialog sx={dialogStyle} open={open} onClose={close}>
@@ -125,7 +114,7 @@ const DashboardDevicesDialog = ({
             {editItem.l ? (
               <TextField
                 name="v"
-                label={LL.VALUE(0)}
+                label={LL.VALUE(1)}
                 value={editItem.v}
                 disabled={!writeable}
                 autoFocus
@@ -143,7 +132,7 @@ const DashboardDevicesDialog = ({
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="v"
-                label={LL.VALUE(0)}
+                label={LL.VALUE(1)}
                 value={Math.round(editItem.v * 10) / 10}
                 autoFocus
                 disabled={!writeable}
@@ -159,7 +148,7 @@ const DashboardDevicesDialog = ({
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="v"
-                label={LL.VALUE(0)}
+                label={LL.VALUE(1)}
                 value={editItem.v}
                 disabled={!writeable}
                 autoFocus
@@ -171,7 +160,7 @@ const DashboardDevicesDialog = ({
           </Grid>
           {writeable && (
             <Grid item>
-              <FormHelperText>format:&nbsp;{showHelperText(editItem)}</FormHelperText>
+              <FormHelperText>{showHelperText(editItem)}</FormHelperText>
             </Grid>
           )}
         </Grid>

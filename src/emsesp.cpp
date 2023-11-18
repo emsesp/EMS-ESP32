@@ -386,27 +386,31 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
 
                 // print line
                 for (JsonPair p : json) {
-                    const char * key = p.key().c_str();
-                    shell.printf("  %s: ", key);
-                    JsonVariant data = p.value();
-                    shell.print(COLOR_BRIGHT_GREEN);
-                    shell.print(data.as<std::string>());
-                    // if there is a uom print it
-                    std::string uom = emsdevice->get_value_uom(key);
-                    if (uom == "°C" && EMSESP::system_.fahrenheit()) {
-                        uom = "°F";
-                    }
-                    if (!uom.empty()) {
-                        shell.print(' ');
-                        shell.print(uom);
-                    }
+                    std::string key = p.key().c_str(); // this will be fullname and the shortname in brackets
 
-                    shell.print(COLOR_RESET);
-                    shell.println();
+                    // extract the shortname from the key, which is in brackets
+                    std::size_t first_bracket = key.find_last_of('(');
+                    std::size_t last_bracket  = key.find_last_of(')');
+                    std::string shortname     = key.substr(first_bracket + 1, last_bracket - first_bracket - 1);
+                    std::string uom           = emsdevice->get_value_uom(key.substr(first_bracket + 1, last_bracket - first_bracket - 1));
+
+                    shell.printfln("  %s: %s%s %s%s", key.c_str(), COLOR_BRIGHT_GREEN, p.value().as<std::string>().c_str(), uom.c_str(), COLOR_RESET);
                 }
                 shell.println();
             }
         }
+    }
+
+    // show any custom entities
+    if (webCustomEntityService.count_entities() > 0) {
+        shell.printfln("Custom entities:");
+        StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> custom_doc; // use max size
+        JsonObject                                  custom_output = custom_doc.to<JsonObject>();
+        webCustomEntityService.show_values(custom_output);
+        for (JsonPair p : custom_output) {
+            shell.printfln("  %s: %s%s%s", p.key().c_str(), COLOR_BRIGHT_GREEN, p.value().as<std::string>().c_str(), COLOR_RESET);
+        }
+        shell.println();
     }
 }
 
@@ -480,9 +484,7 @@ void EMSESP::publish_all(bool force) {
         publish_device_values(EMSdevice::DeviceType::THERMOSTAT);
         publish_device_values(EMSdevice::DeviceType::SOLAR);
         publish_device_values(EMSdevice::DeviceType::MIXER);
-        publish_other_values(); // switch and heat pump, ...
-        webSchedulerService.publish();
-        webCustomEntityService.publish();
+        publish_other_values();      // switch and heat pump, ...
         publish_sensor_values(true); // includes temperature and analog sensors
         system_.send_heartbeat();
     }
@@ -514,8 +516,6 @@ void EMSESP::publish_all_loop() {
         break;
     case 5:
         publish_other_values(); // switch and heat pump
-        webSchedulerService.publish(true);
-        webCustomEntityService.publish(true);
         break;
     case 6:
         publish_sensor_values(true, true);
@@ -600,12 +600,13 @@ void EMSESP::publish_other_values() {
     publish_device_values(EMSdevice::DeviceType::HEATPUMP);
     publish_device_values(EMSdevice::DeviceType::HEATSOURCE);
     publish_device_values(EMSdevice::DeviceType::VENTILATION);
+    publish_device_values(EMSdevice::DeviceType::EXTENSION);
+    publish_device_values(EMSdevice::DeviceType::ALERT);
     // other devices without values yet
     // publish_device_values(EMSdevice::DeviceType::GATEWAY);
     // publish_device_values(EMSdevice::DeviceType::CONNECT);
-    // publish_device_values(EMSdevice::DeviceType::ALERT);
-    // publish_device_values(EMSdevice::DeviceType::PUMP);
     // publish_device_values(EMSdevice::DeviceType::GENERIC);
+    webSchedulerService.publish();
     webCustomEntityService.publish();
 }
 
@@ -716,7 +717,6 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     uint8_t offset = telegram->offset;
 
     // find name for src and dest by looking up known devices
-
     std::string src_name("");
     std::string dest_name("");
     std::string type_name("");
@@ -1170,14 +1170,17 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
         device_type,
         F_(info),
         [device_type](const char * value, const int8_t id, JsonObject & output) {
-            return command_info(device_type, output, id, EMSdevice::OUTPUT_TARGET::API_VERBOSE);
+            return EMSdevice::export_values(device_type, output, id, EMSdevice::OUTPUT_TARGET::API_VERBOSE);
         },
         FL_(info_cmd));
     Command::add(
         device_type,
         F_(values),
         [device_type](const char * value, const int8_t id, JsonObject & output) {
-            return command_info(device_type, output, id, EMSdevice::OUTPUT_TARGET::API_SHORTNAMES); // HIDDEN command showing short names, used in e.g. /api/boiler
+            return EMSdevice::export_values(device_type,
+                                            output,
+                                            id,
+                                            EMSdevice::OUTPUT_TARGET::API_SHORTNAMES); // HIDDEN command showing short names, used in e.g. /api/boiler
         },
         nullptr,
         CommandFlag::HIDDEN); // this command is hidden
@@ -1218,43 +1221,6 @@ bool EMSESP::command_commands(uint8_t device_type, JsonObject & output, const in
     return Command::list(device_type, output);
 }
 
-// export all values for a specific device
-bool EMSESP::command_info(uint8_t device_type, JsonObject & output, const int8_t id, const uint8_t output_target) {
-    bool    has_value = false;
-    uint8_t tag;
-    if (id >= 1 && id <= (1 + DeviceValueTAG::TAG_HS16 - DeviceValueTAG::TAG_HC1)) {
-        tag = DeviceValueTAG::TAG_HC1 + id - 1; // this sets also WWC and HS
-    } else if (id == -1 || id == 0) {
-        tag = DeviceValueTAG::TAG_NONE;
-    } else {
-        return false;
-    }
-
-    if (id > 0 || output_target == EMSdevice::OUTPUT_TARGET::API_VERBOSE) {
-        for (const auto & emsdevice : emsdevices) {
-            if (emsdevice && (emsdevice->device_type() == device_type)) {
-                has_value |= emsdevice->generate_values(output, tag, (id < 1), output_target); // use nested for id -1 and 0
-            }
-        }
-        return has_value;
-    }
-    // for nested output add for each tag
-    for (tag = DeviceValueTAG::TAG_BOILER_DATA_WW; tag <= DeviceValueTAG::TAG_HS16; tag++) {
-        JsonObject output_hc    = output;
-        bool       nest_created = false;
-        for (const auto & emsdevice : emsdevices) {
-            if (emsdevice && (emsdevice->device_type() == device_type)) {
-                if (!nest_created && emsdevice->has_tags(tag)) {
-                    output_hc    = output.createNestedObject(EMSdevice::tag_to_mqtt(tag));
-                    nest_created = true;
-                }
-                has_value |= emsdevice->generate_values(output_hc, tag, true, output_target); // use nested for id -1 and 0
-            }
-        }
-    }
-    return has_value;
-}
-
 // send a read request, passing it into to the Tx Service, with optional offset and length
 void EMSESP::send_read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t length, const bool front) {
     txservice_.read_request(type_id, dest, offset, length, front);
@@ -1292,7 +1258,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     uint8_t first_value = data[0];
     if (((first_value & 0x7F) == txservice_.ems_bus_id()) && (length > 1)) {
         // if we ask ourself at roomcontrol for version e.g. 0B 98 02 00 20
-        Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data);
+        Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data, length);
 #ifdef EMSESP_UART_DEBUG
         // get_uptime is only updated once per loop, does not give the right time
         LOG_TRACE("[UART_DEBUG] Echo after %d ms: %s", ::millis() - rx_time_, Helpers::data_to_hex(data, length).c_str());
@@ -1392,7 +1358,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 #ifdef EMSESP_UART_DEBUG
         LOG_TRACE("[UART_DEBUG] Reply after %d ms: %s", ::millis() - rx_time_, Helpers::data_to_hex(data, length).c_str());
 #endif
-        Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data); // check if there is a message for the roomcontroller
+        Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data, length); // check if there is a message for the roomcontroller
 
         rxservice_.add(data, length); // add to RxQueue
     }
@@ -1476,6 +1442,7 @@ void EMSESP::start() {
 
     esp8266React.begin();  // loads core system services settings (network, mqtt, ap, ntp etc)
     webLogService.begin(); // start web log service. now we can start capturing logs to the web log
+    nvs_.begin("ems-esp", false, "nvs");
 
     LOG_INFO("Starting EMS-ESP version %s", EMSESP_APP_VERSION); // welcome message
     LOG_DEBUG("System is running in Debug mode");
@@ -1487,7 +1454,6 @@ void EMSESP::start() {
         system_.system_restart();
     };
 
-    nvs_.begin("ems-esp");
     webSettingsService.begin(); // load EMS-ESP Application settings...
 
     // do any system upgrades

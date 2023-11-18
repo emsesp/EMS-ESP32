@@ -128,6 +128,7 @@ const it: Translation = {
   BYPASS_TOKEN: 'Ignora autorizzazione del token di accesso sulle chiamate API',
   READONLY: 'Abilita modalità sola-lettura (blocca tutti i comandi di scrittura EMS Tx in uscita)',
   UNDERCLOCK_CPU: 'Abbassa velocità della CPU',
+  HEATINGOFF: 'Avviamento caldaia con riscaldamento forzato spento',
   ENABLE_SHOWER_TIMER: 'Abilita timer doccia',
   ENABLE_SHOWER_ALERT: 'Abilita avviso doccia',
   TRIGGER_TIME: 'Tempo di avvio',
@@ -172,7 +173,6 @@ const it: Translation = {
   HELP_INFORMATION_3: 'Per richiedere una funzionalità o segnalare un errore',
   HELP_INFORMATION_4: 'ricordati di scaricare e allegare le informazioni del tuo sistema per una risposta più rapida quando segnali un problema',
   HELP_INFORMATION_5: 'EMS-ESP è un progetto gratuito e open-source. Supporta il suo sviluppo futuro assegnandogli una stella su Github!',
-  SUPPORT_INFO: 'Info Supporto',
   UPLOAD: 'Carica',
   DOWNLOAD: 'Scarica',
   ABORTED: 'Annullato',
@@ -232,7 +232,7 @@ const it: Translation = {
   BROKER: 'Broker',
   CLIENT: 'Cliente',
   BASE_TOPIC: 'Base',
-  OPTIONAL: 'Opzionale',
+  OPTIONAL: 'opzionale',
   FORMATTING: 'Formattazione',
   MQTT_FORMAT: 'Formato Topic/Payload ',
   MQTT_NEST_1: 'Inserito in un singolo argomento',
@@ -325,7 +325,14 @@ const it: Translation = {
   WRITEABLE: 'Scrivibile',
   SHOWING: 'Visualizza',
   SEARCH: 'Ricerca',
-  CERT: 'TSL root certificate (leave blank to disable TSL)' // TODO translate
+  CERT: 'TLS root certificate (leave blank to disable TLS)', // TODO translate
+  ON: 'On', // TODO translate
+  OFF: 'Off', // TODO translate
+  POLARITY: 'Polarity', // TODO translate
+  ACTIVEHIGH: 'Active High', // TODO translate
+  ACTIVELOW: 'Active Low', // TODO translate
+  UNCHANGED: 'Unchanged', // TODO translate
+  ALWAYS: 'Always' // TODO translate
 };
 
 export default it;

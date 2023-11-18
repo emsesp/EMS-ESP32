@@ -7,15 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.6.2] October 1 2023
 
+## **IMPORTANT! BREAKING CHANGES**
+
 ## Added
 
 - Power entities
 - Optional input of BSSID for AP connection
-- Return empty json if no entries in scheduler/custom/analogsnesor/temperaturesensor
+- Return empty json if no entries in scheduler/custom/analogsensor/temperaturesensor
 
 ## Fixed
 
-- Wifi full scan to get strongest AP. This prevents some freezes when EMS-ESP would jump to a weaker AP in a Mesh setup.
+- Wifi full scan to get strongest AP
 - Add missing dhw tags
 - Sending a dash/- to the Reset command doesn't return an error [#1308](https://github.com/emsesp/EMS-ESP32/discussions/1308)
 

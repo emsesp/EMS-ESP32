@@ -70,7 +70,8 @@ class DeviceValue {
         L,           // 20 - L
         KMIN,        // 21 - K*min
         K,           // 22 - K
-        CONNECTIVITY // 23 - used in HA
+        VOLTS,       // 23 - V
+        CONNECTIVITY // 24 - used in HA
     };
 
     // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp

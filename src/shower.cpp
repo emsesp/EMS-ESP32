@@ -101,11 +101,21 @@ void Shower::loop() {
                     if (duration_ > SHOWER_MIN_DURATION) {
                         StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
 
-                        // char s[50];
-                        // snprintf(s, 50, "%02u:%02u:%02u", (uint8_t)(duration_ / 3600000UL), (uint8_t)(duration_ / 60000UL), (uint8_t)((duration_ / 1000UL) % 60));
-                        doc["duration"] = (uint8_t)(duration_ / 1000UL); // seconds
+                        // duration in seconds
+                        doc["duration"] = (duration_ / 1000UL); // seconds
+                        time_t now      = time(nullptr);
+                        // if NTP enabled, publish timestamp
+                        if (now > 1576800000) { // year 2020
+                            // doc["timestamp_s"] = now; // if needed, in seconds
+                            tm * tm_ = localtime(&now);
+                            char dt[25];
+                            strftime(dt, sizeof(dt), "%FT%T%z", tm_);
+                            doc["timestamp"] = dt;
+                            LOG_INFO("shower finished (duration %s)", dt);
+                        } else {
+                            LOG_INFO("shower finished (duration %lu s)", duration_ / 1000UL);
+                        }
                         Mqtt::queue_publish("shower_data", doc.as<JsonObject>());
-                        LOG_INFO("finished with duration %d", duration_);
                     }
                 }
 
@@ -173,7 +183,7 @@ void Shower::set_shower_state(bool state, bool force) {
         char                                       stat_t[50];
 
         //
-        // shower_active topic
+        // shower active
         //
         doc["name"] = "Shower Active";
 
@@ -185,7 +195,7 @@ void Shower::set_shower_state(bool state, bool force) {
         doc["uniq_id"]   = str;
         doc["object_id"] = str;
 
-        snprintf(stat_t, sizeof(stat_t), "%s/shower_active", Mqtt::basename().c_str());
+        snprintf(stat_t, sizeof(stat_t), "%s/shower_active", Mqtt::base().c_str());
         doc["stat_t"] = stat_t;
 
         if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
@@ -201,7 +211,8 @@ void Shower::set_shower_state(bool state, bool force) {
         }
 
         JsonObject dev = doc.createNestedObject("dev");
-        JsonArray  ids = dev.createNestedArray("ids");
+        dev["name"]    = "EMS-ESP";
+        JsonArray ids  = dev.createNestedArray("ids");
         ids.add(Mqtt::basename());
 
         Mqtt::add_avty_to_doc(stat_t, doc.as<JsonObject>()); // add "availability" section
@@ -210,7 +221,7 @@ void Shower::set_shower_state(bool state, bool force) {
         ha_configdone_ = Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
         //
-        // shower_duaration topic
+        // shower duaration
         //
         doc.clear();
 
@@ -219,7 +230,7 @@ void Shower::set_shower_state(bool state, bool force) {
         doc["uniq_id"]   = str;
         doc["object_id"] = str;
 
-        snprintf(stat_t, sizeof(stat_t), "%s/shower_data", Mqtt::basename().c_str());
+        snprintf(stat_t, sizeof(stat_t), "%s/shower_data", Mqtt::base().c_str());
         doc["stat_t"] = stat_t;
 
         doc["name"]         = "Shower Duration";
@@ -230,12 +241,40 @@ void Shower::set_shower_state(bool state, bool force) {
         doc["ent_cat"]      = "diagnostic";
 
         JsonObject dev2 = doc.createNestedObject("dev");
-        JsonArray  ids2 = dev2.createNestedArray("ids");
+        dev2["name"]    = "EMS-ESP";
+        JsonArray ids2  = dev2.createNestedArray("ids");
         ids2.add(Mqtt::basename());
 
         Mqtt::add_avty_to_doc(stat_t, doc.as<JsonObject>(), "value_json.duration is defined"); // add "availability" section
 
         snprintf(topic, sizeof(topic), "sensor/%s/shower_duration/config", Mqtt::basename().c_str());
+        Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
+
+        //
+        // shower timestamp
+        //
+        doc.clear();
+
+        snprintf(str, sizeof(str), "%s_shower_timestamp", Mqtt::basename().c_str());
+
+        doc["uniq_id"]   = str;
+        doc["object_id"] = str;
+
+        snprintf(stat_t, sizeof(stat_t), "%s/shower_data", Mqtt::base().c_str());
+        doc["stat_t"] = stat_t;
+
+        doc["name"]    = "Shower Timestamp";
+        doc["val_tpl"] = "{{value_json.timestamp if value_json.timestamp is defined else 0}}";
+        doc["ent_cat"] = "diagnostic";
+
+        JsonObject dev3 = doc.createNestedObject("dev");
+        dev3["name"]    = "EMS-ESP";
+        JsonArray ids3  = dev3.createNestedArray("ids");
+        ids3.add(Mqtt::basename());
+
+        Mqtt::add_avty_to_doc(stat_t, doc.as<JsonObject>(), "value_json.timestamp is defined"); // add "availability" section
+
+        snprintf(topic, sizeof(topic), "sensor/%s/shower_timestamp/config", Mqtt::basename().c_str());
         Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
     }
 }

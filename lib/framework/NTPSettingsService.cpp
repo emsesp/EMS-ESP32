@@ -1,5 +1,4 @@
 #include <NTPSettingsService.h>
-#include <esp_sntp.h>
 
 #include "../../src/emsesp_stub.hpp"
 
@@ -28,9 +27,11 @@ void NTPSettingsService::WiFiEvent(WiFiEvent_t event) {
     switch (event) {
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
     case ARDUINO_EVENT_ETH_DISCONNECTED:
-        emsesp::EMSESP::logger().info("WiFi connection dropped, stopping NTP");
-        connected_ = false;
-        configureNTP();
+        if (connected_) {
+            emsesp::EMSESP::logger().info("WiFi connection dropped, stopping NTP");
+            connected_ = false;
+            configureNTP();
+        }
         break;
 
     case ARDUINO_EVENT_WIFI_STA_GOT_IP:
@@ -50,13 +51,13 @@ void NTPSettingsService::configureNTP() {
     emsesp::EMSESP::system_.ntp_connected(false);
     if (connected_ && _state.enabled) {
         emsesp::EMSESP::logger().info("Starting NTP service");
-        sntp_set_sync_interval(3600000); // one hour
-        sntp_set_time_sync_notification_cb(ntp_received);
+        esp_sntp_set_sync_interval(3600000); // one hour
+        esp_sntp_set_time_sync_notification_cb(ntp_received);
         configTzTime(_state.tzFormat.c_str(), _state.server.c_str());
     } else {
         setenv("TZ", _state.tzFormat.c_str(), 1);
         tzset();
-        sntp_stop();
+        esp_sntp_stop();
     }
 }
 
@@ -83,5 +84,4 @@ void NTPSettingsService::configureTime(AsyncWebServerRequest * request, JsonVari
 void NTPSettingsService::ntp_received(struct timeval * tv) {
     // emsesp::EMSESP::logger().info("NTP sync to %d sec", tv->tv_sec);
     emsesp::EMSESP::system_.ntp_connected(true);
-    emsesp::EMSESP::system_.send_info_mqtt("connected", true); // send info topic with NTP time
 }

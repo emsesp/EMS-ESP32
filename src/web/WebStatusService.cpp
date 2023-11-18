@@ -36,15 +36,15 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
 
     switch (event) {
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
-        EMSESP::logger().warning("WiFi disconnected. Reason code=%s", disconnectReason(info.wifi_sta_disconnected.reason)); // IDF 4.0
-        WiFi.disconnect(true);
+        EMSESP::logger().warning("WiFi disconnected. Reason: %s (%d)",
+                                 disconnectReason(info.wifi_sta_disconnected.reason),
+                                 info.wifi_sta_disconnected.reason); // IDF 4.0
+        EMSESP::system_.has_ipv6(false);
         break;
 
     case ARDUINO_EVENT_WIFI_STA_GOT_IP:
         EMSESP::logger().info("WiFi connected with IP=%s, hostname=%s", WiFi.localIP().toString().c_str(), WiFi.getHostname());
-        // EMSESP::system_.syslog_init();
         mDNS_start();
-        EMSESP::system_.send_info_mqtt("connected");
         break;
 
     case ARDUINO_EVENT_ETH_START:
@@ -64,22 +64,21 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         // prevent double calls
         if (!EMSESP::system_.ethernet_connected()) {
             EMSESP::logger().info("Ethernet connected with IP=%s, speed %d Mbps", ETH.localIP().toString().c_str(), ETH.linkSpeed());
-            // EMSESP::system_.send_heartbeat();
-            // EMSESP::system_.syslog_init();
             EMSESP::system_.ethernet_connected(true);
             mDNS_start();
-            EMSESP::system_.send_info_mqtt("connected");
         }
         break;
 
     case ARDUINO_EVENT_ETH_DISCONNECTED:
         EMSESP::logger().warning("Ethernet disconnected");
         EMSESP::system_.ethernet_connected(false);
+        EMSESP::system_.has_ipv6(false);
         break;
 
     case ARDUINO_EVENT_ETH_STOP:
         EMSESP::logger().info("Ethernet stopped");
         EMSESP::system_.ethernet_connected(false);
+        EMSESP::system_.has_ipv6(false);
         break;
 
     case ARDUINO_EVENT_WIFI_STA_CONNECTED:
@@ -105,9 +104,8 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         } else {
             EMSESP::logger().info("WiFi connected with IPv6=%s, hostname=%s", WiFi.localIPv6().toString().c_str(), WiFi.getHostname());
         }
-        // EMSESP::system_.syslog_init();
         mDNS_start();
-        EMSESP::system_.send_info_mqtt("connected");
+        EMSESP::system_.has_ipv6(true);
         break;
 
     default:
@@ -151,7 +149,7 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
     if (EMSESP::sensor_enabled()) {
         statJson       = statsJson.createNestedObject();
         statJson["id"] = 3;
-        statJson["s"]  = EMSESP::temperaturesensor_.reads();
+        statJson["s"]  = EMSESP::temperaturesensor_.reads() - EMSESP::temperaturesensor_.fails();
         statJson["f"]  = EMSESP::temperaturesensor_.fails();
         statJson["q"] =
             EMSESP::temperaturesensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::temperaturesensor_.fails()) / EMSESP::temperaturesensor_.reads());
@@ -159,7 +157,7 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
     if (EMSESP::analog_enabled()) {
         statJson       = statsJson.createNestedObject();
         statJson["id"] = 4;
-        statJson["s"]  = EMSESP::analogsensor_.reads();
+        statJson["s"]  = EMSESP::analogsensor_.reads() - EMSESP::analogsensor_.fails();
         statJson["f"]  = EMSESP::analogsensor_.fails();
         statJson["q"]  = EMSESP::analogsensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::analogsensor_.fails()) / EMSESP::analogsensor_.reads());
     }
@@ -285,6 +283,16 @@ const char * WebStatusService::disconnectReason(uint8_t code) {
         return "assoc fail";
     case WIFI_REASON_HANDSHAKE_TIMEOUT: // = 204,
         return "handshake timeout";
+    case WIFI_REASON_CONNECTION_FAIL: // 205,
+        return "connection fail";
+    case WIFI_REASON_AP_TSF_RESET: // 206,
+        return "AP tsf reset";
+    case WIFI_REASON_ROAMING: // 207,
+        return "roaming";
+    case WIFI_REASON_ASSOC_COMEBACK_TIME_TOO_LONG: // 208,
+        return "assoc comeback time too long";
+    case WIFI_REASON_SA_QUERY_TIMEOUT: // 209,
+        return "sa query timeout";
     default:
         return "unknown";
     }
