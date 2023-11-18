@@ -12,7 +12,7 @@ import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-li
 import { useTheme } from '@table-library/react-table-library/theme';
 import { useContext, useState } from 'react';
 
-import { unstable_useBlocker as useBlocker } from 'react-router-dom';
+import { useBlocker } from 'react-router-dom';
 import GenerateToken from './GenerateToken';
 import UserForm from './UserForm';
 import type { FC } from 'react';
