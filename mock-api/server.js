@@ -324,7 +324,7 @@ security_settings = {
   ]
 };
 const features = {
-  version: 'v3.6.0-demo',
+  version: 'v3.6.3-demo',
   // platform: 'ESP32'
   platform: 'ESP32-S3'
 };
@@ -2640,7 +2640,7 @@ rest_server.get(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
 // EMS-ESP API specific
 const emsesp_info = {
   System: {
-    version: '3.6.2',
+    version: '3.6.3',
     uptime: '001+06:40:34.018',
     'uptime (seconds)': 110434,
     freemem: 131,
