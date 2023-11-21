@@ -1023,13 +1023,12 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     // has_update(telegram, hc->selTemp, 10, 1); // single byte conversion, value is * 2 - manual
 
     telegram->read_value(hc->mode_new, 21); // 0-off, 1-manual, 2-auto
-    if (hc->mode_new <= 2) {
+    if (Helpers::hasValue(hc->mode_new)) {
         has_update(hc->mode, hc->mode_new);
     } else {
         uint8_t mode = hc->mode == 2 ? 0xFF : 0; // auto : manual
-        if (telegram->read_value(mode, 0)) {
-            has_update(hc->mode, mode == 0xFF ? 2 : 1);
-        }
+        telegram->read_value(mode, 0);
+        has_update(hc->mode, mode == 0xFF ? 2 : 1);
     }
     has_update(telegram, hc->daytemp, 2);   // is * 2
     has_update(telegram, hc->nighttemp, 4); // is * 2
@@ -2455,8 +2454,9 @@ bool Thermostat::set_mode(const char * value, const int8_t id) {
     // check for the mode being a full string name or single digit
     if (!Helpers::value2enum(value, enum_index, mode_list)) {
         mode_list = FL_(enum_mode_ha);
-        if (Mqtt::ha_enabled() && !Helpers::value2enum(value, enum_index, mode_list)) {
-            LOG_WARNING("wrong mode: %s", value);
+        if (!Mqtt::ha_enabled() || !Helpers::value2enum(value, enum_index, mode_list)) {
+            // We have logging on fail in command.cpp
+            // LOG_WARNING("wrong mode: %s", value);
             return false; // not found
         }
     }
@@ -2597,7 +2597,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
     if (model_ == EMSdevice::EMS_DEVICE_FLAG_RC10) {
         hc->mode = set_mode_value >> 1;
     } else if (model_ == EMSdevice::EMS_DEVICE_FLAG_RC300 || model_ == EMSdevice::EMS_DEVICE_FLAG_RC100) {
-        hc->mode = set_mode_value ? 1 : 0;
+        hc->mode = Helpers::hasValue(hc->mode_new) ? set_mode_value : set_mode_value == 0xFF ? 2 : 1;
     } else if (model_ == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
         hc->mode = set_mode_value - 1;
     } else {

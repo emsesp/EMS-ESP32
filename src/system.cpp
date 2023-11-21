@@ -1099,7 +1099,7 @@ bool System::check_upgrade(bool factory_settings) {
         missing_version = (settingsVersion.empty() || (settingsVersion.length() < 5));
         if (missing_version) {
             LOG_WARNING("No version information found (%s)", settingsVersion.c_str());
-            settingsVersion = "3.6.2"; // this was the last stable version
+            settingsVersion = "3.6.3"; // this was the last stable version
         }
     }
 
