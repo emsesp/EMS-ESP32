@@ -33,6 +33,7 @@ Writeable Text entities have moved from type `sensor` to `text` in Home Assistan
 - shower_data MQTT payload contains the timestamp [#1329](https://github.com/emsesp/EMS-ESP32/issues/1329)
 - fixed helper text in Web Device Entity dialog box for numerical ranges
 - MQTT base with paths not working in HA [#1393](https://github.com/emsesp/EMS-ESP32/issues/1393)
+- set/read thermostat mode for RC100-RC300, [#1440](https://github.com/emsesp/EMS-ESP32/issues/1440) [#1442](https://github.com/emsesp/EMS-ESP32/issues/1442)
 
 ## Changed
 
