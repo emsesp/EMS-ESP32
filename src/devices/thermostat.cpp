@@ -479,8 +479,10 @@ uint8_t Thermostat::HeatingCircuit::get_mode() const {
         }
     } else if ((model == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
         if (mode == 0) {
-            return HeatingCircuit::Mode::MANUAL;
+            return HeatingCircuit::Mode::OFF;
         } else if (mode == 1) {
+            return HeatingCircuit::Mode::MANUAL;
+        } else {
             return HeatingCircuit::Mode::AUTO;
         }
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
