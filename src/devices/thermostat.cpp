@@ -1050,6 +1050,8 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hc->reducetemp, 9);
     has_update(telegram, hc->noreducetemp, 12);
     has_update(telegram, hc->remoteseltemp, 17); // see https://github.com/emsesp/EMS-ESP32/issues/590
+    has_update(telegram, hc->boost, 23);
+    has_update(telegram, hc->boosttime, 24);
     has_update(telegram, hc->cooling, 28);
 }
 
@@ -2668,7 +2670,34 @@ bool Thermostat::set_switchonoptimization(const char * value, const int8_t id) {
     write_command(curve_typeids[hc->hc()], 4, b ? 0xFF : 0x00, curve_typeids[hc->hc()]);
     return true;
 }
+bool Thermostat::set_boost(const char * value, const int8_t id) {
+    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    if (hc == nullptr) {
+        return false;
+    }
+    bool b;
+    if (!Helpers::value2bool(value, b)) {
+        return false;
+    }
+    write_command(set_typeids[hc->hc()], 23, b ? 0xFF : 0x00, set_typeids[hc->hc()]);
+    return true;
+}
 
+bool Thermostat::set_boosttime(const char * value, const int8_t id) {
+    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    if (hc == nullptr) {
+        return false;
+    }
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+    write_command(set_typeids[hc->hc()], 24, (uint8_t)v, set_typeids[hc->hc()]);
+    return true;
+
+}
 
 // sets the thermostat reducemode for RC35 and RC310
 bool Thermostat::set_reducemode(const char * value, const int8_t id) {
@@ -4270,6 +4299,8 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               -1,
                               101);
         register_device_value(tag, &hc->remotehum, DeviceValueType::UINT, FL_(remotehum), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_remotehum), -1, 101);
+        register_device_value(tag, &hc->boost, DeviceValueType::BOOL, FL_(boost), DeviceValueUOM::NONE, MAKE_CF_CB(set_boost));
+        register_device_value(tag, &hc->boosttime, DeviceValueType::UINT, FL_(boosttime), DeviceValueUOM::HOURS, MAKE_CF_CB(set_boosttime));
 
         break;
     case EMS_DEVICE_FLAG_CRF:
