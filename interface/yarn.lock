@@ -1129,86 +1129,86 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/rollup-android-arm-eabi@npm:4.5.0":
-  version: 4.5.0
-  resolution: "@rollup/rollup-android-arm-eabi@npm:4.5.0"
+"@rollup/rollup-android-arm-eabi@npm:4.5.1":
+  version: 4.5.1
+  resolution: "@rollup/rollup-android-arm-eabi@npm:4.5.1"
   conditions: os=android & cpu=arm
   languageName: node
   linkType: hard
 
-"@rollup/rollup-android-arm64@npm:4.5.0":
-  version: 4.5.0
-  resolution: "@rollup/rollup-android-arm64@npm:4.5.0"
+"@rollup/rollup-android-arm64@npm:4.5.1":
+  version: 4.5.1
+  resolution: "@rollup/rollup-android-arm64@npm:4.5.1"
   conditions: os=android & cpu=arm64
   languageName: node
   linkType: hard
 
-"@rollup/rollup-darwin-arm64@npm:4.5.0":
-  version: 4.5.0
-  resolution: "@rollup/rollup-darwin-arm64@npm:4.5.0"
+"@rollup/rollup-darwin-arm64@npm:4.5.1":
+  version: 4.5.1
+  resolution: "@rollup/rollup-darwin-arm64@npm:4.5.1"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@rollup/rollup-darwin-x64@npm:4.5.0":
-  version: 4.5.0
-  resolution: "@rollup/rollup-darwin-x64@npm:4.5.0"
+"@rollup/rollup-darwin-x64@npm:4.5.1":
+  version: 4.5.1
+  resolution: "@rollup/rollup-darwin-x64@npm:4.5.1"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@rollup/rollup-linux-arm-gnueabihf@npm:4.5.0":
-  version: 4.5.0
-  resolution: "@rollup/rollup-linux-arm-gnueabihf@npm:4.5.0"
+"@rollup/rollup-linux-arm-gnueabihf@npm:4.5.1":
+  version: 4.5.1
+  resolution: "@rollup/rollup-linux-arm-gnueabihf@npm:4.5.1"
   conditions: os=linux & cpu=arm
   languageName: node
   linkType: hard
 
-"@rollup/rollup-linux-arm64-gnu@npm:4.5.0":
-  version: 4.5.0
-  resolution: "@rollup/rollup-linux-arm64-gnu@npm:4.5.0"
+"@rollup/rollup-linux-arm64-gnu@npm:4.5.1":
+  version: 4.5.1
+  resolution: "@rollup/rollup-linux-arm64-gnu@npm:4.5.1"
   conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@rollup/rollup-linux-arm64-musl@npm:4.5.0":
-  version: 4.5.0
-  resolution: "@rollup/rollup-linux-arm64-musl@npm:4.5.0"
+"@rollup/rollup-linux-arm64-musl@npm:4.5.1":
+  version: 4.5.1
+  resolution: "@rollup/rollup-linux-arm64-musl@npm:4.5.1"
   conditions: os=linux & cpu=arm64 & libc=musl
   languageName: node
   linkType: hard
 
-"@rollup/rollup-linux-x64-gnu@npm:4.5.0":
-  version: 4.5.0
-  resolution: "@rollup/rollup-linux-x64-gnu@npm:4.5.0"
+"@rollup/rollup-linux-x64-gnu@npm:4.5.1":
+  version: 4.5.1
+  resolution: "@rollup/rollup-linux-x64-gnu@npm:4.5.1"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@rollup/rollup-linux-x64-musl@npm:4.5.0":
-  version: 4.5.0
-  resolution: "@rollup/rollup-linux-x64-musl@npm:4.5.0"
+"@rollup/rollup-linux-x64-musl@npm:4.5.1":
+  version: 4.5.1
+  resolution: "@rollup/rollup-linux-x64-musl@npm:4.5.1"
   conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"@rollup/rollup-win32-arm64-msvc@npm:4.5.0":
-  version: 4.5.0
-  resolution: "@rollup/rollup-win32-arm64-msvc@npm:4.5.0"
+"@rollup/rollup-win32-arm64-msvc@npm:4.5.1":
+  version: 4.5.1
+  resolution: "@rollup/rollup-win32-arm64-msvc@npm:4.5.1"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@rollup/rollup-win32-ia32-msvc@npm:4.5.0":
-  version: 4.5.0
-  resolution: "@rollup/rollup-win32-ia32-msvc@npm:4.5.0"
+"@rollup/rollup-win32-ia32-msvc@npm:4.5.1":
+  version: 4.5.1
+  resolution: "@rollup/rollup-win32-ia32-msvc@npm:4.5.1"
   conditions: os=win32 & cpu=ia32
   languageName: node
   linkType: hard
 
-"@rollup/rollup-win32-x64-msvc@npm:4.5.0":
-  version: 4.5.0
-  resolution: "@rollup/rollup-win32-x64-msvc@npm:4.5.0"
+"@rollup/rollup-win32-x64-msvc@npm:4.5.1":
+  version: 4.5.1
+  resolution: "@rollup/rollup-win32-x64-msvc@npm:4.5.1"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
@@ -1355,12 +1355,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash-es@npm:^4.17.11":
-  version: 4.17.11
-  resolution: "@types/lodash-es@npm:4.17.11"
+"@types/lodash-es@npm:^4.17.12":
+  version: 4.17.12
+  resolution: "@types/lodash-es@npm:4.17.12"
   dependencies:
     "@types/lodash": "npm:*"
-  checksum: 87516f652eb13a544590351dd1986df37929c83d3393491c1b5f0e8d36a604ed9c00d4da9c77df052f38affd9bac33a4534ec52f679989e38bedb595fbbc23bb
+  checksum: 56b9a433348b11c31051c6fa9028540a033a08fb80b400c589d740446c19444d73b217cf1471d4036448ef686a83e8cf2a35d1fadcb3f2105f26701f94aebb07
   languageName: node
   linkType: hard
 
@@ -1378,12 +1378,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^20.9.3":
-  version: 20.9.3
-  resolution: "@types/node@npm:20.9.3"
+"@types/node@npm:*, @types/node@npm:^20.9.4":
+  version: 20.9.4
+  resolution: "@types/node@npm:20.9.4"
   dependencies:
     undici-types: "npm:~5.26.4"
-  checksum: 5d2a3a6b2b900814eab8c5093dabb7aa10895928719ec0074b9ac5584bcc83f5b680e2d2cb6c8b9751511b7b1b7fdd8586d2fc827b156f0263fdb65c4741bdef
+  checksum: d567855b48e453b443499c17fc6c939d154732b54319a05b9b31db6e475e6458f053838635b201b1bb493d349d9b1af0aecc58b28fd6062e564e9fbf593199eb
   languageName: node
   linkType: hard
 
@@ -1401,12 +1401,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:^18.2.16":
-  version: 18.2.16
-  resolution: "@types/react-dom@npm:18.2.16"
+"@types/react-dom@npm:^18.2.17":
+  version: 18.2.17
+  resolution: "@types/react-dom@npm:18.2.17"
   dependencies:
     "@types/react": "npm:*"
-  checksum: c0be61864a9f50bb8cd29c719d170b03b36149f4fbe308faa40194d15492c4a13814a2f344fc5ceb99b4747bfa11cdfb2d15a141ed37218a32ec0edf98b90f2b
+  checksum: fe0dbb3224b48515da8fe25559e3777d756a27c3f22903f0b1b020de8d68bd57eb1f0af62b52ee65d9632637950afed8cbad24d158c4f3d910d083d49bd73fba
   languageName: node
   linkType: hard
 
@@ -1461,9 +1461,9 @@ __metadata:
   linkType: hard
 
 "@types/scheduler@npm:*":
-  version: 0.16.7
-  resolution: "@types/scheduler@npm:0.16.7"
-  checksum: 70684e998202d30c43427e0410c785878f63108f6b9a2e490b78dfb75e21834884a7d553a93de6ab887a6f02e49509981d49ab01f746fd3791de48bb5cbd6bc5
+  version: 0.16.8
+  resolution: "@types/scheduler@npm:0.16.8"
+  checksum: 6c091b096daa490093bf30dd7947cd28e5b2cd612ec93448432b33f724b162587fed9309a0acc104d97b69b1d49a0f3fc755a62282054d62975d53d7fd13472d
   languageName: node
   linkType: hard
 
@@ -1626,10 +1626,10 @@ __metadata:
     "@preact/preset-vite": "npm:^2.7.0"
     "@table-library/react-table-library": "npm:4.1.7"
     "@types/imagemin": "npm:^8.0.5"
-    "@types/lodash-es": "npm:^4.17.11"
-    "@types/node": "npm:^20.9.3"
+    "@types/lodash-es": "npm:^4.17.12"
+    "@types/node": "npm:^20.9.4"
     "@types/react": "npm:^18.2.38"
-    "@types/react-dom": "npm:^18.2.16"
+    "@types/react-dom": "npm:^18.2.17"
     "@types/react-router-dom": "npm:^5.3.3"
     "@typescript-eslint/eslint-plugin": "npm:^6.12.0"
     "@typescript-eslint/parser": "npm:^6.12.0"
@@ -1664,7 +1664,7 @@ __metadata:
     terser: "npm:^5.24.0"
     typesafe-i18n: "npm:^5.26.2"
     typescript: "npm:^5.3.2"
-    vite: "npm:^5.0.1"
+    vite: "npm:^5.0.2"
     vite-plugin-imagemin: "npm:^0.6.1"
     vite-tsconfig-paths: "npm:^4.2.1"
   languageName: unknown
@@ -2008,9 +2008,9 @@ __metadata:
   linkType: hard
 
 "big-integer@npm:^1.6.44":
-  version: 1.6.51
-  resolution: "big-integer@npm:1.6.51"
-  checksum: c7a12640901906d6f6b6bdb42a4eaba9578397b6d9a0dd090cf001ec813ff2bfcd441e364068ea0416db6175d2615f8ed19cff7d1a795115bf7c92d44993f991
+  version: 1.6.52
+  resolution: "big-integer@npm:1.6.52"
+  checksum: 4bc6ae152a96edc9f95020f5fc66b13d26a9ad9a021225a9f0213f7e3dc44269f423aa8c42e19d6ac4a63bb2b22140b95d10be8f9ca7a6d9aa1b22b330d1f514
   languageName: node
   linkType: hard
 
@@ -2268,9 +2268,9 @@ __metadata:
   linkType: hard
 
 "caniuse-lite@npm:^1.0.30001541":
-  version: 1.0.30001563
-  resolution: "caniuse-lite@npm:1.0.30001563"
-  checksum: dab23d85ddba75c4230348a1e491bb95bb9978f6b9dd78df6445cce9aede18ef97a2a24ce54d02aff3c67169a021221aaa04711f13d469ab4f72a487aa36205c
+  version: 1.0.30001564
+  resolution: "caniuse-lite@npm:1.0.30001564"
+  checksum: eb63d0b5be8a4609ac89c02e4518c6a3adb2884fffd6b43151b43f06a5f367bde3e2c90a5df2213d094ef1af2d43f5b8756601955d077116f2a2897534b9ce33
   languageName: node
   linkType: hard
 
@@ -2941,9 +2941,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.4.535":
-  version: 1.4.589
-  resolution: "electron-to-chromium@npm:1.4.589"
-  checksum: 80e3c281593c2e3af340c92330b7b3d20ba8fff30239a065329674d97e96cf3e27834e3550f4b49bc4ab0e67a2e1fed2a81a2521210406741bf854a0ff95d6ca
+  version: 1.4.590
+  resolution: "electron-to-chromium@npm:1.4.590"
+  checksum: 04f54be67d5465432363e6a7cf0813dbd95a23d115f55679662677508d9e068ce241b4a8e1224a53fccc4037094928d38946529c5118c1184090e2609c65cd94
   languageName: node
   linkType: hard
 
@@ -7125,21 +7125,21 @@ __metadata:
   linkType: hard
 
 "rollup@npm:^4.2.0":
-  version: 4.5.0
-  resolution: "rollup@npm:4.5.0"
+  version: 4.5.1
+  resolution: "rollup@npm:4.5.1"
   dependencies:
-    "@rollup/rollup-android-arm-eabi": "npm:4.5.0"
-    "@rollup/rollup-android-arm64": "npm:4.5.0"
-    "@rollup/rollup-darwin-arm64": "npm:4.5.0"
-    "@rollup/rollup-darwin-x64": "npm:4.5.0"
-    "@rollup/rollup-linux-arm-gnueabihf": "npm:4.5.0"
-    "@rollup/rollup-linux-arm64-gnu": "npm:4.5.0"
-    "@rollup/rollup-linux-arm64-musl": "npm:4.5.0"
-    "@rollup/rollup-linux-x64-gnu": "npm:4.5.0"
-    "@rollup/rollup-linux-x64-musl": "npm:4.5.0"
-    "@rollup/rollup-win32-arm64-msvc": "npm:4.5.0"
-    "@rollup/rollup-win32-ia32-msvc": "npm:4.5.0"
-    "@rollup/rollup-win32-x64-msvc": "npm:4.5.0"
+    "@rollup/rollup-android-arm-eabi": "npm:4.5.1"
+    "@rollup/rollup-android-arm64": "npm:4.5.1"
+    "@rollup/rollup-darwin-arm64": "npm:4.5.1"
+    "@rollup/rollup-darwin-x64": "npm:4.5.1"
+    "@rollup/rollup-linux-arm-gnueabihf": "npm:4.5.1"
+    "@rollup/rollup-linux-arm64-gnu": "npm:4.5.1"
+    "@rollup/rollup-linux-arm64-musl": "npm:4.5.1"
+    "@rollup/rollup-linux-x64-gnu": "npm:4.5.1"
+    "@rollup/rollup-linux-x64-musl": "npm:4.5.1"
+    "@rollup/rollup-win32-arm64-msvc": "npm:4.5.1"
+    "@rollup/rollup-win32-ia32-msvc": "npm:4.5.1"
+    "@rollup/rollup-win32-x64-msvc": "npm:4.5.1"
     fsevents: "npm:~2.3.2"
   dependenciesMeta:
     "@rollup/rollup-android-arm-eabi":
@@ -7170,7 +7170,7 @@ __metadata:
       optional: true
   bin:
     rollup: dist/bin/rollup
-  checksum: 71f058e5eb63b42db9b38a43c3feca3b77511d22f127639ea04c94b18d61211bc7da25599920f5b3ca64cf67b26c3661a666cff947d834107853f568fa1e2f48
+  checksum: dbbd4d7b8b0f6814d58b24149d2883ecdfbc2a35f8b206ff8d7d2a6e28666cb385bd0b340b338d70f9493455aafed3be6e7fc5273ff786713d4ac41d37480fb0
   languageName: node
   linkType: hard
 
@@ -8329,9 +8329,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^5.0.1":
-  version: 5.0.1
-  resolution: "vite@npm:5.0.1"
+"vite@npm:^5.0.2":
+  version: 5.0.2
+  resolution: "vite@npm:5.0.2"
   dependencies:
     esbuild: "npm:^0.19.3"
     fsevents: "npm:~2.3.3"
@@ -8365,7 +8365,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 2b06e85709ab8f2ea4a4794160a5ed21aa5cf8c6119fef071d98ea9b9865d7c7080e9272db7c18221da2e5cce39ffb848d61323c120da4751e30859a531652a1
+  checksum: 74f1a6d49a02106796b5fcc04dbe4a92925fba413191718fb37485a29f606b7f80abd371a3ef6b598e8a04f05c09c0b9a5de6bf844dfecb7253798097ddaab35
   languageName: node
   linkType: hard
 
