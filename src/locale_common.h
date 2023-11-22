@@ -294,10 +294,11 @@ MAKE_ENUM(enum_ibaLanguage_RC30, FL_(german), FL_(dutch))
 MAKE_ENUM(enum_floordrystatus, FL_(off), FL_(start), FL_(heat), FL_(hold), FL_(cool), FL_(end))
 MAKE_ENUM(enum_ibaBuildingType, FL_(light), FL_(medium), FL_(heavy))
 MAKE_ENUM(enum_PID, FL_(fast), FL_(medium), FL_(slow))
-MAKE_ENUM(enum_wwMode, FL_(off), FL_(normal), FL_(comfort), FL_(auto), FL_(own_prog), FL_(eco))
+MAKE_ENUM(enum_wwMode, FL_(off), FL_(normal), FL_(comfort), FL_(auto), FL_(own_prog))
 MAKE_ENUM(enum_wwCircMode, FL_(off), FL_(on), FL_(auto), FL_(own_prog))
 MAKE_ENUM(enum_wwMode2, FL_(off), FL_(on), FL_(auto))
 MAKE_ENUM(enum_wwMode3, FL_(on), FL_(off), FL_(auto))
+MAKE_ENUM(enum_wwMode4, FL_(off), FL_(ecoplus), FL_(eco), FL_(comfort), FL_(auto))
 MAKE_ENUM(enum_heatingtype, FL_(off), FL_(radiator), FL_(convector), FL_(floor))
 MAKE_ENUM(enum_summermode, FL_(summer), FL_(auto), FL_(winter))
 MAKE_ENUM(enum_hpoperatingmode, FL_(off), FL_(auto), FL_(heating), FL_(cooling))
@@ -305,8 +306,8 @@ MAKE_ENUM(enum_summer, FL_(winter), FL_(summer))
 MAKE_ENUM(enum_operatingstate, FL_(heating), FL_(off), FL_(cooling))
 MAKE_ENUM(enum_hpmode, FL_(heating), FL_(cooling), FL_(heatandcool))
 
-MAKE_ENUM(enum_mode, FL_(off), FL_(manual), FL_(auto))              // RC100, RC300, RC310
-MAKE_ENUM(enum_mode2, FL_(off), FL_(manual), FL_(auto))             // RC20, RC30
+MAKE_ENUM(enum_mode, FL_(manual), FL_(auto))                        // RC100, RC300, RC310
+MAKE_ENUM(enum_mode2, FL_(off), FL_(manual), FL_(auto))             // RC20, RC30, BC400
 MAKE_ENUM(enum_mode3, FL_(night), FL_(day), FL_(auto))              // RC35, RC30_N, RC25, RC20_N
 MAKE_ENUM(enum_mode4, FL_(nofrost), FL_(eco), FL_(heat), FL_(auto)) // JUNKERS
 MAKE_ENUM(enum_mode5, FL_(auto), FL_(off))                          // CRF

@@ -177,6 +177,7 @@ MAKE_WORD_TRANSLATION(chargepump, "chargepump", "Ladepumpe", "laadpomp", "laddpu
 MAKE_WORD_TRANSLATION(hot, "hot", "Heiß", "heet", "Het", "gorący", "het", "chaud", "sıcak", "caldo")
 MAKE_WORD_TRANSLATION(high_comfort, "high comfort", "gehobener Komfort", "verhoogd comfort", "Förhöjd komfort", "wysoki komfort", "høy komfort", "comfort", "komfor", "comfort alto")
 MAKE_WORD_TRANSLATION(eco, "eco", "Eco", "Eco", "Eko", "eko", "øko", "éco", "eko", "Eco")
+MAKE_WORD_TRANSLATION(ecoplus, "eco+", "Eco+", "Eco+", "Eko+", "eko+", "øko+", "éco+", "eko+", "Eco+")
 MAKE_WORD_TRANSLATION(intelligent, "intelligent", "Intelligent", "intelligent", "Intelligent", "inteligentny", "intelligent", "intelligent", "akıllı", "intelligente")
 MAKE_WORD_TRANSLATION(flow, "flow", "Durchfluss", "volumestroom", "Flöde", "przepływ", "strømme", "débit", "akım", "flusso")
 MAKE_WORD_TRANSLATION(manual, "manual", "Manuell", "handmatig", "Manuell", "ręczny", "manuell", "manuel", "manuel", "manuale")

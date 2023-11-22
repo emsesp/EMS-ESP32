@@ -41,7 +41,7 @@ class Thermostat : public EMSdevice {
         uint8_t tempautotemp;
         int8_t  remoteseltemp;
         uint8_t mode;
-        uint8_t mode_new = EMS_VALUE_UINT_NOTSET; // not initialized by register_value
+        uint8_t mode_new;
         uint8_t modetype;
         uint8_t summermode;
         uint8_t holidaymode;

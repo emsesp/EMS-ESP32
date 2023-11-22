@@ -14,3 +14,5 @@
 ## Fixed
 
 ## Changed
+
+- use flag for BC400 compatible thermostats, manage different mode settings
