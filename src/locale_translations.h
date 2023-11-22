@@ -457,6 +457,7 @@ MAKE_TRANSLATION(wwAltOpPrioWw, "wwaltopprioww", "prioritise dhw during heating"
 MAKE_TRANSLATION(hpEA0, "hpea0", "condensate reservoir heating (EA0)", "Heizung Kondensatwanne (EA0)", "", "", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(boost, "boost", "boost mode", "Boost", "", "", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(boosttime, "boosttime", "boost time", "Boost Dauer", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(hpPumpMode, "hppumpmode", "primary heatpump mode", "Modus Hauptpumpe", "", "", "", "", "", "", "") // TODO translate
 
 // hybrid heatpump
 MAKE_TRANSLATION(hybridStrategy, "hybridstrategy", "hybrid control strategy", "Hybrid Strategie", "Hybride strategie", "Hybrid kontrollstrategi", "strategia sterowania hybrydowego", "hybrid kontrollstrategi", "stratégie contrôle hybride", "hibrit kontrol stratejisi", "strategia comtrollo ibrido")

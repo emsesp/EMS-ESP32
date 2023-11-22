@@ -720,6 +720,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_elHeatStep3));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpEA0_, DeviceValueType::BOOL, FL_(hpEA0), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpPumpMode_, DeviceValueType::ENUM, FL_(enum_hpPumpMode), FL_(hpPumpMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_hpPumpMode));
         // heatpump DHW settings
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
                               &wwAlternatingOper_,
@@ -1815,6 +1816,7 @@ void Boiler::process_HpValve(std::shared_ptr<const Telegram> telegram) {
 void Boiler::process_HpPumps(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, tempDiffHeat_, 4); // is * 10
     has_update(telegram, tempDiffCool_, 3); // is * 10
+    has_update(telegram, hpPumpMode_, 18);
 }
 
 // Boiler(0x08) -> All(0x00), ?(0x0491), data: 03 01 00 00 00 02 64 00 00 14 01 2C 00 0A 00 1E 00 1E 00 00 1E 0A 1E 05 05
@@ -2849,6 +2851,15 @@ bool Boiler::set_hpCircPumpWw(const char * value, const int8_t id) {
     bool v;
     if (Helpers::value2bool(value, v)) {
         write_command(0x484, 46, v ? 1 : 0, 0x484);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_hpPumpMode(const char * value, const int8_t id) {
+    uint8_t v;
+    if (Helpers::value2enum(value, v, FL_(enum_hpPumpMode))) {
+        write_command(0x48B, 18, v, 0x48B);
         return true;
     }
     return false;
