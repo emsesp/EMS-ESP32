@@ -179,7 +179,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           DeviceValueUOM::DEGREES);
 
     // exclude burner related entities from heatpump and HIU
-    if (model() != EMS_DEVICE_FLAG_HEATPUMP && model() != EMS_DEVICE_FLAG_HIU) {
+    if (model() != EMSdevice::EMS_DEVICE_FLAG_HEATPUMP && model() != EMSdevice::EMS_DEVICE_FLAG_HIU) {
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &exhaustTemp_,
                               DeviceValueType::USHORT,
@@ -367,7 +367,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     */
 
     // heatpump info
-    if (model() == EMS_DEVICE_FLAG_HEATPUMP) {
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_HEATPUMP) {
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &nrgTotal_,
                               DeviceValueType::ULONG,
@@ -945,7 +945,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     EMSESP::send_read_request(0xC2, device_id); // read last errorcode on start (only published on errors)
 
 
-    if (model() != EMS_DEVICE_FLAG_HEATPUMP && model() != EMS_DEVICE_FLAG_HIU) {
+    if (model() != EMSdevice::EMS_DEVICE_FLAG_HEATPUMP && model() != EMSdevice::EMS_DEVICE_FLAG_HIU) {
         register_telegram_type(0x04, "UBAFactory", true, MAKE_PF_CB(process_UBAFactory));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nomPower_, DeviceValueType::UINT, FL_(nomPower), DeviceValueUOM::KW, MAKE_CF_CB(set_nomPower));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
@@ -1066,7 +1066,7 @@ void Boiler::check_active() {
     }
 
     // calculate energy for boiler 0x08 from stored modulation an time in units of 0.01 Wh
-    if (model() != EMS_DEVICE_FLAG_HEATPUMP) {
+    if (model() != EMSdevice::EMS_DEVICE_FLAG_HEATPUMP && model() != EMSdevice::EMS_DEVICE_FLAG_HIU) {
         // remember values from last call
         static uint32_t powLastReadTime_ = uuid::get_uptime();
         static uint8_t  heatBurnPow      = 0;
@@ -1309,7 +1309,7 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
 
     // at this point do a quick check to see if the hot water or heating is active
     uint8_t state = EMS_VALUE_UINT_NOTSET;
-    if (telegram->read_value(state, 11)) {
+    if (telegram->read_value(state, 11) && model() != EMSdevice::EMS_DEVICE_FLAG_HIU) {
         boilerState_ = state & 0x01 ? 0x08 : 0;
         boilerState_ |= state & 0x02 ? 0x01 : 0;
         boilerState_ |= state & 0x04 ? 0x02 : 0;
@@ -1348,6 +1348,17 @@ void Boiler::process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram) {
  */
 void Boiler::process_UBAMonitorSlowPlus2(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, absBurnPow_, 13); // current burner absolute power (percent of rating plate power)
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_HIU) {
+        uint8_t state = EMS_VALUE_UINT_NOTSET;
+        boilerState_  = 0;
+        if (telegram->read_value(state, 2)) {
+            boilerState_ |= state == 1 ? 0x09 : 0; // heating 0/1
+        }
+        state = EMS_VALUE_UINT_NOTSET;
+        if (telegram->read_value(state, 5)) {
+            boilerState_ |= state == 1 ? 0x0A : 0; // dhw 0/1
+        }
+    }
 }
 
 /*
