@@ -459,6 +459,9 @@ MAKE_TRANSLATION(hpEA0, "hpea0", "condensate reservoir heating (EA0)", "Heizung 
 MAKE_TRANSLATION(boost, "boost", "boost mode", "Boost", "", "", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(boosttime, "boosttime", "boost time", "Boost Dauer", "", "", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(hpPumpMode, "hppumpmode", "primary heatpump mode", "Modus Hauptpumpe", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(instantstart, "instantstart", "instant start", "Sofortstart", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(heatondelay, "heatondelay", "heat-on delay", "Einschaltverzögerung Heizen", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(heatoffdelay, "heatoffdelay", "heat-off delay", "Ausschaltverzögerung Heizen", "", "", "", "", "", "", "") // TODO translate
 
 // hybrid heatpump
 MAKE_TRANSLATION(hybridStrategy, "hybridstrategy", "hybrid control strategy", "Hybrid Strategie", "Hybride strategie", "Hybrid kontrollstrategi", "strategia sterowania hybrydowego", "hybrid kontrollstrategi", "stratégie contrôle hybride", "hibrit kontrol stratejisi", "strategia comtrollo ibrido")

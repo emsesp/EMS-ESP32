@@ -1108,6 +1108,9 @@ void Thermostat::process_RC300Summer2(std::shared_ptr<const Telegram> telegram) 
         has_update(hc->summersetmode, EMS_VALUE_UINT_NOTSET);
     }
     has_update(telegram, hc->summertemp, 1);
+    has_update(telegram, hc->heatondelay, 2);
+    has_update(telegram, hc->heatoffdelay, 3);
+    has_update(telegram, hc->instantstart, 4);
 }
 
 // types 0x29B ff
@@ -2725,6 +2728,48 @@ bool Thermostat::set_boosttime(const char * value, const int8_t id) {
         return false;
     }
     write_command(set_typeids[hc->hc()], 24, (uint8_t)v, set_typeids[hc->hc()]);
+    return true;
+}
+
+bool Thermostat::set_heatondelay(const char * value, const int8_t id) {
+    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    if (hc == nullptr) {
+        return false;
+    }
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+    write_command(summer2_typeids[hc->hc()], 2, (uint8_t)v, summer2_typeids[hc->hc()]);
+    return true;
+}
+
+bool Thermostat::set_heatoffdelay(const char * value, const int8_t id) {
+    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    if (hc == nullptr) {
+        return false;
+    }
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+    write_command(summer2_typeids[hc->hc()], 3, (uint8_t)v, summer2_typeids[hc->hc()]);
+    return true;
+}
+
+bool Thermostat::set_instantstart(const char * value, const int8_t id) {
+    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    if (hc == nullptr) {
+        return false;
+    }
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+    write_command(summer2_typeids[hc->hc()], 4, (uint8_t)v, summer2_typeids[hc->hc()]);
     return true;
 }
 
@@ -4350,6 +4395,9 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               -1,
                               101);
         register_device_value(tag, &hc->remotehum, DeviceValueType::UINT, FL_(remotehum), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_remotehum), -1, 101);
+        register_device_value(tag, &hc->heatondelay, DeviceValueType::UINT, FL_(heatondelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_heatondelay), 1, 48);
+        register_device_value(tag, &hc->heatoffdelay, DeviceValueType::UINT, FL_(heatoffdelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_heatoffdelay), 1, 48);
+        register_device_value(tag, &hc->instantstart, DeviceValueType::UINT, FL_(instantstart), DeviceValueUOM::K, MAKE_CF_CB(set_instantstart), 1, 10);
         register_device_value(tag, &hc->boost, DeviceValueType::BOOL, FL_(boost), DeviceValueUOM::NONE, MAKE_CF_CB(set_boost));
         register_device_value(tag, &hc->boosttime, DeviceValueType::UINT, FL_(boosttime), DeviceValueUOM::HOURS, MAKE_CF_CB(set_boosttime));
 
