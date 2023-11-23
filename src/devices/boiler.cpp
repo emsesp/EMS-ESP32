@@ -2003,7 +2003,7 @@ bool Boiler::set_ww_temp(const char * value, const int8_t id) {
         return false;
     }
 
-    if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+    if (is_received(EMS_TYPE_UBAParameterWWPlus)) {
         // write_command(EMS_TYPE_UBAFlags, 3, v, EMS_TYPE_UBAParameterWWPlus); // test for #96
         write_command(EMS_TYPE_UBAParameterWWPlus, 6, v, EMS_TYPE_UBAParameterWWPlus);
     } else {
@@ -2056,7 +2056,7 @@ bool Boiler::set_ww_disinfect_temp(const char * value, const int8_t id) {
         return false;
     }
 
-    if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+    if (is_received(EMS_TYPE_UBAParameterWWPlus)) {
         write_command(EMS_TYPE_UBAParameterWWPlus, 12, v, EMS_TYPE_UBAParameterWWPlus);
     } else {
         write_command(EMS_TYPE_UBAParameterWW, 8, v, EMS_TYPE_UBAParameterWW);
@@ -2106,7 +2106,7 @@ bool Boiler::set_ww_flowTempOffset(const char * value, const int8_t id) {
         return false;
     }
 
-    if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+    if (is_received(EMS_TYPE_UBAParameterWWPlus)) {
         write_command(EMS_TYPE_UBAParameterWWPlus, 9, v, EMS_TYPE_UBAParameterWWPlus);
     } else {
         write_command(EMS_TYPE_UBAParameterWW, 5, v, EMS_TYPE_UBAParameterWW);
@@ -2122,7 +2122,7 @@ bool Boiler::set_heating_activated(const char * value, const int8_t id) {
         return false;
     }
 
-    if (is_fetch(EMS_TYPE_UBAParametersPlus)) {
+    if (is_received(EMS_TYPE_UBAParametersPlus)) {
         write_command(EMS_TYPE_UBAParametersPlus, 0, v ? 0x01 : 0, EMS_TYPE_UBAParametersPlus);
     } else {
         write_command(EMS_TYPE_UBAParameters, 0, v ? 0xFF : 0, EMS_TYPE_UBAParameters);
@@ -2138,7 +2138,7 @@ bool Boiler::set_heating_temp(const char * value, const int8_t id) {
         return false;
     }
 
-    if (is_fetch(EMS_TYPE_UBAParametersPlus)) {
+    if (is_received(EMS_TYPE_UBAParametersPlus)) {
         write_command(EMS_TYPE_UBAParametersPlus, 1, v, EMS_TYPE_UBAParametersPlus);
     } else {
         write_command(EMS_TYPE_UBAParameters, 1, v, EMS_TYPE_UBAParameters);
@@ -2154,7 +2154,7 @@ bool Boiler::set_min_power(const char * value, const int8_t id) {
         return false;
     }
 
-    if (is_fetch(EMS_TYPE_UBAParametersPlus)) {
+    if (is_received(EMS_TYPE_UBAParametersPlus)) {
         write_command(EMS_TYPE_UBAParametersPlus, 5, v, EMS_TYPE_UBAParametersPlus);
     } else {
         write_command(EMS_TYPE_UBAParameters, 3, v, EMS_TYPE_UBAParameters);
@@ -2170,7 +2170,7 @@ bool Boiler::set_max_power(const char * value, const int8_t id) {
         return false;
     }
 
-    if (is_fetch(EMS_TYPE_UBAParametersPlus)) {
+    if (is_received(EMS_TYPE_UBAParametersPlus)) {
         write_command(EMS_TYPE_UBAParametersPlus, 4, v, EMS_TYPE_UBAParametersPlus);
     } else {
         write_command(EMS_TYPE_UBAParameters, 2, v, EMS_TYPE_UBAParameters);
@@ -2186,7 +2186,7 @@ bool Boiler::set_ww_hyst_on(const char * value, const int8_t id) {
         return false;
     }
 
-    if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+    if (is_received(EMS_TYPE_UBAParameterWWPlus)) {
         write_command(EMS_TYPE_UBAParameterWWPlus, 7, v, EMS_TYPE_UBAParameterWWPlus);
     } else {
         write_command(EMS_TYPE_UBAParameterWW, 3, v, EMS_TYPE_UBAParameterWW);
@@ -2202,7 +2202,7 @@ bool Boiler::set_ww_hyst_off(const char * value, const int8_t id) {
         return false;
     }
 
-    if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+    if (is_received(EMS_TYPE_UBAParameterWWPlus)) {
         write_command(EMS_TYPE_UBAParameterWWPlus, 8, v, EMS_TYPE_UBAParameterWWPlus);
     } else {
         write_command(EMS_TYPE_UBAParameterWW, 4, v, EMS_TYPE_UBAParameterWW);
@@ -2218,7 +2218,7 @@ bool Boiler::set_ww_chargeOptimization(const char * value, const int8_t id) {
         return false;
     }
 
-    if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+    if (is_received(EMS_TYPE_UBAParameterWWPlus)) {
         write_command(EMS_TYPE_UBAParameterWWPlus, 25, v ? 1 : 0, EMS_TYPE_UBAParameterWWPlus);
     }
 
@@ -2256,7 +2256,7 @@ bool Boiler::set_min_pump(const char * value, const int8_t id) {
         return false;
     }
 
-    if (is_fetch(EMS_TYPE_UBAParametersPlus)) {
+    if (is_received(EMS_TYPE_UBAParametersPlus)) {
         write_command(EMS_TYPE_UBAParametersPlus, 14, v, EMS_TYPE_UBAParametersPlus);
     } else {
         write_command(EMS_TYPE_UBAParameters, 10, v, EMS_TYPE_UBAParameters);
@@ -2272,7 +2272,7 @@ bool Boiler::set_max_pump(const char * value, const int8_t id) {
         return false;
     }
 
-    if (is_fetch(EMS_TYPE_UBAParametersPlus)) {
+    if (is_received(EMS_TYPE_UBAParametersPlus)) {
         write_command(EMS_TYPE_UBAParametersPlus, 13, v, EMS_TYPE_UBAParametersPlus);
     } else {
         write_command(EMS_TYPE_UBAParameters, 9, v, EMS_TYPE_UBAParameters);
@@ -2297,7 +2297,7 @@ bool Boiler::set_hyst_on(const char * value, const int8_t id) {
         return false;
     }
 
-    if (is_fetch(EMS_TYPE_UBAParametersPlus)) {
+    if (is_received(EMS_TYPE_UBAParametersPlus)) {
         write_command(EMS_TYPE_UBAParametersPlus, 9, v, EMS_TYPE_UBAParametersPlus);
     } else {
         write_command(EMS_TYPE_UBAParameters, id == 2 ? 13 : 5, v, EMS_TYPE_UBAParameters);
@@ -2313,7 +2313,7 @@ bool Boiler::set_hyst_off(const char * value, const int8_t id) {
         return false;
     }
 
-    if (is_fetch(EMS_TYPE_UBAParametersPlus)) {
+    if (is_received(EMS_TYPE_UBAParametersPlus)) {
         write_command(EMS_TYPE_UBAParametersPlus, 8, v, EMS_TYPE_UBAParametersPlus);
     } else {
         write_command(EMS_TYPE_UBAParameters, id == 2 ? 12 : 4, v, EMS_TYPE_UBAParameters);
@@ -2329,7 +2329,7 @@ bool Boiler::set_burn_period(const char * value, const int8_t id) {
         return false;
     }
 
-    if (is_fetch(EMS_TYPE_UBAParametersPlus)) {
+    if (is_received(EMS_TYPE_UBAParametersPlus)) {
         write_command(EMS_TYPE_UBAParametersPlus, 10, v, EMS_TYPE_UBAParametersPlus);
     } else {
         write_command(EMS_TYPE_UBAParameters, 6, v, EMS_TYPE_UBAParameters);
@@ -2345,7 +2345,7 @@ bool Boiler::set_pump_delay(const char * value, const int8_t id) {
         return false;
     }
 
-    if (is_fetch(EMS_TYPE_UBAParameters)) {
+    if (is_received(EMS_TYPE_UBAParameters)) {
         write_command(EMS_TYPE_UBAParameters, 8, v, EMS_TYPE_UBAParameters);
         return true;
     }
@@ -2361,7 +2361,7 @@ bool Boiler::set_ww_mode(const char * value, const int8_t id) {
     uint8_t set;
     uint8_t comfort[] = {0x00, 0xD8, 0xEC}; // heat, eco, intelligent
 
-    if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+    if (is_received(EMS_TYPE_UBAParameterWWPlus)) {
         if (Helpers::value2enum(value, set, FL_(enum_comfort1))) {
             write_command(EMS_TYPE_UBAParameterWWPlus, 13, comfort[set], EMS_TYPE_UBAParameterWWPlus);
             write_command(0x05, 70, set ? 0xAA : 0x55); //
@@ -2385,7 +2385,7 @@ bool Boiler::set_ww_activated(const char * value, const int8_t id) {
 
     // https://github.com/emsesp/EMS-ESP/issues/268
     // 08 for HT3 seems to be wrong, see https://github.com/emsesp/EMS-ESP32/issues/89
-    if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+    if (is_received(EMS_TYPE_UBAParameterWWPlus)) {
         write_command(EMS_TYPE_UBAParameterWWPlus, 5, v ? 1 : 0, EMS_TYPE_UBAParameterWWPlus);
     } else {
         write_command(EMS_TYPE_UBAParameterWW, 1, v ? 0xFF : 0, EMS_TYPE_UBAParameterWW);
@@ -2443,7 +2443,7 @@ bool Boiler::set_ww_onetime(const char * value, const int8_t id) {
         return false;
     }
 
-    if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+    if (is_received(EMS_TYPE_UBAParameterWWPlus)) {
         write_command(EMS_TYPE_UBAFlags, 0, (v ? 0x22 : 0x02), 0xE9); // not sure if this is in flags
     } else {
         write_command(EMS_TYPE_UBAFlags, 0, (v ? 0x23 : 0x03), 0x34);
@@ -2459,7 +2459,7 @@ bool Boiler::set_ww_disinfect(const char * value, const int8_t id) {
         return false;
     }
 
-    if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+    if (is_received(EMS_TYPE_UBAParameterWWPlus)) {
         write_command(EMS_TYPE_UBAFlags, 0, (v ? 0x44 : 0x04), 0xE9); // not sure if this is in flags
     } else {
         write_command(EMS_TYPE_UBAFlags, 0, (v ? 0x44 : 0x04), 0x34);
@@ -2476,7 +2476,7 @@ bool Boiler::set_ww_circulation(const char * value, const int8_t id) {
         return false;
     }
 
-    if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+    if (is_received(EMS_TYPE_UBAParameterWWPlus)) {
         write_command(EMS_TYPE_UBAFlags, 1, (v ? 0x22 : 0x02), 0xE9); // not sure if this is in flags
     } else {
         write_command(EMS_TYPE_UBAFlags, 1, (v ? 0x22 : 0x02), 0x34);
@@ -2492,7 +2492,7 @@ bool Boiler::set_ww_circulation_pump(const char * value, const int8_t id) {
         return false;
     }
 
-    if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+    if (is_received(EMS_TYPE_UBAParameterWWPlus)) {
         write_command(EMS_TYPE_UBAParameterWWPlus, 10, v ? 0x01 : 0x00, EMS_TYPE_UBAParameterWWPlus);
     } else {
         write_command(EMS_TYPE_UBAParameterWW, 6, v ? 0xFF : 0x00, EMS_TYPE_UBAParameterWW);
@@ -2509,7 +2509,7 @@ bool Boiler::set_ww_circulation_mode(const char * value, const int8_t id) {
         return false;
     }
 
-    if (is_fetch(EMS_TYPE_UBAParameterWWPlus)) {
+    if (is_received(EMS_TYPE_UBAParameterWWPlus)) {
         write_command(EMS_TYPE_UBAParameterWWPlus, 11, v, EMS_TYPE_UBAParameterWWPlus);
     } else {
         write_command(EMS_TYPE_UBAParameterWW, 7, v, EMS_TYPE_UBAParameterWW);
