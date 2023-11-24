@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.6.3] November 18 2023
+## [3.6.4] November 24 2023
 
 ## **IMPORTANT! BREAKING CHANGES**
 
@@ -34,6 +34,7 @@ Writeable Text entities have moved from type `sensor` to `text` in Home Assistan
 - fixed helper text in Web Device Entity dialog box for numerical ranges
 - MQTT base with paths not working in HA [#1393](https://github.com/emsesp/EMS-ESP32/issues/1393)
 - set/read thermostat mode for RC100-RC300, [#1440](https://github.com/emsesp/EMS-ESP32/issues/1440) [#1442](https://github.com/emsesp/EMS-ESP32/issues/1442)
+- some setting commands for ems-boiler have used wrong ems+ telegram in 3.6.3
 
 ## Changed
 
