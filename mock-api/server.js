@@ -324,7 +324,7 @@ security_settings = {
   ]
 };
 const features = {
-  version: 'v3.6.3-demo',
+  version: 'v3.6.4-demo',
   // platform: 'ESP32'
   platform: 'ESP32-S3'
 };
@@ -355,7 +355,7 @@ const EMSESP_WRITE_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'entities';
 
 const emsesp_info = {
   System: {
-    version: '3.6.3',
+    version: '3.6.4',
     uptime: '001+06:40:34.018',
     'uptime (seconds)': 110434,
     freemem: 131,
