@@ -67,6 +67,14 @@ class Heatpump : public EMSdevice {
     int16_t hpJr0_;      // low pressure sensor
     int16_t hpJr1_;      // high pressure sensor
 
+    uint32_t nrgTotal_;
+    uint32_t nrgWw_;
+    uint32_t nrgHeat_;
+    uint32_t meterTotal_;
+    uint32_t meterComp_;
+    uint32_t meterEHeat_;
+
+
     void process_HPMonitor1(std::shared_ptr<const Telegram> telegram);
     void process_HPMonitor2(std::shared_ptr<const Telegram> telegram);
     void process_HPSettings(std::shared_ptr<const Telegram> telegram);
@@ -74,6 +82,8 @@ class Heatpump : public EMSdevice {
     void process_HPTemperature(std::shared_ptr<const Telegram> telegram);
     void process_HPFlowTemp(std::shared_ptr<const Telegram> telegram);
     void process_HPComp(std::shared_ptr<const Telegram> telegram);
+    void process_HpEnergy(std::shared_ptr<const Telegram> telegram);
+    void process_HpMeters(std::shared_ptr<const Telegram> telegram);
 
     bool set_controlStrategy(const char * value, const int8_t id);
     bool set_lowNoiseMode(const char * value, const int8_t id);
