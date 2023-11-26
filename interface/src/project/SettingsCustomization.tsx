@@ -23,7 +23,7 @@ import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-li
 import { useTheme } from '@table-library/react-table-library/theme';
 import { useRequest } from 'alova';
 import { useState, useEffect, useCallback } from 'react';
-import { useBlocker, useLocation } from 'react-router-dom';
+import { unstable_useBlocker as useBlocker, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 import EntityMaskToggle from './EntityMaskToggle';
