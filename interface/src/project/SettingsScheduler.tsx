@@ -9,7 +9,7 @@ import { useTheme } from '@table-library/react-table-library/theme';
 // eslint-disable-next-line import/named
 import { updateState, useRequest } from 'alova';
 import { useState, useEffect, useCallback } from 'react';
-import { unstable_useBlocker as useBlocker } from 'react-router-dom';
+import { useBlocker } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import SettingsSchedulerDialog from './SettingsSchedulerDialog';
 import * as EMSESP from './api';
