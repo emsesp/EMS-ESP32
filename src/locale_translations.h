@@ -529,6 +529,7 @@ MAKE_TRANSLATION(nomPower, "nompower", "nominal Power", "Brennerleistung", "", "
 MAKE_TRANSLATION(meterTotal, "metertotal", "meter total", "Messung gesamt", "", "", "licznik całkowity", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(meterComp, "metercomp", "meter compressor", "Messung Kompressor", "", "", "licznik sprężarki", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(meterEHeat, "metereheat", "meter e-heater", "Messung E-Heizer", "", "", "licznik e-heater", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(meterHeat, "meterheat", "meter heating", "Messung Heizen", "", "", "licznik grzania", "", "", "", "") // TODO translate
 
 // HIU
 MAKE_TRANSLATION(netFlowTemp, "netflowtemp", "heat network flow temp", "System Vorlauftemperatur", "Netto aanvoertemperatuur", "", "temp. zasilania sieci cieplnej", "", "", "ısıtma şebekesi akış derecesi", "temperatura di mandata della rete di riscaldamento") // TODO translate

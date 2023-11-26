@@ -400,6 +400,12 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(meterEHeat),
                               DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &meterHeat_,
+                              DeviceValueType::ULONG,
+                              DeviceValueNumOp::DV_NUMOP_DIV100,
+                              FL_(meterHeat),
+                              DeviceValueUOM::KWH);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &upTimeTotal_,
                               DeviceValueType::TIME,
                               DeviceValueNumOp::DV_NUMOP_DIV60,
@@ -1884,6 +1890,7 @@ void Boiler::process_HpMeters(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, meterTotal_, 0);
     has_update(telegram, meterComp_, 4);
     has_update(telegram, meterEHeat_, 8);
+    has_update(telegram, meterHeat_, 24);
 }
 
 // HIU unit
