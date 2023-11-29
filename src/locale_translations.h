@@ -453,6 +453,12 @@ MAKE_TRANSLATION(wwAlternatingOper, "wwalternatingop", "alternating operation", 
 MAKE_TRANSLATION(wwAltOpPrioHeat, "wwaltopprioheat", "prioritise heating during dhw", "Heizen bevorzugt vor WW", "Proriteit verwarming boven ww", "", "czas na ogrzewanie w trakcie c.w.u", "prioritert oppvarmning", "", "sıcak kullanım suyu esnasında ısıtmayı öne al", "dare la priorità al riscaldamento durante l'ACS") // TODO translate
 MAKE_TRANSLATION(wwAltOpPrioWw, "wwaltopprioww", "prioritise dhw during heating", "WW bevorzugt vor Heizen", "Prioriteit ww boven verwarming", "", "czas na c.w.u w trakcie ogrzewania", "prioritert varmtvann", "", "ısıtma esnasında sıcak kullanım suyunu öne al", "dare priorità all'acqua calda durante il riscaldamento") // TODO translate
 MAKE_TRANSLATION(hpEA0, "hpea0", "condensate reservoir heating (EA0)", "Heizung Kondensatwanne (EA0)", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(boost, "boost", "boost mode", "Boost", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(boosttime, "boosttime", "boost time", "Boost Dauer", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(hpPumpMode, "hppumpmode", "primary heatpump mode", "Modus Hauptpumpe", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(instantstart, "instantstart", "instant start", "Sofortstart", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(heatondelay, "heatondelay", "heat-on delay", "Einschaltverzögerung Heizen", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(heatoffdelay, "heatoffdelay", "heat-off delay", "Ausschaltverzögerung Heizen", "", "", "", "", "", "", "") // TODO translate
 
 // hybrid heatpump
 MAKE_TRANSLATION(hybridStrategy, "hybridstrategy", "hybrid control strategy", "Hybrid Strategie", "Hybride strategie", "Hybrid kontrollstrategi", "strategia sterowania hybrydowego", "hybrid kontrollstrategi", "stratégie contrôle hybride", "hibrit kontrol stratejisi", "strategia comtrollo ibrido")
@@ -520,6 +526,7 @@ MAKE_TRANSLATION(nomPower, "nompower", "nominal Power", "Brennerleistung", "", "
 MAKE_TRANSLATION(meterTotal, "metertotal", "meter total", "Messung gesamt", "", "", "licznik całkowity", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(meterComp, "metercomp", "meter compressor", "Messung Kompressor", "", "", "licznik sprężarki", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(meterEHeat, "metereheat", "meter e-heater", "Messung E-Heizer", "", "", "licznik e-heater", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(meterHeat, "meterheat", "meter heating", "Messung Heizen", "", "", "licznik grzania", "", "", "", "") // TODO translate
 
 // HIU
 MAKE_TRANSLATION(netFlowTemp, "netflowtemp", "heat network flow temp", "System Vorlauftemperatur", "Netto aanvoertemperatuur", "", "temp. zasilania sieci cieplnej", "", "", "ısıtma şebekesi akış derecesi", "temperatura di mandata della rete di riscaldamento") // TODO translate

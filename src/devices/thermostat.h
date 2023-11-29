@@ -98,6 +98,12 @@ class Thermostat : public EMSdevice {
         uint8_t hpmode;
         uint8_t cooling;
         uint8_t coolingon;
+        // RC300
+        uint8_t heatoffdelay; // 1-48h
+        uint8_t heatondelay;  // 1-48h
+        uint8_t instantstart; // 1-10K
+        uint8_t boost;
+        uint8_t boosttime; // hours
 
         uint8_t hc_num() const {
             return hc_num_;
@@ -439,6 +445,11 @@ class Thermostat : public EMSdevice {
     bool set_wwprio(const char * value, const int8_t id);
     bool set_fastheatup(const char * value, const int8_t id);
     bool set_switchonoptimization(const char * value, const int8_t id);
+    bool set_heatondelay(const char * value, const int8_t id);
+    bool set_heatoffdelay(const char * value, const int8_t id);
+    bool set_instantstart(const char * value, const int8_t id);
+    bool set_boost(const char * value, const int8_t id);
+    bool set_boosttime(const char * value, const int8_t id);
 
     inline bool set_temp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::AUTO);
