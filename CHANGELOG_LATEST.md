@@ -16,3 +16,4 @@
 ## Changed
 
 - use flag for BC400 compatible thermostats, manage different mode settings
+- HA don't set entity_category to Diagnostic/Configuration for EMS entities [#1459](https://github.com/emsesp/EMS-ESP32/discussions/1459)

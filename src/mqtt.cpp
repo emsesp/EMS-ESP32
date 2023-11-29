@@ -937,7 +937,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // we add the command topic parameter for commands
     if (has_cmd) {
         // add category
-        doc["ent_cat"] = "config"; // for writeable entities, like switch, number, text, select
+        // doc["ent_cat"] = "config"; // for writeable entities, like switch, number, text, select
 
         char command_topic[MQTT_TOPIC_MAX_SIZE];
         // add command topic
@@ -1065,8 +1065,11 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // Add the state class, device class and sometimes the icon. Used only for read-only sensors Sensor and Binary Sensor
     if (readonly_sensors) {
-        // first set the catagory
-        doc["ent_cat"] = "diagnostic";
+        // first set the catagory for System entities
+        // https://github.com/emsesp/EMS-ESP32/discussions/1459#discussioncomment-7694873
+        if (device_type == EMSdevice::DeviceType::SYSTEM) {
+            doc["ent_cat"] = "diagnostic";
+        }
 
         const char * dc_ha = "dev_cla";  // device class
         const char * sc_ha = "stat_cla"; // state class
