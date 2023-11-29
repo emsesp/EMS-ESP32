@@ -101,21 +101,22 @@ class Boiler : public EMSdevice {
     uint8_t wwTapActivated_; // maintenance-mode to switch DHW off
 
     // main
-    uint8_t  reset_;            // for reset command
-    uint8_t  heatingActive_;    // Central heating is on/off
-    uint8_t  tapwaterActive_;   // Hot tap water is on/off
-    uint8_t  selFlowTemp_;      // Selected flow temperature
-    uint8_t  selBurnPow_;       // Burner max power % (can be > 100%)
-    uint8_t  absBurnPow_;       // absolute burner power in % of rating plate
-    uint8_t  heatingPumpMod_;   // Pump modulation %
-    int16_t  outdoorTemp_;      // Outside temperature
-    uint16_t curFlowTemp_;      // Current flow temperature
-    uint16_t retTemp_;          // Return temperature
-    uint16_t switchTemp_;       // Switch temperature
-    uint8_t  sysPress_;         // System pressure
-    uint16_t boilTemp_;         // Boiler temperature
-    uint16_t exhaustTemp_;      // Exhaust temperature published
-    uint16_t exhaustTemp1_;     // read from E4
+    uint8_t  reset_;          // for reset command
+    uint8_t  heatingActive_;  // Central heating is on/off
+    uint8_t  tapwaterActive_; // Hot tap water is on/off
+    uint8_t  selFlowTemp_;    // Selected flow temperature
+    uint8_t  selBurnPow_;     // Burner max power % (can be > 100%)
+    uint8_t  absBurnPow_;     // absolute burner power in % of rating plate
+    uint8_t  heatingPumpMod_; // Pump modulation %
+    int16_t  outdoorTemp_;    // Outside temperature
+    uint16_t curFlowTemp_;    // Current flow temperature
+    uint16_t retTemp_;        // Return temperature
+    uint16_t switchTemp_;     // Switch temperature
+    uint8_t  sysPress_;       // System pressure
+    uint16_t boilTemp_;       // Boiler temperature
+    uint16_t exhaustTemp_;    // Exhaust temperature published
+    // read second value from E4 and initialize it
+    uint16_t exhaustTemp1_ = EMS_VALUE_USHORT_NOTSET;
     uint8_t  burnGas_;          // Gas on/off
     uint8_t  burnGas2_;         // Gas stage 2 on/off
     uint16_t flameCurr_;        // Flame current in micro amps
