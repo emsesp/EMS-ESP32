@@ -6,7 +6,12 @@
 
 ## Added
 
+- thermostat boost mode and boost time
+- heatpump energy meters
+
 ## Fixed
+
+- exhaust temperature for some boilers
 
 ## Changed
 
