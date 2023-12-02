@@ -56,8 +56,9 @@ const Help: FC = () => {
             </Link>
             <br />
             <i>({LL.HELP_INFORMATION_4()}</i>&nbsp;
+            <EastIcon style={{ fontSize: 24, color: 'lightblue', verticalAlign: 'middle' }} />
             <Link href={uploadURL} color="primary">
-              {LL.UPLOAD()}
+              {LL.UPLOAD_DOWNLOAD()}
             </Link>
             )
           </ListItemText>
