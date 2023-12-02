@@ -44,13 +44,9 @@ const NetworkConnection: FC = () => {
       }}
     >
       <RouterTabs value={routerTab}>
-        <Tab value="/network/status" label={LL.STATUS_OF(LL.NETWORK(1))} />
-        <Tab value="/network/scan" label={LL.NETWORK_SCAN()} disabled={!authenticatedContext.me.admin} />
-        <Tab
-          value="/network/settings"
-          label={LL.SETTINGS_OF(LL.NETWORK(1))}
-          disabled={!authenticatedContext.me.admin}
-        />
+        <Tab value="status" label={LL.STATUS_OF(LL.NETWORK(1))} />
+        <Tab value="scan" label={LL.NETWORK_SCAN()} disabled={!authenticatedContext.me.admin} />
+        <Tab value="settings" label={LL.SETTINGS_OF(LL.NETWORK(1))} disabled={!authenticatedContext.me.admin} />
       </RouterTabs>
       <Routes>
         <Route path="status" element={<NetworkStatusForm />} />
@@ -70,7 +66,7 @@ const NetworkConnection: FC = () => {
             </RequireAdmin>
           }
         />
-        <Route path="*" element={<Navigate replace to="/network/status" />} />
+        <Route path="/*" element={<Navigate replace to="status" />} />
       </Routes>
     </WiFiConnectionContext.Provider>
   );
