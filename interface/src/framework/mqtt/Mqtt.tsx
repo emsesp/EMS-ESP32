@@ -21,8 +21,8 @@ const Mqtt: FC = () => {
   return (
     <>
       <RouterTabs value={routerTab}>
-        <Tab value="/mqtt/status" label={LL.STATUS_OF('MQTT')} />
-        <Tab value="/mqtt/settings" label={LL.SETTINGS_OF('MQTT')} disabled={!authenticatedContext.me.admin} />
+        <Tab value="status" label={LL.STATUS_OF('MQTT')} />
+        <Tab value="settings" label={LL.SETTINGS_OF('MQTT')} disabled={!authenticatedContext.me.admin} />
       </RouterTabs>
       <Routes>
         <Route path="status" element={<MqttStatusForm />} />
@@ -34,7 +34,7 @@ const Mqtt: FC = () => {
             </RequireAdmin>
           }
         />
-        <Route path="*" element={<Navigate replace to="/mqtt/status" />} />
+        <Route path="/*" element={<Navigate replace to="status" />} />
       </Routes>
     </>
   );
