@@ -1148,7 +1148,7 @@ void Thermostat::process_RC300WWmode(std::shared_ptr<const Telegram> telegram) {
 
     if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400) {
         const uint8_t modes[] = {0, 5, 1, 2, 4}; // off, eco+, eco, comfort, auto
-        uint8_t wwmode = wwMode_ < sizeof(modes) ? modes[wwMode_] : EMS_VALUE_UINT_NOTSET;
+        uint8_t       wwmode  = wwMode_ < sizeof(modes) ? modes[wwMode_] : EMS_VALUE_UINT_NOTSET;
         telegram->read_value(wwmode, 2);
         const uint8_t modes1[] = {0, 2, 3, 0, 4, 1};
         has_update(wwMode_, wwmode < sizeof(modes1) ? modes1[wwmode] : EMS_VALUE_UINT_NOTSET);

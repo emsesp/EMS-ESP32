@@ -10,8 +10,11 @@
 
 - some more entities for dhw with SM100 module
 - thermostat boost mode and boost time
+- heatpump energy meters
 
 ## Fixed
+
+- exhaust temperature for some boilers
 
 ## Changed
 

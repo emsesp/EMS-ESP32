@@ -324,7 +324,8 @@ const sv: Translation = {
   WRITEABLE: 'Writeable', // TODO translate
   SHOWING: 'Showing', // TODO translate
   SEARCH: 'Search', // TODO translate
-  CERT: 'TLS root certificate (leave blank to disable TLS)', // TODO translate
+  CERT: 'TLS root certificate (leave blank for insecure)', // TODO translate
+  ENABLE_TLS: 'Aktivera TLS',
   ON: 'On', // TODO translate
   OFF: 'Off', // TODO translate
   POLARITY: 'Polarity', // TODO translate

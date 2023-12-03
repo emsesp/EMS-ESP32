@@ -64,6 +64,7 @@ class MqttSettings {
     String   host;
     uint16_t port;
     String   rootCA;
+    bool     enableTLS;
 
     // username and password
     String username;

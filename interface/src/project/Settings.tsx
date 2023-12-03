@@ -18,17 +18,17 @@ const Settings: FC = () => {
   return (
     <>
       <RouterTabs value={routerTab}>
-        <Tab value="/settings/application" label={LL.APPLICATION_SETTINGS()} />
-        <Tab value="/settings/customization" label={LL.CUSTOMIZATIONS()} />
-        <Tab value="/settings/scheduler" label={LL.SCHEDULER()} />
-        <Tab value="/settings/customentities" label={LL.CUSTOM_ENTITIES(0)} />
+        <Tab value="application" label={LL.APPLICATION_SETTINGS()} />
+        <Tab value="customization" label={LL.CUSTOMIZATIONS()} />
+        <Tab value="scheduler" label={LL.SCHEDULER()} />
+        <Tab value="customentities" label={LL.CUSTOM_ENTITIES(0)} />
       </RouterTabs>
       <Routes>
         <Route path="application" element={<SettingsApplication />} />
         <Route path="customization" element={<SettingsCustomization />} />
         <Route path="scheduler" element={<SettingsScheduler />} />
         <Route path="customentities" element={<SettingsEntities />} />
-        <Route path="*" element={<Navigate replace to="/settings/application" />} />
+        <Route path="/*" element={<Navigate replace to="application" />} />
       </Routes>
     </>
   );

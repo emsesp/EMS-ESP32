@@ -20,15 +20,15 @@ const Dashboard: FC = () => {
   return (
     <>
       <RouterTabs value={routerTab}>
-        <Tab value="/dashboard/devices" label={LL.DEVICES()} />
-        <Tab value="/dashboard/sensors" label={LL.SENSORS()} />
-        <Tab value="/dashboard/status" label="Status" />
+        <Tab value="devices" label={LL.DEVICES()} />
+        <Tab value="sensors" label={LL.SENSORS()} />
+        <Tab value="status" label="Status" />
       </RouterTabs>
       <Routes>
         <Route path="devices" element={<DashboardDevices />} />
         <Route path="sensors" element={<DashboardSensors />} />
         <Route path="status" element={<DashboardStatus />} />
-        <Route path="*" element={<Navigate replace to="/dashboard/devices" />} />
+        <Route path="/*" element={<Navigate replace to="devices" />} />
       </Routes>
     </>
   );

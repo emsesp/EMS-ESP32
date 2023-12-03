@@ -230,6 +230,16 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
             DeviceValueTAG::TAG_DEVICE_DATA, &boilHystOn_, DeviceValueType::INT, FL_(boilHystOn), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_hyst_on), -20, 0);
         register_device_value(
             DeviceValueTAG::TAG_DEVICE_DATA, &boilHystOff_, DeviceValueType::INT, FL_(boilHystOff), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_hyst_off), 0, 20);
+        register_device_value(
+            DeviceValueTAG::TAG_DEVICE_DATA, &boil2HystOn_, DeviceValueType::INT, FL_(boil2HystOn), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_hyst2_on), -20, 0);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &boil2HystOff_,
+                              DeviceValueType::INT,
+                              FL_(boil2HystOff),
+                              DeviceValueUOM::DEGREES_R,
+                              MAKE_CF_CB(set_hyst2_off),
+                              0,
+                              20);
     }
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &heatingActivated_,
@@ -726,7 +736,13 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_elHeatStep3));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpEA0_, DeviceValueType::BOOL, FL_(hpEA0), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpPumpMode_, DeviceValueType::ENUM, FL_(enum_hpPumpMode), FL_(hpPumpMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_hpPumpMode));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &hpPumpMode_,
+                              DeviceValueType::ENUM,
+                              FL_(enum_hpPumpMode),
+                              FL_(hpPumpMode),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_hpPumpMode));
         // heatpump DHW settings
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
                               &wwAlternatingOper_,
@@ -1316,9 +1332,9 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
     // at this point do a quick check to see if the hot water or heating is active
     uint8_t state = EMS_VALUE_UINT_NOTSET;
     if (telegram->read_value(state, 11) && model() != EMSdevice::EMS_DEVICE_FLAG_HIU) {
-        boilerState_ = state & 0x01 ? 0x08 : 0;
-        boilerState_ |= state & 0x02 ? 0x01 : 0;
-        boilerState_ |= state & 0x04 ? 0x02 : 0;
+        boilerState_ = state & 0x01 ? 0x08 : 0;  // burnGas
+        boilerState_ |= state & 0x02 ? 0x01 : 0; // heatingPump
+        boilerState_ |= state & 0x04 ? 0x02 : 0; // 3-way-valve
     }
 
     if (telegram->offset <= 10 && telegram->offset + telegram->message_length > 11) {

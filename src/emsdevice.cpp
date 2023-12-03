@@ -989,6 +989,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                     if (dv.get_min_max(dv_set_min, dv_set_max)) {
                         obj["m"] = dv_set_min;
                         obj["x"] = dv_set_max;
+                        // add steps to numeric values as rendered string to avoid rounding floats in js
                         char s[10];
                         obj["s"] = Helpers::render_value(s, (uint32_t)1, dv.numeric_operator);
                     }

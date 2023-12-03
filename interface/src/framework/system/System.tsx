@@ -23,10 +23,10 @@ const System: FC = () => {
   return (
     <>
       <RouterTabs value={routerTab}>
-        <Tab value="/system/status" label={LL.STATUS_OF(LL.SYSTEM(1))} />
-        <Tab value="/system/log" label={LL.LOG_OF(LL.SYSTEM(2))} />
-        <Tab value="/system/ota" label={LL.SETTINGS_OF('OTA')} disabled={!me.admin} />
-        <Tab value="/system/upload" label={LL.UPLOAD_DOWNLOAD()} disabled={!me.admin} />
+        <Tab value="status" label={LL.STATUS_OF(LL.SYSTEM(1))} />
+        <Tab value="log" label={LL.LOG_OF(LL.SYSTEM(2))} />
+        <Tab value="ota" label={LL.SETTINGS_OF('OTA')} disabled={!me.admin} />
+        <Tab value="upload" label={LL.UPLOAD_DOWNLOAD()} disabled={!me.admin} />
       </RouterTabs>
       <Routes>
         <Route path="status" element={<SystemStatusForm />} />
@@ -47,7 +47,7 @@ const System: FC = () => {
             </RequireAdmin>
           }
         />
-        <Route path="*" element={<Navigate replace to="/system/status" />} />
+        <Route path="/*" element={<Navigate replace to="status" />} />
       </Routes>
     </>
   );
