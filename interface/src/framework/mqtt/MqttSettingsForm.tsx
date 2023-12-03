@@ -168,20 +168,24 @@ const MqttSettingsForm: FC = () => {
               <MenuItem value={2}>2</MenuItem>
             </TextField>
           </Grid>
-          {data.rootCA !== undefined && (
-            <Grid item xs={12} sm={6}>
-              <ValidatedPasswordField
-                name="rootCA"
-                label={LL.CERT()}
-                fullWidth
-                variant="outlined"
-                value={data.rootCA}
-                onChange={updateFormValue}
-                margin="normal"
-              />
-            </Grid>
-          )}
         </Grid>
+        {data.enableTLS !== undefined && (
+          <BlockFormControlLabel
+            control={<Checkbox name="enableTLS" checked={data.enableTLS} onChange={updateFormValue} />}
+            label={LL.ENABLE_TLS()}
+          />
+        )}
+        {data.enableTLS === true && (
+          <ValidatedPasswordField
+            name="rootCA"
+            label={LL.CERT()}
+            fullWidth
+            variant="outlined"
+            value={data.rootCA}
+            onChange={updateFormValue}
+            margin="normal"
+          />
+        )}
 
         <BlockFormControlLabel
           control={<Checkbox name="clean_session" checked={data.clean_session} onChange={updateFormValue} />}

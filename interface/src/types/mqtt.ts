@@ -25,6 +25,7 @@ export interface MqttSettings {
   port: number;
   base: string;
   rootCA?: string;
+  enableTLS?: boolean;
   username: string;
   password: string;
   client_id: string;
