@@ -130,7 +130,7 @@ export interface DeviceValue {
   c?: string; // command, optional
   l?: string[]; // list, optional
   h?: string; // help text, optional
-  s?: number; // steps for up/down, optional
+  s?: string; // steps for up/down, optional
   m?: number; // min, optional
   x?: number; // max, optional
 }
@@ -355,6 +355,7 @@ export const enum DeviceType {
   TEMPERATURESENSOR,
   ANALOGSENSOR,
   SCHEDULER,
+  CUSTOM,
   BOILER,
   THERMOSTAT,
   MIXER,
@@ -368,7 +369,9 @@ export const enum DeviceType {
   EXTENSION,
   GENERIC,
   HEATSOURCE,
-  CUSTOM,
+  VENTILATION,
+  WATER,
+  POOL,
   UNKNOWN
 }
 

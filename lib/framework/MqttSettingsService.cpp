@@ -51,13 +51,13 @@ void MqttSettingsService::startClient() {
     static bool isSecure = false;
     if (_mqttClient != nullptr) {
         // do we need to change the client?
-        if ((isSecure && _state.rootCA.length() > 0) || (!isSecure && _state.rootCA.length() == 0)) {
+        if ((isSecure && _state.enableTLS) || (!isSecure && _state.enableTLS)) {
             return;
         }
         delete _mqttClient;
     }
 #if CONFIG_IDF_TARGET_ESP32S3
-    if (_state.rootCA.length() > 0) {
+    if (_state.enableTLS) {
         isSecure    = true;
         _mqttClient = static_cast<MqttClient *>(new espMqttClientSecure(espMqttClientTypes::UseInternalTask::NO));
         if (_state.rootCA == "insecure") {
@@ -100,7 +100,7 @@ const char * MqttSettingsService::getClientId() {
 
 void MqttSettingsService::setWill(const char * topic) {
 #if CONFIG_IDF_TARGET_ESP32S3
-    if (_state.rootCA.length() > 0) {
+    if (_state.enableTLS) {
         static_cast<espMqttClientSecure *>(_mqttClient)->setWill(topic, 1, true, "offline");
         return;
     }
@@ -110,7 +110,7 @@ void MqttSettingsService::setWill(const char * topic) {
 
 void MqttSettingsService::onMessage(espMqttClientTypes::OnMessageCallback callback) {
 #if CONFIG_IDF_TARGET_ESP32S3
-    if (_state.rootCA.length() > 0) {
+    if (_state.enableTLS) {
         static_cast<espMqttClientSecure *>(_mqttClient)->onMessage(callback);
         return;
     }
@@ -181,7 +181,7 @@ bool MqttSettingsService::configureMqtt() {
     if (_state.enabled && emsesp::EMSESP::system_.network_connected() && !_state.host.isEmpty()) {
         _reconfigureMqtt = false;
 #if CONFIG_IDF_TARGET_ESP32S3
-        if (_state.rootCA.length() > 0) {
+        if (_state.enableTLS) {
             // emsesp::EMSESP::logger().info("Start secure MQTT with rootCA");
             static_cast<espMqttClientSecure *>(_mqttClient)->setServer(retainCstr(_state.host.c_str(), &_retainedHost), _state.port);
             if (_state.username.length() > 0) {
@@ -217,7 +217,8 @@ bool MqttSettingsService::configureMqtt() {
 
 void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
 #if CONFIG_IDF_TARGET_ESP32S3
-    root["rootCA"] = settings.rootCA;
+    root["enableTLS"] = settings.enableTLS;
+    root["rootCA"]    = settings.rootCA;
 #endif
     root["enabled"]       = settings.enabled;
     root["host"]          = settings.host;
@@ -234,6 +235,7 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
     root["publish_time_thermostat"] = settings.publish_time_thermostat;
     root["publish_time_solar"]      = settings.publish_time_solar;
     root["publish_time_mixer"]      = settings.publish_time_mixer;
+    root["publish_time_water"]      = settings.publish_time_water;
     root["publish_time_other"]      = settings.publish_time_other;
     root["publish_time_sensor"]     = settings.publish_time_sensor;
     root["publish_time_heartbeat"]  = settings.publish_time_heartbeat;
@@ -253,7 +255,8 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     bool         changed     = false;
 
 #if CONFIG_IDF_TARGET_ESP32S3
-    newSettings.rootCA = root["rootCA"] | "";
+    newSettings.enableTLS = root["enableTLS"] | false;
+    newSettings.rootCA    = root["rootCA"] | "";
 #endif
     newSettings.enabled      = root["enabled"] | FACTORY_MQTT_ENABLED;
     newSettings.host         = root["host"] | FACTORY_MQTT_HOST;
@@ -271,6 +274,7 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.publish_time_thermostat = root["publish_time_thermostat"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_solar      = root["publish_time_solar"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_mixer      = root["publish_time_mixer"] | EMSESP_DEFAULT_PUBLISH_TIME;
+    newSettings.publish_time_water      = root["publish_time_water"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_other      = root["publish_time_other"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_sensor     = root["publish_time_sensor"] | EMSESP_DEFAULT_PUBLISH_TIME;
     newSettings.publish_time_heartbeat  = root["publish_time_heartbeat"] | EMSESP_DEFAULT_PUBLISH_HEARTBEAT;
@@ -358,6 +362,10 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
         emsesp::EMSESP::mqtt_.set_publish_time_mixer(newSettings.publish_time_mixer);
     }
 
+    if (newSettings.publish_time_water != settings.publish_time_water) {
+        emsesp::EMSESP::mqtt_.set_publish_time_water(newSettings.publish_time_water);
+    }
+
     if (newSettings.publish_time_other != settings.publish_time_other) {
         emsesp::EMSESP::mqtt_.set_publish_time_other(newSettings.publish_time_other);
     }
@@ -377,10 +385,10 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.rootCA.replace("-----BEGIN CERTIFICATE-----", "");
     newSettings.rootCA.replace("-----END CERTIFICATE-----", "");
     newSettings.rootCA.replace(" ", "");
-    if (newSettings.rootCA.length() == 0 && newSettings.port > 8800) {
+    if (newSettings.rootCA.length() == 0 && newSettings.enableTLS) {
         newSettings.rootCA = "insecure";
     }
-    if (newSettings.rootCA != settings.rootCA) {
+    if (newSettings.enableTLS != settings.enableTLS || newSettings.rootCA != settings.rootCA) {
         changed = true;
     }
 #endif

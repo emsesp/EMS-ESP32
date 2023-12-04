@@ -25,6 +25,7 @@ export interface MqttSettings {
   port: number;
   base: string;
   rootCA?: string;
+  enableTLS?: boolean;
   username: string;
   password: string;
   client_id: string;
@@ -35,6 +36,7 @@ export interface MqttSettings {
   publish_time_thermostat: number;
   publish_time_solar: number;
   publish_time_mixer: number;
+  publish_time_water: number;
   publish_time_other: number;
   publish_time_sensor: number;
   publish_time_heartbeat: number;

@@ -246,6 +246,7 @@ const fr: Translation = {
   MQTT_INT_THERMOSTATS: 'Thermostats',
   MQTT_INT_SOLAR: 'Modules solaires',
   MQTT_INT_MIXER: 'Modules mélangeurs',
+  MQTT_INT_WATER: 'Modules eau',
   MQTT_QUEUE: 'Queue MQTT',
   DEFAULT: 'Défaut',
   MQTT_ENTITY_FORMAT: 'Entity ID format', // TODO translate
@@ -323,7 +324,8 @@ const fr: Translation = {
   WRITEABLE: 'Writeable', // TODO translate
   SHOWING: 'Showing', // TODO translate
   SEARCH: 'Search', // TODO translate
-  CERT: 'TLS root certificate (leave blank to disable TLS)', // TODO translate
+  CERT: 'TLS root certificate (leave blank for insecure)', // TODO translate
+  ENABLE_TLS: 'Activer TLS',
   ON: 'On', // TODO translate
   OFF: 'Off', // TODO translate
   POLARITY: 'Polarity', // TODO translate

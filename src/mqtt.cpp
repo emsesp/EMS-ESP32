@@ -34,6 +34,7 @@ uint32_t    Mqtt::publish_time_boiler_;
 uint32_t    Mqtt::publish_time_thermostat_;
 uint32_t    Mqtt::publish_time_solar_;
 uint32_t    Mqtt::publish_time_mixer_;
+uint32_t    Mqtt::publish_time_water_;
 uint32_t    Mqtt::publish_time_sensor_;
 uint32_t    Mqtt::publish_time_other_;
 uint32_t    Mqtt::publish_time_heartbeat_;
@@ -168,6 +169,11 @@ void Mqtt::loop() {
         if (publish_time_mixer_ && (currentMillis - last_publish_mixer_ > publish_time_mixer_)) {
         last_publish_mixer_ = (currentMillis / publish_time_mixer_) * publish_time_mixer_;
         EMSESP::publish_device_values(EMSdevice::DeviceType::MIXER);
+    } else
+
+        if (publish_time_water_ && (currentMillis - last_publish_water_ > publish_time_water_)) {
+        last_publish_water_ = (currentMillis / publish_time_water_) * publish_time_water_;
+        EMSESP::publish_device_values(EMSdevice::DeviceType::WATER);
     } else
 
         if (publish_time_other_ && (currentMillis - last_publish_other_ > publish_time_other_)) {
@@ -350,6 +356,7 @@ void Mqtt::load_settings() {
         publish_time_thermostat_ = mqttSettings.publish_time_thermostat * 1000;
         publish_time_solar_      = mqttSettings.publish_time_solar * 1000;
         publish_time_mixer_      = mqttSettings.publish_time_mixer * 1000;
+        publish_time_water_      = mqttSettings.publish_time_water * 1000;
         publish_time_other_      = mqttSettings.publish_time_other * 1000;
         publish_time_sensor_     = mqttSettings.publish_time_sensor * 1000;
         publish_time_heartbeat_  = mqttSettings.publish_time_heartbeat * 1000;
@@ -413,6 +420,10 @@ void Mqtt::set_publish_time_mixer(uint16_t publish_time) {
     publish_time_mixer_ = publish_time * 1000; // convert to milliseconds
 }
 
+void Mqtt::set_publish_time_water(uint16_t publish_time) {
+    publish_time_water_ = publish_time * 1000; // convert to milliseconds
+}
+
 void Mqtt::set_publish_time_other(uint16_t publish_time) {
     publish_time_other_ = publish_time * 1000; // convert to milliseconds
 }
@@ -443,6 +454,10 @@ bool Mqtt::get_publish_onchange(uint8_t device_type) {
         }
     } else if (device_type == EMSdevice::DeviceType::MIXER) {
         if (!publish_time_mixer_) {
+            return true;
+        }
+    } else if (device_type == EMSdevice::DeviceType::WATER) {
+        if (!publish_time_water_) {
             return true;
         }
     } else if (!publish_time_other_) {
@@ -922,7 +937,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // we add the command topic parameter for commands
     if (has_cmd) {
         // add category
-        doc["ent_cat"] = "config"; // for writeable entities, like switch, number, text, select
+        // doc["ent_cat"] = "config"; // for writeable entities, like switch, number, text, select
 
         char command_topic[MQTT_TOPIC_MAX_SIZE];
         // add command topic
@@ -1050,8 +1065,11 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // Add the state class, device class and sometimes the icon. Used only for read-only sensors Sensor and Binary Sensor
     if (readonly_sensors) {
-        // first set the catagory
-        doc["ent_cat"] = "diagnostic";
+        // first set the catagory for System entities
+        // https://github.com/emsesp/EMS-ESP32/discussions/1459#discussioncomment-7694873
+        if (device_type == EMSdevice::DeviceType::SYSTEM) {
+            doc["ent_cat"] = "diagnostic";
+        }
 
         const char * dc_ha = "dev_cla";  // device class
         const char * sc_ha = "stat_cla"; // state class

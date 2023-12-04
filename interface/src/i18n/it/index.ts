@@ -248,6 +248,7 @@ const it: Translation = {
   MQTT_INT_THERMOSTATS: 'Termostati',
   MQTT_INT_SOLAR: 'Moduli solari',
   MQTT_INT_MIXER: 'Moduli Mixer',
+  MQTT_INT_WATER: 'Moduli Acqua',
   MQTT_QUEUE: 'Coda MQTT',
   DEFAULT: 'Predefinito',
   MQTT_ENTITY_FORMAT: 'Formato ID entità',
@@ -325,7 +326,8 @@ const it: Translation = {
   WRITEABLE: 'Scrivibile',
   SHOWING: 'Visualizza',
   SEARCH: 'Ricerca',
-  CERT: 'TLS root certificate (leave blank to disable TLS)', // TODO translate
+  CERT: 'TLS root certificate (leave blank for insecure)', // TODO translate
+  ENABLE_TLS: 'Abilita TLS',
   ON: 'On', // TODO translate
   OFF: 'Off', // TODO translate
   POLARITY: 'Polarity', // TODO translate

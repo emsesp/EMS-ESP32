@@ -102,6 +102,8 @@ MAKE_WORD(heatsource)
 MAKE_WORD(scheduler)
 MAKE_WORD(custom)
 MAKE_WORD(ventilation)
+MAKE_WORD(water)
+MAKE_WORD(pool)
 
 // brands
 MAKE_WORD_CUSTOM(bosch, "Bosch")
@@ -283,6 +285,7 @@ MAKE_ENUM(enum_flow, FL_(off), FL_(flow), FL_(bufferedflow), FL_(buffer), FL_(la
 MAKE_ENUM(enum_reset, FL_(dash), FL_(maintenance), FL_(error))
 MAKE_ENUM(enum_maxHeat, FL_(0kW), FL_(2kW), FL_(3kW), FL_(4kW), FL_(6kW), FL_(9kW))
 MAKE_ENUM(enum_pumpMode, FL_(proportional), FL_(deltaP1), FL_(deltaP2), FL_(deltaP3), FL_(deltaP4))
+MAKE_ENUM(enum_hpPumpMode, FL_(auto), FL_(continuous))
 
 // thermostat lists
 MAKE_ENUM(enum_ibaMainDisplay, FL_(internal_temperature), FL_(internal_setpoint), FL_(external_temperature), FL_(burner_temperature), FL_(ww_temperature), FL_(functioning_mode), FL_(time), FL_(date), FL_(smoke_temperature))
@@ -291,10 +294,11 @@ MAKE_ENUM(enum_ibaLanguage_RC30, FL_(german), FL_(dutch))
 MAKE_ENUM(enum_floordrystatus, FL_(off), FL_(start), FL_(heat), FL_(hold), FL_(cool), FL_(end))
 MAKE_ENUM(enum_ibaBuildingType, FL_(light), FL_(medium), FL_(heavy))
 MAKE_ENUM(enum_PID, FL_(fast), FL_(medium), FL_(slow))
-MAKE_ENUM(enum_wwMode, FL_(off), FL_(normal), FL_(comfort), FL_(auto), FL_(own_prog), FL_(eco))
+MAKE_ENUM(enum_wwMode, FL_(off), FL_(normal), FL_(comfort), FL_(auto), FL_(own_prog))
 MAKE_ENUM(enum_wwCircMode, FL_(off), FL_(on), FL_(auto), FL_(own_prog))
 MAKE_ENUM(enum_wwMode2, FL_(off), FL_(on), FL_(auto))
 MAKE_ENUM(enum_wwMode3, FL_(on), FL_(off), FL_(auto))
+MAKE_ENUM(enum_wwMode4, FL_(off), FL_(ecoplus), FL_(eco), FL_(comfort), FL_(auto))
 MAKE_ENUM(enum_heatingtype, FL_(off), FL_(radiator), FL_(convector), FL_(floor))
 MAKE_ENUM(enum_summermode, FL_(summer), FL_(auto), FL_(winter))
 MAKE_ENUM(enum_hpoperatingmode, FL_(off), FL_(auto), FL_(heating), FL_(cooling))
@@ -302,8 +306,8 @@ MAKE_ENUM(enum_summer, FL_(winter), FL_(summer))
 MAKE_ENUM(enum_operatingstate, FL_(heating), FL_(off), FL_(cooling))
 MAKE_ENUM(enum_hpmode, FL_(heating), FL_(cooling), FL_(heatandcool))
 
-MAKE_ENUM(enum_mode, FL_(off), FL_(manual), FL_(auto))              // RC100, RC300, RC310
-MAKE_ENUM(enum_mode2, FL_(off), FL_(manual), FL_(auto))             // RC20, RC30
+MAKE_ENUM(enum_mode, FL_(manual), FL_(auto))                        // RC100, RC300, RC310
+MAKE_ENUM(enum_mode2, FL_(off), FL_(manual), FL_(auto))             // RC20, RC30, BC400
 MAKE_ENUM(enum_mode3, FL_(night), FL_(day), FL_(auto))              // RC35, RC30_N, RC25, RC20_N
 MAKE_ENUM(enum_mode4, FL_(nofrost), FL_(eco), FL_(heat), FL_(auto)) // JUNKERS
 MAKE_ENUM(enum_mode5, FL_(auto), FL_(off))                          // CRF
@@ -361,6 +365,9 @@ MAKE_ENUM(enum_blockTerm, FL_(n_o), FL_(n_c))
 
 // Ventilation
 MAKE_ENUM(enum_ventMode, FL_(auto), FL_(off), FL_(L1), FL_(L2), FL_(L3), FL_(L4), FL_(demand), FL_(sleep), FL_(intense), FL_(bypass), FL_(partymode), FL_(fireplace))
+
+// water
+MAKE_ENUM(enum_errorDisp, FL_(off), FL_(normal), FL_(inverted))
 
 #pragma GCC diagnostic pop
 

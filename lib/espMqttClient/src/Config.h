@@ -53,6 +53,10 @@ the LICENSE file.
 #define EMC_TASK_STACK_SIZE 5120
 #endif
 
+#ifndef EMC_MULTIPLE_CALLBACKS
+#define EMC_MULTIPLE_CALLBACKS 0
+#endif
+
 #ifndef EMC_USE_WATCHDOG
 #define EMC_USE_WATCHDOG 0
 #endif

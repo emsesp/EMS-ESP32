@@ -246,6 +246,7 @@ const nl: Translation = {
   MQTT_INT_THERMOSTATS: 'Thermostaten',
   MQTT_INT_SOLAR: 'Solar Modules',
   MQTT_INT_MIXER: 'Mixer Modules',
+  MQTT_INT_WATER: 'Water Modules',
   MQTT_QUEUE: 'MQTT Queue',
   DEFAULT: 'Default',
   MQTT_ENTITY_FORMAT: 'Entity ID formaat',
@@ -323,7 +324,8 @@ const nl: Translation = {
   WRITEABLE: 'Beschrijfbare',
   SHOWING: 'Tonen',
   SEARCH: 'Zoek',
-  CERT: 'TLS rootcertificaat (laat leeg om TLS uit te schakelen)',
+  CERT: 'TLS rootcertificaat (laat leeg om TLS-insecure)', // TODO translate
+  ENABLE_TLS: 'Activeer TLS',
   ON: 'On', // TODO translate
   OFF: 'Off', // TODO translate
   POLARITY: 'Polarity', // TODO translate

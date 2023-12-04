@@ -246,6 +246,7 @@ const tr: Translation = {
   MQTT_INT_THERMOSTATS: 'Termostatlar',
   MQTT_INT_SOLAR: 'Güneş Enerjisi Modülleri',
   MQTT_INT_MIXER: 'Karışım Modülleri',
+  MQTT_INT_WATER: 'Water Modules', // TODO translate
   MQTT_QUEUE: 'MQTT Sırası',
   DEFAULT: 'Varsayılan',
   MQTT_ENTITY_FORMAT: 'Varlık Kimlik biçimi',
@@ -323,7 +324,8 @@ const tr: Translation = {
   WRITEABLE: 'Writeable', // TODO translate
   SHOWING: 'Showing', // TODO translate
   SEARCH: 'Search', // TODO translate
-  CERT: 'TLS root certificate (leave blank to disable TLS)', // TODO translate
+  CERT: 'TLS root certificate (leave blank for insecure)',
+  ENABLE_TLS: 'TLS deveye al',
   ON: 'On', // TODO translate
   OFF: 'Off', // TODO translate
   POLARITY: 'Polarity', // TODO translate

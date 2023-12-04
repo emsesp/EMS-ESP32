@@ -238,7 +238,7 @@ void Shower::set_shower_state(bool state, bool force) {
         doc["unit_of_meas"] = "s";
         doc["stat_cla"]     = "measurement";
         doc["dev_cla"]      = "duration";
-        doc["ent_cat"]      = "diagnostic";
+        // doc["ent_cat"]      = "diagnostic";
 
         JsonObject dev2 = doc.createNestedObject("dev");
         dev2["name"]    = "EMS-ESP";
@@ -265,7 +265,7 @@ void Shower::set_shower_state(bool state, bool force) {
 
         doc["name"]    = "Shower Timestamp";
         doc["val_tpl"] = "{{value_json.timestamp if value_json.timestamp is defined else 0}}";
-        doc["ent_cat"] = "diagnostic";
+        // doc["ent_cat"] = "diagnostic";
 
         JsonObject dev3 = doc.createNestedObject("dev");
         dev3["name"]    = "EMS-ESP";

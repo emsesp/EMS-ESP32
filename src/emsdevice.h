@@ -342,7 +342,9 @@ class EMSdevice {
         SYSTEM = 0,        // this is us (EMS-ESP)
         TEMPERATURESENSOR, // for internal temperature sensors
         ANALOGSENSOR,      // for internal analog sensors
-        SCHEDULER,
+        SCHEDULER,         // for internal schedule
+        CUSTOM,            // for user defined entities
+
         BOILER,
         THERMOSTAT,
         MIXER,
@@ -356,8 +358,9 @@ class EMSdevice {
         EXTENSION,
         GENERIC,
         HEATSOURCE,
-        CUSTOM,
         VENTILATION,
+        WATER,
+        POOL,
         UNKNOWN
     };
 
@@ -382,8 +385,11 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_ID_MODEM          = 0x48;
     static constexpr uint8_t EMS_DEVICE_ID_RFSENSOR       = 0x40; // RF sensor only sending, no reply
     static constexpr uint8_t EMS_DEVICE_ID_RFBASE         = 0x50;
-    static constexpr uint8_t EMS_DEVICE_ID_ROOMTHERMOSTAT = 0x17; // TADO using this with no version reply
-    static constexpr uint8_t EMS_DEVICE_ID_TADO_OLD       = 0x19; // TADO using this with no broadcast and version
+    static constexpr uint8_t EMS_DEVICE_ID_ROOMTHERMOSTAT = 0x17; // TADO using this with no version reply #174
+    static constexpr uint8_t EMS_DEVICE_ID_TADO_OLD       = 0x19; // older TADO using this with no version reply, #1031
+    static constexpr uint8_t EMS_DEVICE_ID_DHW1           = 0x28; // MM100 module as water station
+    static constexpr uint8_t EMS_DEVICE_ID_DHW2           = 0x29; // MM100 module as water station
+    static constexpr uint8_t EMS_DEVICE_ID_DHW8           = 0x2F; // last DHW module id?
 
     // generic type IDs
     static constexpr uint16_t EMS_TYPE_VERSION    = 0x02; // type ID for Version information. Generic across all EMS devices.
@@ -430,6 +436,7 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_JUNKERS     = 11;
     static constexpr uint8_t EMS_DEVICE_FLAG_CRF         = 12; // CRF200 only monitor
     static constexpr uint8_t EMS_DEVICE_FLAG_RC100H      = 13; // with humidity
+    static constexpr uint8_t EMS_DEVICE_FLAG_BC400       = 14; // mostly like RC300, but some changes
 
     uint8_t count_entities();
     bool    has_entities() const;

@@ -1,6 +1,6 @@
 import { useRequest, type Method } from 'alova';
 import { useState } from 'react';
-import { unstable_useBlocker as useBlocker } from 'react-router-dom';
+import { useBlocker } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 import { useI18nContext } from 'i18n/i18n-react';

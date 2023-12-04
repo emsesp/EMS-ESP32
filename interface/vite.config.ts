@@ -5,7 +5,6 @@ import viteImagemin from 'vite-plugin-imagemin';
 import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig(({ command, mode }) => {
-  // standalone build for development - runs the server
   if (command === 'serve') {
     console.log('Preparing for standalone build with server, mode=' + mode);
     return {
@@ -30,9 +29,17 @@ export default defineConfig(({ command, mode }) => {
     };
   }
 
+  if (command === 'build' && mode === 'hosted') {
+    return {
+      plugins: [preact(), viteTsconfigPaths()],
+      build: {
+        chunkSizeWarningLimit: 1024
+      }
+    };
+  }
+
   // production build, both for hosted and building the firmware
   if (command === 'build') {
-    console.log('Preparing for production build, mode is ' + mode);
     return {
       plugins: [
         preact(),
@@ -79,11 +86,7 @@ export default defineConfig(({ command, mode }) => {
 
       build: {
         // target: 'es2022',
-        outDir: 'dist',
-        reportCompressedSize: false,
         chunkSizeWarningLimit: 1024,
-        sourcemap: false,
-        manifest: false,
         minify: 'terser',
         terserOptions: {
           compress: {
@@ -109,16 +112,6 @@ export default defineConfig(({ command, mode }) => {
           nameCache: null,
           safari10: false,
           toplevel: false
-        },
-
-        rollupOptions: {
-          // Ignore "use client" waning since we are not using SSR
-          onwarn(warning, warn) {
-            if (warning.code === 'MODULE_LEVEL_DIRECTIVE' && warning.message.includes(`"use client"`)) {
-              return;
-            }
-            warn(warning);
-          }
         }
       }
     };

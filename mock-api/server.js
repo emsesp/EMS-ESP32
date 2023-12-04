@@ -324,7 +324,7 @@ security_settings = {
   ]
 };
 const features = {
-  version: 'v3.6.0-demo',
+  version: 'v3.6-demo',
   // platform: 'ESP32'
   platform: 'ESP32-S3'
 };
@@ -352,6 +352,54 @@ const EMSESP_CUSTOMIZATION_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customizati
 const EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'resetCustomizations';
 const EMSESP_WRITE_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
 const EMSESP_WRITE_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'entities';
+
+const emsesp_info = {
+  System: {
+    version: '3.6.5',
+    uptime: '001+06:40:34.018',
+    'uptime (seconds)': 110434,
+    freemem: 131,
+    'reset reason': 'Software reset CPU / Software reset CPU',
+    'Sensor sensors': 3
+  },
+  Network: {
+    connection: 'Ethernet',
+    hostname: 'ems-esp',
+    MAC: 'A8:03:2A:62:64:CF',
+    'IPv4 address': '192.168.1.134/255.255.255.0',
+    'IPv4 gateway': '192.168.1.1',
+    'IPv4 nameserver': '192.168.1.1'
+  },
+  Status: {
+    'bus status': 'connected',
+    'bus protocol': 'Buderus',
+    'telegrams received': 84986,
+    'read requests sent': 14748,
+    'write requests sent': 3,
+    'incomplete telegrams': 8,
+    'tx fails': 0,
+    'rx line quality': 100,
+    'tx line quality': 100,
+    MQTT: 'connected',
+    'MQTT publishes': 46336,
+    'MQTT publish fails': 0,
+    'Sensor reads': 22086,
+    'Sensor fails': 0
+  },
+  Devices: [
+    {
+      type: 'Boiler',
+      name: 'Nefit GBx72/Trendline/Cerapur/Greenstar Si/27i (DeviceID:0x08 ProductID:123, Version:06.01)',
+      handlers:
+        '0x10 0x11 0xC2 0x14 0x15 0x1C 0x18 0x19 0x1A 0x35 0x16 0x33 0x34 0x26 0x2A 0xD1 0xE3 0xE4 0xE5 0xE6 0xE9 0xEA'
+    },
+    {
+      type: 'Thermostat',
+      name: 'RC20/Moduline 300 (DeviceID:0x17, ProductID:77, Version:03.03)',
+      handlers: '0xA3 0x06 0xA2 0x12 0x91 0xA8'
+    }
+  ]
+};
 
 settings = {
   locale: 'en',
@@ -2638,53 +2686,6 @@ rest_server.get(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
 });
 
 // EMS-ESP API specific
-const emsesp_info = {
-  System: {
-    version: '3.6.2',
-    uptime: '001+06:40:34.018',
-    'uptime (seconds)': 110434,
-    freemem: 131,
-    'reset reason': 'Software reset CPU / Software reset CPU',
-    'Sensor sensors': 3
-  },
-  Network: {
-    connection: 'Ethernet',
-    hostname: 'ems-esp',
-    MAC: 'A8:03:2A:62:64:CF',
-    'IPv4 address': '192.168.1.134/255.255.255.0',
-    'IPv4 gateway': '192.168.1.1',
-    'IPv4 nameserver': '192.168.1.1'
-  },
-  Status: {
-    'bus status': 'connected',
-    'bus protocol': 'Buderus',
-    'telegrams received': 84986,
-    'read requests sent': 14748,
-    'write requests sent': 3,
-    'incomplete telegrams': 8,
-    'tx fails': 0,
-    'rx line quality': 100,
-    'tx line quality': 100,
-    MQTT: 'connected',
-    'MQTT publishes': 46336,
-    'MQTT publish fails': 0,
-    'Sensor reads': 22086,
-    'Sensor fails': 0
-  },
-  Devices: [
-    {
-      type: 'Boiler',
-      name: 'Nefit GBx72/Trendline/Cerapur/Greenstar Si/27i (DeviceID:0x08 ProductID:123, Version:06.01)',
-      handlers:
-        '0x10 0x11 0xC2 0x14 0x15 0x1C 0x18 0x19 0x1A 0x35 0x16 0x33 0x34 0x26 0x2A 0xD1 0xE3 0xE4 0xE5 0xE6 0xE9 0xEA'
-    },
-    {
-      type: 'Thermostat',
-      name: 'RC20/Moduline 300 (DeviceID:0x17, ProductID:77, Version:03.03)',
-      handlers: '0xA3 0x06 0xA2 0x12 0x91 0xA8'
-    }
-  ]
-};
 
 rest_server.post(API_ENDPOINT_ROOT, (req, res) => {
   console.log('Generic API POST');

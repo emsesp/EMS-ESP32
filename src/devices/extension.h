@@ -43,10 +43,10 @@ class Extension : public EMSdevice {
 
     int16_t headerTemp_; // T0
     uint8_t input_;      // IO1
-    uint8_t errorState_; // OE1
-    uint8_t errorPump_;  // IE0
-    uint8_t outPower_;   // IO1
-    uint8_t setPower_;   // request
+    // uint8_t errorState_; // OE1
+    // uint8_t errorPump_; // IE0
+    uint8_t outPower_; // IO1
+    uint8_t setPower_; // request
     uint8_t setPoint_;
     uint8_t dip_; // dip switch
     uint8_t minV_;

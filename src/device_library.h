@@ -82,7 +82,7 @@
 {203, DeviceType::THERMOSTAT, "EasyControl/CT200", DeviceFlags::EMS_DEVICE_FLAG_EASY | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18, cannot write
 
 // Thermostat - Buderus/Nefit/Bosch specific - 0x17 / 0x10 / 0x18 / 0x19-0x1B for hc2-4 / 0x38
-{  4, DeviceType::THERMOSTAT, "UI800/BC400", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
+{  4, DeviceType::THERMOSTAT, "UI800/BC400", DeviceFlags::EMS_DEVICE_FLAG_BC400}, // 0x10
 { 65, DeviceType::THERMOSTAT, "RC10", DeviceFlags::EMS_DEVICE_FLAG_RC20_N},// 0x17
 { 67, DeviceType::THERMOSTAT, "RC30", DeviceFlags::EMS_DEVICE_FLAG_RC30_N},// 0x10 - based on RC35
 { 77, DeviceType::THERMOSTAT, "RC20/Moduline 300", DeviceFlags::EMS_DEVICE_FLAG_RC20},// 0x17
@@ -101,7 +101,7 @@
 {215, DeviceType::THERMOSTAT, "Comfort RF", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
 {216, DeviceType::THERMOSTAT, "CRF200S", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
 {246, DeviceType::THERMOSTAT, "Comfort+2RF", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
-{253, DeviceType::THERMOSTAT, "Rego 3000/UI800/WSW196i/BC400", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
+{253, DeviceType::THERMOSTAT, "Rego 3000/UI800/WSW196i/BC400", DeviceFlags::EMS_DEVICE_FLAG_BC400}, // 0x10
 
 // Thermostat - Sieger - 0x10 / 0x17
 { 66, DeviceType::THERMOSTAT, "ES72/RC20", DeviceFlags::EMS_DEVICE_FLAG_RC20_N}, // 0x17 or remote
@@ -142,7 +142,7 @@
 {160, DeviceType::MIXER, "MM100", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
 {161, DeviceType::MIXER, "MM200", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
 {193, DeviceType::MIXER, "MZ100", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
-{204, DeviceType::MIXER, "MP100", DeviceFlags::EMS_DEVICE_FLAG_MP}, // pool
+{204, DeviceType::POOL, "MP100", DeviceFlags::EMS_DEVICE_FLAG_MP}, // pool
 
 // Heat Pumps - 0x38? This is a thermostat like RC100H
 // also prod-id of wifi module and wireless base

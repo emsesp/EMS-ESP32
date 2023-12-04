@@ -115,7 +115,7 @@ bool System::command_allvalues(const char * value, const int8_t id, JsonObject &
     for (const auto & emsdevice : EMSESP::emsdevices) {
         std::string title = emsdevice->device_type_2_device_name_translated() + std::string(" ") + emsdevice->to_string();
         device_output     = output.createNestedObject(title);
-        emsesp::EMSdevice::export_values(emsdevice->unique_id(), device_output, id, EMSdevice::OUTPUT_TARGET::API_VERBOSE);
+        emsdevice->generate_values(device_output, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::API_VERBOSE); // use nested for id -1 and 0
     }
 
     // Custom entities
@@ -177,6 +177,9 @@ bool System::command_publish(const char * value, const int8_t id) {
             return true;
         } else if (value_s == (F_(mixer))) {
             EMSESP::publish_device_values(EMSdevice::DeviceType::MIXER);
+            return true;
+        } else if (value_s == (F_(water))) {
+            EMSESP::publish_device_values(EMSdevice::DeviceType::WATER);
             return true;
         } else if (value_s == "other") {
             EMSESP::publish_other_values(); // switch and heat pump
@@ -1096,7 +1099,7 @@ bool System::check_upgrade(bool factory_settings) {
         missing_version = (settingsVersion.empty() || (settingsVersion.length() < 5));
         if (missing_version) {
             LOG_WARNING("No version information found (%s)", settingsVersion.c_str());
-            settingsVersion = "3.6.2"; // this was the last stable version
+            settingsVersion = "3.6.4"; // this was the last stable version
         }
     }
 
@@ -1306,6 +1309,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
         node["publish time thermostat"] = settings.publish_time_thermostat;
         node["publish time solar"]      = settings.publish_time_solar;
         node["publish time mixer"]      = settings.publish_time_mixer;
+        node["publish time water"]      = settings.publish_time_water;
         node["publish time other"]      = settings.publish_time_other;
         node["publish time sensor"]     = settings.publish_time_sensor;
         node["publish single"]          = settings.publish_single;

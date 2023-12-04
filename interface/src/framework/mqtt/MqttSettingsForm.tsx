@@ -168,20 +168,24 @@ const MqttSettingsForm: FC = () => {
               <MenuItem value={2}>2</MenuItem>
             </TextField>
           </Grid>
-          {data.rootCA !== undefined && (
-            <Grid item xs={12} sm={6}>
-              <ValidatedPasswordField
-                name="rootCA"
-                label={LL.CERT()}
-                fullWidth
-                variant="outlined"
-                value={data.rootCA}
-                onChange={updateFormValue}
-                margin="normal"
-              />
-            </Grid>
-          )}
         </Grid>
+        {data.enableTLS !== undefined && (
+          <BlockFormControlLabel
+            control={<Checkbox name="enableTLS" checked={data.enableTLS} onChange={updateFormValue} />}
+            label={LL.ENABLE_TLS()}
+          />
+        )}
+        {data.enableTLS === true && (
+          <ValidatedPasswordField
+            name="rootCA"
+            label={LL.CERT()}
+            fullWidth
+            variant="outlined"
+            value={data.rootCA}
+            onChange={updateFormValue}
+            margin="normal"
+          />
+        )}
 
         <BlockFormControlLabel
           control={<Checkbox name="clean_session" checked={data.clean_session} onChange={updateFormValue} />}
@@ -377,6 +381,21 @@ const MqttSettingsForm: FC = () => {
               fullWidth
               variant="outlined"
               value={numberValue(data.publish_time_mixer)}
+              type="number"
+              onChange={updateFormValue}
+              margin="normal"
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <TextField
+              name="publish_time_water"
+              label={LL.MQTT_INT_WATER()}
+              InputProps={{
+                endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+              }}
+              fullWidth
+              variant="outlined"
+              value={numberValue(data.publish_time_water)}
               type="number"
               onChange={updateFormValue}
               margin="normal"

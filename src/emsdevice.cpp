@@ -107,6 +107,8 @@ const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
         return F_(system);
     case DeviceType::SCHEDULER:
         return F_(scheduler);
+    case DeviceType::CUSTOM:
+        return F_(custom);
     case DeviceType::BOILER:
         return F_(boiler);
     case DeviceType::THERMOSTAT:
@@ -135,10 +137,12 @@ const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
         return F_(extension);
     case DeviceType::HEATSOURCE:
         return F_(heatsource);
-    case DeviceType::CUSTOM:
-        return F_(custom);
     case DeviceType::VENTILATION:
         return F_(ventilation);
+    case DeviceType::WATER:
+        return F_(water);
+    case DeviceType::POOL:
+        return F_(pool);
     default:
         return Helpers::translated_word(FL_(unknown), true);
     }
@@ -174,6 +178,10 @@ const char * EMSdevice::device_type_2_device_name_translated() {
         return Helpers::translated_word(FL_(heatsource_device));
     case DeviceType::VENTILATION:
         return Helpers::translated_word(FL_(ventilation_device));
+    case DeviceType::WATER:
+        return Helpers::translated_word(FL_(water_device));
+    case DeviceType::POOL:
+        return Helpers::translated_word(FL_(pool_device));
     default:
         break;
     }
@@ -240,6 +248,12 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
     }
     if (!strcmp(lowtopic, F_(ventilation))) {
         return DeviceType::VENTILATION;
+    }
+    if (!strcmp(lowtopic, F_(water))) {
+        return DeviceType::WATER;
+    }
+    if (!strcmp(lowtopic, F_(pool))) {
+        return DeviceType::POOL;
     }
 
     return DeviceType::UNKNOWN;
@@ -827,7 +841,7 @@ std::string EMSdevice::get_value_uom(const std::string & shortname) const {
     return std::string{}; // not found
 }
 
-bool EMSdevice::export_values(uint8_t unique_id, JsonObject & output, const int8_t id, const uint8_t output_target) {
+bool EMSdevice::export_values(uint8_t device_type, JsonObject & output, const int8_t id, const uint8_t output_target) {
     bool    has_value = false;
     uint8_t tag;
     if (id >= 1 && id <= (1 + DeviceValueTAG::TAG_HS16 - DeviceValueTAG::TAG_HC1)) {
@@ -840,7 +854,7 @@ bool EMSdevice::export_values(uint8_t unique_id, JsonObject & output, const int8
 
     if (id > 0 || output_target == EMSdevice::OUTPUT_TARGET::API_VERBOSE) {
         for (const auto & emsdevice : EMSESP::emsdevices) {
-            if (emsdevice->unique_id() == unique_id) {
+            if (emsdevice && (emsdevice->device_type() == device_type)) {
                 has_value |= emsdevice->generate_values(output, tag, (id < 1), output_target); // use nested for id -1 and 0
             }
         }
@@ -852,7 +866,7 @@ bool EMSdevice::export_values(uint8_t unique_id, JsonObject & output, const int8
         JsonObject output_hc    = output;
         bool       nest_created = false;
         for (const auto & emsdevice : EMSESP::emsdevices) {
-            if (emsdevice->unique_id() == unique_id) {
+            if (emsdevice && (emsdevice->device_type() == device_type)) {
                 if (!nest_created && emsdevice->has_tags(tag)) {
                     output_hc    = output.createNestedObject(EMSdevice::tag_to_mqtt(tag));
                     nest_created = true;
@@ -969,19 +983,15 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                 }
                 // handle INTs
                 else {
-                    // add step if it's not 1
-                    if (dv.numeric_operator > 0) {
-                        obj["s"] = (float)1 / dv.numeric_operator;
-                    } else if (dv.numeric_operator < 0) {
-                        obj["s"] = (float)(-1) * dv.numeric_operator;
-                    }
-
                     // add min and max values, if available
                     int16_t  dv_set_min;
                     uint32_t dv_set_max;
                     if (dv.get_min_max(dv_set_min, dv_set_max)) {
                         obj["m"] = dv_set_min;
                         obj["x"] = dv_set_max;
+                        // add steps to numeric values as rendered string to avoid rounding floats in js
+                        char s[10];
+                        obj["s"] = Helpers::render_value(s, (uint32_t)1, dv.numeric_operator);
                     }
                 }
             }
