@@ -1309,7 +1309,7 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
     uint8_t syspress = sysPress_;
     telegram->read_value(syspress, 21); // 0 means no sensor
     if (syspress == 0) {
-        sysPress_ = EMS_VALUE_UINT_NOTSET;
+        syspress = EMS_VALUE_UINT_NOTSET;
     }
     has_update(sysPress_, syspress);
 
