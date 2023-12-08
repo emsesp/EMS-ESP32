@@ -1031,7 +1031,7 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     // has_update(telegram, hc->selTemp, 10, 1); // single byte conversion, value is * 2 - manual
 
     has_update(telegram, hc->mode_new, 21);  // for BC400
-    has_bitupdate(telegram, hc->mode, 2, 0); // RC300, RC100
+    has_bitupdate(telegram, hc->mode, 0, 0); // RC300, RC100
     /*
     telegram->read_value(hc->mode_new, 21); // 0-off, 1-manual, 2-auto
     if (Helpers::hasValue(hc->mode_new)) {
