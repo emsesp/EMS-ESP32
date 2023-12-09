@@ -1184,7 +1184,10 @@ void Boiler::process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram) {
 
     has_update(telegram, serviceCodeNumber_, 20);
 
-    if (telegram->offset <= 4 && telegram->offset + telegram->message_length > 5) {
+    if (telegram->offset <= 4 && telegram->offset + telegram->message_length > 7) {
+        if (burnGas_ || burnGas2_) {
+            boilerState_ |= 0x08; // set flame signal
+        }
         check_active(); // do a quick check to see if the hot water or heating is active
     }
 }
@@ -1475,7 +1478,9 @@ void Boiler::process_UBAMonitorWWPlus(std::shared_ptr<const Telegram> telegram) 
     has_update(telegram, wwSetTemp_, 0);
     has_update(telegram, wwCurTemp_, 1);
     has_update(telegram, wwCurTemp2_, 3);
-    has_update(telegram, wwCurFlow_, 11);
+    if (!is_received(0x779)) { // HIUMonitor
+        has_update(telegram, wwCurFlow_, 11);
+    }
 
     has_update(telegram, wwWorkM_, 14, 3);  // force to 3 bytes
     has_update(telegram, wwStarts_, 17, 3); // force to 3 bytes
