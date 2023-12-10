@@ -419,8 +419,13 @@ const EMSESP_CORE_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'coreData';
 const EMSESP_SENSOR_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'sensorData';
 const EMSESP_DEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'devices';
 const EMSESP_SCANDEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'scanDevices';
-const EMSESP_DEVICEDATA_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceData/:id';
-const EMSESP_DEVICEENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceEntities/:id';
+
+// const EMSESP_DEVICEDATA_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceData/:id';
+// const EMSESP_DEVICEENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceEntities/:id';
+
+const EMSESP_DEVICEDATA_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceData';
+const EMSESP_DEVICEENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceEntities';
+
 const EMSESP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'status';
 const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile';
 const EMSESP_WRITE_VALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceValue';
@@ -2466,7 +2471,9 @@ router
   .post(EMSESP_SCANDEVICES_ENDPOINT, () => new Response('OK', { status: 200 }))
   .get(EMSESP_STATUS_ENDPOINT, () => new Response(JSON.stringify(status), { headers }))
   .get(EMSESP_DEVICEDATA_ENDPOINT, (request) => {
-    const id = Number(request.params.id);
+    // const id = Number(request.params.id); // TODO when using :id
+    const id = Number(request.query.id);
+
     if (id == 1) {
       return new Response(encoder.encode(emsesp_devicedata_1), { headers });
     }
@@ -2493,7 +2500,9 @@ router
     }
   })
   .get(EMSESP_DEVICEENTITIES_ENDPOINT, (request) => {
-    const id = Number(request.params.id);
+    // const id = Number(request.params.id); // TODO when using :id
+    const id = Number(request.query.id);
+
     if (id == 1) {
       return new Response(encoder.encode(emsesp_deviceentities_1), { headers });
     }
