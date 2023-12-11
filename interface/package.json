@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@alova/adapter-xhr": "^1.0.1",
-    "@babel/core": "^7.23.5",
+    "@babel/core": "^7.23.6",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.14.19",
