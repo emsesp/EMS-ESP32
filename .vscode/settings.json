@@ -4,8 +4,7 @@
     "**/.pnp.*": true
   },
   "editor.codeActionsOnSave": {
-    "source.fixAll": true
-    // "source.organizeImports": true
+    "source.fixAll": "explicit"
   },
   "eslint.nodePath": "interface/.yarn/sdks",
   "eslint.workingDirectories": ["interface"],
