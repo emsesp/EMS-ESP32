@@ -61,6 +61,7 @@ class Mqtt {
 
     static void on_connect();
     static void on_disconnect(espMqttClientTypes::DisconnectReason reason);
+    static void on_message(const char * topic, const uint8_t * payload, size_t len);
     static void subscribe(const uint8_t device_type, const std::string & topic, mqtt_sub_function_p cb);
     static void subscribe(const std::string & topic);
     static void resubscribe();
@@ -232,7 +233,6 @@ class Mqtt {
     static void queue_unsubscribe_message(const std::string & topic);
 
     void on_publish(uint16_t packetId) const;
-    void on_message(const char * topic, const uint8_t * payload, size_t len) const;
 
     // function handlers for MQTT subscriptions
     struct MQTTSubFunction {

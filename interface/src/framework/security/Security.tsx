@@ -17,13 +17,13 @@ const Security: FC = () => {
   return (
     <>
       <RouterTabs value={routerTab}>
-        <Tab value="users" label={LL.MANAGE_USERS()} />
-        <Tab value="settings" label={LL.SETTINGS_OF(LL.SECURITY(1))} />
+        <Tab value="/security/users" label={LL.MANAGE_USERS()} />
+        <Tab value="/security/settings" label={LL.SETTINGS_OF(LL.SECURITY(1))} />
       </RouterTabs>
       <Routes>
         <Route path="users" element={<ManageUsersForm />} />
         <Route path="settings" element={<SecuritySettingsForm />} />
-        <Route path="/*" element={<Navigate replace to="users" />} />
+        <Route path="*" element={<Navigate replace to="/security/users" />} />
       </Routes>
     </>
   );
