@@ -171,7 +171,7 @@ const it: Translation = {
   HELP_INFORMATION_1: 'Visita il wiki online per ottenere istruzioni su come configurare EMS-ESP',
   HELP_INFORMATION_2: 'Per la chat della community dal vivo unisciti al nostro server Discord',
   HELP_INFORMATION_3: 'Per richiedere una funzionalità o segnalare un errore',
-  HELP_INFORMATION_4: 'ricordati di scaricare e allegare le informazioni del tuo sistema per una risposta più rapida quando segnali un problema',
+  HELP_INFORMATION_4: 'Ricordati di scaricare e allegare le informazioni del tuo sistema per una risposta più rapida quando segnali un problema',
   HELP_INFORMATION_5: 'EMS-ESP è un progetto gratuito e open-source. Supporta il suo sviluppo futuro assegnandogli una stella su Github!',
   UPLOAD: 'Carica',
   DOWNLOAD: 'Scarica',
