@@ -68,6 +68,7 @@ void MqttSettingsService::startClient() {
         }
         static_cast<espMqttClientSecure *>(_mqttClient)->onConnect(std::bind(&MqttSettingsService::onMqttConnect, this, _1));
         static_cast<espMqttClientSecure *>(_mqttClient)->onDisconnect(std::bind(&MqttSettingsService::onMqttDisconnect, this, _1));
+        static_cast<espMqttClientSecure *>(_mqttClient)->onMessage(std::bind(&MqttSettingsService::onMqttMessage, this, _1, _2, _3, _4, _5, _6));
         return;
     }
 #endif
@@ -75,6 +76,7 @@ void MqttSettingsService::startClient() {
     _mqttClient = static_cast<MqttClient *>(new espMqttClient(espMqttClientTypes::UseInternalTask::NO));
     static_cast<espMqttClient *>(_mqttClient)->onConnect(std::bind(&MqttSettingsService::onMqttConnect, this, _1));
     static_cast<espMqttClient *>(_mqttClient)->onDisconnect(std::bind(&MqttSettingsService::onMqttDisconnect, this, _1));
+    static_cast<espMqttClient *>(_mqttClient)->onMessage(std::bind(&MqttSettingsService::onMqttMessage, this, _1, _2, _3, _4, _5, _6));
 }
 
 void MqttSettingsService::loop() {
@@ -108,14 +110,13 @@ void MqttSettingsService::setWill(const char * topic) {
     static_cast<espMqttClient *>(_mqttClient)->setWill(topic, 1, true, "offline");
 }
 
-void MqttSettingsService::onMessage(espMqttClientTypes::OnMessageCallback callback) {
-#if CONFIG_IDF_TARGET_ESP32S3
-    if (_state.enableTLS) {
-        static_cast<espMqttClientSecure *>(_mqttClient)->onMessage(callback);
-        return;
-    }
-#endif
-    static_cast<espMqttClient *>(_mqttClient)->onMessage(callback);
+void MqttSettingsService::onMqttMessage(const espMqttClientTypes::MessageProperties & properties,
+                                        const char *                                  topic,
+                                        const uint8_t *                               payload,
+                                        size_t                                        len,
+                                        size_t                                        index,
+                                        size_t                                        total) {
+    emsesp::EMSESP::mqtt_.on_message(topic, payload, len);
 }
 
 espMqttClientTypes::DisconnectReason MqttSettingsService::getDisconnectReason() {
