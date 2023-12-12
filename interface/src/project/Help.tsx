@@ -18,6 +18,7 @@ const Help: FC = () => {
   const { send: getAPI, onSuccess: onGetAPI } = useRequest((data) => EMSESP.API(data), {
     immediate: false
   });
+
   onGetAPI((event) => {
     const anchor = document.createElement('a');
     anchor.href = URL.createObjectURL(
@@ -25,11 +26,12 @@ const Help: FC = () => {
         type: 'text/plain'
       })
     );
-    anchor.download = 'emsesp_' + event.sendArgs[0].device + '_' + event.sendArgs[0].entity + '.json';
+    anchor.download = 'emsesp_' + event.sendArgs[0].device + '_' + event.sendArgs[0].entity + '.txt';
     anchor.click();
     URL.revokeObjectURL(anchor.href);
     toast.info(LL.DOWNLOAD_SUCCESSFUL());
   });
+
   const callAPI = async (device: string, entity: string) => {
     await getAPI({ device, entity, id: 0 }).catch((error) => {
       toast.error(error.message);

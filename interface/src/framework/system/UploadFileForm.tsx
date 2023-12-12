@@ -71,27 +71,26 @@ const UploadFileForm: FC = () => {
         type: 'text/plain'
       })
     );
-    anchor.download = 'emsesp_' + endpoint + '.json';
+    anchor.download = 'emsesp_' + endpoint;
     anchor.click();
     URL.revokeObjectURL(anchor.href);
     toast.info(LL.DOWNLOAD_SUCCESSFUL());
   };
 
   onSuccessGetSettings((event) => {
-    saveFile(event.data, 'settings');
+    saveFile(event.data, 'settings.json');
   });
   onSuccessgetCustomizations((event) => {
-    saveFile(event.data, 'customizations');
+    saveFile(event.data, 'customizations.json');
   });
   onSuccessGetEntities((event) => {
-    saveFile(event.data, 'entities');
+    saveFile(event.data, 'entities.json');
   });
   onSuccessGetSchedule((event) => {
-    saveFile(event.data, 'schedule');
+    saveFile(event.data, 'schedule.json');
   });
   onGetAPI((event) => {
-    const filename = event.sendArgs[0].device + '_' + event.sendArgs[0].entity;
-    saveFile(event.data, filename);
+    saveFile(event.data, event.sendArgs[0].device + '_' + event.sendArgs[0].entity + '.txt');
   });
 
   const downloadSettings = async () => {
