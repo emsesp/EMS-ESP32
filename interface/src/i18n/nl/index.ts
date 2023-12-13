@@ -169,7 +169,7 @@ const nl: Translation = {
   HELP_INFORMATION_1: 'Bezoek de online wiki om instructies te vinden om EMS-ESP te configureren',
   HELP_INFORMATION_2: 'Voor de live community ga naar de Discord server',
   HELP_INFORMATION_3: 'Om een nieuwe feature te vragen of een bug te rapporteren',
-  HELP_INFORMATION_4: 'zorg dat je ook je systeem details zijn toevoeged voor een sneller antwoord',
+  HELP_INFORMATION_4: 'Zorg dat je ook je systeem details zijn toevoeged voor een sneller antwoord',
   HELP_INFORMATION_5: 'EMS-ESP is een gratis en open source project. Steun ons met een Star op Github!',
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',

@@ -145,7 +145,8 @@ class MqttSettingsService : public StatefulService<MqttSettings> {
     void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
     void onMqttConnect(bool sessionPresent);
     void onMqttDisconnect(espMqttClientTypes::DisconnectReason reason);
-    void onMqttMessage(const espMqttClientTypes::MessageProperties& properties, const char* topic, const uint8_t* payload, size_t len, size_t index, size_t total);
+    void
+    onMqttMessage(const espMqttClientTypes::MessageProperties & properties, const char * topic, const uint8_t * payload, size_t len, size_t index, size_t total);
     bool configureMqtt();
 };
 
