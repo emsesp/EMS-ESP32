@@ -88,7 +88,7 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &hybridDHW_,
                           DeviceValueType::ENUM,
-                          FL_(enum_comfort2),
+                          FL_(enum_comfort1),
                           FL_(hybridDHW),
                           DeviceValueUOM::NONE,
                           MAKE_CF_CB(set_hybridDHW));
@@ -332,7 +332,7 @@ bool Heatpump::set_lowNoiseStop(const char * value, const int8_t id) {
 }
 bool Heatpump::set_hybridDHW(const char * value, const int8_t id) {
     uint8_t v;
-    if (!Helpers::value2enum(value, v, FL_(enum_comfort2))) {
+    if (!Helpers::value2enum(value, v, FL_(enum_comfort1))) {
         return false;
     }
     write_command(0x998, 1, v, 0x998);

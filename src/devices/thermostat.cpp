@@ -718,6 +718,15 @@ void Thermostat::process_RemoteHumidity(std::shared_ptr<const Telegram> telegram
     // has_update(telegram, dewtemperature_, 0); // this is int8
     has_update(telegram, humidity_, 1);
     has_update(telegram, dewtemperature_, 2); // this is int16
+    // some thermostats use short telegram with int8 dewpoint, https://github.com/emsesp/EMS-ESP32/issues/1491
+    if (telegram->offset == 0 && telegram->message_length < 4) {
+        int8_t dew = dewtemperature_ / 10;
+        telegram->read_value(dew, 0);
+        if (dew != EMS_VALUE_INT_NOTSET && dewtemperature_ != dew * 10) {
+            dewtemperature_ = dew * 10;
+            has_update(dewtemperature_);
+        }
+    }
 }
 
 // 0x273 - for reading temperaturcorrection from the RC100H remote thermostat (0x38, 0x39, ..)

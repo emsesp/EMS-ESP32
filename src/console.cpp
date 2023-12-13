@@ -346,6 +346,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                       return StateUpdateResult::CHANGED;
                                   },
                                   "local");
+                              to_app(shell).uart_init();
                           });
 
     //

@@ -216,6 +216,7 @@ void EMSESP::uart_init() {
     }
 
     txservice_.start(); // sends out request to EMS bus for all devices
+    txservice_.tx_mode(tx_mode);
 
     // force a fetch for all new values, unless Tx is set to off
     if (tx_mode != 0) {

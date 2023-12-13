@@ -218,7 +218,7 @@ void Mqtt::incoming(const char * topic, const char * payload) {
 // received an MQTT message that we subscribed too
 // topic is the full path
 // payload is json or a single string and converted to a json with key 'value'
-void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) const {
+void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) {
     // the payload is not terminated
     // convert payload to a null-terminated char string
     // see https://www.emelis.net/espMqttClient/#code-samples
@@ -397,11 +397,6 @@ void Mqtt::start() {
     }
 
     EMSESP::esp8266React.setWill(will_topic); // with qos 1, retain true
-
-    EMSESP::esp8266React.onMessage(
-        [this](const espMqttClientTypes::MessageProperties & properties, const char * topic, const uint8_t * payload, size_t len, size_t index, size_t total) {
-            on_message(topic, payload, len); // receiving mqtt
-        });
 }
 
 void Mqtt::set_publish_time_boiler(uint16_t publish_time) {
