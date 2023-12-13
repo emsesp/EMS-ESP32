@@ -110,7 +110,12 @@ void MqttSettingsService::setWill(const char * topic) {
     static_cast<espMqttClient *>(_mqttClient)->setWill(topic, 1, true, "offline");
 }
 
-void MqttSettingsService::onMqttMessage(const espMqttClientTypes::MessageProperties& properties, const char* topic, const uint8_t* payload, size_t len, size_t index, size_t total) {
+void MqttSettingsService::onMqttMessage(const espMqttClientTypes::MessageProperties & properties,
+                                        const char *                                  topic,
+                                        const uint8_t *                               payload,
+                                        size_t                                        len,
+                                        size_t                                        index,
+                                        size_t                                        total) {
     emsesp::EMSESP::mqtt_.on_message(topic, payload, len);
 }
 

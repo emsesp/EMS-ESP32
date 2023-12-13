@@ -317,7 +317,8 @@ void MqttClient::_loop(MqttClient * c) {
 
 uint16_t MqttClient::_getNextPacketId() {
     ++_packetId;
-    if (_packetId == 0) ++_packetId;
+    if (_packetId == 0)
+        ++_packetId;
     return _packetId;
 }
 
@@ -333,7 +334,7 @@ int MqttClient::_sendPacket() {
     EMC_SEMAPHORE_TAKE();
     OutgoingPacket * packet = _outbox.getCurrent();
 
-    size_t written     = 0;
+    size_t written = 0;
     if (packet) {
         size_t wantToWrite = packet->packet.available(_bytesSent);
         if (wantToWrite == 0) {
@@ -498,12 +499,12 @@ void MqttClient::_onConnack() {
 }
 
 void MqttClient::_onPublish() {
-    espMqttClientInternals::IncomingPacket p        = _parser.getPacket();
-    uint8_t                                qos      = p.qos();
-    bool                                   retain   = p.retain();
-    bool                                   dup      = p.dup();
-    uint16_t                               packetId = p.variableHeader.fixed.packetId;
-    bool                                   callback = true;
+    const espMqttClientInternals::IncomingPacket & p        = _parser.getPacket();
+    uint8_t                                        qos      = p.qos();
+    bool                                           retain   = p.retain();
+    bool                                           dup      = p.dup();
+    uint16_t                                       packetId = p.variableHeader.fixed.packetId;
+    bool                                           callback = true;
     if (qos == 1) {
         if (p.payload.index + p.payload.length == p.payload.total) {
             EMC_SEMAPHORE_TAKE();

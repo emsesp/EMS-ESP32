@@ -15,6 +15,7 @@
 
 - exhaust temperature for some boilers
 - add back boil2hyst [#1477](https://github.com/emsesp/EMS-ESP32/issues/1477)
+- subscribed MQTT topics not detecting changes by EMS-ESP [#1494](https://github.com/emsesp/EMS-ESP32/issues/1494)
 
 ## Changed
 
