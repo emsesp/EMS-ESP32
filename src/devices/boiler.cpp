@@ -2420,7 +2420,7 @@ bool Boiler::set_ww_mode(const char * value, const int8_t id) {
     if (is_received(EMS_TYPE_UBAParameterWWPlus)) {
         if (Helpers::value2enum(value, set, FL_(enum_comfort1))) {
             write_command(EMS_TYPE_UBAParameterWWPlus, 13, comfort[set], EMS_TYPE_UBAParameterWWPlus);
-            write_command(0x05, 70, set ? 0xAA : 0x55); //
+            write_command(0x05, 70, set == 0 ? 0xAA : 0x55); //
             return true;
         }
     } else {
