@@ -1,6 +1,7 @@
 import ForwardIcon from '@mui/icons-material/Forward';
 import { Box, Paper, Typography, MenuItem, TextField, Button } from '@mui/material';
 import { useRequest } from 'alova';
+import SKflag from 'i18n/SK.svg';
 import { useContext, useState } from 'react';
 import { toast } from 'react-toastify';
 import { FeaturesContext } from './contexts/features';
@@ -149,6 +150,10 @@ const SignIn: FC = () => {
           <MenuItem key="tr" value="tr">
             <img src={TRflag} style={{ width: 16, verticalAlign: 'middle' }} />
             &nbsp;TR
+          </MenuItem>
+          <MenuItem key="sk" value="tr">
+            <img src={SKflag} style={{ width: 16, verticalAlign: 'middle' }} />
+            &nbsp;SK
           </MenuItem>
         </TextField>
 
