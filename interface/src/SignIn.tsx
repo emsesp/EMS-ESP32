@@ -24,6 +24,7 @@ import NOflag from 'i18n/NO.svg';
 import PLflag from 'i18n/PL.svg';
 import SVflag from 'i18n/SV.svg';
 import TRflag from 'i18n/TR.svg';
+import TRflag from 'i18n/SK.svg';
 import { I18nContext } from 'i18n/i18n-react';
 import { loadLocaleAsync } from 'i18n/i18n-util.async';
 import { onEnterCallback, updateValue } from 'utils';
@@ -149,6 +150,10 @@ const SignIn: FC = () => {
           <MenuItem key="tr" value="tr">
             <img src={TRflag} style={{ width: 16, verticalAlign: 'middle' }} />
             &nbsp;TR
+          </MenuItem>
+          <MenuItem key="sk" value="sk">
+            <img src={TRflag} style={{ width: 16, verticalAlign: 'middle' }} />
+            &nbsp;SK
           </MenuItem>
         </TextField>
 
