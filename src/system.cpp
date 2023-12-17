@@ -732,7 +732,11 @@ void System::network_init(bool refresh) {
     //  ETH_CLOCK_GPIO17_OUT = 3  RMII clock output from GPIO17, for 50hz inverted clock
     auto clock_mode = (eth_clock_mode_t)eth_clock_mode_;
 
-    eth_present_ = ETH.begin((eth_phy_type_t)phy_addr, power, mdc, mdio, type, clock_mode);
+#if ESP_ARDUINO_VERSION_MAJOR < 3
+    eth_present_ = ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode);
+#else
+    eth_present_ = ETH.begin(type, phy_addr, mdc, mdio, power, clock_mode);
+#endif
 #endif
 }
 
