@@ -10,6 +10,7 @@
 - heatpump energy meters [#1463](https://github.com/emsesp/EMS-ESP32/issues/1463)
 - heatpump max power [#1475](https://github.com/emsesp/EMS-ESP32/issues/1475)
 - checkbox for MQTT-TLS enable [#1474](https://github.com/emsesp/EMS-ESP32/issues/1474)
+- added SK (Slovencina) language. Thanks @misa1515
 
 ## Fixed
 
