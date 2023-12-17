@@ -384,9 +384,9 @@ const SettingsApplication: FC = () => {
             <MenuItem value="nl">Nederlands (NL)</MenuItem>
             <MenuItem value="no">Norsk (NO)</MenuItem>
             <MenuItem value="pl">Polski (PL)</MenuItem>
+            <MenuItem value="sk">Slovenčina (SK)</MenuItem>
             <MenuItem value="sv">Svenska (SV)</MenuItem>
             <MenuItem value="tr">Türk (TR)</MenuItem>
-            <MenuItem value="sk">Slovenčina (SK)</MenuItem>
           </TextField>
         </Grid>
         {data.led_gpio !== 0 && (
