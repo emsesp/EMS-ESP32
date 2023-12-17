@@ -29,8 +29,9 @@
 #define EMSESP_LOCALE_FR "fr"
 #define EMSESP_LOCALE_TR "tr"
 #define EMSESP_LOCALE_IT "it"
+#define EMSESP_LOCALE_SK "sk"
 
-// IMPORTANT! translations are in the order:,en, de, nl, sv, pl, no, fr, tr, it
+// IMPORTANT! translations are in the order:,en, de, nl, sv, pl, no, fr, tr, it, sk
 //
 // if there is no translation, it will default to en
 //

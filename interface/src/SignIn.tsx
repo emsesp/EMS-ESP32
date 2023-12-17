@@ -1,7 +1,6 @@
 import ForwardIcon from '@mui/icons-material/Forward';
 import { Box, Paper, Typography, MenuItem, TextField, Button } from '@mui/material';
 import { useRequest } from 'alova';
-import SKflag from 'i18n/SK.svg';
 import { useContext, useState } from 'react';
 import { toast } from 'react-toastify';
 import { FeaturesContext } from './contexts/features';
@@ -23,8 +22,8 @@ import ITflag from 'i18n/IT.svg';
 import NLflag from 'i18n/NL.svg';
 import NOflag from 'i18n/NO.svg';
 import PLflag from 'i18n/PL.svg';
+import SKflag from 'i18n/SK.svg';
 import SVflag from 'i18n/SV.svg';
-import SVflag from 'i18n/SK.svg';
 import TRflag from 'i18n/TR.svg';
 import { I18nContext } from 'i18n/i18n-react';
 import { loadLocaleAsync } from 'i18n/i18n-util.async';
