@@ -143,6 +143,10 @@ const SignIn: FC = () => {
             <img src={PLflag} style={{ width: 16, verticalAlign: 'middle' }} />
             &nbsp;PL
           </MenuItem>
+          <MenuItem key="sk" value="sk">
+            <img src={SKflag} style={{ width: 16, verticalAlign: 'middle' }} />
+            &nbsp;SK
+          </MenuItem>
           <MenuItem key="sv" value="sv">
             <img src={SVflag} style={{ width: 16, verticalAlign: 'middle' }} />
             &nbsp;SV
@@ -150,10 +154,6 @@ const SignIn: FC = () => {
           <MenuItem key="tr" value="tr">
             <img src={TRflag} style={{ width: 16, verticalAlign: 'middle' }} />
             &nbsp;TR
-          </MenuItem>
-          <MenuItem key="sk" value="sk">
-            <img src={SKflag} style={{ width: 16, verticalAlign: 'middle' }} />
-            &nbsp;SK
           </MenuItem>
         </TextField>
 

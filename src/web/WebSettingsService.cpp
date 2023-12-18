@@ -109,13 +109,21 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
         if (!System::load_board_profile(data, settings.board_profile.c_str())) {
 #if CONFIG_IDF_TARGET_ESP32 && !defined(EMSESP_STANDALONE)
             if (settings.board_profile == "") { // empty: new test
-                if (ETH.begin((eth_phy_type_t)1, 16, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_IN)) {
+#if ESP_ARDUINO_VERSION_MAJOR < 3
+                if (ETH.begin(1, 16, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_IN)) {
+#else
+                if (ETH.begin(ETH_PHY_LAN8720, 1, 23, 18, 16, ETH_CLOCK_GPIO0_IN)) {
+#endif
                     EMSESP::nvs_.putString("boot", "E32");
                 } else {
                     EMSESP::nvs_.putString("boot", "Test");
                 }
             } else if (settings.board_profile == "Test") {
-                if (ETH.begin((eth_phy_type_t)0, 15, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_OUT)) {
+#if ESP_ARDUINO_VERSION_MAJOR < 3
+                if (ETH.begin(0, 15, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_OUT)) {
+#else
+                if (ETH.begin(ETH_PHY_LAN8720, 0, 23, 18, 15, ETH_CLOCK_GPIO0_OUT)) {
+#endif
                     EMSESP::nvs_.putString("boot", "E32V2");
                 } else {
                     EMSESP::nvs_.putString("boot", "S32");
