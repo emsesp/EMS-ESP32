@@ -755,7 +755,7 @@ MAKE_TRANSLATION(energyToday, "energytoday", "total energy today", "Energie heut
 // solar ww
 MAKE_TRANSLATION(wwTemp1, "wwtemp1", "temperature 1(TS17)", "Temperatur 1", "Temperatuur 1", "Temperatur 1", "temperatura 1", "temperatur 1", "température 1", "sıcaklık 1", "Temperatura 1", "teplota 1")
 MAKE_TRANSLATION(wwTemp3, "wwtemp3", "temperature 3 (TS21)", "Temperatur 3", "Temperatuur 3", "Temperatur 3", "temperatura 3", "Temperatur 3", "température 3", "sıcaklık 3", "Temperatura 3", "teplota 3")
-MAKE_TRANSLATION(wwTemp4, "wwtemp4", "cold water", "Kaltwasser", "Temperatuur 4", "Temperatur 4", "temperatura 4", "Temperatur 4", "température 4", "sıcaklık 4", "Temperatura 4", "studená voda")
+MAKE_TRANSLATION(wwTemp4, "wwtemp4", "cold water", "Temperatur 4", "Temperatuur 4", "Temperatur 4", "temperatura 4", "Temperatur 4", "température 4", "sıcaklık 4", "Temperatura 4", "studená voda")
 MAKE_TRANSLATION(wwTemp5, "wwtemp5", "temperature 5", "Temperatur 5", "Temperatuur 5", "Temperatur 5", "temperatura 5", "Temperatur 5", "température 5", "sıcaklık 5", "Temperatura 5", "teplota 5")
 MAKE_TRANSLATION(wwTemp6, "wwtemp6", "temperature 6", "Temperatur 6", "Temperatuur 6", "Temperatur 6", "temperatura 6", "temperatur 6", "température 6", "sıcaklık 6", "Temperatura 6", "teplota 6")
 MAKE_TRANSLATION(wwTemp7, "wwtemp7", "temperature 7", "Temperatur 7", "Temperatuur 7", "Temperatur 7", "temperatura 7", "Temperatur 7", "température 7", "sıcaklık 7", "Temperatura 7", "teplota 7")
