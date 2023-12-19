@@ -14,11 +14,9 @@ import {
 } from '@mui/material';
 import { useState, useContext } from 'react';
 import type { TypographyProps } from '@mui/material';
-
 import type { Locales } from 'i18n/i18n-types';
 import type { FC, ChangeEventHandler } from 'react';
 import { AuthenticatedContext } from 'contexts/authentication';
-
 import DEflag from 'i18n/DE.svg';
 import FRflag from 'i18n/FR.svg';
 import GBflag from 'i18n/GB.svg';
@@ -26,8 +24,10 @@ import ITflag from 'i18n/IT.svg';
 import NLflag from 'i18n/NL.svg';
 import NOflag from 'i18n/NO.svg';
 import PLflag from 'i18n/PL.svg';
+import SKflag from 'i18n/SK.svg';
 import SVflag from 'i18n/SV.svg';
 import TRflag from 'i18n/TR.svg';
+
 import { I18nContext } from 'i18n/i18n-react';
 import { loadLocaleAsync } from 'i18n/i18n-util.async';
 
@@ -101,6 +101,10 @@ const LayoutAuthMenu: FC = () => {
         <MenuItem key="pl" value="pl">
           <img src={PLflag} style={{ width: 16, verticalAlign: 'middle' }} />
           &nbsp;PL
+        </MenuItem>
+        <MenuItem key="sk" value="sk">
+          <img src={SKflag} style={{ width: 16, verticalAlign: 'middle' }} />
+          &nbsp;SK
         </MenuItem>
         <MenuItem key="sv" value="sv">
           <img src={SVflag} style={{ width: 16, verticalAlign: 'middle' }} />

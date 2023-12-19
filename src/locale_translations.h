@@ -1,4 +1,4 @@
-﻿/*
+/*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020-2023  Paul Derbyshire
  *
@@ -35,7 +35,7 @@
 //
 // if there is no translation, it will default to en
 //
-
+// critcal characters: č, ď
 // device types, as display in Web and Console
 MAKE_WORD_TRANSLATION(boiler_device, "Boiler", "Kessel", "CV ketel", "Värmepanna", "Kocioł", "Varmekjele", "", "Kazan", "Caldaia", "Bojler") // TODO translate
 MAKE_WORD_TRANSLATION(thermostat_device, "Thermostat", "Thermostat", "Thermostaat", "Termostat", "Termostat", "Termostat", "", "Termostat", "Termostato", "Termostat") // TODO translate
@@ -166,7 +166,7 @@ MAKE_WORD_TRANSLATION(intern, "intern", "intern", "intern", "intern", "wewnętrz
 MAKE_WORD_TRANSLATION(lower, "lower", "niedirger", "lager", "lägre", "mniejszy", "nedre", "inférieur", "daha düşük", "basso", "nízky")
 MAKE_WORD_TRANSLATION(error, "error", "Fehler", "error", "Fel", "błąd", "feil", "erreur", "Hata", "errore", "error")
 MAKE_WORD_TRANSLATION(na, "n/a", "n/a", "n/a", "n/a", "nd.", "n/a", "n/c", "mevcut değil", "n/a", "n/a")
-MAKE_WORD_TRANSLATION(inverted, "inverted", "invertiert", "", "", "", "", "", "", "")
+MAKE_WORD_TRANSLATION(inverted, "inverted", "invertiert", "", "", "", "", "", "", "", "")
 
 // boiler
 MAKE_WORD_TRANSLATION(time, "time", "Zeit", "tijd", "Tid", "godzina", "tid", "heure", "zaman", "ora", "čas")
@@ -289,7 +289,7 @@ MAKE_WORD_TRANSLATION(fireplace, "fireplace", "Kamin", "haard", "", "kominek", "
 MAKE_TRANSLATION(haclimate, "haclimate", "Discovery current room temperature", "Discovery Temperatur", "Discovery huidige kamertemperatuur", "", "termostat w HA", "HA Avlest temp", "", "Güncel osa sıcaklığı", "verifica temperatura ambiente attuale", "Zistiť aktuálnu teplotu v miestnosti") // TODO translate
 
 // Entity translations: tag, mqtt, en, de, nl, sv, pl, no, fr, tr, it, sk
-/// Boiler
+// Boiler
 MAKE_TRANSLATION(forceHeatingOff, "heatingoff", "force heating off", "Heizen abschalten", "", "", "wymuś wyłączenie grzania", "", "", "", "", "vynútiť kúrenie") // TODO translate
 MAKE_TRANSLATION(wwtapactivated, "wwtapactivated", "turn on/off", "Durchlauferhitzer aktiv", "zet aan/uit", "på/av", "system przygotowywania", "Varmtvann active", "ecs activée", "aç/kapa", "commuta on/off", "zapnúť/vypnúť")
 MAKE_TRANSLATION(reset, "reset", "reset", "Reset", "Reset", "Nollställ", "kasowanie komunikatu", "nullstill", "reset", "Sıfırla", "Reset", "reset")

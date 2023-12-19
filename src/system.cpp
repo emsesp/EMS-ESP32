@@ -64,7 +64,8 @@ const char * const languages[] = {EMSESP_LOCALE_EN,
                                   EMSESP_LOCALE_NO,
                                   EMSESP_LOCALE_FR,
                                   EMSESP_LOCALE_TR,
-                                  EMSESP_LOCALE_IT};
+                                  EMSESP_LOCALE_IT,
+                                  EMSESP_LOCALE_SK};
 #endif
 
 static constexpr uint8_t NUM_LANGUAGES = sizeof(languages) / sizeof(const char *);
@@ -1208,13 +1209,16 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     // System
     node                     = output.createNestedObject("System Info");
     node["version"]          = EMSESP_APP_VERSION;
-    node["platform"]         = EMSESP_PLATFORM;
     node["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     node["uptime (seconds)"] = uuid::get_uptime_sec();
 #ifndef EMSESP_STANDALONE
+    node["platform"]  = ARDUINO_VERSION;
+    node["sdk"]       = ESP.getSdkVersion();
     node["free mem"]  = getHeapMem();
     node["max alloc"] = getMaxAllocMem();
+    node["used app"]  = EMSESP::system_.appUsed(); // kilobytes
     node["free app"]  = EMSESP::system_.appFree(); // kilobytes
+    node["partition"] = esp_ota_get_running_partition()->label;
 #endif
     node["reset reason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 

@@ -19,10 +19,15 @@ void SystemStatus::systemStatus(AsyncWebServerRequest * request) {
 
     root["emsesp_version"]   = EMSESP_APP_VERSION;
     root["esp_platform"]     = EMSESP_PLATFORM;
+    root["cpu_type"]         = ESP.getChipModel();
+    root["cpu_rev"]          = ESP.getChipRevision();
+    root["cpu_cores"]        = ESP.getChipCores();
     root["cpu_freq_mhz"]     = ESP.getCpuFreqMHz();
     root["max_alloc_heap"]   = emsesp::EMSESP::system_.getMaxAllocMem();
     root["free_heap"]        = emsesp::EMSESP::system_.getHeapMem();
+    root["arduino_version"]  = ARDUINO_VERSION;
     root["sdk_version"]      = ESP.getSdkVersion();
+    root["partition"]        = esp_ota_get_running_partition()->label;
     root["flash_chip_size"]  = ESP.getFlashChipSize() / 1024;
     root["flash_chip_speed"] = ESP.getFlashChipSpeed();
     root["app_used"]         = emsesp::EMSESP::system_.appUsed();
@@ -39,7 +44,7 @@ void SystemStatus::systemStatus(AsyncWebServerRequest * request) {
     const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, NULL);
     if (partition != NULL) { // factory partition found
         root["has_loader"] = true;
-    } else {                 // check for not empty, smaller OTA partition
+    } else { // check for not empty, smaller OTA partition
         partition = esp_ota_get_next_update_partition(NULL);
         if (partition) {
             uint64_t buffer;

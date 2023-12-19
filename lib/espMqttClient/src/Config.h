@@ -8,6 +8,10 @@ the LICENSE file.
 
 #pragma once
 
+#ifndef TASMOTA_SDK
+#define EMC_CLIENT_SECURE
+#endif
+
 #ifndef EMC_TX_TIMEOUT
 #define EMC_TX_TIMEOUT 2000
 #endif
