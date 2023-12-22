@@ -254,7 +254,9 @@ bool System::command_watch(const char * value, const int8_t id) {
 }
 
 void System::store_nvs_values() {
-    Command::call(EMSdevice::DeviceType::BOILER, "nompower", "-1"); // trigger a write
+    if (Command::find_command(EMSdevice::DeviceType::BOILER, 0, "nompower") != nullptr) {
+        Command::call(EMSdevice::DeviceType::BOILER, "nompower", "-1"); // trigger a write
+    }
     EMSESP::analogsensor_.store_counters();
     EMSESP::nvs_.end();
 }
