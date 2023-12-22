@@ -194,7 +194,6 @@ const fr: Translation = {
   RELEASE_IS: 'release est', // TODO translate
   RELEASE_NOTES: 'notes de version',
   EMS_ESP_VER: 'Version EMS-ESP',
-  PLATFORM: 'Appareil (Plateforme / SDK)',
   UPTIME: 'Durée de fonctionnement du système',
   HEAP: 'Heap (Libre / Max Allouée)',
   PSRAM: 'PSRAM (Taille / Libre)',

@@ -39,7 +39,7 @@ const Help: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.SUPPORT_INFORMATION()} titleGutter>
+    <SectionContent title={LL.SUPPORT_INFORMATION(0)} titleGutter>
       <List>
         <ListItem>
           <ListItemAvatar>
@@ -90,7 +90,7 @@ const Help: FC = () => {
         </Typography>
       </Box>
       <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={() => callAPI('system', 'info')}>
-        {LL.SUPPORT_INFORMATION()}
+        {LL.SUPPORT_INFORMATION(0)}
       </Button>
       <Button
         sx={{ ml: 2 }}
