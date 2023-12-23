@@ -1208,13 +1208,17 @@ bool Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     }
 
     snprintf(mode_str_tpl,
-             sizeof(mode_str_tpl),
-             "{%%if %s%%}off{%%elif %s=='Manuell'%%}heat{%%elif %s=='auto'%%}auto{%%elif %s=='aus'%%}off{%%else%%}auto{%%endif%%}",
-             hc_mode_cond,
-             hc_mode_s,
-             hc_mode_s,
-             hc_mode_s,
-             hc_mode_s);
+        sizeof(mode_str_tpl),
+        "{%%if %s%%}off{%%elif %s=='%s'%%}heat{%%elif %s=='%s'%%}heat{%%elif %s=='%s'%%}off{%%elif %s=='%s'%%}off{%%else%%}auto{%%endif%%}",
+        hc_mode_cond,
+        hc_mode_s,
+        Helpers::translated_word(FL_(manual)),
+        hc_mode_s,
+        Helpers::translated_word(FL_(day)),
+        hc_mode_s,
+        Helpers::translated_word(FL_(night)),
+        hc_mode_s,
+        Helpers::translated_word(FL_(off)));
 
     snprintf(name_s, sizeof(name_s), "Hc%d", hc_num);
 
