@@ -306,7 +306,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         run_test("general");
 
 #ifdef EMSESP_STANDALONE
-        AsyncWebServerRequest request;
+        PsychicRequest request;
         request.method(HTTP_GET);
         request.url("/api/custom");
         request.url("/api/custom/boiler_flowtemp");
@@ -321,7 +321,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         run_test("general");
 
 #ifdef EMSESP_STANDALONE
-        AsyncWebServerRequest request;
+        PsychicRequest request;
         request.method(HTTP_GET);
         request.url("/api/boiler/coldshot");
         EMSESP::webAPIService.webAPIService_get(&request);
@@ -846,7 +846,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         run_test("boiler");
         run_test("thermostat");
 
-        AsyncWebServerRequest request;
+        PsychicRequest request;
         DynamicJsonDocument   doc(2000);
         JsonVariant           json;
         request.method(HTTP_GET);
@@ -890,7 +890,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         Mqtt::nested_format(1);
         run_test("310");
 
-        AsyncWebServerRequest request;
+        PsychicRequest request;
         request.method(HTTP_POST);
         DynamicJsonDocument doc(2000);
         JsonVariant         json;
@@ -915,7 +915,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         run_test("boiler");
         run_test("thermostat");
 
-        AsyncWebServerRequest requestX;
+        PsychicRequest requestX;
         DynamicJsonDocument   docX(2000);
         JsonVariant           jsonX;
 
@@ -1084,7 +1084,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::mqtt_.incoming("home/cellar/heating/thermostat/mode"); // empty payload
 
         // Web API TESTS
-        AsyncWebServerRequest request;
+        PsychicRequest request;
 
         request.method(HTTP_GET);
 
@@ -1714,7 +1714,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // shell.invoke_command("call mixer wwc2 info");
 
         // test API
-        AsyncWebServerRequest request;
+        PsychicRequest request;
         request.url("/api/mixer");
         EMSESP::webAPIService.webAPIService_get(&request);
         request.url("/api/mixer/hc1/pumpstatus");

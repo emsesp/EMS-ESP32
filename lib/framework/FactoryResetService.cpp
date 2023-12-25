@@ -2,21 +2,24 @@
 
 using namespace std::placeholders;
 
-FactoryResetService::FactoryResetService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
-    : fs(fs) {
-    server->on(FACTORY_RESET_SERVICE_PATH,
-               HTTP_POST,
-               securityManager->wrapRequest(std::bind(&FactoryResetService::handleRequest, this, _1), AuthenticationPredicates::IS_ADMIN));
+FactoryResetService::FactoryResetService(PsychicHttpServer * server, FS * fs, SecurityManager * securityManager)
+    : _server(server)
+    , _securityManager(securityManager) {
 }
 
-void FactoryResetService::handleRequest(AsyncWebServerRequest * request) {
-    request->onDisconnect(std::bind(&FactoryResetService::factoryReset, this));
-    request->send(200);
+void FactoryResetService::registerURI() {
+    _server->on(FACTORY_RESET_SERVICE_PATH,
+                HTTP_POST,
+                _securityManager->wrapRequest(std::bind(&FactoryResetService::handleRequest, this, _1), AuthenticationPredicates::IS_ADMIN));
 }
 
-/**
- * Delete function assumes that all files are stored flat, within the config directory.
- */
+esp_err_t FactoryResetService::handleRequest(PsychicRequest * request) {
+    request->reply(200);
+    RestartService::restartNow();
+    return ESP_OK;
+}
+
+// Delete function assumes that all files are stored flat, within the config directory.
 void FactoryResetService::factoryReset() {
     // TODO To replaced with fs.rmdir(FS_CONFIG_DIRECTORY) now we're using IDF 4.2
     File root = fs->open(FS_CONFIG_DIRECTORY);

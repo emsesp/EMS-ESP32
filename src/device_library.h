@@ -1,7 +1,7 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020-2023  Paul Derbyshire
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -20,7 +20,7 @@
 
 /*
  * These is the EMS devices that we currently recognize
- * The types and flags are stored in emsdevice.h 
+ * The types and flags are stored in emsdevice.h
  */
 
 // Boilers - 0x08
@@ -107,6 +107,7 @@
 { 66, DeviceType::THERMOSTAT, "ES72/RC20", DeviceFlags::EMS_DEVICE_FLAG_RC20_N}, // 0x17 or remote
 { 76, DeviceType::THERMOSTAT, "ES73", DeviceFlags::EMS_DEVICE_FLAG_RC30_N}, // 0x10
 {113, DeviceType::THERMOSTAT, "ES72/RC20", DeviceFlags::EMS_DEVICE_FLAG_RC20_N}, // 0x17
+{159, DeviceType::THERMOSTAT, "ES79", DeviceFlags::EMS_DEVICE_FLAG_RC35}, // 0x10
 
 // Thermostat - Junkers - 0x10
 {105, DeviceType::THERMOSTAT, "FW100", DeviceFlags::EMS_DEVICE_FLAG_JUNKERS},

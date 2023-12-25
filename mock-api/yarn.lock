@@ -129,7 +129,7 @@ __metadata:
     "@msgpack/msgpack": "npm:^2.8.0"
     "@types/multer": "npm:^1.4.11"
     busboy: "npm:^1.6.0"
-    itty-router: "npm:^4.0.23"
+    itty-router: "npm:^4.0.25"
   languageName: unknown
   linkType: soft
 
@@ -142,10 +142,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"itty-router@npm:^4.0.23":
-  version: 4.0.23
-  resolution: "itty-router@npm:4.0.23"
-  checksum: b412f80f7d3bf78293144a43c47053c9873c98565e58aa188a66306cc6018ad3801fa157b0d694e9e1719cbc0424fcd89951f1916699eff6606f30b0645afa3e
+"itty-router@npm:^4.0.25":
+  version: 4.0.25
+  resolution: "itty-router@npm:4.0.25"
+  checksum: befa18a3cda3ab5fcbd21bcdeb87fd5c115e9538c0f5372170a7a73fb36906e373ea1be677d6b9c3cf1864c0f957caf37376e1f2b9e19fc275340fb0cbcbcb18
   languageName: node
   linkType: hard
 

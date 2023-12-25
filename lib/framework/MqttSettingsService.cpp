@@ -24,8 +24,10 @@ static char * retainCstr(const char * cstr, char ** ptr) {
     return *ptr;
 }
 
-MqttSettingsService::MqttSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
-    : _httpEndpoint(MqttSettings::read, MqttSettings::update, this, server, MQTT_SETTINGS_SERVICE_PATH, securityManager)
+MqttSettingsService::MqttSettingsService(PsychicHttpServer * server, FS * fs, SecurityManager * securityManager)
+    : _server(server)
+    , _securityManager(securityManager)
+    , _httpEndpoint(MqttSettings::read, MqttSettings::update, this, server, MQTT_SETTINGS_SERVICE_PATH, securityManager)
     , _fsPersistence(MqttSettings::read, MqttSettings::update, this, fs, MQTT_SETTINGS_FILE)
     , _retainedHost(nullptr)
     , _retainedClientId(nullptr)
@@ -45,6 +47,10 @@ MqttSettingsService::~MqttSettingsService() {
 void MqttSettingsService::begin() {
     _fsPersistence.readFromFS();
     startClient();
+}
+
+void MqttSettingsService::registerURI() {
+    _httpEndpoint.registerURI();
 }
 
 void MqttSettingsService::startClient() {
@@ -218,8 +224,10 @@ bool MqttSettingsService::configureMqtt() {
 
 void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
 #if CONFIG_IDF_TARGET_ESP32S3
+#ifndef TASMOTA_SDK
     root["enableTLS"] = settings.enableTLS;
     root["rootCA"]    = settings.rootCA;
+#endif
 #endif
     root["enabled"]       = settings.enabled;
     root["host"]          = settings.host;
@@ -255,8 +263,10 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     bool         changed     = false;
 
 #if CONFIG_IDF_TARGET_ESP32S3
+#ifndef TASMOTA_SDK
     newSettings.enableTLS = root["enableTLS"] | false;
     newSettings.rootCA    = root["rootCA"] | "";
+#endif
 #endif
     newSettings.enabled      = root["enabled"] | FACTORY_MQTT_ENABLED;
     newSettings.host         = root["host"] | FACTORY_MQTT_HOST;

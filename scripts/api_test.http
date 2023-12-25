@@ -4,7 +4,7 @@
 # The response will be shown in the right panel
 
 @host = http://ems-esp.local
-@host_dev = http://ems-esp2.local
+@host_dev = http://10.10.10.135
 
 @token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiYWRtaW4iOnRydWV9.2bHpWya2C7Q12WjNUBD6_7N3RCD7CMl-EGhyQVzFdDg
 
@@ -67,6 +67,10 @@ GET {{host}}/api/temperaturesensor/info
 # Test on dev
 #
 
+GET {{host_dev}}/rest/features
+
+###
+
 GET {{host_dev}}/api/system/info
 
 # Run a test. EMS-ESP must be compiled with -DEMSESP_TEST
@@ -93,5 +97,44 @@ GET {{host_dev}}/api/boiler/coldshot
 Authorization: Bearer {{token}}
 
 ###
+
 GET {{host_dev}}/api/system/commands
+
+###
+GET {{host_dev}}/rest/getSettings
+Authorization: Bearer {{token}}
+
+###
+
+POST {{host_dev}}/rest/signIn
+Content-Type: application/json
+
+###
+
+GET {{host_dev}}/rest/coreData
+Authorization: Bearer {{token}}
+
+###
+
+GET {{host_dev}}/rest/logSettings
+
+###
+
+GET {{host_dev}}/rest/systemStatus
+Authorization: Bearer {{token}}
+
+###
+
+GET {{host_dev}}/rest/deviceData?id=1
+Authorization: Bearer {{token}}
+
+###
+
+GET {{host_dev}}/rest/networkSettings
+Authorization: Bearer {{token}}
+
+# test using CLI with:
+  curl -X POST http://10.10.10.135/rest/signIn \
+  -H 'Content-Type: application/json' \
+  -d '{ "value" : 22 }'
 

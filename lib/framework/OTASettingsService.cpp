@@ -4,8 +4,10 @@
 
 using namespace std::placeholders; // for `_1` etc
 
-OTASettingsService::OTASettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
-    : _httpEndpoint(OTASettings::read, OTASettings::update, this, server, OTA_SETTINGS_SERVICE_PATH, securityManager)
+OTASettingsService::OTASettingsService(PsychicHttpServer * server, FS * fs, SecurityManager * securityManager)
+    : _server(server)
+    , _securityManager(securityManager)
+    , _httpEndpoint(OTASettings::read, OTASettings::update, this, server, OTA_SETTINGS_SERVICE_PATH, securityManager)
     , _fsPersistence(OTASettings::read, OTASettings::update, this, fs, OTA_SETTINGS_FILE)
     , _arduinoOTA(nullptr) {
     WiFi.onEvent(std::bind(&OTASettingsService::WiFiEvent, this, _1, _2));
@@ -15,6 +17,10 @@ OTASettingsService::OTASettingsService(AsyncWebServer * server, FS * fs, Securit
 void OTASettingsService::begin() {
     _fsPersistence.readFromFS();
     configureArduinoOTA();
+}
+
+void OTASettingsService::registerURI() {
+    _httpEndpoint.registerURI();
 }
 
 void OTASettingsService::loop() {

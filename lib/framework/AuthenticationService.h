@@ -2,29 +2,20 @@
 #define AuthenticationService_H_
 
 #include <Features.h>
-#include <ESPAsyncWebServer.h>
+#include <PsychicHttp.h>
 #include <SecurityManager.h>
 
 #define VERIFY_AUTHORIZATION_PATH "/rest/verifyAuthorization"
 #define SIGN_IN_PATH "/rest/signIn"
 
-#define MAX_AUTHENTICATION_SIZE 256
-
-#if FT_ENABLED(FT_SECURITY)
-
 class AuthenticationService {
   public:
-    AuthenticationService(AsyncWebServer * server, SecurityManager * securityManager);
+    AuthenticationService(PsychicHttpServer * server, SecurityManager * securityManager);
+    void registerURI();
 
   private:
-    SecurityManager *           _securityManager;
-    AsyncCallbackJsonWebHandler _signInHandler;
-
-    // endpoint functions
-    void signIn(AsyncWebServerRequest * request, JsonVariant & json);
-    void verifyAuthorization(AsyncWebServerRequest * request);
+    SecurityManager *   _securityManager;
+    PsychicHttpServer * _server;
 };
-
-#endif
 
 #endif

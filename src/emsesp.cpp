@@ -22,9 +22,11 @@ static_assert(uuid::thread_safe, "uuid-common must be thread-safe");
 static_assert(uuid::log::thread_safe, "uuid-log must be thread-safe");
 static_assert(uuid::console::thread_safe, "uuid-console must be thread-safe");
 
+#include <WWWData.h>
+
 namespace emsesp {
 
-AsyncWebServer webServer(80);
+PsychicHttpServer webServer; // web server is static and global
 
 #if defined(EMSESP_STANDALONE)
 FS                      dummyFS;
@@ -61,7 +63,7 @@ uuid::log::Logger EMSESP::logger() {
 uuid::syslog::SyslogService System::syslog_;
 #endif
 
-// The services
+// Core EMS-ESP services
 RxService         EMSESP::rxservice_;         // incoming Telegram Rx handler
 TxService         EMSESP::txservice_;         // outgoing Telegram Tx handler
 Mqtt              EMSESP::mqtt_;              // mqtt handler
@@ -69,7 +71,9 @@ System            EMSESP::system_;            // core system services
 TemperatureSensor EMSESP::temperaturesensor_; // Temperature sensors
 AnalogSensor      EMSESP::analogsensor_;      // Analog sensors
 Shower            EMSESP::shower_;            // Shower logic
-Preferences       EMSESP::nvs_;               // NV Storage
+
+// NV Storage
+Preferences EMSESP::nvs_;
 
 // static/common variables
 uint16_t EMSESP::watch_id_         = WATCH_ID_NONE; // for when log is TRACE. 0 means no trace set
@@ -1389,8 +1393,6 @@ void EMSESP::scheduled_fetch_values() {
     }
 }
 
-// EMSESP main class
-
 EMSESP::EMSESP()
 #ifndef EMSESP_STANDALONE
     : telnet_([this](Stream & stream, const IPAddress & addr, uint16_t port) -> std::shared_ptr<uuid::console::Shell> {
@@ -1398,6 +1400,73 @@ EMSESP::EMSESP()
     })
 #endif
 {
+}
+
+// add web server endpoint
+void EMSESP::handler(const char * uri, const char * contentType, const uint8_t * content, size_t len) {
+    // remap to root
+    if (strcmp(uri, "/index.html") == 0) {
+        uri = "/";
+    }
+    webServer.on(uri, HTTP_GET, [contentType, content, len](PsychicRequest * request) {
+        PsychicResponse response(request);
+        response.setCode(200);
+        response.setContentType(contentType);
+        response.addHeader("Content-Encoding", "gzip");
+        // response.addHeader("Content-Encoding", "br"); // Brotli - only works over HTTPS
+        response.setContent(content, len);
+        return response.send();
+    });
+};
+
+// configure web server
+// this can be only be done after the network has been initialized
+void EMSESP::setupWeb() {
+    // set maximum number of uri handlers (.on() calls). default was 8
+    //   WWWData has 19 (in registerRoutes(handler)
+    //   esp8266React services has 13
+    //   custom projects has around 23
+    webServer.config.max_uri_handlers = 70;
+
+    // TODO add support for HTTPS
+    webServer.listen(80); // start the web server
+
+    DefaultHeaders::Instance().addHeader("Server", "EMS-ESP");
+
+    WWWData::registerRoutes(handler); // add webServer.on() endpoints from the generated web code
+
+    esp8266React.registerURI(); // load up the core system web endpoints
+
+    // init EMS-ESP web endpoints
+    webDataService.registerURI();          // /rest{deviceData,coreData,sensorData...}
+    webStatusService.registerURI();        // /rest/status
+    webSettingsService.registerURI();      // /rest/{settings,boardprofile}
+    webAPIService.registerURI();           // /api/*, /rest/{getSettings,getSchedule,getCustomizations,getEntities}
+    webLogService.registerURI();           // /rest/logSettings and EventSource
+    webCustomizationService.registerURI(); // /rest{customization,customizationEntities,resetCustomizations,devices,deviceEntities}
+    webSchedulerService.registerURI();     // /rest/schedule
+    webCustomEntityService.registerURI();  // /rest/customentities
+
+    webServer.onNotFound([](PsychicRequest * request) {
+        if (request->method() == HTTP_GET) {
+            Serial.printf("redirecting not found %s\n", request->uri().c_str()); // TODO remove debug
+            String url = "http://" + request->host();                            // TODO add support for https
+            return request->redirect(url.c_str());
+        } else if (request->method() == HTTP_OPTIONS) {
+            return request->reply(200);
+        } else {
+            return request->reply(404);
+        }
+    });
+
+    // Add CORS if specified in the network settings
+    esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
+        if (networkSettings.enableCORS) {
+            DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", networkSettings.CORSOrigin);
+            DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "Accept, Content-Type, Authorization");
+            DefaultHeaders::Instance().addHeader("Access-Control-Allow-Credentials", "true");
+        }
+    });
 }
 
 // start all the core services
@@ -1441,8 +1510,13 @@ void EMSESP::start() {
     bool factory_settings = false;
 #endif
 
-    esp8266React.begin();  // loads core system services settings (network, mqtt, ap, ntp etc)
+    esp8266React.begin(); // loads core system services settings (network, mqtt, ap, ntp etc)
+
+    setupWeb(); // configure web server, now that the network has been initialized
+
     webLogService.begin(); // start web log service. now we can start capturing logs to the web log
+
+    // start Prefences, the internal persistance storage
     nvs_.begin("ems-esp", false, "nvs");
 
     LOG_INFO("Starting EMS-ESP version %s", EMSESP_APP_VERSION); // welcome message
@@ -1496,11 +1570,11 @@ void EMSESP::start() {
 #if defined(EMSESP_STANDALONE)
     Mqtt::on_connect(); // simulate an MQTT connection
 #endif
-
-    webServer.begin(); // start the web server
 }
 
 // main loop calling all services
+
+
 void EMSESP::loop() {
     esp8266React.loop(); // web services
     system_.loop();      // does LED and checks system health, and syslog service
@@ -1527,6 +1601,7 @@ void EMSESP::loop() {
     if (system_.telnet_enabled()) {
         telnet_.loop();
     }
+
 #else
     if (!shell_->running()) {
         ::exit(0);

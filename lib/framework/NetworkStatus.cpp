@@ -4,15 +4,20 @@
 
 using namespace std::placeholders; // for `_1` etc
 
-NetworkStatus::NetworkStatus(AsyncWebServer * server, SecurityManager * securityManager) {
-    server->on(NETWORK_STATUS_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest(std::bind(&NetworkStatus::networkStatus, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+NetworkStatus::NetworkStatus(PsychicHttpServer * server, SecurityManager * securityManager)
+    : _server(server)
+    , _securityManager(securityManager) {
 }
 
-void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_NETWORK_STATUS_SIZE);
-    JsonObject          root     = response->getRoot();
+void NetworkStatus::registerURI() {
+    _server->on(NETWORK_STATUS_SERVICE_PATH,
+                HTTP_GET,
+                _securityManager->wrapRequest(std::bind(&NetworkStatus::networkStatus, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+}
+
+esp_err_t NetworkStatus::networkStatus(PsychicRequest * request) {
+    PsychicJsonResponse response = PsychicJsonResponse(request, false, MAX_NETWORK_STATUS_SIZE);
+    JsonObject          root     = response.getRoot();
 
     bool        ethernet_connected = emsesp::EMSESP::system_.ethernet_connected();
     wl_status_t wifi_status        = WiFi.status();
@@ -64,6 +69,5 @@ void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
         }
     }
 
-    response->setLength();
-    request->send(response);
+    return response.send();
 }

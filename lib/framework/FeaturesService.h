@@ -5,18 +5,18 @@
 
 #include <WiFi.h>
 #include <ArduinoJson.h>
-#include <AsyncJson.h>
-#include <ESPAsyncWebServer.h>
+#include <PsychicHttp.h>
 
-#define MAX_FEATURES_SIZE 256
 #define FEATURES_SERVICE_PATH "/rest/features"
 
 class FeaturesService {
   public:
-    FeaturesService(AsyncWebServer * server);
+    FeaturesService(PsychicHttpServer * server);
+
+    void registerURI();
 
   private:
-    void features(AsyncWebServerRequest * request);
+    PsychicHttpServer * _server;
 };
 
 #endif

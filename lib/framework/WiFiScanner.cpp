@@ -2,30 +2,36 @@
 
 using namespace std::placeholders; // for `_1` etc
 
-WiFiScanner::WiFiScanner(AsyncWebServer * server, SecurityManager * securityManager) {
-    server->on(SCAN_NETWORKS_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WiFiScanner::scanNetworks, this, _1), AuthenticationPredicates::IS_ADMIN));
-    server->on(LIST_NETWORKS_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WiFiScanner::listNetworks, this, _1), AuthenticationPredicates::IS_ADMIN));
+WiFiScanner::WiFiScanner(PsychicHttpServer * server, SecurityManager * securityManager)
+    : _server(server)
+    , _securityManager(securityManager){};
+
+void WiFiScanner::registerURI() {
+    _server->on(SCAN_NETWORKS_SERVICE_PATH,
+                HTTP_GET,
+                _securityManager->wrapRequest(std::bind(&WiFiScanner::scanNetworks, this, _1), AuthenticationPredicates::IS_ADMIN));
+    _server->on(LIST_NETWORKS_SERVICE_PATH,
+                HTTP_GET,
+                _securityManager->wrapRequest(std::bind(&WiFiScanner::listNetworks, this, _1), AuthenticationPredicates::IS_ADMIN));
 };
 
-void WiFiScanner::scanNetworks(AsyncWebServerRequest * request) {
-    request->send(202); // special code to indicate scan in progress
 
+esp_err_t WiFiScanner::scanNetworks(PsychicRequest * request) {
     if (WiFi.scanComplete() != -1) {
         WiFi.scanDelete();
         WiFi.scanNetworks(true);
     }
+
+    return request->reply(202); // special code to indicate scan in progress
 }
 
-void WiFiScanner::listNetworks(AsyncWebServerRequest * request) {
+esp_err_t WiFiScanner::listNetworks(PsychicRequest * request) {
     int numNetworks = WiFi.scanComplete();
     if (numNetworks > -1) {
-        AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_WIFI_SCANNER_SIZE);
-        JsonObject          root     = response->getRoot();
-        JsonArray           networks = root.createNestedArray("networks");
+        PsychicJsonResponse response = PsychicJsonResponse(request, false, MAX_WIFI_SCANNER_SIZE);
+        JsonObject          root     = response.getRoot();
+
+        JsonArray networks = root.createNestedArray("networks");
         for (int i = 0; i < numNetworks; i++) {
             JsonObject network         = networks.createNestedObject();
             network["rssi"]            = WiFi.RSSI(i);
@@ -34,11 +40,12 @@ void WiFiScanner::listNetworks(AsyncWebServerRequest * request) {
             network["channel"]         = WiFi.channel(i);
             network["encryption_type"] = (uint8_t)WiFi.encryptionType(i);
         }
-        response->setLength();
-        request->send(response);
+
+        return response.send();
+
     } else if (numNetworks == -1) {
-        request->send(202); // special code to indicate scan in progress
+        return request->reply(202); // special code to indicate scan in progress
     } else {
-        scanNetworks(request);
+        return scanNetworks(request);
     }
 }

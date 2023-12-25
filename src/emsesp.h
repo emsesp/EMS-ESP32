@@ -1,7 +1,7 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020-2023  Paul Derbyshire
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -228,8 +228,10 @@ class EMSESP {
     static TxService         txservice_;
     static Preferences       nvs_;
 
-    // web controllers
-    static ESP8266React            esp8266React;
+    // esp8266React framework
+    static ESP8266React esp8266React;
+
+    // EMS-ESP web controllers
     static WebSettingsService      webSettingsService;
     static WebStatusService        webStatusService;
     static WebDataService          webDataService;
@@ -238,6 +240,8 @@ class EMSESP {
     static WebCustomizationService webCustomizationService;
     static WebSchedulerService     webSchedulerService;
     static WebCustomEntityService  webCustomEntityService;
+
+    static void handler(const char * uri, const char * contentType, const uint8_t * content, size_t len);
 
   private:
     static std::string device_tostring(const uint8_t device_id);
@@ -282,8 +286,9 @@ class EMSESP {
     uuid::telnet::TelnetService telnet_;
 #endif
 
+    void setupWeb();
+
   protected:
-    //  EMSESP();
     static uuid::log::Logger logger_;
 };
 

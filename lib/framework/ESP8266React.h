@@ -2,8 +2,6 @@
 #define ESP8266React_h
 
 #include <Arduino.h>
-
-#include <AsyncTCP.h>
 #include <WiFi.h>
 
 #include <FeaturesService.h>
@@ -26,10 +24,11 @@
 
 class ESP8266React {
   public:
-    ESP8266React(AsyncWebServer * server, FS * fs);
+    ESP8266React(PsychicHttpServer * server, FS * fs);
 
     void begin();
     void loop();
+    void registerURI();
 
     SecurityManager * getSecurityManager() {
         return &_securitySettingsService;

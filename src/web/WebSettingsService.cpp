@@ -1,7 +1,7 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020-2023  Paul Derbyshire
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -24,15 +24,19 @@ uint8_t WebSettings::flags_ = 0;
 
 using namespace std::placeholders; // for `_1` etc
 
-WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
-    : _httpEndpoint(WebSettings::read, WebSettings::update, this, server, EMSESP_SETTINGS_SERVICE_PATH, securityManager)
+WebSettingsService::WebSettingsService(PsychicHttpServer * server, FS * fs, SecurityManager * securityManager)
+    : _server(server)
+    , _securityManager(securityManager)
+    , _httpEndpoint(WebSettings::read, WebSettings::update, this, server, EMSESP_SETTINGS_SERVICE_PATH, securityManager)
     , _fsPersistence(WebSettings::read, WebSettings::update, this, fs, EMSESP_SETTINGS_FILE) {
-    // GET
-    server->on(EMSESP_BOARD_PROFILE_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WebSettingsService::board_profile, this, _1), AuthenticationPredicates::IS_ADMIN));
-
     addUpdateHandler([&](const String & originId) { onUpdate(); }, false);
+}
+
+void WebSettingsService::registerURI() {
+    _httpEndpoint.registerURI();
+    _server->on(EMSESP_BOARD_PROFILE_SERVICE_PATH,
+                HTTP_GET,
+                _securityManager->wrapRequest(std::bind(&WebSettingsService::board_profile, this, _1), AuthenticationPredicates::IS_ADMIN));
 }
 
 void WebSettings::read(WebSettings & settings, JsonObject & root) {
@@ -91,6 +95,7 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     if ((String)EMSESP_DEFAULT_BOARD_PROFILE != "default" && EMSESP::nvs_.getString("boot") == "") {
         EMSESP::nvs_.putString("boot", (const char *)EMSESP_DEFAULT_BOARD_PROFILE);
     }
+
     /*
 #if CONFIG_IDF_TARGET_ESP32C3
     settings.board_profile = root["board_profile"] | "C3MINI";
@@ -103,19 +108,28 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
     settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
 #endif
 */
+
     if (!System::load_board_profile(data, settings.board_profile.c_str())) {
         // unknown, check for NVS or scan for ethernet, use default E32/E32V2/S32
         settings.board_profile = EMSESP::nvs_.getString("boot");
         if (!System::load_board_profile(data, settings.board_profile.c_str())) {
 #if CONFIG_IDF_TARGET_ESP32 && !defined(EMSESP_STANDALONE)
             if (settings.board_profile == "") { // empty: new test
-                if (ETH.begin((eth_phy_type_t)1, 16, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_IN)) {
+#if ESP_ARDUINO_VERSION_MAJOR < 3
+                if (ETH.begin(1, 16, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_IN)) {
+#else
+                if (ETH.begin(ETH_PHY_LAN8720, 1, 23, 18, 16, ETH_CLOCK_GPIO0_IN)) {
+#endif
                     EMSESP::nvs_.putString("boot", "E32");
                 } else {
                     EMSESP::nvs_.putString("boot", "Test");
                 }
             } else if (settings.board_profile == "Test") {
-                if (ETH.begin((eth_phy_type_t)0, 15, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_OUT)) {
+#if ESP_ARDUINO_VERSION_MAJOR < 3
+                if (ETH.begin(0, 15, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_OUT)) {
+#else
+                if (ETH.begin(ETH_PHY_LAN8720, 0, 23, 18, 15, ETH_CLOCK_GPIO0_OUT)) {
+#endif
                     EMSESP::nvs_.putString("boot", "E32V2");
                 } else {
                     EMSESP::nvs_.putString("boot", "S32");
@@ -352,12 +366,12 @@ void WebSettingsService::save() {
 }
 
 // build the json profile to send back
-void WebSettingsService::board_profile(AsyncWebServerRequest * request) {
+esp_err_t WebSettingsService::board_profile(PsychicRequest * request) {
     if (request->hasParam("boardProfile")) {
         std::string board_profile = request->getParam("boardProfile")->value().c_str();
 
-        auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_MEDIUM);
-        JsonObject root     = response->getRoot();
+        PsychicJsonResponse response = PsychicJsonResponse(request, false, EMSESP_JSON_SIZE_MEDIUM);
+        JsonObject          root     = response.getRoot();
 
         std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
         (void)System::load_board_profile(data, board_profile);
@@ -372,13 +386,10 @@ void WebSettingsService::board_profile(AsyncWebServerRequest * request) {
         root["eth_phy_addr"]   = data[7];
         root["eth_clock_mode"] = data[8];
 
-        response->setLength();
-        request->send(response);
-        return;
+        return response.send();
     }
 
-    AsyncWebServerResponse * response = request->beginResponse(200);
-    request->send(response);
+    return request->reply(200);
 }
 
 } // namespace emsesp

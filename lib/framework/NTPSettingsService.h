@@ -1,6 +1,8 @@
 #ifndef NTPSettingsService_h
 #define NTPSettingsService_h
 
+#include <WiFi.h>
+
 #include <HttpEndpoint.h>
 #include <FSPersistence.h>
 
@@ -26,7 +28,6 @@
 #define NTP_SETTINGS_FILE "/config/ntpSettings.json"
 #define NTP_SETTINGS_SERVICE_PATH "/rest/ntpSettings"
 
-#define MAX_TIME_SIZE 256
 #define TIME_PATH "/rest/time"
 
 class NTPSettings {
@@ -54,20 +55,26 @@ class NTPSettings {
 
 class NTPSettingsService : public StatefulService<NTPSettings> {
   public:
-    NTPSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
+    NTPSettingsService(PsychicHttpServer * server, FS * fs, SecurityManager * securityManager);
 
-    void        begin();
+    void begin();
+    void registerURI();
+
     static void ntp_received(struct timeval * tv);
 
   private:
-    HttpEndpoint<NTPSettings>   _httpEndpoint;
-    FSPersistence<NTPSettings>  _fsPersistence;
-    AsyncCallbackJsonWebHandler _timeHandler;
+    SecurityManager *   _securityManager;
+    PsychicHttpServer * _server;
+
+    HttpEndpoint<NTPSettings>  _httpEndpoint;
+    FSPersistence<NTPSettings> _fsPersistence;
 
     bool connected_ = false;
     void WiFiEvent(WiFiEvent_t event);
     void configureNTP();
-    void configureTime(AsyncWebServerRequest * request, JsonVariant & json);
+
+    // POST
+    esp_err_t configureTime(PsychicRequest * request, JsonVariant & json);
 };
 
 #endif

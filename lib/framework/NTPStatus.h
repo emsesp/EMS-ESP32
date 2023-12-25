@@ -7,7 +7,7 @@
 #include <esp_sntp.h>
 
 #include <ArduinoJson.h>
-#include <ESPAsyncWebServer.h>
+#include <PsychicHttp.h>
 #include <SecurityManager.h>
 #include <uuid/common.h>
 
@@ -16,10 +16,14 @@
 
 class NTPStatus {
   public:
-    NTPStatus(AsyncWebServer * server, SecurityManager * securityManager);
+    NTPStatus(PsychicHttpServer * server, SecurityManager * securityManager);
+    void registerURI();
 
   private:
-    void ntpStatus(AsyncWebServerRequest * request);
+    SecurityManager *   _securityManager;
+    PsychicHttpServer * _server;
+
+    esp_err_t ntpStatus(PsychicRequest * request);
 };
 
 #endif

@@ -98,7 +98,6 @@ class MqttClient {
     uint32_t        _timeout;
 
     // state is protected to allow state changes by the transport system, defined in child classes
-    // eg. to allow AsyncTCP
     enum class State {
         disconnected       = 0,
         connectingTcp1     = 1,

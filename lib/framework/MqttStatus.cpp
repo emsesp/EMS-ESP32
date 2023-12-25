@@ -4,16 +4,21 @@
 
 using namespace std::placeholders; // for `_1` etc
 
-MqttStatus::MqttStatus(AsyncWebServer * server, MqttSettingsService * mqttSettingsService, SecurityManager * securityManager)
-    : _mqttSettingsService(mqttSettingsService) {
-    server->on(MQTT_STATUS_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest(std::bind(&MqttStatus::mqttStatus, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+MqttStatus::MqttStatus(PsychicHttpServer * server, MqttSettingsService * mqttSettingsService, SecurityManager * securityManager)
+    : _mqttSettingsService(mqttSettingsService)
+    , _server(server)
+    , _securityManager(securityManager) {
 }
 
-void MqttStatus::mqttStatus(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_MQTT_STATUS_SIZE);
-    JsonObject          root     = response->getRoot();
+void MqttStatus::registerURI() {
+    _server->on(MQTT_STATUS_SERVICE_PATH,
+                HTTP_GET,
+                _securityManager->wrapRequest(std::bind(&MqttStatus::mqttStatus, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+}
+
+esp_err_t MqttStatus::mqttStatus(PsychicRequest * request) {
+    PsychicJsonResponse response = PsychicJsonResponse(request, false, MAX_MQTT_STATUS_SIZE);
+    JsonObject          root     = response.getRoot();
 
     root["enabled"]           = _mqttSettingsService->isEnabled();
     root["connected"]         = _mqttSettingsService->isConnected();
@@ -24,6 +29,5 @@ void MqttStatus::mqttStatus(AsyncWebServerRequest * request) {
     root["mqtt_fails"]    = emsesp::Mqtt::publish_fails();
     root["connect_count"] = emsesp::Mqtt::connect_count();
 
-    response->setLength();
-    request->send(response);
+    return response.send();
 }

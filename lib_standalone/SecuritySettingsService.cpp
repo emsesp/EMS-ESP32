@@ -4,7 +4,7 @@
 
 #if FT_ENABLED(FT_SECURITY)
 
-#include "../../src/emsesp_stub.h" // proddy added
+#include "../../src/emsesp_stub.h
 
 SecuritySettingsService::SecuritySettingsService(AsyncWebServer * server, FS * fs)
     : _httpEndpoint(SecuritySettings::read, SecuritySettings::update, this, server, SECURITY_SETTINGS_PATH, this)

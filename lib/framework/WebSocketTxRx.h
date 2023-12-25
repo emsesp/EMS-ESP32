@@ -2,7 +2,7 @@
 #define WebSocketTxRx_h
 
 #include <StatefulService.h>
-#include <ESPAsyncWebServer.h>
+#include <PsychicHttp.h>
 #include <SecurityManager.h>
 
 #define WEB_SOCKET_CLIENT_ID_MSG_SIZE 128
@@ -16,12 +16,12 @@ template <class T>
 class WebSocketConnector {
   protected:
     StatefulService<T> * _statefulService;
-    AsyncWebServer *     _server;
+    PsychicHttpServer *     _server;
     AsyncWebSocket       _webSocket;
     size_t               _bufferSize;
 
     WebSocketConnector(StatefulService<T> *    statefulService,
-                       AsyncWebServer *        server,
+                       PsychicHttpServer *        server,
                        const char *            webSocketPath,
                        SecurityManager *       securityManager,
                        AuthenticationPredicate authenticationPredicate,
@@ -36,7 +36,7 @@ class WebSocketConnector {
         _server->on(webSocketPath, HTTP_GET, std::bind(&WebSocketConnector::forbidden, this, _1));
     }
 
-    WebSocketConnector(StatefulService<T> * statefulService, AsyncWebServer * server, const char * webSocketPath, size_t bufferSize)
+    WebSocketConnector(StatefulService<T> * statefulService, PsychicHttpServer * server, const char * webSocketPath, size_t bufferSize)
         : _statefulService(statefulService)
         , _server(server)
         , _webSocket(webSocketPath)
@@ -52,7 +52,7 @@ class WebSocketConnector {
     }
 
   private:
-    void forbidden(AsyncWebServerRequest * request) {
+    void forbidden(PsychicRequest * request) {
         request->send(403);
     }
 };
@@ -62,7 +62,7 @@ class WebSocketTx : virtual public WebSocketConnector<T> {
   public:
     WebSocketTx(JsonStateReader<T>      stateReader,
                 StatefulService<T> *    statefulService,
-                AsyncWebServer *        server,
+                PsychicHttpServer *        server,
                 const char *            webSocketPath,
                 SecurityManager *       securityManager,
                 AuthenticationPredicate authenticationPredicate = AuthenticationPredicates::IS_ADMIN,
@@ -74,7 +74,7 @@ class WebSocketTx : virtual public WebSocketConnector<T> {
 
     WebSocketTx(JsonStateReader<T>   stateReader,
                 StatefulService<T> * statefulService,
-                AsyncWebServer *     server,
+                PsychicHttpServer *     server,
                 const char *         webSocketPath,
                 size_t               bufferSize = DEFAULT_BUFFER_SIZE)
         : WebSocketConnector<T>(statefulService, server, webSocketPath, bufferSize)
@@ -140,7 +140,7 @@ class WebSocketRx : virtual public WebSocketConnector<T> {
   public:
     WebSocketRx(JsonStateUpdater<T>     stateUpdater,
                 StatefulService<T> *    statefulService,
-                AsyncWebServer *        server,
+                PsychicHttpServer *        server,
                 const char *            webSocketPath,
                 SecurityManager *       securityManager,
                 AuthenticationPredicate authenticationPredicate = AuthenticationPredicates::IS_ADMIN,
@@ -151,7 +151,7 @@ class WebSocketRx : virtual public WebSocketConnector<T> {
 
     WebSocketRx(JsonStateUpdater<T>  stateUpdater,
                 StatefulService<T> * statefulService,
-                AsyncWebServer *     server,
+                PsychicHttpServer *     server,
                 const char *         webSocketPath,
                 size_t               bufferSize = DEFAULT_BUFFER_SIZE)
         : WebSocketConnector<T>(statefulService, server, webSocketPath, bufferSize)
@@ -185,7 +185,7 @@ class WebSocketTxRx : public WebSocketTx<T>, public WebSocketRx<T> {
     WebSocketTxRx(JsonStateReader<T>      stateReader,
                   JsonStateUpdater<T>     stateUpdater,
                   StatefulService<T> *    statefulService,
-                  AsyncWebServer *        server,
+                  PsychicHttpServer *        server,
                   const char *            webSocketPath,
                   SecurityManager *       securityManager,
                   AuthenticationPredicate authenticationPredicate = AuthenticationPredicates::IS_ADMIN,
@@ -198,7 +198,7 @@ class WebSocketTxRx : public WebSocketTx<T>, public WebSocketRx<T> {
     WebSocketTxRx(JsonStateReader<T>   stateReader,
                   JsonStateUpdater<T>  stateUpdater,
                   StatefulService<T> * statefulService,
-                  AsyncWebServer *     server,
+                  PsychicHttpServer *     server,
                   const char *         webSocketPath,
                   size_t               bufferSize = DEFAULT_BUFFER_SIZE)
         : WebSocketConnector<T>(statefulService, server, webSocketPath, bufferSize)

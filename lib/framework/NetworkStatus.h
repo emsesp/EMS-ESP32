@@ -2,12 +2,11 @@
 #define NetworkStatus_h
 
 #include <WiFi.h>
-#include <AsyncTCP.h>
 
 #include <ETH.h>
 
 #include <ArduinoJson.h>
-#include <ESPAsyncWebServer.h>
+#include <PsychicHttp.h>
 #include <IPAddress.h>
 #include <IPUtils.h>
 #include <SecurityManager.h>
@@ -17,10 +16,14 @@
 
 class NetworkStatus {
   public:
-    NetworkStatus(AsyncWebServer * server, SecurityManager * securityManager);
+    NetworkStatus(PsychicHttpServer * server, SecurityManager * securityManager);
+    void registerURI();
 
   private:
-    void networkStatus(AsyncWebServerRequest * request);
+    SecurityManager *   _securityManager;
+    PsychicHttpServer * _server;
+
+    esp_err_t networkStatus(PsychicRequest * request);
 };
 
 #endif

@@ -4,6 +4,7 @@
 #include <HttpEndpoint.h>
 #include <FSPersistence.h>
 #include <JsonUtils.h>
+#include <WiFi.h>
 
 #include <DNSServer.h>
 #include <IPAddress.h>
@@ -118,17 +119,21 @@ class APSettings {
 
 class APSettingsService : public StatefulService<APSettings> {
   public:
-    APSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
+    APSettingsService(PsychicHttpServer * server, FS * fs, SecurityManager * securityManager);
 
-    void            begin();
-    void            loop();
+    void begin();
+    void loop();
+    void registerURI();
+
     APNetworkStatus getAPNetworkStatus();
 
   private:
+    SecurityManager *   _securityManager;
+    PsychicHttpServer * _server;
+
     HttpEndpoint<APSettings>  _httpEndpoint;
     FSPersistence<APSettings> _fsPersistence;
 
-    // for the captive portal
     DNSServer * _dnsServer;
 
     // for the management delay loop

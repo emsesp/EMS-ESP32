@@ -44,15 +44,19 @@ class OTASettings {
 
 class OTASettingsService : public StatefulService<OTASettings> {
   public:
-    OTASettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
+    OTASettingsService(PsychicHttpServer * server, FS * fs, SecurityManager * securityManager);
 
     void begin();
     void loop();
+    void registerURI();
 
   private:
+    SecurityManager *          _securityManager;
+    PsychicHttpServer *        _server;
     HttpEndpoint<OTASettings>  _httpEndpoint;
     FSPersistence<OTASettings> _fsPersistence;
-    ArduinoOTAClass *          _arduinoOTA;
+
+    ArduinoOTAClass * _arduinoOTA;
 
     void configureArduinoOTA();
     void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);

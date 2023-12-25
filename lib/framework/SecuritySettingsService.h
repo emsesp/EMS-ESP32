@@ -28,8 +28,6 @@
 #define GENERATE_TOKEN_SIZE 512
 #define GENERATE_TOKEN_PATH "/rest/generateToken"
 
-#if FT_ENABLED(FT_SECURITY)
-
 class SecuritySettings {
   public:
     String          jwtSecret;
@@ -69,51 +67,33 @@ class SecuritySettings {
 
 class SecuritySettingsService : public StatefulService<SecuritySettings>, public SecurityManager {
   public:
-    SecuritySettingsService(AsyncWebServer * server, FS * fs);
+    SecuritySettingsService(PsychicHttpServer * server, FS * fs);
 
     void begin();
+    void registerURI();
 
     // Functions to implement SecurityManager
-    Authentication               authenticate(const String & username, const String & password);
-    Authentication               authenticateRequest(AsyncWebServerRequest * request);
-    String                       generateJWT(User * user);
-    ArRequestFilterFunction      filterRequest(AuthenticationPredicate predicate);
-    ArRequestHandlerFunction     wrapRequest(ArRequestHandlerFunction onRequest, AuthenticationPredicate predicate);
-    ArJsonRequestHandlerFunction wrapCallback(ArJsonRequestHandlerFunction callback, AuthenticationPredicate predicate);
+    Authentication authenticate(const String & username, const String & password);
+    Authentication authenticateRequest(PsychicRequest * request);
+    String         generateJWT(User * user);
+
+    PsychicRequestFilterFunction filterRequest(AuthenticationPredicate predicate);
+    PsychicHttpRequestCallback   wrapRequest(PsychicHttpRequestCallback onRequest, AuthenticationPredicate predicate);
+    PsychicJsonRequestCallback   wrapCallback(PsychicJsonRequestCallback onRequest, AuthenticationPredicate predicate);
 
   private:
+    PsychicHttpServer * _server;
+
     HttpEndpoint<SecuritySettings>  _httpEndpoint;
     FSPersistence<SecuritySettings> _fsPersistence;
     ArduinoJsonJWT                  _jwtHandler;
 
-    void generateToken(AsyncWebServerRequest * request);
+    esp_err_t generateToken(PsychicRequest * request);
 
     void configureJWTHandler();
 
-    /*
-   * Lookup the user by JWT
-   */
-    Authentication authenticateJWT(String & jwt);
-
-    /*
-   * Verify the payload is correct
-   */
-    boolean validatePayload(JsonObject & parsedPayload, User * user);
+    Authentication authenticateJWT(String & jwt);                            // Lookup the user by JWT
+    boolean        validatePayload(JsonObject & parsedPayload, User * user); // Verify the payload is correct
 };
 
-#else
-
-class SecuritySettingsService : public SecurityManager {
-  public:
-    SecuritySettingsService(AsyncWebServer * server, FS * fs);
-    ~SecuritySettingsService();
-
-    // minimal set of functions to support framework with security settings disabled
-    Authentication               authenticateRequest(AsyncWebServerRequest * request);
-    ArRequestFilterFunction      filterRequest(AuthenticationPredicate predicate);
-    ArRequestHandlerFunction     wrapRequest(ArRequestHandlerFunction onRequest, AuthenticationPredicate predicate);
-    ArJsonRequestHandlerFunction wrapCallback(ArJsonRequestHandlerFunction onRequest, AuthenticationPredicate predicate);
-};
-
-#endif
 #endif

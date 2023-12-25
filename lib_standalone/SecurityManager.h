@@ -4,7 +4,6 @@
 #include <Arduino.h>
 #include <Features.h>
 #include <ESPAsyncWebServer.h>
-#include <AsyncJson.h>
 #include <list>
 
 #ifndef FACTORY_JWT_SECRET

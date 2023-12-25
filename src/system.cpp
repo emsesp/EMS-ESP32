@@ -64,7 +64,8 @@ const char * const languages[] = {EMSESP_LOCALE_EN,
                                   EMSESP_LOCALE_NO,
                                   EMSESP_LOCALE_FR,
                                   EMSESP_LOCALE_TR,
-                                  EMSESP_LOCALE_IT};
+                                  EMSESP_LOCALE_IT,
+                                  EMSESP_LOCALE_SK};
 #endif
 
 static constexpr uint8_t NUM_LANGUAGES = sizeof(languages) / sizeof(const char *);
@@ -253,7 +254,9 @@ bool System::command_watch(const char * value, const int8_t id) {
 }
 
 void System::store_nvs_values() {
-    Command::call(EMSdevice::DeviceType::BOILER, "nompower", "-1"); // trigger a write
+    if (Command::find_command(EMSdevice::DeviceType::BOILER, 0, "nompower") != nullptr) {
+        Command::call(EMSdevice::DeviceType::BOILER, "nompower", "-1"); // trigger a write
+    }
     EMSESP::analogsensor_.store_counters();
     EMSESP::nvs_.end();
 }
@@ -729,7 +732,11 @@ void System::network_init(bool refresh) {
     //  ETH_CLOCK_GPIO17_OUT = 3  RMII clock output from GPIO17, for 50hz inverted clock
     auto clock_mode = (eth_clock_mode_t)eth_clock_mode_;
 
-    eth_present_ = ETH.begin((eth_phy_type_t)phy_addr, power, mdc, mdio, type, clock_mode);
+#if ESP_ARDUINO_VERSION_MAJOR < 3
+    eth_present_ = ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode);
+#else
+    eth_present_ = ETH.begin(type, phy_addr, mdc, mdio, power, clock_mode);
+#endif
 #endif
 }
 
@@ -1039,42 +1046,44 @@ bool System::check_restore() {
 
 #ifndef EMSESP_STANDALONE
     // see if we have a temp file, if so try and read it
-    File new_file = LittleFS.open(TEMP_FILENAME_PATH);
-    if (new_file) {
-        DynamicJsonDocument  jsonDocument = DynamicJsonDocument(FS_BUFFER_SIZE);
-        DeserializationError error        = deserializeJson(jsonDocument, new_file);
-        if (error == DeserializationError::Ok && jsonDocument.is<JsonObject>()) {
-            JsonObject input = jsonDocument.as<JsonObject>();
-            // see what type of file it is, either settings or customization. anything else is ignored
-            std::string settings_type = input["type"];
-            if (settings_type == "settings") {
-                // It's a settings file. Parse each section separately. If it's system related it will require a reboot
-                reboot_required = saveSettings(NETWORK_SETTINGS_FILE, "Network", input);
-                reboot_required |= saveSettings(AP_SETTINGS_FILE, "AP", input);
-                reboot_required |= saveSettings(MQTT_SETTINGS_FILE, "MQTT", input);
-                reboot_required |= saveSettings(NTP_SETTINGS_FILE, "NTP", input);
-                reboot_required |= saveSettings(SECURITY_SETTINGS_FILE, "Security", input);
-                reboot_required |= saveSettings(EMSESP_SETTINGS_FILE, "Settings", input);
-                reboot_required |= saveSettings(OTA_SETTINGS_FILE, "OTA", input);
-            } else if (settings_type == "customizations") {
-                // it's a customization file, just replace it and there's no need to reboot
-                saveSettings(EMSESP_CUSTOMIZATION_FILE, "Customizations", input);
-            } else if (settings_type == "schedule") {
-                // it's a schedule file, just replace it and there's no need to reboot
-                saveSettings(EMSESP_SCHEDULER_FILE, "Schedule", input);
-            } else if (settings_type == "entities") {
-                // it's a entity file, just replace it and there's no need to reboot
-                saveSettings(EMSESP_CUSTOMENTITY_FILE, "Entities", input);
+    if (LittleFS.exists(TEMP_FILENAME_PATH)) { // prevents open(): /littlefs/tmp_upload does not exist, no permits for creation
+        File new_file = LittleFS.open(TEMP_FILENAME_PATH);
+        if (new_file) {
+            DynamicJsonDocument  jsonDocument = DynamicJsonDocument(FS_BUFFER_SIZE);
+            DeserializationError error        = deserializeJson(jsonDocument, new_file);
+            if (error == DeserializationError::Ok && jsonDocument.is<JsonObject>()) {
+                JsonObject input = jsonDocument.as<JsonObject>();
+                // see what type of file it is, either settings or customization. anything else is ignored
+                std::string settings_type = input["type"];
+                if (settings_type == "settings") {
+                    // It's a settings file. Parse each section separately. If it's system related it will require a reboot
+                    reboot_required = saveSettings(NETWORK_SETTINGS_FILE, "Network", input);
+                    reboot_required |= saveSettings(AP_SETTINGS_FILE, "AP", input);
+                    reboot_required |= saveSettings(MQTT_SETTINGS_FILE, "MQTT", input);
+                    reboot_required |= saveSettings(NTP_SETTINGS_FILE, "NTP", input);
+                    reboot_required |= saveSettings(SECURITY_SETTINGS_FILE, "Security", input);
+                    reboot_required |= saveSettings(EMSESP_SETTINGS_FILE, "Settings", input);
+                    reboot_required |= saveSettings(OTA_SETTINGS_FILE, "OTA", input);
+                } else if (settings_type == "customizations") {
+                    // it's a customization file, just replace it and there's no need to reboot
+                    saveSettings(EMSESP_CUSTOMIZATION_FILE, "Customizations", input);
+                } else if (settings_type == "schedule") {
+                    // it's a schedule file, just replace it and there's no need to reboot
+                    saveSettings(EMSESP_SCHEDULER_FILE, "Schedule", input);
+                } else if (settings_type == "entities") {
+                    // it's a entity file, just replace it and there's no need to reboot
+                    saveSettings(EMSESP_CUSTOMENTITY_FILE, "Entities", input);
+                } else {
+                    LOG_ERROR("Unrecognized file uploaded");
+                }
             } else {
-                LOG_ERROR("Unrecognized file uploaded");
+                LOG_ERROR("Unrecognized file uploaded, not json");
             }
-        } else {
-            LOG_ERROR("Unrecognized file uploaded, not json");
-        }
 
-        // close (just in case) and remove the temp file
-        new_file.close();
-        LittleFS.remove(TEMP_FILENAME_PATH);
+            // close (just in case) and remove the temp file
+            new_file.close();
+            LittleFS.remove(TEMP_FILENAME_PATH);
+        }
     }
 #endif
 
@@ -1201,13 +1210,16 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     // System
     node                     = output.createNestedObject("System Info");
     node["version"]          = EMSESP_APP_VERSION;
-    node["platform"]         = EMSESP_PLATFORM;
     node["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     node["uptime (seconds)"] = uuid::get_uptime_sec();
 #ifndef EMSESP_STANDALONE
+    node["platform"]  = ARDUINO_VERSION;
+    node["sdk"]       = ESP.getSdkVersion();
     node["free mem"]  = getHeapMem();
     node["max alloc"] = getMaxAllocMem();
+    node["used app"]  = EMSESP::system_.appUsed(); // kilobytes
     node["free app"]  = EMSESP::system_.appFree(); // kilobytes
+    node["partition"] = esp_ota_get_running_partition()->label;
 #endif
     node["reset reason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 

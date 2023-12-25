@@ -2,7 +2,7 @@
 
 using namespace std::placeholders; // for `_1` etc
 
-NetworkSettingsService::NetworkSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
+NetworkSettingsService::NetworkSettingsService(PsychicHttpServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(NetworkSettings::read, NetworkSettings::update, this, server, NETWORK_SETTINGS_SERVICE_PATH, securityManager)
     , _fsPersistence(NetworkSettings::read, NetworkSettings::update, this, fs, NETWORK_SETTINGS_FILE)
     , _lastConnectionAttempt(0) {
@@ -23,12 +23,16 @@ void NetworkSettingsService::begin() {
 
     WiFi.mode(WIFI_MODE_MAX);
     WiFi.mode(WIFI_MODE_NULL);
+
     // WiFi.setScanMethod(WIFI_ALL_CHANNEL_SCAN);     // default is FAST_SCAN, connect issues in 2.0.14
     // WiFi.setSortMethod(WIFI_CONNECT_AP_BY_SIGNAL); // is default, no need to set
 
-
     _fsPersistence.readFromFS();
     // reconfigureWiFiConnection();
+}
+
+void NetworkSettingsService::registerURI() {
+    _httpEndpoint.registerURI();
 }
 
 void NetworkSettingsService::reconfigureWiFiConnection() {

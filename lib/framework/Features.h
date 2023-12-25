@@ -1,8 +1,6 @@
 #ifndef Features_h
 #define Features_h
 
-// modified by Proddy
-
 #define FT_ENABLED(feature) feature
 
 // project feature on by default

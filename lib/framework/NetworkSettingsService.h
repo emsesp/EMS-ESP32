@@ -29,7 +29,7 @@
 
 class NetworkSettings {
   public:
-    // core wifi configuration
+    // core network configuration
     String ssid;
     String bssid;
     String password;
@@ -119,12 +119,15 @@ class NetworkSettings {
 
 class NetworkSettingsService : public StatefulService<NetworkSettings> {
   public:
-    NetworkSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
+    NetworkSettingsService(PsychicHttpServer * server, FS * fs, SecurityManager * securityManager);
 
     void begin();
     void loop();
+    void registerURI();
 
   private:
+    SecurityManager *              _securityManager;
+    PsychicHttpServer *            _server;
     HttpEndpoint<NetworkSettings>  _httpEndpoint;
     FSPersistence<NetworkSettings> _fsPersistence;
     unsigned long                  _lastConnectionAttempt;

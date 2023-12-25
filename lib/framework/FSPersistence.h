@@ -63,6 +63,10 @@ class FSPersistence {
         // serialize it to filesystem
         File settingsFile = _fs->open(_filePath, "w");
 
+#ifdef EMSESP_DEBUG
+        Serial.println("Writing settings to " + String(_filePath));
+#endif
+
         // failed to open file, return false
         if (!settingsFile || !jsonObject.size()) {
             return false;
