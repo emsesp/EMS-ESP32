@@ -208,14 +208,12 @@ esp_err_t WebCustomizationService::device_entities(PsychicRequest * request) {
         PsychicJsonResponse response = PsychicJsonResponse(request, true, EMSESP_JSON_SIZE_XXXXLARGE, true); // is array and also msgpack
         JsonArray           output   = response.getRoot();
 
-        // TODO add back memory management
+        // TODO add back memory managegement. Be careful we do need to free()/delete() any object we extend with new()
         // while (!response) {
         //     delete response;
         //     buffer -= 1024;
         //     // response = new MsgpackAsyncJsonResponse(true, buffer);
         // }
-
-        // TODO add msgpack
 
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice->unique_id() == id) {

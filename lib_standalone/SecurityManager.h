@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include <Features.h>
-#include <ESPAsyncWebServer.h>
 #include <list>
 
 #ifndef FACTORY_JWT_SECRET
@@ -72,11 +71,6 @@ class SecurityManager {
     virtual Authentication authenticate(const String & username, const String & password) = 0;
     virtual String         generateJWT(User * user)                                       = 0;
 #endif
-
-    virtual Authentication               authenticateRequest(AsyncWebServerRequest * request)                                    = 0;
-    virtual ArRequestFilterFunction      filterRequest(AuthenticationPredicate predicate)                                        = 0;
-    virtual ArRequestHandlerFunction     wrapRequest(ArRequestHandlerFunction onRequest, AuthenticationPredicate predicate)      = 0;
-    virtual ArJsonRequestHandlerFunction wrapCallback(ArJsonRequestHandlerFunction onRequest, AuthenticationPredicate predicate) = 0;
 };
 
 #endif

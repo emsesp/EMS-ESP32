@@ -1,13 +1,10 @@
 #ifndef ESP8266React_h
 #define ESP8266React_h
-
 #include <Arduino.h>
 
 #include <ArduinoJson.h>
-#include <AsyncJson.h>
 
 #include <espMqttClient.h>
-#include <ESPAsyncWebServer.h>
 
 #include <list>
 
@@ -146,7 +143,7 @@ class ESP8266React {
 
 class EMSESPSettingsService {
   public:
-    EMSESPSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
+    EMSESPSettingsService(PsychicHttpServer * server, FS * fs, SecurityManager * securityManager);
     void begin();
 };
 

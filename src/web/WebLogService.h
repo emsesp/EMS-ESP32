@@ -48,9 +48,10 @@ class WebLogService : public uuid::log::Handler {
     virtual void operator<<(std::shared_ptr<uuid::log::Message> message);
 
   private:
-    PsychicEventSource  _events;
     SecurityManager *   _securityManager;
     PsychicHttpServer * _server;
+
+    PsychicEventSource _events;
 
     class QueuedLogMessage {
       public:
@@ -64,9 +65,6 @@ class WebLogService : public uuid::log::Handler {
 
     void   transmit(const QueuedLogMessage & message);
     char * messagetime(char * out, const uint64_t t, const size_t bufsize);
-
-    // TODO remove this?
-    // PsychicJsonHandler setValues_; // for POSTs
 
     esp_err_t fetchLog(PsychicRequest * request);
     esp_err_t getValues(PsychicRequest * request);

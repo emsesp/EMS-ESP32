@@ -42,9 +42,6 @@ class HttpGetEndpoint {
     AuthenticationPredicate _authenticationPredicate;
 
     void registerURI() {
-#ifdef EMSESP_DEBUG
-        ESP_LOGE("HttpGetEndpoint", "Addding GET endpoint %s", _servicePath);
-#endif
         _server->on(_servicePath,
                     HTTP_GET,
                     _securityManager->wrapRequest(
@@ -91,9 +88,6 @@ class HttpPostEndpoint {
     const char *            _servicePath;
 
     void registerURI() {
-#ifdef EMSESP_DEBUG
-        ESP_LOGE("HttpPostEndpoint", "Addding POST endpoint %s", _servicePath);
-#endif
         _server->on(_servicePath,
                     HTTP_POST,
                     _securityManager->wrapCallback(
@@ -110,7 +104,7 @@ class HttpPostEndpoint {
                             } else if ((outcome == StateUpdateResult::CHANGED) || (outcome == StateUpdateResult::CHANGED_RESTART)) {
                                 // TODO see if this works as intended. Before the stat was updated on an onDisconnect
                                 // request->onDisconnect([this]() { _statefulService->callUpdateHandlers(HTTP_ENDPOINT_ORIGIN_ID); });
-                                // TODO add https
+                                // TODO add support for https
                                 _statefulService->callUpdateHandlers(HTTP_ENDPOINT_ORIGIN_ID); // persist the changes to the FS
                             }
 

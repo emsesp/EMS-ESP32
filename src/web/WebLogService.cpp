@@ -80,7 +80,7 @@ void WebLogService::registerURI() {
         return request->reply(200);
     });
 
-    // TODO remove?
+    // TODO this can be removed when ported over
     // server->addHandler(&events_);
 }
 

@@ -69,7 +69,7 @@
 // uses StaticJsonDocument
 #define EMSESP_JSON_SIZE_SMALL 256
 #define EMSESP_JSON_SIZE_MEDIUM 768
-#define EMSESP_JSON_SIZE_LARGE 1024 // used in forming HA config payloads, also in *AsyncJsonResponse
+#define EMSESP_JSON_SIZE_LARGE 1024 // used in forming HA config payloads
 
 // used in larger buffers like DynamicJsonDocument
 #define EMSESP_JSON_SIZE_XLARGE 2048

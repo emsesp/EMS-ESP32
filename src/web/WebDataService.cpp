@@ -178,7 +178,7 @@ esp_err_t WebDataService::device_data(PsychicRequest * request) {
         PsychicJsonResponse response = PsychicJsonResponse(request, false, EMSESP_JSON_SIZE_XXXXLARGE, true); // is jsonobject and also msgpack
         JsonObject          output   = response.getRoot();
 
-        // TODO add back memory management?
+        // TODO add back memory managegement. Be careful we do need to free()/delete() any object we extend with new()
         // check size
         // while (!response) {
         //     delete response;

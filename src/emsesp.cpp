@@ -1404,11 +1404,7 @@ EMSESP::EMSESP()
 
 // add web server endpoint
 void EMSESP::handler(const char * uri, const char * contentType, const uint8_t * content, size_t len) {
-    // remap to root
-    if (strcmp(uri, "/index.html") == 0) {
-        uri = "/";
-    }
-    webServer.on(uri, HTTP_GET, [contentType, content, len](PsychicRequest * request) {
+    PsychicHttpRequestCallback fn = [contentType, content, len](PsychicRequest * request) {
         PsychicResponse response(request);
         response.setCode(200);
         response.setContentType(contentType);
@@ -1416,7 +1412,17 @@ void EMSESP::handler(const char * uri, const char * contentType, const uint8_t *
         // response.addHeader("Content-Encoding", "br"); // Brotli - only works over HTTPS
         response.setContent(content, len);
         return response.send();
-    });
+    };
+
+    PsychicWebHandler * handler = new PsychicWebHandler();
+    handler->onRequest(fn);
+    webServer.on(uri, HTTP_GET, handler);
+
+    // Set default end-point for all non matching requests
+    // this is easier than using webServer.onNotFound()
+    if (strcmp(uri, "/index.html") == 0) {
+        webServer.defaultEndpoint->setHandler(handler);
+    }
 };
 
 // configure web server
@@ -1426,9 +1432,9 @@ void EMSESP::setupWeb() {
     //   WWWData has 19 (in registerRoutes(handler)
     //   esp8266React services has 13
     //   custom projects has around 23
-    webServer.config.max_uri_handlers = 70;
+    webServer.config.max_uri_handlers = 80;
 
-    // TODO add support for HTTPS
+    // TODO add support for https
     webServer.listen(80); // start the web server
 
     DefaultHeaders::Instance().addHeader("Server", "EMS-ESP");
@@ -1446,18 +1452,6 @@ void EMSESP::setupWeb() {
     webCustomizationService.registerURI(); // /rest{customization,customizationEntities,resetCustomizations,devices,deviceEntities}
     webSchedulerService.registerURI();     // /rest/schedule
     webCustomEntityService.registerURI();  // /rest/customentities
-
-    webServer.onNotFound([](PsychicRequest * request) {
-        if (request->method() == HTTP_GET) {
-            Serial.printf("redirecting not found %s\n", request->uri().c_str()); // TODO remove debug
-            String url = "http://" + request->host();                            // TODO add support for https
-            return request->redirect(url.c_str());
-        } else if (request->method() == HTTP_OPTIONS) {
-            return request->reply(200);
-        } else {
-            return request->reply(404);
-        }
-    });
 
     // Add CORS if specified in the network settings
     esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
@@ -1498,7 +1492,7 @@ void EMSESP::start() {
 // do a quick scan of the filesystem to see if we have a /config folder
 // so we know if this is a new install or not
 #ifndef EMSESP_STANDALONE
-    File root             = LittleFS.open("/config");
+    File root             = LittleFS.open("/config"); // FS_CONFIG_DIRECTORY
     bool factory_settings = !root;
     if (!root) {
 #if defined(EMSESP_DEBUG)
