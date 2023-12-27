@@ -82,7 +82,7 @@ class DummySettings {
 
 class DummySettingsService : public StatefulService<DummySettings> {
   public:
-    DummySettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager){};
+    DummySettingsService(PsychicHttpServer * server, FS * fs, SecurityManager * securityManager){};
 
     void begin();
     void loop();
@@ -95,15 +95,16 @@ class DummySettingsService : public StatefulService<DummySettings> {
 
 class ESP8266React {
   public:
-    ESP8266React(AsyncWebServer * server, FS * fs)
+    ESP8266React(PsychicHttpServer * server, FS * fs)
         : _settings(server, fs, nullptr)
         , _securitySettingsService(server, fs){};
 
     void begin() {
-        // initialize mqtt
         _mqttClient = new espMqttClient();
     };
     void loop(){};
+
+    void registerURI(){};
 
     SecurityManager * getSecurityManager() {
         return &_securitySettingsService;

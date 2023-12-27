@@ -1,7 +1,7 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020-2023  Paul Derbyshire
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -22,7 +22,9 @@ static_assert(uuid::thread_safe, "uuid-common must be thread-safe");
 static_assert(uuid::log::thread_safe, "uuid-log must be thread-safe");
 static_assert(uuid::console::thread_safe, "uuid-console must be thread-safe");
 
+#ifndef EMSESP_STANDALONE
 #include <WWWData.h>
+#endif
 
 namespace emsesp {
 
@@ -1439,7 +1441,9 @@ void EMSESP::setupWeb() {
 
     DefaultHeaders::Instance().addHeader("Server", "EMS-ESP");
 
+#ifndef EMSESP_STANDALONE
     WWWData::registerRoutes(handler); // add webServer.on() endpoints from the generated web code
+#endif
 
     esp8266React.registerURI(); // load up the core system web endpoints
 

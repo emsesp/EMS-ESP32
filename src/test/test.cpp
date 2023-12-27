@@ -846,9 +846,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         run_test("boiler");
         run_test("thermostat");
 
-        PsychicRequest request;
-        DynamicJsonDocument   doc(2000);
-        JsonVariant           json;
+        PsychicRequest      request;
+        DynamicJsonDocument doc(2000);
+        JsonVariant         json;
         request.method(HTTP_GET);
 
         request.url("/api/boiler/values");
@@ -915,9 +915,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         run_test("boiler");
         run_test("thermostat");
 
-        PsychicRequest requestX;
-        DynamicJsonDocument   docX(2000);
-        JsonVariant           jsonX;
+        PsychicRequest      requestX;
+        DynamicJsonDocument docX(2000);
+        JsonVariant         jsonX;
 
         requestX.method(HTTP_GET);
 
