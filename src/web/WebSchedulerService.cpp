@@ -292,9 +292,9 @@ void WebSchedulerService::publish(const bool force) {
                 }
 
                 JsonObject dev = config.createNestedObject("dev");
-                dev["name"]    = Mqtt::basename();
+                dev["name"]    = Mqtt::basename() + " Scheduler";
                 JsonArray ids  = dev.createNestedArray("ids");
-                ids.add(Mqtt::basename());
+                ids.add(Mqtt::basename() + "-scheduler");
 
                 // add "availability" section
                 Mqtt::add_avty_to_doc(stat_t, config.as<JsonObject>(), val_cond);
@@ -356,7 +356,7 @@ bool WebSchedulerService::command(const char * cmd, const char * data) {
     } else {
         snprintf(error, sizeof(error), "Scheduled command %s failed with error code (%s)", cmd, Command::return_code_string(return_code).c_str());
     }
-    emsesp::EMSESP::logger().err(error);
+    EMSESP::logger().err(error);
     return false;
 }
 

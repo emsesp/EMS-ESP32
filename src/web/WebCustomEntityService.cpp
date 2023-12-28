@@ -431,9 +431,9 @@ void WebCustomEntityService::publish(const bool force) {
                 }
             }
             JsonObject dev = config.createNestedObject("dev");
-            dev["name"]    = Mqtt::basename();
+            dev["name"]    = Mqtt::basename() + " Custom";
             JsonArray ids  = dev.createNestedArray("ids");
-            ids.add(Mqtt::basename());
+            ids.add(Mqtt::basename() + "-custom");
 
             // add "availability" section
             Mqtt::add_avty_to_doc(stat_t, config.as<JsonObject>(), val_cond);

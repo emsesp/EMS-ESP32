@@ -256,7 +256,7 @@ esp_err_t WebCustomizationService::customization_entities(PsychicRequest * reque
                         } else {
                             emsdevice->setCustomizationEntity(id_s);
                         }
-                        // emsesp::EMSESP::logger().info(id.as<const char *>());
+                        // EMSESP::logger().info(id.as<const char *>());
                     }
                     // add deleted entities from file
                     read([&](WebCustomization & settings) {

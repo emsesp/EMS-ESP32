@@ -1112,7 +1112,7 @@ bool System::check_upgrade(bool factory_settings) {
 
 #if defined(EMSESP_DEBUG)
     if (!missing_version) {
-        LOG_INFO("Current version from settings is %d.%d.%d-%s",
+        LOG_INFO("Checking version (settings has %d.%d.%d-%s)...",
                  settings_version.major(),
                  settings_version.minor(),
                  settings_version.patch(),
@@ -1120,26 +1120,20 @@ bool System::check_upgrade(bool factory_settings) {
     }
 #endif
 
-    // always save the new version to the settings
-    EMSESP::webSettingsService.update(
-        [&](WebSettings & settings) {
-            settings.version = EMSESP_APP_VERSION;
-            return StateUpdateResult::CHANGED;
-        },
-        "local");
-
     if (factory_settings) {
         return false; // fresh install, do nothing
     }
 
     version::Semver200_version this_version(EMSESP_APP_VERSION);
 
+    bool save_version = true;
+
     // compare versions
-    bool reboot_required = false;
     if (this_version > settings_version) {
+        // need upgrade
         LOG_NOTICE("Upgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
 
-        // if we're coming from 3.4.4 or 3.5.0b14 then we need to apply new settings
+        // if we're coming from 3.4.4 or 3.5.0b14 which had no version stored then we need to apply new settings
         if (missing_version) {
             LOG_DEBUG("Setting MQTT Entity ID format to v3.4 format");
             EMSESP::esp8266React.getMqttSettingsService()->update(
@@ -1149,15 +1143,26 @@ bool System::check_upgrade(bool factory_settings) {
                 },
                 "local");
         }
-
     } else if (this_version < settings_version) {
+        // need downgrade
         LOG_NOTICE("Downgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
     } else {
         // same version, do nothing
-        return false;
+        save_version = false;
     }
 
-    return reboot_required;
+    // if we did a change, set the new version and reboot
+    if (save_version) {
+        EMSESP::webSettingsService.update(
+            [&](WebSettings & settings) {
+                settings.version = EMSESP_APP_VERSION;
+                return StateUpdateResult::CHANGED;
+            },
+            "local");
+        return true; // need reboot
+    }
+
+    return false;
 }
 
 // list commands
@@ -1220,15 +1225,14 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     node["free app"]  = EMSESP::system_.appFree(); // kilobytes
     node["partition"] = esp_ota_get_running_partition()->label;
 
-    // TODO test if works
-    const esp_app_desc_t * desc = esp_ota_get_app_description();
+    // hash: Helpers::data_to_hex(desc->app_elf_sha256, sizeof(desc->app_elf_sha256));
+    const esp_app_desc_t * desc =
+        esp_ota_get_app_description(); // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/misc_system_api.html#_CPPv414esp_app_desc_t
     if (desc != nullptr) {
-        node["app_build"] = std::string(desc->date) + " " + desc->time + " hash: " + Helpers::data_to_hex(desc->app_elf_sha256, sizeof(desc->app_elf_sha256));
+        node["app_build"] = std::string(desc->date) + " " + desc->time;
     }
-#endif
-    node["reset reason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
+    node["build_date"] = std::string(__DATE__) + " " + __TIME__;
 
-#ifndef EMSESP_STANDALONE
     // Network Status
     node = output.createNestedObject("Network Info");
     if (EMSESP::system_.ethernet_connected()) {

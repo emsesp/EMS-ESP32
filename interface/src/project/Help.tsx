@@ -111,7 +111,7 @@ const Help: FC = () => {
             {'github.com/emsesp/EMS-ESP32'}
           </Link>
         </Typography>
-        <Typography color="white" align="center">
+        <Typography color="white" variant="subtitle2" align="center">
           @proddy @MichaelDvP
         </Typography>
       </Box>

@@ -282,8 +282,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         run_test("general");
 
         // add sensors
-        emsesp::EMSESP::analogsensor_.test();
-        emsesp::EMSESP::temperaturesensor_.test();
+        EMSESP::analogsensor_.test();
+        EMSESP::temperaturesensor_.test();
 
         // shell.invoke_command("show devices");
         shell.invoke_command("show values");
@@ -704,7 +704,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "temperature") {
         shell.printfln("Testing adding Temperature sensor");
-        emsesp::EMSESP::temperaturesensor_.test();
+        EMSESP::temperaturesensor_.test();
         ok = true;
     }
 
@@ -714,7 +714,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         Mqtt::nested_format(1);
         // Mqtt::nested_format(0);
 
-        emsesp::EMSESP::temperaturesensor_.test();
+        EMSESP::temperaturesensor_.test();
         shell.invoke_command("show values");
         shell.invoke_command("call system publish");
 
@@ -732,7 +732,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         Mqtt::nested_format(1);
         // Mqtt::nested_format(0);
 
-        emsesp::EMSESP::analogsensor_.test();
+        EMSESP::analogsensor_.test();
         shell.invoke_command("show values");
         // shell.invoke_command("call system publish");
         // shell.invoke_command("show mqtt");
@@ -956,19 +956,19 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         /*
         requestX.url("/api/system"); // check if defaults to info
         EMSESP::webAPIService.webAPIService_get(&requestX);
-        emsesp::EMSESP::logger().notice("*");
+        EMSESP::logger().notice("*");
 
         requestX.url("/api/system/info");
         EMSESP::webAPIService.webAPIService_get(&requestX);
-        emsesp::EMSESP::logger().notice("*");
+        EMSESP::logger().notice("*");
 
         requestX.url("/api/thermostat"); // check if defaults to values
         EMSESP::webAPIService.webAPIService_get(&requestX);
-        emsesp::EMSESP::logger().notice("*");
+        EMSESP::logger().notice("*");
 
         requestX.url("/api/thermostat/info");
         EMSESP::webAPIService.webAPIService_get(&requestX);
-        emsesp::EMSESP::logger().notice("*");
+        EMSESP::logger().notice("*");
 
         requestX.url("/api/thermostat/seltemp");
         EMSESP::webAPIService.webAPIService_get(&requestX);
@@ -984,7 +984,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         /*
         requestX.url("/api/temperaturesensor/xxxx");
         EMSESP::webAPIService.webAPIService_get(&requestX);
-        emsesp::EMSESP::logger().notice("****");
+        EMSESP::logger().notice("****");
         requestX.url("/api/temperaturesensor/info");
         EMSESP::webAPIService.webAPIService_get(&requestX);
         return;
@@ -1160,7 +1160,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         request.url("/api");
         EMSESP::webAPIService.webAPIService_post(&request, json);
 
-        emsesp::EMSESP::logger().warning("* these next ones should fail *");
+        EMSESP::logger().warning("* these next ones should fail *");
 
         // write value from web - testing hc9/seltemp - should fail!
         char data8[] = "{\"id\":2,\"devicevalue\":{\"v\":\"55\",\"u\":1,\"n\":\"hc2 selected room temperature\",\"c\":\"hc9/seltemp\"}";

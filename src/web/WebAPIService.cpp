@@ -31,10 +31,10 @@ WebAPIService::WebAPIService(PsychicHttpServer * server, SecurityManager * secur
 }
 
 void WebAPIService::registerURI() {
-    // POST /{device}[/{hc|id}][/{name}]
+    // POST /api/{device}[/{hc|wwc|id}][/{name}]
     // note: must explicity use 'Content-Type: application/json' in header
     _server->on(EMSESP_API_SERVICE_PATH, HTTP_POST, [this](PsychicRequest * request, JsonVariant & json) {
-        // if no body then treat it as a secure GET
+        // if no json body then treat it as a secure GET
         if (!json.is<JsonObject>()) {
             StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> input_doc;
             JsonObject                                 input = input_doc.to<JsonObject>();
@@ -49,7 +49,15 @@ void WebAPIService::registerURI() {
     // GET /{device}/{entity}
     _server->on(EMSESP_API_SERVICE_PATH, HTTP_GET, [this](PsychicRequest * request) {
         StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> input_doc;
-        JsonObject                                 input = input_doc.to<JsonObject>();
+        JsonObject                                 input = input_doc.to<JsonObject>(); // empty input json
+        return parse(request, input);
+    });
+
+
+    // GET - for when using GET query parameters, the old style from v2
+    _server->on("/api", HTTP_GET, [this](PsychicRequest * request) {
+        StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> input_doc;
+        JsonObject                                 input = input_doc.to<JsonObject>(); // empty input json
         return parse(request, input);
     });
 
@@ -75,33 +83,40 @@ esp_err_t WebAPIService::parse(PsychicRequest * request, JsonObject & input) {
     // check for query parameters first, the old style from v2
     // api?device={device}&cmd={name}&data={value}&id={hc}
     // TODO check if this works, because we're using wildcard now for api/*
-    if (request->url() == "/api") {
-        // get the device
-        if (request->hasParam(F_(device))) {
-            input["device"] = request->getParam(F_(device))->value().c_str();
-        }
-        if (request->hasParam(F_(cmd))) {
-            input["cmd"] = request->getParam(F_(cmd))->value().c_str();
-        }
-        if (request->hasParam(F_(data))) {
-            input["data"] = request->getParam(F_(data))->value().c_str();
-        }
-        if (request->hasParam(F_(value))) {
-            input["value"] = request->getParam(F_(value))->value().c_str();
-        }
-        if (request->hasParam(F_(id))) {
-            input["id"] = Helpers::atoint(request->getParam(F_(id))->value().c_str());
-        }
-        if (request->hasParam(F_(hc))) {
-            input["hc"] = Helpers::atoint(request->getParam(F_(hc))->value().c_str());
-        }
-        if (request->hasParam(F_(wwc))) {
-            input["wwc"] = Helpers::atoint(request->getParam(F_(wwc))->value().c_str());
-        }
+    EMSESP::logger().info("API URL: %s", request->url().c_str()); // TODO remove
+    if (request->hasParam(F_(device))) {
+        input["device"] = request->getParam(F_(device))->value().c_str();
+        EMSESP::logger().info("API: have device"); // TODO remove
     }
 
+    // if (request->url() == "/api") {
+    // get the device
+    if (request->hasParam(F_(device))) {
+        input["device"] = request->getParam(F_(device))->value().c_str();
+    }
+    if (request->hasParam(F_(cmd))) {
+        input["cmd"] = request->getParam(F_(cmd))->value().c_str();
+    }
+    if (request->hasParam(F_(data))) {
+        input["data"] = request->getParam(F_(data))->value().c_str();
+    }
+    if (request->hasParam(F_(value))) {
+        input["value"] = request->getParam(F_(value))->value().c_str();
+    }
+    if (request->hasParam(F_(id))) {
+        input["id"] = Helpers::atoint(request->getParam(F_(id))->value().c_str());
+    }
+    if (request->hasParam(F_(hc))) {
+        input["hc"] = Helpers::atoint(request->getParam(F_(hc))->value().c_str());
+    }
+    if (request->hasParam(F_(wwc))) {
+        input["wwc"] = Helpers::atoint(request->getParam(F_(wwc))->value().c_str());
+    }
+    serializeJson(input, Serial); // TODO remove
+    // }
+
     // capture current heap memory before allocating the large return buffer
-    emsesp::EMSESP::system_.refreshHeapMem();
+    EMSESP::system_.refreshHeapMem();
 
     // output json buffer
     size_t buffer = EMSESP_JSON_SIZE_XXXLARGE;
@@ -129,7 +144,7 @@ esp_err_t WebAPIService::parse(PsychicRequest * request, JsonObject & input) {
         } else {
             snprintf(error, sizeof(error), "API failed with error code (%s)", Command::return_code_string(return_code).c_str());
         }
-        emsesp::EMSESP::logger().err(error);
+        EMSESP::logger().err(error);
         api_fails_++;
 
         // FAIL, OK, NOT_FOUND, ERROR, NOT_ALLOWED = 400 (bad request), 200 (OK), 400 (not found), 400 (bad request), 401 (unauthorized)

@@ -1755,7 +1755,7 @@ void EMSdevice::mqtt_ha_entity_config_create() {
             }
 #ifndef EMSESP_STANDALONE
             // always create minimum one config
-            if (ESP.getMaxAllocHeap() < (6 * 1024) || (!emsesp::EMSESP::system_.PSram() && ESP.getFreeHeap() < (65 * 1024))) {
+            if (ESP.getMaxAllocHeap() < (6 * 1024) || (!EMSESP::system_.PSram() && ESP.getFreeHeap() < (65 * 1024))) {
                 break;
             }
 #endif

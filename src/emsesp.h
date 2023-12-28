@@ -83,11 +83,11 @@
 
 namespace emsesp {
 
-using DeviceValueUOM   = emsesp::DeviceValue::DeviceValueUOM;
-using DeviceValueType  = emsesp::DeviceValue::DeviceValueType;
-using DeviceValueState = emsesp::DeviceValue::DeviceValueState;
-using DeviceValueTAG   = emsesp::DeviceValue::DeviceValueTAG;
-using DeviceValueNumOp = emsesp::DeviceValue::DeviceValueNumOp;
+using DeviceValueUOM   = DeviceValue::DeviceValueUOM;
+using DeviceValueType  = DeviceValue::DeviceValueType;
+using DeviceValueState = DeviceValue::DeviceValueState;
+using DeviceValueTAG   = DeviceValue::DeviceValueTAG;
+using DeviceValueNumOp = DeviceValue::DeviceValueNumOp;
 
 // forward declarations for compiler
 class EMSESPShell;

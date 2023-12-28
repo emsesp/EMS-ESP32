@@ -1,7 +1,7 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020  Paul Derbyshire
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -116,7 +116,7 @@ void AnalogSensor::reload() {
             }
             if (!found) {
                 sensors_.emplace_back(sensor.gpio, sensor.name, sensor.offset, sensor.factor, sensor.uom, sensor.type);
-                sensors_.back().ha_registered = false; // this will trigger recrate of the HA config
+                sensors_.back().ha_registered = false; // this will trigger recreate of the HA config
                 if (sensor.type == AnalogType::COUNTER || sensor.type >= AnalogType::DIGITAL_OUT) {
                     sensors_.back().set_value(sensor.offset);
                 } else {
@@ -616,9 +616,9 @@ void AnalogSensor::publish_values(const bool force) {
                 }
 
                 JsonObject dev = config.createNestedObject("dev");
-                dev["name"]    = name;
+                dev["name"]    = Mqtt::basename() + " Analog";
                 JsonArray ids  = dev.createNestedArray("ids");
-                ids.add(Mqtt::basename());
+                ids.add(Mqtt::basename() + "-analog");
 
                 // add "availability" section
                 Mqtt::add_avty_to_doc(stat_t, config.as<JsonObject>(), val_cond);

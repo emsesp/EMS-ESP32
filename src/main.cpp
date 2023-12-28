@@ -18,7 +18,9 @@
 
 #include "emsesp.h"
 
-static emsesp::EMSESP application;
+using namespace emsesp;
+
+static EMSESP application; // the main application
 
 void setup() {
     application.start();
