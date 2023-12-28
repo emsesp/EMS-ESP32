@@ -90,7 +90,7 @@ void Shell::print_all_available_commands() {
 }
 
 void Shell::erase_current_line() {
-    print("\033[0G\033[K");
+    print("\033[G\033[K");
 }
 
 void Shell::erase_characters(size_t count) {
