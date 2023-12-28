@@ -445,7 +445,6 @@ void System::start() {
         setCpuFrequencyMhz(160);
 #endif
     }
-
     // get current memory values
     fstotal_ = LittleFS.totalBytes() / 1024; // read only once, it takes 500 ms to read
     psram_   = ESP.getPsramSize() / 1024;
@@ -1220,6 +1219,12 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     node["used app"]  = EMSESP::system_.appUsed(); // kilobytes
     node["free app"]  = EMSESP::system_.appFree(); // kilobytes
     node["partition"] = esp_ota_get_running_partition()->label;
+
+    // TODO test if works
+    const esp_app_desc_t * desc = esp_ota_get_app_description();
+    if (desc != nullptr) {
+        node["app_build"] = std::string(desc->date) + " " + desc->time + " hash: " + Helpers::data_to_hex(desc->app_elf_sha256, sizeof(desc->app_elf_sha256));
+    }
 #endif
     node["reset reason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 
