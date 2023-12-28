@@ -210,7 +210,7 @@ const SettingsSchedulerDialog = ({
         />
         <TextField
           name="value"
-          label={LL.VALUE(1)}
+          label={LL.VALUE(0)}
           multiline
           margin="normal"
           fullWidth

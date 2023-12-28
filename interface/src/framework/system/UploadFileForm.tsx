@@ -136,7 +136,7 @@ const UploadFileForm: FC = () => {
         <Typography variant="body2">
           {LL.UPLOAD_TEXT()}
           <br />
-          {LL.RESTART_TEXT()}.
+          {LL.RESTART_TEXT(1)}.
         </Typography>
       </Box>
       {md5 && (
@@ -148,7 +148,7 @@ const UploadFileForm: FC = () => {
       {!isUploading && (
         <>
           <Typography sx={{ pt: 4, pb: 2 }} variant="h6" color="primary">
-            {LL.DOWNLOAD(0)}&nbsp;{LL.SUPPORT_INFORMATION()}
+            {LL.DOWNLOAD(0)}&nbsp;{LL.SUPPORT_INFORMATION(1)}
           </Typography>
           <Box color="warning.main">
             <Typography mb={1} variant="body2">
@@ -161,7 +161,7 @@ const UploadFileForm: FC = () => {
             color="primary"
             onClick={() => callAPI('system', 'info')}
           >
-            {LL.SUPPORT_INFORMATION()}
+            {LL.SUPPORT_INFORMATION(0)}
           </Button>
           <Button
             sx={{ ml: 2 }}
@@ -174,7 +174,7 @@ const UploadFileForm: FC = () => {
           </Button>
 
           <Typography sx={{ pt: 4, pb: 2 }} variant="h6" color="primary">
-            {LL.DOWNLOAD(0)}&nbsp;{LL.SETTINGS()}
+            {LL.DOWNLOAD(0)}&nbsp;{LL.SETTINGS(1)}
           </Typography>
           <Box color="warning.main">
             <Typography mb={1} variant="body2">
