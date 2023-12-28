@@ -68,7 +68,10 @@ class FSPersistence {
             return false;
         }
 
-        // serialize the data to the file
+// serialize the data to the file
+#ifdef EMSESP_DEBUG
+        Serial.println("Writing settings to " + String(_filePath));
+#endif
         serializeJson(jsonDocument, settingsFile);
         settingsFile.close();
         return true;
