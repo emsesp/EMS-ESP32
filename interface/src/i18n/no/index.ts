@@ -194,7 +194,6 @@ const no: Translation = {
   RELEASE_IS: 'release er',
   RELEASE_NOTES: 'release notes',
   EMS_ESP_VER: 'EMS-ESP Version',
-  PLATFORM: 'Enhet (Platform / SDK)',
   UPTIME: 'System Oppetid',
   HEAP: 'Heap (Ledig / Max Allokert)',
   PSRAM: 'PSRAM (Størrelse / Ledig)',

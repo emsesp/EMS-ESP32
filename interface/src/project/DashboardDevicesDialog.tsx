@@ -103,7 +103,7 @@ const DashboardDevicesDialog = ({
   return (
     <Dialog sx={dialogStyle} open={open} onClose={close}>
       <DialogTitle>
-        {selectedItem.v === '' && selectedItem.c ? LL.RUN_COMMAND() : writeable ? LL.CHANGE_VALUE() : LL.VALUE(1)}
+        {selectedItem.v === '' && selectedItem.c ? LL.RUN_COMMAND() : writeable ? LL.CHANGE_VALUE() : LL.VALUE(0)}
       </DialogTitle>
       <DialogContent dividers>
         <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>

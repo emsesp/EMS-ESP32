@@ -194,7 +194,6 @@ const sk: Translation = {
   RELEASE_IS: 'vydanie je',
   RELEASE_NOTES: 'poznámky k vydaniu',
   EMS_ESP_VER: 'EMS-ESP verzia',
-  PLATFORM: 'Zariadenie (Platforma / SDK)',
   UPTIME: 'Beh systému',
   HEAP: 'Zásobník (voľné / max pridelenie)',
   PSRAM: 'PSRAM (Veľkosť / Voľné)',
