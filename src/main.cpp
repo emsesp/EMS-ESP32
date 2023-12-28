@@ -1,7 +1,7 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020-2023  Paul Derbyshire
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -18,7 +18,9 @@
 
 #include "emsesp.h"
 
-static emsesp::EMSESP application;
+using namespace emsesp;
+
+static EMSESP application; // the main application
 
 void setup() {
     application.start();
