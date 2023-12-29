@@ -14,33 +14,37 @@
 using namespace std::placeholders; // for `_1` etc
 
 template <class T>
-class HttpGetEndpoint {
+class HttpEndpoint {
+  protected:
+    JsonStateReader<T>      _stateReader;
+    JsonStateUpdater<T>     _stateUpdater;
+    StatefulService<T> *    _statefulService;
+    size_t                  _bufferSize;
+    SecurityManager *       _securityManager;
+    AuthenticationPredicate _authenticationPredicate;
+    PsychicHttpServer *     _server;
+    const char *            _servicePath;
+
   public:
-    HttpGetEndpoint(JsonStateReader<T>      stateReader,
-                    StatefulService<T> *    statefulService,
-                    PsychicHttpServer *     server,
-                    const char *            servicePath,
-                    SecurityManager *       securityManager,
-                    AuthenticationPredicate authenticationPredicate = AuthenticationPredicates::IS_ADMIN,
-                    size_t                  bufferSize              = DEFAULT_BUFFER_SIZE)
+    HttpEndpoint(JsonStateReader<T>      stateReader,
+                 JsonStateUpdater<T>     stateUpdater,
+                 StatefulService<T> *    statefulService,
+                 PsychicHttpServer *     server,
+                 const char *            servicePath,
+                 SecurityManager *       securityManager,
+                 AuthenticationPredicate authenticationPredicate = AuthenticationPredicates::IS_ADMIN,
+                 size_t                  bufferSize              = DEFAULT_BUFFER_SIZE)
         : _stateReader(stateReader)
+        , _stateUpdater(stateUpdater)
         , _statefulService(statefulService)
-        , _bufferSize(bufferSize)
         , _server(server)
         , _servicePath(servicePath)
         , _securityManager(securityManager)
-        , _authenticationPredicate(authenticationPredicate) {
+        , _authenticationPredicate(authenticationPredicate)
+        , _bufferSize(bufferSize) {
     }
 
-  protected:
-    JsonStateReader<T>      _stateReader;
-    StatefulService<T> *    _statefulService;
-    size_t                  _bufferSize;
-    PsychicHttpServer *     _server;
-    const char *            _servicePath;
-    SecurityManager *       _securityManager;
-    AuthenticationPredicate _authenticationPredicate;
-
+    // register the web server on() endpoints
     void registerURI() {
         _server->on(_servicePath,
                     HTTP_GET,
@@ -52,42 +56,7 @@ class HttpGetEndpoint {
                             return response.send();
                         },
                         _authenticationPredicate));
-    }
-};
 
-template <class T>
-class HttpPostEndpoint {
-  public:
-    HttpPostEndpoint(JsonStateReader<T>      stateReader,
-                     JsonStateUpdater<T>     stateUpdater,
-                     StatefulService<T> *    statefulService,
-                     PsychicHttpServer *     server,
-                     const char *            servicePath,
-                     SecurityManager *       securityManager,
-                     AuthenticationPredicate authenticationPredicate = AuthenticationPredicates::IS_ADMIN,
-                     size_t                  bufferSize              = DEFAULT_BUFFER_SIZE)
-        : _stateReader(stateReader)
-        , _stateUpdater(stateUpdater)
-        , _statefulService(statefulService)
-        , _server(server)
-        , _servicePath(servicePath)
-        , _securityManager(securityManager)
-        , _authenticationPredicate(authenticationPredicate)
-        , _bufferSize(bufferSize) {
-    }
-
-
-  protected:
-    JsonStateReader<T>      _stateReader;
-    JsonStateUpdater<T>     _stateUpdater;
-    StatefulService<T> *    _statefulService;
-    size_t                  _bufferSize;
-    SecurityManager *       _securityManager;
-    AuthenticationPredicate _authenticationPredicate;
-    PsychicHttpServer *     _server;
-    const char *            _servicePath;
-
-    void registerURI() {
         _server->on(_servicePath,
                     HTTP_POST,
                     _securityManager->wrapCallback(
@@ -102,10 +71,8 @@ class HttpPostEndpoint {
                             if (outcome == StateUpdateResult::ERROR) {
                                 return request->reply(400);
                             } else if ((outcome == StateUpdateResult::CHANGED) || (outcome == StateUpdateResult::CHANGED_RESTART)) {
-                                // TODO see if this works as intended. Before the stat was updated on an onDisconnect
-                                // request->onDisconnect([this]() { _statefulService->callUpdateHandlers(HTTP_ENDPOINT_ORIGIN_ID); });
-                                // TODO add support for https
-                                _statefulService->callUpdateHandlers(HTTP_ENDPOINT_ORIGIN_ID); // persist the changes to the FS
+                                // persist the changes to the FS
+                                _statefulService->callUpdateHandlers(HTTP_ENDPOINT_ORIGIN_ID);
                             }
 
                             PsychicJsonResponse response = PsychicJsonResponse(request, false, _bufferSize);
@@ -114,33 +81,12 @@ class HttpPostEndpoint {
                             _statefulService->read(jsonObject, _stateReader);
 
                             if (outcome == StateUpdateResult::CHANGED_RESTART) {
-                                return request->reply(205); // reboot required
+                                response.setCode(205); // reboot required
                             }
+
                             return response.send();
                         },
                         _authenticationPredicate));
-    }
-};
-
-template <class T>
-class HttpEndpoint : public HttpGetEndpoint<T>, public HttpPostEndpoint<T> {
-  public:
-    HttpEndpoint(JsonStateReader<T>      stateReader,
-                 JsonStateUpdater<T>     stateUpdater,
-                 StatefulService<T> *    statefulService,
-                 PsychicHttpServer *     server,
-                 const char *            servicePath,
-                 SecurityManager *       securityManager,
-                 AuthenticationPredicate authenticationPredicate = AuthenticationPredicates::IS_ADMIN,
-                 size_t                  bufferSize              = DEFAULT_BUFFER_SIZE)
-        : HttpGetEndpoint<T>(stateReader, statefulService, server, servicePath, securityManager, authenticationPredicate, bufferSize)
-        , HttpPostEndpoint<T>(stateReader, stateUpdater, statefulService, server, servicePath, securityManager, authenticationPredicate, bufferSize) {
-    }
-
-    // register the web server on() endpoints
-    void registerURI() {
-        HttpGetEndpoint<T>::registerURI();
-        HttpPostEndpoint<T>::registerURI();
     }
 };
 

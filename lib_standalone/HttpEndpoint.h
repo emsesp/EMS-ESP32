@@ -102,9 +102,6 @@ class HttpPostEndpoint {
                             if (outcome == StateUpdateResult::ERROR) {
                                 return request->reply(400);
                             } else if ((outcome == StateUpdateResult::CHANGED) || (outcome == StateUpdateResult::CHANGED_RESTART)) {
-                                // TODO see if this works as intended. Before the stat was updated on an onDisconnect
-                                // request->onDisconnect([this]() { _statefulService->callUpdateHandlers(HTTP_ENDPOINT_ORIGIN_ID); });
-                                // TODO add support for https
                                 _statefulService->callUpdateHandlers(HTTP_ENDPOINT_ORIGIN_ID); // persist the changes to the FS
                             }
 
