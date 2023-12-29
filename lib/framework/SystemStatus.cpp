@@ -42,8 +42,6 @@ esp_err_t SystemStatus::systemStatus(PsychicRequest * request) {
     root["fs_free"]          = emsesp::EMSESP::system_.FStotal() - FSused;
     root["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
 
-    // TODO add buid time with __TIME__ and __DATE__
-
     if (emsesp::EMSESP::system_.PSram()) {
         root["psram_size"] = emsesp::EMSESP::system_.PSram();
         root["free_psram"] = ESP.getFreePsram() / 1024;
