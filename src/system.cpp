@@ -305,7 +305,7 @@ void System::syslog_init() {
 #ifndef EMSESP_STANDALONE
     if (syslog_enabled_) {
         // start & configure syslog
-        EMSESP::logger().info("Starting Syslog service");
+        logger_.info("Starting Syslog service");
         syslog_.start();
 
         syslog_.log_level((uuid::log::Level)syslog_level_);
@@ -319,7 +319,7 @@ void System::syslog_init() {
     } else if (syslog_.started()) {
         // in case service is still running, this flushes the queue
         // https://github.com/emsesp/EMS-ESP/issues/496
-        EMSESP::logger().info("Stopping Syslog");
+        logger_.info("Stopping Syslog service");
         syslog_.log_level((uuid::log::Level)-1); // stop server
         syslog_.mark_interval(0);
         syslog_.destination("");
@@ -1045,7 +1045,9 @@ bool System::check_restore() {
 
 #ifndef EMSESP_STANDALONE
     // see if we have a temp file, if so try and read it
-    if (LittleFS.exists(TEMP_FILENAME_PATH)) { // prevents open(): /littlefs/tmp_upload does not exist, no permits for creation
+    // prevents open(): /littlefs/tmp_upload does not exist, no permits for creation
+    // but doesn't work! https://github.com/espressif/arduino-esp32/issues/7615
+    if (LittleFS.exists(TEMP_FILENAME_PATH)) {
         File new_file = LittleFS.open(TEMP_FILENAME_PATH);
         if (new_file) {
             DynamicJsonDocument  jsonDocument = DynamicJsonDocument(FS_BUFFER_SIZE);
@@ -1217,7 +1219,8 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     node["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     node["uptime (seconds)"] = uuid::get_uptime_sec();
 #ifndef EMSESP_STANDALONE
-    node["platform"]  = ARDUINO_VERSION;
+    node["platform"] = ARDUINO_VERSION;
+
     node["sdk"]       = ESP.getSdkVersion();
     node["free mem"]  = getHeapMem();
     node["max alloc"] = getMaxAllocMem();
@@ -1445,10 +1448,11 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
                     obj["product id"] = emsdevice->product_id();
                     obj["version"]    = emsdevice->version();
                     obj["entities"]   = emsdevice->count_entities();
-                    char result[300];
+                    char result[300]  = {'\0'};
                     (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::RECEIVED);
+                    // don't show handlers if there aren't any
                     if (result[0] != '\0') {
-                        obj["handlers received"] = result; // don't show handlers if there aren't any
+                        obj["handlers received"] = result;
                     }
                     (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::FETCHED);
                     if (result[0] != '\0') {
