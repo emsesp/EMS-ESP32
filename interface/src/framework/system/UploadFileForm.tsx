@@ -28,7 +28,7 @@ const UploadFileForm: FC = () => {
   const { send: getSchedule, onSuccess: onSuccessGetSchedule } = useRequest(EMSESP.getSchedule(), {
     immediate: false
   });
-  const { send: getAPI, onSuccess: onGetAPI } = useRequest((data) => EMSESP.API(data), {
+  const { send: getSystemAPI, onSuccess: onSystemAPI } = useRequest((data) => EMSESP.APIcall('system', data), {
     immediate: false
   });
 
@@ -89,8 +89,8 @@ const UploadFileForm: FC = () => {
   onSuccessGetSchedule((event) => {
     saveFile(event.data, 'schedule.json');
   });
-  onGetAPI((event) => {
-    saveFile(event.data, event.sendArgs[0].device + '_' + event.sendArgs[0].entity + '.txt');
+  onSystemAPI((event) => {
+    saveFile(event.data, event.sendArgs[0].entity + '.txt');
   });
 
   const downloadSettings = async () => {
@@ -121,8 +121,8 @@ const UploadFileForm: FC = () => {
       });
   };
 
-  const callAPI = async (device: string, entity: string) => {
-    await getAPI({ device, entity, id: 0 }).catch((error) => {
+  const callSystemAPI = async (entity: string) => {
+    await getSystemAPI({ entity, id: 0 }).catch((error) => {
       toast.error(error.message);
     });
   };
@@ -134,7 +134,8 @@ const UploadFileForm: FC = () => {
       </Typography>
       <Box mb={2} color="warning.main">
         <Typography variant="body2">
-          {LL.UPLOAD_TEXT()}
+          {LL.UPLOAD_TEXT()}.
+          <br />
           <br />
           {LL.RESTART_TEXT(1)}.
         </Typography>
@@ -155,12 +156,7 @@ const UploadFileForm: FC = () => {
               {LL.HELP_INFORMATION_4()}
             </Typography>
           </Box>
-          <Button
-            startIcon={<DownloadIcon />}
-            variant="outlined"
-            color="primary"
-            onClick={() => callAPI('system', 'info')}
-          >
+          <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={() => callSystemAPI('info')}>
             {LL.SUPPORT_INFORMATION(0)}
           </Button>
           <Button
@@ -168,7 +164,7 @@ const UploadFileForm: FC = () => {
             startIcon={<DownloadIcon />}
             variant="outlined"
             color="primary"
-            onClick={() => callAPI('system', 'allvalues')}
+            onClick={() => callSystemAPI('allvalues')}
           >
             All Values
           </Button>

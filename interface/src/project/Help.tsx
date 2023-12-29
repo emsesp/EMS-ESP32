@@ -15,7 +15,7 @@ const Help: FC = () => {
   const { LL } = useI18nContext();
   useLayoutTitle(LL.HELP_OF(''));
 
-  const { send: getAPI, onSuccess: onGetAPI } = useRequest((data) => EMSESP.API(data), {
+  const { send: getSystemAPI, onSuccess: onGetAPI } = useRequest((data) => EMSESP.APIcall('system', data), {
     immediate: false
   });
 
@@ -26,14 +26,14 @@ const Help: FC = () => {
         type: 'text/plain'
       })
     );
-    anchor.download = 'emsesp_' + event.sendArgs[0].device + '_' + event.sendArgs[0].entity + '.txt';
+    anchor.download = 'emsesp_' + event.sendArgs[0].entity + '.txt';
     anchor.click();
     URL.revokeObjectURL(anchor.href);
     toast.info(LL.DOWNLOAD_SUCCESSFUL());
   });
 
-  const callAPI = async (device: string, entity: string) => {
-    await getAPI({ device, entity, id: 0 }).catch((error) => {
+  const callSystemAPI = async (entity: string) => {
+    await getSystemAPI({ entity, id: 0 }).catch((error) => {
       toast.error(error.message);
     });
   };
@@ -89,7 +89,7 @@ const Help: FC = () => {
           {LL.HELP_INFORMATION_4()}
         </Typography>
       </Box>
-      <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={() => callAPI('system', 'info')}>
+      <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={() => callSystemAPI('info')}>
         {LL.SUPPORT_INFORMATION(0)}
       </Button>
       <Button
@@ -97,7 +97,7 @@ const Help: FC = () => {
         startIcon={<DownloadIcon />}
         variant="outlined"
         color="primary"
-        onClick={() => callAPI('system', 'allvalues')}
+        onClick={() => callSystemAPI('allvalues')}
       >
         All Values
       </Button>

@@ -58,10 +58,11 @@ GET {{host}}/api/temperaturesensor/info
 # Test on dev
 #
 
-
 GET {{host_dev}}/api/system/info
 ###
 GET {{host_dev}}/api?device=system&cmd=test&data=general
+###
+GET {{host_dev}}/api?device=system&cmd=info
 ###
 GET {{host_dev}}/api/boiler/info
 ###
@@ -74,16 +75,14 @@ Authorization: Bearer {{token}}
 ###
 GET {{host_dev}}/api/system/commands
 ###
-POST {{host_dev}}/api
+POST {{host_dev}}/api/system
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-    "device" : "system",
     "entity" : "info",
     "id" : 0
 }
-
 ###
 GET {{host_dev}}/rest/features
 ###

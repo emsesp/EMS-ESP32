@@ -5,7 +5,7 @@ import busboy from 'busboy';
 
 const encoder = new Encoder();
 const router = Router();
-// const upload = multer({ dest: '../mock-api/uploads' }); // TODO remove
+// const upload = multer({ dest: '../mock-api/uploads' }); // TODO remove multer
 
 const REST_ENDPOINT_ROOT = '/rest/';
 const API_ENDPOINT_ROOT = '/api/';
@@ -2351,11 +2351,11 @@ router
   .get(VERIFY_AUTHORIZATION_ENDPOINT, () => new Response(JSON.stringify(verify_authentication), { headers }))
   .post(RESTART_ENDPOINT, () => new Response('OK', { status: 200 }))
   .post(FACTORY_RESET_ENDPOINT, () => new Response('OK', { status: 200 }))
-  .post(UPLOAD_FILE_ENDPOINT, () => new Response('OK', { status: 404 })) // TODO remove
+  .post(UPLOAD_FILE_ENDPOINT, () => new Response('OK', { status: 404 })) // TODO remove upload filepoint
   .post(SIGN_IN_ENDPOINT, () => new Response(JSON.stringify(signin), { headers }))
   .get(GENERATE_TOKEN_ENDPOINT, () => new Response(JSON.stringify(generate_token), { headers }));
 
-// uploads // TODO fix later
+// uploads // TODO fix uploads later
 
 // const progress_middleware = async (req: any) => {
 //   console.log('progress_middleware');
@@ -2775,6 +2775,7 @@ router
   });
 
 // API and calls
+const SYSTEM_API_ENDPOINT = API_ENDPOINT_ROOT + 'system';
 const SYSTEM_INFO_ENDPOINT = API_ENDPOINT_ROOT + 'system/info';
 const GET_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'getSettings';
 const GET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'getCustomizations';
@@ -2792,32 +2793,18 @@ router
   .get(GET_SCHEDULE_ENDPOINT, () => new Response(JSON.stringify(emsesp_schedule), { headers }))
   .get(SCHEDULE_ENDPOINT, () => new Response(JSON.stringify(emsesp_schedule), { headers }))
   .get(ENTITIES_ENDPOINT, () => new Response(JSON.stringify(emsesp_customentities), { headers }))
-  .post(API_ENDPOINT_ROOT, async (request: any) => {
+  .post(SYSTEM_API_ENDPOINT, async (request: any) => {
     const data = await request.json();
-    if (data.device === 'system') {
-      if (data.entity === 'info') {
-        return new Response(JSON.stringify(emsesp_info), { headers });
-      }
-      if (data.entity === 'allvalues') {
-        return new Response(JSON.stringify(emsesp_allvalues), { headers });
-      }
+    if (data.entity === 'info') {
+      return new Response(JSON.stringify(emsesp_info), { headers });
     }
+    if (data.entity === 'allvalues') {
+      return new Response(JSON.stringify(emsesp_allvalues), { headers });
+    }
+
     return new Response('Not Found', { status: 404 });
   });
 
-// Event Source // TODO fix later
-
-// const data = {
-//   t: '000+00:00:00.000',
-//   l: 3, // error
-//   i: 1,
-//   n: 'system',
-//   m: 'incoming message #1'
-// };
-// const sseFormattedResponse = `data: ${JSON.stringify(data)}\n\n`;
-// router.get('/es/log', () => new Response(sseFormattedResponse, { headers: ESheaders }));
-
-var count = 8;
 var log_index = 0;
 const ES_LOG_ENDPOINT = ES_ENDPOINT_ROOT + 'log';
 

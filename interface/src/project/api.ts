@@ -1,5 +1,5 @@
 import type {
-  APIcall,
+  APIdata,
   Settings,
   Status,
   CoreData,
@@ -44,7 +44,7 @@ export const readStatus = () => alovaInstance.Get<Status>('/rest/status');
 export const scanDevices = () => alovaInstance.Post('/rest/scanDevices');
 
 // HelpInformation
-export const API = (apiCall: APIcall) => alovaInstance.Post('/api', apiCall);
+export const APIcall = (device: string, apiData: APIdata) => alovaInstance.Post(`/api/${device}`, apiData);
 
 // UploadFileForm
 export const getSettings = () => alovaInstance.Get('/rest/getSettings');
