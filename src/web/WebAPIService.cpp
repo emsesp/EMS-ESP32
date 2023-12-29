@@ -53,8 +53,8 @@ void WebAPIService::registerURI() {
         return parse(request, input);
     });
 
-
     // GET - for when using GET query parameters, the old style from v2
+    // Note POST just to /api is no longer supported
     _server->on("/api", HTTP_GET, [this](PsychicRequest * request) {
         StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> input_doc;
         JsonObject                                 input = input_doc.to<JsonObject>(); // empty input json
@@ -82,15 +82,6 @@ esp_err_t WebAPIService::parse(PsychicRequest * request, JsonObject & input) {
 
     // check for query parameters first, the old style from v2
     // api?device={device}&cmd={name}&data={value}&id={hc}
-    // TODO check if this works, because we're using wildcard now for api/*
-    EMSESP::logger().info("API URL: %s", request->url().c_str()); // TODO remove
-    if (request->hasParam(F_(device))) {
-        input["device"] = request->getParam(F_(device))->value().c_str();
-        EMSESP::logger().info("API: have device"); // TODO remove
-    }
-
-    // if (request->url() == "/api") {
-    // get the device
     if (request->hasParam(F_(device))) {
         input["device"] = request->getParam(F_(device))->value().c_str();
     }
@@ -112,8 +103,6 @@ esp_err_t WebAPIService::parse(PsychicRequest * request, JsonObject & input) {
     if (request->hasParam(F_(wwc))) {
         input["wwc"] = Helpers::atoint(request->getParam(F_(wwc))->value().c_str());
     }
-    serializeJson(input, Serial); // TODO remove
-    // }
 
     // capture current heap memory before allocating the large return buffer
     EMSESP::system_.refreshHeapMem();
@@ -167,7 +156,7 @@ esp_err_t WebAPIService::parse(PsychicRequest * request, JsonObject & input) {
 }
 
 esp_err_t WebAPIService::getSettings(PsychicRequest * request) {
-    PsychicJsonResponse response = PsychicJsonResponse(request, this, FS_BUFFER_SIZE);
+    PsychicJsonResponse response = PsychicJsonResponse(request, false, FS_BUFFER_SIZE);
     JsonObject          root     = response.getRoot();
 
     root["type"] = "settings";
@@ -187,7 +176,7 @@ esp_err_t WebAPIService::getSettings(PsychicRequest * request) {
 }
 
 esp_err_t WebAPIService::getCustomizations(PsychicRequest * request) {
-    PsychicJsonResponse response = PsychicJsonResponse(request, this, FS_BUFFER_SIZE);
+    PsychicJsonResponse response = PsychicJsonResponse(request, false, FS_BUFFER_SIZE);
     JsonObject          root     = response.getRoot();
 
     root["type"] = "customizations";
@@ -197,7 +186,7 @@ esp_err_t WebAPIService::getCustomizations(PsychicRequest * request) {
 }
 
 esp_err_t WebAPIService::getSchedule(PsychicRequest * request) {
-    PsychicJsonResponse response = PsychicJsonResponse(request, this, FS_BUFFER_SIZE);
+    PsychicJsonResponse response = PsychicJsonResponse(request, false, FS_BUFFER_SIZE);
     JsonObject          root     = response.getRoot();
 
     root["type"] = "schedule";
@@ -208,7 +197,7 @@ esp_err_t WebAPIService::getSchedule(PsychicRequest * request) {
 }
 
 esp_err_t WebAPIService::getEntities(PsychicRequest * request) {
-    PsychicJsonResponse response = PsychicJsonResponse(request, this, FS_BUFFER_SIZE);
+    PsychicJsonResponse response = PsychicJsonResponse(request, false, FS_BUFFER_SIZE);
     JsonObject          root     = response.getRoot();
 
     root["type"] = "entities";
