@@ -7,7 +7,7 @@ FeaturesService::FeaturesService(PsychicHttpServer * server)
 
 void FeaturesService::registerURI() {
     // return feature set
-    _server->on(FEATURES_SERVICE_PATH, HTTP_GET, [this](PsychicRequest * request) {
+    _server->on(FEATURES_SERVICE_PATH, HTTP_GET, [](PsychicRequest * request) {
         PsychicJsonResponse response = PsychicJsonResponse(request, false, 256);
         JsonObject          root     = response.getRoot();
 
