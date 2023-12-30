@@ -151,7 +151,10 @@ esp_err_t WebAPIService::parse(PsychicRequest * request, JsonObject & input) {
     }
 
     // normal return
-    // as setContentType("application/json; charset=utf-8")
+    // TODO check if needed to add utf-8 here
+    response.setContentType("application/json; charset=utf-8"); // TODO doesn't seem to work
+    // response.addHeader("Connection", "close");
+
     return response.send();
 }
 

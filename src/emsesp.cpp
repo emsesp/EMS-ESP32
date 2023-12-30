@@ -1435,6 +1435,7 @@ void EMSESP::setupWeb() {
     //   esp8266React services has 13
     //   custom projects has around 23
     webServer.config.max_uri_handlers = 80;
+    // webServer.config.uri_match_fn     = NULL;
 
     // TODO add support for https
     webServer.listen(80); // start the web server

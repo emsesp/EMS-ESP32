@@ -60,3 +60,5 @@ bw-output/
 # entity dump results
 # dump_entities.csv
 # dump_entities.xls*
+
+benchmark/*.log
