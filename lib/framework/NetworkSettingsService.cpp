@@ -13,11 +13,11 @@ NetworkSettingsService::NetworkSettingsService(PsychicHttpServer * server, FS * 
 void NetworkSettingsService::begin() {
     // We want the device to come up in opmode=0 (WIFI_OFF), when erasing the flash this is not the default.
     // If needed, we save opmode=0 before disabling persistence so the device boots with WiFi disabled in the future.
-    if (WiFi.getMode() != WIFI_OFF) {
-        WiFi.mode(WIFI_OFF);
-    }
+    // if (WiFi.getMode() != WIFI_OFF) {
+    //     WiFi.mode(WIFI_OFF);
+    // }
 
-    // Disable WiFi config persistance and auto reconnect
+    // WiFi.useStaticBuffers(true); // uses 40kb more heap and max alloc, so not recommended
     WiFi.persistent(false);
     WiFi.setAutoReconnect(false);
 

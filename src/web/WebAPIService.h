@@ -19,7 +19,7 @@
 #ifndef WebAPIService_h
 #define WebAPIService_h
 
-#define EMSESP_API_SERVICE_PATH "/api/*"
+#define EMSESP_API_SERVICE_PATH "/api/?*"
 #define GET_SETTINGS_PATH "/rest/getSettings"
 #define GET_CUSTOMIZATIONS_PATH "/rest/getCustomizations"
 #define GET_SCHEDULE_PATH "/rest/getSchedule"

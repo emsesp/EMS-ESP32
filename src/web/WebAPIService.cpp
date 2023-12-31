@@ -32,7 +32,6 @@ WebAPIService::WebAPIService(PsychicHttpServer * server, SecurityManager * secur
 
 void WebAPIService::registerURI() {
     // POST /api/{device}[/{hc|wwc|id}][/{name}]
-    // note: must explicity use 'Content-Type: application/json' in header
     _server->on(EMSESP_API_SERVICE_PATH, HTTP_POST, [this](PsychicRequest * request, JsonVariant & json) {
         // if no json body then treat it as a secure GET
         if (!json.is<JsonObject>()) {
@@ -48,14 +47,6 @@ void WebAPIService::registerURI() {
 
     // GET /{device}/{entity}
     _server->on(EMSESP_API_SERVICE_PATH, HTTP_GET, [this](PsychicRequest * request) {
-        StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> input_doc;
-        JsonObject                                 input = input_doc.to<JsonObject>(); // empty input json
-        return parse(request, input);
-    });
-
-    // GET - for when using GET query parameters, the old style from v2
-    // Note POST just to /api is no longer supported
-    _server->on("/api", HTTP_GET, [this](PsychicRequest * request) {
         StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> input_doc;
         JsonObject                                 input = input_doc.to<JsonObject>(); // empty input json
         return parse(request, input);
@@ -141,7 +132,7 @@ esp_err_t WebAPIService::parse(PsychicRequest * request, JsonObject & input) {
         request->reply(ret_codes[return_code]); // exit with error code
     }
 
-    api_count_++; // another succesful api call
+    api_count_++; // another successful api call
 
     // if we're returning single values, just sent as plain text and not json
     // https://github.com/emsesp/EMS-ESP32/issues/462#issuecomment-1093877210
@@ -151,7 +142,6 @@ esp_err_t WebAPIService::parse(PsychicRequest * request, JsonObject & input) {
     }
 
     // normal return
-    // TODO check if needed to add utf-8 here
     response.setContentType("application/json; charset=utf-8"); // TODO doesn't seem to work
     // response.addHeader("Connection", "close");
 

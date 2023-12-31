@@ -84,6 +84,16 @@ Authorization: Bearer {{token}}
     "id" : 0
 }
 ###
+POST {{host_dev}}/api
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "device" : "system",
+    "entity" : "info",
+    "id" : 0
+}
+###
 GET {{host_dev}}/rest/features
 ###
 GET {{host_dev}}/rest/getSettings
