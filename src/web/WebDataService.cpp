@@ -22,57 +22,56 @@ namespace emsesp {
 
 using namespace std::placeholders; // for `_1` etc
 
-WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securityManager)
-    : _write_value_handler(WRITE_DEVICE_VALUE_SERVICE_PATH,
-                           securityManager->wrapCallback(std::bind(&WebDataService::write_device_value, this, _1, _2), AuthenticationPredicates::IS_ADMIN))
-    , _write_temperature_handler(WRITE_TEMPERATURE_SENSOR_SERVICE_PATH,
-                                 securityManager->wrapCallback(std::bind(&WebDataService::write_temperature_sensor, this, _1, _2),
-                                                               AuthenticationPredicates::IS_ADMIN))
-    , _write_analog_handler(WRITE_ANALOG_SENSOR_SERVICE_PATH,
-                            securityManager->wrapCallback(std::bind(&WebDataService::write_analog_sensor, this, _1, _2), AuthenticationPredicates::IS_ADMIN)) {
-    // GET's
-    server->on(DEVICE_DATA_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WebDataService::device_data, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
-
-    server->on(CORE_DATA_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WebDataService::core_data, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
-
-    server->on(SENSOR_DATA_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WebDataService::sensor_data, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
-
-    // POST's
-    server->on(SCAN_DEVICES_SERVICE_PATH,
-               HTTP_POST,
-               securityManager->wrapRequest(std::bind(&WebDataService::scan_devices, this, _1), AuthenticationPredicates::IS_ADMIN));
-
-    _write_value_handler.setMethod(HTTP_POST);
-    _write_value_handler.setMaxContentLength(256);
-    server->addHandler(&_write_value_handler);
-
-    _write_temperature_handler.setMethod(HTTP_POST);
-    _write_temperature_handler.setMaxContentLength(256);
-    server->addHandler(&_write_temperature_handler);
-
-    _write_analog_handler.setMethod(HTTP_POST);
-    _write_analog_handler.setMaxContentLength(256);
-    server->addHandler(&_write_analog_handler);
+WebDataService::WebDataService(PsychicHttpServer * server, SecurityManager * securityManager)
+    : _server(server)
+    , _securityManager(securityManager) {
 }
 
+void WebDataService::registerURI() {
+    // GET's
+    _server->on(CORE_DATA_SERVICE_PATH,
+                HTTP_GET,
+                _securityManager->wrapRequest(std::bind(&WebDataService::core_data, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+
+    _server->on(DEVICE_DATA_SERVICE_PATH,
+                HTTP_GET,
+                _securityManager->wrapRequest(std::bind(&WebDataService::device_data, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+
+    _server->on(SENSOR_DATA_SERVICE_PATH,
+                HTTP_GET,
+                _securityManager->wrapRequest(std::bind(&WebDataService::sensor_data, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+
+    // POST's
+    _server->on(SCAN_DEVICES_SERVICE_PATH,
+                HTTP_POST,
+                _securityManager->wrapRequest(std::bind(&WebDataService::scan_devices, this, _1), AuthenticationPredicates::IS_ADMIN));
+
+    _server->on(WRITE_DEVICE_VALUE_SERVICE_PATH,
+                HTTP_POST,
+                _securityManager->wrapCallback(std::bind(&WebDataService::write_device_value, this, _1, _2), AuthenticationPredicates::IS_AUTHENTICATED));
+
+    _server->on(WRITE_TEMPERATURE_SENSOR_SERVICE_PATH,
+                HTTP_POST,
+                _securityManager->wrapCallback(std::bind(&WebDataService::write_temperature_sensor, this, _1, _2), AuthenticationPredicates::IS_AUTHENTICATED));
+
+    _server->on(WRITE_ANALOG_SENSOR_SERVICE_PATH,
+                HTTP_POST,
+                _securityManager->wrapCallback(std::bind(&WebDataService::write_analog_sensor, this, _1, _2), AuthenticationPredicates::IS_AUTHENTICATED));
+}
+
+
 // scan devices service
-void WebDataService::scan_devices(AsyncWebServerRequest * request) {
+esp_err_t WebDataService::scan_devices(PsychicRequest * request) {
     EMSESP::logger().info("Scanning devices...");
     EMSESP::scan_devices();
-    request->send(200);
+    return request->reply(200);
 }
 
 // this is used in the dashboard and contains all ems device information
 // /coreData endpoint
-void WebDataService::core_data(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE);
-    JsonObject root     = response->getRoot();
+esp_err_t WebDataService::core_data(PsychicRequest * request) {
+    PsychicJsonResponse response = PsychicJsonResponse(request, false, EMSESP_JSON_SIZE_XXLARGE);
+    JsonObject          root     = response.getRoot();
 
     // list is already sorted by device type
     JsonArray devices = root.createNestedArray("devices");
@@ -109,15 +108,14 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
 
     root["connected"] = EMSESP::bus_status() != 2;
 
-    response->setLength();
-    request->send(response);
+    return response.send();
 }
 
 // sensor data - sends back to web
 // /sensorData endpoint
-void WebDataService::sensor_data(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE);
-    JsonObject root     = response->getRoot();
+esp_err_t WebDataService::sensor_data(PsychicRequest * request) {
+    PsychicJsonResponse response = PsychicJsonResponse(request, false, EMSESP_JSON_SIZE_XXLARGE);
+    JsonObject          root     = response.getRoot();
 
     // temperature sensors
     JsonArray sensors = root.createNestedArray("ts");
@@ -167,68 +165,55 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
     root["analog_enabled"] = EMSESP::analog_enabled();
     root["platform"]       = EMSESP_PLATFORM;
 
-    response->setLength();
-    request->send(response);
+    return response.send();
 }
 
 // The unique_id is the unique record ID from the Web table to identify which device to load
 // Compresses the JSON using MsgPack https://msgpack.org/index.html
-void WebDataService::device_data(AsyncWebServerRequest * request) {
+esp_err_t WebDataService::device_data(PsychicRequest * request) {
     uint8_t id;
     if (request->hasParam(F_(id))) {
         id = Helpers::atoint(request->getParam(F_(id))->value().c_str()); // get id from url
 
-        size_t buffer   = EMSESP_JSON_SIZE_XXXXLARGE;
-        auto * response = new MsgpackAsyncJsonResponse(false, buffer);
+        PsychicJsonResponse response = PsychicJsonResponse(request, false, EMSESP_JSON_SIZE_XXXXLARGE, true); // is jsonobject and also msgpack
+        JsonObject          output   = response.getRoot();
 
+        // TODO add back memory managegement. Be careful we do need to free()/delete() any object we extend with new()
         // check size
-        while (!response) {
-            delete response;
-            buffer -= 1024;
-            response = new MsgpackAsyncJsonResponse(false, buffer);
-        }
+        // while (!response) {
+        //     delete response;
+        //     buffer -= 1024;
+        //     response = new MsgpackAsyncJsonResponse(false, buffer);
+        // }
 
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice->unique_id() == id) {
                 // wait max 2.5 sec for updated data (post_send_delay is 2 sec)
-                for (uint16_t i = 0; i < (emsesp::TxService::POST_SEND_DELAY + 500) && EMSESP::wait_validate(); i++) {
+                for (uint16_t i = 0; i < (TxService::POST_SEND_DELAY + 500) && EMSESP::wait_validate(); i++) {
                     delay(1);
                 }
                 EMSESP::wait_validate(0); // reset in case of timeout
 #ifndef EMSESP_STANDALONE
-                JsonObject output = response->getRoot();
                 emsdevice->generate_values_web(output);
 #endif
 
-#if defined(EMSESP_DEBUG)
-                size_t length = response->setLength();
-                EMSESP::logger().debug("Dashboard buffer used: %d", length);
-#else
-                response->setLength();
-#endif
-                request->send(response);
-                return;
+                return response.send();
             }
         }
 
 #ifndef EMSESP_STANDALONE
         if (id == 99) {
-            JsonObject output = response->getRoot();
             EMSESP::webCustomEntityService.generate_value_web(output);
-            response->setLength();
-            request->send(response);
-            return;
+            return response.send();
         }
 #endif
     }
 
-    // invalid
-    AsyncWebServerResponse * response = request->beginResponse(400);
-    request->send(response);
+    return request->reply(400); // Invalid/bad request
 }
 
 // assumes the service has been checked for admin authentication
-void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVariant & json) {
+esp_err_t WebDataService::write_device_value(PsychicRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
         uint8_t      unique_id = json["id"]; // unique ID
         const char * cmd       = json["c"];  // the command
@@ -236,9 +221,7 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
 
         // quit on bad values
         if (strlen(cmd) == 0 || data.isNull()) {
-            AsyncWebServerResponse * response = request->beginResponse(400); // bad request
-            request->send(response);
-            return;
+            return request->reply(400); // Invalid/bad request
         }
 
         // using the unique ID from the web find the real device type
@@ -249,8 +232,8 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
                 cmd       = Command::parse_command_string(cmd, id); // extract hc or wwc
 
                 // create JSON for output
-                auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
-                JsonObject output   = response->getRoot();
+                PsychicJsonResponse response = PsychicJsonResponse(request, false, EMSESP_JSON_SIZE_SMALL);
+                JsonObject          output   = response.getRoot();
 
                 // the data could be in any format, but we need string
                 // authenticated is always true
@@ -277,22 +260,22 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
 #endif
                 }
 
-                response->setCode((return_code == CommandRet::OK) ? 200 : 400); // bad request
-                response->setLength();
-                request->send(response);
-                return;
+                response.setCode((return_code == CommandRet::OK) ? 200 : 400); // bad request
+                return response.send();
             }
         }
 
         // special check for custom entities (which have a unique id of 99)
         if (unique_id == 99) {
             // parse the command as it could have a hc or wwc prefixed, e.g. hc2/seltemp
-            int8_t id              = -1;
-            cmd                    = Command::parse_command_string(cmd, id);
-            auto *     response    = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
-            JsonObject output      = response->getRoot();
-            uint8_t    return_code = CommandRet::NOT_FOUND;
-            uint8_t    device_type = EMSdevice::DeviceType::CUSTOM;
+            int8_t id = -1;
+            cmd       = Command::parse_command_string(cmd, id);
+
+            PsychicJsonResponse response = PsychicJsonResponse(request, false, EMSESP_JSON_SIZE_SMALL);
+            JsonObject          output   = response.getRoot();
+
+            uint8_t return_code = CommandRet::NOT_FOUND;
+            uint8_t device_type = EMSdevice::DeviceType::CUSTOM;
             if (data.is<const char *>()) {
                 return_code = Command::call(device_type, cmd, data.as<const char *>(), true, id, output);
             } else if (data.is<int>()) {
@@ -310,21 +293,18 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
 #endif
             }
 
-            response->setCode((return_code == CommandRet::OK) ? 200 : 400); // bad request
-            response->setLength();
-            request->send(response);
-            return;
+            response.setCode((return_code == CommandRet::OK) ? 200 : 400); // bad request
+            return response.send();
         }
     }
 
     // if we reach here, fail
-    AsyncWebServerResponse * response = request->beginResponse(400); // bad request
-    request->send(response);
+    return request->reply(400); // Invalid/Bad Request
 }
 
 // takes a temperaturesensor name and optional offset from the WebUI and update the customization settings
 // via the temperaturesensor service
-void WebDataService::write_temperature_sensor(AsyncWebServerRequest * request, JsonVariant & json) {
+esp_err_t WebDataService::write_temperature_sensor(PsychicRequest * request, JsonVariant & json) {
     bool ok = false;
     if (json.is<JsonObject>()) {
         JsonObject sensor = json;
@@ -342,12 +322,11 @@ void WebDataService::write_temperature_sensor(AsyncWebServerRequest * request, J
         ok = EMSESP::temperaturesensor_.update(id, name, offset10);
     }
 
-    AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 400); // bad request
-    request->send(response);
+    return request->reply(ok ? 200 : 400); // bad request); // Invalid/Bad Request
 }
 
 // update the analog record, or create a new one
-void WebDataService::write_analog_sensor(AsyncWebServerRequest * request, JsonVariant & json) {
+esp_err_t WebDataService::write_analog_sensor(PsychicRequest * request, JsonVariant & json) {
     bool ok = false;
     if (json.is<JsonObject>()) {
         JsonObject analog = json;
@@ -362,8 +341,7 @@ void WebDataService::write_analog_sensor(AsyncWebServerRequest * request, JsonVa
         ok                  = EMSESP::analogsensor_.update(gpio, name, offset, factor, uom, type, deleted);
     }
 
-    AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 400); // bad request
-    request->send(response);
+    return request->reply(ok ? 200 : 400); // bad request); // Invalid/Bad Request
 }
 
 } // namespace emsesp

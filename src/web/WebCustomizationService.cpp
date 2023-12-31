@@ -24,35 +24,38 @@ using namespace std::placeholders; // for `_1` etc
 
 bool WebCustomization::_start = true;
 
-WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
-    : _httpEndpoint(WebCustomization::read,
+WebCustomizationService::WebCustomizationService(PsychicHttpServer * server, FS * fs, SecurityManager * securityManager)
+    : _server(server)
+    , _securityManager(securityManager)
+    , _httpEndpoint(WebCustomization::read,
                     WebCustomization::update,
                     this,
                     server,
                     EMSESP_CUSTOMIZATION_SERVICE_PATH,
                     securityManager,
                     AuthenticationPredicates::IS_AUTHENTICATED)
-    , _fsPersistence(WebCustomization::read, WebCustomization::update, this, fs, EMSESP_CUSTOMIZATION_FILE)
-    , _masked_entities_handler(CUSTOMIZATION_ENTITIES_PATH,
-                               securityManager->wrapCallback(std::bind(&WebCustomizationService::customization_entities, this, _1, _2),
-                                                             AuthenticationPredicates::IS_AUTHENTICATED)) {
-    server->on(DEVICE_ENTITIES_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WebCustomizationService::device_entities, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+    , _fsPersistence(WebCustomization::read, WebCustomization::update, this, fs, EMSESP_CUSTOMIZATION_FILE) {
+}
 
+void WebCustomizationService::registerURI() {
+    _httpEndpoint.registerURI();
 
-    server->on(DEVICES_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WebCustomizationService::devices, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+    _server->on(CUSTOMIZATION_ENTITIES_PATH,
+                HTTP_POST,
+                _securityManager->wrapCallback(std::bind(&WebCustomizationService::customization_entities, this, _1, _2),
+                                               AuthenticationPredicates::IS_AUTHENTICATED));
 
-    server->on(RESET_CUSTOMIZATION_SERVICE_PATH,
-               HTTP_POST,
-               securityManager->wrapRequest(std::bind(&WebCustomizationService::reset_customization, this, _1), AuthenticationPredicates::IS_ADMIN));
+    _server->on(DEVICE_ENTITIES_PATH,
+                HTTP_GET,
+                _securityManager->wrapRequest(std::bind(&WebCustomizationService::device_entities, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
 
-    _masked_entities_handler.setMethod(HTTP_POST);
-    _masked_entities_handler.setMaxContentLength(2048);
-    _masked_entities_handler.setMaxJsonBufferSize(2048);
-    server->addHandler(&_masked_entities_handler);
+    _server->on(DEVICES_SERVICE_PATH,
+                HTTP_GET,
+                _securityManager->wrapRequest(std::bind(&WebCustomizationService::devices, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+
+    _server->on(RESET_CUSTOMIZATION_SERVICE_PATH,
+                HTTP_POST,
+                _securityManager->wrapRequest(std::bind(&WebCustomizationService::reset_customization, this, _1), AuthenticationPredicates::IS_ADMIN));
 }
 
 // this creates the customization file, saving it to the FS
@@ -163,24 +166,22 @@ StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization &
 }
 
 // deletes the customization file
-void WebCustomizationService::reset_customization(AsyncWebServerRequest * request) {
+esp_err_t WebCustomizationService::reset_customization(PsychicRequest * request) {
 #ifndef EMSESP_STANDALONE
     if (LittleFS.remove(EMSESP_CUSTOMIZATION_FILE)) {
-        AsyncWebServerResponse * response = request->beginResponse(205); // restart needed
-        request->send(response);
         EMSESP::system_.restart_requested(true);
-        return;
+        return request->reply(205); // restart needed
     }
+
     // failed
-    AsyncWebServerResponse * response = request->beginResponse(400); // bad request
-    request->send(response);
+    return request->reply(400); // bad request
 #endif
 }
 
 // send back a list of devices used in the customization web page
-void WebCustomizationService::devices(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE);
-    JsonObject root     = response->getRoot();
+esp_err_t WebCustomizationService::devices(PsychicRequest * request) {
+    PsychicJsonResponse response = PsychicJsonResponse(request, false, EMSESP_JSON_SIZE_XLARGE);
+    JsonObject          root     = response.getRoot();
 
     // list is already sorted by device type
     // controller is ignored since it doesn't have any associated entities
@@ -195,51 +196,45 @@ void WebCustomizationService::devices(AsyncWebServerRequest * request) {
         }
     }
 
-    response->setLength();
-    request->send(response);
+    return response.send();
 }
 
 // send back list of device entities
-void WebCustomizationService::device_entities(AsyncWebServerRequest * request) {
+esp_err_t WebCustomizationService::device_entities(PsychicRequest * request) {
     uint8_t id;
     if (request->hasParam(F_(id))) {
         id = Helpers::atoint(request->getParam(F_(id))->value().c_str()); // get id from url
 
-        size_t buffer   = EMSESP_JSON_SIZE_XXXXLARGE;
-        auto * response = new MsgpackAsyncJsonResponse(true, buffer);
+        PsychicJsonResponse response = PsychicJsonResponse(request, true, EMSESP_JSON_SIZE_XXXXLARGE, true); // is array and also msgpack
+        JsonArray           output   = response.getRoot();
 
-        while (!response) {
-            delete response;
-            buffer -= 1024;
-            response = new MsgpackAsyncJsonResponse(true, buffer);
-        }
+        // TODO add back memory managegement. Be careful we do need to free()/delete() any object we extend with new()
+        // while (!response) {
+        //     delete response;
+        //     buffer -= 1024;
+        //     // response = new MsgpackAsyncJsonResponse(true, buffer);
+        // }
+
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice->unique_id() == id) {
 #ifndef EMSESP_STANDALONE
-                JsonArray output = response->getRoot();
                 emsdevice->generate_values_web_customization(output);
 #endif
-#if defined(EMSESP_DEBUG)
-                size_t length = response->setLength();
-                EMSESP::logger().debug("Customization buffer used: %d", length);
-#else
-                response->setLength();
-#endif
-                request->send(response);
-                return;
+                // request->send(response);
+                // return;
+                return response.send();
             }
         }
     }
 
     // invalid, but send OK anyway
-    AsyncWebServerResponse * response = request->beginResponse(200);
-    request->send(response);
+    return request->reply(200); // OK
 }
 
 // takes a list of updated entities with new masks from the web UI
 // saves it in the customization service
 // and updates the entity list real-time
-void WebCustomizationService::customization_entities(AsyncWebServerRequest * request, JsonVariant & json) {
+esp_err_t WebCustomizationService::customization_entities(PsychicRequest * request, JsonVariant & json) {
     bool need_reboot = false;
     if (json.is<JsonObject>()) {
         // find the device using the unique_id
@@ -261,7 +256,7 @@ void WebCustomizationService::customization_entities(AsyncWebServerRequest * req
                         } else {
                             emsdevice->setCustomizationEntity(id_s);
                         }
-                        // emsesp::EMSESP::logger().info(id.as<const char *>());
+                        // EMSESP::logger().info(id.as<const char *>());
                     }
                     // add deleted entities from file
                     read([&](WebCustomization & settings) {
@@ -324,8 +319,7 @@ void WebCustomizationService::customization_entities(AsyncWebServerRequest * req
         }
     }
 
-    AsyncWebServerResponse * response = request->beginResponse(need_reboot ? 205 : 200); // reboot or just OK
-    request->send(response);
+    return request->reply(need_reboot ? 205 : 200); // reboot or just OK
 }
 
 // load the settings when the service starts

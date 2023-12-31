@@ -3,10 +3,16 @@
 
 using namespace std::placeholders; // for `_1` etc
 
-NTPStatus::NTPStatus(AsyncWebServer * server, SecurityManager * securityManager) {
-    server->on(NTP_STATUS_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest(std::bind(&NTPStatus::ntpStatus, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+NTPStatus::NTPStatus(PsychicHttpServer * server, SecurityManager * securityManager)
+    : _server(server)
+    , _securityManager(securityManager) {
+}
+
+
+void NTPStatus::registerURI() {
+    _server->on(NTP_STATUS_SERVICE_PATH,
+                HTTP_GET,
+                _securityManager->wrapRequest(std::bind(&NTPStatus::ntpStatus, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
 }
 
 /*
@@ -28,9 +34,9 @@ String toLocalTimeString(tm * time) {
     return formatTime(time, "%FT%T");
 }
 
-void NTPStatus::ntpStatus(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_NTP_STATUS_SIZE);
-    JsonObject          root     = response->getRoot();
+esp_err_t NTPStatus::ntpStatus(PsychicRequest * request) {
+    PsychicJsonResponse response = PsychicJsonResponse(request, false, MAX_NTP_STATUS_SIZE);
+    JsonObject          root     = response.getRoot();
 
     // grab the current instant in unix seconds
     time_t now = time(nullptr);
@@ -47,6 +53,5 @@ void NTPStatus::ntpStatus(AsyncWebServerRequest * request) {
     // the sntp server name
     root["server"] = esp_sntp_getservername(0);
 
-    response->setLength();
-    request->send(response);
+    return response.send();
 }

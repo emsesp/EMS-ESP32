@@ -34,25 +34,27 @@ namespace emsesp {
 
 class WebDataService {
   public:
-    WebDataService(AsyncWebServer * server, SecurityManager * securityManager);
+    WebDataService(PsychicHttpServer * server, SecurityManager * securityManager);
+    void registerURI();
 
 // make all functions public so we can test in the debug and standalone mode
 #ifndef EMSESP_STANDALONE
   private:
 #endif
 
+    SecurityManager *   _securityManager;
+    PsychicHttpServer * _server;
+
     // GET
-    void core_data(AsyncWebServerRequest * request);
-    void sensor_data(AsyncWebServerRequest * request);
-    void device_data(AsyncWebServerRequest * request);
+    esp_err_t core_data(PsychicRequest * request);
+    esp_err_t sensor_data(PsychicRequest * request);
+    esp_err_t device_data(PsychicRequest * request);
 
     // POST
-    void write_device_value(AsyncWebServerRequest * request, JsonVariant & json);
-    void write_temperature_sensor(AsyncWebServerRequest * request, JsonVariant & json);
-    void write_analog_sensor(AsyncWebServerRequest * request, JsonVariant & json);
-    void scan_devices(AsyncWebServerRequest * request); // command
-
-    AsyncCallbackJsonWebHandler _write_value_handler, _write_temperature_handler, _write_analog_handler;
+    esp_err_t write_device_value(PsychicRequest * request, JsonVariant & json);
+    esp_err_t write_temperature_sensor(PsychicRequest * request, JsonVariant & json);
+    esp_err_t write_analog_sensor(PsychicRequest * request, JsonVariant & json);
+    esp_err_t scan_devices(PsychicRequest * request); // command
 };
 
 } // namespace emsesp

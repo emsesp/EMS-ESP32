@@ -282,8 +282,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         run_test("general");
 
         // add sensors
-        emsesp::EMSESP::analogsensor_.test();
-        emsesp::EMSESP::temperaturesensor_.test();
+        EMSESP::analogsensor_.test();
+        EMSESP::temperaturesensor_.test();
 
         // shell.invoke_command("show devices");
         shell.invoke_command("show values");
@@ -306,7 +306,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         run_test("general");
 
 #ifdef EMSESP_STANDALONE
-        AsyncWebServerRequest request;
+        PsychicRequest request;
         request.method(HTTP_GET);
         request.url("/api/custom");
         request.url("/api/custom/boiler_flowtemp");
@@ -321,7 +321,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         run_test("general");
 
 #ifdef EMSESP_STANDALONE
-        AsyncWebServerRequest request;
+        PsychicRequest request;
         request.method(HTTP_GET);
         request.url("/api/boiler/coldshot");
         EMSESP::webAPIService.webAPIService_get(&request);
@@ -704,7 +704,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "temperature") {
         shell.printfln("Testing adding Temperature sensor");
-        emsesp::EMSESP::temperaturesensor_.test();
+        EMSESP::temperaturesensor_.test();
         ok = true;
     }
 
@@ -714,7 +714,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         Mqtt::nested_format(1);
         // Mqtt::nested_format(0);
 
-        emsesp::EMSESP::temperaturesensor_.test();
+        EMSESP::temperaturesensor_.test();
         shell.invoke_command("show values");
         shell.invoke_command("call system publish");
 
@@ -732,7 +732,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         Mqtt::nested_format(1);
         // Mqtt::nested_format(0);
 
-        emsesp::EMSESP::analogsensor_.test();
+        EMSESP::analogsensor_.test();
         shell.invoke_command("show values");
         // shell.invoke_command("call system publish");
         // shell.invoke_command("show mqtt");
@@ -846,9 +846,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         run_test("boiler");
         run_test("thermostat");
 
-        AsyncWebServerRequest request;
-        DynamicJsonDocument   doc(2000);
-        JsonVariant           json;
+        PsychicRequest      request;
+        DynamicJsonDocument doc(2000);
+        JsonVariant         json;
         request.method(HTTP_GET);
 
         request.url("/api/boiler/values");
@@ -890,7 +890,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         Mqtt::nested_format(1);
         run_test("310");
 
-        AsyncWebServerRequest request;
+        PsychicRequest request;
         request.method(HTTP_POST);
         DynamicJsonDocument doc(2000);
         JsonVariant         json;
@@ -915,9 +915,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         run_test("boiler");
         run_test("thermostat");
 
-        AsyncWebServerRequest requestX;
-        DynamicJsonDocument   docX(2000);
-        JsonVariant           jsonX;
+        PsychicRequest      requestX;
+        DynamicJsonDocument docX(2000);
+        JsonVariant         jsonX;
 
         requestX.method(HTTP_GET);
 
@@ -956,19 +956,19 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         /*
         requestX.url("/api/system"); // check if defaults to info
         EMSESP::webAPIService.webAPIService_get(&requestX);
-        emsesp::EMSESP::logger().notice("*");
+        EMSESP::logger().notice("*");
 
         requestX.url("/api/system/info");
         EMSESP::webAPIService.webAPIService_get(&requestX);
-        emsesp::EMSESP::logger().notice("*");
+        EMSESP::logger().notice("*");
 
         requestX.url("/api/thermostat"); // check if defaults to values
         EMSESP::webAPIService.webAPIService_get(&requestX);
-        emsesp::EMSESP::logger().notice("*");
+        EMSESP::logger().notice("*");
 
         requestX.url("/api/thermostat/info");
         EMSESP::webAPIService.webAPIService_get(&requestX);
-        emsesp::EMSESP::logger().notice("*");
+        EMSESP::logger().notice("*");
 
         requestX.url("/api/thermostat/seltemp");
         EMSESP::webAPIService.webAPIService_get(&requestX);
@@ -984,7 +984,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         /*
         requestX.url("/api/temperaturesensor/xxxx");
         EMSESP::webAPIService.webAPIService_get(&requestX);
-        emsesp::EMSESP::logger().notice("****");
+        EMSESP::logger().notice("****");
         requestX.url("/api/temperaturesensor/info");
         EMSESP::webAPIService.webAPIService_get(&requestX);
         return;
@@ -1084,7 +1084,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::mqtt_.incoming("home/cellar/heating/thermostat/mode"); // empty payload
 
         // Web API TESTS
-        AsyncWebServerRequest request;
+        PsychicRequest request;
 
         request.method(HTTP_GET);
 
@@ -1160,7 +1160,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         request.url("/api");
         EMSESP::webAPIService.webAPIService_post(&request, json);
 
-        emsesp::EMSESP::logger().warning("* these next ones should fail *");
+        EMSESP::logger().warning("* these next ones should fail *");
 
         // write value from web - testing hc9/seltemp - should fail!
         char data8[] = "{\"id\":2,\"devicevalue\":{\"v\":\"55\",\"u\":1,\"n\":\"hc2 selected room temperature\",\"c\":\"hc9/seltemp\"}";
@@ -1714,7 +1714,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // shell.invoke_command("call mixer wwc2 info");
 
         // test API
-        AsyncWebServerRequest request;
+        PsychicRequest request;
         request.url("/api/mixer");
         EMSESP::webAPIService.webAPIService_get(&request);
         request.url("/api/mixer/hc1/pumpstatus");

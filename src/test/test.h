@@ -22,7 +22,7 @@
 #define EMSESP_TEST_H
 
 #include "emsesp.h"
-#include <ESPAsyncWebServer.h>
+#include <PsychicHttp.h>
 
 namespace emsesp {
 

@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "autocannon": "^7.14.0",
+    "axios": "^1.6.2",
+    "eventsource": "^2.0.2",
+    "ws": "^8.14.2"
+  }
+}

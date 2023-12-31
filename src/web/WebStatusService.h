@@ -1,7 +1,7 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020-2023  Paul Derbyshire
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -27,10 +27,14 @@ namespace emsesp {
 
 class WebStatusService {
   public:
-    WebStatusService(AsyncWebServer * server, SecurityManager * securityManager);
+    WebStatusService(PsychicHttpServer * server, SecurityManager * securityManager);
+    void registerURI();
 
   private:
-    void         webStatusService(AsyncWebServerRequest * request);
+    SecurityManager *   _securityManager;
+    PsychicHttpServer * _server;
+
+    esp_err_t    webStatusService(PsychicRequest * request);
     void         WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
     void         mDNS_start() const;
     const char * disconnectReason(uint8_t code);

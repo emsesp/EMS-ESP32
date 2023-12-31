@@ -2,8 +2,10 @@
 
 #include "../../src/emsesp_stub.hpp"
 
-APSettingsService::APSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
-    : _httpEndpoint(APSettings::read, APSettings::update, this, server, AP_SETTINGS_SERVICE_PATH, securityManager)
+APSettingsService::APSettingsService(PsychicHttpServer * server, FS * fs, SecurityManager * securityManager)
+    : _server(server)
+    , _securityManager(securityManager)
+    , _httpEndpoint(APSettings::read, APSettings::update, this, server, AP_SETTINGS_SERVICE_PATH, securityManager)
     , _fsPersistence(APSettings::read, APSettings::update, this, fs, AP_SETTINGS_FILE)
     , _dnsServer(nullptr)
     , _lastManaged(0)
@@ -17,6 +19,10 @@ void APSettingsService::begin() {
     _fsPersistence.readFromFS();
     // disabled for delayed start, first try station mode
     // reconfigureAP();
+}
+
+void APSettingsService::registerURI() {
+    _httpEndpoint.registerURI();
 }
 
 // wait 10 sec on STA disconnect before starting AP

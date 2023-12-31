@@ -1,7 +1,7 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020-2023  Paul Derbyshire
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -22,12 +22,16 @@ using namespace std::placeholders; // for `_1` etc
 
 namespace emsesp {
 
-WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * securityManager) {
-    // rest endpoint for web page
-    server->on(EMSESP_STATUS_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WebStatusService::webStatusService, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+WebStatusService::WebStatusService(PsychicHttpServer * server, SecurityManager * securityManager)
+    : _server(server)
+    , _securityManager(securityManager) {
     WiFi.onEvent(std::bind(&WebStatusService::WiFiEvent, this, _1, _2));
+}
+
+void WebStatusService::registerURI() {
+    _server->on(EMSESP_STATUS_SERVICE_PATH,
+                HTTP_GET,
+                _securityManager->wrapRequest(std::bind(&WebStatusService::webStatusService, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
 }
 
 // handles both WiFI and Ethernet
@@ -114,9 +118,9 @@ void WebStatusService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
 #endif
 }
 
-void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_LARGE);
-    JsonObject root     = response->getRoot();
+esp_err_t WebStatusService::webStatusService(PsychicRequest * request) {
+    PsychicJsonResponse response = PsychicJsonResponse(request, false, EMSESP_JSON_SIZE_LARGE);
+    JsonObject          root     = response.getRoot();
 
     root["status"]      = EMSESP::bus_status(); // 0, 1 or 2
     root["tx_mode"]     = EMSESP::txservice_.tx_mode();
@@ -189,8 +193,7 @@ void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
     }
 #endif
 
-    response->setLength();
-    request->send(response);
+    return response.send();
 }
 
 // start the multicast UDP service so EMS-ESP is discoverable via .local

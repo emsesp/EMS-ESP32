@@ -22,7 +22,7 @@ namespace emsesp {
 
 using namespace std::placeholders; // for `_1` etc
 
-WebCustomEntityService::WebCustomEntityService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
+WebCustomEntityService::WebCustomEntityService(PsychicHttpServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(WebCustomEntity::read,
                     WebCustomEntity::update,
                     this,
@@ -31,6 +31,10 @@ WebCustomEntityService::WebCustomEntityService(AsyncWebServer * server, FS * fs,
                     securityManager,
                     AuthenticationPredicates::IS_AUTHENTICATED)
     , _fsPersistence(WebCustomEntity::read, WebCustomEntity::update, this, fs, EMSESP_CUSTOMENTITY_FILE, FS_BUFFER_SIZE) {
+}
+
+void WebCustomEntityService::registerURI() {
+    _httpEndpoint.registerURI();
 }
 
 // load the settings when the service starts
@@ -427,9 +431,9 @@ void WebCustomEntityService::publish(const bool force) {
                 }
             }
             JsonObject dev = config.createNestedObject("dev");
-            dev["name"]    = Mqtt::basename();
+            dev["name"]    = Mqtt::basename() + " Custom";
             JsonArray ids  = dev.createNestedArray("ids");
-            ids.add(Mqtt::basename());
+            ids.add(Mqtt::basename() + "-custom");
 
             // add "availability" section
             Mqtt::add_avty_to_doc(stat_t, config.as<JsonObject>(), val_cond);
@@ -469,7 +473,7 @@ uint8_t WebCustomEntityService::has_commands() {
     return count;
 }
 
-// send to dashboard, msgpack don't like serialized, use number
+// send to dashboard
 void WebCustomEntityService::generate_value_web(JsonObject & output) {
     EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
 

@@ -8,6 +8,12 @@ the LICENSE file.
 
 #pragma once
 
+#ifndef TASMOTA_SDK
+#define EMC_CLIENT_SECURE
+#else
+#undef EMC_CLIENT_SECURE
+#endif
+
 #ifndef EMC_TX_TIMEOUT
 #define EMC_TX_TIMEOUT 2000
 #endif
@@ -51,6 +57,10 @@ the LICENSE file.
 
 #ifndef EMC_TASK_STACK_SIZE
 #define EMC_TASK_STACK_SIZE 5120
+#endif
+
+#ifndef EMC_MULTIPLE_CALLBACKS
+#define EMC_MULTIPLE_CALLBACKS 0
 #endif
 
 #ifndef EMC_USE_WATCHDOG

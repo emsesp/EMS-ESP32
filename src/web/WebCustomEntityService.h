@@ -50,9 +50,11 @@ class WebCustomEntity {
 
 class WebCustomEntityService : public StatefulService<WebCustomEntity> {
   public:
-    WebCustomEntityService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
+    WebCustomEntityService(PsychicHttpServer * server, FS * fs, SecurityManager * securityManager);
 
     void begin();
+    void registerURI();
+
     void publish_single(const CustomEntityItem & entity);
     void publish(const bool force = false);
     bool command_setvalue(const char * value, const std::string name);

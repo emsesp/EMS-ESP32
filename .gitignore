@@ -61,3 +61,4 @@ bw-output/
 # dump_entities.csv
 # dump_entities.xls*
 
+benchmark/*.log

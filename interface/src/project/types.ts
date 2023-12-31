@@ -266,8 +266,7 @@ export interface BoardProfile {
   eth_clock_mode: number;
 }
 
-export interface APIcall {
-  device: string;
+export interface APIdata {
   entity: string;
   id: any;
 }

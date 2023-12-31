@@ -2,12 +2,11 @@
 #define SystemStatus_h
 
 #include <WiFi.h>
-#include <AsyncTCP.h>
 #include <FS.h>
 #include <LittleFS.h>
 
 #include <ArduinoJson.h>
-#include <ESPAsyncWebServer.h>
+#include <PsychicHttp.h>
 #include <SecurityManager.h>
 
 #define MAX_ESP_STATUS_SIZE 1024
@@ -15,10 +14,14 @@
 
 class SystemStatus {
   public:
-    SystemStatus(AsyncWebServer * server, SecurityManager * securityManager);
+    SystemStatus(PsychicHttpServer * server, SecurityManager * securityManager);
+    void registerURI();
 
   private:
-    void systemStatus(AsyncWebServerRequest * request);
+    SecurityManager *   _securityManager;
+    PsychicHttpServer * _server;
+
+    esp_err_t systemStatus(PsychicRequest * request);
 };
 
 #endif

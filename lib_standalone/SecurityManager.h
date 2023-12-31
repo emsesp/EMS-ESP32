@@ -2,17 +2,12 @@
 #define SecurityManager_h
 
 #include <Arduino.h>
+#include <PsychicHttp.h>
 #include <Features.h>
-#include <ESPAsyncWebServer.h>
-#include <AsyncJson.h>
 #include <list>
 
-#ifndef FACTORY_JWT_SECRET
-#define FACTORY_JWT_SECRET ESPUtils::defaultDeviceValue()
-#endif
-
+#define FACTORY_JWT_SECRET "secret"
 #define ACCESS_TOKEN_PARAMATER "access_token"
-
 #define AUTHORIZATION_HEADER "Authorization"
 #define AUTHORIZATION_HEADER_PREFIX "Bearer "
 #define AUTHORIZATION_HEADER_PREFIX_LEN 7
@@ -69,15 +64,35 @@ class AuthenticationPredicates {
 
 class SecurityManager {
   public:
-#if FT_ENABLED(FT_SECURITY)
+    /*
+   * Authenticate, returning the user if found
+   */
     virtual Authentication authenticate(const String & username, const String & password) = 0;
-    virtual String         generateJWT(User * user)                                       = 0;
-#endif
 
-    virtual Authentication               authenticateRequest(AsyncWebServerRequest * request)                                    = 0;
-    virtual ArRequestFilterFunction      filterRequest(AuthenticationPredicate predicate)                                        = 0;
-    virtual ArRequestHandlerFunction     wrapRequest(ArRequestHandlerFunction onRequest, AuthenticationPredicate predicate)      = 0;
-    virtual ArJsonRequestHandlerFunction wrapCallback(ArJsonRequestHandlerFunction onRequest, AuthenticationPredicate predicate) = 0;
+    /*
+   * Generate a JWT for the user provided
+   */
+    virtual String generateJWT(User * user) = 0;
+
+    /*
+   * Check the request header for the Authorization token
+   */
+    virtual Authentication authenticateRequest(PsychicRequest * request) = 0;
+
+    /**
+   * Filter a request with the provided predicate, only returning true if the predicate matches.
+   */
+    virtual PsychicRequestFilterFunction filterRequest(AuthenticationPredicate predicate) = 0;
+
+    /**
+   * Wrap the provided request to provide validation against an AuthenticationPredicate.
+   */
+    virtual PsychicHttpRequestCallback wrapRequest(PsychicHttpRequestCallback onRequest, AuthenticationPredicate predicate) = 0;
+
+    /**
+   * Wrap the provided json request callback to provide validation against an AuthenticationPredicate.
+   */
+    virtual PsychicJsonRequestCallback wrapCallback(PsychicJsonRequestCallback onRequest, AuthenticationPredicate predicate) = 0;
 };
 
 #endif

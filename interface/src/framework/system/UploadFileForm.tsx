@@ -28,7 +28,7 @@ const UploadFileForm: FC = () => {
   const { send: getSchedule, onSuccess: onSuccessGetSchedule } = useRequest(EMSESP.getSchedule(), {
     immediate: false
   });
-  const { send: getAPI, onSuccess: onGetAPI } = useRequest((data) => EMSESP.API(data), {
+  const { send: getSystemAPI, onSuccess: onSystemAPI } = useRequest((data) => EMSESP.APIcall('system', data), {
     immediate: false
   });
 
@@ -89,8 +89,8 @@ const UploadFileForm: FC = () => {
   onSuccessGetSchedule((event) => {
     saveFile(event.data, 'schedule.json');
   });
-  onGetAPI((event) => {
-    saveFile(event.data, event.sendArgs[0].device + '_' + event.sendArgs[0].entity + '.txt');
+  onSystemAPI((event) => {
+    saveFile(event.data, event.sendArgs[0].entity + '.txt');
   });
 
   const downloadSettings = async () => {
@@ -121,8 +121,8 @@ const UploadFileForm: FC = () => {
       });
   };
 
-  const callAPI = async (device: string, entity: string) => {
-    await getAPI({ device, entity, id: 0 }).catch((error) => {
+  const callSystemAPI = async (entity: string) => {
+    await getSystemAPI({ entity, id: 0 }).catch((error) => {
       toast.error(error.message);
     });
   };
@@ -134,9 +134,10 @@ const UploadFileForm: FC = () => {
       </Typography>
       <Box mb={2} color="warning.main">
         <Typography variant="body2">
-          {LL.UPLOAD_TEXT()}
+          {LL.UPLOAD_TEXT()}.
           <br />
-          {LL.RESTART_TEXT()}.
+          <br />
+          {LL.RESTART_TEXT(1)}.
         </Typography>
       </Box>
       {md5 && (
@@ -148,33 +149,28 @@ const UploadFileForm: FC = () => {
       {!isUploading && (
         <>
           <Typography sx={{ pt: 4, pb: 2 }} variant="h6" color="primary">
-            {LL.DOWNLOAD(0)}&nbsp;{LL.SUPPORT_INFORMATION()}
+            {LL.DOWNLOAD(0)}&nbsp;{LL.SUPPORT_INFORMATION(1)}
           </Typography>
           <Box color="warning.main">
             <Typography mb={1} variant="body2">
               {LL.HELP_INFORMATION_4()}
             </Typography>
           </Box>
-          <Button
-            startIcon={<DownloadIcon />}
-            variant="outlined"
-            color="primary"
-            onClick={() => callAPI('system', 'info')}
-          >
-            {LL.SUPPORT_INFORMATION()}
+          <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={() => callSystemAPI('info')}>
+            {LL.SUPPORT_INFORMATION(0)}
           </Button>
           <Button
             sx={{ ml: 2 }}
             startIcon={<DownloadIcon />}
             variant="outlined"
             color="primary"
-            onClick={() => callAPI('system', 'allvalues')}
+            onClick={() => callSystemAPI('allvalues')}
           >
             All Values
           </Button>
 
           <Typography sx={{ pt: 4, pb: 2 }} variant="h6" color="primary">
-            {LL.DOWNLOAD(0)}&nbsp;{LL.SETTINGS()}
+            {LL.DOWNLOAD(0)}&nbsp;{LL.SETTINGS(1)}
           </Typography>
           <Box color="warning.main">
             <Typography mb={1} variant="body2">

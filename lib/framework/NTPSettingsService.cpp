@@ -4,22 +4,26 @@
 
 using namespace std::placeholders; // for `_1` etc
 
-NTPSettingsService::NTPSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
-    : _httpEndpoint(NTPSettings::read, NTPSettings::update, this, server, NTP_SETTINGS_SERVICE_PATH, securityManager)
-    , _fsPersistence(NTPSettings::read, NTPSettings::update, this, fs, NTP_SETTINGS_FILE)
-    , _timeHandler(TIME_PATH, securityManager->wrapCallback(std::bind(&NTPSettingsService::configureTime, this, _1, _2), AuthenticationPredicates::IS_ADMIN)) {
-    _timeHandler.setMethod(HTTP_POST);
-    _timeHandler.setMaxContentLength(MAX_TIME_SIZE);
-    server->addHandler(&_timeHandler);
-
+NTPSettingsService::NTPSettingsService(PsychicHttpServer * server, FS * fs, SecurityManager * securityManager)
+    : _server(server)
+    , _securityManager(securityManager)
+    , _httpEndpoint(NTPSettings::read, NTPSettings::update, this, server, NTP_SETTINGS_SERVICE_PATH, securityManager)
+    , _fsPersistence(NTPSettings::read, NTPSettings::update, this, fs, NTP_SETTINGS_FILE) {
     WiFi.onEvent(std::bind(&NTPSettingsService::WiFiEvent, this, _1));
-
     addUpdateHandler([&](const String & originId) { configureNTP(); }, false);
 }
 
 void NTPSettingsService::begin() {
     _fsPersistence.readFromFS();
     configureNTP();
+}
+
+void NTPSettingsService::registerURI() {
+    _httpEndpoint.registerURI();
+
+    _server->on(TIME_PATH,
+                HTTP_POST,
+                _securityManager->wrapCallback(std::bind(&NTPSettingsService::configureTime, this, _1, _2), AuthenticationPredicates::IS_ADMIN));
 }
 
 // handles both WiFI and Ethernet
@@ -61,7 +65,7 @@ void NTPSettingsService::configureNTP() {
     }
 }
 
-void NTPSettingsService::configureTime(AsyncWebServerRequest * request, JsonVariant & json) {
+esp_err_t NTPSettingsService::configureTime(PsychicRequest * request, JsonVariant & json) {
     if (json.is<JsonObject>()) {
         struct tm tm        = {0};
         String    timeLocal = json["local_time"];
@@ -71,14 +75,11 @@ void NTPSettingsService::configureTime(AsyncWebServerRequest * request, JsonVari
             time_t         time = mktime(&tm);
             struct timeval now  = {.tv_sec = time};
             settimeofday(&now, nullptr);
-            AsyncWebServerResponse * response = request->beginResponse(200);
-            request->send(response);
-            return;
+            return request->reply(200);
         }
     }
 
-    AsyncWebServerResponse * response = request->beginResponse(400);
-    request->send(response);
+    return request->reply(400);
 }
 
 void NTPSettingsService::ntp_received(struct timeval * tv) {

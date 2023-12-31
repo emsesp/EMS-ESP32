@@ -8,6 +8,8 @@
 #include <ESPUtils.h>
 
 #include <uuid/common.h>
+#include <esp_wps.h>
+#include <WiFi.h>
 
 #define MQTT_RECONNECTION_DELAY 2000 // 2 seconds
 
@@ -103,12 +105,14 @@ class MqttSettings {
 
 class MqttSettingsService : public StatefulService<MqttSettings> {
   public:
-    MqttSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
+    MqttSettingsService(PsychicHttpServer * server, FS * fs, SecurityManager * securityManager);
     ~MqttSettingsService();
 
-    void                                 begin();
-    void                                 startClient();
-    void                                 loop();
+    void begin();
+    void startClient();
+    void loop();
+    void registerURI();
+
     bool                                 isEnabled();
     bool                                 isConnected();
     const char *                         getClientId();
@@ -120,6 +124,9 @@ class MqttSettingsService : public StatefulService<MqttSettings> {
     void onConfigUpdated();
 
   private:
+    SecurityManager *   _securityManager;
+    PsychicHttpServer * _server;
+
     HttpEndpoint<MqttSettings>  _httpEndpoint;
     FSPersistence<MqttSettings> _fsPersistence;
 

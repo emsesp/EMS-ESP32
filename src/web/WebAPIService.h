@@ -1,7 +1,7 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020-2023  Paul Derbyshire
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -19,7 +19,7 @@
 #ifndef WebAPIService_h
 #define WebAPIService_h
 
-#define EMSESP_API_SERVICE_PATH "/api"
+#define EMSESP_API_SERVICE_PATH "/api/?*"
 #define GET_SETTINGS_PATH "/rest/getSettings"
 #define GET_CUSTOMIZATIONS_PATH "/rest/getCustomizations"
 #define GET_SCHEDULE_PATH "/rest/getSchedule"
@@ -29,10 +29,9 @@ namespace emsesp {
 
 class WebAPIService {
   public:
-    WebAPIService(AsyncWebServer * server, SecurityManager * securityManager);
+    WebAPIService(PsychicHttpServer * server, SecurityManager * securityManager);
 
-    void webAPIService_post(AsyncWebServerRequest * request, JsonVariant & json); // for POSTs
-    void webAPIService_get(AsyncWebServerRequest * request);                      // for GETs
+    void registerURI();
 
     static uint32_t api_count() {
         return api_count_;
@@ -43,18 +42,18 @@ class WebAPIService {
     }
 
   private:
-    SecurityManager *           _securityManager;
-    AsyncCallbackJsonWebHandler _apiHandler; // for POSTs
+    SecurityManager *   _securityManager;
+    PsychicHttpServer * _server;
 
     static uint32_t api_count_;
     static uint16_t api_fails_;
 
-    void parse(AsyncWebServerRequest * request, JsonObject & input);
+    esp_err_t parse(PsychicRequest * request, JsonObject & input);
 
-    void getSettings(AsyncWebServerRequest * request);
-    void getCustomizations(AsyncWebServerRequest * request);
-    void getSchedule(AsyncWebServerRequest * request);
-    void getEntities(AsyncWebServerRequest * request);
+    esp_err_t getSettings(PsychicRequest * request);
+    esp_err_t getCustomizations(PsychicRequest * request);
+    esp_err_t getSchedule(PsychicRequest * request);
+    esp_err_t getEntities(PsychicRequest * request);
 };
 
 } // namespace emsesp

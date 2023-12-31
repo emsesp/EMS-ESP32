@@ -544,9 +544,9 @@ void TemperatureSensor::publish_values(const bool force) {
                 config["name"] = name;
 
                 JsonObject dev = config.createNestedObject("dev");
-                dev["name"]    = Mqtt::basename();
+                dev["name"]    = Mqtt::basename() + " Temperature";
                 JsonArray ids  = dev.createNestedArray("ids");
-                ids.add(Mqtt::basename());
+                ids.add(Mqtt::basename() + "-temperature");
 
                 // add "availability" section
                 Mqtt::add_avty_to_doc(stat_t, config.as<JsonObject>(), val_cond);

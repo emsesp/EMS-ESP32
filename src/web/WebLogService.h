@@ -1,7 +1,7 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020-2023  Paul Derbyshire
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -30,10 +30,13 @@ class WebLogService : public uuid::log::Handler {
     static constexpr size_t MAX_LOG_MESSAGES = 50;
     static constexpr size_t REFRESH_SYNC     = 50;
 
-    WebLogService(AsyncWebServer * server, SecurityManager * securityManager);
+    WebLogService(PsychicHttpServer * server, SecurityManager * securityManager);
 
-    void             begin();
-    void             start();
+    void begin();
+    void start();
+    void loop();
+    void registerURI();
+
     uuid::log::Level log_level() const;
     void             log_level(uuid::log::Level level);
     size_t           maximum_log_messages() const;
@@ -41,12 +44,14 @@ class WebLogService : public uuid::log::Handler {
     void             maximum_log_messages(size_t count);
     bool             compact() const;
     void             compact(bool compact);
-    void             loop();
 
     virtual void operator<<(std::shared_ptr<uuid::log::Message> message);
 
   private:
-    AsyncEventSource events_;
+    SecurityManager *   _securityManager;
+    PsychicHttpServer * _server;
+
+    PsychicEventSource _events;
 
     class QueuedLogMessage {
       public:
@@ -58,15 +63,12 @@ class WebLogService : public uuid::log::Handler {
         const std::shared_ptr<const uuid::log::Message> content_; // Log message content
     };
 
-    void transmit(const QueuedLogMessage & message);
-    void fetchLog(AsyncWebServerRequest * request);
-    void getValues(AsyncWebServerRequest * request);
-
+    void   transmit(const QueuedLogMessage & message);
     char * messagetime(char * out, const uint64_t t, const size_t bufsize);
 
-    void setValues(AsyncWebServerRequest * request, JsonVariant & json);
-
-    AsyncCallbackJsonWebHandler setValues_; // for POSTs
+    esp_err_t fetchLog(PsychicRequest * request);
+    esp_err_t getValues(PsychicRequest * request);
+    esp_err_t setValues(PsychicRequest * request, JsonVariant & json);
 
     uint64_t                     last_transmit_        = 0;                // Last transmit time
     size_t                       maximum_log_messages_ = MAX_LOG_MESSAGES; // Maximum number of log messages to buffer before they are output

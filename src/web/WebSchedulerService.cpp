@@ -22,9 +22,13 @@ namespace emsesp {
 
 using namespace std::placeholders; // for `_1` etc
 
-WebSchedulerService::WebSchedulerService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
+WebSchedulerService::WebSchedulerService(PsychicHttpServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(WebScheduler::read, WebScheduler::update, this, server, EMSESP_SCHEDULER_SERVICE_PATH, securityManager, AuthenticationPredicates::IS_AUTHENTICATED)
     , _fsPersistence(WebScheduler::read, WebScheduler::update, this, fs, EMSESP_SCHEDULER_FILE) {
+}
+
+void WebSchedulerService::registerURI() {
+    _httpEndpoint.registerURI();
 }
 
 // load the settings when the service starts
@@ -288,9 +292,9 @@ void WebSchedulerService::publish(const bool force) {
                 }
 
                 JsonObject dev = config.createNestedObject("dev");
-                dev["name"]    = Mqtt::basename();
+                dev["name"]    = Mqtt::basename() + " Scheduler";
                 JsonArray ids  = dev.createNestedArray("ids");
-                ids.add(Mqtt::basename());
+                ids.add(Mqtt::basename() + "-scheduler");
 
                 // add "availability" section
                 Mqtt::add_avty_to_doc(stat_t, config.as<JsonObject>(), val_cond);
@@ -352,7 +356,7 @@ bool WebSchedulerService::command(const char * cmd, const char * data) {
     } else {
         snprintf(error, sizeof(error), "Scheduled command %s failed with error code (%s)", cmd, Command::return_code_string(return_code).c_str());
     }
-    emsesp::EMSESP::logger().err(error);
+    EMSESP::logger().err(error);
     return false;
 }
 

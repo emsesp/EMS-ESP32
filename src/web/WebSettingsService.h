@@ -117,16 +117,20 @@ class WebSettings {
 
 class WebSettingsService : public StatefulService<WebSettings> {
   public:
-    WebSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
+    WebSettingsService(PsychicHttpServer * server, FS * fs, SecurityManager * securityManager);
 
     void begin();
     void save();
+    void registerURI();
 
   private:
+    SecurityManager *   _securityManager;
+    PsychicHttpServer * _server;
+
     HttpEndpoint<WebSettings>  _httpEndpoint;
     FSPersistence<WebSettings> _fsPersistence;
 
-    void board_profile(AsyncWebServerRequest * request);
+    esp_err_t board_profile(PsychicRequest * request);
 
     void onUpdate();
 };

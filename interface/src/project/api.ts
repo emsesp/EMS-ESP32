@@ -1,5 +1,5 @@
 import type {
-  APIcall,
+  APIdata,
   Settings,
   Status,
   CoreData,
@@ -20,7 +20,7 @@ export const readCoreData = () => alovaInstance.Get<CoreData>(`/rest/coreData`);
 export const readDeviceData = (id: number) =>
   alovaInstance.Get<DeviceData>('/rest/deviceData', {
     // alovaInstance.Get<DeviceData>(`/rest/deviceData/${id}`, {
-    params: { id }, // TODO remove later
+    params: { id }, // TODO replace params later
     responseType: 'arraybuffer' // uses msgpack
   });
 export const writeDeviceValue = (data: any) => alovaInstance.Post('/rest/writeDeviceValue', data);
@@ -44,7 +44,7 @@ export const readStatus = () => alovaInstance.Get<Status>('/rest/status');
 export const scanDevices = () => alovaInstance.Post('/rest/scanDevices');
 
 // HelpInformation
-export const API = (apiCall: APIcall) => alovaInstance.Post('/api', apiCall);
+export const APIcall = (device: string, apiData: APIdata) => alovaInstance.Post(`/api/${device}`, apiData);
 
 // UploadFileForm
 export const getSettings = () => alovaInstance.Get('/rest/getSettings');
@@ -56,7 +56,7 @@ export const getSchedule = () => alovaInstance.Get('/rest/getSchedule');
 export const readDeviceEntities = (id: number) =>
   // alovaInstance.Get<DeviceEntity[]>(`/rest/deviceEntities/${id}`, {
   alovaInstance.Get<DeviceEntity[]>(`/rest/deviceEntities`, {
-    params: { id }, // TODO remove later
+    params: { id }, // TODO replace params later
     responseType: 'arraybuffer',
     transformData(data: any) {
       return data.map((de: DeviceEntity) => ({ ...de, o_m: de.m, o_cn: de.cn, o_mi: de.mi, o_ma: de.ma }));

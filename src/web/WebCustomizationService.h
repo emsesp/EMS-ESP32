@@ -80,9 +80,10 @@ class WebCustomization {
 
 class WebCustomizationService : public StatefulService<WebCustomization> {
   public:
-    WebCustomizationService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
+    WebCustomizationService(PsychicHttpServer * server, FS * fs, SecurityManager * securityManager);
 
     void begin();
+    void registerURI();
 
 // make all functions public so we can test in the debug and standalone mode
 #ifndef EMSESP_STANDALONE
@@ -93,14 +94,16 @@ class WebCustomizationService : public StatefulService<WebCustomization> {
     FSPersistence<WebCustomization> _fsPersistence;
 
     // GET
-    void devices(AsyncWebServerRequest * request);
-    void device_entities(AsyncWebServerRequest * request);
+    esp_err_t devices(PsychicRequest * request);
+    esp_err_t device_entities(PsychicRequest * request);
 
     // POST
-    void customization_entities(AsyncWebServerRequest * request, JsonVariant & json);
-    void reset_customization(AsyncWebServerRequest * request); // command
+    esp_err_t customization_entities(PsychicRequest * request, JsonVariant & json);
+    esp_err_t reset_customization(PsychicRequest * request); // is a command
 
-    AsyncCallbackJsonWebHandler _masked_entities_handler;
+  private:
+    SecurityManager *   _securityManager;
+    PsychicHttpServer * _server;
 };
 
 } // namespace emsesp

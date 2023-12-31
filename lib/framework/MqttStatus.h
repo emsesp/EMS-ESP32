@@ -4,7 +4,7 @@
 #include <WiFi.h>
 #include <MqttSettingsService.h>
 #include <ArduinoJson.h>
-#include <ESPAsyncWebServer.h>
+#include <PsychicHttp.h>
 #include <SecurityManager.h>
 
 #define MAX_MQTT_STATUS_SIZE 1024
@@ -12,12 +12,16 @@
 
 class MqttStatus {
   public:
-    MqttStatus(AsyncWebServer * server, MqttSettingsService * mqttSettingsService, SecurityManager * securityManager);
+    MqttStatus(PsychicHttpServer * server, MqttSettingsService * mqttSettingsService, SecurityManager * securityManager);
+    void registerURI();
 
   private:
+    SecurityManager *   _securityManager;
+    PsychicHttpServer * _server;
+
     MqttSettingsService * _mqttSettingsService;
 
-    void mqttStatus(AsyncWebServerRequest * request);
+    esp_err_t mqttStatus(PsychicRequest * request);
 };
 
 #endif

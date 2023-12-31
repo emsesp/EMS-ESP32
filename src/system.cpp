@@ -64,7 +64,8 @@ const char * const languages[] = {EMSESP_LOCALE_EN,
                                   EMSESP_LOCALE_NO,
                                   EMSESP_LOCALE_FR,
                                   EMSESP_LOCALE_TR,
-                                  EMSESP_LOCALE_IT};
+                                  EMSESP_LOCALE_IT,
+                                  EMSESP_LOCALE_SK};
 #endif
 
 static constexpr uint8_t NUM_LANGUAGES = sizeof(languages) / sizeof(const char *);
@@ -253,7 +254,9 @@ bool System::command_watch(const char * value, const int8_t id) {
 }
 
 void System::store_nvs_values() {
-    Command::call(EMSdevice::DeviceType::BOILER, "nompower", "-1"); // trigger a write
+    if (Command::find_command(EMSdevice::DeviceType::BOILER, 0, "nompower") != nullptr) {
+        Command::call(EMSdevice::DeviceType::BOILER, "nompower", "-1"); // trigger a write
+    }
     EMSESP::analogsensor_.store_counters();
     EMSESP::nvs_.end();
 }
@@ -302,7 +305,7 @@ void System::syslog_init() {
 #ifndef EMSESP_STANDALONE
     if (syslog_enabled_) {
         // start & configure syslog
-        EMSESP::logger().info("Starting Syslog service");
+        logger_.info("Starting Syslog service");
         syslog_.start();
 
         syslog_.log_level((uuid::log::Level)syslog_level_);
@@ -316,7 +319,7 @@ void System::syslog_init() {
     } else if (syslog_.started()) {
         // in case service is still running, this flushes the queue
         // https://github.com/emsesp/EMS-ESP/issues/496
-        EMSESP::logger().info("Stopping Syslog");
+        logger_.info("Stopping Syslog service");
         syslog_.log_level((uuid::log::Level)-1); // stop server
         syslog_.mark_interval(0);
         syslog_.destination("");
@@ -442,7 +445,6 @@ void System::start() {
         setCpuFrequencyMhz(160);
 #endif
     }
-
     // get current memory values
     fstotal_ = LittleFS.totalBytes() / 1024; // read only once, it takes 500 ms to read
     psram_   = ESP.getPsramSize() / 1024;
@@ -729,7 +731,11 @@ void System::network_init(bool refresh) {
     //  ETH_CLOCK_GPIO17_OUT = 3  RMII clock output from GPIO17, for 50hz inverted clock
     auto clock_mode = (eth_clock_mode_t)eth_clock_mode_;
 
-    eth_present_ = ETH.begin((eth_phy_type_t)phy_addr, power, mdc, mdio, type, clock_mode);
+#if ESP_ARDUINO_VERSION_MAJOR < 3
+    eth_present_ = ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode);
+#else
+    eth_present_ = ETH.begin(type, phy_addr, mdc, mdio, power, clock_mode);
+#endif
 #endif
 }
 
@@ -1039,42 +1045,46 @@ bool System::check_restore() {
 
 #ifndef EMSESP_STANDALONE
     // see if we have a temp file, if so try and read it
-    File new_file = LittleFS.open(TEMP_FILENAME_PATH);
-    if (new_file) {
-        DynamicJsonDocument  jsonDocument = DynamicJsonDocument(FS_BUFFER_SIZE);
-        DeserializationError error        = deserializeJson(jsonDocument, new_file);
-        if (error == DeserializationError::Ok && jsonDocument.is<JsonObject>()) {
-            JsonObject input = jsonDocument.as<JsonObject>();
-            // see what type of file it is, either settings or customization. anything else is ignored
-            std::string settings_type = input["type"];
-            if (settings_type == "settings") {
-                // It's a settings file. Parse each section separately. If it's system related it will require a reboot
-                reboot_required = saveSettings(NETWORK_SETTINGS_FILE, "Network", input);
-                reboot_required |= saveSettings(AP_SETTINGS_FILE, "AP", input);
-                reboot_required |= saveSettings(MQTT_SETTINGS_FILE, "MQTT", input);
-                reboot_required |= saveSettings(NTP_SETTINGS_FILE, "NTP", input);
-                reboot_required |= saveSettings(SECURITY_SETTINGS_FILE, "Security", input);
-                reboot_required |= saveSettings(EMSESP_SETTINGS_FILE, "Settings", input);
-                reboot_required |= saveSettings(OTA_SETTINGS_FILE, "OTA", input);
-            } else if (settings_type == "customizations") {
-                // it's a customization file, just replace it and there's no need to reboot
-                saveSettings(EMSESP_CUSTOMIZATION_FILE, "Customizations", input);
-            } else if (settings_type == "schedule") {
-                // it's a schedule file, just replace it and there's no need to reboot
-                saveSettings(EMSESP_SCHEDULER_FILE, "Schedule", input);
-            } else if (settings_type == "entities") {
-                // it's a entity file, just replace it and there's no need to reboot
-                saveSettings(EMSESP_CUSTOMENTITY_FILE, "Entities", input);
+    // prevents open(): /littlefs/tmp_upload does not exist, no permits for creation
+    // but doesn't work! https://github.com/espressif/arduino-esp32/issues/7615
+    if (LittleFS.exists(TEMP_FILENAME_PATH)) {
+        File new_file = LittleFS.open(TEMP_FILENAME_PATH);
+        if (new_file) {
+            DynamicJsonDocument  jsonDocument = DynamicJsonDocument(FS_BUFFER_SIZE);
+            DeserializationError error        = deserializeJson(jsonDocument, new_file);
+            if (error == DeserializationError::Ok && jsonDocument.is<JsonObject>()) {
+                JsonObject input = jsonDocument.as<JsonObject>();
+                // see what type of file it is, either settings or customization. anything else is ignored
+                std::string settings_type = input["type"];
+                if (settings_type == "settings") {
+                    // It's a settings file. Parse each section separately. If it's system related it will require a reboot
+                    reboot_required = saveSettings(NETWORK_SETTINGS_FILE, "Network", input);
+                    reboot_required |= saveSettings(AP_SETTINGS_FILE, "AP", input);
+                    reboot_required |= saveSettings(MQTT_SETTINGS_FILE, "MQTT", input);
+                    reboot_required |= saveSettings(NTP_SETTINGS_FILE, "NTP", input);
+                    reboot_required |= saveSettings(SECURITY_SETTINGS_FILE, "Security", input);
+                    reboot_required |= saveSettings(EMSESP_SETTINGS_FILE, "Settings", input);
+                    reboot_required |= saveSettings(OTA_SETTINGS_FILE, "OTA", input);
+                } else if (settings_type == "customizations") {
+                    // it's a customization file, just replace it and there's no need to reboot
+                    saveSettings(EMSESP_CUSTOMIZATION_FILE, "Customizations", input);
+                } else if (settings_type == "schedule") {
+                    // it's a schedule file, just replace it and there's no need to reboot
+                    saveSettings(EMSESP_SCHEDULER_FILE, "Schedule", input);
+                } else if (settings_type == "entities") {
+                    // it's a entity file, just replace it and there's no need to reboot
+                    saveSettings(EMSESP_CUSTOMENTITY_FILE, "Entities", input);
+                } else {
+                    LOG_ERROR("Unrecognized file uploaded");
+                }
             } else {
-                LOG_ERROR("Unrecognized file uploaded");
+                LOG_ERROR("Unrecognized file uploaded, not json");
             }
-        } else {
-            LOG_ERROR("Unrecognized file uploaded, not json");
-        }
 
-        // close (just in case) and remove the temp file
-        new_file.close();
-        LittleFS.remove(TEMP_FILENAME_PATH);
+            // close (just in case) and remove the temp file
+            new_file.close();
+            LittleFS.remove(TEMP_FILENAME_PATH);
+        }
     }
 #endif
 
@@ -1104,7 +1114,7 @@ bool System::check_upgrade(bool factory_settings) {
 
 #if defined(EMSESP_DEBUG)
     if (!missing_version) {
-        LOG_INFO("Current version from settings is %d.%d.%d-%s",
+        LOG_INFO("Checking version (settings has %d.%d.%d-%s)...",
                  settings_version.major(),
                  settings_version.minor(),
                  settings_version.patch(),
@@ -1112,26 +1122,20 @@ bool System::check_upgrade(bool factory_settings) {
     }
 #endif
 
-    // always save the new version to the settings
-    EMSESP::webSettingsService.update(
-        [&](WebSettings & settings) {
-            settings.version = EMSESP_APP_VERSION;
-            return StateUpdateResult::CHANGED;
-        },
-        "local");
-
     if (factory_settings) {
         return false; // fresh install, do nothing
     }
 
     version::Semver200_version this_version(EMSESP_APP_VERSION);
 
+    bool save_version = true;
+
     // compare versions
-    bool reboot_required = false;
     if (this_version > settings_version) {
+        // need upgrade
         LOG_NOTICE("Upgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
 
-        // if we're coming from 3.4.4 or 3.5.0b14 then we need to apply new settings
+        // if we're coming from 3.4.4 or 3.5.0b14 which had no version stored then we need to apply new settings
         if (missing_version) {
             LOG_DEBUG("Setting MQTT Entity ID format to v3.4 format");
             EMSESP::esp8266React.getMqttSettingsService()->update(
@@ -1141,15 +1145,26 @@ bool System::check_upgrade(bool factory_settings) {
                 },
                 "local");
         }
-
     } else if (this_version < settings_version) {
+        // need downgrade
         LOG_NOTICE("Downgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
     } else {
         // same version, do nothing
-        return false;
+        save_version = false;
     }
 
-    return reboot_required;
+    // if we did a change, set the new version and reboot
+    if (save_version) {
+        EMSESP::webSettingsService.update(
+            [&](WebSettings & settings) {
+                settings.version = EMSESP_APP_VERSION;
+                return StateUpdateResult::CHANGED;
+            },
+            "local");
+        return true; // need reboot
+    }
+
+    return false;
 }
 
 // list commands
@@ -1201,17 +1216,26 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     // System
     node                     = output.createNestedObject("System Info");
     node["version"]          = EMSESP_APP_VERSION;
-    node["platform"]         = EMSESP_PLATFORM;
     node["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     node["uptime (seconds)"] = uuid::get_uptime_sec();
 #ifndef EMSESP_STANDALONE
+    node["platform"] = ARDUINO_VERSION;
+
+    node["sdk"]       = ESP.getSdkVersion();
     node["free mem"]  = getHeapMem();
     node["max alloc"] = getMaxAllocMem();
+    node["used app"]  = EMSESP::system_.appUsed(); // kilobytes
     node["free app"]  = EMSESP::system_.appFree(); // kilobytes
-#endif
-    node["reset reason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
+    node["partition"] = esp_ota_get_running_partition()->label;
 
-#ifndef EMSESP_STANDALONE
+    // hash: Helpers::data_to_hex(desc->app_elf_sha256, sizeof(desc->app_elf_sha256));
+    const esp_app_desc_t * desc =
+        esp_ota_get_app_description(); // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/misc_system_api.html#_CPPv414esp_app_desc_t
+    if (desc != nullptr) {
+        node["app_build"] = std::string(desc->date) + " " + desc->time;
+    }
+    node["build_date"] = std::string(__DATE__) + " " + __TIME__;
+
     // Network Status
     node = output.createNestedObject("Network Info");
     if (EMSESP::system_.ethernet_connected()) {
@@ -1424,10 +1448,11 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
                     obj["product id"] = emsdevice->product_id();
                     obj["version"]    = emsdevice->version();
                     obj["entities"]   = emsdevice->count_entities();
-                    char result[300];
+                    char result[300]  = {'\0'};
                     (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::RECEIVED);
+                    // don't show handlers if there aren't any
                     if (result[0] != '\0') {
-                        obj["handlers received"] = result; // don't show handlers if there aren't any
+                        obj["handlers received"] = result;
                     }
                     (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::FETCHED);
                     if (result[0] != '\0') {

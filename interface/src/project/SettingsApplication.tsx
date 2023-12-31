@@ -384,6 +384,7 @@ const SettingsApplication: FC = () => {
             <MenuItem value="nl">Nederlands (NL)</MenuItem>
             <MenuItem value="no">Norsk (NO)</MenuItem>
             <MenuItem value="pl">Polski (PL)</MenuItem>
+            <MenuItem value="sk">Slovenčina (SK)</MenuItem>
             <MenuItem value="sv">Svenska (SV)</MenuItem>
             <MenuItem value="tr">Türk (TR)</MenuItem>
           </TextField>
@@ -644,7 +645,7 @@ const SettingsApplication: FC = () => {
           </Grid>
         )}
         {restartNeeded && (
-          <MessageBox my={2} level="warning" message={LL.RESTART_TEXT()}>
+          <MessageBox my={2} level="warning" message={LL.RESTART_TEXT(0)}>
             <Button startIcon={<PowerSettingsNewIcon />} variant="contained" color="error" onClick={restart}>
               {LL.RESTART()}
             </Button>
