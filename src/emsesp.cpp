@@ -1435,8 +1435,9 @@ void EMSESP::setupWeb() {
     //   esp8266React services has 13
     //   custom projects has around 23
     webServer.config.max_uri_handlers = 80;
-    // webServer.config.uri_match_fn     = NULL; // don't use wildcards
 
+    // TODO remove experimental stuff
+    // webServer.config.uri_match_fn     = NULL; // don't use wildcards
     // webServer.config.task_priority = uxTaskPriorityGet(nullptr); // seems to make it slightly slower
 
     // TODO add support for https
