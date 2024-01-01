@@ -1,3 +1,4 @@
+/*
 import { debounce } from 'lodash-es';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Sockette from 'sockette';
@@ -89,3 +90,4 @@ export const useWs = <D>(wsUrl: string, wsThrottle = 100) => {
 
   return { connected, data, updateData } as const;
 };
+*/
