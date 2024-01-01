@@ -1,3 +1,4 @@
+/*
 #ifndef WebSocketTxRx_h
 #define WebSocketTxRx_h
 
@@ -107,13 +108,12 @@ class WebSocketTx : virtual public WebSocketConnector<T> {
         }
     }
 
-    /**
-   * Broadcasts the payload to the destination, if provided. Otherwise broadcasts to all clients except the origin, if
-   * specified.
-   *
-   * Original implementation sent clients their own IDs so they could ignore updates they initiated. This approach
-   * simplifies the client and the server implementation but may not be sufficent for all use-cases.
-   */
+   // Broadcasts the payload to the destination, if provided. Otherwise broadcasts to all clients except the origin, if
+   // specified.
+   //
+   // Original implementation sent clients their own IDs so they could ignore updates they initiated. This approach
+   // simplifies the client and the server implementation but may not be sufficent for all use-cases.
+   //
     void transmitData(AsyncWebSocketClient * client, const String & originId) {
         DynamicJsonDocument jsonDocument = DynamicJsonDocument(WebSocketConnector<T>::_bufferSize);
         JsonObject          root         = jsonDocument.to<JsonObject>();
@@ -214,3 +214,4 @@ class WebSocketTxRx : public WebSocketTx<T>, public WebSocketRx<T> {
 };
 
 #endif
+*/
