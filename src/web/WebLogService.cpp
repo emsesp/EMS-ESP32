@@ -23,27 +23,19 @@ using namespace std::placeholders;
 namespace emsesp {
 
 WebLogService::WebLogService(PsychicHttpServer * server, SecurityManager * securityManager)
-    // TODO fix event source
-    : // : _events(EVENT_SOURCE_LOG_PATH)
-    _server(server)
+    : _server(server)
     , _securityManager(securityManager) {
 }
 
-
 void WebLogService::registerURI() {
-    // TODO fix event source
-    /*
-    _events_.onOpen([](PsychicEventSourceClient * client) {
-        Serial.printf("[eventsource] connection #%u connected from %s\n", client->socket(), client->remoteIP().toString());
-        client->send("Hello user!", NULL, millis(), 1000);
-    });
-    _events_.onClose([](PsychicEventSourceClient * client) {
-        Serial.printf("[eventsource] connection #%u closed from %s\n", client->socket(), client->remoteIP().toString());
-    });
-    _server->on(EVENT_SOURCE_LOG_PATH, &events_);
-    */
+    // eventsource
+    _server->on(EVENT_SOURCE_LOG_PATH, &_events);
 
-    // post
+    // TODO this doesn't work with PsychicEventSource
+    // _server->on(EVENT_SOURCE_LOG_PATH, &_events)->setFilter(_securityManager->filterRequest(AuthenticationPredicates::IS_ADMIN));
+    // _events.setFilter(_securityManager->filterRequest(AuthenticationPredicates::IS_ADMIN));
+
+    // POST
     _server->on(LOG_SETTINGS_PATH, HTTP_POST, [this](PsychicRequest * request, JsonVariant & json) {
         auto && body = json.as<JsonObject>();
 
@@ -59,9 +51,7 @@ void WebLogService::registerURI() {
         return request->reply(200); // OK
     });
 
-    _events.setFilter(_securityManager->filterRequest(AuthenticationPredicates::IS_ADMIN));
-
-    // get settings
+    // GET settings
     _server->on(LOG_SETTINGS_PATH, HTTP_GET, [this](PsychicRequest * request) {
         PsychicJsonResponse response = PsychicJsonResponse(request, false, EMSESP_JSON_SIZE_SMALL);
         JsonObject          root     = response.getRoot();
@@ -72,6 +62,7 @@ void WebLogService::registerURI() {
         return response.send();
     });
 
+    // /rest/fetchLog
     // for bring back the whole log - is a command, hence a POST
     // send the complete log buffer to the API, not filtering on log level
     // done by resetting the pointer
@@ -79,9 +70,6 @@ void WebLogService::registerURI() {
         log_message_id_tail_ = 0;
         return request->reply(200);
     });
-
-    // TODO this can be removed when ported over
-    // server->addHandler(&events_);
 }
 
 // start the log service with INFO level
@@ -232,9 +220,9 @@ char * WebLogService::messagetime(char * out, const uint64_t t, const size_t buf
 // send to web eventsource
 void WebLogService::transmit(const QueuedLogMessage & message) {
     DynamicJsonDocument jsonDocument(EMSESP_JSON_SIZE_LARGE);
-    if (jsonDocument.capacity() == 0) {
-        return;
-    }
+    // if (jsonDocument.capacity() == 0) {
+    //     return;
+    // }
     JsonObject logEvent = jsonDocument.to<JsonObject>();
     char       time_string[25];
 
@@ -244,47 +232,13 @@ void WebLogService::transmit(const QueuedLogMessage & message) {
     logEvent["n"] = message.content_->name;
     logEvent["m"] = message.content_->text;
 
-    size_t len    = measureJson(jsonDocument);
-    char * buffer = new char[len + 1];
-    if (buffer) {
-        serializeJson(jsonDocument, buffer, len + 1);
+    size_t len    = measureJson(jsonDocument) + 1;
+    char * buffer = (char *)malloc(len);
+    if (buffer != NULL) {
+        serializeJson(jsonDocument, buffer, len);
         _events.send(buffer, "message", message.id_);
     }
-    delete[] buffer;
+    free(buffer);
 }
-
-// send the complete log buffer to the API, not filtering on log level
-// done by resetting the pointer
-// esp_err_t WebLogService::fetchLog(PsychicRequest * request) {
-//     log_message_id_tail_ = 0;
-//     request->send(200);
-// }
-
-// return the current value settings after a GET
-// esp_err_t WebLogService::getValues(PsychicRequest * request) {
-//     auto *     response  = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
-//     JsonObject root      = response->getRoot();
-//     root["level"]        = log_level();
-//     root["max_messages"] = maximum_log_messages();
-//     root["compact"]      = compact();
-//     response->setLength();
-//     request->send(response);
-// }
-
-// sets the values like level after a POST
-// esp_err_t WebLogService::setValues(PsychicRequest * request, JsonVariant & json) {
-//     auto && body = json.as<JsonObject>();
-
-//     uuid::log::Level level = body["level"];
-//     log_level(level);
-
-//     uint8_t max_messages = body["max_messages"];
-//     maximum_log_messages(max_messages);
-
-//     bool comp = body["compact"];
-//     compact(comp);
-
-//     return request->reply(200); // OK
-// }
 
 } // namespace emsesp
