@@ -98,10 +98,12 @@ class PsychicJsonResponse : public PsychicResponse {
     // }
 
     virtual esp_err_t send() override {
-        esp_err_t err    = ESP_OK;
-        size_t    length = getLength();
-        size_t    buffer_size;
-        char *    buffer;
+        esp_err_t err = ESP_OK;
+        // size_t    length = getLength();
+        size_t length = JSON_BUFFER_SIZE; // TODO force chunking
+
+        size_t buffer_size;
+        char * buffer;
 
         DUMP(length);
 

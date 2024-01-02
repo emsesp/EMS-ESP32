@@ -1,30 +1,37 @@
 #include "http_status.h"
 
-bool http_informational(int code) {
+bool http_informational(int code)
+{
     return code >= 100 && code < 200;
 }
 
-bool http_success(int code) {
+bool http_success(int code)
+{
     return code >= 200 && code < 300;
 }
 
-bool http_redirection(int code) {
+bool http_redirection(int code)
+{
     return code >= 300 && code < 400;
 }
 
-bool http_client_error(int code) {
+bool http_client_error(int code)
+{
     return code >= 400 && code < 500;
 }
 
-bool http_server_error(int code) {
+bool http_server_error(int code)
+{
     return code >= 500 && code < 600;
 }
 
-bool http_failure(int code) {
+bool http_failure(int code)
+{
     return code >= 400 && code < 600;
 }
 
-const char * http_status_group(int code) {
+const char *http_status_group(int code)
+{
     if (http_informational(code))
         return "Informational";
 
@@ -43,8 +50,10 @@ const char * http_status_group(int code) {
     return "Unknown";
 }
 
-const char * http_status_reason(int code) {
-    switch (code) {
+const char *http_status_reason(int code)
+{
+    switch (code)
+    {
     /*####### 1xx - Informational #######*/
     case 100:
         return "Continue";
