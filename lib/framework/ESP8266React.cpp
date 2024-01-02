@@ -49,6 +49,7 @@ void ESP8266React::registerURI() {
     _mqttStatus.registerURI();
 
     _securitySettingsService.registerURI();
+
     _otaSettingsService.registerURI();
 
     _restartService.registerURI();
