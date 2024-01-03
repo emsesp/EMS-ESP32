@@ -5,6 +5,7 @@
 #include "PsychicHttpServer.h"
 #include "PsychicClient.h"
 #include "PsychicWebParameter.h"
+#include "PsychicResponse.h"
 
 typedef std::map<String, String> SessionData;
 

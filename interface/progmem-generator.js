@@ -11,7 +11,8 @@ const bytesPerLine = 20;
 var totalSize = 0;
 
 const generateWWWClass = () =>
-  `typedef std::function<void(const char *, const char * contentType, const uint8_t * content, size_t len)> RouteRegistrationHandler;
+  `typedef std::function<void(const String &, const String & contentType, const uint8_t * content, size_t len)> RouteRegistrationHandler;
+// Total size is ${totalSize} bytes
 
 class WWWData {
 ${indent}public:

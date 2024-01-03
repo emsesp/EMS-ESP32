@@ -1405,24 +1405,26 @@ EMSESP::EMSESP()
 }
 
 // add web server endpoint
-void EMSESP::handler(const char * uri, const char * contentType, const uint8_t * content, size_t len) {
+void EMSESP::handler(const String & uri, const String & contentType, const uint8_t * content, size_t len) {
     PsychicHttpRequestCallback fn = [contentType, content, len](PsychicRequest * request) {
         PsychicResponse response(request);
         response.setCode(200);
-        response.setContentType(contentType);
-        response.addHeader("Content-Encoding", "gzip");
+        response.setContentType(contentType.c_str());
         // response.addHeader("Content-Encoding", "br"); // Brotli - only works over HTTPS
+        response.addHeader("Content-Encoding", "gzip");
+        response.addHeader("Cache-Control", "public, immutable, max-age=31536000");
         response.setContent(content, len);
         return response.send();
     };
 
     PsychicWebHandler * handler = new PsychicWebHandler();
     handler->onRequest(fn);
-    webServer.on(uri, HTTP_GET, handler);
+    webServer.on(uri.c_str(), HTTP_GET, handler);
 
     // Set default end-point for all non matching requests
     // this is easier than using webServer.onNotFound()
-    if (strcmp(uri, "/index.html") == 0) {
+    if (uri.equals("/index.html")) {
+        // if (strcmp(uri, "/index.html") == 0) {
         webServer.defaultEndpoint->setHandler(handler);
     }
 };
@@ -1435,14 +1437,43 @@ void EMSESP::setupWeb() {
     //   esp8266React services has 13
     //   custom projects has around 23
     webServer.config.max_uri_handlers = 80;
-    // webServer.config.uri_match_fn     = NULL; // don't use wildcards
 
+    /*
+    #define HTTPD_DEFAULT_CONFIG() {                    \
+        .task_priority      = tskIDLE_PRIORITY+5,       \
+        .stack_size         = 4096,                     \
+        .core_id            = tskNO_AFFINITY,           \
+        .server_port        = 80,                       \
+        .ctrl_port          = 32768,                    \
+        .max_open_sockets   = 7,                        \
+        .max_uri_handlers   = 8,                        \
+        .max_resp_headers   = 8,                        \
+        .backlog_conn       = 5,                        \
+        .lru_purge_enable   = false,                    \
+        .recv_wait_timeout  = 5,                        \
+        .send_wait_timeout  = 5,                        \
+        .global_user_ctx = NULL,                        \
+        .global_user_ctx_free_fn = NULL,                \
+        .global_transport_ctx = NULL,                   \
+        .global_transport_ctx_free_fn = NULL,           \
+        .enable_so_linger = false,                      \
+        .linger_timeout = 0,                            \
+        .open_fn = NULL,                                \
+        .close_fn = NULL,                               \
+        .uri_match_fn = NULL                            \
+    */
+
+    // TODO remove experimental stuff
+    // webServer.config.uri_match_fn     = NULL; // don't use wildcards
+    // webServer.config.stack_size = 8192; // default is 4096, we had 2x8192 in AsyncTCP
+    // webServer.config.max_open_sockets = 3;
     // webServer.config.task_priority = uxTaskPriorityGet(nullptr); // seems to make it slightly slower
+    // webServer.config.task_priority = 5; // same as AsyncTCP, but looks like even slower
+    // webServer.config.lru_purge_enable = true; // makes no diff. is as in https://github.com/espressif/esp-idf/blob/master/examples/protocols/http_server/simple/main/main.c
 
     // TODO add support for https
     webServer.listen(80); // start the web server
 
-    DefaultHeaders::Instance().addHeader("Server", "EMS-ESP");
 
 #ifndef EMSESP_STANDALONE
     WWWData::registerRoutes(handler); // add webServer.on() endpoints from the generated web code
@@ -1561,6 +1592,9 @@ void EMSESP::start() {
     temperaturesensor_.start(); // Temperature external sensors
     analogsensor_.start();      // Analog external sensors
     webLogService.start();      // apply settings to weblog service
+
+    // set hostname on web server
+    DefaultHeaders::Instance().addHeader("Server", system_.hostname().c_str()); // TODO use hostname
 
     // Load our library of known devices into stack mem. Names are stored in Flash memory
     device_library_ = {

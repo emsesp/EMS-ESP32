@@ -241,7 +241,8 @@ class EMSESP {
     static WebSchedulerService     webSchedulerService;
     static WebCustomEntityService  webCustomEntityService;
 
-    static void handler(const char * uri, const char * contentType, const uint8_t * content, size_t len);
+    static void handler(const String & uri, const String & contentType, const uint8_t * content, size_t len);
+    // static void handler(const char * uri, const char * contentType, const uint8_t * content, size_t len);
 
   private:
     static std::string device_tostring(const uint8_t device_id);

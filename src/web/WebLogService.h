@@ -50,8 +50,7 @@ class WebLogService : public uuid::log::Handler {
   private:
     SecurityManager *   _securityManager;
     PsychicHttpServer * _server;
-
-    PsychicEventSource _events;
+    PsychicEventSource  _events;
 
     class QueuedLogMessage {
       public:

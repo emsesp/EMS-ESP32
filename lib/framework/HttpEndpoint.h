@@ -46,6 +46,7 @@ class HttpEndpoint {
 
     // register the web server on() endpoints
     void registerURI() {
+        // GET
         _server->on(_servicePath,
                     HTTP_GET,
                     _securityManager->wrapRequest(
@@ -57,6 +58,7 @@ class HttpEndpoint {
                         },
                         _authenticationPredicate));
 
+        // POST
         _server->on(_servicePath,
                     HTTP_POST,
                     _securityManager->wrapCallback(
