@@ -60,7 +60,8 @@ class Boiler : public EMSdevice {
     uint8_t  wwSelTempEcoplus_;     // DHW ECO+ temperature
     uint8_t  wwType_;               // 0-off, 1-flow, 2-flowbuffer, 3-buffer, 4-layered buffer
     uint8_t  wwComfort_;            // WW comfort mode
-    uint8_t  wwComfort1_;           // WW comfort mode RC310
+    uint8_t  wwComfort1_;           // WW comfort mode RC310, 0xEA offset 13
+    uint8_t  wwComfort2_;           // WW comfort mode emsplus 0xEA, offset 26
     uint8_t  wwCircPump_;           // DHW circulation pump available
     uint8_t  wwChargeType_;         // DHW charge type (pump or 3-way-valve)
     uint8_t  wwChargeOptimization_; // DHW charge optimization

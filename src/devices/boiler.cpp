@@ -846,6 +846,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           FL_(wwComfort),
                           DeviceValueUOM::NONE,
                           MAKE_CF_CB(set_ww_mode));
+    wwComfort2_ = EMS_VALUE_UINT_NOTSET; // read separately, but published as wwComfort1_
     register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
                           &wwComfort1_,
                           DeviceValueType::ENUM,
@@ -1468,9 +1469,12 @@ void Boiler::process_UBAParameterWWPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram, wwMaxTemp_, 20);
     has_update(telegram, wwChargeOptimization_, 25);
     has_update(telegram, wwSelTempEcoplus_, 27);
+    has_update(telegram, wwComfort2_, 26);
 
     uint8_t wwComfort1 = EMS_VALUE_UINT_NOTSET;
-    if (telegram->read_value(wwComfort1, 13)) {
+    if (Helpers::hasValue(wwComfort2_)) {
+        has_update(wwComfort1_, wwComfort1);
+    } else if (telegram->read_value(wwComfort1, 13)) {
         if (wwComfort1 == 0) {
             wwComfort1 = 0; // High_Comfort
         } else if (wwComfort1 == 0xD8) {
@@ -2417,10 +2421,15 @@ bool Boiler::set_ww_mode(const char * value, const int8_t id) {
     uint8_t set;
     uint8_t comfort[] = {0x00, 0xD8, 0xEC}; // heat, eco, intelligent
 
-    if (is_received(EMS_TYPE_UBAParameterWWPlus)) {
+    if (Helpers::hasValue(wwComfort2_)) {
+        if (Helpers::value2enum(value, set, FL_(enum_comfort1))) {
+            write_command(EMS_TYPE_UBAParameterWWPlus, 26, set, EMS_TYPE_UBAParameterWWPlus);
+            return true;
+        }
+    } else if (is_received(EMS_TYPE_UBAParameterWWPlus)) {
         if (Helpers::value2enum(value, set, FL_(enum_comfort1))) {
             write_command(EMS_TYPE_UBAParameterWWPlus, 13, comfort[set], EMS_TYPE_UBAParameterWWPlus);
-            write_command(0x05, 70, set == 0 ? 0xAA : 0x55); //
+            write_command(0x05, 70, set == 1 ? 0xAA : 0x55); //
             return true;
         }
     } else {
