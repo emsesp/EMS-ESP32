@@ -1,5 +1,6 @@
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import DnsIcon from '@mui/icons-material/Dns';
+import GiteIcon from '@mui/icons-material/Gite';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import RouterIcon from '@mui/icons-material/Router';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
@@ -113,6 +114,15 @@ const NetworkStatusForm: FC = () => {
               </Avatar>
             </ListItemAvatar>
             <ListItemText primary="Status" secondary={networkStatus(data)} />
+          </ListItem>
+          <Divider variant="inset" component="li" />
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar sx={{ bgcolor: networkStatusHighlight(data, theme) }}>
+                <GiteIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary="Hostname" secondary={data.hostname} />
           </ListItem>
           <Divider variant="inset" component="li" />
           {isWiFi(data) && (

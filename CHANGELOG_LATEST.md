@@ -12,6 +12,7 @@
 - checkbox for MQTT-TLS enable [#1474](https://github.com/emsesp/EMS-ESP32/issues/1474)
 - added SK (Slovenian) language. Thanks @misa1515
 - CPU info [#1497](https://github.com/emsesp/EMS-ESP32/pull/1497)
+- Show network hostname in Web UI under Network Status
 
 ## Fixed
 
