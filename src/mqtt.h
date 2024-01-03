@@ -217,8 +217,13 @@ class Mqtt {
 
     static std::string tag_to_topic(uint8_t device_type, uint8_t tag);
 
-    static void
-    add_avty_to_doc(const char * state_t, const JsonObject & doc, const char * cond1 = nullptr, const char * cond2 = nullptr, const char * negcond = nullptr);
+    static void add_ha_sections_to_doc(const std::string & name,
+                                       const char *        state_t,
+                                       const JsonObject &  doc,
+                                       const bool          is_first = false,
+                                       const char *        cond1    = nullptr,
+                                       const char *        cond2    = nullptr,
+                                       const char *        negcond  = nullptr);
 
   private:
     static uuid::log::Logger logger_;

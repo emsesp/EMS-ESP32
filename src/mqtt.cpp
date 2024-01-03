@@ -542,7 +542,7 @@ void Mqtt::ha_status() {
     JsonObject dev = doc.createNestedObject("dev");
     dev["name"]    = Mqtt::basename();
     dev["sw"]      = "v" + std::string(EMSESP_APP_VERSION);
-    dev["mf"]      = "proddy";
+    dev["mf"]      = "EMS-ESP";
     dev["mdl"]     = "EMS-ESP";
 #ifndef EMSESP_STANDALONE
     dev["cu"] = "http://" + (EMSESP::system_.ethernet_connected() ? ETH.localIP().toString() : WiFi.localIP().toString());
@@ -739,10 +739,11 @@ bool Mqtt::publish_ha_sensor_config(DeviceValue & dv, const char * model, const 
     dev_json["name"] = Mqtt::basename() + " " + cap_name;
     free(cap_name);
 
+    // create only once per category
     if (create_device_config) {
         dev_json["mf"]         = brand;
         dev_json["mdl"]        = model;
-        dev_json["via_device"] = "ems-esp";
+        dev_json["via_device"] = Mqtt::basename();
     }
 
     // calculate the min and max
@@ -1136,8 +1137,8 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         }
     }
 
-    doc["dev"] = dev_json;                                   // add the dev json object to the end
-    add_avty_to_doc(stat_t, doc.as<JsonObject>(), val_cond); // add "availability" section
+    doc["dev"] = dev_json;                                                     // add the dev json object to the end
+    add_ha_sections_to_doc("", stat_t, doc.as<JsonObject>(), false, val_cond); // no name, since the "dev" has already been added
 
     return queue_ha(topic, doc.as<JsonObject>());
 }
@@ -1245,18 +1246,8 @@ bool Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     modes.add("heat");
     modes.add("off");
 
-    JsonObject dev = doc.createNestedObject("dev");
-    JsonArray  ids = dev.createNestedArray("ids");
-
-    char ha_device[40];
-    snprintf(ha_device, sizeof(ha_device), "%s-thermostat", Mqtt::basename().c_str());
-    ids.add(ha_device);
-
     // device name must be different to the entity name, take the ids value we just created
-    dev["name"] = ha_device;
-
-    // add "availability" section
-    add_avty_to_doc(topic_t, doc.as<JsonObject>(), seltemp_cond, has_roomtemp ? currtemp_cond : nullptr, hc_mode_cond);
+    add_ha_sections_to_doc("thermostat", topic_t, doc.as<JsonObject>(), false, seltemp_cond, has_roomtemp ? currtemp_cond : nullptr, hc_mode_cond);
 
     return queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 }
@@ -1280,42 +1271,68 @@ std::string Mqtt::tag_to_topic(uint8_t device_type, uint8_t tag) {
     }
 }
 
-// adds "availability" section to HA Discovery config
-void Mqtt::add_avty_to_doc(const char * state_t, const JsonObject & doc, const char * cond1, const char * cond2, const char * negcond) {
-    const char * tpl_draft = "{{'online' if %s else 'offline'}}";
-    char         tpl[150];
-    JsonArray    avty = doc.createNestedArray("avty");
-
-    StaticJsonDocument<512> avty_json;
-
-    snprintf(tpl, sizeof(tpl), "%s/status", Mqtt::base().c_str());
-    avty_json["t"] = tpl;
-    snprintf(tpl, sizeof(tpl), tpl_draft, "value == 'online'");
-    avty_json["val_tpl"] = tpl;
-    avty.add(avty_json);
-    avty_json.clear();
-    avty_json["t"] = state_t;
-    snprintf(tpl, sizeof(tpl), tpl_draft, cond1 == nullptr ? "value is defined" : cond1);
-    avty_json["val_tpl"] = tpl;
-    avty.add(avty_json);
-
-    if (cond2 != nullptr) {
-        avty_json.clear();
-        avty_json["t"] = state_t;
-        snprintf(tpl, sizeof(tpl), tpl_draft, cond2);
-        avty_json["val_tpl"] = tpl;
-        avty.add(avty_json);
+// adds availability, dev, ids to the config section to HA Discovery config
+void Mqtt::add_ha_sections_to_doc(const std::string & name,
+                                  const char *        state_t,
+                                  const JsonObject &  config,
+                                  const bool          is_first,
+                                  const char *        cond1,
+                                  const char *        cond2,
+                                  const char *        negcond) {
+    // adds dev section to HA Discovery config
+    if (!name.empty()) {
+        JsonObject dev      = config.createNestedObject("dev");
+        auto       cap_name = name;
+        cap_name[0]         = toupper(name[0]); // capitalize first letter
+        dev["name"]         = Mqtt::basename() + " " + cap_name;
+        // if it's the first in the category, attach the group to the main HA device
+        if (is_first) {
+            dev["mf"]         = "EMS-ESP";
+            dev["mdl"]        = cap_name;
+            dev["via_device"] = Mqtt::basename();
+        }
+        JsonArray ids = dev.createNestedArray("ids");
+        ids.add(Mqtt::basename() + "-" + Helpers::toLower(name));
     }
 
-    if (negcond != nullptr) {
-        avty_json.clear();
-        avty_json["t"] = state_t;
-        snprintf(tpl, sizeof(tpl), "{{'offline' if %s else 'online'}}", negcond);
+    // adds "availability" section to HA Discovery config
+    // but not for Domoticz
+    if (discovery_type() == discoveryType::HOMEASSISTANT) {
+        const char * tpl_draft = "{{'online' if %s else 'offline'}}";
+        char         tpl[150];
+        JsonArray    avty = config.createNestedArray("avty");
+
+        StaticJsonDocument<512> avty_json;
+
+        snprintf(tpl, sizeof(tpl), "%s/status", Mqtt::base().c_str());
+        avty_json["t"] = tpl;
+        snprintf(tpl, sizeof(tpl), tpl_draft, "value == 'online'");
         avty_json["val_tpl"] = tpl;
         avty.add(avty_json);
-    }
+        avty_json.clear();
+        avty_json["t"] = state_t;
+        snprintf(tpl, sizeof(tpl), tpl_draft, cond1 == nullptr ? "value is defined" : cond1);
+        avty_json["val_tpl"] = tpl;
+        avty.add(avty_json);
 
-    doc["avty_mode"] = "all";
+        if (cond2 != nullptr) {
+            avty_json.clear();
+            avty_json["t"] = state_t;
+            snprintf(tpl, sizeof(tpl), tpl_draft, cond2);
+            avty_json["val_tpl"] = tpl;
+            avty.add(avty_json);
+        }
+
+        if (negcond != nullptr) {
+            avty_json.clear();
+            avty_json["t"] = state_t;
+            snprintf(tpl, sizeof(tpl), "{{'offline' if %s else 'online'}}", negcond);
+            avty_json["val_tpl"] = tpl;
+            avty.add(avty_json);
+        }
+
+        config["avty_mode"] = "all";
+    }
 }
 
 } // namespace emsesp

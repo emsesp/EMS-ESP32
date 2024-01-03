@@ -615,13 +615,7 @@ void AnalogSensor::publish_values(const bool force) {
                     config["stat_cla"] = "measurement";
                 }
 
-                JsonObject dev = config.createNestedObject("dev");
-                dev["name"]    = Mqtt::basename() + " Analog";
-                JsonArray ids  = dev.createNestedArray("ids");
-                ids.add(Mqtt::basename() + "-analog");
-
-                // add "availability" section
-                Mqtt::add_avty_to_doc(stat_t, config.as<JsonObject>(), val_cond);
+                Mqtt::add_ha_sections_to_doc("analog", stat_t, config.as<JsonObject>(), true, val_cond);
 
                 sensor.ha_registered = Mqtt::queue_ha(topic, config.as<JsonObject>());
             }

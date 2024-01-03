@@ -210,12 +210,7 @@ void Shower::set_shower_state(bool state, bool force) {
             doc["pl_off"] = Helpers::render_boolean(result, false);
         }
 
-        JsonObject dev = doc.createNestedObject("dev");
-        dev["name"]    = "EMS-ESP Shower";
-        JsonArray ids  = dev.createNestedArray("ids");
-        ids.add(Mqtt::basename() + "-shower");
-
-        Mqtt::add_avty_to_doc(stat_t, doc.as<JsonObject>()); // add "availability" section
+        Mqtt::add_ha_sections_to_doc("shower", stat_t, doc.as<JsonObject>(), true);
 
         snprintf(topic, sizeof(topic), "binary_sensor/%s/shower_active/config", Mqtt::basename().c_str());
         ha_configdone_ = Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
@@ -240,12 +235,7 @@ void Shower::set_shower_state(bool state, bool force) {
         doc["dev_cla"]      = "duration";
         // doc["ent_cat"]      = "diagnostic";
 
-        JsonObject dev2 = doc.createNestedObject("dev");
-        dev2["name"]    = "EMS-ESP Shower";
-        JsonArray ids2  = dev2.createNestedArray("ids");
-        ids2.add(Mqtt::basename() + "-shower");
-
-        Mqtt::add_avty_to_doc(stat_t, doc.as<JsonObject>(), "value_json.duration is defined"); // add "availability" section
+        Mqtt::add_ha_sections_to_doc("shower", stat_t, doc.as<JsonObject>(), "value_json.duration is defined");
 
         snprintf(topic, sizeof(topic), "sensor/%s/shower_duration/config", Mqtt::basename().c_str());
         Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
@@ -267,12 +257,7 @@ void Shower::set_shower_state(bool state, bool force) {
         doc["val_tpl"] = "{{value_json.timestamp if value_json.timestamp is defined else 0}}";
         // doc["ent_cat"] = "diagnostic";
 
-        JsonObject dev3 = doc.createNestedObject("dev");
-        dev3["name"]    = "EMS-ESP Shower";
-        JsonArray ids3  = dev3.createNestedArray("ids");
-        ids3.add(Mqtt::basename() + "-shower");
-
-        Mqtt::add_avty_to_doc(stat_t, doc.as<JsonObject>(), "value_json.timestamp is defined"); // add "availability" section
+        Mqtt::add_ha_sections_to_doc("shower", stat_t, doc.as<JsonObject>(), "value_json.timestamp is defined");
 
         snprintf(topic, sizeof(topic), "sensor/%s/shower_timestamp/config", Mqtt::basename().c_str());
         Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag

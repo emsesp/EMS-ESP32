@@ -527,7 +527,14 @@ void TemperatureSensor::publish_values(const bool force) {
                     snprintf(val_obj, sizeof(val_obj), "value_json['%s']", sensor.name().c_str());
                     snprintf(val_cond, sizeof(val_cond), "%s is defined", val_obj);
                 }
-                config["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else -55}}";
+
+                // for the value template, there's a problem still with Domoticz probably due to the special characters.
+                // See https://github.com/emsesp/EMS-ESP32/issues/1360
+                if (Mqtt::discovery_type() == Mqtt::discoveryType::DOMOTICZ) {
+                    config["val_tpl"] = (std::string) "{{" + val_obj + "}}";
+                } else {
+                    config["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else -55}}";
+                }
 
                 char uniq_s[70];
                 if (Mqtt::entity_format() == Mqtt::entityFormat::MULTI_SHORT) {
@@ -543,13 +550,7 @@ void TemperatureSensor::publish_values(const bool force) {
                 snprintf(name, sizeof(name), "%s", sensor.name().c_str());
                 config["name"] = name;
 
-                JsonObject dev = config.createNestedObject("dev");
-                dev["name"]    = Mqtt::basename() + " Temperature";
-                JsonArray ids  = dev.createNestedArray("ids");
-                ids.add(Mqtt::basename() + "-temperature");
-
-                // add "availability" section
-                Mqtt::add_avty_to_doc(stat_t, config.as<JsonObject>(), val_cond);
+                Mqtt::add_ha_sections_to_doc("temperature", stat_t, config.as<JsonObject>(), true, val_cond);
 
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
                 // use '_' as HA doesn't like '-' in the topic name
