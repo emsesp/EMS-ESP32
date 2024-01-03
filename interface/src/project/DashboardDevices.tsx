@@ -420,7 +420,7 @@ const DashboardDevices: FC = () => {
         <MessageBox my={2} level="warning" message={LL.EMS_BUS_SCANNING()} />
       )}
 
-      {coreData.devices.length && (
+      {coreData.devices.length !== 0 && (
         <Table data={{ nodes: coreData.devices }} select={device_select} theme={device_theme} layout={{ custom: true }}>
           {(tableList: any) => (
             <>
