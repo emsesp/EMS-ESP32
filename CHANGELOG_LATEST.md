@@ -10,7 +10,7 @@
 - heatpump energy meters [#1463](https://github.com/emsesp/EMS-ESP32/issues/1463)
 - heatpump max power [#1475](https://github.com/emsesp/EMS-ESP32/issues/1475)
 - checkbox for MQTT-TLS enable [#1474](https://github.com/emsesp/EMS-ESP32/issues/1474)
-- added SK (Slovencina) language. Thanks @misa1515
+- added SK (Slovenian) language. Thanks @misa1515
 - CPU info [#1497](https://github.com/emsesp/EMS-ESP32/pull/1497)
 
 ## Fixed
@@ -18,6 +18,8 @@
 - exhaust temperature for some boilers
 - add back boil2hyst [#1477](https://github.com/emsesp/EMS-ESP32/issues/1477)
 - subscribed MQTT topics not detecting changes by EMS-ESP [#1494](https://github.com/emsesp/EMS-ESP32/issues/1494)
+- changed HA name and grouping to be consistent [#1528](https://github.com/emsesp/EMS-ESP32/issues/1528)
+- MQTT autodiscovery in Domoticz not working [#1360](https://github.com/emsesp/EMS-ESP32/issues/1528)
 
 ## Changed
 
