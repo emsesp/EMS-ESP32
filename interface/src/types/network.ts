@@ -33,6 +33,7 @@ export interface NetworkStatus {
   gateway_ip: string;
   dns_ip_1: string;
   dns_ip_2: string;
+  hostname: string;
 }
 
 export interface NetworkSettings {

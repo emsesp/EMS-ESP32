@@ -58,7 +58,6 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "custom_entities"
 // #define EMSESP_DEBUG_DEFAULT "heat_exchange"
 
-
 class Test {
   public:
     static void run_test(uuid::console::Shell & shell, const std::string & command, const std::string & data = "");

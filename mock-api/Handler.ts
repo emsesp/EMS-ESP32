@@ -249,7 +249,8 @@ const network_status = {
   subnet_mask: '255.255.255.0',
   gateway_ip: '10.10.10.1',
   dns_ip_1: '10.10.10.1',
-  dns_ip_2: '0.0.0.0'
+  dns_ip_2: '0.0.0.0',
+  hostname: 'ems-esp'
 };
 const list_networks = {
   networks: [
@@ -650,9 +651,9 @@ const emsesp_devices = {
 };
 
 const emsesp_coredata = {
-  connected: true,
-  // devices: [],
-  devices: [
+  connected: false,
+  devices: [],
+  devices2: [
     {
       id: 7,
       t: 4,

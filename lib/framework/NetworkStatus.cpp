@@ -19,9 +19,11 @@ void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
 
     // see if Ethernet is connected
     if (ethernet_connected) {
-        root["status"] = 10; // custom code #10 - ETHERNET_STATUS_CONNECTED
+        root["status"]   = 10; // custom code #10 - ETHERNET_STATUS_CONNECTED
+        root["hostname"] = ETH.getHostname();
     } else {
-        root["status"] = (uint8_t)wifi_status;
+        root["status"]   = (uint8_t)wifi_status;
+        root["hostname"] = WiFi.getHostname();
     }
 
     // for both connections show ethernet

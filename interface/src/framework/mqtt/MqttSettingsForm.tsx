@@ -273,6 +273,7 @@ const MqttSettingsForm: FC = () => {
                   >
                     <MenuItem value={0}>Home Assistant</MenuItem>
                     <MenuItem value={1}>Domoticz</MenuItem>
+                    <MenuItem value={2}>Domoticz (latest)</MenuItem>
                   </TextField>
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>

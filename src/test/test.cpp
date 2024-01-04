@@ -286,7 +286,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         emsesp::EMSESP::temperaturesensor_.test();
 
         // shell.invoke_command("show devices");
-        shell.invoke_command("show values");
+        // shell.invoke_command("show values");
         shell.invoke_command("call system allvalues");
         // shell.invoke_command("call system publish");
         // shell.invoke_command("show mqtt");
@@ -705,6 +705,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     if (command == "temperature") {
         shell.printfln("Testing adding Temperature sensor");
         emsesp::EMSESP::temperaturesensor_.test();
+        shell.invoke_command("show values");
         ok = true;
     }
 

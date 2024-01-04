@@ -1,7 +1,7 @@
-; example custom platformio.ini file for EMS-ESP
+; example custom platformio ini file for EMS-ESP
 
 [common]
-; custom build flags:
+; custom build flags to use in my_build_flags
 ;  -DEMSESP_WIFI_TWEAK ; experimental WiFi tweaks for stability
 ;  -DEMSESP_UART_DEBUG ; debugging UART
 ;  -DEMSESP_DEBUG ; enables DEBUG to the log. Will generate a lot of extra traffic on Console and Syslog
@@ -11,41 +11,65 @@
 ;  -DEMSESP_TEST ; enable the tests. EN language only
 ;  -DEMSESP_DE_ONLY ; only DE translated entity names
 ;  -DEMSESP_EN_ONLY ; only EN translated entity names
-; my_build_flags = -DEMSESP_DEBUG
+; my_build_flags = -DEMSESP_TEST
+; my_build_flags = -DEMSESP_DEBUG -DEMSESP_TEST
 
 [platformio]
-default_envs = esp32_4M
+; default_envs = esp32_4M
 ; default_envs = esp32_16M
 ; default_envs = lolin_s3
 ; default_envs = standalone
-; default_envs =  debug
+; default_envs = debug
+default_envs = custom
 
 [env:esp32_4M]
-; update to arduino 3, IDF 5
-platform = https://github.com/Jason2866/platform-espressif32.git#Arduino/IDF5
-;
 ; if using OTA enter your details below
 ;  upload_protocol = espota
 ;  upload_flags =
 ;    --port=8266
 ;    --auth=ems-esp-neo
 ;  upload_port = ems-esp.local
-; for USB use
-upload_port = /dev/ttyUSB*
+; for USB use one of these:
+; upload_port = /dev/ttyUSB*
 ; upload_port = COM5
 
-; override arduino espressif core
-platform = espressif32 ; take latest
-; platform = espressif32@5.3.0
-; platform = espressif32@6.3.2
-; platform = espressif32@6.4.0
-
-extra_scripts =
-  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
-  scripts/rename_fw.py
-  ; post:scripts/app-tls-size.py
-
 [env:esp32_16M]
+
+[env:custom]
+; use for ESP-S boards with 4MB flash
+; make sure -D TASMOTA_SDK is also enabled
+platform = https://github.com/tasmota/platform-espressif32/releases/download/2023.10.03/platform-espressif32-2023.10.03.zip
+; use for S3 boards:
+; platform = espressif32
+framework = arduino
+board = esp32dev
+board_build.filesystem = littlefs
+board_build.f_cpu = 240000000L
+board_upload.flash_size = 4MB
+board_build.partitions = esp32_partition_4M.csv
+board_upload.use_1200bps_touch = false
+board_upload.wait_for_upload_port = true
+upload_port = /dev/ttyUSB0
+extra_scripts = 
+	; pre:scripts/build_interface.py
+	scripts/rename_fw.py
+build_unflags = ${common.unbuild_flags}
+build_flags = 
+	${common.core_build_flags}
+	${factory_settings.build_flags}
+	${common.my_build_flags}
+	-D ONEWIRE_CRC16=0
+	-D NO_GLOBAL_ARDUINOOTA
+	-D ARDUINOJSON_ENABLE_STD_STRING=1
+	-D ARDUINOJSON_USE_DOUBLE=0
+	; -D ARDUINOTRACE_ENABLE=1
+	-D TASMOTA_SDK
+	; -D CORE_DEBUG_LEVEL=ARDUHAL_LOG_LEVEL_WARN
+	-D EMSESP_TEST
+	-D EMSESP_DEBUG
+ 	-D CONFIG_ETH_ENABLED
+    ; -D TASMOTA_SDK
+	'-DEMSESP_DEFAULT_BOARD_PROFILE="Test"'
 
 [env:lolin_s3]
 upload_port = /dev/ttyACM0
@@ -61,7 +85,6 @@ board = esp32dev
 framework = arduino
 platform = espressif32
 board_build.partitions = esp32_partition_debug.csv
-; board_build.partitions = esp32_partition_4M.csv
 board_upload.flash_size = 4MB
 board_build.filesystem = littlefs
 upload_protocol = esptool
@@ -73,6 +96,5 @@ debug_init_break = tbreak setup
 build_flags = ${factory_settings.build_flags} -DEMSESP_EN_ONLY -DCORE_DEBUG_LEVEL=5 -DONEWIRE_CRC16=0 -DNO_GLOBAL_ARDUINOOTA -DARDUINOJSON_ENABLE_STD_STRING=1 -DESP32=1 -DARDUINO_ARCH_ESP32=1
 upload_port = /dev/ttyUSB0
 extra_scripts =
-  ; pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
-  ; post:scripts/app-tls-size.py
+  post:scripts/app-tls-size.py

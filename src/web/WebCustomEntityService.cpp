@@ -397,7 +397,7 @@ void WebCustomEntityService::publish(const bool force) {
                     snprintf(topic, sizeof(topic), "switch/%s/custom_%s/config", Mqtt::basename().c_str(), entityItem.name.c_str());
                 } else if (entityItem.value_type == DeviceValueType::STRING) {
                     snprintf(topic, sizeof(topic), "sensor/%s/custom_%s/config", Mqtt::basename().c_str(), entityItem.name.c_str());
-                } else if (Mqtt::discovery_type() == Mqtt::discoveryType::HOMEASSISTANT) {
+                } else if (Mqtt::discovery_type() == Mqtt::discoveryType::HOMEASSISTANT || Mqtt::discovery_type() == Mqtt::discoveryType::DOMOTICZ_LATEST) {
                     snprintf(topic, sizeof(topic), "number/%s/custom_%s/config", Mqtt::basename().c_str(), entityItem.name.c_str());
                 } else {
                     snprintf(topic, sizeof(topic), "sensor/%s/custom_%s/config", Mqtt::basename().c_str(), entityItem.name.c_str());
@@ -426,13 +426,8 @@ void WebCustomEntityService::publish(const bool force) {
                     config["pl_off"] = Helpers::render_boolean(result, false);
                 }
             }
-            JsonObject dev = config.createNestedObject("dev");
-            dev["name"]    = Mqtt::basename() + " Custom";
-            JsonArray ids  = dev.createNestedArray("ids");
-            ids.add(Mqtt::basename() + "-custom");
+            Mqtt::add_ha_sections_to_doc("custom", stat_t, config.as<JsonObject>(), true, val_cond);
 
-            // add "availability" section
-            Mqtt::add_avty_to_doc(stat_t, config.as<JsonObject>(), val_cond);
             ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
         }
     }
