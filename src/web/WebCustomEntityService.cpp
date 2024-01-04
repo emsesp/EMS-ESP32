@@ -397,7 +397,7 @@ void WebCustomEntityService::publish(const bool force) {
                     snprintf(topic, sizeof(topic), "switch/%s/custom_%s/config", Mqtt::basename().c_str(), entityItem.name.c_str());
                 } else if (entityItem.value_type == DeviceValueType::STRING) {
                     snprintf(topic, sizeof(topic), "sensor/%s/custom_%s/config", Mqtt::basename().c_str(), entityItem.name.c_str());
-                } else if (Mqtt::discovery_type() == Mqtt::discoveryType::HOMEASSISTANT) {
+                } else if (Mqtt::discovery_type() == Mqtt::discoveryType::HOMEASSISTANT || Mqtt::discovery_type() == Mqtt::discoveryType::DOMOTICZ_LATEST) {
                     snprintf(topic, sizeof(topic), "number/%s/custom_%s/config", Mqtt::basename().c_str(), entityItem.name.c_str());
                 } else {
                     snprintf(topic, sizeof(topic), "sensor/%s/custom_%s/config", Mqtt::basename().c_str(), entityItem.name.c_str());

@@ -863,8 +863,8 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         case DeviceValueType::USHORT:
         case DeviceValueType::ULONG:
             // number - https://www.home-assistant.io/integrations/number.mqtt
-            // Domoticz does not support number, use sensor
-            if (discovery_type() == discoveryType::HOMEASSISTANT) {
+            // older Domoticz does not support number, use sensor
+            if (discovery_type() == discoveryType::HOMEASSISTANT || discovery_type() == discoveryType::DOMOTICZ_LATEST) {
                 snprintf(topic, sizeof(topic), "number/%s", config_topic);
                 readonly_sensors = false;
             } else {
@@ -1296,39 +1296,44 @@ void Mqtt::add_ha_sections_to_doc(const std::string & name,
     }
 
     // adds "availability" section to HA Discovery config
-    // but not for Domoticz
+    JsonArray                                  avty = config.createNestedArray("avty");
+    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> avty_json;
+
+    const char * tpl_draft = "{{'online' if %s else 'offline'}}";
+
+    // EMS-ESP status check
+    char tpl[150];
+    snprintf(tpl, sizeof(tpl), "%s/status", Mqtt::base().c_str());
+    avty_json["t"] = tpl;
+    snprintf(tpl, sizeof(tpl), tpl_draft, "value == 'online'");
+    avty_json["val_tpl"] = tpl;
+    avty.add(avty_json); // returns 0 if no mem
+
+    // skip conditional Jinja2 templates if not home assistant
     if (discovery_type() == discoveryType::HOMEASSISTANT) {
-        const char * tpl_draft = "{{'online' if %s else 'offline'}}";
-        char         tpl[150];
-        JsonArray    avty = config.createNestedArray("avty");
-
-        StaticJsonDocument<512> avty_json;
-
-        snprintf(tpl, sizeof(tpl), "%s/status", Mqtt::base().c_str());
-        avty_json["t"] = tpl;
-        snprintf(tpl, sizeof(tpl), tpl_draft, "value == 'online'");
-        avty_json["val_tpl"] = tpl;
-        avty.add(avty_json);
+        // condition 1
         avty_json.clear();
         avty_json["t"] = state_t;
         snprintf(tpl, sizeof(tpl), tpl_draft, cond1 == nullptr ? "value is defined" : cond1);
         avty_json["val_tpl"] = tpl;
-        avty.add(avty_json);
+        avty.add(avty_json); // returns 0 if no mem
 
+        // condition 2
         if (cond2 != nullptr) {
             avty_json.clear();
             avty_json["t"] = state_t;
             snprintf(tpl, sizeof(tpl), tpl_draft, cond2);
             avty_json["val_tpl"] = tpl;
-            avty.add(avty_json);
+            avty.add(avty_json); // returns 0 if no mem
         }
 
+        // negative condition
         if (negcond != nullptr) {
             avty_json.clear();
             avty_json["t"] = state_t;
             snprintf(tpl, sizeof(tpl), "{{'offline' if %s else 'online'}}", negcond);
             avty_json["val_tpl"] = tpl;
-            avty.add(avty_json);
+            avty.add(avty_json); // returns 0 if no mem
         }
 
         config["avty_mode"] = "all";

@@ -35,7 +35,7 @@ using mqtt_sub_function_p = std::function<bool(const char * message)>;
 
 class Mqtt {
   public:
-    enum discoveryType : uint8_t { HOMEASSISTANT, DOMOTICZ };
+    enum discoveryType : uint8_t { HOMEASSISTANT, DOMOTICZ, DOMOTICZ_LATEST };
     enum entityFormat : uint8_t { SINGLE_LONG, SINGLE_SHORT, MULTI_SHORT };
 
     void loop();
@@ -219,7 +219,7 @@ class Mqtt {
 
     static void add_ha_sections_to_doc(const std::string & name,
                                        const char *        state_t,
-                                       const JsonObject &  doc,
+                                       const JsonObject &  config,
                                        const bool          is_first = false,
                                        const char *        cond1    = nullptr,
                                        const char *        cond2    = nullptr,
