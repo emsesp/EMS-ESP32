@@ -1469,11 +1469,11 @@ void Boiler::process_UBAParameterWWPlus(std::shared_ptr<const Telegram> telegram
     has_update(telegram, wwMaxTemp_, 20);
     has_update(telegram, wwChargeOptimization_, 25);
     has_update(telegram, wwSelTempEcoplus_, 27);
-    has_update(telegram, wwComfort2_, 26);
 
+    telegram->read_value(wwComfort2_, 26);
     uint8_t wwComfort1 = EMS_VALUE_UINT_NOTSET;
     if (Helpers::hasValue(wwComfort2_)) {
-        has_update(wwComfort1_, wwComfort1);
+        has_update(wwComfort1_, wwComfort2_);
     } else if (telegram->read_value(wwComfort1, 13)) {
         if (wwComfort1 == 0) {
             wwComfort1 = 0; // High_Comfort
