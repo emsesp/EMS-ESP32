@@ -108,11 +108,14 @@ void TemperatureSensor::loop() {
                     if (++scanretry_ > SCAN_MAX) { // every 30 sec
                         scanretry_ = 0;
 #ifdef EMSESP_DEBUG_SENSOR
-                        LOG_ERROR("Bus reset failed");
+                        LOG_DEBUG("Error: Bus reset failed");
 #endif
+#ifndef EMSESP_TEST
+                        // don't reset if running in test mode where we simulate sensors
                         for (auto & sensor : sensors_) {
                             sensor.temperature_c = EMS_VALUE_SHORT_NOTSET;
                         }
+#endif
                     }
                 }
             }
@@ -202,6 +205,7 @@ void TemperatureSensor::loop() {
                     bus_.depower();
                 }
                 // check for missing sensors after some samples
+                // but don't do this if running in test mode where we simulate sensors
                 if (++scancnt_ > SCAN_MAX) {
                     for (auto & sensor : sensors_) {
                         if (!sensor.read) {
@@ -309,6 +313,7 @@ bool TemperatureSensor::update(const std::string & id, const std::string & name,
             // if HA is enabled then delete the old record
             if (Mqtt::ha_enabled()) {
                 remove_ha_topic(id);
+                sensor.ha_registered = false; // force HA configs to be re-created
             }
 
             sensor.set_name(name);
@@ -458,6 +463,7 @@ void TemperatureSensor::remove_ha_topic(const std::string & id) {
     if (!Mqtt::ha_enabled()) {
         return;
     }
+
     LOG_DEBUG("Removing HA config for temperature sensor ID %s", id.c_str());
     // use '_' as HA doesn't like '-' in the topic name
     std::string sensorid = id;
@@ -474,7 +480,6 @@ void TemperatureSensor::publish_values(const bool force) {
     }
 
     uint8_t num_sensors = sensors_.size();
-
     if (num_sensors == 0) {
         return;
     }
@@ -485,19 +490,30 @@ void TemperatureSensor::publish_values(const bool force) {
         }
     }
 
-    DynamicJsonDocument doc(120 * num_sensors);
+    DynamicJsonDocument doc(150 * num_sensors);
+
+    // used to see if we need to create the [devs] discovery section, as this needs only to be done once for all sensors
+    bool is_first_ha = true;
+    if (Mqtt::ha_enabled()) {
+        for (auto & sensor : sensors_) {
+            if (sensor.ha_registered) {
+                is_first_ha = false;
+                break;
+            }
+        }
+    }
 
     for (auto & sensor : sensors_) {
         bool has_value = Helpers::hasValue(sensor.temperature_c);
-        char val[10];
-        if (Mqtt::is_nested()) {
-            JsonObject dataSensor = doc.createNestedObject(sensor.id());
-            dataSensor["name"]    = sensor.name();
-            if (has_value) {
-                dataSensor["temp"] = serialized(Helpers::render_value(val, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
+        if (has_value) {
+            char val[10];
+            if (Mqtt::is_nested()) {
+                JsonObject dataSensor = doc.createNestedObject(sensor.id());
+                dataSensor["name"]    = sensor.name();
+                dataSensor["temp"]    = serialized(Helpers::render_value(val, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
+            } else {
+                doc[sensor.name()] = serialized(Helpers::render_value(val, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
             }
-        } else if (has_value) {
-            doc[sensor.name()] = serialized(Helpers::render_value(val, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
         }
 
         // create the HA MQTT config
@@ -509,7 +525,7 @@ void TemperatureSensor::publish_values(const bool force) {
             } else if (!sensor.ha_registered || force) {
                 LOG_DEBUG("Recreating HA config for sensor ID %s", sensor.id().c_str());
 
-                StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
+                StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> config; // this needs to be large because of all the copying in add_ha_sections_to_doc()
                 config["dev_cla"] = "temperature";
 
                 char stat_t[50];
@@ -518,8 +534,8 @@ void TemperatureSensor::publish_values(const bool force) {
 
                 config["unit_of_meas"] = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
 
-                char val_obj[50];
-                char val_cond[95];
+                char val_obj[70];
+                char val_cond[170];
                 if (Mqtt::is_nested()) {
                     snprintf(val_obj, sizeof(val_obj), "value_json['%s'].temp", sensor.id().c_str());
                     snprintf(val_cond, sizeof(val_cond), "value_json['%s'] is defined and %s is defined", sensor.id().c_str(), val_obj);
@@ -530,10 +546,10 @@ void TemperatureSensor::publish_values(const bool force) {
 
                 // for the value template, there's a problem still with Domoticz probably due to the special characters.
                 // See https://github.com/emsesp/EMS-ESP32/issues/1360
-                if (Mqtt::discovery_type() == Mqtt::discoveryType::DOMOTICZ) {
-                    config["val_tpl"] = (std::string) "{{" + val_obj + "}}";
-                } else {
+                if (Mqtt::discovery_type() == Mqtt::discoveryType::HOMEASSISTANT) {
                     config["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else -55}}";
+                } else {
+                    config["val_tpl"] = (std::string) "{{" + val_obj + "}}"; // ommit value conditional Jinja2 template code
                 }
 
                 char uniq_s[70];
@@ -550,7 +566,7 @@ void TemperatureSensor::publish_values(const bool force) {
                 snprintf(name, sizeof(name), "%s", sensor.name().c_str());
                 config["name"] = name;
 
-                Mqtt::add_ha_sections_to_doc("temperature", stat_t, config.as<JsonObject>(), true, val_cond);
+                Mqtt::add_ha_sections_to_doc("temperature", stat_t, config.as<JsonObject>(), is_first_ha, val_cond);
 
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
                 // use '_' as HA doesn't like '-' in the topic name
@@ -568,7 +584,6 @@ void TemperatureSensor::publish_values(const bool force) {
     snprintf(topic, sizeof(topic), "%s_data", F_(temperaturesensor));
     Mqtt::queue_publish(topic, doc.as<JsonObject>());
 }
-
 
 // skip crc from id
 TemperatureSensor::Sensor::Sensor(const uint8_t addr[])
@@ -629,15 +644,17 @@ void TemperatureSensor::test() {
     // add 2 temperature sensors
     uint8_t addr[ADDR_LEN] = {1, 2, 3, 4, 5, 6, 7, 8};
     sensors_.emplace_back(addr);
+    // sensors_.back().apply_customization();
     sensors_.back().temperature_c = 123;
     sensors_.back().read          = true;
-    sensors_.back().apply_customization();
+    publish_sensor(sensors_.back()); // call publish single
 
     uint8_t addr2[ADDR_LEN] = {11, 12, 13, 14, 15, 16, 17, 18};
     sensors_.emplace_back(addr2);
+    // sensors_.back().apply_customization();
     sensors_.back().temperature_c = 456;
     sensors_.back().read          = true;
-    sensors_.back().apply_customization();
+    publish_sensor(sensors_.back()); // call publish single
 }
 #endif
 
