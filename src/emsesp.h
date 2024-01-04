@@ -1,7 +1,7 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020-2023  Paul Derbyshire
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -83,11 +83,11 @@
 
 namespace emsesp {
 
-using DeviceValueUOM   = emsesp::DeviceValue::DeviceValueUOM;
-using DeviceValueType  = emsesp::DeviceValue::DeviceValueType;
-using DeviceValueState = emsesp::DeviceValue::DeviceValueState;
-using DeviceValueTAG   = emsesp::DeviceValue::DeviceValueTAG;
-using DeviceValueNumOp = emsesp::DeviceValue::DeviceValueNumOp;
+using DeviceValueUOM   = DeviceValue::DeviceValueUOM;
+using DeviceValueType  = DeviceValue::DeviceValueType;
+using DeviceValueState = DeviceValue::DeviceValueState;
+using DeviceValueTAG   = DeviceValue::DeviceValueTAG;
+using DeviceValueNumOp = DeviceValue::DeviceValueNumOp;
 
 // forward declarations for compiler
 class EMSESPShell;

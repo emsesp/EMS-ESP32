@@ -194,7 +194,6 @@ const sv: Translation = {
   RELEASE_IS: 'release är', // TODO translate
   RELEASE_NOTES: 'release-logg',
   EMS_ESP_VER: 'EMS-ESP Version',
-  PLATFORM: 'Enhet (Plattform / SDK)',
   UPTIME: 'Systemets Upptid',
   HEAP: 'Heap (Ledigt / Max allokerat)',
   PSRAM: 'PSRAM (Storlek / Ledigt)',

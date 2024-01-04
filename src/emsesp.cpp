@@ -1161,7 +1161,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     emsdevices.back()->unique_id(++unique_id_count_);
 
     // sort devices based on type
-    std::sort(emsdevices.begin(), emsdevices.end(), [](const std::unique_ptr<emsesp::EMSdevice> & a, const std::unique_ptr<emsesp::EMSdevice> & b) {
+    std::sort(emsdevices.begin(), emsdevices.end(), [](const std::unique_ptr<EMSdevice> & a, const std::unique_ptr<EMSdevice> & b) {
         return a->device_type() < b->device_type();
     });
 
@@ -1402,7 +1402,7 @@ void EMSESP::scheduled_fetch_values() {
 EMSESP::EMSESP()
 #ifndef EMSESP_STANDALONE
     : telnet_([this](Stream & stream, const IPAddress & addr, uint16_t port) -> std::shared_ptr<uuid::console::Shell> {
-        return std::make_shared<emsesp::EMSESPConsole>(*this, stream, addr, port);
+        return std::make_shared<EMSESPConsole>(*this, stream, addr, port);
     })
 #endif
 {
@@ -1429,7 +1429,7 @@ void EMSESP::start() {
 // start the file system
 #ifndef EMSESP_STANDALONE
     if (!LittleFS.begin(true)) {
-        Serial.println("LittleFS Mount Failed. EMS-ESP stopped.");
+        Serial.println("LittleFS Mount Failed. Using default settings.");
         return;
     }
 #endif

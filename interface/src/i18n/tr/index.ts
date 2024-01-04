@@ -194,7 +194,6 @@ const tr: Translation = {
   RELEASE_IS: 'release is', // TODO translate
   RELEASE_NOTES: 'yayınlanma notları',
   EMS_ESP_VER: 'EMS-ESP Sürümü',
-  PLATFORM: 'Cihaz (Platform / SDK)',
   UPTIME: 'Sistem Çalışma Süresi',
   HEAP: 'Yığın (Boş / Maksimum Tahsis)',
   PSRAM: 'PSRAM (Boyut / Boş)',

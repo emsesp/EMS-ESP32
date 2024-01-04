@@ -4271,7 +4271,7 @@ void Thermostat::register_device_values() {
 
 #if defined(EMSESP_STANDALONE_DUMP)
     // if we're just dumping out values, create a single dummy hc
-    register_device_values_hc(std::make_shared<emsesp::Thermostat::HeatingCircuit>(1, this->model())); // hc=1
+    register_device_values_hc(std::make_shared<Thermostat::HeatingCircuit>(1, this->model())); // hc=1
 #endif
 }
 

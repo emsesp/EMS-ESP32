@@ -257,7 +257,9 @@ bool System::command_watch(const char * value, const int8_t id) {
 }
 
 void System::store_nvs_values() {
-    Command::call(EMSdevice::DeviceType::BOILER, "nompower", "-1"); // trigger a write
+    if (Command::find_command(EMSdevice::DeviceType::BOILER, 0, "nompower") != nullptr) {
+        Command::call(EMSdevice::DeviceType::BOILER, "nompower", "-1"); // trigger a write
+    }
     EMSESP::analogsensor_.store_counters();
     EMSESP::nvs_.end();
 }
@@ -1112,7 +1114,7 @@ bool System::check_upgrade(bool factory_settings) {
 
 #if defined(EMSESP_DEBUG)
     if (!missing_version) {
-        LOG_INFO("Current version from settings is %d.%d.%d-%s",
+        LOG_INFO("Checking version (settings has %d.%d.%d-%s)...",
                  settings_version.major(),
                  settings_version.minor(),
                  settings_version.patch(),
@@ -1120,26 +1122,20 @@ bool System::check_upgrade(bool factory_settings) {
     }
 #endif
 
-    // always save the new version to the settings
-    EMSESP::webSettingsService.update(
-        [&](WebSettings & settings) {
-            settings.version = EMSESP_APP_VERSION;
-            return StateUpdateResult::CHANGED;
-        },
-        "local");
-
     if (factory_settings) {
         return false; // fresh install, do nothing
     }
 
     version::Semver200_version this_version(EMSESP_APP_VERSION);
 
+    bool save_version = true;
+
     // compare versions
-    bool reboot_required = false;
     if (this_version > settings_version) {
+        // need upgrade
         LOG_NOTICE("Upgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
 
-        // if we're coming from 3.4.4 or 3.5.0b14 then we need to apply new settings
+        // if we're coming from 3.4.4 or 3.5.0b14 which had no version stored then we need to apply new settings
         if (missing_version) {
             LOG_DEBUG("Setting MQTT Entity ID format to v3.4 format");
             EMSESP::esp8266React.getMqttSettingsService()->update(
@@ -1149,15 +1145,26 @@ bool System::check_upgrade(bool factory_settings) {
                 },
                 "local");
         }
-
     } else if (this_version < settings_version) {
+        // need downgrade
         LOG_NOTICE("Downgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
     } else {
         // same version, do nothing
-        return false;
+        save_version = false;
     }
 
-    return reboot_required;
+    // if we did a change, set the new version and reboot
+    if (save_version) {
+        EMSESP::webSettingsService.update(
+            [&](WebSettings & settings) {
+                settings.version = EMSESP_APP_VERSION;
+                return StateUpdateResult::CHANGED;
+            },
+            "local");
+        return true; // need reboot
+    }
+
+    return false;
 }
 
 // list commands
