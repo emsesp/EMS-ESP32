@@ -175,6 +175,9 @@ class AsyncJsonResponse {
 
     void setCode(uint16_t) {
     }
+
+    void setContentType(const char * s) {
+    }
 };
 
 typedef std::function<void(AsyncWebServerRequest * request, JsonVariant & json)> ArJsonRequestHandlerFunction;
