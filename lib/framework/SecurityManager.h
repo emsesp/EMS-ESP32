@@ -18,7 +18,7 @@
 #define AUTHORIZATION_HEADER_PREFIX "Bearer "
 #define AUTHORIZATION_HEADER_PREFIX_LEN 7
 
-#define MAX_JWT_SIZE 128
+// #define MAX_JWT_SIZE 128
 
 class User {
   public:

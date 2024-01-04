@@ -29,7 +29,7 @@ String toLocalTimeString(tm * time) {
 }
 
 void NTPStatus::ntpStatus(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_NTP_STATUS_SIZE);
+    AsyncJsonResponse * response = new AsyncJsonResponse(false);
     JsonObject          root     = response->getRoot();
 
     // grab the current instant in unix seconds

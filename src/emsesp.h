@@ -66,17 +66,6 @@
 
 #define WATCH_ID_NONE 0 // no watch id set
 
-// uses StaticJsonDocument
-#define EMSESP_JSON_SIZE_SMALL 256
-#define EMSESP_JSON_SIZE_MEDIUM 768
-#define EMSESP_JSON_SIZE_LARGE 1024 // used in forming HA config payloads, also in *AsyncJsonResponse
-
-// used in larger buffers like DynamicJsonDocument
-#define EMSESP_JSON_SIZE_XLARGE 2048
-#define EMSESP_JSON_SIZE_XXLARGE 4096
-#define EMSESP_JSON_SIZE_XXXLARGE 16384
-#define EMSESP_JSON_SIZE_XXXXLARGE 20480 // web output
-
 // helpers for callback functions
 #define MAKE_PF_CB(__f) [&](std::shared_ptr<const Telegram> t) { __f(t); }                  // for Process Function callbacks to EMSDevice::process_function_p
 #define MAKE_CF_CB(__f) [&](const char * value, const int8_t id) { return __f(value, id); } // for Command Function callbacks Command::cmd_function_p

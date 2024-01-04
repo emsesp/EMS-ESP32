@@ -11,7 +11,7 @@ NetworkStatus::NetworkStatus(AsyncWebServer * server, SecurityManager * security
 }
 
 void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_NETWORK_STATUS_SIZE);
+    AsyncJsonResponse * response = new AsyncJsonResponse(false);
     JsonObject          root     = response->getRoot();
 
     bool        ethernet_connected = emsesp::EMSESP::system_.ethernet_connected();

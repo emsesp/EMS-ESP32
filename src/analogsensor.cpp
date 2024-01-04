@@ -462,13 +462,13 @@ void AnalogSensor::publish_values(const bool force) {
         }
     }
 
-    DynamicJsonDocument doc(120 * num_sensors);
+    JsonDocument doc;
 
     for (auto & sensor : sensors_) {
         if (sensor.type() != AnalogType::NOTUSED) {
             if (Mqtt::is_nested()) {
                 char       s[10];
-                JsonObject dataSensor = doc.createNestedObject(Helpers::smallitoa(s, sensor.gpio()));
+                JsonObject dataSensor = doc[Helpers::smallitoa(s, sensor.gpio())].add<JsonObject>();
                 dataSensor["name"]    = sensor.name();
                 switch (sensor.type()) {
                 case AnalogType::COUNTER:
@@ -512,7 +512,7 @@ void AnalogSensor::publish_values(const bool force) {
             if (Mqtt::ha_enabled() && (!sensor.ha_registered || force)) {
                 LOG_DEBUG("Recreating HA config for analog sensor GPIO %02d", sensor.gpio());
 
-                StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
+                JsonDocument config;
 
                 char stat_t[50];
                 snprintf(stat_t, sizeof(stat_t), "%s/%s_data", Mqtt::base().c_str(), F_(analogsensor)); // use base path
@@ -615,7 +615,7 @@ void AnalogSensor::publish_values(const bool force) {
                     config["stat_cla"] = "measurement";
                 }
 
-                Mqtt::add_ha_sections_to_doc("analog", stat_t, config.as<JsonObject>(), true, val_cond);
+                Mqtt::add_ha_sections_to_doc("analog", stat_t, config, true, val_cond);
 
                 sensor.ha_registered = Mqtt::queue_ha(topic, config.as<JsonObject>());
             }
@@ -697,7 +697,7 @@ bool AnalogSensor::command_info(const char * value, const int8_t id, JsonObject 
 
     for (const auto & sensor : sensors_) {
         if (id == -1) { // show number and id for info command
-            JsonObject dataSensor = output.createNestedObject(sensor.name());
+            JsonObject dataSensor = output[sensor.name()].add<JsonObject>();
             dataSensor["gpio"]    = sensor.gpio();
             dataSensor["type"]    = F_(number);
             dataSensor["value"]   = sensor.value();

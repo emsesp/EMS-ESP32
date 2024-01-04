@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2023, Benoit BLANCHON
+// Copyright © 2014-2024, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -15,7 +15,7 @@ struct Reader<TSource,
   explicit Reader(Stream& stream) : stream_(&stream) {}
 
   int read() {
-    // don't use stream_.read() as it ignores the timeout
+    // don't use stream_->read() as it ignores the timeout
     char c;
     return stream_->readBytes(&c, 1) ? static_cast<unsigned char>(c) : -1;
   }

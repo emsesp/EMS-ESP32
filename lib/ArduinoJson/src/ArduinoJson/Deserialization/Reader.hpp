@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2023, Benoit BLANCHON
+// Copyright © 2014-2024, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -19,7 +19,7 @@ struct Reader {
 
   int read() {
     // clang-format off
-    return source_->read();  // Error here? See https://arduinojson.org/v6/invalid-input/
+    return source_->read();  // Error here? See https://arduinojson.org/v7/invalid-input/
     // clang-format on
   }
 

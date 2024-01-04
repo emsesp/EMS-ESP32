@@ -37,10 +37,10 @@ void WebSchedulerService::begin() {
 // this creates the scheduler file, saving it to the FS
 // and also calls when the Scheduler web page is refreshed
 void WebScheduler::read(WebScheduler & webScheduler, JsonObject & root) {
-    JsonArray schedule = root.createNestedArray("schedule");
+    JsonArray schedule = root["schedule"].to<JsonArray>();
     uint8_t   counter  = 0;
     for (const ScheduleItem & scheduleItem : webScheduler.scheduleItems) {
-        JsonObject si = schedule.createNestedObject();
+        JsonObject si = schedule.add<JsonObject>();
         si["id"]      = counter++; // id is only used to render the table and must be unique
         si["active"]  = scheduleItem.active;
         si["flags"]   = scheduleItem.flags;
@@ -59,7 +59,7 @@ StateUpdateResult WebScheduler::update(JsonObject & root, WebScheduler & webSche
     const char * json =
         "{\"schedule\": [{\"id\":1,\"active\":true,\"flags\":31,\"time\": \"07:30\",\"cmd\": \"hc1mode\",\"value\": \"day\",\"name\": \"turn on "
         "central heating\"}]}";
-    StaticJsonDocument<500> doc;
+    JsonDocument doc;
     deserializeJson(doc, json);
     root = doc.as<JsonObject>();
     Serial.println(COLOR_BRIGHT_MAGENTA);
@@ -237,8 +237,8 @@ void WebSchedulerService::publish(const bool force) {
         }
     }
 
-    DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE);
-    bool                ha_created = ha_registered_;
+    JsonDocument doc;
+    bool         ha_created = ha_registered_;
     for (const ScheduleItem & scheduleItem : *scheduleItems) {
         if (!scheduleItem.name.empty() && !doc.containsKey(scheduleItem.name)) {
             if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
@@ -252,8 +252,8 @@ void WebSchedulerService::publish(const bool force) {
 
             // create HA config
             if (Mqtt::ha_enabled() && !ha_registered_) {
-                StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
-                char                                        stat_t[50];
+                JsonDocument config;
+                char         stat_t[50];
                 snprintf(stat_t, sizeof(stat_t), "%s/scheduler_data", Mqtt::base().c_str());
                 config["stat_t"] = stat_t;
 
@@ -287,7 +287,7 @@ void WebSchedulerService::publish(const bool force) {
                     config["pl_off"] = Helpers::render_boolean(result, false);
                 }
 
-                Mqtt::add_ha_sections_to_doc("scheduler", stat_t, config.as<JsonObject>(), true, val_cond);
+                Mqtt::add_ha_sections_to_doc("scheduler", stat_t, config, true, val_cond);
 
                 ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
             }
@@ -314,14 +314,14 @@ bool WebSchedulerService::has_commands() {
 
 // execute scheduled command
 bool WebSchedulerService::command(const char * cmd, const char * data) {
-    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc_input;
-    JsonObject                                 input = doc_input.to<JsonObject>();
+    JsonDocument doc_input;
+    JsonObject   input = doc_input.to<JsonObject>();
     if (strlen(data)) { // empty data queries a value
         input["data"] = data;
     }
 
-    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc_output; // only for commands without output
-    JsonObject                                 output = doc_output.to<JsonObject>();
+    JsonDocument doc_output; // only for commands without output
+    JsonObject   output = doc_output.to<JsonObject>();
 
     // prefix "api/" to command string
     char command_str[100];

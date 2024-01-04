@@ -496,11 +496,11 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                 return;
             }
 
-            DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXXLARGE);
-            int8_t              id          = -1;
-            const char *        cmd         = Command::parse_command_string(arguments[1].c_str(), id);
-            uint8_t             return_code = CommandRet::OK;
-            JsonObject          json        = doc.to<JsonObject>();
+            JsonDocument doc;
+            int8_t       id          = -1;
+            const char * cmd         = Command::parse_command_string(arguments[1].c_str(), id);
+            uint8_t      return_code = CommandRet::OK;
+            JsonObject   json        = doc.to<JsonObject>();
 
             if (cmd == nullptr) {
                 cmd = device_type == EMSdevice::DeviceType::SYSTEM ? F_(info) : F_(values);

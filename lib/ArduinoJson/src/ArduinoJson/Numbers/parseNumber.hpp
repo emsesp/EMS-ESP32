@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2023, Benoit BLANCHON
+// Copyright © 2014-2024, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -147,6 +147,6 @@ template <typename T>
 inline T parseNumber(const char* s) {
   VariantData value;
   parseNumber(s, value);
-  return Converter<T>::fromJson(JsonVariantConst(&value));
+  return Converter<T>::fromJson(JsonVariantConst(&value, nullptr));
 }
 ARDUINOJSON_END_PRIVATE_NAMESPACE

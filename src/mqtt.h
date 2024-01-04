@@ -219,7 +219,7 @@ class Mqtt {
 
     static void add_ha_sections_to_doc(const std::string & name,
                                        const char *        state_t,
-                                       const JsonObject &  config,
+                                       JsonDocument &      config,
                                        const bool          is_first = false,
                                        const char *        cond1    = nullptr,
                                        const char *        cond2    = nullptr,

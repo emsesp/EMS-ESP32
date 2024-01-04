@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2023, Benoit BLANCHON
+// Copyright © 2014-2024, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -12,7 +12,7 @@ ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 class JsonArray;
 
 // A reference to an object in a JsonDocument.
-// https://arduinojson.org/v6/api/jsonobject/
+// https://arduinojson.org/v7/api/jsonobject/
 class JsonObject : public detail::VariantOperators<JsonObject> {
   friend class detail::VariantAttorney;
 
@@ -20,93 +20,88 @@ class JsonObject : public detail::VariantOperators<JsonObject> {
   typedef JsonObjectIterator iterator;
 
   // Creates an unbound reference.
-  FORCE_INLINE JsonObject() : data_(0), pool_(0) {}
+  FORCE_INLINE JsonObject() : data_(0), resources_(0) {}
 
   // INTERNAL USE ONLY
-  FORCE_INLINE JsonObject(detail::MemoryPool* buf, detail::CollectionData* data)
-      : data_(data), pool_(buf) {}
+  FORCE_INLINE JsonObject(detail::ObjectData* data,
+                          detail::ResourceManager* resource)
+      : data_(data), resources_(resource) {}
 
   operator JsonVariant() const {
     void* data = data_;  // prevent warning cast-align
-    return JsonVariant(pool_, reinterpret_cast<detail::VariantData*>(data));
+    return JsonVariant(reinterpret_cast<detail::VariantData*>(data),
+                       resources_);
   }
 
   operator JsonObjectConst() const {
-    return JsonObjectConst(data_);
+    return JsonObjectConst(data_, resources_);
   }
 
   operator JsonVariantConst() const {
-    return JsonVariantConst(collectionToVariant(data_));
+    return JsonVariantConst(collectionToVariant(data_), resources_);
   }
 
   // Returns true if the reference is unbound.
-  // https://arduinojson.org/v6/api/jsonobject/isnull/
+  // https://arduinojson.org/v7/api/jsonobject/isnull/
   FORCE_INLINE bool isNull() const {
     return data_ == 0;
   }
 
   // Returns true if the reference is bound.
-  // https://arduinojson.org/v6/api/jsonobject/isnull/
+  // https://arduinojson.org/v7/api/jsonobject/isnull/
   FORCE_INLINE operator bool() const {
     return data_ != 0;
   }
 
-  // Returns the number of bytes occupied by the object.
-  // https://arduinojson.org/v6/api/jsonobject/memoryusage/
-  FORCE_INLINE size_t memoryUsage() const {
-    return data_ ? data_->memoryUsage() : 0;
-  }
-
   // Returns the depth (nesting level) of the object.
-  // https://arduinojson.org/v6/api/jsonobject/nesting/
+  // https://arduinojson.org/v7/api/jsonobject/nesting/
   FORCE_INLINE size_t nesting() const {
-    return variantNesting(collectionToVariant(data_));
+    return detail::VariantData::nesting(collectionToVariant(data_), resources_);
   }
 
   // Returns the number of members in the object.
-  // https://arduinojson.org/v6/api/jsonobject/size/
+  // https://arduinojson.org/v7/api/jsonobject/size/
   FORCE_INLINE size_t size() const {
-    return data_ ? data_->size() : 0;
+    return data_ ? data_->size(resources_) : 0;
   }
 
   // Returns an iterator to the first key-value pair of the object.
-  // https://arduinojson.org/v6/api/jsonobject/begin/
+  // https://arduinojson.org/v7/api/jsonobject/begin/
   FORCE_INLINE iterator begin() const {
     if (!data_)
       return iterator();
-    return iterator(pool_, data_->head());
+    return iterator(data_->createIterator(resources_), resources_);
   }
 
   // Returns an iterator following the last key-value pair of the object.
-  // https://arduinojson.org/v6/api/jsonobject/end/
+  // https://arduinojson.org/v7/api/jsonobject/end/
   FORCE_INLINE iterator end() const {
     return iterator();
   }
 
   // Removes all the members of the object.
-  // ⚠️ Doesn't release the memory associated with the removed members.
-  // https://arduinojson.org/v6/api/jsonobject/clear/
+  // https://arduinojson.org/v7/api/jsonobject/clear/
   void clear() const {
-    if (!data_)
-      return;
-    data_->clear();
+    detail::ObjectData::clear(data_, resources_);
   }
 
   // Copies an object.
-  // https://arduinojson.org/v6/api/jsonobject/set/
+  // https://arduinojson.org/v7/api/jsonobject/set/
   FORCE_INLINE bool set(JsonObjectConst src) {
     if (!data_ || !src.data_)
       return false;
-    return data_->copyFrom(*src.data_, pool_);
-  }
 
-  // Compares the content of two objects.
-  FORCE_INLINE bool operator==(JsonObject rhs) const {
-    return JsonObjectConst(data_) == JsonObjectConst(rhs.data_);
+    clear();
+    for (auto kvp : src) {
+      if (!operator[](kvp.key()).set(kvp.value()))
+        return false;
+    }
+
+    return true;
   }
 
   // Gets or sets the member with specified key.
-  // https://arduinojson.org/v6/api/jsonobject/subscript/
+  // https://arduinojson.org/v7/api/jsonobject/subscript/
   template <typename TString>
   FORCE_INLINE
       typename detail::enable_if<detail::IsString<TString>::value,
@@ -116,7 +111,7 @@ class JsonObject : public detail::VariantOperators<JsonObject> {
   }
 
   // Gets or sets the member with specified key.
-  // https://arduinojson.org/v6/api/jsonobject/subscript/
+  // https://arduinojson.org/v7/api/jsonobject/subscript/
   template <typename TChar>
   FORCE_INLINE
       typename detail::enable_if<detail::IsString<TChar*>::value,
@@ -126,75 +121,84 @@ class JsonObject : public detail::VariantOperators<JsonObject> {
   }
 
   // Removes the member at the specified iterator.
-  // ⚠️ Doesn't release the memory associated with the removed member.
-  // https://arduinojson.org/v6/api/jsonobject/remove/
+  // https://arduinojson.org/v7/api/jsonobject/remove/
   FORCE_INLINE void remove(iterator it) const {
-    if (!data_)
-      return;
-    data_->removeSlot(it.slot_);
+    detail::ObjectData::remove(data_, it.iterator_, resources_);
   }
 
   // Removes the member with the specified key.
-  // ⚠️ Doesn't release the memory associated with the removed member.
-  // https://arduinojson.org/v6/api/jsonobject/remove/
+  // https://arduinojson.org/v7/api/jsonobject/remove/
   template <typename TString>
   FORCE_INLINE void remove(const TString& key) const {
-    removeMember(detail::adaptString(key));
+    detail::ObjectData::removeMember(data_, detail::adaptString(key),
+                                     resources_);
   }
 
   // Removes the member with the specified key.
-  // ⚠️ Doesn't release the memory associated with the removed member.
-  // https://arduinojson.org/v6/api/jsonobject/remove/
+  // https://arduinojson.org/v7/api/jsonobject/remove/
   template <typename TChar>
   FORCE_INLINE void remove(TChar* key) const {
-    removeMember(detail::adaptString(key));
+    detail::ObjectData::removeMember(data_, detail::adaptString(key),
+                                     resources_);
   }
 
   // Returns true if the object contains the specified key.
-  // https://arduinojson.org/v6/api/jsonobject/containskey/
+  // https://arduinojson.org/v7/api/jsonobject/containskey/
   template <typename TString>
   FORCE_INLINE
       typename detail::enable_if<detail::IsString<TString>::value, bool>::type
       containsKey(const TString& key) const {
-    return getMember(detail::adaptString(key)) != 0;
+    return detail::ObjectData::getMember(data_, detail::adaptString(key),
+                                         resources_) != 0;
   }
 
   // Returns true if the object contains the specified key.
-  // https://arduinojson.org/v6/api/jsonobject/containskey/
+  // https://arduinojson.org/v7/api/jsonobject/containskey/
   template <typename TChar>
   FORCE_INLINE
       typename detail::enable_if<detail::IsString<TChar*>::value, bool>::type
       containsKey(TChar* key) const {
-    return getMember(detail::adaptString(key)) != 0;
+    return detail::ObjectData::getMember(data_, detail::adaptString(key),
+                                         resources_) != 0;
   }
 
-  // Creates an array and adds it to the object.
-  // https://arduinojson.org/v6/api/jsonobject/createnestedarray/
-  template <typename TString>
-  FORCE_INLINE JsonArray createNestedArray(const TString& key) const;
-
-  // Creates an array and adds it to the object.
-  // https://arduinojson.org/v6/api/jsonobject/createnestedarray/
+  // DEPRECATED: use obj[key].to<JsonArray>() instead
   template <typename TChar>
-  FORCE_INLINE JsonArray createNestedArray(TChar* key) const;
+  ARDUINOJSON_DEPRECATED("use obj[key].to<JsonArray>() instead")
+  JsonArray createNestedArray(TChar* key) const {
+    return operator[](key).template to<JsonArray>();
+  }
 
-  // Creates an object and adds it to the object.
-  // https://arduinojson.org/v6/api/jsonobject/createnestedobject/
+  // DEPRECATED: use obj[key].to<JsonArray>() instead
   template <typename TString>
-  JsonObject createNestedObject(const TString& key) const {
+  ARDUINOJSON_DEPRECATED("use obj[key].to<JsonArray>() instead")
+  JsonArray createNestedArray(const TString& key) const {
+    return operator[](key).template to<JsonArray>();
+  }
+
+  // DEPRECATED: use obj[key].to<JsonObject>() instead
+  template <typename TChar>
+  ARDUINOJSON_DEPRECATED("use obj[key].to<JsonObject>() instead")
+  JsonObject createNestedObject(TChar* key) {
     return operator[](key).template to<JsonObject>();
   }
 
-  // Creates an object and adds it to the object.
-  // https://arduinojson.org/v6/api/jsonobject/createnestedobject/
-  template <typename TChar>
-  JsonObject createNestedObject(TChar* key) const {
+  // DEPRECATED: use obj[key].to<JsonObject>() instead
+  template <typename TString>
+  ARDUINOJSON_DEPRECATED("use obj[key].to<JsonObject>() instead")
+  JsonObject createNestedObject(const TString& key) {
     return operator[](key).template to<JsonObject>();
+  }
+
+  // DEPRECATED: always returns zero
+  ARDUINOJSON_DEPRECATED("always returns zero")
+  size_t memoryUsage() const {
+    return 0;
   }
 
  private:
-  detail::MemoryPool* getPool() const {
-    return pool_;
+  detail::ResourceManager* getResourceManager() const {
+    return resources_;
   }
 
   detail::VariantData* getData() const {
@@ -205,47 +209,8 @@ class JsonObject : public detail::VariantOperators<JsonObject> {
     return detail::collectionToVariant(data_);
   }
 
-  template <typename TAdaptedString>
-  inline detail::VariantData* getMember(TAdaptedString key) const {
-    if (!data_)
-      return 0;
-    return data_->getMember(key);
-  }
-
-  template <typename TAdaptedString>
-  void removeMember(TAdaptedString key) const {
-    if (!data_)
-      return;
-    data_->removeMember(key);
-  }
-
-  detail::CollectionData* data_;
-  detail::MemoryPool* pool_;
-};
-
-template <>
-struct Converter<JsonObject> : private detail::VariantAttorney {
-  static void toJson(JsonVariantConst src, JsonVariant dst) {
-    variantCopyFrom(getData(dst), getData(src), getPool(dst));
-  }
-
-  static JsonObject fromJson(JsonVariant src) {
-    auto data = getData(src);
-    auto pool = getPool(src);
-    return JsonObject(pool, data != 0 ? data->asObject() : 0);
-  }
-
-  static detail::InvalidConversion<JsonVariantConst, JsonObject> fromJson(
-      JsonVariantConst);
-
-  static bool checkJson(JsonVariantConst) {
-    return false;
-  }
-
-  static bool checkJson(JsonVariant src) {
-    auto data = getData(src);
-    return data && data->isObject();
-  }
+  detail::ObjectData* data_;
+  detail::ResourceManager* resources_;
 };
 
 ARDUINOJSON_END_PUBLIC_NAMESPACE
