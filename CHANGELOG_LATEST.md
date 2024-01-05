@@ -13,6 +13,7 @@
 - added SK (Slovenian) language. Thanks @misa1515
 - CPU info [#1497](https://github.com/emsesp/EMS-ESP32/pull/1497)
 - Show network hostname in Web UI under Network Status
+- Improved HA Discovery so each section (EMS device, Scheduler, Analog, Temperature, Custom, Shower) have their own section
 
 ## Fixed
 
@@ -25,3 +26,4 @@
 ## Changed
 
 - HA don't set entity_category to Diagnostic/Configuration for EMS entities [#1459](https://github.com/emsesp/EMS-ESP32/discussions/1459)
+- Upgraded ArduinoJson to 7.0.0 #1538
