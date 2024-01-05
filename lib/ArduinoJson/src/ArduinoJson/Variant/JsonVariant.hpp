@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2023, Benoit BLANCHON
+// Copyright © 2014-2024, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -9,22 +9,22 @@
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 
 // A reference to a value in a JsonDocument.
-// https://arduinojson.org/v6/api/jsonvariant/
+// https://arduinojson.org/v7/api/jsonvariant/
 class JsonVariant : public detail::VariantRefBase<JsonVariant>,
                     public detail::VariantOperators<JsonVariant> {
   friend class detail::VariantAttorney;
 
  public:
   // Creates an unbound reference.
-  JsonVariant() : data_(0), pool_(0) {}
+  JsonVariant() : data_(0), resources_(0) {}
 
   // INTERNAL USE ONLY
-  JsonVariant(detail::MemoryPool* pool, detail::VariantData* data)
-      : data_(data), pool_(pool) {}
+  JsonVariant(detail::VariantData* data, detail::ResourceManager* resources)
+      : data_(data), resources_(resources) {}
 
  private:
-  FORCE_INLINE detail::MemoryPool* getPool() const {
-    return pool_;
+  FORCE_INLINE detail::ResourceManager* getResourceManager() const {
+    return resources_;
   }
 
   FORCE_INLINE detail::VariantData* getData() const {
@@ -36,13 +36,17 @@ class JsonVariant : public detail::VariantRefBase<JsonVariant>,
   }
 
   detail::VariantData* data_;
-  detail::MemoryPool* pool_;
+  detail::ResourceManager* resources_;
 };
+
+namespace detail {
+bool copyVariant(JsonVariant dst, JsonVariantConst src);
+}
 
 template <>
 struct Converter<JsonVariant> : private detail::VariantAttorney {
-  static void toJson(JsonVariant src, JsonVariant dst) {
-    detail::variantCopyFrom(getData(dst), getData(src), getPool(dst));
+  static void toJson(JsonVariantConst src, JsonVariant dst) {
+    copyVariant(dst, src);
   }
 
   static JsonVariant fromJson(JsonVariant src) {
@@ -65,11 +69,11 @@ struct Converter<JsonVariant> : private detail::VariantAttorney {
 template <>
 struct Converter<JsonVariantConst> : private detail::VariantAttorney {
   static void toJson(JsonVariantConst src, JsonVariant dst) {
-    variantCopyFrom(getData(dst), getData(src), getPool(dst));
+    copyVariant(dst, src);
   }
 
   static JsonVariantConst fromJson(JsonVariantConst src) {
-    return JsonVariantConst(getData(src));
+    return JsonVariantConst(getData(src), getResourceManager(src));
   }
 
   static bool checkJson(JsonVariantConst src) {

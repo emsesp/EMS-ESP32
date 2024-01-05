@@ -99,7 +99,7 @@ void Shower::loop() {
                 if ((timer_pause_ - timer_start_) > SHOWER_OFFSET_TIME) {
                     duration_ = (timer_pause_ - timer_start_ - SHOWER_OFFSET_TIME);
                     if (duration_ > SHOWER_MIN_DURATION) {
-                        StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
+                        JsonDocument doc;
 
                         // duration in seconds
                         doc["duration"] = (duration_ / 1000UL); // seconds
@@ -177,10 +177,10 @@ void Shower::set_shower_state(bool state, bool force) {
 
     // send out HA MQTT Discovery config topic
     if ((Mqtt::ha_enabled()) && (!ha_configdone_ || force)) {
-        StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> doc;
-        char                                       topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-        char                                       str[70];
-        char                                       stat_t[50];
+        JsonDocument doc;
+        char         topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+        char         str[70];
+        char         stat_t[50];
 
         //
         // shower active
@@ -210,7 +210,7 @@ void Shower::set_shower_state(bool state, bool force) {
             doc["pl_off"] = Helpers::render_boolean(result, false);
         }
 
-        Mqtt::add_ha_sections_to_doc("shower", stat_t, doc.as<JsonObject>(), true); // create first dev & ids
+        Mqtt::add_ha_sections_to_doc("shower", stat_t, doc, true); // create first dev & ids
 
         snprintf(topic, sizeof(topic), "binary_sensor/%s/shower_active/config", Mqtt::basename().c_str());
         ha_configdone_ = Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
@@ -235,7 +235,7 @@ void Shower::set_shower_state(bool state, bool force) {
         doc["dev_cla"]      = "duration";
         // doc["ent_cat"]      = "diagnostic";
 
-        Mqtt::add_ha_sections_to_doc("shower", stat_t, doc.as<JsonObject>(), false, "value_json.duration is defined");
+        Mqtt::add_ha_sections_to_doc("shower", stat_t, doc, false, "value_json.duration is defined");
 
         snprintf(topic, sizeof(topic), "sensor/%s/shower_duration/config", Mqtt::basename().c_str());
         Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
@@ -257,7 +257,7 @@ void Shower::set_shower_state(bool state, bool force) {
         doc["val_tpl"] = "{{value_json.timestamp if value_json.timestamp is defined else 0}}";
         // doc["ent_cat"] = "diagnostic";
 
-        Mqtt::add_ha_sections_to_doc("shower", stat_t, doc.as<JsonObject>(), false, "value_json.timestamp is defined");
+        Mqtt::add_ha_sections_to_doc("shower", stat_t, doc, false, "value_json.timestamp is defined");
 
         snprintf(topic, sizeof(topic), "sensor/%s/shower_timestamp/config", Mqtt::basename().c_str());
         Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag

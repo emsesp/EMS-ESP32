@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2023, Benoit BLANCHON
+// Copyright © 2014-2024, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -11,7 +11,7 @@
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 
 // A string.
-// https://arduinojson.org/v6/api/jsonstring/
+// https://arduinojson.org/v7/api/jsonstring/
 class JsonString {
  public:
   enum Ownership { Copied, Linked };

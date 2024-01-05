@@ -30,7 +30,7 @@ WebCustomEntityService::WebCustomEntityService(AsyncWebServer * server, FS * fs,
                     EMSESP_CUSTOMENTITY_SERVICE_PATH,
                     securityManager,
                     AuthenticationPredicates::IS_AUTHENTICATED)
-    , _fsPersistence(WebCustomEntity::read, WebCustomEntity::update, this, fs, EMSESP_CUSTOMENTITY_FILE, FS_BUFFER_SIZE) {
+    , _fsPersistence(WebCustomEntity::read, WebCustomEntity::update, this, fs, EMSESP_CUSTOMENTITY_FILE) {
 }
 
 // load the settings when the service starts
@@ -43,10 +43,10 @@ void WebCustomEntityService::begin() {
 // this creates the entity file, saving it to the FS
 // and also calls when the Entity web page is refreshed
 void WebCustomEntity::read(WebCustomEntity & webEntity, JsonObject & root) {
-    JsonArray entity  = root.createNestedArray("entities");
+    JsonArray entity  = root["entities"].to<JsonArray>();
     uint8_t   counter = 0;
     for (const CustomEntityItem & entityItem : webEntity.customEntityItems) {
-        JsonObject ei    = entity.createNestedObject();
+        JsonObject ei    = entity.add<JsonObject>();
         ei["id"]         = counter++; // id is only used to render the table and must be unique
         ei["device_id"]  = entityItem.device_id;
         ei["type_id"]    = entityItem.type_id;
@@ -70,7 +70,7 @@ StateUpdateResult WebCustomEntity::update(JsonObject & root, WebCustomEntity & w
     const char * json =
         "{\"entities\": [{\"id\":0,\"device_id\":8,\"type_id\":24,\"offset\":0,\"factor\":1,\"name\":\"boiler_flowtemp\",\"uom\":1,\"value_type\":1,\"writeable\":true}]}";
     // clang-format on
-    StaticJsonDocument<500> doc;
+    JsonDocument doc;
     deserializeJson(doc, json);
     root = doc.as<JsonObject>();
     Serial.println(COLOR_BRIGHT_MAGENTA);
@@ -342,8 +342,8 @@ void WebCustomEntityService::publish_single(const CustomEntityItem & entity) {
     } else {
         snprintf(topic, sizeof(topic), "%s/%s", "custom_data", entity.name.c_str());
     }
-    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
-    JsonObject                                 output = doc.to<JsonObject>();
+    JsonDocument doc;
+    JsonObject   output = doc.to<JsonObject>();
     render_value(output, entity, true);
     Mqtt::queue_publish(topic, output["value"].as<std::string>());
 }
@@ -353,9 +353,11 @@ void WebCustomEntityService::publish(const bool force) {
     if (force) {
         ha_registered_ = false;
     }
+
     if (!Mqtt::enabled()) {
         return;
     }
+
     EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
     if (customEntityItems->size() == 0) {
         return;
@@ -366,15 +368,16 @@ void WebCustomEntityService::publish(const bool force) {
         }
     }
 
-    DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE);
-    JsonObject          output     = doc.to<JsonObject>();
-    bool                ha_created = ha_registered_;
+    JsonDocument doc;
+    JsonObject   output     = doc.to<JsonObject>();
+    bool         ha_created = ha_registered_;
+
     for (const CustomEntityItem & entityItem : *customEntityItems) {
         render_value(output, entityItem);
         // create HA config
         if (Mqtt::ha_enabled() && !ha_registered_) {
-            StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> config;
-            char                                        stat_t[50];
+            JsonDocument config;
+            char         stat_t[50];
             snprintf(stat_t, sizeof(stat_t), "%s/custom_data", Mqtt::base().c_str());
             config["stat_t"] = stat_t;
 
@@ -392,6 +395,7 @@ void WebCustomEntityService::publish(const bool force) {
             config["name"]    = entityItem.name.c_str();
 
             char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+
             if (entityItem.writeable) {
                 if (entityItem.value_type == DeviceValueType::BOOL) {
                     snprintf(topic, sizeof(topic), "switch/%s/custom_%s/config", Mqtt::basename().c_str(), entityItem.name.c_str());
@@ -412,6 +416,7 @@ void WebCustomEntityService::publish(const bool force) {
                     snprintf(topic, sizeof(topic), "sensor/%s/custom_%s/config", Mqtt::basename().c_str(), entityItem.name.c_str());
                 }
             }
+
             if (entityItem.value_type == DeviceValueType::BOOL) {
                 // applies to both Binary Sensor (read only) and a Switch (for a command)
                 if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
@@ -426,11 +431,13 @@ void WebCustomEntityService::publish(const bool force) {
                     config["pl_off"] = Helpers::render_boolean(result, false);
                 }
             }
-            Mqtt::add_ha_sections_to_doc("custom", stat_t, config.as<JsonObject>(), true, val_cond);
+
+            Mqtt::add_ha_sections_to_doc("custom", stat_t, config, !ha_created, val_cond);
 
             ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
         }
     }
+
     ha_registered_ = ha_created;
     if (output.size() > 0) {
         Mqtt::queue_publish("custom_data", output);
@@ -445,9 +452,9 @@ uint8_t WebCustomEntityService::count_entities() {
         return 0;
     }
 
-    DynamicJsonDocument doc(EMSESP_JSON_SIZE_XLARGE);
-    JsonObject          output = doc.to<JsonObject>();
-    uint8_t             count  = 0;
+    JsonDocument doc;
+    JsonObject   output = doc.to<JsonObject>();
+    uint8_t      count  = 0;
     for (const CustomEntityItem & entity : *customEntityItems) {
         render_value(output, entity);
         count += (output.containsKey(entity.name) || entity.writeable) ? 1 : 0;
@@ -469,10 +476,10 @@ void WebCustomEntityService::generate_value_web(JsonObject & output) {
     EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
 
     output["label"] = (std::string) "Custom Entities";
-    JsonArray data  = output.createNestedArray("data");
+    JsonArray data  = output["data"].to<JsonArray>();
     uint8_t   index = 0;
     for (const CustomEntityItem & entity : *customEntityItems) {
-        JsonObject obj = data.createNestedObject(); // create the object, we know there is a value
+        JsonObject obj = data.add<JsonObject>(); // create the object, we know there is a value
         obj["id"]      = "00" + entity.name;
         obj["u"]       = entity.uom;
         if (entity.writeable) {
@@ -487,7 +494,7 @@ void WebCustomEntityService::generate_value_web(JsonObject & output) {
         case DeviceValueType::BOOL: {
             char s[12];
             obj["v"]    = Helpers::render_boolean(s, (uint8_t)entity.value, true);
-            JsonArray l = obj.createNestedArray("l");
+            JsonArray l = obj["l"].to<JsonArray>();
             l.add(Helpers::render_boolean(s, false, true));
             l.add(Helpers::render_boolean(s, true, true));
             break;

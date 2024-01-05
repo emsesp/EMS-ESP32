@@ -1,197 +1,133 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2023, Benoit BLANCHON
+// Copyright © 2014-2024, Benoit BLANCHON
 // MIT License
 
 #pragma once
 
 #include <ArduinoJson/Collection/CollectionData.hpp>
-#include <ArduinoJson/Strings/StoragePolicy.hpp>
+#include <ArduinoJson/Memory/Alignment.hpp>
 #include <ArduinoJson/Strings/StringAdapters.hpp>
+#include <ArduinoJson/Variant/VariantCompare.hpp>
 #include <ArduinoJson/Variant/VariantData.hpp>
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
-inline VariantSlot* CollectionData::addSlot(MemoryPool* pool) {
-  VariantSlot* slot = pool->allocVariant();
-  if (!slot)
-    return 0;
+inline CollectionIterator::CollectionIterator(VariantSlot* slot, SlotId slotId)
+    : slot_(slot), currentId_(slotId) {
+  nextId_ = slot_ ? slot_->next() : NULL_SLOT;
+}
 
-  if (tail_) {
-    ARDUINOJSON_ASSERT(pool->owns(tail_));  // Can't alter a linked array/object
-    tail_->setNextNotNull(slot);
-    tail_ = slot;
+inline const char* CollectionIterator::key() const {
+  ARDUINOJSON_ASSERT(slot_ != nullptr);
+  return slot_->key();
+}
+
+inline void CollectionIterator::setKey(const char* s) {
+  ARDUINOJSON_ASSERT(slot_ != nullptr);
+  ARDUINOJSON_ASSERT(s != nullptr);
+  return slot_->setKey(s);
+}
+
+inline void CollectionIterator::setKey(StringNode* s) {
+  ARDUINOJSON_ASSERT(slot_ != nullptr);
+  ARDUINOJSON_ASSERT(s != nullptr);
+  return slot_->setKey(s);
+}
+
+inline bool CollectionIterator::ownsKey() const {
+  ARDUINOJSON_ASSERT(slot_ != nullptr);
+  return slot_->ownsKey();
+}
+
+inline void CollectionIterator::next(const ResourceManager* resources) {
+  ARDUINOJSON_ASSERT(currentId_ != NULL_SLOT);
+  slot_ = resources->getSlot(nextId_);
+  currentId_ = nextId_;
+  if (slot_)
+    nextId_ = slot_->next();
+}
+
+inline CollectionData::iterator CollectionData::addSlot(
+    ResourceManager* resources) {
+  auto slot = resources->allocSlot();
+  if (!slot)
+    return {};
+  if (tail_ != NULL_SLOT) {
+    auto tail = resources->getSlot(tail_);
+    tail->setNext(slot.id());
+    tail_ = slot.id();
   } else {
-    head_ = slot;
-    tail_ = slot;
+    head_ = slot.id();
+    tail_ = slot.id();
+  }
+  return iterator(slot, slot.id());
+}
+
+inline void CollectionData::clear(ResourceManager* resources) {
+  auto next = head_;
+  while (next != NULL_SLOT) {
+    auto currId = next;
+    auto slot = resources->getSlot(next);
+    next = slot->next();
+    releaseSlot(SlotWithId(slot, currId), resources);
   }
 
-  slot->clear();
-  return slot;
+  head_ = NULL_SLOT;
+  tail_ = NULL_SLOT;
 }
 
-inline VariantData* CollectionData::addElement(MemoryPool* pool) {
-  return slotData(addSlot(pool));
-}
-
-template <typename TAdaptedString>
-inline VariantData* CollectionData::addMember(TAdaptedString key,
-                                              MemoryPool* pool) {
-  VariantSlot* slot = addSlot(pool);
-  if (!slotSetKey(slot, key, pool)) {
-    removeSlot(slot);
-    return 0;
+inline SlotWithId CollectionData::getPreviousSlot(
+    VariantSlot* target, const ResourceManager* resources) const {
+  auto prev = SlotWithId();
+  auto currentId = head_;
+  while (currentId != NULL_SLOT) {
+    auto currentSlot = resources->getSlot(currentId);
+    if (currentSlot == target)
+      return prev;
+    prev = SlotWithId(currentSlot, currentId);
+    currentId = currentSlot->next();
   }
-  return slot->data();
+  return SlotWithId();
 }
 
-inline void CollectionData::clear() {
-  head_ = 0;
-  tail_ = 0;
-}
-
-template <typename TAdaptedString>
-inline bool CollectionData::containsKey(const TAdaptedString& key) const {
-  return getSlot(key) != 0;
-}
-
-inline bool CollectionData::copyFrom(const CollectionData& src,
-                                     MemoryPool* pool) {
-  clear();
-  for (VariantSlot* s = src.head_; s; s = s->next()) {
-    VariantData* var;
-    if (s->key() != 0) {
-      JsonString key(s->key(),
-                     s->ownsKey() ? JsonString::Copied : JsonString::Linked);
-      var = addMember(adaptString(key), pool);
-    } else {
-      var = addElement(pool);
-    }
-    if (!var)
-      return false;
-    if (!var->copyFrom(*s->data(), pool))
-      return false;
-  }
-  return true;
-}
-
-template <typename TAdaptedString>
-inline VariantSlot* CollectionData::getSlot(TAdaptedString key) const {
-  if (key.isNull())
-    return 0;
-  VariantSlot* slot = head_;
-  while (slot) {
-    if (stringEquals(key, adaptString(slot->key())))
-      break;
-    slot = slot->next();
-  }
-  return slot;
-}
-
-inline VariantSlot* CollectionData::getSlot(size_t index) const {
-  if (!head_)
-    return 0;
-  return head_->next(index);
-}
-
-inline VariantSlot* CollectionData::getPreviousSlot(VariantSlot* target) const {
-  VariantSlot* current = head_;
-  while (current) {
-    VariantSlot* next = current->next();
-    if (next == target)
-      return current;
-    current = next;
-  }
-  return 0;
-}
-
-template <typename TAdaptedString>
-inline VariantData* CollectionData::getMember(TAdaptedString key) const {
-  VariantSlot* slot = getSlot(key);
-  return slot ? slot->data() : 0;
-}
-
-template <typename TAdaptedString>
-inline VariantData* CollectionData::getOrAddMember(TAdaptedString key,
-                                                   MemoryPool* pool) {
-  // ignore null key
-  if (key.isNull())
-    return 0;
-
-  // search a matching key
-  VariantSlot* slot = getSlot(key);
-  if (slot)
-    return slot->data();
-
-  return addMember(key, pool);
-}
-
-inline VariantData* CollectionData::getElement(size_t index) const {
-  VariantSlot* slot = getSlot(index);
-  return slot ? slot->data() : 0;
-}
-
-inline VariantData* CollectionData::getOrAddElement(size_t index,
-                                                    MemoryPool* pool) {
-  VariantSlot* slot = head_;
-  while (slot && index > 0) {
-    slot = slot->next();
-    index--;
-  }
-  if (!slot)
-    index++;
-  while (index > 0) {
-    slot = addSlot(pool);
-    index--;
-  }
-  return slotData(slot);
-}
-
-inline void CollectionData::removeSlot(VariantSlot* slot) {
-  if (!slot)
+inline void CollectionData::remove(iterator it, ResourceManager* resources) {
+  if (it.done())
     return;
-  VariantSlot* prev = getPreviousSlot(slot);
-  VariantSlot* next = slot->next();
+  auto curr = it.slot_;
+  auto prev = getPreviousSlot(curr, resources);
+  auto next = curr->next();
   if (prev)
     prev->setNext(next);
   else
     head_ = next;
-  if (!next)
-    tail_ = prev;
+  if (next == NULL_SLOT)
+    tail_ = prev.id();
+  releaseSlot({it.slot_, it.currentId_}, resources);
 }
 
-inline void CollectionData::removeElement(size_t index) {
-  removeSlot(getSlot(index));
-}
-
-inline size_t CollectionData::memoryUsage() const {
-  size_t total = 0;
-  for (VariantSlot* s = head_; s; s = s->next()) {
-    total += sizeof(VariantSlot) + s->data()->memoryUsage();
-    if (s->ownsKey())
-      total += strlen(s->key()) + 1;
+inline size_t CollectionData::nesting(const ResourceManager* resources) const {
+  size_t maxChildNesting = 0;
+  for (auto it = createIterator(resources); !it.done(); it.next(resources)) {
+    size_t childNesting = it->nesting(resources);
+    if (childNesting > maxChildNesting)
+      maxChildNesting = childNesting;
   }
-  return total;
+  return maxChildNesting + 1;
 }
 
-inline size_t CollectionData::size() const {
-  return slotSize(head_);
+inline size_t CollectionData::size(const ResourceManager* resources) const {
+  size_t count = 0;
+  for (auto it = createIterator(resources); !it.done(); it.next(resources))
+    count++;
+  return count;
 }
 
-template <typename T>
-inline void movePointer(T*& p, ptrdiff_t offset) {
-  if (!p)
-    return;
-  p = reinterpret_cast<T*>(
-      reinterpret_cast<void*>(reinterpret_cast<char*>(p) + offset));
-  ARDUINOJSON_ASSERT(isAligned(p));
-}
-
-inline void CollectionData::movePointers(ptrdiff_t stringDistance,
-                                         ptrdiff_t variantDistance) {
-  movePointer(head_, variantDistance);
-  movePointer(tail_, variantDistance);
-  for (VariantSlot* slot = head_; slot; slot = slot->next())
-    slot->movePointers(stringDistance, variantDistance);
+inline void CollectionData::releaseSlot(SlotWithId slot,
+                                        ResourceManager* resources) {
+  if (slot->ownsKey())
+    resources->dereferenceString(slot->key());
+  slot->data()->setNull(resources);
+  resources->freeSlot(slot);
 }
 
 ARDUINOJSON_END_PRIVATE_NAMESPACE

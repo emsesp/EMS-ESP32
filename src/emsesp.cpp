@@ -380,8 +380,8 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
                 // print header, with device type translated
                 shell.printfln("%s: %s (%d)", emsdevice->device_type_2_device_name_translated(), emsdevice->to_string().c_str(), emsdevice->count_entities());
 
-                DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXXLARGE); // use max size
-                JsonObject          json = doc.to<JsonObject>();
+                JsonDocument doc;
+                JsonObject   json = doc.to<JsonObject>();
 
                 emsdevice->generate_values(json, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::CONSOLE);
 
@@ -405,8 +405,8 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
     // show any custom entities
     if (webCustomEntityService.count_entities() > 0) {
         shell.printfln("Custom entities:");
-        StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> custom_doc; // use max size
-        JsonObject                                  custom_output = custom_doc.to<JsonObject>();
+        JsonDocument custom_doc; // use max size
+        JsonObject   custom_output = custom_doc.to<JsonObject>();
         webCustomEntityService.show_values(custom_output);
         for (JsonPair p : custom_output) {
             shell.printfln("  %s: %s%s%s", p.key().c_str(), COLOR_BRIGHT_GREEN, p.value().as<std::string>().c_str(), COLOR_RESET);
@@ -553,22 +553,22 @@ void EMSESP::reset_mqtt_ha() {
 // this will also create the HA /config topic for each device value
 // generate_values_json is called to build the device value (dv) object array
 void EMSESP::publish_device_values(uint8_t device_type) {
-    DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXLARGE);
-    JsonObject          json         = doc.to<JsonObject>();
-    bool                need_publish = false;
-    bool                nested       = (Mqtt::is_nested());
+    JsonDocument doc;
+    JsonObject   json         = doc.to<JsonObject>();
+    bool         need_publish = false;
+    bool         nested       = (Mqtt::is_nested());
 
     // group by device type
     for (uint8_t tag = DeviceValueTAG::TAG_BOILER_DATA_WW; tag <= DeviceValueTAG::TAG_HS16; tag++) {
-        JsonObject json_hc      = json;
+        JsonObject json_tag     = json;
         bool       nest_created = false;
         for (const auto & emsdevice : emsdevices) {
             if (emsdevice && (emsdevice->device_type() == device_type)) {
                 if (nested && !nest_created && emsdevice->has_tags(tag)) {
-                    json_hc      = doc.createNestedObject(EMSdevice::tag_to_mqtt(tag));
+                    json_tag     = doc[EMSdevice::tag_to_mqtt(tag)].to<JsonObject>();
                     nest_created = true;
                 }
-                need_publish |= emsdevice->generate_values(json_hc, tag, false, EMSdevice::OUTPUT_TARGET::MQTT);
+                need_publish |= emsdevice->generate_values(json_tag, tag, false, EMSdevice::OUTPUT_TARGET::MQTT);
             }
         }
         if (need_publish && ((!nested && tag >= DeviceValueTAG::TAG_DEVICE_DATA_WW) || (tag == DeviceValueTAG::TAG_BOILER_DATA_WW))) {
@@ -640,8 +640,8 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
         strlcat(buffer, " ", 768);
         return;
     }
-    DynamicJsonDocument doc(EMSESP_JSON_SIZE_LARGE);
-    char                s[10];
+    JsonDocument doc;
+    char         s[10];
     doc["src"]    = Helpers::hextoa(s, telegram->src);
     doc["dest"]   = Helpers::hextoa(s, telegram->dest);
     doc["type"]   = Helpers::hextoa(s, telegram->type_id);

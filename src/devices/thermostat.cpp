@@ -2905,8 +2905,8 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
     uint8_t time = 0x91; // invalid
 
     if (value[0] == '{') {
-        StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
-        DeserializationError                       error = deserializeJson(doc, value);
+        JsonDocument         doc;
+        DeserializationError error = deserializeJson(doc, value);
         if (error) {
             return false;
         }
