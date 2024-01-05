@@ -376,7 +376,7 @@ bool TemperatureSensor::command_info(const char * value, const int8_t id, JsonOb
     for (const auto & sensor : sensors_) {
         char val[10];
         if (id == -1) { // show number and id, info command
-            JsonObject dataSensor = output[sensor.name()].add<JsonObject>();
+            JsonObject dataSensor = output[sensor.name()].to<JsonObject>();
             dataSensor["id"]      = sensor.id();
             dataSensor["uom"]     = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
             dataSensor["type"]    = F_(number);
@@ -492,23 +492,12 @@ void TemperatureSensor::publish_values(const bool force) {
 
     JsonDocument doc;
 
-    // used to see if we need to create the [devs] discovery section, as this needs only to be done once for all sensors
-    bool is_first_ha = true;
-    if (Mqtt::ha_enabled()) {
-        for (auto & sensor : sensors_) {
-            if (sensor.ha_registered) {
-                is_first_ha = false;
-                break;
-            }
-        }
-    }
-
     for (auto & sensor : sensors_) {
         bool has_value = Helpers::hasValue(sensor.temperature_c);
         if (has_value) {
             char val[10];
             if (Mqtt::is_nested()) {
-                JsonObject dataSensor = doc[sensor.id()].add<JsonObject>();
+                JsonObject dataSensor = doc[sensor.id()].to<JsonObject>();
                 dataSensor["name"]    = sensor.name();
                 dataSensor["temp"]    = serialized(Helpers::render_value(val, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
             } else {
@@ -566,7 +555,16 @@ void TemperatureSensor::publish_values(const bool force) {
                 snprintf(name, sizeof(name), "%s", sensor.name().c_str());
                 config["name"] = name;
 
-                Mqtt::add_ha_sections_to_doc("temperature", stat_t, config, is_first_ha, val_cond);
+                // see if we need to create the [devs] discovery section, as this needs only to be done once for all sensors
+                bool is_ha_device_created = false;
+                for (auto & sensor : sensors_) {
+                    if (sensor.ha_registered) {
+                        is_ha_device_created = true;
+                        break;
+                    }
+                }
+
+                Mqtt::add_ha_sections_to_doc("temperature", stat_t, config, !is_ha_device_created, val_cond);
 
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
                 // use '_' as HA doesn't like '-' in the topic name

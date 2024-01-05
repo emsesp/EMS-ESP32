@@ -353,9 +353,11 @@ void WebCustomEntityService::publish(const bool force) {
     if (force) {
         ha_registered_ = false;
     }
+
     if (!Mqtt::enabled()) {
         return;
     }
+
     EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
     if (customEntityItems->size() == 0) {
         return;
@@ -369,6 +371,7 @@ void WebCustomEntityService::publish(const bool force) {
     JsonDocument doc;
     JsonObject   output     = doc.to<JsonObject>();
     bool         ha_created = ha_registered_;
+
     for (const CustomEntityItem & entityItem : *customEntityItems) {
         render_value(output, entityItem);
         // create HA config
@@ -392,6 +395,7 @@ void WebCustomEntityService::publish(const bool force) {
             config["name"]    = entityItem.name.c_str();
 
             char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+
             if (entityItem.writeable) {
                 if (entityItem.value_type == DeviceValueType::BOOL) {
                     snprintf(topic, sizeof(topic), "switch/%s/custom_%s/config", Mqtt::basename().c_str(), entityItem.name.c_str());
@@ -412,6 +416,7 @@ void WebCustomEntityService::publish(const bool force) {
                     snprintf(topic, sizeof(topic), "sensor/%s/custom_%s/config", Mqtt::basename().c_str(), entityItem.name.c_str());
                 }
             }
+
             if (entityItem.value_type == DeviceValueType::BOOL) {
                 // applies to both Binary Sensor (read only) and a Switch (for a command)
                 if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
@@ -426,11 +431,13 @@ void WebCustomEntityService::publish(const bool force) {
                     config["pl_off"] = Helpers::render_boolean(result, false);
                 }
             }
-            Mqtt::add_ha_sections_to_doc("custom", stat_t, config, true, val_cond);
+
+            Mqtt::add_ha_sections_to_doc("custom", stat_t, config, !ha_created, val_cond);
 
             ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
         }
     }
+
     ha_registered_ = ha_created;
     if (output.size() > 0) {
         Mqtt::queue_publish("custom_data", output);

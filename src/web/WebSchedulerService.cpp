@@ -113,6 +113,7 @@ bool WebSchedulerService::command_setvalue(const char * value, const std::string
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
+
     EMSESP::webSchedulerService.read([&](WebScheduler & webScheduler) { scheduleItems = &webScheduler.scheduleItems; });
     for (ScheduleItem & scheduleItem : *scheduleItems) {
         if (scheduleItem.name == name) {
@@ -143,9 +144,11 @@ bool WebSchedulerService::get_value_info(JsonObject & output, const char * cmd) 
         }
         return true;
     }
+
     if (scheduleItems->size() == 0) {
         return true;
     }
+
     if (strlen(cmd) == 0 || Helpers::toLower(cmd) == F_(values) || Helpers::toLower(cmd) == F_(info)) {
         // list all names
         for (const ScheduleItem & scheduleItem : *scheduleItems) {
@@ -162,6 +165,7 @@ bool WebSchedulerService::get_value_info(JsonObject & output, const char * cmd) 
         }
         return (output.size() > 0);
     }
+
     char command_s[30];
     strlcpy(command_s, cmd, sizeof(command_s));
     char * attribute_s = nullptr;
@@ -172,6 +176,7 @@ bool WebSchedulerService::get_value_info(JsonObject & output, const char * cmd) 
         *breakp     = '\0';
         attribute_s = breakp + 1;
     }
+
     JsonVariant data;
     for (const ScheduleItem & scheduleItem : *scheduleItems) {
         if (Helpers::toLower(scheduleItem.name) == Helpers::toLower(command_s)) {
@@ -192,14 +197,17 @@ bool WebSchedulerService::get_value_info(JsonObject & output, const char * cmd) 
             output["visible"]   = true;
         }
     }
+
     if (attribute_s && output.containsKey(attribute_s)) {
         data = output[attribute_s];
         output.clear();
         output["api_data"] = data;
     }
+
     if (output.size()) {
         return true;
     }
+
     output["message"] = "unknown command";
     return false;
 }
@@ -209,12 +217,14 @@ void WebSchedulerService::publish_single(const char * name, const bool state) {
     if (!Mqtt::publish_single() || name == nullptr || name[0] == '\0') {
         return;
     }
+
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
     if (Mqtt::publish_single2cmd()) {
         snprintf(topic, sizeof(topic), "%s/%s", F_(scheduler), name);
     } else {
         snprintf(topic, sizeof(topic), "%s%s/%s", F_(scheduler), "_data", name);
     }
+
     char payload[12];
     Mqtt::queue_publish(topic, Helpers::render_boolean(payload, state));
 }
@@ -224,13 +234,16 @@ void WebSchedulerService::publish(const bool force) {
     if (force) {
         ha_registered_ = false;
     }
+
     if (!Mqtt::enabled()) {
         return;
     }
+
     EMSESP::webSchedulerService.read([&](WebScheduler & webScheduler) { scheduleItems = &webScheduler.scheduleItems; });
     if (scheduleItems->size() == 0) {
         return;
     }
+
     if (Mqtt::publish_single() && force) {
         for (const ScheduleItem & scheduleItem : *scheduleItems) {
             publish_single(scheduleItem.name.c_str(), scheduleItem.active);
@@ -272,9 +285,11 @@ void WebSchedulerService::publish(const bool force) {
 
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
                 char command_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+
                 snprintf(topic, sizeof(topic), "switch/%s/scheduler_%s/config", Mqtt::basename().c_str(), scheduleItem.name.c_str());
                 snprintf(command_topic, sizeof(command_topic), "%s/scheduler/%s", Mqtt::base().c_str(), scheduleItem.name.c_str());
                 config["cmd_t"] = command_topic;
+
                 if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
                     config["pl_on"]  = true;
                     config["pl_off"] = false;
@@ -287,7 +302,7 @@ void WebSchedulerService::publish(const bool force) {
                     config["pl_off"] = Helpers::render_boolean(result, false);
                 }
 
-                Mqtt::add_ha_sections_to_doc("scheduler", stat_t, config, true, val_cond);
+                Mqtt::add_ha_sections_to_doc("scheduler", stat_t, config, !ha_created, val_cond);
 
                 ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
             }
@@ -304,6 +319,7 @@ bool WebSchedulerService::has_commands() {
     if (scheduleItems->size() == 0) {
         return false;
     }
+
     for (const ScheduleItem & scheduleItem : *scheduleItems) {
         if (!scheduleItem.name.empty()) {
             return true;
@@ -347,6 +363,7 @@ bool WebSchedulerService::command(const char * cmd, const char * data) {
     } else {
         snprintf(error, sizeof(error), "Scheduled command %s failed with error code (%s)", cmd, Command::return_code_string(return_code).c_str());
     }
+
     emsesp::EMSESP::logger().err(error);
     return false;
 }

@@ -500,8 +500,7 @@ void Mqtt::on_connect() {
     }
 
     // send initial MQTT messages for some of our services
-    EMSESP::shower_.set_shower_state(false, true); // Send shower_activated as false
-    EMSESP::system_.send_heartbeat();              // send heartbeat
+    EMSESP::system_.send_heartbeat(); // send heartbeat
 
     // re-subscribe to all custom registered MQTT topics
     resubscribe();
@@ -539,7 +538,7 @@ void Mqtt::ha_status() {
     // doc["avty_t"]      = "~/status"; // commented out, as it causes errors in HA sometimes
     // doc["json_attr_t"] = "~/heartbeat"; // store also as HA attributes
 
-    JsonObject dev = doc.add<JsonObject>();
+    JsonObject dev = doc["dev"].to<JsonObject>();
     dev["name"]    = Mqtt::basename();
     dev["sw"]      = "v" + std::string(EMSESP_APP_VERSION);
     dev["mf"]      = "EMS-ESP";
@@ -776,7 +775,7 @@ bool Mqtt::publish_ha_sensor_config(DeviceValue & dv, const char * model, const 
 // publish HA sensor for System using the heartbeat tag
 bool Mqtt::publish_system_ha_sensor_config(uint8_t type, const char * name, const char * entity, const uint8_t uom) {
     JsonDocument doc;
-    JsonObject   dev_json = doc["dev"].add<JsonObject>();
+    JsonObject   dev_json = doc["dev"].to<JsonObject>();
 
     dev_json["name"] = Mqtt::basename();
     JsonArray ids    = dev_json["ids"].to<JsonArray>();
@@ -1137,8 +1136,8 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         }
     }
 
-    doc["dev"] = dev_json;                                    // add the dev json object to the end
-    add_ha_sections_to_doc("", stat_t, doc, false, val_cond); // no name, since the "dev" has already been added
+    doc["dev"] = dev_json;                                         // add the dev json object to the end
+    add_ha_sections_to_doc(nullptr, stat_t, doc, false, val_cond); // no name, since the "dev" has already been added
 
     return queue_ha(topic, doc.as<JsonObject>());
 }
@@ -1217,7 +1216,7 @@ bool Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
     snprintf(temp_cmd_s, sizeof(temp_cmd_s), "~/thermostat/hc%d/seltemp", hc_num);
     snprintf(mode_cmd_s, sizeof(mode_cmd_s), "~/thermostat/hc%d/mode", hc_num);
 
-    JsonDocument doc; // 1024 is not enough
+    JsonDocument doc;
 
     doc["~"]             = Mqtt::base();
     doc["uniq_id"]       = uniq_id_s;
@@ -1272,19 +1271,19 @@ std::string Mqtt::tag_to_topic(uint8_t device_type, uint8_t tag) {
 }
 
 // adds availability, dev, ids to the config section to HA Discovery config
-void Mqtt::add_ha_sections_to_doc(const std::string & name,
-                                  const char *        state_t,
-                                  JsonDocument &      config,
-                                  const bool          is_first,
-                                  const char *        cond1,
-                                  const char *        cond2,
-                                  const char *        negcond) {
+void Mqtt::add_ha_sections_to_doc(const char *   name,
+                                  const char *   state_t,
+                                  JsonDocument & config,
+                                  const bool     is_first,
+                                  const char *   cond1,
+                                  const char *   cond2,
+                                  const char *   negcond) {
     // adds dev section to HA Discovery config
-    if (!name.empty()) {
-        JsonObject dev      = config.add<JsonObject>();
-        auto       cap_name = name;
+    if (name != nullptr) {
+        JsonObject dev      = config["dev"].to<JsonObject>();
+        char *     cap_name = strdup(name);
         cap_name[0]         = toupper(name[0]); // capitalize first letter
-        dev["name"]         = Mqtt::basename() + " " + cap_name;
+        dev["name"]         = std::string(Mqtt::basename()) + " " + cap_name;
         // if it's the first in the category, attach the group to the main HA device
         if (is_first) {
             dev["mf"]         = "EMS-ESP";
@@ -1293,6 +1292,7 @@ void Mqtt::add_ha_sections_to_doc(const std::string & name,
         }
         JsonArray ids = dev["ids"].to<JsonArray>();
         ids.add(Mqtt::basename() + "-" + Helpers::toLower(name));
+        free(cap_name);
     }
 
     // adds "availability" section to HA Discovery config

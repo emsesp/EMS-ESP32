@@ -468,7 +468,7 @@ void AnalogSensor::publish_values(const bool force) {
         if (sensor.type() != AnalogType::NOTUSED) {
             if (Mqtt::is_nested()) {
                 char       s[10];
-                JsonObject dataSensor = doc[Helpers::smallitoa(s, sensor.gpio())].add<JsonObject>();
+                JsonObject dataSensor = doc[Helpers::smallitoa(s, sensor.gpio())].to<JsonObject>();
                 dataSensor["name"]    = sensor.name();
                 switch (sensor.type()) {
                 case AnalogType::COUNTER:
@@ -508,7 +508,7 @@ void AnalogSensor::publish_values(const bool force) {
                 doc[sensor.name()] = serialized(Helpers::render_value(s, sensor.value(), 2));
             }
 
-            // create HA config
+            // create HA config if hasn't already been done
             if (Mqtt::ha_enabled() && (!sensor.ha_registered || force)) {
                 LOG_DEBUG("Recreating HA config for analog sensor GPIO %02d", sensor.gpio());
 
@@ -615,7 +615,16 @@ void AnalogSensor::publish_values(const bool force) {
                     config["stat_cla"] = "measurement";
                 }
 
-                Mqtt::add_ha_sections_to_doc("analog", stat_t, config, true, val_cond);
+                // see if we need to create the [devs] discovery section, as this needs only to be done once for all sensors
+                bool is_ha_device_created = false;
+                for (auto & sensor : sensors_) {
+                    if (sensor.ha_registered) {
+                        is_ha_device_created = true;
+                        break;
+                    }
+                }
+
+                Mqtt::add_ha_sections_to_doc("analog", stat_t, config, !is_ha_device_created, val_cond);
 
                 sensor.ha_registered = Mqtt::queue_ha(topic, config.as<JsonObject>());
             }
@@ -697,7 +706,7 @@ bool AnalogSensor::command_info(const char * value, const int8_t id, JsonObject 
 
     for (const auto & sensor : sensors_) {
         if (id == -1) { // show number and id for info command
-            JsonObject dataSensor = output[sensor.name()].add<JsonObject>();
+            JsonObject dataSensor = output[sensor.name()].to<JsonObject>();
             dataSensor["gpio"]    = sensor.gpio();
             dataSensor["type"]    = F_(number);
             dataSensor["value"]   = sensor.value();

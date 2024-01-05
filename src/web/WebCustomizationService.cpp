@@ -58,6 +58,7 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
 void WebCustomization::read(WebCustomization & customizations, JsonObject & root) {
     // Temperature Sensor customization
     JsonArray sensorsJson = root["ts"].to<JsonArray>();
+
     for (const SensorCustomization & sensor : customizations.sensorCustomizations) {
         JsonObject sensorJson = sensorsJson.add<JsonObject>();
         sensorJson["id"]      = sensor.id;     // ID of chip
