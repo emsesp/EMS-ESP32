@@ -168,7 +168,7 @@ void WebAPIService::getSettings(AsyncWebServerRequest * request) {
 
     root["type"] = "settings";
 
-    JsonObject node = root["System"].add<JsonObject>();
+    JsonObject node = root["System"].to<JsonObject>();
     node["version"] = EMSESP_APP_VERSION;
 
     System::extractSettings(NETWORK_SETTINGS_FILE, "Network", root);

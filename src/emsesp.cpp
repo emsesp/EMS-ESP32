@@ -560,15 +560,15 @@ void EMSESP::publish_device_values(uint8_t device_type) {
 
     // group by device type
     for (uint8_t tag = DeviceValueTAG::TAG_BOILER_DATA_WW; tag <= DeviceValueTAG::TAG_HS16; tag++) {
-        JsonObject json_hc      = json;
+        JsonObject json_tag     = json;
         bool       nest_created = false;
         for (const auto & emsdevice : emsdevices) {
             if (emsdevice && (emsdevice->device_type() == device_type)) {
                 if (nested && !nest_created && emsdevice->has_tags(tag)) {
-                    json_hc      = doc[EMSdevice::tag_to_mqtt(tag)].add<JsonObject>();
+                    json_tag     = doc[EMSdevice::tag_to_mqtt(tag)].to<JsonObject>();
                     nest_created = true;
                 }
-                need_publish |= emsdevice->generate_values(json_hc, tag, false, EMSdevice::OUTPUT_TARGET::MQTT);
+                need_publish |= emsdevice->generate_values(json_tag, tag, false, EMSdevice::OUTPUT_TARGET::MQTT);
             }
         }
         if (need_publish && ((!nested && tag >= DeviceValueTAG::TAG_DEVICE_DATA_WW) || (tag == DeviceValueTAG::TAG_BOILER_DATA_WW))) {

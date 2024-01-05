@@ -115,18 +115,18 @@ bool System::command_allvalues(const char * value, const int8_t id, JsonObject &
 
     for (const auto & emsdevice : EMSESP::emsdevices) {
         std::string title = emsdevice->device_type_2_device_name_translated() + std::string(" ") + emsdevice->to_string();
-        device_output     = output[title].add<JsonObject>();
+        device_output     = output[title].to<JsonObject>();
         emsdevice->generate_values(device_output, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::API_VERBOSE); // use nested for id -1 and 0
     }
 
     // Custom entities
-    device_output = output["Custom Entities"].add<JsonObject>();
+    device_output = output["Custom Entities"].to<JsonObject>();
     EMSESP::webCustomEntityService.get_value_info(device_output, "");
 
     // Sensors
-    device_output = output["Analog Sensors"].add<JsonObject>();
+    device_output = output["Analog Sensors"].to<JsonObject>();
     EMSESP::analogsensor_.command_info(nullptr, 0, device_output);
-    device_output = output["Temperature Sensors"].add<JsonObject>();
+    device_output = output["Temperature Sensors"].to<JsonObject>();
     EMSESP::temperaturesensor_.command_info(nullptr, 0, device_output);
 
     return true;
@@ -1178,7 +1178,7 @@ void System::extractSettings(const char * filename, const char * section, JsonOb
         DeserializationError error = deserializeJson(jsonDocument, settingsFile);
         if (error == DeserializationError::Ok && jsonDocument.is<JsonObject>()) {
             JsonObject jsonObject = jsonDocument.as<JsonObject>();
-            JsonObject node       = output[section].add<JsonObject>();
+            JsonObject node       = output[section].to<JsonObject>();
             for (JsonPair kvp : jsonObject) {
                 node[kvp.key()] = kvp.value();
             }
@@ -1211,7 +1211,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     JsonObject node;
 
     // System
-    node                     = output["System Info"].add<JsonObject>();
+    node                     = output["System Info"].to<JsonObject>();
     node["version"]          = EMSESP_APP_VERSION;
     node["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     node["uptime (seconds)"] = uuid::get_uptime_sec();
@@ -1228,7 +1228,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 
 #ifndef EMSESP_STANDALONE
     // Network Status
-    node = output["Network Info"].add<JsonObject>();
+    node = output["Network Info"].to<JsonObject>();
     if (EMSESP::system_.ethernet_connected()) {
         node["network"]  = "Ethernet";
         node["hostname"] = ETH.getHostname();
@@ -1276,7 +1276,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 #endif
 
     // NTP status
-    node = output["NTP Info"].add<JsonObject>();
+    node = output["NTP Info"].to<JsonObject>();
 #ifndef EMSESP_STANDALONE
     node["NTP status"] = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
     EMSESP::esp8266React.getNTPSettingsService()->read([&](NTPSettings & settings) {
@@ -1287,7 +1287,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     });
 
     // OTA status
-    node = output["OTA Info"].add<JsonObject>();
+    node = output["OTA Info"].to<JsonObject>();
     EMSESP::esp8266React.getOTASettingsService()->read([&](OTASettings & settings) {
         node["enabled"] = settings.enabled;
         node["port"]    = settings.port;
@@ -1295,7 +1295,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 #endif
 
     // MQTT Status
-    node                = output["MQTT Info"].add<JsonObject>();
+    node                = output["MQTT Info"].to<JsonObject>();
     node["MQTT status"] = Mqtt::connected() ? F_(connected) : F_(disconnected);
     if (Mqtt::enabled()) {
         node["MQTT publishes"]     = Mqtt::publish_count();
@@ -1329,7 +1329,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     });
 
     // Syslog Status
-    node            = output["Syslog Info"].add<JsonObject>();
+    node            = output["Syslog Info"].to<JsonObject>();
     node["enabled"] = EMSESP::system_.syslog_enabled_;
 #ifndef EMSESP_STANDALONE
     if (EMSESP::system_.syslog_enabled_) {
@@ -1341,7 +1341,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 #endif
 
     // Sensor Status
-    node = output["Sensor Info"].add<JsonObject>();
+    node = output["Sensor Info"].to<JsonObject>();
     if (EMSESP::sensor_enabled()) {
         node["temperature sensors"]      = EMSESP::temperaturesensor_.no_sensors();
         node["temperature sensor reads"] = EMSESP::temperaturesensor_.reads();
@@ -1354,12 +1354,12 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     }
 
     // API Status
-    node              = output["API Info"].add<JsonObject>();
+    node              = output["API Info"].to<JsonObject>();
     node["API calls"] = WebAPIService::api_count();
     node["API fails"] = WebAPIService::api_fails();
 
     // EMS Bus Status
-    node = output["Bus Info"].add<JsonObject>();
+    node = output["Bus Info"].to<JsonObject>();
     switch (EMSESP::bus_status()) {
     case EMSESP::BUS_STATUS_OFFLINE:
         node["bus status"] = "disconnected";
@@ -1387,7 +1387,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     }
 
     // Settings
-    node = output["Settings"].add<JsonObject>();
+    node = output["Settings"].to<JsonObject>();
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         node["board profile"] = settings.board_profile;
         node["locale"]        = settings.locale;

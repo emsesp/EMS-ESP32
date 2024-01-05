@@ -854,7 +854,7 @@ bool EMSdevice::export_values(uint8_t device_type, JsonObject & output, const in
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice && (emsdevice->device_type() == device_type)) {
                 if (!nest_created && emsdevice->has_tags(tag)) {
-                    output_hc    = output[EMSdevice::tag_to_mqtt(tag)].add<JsonObject>();
+                    output_hc    = output[EMSdevice::tag_to_mqtt(tag)].to<JsonObject>();
                     nest_created = true;
                 }
                 has_value |= emsdevice->generate_values(output_hc, tag, true, output_target); // use nested for id -1 and 0
@@ -1614,15 +1614,19 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                 if (dv.tag != old_tag) {
                     old_tag = dv.tag;
                     if (nested && have_tag && dv.tag >= DeviceValueTAG::TAG_HC1) {
-                        json = output[tag_to_mqtt(dv.tag)].add<JsonObject>();
+                        json = output[tag_to_mqtt(dv.tag)].to<JsonObject>();
                     }
                 }
             }
+
             // do not overwrite
             if (json.containsKey(name)) {
+#ifdef EMSESP_DEBUG
                 EMSESP::logger().debug("double json key: %s", name);
+#endif
                 continue;
             }
+
             // handle Booleans
             if (dv.type == DeviceValueType::BOOL && Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
                 // see how to render the value depending on the setting
