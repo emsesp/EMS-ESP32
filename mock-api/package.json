@@ -11,7 +11,7 @@
   "dependencies": {
     "@msgpack/msgpack": "^2.8.0",
     "busboy": "^1.6.0",
-    "itty-router": "^4.0.25"
+    "itty-router": "^4.0.26"
   },
   "packageManager": "yarn@4.0.2",
   "devDependencies": {
