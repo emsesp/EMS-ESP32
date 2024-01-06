@@ -227,6 +227,8 @@ const SystemStatusForm: FC = () => {
             <ListItemText
               primary="CPU"
               secondary={
+                data.esp_platform +
+                '/' +
                 data.cpu_type +
                 ' (rev.' +
                 data.cpu_rev +

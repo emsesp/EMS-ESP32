@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2023, Benoit BLANCHON
+// Copyright © 2014-2024, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -8,7 +8,6 @@
 #include <ArduinoJson/Deserialization/DeserializationOptions.hpp>
 #include <ArduinoJson/Deserialization/Reader.hpp>
 #include <ArduinoJson/Polyfills/utility.hpp>
-#include <ArduinoJson/StringStorage/StringStorage.hpp>
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
@@ -23,44 +22,62 @@ struct first_or_void<T, Rest...> {
   using type = T;
 };
 
-template <template <typename, typename> class TDeserializer, typename TReader,
-          typename TWriter>
-TDeserializer<TReader, TWriter> makeDeserializer(MemoryPool* pool,
-                                                 TReader reader,
-                                                 TWriter writer) {
-  ARDUINOJSON_ASSERT(pool != 0);
-  return TDeserializer<TReader, TWriter>(pool, reader, writer);
+// A meta-function that returns true if T is a valid destination type for
+// deserialize()
+template <class T, class = void>
+struct is_deserialize_destination : false_type {};
+
+template <class T>
+struct is_deserialize_destination<
+    T, typename enable_if<is_same<decltype(VariantAttorney::getResourceManager(
+                                      detail::declval<T&>())),
+                                  ResourceManager*>::value>::type> : true_type {
+};
+
+template <typename TDestination>
+inline void shrinkJsonDocument(TDestination&) {
+  // no-op by default
 }
 
-template <template <typename, typename> class TDeserializer, typename TStream,
-          typename... Args,
+#if ARDUINOJSON_AUTO_SHRINK
+inline void shrinkJsonDocument(JsonDocument& doc) {
+  doc.shrinkToFit();
+}
+#endif
+
+template <template <typename> class TDeserializer, typename TDestination,
+          typename TReader, typename TOptions>
+DeserializationError doDeserialize(TDestination&& dst, TReader reader,
+                                   TOptions options) {
+  auto data = VariantAttorney::getOrCreateData(dst);
+  if (!data)
+    return DeserializationError::NoMemory;
+  auto resources = VariantAttorney::getResourceManager(dst);
+  dst.clear();
+  auto err = TDeserializer<TReader>(resources, reader)
+                 .parse(*data, options.filter, options.nestingLimit);
+  shrinkJsonDocument(dst);
+  return err;
+}
+
+template <template <typename> class TDeserializer, typename TDestination,
+          typename TStream, typename... Args,
           typename = typename enable_if<  // issue #1897
               !is_integral<typename first_or_void<Args...>::type>::value>::type>
-DeserializationError deserialize(JsonDocument& doc, TStream&& input,
+DeserializationError deserialize(TDestination&& dst, TStream&& input,
                                  Args... args) {
-  auto reader = makeReader(detail::forward<TStream>(input));
-  auto data = VariantAttorney::getData(doc);
-  auto pool = VariantAttorney::getPool(doc);
-  auto options = makeDeserializationOptions(args...);
-  doc.clear();
-  return makeDeserializer<TDeserializer>(pool, reader,
-                                         makeStringStorage(input, pool))
-      .parse(*data, options.filter, options.nestingLimit);
+  return doDeserialize<TDeserializer>(
+      dst, makeReader(detail::forward<TStream>(input)),
+      makeDeserializationOptions(args...));
 }
 
-template <template <typename, typename> class TDeserializer, typename TChar,
-          typename Size, typename... Args,
+template <template <typename> class TDeserializer, typename TDestination,
+          typename TChar, typename Size, typename... Args,
           typename = typename enable_if<is_integral<Size>::value>::type>
-DeserializationError deserialize(JsonDocument& doc, TChar* input,
+DeserializationError deserialize(TDestination&& dst, TChar* input,
                                  Size inputSize, Args... args) {
-  auto reader = makeReader(input, size_t(inputSize));
-  auto data = VariantAttorney::getData(doc);
-  auto pool = VariantAttorney::getPool(doc);
-  auto options = makeDeserializationOptions(args...);
-  doc.clear();
-  return makeDeserializer<TDeserializer>(pool, reader,
-                                         makeStringStorage(input, pool))
-      .parse(*data, options.filter, options.nestingLimit);
+  return doDeserialize<TDeserializer>(dst, makeReader(input, size_t(inputSize)),
+                                      makeDeserializationOptions(args...));
 }
 
 ARDUINOJSON_END_PRIVATE_NAMESPACE

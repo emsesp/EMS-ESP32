@@ -40,9 +40,9 @@ class SecuritySettings {
         root["jwt_secret"] = settings.jwtSecret;
 
         // users
-        JsonArray users = root.createNestedArray("users");
+        JsonArray users = root["users"].to<JsonArray>();
         for (User user : settings.users) {
-            JsonObject userRoot  = users.createNestedObject();
+            JsonObject userRoot  = users.add<JsonObject>();
             userRoot["username"] = user.username;
             userRoot["password"] = user.password;
             userRoot["admin"]    = user.admin;

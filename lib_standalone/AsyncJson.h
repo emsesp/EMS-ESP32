@@ -42,19 +42,18 @@ class ChunkPrint : public Print {
 
 class PrettyAsyncJsonResponse {
   protected:
-    DynamicJsonDocument _jsonBuffer;
+    JsonDocument _jsonBuffer;
 
     JsonVariant _root;
     bool        _isValid;
 
   public:
-    PrettyAsyncJsonResponse(bool isArray = false, size_t maxJsonBufferSize = DYNAMIC_JSON_DOCUMENT_SIZE)
-        : _jsonBuffer(maxJsonBufferSize)
-        , _isValid{false} {
+    PrettyAsyncJsonResponse(bool isArray = false)
+        : _isValid{false} {
         if (isArray)
-            _root = _jsonBuffer.createNestedArray();
+            _root = _jsonBuffer.to<JsonArray>();
         else
-            _root = _jsonBuffer.createNestedObject();
+            _root = _jsonBuffer.add<JsonObject>();
     }
 
     ~PrettyAsyncJsonResponse() {
@@ -89,18 +88,17 @@ class PrettyAsyncJsonResponse {
 
 class MsgpackAsyncJsonResponse {
   protected:
-    DynamicJsonDocument _jsonBuffer;
-    JsonVariant         _root;
-    bool                _isValid;
+    JsonDocument _jsonBuffer;
+    JsonVariant  _root;
+    bool         _isValid;
 
   public:
-    MsgpackAsyncJsonResponse(bool isArray = false, size_t maxJsonBufferSize = DYNAMIC_JSON_DOCUMENT_SIZE)
-        : _jsonBuffer(maxJsonBufferSize)
-        , _isValid{false} {
+    MsgpackAsyncJsonResponse(bool isArray = false)
+        : _isValid{false} {
         if (isArray)
-            _root = _jsonBuffer.createNestedArray();
+            _root = _jsonBuffer.to<JsonArray>();
         else
-            _root = _jsonBuffer.createNestedObject();
+            _root = _jsonBuffer.add<JsonObject>();
     }
 
     ~MsgpackAsyncJsonResponse() {
@@ -135,19 +133,18 @@ class MsgpackAsyncJsonResponse {
 
 class AsyncJsonResponse {
   protected:
-    DynamicJsonDocument _jsonBuffer;
+    JsonDocument _jsonBuffer;
 
     JsonVariant _root;
     bool        _isValid;
 
   public:
-    AsyncJsonResponse(bool isArray = false, size_t maxJsonBufferSize = DYNAMIC_JSON_DOCUMENT_SIZE)
-        : _jsonBuffer(maxJsonBufferSize)
-        , _isValid{false} {
+    AsyncJsonResponse(bool isArray = false)
+        : _isValid{false} {
         if (isArray)
-            _root = _jsonBuffer.createNestedArray();
+            _root = _jsonBuffer.to<JsonArray>();
         else
-            _root = _jsonBuffer.createNestedObject();
+            _root = _jsonBuffer.add<JsonObject>();
     }
 
     ~AsyncJsonResponse() {
@@ -174,6 +171,9 @@ class AsyncJsonResponse {
     }
 
     void setCode(uint16_t) {
+    }
+
+    void setContentType(const char * s) {
     }
 };
 
@@ -224,7 +224,7 @@ class AsyncCallbackJsonWebHandler : public AsyncWebHandler {
     virtual void handleRequest(AsyncWebServerRequest * request) override final {
         if (_onRequest) {
             if (request->_tempObject != NULL) {
-                DynamicJsonDocument  jsonBuffer(1024);
+                JsonDocument         jsonBuffer;
                 DeserializationError error = deserializeJson(jsonBuffer, (uint8_t *)(request->_tempObject));
                 if (!error) {
                     JsonVariant json = jsonBuffer.as<JsonVariant>();

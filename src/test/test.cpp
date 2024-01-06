@@ -286,7 +286,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         emsesp::EMSESP::temperaturesensor_.test();
 
         // shell.invoke_command("show devices");
-        shell.invoke_command("show values");
+        // shell.invoke_command("show values");
         shell.invoke_command("call system allvalues");
         // shell.invoke_command("call system publish");
         // shell.invoke_command("show mqtt");
@@ -545,7 +545,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         run_test("boiler");
         run_test("thermostat");
 
-        DynamicJsonDocument doc(8000); // some absurd high number
+        JsonDocument doc; // some absurd high number
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice) {
                 doc.clear();
@@ -570,8 +570,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
                 serializeJson(doc, Serial);
                 Serial.print(COLOR_RESET);
                 Serial.println();
-                Serial.print("** memoryUsage=");
-                Serial.print(doc.memoryUsage());
                 Serial.print(" measureMsgPack=");
                 Serial.print(measureMsgPack(doc));
                 Serial.print(" measureJson=");
@@ -705,6 +703,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     if (command == "temperature") {
         shell.printfln("Testing adding Temperature sensor");
         emsesp::EMSESP::temperaturesensor_.test();
+        shell.invoke_command("show values");
         ok = true;
     }
 
@@ -847,7 +846,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         run_test("thermostat");
 
         AsyncWebServerRequest request;
-        DynamicJsonDocument   doc(2000);
+        JsonDocument          doc;
         JsonVariant           json;
         request.method(HTTP_GET);
 
@@ -892,8 +891,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         AsyncWebServerRequest request;
         request.method(HTTP_POST);
-        DynamicJsonDocument doc(2000);
-        JsonVariant         json;
+        JsonDocument doc;
+        JsonVariant  json;
 
         char data[] = "{\"value\":\"off\"}";
         deserializeJson(doc, data);
@@ -916,7 +915,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         run_test("thermostat");
 
         AsyncWebServerRequest requestX;
-        DynamicJsonDocument   docX(2000);
+        JsonDocument          docX;
         JsonVariant           jsonX;
 
         requestX.method(HTTP_GET);
@@ -1107,8 +1106,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         // POST tests
         request.method(HTTP_POST);
-        DynamicJsonDocument doc(2000);
-        JsonVariant         json;
+        JsonDocument doc;
+        JsonVariant  json;
 
         // 1
         char data1[] = "{\"entity\":\"seltemp\",\"value\":11}";
@@ -1535,7 +1534,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     if (command == "mqtt2") {
         shell.printfln("Testing MQTT large payloads...");
 
-        DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXXLARGE);
+        JsonDocument doc;
 
         char key[8];
         char value[8];
@@ -1548,7 +1547,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         }
         doc.shrinkToFit();
         JsonObject jo = doc.as<JsonObject>();
-        shell.printfln("Size of JSON payload = %d", jo.memoryUsage());
         shell.printfln("Length of JSON payload = %d", measureJson(jo));
 
         Mqtt::queue_publish("test", jo);

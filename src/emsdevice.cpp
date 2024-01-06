@@ -393,7 +393,7 @@ void EMSdevice::list_device_entries(JsonObject & output) const {
                 snprintf(key, sizeof(key), "%s", dv.short_name);
             }
 
-            JsonArray details = output.createNestedArray(key);
+            JsonArray details = output[key].to<JsonArray>();
 
             // add the full name description
             details.add(fullname);
@@ -868,7 +868,7 @@ bool EMSdevice::export_values(uint8_t device_type, JsonObject & output, const in
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice && (emsdevice->device_type() == device_type)) {
                 if (!nest_created && emsdevice->has_tags(tag)) {
-                    output_hc    = output.createNestedObject(EMSdevice::tag_to_mqtt(tag));
+                    output_hc    = output[EMSdevice::tag_to_mqtt(tag)].to<JsonObject>();
                     nest_created = true;
                 }
                 has_value |= emsdevice->generate_values(output_hc, tag, true, output_target); // use nested for id -1 and 0
@@ -885,7 +885,7 @@ bool EMSdevice::export_values(uint8_t device_type, JsonObject & output, const in
 void EMSdevice::generate_values_web(JsonObject & output) {
     // output["label"] = to_string_short();
     // output["label"] = name_;
-    JsonArray data = output.createNestedArray("data");
+    JsonArray data = output["data"].to<JsonArray>();
 
     for (auto & dv : devicevalues_) {
         auto fullname = dv.get_fullname();
@@ -895,7 +895,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
         //  2. it must have a valid value, if it is not a command like 'reset'
         //  3. show favorites first
         if (!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && !fullname.empty() && (dv.hasValue() || (dv.type == DeviceValueType::CMD))) {
-            JsonObject obj        = data.createNestedObject(); // create the object, we know there is a value
+            JsonObject obj        = data.add<JsonObject>(); // create the object, we know there is a value
             uint8_t    fahrenheit = 0;
 
             // handle Booleans (true, false), output as strings according to the user settings
@@ -962,7 +962,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
 
                 // add the Command options
                 if (dv.type == DeviceValueType::ENUM || (dv.type == DeviceValueType::CMD && dv.options_size > 1)) {
-                    JsonArray l = obj.createNestedArray("l");
+                    JsonArray l = obj["l"].to<JsonArray>();
                     for (uint8_t i = 0; i < dv.options_size; i++) {
                         auto enum_str = Helpers::translated_word(dv.options[i]);
                         if (enum_str) {
@@ -970,7 +970,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                         }
                     }
                 } else if (dv.type == DeviceValueType::BOOL) {
-                    JsonArray l = obj.createNestedArray("l");
+                    JsonArray l = obj["l"].to<JsonArray>();
                     char      result[12];
                     l.add(Helpers::render_boolean(result, false, true));
                     l.add(Helpers::render_boolean(result, true, true));
@@ -1004,7 +1004,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
 void EMSdevice::generate_values_web_customization(JsonArray & output) {
     for (auto & dv : devicevalues_) {
         // also show commands and entities that have an empty full name
-        JsonObject obj        = output.createNestedObject();
+        JsonObject obj        = output.add<JsonObject>();
         uint8_t    fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 
         // create the value
@@ -1096,7 +1096,7 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
                 for (std::string entity_id : entityCustomization.entity_ids) {
                     uint8_t mask = Helpers::hextoint(entity_id.substr(0, 2).c_str());
                     if (mask & 0x80) {
-                        JsonObject obj = output.createNestedObject();
+                        JsonObject obj = output.add<JsonObject>();
                         obj["id"]      = DeviceValue::get_name(entity_id);
                         obj["m"]       = mask;
                         obj["w"]       = false;
@@ -1433,7 +1433,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                     }
                 }
                 json[type]      = F_(enum);
-                JsonArray enum_ = json.createNestedArray(F_(enum));
+                JsonArray enum_ = json[F_(enum)].to<JsonArray>();
                 for (uint8_t i = 0; i < dv.options_size; i++) {
                     enum_.add(Helpers::translated_word(dv.options[i]));
                 }
@@ -1507,7 +1507,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
             case DeviceValueType::CMD:
                 json[type] = F_(command);
                 if (dv.options_size > 1) {
-                    JsonArray enum_ = json.createNestedArray(F_(enum));
+                    JsonArray enum_ = json[F_(enum)].to<JsonArray>();
                     for (uint8_t i = 0; i < dv.options_size; i++) {
                         enum_.add(Helpers::translated_word(dv.options[i]));
                     }
@@ -1628,15 +1628,19 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                 if (dv.tag != old_tag) {
                     old_tag = dv.tag;
                     if (nested && have_tag && dv.tag >= DeviceValueTAG::TAG_HC1) {
-                        json = output.createNestedObject(tag_to_mqtt(dv.tag));
+                        json = output[tag_to_mqtt(dv.tag)].to<JsonObject>();
                     }
                 }
             }
+
             // do not overwrite
             if (json.containsKey(name)) {
+#ifdef EMSESP_DEBUG
                 EMSESP::logger().debug("double json key: %s", name);
+#endif
                 continue;
             }
+
             // handle Booleans
             if (dv.type == DeviceValueType::BOOL && Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
                 // see how to render the value depending on the setting

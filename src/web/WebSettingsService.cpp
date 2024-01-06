@@ -364,7 +364,7 @@ void WebSettingsService::board_profile(AsyncWebServerRequest * request) {
     if (request->hasParam("boardProfile")) {
         std::string board_profile = request->getParam("boardProfile")->value().c_str();
 
-        auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_MEDIUM);
+        auto *     response = new AsyncJsonResponse(false);
         JsonObject root     = response->getRoot();
 
         std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode

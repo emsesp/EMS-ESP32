@@ -62,6 +62,7 @@ class TemperatureSensor {
 
         bool apply_customization();
 
+        // initial values
         int16_t temperature_c = EMS_VALUE_SHORT_NOTSET;
         bool    read          = false;
         bool    ha_registered = false;

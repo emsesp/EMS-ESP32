@@ -5,7 +5,7 @@ import busboy from 'busboy';
 
 const encoder = new Encoder();
 const router = Router();
-// const upload = multer({ dest: '../mock-api/uploads' }); // TODO remove
+// const upload = multer({ dest: '../mock-api/uploads' }); // TODO remove muter
 
 const REST_ENDPOINT_ROOT = '/rest/';
 const API_ENDPOINT_ROOT = '/api/';
@@ -249,7 +249,8 @@ const network_status = {
   subnet_mask: '255.255.255.0',
   gateway_ip: '10.10.10.1',
   dns_ip_1: '10.10.10.1',
-  dns_ip_2: '0.0.0.0'
+  dns_ip_2: '0.0.0.0',
+  hostname: 'ems-esp'
 };
 const list_networks = {
   networks: [
@@ -650,9 +651,9 @@ const emsesp_devices = {
 };
 
 const emsesp_coredata = {
-  connected: true,
-  // devices: [],
-  devices: [
+  connected: false,
+  devices: [],
+  devices2: [
     {
       id: 7,
       t: 4,
@@ -2351,11 +2352,11 @@ router
   .get(VERIFY_AUTHORIZATION_ENDPOINT, () => new Response(JSON.stringify(verify_authentication), { headers }))
   .post(RESTART_ENDPOINT, () => new Response('OK', { status: 200 }))
   .post(FACTORY_RESET_ENDPOINT, () => new Response('OK', { status: 200 }))
-  .post(UPLOAD_FILE_ENDPOINT, () => new Response('OK', { status: 404 })) // TODO remove
+  .post(UPLOAD_FILE_ENDPOINT, () => new Response('OK', { status: 404 })) // TODO remove upload when fixed
   .post(SIGN_IN_ENDPOINT, () => new Response(JSON.stringify(signin), { headers }))
   .get(GENERATE_TOKEN_ENDPOINT, () => new Response(JSON.stringify(generate_token), { headers }));
 
-// uploads // TODO fix later
+// uploads // TODO fix uploading later
 
 // const progress_middleware = async (req: any) => {
 //   console.log('progress_middleware');
@@ -2805,7 +2806,7 @@ router
     return new Response('Not Found', { status: 404 });
   });
 
-// Event Source // TODO fix later
+// Event Source // TODO fix event source later
 
 // const data = {
 //   t: '000+00:00:00.000',
