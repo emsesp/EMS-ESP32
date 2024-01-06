@@ -75,10 +75,10 @@ class DummySettings {
     bool   enableCORS     = false;
     String CORSOrigin     = "*";
 
-    static void read(DummySettings & settings, JsonObject & root){};
+    static void read(DummySettings & settings, JsonObject root){};
     static void read(DummySettings & settings){};
 
-    static StateUpdateResult update(JsonObject & root, DummySettings & settings) {
+    static StateUpdateResult update(JsonObject root, DummySettings & settings) {
         return StateUpdateResult::CHANGED;
     }
 };
@@ -152,7 +152,7 @@ class EMSESPSettingsService {
 
 class JsonUtils {
   public:
-    static void writeIP(JsonObject & root, const String & key, const String & ip) {
+    static void writeIP(JsonObject root, const String & key, const String & ip) {
         root[key] = ip;
     }
 };

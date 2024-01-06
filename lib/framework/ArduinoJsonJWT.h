@@ -25,7 +25,7 @@ class ArduinoJsonJWT {
     void   setSecret(String secret);
     String getSecret();
 
-    String buildJWT(JsonObject & payload);
+    String buildJWT(JsonObject payload);
     void   parseJWT(String jwt, JsonDocument & jsonDocument);
 };
 

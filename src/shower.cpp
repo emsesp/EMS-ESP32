@@ -35,7 +35,7 @@ void Shower::start() {
     Command::add(
         EMSdevice::DeviceType::BOILER,
         F_(coldshot),
-        [&](const char * value, const int8_t id, JsonObject & output) {
+        [&](const char * value, const int8_t id, JsonObject output) {
             LOG_INFO("Forcing coldshot...");
             if (shower_state_) {
                 output["message"] = "OK";

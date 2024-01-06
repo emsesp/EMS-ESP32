@@ -49,7 +49,7 @@ enum CommandRet : uint8_t {
 };
 
 using cmd_function_p      = std::function<bool(const char * data, const int8_t id)>;
-using cmd_json_function_p = std::function<bool(const char * data, const int8_t id, JsonObject & output)>;
+using cmd_json_function_p = std::function<bool(const char * data, const int8_t id, JsonObject output)>;
 
 class Command {
   public:
@@ -96,7 +96,7 @@ class Command {
         return cmdfunctions_;
     }
 
-    static uint8_t call(const uint8_t device_type, const char * cmd, const char * value, const bool is_admin, const int8_t id, JsonObject & output);
+    static uint8_t call(const uint8_t device_type, const char * cmd, const char * value, const bool is_admin, const int8_t id, JsonObject output);
     static uint8_t call(const uint8_t device_type, const char * cmd, const char * value);
 
     // with normal call back function taking a value and id
@@ -129,9 +129,9 @@ class Command {
     static void show_devices(uuid::console::Shell & shell);
     static bool device_has_commands(const uint8_t device_type);
 
-    static bool list(const uint8_t device_type, JsonObject & output);
+    static bool list(const uint8_t device_type, JsonObject output);
 
-    static uint8_t process(const char * path, const bool is_admin, const JsonObject & input, JsonObject & output);
+    static uint8_t process(const char * path, const bool is_admin, const JsonObject input, JsonObject output);
 
     static const char * parse_command_string(const char * command, int8_t & id);
 
@@ -142,7 +142,7 @@ class Command {
 
     static std::vector<CmdFunction> cmdfunctions_; // the list of commands
 
-    inline static uint8_t message(uint8_t error_code, const char * message, const JsonObject & output) {
+    inline static uint8_t message(uint8_t error_code, const char * message, const JsonObject output) {
         output.clear();
         output["message"] = message;
         return error_code;

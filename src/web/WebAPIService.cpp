@@ -67,7 +67,7 @@ void WebAPIService::webAPIService_post(AsyncWebServerRequest * request, JsonVari
 
 // parse the URL looking for query or path parameters
 // reporting back any errors
-void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
+void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     // check if the user has admin privileges (token is included and authorized)
     bool is_admin = false;
     EMSESP::webSettingsService.read([&](WebSettings & settings) {

@@ -49,7 +49,7 @@ class WebAPIService {
     static uint32_t api_count_;
     static uint16_t api_fails_;
 
-    void parse(AsyncWebServerRequest * request, JsonObject & input);
+    void parse(AsyncWebServerRequest * request, JsonObject input);
 
     void getSettings(AsyncWebServerRequest * request);
     void getCustomizations(AsyncWebServerRequest * request);

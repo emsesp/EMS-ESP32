@@ -83,7 +83,7 @@ class TemperatureSensor {
     void publish_values(const bool force);
     void reload();
     bool updated_values();
-    bool get_value_info(JsonObject & output, const char * cmd, const int8_t id);
+    bool get_value_info(JsonObject output, const char * cmd, const int8_t id);
 
     // return back reference to the sensor list, used by other classes
     std::vector<Sensor> sensors() const {
@@ -112,7 +112,7 @@ class TemperatureSensor {
 
     bool update(const std::string & id, const std::string & name, int16_t offset);
 
-    bool command_info(const char * value, const int8_t id, JsonObject & output);
+    bool command_info(const char * value, const int8_t id, JsonObject output);
 
 #if defined(EMSESP_TEST)
     void test();
@@ -155,7 +155,7 @@ class TemperatureSensor {
     uint64_t get_id(const uint8_t addr[]);
     void     remove_ha_topic(const std::string & id);
 
-    bool command_commands(const char * value, const int8_t id, JsonObject & output);
+    bool command_commands(const char * value, const int8_t id, JsonObject output);
 
     std::vector<Sensor> sensors_; // our list of active sensors
 

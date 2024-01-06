@@ -57,10 +57,10 @@ class System {
     static bool command_restart(const char * value, const int8_t id);
     static bool command_syslog_level(const char * value, const int8_t id);
     static bool command_watch(const char * value, const int8_t id);
-    static bool command_info(const char * value, const int8_t id, JsonObject & output);
-    static bool command_commands(const char * value, const int8_t id, JsonObject & output);
-    static bool command_response(const char * value, const int8_t id, JsonObject & output);
-    static bool command_allvalues(const char * value, const int8_t id, JsonObject & output);
+    static bool command_info(const char * value, const int8_t id, JsonObject output);
+    static bool command_commands(const char * value, const int8_t id, JsonObject output);
+    static bool command_response(const char * value, const int8_t id, JsonObject output);
+    static bool command_allvalues(const char * value, const int8_t id, JsonObject output);
 
 #if defined(EMSESP_TEST)
     static bool command_test(const char * value, const int8_t id);
@@ -79,7 +79,7 @@ class System {
     void syslog_init();
     bool check_upgrade(bool factory_settings);
     bool check_restore();
-    bool heartbeat_json(JsonObject & output);
+    bool heartbeat_json(JsonObject output);
     void send_heartbeat();
     void send_info_mqtt();
 
@@ -102,8 +102,8 @@ class System {
     void button_init(bool refresh);
     void commands_init();
 
-    static void extractSettings(const char * filename, const char * section, JsonObject & output);
-    static bool saveSettings(const char * filename, const char * section, JsonObject & input);
+    static void extractSettings(const char * filename, const char * section, JsonObject output);
+    static bool saveSettings(const char * filename, const char * section, JsonObject input);
 
     static bool is_valid_gpio(uint8_t pin);
     static bool load_board_profile(std::vector<int8_t> & data, const std::string & board_profile);

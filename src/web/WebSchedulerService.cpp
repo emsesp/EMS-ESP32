@@ -36,7 +36,7 @@ void WebSchedulerService::begin() {
 
 // this creates the scheduler file, saving it to the FS
 // and also calls when the Scheduler web page is refreshed
-void WebScheduler::read(WebScheduler & webScheduler, JsonObject & root) {
+void WebScheduler::read(WebScheduler & webScheduler, JsonObject root) {
     JsonArray schedule = root["schedule"].to<JsonArray>();
     uint8_t   counter  = 0;
     for (const ScheduleItem & scheduleItem : webScheduler.scheduleItems) {
@@ -53,7 +53,7 @@ void WebScheduler::read(WebScheduler & webScheduler, JsonObject & root) {
 
 // call on initialization and also when the Schedule web page is saved
 // this loads the data into the internal class
-StateUpdateResult WebScheduler::update(JsonObject & root, WebScheduler & webScheduler) {
+StateUpdateResult WebScheduler::update(JsonObject root, WebScheduler & webScheduler) {
 #ifdef EMSESP_STANDALONE
     // invoke some fake data for testing
     const char * json =
@@ -132,7 +132,7 @@ bool WebSchedulerService::command_setvalue(const char * value, const std::string
 }
 
 // process json output for info/commands and value_info
-bool WebSchedulerService::get_value_info(JsonObject & output, const char * cmd) {
+bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
     EMSESP::webSchedulerService.read([&](WebScheduler & webScheduler) { scheduleItems = &webScheduler.scheduleItems; });
     if (Helpers::toLower(cmd) == F_(commands)) {
         output[F_(info)]     = Helpers::translated_word(FL_(info_cmd));

@@ -71,8 +71,8 @@ class WebSettings {
     uint8_t eth_phy_addr;
     uint8_t eth_clock_mode;
 
-    static void              read(WebSettings & settings, JsonObject & root);
-    static StateUpdateResult update(JsonObject & root, WebSettings & settings);
+    static void              read(WebSettings & settings, JsonObject root);
+    static StateUpdateResult update(JsonObject root, WebSettings & settings);
 
     enum ChangeFlags : uint8_t {
 

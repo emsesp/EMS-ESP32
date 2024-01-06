@@ -366,7 +366,7 @@ bool EMSdevice::has_cmd(const char * cmd, const int8_t id) const {
 
 // list of registered device entries
 // called from the command 'entities'
-void EMSdevice::list_device_entries(JsonObject & output) const {
+void EMSdevice::list_device_entries(JsonObject output) const {
     for (const auto & dv : devicevalues_) {
         auto fullname = dv.get_fullname();
         if (!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && dv.type != DeviceValueType::CMD && !fullname.empty()) {
@@ -827,7 +827,7 @@ std::string EMSdevice::get_value_uom(const std::string & shortname) const {
     return std::string{}; // not found
 }
 
-bool EMSdevice::export_values(uint8_t device_type, JsonObject & output, const int8_t id, const uint8_t output_target) {
+bool EMSdevice::export_values(uint8_t device_type, JsonObject output, const int8_t id, const uint8_t output_target) {
     bool    has_value = false;
     uint8_t tag;
     if (id >= 1 && id <= (1 + DeviceValueTAG::TAG_HS16 - DeviceValueTAG::TAG_HC1)) {
@@ -868,7 +868,7 @@ bool EMSdevice::export_values(uint8_t device_type, JsonObject & output, const in
 // this is loosely based of the function generate_values used for the MQTT and Console
 // except additional data is stored in the JSON document needed for the Web UI like the UOM and command
 // v=value, u=uom, n=name, c=cmd, h=help string, s=step, m=min, x=max
-void EMSdevice::generate_values_web(JsonObject & output) {
+void EMSdevice::generate_values_web(JsonObject output) {
     // output["label"] = to_string_short();
     // output["label"] = name_;
     JsonArray data = output["data"].to<JsonArray>();
@@ -1362,7 +1362,7 @@ void EMSdevice::dump_value_info() {
 // builds json for a specific device value / entity
 // cmd is the endpoint or name of the device entity
 // returns false if failed, otherwise true
-bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8_t id) {
+bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t id) {
     JsonObject json = output;
     int8_t     tag  = id;
 
@@ -1568,7 +1568,7 @@ void EMSdevice::publish_all_values() {
 // For each value in the device create the json object pair and add it to given json
 // return false if empty
 // this is used to create the MQTT payloads, Console messages and Web API calls
-bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, const bool nested, const uint8_t output_target) {
+bool EMSdevice::generate_values(JsonObject output, const uint8_t tag_filter, const bool nested, const uint8_t output_target) {
     bool       has_values = false; // to see if we've added a value. it's faster than doing a json.size() at the end
     uint8_t    old_tag    = 255;   // NAN
     JsonObject json       = output;

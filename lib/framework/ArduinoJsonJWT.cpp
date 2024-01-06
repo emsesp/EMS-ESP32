@@ -34,7 +34,7 @@ String ArduinoJsonJWT::sign(String & payload) {
     return encode((char *)hmacResult, 32);
 }
 
-String ArduinoJsonJWT::buildJWT(JsonObject & payload) {
+String ArduinoJsonJWT::buildJWT(JsonObject payload) {
     // serialize, then encode payload
     String jwt;
     serializeJson(payload, jwt);

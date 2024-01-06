@@ -55,7 +55,7 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
 }
 
 // this creates the customization file, saving it to the FS
-void WebCustomization::read(WebCustomization & customizations, JsonObject & root) {
+void WebCustomization::read(WebCustomization & customizations, JsonObject root) {
     // Temperature Sensor customization
     JsonArray sensorsJson = root["ts"].to<JsonArray>();
 
@@ -95,7 +95,7 @@ void WebCustomization::read(WebCustomization & customizations, JsonObject & root
 
 // call on initialization and also when the page is saved via web UI
 // this loads the data into the internal class
-StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization & customizations) {
+StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & customizations) {
 #ifdef EMSESP_STANDALONE
     // invoke some fake data for testing
     const char * json = "{\"ts\":[],\"as\":[],\"masked_entities\":[{\"product_id\":123,\"device_id\":8,\"entity_ids\":[\"08heatingactive|my custom "
