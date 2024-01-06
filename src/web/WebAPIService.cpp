@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,7 +67,7 @@ void WebAPIService::webAPIService_post(AsyncWebServerRequest * request, JsonVari
 
 // parse the URL looking for query or path parameters
 // reporting back any errors
-void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
+void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     // check if the user has admin privileges (token is included and authorized)
     bool is_admin = false;
     EMSESP::webSettingsService.read([&](WebSettings & settings) {

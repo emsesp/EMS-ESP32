@@ -50,7 +50,7 @@ class NetworkSettings {
     IPAddress dnsIP1;
     IPAddress dnsIP2;
 
-    static void read(NetworkSettings & settings, JsonObject & root) {
+    static void read(NetworkSettings & settings, JsonObject root) {
         // connection settings
         root["ssid"]             = settings.ssid;
         root["bssid"]            = settings.bssid;
@@ -73,7 +73,7 @@ class NetworkSettings {
         JsonUtils::writeIP(root, "dns_ip_2", settings.dnsIP2);
     }
 
-    static StateUpdateResult update(JsonObject & root, NetworkSettings & settings) {
+    static StateUpdateResult update(JsonObject root, NetworkSettings & settings) {
         auto enableCORS         = settings.enableCORS;
         auto CORSOrigin         = settings.CORSOrigin;
         auto ssid               = settings.ssid;

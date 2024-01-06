@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ std::vector<Command::CmdFunction> Command::cmdfunctions_;
 // the path is leading so if duplicate keys are in the input JSON it will be ignored
 // the entry point will be either via the Web API (api/) or MQTT (<base>/)
 // returns a return code and json output
-uint8_t Command::process(const char * path, const bool is_admin, const JsonObject & input, JsonObject & output) {
+uint8_t Command::process(const char * path, const bool is_admin, const JsonObject input, JsonObject output) {
     SUrlParser p; // parse URL for the path names
     p.parse(path);
 
@@ -288,7 +288,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 // calls a command. Takes a json object for output.
 // id may be used to represent a heating circuit for example
 // returns 0 if the command errored, 1 (TRUE) if ok, 2 if not found, 3 if error or 4 if not allowed
-uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * value, const bool is_admin, const int8_t id, JsonObject & output) {
+uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * value, const bool is_admin, const int8_t id, JsonObject output) {
     if (cmd == nullptr) {
         return CommandRet::NOT_FOUND;
     }
@@ -435,7 +435,7 @@ void Command::erase_command(const uint8_t device_type, const char * cmd) {
 }
 
 // list all commands for a specific device, output as json
-bool Command::list(const uint8_t device_type, JsonObject & output) {
+bool Command::list(const uint8_t device_type, JsonObject output) {
     if (cmdfunctions_.empty()) {
         output["message"] = "no commands available";
         return false;

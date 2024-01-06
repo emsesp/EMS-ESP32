@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ void WebCustomEntityService::begin() {
 
 // this creates the entity file, saving it to the FS
 // and also calls when the Entity web page is refreshed
-void WebCustomEntity::read(WebCustomEntity & webEntity, JsonObject & root) {
+void WebCustomEntity::read(WebCustomEntity & webEntity, JsonObject root) {
     JsonArray entity  = root["entities"].to<JsonArray>();
     uint8_t   counter = 0;
     for (const CustomEntityItem & entityItem : webEntity.customEntityItems) {
@@ -62,7 +62,7 @@ void WebCustomEntity::read(WebCustomEntity & webEntity, JsonObject & root) {
 
 // call on initialization and also when the Entity web page is updated
 // this loads the data into the internal class
-StateUpdateResult WebCustomEntity::update(JsonObject & root, WebCustomEntity & webCustomEntity) {
+StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & webCustomEntity) {
 #ifdef EMSESP_STANDALONE
     // invoke some fake data for testing
     // clang-format off
@@ -183,7 +183,7 @@ bool WebCustomEntityService::command_setvalue(const char * value, const std::str
 
 // output of a single value
 // if add_uom is true it will add the UOM string to the value
-void WebCustomEntityService::render_value(JsonObject & output, CustomEntityItem entity, const bool useVal, const bool web, const bool add_uom) {
+void WebCustomEntityService::render_value(JsonObject output, CustomEntityItem entity, const bool useVal, const bool web, const bool add_uom) {
     char        payload[12];
     std::string name = useVal ? "value" : entity.name;
     switch (entity.value_type) {
@@ -244,7 +244,7 @@ void WebCustomEntityService::render_value(JsonObject & output, CustomEntityItem 
 
 // display all custom entities
 // adding each one, with UOM to a json object string
-void WebCustomEntityService::show_values(JsonObject & output) {
+void WebCustomEntityService::show_values(JsonObject output) {
     for (const CustomEntityItem & entity : *customEntityItems) {
         render_value(output, entity, false, false, true); // with add_uom
     }
@@ -252,7 +252,7 @@ void WebCustomEntityService::show_values(JsonObject & output) {
 
 
 // process json output for info/commands and value_info
-bool WebCustomEntityService::get_value_info(JsonObject & output, const char * cmd) {
+bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd) {
     EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
     if (Helpers::toLower(cmd) == F_(commands)) {
         output[F_(info)]     = Helpers::translated_word(FL_(info_cmd));
@@ -472,7 +472,7 @@ uint8_t WebCustomEntityService::has_commands() {
 }
 
 // send to dashboard, msgpack don't like serialized, use number
-void WebCustomEntityService::generate_value_web(JsonObject & output) {
+void WebCustomEntityService::generate_value_web(JsonObject output) {
     EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
 
     output["label"] = (std::string) "Custom Entities";

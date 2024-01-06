@@ -28,13 +28,13 @@ class OTASettings {
     int    port;
     String password;
 
-    static void read(OTASettings & settings, JsonObject & root) {
+    static void read(OTASettings & settings, JsonObject root) {
         root["enabled"]  = settings.enabled;
         root["port"]     = settings.port;
         root["password"] = settings.password;
     }
 
-    static StateUpdateResult update(JsonObject & root, OTASettings & settings) {
+    static StateUpdateResult update(JsonObject root, OTASettings & settings) {
         settings.enabled  = root["enabled"] | FACTORY_OTA_ENABLED;
         settings.port     = root["port"] | FACTORY_OTA_PORT;
         settings.password = root["password"] | FACTORY_OTA_PASSWORD;

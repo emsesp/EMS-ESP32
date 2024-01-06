@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -464,7 +464,7 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
                                COLOR_BRIGHT_GREEN,
                                (uint16_t)sensor.value(), // as int
                                COLOR_RESET,
-                               sensor.type() == AnalogSensor::AnalogType::COUNTER ? "Counter" : "Digital in");
+                               sensor.type() == AnalogSensor::AnalogType::COUNTER ? "Counter" : "Digital In");
                 break;
             }
         }
@@ -662,7 +662,7 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
 
 // builds json with the detail of each value,
 // for a specific EMS device type or the sensors, scheduler and custom entities
-bool EMSESP::get_device_value_info(JsonObject & root, const char * cmd, const int8_t id, const uint8_t devicetype) {
+bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8_t id, const uint8_t devicetype) {
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice->device_type() == devicetype) {
             if (emsdevice->get_value_info(root, cmd, id)) {
@@ -1170,14 +1170,14 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     Command::add(
         device_type,
         F_(info),
-        [device_type](const char * value, const int8_t id, JsonObject & output) {
+        [device_type](const char * value, const int8_t id, JsonObject output) {
             return EMSdevice::export_values(device_type, output, id, EMSdevice::OUTPUT_TARGET::API_VERBOSE);
         },
         FL_(info_cmd));
     Command::add(
         device_type,
         F_(values),
-        [device_type](const char * value, const int8_t id, JsonObject & output) {
+        [device_type](const char * value, const int8_t id, JsonObject output) {
             return EMSdevice::export_values(device_type,
                                             output,
                                             id,
@@ -1188,12 +1188,12 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     Command::add(
         device_type,
         F_(commands),
-        [device_type](const char * value, const int8_t id, JsonObject & output) { return command_commands(device_type, output, id); },
+        [device_type](const char * value, const int8_t id, JsonObject output) { return command_commands(device_type, output, id); },
         FL_(commands_cmd));
     Command::add(
         device_type,
         F_(entities),
-        [device_type](const char * value, const int8_t id, JsonObject & output) { return command_entities(device_type, output, id); },
+        [device_type](const char * value, const int8_t id, JsonObject output) { return command_entities(device_type, output, id); },
         FL_(entities_cmd));
 
     // MQTT subscribe to the device e.g. "ems-esp/boiler/#"
@@ -1204,7 +1204,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
 }
 
 // list device entities
-bool EMSESP::command_entities(uint8_t device_type, JsonObject & output, const int8_t id) {
+bool EMSESP::command_entities(uint8_t device_type, JsonObject output, const int8_t id) {
     JsonObject node;
 
     for (const auto & emsdevice : emsdevices) {
@@ -1218,7 +1218,7 @@ bool EMSESP::command_entities(uint8_t device_type, JsonObject & output, const in
 }
 
 // list all available commands, return as json
-bool EMSESP::command_commands(uint8_t device_type, JsonObject & output, const int8_t id) {
+bool EMSESP::command_commands(uint8_t device_type, JsonObject output, const int8_t id) {
     return Command::list(device_type, output);
 }
 

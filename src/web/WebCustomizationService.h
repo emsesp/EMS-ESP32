@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,8 +71,8 @@ class WebCustomization {
     std::list<SensorCustomization> sensorCustomizations; // for sensor names and offsets
     std::list<AnalogCustomization> analogCustomizations; // for analog sensors
     std::list<EntityCustomization> entityCustomizations; // for a list of entities that have a special mask set
-    static void                    read(WebCustomization & customizations, JsonObject & root);
-    static StateUpdateResult       update(JsonObject & root, WebCustomization & customizations);
+    static void                    read(WebCustomization & customizations, JsonObject root);
+    static StateUpdateResult       update(JsonObject root, WebCustomization & customizations);
 
   private:
     static bool _start;
