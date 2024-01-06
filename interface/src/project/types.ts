@@ -223,12 +223,12 @@ export enum AnalogType {
 
 export const AnalogTypeNames = [
   '(disabled)',
-  'Digital in',
+  'Digital In',
   'Counter',
   'ADC',
   'Timer',
   'Rate',
-  'Digital out',
+  'Digital Out',
   'PWM 0',
   'PWM 1',
   'PWM 2'
