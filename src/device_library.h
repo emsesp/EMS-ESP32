@@ -25,6 +25,7 @@
 
 // Boilers - 0x08
 {  8, DeviceType::BOILER, "CS6800i/WLW176i", DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
+{ 12, DeviceType::BOILER, "C1200W", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 64, DeviceType::BOILER, "BK13/BK15/Smartline/GB1x2", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 72, DeviceType::BOILER, "GB125/GB135/MC10", DeviceFlags::EMS_DEVICE_FLAG_EMS},
 { 81, DeviceType::BOILER, "Cascade CM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
@@ -107,6 +108,7 @@
 { 66, DeviceType::THERMOSTAT, "ES72/RC20", DeviceFlags::EMS_DEVICE_FLAG_RC20_N}, // 0x17 or remote
 { 76, DeviceType::THERMOSTAT, "ES73", DeviceFlags::EMS_DEVICE_FLAG_RC30_N}, // 0x10
 {113, DeviceType::THERMOSTAT, "ES72/RC20", DeviceFlags::EMS_DEVICE_FLAG_RC20_N}, // 0x17
+{159, DeviceType::THERMOSTAT, "ES79", DeviceFlags::EMS_DEVICE_FLAG_RC35}, // 0x10
 
 // Thermostat - Junkers - 0x10
 {105, DeviceType::THERMOSTAT, "FW100", DeviceFlags::EMS_DEVICE_FLAG_JUNKERS},

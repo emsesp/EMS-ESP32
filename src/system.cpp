@@ -64,7 +64,8 @@ const char * const languages[] = {EMSESP_LOCALE_EN,
                                   EMSESP_LOCALE_NO,
                                   EMSESP_LOCALE_FR,
                                   EMSESP_LOCALE_TR,
-                                  EMSESP_LOCALE_IT};
+                                  EMSESP_LOCALE_IT,
+                                  EMSESP_LOCALE_SK};
 #endif
 
 static constexpr uint8_t NUM_LANGUAGES = sizeof(languages) / sizeof(const char *);
@@ -256,7 +257,9 @@ bool System::command_watch(const char * value, const int8_t id) {
 }
 
 void System::store_nvs_values() {
-    Command::call(EMSdevice::DeviceType::BOILER, "nompower", "-1"); // trigger a write
+    if (Command::find_command(EMSdevice::DeviceType::BOILER, 0, "nompower") != nullptr) {
+        Command::call(EMSdevice::DeviceType::BOILER, "nompower", "-1"); // trigger a write
+    }
     EMSESP::analogsensor_.store_counters();
     EMSESP::nvs_.end();
 }
@@ -732,7 +735,11 @@ void System::network_init(bool refresh) {
     //  ETH_CLOCK_GPIO17_OUT = 3  RMII clock output from GPIO17, for 50hz inverted clock
     auto clock_mode = (eth_clock_mode_t)eth_clock_mode_;
 
-    eth_present_ = ETH.begin((eth_phy_type_t)phy_addr, power, mdc, mdio, type, clock_mode);
+#if ESP_ARDUINO_VERSION_MAJOR < 3
+    eth_present_ = ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode);
+#else
+    eth_present_ = ETH.begin(type, phy_addr, mdc, mdio, power, clock_mode);
+#endif
 #endif
 }
 
@@ -1107,7 +1114,7 @@ bool System::check_upgrade(bool factory_settings) {
 
 #if defined(EMSESP_DEBUG)
     if (!missing_version) {
-        LOG_INFO("Current version from settings is %d.%d.%d-%s",
+        LOG_INFO("Checking version (settings has %d.%d.%d-%s)...",
                  settings_version.major(),
                  settings_version.minor(),
                  settings_version.patch(),
@@ -1115,26 +1122,20 @@ bool System::check_upgrade(bool factory_settings) {
     }
 #endif
 
-    // always save the new version to the settings
-    EMSESP::webSettingsService.update(
-        [&](WebSettings & settings) {
-            settings.version = EMSESP_APP_VERSION;
-            return StateUpdateResult::CHANGED;
-        },
-        "local");
-
     if (factory_settings) {
         return false; // fresh install, do nothing
     }
 
     version::Semver200_version this_version(EMSESP_APP_VERSION);
 
+    bool save_version = true;
+
     // compare versions
-    bool reboot_required = false;
     if (this_version > settings_version) {
+        // need upgrade
         LOG_NOTICE("Upgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
 
-        // if we're coming from 3.4.4 or 3.5.0b14 then we need to apply new settings
+        // if we're coming from 3.4.4 or 3.5.0b14 which had no version stored then we need to apply new settings
         if (missing_version) {
             LOG_DEBUG("Setting MQTT Entity ID format to v3.4 format");
             EMSESP::esp8266React.getMqttSettingsService()->update(
@@ -1144,15 +1145,26 @@ bool System::check_upgrade(bool factory_settings) {
                 },
                 "local");
         }
-
     } else if (this_version < settings_version) {
+        // need downgrade
         LOG_NOTICE("Downgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
     } else {
         // same version, do nothing
-        return false;
+        save_version = false;
     }
 
-    return reboot_required;
+    // if we did a change, set the new version and reboot
+    if (save_version) {
+        EMSESP::webSettingsService.update(
+            [&](WebSettings & settings) {
+                settings.version = EMSESP_APP_VERSION;
+                return StateUpdateResult::CHANGED;
+            },
+            "local");
+        return true; // need reboot
+    }
+
+    return false;
 }
 
 // list commands
@@ -1204,13 +1216,16 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     // System
     node                     = output.createNestedObject("System Info");
     node["version"]          = EMSESP_APP_VERSION;
-    node["platform"]         = EMSESP_PLATFORM;
     node["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     node["uptime (seconds)"] = uuid::get_uptime_sec();
 #ifndef EMSESP_STANDALONE
+    node["platform"]  = ARDUINO_VERSION;
+    node["sdk"]       = ESP.getSdkVersion();
     node["free mem"]  = getHeapMem();
     node["max alloc"] = getMaxAllocMem();
+    node["used app"]  = EMSESP::system_.appUsed(); // kilobytes
     node["free app"]  = EMSESP::system_.appFree(); // kilobytes
+    node["partition"] = esp_ota_get_running_partition()->label;
 #endif
     node["reset reason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 
