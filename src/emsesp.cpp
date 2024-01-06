@@ -464,7 +464,7 @@ void EMSESP::show_sensor_values(uuid::console::Shell & shell) {
                                COLOR_BRIGHT_GREEN,
                                (uint16_t)sensor.value(), // as int
                                COLOR_RESET,
-                               sensor.type() == AnalogSensor::AnalogType::COUNTER ? "Counter" : "Digital in");
+                               sensor.type() == AnalogSensor::AnalogType::COUNTER ? "Counter" : "Digital In");
                 break;
             }
         }
