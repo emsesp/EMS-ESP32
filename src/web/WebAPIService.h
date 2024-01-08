@@ -31,8 +31,8 @@ class WebAPIService {
   public:
     WebAPIService(AsyncWebServer * server, SecurityManager * securityManager);
 
-    void webAPIService_post(AsyncWebServerRequest * request, JsonVariant & json); // for POSTs
-    void webAPIService_get(AsyncWebServerRequest * request);                      // for GETs
+    void webAPIService_post(AsyncWebServerRequest * request, JsonVariant json); // for POSTs
+    void webAPIService_get(AsyncWebServerRequest * request);                    // for GETs
 
     static uint32_t api_count() {
         return api_count_;

@@ -83,7 +83,7 @@ class HttpPostEndpoint {
     StatefulService<T> *        _statefulService;
     AsyncCallbackJsonWebHandler _updateHandler;
 
-    void updateSettings(AsyncWebServerRequest * request, JsonVariant & json) {
+    void updateSettings(AsyncWebServerRequest * request, JsonVariant json) {
         if (!json.is<JsonObject>()) {
             request->send(400);
             return;

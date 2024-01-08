@@ -47,9 +47,9 @@ class WebDataService {
     void device_data(AsyncWebServerRequest * request);
 
     // POST
-    void write_device_value(AsyncWebServerRequest * request, JsonVariant & json);
-    void write_temperature_sensor(AsyncWebServerRequest * request, JsonVariant & json);
-    void write_analog_sensor(AsyncWebServerRequest * request, JsonVariant & json);
+    void write_device_value(AsyncWebServerRequest * request, JsonVariant json);
+    void write_temperature_sensor(AsyncWebServerRequest * request, JsonVariant json);
+    void write_analog_sensor(AsyncWebServerRequest * request, JsonVariant json);
     void scan_devices(AsyncWebServerRequest * request); // command
 
     AsyncCallbackJsonWebHandler _write_value_handler, _write_temperature_handler, _write_analog_handler;

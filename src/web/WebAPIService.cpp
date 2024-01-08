@@ -53,7 +53,7 @@ void WebAPIService::webAPIService_get(AsyncWebServerRequest * request) {
 // For HTTP POSTS with an optional JSON body
 // HTTP_POST | HTTP_PUT | HTTP_PATCH
 // POST /{device}[/{hc|id}][/{name}]
-void WebAPIService::webAPIService_post(AsyncWebServerRequest * request, JsonVariant & json) {
+void WebAPIService::webAPIService_post(AsyncWebServerRequest * request, JsonVariant json) {
     // if no body then treat it as a secure GET
     if (!json.is<JsonObject>()) {
         webAPIService_get(request);
