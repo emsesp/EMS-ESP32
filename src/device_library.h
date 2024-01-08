@@ -108,7 +108,7 @@
 { 66, DeviceType::THERMOSTAT, "ES72/RC20", DeviceFlags::EMS_DEVICE_FLAG_RC20_N}, // 0x17 or remote
 { 76, DeviceType::THERMOSTAT, "ES73", DeviceFlags::EMS_DEVICE_FLAG_RC30_N}, // 0x10
 {113, DeviceType::THERMOSTAT, "ES72/RC20", DeviceFlags::EMS_DEVICE_FLAG_RC20_N}, // 0x17
-{159, DeviceType::THERMOSTAT, "ES79", DeviceFlags::EMS_DEVICE_FLAG_RC35}, // 0x10
+{156, DeviceType::THERMOSTAT, "ES79", DeviceFlags::EMS_DEVICE_FLAG_RC35}, // 0x10
 
 // Thermostat - Junkers - 0x10
 {105, DeviceType::THERMOSTAT, "FW100", DeviceFlags::EMS_DEVICE_FLAG_JUNKERS},
