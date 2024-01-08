@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -683,12 +683,12 @@ bool Mqtt::queue_publish(const char * topic, const std::string & payload) {
     return queue_publish_message((topic), payload, mqtt_retain_);
 }
 
-bool Mqtt::queue_publish(const char * topic, const JsonObject & payload) {
+bool Mqtt::queue_publish(const char * topic, const JsonObjectConst & payload) {
     return queue_publish_retain(topic, payload, mqtt_retain_);
 }
 
 // publish json doc, only if its not empty
-bool Mqtt::queue_publish(const std::string & topic, const JsonObject & payload) {
+bool Mqtt::queue_publish(const std::string & topic, const JsonObjectConst & payload) {
     return queue_publish_retain(topic, payload, mqtt_retain_);
 }
 
@@ -698,11 +698,11 @@ bool Mqtt::queue_publish_retain(const char * topic, const std::string & payload,
 }
 
 // publish json doc, only if its not empty, using the retain flag
-bool Mqtt::queue_publish_retain(const std::string & topic, const JsonObject & payload, const bool retain) {
+bool Mqtt::queue_publish_retain(const std::string & topic, const JsonObjectConst & payload, const bool retain) {
     return queue_publish_retain(topic.c_str(), payload, retain);
 }
 
-bool Mqtt::queue_publish_retain(const char * topic, const JsonObject & payload, const bool retain) {
+bool Mqtt::queue_publish_retain(const char * topic, const JsonObjectConst & payload, const bool retain) {
     if (payload.size()) {
         std::string payload_text;
         payload_text.reserve(measureJson(payload) + 1);
@@ -722,7 +722,7 @@ bool Mqtt::queue_remove_topic(const char * topic) {
 }
 
 // queue a Home Assistant config topic and payload, with retain flag off.
-bool Mqtt::queue_ha(const char * topic, const JsonObject & payload) {
+bool Mqtt::queue_ha(const char * topic, const JsonObjectConst & payload) {
     if (!enabled()) {
         return false;
     }
@@ -803,21 +803,21 @@ bool Mqtt::publish_system_ha_sensor_config(uint8_t type, const char * name, cons
 // MQTT discovery configs
 // entity must match the key/value pair in the *_data topic
 // note: some extra string copying done here, it looks messy but does help with heap fragmentation issues
-bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdevice::DeviceValueType
-                                    uint8_t               tag,         // EMSdevice::DeviceValueTAG
-                                    const char * const    fullname,    // fullname, already translated
-                                    const char * const    en_name,     // original name in english
-                                    const uint8_t         device_type, // EMSdevice::DeviceType
-                                    const char * const    entity,      // same as shortname
-                                    const uint8_t         uom,         // EMSdevice::DeviceValueUOM (0=NONE)
-                                    const bool            remove,      // true if we want to remove this topic
-                                    const bool            has_cmd,
-                                    const char * const ** options,
-                                    uint8_t               options_size,
-                                    const int16_t         dv_set_min,
-                                    const uint32_t        dv_set_max,
-                                    const int8_t          num_op,
-                                    const JsonObject &    dev_json) {
+bool Mqtt::publish_ha_sensor_config(uint8_t                 type,        // EMSdevice::DeviceValueType
+                                    uint8_t                 tag,         // EMSdevice::DeviceValueTAG
+                                    const char * const      fullname,    // fullname, already translated
+                                    const char * const      en_name,     // original name in english
+                                    const uint8_t           device_type, // EMSdevice::DeviceType
+                                    const char * const      entity,      // same as shortname
+                                    const uint8_t           uom,         // EMSdevice::DeviceValueUOM (0=NONE)
+                                    const bool              remove,      // true if we want to remove this topic
+                                    const bool              has_cmd,
+                                    const char * const **   options,
+                                    uint8_t                 options_size,
+                                    const int16_t           dv_set_min,
+                                    const uint32_t          dv_set_max,
+                                    const int8_t            num_op,
+                                    const JsonObjectConst & dev_json) {
     // ignore if name (fullname) is empty
     if (!fullname || !en_name) {
         return false;

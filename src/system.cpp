@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -95,7 +95,7 @@ bool System::command_send(const char * value, const int8_t id) {
     return EMSESP::txservice_.send_raw(value); // ignore id
 }
 
-bool System::command_response(const char * value, const int8_t id, JsonObject & output) {
+bool System::command_response(const char * value, const int8_t id, JsonObject output) {
     JsonDocument doc;
     if (DeserializationError::Ok == deserializeJson(doc, Mqtt::get_response())) {
         for (JsonPair p : doc.as<JsonObject>()) {
@@ -109,7 +109,7 @@ bool System::command_response(const char * value, const int8_t id, JsonObject & 
 
 // output all the EMS devices and their values, plus the sensors and any custom entities
 // not scheduler as these are records with no output data
-bool System::command_allvalues(const char * value, const int8_t id, JsonObject & output) {
+bool System::command_allvalues(const char * value, const int8_t id, JsonObject output) {
     JsonDocument doc;
     JsonObject   device_output;
 
@@ -632,7 +632,7 @@ void System::send_info_mqtt() {
 }
 
 // create the json for heartbeat
-bool System::heartbeat_json(JsonObject & output) {
+bool System::heartbeat_json(JsonObject output) {
     uint8_t bus_status = EMSESP::bus_status();
     if (bus_status == EMSESP::BUS_STATUS_TX_ERRORS) {
         output["bus_status"] = "txerror";
@@ -1168,12 +1168,12 @@ bool System::check_upgrade(bool factory_settings) {
 }
 
 // list commands
-bool System::command_commands(const char * value, const int8_t id, JsonObject & output) {
+bool System::command_commands(const char * value, const int8_t id, JsonObject output) {
     return Command::list(EMSdevice::DeviceType::SYSTEM, output);
 }
 
 // convert settings file into json object
-void System::extractSettings(const char * filename, const char * section, JsonObject & output) {
+void System::extractSettings(const char * filename, const char * section, JsonObject output) {
 #ifndef EMSESP_STANDALONE
     File settingsFile = LittleFS.open(filename);
     if (settingsFile) {
@@ -1192,7 +1192,7 @@ void System::extractSettings(const char * filename, const char * section, JsonOb
 }
 
 // save settings file using input from a json object
-bool System::saveSettings(const char * filename, const char * section, JsonObject & input) {
+bool System::saveSettings(const char * filename, const char * section, JsonObject input) {
 #ifndef EMSESP_STANDALONE
     JsonObject section_json = input[section];
     if (section_json) {
@@ -1210,7 +1210,7 @@ bool System::saveSettings(const char * filename, const char * section, JsonObjec
 
 // export status information including the device information
 // http://ems-esp/api/system/info
-bool System::command_info(const char * value, const int8_t id, JsonObject & output) {
+bool System::command_info(const char * value, const int8_t id, JsonObject output) {
     JsonObject node;
 
     // System

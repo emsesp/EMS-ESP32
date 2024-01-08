@@ -651,9 +651,10 @@ const emsesp_devices = {
 };
 
 const emsesp_coredata = {
-  connected: false,
-  devices: [],
-  devices2: [
+  connected: true,
+  // connected: false,
+  // devices: [],
+  devices: [
     {
       id: 7,
       t: 4,

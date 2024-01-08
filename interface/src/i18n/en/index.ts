@@ -63,7 +63,7 @@ const en: Translation = {
   FREQ: 'Frequency',
   DUTY_CYCLE: 'Duty Cycle',
   UNIT: 'UoM',
-  STARTVALUE: 'Start value',
+  STARTVALUE: 'Start Value',
   WARN_GPIO: 'Warning: be careful when assigning a GPIO!',
   EDIT: 'Edit',
   SENSOR: 'Sensor',

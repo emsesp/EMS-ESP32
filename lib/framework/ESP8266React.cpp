@@ -25,6 +25,7 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
         ArRequestHandlerFunction requestHandler = [contentType, content, len](AsyncWebServerRequest * request) {
             AsyncWebServerResponse * response = request->beginResponse_P(200, contentType, content, len);
             response->addHeader("Content-Encoding", "gzip");
+            response->addHeader("Cache-Control", "public, immutable, max-age=31536000");
             // response->addHeader("Content-Encoding", "br"); // only works over HTTPS
             request->send(response);
         };
@@ -53,6 +54,7 @@ void ESP8266React::begin() {
             DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "Accept, Content-Type, Authorization");
             DefaultHeaders::Instance().addHeader("Access-Control-Allow-Credentials", "true");
         }
+        DefaultHeaders::Instance().addHeader("Server", networkSettings.hostname); // TODO use hostname
     });
     _apSettingsService.begin();
     _ntpSettingsService.begin();

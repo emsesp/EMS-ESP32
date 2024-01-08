@@ -216,7 +216,7 @@ bool MqttSettingsService::configureMqtt() {
     return false;
 }
 
-void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
+void MqttSettings::read(MqttSettings & settings, JsonObject root) {
 #if CONFIG_IDF_TARGET_ESP32S3
 #ifndef TASMOTA_SDK
     root["enableTLS"] = settings.enableTLS;
@@ -253,7 +253,7 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
     root["send_response"]           = settings.send_response;
 }
 
-StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & settings) {
+StateUpdateResult MqttSettings::update(JsonObject root, MqttSettings & settings) {
     MqttSettings newSettings = {};
     bool         changed     = false;
 

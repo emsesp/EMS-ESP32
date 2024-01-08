@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ class WebAPIService {
     static uint32_t api_count_;
     static uint16_t api_fails_;
 
-    void parse(AsyncWebServerRequest * request, JsonObject & input);
+    void parse(AsyncWebServerRequest * request, JsonObject input);
 
     void getSettings(AsyncWebServerRequest * request);
     void getCustomizations(AsyncWebServerRequest * request);

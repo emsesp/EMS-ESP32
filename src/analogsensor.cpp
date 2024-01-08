@@ -37,12 +37,12 @@ void AnalogSensor::start() {
     Command::add(
         EMSdevice::DeviceType::ANALOGSENSOR,
         F_(info),
-        [&](const char * value, const int8_t id, JsonObject & output) { return command_info(value, id, output); },
+        [&](const char * value, const int8_t id, JsonObject output) { return command_info(value, id, output); },
         FL_(info_cmd));
     Command::add(
         EMSdevice::DeviceType::ANALOGSENSOR,
         F_(values),
-        [&](const char * value, const int8_t id, JsonObject & output) { return command_info(value, 0, output); },
+        [&](const char * value, const int8_t id, JsonObject output) { return command_info(value, 0, output); },
         nullptr,
         CommandFlag::HIDDEN); // this command is hidden
     Command::add(
@@ -54,7 +54,7 @@ void AnalogSensor::start() {
     Command::add(
         EMSdevice::DeviceType::ANALOGSENSOR,
         F_(commands),
-        [&](const char * value, const int8_t id, JsonObject & output) { return command_commands(value, id, output); },
+        [&](const char * value, const int8_t id, JsonObject output) { return command_commands(value, id, output); },
         FL_(commands_cmd));
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
@@ -638,7 +638,7 @@ void AnalogSensor::publish_values(const bool force) {
 
 // called from emsesp.cpp, similar to the emsdevice->get_value_info
 // searches by name
-bool AnalogSensor::get_value_info(JsonObject & output, const char * cmd, const int8_t id) const {
+bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int8_t id) const {
     if (sensors_.empty()) {
         return true;
     }
@@ -699,7 +699,7 @@ bool AnalogSensor::get_value_info(JsonObject & output, const char * cmd, const i
 
 // creates JSON doc from values
 // returns true if there are no sensors
-bool AnalogSensor::command_info(const char * value, const int8_t id, JsonObject & output) const {
+bool AnalogSensor::command_info(const char * value, const int8_t id, JsonObject output) const {
     if (sensors_.empty()) {
         return true;
     }
@@ -851,7 +851,7 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
 }
 
 // list commands
-bool AnalogSensor::command_commands(const char * value, const int8_t id, JsonObject & output) {
+bool AnalogSensor::command_commands(const char * value, const int8_t id, JsonObject output) {
     return Command::list(EMSdevice::DeviceType::ANALOGSENSOR, output);
 }
 

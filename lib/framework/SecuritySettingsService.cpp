@@ -63,12 +63,12 @@ Authentication SecuritySettingsService::authenticate(const String & username, co
     return Authentication();
 }
 
-inline void populateJWTPayload(JsonObject & payload, User * user) {
+inline void populateJWTPayload(JsonObject payload, User * user) {
     payload["username"] = user->username;
     payload["admin"]    = user->admin;
 }
 
-boolean SecuritySettingsService::validatePayload(JsonObject & parsedPayload, User * user) {
+boolean SecuritySettingsService::validatePayload(JsonObject parsedPayload, User * user) {
     JsonDocument jsonDocument;
     JsonObject   payload = jsonDocument.to<JsonObject>();
     populateJWTPayload(payload, user);

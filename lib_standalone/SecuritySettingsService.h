@@ -32,7 +32,7 @@ class SecuritySettings {
     String          jwtSecret;
     std::list<User> users;
 
-    static void read(SecuritySettings & settings, JsonObject & root) {
+    static void read(SecuritySettings & settings, JsonObject root) {
         // secret
         root["jwt_secret"] = settings.jwtSecret;
 
@@ -46,7 +46,7 @@ class SecuritySettings {
         }
     }
 
-    static StateUpdateResult update(JsonObject & root, SecuritySettings & settings) {
+    static StateUpdateResult update(JsonObject root, SecuritySettings & settings) {
         // secret
         settings.jwtSecret = root["jwt_secret"] | FACTORY_JWT_SECRET;
 
@@ -85,7 +85,7 @@ class SecuritySettingsService : public StatefulService<SecuritySettings>, public
 
     void           configureJWTHandler();
     Authentication authenticateJWT(String & jwt);
-    boolean        validatePayload(JsonObject & parsedPayload, User * user);
+    boolean        validatePayload(JsonObject parsedPayload, User * user);
 };
 
 #else

@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,18 +49,18 @@ void TemperatureSensor::start() {
     Command::add(
         EMSdevice::DeviceType::TEMPERATURESENSOR,
         F_(info),
-        [&](const char * value, const int8_t id, JsonObject & output) { return command_info(value, id, output); },
+        [&](const char * value, const int8_t id, JsonObject output) { return command_info(value, id, output); },
         FL_(info_cmd));
     Command::add(
         EMSdevice::DeviceType::TEMPERATURESENSOR,
         F_(values),
-        [&](const char * value, const int8_t id, JsonObject & output) { return command_info(value, 0, output); },
+        [&](const char * value, const int8_t id, JsonObject output) { return command_info(value, 0, output); },
         nullptr,
         CommandFlag::HIDDEN); // this command is hidden
     Command::add(
         EMSdevice::DeviceType::TEMPERATURESENSOR,
         F_(commands),
-        [&](const char * value, const int8_t id, JsonObject & output) { return command_commands(value, id, output); },
+        [&](const char * value, const int8_t id, JsonObject output) { return command_commands(value, id, output); },
         FL_(commands_cmd));
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
@@ -362,13 +362,13 @@ bool TemperatureSensor::updated_values() {
 }
 
 // list commands
-bool TemperatureSensor::command_commands(const char * value, const int8_t id, JsonObject & output) {
+bool TemperatureSensor::command_commands(const char * value, const int8_t id, JsonObject output) {
     return Command::list(EMSdevice::DeviceType::TEMPERATURESENSOR, output);
 }
 
 // creates JSON doc from values
 // returns true if there are no sensors
-bool TemperatureSensor::command_info(const char * value, const int8_t id, JsonObject & output) {
+bool TemperatureSensor::command_info(const char * value, const int8_t id, JsonObject output) {
     if (sensors_.empty()) {
         return true;
     }
@@ -394,7 +394,7 @@ bool TemperatureSensor::command_info(const char * value, const int8_t id, JsonOb
 }
 
 // called from emsesp.cpp, similar to the emsdevice->get_value_info
-bool TemperatureSensor::get_value_info(JsonObject & output, const char * cmd, const int8_t id) {
+bool TemperatureSensor::get_value_info(JsonObject output, const char * cmd, const int8_t id) {
     if (sensors_.empty()) {
         return true;
     }
