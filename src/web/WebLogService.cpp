@@ -211,7 +211,7 @@ void WebLogService::fetchLog(AsyncWebServerRequest * request) {
 }
 
 // sets the values like level after a POST
-void WebLogService::setValues(AsyncWebServerRequest * request, JsonVariant & json) {
+void WebLogService::setValues(AsyncWebServerRequest * request, JsonVariant json) {
     if (!json.is<JsonObject>()) {
         return;
     }

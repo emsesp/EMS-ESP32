@@ -25,7 +25,7 @@ void AuthenticationService::verifyAuthorization(AsyncWebServerRequest * request)
  * Signs in a user if the username and password match. Provides a JWT to be used in the Authorization header in
  * subsequent requests.
  */
-void AuthenticationService::signIn(AsyncWebServerRequest * request, JsonVariant & json) {
+void AuthenticationService::signIn(AsyncWebServerRequest * request, JsonVariant json) {
     if (json.is<JsonObject>()) {
         String         username       = json["username"];
         String         password       = json["password"];

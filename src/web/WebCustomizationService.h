@@ -97,7 +97,7 @@ class WebCustomizationService : public StatefulService<WebCustomization> {
     void device_entities(AsyncWebServerRequest * request);
 
     // POST
-    void customization_entities(AsyncWebServerRequest * request, JsonVariant & json);
+    void customization_entities(AsyncWebServerRequest * request, JsonVariant json);
     void reset_customization(AsyncWebServerRequest * request); // command
 
     AsyncCallbackJsonWebHandler _masked_entities_handler;

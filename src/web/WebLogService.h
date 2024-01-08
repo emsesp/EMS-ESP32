@@ -64,7 +64,7 @@ class WebLogService : public uuid::log::Handler {
 
     char * messagetime(char * out, const uint64_t t, const size_t bufsize);
 
-    void setValues(AsyncWebServerRequest * request, JsonVariant & json);
+    void setValues(AsyncWebServerRequest * request, JsonVariant json);
 
     AsyncCallbackJsonWebHandler setValues_; // for POSTs
 

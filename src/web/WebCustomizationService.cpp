@@ -239,7 +239,7 @@ void WebCustomizationService::device_entities(AsyncWebServerRequest * request) {
 // takes a list of updated entities with new masks from the web UI
 // saves it in the customization service
 // and updates the entity list real-time
-void WebCustomizationService::customization_entities(AsyncWebServerRequest * request, JsonVariant & json) {
+void WebCustomizationService::customization_entities(AsyncWebServerRequest * request, JsonVariant json) {
     bool need_reboot = false;
     if (json.is<JsonObject>()) {
         // find the device using the unique_id
