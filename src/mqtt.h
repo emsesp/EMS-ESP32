@@ -67,13 +67,13 @@ class Mqtt {
 
     static bool queue_publish(const std::string & topic, const std::string & payload);
     static bool queue_publish(const char * topic, const char * payload);
-    static bool queue_publish(const std::string & topic, const JsonObjectConst & payload);
-    static bool queue_publish(const char * topic, const JsonObjectConst & payload);
+    static bool queue_publish(const std::string & topic, const JsonObjectConst payload);
+    static bool queue_publish(const char * topic, const JsonObjectConst payload);
     static bool queue_publish(const char * topic, const std::string & payload);
-    static bool queue_publish_retain(const std::string & topic, const JsonObjectConst & payload, const bool retain);
+    static bool queue_publish_retain(const std::string & topic, const JsonObjectConst payload, const bool retain);
     static bool queue_publish_retain(const char * topic, const std::string & payload, const bool retain);
-    static bool queue_publish_retain(const char * topic, const JsonObjectConst & payload, const bool retain);
-    static bool queue_ha(const char * topic, const JsonObjectConst & payload);
+    static bool queue_publish_retain(const char * topic, const JsonObjectConst payload, const bool retain);
+    static bool queue_ha(const char * topic, const JsonObjectConst payload);
     static bool queue_remove_topic(const char * topic);
 
     static bool publish_ha_sensor_config(DeviceValue & dv, const char * model, const char * brand, const bool remove, const bool create_device_config = false);
@@ -91,7 +91,7 @@ class Mqtt {
                                          const int16_t           dv_set_min,
                                          const uint32_t          dv_set_max,
                                          const int8_t            num_op,
-                                         const JsonObjectConst & dev_json);
+                                         const JsonObjectConst dev_json);
 
     static bool publish_system_ha_sensor_config(uint8_t type, const char * name, const char * entity, const uint8_t uom);
     static bool publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp, const bool remove = false, const int16_t min = 5, const uint32_t max = 30);

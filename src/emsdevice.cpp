@@ -987,7 +987,7 @@ void EMSdevice::generate_values_web(JsonObject output) {
 
 // as generate_values_web() but stripped down to only show all entities and their state
 // this is used only for WebCustomizationService::device_entities()
-void EMSdevice::generate_values_web_customization(JsonArray & output) {
+void EMSdevice::generate_values_web_customization(JsonArray output) {
     for (auto & dv : devicevalues_) {
         // also show commands and entities that have an empty full name
         JsonObject obj        = output.add<JsonObject>();
