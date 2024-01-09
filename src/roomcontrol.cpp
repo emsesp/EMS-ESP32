@@ -66,7 +66,7 @@ uint8_t Roomctrl::get_hc(uint8_t addr) {
     case SENSOR:
         return addr - 0x40;
     case RC100H:
-        return addr - 0x38;
+        return addr == 0x1A ? 2 : addr - 0x38;
     case FB10:
     case RC20:
     default:
