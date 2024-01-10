@@ -66,7 +66,7 @@ uint8_t Roomctrl::get_hc(uint8_t addr) {
     case SENSOR:
         return addr - 0x40;
     case RC100H:
-        return addr == 0x1A ? 2 : addr - 0x38;
+        return addr - 0x38;
     case FB10:
     case RC20:
     default:
@@ -98,7 +98,7 @@ void Roomctrl::send(const uint8_t addr) {
                 humidity(addr, 0x10, hc);
                 sendcnt[hc] = 0;
             } else { // temperature telegram
-                if (remotehum_[hc] != EMS_VALUE_UINT_NOTSET) {
+                if (remotehum_[hc] != EMS_VALUE_UINT_NOTSET && hc < 2) { // humidity only for hc 0,1
                     sendcnt[hc] = 1;
                 } else {
                     rc_time_[hc] = uuid::get_uptime();
@@ -172,9 +172,15 @@ void Roomctrl::version(uint8_t addr, uint8_t dst) {
     data[1] = dst;
     data[2] = 0x02;
     data[3] = 0;
-    data[4] = type_; // set RC20 id 113, Ver 02.01 or Junkers FB10 id 109, Ver 16.05, RC100H id 200 ver 40.04
-    data[5] = type_ == RC20 ? 2 : type_ == FB10 ? 16 : 40;
-    data[6] = type_ == RC20 ? 1 : type_ == FB10 ? 5 : 4;
+    if (type_ == RC100H && addr > 0x39) { // use RC200 id=157,ver 41.08
+        data[4] = 157;
+        data[5] = 41;
+        data[6] = 8;
+    } else {
+        data[4] = type_; // set RC20 id 113, Ver 02.01 or Junkers FB10 id 109, Ver 16.05, RC100H id 200 ver 40.04
+        data[5] = type_ == RC20 ? 2 : type_ == FB10 ? 16 : 40;
+        data[6] = type_ == RC20 ? 1 : type_ == FB10 ? 5 : 4;
+    }
     data[7] = EMSbus::calculate_crc(data, 7); // apppend CRC
     EMSuart::transmit(data, 8);
 }
