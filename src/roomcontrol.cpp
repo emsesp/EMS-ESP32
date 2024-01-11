@@ -103,7 +103,7 @@ void Roomctrl::send(const uint8_t addr) {
                 } else {
                     rc_time_[hc] = uuid::get_uptime();
                 }
-                temperature(addr, 0x10, hc); // send to master-thermostat (https://github.com/emsesp/EMS-ESP32/issues/336)
+                temperature(addr, 0x10, hc); // send to master-thermostat
             }
         } else if (type_ == FB10) {
             rc_time_[hc] = uuid::get_uptime();
@@ -152,9 +152,9 @@ void Roomctrl::check(const uint8_t addr, const uint8_t * data, const uint8_t len
         temperature(addr, data[0], hc);
     } else if (length == 7 && data[2] == 0xFF && data[3] == 0 && data[5] == 0 && data[6] == 0x23) { // Junkers
         temperature(addr, data[0], hc);
-    } else if (length == 7 && data[2] == 0xFF && data[3] == 0 && data[5] == 3 && data[6] == 0x2B) { // EMS+ temperature
+    } else if (length == 7 && data[2] == 0xFF && data[3] == 0 && data[5] == 3 && data[6] == 0x2B + hc) { // EMS+ temperature
         temperature(addr, data[0], hc);
-    } else if (length == 7 && data[2] == 0xFF && data[3] == 0 && data[5] == 3 && data[6] == 0x7B && remotehum_[hc] != EMS_VALUE_UINT_NOTSET) { // EMS+ humidity
+    } else if (length == 7 && data[2] == 0xFF && data[3] == 0 && data[5] == 3 && data[6] == 0x7B + hc && remotehum_[hc] != EMS_VALUE_UINT_NOTSET) { // EMS+ humidity
         humidity(addr, data[0], hc);
     } else if (length == 5) { // ems query
         unknown(addr, data[0], data[2], data[3]);
@@ -238,7 +238,7 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[2] = 0xFF;
         data[3] = 0;
         data[4] = 3;
-        data[5] = 0x2B;
+        data[5] = 0x2B + hc;
         data[6] = (uint8_t)(remotetemp_[hc] >> 8);
         data[7] = (uint8_t)(remotetemp_[hc] & 0xFF);
         data[8] = EMSbus::calculate_crc(data, 8); // apppend CRC
@@ -265,7 +265,7 @@ void Roomctrl::humidity(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[2]  = 0xFF;
         data[3]  = 0;
         data[4]  = 3;
-        data[5]  = 0x7B;
+        data[5]  = 0x7B + hc;
         data[6]  = dew == EMS_VALUE_SHORT_NOTSET ? EMS_VALUE_INT_NOTSET : (uint8_t)((dew + 5) / 10);
         data[7]  = remotehum_[hc];
         data[8]  = (uint8_t)(dew << 8);
