@@ -73,7 +73,7 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
     JsonDocument doc;
     deserializeJson(doc, json);
     root = doc.as<JsonObject>();
-    Serial.println(COLOR_BRIGHT_MAGENTA);
+    Serial.print(COLOR_BRIGHT_MAGENTA);
     Serial.print(" Using fake custom entity file: ");
     serializeJson(root, Serial);
     Serial.println(COLOR_RESET);
