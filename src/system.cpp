@@ -1467,7 +1467,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
 #if defined(EMSESP_TEST)
 // run a test, e.g. http://ems-esp/api?device=system&cmd=test&data=boiler
 bool System::command_test(const char * value, const int8_t id) {
-    return Test::run_test(value, id);
+    return Test::test(value, id);
 }
 #endif
 

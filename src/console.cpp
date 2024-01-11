@@ -128,14 +128,16 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
                           string_vector{"test"},
-                          string_vector{F_(name_optional), F_(data_optional)},
+                          string_vector{F_(name_optional), F_(data_optional), F_(id_optional)},
                           [=](Shell & shell, const std::vector<std::string> & arguments) {
                               if (arguments.empty()) {
                                   Test::run_test(shell, "default");
                               } else if (arguments.size() == 1) {
                                   Test::run_test(shell, arguments.front());
-                              } else {
+                              } else if (arguments.size() == 2) {
                                   Test::run_test(shell, arguments[0].c_str(), arguments[1].c_str());
+                              } else {
+                                  Test::run_test(shell, arguments[0].c_str(), arguments[1].c_str(), arguments[2].c_str());
                               }
                           });
     commands->add_command(ShellContext::MAIN, CommandFlags::USER, string_vector{"t"}, [=](Shell & shell, const std::vector<std::string> & arguments) {
