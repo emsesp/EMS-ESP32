@@ -98,7 +98,7 @@ void Roomctrl::send(const uint8_t addr) {
                 humidity(addr, 0x10, hc);
                 sendcnt[hc] = 0;
             } else { // temperature telegram
-                if (remotehum_[hc] != EMS_VALUE_UINT_NOTSET && hc < 2) { // humidity only for hc 0,1
+                if (remotehum_[hc] != EMS_VALUE_UINT_NOTSET) {
                     sendcnt[hc] = 1;
                 } else {
                     rc_time_[hc] = uuid::get_uptime();
@@ -172,6 +172,10 @@ void Roomctrl::version(uint8_t addr, uint8_t dst) {
     data[1] = dst;
     data[2] = 0x02;
     data[3] = 0;
+    data[4] = type_; // set RC20 id 113, Ver 02.01 or Junkers FB10 id 109, Ver 16.05, RC100H id 200 ver 40.04
+    data[5] = type_ == RC20 ? 2 : type_ == FB10 ? 16 : 40;
+    data[6] = type_ == RC20 ? 1 : type_ == FB10 ? 5 : 4;
+    /*
     if (type_ == RC100H && addr > 0x39) { // use RC200 id=157,ver 41.08
         data[4] = 157;
         data[5] = 41;
@@ -181,6 +185,7 @@ void Roomctrl::version(uint8_t addr, uint8_t dst) {
         data[5] = type_ == RC20 ? 2 : type_ == FB10 ? 16 : 40;
         data[6] = type_ == RC20 ? 1 : type_ == FB10 ? 5 : 4;
     }
+    */
     data[7] = EMSbus::calculate_crc(data, 7); // apppend CRC
     EMSuart::transmit(data, 8);
 }
@@ -214,7 +219,7 @@ void Roomctrl::unknown(uint8_t addr, uint8_t dst, uint8_t offset, uint8_t typeh,
  * send the room temperature in message 0xAF
  */
 void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
-    uint8_t data[10];
+    uint8_t data[12];
     data[0] = addr;
     data[1] = dst;
     if (type_ == RC20) { // RC20, telegram 0xAF
@@ -234,7 +239,22 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[7] = (uint8_t)(remotetemp_[hc] & 0xFF);
         data[8] = EMSbus::calculate_crc(data, 8); // apppend CRC
         EMSuart::transmit(data, 9);
-    } else if (type_ == RC100H) { // RC100H, telegram 42B
+        /*
+    } else if (type_ == RC100H && hc >= 2) { // RC200, telegram 42B, ff
+        data[2] = 0xFF;
+        data[3] = 0;
+        data[4] = 3;
+        data[5] = 0x2B + hc;
+        data[6] = (uint8_t)(remotetemp_[hc] >> 8);
+        data[7] = (uint8_t)(remotetemp_[hc] & 0xFF);
+        uint16_t t1 = remotetemp_[hc] * 10;
+        data[8] = (uint8_t)(t1 >> 8);
+        data[9] = (uint8_t)(t1 & 0xFF);
+        data[10] = 1; // not sure what this is and if we need it, maybe mode?
+        data[11] = EMSbus::calculate_crc(data, 11); // apppend CRC
+        EMSuart::transmit(data, 12);
+    */
+    } else if (type_ == RC100H) { // RC100H, telegram 42B, ff
         data[2] = 0xFF;
         data[3] = 0;
         data[4] = 3;
