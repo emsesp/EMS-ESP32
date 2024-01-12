@@ -103,7 +103,7 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
     JsonDocument doc;
     deserializeJson(doc, json);
     root = doc.as<JsonObject>();
-    Serial.println(COLOR_BRIGHT_MAGENTA);
+    Serial.print(COLOR_BRIGHT_MAGENTA);
     Serial.print(" Using fake customization file: ");
     serializeJson(root, Serial);
     Serial.println(COLOR_RESET);

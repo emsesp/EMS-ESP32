@@ -62,7 +62,7 @@ StateUpdateResult WebScheduler::update(JsonObject root, WebScheduler & webSchedu
     JsonDocument doc;
     deserializeJson(doc, json);
     root = doc.as<JsonObject>();
-    Serial.println(COLOR_BRIGHT_MAGENTA);
+    Serial.print(COLOR_BRIGHT_MAGENTA);
     Serial.print(" Using fake scheduler file: ");
     serializeJson(root, Serial);
     Serial.println(COLOR_RESET);

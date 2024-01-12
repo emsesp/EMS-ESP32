@@ -77,20 +77,20 @@ class Mqtt {
     static bool queue_remove_topic(const char * topic);
 
     static bool publish_ha_sensor_config(DeviceValue & dv, const char * model, const char * brand, const bool remove, const bool create_device_config = false);
-    static bool publish_ha_sensor_config(uint8_t                 type,
-                                         uint8_t                 tag,
-                                         const char * const      fullname,
-                                         const char * const      en_name,
-                                         const uint8_t           device_type,
-                                         const char * const      entity,
-                                         const uint8_t           uom,
-                                         const bool              remove,
-                                         const bool              has_cmd,
-                                         const char * const **   options,
-                                         uint8_t                 options_size,
-                                         const int16_t           dv_set_min,
-                                         const uint32_t          dv_set_max,
-                                         const int8_t            num_op,
+    static bool publish_ha_sensor_config(uint8_t               type,
+                                         uint8_t               tag,
+                                         const char * const    fullname,
+                                         const char * const    en_name,
+                                         const uint8_t         device_type,
+                                         const char * const    entity,
+                                         const uint8_t         uom,
+                                         const bool            remove,
+                                         const bool            has_cmd,
+                                         const char * const ** options,
+                                         uint8_t               options_size,
+                                         const int16_t         dv_set_min,
+                                         const uint32_t        dv_set_max,
+                                         const int8_t          num_op,
                                          const JsonObjectConst dev_json);
 
     static bool publish_system_ha_sensor_config(uint8_t type, const char * name, const char * entity, const uint8_t uom);
@@ -165,6 +165,10 @@ class Mqtt {
 
     static uint8_t entity_format() {
         return entity_format_;
+    }
+
+    static void entity_format(uint8_t n) {
+        entity_format_ = n;
     }
 
     static uint8_t discovery_type() {
