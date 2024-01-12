@@ -32,7 +32,7 @@ uint8_t  Roomctrl::type_            = RC20;
  * set the temperature,
  */
 void Roomctrl::set_remotetemp(const uint8_t type, const uint8_t hc, const int16_t temp) {
-    if (hc >= HCS || (type != RC20 && type != FB10 && type != RC100H && type != SENSOR)) {
+    if (hc >= HCS || (type != RC20 && type != FB10 && type != RC100H && type != SENSOR && type != RC200)) {
         return;
     }
     type_ = type;
@@ -65,6 +65,7 @@ uint8_t Roomctrl::get_hc(uint8_t addr) {
     switch (type_) {
     case SENSOR:
         return addr - 0x40;
+    case RC200:
     case RC100H:
         return addr - 0x38;
     case FB10:
@@ -98,13 +99,16 @@ void Roomctrl::send(const uint8_t addr) {
                 humidity(addr, 0x10, hc);
                 sendcnt[hc] = 0;
             } else { // temperature telegram
-                if (remotehum_[hc] != EMS_VALUE_UINT_NOTSET &&  hc < 2) {
+                if (remotehum_[hc] != EMS_VALUE_UINT_NOTSET && hc < 2) {
                     sendcnt[hc] = 1;
                 } else {
                     rc_time_[hc] = uuid::get_uptime();
                 }
                 temperature(addr, 0x10, hc); // send to master-thermostat
             }
+        } else if (type_ == RC200) {
+            rc_time_[hc] = uuid::get_uptime();
+            temperature(addr, 0x10, hc);
         } else if (type_ == FB10) {
             rc_time_[hc] = uuid::get_uptime();
             temperature(addr, 0x10, hc); // send to master-thermostat (https://github.com/emsesp/EMS-ESP32/issues/336)
@@ -173,17 +177,8 @@ void Roomctrl::version(uint8_t addr, uint8_t dst) {
     data[2] = 0x02;
     data[3] = 0;
     data[4] = type_; // set RC20 id 113, Ver 02.01 or Junkers FB10 id 109, Ver 16.05, RC100H id 200 ver 40.04
-    data[5] = type_ == RC20 ? 2 : type_ == FB10 ? 16 : 40;
-    data[6] = type_ == RC20 ? 1 : type_ == FB10 ? 5 : 4;
-    if (type_ == RC100H && addr > 0x39) { // use RC200 id=157,ver 41.08
-        data[4] = 157;
-        data[5] = 41;
-        data[6] = 8;
-    } else {
-        data[4] = type_; // set RC20 id 113, Ver 02.01 or Junkers FB10 id 109, Ver 16.05, RC100H id 200 ver 40.04
-        data[5] = type_ == RC20 ? 2 : type_ == FB10 ? 16 : 40;
-        data[6] = type_ == RC20 ? 1 : type_ == FB10 ? 5 : 4;
-    }
+    data[5] = type_ == RC20 ? 2 : type_ == FB10 ? 16 : type_ == RC200 ? 41 : 40;
+    data[6] = type_ == RC20 ? 1 : type_ == FB10 ? 5 : type_ == RC200 ? 8 : 4;
     data[7] = EMSbus::calculate_crc(data, 7); // apppend CRC
     EMSuart::transmit(data, 8);
 }
@@ -237,18 +232,18 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[7] = (uint8_t)(remotetemp_[hc] & 0xFF);
         data[8] = EMSbus::calculate_crc(data, 8); // apppend CRC
         EMSuart::transmit(data, 9);
-    } else if (type_ == RC100H && hc >= 2) { // RC200, telegram 42B, ff
-        data[2] = 0xFF;
-        data[3] = 0;
-        data[4] = 3;
-        data[5] = 0x2B + hc;
-        data[6] = (uint8_t)(remotetemp_[hc] >> 8);
-        data[7] = (uint8_t)(remotetemp_[hc] & 0xFF);
+    } else if (type_ == RC200) { // RC200, telegram 42B, ff
+        data[2]     = 0xFF;
+        data[3]     = 0;
+        data[4]     = 3;
+        data[5]     = 0x2B + hc;
+        data[6]     = (uint8_t)(remotetemp_[hc] >> 8);
+        data[7]     = (uint8_t)(remotetemp_[hc] & 0xFF);
         uint16_t t1 = remotetemp_[hc] * 10;
-        data[8] = (uint8_t)(t1 >> 8);
-        data[9] = (uint8_t)(t1 & 0xFF);
-        data[10] = 1; // not sure what this is and if we need it, maybe mode?
-        data[11] = EMSbus::calculate_crc(data, 11); // apppend CRC
+        data[8]     = (uint8_t)(t1 >> 8);
+        data[9]     = (uint8_t)(t1 & 0xFF);
+        data[10]    = 1;                               // not sure what this is and if we need it, maybe mode?
+        data[11]    = EMSbus::calculate_crc(data, 11); // apppend CRC
         EMSuart::transmit(data, 12);
     } else if (type_ == RC100H) { // RC100H, telegram 42B, ff
         data[2] = 0xFF;

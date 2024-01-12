@@ -1809,7 +1809,11 @@ bool Thermostat::set_remotetemp(const char * value, const int8_t id) {
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC35 || model() == EMSdevice::EMS_DEVICE_FLAG_RC30_N) {
         Roomctrl::set_remotetemp(Roomctrl::RC20, hc->hc(), hc->remotetemp); // RC20
     } else if ((model() == EMSdevice::EMS_DEVICE_FLAG_BC400) || model() == EMSdevice::EMS_DEVICE_FLAG_RC300) {
-        Roomctrl::set_remotetemp(Roomctrl::RC100H, hc->hc(), hc->remotetemp); // RC100H
+        if (hc->control == 1) {
+            Roomctrl::set_remotetemp(Roomctrl::RC200, hc->hc(), hc->remotetemp); // RC200
+        } else {
+            Roomctrl::set_remotetemp(Roomctrl::RC100H, hc->hc(), hc->remotetemp); // RC100H
+        }
     }
 
     return true;
@@ -1833,7 +1837,7 @@ bool Thermostat::set_remotehum(const char * value, const int8_t id) {
         hc->remotehum = h;
     }
 
-    if ((model() == EMSdevice::EMS_DEVICE_FLAG_BC400) || model() == EMSdevice::EMS_DEVICE_FLAG_RC300) {
+    if (hc->control == 3 && (model() == EMSdevice::EMS_DEVICE_FLAG_BC400 || model() == EMSdevice::EMS_DEVICE_FLAG_RC300)) {
         Roomctrl::set_remotehum(Roomctrl::RC100H, hc->hc(), hc->remotehum); // RC100H
         return true;
     }
