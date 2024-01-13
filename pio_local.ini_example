@@ -20,7 +20,7 @@
 ; default_envs = lolin_s3
 ; default_envs = standalone
 ; default_envs = debug
-default_envs = custom
+; default_envs = custom
 
 [env:esp32_4M]
 ; if using OTA enter your details below
@@ -29,16 +29,19 @@ default_envs = custom
 ;    --port=8266
 ;    --auth=ems-esp-neo
 ;  upload_port = ems-esp.local
-; for USB use one of these:
+; for USB, here are some examples:
 ; upload_port = /dev/ttyUSB*
 ; upload_port = COM5
+extra_scripts =
+;   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+  scripts/rename_fw.py
 
 [env:esp32_16M]
 
 [env:custom]
-; use for ESP-S boards with 4MB flash
+; use for baisc ESP boards with 4MB flash
 ; make sure -D TASMOTA_SDK is also enabled
-platform = https://github.com/tasmota/platform-espressif32/releases/download/2023.10.03/platform-espressif32-2023.10.03.zip
+platform = https://github.com/tasmota/platform-espressif32/releases/download/2024.01.00/platform-espressif32.zip
 ; use for S3 boards:
 ; platform = espressif32
 framework = arduino
@@ -68,13 +71,13 @@ build_flags =
 	-D EMSESP_TEST
 	-D EMSESP_DEBUG
  	-D CONFIG_ETH_ENABLED
-    ; -D TASMOTA_SDK
+    -D TASMOTA_SDK
 	'-DEMSESP_DEFAULT_BOARD_PROFILE="Test"'
 
 [env:lolin_s3]
-upload_port = /dev/ttyACM0
+upload_port = /dev/ttyUSB0
 extra_scripts =
-  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+;   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
 
 ; pio run -e debug
