@@ -99,7 +99,7 @@ void Roomctrl::send(const uint8_t addr) {
                 humidity(addr, 0x10, hc);
                 sendcnt[hc] = 0;
             } else { // temperature telegram
-                if (remotehum_[hc] != EMS_VALUE_UINT_NOTSET && hc < 2) {
+                if (remotehum_[hc] != EMS_VALUE_UINT_NOTSET) {
                     sendcnt[hc] = 1;
                 } else {
                     rc_time_[hc] = uuid::get_uptime();
@@ -148,21 +148,21 @@ void Roomctrl::check(const uint8_t addr, const uint8_t * data, const uint8_t len
     // empty message back if temperature not set or unknown message type
     if (data[2] == EMSdevice::EMS_TYPE_VERSION) {
         version(addr, data[0]);
-    } else if (length == 5 && remotetemp_[hc] == EMS_VALUE_SHORT_NOTSET) {
+    } else if (length == 6 && remotetemp_[hc] == EMS_VALUE_SHORT_NOTSET) {
         unknown(addr, data[0], data[2], data[3]);
-    } else if (length == 7 && remotetemp_[hc] == EMS_VALUE_SHORT_NOTSET) {
+    } else if (length == 8 && remotetemp_[hc] == EMS_VALUE_SHORT_NOTSET) {
         unknown(addr, data[0], data[3], data[5], data[6]);
     } else if (data[2] == 0xAF && data[3] == 0) {
         temperature(addr, data[0], hc);
-    } else if (length == 7 && data[2] == 0xFF && data[3] == 0 && data[5] == 0 && data[6] == 0x23) { // Junkers
+    } else if (length == 8 && data[2] == 0xFF && data[3] == 0 && data[5] == 0 && data[6] == 0x23) { // Junkers
         temperature(addr, data[0], hc);
-    } else if (length == 7 && data[2] == 0xFF && data[3] == 0 && data[5] == 3 && data[6] == 0x2B + hc) { // EMS+ temperature
+    } else if (length == 8 && data[2] == 0xFF && data[3] == 0 && data[5] == 3 && data[6] == 0x2B + hc) { // EMS+ temperature
         temperature(addr, data[0], hc);
-    } else if (length == 7 && data[2] == 0xFF && data[3] == 0 && data[5] == 3 && data[6] == 0x7B + hc && remotehum_[hc] != EMS_VALUE_UINT_NOTSET) { // EMS+ humidity
+    } else if (length == 8 && data[2] == 0xFF && data[3] == 0 && data[5] == 3 && data[6] == 0x7B + hc && remotehum_[hc] != EMS_VALUE_UINT_NOTSET) { // EMS+ humidity
         humidity(addr, data[0], hc);
-    } else if (length == 5) { // ems query
+    } else if (length == 6) { // ems query
         unknown(addr, data[0], data[2], data[3]);
-    } else if (length == 7 && data[2] == 0xFF) { // ems+ query
+    } else if (length == 8 && data[2] == 0xFF) { // ems+ query
         unknown(addr, data[0], data[3], data[5], data[6]);
     }
 }
@@ -239,7 +239,7 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[5]     = 0x2B + hc;
         data[6]     = (uint8_t)(remotetemp_[hc] >> 8);
         data[7]     = (uint8_t)(remotetemp_[hc] & 0xFF);
-        uint16_t t1 = remotetemp_[hc] * 10;
+        uint16_t t1 = remotetemp_[hc] * 10 + 5;
         data[8]     = (uint8_t)(t1 >> 8);
         data[9]     = (uint8_t)(t1 & 0xFF);
         data[10]    = 1;                               // not sure what this is and if we need it, maybe mode?
