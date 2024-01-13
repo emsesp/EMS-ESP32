@@ -1,6 +1,13 @@
 ArduinoJson: change log
 =======================
 
+v7.0.1 (2024-01-10)
+------
+
+* Fix "no matching function" with `JsonObjectConst::operator[]` (issue #2019)
+* Remove unused files in the PlatformIO package
+* Fix `volatile bool` serialized as `1` or `0` instead of `true` or `false` (issue #2029)
+
 v7.0.0 (2024-01-03)
 ------
 
