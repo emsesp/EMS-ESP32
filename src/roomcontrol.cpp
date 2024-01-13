@@ -171,7 +171,7 @@ void Roomctrl::check(const uint8_t addr, const uint8_t * data, const uint8_t len
  * send version info RC20 (Prod. 113, Ver. 02.01) or RC20RF (Prod. 93, Ver. 02.00)
  */
 void Roomctrl::version(uint8_t addr, uint8_t dst) {
-    uint8_t data[10];
+    uint8_t data[15];
     data[0] = addr;
     data[1] = dst;
     data[2] = 0x02;
@@ -179,8 +179,19 @@ void Roomctrl::version(uint8_t addr, uint8_t dst) {
     data[4] = type_; // set RC20 id 113, Ver 02.01 or Junkers FB10 id 109, Ver 16.05, RC100H id 200 ver 40.04
     data[5] = type_ == RC20 ? 2 : type_ == FB10 ? 16 : type_ == RC200 ? 41 : 40;
     data[6] = type_ == RC20 ? 1 : type_ == FB10 ? 5 : type_ == RC200 ? 8 : 4;
-    data[7] = EMSbus::calculate_crc(data, 7); // apppend CRC
-    EMSuart::transmit(data, 8);
+    if (type_ != RC200) {
+        data[7] = EMSbus::calculate_crc(data, 7); // apppend CRC
+        EMSuart::transmit(data, 8);
+        return;
+    }
+    // RC200 adds some extra bytes
+    data[7] = 0;
+    data[8] = 0xFF, data[9] = 0;
+    data[10] = 0;
+    data[11] = 0;
+    data[12] = 0;
+    data[13] = EMSbus::calculate_crc(data, 13); // apppend CRC
+    EMSuart::transmit(data, 14);
 }
 
 /**
