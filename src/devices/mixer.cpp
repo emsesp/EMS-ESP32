@@ -30,12 +30,24 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
         register_telegram_type(device_id - 0x20 + 0x02D7, "MMPLUSStatusMessage_HC", false, MAKE_PF_CB(process_MMPLUSStatusMessage_HC));
         // register_telegram_type(device_id - 0x20 + 0x02E1, "MMPLUSSetMessage_HC", true, MAKE_PF_CB(process_MMPLUSSetMessage_HC));
+        register_telegram_type(device_id - 0x20 + 0x02CC, "MMPLUSSetMessage_HC", false, MAKE_PF_CB(process_MMPLUSSetMessage_HC));
         hc_         = device_id - 0x20 + 1;
         uint8_t tag = DeviceValueTAG::TAG_HC1 + hc_ - 1;
         register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(flowTempHc), DeviceValueUOM::DEGREES);
         register_device_value(tag, &status_, DeviceValueType::UINT, FL_(mixerStatus), DeviceValueUOM::PERCENT);
         register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
         register_device_value(tag, &pumpStatus_, DeviceValueType::BOOL, FL_(pumpStatus), DeviceValueUOM::NONE, MAKE_CF_CB(set_pump));
+        register_device_value(tag, &activated_, DeviceValueType::BOOL, FL_(activated), DeviceValueUOM::NONE, MAKE_CF_CB(set_activated));
+        register_device_value(tag,
+                              &setValveTime_,
+                              DeviceValueType::UINT,
+                              DeviceValueNumOp::DV_NUMOP_MUL10,
+                              FL_(mixerSetTime),
+                              DeviceValueUOM::SECONDS,
+                              MAKE_CF_CB(set_setValveTime),
+                              10,
+                              600);
+        register_device_value(tag, &flowTempOffset_, DeviceValueType::UINT, FL_(flowtempoffset), DeviceValueUOM::K, MAKE_CF_CB(set_flowTempOffset), 0, 20);
     }
 
     // EMS 1.0
@@ -139,6 +151,12 @@ void Mixer::process_MMConfigMessage(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, setValveTime_, 1); // valve runtime in 10 sec, max 120 s
 }
 
+// Mixer Setting 0x2CC
+void Mixer::process_MMPLUSSetMessage_HC(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, activated_, 0);      // on = 0xFF
+    has_update(telegram, setValveTime_, 1);   // valve runtime in 10 sec, max 120 s
+    has_update(telegram, flowTempOffset_, 2); // Mixer increase [0-20 K]
+}
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -146,10 +164,10 @@ void Mixer::process_MMConfigMessage(std::shared_ptr<const Telegram> telegram) {
 // Thermostat(0x10) -> Mixer(0x20), ?(0x2E1), data: 01 1C 64 00 01
 // Thermostat(0x10) -> Mixing Module(0x20), (0x2E1), data: 01 00 00 00 01
 // Thermostat(0x10) -> Mixing Module(0x20), (0x2EB), data: 00
-void Mixer::process_MMPLUSSetMessage_HC(std::shared_ptr<const Telegram> telegram) {
-    // pos 1: setpoint
-    // pos2: pump
-}
+// void Mixer::process_MMPLUSSetMessage_HC(std::shared_ptr<const Telegram> telegram) {
+// pos 1: setpoint
+// pos2: pump
+// }
 
 // Mixer on a MM10 - 0xAC
 // e.g. Thermostat -> Mixer Module, type 0xAC, telegram: 10 21 AC 00 1E 64 01 AB
@@ -221,6 +239,11 @@ bool Mixer::set_activated(const char * value, const int8_t id) {
         write_command(0xAA, 0, b ? 0xFF : 0, 0xAA);
         return true;
     }
+    if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
+        uint8_t hc = device_id() - 0x20;
+        write_command(0x2CC + hc, 0, b ? 0xFF : 0, 0x2CC + hc);
+        return true;
+    }
     return false;
 }
 
@@ -232,6 +255,25 @@ bool Mixer::set_setValveTime(const char * value, const int8_t id) {
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_MM10) {
         v = (v + 5) / 10;
         write_command(0xAA, 1, v, 0xAA);
+        return true;
+    }
+    if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
+        v          = (v + 5) / 10;
+        uint8_t hc = device_id() - 0x20;
+        write_command(0x2CC + hc, 1, v, 0x2CC + hc);
+        return true;
+    }
+    return false;
+}
+
+bool Mixer::set_flowTempOffset(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+    if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
+        uint8_t hc = device_id() - 0x20;
+        write_command(0x2CC + hc, 2, v, 0x2CC + hc);
         return true;
     }
     return false;
