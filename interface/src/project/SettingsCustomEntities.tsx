@@ -1,5 +1,6 @@
 import AddIcon from '@mui/icons-material/Add';
 import CancelIcon from '@mui/icons-material/Cancel';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import WarningIcon from '@mui/icons-material/Warning';
 import { Button, Typography, Box } from '@mui/material';
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
@@ -11,7 +12,7 @@ import { useBlocker } from 'react-router-dom';
 
 import { toast } from 'react-toastify';
 
-import SettingsEntitiesDialog from './SettingsEntitiesDialog';
+import SettingsCustomEntitiesDialog from './SettingsCustomEntitiesDialog';
 import * as EMSESP from './api';
 import { DeviceValueTypeNames, DeviceValueUOM_s } from './types';
 import { entityItemValidation } from './validators';
@@ -21,7 +22,7 @@ import { ButtonRow, FormLoader, SectionContent, BlockNavigation } from 'componen
 
 import { useI18nContext } from 'i18n/i18n-react';
 
-const SettingsEntities: FC = () => {
+const SettingsCustomEntities: FC = () => {
   const { LL } = useI18nContext();
   const [numChanges, setNumChanges] = useState<number>(0);
   const blocker = useBlocker(numChanges !== 0);
@@ -219,7 +220,10 @@ const SettingsEntities: FC = () => {
             <Body>
               {tableList.map((ei: EntityItem) => (
                 <Row key={ei.name} item={ei} onClick={() => editEntityItem(ei)}>
-                  <Cell>{ei.name}</Cell>
+                  <Cell>
+                    {ei.name}&nbsp;
+                    {ei.writeable && <EditOutlinedIcon color="primary" sx={{ fontSize: 12 }} />}
+                  </Cell>
                   <Cell>{showHex(ei.device_id as number, 2)}</Cell>
                   <Cell>{showHex(ei.type_id as number, 3)}</Cell>
                   <Cell>{ei.offset}</Cell>
@@ -244,7 +248,7 @@ const SettingsEntities: FC = () => {
       {renderEntity()}
 
       {selectedEntityItem && (
-        <SettingsEntitiesDialog
+        <SettingsCustomEntitiesDialog
           open={dialogOpen}
           creating={creating}
           onClose={onDialogClose}
@@ -284,4 +288,4 @@ const SettingsEntities: FC = () => {
   );
 };
 
-export default SettingsEntities;
+export default SettingsCustomEntities;

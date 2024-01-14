@@ -414,28 +414,35 @@ const signin = {
 };
 const generate_token = { token: '1234' };
 
+//
 // EMS-ESP Project specific
+//
 const EMSESP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'settings';
 const EMSESP_CORE_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'coreData';
 const EMSESP_SENSOR_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'sensorData';
 const EMSESP_DEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'devices';
 const EMSESP_SCANDEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'scanDevices';
-
 // const EMSESP_DEVICEDATA_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceData/:id';
 // const EMSESP_DEVICEENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceEntities/:id';
-
 const EMSESP_DEVICEDATA_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceData';
 const EMSESP_DEVICEENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceEntities';
-
 const EMSESP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'status';
 const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile';
-const EMSESP_WRITE_VALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceValue';
-const EMSESP_WRITE_SENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeTemperatureSensor';
-const EMSESP_WRITE_ANALOG_ENDPOINT = REST_ENDPOINT_ROOT + 'writeAnalogSensor';
+const EMSESP_WRITE_DEVICEVALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceValue';
+const EMSESP_WRITE_TEMPSENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeTemperatureSensor';
+const EMSESP_WRITE_ANALOGSENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeAnalogSensor';
 const EMSESP_CUSTOMIZATION_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customizationEntities';
 const EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'resetCustomizations';
-const EMSESP_WRITE_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
-const EMSESP_WRITE_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'entities';
+
+const EMSESP_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
+const EMSESP_CUSTOMENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customEntities';
+
+const EMSESP_GET_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'getSettings';
+const EMSESP_GET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'getCustomizations';
+const EMSESP_GET_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'getEntities';
+const EMSESP_GET_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'getSchedule';
+
+const EMSESP_SYSTEM_INFO_ENDPOINT = API_ENDPOINT_ROOT + 'system/info';
 
 const emsesp_info = {
   System: {
@@ -742,7 +749,7 @@ const emsesp_coredata = {
       d: 1,
       p: 1,
       v: '',
-      e: 1
+      e: 2
     }
   ]
 };
@@ -788,7 +795,7 @@ const status = {
 // 1 - RC35 thermo
 // 2 - RC20 thermo
 // 3 - Buderus GB125 boiler
-// 4 - RC100 themo
+// 4 - RC100 thermostat
 // 5 - Mixer MM10
 // 6 - Solar SM10
 // 7 - Nefit Trendline boiler
@@ -2048,6 +2055,11 @@ const emsesp_devicedata_99 = {
       u: 1,
       id: '00boiler_flowtemp',
       c: 'boiler_flowtemp'
+    },
+    {
+      v: 0,
+      u: 0,
+      id: '00wwExtra1'
     }
   ]
 };
@@ -2065,7 +2077,20 @@ let emsesp_customentities = {
       name: 'boiler_flowtemp',
       uom: 1,
       value_type: 1,
-      writeable: true
+      writeable: true,
+      value: 30
+    },
+    {
+      id: 1,
+      device_id: 16,
+      type_id: 797,
+      offset: 0,
+      factor: 1,
+      name: 'wwExtra1',
+      uom: 0,
+      value_type: 0,
+      writeable: false,
+      value: 0
     }
   ]
 };
@@ -2458,15 +2483,16 @@ router
 //  EMS-ESP Project stuff
 //
 router
-  .post(EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT, async (request: any) => {
-    return new Response('OK', { status: 200 });
-  })
+
+  // EMS-ESP Settings
   .get(EMSESP_SETTINGS_ENDPOINT, () => new Response(JSON.stringify(settings), { headers }))
   .post(EMSESP_SETTINGS_ENDPOINT, async (request: any) => {
     settings = await request.json();
     return new Response('OK', { status: 200 }); // no restart needed
     // return new Response('OK', { status: 205 }); // restart needed
   })
+
+  // Device Dashboard Data
   .get(EMSESP_CORE_DATA_ENDPOINT, () => new Response(JSON.stringify(emsesp_coredata), { headers }))
   .get(EMSESP_SENSOR_DATA_ENDPOINT, () => new Response(JSON.stringify(emsesp_sensordata), { headers }))
   .get(EMSESP_DEVICES_ENDPOINT, () => new Response(JSON.stringify(emsesp_devices), { headers }))
@@ -2527,6 +2553,8 @@ router
       return new Response(encoder.encode(emsesp_deviceentities_7), { headers });
     }
   })
+
+  // Customization
   .post(EMSESP_CUSTOMIZATION_ENTITIES_ENDPOINT, async (request: any) => {
     const content = await request.json();
     const id = content.id;
@@ -2549,17 +2577,28 @@ router
     }
     return new Response('OK', { status: 200 });
   })
-  .post(EMSESP_WRITE_SCHEDULE_ENDPOINT, async (request: any) => {
+  .post(EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT, async (request: any) => {
+    return new Response('OK', { status: 200 });
+  })
+
+  // Scheduler
+  .post(EMSESP_SCHEDULE_ENDPOINT, async (request: any) => {
     const content = await request.json();
     emsesp_schedule = content;
     return new Response('OK', { status: 200 });
   })
-  .post(EMSESP_WRITE_ENTITIES_ENDPOINT, async (request: any) => {
+  .get(EMSESP_SCHEDULE_ENDPOINT, () => new Response(JSON.stringify(emsesp_schedule), { headers }))
+
+  // Custom Entities
+  .post(EMSESP_CUSTOMENTITIES_ENDPOINT, async (request: any) => {
     const content = await request.json();
     emsesp_customentities = content;
     return new Response('OK', { status: 200 });
   })
-  .post(EMSESP_WRITE_VALUE_ENDPOINT, async (request: any) => {
+  .get(EMSESP_CUSTOMENTITIES_ENDPOINT, () => new Response(JSON.stringify(emsesp_customentities), { headers }))
+
+  // Device Dashboard
+  .post(EMSESP_WRITE_DEVICEVALUE_ENDPOINT, async (request: any) => {
     const content = await request.json();
     const command = content.c;
     const value = content.v;
@@ -2603,7 +2642,9 @@ router
     await delay(1000); // wait to show spinner
     return new Response('OK', { status: 200 }); // or 400 for bad request
   })
-  .post(EMSESP_WRITE_SENSOR_ENDPOINT, async (request: any) => {
+
+  // Temperature & Analog Sensors
+  .post(EMSESP_WRITE_TEMPSENSOR_ENDPOINT, async (request: any) => {
     const ts = await request.json();
     var objIndex = emsesp_sensordata.ts.findIndex((obj) => obj.id == ts.id_str);
     if (objIndex !== -1) {
@@ -2612,7 +2653,7 @@ router
     }
     return new Response('OK', { status: 200 });
   })
-  .post(EMSESP_WRITE_ANALOG_ENDPOINT, async (request: any) => {
+  .post(EMSESP_WRITE_ANALOGSENSOR_ENDPOINT, async (request: any) => {
     const as = await request.json();
     var objIndex = emsesp_sensordata.as.findIndex((obj) => obj.g == as.gpio);
     if (objIndex === -1) {
@@ -2645,6 +2686,8 @@ router
 
     return new Response('OK', { status: 200 });
   })
+
+  // Settings - board profile
   .post(EMSESP_BOARDPROFILE_ENDPOINT, async (request: any) => {
     const content = await request.json();
     const board_profile = content.code;
@@ -2774,26 +2817,18 @@ router
     }
 
     return new Response(JSON.stringify(data), { headers });
-  });
+  })
 
-// API and calls
-const SYSTEM_INFO_ENDPOINT = API_ENDPOINT_ROOT + 'system/info';
-const GET_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'getSettings';
-const GET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'getCustomizations';
-const GET_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'getEntities';
-const GET_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'getSchedule';
-const SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
-const ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customentities';
+  // Download Settings
+  .get(EMSESP_GET_SETTINGS_ENDPOINT, () => new Response(JSON.stringify(emsesp_info), { headers }))
+  .get(EMSESP_GET_CUSTOMIZATIONS_ENDPOINT, () => new Response(JSON.stringify(emsesp_deviceentities_1), { headers }))
+  .get(EMSESP_GET_ENTITIES_ENDPOINT, () => new Response(JSON.stringify(emsesp_customentities), { headers }))
+  .get(EMSESP_GET_SCHEDULE_ENDPOINT, () => new Response(JSON.stringify(emsesp_schedule), { headers }));
 
+// API which are usually POST for security
 router
-  .post(SYSTEM_INFO_ENDPOINT, () => new Response(JSON.stringify(emsesp_info), { headers }))
-  .get(SYSTEM_INFO_ENDPOINT, () => new Response(JSON.stringify(emsesp_info), { headers }))
-  .get(GET_SETTINGS_ENDPOINT, () => new Response(JSON.stringify(emsesp_info), { headers }))
-  .get(GET_CUSTOMIZATIONS_ENDPOINT, () => new Response(JSON.stringify(emsesp_deviceentities_1), { headers }))
-  .get(GET_ENTITIES_ENDPOINT, () => new Response(JSON.stringify(emsesp_customentities), { headers }))
-  .get(GET_SCHEDULE_ENDPOINT, () => new Response(JSON.stringify(emsesp_schedule), { headers }))
-  .get(SCHEDULE_ENDPOINT, () => new Response(JSON.stringify(emsesp_schedule), { headers }))
-  .get(ENTITIES_ENDPOINT, () => new Response(JSON.stringify(emsesp_customentities), { headers }))
+  .post(EMSESP_SYSTEM_INFO_ENDPOINT, () => new Response(JSON.stringify(emsesp_info), { headers }))
+  .get(EMSESP_SYSTEM_INFO_ENDPOINT, () => new Response(JSON.stringify(emsesp_info), { headers }))
   .post(API_ENDPOINT_ROOT, async (request: any) => {
     const data = await request.json();
     if (data.device === 'system') {
@@ -2807,7 +2842,9 @@ router
     return new Response('Not Found', { status: 404 });
   });
 
+//
 // Event Source // TODO fix event source later
+//
 
 // const data = {
 //   t: '000+00:00:00.000',

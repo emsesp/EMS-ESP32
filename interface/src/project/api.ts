@@ -88,7 +88,7 @@ export const writeSchedule = (data: any) => alovaInstance.Post('/rest/schedule',
 
 // SettingsEntities
 export const readCustomEntities = () =>
-  alovaInstance.Get<EntityItem[]>('/rest/customentities', {
+  alovaInstance.Get<EntityItem[]>('/rest/customEntities', {
     name: 'entities',
     transformData(data: any) {
       return data.entities.map((ei: EntityItem) => ({
@@ -106,4 +106,4 @@ export const readCustomEntities = () =>
       }));
     }
   });
-export const writeCustomEntities = (data: any) => alovaInstance.Post('/rest/customentities', data);
+export const writeCustomEntities = (data: any) => alovaInstance.Post('/rest/customEntities', data);

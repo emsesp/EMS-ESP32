@@ -23,7 +23,6 @@
 
 // GET
 #define DEVICES_SERVICE_PATH "/rest/devices"
-#define EMSESP_CUSTOMIZATION_SERVICE_PATH "/rest/customization"
 #define DEVICE_ENTITIES_PATH "/rest/deviceEntities"
 
 // POST
@@ -89,7 +88,6 @@ class WebCustomizationService : public StatefulService<WebCustomization> {
   private:
 #endif
 
-    HttpEndpoint<WebCustomization>  _httpEndpoint;
     FSPersistence<WebCustomization> _fsPersistence;
 
     // GET
