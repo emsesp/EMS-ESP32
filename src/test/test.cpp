@@ -306,10 +306,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         ok = true;
     }
 
-    // TODO Fix !
-    //   operating time compressor heating (uptimecompheating: 0 days 3 hours 27 minutes
-    // concat!!!
-
     if (command == "general") {
         shell.printfln("Testing adding a boiler, thermostat and sensors...");
         test("general");
