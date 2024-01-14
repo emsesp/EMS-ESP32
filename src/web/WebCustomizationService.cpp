@@ -25,14 +25,7 @@ using namespace std::placeholders; // for `_1` etc
 bool WebCustomization::_start = true;
 
 WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
-    : _httpEndpoint(WebCustomization::read,
-                    WebCustomization::update,
-                    this,
-                    server,
-                    EMSESP_CUSTOMIZATION_SERVICE_PATH,
-                    securityManager,
-                    AuthenticationPredicates::IS_AUTHENTICATED)
-    , _fsPersistence(WebCustomization::read, WebCustomization::update, this, fs, EMSESP_CUSTOMIZATION_FILE)
+    : _fsPersistence(WebCustomization::read, WebCustomization::update, this, fs, EMSESP_CUSTOMIZATION_FILE)
     , _masked_entities_handler(CUSTOMIZATION_ENTITIES_PATH,
                                securityManager->wrapCallback(std::bind(&WebCustomizationService::customization_entities, this, _1, _2),
                                                              AuthenticationPredicates::IS_AUTHENTICATED)) {
@@ -85,7 +78,7 @@ void WebCustomization::read(WebCustomization & customizations, JsonObject root) 
         entityJson["product_id"] = entityCustomization.product_id;
         entityJson["device_id"]  = entityCustomization.device_id;
 
-        // entries are in the form <XX><shortname>[|optional customname] e.g "08heatingactive|heating is on"
+        // entries are in the form <XX><shortname>[optional customname] e.g "08heatingactive|heating is on"
         JsonArray masked_entityJson = entityJson["entity_ids"].to<JsonArray>();
         for (std::string entity_id : entityCustomization.entity_ids) {
             masked_entityJson.add(entity_id);
