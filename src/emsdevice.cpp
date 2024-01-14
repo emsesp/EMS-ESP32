@@ -931,7 +931,8 @@ void EMSdevice::generate_values_web(JsonObject output) {
 
             // add name, prefixing the tag if it exists. This is the id used in the WebUI table and must be unique
             if (dv.has_tag()) {
-                obj["id"] = mask + tag_to_string(dv.tag) + " " + fullname;
+                // TODO check TAG https://github.com/emsesp/EMS-ESP32/issues/1338
+                obj["id"] = mask + fullname + " " + tag_to_string(dv.tag);
             } else {
                 obj["id"] = mask + fullname;
             }
