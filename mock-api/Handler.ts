@@ -573,7 +573,7 @@ const emsesp_allvalues = {
     'date/time': '10.12.2023 13:49',
     'hc1 how hot lounge should be': 19,
     'hc1 current room temp': 19.5,
-    'hc1 Discovery current room temperature': 'roomTemp',
+    'hc1 mqtt discovery current room temperature': 'roomTemp',
     'hc1 mode': 'auto',
     'hc1 manual temperature': 21.5,
     'hc1 temperature when mode is off': 7,
