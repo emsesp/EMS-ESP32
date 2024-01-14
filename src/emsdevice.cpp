@@ -569,6 +569,7 @@ void EMSdevice::add_device_value(uint8_t               tag,              // to b
             }
         }
     });
+
     if (ignore) {
         return;
     }
@@ -1045,8 +1046,9 @@ void EMSdevice::generate_values_web_customization(JsonArray output) {
         if (dv.type != DeviceValueType::CMD) {
             if (fullname) {
                 if (dv.has_tag()) {
-                    char name[50];
-                    snprintf(name, sizeof(name), "%s %s", tag_to_string(dv.tag), fullname);
+                    char name[80];
+                    // TODO check TAG https://github.com/emsesp/EMS-ESP32/issues/1338
+                    snprintf(name, sizeof(name), "%s %s", fullname, tag_to_string(dv.tag)); // suffix tag
                     obj["n"] = name;
                 } else {
                     obj["n"] = fullname;
@@ -1396,8 +1398,9 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
             auto fullname = dv.get_fullname();
             if (!fullname.empty()) {
                 if (dv.has_tag()) {
-                    char name[50];
-                    snprintf(name, sizeof(name), "%s %s", tag_to_string(dv.tag), fullname.c_str());
+                    char name[80];
+                    // TODO check TAG https://github.com/emsesp/EMS-ESP32/issues/1338
+                    snprintf(name, sizeof(name), "%s %s", fullname.c_str(), tag_to_string(dv.tag)); // suffix tag
                     json["fullname"] = name;
                 } else {
                     json["fullname"] = fullname;
@@ -1596,16 +1599,18 @@ bool EMSdevice::generate_values(JsonObject output, const uint8_t tag_filter, con
             char name[80];
 
             if (output_target == OUTPUT_TARGET::API_VERBOSE || output_target == OUTPUT_TARGET::CONSOLE) {
-                char short_name[20];
-                if (output_target == OUTPUT_TARGET::CONSOLE) {
-                    snprintf(short_name, sizeof(short_name), " (%s)", dv.short_name);
-                } else {
-                    strcpy(short_name, "");
-                }
+                // char short_name[20];
+                // if (output_target == OUTPUT_TARGET::CONSOLE) {
+                //     snprintf(short_name, sizeof(short_name), "(%s)", dv.short_name);
+                // } else {
+                //     strcpy(short_name, "");
+                // }
+
                 if (have_tag) {
-                    snprintf(name, sizeof(name), "%s %s%s", tag_to_string(dv.tag), fullname.c_str(), short_name); // prefix the tag
+                    // TODO check TAG https://github.com/emsesp/EMS-ESP32/issues/1338
+                    snprintf(name, sizeof(name), "%s %s (%s)", fullname.c_str(), tag_to_string(dv.tag), dv.short_name); // add the tag
                 } else {
-                    snprintf(name, sizeof(name), "%s%s", fullname.c_str(), short_name);
+                    snprintf(name, sizeof(name), "%s (%s)", fullname.c_str(), dv.short_name);
                 }
             } else {
                 strlcpy(name, (dv.short_name), sizeof(name)); // use short name
