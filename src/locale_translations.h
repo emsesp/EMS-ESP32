@@ -284,7 +284,7 @@ MAKE_WORD_TRANSLATION(partymode, "party", "Party", "party", "", "impreza", "", "
 MAKE_WORD_TRANSLATION(fireplace, "fireplace", "Kamin", "haard", "", "kominek", "", "", "şömine", "camino", "krb") // TODO translate
 
 // MQTT Discovery - this is special device entity for 'climate'
-MAKE_TRANSLATION(haclimate, "haclimate", "Discovery current room temperature", "Discovery Temperatur", "Discovery huidige kamertemperatuur", "", "termostat w HA", "HA Avlest temp", "", "Güncel osa sıcaklığı", "verifica temperatura ambiente attuale", "Zistiť aktuálnu teplotu v miestnosti") // TODO translate
+MAKE_TRANSLATION(haclimate, "haclimate", "mqtt discovery current room temperature", "Discovery Temperatur", "Discovery huidige kamertemperatuur", "", "termostat w HA", "HA Avlest temp", "", "Güncel osa sıcaklığı", "verifica temperatura ambiente attuale", "Zistiť aktuálnu teplotu v miestnosti") // TODO translate
 
 // Entity translations: tag, mqtt, en, de, nl, sv, pl, no, fr, tr, it, sk
 // Boiler
