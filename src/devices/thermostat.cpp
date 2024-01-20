@@ -1166,7 +1166,7 @@ void Thermostat::process_RC300WWmode(std::shared_ptr<const Telegram> telegram) {
     }
     has_update(telegram, wwCircMode_, 3);        // 0=off, 1=on, 2=auto, 4=own?
     has_update(telegram, wwChargeDuration_, 10); // value in steps of 15 min
-    has_update(telegram, wwCharge_, 11);         // boolv0xFF on
+    has_update(telegram, wwCharge_, 11);         // bool 0xFF on
     has_update(telegram, wwDisinfecting_, 5);    // 0-off, 0xFF on
     has_update(telegram, wwDisinfectHour_, 6);   // value in steps of 15 min
     has_update(telegram, wwDisinfectDay_, 7);    // 0-6 Day of week, 7 every day
