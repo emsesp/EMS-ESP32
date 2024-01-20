@@ -308,7 +308,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
             render_value(output, entity, true);
             if (attribute_s) {
                 if (output.containsKey(attribute_s)) {
-                    JsonVariant data = output[attribute_s];
+                    String data = output[attribute_s].as<String>();
                     output.clear();
                     output["api_data"] = data;
                     return true;
