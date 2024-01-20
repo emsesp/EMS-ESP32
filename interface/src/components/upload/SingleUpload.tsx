@@ -50,8 +50,10 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, isUploading, pr
 
   const progressText = () => {
     if (uploading) {
-      if (progress.total) {
-        return LL.UPLOADING() + ': ' + Math.round((progress.loaded * 100) / progress.total) + '%';
+      if (progress.total && progress.loaded) {
+        return progress.loaded <= progress.total
+          ? LL.UPLOADING() + ': ' + Math.round((progress.loaded * 100) / progress.total) + '%'
+          : LL.UPLOADING() + ': ' + Math.round((progress.total * 100) / progress.loaded) + '%';
       }
     }
     return LL.UPLOAD_DROP_TEXT();
@@ -83,7 +85,13 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, isUploading, pr
             <Box width="100%" p={2}>
               <LinearProgress
                 variant="determinate"
-                value={progress.total === 0 ? 0 : Math.round((progress.loaded * 100) / progress.total)}
+                value={
+                  progress.total === 0 || progress.loaded === 0
+                    ? 0
+                    : progress.loaded <= progress.total
+                      ? Math.round((progress.loaded * 100) / progress.total)
+                      : Math.round((progress.total * 100) / progress.loaded)
+                }
               />
             </Box>
             <Button startIcon={<CancelIcon />} variant="outlined" color="secondary" onClick={onCancel}>
