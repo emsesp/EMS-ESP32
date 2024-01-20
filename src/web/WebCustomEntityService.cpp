@@ -48,6 +48,7 @@ void WebCustomEntity::read(WebCustomEntity & webEntity, JsonObject root) {
     for (const CustomEntityItem & entityItem : webEntity.customEntityItems) {
         JsonObject ei    = entity.add<JsonObject>();
         ei["id"]         = counter++; // id is only used to render the table and must be unique
+        ei["ram"]        = entityItem.ram;
         ei["device_id"]  = entityItem.device_id;
         ei["type_id"]    = entityItem.type_id;
         ei["offset"]     = entityItem.offset;
@@ -88,6 +89,7 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
     if (root["entities"].is<JsonArray>()) {
         for (const JsonObject ei : root["entities"].as<JsonArray>()) {
             auto entityItem       = CustomEntityItem();
+            entityItem.ram        = ei["ram"] | 0;
             entityItem.device_id  = ei["device_id"]; // send as numeric, will be converted to string in web
             entityItem.type_id    = ei["type_id"];
             entityItem.offset     = ei["offset"];
@@ -96,6 +98,14 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
             entityItem.uom        = ei["uom"];
             entityItem.value_type = ei["value_type"];
             entityItem.writeable  = ei["writeable"];
+            entityItem.data       = ei["value"].as<std::string>();
+            if (entityItem.ram == 1) {
+                entityItem.device_id  = 0;
+                entityItem.type_id    = 0;
+                entityItem.uom        = 0;
+                entityItem.value_type = DeviceValueType::STRING;
+                entityItem.writeable  = true;
+            }
 
             if (entityItem.value_type == DeviceValueType::BOOL) {
                 entityItem.value = EMS_VALUE_DEFAULT_BOOL;
@@ -107,7 +117,7 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
                 entityItem.value = EMS_VALUE_DEFAULT_SHORT;
             } else if (entityItem.value_type == DeviceValueType::USHORT) {
                 entityItem.value = EMS_VALUE_DEFAULT_USHORT;
-            } else { // if (entityItem.value_type == DeviceValueType::ULONG || entityItem.value_type == DeviceValueType::TIME) {
+            } else if (entityItem.value_type == DeviceValueType::ULONG || entityItem.value_type == DeviceValueType::TIME) {
                 entityItem.value = EMS_VALUE_DEFAULT_ULONG;
             }
             if (entityItem.factor == 0) {
@@ -134,7 +144,9 @@ bool WebCustomEntityService::command_setvalue(const char * value, const std::str
     EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
     for (CustomEntityItem & entityItem : *customEntityItems) {
         if (Helpers::toLower(entityItem.name) == Helpers::toLower(name)) {
-            if (entityItem.value_type == DeviceValueType::STRING) {
+            if (entityItem.ram == 1) {
+                entityItem.data = value;
+            } else if (entityItem.value_type == DeviceValueType::STRING) {
                 char telegram[84];
                 strlcpy(telegram, value, sizeof(telegram));
                 uint8_t data[EMS_MAX_TELEGRAM_LENGTH];
@@ -274,7 +286,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
         for (const CustomEntityItem & entity : *customEntityItems) {
             render_value(output, entity);
         }
-        return (output.size() != 0);
+        return true;
     }
 
     char command_s[30];
@@ -297,13 +309,15 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
             output["readable"]  = true;
             output["writeable"] = entity.writeable;
             output["visible"]   = true;
-            output["device_id"] = Helpers::hextoa(entity.device_id);
-            output["type_id"]   = Helpers::hextoa(entity.type_id);
-            output["offset"]    = entity.offset;
-            if (entity.value_type != DeviceValueType::BOOL && entity.value_type != DeviceValueType::STRING) {
-                output["factor"] = entity.factor;
-            } else if (entity.value_type == DeviceValueType::STRING) {
-                output["bytes"] = (uint8_t)entity.factor;
+            if (entity.ram == 0) {
+                output["device_id"] = Helpers::hextoa(entity.device_id);
+                output["type_id"]   = Helpers::hextoa(entity.type_id);
+                output["offset"]    = entity.offset;
+                if (entity.value_type != DeviceValueType::BOOL && entity.value_type != DeviceValueType::STRING) {
+                    output["factor"] = entity.factor;
+                } else if (entity.value_type == DeviceValueType::STRING) {
+                    output["bytes"] = (uint8_t)entity.factor;
+                }
             }
             render_value(output, entity, true);
             if (attribute_s) {
@@ -547,10 +561,21 @@ void WebCustomEntityService::fetch() {
     EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
     const uint8_t len[] = {1, 1, 1, 2, 2, 3, 3};
     for (auto & entity : *customEntityItems) {
-        EMSESP::send_read_request(entity.type_id,
-                                  entity.device_id,
-                                  entity.offset,
-                                  entity.value_type == DeviceValueType::STRING ? (uint8_t)entity.factor : len[entity.value_type]);
+        if (entity.device_id > 0 && entity.type_id > 0) { // ths excludes also RAM type
+            bool needFetch = true;
+            for (const auto & emsdevice : EMSESP::emsdevices) {
+                if (entity.value_type != DeviceValueType::STRING && emsdevice->is_device_id(entity.device_id) && emsdevice->is_fetch(entity.type_id)) {
+                    needFetch = false;
+                    break;
+                }
+            }
+            if (needFetch) {
+                EMSESP::send_read_request(entity.type_id,
+                                          entity.device_id,
+                                          entity.offset,
+                                          entity.value_type == DeviceValueType::STRING ? (uint8_t)entity.factor : len[entity.value_type]);
+            }
+        }
     }
     // EMSESP::logger().debug("fetch custom entities");
 }
@@ -563,8 +588,8 @@ bool WebCustomEntityService::get_value(std::shared_ptr<const Telegram> telegram)
     const uint8_t len[] = {1, 1, 1, 2, 2, 3, 3};
     for (auto & entity : *customEntityItems) {
         if (entity.value_type == DeviceValueType::STRING && telegram->type_id == entity.type_id && telegram->src == entity.device_id
-            && telegram->offset == entity.offset) {
-            auto data = Helpers::data_to_hex(telegram->message_data, telegram->message_length);
+            && telegram->offset <= entity.offset && (telegram->offset + telegram->message_length) >= (entity.offset + (uint8_t)entity.factor)) {
+            auto data = Helpers::data_to_hex(telegram->message_data, (uint8_t)entity.factor);
             if (entity.data != data) {
                 entity.data = data;
                 if (Mqtt::publish_single()) {
@@ -573,9 +598,8 @@ bool WebCustomEntityService::get_value(std::shared_ptr<const Telegram> telegram)
                     has_change = true;
                 }
             }
-        }
-        if (entity.value_type != DeviceValueType::STRING && telegram->type_id == entity.type_id && telegram->src == entity.device_id
-            && telegram->offset <= entity.offset && (telegram->offset + telegram->message_length) >= (entity.offset + len[entity.value_type])) {
+        } else if (entity.value_type != DeviceValueType::STRING && telegram->type_id == entity.type_id && telegram->src == entity.device_id
+                   && telegram->offset <= entity.offset && (telegram->offset + telegram->message_length) >= (entity.offset + len[entity.value_type])) {
             uint32_t value = 0;
             for (uint8_t i = 0; i < len[entity.value_type]; i++) {
                 value = (value << 8) + telegram->message_data[i + entity.offset - telegram->offset];

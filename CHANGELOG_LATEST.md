@@ -17,6 +17,7 @@
 - boiler Bosch C1200W, id 12, [#1536](https://github.com/emsesp/EMS-ESP32/issues/1536)
 - mixer MM100 telegram 0x2CC [#1554](https://github.com/emsesp/EMS-ESP32/issues/1554)
 - boiler hpSetDiffPressure [#1563](https://github.com/emsesp/EMS-ESP32/issues/1563)
+- custom variables  [#1423](https://github.com/emsesp/EMS-ESP32/issues/1423)
 
 ## Fixed
 

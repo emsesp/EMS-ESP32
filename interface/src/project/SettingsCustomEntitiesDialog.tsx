@@ -100,7 +100,7 @@ const SettingsCustomEntitiesDialog = ({
           <Box flexWrap="nowrap" whiteSpace="nowrap" />
         </Box>
         <Grid container spacing={2}>
-          <Grid item xs={8}>
+          <Grid item xs={4}>
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="name"
@@ -111,121 +111,153 @@ const SettingsCustomEntitiesDialog = ({
               onChange={updateFormValue}
             />
           </Grid>
-          <Grid item xs={4} mt={3}>
-            <BlockFormControlLabel
-              control={<Checkbox checked={editItem.writeable} onChange={updateFormValue} name="writeable" />}
-              label={LL.WRITEABLE()}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <ValidatedTextField
-              fieldErrors={fieldErrors}
-              name="device_id"
-              label={LL.ID_OF(LL.DEVICE())}
-              margin="normal"
-              type="string"
-              fullWidth
-              value={editItem.device_id as string}
-              onChange={updateFormValue}
-              inputProps={{ style: { textTransform: 'uppercase' } }}
-              InputProps={{ startAdornment: <InputAdornment position="start">0x</InputAdornment> }}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <ValidatedTextField
-              fieldErrors={fieldErrors}
-              name="type_id"
-              label={LL.ID_OF(LL.TYPE(1))}
-              margin="normal"
-              fullWidth
-              value={editItem.type_id}
-              onChange={updateFormValue}
-              inputProps={{ style: { textTransform: 'uppercase' } }}
-              InputProps={{ startAdornment: <InputAdornment position="start">0x</InputAdornment> }}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <ValidatedTextField
-              fieldErrors={fieldErrors}
-              name="offset"
-              label={LL.OFFSET()}
-              margin="normal"
-              fullWidth
-              type="number"
-              value={editItem.offset}
-              onChange={updateFormValue}
-            />
-          </Grid>
           <Grid item xs={4}>
             <TextField
-              name="value_type"
+              name="ram"
               label={LL.VALUE(1) + ' ' + LL.TYPE(1)}
-              value={editItem.value_type}
+              value={editItem.ram}
               variant="outlined"
               onChange={updateFormValue}
               margin="normal"
               fullWidth
               select
             >
-              <MenuItem value={DeviceValueType.BOOL}>BOOL</MenuItem>
-              <MenuItem value={DeviceValueType.INT}>INT</MenuItem>
-              <MenuItem value={DeviceValueType.UINT}>UINT</MenuItem>
-              <MenuItem value={DeviceValueType.SHORT}>SHORT</MenuItem>
-              <MenuItem value={DeviceValueType.USHORT}>USHORT</MenuItem>
-              <MenuItem value={DeviceValueType.ULONG}>ULONG</MenuItem>
-              <MenuItem value={DeviceValueType.TIME}>TIME</MenuItem>
-              <MenuItem value={DeviceValueType.STRING}>RAW</MenuItem>
+              <MenuItem value={0}>EMS-{LL.VALUE(1)}</MenuItem>
+              <MenuItem value={1}>RAM-{LL.VALUE(1)}</MenuItem>
             </TextField>
           </Grid>
-
-          {editItem.value_type !== DeviceValueType.BOOL && editItem.value_type !== DeviceValueType.STRING && (
-            <>
-              <Grid item xs={4}>
-                <TextField
-                  name="factor"
-                  label={LL.FACTOR()}
-                  value={editItem.factor}
-                  variant="outlined"
-                  onChange={updateFormValue}
-                  fullWidth
-                  margin="normal"
-                  type="number"
-                  inputProps={{ step: '0.001' }}
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <TextField
-                  name="uom"
-                  label={LL.UNIT()}
-                  value={editItem.uom}
-                  margin="normal"
-                  fullWidth
-                  onChange={updateFormValue}
-                  select
-                >
-                  {DeviceValueUOM_s.map((val, i) => (
-                    <MenuItem key={i} value={i}>
-                      {val}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
-            </>
-          )}
-          {editItem.value_type === DeviceValueType.STRING && (
+          {editItem.ram === 1 && (
             <Grid item xs={4}>
               <TextField
-                name="factor"
-                label="Bytes"
-                value={editItem.factor}
+                name="value"
+                label={LL.STARTVALUE()}
+                value={editItem.value}
                 variant="outlined"
                 onChange={updateFormValue}
                 fullWidth
                 margin="normal"
-                type="number"
-                inputProps={{ min: '1', max: '27', step: '1' }}
               />
             </Grid>
+          )}
+          {editItem.ram === 0 && (
+            <>
+              <Grid item xs={4} mt={3}>
+                <BlockFormControlLabel
+                  control={<Checkbox checked={editItem.writeable} onChange={updateFormValue} name="writeable" />}
+                  label={LL.WRITEABLE()}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <ValidatedTextField
+                  fieldErrors={fieldErrors}
+                  name="device_id"
+                  label={LL.ID_OF(LL.DEVICE())}
+                  margin="normal"
+                  type="string"
+                  fullWidth
+                  value={editItem.device_id as string}
+                  onChange={updateFormValue}
+                  inputProps={{ style: { textTransform: 'uppercase' } }}
+                  InputProps={{ startAdornment: <InputAdornment position="start">0x</InputAdornment> }}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <ValidatedTextField
+                  fieldErrors={fieldErrors}
+                  name="type_id"
+                  label={LL.ID_OF(LL.TYPE(1))}
+                  margin="normal"
+                  fullWidth
+                  value={editItem.type_id}
+                  onChange={updateFormValue}
+                  inputProps={{ style: { textTransform: 'uppercase' } }}
+                  InputProps={{ startAdornment: <InputAdornment position="start">0x</InputAdornment> }}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <ValidatedTextField
+                  fieldErrors={fieldErrors}
+                  name="offset"
+                  label={LL.OFFSET()}
+                  margin="normal"
+                  fullWidth
+                  type="number"
+                  value={editItem.offset}
+                  onChange={updateFormValue}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <TextField
+                  name="value_type"
+                  label={LL.VALUE(1) + ' ' + LL.TYPE(1)}
+                  value={editItem.value_type}
+                  variant="outlined"
+                  onChange={updateFormValue}
+                  margin="normal"
+                  fullWidth
+                  select
+                >
+                  <MenuItem value={DeviceValueType.BOOL}>BOOL</MenuItem>
+                  <MenuItem value={DeviceValueType.INT}>INT</MenuItem>
+                  <MenuItem value={DeviceValueType.UINT}>UINT</MenuItem>
+                  <MenuItem value={DeviceValueType.SHORT}>SHORT</MenuItem>
+                  <MenuItem value={DeviceValueType.USHORT}>USHORT</MenuItem>
+                  <MenuItem value={DeviceValueType.ULONG}>ULONG</MenuItem>
+                  <MenuItem value={DeviceValueType.TIME}>TIME</MenuItem>
+                  <MenuItem value={DeviceValueType.STRING}>RAW</MenuItem>
+                </TextField>
+              </Grid>
+
+              {editItem.value_type !== DeviceValueType.BOOL && editItem.value_type !== DeviceValueType.STRING && (
+                <>
+                  <Grid item xs={4}>
+                    <TextField
+                      name="factor"
+                      label={LL.FACTOR()}
+                      value={editItem.factor}
+                      variant="outlined"
+                      onChange={updateFormValue}
+                      fullWidth
+                      margin="normal"
+                      type="number"
+                      inputProps={{ step: '0.001' }}
+                    />
+                  </Grid>
+                  <Grid item xs={4}>
+                    <TextField
+                      name="uom"
+                      label={LL.UNIT()}
+                      value={editItem.uom}
+                      margin="normal"
+                      fullWidth
+                      onChange={updateFormValue}
+                      select
+                    >
+                      {DeviceValueUOM_s.map((val, i) => (
+                        <MenuItem key={i} value={i}>
+                          {val}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  </Grid>
+                </>
+              )}
+              {editItem.value_type === DeviceValueType.STRING && editItem.device_id !== '0' && (
+                <Grid item xs={4}>
+                  <TextField
+                    name="factor"
+                    label="Bytes"
+                    value={editItem.factor}
+                    variant="outlined"
+                    onChange={updateFormValue}
+                    fullWidth
+                    margin="normal"
+                    type="number"
+                    inputProps={{ min: '1', max: '27', step: '1' }}
+                  />
+                </Grid>
+              )}
+            </>
           )}
         </Grid>
       </DialogContent>

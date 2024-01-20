@@ -38,6 +38,7 @@ class CustomEntityItem {
     bool        writeable;
     uint32_t    value;
     std::string data;
+    uint8_t ram;
 };
 
 class WebCustomEntity {
