@@ -2070,6 +2070,7 @@ let emsesp_customentities = {
   entities: [
     {
       id: 0,
+      ram: 0,
       device_id: 8,
       type_id: 24,
       offset: 0,
@@ -2082,6 +2083,7 @@ let emsesp_customentities = {
     },
     {
       id: 1,
+      ram: 0,
       device_id: 16,
       type_id: 797,
       offset: 0,

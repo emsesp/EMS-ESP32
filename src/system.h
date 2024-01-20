@@ -79,7 +79,7 @@ class System {
     void syslog_init();
     bool check_upgrade(bool factory_settings);
     bool check_restore();
-    bool heartbeat_json(JsonObject output);
+    void heartbeat_json(JsonObject output);
     void send_heartbeat();
     void send_info_mqtt();
 

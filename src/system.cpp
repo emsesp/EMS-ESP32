@@ -629,7 +629,7 @@ void System::send_info_mqtt() {
 }
 
 // create the json for heartbeat
-bool System::heartbeat_json(JsonObject output) {
+void System::heartbeat_json(JsonObject output) {
     uint8_t bus_status = EMSESP::bus_status();
     if (bus_status == EMSESP::BUS_STATUS_TX_ERRORS) {
         output["bus_status"] = "txerror";
@@ -681,8 +681,6 @@ bool System::heartbeat_json(JsonObject output) {
         output["wifistrength"] = wifi_quality(rssi);
     }
 #endif
-
-    return true;
 }
 
 // send periodic MQTT message with system information
@@ -697,9 +695,8 @@ void System::send_heartbeat() {
     JsonDocument doc;
     JsonObject   json = doc.to<JsonObject>();
 
-    if (heartbeat_json(json)) {
-        Mqtt::queue_publish(F_(heartbeat), json); // send to MQTT with retain off. This will add to MQTT queue.
-    }
+    heartbeat_json(json);
+    Mqtt::queue_publish(F_(heartbeat), json); // send to MQTT with retain off. This will add to MQTT queue.
 }
 
 // initializes network
