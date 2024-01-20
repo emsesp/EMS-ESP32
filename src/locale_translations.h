@@ -461,6 +461,7 @@ MAKE_TRANSLATION(hpPumpMode, "hppumpmode", "primary heatpump mode", "Modus Haupt
 MAKE_TRANSLATION(instantstart, "instantstart", "instant start", "Sofortstart", "", "", "natychmiastowy start", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(heatondelay, "heatondelay", "heat-on delay", "Einschaltverzögerung Heizen", "", "", "opóźnienie włączania ogrzewania", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(heatoffdelay, "heatoffdelay", "heat-off delay", "Ausschaltverzögerung Heizen", "", "", "opóźnienie włączania ogrzewania", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(hpSetDiffPress, "hpsetdiffpress", "set differental pressure", "Pumpensolldruck", "", "", "", "", "", "", "", "") // TODO translate
 
 // hybrid heatpump
 MAKE_TRANSLATION(hybridStrategy, "hybridstrategy", "hybrid control strategy", "Hybrid Strategie", "Hybride strategie", "Hybrid kontrollstrategi", "strategia sterowania hybrydowego", "hybrid kontrollstrategi", "stratégie contrôle hybride", "hibrit kontrol stratejisi", "strategia comtrollo ibrido", "hybridná stratégia riadenia")
