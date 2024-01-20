@@ -9,7 +9,6 @@ export interface NTPStatus {
   utc_time: string;
   local_time: string;
   server: string;
-  uptime: number;
 }
 
 export interface NTPSettings {
