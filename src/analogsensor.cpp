@@ -679,7 +679,7 @@ bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int
             // if we're filtering on an attribute, go find it
             if (attribute_s) {
                 if (output.containsKey(attribute_s)) {
-                    JsonVariant data = output[attribute_s];
+                    String data = output[attribute_s].as<String>();
                     output.clear();
                     output["api_data"] = data;
                     return true;

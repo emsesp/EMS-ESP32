@@ -1529,7 +1529,7 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
                 EMSESP::logger().debug("Attribute '%s'", attribute_s);
 #endif
                 if (json.containsKey(attribute_s)) {
-                    JsonVariant data = json[attribute_s];
+                    String data = json[attribute_s].as<String>();
                     output.clear();
                     output["api_data"] = data;
                     return true;

@@ -134,8 +134,8 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     // if we're returning single values, just sent as plain text
     // https://github.com/emsesp/EMS-ESP32/issues/462#issuecomment-1093877210
     if (output.containsKey("api_data")) {
-        JsonVariant data = output["api_data"];
-        request->send(200, "text/plain; charset=utf-8", data.as<String>());
+        String data = output["api_data"].as<String>();
+        request->send(200, "text/plain; charset=utf-8", data);
         api_count_++;
         delete response;
         return;
