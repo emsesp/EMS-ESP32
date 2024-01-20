@@ -2370,6 +2370,7 @@ router
 // SYSTEM
 router
   .get(SYSTEM_STATUS_ENDPOINT, () => new Response(JSON.stringify(system_status), { headers }))
+  .get(SECURITY_SETTINGS_ENDPOINT, () => new Response(JSON.stringify(security_settings), { headers }))
   .post(SECURITY_SETTINGS_ENDPOINT, async (request: any) => {
     security_settings = await request.json();
     return new Response('OK', { status: 200 });
