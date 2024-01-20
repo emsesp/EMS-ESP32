@@ -414,8 +414,8 @@ bool TemperatureSensor::get_value_info(JsonObject output, const char * cmd, cons
         if (Helpers::toLower(command_s) == Helpers::toLower(sensor.name().c_str()) || Helpers::toLower(command_s) == Helpers::toLower(sensor.id().c_str())) {
             output["id"]   = sensor.id();
             output["name"] = sensor.name();
-            char val[10];
             if (Helpers::hasValue(sensor.temperature_c)) {
+                char val[10];
                 output["value"] = serialized(Helpers::render_value(val, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
             }
 

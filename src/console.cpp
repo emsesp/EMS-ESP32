@@ -563,9 +563,9 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                 }
                 return devices_list;
             } else if (current_arguments.size() == 1) {
-                std::vector<std::string> command_list;
-                uint8_t                  device_type = EMSdevice::device_name_2_device_type(current_arguments[0].c_str());
+                uint8_t device_type = EMSdevice::device_name_2_device_type(current_arguments[0].c_str());
                 if (Command::device_has_commands(device_type)) {
+                    std::vector<std::string> command_list;
                     for (const auto & cf : Command::commands()) {
                         if (cf.device_type_ == device_type) {
                             command_list.emplace_back(cf.cmd_);

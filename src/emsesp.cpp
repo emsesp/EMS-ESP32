@@ -392,7 +392,6 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
                     // extract the shortname from the key, which is in brackets
                     std::size_t first_bracket = key.find_last_of('(');
                     std::size_t last_bracket  = key.find_last_of(')');
-                    std::string shortname     = key.substr(first_bracket + 1, last_bracket - first_bracket - 1);
                     std::string uom           = emsdevice->get_value_uom(key.substr(first_bracket + 1, last_bracket - first_bracket - 1));
 
                     shell.printfln("  %s: %s%s %s%s", key.c_str(), COLOR_BRIGHT_GREEN, p.value().as<std::string>().c_str(), uom.c_str(), COLOR_RESET);
