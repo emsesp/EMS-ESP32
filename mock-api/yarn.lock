@@ -138,10 +138,8 @@ __metadata:
   dependencies:
     "@msgpack/msgpack": "npm:^2.8.0"
     "@types/multer": "npm:^1.4.11"
-    busboy: "npm:^1.6.0"
     compression: "npm:^1.7.4"
     express: "npm:^4.18.2"
-    express-slow-down: "npm:^2.0.1"
     itty-router: "npm:^4.0.27"
     multer: "npm:^1.4.5-lts.1"
   languageName: unknown
@@ -188,7 +186,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"busboy@npm:^1.0.0, busboy@npm:^1.6.0":
+"busboy@npm:^1.0.0":
   version: 1.6.0
   resolution: "busboy@npm:1.6.0"
   dependencies:
@@ -354,26 +352,6 @@ __metadata:
   version: 1.8.1
   resolution: "etag@npm:1.8.1"
   checksum: 571aeb3dbe0f2bbd4e4fadbdb44f325fc75335cd5f6f6b6a091e6a06a9f25ed5392f0863c5442acb0646787446e816f13cbfc6edce5b07658541dff573cab1ff
-  languageName: node
-  linkType: hard
-
-"express-rate-limit@npm:7":
-  version: 7.1.5
-  resolution: "express-rate-limit@npm:7.1.5"
-  peerDependencies:
-    express: 4 || 5 || ^5.0.0-beta.1
-  checksum: bced4208de86fc8b99fe9a2dbfd522e0ea9a1875e678a4079102cc77c13c94f40b892ec46dac30cd028e229178ba021778070b86d0741e7258db0adc38cc858a
-  languageName: node
-  linkType: hard
-
-"express-slow-down@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "express-slow-down@npm:2.0.1"
-  dependencies:
-    express-rate-limit: "npm:7"
-  peerDependencies:
-    express: ">= 4"
-  checksum: b9b053cf99104a164420df08d6b42768024c9c797e944a7a1f631ebc5741ae31067264c0f05eca3a86eaaa9ab7c7da82d0082f135690b5cb603b687ddd36fdbb
   languageName: node
   linkType: hard
 
