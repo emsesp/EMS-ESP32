@@ -19,7 +19,7 @@ const UploadFileForm: FC = () => {
   const { send: getSettings, onSuccess: onSuccessGetSettings } = useRequest(EMSESP.getSettings(), {
     immediate: false
   });
-  const { send: getCustomizations, onSuccess: onSuccessgetCustomizations } = useRequest(EMSESP.getCustomizations(), {
+  const { send: getCustomizations, onSuccess: onSuccessGetCustomizations } = useRequest(EMSESP.getCustomizations(), {
     immediate: false
   });
   const { send: getEntities, onSuccess: onSuccessGetEntities } = useRequest(EMSESP.getEntities(), {
@@ -80,7 +80,7 @@ const UploadFileForm: FC = () => {
   onSuccessGetSettings((event) => {
     saveFile(event.data, 'settings.json');
   });
-  onSuccessgetCustomizations((event) => {
+  onSuccessGetCustomizations((event) => {
     saveFile(event.data, 'customizations.json');
   });
   onSuccessGetEntities((event) => {
