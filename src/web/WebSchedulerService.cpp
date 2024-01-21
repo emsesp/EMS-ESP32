@@ -54,26 +54,15 @@ void WebScheduler::read(WebScheduler & webScheduler, JsonObject root) {
 // call on initialization and also when the Schedule web page is saved
 // this loads the data into the internal class
 StateUpdateResult WebScheduler::update(JsonObject root, WebScheduler & webScheduler) {
-#ifdef EMSESP_STANDALONE
-    // invoke some fake data for testing
-    const char * json =
-        "{\"schedule\": [{\"id\":1,\"active\":true,\"flags\":31,\"time\": \"07:30\",\"cmd\": \"hc1mode\",\"value\": \"day\",\"name\": \"turn on "
-        "central heating\"}]}";
-    JsonDocument doc;
-    deserializeJson(doc, json);
-    root = doc.as<JsonObject>();
-    Serial.print(COLOR_BRIGHT_MAGENTA);
-    Serial.print(" Using fake scheduler file: ");
-    serializeJson(root, Serial);
-    Serial.println(COLOR_RESET);
-#endif
-
     for (ScheduleItem & scheduleItem : webScheduler.scheduleItems) {
         Command::erase_command(EMSdevice::DeviceType::SCHEDULER, scheduleItem.name.c_str());
     }
+
+    // reset the list
     webScheduler.scheduleItems.clear();
     EMSESP::webSchedulerService.ha_reset();
 
+    // build up the list of schedule items
     if (root["schedule"].is<JsonArray>()) {
         for (const JsonObject schedule : root["schedule"].as<JsonArray>()) {
             // create each schedule item, overwriting any previous settings
@@ -424,5 +413,29 @@ void WebSchedulerService::loop() {
         last_tm_min = tm->tm_min;
     }
 }
+
+// hard coded tests
+#if defined(EMSESP_TEST)
+void WebSchedulerService::test() {
+    update(
+        [&](WebScheduler & webScheduler) {
+            // test 1
+            auto si        = ScheduleItem();
+            si.active      = true;
+            si.flags       = 1;
+            si.time        = "12:00";
+            si.cmd         = "test";
+            si.value       = "10";
+            si.name        = "test_scheduler";
+            si.elapsed_min = 0;
+            si.retry_cnt   = 0xFF; // no startup retries
+
+            webScheduler.scheduleItems.push_back(si);
+
+            return StateUpdateResult::CHANGED; // persist the changes
+        },
+        "local");
+}
+#endif
 
 } // namespace emsesp

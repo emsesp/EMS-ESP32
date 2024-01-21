@@ -307,12 +307,18 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "general") {
-        shell.printfln("Testing adding a boiler, thermostat and sensors...");
+        shell.printfln("Testing adding a boiler, thermostat, all sensors, scheduler and custom entities...");
         test("general");
 
-        // add sensors
+        // add analog and temperatire sensors
         emsesp::EMSESP::analogsensor_.test();
         emsesp::EMSESP::temperaturesensor_.test();
+
+        // scheduler
+        EMSESP::webSchedulerService.test();
+
+        // custom entities
+        EMSESP::webCustomEntityService.test();
 
         // shell.invoke_command("show devices");
         // shell.invoke_command("show values");
@@ -331,16 +337,40 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "custom_entities") {
-        shell.printfln("custom entities...");
-        test("general");
+        shell.printfln("Adding custom entities...");
+
+        // add some dummy entities
+        EMSESP::webCustomEntityService.test();
 
 #ifdef EMSESP_STANDALONE
         AsyncWebServerRequest request;
         request.method(HTTP_GET);
         request.url("/api/custom");
-        request.url("/api/custom/boiler_flowtemp");
-        request.url("/api/custom/boiler_flowtemp2");
         EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/custom/test_custom");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/custom/test_read_only");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/custom/test_ram");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        shell.invoke_command("call custom info");
+
+#endif
+        ok = true;
+    }
+
+    if (command == "scheduler") {
+        shell.printfln("Adding Scheduler items...");
+
+        // add some dummy entities
+        EMSESP::webSchedulerService.test();
+
+#ifdef EMSESP_STANDALONE
+        AsyncWebServerRequest request;
+        request.method(HTTP_GET);
+        request.url("/api/scheduler");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        shell.invoke_command("call scheduler info");
 #endif
         ok = true;
     }
@@ -574,7 +604,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         test("boiler");
         test("thermostat");
 
-        JsonDocument doc; // some absurd high number
+        JsonDocument doc;
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice) {
                 doc.clear();
@@ -784,25 +814,26 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         ok = true;
     }
 
-    if (command == "custom") {
-        shell.printfln("Testing custom entities");
+    if (command == "customization") {
+        shell.printfln("Testing customization renaming entity");
 
         Mqtt::ha_enabled(true);
         // Mqtt::send_response(false);
 
         test("thermostat");
 
+        // before
         // shell.invoke_command("call thermostat seltemp");
         // shell.invoke_command("call system publish");
 
-        // toggle mode
+        // find thermostat
         for (const auto & emsdevice : EMSESP::emsdevices) {
-            Serial.print("Custom: ");
-            Serial.print(emsdevice->device_type_name());
-            Serial.print(" uniqueid=");
-            Serial.println(emsdevice->unique_id());
-
-            if (emsdevice->unique_id() == 1) { // thermostat
+            if (emsdevice->unique_id() == 1) {
+                Serial.println();
+                Serial.print("Custom: ");
+                Serial.print(emsdevice->device_type_name());
+                Serial.print(" uniqueid=");
+                Serial.println(emsdevice->unique_id());
                 std::string a = "00hc1/seltemp|new name>5<52";
                 emsdevice->setCustomizationEntity(a);
                 break;

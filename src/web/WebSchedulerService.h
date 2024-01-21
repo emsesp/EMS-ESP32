@@ -62,6 +62,10 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
         ha_registered_ = false;
     }
 
+#if defined(EMSESP_TEST)
+    void test();
+#endif
+
 // make all functions public so we can test in the debug and standalone mode
 #ifndef EMSESP_STANDALONE
   private:
