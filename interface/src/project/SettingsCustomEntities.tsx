@@ -1,5 +1,7 @@
 import AddIcon from '@mui/icons-material/Add';
 import CancelIcon from '@mui/icons-material/Cancel';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import WarningIcon from '@mui/icons-material/Warning';
 import { Button, Typography, Box } from '@mui/material';
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
@@ -11,7 +13,7 @@ import { useBlocker } from 'react-router-dom';
 
 import { toast } from 'react-toastify';
 
-import SettingsEntitiesDialog from './SettingsEntitiesDialog';
+import SettingsCustomEntitiesDialog from './SettingsCustomEntitiesDialog';
 import * as EMSESP from './api';
 import { DeviceValueTypeNames, DeviceValueUOM_s } from './types';
 import { entityItemValidation } from './validators';
@@ -21,7 +23,7 @@ import { ButtonRow, FormLoader, SectionContent, BlockNavigation } from 'componen
 
 import { useI18nContext } from 'i18n/i18n-react';
 
-const SettingsEntities: FC = () => {
+const SettingsCustomEntities: FC = () => {
   const { LL } = useI18nContext();
   const [numChanges, setNumChanges] = useState<number>(0);
   const blocker = useBlocker(numChanges !== 0);
@@ -43,6 +45,7 @@ const SettingsEntities: FC = () => {
   function hasEntityChanged(ei: EntityItem) {
     return (
       ei.id !== ei.o_id ||
+      ei.ram !== ei.o_ram ||
       (ei?.name || '') !== (ei?.o_name || '') ||
       ei.device_id !== ei.o_device_id ||
       ei.type_id !== ei.o_type_id ||
@@ -51,7 +54,8 @@ const SettingsEntities: FC = () => {
       ei.factor !== ei.o_factor ||
       ei.value_type !== ei.o_value_type ||
       ei.writeable !== ei.o_writeable ||
-      ei.deleted !== ei.o_deleted
+      ei.deleted !== ei.o_deleted ||
+      (ei.value || '') !== (ei.o_value || '')
     );
   }
 
@@ -118,6 +122,7 @@ const SettingsEntities: FC = () => {
         .filter((ei) => !ei.deleted)
         .map((condensed_ei) => ({
           id: condensed_ei.id,
+          ram: condensed_ei.ram,
           name: condensed_ei.name,
           device_id: condensed_ei.device_id,
           type_id: condensed_ei.type_id,
@@ -125,7 +130,8 @@ const SettingsEntities: FC = () => {
           factor: condensed_ei.factor,
           uom: condensed_ei.uom,
           writeable: condensed_ei.writeable,
-          value_type: condensed_ei.value_type
+          value_type: condensed_ei.value_type,
+          value: condensed_ei.value
         }))
     })
       .then(() => {
@@ -173,14 +179,16 @@ const SettingsEntities: FC = () => {
     setSelectedEntityItem({
       id: Math.floor(Math.random() * (Math.floor(200) - 100) + 100),
       name: '',
-      device_id: '',
-      type_id: '',
+      ram: 0,
+      device_id: '0',
+      type_id: '0',
       offset: 0,
       factor: 1,
       uom: 0,
       value_type: 0,
       writeable: false,
-      deleted: false
+      deleted: false,
+      value: ''
     });
     setDialogOpen(true);
   };
@@ -212,18 +220,21 @@ const SettingsEntities: FC = () => {
                 <HeaderCell stiff>{LL.ID_OF(LL.DEVICE())}</HeaderCell>
                 <HeaderCell stiff>{LL.ID_OF(LL.TYPE(1))}</HeaderCell>
                 <HeaderCell stiff>{LL.OFFSET()}</HeaderCell>
-                <HeaderCell stiff>{LL.VALUE(1) + ' ' + LL.TYPE(1)}</HeaderCell>
+                <HeaderCell stiff>{LL.TYPE(1)}</HeaderCell>
                 <HeaderCell stiff>{LL.VALUE(1)}</HeaderCell>
               </HeaderRow>
             </Header>
             <Body>
               {tableList.map((ei: EntityItem) => (
                 <Row key={ei.name} item={ei} onClick={() => editEntityItem(ei)}>
-                  <Cell>{ei.name}</Cell>
-                  <Cell>{showHex(ei.device_id as number, 2)}</Cell>
-                  <Cell>{showHex(ei.type_id as number, 3)}</Cell>
-                  <Cell>{ei.offset}</Cell>
-                  <Cell>{DeviceValueTypeNames[ei.value_type]}</Cell>
+                  <Cell>
+                    {ei.name}&nbsp;
+                    {ei.writeable && <EditOutlinedIcon color="primary" sx={{ fontSize: 12 }} />}
+                  </Cell>
+                  <Cell>{ei.ram === 1 ? '' : showHex(ei.device_id as number, 2)}</Cell>
+                  <Cell>{ei.ram === 1 ? '' : showHex(ei.type_id as number, 3)}</Cell>
+                  <Cell>{ei.ram === 1 ? '' : ei.offset}</Cell>
+                  <Cell>{ei.ram === 1 ? 'RAM' : DeviceValueTypeNames[ei.value_type]}</Cell>
                   <Cell>{formatValue(ei.value, ei.uom)}</Cell>
                 </Row>
               ))}
@@ -244,7 +255,7 @@ const SettingsEntities: FC = () => {
       {renderEntity()}
 
       {selectedEntityItem && (
-        <SettingsEntitiesDialog
+        <SettingsCustomEntitiesDialog
           open={dialogOpen}
           creating={creating}
           onClose={onDialogClose}
@@ -274,7 +285,10 @@ const SettingsEntities: FC = () => {
         </Box>
         <Box flexWrap="nowrap" whiteSpace="nowrap">
           <ButtonRow>
-            <Button startIcon={<AddIcon />} variant="outlined" color="secondary" onClick={addEntityItem}>
+            <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={fetchEntities}>
+              {LL.REFRESH()}
+            </Button>
+            <Button startIcon={<AddIcon />} variant="outlined" color="primary" onClick={addEntityItem}>
               {LL.ADD(0)}
             </Button>
           </ButtonRow>
@@ -284,4 +298,4 @@ const SettingsEntities: FC = () => {
   );
 };
 
-export default SettingsEntities;
+export default SettingsCustomEntities;

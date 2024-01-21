@@ -75,7 +75,7 @@ class APSettings {
                && subnetMask == settings.subnetMask;
     }
 
-    static void read(APSettings & settings, JsonObject & root) {
+    static void read(APSettings & settings, JsonObject root) {
         root["provision_mode"] = settings.provisionMode;
         root["ssid"]           = settings.ssid;
         root["password"]       = settings.password;
@@ -87,7 +87,7 @@ class APSettings {
         root["subnet_mask"]    = settings.subnetMask.toString();
     }
 
-    static StateUpdateResult update(JsonObject & root, APSettings & settings) {
+    static StateUpdateResult update(JsonObject root, APSettings & settings) {
         APSettings newSettings    = {};
         newSettings.provisionMode = root["provision_mode"] | FACTORY_AP_PROVISION_MODE;
         switch (settings.provisionMode) {

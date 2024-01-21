@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -223,6 +223,7 @@ class Boiler : public EMSdevice {
     uint32_t meterHeat_;
     uint8_t  hpEA0_;
     uint8_t  hpPumpMode_;
+    uint8_t  hpSetDiffPress_;
 
     // Pool unit
     int8_t poolSetTemp_;
@@ -334,6 +335,7 @@ class Boiler : public EMSdevice {
     void process_HpPool(std::shared_ptr<const Telegram> telegram);
     void process_HpInput(std::shared_ptr<const Telegram> telegram);
     void process_HpInConfig(std::shared_ptr<const Telegram> telegram);
+    void process_HpPressure(std::shared_ptr<const Telegram> telegram);
     void process_HpCooling(std::shared_ptr<const Telegram> telegram);
     void process_HpHeaterConfig(std::shared_ptr<const Telegram> telegram);
     void process_HybridHp(std::shared_ptr<const Telegram> telegram);
@@ -437,6 +439,7 @@ class Boiler : public EMSdevice {
     bool set_hpCircPumpWw(const char * value, const int8_t id);
     bool set_hpPumpMode(const char * value, const int8_t id);
     bool set_hpMaxPower(const char * value, const int8_t id);
+    bool set_hpDiffPress(const char * value, const int8_t id);
 
     bool        set_auxLimit(const char * value, const int8_t id);
     inline bool set_auxMaxLimit(const char * value, const int8_t id) {

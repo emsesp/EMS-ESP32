@@ -14,7 +14,7 @@ SystemStatus::SystemStatus(AsyncWebServer * server, SecurityManager * securityMa
 void SystemStatus::systemStatus(AsyncWebServerRequest * request) {
     emsesp::EMSESP::system_.refreshHeapMem(); // refresh free heap and max alloc heap
 
-    AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_ESP_STATUS_SIZE);
+    AsyncJsonResponse * response = new AsyncJsonResponse(false);
     JsonObject          root     = response->getRoot();
 
     root["emsesp_version"]   = EMSESP_APP_VERSION;

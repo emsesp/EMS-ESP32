@@ -7,14 +7,6 @@
 #include <list>
 #include <functional>
 
-#ifndef DEFAULT_BUFFER_SIZE
-#define DEFAULT_BUFFER_SIZE 2048
-#endif
-
-#ifndef FS_BUFFER_SIZE
-#define FS_BUFFER_SIZE 8192
-#endif
-
 enum class StateUpdateResult {
     CHANGED = 0,     // The update changed the state and propagation should take place if required
     CHANGED_RESTART, // The update changed the state and the service should be restarted
@@ -23,10 +15,10 @@ enum class StateUpdateResult {
 };
 
 template <typename T>
-using JsonStateUpdater = std::function<StateUpdateResult(JsonObject & root, T & settings)>;
+using JsonStateUpdater = std::function<StateUpdateResult(JsonObject root, T & settings)>;
 
 template <typename T>
-using JsonStateReader = std::function<void(T & settings, JsonObject & root)>;
+using JsonStateReader = std::function<void(T & settings, JsonObject root)>;
 
 typedef size_t                                       update_handler_id_t;
 typedef std::function<void(const String & originId)> StateUpdateCallback;
@@ -93,7 +85,7 @@ class StatefulService {
         return result;
     }
 
-    StateUpdateResult update(JsonObject & jsonObject, JsonStateUpdater<T> stateUpdater, const String & originId) {
+    StateUpdateResult update(JsonObject jsonObject, JsonStateUpdater<T> stateUpdater, const String & originId) {
         beginTransaction();
         StateUpdateResult result = stateUpdater(jsonObject, _state);
         endTransaction();
@@ -103,7 +95,7 @@ class StatefulService {
         return result;
     }
 
-    StateUpdateResult updateWithoutPropagation(JsonObject & jsonObject, JsonStateUpdater<T> stateUpdater) {
+    StateUpdateResult updateWithoutPropagation(JsonObject jsonObject, JsonStateUpdater<T> stateUpdater) {
         beginTransaction();
         StateUpdateResult result = stateUpdater(jsonObject, _state);
         endTransaction();
@@ -116,7 +108,7 @@ class StatefulService {
         endTransaction();
     }
 
-    void read(JsonObject & jsonObject, JsonStateReader<T> stateReader) {
+    void read(JsonObject jsonObject, JsonStateReader<T> stateReader) {
         beginTransaction();
         stateReader(_state, jsonObject);
         endTransaction();

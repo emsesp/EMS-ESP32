@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -95,8 +95,8 @@ bool System::command_send(const char * value, const int8_t id) {
     return EMSESP::txservice_.send_raw(value); // ignore id
 }
 
-bool System::command_response(const char * value, const int8_t id, JsonObject & output) {
-    DynamicJsonDocument doc(EMSESP_JSON_SIZE_LARGE);
+bool System::command_response(const char * value, const int8_t id, JsonObject output) {
+    JsonDocument doc;
     if (DeserializationError::Ok == deserializeJson(doc, Mqtt::get_response())) {
         for (JsonPair p : doc.as<JsonObject>()) {
             output[p.key()] = p.value();
@@ -109,24 +109,24 @@ bool System::command_response(const char * value, const int8_t id, JsonObject & 
 
 // output all the EMS devices and their values, plus the sensors and any custom entities
 // not scheduler as these are records with no output data
-bool System::command_allvalues(const char * value, const int8_t id, JsonObject & output) {
-    DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXXLARGE);
-    JsonObject          device_output;
+bool System::command_allvalues(const char * value, const int8_t id, JsonObject output) {
+    JsonDocument doc;
+    JsonObject   device_output;
 
     for (const auto & emsdevice : EMSESP::emsdevices) {
         std::string title = emsdevice->device_type_2_device_name_translated() + std::string(" ") + emsdevice->to_string();
-        device_output     = output.createNestedObject(title);
+        device_output     = output[title].to<JsonObject>();
         emsdevice->generate_values(device_output, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::API_VERBOSE); // use nested for id -1 and 0
     }
 
     // Custom entities
-    device_output = output.createNestedObject("Custom Entities");
+    device_output = output["Custom Entities"].to<JsonObject>();
     EMSESP::webCustomEntityService.get_value_info(device_output, "");
 
     // Sensors
-    device_output = output.createNestedObject("Analog Sensors");
+    device_output = output["Analog Sensors"].to<JsonObject>();
     EMSESP::analogsensor_.command_info(nullptr, 0, device_output);
-    device_output = output.createNestedObject("Temperature Sensors");
+    device_output = output["Temperature Sensors"].to<JsonObject>();
     EMSESP::temperaturesensor_.command_info(nullptr, 0, device_output);
 
     return true;
@@ -586,7 +586,7 @@ void System::send_info_mqtt() {
         return;
     }
     _connection = connection;
-    StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> doc;
+    JsonDocument doc;
     doc["event"]   = "connected";
     doc["version"] = EMSESP_APP_VERSION;
 
@@ -632,7 +632,7 @@ void System::send_info_mqtt() {
 }
 
 // create the json for heartbeat
-bool System::heartbeat_json(JsonObject & output) {
+void System::heartbeat_json(JsonObject output) {
     uint8_t bus_status = EMSESP::bus_status();
     if (bus_status == EMSESP::BUS_STATUS_TX_ERRORS) {
         output["bus_status"] = "txerror";
@@ -684,8 +684,6 @@ bool System::heartbeat_json(JsonObject & output) {
         output["wifistrength"] = wifi_quality(rssi);
     }
 #endif
-
-    return true;
 }
 
 // send periodic MQTT message with system information
@@ -697,12 +695,11 @@ void System::send_heartbeat() {
 
     refreshHeapMem(); // refresh free heap and max alloc heap
 
-    StaticJsonDocument<EMSESP_JSON_SIZE_MEDIUM> doc;
-    JsonObject                                  json = doc.to<JsonObject>();
+    JsonDocument doc;
+    JsonObject   json = doc.to<JsonObject>();
 
-    if (heartbeat_json(json)) {
-        Mqtt::queue_publish(F_(heartbeat), json); // send to MQTT with retain off. This will add to MQTT queue.
-    }
+    heartbeat_json(json);
+    Mqtt::queue_publish(F_(heartbeat), json); // send to MQTT with retain off. This will add to MQTT queue.
 }
 
 // initializes network
@@ -1051,8 +1048,8 @@ bool System::check_restore() {
     // see if we have a temp file, if so try and read it
     File new_file = LittleFS.open(TEMP_FILENAME_PATH);
     if (new_file) {
-        DynamicJsonDocument  jsonDocument = DynamicJsonDocument(FS_BUFFER_SIZE);
-        DeserializationError error        = deserializeJson(jsonDocument, new_file);
+        JsonDocument         jsonDocument;
+        DeserializationError error = deserializeJson(jsonDocument, new_file);
         if (error == DeserializationError::Ok && jsonDocument.is<JsonObject>()) {
             JsonObject input = jsonDocument.as<JsonObject>();
             // see what type of file it is, either settings or customization. anything else is ignored
@@ -1168,20 +1165,20 @@ bool System::check_upgrade(bool factory_settings) {
 }
 
 // list commands
-bool System::command_commands(const char * value, const int8_t id, JsonObject & output) {
+bool System::command_commands(const char * value, const int8_t id, JsonObject output) {
     return Command::list(EMSdevice::DeviceType::SYSTEM, output);
 }
 
 // convert settings file into json object
-void System::extractSettings(const char * filename, const char * section, JsonObject & output) {
+void System::extractSettings(const char * filename, const char * section, JsonObject output) {
 #ifndef EMSESP_STANDALONE
     File settingsFile = LittleFS.open(filename);
     if (settingsFile) {
-        DynamicJsonDocument  jsonDocument = DynamicJsonDocument(FS_BUFFER_SIZE);
-        DeserializationError error        = deserializeJson(jsonDocument, settingsFile);
+        JsonDocument         jsonDocument;
+        DeserializationError error = deserializeJson(jsonDocument, settingsFile);
         if (error == DeserializationError::Ok && jsonDocument.is<JsonObject>()) {
             JsonObject jsonObject = jsonDocument.as<JsonObject>();
-            JsonObject node       = output.createNestedObject(section);
+            JsonObject node       = output[section].to<JsonObject>();
             for (JsonPair kvp : jsonObject) {
                 node[kvp.key()] = kvp.value();
             }
@@ -1192,7 +1189,7 @@ void System::extractSettings(const char * filename, const char * section, JsonOb
 }
 
 // save settings file using input from a json object
-bool System::saveSettings(const char * filename, const char * section, JsonObject & input) {
+bool System::saveSettings(const char * filename, const char * section, JsonObject input) {
 #ifndef EMSESP_STANDALONE
     JsonObject section_json = input[section];
     if (section_json) {
@@ -1210,11 +1207,11 @@ bool System::saveSettings(const char * filename, const char * section, JsonObjec
 
 // export status information including the device information
 // http://ems-esp/api/system/info
-bool System::command_info(const char * value, const int8_t id, JsonObject & output) {
+bool System::command_info(const char * value, const int8_t id, JsonObject output) {
     JsonObject node;
 
     // System
-    node                     = output.createNestedObject("System Info");
+    node                     = output["System Info"].to<JsonObject>();
     node["version"]          = EMSESP_APP_VERSION;
     node["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     node["uptime (seconds)"] = uuid::get_uptime_sec();
@@ -1231,7 +1228,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 
 #ifndef EMSESP_STANDALONE
     // Network Status
-    node = output.createNestedObject("Network Info");
+    node = output["Network Info"].to<JsonObject>();
     if (EMSESP::system_.ethernet_connected()) {
         node["network"]  = "Ethernet";
         node["hostname"] = ETH.getHostname();
@@ -1279,7 +1276,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 #endif
 
     // NTP status
-    node = output.createNestedObject("NTP Info");
+    node = output["NTP Info"].to<JsonObject>();
 #ifndef EMSESP_STANDALONE
     node["NTP status"] = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
     EMSESP::esp8266React.getNTPSettingsService()->read([&](NTPSettings & settings) {
@@ -1290,7 +1287,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     });
 
     // OTA status
-    node = output.createNestedObject("OTA Info");
+    node = output["OTA Info"].to<JsonObject>();
     EMSESP::esp8266React.getOTASettingsService()->read([&](OTASettings & settings) {
         node["enabled"] = settings.enabled;
         node["port"]    = settings.port;
@@ -1298,7 +1295,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 #endif
 
     // MQTT Status
-    node                = output.createNestedObject("MQTT Info");
+    node                = output["MQTT Info"].to<JsonObject>();
     node["MQTT status"] = Mqtt::connected() ? F_(connected) : F_(disconnected);
     if (Mqtt::enabled()) {
         node["MQTT publishes"]     = Mqtt::publish_count();
@@ -1333,7 +1330,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     });
 
     // Syslog Status
-    node            = output.createNestedObject("Syslog Info");
+    node            = output["Syslog Info"].to<JsonObject>();
     node["enabled"] = EMSESP::system_.syslog_enabled_;
 #ifndef EMSESP_STANDALONE
     if (EMSESP::system_.syslog_enabled_) {
@@ -1345,7 +1342,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 #endif
 
     // Sensor Status
-    node = output.createNestedObject("Sensor Info");
+    node = output["Sensor Info"].to<JsonObject>();
     if (EMSESP::sensor_enabled()) {
         node["temperature sensors"]      = EMSESP::temperaturesensor_.no_sensors();
         node["temperature sensor reads"] = EMSESP::temperaturesensor_.reads();
@@ -1358,12 +1355,12 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     }
 
     // API Status
-    node              = output.createNestedObject("API Info");
+    node              = output["API Info"].to<JsonObject>();
     node["API calls"] = WebAPIService::api_count();
     node["API fails"] = WebAPIService::api_fails();
 
     // EMS Bus Status
-    node = output.createNestedObject("Bus Info");
+    node = output["Bus Info"].to<JsonObject>();
     switch (EMSESP::bus_status()) {
     case EMSESP::BUS_STATUS_OFFLINE:
         node["bus status"] = "disconnected";
@@ -1391,7 +1388,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
     }
 
     // Settings
-    node = output.createNestedObject("Settings");
+    node = output["Settings"].to<JsonObject>();
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         node["board profile"] = settings.board_profile;
         node["locale"]        = settings.locale;
@@ -1432,11 +1429,11 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 
     // Devices - show EMS devices if we have any
     if (!EMSESP::emsdevices.empty()) {
-        JsonArray devices = output.createNestedArray("Devices");
+        JsonArray devices = output["Devices"].to<JsonArray>();
         for (const auto & device_class : EMSFactory::device_handlers()) {
             for (const auto & emsdevice : EMSESP::emsdevices) {
                 if (emsdevice && (emsdevice->device_type() == device_class.first)) {
-                    JsonObject obj    = devices.createNestedObject();
+                    JsonObject obj    = devices.add<JsonObject>();
                     obj["type"]       = emsdevice->device_type_name(); // non translated name
                     obj["name"]       = emsdevice->name();
                     obj["device id"]  = Helpers::hextoa(emsdevice->device_id());
@@ -1471,7 +1468,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject & outp
 #if defined(EMSESP_TEST)
 // run a test, e.g. http://ems-esp/api?device=system&cmd=test&data=boiler
 bool System::command_test(const char * value, const int8_t id) {
-    return Test::run_test(value, id);
+    return Test::test(value, id);
 }
 #endif
 

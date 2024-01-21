@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2023, Benoit BLANCHON
+// Copyright © 2014-2024, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -13,8 +13,10 @@ class Writer<::String, void> {
   static const size_t bufferCapacity = ARDUINOJSON_STRING_BUFFER_SIZE;
 
  public:
-  explicit Writer(::String& str) : destination_(&str) {
-    size_ = 0;
+  explicit Writer(::String& str) : destination_(&str), size_(0) {
+    // clear the string but don't use "" to avoid useless allocation
+    // https://cpp4arduino.com/2018/11/21/eight-tips-to-use-the-string-class-efficiently.html
+    str = static_cast<const char*>(0);
   }
 
   ~Writer() {

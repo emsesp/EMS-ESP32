@@ -1,17 +1,24 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2023, Benoit BLANCHON
+// Copyright © 2014-2024, Benoit BLANCHON
 // MIT License
 
 #pragma once
 
-#include <ArduinoJson/Namespace.hpp>
+#include <ArduinoJson/Variant/JsonVariant.hpp>
+#include <ArduinoJson/Variant/VariantAttorney.hpp>
 
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 
 namespace DeserializationOption {
 class Filter {
  public:
-  explicit Filter(JsonVariantConst v) : variant_(v) {}
+#if ARDUINOJSON_AUTO_SHRINK
+  explicit Filter(JsonDocument& doc) : variant_(doc) {
+    doc.shrinkToFit();
+  }
+#endif
+
+  explicit Filter(JsonVariantConst variant) : variant_(variant) {}
 
   bool allow() const {
     return variant_;

@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ void Shower::start() {
     Command::add(
         EMSdevice::DeviceType::BOILER,
         F_(coldshot),
-        [&](const char * value, const int8_t id, JsonObject & output) {
+        [&](const char * value, const int8_t id, JsonObject output) {
             LOG_INFO("Forcing coldshot...");
             if (shower_state_) {
                 output["message"] = "OK";
@@ -99,7 +99,7 @@ void Shower::loop() {
                 if ((timer_pause_ - timer_start_) > SHOWER_OFFSET_TIME) {
                     duration_ = (timer_pause_ - timer_start_ - SHOWER_OFFSET_TIME);
                     if (duration_ > SHOWER_MIN_DURATION) {
-                        StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
+                        JsonDocument doc;
 
                         // duration in seconds
                         doc["duration"] = (duration_ / 1000UL); // seconds
@@ -177,10 +177,10 @@ void Shower::set_shower_state(bool state, bool force) {
 
     // send out HA MQTT Discovery config topic
     if ((Mqtt::ha_enabled()) && (!ha_configdone_ || force)) {
-        StaticJsonDocument<EMSESP_JSON_SIZE_LARGE> doc;
-        char                                       topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-        char                                       str[70];
-        char                                       stat_t[50];
+        JsonDocument doc;
+        char         topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+        char         str[70];
+        char         stat_t[50];
 
         //
         // shower active
@@ -210,12 +210,7 @@ void Shower::set_shower_state(bool state, bool force) {
             doc["pl_off"] = Helpers::render_boolean(result, false);
         }
 
-        JsonObject dev = doc.createNestedObject("dev");
-        dev["name"]    = "EMS-ESP Shower";
-        JsonArray ids  = dev.createNestedArray("ids");
-        ids.add(Mqtt::basename() + "-shower");
-
-        Mqtt::add_avty_to_doc(stat_t, doc.as<JsonObject>()); // add "availability" section
+        Mqtt::add_ha_sections_to_doc("shower", stat_t, doc, true); // create first dev & ids
 
         snprintf(topic, sizeof(topic), "binary_sensor/%s/shower_active/config", Mqtt::basename().c_str());
         ha_configdone_ = Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
@@ -240,12 +235,7 @@ void Shower::set_shower_state(bool state, bool force) {
         doc["dev_cla"]      = "duration";
         // doc["ent_cat"]      = "diagnostic";
 
-        JsonObject dev2 = doc.createNestedObject("dev");
-        dev2["name"]    = "EMS-ESP Shower";
-        JsonArray ids2  = dev2.createNestedArray("ids");
-        ids2.add(Mqtt::basename() + "-shower");
-
-        Mqtt::add_avty_to_doc(stat_t, doc.as<JsonObject>(), "value_json.duration is defined"); // add "availability" section
+        Mqtt::add_ha_sections_to_doc("shower", stat_t, doc, false, "value_json.duration is defined");
 
         snprintf(topic, sizeof(topic), "sensor/%s/shower_duration/config", Mqtt::basename().c_str());
         Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
@@ -267,12 +257,7 @@ void Shower::set_shower_state(bool state, bool force) {
         doc["val_tpl"] = "{{value_json.timestamp if value_json.timestamp is defined else 0}}";
         // doc["ent_cat"] = "diagnostic";
 
-        JsonObject dev3 = doc.createNestedObject("dev");
-        dev3["name"]    = "EMS-ESP Shower";
-        JsonArray ids3  = dev3.createNestedArray("ids");
-        ids3.add(Mqtt::basename() + "-shower");
-
-        Mqtt::add_avty_to_doc(stat_t, doc.as<JsonObject>(), "value_json.timestamp is defined"); // add "availability" section
+        Mqtt::add_ha_sections_to_doc("shower", stat_t, doc, false, "value_json.timestamp is defined");
 
         snprintf(topic, sizeof(topic), "sensor/%s/shower_timestamp/config", Mqtt::basename().c_str());
         Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag

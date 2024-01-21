@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -249,6 +249,7 @@ MAKE_WORD_CUSTOM(uom_l, "l")
 MAKE_WORD_CUSTOM(uom_kmin, "K*min")
 MAKE_WORD_CUSTOM(uom_k, "K")
 MAKE_WORD_CUSTOM(uom_volts, "V")
+MAKE_WORD_CUSTOM(uom_mbar, "mbar")
 
 // MQTT topics and prefixes
 MAKE_WORD_CUSTOM(heating_active, "heating_active")

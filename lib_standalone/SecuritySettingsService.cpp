@@ -39,7 +39,7 @@ void SecuritySettingsService::configureJWTHandler() {
 }
 
 Authentication SecuritySettingsService::authenticateJWT(String & jwt) {
-    DynamicJsonDocument payloadDocument(MAX_JWT_SIZE);
+    JsonDocument payloadDocument;
     _jwtHandler.parseJWT(jwt, payloadDocument);
     if (payloadDocument.is<JsonObject>()) {
         JsonObject parsedPayload = payloadDocument.as<JsonObject>();
@@ -62,21 +62,21 @@ Authentication SecuritySettingsService::authenticate(const String & username, co
     return Authentication();
 }
 
-inline void populateJWTPayload(JsonObject & payload, User * user) {
+inline void populateJWTPayload(JsonObject payload, User * user) {
     payload["username"] = user->username;
     payload["admin"]    = user->admin;
 }
 
-boolean SecuritySettingsService::validatePayload(JsonObject & parsedPayload, User * user) {
-    DynamicJsonDocument jsonDocument(MAX_JWT_SIZE);
-    JsonObject          payload = jsonDocument.to<JsonObject>();
+boolean SecuritySettingsService::validatePayload(JsonObject parsedPayload, User * user) {
+    JsonDocument jsonDocument;
+    JsonObject   payload = jsonDocument.to<JsonObject>();
     populateJWTPayload(payload, user);
     return payload == parsedPayload;
 }
 
 String SecuritySettingsService::generateJWT(User * user) {
-    DynamicJsonDocument jsonDocument(MAX_JWT_SIZE);
-    JsonObject          payload = jsonDocument.to<JsonObject>();
+    JsonDocument jsonDocument;
+    JsonObject   payload = jsonDocument.to<JsonObject>();
     populateJWTPayload(payload, user);
     return _jwtHandler.buildJWT(payload);
 }
@@ -100,7 +100,7 @@ ArRequestHandlerFunction SecuritySettingsService::wrapRequest(ArRequestHandlerFu
 }
 
 ArJsonRequestHandlerFunction SecuritySettingsService::wrapCallback(ArJsonRequestHandlerFunction onRequest, AuthenticationPredicate predicate) {
-    return [this, onRequest, predicate](AsyncWebServerRequest * request, JsonVariant & json) {
+    return [this, onRequest, predicate](AsyncWebServerRequest * request, JsonVariant json) {
         Authentication authentication = authenticateRequest(request);
         if (!predicate(authentication)) {
             request->send(401);

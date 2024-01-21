@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ namespace emsesp {
 
 WebLogService::WebLogService(AsyncWebServer * server, SecurityManager * securityManager)
     : events_(EVENT_SOURCE_LOG_PATH)
-    , setValues_(LOG_SETTINGS_PATH, std::bind(&WebLogService::setValues, this, _1, _2), 256) {
+    , setValues_(LOG_SETTINGS_PATH, std::bind(&WebLogService::setValues, this, _1, _2)) {
     events_.setFilter(securityManager->filterRequest(AuthenticationPredicates::IS_ADMIN));
 
     server->on(LOG_SETTINGS_PATH, HTTP_GET, std::bind(&WebLogService::getValues, this, _1)); // get settings
@@ -183,10 +183,8 @@ char * WebLogService::messagetime(char * out, const uint64_t t, const size_t buf
 
 // send to web eventsource
 void WebLogService::transmit(const QueuedLogMessage & message) {
-    DynamicJsonDocument jsonDocument(EMSESP_JSON_SIZE_LARGE);
-    if (jsonDocument.capacity() == 0) {
-        return;
-    }
+    JsonDocument jsonDocument;
+
     JsonObject logEvent = jsonDocument.to<JsonObject>();
     char       time_string[25];
 
@@ -213,7 +211,7 @@ void WebLogService::fetchLog(AsyncWebServerRequest * request) {
 }
 
 // sets the values like level after a POST
-void WebLogService::setValues(AsyncWebServerRequest * request, JsonVariant & json) {
+void WebLogService::setValues(AsyncWebServerRequest * request, JsonVariant json) {
     if (!json.is<JsonObject>()) {
         return;
     }
@@ -234,7 +232,7 @@ void WebLogService::setValues(AsyncWebServerRequest * request, JsonVariant & jso
 
 // return the current value settings after a GET
 void WebLogService::getValues(AsyncWebServerRequest * request) {
-    auto *     response  = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
+    auto *     response  = new AsyncJsonResponse(false);
     JsonObject root      = response->getRoot();
     root["level"]        = log_level();
     root["max_messages"] = maximum_log_messages();

@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig, splitVendorChunkPlugin } from 'vite';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 import preact from '@preact/preset-vite';
 import viteImagemin from 'vite-plugin-imagemin';
@@ -44,6 +44,7 @@ export default defineConfig(({ command, mode }) => {
       plugins: [
         preact(),
         viteTsconfigPaths(),
+        splitVendorChunkPlugin(),
         {
           ...viteImagemin({
             verbose: false,
@@ -112,6 +113,20 @@ export default defineConfig(({ command, mode }) => {
           nameCache: null,
           safari10: false,
           toplevel: false
+        },
+
+        rollupOptions: {
+          output: {
+            manualChunks(id: string) {
+              if (id.includes('node_modules')) {
+                // creating a chunk to react routes deps. Reducing the vendor chunk size
+                if (id.includes('react-router-dom') || id.includes('@remix-run') || id.includes('react-router')) {
+                  return '@react-router';
+                }
+                return 'vendor';
+              }
+            }
+          }
         }
       }
     };

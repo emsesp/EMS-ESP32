@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ class Roomctrl {
     static void check(const uint8_t addr, const uint8_t * data, const uint8_t length);
     static void set_remotetemp(const uint8_t type, const uint8_t hc, const int16_t temp);
     static void set_remotehum(const uint8_t type, const uint8_t hc, const int8_t hum);
-    enum : uint8_t { RC20 = 113, FB10 = 109, RC100H = 200, SENSOR = 0x40 };
+    enum : uint8_t { RC20 = 113, FB10 = 109, RC100H = 200, SENSOR = 0x40, RC200 = 157 };
 
   private:
     static constexpr uint8_t  ADDR          = 0x18;  // address for hc1

@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2023, Benoit BLANCHON
+// Copyright © 2014-2024, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -9,7 +9,7 @@
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
 // A proxy class to get or set an element of an array.
-// https://arduinojson.org/v6/api/jsonarray/subscript/
+// https://arduinojson.org/v7/api/jsonarray/subscript/
 template <typename TUpstream>
 class ElementProxy : public VariantRefBase<ElementProxy<TUpstream>>,
                      public VariantOperators<ElementProxy<TUpstream>> {
@@ -40,17 +40,22 @@ class ElementProxy : public VariantRefBase<ElementProxy<TUpstream>>,
   }
 
  private:
-  FORCE_INLINE MemoryPool* getPool() const {
-    return VariantAttorney::getPool(upstream_);
+  FORCE_INLINE ResourceManager* getResourceManager() const {
+    return VariantAttorney::getResourceManager(upstream_);
   }
 
   FORCE_INLINE VariantData* getData() const {
-    return variantGetElement(VariantAttorney::getData(upstream_), index_);
+    return VariantData::getElement(
+        VariantAttorney::getData(upstream_), index_,
+        VariantAttorney::getResourceManager(upstream_));
   }
 
   FORCE_INLINE VariantData* getOrCreateData() const {
-    return variantGetOrAddElement(VariantAttorney::getOrCreateData(upstream_),
-                                  index_, VariantAttorney::getPool(upstream_));
+    auto data = VariantAttorney::getOrCreateData(upstream_);
+    if (!data)
+      return nullptr;
+    return data->getOrAddElement(
+        index_, VariantAttorney::getResourceManager(upstream_));
   }
 
   TUpstream upstream_;

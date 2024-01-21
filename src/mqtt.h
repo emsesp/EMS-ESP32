@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ using mqtt_sub_function_p = std::function<bool(const char * message)>;
 
 class Mqtt {
   public:
-    enum discoveryType : uint8_t { HOMEASSISTANT, DOMOTICZ };
+    enum discoveryType : uint8_t { HOMEASSISTANT, DOMOTICZ, DOMOTICZ_LATEST };
     enum entityFormat : uint8_t { SINGLE_LONG, SINGLE_SHORT, MULTI_SHORT };
 
     void loop();
@@ -68,13 +68,13 @@ class Mqtt {
 
     static bool queue_publish(const std::string & topic, const std::string & payload);
     static bool queue_publish(const char * topic, const char * payload);
-    static bool queue_publish(const std::string & topic, const JsonObject & payload);
-    static bool queue_publish(const char * topic, const JsonObject & payload);
+    static bool queue_publish(const std::string & topic, const JsonObjectConst payload);
+    static bool queue_publish(const char * topic, const JsonObjectConst payload);
     static bool queue_publish(const char * topic, const std::string & payload);
-    static bool queue_publish_retain(const std::string & topic, const JsonObject & payload, const bool retain);
+    static bool queue_publish_retain(const std::string & topic, const JsonObjectConst payload, const bool retain);
     static bool queue_publish_retain(const char * topic, const std::string & payload, const bool retain);
-    static bool queue_publish_retain(const char * topic, const JsonObject & payload, const bool retain);
-    static bool queue_ha(const char * topic, const JsonObject & payload);
+    static bool queue_publish_retain(const char * topic, const JsonObjectConst payload, const bool retain);
+    static bool queue_ha(const char * topic, const JsonObjectConst payload);
     static bool queue_remove_topic(const char * topic);
 
     static bool publish_ha_sensor_config(DeviceValue & dv, const char * model, const char * brand, const bool remove, const bool create_device_config = false);
@@ -92,7 +92,7 @@ class Mqtt {
                                          const int16_t         dv_set_min,
                                          const uint32_t        dv_set_max,
                                          const int8_t          num_op,
-                                         const JsonObject &    dev_json);
+                                         const JsonObjectConst dev_json);
 
     static bool publish_system_ha_sensor_config(uint8_t type, const char * name, const char * entity, const uint8_t uom);
     static bool publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp, const bool remove = false, const int16_t min = 5, const uint32_t max = 30);
@@ -168,6 +168,10 @@ class Mqtt {
         return entity_format_;
     }
 
+    static void entity_format(uint8_t n) {
+        entity_format_ = n;
+    }
+
     static uint8_t discovery_type() {
         return discovery_type_;
     }
@@ -218,8 +222,13 @@ class Mqtt {
 
     static std::string tag_to_topic(uint8_t device_type, uint8_t tag);
 
-    static void
-    add_avty_to_doc(const char * state_t, const JsonObject & doc, const char * cond1 = nullptr, const char * cond2 = nullptr, const char * negcond = nullptr);
+    static void add_ha_sections_to_doc(const char *   name,
+                                       const char *   state_t,
+                                       JsonDocument & config,
+                                       const bool     is_first = false,
+                                       const char *   cond1    = nullptr,
+                                       const char *   cond2    = nullptr,
+                                       const char *   negcond  = nullptr);
 
   private:
     static uuid::log::Logger logger_;

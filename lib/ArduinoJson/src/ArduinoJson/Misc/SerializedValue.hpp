@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2023, Benoit BLANCHON
+// Copyright © 2014-2024, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -50,6 +50,8 @@ class SerializedValue<TChar*> {
   TChar* data_;
   size_t size_;
 };
+
+using RawString = SerializedValue<const char*>;
 
 template <typename T>
 inline SerializedValue<T> serialized(T str) {

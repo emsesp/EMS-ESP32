@@ -8,7 +8,7 @@ FeaturesService::FeaturesService(AsyncWebServer * server) {
 }
 
 void FeaturesService::features(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_FEATURES_SIZE);
+    AsyncJsonResponse * response = new AsyncJsonResponse(false);
     JsonObject          root     = response->getRoot();
 
     root["version"]  = EMSESP_APP_VERSION;

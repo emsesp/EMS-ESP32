@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,8 +27,8 @@ uint16_t WebAPIService::api_fails_ = 0;
 
 WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager)
-    , _apiHandler("/api", std::bind(&WebAPIService::webAPIService_post, this, _1, _2), 256) { // for POSTS, must use 'Content-Type: application/json' in header
-    server->on("/api", HTTP_GET, std::bind(&WebAPIService::webAPIService_get, this, _1));     // for GETS
+    , _apiHandler("/api", std::bind(&WebAPIService::webAPIService_post, this, _1, _2)) {  // for POSTS, must use 'Content-Type: application/json' in header
+    server->on("/api", HTTP_GET, std::bind(&WebAPIService::webAPIService_get, this, _1)); // for GETS
     server->addHandler(&_apiHandler);
 
     // for settings
@@ -45,15 +45,15 @@ WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * security
 // GET /{device}/{entity}
 void WebAPIService::webAPIService_get(AsyncWebServerRequest * request) {
     // has no body JSON so create dummy as empty input object
-    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> input_doc;
-    JsonObject                                 input = input_doc.to<JsonObject>();
+    JsonDocument input_doc;
+    JsonObject   input = input_doc.to<JsonObject>();
     parse(request, input);
 }
 
 // For HTTP POSTS with an optional JSON body
 // HTTP_POST | HTTP_PUT | HTTP_PATCH
 // POST /{device}[/{hc|id}][/{name}]
-void WebAPIService::webAPIService_post(AsyncWebServerRequest * request, JsonVariant & json) {
+void WebAPIService::webAPIService_post(AsyncWebServerRequest * request, JsonVariant json) {
     // if no body then treat it as a secure GET
     if (!json.is<JsonObject>()) {
         webAPIService_get(request);
@@ -67,7 +67,7 @@ void WebAPIService::webAPIService_post(AsyncWebServerRequest * request, JsonVari
 
 // parse the URL looking for query or path parameters
 // reporting back any errors
-void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
+void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     // check if the user has admin privileges (token is included and authorized)
     bool is_admin = false;
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
@@ -106,13 +106,15 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     emsesp::EMSESP::system_.refreshHeapMem();
 
     // output json buffer
-    size_t buffer   = EMSESP_JSON_SIZE_XXXLARGE;
-    auto * response = new PrettyAsyncJsonResponse(false, buffer);
-    while (!response->getSize()) {
-        delete response;
-        buffer -= 1024;
-        response = new PrettyAsyncJsonResponse(false, buffer);
-    }
+    AsyncJsonResponse * response = new AsyncJsonResponse(false);
+
+    // add more mem if needed - won't be needed in ArduinoJson 7
+    // while (!response->getSize()) {
+    //     delete response;
+    //     buffer -= 1024;
+    //     response = new AsyncJsonResponse(false, buffer);
+    // }
+
     JsonObject output = response->getRoot();
 
     // call command
@@ -132,8 +134,8 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     // if we're returning single values, just sent as plain text
     // https://github.com/emsesp/EMS-ESP32/issues/462#issuecomment-1093877210
     if (output.containsKey("api_data")) {
-        JsonVariant data = output["api_data"];
-        request->send(200, "text/plain; charset=utf-8", data.as<String>());
+        String data = output["api_data"].as<String>();
+        request->send(200, "text/plain; charset=utf-8", data);
         api_count_++;
         delete response;
         return;
@@ -161,12 +163,12 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
 }
 
 void WebAPIService::getSettings(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, FS_BUFFER_SIZE);
+    auto *     response = new AsyncJsonResponse(false);
     JsonObject root     = response->getRoot();
 
     root["type"] = "settings";
 
-    JsonObject node = root.createNestedObject("System");
+    JsonObject node = root["System"].to<JsonObject>();
     node["version"] = EMSESP_APP_VERSION;
 
     System::extractSettings(NETWORK_SETTINGS_FILE, "Network", root);
@@ -182,7 +184,7 @@ void WebAPIService::getSettings(AsyncWebServerRequest * request) {
 }
 
 void WebAPIService::getCustomizations(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, FS_BUFFER_SIZE);
+    auto *     response = new AsyncJsonResponse(false);
     JsonObject root     = response->getRoot();
 
     root["type"] = "customizations";
@@ -194,7 +196,7 @@ void WebAPIService::getCustomizations(AsyncWebServerRequest * request) {
 }
 
 void WebAPIService::getSchedule(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, FS_BUFFER_SIZE);
+    auto *     response = new AsyncJsonResponse(false);
     JsonObject root     = response->getRoot();
 
     root["type"] = "schedule";
@@ -206,7 +208,7 @@ void WebAPIService::getSchedule(AsyncWebServerRequest * request) {
 }
 
 void WebAPIService::getEntities(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, FS_BUFFER_SIZE);
+    auto *     response = new AsyncJsonResponse(false);
     JsonObject root     = response->getRoot();
 
     root["type"] = "entities";

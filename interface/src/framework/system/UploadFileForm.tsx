@@ -136,6 +136,7 @@ const UploadFileForm: FC = () => {
         <Typography variant="body2">
           {LL.UPLOAD_TEXT()}
           <br />
+          <br />
           {LL.RESTART_TEXT(1)}.
         </Typography>
       </Box>

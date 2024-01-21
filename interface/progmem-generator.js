@@ -12,6 +12,7 @@ var totalSize = 0;
 
 const generateWWWClass = () =>
   `typedef std::function<void(const String& uri, const String& contentType, const uint8_t * content, size_t len)> RouteRegistrationHandler;
+// Total size is ${totalSize} bytes
 
 class WWWData {
 ${indent}public:

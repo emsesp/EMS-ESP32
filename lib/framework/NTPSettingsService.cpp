@@ -61,7 +61,7 @@ void NTPSettingsService::configureNTP() {
     }
 }
 
-void NTPSettingsService::configureTime(AsyncWebServerRequest * request, JsonVariant & json) {
+void NTPSettingsService::configureTime(AsyncWebServerRequest * request, JsonVariant json) {
     if (json.is<JsonObject>()) {
         struct tm tm        = {0};
         String    timeLocal = json["local_time"];

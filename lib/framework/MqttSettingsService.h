@@ -98,8 +98,8 @@ class MqttSettings {
     bool     send_response;
     uint8_t  entity_format;
 
-    static void              read(MqttSettings & settings, JsonObject & root);
-    static StateUpdateResult update(JsonObject & root, MqttSettings & settings);
+    static void              read(MqttSettings & settings, JsonObject root);
+    static StateUpdateResult update(JsonObject root, MqttSettings & settings);
 };
 
 class MqttSettingsService : public StatefulService<MqttSettings> {

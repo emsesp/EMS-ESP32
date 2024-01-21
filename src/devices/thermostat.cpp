@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,15 +33,15 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
     }
     // remote thermostats with humidity: RC100H remote, each thermostat is for one hc
     if (device_id >= 0x38 && device_id <= 0x3F) {
-        // reserve_telegram_functions(3);
         register_telegram_type(0x042B + device_id - 0x38, "RemoteTemp", false, MAKE_PF_CB(process_RemoteTemp));
-        register_telegram_type(0x047B + device_id - 0x38, "RemoteHumidity", false, MAKE_PF_CB(process_RemoteHumidity));
-        register_telegram_type(0x0273 + device_id - 0x38, "RemoteCorrection", true, MAKE_PF_CB(process_RemoteCorrection));
-        register_telegram_type(0x0A6A + device_id - 0x38, "RemoteBattery", true, MAKE_PF_CB(process_RemoteBattery));
-        // maybe fixed type for these telegrams?
-        // register_telegram_type(0x0273, "RemoteCorrection", true, MAKE_PF_CB(process_RemoteCorrection));
-        // register_telegram_type(0x0A6B, "RemoteBattery", true, MAKE_PF_CB(process_RemoteBattery));
-
+        if (product_id != Roomctrl::RC200) {
+            register_telegram_type(0x047B + device_id - 0x38, "RemoteHumidity", false, MAKE_PF_CB(process_RemoteHumidity));
+            register_telegram_type(0x0273 + device_id - 0x38, "RemoteCorrection", true, MAKE_PF_CB(process_RemoteCorrection));
+            register_telegram_type(0x0A6A + device_id - 0x38, "RemoteBattery", true, MAKE_PF_CB(process_RemoteBattery));
+            // maybe fixed type for these telegrams?
+            // register_telegram_type(0x0273, "RemoteCorrection", true, MAKE_PF_CB(process_RemoteCorrection));
+            // register_telegram_type(0x0A6B, "RemoteBattery", true, MAKE_PF_CB(process_RemoteBattery));
+        }
         register_device_values(); // register device values for common values (not heating circuit)
         return;                   // no values to add
     }
@@ -1166,7 +1166,7 @@ void Thermostat::process_RC300WWmode(std::shared_ptr<const Telegram> telegram) {
     }
     has_update(telegram, wwCircMode_, 3);        // 0=off, 1=on, 2=auto, 4=own?
     has_update(telegram, wwChargeDuration_, 10); // value in steps of 15 min
-    has_update(telegram, wwCharge_, 11);         // boolv0xFF on
+    has_update(telegram, wwCharge_, 11);         // bool 0xFF on
     has_update(telegram, wwDisinfecting_, 5);    // 0-off, 0xFF on
     has_update(telegram, wwDisinfectHour_, 6);   // value in steps of 15 min
     has_update(telegram, wwDisinfectDay_, 7);    // 0-6 Day of week, 7 every day
@@ -1810,7 +1810,11 @@ bool Thermostat::set_remotetemp(const char * value, const int8_t id) {
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC35 || model() == EMSdevice::EMS_DEVICE_FLAG_RC30_N) {
         Roomctrl::set_remotetemp(Roomctrl::RC20, hc->hc(), hc->remotetemp); // RC20
     } else if ((model() == EMSdevice::EMS_DEVICE_FLAG_BC400) || model() == EMSdevice::EMS_DEVICE_FLAG_RC300) {
-        Roomctrl::set_remotetemp(Roomctrl::RC100H, hc->hc(), hc->remotetemp); // RC100H
+        if (hc->control == 1) {
+            Roomctrl::set_remotetemp(Roomctrl::RC200, hc->hc(), hc->remotetemp); // RC200
+        } else {
+            Roomctrl::set_remotetemp(Roomctrl::RC100H, hc->hc(), hc->remotetemp); // RC100H
+        }
     }
 
     return true;
@@ -1834,7 +1838,7 @@ bool Thermostat::set_remotehum(const char * value, const int8_t id) {
         hc->remotehum = h;
     }
 
-    if ((model() == EMSdevice::EMS_DEVICE_FLAG_BC400) || model() == EMSdevice::EMS_DEVICE_FLAG_RC300) {
+    if (hc->control == 3 && (model() == EMSdevice::EMS_DEVICE_FLAG_BC400 || model() == EMSdevice::EMS_DEVICE_FLAG_RC300)) {
         Roomctrl::set_remotehum(Roomctrl::RC100H, hc->hc(), hc->remotehum); // RC100H
         return true;
     }
@@ -2933,8 +2937,8 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
     uint8_t time = 0x91; // invalid
 
     if (value[0] == '{') {
-        StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
-        DeserializationError                       error = deserializeJson(doc, value);
+        JsonDocument         doc;
+        DeserializationError error = deserializeJson(doc, value);
         if (error) {
             return false;
         }
