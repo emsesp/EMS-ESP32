@@ -1,5 +1,4 @@
 const express = require('express');
-const rateLimit = require('express-rate-limit');
 const compression = require('compression');
 const path = require('path');
 const msgpack = require('@msgpack/msgpack');
@@ -14,12 +13,6 @@ rest_server.use(express.static(path.join(__dirname, '../interface/build')));
 rest_server.use(express.json());
 
 // uploads
-const testLimiter = rateLimit({
-  windowMs: 20 * 60 * 1000, // 20 minutes
-  delayAfter: 70, // 70 requests
-  delayMs: 1000 // adding 500ms delay
-});
-
 const upload = multer({ dest: '../mock-api/uploads' });
 
 function progress_middleware(req, res, next) {
@@ -33,7 +26,7 @@ function progress_middleware(req, res, next) {
     const percentage = (progress / file_size) * 100;
     console.log(`Progress: ${Math.round(percentage)}%`);
     // await delay(1000); // slow it down
-    // delay_blocking(1000); // slow it down
+    delay_blocking(1000); // slow it down
   });
   next(); // invoke next middleware which is multer
 }
@@ -2212,7 +2205,7 @@ rest_server.post(FACTORY_RESET_ENDPOINT, (req, res) => {
   res.sendStatus(200);
 });
 
-rest_server.post(UPLOAD_FILE_ENDPOINT, testLimiter, progress_middleware, upload.single('file'), (req, res) => {
+rest_server.post(UPLOAD_FILE_ENDPOINT, progress_middleware, upload.single('file'), (req, res) => {
   console.log('command: uploadFile completed.');
   if (req.file) {
     const filename = req.file.originalname;
