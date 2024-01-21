@@ -1,4 +1,4 @@
-import { handleRequest } from './Handler';
+import { handleRequest } from './handler';
 
 export default {
   port: 3080,
