@@ -611,7 +611,7 @@ void Command::show_all(uuid::console::Shell & shell) {
     shell.print(COLOR_RESET);
     show(shell, EMSdevice::DeviceType::SYSTEM, true);
 
-    // show Custom
+    // show Custom Entities
     shell.print(COLOR_BOLD_ON);
     shell.print(COLOR_YELLOW);
     shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::CUSTOM));
