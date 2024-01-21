@@ -55,7 +55,7 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
         // System::test_set_all_active(true); // uncomment if we want to show all entities and give them fake values
 
         add_device(0x08, 123); // Nefit Trendline
-        add_device(0x18, 157); // Bosch CR100
+        add_device(0x18, 157); // RC200/CW100
 
         // add_device(0x10, 158); // RC300 - there's no data here
 
@@ -310,15 +310,11 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Testing adding a boiler, thermostat, all sensors, scheduler and custom entities...");
         test("general");
 
-        // add analog and temperatire sensors
-        emsesp::EMSESP::analogsensor_.test();
-        emsesp::EMSESP::temperaturesensor_.test();
-
-        // scheduler
-        EMSESP::webSchedulerService.test();
-
-        // custom entities
-        EMSESP::webCustomEntityService.test();
+        // setup fake data
+        EMSESP::webCustomizationService.test(); // set customizations
+        EMSESP::temperaturesensor_.test();      // add temperature sensors
+        EMSESP::webSchedulerService.test();     // add scheduler items
+        EMSESP::webCustomEntityService.test();  // add custom entities
 
         // shell.invoke_command("show devices");
         // shell.invoke_command("show values");
@@ -790,15 +786,19 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         Mqtt::nested_format(1);
         // Mqtt::nested_format(0);
 
-        emsesp::EMSESP::analogsensor_.test();
-        shell.invoke_command("show values");
-        // shell.invoke_command("call system publish");
-        // shell.invoke_command("show mqtt");
+        // load some EMS data
+        test("general");
 
-        // rename
-        // bool update(uint8_t id, const std::string & name, int16_t offset, float factor, uint8_t uom, uint8_t type);
-        EMSESP::analogsensor_.update(36, "analogtest", 2, 0.7, 17, 1);
+        EMSESP::webCustomizationService.test(); // load the analog sensors
+
         shell.invoke_command("show values");
+        shell.invoke_command("call analogsensor info");
+        shell.invoke_command("call analogsensor values");
+
+        // test renaming it
+        // bool update(uint8_t id, const std::string & name, int16_t offset, float factor, uint8_t uom, uint8_t type);
+        // EMSESP::analogsensor_.update(36, "test_analog1_new", 2, 0.7, 17, 1);
+        // shell.invoke_command("show values");
         // shell.invoke_command("call system publish");
         ok = true;
     }
