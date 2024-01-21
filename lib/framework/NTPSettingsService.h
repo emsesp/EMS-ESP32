@@ -67,7 +67,7 @@ class NTPSettingsService : public StatefulService<NTPSettings> {
     bool connected_ = false;
     void WiFiEvent(WiFiEvent_t event);
     void configureNTP();
-    void configureTime(AsyncWebServerRequest * request, JsonVariant & json);
+    void configureTime(AsyncWebServerRequest * request, JsonVariant json);
 };
 
 #endif

@@ -21,7 +21,7 @@
 #define WebCustomEntityService_h
 
 #define EMSESP_CUSTOMENTITY_FILE "/config/emsespEntity.json"
-#define EMSESP_CUSTOMENTITY_SERVICE_PATH "/rest/customentities" // GET and POST
+#define EMSESP_CUSTOMENTITY_SERVICE_PATH "/rest/customEntities" // GET and POST
 
 namespace emsesp {
 
@@ -38,6 +38,7 @@ class CustomEntityItem {
     bool        writeable;
     uint32_t    value;
     std::string data;
+    uint8_t ram;
 };
 
 class WebCustomEntity {

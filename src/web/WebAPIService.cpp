@@ -53,7 +53,7 @@ void WebAPIService::webAPIService_get(AsyncWebServerRequest * request) {
 // For HTTP POSTS with an optional JSON body
 // HTTP_POST | HTTP_PUT | HTTP_PATCH
 // POST /{device}[/{hc|id}][/{name}]
-void WebAPIService::webAPIService_post(AsyncWebServerRequest * request, JsonVariant & json) {
+void WebAPIService::webAPIService_post(AsyncWebServerRequest * request, JsonVariant json) {
     // if no body then treat it as a secure GET
     if (!json.is<JsonObject>()) {
         webAPIService_get(request);
@@ -134,8 +134,8 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     // if we're returning single values, just sent as plain text
     // https://github.com/emsesp/EMS-ESP32/issues/462#issuecomment-1093877210
     if (output.containsKey("api_data")) {
-        JsonVariant data = output["api_data"];
-        request->send(200, "text/plain; charset=utf-8", data.as<String>());
+        String data = output["api_data"].as<String>();
+        request->send(200, "text/plain; charset=utf-8", data);
         api_count_++;
         delete response;
         return;

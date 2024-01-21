@@ -286,7 +286,7 @@ MAKE_WORD_TRANSLATION(partymode, "party", "Party", "party", "", "impreza", "", "
 MAKE_WORD_TRANSLATION(fireplace, "fireplace", "Kamin", "haard", "", "kominek", "", "", "şömine", "camino", "krb") // TODO translate
 
 // MQTT Discovery - this is special device entity for 'climate'
-MAKE_TRANSLATION(haclimate, "haclimate", "Discovery current room temperature", "Discovery Temperatur", "Discovery huidige kamertemperatuur", "", "termostat w HA", "HA Avlest temp", "", "Güncel osa sıcaklığı", "verifica temperatura ambiente attuale", "Zistiť aktuálnu teplotu v miestnosti") // TODO translate
+MAKE_TRANSLATION(haclimate, "haclimate", "mqtt discovery current room temperature", "Discovery Temperatur", "Discovery huidige kamertemperatuur", "", "termostat w HA", "HA Avlest temp", "", "Güncel osa sıcaklığı", "verifica temperatura ambiente attuale", "Zistiť aktuálnu teplotu v miestnosti") // TODO translate
 
 // Entity translations: tag, mqtt, en, de, nl, sv, pl, no, fr, tr, it, sk
 // Boiler
@@ -463,6 +463,7 @@ MAKE_TRANSLATION(hpPumpMode, "hppumpmode", "primary heatpump mode", "Modus Haupt
 MAKE_TRANSLATION(instantstart, "instantstart", "instant start", "Sofortstart", "", "", "natychmiastowy start", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(heatondelay, "heatondelay", "heat-on delay", "Einschaltverzögerung Heizen", "", "", "opóźnienie włączania ogrzewania", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(heatoffdelay, "heatoffdelay", "heat-off delay", "Ausschaltverzögerung Heizen", "", "", "opóźnienie włączania ogrzewania", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(hpSetDiffPress, "hpsetdiffpress", "set differental pressure", "Pumpensolldruck", "", "", "", "", "", "", "", "") // TODO translate
 
 // hybrid heatpump
 MAKE_TRANSLATION(hybridStrategy, "hybridstrategy", "hybrid control strategy", "Hybrid Strategie", "Hybride strategie", "Hybrid kontrollstrategi", "strategia sterowania hybrydowego", "hybrid kontrollstrategi", "stratégie contrôle hybride", "hibrit kontrol stratejisi", "strategia comtrollo ibrido", "hybridná stratégia riadenia")

@@ -482,6 +482,15 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(hpMaxPower),
                               DeviceValueUOM::PERCENT,
                               MAKE_CF_CB(set_hpMaxPower));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &hpSetDiffPress_,
+                              DeviceValueType::UINT,
+                              DeviceValueNumOp::DV_NUMOP_MUL50,
+                              FL_(hpSetDiffPress),
+                              DeviceValueUOM::MBAR,
+                              MAKE_CF_CB(set_hpDiffPress),
+                              150,
+                              750);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpCompOn_, DeviceValueType::BOOL, FL_(hpCompOn), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpActivity_, DeviceValueType::ENUM, FL_(enum_hpactivity), FL_(hpActivity), DeviceValueUOM::NONE);
         // register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpHeatingOn_, DeviceValueType::BOOL, FL_(hpHeatingOn), DeviceValueUOM::NONE);
@@ -1935,6 +1944,10 @@ void Boiler::process_HpMeters(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, meterHeat_, 24);
 }
 
+void Boiler::process_HpPressure(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, hpSetDiffPress_, 9);
+}
+
 // HIU unit
 
 // boiler(0x08) -B-> All(0x00), ?(0x0779), data: 06 05 01 01 AD 02 EF FF FF 00 00 7F FF
@@ -2934,6 +2947,15 @@ bool Boiler::set_hpMaxPower(const char * value, const int8_t id) {
     int v;
     if (Helpers::value2number(value, v)) {
         write_command(0x484, 31, v, 0x484);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_hpDiffPress(const char * value, const int8_t id) {
+    int v;
+    if (Helpers::value2number(value, v)) {
+        write_command(0x2CC, 9, (uint8_t)(v / 50), 0x2CC);
         return true;
     }
     return false;

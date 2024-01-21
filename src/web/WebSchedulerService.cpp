@@ -62,7 +62,7 @@ StateUpdateResult WebScheduler::update(JsonObject root, WebScheduler & webSchedu
     JsonDocument doc;
     deserializeJson(doc, json);
     root = doc.as<JsonObject>();
-    Serial.println(COLOR_BRIGHT_MAGENTA);
+    Serial.print(COLOR_BRIGHT_MAGENTA);
     Serial.print(" Using fake scheduler file: ");
     serializeJson(root, Serial);
     Serial.println(COLOR_RESET);
@@ -177,7 +177,6 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
         attribute_s = breakp + 1;
     }
 
-    JsonVariant data;
     for (const ScheduleItem & scheduleItem : *scheduleItems) {
         if (Helpers::toLower(scheduleItem.name) == Helpers::toLower(command_s)) {
             output["name"] = scheduleItem.name;
@@ -199,7 +198,7 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
     }
 
     if (attribute_s && output.containsKey(attribute_s)) {
-        data = output[attribute_s];
+        String data = output[attribute_s].as<String>();
         output.clear();
         output["api_data"] = data;
     }

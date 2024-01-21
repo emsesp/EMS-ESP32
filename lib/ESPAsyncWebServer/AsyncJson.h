@@ -70,7 +70,7 @@ class MsgpackAsyncJsonResponse : public AsyncAbstractResponse {
 
     ~MsgpackAsyncJsonResponse() {
     }
-    JsonVariant & getRoot() {
+    JsonVariant getRoot() {
         return _root;
     }
     bool _sourceValid() const {
@@ -114,7 +114,7 @@ class AsyncJsonResponse : public AsyncAbstractResponse {
 
     ~AsyncJsonResponse() {
     }
-    JsonVariant & getRoot() {
+    JsonVariant getRoot() {
         return _root;
     }
     bool _sourceValid() const {
@@ -158,7 +158,7 @@ class PrettyAsyncJsonResponse : public AsyncJsonResponse {
     }
 };
 
-typedef std::function<void(AsyncWebServerRequest * request, JsonVariant & json)> ArJsonRequestHandlerFunction;
+typedef std::function<void(AsyncWebServerRequest * request, JsonVariant json)> ArJsonRequestHandlerFunction;
 
 class AsyncCallbackJsonWebHandler : public AsyncWebHandler {
   private:

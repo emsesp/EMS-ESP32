@@ -249,6 +249,7 @@ MAKE_WORD_CUSTOM(uom_l, "l")
 MAKE_WORD_CUSTOM(uom_kmin, "K*min")
 MAKE_WORD_CUSTOM(uom_k, "K")
 MAKE_WORD_CUSTOM(uom_volts, "V")
+MAKE_WORD_CUSTOM(uom_mbar, "mbar")
 
 // MQTT topics and prefixes
 MAKE_WORD_CUSTOM(heating_active, "heating_active")

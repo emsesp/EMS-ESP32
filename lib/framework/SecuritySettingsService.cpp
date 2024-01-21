@@ -101,7 +101,7 @@ ArRequestHandlerFunction SecuritySettingsService::wrapRequest(ArRequestHandlerFu
 }
 
 ArJsonRequestHandlerFunction SecuritySettingsService::wrapCallback(ArJsonRequestHandlerFunction onRequest, AuthenticationPredicate predicate) {
-    return [this, onRequest, predicate](AsyncWebServerRequest * request, JsonVariant & json) {
+    return [this, onRequest, predicate](AsyncWebServerRequest * request, JsonVariant json) {
         Authentication authentication = authenticateRequest(request);
         if (!predicate(authentication)) {
             request->send(401);

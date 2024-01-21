@@ -67,7 +67,7 @@ class HttpPostEndpoint {
     JsonStateUpdater<T>  _stateUpdater;
     StatefulService<T> * _statefulService;
 
-    void updateSettings(AsyncWebServerRequest * request, JsonVariant & json) {
+    void updateSettings(AsyncWebServerRequest * request, JsonVariant json) {
         if (!json.is<JsonObject>()) {
             return;
         }

@@ -227,7 +227,7 @@ void WebDataService::device_data(AsyncWebServerRequest * request) {
 }
 
 // assumes the service has been checked for admin authentication
-void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVariant & json) {
+void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVariant json) {
     if (json.is<JsonObject>()) {
         uint8_t      unique_id = json["id"]; // unique ID
         const char * cmd       = json["c"];  // the command
@@ -323,7 +323,7 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
 
 // takes a temperaturesensor name and optional offset from the WebUI and update the customization settings
 // via the temperaturesensor service
-void WebDataService::write_temperature_sensor(AsyncWebServerRequest * request, JsonVariant & json) {
+void WebDataService::write_temperature_sensor(AsyncWebServerRequest * request, JsonVariant json) {
     bool ok = false;
     if (json.is<JsonObject>()) {
         JsonObject sensor = json;
@@ -346,7 +346,7 @@ void WebDataService::write_temperature_sensor(AsyncWebServerRequest * request, J
 }
 
 // update the analog record, or create a new one
-void WebDataService::write_analog_sensor(AsyncWebServerRequest * request, JsonVariant & json) {
+void WebDataService::write_analog_sensor(AsyncWebServerRequest * request, JsonVariant json) {
     bool ok = false;
     if (json.is<JsonObject>()) {
         JsonObject analog = json;

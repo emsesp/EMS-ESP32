@@ -13,77 +13,48 @@
 using namespace std::placeholders; // for `_1` etc
 
 template <class T>
-class HttpGetEndpoint {
-  public:
-    HttpGetEndpoint(JsonStateReader<T>      stateReader,
-                    StatefulService<T> *    statefulService,
-                    AsyncWebServer *        server,
-                    const String &          servicePath,
-                    SecurityManager *       securityManager,
-                    AuthenticationPredicate authenticationPredicate = AuthenticationPredicates::IS_ADMIN)
-        : _stateReader(stateReader)
-        , _statefulService(statefulService) {
-        server->on(servicePath.c_str(), HTTP_GET, securityManager->wrapRequest(std::bind(&HttpGetEndpoint::fetchSettings, this, _1), authenticationPredicate));
-    }
-
-    HttpGetEndpoint(JsonStateReader<T> stateReader, StatefulService<T> * statefulService, AsyncWebServer * server, const String & servicePath)
-        : _stateReader(stateReader)
-        , _statefulService(statefulService) {
-        server->on(servicePath.c_str(), HTTP_GET, std::bind(&HttpGetEndpoint::fetchSettings, this, _1));
-    }
-
+class HttpEndpoint {
   protected:
     JsonStateReader<T>   _stateReader;
+    JsonStateUpdater<T>  _stateUpdater;
     StatefulService<T> * _statefulService;
 
-    void fetchSettings(AsyncWebServerRequest * request) {
-        AsyncJsonResponse * response   = new AsyncJsonResponse(false);
-        JsonObject          jsonObject = response->getRoot().to<JsonObject>();
-        _statefulService->read(jsonObject, _stateReader);
+    AsyncCallbackWebHandler *     GEThandler;
+    AsyncCallbackJsonWebHandler * POSThandler;
 
-        response->setLength();
-        request->send(response);
-    }
-};
-
-template <class T>
-class HttpPostEndpoint {
   public:
-    HttpPostEndpoint(JsonStateReader<T>      stateReader,
-                     JsonStateUpdater<T>     stateUpdater,
-                     StatefulService<T> *    statefulService,
-                     AsyncWebServer *        server,
-                     const String &          servicePath,
-                     SecurityManager *       securityManager,
-                     AuthenticationPredicate authenticationPredicate = AuthenticationPredicates::IS_ADMIN)
+    HttpEndpoint(JsonStateReader<T>      stateReader,
+                 JsonStateUpdater<T>     stateUpdater,
+                 StatefulService<T> *    statefulService,
+                 AsyncWebServer *        server,
+                 const String &          servicePath,
+                 SecurityManager *       securityManager,
+                 AuthenticationPredicate authenticationPredicate = AuthenticationPredicates::IS_ADMIN)
         : _stateReader(stateReader)
         , _stateUpdater(stateUpdater)
-        , _statefulService(statefulService)
-        , _updateHandler(servicePath, securityManager->wrapCallback(std::bind(&HttpPostEndpoint::updateSettings, this, _1, _2), authenticationPredicate)) {
-        _updateHandler.setMethod(HTTP_POST);
-        server->addHandler(&_updateHandler);
-    }
+        , _statefulService(statefulService) {
+        // Create the GET and POST endpoints
+        // We can't use HTTP_ANY and process one a single endpoint due to the way the ESPAsyncWebServer library works
+        // Could also use server->on() but this is more efficient
 
-    HttpPostEndpoint(JsonStateReader<T>   stateReader,
-                     JsonStateUpdater<T>  stateUpdater,
-                     StatefulService<T> * statefulService,
-                     AsyncWebServer *     server,
-                     const String &       servicePath)
-        : _stateReader(stateReader)
-        , _stateUpdater(stateUpdater)
-        , _statefulService(statefulService)
-        , _updateHandler(servicePath, std::bind(&HttpPostEndpoint::updateSettings, this, _1, _2)) {
-        _updateHandler.setMethod(HTTP_POST);
-        server->addHandler(&_updateHandler);
+        // create the GET
+        GEThandler = new AsyncCallbackWebHandler();
+        GEThandler->setUri(servicePath);
+        GEThandler->setMethod(HTTP_GET);
+        GEThandler->onRequest(securityManager->wrapRequest(std::bind(&HttpEndpoint::fetchSettings, this, _1), authenticationPredicate));
+        server->addHandler(GEThandler);
+
+        // create the POST
+        POSThandler =
+            new AsyncCallbackJsonWebHandler(servicePath,
+                                            securityManager->wrapCallback(std::bind(&HttpEndpoint::updateSettings, this, _1, _2), authenticationPredicate));
+        POSThandler->setMethod(HTTP_POST);
+        server->addHandler(POSThandler);
     }
 
   protected:
-    JsonStateReader<T>          _stateReader;
-    JsonStateUpdater<T>         _stateUpdater;
-    StatefulService<T> *        _statefulService;
-    AsyncCallbackJsonWebHandler _updateHandler;
-
-    void updateSettings(AsyncWebServerRequest * request, JsonVariant & json) {
+    // for POST
+    void updateSettings(AsyncWebServerRequest * request, JsonVariant json) {
         if (!json.is<JsonObject>()) {
             request->send(400);
             return;
@@ -105,29 +76,15 @@ class HttpPostEndpoint {
         response->setLength();
         request->send(response);
     }
-};
 
-template <class T>
-class HttpEndpoint : public HttpGetEndpoint<T>, public HttpPostEndpoint<T> {
-  public:
-    HttpEndpoint(JsonStateReader<T>      stateReader,
-                 JsonStateUpdater<T>     stateUpdater,
-                 StatefulService<T> *    statefulService,
-                 AsyncWebServer *        server,
-                 const String &          servicePath,
-                 SecurityManager *       securityManager,
-                 AuthenticationPredicate authenticationPredicate = AuthenticationPredicates::IS_ADMIN)
-        : HttpGetEndpoint<T>(stateReader, statefulService, server, servicePath, securityManager, authenticationPredicate)
-        , HttpPostEndpoint<T>(stateReader, stateUpdater, statefulService, server, servicePath, securityManager, authenticationPredicate) {
-    }
+    // for GET
+    void fetchSettings(AsyncWebServerRequest * request) {
+        AsyncJsonResponse * response   = new AsyncJsonResponse(false);
+        JsonObject          jsonObject = response->getRoot().to<JsonObject>();
+        _statefulService->read(jsonObject, _stateReader);
 
-    HttpEndpoint(JsonStateReader<T>   stateReader,
-                 JsonStateUpdater<T>  stateUpdater,
-                 StatefulService<T> * statefulService,
-                 AsyncWebServer *     server,
-                 const String &       servicePath)
-        : HttpGetEndpoint<T>(stateReader, statefulService, server, servicePath)
-        , HttpPostEndpoint<T>(stateReader, stateUpdater, statefulService, server, servicePath) {
+        response->setLength();
+        request->send(response);
     }
 };
 

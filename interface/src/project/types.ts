@@ -177,7 +177,8 @@ export enum DeviceValueUOM {
   L,
   KMIN,
   K,
-  VOLTS
+  VOLTS,
+  MBAR
 }
 
 export const DeviceValueUOM_s = [
@@ -204,7 +205,8 @@ export const DeviceValueUOM_s = [
   'l',
   'K*min',
   'K',
-  'V'
+  'V',
+  'mbar'
 ];
 
 export enum AnalogType {
@@ -323,6 +325,7 @@ export enum ScheduleFlag {
 
 export interface EntityItem {
   id: number; // unique number
+  ram: number;
   name: string;
   device_id: number | string;
   type_id: number | string;
@@ -334,6 +337,7 @@ export interface EntityItem {
   writeable: boolean;
   deleted?: boolean;
   o_id?: number;
+  o_ram?: number;
   o_name?: string;
   o_device_id?: number | string;
   o_type_id?: number | string;
@@ -343,6 +347,7 @@ export interface EntityItem {
   o_value_type?: number;
   o_deleted?: boolean;
   o_writeable?: boolean;
+  o_value?: any;
 }
 
 export interface Entities {
@@ -398,6 +403,6 @@ export const DeviceValueTypeNames = [
   'ULONG',
   'TIME',
   'ENUM',
-  'STRING',
+  'RAW',
   'CMD'
 ];

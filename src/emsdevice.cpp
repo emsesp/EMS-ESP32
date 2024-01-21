@@ -583,6 +583,7 @@ void EMSdevice::add_device_value(uint8_t               tag,              // to b
             }
         }
     });
+
     if (ignore) {
         return;
     }
@@ -943,11 +944,10 @@ void EMSdevice::generate_values_web(JsonObject output) {
             auto mask = Helpers::hextoa((uint8_t)(dv.state >> 4), false); // create mask to a 2-char string
 
             // add name, prefixing the tag if it exists. This is the id used in the WebUI table and must be unique
-            if (dv.has_tag()) {
-                obj["id"] = mask + tag_to_string(dv.tag) + " " + fullname;
-            } else {
-                obj["id"] = mask + fullname;
-            }
+            obj["id"] = dv.has_tag() ? mask + tag_to_string(dv.tag) + " " + fullname : mask + fullname; // suffix tag
+
+            // TODO check TAG https://github.com/emsesp/EMS-ESP32/issues/1338
+            // obj["id"] = dv.has_tag() ? mask + fullname + " " + tag_to_string(dv.tag) : mask + fullname; // suffix tag
 
             // add commands and options
             if (dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY)) {
@@ -1001,7 +1001,7 @@ void EMSdevice::generate_values_web(JsonObject output) {
 
 // as generate_values_web() but stripped down to only show all entities and their state
 // this is used only for WebCustomizationService::device_entities()
-void EMSdevice::generate_values_web_customization(JsonArray & output) {
+void EMSdevice::generate_values_web_customization(JsonArray output) {
     for (auto & dv : devicevalues_) {
         // also show commands and entities that have an empty full name
         JsonObject obj        = output.add<JsonObject>();
@@ -1058,13 +1058,10 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
         auto fullname = Helpers::translated_word(dv.fullname);
         if (dv.type != DeviceValueType::CMD) {
             if (fullname) {
-                if (dv.has_tag()) {
-                    char name[50];
-                    snprintf(name, sizeof(name), "%s %s", tag_to_string(dv.tag), fullname);
-                    obj["n"] = name;
-                } else {
-                    obj["n"] = fullname;
-                }
+                obj["n"] = dv.has_tag() ? std::string(tag_to_string(dv.tag)) + " " + fullname : fullname; // prefix tag
+
+                // TODO check TAG https://github.com/emsesp/EMS-ESP32/issues/1338
+                // obj["n"] = (dv.has_tag()) ? fullname + " " + tag_to_string(dv.tag) : fullname; // suffix tag
             }
 
             // add the custom name, is optional
@@ -1409,13 +1406,10 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
 
             auto fullname = dv.get_fullname();
             if (!fullname.empty()) {
-                if (dv.has_tag()) {
-                    char name[50];
-                    snprintf(name, sizeof(name), "%s %s", tag_to_string(dv.tag), fullname.c_str());
-                    json["fullname"] = name;
-                } else {
-                    json["fullname"] = fullname;
-                }
+                json["fullname"] = dv.has_tag() ? fullname + " " + tag_to_string(dv.tag) : fullname; // suffix tag
+
+                // TODO check TAG https://github.com/emsesp/EMS-ESP32/issues/1338
+                json["fullname"] = dv.has_tag() ? std::string(tag_to_string(dv.tag)) + " " + fullname.c_str() : fullname; // prefix tag
             }
 
             if (dv.tag != DeviceValueTAG::TAG_NONE) {
@@ -1549,7 +1543,7 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
                 EMSESP::logger().debug("Attribute '%s'", attribute_s);
 #endif
                 if (json.containsKey(attribute_s)) {
-                    JsonVariant data = json[attribute_s];
+                    String data = json[attribute_s].as<String>();
                     output.clear();
                     output["api_data"] = data;
                     return true;
@@ -1610,16 +1604,20 @@ bool EMSdevice::generate_values(JsonObject output, const uint8_t tag_filter, con
             char name[80];
 
             if (output_target == OUTPUT_TARGET::API_VERBOSE || output_target == OUTPUT_TARGET::CONSOLE) {
-                char short_name[20];
-                if (output_target == OUTPUT_TARGET::CONSOLE) {
-                    snprintf(short_name, sizeof(short_name), " (%s)", dv.short_name);
-                } else {
-                    strcpy(short_name, "");
-                }
+                // char short_name[20];
+                // if (output_target == OUTPUT_TARGET::CONSOLE) {
+                //     snprintf(short_name, sizeof(short_name), "(%s)", dv.short_name);
+                // } else {
+                //     strcpy(short_name, "");
+                // }
+
+                // add tag
                 if (have_tag) {
-                    snprintf(name, sizeof(name), "%s %s%s", tag_to_string(dv.tag), fullname.c_str(), short_name); // prefix the tag
+                    snprintf(name, sizeof(name), "%s %s (%s)", tag_to_string(dv.tag), fullname.c_str(), dv.short_name); // prefix tag
+                    // TODO check TAG https://github.com/emsesp/EMS-ESP32/issues/1338
+                    // snprintf(name, sizeof(name), "%s %s (%s)", fullname.c_str(), tag_to_string(dv.tag), dv.short_name); // sufix tag
                 } else {
-                    snprintf(name, sizeof(name), "%s%s", fullname.c_str(), short_name);
+                    snprintf(name, sizeof(name), "%s (%s)", fullname.c_str(), dv.short_name);
                 }
             } else {
                 strlcpy(name, (dv.short_name), sizeof(name)); // use short name

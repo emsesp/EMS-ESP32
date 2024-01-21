@@ -54,7 +54,7 @@ void ESP8266React::begin() {
             DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "Accept, Content-Type, Authorization");
             DefaultHeaders::Instance().addHeader("Access-Control-Allow-Credentials", "true");
         }
-        DefaultHeaders::Instance().addHeader("Server", networkSettings.hostname); // TODO use hostname
+        DefaultHeaders::Instance().addHeader("Server", networkSettings.hostname);
     });
     _apSettingsService.begin();
     _ntpSettingsService.begin();

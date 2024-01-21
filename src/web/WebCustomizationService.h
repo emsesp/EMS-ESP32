@@ -23,7 +23,6 @@
 
 // GET
 #define DEVICES_SERVICE_PATH "/rest/devices"
-#define EMSESP_CUSTOMIZATION_SERVICE_PATH "/rest/customization"
 #define DEVICE_ENTITIES_PATH "/rest/deviceEntities"
 
 // POST
@@ -89,7 +88,6 @@ class WebCustomizationService : public StatefulService<WebCustomization> {
   private:
 #endif
 
-    HttpEndpoint<WebCustomization>  _httpEndpoint;
     FSPersistence<WebCustomization> _fsPersistence;
 
     // GET
@@ -97,7 +95,7 @@ class WebCustomizationService : public StatefulService<WebCustomization> {
     void device_entities(AsyncWebServerRequest * request);
 
     // POST
-    void customization_entities(AsyncWebServerRequest * request, JsonVariant & json);
+    void customization_entities(AsyncWebServerRequest * request, JsonVariant json);
     void reset_customization(AsyncWebServerRequest * request); // command
 
     AsyncCallbackJsonWebHandler _masked_entities_handler;
