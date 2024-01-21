@@ -13,7 +13,9 @@
     "build-hosted": "typesafe-i18n --no-watch && vite build --mode hosted",
     "preview-standalone": "typesafe-i18n --no-watch && vite build && concurrently -c \"auto\" \"npm:mock-api\" \"vite preview\"",
     "mock-api": "bun --watch ../mock-api/server.ts",
+    "old_mock-api": "bun --watch ../mock-api/server.js",
     "standalone": "concurrently -c \"auto\" \"typesafe-i18n\" \"npm:mock-api\" \"vite\"",
+    "old_standalone": "concurrently -c \"auto\" \"typesafe-i18n\" \"npm:old_mock-api\" \"vite\"",
     "typesafe-i18n": "typesafe-i18n --no-watch",
     "webUI": "node progmem-generator.js",
     "format": "prettier --write '**/*.{ts,tsx,js,css,json,md}'",
@@ -44,7 +46,7 @@
     "react-dropzone": "^14.2.3",
     "react-icons": "^5.0.1",
     "react-router-dom": "^6.21.3",
-    "react-toastify": "^10.0.3",
+    "react-toastify": "^10.0.4",
     "sockette": "^2.0.6",
     "typesafe-i18n": "^5.26.2",
     "typescript": "^5.3.3"
