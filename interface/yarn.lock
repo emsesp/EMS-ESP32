@@ -1867,7 +1867,7 @@ __metadata:
     react-dropzone: "npm:^14.2.3"
     react-icons: "npm:^5.0.1"
     react-router-dom: "npm:^6.21.3"
-    react-toastify: "npm:^10.0.3"
+    react-toastify: "npm:^10.0.4"
     rollup-plugin-visualizer: "npm:^5.12.0"
     sockette: "npm:^2.0.6"
     terser: "npm:^5.27.0"
@@ -7242,15 +7242,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-toastify@npm:^10.0.3":
-  version: 10.0.3
-  resolution: "react-toastify@npm:10.0.3"
+"react-toastify@npm:^10.0.4":
+  version: 10.0.4
+  resolution: "react-toastify@npm:10.0.4"
   dependencies:
     clsx: "npm:^2.1.0"
   peerDependencies:
     react: ">=16"
     react-dom: ">=16"
-  checksum: 3c9e9cebef41cff7ea60528d1ca01f03feed98a9bba10bd0749a17d7627fa5e4719b2f1d28dee22c9f9a66df2d9ddf906e180f3f9771607e16d96c889f1bf484
+  checksum: 57f4d0032bf328381bdfeb78ab5efa988d425627a61ffa43b0caa184633a0ea44253a349d6b967247fa3d480ad82a2bbaa9063ce3f89be9550eb9b30398a6837
   languageName: node
   linkType: hard
 

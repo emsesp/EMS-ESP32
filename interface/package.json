@@ -44,7 +44,7 @@
     "react-dropzone": "^14.2.3",
     "react-icons": "^5.0.1",
     "react-router-dom": "^6.21.3",
-    "react-toastify": "^10.0.3",
+    "react-toastify": "^10.0.4",
     "sockette": "^2.0.6",
     "typesafe-i18n": "^5.26.2",
     "typescript": "^5.3.3"
