@@ -333,10 +333,10 @@ void AnalogSensor::loop() {
 }
 
 // update analog information name and offset
-// a type of -1 is used to delete the sensor
+// a type value of -1 is used to delete the sensor
 bool AnalogSensor::update(uint8_t gpio, const std::string & name, double offset, double factor, uint8_t uom, int8_t type, bool deleted) {
-    boolean found_sensor = false; // see if we can find the sensor in our customization list
-
+    // first see if we can find the sensor in our customization list
+    bool found_sensor = false;
     EMSESP::webCustomizationService.update(
         [&](WebCustomization & settings) {
             for (auto & AnalogCustomization : settings.analogCustomizations) {
@@ -374,7 +374,7 @@ bool AnalogSensor::update(uint8_t gpio, const std::string & name, double offset,
         remove_ha_topic(type, gpio); // the GPIO
     }
 
-    // we didn't find it, it's new, so create and store it
+    // we didn't find it, it's new, so create and store it in the customization list
     if (!found_sensor) {
         EMSESP::webCustomizationService.update(
             [&](WebCustomization & settings) {
@@ -855,16 +855,5 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
 bool AnalogSensor::command_commands(const char * value, const int8_t id, JsonObject output) {
     return Command::list(EMSdevice::DeviceType::ANALOGSENSOR, output);
 }
-
-// hard coded tests
-#ifdef EMSESP_TEST
-void AnalogSensor::test() {
-    sensors_.emplace_back(36, "test12", 0, 0.1, 17, AnalogType::ADC);
-    sensors_.back().set_value(12.4);
-
-    sensors_.emplace_back(37, "test13", 0, 0, 0, AnalogType::DIGITAL_IN);
-    sensors_.back().set_value(13);
-}
-#endif
 
 } // namespace emsesp

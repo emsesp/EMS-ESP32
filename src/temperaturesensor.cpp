@@ -640,16 +640,18 @@ bool TemperatureSensor::Sensor::apply_customization() {
 #if defined(EMSESP_TEST)
 void TemperatureSensor::test() {
     // add 2 temperature sensors
+    // Sensor ID: 01-0203-0405-0607
     uint8_t addr[ADDR_LEN] = {1, 2, 3, 4, 5, 6, 7, 8};
     sensors_.emplace_back(addr);
-    // sensors_.back().apply_customization();
+    sensors_.back().apply_customization();
     sensors_.back().temperature_c = 123;
     sensors_.back().read          = true;
     publish_sensor(sensors_.back()); // call publish single
 
+    // Sensor ID: 0B-0C0D-0E0F-1011
     uint8_t addr2[ADDR_LEN] = {11, 12, 13, 14, 15, 16, 17, 18};
     sensors_.emplace_back(addr2);
-    // sensors_.back().apply_customization();
+    sensors_.back().apply_customization();
     sensors_.back().temperature_c = 456;
     sensors_.back().read          = true;
     publish_sensor(sensors_.back()); // call publish single

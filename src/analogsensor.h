@@ -158,11 +158,6 @@ class AnalogSensor {
 
     bool command_info(const char * value, const int8_t id, JsonObject output) const;
 
-
-#if defined(EMSESP_TEST)
-    void test();
-#endif
-
   private:
     static constexpr uint8_t  MAX_SENSORS             = 20;
     static constexpr uint32_t MEASURE_ANALOG_INTERVAL = 500;

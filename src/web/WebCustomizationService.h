@@ -83,6 +83,10 @@ class WebCustomizationService : public StatefulService<WebCustomization> {
 
     void begin();
 
+#if defined(EMSESP_TEST)
+    void test();
+#endif
+
 // make all functions public so we can test in the debug and standalone mode
 #ifndef EMSESP_STANDALONE
   private:

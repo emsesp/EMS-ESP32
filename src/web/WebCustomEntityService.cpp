@@ -626,6 +626,7 @@ bool WebCustomEntityService::get_value(std::shared_ptr<const Telegram> telegram)
 void WebCustomEntityService::test() {
     update(
         [&](WebCustomEntity & webCustomEntity) {
+            webCustomEntity.customEntityItems.clear();
             // test 1
             auto entityItem       = CustomEntityItem();
             entityItem.ram        = 0;
@@ -642,15 +643,15 @@ void WebCustomEntityService::test() {
 
             // test 2
             entityItem.ram        = 0;
-            entityItem.device_id  = 8;
-            entityItem.type_id    = 18;
-            entityItem.offset     = 0;
+            entityItem.device_id  = 24;
+            entityItem.type_id    = 677;
+            entityItem.offset     = 3;
             entityItem.factor     = 1;
             entityItem.name       = "test_read_only";
-            entityItem.uom        = 3;
+            entityItem.uom        = 0;
             entityItem.value_type = 2;
             entityItem.writeable  = false;
-            entityItem.data       = "12";
+            entityItem.data       = "48";
             webCustomEntity.customEntityItems.push_back(entityItem);
 
             // test 2

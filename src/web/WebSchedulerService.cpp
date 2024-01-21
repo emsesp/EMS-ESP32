@@ -419,12 +419,13 @@ void WebSchedulerService::loop() {
 void WebSchedulerService::test() {
     update(
         [&](WebScheduler & webScheduler) {
+            webScheduler.scheduleItems.clear();
             // test 1
             auto si        = ScheduleItem();
             si.active      = true;
             si.flags       = 1;
             si.time        = "12:00";
-            si.cmd         = "test";
+            si.cmd         = "system/fetch";
             si.value       = "10";
             si.name        = "test_scheduler";
             si.elapsed_min = 0;
