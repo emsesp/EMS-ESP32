@@ -318,7 +318,7 @@ const it: Translation = {
   SCHEDULE_TIMER_2: 'Ogni minuto',
   SCHEDULE_TIMER_3: 'Ogni ora',
   CUSTOM_ENTITIES: 'Entità personalizzate',
-  ENTITIES_HELP_1: 'Recupera entità personalizzate dal BUS EMS',
+  ENTITIES_HELP_1: 'Recupera entità personalizzate dal BUS EMS', // TODO translate
   ENTITIES_UPDATED: 'Entità aggiornate',
   WRITEABLE: 'Scrivibile',
   SHOWING: 'Visualizza',

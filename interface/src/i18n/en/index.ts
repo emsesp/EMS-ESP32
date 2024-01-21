@@ -317,7 +317,7 @@ const en: Translation = {
   SCHEDULE_TIMER_2: 'every minute',
   SCHEDULE_TIMER_3: 'every hour',
   CUSTOM_ENTITIES: 'Custom Entities',
-  ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus',
+  ENTITIES_HELP_1: 'Define custom EMS entities or dynamic user variables',
   ENTITIES_UPDATED: 'Entities Updated',
   WRITEABLE: 'Writeable',
   SHOWING: 'Showing',

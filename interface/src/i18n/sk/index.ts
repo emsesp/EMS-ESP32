@@ -316,7 +316,7 @@ const sk: Translation = {
   SCHEDULE_TIMER_2: 'každú minútu',
   SCHEDULE_TIMER_3: 'každú hodinu',
   CUSTOM_ENTITIES: 'Vlastné entity',
-  ENTITIES_HELP_1: 'Získavanie vlastných entít zo zbernice EMS',
+  ENTITIES_HELP_1: 'Získavanie vlastných entít zo zbernice EMS', // TODO translate
   ENTITIES_UPDATED: 'Aktualizované entity',
   WRITEABLE: 'Zapísateľný',
   SHOWING: 'Zobrazenie',

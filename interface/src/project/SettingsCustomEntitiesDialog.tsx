@@ -130,7 +130,7 @@ const SettingsCustomEntitiesDialog = ({
             <Grid item xs={4}>
               <TextField
                 name="value"
-                label={LL.STARTVALUE()}
+                label={LL.DEFAULT(0) + ' ' + LL.VALUE(1)}
                 value={editItem.value}
                 variant="outlined"
                 onChange={updateFormValue}
