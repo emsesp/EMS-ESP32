@@ -685,7 +685,7 @@ bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8
         return EMSESP::webSchedulerService.get_value_info(root, cmd);
     }
 
-    // own entities
+    // custom entities
     if (devicetype == DeviceType::CUSTOM) {
         return EMSESP::webCustomEntityService.get_value_info(root, cmd);
     }

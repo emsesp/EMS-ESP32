@@ -642,6 +642,7 @@ bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int
     if (sensors_.empty()) {
         return true;
     }
+
     // make a copy of the string command for parsing
     char command_s[30];
     strlcpy(command_s, cmd, sizeof(command_s));

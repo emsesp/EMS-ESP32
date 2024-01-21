@@ -302,6 +302,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 
     // check if its a call to an end-point of a device
     // this is used to fetch the attributes of the device entity, or call a command directly
+    // for example info, values, commands, etc
     bool single_command = (!value || !strlen(value));
     if (single_command) {
         // exception 1: anything that is from System
@@ -474,7 +475,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
         return;
     }
 
-    // create a list of commands, sort them
+    // create list of command, and sort
     std::list<std::string> sorted_cmds;
     for (const auto & cf : cmdfunctions_) {
         if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN)) {
@@ -483,7 +484,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
     }
     sorted_cmds.sort();
 
-    // if not in verbose mode, just print them on a single line
+    // if not in verbose mode, just print them on a single line and exit
     if (!verbose) {
         for (const auto & cl : sorted_cmds) {
             shell.print(cl);
@@ -615,6 +616,7 @@ void Command::show_all(uuid::console::Shell & shell) {
     shell.print(COLOR_YELLOW);
     shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::CUSTOM));
     shell.println(COLOR_RESET);
+    // TODO to remove later?
     shell.printf("  info:\t\t\t\t%slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
     shell.println(COLOR_RESET);
     shell.printf("  commands:\t\t\t%slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
@@ -626,6 +628,7 @@ void Command::show_all(uuid::console::Shell & shell) {
     shell.print(COLOR_YELLOW);
     shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SCHEDULER));
     shell.println(COLOR_RESET);
+    // TODO to remove later?
     shell.printf("  info:\t\t\t\t%slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
     shell.println(COLOR_RESET);
     shell.printf("  commands:\t\t\t%slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
