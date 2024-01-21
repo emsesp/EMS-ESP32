@@ -638,6 +638,7 @@ void AnalogSensor::publish_values(const bool force) {
 
 // called from emsesp.cpp, similar to the emsdevice->get_value_info
 // searches by name
+// TODO see if this can replace the command_info
 bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int8_t id) const {
     if (sensors_.empty()) {
         return true;
@@ -700,6 +701,7 @@ bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int
 
 // creates JSON doc from values
 // returns true if there are no sensors
+// TODO see if this can be merged with get_value_info so we can remove the commands (info, commands, etc...)
 bool AnalogSensor::command_info(const char * value, const int8_t id, JsonObject output) const {
     if (sensors_.empty()) {
         return true;
