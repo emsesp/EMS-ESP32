@@ -726,20 +726,25 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     std::string dest_name("");
     std::string type_name("");
     for (const auto & emsdevice : emsdevices) {
-        if (emsdevice) {
-            // get src & dest
-            if (emsdevice->is_device_id(src)) {
-                src_name = emsdevice->device_type_name();
-            } else if (emsdevice->is_device_id(dest)) {
-                dest_name = emsdevice->device_type_name();
+        // get src & dest
+        if (emsdevice->is_device_id(src)) {
+            src_name = emsdevice->device_type_name();
+        } else if (emsdevice->is_device_id(dest)) {
+            dest_name = emsdevice->device_type_name();
+        }
+        // get the type name
+        if (type_name.empty()) {
+            if ((telegram->operation == Telegram::Operation::RX_READ && emsdevice->is_device_id(dest))
+                || (telegram->operation != Telegram::Operation::RX_READ && dest == 0 && emsdevice->is_device_id(src))
+                || (telegram->operation != Telegram::Operation::RX_READ && src == EMSbus::ems_bus_id() && emsdevice->is_device_id(dest))) {
+                type_name = emsdevice->telegram_type_name(telegram);
             }
-            // get the type name
-            if (type_name.empty()) {
-                if ((telegram->operation == Telegram::Operation::RX_READ && emsdevice->is_device_id(dest))
-                    || (telegram->operation != Telegram::Operation::RX_READ && dest == 0 && emsdevice->is_device_id(src))
-                    || (telegram->operation != Telegram::Operation::RX_READ && src == EMSbus::ems_bus_id() && emsdevice->is_device_id(dest))) {
-                    type_name = emsdevice->telegram_type_name(telegram);
-                }
+        }
+    }
+    if (type_name.empty()) {
+        for (const auto & emsdevice : emsdevices) {
+            if (telegram->operation != Telegram::Operation::RX_READ && emsdevice->is_device_id(src)) {
+                type_name = emsdevice->telegram_type_name(telegram);
             }
         }
     }
@@ -946,7 +951,7 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     if (!telegram_found) {
         // check for sends to master thermostat
         for (const auto & emsdevice : emsdevices) {
-            if (emsdevice->is_device_id(telegram->src) && telegram->dest != 0x10) {
+            if (emsdevice->is_device_id(telegram->src) && telegram->dest == 0x10) {
                 telegram_found = emsdevice->handle_telegram(telegram);
                 device_found   = emsdevice->unique_id();
                 break;
