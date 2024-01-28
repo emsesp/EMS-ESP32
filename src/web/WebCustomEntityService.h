@@ -38,6 +38,7 @@ class CustomEntityItem {
     bool        writeable;
     uint32_t    value;
     std::string data;
+    uint8_t     ram;
 };
 
 class WebCustomEntity {
@@ -68,6 +69,10 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
     void    ha_reset() {
         ha_registered_ = false;
     }
+
+#if defined(EMSESP_TEST)
+    void test();
+#endif
 
   private:
     HttpEndpoint<WebCustomEntity>  _httpEndpoint;

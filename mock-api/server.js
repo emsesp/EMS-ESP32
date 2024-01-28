@@ -1,135 +1,65 @@
-import { Router } from 'itty-router';
-import { Encoder } from '@msgpack/msgpack';
-import busboy from 'busboy';
-// import multer from 'multer';
+const express = require('express');
+const compression = require('compression');
+const path = require('path');
+const msgpack = require('@msgpack/msgpack');
+const multer = require('multer'); // https://www.npmjs.com/package/multer#readme
 
-const encoder = new Encoder();
-const router = Router();
-// const upload = multer({ dest: '../mock-api/uploads' }); // TODO remove muter
+// REST API
+const rest_server = express();
+const port = 3080;
 
-const REST_ENDPOINT_ROOT = '/rest/';
-const API_ENDPOINT_ROOT = '/api/';
-const ES_ENDPOINT_ROOT = '/es/';
+rest_server.use(compression());
+rest_server.use(express.static(path.join(__dirname, '../interface/build')));
+rest_server.use(express.json());
 
-const restRouter = Router({ base: REST_ENDPOINT_ROOT });
-const apiRouter = Router({ base: API_ENDPOINT_ROOT });
-const esRouter = Router({ base: ES_ENDPOINT_ROOT });
+// uploads
+const upload = multer({ dest: '../mock-api/uploads' });
 
-// HTTP HEADERS
-const headers = {
-  'Access-Control-Allow-Origin': '*',
-  'Content-type': 'application/json'
-};
+function progress_middleware(req, res, next) {
+  console.log('Uploading file... ');
+  let progress = 0;
+  const file_size = req.headers['content-length'];
 
-const ESheaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Content-type': 'text/event-stream',
-  'Cache-Control': 'no-cache',
-  Connection: 'keep-alive'
-};
+  // set event listener
+  req.on('data', async (chunk) => {
+    progress += chunk.length;
+    const percentage = (progress / file_size) * 100;
+    console.log(`Progress: ${Math.round(percentage)}%`);
+    // await delay(1000); // slow it down
+    delay_blocking(1000); // slow it down
+  });
+  next(); // invoke next middleware which is multer
+}
 
-// GLOBAL VARIABLES
-let countWifiScanPoll = 0; // wifi network scan
-
-// FUNCTIONS
+// delays
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 function delay_blocking(milliseconds) {
   var start = new Date().getTime();
-  for (var i = 0; i < 1e7; i++) {
+  // for (var i = 0; i < 1e7; i++) {
+  while (true) {
     if (new Date().getTime() - start > milliseconds) {
       break;
     }
   }
 }
 
-function updateMask(entity: any, de: any, dd: any) {
-  const current_mask = parseInt(entity.slice(0, 2), 16);
+// endpoints
+const API_ENDPOINT_ROOT = '/api/';
+const REST_ENDPOINT_ROOT = '/rest/';
 
-  // strip of any min/max ranges
-  const shortname_with_customname = entity.slice(2).split('>')[0];
-  const shortname = shortname_with_customname.split('|')[0];
-  const new_custom_name = shortname_with_customname.split('|')[1];
-  const has_min_max = entity.slice(2).split('>')[1];
-
-  // find in de
-  const de_objIndex = de.findIndex((obj: any) => obj.id === shortname);
-  let fullname = '';
-  let new_fullname = '';
-  if (de_objIndex !== -1) {
-    // get current name
-    if (de[de_objIndex].cn) {
-      fullname = de[de_objIndex].cn;
-    } else {
-      fullname = de[de_objIndex].n;
-    }
-
-    // find in dd, either looking for fullname or custom name
-    // console.log('looking for ' + fullname + ' in ' + dd.data);
-    const dd_objIndex = dd.data.findIndex((obj: any) => obj.id.slice(2) === fullname);
-    if (dd_objIndex !== -1) {
-      let changed = new Boolean(false);
-
-      // see if the mask has changed
-      const old_mask = parseInt(dd.data[dd_objIndex].id.slice(0, 2), 16);
-      if (old_mask !== current_mask) {
-        changed = true;
-        console.log('mask has changed to ' + current_mask.toString(16));
-      }
-
-      // see if the custom name has changed
-      const old_custom_name = dd.data[dd_objIndex].cn;
-      console.log('comparing names, old (' + old_custom_name + ') with new (' + new_custom_name + ')');
-      if (old_custom_name !== new_custom_name) {
-        changed = true;
-        new_fullname = new_custom_name;
-        console.log('name has changed to ' + new_custom_name);
-      } else {
-        new_fullname = fullname;
-      }
-
-      // see if min or max has changed
-      // get current min/max values if they exist
-      const current_min = dd.data[dd_objIndex].min;
-      const current_max = dd.data[dd_objIndex].max;
-      let new_min = current_min;
-      let new_max = current_max;
-      if (has_min_max) {
-        new_min = parseInt(has_min_max.split('<')[0]);
-        new_max = parseInt(has_min_max.split('<')[1]);
-        if (current_min !== new_min || current_max !== new_max) {
-          changed = true;
-          console.log('min/max has changed to ' + new_min + '/' + new_max);
-        }
-      }
-
-      if (changed === true) {
-        de[de_objIndex].m = current_mask;
-        de[de_objIndex].cn = new_fullname;
-        if (new_min) {
-          de[de_objIndex].mi = new_min;
-        }
-        if (new_max) {
-          de[de_objIndex].ma = new_max;
-        }
-        dd.data[dd_objIndex].id = current_mask.toString(16).padStart(2, '0') + new_fullname;
-        dd.data[dd_objIndex].cn = new_fullname;
-      }
-    }
-  }
-}
-
-// START DATA
+// network poll
+let countWifiScanPoll = 0;
 
 // LOG
 const LOG_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'logSettings';
-let log_settings = {
+log_settings = {
   level: 6,
   max_messages: 50,
   compact: false
 };
 
 const FETCH_LOG_ENDPOINT = REST_ENDPOINT_ROOT + 'fetchLog';
-const fetch_log = {
+let fetch_log = {
   events: [
     {
       t: '000+00:00:00.001',
@@ -180,7 +110,7 @@ const fetch_log = {
 const NTP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'ntpStatus';
 const NTP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'ntpSettings';
 const TIME_ENDPOINT = REST_ENDPOINT_ROOT + 'time';
-let ntp_settings = {
+ntp_settings = {
   enabled: true,
   server: 'time.google.com',
   tz_label: 'Europe/Amsterdam',
@@ -197,7 +127,7 @@ const ntp_status = {
 // AP
 const AP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'apSettings';
 const AP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'apStatus';
-let ap_settings = {
+ap_settings = {
   provision_mode: 1,
   ssid: 'ems-esp',
   password: 'ems-esp-neo',
@@ -208,7 +138,7 @@ let ap_settings = {
   ssid_hidden: true,
   max_clients: 4
 };
-const ap_status = {
+ap_status = {
   status: 1,
   ip_address: '192.168.4.1',
   mac_address: '3C:61:05:03:AB:2D',
@@ -220,7 +150,7 @@ const NETWORK_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'networkSettings';
 const NETWORK_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'networkStatus';
 const SCAN_NETWORKS_ENDPOINT = REST_ENDPOINT_ROOT + 'scanNetworks';
 const LIST_NETWORKS_ENDPOINT = REST_ENDPOINT_ROOT + 'listNetworks';
-let network_settings = {
+network_settings = {
   ssid: 'myWifi',
   password: 'myPassword',
   hostname: 'ems-esp',
@@ -249,8 +179,7 @@ const network_status = {
   subnet_mask: '255.255.255.0',
   gateway_ip: '10.10.10.1',
   dns_ip_1: '10.10.10.1',
-  dns_ip_2: '0.0.0.0',
-  hostname: 'ems-esp'
+  dns_ip_2: '0.0.0.0'
 };
 const list_networks = {
   networks: [
@@ -315,7 +244,7 @@ const list_networks = {
 
 // OTA
 const OTA_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'otaSettings';
-let ota_settings = {
+ota_settings = {
   enabled: true,
   port: 8266,
   password: 'ems-esp-neo'
@@ -324,7 +253,7 @@ let ota_settings = {
 // MQTT
 const MQTT_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'mqttSettings';
 const MQTT_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'mqttStatus';
-let mqtt_settings = {
+mqtt_settings = {
   enabled: true,
   host: '192.168.1.4',
   port: 1883,
@@ -372,8 +301,9 @@ const FACTORY_RESET_ENDPOINT = REST_ENDPOINT_ROOT + 'factoryReset';
 const UPLOAD_FILE_ENDPOINT = REST_ENDPOINT_ROOT + 'uploadFile';
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn';
 const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken';
-const system_status = {
-  emsesp_version: '3.6-demo',
+
+let system_status = {
+  emsesp_version: '3.x-demo',
   esp_platform: 'ESP32',
   max_alloc_heap: 89,
   psram_size: 0,
@@ -389,7 +319,7 @@ const system_status = {
   app_free: 121,
   uptime: '000+00:15:42.707'
 };
-let security_settings = {
+security_settings = {
   jwt_secret: 'naughty!',
   users: [
     { username: 'admin', password: 'admin', admin: true },
@@ -397,12 +327,6 @@ let security_settings = {
   ]
 };
 const features = {
-  project: true,
-  security: true,
-  mqtt: true,
-  ntp: true,
-  ota: true,
-  upload_firmware: true,
   version: 'v3.6-demo',
   // platform: 'ESP32'
   platform: 'ESP32-S3'
@@ -414,44 +338,32 @@ const signin = {
 };
 const generate_token = { token: '1234' };
 
-//
 // EMS-ESP Project specific
-//
 const EMSESP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'settings';
 const EMSESP_CORE_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'coreData';
 const EMSESP_SENSOR_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'sensorData';
 const EMSESP_DEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'devices';
 const EMSESP_SCANDEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'scanDevices';
-// const EMSESP_DEVICEDATA_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceData/:id';
-// const EMSESP_DEVICEENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceEntities/:id';
 const EMSESP_DEVICEDATA_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceData';
 const EMSESP_DEVICEENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceEntities';
 const EMSESP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'status';
 const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile';
-const EMSESP_WRITE_DEVICEVALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceValue';
-const EMSESP_WRITE_TEMPSENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeTemperatureSensor';
-const EMSESP_WRITE_ANALOGSENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeAnalogSensor';
+const EMSESP_WRITE_VALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceValue';
+const EMSESP_WRITE_SENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeTemperatureSensor';
+const EMSESP_WRITE_ANALOG_ENDPOINT = REST_ENDPOINT_ROOT + 'writeAnalogSensor';
 const EMSESP_CUSTOMIZATION_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customizationEntities';
 const EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'resetCustomizations';
-
-const EMSESP_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
-const EMSESP_CUSTOMENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customEntities';
-
-const EMSESP_GET_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'getSettings';
-const EMSESP_GET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'getCustomizations';
-const EMSESP_GET_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'getEntities';
-const EMSESP_GET_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'getSchedule';
-
-const EMSESP_SYSTEM_INFO_ENDPOINT = API_ENDPOINT_ROOT + 'system/info';
+const EMSESP_WRITE_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
+const EMSESP_WRITE_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'entities';
 
 const emsesp_info = {
   System: {
-    version: '3.6-demo',
+    version: '3.6.5',
     uptime: '001+06:40:34.018',
     'uptime (seconds)': 110434,
     freemem: 131,
     'reset reason': 'Software reset CPU / Software reset CPU',
-    'Dallas sensors': 3
+    'Sensor sensors': 3
   },
   Network: {
     connection: 'Ethernet',
@@ -474,8 +386,8 @@ const emsesp_info = {
     MQTT: 'connected',
     'MQTT publishes': 46336,
     'MQTT publish fails': 0,
-    'Dallas reads': 22086,
-    'Dallas fails': 0
+    'Sensor reads': 22086,
+    'Sensor fails': 0
   },
   Devices: [
     {
@@ -492,111 +404,7 @@ const emsesp_info = {
   ]
 };
 
-const emsesp_allvalues = {
-  'Boiler Nefit GBx72/Trendline/Cerapur/Greenstar Si (DeviceID:0x08, ProductID:123, Version:06.01)': {
-    'force heating off': 'off',
-    'heating active': 'off',
-    'tapwater active': 'off',
-    'selected flow temperature': 5,
-    'heating pump modulation': 0,
-    'current flow temperature': 41.4,
-    'return temperature': 37.7,
-    'system pressure': 1.3,
-    'actual boiler temperature': 44.2,
-    gas: 'off',
-    'gas stage 2': 'off',
-    'flame current': 0,
-    fan: 'off',
-    ignition: 'off',
-    'oil preheating': 'off',
-    'burner min power': 0,
-    'burner max power': 50,
-    'burner min period': 10,
-    'hysteresis on temperature': -6,
-    'hysteresis off temperature': 6,
-    'heating activated': 'on',
-    'heating temperature': 70,
-    'heating pump': 'off',
-    'boiler pump max power': 70,
-    'boiler pump min power': 50,
-    'boiler pump mode': 'proportional',
-    'pump delay': 2,
-    'burner selected max power': 0,
-    'burner current power': 0,
-    'burner starts': 394602,
-    'total burner operating time': '480 days 4 hours 23 minutes',
-    'burner stage 2 operating time': '0 days 0 hours 0 minutes',
-    'total heat operating time': '395 days 2 hours 14 minutes',
-    'burner starts heating': 46245,
-    'total UBA operating time': '3932 days 23 hours 58 minutes',
-    'last error code': '2E(207) 100.75.2000 65:00 (0 min)',
-    'service code': '0H',
-    'service code number': 203,
-    'maintenance message': 'H00',
-    'maintenance scheduled': 'manual',
-    'time to next maintenance': 6000,
-    'next maintenance date': '01.01.2012',
-    'dhw turn on/off': 'on',
-    'dhw set temperature': 62,
-    'dhw selected temperature': 60,
-    'dhw type': 'flow',
-    'dhw comfort': 'hot',
-    'dhw flow temperature offset': 40,
-    'dhw max power': 100,
-    'dhw circulation pump available': 'off',
-    'dhw charging type': '3-way valve',
-    'dhw hysteresis on temperature': -5,
-    'dhw hysteresis off temperature': 0,
-    'dhw disinfection temperature': 70,
-    'dhw circulation pump mode': 'off',
-    'dhw circulation active': 'off',
-    'dhw current intern temperature': 33.5,
-    'dhw current tap water flow': 0,
-    'dhw storage intern temperature': 33.5,
-    'dhw activated': 'on',
-    'dhw one time charging': 'off',
-    'dhw disinfecting': 'off',
-    'dhw charging': 'off',
-    'dhw recharging': 'off',
-    'dhw temperature ok': 'on',
-    'dhw active': 'off',
-    'dhw 3-way valve active': 'on',
-    'dhw set pump power': 0,
-    'dhw starts': 348357,
-    'dhw active time': '85 days 2 hours 9 minutes',
-    'nominal Power': 30,
-    'total energy': 3088.69,
-    'energy heating': 2532.94,
-    'dhw energy': 555.75
-  },
-  'Thermostat RC20/Moduline 300 (DeviceID:0x17, ProductID:77, Version:03.03)': {
-    'date/time': '10.12.2023 13:49',
-    'hc1 how hot lounge should be': 19,
-    'hc1 current room temp': 19.5,
-    'hc1 Discovery current room temperature': 'roomTemp',
-    'hc1 mode': 'auto',
-    'hc1 manual temperature': 21.5,
-    'hc1 temperature when mode is off': 7,
-    'hc1 day temperature T2': 20,
-    'hc1 day temperature T3': 20,
-    'hc1 day temperature T4': 20,
-    'hc1 night temperature T1': 15,
-    'hc1 program switchtime': '00 mo 00:00 T1'
-  },
-  'Controller Module BC10 (DeviceID:0x09, ProductID:190, Version:01.03)': {},
-  'Custom Entities': {
-    boiler_flowtemp: 5,
-    nominalpower: 30,
-    minmodulation: 23,
-    maxmodulation: 115
-  },
-  'Analog Sensors': {},
-  'Temperature Sensors': {
-    zolder: 18.3
-  }
-};
-
-let settings = {
+settings = {
   locale: 'en',
   tx_mode: 4,
   ems_bus_id: 11,
@@ -606,6 +414,7 @@ let settings = {
   syslog_mark_interval: 0,
   syslog_host: '192.168.1.4',
   syslog_port: 514,
+  boiler_heatingfailsafe: 120,
   shower_timer: true,
   shower_alert: true,
   shower_alert_trigger: 7,
@@ -623,7 +432,6 @@ let settings = {
   notoken_api: false,
   readonly_mode: false,
   low_clock: false,
-  boiler_heatingoff: false,
   telnet_enabled: true,
   analog_enabled: false,
   pbutton_gpio: 0,
@@ -634,6 +442,7 @@ let settings = {
   fahrenheit: false
 };
 
+// this is used in customizations
 const emsesp_devices = {
   devices: [
     {
@@ -659,7 +468,6 @@ const emsesp_devices = {
 
 const emsesp_coredata = {
   connected: true,
-  // connected: false,
   // devices: [],
   devices: [
     {
@@ -749,7 +557,7 @@ const emsesp_coredata = {
       d: 1,
       p: 1,
       v: '',
-      e: 2
+      e: 1
     }
   ]
 };
@@ -795,7 +603,7 @@ const status = {
 // 1 - RC35 thermo
 // 2 - RC20 thermo
 // 3 - Buderus GB125 boiler
-// 4 - RC100 thermostat
+// 4 - RC100 themo
 // 5 - Mixer MM10
 // 6 - Solar SM10
 // 7 - Nefit Trendline boiler
@@ -916,7 +724,7 @@ const emsesp_devicedata_1 = {
     {
       v: 60,
       u: 1,
-      id: '00dhw maximmu temperature',
+      id: '00dhw maximum temperature',
       c: 'wwmaxtemp',
       m: 60,
       x: 80,
@@ -1315,6 +1123,15 @@ const emsesp_devicedata_3 = {
       id: '00force heating off',
       c: 'heatingoff',
       l: ['off', 'on']
+    },
+    {
+      v: 120,
+      u: 1,
+      id: '00heating failsafe',
+      c: 'heatingfailsafe',
+      m: 0,
+      x: 90,
+      s: 1
     },
     {
       v: 'off',
@@ -2055,11 +1872,6 @@ const emsesp_devicedata_99 = {
       u: 1,
       id: '00boiler_flowtemp',
       c: 'boiler_flowtemp'
-    },
-    {
-      v: 0,
-      u: 0,
-      id: '00wwExtra1'
     }
   ]
 };
@@ -2077,20 +1889,7 @@ let emsesp_customentities = {
       name: 'boiler_flowtemp',
       uom: 1,
       value_type: 1,
-      writeable: true,
-      value: 30
-    },
-    {
-      id: 1,
-      device_id: 16,
-      type_id: 797,
-      offset: 0,
-      factor: 1,
-      name: 'wwExtra1',
-      uom: 0,
-      value_type: 0,
-      writeable: false,
-      value: 0
+      writeable: true
     }
   ]
 };
@@ -2137,7 +1936,7 @@ let emsesp_schedule = {
   ]
 };
 
-// CUSTOMIZATION
+// CUSTOMIZATIONS
 const emsesp_deviceentities_1 = [{ v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }];
 const emsesp_deviceentities_3 = [{ v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }];
 const emsesp_deviceentities_5 = [{ v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }];
@@ -2291,628 +2090,721 @@ const emsesp_deviceentities_4 = [
   }
 ];
 
-// END DATA
-
-// ROUTING STARTS HERE
-
 // LOG
-router
-  .post(FETCH_LOG_ENDPOINT, () => {
-    const encoded = encoder.encode(fetch_log);
-    // TODO check if still need this or just send a 200 since ES will catch up?
-    return new Response(encoded, { headers });
-  })
-  .get(LOG_SETTINGS_ENDPOINT, () => new Response(JSON.stringify(log_settings), { headers }))
-  .post(LOG_SETTINGS_ENDPOINT, async (request: any) => {
-    log_settings = await request.json();
-    return new Response('OK', { status: 200 });
-  });
+rest_server.post(FETCH_LOG_ENDPOINT, (req, res) => {
+  console.log('command: fetchLog');
+  res.sendStatus(200);
+});
+rest_server.get(LOG_SETTINGS_ENDPOINT, (req, res) => {
+  res.json(log_settings);
+});
+rest_server.post(LOG_SETTINGS_ENDPOINT, (req, res) => {
+  log_settings = req.body;
+  console.log(JSON.stringify(log_settings));
+  res.sendStatus(200);
+});
 
 // NETWORK
-router
-  .get(NETWORK_STATUS_ENDPOINT, () => new Response(JSON.stringify(network_status), { headers }))
-  .get(NETWORK_SETTINGS_ENDPOINT, () => new Response(JSON.stringify(network_settings), { headers }))
-  .get(LIST_NETWORKS_ENDPOINT, () => {
-    if (countWifiScanPoll++ === 3) {
-      console.log('done, sending list');
-      return new Response(JSON.stringify(list_networks), { headers }); // send list
-    } else {
-      console.log('...waiting #' + countWifiScanPoll);
-      return new Response('OK', { status: 200 });
-    }
-  })
-  .get(SCAN_NETWORKS_ENDPOINT, () => {
-    console.log('start scan networks');
-    countWifiScanPoll = 0; // stop the poll
-    return new Response('OK', { status: 202 }); // always 202, poll for list
-  })
-  .post(NETWORK_SETTINGS_ENDPOINT, async (request: any) => {
-    network_settings = await request.json();
-    return new Response('OK', { status: 200 });
-  });
+rest_server.get(NETWORK_STATUS_ENDPOINT, (req, res) => {
+  res.json(network_status);
+});
+rest_server.get(NETWORK_SETTINGS_ENDPOINT, (req, res) => {
+  res.json(network_settings);
+});
+rest_server.post(NETWORK_SETTINGS_ENDPOINT, (req, res) => {
+  network_settings = req.body;
+  console.log(JSON.stringify(network_settings));
+  res.sendStatus(200);
+});
+rest_server.get(LIST_NETWORKS_ENDPOINT, (req, res) => {
+  if (countWifiScanPoll++ === 3) {
+    // console.log('done, have list');
+    res.json(list_networks); // send list
+  } else {
+    // console.log('...waiting #' + countWifiScanPoll);
+    res.sendStatus(200); // waiting....
+  }
+});
+rest_server.get(SCAN_NETWORKS_ENDPOINT, (req, res) => {
+  console.log('start scan networks');
+  countWifiScanPoll = 0; // stop the poll
+  res.sendStatus(200); // always 202, poll for list
+});
 
 // AP
-router
-  .get(AP_SETTINGS_ENDPOINT, () => new Response(JSON.stringify(ap_settings), { headers }))
-  .get(AP_STATUS_ENDPOINT, () => new Response(JSON.stringify(ap_status), { headers }))
-  .post(AP_SETTINGS_ENDPOINT, async (request: any) => {
-    ap_settings = await request.json();
-    return new Response('OK', { status: 200 });
-  });
+rest_server.get(AP_SETTINGS_ENDPOINT, (req, res) => {
+  res.json(ap_settings);
+});
+rest_server.get(AP_STATUS_ENDPOINT, (req, res) => {
+  console.log('get apStatus', ap_status);
+  res.json(ap_status);
+});
+rest_server.post(AP_SETTINGS_ENDPOINT, (req, res) => {
+  ap_settings = req.body;
+  console.log('post apSettings', ap_settings);
+  res.sendStatus(200);
+});
 
 // OTA
-router
-  .get(OTA_SETTINGS_ENDPOINT, () => new Response(JSON.stringify(ota_settings), { headers }))
-  .post(OTA_SETTINGS_ENDPOINT, async (request: any) => {
-    ota_settings = await request.json();
-    return new Response('OK', { status: 200 });
-  });
+rest_server.get(OTA_SETTINGS_ENDPOINT, (req, res) => {
+  res.json(ota_settings);
+});
+rest_server.post(OTA_SETTINGS_ENDPOINT, (req, res) => {
+  ota_settings = req.body;
+  console.log(JSON.stringify(ota_settings));
+  res.sendStatus(200);
+});
 
 // MQTT
-router
-  .get(MQTT_SETTINGS_ENDPOINT, () => new Response(JSON.stringify(mqtt_settings), { headers }))
-  .get(MQTT_STATUS_ENDPOINT, () => new Response(JSON.stringify(mqtt_status), { headers }))
-  .post(MQTT_SETTINGS_ENDPOINT, async (request: any) => {
-    mqtt_settings = await request.json();
-    return new Response('OK', { status: 200 });
-  });
+rest_server.get(MQTT_SETTINGS_ENDPOINT, (req, res) => {
+  res.json(mqtt_settings);
+});
+rest_server.post(MQTT_SETTINGS_ENDPOINT, (req, res) => {
+  mqtt_settings = req.body;
+  console.log(JSON.stringify(mqtt_settings));
+  res.sendStatus(200);
+});
+rest_server.get(MQTT_STATUS_ENDPOINT, (req, res) => {
+  res.json(mqtt_status);
+});
 
 // NTP
-router
-  .get(NTP_SETTINGS_ENDPOINT, () => new Response(JSON.stringify(ntp_settings), { headers }))
-  .get(NTP_STATUS_ENDPOINT, () => new Response(JSON.stringify(ntp_status), { headers }))
-  .post(TIME_ENDPOINT, () => new Response('OK', { status: 200 }))
-  .post(NTP_SETTINGS_ENDPOINT, async (request: any) => {
-    ntp_settings = await request.json();
-    return new Response('OK', { status: 200 });
-  });
+rest_server.get(NTP_SETTINGS_ENDPOINT, (req, res) => {
+  res.json(ntp_settings);
+});
+rest_server.post(NTP_SETTINGS_ENDPOINT, (req, res) => {
+  ntp_settings = req.body;
+  console.log(JSON.stringify(ntp_settings));
+  res.sendStatus(200);
+});
+rest_server.get(NTP_STATUS_ENDPOINT, (req, res) => {
+  res.json(ntp_status);
+});
+rest_server.post(TIME_ENDPOINT, (req, res) => {
+  res.sendStatus(200);
+});
 
 // SYSTEM
-router
-  .get(SYSTEM_STATUS_ENDPOINT, () => new Response(JSON.stringify(system_status), { headers }))
-  .post(SECURITY_SETTINGS_ENDPOINT, async (request: any) => {
-    security_settings = await request.json();
-    return new Response('OK', { status: 200 });
-  })
-  .get(FEATURES_ENDPOINT, () => new Response(JSON.stringify(features), { headers }))
-  .get(VERIFY_AUTHORIZATION_ENDPOINT, () => new Response(JSON.stringify(verify_authentication), { headers }))
-  .post(RESTART_ENDPOINT, () => new Response('OK', { status: 200 }))
-  .post(FACTORY_RESET_ENDPOINT, () => new Response('OK', { status: 200 }))
-  .post(UPLOAD_FILE_ENDPOINT, () => new Response('OK', { status: 404 })) // TODO remove upload when fixed
-  .post(SIGN_IN_ENDPOINT, () => new Response(JSON.stringify(signin), { headers }))
-  .get(GENERATE_TOKEN_ENDPOINT, () => new Response(JSON.stringify(generate_token), { headers }));
+rest_server.get(SYSTEM_STATUS_ENDPOINT, (req, res) => {
+  console.log('get systemStatus');
+  // create some random data to see if caching works
+  system_status.fs_used = Math.floor(Math.random() * (Math.floor(200) - 100) + 100);
+  res.json(system_status);
+});
+rest_server.get(SECURITY_SETTINGS_ENDPOINT, (req, res) => {
+  res.json(security_settings);
+});
+rest_server.post(SECURITY_SETTINGS_ENDPOINT, (req, res) => {
+  security_settings = req.body;
+  console.log(JSON.stringify(security_settings));
+  res.sendStatus(200);
+});
+rest_server.get(FEATURES_ENDPOINT, (req, res) => {
+  res.json(features);
+});
+rest_server.get(VERIFY_AUTHORIZATION_ENDPOINT, (req, res) => {
+  res.json(verify_authentication);
+});
+rest_server.post(RESTART_ENDPOINT, async (req, res) => {
+  console.log('command: restart');
+  // await delay(1000);
+  res.sendStatus(200);
+});
+rest_server.post(FACTORY_RESET_ENDPOINT, (req, res) => {
+  console.log('command: reset');
+  res.sendStatus(200);
+});
 
-// uploads // TODO fix uploading later
+rest_server.post(UPLOAD_FILE_ENDPOINT, progress_middleware, upload.single('file'), (req, res) => {
+  console.log('command: uploadFile completed.');
+  if (req.file) {
+    const filename = req.file.originalname;
+    const ext = filename.substring(filename.lastIndexOf('.') + 1);
+    console.log(req.file);
+    console.log('ext: ' + ext);
 
-// const progress_middleware = async (req: any) => {
-//   console.log('progress_middleware');
-//   let progress = 0;
-//   const file_size = req.headers['content-length'];
-
-//   // set event listener
-//   req.on('data', async (chunk) => {
-//     progress += chunk.length;
-//     const percentage = (progress / file_size) * 100;
-//     console.log(`Progress: ${Math.round(percentage)}%`);
-//     delay_blocking(200); // slow it down
-//   });
-//   // next(); // invoke next middleware which is multer
-// };
-
-// const withContent = async (request) => {
-//   const { headers } = request;
-//   const type = headers.get('content-type');
-
-//   // console.log(Object.getOwnPropertyNames(Object.getPrototypeOf(request)));
-
-//   if (type?.includes('form-data')) {
-//     console.log('withContent: got formdata');
-//     // request.content = await request.formData();
-
-//     // const bb = busboy({ headers: request.headers });
-//     // console.log('bb created');
-//     // bb.on('file', (name, file, info) => {
-//     //   const { filename, encoding, mimeType } = info;
-//     //   console.log(`File [${name}]: filename: %j, encoding: %j, mimeType: %j`, filename, encoding, mimeType);
-//     //   request.filename = filename;
-
-//     //   file
-//     //     .on('data', (data) => {
-//     //       console.log(`File [${name}] got ${data.length} bytes`);
-//     //     })
-//     //     .on('close', () => {
-//     //       console.log(`File [${name}] done`);
-//     //     });
-//     // });
-//     // bb.on('field', (name, val, info) => {
-//     //   console.log(`Field [${name}]: value: %j`, val);
-//     // });
-//     // bb.on('close', () => {
-//     //   console.log('Done parsing form!');
-//     //   // res.writeHead(303, { Connection: 'close', Location: '/' });
-//     //   // res.end();
-//     // });
-//   }
-// };
-
-// const makeMiddleware = (req) => {
-//   console.log('makeMiddleware');
-//   // const bb = busboy({ headers: req.headers });
-
-//   // bb.on('error', (err) => {
-//   //   // Send this error along to the global error handler
-//   //   console.log('Error' + err);
-//   //   return;
-//   // });
-//   // bb.on('file', (name, file, info) => {
-//   //   const { filename, encoding, mimeType } = info;
-//   //   console.log(`File [${name}]: filename: %j, encoding: %j, mimeType: %j`, filename, encoding, mimeType);
-//   //   req.filename = filename;
-
-//   //   file
-//   //     .on('data', (data) => {
-//   //       console.log(`File [${name}] got ${data.length} bytes`);
-//   //     })
-//   //     .on('close', () => {
-//   //       console.log(`File [${name}] done`);
-//   //     });
-//   // });
-//   // bb.end(req.rawBody);
-//   // req.pipe(bb);
-// };
-
-// router.post(UPLOAD_FILE_ENDPOINT, withContent, makeMiddleware, progress_middleware, ({ filename }) => {
-//   console.log('filename: ' + filename);
-
-//   // if (req.file) {
-//   //   const filename = req.file.originalname;
-//   //   const ext = filename.substring(filename.lastIndexOf('.') + 1);
-//   //   console.log(req.file);
-//   //   console.log('ext: ' + ext);
-
-//   //   if (ext === 'bin' || ext === 'json') {
-//   //     return res.sendStatus(200);
-//   //   } else if (ext === 'md5') {
-//   //     return res.json({ md5: 'ef4304fc4d9025a58dcf25d71c882d2c' });
-//   //   }
-//   // }
-//   return new Response('OK', { status: 200 });
-// });
-
-//
-//  EMS-ESP Project stuff
-//
-router
-
-  // EMS-ESP Settings
-  .get(EMSESP_SETTINGS_ENDPOINT, () => new Response(JSON.stringify(settings), { headers }))
-  .post(EMSESP_SETTINGS_ENDPOINT, async (request: any) => {
-    settings = await request.json();
-    return new Response('OK', { status: 200 }); // no restart needed
-    // return new Response('OK', { status: 205 }); // restart needed
-  })
-
-  // Device Dashboard Data
-  .get(EMSESP_CORE_DATA_ENDPOINT, () => new Response(JSON.stringify(emsesp_coredata), { headers }))
-  .get(EMSESP_SENSOR_DATA_ENDPOINT, () => new Response(JSON.stringify(emsesp_sensordata), { headers }))
-  .get(EMSESP_DEVICES_ENDPOINT, () => new Response(JSON.stringify(emsesp_devices), { headers }))
-  .post(EMSESP_SCANDEVICES_ENDPOINT, () => new Response('OK', { status: 200 }))
-  .get(EMSESP_STATUS_ENDPOINT, () => new Response(JSON.stringify(status), { headers }))
-  .get(EMSESP_DEVICEDATA_ENDPOINT, (request) => {
-    // const id = Number(request.params.id); // TODO when using :id
-    const id = Number(request.query.id);
-
-    if (id == 1) {
-      return new Response(encoder.encode(emsesp_devicedata_1), { headers });
+    if (ext === 'bin' || ext === 'json') {
+      return res.sendStatus(200);
+    } else if (ext === 'md5') {
+      return res.json({ md5: 'ef4304fc4d9025a58dcf25d71c882d2c' });
     }
-    if (id == 2) {
-      return new Response(encoder.encode(emsesp_devicedata_2), { headers });
-    }
-    if (id == 3) {
-      return new Response(encoder.encode(emsesp_devicedata_3), { headers });
-    }
-    if (id == 4) {
-      return new Response(encoder.encode(emsesp_devicedata_4), { headers });
-    }
-    if (id == 5) {
-      return new Response(encoder.encode(emsesp_devicedata_5), { headers });
-    }
-    if (id == 6) {
-      return new Response(encoder.encode(emsesp_devicedata_6), { headers });
-    }
-    if (id == 7) {
-      return new Response(encoder.encode(emsesp_devicedata_7), { headers });
-    }
-    if (id == 99) {
-      return new Response(encoder.encode(emsesp_devicedata_99), { headers });
-    }
-  })
-  .get(EMSESP_DEVICEENTITIES_ENDPOINT, (request) => {
-    // const id = Number(request.params.id); // TODO when using :id
-    const id = Number(request.query.id);
+  }
+  return res.sendStatus(400);
+});
 
-    if (id == 1) {
-      return new Response(encoder.encode(emsesp_deviceentities_1), { headers });
-    }
-    if (id == 2) {
-      return new Response(encoder.encode(emsesp_deviceentities_2), { headers });
-    }
-    if (id == 3) {
-      return new Response(encoder.encode(emsesp_deviceentities_3), { headers });
-    }
-    if (id == 4) {
-      return new Response(encoder.encode(emsesp_deviceentities_4), { headers });
-    }
-    if (id == 5) {
-      return new Response(encoder.encode(emsesp_deviceentities_5), { headers });
-    }
-    if (id == 6) {
-      return new Response(encoder.encode(emsesp_deviceentities_6), { headers });
-    }
-    if (id == 7) {
-      return new Response(encoder.encode(emsesp_deviceentities_7), { headers });
-    }
-  })
+rest_server.post(SIGN_IN_ENDPOINT, (req, res) => {
+  console.log('Signed in');
+  res.json(signin);
+});
 
-  // Customization
-  .post(EMSESP_CUSTOMIZATION_ENTITIES_ENDPOINT, async (request: any) => {
-    const content = await request.json();
-    const id = content.id;
-    for (const entity of content.entity_ids) {
-      if (id === 7) {
-        updateMask(entity, emsesp_deviceentities_7, emsesp_devicedata_7);
-      } else if (id === 1) {
-        updateMask(entity, emsesp_deviceentities_1, emsesp_devicedata_1);
-      } else if (id === 2) {
-        updateMask(entity, emsesp_deviceentities_2, emsesp_devicedata_2);
-      } else if (id === 3) {
-        updateMask(entity, emsesp_deviceentities_3, emsesp_devicedata_3);
-      } else if (id === 4) {
-        updateMask(entity, emsesp_deviceentities_4, emsesp_devicedata_4);
-      } else if (id === 5) {
-        updateMask(entity, emsesp_deviceentities_5, emsesp_devicedata_5);
-      } else if (id === 6) {
-        updateMask(entity, emsesp_deviceentities_6, emsesp_devicedata_6);
-      }
-    }
-    return new Response('OK', { status: 200 });
-  })
-  .post(EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT, async (request: any) => {
-    return new Response('OK', { status: 200 });
-  })
+rest_server.get(GENERATE_TOKEN_ENDPOINT, (req, res) => {
+  res.json(generate_token);
+});
 
-  // Scheduler
-  .post(EMSESP_SCHEDULE_ENDPOINT, async (request: any) => {
-    const content = await request.json();
-    emsesp_schedule = content;
-    return new Response('OK', { status: 200 });
-  })
-  .get(EMSESP_SCHEDULE_ENDPOINT, () => new Response(JSON.stringify(emsesp_schedule), { headers }))
+// EMS-ESP Project stuff
+rest_server.post(EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT, (req, res) => {
+  console.log('Removing all customizations...');
+  res.sendStatus(200);
+});
+rest_server.get(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
+  console.log('Get settings: ' + JSON.stringify(settings));
+  res.json(settings);
+});
+rest_server.post(EMSESP_SETTINGS_ENDPOINT, (req, res) => {
+  settings = req.body;
+  console.log('Write settings: ' + JSON.stringify(settings));
+  // res.sendStatus(205); // restart needed
+  res.sendStatus(200); // no restart needed
+});
+rest_server.get(EMSESP_CORE_DATA_ENDPOINT, (req, res) => {
+  console.log('send back core data...');
+  res.json(emsesp_coredata);
+});
+rest_server.get(EMSESP_SENSOR_DATA_ENDPOINT, (req, res) => {
+  console.log('send back sensor data...');
+  // console.log(emsesp_sensordata);
+  res.json(emsesp_sensordata);
+});
+rest_server.get(EMSESP_DEVICES_ENDPOINT, (req, res) => {
+  console.log('send back list of devices...');
+  res.json(emsesp_devices);
+});
+rest_server.post(EMSESP_SCANDEVICES_ENDPOINT, (req, res) => {
+  console.log('Scan devices...');
+  res.sendStatus(200);
+});
+rest_server.get(EMSESP_STATUS_ENDPOINT, (req, res) => {
+  res.json(status);
+});
 
-  // Custom Entities
-  .post(EMSESP_CUSTOMENTITIES_ENDPOINT, async (request: any) => {
-    const content = await request.json();
-    emsesp_customentities = content;
-    return new Response('OK', { status: 200 });
-  })
-  .get(EMSESP_CUSTOMENTITIES_ENDPOINT, () => new Response(JSON.stringify(emsesp_customentities), { headers }))
+rest_server.get(EMSESP_DEVICEDATA_ENDPOINT, (req, res) => {
+  const id = Number(req.query.id);
+  console.log('send back device data for ' + id);
+  let data = {};
 
-  // Device Dashboard
-  .post(EMSESP_WRITE_DEVICEVALUE_ENDPOINT, async (request: any) => {
-    const content = await request.json();
-    const command = content.c;
-    const value = content.v;
-    const id = content.id;
+  if (id === 1) {
+    data = emsesp_devicedata_1;
+  }
+  if (id === 2) {
+    data = emsesp_devicedata_2;
+  }
+  if (id === 3) {
+    data = emsesp_devicedata_3;
+  }
+  if (id === 4) {
+    data = emsesp_devicedata_4;
+  }
+  if (id === 5) {
+    data = emsesp_devicedata_5;
+  }
+  if (id === 6) {
+    data = emsesp_devicedata_6;
+  }
+  if (id === 7) {
+    data = emsesp_devicedata_7;
+  }
+  if (id === 99) {
+    data = emsesp_devicedata_99;
+  }
+  res.write(msgpack.encode(data), 'binary');
+  res.end(null, 'binary');
+});
 
-    var objIndex;
-    if (id === 1) {
-      objIndex = emsesp_devicedata_1.data.findIndex((obj) => obj.c == command);
-      emsesp_devicedata_1.data[objIndex].v = value;
-    }
-    if (id === 2) {
-      objIndex = emsesp_devicedata_2.data.findIndex((obj) => obj.c == command);
-      emsesp_devicedata_2.data[objIndex].v = value;
-    }
-    if (id === 3) {
-      objIndex = emsesp_devicedata_3.data.findIndex((obj) => obj.c == command);
-      emsesp_devicedata_3.data[objIndex].v = value;
-    }
-    if (id === 4) {
-      objIndex = emsesp_devicedata_4.data.findIndex((obj) => obj.c == command);
-      emsesp_devicedata_4.data[objIndex].v = value;
-    }
-    if (id === 5) {
-      objIndex = emsesp_devicedata_5.data.findIndex((obj) => obj.c == command);
-      emsesp_devicedata_5.data[objIndex].v = value;
-    }
-    if (id === 6) {
-      objIndex = emsesp_devicedata_6.data.findIndex((obj) => obj.c == command);
-      emsesp_devicedata_6.data[objIndex].v = value;
-    }
-    if (id === 7) {
-      objIndex = emsesp_devicedata_7.data.findIndex((obj) => obj.c == command);
-      emsesp_devicedata_7.data[objIndex].v = value;
-    }
-    if (id === 99) {
-      // custom entities
-      objIndex = emsesp_devicedata_99.data.findIndex((obj) => obj.c == command);
-      emsesp_devicedata_99.data[objIndex].v = value;
-    }
+rest_server.get(EMSESP_DEVICEENTITIES_ENDPOINT, (req, res) => {
+  const id = Number(req.query.id);
+  console.log('deviceentities for device ' + id + ' received');
+  let data = null;
 
-    await delay(1000); // wait to show spinner
-    return new Response('OK', { status: 200 }); // or 400 for bad request
-  })
+  if (id === 1) {
+    data = emsesp_deviceentities_1;
+  }
+  if (id === 2) {
+    data = emsesp_deviceentities_2;
+  }
+  if (id === 3) {
+    data = emsesp_deviceentities_3;
+  }
+  if (id === 4) {
+    data = emsesp_deviceentities_4;
+  }
+  if (id === 5) {
+    data = emsesp_deviceentities_5;
+  }
+  if (id === 6) {
+    data = emsesp_deviceentities_6;
+  }
+  if (id === 7) {
+    data = emsesp_deviceentities_7;
+  }
+  res.write(msgpack.encode(data), 'binary');
+  res.end(null, 'binary');
+});
 
-  // Temperature & Analog Sensors
-  .post(EMSESP_WRITE_TEMPSENSOR_ENDPOINT, async (request: any) => {
-    const ts = await request.json();
-    var objIndex = emsesp_sensordata.ts.findIndex((obj) => obj.id == ts.id_str);
-    if (objIndex !== -1) {
-      emsesp_sensordata.ts[objIndex].n = ts.name;
-      emsesp_sensordata.ts[objIndex].o = ts.offset;
-    }
-    return new Response('OK', { status: 200 });
-  })
-  .post(EMSESP_WRITE_ANALOGSENSOR_ENDPOINT, async (request: any) => {
-    const as = await request.json();
-    var objIndex = emsesp_sensordata.as.findIndex((obj) => obj.g == as.gpio);
-    if (objIndex === -1) {
-      emsesp_sensordata.as.push({
-        id: as.id,
-        g: as.gpio,
-        n: as.name,
-        f: as.factor,
-        o: as.offset,
-        u: as.uom,
-        t: as.type,
-        d: as.deleted,
-        v: 0 // must be added for demo only
-      });
+function updateMask(entity, de, dd) {
+  const current_mask = parseInt(entity.slice(0, 2), 16);
+
+  // strip of any min/max ranges
+  const shortname_with_customname = entity.slice(2).split('>')[0];
+  const shortname = shortname_with_customname.split('|')[0];
+  const new_custom_name = shortname_with_customname.split('|')[1];
+  const has_min_max = entity.slice(2).split('>')[1];
+
+  // find in de
+  de_objIndex = de.findIndex((obj) => obj.id === shortname);
+  if (de_objIndex !== -1) {
+    // get current name
+    if (de[de_objIndex].cn) {
+      fullname = de[de_objIndex].cn;
     } else {
-      if (as.deleted) {
-        emsesp_sensordata.as[objIndex].d = true;
-        var filtered = emsesp_sensordata.as.filter(function (value, index, arr) {
-          return !value.d;
-        });
-        emsesp_sensordata.as = filtered;
+      fullname = de[de_objIndex].n;
+    }
+
+    // find in dd, either looking for fullname or custom name
+    // console.log('looking for ' + fullname + ' in ' + dd.data);
+    dd_objIndex = dd.data.findIndex((obj) => obj.id.slice(2) === fullname);
+    if (dd_objIndex !== -1) {
+      let changed = new Boolean(false);
+
+      // see if the mask has changed
+      const old_mask = parseInt(dd.data[dd_objIndex].id.slice(0, 2), 16);
+      if (old_mask !== current_mask) {
+        changed = true;
+        console.log('mask has changed to ' + current_mask.toString(16));
+      }
+
+      // see if the custom name has changed
+      const old_custom_name = dd.data[dd_objIndex].cn;
+      console.log('comparing names, old (' + old_custom_name + ') with new (' + new_custom_name + ')');
+      if (old_custom_name !== new_custom_name) {
+        changed = true;
+        new_fullname = new_custom_name;
+        console.log('name has changed to ' + new_custom_name);
       } else {
-        emsesp_sensordata.as[objIndex].n = as.name;
-        emsesp_sensordata.as[objIndex].f = as.factor;
-        emsesp_sensordata.as[objIndex].o = as.offset;
-        emsesp_sensordata.as[objIndex].u = as.uom;
-        emsesp_sensordata.as[objIndex].t = as.type;
+        new_fullname = fullname;
       }
-    }
 
-    return new Response('OK', { status: 200 });
-  })
-
-  // Settings - board profile
-  .post(EMSESP_BOARDPROFILE_ENDPOINT, async (request: any) => {
-    const content = await request.json();
-    const board_profile = content.code;
-
-    const data = {
-      led_gpio: settings.led_gpio,
-      dallas_gpio: settings.dallas_gpio,
-      rx_gpio: settings.rx_gpio,
-      tx_gpio: settings.tx_gpio,
-      pbutton_gpio: settings.pbutton_gpio,
-      phy_type: settings.phy_type,
-      eth_power: settings.eth_power,
-      eth_phy_addr: settings.eth_phy_addr,
-      eth_clock_mode: settings.eth_clock_mode
-    };
-
-    if (board_profile == 'S32') {
-      // BBQKees Gateway S32
-      data.led_gpio = 2;
-      data.dallas_gpio = 18;
-      data.rx_gpio = 23;
-      data.tx_gpio = 5;
-      data.pbutton_gpio = 0;
-      data.phy_type = 0;
-      data.eth_power = 0;
-      data.eth_phy_addr = 0;
-      data.eth_clock_mode = 0;
-    } else if (board_profile == 'E32') {
-      // BBQKees Gateway E32
-      data.led_gpio = 2;
-      data.dallas_gpio = 4;
-      data.rx_gpio = 5;
-      data.tx_gpio = 17;
-      data.pbutton_gpio = 33;
-      data.phy_type = 1;
-      data.eth_power = 16;
-      data.eth_phy_addr = 1;
-      data.eth_clock_mode = 0;
-    } else if (board_profile == 'MH-ET') {
-      // MH-ET Live D1 Mini
-      data.led_gpio = 2;
-      data.dallas_gpio = 18;
-      data.rx_gpio = 23;
-      data.tx_gpio = 5;
-      data.pbutton_gpio = 0;
-      data.phy_type = 0;
-      data.eth_power = 0;
-      data.eth_phy_addr = 0;
-      data.eth_clock_mode = 0;
-    } else if (board_profile == 'NODEMCU') {
-      // NodeMCU 32S
-      data.led_gpio = 2;
-      data.dallas_gpio = 18;
-      data.rx_gpio = 23;
-      data.tx_gpio = 5;
-      data.pbutton_gpio = 0;
-      data.phy_type = 0;
-      data.eth_power = 0;
-      data.eth_phy_addr = 0;
-      data.eth_clock_mode = 0;
-    } else if (board_profile == 'LOLIN') {
-      // Lolin D32
-      data.led_gpio = 2;
-      data.dallas_gpio = 18;
-      data.rx_gpio = 17;
-      data.tx_gpio = 16;
-      data.pbutton_gpio = 0;
-      data.phy_type = 0;
-      data.eth_power = 0;
-      data.eth_phy_addr = 0;
-      data.eth_clock_mode = 0;
-    } else if (board_profile == 'OLIMEX') {
-      // Olimex ESP32-EVB (uses U1TXD/U1RXD/BUTTON, no LED or Dallas)
-      data.led_gpio = 0;
-      data.dallas_gpio = 0;
-      data.rx_gpio = 36;
-      data.tx_gpio = 4;
-      data.pbutton_gpio = 34;
-      data.phy_type = 1;
-      data.eth_power = -1;
-      data.eth_phy_addr = 0;
-      data.eth_clock_mode = 0;
-    } else if (board_profile == 'OLIMEXPOE') {
-      // Olimex ESP32-POE
-      data.led_gpio = 0;
-      data.dallas_gpio = 0;
-      data.rx_gpio = 36;
-      data.tx_gpio = 4;
-      data.pbutton_gpio = 34;
-      data.phy_type = 1;
-      data.eth_power = 12;
-      data.eth_phy_addr = 0;
-      data.eth_clock_mode = 3;
-    } else if (board_profile == 'C3MINI') {
-      // Lolin C3 mini
-      data.led_gpio = 7;
-      data.dallas_gpio = 1;
-      data.rx_gpio = 4;
-      data.tx_gpio = 5;
-      data.pbutton_gpio = 9;
-      data.phy_type = 0;
-      data.eth_power = 0;
-      data.eth_phy_addr = 0;
-      data.eth_clock_mode = 0;
-    } else if (board_profile == 'S2MINI') {
-      // Lolin C3 mini
-      data.led_gpio = 15;
-      data.dallas_gpio = 7;
-      data.rx_gpio = 11;
-      data.tx_gpio = 12;
-      data.pbutton_gpio = 0;
-      data.phy_type = 0;
-      data.eth_power = 0;
-      data.eth_phy_addr = 0;
-      data.eth_clock_mode = 0;
-    } else if (board_profile == 'S3MINI') {
-      // Liligo S3 mini
-      data.led_gpio = 17;
-      data.dallas_gpio = 18;
-      data.rx_gpio = 8;
-      data.tx_gpio = 5;
-      data.pbutton_gpio = 0;
-      data.phy_type = 0;
-      data.eth_power = 0;
-      data.eth_phy_addr = 0;
-      data.eth_clock_mode = 0;
-    }
-
-    return new Response(JSON.stringify(data), { headers });
-  })
-
-  // Download Settings
-  .get(EMSESP_GET_SETTINGS_ENDPOINT, () => new Response(JSON.stringify(emsesp_info), { headers }))
-  .get(EMSESP_GET_CUSTOMIZATIONS_ENDPOINT, () => new Response(JSON.stringify(emsesp_deviceentities_1), { headers }))
-  .get(EMSESP_GET_ENTITIES_ENDPOINT, () => new Response(JSON.stringify(emsesp_customentities), { headers }))
-  .get(EMSESP_GET_SCHEDULE_ENDPOINT, () => new Response(JSON.stringify(emsesp_schedule), { headers }));
-
-// API which are usually POST for security
-router
-  .post(EMSESP_SYSTEM_INFO_ENDPOINT, () => new Response(JSON.stringify(emsesp_info), { headers }))
-  .get(EMSESP_SYSTEM_INFO_ENDPOINT, () => new Response(JSON.stringify(emsesp_info), { headers }))
-  .post(API_ENDPOINT_ROOT, async (request: any) => {
-    const data = await request.json();
-    if (data.device === 'system') {
-      if (data.entity === 'info') {
-        return new Response(JSON.stringify(emsesp_info), { headers });
+      // see if min or max has changed
+      // get current min/max values if they exist
+      const current_min = dd.data[dd_objIndex].min;
+      const current_max = dd.data[dd_objIndex].max;
+      new_min = current_min;
+      new_max = current_max;
+      if (has_min_max) {
+        new_min = parseInt(has_min_max.split('<')[0]);
+        new_max = parseInt(has_min_max.split('<')[1]);
+        if (current_min !== new_min || current_max !== new_max) {
+          changed = true;
+          console.log('min/max has changed to ' + new_min + '/' + new_max);
+        }
       }
-      if (data.entity === 'allvalues') {
-        return new Response(JSON.stringify(emsesp_allvalues), { headers });
+
+      if (changed === true) {
+        console.log(
+          'Updating ' + dd.data[dd_objIndex].id + ' -> ' + current_mask.toString(16).padStart(2, '0') + new_fullname
+        );
+        de[de_objIndex].m = current_mask;
+        de[de_objIndex].cn = new_fullname;
+        if (new_min) {
+          de[de_objIndex].mi = new_min;
+        }
+        if (new_max) {
+          de[de_objIndex].ma = new_max;
+        }
+        dd.data[dd_objIndex].id = current_mask.toString(16).padStart(2, '0') + new_fullname;
+        dd.data[dd_objIndex].cn = new_fullname;
       }
+
+      console.log('new dd:');
+      console.log(dd.data[dd_objIndex]);
+      console.log('new de:');
+      console.log(de[de_objIndex]);
+    } else {
+      console.log('error, dd not found');
     }
-    return new Response('Not Found', { status: 404 });
-  });
+  } else {
+    console.log("can't locate record for shortname " + shortname);
+  }
+}
 
-//
-// Event Source // TODO fix event source later
-//
+rest_server.post(EMSESP_CUSTOMIZATION_ENTITIES_ENDPOINT, (req, res) => {
+  const id = req.body.id;
+  console.log('customization id = ' + id);
+  console.log(req.body.entity_ids);
+  for (const entity of req.body.entity_ids) {
+    if (id === 7) {
+      updateMask(entity, emsesp_deviceentities_7, emsesp_devicedata_7);
+    } else if (id === 1) {
+      updateMask(entity, emsesp_deviceentities_1, emsesp_devicedata_1);
+    } else if (id === 2) {
+      updateMask(entity, emsesp_deviceentities_2, emsesp_devicedata_2);
+    } else if (id === 3) {
+      updateMask(entity, emsesp_deviceentities_3, emsesp_devicedata_3);
+    } else if (id === 4) {
+      updateMask(entity, emsesp_deviceentities_4, emsesp_devicedata_4);
+    } else if (id === 5) {
+      updateMask(entity, emsesp_deviceentities_5, emsesp_devicedata_5);
+    } else if (id === 6) {
+      updateMask(entity, emsesp_deviceentities_6, emsesp_devicedata_6);
+    }
+  }
+  res.sendStatus(200);
+});
 
-// const data = {
-//   t: '000+00:00:00.000',
-//   l: 3, // error
-//   i: 1,
-//   n: 'system',
-//   m: 'incoming message #1'
-// };
-// const sseFormattedResponse = `data: ${JSON.stringify(data)}\n\n`;
-// router.get('/es/log', () => new Response(sseFormattedResponse, { headers: ESheaders }));
+rest_server.post(EMSESP_WRITE_SCHEDULE_ENDPOINT, (req, res) => {
+  console.log('write schedule');
+  console.log(req.body);
+  emsesp_schedule = req.body;
+  res.sendStatus(200);
+});
 
+rest_server.post(EMSESP_WRITE_ENTITIES_ENDPOINT, (req, res) => {
+  console.log('write entities');
+  console.log(req.body);
+  emsesp_customentities = req.body;
+  res.sendStatus(200);
+});
+
+rest_server.post(EMSESP_WRITE_VALUE_ENDPOINT, async (req, res) => {
+  const command = req.body.c;
+  const value = req.body.v;
+  const id = req.body.id;
+  console.log('Write device value for id : ' + id);
+  console.log(' data: ' + JSON.stringify(req.body));
+
+  if (id === 1) {
+    objIndex = emsesp_devicedata_1.data.findIndex((obj) => obj.c == command);
+    emsesp_devicedata_1.data[objIndex].v = value;
+  }
+  if (id === 2) {
+    objIndex = emsesp_devicedata_2.data.findIndex((obj) => obj.c == command);
+    emsesp_devicedata_2.data[objIndex].v = value;
+  }
+  if (id === 3) {
+    objIndex = emsesp_devicedata_3.data.findIndex((obj) => obj.c == command);
+    emsesp_devicedata_3.data[objIndex].v = value;
+  }
+  if (id === 4) {
+    objIndex = emsesp_devicedata_4.data.findIndex((obj) => obj.c == command);
+    emsesp_devicedata_4.data[objIndex].v = value;
+  }
+  if (id === 5) {
+    objIndex = emsesp_devicedata_5.data.findIndex((obj) => obj.c == command);
+    emsesp_devicedata_5.data[objIndex].v = value;
+  }
+  if (id === 6) {
+    objIndex = emsesp_devicedata_6.data.findIndex((obj) => obj.c == command);
+    emsesp_devicedata_6.data[objIndex].v = value;
+  }
+  if (id === 7) {
+    objIndex = emsesp_devicedata_7.data.findIndex((obj) => obj.c == command);
+    emsesp_devicedata_7.data[objIndex].v = value;
+  }
+
+  // custom entities
+  if (id === 99) {
+    objIndex = emsesp_devicedata_99.data.findIndex((obj) => obj.c == command);
+    emsesp_devicedata_99.data[objIndex].v = value;
+  }
+
+  await delay(1000); // wait to show spinner
+  // res.sendStatus(400); // bad request
+
+  res.sendStatus(200);
+});
+
+rest_server.post(EMSESP_WRITE_SENSOR_ENDPOINT, (req, res) => {
+  const ts = req.body;
+  console.log('Write temperaure sensor: ' + JSON.stringify(ts));
+  objIndex = emsesp_sensordata.ts.findIndex((obj) => obj.id == ts.id);
+  if (objIndex !== -1) {
+    emsesp_sensordata.ts[objIndex].n = ts.name;
+    emsesp_sensordata.ts[objIndex].o = ts.offset;
+  } else {
+    console.log('not found');
+  }
+  res.sendStatus(200);
+});
+
+rest_server.post(EMSESP_WRITE_ANALOG_ENDPOINT, (req, res) => {
+  const as = req.body;
+  console.log('Write analog sensor: ' + JSON.stringify(as));
+  objIndex = emsesp_sensordata.as.findIndex((obj) => obj.g == as.gpio);
+
+  if (objIndex === -1) {
+    console.log('new analog entry found');
+    emsesp_sensordata.as.push({
+      id: as.id,
+      g: as.gpio,
+      n: as.name,
+      f: as.factor,
+      o: as.offset,
+      u: as.uom,
+      t: as.type,
+      d: as.deleted
+    });
+  } else {
+    if (as.deleted) {
+      console.log('removing analog gpio' + as.gpio + ' index ' + objIndex);
+      emsesp_sensordata.as[objIndex].d = true;
+      var filtered = emsesp_sensordata.as.filter(function (value, index, arr) {
+        return !value.d;
+      });
+      emsesp_sensordata.as = filtered;
+    } else {
+      console.log('updating analog gpio' + as.gpio + ' index ' + objIndex);
+      emsesp_sensordata.as[objIndex].n = as.name;
+      emsesp_sensordata.as[objIndex].f = as.factor;
+      emsesp_sensordata.as[objIndex].o = as.offset;
+      emsesp_sensordata.as[objIndex].u = as.uom;
+      emsesp_sensordata.as[objIndex].t = as.type;
+    }
+  }
+
+  res.sendStatus(200);
+});
+
+rest_server.get(EMSESP_BOARDPROFILE_ENDPOINT, (req, res) => {
+  const board_profile = req.query.boardProfile;
+
+  // default values
+  const data = {
+    board_profile: board_profile,
+    led_gpio: settings.led_gpio,
+    dallas_gpio: settings.dallas_gpio,
+    rx_gpio: settings.rx_gpio,
+    tx_gpio: settings.tx_gpio,
+    pbutton_gpio: settings.pbutton_gpio,
+    phy_type: settings.phy_type,
+    eth_power: settings.eth_power,
+    eth_phy_addr: settings.eth_phy_addr,
+    eth_clock_mode: settings.eth_clock_mode
+  };
+
+  if (board_profile == 'S32') {
+    // BBQKees Gateway S32
+    data.led_gpio = 2;
+    data.dallas_gpio = 18;
+    data.rx_gpio = 23;
+    data.tx_gpio = 5;
+    data.pbutton_gpio = 0;
+    data.phy_type = 0;
+    data.eth_power = 0;
+    data.eth_phy_addr = 0;
+    data.eth_clock_mode = 0;
+  } else if (board_profile == 'E32') {
+    // BBQKees Gateway E32
+    data.led_gpio = 2;
+    data.dallas_gpio = 4;
+    data.rx_gpio = 5;
+    data.tx_gpio = 17;
+    data.pbutton_gpio = 33;
+    data.phy_type = 1;
+    data.eth_power = 16;
+    data.eth_phy_addr = 1;
+    data.eth_clock_mode = 0;
+  } else if (board_profile == 'MH-ET') {
+    // MH-ET Live D1 Mini
+    data.led_gpio = 2;
+    data.dallas_gpio = 18;
+    data.rx_gpio = 23;
+    data.tx_gpio = 5;
+    data.pbutton_gpio = 0;
+    data.phy_type = 0;
+    data.eth_power = 0;
+    data.eth_phy_addr = 0;
+    data.eth_clock_mode = 0;
+  } else if (board_profile == 'NODEMCU') {
+    // NodeMCU 32S
+    data.led_gpio = 2;
+    data.dallas_gpio = 18;
+    data.rx_gpio = 23;
+    data.tx_gpio = 5;
+    data.pbutton_gpio = 0;
+    data.phy_type = 0;
+    data.eth_power = 0;
+    data.eth_phy_addr = 0;
+    data.eth_clock_mode = 0;
+  } else if (board_profile == 'LOLIN') {
+    // Lolin D32
+    data.led_gpio = 2;
+    data.dallas_gpio = 18;
+    data.rx_gpio = 17;
+    data.tx_gpio = 16;
+    data.pbutton_gpio = 0;
+    data.phy_type = 0;
+    data.eth_power = 0;
+    data.eth_phy_addr = 0;
+    data.eth_clock_mode = 0;
+  } else if (board_profile == 'OLIMEX') {
+    // Olimex ESP32-EVB (uses U1TXD/U1RXD/BUTTON, no LED or Dallas)
+    data.led_gpio = 0;
+    data.dallas_gpio = 0;
+    data.rx_gpio = 36;
+    data.tx_gpio = 4;
+    data.pbutton_gpio = 34;
+    data.phy_type = 1;
+    data.eth_power = -1;
+    data.eth_phy_addr = 0;
+    data.eth_clock_mode = 0;
+  } else if (board_profile == 'OLIMEXPOE') {
+    // Olimex ESP32-POE
+    data.led_gpio = 0;
+    data.dallas_gpio = 0;
+    data.rx_gpio = 36;
+    data.tx_gpio = 4;
+    data.pbutton_gpio = 34;
+    data.phy_type = 1;
+    data.eth_power = 12;
+    data.eth_phy_addr = 0;
+    data.eth_clock_mode = 3;
+  } else if (board_profile == 'C3MINI') {
+    // Lolin C3 mini
+    data.led_gpio = 7;
+    data.dallas_gpio = 1;
+    data.rx_gpio = 4;
+    data.tx_gpio = 5;
+    data.pbutton_gpio = 9;
+    data.phy_type = 0;
+    data.eth_power = 0;
+    data.eth_phy_addr = 0;
+    data.eth_clock_mode = 0;
+  } else if (board_profile == 'S2MINI') {
+    // Lolin C3 mini
+    data.led_gpio = 15;
+    data.dallas_gpio = 7;
+    data.rx_gpio = 11;
+    data.tx_gpio = 12;
+    data.pbutton_gpio = 0;
+    data.phy_type = 0;
+    data.eth_power = 0;
+    data.eth_phy_addr = 0;
+    data.eth_clock_mode = 0;
+  } else if (board_profile == 'S3MINI') {
+    // Liligo S3 mini
+    data.led_gpio = 17;
+    data.dallas_gpio = 18;
+    data.rx_gpio = 8;
+    data.tx_gpio = 5;
+    data.pbutton_gpio = 0;
+    data.phy_type = 0;
+    data.eth_power = 0;
+    data.eth_phy_addr = 0;
+    data.eth_clock_mode = 0;
+  }
+
+  console.log('boardProfile GET. Sending back, profile: ' + board_profile + ', ' + 'data: ' + JSON.stringify(data));
+
+  // res.sendStatus(400); // send back an error, for testing
+  res.json(data);
+});
+
+// EMS-ESP API specific
+
+rest_server.post(API_ENDPOINT_ROOT, (req, res) => {
+  console.log('Generic API POST');
+  console.log(req.body);
+  if (req.body.device === 'system') {
+    if (req.body.entity === 'info') {
+      console.log('sending system info: ' + JSON.stringify(emsesp_info));
+      res.json(emsesp_info);
+    } else if (req.body.entity === 'settings') {
+      console.log('sending system settings: ' + JSON.stringify(settings));
+      res.json(settings);
+    } else {
+      res.sendStatus(200);
+    }
+  } else {
+    res.sendStatus(200);
+  }
+});
+rest_server.get(API_ENDPOINT_ROOT, (req, res) => {
+  console.log('Generic API GET');
+  res.sendStatus(200);
+});
+
+const SYSTEM_INFO_ENDPOINT = API_ENDPOINT_ROOT + 'system/info';
+rest_server.post(SYSTEM_INFO_ENDPOINT, (req, res) => {
+  console.log('System Info POST: ' + JSON.stringify(req.body));
+  res.sendStatus(200);
+});
+rest_server.get(SYSTEM_INFO_ENDPOINT, (req, res) => {
+  console.log('System Info GET');
+  res.json(emsesp_info);
+});
+
+const GET_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'getSettings';
+rest_server.get(GET_SETTINGS_ENDPOINT, (req, res) => {
+  console.log('getSettings');
+  res.json(settings);
+});
+
+const GET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'getCustomizations';
+rest_server.get(GET_CUSTOMIZATIONS_ENDPOINT, (req, res) => {
+  console.log('getCustomization');
+  // not implemented yet
+  res.sendStatus(200);
+});
+
+const GET_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'getEntities';
+rest_server.get(GET_ENTITIES_ENDPOINT, (req, res) => {
+  console.log('getEntities');
+  res.json(emsesp_customentities);
+});
+
+const GET_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'getSchedule';
+rest_server.get(GET_SCHEDULE_ENDPOINT, (req, res) => {
+  console.log('getSchedule');
+  res.json(emsesp_schedule);
+});
+
+const SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
+rest_server.get(SCHEDULE_ENDPOINT, (req, res) => {
+  console.log('Sending Schedule data');
+  res.json(emsesp_schedule);
+});
+
+const ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customentities';
+rest_server.get(ENTITIES_ENDPOINT, (req, res) => {
+  console.log('Sending Custom Entities data');
+  res.json(emsesp_customentities);
+});
+
+// start server
+const expressServer = rest_server.listen(port, () =>
+  console.log(`Legacy EMS-ESP REST API server running on http://localhost:${port}/`)
+);
+
+// event source
 var count = 8;
 var log_index = 0;
+const ES_ENDPOINT_ROOT = '/es/';
 const ES_LOG_ENDPOINT = ES_ENDPOINT_ROOT + 'log';
+rest_server.get(ES_LOG_ENDPOINT, function (req, res) {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
 
-// new Response({
-//   headers: {
-//     'content-type': 'application/json',
-//     'Content-Type': 'text/event-stream',
-//     'Cache-Control': 'no-cache',
-//     'Access-Control-Allow-Origin': '*',
-//     'Connection': 'keep-alive'
-//   },
-//   body: '{"foo":"bar"}'
-// })
+  var timer = setInterval(function () {
+    count += 1;
+    log_index += 1;
+    const data = {
+      t: '000+00:00:00.000',
+      l: 3, // error
+      i: count,
+      n: 'system',
+      m: 'incoming message #' + count + '/' + log_index
+    };
+    const sseFormattedResponse = `data: ${JSON.stringify(data)}\n\n`;
+    res.write(sseFormattedResponse);
+    res.flush(); // this is important
 
-// rest_server.get(ES_LOG_ENDPOINT, function (req, res) {
-//   res.setHeader('Content-Type', 'text/event-stream');
-//   res.setHeader('Cache-Control', 'no-cache');
-//   res.setHeader('Access-Control-Allow-Origin', '*');
-//   res.setHeader('Connection', 'keep-alive');
-//   res.flushHeaders();
-
-let sseFormattedResponse = '';
-
-// var timer = setInterval(function () {
-//   count += 1;
-//   log_index += 1;
-//   const data = {
-//     t: '000+00:00:00.000',
-//     l: 3, // error
-//     i: count,
-//     n: 'system',
-//     m: 'incoming message #' + count + '/' + log_index
-//   };
-//   sseFormattedResponse = `data: ${JSON.stringify(data)}\n\n`;
-//   console.log('done');
-//   // res.write(sseFormattedResponse);
-//   // res.flush(); // this is important
-
-//   // if buffer is full, start over
-//   if (log_index > 50) {
-//     fetch_log.events = [];
-//     log_index = 0;
-//   }
-//   fetch_log.events.push(data); // append to buffer
-// }, 300);
-
-router.get(ES_LOG_ENDPOINT, () => new Response(sseFormattedResponse, { headers: ESheaders }));
-
-// Tie it all together
-const missingHandler = () => new Response('Not found.', { status: 404 });
-
-router
-  .all('/api/*', apiRouter.handle)
-  .all('/rest/*', restRouter.handle)
-  .all('/es/*', esRouter.handle)
-  .all('*', missingHandler);
-
-const errorHandler = (error: any) => new Response(error.message || 'Server Error', { status: error.status || 500 });
-export const handleRequest = (request: any) => router.handle(request).catch(errorHandler);
+    // if buffer is full, start over
+    if (log_index > 50) {
+      fetch_log.events = [];
+      log_index = 0;
+    }
+    fetch_log.events.push(data); // append to buffer
+  }, 5000);
+});

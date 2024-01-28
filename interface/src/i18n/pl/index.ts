@@ -317,20 +317,20 @@ const pl: BaseTranslation = {
   SCHEDULE_TIMER_2: 'co minutę',
   SCHEDULE_TIMER_3: 'co godzinę',
   CUSTOM_ENTITIES: '{{N|n|}}iestandardowe{{|j|}} encj{{e|i|}}',
-  ENTITIES_HELP_1: 'Zdefiniuj niestandardowe encje dla magistrali EMS.',
+  ENTITIES_HELP_1: 'Zdefiniuj niestandardowe encje dla magistrali EMS.', // TODO translate
   ENTITIES_UPDATED: 'Niestandardowe encje zostały uaktualnione.',
   WRITEABLE: 'Zapisywalna',
   SHOWING: 'Wyświetlane',
   SEARCH: 'Szukaj',
   CERT: 'Certyfikat główny TLS (pozostaw puste dla TLS-insecure)',
   ENABLE_TLS: 'Włącz wsparcie dla TLS',
-  ON: 'włączony', 
+  ON: 'włączony',
   OFF: 'wyłączony',
   POLARITY: 'Typ przekaźnika',
-  ACTIVEHIGH: 'Wyzwalany stanem wysokim', 
-  ACTIVELOW: 'Wyzwalany stanem niskim', 
-  UNCHANGED: 'Zachowaj stan', 
-  ALWAYS: 'Zawsze' 
+  ACTIVEHIGH: 'Wyzwalany stanem wysokim',
+  ACTIVELOW: 'Wyzwalany stanem niskim',
+  UNCHANGED: 'Zachowaj stan',
+  ALWAYS: 'Zawsze'
 };
 
 export default pl;

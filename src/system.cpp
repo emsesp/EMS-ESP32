@@ -119,15 +119,15 @@ bool System::command_allvalues(const char * value, const int8_t id, JsonObject o
         emsdevice->generate_values(device_output, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::API_VERBOSE); // use nested for id -1 and 0
     }
 
-    // Custom entities
+    // Custom Entities
     device_output = output["Custom Entities"].to<JsonObject>();
     EMSESP::webCustomEntityService.get_value_info(device_output, "");
 
     // Sensors
     device_output = output["Analog Sensors"].to<JsonObject>();
-    EMSESP::analogsensor_.command_info(nullptr, 0, device_output);
+    EMSESP::analogsensor_.get_value_info(device_output, "values");
     device_output = output["Temperature Sensors"].to<JsonObject>();
-    EMSESP::temperaturesensor_.command_info(nullptr, 0, device_output);
+    EMSESP::temperaturesensor_.get_value_info(device_output, "values");
 
     return true;
 }
@@ -629,7 +629,7 @@ void System::send_info_mqtt() {
 }
 
 // create the json for heartbeat
-bool System::heartbeat_json(JsonObject output) {
+void System::heartbeat_json(JsonObject output) {
     uint8_t bus_status = EMSESP::bus_status();
     if (bus_status == EMSESP::BUS_STATUS_TX_ERRORS) {
         output["bus_status"] = "txerror";
@@ -681,8 +681,6 @@ bool System::heartbeat_json(JsonObject output) {
         output["wifistrength"] = wifi_quality(rssi);
     }
 #endif
-
-    return true;
 }
 
 // send periodic MQTT message with system information
@@ -697,9 +695,8 @@ void System::send_heartbeat() {
     JsonDocument doc;
     JsonObject   json = doc.to<JsonObject>();
 
-    if (heartbeat_json(json)) {
-        Mqtt::queue_publish(F_(heartbeat), json); // send to MQTT with retain off. This will add to MQTT queue.
-    }
+    heartbeat_json(json);
+    Mqtt::queue_publish(F_(heartbeat), json); // send to MQTT with retain off. This will add to MQTT queue.
 }
 
 // initializes network
@@ -1233,23 +1230,23 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         node["network"]  = "Ethernet";
         node["hostname"] = ETH.getHostname();
         // node["MAC"]             = ETH.macAddress();
-        node["IPv4 address"]    = uuid::printable_to_string(ETH.localIP()) + "/" + uuid::printable_to_string(ETH.subnetMask());
-        node["IPv4 gateway"]    = uuid::printable_to_string(ETH.gatewayIP());
-        node["IPv4 nameserver"] = uuid::printable_to_string(ETH.dnsIP());
-        if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
-            node["IPv6 address"] = uuid::printable_to_string(ETH.localIPv6());
-        }
+        // node["IPv4 address"]    = uuid::printable_to_string(ETH.localIP()) + "/" + uuid::printable_to_string(ETH.subnetMask());
+        // node["IPv4 gateway"]    = uuid::printable_to_string(ETH.gatewayIP());
+        // node["IPv4 nameserver"] = uuid::printable_to_string(ETH.dnsIP());
+        // if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
+        //     node["IPv6 address"] = uuid::printable_to_string(ETH.localIPv6());
+        // }
     } else if (WiFi.status() == WL_CONNECTED) {
         node["network"]  = "WiFi";
         node["hostname"] = WiFi.getHostname();
         node["RSSI"]     = WiFi.RSSI();
         // node["MAC"]             = WiFi.macAddress();
-        node["IPv4 address"]    = uuid::printable_to_string(WiFi.localIP()) + "/" + uuid::printable_to_string(WiFi.subnetMask());
-        node["IPv4 gateway"]    = uuid::printable_to_string(WiFi.gatewayIP());
-        node["IPv4 nameserver"] = uuid::printable_to_string(WiFi.dnsIP());
-        if (WiFi.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
-            node["IPv6 address"] = uuid::printable_to_string(WiFi.localIPv6());
-        }
+        // node["IPv4 address"]    = uuid::printable_to_string(WiFi.localIP()) + "/" + uuid::printable_to_string(WiFi.subnetMask());
+        // node["IPv4 gateway"]    = uuid::printable_to_string(WiFi.gatewayIP());
+        // node["IPv4 nameserver"] = uuid::printable_to_string(WiFi.dnsIP());
+        // if (WiFi.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
+        //     node["IPv6 address"] = uuid::printable_to_string(WiFi.localIPv6());
+        // }
     }
 #endif
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {

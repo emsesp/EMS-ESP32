@@ -236,7 +236,7 @@ There are breaking changes between 3.5.x and earlier versions of 3.6.0. Please r
 
 - fix Table resizing in WebUI [#519](https://github.com/emsesp/EMS-ESP32/issues/519)
 - allow larger customization files [#570](https://github.com/emsesp/EMS-ESP32/issues/570)
-- losing entitiy wwcomfort [#581](https://github.com/emsesp/EMS-ESP32/issues/581)
+- losing entity wwcomfort [#581](https://github.com/emsesp/EMS-ESP32/issues/581)
 
 ## Changed
 
