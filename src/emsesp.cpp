@@ -742,6 +742,7 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
         }
     }
     if (type_name.empty()) {
+        // fallback, get the type name from src
         for (const auto & emsdevice : emsdevices) {
             if (telegram->operation != Telegram::Operation::RX_READ && emsdevice->is_device_id(src)) {
                 type_name = emsdevice->telegram_type_name(telegram);
@@ -931,6 +932,7 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     // after the telegram has been processed, see if there have been values changed and we need to do a MQTT publish
     bool    telegram_found = false;
     uint8_t device_found   = 0;
+    // broadcast or send to us
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice->is_device_id(telegram->src) && (telegram->dest == 0 || telegram->dest == EMSbus::ems_bus_id())) {
             telegram_found = emsdevice->handle_telegram(telegram);
