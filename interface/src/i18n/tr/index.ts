@@ -127,6 +127,7 @@ const tr: Translation = {
   READONLY: 'Salt okunur modu devreye al (bütün giden EMS Tx Yazma komutlarını engeller)',
   UNDERCLOCK_CPU: 'İşlemci hızını düşür',
   HEATINGOFF: 'Start boiler with forced heating off', // TODO translate
+  HEATINGFAILSAFE: 'Hiçbir EMS mesajı alınmadığında ısıtıcının kapanması için gecikme', // TODO check translation
   ENABLE_SHOWER_TIMER: 'Duş Sayacını Devreye Al',
   ENABLE_SHOWER_ALERT: 'Duş Alarmını Devreye Al',
   TRIGGER_TIME: 'Tetikleme Zamanı',

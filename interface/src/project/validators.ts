@@ -104,6 +104,12 @@ export const createSettingsValidator = (settings: Settings) =>
         { type: 'number', min: 0, max: 10, message: 'Must be between 0 and 10' }
       ]
     }),
+    ...({
+      boiler_heatingfailsafe: [
+        { required: true, message: 'Boiler failsafe is required' },
+        { type: 'number', min: 0, max: 600, message: 'Boiler failsafe must be between 0 (disable) and 600 seconds' }
+      ]
+    }),
     ...(settings.shower_alert && {
       shower_alert_trigger: [{ type: 'number', min: 1, max: 20, message: 'Time must be between 1 and 20 minutes' }],
       shower_alert_coldshot: [{ type: 'number', min: 1, max: 10, message: 'Time must be between 1 and 10 seconds' }]

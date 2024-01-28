@@ -140,6 +140,14 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                           FL_(forceHeatingOff),
                           DeviceValueUOM::NONE,
                           MAKE_CF_CB(set_forceHeatingOff));
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &heatingFailsafe_,
+                          DeviceValueType::USHORT,
+                          FL_(heatingFailsafe),
+                          DeviceValueUOM::SECONDS,
+                          MAKE_CF_CB(set_heatingFailsafe),
+                          0,
+                          600);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatingActive_, DeviceValueType::BOOL, FL_(heatingActive), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &tapwaterActive_, DeviceValueType::BOOL, FL_(tapwaterActive), DeviceValueUOM::NONE);
     register_device_value(
@@ -1057,9 +1065,18 @@ void Boiler::check_active() {
         EMSESP::webSettingsService.read([&](WebSettings & settings) { forceHeatingOff_ = settings.boiler_heatingoff ? EMS_VALUE_BOOL_ON : 0; });
         has_update(&forceHeatingOff_);
     }
+
+    // check heatingfailsafe option
+    if (!Helpers::hasValue(heatingFailsafe_)) {
+        EMSESP::webSettingsService.read([&](WebSettings & settings) { heatingFailsafe_ = settings.boiler_heatingfailsafe; });
+        has_update(&heatingFailsafe_);
+    }
+
     static uint32_t lastSendHeatingOff = 0;
-    if (forceHeatingOff_ == EMS_VALUE_BOOL_ON && (uuid::get_uptime_sec() - lastSendHeatingOff) >= 60) {
-        lastSendHeatingOff = uuid::get_uptime_sec();
+    bool use_the_force = 0;
+    use_the_force |= (forceHeatingOff_ == EMS_VALUE_BOOL_ON);
+    use_the_force |= (heatingFailsafe_ > 0 && ((heatingLastCommand_ == 0) || (uuid::get_uptime_sec()) >= heatingLastCommand_ + heatingFailsafe_));
+    if (use_the_force && (uuid::get_uptime_sec() - lastSendHeatingOff) >= 60) {
         uint8_t data[]     = {0, 0, 0, 0};
         write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
     }
@@ -1628,7 +1645,11 @@ void Boiler::process_UBASetPoints(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, wwSetPumpPower_, 2); // ww pump speed/power?
 
     // overwrite other settings on receive?
-    if (forceHeatingOff_ == EMS_VALUE_BOOL_ON && telegram->dest == 0x08 && (setFlowTemp_ + setBurnPow_ + wwSetPumpPower_) != 0) {
+    bool use_the_force = 0;
+    use_the_force |= (forceHeatingOff_ == EMS_VALUE_BOOL_ON);
+    // TODO - required in this path?
+    use_the_force |= (heatingFailsafe_ > 0 && ((heatingLastCommand_ == 0) || (uuid::get_uptime_sec()) >= heatingLastCommand_ + heatingFailsafe_));
+    if (use_the_force && telegram->dest == 0x08 && (setFlowTemp_ + setBurnPow_ + wwSetPumpPower_) != 0) {
         uint8_t data[] = {0, 0, 0, 0};
         write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
     }
@@ -2082,6 +2103,9 @@ bool Boiler::set_flow_temp(const char * value, const int8_t id) {
     } else {
         write_command(EMS_TYPE_UBASetPoints, 0, v, 0x18);
     }
+
+    heatingLastCommand_ = uuid::get_uptime_sec();
+
     return true;
 }
 
@@ -2093,6 +2117,8 @@ bool Boiler::set_burn_power(const char * value, const int8_t id) {
     }
 
     write_command(EMS_TYPE_UBASetPoints, 1, v, EMS_TYPE_UBASetPoints);
+
+    heatingLastCommand_ = uuid::get_uptime_sec();
 
     return true;
 }
@@ -2948,6 +2974,15 @@ bool Boiler::set_forceHeatingOff(const char * value, const int8_t id) {
                               0};
             write_command(EMS_TYPE_UBASetPoints, 0, data, sizeof(data), 0);
         }
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_heatingFailsafe(const char * value, const int8_t id) {
+    int v;
+    if (Helpers::value2number(value, v)) {
+        has_update(heatingFailsafe_, v);
         return true;
     }
     return false;

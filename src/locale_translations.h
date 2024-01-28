@@ -287,7 +287,8 @@ MAKE_TRANSLATION(haclimate, "haclimate", "Discovery current room temperature", "
 
 // Entity translations: tag, mqtt, en, de, nl, sv, pl, no, fr, tr, it
 // Boiler
-MAKE_TRANSLATION(forceHeatingOff, "heatingoff", "force heating off", "Heizen abschalten", "", "", "wymuś wyłączenie grzania", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(forceHeatingOff, "heatingoff", "force heating off", "Heizen abschalten", "Verwarming uitschakelen", "Stäng av värmen", "wymuś wyłączenie grzania", "tving varmen av", "forcer l'arrêt du chauffage", "ısıtmayı durmaya zorla", "forzare l'arresto del riscaldamento") // TODO check translations
+MAKE_TRANSLATION(heatingFailsafe, "heatingfailsafe", "heating failsafe", "Heizung ausfallsicher", "verwarming faalveilig", "värmarens säkerhetsavstängning", "wyłączenie bezpieczeństwa ogrzewania", "oppvarmingssikkerhetsavstengning", "arrêt de sécurité du chauffage", "güvenli ısıtma durdurma", "arresto di sicurezza del riscaldamento") // TODO check translations
 MAKE_TRANSLATION(wwtapactivated, "wwtapactivated", "turn on/off", "Durchlauferhitzer aktiv", "zet aan/uit", "på/av", "system przygotowywania", "Varmtvann active", "ecs activée", "aç/kapa", "commuta on/off")
 MAKE_TRANSLATION(reset, "reset", "reset", "Reset", "Reset", "Nollställ", "kasowanie komunikatu", "nullstill", "reset", "Sıfırla", "Reset")
 MAKE_TRANSLATION(oilPreHeat, "oilpreheat", "oil preheating", "Ölvorwärmung", "Olie voorverwarming", "Förvärmning olja", "podgrzewanie oleju", "oljeforvarming", "préchauffage de l'huile", "Yakıt Ön ısıtma devrede", "preriscaldamento olio")

@@ -4,6 +4,14 @@
 .vscode/launch.json
 # .vscode/settings.json
 
+# Visual Studio
+.vs/CMake Overview
+.vs/EMS-ESP32/v16/.suo
+.vs/EMS-ESP32/v16/Browse.VC.db
+.vs/ProjectSettings.json
+.vs/slnx.sqlite
+.vs/VSWorkspaceState.json
+
 # c++ compiling
 .clang_complete
 .gcc-flags.json
@@ -60,4 +68,4 @@ bw-output/
 # entity dump results
 # dump_entities.csv
 # dump_entities.xls*
-
+ 

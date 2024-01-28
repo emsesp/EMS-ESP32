@@ -127,6 +127,7 @@ const en: Translation = {
   READONLY: 'Enable read-only mode (blocks all outgoing EMS Tx Write commands)',
   UNDERCLOCK_CPU: 'Underclock CPU speed',
   HEATINGOFF: 'Start boiler with forced heating off',
+  HEATINGFAILSAFE: 'Delay until forced heating off if no EMS messages received',
   ENABLE_SHOWER_TIMER: 'Enable Shower Timer',
   ENABLE_SHOWER_ALERT: 'Enable Shower Alert',
   TRIGGER_TIME: 'Trigger Time',

@@ -411,6 +411,7 @@ settings = {
   syslog_mark_interval: 0,
   syslog_host: '192.168.1.4',
   syslog_port: 514,
+  boiler_heatingfailsafe: 120,
   shower_timer: true,
   shower_alert: true,
   shower_alert_trigger: 7,
@@ -1119,6 +1120,15 @@ const emsesp_devicedata_3 = {
       id: '00force heating off',
       c: 'heatingoff',
       l: ['off', 'on']
+    },
+    {
+      v: 120,
+      u: 1,
+      id: '00heating failsafe',
+      c: 'heatingfailsafe',
+      m: 0,
+      x: 90,
+      s: 1
     },
     {
       v: 'off',

@@ -127,6 +127,7 @@ const pl: BaseTranslation = {
   READONLY: 'Tryb pracy "tylko do odczytu" (blokuje wszystkie komendy zapisu na magistralę EMS)',
   UNDERCLOCK_CPU: 'Obniż taktowanie CPU',
   HEATINGOFF: 'Uruchom boiler z wymuszonym wyłączonym grzaniem', 
+  HEATINGFAILSAFE: 'Opóźnienie wyłączenia grzejnika, jeśli nie otrzymano żadnych komunikatów EMS', // TODO check translation
   ENABLE_SHOWER_TIMER: 'Aktywuj minutnik prysznica',
   ENABLE_SHOWER_ALERT: 'Aktywuj alarm prysznica',
   TRIGGER_TIME: 'Wyzwalaj po czasie',

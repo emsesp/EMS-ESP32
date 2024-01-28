@@ -99,6 +99,8 @@ class Boiler : public EMSdevice {
     // special function
     uint8_t forceHeatingOff_;
     uint8_t wwTapActivated_; // maintenance-mode to switch DHW off
+    uint16_t heatingFailsafe_;
+    uint32_t heatingLastCommand_;
 
     // main
     uint8_t  reset_;            // for reset command
@@ -490,6 +492,7 @@ class Boiler : public EMSdevice {
         return set_wwAltOpPrio(value, 3);
     }
     bool set_forceHeatingOff(const char * value, const int8_t id);
+    bool set_heatingFailsafe(const char * value, const int8_t id);
 
     /*
     bool set_hybridStrategy(const char * value, const int8_t id);

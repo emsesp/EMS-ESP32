@@ -129,6 +129,7 @@ const it: Translation = {
   READONLY: 'Abilita modalità sola-lettura (blocca tutti i comandi di scrittura EMS Tx in uscita)',
   UNDERCLOCK_CPU: 'Abbassa velocità della CPU',
   HEATINGOFF: 'Avviamento caldaia con riscaldamento forzato spento',
+  HEATINGFAILSAFE: 'Ritardo per lo spegnimento del riscaldatore se non vengono ricevuti messaggi EMS', // TODO check translation
   ENABLE_SHOWER_TIMER: 'Abilita timer doccia',
   ENABLE_SHOWER_ALERT: 'Abilita avviso doccia',
   TRIGGER_TIME: 'Tempo di avvio',

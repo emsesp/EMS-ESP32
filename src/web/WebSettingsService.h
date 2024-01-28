@@ -34,6 +34,7 @@ class WebSettings {
     uint8_t  tx_mode;
     uint8_t  ems_bus_id;
     bool     boiler_heatingoff;
+    uint16_t boiler_heatingfailsafe;
     bool     shower_timer;
     bool     shower_alert;
     uint8_t  shower_alert_trigger;

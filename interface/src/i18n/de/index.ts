@@ -127,6 +127,7 @@ const de: Translation = {
   READONLY: 'Nur-Lese-Modus aktivieren (blockiert alle ausgehenden EMS Tx Write-Befehle)',
   UNDERCLOCK_CPU: 'CPU-Geschwindigkeit untertakten',
   HEATINGOFF: 'Heizen ausschalten beim EMS-ESP Start',
+  HEATINGFAILSAFE: 'Verzögerung für die Abschaltung der Heizung, wenn keine EMS-Nachrichten empfangen werden', // TODO check translation
   ENABLE_SHOWER_TIMER: 'Duschtimer aktivieren',
   ENABLE_SHOWER_ALERT: 'Duschalarm aktivieren',
   TRIGGER_TIME: 'Auslösezeit',

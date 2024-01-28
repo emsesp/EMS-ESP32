@@ -127,6 +127,7 @@ const sv: Translation = {
   READONLY: 'Aktivera read-only (blockerar alla utgående skrivkommandon mot EMS-bussen)',
   UNDERCLOCK_CPU: 'Nedklocka Processorhastighet',
   HEATINGOFF: 'Start boiler with forced heating off', // TODO translate
+  HEATINGFAILSAFE: 'Fördröjning för värmarens avstängning om inga EMS-meddelanden tas emot', // TODO check translation
   ENABLE_SHOWER_TIMER: 'Aktivera Dusch-timer',
   ENABLE_SHOWER_ALERT: 'Aktivera Dusch-varning',
   TRIGGER_TIME: 'Aktiveringstid',

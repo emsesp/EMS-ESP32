@@ -430,6 +430,20 @@ const SettingsApplication: FC = () => {
           label={LL.HEATINGOFF()}
           disabled={saving}
         />
+        <ValidatedTextField
+          fieldErrors={fieldErrors}
+          name="boiler_heatingfailsafe"
+          label={LL.HEATINGFAILSAFE()}
+          InputProps={{
+            endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+          }}
+          fullWidth
+          variant="outlined"
+          value={numberValue(data.boiler_heatingfailsafe)}
+          type="number"
+          onChange={updateFormValue}
+          margin="normal"
+        />
         <Grid container spacing={0} direction="row" justifyContent="flex-start" alignItems="flex-start">
           <BlockFormControlLabel
             control={<Checkbox checked={data.shower_timer} onChange={updateFormValue} name="shower_timer" />}

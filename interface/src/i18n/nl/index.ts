@@ -127,6 +127,7 @@ const nl: Translation = {
   READONLY: 'Activeer read-only modus (blokkeert alle outgaande EMS Tx schrijf commandos)',
   UNDERCLOCK_CPU: 'Underclock CPU snelheid',
   HEATINGOFF: 'Start boiler with forced heating off', // TODO translate
+  HEATINGFAILSAFE: 'Vertraging voor het uitschakelen van de verwarming als er geen EMS-berichten worden ontvangen', // TODO check translation
   ENABLE_SHOWER_TIMER: 'Activeer Douche Timer (tijdmeting)',
   ENABLE_SHOWER_ALERT: 'Activeer Douchemelding',
   TRIGGER_TIME: 'Trigger tijd',
