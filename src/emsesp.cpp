@@ -659,9 +659,10 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
     buffer = nullptr;
 }
 
-// builds json with the detail of each value,
-// for a specific EMS device type or the sensors, scheduler and custom entities
+// builds json with the detail of each value, for an EMS device
+// for other types like sensors, scheduler, custom entities it will process single commands like 'info', 'values', 'commands'...
 bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8_t id, const uint8_t devicetype) {
+    // check first for EMS devices
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice->device_type() == devicetype) {
             if (emsdevice->get_value_info(root, cmd, id)) {
@@ -670,24 +671,24 @@ bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8
         }
     }
 
-    // specific for the temperaturesensor
+    // temperaturesensor
     if (devicetype == DeviceType::TEMPERATURESENSOR) {
-        return EMSESP::temperaturesensor_.get_value_info(root, cmd, id);
+        return temperaturesensor_.get_value_info(root, cmd, id);
     }
 
     // analog sensor
     if (devicetype == DeviceType::ANALOGSENSOR) {
-        return EMSESP::analogsensor_.get_value_info(root, cmd, id);
+        return analogsensor_.get_value_info(root, cmd, id);
     }
 
     // scheduler
     if (devicetype == DeviceType::SCHEDULER) {
-        return EMSESP::webSchedulerService.get_value_info(root, cmd);
+        return webSchedulerService.get_value_info(root, cmd);
     }
 
     // custom entities
     if (devicetype == DeviceType::CUSTOM) {
-        return EMSESP::webCustomEntityService.get_value_info(root, cmd);
+        return webCustomEntityService.get_value_info(root, cmd);
     }
 
     char error[100];
@@ -1165,7 +1166,9 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     // Print to LOG showing we've added a new device
     LOG_INFO("Recognized new %s with deviceID 0x%02X", EMSdevice::device_type_2_device_name(device_type), device_id);
 
-    // add command commands for all devices, except for connect, controller and gateway
+    // add commands 'info', 'commands', 'values', 'entities' for all EMS devices
+    // and register the MQTT subscribe topic for this device
+    // except for connect, controller and gateway
     if ((device_type == DeviceType::CONNECT) || (device_type == DeviceType::CONTROLLER) || (device_type == DeviceType::GATEWAY)) {
         return true;
     }

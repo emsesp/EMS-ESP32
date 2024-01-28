@@ -364,10 +364,10 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 
     // report back. If not OK show output from error, other return the HTTP code
     if (return_code != CommandRet::OK) {
-        if (value == nullptr) {
+        if ((value == nullptr) || (strlen(value) == 0)) {
             LOG_ERROR("Command '%s' failed with code: %d", cmd, return_code);
         } else {
-            LOG_ERROR("Command '%s:%s' failed with code: %d", cmd, value, return_code);
+            LOG_ERROR("Command '%s/%s' failed with code: %d", cmd, value, return_code);
         }
         return message(return_code, "callback function failed", output);
     }
@@ -442,7 +442,7 @@ bool Command::list(const uint8_t device_type, JsonObject output) {
         return false;
     }
 
-    // create a list of commands, sort them
+    // create a list of commands we have registered, and sort them
     std::list<std::string> sorted_cmds;
     for (const auto & cf : cmdfunctions_) {
         if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN)) {
@@ -450,6 +450,12 @@ bool Command::list(const uint8_t device_type, JsonObject output) {
         }
     }
     sorted_cmds.sort();
+
+    // force add info and commands for those non-EMS devices
+    if (device_type == EMSdevice::DeviceType::TEMPERATURESENSOR) {
+        output[F_(info)]     = Helpers::translated_word(FL_(info_cmd));
+        output[F_(commands)] = Helpers::translated_word(FL_(commands_cmd));
+    }
 
     for (const auto & cl : sorted_cmds) {
         for (const auto & cf : cmdfunctions_) {
@@ -475,14 +481,24 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
         return;
     }
 
-    // create list of command, and sort
+    // create list of commands we have registered
     std::list<std::string> sorted_cmds;
     for (const auto & cf : cmdfunctions_) {
         if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN)) {
             sorted_cmds.push_back((cf.cmd_));
         }
     }
-    sorted_cmds.sort();
+
+    // non EMS devices always have an info and commands command
+    bool show_info = (device_type == EMSdevice::DeviceType::TEMPERATURESENSOR || device_type == EMSdevice::DeviceType::ANALOGSENSOR
+                      || device_type == EMSdevice::DeviceType::SCHEDULER || device_type == EMSdevice::DeviceType::CUSTOM);
+
+    if (!verbose && show_info) {
+        sorted_cmds.push_back(F_(info));
+        sorted_cmds.push_back(F_(commands));
+    }
+
+    sorted_cmds.sort(); // sort them
 
     // if not in verbose mode, just print them on a single line and exit
     if (!verbose) {
@@ -495,7 +511,16 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
     }
 
     // verbose mode
-    shell.println();
+    shell.printfln("\n%s%s %s:%s", COLOR_BOLD_ON, COLOR_YELLOW, EMSdevice::device_type_2_device_name(device_type), COLOR_RESET);
+
+    // we hard code 'info' and 'commmands' commands so print them first
+    if (show_info) {
+        shell.printf("  info:\t\t\t\t%slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
+        shell.println(COLOR_RESET);
+        shell.printf("  commands:\t\t\t%slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
+        shell.println(COLOR_RESET);
+    }
+
     for (const auto & cl : sorted_cmds) {
         // find and print the description
         for (const auto & cf : cmdfunctions_) {
@@ -530,8 +555,6 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
         }
         shell.println();
     }
-
-    shell.println();
 }
 
 // see if a device_type is active and has associated commands
@@ -599,69 +622,32 @@ void Command::show_devices(uuid::console::Shell & shell) {
     shell.println();
 }
 
-// output list of all commands to console
+// 'show commmands' : output list of all commands to console
 // calls show with verbose mode set
 void Command::show_all(uuid::console::Shell & shell) {
     shell.printfln("Showing all available commands (%s*%s=authentication not required):", COLOR_BRIGHT_GREEN, COLOR_RESET);
 
-    // show system first
-    shell.print(COLOR_BOLD_ON);
-    shell.print(COLOR_YELLOW);
-    shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM));
-    shell.print(COLOR_RESET);
+    // show system ones first
     show(shell, EMSdevice::DeviceType::SYSTEM, true);
-
-    // show Custom Entities
-    shell.print(COLOR_BOLD_ON);
-    shell.print(COLOR_YELLOW);
-    shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::CUSTOM));
-    shell.println(COLOR_RESET);
-    // TODO to remove later?
-    shell.printf("  info:\t\t\t\t%slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
-    shell.println(COLOR_RESET);
-    shell.printf("  commands:\t\t\t%slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
-    shell.print(COLOR_RESET);
     show(shell, EMSdevice::DeviceType::CUSTOM, true);
-
-    // show scheduler
-    shell.print(COLOR_BOLD_ON);
-    shell.print(COLOR_YELLOW);
-    shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SCHEDULER));
-    shell.println(COLOR_RESET);
-    // TODO to remove later?
-    shell.printf("  info:\t\t\t\t%slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
-    shell.println(COLOR_RESET);
-    shell.printf("  commands:\t\t\t%slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
-    shell.print(COLOR_RESET);
     show(shell, EMSdevice::DeviceType::SCHEDULER, true);
 
-    // show sensors
+    // then sensors
     if (EMSESP::sensor_enabled()) {
-        shell.print(COLOR_BOLD_ON);
-        shell.print(COLOR_YELLOW);
-        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::TEMPERATURESENSOR));
-        shell.print(COLOR_RESET);
         show(shell, EMSdevice::DeviceType::TEMPERATURESENSOR, true);
     }
-
     if (EMSESP::analog_enabled()) {
-        shell.print(COLOR_BOLD_ON);
-        shell.print(COLOR_YELLOW);
-        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::ANALOGSENSOR));
-        shell.print(COLOR_RESET);
         show(shell, EMSdevice::DeviceType::ANALOGSENSOR, true);
     }
 
-    // do this in the order of factory classes to keep a consistent order when displaying
+    // now EMS devices, do this in the order of factory classes to keep a consistent order when displaying
     for (const auto & device_class : EMSFactory::device_handlers()) {
         if (Command::device_has_commands(device_class.first)) {
-            shell.print(COLOR_BOLD_ON);
-            shell.print(COLOR_YELLOW);
-            shell.printf(" %s: ", EMSdevice::device_type_2_device_name(device_class.first));
-            shell.print(COLOR_RESET);
             show(shell, device_class.first, true);
         }
     }
+
+    shell.println();
 }
 
 // Extract only the path component from the passed URI and normalized it

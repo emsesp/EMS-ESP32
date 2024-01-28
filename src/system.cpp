@@ -125,9 +125,10 @@ bool System::command_allvalues(const char * value, const int8_t id, JsonObject o
 
     // Sensors
     device_output = output["Analog Sensors"].to<JsonObject>();
+    // TODO fix this also for analogsensor
     EMSESP::analogsensor_.command_info(nullptr, 0, device_output);
     device_output = output["Temperature Sensors"].to<JsonObject>();
-    EMSESP::temperaturesensor_.command_info(nullptr, 0, device_output);
+    EMSESP::temperaturesensor_.get_value_info(device_output, nullptr);
 
     return true;
 }

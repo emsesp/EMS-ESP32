@@ -45,24 +45,6 @@ void TemperatureSensor::start() {
     LOG_INFO("Starting Temperature sensor service");
 #endif
 
-    // Add API calls
-    Command::add(
-        EMSdevice::DeviceType::TEMPERATURESENSOR,
-        F_(info),
-        [&](const char * value, const int8_t id, JsonObject output) { return command_info(value, id, output); },
-        FL_(info_cmd));
-    Command::add(
-        EMSdevice::DeviceType::TEMPERATURESENSOR,
-        F_(values),
-        [&](const char * value, const int8_t id, JsonObject output) { return command_info(value, 0, output); },
-        nullptr,
-        CommandFlag::HIDDEN); // this command is hidden
-    Command::add(
-        EMSdevice::DeviceType::TEMPERATURESENSOR,
-        F_(commands),
-        [&](const char * value, const int8_t id, JsonObject output) { return command_commands(value, id, output); },
-        FL_(commands_cmd));
-
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
     snprintf(topic, sizeof(topic), "%s/#", F_(temperaturesensor));
     Mqtt::subscribe(EMSdevice::DeviceType::TEMPERATURESENSOR, topic, nullptr); // use empty function callback
@@ -361,57 +343,56 @@ bool TemperatureSensor::updated_values() {
     return false;
 }
 
-// list commands
-bool TemperatureSensor::command_commands(const char * value, const int8_t id, JsonObject output) {
-    return Command::list(EMSdevice::DeviceType::TEMPERATURESENSOR, output);
-}
-
-// creates JSON doc from values
-// returns true if there are no sensors
-bool TemperatureSensor::command_info(const char * value, const int8_t id, JsonObject output) {
-    if (sensors_.empty()) {
-        return true;
-    }
-
-    for (const auto & sensor : sensors_) {
-        char val[10];
-        if (id == -1) { // show number and id, info command
-            JsonObject dataSensor = output[sensor.name()].to<JsonObject>();
-            dataSensor["id"]      = sensor.id();
-            dataSensor["uom"]     = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
-            dataSensor["type"]    = F_(number);
-            if (Helpers::hasValue(sensor.temperature_c)) {
-                dataSensor["temp"] = serialized(Helpers::render_value(val, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
-            }
-        } else if (id == 0 && Helpers::hasValue(sensor.temperature_c)) { // values command
-            output[sensor.name()] = serialized(Helpers::render_value(val, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
-        } else if (Helpers::hasValue(sensor.temperature_c)) {
-            output[sensor.id()] = serialized(Helpers::render_value(val, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
-        }
-    }
-
-    return (output.size() > 0);
-}
-
-// called from emsesp.cpp, similar to the emsdevice->get_value_info
+// called from emsesp.cpp for commands
 bool TemperatureSensor::get_value_info(JsonObject output, const char * cmd, const int8_t id) {
     if (sensors_.empty()) {
+        return true; // no sensors, return true
+    }
+
+    bool show_all = true;
+    if (Helpers::hasValue(cmd)) {
+        show_all = (strncmp(cmd, F_(info), 4) == 0);
+    }
+
+    // see if we're showing all sensors
+    if (show_all) {
+        for (const auto & sensor : sensors_) {
+            JsonObject dataSensor = output[sensor.name()].to<JsonObject>();
+            dataSensor["id"]      = sensor.id();
+            dataSensor["offset"]  = sensor.offset();
+            if (Helpers::hasValue(sensor.temperature_c)) {
+                char val[10];
+                dataSensor["value"] = serialized(Helpers::render_value(val, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
+            }
+            dataSensor["type"]      = F_(number);
+            dataSensor["uom"]       = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
+            dataSensor["writeable"] = false;
+        }
         return true;
     }
-    // make a copy of the string command for parsing
-    char command_s[30];
-    strlcpy(command_s, cmd, sizeof(command_s));
-    char * attribute_s = nullptr;
 
-    // check specific attribute to fetch instead of the complete record
-    char * breakp = strchr(command_s, '/');
+    // check of it a 'commmands' command
+    if (Helpers::toLower(cmd) == F_(commands)) {
+        return Command::list(EMSdevice::DeviceType::TEMPERATURESENSOR, output);
+    }
+
+    // this is for a specific sensor
+    // make a copy of the string command for parsing, and lowercase it
+    char   sensor_name[30] = {'\0'};
+    char * attribute_s     = nullptr;
+    strlcpy(sensor_name, cmd, sizeof(sensor_name));
+    auto sensor_lowercase = Helpers::toLower(sensor_name);
+
+    // check for a specific attribute to fetch instead of the complete record
+    char * breakp = strchr(sensor_name, '/');
     if (breakp) {
         *breakp     = '\0';
         attribute_s = breakp + 1;
     }
 
     for (const auto & sensor : sensors_) {
-        if (Helpers::toLower(command_s) == Helpers::toLower(sensor.name().c_str()) || Helpers::toLower(command_s) == Helpers::toLower(sensor.id().c_str())) {
+        // match custom name or sensor ID
+        if (sensor_lowercase == Helpers::toLower(sensor.name().c_str()) || sensor_lowercase == Helpers::toLower(sensor.id().c_str())) {
             output["id"]   = sensor.id();
             output["name"] = sensor.name();
             if (Helpers::hasValue(sensor.temperature_c)) {
@@ -432,16 +413,17 @@ bool TemperatureSensor::get_value_info(JsonObject output, const char * cmd, cons
                     return true;
                 } else {
                     char error[100];
-                    snprintf(error, sizeof(error), "cannot find attribute %s in entity %s", attribute_s, command_s);
+                    snprintf(error, sizeof(error), "cannot find attribute %s in entity %s", attribute_s, sensor_name);
                     output.clear();
                     output["message"] = error;
                     return false;
                 }
             }
-            return true;
+            return true; // found a match, exit
         }
     }
-    return false;
+
+    return false; // not found
 }
 
 // publish a single sensor to MQTT

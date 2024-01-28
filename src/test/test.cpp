@@ -757,8 +757,24 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "temperature") {
         shell.printfln("Testing adding Temperature sensor");
+        shell.invoke_command("show commands");
+
         emsesp::EMSESP::temperaturesensor_.test();
+
+        shell.invoke_command("call temperaturesensor");
         shell.invoke_command("show values");
+        shell.invoke_command("call system allvalues");
+
+        shell.invoke_command("call temperaturesensor info");
+        AsyncWebServerRequest request;
+        request.method(HTTP_GET);
+        request.url("/api/temperaturesensor/commands");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/temperaturesensor/info");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/temperaturesensor/01-0203-0405-0607");
+        EMSESP::webAPIService.webAPIService_get(&request);
+
         ok = true;
     }
 
