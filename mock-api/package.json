@@ -6,12 +6,15 @@
   "main": "server.ts",
   "license": "MIT",
   "scripts": {
-    "standalone": "bun --watch server.ts"
+    "standalone": "bun --watch server.ts",
+    "old_standalone": "node server.js"
   },
   "dependencies": {
     "@msgpack/msgpack": "^2.8.0",
-    "busboy": "^1.6.0",
-    "itty-router": "^4.0.27"
+    "compression": "^1.7.4",
+    "express": "^4.18.2",
+    "itty-router": "^4.0.27",
+    "multer": "^1.4.5-lts.1"
   },
   "packageManager": "yarn@4.0.2",
   "devDependencies": {

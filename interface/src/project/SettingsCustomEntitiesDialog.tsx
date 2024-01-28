@@ -27,7 +27,7 @@ import { BlockFormControlLabel, ValidatedTextField } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
-import { updateValue } from 'utils';
+import { numberValue, updateValue } from 'utils';
 import { validate } from 'validators';
 
 type SettingsCustomEntitiesDialogProps = {
@@ -130,7 +130,7 @@ const SettingsCustomEntitiesDialog = ({
             <Grid item xs={4}>
               <TextField
                 name="value"
-                label={LL.STARTVALUE()}
+                label={LL.DEFAULT(0) + ' ' + LL.VALUE(1)}
                 value={editItem.value}
                 variant="outlined"
                 onChange={updateFormValue}
@@ -214,7 +214,7 @@ const SettingsCustomEntitiesDialog = ({
                     <TextField
                       name="factor"
                       label={LL.FACTOR()}
-                      value={editItem.factor}
+                      value={numberValue(editItem.factor)}
                       variant="outlined"
                       onChange={updateFormValue}
                       fullWidth
