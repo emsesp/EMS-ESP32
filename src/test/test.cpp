@@ -744,7 +744,11 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Testing device value rendering");
 
         Mqtt::ha_enabled(true);
+        // Mqtt::ha_enabled(false);
+
         Mqtt::nested_format(1);
+        // Mqtt::nested_format(0);
+
         // Mqtt::send_response(false);
 
         test("boiler");
@@ -759,13 +763,17 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Testing adding Temperature sensor");
         shell.invoke_command("show commands");
 
+        // load some EMS data
+        // test("general");
+
         emsesp::EMSESP::temperaturesensor_.test();
 
         shell.invoke_command("call temperaturesensor");
         shell.invoke_command("show values");
         shell.invoke_command("call system allvalues");
-
         shell.invoke_command("call temperaturesensor info");
+        shell.invoke_command("call temperaturesensor values");
+
         AsyncWebServerRequest request;
         request.method(HTTP_GET);
         request.url("/api/temperaturesensor/commands");
@@ -799,17 +807,32 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Testing adding Analog sensor");
         Mqtt::ha_enabled(true);
         // Mqtt::ha_enabled(false);
+
         Mqtt::nested_format(1);
         // Mqtt::nested_format(0);
+
+        // Mqtt::send_response(false);
 
         // load some EMS data
         test("general");
 
         EMSESP::webCustomizationService.test(); // load the analog sensors
 
+        shell.invoke_command("call analogsensor");
         shell.invoke_command("show values");
+        shell.invoke_command("call system allvalues");
         shell.invoke_command("call analogsensor info");
         shell.invoke_command("call analogsensor values");
+
+        AsyncWebServerRequest request;
+        request.method(HTTP_GET);
+        request.url("/api/analogsensor/commands");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/analogsensor/info");
+        EMSESP::webAPIService.webAPIService_get(&request);
+        request.url("/api/analogsensor/test_analog1");
+        request.url("/api/analogsensor/36");
+        EMSESP::webAPIService.webAPIService_get(&request);
 
         // test renaming it
         // bool update(uint8_t id, const std::string & name, int16_t offset, float factor, uint8_t uom, uint8_t type);
