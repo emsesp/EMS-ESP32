@@ -960,9 +960,6 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
             if (telegram->message_length > 0) {
                 emsdevice->add_handlers_ignored(telegram->type_id);
             }
-            if (telegram->dest == 0 && telegram->offset == 0 && telegram->message_length > 0) {
-                emsdevice->add_handlers_broadcasted(telegram->type_id);
-            }
             if (Mqtt::connected() && telegram_found
                 && ((mqtt_.get_publish_onchange(emsdevice->device_type()) && emsdevice->has_update())
                     || (telegram->type_id == publish_id_ && telegram->dest == EMSbus::ems_bus_id()))) {
