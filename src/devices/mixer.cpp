@@ -30,7 +30,7 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
         register_telegram_type(device_id - 0x20 + 0x02D7, "MMPLUSStatusMessage_HC", false, MAKE_PF_CB(process_MMPLUSStatusMessage_HC));
         // register_telegram_type(device_id - 0x20 + 0x02E1, "MMPLUSSetMessage_HC", true, MAKE_PF_CB(process_MMPLUSSetMessage_HC));
-        register_telegram_type((device_id - 0x20) * 2 + 0x02CC, "MMPLUSSetMessage_HC", false, MAKE_PF_CB(process_MMPLUSSetMessage_HC));
+        register_telegram_type((device_id - 0x20) * 2 + 0x02CC, "MMPLUSSetMessage_HC", true, MAKE_PF_CB(process_MMPLUSSetMessage_HC));
         hc_         = device_id - 0x20 + 1;
         uint8_t tag = DeviceValueTAG::TAG_HC1 + hc_ - 1;
         register_device_value(tag, &flowTempHc_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(flowTempHc), DeviceValueUOM::DEGREES);
