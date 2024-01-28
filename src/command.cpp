@@ -173,8 +173,10 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
                 if (!output.containsKey("api_data")) {
                     return CommandRet::INVALID;
                 }
-                data = output["api_data"];
+                String dat = output["api_data"];
                 output.clear();
+                input["data"] = dat.c_str();
+                data = input["data"];
             }
         }
     }
