@@ -1230,23 +1230,23 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         node["network"]  = "Ethernet";
         node["hostname"] = ETH.getHostname();
         // node["MAC"]             = ETH.macAddress();
-        node["IPv4 address"]    = uuid::printable_to_string(ETH.localIP()) + "/" + uuid::printable_to_string(ETH.subnetMask());
-        node["IPv4 gateway"]    = uuid::printable_to_string(ETH.gatewayIP());
-        node["IPv4 nameserver"] = uuid::printable_to_string(ETH.dnsIP());
-        if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
-            node["IPv6 address"] = uuid::printable_to_string(ETH.localIPv6());
-        }
+        // node["IPv4 address"]    = uuid::printable_to_string(ETH.localIP()) + "/" + uuid::printable_to_string(ETH.subnetMask());
+        // node["IPv4 gateway"]    = uuid::printable_to_string(ETH.gatewayIP());
+        // node["IPv4 nameserver"] = uuid::printable_to_string(ETH.dnsIP());
+        // if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
+        //     node["IPv6 address"] = uuid::printable_to_string(ETH.localIPv6());
+        // }
     } else if (WiFi.status() == WL_CONNECTED) {
         node["network"]  = "WiFi";
         node["hostname"] = WiFi.getHostname();
         node["RSSI"]     = WiFi.RSSI();
         // node["MAC"]             = WiFi.macAddress();
-        node["IPv4 address"]    = uuid::printable_to_string(WiFi.localIP()) + "/" + uuid::printable_to_string(WiFi.subnetMask());
-        node["IPv4 gateway"]    = uuid::printable_to_string(WiFi.gatewayIP());
-        node["IPv4 nameserver"] = uuid::printable_to_string(WiFi.dnsIP());
-        if (WiFi.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
-            node["IPv6 address"] = uuid::printable_to_string(WiFi.localIPv6());
-        }
+        // node["IPv4 address"]    = uuid::printable_to_string(WiFi.localIP()) + "/" + uuid::printable_to_string(WiFi.subnetMask());
+        // node["IPv4 gateway"]    = uuid::printable_to_string(WiFi.gatewayIP());
+        // node["IPv4 nameserver"] = uuid::printable_to_string(WiFi.dnsIP());
+        // if (WiFi.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
+        //     node["IPv6 address"] = uuid::printable_to_string(WiFi.localIPv6());
+        // }
     }
 #endif
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
