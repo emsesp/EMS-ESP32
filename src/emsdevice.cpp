@@ -932,7 +932,7 @@ void EMSdevice::generate_values_web(JsonObject output) {
             // add name, prefixing the tag if it exists. This is the id used in the WebUI table and must be unique
             obj["id"] = dv.has_tag() ? mask + tag_to_string(dv.tag) + " " + fullname : mask + fullname; // suffix tag
 
-            // TODO check TAG https://github.com/emsesp/EMS-ESP32/issues/1338
+            // TAG https://github.com/emsesp/EMS-ESP32/issues/1338
             // obj["id"] = dv.has_tag() ? mask + fullname + " " + tag_to_string(dv.tag) : mask + fullname; // suffix tag
 
             // add commands and options
@@ -1046,7 +1046,7 @@ void EMSdevice::generate_values_web_customization(JsonArray output) {
             if (fullname) {
                 obj["n"] = dv.has_tag() ? std::string(tag_to_string(dv.tag)) + " " + fullname : fullname; // prefix tag
 
-                // TODO check TAG https://github.com/emsesp/EMS-ESP32/issues/1338
+                // TAG https://github.com/emsesp/EMS-ESP32/issues/1338
                 // obj["n"] = (dv.has_tag()) ? fullname + " " + tag_to_string(dv.tag) : fullname; // suffix tag
             }
 
@@ -1394,7 +1394,7 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
             if (!fullname.empty()) {
                 json["fullname"] = dv.has_tag() ? fullname + " " + tag_to_string(dv.tag) : fullname; // suffix tag
 
-                // TODO check TAG https://github.com/emsesp/EMS-ESP32/issues/1338
+                // TAG https://github.com/emsesp/EMS-ESP32/issues/1338
                 json["fullname"] = dv.has_tag() ? std::string(tag_to_string(dv.tag)) + " " + fullname.c_str() : fullname; // prefix tag
             }
 
@@ -1600,7 +1600,7 @@ bool EMSdevice::generate_values(JsonObject output, const uint8_t tag_filter, con
                 // add tag
                 if (have_tag) {
                     snprintf(name, sizeof(name), "%s %s (%s)", tag_to_string(dv.tag), fullname.c_str(), dv.short_name); // prefix tag
-                    // TODO check TAG https://github.com/emsesp/EMS-ESP32/issues/1338
+                    // TAG https://github.com/emsesp/EMS-ESP32/issues/1338
                     // snprintf(name, sizeof(name), "%s %s (%s)", fullname.c_str(), tag_to_string(dv.tag), dv.short_name); // sufix tag
                 } else {
                     snprintf(name, sizeof(name), "%s (%s)", fullname.c_str(), dv.short_name);

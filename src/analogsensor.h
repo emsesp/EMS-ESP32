@@ -153,10 +153,8 @@ class AnalogSensor {
     }
 
     bool update(uint8_t gpio, const std::string & name, double offset, double factor, uint8_t uom, int8_t type, bool deleted = false);
-    bool get_value_info(JsonObject output, const char * cmd, const int8_t id) const;
+    bool get_value_info(JsonObject output, const char * cmd, const int8_t id = -1);
     void store_counters();
-
-    bool command_info(const char * value, const int8_t id, JsonObject output) const;
 
   private:
     static constexpr uint8_t  MAX_SENSORS             = 20;
@@ -167,7 +165,7 @@ class AnalogSensor {
     void remove_ha_topic(const int8_t type, const uint8_t id) const;
     bool command_setvalue(const char * value, const int8_t gpio);
     void measure();
-    bool command_commands(const char * value, const int8_t id, JsonObject output);
+    void addSensorJson(JsonObject output, const Sensor & sensor);
 
     std::vector<Sensor> sensors_; // our list of sensors
 

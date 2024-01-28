@@ -152,6 +152,7 @@ class TemperatureSensor {
     int16_t  get_temperature_c(const uint8_t addr[]);
     uint64_t get_id(const uint8_t addr[]);
     void     remove_ha_topic(const std::string & id);
+    void     addSensorJson(JsonObject output, const Sensor & sensor);
 
     std::vector<Sensor> sensors_; // our list of active sensors
 

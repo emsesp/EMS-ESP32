@@ -349,24 +349,25 @@ bool TemperatureSensor::get_value_info(JsonObject output, const char * cmd, cons
         return true; // no sensors, return true
     }
 
-    bool show_all = true;
+    uint8_t show_all = 0;
     if (Helpers::hasValue(cmd)) {
-        show_all = (strncmp(cmd, F_(info), 4) == 0);
+        show_all = (strncmp(cmd, F_(info), 4) == 0) ? 1 : (strncmp(cmd, F_(values), 6) == 0) ? 2 : 0;
     }
 
     // see if we're showing all sensors
     if (show_all) {
         for (const auto & sensor : sensors_) {
-            JsonObject dataSensor = output[sensor.name()].to<JsonObject>();
-            dataSensor["id"]      = sensor.id();
-            dataSensor["offset"]  = sensor.offset();
-            if (Helpers::hasValue(sensor.temperature_c)) {
-                char val[10];
-                dataSensor["value"] = serialized(Helpers::render_value(val, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
+            if (show_all == 1) {
+                // info
+                JsonObject dataSensor = output[sensor.name()].to<JsonObject>();
+                addSensorJson(dataSensor, sensor);
+            } else {
+                // values, shortname version. Also used in 'system allvalues'
+                if (Helpers::hasValue(sensor.temperature_c)) {
+                    char val[10];
+                    output[sensor.name()] = serialized(Helpers::render_value(val, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
+                }
             }
-            dataSensor["type"]      = F_(number);
-            dataSensor["uom"]       = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
-            dataSensor["writeable"] = false;
         }
         return true;
     }
@@ -393,17 +394,8 @@ bool TemperatureSensor::get_value_info(JsonObject output, const char * cmd, cons
     for (const auto & sensor : sensors_) {
         // match custom name or sensor ID
         if (sensor_lowercase == Helpers::toLower(sensor.name().c_str()) || sensor_lowercase == Helpers::toLower(sensor.id().c_str())) {
-            output["id"]   = sensor.id();
-            output["name"] = sensor.name();
-            if (Helpers::hasValue(sensor.temperature_c)) {
-                char val[10];
-                output["value"] = serialized(Helpers::render_value(val, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
-            }
-
-            output["type"]      = F_(number);
-            output["uom"]       = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
-            output["writeable"] = false;
-
+            // add values
+            addSensorJson(output, sensor);
             // if we're filtering on an attribute, go find it
             if (attribute_s) {
                 if (output.containsKey(attribute_s)) {
@@ -425,6 +417,20 @@ bool TemperatureSensor::get_value_info(JsonObject output, const char * cmd, cons
 
     return false; // not found
 }
+
+void TemperatureSensor::addSensorJson(JsonObject output, const Sensor & sensor) {
+    output["id"]   = sensor.id();
+    output["name"] = sensor.name();
+    if (Helpers::hasValue(sensor.temperature_c)) {
+        char val[10];
+        output["value"] = serialized(Helpers::render_value(val, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
+    }
+
+    output["type"]      = F_(number);
+    output["uom"]       = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
+    output["writeable"] = false;
+}
+
 
 // publish a single sensor to MQTT
 void TemperatureSensor::publish_sensor(const Sensor & sensor) {

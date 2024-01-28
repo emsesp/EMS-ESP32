@@ -119,16 +119,15 @@ bool System::command_allvalues(const char * value, const int8_t id, JsonObject o
         emsdevice->generate_values(device_output, DeviceValueTAG::TAG_NONE, true, EMSdevice::OUTPUT_TARGET::API_VERBOSE); // use nested for id -1 and 0
     }
 
-    // Custom entities
+    // Custom Entities
     device_output = output["Custom Entities"].to<JsonObject>();
     EMSESP::webCustomEntityService.get_value_info(device_output, "");
 
     // Sensors
     device_output = output["Analog Sensors"].to<JsonObject>();
-    // TODO fix this also for analogsensor
-    EMSESP::analogsensor_.command_info(nullptr, 0, device_output);
+    EMSESP::analogsensor_.get_value_info(device_output, "values");
     device_output = output["Temperature Sensors"].to<JsonObject>();
-    EMSESP::temperaturesensor_.get_value_info(device_output, nullptr);
+    EMSESP::temperaturesensor_.get_value_info(device_output, "values");
 
     return true;
 }
