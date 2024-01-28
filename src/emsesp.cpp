@@ -957,8 +957,11 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     }
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice->unique_id() == device_found) {
-            if (telegram->message_length > 0) {
+            if (!telegram_found && telegram->message_length > 0) {
                 emsdevice->add_handlers_ignored(telegram->type_id);
+            }
+            if (wait_validate_ == telegram->type_id) {
+                wait_validate_ = 0;
             }
             if (Mqtt::connected() && telegram_found
                 && ((mqtt_.get_publish_onchange(emsdevice->device_type()) && emsdevice->has_update())
