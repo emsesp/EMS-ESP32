@@ -35,21 +35,21 @@ class SecuritySettings {
     String          jwtSecret;
     std::list<User> users;
 
-    static void read(SecuritySettings & settings, JsonObject & root) {
+    static void read(SecuritySettings & settings, JsonObject root) {
         // secret
         root["jwt_secret"] = settings.jwtSecret;
 
         // users
-        JsonArray users = root.createNestedArray("users");
+        JsonArray users = root["users"].to<JsonArray>();
         for (User user : settings.users) {
-            JsonObject userRoot  = users.createNestedObject();
+            JsonObject userRoot  = users.add<JsonObject>();
             userRoot["username"] = user.username;
             userRoot["password"] = user.password;
             userRoot["admin"]    = user.admin;
         }
     }
 
-    static StateUpdateResult update(JsonObject & root, SecuritySettings & settings) {
+    static StateUpdateResult update(JsonObject root, SecuritySettings & settings) {
         // secret
         settings.jwtSecret = root["jwt_secret"] | FACTORY_JWT_SECRET;
 
@@ -98,7 +98,7 @@ class SecuritySettingsService : public StatefulService<SecuritySettings>, public
     /*
    * Verify the payload is correct
    */
-    boolean validatePayload(JsonObject & parsedPayload, User * user);
+    boolean validatePayload(JsonObject parsedPayload, User * user);
 };
 
 #else

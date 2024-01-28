@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ class EMSdevice {
     static const char * uom_to_string(uint8_t uom);
     static const char * tag_to_mqtt(uint8_t tag);
     static uint8_t      decode_brand(uint8_t value);
-    static bool         export_values(uint8_t device_type, JsonObject & output, const int8_t id, const uint8_t output_target);
+    static bool         export_values(uint8_t device_type, JsonObject output, const int8_t id, const uint8_t output_target);
 
     // non static
 
@@ -204,7 +204,7 @@ class EMSdevice {
     void   show_telegram_handlers(uuid::console::Shell & shell) const;
     char * show_telegram_handlers(char * result, const size_t len, const uint8_t handlers);
     void   show_mqtt_handlers(uuid::console::Shell & shell) const;
-    void   list_device_entries(JsonObject & output) const;
+    void   list_device_entries(JsonObject output) const;
     void   add_handlers_ignored(const uint16_t handler);
 
     void set_climate_minmax(uint8_t tag, int16_t min, uint32_t max);
@@ -216,13 +216,13 @@ class EMSdevice {
 
     std::string get_value_uom(const std::string & shortname) const;
 
-    bool get_value_info(JsonObject & root, const char * cmd, const int8_t id);
-    void get_dv_info(JsonObject & json);
+    bool get_value_info(JsonObject root, const char * cmd, const int8_t id);
+    void get_dv_info(JsonObject json);
 
     enum OUTPUT_TARGET : uint8_t { API_VERBOSE, API_SHORTNAMES, MQTT, CONSOLE };
-    bool generate_values(JsonObject & output, const uint8_t tag_filter, const bool nested, const uint8_t output_target);
-    void generate_values_web(JsonObject & output);
-    void generate_values_web_customization(JsonArray & output);
+    bool generate_values(JsonObject output, const uint8_t tag_filter, const bool nested, const uint8_t output_target);
+    void generate_values_web(JsonObject output);
+    void generate_values_web_customization(JsonArray output);
 
     void add_device_value(uint8_t               tag,
                           void *                value_p,

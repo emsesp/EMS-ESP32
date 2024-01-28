@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2023, Benoit BLANCHON
+// Copyright © 2014-2024, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -11,58 +11,60 @@
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 
 // A key-value pair.
-// https://arduinojson.org/v6/api/jsonobject/begin_end/
+// https://arduinojson.org/v7/api/jsonobject/begin_end/
 class JsonPair {
  public:
   // INTERNAL USE ONLY
-  JsonPair(detail::MemoryPool* pool, detail::VariantSlot* slot) {
-    if (slot) {
-      key_ = JsonString(slot->key(), slot->ownsKey() ? JsonString::Copied
-                                                     : JsonString::Linked);
-      value_ = JsonVariant(pool, slot->data());
-    }
-  }
+  JsonPair(detail::ObjectData::iterator iterator,
+           detail::ResourceManager* resources)
+      : iterator_(iterator), resources_(resources) {}
 
   // Returns the key.
   JsonString key() const {
-    return key_;
+    if (!iterator_.done())
+      return JsonString(iterator_.key(), iterator_.ownsKey()
+                                             ? JsonString::Copied
+                                             : JsonString::Linked);
+    else
+      return JsonString();
   }
 
   // Returns the value.
-  JsonVariant value() const {
-    return value_;
+  JsonVariant value() {
+    return JsonVariant(iterator_.data(), resources_);
   }
 
  private:
-  JsonString key_;
-  JsonVariant value_;
+  detail::ObjectData::iterator iterator_;
+  detail::ResourceManager* resources_;
 };
 
 // A read-only key-value pair.
-// https://arduinojson.org/v6/api/jsonobjectconst/begin_end/
+// https://arduinojson.org/v7/api/jsonobjectconst/begin_end/
 class JsonPairConst {
  public:
-  JsonPairConst(const detail::VariantSlot* slot) {
-    if (slot) {
-      key_ = JsonString(slot->key(), slot->ownsKey() ? JsonString::Copied
-                                                     : JsonString::Linked);
-      value_ = JsonVariantConst(slot->data());
-    }
-  }
+  JsonPairConst(detail::ObjectData::iterator iterator,
+                const detail::ResourceManager* resources)
+      : iterator_(iterator), resources_(resources) {}
 
   // Returns the key.
   JsonString key() const {
-    return key_;
+    if (!iterator_.done())
+      return JsonString(iterator_.key(), iterator_.ownsKey()
+                                             ? JsonString::Copied
+                                             : JsonString::Linked);
+    else
+      return JsonString();
   }
 
   // Returns the value.
   JsonVariantConst value() const {
-    return value_;
+    return JsonVariantConst(iterator_.data(), resources_);
   }
 
  private:
-  JsonString key_;
-  JsonVariantConst value_;
+  detail::ObjectData::iterator iterator_;
+  const detail::ResourceManager* resources_;
 };
 
 ARDUINOJSON_END_PUBLIC_NAMESPACE

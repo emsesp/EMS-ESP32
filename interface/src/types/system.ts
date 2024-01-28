@@ -2,9 +2,14 @@ export interface SystemStatus {
   emsesp_version: string;
   esp_platform: string;
   max_alloc_heap: number;
+  cpu_type: string;
+  cpu_rev: number;
+  cpu_cores: number;
   cpu_freq_mhz: number;
   free_heap: number;
+  arduino_version: string;
   sdk_version: string;
+  partition: string;
   flash_chip_size: number;
   flash_chip_speed: number;
   app_used: number;

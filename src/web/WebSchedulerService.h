@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,8 +43,8 @@ class WebScheduler {
   public:
     std::list<ScheduleItem> scheduleItems;
 
-    static void              read(WebScheduler & webScheduler, JsonObject & root);
-    static StateUpdateResult update(JsonObject & root, WebScheduler & webScheduler);
+    static void              read(WebScheduler & webScheduler, JsonObject root);
+    static StateUpdateResult update(JsonObject root, WebScheduler & webScheduler);
 };
 
 class WebSchedulerService : public StatefulService<WebScheduler> {
@@ -57,7 +57,7 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
     void publish(const bool force = false);
     bool has_commands();
     bool command_setvalue(const char * value, const std::string name);
-    bool get_value_info(JsonObject & output, const char * cmd);
+    bool get_value_info(JsonObject output, const char * cmd);
     void ha_reset() {
         ha_registered_ = false;
     }

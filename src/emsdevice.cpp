@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -366,7 +366,7 @@ bool EMSdevice::has_cmd(const char * cmd, const int8_t id) const {
 
 // list of registered device entries
 // called from the command 'entities'
-void EMSdevice::list_device_entries(JsonObject & output) const {
+void EMSdevice::list_device_entries(JsonObject output) const {
     for (const auto & dv : devicevalues_) {
         auto fullname = dv.get_fullname();
         if (!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && dv.type != DeviceValueType::CMD && !fullname.empty()) {
@@ -379,7 +379,7 @@ void EMSdevice::list_device_entries(JsonObject & output) const {
                 snprintf(key, sizeof(key), "%s", dv.short_name);
             }
 
-            JsonArray details = output.createNestedArray(key);
+            JsonArray details = output[key].to<JsonArray>();
 
             // add the full name description
             details.add(fullname);
@@ -827,7 +827,7 @@ std::string EMSdevice::get_value_uom(const std::string & shortname) const {
     return std::string{}; // not found
 }
 
-bool EMSdevice::export_values(uint8_t device_type, JsonObject & output, const int8_t id, const uint8_t output_target) {
+bool EMSdevice::export_values(uint8_t device_type, JsonObject output, const int8_t id, const uint8_t output_target) {
     bool    has_value = false;
     uint8_t tag;
     if (id >= 1 && id <= (1 + DeviceValueTAG::TAG_HS16 - DeviceValueTAG::TAG_HC1)) {
@@ -854,7 +854,7 @@ bool EMSdevice::export_values(uint8_t device_type, JsonObject & output, const in
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice && (emsdevice->device_type() == device_type)) {
                 if (!nest_created && emsdevice->has_tags(tag)) {
-                    output_hc    = output.createNestedObject(EMSdevice::tag_to_mqtt(tag));
+                    output_hc    = output[EMSdevice::tag_to_mqtt(tag)].to<JsonObject>();
                     nest_created = true;
                 }
                 has_value |= emsdevice->generate_values(output_hc, tag, true, output_target); // use nested for id -1 and 0
@@ -868,10 +868,10 @@ bool EMSdevice::export_values(uint8_t device_type, JsonObject & output, const in
 // this is loosely based of the function generate_values used for the MQTT and Console
 // except additional data is stored in the JSON document needed for the Web UI like the UOM and command
 // v=value, u=uom, n=name, c=cmd, h=help string, s=step, m=min, x=max
-void EMSdevice::generate_values_web(JsonObject & output) {
+void EMSdevice::generate_values_web(JsonObject output) {
     // output["label"] = to_string_short();
     // output["label"] = name_;
-    JsonArray data = output.createNestedArray("data");
+    JsonArray data = output["data"].to<JsonArray>();
 
     for (auto & dv : devicevalues_) {
         auto fullname = dv.get_fullname();
@@ -881,7 +881,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
         //  2. it must have a valid value, if it is not a command like 'reset'
         //  3. show favorites first
         if (!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && !fullname.empty() && (dv.hasValue() || (dv.type == DeviceValueType::CMD))) {
-            JsonObject obj        = data.createNestedObject(); // create the object, we know there is a value
+            JsonObject obj        = data.add<JsonObject>(); // create the object, we know there is a value
             uint8_t    fahrenheit = 0;
 
             // handle Booleans (true, false), output as strings according to the user settings
@@ -948,7 +948,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
 
                 // add the Command options
                 if (dv.type == DeviceValueType::ENUM || (dv.type == DeviceValueType::CMD && dv.options_size > 1)) {
-                    JsonArray l = obj.createNestedArray("l");
+                    JsonArray l = obj["l"].to<JsonArray>();
                     for (uint8_t i = 0; i < dv.options_size; i++) {
                         auto enum_str = Helpers::translated_word(dv.options[i]);
                         if (enum_str) {
@@ -956,7 +956,7 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                         }
                     }
                 } else if (dv.type == DeviceValueType::BOOL) {
-                    JsonArray l = obj.createNestedArray("l");
+                    JsonArray l = obj["l"].to<JsonArray>();
                     char      result[12];
                     l.add(Helpers::render_boolean(result, false, true));
                     l.add(Helpers::render_boolean(result, true, true));
@@ -969,19 +969,15 @@ void EMSdevice::generate_values_web(JsonObject & output) {
                 }
                 // handle INTs
                 else {
-                    // add step if it's not 1
-                    if (dv.numeric_operator > 0) {
-                        obj["s"] = (float)1 / dv.numeric_operator;
-                    } else if (dv.numeric_operator < 0) {
-                        obj["s"] = (float)(-1) * dv.numeric_operator;
-                    }
-
                     // add min and max values, if available
                     int16_t  dv_set_min;
                     uint32_t dv_set_max;
                     if (dv.get_min_max(dv_set_min, dv_set_max)) {
                         obj["m"] = dv_set_min;
                         obj["x"] = dv_set_max;
+                        // add steps to numeric values as rendered string to avoid rounding floats in js
+                        char s[10];
+                        obj["s"] = Helpers::render_value(s, (uint32_t)1, dv.numeric_operator);
                     }
                 }
             }
@@ -991,10 +987,10 @@ void EMSdevice::generate_values_web(JsonObject & output) {
 
 // as generate_values_web() but stripped down to only show all entities and their state
 // this is used only for WebCustomizationService::device_entities()
-void EMSdevice::generate_values_web_customization(JsonArray & output) {
+void EMSdevice::generate_values_web_customization(JsonArray output) {
     for (auto & dv : devicevalues_) {
         // also show commands and entities that have an empty full name
-        JsonObject obj        = output.createNestedObject();
+        JsonObject obj        = output.add<JsonObject>();
         uint8_t    fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 
         // create the value
@@ -1086,7 +1082,7 @@ void EMSdevice::generate_values_web_customization(JsonArray & output) {
                 for (std::string entity_id : entityCustomization.entity_ids) {
                     uint8_t mask = Helpers::hextoint(entity_id.substr(0, 2).c_str());
                     if (mask & 0x80) {
-                        JsonObject obj = output.createNestedObject();
+                        JsonObject obj = output.add<JsonObject>();
                         obj["id"]      = DeviceValue::get_name(entity_id);
                         obj["m"]       = mask;
                         obj["w"]       = false;
@@ -1366,7 +1362,7 @@ void EMSdevice::dump_value_info() {
 // builds json for a specific device value / entity
 // cmd is the endpoint or name of the device entity
 // returns false if failed, otherwise true
-bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8_t id) {
+bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t id) {
     JsonObject json = output;
     int8_t     tag  = id;
 
@@ -1423,7 +1419,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
                     }
                 }
                 json[type]      = F_(enum);
-                JsonArray enum_ = json.createNestedArray(F_(enum));
+                JsonArray enum_ = json[F_(enum)].to<JsonArray>();
                 for (uint8_t i = 0; i < dv.options_size; i++) {
                     enum_.add(Helpers::translated_word(dv.options[i]));
                 }
@@ -1497,7 +1493,7 @@ bool EMSdevice::get_value_info(JsonObject & output, const char * cmd, const int8
             case DeviceValueType::CMD:
                 json[type] = F_(command);
                 if (dv.options_size > 1) {
-                    JsonArray enum_ = json.createNestedArray(F_(enum));
+                    JsonArray enum_ = json[F_(enum)].to<JsonArray>();
                     for (uint8_t i = 0; i < dv.options_size; i++) {
                         enum_.add(Helpers::translated_word(dv.options[i]));
                     }
@@ -1572,7 +1568,7 @@ void EMSdevice::publish_all_values() {
 // For each value in the device create the json object pair and add it to given json
 // return false if empty
 // this is used to create the MQTT payloads, Console messages and Web API calls
-bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, const bool nested, const uint8_t output_target) {
+bool EMSdevice::generate_values(JsonObject output, const uint8_t tag_filter, const bool nested, const uint8_t output_target) {
     bool       has_values = false; // to see if we've added a value. it's faster than doing a json.size() at the end
     uint8_t    old_tag    = 255;   // NAN
     JsonObject json       = output;
@@ -1618,15 +1614,19 @@ bool EMSdevice::generate_values(JsonObject & output, const uint8_t tag_filter, c
                 if (dv.tag != old_tag) {
                     old_tag = dv.tag;
                     if (nested && have_tag && dv.tag >= DeviceValueTAG::TAG_HC1) {
-                        json = output.createNestedObject(tag_to_mqtt(dv.tag));
+                        json = output[tag_to_mqtt(dv.tag)].to<JsonObject>();
                     }
                 }
             }
+
             // do not overwrite
             if (json.containsKey(name)) {
+#ifdef EMSESP_DEBUG
                 EMSESP::logger().debug("double json key: %s", name);
+#endif
                 continue;
             }
+
             // handle Booleans
             if (dv.type == DeviceValueType::BOOL && Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
                 // see how to render the value depending on the setting
@@ -1759,7 +1759,7 @@ void EMSdevice::mqtt_ha_entity_config_create() {
             }
 #ifndef EMSESP_STANDALONE
             // always create minimum one config
-            if (ESP.getMaxAllocHeap() < (6 * 1024) || (!emsesp::EMSESP::system_.PSram() && ESP.getFreeHeap() < (65 * 1024))) {
+            if (ESP.getMaxAllocHeap() < (6 * 1024) || (!EMSESP::system_.PSram() && ESP.getFreeHeap() < (65 * 1024))) {
                 break;
             }
 #endif

@@ -2,8 +2,8 @@ import { Tab } from '@mui/material';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import SettingsApplication from './SettingsApplication';
+import SettingsCustomEntities from './SettingsCustomEntities';
 import SettingsCustomization from './SettingsCustomization';
-import SettingsEntities from './SettingsEntities';
 import SettingsScheduler from './SettingsScheduler';
 import type { FC } from 'react';
 import { RouterTabs, useRouterTab, useLayoutTitle } from 'components';
@@ -27,7 +27,7 @@ const Settings: FC = () => {
         <Route path="application" element={<SettingsApplication />} />
         <Route path="customization" element={<SettingsCustomization />} />
         <Route path="scheduler" element={<SettingsScheduler />} />
-        <Route path="customentities" element={<SettingsEntities />} />
+        <Route path="customentities" element={<SettingsCustomEntities />} />
         <Route path="*" element={<Navigate replace to="/settings/application" />} />
       </Routes>
     </>

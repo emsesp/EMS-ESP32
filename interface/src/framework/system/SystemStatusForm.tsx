@@ -1,6 +1,7 @@
 import AppsIcon from '@mui/icons-material/Apps';
 import BuildIcon from '@mui/icons-material/Build';
 import CancelIcon from '@mui/icons-material/Cancel';
+import DeveloperBoardIcon from '@mui/icons-material/DeveloperBoard';
 import DevicesIcon from '@mui/icons-material/Devices';
 import FolderIcon from '@mui/icons-material/Folder';
 import MemoryIcon from '@mui/icons-material/Memory';
@@ -9,7 +10,6 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import SdCardAlertIcon from '@mui/icons-material/SdCardAlert';
 import SdStorageIcon from '@mui/icons-material/SdStorage';
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
-import ShowChartIcon from '@mui/icons-material/ShowChart';
 import TimerIcon from '@mui/icons-material/Timer';
 import {
   Avatar,
@@ -203,15 +203,6 @@ const SystemStatusForm: FC = () => {
           <ListItem>
             <ListItemAvatar>
               <Avatar>
-                <DevicesIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary={LL.PLATFORM()} secondary={data.esp_platform + ' / ' + data.sdk_version} />
-          </ListItem>
-          <Divider variant="inset" component="li" />
-          <ListItem>
-            <ListItemAvatar>
-              <Avatar>
                 <TimerIcon />
               </Avatar>
             </ListItemAvatar>
@@ -221,10 +212,33 @@ const SystemStatusForm: FC = () => {
           <ListItem>
             <ListItemAvatar>
               <Avatar>
-                <ShowChartIcon />
+                <DevicesIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary={LL.CPU_FREQ()} secondary={data.cpu_freq_mhz + ' MHz'} />
+            <ListItemText primary="SDK" secondary={data.arduino_version + ' / ESP-IDF v' + data.sdk_version} />
+          </ListItem>
+          <Divider variant="inset" component="li" />
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar>
+                <DeveloperBoardIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText
+              primary="CPU"
+              secondary={
+                data.esp_platform +
+                '/' +
+                data.cpu_type +
+                ' (rev.' +
+                data.cpu_rev +
+                ', ' +
+                (data.cpu_cores == 1 ? 'single-core)' : 'dual-core)') +
+                ' @ ' +
+                data.cpu_freq_mhz +
+                ' Mhz'
+              }
+            />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
@@ -277,7 +291,9 @@ const SystemStatusForm: FC = () => {
             </ListItemAvatar>
             <ListItemText
               primary={LL.APPSIZE()}
-              secondary={formatNumber(data.app_used) + ' KB / ' + formatNumber(data.app_free) + ' KB'}
+              secondary={
+                data.partition + ': ' + formatNumber(data.app_used) + ' KB / ' + formatNumber(data.app_free) + ' KB'
+              }
             />
           </ListItem>
           <Divider variant="inset" component="li" />

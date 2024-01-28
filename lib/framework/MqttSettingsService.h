@@ -64,6 +64,7 @@ class MqttSettings {
     String   host;
     uint16_t port;
     String   rootCA;
+    bool     enableTLS;
 
     // username and password
     String username;
@@ -96,8 +97,8 @@ class MqttSettings {
     bool     send_response;
     uint8_t  entity_format;
 
-    static void              read(MqttSettings & settings, JsonObject & root);
-    static StateUpdateResult update(JsonObject & root, MqttSettings & settings);
+    static void              read(MqttSettings & settings, JsonObject root);
+    static StateUpdateResult update(JsonObject root, MqttSettings & settings);
 };
 
 class MqttSettingsService : public StatefulService<MqttSettings> {
@@ -114,7 +115,6 @@ class MqttSettingsService : public StatefulService<MqttSettings> {
     espMqttClientTypes::DisconnectReason getDisconnectReason();
     MqttClient *                         getMqttClient();
     void                                 setWill(const char * topic);
-    void                                 onMessage(espMqttClientTypes::OnMessageCallback callback);
 
   protected:
     void onConfigUpdated();
@@ -144,6 +144,8 @@ class MqttSettingsService : public StatefulService<MqttSettings> {
     void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
     void onMqttConnect(bool sessionPresent);
     void onMqttDisconnect(espMqttClientTypes::DisconnectReason reason);
+    void
+    onMqttMessage(const espMqttClientTypes::MessageProperties & properties, const char * topic, const uint8_t * payload, size_t len, size_t index, size_t total);
     bool configureMqtt();
 };
 

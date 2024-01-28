@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, Securit
     addUpdateHandler([&](const String & originId) { onUpdate(); }, false);
 }
 
-void WebSettings::read(WebSettings & settings, JsonObject & root) {
+void WebSettings::read(WebSettings & settings, JsonObject root) {
     root["version"]               = settings.version;
     root["locale"]                = settings.locale;
     root["tx_mode"]               = settings.tx_mode;
@@ -81,7 +81,7 @@ void WebSettings::read(WebSettings & settings, JsonObject & root) {
 }
 
 // call on initialization and also when settings are updated via web or console
-StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings) {
+StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     // load the version of the settings
     // will be picked up in System::check_upgrade()
     settings.version = root["version"] | EMSESP_DEFAULT_VERSION;
@@ -110,13 +110,21 @@ StateUpdateResult WebSettings::update(JsonObject & root, WebSettings & settings)
         if (!System::load_board_profile(data, settings.board_profile.c_str())) {
 #if CONFIG_IDF_TARGET_ESP32 && !defined(EMSESP_STANDALONE)
             if (settings.board_profile == "") { // empty: new test
-                if (ETH.begin((eth_phy_type_t)1, 16, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_IN)) {
+#if ESP_ARDUINO_VERSION_MAJOR < 3
+                if (ETH.begin(1, 16, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_IN)) {
+#else
+                if (ETH.begin(ETH_PHY_LAN8720, 1, 23, 18, 16, ETH_CLOCK_GPIO0_IN)) {
+#endif
                     EMSESP::nvs_.putString("boot", "E32");
                 } else {
                     EMSESP::nvs_.putString("boot", "Test");
                 }
             } else if (settings.board_profile == "Test") {
-                if (ETH.begin((eth_phy_type_t)0, 15, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_OUT)) {
+#if ESP_ARDUINO_VERSION_MAJOR < 3
+                if (ETH.begin(0, 15, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_OUT)) {
+#else
+                if (ETH.begin(ETH_PHY_LAN8720, 0, 23, 18, 15, ETH_CLOCK_GPIO0_OUT)) {
+#endif
                     EMSESP::nvs_.putString("boot", "E32V2");
                 } else {
                     EMSESP::nvs_.putString("boot", "S32");
@@ -358,7 +366,7 @@ void WebSettingsService::board_profile(AsyncWebServerRequest * request) {
     if (request->hasParam("boardProfile")) {
         std::string board_profile = request->getParam("boardProfile")->value().c_str();
 
-        auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_MEDIUM);
+        auto *     response = new AsyncJsonResponse(false);
         JsonObject root     = response->getRoot();
 
         std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode

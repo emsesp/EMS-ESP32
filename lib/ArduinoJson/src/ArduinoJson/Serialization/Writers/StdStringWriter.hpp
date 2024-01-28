@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2023, Benoit BLANCHON
+// Copyright © 2014-2024, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -24,7 +24,9 @@ template <typename TDestination>
 class Writer<TDestination,
              typename enable_if<is_std_string<TDestination>::value>::type> {
  public:
-  Writer(TDestination& str) : str_(&str) {}
+  Writer(TDestination& str) : str_(&str) {
+    str.clear();
+  }
 
   size_t write(uint8_t c) {
     str_->push_back(static_cast<char>(c));

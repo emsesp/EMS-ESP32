@@ -1,20 +1,45 @@
 import CommentIcon from '@mui/icons-material/CommentTwoTone';
 import EastIcon from '@mui/icons-material/East';
+import DownloadIcon from '@mui/icons-material/GetApp';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import MenuBookIcon from '@mui/icons-material/MenuBookTwoTone';
-import { Box, List, ListItem, ListItemAvatar, ListItemText, Link, Typography } from '@mui/material';
+import { Box, List, ListItem, ListItemAvatar, ListItemText, Link, Typography, Button } from '@mui/material';
+import { useRequest } from 'alova';
+import { toast } from 'react-toastify';
 import type { FC } from 'react';
 import { SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
+import * as EMSESP from 'project/api';
 
 const Help: FC = () => {
   const { LL } = useI18nContext();
   useLayoutTitle(LL.HELP_OF(''));
 
-  const uploadURL = window.location.origin + '/system/upload';
+  const { send: getAPI, onSuccess: onGetAPI } = useRequest((data) => EMSESP.API(data), {
+    immediate: false
+  });
+
+  onGetAPI((event) => {
+    const anchor = document.createElement('a');
+    anchor.href = URL.createObjectURL(
+      new Blob([JSON.stringify(event.data, null, 2)], {
+        type: 'text/plain'
+      })
+    );
+    anchor.download = 'emsesp_' + event.sendArgs[0].device + '_' + event.sendArgs[0].entity + '.txt';
+    anchor.click();
+    URL.revokeObjectURL(anchor.href);
+    toast.info(LL.DOWNLOAD_SUCCESSFUL());
+  });
+
+  const callAPI = async (device: string, entity: string) => {
+    await getAPI({ device, entity, id: 0 }).catch((error) => {
+      toast.error(error.message);
+    });
+  };
 
   return (
-    <SectionContent title={LL.SUPPORT_INFORMATION()} titleGutter>
+    <SectionContent title={LL.SUPPORT_INFORMATION(0)} titleGutter>
       <List>
         <ListItem>
           <ListItemAvatar>
@@ -55,14 +80,27 @@ const Help: FC = () => {
               {LL.CLICK_HERE()}
             </Link>
             <br />
-            <i>({LL.HELP_INFORMATION_4()}</i>&nbsp;
-            <Link href={uploadURL} color="primary">
-              {LL.UPLOAD()}
-            </Link>
-            )
           </ListItemText>
         </ListItem>
       </List>
+
+      <Box color="warning.main">
+        <Typography mb={1} variant="body2">
+          {LL.HELP_INFORMATION_4()}
+        </Typography>
+      </Box>
+      <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={() => callAPI('system', 'info')}>
+        {LL.SUPPORT_INFORMATION(0)}
+      </Button>
+      <Button
+        sx={{ ml: 2 }}
+        startIcon={<DownloadIcon />}
+        variant="outlined"
+        color="primary"
+        onClick={() => callAPI('system', 'allvalues')}
+      >
+        All Values
+      </Button>
 
       <Box border={1} p={1} mt={4} color="orange">
         <Typography align="center" variant="subtitle1" color="orange">
@@ -73,7 +111,7 @@ const Help: FC = () => {
             {'github.com/emsesp/EMS-ESP32'}
           </Link>
         </Typography>
-        <Typography color="white" align="center">
+        <Typography color="white" variant="subtitle2" align="center">
           @proddy @MichaelDvP
         </Typography>
       </Box>

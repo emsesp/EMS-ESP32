@@ -1,6 +1,7 @@
+
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -127,14 +128,16 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
                           string_vector{"test"},
-                          string_vector{F_(name_optional), F_(data_optional)},
+                          string_vector{F_(name_optional), F_(data_optional), F_(id_optional)},
                           [=](Shell & shell, const std::vector<std::string> & arguments) {
                               if (arguments.empty()) {
                                   Test::run_test(shell, "default");
                               } else if (arguments.size() == 1) {
                                   Test::run_test(shell, arguments.front());
-                              } else {
+                              } else if (arguments.size() == 2) {
                                   Test::run_test(shell, arguments[0].c_str(), arguments[1].c_str());
+                              } else {
+                                  Test::run_test(shell, arguments[0].c_str(), arguments[1].c_str(), arguments[2].c_str());
                               }
                           });
     commands->add_command(ShellContext::MAIN, CommandFlags::USER, string_vector{"t"}, [=](Shell & shell, const std::vector<std::string> & arguments) {
@@ -237,7 +240,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                                           networkSettings.password = password2.c_str();
                                                           return StateUpdateResult::CHANGED;
                                                       });
-                                                  shell.println("Use `wifi reconnect` to save and apply the new settings");
+                                                  shell.println("WiFi password updated");
                                               } else {
                                                   shell.println("Passwords do not match");
                                               }
@@ -272,7 +275,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                   networkSettings.ssid = arguments.front().c_str();
                                   return StateUpdateResult::CHANGED;
                               });
-                              shell.println("Use `wifi reconnect` to save and apply the new settings");
+                              shell.println("WiFi ssid updated");
                           });
 
 
@@ -346,6 +349,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                       return StateUpdateResult::CHANGED;
                                   },
                                   "local");
+                              to_app(shell).uart_init();
                           });
 
     //
@@ -495,11 +499,11 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                 return;
             }
 
-            DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXXLARGE);
-            int8_t              id          = -1;
-            const char *        cmd         = Command::parse_command_string(arguments[1].c_str(), id);
-            uint8_t             return_code = CommandRet::OK;
-            JsonObject          json        = doc.to<JsonObject>();
+            JsonDocument doc;
+            int8_t       id          = -1;
+            const char * cmd         = Command::parse_command_string(arguments[1].c_str(), id);
+            uint8_t      return_code = CommandRet::OK;
+            JsonObject   json        = doc.to<JsonObject>();
 
             if (cmd == nullptr) {
                 cmd = device_type == EMSdevice::DeviceType::SYSTEM ? F_(info) : F_(values);

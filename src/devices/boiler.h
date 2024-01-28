@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,7 +60,8 @@ class Boiler : public EMSdevice {
     uint8_t  wwSelTempEcoplus_;     // DHW ECO+ temperature
     uint8_t  wwType_;               // 0-off, 1-flow, 2-flowbuffer, 3-buffer, 4-layered buffer
     uint8_t  wwComfort_;            // WW comfort mode
-    uint8_t  wwComfort1_;           // WW comfort mode RC310
+    uint8_t  wwComfort1_;           // WW comfort mode RC310, 0xEA offset 13
+    uint8_t  wwComfort2_;           // WW comfort mode emsplus 0xEA, offset 26
     uint8_t  wwCircPump_;           // DHW circulation pump available
     uint8_t  wwChargeType_;         // DHW charge type (pump or 3-way-valve)
     uint8_t  wwChargeOptimization_; // DHW charge optimization
@@ -103,21 +104,22 @@ class Boiler : public EMSdevice {
     uint32_t heatingLastCommand_;
 
     // main
-    uint8_t  reset_;            // for reset command
-    uint8_t  heatingActive_;    // Central heating is on/off
-    uint8_t  tapwaterActive_;   // Hot tap water is on/off
-    uint8_t  selFlowTemp_;      // Selected flow temperature
-    uint8_t  selBurnPow_;       // Burner max power % (can be > 100%)
-    uint8_t  absBurnPow_;       // absolute burner power in % of rating plate
-    uint8_t  heatingPumpMod_;   // Pump modulation %
-    int16_t  outdoorTemp_;      // Outside temperature
-    uint16_t curFlowTemp_;      // Current flow temperature
-    uint16_t retTemp_;          // Return temperature
-    uint16_t switchTemp_;       // Switch temperature
-    uint8_t  sysPress_;         // System pressure
-    uint16_t boilTemp_;         // Boiler temperature
-    uint16_t exhaustTemp_;      // Exhaust temperature published
-    uint16_t exhaustTemp1_;     // read from E4
+    uint8_t  reset_;          // for reset command
+    uint8_t  heatingActive_;  // Central heating is on/off
+    uint8_t  tapwaterActive_; // Hot tap water is on/off
+    uint8_t  selFlowTemp_;    // Selected flow temperature
+    uint8_t  selBurnPow_;     // Burner max power % (can be > 100%)
+    uint8_t  absBurnPow_;     // absolute burner power in % of rating plate
+    uint8_t  heatingPumpMod_; // Pump modulation %
+    int16_t  outdoorTemp_;    // Outside temperature
+    uint16_t curFlowTemp_;    // Current flow temperature
+    uint16_t retTemp_;        // Return temperature
+    uint16_t switchTemp_;     // Switch temperature
+    uint8_t  sysPress_;       // System pressure
+    uint16_t boilTemp_;       // Boiler temperature
+    uint16_t exhaustTemp_;    // Exhaust temperature published
+    // read second value from E4 and initialize it
+    uint16_t exhaustTemp1_ = EMS_VALUE_USHORT_NOTSET;
     uint8_t  burnGas_;          // Gas on/off
     uint8_t  burnGas2_;         // Gas stage 2 on/off
     uint16_t flameCurr_;        // Flame current in micro amps
@@ -220,7 +222,9 @@ class Boiler : public EMSdevice {
     uint32_t meterTotal_;
     uint32_t meterComp_;
     uint32_t meterEHeat_;
+    uint32_t meterHeat_;
     uint8_t  hpEA0_;
+    uint8_t  hpPumpMode_;
 
     // Pool unit
     int8_t poolSetTemp_;
@@ -235,6 +239,7 @@ class Boiler : public EMSdevice {
     uint8_t maxHeatComp_;
     uint8_t maxHeatHeat_;
     uint8_t maxHeatDhw_;
+    uint8_t hpMaxPower_;
 
     uint8_t  pvCooling_;
     uint8_t  manDefrost_;
@@ -432,6 +437,8 @@ class Boiler : public EMSdevice {
     bool set_manDefrost(const char * value, const int8_t id);
     bool set_pvCooling(const char * value, const int8_t id);
     bool set_hpCircPumpWw(const char * value, const int8_t id);
+    bool set_hpPumpMode(const char * value, const int8_t id);
+    bool set_hpMaxPower(const char * value, const int8_t id);
 
     bool        set_auxLimit(const char * value, const int8_t id);
     inline bool set_auxMaxLimit(const char * value, const int8_t id) {

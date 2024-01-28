@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -712,6 +712,15 @@ void Thermostat::process_RemoteHumidity(std::shared_ptr<const Telegram> telegram
     // has_update(telegram, dewtemperature_, 0); // this is int8
     has_update(telegram, humidity_, 1);
     has_update(telegram, dewtemperature_, 2); // this is int16
+    // some thermostats use short telegram with int8 dewpoint, https://github.com/emsesp/EMS-ESP32/issues/1491
+    if (telegram->offset == 0 && telegram->message_length < 4) {
+        int8_t dew = dewtemperature_ / 10;
+        telegram->read_value(dew, 0);
+        if (dew != EMS_VALUE_INT_NOTSET && dewtemperature_ != dew * 10) {
+            dewtemperature_ = dew * 10;
+            has_update(dewtemperature_);
+        }
+    }
 }
 
 // 0x273 - for reading temperaturcorrection from the RC100H remote thermostat (0x38, 0x39, ..)
@@ -1052,6 +1061,8 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hc->reducetemp, 9);
     has_update(telegram, hc->noreducetemp, 12);
     has_update(telegram, hc->remoteseltemp, 17); // see https://github.com/emsesp/EMS-ESP32/issues/590
+    has_update(telegram, hc->boost, 23);
+    has_update(telegram, hc->boosttime, 24);
     has_update(telegram, hc->cooling, 28);
 }
 
@@ -1096,6 +1107,9 @@ void Thermostat::process_RC300Summer2(std::shared_ptr<const Telegram> telegram) 
         has_update(hc->summersetmode, EMS_VALUE_UINT_NOTSET);
     }
     has_update(telegram, hc->summertemp, 1);
+    has_update(telegram, hc->heatondelay, 2);
+    has_update(telegram, hc->heatoffdelay, 3);
+    has_update(telegram, hc->instantstart, 4);
 }
 
 // types 0x29B ff
@@ -2670,7 +2684,75 @@ bool Thermostat::set_switchonoptimization(const char * value, const int8_t id) {
     write_command(curve_typeids[hc->hc()], 4, b ? 0xFF : 0x00, curve_typeids[hc->hc()]);
     return true;
 }
+bool Thermostat::set_boost(const char * value, const int8_t id) {
+    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    if (hc == nullptr) {
+        return false;
+    }
+    bool b;
+    if (!Helpers::value2bool(value, b)) {
+        return false;
+    }
+    write_command(set_typeids[hc->hc()], 23, b ? 0xFF : 0x00, set_typeids[hc->hc()]);
+    return true;
+}
 
+bool Thermostat::set_boosttime(const char * value, const int8_t id) {
+    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    if (hc == nullptr) {
+        return false;
+    }
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+    write_command(set_typeids[hc->hc()], 24, (uint8_t)v, set_typeids[hc->hc()]);
+    return true;
+}
+
+bool Thermostat::set_heatondelay(const char * value, const int8_t id) {
+    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    if (hc == nullptr) {
+        return false;
+    }
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+    write_command(summer2_typeids[hc->hc()], 2, (uint8_t)v, summer2_typeids[hc->hc()]);
+    return true;
+}
+
+bool Thermostat::set_heatoffdelay(const char * value, const int8_t id) {
+    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    if (hc == nullptr) {
+        return false;
+    }
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+    write_command(summer2_typeids[hc->hc()], 3, (uint8_t)v, summer2_typeids[hc->hc()]);
+    return true;
+}
+
+bool Thermostat::set_instantstart(const char * value, const int8_t id) {
+    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    if (hc == nullptr) {
+        return false;
+    }
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+    write_command(summer2_typeids[hc->hc()], 4, (uint8_t)v, summer2_typeids[hc->hc()]);
+    return true;
+}
 
 // sets the thermostat reducemode for RC35 and RC310
 bool Thermostat::set_reducemode(const char * value, const int8_t id) {
@@ -2823,8 +2905,8 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
     uint8_t time = 0x91; // invalid
 
     if (value[0] == '{') {
-        StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> doc;
-        DeserializationError                       error = deserializeJson(doc, value);
+        JsonDocument         doc;
+        DeserializationError error = deserializeJson(doc, value);
         if (error) {
             return false;
         }
@@ -4144,7 +4226,7 @@ void Thermostat::register_device_values() {
 
 #if defined(EMSESP_STANDALONE_DUMP)
     // if we're just dumping out values, create a single dummy hc
-    register_device_values_hc(std::make_shared<emsesp::Thermostat::HeatingCircuit>(1, this->model())); // hc=1
+    register_device_values_hc(std::make_shared<Thermostat::HeatingCircuit>(1, this->model())); // hc=1
 #endif
 }
 
@@ -4272,6 +4354,11 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               -1,
                               101);
         register_device_value(tag, &hc->remotehum, DeviceValueType::UINT, FL_(remotehum), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_remotehum), -1, 101);
+        register_device_value(tag, &hc->heatondelay, DeviceValueType::UINT, FL_(heatondelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_heatondelay), 1, 48);
+        register_device_value(tag, &hc->heatoffdelay, DeviceValueType::UINT, FL_(heatoffdelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_heatoffdelay), 1, 48);
+        register_device_value(tag, &hc->instantstart, DeviceValueType::UINT, FL_(instantstart), DeviceValueUOM::K, MAKE_CF_CB(set_instantstart), 1, 10);
+        register_device_value(tag, &hc->boost, DeviceValueType::BOOL, FL_(boost), DeviceValueUOM::NONE, MAKE_CF_CB(set_boost));
+        register_device_value(tag, &hc->boosttime, DeviceValueType::UINT, FL_(boosttime), DeviceValueUOM::HOURS, MAKE_CF_CB(set_boosttime));
 
         break;
     case EMS_DEVICE_FLAG_CRF:

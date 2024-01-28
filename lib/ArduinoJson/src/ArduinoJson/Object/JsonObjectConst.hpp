@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2023, Benoit BLANCHON
+// Copyright © 2014-2024, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -10,7 +10,7 @@
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 
 // A read-only reference to an object in a JsonDocument.
-// https://arduinojson.org/v6/api/jsonobjectconst/
+// https://arduinojson.org/v7/api/jsonobjectconst/
 class JsonObjectConst : public detail::VariantOperators<JsonObjectConst> {
   friend class JsonObject;
   friend class detail::VariantAttorney;
@@ -22,103 +22,94 @@ class JsonObjectConst : public detail::VariantOperators<JsonObjectConst> {
   JsonObjectConst() : data_(0) {}
 
   // INTERNAL USE ONLY
-  JsonObjectConst(const detail::CollectionData* data) : data_(data) {}
+  JsonObjectConst(const detail::ObjectData* data,
+                  const detail::ResourceManager* resources)
+      : data_(data), resources_(resources) {}
 
   operator JsonVariantConst() const {
-    return JsonVariantConst(collectionToVariant(data_));
+    return JsonVariantConst(getData(), resources_);
   }
 
   // Returns true if the reference is unbound.
-  // https://arduinojson.org/v6/api/jsonobjectconst/isnull/
+  // https://arduinojson.org/v7/api/jsonobjectconst/isnull/
   FORCE_INLINE bool isNull() const {
     return data_ == 0;
   }
 
   // Returns true if the reference is bound.
-  // https://arduinojson.org/v6/api/jsonobjectconst/isnull/
+  // https://arduinojson.org/v7/api/jsonobjectconst/isnull/
   FORCE_INLINE operator bool() const {
     return data_ != 0;
   }
 
-  // Returns the number of bytes occupied by the object.
-  // https://arduinojson.org/v6/api/jsonobjectconst/memoryusage/
-  FORCE_INLINE size_t memoryUsage() const {
-    return data_ ? data_->memoryUsage() : 0;
-  }
-
   // Returns the depth (nesting level) of the object.
-  // https://arduinojson.org/v6/api/jsonobjectconst/nesting/
+  // https://arduinojson.org/v7/api/jsonobjectconst/nesting/
   FORCE_INLINE size_t nesting() const {
-    return variantNesting(collectionToVariant(data_));
+    return detail::VariantData::nesting(getData(), resources_);
   }
 
   // Returns the number of members in the object.
-  // https://arduinojson.org/v6/api/jsonobjectconst/size/
+  // https://arduinojson.org/v7/api/jsonobjectconst/size/
   FORCE_INLINE size_t size() const {
-    return data_ ? data_->size() : 0;
+    return data_ ? data_->size(resources_) : 0;
   }
 
   // Returns an iterator to the first key-value pair of the object.
-  // https://arduinojson.org/v6/api/jsonobjectconst/begin/
+  // https://arduinojson.org/v7/api/jsonobjectconst/begin/
   FORCE_INLINE iterator begin() const {
     if (!data_)
       return iterator();
-    return iterator(data_->head());
+    return iterator(data_->createIterator(resources_), resources_);
   }
 
   // Returns an iterator following the last key-value pair of the object.
-  // https://arduinojson.org/v6/api/jsonobjectconst/end/
+  // https://arduinojson.org/v7/api/jsonobjectconst/end/
   FORCE_INLINE iterator end() const {
     return iterator();
   }
 
   // Returns true if the object contains the specified key.
-  // https://arduinojson.org/v6/api/jsonobjectconst/containskey/
+  // https://arduinojson.org/v7/api/jsonobjectconst/containskey/
   template <typename TString>
   FORCE_INLINE bool containsKey(const TString& key) const {
-    return getMember(detail::adaptString(key)) != 0;
+    return detail::ObjectData::getMember(data_, detail::adaptString(key),
+                                         resources_) != 0;
   }
 
   // Returns true if the object contains the specified key.
-  // https://arduinojson.org/v6/api/jsonobjectconst/containskey/
+  // https://arduinojson.org/v7/api/jsonobjectconst/containskey/
   template <typename TChar>
   FORCE_INLINE bool containsKey(TChar* key) const {
-    return getMember(detail::adaptString(key)) != 0;
+    return detail::ObjectData::getMember(data_, detail::adaptString(key),
+                                         resources_) != 0;
   }
 
   // Gets the member with specified key.
-  // https://arduinojson.org/v6/api/jsonobjectconst/subscript/
+  // https://arduinojson.org/v7/api/jsonobjectconst/subscript/
   template <typename TString>
   FORCE_INLINE typename detail::enable_if<detail::IsString<TString>::value,
                                           JsonVariantConst>::type
   operator[](const TString& key) const {
-    return JsonVariantConst(getMember(detail::adaptString(key)));
+    return JsonVariantConst(detail::ObjectData::getMember(
+                                data_, detail::adaptString(key), resources_),
+                            resources_);
   }
 
   // Gets the member with specified key.
-  // https://arduinojson.org/v6/api/jsonobjectconst/subscript/
+  // https://arduinojson.org/v7/api/jsonobjectconst/subscript/
   template <typename TChar>
   FORCE_INLINE typename detail::enable_if<detail::IsString<TChar*>::value,
                                           JsonVariantConst>::type
   operator[](TChar* key) const {
-    return JsonVariantConst(getMember(detail::adaptString(key)));
+    return JsonVariantConst(detail::ObjectData::getMember(
+                                data_, detail::adaptString(key), resources_),
+                            resources_);
   }
 
-  // Compares objects.
-  FORCE_INLINE bool operator==(JsonObjectConst rhs) const {
-    if (data_ == rhs.data_)
-      return true;
-
-    if (!data_ || !rhs.data_)
-      return false;
-
-    size_t count = 0;
-    for (iterator it = begin(); it != end(); ++it) {
-      if (it->value() != rhs[it->key()])
-        return false;
-      count++;
-    }
-    return count == rhs.size();
+  // DEPRECATED: always returns zero
+  ARDUINOJSON_DEPRECATED("always returns zero")
+  size_t memoryUsage() const {
+    return 0;
   }
 
  private:
@@ -126,31 +117,27 @@ class JsonObjectConst : public detail::VariantOperators<JsonObjectConst> {
     return collectionToVariant(data_);
   }
 
-  template <typename TAdaptedString>
-  const detail::VariantData* getMember(TAdaptedString key) const {
-    if (!data_)
-      return 0;
-    return data_->getMember(key);
-  }
-
-  const detail::CollectionData* data_;
+  const detail::ObjectData* data_;
+  const detail::ResourceManager* resources_;
 };
 
-template <>
-struct Converter<JsonObjectConst> : private detail::VariantAttorney {
-  static void toJson(JsonVariantConst src, JsonVariant dst) {
-    variantCopyFrom(getData(dst), getData(src), getPool(dst));
-  }
+inline bool operator==(JsonObjectConst lhs, JsonObjectConst rhs) {
+  if (!lhs && !rhs)  // both are null
+    return true;
 
-  static JsonObjectConst fromJson(JsonVariantConst src) {
-    auto data = getData(src);
-    return data != 0 ? data->asObject() : 0;
-  }
+  if (!lhs || !rhs)  // only one is null
+    return false;
 
-  static bool checkJson(JsonVariantConst src) {
-    auto data = getData(src);
-    return data && data->isObject();
+  size_t count = 0;
+  for (auto kvp : lhs) {
+    auto rhsValue = rhs[kvp.key()];
+    if (rhsValue.isUnbound())
+      return false;
+    if (kvp.value() != rhsValue)
+      return false;
+    count++;
   }
-};
+  return count == rhs.size();
+}
 
 ARDUINOJSON_END_PUBLIC_NAMESPACE

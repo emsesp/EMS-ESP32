@@ -420,33 +420,35 @@ const DashboardDevices: FC = () => {
         <MessageBox my={2} level="warning" message={LL.EMS_BUS_SCANNING()} />
       )}
 
-      <Table data={{ nodes: coreData.devices }} select={device_select} theme={device_theme} layout={{ custom: true }}>
-        {(tableList: any) => (
-          <>
-            <Header>
-              <HeaderRow>
-                <HeaderCell stiff />
-                <HeaderCell resize>{LL.DESCRIPTION()}</HeaderCell>
-                <HeaderCell stiff>{LL.TYPE(0)}</HeaderCell>
-              </HeaderRow>
-            </Header>
-            <Body>
-              {tableList.map((device: Device) => (
-                <Row key={device.id} item={device}>
-                  <Cell stiff>
-                    <DeviceIcon type_id={device.t} />
-                  </Cell>
-                  <Cell>
-                    {device.n}
-                    <span style={{ color: 'lightblue' }}>&nbsp;&nbsp;({device.e})</span>
-                  </Cell>
-                  <Cell stiff>{device.tn}</Cell>
-                </Row>
-              ))}
-            </Body>
-          </>
-        )}
-      </Table>
+      {coreData.devices.length !== 0 && (
+        <Table data={{ nodes: coreData.devices }} select={device_select} theme={device_theme} layout={{ custom: true }}>
+          {(tableList: any) => (
+            <>
+              <Header>
+                <HeaderRow>
+                  <HeaderCell stiff />
+                  <HeaderCell resize>{LL.DESCRIPTION()}</HeaderCell>
+                  <HeaderCell stiff>{LL.TYPE(0)}</HeaderCell>
+                </HeaderRow>
+              </Header>
+              <Body>
+                {tableList.map((device: Device) => (
+                  <Row key={device.id} item={device}>
+                    <Cell stiff>
+                      <DeviceIcon type_id={device.t} />
+                    </Cell>
+                    <Cell>
+                      {device.n}
+                      <span style={{ color: 'lightblue' }}>&nbsp;&nbsp;({device.e})</span>
+                    </Cell>
+                    <Cell stiff>{device.tn}</Cell>
+                  </Row>
+                ))}
+              </Body>
+            </>
+          )}
+        </Table>
+      )}
     </IconContext.Provider>
   );
 

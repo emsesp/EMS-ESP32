@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #define EMSESP_TEST_H
 
 #include "emsesp.h"
+
 #include <ESPAsyncWebServer.h>
 
 namespace emsesp {
@@ -58,11 +59,10 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "custom_entities"
 // #define EMSESP_DEBUG_DEFAULT "heat_exchange"
 
-
 class Test {
   public:
-    static void run_test(uuid::console::Shell & shell, const std::string & command, const std::string & data = "");
-    static bool run_test(const char * command, int8_t id = 0);
+    static void run_test(uuid::console::Shell & shell, const std::string & command, const std::string & id1 = "", const std::string & id2 = "");
+    static bool test(const std::string & command, int8_t id1 = -1, int8_t id2 = -1);
     static void dummy_mqtt_commands(const char * message);
     static void rx_telegram(const std::vector<uint8_t> & data);
     static void uart_telegram(const std::vector<uint8_t> & rx_data);

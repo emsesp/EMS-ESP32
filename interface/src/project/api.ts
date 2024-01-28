@@ -19,7 +19,8 @@ import { alovaInstance } from 'api/endpoints';
 export const readCoreData = () => alovaInstance.Get<CoreData>(`/rest/coreData`);
 export const readDeviceData = (id: number) =>
   alovaInstance.Get<DeviceData>('/rest/deviceData', {
-    params: { id },
+    // alovaInstance.Get<DeviceData>(`/rest/deviceData/${id}`, {
+    params: { id }, // TODO replace later
     responseType: 'arraybuffer' // uses msgpack
   });
 export const writeDeviceValue = (data: any) => alovaInstance.Post('/rest/writeDeviceValue', data);
@@ -53,8 +54,9 @@ export const getSchedule = () => alovaInstance.Get('/rest/getSchedule');
 
 // SettingsCustomization
 export const readDeviceEntities = (id: number) =>
-  alovaInstance.Get<DeviceEntity[]>('/rest/deviceEntities', {
-    params: { id },
+  // alovaInstance.Get<DeviceEntity[]>(`/rest/deviceEntities/${id}`, {
+  alovaInstance.Get<DeviceEntity[]>(`/rest/deviceEntities`, {
+    params: { id }, // TODO replace later
     responseType: 'arraybuffer',
     transformData(data: any) {
       return data.map((de: DeviceEntity) => ({ ...de, o_m: de.m, o_cn: de.cn, o_mi: de.mi, o_ma: de.ma }));
@@ -86,7 +88,7 @@ export const writeSchedule = (data: any) => alovaInstance.Post('/rest/schedule',
 
 // SettingsEntities
 export const readCustomEntities = () =>
-  alovaInstance.Get<EntityItem[]>('/rest/customentities', {
+  alovaInstance.Get<EntityItem[]>('/rest/customEntities', {
     name: 'entities',
     transformData(data: any) {
       return data.entities.map((ei: EntityItem) => ({
@@ -104,4 +106,4 @@ export const readCustomEntities = () =>
       }));
     }
   });
-export const writeCustomEntities = (data: any) => alovaInstance.Post('/rest/customentities', data);
+export const writeCustomEntities = (data: any) => alovaInstance.Post('/rest/customEntities', data);

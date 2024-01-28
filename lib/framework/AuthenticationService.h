@@ -21,7 +21,7 @@ class AuthenticationService {
     AsyncCallbackJsonWebHandler _signInHandler;
 
     // endpoint functions
-    void signIn(AsyncWebServerRequest * request, JsonVariant & json);
+    void signIn(AsyncWebServerRequest * request, JsonVariant json);
     void verifyAuthorization(AsyncWebServerRequest * request);
 };
 

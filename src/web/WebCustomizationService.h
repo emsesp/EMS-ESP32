@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@
 
 // GET
 #define DEVICES_SERVICE_PATH "/rest/devices"
-#define EMSESP_CUSTOMIZATION_SERVICE_PATH "/rest/customization"
 #define DEVICE_ENTITIES_PATH "/rest/deviceEntities"
 
 // POST
@@ -71,8 +70,8 @@ class WebCustomization {
     std::list<SensorCustomization> sensorCustomizations; // for sensor names and offsets
     std::list<AnalogCustomization> analogCustomizations; // for analog sensors
     std::list<EntityCustomization> entityCustomizations; // for a list of entities that have a special mask set
-    static void                    read(WebCustomization & customizations, JsonObject & root);
-    static StateUpdateResult       update(JsonObject & root, WebCustomization & customizations);
+    static void                    read(WebCustomization & customizations, JsonObject root);
+    static StateUpdateResult       update(JsonObject root, WebCustomization & customizations);
 
   private:
     static bool _start;
@@ -89,7 +88,6 @@ class WebCustomizationService : public StatefulService<WebCustomization> {
   private:
 #endif
 
-    HttpEndpoint<WebCustomization>  _httpEndpoint;
     FSPersistence<WebCustomization> _fsPersistence;
 
     // GET
@@ -97,7 +95,7 @@ class WebCustomizationService : public StatefulService<WebCustomization> {
     void device_entities(AsyncWebServerRequest * request);
 
     // POST
-    void customization_entities(AsyncWebServerRequest * request, JsonVariant & json);
+    void customization_entities(AsyncWebServerRequest * request, JsonVariant json);
     void reset_customization(AsyncWebServerRequest * request); // command
 
     AsyncCallbackJsonWebHandler _masked_entities_handler;

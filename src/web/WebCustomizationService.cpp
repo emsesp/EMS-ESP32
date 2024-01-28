@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,14 +25,7 @@ using namespace std::placeholders; // for `_1` etc
 bool WebCustomization::_start = true;
 
 WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
-    : _httpEndpoint(WebCustomization::read,
-                    WebCustomization::update,
-                    this,
-                    server,
-                    EMSESP_CUSTOMIZATION_SERVICE_PATH,
-                    securityManager,
-                    AuthenticationPredicates::IS_AUTHENTICATED)
-    , _fsPersistence(WebCustomization::read, WebCustomization::update, this, fs, EMSESP_CUSTOMIZATION_FILE)
+    : _fsPersistence(WebCustomization::read, WebCustomization::update, this, fs, EMSESP_CUSTOMIZATION_FILE)
     , _masked_entities_handler(CUSTOMIZATION_ENTITIES_PATH,
                                securityManager->wrapCallback(std::bind(&WebCustomizationService::customization_entities, this, _1, _2),
                                                              AuthenticationPredicates::IS_AUTHENTICATED)) {
@@ -51,25 +44,25 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
 
     _masked_entities_handler.setMethod(HTTP_POST);
     _masked_entities_handler.setMaxContentLength(2048);
-    _masked_entities_handler.setMaxJsonBufferSize(2048);
     server->addHandler(&_masked_entities_handler);
 }
 
 // this creates the customization file, saving it to the FS
-void WebCustomization::read(WebCustomization & customizations, JsonObject & root) {
+void WebCustomization::read(WebCustomization & customizations, JsonObject root) {
     // Temperature Sensor customization
-    JsonArray sensorsJson = root.createNestedArray("ts");
+    JsonArray sensorsJson = root["ts"].to<JsonArray>();
+
     for (const SensorCustomization & sensor : customizations.sensorCustomizations) {
-        JsonObject sensorJson = sensorsJson.createNestedObject();
+        JsonObject sensorJson = sensorsJson.add<JsonObject>();
         sensorJson["id"]      = sensor.id;     // ID of chip
         sensorJson["name"]    = sensor.name;   // n
         sensorJson["offset"]  = sensor.offset; // o
     }
 
     // Analog Sensor customization
-    JsonArray analogJson = root.createNestedArray("as");
+    JsonArray analogJson = root["as"].to<JsonArray>();
     for (const AnalogCustomization & sensor : customizations.analogCustomizations) {
-        JsonObject sensorJson = analogJson.createNestedObject();
+        JsonObject sensorJson = analogJson.add<JsonObject>();
         sensorJson["gpio"]    = sensor.gpio;   // g
         sensorJson["name"]    = sensor.name;   // n
         sensorJson["offset"]  = sensor.offset; // o
@@ -79,14 +72,14 @@ void WebCustomization::read(WebCustomization & customizations, JsonObject & root
     }
 
     // Masked entities customization
-    JsonArray masked_entitiesJson = root.createNestedArray("masked_entities");
+    JsonArray masked_entitiesJson = root["masked_entities"].to<JsonArray>();
     for (const EntityCustomization & entityCustomization : customizations.entityCustomizations) {
-        JsonObject entityJson    = masked_entitiesJson.createNestedObject();
+        JsonObject entityJson    = masked_entitiesJson.add<JsonObject>();
         entityJson["product_id"] = entityCustomization.product_id;
         entityJson["device_id"]  = entityCustomization.device_id;
 
-        // entries are in the form <XX><shortname>[|optional customname] e.g "08heatingactive|heating is on"
-        JsonArray masked_entityJson = entityJson.createNestedArray("entity_ids");
+        // entries are in the form <XX><shortname>[optional customname] e.g "08heatingactive|heating is on"
+        JsonArray masked_entityJson = entityJson["entity_ids"].to<JsonArray>();
         for (std::string entity_id : entityCustomization.entity_ids) {
             masked_entityJson.add(entity_id);
         }
@@ -95,15 +88,15 @@ void WebCustomization::read(WebCustomization & customizations, JsonObject & root
 
 // call on initialization and also when the page is saved via web UI
 // this loads the data into the internal class
-StateUpdateResult WebCustomization::update(JsonObject & root, WebCustomization & customizations) {
+StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & customizations) {
 #ifdef EMSESP_STANDALONE
     // invoke some fake data for testing
-    const char *            json = "{\"ts\":[],\"as\":[],\"masked_entities\":[{\"product_id\":123,\"device_id\":8,\"entity_ids\":[\"08heatingactive|my custom "
-                                   "name for heating active (HS1)\",\"08tapwateractive\"]}]}";
-    StaticJsonDocument<500> doc;
+    const char * json = "{\"ts\":[],\"as\":[],\"masked_entities\":[{\"product_id\":123,\"device_id\":8,\"entity_ids\":[\"08heatingactive|my custom "
+                        "name for heating active (HS1)\",\"08tapwateractive\"]}]}";
+    JsonDocument doc;
     deserializeJson(doc, json);
     root = doc.as<JsonObject>();
-    Serial.println(COLOR_BRIGHT_MAGENTA);
+    Serial.print(COLOR_BRIGHT_MAGENTA);
     Serial.print(" Using fake customization file: ");
     serializeJson(root, Serial);
     Serial.println(COLOR_RESET);
@@ -179,15 +172,15 @@ void WebCustomizationService::reset_customization(AsyncWebServerRequest * reques
 
 // send back a list of devices used in the customization web page
 void WebCustomizationService::devices(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XLARGE);
+    auto *     response = new AsyncJsonResponse(false);
     JsonObject root     = response->getRoot();
 
     // list is already sorted by device type
     // controller is ignored since it doesn't have any associated entities
-    JsonArray devices = root.createNestedArray("devices");
+    JsonArray devices = root["devices"].to<JsonArray>();
     for (const auto & emsdevice : EMSESP::emsdevices) {
         if (emsdevice->has_entities()) {
-            JsonObject obj = devices.createNestedObject();
+            JsonObject obj = devices.add<JsonObject>();
             obj["i"]       = emsdevice->unique_id();                                                                     // its unique id
             obj["s"]  = std::string(emsdevice->device_type_2_device_name_translated()) + " (" + emsdevice->name() + ")"; // shortname, is device type translated
             obj["tn"] = emsdevice->device_type_name();                                                                   // non-translated, lower-case
@@ -205,14 +198,14 @@ void WebCustomizationService::device_entities(AsyncWebServerRequest * request) {
     if (request->hasParam(F_(id))) {
         id = Helpers::atoint(request->getParam(F_(id))->value().c_str()); // get id from url
 
-        size_t buffer   = EMSESP_JSON_SIZE_XXXXLARGE;
-        auto * response = new MsgpackAsyncJsonResponse(true, buffer);
+        auto * response = new MsgpackAsyncJsonResponse(true);
 
-        while (!response) {
-            delete response;
-            buffer -= 1024;
-            response = new MsgpackAsyncJsonResponse(true, buffer);
-        }
+        // while (!response) {
+        //     delete response;
+        //     buffer -= 1024;
+        //     response = new MsgpackAsyncJsonResponse(true, buffer);
+        // }
+
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice->unique_id() == id) {
 #ifndef EMSESP_STANDALONE
@@ -239,7 +232,7 @@ void WebCustomizationService::device_entities(AsyncWebServerRequest * request) {
 // takes a list of updated entities with new masks from the web UI
 // saves it in the customization service
 // and updates the entity list real-time
-void WebCustomizationService::customization_entities(AsyncWebServerRequest * request, JsonVariant & json) {
+void WebCustomizationService::customization_entities(AsyncWebServerRequest * request, JsonVariant json) {
     bool need_reboot = false;
     if (json.is<JsonObject>()) {
         // find the device using the unique_id

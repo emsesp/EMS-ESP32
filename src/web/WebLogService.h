@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ class WebLogService : public uuid::log::Handler {
 
     char * messagetime(char * out, const uint64_t t, const size_t bufsize);
 
-    void setValues(AsyncWebServerRequest * request, JsonVariant & json);
+    void setValues(AsyncWebServerRequest * request, JsonVariant json);
 
     AsyncCallbackJsonWebHandler setValues_; // for POSTs
 

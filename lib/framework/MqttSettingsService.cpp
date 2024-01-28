@@ -51,13 +51,13 @@ void MqttSettingsService::startClient() {
     static bool isSecure = false;
     if (_mqttClient != nullptr) {
         // do we need to change the client?
-        if ((isSecure && _state.rootCA.length() > 0) || (!isSecure && _state.rootCA.length() == 0)) {
+        if ((isSecure && _state.enableTLS) || (!isSecure && _state.enableTLS)) {
             return;
         }
         delete _mqttClient;
     }
 #if CONFIG_IDF_TARGET_ESP32S3
-    if (_state.rootCA.length() > 0) {
+    if (_state.enableTLS) {
         isSecure    = true;
         _mqttClient = static_cast<MqttClient *>(new espMqttClientSecure(espMqttClientTypes::UseInternalTask::NO));
         if (_state.rootCA == "insecure") {
@@ -68,6 +68,7 @@ void MqttSettingsService::startClient() {
         }
         static_cast<espMqttClientSecure *>(_mqttClient)->onConnect(std::bind(&MqttSettingsService::onMqttConnect, this, _1));
         static_cast<espMqttClientSecure *>(_mqttClient)->onDisconnect(std::bind(&MqttSettingsService::onMqttDisconnect, this, _1));
+        static_cast<espMqttClientSecure *>(_mqttClient)->onMessage(std::bind(&MqttSettingsService::onMqttMessage, this, _1, _2, _3, _4, _5, _6));
         return;
     }
 #endif
@@ -75,6 +76,7 @@ void MqttSettingsService::startClient() {
     _mqttClient = static_cast<MqttClient *>(new espMqttClient(espMqttClientTypes::UseInternalTask::NO));
     static_cast<espMqttClient *>(_mqttClient)->onConnect(std::bind(&MqttSettingsService::onMqttConnect, this, _1));
     static_cast<espMqttClient *>(_mqttClient)->onDisconnect(std::bind(&MqttSettingsService::onMqttDisconnect, this, _1));
+    static_cast<espMqttClient *>(_mqttClient)->onMessage(std::bind(&MqttSettingsService::onMqttMessage, this, _1, _2, _3, _4, _5, _6));
 }
 
 void MqttSettingsService::loop() {
@@ -100,7 +102,7 @@ const char * MqttSettingsService::getClientId() {
 
 void MqttSettingsService::setWill(const char * topic) {
 #if CONFIG_IDF_TARGET_ESP32S3
-    if (_state.rootCA.length() > 0) {
+    if (_state.enableTLS) {
         static_cast<espMqttClientSecure *>(_mqttClient)->setWill(topic, 1, true, "offline");
         return;
     }
@@ -108,14 +110,13 @@ void MqttSettingsService::setWill(const char * topic) {
     static_cast<espMqttClient *>(_mqttClient)->setWill(topic, 1, true, "offline");
 }
 
-void MqttSettingsService::onMessage(espMqttClientTypes::OnMessageCallback callback) {
-#if CONFIG_IDF_TARGET_ESP32S3
-    if (_state.rootCA.length() > 0) {
-        static_cast<espMqttClientSecure *>(_mqttClient)->onMessage(callback);
-        return;
-    }
-#endif
-    static_cast<espMqttClient *>(_mqttClient)->onMessage(callback);
+void MqttSettingsService::onMqttMessage(const espMqttClientTypes::MessageProperties & properties,
+                                        const char *                                  topic,
+                                        const uint8_t *                               payload,
+                                        size_t                                        len,
+                                        size_t                                        index,
+                                        size_t                                        total) {
+    emsesp::EMSESP::mqtt_.on_message(topic, payload, len);
 }
 
 espMqttClientTypes::DisconnectReason MqttSettingsService::getDisconnectReason() {
@@ -181,7 +182,7 @@ bool MqttSettingsService::configureMqtt() {
     if (_state.enabled && emsesp::EMSESP::system_.network_connected() && !_state.host.isEmpty()) {
         _reconfigureMqtt = false;
 #if CONFIG_IDF_TARGET_ESP32S3
-        if (_state.rootCA.length() > 0) {
+        if (_state.enableTLS) {
             // emsesp::EMSESP::logger().info("Start secure MQTT with rootCA");
             static_cast<espMqttClientSecure *>(_mqttClient)->setServer(retainCstr(_state.host.c_str(), &_retainedHost), _state.port);
             if (_state.username.length() > 0) {
@@ -215,9 +216,12 @@ bool MqttSettingsService::configureMqtt() {
     return false;
 }
 
-void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
+void MqttSettings::read(MqttSettings & settings, JsonObject root) {
 #if CONFIG_IDF_TARGET_ESP32S3
-    root["rootCA"] = settings.rootCA;
+#ifndef TASMOTA_SDK
+    root["enableTLS"] = settings.enableTLS;
+    root["rootCA"]    = settings.rootCA;
+#endif
 #endif
     root["enabled"]       = settings.enabled;
     root["host"]          = settings.host;
@@ -248,12 +252,15 @@ void MqttSettings::read(MqttSettings & settings, JsonObject & root) {
     root["send_response"]           = settings.send_response;
 }
 
-StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & settings) {
+StateUpdateResult MqttSettings::update(JsonObject root, MqttSettings & settings) {
     MqttSettings newSettings = {};
     bool         changed     = false;
 
 #if CONFIG_IDF_TARGET_ESP32S3
-    newSettings.rootCA = root["rootCA"] | "";
+#ifndef TASMOTA_SDK
+    newSettings.enableTLS = root["enableTLS"] | false;
+    newSettings.rootCA    = root["rootCA"] | "";
+#endif
 #endif
     newSettings.enabled      = root["enabled"] | FACTORY_MQTT_ENABLED;
     newSettings.host         = root["host"] | FACTORY_MQTT_HOST;
@@ -377,10 +384,10 @@ StateUpdateResult MqttSettings::update(JsonObject & root, MqttSettings & setting
     newSettings.rootCA.replace("-----BEGIN CERTIFICATE-----", "");
     newSettings.rootCA.replace("-----END CERTIFICATE-----", "");
     newSettings.rootCA.replace(" ", "");
-    if (newSettings.rootCA.length() == 0 && newSettings.port > 8800) {
+    if (newSettings.rootCA.length() == 0 && newSettings.enableTLS) {
         newSettings.rootCA = "insecure";
     }
-    if (newSettings.rootCA != settings.rootCA) {
+    if (newSettings.enableTLS != settings.enableTLS || newSettings.rootCA != settings.rootCA) {
         changed = true;
     }
 #endif

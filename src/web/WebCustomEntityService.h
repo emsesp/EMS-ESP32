@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 #define WebCustomEntityService_h
 
 #define EMSESP_CUSTOMENTITY_FILE "/config/emsespEntity.json"
-#define EMSESP_CUSTOMENTITY_SERVICE_PATH "/rest/customentities" // GET and POST
+#define EMSESP_CUSTOMENTITY_SERVICE_PATH "/rest/customEntities" // GET and POST
 
 namespace emsesp {
 
@@ -44,8 +44,8 @@ class WebCustomEntity {
   public:
     std::list<CustomEntityItem> customEntityItems;
 
-    static void              read(WebCustomEntity & webEntity, JsonObject & root);
-    static StateUpdateResult update(JsonObject & root, WebCustomEntity & webEntity);
+    static void              read(WebCustomEntity & webEntity, JsonObject root);
+    static StateUpdateResult update(JsonObject root, WebCustomEntity & webEntity);
 };
 
 class WebCustomEntityService : public StatefulService<WebCustomEntity> {
@@ -56,12 +56,12 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
     void publish_single(const CustomEntityItem & entity);
     void publish(const bool force = false);
     bool command_setvalue(const char * value, const std::string name);
-    bool get_value_info(JsonObject & output, const char * cmd);
+    bool get_value_info(JsonObject output, const char * cmd);
     bool get_value(std::shared_ptr<const Telegram> telegram);
     void fetch();
-    void render_value(JsonObject & output, CustomEntityItem entity, const bool useVal = false, const bool web = false, const bool add_uom = false);
-    void show_values(JsonObject & output);
-    void generate_value_web(JsonObject & output);
+    void render_value(JsonObject output, CustomEntityItem entity, const bool useVal = false, const bool web = false, const bool add_uom = false);
+    void show_values(JsonObject output);
+    void generate_value_web(JsonObject output);
 
     uint8_t count_entities();
     uint8_t has_commands();

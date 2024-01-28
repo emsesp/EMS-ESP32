@@ -14,7 +14,7 @@ const RouterTabs: FC<RouterTabsProps> = ({ value, children }) => {
   const theme = useTheme();
   const smallDown = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const handleTabChange = (event: React.ChangeEvent<HTMLInputElement>, path: string) => {
+  const handleTabChange = (_event: any, path: string) => {
     navigate(path);
   };
 

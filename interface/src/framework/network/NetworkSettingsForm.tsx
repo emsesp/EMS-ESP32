@@ -313,7 +313,7 @@ const WiFiSettingsForm: FC = () => {
           </>
         )}
         {restartNeeded && (
-          <MessageBox my={2} level="warning" message={LL.RESTART_TEXT()}>
+          <MessageBox my={2} level="warning" message={LL.RESTART_TEXT(0)}>
             <Button startIcon={<PowerSettingsNewIcon />} variant="contained" color="error" onClick={restart}>
               {LL.RESTART()}
             </Button>
