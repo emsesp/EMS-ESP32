@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## **IMPORTANT! BREAKING CHANGES**
 
-Writeable Text entities have moved from type `sensor` to `text` in Home Assistant to make them also editable within an HA dashboard. Examples are `datetime`, `holidays`, `switchtime`, `vacations`, `maintenancedate`... You will need to manually remove any old discovery topics from your MQTT broker using an application like MQTT Explorer.
+Writeable Text entities have moved from type `sensor` to `text` in Home Assistant to make them also editable within an HA dashboard. Examples are `datetime`, `holidays`, `switchtime`, `vacations`, `maintenancedate`. You will need to manually remove any old discovery topics from your MQTT broker using an application like MQTT Explorer.
 
 ## Added
 
