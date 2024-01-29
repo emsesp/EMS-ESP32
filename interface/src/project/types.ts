@@ -392,6 +392,7 @@ export const enum DeviceValueType {
 }
 
 export const DeviceValueTypeNames = [
+  //
   'BOOL',
   'INT',
   'UINT',

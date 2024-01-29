@@ -316,7 +316,7 @@ const nl: Translation = {
   SCHEDULE_TIMER_2: 'elke minuut',
   SCHEDULE_TIMER_3: 'elke huur',
   CUSTOM_ENTITIES: 'Aangepaste Entiteiten',
-  ENTITIES_HELP_1: 'Aangepaste entiteiten ophalen uit de EMS-bus',
+  ENTITIES_HELP_1: 'Aangepaste entiteiten ophalen uit de EMS-bus', // TODO translate
   ENTITIES_UPDATED: 'Entiteiten bijgewerkt',
   WRITEABLE: 'Beschrijfbare',
   SHOWING: 'Tonen',

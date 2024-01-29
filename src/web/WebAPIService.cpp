@@ -152,12 +152,13 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
 
 #if defined(EMSESP_STANDALONE)
     Serial.print(COLOR_YELLOW);
-    Serial.print("web response code: ");
-    Serial.println(ret_codes[return_code]);
+    Serial.print("data: ");
     if (output.size()) {
-        serializeJsonPretty(output, Serial);
+        serializeJson(output, Serial);
     }
-    Serial.println();
+    Serial.print("  (response code ");
+    Serial.print(ret_codes[return_code]);
+    Serial.println(")");
     Serial.print(COLOR_RESET);
 #endif
 }
