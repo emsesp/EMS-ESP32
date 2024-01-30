@@ -1,0 +1,16 @@
+{
+  "type": "schedule",
+  "Schedule": {
+    "schedule": [
+      {
+        "id": 0,
+        "active": true,
+        "flags": 1,
+        "time": "12:00",
+        "cmd": "system/fetch",
+        "value": "10",
+        "name": "test_scheduler"
+      }
+    ]
+  }
+}

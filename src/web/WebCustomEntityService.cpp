@@ -36,7 +36,7 @@ WebCustomEntityService::WebCustomEntityService(AsyncWebServer * server, FS * fs,
 // load the settings when the service starts
 void WebCustomEntityService::begin() {
     _fsPersistence.readFromFS();
-    EMSESP::logger().info("Starting Custom entity service");
+    EMSESP::logger().info("Starting Custom Entity service");
     Mqtt::subscribe(EMSdevice::DeviceType::CUSTOM, "custom/#", nullptr); // use empty function callback
 }
 
@@ -61,31 +61,17 @@ void WebCustomEntity::read(WebCustomEntity & webEntity, JsonObject root) {
     }
 }
 
-// call on initialization and also when the Entity web page is updated
+// call on initialization and also when the Entity web page is updated/saved
 // this loads the data into the internal class
 StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & webCustomEntity) {
-#ifdef EMSESP_STANDALONE
-    // invoke some fake data for testing
-    // clang-format off
-    /* prettier-ignore */
-    const char * json =
-        "{\"entities\": [{\"id\":0,\"device_id\":8,\"type_id\":24,\"offset\":0,\"factor\":1,\"name\":\"boiler_flowtemp\",\"uom\":1,\"value_type\":1,\"writeable\":true}]}";
-    // clang-format on
-    JsonDocument doc;
-    deserializeJson(doc, json);
-    root = doc.as<JsonObject>();
-    Serial.print(COLOR_BRIGHT_MAGENTA);
-    Serial.print(" Using fake custom entity file: ");
-    serializeJson(root, Serial);
-    Serial.println(COLOR_RESET);
-#endif
-
+    // reset everything to start fresh
     for (CustomEntityItem & entityItem : webCustomEntity.customEntityItems) {
         Command::erase_command(EMSdevice::DeviceType::CUSTOM, entityItem.name.c_str());
     }
     webCustomEntity.customEntityItems.clear();
     EMSESP::webCustomEntityService.ha_reset();
 
+    // rebuild the list
     if (root["entities"].is<JsonArray>()) {
         for (const JsonObject ei : root["entities"].as<JsonArray>()) {
             auto entityItem       = CustomEntityItem();
@@ -120,10 +106,13 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
             } else if (entityItem.value_type == DeviceValueType::ULONG || entityItem.value_type == DeviceValueType::TIME) {
                 entityItem.value = EMS_VALUE_DEFAULT_ULONG;
             }
+
             if (entityItem.factor == 0) {
                 entityItem.factor = 1;
             }
+
             webCustomEntity.customEntityItems.push_back(entityItem); // add to list
+
             if (entityItem.writeable) {
                 Command::add(
                     EMSdevice::DeviceType::CUSTOM,
@@ -262,15 +251,16 @@ void WebCustomEntityService::show_values(JsonObject output) {
     }
 }
 
-
 // process json output for info/commands and value_info
 bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd) {
     EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
+
+    // if it's commands...
     if (Helpers::toLower(cmd) == F_(commands)) {
         output[F_(info)]     = Helpers::translated_word(FL_(info_cmd));
         output[F_(commands)] = Helpers::translated_word(FL_(commands_cmd));
         for (const auto & entity : *customEntityItems) {
-            output[entity.name] = "custom entitiy";
+            output[entity.name] = "custom entity";
         }
         return true;
     }
@@ -281,6 +271,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
         return true;
     }
 
+    // if it's info or values...
     if (strlen(cmd) == 0 || Helpers::toLower(cmd) == F_(values) || Helpers::toLower(cmd) == F_(info)) {
         // list all names
         for (const CustomEntityItem & entity : *customEntityItems) {
@@ -350,12 +341,14 @@ void WebCustomEntityService::publish_single(const CustomEntityItem & entity) {
     if (!Mqtt::enabled() || !Mqtt::publish_single()) {
         return;
     }
+
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
     if (Mqtt::publish_single2cmd()) {
         snprintf(topic, sizeof(topic), "%s/%s", "custom", entity.name.c_str());
     } else {
         snprintf(topic, sizeof(topic), "%s/%s", "custom_data", entity.name.c_str());
     }
+
     JsonDocument doc;
     JsonObject   output = doc.to<JsonObject>();
     render_value(output, entity, true);
@@ -473,6 +466,7 @@ uint8_t WebCustomEntityService::count_entities() {
         render_value(output, entity);
         count += (output.containsKey(entity.name) || entity.writeable) ? 1 : 0;
     }
+
     return count;
 }
 
@@ -482,6 +476,7 @@ uint8_t WebCustomEntityService::has_commands() {
     for (const CustomEntityItem & entity : *customEntityItems) {
         count += entity.writeable ? 1 : 0;
     }
+
     return count;
 }
 
@@ -547,6 +542,7 @@ void WebCustomEntityService::generate_value_web(JsonObject output) {
         default:
             break;
         }
+
         // show only entities with value or command
         if (!obj.containsKey("v") && !obj.containsKey("c")) {
             data.remove(index);
@@ -560,6 +556,7 @@ void WebCustomEntityService::generate_value_web(JsonObject output) {
 void WebCustomEntityService::fetch() {
     EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
     const uint8_t len[] = {1, 1, 1, 2, 2, 3, 3};
+
     for (auto & entity : *customEntityItems) {
         if (entity.device_id > 0 && entity.type_id > 0) { // ths excludes also RAM type
             bool needFetch = true;
@@ -615,11 +612,65 @@ bool WebCustomEntityService::get_value(std::shared_ptr<const Telegram> telegram)
             // EMSESP::logger().debug("custom entity %s received with value %d", entity.name.c_str(), (int)entity.val);
         }
     }
+
     if (has_change) {
         publish();
         return true;
     }
+
     return false;
 }
+
+// hard coded tests
+#ifdef EMSESP_TEST
+void WebCustomEntityService::test() {
+    update(
+        [&](WebCustomEntity & webCustomEntity) {
+            webCustomEntity.customEntityItems.clear();
+            // test 1
+            auto entityItem       = CustomEntityItem();
+            entityItem.ram        = 0;
+            entityItem.device_id  = 8;
+            entityItem.type_id    = 24;
+            entityItem.offset     = 0;
+            entityItem.factor     = 1;
+            entityItem.name       = "test_custom";
+            entityItem.uom        = 1;
+            entityItem.value_type = 1;
+            entityItem.writeable  = true;
+            entityItem.data       = "70";
+            webCustomEntity.customEntityItems.push_back(entityItem);
+
+            // test 2
+            entityItem.ram        = 0;
+            entityItem.device_id  = 24;
+            entityItem.type_id    = 677;
+            entityItem.offset     = 3;
+            entityItem.factor     = 1;
+            entityItem.name       = "test_read_only";
+            entityItem.uom        = 0;
+            entityItem.value_type = 2;
+            entityItem.writeable  = false;
+            entityItem.data       = "48";
+            webCustomEntity.customEntityItems.push_back(entityItem);
+
+            // test 2
+            entityItem.ram        = 1;
+            entityItem.device_id  = 0;
+            entityItem.type_id    = 0;
+            entityItem.offset     = 0;
+            entityItem.factor     = 1;
+            entityItem.name       = "test_ram";
+            entityItem.uom        = 0;
+            entityItem.value_type = 8;
+            entityItem.writeable  = true;
+            entityItem.data       = "14";
+            webCustomEntity.customEntityItems.push_back(entityItem);
+
+            return StateUpdateResult::CHANGED; // persist the changes
+        },
+        "local");
+}
+#endif
 
 } // namespace emsesp

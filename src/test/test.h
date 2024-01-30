@@ -27,7 +27,7 @@
 
 namespace emsesp {
 
-#define EMSESP_DEBUG_DEFAULT "general"
+// #define EMSESP_DEBUG_DEFAULT "general"
 
 // #define EMSESP_DEBUG_DEFAULT "thermostat"
 // #define EMSESP_DEBUG_DEFAULT "solar"
@@ -48,15 +48,16 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "lastcode"
 // #define EMSESP_DEBUG_DEFAULT "2thermostats"
 // #define EMSESP_DEBUG_DEFAULT "temperature"
-// #define EMSESP_DEBUG_DEFAULT "analog"
+#define EMSESP_DEBUG_DEFAULT "analog"
 // #define EMSESP_DEBUG_DEFAULT "api_values"
 // #define EMSESP_DEBUG_DEFAULT "mqtt_post"
 // #define EMSESP_DEBUG_DEFAULT "api_wwmode"
-// #define EMSESP_DEBUG_DEFAULT "custom"
+// #define EMSESP_DEBUG_DEFAULT "customization"
 // #define EMSESP_DEBUG_DEFAULT "entity_dump"
 // #define EMSESP_DEBUG_DEFAULT "memory"
 // #define EMSESP_DEBUG_DEFAULT "coldshot"
 // #define EMSESP_DEBUG_DEFAULT "custom_entities"
+// #define EMSESP_DEBUG_DEFAULT "scheduler"
 // #define EMSESP_DEBUG_DEFAULT "heat_exchange"
 
 class Test {
