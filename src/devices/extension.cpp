@@ -24,6 +24,11 @@ REGISTER_FACTORY(Extension, EMSdevice::DeviceType::EXTENSION);
 
 Extension::Extension(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
+    if (device_id == 0x16) {
+        // no entities for T1RF outdoor sensor, values are comming from RFbase 0x50 (connect)
+        return;
+    }
+    // Extension module EM100 device_id 0x12
     register_telegram_type(0x935, "EM100SetMessage", true, MAKE_PF_CB(process_EM100SetMessage));
     register_telegram_type(0x936, "EM100OutMessage", false, MAKE_PF_CB(process_EM100OutMessage));
     register_telegram_type(0x937, "EM100TempMessage", false, MAKE_PF_CB(process_EM100TempMessage));

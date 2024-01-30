@@ -62,6 +62,10 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
         ha_registered_ = false;
     }
 
+#if defined(EMSESP_TEST)
+    void test();
+#endif
+
 // make all functions public so we can test in the debug and standalone mode
 #ifndef EMSESP_STANDALONE
   private:
@@ -71,7 +75,7 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
     HttpEndpoint<WebScheduler>  _httpEndpoint;
     FSPersistence<WebScheduler> _fsPersistence;
 
-    std::list<ScheduleItem> * scheduleItems; // pointer to the list of schedule events
+    std::list<ScheduleItem> * scheduleItems_; // pointer to the list of schedule events
     bool                      ha_registered_ = false;
 };
 

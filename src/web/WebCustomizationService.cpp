@@ -89,19 +89,6 @@ void WebCustomization::read(WebCustomization & customizations, JsonObject root) 
 // call on initialization and also when the page is saved via web UI
 // this loads the data into the internal class
 StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & customizations) {
-#ifdef EMSESP_STANDALONE
-    // invoke some fake data for testing
-    const char * json = "{\"ts\":[],\"as\":[],\"masked_entities\":[{\"product_id\":123,\"device_id\":8,\"entity_ids\":[\"08heatingactive|my custom "
-                        "name for heating active (HS1)\",\"08tapwateractive\"]}]}";
-    JsonDocument doc;
-    deserializeJson(doc, json);
-    root = doc.as<JsonObject>();
-    Serial.print(COLOR_BRIGHT_MAGENTA);
-    Serial.print(" Using fake customization file: ");
-    serializeJson(root, Serial);
-    Serial.println(COLOR_RESET);
-#endif
-
     // Temperature Sensor customization
     customizations.sensorCustomizations.clear();
     if (root["ts"].is<JsonArray>()) {
@@ -120,35 +107,36 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
     if (root["as"].is<JsonArray>()) {
         for (const JsonObject analogJson : root["as"].as<JsonArray>()) {
             // create each of the sensor, overwriting any previous settings
-            auto sensor   = AnalogCustomization();
-            sensor.gpio   = analogJson["gpio"];
-            sensor.name   = analogJson["name"].as<std::string>();
-            sensor.offset = analogJson["offset"];
-            sensor.factor = analogJson["factor"];
-            sensor.uom    = analogJson["uom"];
-            sensor.type   = analogJson["type"];
-            if (_start && sensor.type == EMSESP::analogsensor_.AnalogType::DIGITAL_OUT && sensor.uom > DeviceValue::DeviceValueUOM::NONE) {
-                sensor.offset = sensor.uom - 1;
+            auto analog   = AnalogCustomization();
+            analog.gpio   = analogJson["gpio"];
+            analog.name   = analogJson["name"].as<std::string>();
+            analog.offset = analogJson["offset"];
+            analog.factor = analogJson["factor"];
+            analog.uom    = analogJson["uom"];
+            analog.type   = analogJson["type"];
+            if (_start && analog.type == EMSESP::analogsensor_.AnalogType::DIGITAL_OUT && analog.uom > DeviceValue::DeviceValueUOM::NONE) {
+                analog.offset = analog.uom - 1;
             }
-            customizations.analogCustomizations.push_back(sensor); // add to list
+            customizations.analogCustomizations.push_back(analog); // add to list
         }
     }
+
     _start = false;
     // load array of entities id's with masks, building up the object class
     customizations.entityCustomizations.clear();
     if (root["masked_entities"].is<JsonArray>()) {
         for (const JsonObject masked_entities : root["masked_entities"].as<JsonArray>()) {
-            auto new_entry       = EntityCustomization();
-            new_entry.product_id = masked_entities["product_id"];
-            new_entry.device_id  = masked_entities["device_id"];
+            auto emsEntity       = EntityCustomization();
+            emsEntity.product_id = masked_entities["product_id"];
+            emsEntity.device_id  = masked_entities["device_id"];
 
             for (const JsonVariant masked_entity_id : masked_entities["entity_ids"].as<JsonArray>()) {
                 if (masked_entity_id.is<std::string>()) {
-                    new_entry.entity_ids.push_back(masked_entity_id.as<std::string>()); // add entity list
+                    emsEntity.entity_ids.push_back(masked_entity_id.as<std::string>()); // add entity list
                 }
             }
 
-            customizations.entityCustomizations.push_back(new_entry); // save the new object
+            customizations.entityCustomizations.push_back(emsEntity); // save the new object
         }
     }
 
@@ -256,6 +244,7 @@ void WebCustomizationService::customization_entities(AsyncWebServerRequest * req
                         }
                         // emsesp::EMSESP::logger().info(id.as<const char *>());
                     }
+
                     // add deleted entities from file
                     read([&](WebCustomization & settings) {
                         for (EntityCustomization entityCustomization : settings.entityCustomizations) {
@@ -282,6 +271,7 @@ void WebCustomizationService::customization_entities(AsyncWebServerRequest * req
                             }
                         }
                     });
+
                     // get list of entities that have masks set or a custom fullname
                     emsdevice->getCustomizationEntities(entity_ids);
 
@@ -325,5 +315,62 @@ void WebCustomizationService::customization_entities(AsyncWebServerRequest * req
 void WebCustomizationService::begin() {
     _fsPersistence.readFromFS();
 }
+
+
+// hard coded tests
+#ifdef EMSESP_TEST
+void WebCustomizationService::test() {
+    update(
+        [&](WebCustomization & webCustomization) {
+            // Temperature sensors
+            webCustomization.sensorCustomizations.clear();
+            auto sensor   = SensorCustomization();
+            sensor.id     = "01-0203-0405-0607";
+            sensor.name   = "test_sensor1";
+            sensor.offset = 0;
+            webCustomization.sensorCustomizations.push_back(sensor);
+
+            sensor        = SensorCustomization();
+            sensor.id     = "0B-0C0D-0E0F-1011";
+            sensor.name   = "test_sensor2";
+            sensor.offset = 4;
+            webCustomization.sensorCustomizations.push_back(sensor);
+
+            // Analog sensors
+            // This actually adds the sensors as we use customizations to store them
+            webCustomization.analogCustomizations.clear();
+            auto analog   = AnalogCustomization();
+            analog.gpio   = 36;
+            analog.name   = "test_analog1";
+            analog.offset = 0;
+            analog.factor = 0.1;
+            analog.uom    = 17;
+            analog.type   = 3;
+            webCustomization.analogCustomizations.push_back(analog);
+
+            analog        = AnalogCustomization();
+            analog.gpio   = 37;
+            analog.name   = "test_analog2";
+            analog.offset = 0;
+            analog.factor = 1;
+            analog.uom    = 0;
+            analog.type   = 1;
+            webCustomization.analogCustomizations.push_back(analog);
+
+            // EMS entities
+            webCustomization.entityCustomizations.clear();
+            auto emsEntity       = EntityCustomization();
+            emsEntity.product_id = 123;
+            emsEntity.device_id  = 8;
+            emsEntity.entity_ids.push_back("08heatingactive|is my heating on?");
+            webCustomization.entityCustomizations.push_back(emsEntity);
+
+            return StateUpdateResult::CHANGED; // persist the changes
+        },
+        "local");
+
+    EMSESP::analogsensor_.reload(); // this is needed to active the analog sensors
+}
+#endif
 
 } // namespace emsesp

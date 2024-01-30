@@ -509,8 +509,8 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
     }
 
     if (operation == Telegram::Operation::TX_RAW) {
-        if (src != ems_bus_id()) {
-            operation = Telegram::Operation::NONE; // do not check reply/ack for other ids
+        if (src != ems_bus_id() || dest == 0) {
+            operation = Telegram::Operation::NONE; // do not check reply/ack for other ids and broadcasts
         } else if (dest & 0x80) {
             operation = Telegram::Operation::TX_READ;
             EMSESP::set_response_id(type_id);

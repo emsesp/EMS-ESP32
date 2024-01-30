@@ -20,7 +20,7 @@
 - boiler Bosch C1200W, id 12, [#1536](https://github.com/emsesp/EMS-ESP32/issues/1536)
 - mixer MM100 telegram 0x2CC [#1554](https://github.com/emsesp/EMS-ESP32/issues/1554)
 - boiler hpSetDiffPressure [#1563](https://github.com/emsesp/EMS-ESP32/issues/1563)
-- custom variables  [#1423](https://github.com/emsesp/EMS-ESP32/issues/1423)
+- custom variables [#1423](https://github.com/emsesp/EMS-ESP32/issues/1423)
 
 ## Fixed
 
@@ -37,3 +37,4 @@
 - use flag for BC400 compatible thermostats, manage different mode settings
 - HA don't set entity_category to Diagnostic/Configuration for EMS entities [#1459](https://github.com/emsesp/EMS-ESP32/discussions/1459)
 - upgraded ArduinoJson to 7.0.0 #1538 and then 7.0.2
+- small changes to the API for analog and temperature sensors
