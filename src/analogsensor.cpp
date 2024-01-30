@@ -623,6 +623,11 @@ void AnalogSensor::publish_values(const bool force) {
 // called from emsesp.cpp for commands
 // searches sensor by name
 bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int8_t id) {
+    // check of it a 'commmands' command
+    if (Helpers::toLower(cmd) == F_(commands)) {
+        return Command::list(EMSdevice::DeviceType::ANALOGSENSOR, output);
+    }
+
     if (sensors_.empty()) {
         return true; // no sensors, return true
     }
@@ -645,11 +650,6 @@ bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int
             }
         }
         return true;
-    }
-
-    // check of it a 'commmands' command
-    if (Helpers::toLower(cmd) == F_(commands)) {
-        return Command::list(EMSdevice::DeviceType::TEMPERATURESENSOR, output);
     }
 
     // this is for a specific sensor
