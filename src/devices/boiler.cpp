@@ -86,6 +86,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x49D, "HPSettings3", true, MAKE_PF_CB(process_HpSettings3));
         register_telegram_type(0x4AE, "HPEnergy", true, MAKE_PF_CB(process_HpEnergy));
         register_telegram_type(0x4AF, "HPMeters", true, MAKE_PF_CB(process_HpMeters));
+        register_telegram_type(0x2CC, "HPPressure", true, MAKE_PF_CB(process_HpPressure));
     }
 
     if (model() == EMSdevice::EMS_DEVICE_FLAG_HIU) {
