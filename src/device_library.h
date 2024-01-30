@@ -70,8 +70,6 @@
 {206, DeviceType::CONTROLLER, "Ecomline", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {207, DeviceType::CONTROLLER, "Sense II/CS200", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x10
 {209, DeviceType::CONTROLLER, "ErP", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
-{218, DeviceType::CONTROLLER, "M200/RFM200", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x50
-{220, DeviceType::CONTROLLER, "BC30", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x16
 {224, DeviceType::CONTROLLER, "9000i", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {229, DeviceType::CONTROLLER, "8700i", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
 {230, DeviceType::CONTROLLER, "BC Base", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x09
@@ -165,6 +163,7 @@
 {206, DeviceType::CONNECT, "Easy Connect", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Wireless sensor base - 0x50
+{218, DeviceType::CONNECT, "M200/RFM200", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {236, DeviceType::CONNECT, "Wireless sensor base", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {238, DeviceType::CONNECT, "Wireless sensor base", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
@@ -173,6 +172,9 @@
 
 // EM10/100 extension module, pump module - 0x15
 { 243, DeviceType::EXTENSION, "EM10/EM100", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+
+// Wireless outdoor sensor T1RF - 0x16
+{ 220, DeviceType::EXTENSION, "T1RF", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x16
 
 // EM10 error contact and analog flowtemp control- 0x12
 { 74, DeviceType::ALERT, "EM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
