@@ -54,8 +54,8 @@
   "devDependencies": {
     "@preact/compat": "^17.1.2",
     "@preact/preset-vite": "^2.8.1",
-    "@typescript-eslint/eslint-plugin": "^6.19.1",
-    "@typescript-eslint/parser": "^6.19.1",
+    "@typescript-eslint/eslint-plugin": "^6.20.0",
+    "@typescript-eslint/parser": "^6.20.0",
     "concurrently": "^8.2.2",
     "eslint": "^8.56.0",
     "eslint-config-airbnb": "^19.0.4",

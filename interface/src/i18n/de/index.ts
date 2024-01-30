@@ -191,7 +191,7 @@ const de: Translation = {
   THE_LATEST: 'Die neueste',
   OFFICIAL: 'offizielle',
   DEVELOPMENT: 'Entwicklungs',
-  RELEASE_IS: 'release ist', // TODO translate
+  RELEASE_IS: 'Release ist',
   RELEASE_NOTES: 'Versionshinweise',
   EMS_ESP_VER: 'EMS-ESP Version',
   UPTIME: 'System Betriebszeit',
@@ -228,7 +228,7 @@ const de: Translation = {
   BROKER: 'Broker',
   CLIENT: 'Client',
   BASE_TOPIC: 'Base',
-  OPTIONAL: 'Optional', // TODO translate
+  OPTIONAL: 'Optional',
   FORMATTING: 'Formattierung',
   MQTT_FORMAT: 'Topic/Payload Format',
   MQTT_NEST_1: 'Eingebettet in einem Gesamttopic',
@@ -307,7 +307,7 @@ const de: Translation = {
   LEAVE: 'Verlassen',
   SCHEDULER: 'Planer',
   SCHEDULER_HELP_1: 'Fügen Sie eigene, geplante Befehle zur Automatisierung hinzu. Vergeben Sie einen Entitätsnamen um die Aktivierung über API/Mqtt zu steuern',
-  SCHEDULER_HELP_2: 'Use 00:00 to trigger once on start-up', // TODO translate
+  SCHEDULER_HELP_2: '00:00 aktiviert einmalige Ausführung am Start',
   SCHEDULE: 'Zeitplan',
   TIME: 'Zeit',
   TIMER: 'Timer',
@@ -316,7 +316,7 @@ const de: Translation = {
   SCHEDULE_TIMER_2: 'jede Minute',
   SCHEDULE_TIMER_3: 'jede Stunde',
   CUSTOM_ENTITIES: 'Individuelle Entitäten',
-  ENTITIES_HELP_1: 'Abfrage von Werten auf dem EMS-Bus', // TODO translate
+  ENTITIES_HELP_1: 'Definition eigener EMS-Werte oder dynamischer Variablen',
   ENTITIES_UPDATED: 'Entitäten gespeichert',
   WRITEABLE: 'Schreibbar',
   SHOWING: 'Anzeigen von',

@@ -173,8 +173,10 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
                 if (!output.containsKey("api_data")) {
                     return CommandRet::INVALID;
                 }
-                data = output["api_data"];
+                String dat = output["api_data"];
                 output.clear();
+                input["data"] = dat.c_str();
+                data          = input["data"];
             }
         }
     }
@@ -437,7 +439,11 @@ void Command::erase_command(const uint8_t device_type, const char * cmd) {
 
 // list all commands for a specific device, output as json
 bool Command::list(const uint8_t device_type, JsonObject output) {
-    if (cmdfunctions_.empty()) {
+    // force add info and commands for those non-EMS devices
+    if (device_type == EMSdevice::DeviceType::TEMPERATURESENSOR || device_type == EMSdevice::DeviceType::ANALOGSENSOR) {
+        output[F_(info)]     = Helpers::translated_word(FL_(info_cmd));
+        output[F_(commands)] = Helpers::translated_word(FL_(commands_cmd));
+    } else if (cmdfunctions_.empty()) {
         output["message"] = "no commands available";
         return false;
     }
@@ -450,12 +456,6 @@ bool Command::list(const uint8_t device_type, JsonObject output) {
         }
     }
     sorted_cmds.sort();
-
-    // force add info and commands for those non-EMS devices
-    if (device_type == EMSdevice::DeviceType::TEMPERATURESENSOR) {
-        output[F_(info)]     = Helpers::translated_word(FL_(info_cmd));
-        output[F_(commands)] = Helpers::translated_word(FL_(commands_cmd));
-    }
 
     for (const auto & cl : sorted_cmds) {
         for (const auto & cf : cmdfunctions_) {
