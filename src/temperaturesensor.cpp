@@ -345,6 +345,11 @@ bool TemperatureSensor::updated_values() {
 
 // called from emsesp.cpp for commands
 bool TemperatureSensor::get_value_info(JsonObject output, const char * cmd, const int8_t id) {
+    // check of it a 'commmands' command
+    if (Helpers::toLower(cmd) == F_(commands)) {
+        return Command::list(EMSdevice::DeviceType::TEMPERATURESENSOR, output);
+    }
+
     if (sensors_.empty()) {
         return true; // no sensors, return true
     }
@@ -370,11 +375,6 @@ bool TemperatureSensor::get_value_info(JsonObject output, const char * cmd, cons
             }
         }
         return true;
-    }
-
-    // check of it a 'commmands' command
-    if (Helpers::toLower(cmd) == F_(commands)) {
-        return Command::list(EMSdevice::DeviceType::TEMPERATURESENSOR, output);
     }
 
     // this is for a specific sensor
