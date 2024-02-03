@@ -747,10 +747,20 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
         for (const auto & emsdevice : emsdevices) {
             if (telegram->operation != Telegram::Operation::RX_READ && emsdevice->is_device_id(src)) {
                 type_name = emsdevice->telegram_type_name(telegram);
+                break;
             }
         }
     }
 
+    if (type_name.empty()) {
+        // 2nd fallback, get the type name from dest
+        for (const auto & emsdevice : emsdevices) {
+            if (telegram->operation != Telegram::Operation::RX_READ && emsdevice->is_device_id(dest)) {
+                type_name = emsdevice->telegram_type_name(telegram);
+                break;
+            }
+        }
+    }
     // if we can't find names for the devices, use their hex values
     if (src_name.empty()) {
         src_name = device_tostring(src);
