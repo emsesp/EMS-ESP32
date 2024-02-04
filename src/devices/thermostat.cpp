@@ -175,6 +175,12 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
 
         // JUNKERS/HT3
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
+        if (device_id >= 0x18 && device_id <= 0x1B) { // remote hc1-hc4
+            register_telegram_type(0x123, "JunkersRemote", false, MAKE_PF_CB(process_JunkersRemoteMonitor));
+            register_device_values(); // register device values for common values (not heating circuit)
+            return;                   // no values to add
+        }
+
         monitor_typeids = {0x016F, 0x0170, 0x0171, 0x0172};
         for (uint8_t i = 0; i < monitor_typeids.size(); i++) {
             register_telegram_type(monitor_typeids[i], "JunkersMonitor", false, MAKE_PF_CB(process_JunkersMonitor));
@@ -194,7 +200,6 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         }
         register_telegram_type(0xBB, "HybridSettings", true, MAKE_PF_CB(process_HybridSettings));
         register_telegram_type(0x23, "JunkersSetMixer", true, MAKE_PF_CB(process_JunkersSetMixer));
-        register_telegram_type(0x123, "JunkersRemote", false, MAKE_PF_CB(process_JunkersRemoteMonitor));
         register_telegram_type(0x1D3, "JunkersDhw", true, MAKE_PF_CB(process_JunkersWW));
     }
 
@@ -772,11 +777,7 @@ void Thermostat::process_JunkersSet2(std::shared_ptr<const Telegram> telegram) {
 
 // type 0x123 - FR10/FR110 Junkers as remote
 void Thermostat::process_JunkersRemoteMonitor(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
-    if (hc == nullptr) {
-        return;
-    }
-    has_update(telegram, hc->remotetemp, 0); // roomTemp from remote
+    has_update(telegram, tempsensor1_, 0); // roomTemp from remote
 }
 
 // type 0xA3 - for external temp settings from the the RC* thermostats (e.g. RC35)
@@ -3630,7 +3631,12 @@ void Thermostat::register_device_values() {
         register_device_value(tag, &battery_, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(battery), DeviceValueUOM::PERCENT);
         return;
     }
-
+    // Junkers FB10 remote, show only internal sensor
+    if (this->model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS && device_id() >= 0x18 && device_id() <= 0x1B) {
+        uint8_t tag = DeviceValueTAG::TAG_HC1 + device_id() - 0x18;
+        register_device_value(tag, &tempsensor1_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(remotetemp), DeviceValueUOM::DEGREES);
+        return;
+    }
     // Common for all thermostats
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &errorCode_, DeviceValueType::STRING, FL_(errorCode), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &lastCode_, DeviceValueType::STRING, FL_(lastCode), DeviceValueUOM::NONE);
@@ -4616,7 +4622,15 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               MAKE_CF_CB(set_nofrosttemp));
         register_device_value(tag, &hc->control, DeviceValueType::ENUM, FL_(enum_j_control), FL_(control), DeviceValueUOM::NONE, MAKE_CF_CB(set_control));
         register_device_value(tag, &hc->program, DeviceValueType::ENUM, FL_(enum_progMode4), FL_(program), DeviceValueUOM::NONE, MAKE_CF_CB(set_program));
-        register_device_value(tag, &hc->remotetemp, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(remotetemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag,
+                              &hc->remotetemp,
+                              DeviceValueType::SHORT,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(remotetemp),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_remotetemp),
+                              -1,
+                              101);
         register_device_value(tag, &hc->targetflowtemp, DeviceValueType::UINT, FL_(targetflowtemp), DeviceValueUOM::DEGREES);
         register_device_value(tag, &hc->roomsensor, DeviceValueType::ENUM, FL_(enum_roomsensor), FL_(roomsensor), DeviceValueUOM::NONE, MAKE_CF_CB(set_roomsensor));
         break;
