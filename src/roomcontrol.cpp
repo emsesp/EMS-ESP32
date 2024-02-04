@@ -154,7 +154,7 @@ void Roomctrl::check(const uint8_t addr, const uint8_t * data, const uint8_t len
         unknown(addr, data[0], data[3], data[5], data[6]);
     } else if (data[2] == 0xAF && data[3] == 0) {
         temperature(addr, data[0], hc);
-    } else if (length == 8 && data[2] == 0xFF && data[3] == 0 && data[5] == 0 && data[6] == 0x23) { // Junkers
+    } else if (length == 8 && data[2] == 0xFF && data[3] == 0 && data[5] == 0 && data[6] == 0x22 + hc) { // Junkers
         temperature(addr, data[0], hc);
     } else if (length == 8 && data[2] == 0xFF && data[3] == 0 && data[5] == 3 && data[6] == 0x2B + hc) { // EMS+ temperature
         temperature(addr, data[0], hc);
@@ -234,11 +234,11 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[6] = 0;
         data[7] = EMSbus::calculate_crc(data, 7); // apppend CRC
         EMSuart::transmit(data, 8);
-    } else if (type_ == FB10) { // Junkers FB10, telegram 0x0123
+    } else if (type_ == FB10) { // Junkers FB10, telegram 0x0122
         data[2] = 0xFF;
         data[3] = 0;
         data[4] = 0;
-        data[5] = 0x23; // is this always 0x23 or count with hc?
+        data[5] = 0x22 + hc; // count with hc?
         data[6] = (uint8_t)(remotetemp_[hc] >> 8);
         data[7] = (uint8_t)(remotetemp_[hc] & 0xFF);
         data[8] = EMSbus::calculate_crc(data, 8); // apppend CRC
