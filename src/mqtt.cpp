@@ -788,20 +788,20 @@ bool Mqtt::publish_system_ha_sensor_config(uint8_t type, const char * name, cons
 // MQTT discovery configs
 // entity must match the key/value pair in the *_data topic
 // note: some extra string copying done here, it looks messy but does help with heap fragmentation issues
-bool Mqtt::publish_ha_sensor_config(uint8_t                 type,        // EMSdevice::DeviceValueType
-                                    uint8_t                 tag,         // EMSdevice::DeviceValueTAG
-                                    const char * const      fullname,    // fullname, already translated
-                                    const char * const      en_name,     // original name in english
-                                    const uint8_t           device_type, // EMSdevice::DeviceType
-                                    const char * const      entity,      // same as shortname
-                                    const uint8_t           uom,         // EMSdevice::DeviceValueUOM (0=NONE)
-                                    const bool              remove,      // true if we want to remove this topic
-                                    const bool              has_cmd,
-                                    const char * const **   options,
-                                    uint8_t                 options_size,
-                                    const int16_t           dv_set_min,
-                                    const uint32_t          dv_set_max,
-                                    const int8_t            num_op,
+bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdevice::DeviceValueType
+                                    uint8_t               tag,         // EMSdevice::DeviceValueTAG
+                                    const char * const    fullname,    // fullname, already translated
+                                    const char * const    en_name,     // original name in english
+                                    const uint8_t         device_type, // EMSdevice::DeviceType
+                                    const char * const    entity,      // same as shortname
+                                    const uint8_t         uom,         // EMSdevice::DeviceValueUOM (0=NONE)
+                                    const bool            remove,      // true if we want to remove this topic
+                                    const bool            has_cmd,
+                                    const char * const ** options,
+                                    uint8_t               options_size,
+                                    const int16_t         dv_set_min,
+                                    const uint32_t        dv_set_max,
+                                    const int8_t          num_op,
                                     const JsonObjectConst dev_json) {
     // ignore if name (fullname) is empty
     if (!fullname || !en_name) {
