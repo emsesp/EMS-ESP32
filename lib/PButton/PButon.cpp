@@ -55,7 +55,7 @@ bool PButton::init(uint8_t pin, bool pullMode) {
 
 #if defined(ESP32)
     pinMode(pin_, pullMode ? INPUT_PULLUP : INPUT_PULLDOWN);
-#else                                           // esp8266 and standalone
+#else // esp8266 and standalone
     pinMode(pin_, pullMode ? INPUT_PULLUP : INPUT);
 #endif
     enabled_ = (digitalRead(pin_) == pullMode); // see if a button is connected
@@ -91,6 +91,12 @@ bool PButton::check(void) {
     int  resultEvent = 0;
     long millisRes   = millis();
 
+    // make sure the pin is still input
+#if defined(ESP32)
+    pinMode(pin_, pullMode_ ? INPUT_PULLUP : INPUT_PULLDOWN);
+#else // esp8266 and standalone
+    pinMode(pin_, pullMode_ ? INPUT_PULLUP : INPUT);
+#endif
     state_ = digitalRead(pin_) == pullMode_;
 
     // Button pressed down
