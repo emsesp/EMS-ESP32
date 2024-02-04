@@ -32,8 +32,9 @@
 
 class SecuritySettings {
   public:
-    String          jwtSecret;
-    std::list<User> users;
+    String jwtSecret;
+    std::vector<User> users;
+    // std::list<User> users;
 
     static void read(SecuritySettings & settings, JsonObject root) {
         // secret
