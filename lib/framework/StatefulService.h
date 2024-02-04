@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 
+#include <vector>
 #include <list>
 #include <functional>
 #include <freertos/FreeRTOS.h>
@@ -128,8 +129,9 @@ class StatefulService {
     }
 
   private:
-    SemaphoreHandle_t                   _accessMutex;
-    std::list<StateUpdateHandlerInfo_t> _updateHandlers;
+    SemaphoreHandle_t _accessMutex;
+    std::vector<StateUpdateHandlerInfo_t> _updateHandlers;
+    // std::list<StateUpdateHandlerInfo_t> _updateHandlers;
 };
 
 #endif

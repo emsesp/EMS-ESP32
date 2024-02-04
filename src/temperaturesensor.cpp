@@ -42,7 +42,7 @@ void TemperatureSensor::start() {
 
 #ifndef EMSESP_STANDALONE
     bus_.begin(dallas_gpio_);
-    LOG_INFO("Starting Temperature sensor service");
+    LOG_INFO("Starting Temperature Sensor service");
 #endif
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];

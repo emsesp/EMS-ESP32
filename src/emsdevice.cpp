@@ -501,7 +501,7 @@ void EMSdevice::add_device_value(uint8_t               tag,              // to b
                                  uint32_t              max               // max allowed value
 ) {
     // initialize the device value depending on it's type
-    // ignoring DeviceValueType::CMD and DeviceValueType::TIME
+    // ignoring DeviceValueType::CMD
 
     if (type == DeviceValueType::STRING) {
         *(char *)(value_p) = {'\0'}; // this is important for string functions like strlen() to work later
