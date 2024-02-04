@@ -58,7 +58,7 @@ AsyncStaticWebHandler& AsyncStaticWebHandler::setCacheControl(const char* cache_
 }
 
 AsyncStaticWebHandler& AsyncStaticWebHandler::setLastModified(const char* last_modified){
-  _last_modified = String(last_modified);
+  _last_modified = last_modified;
   return *this;
 }
 
@@ -99,7 +99,6 @@ bool AsyncStaticWebHandler::canHandle(AsyncWebServerRequest *request){
     if(_cache_control.length())
       request->addInterestingHeader(F("If-None-Match"));
 
-    DEBUGF("[AsyncStaticWebHandler::canHandle] TRUE\n");
     return true;
   }
 
@@ -146,18 +145,26 @@ bool AsyncStaticWebHandler::_fileExists(AsyncWebServerRequest *request, const St
   String gzip = path + F(".gz");
 
   if (_gzipFirst) {
-    request->_tempFile = _fs.open(gzip, fs::FileOpenMode::read);
-    gzipFound = FILE_IS_REAL(request->_tempFile);
+    if (_fs.exists(gzip)) {                             
+     request->_tempFile = _fs.open(gzip, fs::FileOpenMode::read);
+     gzipFound = FILE_IS_REAL(request->_tempFile);
+    } 
     if (!gzipFound){
+     if (_fs.exists(path)) {                              
       request->_tempFile = _fs.open(path, fs::FileOpenMode::read);
       fileFound = FILE_IS_REAL(request->_tempFile);
+     }  
     }
   } else {
-    request->_tempFile = _fs.open(path, fs::FileOpenMode::read);
-    fileFound = FILE_IS_REAL(request->_tempFile);
+    if (_fs.exists(path)) {                           
+     request->_tempFile = _fs.open(path, fs::FileOpenMode::read);
+     fileFound = FILE_IS_REAL(request->_tempFile);
+    }
     if (!fileFound){
+     if (_fs.exists(gzip)) {                             
       request->_tempFile = _fs.open(gzip, fs::FileOpenMode::read);
       gzipFound = FILE_IS_REAL(request->_tempFile);
+     }
     }
   }
 
@@ -198,7 +205,9 @@ void AsyncStaticWebHandler::handleRequest(AsyncWebServerRequest *request)
       return request->requestAuthentication();
 
   if (request->_tempFile == true) {
-    String etag = String(request->_tempFile.size());
+    time_t lw = request->_tempFile.getLastWrite();    // get last file mod time (if supported by FS)
+    if (lw) setLastModified(gmtime(&lw));
+    String etag(lw ? lw : request->_tempFile.size());   // set etag to lastmod timestamp if available, otherwise to size
     if (_last_modified.length() && _last_modified == request->header(F("If-Modified-Since"))) {
       request->_tempFile.close();
       request->send(304); // Not modified
