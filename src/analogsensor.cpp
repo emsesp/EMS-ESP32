@@ -31,7 +31,7 @@ void AnalogSensor::start() {
     }
     analogSetAttenuation(ADC_2_5db); // for all channels 1.5V
 
-    LOG_INFO("Starting Analog sensor service");
+    LOG_INFO("Starting Analog Sensor service");
 
     // Add API calls
     Command::add(
