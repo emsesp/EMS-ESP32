@@ -176,7 +176,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         // JUNKERS/HT3
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
         if (device_id >= 0x18 && device_id <= 0x1B) { // remote hc1-hc4
-            register_telegram_type(0x122 + (device_id - 0x18), "JunkersRemote", false, MAKE_PF_CB(process_JunkersRemoteMonitor));
+            register_telegram_type(0x123, "JunkersRemote", false, MAKE_PF_CB(process_JunkersRemoteMonitor));
             register_device_values(); // register device values for common values (not heating circuit)
             return;                   // no values to add
         }
@@ -775,7 +775,7 @@ void Thermostat::process_JunkersSet2(std::shared_ptr<const Telegram> telegram) {
     has_enumupdate(telegram, hc->mode, 4, 1);     // 0 = nofrost, 1 = eco, 2 = heat, 3 = auto
 }
 
-// type 0x122 ff - FR10/FR110 Junkers as remote
+// type 0x123 - FB10 Junkers remote
 void Thermostat::process_JunkersRemoteMonitor(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, tempsensor1_, 0); // roomTemp from remote
 }

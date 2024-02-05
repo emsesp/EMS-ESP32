@@ -79,7 +79,8 @@ uint8_t Roomctrl::get_hc(uint8_t addr) {
 /**
  * if remote control is active send the temperature every minute
  */
-void Roomctrl::send(const uint8_t addr) {
+void Roomctrl::send(uint8_t addr) {
+    addr &= 0x7F;
     uint8_t hc = get_hc(addr);
     // check address, reply only on addresses 0x18..0x1B or 0x40..0x43
     if (hc >= HCS) {
@@ -142,7 +143,7 @@ void Roomctrl::check(uint8_t addr, const uint8_t * data, const uint8_t length) {
     }
     // reply to writes with write nack byte
     if ((addr & 0x80) == 0) { // it's a write to us
-        nack_write();         // we don't accept writes.
+        ack_write();          // accept writes, don't care.
         return;
     }
     addr &= 0x7F;
@@ -156,7 +157,7 @@ void Roomctrl::check(uint8_t addr, const uint8_t * data, const uint8_t length) {
         unknown(addr, data[0], data[3], data[5], data[6]);
     } else if (data[2] == 0xAF && data[3] == 0) {
         temperature(addr, data[0], hc);
-    } else if (length == 8 && data[2] == 0xFF && data[3] == 0 && data[5] == 0 && data[6] == 0x22 + hc) { // Junkers
+    } else if (length == 8 && data[2] == 0xFF && data[3] == 0 && data[5] == 0 && data[6] == 0x23) { // Junkers
         temperature(addr, data[0], hc);
     } else if (length == 8 && data[2] == 0xFF && data[3] == 0 && data[5] == 3 && data[6] == 0x2B + hc) { // EMS+ temperature
         temperature(addr, data[0], hc);
@@ -237,11 +238,11 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[6] = 0;
         data[7] = EMSbus::calculate_crc(data, 7); // apppend CRC
         EMSuart::transmit(data, 8);
-    } else if (type_ == FB10) { // Junkers FB10, telegram 0x0122
+    } else if (type_ == FB10) { // Junkers FB10, telegram 0x0123
         data[2] = 0xFF;
         data[3] = 0;
         data[4] = 0;
-        data[5] = 0x22 + hc; // count with hc?
+        data[5] = 0x23; // count with hc?
         data[6] = (uint8_t)(remotetemp_[hc] >> 8);
         data[7] = (uint8_t)(remotetemp_[hc] & 0xFF);
         data[8] = EMSbus::calculate_crc(data, 8); // apppend CRC
@@ -306,6 +307,15 @@ void Roomctrl::humidity(uint8_t addr, uint8_t dst, uint8_t hc) {
 void Roomctrl::nack_write() {
     uint8_t data[1];
     data[0] = TxService::TX_WRITE_FAIL;
+    EMSuart::transmit(data, 1);
+}
+
+/**
+ * send a ack if someone want to write to us.
+ */
+void Roomctrl::ack_write() {
+    uint8_t data[1];
+    data[0] = TxService::TX_WRITE_SUCCESS;
     EMSuart::transmit(data, 1);
 }
 
