@@ -122,7 +122,7 @@ void Roomctrl::send(const uint8_t addr) {
         }
     } else {
         // acknowledge every poll, otherwise the master shows error A22-816
-        EMSuart::send_poll(addr ^ EMSbus::ems_mask());
+        EMSuart::send_poll(addr | EMSbus::ems_mask());
     }
 }
 
@@ -174,8 +174,8 @@ void Roomctrl::check(uint8_t addr, const uint8_t * data, const uint8_t length) {
  */
 void Roomctrl::version(uint8_t addr, uint8_t dst) {
     uint8_t data[15];
-    data[0] = addr ^ EMSbus::ems_mask();
-    data[1] = dst;
+    data[0] = addr | EMSbus::ems_mask();
+    data[1] = dst & 0x7F;
     data[2] = 0x02;
     data[3] = 0;
     data[4] = type_; // set RC20 id 113, Ver 02.01 or Junkers FB10 id 109, Ver 16.05, RC100H id 200 ver 40.04
@@ -187,8 +187,9 @@ void Roomctrl::version(uint8_t addr, uint8_t dst) {
         return;
     }
     // RC200 adds some extra bytes
-    data[7] = 0;
-    data[8] = 0xFF, data[9] = 0;
+    data[7]  = 0;
+    data[8]  = 0xFF;
+    data[9]  = 0;
     data[10] = 0;
     data[11] = 0;
     data[12] = 0;
@@ -201,8 +202,8 @@ void Roomctrl::version(uint8_t addr, uint8_t dst) {
  */
 void Roomctrl::unknown(uint8_t addr, uint8_t dst, uint8_t type, uint8_t offset) {
     uint8_t data[10];
-    data[0] = addr ^ EMSbus::ems_mask();
-    data[1] = dst;
+    data[0] = addr | EMSbus::ems_mask();
+    data[1] = dst & 0x7F;
     data[2] = type;
     data[3] = offset;
     data[4] = EMSbus::calculate_crc(data, 4); // apppend CRC
@@ -211,8 +212,8 @@ void Roomctrl::unknown(uint8_t addr, uint8_t dst, uint8_t type, uint8_t offset) 
 
 void Roomctrl::unknown(uint8_t addr, uint8_t dst, uint8_t offset, uint8_t typeh, uint8_t typel) {
     uint8_t data[10];
-    data[0] = addr ^ EMSbus::ems_mask();
-    data[1] = dst;
+    data[0] = addr | EMSbus::ems_mask();
+    data[1] = dst & 0x7F;
     data[2] = 0xFF;
     data[3] = offset;
     data[4] = typeh;
@@ -226,8 +227,8 @@ void Roomctrl::unknown(uint8_t addr, uint8_t dst, uint8_t offset, uint8_t typeh,
  */
 void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
     uint8_t data[12];
-    data[0] = addr ^ EMSbus::ems_mask();
-    data[1] = dst;
+    data[0] = addr | EMSbus::ems_mask();
+    data[1] = dst & 0x7F;
     if (type_ == RC20) { // RC20, telegram 0xAF
         data[2] = 0xAF;
         data[3] = 0;
@@ -282,8 +283,8 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
 // send telegram 0x047B only for RC100H
 void Roomctrl::humidity(uint8_t addr, uint8_t dst, uint8_t hc) {
     uint8_t data[11];
-    data[0]      = addr ^ EMSbus::ems_mask();
-    data[1]      = dst;
+    data[0]      = addr | EMSbus::ems_mask();
+    data[1]      = dst & 0x7F;
     uint16_t dew = calc_dew(remotetemp_[hc], remotehum_[hc]);
     if (type_ == RC100H) { // RC100H, telegram 47B
         data[2]  = 0xFF;
