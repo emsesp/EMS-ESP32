@@ -62,6 +62,7 @@ void Roomctrl::set_remotehum(const uint8_t type, const uint8_t hc, const int8_t 
 }
 
 uint8_t Roomctrl::get_hc(uint8_t addr) {
+    addr &= 0x7F;
     switch (type_) {
     case SENSOR:
         return addr - 0x40;
@@ -121,15 +122,15 @@ void Roomctrl::send(const uint8_t addr) {
         }
     } else {
         // acknowledge every poll, otherwise the master shows error A22-816
-        EMSuart::send_poll(addr);
+        EMSuart::send_poll(addr ^ EMSbus::ems_mask());
     }
 }
 
 /**
  * check if there is a message for the remote room controller
  */
-void Roomctrl::check(const uint8_t addr, const uint8_t * data, const uint8_t length) {
-    uint8_t hc = get_hc(addr & 0x7F);
+void Roomctrl::check(uint8_t addr, const uint8_t * data, const uint8_t length) {
+    uint8_t hc = get_hc(addr);
 
     // check address, reply only on addresses 0x18..0x1B
     if (hc >= HCS || length < 5) {
@@ -140,10 +141,11 @@ void Roomctrl::check(const uint8_t addr, const uint8_t * data, const uint8_t len
         return;
     }
     // reply to writes with write nack byte
-    if (addr & 0x80) { // it's a write to us
-        nack_write();  // we don't accept writes.
+    if ((addr & 0x80) == 0) { // it's a write to us
+        nack_write();         // we don't accept writes.
         return;
     }
+    addr &= 0x7F;
     // reads: for now we only reply to version and remote temperature
     // empty message back if temperature not set or unknown message type
     if (data[2] == EMSdevice::EMS_TYPE_VERSION) {
@@ -172,7 +174,7 @@ void Roomctrl::check(const uint8_t addr, const uint8_t * data, const uint8_t len
  */
 void Roomctrl::version(uint8_t addr, uint8_t dst) {
     uint8_t data[15];
-    data[0] = addr;
+    data[0] = addr ^ EMSbus::ems_mask();
     data[1] = dst;
     data[2] = 0x02;
     data[3] = 0;
@@ -199,7 +201,7 @@ void Roomctrl::version(uint8_t addr, uint8_t dst) {
  */
 void Roomctrl::unknown(uint8_t addr, uint8_t dst, uint8_t type, uint8_t offset) {
     uint8_t data[10];
-    data[0] = addr;
+    data[0] = addr ^ EMSbus::ems_mask();
     data[1] = dst;
     data[2] = type;
     data[3] = offset;
@@ -209,7 +211,7 @@ void Roomctrl::unknown(uint8_t addr, uint8_t dst, uint8_t type, uint8_t offset) 
 
 void Roomctrl::unknown(uint8_t addr, uint8_t dst, uint8_t offset, uint8_t typeh, uint8_t typel) {
     uint8_t data[10];
-    data[0] = addr;
+    data[0] = addr ^ EMSbus::ems_mask();
     data[1] = dst;
     data[2] = 0xFF;
     data[3] = offset;
@@ -224,7 +226,7 @@ void Roomctrl::unknown(uint8_t addr, uint8_t dst, uint8_t offset, uint8_t typeh,
  */
 void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
     uint8_t data[12];
-    data[0] = addr;
+    data[0] = addr ^ EMSbus::ems_mask();
     data[1] = dst;
     if (type_ == RC20) { // RC20, telegram 0xAF
         data[2] = 0xAF;
@@ -280,7 +282,7 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
 // send telegram 0x047B only for RC100H
 void Roomctrl::humidity(uint8_t addr, uint8_t dst, uint8_t hc) {
     uint8_t data[11];
-    data[0]      = addr;
+    data[0]      = addr ^ EMSbus::ems_mask();
     data[1]      = dst;
     uint16_t dew = calc_dew(remotetemp_[hc], remotehum_[hc]);
     if (type_ == RC100H) { // RC100H, telegram 47B

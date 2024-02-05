@@ -25,7 +25,7 @@ namespace emsesp {
 class Roomctrl {
   public:
     static void send(const uint8_t addr);
-    static void check(const uint8_t addr, const uint8_t * data, const uint8_t length);
+    static void check(uint8_t addr, const uint8_t * data, const uint8_t length);
     static void set_remotetemp(const uint8_t type, const uint8_t hc, const int16_t temp);
     static void set_remotehum(const uint8_t type, const uint8_t hc, const int8_t hum);
     enum : uint8_t { RC20 = 113, FB10 = 109, RC100H = 200, SENSOR = 0x40, RC200 = 157 };
