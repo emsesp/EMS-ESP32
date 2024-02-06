@@ -332,7 +332,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         ok = true;
     }
 
-    if (command == "custom_entities") {
+    if (command == "custom") {
         shell.printfln("Adding custom entities...");
 
         // add some dummy entities

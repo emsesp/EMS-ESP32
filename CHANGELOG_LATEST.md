@@ -13,7 +13,7 @@
 - heatpump energy meters [#1463](https://github.com/emsesp/EMS-ESP32/issues/1463)
 - heatpump max power [#1475](https://github.com/emsesp/EMS-ESP32/issues/1475)
 - checkbox for MQTT-TLS enable [#1474](https://github.com/emsesp/EMS-ESP32/issues/1474)
-- added SK (Slovenian) language. Thanks @misa1515
+- added SK (Slovak) language. Thanks @misa1515
 - CPU info [#1497](https://github.com/emsesp/EMS-ESP32/pull/1497)
 - Show network hostname in Web UI under Network Status
 - Improved HA Discovery so each section (EMS device, Scheduler, Analog, Temperature, Custom, Shower) have their own section

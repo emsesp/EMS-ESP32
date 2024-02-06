@@ -43,7 +43,8 @@ class CustomEntityItem {
 
 class WebCustomEntity {
   public:
-    std::list<CustomEntityItem> customEntityItems;
+    std::vector<CustomEntityItem> customEntityItems;
+    // std::list<CustomEntityItem> customEntityItems;
 
     static void              read(WebCustomEntity & webEntity, JsonObject root);
     static StateUpdateResult update(JsonObject root, WebCustomEntity & webEntity);
@@ -78,8 +79,10 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
     HttpEndpoint<WebCustomEntity>  _httpEndpoint;
     FSPersistence<WebCustomEntity> _fsPersistence;
 
-    std::list<CustomEntityItem> * customEntityItems; // pointer to the list of entity items
-    bool                          ha_registered_ = false;
+    std::vector<CustomEntityItem> * customEntityItems; // pointer to the list of entity items
+    // std::list<CustomEntityItem> * customEntityItems; // pointer to the list of entity items
+
+    bool ha_registered_ = false;
 };
 
 } // namespace emsesp

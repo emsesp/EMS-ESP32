@@ -25,7 +25,7 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
         ArRequestHandlerFunction requestHandler = [contentType, content, len](AsyncWebServerRequest * request) {
             AsyncWebServerResponse * response = request->beginResponse_P(200, contentType, content, len);
             response->addHeader("Content-Encoding", "gzip");
-            response->addHeader("Cache-Control", "public, immutable, max-age=31536000");
+            // response->addHeader("Cache-Control", "public, immutable, max-age=31536000");
             // response->addHeader("Content-Encoding", "br"); // only works over HTTPS
             request->send(response);
         };

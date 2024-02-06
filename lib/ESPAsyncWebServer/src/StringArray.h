@@ -55,7 +55,7 @@ class LinkedList {
       const T& operator * () const { return _node->value(); }
       const T* operator -> () const { return &_node->value(); }
     };
-
+    
   public:
     typedef const Iterator ConstIterator;
     ConstIterator begin() const { return ConstIterator(_root); }
@@ -76,7 +76,7 @@ class LinkedList {
     T& front() const {
       return _root->value();
     }
-
+    
     bool isEmpty() const {
       return _root == nullptr;
     }
@@ -123,11 +123,11 @@ class LinkedList {
           } else {
             pit->next = it->next;
           }
-
+          
           if (_onRemove) {
             _onRemove(it->value());
           }
-
+          
           delete it;
           return true;
         }
@@ -157,7 +157,7 @@ class LinkedList {
       }
       return false;
     }
-
+    
     void free(){
       while(_root != nullptr){
         auto it = _root;
@@ -170,24 +170,5 @@ class LinkedList {
       _root = nullptr;
     }
 };
-
-
-class StringArray : public LinkedList<String> {
-public:
-
-  StringArray() : LinkedList(nullptr) {}
-
-  bool containsIgnoreCase(const String& str){
-    for (const auto& s : *this) {
-      if (str.equalsIgnoreCase(s)) {
-        return true;
-      }
-    }
-    return false;
-  }
-};
-
-
-
 
 #endif /* STRINGARRAY_H_ */

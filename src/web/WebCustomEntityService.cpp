@@ -293,10 +293,11 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
     for (const auto & entity : *customEntityItems) {
         if (Helpers::toLower(entity.name) == Helpers::toLower(command_s)) {
             output["name"] = entity.name;
+            output["ram"]  = entity.ram;
+            output["type"] = entity.value_type == DeviceValueType::BOOL ? "boolean" : entity.value_type == DeviceValueType::STRING ? "string" : F_(number);
             if (entity.uom > 0) {
                 output["uom"] = EMSdevice::uom_to_string(entity.uom);
             }
-            output["type"]      = entity.value_type == DeviceValueType::BOOL ? "boolean" : entity.value_type == DeviceValueType::STRING ? "string" : F_(number);
             output["readable"]  = true;
             output["writeable"] = entity.writeable;
             output["visible"]   = true;
@@ -311,6 +312,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
                 }
             }
             render_value(output, entity, true);
+
             if (attribute_s) {
                 if (output.containsKey(attribute_s)) {
                     String data = output[attribute_s].as<String>();
