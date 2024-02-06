@@ -751,28 +751,46 @@ void Thermostat::process_JunkersSet(std::shared_ptr<const Telegram> telegram) {
     if (hc == nullptr) {
         return;
     }
-
-    has_update(telegram, hc->daytemp, 17);          // is * 2
-    has_update(telegram, hc->nighttemp, 16);        // is * 2
-    has_update(telegram, hc->nofrosttemp, 15);      // is * 2
+    has_update(telegram, hc->controlmode, 0);       // 0-off, 1-unmixed-no-IPM, 2-unmixed-IPM, 3-mixed
     has_update(telegram, hc->control, 1);           // remote: 0-off, 1-FB10, 2-FB100
-    has_enumupdate(telegram, hc->program, 13, 1);   // 1-6: 1 = A, 2 = B,...
-    has_enumupdate(telegram, hc->mode, 14, 1);      // 0 = nofrost, 1 = eco, 2 = heat, 3 = auto
+    has_update(telegram, hc->heatingtype, 2);       // 0-off, 1-curve, 2-radiator, 3-convector, 4-floor
+    has_update(telegram, hc->minflowtemp, 3);       // degrees
+    has_update(telegram, hc->designtemp, 4);        // degrees
+    has_update(telegram, hc->maxflowtemp, 5);       // degrees
+    has_update(telegram, hc->roominfl_factor, 6);   // %
+    has_update(telegram, hc->roominfluence, 7);     // 0-off, 1-ext, 2-int, 3-auto
+    has_update(telegram, hc->offsettemp, 8);        // 0-off, 0xFF-on
     has_enumupdate(telegram, hc->roomsensor, 9, 1); // 1-intern, 2-extern, 3-autoselect the lower value
+    has_update(telegram, hc->nofrostmode, 10);      // 0-off, 0xFF-on
+    has_update(telegram, hc->summertemp, 11);       // degrees
+    // 12 Frostgrenztemperatur für Heizkeis (*2)?
+    has_enumupdate(telegram, hc->program, 13, 1);     // 1-6: 1 = A, 2 = B,...
+    has_enumupdate(telegram, hc->mode, 14, 1);        // 0 = nofrost, 1 = eco, 2 = heat, 3 = auto
+    has_update(telegram, hc->nofrosttemp, 15);        // is * 2
+    has_update(telegram, hc->nighttemp, 16);          // is * 2
+    has_update(telegram, hc->daytemp, 17);            // is * 2
+    has_enumupdate(telegram, hc->fastHeatup, 18, 1);  // slow, normal, fast
+    has_enumupdate(telegram, hc->holidaymode, 19, 1); // as mode: nofrost, eco, heat, auto
 }
 
-// type 0x0179, ff
+// type 0x0179, ff for Junkers_OLD
 void Thermostat::process_JunkersSet2(std::shared_ptr<const Telegram> telegram) {
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
 
-    has_update(telegram, hc->daytemp, 7);         // is * 2
-    has_update(telegram, hc->nighttemp, 6);       // is * 2
-    has_update(telegram, hc->nofrosttemp, 5);     // is * 2
-    has_enumupdate(telegram, hc->program, 10, 1); // 1-6: 1 = A, 2 = B,...
-    has_enumupdate(telegram, hc->mode, 4, 1);     // 0 = nofrost, 1 = eco, 2 = heat, 3 = auto
+    has_update(telegram, hc->controlmode, 0); // 0-off, 1-unmixed-no-IPM, 2-unmixed-IPM, 3-mixed
+    // 1 curve factor roomtemp
+    // 2 curve factor heating
+    has_update(telegram, hc->maxflowtemp, 3);          // degrees
+    has_enumupdate(telegram, hc->mode, 4, 1);          // 0 = nofrost, 1 = eco, 2 = heat, 3 = auto
+    has_update(telegram, hc->nofrosttemp, 5);          // is * 2
+    has_update(telegram, hc->nighttemp, 6);            // is * 2
+    has_update(telegram, hc->daytemp, 7);              // is * 2
+    has_enumupdate(telegram, hc->holidaymode, 8, 1);   // as mode: 1-nofrost, 2-eco, 3-heat, 4-auto
+    has_update(telegram, hc->switchonoptimization, 9); // 0-off, 0xFF-on
+    has_enumupdate(telegram, hc->program, 10, 1);      // 1-6: 1 = A, 2 = B,...
 }
 
 // type 0x123 - FB10 Junkers remote
@@ -1348,6 +1366,8 @@ void Thermostat::process_RC35Set(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hc->roominfluence, 4); // is * 1
     has_update(telegram, hc->offsettemp, 6);    // is * 2
     has_update(telegram, hc->mode, 7);          // night, day, auto
+
+    has_update(telegram, hc->switchonoptimization, 19); // 0xFF for on
 
     has_update(telegram, hc->wwprio, 21);         // 0xFF for on
     has_update(telegram, hc->summertemp, 22);     // is * 1
@@ -2452,8 +2472,28 @@ bool Thermostat::set_roominfl_factor(const char * value, const int8_t id) {
     if (!Helpers::value2float(value, val)) {
         return false;
     }
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
+        write_command(set_typeids[hc->hc()], 6, (uint8_t)val);
 
-    write_command(summer_typeids[hc->hc()], 1, (uint8_t)(val * 10));
+    } else {
+        write_command(summer_typeids[hc->hc()], 1, (uint8_t)(val * 10));
+    }
+
+    return true;
+}
+
+// set Junkers roominfluence mode
+bool Thermostat::set_roominfl_mode(const char * value, const int8_t id) {
+    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    if (hc == nullptr) {
+        return false;
+    }
+    uint8_t val;
+    if (!Helpers::value2enum(value, val, FL_(enum_roominfluence))) {
+        return false;
+    }
+    write_command(set_typeids[hc->hc()], 7, (uint8_t)val);
 
     return true;
 }
@@ -2476,8 +2516,8 @@ bool Thermostat::set_mode(const char * value, const int8_t id) {
         break;
     case EMSdevice::EMS_DEVICE_FLAG_RC20_N:
     case EMSdevice::EMS_DEVICE_FLAG_RC25:
-    case EMSdevice::EMS_DEVICE_FLAG_RC35:
     case EMSdevice::EMS_DEVICE_FLAG_RC30_N:
+    case EMSdevice::EMS_DEVICE_FLAG_RC35:
         mode_list = FL_(enum_mode3);
         break;
     case EMSdevice::EMS_DEVICE_FLAG_BC400:
@@ -2701,6 +2741,44 @@ bool Thermostat::set_fastheatup(const char * value, const int8_t id) {
     return true;
 }
 
+// Set holidaymode Junkers
+bool Thermostat::set_holidaymode(const char * value, const int8_t id) {
+    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    if (hc == nullptr) {
+        return false;
+    }
+
+    uint8_t v;
+
+    if (!Helpers::value2enum(value, v, FL_(enum_mode4))) {
+        return false;
+    }
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS && has_flags(EMSdevice::EMS_DEVICE_FLAG_JUNKERS_OLD)) {
+        write_command(set_typeids[hc->hc()], 8, v + 1, set_typeids[hc->hc()]);
+    } else {
+        write_command(set_typeids[hc->hc()], 19, v + 1, set_typeids[hc->hc()]);
+    }
+    return true;
+}
+
+// Set heatup mode Junkers
+bool Thermostat::set_heatup(const char * value, const int8_t id) {
+    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    if (hc == nullptr) {
+        return false;
+    }
+
+    uint8_t v;
+
+    if (!Helpers::value2enum(value, v, FL_(enum_heatup))) {
+        return false;
+    }
+    write_command(set_typeids[hc->hc()], 18, v + 1, set_typeids[hc->hc()]);
+    return true;
+}
+
 // Set switchonoptimization RC310
 bool Thermostat::set_switchonoptimization(const char * value, const int8_t id) {
     uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
@@ -2714,9 +2792,16 @@ bool Thermostat::set_switchonoptimization(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
-    write_command(curve_typeids[hc->hc()], 4, b ? 0xFF : 0x00, curve_typeids[hc->hc()]);
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_RC35) {
+        write_command(set_typeids[hc->hc()], 19, b ? 0xFF : 0x00, set_typeids[hc->hc()]);
+    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS && has_flags(EMSdevice::EMS_DEVICE_FLAG_JUNKERS_OLD)) {
+        write_command(set_typeids[hc->hc()], 9, b ? 0xFF : 0x00, set_typeids[hc->hc()]);
+    } else {
+        write_command(curve_typeids[hc->hc()], 4, b ? 0xFF : 0x00, curve_typeids[hc->hc()]);
+    }
     return true;
 }
+
 bool Thermostat::set_boost(const char * value, const int8_t id) {
     uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
     std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
@@ -2859,6 +2944,10 @@ bool Thermostat::set_heatingtype(const char * value, const int8_t id) {
     }
 
     uint8_t set;
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS && Helpers::value2enum(value, set, FL_(enum_heatingtype1))) {
+        write_command(set_typeids[hc->hc()], 0, set, set_typeids[hc->hc()]);
+        return true;
+    }
     if (Helpers::value2enum(value, set, FL_(enum_heatingtype))) {
         if ((model() == EMSdevice::EMS_DEVICE_FLAG_RC20_N) || (model() == EMSdevice::EMS_DEVICE_FLAG_RC25)) {
             write_command(set_typeids[hc->hc()], 0, set, set_typeids[hc->hc()]);
@@ -2884,7 +2973,12 @@ bool Thermostat::set_controlmode(const char * value, const int8_t id) {
     }
 
     uint8_t set;
-    if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
+        if (Helpers::value2enum(value, set, FL_(enum_controlmode3))) {
+            write_command(set_typeids[hc->hc()], 0, set, set_typeids[hc->hc()]);
+            return true;
+        }
+    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
         if (Helpers::value2enum(value, set, FL_(enum_controlmode))) {
             write_command(curve_typeids[hc->hc()], 0, set, curve_typeids[hc->hc()]);
             return true;
@@ -3512,6 +3606,21 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
         bool old_junkers = (has_flags(EMSdevice::EMS_DEVICE_FLAG_JUNKERS_OLD));
         if (!old_junkers) {
             switch (mode) {
+            case HeatingCircuit::Mode::SUMMER:
+                offset = 11;
+                break;
+            case HeatingCircuit::Mode::MINFLOW:
+                offset = 3;
+                factor = 1;
+                break;
+            case HeatingCircuit::Mode::MAXFLOW:
+                offset = 5;
+                factor = 1;
+                break;
+            case HeatingCircuit::Mode::DESIGN:
+                offset = 4;
+                factor = 1;
+                break;
             case HeatingCircuit::Mode::NOFROST:
                 offset = EMS_OFFSET_JunkersSetMessage_no_frost_temp;
                 break;
@@ -3549,6 +3658,10 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
         } else {
             // older, like the FR100
             switch (mode) {
+            case HeatingCircuit::Mode::MAXFLOW:
+                offset = 3;
+                factor = 1;
+                break;
             case HeatingCircuit::Mode::NOFROST:
                 offset = EMS_OFFSET_JunkersSetMessage2_no_frost_temp;
                 break;
@@ -4601,6 +4714,12 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               -1,
                               101);
         register_device_value(tag, &hc->wwprio, DeviceValueType::BOOL, FL_(wwprio), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwprio));
+        register_device_value(tag,
+                              &hc->switchonoptimization,
+                              DeviceValueType::BOOL,
+                              FL_(switchonoptimization),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_switchonoptimization));
         register_device_value(
             tag, &hc->switchtime1, DeviceValueType::STRING, FL_(tpl_switchtime), FL_(switchtime1), DeviceValueUOM::NONE, MAKE_CF_CB(set_switchtime1));
         register_device_value(
@@ -4632,7 +4751,26 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               -1,
                               101);
         register_device_value(tag, &hc->targetflowtemp, DeviceValueType::UINT, FL_(targetflowtemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &hc->summertemp, DeviceValueType::UINT, FL_(summertemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_summertemp), 9, 25);
         register_device_value(tag, &hc->roomsensor, DeviceValueType::ENUM, FL_(enum_roomsensor), FL_(roomsensor), DeviceValueUOM::NONE, MAKE_CF_CB(set_roomsensor));
+        register_device_value(tag, &hc->holidaymode, DeviceValueType::ENUM, FL_(enum_mode4), FL_(holidaymode), DeviceValueUOM::NONE, MAKE_CF_CB(set_holidaymode));
+        register_device_value(tag,
+                              &hc->switchonoptimization,
+                              DeviceValueType::BOOL,
+                              FL_(switchonoptimization),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_switchonoptimization));
+        register_device_value(tag, &hc->fastHeatup, DeviceValueType::ENUM, FL_(enum_heatup), FL_(heatup), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatup));
+        register_device_value(tag, &hc->minflowtemp, DeviceValueType::UINT, FL_(minflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_minflowtemp), 5, 70);
+        register_device_value(tag, &hc->maxflowtemp, DeviceValueType::UINT, FL_(maxflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_maxflowtemp), 30, 90);
+        register_device_value(tag, &hc->designtemp, DeviceValueType::UINT, FL_(designtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_designtemp), 30, 90);
+        register_device_value(
+            tag, &hc->roominfluence, DeviceValueType::ENUM, FL_(enum_roominfluence), FL_(roominfluence), DeviceValueUOM::NONE, MAKE_CF_CB(set_roominfl_mode));
+        register_device_value(tag, &hc->roominfl_factor, DeviceValueType::UINT, FL_(roominfl_factor), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_roominfl_factor));
+        register_device_value(
+            tag, &hc->heatingtype, DeviceValueType::ENUM, FL_(enum_heatingtype1), FL_(heatingtype), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatingtype));
+        register_device_value(
+            tag, &hc->controlmode, DeviceValueType::ENUM, FL_(enum_controlmode3), FL_(controlmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_controlmode));
         break;
     default:
         break;

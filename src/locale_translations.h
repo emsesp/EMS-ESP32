@@ -231,6 +231,7 @@ MAKE_WORD_TRANSLATION(french, "french", "Französisch", "Frans", "Franska", "fra
 MAKE_WORD_TRANSLATION(italian, "italian", "Italienisch", "Italiaans", "Italienska", "włoski", "italiensk", "italien", "İtalyanca", "Italiano", "taliansky")
 MAKE_WORD_TRANSLATION(high, "high", "hoch", "hoog", "Hög", "wysoki", "høy", "haut", "yüksek", "alto", "vysoký")
 MAKE_WORD_TRANSLATION(low, "low", "niedrig", "laag", "Låg", "niski", "lav", "bas", "düşük", "basso", "nízky")
+MAKE_WORD_TRANSLATION(curve, "heatingcurve", "Heizkurve", "", "", "", "", "", "", "", "")  // TODO translate
 MAKE_WORD_TRANSLATION(radiator, "radiator", "Heizkörper", "radiator", "Radiator", "grzejniki", "radiator", "radiateur", "radyatör", "radiatore", "radiátor")
 MAKE_WORD_TRANSLATION(convector, "convector", "Konvektor", "convector", "Konvektor", "konwektory", "konvektor", "convecteur", "convector", "convettore", "konvektor")
 MAKE_WORD_TRANSLATION(floor, "floor", "Fussboden", "vloer", "Golv", "podłoga", "gulv", "sol", "yer", "pavimento", "podlaha")
@@ -266,6 +267,9 @@ MAKE_WORD_TRANSLATION(smoke_temperature, "smoke temperature", "Abgastemperatur",
 MAKE_WORD_TRANSLATION(weather_compensated, "weather compensated", "Wetter kompensiert", "weer gecompenseerd", "Väderkompenserad", "skompensow. pogodą", "værkompensert", "compensation par l'extérieur", "hava durumuna göre dengelenmiş", "acqua compensata", "kompenzácia počasia")
 MAKE_WORD_TRANSLATION(outside_basepoint, "outside basepoint", "Basispunkt Außentemp.", "buiten basispunt", "Utomhus baspunkt", "temp. zewn. z pkt. pocz.", "utendørs basispunkt", "point de base temp. ext.", "dış hava sıcaklığı taban noktası", "basepoint esterno", "vonkajší základný bod")
 MAKE_WORD_TRANSLATION(functioning_mode, "functioning mode", "Funktionsweise", "functiemodus", "Driftläge", "tryb pracy", "driftsmodus", "mode de fonctionnement", "işletme konumu", "modalità di funzionamento", "funkčný režim")
+MAKE_WORD_TRANSLATION(unmixed, "unmixed", "ungemischt", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_WORD_TRANSLATION(unmixedIPM, "unmixed IPM", "ungemischt IPM", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_WORD_TRANSLATION(mixed, "mixed IPM", "gemischt IPM", "", "", "", "", "", "", "", "") // TODO translate
 
 // mixer
 MAKE_WORD_TRANSLATION(stopped, "stopped", "gestoppt", "gestopt", "stoppad", "zatrzymany", "stoppet", "arrêté", "durdu", "fermato", "zastavený")
@@ -529,12 +533,13 @@ MAKE_TRANSLATION(releaseWait, "releasewait", "boiler release wait time", "Wartez
 // energy
 MAKE_TRANSLATION(nrgTotal, "nrgtotal", "total energy", "Energie gesamt", "", "", "całkowita energia", "", "", "", "", "celková energia") // TODO translate
 MAKE_TRANSLATION(nrgHeat, "nrgheat", "energy heating", "Energie Heizen", "", "", "energia na ogrzewanie", "", "", "ısıtma enerjisi", "", "energetické vykurovanie") // TODO translate
-MAKE_TRANSLATION(nrgWw, "nrgww", "energy", "Energie", "", "", "energia na c.w.u.", "", "", "sıcak kullanım suyu enerjisi", "", "energia") // TODO translate
+MAKE_TRANSLATION(nrgWw, "nrgww", "energy", "Energie", "", "", "energia", "", "", "sıcak kullanım suyu enerjisi", "", "energia") // TODO translate
 MAKE_TRANSLATION(nomPower, "nompower", "nominal Power", "Brennerleistung", "", "", "moc nominalna", "", "", "nominal güç", "", "nominálny výkon") // TODO translate
 MAKE_TRANSLATION(meterTotal, "metertotal", "meter total", "Messung gesamt", "", "", "licznik całkowity", "", "", "", "", "meter celkom") // TODO translate
 MAKE_TRANSLATION(meterComp, "metercomp", "meter compressor", "Messung Kompressor", "", "", "licznik sprężarki", "", "", "", "", "meter kompresor") // TODO translate
 MAKE_TRANSLATION(meterEHeat, "metereheat", "meter e-heater", "Messung E-Heizer", "", "", "licznik dogrzewacza", "", "", "", "", "elektrický ohrievač") // TODO translate
 MAKE_TRANSLATION(meterHeat, "meterheat", "meter heating", "Messung Heizen", "", "", "licznik ogrzewania", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(meterWw, "meterww", "meter", "Messung", "", "", "licznik", "", "", "", "", "") // TODO translate
 
 // HIU
 MAKE_TRANSLATION(netFlowTemp, "netflowtemp", "heat network flow temp", "System Vorlauftemperatur", "Netto aanvoertemperatuur", "", "temp. zasilania sieci cieplnej", "", "", "ısıtma şebekesi akış derecesi", "temperatura di mandata della rete di riscaldamento", "teplota prívodu tepelnej siete") // TODO translate
@@ -639,6 +644,7 @@ MAKE_TRANSLATION(roomTemp, "currtemp", "current room temperature", "aktuelle Rau
 MAKE_TRANSLATION(mode, "mode", "mode", "Modus", "Modus", "Läge", "sposób sterowania", "modus", "mode", "mod", "modalità", "režim")
 MAKE_TRANSLATION(modetype, "modetype", "mode type", "Modus Typ", "Type modus", "Typ av läge", "aktualny tryb pracy", "modusrype", "type mode", "mod tipi", "tipo di modalita", "typ režimu")
 MAKE_TRANSLATION(fastheatup, "fastheatup", "fast heatup", "schnelles Aufheizen", "Snel opwarmen", "Snabb Uppvärmning", "szybkie nagrzewanie", "rask oppvarming", "chauffage rapide", "hızlı ısıtma", "riscaldamento rapido", "rýchle zahriatie")
+MAKE_TRANSLATION(heatup, "heatup", "heatup", "Aufheizen", "opwarmen", "Uppvärmning", "nagrzewanie", "oppvarming", "chauffage", "hızlı", "riscaldamento", "rýchle zahriatie")
 MAKE_TRANSLATION(daytemp, "daytemp", "day temperature", "Tagestemperatur", "temperatuur dag", "Dagstemperatur", "temperatura w dzień", "dagtemperatur", "température jour", "gündüz sıcaklığı", "temperatura giornaliera", "denná teplota")
 MAKE_TRANSLATION(daylowtemp, "daytemp2", "day temperature T2", "Tagestemperatur T2", "Temperatuur dag T2", "Dagstemperatur T2", "temperatura w dzień T2", "dagtemperatur T2", "température jour T2", "gündüz sıcaklığı T2", "temperatura giornaliera T2", "denná teplota T2")
 MAKE_TRANSLATION(daymidtemp, "daytemp3", "day temperature T3", "Tagestemperatur T3", "Temperatuur dag T3", "Dagstemperatur T3", "temperatura w dzień T3", "dagtemperatur T3", "température jour T3", "gündüz sıcaklığı T3", "temperatura giornaliera T3", "denná teplota T3")
