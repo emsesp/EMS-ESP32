@@ -69,7 +69,7 @@ void AnalogSensor::reload() {
             // update existing sensors
             bool found = false;
             for (const auto & sensor : settings.analogCustomizations) { //search customlist
-                if (sensor_.gpio() == sensor.gpio) {
+                if (System::is_valid_gpio(sensor.gpio) && sensor_.gpio() == sensor.gpio) {
                     // for output sensors set value to new start-value
                     if ((sensor.type == AnalogType::COUNTER || sensor.type >= AnalogType::DIGITAL_OUT)
                         && (sensor_.type() != sensor.type || sensor_.offset() != sensor.offset || sensor_.factor() != sensor.factor)) {
@@ -94,11 +94,14 @@ void AnalogSensor::reload() {
         for (const auto & sensor : settings.analogCustomizations) {
             bool found = false;
             for (const auto & sensor_ : sensors_) {
-                if (sensor_.gpio() == sensor.gpio) {
+                if (System::is_valid_gpio(sensor.gpio) && sensor_.gpio() == sensor.gpio) {
                     found = true;
                 }
             }
             if (!found) {
+                if (!System::is_valid_gpio(sensor.gpio)) {
+                    continue;
+                }
                 sensors_.emplace_back(sensor.gpio, sensor.name, sensor.offset, sensor.factor, sensor.uom, sensor.type);
                 sensors_.back().ha_registered = false; // this will trigger recreate of the HA config
                 if (sensor.type == AnalogType::COUNTER || sensor.type >= AnalogType::DIGITAL_OUT) {
@@ -790,8 +793,6 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                     sensor.set_value(v);
                     pinMode(sensor.gpio(), OUTPUT);
                     dacWrite(sensor.gpio(), sensor.offset());
-                    publish_sensor(sensor);
-                    return true;
                 } else
 #endif
                     if (v == 0 || v == 1) {

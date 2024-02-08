@@ -105,7 +105,7 @@ class System {
     static void extractSettings(const char * filename, const char * section, JsonObject output);
     static bool saveSettings(const char * filename, const char * section, JsonObject input);
 
-    static bool is_valid_gpio(uint8_t pin);
+    static bool is_valid_gpio(uint8_t pin, bool has_psram = false);
     static bool load_board_profile(std::vector<int8_t> & data, const std::string & board_profile);
 
     static void restart_requested(bool restart_requested) {

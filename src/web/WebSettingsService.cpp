@@ -76,7 +76,8 @@ void WebSettings::read(WebSettings & settings, JsonObject root) {
     root["eth_power"]             = settings.eth_power;
     root["eth_phy_addr"]          = settings.eth_phy_addr;
     root["eth_clock_mode"]        = settings.eth_clock_mode;
-    root["platform"]              = EMSESP_PLATFORM;
+    String platform               = EMSESP_PLATFORM;
+    root["platform"]              = (platform == "ESP32" && EMSESP::system_.PSram()) ? "ESP32R" : platform;
 }
 
 // call on initialization and also when settings are updated via web or console
@@ -88,27 +89,39 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     // load default GPIO configuration based on board profile
     std::vector<int8_t> data; //  // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
     settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
+    // for -D compile setting store it in NVS
     if ((String)EMSESP_DEFAULT_BOARD_PROFILE != "default" && EMSESP::nvs_.getString("boot") == "") {
         EMSESP::nvs_.putString("boot", (const char *)EMSESP_DEFAULT_BOARD_PROFILE);
     }
-    /*
-#if CONFIG_IDF_TARGET_ESP32C3
-    settings.board_profile = root["board_profile"] | "C3MINI";
-#elif CONFIG_IDF_TARGET_ESP32S2
-    settings.board_profile = root["board_profile"] | "S2MINI";
-#elif CONFIG_IDF_TARGET_ESP32S3
-    // settings.board_profile = root["board_profile"] | "S3MINI";
-    settings.board_profile = root["board_profile"] | "S32S3"; // BBQKees Gateway S3
-#elif CONFIG_IDF_TARGET_ESP32
-    settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
-#endif
-*/
+
+    bool psram = ESP.getPsramSize() > 0; // System::PSram() is initializd later
+    if (System::load_board_profile(data, settings.board_profile.c_str())) {
+        if (settings.board_profile == "CUSTOM") { //read pins, fallback to S32
+            data[0] = root["led_gpio"] | 2;
+            data[1] = root["dallas_gpio"] | 18;
+            data[2] = root["rx_gpio"] | 23;
+            data[3] = root["tx_gpio"] | 5;
+            data[4] = root["pbutton_gpio"] | 0;
+            data[5] = root["phy_type"] | PHY_type::PHY_TYPE_NONE;
+            data[6] = root["eth_power"] | 0;
+            data[7] = root["eth_phy_addr"] | 0;
+            data[8] = root["eth_clock_mode"] | 0;
+        }
+        // check valid pins in this board profile
+        if (!System::is_valid_gpio(data[0], psram) || !System::is_valid_gpio(data[1], psram) || !System::is_valid_gpio(data[2], psram)
+            || !System::is_valid_gpio(data[3], psram) || !System::is_valid_gpio(data[4], psram) || !System::is_valid_gpio(data[6], psram)) {
+            settings.board_profile = ""; // reset to factory default
+        }
+    }
+    // load the profile
     if (!System::load_board_profile(data, settings.board_profile.c_str())) {
         // unknown, check for NVS or scan for ethernet, use default E32/E32V2/S32
         settings.board_profile = EMSESP::nvs_.getString("boot");
         if (!System::load_board_profile(data, settings.board_profile.c_str())) {
-#if CONFIG_IDF_TARGET_ESP32 && !defined(EMSESP_STANDALONE)
-            if (settings.board_profile == "") { // empty: new test
+#if defined(EMSESP_STANDALONE)
+            settings.board_profile = "S32";
+#elif CONFIG_IDF_TARGET_ESP32
+            if (settings.board_profile == "" && !psram) { // empty: new test for E32
 #if ESP_ARDUINO_VERSION_MAJOR < 3
                 if (ETH.begin(1, 16, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_IN)) {
 #else
@@ -118,7 +131,7 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
                 } else {
                     EMSESP::nvs_.putString("boot", "Test");
                 }
-            } else if (settings.board_profile == "Test") {
+            } else if (settings.board_profile == "Test" || psram) { // test E32V2
 #if ESP_ARDUINO_VERSION_MAJOR < 3
                 if (ETH.begin(0, 15, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_OUT)) {
 #else
@@ -132,39 +145,58 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
                 EMSESP::nvs_.putString("boot", "S32");
             }
             ESP.restart();
+#elif CONFIG_IDF_TARGET_ESP32C3
+            settings.board_profile = "C3MINI";
+#elif CONFIG_IDF_TARGET_ESP32S2
+            settings.board_profile = "S2MINI";
+#elif CONFIG_IDF_TARGET_ESP32S3
+            settings.board_profile = "S32S3"; // BBQKees Gateway S3
 #else
             settings.board_profile = "S32";
-            System::load_board_profile(data, settings.board_profile.c_str());
 #endif
+            System::load_board_profile(data, settings.board_profile.c_str());
         }
         EMSESP::logger().info("No board profile found. Re-setting to %s", settings.board_profile.c_str());
     } else {
         EMSESP::logger().info("Loading board profile %s", settings.board_profile.c_str());
     }
 
-    uint8_t default_led_gpio       = data[0];
-    uint8_t default_dallas_gpio    = data[1];
-    uint8_t default_rx_gpio        = data[2];
-    uint8_t default_tx_gpio        = data[3];
-    uint8_t default_pbutton_gpio   = data[4];
-    uint8_t default_phy_type       = data[5];
-    uint8_t default_eth_power      = data[6];
-    uint8_t default_eth_phy_addr   = data[7];
-    uint8_t default_eth_clock_mode = data[8];
-
     int prev;
     reset_flags();
+
+    // pins
+    prev              = settings.led_gpio;
+    settings.led_gpio = data[0];
+    check_flag(prev, settings.led_gpio, ChangeFlags::LED);
+    prev                 = settings.dallas_gpio;
+    settings.dallas_gpio = data[1];
+    check_flag(prev, settings.dallas_gpio, ChangeFlags::SENSOR);
+    prev             = settings.rx_gpio;
+    settings.rx_gpio = data[2];
+    check_flag(prev, settings.rx_gpio, ChangeFlags::RESTART);
+    prev             = settings.tx_gpio;
+    settings.tx_gpio = data[3];
+    check_flag(prev, settings.tx_gpio, ChangeFlags::RESTART);
+    prev                  = settings.pbutton_gpio;
+    settings.pbutton_gpio = data[4];
+    check_flag(prev, settings.pbutton_gpio, ChangeFlags::BUTTON);
+    prev              = settings.phy_type;
+    settings.phy_type = data[5];
+    check_flag(prev, settings.phy_type, ChangeFlags::RESTART);
+    prev               = settings.eth_power;
+    settings.eth_power = data[6];
+    check_flag(prev, settings.eth_power, ChangeFlags::RESTART);
+    prev                  = settings.eth_phy_addr;
+    settings.eth_phy_addr = data[7];
+    check_flag(prev, settings.eth_phy_addr, ChangeFlags::RESTART);
+    prev                    = settings.eth_clock_mode;
+    settings.eth_clock_mode = data[8];
+    check_flag(prev, settings.eth_clock_mode, ChangeFlags::RESTART);
 
     // tx_mode, rx and tx pins
     prev             = settings.tx_mode;
     settings.tx_mode = root["tx_mode"] | EMSESP_DEFAULT_TX_MODE;
     check_flag(prev, settings.tx_mode, ChangeFlags::UART);
-    prev             = settings.rx_gpio;
-    settings.rx_gpio = root["rx_gpio"] | default_rx_gpio;
-    check_flag(prev, settings.rx_gpio, ChangeFlags::RESTART);
-    prev             = settings.tx_gpio;
-    settings.tx_gpio = root["tx_gpio"] | default_tx_gpio;
-    check_flag(prev, settings.tx_gpio, ChangeFlags::RESTART);
 
     // syslog
     prev                    = settings.syslog_enabled;
@@ -188,15 +220,7 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     }
 #endif
 
-    // button
-    prev                  = settings.pbutton_gpio;
-    settings.pbutton_gpio = root["pbutton_gpio"] | default_pbutton_gpio;
-    check_flag(prev, settings.pbutton_gpio, ChangeFlags::BUTTON);
-
     // temperaturesensor
-    prev                 = settings.dallas_gpio;
-    settings.dallas_gpio = root["dallas_gpio"] | default_dallas_gpio;
-    check_flag(prev, settings.dallas_gpio, ChangeFlags::SENSOR);
     prev                     = settings.dallas_parasite;
     settings.dallas_parasite = root["dallas_parasite"] | EMSESP_DEFAULT_DALLAS_PARASITE;
     check_flag(prev, settings.dallas_parasite, ChangeFlags::SENSOR);
@@ -216,9 +240,6 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     check_flag(prev, settings.shower_alert_coldshot, ChangeFlags::SHOWER);
 
     // led
-    prev              = settings.led_gpio;
-    settings.led_gpio = root["led_gpio"] | default_led_gpio;
-    check_flag(prev, settings.led_gpio, ChangeFlags::LED);
     prev              = settings.hide_led;
     settings.hide_led = root["hide_led"] | EMSESP_DEFAULT_HIDE_LED;
     check_flag(prev, settings.hide_led, ChangeFlags::LED);
@@ -228,19 +249,6 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     settings.analog_enabled = root["analog_enabled"] | EMSESP_DEFAULT_ANALOG_ENABLED;
     check_flag(prev, settings.analog_enabled, ChangeFlags::ADC);
 
-    // ethernet
-    prev              = settings.phy_type;
-    settings.phy_type = root["phy_type"] | default_phy_type;
-    check_flag(prev, settings.phy_type, ChangeFlags::RESTART);
-    prev               = settings.eth_power;
-    settings.eth_power = root["eth_power"] | default_eth_power;
-    check_flag(prev, settings.eth_power, ChangeFlags::RESTART);
-    prev                  = settings.eth_phy_addr;
-    settings.eth_phy_addr = root["eth_phy_addr"] | default_eth_phy_addr;
-    check_flag(prev, settings.eth_phy_addr, ChangeFlags::RESTART);
-    prev                    = settings.eth_clock_mode;
-    settings.eth_clock_mode = root["eth_clock_mode"] | default_eth_clock_mode;
-    check_flag(prev, settings.eth_clock_mode, ChangeFlags::RESTART);
 
     //
     // these need system restarts first before settings are activated...

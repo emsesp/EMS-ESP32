@@ -22,6 +22,26 @@ export const GPIO_VALIDATOR = {
   }
 };
 
+export const GPIO_VALIDATORR = {
+  validator(rule: InternalRuleItem, value: number, callback: (error?: string) => void) {
+    if (
+      value &&
+      (value === 1 ||
+        (value >= 6 && value <= 11) ||
+        (value >= 16 && value <= 17) ||
+        value === 20 ||
+        value === 24 ||
+        (value >= 28 && value <= 31) ||
+        value > 40 ||
+        value < 0)
+    ) {
+      callback('Must be an valid GPIO port');
+    } else {
+      callback();
+    }
+  }
+};
+
 export const GPIO_VALIDATORC3 = {
   validator(rule: InternalRuleItem, value: number, callback: (error?: string) => void) {
     if (value && ((value >= 11 && value <= 19) || value > 21 || value < 0)) {
@@ -68,6 +88,14 @@ export const createSettingsValidator = (settings: Settings) =>
         pbutton_gpio: [{ required: true, message: 'Button GPIO is required' }, GPIO_VALIDATOR],
         tx_gpio: [{ required: true, message: 'Tx GPIO is required' }, GPIO_VALIDATOR],
         rx_gpio: [{ required: true, message: 'Rx GPIO is required' }, GPIO_VALIDATOR]
+      }),
+    ...(settings.board_profile === 'CUSTOM' &&
+      settings.platform === 'ESP32PSRAM' && {
+        led_gpio: [{ required: true, message: 'LED GPIO is required' }, GPIO_VALIDATORR],
+        dallas_gpio: [{ required: true, message: 'GPIO is required' }, GPIO_VALIDATORR],
+        pbutton_gpio: [{ required: true, message: 'Button GPIO is required' }, GPIO_VALIDATORR],
+        tx_gpio: [{ required: true, message: 'Tx GPIO is required' }, GPIO_VALIDATORR],
+        rx_gpio: [{ required: true, message: 'Rx GPIO is required' }, GPIO_VALIDATORR]
       }),
     ...(settings.board_profile === 'CUSTOM' &&
       settings.platform === 'ESP32-C3' && {
@@ -193,7 +221,15 @@ export const analogSensorItemValidation = (sensors: AnalogSensor[], creating: bo
     n: [{ required: true, message: 'Name is required' }],
     g: [
       { required: true, message: 'GPIO is required' },
-      platform === 'ESP32-S3' ? GPIO_VALIDATORS3 : platform === 'ESP32-C3' ? GPIO_VALIDATORC3 : GPIO_VALIDATOR,
+      platform === 'ESP32-S3'
+        ? GPIO_VALIDATORS3
+        : platform === 'ESP32-S2'
+          ? GPIO_VALIDATORS2
+          : platform === 'ESP32-C3'
+            ? GPIO_VALIDATORC3
+            : platform === 'ESP32R'
+              ? GPIO_VALIDATORR
+              : GPIO_VALIDATOR,
       ...(creating ? [isGPIOUniqueValidator(sensors)] : [])
     ]
   });
