@@ -78,7 +78,7 @@ typedef struct {
         };
 } lwip_event_packet_t;
 
-static xQueueHandle _async_queue;
+static QueueHandle_t _async_queue;
 static TaskHandle_t _async_service_task_handle = NULL;
 
 
