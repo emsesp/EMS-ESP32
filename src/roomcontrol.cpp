@@ -182,14 +182,19 @@ void Roomctrl::version(uint8_t addr, uint8_t dst) {
     data[4] = type_; // set RC20 id 113, Ver 02.01 or Junkers FB10 id 109, Ver 16.05, RC100H id 200 ver 40.04
     data[5] = type_ == RC20 ? 2 : type_ == FB10 ? 16 : type_ == RC200 ? 41 : 40;
     data[6] = type_ == RC20 ? 1 : type_ == FB10 ? 5 : type_ == RC200 ? 8 : 4;
-    if (type_ != RC200) {
+    if (type_ == RC20 || type_ == FB10) {
         data[7] = EMSbus::calculate_crc(data, 7); // apppend CRC
         EMSuart::transmit(data, 8);
         return;
     }
+    data[7] = 0;
+    data[8] = 0xFF;
+    if (type_ == RC100H) {
+        data[9] = EMSbus::calculate_crc(data, 9); // apppend CRC
+        EMSuart::transmit(data, 10);
+        return;
+    }
     // RC200 adds some extra bytes
-    data[7]  = 0;
-    data[8]  = 0xFF;
     data[9]  = 0;
     data[10] = 0;
     data[11] = 0;
@@ -242,7 +247,7 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[2] = 0xFF;
         data[3] = 0;
         data[4] = 0;
-        data[5] = 0x23; // count with hc?
+        data[5] = 0x23; //  fixed for all hc
         data[6] = (uint8_t)(remotetemp_[hc] >> 8);
         data[7] = (uint8_t)(remotetemp_[hc] & 0xFF);
         data[8] = EMSbus::calculate_crc(data, 8); // apppend CRC

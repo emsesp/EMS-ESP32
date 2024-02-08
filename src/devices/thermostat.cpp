@@ -715,6 +715,11 @@ void Thermostat::process_RC20Remote(std::shared_ptr<const Telegram> telegram) {
 // e.g. "38 10 FF 00 03 2B 00 D1 08 2A 01"
 void Thermostat::process_RemoteTemp(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, tempsensor1_, 0);
+    uint8_t hc = telegram->type_id - 0x42B;
+    if (Roomctrl::is_remote(hc)) {
+        toggle_fetch(0x273 + hc, false);
+        toggle_fetch(0xA6A + hc, false);
+    }
 }
 
 // 0x47B, ff - for reading humidity from the RC100H remote thermostat (0x38, 0x39, ..)
@@ -1241,6 +1246,7 @@ void Thermostat::process_RC300Floordry(std::shared_ptr<const Telegram> telegram)
 }
 
 // 0x291 ff.  HP mode
+// thermostat(0x10) -W-> Me(0x0B), HPMode(0x0291), data: 01 00 00 03 FF 00
 void Thermostat::process_HPMode(std::shared_ptr<const Telegram> telegram) {
     std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
     if (hc == nullptr) {
@@ -4639,7 +4645,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode3), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
         register_device_value(tag, &hc->modetype, DeviceValueType::ENUM, FL_(enum_modetype3), FL_(modetype), DeviceValueUOM::NONE);
         register_device_value(
-            tag, &hc->daytemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(daytemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daytemp), 5, 30);
+            tag, &hc->daytemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(daytemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daytemp), 10, 30);
         register_device_value(tag,
                               &hc->nighttemp,
                               DeviceValueType::UINT,
@@ -4647,7 +4653,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               FL_(nighttemp),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_nighttemp),
-                              5,
+                              10,
                               30);
         register_device_value(tag, &hc->designtemp, DeviceValueType::UINT, FL_(designtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_designtemp), 30, 90);
         register_device_value(tag,
