@@ -186,7 +186,7 @@ void WebCustomizationService::device_entities(AsyncWebServerRequest * request) {
     if (request->hasParam(F_(id))) {
         id = Helpers::atoint(request->getParam(F_(id))->value().c_str()); // get id from url
 
-        auto * response = new MsgpackAsyncJsonResponse(true);
+        auto * response = new AsyncJsonResponse(true, true); // array and msgpack
 
         // while (!response) {
         //     delete response;

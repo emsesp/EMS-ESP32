@@ -178,7 +178,7 @@ void WebDataService::device_data(AsyncWebServerRequest * request) {
     if (request->hasParam(F_(id))) {
         id = Helpers::atoint(request->getParam(F_(id))->value().c_str()); // get id from url
 
-        auto * response = new MsgpackAsyncJsonResponse(false);
+        auto * response = new AsyncJsonResponse(false, true); // use msgPack
 
         // check size
         // while (!response) {

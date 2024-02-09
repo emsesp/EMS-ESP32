@@ -35,57 +35,39 @@ class HttpEndpoint {
         , _statefulService(statefulService) {
         // Create the GET and POST endpoints
         POSThandler = new AsyncCallbackJsonWebHandler(servicePath,
-                                                      securityManager->wrapCallback(
-                                                          [this](AsyncWebServerRequest * request, JsonVariant json) {
-                                                              //
-                                                              if (request->method() == HTTP_GET) {
-                                                                  fetchSettings(request);
-                                                              } else if (request->method() == HTTP_POST) {
-                                                                  updateSettings(request, json);
-                                                              } else {
-                                                                  request->send(405, "application/json", "{\"message\":\"Method Not Allowed\"}");
-                                                              }
-                                                          },
-                                                          authenticationPredicate));
+                                                      securityManager->wrapCallback([this](AsyncWebServerRequest * request,
+                                                                                           JsonVariant             json) { handleRequest(request, json); },
+                                                                                    authenticationPredicate));
         server->addHandler(POSThandler);
     }
 
   protected:
     // for POST
-    void updateSettings(AsyncWebServerRequest * request, JsonVariant json) {
-        if (!json.is<JsonObject>()) {
-            request->send(400);
-            return;
+    void handleRequest(AsyncWebServerRequest * request, JsonVariant json) {
+        if (request->method() == HTTP_POST) {
+            // Handle POST
+            if (!json.is<JsonObject>()) {
+                request->send(400);
+                return;
+            }
+
+            StateUpdateResult outcome = _statefulService->updateWithoutPropagation(json.as<JsonObject>(), _stateUpdater);
+
+            if (outcome == StateUpdateResult::ERROR) {
+                request->send(400); // error
+                return;
+            } else if (outcome == StateUpdateResult::CHANGED_RESTART) {
+                // TODO check if works
+                request->send(205); // reboot required
+                return;
+            } else if (outcome == StateUpdateResult::CHANGED) {
+                request->onDisconnect([this]() { _statefulService->callUpdateHandlers(HTTP_ENDPOINT_ORIGIN_ID); });
+            }
         }
 
-        JsonObject        jsonObject = json.as<JsonObject>();
-        StateUpdateResult outcome    = _statefulService->updateWithoutPropagation(jsonObject, _stateUpdater);
-
-        if (outcome == StateUpdateResult::ERROR) {
-            request->send(400);
-            return;
-        } else if ((outcome == StateUpdateResult::CHANGED) || (outcome == StateUpdateResult::CHANGED_RESTART)) {
-            request->onDisconnect([this]() { _statefulService->callUpdateHandlers(HTTP_ENDPOINT_ORIGIN_ID); });
-        }
-
-        AsyncJsonResponse * response = new AsyncJsonResponse(false);
-        jsonObject                   = response->getRoot().to<JsonObject>();
-        _statefulService->read(jsonObject, _stateReader);
-
-        if (outcome == StateUpdateResult::CHANGED_RESTART) {
-            response->setCode(205); // reboot required
-        }
-
-        response->setLength();
-        request->send(response);
-    }
-
-    // for GET
-    void fetchSettings(AsyncWebServerRequest * request) {
         AsyncJsonResponse * response   = new AsyncJsonResponse(false);
         JsonObject          jsonObject = response->getRoot().to<JsonObject>();
         _statefulService->read(jsonObject, _stateReader);
-
         response->setLength();
         request->send(response);
     }

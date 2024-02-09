@@ -1,39 +1,8 @@
 // AsyncJson.h
-/*
-  Async Response to use with ArduinoJson and AsyncWebServer
-  Written by Andrew Melvin (SticilFace) with help from me-no-dev and BBlanchon.
 
-  Example of callback in use
-
-   server.on("/json", HTTP_ANY, [](AsyncWebServerRequest * request) {
-
-    AsyncJsonResponse * response = new AsyncJsonResponse();
-    JsonObject& root = response->getRoot();
-    root["key1"] = "key number one";
-    JsonObject& nested = root.createNestedObject("nested");
-    nested["key1"] = "key number one";
-
-    response->setLength();
-    request->send(response);
-  });
-
-  --------------------
-
-  Async Request to use with ArduinoJson and AsyncWebServer
-  Written by Arsène von Wyss (avonwyss)
-
-  Example
-
-  AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler("/rest/endpoint");
-  handler->onRequest([](AsyncWebServerRequest *request, JsonVariant &json) {
-    JsonObject& jsonObj = json.as<JsonObject>();
-    // ...
-  });
-  server.addHandler(handler);
-
-*/
 #ifndef ASYNC_JSON_H_
 #define ASYNC_JSON_H_
+
 #include <ArduinoJson.h>
 #include <ESPAsyncWebServer.h>
 #include <Print.h>
@@ -72,60 +41,18 @@ class ChunkPrint : public Print {
     }
 };
 
-// added by Proddy
-class MsgpackAsyncJsonResponse : public AsyncAbstractResponse {
-  protected:
-    JsonDocument _jsonBuffer;
-    JsonVariant  _root;
-    bool         _isValid;
-
-  public:
-    MsgpackAsyncJsonResponse(bool isArray = false)
-        : _isValid{false} {
-        _code        = 200;
-        _contentType = JSON_MIMETYPE;
-        if (isArray)
-            _root = _jsonBuffer.to<JsonArray>();
-        else
-            _root = _jsonBuffer.add<JsonObject>();
-    }
-
-    ~MsgpackAsyncJsonResponse() {
-    }
-    JsonVariant getRoot() {
-        return _root;
-    }
-    bool _sourceValid() const {
-        return _isValid;
-    }
-    size_t setLength() {
-        _contentLength = measureMsgPack(_root);
-        if (_contentLength) {
-            _isValid = true;
-        }
-        return _contentLength;
-    }
-
-    size_t getSize() {
-        return _jsonBuffer.size();
-    }
-
-    size_t _fillBuffer(uint8_t * data, size_t len) {
-        ChunkPrint dest(data, _sentLength, len);
-        serializeMsgPack(_root, dest);
-        return len;
-    }
-};
-
+// added msgPack by Proddy
 class AsyncJsonResponse : public AsyncAbstractResponse {
   protected:
     JsonDocument _jsonBuffer;
     JsonVariant  _root;
     bool         _isValid;
+    bool         _msgPack;
 
   public:
-    AsyncJsonResponse(bool isArray = false)
-        : _isValid{false} {
+    AsyncJsonResponse(bool isArray = false, bool msgPack = false)
+        : _isValid{false}
+        , _msgPack{msgPack} {
         _code        = 200;
         _contentType = JSON_MIMETYPE;
         if (isArray)
@@ -143,7 +70,7 @@ class AsyncJsonResponse : public AsyncAbstractResponse {
         return _isValid;
     }
     size_t setLength() {
-        _contentLength = measureJson(_root);
+        _contentLength = _msgPack ? measureMsgPack(_root) : measureJson(_root);
 
         if (_contentLength) {
             _isValid = true;
@@ -157,7 +84,7 @@ class AsyncJsonResponse : public AsyncAbstractResponse {
 
     size_t _fillBuffer(uint8_t * data, size_t len) {
         ChunkPrint dest(data, _sentLength, len);
-        serializeJson(_root, dest);
+        _msgPack ? serializeMsgPack(_root, dest) : serializeJson(_root, dest);
         return len;
     }
 };
