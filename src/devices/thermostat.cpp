@@ -1839,7 +1839,9 @@ bool Thermostat::set_remotetemp(const char * value, const int8_t id) {
     } else if ((model() == EMSdevice::EMS_DEVICE_FLAG_BC400) || model() == EMSdevice::EMS_DEVICE_FLAG_RC300) {
         if (hc->control == 1) {
             Roomctrl::set_remotetemp(Roomctrl::RC200, hc->hc(), hc->remotetemp); // RC200
-        } else {
+        } else if (hc->control == 0) {
+            Roomctrl::set_remotetemp(Roomctrl::SENSOR, hc->hc(), hc->remotetemp); // RF Sensor
+        } else { // RC100(2) and RC100H(3)
             Roomctrl::set_remotetemp(Roomctrl::RC100H, hc->hc(), hc->remotetemp); // RC100H
         }
     }

@@ -410,17 +410,17 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueNumOp::DV_NUMOP_DIV100,
                               FL_(meterEHeat),
                               DeviceValueUOM::KWH);
-        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
-                              &meterWw_,
-                              DeviceValueType::ULONG,
-                              DeviceValueNumOp::DV_NUMOP_DIV100,
-                              FL_(meterWw),
-                              DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &meterHeat_,
                               DeviceValueType::ULONG,
                               DeviceValueNumOp::DV_NUMOP_DIV100,
                               FL_(meterHeat),
+                              DeviceValueUOM::KWH);
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
+                              &meterWw_,
+                              DeviceValueType::ULONG,
+                              DeviceValueNumOp::DV_NUMOP_DIV100,
+                              FL_(meterWw),
                               DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &upTimeTotal_,

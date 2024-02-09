@@ -114,7 +114,7 @@ void Roomctrl::send(uint8_t addr) {
         } else if (type_ == FB10) {
             rc_time_[hc] = uuid::get_uptime();
             temperature(addr, 0x10, hc); // send to master-thermostat (https://github.com/emsesp/EMS-ESP32/issues/336)
-        } else {                         // type==RC20
+        } else {                         // type==RC20 or SENSOR
             rc_time_[hc] = uuid::get_uptime();
             temperature(addr, 0x00, hc); // send to all
         }
@@ -131,8 +131,11 @@ void Roomctrl::send(uint8_t addr) {
  * check if there is a message for the remote room controller
  */
 void Roomctrl::check(uint8_t addr, const uint8_t * data, const uint8_t length) {
-    uint8_t hc = get_hc(addr);
+    if (type_ == SENSOR) {
+        return;
+    }
 
+    uint8_t hc = get_hc(addr);
     // check address, reply only on addresses 0x18..0x1B
     if (hc >= HCS || length < 5) {
         return;
