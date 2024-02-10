@@ -10,8 +10,6 @@
 
 #define MAX_AUTHENTICATION_SIZE 256
 
-#if FT_ENABLED(FT_SECURITY)
-
 class AuthenticationService {
   public:
     AuthenticationService(AsyncWebServer * server, SecurityManager * securityManager);
@@ -24,7 +22,5 @@ class AuthenticationService {
     void signIn(AsyncWebServerRequest * request, JsonVariant json);
     void verifyAuthorization(AsyncWebServerRequest * request);
 };
-
-#endif
 
 #endif
