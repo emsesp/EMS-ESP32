@@ -34,55 +34,39 @@ class HttpEndpoint {
         , _stateUpdater(stateUpdater)
         , _statefulService(statefulService) {
         // Create the GET and POST endpoints
-        // We can't use HTTP_ANY and process one a single endpoint due to the way the ESPAsyncWebServer library works
-        // Could also use server->on() but this is more efficient
-
-        // create the GET
-        GEThandler = new AsyncCallbackWebHandler();
-        GEThandler->setUri(servicePath);
-        GEThandler->setMethod(HTTP_GET);
-        GEThandler->onRequest(securityManager->wrapRequest(std::bind(&HttpEndpoint::fetchSettings, this, _1), authenticationPredicate));
-        server->addHandler(GEThandler);
-
-        // create the POST
-        POSThandler =
-            new AsyncCallbackJsonWebHandler(servicePath,
-                                            securityManager->wrapCallback(std::bind(&HttpEndpoint::updateSettings, this, _1, _2), authenticationPredicate));
-        POSThandler->setMethod(HTTP_POST);
+        POSThandler = new AsyncCallbackJsonWebHandler(servicePath,
+                                                      securityManager->wrapCallback([this](AsyncWebServerRequest * request,
+                                                                                           JsonVariant             json) { handleRequest(request, json); },
+                                                                                    authenticationPredicate));
         server->addHandler(POSThandler);
     }
 
   protected:
     // for POST
-    void updateSettings(AsyncWebServerRequest * request, JsonVariant json) {
-        if (!json.is<JsonObject>()) {
-            request->send(400);
-            return;
-        }
-        JsonObject        jsonObject = json.as<JsonObject>();
-        StateUpdateResult outcome    = _statefulService->updateWithoutPropagation(jsonObject, _stateUpdater);
-        if (outcome == StateUpdateResult::ERROR) {
-            request->send(400);
-            return;
-        } else if ((outcome == StateUpdateResult::CHANGED) || (outcome == StateUpdateResult::CHANGED_RESTART)) {
-            request->onDisconnect([this]() { _statefulService->callUpdateHandlers(HTTP_ENDPOINT_ORIGIN_ID); });
-        }
-        AsyncJsonResponse * response = new AsyncJsonResponse(false);
-        jsonObject                   = response->getRoot().to<JsonObject>();
-        _statefulService->read(jsonObject, _stateReader);
-        if (outcome == StateUpdateResult::CHANGED_RESTART) {
-            response->setCode(205); // reboot required
-        }
-        response->setLength();
-        request->send(response);
-    }
+    void handleRequest(AsyncWebServerRequest * request, JsonVariant json) {
+        if (request->method() == HTTP_POST) {
+            // Handle POST
+            if (!json.is<JsonObject>()) {
+                request->send(400);
+                return;
+            }
 
-    // for GET
-    void fetchSettings(AsyncWebServerRequest * request) {
+            StateUpdateResult outcome = _statefulService->updateWithoutPropagation(json.as<JsonObject>(), _stateUpdater);
+
+            if (outcome == StateUpdateResult::ERROR) {
+                request->send(400); // error
+                return;
+            } else if (outcome == StateUpdateResult::CHANGED_RESTART) {
+                request->send(205); // reboot required
+                return;
+            } else if (outcome == StateUpdateResult::CHANGED) {
+                request->onDisconnect([this]() { _statefulService->callUpdateHandlers(HTTP_ENDPOINT_ORIGIN_ID); });
+            }
+        }
+
         AsyncJsonResponse * response   = new AsyncJsonResponse(false);
         JsonObject          jsonObject = response->getRoot().to<JsonObject>();
         _statefulService->read(jsonObject, _stateReader);
-
         response->setLength();
         request->send(response);
     }

@@ -32,7 +32,7 @@ class CustomEntityItem {
     uint16_t    type_id;
     uint8_t     offset;
     int8_t      value_type;
-    uint8_t     uom;
+    uint8_t     uom; // DeviceValueUOM
     std::string name;
     double      factor;
     bool        writeable;

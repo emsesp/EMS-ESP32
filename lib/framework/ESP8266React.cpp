@@ -3,8 +3,7 @@
 #include <WWWData.h>
 
 ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
-    : _featureService(server)
-    , _securitySettingsService(server, fs)
+    : _securitySettingsService(server, fs)
     , _networkSettingsService(server, fs, &_securitySettingsService)
     , _wifiScanner(server, &_securitySettingsService)
     , _networkStatus(server, &_securitySettingsService)
@@ -20,12 +19,12 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
     , _restartService(server, &_securitySettingsService)
     , _factoryResetService(server, fs, &_securitySettingsService)
     , _systemStatus(server, &_securitySettingsService) {
-    // Serve static resources from PROGMEM
+    // Serve static resources
     WWWData::registerRoutes([server, this](const String & uri, const String & contentType, const uint8_t * content, size_t len) {
         ArRequestHandlerFunction requestHandler = [contentType, content, len](AsyncWebServerRequest * request) {
             AsyncWebServerResponse * response = request->beginResponse_P(200, contentType, content, len);
             response->addHeader("Content-Encoding", "gzip");
-            // response->addHeader("Cache-Control", "public, immutable, max-age=31536000");
+            response->addHeader("Cache-Control", "public, immutable, max-age=31536000");
             // response->addHeader("Content-Encoding", "br"); // only works over HTTPS
             request->send(response);
         };

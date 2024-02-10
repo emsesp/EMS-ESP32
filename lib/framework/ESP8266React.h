@@ -6,7 +6,6 @@
 #include <AsyncTCP.h>
 #include <WiFi.h>
 
-#include <FeaturesService.h>
 #include <APSettingsService.h>
 #include <APStatus.h>
 #include <AuthenticationService.h>
@@ -72,7 +71,6 @@ class ESP8266React {
     }
 
   private:
-    FeaturesService         _featureService;
     SecuritySettingsService _securitySettingsService;
     NetworkSettingsService  _networkSettingsService;
     WiFiScanner             _wifiScanner;

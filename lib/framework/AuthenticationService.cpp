@@ -2,8 +2,6 @@
 
 using namespace std::placeholders; // for `_1` etc
 
-#if FT_ENABLED(FT_SECURITY)
-
 AuthenticationService::AuthenticationService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager)
     , _signInHandler(SIGN_IN_PATH, std::bind(&AuthenticationService::signIn, this, _1, _2)) {
@@ -43,5 +41,3 @@ void AuthenticationService::signIn(AsyncWebServerRequest * request, JsonVariant 
     AsyncWebServerResponse * response = request->beginResponse(401);
     request->send(response);
 }
-
-#endif

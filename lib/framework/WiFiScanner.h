@@ -11,8 +11,6 @@
 #define SCAN_NETWORKS_SERVICE_PATH "/rest/scanNetworks"
 #define LIST_NETWORKS_SERVICE_PATH "/rest/listNetworks"
 
-// #define MAX_WIFI_SCANNER_SIZE 1024
-
 class WiFiScanner {
   public:
     WiFiScanner(AsyncWebServer * server, SecurityManager * securityManager);
