@@ -909,9 +909,6 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     doc["uniq_id"] = uniq_id;
     doc["obj_id"]  = uniq_id; // same as unique_id
 
-    const char * ic_ha  = "ic";           // icon - only set this if there is no device class
-    const char * uom_ha = "unit_of_meas"; // unit of measure
-
     char sample_val[30] = "0"; // sample, correct(!) entity value, used only to prevent warning/error in HA if real value is not published yet
 
     // we add the command topic parameter for commands
@@ -970,10 +967,10 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         case DeviceValueUOM::DEGREES:
         case DeviceValueUOM::DEGREES_R:
         case DeviceValueUOM::K:
-            doc[ic_ha] = F_(icondegrees);
+            doc["ic"] = F_(icondegrees);
             break;
         case DeviceValueUOM::PERCENT:
-            doc[ic_ha] = F_(iconpercent);
+            doc["ic"] = F_(iconpercent);
             break;
         default:
             break;
@@ -1027,9 +1024,35 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             doc["pl_off"] = Helpers::render_boolean(result, false);
             snprintf(sample_val, sizeof(sample_val), "'%s'", Helpers::render_boolean(result, false));
         }
-    } else {
-        // always set the uom, using the standards except for hours/minutes/seconds
-        // using HA specific codes from https://github.com/home-assistant/core/blob/dev/homeassistant/const.py
+    }
+
+    doc["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else " + sample_val + "}}";
+
+    // Add the state class, device class and sometimes the icon. Used only for read-only sensors like Sensor and Binary Sensor
+    if (readonly_sensors) {
+        // first set the catagory for System entities
+        // https://github.com/emsesp/EMS-ESP32/discussions/1459#discussioncomment-7694873
+        if (device_type == EMSdevice::DeviceType::SYSTEM) {
+            doc["ent_cat"] = "diagnostic";
+        }
+
+        add_ha_uom(doc.as<JsonObject>(), type, uom, entity); // add the UoM, device and state class
+    }
+
+    doc["dev"] = dev_json;                                         // add the dev json object to the end
+    add_ha_sections_to_doc(nullptr, stat_t, doc, false, val_cond); // no name, since the "dev" has already been added
+
+    return queue_ha(topic, doc.as<JsonObject>());
+}
+
+void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, const char * entity) {
+    const char * dc_ha  = "dev_cla";      // device class
+    const char * sc_ha  = "stat_cla";     // state class
+    const char * uom_ha = "unit_of_meas"; // unit of measure
+
+    // set icon, except for booleans
+    // using HA specific codes from https://github.com/home-assistant/core/blob/dev/homeassistant/const.py
+    if (type != DeviceValueType::BOOL) {
         if (uom == DeviceValueUOM::HOURS) {
             doc[uom_ha] = "h";
         } else if (uom == DeviceValueUOM::MINUTES) {
@@ -1041,105 +1064,87 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         }
     }
 
-    doc["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else " + sample_val + "}}";
-
-    // Add the state class, device class and sometimes the icon. Used only for read-only sensors Sensor and Binary Sensor
-    if (readonly_sensors) {
-        // first set the catagory for System entities
-        // https://github.com/emsesp/EMS-ESP32/discussions/1459#discussioncomment-7694873
-        if (device_type == EMSdevice::DeviceType::SYSTEM) {
-            doc["ent_cat"] = "diagnostic";
-        }
-
-        const char * dc_ha = "dev_cla";  // device class
-        const char * sc_ha = "stat_cla"; // state class
-
-        switch (uom) {
-        case DeviceValueUOM::DEGREES:
-        case DeviceValueUOM::DEGREES_R:
-        case DeviceValueUOM::K:
-            doc[sc_ha] = F_(measurement);
-            doc[dc_ha] = "temperature"; // no icon needed
-            break;
-        case DeviceValueUOM::PERCENT:
-            doc[sc_ha] = F_(measurement);
-            doc[dc_ha] = "power_factor"; // no icon needed
-            break;
-        case DeviceValueUOM::SECONDS:
-        case DeviceValueUOM::MINUTES:
-        case DeviceValueUOM::HOURS:
-            if (type == DeviceValueType::TIME) {
-                doc[sc_ha] = F_(total_increasing);
-            } else {
-                doc[sc_ha] = F_(measurement);
-            }
-            doc[dc_ha] = "duration"; // https://github.com/emsesp/EMS-ESP32/issues/822
-            break;
-        case DeviceValueUOM::KB:
-            doc[ic_ha] = F_(iconkb);
-            break;
-        case DeviceValueUOM::LMIN:
-            doc[ic_ha] = F_(iconlmin);
-            doc[sc_ha] = F_(measurement);
-            break;
-        case DeviceValueUOM::WH:
-            if (entity == FL_(energyToday)[0]) {
-                doc[sc_ha] = F_(total_increasing);
-            } else {
-                doc[sc_ha] = F_(measurement);
-            }
-            doc[dc_ha] = "energy";
-            break;
-        case DeviceValueUOM::KWH:
+    // set state and device class
+    switch (uom) {
+    case DeviceValueUOM::DEGREES:
+    case DeviceValueUOM::DEGREES_R:
+    case DeviceValueUOM::K:
+        doc[sc_ha] = F_(measurement);
+        doc[dc_ha] = "temperature";
+        break;
+    case DeviceValueUOM::PERCENT:
+        doc[sc_ha] = F_(measurement);
+        doc[dc_ha] = "power_factor";
+        break;
+    case DeviceValueUOM::SECONDS:
+    case DeviceValueUOM::MINUTES:
+    case DeviceValueUOM::HOURS:
+        if (type == DeviceValueType::TIME) {
             doc[sc_ha] = F_(total_increasing);
-            doc[dc_ha] = "energy";
-            break;
-        case DeviceValueUOM::UA:
-            doc[ic_ha] = F_(iconua);
+        } else {
             doc[sc_ha] = F_(measurement);
-            break;
-        case DeviceValueUOM::BAR:
-            doc[sc_ha] = F_(measurement);
-            doc[dc_ha] = "pressure";
-            break;
-        case DeviceValueUOM::W:
-        case DeviceValueUOM::KW:
-            doc[sc_ha] = F_(measurement);
-            doc[dc_ha] = "power";
-            break;
-        case DeviceValueUOM::DBM:
-            doc[sc_ha] = F_(measurement);
-            doc[dc_ha] = "signal_strength";
-            break;
-        case DeviceValueUOM::CONNECTIVITY:
-            doc[sc_ha] = F_(measurement);
-            doc[dc_ha] = "connectivity";
-            break;
-        case DeviceValueUOM::NONE:
-            // for device entities which have numerical values, with no UOM
-            if ((type != DeviceValueType::STRING)
-                && (type == DeviceValueType::INT || type == DeviceValueType::UINT || type == DeviceValueType::SHORT || type == DeviceValueType::USHORT
-                    || type == DeviceValueType::ULONG)) {
-                doc[ic_ha] = F_(iconnum); // set icon
-                // determine if its a measurement or total increasing
-                // most of the values are measurement. for example Tx Reads will increment but can be reset to 0 after a restart
-                // all the starts are increasing, and they are ULONGs
-                if (type == DeviceValueType::ULONG) {
-                    doc[sc_ha] = F_(total_increasing);
-                } else {
-                    doc[sc_ha] = F_(measurement); // default to measurement
-                }
-            }
-            break;
-        default:
-            break;
         }
+        doc[dc_ha] = "duration"; // https://github.com/emsesp/EMS-ESP32/issues/822
+        break;
+    case DeviceValueUOM::KB:
+        doc["ic"] = F_(iconkb);
+        break;
+    case DeviceValueUOM::LMIN:
+        doc["ic"]  = F_(iconlmin);
+        doc[sc_ha] = F_(measurement);
+        break;
+    case DeviceValueUOM::WH:
+        if (entity == FL_(energyToday)[0]) {
+            doc[sc_ha] = F_(total_increasing);
+        } else {
+            doc[sc_ha] = F_(measurement);
+        }
+        doc[dc_ha] = "energy";
+        break;
+    case DeviceValueUOM::KWH:
+        doc[sc_ha] = F_(total_increasing);
+        doc[dc_ha] = "energy";
+        break;
+    case DeviceValueUOM::UA:
+        doc["ic"]  = F_(iconua);
+        doc[sc_ha] = F_(measurement);
+        break;
+    case DeviceValueUOM::BAR:
+        doc[sc_ha] = F_(measurement);
+        doc[dc_ha] = "pressure";
+        break;
+    case DeviceValueUOM::W:
+    case DeviceValueUOM::KW:
+        doc[sc_ha] = F_(measurement);
+        doc[dc_ha] = "power";
+        break;
+    case DeviceValueUOM::DBM:
+        doc[sc_ha] = F_(measurement);
+        doc[dc_ha] = "signal_strength";
+        break;
+    case DeviceValueUOM::CONNECTIVITY:
+        doc[sc_ha] = F_(measurement);
+        doc[dc_ha] = "connectivity";
+        break;
+    case DeviceValueUOM::NONE:
+        // for device entities which have numerical values, with no UOM
+        if ((type != DeviceValueType::STRING)
+            && (type == DeviceValueType::INT || type == DeviceValueType::UINT || type == DeviceValueType::SHORT || type == DeviceValueType::USHORT
+                || type == DeviceValueType::ULONG)) {
+            doc["ic"] = F_(iconnum); // set icon
+            // determine if its a measurement or total increasing
+            // most of the values are measurement. for example Tx Reads will increment but can be reset to 0 after a restart
+            // all the starts are increasing, and they are ULONGs
+            if (type == DeviceValueType::ULONG) {
+                doc[sc_ha] = F_(total_increasing);
+            } else {
+                doc[sc_ha] = F_(measurement); // default to measurement
+            }
+        }
+        break;
+    default:
+        break;
     }
-
-    doc["dev"] = dev_json;                                         // add the dev json object to the end
-    add_ha_sections_to_doc(nullptr, stat_t, doc, false, val_cond); // no name, since the "dev" has already been added
-
-    return queue_ha(topic, doc.as<JsonObject>());
 }
 
 bool Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp, const bool remove, const int16_t min, const uint32_t max) {

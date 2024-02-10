@@ -441,6 +441,8 @@ void WebCustomEntityService::publish(const bool force) {
                 }
             }
 
+            Mqtt::add_ha_uom(config.as<JsonObject>(), entityItem.value_type, entityItem.uom); // add uom
+
             Mqtt::add_ha_sections_to_doc("custom", stat_t, config, !ha_created, val_cond);
 
             ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
