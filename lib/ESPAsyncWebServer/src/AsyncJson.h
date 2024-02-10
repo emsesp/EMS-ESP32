@@ -47,12 +47,12 @@ class AsyncJsonResponse : public AsyncAbstractResponse {
     JsonDocument _jsonBuffer;
     JsonVariant  _root;
     bool         _isValid;
-    bool         _msgPack;
+    bool         _isMsgPack;
 
   public:
-    AsyncJsonResponse(bool isArray = false, bool msgPack = false)
+    AsyncJsonResponse(bool isArray = false, bool isMsgPack = false)
         : _isValid{false}
-        , _msgPack{msgPack} {
+        , _isMsgPack{isMsgPack} {
         _code        = 200;
         _contentType = JSON_MIMETYPE;
         if (isArray)
@@ -70,7 +70,7 @@ class AsyncJsonResponse : public AsyncAbstractResponse {
         return _isValid;
     }
     size_t setLength() {
-        _contentLength = _msgPack ? measureMsgPack(_root) : measureJson(_root);
+        _contentLength = _isMsgPack ? measureMsgPack(_root) : measureJson(_root);
 
         if (_contentLength) {
             _isValid = true;
@@ -84,7 +84,7 @@ class AsyncJsonResponse : public AsyncAbstractResponse {
 
     size_t _fillBuffer(uint8_t * data, size_t len) {
         ChunkPrint dest(data, _sentLength, len);
-        _msgPack ? serializeMsgPack(_root, dest) : serializeJson(_root, dest);
+        _isMsgPack ? serializeMsgPack(_root, dest) : serializeJson(_root, dest);
         return len;
     }
 };
