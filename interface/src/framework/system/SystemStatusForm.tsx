@@ -29,7 +29,6 @@ import {
 import { useRequest } from 'alova';
 import { useContext, useState } from 'react';
 import { toast } from 'react-toastify';
-import { FeaturesContext } from '../../contexts/features';
 import RestartMonitor from './RestartMonitor';
 import SystemStatusVersionDialog from './SystemStatusVersionDialog';
 import type { FC } from 'react';
@@ -53,8 +52,6 @@ const SystemStatusForm: FC = () => {
   const [processing, setProcessing] = useState<boolean>(false);
   const [restarting, setRestarting] = useState<boolean>();
   const [versionDialogOpen, setVersionDialogOpen] = useState<boolean>(false);
-
-  const { features } = useContext(FeaturesContext);
 
   const { send: restartCommand } = useRequest(SystemApi.restart(), {
     immediate: false
@@ -355,7 +352,7 @@ const SystemStatusForm: FC = () => {
           open={versionDialogOpen}
           onClose={() => setVersionDialogOpen(false)}
           version={data.emsesp_version}
-          platform={features.platform}
+          platform={data.esp_platform}
         />
       )}
     </SectionContent>

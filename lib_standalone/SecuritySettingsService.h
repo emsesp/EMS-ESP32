@@ -25,8 +25,6 @@
 #define SECURITY_SETTINGS_FILE "/config/securitySettings.json"
 #define SECURITY_SETTINGS_PATH "/rest/securitySettings"
 
-#if FT_ENABLED(FT_SECURITY)
-
 class SecuritySettings {
   public:
     String          jwtSecret;
@@ -102,5 +100,4 @@ class SecuritySettingsService : public SecurityManager {
     ArJsonRequestHandlerFunction wrapCallback(ArJsonRequestHandlerFunction onRequest, AuthenticationPredicate predicate);
 };
 
-#endif
 #endif
