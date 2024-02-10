@@ -1046,13 +1046,13 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 }
 
 void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, const char * entity) {
-    const char * dc_ha  = "dev_cla";      // device class
-    const char * sc_ha  = "stat_cla";     // state class
-    const char * uom_ha = "unit_of_meas"; // unit of measure
+    const char * dc_ha = "dev_cla";  // device class
+    const char * sc_ha = "stat_cla"; // state class
 
     // set icon, except for booleans
     // using HA specific codes from https://github.com/home-assistant/core/blob/dev/homeassistant/const.py
     if (type != DeviceValueType::BOOL) {
+        const char * uom_ha = "unit_of_meas"; // unit of measure
         if (uom == DeviceValueUOM::HOURS) {
             doc[uom_ha] = "h";
         } else if (uom == DeviceValueUOM::MINUTES) {
