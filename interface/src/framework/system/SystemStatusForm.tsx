@@ -215,7 +215,7 @@ const SystemStatusForm: FC = () => {
                 <DevicesIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="SDK" secondary={data.arduino_version + ' / ESP-IDF v' + data.sdk_version} />
+            <ListItemText primary="SDK" secondary={data.arduino_version + ' / ESP-IDF ' + data.sdk_version} />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
