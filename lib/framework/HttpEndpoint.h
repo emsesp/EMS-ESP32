@@ -57,7 +57,6 @@ class HttpEndpoint {
                 request->send(400); // error
                 return;
             } else if (outcome == StateUpdateResult::CHANGED_RESTART) {
-                // TODO check if works
                 request->send(205); // reboot required
                 return;
             } else if (outcome == StateUpdateResult::CHANGED) {

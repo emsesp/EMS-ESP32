@@ -18,8 +18,6 @@
 #define AUTHORIZATION_HEADER_PREFIX "Bearer "
 #define AUTHORIZATION_HEADER_PREFIX_LEN 7
 
-// #define MAX_JWT_SIZE 128
-
 class User {
   public:
     String username;
@@ -70,7 +68,6 @@ class AuthenticationPredicates {
 
 class SecurityManager {
   public:
-#if FT_ENABLED(FT_SECURITY)
     /*
    * Authenticate, returning the user if found
    */
@@ -80,8 +77,6 @@ class SecurityManager {
    * Generate a JWT for the user provided
    */
     virtual String generateJWT(User * user) = 0;
-
-#endif
 
     /*
    * Check the request header for the Authorization token
