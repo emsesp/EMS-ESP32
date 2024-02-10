@@ -26,7 +26,6 @@ void NetworkSettingsService::begin() {
     // WiFi.setScanMethod(WIFI_ALL_CHANNEL_SCAN);     // default is FAST_SCAN, connect issues in 2.0.14
     // WiFi.setSortMethod(WIFI_CONNECT_AP_BY_SIGNAL); // is default, no need to set
 
-
     _fsPersistence.readFromFS();
     // reconfigureWiFiConnection();
 }
@@ -36,6 +35,7 @@ void NetworkSettingsService::reconfigureWiFiConnection() {
     if (WiFi.isConnected() && _state.ssid.length() == 0) {
         return;
     }
+
     // disconnect and de-configure wifi
     if (WiFi.disconnect(true)) {
         _stopping = true;
@@ -84,15 +84,16 @@ void NetworkSettingsService::manageSTA() {
             WiFi.begin(_state.ssid.c_str(), _state.password.c_str());
         }
         // set power after wifi is startet, fixed value for C3_V1
-        if (WiFi.isConnected()) {
+        // if (WiFi.isConnected()) {
 #ifdef BOARD_C3_MINI_V1
-            // v1 needs this value, see https://github.com/emsesp/EMS-ESP32/pull/620#discussion_r993173979
-            WiFi.setTxPower(WIFI_POWER_8_5dBm); // https://www.wemos.cc/en/latest/c3/c3_mini_1_0_0.html#about-wifi
+        // v1 needs this value, see https://github.com/emsesp/EMS-ESP32/pull/620#discussion_r993173979
+        WiFi.setTxPower(WIFI_POWER_8_5dBm); // https://www.wemos.cc/en/latest/c3/c3_mini_1_0_0.html#about-wifi
 #else
-            // esp_wifi_set_max_tx_power(_state.tx_power * 4);
-            WiFi.setTxPower((wifi_power_t)(_state.tx_power * 4));
+        // esp_wifi_set_max_tx_power(_state.tx_power * 4);
+        // TODO make it dynamic
+        WiFi.setTxPower((wifi_power_t)(_state.tx_power * 4));
 #endif
-        }
+        // }
     } else { // not connected but STA-mode active => disconnect
         reconfigureWiFiConnection();
     }
