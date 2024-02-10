@@ -90,7 +90,7 @@ export const createSettingsValidator = (settings: Settings) =>
         rx_gpio: [{ required: true, message: 'Rx GPIO is required' }, GPIO_VALIDATOR]
       }),
     ...(settings.board_profile === 'CUSTOM' &&
-      settings.platform === 'ESP32PSRAM' && {
+      settings.platform === 'ESP32R' && {
         led_gpio: [{ required: true, message: 'LED GPIO is required' }, GPIO_VALIDATORR],
         dallas_gpio: [{ required: true, message: 'GPIO is required' }, GPIO_VALIDATORR],
         pbutton_gpio: [{ required: true, message: 'Button GPIO is required' }, GPIO_VALIDATORR],

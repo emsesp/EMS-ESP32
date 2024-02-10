@@ -165,7 +165,8 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
     }
 
     root["analog_enabled"] = EMSESP::analog_enabled();
-    root["platform"]       = EMSESP_PLATFORM;
+    String platform        = EMSESP_PLATFORM;
+    root["platform"]       = (platform == "ESP32" && EMSESP::system_.PSram()) ? "ESP32R" : platform;
 
     response->setLength();
     request->send(response);
