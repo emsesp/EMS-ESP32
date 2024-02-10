@@ -69,9 +69,6 @@ class AuthenticationPredicates {
 
 class SecurityManager {
   public:
-    virtual Authentication authenticate(const String & username, const String & password) = 0;
-    virtual String         generateJWT(User * user)                                       = 0;
-
     virtual Authentication               authenticateRequest(AsyncWebServerRequest * request)                                    = 0;
     virtual ArRequestFilterFunction      filterRequest(AuthenticationPredicate predicate)                                        = 0;
     virtual ArRequestHandlerFunction     wrapRequest(ArRequestHandlerFunction onRequest, AuthenticationPredicate predicate)      = 0;
