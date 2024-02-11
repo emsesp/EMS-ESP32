@@ -19,15 +19,32 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
     , _restartService(server, &_securitySettingsService)
     , _factoryResetService(server, fs, &_securitySettingsService)
     , _systemStatus(server, &_securitySettingsService) {
-    // Serve static resources
-    WWWData::registerRoutes([server, this](const String & uri, const String & contentType, const uint8_t * content, size_t len) {
-        ArRequestHandlerFunction requestHandler = [contentType, content, len](AsyncWebServerRequest * request) {
+    //
+    // Serve static web resources
+    //
+
+    // Populate the last modification date based on build datetime
+    static char last_modified[50];
+    sprintf(last_modified, "%s %s CET", __DATE__, __TIME__);
+
+    WWWData::registerRoutes([server, this](const String & uri, const String & contentType, const uint8_t * content, size_t len, const String & hash) {
+        ArRequestHandlerFunction requestHandler = [contentType, content, len, hash](AsyncWebServerRequest * request) {
+            // Check if the client already has the same version and respond with a 304 (Not modified)
+            if (request->header("If-Modified-Since").indexOf(last_modified) > 0) {
+                return request->send(304);
+            } else if (request->header("If-None-Match").equals(hash)) {
+                return request->send(304);
+            }
+
             AsyncWebServerResponse * response = request->beginResponse_P(200, contentType, content, len);
             response->addHeader("Content-Encoding", "gzip");
-            response->addHeader("Cache-Control", "public, immutable, max-age=31536000");
+            // response->addHeader("Cache-Control", "public, immutable, max-age=31536000");
+            response->addHeader("Last-Modified", last_modified);
+            response->addHeader("ETag", hash);
             // response->addHeader("Content-Encoding", "br"); // only works over HTTPS
             request->send(response);
         };
+
         server->on(uri.c_str(), HTTP_GET, requestHandler);
         // Serving non matching get requests with "/index.html"
         // OPTIONS get a straight up 200 response
