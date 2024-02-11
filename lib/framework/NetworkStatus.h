@@ -1,15 +1,11 @@
 #ifndef NetworkStatus_h
 #define NetworkStatus_h
 
-#include <WiFi.h>
-#include <AsyncTCP.h>
-
-#include <ETH.h>
-
 #include <ArduinoJson.h>
 #include <ESPAsyncWebServer.h>
 #include <IPAddress.h>
 #include <IPUtils.h>
+
 #include <SecurityManager.h>
 
 #define MAX_NETWORK_STATUS_SIZE 1024

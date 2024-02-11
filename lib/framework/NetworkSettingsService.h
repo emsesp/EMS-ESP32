@@ -9,7 +9,12 @@
 #ifndef EMSESP_STANDALONE
 #include <esp_wifi.h>
 #include <ETH.h>
+#include <WiFi.h>
+#include <AsyncTCP.h>
+#include <ESPmDNS.h>
 #endif
+
+#include <helpers.h>
 
 #define NETWORK_SETTINGS_FILE "/config/networkSettings.json"
 #define NETWORK_SETTINGS_SERVICE_PATH "/rest/networkSettings"
@@ -25,6 +30,37 @@
 
 #ifndef FACTORY_WIFI_HOSTNAME
 #define FACTORY_WIFI_HOSTNAME ""
+#endif
+
+
+#if CONFIG_IDF_TARGET_ESP32S2
+#define MAX_TX_PWR_DBM_11b 195
+#define MAX_TX_PWR_DBM_54g 150
+#define MAX_TX_PWR_DBM_n 130
+#define WIFI_SENSITIVITY_11b -880
+#define WIFI_SENSITIVITY_54g -750
+#define WIFI_SENSITIVITY_n -720
+#elif CONFIG_IDF_TARGET_ESP32S3
+#define MAX_TX_PWR_DBM_11b 210
+#define MAX_TX_PWR_DBM_54g 190
+#define MAX_TX_PWR_DBM_n 185
+#define WIFI_SENSITIVITY_11b -880
+#define WIFI_SENSITIVITY_54g -760
+#define WIFI_SENSITIVITY_n -720
+#elif CONFIG_IDF_TARGET_ESP32C2 || CONFIG_IDF_TARGET_ESP32C3
+#define MAX_TX_PWR_DBM_11b 210
+#define MAX_TX_PWR_DBM_54g 190
+#define MAX_TX_PWR_DBM_n 185
+#define WIFI_SENSITIVITY_11b -880
+#define WIFI_SENSITIVITY_54g -760
+#define WIFI_SENSITIVITY_n -730
+#else
+#define MAX_TX_PWR_DBM_11b 195
+#define MAX_TX_PWR_DBM_54g 160
+#define MAX_TX_PWR_DBM_n 140
+#define WIFI_SENSITIVITY_11b -880
+#define WIFI_SENSITIVITY_54g -750
+#define WIFI_SENSITIVITY_n -700
 #endif
 
 class NetworkSettings {
@@ -84,7 +120,7 @@ class NetworkSettings {
         settings.staticIPConfig = root["static_ip_config"] | false;
         settings.enableIPv6     = root["enableIPv6"] | false;
         settings.bandwidth20    = root["bandwidth20"] | false;
-        settings.tx_power       = root["tx_power"] | 20;
+        settings.tx_power       = root["tx_power"] | 0;
         settings.nosleep        = root["nosleep"] | false;
         settings.enableMDNS     = root["enableMDNS"] | true;
         settings.enableCORS     = root["enableCORS"] | false;
@@ -127,13 +163,16 @@ class NetworkSettingsService : public StatefulService<NetworkSettings> {
   private:
     HttpEndpoint<NetworkSettings>  _httpEndpoint;
     FSPersistence<NetworkSettings> _fsPersistence;
-    unsigned long                  _lastConnectionAttempt;
 
-    bool _stopping;
-    void WiFiEvent(WiFiEvent_t event);
+    unsigned long _lastConnectionAttempt;
+    bool          _stopping;
 
-    void reconfigureWiFiConnection();
-    void manageSTA();
+    void         WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
+    void         mDNS_start() const;
+    const char * disconnectReason(uint8_t code);
+    void         reconfigureWiFiConnection();
+    void         manageSTA();
+    void         setWiFiPower();
 };
 
 #endif

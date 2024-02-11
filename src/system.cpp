@@ -1131,7 +1131,7 @@ bool System::check_upgrade(bool factory_settings) {
 
         // if we're coming from 3.4.4 or 3.5.0b14 which had no version stored then we need to apply new settings
         if (missing_version) {
-            LOG_DEBUG("Setting MQTT Entity ID format to v3.4 format");
+            LOG_INFO("Setting MQTT Entity ID format to v3.4 format");
             EMSESP::esp8266React.getMqttSettingsService()->update(
                 [&](MqttSettings & mqttSettings) {
                     mqttSettings.entity_format = 0; // use old Entity ID format from v3.4
@@ -1139,6 +1139,19 @@ bool System::check_upgrade(bool factory_settings) {
                 },
                 "local");
         }
+
+        // Network Settings Wifi tx_power is now using the value * 4.
+        EMSESP::esp8266React.getNetworkSettingsService()->update(
+            [&](NetworkSettings & networkSettings) {
+                if (networkSettings.tx_power == 20) {
+                    networkSettings.tx_power = 0; // use Auto
+                    LOG_INFO("Setting WiFi TX Power to Auto");
+                    return StateUpdateResult::CHANGED;
+                }
+                return StateUpdateResult::UNCHANGED;
+            },
+            "local");
+
     } else if (this_version < settings_version) {
         // need downgrade
         LOG_NOTICE("Downgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());

@@ -1748,6 +1748,7 @@ void EMSdevice::mqtt_ha_entity_config_create() {
             }
         }
 
+        // TODO remove CMD - see https://github.com/emsesp/EMS-ESP32/issues/1605
         if (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) && (dv.type != DeviceValueType::CMD) && dv.has_state(DeviceValueState::DV_ACTIVE)
             && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE)) {
             // create_device_config is only done once for the EMS device. It can added to any entity, so we take the first

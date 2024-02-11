@@ -155,7 +155,7 @@ network_settings = {
   password: 'myPassword',
   hostname: 'ems-esp',
   nosleep: true,
-  tx_power: 20,
+  tx_power: 0,
   bandwidth20: false,
   static_ip_config: false,
   enableMDNS: true,
