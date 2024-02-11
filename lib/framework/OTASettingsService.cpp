@@ -74,3 +74,16 @@ void OTASettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
         break;
     }
 }
+
+void OTASettings::read(OTASettings & settings, JsonObject root) {
+    root["enabled"]  = settings.enabled;
+    root["port"]     = settings.port;
+    root["password"] = settings.password;
+}
+
+StateUpdateResult OTASettings::update(JsonObject root, OTASettings & settings) {
+    settings.enabled  = root["enabled"] | FACTORY_OTA_ENABLED;
+    settings.port     = root["port"] | FACTORY_OTA_PORT;
+    settings.password = root["password"] | FACTORY_OTA_PASSWORD;
+    return StateUpdateResult::CHANGED;
+}

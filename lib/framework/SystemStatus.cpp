@@ -17,7 +17,15 @@ void SystemStatus::systemStatus(AsyncWebServerRequest * request) {
     AsyncJsonResponse * response = new AsyncJsonResponse(false);
     JsonObject          root     = response->getRoot();
 
-    root["emsesp_version"]   = EMSESP_APP_VERSION;
+#ifdef EMSESP_DEBUG
+    root["emsesp_version"] = std::string(EMSESP_APP_VERSION) + " (DEBUG)";
+#else
+#ifdef EMSESP_TEST
+    root["emsesp_version"] = std::string(EMSESP_APP_VERSION) + " (TEST)";
+#else
+    root["emsesp_version"] = EMSESP_APP_VERSION;
+#endif
+#endif
     root["esp_platform"]     = EMSESP_PLATFORM;
     root["cpu_type"]         = ESP.getChipModel();
     root["cpu_rev"]          = ESP.getChipRevision();

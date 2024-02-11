@@ -23,6 +23,7 @@
 #include "temperaturesensor.h"
 #include "version.h"
 #include "default_settings.h"
+#include "helpers.h"
 
 #include <ESP8266React.h>
 

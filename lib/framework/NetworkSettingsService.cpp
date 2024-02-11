@@ -86,15 +86,20 @@ void NetworkSettingsService::manageSTA() {
         } else {
             WiFi.begin(_state.ssid.c_str(), _state.password.c_str());
         }
-        // Set thw Wifi Tx power
-        setWiFiPower();
+
+#ifdef BOARD_C3_MINI_V1
+        // hardcode Tx power for Wemos CS Mini v1
+        // v1 needs this value, see https://github.com/emsesp/EMS-ESP32/pull/620#discussion_r993173979
+        // https://www.wemos.cc/en/latest/c3/c3_mini_1_0_0.html#about-wifi
+        WiFi.setTxPower(WIFI_POWER_8_5dBm);
+        return;
+#endif
     } else { // not connected but STA-mode active => disconnect
         reconfigureWiFiConnection();
     }
 }
 
 // set the Tx WiFi power
-// based of RSSI (signal strength) and copied from Tasmota's WiFiSetTXpowerBasedOnRssi() function with is copied from espEasy
 void NetworkSettingsService::setWiFiPower() {
 // hardcode Tx power for Wemos CS Mini v1
 // v1 needs this value, see https://github.com/emsesp/EMS-ESP32/pull/620#discussion_r993173979
@@ -106,7 +111,8 @@ void NetworkSettingsService::setWiFiPower() {
 
     auto set_power = _state.tx_power; // get user settings. 0 means auto
 
-    // If Auto set the TxPower based on the RSSI (signal strength)
+    // If Auto set the TxPower based on the RSSI (signal strength), picking the lowest value
+    // based of RSSI (signal strength) and copied from Tasmota's WiFiSetTXpowerBasedOnRssi() which is copied ESPEasy's ESPEasyWifi.SetWiFiTXpower() function
     if (set_power == 0) {
         // Range ESP32  : 2dBm - 20dBm
         // 802.11b - wifi1
@@ -134,6 +140,9 @@ void NetworkSettingsService::setWiFiPower() {
         }
 
         set_power = min_tx_pwr / 10; // this is the recommended power setting to use
+#ifdef EMSESP_DEBUG
+        emsesp::EMSESP::logger().debug("Recommended set WiFi Tx Power (set_power %d, rssi %d, threshold %d", set_power, rssi, threshold);
+#endif
     }
 
     // use the user setting, which is a value from WiFIGeneric.h
@@ -298,7 +307,7 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) 
 
     case ARDUINO_EVENT_WIFI_STA_GOT_IP:
         char result[10];
-        emsesp::EMSESP::logger().info("WiFi connected with IP=%s, hostname=%s, TxPower=%s",
+        emsesp::EMSESP::logger().info("WiFi connected with IP=%s, hostname=%s, TxPower=%s dBm",
                                       WiFi.localIP().toString().c_str(),
                                       WiFi.getHostname(),
                                       emsesp::Helpers::render_value(result, (double)(WiFi.getTxPower() / 4), 1));
@@ -337,6 +346,8 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) 
         break;
 
     case ARDUINO_EVENT_WIFI_STA_CONNECTED:
+        // Set the TxPower after the connection is established
+        setWiFiPower();
         if (_state.enableIPv6) {
             WiFi.enableIpV6();
         }
@@ -364,4 +375,76 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) 
         break;
     }
 #endif
+}
+
+void NetworkSettings::read(NetworkSettings & settings, JsonObject root) {
+    // connection settings
+    root["ssid"]             = settings.ssid;
+    root["bssid"]            = settings.bssid;
+    root["password"]         = settings.password;
+    root["hostname"]         = settings.hostname;
+    root["static_ip_config"] = settings.staticIPConfig;
+    root["enableIPv6"]       = settings.enableIPv6;
+    root["bandwidth20"]      = settings.bandwidth20;
+    root["tx_power"]         = settings.tx_power;
+    root["nosleep"]          = settings.nosleep;
+    root["enableMDNS"]       = settings.enableMDNS;
+    root["enableCORS"]       = settings.enableCORS;
+    root["CORSOrigin"]       = settings.CORSOrigin;
+
+    // extended settings
+    JsonUtils::writeIP(root, "local_ip", settings.localIP);
+    JsonUtils::writeIP(root, "gateway_ip", settings.gatewayIP);
+    JsonUtils::writeIP(root, "subnet_mask", settings.subnetMask);
+    JsonUtils::writeIP(root, "dns_ip_1", settings.dnsIP1);
+    JsonUtils::writeIP(root, "dns_ip_2", settings.dnsIP2);
+}
+
+StateUpdateResult NetworkSettings::update(JsonObject root, NetworkSettings & settings) {
+    // keep copy of original settings
+    auto enableCORS = settings.enableCORS;
+    auto CORSOrigin = settings.CORSOrigin;
+    auto ssid       = settings.ssid;
+    auto tx_power   = settings.tx_power;
+
+    settings.ssid           = root["ssid"] | FACTORY_WIFI_SSID;
+    settings.bssid          = root["bssid"] | "";
+    settings.password       = root["password"] | FACTORY_WIFI_PASSWORD;
+    settings.hostname       = root["hostname"] | FACTORY_WIFI_HOSTNAME;
+    settings.staticIPConfig = root["static_ip_config"] | false;
+    settings.enableIPv6     = root["enableIPv6"] | false;
+    settings.bandwidth20    = root["bandwidth20"] | false;
+    settings.tx_power       = root["tx_power"] | 0;
+    settings.nosleep        = root["nosleep"] | false;
+    settings.enableMDNS     = root["enableMDNS"] | true;
+    settings.enableCORS     = root["enableCORS"] | false;
+    settings.CORSOrigin     = root["CORSOrigin"] | "*";
+
+    // extended settings
+    JsonUtils::readIP(root, "local_ip", settings.localIP);
+    JsonUtils::readIP(root, "gateway_ip", settings.gatewayIP);
+    JsonUtils::readIP(root, "subnet_mask", settings.subnetMask);
+    JsonUtils::readIP(root, "dns_ip_1", settings.dnsIP1);
+    JsonUtils::readIP(root, "dns_ip_2", settings.dnsIP2);
+
+    // Swap around the dns servers if 2 is populated but 1 is not
+    if (IPUtils::isNotSet(settings.dnsIP1) && IPUtils::isSet(settings.dnsIP2)) {
+        settings.dnsIP1 = settings.dnsIP2;
+        settings.dnsIP2 = INADDR_NONE;
+    }
+
+    // Turning off static ip config if we don't meet the minimum requirements
+    // of ipAddress, gateway and subnet. This may change to static ip only
+    // as sensible defaults can be assumed for gateway and subnet
+    if (settings.staticIPConfig && (IPUtils::isNotSet(settings.localIP) || IPUtils::isNotSet(settings.gatewayIP) || IPUtils::isNotSet(settings.subnetMask))) {
+        settings.staticIPConfig = false;
+    }
+
+    // see if we need to inform the user of a restart
+    if (tx_power != settings.tx_power || enableCORS != settings.enableCORS || CORSOrigin != settings.CORSOrigin
+        || (ssid != settings.ssid && settings.ssid == "")) {
+        return StateUpdateResult::CHANGED_RESTART; // tell WebUI that a restart is needed
+    }
+
+    return StateUpdateResult::CHANGED;
 }

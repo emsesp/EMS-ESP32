@@ -123,3 +123,34 @@ void SecuritySettingsService::generateToken(AsyncWebServerRequest * request) {
     }
     request->send(401);
 }
+
+void SecuritySettings::read(SecuritySettings & settings, JsonObject root) {
+    // secret
+    root["jwt_secret"] = settings.jwtSecret;
+
+    // users
+    JsonArray users = root["users"].to<JsonArray>();
+    for (User user : settings.users) {
+        JsonObject userRoot  = users.add<JsonObject>();
+        userRoot["username"] = user.username;
+        userRoot["password"] = user.password;
+        userRoot["admin"]    = user.admin;
+    }
+}
+
+StateUpdateResult SecuritySettings::update(JsonObject root, SecuritySettings & settings) {
+    // secret
+    settings.jwtSecret = root["jwt_secret"] | FACTORY_JWT_SECRET;
+
+    // users
+    settings.users.clear();
+    if (root["users"].is<JsonArray>()) {
+        for (JsonVariant user : root["users"].as<JsonArray>()) {
+            settings.users.push_back(User(user["username"], user["password"], user["admin"]));
+        }
+    } else {
+        settings.users.push_back(User(FACTORY_ADMIN_USERNAME, FACTORY_ADMIN_PASSWORD, true));
+        settings.users.push_back(User(FACTORY_GUEST_USERNAME, FACTORY_GUEST_PASSWORD, false));
+    }
+    return StateUpdateResult::CHANGED;
+}

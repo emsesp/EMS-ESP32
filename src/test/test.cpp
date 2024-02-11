@@ -1978,20 +1978,22 @@ void Test::listDir(fs::FS & fs, const char * dirname, uint8_t levels) {
     File file = root.openNextFile();
     while (file) {
         if (file.isDirectory()) {
-            Serial.print("  DIR : ");
+            Serial.print(" DIR: ");
             Serial.println(file.name());
             if (levels) {
                 listDir(fs, file.name(), levels - 1);
             }
             Serial.println();
         } else {
-            Serial.print("  FILE: ");
+            Serial.print(" ");
             Serial.print(file.name());
-            Serial.print("\tSIZE: ");
-            Serial.println(file.size());
+            Serial.print(" (");
+            Serial.print(file.size());
+            Serial.println(" bytes)");
         }
         file = root.openNextFile();
     }
+    Serial.println();
 }
 #endif
 #endif

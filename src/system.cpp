@@ -274,10 +274,11 @@ void System::system_restart() {
 
 // saves all settings
 void System::wifi_reconnect() {
-    LOG_INFO("WiFi reconnecting...");
+    EMSESP::esp8266React.getNetworkSettingsService()->read(
+        [](NetworkSettings & networkSettings) { LOG_INFO("WiFi reconnecting to SSID '%s'...", networkSettings.ssid.c_str()); });
     Shell::loop_all();
     delay(1000);                                                                   // wait a second
-    EMSESP::webSettingsService.save();                                             // local settings
+    EMSESP::webSettingsService.save();                                             // save local settings
     EMSESP::esp8266React.getNetworkSettingsService()->callUpdateHandlers("local"); // in case we've changed ssid or password
 }
 
@@ -468,7 +469,7 @@ void System::start() {
 
 // button single click
 void System::button_OnClick(PButton & b) {
-    LOG_DEBUG("Button pressed - single click");
+    LOG_NOTICE("Button pressed - single click - show settings folders");
 
 #if defined(EMSESP_TEST)
 #ifndef EMSESP_STANDALONE
@@ -479,20 +480,19 @@ void System::button_OnClick(PButton & b) {
 
 // button double click
 void System::button_OnDblClick(PButton & b) {
-    LOG_DEBUG("Button pressed - double click - reconnect");
+    LOG_NOTICE("Button pressed - double click - wifi reconnect");
     EMSESP::system_.wifi_reconnect();
 }
 
 // button long press
 void System::button_OnLongPress(PButton & b) {
-    LOG_DEBUG("Button pressed - long press");
+    LOG_NOTICE("Button pressed - long press");
 }
 
 // button indefinite press
 void System::button_OnVLongPress(PButton & b) {
-    LOG_DEBUG("Button pressed - very long press");
+    LOG_NOTICE("Button pressed - very long press - factory reset");
 #ifndef EMSESP_STANDALONE
-    LOG_WARNING("Performing factory reset...");
     EMSESP::esp8266React.factoryReset();
 #endif
 }
@@ -973,6 +973,8 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.printfln(" SSID: %s", WiFi.SSID().c_str());
         shell.printfln(" BSSID: %s", WiFi.BSSIDstr().c_str());
         shell.printfln(" RSSI: %d dBm (%d %%)", WiFi.RSSI(), wifi_quality(WiFi.RSSI()));
+        char result[10];
+        shell.printfln(" TxPower: %s dBm", emsesp::Helpers::render_value(result, (double)(WiFi.getTxPower() / 4), 1));
         shell.printfln(" MAC address: %s", WiFi.macAddress().c_str());
         shell.printfln(" Hostname: %s", WiFi.getHostname());
         shell.printfln(" IPv4 address: %s/%s", uuid::printable_to_string(WiFi.localIP()).c_str(), uuid::printable_to_string(WiFi.subnetMask()).c_str());
@@ -1108,7 +1110,7 @@ bool System::check_upgrade(bool factory_settings) {
 
 #if defined(EMSESP_DEBUG)
     if (!missing_version) {
-        LOG_INFO("Checking version (settings has %d.%d.%d-%s)...",
+        LOG_INFO("Checking version (settings file is v%d.%d.%d-%s)...",
                  settings_version.major(),
                  settings_version.minor(),
                  settings_version.patch(),
@@ -1144,7 +1146,7 @@ bool System::check_upgrade(bool factory_settings) {
         EMSESP::esp8266React.getNetworkSettingsService()->update(
             [&](NetworkSettings & networkSettings) {
                 if (networkSettings.tx_power == 20) {
-                    networkSettings.tx_power = 0; // use Auto
+                    networkSettings.tx_power = WIFI_POWER_19_5dBm; // use 19.5 as we don't have 20 anymore
                     LOG_INFO("Setting WiFi TX Power to Auto");
                     return StateUpdateResult::CHANGED;
                 }
@@ -1266,6 +1268,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         if (WiFi.status() == WL_CONNECTED && !settings.bssid.isEmpty()) {
             node["BSSID"] = "set";
         }
+        node["TxPower setting"]  = settings.tx_power;
         node["static ip config"] = settings.staticIPConfig;
         node["enable IPv6"]      = settings.enableIPv6;
         node["low bandwidth"]    = settings.bandwidth20;

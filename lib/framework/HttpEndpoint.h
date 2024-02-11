@@ -56,11 +56,13 @@ class HttpEndpoint {
             if (outcome == StateUpdateResult::ERROR) {
                 request->send(400); // error
                 return;
-            } else if (outcome == StateUpdateResult::CHANGED_RESTART) {
-                request->send(205); // reboot required
-                return;
-            } else if (outcome == StateUpdateResult::CHANGED) {
+            } else if (outcome == StateUpdateResult::CHANGED || outcome == StateUpdateResult::CHANGED_RESTART) {
+                // persist changes
                 request->onDisconnect([this]() { _statefulService->callUpdateHandlers(HTTP_ENDPOINT_ORIGIN_ID); });
+                if (outcome == StateUpdateResult::CHANGED_RESTART) {
+                    request->send(205); // reboot required
+                    return;
+                }
             }
         }
 

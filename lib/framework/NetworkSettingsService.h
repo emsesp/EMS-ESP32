@@ -14,8 +14,6 @@
 #include <ESPmDNS.h>
 #endif
 
-#include <helpers.h>
-
 #define NETWORK_SETTINGS_FILE "/config/networkSettings.json"
 #define NETWORK_SETTINGS_SERVICE_PATH "/rest/networkSettings"
 #define WIFI_RECONNECTION_DELAY 1000 * 3
@@ -32,7 +30,7 @@
 #define FACTORY_WIFI_HOSTNAME ""
 #endif
 
-
+// copied from Tasmota
 #if CONFIG_IDF_TARGET_ESP32S2
 #define MAX_TX_PWR_DBM_11b 195
 #define MAX_TX_PWR_DBM_54g 150
@@ -66,18 +64,18 @@
 class NetworkSettings {
   public:
     // core wifi configuration
-    String ssid;
-    String bssid;
-    String password;
-    String hostname;
-    bool   staticIPConfig;
-    bool   enableIPv6;
-    bool   bandwidth20;
-    int8_t tx_power;
-    bool   nosleep;
-    bool   enableMDNS;
-    bool   enableCORS;
-    String CORSOrigin;
+    String  ssid;
+    String  bssid;
+    String  password;
+    String  hostname;
+    bool    staticIPConfig;
+    bool    enableIPv6;
+    bool    bandwidth20;
+    uint8_t tx_power;
+    bool    nosleep;
+    bool    enableMDNS;
+    bool    enableCORS;
+    String  CORSOrigin;
 
     // optional configuration for static IP address
     IPAddress localIP;
@@ -86,72 +84,10 @@ class NetworkSettings {
     IPAddress dnsIP1;
     IPAddress dnsIP2;
 
-    static void read(NetworkSettings & settings, JsonObject root) {
-        // connection settings
-        root["ssid"]             = settings.ssid;
-        root["bssid"]            = settings.bssid;
-        root["password"]         = settings.password;
-        root["hostname"]         = settings.hostname;
-        root["static_ip_config"] = settings.staticIPConfig;
-        root["enableIPv6"]       = settings.enableIPv6;
-        root["bandwidth20"]      = settings.bandwidth20;
-        root["tx_power"]         = settings.tx_power;
-        root["nosleep"]          = settings.nosleep;
-        root["enableMDNS"]       = settings.enableMDNS;
-        root["enableCORS"]       = settings.enableCORS;
-        root["CORSOrigin"]       = settings.CORSOrigin;
-
-        // extended settings
-        JsonUtils::writeIP(root, "local_ip", settings.localIP);
-        JsonUtils::writeIP(root, "gateway_ip", settings.gatewayIP);
-        JsonUtils::writeIP(root, "subnet_mask", settings.subnetMask);
-        JsonUtils::writeIP(root, "dns_ip_1", settings.dnsIP1);
-        JsonUtils::writeIP(root, "dns_ip_2", settings.dnsIP2);
-    }
-
-    static StateUpdateResult update(JsonObject root, NetworkSettings & settings) {
-        auto enableCORS         = settings.enableCORS;
-        auto CORSOrigin         = settings.CORSOrigin;
-        auto ssid               = settings.ssid;
-        settings.ssid           = root["ssid"] | FACTORY_WIFI_SSID;
-        settings.bssid          = root["bssid"] | "";
-        settings.password       = root["password"] | FACTORY_WIFI_PASSWORD;
-        settings.hostname       = root["hostname"] | FACTORY_WIFI_HOSTNAME;
-        settings.staticIPConfig = root["static_ip_config"] | false;
-        settings.enableIPv6     = root["enableIPv6"] | false;
-        settings.bandwidth20    = root["bandwidth20"] | false;
-        settings.tx_power       = root["tx_power"] | 0;
-        settings.nosleep        = root["nosleep"] | false;
-        settings.enableMDNS     = root["enableMDNS"] | true;
-        settings.enableCORS     = root["enableCORS"] | false;
-        settings.CORSOrigin     = root["CORSOrigin"] | "*";
-
-        // extended settings
-        JsonUtils::readIP(root, "local_ip", settings.localIP);
-        JsonUtils::readIP(root, "gateway_ip", settings.gatewayIP);
-        JsonUtils::readIP(root, "subnet_mask", settings.subnetMask);
-        JsonUtils::readIP(root, "dns_ip_1", settings.dnsIP1);
-        JsonUtils::readIP(root, "dns_ip_2", settings.dnsIP2);
-
-        // Swap around the dns servers if 2 is populated but 1 is not
-        if (IPUtils::isNotSet(settings.dnsIP1) && IPUtils::isSet(settings.dnsIP2)) {
-            settings.dnsIP1 = settings.dnsIP2;
-            settings.dnsIP2 = INADDR_NONE;
-        }
-
-        // Turning off static ip config if we don't meet the minimum requirements
-        // of ipAddress, gateway and subnet. This may change to static ip only
-        // as sensible defaults can be assumed for gateway and subnet
-        if (settings.staticIPConfig && (IPUtils::isNotSet(settings.localIP) || IPUtils::isNotSet(settings.gatewayIP) || IPUtils::isNotSet(settings.subnetMask))) {
-            settings.staticIPConfig = false;
-        }
-        if (enableCORS != settings.enableCORS || CORSOrigin != settings.CORSOrigin || (ssid != settings.ssid && settings.ssid == "")) {
-            return StateUpdateResult::CHANGED_RESTART; // tell WebUI that a restart is needed
-        }
-
-        return StateUpdateResult::CHANGED;
-    }
+    static void              read(NetworkSettings & settings, JsonObject root);
+    static StateUpdateResult update(JsonObject root, NetworkSettings & settings);
 };
+
 
 class NetworkSettingsService : public StatefulService<NetworkSettings> {
   public:
