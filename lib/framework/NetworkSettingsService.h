@@ -108,7 +108,7 @@ class NetworkSettingsService : public StatefulService<NetworkSettings> {
     const char * disconnectReason(uint8_t code);
     void         reconfigureWiFiConnection();
     void         manageSTA();
-    void         setWiFiPower();
+    void         setWiFiPowerOnRSSI();
 };
 
 #endif

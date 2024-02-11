@@ -88,64 +88,53 @@ void NetworkSettingsService::manageSTA() {
         }
 
 #ifdef BOARD_C3_MINI_V1
-        // hardcode Tx power for Wemos CS Mini v1
+        // always hardcode Tx power for Wemos CS Mini v1
         // v1 needs this value, see https://github.com/emsesp/EMS-ESP32/pull/620#discussion_r993173979
         // https://www.wemos.cc/en/latest/c3/c3_mini_1_0_0.html#about-wifi
         WiFi.setTxPower(WIFI_POWER_8_5dBm);
         return;
+#else
+        if (_state.tx_power != 0) {
+            // if not set to Auto (0) set the Tx power now
+            WiFi.setTxPower((wifi_power_t)_state.tx_power);
+        }
 #endif
     } else { // not connected but STA-mode active => disconnect
         reconfigureWiFiConnection();
     }
 }
 
-// set the Tx WiFi power
-void NetworkSettingsService::setWiFiPower() {
-// hardcode Tx power for Wemos CS Mini v1
-// v1 needs this value, see https://github.com/emsesp/EMS-ESP32/pull/620#discussion_r993173979
-// https://www.wemos.cc/en/latest/c3/c3_mini_1_0_0.html#about-wifi
-#ifdef BOARD_C3_MINI_V1
-    WiFi.setTxPower(WIFI_POWER_8_5dBm);
-    return;
-#endif
+// set the TxPower based on the RSSI (signal strength), picking the lowest value
+// code is based of RSSI (signal strength) and copied from Tasmota's WiFiSetTXpowerBasedOnRssi() which is copied ESPEasy's ESPEasyWifi.SetWiFiTXpower() function
+void NetworkSettingsService::setWiFiPowerOnRSSI() {
+    // Range ESP32  : 2dBm - 20dBm
+    // 802.11b - wifi1
+    // 802.11a - wifi2
+    // 802.11g - wifi3
+    // 802.11n - wifi4
+    // 802.11ac - wifi5
+    // 802.11ax - wifi6
 
-    auto set_power = _state.tx_power; // get user settings. 0 means auto
+    int max_tx_pwr = MAX_TX_PWR_DBM_n;        // assume wifi4
+    int threshold  = WIFI_SENSITIVITY_n + 30; // Margin in dBm * 10 on top of threshold
 
-    // If Auto set the TxPower based on the RSSI (signal strength), picking the lowest value
-    // based of RSSI (signal strength) and copied from Tasmota's WiFiSetTXpowerBasedOnRssi() which is copied ESPEasy's ESPEasyWifi.SetWiFiTXpower() function
-    if (set_power == 0) {
-        // Range ESP32  : 2dBm - 20dBm
-        // 802.11b - wifi1
-        // 802.11a - wifi2
-        // 802.11g - wifi3
-        // 802.11n - wifi4
-        // 802.11ac - wifi5
-        // 802.11ax - wifi6
-        int max_tx_pwr = MAX_TX_PWR_DBM_n; // assume wifi4
-        int threshold  = WIFI_SENSITIVITY_n;
-        threshold += 30; // Margin in dBm * 10 on top of threshold
+    // Assume AP sends with max set by ETSI standard.
+    // 2.4 GHz: 100 mWatt (20 dBm)
+    // US and some other countries allow 1000 mW (30 dBm)
+    int rssi    = WiFi.RSSI() * 10;
+    int newrssi = rssi - 200; // We cannot send with over 20 dBm, thus it makes no sense to force higher TX power all the time.
 
-        // Assume AP sends with max set by ETSI standard.
-        // 2.4 GHz: 100 mWatt (20 dBm)
-        // US and some other countries allow 1000 mW (30 dBm)
-        int rssi    = WiFi.RSSI() * 10;
-        int newrssi = rssi - 200; // We cannot send with over 20 dBm, thus it makes no sense to force higher TX power all the time.
-
-        int min_tx_pwr = 0;
-        if (newrssi < threshold) {
-            min_tx_pwr = threshold - newrssi;
-        }
-        if (min_tx_pwr > max_tx_pwr) {
-            min_tx_pwr = max_tx_pwr;
-        }
-
-        set_power = min_tx_pwr / 10; // this is the recommended power setting to use
-#ifdef EMSESP_DEBUG
-        emsesp::EMSESP::logger().debug("Recommended set WiFi Tx Power (set_power %d, rssi %d, threshold %d", set_power, rssi, threshold);
-#endif
+    int min_tx_pwr = 0;
+    if (newrssi < threshold) {
+        min_tx_pwr = threshold - newrssi;
+    }
+    if (min_tx_pwr > max_tx_pwr) {
+        min_tx_pwr = max_tx_pwr;
     }
 
-    // use the user setting, which is a value from WiFIGeneric.h
+    uint8_t set_power = min_tx_pwr / 10; // this is the recommended power setting to use
+
+    // from WiFIGeneric.h use:
     //  WIFI_POWER_19_5dBm = 78,// 19.5dBm
     //  WIFI_POWER_19dBm = 76,// 19dBm
     //  WIFI_POWER_18_5dBm = 74,// 18.5dBm
@@ -177,6 +166,13 @@ void NetworkSettingsService::setWiFiPower() {
         p = WIFI_POWER_7dBm;
     else if (set_power >= 5)
         p = WIFI_POWER_5dBm;
+
+#ifdef EMSESP_DEBUG
+    emsesp::EMSESP::logger().debug("Recommended set WiFi Tx Power (set_power %d, new power %d, rssi %d, threshold %d", set_power, p, rssi, threshold);
+#else
+    char result[10];
+    emsesp::EMSESP::logger().info("Setting WiFi Tx Power to %s dBm", emsesp::Helpers::render_value(result, (double)(p / 4), 1));
+#endif
 
     WiFi.setTxPower(p);
 }
@@ -347,7 +343,10 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) 
 
     case ARDUINO_EVENT_WIFI_STA_CONNECTED:
         // Set the TxPower after the connection is established
-        setWiFiPower();
+        // if we're using TxPower = 0 (Auto)
+        if (_state.tx_power == 0) {
+            setWiFiPowerOnRSSI();
+        }
         if (_state.enableIPv6) {
             WiFi.enableIpV6();
         }
