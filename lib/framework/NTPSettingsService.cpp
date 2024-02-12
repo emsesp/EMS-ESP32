@@ -14,7 +14,7 @@ NTPSettingsService::NTPSettingsService(AsyncWebServer * server, FS * fs, Securit
 
     WiFi.onEvent(std::bind(&NTPSettingsService::WiFiEvent, this, _1));
 
-    addUpdateHandler([&](const String & originId) { configureNTP(); }, false);
+    addUpdateHandler([&] { configureNTP(); }, false);
 }
 
 void NTPSettingsService::begin() {

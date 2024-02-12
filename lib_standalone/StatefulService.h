@@ -20,8 +20,8 @@ using JsonStateUpdater = std::function<StateUpdateResult(JsonObject root, T & se
 template <typename T>
 using JsonStateReader = std::function<void(T & settings, JsonObject root)>;
 
-typedef size_t                                       update_handler_id_t;
-typedef std::function<void(const String & originId)> StateUpdateCallback;
+typedef size_t                update_handler_id_t;
+typedef std::function<void()> StateUpdateCallback;
 
 typedef struct StateUpdateHandlerInfo {
     static update_handler_id_t currentUpdatedHandlerId;
@@ -68,12 +68,12 @@ class StatefulService {
         }
     }
 
-    StateUpdateResult update(std::function<StateUpdateResult(T &)> stateUpdater, const String & originId) {
+    StateUpdateResult update(std::function<StateUpdateResult(T &)> stateUpdater, ) {
         beginTransaction();
         StateUpdateResult result = stateUpdater(_state);
         endTransaction();
         if (result == StateUpdateResult::CHANGED) {
-            callUpdateHandlers(originId);
+            callUpdateHandlers();
         }
         return result;
     }
@@ -85,12 +85,12 @@ class StatefulService {
         return result;
     }
 
-    StateUpdateResult update(JsonObject jsonObject, JsonStateUpdater<T> stateUpdater, const String & originId) {
+    StateUpdateResult update(JsonObject jsonObject, JsonStateUpdater<T> stateUpdater, ) {
         beginTransaction();
         StateUpdateResult result = stateUpdater(jsonObject, _state);
         endTransaction();
         if (result == StateUpdateResult::CHANGED) {
-            callUpdateHandlers(originId);
+            callUpdateHandlers();
         }
         return result;
     }
@@ -114,9 +114,9 @@ class StatefulService {
         endTransaction();
     }
 
-    void callUpdateHandlers(const String & originId) {
+    void callUpdateHandlers() {
         for (const StateUpdateHandlerInfo_t & updateHandler : _updateHandlers) {
-            updateHandler._cb(originId);
+            updateHandler._cb();
         }
     }
 

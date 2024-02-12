@@ -36,7 +36,7 @@ MqttSettingsService::MqttSettingsService(AsyncWebServer * server, FS * fs, Secur
     , _disconnectReason(espMqttClientTypes::DisconnectReason::TCP_DISCONNECTED)
     , _mqttClient(nullptr) {
     WiFi.onEvent(std::bind(&MqttSettingsService::WiFiEvent, this, _1, _2));
-    addUpdateHandler([&](const String & originId) { onConfigUpdated(); }, false);
+    addUpdateHandler([&] { onConfigUpdated(); }, false);
 }
 
 MqttSettingsService::~MqttSettingsService() {

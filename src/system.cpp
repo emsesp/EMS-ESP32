@@ -208,8 +208,7 @@ bool System::command_syslog_level(const char * value, const int8_t id) {
                     changed               = true;
                 }
                 return StateUpdateResult::CHANGED;
-            },
-            "local");
+            });
         if (changed) {
             EMSESP::system_.syslog_init();
         }
@@ -277,9 +276,9 @@ void System::wifi_reconnect() {
     EMSESP::esp8266React.getNetworkSettingsService()->read(
         [](NetworkSettings & networkSettings) { LOG_INFO("WiFi reconnecting to SSID '%s'...", networkSettings.ssid.c_str()); });
     Shell::loop_all();
-    delay(1000);                                                                   // wait a second
-    EMSESP::webSettingsService.save();                                             // save local settings
-    EMSESP::esp8266React.getNetworkSettingsService()->callUpdateHandlers("local"); // in case we've changed ssid or password
+    delay(1000);                                                            // wait a second
+    EMSESP::webSettingsService.save();                                      // save local settings
+    EMSESP::esp8266React.getNetworkSettingsService()->callUpdateHandlers(); // in case we've changed ssid or password
 }
 
 // format the FS. Wipes everything.
@@ -384,33 +383,6 @@ void System::reload_settings() {
 
         locale_ = settings.locale;
     });
-}
-
-// adjust WiFi settings
-// this for problem solving mesh and connection issues, and also get EMS bus-powered more stable by lowering power
-void System::wifi_tweak() {
-#if defined(EMSESP_WIFI_TWEAK)
-    // Default Tx Power is 80 = 20dBm <-- default
-    // WIFI_POWER_19_5dBm = 78,// 19.5dBm
-    // WIFI_POWER_19dBm = 76,// 19dBm
-    // WIFI_POWER_18_5dBm = 74,// 18.5dBm
-    // WIFI_POWER_17dBm = 68,// 17dBm
-    // WIFI_POWER_15dBm = 60,// 15dBm
-    // WIFI_POWER_13dBm = 52,// 13dBm
-    // WIFI_POWER_11dBm = 44,// 11dBm
-    // WIFI_POWER_8_5dBm = 34,// 8.5dBm
-    // WIFI_POWER_7dBm = 28,// 7dBm
-    // WIFI_POWER_5dBm = 20,// 5dBm
-    // WIFI_POWER_2dBm = 8,// 2dBm
-    // WIFI_POWER_MINUS_1dBm = -4// -1dBm
-    wifi_power_t p1 = WiFi.getTxPower();
-    (void)WiFi.setTxPower(WIFI_POWER_17dBm);
-    wifi_power_t p2 = WiFi.getTxPower();
-    bool         s1 = WiFi.getSleep();
-    WiFi.setSleep(false); // turn off sleep - WIFI_PS_NONE
-    bool s2 = WiFi.getSleep();
-    LOG_DEBUG("Adjusting WiFi - Tx power %d->%d, Sleep %d->%d", p1, p2, s1, s2);
-#endif
 }
 
 // check for valid ESP32 pins. This is very dependent on which ESP32 board is being used.
@@ -1134,25 +1106,21 @@ bool System::check_upgrade(bool factory_settings) {
         // if we're coming from 3.4.4 or 3.5.0b14 which had no version stored then we need to apply new settings
         if (missing_version) {
             LOG_INFO("Setting MQTT Entity ID format to v3.4 format");
-            EMSESP::esp8266React.getMqttSettingsService()->update(
-                [&](MqttSettings & mqttSettings) {
-                    mqttSettings.entity_format = 0; // use old Entity ID format from v3.4
-                    return StateUpdateResult::CHANGED;
-                },
-                "local");
+            EMSESP::esp8266React.getMqttSettingsService()->update([&](MqttSettings & mqttSettings) {
+                mqttSettings.entity_format = 0; // use old Entity ID format from v3.4
+                return StateUpdateResult::CHANGED;
+            });
         }
 
         // Network Settings Wifi tx_power is now using the value * 4.
-        EMSESP::esp8266React.getNetworkSettingsService()->update(
-            [&](NetworkSettings & networkSettings) {
-                if (networkSettings.tx_power == 20) {
-                    networkSettings.tx_power = WIFI_POWER_19_5dBm; // use 19.5 as we don't have 20 anymore
-                    LOG_INFO("Setting WiFi TX Power to Auto");
-                    return StateUpdateResult::CHANGED;
-                }
-                return StateUpdateResult::UNCHANGED;
-            },
-            "local");
+        EMSESP::esp8266React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
+            if (networkSettings.tx_power == 20) {
+                networkSettings.tx_power = WIFI_POWER_19_5dBm; // use 19.5 as we don't have 20 anymore
+                LOG_INFO("Setting WiFi TX Power to Auto");
+                return StateUpdateResult::CHANGED;
+            }
+            return StateUpdateResult::UNCHANGED;
+        });
 
     } else if (this_version < settings_version) {
         // need downgrade
@@ -1164,12 +1132,10 @@ bool System::check_upgrade(bool factory_settings) {
 
     // if we did a change, set the new version and reboot
     if (save_version) {
-        EMSESP::webSettingsService.update(
-            [&](WebSettings & settings) {
-                settings.version = EMSESP_APP_VERSION;
-                return StateUpdateResult::CHANGED;
-            },
-            "local");
+        EMSESP::webSettingsService.update([&](WebSettings & settings) {
+            settings.version = EMSESP_APP_VERSION;
+            return StateUpdateResult::CHANGED;
+        });
         return true; // need reboot
     }
 

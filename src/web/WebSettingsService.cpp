@@ -32,7 +32,7 @@ WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, Securit
                HTTP_GET,
                securityManager->wrapRequest(std::bind(&WebSettingsService::board_profile, this, _1), AuthenticationPredicates::IS_ADMIN));
 
-    addUpdateHandler([&](const String & originId) { onUpdate(); }, false);
+    addUpdateHandler([&] { onUpdate(); }, false);
 }
 
 void WebSettings::read(WebSettings & settings, JsonObject root) {

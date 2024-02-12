@@ -6,7 +6,7 @@ SecuritySettingsService::SecuritySettingsService(AsyncWebServer * server, FS * f
     : _httpEndpoint(SecuritySettings::read, SecuritySettings::update, this, server, SECURITY_SETTINGS_PATH, this)
     , _fsPersistence(SecuritySettings::read, SecuritySettings::update, this, fs, SECURITY_SETTINGS_FILE)
     , _jwtHandler(FACTORY_JWT_SECRET) {
-    addUpdateHandler([&](const String & originId) { configureJWTHandler(); }, false);
+    addUpdateHandler([&] { configureJWTHandler(); }, false);
     server->on(GENERATE_TOKEN_PATH,
                HTTP_GET,
                wrapRequest(std::bind(&SecuritySettingsService::generateToken, this, std::placeholders::_1), AuthenticationPredicates::IS_ADMIN));

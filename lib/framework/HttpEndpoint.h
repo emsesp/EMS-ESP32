@@ -58,7 +58,7 @@ class HttpEndpoint {
                 return;
             } else if (outcome == StateUpdateResult::CHANGED || outcome == StateUpdateResult::CHANGED_RESTART) {
                 // persist changes
-                request->onDisconnect([this]() { _statefulService->callUpdateHandlers(HTTP_ENDPOINT_ORIGIN_ID); });
+                request->onDisconnect([this] { _statefulService->callUpdateHandlers(); });
                 if (outcome == StateUpdateResult::CHANGED_RESTART) {
                     request->send(205); // reboot required
                     return;

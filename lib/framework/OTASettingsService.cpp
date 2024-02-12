@@ -9,7 +9,7 @@ OTASettingsService::OTASettingsService(AsyncWebServer * server, FS * fs, Securit
     , _fsPersistence(OTASettings::read, OTASettings::update, this, fs, OTA_SETTINGS_FILE)
     , _arduinoOTA(nullptr) {
     WiFi.onEvent(std::bind(&OTASettingsService::WiFiEvent, this, _1, _2));
-    addUpdateHandler([&](const String & originId) { configureArduinoOTA(); }, false);
+    addUpdateHandler([&] { configureArduinoOTA(); }, false);
 }
 
 void OTASettingsService::begin() {
@@ -35,8 +35,8 @@ void OTASettingsService::configureArduinoOTA() {
         _arduinoOTA->setPort(_state.port);
         _arduinoOTA->setPassword(_state.password.c_str());
 
-        _arduinoOTA->onStart([]() { emsesp::EMSESP::system_.upload_status(true); });
-        _arduinoOTA->onEnd([]() { emsesp::EMSESP::system_.upload_status(false); });
+        _arduinoOTA->onStart([] { emsesp::EMSESP::system_.upload_status(true); });
+        _arduinoOTA->onEnd([] { emsesp::EMSESP::system_.upload_status(false); });
 
         _arduinoOTA->onProgress([](unsigned int progress, unsigned int total) {
             // Serial.printf("Progress: %u%%\r\n", (progress / (total / 100)));

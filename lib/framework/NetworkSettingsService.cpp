@@ -8,7 +8,7 @@ NetworkSettingsService::NetworkSettingsService(AsyncWebServer * server, FS * fs,
     : _httpEndpoint(NetworkSettings::read, NetworkSettings::update, this, server, NETWORK_SETTINGS_SERVICE_PATH, securityManager)
     , _fsPersistence(NetworkSettings::read, NetworkSettings::update, this, fs, NETWORK_SETTINGS_FILE)
     , _lastConnectionAttempt(0) {
-    addUpdateHandler([&](const String & originId) { reconfigureWiFiConnection(); }, false);
+    addUpdateHandler([&] { reconfigureWiFiConnection(); }, false);
     // wifi event callbacks
     WiFi.onEvent(std::bind(&NetworkSettingsService::WiFiEvent, this, _1, _2));
 }
@@ -75,6 +75,7 @@ void NetworkSettingsService::manageSTA() {
         if (_state.nosleep) {
             WiFi.setSleep(false); // turn off sleep - WIFI_PS_NONE
         }
+
         // attempt to connect to the network
         uint mac[6];
         if (!_state.bssid.isEmpty() && sscanf(_state.bssid.c_str(), "%X:%X:%X:%X:%X:%X", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]) == 6) {
@@ -92,11 +93,12 @@ void NetworkSettingsService::manageSTA() {
         // v1 needs this value, see https://github.com/emsesp/EMS-ESP32/pull/620#discussion_r993173979
         // https://www.wemos.cc/en/latest/c3/c3_mini_1_0_0.html#about-wifi
         WiFi.setTxPower(WIFI_POWER_8_5dBm);
-        return;
 #else
         if (_state.tx_power != 0) {
             // if not set to Auto (0) set the Tx power now
-            WiFi.setTxPower((wifi_power_t)_state.tx_power);
+            if (!WiFi.setTxPower((wifi_power_t)_state.tx_power)) {
+                emsesp::EMSESP::logger().warning("Failed to set WiFi Tx Power");
+            }
         }
 #endif
     } else { // not connected but STA-mode active => disconnect
@@ -174,7 +176,9 @@ void NetworkSettingsService::setWiFiPowerOnRSSI() {
     emsesp::EMSESP::logger().info("Setting WiFi Tx Power to %s dBm", emsesp::Helpers::render_value(result, (double)(p / 4), 1));
 #endif
 
-    WiFi.setTxPower(p);
+    if (!WiFi.setTxPower(p)) {
+        emsesp::EMSESP::logger().warning("Failed to set WiFi Tx Power");
+    }
 }
 
 // start the multicast UDP service so EMS-ESP is discoverable via .local
@@ -184,7 +188,7 @@ void NetworkSettingsService::mDNS_start() const {
 
     if (_state.enableMDNS) {
         if (!MDNS.begin(emsesp::EMSESP::system_.hostname().c_str())) {
-            emsesp::EMSESP::logger().warning("Failed to start mDNS responder service");
+            emsesp::EMSESP::logger().warning("Failed to start mDNS Responder service");
             return;
         }
 
@@ -196,11 +200,11 @@ void NetworkSettingsService::mDNS_start() const {
         MDNS.addServiceTxt("http", "tcp", "version", EMSESP_APP_VERSION);
         MDNS.addServiceTxt("http", "tcp", "address", address_s.c_str());
 
-        emsesp::EMSESP::logger().info("mDNS responder service started");
+        emsesp::EMSESP::logger().info("mDNS Responder service started");
     }
 #else
     if (_state.enableMDNS) {
-        EMSESP::logger().info("mDNS responder service started");
+        EMSESP::logger().info("mDNS Responder service started");
     }
 #endif
 }

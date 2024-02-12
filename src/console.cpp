@@ -184,12 +184,10 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                 shell.enter_password(F_(new_password_prompt2), [password1](Shell & shell, bool completed, const std::string & password2) {
                     if (completed) {
                         if (password1 == password2) {
-                            to_app(shell).esp8266React.getSecuritySettingsService()->update(
-                                [&](SecuritySettings & securitySettings) {
-                                    securitySettings.jwtSecret = password2.c_str();
-                                    return StateUpdateResult::CHANGED;
-                                },
-                                "local");
+                            to_app(shell).esp8266React.getSecuritySettingsService()->update([&](SecuritySettings & securitySettings) {
+                                securitySettings.jwtSecret = password2.c_str();
+                                return StateUpdateResult::CHANGED;
+                            });
                             shell.println("Admin password updated");
                         } else {
                             shell.println("Passwords do not match");
@@ -258,12 +256,10 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                               shell.println("The network connection will be reset...");
                               Shell::loop_all();
                               delay(1000); // wait a second
-                              to_app(shell).esp8266React.getNetworkSettingsService()->update(
-                                  [&](NetworkSettings & networkSettings) {
-                                      networkSettings.hostname = arguments.front().c_str();
-                                      return StateUpdateResult::CHANGED;
-                                  },
-                                  "local");
+                              to_app(shell).esp8266React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
+                                  networkSettings.hostname = arguments.front().c_str();
+                                  return StateUpdateResult::CHANGED;
+                              });
                           });
 
     commands->add_command(ShellContext::MAIN,
@@ -293,21 +289,19 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                               if (arguments.size() == 2 && Helpers::toLower(arguments.back()) == "nvs") {
                                   to_app(shell).nvs_.putString("boot", board_profile.c_str());
                               }
-                              to_app(shell).webSettingsService.update(
-                                  [&](WebSettings & settings) {
-                                      settings.board_profile  = board_profile.c_str();
-                                      settings.led_gpio       = data[0];
-                                      settings.dallas_gpio    = data[1];
-                                      settings.rx_gpio        = data[2];
-                                      settings.tx_gpio        = data[3];
-                                      settings.pbutton_gpio   = data[4];
-                                      settings.phy_type       = data[5];
-                                      settings.eth_power      = data[6]; // can be -1
-                                      settings.eth_phy_addr   = data[7];
-                                      settings.eth_clock_mode = data[8];
-                                      return StateUpdateResult::CHANGED;
-                                  },
-                                  "local");
+                              to_app(shell).webSettingsService.update([&](WebSettings & settings) {
+                                  settings.board_profile  = board_profile.c_str();
+                                  settings.led_gpio       = data[0];
+                                  settings.dallas_gpio    = data[1];
+                                  settings.rx_gpio        = data[2];
+                                  settings.tx_gpio        = data[3];
+                                  settings.pbutton_gpio   = data[4];
+                                  settings.phy_type       = data[5];
+                                  settings.eth_power      = data[6]; // can be -1
+                                  settings.eth_phy_addr   = data[7];
+                                  settings.eth_clock_mode = data[8];
+                                  return StateUpdateResult::CHANGED;
+                              });
                               shell.printfln("Loaded board profile %s", board_profile.c_str());
                               to_app(shell).system_.network_init(true);
                           });
@@ -320,13 +314,11 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
         [](Shell & shell, const std::vector<std::string> & arguments) {
             uint8_t device_id = Helpers::hextoint(arguments.front().c_str());
             if ((device_id == 0x0B) || (device_id == 0x0D) || (device_id == 0x0A) || (device_id == 0x0F) || (device_id == 0x12)) {
-                to_app(shell).webSettingsService.update(
-                    [&](WebSettings & settings) {
-                        settings.ems_bus_id = device_id;
-                        shell.printfln(F_(bus_id_fmt), settings.ems_bus_id);
-                        return StateUpdateResult::CHANGED;
-                    },
-                    "local");
+                to_app(shell).webSettingsService.update([&](WebSettings & settings) {
+                    settings.ems_bus_id = device_id;
+                    shell.printfln(F_(bus_id_fmt), settings.ems_bus_id);
+                    return StateUpdateResult::CHANGED;
+                });
             } else {
                 shell.println("Must be 0B, 0D, 0A, 0E, 0F, or 48 - 4D");
             }
@@ -342,13 +334,11 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               uint8_t tx_mode = std::strtol(arguments[0].c_str(), nullptr, 10);
                               // save the tx_mode
-                              to_app(shell).webSettingsService.update(
-                                  [&](WebSettings & settings) {
-                                      settings.tx_mode = tx_mode;
-                                      shell.printfln(F_(tx_mode_fmt), settings.tx_mode);
-                                      return StateUpdateResult::CHANGED;
-                                  },
-                                  "local");
+                              to_app(shell).webSettingsService.update([&](WebSettings & settings) {
+                                  settings.tx_mode = tx_mode;
+                                  shell.printfln(F_(tx_mode_fmt), settings.tx_mode);
+                                  return StateUpdateResult::CHANGED;
+                              });
                               to_app(shell).uart_init();
                           });
 
