@@ -398,6 +398,7 @@ void NetworkSettings::read(NetworkSettings & settings, JsonObject root) {
     root["enableMDNS"]       = settings.enableMDNS;
     root["enableCORS"]       = settings.enableCORS;
     root["CORSOrigin"]       = settings.CORSOrigin;
+    root["tx_power"]         = settings.tx_power;
 
     // extended settings
     JsonUtils::writeIP(root, "local_ip", settings.localIP);
