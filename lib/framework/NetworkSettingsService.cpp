@@ -123,7 +123,7 @@ void NetworkSettingsService::setWiFiPowerOnRSSI() {
     // 802.11ax - wifi6
 
     int max_tx_pwr = MAX_TX_PWR_DBM_n;        // assume wifi4
-    int threshold  = WIFI_SENSITIVITY_n + 30; // Margin in dBm * 10 on top of threshold
+    int threshold  = WIFI_SENSITIVITY_n + 70; // Margin in dBm * 10 on top of threshold
 
     // Assume AP sends with max set by ETSI standard.
     // 2.4 GHz: 100 mWatt (20 dBm)
@@ -155,27 +155,27 @@ void NetworkSettingsService::setWiFiPowerOnRSSI() {
     //  WIFI_POWER_2dBm = 8,// 2dBm
     //  WIFI_POWER_MINUS_1dBm = -4// -1dBm
     wifi_power_t p = WIFI_POWER_2dBm;
-    if (set_power > 19)
+    if (min_tx_pwr > 185)
         p = WIFI_POWER_19_5dBm;
-    else if (set_power > 18)
+    else if (min_tx_pwr > 170)
         p = WIFI_POWER_18_5dBm;
-    else if (set_power >= 17)
+    else if (min_tx_pwr > 150)
         p = WIFI_POWER_17dBm;
-    else if (set_power >= 15)
+    else if (min_tx_pwr > 130)
         p = WIFI_POWER_15dBm;
-    else if (set_power >= 13)
+    else if (min_tx_pwr > 110)
         p = WIFI_POWER_13dBm;
-    else if (set_power >= 11)
+    else if (min_tx_pwr > 85)
         p = WIFI_POWER_11dBm;
-    else if (set_power >= 8)
+    else if (min_tx_pwr > 70)
         p = WIFI_POWER_8_5dBm;
-    else if (set_power >= 7)
+    else if (min_tx_pwr > 50)
         p = WIFI_POWER_7dBm;
-    else if (set_power >= 5)
+    else if (min_tx_pwr > 20)
         p = WIFI_POWER_5dBm;
 
 #ifdef EMSESP_DEBUG
-    emsesp::EMSESP::logger().debug("Recommended set WiFi Tx Power (set_power %d, new power %d, rssi %d, threshold %d", set_power, p, rssi, threshold);
+    emsesp::EMSESP::logger().debug("Recommended set WiFi Tx Power (set_power %d, new power %d, rssi %d, threshold %d)", set_power, p, rssi, threshold);
 #else
     char result[10];
     emsesp::EMSESP::logger().info("Setting WiFi Tx Power to %s dBm", emsesp::Helpers::render_value(result, ((double)(p) / 4), 1));
