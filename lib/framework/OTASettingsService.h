@@ -1,8 +1,8 @@
 #ifndef OTASettingsService_h
 #define OTASettingsService_h
 
-#include <HttpEndpoint.h>
-#include <FSPersistence.h>
+#include "HttpEndpoint.h"
+#include "FSPersistence.h"
 
 #include <ArduinoOTA.h>
 #include <WiFiUdp.h>
@@ -45,7 +45,7 @@ class OTASettingsService : public StatefulService<OTASettings> {
     ArduinoOTAClass *          _arduinoOTA;
 
     void configureArduinoOTA();
-    void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
+    void WiFiEvent(WiFiEvent_t event);
 };
 
 #endif

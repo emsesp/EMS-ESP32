@@ -22,17 +22,13 @@ namespace emsesp {
 
 uint8_t WebSettings::flags_ = 0;
 
-using namespace std::placeholders; // for `_1` etc
-
 WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(WebSettings::read, WebSettings::update, this, server, EMSESP_SETTINGS_SERVICE_PATH, securityManager)
     , _fsPersistence(WebSettings::read, WebSettings::update, this, fs, EMSESP_SETTINGS_FILE) {
-    // GET
     server->on(EMSESP_BOARD_PROFILE_SERVICE_PATH,
                HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WebSettingsService::board_profile, this, _1), AuthenticationPredicates::IS_ADMIN));
-
-    addUpdateHandler([&] { onUpdate(); }, false);
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { board_profile(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
+    addUpdateHandler([this] { onUpdate(); }, false);
 }
 
 void WebSettings::read(WebSettings & settings, JsonObject root) {

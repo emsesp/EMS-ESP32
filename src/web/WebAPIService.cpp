@@ -18,8 +18,6 @@
 
 #include "emsesp.h"
 
-using namespace std::placeholders; // for `_1` etc
-
 namespace emsesp {
 
 uint32_t WebAPIService::api_count_ = 0;
@@ -27,17 +25,26 @@ uint16_t WebAPIService::api_fails_ = 0;
 
 WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager)
-    , _apiHandler("/api", std::bind(&WebAPIService::webAPIService_post, this, _1, _2)) {  // for POSTS, must use 'Content-Type: application/json' in header
-    server->on("/api", HTTP_GET, std::bind(&WebAPIService::webAPIService_get, this, _1)); // for GETS
+    , _apiHandler(EMSESP_API_SERVICE_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { webAPIService_post(request, json); }) { // for POSTs
+    server->on(EMSESP_API_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { webAPIService_get(request); });                    // for GETs
     server->addHandler(&_apiHandler);
 
     // for settings
-    server->on(GET_SETTINGS_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&WebAPIService::getSettings, this, _1), AuthenticationPredicates::IS_ADMIN));
+    server->on(GET_SETTINGS_PATH,
+               HTTP_GET,
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { getSettings(request); }, AuthenticationPredicates::IS_ADMIN));
+
     server->on(GET_CUSTOMIZATIONS_PATH,
                HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WebAPIService::getCustomizations, this, _1), AuthenticationPredicates::IS_ADMIN));
-    server->on(GET_SCHEDULE_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&WebAPIService::getSchedule, this, _1), AuthenticationPredicates::IS_ADMIN));
-    server->on(GET_ENTITIES_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&WebAPIService::getEntities, this, _1), AuthenticationPredicates::IS_ADMIN));
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { getCustomizations(request); }, AuthenticationPredicates::IS_ADMIN));
+
+    server->on(GET_SCHEDULE_PATH,
+               HTTP_GET,
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { getSchedule(request); }, AuthenticationPredicates::IS_ADMIN));
+
+    server->on(GET_ENTITIES_PATH,
+               HTTP_GET,
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { getEntities(request); }, AuthenticationPredicates::IS_ADMIN));
 }
 
 // HTTP GET

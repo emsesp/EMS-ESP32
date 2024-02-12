@@ -20,8 +20,6 @@
 
 namespace emsesp {
 
-using namespace std::placeholders; // for `_1` etc
-
 WebCustomEntityService::WebCustomEntityService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(WebCustomEntity::read,
                     WebCustomEntity::update,

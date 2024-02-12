@@ -1,10 +1,10 @@
 #ifndef SecuritySettingsService_h
 #define SecuritySettingsService_h
 
-#include <Features.h>
-#include <SecurityManager.h>
-#include <HttpEndpoint.h>
-#include <FSPersistence.h>
+#include "Features.h"
+#include "SecurityManager.h"
+#include "HttpEndpoint.h"
+#include "FSPersistence.h"
 
 #ifndef FACTORY_ADMIN_USERNAME
 #define FACTORY_ADMIN_USERNAME "admin"
@@ -33,23 +33,51 @@ class SecuritySettings {
     String            jwtSecret;
     std::vector<User> users;
 
-    static void              read(SecuritySettings & settings, JsonObject root);
-    static StateUpdateResult update(JsonObject root, SecuritySettings & settings);
+    static void read(SecuritySettings & settings, JsonObject root) {
+        // secret
+        root["jwt_secret"] = settings.jwtSecret;
+
+        // users
+        JsonArray users = root["users"].to<JsonArray>();
+        for (const User & user : settings.users) {
+            JsonObject userRoot  = users.add<JsonObject>();
+            userRoot["username"] = user.username;
+            userRoot["password"] = user.password;
+            userRoot["admin"]    = user.admin;
+        }
+    }
+
+    static StateUpdateResult update(JsonObject root, SecuritySettings & settings) {
+        // secret
+        settings.jwtSecret = root["jwt_secret"] | FACTORY_JWT_SECRET;
+
+        // users
+        settings.users.clear();
+        if (root["users"].is<JsonArray>()) {
+            for (JsonVariant user : root["users"].as<JsonArray>()) {
+                settings.users.emplace_back(user["username"], user["password"], user["admin"]);
+            }
+        } else {
+            settings.users.emplace_back(FACTORY_ADMIN_USERNAME, FACTORY_ADMIN_PASSWORD, true);
+            settings.users.emplace_back(FACTORY_GUEST_USERNAME, FACTORY_GUEST_PASSWORD, false);
+        }
+        return StateUpdateResult::CHANGED;
+    }
 };
 
-class SecuritySettingsService : public StatefulService<SecuritySettings>, public SecurityManager {
+class SecuritySettingsService final : public StatefulService<SecuritySettings>, public SecurityManager {
   public:
     SecuritySettingsService(AsyncWebServer * server, FS * fs);
 
     void begin();
 
     // Functions to implement SecurityManager
-    Authentication               authenticate(const String & username, const String & password);
-    Authentication               authenticateRequest(AsyncWebServerRequest * request);
-    String                       generateJWT(User * user);
-    ArRequestFilterFunction      filterRequest(AuthenticationPredicate predicate);
-    ArRequestHandlerFunction     wrapRequest(ArRequestHandlerFunction onRequest, AuthenticationPredicate predicate);
-    ArJsonRequestHandlerFunction wrapCallback(ArJsonRequestHandlerFunction callback, AuthenticationPredicate predicate);
+    Authentication               authenticate(const String & username, const String & password) override;
+    Authentication               authenticateRequest(AsyncWebServerRequest * request) override;
+    String                       generateJWT(const User * user) override;
+    ArRequestFilterFunction      filterRequest(AuthenticationPredicate predicate) override;
+    ArRequestHandlerFunction     wrapRequest(ArRequestHandlerFunction onRequest, AuthenticationPredicate predicate) override;
+    ArJsonRequestHandlerFunction wrapCallback(ArJsonRequestHandlerFunction callback, AuthenticationPredicate predicate) override;
 
   private:
     HttpEndpoint<SecuritySettings>  _httpEndpoint;
@@ -68,7 +96,7 @@ class SecuritySettingsService : public StatefulService<SecuritySettings>, public
     /*
    * Verify the payload is correct
    */
-    boolean validatePayload(JsonObject parsedPayload, User * user);
+    boolean validatePayload(JsonObject parsedPayload, const User * user);
 };
 
 #endif

@@ -18,19 +18,18 @@
 
 #include "emsesp.h"
 
-using namespace std::placeholders;
-
 namespace emsesp {
 
 WebLogService::WebLogService(AsyncWebServer * server, SecurityManager * securityManager)
     : events_(EVENT_SOURCE_LOG_PATH)
-    , setValues_(LOG_SETTINGS_PATH, std::bind(&WebLogService::setValues, this, _1, _2)) {
+    , setValues_(LOG_SETTINGS_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { setValues(request, json); }) {
     events_.setFilter(securityManager->filterRequest(AuthenticationPredicates::IS_ADMIN));
 
-    server->on(LOG_SETTINGS_PATH, HTTP_GET, std::bind(&WebLogService::getValues, this, _1)); // get settings
+    // get settings
+    server->on(LOG_SETTINGS_PATH, HTTP_POST, [this](AsyncWebServerRequest * request) { getValues(request); });
 
     // for bring back the whole log - is a command, hence a POST
-    server->on(FETCH_LOG_PATH, HTTP_POST, std::bind(&WebLogService::fetchLog, this, _1));
+    server->on(FETCH_LOG_PATH, HTTP_POST, [this](AsyncWebServerRequest * request) { fetchLog(request); });
 
     server->addHandler(&setValues_);
     server->addHandler(&events_);

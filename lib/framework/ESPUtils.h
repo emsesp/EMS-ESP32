@@ -5,8 +5,8 @@
 
 class ESPUtils {
   public:
-    static String defaultDeviceValue(String prefix = "") {
-        return prefix + String((uint32_t)ESP.getEfuseMac(), HEX);
+    static String defaultDeviceValue(const String & prefix = "") {
+        return prefix + String(static_cast<uint32_t>(ESP.getEfuseMac()), HEX);
     }
 };
 

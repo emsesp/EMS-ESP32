@@ -18,14 +18,12 @@
 
 #include "emsesp.h"
 
-using namespace std::placeholders; // for `_1` etc
-
 namespace emsesp {
 
 WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * securityManager) {
     server->on(EMSESP_STATUS_SERVICE_PATH,
                HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WebStatusService::webStatusService, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { webStatusService(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
 }
 
 void WebStatusService::webStatusService(AsyncWebServerRequest * request) {

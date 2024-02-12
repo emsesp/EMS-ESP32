@@ -1,9 +1,9 @@
 #ifndef APSettingsConfig_h
 #define APSettingsConfig_h
 
-#include <HttpEndpoint.h>
-#include <FSPersistence.h>
-#include <JsonUtils.h>
+#include "HttpEndpoint.h"
+#include "FSPersistence.h"
+#include "JsonUtils.h"
 
 #include <DNSServer.h>
 #include <IPAddress.h>
@@ -75,7 +75,7 @@ class APSettings {
                && subnetMask == settings.subnetMask;
     }
 
-    static void              read(APSettings & settings, JsonObject root);
+    static void              read(const APSettings & settings, JsonObject root);
     static StateUpdateResult update(JsonObject root, APSettings & settings);
 };
 

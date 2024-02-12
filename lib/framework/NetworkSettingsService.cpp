@@ -1,16 +1,25 @@
-#include <NetworkSettingsService.h>
+#include "NetworkSettingsService.h"
 
 #include "../../src/emsesp_stub.hpp"
-
-using namespace std::placeholders; // for `_1` etc
 
 NetworkSettingsService::NetworkSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(NetworkSettings::read, NetworkSettings::update, this, server, NETWORK_SETTINGS_SERVICE_PATH, securityManager)
     , _fsPersistence(NetworkSettings::read, NetworkSettings::update, this, fs, NETWORK_SETTINGS_FILE)
-    , _lastConnectionAttempt(0) {
-    addUpdateHandler([&] { reconfigureWiFiConnection(); }, false);
-    // wifi event callbacks
-    WiFi.onEvent(std::bind(&NetworkSettingsService::WiFiEvent, this, _1, _2));
+    , _lastConnectionAttempt(0)
+    , _stopping(false) {
+    addUpdateHandler([this]() { reconfigureWiFiConnection(); }, false);
+    WiFi.onEvent([this](WiFiEvent_t event, WiFiEventInfo_t info) { WiFiEvent(event, info); });
+}
+
+static bool formatBssid(const String & bssid, uint8_t (&mac)[6]) {
+    uint tmp[6];
+    if (bssid.isEmpty() || sscanf(bssid.c_str(), "%X:%X:%X:%X:%X:%X", &tmp[0], &tmp[1], &tmp[2], &tmp[3], &tmp[4], &tmp[5]) != 6) {
+        return false;
+    }
+    for (uint8_t i = 0; i < 6; i++) {
+        mac[i] = static_cast<uint8_t>(tmp[i]);
+    }
+    return true;
 }
 
 void NetworkSettingsService::begin() {
@@ -47,7 +56,7 @@ void NetworkSettingsService::reconfigureWiFiConnection() {
 
 void NetworkSettingsService::loop() {
     unsigned long currentMillis = millis();
-    if (!_lastConnectionAttempt || (uint32_t)(currentMillis - _lastConnectionAttempt) >= WIFI_RECONNECTION_DELAY) {
+    if (!_lastConnectionAttempt || static_cast<uint32_t>(currentMillis - _lastConnectionAttempt) >= WIFI_RECONNECTION_DELAY) {
         _lastConnectionAttempt = currentMillis;
         manageSTA();
     }
@@ -68,22 +77,18 @@ void NetworkSettingsService::manageSTA() {
 
         // www.esp32.com/viewtopic.php?t=12055
         if (_state.bandwidth20) {
-            esp_wifi_set_bandwidth((wifi_interface_t)ESP_IF_WIFI_STA, WIFI_BW_HT20);
+            esp_wifi_set_bandwidth(static_cast<wifi_interface_t>(ESP_IF_WIFI_STA), WIFI_BW_HT20);
         } else {
-            esp_wifi_set_bandwidth((wifi_interface_t)ESP_IF_WIFI_STA, WIFI_BW_HT40);
+            esp_wifi_set_bandwidth(static_cast<wifi_interface_t>(ESP_IF_WIFI_STA), WIFI_BW_HT40);
         }
         if (_state.nosleep) {
             WiFi.setSleep(false); // turn off sleep - WIFI_PS_NONE
         }
 
         // attempt to connect to the network
-        uint mac[6];
-        if (!_state.bssid.isEmpty() && sscanf(_state.bssid.c_str(), "%X:%X:%X:%X:%X:%X", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]) == 6) {
-            uint8_t mac1[6];
-            for (uint8_t i = 0; i < 6; i++) {
-                mac1[i] = (uint8_t)mac[i];
-            }
-            WiFi.begin(_state.ssid.c_str(), _state.password.c_str(), 0, mac1);
+        uint8_t bssid[6];
+        if (formatBssid(_state.bssid, bssid)) {
+            WiFi.begin(_state.ssid.c_str(), _state.password.c_str(), 0, bssid);
         } else {
             WiFi.begin(_state.ssid.c_str(), _state.password.c_str());
         }
@@ -96,7 +101,7 @@ void NetworkSettingsService::manageSTA() {
 #else
         if (_state.tx_power != 0) {
             // if not set to Auto (0) set the Tx power now
-            if (!WiFi.setTxPower((wifi_power_t)_state.tx_power)) {
+            if (!WiFi.setTxPower(static_cast<wifi_power_t>(_state.tx_power))) {
                 emsesp::EMSESP::logger().warning("Failed to set WiFi Tx Power");
             }
         }
@@ -173,7 +178,7 @@ void NetworkSettingsService::setWiFiPowerOnRSSI() {
     emsesp::EMSESP::logger().debug("Recommended set WiFi Tx Power (set_power %d, new power %d, rssi %d, threshold %d", set_power, p, rssi, threshold);
 #else
     char result[10];
-    emsesp::EMSESP::logger().info("Setting WiFi Tx Power to %s dBm", emsesp::Helpers::render_value(result, (double)(p / 4), 1));
+    emsesp::EMSESP::logger().info("Setting WiFi Tx Power to %s dBm", emsesp::Helpers::render_value(result, ((double)(p) / 4), 1));
 #endif
 
     if (!WiFi.setTxPower(p)) {
@@ -310,7 +315,7 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) 
         emsesp::EMSESP::logger().info("WiFi connected with IP=%s, hostname=%s, TxPower=%s dBm",
                                       WiFi.localIP().toString().c_str(),
                                       WiFi.getHostname(),
-                                      emsesp::Helpers::render_value(result, (double)(WiFi.getTxPower() / 4), 1));
+                                      emsesp::Helpers::render_value(result, ((double)(WiFi.getTxPower()) / 4), 1));
 
         mDNS_start();
         break;
@@ -389,7 +394,6 @@ void NetworkSettings::read(NetworkSettings & settings, JsonObject root) {
     root["static_ip_config"] = settings.staticIPConfig;
     root["enableIPv6"]       = settings.enableIPv6;
     root["bandwidth20"]      = settings.bandwidth20;
-    root["tx_power"]         = settings.tx_power;
     root["nosleep"]          = settings.nosleep;
     root["enableMDNS"]       = settings.enableMDNS;
     root["enableCORS"]       = settings.enableCORS;
@@ -417,7 +421,7 @@ StateUpdateResult NetworkSettings::update(JsonObject root, NetworkSettings & set
     settings.staticIPConfig = root["static_ip_config"] | false;
     settings.enableIPv6     = root["enableIPv6"] | false;
     settings.bandwidth20    = root["bandwidth20"] | false;
-    settings.tx_power       = root["tx_power"] | 0;
+    settings.tx_power       = static_cast<uint8_t>(root["tx_power"] | 0);
     settings.nosleep        = root["nosleep"] | false;
     settings.enableMDNS     = root["enableMDNS"] | true;
     settings.enableCORS     = root["enableCORS"] | false;
@@ -445,7 +449,7 @@ StateUpdateResult NetworkSettings::update(JsonObject root, NetworkSettings & set
 
     // see if we need to inform the user of a restart
     if (tx_power != settings.tx_power || enableCORS != settings.enableCORS || CORSOrigin != settings.CORSOrigin
-        || (ssid != settings.ssid && settings.ssid == "")) {
+        || (ssid != settings.ssid && settings.ssid.isEmpty())) {
         return StateUpdateResult::CHANGED_RESTART; // tell WebUI that a restart is needed
     }
 

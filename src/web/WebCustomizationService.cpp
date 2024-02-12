@@ -20,27 +20,24 @@
 
 namespace emsesp {
 
-using namespace std::placeholders; // for `_1` etc
-
 bool WebCustomization::_start = true;
 
 WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _fsPersistence(WebCustomization::read, WebCustomization::update, this, fs, EMSESP_CUSTOMIZATION_FILE)
     , _masked_entities_handler(CUSTOMIZATION_ENTITIES_PATH,
-                               securityManager->wrapCallback(std::bind(&WebCustomizationService::customization_entities, this, _1, _2),
+                               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { customization_entities(request, json); },
                                                              AuthenticationPredicates::IS_AUTHENTICATED)) {
     server->on(DEVICE_ENTITIES_PATH,
                HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WebCustomizationService::device_entities, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
-
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { device_entities(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
 
     server->on(DEVICES_SERVICE_PATH,
                HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WebCustomizationService::devices, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { devices(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
 
     server->on(RESET_CUSTOMIZATION_SERVICE_PATH,
                HTTP_POST,
-               securityManager->wrapRequest(std::bind(&WebCustomizationService::reset_customization, this, _1), AuthenticationPredicates::IS_ADMIN));
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { reset_customization(request); }, AuthenticationPredicates::IS_ADMIN));
 
     _masked_entities_handler.setMethod(HTTP_POST);
     _masked_entities_handler.setMaxContentLength(2048);

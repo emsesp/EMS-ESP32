@@ -1,10 +1,10 @@
 #ifndef NetworkSettingsService_h
 #define NetworkSettingsService_h
 
-#include <StatefulService.h>
-#include <FSPersistence.h>
-#include <HttpEndpoint.h>
-#include <JsonUtils.h>
+#include "StatefulService.h"
+#include "FSPersistence.h"
+#include "HttpEndpoint.h"
+#include "JsonUtils.h"
 
 #ifndef EMSESP_STANDALONE
 #include <esp_wifi.h>
@@ -16,7 +16,7 @@
 
 #define NETWORK_SETTINGS_FILE "/config/networkSettings.json"
 #define NETWORK_SETTINGS_SERVICE_PATH "/rest/networkSettings"
-#define WIFI_RECONNECTION_DELAY 1000 * 3
+#define WIFI_RECONNECTION_DELAY (1000 * 3)
 
 #ifndef FACTORY_WIFI_SSID
 #define FACTORY_WIFI_SSID ""

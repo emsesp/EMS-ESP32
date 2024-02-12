@@ -1,11 +1,12 @@
 #ifndef MqttSettingsService_h
 #define MqttSettingsService_h
 
-#include <StatefulService.h>
-#include <HttpEndpoint.h>
-#include <FSPersistence.h>
+#include "StatefulService.h"
+#include "HttpEndpoint.h"
+#include "FSPersistence.h"
+#include "ESPUtils.h"
+
 #include <espMqttClient.h>
-#include <ESPUtils.h>
 
 #include <uuid/common.h>
 
@@ -141,11 +142,12 @@ class MqttSettingsService : public StatefulService<MqttSettings> {
     // the MQTT client instance
     MqttClient * _mqttClient;
 
-    void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
+    void WiFiEvent(WiFiEvent_t event);
     void onMqttConnect(bool sessionPresent);
     void onMqttDisconnect(espMqttClientTypes::DisconnectReason reason);
     void
     onMqttMessage(const espMqttClientTypes::MessageProperties & properties, const char * topic, const uint8_t * payload, size_t len, size_t index, size_t total);
+
     bool configureMqtt();
 };
 

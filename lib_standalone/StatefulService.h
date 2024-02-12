@@ -68,7 +68,7 @@ class StatefulService {
         }
     }
 
-    StateUpdateResult update(std::function<StateUpdateResult(T &)> stateUpdater, ) {
+    StateUpdateResult update(std::function<StateUpdateResult(T &)> stateUpdater) {
         beginTransaction();
         StateUpdateResult result = stateUpdater(_state);
         endTransaction();
@@ -85,7 +85,7 @@ class StatefulService {
         return result;
     }
 
-    StateUpdateResult update(JsonObject jsonObject, JsonStateUpdater<T> stateUpdater, ) {
+    StateUpdateResult update(JsonObject jsonObject, JsonStateUpdater<T> stateUpdater) {
         beginTransaction();
         StateUpdateResult result = stateUpdater(jsonObject, _state);
         endTransaction();

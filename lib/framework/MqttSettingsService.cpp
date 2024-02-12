@@ -1,8 +1,5 @@
-#include <MqttSettingsService.h>
-
+#include "MqttSettingsService.h"
 #include "../../src/emsesp_stub.hpp"
-
-using namespace std::placeholders; // for `_1` etc
 
 /**
  * Retains a copy of the cstr provided in the pointer provided using dynamic allocation.
@@ -10,13 +7,17 @@ using namespace std::placeholders; // for `_1` etc
  * Frees the pointer before allocation and leaves it as nullptr if cstr == nullptr.
  */
 static char * retainCstr(const char * cstr, char ** ptr) {
+    if (ptr == nullptr || *ptr == nullptr) {
+        return nullptr;
+    }
+
     // free up previously retained value if exists
-    free(*ptr);
+    delete[] *ptr;
     *ptr = nullptr;
 
     // dynamically allocate and copy cstr (if non null)
     if (cstr != nullptr) {
-        *ptr = (char *)malloc(strlen(cstr) + 1);
+        *ptr = new char[strlen(cstr) + 1];
         strcpy(*ptr, cstr);
     }
 
@@ -31,15 +32,22 @@ MqttSettingsService::MqttSettingsService(AsyncWebServer * server, FS * fs, Secur
     , _retainedClientId(nullptr)
     , _retainedUsername(nullptr)
     , _retainedPassword(nullptr)
+    , _retainedRootCA(nullptr)
     , _reconfigureMqtt(false)
     , _disconnectedAt(0)
     , _disconnectReason(espMqttClientTypes::DisconnectReason::TCP_DISCONNECTED)
     , _mqttClient(nullptr) {
-    WiFi.onEvent(std::bind(&MqttSettingsService::WiFiEvent, this, _1, _2));
-    addUpdateHandler([&] { onConfigUpdated(); }, false);
+    WiFi.onEvent([this](WiFiEvent_t event, WiFiEventInfo_t info) { WiFiEvent(event); });
+    addUpdateHandler([this]() { onConfigUpdated(); }, false);
 }
 
 MqttSettingsService::~MqttSettingsService() {
+    delete _mqttClient;
+    retainCstr(nullptr, &_retainedHost);
+    retainCstr(nullptr, &_retainedClientId);
+    retainCstr(nullptr, &_retainedUsername);
+    retainCstr(nullptr, &_retainedPassword);
+    retainCstr(nullptr, &_retainedRootCA);
 }
 
 void MqttSettingsService::begin() {
@@ -55,32 +63,41 @@ void MqttSettingsService::startClient() {
             return;
         }
         delete _mqttClient;
+        _mqttClient = nullptr;
     }
 #if CONFIG_IDF_TARGET_ESP32S3
     if (_state.enableTLS) {
         isSecure    = true;
-        _mqttClient = static_cast<MqttClient *>(new espMqttClientSecure(espMqttClientTypes::UseInternalTask::NO));
+        _mqttClient = new espMqttClientSecure(espMqttClientTypes::UseInternalTask::NO);
         if (_state.rootCA == "insecure") {
             static_cast<espMqttClientSecure *>(_mqttClient)->setInsecure();
         } else {
             String certificate = "-----BEGIN CERTIFICATE-----\n" + _state.rootCA + "\n-----END CERTIFICATE-----\n";
             static_cast<espMqttClientSecure *>(_mqttClient)->setCACert(retainCstr(certificate.c_str(), &_retainedRootCA));
         }
-        static_cast<espMqttClientSecure *>(_mqttClient)->onConnect(std::bind(&MqttSettingsService::onMqttConnect, this, _1));
-        static_cast<espMqttClientSecure *>(_mqttClient)->onDisconnect(std::bind(&MqttSettingsService::onMqttDisconnect, this, _1));
-        static_cast<espMqttClientSecure *>(_mqttClient)->onMessage(std::bind(&MqttSettingsService::onMqttMessage, this, _1, _2, _3, _4, _5, _6));
+        static_cast<espMqttClientSecure *>(_mqttClient)->onConnect([this](bool sessionPresent) { onMqttConnect(sessionPresent); });
+        static_cast<espMqttClientSecure *>(_mqttClient)->onDisconnect([this](espMqttClientTypes::DisconnectReason reason) { onMqttDisconnect(reason); });
+        static_cast<espMqttClientSecure *>(_mqttClient)
+            ->onMessage(
+                [this](const espMqttClientTypes::MessageProperties & properties, const char * topic, const uint8_t * payload, size_t len, size_t index, size_t total) {
+                    onMqttMessage(properties, topic, payload, len, index, total);
+                });
         return;
     }
 #endif
     isSecure    = false;
-    _mqttClient = static_cast<MqttClient *>(new espMqttClient(espMqttClientTypes::UseInternalTask::NO));
-    static_cast<espMqttClient *>(_mqttClient)->onConnect(std::bind(&MqttSettingsService::onMqttConnect, this, _1));
-    static_cast<espMqttClient *>(_mqttClient)->onDisconnect(std::bind(&MqttSettingsService::onMqttDisconnect, this, _1));
-    static_cast<espMqttClient *>(_mqttClient)->onMessage(std::bind(&MqttSettingsService::onMqttMessage, this, _1, _2, _3, _4, _5, _6));
+    _mqttClient = new espMqttClient(espMqttClientTypes::UseInternalTask::NO);
+    static_cast<espMqttClient *>(_mqttClient)->onConnect([this](bool sessionPresent) { onMqttConnect(sessionPresent); });
+    static_cast<espMqttClient *>(_mqttClient)->onDisconnect([this](espMqttClientTypes::DisconnectReason reason) { onMqttDisconnect(reason); });
+    static_cast<espMqttClient *>(_mqttClient)
+        ->onMessage(
+            [this](const espMqttClientTypes::MessageProperties & properties, const char * topic, const uint8_t * payload, size_t len, size_t index, size_t total) {
+                onMqttMessage(properties, topic, payload, len, index, total);
+            });
 }
 
 void MqttSettingsService::loop() {
-    if (_reconfigureMqtt || (_disconnectedAt && (uint32_t)(uuid::get_uptime() - _disconnectedAt) >= MQTT_RECONNECTION_DELAY)) {
+    if (_reconfigureMqtt || (_disconnectedAt && static_cast<uint32_t>(uuid::get_uptime() - _disconnectedAt) >= MQTT_RECONNECTION_DELAY)) {
         // reconfigure MQTT client
         _disconnectedAt  = configureMqtt() ? 0 : uuid::get_uptime();
         _reconfigureMqtt = false;
@@ -116,6 +133,9 @@ void MqttSettingsService::onMqttMessage(const espMqttClientTypes::MessagePropert
                                         size_t                                        len,
                                         size_t                                        index,
                                         size_t                                        total) {
+    (void)properties;
+    (void)index;
+    (void)total;
     emsesp::EMSESP::mqtt_.on_message(topic, payload, len);
 }
 
@@ -128,6 +148,7 @@ MqttClient * MqttSettingsService::getMqttClient() {
 }
 
 void MqttSettingsService::onMqttConnect(bool sessionPresent) {
+    (void)sessionPresent;
     // _disconnectedAt = 0;
     emsesp::EMSESP::mqtt_.on_connect();
     // emsesp::EMSESP::logger().info("Connected to MQTT, %s", (sessionPresent) ? ("with persistent session") : ("without persistent session"));
@@ -149,7 +170,7 @@ void MqttSettingsService::onConfigUpdated() {
     emsesp::EMSESP::mqtt_.start(); // reload EMS-ESP MQTT settings
 }
 
-void MqttSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
+void MqttSettingsService::WiFiEvent(WiFiEvent_t event) {
     switch (event) {
     case ARDUINO_EVENT_WIFI_STA_GOT_IP:
     case ARDUINO_EVENT_ETH_GOT_IP:
@@ -264,32 +285,32 @@ StateUpdateResult MqttSettings::update(JsonObject root, MqttSettings & settings)
 #endif
     newSettings.enabled      = root["enabled"] | FACTORY_MQTT_ENABLED;
     newSettings.host         = root["host"] | FACTORY_MQTT_HOST;
-    newSettings.port         = root["port"] | FACTORY_MQTT_PORT;
+    newSettings.port         = static_cast<uint16_t>(root["port"] | FACTORY_MQTT_PORT);
     newSettings.base         = root["base"] | FACTORY_MQTT_BASE;
     newSettings.username     = root["username"] | FACTORY_MQTT_USERNAME;
     newSettings.password     = root["password"] | FACTORY_MQTT_PASSWORD;
     newSettings.clientId     = root["client_id"] | FACTORY_MQTT_CLIENT_ID;
-    newSettings.keepAlive    = root["keep_alive"] | FACTORY_MQTT_KEEP_ALIVE;
+    newSettings.keepAlive    = static_cast<uint16_t>(root["keep_alive"] | FACTORY_MQTT_KEEP_ALIVE);
     newSettings.cleanSession = root["clean_session"] | FACTORY_MQTT_CLEAN_SESSION;
-    newSettings.mqtt_qos     = root["mqtt_qos"] | EMSESP_DEFAULT_MQTT_QOS;
+    newSettings.mqtt_qos     = static_cast<uint8_t>(root["mqtt_qos"] | EMSESP_DEFAULT_MQTT_QOS);
     newSettings.mqtt_retain  = root["mqtt_retain"] | EMSESP_DEFAULT_MQTT_RETAIN;
 
-    newSettings.publish_time_boiler     = root["publish_time_boiler"] | EMSESP_DEFAULT_PUBLISH_TIME;
-    newSettings.publish_time_thermostat = root["publish_time_thermostat"] | EMSESP_DEFAULT_PUBLISH_TIME;
-    newSettings.publish_time_solar      = root["publish_time_solar"] | EMSESP_DEFAULT_PUBLISH_TIME;
-    newSettings.publish_time_mixer      = root["publish_time_mixer"] | EMSESP_DEFAULT_PUBLISH_TIME;
-    newSettings.publish_time_other      = root["publish_time_other"] | EMSESP_DEFAULT_PUBLISH_TIME;
-    newSettings.publish_time_sensor     = root["publish_time_sensor"] | EMSESP_DEFAULT_PUBLISH_TIME;
-    newSettings.publish_time_heartbeat  = root["publish_time_heartbeat"] | EMSESP_DEFAULT_PUBLISH_HEARTBEAT;
+    newSettings.publish_time_boiler     = static_cast<uint16_t>(root["publish_time_boiler"] | EMSESP_DEFAULT_PUBLISH_TIME);
+    newSettings.publish_time_thermostat = static_cast<uint16_t>(root["publish_time_thermostat"] | EMSESP_DEFAULT_PUBLISH_TIME);
+    newSettings.publish_time_solar      = static_cast<uint16_t>(root["publish_time_solar"] | EMSESP_DEFAULT_PUBLISH_TIME);
+    newSettings.publish_time_mixer      = static_cast<uint16_t>(root["publish_time_mixer"] | EMSESP_DEFAULT_PUBLISH_TIME);
+    newSettings.publish_time_other      = static_cast<uint16_t>(root["publish_time_other"] | EMSESP_DEFAULT_PUBLISH_TIME);
+    newSettings.publish_time_sensor     = static_cast<uint16_t>(root["publish_time_sensor"] | EMSESP_DEFAULT_PUBLISH_TIME);
+    newSettings.publish_time_heartbeat  = static_cast<uint16_t>(root["publish_time_heartbeat"] | EMSESP_DEFAULT_PUBLISH_HEARTBEAT);
 
     newSettings.ha_enabled         = root["ha_enabled"] | EMSESP_DEFAULT_HA_ENABLED;
-    newSettings.nested_format      = root["nested_format"] | EMSESP_DEFAULT_NESTED_FORMAT;
+    newSettings.nested_format      = static_cast<uint8_t>(root["nested_format"] | EMSESP_DEFAULT_NESTED_FORMAT);
     newSettings.discovery_prefix   = root["discovery_prefix"] | EMSESP_DEFAULT_DISCOVERY_PREFIX;
-    newSettings.discovery_type     = root["discovery_type"] | EMSESP_DEFAULT_DISCOVERY_TYPE;
+    newSettings.discovery_type     = static_cast<uint8_t>(root["discovery_type"] | EMSESP_DEFAULT_DISCOVERY_TYPE);
     newSettings.publish_single     = root["publish_single"] | EMSESP_DEFAULT_PUBLISH_SINGLE;
     newSettings.publish_single2cmd = root["publish_single2cmd"] | EMSESP_DEFAULT_PUBLISH_SINGLE2CMD;
     newSettings.send_response      = root["send_response"] | EMSESP_DEFAULT_SEND_RESPONSE;
-    newSettings.entity_format      = root["entity_format"] | EMSESP_DEFAULT_ENTITY_FORMAT;
+    newSettings.entity_format      = static_cast<uint8_t>(root["entity_format"] | EMSESP_DEFAULT_ENTITY_FORMAT);
 
     if (newSettings.enabled != settings.enabled) {
         changed = true;
