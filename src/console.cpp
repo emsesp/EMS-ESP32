@@ -604,7 +604,7 @@ void EMSESPShell::display_banner() {
     println();
 
     // set console name
-    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) { console_hostname_ = networkSettings.hostname.c_str(); });
+    EMSESP::esp8266React.getNetworkSettingsService()->read([this](NetworkSettings & networkSettings) { console_hostname_ = networkSettings.hostname.c_str(); });
     if (console_hostname_.empty()) {
         console_hostname_ = "ems-esp";
     }

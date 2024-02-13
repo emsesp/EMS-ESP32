@@ -65,7 +65,7 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
 
 void ESP8266React::begin() {
     _networkSettingsService.begin();
-    _networkSettingsService.read([&](NetworkSettings & networkSettings) {
+    _networkSettingsService.read([this](NetworkSettings & networkSettings) {
         DefaultHeaders & defaultHeaders = DefaultHeaders::Instance();
         if (networkSettings.enableCORS) {
             defaultHeaders.addHeader("Access-Control-Allow-Origin", networkSettings.CORSOrigin);

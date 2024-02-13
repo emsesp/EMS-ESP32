@@ -128,7 +128,7 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
 
 // set value by api command
 bool WebCustomEntityService::command_setvalue(const char * value, const std::string name) {
-    EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
+    EMSESP::webCustomEntityService.read([this](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
     for (CustomEntityItem & entityItem : *customEntityItems) {
         if (Helpers::toLower(entityItem.name) == Helpers::toLower(name)) {
             if (entityItem.ram == 1) {
@@ -251,7 +251,7 @@ void WebCustomEntityService::show_values(JsonObject output) {
 
 // process json output for info/commands and value_info
 bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd) {
-    EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
+    EMSESP::webCustomEntityService.read([this](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
 
     // if it's commands...
     if (Helpers::toLower(cmd) == F_(commands)) {
@@ -365,7 +365,7 @@ void WebCustomEntityService::publish(const bool force) {
         return;
     }
 
-    EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
+    EMSESP::webCustomEntityService.read([this](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
     if (customEntityItems->size() == 0) {
         return;
     }
@@ -456,7 +456,7 @@ void WebCustomEntityService::publish(const bool force) {
 
 // count only entities with valid value or command to show in dashboard
 uint8_t WebCustomEntityService::count_entities() {
-    EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
+    EMSESP::webCustomEntityService.read([this](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
     if (customEntityItems->size() == 0) {
         return 0;
     }
@@ -473,7 +473,7 @@ uint8_t WebCustomEntityService::count_entities() {
 }
 
 uint8_t WebCustomEntityService::has_commands() {
-    EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
+    EMSESP::webCustomEntityService.read([this](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
     uint8_t count = 0;
     for (const CustomEntityItem & entity : *customEntityItems) {
         count += entity.writeable ? 1 : 0;
@@ -484,7 +484,7 @@ uint8_t WebCustomEntityService::has_commands() {
 
 // send to dashboard, msgpack don't like serialized, use number
 void WebCustomEntityService::generate_value_web(JsonObject output) {
-    EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
+    EMSESP::webCustomEntityService.read([this](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
 
     output["label"] = (std::string) "Custom Entities";
     JsonArray data  = output["data"].to<JsonArray>();
@@ -556,7 +556,7 @@ void WebCustomEntityService::generate_value_web(JsonObject output) {
 
 // fetch telegram, called from emsesp::fetch
 void WebCustomEntityService::fetch() {
-    EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
+    EMSESP::webCustomEntityService.read([this](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
     const uint8_t len[] = {1, 1, 1, 2, 2, 3, 3};
 
     for (auto & entity : *customEntityItems) {
@@ -582,7 +582,7 @@ void WebCustomEntityService::fetch() {
 // called on process telegram, read from telegram
 bool WebCustomEntityService::get_value(std::shared_ptr<const Telegram> telegram) {
     bool has_change = false;
-    EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
+    EMSESP::webCustomEntityService.read([this](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
     // read-length of BOOL, INT, UINT, SHORT, USHORT, ULONG, TIME
     const uint8_t len[] = {1, 1, 1, 2, 2, 3, 3};
     for (auto & entity : *customEntityItems) {
@@ -626,7 +626,7 @@ bool WebCustomEntityService::get_value(std::shared_ptr<const Telegram> telegram)
 // hard coded tests
 #ifdef EMSESP_TEST
 void WebCustomEntityService::test() {
-    update([&](WebCustomEntity & webCustomEntity) {
+    update([this](WebCustomEntity & webCustomEntity) {
         webCustomEntity.customEntityItems.clear();
         // test 1
         auto entityItem       = CustomEntityItem();

@@ -40,7 +40,7 @@ class FSPersistence {
 
     void enableUpdateHandler() {
         if (!_updateHandlerId) {
-            _updateHandlerId = _statefulService->addUpdateHandler([&]() { writeToFS(); });
+            _updateHandlerId = _statefulService->addUpdateHandler([this] { writeToFS(); });
         }
     }
 

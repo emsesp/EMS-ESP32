@@ -195,8 +195,8 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
     for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
         shell.printfln(" %s/%s", Mqtt::base().c_str(), mqtt_subfunction.topic_.c_str());
     }
-    shell.println();
 
+    shell.println();
     shell.println();
 }
 
@@ -451,6 +451,7 @@ void Mqtt::on_disconnect(espMqttClientTypes::DisconnectReason reason) {
         return;
     }
     connecting_ = false;
+
     if (reason == espMqttClientTypes::DisconnectReason::TCP_DISCONNECTED) {
         LOG_WARNING("MQTT disconnected: TCP");
     } else if (reason == espMqttClientTypes::DisconnectReason::MQTT_UNACCEPTABLE_PROTOCOL_VERSION) {
@@ -468,6 +469,7 @@ void Mqtt::on_disconnect(espMqttClientTypes::DisconnectReason reason) {
     } else {
         LOG_WARNING("MQTT disconnected: code %d", reason);
     }
+
     mqttClient_->clearQueue(true);
 }
 

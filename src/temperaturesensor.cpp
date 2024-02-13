@@ -53,7 +53,7 @@ void TemperatureSensor::start() {
 // load settings
 void TemperatureSensor::reload() {
     // load the service settings
-    EMSESP::webSettingsService.read([&](WebSettings & settings) {
+    EMSESP::webSettingsService.read([this](WebSettings & settings) {
         dallas_gpio_ = settings.dallas_gpio;
         parasite_    = settings.dallas_parasite;
     });
@@ -604,7 +604,7 @@ std::string TemperatureSensor::Sensor::name() const {
 // look up in customization service for a specific sensor
 // and set the name and offset from that entry if it exists
 bool TemperatureSensor::Sensor::apply_customization() {
-    EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
+    EMSESP::webCustomizationService.read([this](WebCustomization & settings) {
         auto sensors = settings.sensorCustomizations;
         if (!sensors.empty()) {
             for (const auto & sensor : sensors) {
