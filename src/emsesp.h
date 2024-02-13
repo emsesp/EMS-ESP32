@@ -53,6 +53,7 @@
 #include "emsfactory.h"
 #include "telegram.h"
 #include "mqtt.h"
+#include "modbus.h"
 #include "system.h"
 #include "temperaturesensor.h"
 #include "analogsensor.h"
@@ -208,6 +209,7 @@ class EMSESP {
 
     // services
     static Mqtt              mqtt_;
+    static Modbus            modbus_;
     static System            system_;
     static TemperatureSensor temperaturesensor_;
     static AnalogSensor      analogsensor_;
