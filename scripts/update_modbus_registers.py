@@ -4,12 +4,6 @@ import json
 import re
 from string import Template
 
-max_circuit_num = {
-    'hc1': 8,  # max. 8 heating circuits
-    'wwc1': 10,  # max. 10 warm water circuits
-    'hs1': 16  # max. 16 heat sources
-}
-
 modbus_block_size = 1000  # block size of a register block for each tag
 
 # string sizes including terminating NUL. Extracted from the source codes.
@@ -80,6 +74,29 @@ tag_to_tagtype = {
     39: "TAG_TYPE_HS"
 }
 
+device_type_names = [
+    "SYSTEM",
+    "TEMPERATURESENSOR",
+    "ANALOGSENSOR",
+    "SCHEDULER",
+    "BOILER",
+    "THERMOSTAT",
+    "MIXER",
+    "SOLAR",
+    "HEATPUMP",
+    "GATEWAY",
+    "SWITCH",
+    "CONTROLLER",
+    "CONNECT",
+    "ALERT",
+    "EXTENSION",
+    "GENERIC",
+    "HEATSOURCE",
+    "CUSTOM",
+    "VENTILATION",
+    "UNKNOWN"
+]
+
 cpp_file_template = Template('''#include "modbus.h"
 #include "emsdevice.h"
 
@@ -87,14 +104,33 @@ namespace emsesp {
 
 using dt = EMSdevice::DeviceType;
 
-void Modbus::register_mappings() {
+#define REGISTER_MAPPING(device_type, device_value_tag_type, long_name, modbus_register_offset, modbus_register_count) \\
+    Modbus::EntityModbusInfo(device_type, device_value_tag_type,                                                       \\
+    long_name[0], modbus_register_offset, modbus_register_count)
+
+// IMPORTANT: This list MUST be ordered by keys device_type, device_value_tag_type and modbus_register_offset in this order.    
+std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_mappings = {
 $entries};
 
 } // namespace emsesp''')
-#cpp_entry_template = Template(
+# cpp_entry_template = Template(
 #    '    {std::make_tuple($devtype, $tagtype, std::string(\"$shortname\")), {$registeroffset, $registercount}},\n')
 cpp_entry_template = Template(
-    '    register_mapping($devtype, $tagtype, \"$shortname\", $registeroffset, $registercount);\n')
+    '    REGISTER_MAPPING($devtype, $tagtype, $shortname, $registeroffset, $registercount),\n')
+
+# read translations
+listNames = {}
+transre = re.compile(r'^MAKE_TRANSLATION\(([^,\s]+)\s*,\s*\"([^\"]+)\"')
+transf = open('../src/locale_translations.h', 'r')
+while True:
+    line = transf.readline()
+    if not line:
+        break
+    m = transre.match(line)
+    if m is not None:
+        listNames[m.group(2)] = m.group(1)
+transf.close()
+
 entities = []
 
 with fileinput.input() as f_input:
@@ -118,7 +154,7 @@ entity_modbus_property_names = [
 ]
 
 for entity in entities:
-    device_type_name = entity['device type']
+    device_type_name = entity['device type'].upper()
     if device_type_name not in device_types:
         device_types[device_type_name] = {}
     device_type = device_types[device_type_name]
@@ -175,24 +211,28 @@ for device_type_name, device_type in device_types.items():
                 modbus_info['modbus offset'] = str(next_free_offset)
                 next_free_offset += register_count
 
-# exit(0)
-
 # OUTPUT
 
 cpp_entries = ""
 
-for device_type_name, device_type in device_types.items():
-    for tag, entities in device_type.items():
-        for entity_name, modbus_info in entities.items():
-            params = {
-                'devtype': "dt::" + device_type_name.upper(),
-                "tagtype": tag_to_tagtype[int(tag)],  # re.sub(r"[0-9]+", "*", tag),
-                "shortname": entity_name,
-                'registeroffset': modbus_info["modbus offset"],
-                'registercount': modbus_info["modbus count"]
-            }
-            # print(entitypath + ": " + str(modbus_info))
-            cpp_entries += cpp_entry_template.substitute(params)
+# traverse all elements in correct order so they are correctly sorted
+for device_type_name in device_type_names:
+    if device_type_name in device_types:
+        device_type = device_types[device_type_name]
+        for ntag in range(0, 40):
+            tag = str(ntag)
+            if tag in device_type:
+                entities = device_type[tag]
+                for entity_name, modbus_info in sorted(entities.items(), key=lambda x: int(x[1]["modbus offset"])):
+                    params = {
+                        'devtype': "dt::" + device_type_name,
+                        "tagtype": tag_to_tagtype[int(tag)],  # re.sub(r"[0-9]+", "*", tag),
+                        "shortname": 'FL_(' + listNames[entity_name] + ")",
+                        'registeroffset': modbus_info["modbus offset"],
+                        'registercount': modbus_info["modbus count"]
+                    }
+                    # print(entitypath + ": " + str(modbus_info))
+                    cpp_entries += cpp_entry_template.substitute(params)
 
 cpp_src = cpp_file_template.substitute({'entries': cpp_entries})
 print(cpp_src)

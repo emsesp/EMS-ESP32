@@ -20,33 +20,53 @@ namespace emsesp {
 
 class Modbus {
   public:
-    Modbus();
-
     static const int REGISTER_BLOCK_SIZE = 1000;
 
     void start();
 
 #if defined(EMSESP_STANDALONE)
-    int  getRegisterOffset(const DeviceValue & dv);
-    int  getRegisterCount(const DeviceValue & dv);
-    int  getRegisterStartAddress(const DeviceValue & dv);
+    int getRegisterOffset(const DeviceValue & dv);
+    int getRegisterCount(const DeviceValue & dv);
+    int getRegisterStartAddress(const DeviceValue & dv);
 #endif
 
   private:
     static uuid::log::Logger logger_;
 
-    struct EntityModbusInfo {
-        std::string short_name;
-        uint16_t    registerOffset;
-        uint16_t    registerCount;
+    struct EntityModbusInfoKey {
+        uint8_t  device_type;
+        uint8_t  device_value_tag_type;
+        uint16_t registerOffset;
 
-        EntityModbusInfo(const std::string & short_name, uint16_t registerOffset, uint16_t registerCount)
-            : short_name(short_name)
-            , registerOffset(registerOffset)
-            , registerCount(registerCount) {
+        EntityModbusInfoKey(uint8_t deviceType, uint8_t deviceValueTagType, uint16_t registerOffset)
+            : device_type(deviceType)
+            , device_value_tag_type(deviceValueTagType)
+            , registerOffset(registerOffset) {
         }
 
-        EntityModbusInfo(const EntityModbusInfo & other) = default;
+        bool equals(const EntityModbusInfoKey & other) const {
+            return device_type == other.device_type && device_value_tag_type == other.device_value_tag_type && registerOffset == other.registerOffset;
+        }
+
+        bool isLessThan(const EntityModbusInfoKey & other) const {
+            return device_type < other.device_type || (device_type == other.device_type && device_value_tag_type < other.device_value_tag_type)
+                   || (device_value_tag_type == other.device_value_tag_type && registerOffset < other.registerOffset);
+        }
+    };
+
+    struct EntityModbusInfo : EntityModbusInfoKey {
+        uint16_t     registerCount;
+        const char * short_name;
+
+        EntityModbusInfo(uint8_t device_type, uint8_t device_value_tag_type, const char * const short_name, uint16_t registerOffset, uint16_t registerCount)
+            : EntityModbusInfoKey(device_type, device_value_tag_type, registerOffset)
+            , registerCount(registerCount)
+            , short_name(short_name) {
+        }
+
+        EntityModbusInfo()
+            : EntityModbusInfo(0, 0, "", 0, 0) {
+        }
     };
 
     enum DeviceValueTAGType : uint8_t {
@@ -61,27 +81,10 @@ class Modbus {
         TAG_TYPE_HS             = DeviceValue::DeviceValueTAG::TAG_HS1
     };
 
-    static std::map<uint8_t, uint8_t> tag_to_type;
+    static std::map<uint8_t, uint8_t>              tag_to_type;
+    static std::initializer_list<EntityModbusInfo> modbus_register_mappings;
 
-#if defined(EMSESP_STANDALONE)
-    std::map<std::tuple<uint8_t /* DeviceType */, uint8_t /* DeviceValueTAGType */, std::string /* short_name */>, std::shared_ptr<EntityModbusInfo>>
-        entityModbusInfoByShortName_;
-#endif
-
-    std::unordered_map<uint32_t, std::shared_ptr<EntityModbusInfo>> entityModbusInfoByRegisterOffset_;
-
-    static inline uint32_t mk_key(uint8_t device_type, uint8_t device_value_tag_type, uint16_t modbus_register_offset) {
-        return ((uint32_t)device_type << 24) | ((uint32_t)device_value_tag_type << 16) | ((uint32_t)modbus_register_offset);
-    }
-
-    // implemented in modbus_entity_parameters.cpp
-    void register_mappings();
-
-    void register_mapping(uint8_t             device_type,
-                          uint8_t             device_value_tag_type,
-                          const std::string & short_name,
-                          uint16_t            modbus_register_offset,
-                          uint8_t             modbus_register_count);
+    static bool check_parameter_order();
 
 #ifndef EMSESP_STANDALONE
     static ModbusServerTCPasync modbusServer_;

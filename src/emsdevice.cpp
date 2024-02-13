@@ -1876,7 +1876,7 @@ void EMSdevice::read_command(const uint16_t type_id, const uint8_t offset, const
     EMSESP::send_read_request(type_id, device_id(), offset, length);
 }
 
-// copy a raw value (i.e. without appying the numeric_oeprator) to the output buffer.
+// copy a raw value (i.e. without appying the numeric_operator) to the output buffer.
 // returns true on success.
 bool EMSdevice::copy_raw_value(uint8_t tag, const std::string & shortname, std::vector<uint16_t> & result) {
     // find device value by shortname
