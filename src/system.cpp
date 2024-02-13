@@ -1557,8 +1557,8 @@ std::string System::reset_reason(uint8_t cpu) const {
 
 // set NTP status
 void System::ntp_connected(bool b) {
-    if (b != ntp_connected_) {
-        LOG_INFO(b ? "NTP connected" : "NTP disconnected"); // if changed report it
+    if (b != ntp_connected_ && !b) {
+        LOG_WARNING("NTP disconnected"); // if turned off report it
     }
 
     ntp_connected_  = b;
