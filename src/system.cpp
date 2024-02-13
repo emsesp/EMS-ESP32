@@ -202,7 +202,7 @@ bool System::command_syslog_level(const char * value, const int8_t id) {
     if (Helpers::value2enum(value, s, FL_(list_syslog_level))) {
         bool changed = false;
         EMSESP::webSettingsService.update(
-            [this](WebSettings & settings) {
+            [&](WebSettings & settings) {
                 if (settings.syslog_level != (int8_t)s - 1) {
                     settings.syslog_level = (int8_t)s - 1;
                     changed               = true;
@@ -295,7 +295,7 @@ void System::format(uuid::console::Shell & shell) {
 }
 
 void System::syslog_init() {
-    EMSESP::webSettingsService.read([this](WebSettings & settings) {
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
         syslog_enabled_       = settings.syslog_enabled;
         syslog_level_         = settings.syslog_level;
         syslog_mark_interval_ = settings.syslog_mark_interval;
@@ -349,7 +349,7 @@ void System::syslog_init() {
 
 // read some specific system settings to store locally for faster access
 void System::reload_settings() {
-    EMSESP::webSettingsService.read([this](WebSettings & settings) {
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
         version_ = settings.version;
 
         pbutton_gpio_   = settings.pbutton_gpio;
@@ -427,7 +427,7 @@ void System::start() {
     refreshHeapMem(); // refresh free heap and max alloc heap
 #endif
 
-    EMSESP::esp8266React.getNetworkSettingsService()->read([this](NetworkSettings & networkSettings) {
+    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
         hostname(networkSettings.hostname.c_str()); // sets the hostname
     });
 
@@ -1104,14 +1104,14 @@ bool System::check_upgrade(bool factory_settings) {
         // if we're coming from 3.4.4 or 3.5.0b14 which had no version stored then we need to apply new settings
         if (missing_version) {
             LOG_INFO("Setting MQTT Entity ID format to v3.4 format");
-            EMSESP::esp8266React.getMqttSettingsService()->update([this](MqttSettings & mqttSettings) {
+            EMSESP::esp8266React.getMqttSettingsService()->update([&](MqttSettings & mqttSettings) {
                 mqttSettings.entity_format = 0; // use old Entity ID format from v3.4
                 return StateUpdateResult::CHANGED;
             });
         }
 
         // Network Settings Wifi tx_power is now using the value * 4.
-        EMSESP::esp8266React.getNetworkSettingsService()->update([this](NetworkSettings & networkSettings) {
+        EMSESP::esp8266React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
             if (networkSettings.tx_power == 20) {
                 networkSettings.tx_power = WIFI_POWER_19_5dBm; // use 19.5 as we don't have 20 anymore
                 LOG_INFO("Setting WiFi TX Power to Auto");
@@ -1130,7 +1130,7 @@ bool System::check_upgrade(bool factory_settings) {
 
     // if we did a change, set the new version and reboot
     if (save_version) {
-        EMSESP::webSettingsService.update([this](WebSettings & settings) {
+        EMSESP::webSettingsService.update([&](WebSettings & settings) {
             settings.version = EMSESP_APP_VERSION;
             return StateUpdateResult::CHANGED;
         });

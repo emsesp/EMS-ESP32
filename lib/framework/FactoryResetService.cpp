@@ -8,7 +8,7 @@ FactoryResetService::FactoryResetService(AsyncWebServer * server, FS * fs, Secur
 }
 
 void FactoryResetService::handleRequest(AsyncWebServerRequest * request) {
-    request->onDisconnect([this]() { factoryReset(); });
+    request->onDisconnect([this] { factoryReset(); });
     request->send(200);
 }
 

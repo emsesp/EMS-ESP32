@@ -37,7 +37,7 @@ void NTPStatus::ntpStatus(AsyncWebServerRequest * request) {
     time_t now = time(nullptr);
 
     // only provide enabled/disabled status for now
-    root["status"] = []() {
+    root["status"] = [] {
         if (esp_sntp_enabled()) {
             if (emsesp::EMSESP::system_.ntp_connected()) {
                 return 2;

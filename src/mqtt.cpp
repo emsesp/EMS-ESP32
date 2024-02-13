@@ -20,6 +20,7 @@
 #include "emsesp.h"
 #include "version.h"
 #include "emsdevice.h"
+#include <MqttSettingsService.h>
 
 namespace emsesp {
 
@@ -381,7 +382,7 @@ void Mqtt::start() {
     // add the 'publish' command ('call system publish' in console or via API)
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), System::command_publish, FL_(publish_cmd));
 
-    // create last will topic with the base prefixed. It has to be static because asyncmqttclient destroys the reference
+    // create last will topic with the base prefixed. It has to be static because the client destroys the reference
     static char will_topic[MQTT_TOPIC_MAX_SIZE];
     if (!Mqtt::base().empty()) {
         snprintf(will_topic, MQTT_TOPIC_MAX_SIZE, "%s/status", Mqtt::base().c_str());

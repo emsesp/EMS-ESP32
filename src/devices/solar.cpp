@@ -554,7 +554,7 @@ void Solar::process_SM10Monitor(std::shared_ptr<const Telegram> telegram) {
     has_update(solarPumpMod_, solarpumpmod);
 
     if (!Helpers::hasValue(maxFlow_)) {
-        EMSESP::webSettingsService.read([this](WebSettings & settings) { maxFlow_ = settings.solar_maxflow; });
+        EMSESP::webSettingsService.read([&](WebSettings & settings) { maxFlow_ = settings.solar_maxflow; });
         has_update(&maxFlow_);
     }
 
@@ -1047,7 +1047,7 @@ bool Solar::set_SM10MaxFlow(const char * value, const int8_t id) {
         return false;
     }
     maxFlow_ = (flow * 10);
-    EMSESP::webSettingsService.update([this](WebSettings & settings) {
+    EMSESP::webSettingsService.update([&](WebSettings & settings) {
         settings.solar_maxflow = maxFlow_;
         return StateUpdateResult::CHANGED;
     });

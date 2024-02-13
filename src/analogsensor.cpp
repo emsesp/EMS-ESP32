@@ -37,7 +37,7 @@ void AnalogSensor::start() {
     Command::add(
         EMSdevice::DeviceType::ANALOGSENSOR,
         F_(setvalue),
-        [this](const char * value, const int8_t id) { return command_setvalue(value, id); },
+        [&](const char * value, const int8_t id) { return command_setvalue(value, id); },
         FL_(setiovalue_cmd),
         CommandFlag::ADMIN_ONLY);
 
@@ -48,7 +48,7 @@ void AnalogSensor::start() {
 
 // load settings from the customization file, sorts them and initializes the GPIOs
 void AnalogSensor::reload() {
-    EMSESP::webSettingsService.read([this](WebSettings & settings) { analog_enabled_ = settings.analog_enabled; });
+    EMSESP::webSettingsService.read([&](WebSettings & settings) { analog_enabled_ = settings.analog_enabled; });
 
 #if defined(EMSESP_STANDALONE)
     analog_enabled_ = true; // for local offline testing
@@ -63,7 +63,7 @@ void AnalogSensor::reload() {
     }
     // load the list of analog sensors from the customization service
     // and store them locally and then activate them
-    EMSESP::webCustomizationService.read([this](WebCustomization & settings) {
+    EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
         auto it = sensors_.begin();
         for (auto & sensor_ : sensors_) {
             // update existing sensors

@@ -25,7 +25,7 @@ uuid::log::Logger Shower::logger_{F_(shower), uuid::log::Facility::CONSOLE};
 static bool force_coldshot = false;
 
 void Shower::start() {
-    EMSESP::webSettingsService.read([this](WebSettings & settings) {
+    EMSESP::webSettingsService.read([&](WebSettings & settings) {
         shower_timer_          = settings.shower_timer;
         shower_alert_          = settings.shower_alert;
         shower_alert_trigger_  = settings.shower_alert_trigger * 60000; // convert from minutes
@@ -35,7 +35,7 @@ void Shower::start() {
     Command::add(
         EMSdevice::DeviceType::BOILER,
         F_(coldshot),
-        [this](const char * value, const int8_t id, JsonObject output) {
+        [&](const char * value, const int8_t id, JsonObject output) {
             LOG_INFO("Forcing coldshot...");
             if (shower_state_) {
                 output["message"] = "OK";

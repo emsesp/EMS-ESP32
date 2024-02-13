@@ -84,7 +84,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
                     Update.setMD5(_md5.data());
                     _md5.front() = '\0';
                 }
-                request->onDisconnect([this]() { handleEarlyDisconnect(); }); // success, let's make sure we end the update if the client hangs up
+                request->onDisconnect([this] { handleEarlyDisconnect(); }); // success, let's make sure we end the update if the client hangs up
             } else {
                 handleError(request, 507); // failed to begin, send an error response Insufficient Storage
                 return;

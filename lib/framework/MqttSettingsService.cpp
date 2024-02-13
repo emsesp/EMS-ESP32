@@ -13,7 +13,7 @@ MqttSettingsService::MqttSettingsService(AsyncWebServer * server, FS * fs, Secur
     , _disconnectReason(espMqttClientTypes::DisconnectReason::TCP_DISCONNECTED)
     , _mqttClient(nullptr) {
     WiFi.onEvent([this](WiFiEvent_t event, WiFiEventInfo_t info) { WiFiEvent(event); });
-    addUpdateHandler([this]() { onConfigUpdated(); }, false);
+    addUpdateHandler([this] { onConfigUpdated(); }, false);
 }
 
 MqttSettingsService::~MqttSettingsService() {

@@ -7,7 +7,7 @@ NetworkSettingsService::NetworkSettingsService(AsyncWebServer * server, FS * fs,
     , _fsPersistence(NetworkSettings::read, NetworkSettings::update, this, fs, NETWORK_SETTINGS_FILE)
     , _lastConnectionAttempt(0)
     , _stopping(false) {
-    addUpdateHandler([this]() { reconfigureWiFiConnection(); }, false);
+    addUpdateHandler([this] { reconfigureWiFiConnection(); }, false);
     WiFi.onEvent([this](WiFiEvent_t event, WiFiEventInfo_t info) { WiFiEvent(event, info); });
 }
 
