@@ -391,6 +391,11 @@ void System::reload_settings() {
         board_profile_  = settings.board_profile;
         telnet_enabled_ = settings.telnet_enabled;
 
+        modbus_enabled_       = settings.modbus_enabled;
+        modbus_port_          = settings.modbus_port;
+        modbus_maxClients_    = settings.modbus_maxClients;
+        modbus_timeoutMillis_ = settings.modbus_timeoutMillis;
+
         rx_gpio_     = settings.rx_gpio;
         tx_gpio_     = settings.tx_gpio;
         dallas_gpio_ = settings.dallas_gpio;
