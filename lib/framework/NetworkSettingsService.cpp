@@ -205,11 +205,7 @@ void NetworkSettingsService::mDNS_start() const {
         MDNS.addServiceTxt("http", "tcp", "version", EMSESP_APP_VERSION);
         MDNS.addServiceTxt("http", "tcp", "address", address_s.c_str());
 
-        emsesp::EMSESP::logger().info("mDNS Responder service started");
-    }
-#else
-    if (_state.enableMDNS) {
-        EMSESP::logger().info("mDNS Responder service started");
+        emsesp::EMSESP::logger().info("Starting mDNS Responder service");
     }
 #endif
 }
