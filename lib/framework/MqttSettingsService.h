@@ -60,21 +60,14 @@ static String generateClientId() {
 
 class MqttSettings {
   public:
-    // host and port - if enabled
     bool     enabled;
     String   host;
     uint16_t port;
     String   rootCA;
     bool     enableTLS;
-
-    // username and password
-    String username;
-    String password;
-
-    // client id settings
-    String clientId;
-
-    // connection settings
+    String   username;
+    String   password;
+    String   clientId;
     uint16_t keepAlive;
     bool     cleanSession;
 
