@@ -65,9 +65,11 @@ class ESP8266React {
         _mqttSettingsService.setWill(will_topic);
     }
 
+#ifndef EMSESP_STANDALONE
     void factoryReset() {
         _factoryResetService.factoryReset();
     }
+#endif
 
   private:
     SecuritySettingsService _securitySettingsService;
