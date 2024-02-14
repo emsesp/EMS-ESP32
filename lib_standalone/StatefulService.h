@@ -1,7 +1,8 @@
 #ifndef StatefulService_h
 #define StatefulService_h
 
-#include <Arduino.h>
+#include "Arduino.h"
+
 #include <ArduinoJson.h>
 
 #include <list>

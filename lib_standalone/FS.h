@@ -21,9 +21,10 @@
 #ifndef FS_H
 #define FS_H
 
+#include "Arduino.h"
+
 #include <memory>
 #include <string>
-#include <Arduino.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <dirent.h>

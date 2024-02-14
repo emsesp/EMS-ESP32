@@ -17,9 +17,9 @@
  */
 #ifdef ENV_NATIVE
 
-#include <Arduino.h>
-#include <FS.h>
-#include <LittleFS.h>
+#include "Arduino.h"
+#include "FS.h"
+#include "LittleFS.h"
 
 fs::LittleFSFS LittleFS;
 

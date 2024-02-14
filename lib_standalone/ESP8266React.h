@@ -1,21 +1,19 @@
 #ifndef ESP8266React_h
 #define ESP8266React_h
 
-#include <Arduino.h>
-
-#include <ArduinoJson.h>
-#include <AsyncJson.h>
-
-#include <espMqttClient.h>
-#include <ESPAsyncWebServer.h>
-
 #include <list>
 
-#include <FS.h>
-#include <SecurityManager.h>
-#include <SecuritySettingsService.h>
-#include <StatefulService.h>
-#include <Network.h>
+#include "Arduino.h"
+#include "ArduinoJson.h"
+#include "AsyncJson.h"
+#include "ESPAsyncWebServer.h"
+#include "FS.h"
+#include "SecurityManager.h"
+#include "SecuritySettingsService.h"
+#include "StatefulService.h"
+#include "Network.h"
+
+#include <espMqttClient.h>
 
 #define AP_SETTINGS_FILE "/config/apSettings.json"
 #define MQTT_SETTINGS_FILE "/config/mqttSettings.json"
@@ -104,7 +102,6 @@ class ESP8266React {
         , _securitySettingsService(server, fs){};
 
     void begin() {
-        // initialize mqtt
         _mqttClient = new espMqttClient();
     };
     void loop(){};
