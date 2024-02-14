@@ -20,7 +20,6 @@
 #include "emsesp.h"
 #include "version.h"
 #include "emsdevice.h"
-#include <MqttSettingsService.h>
 
 namespace emsesp {
 
