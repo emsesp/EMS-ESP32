@@ -4,7 +4,6 @@
 #include "StatefulService.h"
 #include "HttpEndpoint.h"
 #include "FSPersistence.h"
-#include "ESPUtils.h"
 
 #include <espMqttClient.h>
 
@@ -37,13 +36,6 @@
 
 #ifndef FACTORY_MQTT_PASSWORD
 #define FACTORY_MQTT_PASSWORD ""
-#endif
-
-#ifndef FACTORY_MQTT_CLIENT_ID
-#define FACTORY_MQTT_CLIENT_ID generateClientId()
-static String generateClientId() {
-    return ESPUtils::defaultDeviceValue("esp32-");
-}
 #endif
 
 #ifndef FACTORY_MQTT_KEEP_ALIVE

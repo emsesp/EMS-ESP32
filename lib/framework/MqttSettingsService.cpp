@@ -16,6 +16,14 @@ MqttSettingsService::MqttSettingsService(AsyncWebServer * server, FS * fs, Secur
     addUpdateHandler([this] { onConfigUpdated(); }, false);
 }
 
+static String generateClientId() {
+#ifdef EMSESP_STANDALONE
+    return "ems-esp";
+#else
+    return "esp32-" + String(static_cast<uint32_t>(ESP.getEfuseMac()), HEX);
+#endif
+}
+
 MqttSettingsService::~MqttSettingsService() {
     delete _mqttClient;
 }
@@ -255,7 +263,7 @@ StateUpdateResult MqttSettings::update(JsonObject root, MqttSettings & settings)
     newSettings.base         = root["base"] | FACTORY_MQTT_BASE;
     newSettings.username     = root["username"] | FACTORY_MQTT_USERNAME;
     newSettings.password     = root["password"] | FACTORY_MQTT_PASSWORD;
-    newSettings.clientId     = root["client_id"] | FACTORY_MQTT_CLIENT_ID;
+    newSettings.clientId     = root["client_id"] | generateClientId();
     newSettings.keepAlive    = static_cast<uint16_t>(root["keep_alive"] | FACTORY_MQTT_KEEP_ALIVE);
     newSettings.cleanSession = root["clean_session"] | FACTORY_MQTT_CLEAN_SESSION;
     newSettings.mqtt_qos     = static_cast<uint8_t>(root["mqtt_qos"] | EMSESP_DEFAULT_MQTT_QOS);
