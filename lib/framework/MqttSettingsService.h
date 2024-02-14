@@ -109,14 +109,6 @@ class MqttSettingsService : public StatefulService<MqttSettings> {
     HttpEndpoint<MqttSettings>  _httpEndpoint;
     FSPersistence<MqttSettings> _fsPersistence;
 
-    // Pointers to hold retained copies of the mqtt client connection strings.
-    // This is required as espMqttClient holds references to the supplied connection strings.
-    char * _retainedHost;
-    char * _retainedClientId;
-    char * _retainedUsername;
-    char * _retainedPassword;
-    char * _retainedRootCA;
-
     // variable to help manage connection
     bool          _reconfigureMqtt;
     unsigned long _disconnectedAt;
