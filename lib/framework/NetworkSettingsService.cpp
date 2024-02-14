@@ -1,13 +1,25 @@
-#include <NetworkSettingsService.h>
+#include "NetworkSettingsService.h"
 
-using namespace std::placeholders; // for `_1` etc
+#include "../../src/emsesp_stub.hpp"
 
 NetworkSettingsService::NetworkSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(NetworkSettings::read, NetworkSettings::update, this, server, NETWORK_SETTINGS_SERVICE_PATH, securityManager)
     , _fsPersistence(NetworkSettings::read, NetworkSettings::update, this, fs, NETWORK_SETTINGS_FILE)
-    , _lastConnectionAttempt(0) {
-    addUpdateHandler([&](const String & originId) { reconfigureWiFiConnection(); }, false);
-    WiFi.onEvent(std::bind(&NetworkSettingsService::WiFiEvent, this, _1));
+    , _lastConnectionAttempt(0)
+    , _stopping(false) {
+    addUpdateHandler([this] { reconfigureWiFiConnection(); }, false);
+    WiFi.onEvent([this](WiFiEvent_t event, WiFiEventInfo_t info) { WiFiEvent(event, info); });
+}
+
+static bool formatBssid(const String & bssid, uint8_t (&mac)[6]) {
+    uint tmp[6];
+    if (bssid.isEmpty() || sscanf(bssid.c_str(), "%X:%X:%X:%X:%X:%X", &tmp[0], &tmp[1], &tmp[2], &tmp[3], &tmp[4], &tmp[5]) != 6) {
+        return false;
+    }
+    for (uint8_t i = 0; i < 6; i++) {
+        mac[i] = static_cast<uint8_t>(tmp[i]);
+    }
+    return true;
 }
 
 void NetworkSettingsService::begin() {
@@ -44,7 +56,7 @@ void NetworkSettingsService::reconfigureWiFiConnection() {
 
 void NetworkSettingsService::loop() {
     unsigned long currentMillis = millis();
-    if (!_lastConnectionAttempt || (uint32_t)(currentMillis - _lastConnectionAttempt) >= WIFI_RECONNECTION_DELAY) {
+    if (!_lastConnectionAttempt || static_cast<uint32_t>(currentMillis - _lastConnectionAttempt) >= WIFI_RECONNECTION_DELAY) {
         _lastConnectionAttempt = currentMillis;
         manageSTA();
     }
@@ -65,49 +77,379 @@ void NetworkSettingsService::manageSTA() {
 
         // www.esp32.com/viewtopic.php?t=12055
         if (_state.bandwidth20) {
-            esp_wifi_set_bandwidth((wifi_interface_t)ESP_IF_WIFI_STA, WIFI_BW_HT20);
+            esp_wifi_set_bandwidth(static_cast<wifi_interface_t>(ESP_IF_WIFI_STA), WIFI_BW_HT20);
         } else {
-            esp_wifi_set_bandwidth((wifi_interface_t)ESP_IF_WIFI_STA, WIFI_BW_HT40);
+            esp_wifi_set_bandwidth(static_cast<wifi_interface_t>(ESP_IF_WIFI_STA), WIFI_BW_HT40);
         }
         if (_state.nosleep) {
             WiFi.setSleep(false); // turn off sleep - WIFI_PS_NONE
         }
+
         // attempt to connect to the network
-        uint mac[6];
-        if (!_state.bssid.isEmpty() && sscanf(_state.bssid.c_str(), "%X:%X:%X:%X:%X:%X", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]) == 6) {
-            uint8_t mac1[6];
-            for (uint8_t i = 0; i < 6; i++) {
-                mac1[i] = (uint8_t)mac[i];
-            }
-            WiFi.begin(_state.ssid.c_str(), _state.password.c_str(), 0, mac1);
+        uint8_t bssid[6];
+        if (formatBssid(_state.bssid, bssid)) {
+            WiFi.begin(_state.ssid.c_str(), _state.password.c_str(), 0, bssid);
         } else {
             WiFi.begin(_state.ssid.c_str(), _state.password.c_str());
         }
-        // set power after wifi is startet, fixed value for C3_V1
-        // if (WiFi.isConnected()) {
+
 #ifdef BOARD_C3_MINI_V1
+        // always hardcode Tx power for Wemos CS Mini v1
         // v1 needs this value, see https://github.com/emsesp/EMS-ESP32/pull/620#discussion_r993173979
-        WiFi.setTxPower(WIFI_POWER_8_5dBm); // https://www.wemos.cc/en/latest/c3/c3_mini_1_0_0.html#about-wifi
+        // https://www.wemos.cc/en/latest/c3/c3_mini_1_0_0.html#about-wifi
+        WiFi.setTxPower(WIFI_POWER_8_5dBm);
 #else
-        // esp_wifi_set_max_tx_power(_state.tx_power * 4);
-        // TODO make it dynamic
-        WiFi.setTxPower((wifi_power_t)(_state.tx_power * 4));
+        if (_state.tx_power != 0) {
+            // if not set to Auto (0) set the Tx power now
+            if (!WiFi.setTxPower(static_cast<wifi_power_t>(_state.tx_power))) {
+                emsesp::EMSESP::logger().warning("Failed to set WiFi Tx Power");
+            }
+        }
 #endif
-        // }
     } else { // not connected but STA-mode active => disconnect
         reconfigureWiFiConnection();
     }
 }
 
-// handles if wifi stopped
-void NetworkSettingsService::WiFiEvent(WiFiEvent_t event) {
-    if (event == ARDUINO_EVENT_WIFI_STA_STOP) {
+// set the TxPower based on the RSSI (signal strength), picking the lowest value
+// code is based of RSSI (signal strength) and copied from Tasmota's WiFiSetTXpowerBasedOnRssi() which is copied ESPEasy's ESPEasyWifi.SetWiFiTXpower() function
+void NetworkSettingsService::setWiFiPowerOnRSSI() {
+    // Range ESP32  : 2dBm - 20dBm
+    // 802.11b - wifi1
+    // 802.11a - wifi2
+    // 802.11g - wifi3
+    // 802.11n - wifi4
+    // 802.11ac - wifi5
+    // 802.11ax - wifi6
+
+    int max_tx_pwr = MAX_TX_PWR_DBM_n;        // assume wifi4
+    int threshold  = WIFI_SENSITIVITY_n + 70; // Margin in dBm * 10 on top of threshold
+
+    // Assume AP sends with max set by ETSI standard.
+    // 2.4 GHz: 100 mWatt (20 dBm)
+    // US and some other countries allow 1000 mW (30 dBm)
+    int rssi    = WiFi.RSSI() * 10;
+    int newrssi = rssi - 200; // We cannot send with over 20 dBm, thus it makes no sense to force higher TX power all the time.
+
+    int min_tx_pwr = 0;
+    if (newrssi < threshold) {
+        min_tx_pwr = threshold - newrssi;
+    }
+    if (min_tx_pwr > max_tx_pwr) {
+        min_tx_pwr = max_tx_pwr;
+    }
+
+    uint8_t set_power = min_tx_pwr / 10; // this is the recommended power setting to use
+
+    // from WiFIGeneric.h use:
+    //  WIFI_POWER_19_5dBm = 78,// 19.5dBm
+    //  WIFI_POWER_19dBm = 76,// 19dBm
+    //  WIFI_POWER_18_5dBm = 74,// 18.5dBm
+    //  WIFI_POWER_17dBm = 68,// 17dBm
+    //  WIFI_POWER_15dBm = 60,// 15dBm
+    //  WIFI_POWER_13dBm = 52,// 13dBm
+    //  WIFI_POWER_11dBm = 44,// 11dBm
+    //  WIFI_POWER_8_5dBm = 34,// 8.5dBm
+    //  WIFI_POWER_7dBm = 28,// 7dBm
+    //  WIFI_POWER_5dBm = 20,// 5dBm
+    //  WIFI_POWER_2dBm = 8,// 2dBm
+    //  WIFI_POWER_MINUS_1dBm = -4// -1dBm
+    wifi_power_t p = WIFI_POWER_2dBm;
+    if (min_tx_pwr > 185)
+        p = WIFI_POWER_19_5dBm;
+    else if (min_tx_pwr > 170)
+        p = WIFI_POWER_18_5dBm;
+    else if (min_tx_pwr > 150)
+        p = WIFI_POWER_17dBm;
+    else if (min_tx_pwr > 130)
+        p = WIFI_POWER_15dBm;
+    else if (min_tx_pwr > 110)
+        p = WIFI_POWER_13dBm;
+    else if (min_tx_pwr > 85)
+        p = WIFI_POWER_11dBm;
+    else if (min_tx_pwr > 70)
+        p = WIFI_POWER_8_5dBm;
+    else if (min_tx_pwr > 50)
+        p = WIFI_POWER_7dBm;
+    else if (min_tx_pwr > 20)
+        p = WIFI_POWER_5dBm;
+
+#ifdef EMSESP_DEBUG
+    emsesp::EMSESP::logger().debug("Recommended set WiFi Tx Power (set_power %d, new power %d, rssi %d, threshold %d)", set_power, p, rssi, threshold);
+#else
+    char result[10];
+    emsesp::EMSESP::logger().info("Setting WiFi Tx Power to %s dBm", emsesp::Helpers::render_value(result, ((double)(p) / 4), 1));
+#endif
+
+    if (!WiFi.setTxPower(p)) {
+        emsesp::EMSESP::logger().warning("Failed to set WiFi Tx Power");
+    }
+}
+
+// start the multicast UDP service so EMS-ESP is discoverable via .local
+void NetworkSettingsService::mDNS_start() const {
+#ifndef EMSESP_STANDALONE
+    MDNS.end();
+
+    if (_state.enableMDNS) {
+        if (!MDNS.begin(emsesp::EMSESP::system_.hostname().c_str())) {
+            emsesp::EMSESP::logger().warning("Failed to start mDNS Responder service");
+            return;
+        }
+
+        std::string address_s = emsesp::EMSESP::system_.hostname() + ".local";
+
+        MDNS.addService("http", "tcp", 80);   // add our web server and rest API
+        MDNS.addService("telnet", "tcp", 23); // add our telnet console
+
+        MDNS.addServiceTxt("http", "tcp", "version", EMSESP_APP_VERSION);
+        MDNS.addServiceTxt("http", "tcp", "address", address_s.c_str());
+
+        emsesp::EMSESP::logger().info("Starting mDNS Responder service");
+    }
+#endif
+}
+
+const char * NetworkSettingsService::disconnectReason(uint8_t code) {
+#ifndef EMSESP_STANDALONE
+    switch (code) {
+    case WIFI_REASON_UNSPECIFIED: // = 1,
+        return "unspecified";
+    case WIFI_REASON_AUTH_EXPIRE: // = 2,
+        return "auth expire";
+    case WIFI_REASON_AUTH_LEAVE: // = 3,
+        return "auth leave";
+    case WIFI_REASON_ASSOC_EXPIRE: // = 4,
+        return "assoc expired";
+    case WIFI_REASON_ASSOC_TOOMANY: // = 5,
+        return "assoc too many";
+    case WIFI_REASON_NOT_AUTHED: // = 6,
+        return "not authenticated";
+    case WIFI_REASON_NOT_ASSOCED: // = 7,
+        return "not assoc";
+    case WIFI_REASON_ASSOC_LEAVE: // = 8,
+        return "assoc leave";
+    case WIFI_REASON_ASSOC_NOT_AUTHED: // = 9,
+        return "assoc not authed";
+    case WIFI_REASON_DISASSOC_PWRCAP_BAD: // = 10,
+        return "disassoc powerCAP bad";
+    case WIFI_REASON_DISASSOC_SUPCHAN_BAD: // = 11,
+        return "disassoc supchan bad";
+    case WIFI_REASON_IE_INVALID: // = 13,
+        return "IE invalid";
+    case WIFI_REASON_MIC_FAILURE: // = 14,
+        return "MIC failure";
+    case WIFI_REASON_4WAY_HANDSHAKE_TIMEOUT: // = 15,
+        return "4way handshake timeout";
+    case WIFI_REASON_GROUP_KEY_UPDATE_TIMEOUT: // = 16,
+        return "group key-update timeout";
+    case WIFI_REASON_IE_IN_4WAY_DIFFERS: // = 17,
+        return "IE in 4way differs";
+    case WIFI_REASON_GROUP_CIPHER_INVALID: // = 18,
+        return "group cipher invalid";
+    case WIFI_REASON_PAIRWISE_CIPHER_INVALID: // = 19,
+        return "pairwise cipher invalid";
+    case WIFI_REASON_AKMP_INVALID: // = 20,
+        return "AKMP invalid";
+    case WIFI_REASON_UNSUPP_RSN_IE_VERSION: // = 21,
+        return "unsupported RSN_IE version";
+    case WIFI_REASON_INVALID_RSN_IE_CAP: // = 22,
+        return "invalid RSN_IE_CAP";
+    case WIFI_REASON_802_1X_AUTH_FAILED: // = 23,
+        return "802 X1 auth failed";
+    case WIFI_REASON_CIPHER_SUITE_REJECTED: // = 24,
+        return "cipher suite rejected";
+    case WIFI_REASON_BEACON_TIMEOUT: // = 200,
+        return "beacon timeout";
+    case WIFI_REASON_NO_AP_FOUND: // = 201,
+        return "no AP found";
+    case WIFI_REASON_AUTH_FAIL: // = 202,
+        return "auth fail";
+    case WIFI_REASON_ASSOC_FAIL: // = 203,
+        return "assoc fail";
+    case WIFI_REASON_HANDSHAKE_TIMEOUT: // = 204,
+        return "handshake timeout";
+    case WIFI_REASON_CONNECTION_FAIL: // 205,
+        return "connection fail";
+    case WIFI_REASON_AP_TSF_RESET: // 206,
+        return "AP tsf reset";
+    case WIFI_REASON_ROAMING: // 207,
+        return "roaming";
+    case WIFI_REASON_ASSOC_COMEBACK_TIME_TOO_LONG: // 208,
+        return "assoc comeback time too long";
+    case WIFI_REASON_SA_QUERY_TIMEOUT: // 209,
+        return "sa query timeout";
+    default:
+        return "unknown";
+    }
+#endif
+
+    return "";
+}
+
+// handles both WiFI and Ethernet
+void NetworkSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
+#ifndef EMSESP_STANDALONE
+
+    switch (event) {
+    case ARDUINO_EVENT_WIFI_STA_STOP:
         if (_stopping) {
             _lastConnectionAttempt = 0;
             _stopping              = false;
         }
+        break;
+
+    case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
+        emsesp::EMSESP::logger().warning("WiFi disconnected. Reason: %s (%d)",
+                                         disconnectReason(info.wifi_sta_disconnected.reason),
+                                         info.wifi_sta_disconnected.reason); // IDF 4.0
+        emsesp::EMSESP::system_.has_ipv6(false);
+        break;
+
+    case ARDUINO_EVENT_WIFI_STA_GOT_IP:
+        char result[10];
+        emsesp::EMSESP::logger().info("WiFi connected (IP=%s, hostname=%s, TxPower=%s dBm)",
+                                      WiFi.localIP().toString().c_str(),
+                                      WiFi.getHostname(),
+                                      emsesp::Helpers::render_value(result, ((double)(WiFi.getTxPower()) / 4), 1));
+        mDNS_start();
+        break;
+
+    case ARDUINO_EVENT_ETH_START:
+        ETH.setHostname(emsesp::EMSESP::system_.hostname().c_str());
+
+        // configure for static IP
+        if (_state.staticIPConfig) {
+            ETH.config(_state.localIP, _state.gatewayIP, _state.subnetMask, _state.dnsIP1, _state.dnsIP2);
+        }
+        break;
+
+    case ARDUINO_EVENT_ETH_GOT_IP:
+        // prevent double calls
+        if (!emsesp::EMSESP::system_.ethernet_connected()) {
+            emsesp::EMSESP::logger().info("Ethernet connected (IP=%s, speed %d Mbps)", ETH.localIP().toString().c_str(), ETH.linkSpeed());
+            emsesp::EMSESP::system_.ethernet_connected(true);
+            mDNS_start();
+        }
+        break;
+
+    case ARDUINO_EVENT_ETH_DISCONNECTED:
+        emsesp::EMSESP::logger().warning("Ethernet disconnected");
+        emsesp::EMSESP::system_.ethernet_connected(false);
+        emsesp::EMSESP::system_.has_ipv6(false);
+        break;
+
+    case ARDUINO_EVENT_ETH_STOP:
+        emsesp::EMSESP::logger().info("Ethernet stopped");
+        emsesp::EMSESP::system_.ethernet_connected(false);
+        emsesp::EMSESP::system_.has_ipv6(false);
+        break;
+
+    case ARDUINO_EVENT_WIFI_STA_CONNECTED:
+        // Set the TxPower after the connection is established, if we're using TxPower = 0 (Auto)
+        if (_state.tx_power == 0) {
+            setWiFiPowerOnRSSI();
+        }
+        if (_state.enableIPv6) {
+            WiFi.enableIpV6();
+        }
+        break;
+
+    case ARDUINO_EVENT_ETH_CONNECTED:
+        if (_state.enableIPv6) {
+            ETH.enableIpV6();
+        }
+        break;
+
+        // IPv6 specific
+    case ARDUINO_EVENT_WIFI_STA_GOT_IP6:
+    case ARDUINO_EVENT_ETH_GOT_IP6:
+        if (emsesp::EMSESP::system_.ethernet_connected()) {
+            emsesp::EMSESP::logger().info("Ethernet connected (IPv6=%s, speed %d Mbps)", ETH.localIPv6().toString().c_str(), ETH.linkSpeed());
+        } else {
+            emsesp::EMSESP::logger().info("WiFi connected (IPv6=%s, hostname=%s, TxPower=%s dBm)",
+                                          WiFi.localIPv6().toString().c_str(),
+                                          WiFi.getHostname(),
+                                          emsesp::Helpers::render_value(result, ((double)(WiFi.getTxPower()) / 4), 1));
+        }
+        mDNS_start();
+        emsesp::EMSESP::system_.has_ipv6(true);
+        break;
+
+    default:
+        break;
     }
-    // if (!_stopping && (event == ARDUINO_EVENT_WIFI_STA_LOST_IP || event == ARDUINO_EVENT_WIFI_STA_DISCONNECTED)) {
-    //     reconfigureWiFiConnection();
-    // }
+#endif
+}
+
+void NetworkSettings::read(NetworkSettings & settings, JsonObject root) {
+    // connection settings
+    root["ssid"]             = settings.ssid;
+    root["bssid"]            = settings.bssid;
+    root["password"]         = settings.password;
+    root["hostname"]         = settings.hostname;
+    root["static_ip_config"] = settings.staticIPConfig;
+    root["enableIPv6"]       = settings.enableIPv6;
+    root["bandwidth20"]      = settings.bandwidth20;
+    root["nosleep"]          = settings.nosleep;
+    root["enableMDNS"]       = settings.enableMDNS;
+    root["enableCORS"]       = settings.enableCORS;
+    root["CORSOrigin"]       = settings.CORSOrigin;
+    root["tx_power"]         = settings.tx_power;
+
+    // extended settings
+    JsonUtils::writeIP(root, "local_ip", settings.localIP);
+    JsonUtils::writeIP(root, "gateway_ip", settings.gatewayIP);
+    JsonUtils::writeIP(root, "subnet_mask", settings.subnetMask);
+    JsonUtils::writeIP(root, "dns_ip_1", settings.dnsIP1);
+    JsonUtils::writeIP(root, "dns_ip_2", settings.dnsIP2);
+}
+
+StateUpdateResult NetworkSettings::update(JsonObject root, NetworkSettings & settings) {
+    // keep copy of original settings
+    auto enableCORS = settings.enableCORS;
+    auto CORSOrigin = settings.CORSOrigin;
+    auto ssid       = settings.ssid;
+    auto tx_power   = settings.tx_power;
+
+    settings.ssid           = root["ssid"] | FACTORY_WIFI_SSID;
+    settings.bssid          = root["bssid"] | "";
+    settings.password       = root["password"] | FACTORY_WIFI_PASSWORD;
+    settings.hostname       = root["hostname"] | FACTORY_WIFI_HOSTNAME;
+    settings.staticIPConfig = root["static_ip_config"] | false;
+    settings.enableIPv6     = root["enableIPv6"] | false;
+    settings.bandwidth20    = root["bandwidth20"] | false;
+    settings.tx_power       = static_cast<uint8_t>(root["tx_power"] | 0);
+    settings.nosleep        = root["nosleep"] | false;
+    settings.enableMDNS     = root["enableMDNS"] | true;
+    settings.enableCORS     = root["enableCORS"] | false;
+    settings.CORSOrigin     = root["CORSOrigin"] | "*";
+
+    // extended settings
+    JsonUtils::readIP(root, "local_ip", settings.localIP);
+    JsonUtils::readIP(root, "gateway_ip", settings.gatewayIP);
+    JsonUtils::readIP(root, "subnet_mask", settings.subnetMask);
+    JsonUtils::readIP(root, "dns_ip_1", settings.dnsIP1);
+    JsonUtils::readIP(root, "dns_ip_2", settings.dnsIP2);
+
+    // Swap around the dns servers if 2 is populated but 1 is not
+    if (IPUtils::isNotSet(settings.dnsIP1) && IPUtils::isSet(settings.dnsIP2)) {
+        settings.dnsIP1 = settings.dnsIP2;
+        settings.dnsIP2 = INADDR_NONE;
+    }
+
+    // Turning off static ip config if we don't meet the minimum requirements
+    // of ipAddress, gateway and subnet. This may change to static ip only
+    // as sensible defaults can be assumed for gateway and subnet
+    if (settings.staticIPConfig && (IPUtils::isNotSet(settings.localIP) || IPUtils::isNotSet(settings.gatewayIP) || IPUtils::isNotSet(settings.subnetMask))) {
+        settings.staticIPConfig = false;
+    }
+
+    // see if we need to inform the user of a restart
+    if (tx_power != settings.tx_power || enableCORS != settings.enableCORS || CORSOrigin != settings.CORSOrigin
+        || (ssid != settings.ssid && settings.ssid.isEmpty())) {
+        return StateUpdateResult::CHANGED_RESTART; // tell WebUI that a restart is needed
+    }
+
+    return StateUpdateResult::CHANGED;
 }

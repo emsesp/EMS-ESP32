@@ -208,8 +208,7 @@ bool System::command_syslog_level(const char * value, const int8_t id) {
                     changed               = true;
                 }
                 return StateUpdateResult::CHANGED;
-            },
-            "local");
+            });
         if (changed) {
             EMSESP::system_.syslog_init();
         }
@@ -274,11 +273,12 @@ void System::system_restart() {
 
 // saves all settings
 void System::wifi_reconnect() {
-    LOG_INFO("WiFi reconnecting...");
+    EMSESP::esp8266React.getNetworkSettingsService()->read(
+        [](NetworkSettings & networkSettings) { LOG_INFO("WiFi reconnecting to SSID '%s'...", networkSettings.ssid.c_str()); });
     Shell::loop_all();
-    delay(1000);                                                                   // wait a second
-    EMSESP::webSettingsService.save();                                             // local settings
-    EMSESP::esp8266React.getNetworkSettingsService()->callUpdateHandlers("local"); // in case we've changed ssid or password
+    delay(1000);                                                            // wait a second
+    EMSESP::webSettingsService.save();                                      // save local settings
+    EMSESP::esp8266React.getNetworkSettingsService()->callUpdateHandlers(); // in case we've changed ssid or password
 }
 
 // format the FS. Wipes everything.
@@ -385,33 +385,6 @@ void System::reload_settings() {
     });
 }
 
-// adjust WiFi settings
-// this for problem solving mesh and connection issues, and also get EMS bus-powered more stable by lowering power
-void System::wifi_tweak() {
-#if defined(EMSESP_WIFI_TWEAK)
-    // Default Tx Power is 80 = 20dBm <-- default
-    // WIFI_POWER_19_5dBm = 78,// 19.5dBm
-    // WIFI_POWER_19dBm = 76,// 19dBm
-    // WIFI_POWER_18_5dBm = 74,// 18.5dBm
-    // WIFI_POWER_17dBm = 68,// 17dBm
-    // WIFI_POWER_15dBm = 60,// 15dBm
-    // WIFI_POWER_13dBm = 52,// 13dBm
-    // WIFI_POWER_11dBm = 44,// 11dBm
-    // WIFI_POWER_8_5dBm = 34,// 8.5dBm
-    // WIFI_POWER_7dBm = 28,// 7dBm
-    // WIFI_POWER_5dBm = 20,// 5dBm
-    // WIFI_POWER_2dBm = 8,// 2dBm
-    // WIFI_POWER_MINUS_1dBm = -4// -1dBm
-    wifi_power_t p1 = WiFi.getTxPower();
-    (void)WiFi.setTxPower(WIFI_POWER_17dBm);
-    wifi_power_t p2 = WiFi.getTxPower();
-    bool         s1 = WiFi.getSleep();
-    WiFi.setSleep(false); // turn off sleep - WIFI_PS_NONE
-    bool s2 = WiFi.getSleep();
-    LOG_DEBUG("Adjusting WiFi - Tx power %d->%d, Sleep %d->%d", p1, p2, s1, s2);
-#endif
-}
-
 // check for valid ESP32 pins. This is very dependent on which ESP32 board is being used.
 // Typically you can't use 1, 6-11, 20, 24, 28-31 and 40+
 // we allow 0 as it has a special function on the NodeMCU apparently
@@ -468,7 +441,7 @@ void System::start() {
 
 // button single click
 void System::button_OnClick(PButton & b) {
-    LOG_DEBUG("Button pressed - single click");
+    LOG_NOTICE("Button pressed - single click - show settings folders");
 
 #if defined(EMSESP_TEST)
 #ifndef EMSESP_STANDALONE
@@ -479,20 +452,19 @@ void System::button_OnClick(PButton & b) {
 
 // button double click
 void System::button_OnDblClick(PButton & b) {
-    LOG_DEBUG("Button pressed - double click - reconnect");
+    LOG_NOTICE("Button pressed - double click - wifi reconnect");
     EMSESP::system_.wifi_reconnect();
 }
 
 // button long press
 void System::button_OnLongPress(PButton & b) {
-    LOG_DEBUG("Button pressed - long press");
+    LOG_NOTICE("Button pressed - long press");
 }
 
 // button indefinite press
 void System::button_OnVLongPress(PButton & b) {
-    LOG_DEBUG("Button pressed - very long press");
+    LOG_NOTICE("Button pressed - very long press - factory reset");
 #ifndef EMSESP_STANDALONE
-    LOG_WARNING("Performing factory reset...");
     EMSESP::esp8266React.factoryReset();
 #endif
 }
@@ -973,6 +945,8 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.printfln(" SSID: %s", WiFi.SSID().c_str());
         shell.printfln(" BSSID: %s", WiFi.BSSIDstr().c_str());
         shell.printfln(" RSSI: %d dBm (%d %%)", WiFi.RSSI(), wifi_quality(WiFi.RSSI()));
+        char result[10];
+        shell.printfln(" TxPower: %s dBm", emsesp::Helpers::render_value(result, (double)(WiFi.getTxPower() / 4), 1));
         shell.printfln(" MAC address: %s", WiFi.macAddress().c_str());
         shell.printfln(" Hostname: %s", WiFi.getHostname());
         shell.printfln(" IPv4 address: %s/%s", uuid::printable_to_string(WiFi.localIP()).c_str(), uuid::printable_to_string(WiFi.subnetMask()).c_str());
@@ -1106,15 +1080,13 @@ bool System::check_upgrade(bool factory_settings) {
 
     version::Semver200_version settings_version(settingsVersion);
 
-#if defined(EMSESP_DEBUG)
     if (!missing_version) {
-        LOG_INFO("Checking version (settings has %d.%d.%d-%s)...",
-                 settings_version.major(),
-                 settings_version.minor(),
-                 settings_version.patch(),
-                 settings_version.prerelease().c_str());
+        LOG_DEBUG("Checking version upgrade (settings file is v%d.%d.%d-%s)",
+                  settings_version.major(),
+                  settings_version.minor(),
+                  settings_version.patch(),
+                  settings_version.prerelease().c_str());
     }
-#endif
 
     if (factory_settings) {
         return false; // fresh install, do nothing
@@ -1131,14 +1103,23 @@ bool System::check_upgrade(bool factory_settings) {
 
         // if we're coming from 3.4.4 or 3.5.0b14 which had no version stored then we need to apply new settings
         if (missing_version) {
-            LOG_DEBUG("Setting MQTT Entity ID format to v3.4 format");
-            EMSESP::esp8266React.getMqttSettingsService()->update(
-                [&](MqttSettings & mqttSettings) {
-                    mqttSettings.entity_format = 0; // use old Entity ID format from v3.4
-                    return StateUpdateResult::CHANGED;
-                },
-                "local");
+            LOG_INFO("Setting MQTT Entity ID format to v3.4 format");
+            EMSESP::esp8266React.getMqttSettingsService()->update([&](MqttSettings & mqttSettings) {
+                mqttSettings.entity_format = 0; // use old Entity ID format from v3.4
+                return StateUpdateResult::CHANGED;
+            });
         }
+
+        // Network Settings Wifi tx_power is now using the value * 4.
+        EMSESP::esp8266React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
+            if (networkSettings.tx_power == 20) {
+                networkSettings.tx_power = WIFI_POWER_19_5dBm; // use 19.5 as we don't have 20 anymore
+                LOG_INFO("Setting WiFi TX Power to Auto");
+                return StateUpdateResult::CHANGED;
+            }
+            return StateUpdateResult::UNCHANGED;
+        });
+
     } else if (this_version < settings_version) {
         // need downgrade
         LOG_NOTICE("Downgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
@@ -1149,12 +1130,10 @@ bool System::check_upgrade(bool factory_settings) {
 
     // if we did a change, set the new version and reboot
     if (save_version) {
-        EMSESP::webSettingsService.update(
-            [&](WebSettings & settings) {
-                settings.version = EMSESP_APP_VERSION;
-                return StateUpdateResult::CHANGED;
-            },
-            "local");
+        EMSESP::webSettingsService.update([&](WebSettings & settings) {
+            settings.version = EMSESP_APP_VERSION;
+            return StateUpdateResult::CHANGED;
+        });
         return true; // need reboot
     }
 
@@ -1253,6 +1232,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         if (WiFi.status() == WL_CONNECTED && !settings.bssid.isEmpty()) {
             node["BSSID"] = "set";
         }
+        node["TxPower setting"]  = settings.tx_power;
         node["static ip config"] = settings.staticIPConfig;
         node["enable IPv6"]      = settings.enableIPv6;
         node["low bandwidth"]    = settings.bandwidth20;
@@ -1575,8 +1555,8 @@ std::string System::reset_reason(uint8_t cpu) const {
 
 // set NTP status
 void System::ntp_connected(bool b) {
-    if (b != ntp_connected_) {
-        LOG_INFO(b ? "NTP connected" : "NTP disconnected"); // if changed report it
+    if (b != ntp_connected_ && !b) {
+        LOG_WARNING("NTP disconnected"); // if turned off report it
     }
 
     ntp_connected_  = b;

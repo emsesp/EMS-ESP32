@@ -2,15 +2,13 @@
 #define HttpEndpoint_h
 
 #include <functional>
-
 #include <ESPAsyncWebServer.h>
 
-#include <SecurityManager.h>
-#include <StatefulService.h>
+#include "SecurityManager.h"
+#include "StatefulService.h"
 
 #define HTTP_ENDPOINT_ORIGIN_ID "http"
-
-using namespace std::placeholders; // for `_1` etc
+#define HTTPS_ENDPOINT_ORIGIN_ID "https"
 
 template <class T>
 class HttpEndpoint {
@@ -19,8 +17,7 @@ class HttpEndpoint {
     JsonStateUpdater<T>  _stateUpdater;
     StatefulService<T> * _statefulService;
 
-    AsyncCallbackWebHandler *     GEThandler;
-    AsyncCallbackJsonWebHandler * POSThandler;
+    AsyncCallbackJsonWebHandler * handler;
 
   public:
     HttpEndpoint(JsonStateReader<T>      stateReader,
@@ -33,12 +30,12 @@ class HttpEndpoint {
         : _stateReader(stateReader)
         , _stateUpdater(stateUpdater)
         , _statefulService(statefulService) {
-        // Create the GET and POST endpoints
-        POSThandler = new AsyncCallbackJsonWebHandler(servicePath,
-                                                      securityManager->wrapCallback([this](AsyncWebServerRequest * request,
-                                                                                           JsonVariant             json) { handleRequest(request, json); },
-                                                                                    authenticationPredicate));
-        server->addHandler(POSThandler);
+        // Create hander for both GET and POST endpoints
+        handler = new AsyncCallbackJsonWebHandler(servicePath,
+                                                  securityManager->wrapCallback([this](AsyncWebServerRequest * request,
+                                                                                       JsonVariant             json) { handleRequest(request, json); },
+                                                                                authenticationPredicate));
+        server->addHandler(handler);
     }
 
   protected:
@@ -56,16 +53,18 @@ class HttpEndpoint {
             if (outcome == StateUpdateResult::ERROR) {
                 request->send(400); // error
                 return;
-            } else if (outcome == StateUpdateResult::CHANGED_RESTART) {
-                request->send(205); // reboot required
-                return;
-            } else if (outcome == StateUpdateResult::CHANGED) {
-                request->onDisconnect([this]() { _statefulService->callUpdateHandlers(HTTP_ENDPOINT_ORIGIN_ID); });
+            } else if (outcome == StateUpdateResult::CHANGED || outcome == StateUpdateResult::CHANGED_RESTART) {
+                // persist changes
+                request->onDisconnect([this] { _statefulService->callUpdateHandlers(); });
+                if (outcome == StateUpdateResult::CHANGED_RESTART) {
+                    request->send(205); // reboot required
+                    return;
+                }
             }
         }
 
-        AsyncJsonResponse * response   = new AsyncJsonResponse(false);
-        JsonObject          jsonObject = response->getRoot().to<JsonObject>();
+        auto *     response   = new AsyncJsonResponse(false);
+        JsonObject jsonObject = response->getRoot().to<JsonObject>();
         _statefulService->read(jsonObject, _stateReader);
         response->setLength();
         request->send(response);

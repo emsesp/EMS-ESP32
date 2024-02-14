@@ -1,8 +1,8 @@
 #ifndef FSPersistence_h
 #define FSPersistence_h
 
-#include <StatefulService.h>
-#include <FS.h>
+#include "StatefulService.h"
+#include "FS.h"
 
 template <class T>
 class FSPersistence {
@@ -47,8 +47,8 @@ class FSPersistence {
         // make directories if required, for new IDF4.2 & LittleFS
         String path(_filePath);
         int    index = 0;
-        while ((index = path.indexOf('/', index + 1)) != -1) {
-            String segment = path.substring(0, index);
+        while ((index = path.indexOf('/', static_cast<unsigned int>(index) + 1)) != -1) {
+            String segment = path.substring(0, static_cast<unsigned int>(index));
             if (!_fs->exists(segment)) {
                 _fs->mkdir(segment);
             }
@@ -80,7 +80,7 @@ class FSPersistence {
 
     void enableUpdateHandler() {
         if (!_updateHandlerId) {
-            _updateHandlerId = _statefulService->addUpdateHandler([&](const String & originId) { writeToFS(); });
+            _updateHandlerId = _statefulService->addUpdateHandler([&] { writeToFS(); });
         }
     }
 

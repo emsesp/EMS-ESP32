@@ -1,15 +1,13 @@
-#include <OTASettingsService.h>
+#include "OTASettingsService.h"
 
 #include "../../src/emsesp_stub.hpp"
-
-using namespace std::placeholders; // for `_1` etc
 
 OTASettingsService::OTASettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(OTASettings::read, OTASettings::update, this, server, OTA_SETTINGS_SERVICE_PATH, securityManager)
     , _fsPersistence(OTASettings::read, OTASettings::update, this, fs, OTA_SETTINGS_FILE)
     , _arduinoOTA(nullptr) {
-    WiFi.onEvent(std::bind(&OTASettingsService::WiFiEvent, this, _1, _2));
-    addUpdateHandler([&](const String & originId) { configureArduinoOTA(); }, false);
+    WiFi.onEvent([this](WiFiEvent_t event, WiFiEventInfo_t info) { WiFiEvent(event); });
+    addUpdateHandler([this] { configureArduinoOTA(); }, false);
 }
 
 void OTASettingsService::begin() {
@@ -32,11 +30,11 @@ void OTASettingsService::configureArduinoOTA() {
 
     if (_state.enabled) {
         _arduinoOTA = new ArduinoOTAClass;
-        _arduinoOTA->setPort(_state.port);
+        _arduinoOTA->setPort(static_cast<uint16_t>(_state.port));
         _arduinoOTA->setPassword(_state.password.c_str());
 
-        _arduinoOTA->onStart([]() { emsesp::EMSESP::system_.upload_status(true); });
-        _arduinoOTA->onEnd([]() { emsesp::EMSESP::system_.upload_status(false); });
+        _arduinoOTA->onStart([] { emsesp::EMSESP::system_.upload_status(true); });
+        _arduinoOTA->onEnd([] { emsesp::EMSESP::system_.upload_status(false); });
 
         _arduinoOTA->onProgress([](unsigned int progress, unsigned int total) {
             // Serial.printf("Progress: %u%%\r\n", (progress / (total / 100)));
@@ -64,7 +62,7 @@ void OTASettingsService::configureArduinoOTA() {
     }
 }
 
-void OTASettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
+void OTASettingsService::WiFiEvent(WiFiEvent_t event) {
     switch (event) {
     case ARDUINO_EVENT_WIFI_STA_GOT_IP:
     case ARDUINO_EVENT_ETH_GOT_IP:
@@ -73,4 +71,17 @@ void OTASettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) {
     default:
         break;
     }
+}
+
+void OTASettings::read(OTASettings & settings, JsonObject root) {
+    root["enabled"]  = settings.enabled;
+    root["port"]     = settings.port;
+    root["password"] = settings.password;
+}
+
+StateUpdateResult OTASettings::update(JsonObject root, OTASettings & settings) {
+    settings.enabled  = root["enabled"] | FACTORY_OTA_ENABLED;
+    settings.port     = root["port"] | FACTORY_OTA_PORT;
+    settings.password = root["password"] | FACTORY_OTA_PASSWORD;
+    return StateUpdateResult::CHANGED;
 }

@@ -5,8 +5,8 @@
   },
   "extends": [
     "eslint:recommended",
-    "airbnb/hooks",
-    "airbnb-typescript",
+    // "airbnb/hooks",
+    // "airbnb-typescript",
     "plugin:react/recommended",
     "plugin:react/jsx-runtime",
     "plugin:@typescript-eslint/recommended",

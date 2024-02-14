@@ -1,18 +1,15 @@
 #ifndef SecurityManager_h
 #define SecurityManager_h
 
-#include <Arduino.h>
-#include <Features.h>
-#include <ESPAsyncWebServer.h>
-#include <AsyncJson.h>
+#include "Arduino.h"
+#include "Features.h"
+#include "ESPAsyncWebServer.h"
+#include "AsyncJson.h"
+
 #include <list>
 
-#ifndef FACTORY_JWT_SECRET
-#define FACTORY_JWT_SECRET ESPUtils::defaultDeviceValue()
-#endif
-
+#define FACTORY_JWT_SECRET "ems-esp"
 #define ACCESS_TOKEN_PARAMATER "access_token"
-
 #define AUTHORIZATION_HEADER "Authorization"
 #define AUTHORIZATION_HEADER_PREFIX "Bearer "
 #define AUTHORIZATION_HEADER_PREFIX_LEN 7

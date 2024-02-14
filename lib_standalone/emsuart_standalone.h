@@ -19,7 +19,7 @@
 #ifndef EMSESP_EMSUART_H
 #define EMSESP_EMSUART_H
 
-#include <Arduino.h>
+#include "Arduino.h"
 
 namespace emsesp {
 

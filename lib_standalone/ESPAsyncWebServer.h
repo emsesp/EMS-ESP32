@@ -2,9 +2,9 @@
 #define _ESPAsyncWebServer_H_
 
 #include "Arduino.h"
+#include "AsyncTCP.h"
 
 #include <functional>
-#include <AsyncTCP.h>
 #include <ArduinoJson.h>
 
 class AsyncWebServer;

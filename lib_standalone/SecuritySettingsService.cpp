@@ -1,6 +1,6 @@
 #ifdef EMSESP_STANDALONE
 
-#include <SecuritySettingsService.h>
+#include "SecuritySettingsService.h"
 
 User ADMIN_USER = User(FACTORY_ADMIN_USERNAME, FACTORY_ADMIN_PASSWORD, true);
 
@@ -11,7 +11,7 @@ SecuritySettingsService::~SecuritySettingsService() {
 }
 
 ArRequestFilterFunction SecuritySettingsService::filterRequest(AuthenticationPredicate predicate) {
-    return [this, predicate](AsyncWebServerRequest * request) { return true; };
+    return [predicate](AsyncWebServerRequest * request) { return true; };
 }
 
 // Return the admin user on all request - disabling security features
