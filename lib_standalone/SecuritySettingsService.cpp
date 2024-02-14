@@ -11,7 +11,7 @@ SecuritySettingsService::~SecuritySettingsService() {
 }
 
 ArRequestFilterFunction SecuritySettingsService::filterRequest(AuthenticationPredicate predicate) {
-    return [this, predicate](AsyncWebServerRequest * request) { return true; };
+    return [predicate](AsyncWebServerRequest * request) { return true; };
 }
 
 // Return the admin user on all request - disabling security features
