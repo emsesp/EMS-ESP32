@@ -1,6 +1,6 @@
-#include <ESP8266React.h>
+#include "ESP8266React.h"
 
-#include <WWWData.h>
+#include "WWWData.h"
 
 ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
     : _securitySettingsService(server, fs)
@@ -19,15 +19,33 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
     , _restartService(server, &_securitySettingsService)
     , _factoryResetService(server, fs, &_securitySettingsService)
     , _systemStatus(server, &_securitySettingsService) {
-    // Serve static resources
-    WWWData::registerRoutes([server, this](const String & uri, const String & contentType, const uint8_t * content, size_t len) {
-        ArRequestHandlerFunction requestHandler = [contentType, content, len](AsyncWebServerRequest * request) {
+    //
+    // Serve static web resources
+    //
+
+    // Populate the last modification date based on build datetime
+    static char last_modified[50];
+    sprintf(last_modified, "%s %s CET", __DATE__, __TIME__);
+
+    WWWData::registerRoutes([server](const String & uri, const String & contentType, const uint8_t * content, size_t len, const String & hash) {
+        ArRequestHandlerFunction requestHandler = [contentType, content, len, hash](AsyncWebServerRequest * request) {
+            // Check if the client already has the same version and respond with a 304 (Not modified)
+            if (request->header("If-Modified-Since").indexOf(last_modified) > 0) {
+                return request->send(304);
+            } else if (request->header("If-None-Match").equals(hash)) {
+                return request->send(304);
+            }
+
             AsyncWebServerResponse * response = request->beginResponse_P(200, contentType, content, len);
             response->addHeader("Content-Encoding", "gzip");
-            response->addHeader("Cache-Control", "public, immutable, max-age=31536000");
             // response->addHeader("Content-Encoding", "br"); // only works over HTTPS
+            // response->addHeader("Cache-Control", "public, immutable, max-age=31536000");
+            response->addHeader("Last-Modified", last_modified);
+            response->addHeader("ETag", hash);
+
             request->send(response);
         };
+
         server->on(uri.c_str(), HTTP_GET, requestHandler);
         // Serving non matching get requests with "/index.html"
         // OPTIONS get a straight up 200 response
@@ -48,12 +66,13 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
 void ESP8266React::begin() {
     _networkSettingsService.begin();
     _networkSettingsService.read([&](NetworkSettings & networkSettings) {
+        DefaultHeaders & defaultHeaders = DefaultHeaders::Instance();
         if (networkSettings.enableCORS) {
-            DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", networkSettings.CORSOrigin);
-            DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "Accept, Content-Type, Authorization");
-            DefaultHeaders::Instance().addHeader("Access-Control-Allow-Credentials", "true");
+            defaultHeaders.addHeader("Access-Control-Allow-Origin", networkSettings.CORSOrigin);
+            defaultHeaders.addHeader("Access-Control-Allow-Headers", "Accept, Content-Type, Authorization");
+            defaultHeaders.addHeader("Access-Control-Allow-Credentials", "true");
         }
-        DefaultHeaders::Instance().addHeader("Server", networkSettings.hostname);
+        defaultHeaders.addHeader("Server", networkSettings.hostname);
     });
     _apSettingsService.begin();
     _ntpSettingsService.begin();

@@ -1,16 +1,12 @@
 #ifndef SecurityManager_h
 #define SecurityManager_h
 
-#include <Features.h>
-#include <ArduinoJsonJWT.h>
+#include "Features.h"
+#include "ArduinoJsonJWT.h"
+
 #include <ESPAsyncWebServer.h>
-#include <ESPUtils.h>
 #include <AsyncJson.h>
 #include <list>
-
-#ifndef FACTORY_JWT_SECRET
-#define FACTORY_JWT_SECRET ESPUtils::defaultDeviceValue()
-#endif
 
 #define ACCESS_TOKEN_PARAMATER "access_token"
 
@@ -26,28 +22,27 @@ class User {
 
   public:
     User(String username, String password, bool admin)
-        : username(username)
-        , password(password)
+        : username(std::move(username))
+        , password(std::move(password))
         , admin(admin) {
     }
 };
 
 class Authentication {
   public:
-    User *  user;
-    boolean authenticated;
+    User *  user          = nullptr;
+    boolean authenticated = false;
 
   public:
-    Authentication(User & user)
+    explicit Authentication(const User & user)
         : user(new User(user))
         , authenticated(true) {
     }
-    Authentication()
-        : user(nullptr)
-        , authenticated(false) {
-    }
+
+    Authentication() = default;
+
     ~Authentication() {
-        delete (user);
+        delete user;
     }
 };
 
@@ -55,13 +50,14 @@ typedef std::function<boolean(Authentication & authentication)> AuthenticationPr
 
 class AuthenticationPredicates {
   public:
-    static bool NONE_REQUIRED(Authentication & authentication) {
+    static bool NONE_REQUIRED(const Authentication & authentication) {
+        (void)authentication;
         return true;
     };
-    static bool IS_AUTHENTICATED(Authentication & authentication) {
+    static bool IS_AUTHENTICATED(const Authentication & authentication) {
         return authentication.authenticated;
     };
-    static bool IS_ADMIN(Authentication & authentication) {
+    static bool IS_ADMIN(const Authentication & authentication) {
         return authentication.authenticated && authentication.user->admin;
     };
 };
@@ -76,7 +72,7 @@ class SecurityManager {
     /*
    * Generate a JWT for the user provided
    */
-    virtual String generateJWT(User * user) = 0;
+    virtual String generateJWT(const User * user) = 0;
 
     /*
    * Check the request header for the Authorization token

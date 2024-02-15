@@ -1,7 +1,7 @@
 
 #ifdef EMSESP_STANDALONE
 
-#include <Arduino.h>
+#include "Arduino.h"
 #include "WString.h"
 
 /*

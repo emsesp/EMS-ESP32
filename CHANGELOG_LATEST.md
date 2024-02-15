@@ -5,6 +5,7 @@
 ## **IMPORTANT! BREAKING CHANGES**
 
 - new device WATER shows dhw entities from MM100 and SM100 in dhw setting
+- The Wifi Tx Power setting in Network Settings will be reset to Auto
 
 ## Added
 
@@ -31,6 +32,9 @@
 - MQTT autodiscovery in Domoticz not working [#1360](https://github.com/emsesp/EMS-ESP32/issues/1528)
 - dhw comfort for new ems+, [#1495](https://github.com/emsesp/EMS-ESP32/issues/1495)
 - added writeable icon to Web's Custom Entity page for each entity shown in the table
+- Wifi Tx Power not adjusted [#1614](https://github.com/emsesp/EMS-ESP32/issues/1614)
+- MQTT discovery of custom entity doesn't consider type of data [#1587](https://github.com/emsesp/EMS-ESP32/issues/1587)
+- WiFi TxPower wasn't correctly used. Added an 'Auto' setting, which is the default.
 
 ## Changed
 
@@ -38,3 +42,5 @@
 - HA don't set entity_category to Diagnostic/Configuration for EMS entities [#1459](https://github.com/emsesp/EMS-ESP32/discussions/1459)
 - upgraded ArduinoJson to 7.0.0 #1538 and then 7.0.2
 - small changes to the API for analog and temperature sensors
+- Length of mqtt Broker adress [#1619](https://github.com/emsesp/EMS-ESP32/issues/1619)
+- C++ optimizations - see <https://github.com/emsesp/EMS-ESP32/pull/1615>

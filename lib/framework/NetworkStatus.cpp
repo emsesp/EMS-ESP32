@@ -1,18 +1,16 @@
-#include <NetworkStatus.h>
+#include "NetworkStatus.h"
 
 #include "../../src/emsesp_stub.hpp"
-
-using namespace std::placeholders; // for `_1` etc
 
 NetworkStatus::NetworkStatus(AsyncWebServer * server, SecurityManager * securityManager) {
     server->on(NETWORK_STATUS_SERVICE_PATH,
                HTTP_GET,
-               securityManager->wrapRequest(std::bind(&NetworkStatus::networkStatus, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { networkStatus(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
 }
 
 void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false);
-    JsonObject          root     = response->getRoot();
+    auto *     response = new AsyncJsonResponse(false);
+    JsonObject root     = response->getRoot();
 
     bool        ethernet_connected = emsesp::EMSESP::system_.ethernet_connected();
     wl_status_t wifi_status        = WiFi.status();
@@ -22,7 +20,7 @@ void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
         root["status"]   = 10; // custom code #10 - ETHERNET_STATUS_CONNECTED
         root["hostname"] = ETH.getHostname();
     } else {
-        root["status"]   = (uint8_t)wifi_status;
+        root["status"]   = static_cast<uint8_t>(wifi_status);
         root["hostname"] = WiFi.getHostname();
     }
 

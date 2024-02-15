@@ -21,8 +21,6 @@
 
 namespace emsesp {
 
-using namespace std::placeholders; // for `_1` etc
-
 WebSchedulerService::WebSchedulerService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(WebScheduler::read, WebScheduler::update, this, server, EMSESP_SCHEDULER_SERVICE_PATH, securityManager, AuthenticationPredicates::IS_AUTHENTICATED)
     , _fsPersistence(WebScheduler::read, WebScheduler::update, this, fs, EMSESP_SCHEDULER_FILE) {
@@ -432,25 +430,23 @@ void WebSchedulerService::loop() {
 // hard coded tests
 #if defined(EMSESP_TEST)
 void WebSchedulerService::test() {
-    update(
-        [&](WebScheduler & webScheduler) {
-            webScheduler.scheduleItems.clear();
-            // test 1
-            auto si        = ScheduleItem();
-            si.active      = true;
-            si.flags       = 1;
-            si.time        = "12:00";
-            si.cmd         = "system/fetch";
-            si.value       = "10";
-            si.name        = "test_scheduler";
-            si.elapsed_min = 0;
-            si.retry_cnt   = 0xFF; // no startup retries
+    update([&](WebScheduler & webScheduler) {
+        webScheduler.scheduleItems.clear();
+        // test 1
+        auto si        = ScheduleItem();
+        si.active      = true;
+        si.flags       = 1;
+        si.time        = "12:00";
+        si.cmd         = "system/fetch";
+        si.value       = "10";
+        si.name        = "test_scheduler";
+        si.elapsed_min = 0;
+        si.retry_cnt   = 0xFF; // no startup retries
 
-            webScheduler.scheduleItems.push_back(si);
+        webScheduler.scheduleItems.push_back(si);
 
-            return StateUpdateResult::CHANGED; // persist the changes
-        },
-        "local");
+        return StateUpdateResult::CHANGED; // persist the changes
+    });
 }
 #endif
 

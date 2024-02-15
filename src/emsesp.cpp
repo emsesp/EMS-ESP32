@@ -1492,8 +1492,10 @@ void EMSESP::start() {
     bool factory_settings = false;
 #endif
 
-    esp8266React.begin();  // loads core system services settings (network, mqtt, ap, ntp etc)
     webLogService.begin(); // start web log service. now we can start capturing logs to the web log
+
+    esp8266React.begin(); // loads core system services settings (network, mqtt, ap, ntp etc)
+
     nvs_.begin("ems-esp", false, "nvs");
 
     LOG_INFO("Starting EMS-ESP version %s", EMSESP_APP_VERSION); // welcome message

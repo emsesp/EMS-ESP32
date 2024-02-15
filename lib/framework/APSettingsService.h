@@ -1,9 +1,9 @@
 #ifndef APSettingsConfig_h
 #define APSettingsConfig_h
 
-#include <HttpEndpoint.h>
-#include <FSPersistence.h>
-#include <JsonUtils.h>
+#include "HttpEndpoint.h"
+#include "FSPersistence.h"
+#include "JsonUtils.h"
 
 #include <DNSServer.h>
 #include <IPAddress.h>
@@ -75,45 +75,8 @@ class APSettings {
                && subnetMask == settings.subnetMask;
     }
 
-    static void read(APSettings & settings, JsonObject root) {
-        root["provision_mode"] = settings.provisionMode;
-        root["ssid"]           = settings.ssid;
-        root["password"]       = settings.password;
-        root["channel"]        = settings.channel;
-        root["ssid_hidden"]    = settings.ssidHidden;
-        root["max_clients"]    = settings.maxClients;
-        root["local_ip"]       = settings.localIP.toString();
-        root["gateway_ip"]     = settings.gatewayIP.toString();
-        root["subnet_mask"]    = settings.subnetMask.toString();
-    }
-
-    static StateUpdateResult update(JsonObject root, APSettings & settings) {
-        APSettings newSettings    = {};
-        newSettings.provisionMode = root["provision_mode"] | FACTORY_AP_PROVISION_MODE;
-        switch (settings.provisionMode) {
-        case AP_MODE_ALWAYS:
-        case AP_MODE_DISCONNECTED:
-        case AP_MODE_NEVER:
-            break;
-        default:
-            newSettings.provisionMode = AP_MODE_ALWAYS;
-        }
-        newSettings.ssid       = root["ssid"] | FACTORY_AP_SSID;
-        newSettings.password   = root["password"] | FACTORY_AP_PASSWORD;
-        newSettings.channel    = root["channel"] | FACTORY_AP_CHANNEL;
-        newSettings.ssidHidden = root["ssid_hidden"] | FACTORY_AP_SSID_HIDDEN;
-        newSettings.maxClients = root["max_clients"] | FACTORY_AP_MAX_CLIENTS;
-
-        JsonUtils::readIP(root, "local_ip", newSettings.localIP, FACTORY_AP_LOCAL_IP);
-        JsonUtils::readIP(root, "gateway_ip", newSettings.gatewayIP, FACTORY_AP_GATEWAY_IP);
-        JsonUtils::readIP(root, "subnet_mask", newSettings.subnetMask, FACTORY_AP_SUBNET_MASK);
-
-        if (newSettings == settings) {
-            return StateUpdateResult::UNCHANGED;
-        }
-        settings = newSettings;
-        return StateUpdateResult::CHANGED;
-    }
+    static void              read(const APSettings & settings, JsonObject root);
+    static StateUpdateResult update(JsonObject root, APSettings & settings);
 };
 
 class APSettingsService : public StatefulService<APSettings> {

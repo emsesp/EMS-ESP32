@@ -1,23 +1,30 @@
-#include <SystemStatus.h>
+#include "SystemStatus.h"
+
 #include <esp_ota_ops.h>
 
 #include "../../src/emsesp_stub.hpp"
 
-using namespace std::placeholders; // for `_1` etc
-
 SystemStatus::SystemStatus(AsyncWebServer * server, SecurityManager * securityManager) {
     server->on(SYSTEM_STATUS_SERVICE_PATH,
                HTTP_GET,
-               securityManager->wrapRequest(std::bind(&SystemStatus::systemStatus, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { systemStatus(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
 }
 
 void SystemStatus::systemStatus(AsyncWebServerRequest * request) {
     emsesp::EMSESP::system_.refreshHeapMem(); // refresh free heap and max alloc heap
 
-    AsyncJsonResponse * response = new AsyncJsonResponse(false);
-    JsonObject          root     = response->getRoot();
+    auto *     response = new AsyncJsonResponse(false);
+    JsonObject root     = response->getRoot();
 
-    root["emsesp_version"]   = EMSESP_APP_VERSION;
+#ifdef EMSESP_DEBUG
+    root["emsesp_version"] = std::string(EMSESP_APP_VERSION) + " (DEBUG)";
+#else
+#ifdef EMSESP_TEST
+    root["emsesp_version"] = std::string(EMSESP_APP_VERSION) + " (TEST)";
+#else
+    root["emsesp_version"] = EMSESP_APP_VERSION;
+#endif
+#endif
     root["esp_platform"]     = EMSESP_PLATFORM;
     root["cpu_type"]         = ESP.getChipModel();
     root["cpu_rev"]          = ESP.getChipRevision();
@@ -41,11 +48,11 @@ void SystemStatus::systemStatus(AsyncWebServerRequest * request) {
         root["psram_size"] = emsesp::EMSESP::system_.PSram();
         root["free_psram"] = ESP.getFreePsram() / 1024;
     }
-    const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, NULL);
+    const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
     if (partition != NULL) { // factory partition found
         root["has_loader"] = true;
     } else { // check for not empty, smaller OTA partition
-        partition = esp_ota_get_next_update_partition(NULL);
+        partition = esp_ota_get_next_update_partition(nullptr);
         if (partition) {
             uint64_t buffer;
             esp_partition_read(partition, 0, &buffer, 8);

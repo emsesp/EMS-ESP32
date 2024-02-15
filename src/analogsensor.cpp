@@ -324,37 +324,35 @@ void AnalogSensor::loop() {
 bool AnalogSensor::update(uint8_t gpio, const std::string & name, double offset, double factor, uint8_t uom, int8_t type, bool deleted) {
     // first see if we can find the sensor in our customization list
     bool found_sensor = false;
-    EMSESP::webCustomizationService.update(
-        [&](WebCustomization & settings) {
-            for (auto & AnalogCustomization : settings.analogCustomizations) {
-                if (AnalogCustomization.type == AnalogType::COUNTER || AnalogCustomization.type >= AnalogType::DIGITAL_OUT) {
-                    Command::erase_command(EMSdevice::DeviceType::ANALOGSENSOR, AnalogCustomization.name.c_str());
-                }
-                if (AnalogCustomization.gpio == gpio) {
-                    found_sensor = true; // found the record
-                    // see if it's marked for deletion
-                    if (deleted) {
-                        EMSESP::nvs_.remove(AnalogCustomization.name.c_str());
-                        LOG_DEBUG("Removing analog sensor GPIO %02d", gpio);
-                        settings.analogCustomizations.remove(AnalogCustomization);
-                    } else {
-                        // update existing record
-                        if (name != AnalogCustomization.name) {
-                            EMSESP::nvs_.remove(AnalogCustomization.name.c_str());
-                        }
-                        AnalogCustomization.name   = name;
-                        AnalogCustomization.offset = offset;
-                        AnalogCustomization.factor = factor;
-                        AnalogCustomization.uom    = uom;
-                        AnalogCustomization.type   = type;
-                        LOG_DEBUG("Customizing existing analog GPIO %02d", gpio);
-                    }
-                    return StateUpdateResult::CHANGED; // persist the change
-                }
+    EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
+        for (auto & AnalogCustomization : settings.analogCustomizations) {
+            if (AnalogCustomization.type == AnalogType::COUNTER || AnalogCustomization.type >= AnalogType::DIGITAL_OUT) {
+                Command::erase_command(EMSdevice::DeviceType::ANALOGSENSOR, AnalogCustomization.name.c_str());
             }
-            return StateUpdateResult::UNCHANGED;
-        },
-        "local");
+            if (AnalogCustomization.gpio == gpio) {
+                found_sensor = true; // found the record
+                // see if it's marked for deletion
+                if (deleted) {
+                    EMSESP::nvs_.remove(AnalogCustomization.name.c_str());
+                    LOG_DEBUG("Removing analog sensor GPIO %02d", gpio);
+                    settings.analogCustomizations.remove(AnalogCustomization);
+                } else {
+                    // update existing record
+                    if (name != AnalogCustomization.name) {
+                        EMSESP::nvs_.remove(AnalogCustomization.name.c_str());
+                    }
+                    AnalogCustomization.name   = name;
+                    AnalogCustomization.offset = offset;
+                    AnalogCustomization.factor = factor;
+                    AnalogCustomization.uom    = uom;
+                    AnalogCustomization.type   = type;
+                    LOG_DEBUG("Customizing existing analog GPIO %02d", gpio);
+                }
+                return StateUpdateResult::CHANGED; // persist the change
+            }
+        }
+        return StateUpdateResult::UNCHANGED;
+    });
 
     // if the sensor exists and we're using HA, delete the old HA record
     if (found_sensor && Mqtt::ha_enabled()) {
@@ -363,20 +361,18 @@ bool AnalogSensor::update(uint8_t gpio, const std::string & name, double offset,
 
     // we didn't find it, it's new, so create and store it in the customization list
     if (!found_sensor) {
-        EMSESP::webCustomizationService.update(
-            [&](WebCustomization & settings) {
-                auto newSensor   = AnalogCustomization();
-                newSensor.gpio   = gpio;
-                newSensor.name   = name;
-                newSensor.offset = offset;
-                newSensor.factor = factor;
-                newSensor.uom    = uom;
-                newSensor.type   = type;
-                settings.analogCustomizations.push_back(newSensor);
-                LOG_DEBUG("Adding new customization for analog sensor GPIO %02d", gpio);
-                return StateUpdateResult::CHANGED; // persist the change
-            },
-            "local");
+        EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
+            auto newSensor   = AnalogCustomization();
+            newSensor.gpio   = gpio;
+            newSensor.name   = name;
+            newSensor.offset = offset;
+            newSensor.factor = factor;
+            newSensor.uom    = uom;
+            newSensor.type   = type;
+            settings.analogCustomizations.push_back(newSensor);
+            LOG_DEBUG("Adding new customization for analog sensor GPIO %02d", gpio);
+            return StateUpdateResult::CHANGED; // persist the change
+        });
     }
 
     // reloads the sensors in the customizations file into the sensors list
@@ -819,20 +815,18 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                 return false;
             }
             if (oldoffset != sensor.offset()) {
-                EMSESP::webCustomizationService.update(
-                    [&](WebCustomization & settings) {
-                        for (auto & AnalogCustomization : settings.analogCustomizations) {
-                            if (AnalogCustomization.gpio == sensor.gpio() && AnalogCustomization.type == sensor.type()) {
-                                AnalogCustomization.offset = sensor.offset();
-                            }
+                EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
+                    for (auto & AnalogCustomization : settings.analogCustomizations) {
+                        if (AnalogCustomization.gpio == sensor.gpio() && AnalogCustomization.type == sensor.type()) {
+                            AnalogCustomization.offset = sensor.offset();
                         }
-                        if (sensor.type() == AnalogType::COUNTER || (sensor.type() == AnalogType::DIGITAL_OUT && sensor.uom() > 0)) {
-                            return StateUpdateResult::UNCHANGED; // temporary change
-                        } else {
-                            return StateUpdateResult::CHANGED; // persist the change
-                        }
-                    },
-                    "local");
+                    }
+                    if (sensor.type() == AnalogType::COUNTER || (sensor.type() == AnalogType::DIGITAL_OUT && sensor.uom() > 0)) {
+                        return StateUpdateResult::UNCHANGED; // temporary change
+                    } else {
+                        return StateUpdateResult::CHANGED; // persist the change
+                    }
+                });
                 publish_sensor(sensor);
                 changed_ = true;
             }

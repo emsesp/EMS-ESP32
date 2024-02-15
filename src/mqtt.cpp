@@ -201,8 +201,8 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
     for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
         shell.printfln(" %s/%s", Mqtt::base().c_str(), mqtt_subfunction.topic_.c_str());
     }
-    shell.println();
 
+    shell.println();
     shell.println();
 }
 
@@ -388,7 +388,7 @@ void Mqtt::start() {
     // add the 'publish' command ('call system publish' in console or via API)
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), System::command_publish, FL_(publish_cmd));
 
-    // create last will topic with the base prefixed. It has to be static because asyncmqttclient destroys the reference
+    // create last will topic with the base prefixed. It has to be static because the client destroys the reference
     static char will_topic[MQTT_TOPIC_MAX_SIZE];
     if (!Mqtt::base().empty()) {
         snprintf(will_topic, MQTT_TOPIC_MAX_SIZE, "%s/status", Mqtt::base().c_str());
@@ -466,6 +466,7 @@ void Mqtt::on_disconnect(espMqttClientTypes::DisconnectReason reason) {
         return;
     }
     connecting_ = false;
+
     if (reason == espMqttClientTypes::DisconnectReason::TCP_DISCONNECTED) {
         LOG_WARNING("MQTT disconnected: TCP");
     } else if (reason == espMqttClientTypes::DisconnectReason::MQTT_UNACCEPTABLE_PROTOCOL_VERSION) {
@@ -483,6 +484,7 @@ void Mqtt::on_disconnect(espMqttClientTypes::DisconnectReason reason) {
     } else {
         LOG_WARNING("MQTT disconnected: code %d", reason);
     }
+
     mqttClient_->clearQueue(true);
 }
 

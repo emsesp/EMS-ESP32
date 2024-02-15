@@ -75,7 +75,6 @@ class System {
     bool upload_status();
     void show_mem(const char * note);
     void reload_settings();
-    void wifi_tweak();
     void syslog_init();
     bool check_upgrade(bool factory_settings);
     bool check_restore();

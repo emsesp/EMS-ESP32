@@ -25,15 +25,13 @@
 #include <cstring>
 #include <string>
 #include <math.h>
-
-#include <algorithm> // for count_if
-
+#include <algorithm>
 #include <Print.h>
 #include <Printable.h>
 #include <Stream.h>
-#include <WString.h>
-
 #include <iostream>
+
+#include "WString.h"
 
 typedef double double_t;
 
@@ -187,7 +185,5 @@ void yield(void);
 
 void setup(void);
 void loop(void);
-
-
 
 #endif
