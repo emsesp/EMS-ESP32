@@ -35,7 +35,7 @@ class Roomctrl {
 
   private:
     static constexpr uint8_t  ADDR          = 0x18;  // address for hc1
-    static constexpr uint32_t SEND_INTERVAL = 30000; // 1/2 minute
+    static constexpr uint32_t SEND_INTERVAL = 55000; // ~1 minute
     static constexpr uint8_t  HCS           = 4;     // max 4 heating circuits
 
     static uint8_t get_hc(const uint8_t addr);

@@ -177,33 +177,53 @@ void Roomctrl::check(uint8_t addr, const uint8_t * data, const uint8_t length) {
  * send version info RC20 (Prod. 113, Ver. 02.01) or RC20RF (Prod. 93, Ver. 02.00)
  */
 void Roomctrl::version(uint8_t addr, uint8_t dst) {
-    uint8_t data[15];
+    uint8_t data[20];
     data[0] = addr | EMSbus::ems_mask();
     data[1] = dst & 0x7F;
     data[2] = 0x02;
     data[3] = 0;
     data[4] = type_; // set RC20 id 113, Ver 02.01 or Junkers FB10 id 109, Ver 16.05, RC100H id 200 ver 40.04
-    data[5] = type_ == RC20 ? 2 : type_ == FB10 ? 16 : type_ == RC200 ? 41 : 40;
-    data[6] = type_ == RC20 ? 1 : type_ == FB10 ? 5 : type_ == RC200 ? 8 : 4;
-    if (type_ == RC20 || type_ == FB10) {
+    if (type_ == RC20) {
+        data[5] = 2; // version 2.01
+        data[6] = 1;
         data[7] = EMSbus::calculate_crc(data, 7); // apppend CRC
         EMSuart::transmit(data, 8);
         return;
-    }
-    data[7] = 0;
-    data[8] = 0xFF;
-    if (type_ == RC100H) {
+    } else if (type_ == FB10) {
+        data[5]  = 16; // version 16.05
+        data[6]  = 5;
+        data[7]  = 0;
+        data[8]  = 0;
+        data[9]  = 0;
+        data[10] = 0;
+        data[11] = 0;
+        data[12] = 0;
+        data[13] = 0;
+        data[14] = EMSbus::calculate_crc(data, 14); // apppend CRC
+        EMSuart::transmit(data, 15);
+        return;
+    } else if (type_ == RC200) {
+        data[5]  = 32; // version 32.02 see #1611
+        data[6]  = 2;
+        data[7]  = 0;
+        data[8]  = 0xFF;
+        data[9]  = 0;
+        data[10] = 0;
+        data[11] = 0;
+        data[12] = 0;
+        data[13] = 0;
+        data[14] = EMSbus::calculate_crc(data, 14); // apppend CRC
+        EMSuart::transmit(data, 15);
+        return;
+    } else if (type_ == RC100H) {
+        data[5] = 40; // version 40.04
+        data[6] = 4;
+        data[7] = 0;
+        data[8] = 0xFF;
         data[9] = EMSbus::calculate_crc(data, 9); // apppend CRC
         EMSuart::transmit(data, 10);
         return;
     }
-    // RC200 adds some extra bytes
-    data[9]  = 0;
-    data[10] = 0;
-    data[11] = 0;
-    data[12] = 0;
-    data[13] = EMSbus::calculate_crc(data, 13); // apppend CRC
-    EMSuart::transmit(data, 14);
 }
 
 /**
@@ -262,7 +282,7 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[5]     = 0x2B + hc;
         data[6]     = (uint8_t)(remotetemp_[hc] >> 8);
         data[7]     = (uint8_t)(remotetemp_[hc] & 0xFF);
-        uint16_t t1 = remotetemp_[hc] * 10 + 5;
+        uint16_t t1 = remotetemp_[hc] * 10 + 3;
         data[8]     = (uint8_t)(t1 >> 8);
         data[9]     = (uint8_t)(t1 & 0xFF);
         data[10]    = 1;                               // not sure what this is and if we need it, maybe mode?
