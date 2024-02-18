@@ -81,6 +81,7 @@ void Modbus::start() {
             if (i != systemServerId) {
                 modbusServer_.registerWorker(i, READ_INPUT_REGISTER, [this](auto && request) { return handleRead(request); });
                 modbusServer_.registerWorker(i, READ_HOLD_REGISTER, [this](auto && request) { return handleRead(request); });
+                modbusServer_.registerWorker(i, WRITE_MULT_REGISTERS, [this](auto && request) { return handleWrite(request); });
             }
         }
         modbusServer_.start(port, maxClients, timeoutMillis);
@@ -165,50 +166,162 @@ ModbusMessage Modbus::handleRead(const ModbusMessage & request) {
     request.get(2, start_address);
     request.get(4, num_words);
 
-    LOG_DEBUG("Got request for serverId %d, startAddress %d, numWords %d", device_id, start_address, num_words);
+    LOG_DEBUG("Got read request for serverId %d, startAddress %d, numWords %d", device_id, start_address, num_words);
 
     // each register block corresponds to a device value tag
-    // TODO check for valid values!
-    auto tag             = (uint8_t)(start_address / REGISTER_BLOCK_SIZE);
-    auto tag_type        = tag_to_type[tag];
+    auto tag         = (uint8_t)(start_address / REGISTER_BLOCK_SIZE);
+    auto tag_type_it = tag_to_type.find(tag);
+
+    if (tag_type_it == tag_to_type.end()) {
+        // invalid register block, does not correspond to an existing tag
+        response.setError(request.getServerID(), request.getFunctionCode(), ILLEGAL_DATA_ADDRESS);
+        return response;
+    }
+
+    auto tag_type        = tag_type_it->second;
     auto register_offset = start_address - tag * REGISTER_BLOCK_SIZE;
 
-    const auto & it =
+    const auto & dev_it =
         std::find_if(EMSESP::emsdevices.begin(), EMSESP::emsdevices.end(), [&](const std::unique_ptr<EMSdevice> & x) { return x->device_id() == device_id; });
 
-
-    if (it != EMSESP::emsdevices.end()) {
-        const auto & dev = *it;
-
-        // binary search
-        auto key        = EntityModbusInfoKey(dev->device_type(), tag_type, register_offset);
-        auto modbusInfo = std::lower_bound(modbus_register_mappings.begin(),
-                                           modbus_register_mappings.end(),
-                                           key,
-                                           [](const EntityModbusInfo & mi, const EntityModbusInfoKey & k) { return mi.isLessThan(k); });
-
-        if (modbusInfo != modbus_register_mappings.end() && modbusInfo->equals(key)) {
-            // only reading a single value at a time is supported for now
-            if (num_words == modbusInfo->registerCount) {
-                auto buf = std::vector<uint16_t>(num_words);
-                if (dev->copy_raw_value(tag, modbusInfo->short_name, buf)) {
-                    response.add(request.getServerID());
-                    response.add(request.getFunctionCode());
-                    response.add((uint8_t)(num_words * 2));
-                    for (auto & value : buf)
-                        response.add(value);
-                } else {
-                    LOG_ERROR("Unable to read raw device value %s for tag=%d", modbusInfo->short_name, (int)tag);
-                    response.setError(request.getServerID(), request.getFunctionCode(), SERVER_DEVICE_FAILURE);
-                }
-            } else {
-                response.setError(request.getServerID(), request.getFunctionCode(), ILLEGAL_DATA_ADDRESS);
-            }
-        } else {
-            response.setError(request.getServerID(), request.getFunctionCode(), ILLEGAL_DATA_ADDRESS);
-        }
-    } else {
+    if (dev_it != EMSESP::emsdevices.end()) {
+        // device not found => invalid server ID
         response.setError(request.getServerID(), request.getFunctionCode(), ILLEGAL_DATA_ADDRESS);
+        return response;
+    }
+
+    const auto & dev = *dev_it;
+
+    // binary search in modbus infos
+    auto key = EntityModbusInfoKey(dev->device_type(), tag_type, register_offset);
+    auto modbusInfo =
+        std::lower_bound(modbus_register_mappings.begin(), modbus_register_mappings.end(), key, [](const EntityModbusInfo & mi, const EntityModbusInfoKey & k) {
+            return mi.isLessThan(k);
+        });
+
+    if (modbusInfo == modbus_register_mappings.end() || !modbusInfo->equals(key)) {
+        // combination of device_type/tag_type/register_offset does not exist
+        response.setError(request.getServerID(), request.getFunctionCode(), ILLEGAL_DATA_ADDRESS);
+        return response;
+    }
+
+    // only reading a single value at a time is supported for now
+    if (num_words != modbusInfo->registerCount) {
+        // number of registers requested does not match actual register count for entity
+        response.setError(request.getServerID(), request.getFunctionCode(), ILLEGAL_DATA_ADDRESS);
+        return response;
+    }
+
+    auto buf = std::vector<uint16_t>(num_words);
+    if (dev->get_modbus_value(tag, modbusInfo->short_name, buf)) {
+        response.add(request.getServerID());
+        response.add(request.getFunctionCode());
+        response.add((uint8_t)(num_words * 2));
+        for (auto & value : buf)
+            response.add(value);
+    } else {
+        LOG_ERROR("Unable to read raw device value %s for tag=%d", modbusInfo->short_name, (int)tag);
+        response.setError(request.getServerID(), request.getFunctionCode(), SERVER_DEVICE_FAILURE);
+    }
+
+    return response;
+}
+
+ModbusMessage Modbus::handleWrite(const ModbusMessage & request) {
+    ModbusMessage response;
+
+    uint8_t         device_id     = request.getServerID(); // the server ID is the same as the device ID
+    uint16_t        start_address = 0;
+    uint16_t        num_words     = 0;
+    uint8_t         byte_count    = 0;
+    vector<uint8_t> data;
+
+    request.get(2, start_address);
+    request.get(4, num_words);
+    request.get(6, byte_count);
+    request.get(7, data, byte_count);
+
+    LOG_DEBUG("Got write request for serverId %d, startAddress %d, numWords %d, byteCount %d", device_id, start_address, num_words, byte_count);
+
+    // each register block corresponds to a device value tag
+    auto tag         = (uint8_t)(start_address / REGISTER_BLOCK_SIZE);
+    auto tag_type_it = tag_to_type.find(tag);
+
+    if (tag_type_it == tag_to_type.end()) {
+        // invalid register block, does not correspond to an existing tag
+        response.setError(request.getServerID(), request.getFunctionCode(), ILLEGAL_DATA_ADDRESS);
+        return response;
+    }
+
+    auto tag_type        = tag_type_it->second;
+    auto register_offset = start_address - tag * REGISTER_BLOCK_SIZE;
+
+    const auto & dev_it =
+        std::find_if(EMSESP::emsdevices.begin(), EMSESP::emsdevices.end(), [&](const std::unique_ptr<EMSdevice> & x) { return x->device_id() == device_id; });
+
+    if (dev_it != EMSESP::emsdevices.end()) {
+        // device not found => invalid server ID
+        response.setError(request.getServerID(), request.getFunctionCode(), ILLEGAL_DATA_ADDRESS);
+        return response;
+    }
+
+    const auto & dev = *dev_it;
+
+    // binary search in modbus infos
+    auto key = EntityModbusInfoKey(dev->device_type(), tag_type, register_offset);
+    auto modbusInfo =
+        std::lower_bound(modbus_register_mappings.begin(), modbus_register_mappings.end(), key, [](const EntityModbusInfo & mi, const EntityModbusInfoKey & k) {
+            return mi.isLessThan(k);
+        });
+
+    if (modbusInfo == modbus_register_mappings.end() || !modbusInfo->equals(key)) {
+        // combination of device_type/tag_type/register_offset does not exist
+        response.setError(request.getServerID(), request.getFunctionCode(), ILLEGAL_DATA_ADDRESS);
+        return response;
+    }
+
+    // only writing a single value at a time is supported for now
+    if (num_words != modbusInfo->registerCount) {
+        // number of registers requested does not match actual register count for entity
+        response.setError(request.getServerID(), request.getFunctionCode(), ILLEGAL_DATA_ADDRESS);
+        return response;
+    }
+
+    JsonDocument input_doc;
+    JsonDocument output_doc;
+    JsonObject   input, output;
+
+    dev->modbus_value_to_json(tag, modbusInfo->short_name, data, output);
+
+    auto tag_s = std::string(DeviceValue::DeviceValueTAG_mqtt[tag]);
+    auto path  = std::string(modbusInfo->short_name);
+    if (!tag_s.empty())
+        path += std::string("/") + tag_s;
+
+    // parse and call the command
+    input               = input_doc.as<JsonObject>();
+    output              = output_doc.to<JsonObject>();
+    uint8_t return_code = Command::process(path.c_str(), true, input, output); // modbus is always authenticated
+
+    if (return_code != CommandRet::OK) {
+        char error[100];
+        if (output.size()) {
+            snprintf(error,
+                     sizeof(error),
+                     "Modbus write command failed with error: %s (%s)",
+                     (const char *)output["message"],
+                     Command::return_code_string(return_code).c_str());
+        } else {
+            snprintf(error, sizeof(error), "Modbus write command failed with error code (%s)", Command::return_code_string(return_code).c_str());
+        }
+        LOG_ERROR(error);
+        response.setError(request.getServerID(), request.getFunctionCode(), ILLEGAL_DATA_VALUE);
+    } else {
+        // all good
+        response.add(request.getServerID());
+        response.add(request.getFunctionCode());
+        response.add(start_address);
+        response.add(num_words);
     }
 
     return response;

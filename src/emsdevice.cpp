@@ -1876,9 +1876,9 @@ void EMSdevice::read_command(const uint16_t type_id, const uint8_t offset, const
     EMSESP::send_read_request(type_id, device_id(), offset, length);
 }
 
-// copy a raw value (i.e. without appying the numeric_operator) to the output buffer.
+// copy a raw value (i.e. without applying the numeric_operator) to the output buffer.
 // returns true on success.
-bool EMSdevice::copy_raw_value(uint8_t tag, const std::string & shortname, std::vector<uint16_t> & result) {
+bool EMSdevice::get_modbus_value(uint8_t tag, const std::string & shortname, std::vector<uint16_t> & result) {
     // find device value by shortname
     // TODO linear search is inefficient
     const auto & it = std::find_if(devicevalues_.begin(), devicevalues_.end(), [&](const DeviceValue & x) { return x.tag == tag && x.short_name == shortname; });
@@ -1951,6 +1951,71 @@ bool EMSdevice::copy_raw_value(uint8_t tag, const std::string & shortname, std::
         auto value_uint32 = *(uint32_t *)(dv.value_p);
         result[0]         = (uint16_t)(value_uint32 >> 16);
         result[1]         = (uint16_t)(value_uint32 & 0xffff);
+    }
+
+    else {
+        return false;
+    }
+
+    return true;
+}
+
+static float numeric_operator_to_scale_factor(uint8_t numeric_operator) {
+    if (numeric_operator == 0)
+        return 1.0f;
+    else if (numeric_operator > 0)
+        return 1.0f / numeric_operator;
+    else
+        return -numeric_operator;
+}
+
+bool EMSdevice::modbus_value_to_json(uint8_t tag, const std::string & shortname, const std::vector<uint8_t> & modbus_data, JsonObject output) {
+    // find device value by shortname
+    // TODO linear search is inefficient
+    const auto & it = std::find_if(devicevalues_.begin(), devicevalues_.end(), [&](const DeviceValue & x) { return x.tag == tag && x.short_name == shortname; });
+    if (it == devicevalues_.end())
+        return false;
+
+    auto & dv = *it;
+
+    // handle Booleans
+    if (dv.type == DeviceValueType::BOOL) {
+        // bools are 1 16 bit register
+        if (modbus_data.size() != 2)
+            return false;
+        output["value"] = modbus_data[0] || modbus_data[1];
+    }
+
+    // handle TEXT strings
+    else if (dv.type == DeviceValueType::STRING) {
+        // text is optionally nul terminated
+        // check if the data contains a null char
+        auto nul_or_end = std::find(modbus_data.begin(), modbus_data.end(), 0);
+        output["value"] = std::string(modbus_data.begin(), nul_or_end);
+    }
+
+    // handle ENUMs
+    else if (dv.type == DeviceValueType::ENUM) {
+        // these data types are 1 16 bit register
+        if (modbus_data.size() != 2)
+            return false;
+
+        output["value"] = (uint16_t)modbus_data[0] << 8 | (uint16_t)modbus_data[1];
+    }
+
+    // handle Numbers
+    else if (dv.type == DeviceValueType::INT || dv.type == DeviceValueType::UINT || dv.type == DeviceValueType::SHORT || dv.type == DeviceValueType::USHORT) {
+        // these data types are 1 16 bit register
+        if (modbus_data.size() != 2)
+            return false;
+
+        output["value"] = numeric_operator_to_scale_factor(dv.numeric_operator) * (float)((uint16_t)modbus_data[0] << 8 | (uint16_t)modbus_data[1]);
+    } else if (dv.type == DeviceValueType::ULONG || dv.type == DeviceValueType::TIME) {
+        // these data types are 2 16 bit register
+        if (modbus_data.size() != 4)
+            return false;
+        output["value"] = numeric_operator_to_scale_factor(dv.numeric_operator)
+                          * (float)((uint32_t)modbus_data[0] << 24 | (uint32_t)modbus_data[1] << 16 | (uint32_t)modbus_data[2] << 8 | (uint32_t)modbus_data[3]);
     }
 
     else {

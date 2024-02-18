@@ -90,6 +90,7 @@ class Modbus {
     static ModbusServerTCPasync modbusServer_;
     ModbusMessage               handleSystemRead(const ModbusMessage & request);
     ModbusMessage               handleRead(const ModbusMessage & request);
+    ModbusMessage               handleWrite(const ModbusMessage & request);
 #endif
 
     // settings
