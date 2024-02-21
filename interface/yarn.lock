@@ -1893,7 +1893,7 @@ __metadata:
     terser: "npm:^5.27.2"
     typesafe-i18n: "npm:^5.26.2"
     typescript: "npm:^5.3.3"
-    vite: "npm:^5.1.3"
+    vite: "npm:^5.1.4"
     vite-plugin-imagemin: "npm:^0.6.1"
     vite-tsconfig-paths: "npm:^4.3.1"
   languageName: unknown
@@ -8738,9 +8738,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^5.1.3":
-  version: 5.1.3
-  resolution: "vite@npm:5.1.3"
+"vite@npm:^5.1.4":
+  version: 5.1.4
+  resolution: "vite@npm:5.1.4"
   dependencies:
     esbuild: "npm:^0.19.3"
     fsevents: "npm:~2.3.3"
@@ -8774,7 +8774,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10/6ba2223157e2cc2fa62dff9004ccba20fc409c6baf7354c64ed0f8e4bcd853092d08d06ec4dec37143e794a96e061879a870d85bad4f1eb9ee5c6d0a13cef30f
+  checksum: 10/e9003b853f0784260f4fe7ce0190124b347fd8fd6bf889a07080facd0d9a9667eaff4022eddb1ba3f0283ef69d15d77f84bca832082e48874a7a62e7f6d66b08
   languageName: node
   linkType: hard
 
