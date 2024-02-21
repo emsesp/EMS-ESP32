@@ -508,7 +508,7 @@ void Mqtt::on_connect() {
     resubscribe();
 
     // publish to the last will topic (see Mqtt::start() function) to say we're alive
-    queue_publish_retain("status", "online", true); // with retain on
+    queue_publish_retain("status", "online", false); // with retain off
 
     // mqtt_publish_fails_ = 0; // reset fail count to 0
 }

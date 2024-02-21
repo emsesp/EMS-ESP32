@@ -41,3 +41,4 @@
 - small changes to the API for analog and temperature sensors
 - Length of mqtt Broker adress [#1619](https://github.com/emsesp/EMS-ESP32/issues/1619)
 - C++ optimizations - see <https://github.com/emsesp/EMS-ESP32/pull/1615>
+- Send MQTT heartbeat immediately after connection
