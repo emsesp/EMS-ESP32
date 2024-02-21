@@ -316,12 +316,11 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) 
         break;
 
     case ARDUINO_EVENT_ETH_START:
-        ETH.setHostname(emsesp::EMSESP::system_.hostname().c_str());
-
         // configure for static IP
         if (_state.staticIPConfig) {
             ETH.config(_state.localIP, _state.gatewayIP, _state.subnetMask, _state.dnsIP1, _state.dnsIP2);
         }
+        ETH.setHostname(emsesp::EMSESP::system_.hostname().c_str());
         break;
 
     case ARDUINO_EVENT_ETH_GOT_IP:
