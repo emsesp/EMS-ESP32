@@ -20,33 +20,36 @@
 
 namespace emsesp {
 
-using namespace std::placeholders; // for `_1` etc
-
 WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securityManager)
     : _write_value_handler(WRITE_DEVICE_VALUE_SERVICE_PATH,
-                           securityManager->wrapCallback(std::bind(&WebDataService::write_device_value, this, _1, _2), AuthenticationPredicates::IS_ADMIN))
+                           securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_device_value(request, json); },
+                                                         AuthenticationPredicates::IS_ADMIN))
     , _write_temperature_handler(WRITE_TEMPERATURE_SENSOR_SERVICE_PATH,
-                                 securityManager->wrapCallback(std::bind(&WebDataService::write_temperature_sensor, this, _1, _2),
+                                 securityManager->wrapCallback([this](AsyncWebServerRequest * request,
+                                                                      JsonVariant             json) { write_temperature_sensor(request, json); },
                                                                AuthenticationPredicates::IS_ADMIN))
     , _write_analog_handler(WRITE_ANALOG_SENSOR_SERVICE_PATH,
-                            securityManager->wrapCallback(std::bind(&WebDataService::write_analog_sensor, this, _1, _2), AuthenticationPredicates::IS_ADMIN)) {
+                            securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_analog_sensor(request, json); },
+                                                          AuthenticationPredicates::IS_ADMIN)) {
     // GET's
     server->on(DEVICE_DATA_SERVICE_PATH,
                HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WebDataService::device_data, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { device_data(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
+
 
     server->on(CORE_DATA_SERVICE_PATH,
                HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WebDataService::core_data, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { core_data(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
 
     server->on(SENSOR_DATA_SERVICE_PATH,
                HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WebDataService::sensor_data, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { sensor_data(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
 
     // POST's
     server->on(SCAN_DEVICES_SERVICE_PATH,
                HTTP_POST,
-               securityManager->wrapRequest(std::bind(&WebDataService::scan_devices, this, _1), AuthenticationPredicates::IS_ADMIN));
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { scan_devices(request); }, AuthenticationPredicates::IS_ADMIN));
+
 
     _write_value_handler.setMethod(HTTP_POST);
     _write_value_handler.setMaxContentLength(256);
@@ -178,7 +181,7 @@ void WebDataService::device_data(AsyncWebServerRequest * request) {
     if (request->hasParam(F_(id))) {
         id = Helpers::atoint(request->getParam(F_(id))->value().c_str()); // get id from url
 
-        auto * response = new MsgpackAsyncJsonResponse(false);
+        auto * response = new AsyncJsonResponse(false, true); // use msgPack
 
         // check size
         // while (!response) {

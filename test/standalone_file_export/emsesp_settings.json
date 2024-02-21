@@ -11,7 +11,7 @@
     "static_ip_config": false,
     "enableIPv6": false,
     "bandwidth20": false,
-    "tx_power": 20,
+    "tx_power": 0,
     "nosleep": false,
     "enableMDNS": true,
     "enableCORS": false,

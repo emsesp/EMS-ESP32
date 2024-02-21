@@ -17,17 +17,16 @@
 
 #ifdef EMSESP_STANDALONE
 
-#include <Arduino.h>
+
 #include <stdio.h>
 #include <stdarg.h>
-
 #include <iostream>
 #include <thread>
 #include <atomic>
-
 #include <string>
 
-#include <Network.h>
+#include "Arduino.h"
+#include "Network.h"
 
 NativeConsole Serial;
 

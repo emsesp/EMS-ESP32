@@ -18,19 +18,18 @@
 
 #include "emsesp.h"
 
-using namespace std::placeholders;
-
 namespace emsesp {
 
 WebLogService::WebLogService(AsyncWebServer * server, SecurityManager * securityManager)
     : events_(EVENT_SOURCE_LOG_PATH)
-    , setValues_(LOG_SETTINGS_PATH, std::bind(&WebLogService::setValues, this, _1, _2)) {
+    , setValues_(LOG_SETTINGS_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { setValues(request, json); }) {
     events_.setFilter(securityManager->filterRequest(AuthenticationPredicates::IS_ADMIN));
 
-    server->on(LOG_SETTINGS_PATH, HTTP_GET, std::bind(&WebLogService::getValues, this, _1)); // get settings
+    // get settings
+    server->on(LOG_SETTINGS_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { getValues(request); });
 
     // for bring back the whole log - is a command, hence a POST
-    server->on(FETCH_LOG_PATH, HTTP_POST, std::bind(&WebLogService::fetchLog, this, _1));
+    server->on(FETCH_LOG_PATH, HTTP_POST, [this](AsyncWebServerRequest * request) { fetchLog(request); });
 
     server->addHandler(&setValues_);
     server->addHandler(&events_);
@@ -59,12 +58,10 @@ uuid::log::Level WebLogService::log_level() const {
 }
 
 void WebLogService::log_level(uuid::log::Level level) {
-    EMSESP::webSettingsService.update(
-        [&](WebSettings & settings) {
-            settings.weblog_level = level;
-            return StateUpdateResult::CHANGED;
-        },
-        "local");
+    EMSESP::webSettingsService.update([&](WebSettings & settings) {
+        settings.weblog_level = level;
+        return StateUpdateResult::CHANGED;
+    });
     uuid::log::Logger::register_handler(this, level);
     if (level == uuid::log::Level::OFF) {
         log_messages_.clear();
@@ -87,12 +84,10 @@ void WebLogService::maximum_log_messages(size_t count) {
     while (log_messages_.size() > maximum_log_messages_) {
         log_messages_.pop_front();
     }
-    EMSESP::webSettingsService.update(
-        [&](WebSettings & settings) {
-            settings.weblog_buffer = count;
-            return StateUpdateResult::CHANGED;
-        },
-        "local");
+    EMSESP::webSettingsService.update([&](WebSettings & settings) {
+        settings.weblog_buffer = count;
+        return StateUpdateResult::CHANGED;
+    });
 }
 
 bool WebLogService::compact() const {
@@ -101,12 +96,10 @@ bool WebLogService::compact() const {
 
 void WebLogService::compact(bool compact) {
     compact_ = compact;
-    EMSESP::webSettingsService.update(
-        [&](WebSettings & settings) {
-            settings.weblog_compact = compact;
-            return StateUpdateResult::CHANGED;
-        },
-        "local");
+    EMSESP::webSettingsService.update([&](WebSettings & settings) {
+        settings.weblog_compact = compact;
+        return StateUpdateResult::CHANGED;
+    });
 }
 
 WebLogService::QueuedLogMessage::QueuedLogMessage(unsigned long id, std::shared_ptr<uuid::log::Message> && content)

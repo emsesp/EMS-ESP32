@@ -20,8 +20,6 @@
 
 namespace emsesp {
 
-using namespace std::placeholders; // for `_1` etc
-
 WebCustomEntityService::WebCustomEntityService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(WebCustomEntity::read,
                     WebCustomEntity::update,
@@ -441,6 +439,8 @@ void WebCustomEntityService::publish(const bool force) {
                 }
             }
 
+            Mqtt::add_ha_uom(config.as<JsonObject>(), entityItem.value_type, entityItem.uom); // add uom
+
             Mqtt::add_ha_sections_to_doc("custom", stat_t, config, !ha_created, val_cond);
 
             ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
@@ -626,52 +626,50 @@ bool WebCustomEntityService::get_value(std::shared_ptr<const Telegram> telegram)
 // hard coded tests
 #ifdef EMSESP_TEST
 void WebCustomEntityService::test() {
-    update(
-        [&](WebCustomEntity & webCustomEntity) {
-            webCustomEntity.customEntityItems.clear();
-            // test 1
-            auto entityItem       = CustomEntityItem();
-            entityItem.ram        = 0;
-            entityItem.device_id  = 8;
-            entityItem.type_id    = 24;
-            entityItem.offset     = 0;
-            entityItem.factor     = 1;
-            entityItem.name       = "test_custom";
-            entityItem.uom        = 1;
-            entityItem.value_type = 1;
-            entityItem.writeable  = true;
-            entityItem.data       = "70";
-            webCustomEntity.customEntityItems.push_back(entityItem);
+    update([&](WebCustomEntity & webCustomEntity) {
+        webCustomEntity.customEntityItems.clear();
+        // test 1
+        auto entityItem       = CustomEntityItem();
+        entityItem.ram        = 0;
+        entityItem.device_id  = 8;
+        entityItem.type_id    = 24;
+        entityItem.offset     = 0;
+        entityItem.factor     = 1;
+        entityItem.name       = "test_custom";
+        entityItem.uom        = 1;
+        entityItem.value_type = 1;
+        entityItem.writeable  = true;
+        entityItem.data       = "70";
+        webCustomEntity.customEntityItems.push_back(entityItem);
 
-            // test 2
-            entityItem.ram        = 0;
-            entityItem.device_id  = 24;
-            entityItem.type_id    = 677;
-            entityItem.offset     = 3;
-            entityItem.factor     = 1;
-            entityItem.name       = "test_read_only";
-            entityItem.uom        = 0;
-            entityItem.value_type = 2;
-            entityItem.writeable  = false;
-            entityItem.data       = "48";
-            webCustomEntity.customEntityItems.push_back(entityItem);
+        // test 2
+        entityItem.ram        = 0;
+        entityItem.device_id  = 24;
+        entityItem.type_id    = 677;
+        entityItem.offset     = 3;
+        entityItem.factor     = 1;
+        entityItem.name       = "test_read_only";
+        entityItem.uom        = 0;
+        entityItem.value_type = 2;
+        entityItem.writeable  = false;
+        entityItem.data       = "48";
+        webCustomEntity.customEntityItems.push_back(entityItem);
 
-            // test 2
-            entityItem.ram        = 1;
-            entityItem.device_id  = 0;
-            entityItem.type_id    = 0;
-            entityItem.offset     = 0;
-            entityItem.factor     = 1;
-            entityItem.name       = "test_ram";
-            entityItem.uom        = 0;
-            entityItem.value_type = 8;
-            entityItem.writeable  = true;
-            entityItem.data       = "14";
-            webCustomEntity.customEntityItems.push_back(entityItem);
+        // test 2
+        entityItem.ram        = 1;
+        entityItem.device_id  = 0;
+        entityItem.type_id    = 0;
+        entityItem.offset     = 0;
+        entityItem.factor     = 1;
+        entityItem.name       = "test_ram";
+        entityItem.uom        = 0;
+        entityItem.value_type = 8;
+        entityItem.writeable  = true;
+        entityItem.data       = "14";
+        webCustomEntity.customEntityItems.push_back(entityItem);
 
-            return StateUpdateResult::CHANGED; // persist the changes
-        },
-        "local");
+        return StateUpdateResult::CHANGED; // persist the changes
+    });
 }
 #endif
 

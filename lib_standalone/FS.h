@@ -21,9 +21,10 @@
 #ifndef FS_H
 #define FS_H
 
+#include "Arduino.h"
+
 #include <memory>
 #include <string>
-#include <Arduino.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <dirent.h>
@@ -53,7 +54,7 @@ class File : public Stream {
     int    peek() override;
     void   flush() override;
     size_t read(uint8_t * buf, size_t size);
-    size_t readBytes(char * buffer, size_t length) {
+    size_t readBytes(char * buffer, size_t length) override {
         return read((uint8_t *)buffer, length);
     }
 

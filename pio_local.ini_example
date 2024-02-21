@@ -2,7 +2,6 @@
 
 [common]
 ; custom build flags to use in my_build_flags
-;  -DEMSESP_WIFI_TWEAK ; experimental WiFi tweaks for stability
 ;  -DEMSESP_UART_DEBUG ; debugging UART
 ;  -DEMSESP_DEBUG ; enables DEBUG to the log. Will generate a lot of extra traffic on Console and Syslog
 ;  -DEMSESP_DEFAULT_BOARD_PROFILE=\"NODEMCU\" ; hard code the default board name
@@ -71,7 +70,7 @@ build_flags =
 	-D EMSESP_TEST
 	-D EMSESP_DEBUG
  	-D CONFIG_ETH_ENABLED
-    -D TASMOTA_SDK
+	-D CONFIG_ASYNC_TCP_STACK_SIZE=8192
 	'-DEMSESP_DEFAULT_BOARD_PROFILE="Test"'
 
 [env:lolin_s3]

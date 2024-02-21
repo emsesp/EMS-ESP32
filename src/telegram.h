@@ -21,15 +21,14 @@
 
 #include <string>
 #include <deque>
+#include <uuid/log.h>
 
 // UART drivers
 #if defined(ESP32)
 #include "uart/emsuart_esp32.h"
 #elif defined(EMSESP_STANDALONE)
-#include <emsuart_standalone.h>
+#include "emsuart_standalone.h"
 #endif
-
-#include <uuid/log.h>
 
 #include "helpers.h"
 

@@ -1,17 +1,13 @@
-#include <SecuritySettingsService.h>
-
-#if FT_ENABLED(FT_SECURITY)
-
-#include "../../src/emsesp_stub.hpp"
+#include "SecuritySettingsService.h"
 
 SecuritySettingsService::SecuritySettingsService(AsyncWebServer * server, FS * fs)
     : _httpEndpoint(SecuritySettings::read, SecuritySettings::update, this, server, SECURITY_SETTINGS_PATH, this)
     , _fsPersistence(SecuritySettings::read, SecuritySettings::update, this, fs, SECURITY_SETTINGS_FILE)
     , _jwtHandler(FACTORY_JWT_SECRET) {
-    addUpdateHandler([&](const String & originId) { configureJWTHandler(); }, false);
+    addUpdateHandler([this] { configureJWTHandler(); }, false);
     server->on(GENERATE_TOKEN_PATH,
                HTTP_GET,
-               wrapRequest(std::bind(&SecuritySettingsService::generateToken, this, std::placeholders::_1), AuthenticationPredicates::IS_ADMIN));
+               SecuritySettingsService::wrapRequest([this](AsyncWebServerRequest * request) { generateToken(request); }, AuthenticationPredicates::IS_ADMIN));
 }
 
 void SecuritySettingsService::begin() {
@@ -32,7 +28,7 @@ Authentication SecuritySettingsService::authenticateRequest(AsyncWebServerReques
         String              value          = tokenParamater->value();
         return authenticateJWT(value);
     }
-    return Authentication();
+    return {};
 }
 
 void SecuritySettingsService::configureJWTHandler() {
@@ -45,37 +41,37 @@ Authentication SecuritySettingsService::authenticateJWT(String & jwt) {
     if (payloadDocument.is<JsonObject>()) {
         JsonObject parsedPayload = payloadDocument.as<JsonObject>();
         String     username      = parsedPayload["username"];
-        for (User _user : _state.users) {
+        for (const User & _user : _state.users) {
             if (_user.username == username && validatePayload(parsedPayload, &_user)) {
                 return Authentication(_user);
             }
         }
     }
-    return Authentication();
+    return {};
 }
 
 Authentication SecuritySettingsService::authenticate(const String & username, const String & password) {
-    for (User _user : _state.users) {
+    for (const User & _user : _state.users) {
         if (_user.username == username && _user.password == password) {
             return Authentication(_user);
         }
     }
-    return Authentication();
+    return {};
 }
 
-inline void populateJWTPayload(JsonObject payload, User * user) {
+inline void populateJWTPayload(JsonObject payload, const User * user) {
     payload["username"] = user->username;
     payload["admin"]    = user->admin;
 }
 
-boolean SecuritySettingsService::validatePayload(JsonObject parsedPayload, User * user) {
+boolean SecuritySettingsService::validatePayload(JsonObject parsedPayload, const User * user) {
     JsonDocument jsonDocument;
     JsonObject   payload = jsonDocument.to<JsonObject>();
     populateJWTPayload(payload, user);
     return payload == parsedPayload;
 }
 
-String SecuritySettingsService::generateJWT(User * user) {
+String SecuritySettingsService::generateJWT(const User * user) {
     JsonDocument jsonDocument;
     JsonObject   payload = jsonDocument.to<JsonObject>();
     populateJWTPayload(payload, user);
@@ -113,11 +109,11 @@ ArJsonRequestHandlerFunction SecuritySettingsService::wrapCallback(ArJsonRequest
 
 void SecuritySettingsService::generateToken(AsyncWebServerRequest * request) {
     AsyncWebParameter * usernameParam = request->getParam("username");
-    for (User _user : _state.users) {
+    for (const User & _user : _state.users) {
         if (_user.username == usernameParam->value()) {
-            AsyncJsonResponse * response = new AsyncJsonResponse(false);
-            JsonObject          root     = response->getRoot();
-            root["token"]                = generateJWT(&_user);
+            auto *     response = new AsyncJsonResponse(false);
+            JsonObject root     = response->getRoot();
+            root["token"]       = generateJWT(&_user);
             response->setLength();
             request->send(response);
             return;
@@ -125,33 +121,3 @@ void SecuritySettingsService::generateToken(AsyncWebServerRequest * request) {
     }
     request->send(401);
 }
-
-#else
-
-User ADMIN_USER = User(FACTORY_ADMIN_USERNAME, FACTORY_ADMIN_PASSWORD, true);
-
-SecuritySettingsService::SecuritySettingsService(AsyncWebServer * server, FS * fs)
-    : SecurityManager() {
-}
-SecuritySettingsService::~SecuritySettingsService() {
-}
-
-ArRequestFilterFunction SecuritySettingsService::filterRequest(AuthenticationPredicate predicate) {
-    return [this, predicate](AsyncWebServerRequest * request) { return true; };
-}
-
-// Return the admin user on all request - disabling security features
-Authentication SecuritySettingsService::authenticateRequest(AsyncWebServerRequest * request) {
-    return Authentication(ADMIN_USER);
-}
-
-// Return the function unwrapped
-ArRequestHandlerFunction SecuritySettingsService::wrapRequest(ArRequestHandlerFunction onRequest, AuthenticationPredicate predicate) {
-    return onRequest;
-}
-
-ArJsonRequestHandlerFunction SecuritySettingsService::wrapCallback(ArJsonRequestHandlerFunction onRequest, AuthenticationPredicate predicate) {
-    return onRequest;
-}
-
-#endif

@@ -20,27 +20,24 @@
 
 namespace emsesp {
 
-using namespace std::placeholders; // for `_1` etc
-
 bool WebCustomization::_start = true;
 
 WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _fsPersistence(WebCustomization::read, WebCustomization::update, this, fs, EMSESP_CUSTOMIZATION_FILE)
     , _masked_entities_handler(CUSTOMIZATION_ENTITIES_PATH,
-                               securityManager->wrapCallback(std::bind(&WebCustomizationService::customization_entities, this, _1, _2),
+                               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { customization_entities(request, json); },
                                                              AuthenticationPredicates::IS_AUTHENTICATED)) {
     server->on(DEVICE_ENTITIES_PATH,
                HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WebCustomizationService::device_entities, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
-
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { device_entities(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
 
     server->on(DEVICES_SERVICE_PATH,
                HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WebCustomizationService::devices, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { devices(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
 
     server->on(RESET_CUSTOMIZATION_SERVICE_PATH,
                HTTP_POST,
-               securityManager->wrapRequest(std::bind(&WebCustomizationService::reset_customization, this, _1), AuthenticationPredicates::IS_ADMIN));
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { reset_customization(request); }, AuthenticationPredicates::IS_ADMIN));
 
     _masked_entities_handler.setMethod(HTTP_POST);
     _masked_entities_handler.setMaxContentLength(2048);
@@ -186,7 +183,7 @@ void WebCustomizationService::device_entities(AsyncWebServerRequest * request) {
     if (request->hasParam(F_(id))) {
         id = Helpers::atoint(request->getParam(F_(id))->value().c_str()); // get id from url
 
-        auto * response = new MsgpackAsyncJsonResponse(true);
+        auto * response = new AsyncJsonResponse(true, true); // array and msgpack
 
         // while (!response) {
         //     delete response;
@@ -276,30 +273,28 @@ void WebCustomizationService::customization_entities(AsyncWebServerRequest * req
                     emsdevice->getCustomizationEntities(entity_ids);
 
                     // Save the list to the customization file
-                    update(
-                        [&](WebCustomization & settings) {
-                            // see if we already have a mask list for this device, if so remove it
-                            for (auto it = settings.entityCustomizations.begin(); it != settings.entityCustomizations.end();) {
-                                if ((*it).product_id == product_id && (*it).device_id == device_id) {
-                                    it = settings.entityCustomizations.erase(it);
-                                    break;
-                                } else {
-                                    ++it;
-                                }
+                    update([&](WebCustomization & settings) {
+                        // see if we already have a mask list for this device, if so remove it
+                        for (auto it = settings.entityCustomizations.begin(); it != settings.entityCustomizations.end();) {
+                            if ((*it).product_id == product_id && (*it).device_id == device_id) {
+                                it = settings.entityCustomizations.erase(it);
+                                break;
+                            } else {
+                                ++it;
                             }
+                        }
 
-                            // create a new entry for this device if there are values
-                            EntityCustomization new_entry;
-                            new_entry.product_id = product_id;
-                            new_entry.device_id  = device_id;
+                        // create a new entry for this device if there are values
+                        EntityCustomization new_entry;
+                        new_entry.product_id = product_id;
+                        new_entry.device_id  = device_id;
 
-                            new_entry.entity_ids = entity_ids;
+                        new_entry.entity_ids = entity_ids;
 
-                            // add the record and save
-                            settings.entityCustomizations.push_back(new_entry);
-                            return StateUpdateResult::CHANGED;
-                        },
-                        "local");
+                        // add the record and save
+                        settings.entityCustomizations.push_back(new_entry);
+                        return StateUpdateResult::CHANGED;
+                    });
 
                     break;
                 }
@@ -320,54 +315,52 @@ void WebCustomizationService::begin() {
 // hard coded tests
 #ifdef EMSESP_TEST
 void WebCustomizationService::test() {
-    update(
-        [&](WebCustomization & webCustomization) {
-            // Temperature sensors
-            webCustomization.sensorCustomizations.clear();
-            auto sensor   = SensorCustomization();
-            sensor.id     = "01-0203-0405-0607";
-            sensor.name   = "test_sensor1";
-            sensor.offset = 0;
-            webCustomization.sensorCustomizations.push_back(sensor);
+    update([&](WebCustomization & webCustomization) {
+        // Temperature sensors
+        webCustomization.sensorCustomizations.clear();
+        auto sensor   = SensorCustomization();
+        sensor.id     = "01-0203-0405-0607";
+        sensor.name   = "test_sensor1";
+        sensor.offset = 0;
+        webCustomization.sensorCustomizations.push_back(sensor);
 
-            sensor        = SensorCustomization();
-            sensor.id     = "0B-0C0D-0E0F-1011";
-            sensor.name   = "test_sensor2";
-            sensor.offset = 4;
-            webCustomization.sensorCustomizations.push_back(sensor);
+        sensor        = SensorCustomization();
+        sensor.id     = "0B-0C0D-0E0F-1011";
+        sensor.name   = "test_sensor2";
+        sensor.offset = 4;
+        webCustomization.sensorCustomizations.push_back(sensor);
 
-            // Analog sensors
-            // This actually adds the sensors as we use customizations to store them
-            webCustomization.analogCustomizations.clear();
-            auto analog   = AnalogCustomization();
-            analog.gpio   = 36;
-            analog.name   = "test_analog1";
-            analog.offset = 0;
-            analog.factor = 0.1;
-            analog.uom    = 17;
-            analog.type   = 3;
-            webCustomization.analogCustomizations.push_back(analog);
+        // Analog sensors
+        // This actually adds the sensors as we use customizations to store them
+        webCustomization.analogCustomizations.clear();
+        auto analog   = AnalogCustomization();
+        analog.gpio   = 36;
+        analog.name   = "test_analog1";
+        analog.offset = 0;
+        analog.factor = 0.1;
+        analog.uom    = 17;
+        analog.type   = 3;
+        webCustomization.analogCustomizations.push_back(analog);
 
-            analog        = AnalogCustomization();
-            analog.gpio   = 37;
-            analog.name   = "test_analog2";
-            analog.offset = 0;
-            analog.factor = 1;
-            analog.uom    = 0;
-            analog.type   = 1;
-            webCustomization.analogCustomizations.push_back(analog);
+        analog        = AnalogCustomization();
+        analog.gpio   = 37;
+        analog.name   = "test_analog2";
+        analog.offset = 0;
+        analog.factor = 1;
+        analog.uom    = 0;
+        analog.type   = 1;
+        webCustomization.analogCustomizations.push_back(analog);
 
-            // EMS entities
-            webCustomization.entityCustomizations.clear();
-            auto emsEntity       = EntityCustomization();
-            emsEntity.product_id = 123;
-            emsEntity.device_id  = 8;
-            emsEntity.entity_ids.push_back("08heatingactive|is my heating on?");
-            webCustomization.entityCustomizations.push_back(emsEntity);
+        // EMS entities
+        webCustomization.entityCustomizations.clear();
+        auto emsEntity       = EntityCustomization();
+        emsEntity.product_id = 123;
+        emsEntity.device_id  = 8;
+        emsEntity.entity_ids.push_back("08heatingactive|is my heating on?");
+        webCustomization.entityCustomizations.push_back(emsEntity);
 
-            return StateUpdateResult::CHANGED; // persist the changes
-        },
-        "local");
+        return StateUpdateResult::CHANGED; // persist the changes
+    });
 
     EMSESP::analogsensor_.reload(); // this is needed to active the analog sensors
 }

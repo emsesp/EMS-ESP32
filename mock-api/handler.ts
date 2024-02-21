@@ -225,7 +225,7 @@ let network_settings = {
   password: 'myPassword',
   hostname: 'ems-esp',
   nosleep: true,
-  tx_power: 20,
+  tx_power: 0,
   bandwidth20: false,
   static_ip_config: false,
   enableMDNS: true,
@@ -363,7 +363,6 @@ const mqtt_status = {
 };
 
 // SYSTEM
-const FEATURES_ENDPOINT = REST_ENDPOINT_ROOT + 'features';
 const VERIFY_AUTHORIZATION_ENDPOINT = REST_ENDPOINT_ROOT + 'verifyAuthorization';
 const SYSTEM_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'systemStatus';
 const SECURITY_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'securitySettings';
@@ -375,6 +374,9 @@ const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken';
 const system_status = {
   emsesp_version: '3.6-demo',
   esp_platform: 'ESP32',
+  cpu_type: 'ESP32-S3',
+  cpu_rev: '0',
+  cpu_cores: 2,
   max_alloc_heap: 89,
   psram_size: 0,
   free_psram: 0,
@@ -385,9 +387,11 @@ const system_status = {
   flash_chip_speed: 40000000,
   fs_used: 40,
   fs_free: 24,
+  partition: 'app0',
   app_used: 1863,
   app_free: 121,
-  uptime: '000+00:15:42.707'
+  uptime: '000+00:15:42.707',
+  arduino_version: 'ESP32 Arduino v2.0.14'
 };
 let security_settings = {
   jwt_secret: 'naughty!',
@@ -396,17 +400,7 @@ let security_settings = {
     { username: 'guest', password: 'guest', admin: false }
   ]
 };
-const features = {
-  project: true,
-  security: true,
-  mqtt: true,
-  ntp: true,
-  ota: true,
-  upload_firmware: true,
-  version: 'v3.6-demo',
-  // platform: 'ESP32'
-  platform: 'ESP32-S3'
-};
+
 const verify_authentication = { access_token: '1234' };
 const signin = {
   access_token:
@@ -2377,7 +2371,6 @@ router
     security_settings = await request.json();
     return new Response('OK', { status: 200 });
   })
-  .get(FEATURES_ENDPOINT, () => new Response(JSON.stringify(features), { headers }))
   .get(VERIFY_AUTHORIZATION_ENDPOINT, () => new Response(JSON.stringify(verify_authentication), { headers }))
   .post(RESTART_ENDPOINT, () => new Response('OK', { status: 200 }))
   .post(FACTORY_RESET_ENDPOINT, () => new Response('OK', { status: 200 }))

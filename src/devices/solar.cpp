@@ -1047,12 +1047,10 @@ bool Solar::set_SM10MaxFlow(const char * value, const int8_t id) {
         return false;
     }
     maxFlow_ = (flow * 10);
-    EMSESP::webSettingsService.update(
-        [&](WebSettings & settings) {
-            settings.solar_maxflow = maxFlow_;
-            return StateUpdateResult::CHANGED;
-        },
-        "local");
+    EMSESP::webSettingsService.update([&](WebSettings & settings) {
+        settings.solar_maxflow = maxFlow_;
+        return StateUpdateResult::CHANGED;
+    });
     return true;
 }
 

@@ -1,19 +1,17 @@
-#include <MqttStatus.h>
+#include "MqttStatus.h"
 
 #include "../../src/emsesp_stub.hpp"
-
-using namespace std::placeholders; // for `_1` etc
 
 MqttStatus::MqttStatus(AsyncWebServer * server, MqttSettingsService * mqttSettingsService, SecurityManager * securityManager)
     : _mqttSettingsService(mqttSettingsService) {
     server->on(MQTT_STATUS_SERVICE_PATH,
                HTTP_GET,
-               securityManager->wrapRequest(std::bind(&MqttStatus::mqttStatus, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { mqttStatus(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
 }
 
 void MqttStatus::mqttStatus(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false);
-    JsonObject          root     = response->getRoot();
+    auto *     response = new AsyncJsonResponse(false);
+    JsonObject root     = response->getRoot();
 
     root["enabled"]           = _mqttSettingsService->isEnabled();
     root["connected"]         = _mqttSettingsService->isConnected();
