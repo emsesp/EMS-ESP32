@@ -1561,7 +1561,7 @@ void EMSdevice::publish_all_values() {
 
 // For each value in the device create the json object pair and add it to given json
 // return false if empty
-// this is used to create the MQTT payloads, Console messages and Web API calls
+// this is used to create the MQTT payloads, Console messages and Web API call responses
 bool EMSdevice::generate_values(JsonObject output, const uint8_t tag_filter, const bool nested, const uint8_t output_target) {
     bool       has_values = false; // to see if we've added a value. it's faster than doing a json.size() at the end
     uint8_t    old_tag    = 255;   // NAN
@@ -1697,8 +1697,8 @@ bool EMSdevice::generate_values(JsonObject output, const uint8_t tag_filter, con
                     }
                 }
 
-                // commenting out - we don't want Commands in MQTT or Console
-                //  else if (dv.type == DeviceValueType::CMD && output_target != EMSdevice::OUTPUT_TARGET::MQTT) {
+                // commenting out as we don't want Commands in Console ('show values')
+                // else if (dv.type == DeviceValueType::CMD && output_target != EMSdevice::OUTPUT_TARGET::MQTT) {
                 //     json[name] = "";
                 // }
 
@@ -1748,7 +1748,7 @@ void EMSdevice::mqtt_ha_entity_config_create() {
             }
         }
 
-        if (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) && (dv.type != DeviceValueType::CMD) && dv.has_state(DeviceValueState::DV_ACTIVE)
+        if (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) && dv.has_state(DeviceValueState::DV_ACTIVE)
             && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE)) {
             // create_device_config is only done once for the EMS device. It can added to any entity, so we take the first
             if (Mqtt::publish_ha_sensor_config(dv, name(), brand_to_char(), false, create_device_config)) {
