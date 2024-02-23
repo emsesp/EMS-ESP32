@@ -24,7 +24,7 @@ namespace emsesp {
 uuid::log::Logger AnalogSensor::logger_{F_(analogsensor), uuid::log::Facility::DAEMON};
 
 void AnalogSensor::start() {
-    reload(); // fetch the list of sensors from our customization service
+    reload(true); // fetch the list of sensors from our customization service
 
     if (!analog_enabled_) {
         return;
@@ -47,7 +47,7 @@ void AnalogSensor::start() {
 }
 
 // load settings from the customization file, sorts them and initializes the GPIOs
-void AnalogSensor::reload() {
+void AnalogSensor::reload(bool get_nvs) {
     EMSESP::webSettingsService.read([&](WebSettings & settings) { analog_enabled_ = settings.analog_enabled; });
 
 #if defined(EMSESP_STANDALONE)
@@ -195,6 +195,13 @@ void AnalogSensor::reload() {
             } else
 #endif
             {
+                if (sensor.uom() == 0) { // set state from NVS
+                    if (!get_nvs || EMSESP::nvs_.getChar(sensor.name().c_str(), -1) == -1) {
+                        EMSESP::nvs_.putChar(sensor.name().c_str(), (int8_t)sensor.offset());
+                    } else {
+                        sensor.set_offset(EMSESP::nvs_.getChar(sensor.name().c_str()));
+                    }
+                }
                 digitalWrite(sensor.gpio(), sensor.offset() * sensor.factor() > 0 ? 1 : 0);
                 sensor.set_value(sensor.offset());
             }
@@ -722,8 +729,10 @@ void AnalogSensor::addSensorJson(JsonObject output, const Sensor & sensor) {
         output["max"]       = 100;
         output["uom"]       = EMSdevice::uom_to_string(sensor.uom());
     } else if (sensor.type() == AnalogType::DIGITAL_OUT) {
-        output["min"] = 0;
-        output["max"] = sensor.gpio() == 25 || sensor.gpio() == 26 ? 255 : 1;
+        output["min"]   = 0;
+        output["max"]   = sensor.gpio() == 25 || sensor.gpio() == 26 ? 255 : 1;
+        char state[][2] = {"?", "0", "1"};
+        output["start"] = state[sensor.uom()];
     }
 }
 
@@ -796,6 +805,9 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                     sensor.set_value(v);
                     pinMode(sensor.gpio(), OUTPUT);
                     digitalWrite(sensor.gpio(), sensor.offset() * sensor.factor() > 0 ? 1 : 0);
+                    if (sensor.uom() == 0 && EMSESP::nvs_.getChar(sensor.name().c_str()) != (int8_t)sensor.offset()) {
+                        EMSESP::nvs_.putChar(sensor.name().c_str(), (int8_t)sensor.offset());
+                    }
                 }
             } else if (sensor.type() >= AnalogType::PWM_0 && sensor.type() <= AnalogType::PWM_2) {
                 if (val > 100) {
@@ -815,18 +827,6 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                 return false;
             }
             if (oldoffset != sensor.offset()) {
-                EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
-                    for (auto & AnalogCustomization : settings.analogCustomizations) {
-                        if (AnalogCustomization.gpio == sensor.gpio() && AnalogCustomization.type == sensor.type()) {
-                            AnalogCustomization.offset = sensor.offset();
-                        }
-                    }
-                    if (sensor.type() == AnalogType::COUNTER || (sensor.type() == AnalogType::DIGITAL_OUT && sensor.uom() > 0)) {
-                        return StateUpdateResult::UNCHANGED; // temporary change
-                    } else {
-                        return StateUpdateResult::CHANGED; // persist the change
-                    }
-                });
                 publish_sensor(sensor);
                 changed_ = true;
             }
