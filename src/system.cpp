@@ -587,7 +587,6 @@ void System::send_info_mqtt() {
         doc["hostname"]        = WiFi.getHostname();
         doc["SSID"]            = WiFi.SSID();
         doc["BSSID"]           = WiFi.BSSIDstr();
-        doc["RSSI"]            = WiFi.RSSI();
         doc["MAC"]             = WiFi.macAddress();
         doc["IPv4 address"]    = uuid::printable_to_string(WiFi.localIP()) + "/" + uuid::printable_to_string(WiFi.subnetMask());
         doc["IPv4 gateway"]    = uuid::printable_to_string(WiFi.gatewayIP());
@@ -602,13 +601,19 @@ void System::send_info_mqtt() {
 
 // create the json for heartbeat
 void System::heartbeat_json(JsonObject output) {
-    uint8_t bus_status = EMSESP::bus_status();
-    if (bus_status == EMSESP::BUS_STATUS_TX_ERRORS) {
+    switch (EMSESP::bus_status()) {
+    case EMSESP::BUS_STATUS_OFFLINE:
+        output["bus_status"] = "connecting"; // EMS-ESP is booting...
+        break;
+    case EMSESP::BUS_STATUS_TX_ERRORS:
         output["bus_status"] = "txerror";
-    } else if (bus_status == EMSESP::BUS_STATUS_CONNECTED) {
+        break;
+    case EMSESP::BUS_STATUS_CONNECTED:
         output["bus_status"] = "connected";
-    } else {
+        break;
+    default:
         output["bus_status"] = "disconnected";
+        break;
     }
 
     output["uptime"]     = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
@@ -732,6 +737,9 @@ void System::system_check() {
         static uint8_t last_healthcheck_ = 0;
         if (healthcheck_ != last_healthcheck_) {
             last_healthcheck_ = healthcheck_;
+
+            EMSESP::system_.send_heartbeat(); // send MQTT heartbeat immediately when connected
+
             // see if we're better now
             if (healthcheck_ == 0) {
                 // everything is healthy, show LED permanently on or off depending on setting
