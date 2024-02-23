@@ -38,6 +38,7 @@ stats.html
 !.yarn/versions
 yarn.lock
 interface/analyse.html
+interface/vite.config.ts.timestamp*
 
 # scripts
 test.sh

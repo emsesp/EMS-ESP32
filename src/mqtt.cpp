@@ -523,7 +523,7 @@ void Mqtt::on_connect() {
     resubscribe();
 
     // publish to the last will topic (see Mqtt::start() function) to say we're alive
-    queue_publish_retain("status", "online", true); // with retain on
+    queue_publish_retain("status", "online", false); // with retain off
 
     // mqtt_publish_fails_ = 0; // reset fail count to 0
 }
@@ -893,6 +893,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             readonly_sensors = false;
             break;
         case DeviceValueType::ENUM:
+        case DeviceValueType::CMD: // hardcoded commands are always ENUMS
             // select - https://www.home-assistant.io/integrations/select.mqtt
             snprintf(topic, sizeof(topic), "select/%s", config_topic);
             readonly_sensors = false;
@@ -942,8 +943,8 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         }
         doc["cmd_t"] = command_topic;
 
-        // extend for enums, add options
-        if (type == DeviceValueType::ENUM) {
+        // extend for enums and also commands, add options
+        if ((type == DeviceValueType::ENUM) || (type == DeviceValueType::CMD)) {
             JsonArray option_list = doc["ops"].to<JsonArray>();
             if (EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX) {
                 // use index numbers
@@ -958,7 +959,6 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
                 }
                 snprintf(sample_val, sizeof(sample_val), "'%s'", Helpers::translated_word(options[0]));
             }
-
         } else if (type != DeviceValueType::STRING && type != DeviceValueType::BOOL) {
             // For numeric's add the range
             doc["mode"] = "box"; // auto, slider or box
@@ -994,11 +994,6 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         }
     }
 
-    // state topic
-    char stat_t[MQTT_TOPIC_MAX_SIZE];
-    snprintf(stat_t, sizeof(stat_t), "%s/%s", Mqtt::base().c_str(), tag_to_topic(device_type, tag).c_str());
-    doc["stat_t"] = stat_t;
-
     // friendly name = <tag> <name>
     char   ha_name[70];
     char * F_name = strdup(fullname);
@@ -1012,38 +1007,49 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     free(F_name); // very important!
     doc["name"] = ha_name;
 
-    // value template
-    // if its nested mqtt format then use the appended entity name, otherwise take the original name
-    char val_obj[100];
-    char val_cond[200];
-    if (is_nested() && tag >= DeviceValueTAG::TAG_HC1) {
-        snprintf(val_obj, sizeof(val_obj), "value_json.%s.%s", EMSdevice::tag_to_mqtt(tag), entity);
-        snprintf(val_cond, sizeof(val_cond), "value_json.%s is defined and %s is defined", EMSdevice::tag_to_mqtt(tag), val_obj);
-    } else {
-        snprintf(val_obj, sizeof(val_obj), "value_json.%s", entity);
-        snprintf(val_cond, sizeof(val_cond), "%s is defined", val_obj);
-    }
 
-    // special case to handle booleans
-    // applies to both Binary Sensor (read only) and a Switch (for a command)
-    // has no unit of measure or icon
-    if (type == DeviceValueType::BOOL) {
-        if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-            doc["pl_on"]  = true;
-            doc["pl_off"] = false;
-            snprintf(sample_val, sizeof(sample_val), "false");
-        } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-            doc["pl_on"]  = 1;
-            doc["pl_off"] = 0;
+    // not needed for commands
+    if (type != DeviceValueType::CMD) {
+        // state topic, except for commands
+        char stat_t[MQTT_TOPIC_MAX_SIZE];
+        snprintf(stat_t, sizeof(stat_t), "%s/%s", Mqtt::base().c_str(), tag_to_topic(device_type, tag).c_str());
+        doc["stat_t"] = stat_t;
+
+        // value template
+        // if its nested mqtt format then use the appended entity name, otherwise take the original name
+        char val_obj[100];
+        char val_cond[200];
+        if (is_nested() && tag >= DeviceValueTAG::TAG_HC1) {
+            snprintf(val_obj, sizeof(val_obj), "value_json.%s.%s", EMSdevice::tag_to_mqtt(tag), entity);
+            snprintf(val_cond, sizeof(val_cond), "value_json.%s is defined and %s is defined", EMSdevice::tag_to_mqtt(tag), val_obj);
         } else {
-            char result[12];
-            doc["pl_on"]  = Helpers::render_boolean(result, true);
-            doc["pl_off"] = Helpers::render_boolean(result, false);
-            snprintf(sample_val, sizeof(sample_val), "'%s'", Helpers::render_boolean(result, false));
+            snprintf(val_obj, sizeof(val_obj), "value_json.%s", entity);
+            snprintf(val_cond, sizeof(val_cond), "%s is defined", val_obj);
         }
-    }
 
-    doc["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else " + sample_val + "}}";
+        // special case to handle booleans
+        // applies to both Binary Sensor (read only) and a Switch (for a command)
+        // has no unit of measure or icon
+        if (type == DeviceValueType::BOOL) {
+            if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+                doc["pl_on"]  = true;
+                doc["pl_off"] = false;
+                snprintf(sample_val, sizeof(sample_val), "false");
+            } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+                doc["pl_on"]  = 1;
+                doc["pl_off"] = 0;
+            } else {
+                char result[12];
+                doc["pl_on"]  = Helpers::render_boolean(result, true);
+                doc["pl_off"] = Helpers::render_boolean(result, false);
+                snprintf(sample_val, sizeof(sample_val), "'%s'", Helpers::render_boolean(result, false));
+            }
+        }
+        doc["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else " + sample_val + "}}";
+
+        // add the dev json object to the end, not for commands
+        add_ha_sections_to_doc(nullptr, stat_t, doc, false, val_cond); // no name, since the "dev" has already been adde
+    }
 
     // Add the state class, device class and sometimes the icon. Used only for read-only sensors like Sensor and Binary Sensor
     if (readonly_sensors) {
@@ -1052,12 +1058,10 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         if (device_type == EMSdevice::DeviceType::SYSTEM) {
             doc["ent_cat"] = "diagnostic";
         }
-
         add_ha_uom(doc.as<JsonObject>(), type, uom, entity); // add the UoM, device and state class
     }
 
-    doc["dev"] = dev_json;                                         // add the dev json object to the end
-    add_ha_sections_to_doc(nullptr, stat_t, doc, false, val_cond); // no name, since the "dev" has already been added
+    doc["dev"] = dev_json;
 
     return queue_ha(topic, doc.as<JsonObject>());
 }
