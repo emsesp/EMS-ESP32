@@ -1,8 +1,6 @@
 #ifndef Features_h
 #define Features_h
 
-#define FT_ENABLED(feature) feature
-
 // project feature off by default
 #ifndef FT_PROJECT
 #define FT_PROJECT 0

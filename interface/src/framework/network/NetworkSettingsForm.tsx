@@ -15,8 +15,8 @@ import {
   ListItemSecondaryAction,
   ListItemText,
   Typography,
-  InputAdornment,
-  TextField
+  TextField,
+  MenuItem
 } from '@mui/material';
 // eslint-disable-next-line import/named
 import { updateState, useRequest } from 'alova';
@@ -43,7 +43,7 @@ import {
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
-import { numberValue, updateValueDirty, useRest } from 'utils';
+import { updateValueDirty, useRest } from 'utils';
 
 import { validate } from 'validators';
 import { createNetworkSettingsValidator } from 'validators/network';
@@ -88,7 +88,7 @@ const WiFiSettingsForm: FC = () => {
           static_ip_config: false,
           enableIPv6: false,
           bandwidth20: false,
-          tx_power: 20,
+          tx_power: 0,
           nosleep: false,
           enableMDNS: true,
           enableCORS: false,
@@ -196,20 +196,27 @@ const WiFiSettingsForm: FC = () => {
             margin="normal"
           />
         )}
-        <ValidatedTextField
-          fieldErrors={fieldErrors}
+        <TextField
           name="tx_power"
           label={LL.TX_POWER()}
-          InputProps={{
-            endAdornment: <InputAdornment position="end">dBm</InputAdornment>
-          }}
           fullWidth
           variant="outlined"
-          value={numberValue(data.tx_power)}
+          value={data.tx_power}
           onChange={updateFormValue}
-          type="number"
           margin="normal"
-        />
+          select
+        >
+          <MenuItem value={0}>Auto</MenuItem>
+          <MenuItem value={78}>19.5 dBm</MenuItem>
+          <MenuItem value={76}>19 dBm</MenuItem>
+          <MenuItem value={74}>18.5 dBm</MenuItem>
+          <MenuItem value={68}>17 dBm</MenuItem>
+          <MenuItem value={60}>15 dBm</MenuItem>
+          <MenuItem value={52}>13 dBm</MenuItem>
+          <MenuItem value={44}>11 dBm</MenuItem>
+          <MenuItem value={34}>8.5 dBm</MenuItem>
+          <MenuItem value={28}>7 dBm</MenuItem>
+        </TextField>
         <BlockFormControlLabel
           control={<Checkbox name="nosleep" checked={data.nosleep} onChange={updateFormValue} />}
           label={LL.NETWORK_DISABLE_SLEEP()}

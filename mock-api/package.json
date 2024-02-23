@@ -16,7 +16,7 @@
     "itty-router": "^4.0.27",
     "multer": "^1.4.5-lts.1"
   },
-  "packageManager": "yarn@4.0.2",
+  "packageManager": "yarn@4.1.0",
   "devDependencies": {
     "@types/multer": "^1.4.11"
   }

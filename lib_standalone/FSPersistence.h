@@ -1,8 +1,8 @@
 #ifndef FSPersistence_h
 #define FSPersistence_h
 
-#include <StatefulService.h>
-#include <FS.h>
+#include "StatefulService.h"
+#include "FS.h"
 
 template <class T>
 class FSPersistence {
@@ -40,7 +40,7 @@ class FSPersistence {
 
     void enableUpdateHandler() {
         if (!_updateHandlerId) {
-            _updateHandlerId = _statefulService->addUpdateHandler([&](const String & originId) { writeToFS(); });
+            _updateHandlerId = _statefulService->addUpdateHandler([this] { writeToFS(); });
         }
     }
 

@@ -1,4 +1,4 @@
-#include <APSettingsService.h>
+#include "APSettingsService.h"
 
 #include "../../src/emsesp_stub.hpp"
 
@@ -9,8 +9,8 @@ APSettingsService::APSettingsService(AsyncWebServer * server, FS * fs, SecurityM
     , _lastManaged(0)
     , _reconfigureAp(false)
     , _connected(0) {
-    addUpdateHandler([&](const String & originId) { reconfigureAP(); }, false);
-    WiFi.onEvent(std::bind(&APSettingsService::WiFiEvent, this, _1));
+    addUpdateHandler([this] { reconfigureAP(); }, false);
+    WiFi.onEvent([this](WiFiEvent_t event, WiFiEventInfo_t info) { WiFiEvent(event); });
 }
 
 void APSettingsService::begin() {
@@ -53,7 +53,7 @@ void APSettingsService::reconfigureAP() {
 
 void APSettingsService::loop() {
     unsigned long currentMillis = uuid::get_uptime();
-    unsigned long manageElapsed = (uint32_t)(currentMillis - _lastManaged);
+    unsigned long manageElapsed = static_cast<uint32_t>(currentMillis - _lastManaged);
     if (manageElapsed >= MANAGE_NETWORK_DELAY) {
         _lastManaged = currentMillis;
         manageAP();
@@ -76,7 +76,7 @@ void APSettingsService::manageAP() {
 
 void APSettingsService::startAP() {
     WiFi.softAPConfig(_state.localIP, _state.gatewayIP, _state.subnetMask);
-    esp_wifi_set_bandwidth((wifi_interface_t)ESP_IF_WIFI_AP, WIFI_BW_HT20);
+    esp_wifi_set_bandwidth(static_cast<wifi_interface_t>(ESP_IF_WIFI_AP), WIFI_BW_HT20);
     WiFi.softAP(_state.ssid.c_str(), _state.password.c_str(), _state.channel, _state.ssidHidden, _state.maxClients);
 #if CONFIG_IDF_TARGET_ESP32C3
     WiFi.setTxPower(WIFI_POWER_8_5dBm); // https://www.wemos.cc/en/latest/c3/c3_mini_1_0_0.html#about-wifi
@@ -108,8 +108,54 @@ void APSettingsService::handleDNS() {
 APNetworkStatus APSettingsService::getAPNetworkStatus() {
     WiFiMode_t currentWiFiMode = WiFi.getMode();
     bool       apActive        = currentWiFiMode == WIFI_AP || currentWiFiMode == WIFI_AP_STA;
+
     if (apActive && _state.provisionMode != AP_MODE_ALWAYS && WiFi.status() == WL_CONNECTED) {
         return APNetworkStatus::LINGERING;
     }
+
     return apActive ? APNetworkStatus::ACTIVE : APNetworkStatus::INACTIVE;
+}
+
+
+void APSettings::read(const APSettings & settings, JsonObject root) {
+    root["provision_mode"] = settings.provisionMode;
+    root["ssid"]           = settings.ssid;
+    root["password"]       = settings.password;
+    root["channel"]        = settings.channel;
+    root["ssid_hidden"]    = settings.ssidHidden;
+    root["max_clients"]    = settings.maxClients;
+    root["local_ip"]       = settings.localIP.toString();
+    root["gateway_ip"]     = settings.gatewayIP.toString();
+    root["subnet_mask"]    = settings.subnetMask.toString();
+}
+
+StateUpdateResult APSettings::update(JsonObject root, APSettings & settings) {
+    APSettings newSettings    = {};
+    newSettings.provisionMode = static_cast<uint8_t>(root["provision_mode"] | FACTORY_AP_PROVISION_MODE);
+
+    switch (settings.provisionMode) {
+    case AP_MODE_ALWAYS:
+    case AP_MODE_DISCONNECTED:
+    case AP_MODE_NEVER:
+        break;
+    default:
+        newSettings.provisionMode = AP_MODE_ALWAYS;
+    }
+
+    newSettings.ssid       = root["ssid"] | FACTORY_AP_SSID;
+    newSettings.password   = root["password"] | FACTORY_AP_PASSWORD;
+    newSettings.channel    = static_cast<uint8_t>(root["channel"] | FACTORY_AP_CHANNEL);
+    newSettings.ssidHidden = root["ssid_hidden"] | FACTORY_AP_SSID_HIDDEN;
+    newSettings.maxClients = static_cast<uint8_t>(root["max_clients"] | FACTORY_AP_MAX_CLIENTS);
+
+    JsonUtils::readIP(root, "local_ip", newSettings.localIP, FACTORY_AP_LOCAL_IP);
+    JsonUtils::readIP(root, "gateway_ip", newSettings.gatewayIP, FACTORY_AP_GATEWAY_IP);
+    JsonUtils::readIP(root, "subnet_mask", newSettings.subnetMask, FACTORY_AP_SUBNET_MASK);
+
+    if (newSettings == settings) {
+        return StateUpdateResult::UNCHANGED;
+    }
+
+    settings = newSettings;
+    return StateUpdateResult::CHANGED;
 }

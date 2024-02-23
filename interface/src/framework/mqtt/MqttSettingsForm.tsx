@@ -72,6 +72,7 @@ const MqttSettingsForm: FC = () => {
               name="host"
               label={LL.ADDRESS_OF(LL.BROKER())}
               fullWidth
+              multiline
               variant="outlined"
               value={data.host}
               onChange={updateFormValue}

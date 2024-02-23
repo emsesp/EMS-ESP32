@@ -416,6 +416,12 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueNumOp::DV_NUMOP_DIV100,
                               FL_(meterHeat),
                               DeviceValueUOM::KWH);
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
+                              &meterWw_,
+                              DeviceValueType::ULONG,
+                              DeviceValueNumOp::DV_NUMOP_DIV100,
+                              FL_(meterWw),
+                              DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &upTimeTotal_,
                               DeviceValueType::TIME,
@@ -806,6 +812,30 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               MAKE_CF_CB(set_wwEcoPlusOffTemp),
                               48,
                               63);
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
+                              &wwComfDiffTemp_,
+                              DeviceValueType::UINT,
+                              FL_(wwComfDiffTemp),
+                              DeviceValueUOM::K,
+                              MAKE_CF_CB(set_wwComfDiffTemp),
+                              6,
+                              12);
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
+                              &wwEcoDiffTemp_,
+                              DeviceValueType::UINT,
+                              FL_(wwEcoDiffTemp),
+                              DeviceValueUOM::K,
+                              MAKE_CF_CB(set_wwEcoDiffTemp),
+                              6,
+                              12);
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
+                              &wwEcoPlusDiffTemp_,
+                              DeviceValueType::UINT,
+                              FL_(wwEcoPlusDiffTemp),
+                              DeviceValueUOM::K,
+                              MAKE_CF_CB(set_wwEcoPlusDiffTemp),
+                              6,
+                              12);
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
                               &hpCircPumpWw_,
                               DeviceValueType::BOOL,
@@ -1906,6 +1936,10 @@ void Boiler::process_HpDhwSettings(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, wwComfOffTemp_, 1);
     has_update(telegram, wwEcoOffTemp_, 0);
     has_update(telegram, wwEcoPlusOffTemp_, 5);
+    // https://github.com/emsesp/EMS-ESP32/issues/1597
+    has_update(telegram, wwComfDiffTemp_, 12);
+    has_update(telegram, wwEcoDiffTemp_, 13);
+    has_update(telegram, wwEcoPlusDiffTemp_, 14);
 }
 
 // 0x49C:
@@ -1943,6 +1977,7 @@ void Boiler::process_HpMeters(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, meterComp_, 4);
     has_update(telegram, meterEHeat_, 8);
     has_update(telegram, meterHeat_, 24);
+    has_update(telegram, meterWw_, 32);
 }
 
 void Boiler::process_HpPressure(std::shared_ptr<const Telegram> telegram) {
@@ -2918,6 +2953,15 @@ bool Boiler::set_tempDiff(const char * value, const int8_t id) {
 }
 
 bool Boiler::set_wwOffTemp(const char * value, const int8_t id) {
+    int v;
+    if (Helpers::value2temperature(value, v)) {
+        write_command(0x499, id, v, 0x499);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_wwDiffTemp(const char * value, const int8_t id) {
     int v;
     if (Helpers::value2number(value, v)) {
         write_command(0x499, id, v, 0x499);

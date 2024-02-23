@@ -1,28 +1,26 @@
 #ifndef ESP8266React_h
 #define ESP8266React_h
 
-#include <Arduino.h>
+#include "APSettingsService.h"
+#include "APStatus.h"
+#include "AuthenticationService.h"
+#include "FactoryResetService.h"
+#include "MqttSettingsService.h"
+#include "MqttStatus.h"
+#include "NTPSettingsService.h"
+#include "NTPStatus.h"
+#include "OTASettingsService.h"
+#include "UploadFileService.h"
+#include "RestartService.h"
+#include "SecuritySettingsService.h"
+#include "SystemStatus.h"
+#include "WiFiScanner.h"
+#include "NetworkSettingsService.h"
+#include "NetworkStatus.h"
 
+#include <Arduino.h>
 #include <AsyncTCP.h>
 #include <WiFi.h>
-
-#include <FeaturesService.h>
-#include <APSettingsService.h>
-#include <APStatus.h>
-#include <AuthenticationService.h>
-#include <FactoryResetService.h>
-#include <MqttSettingsService.h>
-#include <MqttStatus.h>
-#include <NTPSettingsService.h>
-#include <NTPStatus.h>
-#include <OTASettingsService.h>
-#include <UploadFileService.h>
-#include <RestartService.h>
-#include <SecuritySettingsService.h>
-#include <SystemStatus.h>
-#include <WiFiScanner.h>
-#include <NetworkSettingsService.h>
-#include <NetworkStatus.h>
 
 class ESP8266React {
   public:
@@ -67,12 +65,13 @@ class ESP8266React {
         _mqttSettingsService.setWill(will_topic);
     }
 
+#ifndef EMSESP_STANDALONE
     void factoryReset() {
         _factoryResetService.factoryReset();
     }
+#endif
 
   private:
-    FeaturesService         _featureService;
     SecuritySettingsService _securitySettingsService;
     NetworkSettingsService  _networkSettingsService;
     WiFiScanner             _wifiScanner;

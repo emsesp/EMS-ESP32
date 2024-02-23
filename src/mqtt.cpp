@@ -201,8 +201,8 @@ void Mqtt::show_mqtt(uuid::console::Shell & shell) {
     for (const auto & mqtt_subfunction : mqtt_subfunctions_) {
         shell.printfln(" %s/%s", Mqtt::base().c_str(), mqtt_subfunction.topic_.c_str());
     }
-    shell.println();
 
+    shell.println();
     shell.println();
 }
 
@@ -388,7 +388,7 @@ void Mqtt::start() {
     // add the 'publish' command ('call system publish' in console or via API)
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(publish), System::command_publish, FL_(publish_cmd));
 
-    // create last will topic with the base prefixed. It has to be static because asyncmqttclient destroys the reference
+    // create last will topic with the base prefixed. It has to be static because the client destroys the reference
     static char will_topic[MQTT_TOPIC_MAX_SIZE];
     if (!Mqtt::base().empty()) {
         snprintf(will_topic, MQTT_TOPIC_MAX_SIZE, "%s/status", Mqtt::base().c_str());
@@ -466,6 +466,7 @@ void Mqtt::on_disconnect(espMqttClientTypes::DisconnectReason reason) {
         return;
     }
     connecting_ = false;
+
     if (reason == espMqttClientTypes::DisconnectReason::TCP_DISCONNECTED) {
         LOG_WARNING("MQTT disconnected: TCP");
     } else if (reason == espMqttClientTypes::DisconnectReason::MQTT_UNACCEPTABLE_PROTOCOL_VERSION) {
@@ -483,6 +484,7 @@ void Mqtt::on_disconnect(espMqttClientTypes::DisconnectReason reason) {
     } else {
         LOG_WARNING("MQTT disconnected: code %d", reason);
     }
+
     mqttClient_->clearQueue(true);
 }
 
@@ -521,7 +523,7 @@ void Mqtt::on_connect() {
     resubscribe();
 
     // publish to the last will topic (see Mqtt::start() function) to say we're alive
-    queue_publish_retain("status", "online", true); // with retain on
+    queue_publish_retain("status", "online", false); // with retain off
 
     // mqtt_publish_fails_ = 0; // reset fail count to 0
 }
@@ -605,7 +607,7 @@ bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, con
     }
 // check free mem
 #ifndef EMSESP_STANDALONE
-    if (ESP.getFreeHeap() < 60 * 1204 || ESP.getMaxAllocHeap() < 40 * 1024) {
+    if (ESP.getFreeHeap() < 60 * 1024 || ESP.getMaxAllocHeap() < 40 * 1024) {
         if (operation == Operation::PUBLISH) {
             mqtt_message_id_++;
             mqtt_publish_fails_++;
@@ -803,20 +805,20 @@ bool Mqtt::publish_system_ha_sensor_config(uint8_t type, const char * name, cons
 // MQTT discovery configs
 // entity must match the key/value pair in the *_data topic
 // note: some extra string copying done here, it looks messy but does help with heap fragmentation issues
-bool Mqtt::publish_ha_sensor_config(uint8_t                 type,        // EMSdevice::DeviceValueType
-                                    uint8_t                 tag,         // EMSdevice::DeviceValueTAG
-                                    const char * const      fullname,    // fullname, already translated
-                                    const char * const      en_name,     // original name in english
-                                    const uint8_t           device_type, // EMSdevice::DeviceType
-                                    const char * const      entity,      // same as shortname
-                                    const uint8_t           uom,         // EMSdevice::DeviceValueUOM (0=NONE)
-                                    const bool              remove,      // true if we want to remove this topic
-                                    const bool              has_cmd,
-                                    const char * const **   options,
-                                    uint8_t                 options_size,
-                                    const int16_t           dv_set_min,
-                                    const uint32_t          dv_set_max,
-                                    const int8_t            num_op,
+bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdevice::DeviceValueType
+                                    uint8_t               tag,         // EMSdevice::DeviceValueTAG
+                                    const char * const    fullname,    // fullname, already translated
+                                    const char * const    en_name,     // original name in english
+                                    const uint8_t         device_type, // EMSdevice::DeviceType
+                                    const char * const    entity,      // same as shortname
+                                    const uint8_t         uom,         // EMSdevice::DeviceValueUOM (0=NONE)
+                                    const bool            remove,      // true if we want to remove this topic
+                                    const bool            has_cmd,
+                                    const char * const ** options,
+                                    uint8_t               options_size,
+                                    const int16_t         dv_set_min,
+                                    const uint32_t        dv_set_max,
+                                    const int8_t          num_op,
                                     const JsonObjectConst dev_json) {
     // ignore if name (fullname) is empty
     if (!fullname || !en_name) {
@@ -891,6 +893,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t                 type,        // EMSd
             readonly_sensors = false;
             break;
         case DeviceValueType::ENUM:
+        case DeviceValueType::CMD: // hardcoded commands are always ENUMS
             // select - https://www.home-assistant.io/integrations/select.mqtt
             snprintf(topic, sizeof(topic), "select/%s", config_topic);
             readonly_sensors = false;
@@ -924,9 +927,6 @@ bool Mqtt::publish_ha_sensor_config(uint8_t                 type,        // EMSd
     doc["uniq_id"] = uniq_id;
     doc["obj_id"]  = uniq_id; // same as unique_id
 
-    const char * ic_ha  = "ic";           // icon - only set this if there is no device class
-    const char * uom_ha = "unit_of_meas"; // unit of measure
-
     char sample_val[30] = "0"; // sample, correct(!) entity value, used only to prevent warning/error in HA if real value is not published yet
 
     // we add the command topic parameter for commands
@@ -943,8 +943,8 @@ bool Mqtt::publish_ha_sensor_config(uint8_t                 type,        // EMSd
         }
         doc["cmd_t"] = command_topic;
 
-        // extend for enums, add options
-        if (type == DeviceValueType::ENUM) {
+        // extend for enums and also commands, add options
+        if ((type == DeviceValueType::ENUM) || (type == DeviceValueType::CMD)) {
             JsonArray option_list = doc["ops"].to<JsonArray>();
             if (EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX) {
                 // use index numbers
@@ -959,7 +959,6 @@ bool Mqtt::publish_ha_sensor_config(uint8_t                 type,        // EMSd
                 }
                 snprintf(sample_val, sizeof(sample_val), "'%s'", Helpers::translated_word(options[0]));
             }
-
         } else if (type != DeviceValueType::STRING && type != DeviceValueType::BOOL) {
             // For numeric's add the range
             doc["mode"] = "box"; // auto, slider or box
@@ -985,20 +984,15 @@ bool Mqtt::publish_ha_sensor_config(uint8_t                 type,        // EMSd
         case DeviceValueUOM::DEGREES:
         case DeviceValueUOM::DEGREES_R:
         case DeviceValueUOM::K:
-            doc[ic_ha] = F_(icondegrees);
+            doc["ic"] = F_(icondegrees);
             break;
         case DeviceValueUOM::PERCENT:
-            doc[ic_ha] = F_(iconpercent);
+            doc["ic"] = F_(iconpercent);
             break;
         default:
             break;
         }
     }
-
-    // state topic
-    char stat_t[MQTT_TOPIC_MAX_SIZE];
-    snprintf(stat_t, sizeof(stat_t), "%s/%s", Mqtt::base().c_str(), tag_to_topic(device_type, tag).c_str());
-    doc["stat_t"] = stat_t;
 
     // friendly name = <tag> <name>
     char   ha_name[70];
@@ -1013,38 +1007,73 @@ bool Mqtt::publish_ha_sensor_config(uint8_t                 type,        // EMSd
     free(F_name); // very important!
     doc["name"] = ha_name;
 
-    // value template
-    // if its nested mqtt format then use the appended entity name, otherwise take the original name
-    char val_obj[100];
-    char val_cond[200];
-    if (is_nested() && tag >= DeviceValueTAG::TAG_HC1) {
-        snprintf(val_obj, sizeof(val_obj), "value_json.%s.%s", EMSdevice::tag_to_mqtt(tag), entity);
-        snprintf(val_cond, sizeof(val_cond), "value_json.%s is defined and %s is defined", EMSdevice::tag_to_mqtt(tag), val_obj);
-    } else {
-        snprintf(val_obj, sizeof(val_obj), "value_json.%s", entity);
-        snprintf(val_cond, sizeof(val_cond), "%s is defined", val_obj);
+
+    // not needed for commands
+    if (type != DeviceValueType::CMD) {
+        // state topic, except for commands
+        char stat_t[MQTT_TOPIC_MAX_SIZE];
+        snprintf(stat_t, sizeof(stat_t), "%s/%s", Mqtt::base().c_str(), tag_to_topic(device_type, tag).c_str());
+        doc["stat_t"] = stat_t;
+
+        // value template
+        // if its nested mqtt format then use the appended entity name, otherwise take the original name
+        char val_obj[100];
+        char val_cond[200];
+        if (is_nested() && tag >= DeviceValueTAG::TAG_HC1) {
+            snprintf(val_obj, sizeof(val_obj), "value_json.%s.%s", EMSdevice::tag_to_mqtt(tag), entity);
+            snprintf(val_cond, sizeof(val_cond), "value_json.%s is defined and %s is defined", EMSdevice::tag_to_mqtt(tag), val_obj);
+        } else {
+            snprintf(val_obj, sizeof(val_obj), "value_json.%s", entity);
+            snprintf(val_cond, sizeof(val_cond), "%s is defined", val_obj);
+        }
+
+        // special case to handle booleans
+        // applies to both Binary Sensor (read only) and a Switch (for a command)
+        // has no unit of measure or icon
+        if (type == DeviceValueType::BOOL) {
+            if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+                doc["pl_on"]  = true;
+                doc["pl_off"] = false;
+                snprintf(sample_val, sizeof(sample_val), "false");
+            } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+                doc["pl_on"]  = 1;
+                doc["pl_off"] = 0;
+            } else {
+                char result[12];
+                doc["pl_on"]  = Helpers::render_boolean(result, true);
+                doc["pl_off"] = Helpers::render_boolean(result, false);
+                snprintf(sample_val, sizeof(sample_val), "'%s'", Helpers::render_boolean(result, false));
+            }
+        }
+        doc["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else " + sample_val + "}}";
+
+        // add the dev json object to the end, not for commands
+        add_ha_sections_to_doc(nullptr, stat_t, doc, false, val_cond); // no name, since the "dev" has already been adde
     }
 
-    // special case to handle booleans
-    // applies to both Binary Sensor (read only) and a Switch (for a command)
-    // has no unit of measure or icon
-    if (type == DeviceValueType::BOOL) {
-        if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-            doc["pl_on"]  = true;
-            doc["pl_off"] = false;
-            snprintf(sample_val, sizeof(sample_val), "false");
-        } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-            doc["pl_on"]  = 1;
-            doc["pl_off"] = 0;
-        } else {
-            char result[12];
-            doc["pl_on"]  = Helpers::render_boolean(result, true);
-            doc["pl_off"] = Helpers::render_boolean(result, false);
-            snprintf(sample_val, sizeof(sample_val), "'%s'", Helpers::render_boolean(result, false));
+    // Add the state class, device class and sometimes the icon. Used only for read-only sensors like Sensor and Binary Sensor
+    if (readonly_sensors) {
+        // first set the catagory for System entities
+        // https://github.com/emsesp/EMS-ESP32/discussions/1459#discussioncomment-7694873
+        if (device_type == EMSdevice::DeviceType::SYSTEM) {
+            doc["ent_cat"] = "diagnostic";
         }
-    } else {
-        // always set the uom, using the standards except for hours/minutes/seconds
-        // using HA specific codes from https://github.com/home-assistant/core/blob/dev/homeassistant/const.py
+        add_ha_uom(doc.as<JsonObject>(), type, uom, entity); // add the UoM, device and state class
+    }
+
+    doc["dev"] = dev_json;
+
+    return queue_ha(topic, doc.as<JsonObject>());
+}
+
+void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, const char * entity) {
+    const char * dc_ha = "dev_cla";  // device class
+    const char * sc_ha = "stat_cla"; // state class
+
+    // set icon, except for booleans
+    // using HA specific codes from https://github.com/home-assistant/core/blob/dev/homeassistant/const.py
+    if (type != DeviceValueType::BOOL) {
+        const char * uom_ha = "unit_of_meas"; // unit of measure
         if (uom == DeviceValueUOM::HOURS) {
             doc[uom_ha] = "h";
         } else if (uom == DeviceValueUOM::MINUTES) {
@@ -1056,105 +1085,87 @@ bool Mqtt::publish_ha_sensor_config(uint8_t                 type,        // EMSd
         }
     }
 
-    doc["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else " + sample_val + "}}";
-
-    // Add the state class, device class and sometimes the icon. Used only for read-only sensors Sensor and Binary Sensor
-    if (readonly_sensors) {
-        // first set the catagory for System entities
-        // https://github.com/emsesp/EMS-ESP32/discussions/1459#discussioncomment-7694873
-        if (device_type == EMSdevice::DeviceType::SYSTEM) {
-            doc["ent_cat"] = "diagnostic";
-        }
-
-        const char * dc_ha = "dev_cla";  // device class
-        const char * sc_ha = "stat_cla"; // state class
-
-        switch (uom) {
-        case DeviceValueUOM::DEGREES:
-        case DeviceValueUOM::DEGREES_R:
-        case DeviceValueUOM::K:
-            doc[sc_ha] = F_(measurement);
-            doc[dc_ha] = "temperature"; // no icon needed
-            break;
-        case DeviceValueUOM::PERCENT:
-            doc[sc_ha] = F_(measurement);
-            doc[dc_ha] = "power_factor"; // no icon needed
-            break;
-        case DeviceValueUOM::SECONDS:
-        case DeviceValueUOM::MINUTES:
-        case DeviceValueUOM::HOURS:
-            if (type == DeviceValueType::TIME) {
-                doc[sc_ha] = F_(total_increasing);
-            } else {
-                doc[sc_ha] = F_(measurement);
-            }
-            doc[dc_ha] = "duration"; // https://github.com/emsesp/EMS-ESP32/issues/822
-            break;
-        case DeviceValueUOM::KB:
-            doc[ic_ha] = F_(iconkb);
-            break;
-        case DeviceValueUOM::LMIN:
-            doc[ic_ha] = F_(iconlmin);
-            doc[sc_ha] = F_(measurement);
-            break;
-        case DeviceValueUOM::WH:
-            if (entity == FL_(energyToday)[0]) {
-                doc[sc_ha] = F_(total_increasing);
-            } else {
-                doc[sc_ha] = F_(measurement);
-            }
-            doc[dc_ha] = "energy";
-            break;
-        case DeviceValueUOM::KWH:
+    // set state and device class
+    switch (uom) {
+    case DeviceValueUOM::DEGREES:
+    case DeviceValueUOM::DEGREES_R:
+    case DeviceValueUOM::K:
+        doc[sc_ha] = F_(measurement);
+        doc[dc_ha] = "temperature";
+        break;
+    case DeviceValueUOM::PERCENT:
+        doc[sc_ha] = F_(measurement);
+        doc[dc_ha] = "power_factor";
+        break;
+    case DeviceValueUOM::SECONDS:
+    case DeviceValueUOM::MINUTES:
+    case DeviceValueUOM::HOURS:
+        if (type == DeviceValueType::TIME) {
             doc[sc_ha] = F_(total_increasing);
-            doc[dc_ha] = "energy";
-            break;
-        case DeviceValueUOM::UA:
-            doc[ic_ha] = F_(iconua);
+        } else {
             doc[sc_ha] = F_(measurement);
-            break;
-        case DeviceValueUOM::BAR:
-            doc[sc_ha] = F_(measurement);
-            doc[dc_ha] = "pressure";
-            break;
-        case DeviceValueUOM::W:
-        case DeviceValueUOM::KW:
-            doc[sc_ha] = F_(measurement);
-            doc[dc_ha] = "power";
-            break;
-        case DeviceValueUOM::DBM:
-            doc[sc_ha] = F_(measurement);
-            doc[dc_ha] = "signal_strength";
-            break;
-        case DeviceValueUOM::CONNECTIVITY:
-            doc[sc_ha] = F_(measurement);
-            doc[dc_ha] = "connectivity";
-            break;
-        case DeviceValueUOM::NONE:
-            // for device entities which have numerical values, with no UOM
-            if ((type != DeviceValueType::STRING)
-                && (type == DeviceValueType::INT || type == DeviceValueType::UINT || type == DeviceValueType::SHORT || type == DeviceValueType::USHORT
-                    || type == DeviceValueType::ULONG)) {
-                doc[ic_ha] = F_(iconnum); // set icon
-                // determine if its a measurement or total increasing
-                // most of the values are measurement. for example Tx Reads will increment but can be reset to 0 after a restart
-                // all the starts are increasing, and they are ULONGs
-                if (type == DeviceValueType::ULONG) {
-                    doc[sc_ha] = F_(total_increasing);
-                } else {
-                    doc[sc_ha] = F_(measurement); // default to measurement
-                }
-            }
-            break;
-        default:
-            break;
         }
+        doc[dc_ha] = "duration"; // https://github.com/emsesp/EMS-ESP32/issues/822
+        break;
+    case DeviceValueUOM::KB:
+        doc["ic"] = F_(iconkb);
+        break;
+    case DeviceValueUOM::LMIN:
+        doc["ic"]  = F_(iconlmin);
+        doc[sc_ha] = F_(measurement);
+        break;
+    case DeviceValueUOM::WH:
+        if (entity == FL_(energyToday)[0]) {
+            doc[sc_ha] = F_(total_increasing);
+        } else {
+            doc[sc_ha] = F_(measurement);
+        }
+        doc[dc_ha] = "energy";
+        break;
+    case DeviceValueUOM::KWH:
+        doc[sc_ha] = F_(total_increasing);
+        doc[dc_ha] = "energy";
+        break;
+    case DeviceValueUOM::UA:
+        doc["ic"]  = F_(iconua);
+        doc[sc_ha] = F_(measurement);
+        break;
+    case DeviceValueUOM::BAR:
+        doc[sc_ha] = F_(measurement);
+        doc[dc_ha] = "pressure";
+        break;
+    case DeviceValueUOM::W:
+    case DeviceValueUOM::KW:
+        doc[sc_ha] = F_(measurement);
+        doc[dc_ha] = "power";
+        break;
+    case DeviceValueUOM::DBM:
+        doc[sc_ha] = F_(measurement);
+        doc[dc_ha] = "signal_strength";
+        break;
+    case DeviceValueUOM::CONNECTIVITY:
+        doc[sc_ha] = F_(measurement);
+        doc[dc_ha] = "connectivity";
+        break;
+    case DeviceValueUOM::NONE:
+        // for device entities which have numerical values, with no UOM
+        if ((type != DeviceValueType::STRING)
+            && (type == DeviceValueType::INT || type == DeviceValueType::UINT || type == DeviceValueType::SHORT || type == DeviceValueType::USHORT
+                || type == DeviceValueType::ULONG)) {
+            doc["ic"] = F_(iconnum); // set icon
+            // determine if its a measurement or total increasing
+            // most of the values are measurement. for example Tx Reads will increment but can be reset to 0 after a restart
+            // all the starts are increasing, and they are ULONGs
+            if (type == DeviceValueType::ULONG) {
+                doc[sc_ha] = F_(total_increasing);
+            } else {
+                doc[sc_ha] = F_(measurement); // default to measurement
+            }
+        }
+        break;
+    default:
+        break;
     }
-
-    doc["dev"] = dev_json;                                         // add the dev json object to the end
-    add_ha_sections_to_doc(nullptr, stat_t, doc, false, val_cond); // no name, since the "dev" has already been added
-
-    return queue_ha(topic, doc.as<JsonObject>());
 }
 
 bool Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp, const bool remove, const int16_t min, const uint32_t max) {

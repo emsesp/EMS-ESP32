@@ -26,7 +26,7 @@ import type { ValidateFieldsError } from 'async-validator';
 import { dialogStyle } from 'CustomTheme';
 import { ValidatedTextField } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
-import { updateValue } from 'utils';
+import { updateValue, numberValue } from 'utils';
 
 import { validate } from 'validators';
 
@@ -133,7 +133,7 @@ const DashboardDevicesDialog = ({
                 fieldErrors={fieldErrors}
                 name="v"
                 label={LL.VALUE(1)}
-                value={Math.round(editItem.v * 10) / 10}
+                value={numberValue(Math.round(editItem.v * 10) / 10)}
                 autoFocus
                 disabled={!writeable}
                 type="number"

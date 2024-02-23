@@ -124,7 +124,7 @@ class AnalogSensor {
     void loop();
     void publish_sensor(const Sensor & sensor) const;
     void publish_values(const bool force);
-    void reload();
+    void reload(bool get_nvs = false);
     bool updated_values();
 
     // return back reference to the sensor list, used by other classes

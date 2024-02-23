@@ -176,7 +176,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
                 String dat = output["api_data"];
                 output.clear();
                 input["data"] = dat.c_str();
-                data = input["data"];
+                data          = input["data"];
             }
         }
     }

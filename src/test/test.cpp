@@ -332,7 +332,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         ok = true;
     }
 
-    if (command == "custom_entities") {
+    if (command == "custom") {
         shell.printfln("Adding custom entities...");
 
         // add some dummy entities
@@ -1978,20 +1978,22 @@ void Test::listDir(fs::FS & fs, const char * dirname, uint8_t levels) {
     File file = root.openNextFile();
     while (file) {
         if (file.isDirectory()) {
-            Serial.print("  DIR : ");
+            Serial.print(" DIR: ");
             Serial.println(file.name());
             if (levels) {
                 listDir(fs, file.name(), levels - 1);
             }
             Serial.println();
         } else {
-            Serial.print("  FILE: ");
+            Serial.print(" ");
             Serial.print(file.name());
-            Serial.print("\tSIZE: ");
-            Serial.println(file.size());
+            Serial.print(" (");
+            Serial.print(file.size());
+            Serial.println(" bytes)");
         }
         file = root.openNextFile();
     }
+    Serial.println();
 }
 #endif
 #endif

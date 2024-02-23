@@ -149,7 +149,7 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
                           MAKE_CF_CB(set_heatDrainPan));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatCable_, DeviceValueType::BOOL, FL_(heatCable), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatCable));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgTotal_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgTotal), DeviceValueUOM::KWH);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW, &nrgWw_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgWw), DeviceValueUOM::KWH);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW, &nrgWw_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgWw), DeviceValueUOM::KWH);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgHeat_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgHeat), DeviceValueUOM::KWH);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &meterTotal_,
@@ -175,6 +175,7 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
                           DeviceValueNumOp::DV_NUMOP_DIV100,
                           FL_(meterHeat),
                           DeviceValueUOM::KWH);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW, &meterWw_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(meterWw), DeviceValueUOM::KWH);
 }
 
 /*
@@ -271,6 +272,7 @@ void Heatpump::process_HpMeters(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, meterComp_, 4);
     has_update(telegram, meterEHeat_, 8);
     has_update(telegram, meterHeat_, 24);
+    has_update(telegram, meterWw_, 32);
 }
 
 /*

@@ -42,7 +42,7 @@ void TemperatureSensor::start() {
 
 #ifndef EMSESP_STANDALONE
     bus_.begin(dallas_gpio_);
-    LOG_INFO("Starting Temperature sensor service");
+    LOG_INFO("Starting Temperature Sensor service");
 #endif
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
@@ -302,31 +302,29 @@ bool TemperatureSensor::update(const std::string & id, const std::string & name,
             sensor.set_offset(offset);
 
             // store the new name and offset in our configuration
-            EMSESP::webCustomizationService.update(
-                [&](WebCustomization & settings) {
-                    // look it up to see if it exists
-                    bool found = false;
-                    for (auto & SensorCustomization : settings.sensorCustomizations) {
-                        if (SensorCustomization.id == id) {
-                            SensorCustomization.name   = name;
-                            SensorCustomization.offset = offset;
-                            found                      = true;
-                            LOG_DEBUG("Customizing existing sensor ID %s", id.c_str());
-                            break;
-                        }
+            EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
+                // look it up to see if it exists
+                bool found = false;
+                for (auto & SensorCustomization : settings.sensorCustomizations) {
+                    if (SensorCustomization.id == id) {
+                        SensorCustomization.name   = name;
+                        SensorCustomization.offset = offset;
+                        found                      = true;
+                        LOG_DEBUG("Customizing existing sensor ID %s", id.c_str());
+                        break;
                     }
-                    if (!found) {
-                        SensorCustomization newSensor = SensorCustomization();
-                        newSensor.id                  = id;
-                        newSensor.name                = name;
-                        newSensor.offset              = offset;
-                        settings.sensorCustomizations.push_back(newSensor);
-                        LOG_DEBUG("Adding new customization for sensor ID %s", id.c_str());
-                    }
-                    sensor.ha_registered = false; // it's changed so we may need to recreate the HA config
-                    return StateUpdateResult::CHANGED;
-                },
-                "local");
+                }
+                if (!found) {
+                    SensorCustomization newSensor = SensorCustomization();
+                    newSensor.id                  = id;
+                    newSensor.name                = name;
+                    newSensor.offset              = offset;
+                    settings.sensorCustomizations.push_back(newSensor);
+                    LOG_DEBUG("Adding new customization for sensor ID %s", id.c_str());
+                }
+                sensor.ha_registered = false; // it's changed so we may need to recreate the HA config
+                return StateUpdateResult::CHANGED;
+            });
             return true;
         }
     }

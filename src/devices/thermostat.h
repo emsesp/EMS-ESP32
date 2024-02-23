@@ -431,12 +431,15 @@ class Thermostat : public EMSdevice {
     }
     bool set_pause(const char * value, const int8_t id);
     bool set_party(const char * value, const int8_t id);
+    bool set_holidaymode(const char * value, const int8_t id);
+    bool set_heatup(const char * value, const int8_t id);
     bool set_summermode(const char * value, const int8_t id);
     bool set_vacreducemode(const char * value, const int8_t id);
     bool set_nofrostmode(const char * value, const int8_t id);
     bool set_remotetemp(const char * value, const int8_t id);
     bool set_remotehum(const char * value, const int8_t id);
     bool set_roominfl_factor(const char * value, const int8_t id);
+    bool set_roominfl_mode(const char * value, const int8_t id);
     bool set_reducemode(const char * value, const int8_t id);
     bool set_switchtime1(const char * value, const int8_t id);
     bool set_switchtime2(const char * value, const int8_t id);

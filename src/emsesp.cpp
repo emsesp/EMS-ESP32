@@ -747,10 +747,20 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
         for (const auto & emsdevice : emsdevices) {
             if (telegram->operation != Telegram::Operation::RX_READ && emsdevice->is_device_id(src)) {
                 type_name = emsdevice->telegram_type_name(telegram);
+                break;
             }
         }
     }
 
+    if (type_name.empty()) {
+        // 2nd fallback, get the type name from dest
+        for (const auto & emsdevice : emsdevices) {
+            if (telegram->operation != Telegram::Operation::RX_READ && emsdevice->is_device_id(dest)) {
+                type_name = emsdevice->telegram_type_name(telegram);
+                break;
+            }
+        }
+    }
     // if we can't find names for the devices, use their hex values
     if (src_name.empty()) {
         src_name = device_tostring(src);
@@ -1300,7 +1310,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
     uint8_t first_value = data[0];
     if (((first_value & 0x7F) == EMSbus::ems_bus_id()) && (length > 1)) {
         // if we ask ourself at roomcontrol for version e.g. 0B 98 02 00 20
-        Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data, length);
+        Roomctrl::check(data[1], data, length);
 #ifdef EMSESP_UART_DEBUG
         // get_uptime is only updated once per loop, does not give the right time
         LOG_TRACE("[UART_DEBUG] Echo after %d ms: %s", ::millis() - rx_time_, Helpers::data_to_hex(data, length).c_str());
@@ -1400,7 +1410,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 #ifdef EMSESP_UART_DEBUG
         LOG_TRACE("[UART_DEBUG] Reply after %d ms: %s", ::millis() - rx_time_, Helpers::data_to_hex(data, length).c_str());
 #endif
-        Roomctrl::check((data[1] ^ 0x80 ^ rxservice_.ems_mask()), data, length); // check if there is a message for the roomcontroller
+        Roomctrl::check(data[1], data, length); // check if there is a message for the roomcontroller
 
         rxservice_.add(data, length); // add to RxQueue
     }
@@ -1482,8 +1492,10 @@ void EMSESP::start() {
     bool factory_settings = false;
 #endif
 
-    esp8266React.begin();  // loads core system services settings (network, mqtt, ap, ntp etc)
     webLogService.begin(); // start web log service. now we can start capturing logs to the web log
+
+    esp8266React.begin(); // loads core system services settings (network, mqtt, ap, ntp etc)
+
     nvs_.begin("ems-esp", false, "nvs");
 
     LOG_INFO("Starting EMS-ESP version %s", EMSESP_APP_VERSION); // welcome message

@@ -221,6 +221,7 @@ class Boiler : public EMSdevice {
     uint32_t meterComp_;
     uint32_t meterEHeat_;
     uint32_t meterHeat_;
+    uint32_t meterWw_;
     uint8_t  hpEA0_;
     uint8_t  hpPumpMode_;
     uint8_t  hpSetDiffPress_;
@@ -265,6 +266,9 @@ class Boiler : public EMSdevice {
     uint8_t wwComfOffTemp_;
     uint8_t wwEcoOffTemp_;
     uint8_t wwEcoPlusOffTemp_;
+    uint8_t wwComfDiffTemp_;
+    uint8_t wwEcoDiffTemp_;
+    uint8_t wwEcoPlusDiffTemp_;
 
     uint8_t vp_cooling_;
     uint8_t heatCable_;
@@ -474,6 +478,16 @@ class Boiler : public EMSdevice {
     }
     inline bool set_wwEcoPlusOffTemp(const char * value, const int8_t id) {
         return set_wwOffTemp(value, 5);
+    }
+    bool        set_wwDiffTemp(const char * value, const int8_t id);
+    inline bool set_wwComfDiffTemp(const char * value, const int8_t id) {
+        return set_wwDiffTemp(value, 12);
+    }
+    inline bool set_wwEcoDiffTemp(const char * value, const int8_t id) {
+        return set_wwDiffTemp(value, 13);
+    }
+    inline bool set_wwEcoPlusDiffTemp(const char * value, const int8_t id) {
+        return set_wwDiffTemp(value, 14);
     }
     bool        set_vp_cooling(const char * value, const int8_t id);
     bool        set_heatCable(const char * value, const int8_t id);

@@ -29,7 +29,9 @@ extern "C" {
 #include "lwip/dns.h"
 #include "lwip/err.h"
 }
+#if CONFIG_ASYNC_TCP_USE_WDT
 #include "esp_task_wdt.h"
+#endif
 
 /*
  * TCP/IP Event Task
@@ -103,7 +105,8 @@ static uint32_t   _closed_index = []() {
 
 static inline bool _init_async_event_queue() {
     if (!_async_queue) {
-        _async_queue = xQueueCreate(CONFIG_ASYNC_TCP_QUEUE, sizeof(lwip_event_packet_t *)); // double queue to 128 see https://github.com/emsesp/EMS-ESP32/issues/177
+        _async_queue =
+            xQueueCreate(CONFIG_ASYNC_TCP_QUEUE, sizeof(lwip_event_packet_t *)); // double queue to 128 see https://github.com/emsesp/EMS-ESP32/issues/177
         if (!_async_queue) {
             return false;
         }
@@ -221,13 +224,31 @@ static void _stop_async_task(){
     }
 }
 */
+
+static bool customTaskCreateUniversal(TaskFunction_t       pxTaskCode,
+                                      const char * const   pcName,
+                                      const uint32_t       usStackDepth,
+                                      void * const         pvParameters,
+                                      UBaseType_t          uxPriority,
+                                      TaskHandle_t * const pxCreatedTask,
+                                      const BaseType_t     xCoreID) {
+#ifndef CONFIG_FREERTOS_UNICORE
+    if (xCoreID >= 0 && xCoreID < 2) {
+        return xTaskCreatePinnedToCore(pxTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask, xCoreID);
+    } else {
+#endif
+        return xTaskCreate(pxTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask);
+#ifndef CONFIG_FREERTOS_UNICORE
+    }
+#endif
+}
+
 static bool _start_async_task() {
     if (!_init_async_event_queue()) {
         return false;
     }
     if (!_async_service_task_handle) {
-        // xTaskCreateUniversal(_async_service_task, "async_tcp", 8192 * 2, NULL, 3, &_async_service_task_handle, CONFIG_ASYNC_TCP_RUNNING_CORE);
-        xTaskCreate(_async_service_task, "async_tcp", CONFIG_ASYNC_TCP_STACK, NULL, CONFIG_ASYNC_TCP_TASK_PRIORITY, &_async_service_task_handle);
+        customTaskCreateUniversal(_async_service_task, "async_tcp", CONFIG_ASYNC_TCP_STACK_SIZE, NULL, CONFIG_ASYNC_TCP_TASK_PRIORITY, &_async_service_task_handle, CONFIG_ASYNC_TCP_RUNNING_CORE);
         if (!_async_service_task_handle) {
             return false;
         }
@@ -564,11 +585,10 @@ AsyncClient::AsyncClient(tcp_pcb * pcb)
     , _pb_cb_arg(0)
     , _timeout_cb(0)
     , _timeout_cb_arg(0)
-    , _pcb_busy(false)
-    , _pcb_sent_at(0)
     , _ack_pcb(true)
-    , _rx_last_packet(0)
-    , _rx_since_timeout(0)
+    , _tx_last_packet(0)
+    , _rx_timeout(0)
+    , _rx_last_ack(0)
     , _ack_timeout(ASYNC_MAX_ACK_TIME)
     , _connect_port(0)
     , prev(NULL)
@@ -736,7 +756,11 @@ bool AsyncClient::connect(const char * host, uint16_t port) {
         if (addr.type == IPADDR_TYPE_V6) {
             return connect(IPv6Address(addr.u_addr.ip6.addr), port);
         }
+#if LWIP_IPV6
         return connect(IPAddress(addr.u_addr.ip4.addr), port);
+#else
+        return connect(IPAddress(addr.addr), port);
+#endif
     } else if (err == ERR_INPROGRESS) {
         _connect_port = port;
         return true;
@@ -785,13 +809,12 @@ size_t AsyncClient::add(const char * data, size_t size, uint8_t apiflags) {
 }
 
 bool AsyncClient::send() {
-    int8_t err = ERR_OK;
-    err        = _tcp_output(_pcb, _closed_slot);
-    if (err == ERR_OK) {
-        _pcb_busy    = true;
-        _pcb_sent_at = millis();
+    auto backup     = _tx_last_packet;
+    _tx_last_packet = millis();
+    if (_tcp_output(_pcb, _closed_slot) == ERR_OK) {
         return true;
     }
+    _tx_last_packet = backup;
     return false;
 }
 
@@ -871,7 +894,6 @@ int8_t AsyncClient::_connected(void * pcb, int8_t err) {
     _pcb = reinterpret_cast<tcp_pcb *>(pcb);
     if (_pcb) {
         _rx_last_packet = millis();
-        _pcb_busy       = false;
         //        tcp_recv(_pcb, &_tcp_recv);
         //        tcp_sent(_pcb, &_tcp_sent);
         //        tcp_poll(_pcb, &_tcp_poll, 1);
@@ -933,10 +955,10 @@ int8_t AsyncClient::_fin(tcp_pcb * pcb, int8_t err) {
 
 int8_t AsyncClient::_sent(tcp_pcb * pcb, uint16_t len) {
     _rx_last_packet = millis();
+    _rx_last_ack    = millis();
     //log_i("%u", len);
-    _pcb_busy = false;
     if (_sent_cb) {
-        _sent_cb(_sent_cb_arg, this, len, (millis() - _pcb_sent_at));
+        _sent_cb(_sent_cb_arg, this, len, (millis() - _tx_last_packet));
     }
     return ERR_OK;
 }
@@ -979,15 +1001,18 @@ int8_t AsyncClient::_poll(tcp_pcb * pcb) {
     uint32_t now = millis();
 
     // ACK Timeout
-    if (_pcb_busy && _ack_timeout && (now - _pcb_sent_at) >= _ack_timeout) {
-        _pcb_busy = false;
-        log_w("ack timeout %d", pcb->state);
-        if (_timeout_cb)
-            _timeout_cb(_timeout_cb_arg, this, (now - _pcb_sent_at));
-        return ERR_OK;
+    if (_ack_timeout) {
+        const uint32_t one_day                   = 86400000;
+        bool           last_tx_is_after_last_ack = (_rx_last_ack - _tx_last_packet + one_day) < one_day;
+        if (last_tx_is_after_last_ack && (now - _tx_last_packet) >= _ack_timeout) {
+            log_w("ack timeout %d", pcb->state);
+            if (_timeout_cb)
+                _timeout_cb(_timeout_cb_arg, this, (now - _tx_last_packet));
+            return ERR_OK;
+        }
     }
     // RX Timeout
-    if (_rx_since_timeout && (now - _rx_last_packet) >= (_rx_since_timeout * 1000)) {
+    if (_rx_timeout && (now - _rx_last_packet) >= (_rx_timeout * 1000)) {
         log_w("rx timeout %d", pcb->state);
         _close();
         return ERR_OK;
@@ -1041,21 +1066,18 @@ size_t AsyncClient::write(const char * data) {
 
 size_t AsyncClient::write(const char * data, size_t size, uint8_t apiflags) {
     size_t will_send = add(data, size, apiflags);
-    if (!will_send) {
+    if (!will_send || !send()) {
         return 0;
-    }
-    while (connected() && !send()) {
-        taskYIELD();
     }
     return will_send;
 }
 
 void AsyncClient::setRxTimeout(uint32_t timeout) {
-    _rx_since_timeout = timeout;
+    _rx_timeout = timeout;
 }
 
 uint32_t AsyncClient::getRxTimeout() {
-    return _rx_since_timeout;
+    return _rx_timeout;
 }
 
 uint32_t AsyncClient::getAckTimeout() {
@@ -1084,18 +1106,6 @@ bool AsyncClient::getNoDelay() {
     return tcp_nagle_disabled(_pcb);
 }
 
-void AsyncClient::setKeepAlive(uint32_t ms, uint8_t cnt) {
-    if (ms != 0) {
-        _pcb->so_options |= SOF_KEEPALIVE; //Turn on TCP Keepalive for the given pcb
-        // Set the time between keepalive messages in milli-seconds
-        _pcb->keep_idle  = ms;
-        _pcb->keep_intvl = ms;
-        _pcb->keep_cnt   = cnt; //The number of unanswered probes required to force closure of the socket
-    } else {
-        _pcb->so_options &= ~SOF_KEEPALIVE; //Turn off TCP Keepalive for the given pcb
-    }
-}
-
 uint16_t AsyncClient::getMss() {
     if (!_pcb) {
         return 0;
@@ -1107,7 +1117,11 @@ uint32_t AsyncClient::getRemoteAddress() {
     if (!_pcb) {
         return 0;
     }
+#if LWIP_IPV4 && LWIP_IPV6
     return _pcb->remote_ip.u_addr.ip4.addr;
+#else
+    return _pcb->remote_ip.addr;
+#endif
 }
 
 ip6_addr_t AsyncClient::getRemoteAddress6() {
@@ -1130,7 +1144,11 @@ uint32_t AsyncClient::getLocalAddress() {
     if (!_pcb) {
         return 0;
     }
+#if LWIP_IPV4 && LWIP_IPV6
     return _pcb->local_ip.u_addr.ip4.addr;
+#else
+    return _pcb->local_ip.addr;
+#endif
 }
 
 ip6_addr_t AsyncClient::getLocalAddress6() {

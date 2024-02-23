@@ -28,7 +28,8 @@
 #include <string>
 
 #include <Printable.h>
-#include <WString.h>
+
+#include "WString.h"
 
 int vsnprintf_P(char * str, size_t size, const char * format, va_list ap);
 

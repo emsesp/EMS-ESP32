@@ -2,7 +2,7 @@
 .vscode/c_cpp_properties.json
 .vscode/extensions.json
 .vscode/launch.json
-# .vscode/settings.json
+.vscode/settings.json
 
 # c++ compiling
 .clang_complete
@@ -12,11 +12,11 @@ cppcheck.out.xml
 # platformio
 .pio
 pio_local.ini
+*_old
 
 # OS specific
 .DS_Store
 *Thumbs.db
-emsesp
 
 # web specfic
 build/
@@ -38,12 +38,13 @@ stats.html
 !.yarn/versions
 yarn.lock
 interface/analyse.html
+interface/vite.config.ts.timestamp*
 
 # scripts
 test.sh
 scripts/run.sh
 scripts/__pycache__
-/scripts/stackdmp.txt
+scripts/stackdmp.txt
 
 # i18n generated files
 interface/src/i18n/i18n-react.tsx
@@ -57,7 +58,5 @@ interface/src/i18n/i18n-util.async.ts
 sonar/
 bw-output/
 
-# entity dump results
-# dump_entities.csv
-# dump_entities.xls*
-
+# testing
+emsesp

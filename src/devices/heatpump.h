@@ -74,6 +74,7 @@ class Heatpump : public EMSdevice {
     uint32_t meterComp_;
     uint32_t meterEHeat_;
     uint32_t meterHeat_;
+    uint32_t meterWw_;
 
 
     void process_HPMonitor1(std::shared_ptr<const Telegram> telegram);
