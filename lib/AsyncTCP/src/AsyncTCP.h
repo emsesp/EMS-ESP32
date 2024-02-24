@@ -59,7 +59,7 @@ extern "C" {
 
 
 #ifndef CONFIG_ASYNC_TCP_QUEUE
-#define CONFIG_ASYNC_TCP_QUEUE 128
+#define CONFIG_ASYNC_TCP_QUEUE 32
 #endif
 
 class AsyncClient;
