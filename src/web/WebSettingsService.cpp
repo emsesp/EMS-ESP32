@@ -93,24 +93,25 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     bool psram = ESP.getPsramSize() > 0; // System::PSram() is initializd later
     if (System::load_board_profile(data, settings.board_profile.c_str())) {
         if (settings.board_profile == "CUSTOM") { //read pins, fallback to S32
-            data[0] = root["led_gpio"] | 2;
-            data[1] = root["dallas_gpio"] | 18;
-            data[2] = root["rx_gpio"] | 23;
-            data[3] = root["tx_gpio"] | 5;
-            data[4] = root["pbutton_gpio"] | 0;
-            data[5] = root["phy_type"] | PHY_type::PHY_TYPE_NONE;
-            data[6] = root["eth_power"] | 0;
-            data[7] = root["eth_phy_addr"] | 0;
-            data[8] = root["eth_clock_mode"] | 0;
+            data = {(int8_t)(root["led_gpio"] | 2),
+                    (int8_t)(root["dallas_gpio"] | 18),
+                    (int8_t)(root["rx_gpio"] | 23),
+                    (int8_t)(root["tx_gpio"] | 5),
+                    (int8_t)(root["pbutton_gpio"] | 0),
+                    (int8_t)(root["phy_type"] | PHY_type::PHY_TYPE_NONE),
+                    (int8_t)(root["eth_power"] | 0),
+                    (int8_t)(root["eth_phy_addr"] | 0),
+                    (int8_t)(root["eth_clock_mode"] | 0)};
         }
         // check valid pins in this board profile
         if (!System::is_valid_gpio(data[0], psram) || !System::is_valid_gpio(data[1], psram) || !System::is_valid_gpio(data[2], psram)
             || !System::is_valid_gpio(data[3], psram) || !System::is_valid_gpio(data[4], psram) || !System::is_valid_gpio(data[6], psram)) {
             settings.board_profile = ""; // reset to factory default
         }
+    } else {
+        settings.board_profile = ""; // reset to factory default
     }
-    // load the profile
-    if (!System::load_board_profile(data, settings.board_profile.c_str())) {
+    if (settings.board_profile == "") {
         // unknown, check for NVS or scan for ethernet, use default E32/E32V2/S32
         settings.board_profile = EMSESP::nvs_.getString("boot");
         if (!System::load_board_profile(data, settings.board_profile.c_str())) {
