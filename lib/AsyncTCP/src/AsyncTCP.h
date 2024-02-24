@@ -53,13 +53,15 @@ extern "C" {
 #define CONFIG_ASYNC_TCP_TASK_PRIORITY 5
 #endif
 
+// stack usage measured: ESP32: ~2.3K, ESP32S3: ~3.5k
 #ifndef CONFIG_ASYNC_TCP_STACK_SIZE
 #define CONFIG_ASYNC_TCP_STACK_SIZE 5120
 #endif
 
 
+// maybe enlarge queue to 64 or 128 see https://github.com/emsesp/EMS-ESP32/issues/177
 #ifndef CONFIG_ASYNC_TCP_QUEUE
-#define CONFIG_ASYNC_TCP_QUEUE 128
+#define CONFIG_ASYNC_TCP_QUEUE 32
 #endif
 
 class AsyncClient;
