@@ -2016,7 +2016,7 @@ bool Thermostat::set_roomsensor(const char * value, const int8_t id) {
 
 // sets the thermostat ww working mode, where mode is a string, ems and ems+
 bool Thermostat::set_wwmode(const char * value, const int8_t id) {
-    uint8_t wwc = (id == 2 || id == DeviceValueTAG::TAG_WWC2 - DeviceValueTAG::TAG_HC1) ? 1 : 0;
+    uint8_t wwc = (id == DeviceValueTAG::TAG_WWC2 - DeviceValueTAG::TAG_HC1 + 1) ? 1 : 0;
     uint8_t set;
 
     if (model() == EMSdevice::EMS_DEVICE_FLAG_RC10) {
@@ -2088,7 +2088,7 @@ bool Thermostat::set_wwtemplow(const char * value, const int8_t id) {
 
 // Set ww charge RC300, ems+
 bool Thermostat::set_wwcharge(const char * value, const int8_t id) {
-    uint8_t wwc = (id == 2 || id == DeviceValueTAG::TAG_WWC2 - DeviceValueTAG::TAG_HC1) ? 1 : 0;
+    uint8_t wwc = (id == DeviceValueTAG::TAG_WWC2 - DeviceValueTAG::TAG_HC1 + 1) ? 1 : 0;
     bool    b;
     if (!Helpers::value2bool(value, b)) {
         return false;
@@ -2105,7 +2105,7 @@ bool Thermostat::set_wwcharge(const char * value, const int8_t id) {
 
 // Set ww charge duration in steps of 15 min, ems+
 bool Thermostat::set_wwchargeduration(const char * value, const int8_t id) {
-    uint8_t wwc = (id == 2 || id == DeviceValueTAG::TAG_WWC2 - DeviceValueTAG::TAG_HC1) ? 1 : 0;
+    uint8_t wwc = (id == DeviceValueTAG::TAG_WWC2 - DeviceValueTAG::TAG_HC1 + 1) ? 1 : 0;
     int     t;
     if (!Helpers::value2number(value, t)) {
         return false;
@@ -2154,7 +2154,7 @@ bool Thermostat::set_cooling(const char * value, const int8_t id) {
 
 // sets the thermostat ww circulation working mode, where mode is a string
 bool Thermostat::set_wwcircmode(const char * value, const int8_t id) {
-    uint8_t wwc = (id == 2 || id == DeviceValueTAG::TAG_WWC2 - DeviceValueTAG::TAG_HC1) ? 1 : 0;
+    uint8_t wwc = (id == DeviceValueTAG::TAG_WWC2 - DeviceValueTAG::TAG_HC1 + 1) ? 1 : 0;
     uint8_t set;
 
     if ((model() == EMSdevice::EMS_DEVICE_FLAG_BC400) || (model() == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model() == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
@@ -2174,7 +2174,7 @@ bool Thermostat::set_wwcircmode(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_wwDailyHeating(const char * value, const int8_t id) {
-    uint8_t wwc = (id == 2 || id == DeviceValueTAG::TAG_WWC2 - DeviceValueTAG::TAG_HC1) ? 1 : 0;
+    uint8_t wwc = (id == DeviceValueTAG::TAG_WWC2 - DeviceValueTAG::TAG_HC1 + 1) ? 1 : 0;
     bool    b;
     if (!Helpers::value2bool(value, b)) {
         return false;
@@ -2185,7 +2185,7 @@ bool Thermostat::set_wwDailyHeating(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_wwDailyHeatTime(const char * value, const int8_t id) {
-    uint8_t wwc = (id == 2 || id == DeviceValueTAG::TAG_WWC2 - DeviceValueTAG::TAG_HC1) ? 1 : 0;
+    uint8_t wwc = (id == DeviceValueTAG::TAG_WWC2 - DeviceValueTAG::TAG_HC1 + 1) ? 1 : 0;
     int     set;
     if (!Helpers::value2number(value, set)) {
         return false;
@@ -2203,7 +2203,7 @@ bool Thermostat::set_wwDailyHeatTime(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_wwDisinfect(const char * value, const int8_t id) {
-    uint8_t wwc = (id == 2 || id == DeviceValueTAG::TAG_WWC2 - DeviceValueTAG::TAG_HC1) ? 1 : 0;
+    uint8_t wwc = (id == DeviceValueTAG::TAG_WWC2 - DeviceValueTAG::TAG_HC1 + 1) ? 1 : 0;
     bool    b;
     if (!Helpers::value2bool(value, b)) {
         return false;
@@ -2221,7 +2221,7 @@ bool Thermostat::set_wwDisinfect(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_wwDisinfectDay(const char * value, const int8_t id) {
-    uint8_t wwc = (id == 2 || id == DeviceValueTAG::TAG_WWC2 - DeviceValueTAG::TAG_HC1) ? 1 : 0;
+    uint8_t wwc = (id == DeviceValueTAG::TAG_WWC2 - DeviceValueTAG::TAG_HC1 + 1) ? 1 : 0;
     uint8_t set;
     if (!Helpers::value2enum(value, set, FL_(enum_dayOfWeek))) {
         return false;
@@ -2239,7 +2239,7 @@ bool Thermostat::set_wwDisinfectDay(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_wwDisinfectHour(const char * value, const int8_t id) {
-    uint8_t wwc = (id == 2 || id == DeviceValueTAG::TAG_WWC2 - DeviceValueTAG::TAG_HC1) ? 1 : 0;
+    uint8_t wwc = (id == DeviceValueTAG::TAG_WWC2 - DeviceValueTAG::TAG_HC1 + 1) ? 1 : 0;
     int     set;
     if ((model() == EMSdevice::EMS_DEVICE_FLAG_BC400) || (model() == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model() == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
         if (!Helpers::value2number(value, set, 0, 1431)) {
