@@ -57,7 +57,6 @@ extern "C" {
 #define CONFIG_ASYNC_TCP_STACK_SIZE 5120
 #endif
 
-
 #ifndef CONFIG_ASYNC_TCP_QUEUE
 #define CONFIG_ASYNC_TCP_QUEUE 32
 #endif
