@@ -223,15 +223,23 @@ class Thermostat : public EMSdevice {
     uint8_t wwExtra1_; // wwExtra active for wwSystem 1
     uint8_t wwExtra2_;
     uint8_t wwMode_;
+    uint8_t wwMode2_;
     uint8_t wwCircPump_;
+    uint8_t wwCircPump2_;
     uint8_t wwCircMode_;
+    uint8_t wwCircMode2_;
     uint8_t wwSetTemp_;
     uint8_t wwSetTempLow_;
     uint8_t wwCharge_;
+    uint8_t wwCharge2_;
     uint8_t wwChargeDuration_;
+    uint8_t wwChargeDuration2_;
     uint8_t wwDisinfecting_;
+    uint8_t wwDisinfecting2_;
     uint8_t wwDisinfectDay_;
     uint8_t wwDisinfectHour_;
+    uint8_t wwDisinfectDay2_;
+    uint8_t wwDisinfectHour2_;
     uint8_t wwMaxTemp_;
     uint8_t wwOneTimeKey_;
     uint8_t wwProgMode_;
@@ -240,6 +248,8 @@ class Thermostat : public EMSdevice {
     char    wwCircSwitchTime_[16];
     uint8_t wwDailyHeating_;
     uint8_t wwDailyHeatTime_;
+    uint8_t wwDailyHeating2_;
+    uint8_t wwDailyHeatTime2_;
     uint8_t wwWhenModeOff_;
     char    wwHoliday_[26];
     char    wwVacation_[26];
@@ -393,6 +403,7 @@ class Thermostat : public EMSdevice {
     void process_RC300Summer(std::shared_ptr<const Telegram> telegram);
     void process_RC300Summer2(std::shared_ptr<const Telegram> telegram);
     void process_RC300WWmode(std::shared_ptr<const Telegram> telegram);
+    void process_RC300WW2mode(std::shared_ptr<const Telegram> telegram);
     void process_RC300WWmode2(std::shared_ptr<const Telegram> telegram);
     void process_RC300WWtemp(std::shared_ptr<const Telegram> telegram);
     void process_RC300OutdoorTemp(std::shared_ptr<const Telegram> telegram);
