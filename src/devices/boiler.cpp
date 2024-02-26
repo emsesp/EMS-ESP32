@@ -837,6 +837,24 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               6,
                               12);
         register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
+                              &wwComfStopTemp_,
+                              DeviceValueType::UINT,
+                              FL_(wwComfStopTemp),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_wwComfStopTemp));
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
+                              &wwEcoStopTemp_,
+                              DeviceValueType::UINT,
+                              FL_(wwEcoStopTemp),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_wwEcoStopTemp));
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
+                              &wwEcoPlusStopTemp_,
+                              DeviceValueType::UINT,
+                              FL_(wwEcoPlusStopTemp),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_wwEcoPlusStopTemp));
+        register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW,
                               &hpCircPumpWw_,
                               DeviceValueType::BOOL,
                               FL_(hpCircPumpWw),
@@ -1940,6 +1958,10 @@ void Boiler::process_HpDhwSettings(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, wwComfDiffTemp_, 12);
     has_update(telegram, wwEcoDiffTemp_, 13);
     has_update(telegram, wwEcoPlusDiffTemp_, 14);
+    //https://github.com/emsesp/EMS-ESP32/issues/1624
+    has_update(telegram, wwComfStopTemp_, 8);
+    has_update(telegram, wwEcoStopTemp_, 9);
+    has_update(telegram, wwEcoPlusStopTemp_, 10);
 }
 
 // 0x49C:
@@ -2952,6 +2974,7 @@ bool Boiler::set_tempDiff(const char * value, const int8_t id) {
     return false;
 }
 
+// also used for stopTemp with different index
 bool Boiler::set_wwOffTemp(const char * value, const int8_t id) {
     int v;
     if (Helpers::value2temperature(value, v)) {
