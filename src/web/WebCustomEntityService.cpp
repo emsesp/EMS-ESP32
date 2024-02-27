@@ -278,8 +278,8 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
         return true;
     }
 
-    char command_s[30];
-    strlcpy(command_s, cmd, sizeof(command_s));
+    char command_s[COMMAND_MAX_LENGTH];
+    strlcpy(command_s, Helpers::toLower(cmd).c_str(), sizeof(command_s));
     char * attribute_s = nullptr;
     // check specific attribute to fetch instead of the complete record
     char * breakp = strchr(command_s, '/');
@@ -289,7 +289,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
     }
 
     for (const auto & entity : *customEntityItems) {
-        if (Helpers::toLower(entity.name) == Helpers::toLower(command_s)) {
+        if (Helpers::toLower(entity.name) == command_s) {
             output["name"] = entity.name;
             output["ram"]  = entity.ram;
             output["type"] = entity.value_type == DeviceValueType::BOOL ? "boolean" : entity.value_type == DeviceValueType::STRING ? "string" : F_(number);

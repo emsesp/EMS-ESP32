@@ -650,10 +650,9 @@ bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int
 
     // this is for a specific sensor
     // make a copy of the string command for parsing, and lowercase it
-    char   sensor_name[30] = {'\0'};
+    char   sensor_name[COMMAND_MAX_LENGTH] = {'\0'};
     char * attribute_s     = nullptr;
-    strlcpy(sensor_name, cmd, sizeof(sensor_name));
-    auto sensor_lowercase = Helpers::toLower(sensor_name);
+    strlcpy(sensor_name, Helpers::toLower(cmd).c_str(), sizeof(sensor_name));
 
     // check specific attribute to fetch instead of the complete record
     char * breakp = strchr(sensor_name, '/');
@@ -663,7 +662,7 @@ bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int
     }
 
     for (const auto & sensor : sensors_) {
-        if (sensor_lowercase == Helpers::toLower(sensor.name().c_str()) || Helpers::atoint(sensor_name) == sensor.gpio()) {
+        if (sensor_name == Helpers::toLower(sensor.name()) || Helpers::atoint(sensor_name) == sensor.gpio()) {
             // add the details
             addSensorJson(output, sensor);
 
