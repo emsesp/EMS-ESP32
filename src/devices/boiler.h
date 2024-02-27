@@ -155,6 +155,11 @@ class Boiler : public EMSdevice {
     uint16_t headertemp_; // see #1317
     uint16_t heatblock_;  // see #1317
 
+    // weather compensation, see #1642
+    uint8_t curveOn_;
+    uint8_t curveBase_;
+    uint8_t curveEnd_;
+
     // info
     uint32_t upTimeTotal_;               // Operating time
     uint32_t upTimeControl_;             // Operating time control
@@ -351,6 +356,7 @@ class Boiler : public EMSdevice {
     void process_HpSettings3(std::shared_ptr<const Telegram> telegram);
     void process_HpEnergy(std::shared_ptr<const Telegram> telegram);
     void process_HpMeters(std::shared_ptr<const Telegram> telegram);
+    void process_WeatherComp(std::shared_ptr<const Telegram> telegram);
     // HIU
     void process_HIUSettings(std::shared_ptr<const Telegram> telegram);
     void process_HIUMonitor(std::shared_ptr<const Telegram> telegram);
@@ -523,6 +529,9 @@ class Boiler : public EMSdevice {
     bool set_delayBoiler(const char * value, const int8_t id);
     bool set_tempDiffBoiler(const char * value, const int8_t id);
     */
+    bool set_curveOn(const char * value, const int8_t id);
+    bool set_curveBase(const char * value, const int8_t id);
+    bool set_curveEnd(const char * value, const int8_t id);
 
     bool set_nrgHeat(const char * value, const int8_t id);
     bool set_nrgWw(const char * value, const int8_t id);

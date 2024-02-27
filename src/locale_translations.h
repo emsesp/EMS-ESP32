@@ -346,6 +346,10 @@ MAKE_TRANSLATION(pumpMode, "pumpmode", "boiler pump mode", "Kesselpumpen Modus",
 MAKE_TRANSLATION(headertemp, "headertemp", "low loss header", "Hydr. Weiche", "open verdeler", "", "sprzęgło hydrauliczne", "", "bouteille de déc. hydr.", "isı bloğu gidiş suyu sıc.", "comp. idr.", "nízkostratová hlavica") // TODO translate
 MAKE_TRANSLATION(heatblock, "heatblock", "heating block", "Wärmezelle", "Aanvoertemp. warmtecel", "", "blok grzewczy", "", "départ corps de chauffe", "Hid.denge kabı sıcaklığı", "mandata scamb. pr.", "vykurovací blok") // TODO translate
 
+MAKE_TRANSLATION(curveOn, "curveon", "heatingcurve on", "Heizkurve an", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(curveBase, "curvebase", "heatingcurve base", "Heizkurve Basis", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(curveEnd, "curveend", "heatingcurve end", "Heizkurve Ende", "", "", "", "", "", "", "", "") // TODO translate
+
 // heatpump/compress specific
 MAKE_TRANSLATION(upTimeTotal, "uptimetotal", "heatpump total uptime", "Wärmpepumpe Gesamtbetriebszeit", "", "", "łączny czas pracy pompy ciepła", "", "", "", "", "celková doba prevádzky tepelného čerpadla") // TODO translate
 MAKE_TRANSLATION(upTimeControl, "uptimecontrol", "total operating time heat", "Betriebszeit Heizen gesamt", "Totale bedrijfstijd", "Total tid uppvärmning", "łączny czas generowania ciepła", "total driftstid", "durée totale de fonctionnement chauffage", "ısınma toplam işletme süresi", "Tempo di funzionamento totale riscaldamento", "celkový prevádzkový čas tepla")
