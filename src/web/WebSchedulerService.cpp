@@ -168,8 +168,8 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
         return (output.size() > 0);
     }
 
-    char command_s[30];
-    strlcpy(command_s, cmd, sizeof(command_s));
+    char command_s[COMMAND_MAX_LENGTH];
+    strlcpy(command_s, Helpers::toLower(cmd).c_str(), sizeof(command_s));
     char * attribute_s = nullptr;
 
     // check specific attribute to fetch instead of the complete record
@@ -180,7 +180,7 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
     }
 
     for (const ScheduleItem & scheduleItem : *scheduleItems_) {
-        if (Helpers::toLower(scheduleItem.name) == Helpers::toLower(command_s)) {
+        if (Helpers::toLower(scheduleItem.name) == command_s) {
             output["name"] = scheduleItem.name;
             output["type"] = "boolean";
             if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {

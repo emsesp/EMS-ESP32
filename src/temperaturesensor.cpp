@@ -377,10 +377,9 @@ bool TemperatureSensor::get_value_info(JsonObject output, const char * cmd, cons
 
     // this is for a specific sensor
     // make a copy of the string command for parsing, and lowercase it
-    char   sensor_name[30] = {'\0'};
+    char   sensor_name[COMMAND_MAX_LENGTH] = {'\0'};
     char * attribute_s     = nullptr;
-    strlcpy(sensor_name, cmd, sizeof(sensor_name));
-    auto sensor_lowercase = Helpers::toLower(sensor_name);
+    strlcpy(sensor_name, Helpers::toLower(cmd).c_str(), sizeof(sensor_name));
 
     // check for a specific attribute to fetch instead of the complete record
     char * breakp = strchr(sensor_name, '/');
@@ -391,7 +390,7 @@ bool TemperatureSensor::get_value_info(JsonObject output, const char * cmd, cons
 
     for (const auto & sensor : sensors_) {
         // match custom name or sensor ID
-        if (sensor_lowercase == Helpers::toLower(sensor.name().c_str()) || sensor_lowercase == Helpers::toLower(sensor.id().c_str())) {
+        if (sensor_name == Helpers::toLower(sensor.name()) || sensor_name == Helpers::toLower(sensor.id())) {
             // add values
             addSensorJson(output, sensor);
             // if we're filtering on an attribute, go find it

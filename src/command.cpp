@@ -88,12 +88,12 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         command_p = p.paths()[1].c_str();
     } else if (num_paths == 3) {
         // concatenate the path into one string as it could be in the format 'hc/XXX'
-        char command[50];
+        char command[COMMAND_MAX_LENGTH];
         snprintf(command, sizeof(command), "%s/%s", p.paths()[1].c_str(), p.paths()[2].c_str());
         command_p = command;
     } else if (num_paths > 3) {
         // concatenate the path into one string as it could be in the format 'hc/XXX/attribute'
-        char command[50];
+        char command[COMMAND_MAX_LENGTH];
         snprintf(command, sizeof(command), "%s/%s/%s", p.paths()[1].c_str(), p.paths()[2].c_str(), p.paths()[3].c_str());
         command_p = command;
     } else {
@@ -151,7 +151,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         if (strlen(d)) {
             char * device_end = (char *)strchr(d, '/');
             if (device_end != nullptr) {
-                char         device_s[15] = {'\0'};
+                char         device_s[20] = {'\0'};
                 const char * device_p     = device_s;
                 const char * data_p       = nullptr;
                 strlcpy(device_s, d, device_end - d + 1);
@@ -161,7 +161,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
                 if (data_p == nullptr) {
                     return CommandRet::INVALID;
                 }
-                char data_s[40];
+                char data_s[COMMAND_MAX_LENGTH];
                 strlcpy(data_s, Helpers::toLower(data_p).c_str(), 30);
                 if (strstr(data_s, "/value") == nullptr) {
                     strcat(data_s, "/value");
