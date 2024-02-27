@@ -27,6 +27,8 @@ using uuid::console::Shell;
 
 namespace emsesp {
 
+#define COMMAND_MAX_LENGTH 50
+
 // mqtt flags for command subscriptions
 enum CommandFlag : uint8_t {
     MQTT_SUB_FLAG_DEFAULT = 0,        // 0 no flags set, always subscribe to MQTT

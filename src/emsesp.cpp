@@ -1496,7 +1496,9 @@ void EMSESP::start() {
 
     esp8266React.begin(); // loads core system services settings (network, mqtt, ap, ntp etc)
 
-    nvs_.begin("ems-esp", false, "nvs");
+    if (!nvs_.begin("ems-esp", false, "nvs1")) { // try new partition on 16M flash first
+        nvs_.begin("ems-esp", false, "nvs");     // fallback to  first nvs
+    }
 
     LOG_INFO("Starting EMS-ESP version %s", EMSESP_APP_VERSION); // welcome message
     LOG_DEBUG("System is running in Debug mode");

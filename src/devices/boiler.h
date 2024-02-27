@@ -269,6 +269,9 @@ class Boiler : public EMSdevice {
     uint8_t wwComfDiffTemp_;
     uint8_t wwEcoDiffTemp_;
     uint8_t wwEcoPlusDiffTemp_;
+    uint8_t wwComfStopTemp_;
+    uint8_t wwEcoStopTemp_;
+    uint8_t wwEcoPlusStopTemp_;
 
     uint8_t vp_cooling_;
     uint8_t heatCable_;
@@ -488,6 +491,15 @@ class Boiler : public EMSdevice {
     }
     inline bool set_wwEcoPlusDiffTemp(const char * value, const int8_t id) {
         return set_wwDiffTemp(value, 14);
+    }
+    inline bool set_wwComfStopTemp(const char * value, const int8_t id) {
+        return set_wwOffTemp(value, 8);
+    }
+    inline bool set_wwEcoStopTemp(const char * value, const int8_t id) {
+        return set_wwOffTemp(value, 9);
+    }
+    inline bool set_wwEcoPlusStopTemp(const char * value, const int8_t id) {
+        return set_wwOffTemp(value, 10);
     }
     bool        set_vp_cooling(const char * value, const int8_t id);
     bool        set_heatCable(const char * value, const int8_t id);

@@ -1204,10 +1204,12 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     node["uptime (seconds)"] = uuid::get_uptime_sec();
 #ifndef EMSESP_STANDALONE
-    node["platform"]  = ARDUINO_VERSION;
+    node["platform"]  = EMSESP_PLATFORM;
+    node["arduino"]   = ARDUINO_VERSION;
     node["sdk"]       = ESP.getSdkVersion();
     node["free mem"]  = getHeapMem();
     node["max alloc"] = getMaxAllocMem();
+    node["free caps"] = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024; // includes heap and psram
     node["used app"]  = EMSESP::system_.appUsed(); // kilobytes
     node["free app"]  = EMSESP::system_.appFree(); // kilobytes
     node["partition"] = esp_ota_get_running_partition()->label;

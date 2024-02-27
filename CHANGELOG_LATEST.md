@@ -22,6 +22,11 @@
 - mixer MM100 telegram 0x2CC [#1554](https://github.com/emsesp/EMS-ESP32/issues/1554)
 - boiler hpSetDiffPressure [#1563](https://github.com/emsesp/EMS-ESP32/issues/1563)
 - custom variables [#1423](https://github.com/emsesp/EMS-ESP32/issues/1423)
+- thermostat second dhw circuit [#1634](https://github.com/emsesp/EMS-ESP32/issues/1634)
+- heatpump dhw energy meter [#1609](https://github.com/emsesp/EMS-ESP32/issues/1609)
+- remote thermostat emulation for RC100H, RC200 and FB10 [#1287](https://github.com/emsesp/EMS-ESP32/discussions/1287), [#1602](https://github.com/emsesp/EMS-ESP32/discussions/1602), [#1551](https://github.com/emsesp/EMS-ESP32/discussions/1551)
+- env and partitions for DevKitC-1-N32R8 [#1635](https://github.com/emsesp/EMS-ESP32/discussions/1635)
+- heatpump dhw stop temperatures [#1624](https://github.com/emsesp/EMS-ESP32/issues/1624)
 
 ## Fixed
 
@@ -35,6 +40,8 @@
 - Wifi Tx Power not adjusted [#1614](https://github.com/emsesp/EMS-ESP32/issues/1614)
 - MQTT discovery of custom entity doesn't consider type of data [#1587](https://github.com/emsesp/EMS-ESP32/issues/1587)
 - WiFi TxPower wasn't correctly used. Added an 'Auto' setting, which is the default.
+- MQTT heap check [#622](https://github.com/emsesp/EMS-ESP32/issues/1622)
+- Slovak language fix [#1636](https://github.com/emsesp/EMS-ESP32/discussions/1636)
 
 ## Changed
 
@@ -45,3 +52,4 @@
 - Length of mqtt Broker adress [#1619](https://github.com/emsesp/EMS-ESP32/issues/1619)
 - C++ optimizations - see <https://github.com/emsesp/EMS-ESP32/pull/1615>
 - Send MQTT heartbeat immediately after connection [#1628](https://github.com/emsesp/EMS-ESP32/issues/1628)
+- 16MB partitions with second nvs, larger FS, Coredump

@@ -444,6 +444,9 @@ MAKE_TRANSLATION(wwEcoPlusOffTemp, "wwecoplusoff", "eco+ switch off", "ECO+ Auss
 MAKE_TRANSLATION(wwComfDiffTemp, "wwcomfdiff", "comfort diff", "Komfort Differenztemp", "", "", "", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(wwEcoDiffTemp, "wwecodiff", "eco diff", "ECO Differenztemp", "", "", "", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(wwEcoPlusDiffTemp, "wwecoplusdiff", "eco+ diff", "ECO+ Differenztemp", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(wwComfStopTemp, "wwcomfstop", "comfort stop temp", "Komfort Stopptemp", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(wwEcoStopTemp, "wwecostop", "eco stop temp", "ECO Stopptemp", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(wwEcoPlusStopTemp, "wwecoplusstop", "eco+ stop temp", "ECO+ Stopptemp", "", "", "", "", "", "", "", "") // TODO translate
 
 MAKE_TRANSLATION(auxHeatMode, "auxheatrmode", "aux heater mode", "Modus Zusatzheizer", "Modus bijverwarmer", "", "tryb pracy dogrzewacza po blokadzie z Zakładu Energetycznego", "tilleggsvarmer modus", "", "ilave ısıtıcı modu", "modalità riscaldatore addizionale", "režim pomocného ohrievača") // TODO translate
 MAKE_TRANSLATION(auxMaxLimit, "auxmaxlimit", "aux heater max limit", "Zusatzheizer max. Grenze", "Bijverwarmer grensinstelling maximaal", "", "dogrzewacz, maksymalny limit", "tillegsvarme maksgrense", "", "ilave ısıtıcı maks limit", "limite massimo riscaldatore addizionale", "maximálny limit pomocného ohrievača") // TODO translate

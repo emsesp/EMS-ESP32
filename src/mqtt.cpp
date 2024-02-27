@@ -607,7 +607,8 @@ bool Mqtt::queue_message(const uint8_t operation, const std::string & topic, con
     }
 // check free mem
 #ifndef EMSESP_STANDALONE
-    if (ESP.getFreeHeap() < 60 * 1024 || ESP.getMaxAllocHeap() < 40 * 1024) {
+    // if (ESP.getFreeHeap() < 60 * 1024 || ESP.getMaxAllocHeap() < 40 * 1024) {
+    if (heap_caps_get_free_size(MALLOC_CAP_8BIT) < 60 * 1024) { // checks free Heap+PSRAM
         if (operation == Operation::PUBLISH) {
             mqtt_message_id_++;
             mqtt_publish_fails_++;
@@ -1327,13 +1328,13 @@ void Mqtt::add_ha_sections_to_doc(const char *   name,
 
     const char * tpl_draft = "{{'online' if %s else 'offline'}}";
 
-    // EMS-ESP status check
     char tpl[150];
-    snprintf(tpl, sizeof(tpl), "%s/status", Mqtt::base().c_str());
-    avty_json["t"] = tpl;
-    snprintf(tpl, sizeof(tpl), tpl_draft, "value == 'online'");
-    avty_json["val_tpl"] = tpl;
-    avty.add(avty_json); // returns 0 if no mem
+    // EMS-ESP status check
+    // snprintf(tpl, sizeof(tpl), "%s/status", Mqtt::base().c_str());
+    // avty_json["t"] = tpl;
+    // snprintf(tpl, sizeof(tpl), tpl_draft, "value == 'online'");
+    // avty_json["val_tpl"] = tpl;
+    // avty.add(avty_json); // returns 0 if no mem
 
     // skip conditional Jinja2 templates if not home assistant
     if (discovery_type() == discoveryType::HOMEASSISTANT) {
