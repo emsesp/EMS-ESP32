@@ -243,21 +243,15 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               0,
                               20);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &curveOn_, DeviceValueType::BOOL, FL_(curveOn), DeviceValueUOM::NONE, MAKE_CF_CB(set_curveOn));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &curveBase_, DeviceValueType::UINT, FL_(curveBase), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_curveBase));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &curveEnd_, DeviceValueType::UINT, FL_(curveEnd), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_curveEnd));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &summerTemp_,
-                              DeviceValueType::UINT,
-                              FL_(summertemp),
-                              DeviceValueUOM::DEGREES,
-                              MAKE_CF_CB(set_summerTemp));
+        register_device_value(
+            DeviceValueTAG::TAG_DEVICE_DATA, &curveBase_, DeviceValueType::UINT, FL_(curveBase), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_curveBase), 20, 90);
+        register_device_value(
+            DeviceValueTAG::TAG_DEVICE_DATA, &curveEnd_, DeviceValueType::UINT, FL_(curveEnd), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_curveEnd), 20, 90);
+        register_device_value(
+            DeviceValueTAG::TAG_DEVICE_DATA, &summerTemp_, DeviceValueType::UINT, FL_(summertemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_summerTemp), 0, 30);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nofrost_, DeviceValueType::BOOL, FL_(nofrostmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_nofrost));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                              &nofrostTemp_,
-                              DeviceValueType::UINT,
-                              FL_(nofrosttemp),
-                              DeviceValueUOM::DEGREES,
-                              MAKE_CF_CB(set_nofrostTemp));
+        register_device_value(
+            DeviceValueTAG::TAG_DEVICE_DATA, &nofrostTemp_, DeviceValueType::UINT, FL_(nofrosttemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_nofrostTemp), 0, 10);
     }
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &heatingActivated_,
