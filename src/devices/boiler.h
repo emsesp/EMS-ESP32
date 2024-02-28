@@ -159,6 +159,9 @@ class Boiler : public EMSdevice {
     uint8_t curveOn_;
     uint8_t curveBase_;
     uint8_t curveEnd_;
+    uint8_t summerTemp_;
+    uint8_t nofrost_;
+    uint8_t nofrostTemp_;
 
     // info
     uint32_t upTimeTotal_;               // Operating time
@@ -532,6 +535,9 @@ class Boiler : public EMSdevice {
     bool set_curveOn(const char * value, const int8_t id);
     bool set_curveBase(const char * value, const int8_t id);
     bool set_curveEnd(const char * value, const int8_t id);
+    bool set_summerTemp(const char * value, const int8_t id);
+    bool set_nofrost(const char * value, const int8_t id);
+    bool set_nofrostTemp(const char * value, const int8_t id);
 
     bool set_nrgHeat(const char * value, const int8_t id);
     bool set_nrgWw(const char * value, const int8_t id);
