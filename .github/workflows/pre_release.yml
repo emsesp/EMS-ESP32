@@ -48,6 +48,10 @@ jobs:
         run: |
           platformio run -e ci_s3
 
+      - name: Build E32V2 firmware
+        run: |
+          platformio run -e ci_16M
+
       - name: Create a GH Release
         id: 'automatic_releases'
         uses: 'marvinpinto/action-automatic-releases@latest'

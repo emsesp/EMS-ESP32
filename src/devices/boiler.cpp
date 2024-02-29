@@ -64,6 +64,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0xE6, "UBAParametersPlus", true, MAKE_PF_CB(process_UBAParametersPlus));
         register_telegram_type(0xE9, "UBAMonitorWWPlus", false, MAKE_PF_CB(process_UBAMonitorWWPlus));
         register_telegram_type(0xEA, "UBAParameterWWPlus", true, MAKE_PF_CB(process_UBAParameterWWPlus));
+        register_telegram_type(0x28, "WeatherComp", true, MAKE_PF_CB(process_WeatherComp));
     }
 
     if (model() == EMSdevice::EMS_DEVICE_FLAG_HEATPUMP) {
@@ -241,6 +242,16 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               MAKE_CF_CB(set_hyst2_off),
                               0,
                               20);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &curveOn_, DeviceValueType::BOOL, FL_(curveOn), DeviceValueUOM::NONE, MAKE_CF_CB(set_curveOn));
+        register_device_value(
+            DeviceValueTAG::TAG_DEVICE_DATA, &curveBase_, DeviceValueType::UINT, FL_(curveBase), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_curveBase), 20, 90);
+        register_device_value(
+            DeviceValueTAG::TAG_DEVICE_DATA, &curveEnd_, DeviceValueType::UINT, FL_(curveEnd), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_curveEnd), 20, 90);
+        register_device_value(
+            DeviceValueTAG::TAG_DEVICE_DATA, &summerTemp_, DeviceValueType::UINT, FL_(summertemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_summerTemp), 0, 30);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nofrost_, DeviceValueType::BOOL, FL_(nofrostmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_nofrost));
+        register_device_value(
+            DeviceValueTAG::TAG_DEVICE_DATA, &nofrostTemp_, DeviceValueType::UINT, FL_(nofrosttemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_nofrostTemp), 0, 10);
     }
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &heatingActivated_,
@@ -2023,6 +2034,17 @@ void Boiler::process_HIUSettings(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, setReturnTemp_, 2);
 }
 
+// Weather compensation, #1642
+// boiler(0x08) -W-> Me(0x0B), ?(0x28), data: 00 3C 32 10 00 05
+void Boiler::process_WeatherComp(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, curveOn_, 0);
+    has_update(telegram, curveEnd_, 1);
+    has_update(telegram, curveBase_, 2);
+    has_update(telegram, summerTemp_, 3);
+    has_update(telegram, nofrost_, 4);
+    has_update(telegram, nofrostTemp_, 5);
+}
+
 // HIU Settings
 bool Boiler::set_keepWarmTemp(const char * value, const int8_t id) {
     int v;
@@ -3164,6 +3186,60 @@ bool Boiler::set_nomPower(const char * value, const int8_t id) {
         has_update(nomPower_, (uint8_t)v);
     }
     store_energy();
+    return true;
+}
+
+bool Boiler::set_curveOn(const char * value, const int8_t id) {
+    bool v;
+    if (Helpers::value2bool(value, v)) {
+        write_command(0x28, 0, v ? 0xFF : 0);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_curveBase(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2temperature(value, v)) {
+        return false;
+    }
+    write_command(0x28, 2, v);
+    return true;
+}
+
+bool Boiler::set_curveEnd(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2temperature(value, v)) {
+        return false;
+    }
+    write_command(0x28, 1, v);
+    return true;
+}
+
+bool Boiler::set_summerTemp(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2temperature(value, v)) {
+        return false;
+    }
+    write_command(0x28, 3, v);
+    return true;
+}
+
+bool Boiler::set_nofrost(const char * value, const int8_t id) {
+    bool v;
+    if (Helpers::value2bool(value, v)) {
+        write_command(0x28, 4, v ? 0xFF : 0);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_nofrostTemp(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2temperature(value, v)) {
+        return false;
+    }
+    write_command(0x28, 5, v);
     return true;
 }
 
