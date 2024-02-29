@@ -20,6 +20,8 @@
 - mixer MM100 telegram 0x2CC [#1554](https://github.com/emsesp/EMS-ESP32/issues/1554)
 - boiler hpSetDiffPressure [#1563](https://github.com/emsesp/EMS-ESP32/issues/1563)
 - custom variables [#1423](https://github.com/emsesp/EMS-ESP32/issues/1423)
+- weather compensation [#1642](https://github.com/emsesp/EMS-ESP32/issues/1442)
+- env and partitions for DevKitC-1-N32R8 [#1635](https://github.com/emsesp/EMS-ESP32/discussions/1635)
 
 ## Fixed
 
@@ -33,6 +35,7 @@
 - Wifi Tx Power not adjusted [#1614](https://github.com/emsesp/EMS-ESP32/issues/1614)
 - MQTT discovery of custom entity doesn't consider type of data [#1587](https://github.com/emsesp/EMS-ESP32/issues/1587)
 - WiFi TxPower wasn't correctly used. Added an 'Auto' setting, which is the default.
+- dns w/wo IPv6 [#1644](https://github.com/emsesp/EMS-ESP32/issues/1644)
 
 ## Changed
 
@@ -42,3 +45,4 @@
 - Length of mqtt Broker adress [#1619](https://github.com/emsesp/EMS-ESP32/issues/1619)
 - C++ optimizations - see <https://github.com/emsesp/EMS-ESP32/pull/1615>
 - Send MQTT heartbeat immediately after connection [#1628](https://github.com/emsesp/EMS-ESP32/issues/1628)
+- 16MB partitions with second nvs, larger FS, Coredump
