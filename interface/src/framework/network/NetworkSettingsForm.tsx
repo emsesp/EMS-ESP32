@@ -216,6 +216,8 @@ const WiFiSettingsForm: FC = () => {
           <MenuItem value={44}>11 dBm</MenuItem>
           <MenuItem value={34}>8.5 dBm</MenuItem>
           <MenuItem value={28}>7 dBm</MenuItem>
+          <MenuItem value={20}>5 dBm</MenuItem>
+          <MenuItem value={8}>2 dBm</MenuItem>
         </TextField>
         <BlockFormControlLabel
           control={<Checkbox name="nosleep" checked={data.nosleep} onChange={updateFormValue} />}
@@ -257,10 +259,12 @@ const WiFiSettingsForm: FC = () => {
             margin="normal"
           />
         )}
-        <BlockFormControlLabel
-          control={<Checkbox name="enableIPv6" checked={data.enableIPv6} onChange={updateFormValue} />}
-          label={LL.NETWORK_ENABLE_IPV6()}
-        />
+        {data.enableIPv6 !== undefined && (
+          <BlockFormControlLabel
+            control={<Checkbox name="enableIPv6" checked={data.enableIPv6} onChange={updateFormValue} />}
+            label={LL.NETWORK_ENABLE_IPV6()}
+          />
+        )}
         <BlockFormControlLabel
           control={<Checkbox name="static_ip_config" checked={data.static_ip_config} onChange={updateFormValue} />}
           label={LL.NETWORK_FIXED_IP()}
