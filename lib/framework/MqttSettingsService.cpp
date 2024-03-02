@@ -39,7 +39,7 @@ void MqttSettingsService::startClient() {
         delete _mqttClient;
         _mqttClient = nullptr;
     }
-#if CONFIG_IDF_TARGET_ESP32S3
+#ifndef TASMOTA_SDK
     if (_state.enableTLS) {
         isSecure    = true;
         _mqttClient = new espMqttClientSecure(espMqttClientTypes::UseInternalTask::NO);
@@ -92,7 +92,7 @@ const char * MqttSettingsService::getClientId() {
 }
 
 void MqttSettingsService::setWill(const char * topic) {
-#if CONFIG_IDF_TARGET_ESP32S3
+#ifndef TASMOTA_SDK
     if (_state.enableTLS) {
         static_cast<espMqttClientSecure *>(_mqttClient)->setWill(topic, 1, true, "offline");
         return;
@@ -178,7 +178,7 @@ bool MqttSettingsService::configureMqtt() {
     // only connect if WiFi is connected and MQTT is enabled
     if (_state.enabled && emsesp::EMSESP::system_.network_connected() && !_state.host.isEmpty()) {
         _reconfigureMqtt = false;
-#if CONFIG_IDF_TARGET_ESP32S3
+#ifndef TASMOTA_SDK
         if (_state.enableTLS) {
 #if EMSESP_DEBUG
             emsesp::EMSESP::logger().debug("Start secure MQTT with rootCA");
@@ -208,11 +208,9 @@ bool MqttSettingsService::configureMqtt() {
 }
 
 void MqttSettings::read(MqttSettings & settings, JsonObject root) {
-#if CONFIG_IDF_TARGET_ESP32S3
 #ifndef TASMOTA_SDK
     root["enableTLS"] = settings.enableTLS;
     root["rootCA"]    = settings.rootCA;
-#endif
 #endif
     root["enabled"]       = settings.enabled;
     root["host"]          = settings.host;
@@ -247,11 +245,11 @@ StateUpdateResult MqttSettings::update(JsonObject root, MqttSettings & settings)
     MqttSettings newSettings = {};
     bool         changed     = false;
 
-#if CONFIG_IDF_TARGET_ESP32S3
 #ifndef TASMOTA_SDK
     newSettings.enableTLS = root["enableTLS"] | false;
     newSettings.rootCA    = root["rootCA"] | "";
-#endif
+#else
+    newSettings.enableTLS = false;
 #endif
     newSettings.enabled      = root["enabled"] | FACTORY_MQTT_ENABLED;
     newSettings.host         = root["host"] | FACTORY_MQTT_HOST;
@@ -368,7 +366,7 @@ StateUpdateResult MqttSettings::update(JsonObject root, MqttSettings & settings)
         emsesp::EMSESP::mqtt_.set_publish_time_heartbeat(newSettings.publish_time_heartbeat);
     }
 
-#if CONFIG_IDF_TARGET_ESP32S3
+#ifndef TASMOTA_SDK
     // strip down to certificate only
     newSettings.rootCA.replace("\r", "");
     newSettings.rootCA.replace("\n", "");
