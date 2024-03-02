@@ -1,6 +1,9 @@
 #include "NetworkStatus.h"
 
 #include "../../src/emsesp_stub.hpp"
+#ifdef TASMOTA_SDK
+#include "lwip/dns.h"
+#endif
 
 NetworkStatus::NetworkStatus(AsyncWebServer * server, SecurityManager * securityManager) {
     server->on(NETWORK_STATUS_SERVICE_PATH,
@@ -32,8 +35,13 @@ void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
         root["mac_address"] = ETH.macAddress();
         root["subnet_mask"] = ETH.subnetMask().toString();
         root["gateway_ip"]  = ETH.gatewayIP().toString();
-        IPAddress dnsIP1    = ETH.dnsIP(0);
-        IPAddress dnsIP2    = ETH.dnsIP(1);
+#ifdef TASMOTA_SDK
+        IPAddress dnsIP1 = IPAddress(dns_getserver(0));
+        IPAddress dnsIP2 = IPAddress(dns_getserver(1));
+#else
+        IPAddress dnsIP1 = ETH.dnsIP(0);
+        IPAddress dnsIP2 = ETH.dnsIP(1);
+#endif
         if (IPUtils::isSet(dnsIP1)) {
             root["dns_ip_1"] = dnsIP1.toString();
         }
@@ -54,8 +62,13 @@ void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
             root["gateway_ip"] = WiFi.gatewayIP().toString();
         }
 
+#ifdef TASMOTA_SDK
+        IPAddress dnsIP1 = IPAddress(dns_getserver(0));
+        IPAddress dnsIP2 = IPAddress(dns_getserver(1));
+#else
         IPAddress dnsIP1 = WiFi.dnsIP(0);
         IPAddress dnsIP2 = WiFi.dnsIP(1);
+#endif
         if (dnsIP1 != INADDR_NONE) {
             root["dns_ip_1"] = dnsIP1.toString();
         }
