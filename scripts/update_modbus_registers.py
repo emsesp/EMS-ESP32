@@ -1,3 +1,12 @@
+#
+# Update modbus parameters from entity definitions.
+# This script generates c++ code for the modbus parameter definitions.
+#
+# Usage:
+# - first, dump all entities to csv by running scripts/dump_entities.sh
+# - then run cat ../dump_entities.csv | python3 update_modbus_registers.py > ../src/modbus_entity_parameters.cpp
+#   from the "scripts" folder
+
 import fileinput
 import csv
 import json
@@ -6,7 +15,7 @@ from string import Template
 
 modbus_block_size = 1000  # block size of a register block for each tag
 
-# string sizes including terminating NUL. Extracted from the source codes.
+# string sizes including terminating NUL. Extracted from the source code.
 string_sizes = {
     "boiler/lastcode": 55,
     "boiler/servicecode": 4,
@@ -108,7 +117,7 @@ using dt = EMSdevice::DeviceType;
     Modbus::EntityModbusInfo(device_type, device_value_tag_type,                                                       \\
     long_name[0], modbus_register_offset, modbus_register_count)
 
-// IMPORTANT: This list MUST be ordered by keys device_type, device_value_tag_type and modbus_register_offset in this order.    
+// IMPORTANT: This list MUST be ordered by keys "device_type", "device_value_tag_type" and "modbus_register_offset" in this order.    
 std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_mappings = {
 $entries};
 
@@ -149,6 +158,7 @@ device_types = {}
 string_entities = []
 
 entity_modbus_property_names = [
+    "modbus tag",
     "modbus offset",
     "modbus count"
 ]
@@ -158,7 +168,7 @@ for entity in entities:
     if device_type_name not in device_types:
         device_types[device_type_name] = {}
     device_type = device_types[device_type_name]
-    tag_name = entity['tag']
+    tag_name = entity['modbus tag']
     if tag_name not in device_type:
         device_type[tag_name] = {}
     tag = device_type[tag_name]

@@ -329,7 +329,7 @@ void EMSESP::dump_all_values(uuid::console::Shell & shell) {
     Serial.println("---- CSV START ----"); // marker use by py script
     // add header for CSV
     Serial.print(
-        "device name,device type,product id,tag,shortname,fullname,type [options...] \\| (min/max),uom,writeable,discovery entityid v3.4,discovery entityid,modbus offset,modbus count,scale factor");
+        "device name,device type,product id,shortname,fullname,type [options...] \\| (min/max),uom,writeable,discovery entityid v3.4,discovery entityid,modbus tag,modbus scale factor,modbus offset,modbus count");
     Serial.println();
 
     for (const auto & device_class : EMSFactory::device_handlers()) {

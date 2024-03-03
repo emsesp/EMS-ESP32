@@ -1204,10 +1204,6 @@ void EMSdevice::dump_value_info() {
             Serial.print(product_id_);
             Serial.print(',');
 
-            //Serial.printf("%s", tag_to_string(dv.tag, false));
-            Serial.print(dv.tag);
-            Serial.print(',');
-
             Serial.print(dv.short_name);
             Serial.print(',');
 
@@ -1356,13 +1352,10 @@ void EMSdevice::dump_value_info() {
 
             Serial.print(",");
 
-            // modbus start register
-            Serial.printf("%d", EMSESP::modbus_.getRegisterOffset(dv));
-            Serial.print(",");
+            // modbus specific infos
 
-            // number of registers
-            Serial.printf("%d", EMSESP::modbus_.getRegisterCount(dv));
-            Serial.print(",");
+            Serial.print(dv.tag);
+            Serial.print(',');
 
             // numeric operator -> scale factor
             if (dv.numeric_operator == 0)
@@ -1371,6 +1364,14 @@ void EMSdevice::dump_value_info() {
                 Serial.printf("1/%d", dv.numeric_operator);
             else
                 Serial.print(-dv.numeric_operator);
+            Serial.print(",");
+
+            Serial.printf("%d", EMSESP::modbus_.getRegisterOffset(dv));
+            Serial.print(",");
+
+            Serial.printf("%d", EMSESP::modbus_.getRegisterCount(dv));
+
+            // /modbus specific infos
 
             Serial.println();
         }
