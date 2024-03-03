@@ -9,7 +9,7 @@ using dt = EMSdevice::DeviceType;
     Modbus::EntityModbusInfo(device_type, device_value_tag_type,                                                       \
     long_name[0], modbus_register_offset, modbus_register_count)
 
-// IMPORTANT: This list MUST be ordered by keys device_type, device_value_tag_type and modbus_register_offset in this order.    
+// IMPORTANT: This list MUST be ordered by keys "device_type", "device_value_tag_type" and "modbus_register_offset" in this order.    
 std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_mappings = {
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_BOILER_DATA_WW, FL_(nrgWw), 0, 2),
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_BOILER_DATA_WW, FL_(upTimeCompWw), 2, 2),
@@ -221,6 +221,12 @@ std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_mappings
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(keepWarmTemp), 244, 1),
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(setReturnTemp), 245, 1),
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(heatingOn), 246, 1),
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(curveOn), 247, 1),
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(curveBase), 248, 1),
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(curveEnd), 249, 1),
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(summertemp), 250, 1),
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(nofrostmode), 251, 1),
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(nofrosttemp), 252, 1),
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(errorCode), 0, 8),
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(lastCode), 8, 25),
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(dateTime), 33, 13),
