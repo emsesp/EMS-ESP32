@@ -1961,15 +1961,6 @@ bool EMSdevice::get_modbus_value(uint8_t tag, const std::string & shortname, std
     return true;
 }
 
-static float numeric_operator_to_scale_factor(uint8_t numeric_operator) {
-    if (numeric_operator == 0)
-        return 1.0f;
-    else if (numeric_operator > 0)
-        return 1.0f / numeric_operator;
-    else
-        return -numeric_operator;
-}
-
 bool EMSdevice::modbus_value_to_json(uint8_t tag, const std::string & shortname, const std::vector<uint8_t> & modbus_data, JsonObject output) {
     // find device value by shortname
     // TODO linear search is inefficient
@@ -2010,12 +2001,12 @@ bool EMSdevice::modbus_value_to_json(uint8_t tag, const std::string & shortname,
         if (modbus_data.size() != 2)
             return false;
 
-        output["value"] = numeric_operator_to_scale_factor(dv.numeric_operator) * (float)((uint16_t)modbus_data[0] << 8 | (uint16_t)modbus_data[1]);
+        output["value"] = Helpers::numericoperator2scalefactor(dv.numeric_operator) * (float)((uint16_t)modbus_data[0] << 8 | (uint16_t)modbus_data[1]);
     } else if (dv.type == DeviceValueType::ULONG || dv.type == DeviceValueType::TIME) {
         // these data types are 2 16 bit register
         if (modbus_data.size() != 4)
             return false;
-        output["value"] = numeric_operator_to_scale_factor(dv.numeric_operator)
+        output["value"] = Helpers::numericoperator2scalefactor(dv.numeric_operator)
                           * (float)((uint32_t)modbus_data[0] << 24 | (uint32_t)modbus_data[1] << 16 | (uint32_t)modbus_data[2] << 8 | (uint32_t)modbus_data[3]);
     }
 
