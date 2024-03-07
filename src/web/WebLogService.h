@@ -28,7 +28,7 @@ namespace emsesp {
 class WebLogService : public uuid::log::Handler {
   public:
     static constexpr size_t MAX_LOG_MESSAGES = 50;
-    static constexpr size_t REFRESH_SYNC     = 30;
+    static constexpr size_t REFRESH_SYNC     = 80;
 
     WebLogService(AsyncWebServer * server, SecurityManager * securityManager);
 
