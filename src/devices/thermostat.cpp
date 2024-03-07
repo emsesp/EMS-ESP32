@@ -1863,10 +1863,8 @@ bool Thermostat::set_remotetemp(const char * value, const int8_t id) {
         Roomctrl::set_remotetemp(Roomctrl::RC20, hc->hc(), hc->remotetemp); // RC20
     } else if ((model() == EMSdevice::EMS_DEVICE_FLAG_BC400) || model() == EMSdevice::EMS_DEVICE_FLAG_RC300) {
         if (hc->control == 1) {
-            Roomctrl::set_remotetemp(Roomctrl::RC200, hc->hc(), hc->remotetemp); // RC200
-        } else if (hc->control == 0) {
-            Roomctrl::set_remotetemp(Roomctrl::SENSOR, hc->hc(), hc->remotetemp); // RF Sensor
-        } else { // RC100(2) and RC100H(3)
+            Roomctrl::set_remotetemp(Roomctrl::RC200, hc->hc(), hc->remotetemp);  // RC200
+        } else if (hc->control == 2 || hc->control == 3) {                        // RC100(2) and RC100H(3)
             Roomctrl::set_remotetemp(Roomctrl::RC100H, hc->hc(), hc->remotetemp); // RC100H
         }
     }
@@ -1986,6 +1984,9 @@ bool Thermostat::set_control(const char * value, const int8_t id) {
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400 || model() == EMSdevice::EMS_DEVICE_FLAG_RC300 || model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
         if (Helpers::value2enum(value, ctrl, FL_(enum_control1))) {
             write_command(hpmode_typeids[hc->hc()], 3, ctrl);
+            if (hc->remotetemp != EMS_VALUE_SHORT_NOTSET && ctrl > 0) {
+                Roomctrl::set_remotetemp(ctrl == 1 ? Roomctrl::RC200 : Roomctrl::RC100H, hc->hc(), hc->remotetemp);
+            }
             return true;
         }
     } else if (Helpers::value2enum(value, ctrl, FL_(enum_control))) {
