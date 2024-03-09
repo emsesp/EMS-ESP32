@@ -233,7 +233,8 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(const ui
             return heating_circuit;
         }
     }
-    LOG_DEBUG("Heating circuit not fond on device 0x%02X", device_id());
+
+    LOG_DEBUG("Heating circuit not found on device 0x%02X", device_id());
     return nullptr; // not found
 }
 
@@ -4224,9 +4225,11 @@ void Thermostat::register_device_values() {
         break;
     }
 
-#if defined(EMSESP_STANDALONE_DUMP)
+#if defined(EMSESP_STANDALONE)
     // if we're just dumping out values, create a single dummy hc
-    register_device_values_hc(std::make_shared<Thermostat::HeatingCircuit>(1, this->model())); // hc=1
+    auto new_hc = std::make_shared<Thermostat::HeatingCircuit>(1, this->model()); // hc = 1
+    heating_circuits_.push_back(new_hc);
+    register_device_values_hc(new_hc);
 #endif
 }
 
