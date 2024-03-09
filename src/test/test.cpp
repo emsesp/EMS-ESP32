@@ -301,7 +301,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "add") {
         shell.printfln("Testing Adding a device (product_id %d), with all values...", id2);
-        test("add", id1, id2); // e.g. 8 172
+        test("add", id1, id2); // e.g. "test add 0x8 172"
         shell.invoke_command("show values");
         ok = true;
     }
