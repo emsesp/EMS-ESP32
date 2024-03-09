@@ -322,7 +322,7 @@ MAKE_ENUM(enum_reducemode1, FL_(outdoor), FL_(room), FL_(reduce)) // RC310 value
 MAKE_ENUM(enum_nofrostmode, FL_(off), FL_(outdoor), FL_(room))
 MAKE_ENUM(enum_nofrostmode1, FL_(room), FL_(outdoor), FL_(room_outdoor))
 
-MAKE_ENUM(enum_controlmode, FL_(off), FL_(optimized), FL_(simple), FL_(mpc), FL_(room), FL_(power), FL_(constant))
+MAKE_ENUM(enum_controlmode, FL_(optimized), FL_(simple), FL_(na), FL_(room), FL_(power))
 MAKE_ENUM(enum_controlmode1, FL_(weather_compensated), FL_(outside_basepoint), FL_(na), FL_(room), FL_(power), FL_(constant)) // RC310 1-4
 MAKE_ENUM(enum_controlmode2, FL_(outdoor), FL_(room))
 MAKE_ENUM(enum_control, FL_(off), FL_(rc20), FL_(rc3x))
