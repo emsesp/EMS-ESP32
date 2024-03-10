@@ -21,16 +21,18 @@
 namespace emsesp {
 
 WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securityManager)
-    : _write_value_handler(WRITE_DEVICE_VALUE_SERVICE_PATH,
-                           securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_device_value(request, json); },
-                                                         AuthenticationPredicates::IS_ADMIN))
-    , _write_temperature_handler(WRITE_TEMPERATURE_SENSOR_SERVICE_PATH,
-                                 securityManager->wrapCallback([this](AsyncWebServerRequest * request,
-                                                                      JsonVariant             json) { write_temperature_sensor(request, json); },
-                                                               AuthenticationPredicates::IS_ADMIN))
-    , _write_analog_handler(WRITE_ANALOG_SENSOR_SERVICE_PATH,
-                            securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_analog_sensor(request, json); },
-                                                          AuthenticationPredicates::IS_ADMIN)) {
+
+{
+    // write endpoints
+    server->on(WRITE_DEVICE_VALUE_SERVICE_PATH,
+               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_device_value(request, json); },
+                                             AuthenticationPredicates::IS_ADMIN));
+    server->on(WRITE_TEMPERATURE_SENSOR_SERVICE_PATH,
+               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_temperature_sensor(request, json); },
+                                             AuthenticationPredicates::IS_ADMIN));
+    server->on(WRITE_ANALOG_SENSOR_SERVICE_PATH,
+               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_analog_sensor(request, json); },
+                                             AuthenticationPredicates::IS_ADMIN));
     // GET's
     server->on(DEVICE_DATA_SERVICE_PATH,
                HTTP_GET,
@@ -49,19 +51,6 @@ WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securi
     server->on(SCAN_DEVICES_SERVICE_PATH,
                HTTP_POST,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { scan_devices(request); }, AuthenticationPredicates::IS_ADMIN));
-
-
-    _write_value_handler.setMethod(HTTP_POST);
-    _write_value_handler.setMaxContentLength(256);
-    server->addHandler(&_write_value_handler);
-
-    _write_temperature_handler.setMethod(HTTP_POST);
-    _write_temperature_handler.setMaxContentLength(256);
-    server->addHandler(&_write_temperature_handler);
-
-    _write_analog_handler.setMethod(HTTP_POST);
-    _write_analog_handler.setMaxContentLength(256);
-    server->addHandler(&_write_analog_handler);
 }
 
 // scan devices service

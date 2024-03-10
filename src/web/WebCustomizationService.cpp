@@ -23,10 +23,7 @@ namespace emsesp {
 bool WebCustomization::_start = true;
 
 WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
-    : _fsPersistence(WebCustomization::read, WebCustomization::update, this, fs, EMSESP_CUSTOMIZATION_FILE)
-    , _masked_entities_handler(CUSTOMIZATION_ENTITIES_PATH,
-                               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { customization_entities(request, json); },
-                                                             AuthenticationPredicates::IS_AUTHENTICATED)) {
+    : _fsPersistence(WebCustomization::read, WebCustomization::update, this, fs, EMSESP_CUSTOMIZATION_FILE) {
     server->on(DEVICE_ENTITIES_PATH,
                HTTP_GET,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { device_entities(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
@@ -39,9 +36,9 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
                HTTP_POST,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { reset_customization(request); }, AuthenticationPredicates::IS_ADMIN));
 
-    _masked_entities_handler.setMethod(HTTP_POST);
-    _masked_entities_handler.setMaxContentLength(2048);
-    server->addHandler(&_masked_entities_handler);
+    server->on(CUSTOMIZATION_ENTITIES_PATH,
+               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { customization_entities(request, json); },
+                                             AuthenticationPredicates::IS_AUTHENTICATED));
 }
 
 // this creates the customization file, saving it to the FS
