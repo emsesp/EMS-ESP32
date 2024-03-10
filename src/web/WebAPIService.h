@@ -34,6 +34,11 @@ class WebAPIService {
 
     void webAPIService(AsyncWebServerRequest * request, JsonVariant json);
 
+#ifdef EMSESP_TEST
+    // for test.cpp
+    void webAPIService(AsyncWebServerRequest * request);
+#endif
+
     static uint32_t api_count() {
         return api_count_;
     }

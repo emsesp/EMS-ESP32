@@ -62,6 +62,13 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request, JsonVariant j
     parse(request, input);
 }
 
+#ifdef EMSESP_TEST
+// for test.cpp so we can invoke GETs to test the API
+void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
+    JsonDocument input_doc;
+    parse(request, input_doc.to<JsonObject>());
+}
+#endif
 
 // parse the URL looking for query or path parameters
 // reporting back any errors
