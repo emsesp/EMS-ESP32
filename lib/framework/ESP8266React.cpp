@@ -36,7 +36,8 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
                 return request->send(304);
             }
 
-            AsyncWebServerResponse * response = request->beginResponse_P(200, contentType, content, len);
+            AsyncWebServerResponse * response = request->beginResponse(contentType, content, len);
+
             response->addHeader("Content-Encoding", "gzip");
             // response->addHeader("Content-Encoding", "br"); // only works over HTTPS
             // response->addHeader("Cache-Control", "public, immutable, max-age=31536000");

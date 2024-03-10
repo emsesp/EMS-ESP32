@@ -51,8 +51,6 @@ class WebDataService {
     void write_temperature_sensor(AsyncWebServerRequest * request, JsonVariant json);
     void write_analog_sensor(AsyncWebServerRequest * request, JsonVariant json);
     void scan_devices(AsyncWebServerRequest * request); // command
-
-    AsyncCallbackJsonWebHandler _write_value_handler, _write_temperature_handler, _write_analog_handler;
 };
 
 } // namespace emsesp

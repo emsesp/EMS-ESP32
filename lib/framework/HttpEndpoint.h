@@ -17,8 +17,6 @@ class HttpEndpoint {
     JsonStateUpdater<T>  _stateUpdater;
     StatefulService<T> * _statefulService;
 
-    AsyncCallbackJsonWebHandler * handler;
-
   public:
     HttpEndpoint(JsonStateReader<T>      stateReader,
                  JsonStateUpdater<T>     stateUpdater,
@@ -30,12 +28,10 @@ class HttpEndpoint {
         : _stateReader(stateReader)
         , _stateUpdater(stateUpdater)
         , _statefulService(statefulService) {
-        // Create hander for both GET and POST endpoints
-        handler = new AsyncCallbackJsonWebHandler(servicePath,
-                                                  securityManager->wrapCallback([this](AsyncWebServerRequest * request,
-                                                                                       JsonVariant             json) { handleRequest(request, json); },
-                                                                                authenticationPredicate));
-        server->addHandler(handler);
+        // Create handler for both GET and POST endpoints
+        server->on(servicePath.c_str(),
+                   securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { handleRequest(request, json); },
+                                                 authenticationPredicate));
     }
 
   protected:
