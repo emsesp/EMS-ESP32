@@ -746,20 +746,6 @@ size_t AsyncProgmemResponse::_fillBuffer(uint8_t * data, size_t len) {
     return left;
 }
 
-// added by proddy
-AsyncResponse::AsyncResponse(const String & contentType, const uint8_t * content, size_t len)
-    : AsyncAbstractResponse(nullptr) {
-    _code          = 200;
-    _content       = content;
-    _contentType   = contentType;
-    _contentLength = len;
-    _readLength    = len;
-}
-size_t AsyncResponse::_fillBuffer(uint8_t * data, size_t len) {
-    memcpy(data, _content, len);
-    return len;
-}
-
 /*
  * Response Stream (You can print/write/printf to it, up to the contentLen bytes)
  * */

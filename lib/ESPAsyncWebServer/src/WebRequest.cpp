@@ -855,12 +855,6 @@ AsyncWebServerResponse * AsyncWebServerRequest::beginResponse_P(int code, const 
     return beginResponse_P(code, contentType, (const uint8_t *)content, strlen_P(content), callback);
 }
 
-// added by proddy
-AsyncWebServerResponse *
-AsyncWebServerRequest::beginResponse(const String & contentType, const uint8_t * content, size_t len) {
-    return new AsyncResponse(contentType, content, len);
-}
-
 void AsyncWebServerRequest::send(int code, const String & contentType, const String & content) {
     send(beginResponse(code, contentType, content));
 }
