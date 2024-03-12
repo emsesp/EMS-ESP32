@@ -145,20 +145,6 @@ class AsyncProgmemResponse : public AsyncAbstractResponse {
     virtual size_t _fillBuffer(uint8_t * buf, size_t maxLen) override;
 };
 
-// added by proddy
-class AsyncResponse : public AsyncAbstractResponse {
-  private:
-    const uint8_t * _content;
-    size_t          _readLength;
-
-  public:
-    AsyncResponse(const String & contentType, const uint8_t * content, size_t len);
-    bool _sourceValid() const {
-        return true;
-    }
-    virtual size_t _fillBuffer(uint8_t * buf, size_t maxLen) override;
-};
-
 class cbuf;
 
 class AsyncResponseStream : public AsyncAbstractResponse, public Print {
