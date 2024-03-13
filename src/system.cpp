@@ -261,12 +261,31 @@ void System::store_nvs_values() {
 }
 
 // restart EMS-ESP
-void System::system_restart() {
-    LOG_INFO("Restarting EMS-ESP...");
+void System::system_restart(const bool other_partition) {
+    if (other_partition) {
+        LOG_INFO("Restarting EMS-ESP to other partition...");
+    } else {
+        LOG_INFO("Restarting EMS-ESP...");
+    }
+
     store_nvs_values();
     Shell::loop_all();
     delay(1000); // wait a second
 #ifndef EMSESP_STANDALONE
+    if (other_partition) {
+        // check for factory partiton
+        const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, NULL);
+        if (!partition) {
+            partition = esp_ota_get_next_update_partition(NULL);
+        }
+        if (partition) {
+            uint64_t buffer;
+            esp_partition_read(partition, 0, &buffer, 8);
+            if (buffer != 0xFFFFFFFFFFFFFFFF) { // partition not empty
+                esp_ota_set_boot_partition(partition);
+            }
+        }
+    }
     ESP.restart();
 #endif
 }
@@ -458,7 +477,8 @@ void System::button_OnDblClick(PButton & b) {
 
 // button long press
 void System::button_OnLongPress(PButton & b) {
-    LOG_NOTICE("Button pressed - long press");
+    LOG_NOTICE("Button pressed - long press - boot to other partition");
+    EMSESP::system_.system_restart(true);
 }
 
 // button indefinite press
@@ -1511,9 +1531,13 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
     return true;
 }
 
-// restart command - perform a hard reset by setting flag
+// restart command - perform a hard reset
 bool System::command_restart(const char * value, const int8_t id) {
-    restart_requested(true);
+    if (value[0] == '1' || strcmp(value, "true") == 0 || strcmp(value, "other") == 0) {
+        EMSESP::system_.system_restart(true);
+    } else {
+        EMSESP::system_.system_restart(false);
+    }
     return true;
 }
 

@@ -198,9 +198,17 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
         });
     });
 
-    commands->add_command(ShellContext::MAIN, CommandFlags::ADMIN, string_vector{F_(restart)}, [](Shell & shell, const std::vector<std::string> & arguments) {
-        to_app(shell).system_.system_restart();
-    });
+    commands->add_command(ShellContext::MAIN,
+                          CommandFlags::ADMIN,
+                          string_vector{F_(restart)},
+                          string_vector{F_(other_optional)},
+                          [](Shell & shell, const std::vector<std::string> & arguments) {
+                              if (arguments.size()) {
+                                  to_app(shell).system_.system_restart(arguments.front() == "other");
+                              } else {
+                                  to_app(shell).system_.system_restart();
+                              }
+                          });
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::ADMIN,

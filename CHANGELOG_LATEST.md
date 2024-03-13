@@ -20,8 +20,9 @@
 - mixer MM100 telegram 0x2CC [#1554](https://github.com/emsesp/EMS-ESP32/issues/1554)
 - boiler hpSetDiffPressure [#1563](https://github.com/emsesp/EMS-ESP32/issues/1563)
 - custom variables [#1423](https://github.com/emsesp/EMS-ESP32/issues/1423)
-- weather compensation [#1642](https://github.com/emsesp/EMS-ESP32/issues/1442)
+- weather compensation [#1642](https://github.com/emsesp/EMS-ESP32/issues/1642)
 - env and partitions for DevKitC-1-N32R8 [#1635](https://github.com/emsesp/EMS-ESP32/discussions/1635)
+- command `restart other` and button long press to start with other partition [#1657](https://github.com/emsesp/EMS-ESP32/issues/1657)
 
 ## Fixed
 
