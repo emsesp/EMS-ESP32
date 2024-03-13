@@ -369,7 +369,6 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) 
         if (emsesp::EMSESP::system_.ethernet_connected()) {
             emsesp::EMSESP::logger().info("Ethernet connected (IPv6=%s, speed %d Mbps)", ETH.localIPv6().toString().c_str(), ETH.linkSpeed());
         }
-        mDNS_start();
         emsesp::EMSESP::system_.has_ipv6(true);
         break;
 
