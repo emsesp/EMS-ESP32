@@ -238,7 +238,8 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                                           networkSettings.password = password2.c_str();
                                                           return StateUpdateResult::CHANGED;
                                                       });
-                                                  shell.println("WiFi password updated");
+                                                  shell.println("WiFi password updated. Reconnecting...");
+                                                  to_app(shell).system_.wifi_reconnect();
                                               } else {
                                                   shell.println("Passwords do not match");
                                               }
@@ -271,7 +272,8 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                   networkSettings.ssid = arguments.front().c_str();
                                   return StateUpdateResult::CHANGED;
                               });
-                              shell.println("WiFi ssid updated");
+                              shell.println("WiFi ssid updated. Reconnecting...");
+                              to_app(shell).system_.wifi_reconnect();
                           });
 
 
