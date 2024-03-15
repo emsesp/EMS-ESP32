@@ -201,10 +201,10 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::ADMIN,
                           string_vector{F_(restart)},
-                          string_vector{F_(other_optional)},
+                          string_vector{F_(partitionname_optional)},
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               if (arguments.size()) {
-                                  to_app(shell).system_.system_restart(arguments.front() == "other");
+                                  to_app(shell).system_.system_restart(arguments.front().c_str());
                               } else {
                                   to_app(shell).system_.system_restart();
                               }
@@ -348,6 +348,43 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                   return StateUpdateResult::CHANGED;
                               });
                               to_app(shell).uart_init();
+                          });
+
+    commands->add_command(ShellContext::MAIN,
+                          CommandFlags::ADMIN,
+                          string_vector{F_(set), F_(service)},
+                          string_vector{F_(service_mandatory), F_(enable_mandatory)},
+                          [](Shell & shell, const std::vector<std::string> & arguments) {
+                              if (arguments.back() == "enable" || arguments.back() == "disable") {
+                                  bool enable = arguments.back() == "enable";
+                                  if (arguments.front() == "mqtt") {
+                                      to_app(shell).esp8266React.getMqttSettingsService()->update([&](MqttSettings & Settings) {
+                                          Settings.enabled = enable;
+                                          return StateUpdateResult::CHANGED;
+                                      });
+                                  } else if (arguments.front() == "ota") {
+                                      to_app(shell).esp8266React.getOTASettingsService()->update([&](OTASettings & Settings) {
+                                          Settings.enabled = enable;
+                                          return StateUpdateResult::CHANGED;
+                                      });
+                                  } else if (arguments.front() == "ntp") {
+                                      to_app(shell).esp8266React.getNTPSettingsService()->update([&](NTPSettings & Settings) {
+                                          Settings.enabled = enable;
+                                          return StateUpdateResult::CHANGED;
+                                      });
+                                  } else if (arguments.front() == "ap") {
+                                      to_app(shell).esp8266React.getAPSettingsService()->update([&](APSettings & Settings) {
+                                          Settings.provisionMode = enable ? 0 : 2;
+                                          return StateUpdateResult::CHANGED;
+                                      });
+                                  } else {
+                                      shell.printfln("unknown service: %s", arguments.front().c_str());
+                                      return;
+                                  }
+                                  shell.printfln("service '%s' %sd", arguments.front().c_str(), arguments.back().c_str());
+                              } else {
+                                  shell.println("Must be `enable` or `disable`");
+                              }
                           });
 
     //

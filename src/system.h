@@ -69,7 +69,7 @@ class System {
     std::string reset_reason(uint8_t cpu) const;
 
     void store_nvs_values();
-    void system_restart(const bool other_partition = false);
+    void system_restart(const char * partition = nullptr);
     void format(uuid::console::Shell & shell);
     void upload_status(bool in_progress);
     bool upload_status();
