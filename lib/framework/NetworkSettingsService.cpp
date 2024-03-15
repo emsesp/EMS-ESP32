@@ -368,13 +368,7 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) 
     case ARDUINO_EVENT_ETH_GOT_IP6:
         if (emsesp::EMSESP::system_.ethernet_connected()) {
             emsesp::EMSESP::logger().info("Ethernet connected (IPv6=%s, speed %d Mbps)", ETH.localIPv6().toString().c_str(), ETH.linkSpeed());
-        } else {
-            emsesp::EMSESP::logger().info("WiFi connected (IPv6=%s, hostname=%s, TxPower=%s dBm)",
-                                          WiFi.localIPv6().toString().c_str(),
-                                          WiFi.getHostname(),
-                                          emsesp::Helpers::render_value(result, ((double)(WiFi.getTxPower()) / 4), 1));
         }
-        mDNS_start();
         emsesp::EMSESP::system_.has_ipv6(true);
         break;
 

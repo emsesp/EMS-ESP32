@@ -63,7 +63,7 @@ class AsyncJsonResponse : public AsyncAbstractResponse {
 
     ~AsyncJsonResponse() {
     }
-    JsonVariant & getRoot() {
+    JsonVariant getRoot() {
         return _root;
     }
     bool _sourceValid() const {
@@ -108,7 +108,7 @@ class PrettyAsyncJsonResponse : public AsyncJsonResponse {
     }
 };
 
-typedef std::function<void(AsyncWebServerRequest * request, JsonVariant & json)> ArJsonRequestHandlerFunction;
+typedef std::function<void(AsyncWebServerRequest * request, JsonVariant json)> ArJsonRequestHandlerFunction;
 
 class AsyncCallbackJsonWebHandler : public AsyncWebHandler {
   private:
@@ -142,13 +142,15 @@ class AsyncCallbackJsonWebHandler : public AsyncWebHandler {
         if (!_onRequest)
             return false;
 
-        if (!(_method & request->method()))
+        WebRequestMethodComposite request_method = request->method();
+
+        if (!(_method & request_method))
             return false;
 
         if (_uri.length() && (_uri != request->url() && !request->url().startsWith(_uri + "/")))
             return false;
 
-        if (!request->contentType().equalsIgnoreCase(JSON_MIMETYPE))
+        if (request_method != HTTP_GET && !request->contentType().equalsIgnoreCase(JSON_MIMETYPE))
             return false;
 
         request->addInterestingHeader("ANY");
@@ -156,18 +158,23 @@ class AsyncCallbackJsonWebHandler : public AsyncWebHandler {
     }
 
     virtual void handleRequest(AsyncWebServerRequest * request) override final {
+        if ((_username != "" && _password != "") && !request->authenticate(_username.c_str(), _password.c_str()))
+            return request->requestAuthentication();
         if (_onRequest) {
-            JsonVariant json; // empty variant
-            if (request->_tempObject != NULL) {
+            if (request->method() == HTTP_GET) {
+                JsonVariant json;
+                _onRequest(request, json);
+                return;
+            } else if (request->_tempObject != NULL) {
                 JsonDocument         jsonBuffer;
                 DeserializationError error = deserializeJson(jsonBuffer, (uint8_t *)(request->_tempObject));
                 if (!error) {
-                    json = jsonBuffer.as<JsonVariant>();
+                    JsonVariant json = jsonBuffer.as<JsonVariant>();
                     _onRequest(request, json);
                     return;
                 }
             }
-            _onRequest(request, json);
+            request->send(_contentLength > _maxContentLength ? 413 : 400);
         } else {
             request->send(500);
         }

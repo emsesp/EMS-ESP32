@@ -5,13 +5,10 @@
 NTPSettingsService::NTPSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(NTPSettings::read, NTPSettings::update, this, server, NTP_SETTINGS_SERVICE_PATH, securityManager)
     , _fsPersistence(NTPSettings::read, NTPSettings::update, this, fs, NTP_SETTINGS_FILE)
-    , _timeHandler(TIME_PATH,
-                   securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { configureTime(request, json); },
-                                                 AuthenticationPredicates::IS_ADMIN))
     , _connected(false) {
-    _timeHandler.setMethod(HTTP_POST);
-    _timeHandler.setMaxContentLength(MAX_TIME_SIZE);
-    server->addHandler(&_timeHandler);
+    server->on(TIME_PATH,
+               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { configureTime(request, json); },
+                                             AuthenticationPredicates::IS_ADMIN));
 
     WiFi.onEvent([this](WiFiEvent_t event, WiFiEventInfo_t info) { WiFiEvent(event); });
     addUpdateHandler([this] { configureNTP(); }, false);

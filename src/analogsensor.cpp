@@ -661,7 +661,7 @@ bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int
     // this is for a specific sensor
     // make a copy of the string command for parsing, and lowercase it
     char   sensor_name[COMMAND_MAX_LENGTH] = {'\0'};
-    char * attribute_s     = nullptr;
+    char * attribute_s                     = nullptr;
     strlcpy(sensor_name, Helpers::toLower(cmd).c_str(), sizeof(sensor_name));
 
     // check specific attribute to fetch instead of the complete record

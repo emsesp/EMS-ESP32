@@ -60,13 +60,9 @@ class WebLogService : public uuid::log::Handler {
 
     void transmit(const QueuedLogMessage & message);
     void fetchLog(AsyncWebServerRequest * request);
-    void getValues(AsyncWebServerRequest * request);
+    void getSetValues(AsyncWebServerRequest * request, JsonVariant json);
 
     char * messagetime(char * out, const uint64_t t, const size_t bufsize);
-
-    void setValues(AsyncWebServerRequest * request, JsonVariant json);
-
-    AsyncCallbackJsonWebHandler setValues_; // for POSTs
 
     uint64_t                     last_transmit_        = 0;                // Last transmit time
     size_t                       maximum_log_messages_ = MAX_LOG_MESSAGES; // Maximum number of log messages to buffer before they are output

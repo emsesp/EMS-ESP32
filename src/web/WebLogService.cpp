@@ -21,17 +21,14 @@
 namespace emsesp {
 
 WebLogService::WebLogService(AsyncWebServer * server, SecurityManager * securityManager)
-    : events_(EVENT_SOURCE_LOG_PATH)
-    , setValues_(LOG_SETTINGS_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { setValues(request, json); }) {
-    events_.setFilter(securityManager->filterRequest(AuthenticationPredicates::IS_ADMIN));
-
-    // get settings
-    server->on(LOG_SETTINGS_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { getValues(request); });
+    : events_(EVENT_SOURCE_LOG_PATH) {
+    // get & set settings
+    server->on(LOG_SETTINGS_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { getSetValues(request, json); });
 
     // for bring back the whole log - is a command, hence a POST
     server->on(FETCH_LOG_PATH, HTTP_POST, [this](AsyncWebServerRequest * request) { fetchLog(request); });
 
-    server->addHandler(&setValues_);
+    events_.setFilter(securityManager->filterRequest(AuthenticationPredicates::IS_ADMIN));
     server->addHandler(&events_);
 }
 
@@ -204,11 +201,20 @@ void WebLogService::fetchLog(AsyncWebServerRequest * request) {
 }
 
 // sets the values like level after a POST
-void WebLogService::setValues(AsyncWebServerRequest * request, JsonVariant json) {
-    if (!json.is<JsonObject>()) {
+void WebLogService::getSetValues(AsyncWebServerRequest * request, JsonVariant json) {
+    if ((request->method() == HTTP_GET) || (!json.is<JsonObject>())) {
+        // GET - return the values
+        auto *     response  = new AsyncJsonResponse(false);
+        JsonObject root      = response->getRoot();
+        root["level"]        = log_level();
+        root["max_messages"] = maximum_log_messages();
+        root["compact"]      = compact();
+        response->setLength();
+        request->send(response);
         return;
     }
 
+    // POST - write the settings
     auto && body = json.as<JsonObject>();
 
     uuid::log::Level level = body["level"];
@@ -221,17 +227,6 @@ void WebLogService::setValues(AsyncWebServerRequest * request, JsonVariant json)
     compact(comp);
 
     request->send(200); // OK
-}
-
-// return the current value settings after a GET
-void WebLogService::getValues(AsyncWebServerRequest * request) {
-    auto *     response  = new AsyncJsonResponse(false);
-    JsonObject root      = response->getRoot();
-    root["level"]        = log_level();
-    root["max_messages"] = maximum_log_messages();
-    root["compact"]      = compact();
-    response->setLength();
-    request->send(response);
 }
 
 } // namespace emsesp

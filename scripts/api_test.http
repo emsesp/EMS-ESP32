@@ -4,7 +4,7 @@
 # The response will be shown in the right panel
 
 @host = http://ems-esp.local
-@host_dev = http://ems-esp2.local
+@host_dev = http://10.10.10.20
 
 @token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiYWRtaW4iOnRydWV9.2bHpWya2C7Q12WjNUBD6_7N3RCD7CMl-EGhyQVzFdDg
 
@@ -95,3 +95,14 @@ Authorization: Bearer {{token}}
 ###
 GET {{host_dev}}/api/system/commands
 
+###
+POST {{host_dev}}/api/thermostat/seltemp
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "value" : 21.0
+}
+
+###
+GET {{host_dev}}/api/thermostat/seltemp

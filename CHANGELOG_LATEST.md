@@ -27,6 +27,10 @@
 - remote thermostat emulation for RC100H, RC200 and FB10 [#1287](https://github.com/emsesp/EMS-ESP32/discussions/1287), [#1602](https://github.com/emsesp/EMS-ESP32/discussions/1602), [#1551](https://github.com/emsesp/EMS-ESP32/discussions/1551)
 - env and partitions for DevKitC-1-N32R8 [#1635](https://github.com/emsesp/EMS-ESP32/discussions/1635)
 - heatpump dhw stop temperatures [#1624](https://github.com/emsesp/EMS-ESP32/issues/1624)
+- weather compensation [#1642](https://github.com/emsesp/EMS-ESP32/issues/1642)
+- env and partitions for DevKitC-1-N32R8 [#1635](https://github.com/emsesp/EMS-ESP32/discussions/1635)
+- command `restart partitionname` and button long press to start with other partition [#1657](https://github.com/emsesp/EMS-ESP32/issues/1657)
+- command `set service  <mqtt|ota|ntp|ap> <enable|disable>` [#1663](https://github.com/emsesp/EMS-ESP32/issues/1663)
 
 ## Fixed
 
@@ -42,6 +46,7 @@
 - WiFi TxPower wasn't correctly used. Added an 'Auto' setting, which is the default.
 - MQTT heap check [#622](https://github.com/emsesp/EMS-ESP32/issues/1622)
 - Slovak language fix [#1636](https://github.com/emsesp/EMS-ESP32/discussions/1636)
+- dns w/wo IPv6 [#1644](https://github.com/emsesp/EMS-ESP32/issues/1644)
 
 ## Changed
 
@@ -52,4 +57,5 @@
 - Length of mqtt Broker adress [#1619](https://github.com/emsesp/EMS-ESP32/issues/1619)
 - C++ optimizations - see <https://github.com/emsesp/EMS-ESP32/pull/1615>
 - Send MQTT heartbeat immediately after connection [#1628](https://github.com/emsesp/EMS-ESP32/issues/1628)
-- 16MB partitions with second nvs, larger FS, Coredump
+- 16MB partitions with second nvs, larger FS, Coredump, optional factory partition
+- stop fetching empty telegrams after 5 min

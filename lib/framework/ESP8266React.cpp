@@ -27,7 +27,7 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
     static char last_modified[50];
     sprintf(last_modified, "%s %s CET", __DATE__, __TIME__);
 
-    WWWData::registerRoutes([server](const String & uri, const String & contentType, const uint8_t * content, size_t len, const String & hash) {
+    WWWData::registerRoutes([server](const char * uri, const String & contentType, const uint8_t * content, size_t len, const String & hash) {
         ArRequestHandlerFunction requestHandler = [contentType, content, len, hash](AsyncWebServerRequest * request) {
             // Check if the client already has the same version and respond with a 304 (Not modified)
             if (request->header("If-Modified-Since").indexOf(last_modified) > 0) {
@@ -37,6 +37,7 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
             }
 
             AsyncWebServerResponse * response = request->beginResponse_P(200, contentType, content, len);
+
             response->addHeader("Content-Encoding", "gzip");
             // response->addHeader("Content-Encoding", "br"); // only works over HTTPS
             // response->addHeader("Cache-Control", "public, immutable, max-age=31536000");
@@ -46,10 +47,10 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
             request->send(response);
         };
 
-        server->on(uri.c_str(), HTTP_GET, requestHandler);
+        server->on(uri, HTTP_GET, requestHandler);
         // Serving non matching get requests with "/index.html"
         // OPTIONS get a straight up 200 response
-        if (uri.equals("/index.html")) {
+        if (strncmp(uri, "/index.html", 11) == 0) {
             server->onNotFound([requestHandler](AsyncWebServerRequest * request) {
                 if (request->method() == HTTP_GET) {
                     requestHandler(request);
