@@ -1054,9 +1054,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@preact/preset-vite@npm:^2.8.1":
-  version: 2.8.1
-  resolution: "@preact/preset-vite@npm:2.8.1"
+"@preact/preset-vite@npm:^2.8.2":
+  version: 2.8.2
+  resolution: "@preact/preset-vite@npm:2.8.2"
   dependencies:
     "@babel/plugin-transform-react-jsx": "npm:^7.22.15"
     "@babel/plugin-transform-react-jsx-development": "npm:^7.22.5"
@@ -1068,10 +1068,12 @@ __metadata:
     magic-string: "npm:0.30.5"
     node-html-parser: "npm:^6.1.10"
     resolve: "npm:^1.22.8"
+    source-map: "npm:^0.7.4"
+    stack-trace: "npm:^1.0.0-pre2"
   peerDependencies:
     "@babel/core": 7.x
     vite: 2.x || 3.x || 4.x || 5.x
-  checksum: 10/ac91fc701e078d2910b386b9e793f5429f9db04e3c56ea0f41f5f777fb21f5610acd9091def7bb2da9aaadbb9e687e1c276ff0d636fe3427ebd452dce5f98838
+  checksum: 10/a54b14afbd3a6a09836ec1469bc7924e128778a092cca875c3434989974023bf6f21f09d5c090d12c23fdb81ce9e6499bdf52a2f35c81141e9f2687158c56460
   languageName: node
   linkType: hard
 
@@ -1394,12 +1396,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^20.11.27":
+"@types/node@npm:*":
   version: 20.11.27
   resolution: "@types/node@npm:20.11.27"
   dependencies:
     undici-types: "npm:~5.26.4"
   checksum: 10/4be53485d499dd7c7896190e76a0ce1f6c6917d1f4d0b4b240b3670160fcbc548daed32beaac0fc92429b37dbeaa2496fc56f460acaab969bddb77394318a89b
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^20.11.28":
+  version: 20.11.28
+  resolution: "@types/node@npm:20.11.28"
+  dependencies:
+    undici-types: "npm:~5.26.4"
+  checksum: 10/b03f69213ac6e7cd5f7efa86139f24e23ff70a12fed04adeac5413b62d6982343ce94906f74c401c5afefda48d36ae0efd6a575240996b15a5cf80b456ab4221
   languageName: node
   linkType: hard
 
@@ -1456,7 +1467,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:^18.2.65":
+"@types/react@npm:*":
   version: 18.2.65
   resolution: "@types/react@npm:18.2.65"
   dependencies:
@@ -1464,6 +1475,17 @@ __metadata:
     "@types/scheduler": "npm:*"
     csstype: "npm:^3.0.2"
   checksum: 10/8022689f6c68e76b5e7b3c95af794fb3d128d5b2ccac408adaa80b117724c48b04dd4a2750e5c2ca29cd70ac7719b4ed5c5b1c12cb739d6f1d52188c09fb3060
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:^18.2.66":
+  version: 18.2.66
+  resolution: "@types/react@npm:18.2.66"
+  dependencies:
+    "@types/prop-types": "npm:*"
+    "@types/scheduler": "npm:*"
+    csstype: "npm:^3.0.2"
+  checksum: 10/8a82bda6c254681536fa8348dc15d52345d8203d5d322406feef865f74ebfe2475ebde0be4e2f9a18ffbb587dac946dfb5d0974b598779ff282259aff7e8209a
   languageName: node
   linkType: hard
 
@@ -1640,12 +1662,12 @@ __metadata:
     "@mui/icons-material": "npm:^5.15.13"
     "@mui/material": "npm:^5.15.13"
     "@preact/compat": "npm:^17.1.2"
-    "@preact/preset-vite": "npm:^2.8.1"
+    "@preact/preset-vite": "npm:^2.8.2"
     "@table-library/react-table-library": "npm:4.1.7"
     "@types/imagemin": "npm:^8.0.5"
     "@types/lodash-es": "npm:^4.17.12"
-    "@types/node": "npm:^20.11.27"
-    "@types/react": "npm:^18.2.65"
+    "@types/node": "npm:^20.11.28"
+    "@types/react": "npm:^18.2.66"
     "@types/react-dom": "npm:^18.2.22"
     "@types/react-router-dom": "npm:^5.3.3"
     "@typescript-eslint/eslint-plugin": "npm:^7.2.0"
@@ -1673,15 +1695,15 @@ __metadata:
     react-dropzone: "npm:^14.2.3"
     react-icons: "npm:^5.0.1"
     react-router-dom: "npm:^6.22.3"
-    react-toastify: "npm:^10.0.4"
+    react-toastify: "npm:^10.0.5"
     rollup-plugin-visualizer: "npm:^5.12.0"
     sockette: "npm:^2.0.6"
-    terser: "npm:^5.29.1"
+    terser: "npm:^5.29.2"
     typesafe-i18n: "npm:^5.26.2"
     typescript: "npm:^5.4.2"
     vite: "npm:^5.1.6"
     vite-plugin-imagemin: "npm:^0.6.1"
-    vite-tsconfig-paths: "npm:^4.3.1"
+    vite-tsconfig-paths: "npm:^4.3.2"
   languageName: unknown
   linkType: soft
 
@@ -6858,15 +6880,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-toastify@npm:^10.0.4":
-  version: 10.0.4
-  resolution: "react-toastify@npm:10.0.4"
+"react-toastify@npm:^10.0.5":
+  version: 10.0.5
+  resolution: "react-toastify@npm:10.0.5"
   dependencies:
     clsx: "npm:^2.1.0"
   peerDependencies:
-    react: ">=16"
-    react-dom: ">=16"
-  checksum: 10/57f4d0032bf328381bdfeb78ab5efa988d425627a61ffa43b0caa184633a0ea44253a349d6b967247fa3d480ad82a2bbaa9063ce3f89be9550eb9b30398a6837
+    react: ">=18"
+    react-dom: ">=18"
+  checksum: 10/6630f4b6d6902d827efd5e66c09df693c7ab8abeeb6ef24d880080f47b636614ef9cc251dd5e6564d49fe2f6f25f720ce0f7ef72cd4b0cd58a65b7c4b8052fac
   languageName: node
   linkType: hard
 
@@ -7605,6 +7627,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"stack-trace@npm:^1.0.0-pre2":
+  version: 1.0.0-pre2
+  resolution: "stack-trace@npm:1.0.0-pre2"
+  checksum: 10/a64099f86acc01980b0a7fbc662f3233bf8626daf95c53e31c835b2252ae11fc3dbfe8f3e77a7f8310132dd488af2795057cd7db599de0c41a6fa99b16068273
+  languageName: node
+  linkType: hard
+
 "strict-uri-encode@npm:^1.0.0":
   version: 1.1.0
   resolution: "strict-uri-encode@npm:1.1.0"
@@ -7928,9 +7957,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"terser@npm:^5.29.1":
-  version: 5.29.1
-  resolution: "terser@npm:5.29.1"
+"terser@npm:^5.29.2":
+  version: 5.29.2
+  resolution: "terser@npm:5.29.2"
   dependencies:
     "@jridgewell/source-map": "npm:^0.3.3"
     acorn: "npm:^8.8.2"
@@ -7938,7 +7967,7 @@ __metadata:
     source-map-support: "npm:~0.5.20"
   bin:
     terser: bin/terser
-  checksum: 10/e8c036e7cd7d9e988765272453acdc52a019827e10710cf109c86d6f31248c8d4d8aa3a3deef30f931a2bb75a8ffc731ca947bd126e7d4e6dda157e6fe892ac0
+  checksum: 10/062df6a8f99ea2635d1b3ce41cfd4180dea6e1c83db9b2cf4b525170b2446d10e069d2877d8dcb59fbf6045870efa17b56462b67045ef2d2b420870f9d144690
   languageName: node
   linkType: hard
 
@@ -8020,7 +8049,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsconfck@npm:^3.0.1":
+"tsconfck@npm:^3.0.3":
   version: 3.0.3
   resolution: "tsconfck@npm:3.0.3"
   peerDependencies:
@@ -8329,19 +8358,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite-tsconfig-paths@npm:^4.3.1":
-  version: 4.3.1
-  resolution: "vite-tsconfig-paths@npm:4.3.1"
+"vite-tsconfig-paths@npm:^4.3.2":
+  version: 4.3.2
+  resolution: "vite-tsconfig-paths@npm:4.3.2"
   dependencies:
     debug: "npm:^4.1.1"
     globrex: "npm:^0.1.2"
-    tsconfck: "npm:^3.0.1"
+    tsconfck: "npm:^3.0.3"
   peerDependencies:
     vite: "*"
   peerDependenciesMeta:
     vite:
       optional: true
-  checksum: 10/1432f80750f5cbe181c265eb9fc2e9fff8b25a2858f176dc0a02311e3e826333526ee9c16bb0aaaa8555a417ea944d68a2e8225181215cd9502370f913eb3f79
+  checksum: 10/c12e2087fd01ac8a694850c649b79d5b9798cdba0ef9ab4116f669d8ffa1a9a3195c5a14410d3d9a12d2f08cd35ddd74f03d9c7b13a2d590d002055cdaab45c0
   languageName: node
   linkType: hard
 
