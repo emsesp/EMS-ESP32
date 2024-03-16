@@ -261,12 +261,40 @@ void System::store_nvs_values() {
 }
 
 // restart EMS-ESP
-void System::system_restart() {
-    LOG_INFO("Restarting EMS-ESP...");
+void System::system_restart(const char * partitionname) {
+#ifndef EMSESP_STANDALONE
+    if (partitionname != nullptr) {
+        const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, NULL);
+        if (partition && strcmp(partition->label, partitionname) == 0) {
+            esp_ota_set_boot_partition(partition);
+        } else if (strcmp(esp_ota_get_running_partition()->label, partitionname) != 0) {
+            partition = esp_ota_get_next_update_partition(NULL);
+            if (!partition) {
+                LOG_ERROR("Partition '%s' not found", partitionname);
+                return;
+            }
+            if (strcmp(partition->label, partitionname) != 0 && strcmp(partitionname, "boot") != 0) {
+                partition = esp_ota_get_next_update_partition(partition);
+                if (!partition || strcmp(partition->label, partitionname)) {
+                    LOG_ERROR("Partition '%s' not found", partitionname);
+                    return;
+                }
+            }
+            uint64_t buffer;
+            esp_partition_read(partition, 0, &buffer, 8);
+            if (buffer == 0xFFFFFFFFFFFFFFFF) { // partition empty
+                LOG_ERROR("Partition '%s' is empty, not bootable", partition->label);
+                return;
+            }
+            esp_ota_set_boot_partition(partition);
+        }
+        LOG_INFO("Restarting EMS-ESP from partition '%s'", partitionname);
+    } else {
+        LOG_INFO("Restarting EMS-ESP...");
+    }
     store_nvs_values();
     Shell::loop_all();
     delay(1000); // wait a second
-#ifndef EMSESP_STANDALONE
     ESP.restart();
 #endif
 }
@@ -458,7 +486,8 @@ void System::button_OnDblClick(PButton & b) {
 
 // button long press
 void System::button_OnLongPress(PButton & b) {
-    LOG_NOTICE("Button pressed - long press");
+    LOG_NOTICE("Button pressed - long press - restart other partition");
+    EMSESP::system_.system_restart("boot");
 }
 
 // button indefinite press
@@ -1511,9 +1540,13 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
     return true;
 }
 
-// restart command - perform a hard reset by setting flag
+// restart command - perform a hard reset
 bool System::command_restart(const char * value, const int8_t id) {
-    restart_requested(true);
+    if (value != nullptr && value[0] == '\0') {
+        EMSESP::system_.system_restart(value);
+    } else {
+        EMSESP::system_.system_restart();
+    }
     return true;
 }
 

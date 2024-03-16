@@ -20,8 +20,10 @@
 - mixer MM100 telegram 0x2CC [#1554](https://github.com/emsesp/EMS-ESP32/issues/1554)
 - boiler hpSetDiffPressure [#1563](https://github.com/emsesp/EMS-ESP32/issues/1563)
 - custom variables [#1423](https://github.com/emsesp/EMS-ESP32/issues/1423)
-- weather compensation [#1642](https://github.com/emsesp/EMS-ESP32/issues/1442)
+- weather compensation [#1642](https://github.com/emsesp/EMS-ESP32/issues/1642)
 - env and partitions for DevKitC-1-N32R8 [#1635](https://github.com/emsesp/EMS-ESP32/discussions/1635)
+- command `restart partitionname` and button long press to start with other partition [#1657](https://github.com/emsesp/EMS-ESP32/issues/1657)
+- command `set service  <mqtt|ota|ntp|ap> <enable|disable>` [#1663](https://github.com/emsesp/EMS-ESP32/issues/1663)
 
 ## Fixed
 
@@ -45,4 +47,5 @@
 - Length of mqtt Broker adress [#1619](https://github.com/emsesp/EMS-ESP32/issues/1619)
 - C++ optimizations - see <https://github.com/emsesp/EMS-ESP32/pull/1615>
 - Send MQTT heartbeat immediately after connection [#1628](https://github.com/emsesp/EMS-ESP32/issues/1628)
-- 16MB partitions with second nvs, larger FS, Coredump
+- 16MB partitions with second nvs, larger FS, Coredump, optional factory partition
+- stop fetching empty telegrams after 5 min

@@ -18,6 +18,10 @@
 
 #include "emsesp.h"
 
+#ifndef EMSESP_STANDALONE
+#include "esp_ota_ops.h"
+#endif
+
 static_assert(uuid::thread_safe, "uuid-common must be thread-safe");
 static_assert(uuid::log::thread_safe, "uuid-log must be thread-safe");
 static_assert(uuid::console::thread_safe, "uuid-console must be thread-safe");
@@ -1488,9 +1492,14 @@ void EMSESP::start() {
 
     esp8266React.begin(); // loads core system services settings (network, mqtt, ap, ntp etc)
 
-    nvs_.begin("ems-esp", false, "nvs");
-
+    if (!nvs_.begin("ems-esp", false, "nvs1")) { // try bigger nvs partition on 16M flash first
+        nvs_.begin("ems-esp", false, "nvs");     // fallback to small nvs
+    }
+#ifndef EMSESP_STANDALONE
+    LOG_INFO("Starting EMS-ESP version %s from partition %s", EMSESP_APP_VERSION, esp_ota_get_running_partition()->label); // welcome message
+#else
     LOG_INFO("Starting EMS-ESP version %s", EMSESP_APP_VERSION); // welcome message
+#endif
     LOG_DEBUG("System is running in Debug mode");
     LOG_INFO("Last system reset reason Core0: %s, Core1: %s", system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
 
