@@ -140,7 +140,7 @@ __metadata:
     "@types/multer": "npm:^1.4.11"
     compression: "npm:^1.7.4"
     express: "npm:^4.18.3"
-    itty-router: "npm:^4.2.0"
+    itty-router: "npm:^4.2.2"
     multer: "npm:^1.4.5-lts.1"
   languageName: unknown
   linkType: soft
@@ -526,10 +526,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"itty-router@npm:^4.2.0":
-  version: 4.2.0
-  resolution: "itty-router@npm:4.2.0"
-  checksum: 10/39ee6c8b87f77de3918a9b3c1acaf2047626a69b954d7e1f5b9ab7ab9a2bf7e43c97b99ab86496aa9f5b139b024eebaf3b423f51fe000a8a0510901aeea10604
+"itty-router@npm:^4.2.2":
+  version: 4.2.2
+  resolution: "itty-router@npm:4.2.2"
+  checksum: 10/ead44fd46ea358776dc2bb120970eff5ab0acb10ad82c384eba9b361c6eba7f5971408f80cbc3655004cb12ae53dd77a85de236bdb215cef896c2589f5096854
   languageName: node
   linkType: hard
 
