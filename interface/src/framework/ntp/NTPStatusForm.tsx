@@ -22,7 +22,7 @@ import {
   Typography
 } from '@mui/material';
 import { useRequest } from 'alova';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'react-toastify';
 import type { Theme } from '@mui/material';
 import type { FC } from 'react';
@@ -31,7 +31,6 @@ import type { NTPStatus } from 'types';
 import { dialogStyle } from 'CustomTheme';
 import * as NTPApi from 'api/ntp';
 import { ButtonRow, FormLoader, SectionContent } from 'components';
-import { AuthenticatedContext } from 'contexts/authentication';
 
 import { useI18nContext } from 'i18n/i18n-react';
 import { NTPSyncStatus } from 'types';
@@ -59,7 +58,6 @@ const NTPStatusForm: FC = () => {
   const [localTime, setLocalTime] = useState<string>('');
   const [settingTime, setSettingTime] = useState<boolean>(false);
   const [processing, setProcessing] = useState<boolean>(false);
-  const { me } = useContext(AuthenticatedContext);
 
   const { LL } = useI18nContext();
 
@@ -201,7 +199,7 @@ const NTPStatusForm: FC = () => {
               </Button>
             </ButtonRow>
           </Box>
-          {me.admin && data && !isNtpActive(data) && (
+          {data && !isNtpActive(data) && (
             <Box flexWrap="nowrap" whiteSpace="nowrap">
               <ButtonRow>
                 <Button onClick={openSetTime} variant="outlined" color="primary" startIcon={<AccessTimeIcon />}>

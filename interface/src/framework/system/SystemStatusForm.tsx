@@ -46,12 +46,13 @@ function formatNumber(num: number) {
 const SystemStatusForm: FC = () => {
   const { LL } = useI18nContext();
 
-  const { me } = useContext(AuthenticatedContext);
   const [confirmRestart, setConfirmRestart] = useState<boolean>(false);
   const [confirmFactoryReset, setConfirmFactoryReset] = useState<boolean>(false);
   const [processing, setProcessing] = useState<boolean>(false);
   const [restarting, setRestarting] = useState<boolean>();
   const [versionDialogOpen, setVersionDialogOpen] = useState<boolean>(false);
+
+  const { me } = useContext(AuthenticatedContext);
 
   const { send: restartCommand } = useRequest(SystemApi.restart(), {
     immediate: false
@@ -187,7 +188,7 @@ const SystemStatusForm: FC = () => {
         <List>
           <ListItem>
             <ListItemAvatar>
-              <Avatar>
+              <Avatar sx={{ bgcolor: '#5f9a5f', color: 'white' }}>
                 <BuildIcon />
               </Avatar>
             </ListItemAvatar>
@@ -199,7 +200,7 @@ const SystemStatusForm: FC = () => {
           <Divider variant="inset" component="li" />
           <ListItem>
             <ListItemAvatar>
-              <Avatar>
+              <Avatar sx={{ bgcolor: '#5f9a5f', color: 'white' }}>
                 <TimerIcon />
               </Avatar>
             </ListItemAvatar>
@@ -208,7 +209,7 @@ const SystemStatusForm: FC = () => {
           <Divider variant="inset" component="li" />
           <ListItem>
             <ListItemAvatar>
-              <Avatar>
+              <Avatar sx={{ bgcolor: '#5f9a5f', color: 'white' }}>
                 <DevicesIcon />
               </Avatar>
             </ListItemAvatar>
@@ -217,7 +218,7 @@ const SystemStatusForm: FC = () => {
           <Divider variant="inset" component="li" />
           <ListItem>
             <ListItemAvatar>
-              <Avatar>
+              <Avatar sx={{ bgcolor: '#5f9a5f', color: 'white' }}>
                 <DeveloperBoardIcon />
               </Avatar>
             </ListItemAvatar>
@@ -240,7 +241,7 @@ const SystemStatusForm: FC = () => {
           <Divider variant="inset" component="li" />
           <ListItem>
             <ListItemAvatar>
-              <Avatar>
+              <Avatar sx={{ bgcolor: '#5f9a5f', color: 'white' }}>
                 <MemoryIcon />
               </Avatar>
             </ListItemAvatar>
@@ -254,7 +255,7 @@ const SystemStatusForm: FC = () => {
               <Divider variant="inset" component="li" />
               <ListItem>
                 <ListItemAvatar>
-                  <Avatar>
+                  <Avatar sx={{ bgcolor: '#5f9a5f', color: 'white' }}>
                     <AppsIcon />
                   </Avatar>
                 </ListItemAvatar>
@@ -268,7 +269,7 @@ const SystemStatusForm: FC = () => {
           <Divider variant="inset" component="li" />
           <ListItem>
             <ListItemAvatar>
-              <Avatar>
+              <Avatar sx={{ bgcolor: '#5f9a5f', color: 'white' }}>
                 <SdStorageIcon />
               </Avatar>
             </ListItemAvatar>
@@ -282,7 +283,7 @@ const SystemStatusForm: FC = () => {
           <Divider variant="inset" component="li" />
           <ListItem>
             <ListItemAvatar>
-              <Avatar>
+              <Avatar sx={{ bgcolor: '#5f9a5f', color: 'white' }}>
                 <SdCardAlertIcon />
               </Avatar>
             </ListItemAvatar>
@@ -296,7 +297,7 @@ const SystemStatusForm: FC = () => {
           <Divider variant="inset" component="li" />
           <ListItem>
             <ListItemAvatar>
-              <Avatar>
+              <Avatar sx={{ bgcolor: '#5f9a5f', color: 'white' }}>
                 <FolderIcon />
               </Avatar>
             </ListItemAvatar>

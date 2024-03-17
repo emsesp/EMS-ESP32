@@ -206,7 +206,7 @@ const EMSStatus: FC = () => {
           </ListItem>
           <ListItem>
             <ListItemAvatar>
-              <Avatar>
+              <Avatar sx={{ bgcolor: theme.palette.success.main }}>
                 <DeviceHubIcon />
               </Avatar>
             </ListItemAvatar>
@@ -254,19 +254,20 @@ const EMSStatus: FC = () => {
               {LL.REFRESH()}
             </Button>
           </Box>
-          <Box flexWrap="nowrap" whiteSpace="nowrap">
-            <ButtonRow>
-              <Button
-                startIcon={<PermScanWifiIcon />}
-                variant="outlined"
-                color="primary"
-                disabled={!me.admin}
-                onClick={() => setConfirmScan(true)}
-              >
-                {LL.SCAN_DEVICES()}
-              </Button>
-            </ButtonRow>
-          </Box>
+          {me.admin && (
+            <Box flexWrap="nowrap" whiteSpace="nowrap">
+              <ButtonRow>
+                <Button
+                  startIcon={<PermScanWifiIcon />}
+                  variant="outlined"
+                  color="primary"
+                  onClick={() => setConfirmScan(true)}
+                >
+                  {LL.SCAN_DEVICES()}
+                </Button>
+              </ButtonRow>
+            </Box>
+          )}
         </Box>
       </>
     );

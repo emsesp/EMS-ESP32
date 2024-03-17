@@ -33,7 +33,7 @@ import { useSort, SortToggleType } from '@table-library/react-table-library/sort
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
 import { useRequest } from 'alova';
-import { useState, useContext, useEffect, useCallback, useLayoutEffect } from 'react';
+import { useState, useEffect, useCallback, useLayoutEffect } from 'react';
 
 import { IconContext } from 'react-icons';
 import { useNavigate } from 'react-router-dom';
@@ -50,12 +50,10 @@ import type { Device, DeviceValue } from './types';
 import type { FC } from 'react';
 import { dialogStyle } from 'CustomTheme';
 import { ButtonRow, SectionContent, MessageBox, useLayoutTitle } from 'components';
-import { AuthenticatedContext } from 'contexts/authentication';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
 const Devices: FC = () => {
-  const { me } = useContext(AuthenticatedContext);
   const { LL } = useI18nContext();
   const [size, setSize] = useState([0, 0]);
   const [selectedDeviceValue, setSelectedDeviceValue] = useState<DeviceValue>();
@@ -422,11 +420,8 @@ const Devices: FC = () => {
   };
 
   const renderCoreData = () => (
-    <IconContext.Provider value={{ color: 'lightblue', size: '24', style: { verticalAlign: 'middle' } }}>
+    <IconContext.Provider value={{ color: 'lightblue', size: '18', style: { verticalAlign: 'middle' } }}>
       {!coreData.connected && <MessageBox my={2} level="error" message={LL.EMS_BUS_WARNING()} />}
-      {/* {coreData.connected && coreData.devices.length === 0 && (
-        <MessageBox my={2} level="warning" message={LL.EMS_BUS_SCANNING()} />
-      )} */}
 
       {coreData.connected && (
         <Table data={{ nodes: coreData.devices }} select={device_select} theme={device_theme} layout={{ custom: true }}>
@@ -589,7 +584,7 @@ const Devices: FC = () => {
                     <Cell>{renderNameCell(dv)}</Cell>
                     <Cell>{formatValue(LL, dv.v, dv.u)}</Cell>
                     <Cell stiff>
-                      {dv.c && me.admin && !hasMask(dv.id, DeviceEntityMask.DV_READONLY) && (
+                      {dv.c && !hasMask(dv.id, DeviceEntityMask.DV_READONLY) && (
                         <IconButton size="small" onClick={() => showDeviceValue(dv)}>
                           {dv.v === '' && dv.c ? (
                             <PlayArrowIcon color="primary" sx={{ fontSize: 16 }} />
@@ -621,9 +616,7 @@ const Devices: FC = () => {
           onSave={deviceValueDialogSave}
           selectedItem={selectedDeviceValue}
           writeable={
-            me.admin &&
-            selectedDeviceValue.c !== undefined &&
-            !hasMask(selectedDeviceValue.id, DeviceEntityMask.DV_READONLY)
+            selectedDeviceValue.c !== undefined && !hasMask(selectedDeviceValue.id, DeviceEntityMask.DV_READONLY)
           }
           validator={deviceValueItemValidation(selectedDeviceValue)}
           progress={submitting}

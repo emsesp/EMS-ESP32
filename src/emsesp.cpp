@@ -407,7 +407,7 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
 
     // show any custom entities
     if (webCustomEntityService.count_entities() > 0) {
-        shell.printfln("Custom entities:");
+        shell.printfln("Custom Entities:");
         JsonDocument custom_doc; // use max size
         JsonObject   custom_output = custom_doc.to<JsonObject>();
         webCustomEntityService.show_values(custom_output);

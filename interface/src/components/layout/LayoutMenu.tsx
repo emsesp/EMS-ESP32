@@ -2,7 +2,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import CategoryIcon from '@mui/icons-material/Category';
 import ConstructionIcon from '@mui/icons-material/Construction';
-import InfoIcon from '@mui/icons-material/Info';
+import LiveHelpIcon from '@mui/icons-material/LiveHelp';
 import MoreTimeIcon from '@mui/icons-material/MoreTime';
 import PersonIcon from '@mui/icons-material/Person';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
@@ -73,14 +73,24 @@ const LayoutMenu: FC = () => {
         <LayoutMenuItem icon={CategoryIcon} label={LL.DEVICES()} to={`/devices`} />
         <LayoutMenuItem icon={SensorsIcon} label={LL.SENSORS()} to={`/sensors`} />
         <Divider />
-        <LayoutMenuItem icon={ConstructionIcon} label={LL.CUSTOMIZATIONS()} to={`/customizations`} />
-        <LayoutMenuItem icon={MoreTimeIcon} label={LL.SCHEDULER()} to={`/scheduler`} />
-        <LayoutMenuItem icon={PlaylistAddIcon} label={LL.CUSTOM_ENTITIES(0)} to={`/customentities`} />
+        <LayoutMenuItem
+          icon={ConstructionIcon}
+          label={LL.CUSTOMIZATIONS()}
+          disabled={!me.admin}
+          to={`/customizations`}
+        />
+        <LayoutMenuItem icon={MoreTimeIcon} label={LL.SCHEDULER()} disabled={!me.admin} to={`/scheduler`} />
+        <LayoutMenuItem
+          icon={PlaylistAddIcon}
+          label={LL.CUSTOM_ENTITIES(0)}
+          disabled={!me.admin}
+          to={`/customentities`}
+        />
       </List>
       <List style={{ marginTop: `auto` }}>
         <LayoutMenuItem icon={AssessmentIcon} label={LL.STATUS_OF('')} to="/status" />
         <LayoutMenuItem icon={SettingsIcon} label={LL.SETTINGS(0)} disabled={!me.admin} to="/settings" />
-        <LayoutMenuItem icon={InfoIcon} label={LL.HELP_OF('')} to={`/help`} />
+        <LayoutMenuItem icon={LiveHelpIcon} label={LL.HELP_OF('')} to={`/help`} />
       </List>
       <Divider />
       <List>

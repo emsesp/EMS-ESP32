@@ -8,7 +8,7 @@ import { useSort, SortToggleType } from '@table-library/react-table-library/sort
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
 import { useRequest } from 'alova';
-import { useState, useContext, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 
 import { toast } from 'react-toastify';
 
@@ -27,12 +27,12 @@ import { useI18nContext } from 'i18n/i18n-react';
 
 const Sensors: FC = () => {
   const { LL } = useI18nContext();
-  const { me } = useContext(AuthenticatedContext);
   const [selectedTemperatureSensor, setSelectedTemperatureSensor] = useState<TemperatureSensor>();
   const [selectedAnalogSensor, setSelectedAnalogSensor] = useState<AnalogSensor>();
   const [temperatureDialogOpen, setTemperatureDialogOpen] = useState<boolean>(false);
   const [analogDialogOpen, setAnalogDialogOpen] = useState<boolean>(false);
   const [creating, setCreating] = useState<boolean>(false);
+  const { me } = useContext(AuthenticatedContext);
 
   const { data: sensorData, send: fetchSensorData } = useRequest(() => EMSESP.readSensorData(), {
     initialData: {
@@ -50,8 +50,6 @@ const Sensors: FC = () => {
   const { send: writeAnalogSensor } = useRequest((data) => EMSESP.writeAnalogSensor(data), {
     immediate: false
   });
-
-  const isAdmin = me.admin;
 
   const common_theme = useTheme({
     BaseRow: `
@@ -222,10 +220,8 @@ const Sensors: FC = () => {
   }
 
   const updateTemperatureSensor = (ts: TemperatureSensor) => {
-    if (isAdmin) {
-      setSelectedTemperatureSensor(ts);
-      setTemperatureDialogOpen(true);
-    }
+    setSelectedTemperatureSensor(ts);
+    setTemperatureDialogOpen(true);
   };
 
   const onTemperatureDialogClose = () => {
@@ -248,11 +244,9 @@ const Sensors: FC = () => {
   };
 
   const updateAnalogSensor = (as: AnalogSensor) => {
-    if (isAdmin) {
-      setCreating(false);
-      setSelectedAnalogSensor(as);
-      setAnalogDialogOpen(true);
-    }
+    setCreating(false);
+    setSelectedAnalogSensor(as);
+    setAnalogDialogOpen(true);
   };
 
   const onAnalogDialogClose = () => {
@@ -453,7 +447,7 @@ const Sensors: FC = () => {
               {LL.REFRESH()}
             </Button>
           </Box>
-          {sensorData?.analog_enabled === true && (
+          {sensorData?.analog_enabled === true && me.admin && (
             <Button
               variant="outlined"
               color="primary"

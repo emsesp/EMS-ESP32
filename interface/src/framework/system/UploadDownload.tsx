@@ -153,11 +153,6 @@ const UploadDownload: FC = () => {
           <Typography sx={{ pt: 4, pb: 2 }} variant="h6" color="primary">
             {LL.DOWNLOAD(0)}&nbsp;{LL.SUPPORT_INFORMATION(1)}
           </Typography>
-          <Box color="warning.main">
-            <Typography mb={1} variant="body2">
-              {LL.HELP_INFORMATION_4()}
-            </Typography>
-          </Box>
           <Button
             startIcon={<DownloadIcon />}
             variant="outlined"
@@ -216,7 +211,7 @@ const UploadDownload: FC = () => {
       )}
     </>
   );
-  return <SectionContent title={LL.UPLOAD_DOWNLOAD()}>{restarting ? <RestartMonitor /> : content()}</SectionContent>;
+  return <SectionContent>{restarting ? <RestartMonitor /> : content()}</SectionContent>;
 };
 
 export default UploadDownload;

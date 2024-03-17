@@ -31,7 +31,7 @@ const SystemStatusVersionDialog = ({ open, onClose, version, platform }: SystemS
   const STABLE_RELNOTES_URL = 'https://github.com/emsesp/EMS-ESP32/blob/main/CHANGELOG.md';
   const DEV_RELNOTES_URL = 'https://github.com/emsesp/EMS-ESP32/blob/dev/CHANGELOG_LATEST.md';
 
-  const uploadURL = window.location.origin + '/system/upload';
+  const uploadURL = window.location.origin + '/settings/upload';
 
   const connected = latestVersion && latestDevVersion;
 

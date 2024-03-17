@@ -552,7 +552,7 @@ const emsesp_coredata = {
       t: 17,
       tn: 'Custom',
       b: '',
-      n: 'Custom entities',
+      n: 'Custom Entities',
       d: 1,
       p: 1,
       v: '',

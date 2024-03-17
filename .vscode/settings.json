@@ -84,5 +84,8 @@
       "**/*.map",
       "**/ArduinoJson/**"
     ],
-    "cSpell.enableFiletypes": ["!cpp"]
+    "cSpell.enableFiletypes": [
+      "!cpp",
+      "!typescript"
+    ]
   }

@@ -1,5 +1,5 @@
 import { Tab } from '@mui/material';
-import { useCallback, useContext, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Navigate, Routes, Route, useNavigate } from 'react-router-dom';
 import NetworkSettingsForm from './NetworkSettingsForm';
 import NetworkStatusForm from './NetworkStatusForm';
@@ -9,7 +9,6 @@ import type { FC } from 'react';
 
 import type { WiFiNetwork } from 'types';
 import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from 'components';
-import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 
 const NetworkConnection: FC = () => {
@@ -18,7 +17,6 @@ const NetworkConnection: FC = () => {
 
   const { routerTab } = useRouterTab();
 
-  const authenticatedContext = useContext(AuthenticatedContext);
   const navigate = useNavigate();
 
   const [selectedNetwork, setSelectedNetwork] = useState<WiFiNetwork>();
@@ -44,8 +42,8 @@ const NetworkConnection: FC = () => {
       }}
     >
       <RouterTabs value={routerTab}>
-        <Tab value="settings" label={LL.SETTINGS_OF(LL.NETWORK(1))} disabled={!authenticatedContext.me.admin} />
-        <Tab value="scan" label={LL.NETWORK_SCAN()} disabled={!authenticatedContext.me.admin} />
+        <Tab value="settings" label={LL.SETTINGS_OF(LL.NETWORK(1))} />
+        <Tab value="scan" label={LL.NETWORK_SCAN()} />
         <Tab value="status" label={LL.STATUS_OF(LL.NETWORK(1))} />
       </RouterTabs>
       <Routes>

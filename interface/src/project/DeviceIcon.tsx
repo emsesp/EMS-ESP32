@@ -1,12 +1,13 @@
+import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import { AiOutlineControl, AiOutlineGateway, AiOutlineAlert } from 'react-icons/ai';
 import { CgSmartHomeBoiler } from 'react-icons/cg';
-
 import { FaSolarPanel } from 'react-icons/fa';
 import { GiHeatHaze } from 'react-icons/gi';
-import { MdThermostatAuto, MdOutlineSensors, MdOutlineExtension, MdOutlineDevices } from 'react-icons/md';
+import { MdThermostatAuto, MdOutlineSensors, MdOutlineDevices } from 'react-icons/md';
 import { TiFlowSwitch } from 'react-icons/ti';
 import { VscVmConnect } from 'react-icons/vsc';
 import { DeviceType } from './types';
+
 import type { FC } from 'react';
 
 interface DeviceIconProps {
@@ -41,7 +42,7 @@ const DeviceIcon: FC<DeviceIconProps> = ({ type_id }) => {
     case DeviceType.EXTENSION:
       return <MdOutlineDevices />;
     case DeviceType.CUSTOM:
-      return <MdOutlineExtension />;
+      return <PlaylistAddIcon sx={{ color: 'lightblue', fontSize: 24, verticalAlign: 'middle' }} />;
     default:
       return null;
   }

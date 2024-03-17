@@ -1,12 +1,10 @@
 import { Tab } from '@mui/material';
-import { useContext } from 'react';
 import { Navigate, Routes, Route } from 'react-router-dom';
 
 import APSettingsForm from './APSettingsForm';
 import APStatusForm from './APStatusForm';
 import type { FC } from 'react';
 import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from 'components';
-import { AuthenticatedContext } from 'contexts/authentication';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
@@ -15,14 +13,12 @@ const AccessPoint: FC = () => {
 
   useLayoutTitle(LL.ACCESS_POINT(0));
 
-  const authenticatedContext = useContext(AuthenticatedContext);
-
   const { routerTab } = useRouterTab();
 
   return (
     <>
       <RouterTabs value={routerTab}>
-        <Tab value="settings" label={LL.SETTINGS_OF(LL.ACCESS_POINT(1))} disabled={!authenticatedContext.me.admin} />
+        <Tab value="settings" label={LL.SETTINGS_OF(LL.ACCESS_POINT(1))} />
         <Tab value="status" label={LL.STATUS_OF(LL.ACCESS_POINT(1))} />
       </RouterTabs>
       <Routes>

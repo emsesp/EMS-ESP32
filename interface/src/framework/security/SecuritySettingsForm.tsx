@@ -8,8 +8,8 @@ import type { FC } from 'react';
 import type { SecuritySettings } from 'types';
 import * as SecurityApi from 'api/security';
 import { ButtonRow, FormLoader, MessageBox, SectionContent, ValidatedPasswordField, BlockNavigation } from 'components';
-import { AuthenticatedContext } from 'contexts/authentication';
 
+import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import { updateValueDirty, useRest } from 'utils';
 import { SECURITY_SETTINGS_VALIDATOR, validate } from 'validators';

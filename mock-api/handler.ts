@@ -393,6 +393,7 @@ const system_status = {
   uptime: '000+00:15:42.707',
   arduino_version: 'ESP32 Arduino v2.0.14'
 };
+
 let security_settings = {
   jwt_secret: 'naughty!',
   users: [
@@ -402,10 +403,18 @@ let security_settings = {
 };
 
 const verify_authentication = { access_token: '1234' };
-const signin = {
+
+const admin_signin = {
   access_token:
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiYWRtaW4iOnRydWUsInZlcnNpb24iOiIzLjAuMmIwIn0.MsHSgoJKI1lyYz77EiT5ZN3ECMrb4mPv9FNy3udq0TU'
 };
+const guest_signin = {
+  access_token:
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imd1ZXN0IiwiYWRtaW4iOmZhbHNlfQ.E_lylR_vGIQFZUGNwcl5F6OkHoaELGsC5zqhi0pAiJE'
+};
+const signin = admin_signin;
+// const signin = guest_signin;
+
 const generate_token = { token: '1234' };
 
 //
@@ -739,7 +748,7 @@ const emsesp_coredata = {
       t: 17,
       tn: 'Custom',
       b: '',
-      n: 'Custom entities',
+      n: 'Custom Entities',
       d: 1,
       p: 1,
       v: '',
