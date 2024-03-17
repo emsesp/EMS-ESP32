@@ -20,7 +20,8 @@ import {
   ValidatedTextField,
   ButtonRow,
   MessageBox,
-  BlockNavigation
+  BlockNavigation,
+  useLayoutTitle
 } from 'components';
 
 import RestartMonitor from 'framework/system/RestartMonitor';
@@ -36,7 +37,7 @@ export function boardProfileSelectItems() {
   ));
 }
 
-const SettingsApplication: FC = () => {
+const ApplicationSettings: FC = () => {
   const {
     loadData,
     saveData,
@@ -96,6 +97,8 @@ const SettingsApplication: FC = () => {
       toast.error(error.message);
     });
   };
+
+  useLayoutTitle(LL.APPLICATION_SETTINGS());
 
   const content = () => {
     if (!data) {
@@ -680,11 +683,11 @@ const SettingsApplication: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.APPLICATION_SETTINGS()} titleGutter>
+    <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {restarting ? <RestartMonitor /> : content()}
     </SectionContent>
   );
 };
 
-export default SettingsApplication;
+export default ApplicationSettings;

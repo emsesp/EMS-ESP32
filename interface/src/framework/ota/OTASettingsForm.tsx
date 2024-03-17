@@ -14,7 +14,8 @@ import {
   SectionContent,
   ValidatedPasswordField,
   ValidatedTextField,
-  BlockNavigation
+  BlockNavigation,
+  useLayoutTitle
 } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
@@ -60,6 +61,8 @@ const OTASettingsForm: FC = () => {
         setFieldErrors(errors);
       }
     };
+
+    useLayoutTitle('OTA');
 
     return (
       <>
@@ -117,7 +120,7 @@ const OTASettingsForm: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.SETTINGS_OF('OTA')} titleGutter>
+    <SectionContent title={LL.SETTINGS_OF('OTA')}>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>

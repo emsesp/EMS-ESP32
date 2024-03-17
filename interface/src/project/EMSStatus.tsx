@@ -64,7 +64,7 @@ const showQuality = (stat: Stat) => {
   }
 };
 
-const DashboardStatus: FC = () => {
+const EMSStatus: FC = () => {
   const { data: data, send: loadData, error } = useRequest(EMSESP.readStatus);
 
   const { LL } = useI18nContext();
@@ -272,11 +272,7 @@ const DashboardStatus: FC = () => {
     );
   };
 
-  return (
-    <SectionContent title={LL.EMS_BUS_STATUS_TITLE()} titleGutter>
-      {content()}
-    </SectionContent>
-  );
+  return <SectionContent title={LL.EMS_BUS_STATUS_TITLE()}>{content()}</SectionContent>;
 };
 
-export default DashboardStatus;
+export default EMSStatus;

@@ -26,7 +26,7 @@ import { numberValue, updateValue } from 'utils';
 
 import { validate } from 'validators';
 
-type DashboardSensorsTemperatureDialogProps = {
+type SensorsTemperatureDialogProps = {
   open: boolean;
   onClose: () => void;
   onSave: (ts: TemperatureSensor) => void;
@@ -34,13 +34,13 @@ type DashboardSensorsTemperatureDialogProps = {
   validator: Schema;
 };
 
-const DashboardSensorsTemperatureDialog = ({
+const SensorsTemperatureDialog = ({
   open,
   onClose,
   onSave,
   selectedItem,
   validator
-}: DashboardSensorsTemperatureDialogProps) => {
+}: SensorsTemperatureDialogProps) => {
   const { LL } = useI18nContext();
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
   const [editItem, setEditItem] = useState<TemperatureSensor>(selectedItem);
@@ -119,4 +119,4 @@ const DashboardSensorsTemperatureDialog = ({
   );
 };
 
-export default DashboardSensorsTemperatureDialog;
+export default SensorsTemperatureDialog;

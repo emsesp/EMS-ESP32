@@ -26,9 +26,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { useBlocker, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
+import SettingsCustomizationDialog from './CustomizationDialog';
 import EntityMaskToggle from './EntityMaskToggle';
 import OptionIcon from './OptionIcon';
-import SettingsCustomizationDialog from './SettingsCustomizationDialog';
 
 import * as EMSESP from './api';
 
@@ -37,14 +37,14 @@ import type { DeviceShort, DeviceEntity } from './types';
 import type { FC } from 'react';
 import { dialogStyle } from 'CustomTheme';
 import * as SystemApi from 'api/system';
-import { ButtonRow, SectionContent, MessageBox, BlockNavigation } from 'components';
+import { ButtonRow, SectionContent, MessageBox, BlockNavigation, useLayoutTitle } from 'components';
 
 import RestartMonitor from 'framework/system/RestartMonitor';
 import { useI18nContext } from 'i18n/i18n-react';
 
 export const APIURL = window.location.origin + '/api/';
 
-const SettingsCustomization: FC = () => {
+const Customization: FC = () => {
   const { LL } = useI18nContext();
   const [numChanges, setNumChanges] = useState<number>(0);
   const blocker = useBlocker(numChanges !== 0);
@@ -57,6 +57,8 @@ const SettingsCustomization: FC = () => {
   const [search, setSearch] = useState('');
   const [selectedDeviceEntity, setSelectedDeviceEntity] = useState<DeviceEntity>();
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+
+  useLayoutTitle(LL.CUSTOMIZATIONS());
 
   // fetch devices first
   const { data: devices } = useRequest(EMSESP.readDevices);
@@ -508,9 +510,6 @@ const SettingsCustomization: FC = () => {
 
   const renderContent = () => (
     <>
-      <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
-        {LL.DEVICE_ENTITIES()}
-      </Typography>
       {devices && renderDeviceList()}
       {deviceEntities && renderDeviceData()}
       {restartNeeded && (
@@ -561,7 +560,7 @@ const SettingsCustomization: FC = () => {
   );
 
   return (
-    <SectionContent title={LL.CUSTOMIZATIONS()} titleGutter>
+    <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {restarting ? <RestartMonitor /> : renderContent()}
       {selectedDeviceEntity && (
@@ -576,4 +575,4 @@ const SettingsCustomization: FC = () => {
   );
 };
 
-export default SettingsCustomization;
+export default Customization;

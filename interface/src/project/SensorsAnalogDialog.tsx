@@ -38,7 +38,7 @@ type DashboardSensorsAnalogDialogProps = {
   validator: Schema;
 };
 
-const DashboardSensorsAnalogDialog = ({
+const SensorsAnalogDialog = ({
   open,
   onClose,
   onSave,
@@ -296,4 +296,4 @@ const DashboardSensorsAnalogDialog = ({
   );
 };
 
-export default DashboardSensorsAnalogDialog;
+export default SensorsAnalogDialog;

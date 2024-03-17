@@ -31,7 +31,7 @@ type SettingsCustomizationDialogProps = {
   selectedItem: DeviceEntity;
 };
 
-const SettingsCustomizationDialog = ({ open, onClose, onSave, selectedItem }: SettingsCustomizationDialogProps) => {
+const CustomizationDialog = ({ open, onClose, onSave, selectedItem }: SettingsCustomizationDialogProps) => {
   const { LL } = useI18nContext();
   const [editItem, setEditItem] = useState<DeviceEntity>(selectedItem);
   const [error, setError] = useState<boolean>(false);
@@ -152,4 +152,4 @@ const SettingsCustomizationDialog = ({ open, onClose, onSave, selectedItem }: Se
   );
 };
 
-export default SettingsCustomizationDialog;
+export default CustomizationDialog;

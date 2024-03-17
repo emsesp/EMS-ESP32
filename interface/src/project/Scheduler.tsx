@@ -11,18 +11,18 @@ import { updateState, useRequest } from 'alova';
 import { useState, useEffect, useCallback } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import SettingsSchedulerDialog from './SettingsSchedulerDialog';
+import SettingsSchedulerDialog from './SchedulerDialog';
 import * as EMSESP from './api';
 import { ScheduleFlag } from './types';
 import { schedulerItemValidation } from './validators';
 import type { ScheduleItem } from './types';
 import type { FC } from 'react';
 
-import { ButtonRow, FormLoader, SectionContent, BlockNavigation } from 'components';
+import { ButtonRow, FormLoader, SectionContent, BlockNavigation, useLayoutTitle } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
-const SettingsScheduler: FC = () => {
+const Scheduler: FC = () => {
   const { LL, locale } = useI18nContext();
   const [numChanges, setNumChanges] = useState<number>(0);
   const blocker = useBlocker(numChanges !== 0);
@@ -194,6 +194,8 @@ const SettingsScheduler: FC = () => {
       </>
     );
 
+    useLayoutTitle(LL.SCHEDULER());
+
     return (
       <Table
         data={{ nodes: schedule.filter((si) => !si.deleted).sort((a, b) => a.time.localeCompare(b.time)) }}
@@ -249,7 +251,7 @@ const SettingsScheduler: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.SCHEDULER()} titleGutter>
+    <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       <Box mb={2} color="warning.main">
         <Typography variant="body2">{LL.SCHEDULER_HELP_1()}</Typography>
@@ -298,4 +300,4 @@ const SettingsScheduler: FC = () => {
   );
 };
 
-export default SettingsScheduler;
+export default Scheduler;

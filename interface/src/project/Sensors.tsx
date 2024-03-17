@@ -12,20 +12,20 @@ import { useState, useContext, useEffect } from 'react';
 
 import { toast } from 'react-toastify';
 
-import DashboardSensorsAnalogDialog from './DashboardSensorsAnalogDialog';
-import DashboardSensorsTemperatureDialog from './DashboardSensorsTemperatureDialog';
+import DashboardSensorsAnalogDialog from './SensorsAnalogDialog';
+import DashboardSensorsTemperatureDialog from './SensorsTemperatureDialog';
 import * as EMSESP from './api';
 
 import { DeviceValueUOM, DeviceValueUOM_s, AnalogTypeNames, AnalogType } from './types';
 import { temperatureSensorItemValidation, analogSensorItemValidation } from './validators';
 import type { TemperatureSensor, AnalogSensor } from './types';
 import type { FC } from 'react';
-import { ButtonRow, SectionContent } from 'components';
+import { ButtonRow, SectionContent, useLayoutTitle } from 'components';
 
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 
-const DashboardSensors: FC = () => {
+const Sensors: FC = () => {
   const { LL } = useI18nContext();
   const { me } = useContext(AuthenticatedContext);
   const [selectedTemperatureSensor, setSelectedTemperatureSensor] = useState<TemperatureSensor>();
@@ -169,6 +169,8 @@ const DashboardSensors: FC = () => {
       clearInterval(timer);
     };
   });
+
+  useLayoutTitle(LL.SENSORS());
 
   const formatDurationMin = (duration_min: number) => {
     const days = Math.trunc((duration_min * 60000) / 86400000);
@@ -406,7 +408,7 @@ const DashboardSensors: FC = () => {
   );
 
   return (
-    <SectionContent title={LL.SENSOR_DATA()} titleGutter>
+    <SectionContent>
       {sensorData.ts.length > 0 && (
         <>
           <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="secondary">
@@ -467,4 +469,4 @@ const DashboardSensors: FC = () => {
   );
 };
 
-export default DashboardSensors;
+export default Sensors;

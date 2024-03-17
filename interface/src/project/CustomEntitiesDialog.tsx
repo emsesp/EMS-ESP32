@@ -30,7 +30,7 @@ import { useI18nContext } from 'i18n/i18n-react';
 import { numberValue, updateValue } from 'utils';
 import { validate } from 'validators';
 
-type SettingsCustomEntitiesDialogProps = {
+type CustomEntitiesDialogProps = {
   open: boolean;
   creating: boolean;
   onClose: () => void;
@@ -39,14 +39,14 @@ type SettingsCustomEntitiesDialogProps = {
   validator: Schema;
 };
 
-const SettingsCustomEntitiesDialog = ({
+const CustomEntitiesDialog = ({
   open,
   creating,
   onClose,
   onSave,
   selectedItem,
   validator
-}: SettingsCustomEntitiesDialogProps) => {
+}: CustomEntitiesDialogProps) => {
   const { LL } = useI18nContext();
   const [editItem, setEditItem] = useState<EntityItem>(selectedItem);
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
@@ -281,4 +281,4 @@ const SettingsCustomEntitiesDialog = ({
   );
 };
 
-export default SettingsCustomEntitiesDialog;
+export default CustomEntitiesDialog;

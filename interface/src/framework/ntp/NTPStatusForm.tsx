@@ -216,11 +216,7 @@ const NTPStatusForm: FC = () => {
     );
   };
 
-  return (
-    <SectionContent title={LL.STATUS_OF('NTP')} titleGutter>
-      {content()}
-    </SectionContent>
-  );
+  return <SectionContent title={LL.STATUS_OF('NTP')}>{content()}</SectionContent>;
 };
 
 export default NTPStatusForm;

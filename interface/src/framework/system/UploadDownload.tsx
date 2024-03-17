@@ -6,12 +6,12 @@ import { toast } from 'react-toastify';
 import RestartMonitor from './RestartMonitor';
 
 import * as SystemApi from 'api/system';
-import { SectionContent, SingleUpload } from 'components';
+import { SectionContent, SingleUpload, useLayoutTitle } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
 import * as EMSESP from 'project/api';
 
-const UploadFileForm: FC = () => {
+const UploadDownload: FC = () => {
   const { LL } = useI18nContext();
   const [restarting, setRestarting] = useState<boolean>();
   const [md5, setMd5] = useState<string>();
@@ -127,6 +127,8 @@ const UploadFileForm: FC = () => {
     });
   };
 
+  useLayoutTitle(LL.UPLOAD_DOWNLOAD());
+
   const content = () => (
     <>
       <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
@@ -214,11 +216,7 @@ const UploadFileForm: FC = () => {
       )}
     </>
   );
-  return (
-    <SectionContent title={LL.UPLOAD_DOWNLOAD()} titleGutter>
-      {restarting ? <RestartMonitor /> : content()}
-    </SectionContent>
-  );
+  return <SectionContent title={LL.UPLOAD_DOWNLOAD()}>{restarting ? <RestartMonitor /> : content()}</SectionContent>;
 };
 
-export default UploadFileForm;
+export default UploadDownload;

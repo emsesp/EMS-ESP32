@@ -13,23 +13,25 @@ import { useBlocker } from 'react-router-dom';
 
 import { toast } from 'react-toastify';
 
-import SettingsCustomEntitiesDialog from './SettingsCustomEntitiesDialog';
+import SettingsCustomEntitiesDialog from './CustomEntitiesDialog';
 import * as EMSESP from './api';
 import { DeviceValueTypeNames, DeviceValueUOM_s } from './types';
 import { entityItemValidation } from './validators';
 import type { EntityItem } from './types';
 import type { FC } from 'react';
-import { ButtonRow, FormLoader, SectionContent, BlockNavigation } from 'components';
+import { ButtonRow, FormLoader, SectionContent, BlockNavigation, useLayoutTitle } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
-const SettingsCustomEntities: FC = () => {
+const CustomEntities: FC = () => {
   const { LL } = useI18nContext();
   const [numChanges, setNumChanges] = useState<number>(0);
   const blocker = useBlocker(numChanges !== 0);
   const [selectedEntityItem, setSelectedEntityItem] = useState<EntityItem>();
   const [creating, setCreating] = useState<boolean>(false);
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+
+  useLayoutTitle(LL.CUSTOM_ENTITIES(0));
 
   const {
     data: entities,
@@ -246,7 +248,7 @@ const SettingsCustomEntities: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.CUSTOM_ENTITIES(0)} titleGutter>
+    <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       <Box mb={2} color="warning.main">
         <Typography variant="body2">{LL.ENTITIES_HELP_1()}</Typography>
@@ -298,4 +300,4 @@ const SettingsCustomEntities: FC = () => {
   );
 };
 
-export default SettingsCustomEntities;
+export default CustomEntities;

@@ -20,8 +20,8 @@ const NetworkTime: FC = () => {
   return (
     <>
       <RouterTabs value={routerTab}>
-        <Tab value="/ntp/status" label={LL.STATUS_OF('NTP')} />
-        <Tab value="/ntp/settings" label={LL.SETTINGS_OF('NTP')} disabled={!authenticatedContext.me.admin} />
+        <Tab value="settings" label={LL.SETTINGS_OF('NTP')} disabled={!authenticatedContext.me.admin} />
+        <Tab value="status" label={LL.STATUS_OF('NTP')} />
       </RouterTabs>
       <Routes>
         <Route path="status" element={<NTPStatusForm />} />
@@ -33,7 +33,7 @@ const NetworkTime: FC = () => {
             </RequireAdmin>
           }
         />
-        <Route path="*" element={<Navigate replace to="/ntp/status" />} />
+        <Route path="*" element={<Navigate replace to="settings" />} />
       </Routes>
     </>
   );

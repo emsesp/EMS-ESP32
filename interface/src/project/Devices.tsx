@@ -38,8 +38,8 @@ import { useState, useContext, useEffect, useCallback, useLayoutEffect } from 'r
 import { IconContext } from 'react-icons';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import DashboardDevicesDialog from './DashboardDevicesDialog';
 import DeviceIcon from './DeviceIcon';
+import DashboardDevicesDialog from './DevicesDialog';
 
 import * as EMSESP from './api';
 import { formatValue } from './deviceValue';
@@ -49,12 +49,12 @@ import { deviceValueItemValidation } from './validators';
 import type { Device, DeviceValue } from './types';
 import type { FC } from 'react';
 import { dialogStyle } from 'CustomTheme';
-import { ButtonRow, SectionContent, MessageBox } from 'components';
+import { ButtonRow, SectionContent, MessageBox, useLayoutTitle } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
-const DashboardDevices: FC = () => {
+const Devices: FC = () => {
   const { me } = useContext(AuthenticatedContext);
   const { LL } = useI18nContext();
   const [size, setSize] = useState([0, 0]);
@@ -65,6 +65,8 @@ const DashboardDevices: FC = () => {
   const [selectedDevice, setSelectedDevice] = useState<number>();
 
   const navigate = useNavigate();
+
+  useLayoutTitle(LL.DEVICES());
 
   const { data: coreData, send: readCoreData } = useRequest(() => EMSESP.readCoreData(), {
     initialData: {
@@ -608,7 +610,7 @@ const DashboardDevices: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.DEVICE_DATA()} titleGutter id="devices-window">
+    <SectionContent id="devices-window">
       {renderCoreData()}
       {renderDeviceData()}
       {renderDeviceDetails()}
@@ -636,4 +638,4 @@ const DashboardDevices: FC = () => {
   );
 };
 
-export default DashboardDevices;
+export default Devices;

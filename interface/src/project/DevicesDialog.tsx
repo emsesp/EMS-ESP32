@@ -40,7 +40,7 @@ type DashboardDevicesDialogProps = {
   progress: boolean;
 };
 
-const DashboardDevicesDialog = ({
+const DevicesDialog = ({
   open,
   onClose,
   onSave,
@@ -204,4 +204,4 @@ const DashboardDevicesDialog = ({
   );
 };
 
-export default DashboardDevicesDialog;
+export default DevicesDialog;

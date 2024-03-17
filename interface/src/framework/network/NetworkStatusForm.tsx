@@ -193,11 +193,7 @@ const NetworkStatusForm: FC = () => {
     );
   };
 
-  return (
-    <SectionContent title={LL.STATUS_OF(LL.NETWORK(1))} titleGutter>
-      {content()}
-    </SectionContent>
-  );
+  return <SectionContent title={LL.STATUS_OF(LL.NETWORK(1))}>{content()}</SectionContent>;
 };
 
 export default NetworkStatusForm;

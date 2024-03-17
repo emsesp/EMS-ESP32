@@ -345,7 +345,7 @@ const SystemStatusForm: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.STATUS_OF(LL.SYSTEM(1))} titleGutter>
+    <SectionContent title={LL.STATUS_OF(LL.SYSTEM(1))}>
       {restarting ? <RestartMonitor /> : content()}
       {data && (
         <SystemStatusVersionDialog

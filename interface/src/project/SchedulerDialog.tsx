@@ -32,7 +32,7 @@ import { useI18nContext } from 'i18n/i18n-react';
 import { updateValue } from 'utils';
 import { validate } from 'validators';
 
-type SettingsSchedulerDialogProps = {
+type SchedulerDialogProps = {
   open: boolean;
   creating: boolean;
   onClose: () => void;
@@ -42,15 +42,7 @@ type SettingsSchedulerDialogProps = {
   dow: string[];
 };
 
-const SettingsSchedulerDialog = ({
-  open,
-  creating,
-  onClose,
-  onSave,
-  selectedItem,
-  validator,
-  dow
-}: SettingsSchedulerDialogProps) => {
+const SchedulerDialog = ({ open, creating, onClose, onSave, selectedItem, validator, dow }: SchedulerDialogProps) => {
   const { LL } = useI18nContext();
   const [editItem, setEditItem] = useState<ScheduleItem>(selectedItem);
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
@@ -246,4 +238,4 @@ const SettingsSchedulerDialog = ({
   );
 };
 
-export default SettingsSchedulerDialog;
+export default SchedulerDialog;
