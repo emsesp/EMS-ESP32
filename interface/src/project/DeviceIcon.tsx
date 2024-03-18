@@ -42,7 +42,7 @@ const DeviceIcon: FC<DeviceIconProps> = ({ type_id }) => {
     case DeviceType.EXTENSION:
       return <MdOutlineDevices />;
     case DeviceType.CUSTOM:
-      return <PlaylistAddIcon sx={{ color: 'lightblue', fontSize: 24, verticalAlign: 'middle' }} />;
+      return <PlaylistAddIcon sx={{ color: 'lightblue', fontSize: 22, verticalAlign: 'middle' }} />;
     default:
       return null;
   }

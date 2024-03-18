@@ -176,13 +176,11 @@ const tr: Translation = {
   STATUS_OF: '{0} Durumu',
   UPLOAD_DOWNLOAD: 'Yükleme/İndirme',
   VERSION_ON: 'You are currently on', // TODO translate
-  SYSTEM_APPLY_FIRMWARE: 'yeni bellenimi uygulamak için',
   CLOSE: 'Kapat',
   USE: 'KUllan',
   FACTORY_RESET: 'Fabrika ayarına dönme',
   SYSTEM_FACTORY_TEXT: 'Cihaz fabrika ayarlarına döndü ve şimdi yendiden başlatılacak',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Cihazı fabrika ayarlarına döndürmek istediğinize emin misiniz?',
-  VERSION_CHECK: 'Sürüm Kontrolü',
   THE_LATEST: 'En son',
   OFFICIAL: 'resmi',
   DEVELOPMENT: 'geliştirme',

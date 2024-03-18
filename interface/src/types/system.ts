@@ -1,4 +1,5 @@
 export interface SystemStatus {
+  // TODO fix this next
   emsesp_version: string;
   esp_platform: string;
   max_alloc_heap: number;

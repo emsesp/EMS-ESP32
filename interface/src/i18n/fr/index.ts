@@ -176,13 +176,11 @@ const fr: Translation = {
   STATUS_OF: 'Statut {0}',
   UPLOAD_DOWNLOAD: 'Upload/Download',
   VERSION_ON: 'You are currently on', // TODO translate
-  SYSTEM_APPLY_FIRMWARE: 'pour appliquer le nouveau firmware',
   CLOSE: 'Fermer',
   USE: 'Utiliser',
   FACTORY_RESET: 'Réinitialisation',
   SYSTEM_FACTORY_TEXT: 'L\'appareil a été réinitialisé et va maintenant redémarrer',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Êtes-vous sûr de vouloir réinitialiser l\'appareil à ses paramètres d\'usine ?',
-  VERSION_CHECK: 'Vérification de la version',
   THE_LATEST: 'La dernière',
   OFFICIAL: 'officielle',
   DEVELOPMENT: 'développement',

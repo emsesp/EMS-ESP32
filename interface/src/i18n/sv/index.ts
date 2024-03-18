@@ -176,13 +176,11 @@ const sv: Translation = {
   STATUS_OF: '{0} Status',
   UPLOAD_DOWNLOAD: 'Upp/Nedladdning',
   VERSION_ON: 'You are currently on', // TODO translate
-  SYSTEM_APPLY_FIRMWARE: 'för att aktivera ny firmware',
   CLOSE: 'Stäng',
   USE: 'Använd',
   FACTORY_RESET: 'Fabriksåterställning',
   SYSTEM_FACTORY_TEXT: 'Enheten har blivit fabriksåterställd och startar nu om',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Är du säker att du vill fabriksåterställa enheten?',
-  VERSION_CHECK: 'Senaste versioner',
   THE_LATEST: 'Den senaste',
   OFFICIAL: 'officiell',
   DEVELOPMENT: 'utveckling',

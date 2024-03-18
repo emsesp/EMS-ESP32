@@ -176,13 +176,11 @@ const no: Translation = {
   STATUS_OF: '{0} Status',
   UPLOAD_DOWNLOAD: 'Opp/Nedlasting',
   VERSION_ON: 'You are currently on', // TODO translate
-  SYSTEM_APPLY_FIRMWARE: 'for å aktivere ny firmware',
   CLOSE: 'Steng',
   USE: 'Bruk',
   FACTORY_RESET: 'Sett tilbake til fabrikkinstilling',
   SYSTEM_FACTORY_TEXT: 'Enhet har blitt satt tilbake til fabrikkinstilling og vil restarte',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Er du sikker på at du vil resette enheten til fabrikkinstillinger?',
-  VERSION_CHECK: 'Versjonsjekk',
   THE_LATEST: 'Den nyeste',
   OFFICIAL: 'official',
   DEVELOPMENT: 'development',
