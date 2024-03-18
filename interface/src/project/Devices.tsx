@@ -33,7 +33,7 @@ import { useSort, SortToggleType } from '@table-library/react-table-library/sort
 import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
 import { useRequest } from 'alova';
-import { useState, useEffect, useCallback, useLayoutEffect } from 'react';
+import { useState, useEffect, useCallback, useLayoutEffect, useContext } from 'react';
 
 import { IconContext } from 'react-icons';
 import { useNavigate } from 'react-router-dom';
@@ -51,10 +51,13 @@ import type { FC } from 'react';
 import { dialogStyle } from 'CustomTheme';
 import { ButtonRow, SectionContent, MessageBox, useLayoutTitle } from 'components';
 
+import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 
 const Devices: FC = () => {
   const { LL } = useI18nContext();
+  const { me } = useContext(AuthenticatedContext);
+
   const [size, setSize] = useState([0, 0]);
   const [selectedDeviceValue, setSelectedDeviceValue] = useState<DeviceValue>();
   const [onlyFav, setOnlyFav] = useState(false);
@@ -281,9 +284,9 @@ const Devices: FC = () => {
 
   const customize = () => {
     if (selectedDevice == 99) {
-      navigate('/settings/customentities');
+      navigate('/customentities');
     } else {
-      navigate('/settings/customization', { state: selectedDevice });
+      navigate('/customizations', { state: selectedDevice });
     }
   };
 
@@ -520,9 +523,11 @@ const Devices: FC = () => {
               <IconButton onClick={() => setShowDeviceInfo(true)}>
                 <InfoOutlinedIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
               </IconButton>
-              <IconButton onClick={customize}>
-                <FormatListNumberedIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
-              </IconButton>
+              {me.admin && (
+                <IconButton onClick={customize}>
+                  <FormatListNumberedIcon sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+                </IconButton>
+              )}
               <IconButton onClick={handleDownloadCsv}>
                 <DownloadIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
               </IconButton>
@@ -584,7 +589,7 @@ const Devices: FC = () => {
                     <Cell>{renderNameCell(dv)}</Cell>
                     <Cell>{formatValue(LL, dv.v, dv.u)}</Cell>
                     <Cell stiff>
-                      {dv.c && !hasMask(dv.id, DeviceEntityMask.DV_READONLY) && (
+                      {me.admin && dv.c && !hasMask(dv.id, DeviceEntityMask.DV_READONLY) && (
                         <IconButton size="small" onClick={() => showDeviceValue(dv)}>
                           {dv.v === '' && dv.c ? (
                             <PlayArrowIcon color="primary" sx={{ fontSize: 16 }} />

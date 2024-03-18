@@ -27,12 +27,13 @@ import { useI18nContext } from 'i18n/i18n-react';
 
 const Sensors: FC = () => {
   const { LL } = useI18nContext();
+  const { me } = useContext(AuthenticatedContext);
+
   const [selectedTemperatureSensor, setSelectedTemperatureSensor] = useState<TemperatureSensor>();
   const [selectedAnalogSensor, setSelectedAnalogSensor] = useState<AnalogSensor>();
   const [temperatureDialogOpen, setTemperatureDialogOpen] = useState<boolean>(false);
   const [analogDialogOpen, setAnalogDialogOpen] = useState<boolean>(false);
   const [creating, setCreating] = useState<boolean>(false);
-  const { me } = useContext(AuthenticatedContext);
 
   const { data: sensorData, send: fetchSensorData } = useRequest(() => EMSESP.readSensorData(), {
     initialData: {
@@ -220,8 +221,10 @@ const Sensors: FC = () => {
   }
 
   const updateTemperatureSensor = (ts: TemperatureSensor) => {
-    setSelectedTemperatureSensor(ts);
-    setTemperatureDialogOpen(true);
+    if (me.admin) {
+      setSelectedTemperatureSensor(ts);
+      setTemperatureDialogOpen(true);
+    }
   };
 
   const onTemperatureDialogClose = () => {
@@ -244,9 +247,11 @@ const Sensors: FC = () => {
   };
 
   const updateAnalogSensor = (as: AnalogSensor) => {
-    setCreating(false);
-    setSelectedAnalogSensor(as);
-    setAnalogDialogOpen(true);
+    if (me.admin) {
+      setCreating(false);
+      setSelectedAnalogSensor(as);
+      setAnalogDialogOpen(true);
+    }
   };
 
   const onAnalogDialogClose = () => {

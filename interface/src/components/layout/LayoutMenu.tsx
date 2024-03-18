@@ -131,7 +131,11 @@ const LayoutMenu: FC = () => {
               <Avatar sx={{ bgcolor: '#b1395f', color: 'white' }}>
                 <PersonIcon />
               </Avatar>
-              <ListItemText sx={{ pl: 2 }} primary={me.username} secondary={me.admin ? LL.ADMIN() : LL.GUEST()} />
+              <ListItemText
+                sx={{ pl: 2 }}
+                primary={me.username}
+                secondary={(me.admin ? LL.ADMIN() : LL.GUEST()) + ' Account'}
+              />
             </ListItem>
           </List>
           <Box p={2}>

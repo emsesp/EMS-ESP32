@@ -34,7 +34,7 @@ const Settings: FC = () => {
                 <TuneIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary={LL.APPLICATION_SETTINGS()} secondary="Modify EMS-ESP system settings" />
+            <ListItemText primary={LL.APPLICATION_SETTINGS()} secondary="Modify EMS-ESP Application Settings" />
           </ListItemButton>
         </ListItem>
 
@@ -142,7 +142,7 @@ const Settings: FC = () => {
                 <LockIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary={LL.SECURITY(0)} secondary="Configure user administration" />
+            <ListItemText primary={LL.SECURITY(0)} secondary="Add/Remove Users" />
           </ListItemButton>
         </ListItem>
 
