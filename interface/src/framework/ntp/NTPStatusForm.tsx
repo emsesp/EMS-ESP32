@@ -214,7 +214,7 @@ const NTPStatusForm: FC = () => {
     );
   };
 
-  return <SectionContent title={LL.STATUS_OF('NTP')}>{content()}</SectionContent>;
+  return <SectionContent>{content()}</SectionContent>;
 };
 
 export default NTPStatusForm;

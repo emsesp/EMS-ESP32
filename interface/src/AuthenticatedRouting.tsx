@@ -10,6 +10,7 @@ import NetworkConnection from 'framework/network/NetworkConnection';
 import NetworkTime from 'framework/ntp/NetworkTime';
 import OTASettingsForm from 'framework/ota/OTASettingsForm';
 import Security from 'framework/security/Security';
+import ESPSystemStatus from 'framework/system/ESPSystemStatus';
 import Status from 'framework/system/Status';
 import UploadDownload from 'framework/system/UploadDownload';
 import ApplicationSettings from 'project/ApplicationSettings';
@@ -42,6 +43,7 @@ const AuthenticatedRouting: FC = () => {
             <Route path="/settings/mqtt/*" element={<Mqtt />} />
             <Route path="/settings/ota/*" element={<OTASettingsForm />} />
             <Route path="/settings/security/*" element={<Security />} />
+            <Route path="/settings/espsystemstatus/*" element={<ESPSystemStatus />} />
             <Route path="/settings/upload/*" element={<UploadDownload />} />
           </>
         )}

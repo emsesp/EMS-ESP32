@@ -80,7 +80,6 @@ const no: Translation = {
   FAIL: 'MISLYKKET',
   QUALITY: 'KVALITET',
   SCAN_DEVICES: 'Søk etter nye enheter',
-  EMS_BUS_STATUS_TITLE: 'EMS Buss & Aktivitet Status',
   SCAN: 'Søk',
   STATUS_NAMES: [
     'EMS Telegrammer Mottatt (Rx)',
@@ -322,7 +321,8 @@ const no: Translation = {
   ACTIVEHIGH: 'Active High', // TODO translate
   ACTIVELOW: 'Active Low', // TODO translate
   UNCHANGED: 'Unchanged', // TODO translate
-  ALWAYS: 'Always' // TODO translate
+  ALWAYS: 'Always', // TODO translate
+  ACTIVITY: 'Activity' // TODO translate
 };
 
 export default no;

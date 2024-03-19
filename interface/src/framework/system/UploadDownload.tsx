@@ -32,12 +32,13 @@ const UploadDownload: FC = () => {
     immediate: false
   });
 
-  const { data: data, send: loadData, error } = useRequest(SystemApi.readSystemStatus, { force: true });
+  const { data: data, send: loadData, error } = useRequest(SystemApi.readESPSystemStatus, { force: true });
 
   const { data: latestVersion } = useRequest(SystemApi.getStableVersion, {
     immediate: true,
     force: true
   });
+
   const { data: latestDevVersion } = useRequest(SystemApi.getDevVersion, {
     immediate: true,
     force: true

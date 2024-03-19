@@ -19,7 +19,7 @@
 #ifndef WebStatusService_h
 #define WebStatusService_h
 
-#define EMSESP_STATUS_SERVICE_PATH "/rest/status"
+#define EMSESP_ACTIVITY_SERVICE_PATH "/rest/activity"
 
 namespace emsesp {
 

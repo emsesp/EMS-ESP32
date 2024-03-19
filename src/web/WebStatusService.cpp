@@ -21,7 +21,7 @@
 namespace emsesp {
 
 WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * securityManager) {
-    server->on(EMSESP_STATUS_SERVICE_PATH,
+    server->on(EMSESP_ACTIVITY_SERVICE_PATH,
                HTTP_GET,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { webStatusService(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
 }

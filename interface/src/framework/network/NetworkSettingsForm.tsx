@@ -360,7 +360,7 @@ const WiFiSettingsForm: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.SETTINGS_OF(LL.NETWORK(1))}>
+    <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {restarting ? <RestartMonitor /> : content()}
     </SectionContent>

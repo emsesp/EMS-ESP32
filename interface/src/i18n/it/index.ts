@@ -48,7 +48,6 @@ const it: Translation = {
   REMOVE: 'Elimina',
   PROBLEM_UPDATING: 'Problema aggiornamento',
   PROBLEM_LOADING: 'Problema caricamento',
-  ACCESS_DENIED: 'Accesso Negato',
   ANALOG_SENSOR: 'Sensore Analogico',
   ANALOG_SENSORS: 'Sensori Analogici',
   SETTINGS: 'Settings',
@@ -68,7 +67,6 @@ const it: Translation = {
   TEMP_SENSOR: 'Sensore Temperatura',
   TEMP_SENSORS: 'Sensori Temperatura',
   WRITE_CMD_SENT: 'Scrittura comando inviata',
-  WRITE_CMD_FAILED: 'Scittura comando fallita',
   EMS_BUS_WARNING: 'EMS bus disconnesso. Se questo avvertimento persiste dopo alcuni secondi prego verificare impostazioni scheda',
   EMS_BUS_SCANNING: 'Scansione dispositivi EMS ...',
   CONNECTED: 'Connesso',
@@ -82,7 +80,6 @@ const it: Translation = {
   FAIL: 'FALLITO',
   QUALITY: 'QUALITÂ',
   SCAN_DEVICES: 'Scansione per nuovi dispositivi',
-  EMS_BUS_STATUS_TITLE: 'Bus EMS & Stato Attività',
   SCAN: 'Scansione',
   STATUS_NAMES: [
     'Telegrammi EMS Ricevuti (Rx)',
@@ -324,7 +321,8 @@ const it: Translation = {
   ACTIVEHIGH: 'Active High', // TODO translate
   ACTIVELOW: 'Active Low', // TODO translate
   UNCHANGED: 'Unchanged', // TODO translate
-  ALWAYS: 'Always' // TODO translate
+  ALWAYS: 'Always', // TODO translate
+  ACTIVITY: 'Activity' // TODO translate
 };
 
 export default it;

@@ -4,6 +4,7 @@ import CastIcon from '@mui/icons-material/Cast';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import ImportExportIcon from '@mui/icons-material/ImportExport';
 import LockIcon from '@mui/icons-material/Lock';
+import MemoryIcon from '@mui/icons-material/Memory';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
@@ -24,7 +25,8 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Box
+  Box,
+  Divider
 } from '@mui/material';
 import { useRequest } from 'alova';
 import { useState, type FC } from 'react';
@@ -294,6 +296,26 @@ const Settings: FC = () => {
           </ListItemButton>
         </ListItem>
 
+        <Divider />
+
+        <ListItem
+          disablePadding
+          secondaryAction={
+            <ListItemIcon style={{ justifyContent: 'right', color: 'lightblue', verticalAlign: 'middle' }}>
+              <NavigateNextIcon />
+            </ListItemIcon>
+          }
+        >
+          <ListItemButton component={Link} to="espsystemstatus">
+            <ListItemAvatar>
+              <Avatar sx={{ color: 'white' }}>
+                <MemoryIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary={LL.STATUS_OF('ESP32')} secondary="ESP32 Information" />
+          </ListItemButton>
+        </ListItem>
+
         <ListItem
           disablePadding
           secondaryAction={
@@ -312,8 +334,10 @@ const Settings: FC = () => {
           </ListItemButton>
         </ListItem>
       </List>
+
       {renderRestartDialog()}
       {renderFactoryResetDialog()}
+
       <Box display="flex" flexWrap="wrap">
         <Box flexGrow={1} sx={{ '& button': { mt: 2 } }}>
           <ButtonRow>

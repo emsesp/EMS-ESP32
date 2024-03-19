@@ -80,7 +80,6 @@ const pl: BaseTranslation = {
   FAIL: 'Nieudane',
   QUALITY: 'Jakość',
   SCAN_DEVICES: 'Wyszukiwanie nowych urządzeń',
-  EMS_BUS_STATUS_TITLE: 'Aktywność',
   SCAN: 'Skanuj',
   STATUS_NAMES: [
     'EMS, telegramy odebrane (Rx)',
@@ -322,7 +321,8 @@ const pl: BaseTranslation = {
   ACTIVEHIGH: 'Wyzwalany stanem wysokim',
   ACTIVELOW: 'Wyzwalany stanem niskim',
   UNCHANGED: 'Zachowaj stan',
-  ALWAYS: 'Zawsze'
+  ALWAYS: 'Zawsze',
+  ACTIVITY: 'Activity' // TODO translate
 };
 
 export default pl;

@@ -29,7 +29,7 @@ export default defineConfig(({ command, mode }) => {
     };
   }
 
-  if (command === 'build' && mode === 'hosted') {
+  if (mode === 'hosted') {
     return {
       plugins: [preact(), viteTsconfigPaths()],
       build: {
@@ -38,97 +38,94 @@ export default defineConfig(({ command, mode }) => {
     };
   }
 
-  // production build, both for hosted and building the firmware
-  if (command === 'build') {
-    return {
-      plugins: [
-        preact(),
-        viteTsconfigPaths(),
-        splitVendorChunkPlugin(),
-        {
-          ...viteImagemin({
-            verbose: false,
-            gifsicle: {
-              optimizationLevel: 7,
-              interlaced: false
-            },
-            optipng: {
-              optimizationLevel: 7
-            },
-            mozjpeg: {
-              quality: 20
-            },
-            pngquant: {
-              quality: [0.8, 0.9],
-              speed: 4
-            },
-            svgo: {
-              plugins: [
-                {
-                  name: 'removeViewBox'
-                },
-                {
-                  name: 'removeEmptyAttrs',
-                  active: false
-                }
-              ]
-            }
-          }),
-          enforce: 'pre'
-        },
-        visualizer({
-          template: 'treemap', // or sunburst
-          open: false,
-          gzipSize: true,
-          brotliSize: true,
-          filename: 'analyse.html' // will be saved in project's root
-        })
-      ],
-
-      build: {
-        // target: 'es2022',
-        chunkSizeWarningLimit: 1024,
-        minify: 'terser',
-        terserOptions: {
-          compress: {
-            passes: 4,
-            arrows: true,
-            drop_console: true,
-            drop_debugger: true,
-            sequences: true
+  return {
+    plugins: [
+      preact(),
+      viteTsconfigPaths(),
+      splitVendorChunkPlugin(),
+      {
+        ...viteImagemin({
+          verbose: false,
+          gifsicle: {
+            optimizationLevel: 7,
+            interlaced: false
           },
-          mangle: {
-            // toplevel: true
-            // module: true
-            // properties: {
-            //   regex: /^_/
-            // }
+          optipng: {
+            optimizationLevel: 7
           },
-          ecma: 5,
-          enclose: false,
-          keep_classnames: false,
-          keep_fnames: false,
-          ie8: false,
-          module: false,
-          nameCache: null,
-          safari10: false,
-          toplevel: false
-        },
-
-        rollupOptions: {
-          output: {
-            manualChunks(id: string) {
-              if (id.includes('node_modules')) {
-                // creating a chunk to react routes deps. Reducing the vendor chunk size
-                if (id.includes('react-router-dom') || id.includes('@remix-run') || id.includes('react-router')) {
-                  return '@react-router';
-                }
-                return 'vendor';
+          mozjpeg: {
+            quality: 20
+          },
+          pngquant: {
+            quality: [0.8, 0.9],
+            speed: 4
+          },
+          svgo: {
+            plugins: [
+              {
+                name: 'removeViewBox'
+              },
+              {
+                name: 'removeEmptyAttrs',
+                active: false
               }
+            ]
+          }
+        }),
+        enforce: 'pre'
+      },
+      visualizer({
+        template: 'treemap', // or sunburst
+        open: false,
+        gzipSize: true,
+        brotliSize: true,
+        filename: '../analyse.html' // will be saved in project's root
+      })
+    ],
+
+    build: {
+      // target: 'es2022',
+      chunkSizeWarningLimit: 1024,
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          passes: 4,
+          arrows: true,
+          drop_console: true,
+          drop_debugger: true,
+          sequences: true
+        },
+        mangle: {
+          // toplevel: true
+          // module: true
+          // properties: {
+          //   regex: /^_/
+          // }
+        },
+        ecma: 5,
+        enclose: false,
+        keep_classnames: false,
+        keep_fnames: false,
+        ie8: false,
+        module: false,
+        nameCache: null,
+        safari10: false,
+        toplevel: false
+      },
+
+      rollupOptions: {
+        output: {
+          manualChunks(id: string) {
+            if (id.includes('node_modules')) {
+              // creating a chunk to react routes deps. Reducing the vendor chunk size
+              if (id.includes('react-router-dom') || id.includes('@remix-run') || id.includes('react-router')) {
+                return '@react-router';
+              }
+              return 'vendor';
             }
           }
         }
       }
-    };
-  }
+    }
+  };
 });

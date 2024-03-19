@@ -232,7 +232,7 @@ const ManageUsersForm: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.MANAGE_USERS()}>
+    <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>

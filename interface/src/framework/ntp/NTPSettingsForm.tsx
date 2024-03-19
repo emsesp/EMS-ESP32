@@ -130,7 +130,7 @@ const NTPSettingsForm: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.SETTINGS_OF('NTP')}>
+    <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>

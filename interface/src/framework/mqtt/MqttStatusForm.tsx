@@ -146,7 +146,7 @@ const MqttStatusForm: FC = () => {
     );
   };
 
-  return <SectionContent title={LL.STATUS_OF('MQTT')}>{content()}</SectionContent>;
+  return <SectionContent>{content()}</SectionContent>;
 };
 
 export default MqttStatusForm;

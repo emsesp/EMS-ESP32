@@ -1,7 +1,10 @@
 import { alovaInstance, alovaInstanceGH } from './endpoints';
-import type { OTASettings, SystemStatus, LogSettings } from 'types';
+import type { OTASettings, SystemStatus, LogSettings, ESPSystemStatus } from 'types';
 
-// SystemStatus - also used to ping in Restart monitor for pinging
+// ESPSystemStatus - also used to ping in Restart monitor for pinging
+export const readESPSystemStatus = () => alovaInstance.Get<ESPSystemStatus>('/rest/ESPSystemStatus');
+
+// SystemStatus
 export const readSystemStatus = () => alovaInstance.Get<SystemStatus>('/rest/systemStatus');
 
 // commands

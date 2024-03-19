@@ -80,7 +80,6 @@ const sv: Translation = {
   FAIL: 'Misslyckades',
   QUALITY: 'Kvalitet',
   SCAN_DEVICES: 'Sök efter nya enheter',
-  EMS_BUS_STATUS_TITLE: 'EMS-buss & aktivitetsstatus',
   SCAN: 'Sök',
   STATUS_NAMES: [
     'EMS-telegram (Rx)',
@@ -322,7 +321,8 @@ const sv: Translation = {
   ACTIVEHIGH: 'Active High', // TODO translate
   ACTIVELOW: 'Active Low', // TODO translate
   UNCHANGED: 'Unchanged', // TODO translate
-  ALWAYS: 'Always' // TODO translate
+  ALWAYS: 'Always', // TODO translate
+  ACTIVITY: 'Activity' // TODO translate
 };
 
 export default sv;

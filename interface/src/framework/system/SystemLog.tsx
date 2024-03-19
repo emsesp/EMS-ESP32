@@ -232,7 +232,7 @@ const SystemLog: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.LOG_OF(LL.SYSTEM(2))} id="log-window">
+    <SectionContent id="log-window">
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>

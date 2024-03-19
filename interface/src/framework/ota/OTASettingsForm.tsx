@@ -120,7 +120,7 @@ const OTASettingsForm: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.SETTINGS_OF('OTA')}>
+    <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>

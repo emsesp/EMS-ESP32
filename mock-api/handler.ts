@@ -362,16 +362,23 @@ const mqtt_status = {
   connect_count: 2
 };
 
-// SYSTEM
-const VERIFY_AUTHORIZATION_ENDPOINT = REST_ENDPOINT_ROOT + 'verifyAuthorization';
+// STATUS
 const SYSTEM_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'systemStatus';
+const ACTIVITY_ENDPOINT = REST_ENDPOINT_ROOT + 'activity';
+
+// SETTINGS
+const ESPSYSTEM_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'ESPSystemStatus';
 const SECURITY_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'securitySettings';
 const RESTART_ENDPOINT = REST_ENDPOINT_ROOT + 'restart';
 const FACTORY_RESET_ENDPOINT = REST_ENDPOINT_ROOT + 'factoryReset';
 const UPLOAD_FILE_ENDPOINT = REST_ENDPOINT_ROOT + 'uploadFile';
+
+// SYSTEM SIGNIN
+const VERIFY_AUTHORIZATION_ENDPOINT = REST_ENDPOINT_ROOT + 'verifyAuthorization';
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn';
 const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken';
-const system_status = {
+
+const ESPsystem_status = {
   emsesp_version: '3.6-demo',
   esp_platform: 'ESP32',
   cpu_type: 'ESP32-S3',
@@ -390,8 +397,19 @@ const system_status = {
   partition: 'app0',
   app_used: 1863,
   app_free: 121,
-  uptime: '000+00:15:42.707',
   arduino_version: 'ESP32 Arduino v2.0.14'
+};
+
+const system_status = {
+  emsesp_version: '3.6-demo',
+  esp_platform: 'ESP32',
+  status: 0,
+  // status: 2,
+  tx_mode: 1,
+  uptime: 77186,
+  num_devices: 2,
+  num_sensors: 1,
+  num_analogs: 1
 };
 
 let security_settings = {
@@ -777,14 +795,7 @@ const emsesp_sensordata = {
   analog_enabled: true
 };
 
-const status = {
-  status: 0,
-  // status: 2,
-  tx_mode: 1,
-  uptime: 77186,
-  num_devices: 2,
-  num_sensors: 1,
-  num_analogs: 1,
+const activity = {
   stats: [
     { id: 0, s: 56506, f: 11, q: 100 },
     { id: 1, s: 9026, f: 0, q: 100 },
@@ -2374,9 +2385,11 @@ router
     return new Response('OK', { status: 200 });
   });
 
-// SYSTEM
+// SYSTEM and SETTINGS
 router
   .get(SYSTEM_STATUS_ENDPOINT, () => new Response(JSON.stringify(system_status), { headers }))
+  .get(ACTIVITY_ENDPOINT, () => new Response(JSON.stringify(activity), { headers }))
+  .get(ESPSYSTEM_STATUS_ENDPOINT, () => new Response(JSON.stringify(ESPsystem_status), { headers }))
   .get(SECURITY_SETTINGS_ENDPOINT, () => new Response(JSON.stringify(security_settings), { headers }))
   .post(SECURITY_SETTINGS_ENDPOINT, async (request: any) => {
     security_settings = await request.json();

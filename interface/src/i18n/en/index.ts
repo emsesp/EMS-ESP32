@@ -80,7 +80,6 @@ const en: Translation = {
   FAIL: 'FAIL',
   QUALITY: 'QUALITY',
   SCAN_DEVICES: 'Scan for new devices',
-  EMS_BUS_STATUS_TITLE: 'EMS Bus & Activity Status',
   SCAN: 'Scan',
   STATUS_NAMES: [
     'EMS Telegrams Received (Rx)',
@@ -164,7 +163,7 @@ const en: Translation = {
   HELP_INFORMATION_1: 'Visit the online wiki to get instructions on how to configure EMS-ESP',
   HELP_INFORMATION_2: 'For live community chat join our Discord server',
   HELP_INFORMATION_3: 'To request a feature or report a bug',
-  HELP_INFORMATION_4: 'Remember to download and attach your support information for a faster response when reporting an issue',
+  HELP_INFORMATION_4: 'Download and attach your support information for a faster response when reporting an issue',
   HELP_INFORMATION_5: 'EMS-ESP is a free and open-source project. Please support its future development by giving it a star on Github!',
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
@@ -187,7 +186,6 @@ const en: Translation = {
   RELEASE_IS: 'release is',
   RELEASE_NOTES: 'release notes',
   EMS_ESP_VER: 'EMS-ESP Version',
-  PLATFORM: 'Device (Platform / SDK)',
   UPTIME: 'System Uptime',
   HEAP: 'Heap (Free / Max Alloc)',
   PSRAM: 'PSRAM (Size / Free)',
@@ -323,7 +321,8 @@ const en: Translation = {
   ACTIVEHIGH: 'Active High',
   ACTIVELOW: 'Active Low',
   UNCHANGED: 'Unchanged',
-  ALWAYS: 'Always'
+  ALWAYS: 'Always',
+  ACTIVITY: 'Activity'
 };
 
 export default en;

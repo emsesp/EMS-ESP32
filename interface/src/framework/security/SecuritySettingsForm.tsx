@@ -96,7 +96,7 @@ const SecuritySettingsForm: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.SETTINGS_OF(LL.SECURITY(1))}>
+    <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>

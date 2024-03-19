@@ -99,7 +99,7 @@ const APStatusForm: FC = () => {
     );
   };
 
-  return <SectionContent title={LL.STATUS_OF(LL.ACCESS_POINT(1))}>{content()}</SectionContent>;
+  return <SectionContent>{content()}</SectionContent>;
 };
 
 export default APStatusForm;

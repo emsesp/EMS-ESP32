@@ -80,7 +80,6 @@ const tr: Translation = {
   FAIL: 'HATA',
   QUALITY: 'KALİTE',
   SCAN_DEVICES: 'Yeni cihaz taraması',
-  EMS_BUS_STATUS_TITLE: 'EMS Hattı ve Aktivite Durumu',
   SCAN: 'Tara',
   STATUS_NAMES: [
     'EMS Telegramlar Alındı (Rx)',
@@ -322,7 +321,8 @@ const tr: Translation = {
   ACTIVEHIGH: 'Active High', // TODO translate
   ACTIVELOW: 'Active Low', // TODO translate
   UNCHANGED: 'Unchanged', // TODO translate
-  ALWAYS: 'Always' // TODO translate
+  ALWAYS: 'Always', // TODO translate
+  ACTIVITY: 'Activity' // TODO translate
 };
 
 export default tr;

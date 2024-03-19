@@ -80,7 +80,6 @@ const sk: Translation = {
   FAIL: 'ZLYHANIE',
   QUALITY: 'KVALITA',
   SCAN_DEVICES: 'Scan pre nové zariadenia',
-  EMS_BUS_STATUS_TITLE: 'EMS zbernica & stav aktivity',
   SCAN: 'Scan',
   STATUS_NAMES: [
     'EMS Telegramy prijaté (Rx)',
@@ -322,7 +321,8 @@ const sk: Translation = {
   ACTIVEHIGH: 'Aktívny Vysoký',
   ACTIVELOW: 'Aktívny Nízky',
   UNCHANGED: 'Nezmenené',
-  ALWAYS: 'Vždy'
+  ALWAYS: 'Vždy',
+  ACTIVITY: 'Activity' // TODO translate
 };
 
 export default sk;

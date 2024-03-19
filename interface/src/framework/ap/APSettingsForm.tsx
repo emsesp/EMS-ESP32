@@ -205,7 +205,7 @@ const APSettingsForm: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.SETTINGS_OF(LL.ACCESS_POINT(1))}>
+    <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>

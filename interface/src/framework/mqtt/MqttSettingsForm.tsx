@@ -449,7 +449,7 @@ const MqttSettingsForm: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.SETTINGS_OF('MQTT')}>
+    <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {content()}
     </SectionContent>

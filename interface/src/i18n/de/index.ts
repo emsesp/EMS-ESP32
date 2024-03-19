@@ -80,7 +80,6 @@ const de: Translation = {
   FAIL: 'FEHLER',
   QUALITY: 'QUALITÄT',
   SCAN_DEVICES: 'Nach neuen Geräten suchen',
-  EMS_BUS_STATUS_TITLE: 'EMS-Bus- und Aktivitätsstatus',
   SCAN: 'Suche',
   STATUS_NAMES: [
     'EMS-Telegramme empfangen (Rx)',
@@ -322,7 +321,9 @@ const de: Translation = {
   ACTIVEHIGH: 'Aktiv Positiv',
   ACTIVELOW: 'Aktiv Negativ',
   UNCHANGED: 'Unverändert',
-  ALWAYS: 'Immer'
+  ALWAYS: 'Immer',
+  ACTIVITY: 'Activity' // TODO translate
+
 };
 
 export default de;

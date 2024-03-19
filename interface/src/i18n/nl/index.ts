@@ -80,7 +80,6 @@ const nl: Translation = {
   FAIL: 'MISLUKT',
   QUALITY: 'QUALITEIT',
   SCAN_DEVICES: 'Scannen naar nieuwe apparaten',
-  EMS_BUS_STATUS_TITLE: 'EMS Bus & Activiteitenstatus',
   SCAN: 'Scan',
   STATUS_NAMES: [
     'EMS Telegrammen ontvangen (Rx)',
@@ -322,7 +321,8 @@ const nl: Translation = {
   ACTIVEHIGH: 'Active High', // TODO translate
   ACTIVELOW: 'Active Low', // TODO translate
   UNCHANGED: 'Unchanged', // TODO translate
-  ALWAYS: 'Always' // TODO translate
+  ALWAYS: 'Always', // TODO translate
+  ACTIVITY: 'Activity' // TODO translate
 };
 
 export default nl;
