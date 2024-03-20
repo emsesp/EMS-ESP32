@@ -6,7 +6,7 @@ import { useState } from 'react';
 import type { ValidateFieldsError } from 'async-validator';
 import type { FC } from 'react';
 
-import type { APSettings } from 'types';
+import type { APSettingsType } from 'types';
 import * as APApi from 'api/ap';
 import {
   BlockFormControlLabel,
@@ -24,10 +24,10 @@ import { numberValue, updateValueDirty, useRest } from 'utils';
 
 import { createAPSettingsValidator, validate } from 'validators';
 
-export const isAPEnabled = ({ provision_mode }: APSettings) =>
+export const isAPEnabled = ({ provision_mode }: APSettingsType) =>
   provision_mode === APProvisionMode.AP_MODE_ALWAYS || provision_mode === APProvisionMode.AP_MODE_DISCONNECTED;
 
-const APSettingsForm: FC = () => {
+const APSettings: FC = () => {
   const {
     loadData,
     saving,
@@ -39,7 +39,7 @@ const APSettingsForm: FC = () => {
     blocker,
     saveData,
     errorMessage
-  } = useRest<APSettings>({
+  } = useRest<APSettingsType>({
     read: APApi.readAPSettings,
     update: APApi.updateAPSettings
   });
@@ -212,4 +212,4 @@ const APSettingsForm: FC = () => {
   );
 };
 
-export default APSettingsForm;
+export default APSettings;

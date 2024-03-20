@@ -1,11 +1,11 @@
-export interface User {
+export interface UserType {
   username: string;
   password: string;
   admin: boolean;
 }
 
-export interface SecuritySettings {
-  users: User[];
+export interface SecuritySettingsType {
+  users: UserType[];
   jwt_secret: string;
 }
 

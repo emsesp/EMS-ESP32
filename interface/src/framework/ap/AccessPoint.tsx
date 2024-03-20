@@ -1,8 +1,8 @@
 import { Tab } from '@mui/material';
 import { Navigate, Routes, Route } from 'react-router-dom';
 
-import APSettingsForm from './APSettingsForm';
-import APStatusForm from './APStatusForm';
+import APSettings from './APSettings';
+import APStatus from './APStatus';
 import type { FC } from 'react';
 import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from 'components';
 
@@ -22,12 +22,12 @@ const AccessPoint: FC = () => {
         <Tab value="status" label={LL.STATUS_OF(LL.ACCESS_POINT(1))} />
       </RouterTabs>
       <Routes>
-        <Route path="status" element={<APStatusForm />} />
+        <Route path="status" element={<APStatus />} />
         <Route
           path="settings"
           element={
             <RequireAdmin>
-              <APSettingsForm />
+              <APSettings />
             </RequireAdmin>
           }
         />

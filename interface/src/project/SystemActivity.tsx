@@ -10,13 +10,15 @@ import type { Stat } from './types';
 
 import type { Translation } from 'i18n/i18n-types';
 import type { FC } from 'react';
-import { FormLoader, SectionContent } from 'components';
+import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
-const Activity: FC = () => {
+const SystemActivity: FC = () => {
   const { data: data, send: loadData, error } = useRequest(EMSESP.readActivity);
 
   const { LL } = useI18nContext();
+
+  useLayoutTitle(LL.ACTIVITY());
 
   const stats_theme = tableTheme({
     Table: `
@@ -125,4 +127,4 @@ const Activity: FC = () => {
   return <SectionContent>{content()}</SectionContent>;
 };
 
-export default Activity;
+export default SystemActivity;

@@ -1,7 +1,7 @@
 import { Tab } from '@mui/material';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import NTPSettingsForm from './NTPSettingsForm';
-import NTPStatusForm from './NTPStatusForm';
+import NTPSettings from './NTPSettings';
+import NTPStatus from './NTPStatus';
 import type { FC } from 'react';
 
 import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from 'components';
@@ -21,12 +21,12 @@ const NetworkTime: FC = () => {
         <Tab value="status" label={LL.STATUS_OF('NTP')} />
       </RouterTabs>
       <Routes>
-        <Route path="status" element={<NTPStatusForm />} />
+        <Route path="status" element={<NTPStatus />} />
         <Route
           path="settings"
           element={
             <RequireAdmin>
-              <NTPSettingsForm />
+              <NTPSettings />
             </RequireAdmin>
           }
         />

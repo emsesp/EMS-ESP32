@@ -187,7 +187,7 @@ let ntp_settings = {
   tz_format: 'CET-1CEST,M3.5.0,M10.5.0/3'
 };
 const ntp_status = {
-  status: 1,
+  status: 2,
   utc_time: '2021-04-01T14:25:42Z',
   local_time: '2021-04-01T16:25:42',
   server: 'time.google.com',
@@ -316,7 +316,7 @@ const list_networks = {
 // OTA
 const OTA_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'otaSettings';
 let ota_settings = {
-  enabled: true,
+  enabled: false,
   port: 8266,
   password: 'ems-esp-neo'
 };
@@ -400,16 +400,20 @@ const ESPsystem_status = {
   arduino_version: 'ESP32 Arduino v2.0.14'
 };
 
+// TODO fix this
 const system_status = {
   emsesp_version: '3.6-demo',
   esp_platform: 'ESP32',
   status: 0,
   // status: 2,
-  tx_mode: 1,
   uptime: 77186,
   num_devices: 2,
   num_sensors: 1,
-  num_analogs: 1
+  num_analogs: 1,
+  free_heap: 143,
+  ntp_status: 2,
+  ota_status: false,
+  mqtt_status: true
 };
 
 let security_settings = {

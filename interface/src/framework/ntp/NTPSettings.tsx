@@ -8,7 +8,7 @@ import { selectedTimeZone, timeZoneSelectItems, TIME_ZONES } from './TZ';
 import type { ValidateFieldsError } from 'async-validator';
 import type { FC } from 'react';
 
-import type { NTPSettings } from 'types';
+import type { NTPSettingsType } from 'types';
 import * as NTPApi from 'api/ntp';
 import {
   BlockFormControlLabel,
@@ -23,7 +23,7 @@ import { updateValueDirty, useRest } from 'utils';
 import { validate } from 'validators';
 import { NTP_SETTINGS_VALIDATOR } from 'validators/ntp';
 
-const NTPSettingsForm: FC = () => {
+const NTPSettings: FC = () => {
   const {
     loadData,
     saving,
@@ -35,7 +35,7 @@ const NTPSettingsForm: FC = () => {
     blocker,
     saveData,
     errorMessage
-  } = useRest<NTPSettings>({
+  } = useRest<NTPSettingsType>({
     read: NTPApi.readNTPSettings,
     update: NTPApi.updateNTPSettings
   });
@@ -137,4 +137,4 @@ const NTPSettingsForm: FC = () => {
   );
 };
 
-export default NTPSettingsForm;
+export default NTPSettings;

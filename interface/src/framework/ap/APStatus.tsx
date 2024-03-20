@@ -7,14 +7,14 @@ import { useRequest } from 'alova';
 import type { Theme } from '@mui/material';
 import type { FC } from 'react';
 
-import type { APStatus } from 'types';
+import type { APStatusType } from 'types';
 import * as APApi from 'api/ap';
 import { ButtonRow, FormLoader, SectionContent } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
 import { APNetworkStatus } from 'types';
 
-export const apStatusHighlight = ({ status }: APStatus, theme: Theme) => {
+export const apStatusHighlight = ({ status }: APStatusType, theme: Theme) => {
   switch (status) {
     case APNetworkStatus.ACTIVE:
       return theme.palette.success.main;
@@ -27,14 +27,14 @@ export const apStatusHighlight = ({ status }: APStatus, theme: Theme) => {
   }
 };
 
-const APStatusForm: FC = () => {
+const APStatus: FC = () => {
   const { data: data, send: loadData, error } = useRequest(APApi.readAPStatus);
 
   const { LL } = useI18nContext();
 
   const theme = useTheme();
 
-  const apStatus = ({ status }: APStatus) => {
+  const apStatus = ({ status }: APStatusType) => {
     switch (status) {
       case APNetworkStatus.ACTIVE:
         return LL.ACTIVE();
@@ -102,4 +102,4 @@ const APStatusForm: FC = () => {
   return <SectionContent>{content()}</SectionContent>;
 };
 
-export default APStatusForm;
+export default APStatus;

@@ -322,7 +322,8 @@ const fr: Translation = {
   ACTIVELOW: 'Active Low', // TODO translate
   UNCHANGED: 'Unchanged', // TODO translate
   ALWAYS: 'Always', // TODO translate
-  ACTIVITY: 'Activity' // TODO translate
+  ACTIVITY: 'Activity', // TODO translate
+  CONFIGURE: 'Configure {0}' // TODO translate
 };
 
 export default fr;

@@ -28,7 +28,7 @@ import { isNetworkOpen, networkSecurityMode } from './WiFiNetworkSelector';
 import type { ValidateFieldsError } from 'async-validator';
 import type { FC } from 'react';
 
-import type { NetworkSettings } from 'types';
+import type { NetworkSettingsType } from 'types';
 import * as NetworkApi from 'api/network';
 import * as SystemApi from 'api/system';
 import {
@@ -48,7 +48,7 @@ import { updateValueDirty, useRest } from 'utils';
 import { validate } from 'validators';
 import { createNetworkSettingsValidator } from 'validators/network';
 
-const WiFiSettingsForm: FC = () => {
+const NetworkSettings: FC = () => {
   const { LL } = useI18nContext();
 
   const { selectedNetwork, deselectNetwork } = useContext(WiFiConnectionContext);
@@ -68,7 +68,7 @@ const WiFiSettingsForm: FC = () => {
     saveData,
     errorMessage,
     restartNeeded
-  } = useRest<NetworkSettings>({
+  } = useRest<NetworkSettingsType>({
     read: NetworkApi.readNetworkSettings,
     update: NetworkApi.updateNetworkSettings
   });
@@ -135,7 +135,7 @@ const WiFiSettingsForm: FC = () => {
 
     return (
       <>
-        <Typography sx={{ pt: 2 }} variant="h6" color="primary">
+        <Typography variant="h6" color="primary">
           WiFi
         </Typography>
         {selectedNetwork ? (
@@ -367,4 +367,4 @@ const WiFiSettingsForm: FC = () => {
   );
 };
 
-export default WiFiSettingsForm;
+export default NetworkSettings;

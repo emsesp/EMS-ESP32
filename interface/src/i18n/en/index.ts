@@ -322,7 +322,8 @@ const en: Translation = {
   ACTIVELOW: 'Active Low',
   UNCHANGED: 'Unchanged',
   ALWAYS: 'Always',
-  ACTIVITY: 'Activity'
+  ACTIVITY: 'Activity',
+  CONFIGURE: 'Configure {0}'
 };
 
 export default en;

@@ -28,14 +28,17 @@ export interface SystemStatus {
   emsesp_version: string;
   esp_platform: string;
   status: busConnectionStatus;
-  tx_mode: number;
   uptime: number;
   num_devices: number;
   num_sensors: number;
   num_analogs: number;
+  free_heap: number;
+  ntp_status: number;
+  ota_status: boolean;
+  mqtt_status: boolean;
 }
 
-export interface OTASettings {
+export interface OTASettingsType {
   enabled: boolean;
   port: number;
   password: string;

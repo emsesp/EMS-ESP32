@@ -1,7 +1,7 @@
 import { Tab } from '@mui/material';
 import { Navigate, Routes, Route } from 'react-router-dom';
-import ManageUsersForm from './ManageUsersForm';
-import SecuritySettingsForm from './SecuritySettingsForm';
+import ManageUsers from './ManageUsers';
+import SecuritySettings from './SecuritySettings';
 import type { FC } from 'react';
 
 import { RouterTabs, useRouterTab, useLayoutTitle } from 'components';
@@ -21,8 +21,8 @@ const Security: FC = () => {
         <Tab value="users" label={LL.MANAGE_USERS()} />
       </RouterTabs>
       <Routes>
-        <Route path="users" element={<ManageUsersForm />} />
-        <Route path="settings" element={<SecuritySettingsForm />} />
+        <Route path="users" element={<ManageUsers />} />
+        <Route path="settings" element={<SecuritySettings />} />
         <Route path="*" element={<Navigate replace to="settings" />} />
       </Routes>
     </>

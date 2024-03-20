@@ -11,18 +11,18 @@ import { useRequest } from 'alova';
 import type { Theme } from '@mui/material';
 import type { FC } from 'react';
 
-import type { NetworkStatus } from 'types';
+import type { NetworkStatusType } from 'types';
 import * as NetworkApi from 'api/network';
 import { ButtonRow, FormLoader, SectionContent } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
 import { NetworkConnectionStatus } from 'types';
 
-const isConnected = ({ status }: NetworkStatus) =>
+const isConnected = ({ status }: NetworkStatusType) =>
   status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED ||
   status === NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED;
 
-const networkStatusHighlight = ({ status }: NetworkStatus, theme: Theme) => {
+const networkStatusHighlight = ({ status }: NetworkStatusType, theme: Theme) => {
   switch (status) {
     case NetworkConnectionStatus.WIFI_STATUS_IDLE:
     case NetworkConnectionStatus.WIFI_STATUS_DISCONNECTED:
@@ -39,7 +39,7 @@ const networkStatusHighlight = ({ status }: NetworkStatus, theme: Theme) => {
   }
 };
 
-const networkQualityHighlight = ({ rssi }: NetworkStatus, theme: Theme) => {
+const networkQualityHighlight = ({ rssi }: NetworkStatusType, theme: Theme) => {
   if (rssi <= -85) {
     return theme.palette.error.main;
   } else if (rssi <= -75) {
@@ -48,17 +48,18 @@ const networkQualityHighlight = ({ rssi }: NetworkStatus, theme: Theme) => {
   return theme.palette.success.main;
 };
 
-export const isWiFi = ({ status }: NetworkStatus) => status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED;
-export const isEthernet = ({ status }: NetworkStatus) => status === NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED;
+export const isWiFi = ({ status }: NetworkStatusType) => status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED;
+export const isEthernet = ({ status }: NetworkStatusType) =>
+  status === NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED;
 
-const dnsServers = ({ dns_ip_1, dns_ip_2 }: NetworkStatus) => {
+const dnsServers = ({ dns_ip_1, dns_ip_2 }: NetworkStatusType) => {
   if (!dns_ip_1) {
     return 'none';
   }
   return dns_ip_1 + (!dns_ip_2 || dns_ip_2 === '0.0.0.0' ? '' : ',' + dns_ip_2);
 };
 
-const IPs = (status: NetworkStatus) => {
+const IPs = (status: NetworkStatusType) => {
   if (!status.local_ipv6 || status.local_ipv6 === '0000:0000:0000:0000:0000:0000:0000:0000') {
     return status.local_ip;
   }
@@ -68,14 +69,14 @@ const IPs = (status: NetworkStatus) => {
   return status.local_ip + ', ' + status.local_ipv6;
 };
 
-const NetworkStatusForm: FC = () => {
+const NetworkStatus: FC = () => {
   const { data: data, send: loadData, error } = useRequest(NetworkApi.readNetworkStatus);
 
   const { LL } = useI18nContext();
 
   const theme = useTheme();
 
-  const networkStatus = ({ status }: NetworkStatus) => {
+  const networkStatus = ({ status }: NetworkStatusType) => {
     switch (status) {
       case NetworkConnectionStatus.WIFI_STATUS_NO_SHIELD:
         return LL.INACTIVE(1);
@@ -196,4 +197,4 @@ const NetworkStatusForm: FC = () => {
   return <SectionContent>{content()}</SectionContent>;
 };
 
-export default NetworkStatusForm;
+export default NetworkStatus;

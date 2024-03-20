@@ -5,37 +5,20 @@ import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import ImportExportIcon from '@mui/icons-material/ImportExport';
 import LockIcon from '@mui/icons-material/Lock';
 import MemoryIcon from '@mui/icons-material/Memory';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
-import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import TuneIcon from '@mui/icons-material/Tune';
 
-import {
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Avatar,
-  ListItemButton,
-  ListItemIcon,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Box,
-  Divider
-} from '@mui/material';
+import { List, Button, Dialog, DialogActions, DialogContent, DialogTitle, Box } from '@mui/material';
 import { useRequest } from 'alova';
 import { useState, type FC } from 'react';
-import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import RestartMonitor from './system/RestartMonitor';
 import { dialogStyle } from 'CustomTheme';
 import * as SystemApi from 'api/system';
 import { ButtonRow, SectionContent, useLayoutTitle } from 'components';
+import ListMenuItem from 'components/layout/ListMenuItem';
 import { useI18nContext } from 'i18n/i18n-react';
 
 const Settings: FC = () => {
@@ -134,7 +117,7 @@ const Settings: FC = () => {
           disabled={processing}
           color="primary"
         >
-          EMS-ESP-Loader
+          EMS-ESP Loader
         </Button>
       </DialogActions>
     </Dialog>
@@ -170,169 +153,62 @@ const Settings: FC = () => {
   const content = () => (
     <>
       <List sx={{ borderRadius: 3, border: '2px solid grey' }}>
-        <ListItem
-          disablePadding
-          secondaryAction={
-            <ListItemIcon style={{ justifyContent: 'right', verticalAlign: 'middle' }}>
-              <NavigateNextIcon />
-            </ListItemIcon>
-          }
-        >
-          <ListItemButton component={Link} to="ems-esp">
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: '#134ba2', color: 'white' }}>
-                <TuneIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary={LL.APPLICATION_SETTINGS()} secondary="Modify EMS-ESP Application Settings" />
-          </ListItemButton>
-        </ListItem>
+        {/* TODO: translate */}
+        <ListMenuItem
+          icon={TuneIcon}
+          bgcolor="#134ba2"
+          label={LL.APPLICATION_SETTINGS()}
+          text="Modify EMS-ESP Application Settings"
+          to="ems-esp"
+        />
 
-        <ListItem
-          disablePadding
-          secondaryAction={
-            <ListItemIcon style={{ justifyContent: 'right', color: 'lightblue', verticalAlign: 'middle' }}>
-              <NavigateNextIcon />
-            </ListItemIcon>
-          }
-        >
-          <ListItemButton component={Link} to="network">
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: '#40828f', color: 'white' }}>
-                <SettingsEthernetIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary={LL.NETWORK(0)} secondary="Configure Network settings" />
-          </ListItemButton>
-        </ListItem>
+        <ListMenuItem
+          icon={SettingsEthernetIcon}
+          bgcolor="#40828f"
+          label={LL.NETWORK(0)}
+          text={LL.CONFIGURE(LL.SETTINGS_OF(LL.NETWORK(0)))}
+          to="network"
+        />
 
-        <ListItem
-          disablePadding
-          secondaryAction={
-            <ListItemIcon style={{ justifyContent: 'right', color: 'lightblue', verticalAlign: 'middle' }}>
-              <NavigateNextIcon />
-            </ListItemIcon>
-          }
-        >
-          <ListItemButton component={Link} to="ap">
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: '#5f9a5f', color: 'white' }}>
-                <SettingsInputAntennaIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary={LL.ACCESS_POINT(0)} secondary="Configure Access Point" />
-          </ListItemButton>
-        </ListItem>
+        <ListMenuItem
+          icon={AccessTimeIcon}
+          bgcolor="#5f9a5f"
+          label={LL.ACCESS_POINT(0)}
+          text={LL.CONFIGURE(LL.ACCESS_POINT(0))}
+          to="ap"
+        />
 
-        <ListItem
-          disablePadding
-          secondaryAction={
-            <ListItemIcon style={{ justifyContent: 'right', color: 'lightblue', verticalAlign: 'middle' }}>
-              <NavigateNextIcon />
-            </ListItemIcon>
-          }
-        >
-          <ListItemButton component={Link} to="ntp">
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: '#c5572c', color: 'white' }}>
-                <AccessTimeIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary="NTP" secondary="Configure Network Time" />
-          </ListItemButton>
-        </ListItem>
+        <ListMenuItem
+          icon={AccessTimeIcon}
+          bgcolor="#c5572c"
+          label="NTP"
+          text={LL.CONFIGURE(LL.LOCAL_TIME())}
+          to="ntp"
+        />
 
-        <ListItem
-          disablePadding
-          secondaryAction={
-            <ListItemIcon style={{ justifyContent: 'right', color: 'lightblue', verticalAlign: 'middle' }}>
-              <NavigateNextIcon />
-            </ListItemIcon>
-          }
-        >
-          <ListItemButton component={Link} to="mqtt">
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: '#68374d', color: 'white' }}>
-                <DeviceHubIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary="MQTT" secondary="Configure MQTT" />
-          </ListItemButton>
-        </ListItem>
+        <ListMenuItem icon={DeviceHubIcon} bgcolor="#68374d" label="MQTT" text={LL.CONFIGURE('MQTT')} to="mqtt" />
 
-        <ListItem
-          disablePadding
-          secondaryAction={
-            <ListItemIcon style={{ justifyContent: 'right', color: 'lightblue', verticalAlign: 'middle' }}>
-              <NavigateNextIcon />
-            </ListItemIcon>
-          }
-        >
-          <ListItemButton component={Link} to="ota">
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: '#efc34b', color: 'white' }}>
-                <CastIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary="OTA" secondary="Configure OTA" />
-          </ListItemButton>
-        </ListItem>
+        <ListMenuItem icon={CastIcon} bgcolor="#efc34b" label="OTA" text={LL.CONFIGURE('OTA')} to="ota" />
 
-        <ListItem
-          disablePadding
-          secondaryAction={
-            <ListItemIcon style={{ justifyContent: 'right', color: 'lightblue', verticalAlign: 'middle' }}>
-              <NavigateNextIcon />
-            </ListItemIcon>
-          }
-        >
-          <ListItemButton component={Link} to="security">
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: '#b1395f', color: 'white' }}>
-                <LockIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary={LL.SECURITY(0)} secondary="Add/Remove Users" />
-          </ListItemButton>
-        </ListItem>
+        {/* TODO: translate */}
+        <ListMenuItem icon={LockIcon} label={LL.SECURITY(0)} text="Add/Remove Users" to="security" />
 
-        <Divider />
+        <ListMenuItem
+          icon={MemoryIcon}
+          bgcolor="#b1395f"
+          label={LL.STATUS_OF('ESP32')}
+          text="ESP32 Information"
+          to="espsystemstatus"
+        />
 
-        <ListItem
-          disablePadding
-          secondaryAction={
-            <ListItemIcon style={{ justifyContent: 'right', color: 'lightblue', verticalAlign: 'middle' }}>
-              <NavigateNextIcon />
-            </ListItemIcon>
-          }
-        >
-          <ListItemButton component={Link} to="espsystemstatus">
-            <ListItemAvatar>
-              <Avatar sx={{ color: 'white' }}>
-                <MemoryIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary={LL.STATUS_OF('ESP32')} secondary="ESP32 Information" />
-          </ListItemButton>
-        </ListItem>
-
-        <ListItem
-          disablePadding
-          secondaryAction={
-            <ListItemIcon style={{ justifyContent: 'right', color: 'lightblue', verticalAlign: 'middle' }}>
-              <NavigateNextIcon />
-            </ListItemIcon>
-          }
-        >
-          <ListItemButton component={Link} to="upload">
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: '#5d89f7', color: 'white' }}>
-                <ImportExportIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary={LL.UPLOAD_DOWNLOAD()} secondary="Upload/Download Settings and Firmware" />
-          </ListItemButton>
-        </ListItem>
+        {/* TODO: translate */}
+        <ListMenuItem
+          icon={ImportExportIcon}
+          bgcolor="#5d89f7"
+          label={LL.UPLOAD_DOWNLOAD()}
+          text="Upload/Download Settings and Firmware"
+          to="upload"
+        />
       </List>
 
       {renderRestartDialog()}

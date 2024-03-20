@@ -308,7 +308,7 @@ const pl: BaseTranslation = {
   SCHEDULE_TIMER_2: 'co minutę',
   SCHEDULE_TIMER_3: 'co godzinę',
   CUSTOM_ENTITIES: '{{N|n|}}iestandardowe{{|j|}} encj{{e|i|}}',
-  ENTITIES_HELP_1: 'Zdefiniuj niestandardowe encje dla magistrali EMS.', // TODO translate
+  ENTITIES_HELP_1: 'Zdefiniuj niestandardowe encje dla magistrali EMS.',
   ENTITIES_UPDATED: 'Niestandardowe encje zostały uaktualnione.',
   WRITEABLE: 'Zapisywalna',
   SHOWING: 'Wyświetlane',
@@ -322,7 +322,8 @@ const pl: BaseTranslation = {
   ACTIVELOW: 'Wyzwalany stanem niskim',
   UNCHANGED: 'Zachowaj stan',
   ALWAYS: 'Zawsze',
-  ACTIVITY: 'Activity' // TODO translate
+  ACTIVITY: 'Aktywność',
+  CONFIGURE: 'Konfiguracja {0}'
 };
 
 export default pl;

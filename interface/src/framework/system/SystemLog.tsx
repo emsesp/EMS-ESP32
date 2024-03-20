@@ -11,7 +11,7 @@ import { addAccessTokenParameter } from 'api/authentication';
 import { EVENT_SOURCE_ROOT } from 'api/endpoints';
 import * as SystemApi from 'api/system';
 
-import { SectionContent, FormLoader, BlockFormControlLabel, BlockNavigation } from 'components';
+import { SectionContent, FormLoader, BlockFormControlLabel, BlockNavigation, useLayoutTitle } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
 import { LogLevel } from 'types';
@@ -49,6 +49,8 @@ const levelLabel = (level: LogLevel) => {
 
 const SystemLog: FC = () => {
   const { LL } = useI18nContext();
+
+  useLayoutTitle(LL.LOG_OF(''));
 
   const { loadData, data, updateDataValue, origData, dirtyFlags, setDirtyFlags, blocker, saveData, errorMessage } =
     useRest<LogSettings>({

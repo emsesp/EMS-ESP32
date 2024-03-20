@@ -7,25 +7,25 @@ import type { FC } from 'react';
 import { useRouterTab, RouterTabs, useLayoutTitle } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
-import Activity from 'project/Activity';
+import SystemActivity from 'project/SystemActivity';
 
-const Status: FC = () => {
+const System: FC = () => {
   const { LL } = useI18nContext();
 
-  useLayoutTitle(LL.STATUS_OF(''));
+  useLayoutTitle(LL.SYSTEM(0));
 
   const { routerTab } = useRouterTab();
 
   return (
     <>
       <RouterTabs value={routerTab}>
-        <Tab value="status" label={LL.SYSTEM(1)} />
+        <Tab value="status" label={LL.STATUS_OF('')} />
         <Tab value="activity" label={LL.ACTIVITY()} />
         <Tab value="log" label={LL.LOG_OF('')} />
       </RouterTabs>
       <Routes>
         <Route path="status" element={<SystemStatus />} />
-        <Route path="activity" element={<Activity />} />
+        <Route path="activity" element={<SystemActivity />} />
         <Route path="log" element={<SystemLog />} />
         <Route path="*" element={<Navigate replace to="status" />} />
       </Routes>
@@ -33,4 +33,4 @@ const Status: FC = () => {
   );
 };
 
-export default Status;
+export default System;

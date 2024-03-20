@@ -122,7 +122,7 @@ const nl: Translation = {
   BYPASS_TOKEN: 'API Access Token authenticatie uitschakelen',
   READONLY: 'Activeer read-only modus (blokkeert alle outgaande EMS Tx schrijf commandos)',
   UNDERCLOCK_CPU: 'Underclock CPU snelheid',
-  HEATINGOFF: 'Start boiler with forced heating off', // TODO translate
+  HEATINGOFF: 'Start ketel met geforceerde verwarming uit',
   ENABLE_SHOWER_TIMER: 'Activeer Douche Timer (tijdmeting)',
   ENABLE_SHOWER_ALERT: 'Activeer Douchemelding',
   TRIGGER_TIME: 'Trigger tijd',
@@ -272,7 +272,7 @@ const nl: Translation = {
   NETWORK_SCANNER: 'Netwerk Scanner',
   NETWORK_NO_WIFI: 'Geen WiFi networken gevonden',
   NETWORK_BLANK_SSID: 'laat leeg om WiFi uit te schakelen',
-  NETWORK_BLANK_BSSID: 'leave blank to use only SSID', // TODO translate
+  NETWORK_BLANK_BSSID: 'laat leeg om alleen SSID te bebruiken',
   TX_POWER: 'Tx Vermogen',
   HOSTNAME: 'Hostname',
   NETWORK_DISABLE_SLEEP: 'WiFi Sleep Mode uitzetten',
@@ -308,21 +308,22 @@ const nl: Translation = {
   SCHEDULE_TIMER_2: 'elke minuut',
   SCHEDULE_TIMER_3: 'elke huur',
   CUSTOM_ENTITIES: 'Aangepaste Entiteiten',
-  ENTITIES_HELP_1: 'Aangepaste entiteiten ophalen uit de EMS-bus', // TODO translate
+  ENTITIES_HELP_1: 'Aangepaste entiteiten ophalen uit de EMS-bus',
   ENTITIES_UPDATED: 'Entiteiten bijgewerkt',
   WRITEABLE: 'Beschrijfbare',
   SHOWING: 'Tonen',
   SEARCH: 'Zoek',
-  CERT: 'TLS rootcertificaat (laat leeg om TLS-insecure)', // TODO translate
+  CERT: 'TLS rootcertificaat (laat leeg om TLS-insecure)',
   ENABLE_TLS: 'Activeer TLS',
-  ON: 'On', // TODO translate
-  OFF: 'Off', // TODO translate
-  POLARITY: 'Polarity', // TODO translate
-  ACTIVEHIGH: 'Active High', // TODO translate
-  ACTIVELOW: 'Active Low', // TODO translate
-  UNCHANGED: 'Unchanged', // TODO translate
-  ALWAYS: 'Always', // TODO translate
-  ACTIVITY: 'Activity' // TODO translate
+  ON: 'Aan',
+  OFF: 'Uit',
+  POLARITY: 'Polariteit',
+  ACTIVEHIGH: 'Actiev Hoog',
+  ACTIVELOW: 'Actiev Laag',
+  UNCHANGED: 'Ongewijzigd',
+  ALWAYS: 'Altijd',
+  ACTIVITY: 'Activiteit',
+  CONFIGURE: '{0} Configureren'
 };
 
 export default nl;

@@ -14,9 +14,9 @@ import { useContext, useState } from 'react';
 
 import { useBlocker } from 'react-router-dom';
 import GenerateToken from './GenerateToken';
-import UserForm from './UserForm';
+import User from './User';
 import type { FC } from 'react';
-import type { SecuritySettings, User } from 'types';
+import type { SecuritySettingsType, UserType } from 'types';
 import * as SecurityApi from 'api/security';
 import { ButtonRow, FormLoader, MessageBox, SectionContent, BlockNavigation } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
@@ -24,13 +24,13 @@ import { useI18nContext } from 'i18n/i18n-react';
 import { useRest } from 'utils';
 import { createUserValidator } from 'validators';
 
-const ManageUsersForm: FC = () => {
-  const { loadData, saveData, saving, data, updateDataValue, errorMessage } = useRest<SecuritySettings>({
+const ManageUsers: FC = () => {
+  const { loadData, saveData, saving, data, updateDataValue, errorMessage } = useRest<SecuritySettingsType>({
     read: SecurityApi.readSecuritySettings,
     update: SecurityApi.updateSecuritySettings
   });
 
-  const [user, setUser] = useState<User>();
+  const [user, setUser] = useState<UserType>();
   const [creating, setCreating] = useState<boolean>(false);
   const [changed, setChanged] = useState<number>(0);
   const [generatingToken, setGeneratingToken] = useState<string>();
@@ -86,7 +86,7 @@ const ManageUsersForm: FC = () => {
 
     const noAdminConfigured = () => !data.users.find((u) => u.admin);
 
-    const removeUser = (toRemove: User) => {
+    const removeUser = (toRemove: UserType) => {
       const users = data.users.filter((u) => u.username !== toRemove.username);
       updateDataValue({ ...data, users });
       setChanged(changed + 1);
@@ -101,7 +101,7 @@ const ManageUsersForm: FC = () => {
       });
     };
 
-    const editUser = (toEdit: User) => {
+    const editUser = (toEdit: UserType) => {
       setCreating(false);
       setUser({ ...toEdit });
     };
@@ -219,7 +219,7 @@ const ManageUsersForm: FC = () => {
         </Box>
 
         <GenerateToken username={generatingToken} onClose={closeGenerateToken} />
-        <UserForm
+        <User
           user={user}
           setUser={setUser}
           creating={creating}
@@ -239,4 +239,4 @@ const ManageUsersForm: FC = () => {
   );
 };
 
-export default ManageUsersForm;
+export default ManageUsers;

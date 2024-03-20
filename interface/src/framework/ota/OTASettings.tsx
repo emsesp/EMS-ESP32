@@ -1,42 +1,51 @@
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
-import { Button } from '@mui/material';
-import { useContext, useState } from 'react';
+import { Button, Checkbox } from '@mui/material';
+import { useState } from 'react';
 import type { ValidateFieldsError } from 'async-validator';
 import type { FC } from 'react';
 
-import type { SecuritySettings } from 'types';
-import * as SecurityApi from 'api/security';
-import { ButtonRow, FormLoader, MessageBox, SectionContent, ValidatedPasswordField, BlockNavigation } from 'components';
+import type { OTASettingsType } from 'types';
+import * as SystemApi from 'api/system';
+import {
+  BlockFormControlLabel,
+  ButtonRow,
+  FormLoader,
+  SectionContent,
+  ValidatedPasswordField,
+  ValidatedTextField,
+  BlockNavigation,
+  useLayoutTitle
+} from 'components';
 
-import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
-import { updateValueDirty, useRest } from 'utils';
-import { SECURITY_SETTINGS_VALIDATOR, validate } from 'validators';
+import { numberValue, updateValueDirty, useRest } from 'utils';
 
-const SecuritySettingsForm: FC = () => {
-  const { LL } = useI18nContext();
+import { validate } from 'validators';
+import { OTA_SETTINGS_VALIDATOR } from 'validators/system';
 
-  const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
+const OTASettings: FC = () => {
   const {
     loadData,
+    saveData,
     saving,
-    data,
     updateDataValue,
+    data,
     origData,
     dirtyFlags,
     setDirtyFlags,
     blocker,
-    saveData,
     errorMessage
-  } = useRest<SecuritySettings>({
-    read: SecurityApi.readSecuritySettings,
-    update: SecurityApi.updateSecuritySettings
+  } = useRest<OTASettingsType>({
+    read: SystemApi.readOTASettings,
+    update: SystemApi.updateOTASettings
   });
 
-  const authenticatedContext = useContext(AuthenticatedContext);
+  const { LL } = useI18nContext();
 
   const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, updateDataValue);
+
+  const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
   const content = () => {
     if (!data) {
@@ -46,27 +55,42 @@ const SecuritySettingsForm: FC = () => {
     const validateAndSubmit = async () => {
       try {
         setFieldErrors(undefined);
-        await validate(SECURITY_SETTINGS_VALIDATOR, data);
+        await validate(OTA_SETTINGS_VALIDATOR, data);
         await saveData();
-        await authenticatedContext.refresh();
       } catch (errors: any) {
         setFieldErrors(errors);
       }
     };
 
+    useLayoutTitle('OTA');
+
     return (
       <>
-        <ValidatedPasswordField
+        <BlockFormControlLabel
+          control={<Checkbox name="enabled" checked={data.enabled} onChange={updateFormValue} />}
+          label={LL.ENABLE_OTA()}
+        />
+        <ValidatedTextField
           fieldErrors={fieldErrors}
-          name="jwt_secret"
-          label={LL.SU_PASSWORD()}
+          name="port"
+          label="Port"
           fullWidth
           variant="outlined"
-          value={data.jwt_secret}
+          value={numberValue(data.port)}
+          type="number"
           onChange={updateFormValue}
           margin="normal"
         />
-        <MessageBox level="info" message={LL.SU_TEXT()} mt={1} />
+        <ValidatedPasswordField
+          fieldErrors={fieldErrors}
+          name="password"
+          label={LL.PASSWORD()}
+          fullWidth
+          variant="outlined"
+          value={data.password}
+          onChange={updateFormValue}
+          margin="normal"
+        />
         {dirtyFlags && dirtyFlags.length !== 0 && (
           <ButtonRow>
             <Button
@@ -103,4 +127,4 @@ const SecuritySettingsForm: FC = () => {
   );
 };
 
-export default SecuritySettingsForm;
+export default OTASettings;

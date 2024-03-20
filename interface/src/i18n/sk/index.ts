@@ -308,7 +308,7 @@ const sk: Translation = {
   SCHEDULE_TIMER_2: 'každú minútu',
   SCHEDULE_TIMER_3: 'každú hodinu',
   CUSTOM_ENTITIES: 'Vlastné entity',
-  ENTITIES_HELP_1: 'Získavanie vlastných entít zo zbernice EMS', // TODO translate
+  ENTITIES_HELP_1: 'Získavanie vlastných entít zo zbernice EMS',
   ENTITIES_UPDATED: 'Aktualizované entity',
   WRITEABLE: 'Zapísateľný',
   SHOWING: 'Zobrazenie',
@@ -322,7 +322,8 @@ const sk: Translation = {
   ACTIVELOW: 'Aktívny Nízky',
   UNCHANGED: 'Nezmenené',
   ALWAYS: 'Vždy',
-  ACTIVITY: 'Activity' // TODO translate
+  ACTIVITY: 'Activity', // TODO translate
+  CONFIGURE: 'Configure {0}' // TODO translate
 };
 
 export default sk;

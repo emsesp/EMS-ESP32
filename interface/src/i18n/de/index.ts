@@ -322,8 +322,8 @@ const de: Translation = {
   ACTIVELOW: 'Aktiv Negativ',
   UNCHANGED: 'Unverändert',
   ALWAYS: 'Immer',
-  ACTIVITY: 'Activity' // TODO translate
-
+  ACTIVITY: 'Activity', // TODO translate
+  CONFIGURE: 'Configure {0}' // TODO translate
 };
 
 export default de;

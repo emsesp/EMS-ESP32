@@ -9,7 +9,7 @@ export enum MqttDisconnectReason {
   TCP_DISCONNECTED = 7
 }
 
-export interface MqttStatus {
+export interface MqttStatusType {
   enabled: boolean;
   connected: boolean;
   client_id: string;
@@ -19,7 +19,7 @@ export interface MqttStatus {
   connect_count: number;
 }
 
-export interface MqttSettings {
+export interface MqttSettingsType {
   enabled: boolean;
   host: string;
   port: number;

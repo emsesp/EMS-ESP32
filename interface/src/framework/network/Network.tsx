@@ -1,8 +1,8 @@
 import { Tab } from '@mui/material';
 import { useCallback, useState } from 'react';
 import { Navigate, Routes, Route, useNavigate } from 'react-router-dom';
-import NetworkSettingsForm from './NetworkSettingsForm';
-import NetworkStatusForm from './NetworkStatusForm';
+import NetworkSettings from './NetworkSettings';
+import NetworkStatus from './NetworkStatus';
 import { WiFiConnectionContext } from './WiFiConnectionContext';
 import WiFiNetworkScanner from './WiFiNetworkScanner';
 import type { FC } from 'react';
@@ -11,7 +11,7 @@ import type { WiFiNetwork } from 'types';
 import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
-const NetworkConnection: FC = () => {
+const Network: FC = () => {
   const { LL } = useI18nContext();
   useLayoutTitle(LL.NETWORK(0));
 
@@ -43,11 +43,11 @@ const NetworkConnection: FC = () => {
     >
       <RouterTabs value={routerTab}>
         <Tab value="settings" label={LL.SETTINGS_OF(LL.NETWORK(1))} />
-        <Tab value="scan" label={LL.NETWORK_SCAN()} />
         <Tab value="status" label={LL.STATUS_OF(LL.NETWORK(1))} />
+        <Tab value="scan" label={LL.NETWORK_SCAN()} />
       </RouterTabs>
       <Routes>
-        <Route path="status" element={<NetworkStatusForm />} />
+        <Route path="status" element={<NetworkStatus />} />
         <Route
           path="scan"
           element={
@@ -60,7 +60,7 @@ const NetworkConnection: FC = () => {
           path="settings"
           element={
             <RequireAdmin>
-              <NetworkSettingsForm />
+              <NetworkSettings />
             </RequireAdmin>
           }
         />
@@ -70,4 +70,4 @@ const NetworkConnection: FC = () => {
   );
 };
 
-export default NetworkConnection;
+export default Network;

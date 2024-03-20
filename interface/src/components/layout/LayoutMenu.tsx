@@ -2,12 +2,14 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import CategoryIcon from '@mui/icons-material/Category';
 import ConstructionIcon from '@mui/icons-material/Construction';
+import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import LiveHelpIcon from '@mui/icons-material/LiveHelp';
 import MoreTimeIcon from '@mui/icons-material/MoreTime';
 import PersonIcon from '@mui/icons-material/Person';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import SensorsIcon from '@mui/icons-material/Sensors';
 import SettingsIcon from '@mui/icons-material/Settings';
+
 import {
   Divider,
   List,
@@ -52,6 +54,8 @@ const LayoutMenu: FC = () => {
   const open = Boolean(anchorEl);
   const id = anchorEl ? 'app-menu-popover' : undefined;
 
+  const [menuOpen, setMenuOpen] = useState(true);
+
   const onLocaleSelected: ChangeEventHandler<HTMLInputElement> = async ({ target }) => {
     const loc = target.value as Locales;
     localStorage.setItem('lang', loc);
@@ -73,22 +77,70 @@ const LayoutMenu: FC = () => {
         <LayoutMenuItem icon={CategoryIcon} label={LL.DEVICES()} to={`/devices`} />
         <LayoutMenuItem icon={SensorsIcon} label={LL.SENSORS()} to={`/sensors`} />
         <Divider />
-        <LayoutMenuItem
-          icon={ConstructionIcon}
-          label={LL.CUSTOMIZATIONS()}
-          disabled={!me.admin}
-          to={`/customizations`}
-        />
-        <LayoutMenuItem icon={MoreTimeIcon} label={LL.SCHEDULER()} disabled={!me.admin} to={`/scheduler`} />
-        <LayoutMenuItem
-          icon={PlaylistAddIcon}
-          label={LL.CUSTOM_ENTITIES(0)}
-          disabled={!me.admin}
-          to={`/customentities`}
-        />
+
+        <Box
+          sx={{
+            bgcolor: menuOpen ? 'rgba(71, 98, 130, 0.2)' : null,
+            pb: menuOpen ? 2 : 0
+          }}
+        >
+          <ListItemButton
+            alignItems="flex-start"
+            onClick={() => setMenuOpen(!menuOpen)}
+            sx={{
+              pt: 2.5,
+              pb: menuOpen ? 0 : 2.5,
+              '&:hover, &:focus': { '& svg': { opacity: 1 } }
+            }}
+          >
+            <ListItemText
+              // TODO: translate
+              primary="Customize"
+              primaryTypographyProps={{
+                fontWeight: '600',
+                mb: '2px',
+                color: 'lightblue'
+              }}
+              // TODO: translate
+              secondary="Customizations, Scheduler and Custom Entities"
+              secondaryTypographyProps={{
+                noWrap: true,
+                fontSize: 12,
+                color: menuOpen ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0.5)'
+              }}
+              sx={{ my: 0 }}
+            />
+            <KeyboardArrowDown
+              sx={{
+                mr: -1,
+                opacity: 0,
+                transform: menuOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                transition: '0.2s'
+              }}
+            />
+          </ListItemButton>
+          {menuOpen && (
+            <>
+              <LayoutMenuItem
+                icon={ConstructionIcon}
+                label={LL.CUSTOMIZATIONS()}
+                disabled={!me.admin}
+                to={`/customizations`}
+              />
+              <LayoutMenuItem icon={MoreTimeIcon} label={LL.SCHEDULER()} disabled={!me.admin} to={`/scheduler`} />
+              <LayoutMenuItem
+                icon={PlaylistAddIcon}
+                label={LL.CUSTOM_ENTITIES(0)}
+                disabled={!me.admin}
+                to={`/customentities`}
+              />
+            </>
+          )}
+        </Box>
       </List>
+
       <List style={{ marginTop: `auto` }}>
-        <LayoutMenuItem icon={AssessmentIcon} label={LL.STATUS_OF('')} to="/status" />
+        <LayoutMenuItem icon={AssessmentIcon} label={LL.SYSTEM(0)} to="/system" />
         <LayoutMenuItem icon={SettingsIcon} label={LL.SETTINGS(0)} disabled={!me.admin} to="/settings" />
         <LayoutMenuItem icon={LiveHelpIcon} label={LL.HELP_OF('')} to={`/help`} />
       </List>

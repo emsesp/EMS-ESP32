@@ -8,7 +8,7 @@ import type Schema from 'async-validator';
 import type { ValidateFieldsError } from 'async-validator';
 import type { FC } from 'react';
 
-import type { User } from 'types';
+import type { UserType } from 'types';
 import { dialogStyle } from 'CustomTheme';
 import { BlockFormControlLabel, ValidatedPasswordField, ValidatedTextField } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
@@ -19,14 +19,14 @@ interface UserFormProps {
   creating: boolean;
   validator: Schema;
 
-  user?: User;
-  setUser: React.Dispatch<React.SetStateAction<User | undefined>>;
+  user?: UserType;
+  setUser: React.Dispatch<React.SetStateAction<UserType | undefined>>;
 
   onDoneEditing: () => void;
   onCancelEditing: () => void;
 }
 
-const UserForm: FC<UserFormProps> = ({ creating, validator, user, setUser, onDoneEditing, onCancelEditing }) => {
+const User: FC<UserFormProps> = ({ creating, validator, user, setUser, onDoneEditing, onCancelEditing }) => {
   const { LL } = useI18nContext();
 
   const updateFormValue = updateValue(setUser);
@@ -104,4 +104,4 @@ const UserForm: FC<UserFormProps> = ({ creating, validator, user, setUser, onDon
   );
 };
 
-export default UserForm;
+export default User;

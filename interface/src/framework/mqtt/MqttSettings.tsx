@@ -5,7 +5,7 @@ import { useState } from 'react';
 import type { ValidateFieldsError } from 'async-validator';
 import type { FC } from 'react';
 
-import type { MqttSettings } from 'types';
+import type { MqttSettingsType } from 'types';
 import * as MqttApi from 'api/mqtt';
 import {
   BlockFormControlLabel,
@@ -21,7 +21,7 @@ import { numberValue, updateValueDirty, useRest } from 'utils';
 
 import { createMqttSettingsValidator, validate } from 'validators';
 
-const MqttSettingsForm: FC = () => {
+const MqttSettings: FC = () => {
   const {
     loadData,
     saving,
@@ -33,7 +33,7 @@ const MqttSettingsForm: FC = () => {
     blocker,
     saveData,
     errorMessage
-  } = useRest<MqttSettings>({
+  } = useRest<MqttSettingsType>({
     read: MqttApi.readMqttSettings,
     update: MqttApi.updateMqttSettings
   });
@@ -456,4 +456,4 @@ const MqttSettingsForm: FC = () => {
   );
 };
 
-export default MqttSettingsForm;
+export default MqttSettings;

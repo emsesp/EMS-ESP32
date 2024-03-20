@@ -8,13 +8,13 @@ import { useRequest } from 'alova';
 import type { Theme } from '@mui/material';
 import type { FC } from 'react';
 
-import type { MqttStatus } from 'types';
+import type { MqttStatusType } from 'types';
 import * as MqttApi from 'api/mqtt';
 import { ButtonRow, FormLoader, SectionContent } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import { MqttDisconnectReason } from 'types';
 
-export const mqttStatusHighlight = ({ enabled, connected }: MqttStatus, theme: Theme) => {
+export const mqttStatusHighlight = ({ enabled, connected }: MqttStatusType, theme: Theme) => {
   if (!enabled) {
     return theme.palette.info.main;
   }
@@ -24,27 +24,27 @@ export const mqttStatusHighlight = ({ enabled, connected }: MqttStatus, theme: T
   return theme.palette.error.main;
 };
 
-export const mqttPublishHighlight = ({ mqtt_fails }: MqttStatus, theme: Theme) => {
+export const mqttPublishHighlight = ({ mqtt_fails }: MqttStatusType, theme: Theme) => {
   if (mqtt_fails === 0) return theme.palette.success.main;
   if (mqtt_fails < 10) return theme.palette.warning.main;
 
   return theme.palette.error.main;
 };
 
-export const mqttQueueHighlight = ({ mqtt_queued }: MqttStatus, theme: Theme) => {
+export const mqttQueueHighlight = ({ mqtt_queued }: MqttStatusType, theme: Theme) => {
   if (mqtt_queued <= 1) return theme.palette.success.main;
 
   return theme.palette.warning.main;
 };
 
-const MqttStatusForm: FC = () => {
+const MqttStatus: FC = () => {
   const { data: data, send: loadData, error } = useRequest(MqttApi.readMqttStatus);
 
   const { LL } = useI18nContext();
 
   const theme = useTheme();
 
-  const mqttStatus = ({ enabled, connected, connect_count }: MqttStatus) => {
+  const mqttStatus = ({ enabled, connected, connect_count }: MqttStatusType) => {
     if (!enabled) {
       return LL.NOT_ENABLED();
     }
@@ -54,7 +54,7 @@ const MqttStatusForm: FC = () => {
     return LL.DISCONNECTED() + (connect_count > 1 ? ' (' + connect_count + ')' : '');
   };
 
-  const disconnectReason = ({ disconnect_reason }: MqttStatus) => {
+  const disconnectReason = ({ disconnect_reason }: MqttStatusType) => {
     switch (disconnect_reason) {
       case MqttDisconnectReason.TCP_DISCONNECTED:
         return 'TCP disconnected';
@@ -149,4 +149,4 @@ const MqttStatusForm: FC = () => {
   return <SectionContent>{content()}</SectionContent>;
 };
 
-export default MqttStatusForm;
+export default MqttStatus;

@@ -139,7 +139,7 @@ const ApplicationSettings: FC = () => {
 
     return (
       <>
-        <Typography sx={{ pt: 2 }} variant="h6" color="primary">
+        <Typography sx={{ pb: 1 }} variant="h6" color="primary">
           {LL.INTERFACE_BOARD_PROFILE()}
         </Typography>
         <Box color="warning.main">

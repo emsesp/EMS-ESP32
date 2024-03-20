@@ -1,7 +1,9 @@
 import BuildIcon from '@mui/icons-material/Build';
 import CancelIcon from '@mui/icons-material/Cancel';
+import CastIcon from '@mui/icons-material/Cast';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+import MemoryIcon from '@mui/icons-material/Memory';
 import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import TimerIcon from '@mui/icons-material/Timer';
@@ -29,10 +31,12 @@ import { toast } from 'react-toastify';
 import { dialogStyle } from 'CustomTheme';
 import * as SystemApi from 'api/system';
 import { FormLoader, SectionContent, useLayoutTitle } from 'components';
+import ListMenuItem from 'components/layout/ListMenuItem';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import * as EMSESP from 'project/api';
 import { busConnectionStatus } from 'project/types';
+import { NTPSyncStatus } from 'types';
 
 const SystemStatus: FC = () => {
   const { LL } = useI18nContext();
@@ -71,6 +75,10 @@ const SystemStatus: FC = () => {
     return formatted;
   };
 
+  function formatNumber(num: number) {
+    return new Intl.NumberFormat().format(num);
+  }
+
   const busStatus = () => {
     if (data) {
       switch (data.status) {
@@ -85,8 +93,6 @@ const SystemStatus: FC = () => {
     return 'Unknown';
   };
 
-  // export const isConnected = ({ status }: Status) => status !== busConnectionStatus.BUS_STATUS_OFFLINE;
-
   const busStatusHighlight = () => {
     switch (data.status) {
       case busConnectionStatus.BUS_STATUS_TX_ERRORS:
@@ -99,6 +105,34 @@ const SystemStatus: FC = () => {
         return theme.palette.warning.main;
     }
   };
+
+  const ntpStatus = () => {
+    switch (data.ntp_status) {
+      case NTPSyncStatus.NTP_DISABLED:
+        return LL.NOT_ENABLED();
+      case NTPSyncStatus.NTP_INACTIVE:
+        return LL.INACTIVE(0);
+      case NTPSyncStatus.NTP_ACTIVE:
+        return LL.ACTIVE();
+      default:
+        return LL.UNKNOWN();
+    }
+  };
+
+  const ntpStatusHighlight = () => {
+    switch (data.ntp_status) {
+      case NTPSyncStatus.NTP_DISABLED:
+        return theme.palette.info.main;
+      case NTPSyncStatus.NTP_INACTIVE:
+        return theme.palette.error.main;
+      case NTPSyncStatus.NTP_ACTIVE:
+        return theme.palette.success.main;
+      default:
+        return theme.palette.error.main;
+    }
+  };
+
+  const activeHighlight = (value: boolean) => (value ? theme.palette.success.main : theme.palette.info.main);
 
   const scan = async () => {
     await scanDevices()
@@ -136,27 +170,7 @@ const SystemStatus: FC = () => {
         <List>
           <ListItem>
             <ListItemAvatar>
-              <Avatar>
-                <BuildIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary={LL.EMS_ESP_VER()} secondary={data.emsesp_version} />
-          </ListItem>
-          <Divider variant="inset" component="li" />
-
-          <ListItem>
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: '#5f9a5f', color: 'white' }}>
-                <TimerIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary={LL.UPTIME()} secondary={formatDurationSec(data.uptime)} />
-          </ListItem>
-          <Divider variant="inset" component="li" />
-
-          <ListItem>
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: busStatusHighlight() }}>
+              <Avatar sx={{ bgcolor: busStatusHighlight(), color: 'white' }}>
                 <DirectionsBusIcon />
               </Avatar>
             </ListItemAvatar>
@@ -166,7 +180,7 @@ const SystemStatus: FC = () => {
 
           <ListItem>
             <ListItemAvatar>
-              <Avatar sx={{ bgcolor: theme.palette.success.main }}>
+              <Avatar sx={{ bgcolor: '#5d89f7', color: 'white' }}>
                 <DeviceHubIcon />
               </Avatar>
             </ListItemAvatar>
@@ -191,7 +205,67 @@ const SystemStatus: FC = () => {
               </Button>
             )}
           </ListItem>
+          <Divider variant="inset" component="li" />
 
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar sx={{ bgcolor: '#c5572c', color: 'white' }}>
+                <TimerIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary={LL.UPTIME()} secondary={formatDurationSec(data.uptime)} />
+          </ListItem>
+          <Divider variant="inset" component="li" />
+
+          <ListMenuItem
+            disabled={!me.admin}
+            icon={BuildIcon}
+            bgcolor="#134ba2"
+            label={LL.EMS_ESP_VER()}
+            text={data.emsesp_version}
+            to="/settings/ems-esp"
+          />
+          <Divider variant="inset" component="li" />
+
+          {/* TODO: translate */}
+          <ListMenuItem
+            disabled={!me.admin}
+            icon={MemoryIcon}
+            bgcolor="#68374d"
+            label="System Memory"
+            text={formatNumber(data.free_heap) + ' KB'}
+            to="/settings/espsystemstatus"
+          />
+          <Divider variant="inset" component="li" />
+
+          <ListMenuItem
+            disabled={!me.admin}
+            icon={DeviceHubIcon}
+            bgcolor={activeHighlight(data.mqtt_status)}
+            label={LL.STATUS_OF('MQTT')}
+            text={data.mqtt_status ? LL.ACTIVE() : LL.INACTIVE(0)}
+            to="/settings/mqtt/status"
+          />
+          <Divider variant="inset" component="li" />
+
+          <ListMenuItem
+            disabled={!me.admin}
+            icon={DeviceHubIcon}
+            bgcolor={ntpStatusHighlight()}
+            label={LL.STATUS_OF('NTP')}
+            text={ntpStatus()}
+            to="/settings/ntp/status"
+          />
+          <Divider variant="inset" component="li" />
+
+          <ListMenuItem
+            disabled={!me.admin}
+            icon={CastIcon}
+            bgcolor={activeHighlight(data.ota_status)}
+            label={LL.STATUS_OF('OTA')}
+            text={data.ota_status ? LL.ACTIVE() : LL.INACTIVE(0)}
+            to="/settings/ota"
+          />
           <Divider variant="inset" component="li" />
         </List>
 

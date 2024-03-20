@@ -1,7 +1,7 @@
 import { Tab } from '@mui/material';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import MqttSettingsForm from './MqttSettingsForm';
-import MqttStatusForm from './MqttStatusForm';
+import MqttSettings from './MqttSettings';
+import MqttStatus from './MqttStatus';
 import type { FC } from 'react';
 
 import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from 'components';
@@ -22,12 +22,12 @@ const Mqtt: FC = () => {
         <Tab value="status" label={LL.STATUS_OF('MQTT')} />
       </RouterTabs>
       <Routes>
-        <Route path="status" element={<MqttStatusForm />} />
+        <Route path="status" element={<MqttStatus />} />
         <Route
           path="settings"
           element={
             <RequireAdmin>
-              <MqttSettingsForm />
+              <MqttSettings />
             </RequireAdmin>
           }
         />

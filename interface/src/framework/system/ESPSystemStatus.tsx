@@ -133,6 +133,7 @@ const ESPSystemStatus: FC = () => {
               secondary={formatNumber(data.fs_used) + ' KB / ' + formatNumber(data.fs_free) + ' KB'}
             />
           </ListItem>
+          <Divider variant="inset" component="li" />
         </List>
         <Box display="flex" flexWrap="wrap">
           <Box flexGrow={1} sx={{ '& button': { mt: 2 } }}>

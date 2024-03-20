@@ -27,7 +27,7 @@ import { toast } from 'react-toastify';
 import type { Theme } from '@mui/material';
 import type { FC } from 'react';
 
-import type { NTPStatus } from 'types';
+import type { NTPStatusType } from 'types';
 import { dialogStyle } from 'CustomTheme';
 import * as NTPApi from 'api/ntp';
 import { ButtonRow, FormLoader, SectionContent } from 'components';
@@ -36,23 +36,7 @@ import { useI18nContext } from 'i18n/i18n-react';
 import { NTPSyncStatus } from 'types';
 import { formatDateTime, formatLocalDateTime } from 'utils';
 
-export const isNtpActive = ({ status }: NTPStatus) => status === NTPSyncStatus.NTP_ACTIVE;
-export const isNtpEnabled = ({ status }: NTPStatus) => status !== NTPSyncStatus.NTP_DISABLED;
-
-export const ntpStatusHighlight = ({ status }: NTPStatus, theme: Theme) => {
-  switch (status) {
-    case NTPSyncStatus.NTP_DISABLED:
-      return theme.palette.info.main;
-    case NTPSyncStatus.NTP_INACTIVE:
-      return theme.palette.error.main;
-    case NTPSyncStatus.NTP_ACTIVE:
-      return theme.palette.success.main;
-    default:
-      return theme.palette.error.main;
-  }
-};
-
-const NTPStatusForm: FC = () => {
+const NTPStatus: FC = () => {
   const { data: data, send: loadData, error } = useRequest(NTPApi.readNTPStatus);
 
   const [localTime, setLocalTime] = useState<string>('');
@@ -67,6 +51,22 @@ const NTPStatusForm: FC = () => {
 
   NTPApi.updateTime;
 
+  const isNtpActive = ({ status }: NTPStatusType) => status === NTPSyncStatus.NTP_ACTIVE;
+  const isNtpEnabled = ({ status }: NTPStatusType) => status !== NTPSyncStatus.NTP_DISABLED;
+
+  const ntpStatusHighlight = ({ status }: NTPStatusType, theme: Theme) => {
+    switch (status) {
+      case NTPSyncStatus.NTP_DISABLED:
+        return theme.palette.info.main;
+      case NTPSyncStatus.NTP_INACTIVE:
+        return theme.palette.error.main;
+      case NTPSyncStatus.NTP_ACTIVE:
+        return theme.palette.success.main;
+      default:
+        return theme.palette.error.main;
+    }
+  };
+
   const updateLocalTime = (event: React.ChangeEvent<HTMLInputElement>) => setLocalTime(event.target.value);
 
   const openSetTime = () => {
@@ -76,7 +76,7 @@ const NTPStatusForm: FC = () => {
 
   const theme = useTheme();
 
-  const ntpStatus = ({ status }: NTPStatus) => {
+  const ntpStatus = ({ status }: NTPStatusType) => {
     switch (status) {
       case NTPSyncStatus.NTP_DISABLED:
         return LL.NOT_ENABLED();
@@ -217,4 +217,4 @@ const NTPStatusForm: FC = () => {
   return <SectionContent>{content()}</SectionContent>;
 };
 
-export default NTPStatusForm;
+export default NTPStatus;

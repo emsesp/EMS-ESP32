@@ -410,7 +410,7 @@ const Sensors: FC = () => {
     <SectionContent>
       {sensorData.ts.length > 0 && (
         <>
-          <Typography sx={{ pt: 2, pb: 1 }} variant="h6" color="secondary">
+          <Typography sx={{ pb: 1 }} variant="h6" color="secondary">
             {LL.TEMP_SENSORS()}
           </Typography>
           <RenderTemperatureSensors />
