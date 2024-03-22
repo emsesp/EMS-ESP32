@@ -627,7 +627,7 @@ const Devices: FC = () => {
           progress={submitting}
         />
       )}
-      <ButtonRow>
+      <ButtonRow mt={1}>
         <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={refreshData}>
           {LL.REFRESH()}
         </Button>

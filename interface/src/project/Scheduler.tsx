@@ -270,7 +270,7 @@ const Scheduler: FC = () => {
         />
       )}
 
-      <Box display="flex" flexWrap="wrap">
+      <Box mt={1} display="flex" flexWrap="wrap">
         <Box flexGrow={1}>
           {numChanges !== 0 && (
             <ButtonRow>

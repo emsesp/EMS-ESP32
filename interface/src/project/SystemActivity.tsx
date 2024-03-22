@@ -10,7 +10,7 @@ import type { Stat } from './types';
 
 import type { Translation } from 'i18n/i18n-types';
 import type { FC } from 'react';
-import { FormLoader, SectionContent, useLayoutTitle } from 'components';
+import { ButtonRow, FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
 const SystemActivity: FC = () => {
@@ -115,11 +115,11 @@ const SystemActivity: FC = () => {
             </>
           )}
         </Table>
-        <Box flexGrow={1} sx={{ '& button': { mt: 2 } }}>
+        <ButtonRow mt={1}>
           <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
             {LL.REFRESH()}
           </Button>
-        </Box>
+        </ButtonRow>
       </>
     );
   };

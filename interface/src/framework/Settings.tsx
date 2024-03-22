@@ -214,7 +214,7 @@ const Settings: FC = () => {
       {renderRestartDialog()}
       {renderFactoryResetDialog()}
 
-      <Box display="flex" flexWrap="wrap">
+      <Box mt={1} display="flex" flexWrap="wrap">
         <Box flexGrow={1} sx={{ '& button': { mt: 2 } }}>
           <ButtonRow>
             <Button

@@ -543,7 +543,7 @@ const Customization: FC = () => {
               </ButtonRow>
             )}
           </Box>
-          <ButtonRow>
+          <ButtonRow mt={1}>
             <Button
               startIcon={<SettingsBackupRestoreIcon />}
               variant="outlined"

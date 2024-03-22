@@ -440,7 +440,7 @@ const Sensors: FC = () => {
         </>
       )}
       <ButtonRow>
-        <Box mt={2} display="flex" flexWrap="wrap">
+        <Box mt={1} display="flex" flexWrap="wrap">
           <Box flexGrow={1}>
             <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={fetchSensorData}>
               {LL.REFRESH()}
