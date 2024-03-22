@@ -222,7 +222,7 @@ const SystemStatus: FC = () => {
             bgcolor="#134ba2"
             label={LL.EMS_ESP_VER()}
             text={data.emsesp_version}
-            to="/settings/ems-esp"
+            to="/settings/upload"
           />
           <Divider variant="inset" component="li" />
 
