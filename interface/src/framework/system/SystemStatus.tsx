@@ -83,7 +83,7 @@ const SystemStatus: FC = () => {
     if (data) {
       switch (data.status) {
         case busConnectionStatus.BUS_STATUS_CONNECTED:
-          return LL.CONNECTED(0);
+          return LL.CONNECTED(0) + ' (' + formatDurationSec(data.bus_uptime) + ')';
         case busConnectionStatus.BUS_STATUS_TX_ERRORS:
           return LL.TX_ISSUES();
         case busConnectionStatus.BUS_STATUS_OFFLINE:
@@ -178,6 +178,15 @@ const SystemStatus: FC = () => {
           </ListItem>
           <Divider variant="inset" component="li" />
 
+          <ListMenuItem
+            disabled={!me.admin}
+            icon={TimerIcon}
+            bgcolor="#c5572c"
+            label={LL.UPTIME()}
+            text={formatDurationSec(data.uptime)}
+          />
+          <Divider variant="inset" component="li" />
+
           <ListItem>
             <ListItemAvatar>
               <Avatar sx={{ bgcolor: '#5d89f7', color: 'white' }}>
@@ -204,16 +213,6 @@ const SystemStatus: FC = () => {
                 {LL.SCAN_DEVICES()}
               </Button>
             )}
-          </ListItem>
-          <Divider variant="inset" component="li" />
-
-          <ListItem>
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: '#c5572c', color: 'white' }}>
-                <TimerIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary={LL.UPTIME()} secondary={formatDurationSec(data.uptime)} />
           </ListItem>
           <Divider variant="inset" component="li" />
 

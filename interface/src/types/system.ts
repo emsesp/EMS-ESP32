@@ -29,6 +29,7 @@ export interface SystemStatus {
   esp_platform: string;
   status: busConnectionStatus;
   uptime: number;
+  bus_uptime: number;
   num_devices: number;
   num_sensors: number;
   num_analogs: number;

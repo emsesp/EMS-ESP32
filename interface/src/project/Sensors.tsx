@@ -408,24 +408,19 @@ const Sensors: FC = () => {
 
   return (
     <SectionContent>
-      {sensorData.ts.length > 0 && (
-        <>
-          <Typography sx={{ pb: 1 }} variant="h6" color="secondary">
-            {LL.TEMP_SENSORS()}
-          </Typography>
-          <RenderTemperatureSensors />
-          {selectedTemperatureSensor && (
-            <DashboardSensorsTemperatureDialog
-              open={temperatureDialogOpen}
-              onClose={onTemperatureDialogClose}
-              onSave={onTemperatureDialogSave}
-              selectedItem={selectedTemperatureSensor}
-              validator={temperatureSensorItemValidation()}
-            />
-          )}
-        </>
+      <Typography sx={{ pb: 1 }} variant="h6" color="secondary">
+        {LL.TEMP_SENSORS()}
+      </Typography>
+      <RenderTemperatureSensors />
+      {selectedTemperatureSensor && (
+        <DashboardSensorsTemperatureDialog
+          open={temperatureDialogOpen}
+          onClose={onTemperatureDialogClose}
+          onSave={onTemperatureDialogSave}
+          selectedItem={selectedTemperatureSensor}
+          validator={temperatureSensorItemValidation()}
+        />
       )}
-
       {sensorData?.analog_enabled === true && (
         <>
           <Typography sx={{ pt: 4, pb: 1 }} variant="h6" color="secondary">
@@ -444,7 +439,6 @@ const Sensors: FC = () => {
           )}
         </>
       )}
-
       <ButtonRow>
         <Box mt={2} display="flex" flexWrap="wrap">
           <Box flexGrow={1}>

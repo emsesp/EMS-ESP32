@@ -407,6 +407,7 @@ const system_status = {
   status: 0,
   // status: 2,
   uptime: 77186,
+  bus_uptime: 77121,
   num_devices: 2,
   num_sensors: 1,
   num_analogs: 1,

@@ -49,7 +49,7 @@
     "react-toastify": "^10.0.5",
     "sockette": "^2.0.6",
     "typesafe-i18n": "^5.26.2",
-    "typescript": "^5.4.2"
+    "typescript": "^5.4.3"
   },
   "devDependencies": {
     "@preact/compat": "^17.1.2",
@@ -70,7 +70,7 @@
     "prettier": "^3.2.5",
     "rollup-plugin-visualizer": "^5.12.0",
     "terser": "^5.29.2",
-    "vite": "^5.2.2",
+    "vite": "^5.2.3",
     "vite-plugin-imagemin": "^0.6.1",
     "vite-tsconfig-paths": "^4.3.2"
   },

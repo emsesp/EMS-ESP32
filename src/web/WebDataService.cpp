@@ -157,7 +157,6 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
     }
 
     root["analog_enabled"] = EMSESP::analog_enabled();
-    root["platform"]       = EMSESP_PLATFORM;
 
     response->setLength();
     request->send(response);

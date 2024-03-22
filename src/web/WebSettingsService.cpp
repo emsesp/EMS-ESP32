@@ -87,6 +87,7 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     if ((String)EMSESP_DEFAULT_BOARD_PROFILE != "default" && EMSESP::nvs_.getString("boot") == "") {
         EMSESP::nvs_.putString("boot", (const char *)EMSESP_DEFAULT_BOARD_PROFILE);
     }
+
     /*
 #if CONFIG_IDF_TARGET_ESP32C3
     settings.board_profile = root["board_profile"] | "C3MINI";

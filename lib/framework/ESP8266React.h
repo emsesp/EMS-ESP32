@@ -13,7 +13,6 @@
 #include "UploadFileService.h"
 #include "RestartService.h"
 #include "SecuritySettingsService.h"
-#include "SystemStatus.h"
 #include "WiFiScanner.h"
 #include "NetworkSettingsService.h"
 #include "NetworkStatus.h"
@@ -87,7 +86,6 @@ class ESP8266React {
     AuthenticationService   _authenticationService;
     RestartService          _restartService;
     FactoryResetService     _factoryResetService;
-    SystemStatus            _systemStatus;
 };
 
 #endif
