@@ -119,6 +119,10 @@ class ESP8266React {
         return _mqttClient;
     }
 
+    bool apStatus() {
+        return false;
+    }
+
     void setWill(const char * will_topic) {
     }
     void onMessage(espMqttClientTypes::OnMessageCallback callback) {

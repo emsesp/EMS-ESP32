@@ -400,7 +400,6 @@ const ESPsystem_status = {
   arduino_version: 'ESP32 Arduino v2.0.14'
 };
 
-// TODO fix this
 const system_status = {
   emsesp_version: '3.6-demo',
   esp_platform: 'ESP32',
@@ -414,7 +413,8 @@ const system_status = {
   free_heap: 143,
   ntp_status: 2,
   ota_status: false,
-  mqtt_status: true
+  mqtt_status: true,
+  ap_status: false
 };
 
 let security_settings = {

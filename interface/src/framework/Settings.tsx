@@ -8,6 +8,7 @@ import MemoryIcon from '@mui/icons-material/Memory';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
+import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import TuneIcon from '@mui/icons-material/Tune';
 
 import { List, Button, Dialog, DialogActions, DialogContent, DialogTitle, Box } from '@mui/material';
@@ -171,7 +172,7 @@ const Settings: FC = () => {
         />
 
         <ListMenuItem
-          icon={AccessTimeIcon}
+          icon={SettingsInputAntennaIcon}
           bgcolor="#5f9a5f"
           label={LL.ACCESS_POINT(0)}
           text={LL.CONFIGURE(LL.ACCESS_POINT(0))}

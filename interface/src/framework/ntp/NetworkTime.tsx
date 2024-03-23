@@ -4,7 +4,7 @@ import NTPSettings from './NTPSettings';
 import NTPStatus from './NTPStatus';
 import type { FC } from 'react';
 
-import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from 'components';
+import { RouterTabs, useLayoutTitle, useRouterTab } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
@@ -22,14 +22,7 @@ const NetworkTime: FC = () => {
       </RouterTabs>
       <Routes>
         <Route path="status" element={<NTPStatus />} />
-        <Route
-          path="settings"
-          element={
-            <RequireAdmin>
-              <NTPSettings />
-            </RequireAdmin>
-          }
-        />
+        <Route path="settings" element={<NTPSettings />} />
         <Route path="*" element={<Navigate replace to="settings" />} />
       </Routes>
     </>

@@ -8,7 +8,7 @@ import WiFiNetworkScanner from './WiFiNetworkScanner';
 import type { FC } from 'react';
 
 import type { WiFiNetwork } from 'types';
-import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from 'components';
+import { RouterTabs, useLayoutTitle, useRouterTab } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
 const Network: FC = () => {
@@ -48,22 +48,8 @@ const Network: FC = () => {
       </RouterTabs>
       <Routes>
         <Route path="status" element={<NetworkStatus />} />
-        <Route
-          path="scan"
-          element={
-            <RequireAdmin>
-              <WiFiNetworkScanner />
-            </RequireAdmin>
-          }
-        />
-        <Route
-          path="settings"
-          element={
-            <RequireAdmin>
-              <NetworkSettings />
-            </RequireAdmin>
-          }
-        />
+        <Route path="scan" element={<WiFiNetworkScanner />} />
+        <Route path="settings" element={<NetworkSettings />} />
         <Route path="*" element={<Navigate replace to="settings" />} />
       </Routes>
     </WiFiConnectionContext.Provider>

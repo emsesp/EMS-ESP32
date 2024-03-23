@@ -4,7 +4,7 @@ import { Navigate, Routes, Route } from 'react-router-dom';
 import APSettings from './APSettings';
 import APStatus from './APStatus';
 import type { FC } from 'react';
-import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from 'components';
+import { RouterTabs, useLayoutTitle, useRouterTab } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
@@ -23,14 +23,7 @@ const AccessPoint: FC = () => {
       </RouterTabs>
       <Routes>
         <Route path="status" element={<APStatus />} />
-        <Route
-          path="settings"
-          element={
-            <RequireAdmin>
-              <APSettings />
-            </RequireAdmin>
-          }
-        />
+        <Route path="settings" element={<APSettings />} />
         <Route path="*" element={<Navigate replace to="settings" />} />
       </Routes>
     </>

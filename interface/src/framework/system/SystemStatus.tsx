@@ -1,3 +1,4 @@
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import BuildIcon from '@mui/icons-material/Build';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CastIcon from '@mui/icons-material/Cast';
@@ -6,6 +7,7 @@ import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import MemoryIcon from '@mui/icons-material/Memory';
 import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import TimerIcon from '@mui/icons-material/Timer';
 
 import {
@@ -249,7 +251,7 @@ const SystemStatus: FC = () => {
 
           <ListMenuItem
             disabled={!me.admin}
-            icon={DeviceHubIcon}
+            icon={AccessTimeIcon}
             bgcolor={ntpStatusHighlight()}
             label={LL.STATUS_OF('NTP')}
             text={ntpStatus()}
@@ -264,6 +266,16 @@ const SystemStatus: FC = () => {
             label={LL.STATUS_OF('OTA')}
             text={data.ota_status ? LL.ACTIVE() : LL.INACTIVE(0)}
             to="/settings/ota"
+          />
+          <Divider variant="inset" component="li" />
+
+          <ListMenuItem
+            disabled={!me.admin}
+            icon={SettingsInputAntennaIcon}
+            bgcolor={activeHighlight(data.ota_status)}
+            label={LL.ACCESS_POINT(0)}
+            text={data.ap_status ? LL.ACTIVE() : LL.INACTIVE(0)}
+            to="/settings/ap/status"
           />
           <Divider variant="inset" component="li" />
         </List>

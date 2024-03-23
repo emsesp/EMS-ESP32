@@ -4,7 +4,7 @@ import MqttSettings from './MqttSettings';
 import MqttStatus from './MqttStatus';
 import type { FC } from 'react';
 
-import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from 'components';
+import { RouterTabs, useLayoutTitle, useRouterTab } from 'components';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
@@ -23,14 +23,7 @@ const Mqtt: FC = () => {
       </RouterTabs>
       <Routes>
         <Route path="status" element={<MqttStatus />} />
-        <Route
-          path="settings"
-          element={
-            <RequireAdmin>
-              <MqttSettings />
-            </RequireAdmin>
-          }
-        />
+        <Route path="settings" element={<MqttSettings />} />
         <Route path="*" element={<Navigate replace to="settings" />} />
       </Routes>
     </>

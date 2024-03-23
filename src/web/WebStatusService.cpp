@@ -69,6 +69,8 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     }();
 #endif
 
+    root["ap_status"] = EMSESP::esp8266React.apStatus();
+
     response->setLength();
     request->send(response);
 }

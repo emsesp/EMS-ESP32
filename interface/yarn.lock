@@ -1595,14 +1595,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:^18.2.67":
-  version: 18.2.67
-  resolution: "@types/react@npm:18.2.67"
+"@types/react@npm:^18.2.69":
+  version: 18.2.69
+  resolution: "@types/react@npm:18.2.69"
   dependencies:
     "@types/prop-types": "npm:*"
     "@types/scheduler": "npm:*"
     csstype: "npm:^3.0.2"
-  checksum: 10/d7e248dbe8d9d3b05f0d8e128d615fc9c85aa2c5d15634271d20cb9b343dbeffb0875f31a44e7ac63b42afc25949bd4c3633b7ebee45ee4666591ca934a8dffb
+  checksum: 10/5cc185f00ad5a4c2261e127ad25241448492f391e2206738b0477cbdba6aa75692e18ece5e75854ed513342d95c9ee83315744cb6b1470d488772cef1f8b40c8
   languageName: node
   linkType: hard
 
@@ -1784,7 +1784,7 @@ __metadata:
     "@types/imagemin": "npm:^8.0.5"
     "@types/lodash-es": "npm:^4.17.12"
     "@types/node": "npm:^20.11.30"
-    "@types/react": "npm:^18.2.67"
+    "@types/react": "npm:^18.2.69"
     "@types/react-dom": "npm:^18.2.22"
     "@types/react-router-dom": "npm:^5.3.3"
     "@typescript-eslint/eslint-plugin": "npm:^7.3.1"
@@ -1805,7 +1805,7 @@ __metadata:
     jwt-decode: "npm:^4.0.0"
     lodash-es: "npm:^4.17.21"
     mime-types: "npm:^2.1.35"
-    preact: "npm:^10.20.0"
+    preact: "npm:^10.20.1"
     prettier: "npm:^3.2.5"
     react: "npm:latest"
     react-dom: "npm:latest"
@@ -1818,7 +1818,7 @@ __metadata:
     terser: "npm:^5.29.2"
     typesafe-i18n: "npm:^5.26.2"
     typescript: "npm:^5.4.3"
-    vite: "npm:^5.2.3"
+    vite: "npm:^5.2.4"
     vite-plugin-imagemin: "npm:^0.6.1"
     vite-tsconfig-paths: "npm:^4.3.2"
   languageName: unknown
@@ -6795,10 +6795,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"preact@npm:^10.20.0":
-  version: 10.20.0
-  resolution: "preact@npm:10.20.0"
-  checksum: 10/fb8cfc1ab1b4b8f2bd483b9fdd2f8614cc7e099d741ec33f41d95d9056aefbe3fe5897201ef0f37c76238e7657ecd38afdef377e171cb1477068aae1dcf020d6
+"preact@npm:^10.20.1":
+  version: 10.20.1
+  resolution: "preact@npm:10.20.1"
+  checksum: 10/894ac14b3ec6f8ca308b53fb14e12e57678248fd1faa24ae857f5e37d9c11b34833e6dd1ba8210a34de4d6d523462923b1f9c93d35ce433874affd056f2d0998
   languageName: node
   linkType: hard
 
@@ -8491,9 +8491,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^5.2.3":
-  version: 5.2.3
-  resolution: "vite@npm:5.2.3"
+"vite@npm:^5.2.4":
+  version: 5.2.4
+  resolution: "vite@npm:5.2.4"
   dependencies:
     esbuild: "npm:^0.20.1"
     fsevents: "npm:~2.3.3"
@@ -8527,7 +8527,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10/5033a989462bc3127cb937ae5138024af68ec1b67accad07e07e116254b84fc6888a18d7a0358e3d3ce19fe160d72b6622259edc93e7fba47b84d042dcbe1e4e
+  checksum: 10/ed3d4fa2023642dd578e90eb02876e01729fda0af196304bb1c3a7f037b457f1a505bfa36c10f28d0466945b9da7d7972219716554d43ff3c025f26ed3d89e11
   languageName: node
   linkType: hard
 

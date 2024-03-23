@@ -37,6 +37,7 @@ export interface SystemStatus {
   ntp_status: number;
   ota_status: boolean;
   mqtt_status: boolean;
+  ap_status: boolean;
 }
 
 export interface OTASettingsType {
