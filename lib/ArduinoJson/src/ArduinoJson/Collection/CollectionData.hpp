@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2023, Benoit BLANCHON
+// Copyright © 2014-2024, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -11,74 +11,112 @@
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
-class MemoryPool;
 class VariantData;
 class VariantSlot;
 
-class CollectionData {
-  VariantSlot* head_;
-  VariantSlot* tail_;
+class CollectionIterator {
+  friend class CollectionData;
 
  public:
-  // Must be a POD!
-  // - no constructor
-  // - no destructor
-  // - no virtual
-  // - no inheritance
+  CollectionIterator() : slot_(nullptr), currentId_(NULL_SLOT) {}
 
-  // Array only
+  void next(const ResourceManager* resources);
 
-  VariantData* addElement(MemoryPool* pool);
-
-  VariantData* getElement(size_t index) const;
-
-  VariantData* getOrAddElement(size_t index, MemoryPool* pool);
-
-  void removeElement(size_t index);
-
-  // Object only
-
-  template <typename TAdaptedString>
-  VariantData* addMember(TAdaptedString key, MemoryPool* pool);
-
-  template <typename TAdaptedString>
-  VariantData* getMember(TAdaptedString key) const;
-
-  template <typename TAdaptedString>
-  VariantData* getOrAddMember(TAdaptedString key, MemoryPool* pool);
-
-  template <typename TAdaptedString>
-  void removeMember(TAdaptedString key) {
-    removeSlot(getSlot(key));
+  bool done() const {
+    return slot_ == nullptr;
   }
 
-  template <typename TAdaptedString>
-  bool containsKey(const TAdaptedString& key) const;
+  bool operator==(const CollectionIterator& other) const {
+    return slot_ == other.slot_;
+  }
 
-  // Generic
+  bool operator!=(const CollectionIterator& other) const {
+    return slot_ != other.slot_;
+  }
 
-  void clear();
-  size_t memoryUsage() const;
-  size_t size() const;
+  VariantData* operator->() {
+    ARDUINOJSON_ASSERT(slot_ != nullptr);
+    return data();
+  }
 
-  VariantSlot* addSlot(MemoryPool*);
-  void removeSlot(VariantSlot* slot);
+  VariantData& operator*() {
+    ARDUINOJSON_ASSERT(slot_ != nullptr);
+    return *data();
+  }
 
-  bool copyFrom(const CollectionData& src, MemoryPool* pool);
+  const VariantData& operator*() const {
+    ARDUINOJSON_ASSERT(slot_ != nullptr);
+    return *data();
+  }
 
-  VariantSlot* head() const {
+  const char* key() const;
+  bool ownsKey() const;
+
+  void setKey(StringNode*);
+  void setKey(const char*);
+
+  VariantData* data() {
+    return reinterpret_cast<VariantData*>(slot_);
+  }
+
+  const VariantData* data() const {
+    return reinterpret_cast<const VariantData*>(slot_);
+  }
+
+ private:
+  CollectionIterator(VariantSlot* slot, SlotId slotId);
+
+  VariantSlot* slot_;
+  SlotId currentId_, nextId_;
+};
+
+class CollectionData {
+  SlotId head_ = NULL_SLOT;
+  SlotId tail_ = NULL_SLOT;
+
+ public:
+  // Placement new
+  static void* operator new(size_t, void* p) noexcept {
+    return p;
+  }
+
+  static void operator delete(void*, void*) noexcept {}
+
+  using iterator = CollectionIterator;
+
+  iterator createIterator(const ResourceManager* resources) const {
+    return iterator(resources->getSlot(head_), head_);
+  }
+
+  size_t size(const ResourceManager*) const;
+  size_t nesting(const ResourceManager*) const;
+
+  void clear(ResourceManager* resources);
+
+  static void clear(CollectionData* collection, ResourceManager* resources) {
+    if (!collection)
+      return;
+    collection->clear(resources);
+  }
+
+  void remove(iterator it, ResourceManager* resources);
+
+  static void remove(CollectionData* collection, iterator it,
+                     ResourceManager* resources) {
+    if (collection)
+      return collection->remove(it, resources);
+  }
+
+  SlotId head() const {
     return head_;
   }
 
-  void movePointers(ptrdiff_t stringDistance, ptrdiff_t variantDistance);
+ protected:
+  iterator addSlot(ResourceManager*);
 
  private:
-  VariantSlot* getSlot(size_t index) const;
-
-  template <typename TAdaptedString>
-  VariantSlot* getSlot(TAdaptedString key) const;
-
-  VariantSlot* getPreviousSlot(VariantSlot*) const;
+  SlotWithId getPreviousSlot(VariantSlot*, const ResourceManager*) const;
+  void releaseSlot(SlotWithId, ResourceManager*);
 };
 
 inline const VariantData* collectionToVariant(

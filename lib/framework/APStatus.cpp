@@ -1,17 +1,15 @@
-#include <APStatus.h>
-
-using namespace std::placeholders; // for `_1` etc
+#include "APStatus.h"
 
 APStatus::APStatus(AsyncWebServer * server, SecurityManager * securityManager, APSettingsService * apSettingsService)
     : _apSettingsService(apSettingsService) {
     server->on(AP_STATUS_SERVICE_PATH,
                HTTP_GET,
-               securityManager->wrapRequest(std::bind(&APStatus::apStatus, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { apStatus(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
 }
 
 void APStatus::apStatus(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_AP_STATUS_SIZE);
-    JsonObject          root     = response->getRoot();
+    auto *     response = new AsyncJsonResponse(false);
+    JsonObject root     = response->getRoot();
 
     root["status"]      = _apSettingsService->getAPNetworkStatus();
     root["ip_address"]  = WiFi.softAPIP().toString();

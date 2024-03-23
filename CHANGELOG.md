@@ -5,6 +5,56 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.5] March 23 2024
+
+## **IMPORTANT! BREAKING CHANGES**
+
+- The Wifi Tx Power setting in Network Settings will be reset to Auto
+
+## Added
+
+- thermostat boost mode and boost time [#1446](https://github.com/emsesp/EMS-ESP32/issues/1446)
+- heatpump energy meters [#1463](https://github.com/emsesp/EMS-ESP32/issues/1463)
+- heatpump max power [#1475](https://github.com/emsesp/EMS-ESP32/issues/1475)
+- checkbox for MQTT-TLS enable [#1474](https://github.com/emsesp/EMS-ESP32/issues/1474)
+- added SK (Slovak) language. Thanks @misa1515
+- CPU info [#1497](https://github.com/emsesp/EMS-ESP32/pull/1497)
+- Show network hostname in Web UI under Network Status
+- Improved HA Discovery so each section (EMS device, Scheduler, Analog, Temperature, Custom, Shower) have their own section
+- boiler Bosch C1200W, id 12, [#1536](https://github.com/emsesp/EMS-ESP32/issues/1536)
+- mixer MM100 telegram 0x2CC [#1554](https://github.com/emsesp/EMS-ESP32/issues/1554)
+- boiler hpSetDiffPressure [#1563](https://github.com/emsesp/EMS-ESP32/issues/1563)
+- custom variables [#1423](https://github.com/emsesp/EMS-ESP32/issues/1423)
+- weather compensation [#1642](https://github.com/emsesp/EMS-ESP32/issues/1642)
+- env and partitions for DevKitC-1-N32R8 [#1635](https://github.com/emsesp/EMS-ESP32/discussions/1635)
+- command `restart partitionname` and button long press to start with other partition [#1657](https://github.com/emsesp/EMS-ESP32/issues/1657)
+- command `set service  <mqtt|ota|ntp|ap> <enable|disable>` [#1663](https://github.com/emsesp/EMS-ESP32/issues/1663)
+
+## Fixed
+
+- exhaust temperature for some boilers
+- add back boil2hyst [#1477](https://github.com/emsesp/EMS-ESP32/issues/1477)
+- subscribed MQTT topics not detecting changes by EMS-ESP [#1494](https://github.com/emsesp/EMS-ESP32/issues/1494)
+- changed HA name and grouping to be consistent [#1528](https://github.com/emsesp/EMS-ESP32/issues/1528)
+- MQTT autodiscovery in Domoticz not working [#1360](https://github.com/emsesp/EMS-ESP32/issues/1528)
+- dhw comfort for new ems+, [#1495](https://github.com/emsesp/EMS-ESP32/issues/1495)
+- added writeable icon to Web's Custom Entity page for each entity shown in the table
+- Wifi Tx Power not adjusted [#1614](https://github.com/emsesp/EMS-ESP32/issues/1614)
+- MQTT discovery of custom entity doesn't consider type of data [#1587](https://github.com/emsesp/EMS-ESP32/issues/1587)
+- WiFi TxPower wasn't correctly used. Added an 'Auto' setting, which is the default.
+- dns w/wo IPv6 [#1644](https://github.com/emsesp/EMS-ESP32/issues/1644)
+
+## Changed
+
+- HA don't set entity_category to Diagnostic/Configuration for EMS entities [#1459](https://github.com/emsesp/EMS-ESP32/discussions/1459)
+- upgraded ArduinoJson to 7.0.0 #1538 and then 7.0.2
+- small changes to the API for analog and temperature sensors
+- Length of mqtt Broker adress [#1619](https://github.com/emsesp/EMS-ESP32/issues/1619)
+- C++ optimizations - see <https://github.com/emsesp/EMS-ESP32/pull/1615>
+- Send MQTT heartbeat immediately after connection [#1628](https://github.com/emsesp/EMS-ESP32/issues/1628)
+- 16MB partitions with second nvs, larger FS, Coredump, optional factory partition
+- stop fetching empty telegrams after 5 min
+
 ## [3.6.4] November 24 2023
 
 ## **IMPORTANT! BREAKING CHANGES**
@@ -236,7 +286,7 @@ There are breaking changes between 3.5.x and earlier versions of 3.6.0. Please r
 
 - fix Table resizing in WebUI [#519](https://github.com/emsesp/EMS-ESP32/issues/519)
 - allow larger customization files [#570](https://github.com/emsesp/EMS-ESP32/issues/570)
-- losing entitiy wwcomfort [#581](https://github.com/emsesp/EMS-ESP32/issues/581)
+- losing entity wwcomfort [#581](https://github.com/emsesp/EMS-ESP32/issues/581)
 
 ## Changed
 

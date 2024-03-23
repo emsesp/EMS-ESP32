@@ -1,7 +1,7 @@
 
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,7 +71,8 @@ class DeviceValue {
         KMIN,        // 21 - K*min
         K,           // 22 - K
         VOLTS,       // 23 - V
-        CONNECTIVITY // 24 - used in HA
+        MBAR,        // 24 - mbar
+        CONNECTIVITY // 25 - used in HA
     };
 
     // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
@@ -143,7 +144,8 @@ class DeviceValue {
         DV_NUMOP_DIV100 = 100,
         DV_NUMOP_MUL5   = -5,
         DV_NUMOP_MUL10  = -10,
-        DV_NUMOP_MUL15  = -15
+        DV_NUMOP_MUL15  = -15,
+        DV_NUMOP_MUL50  = -50
     };
 
     uint8_t               device_type;    // EMSdevice::DeviceType

@@ -169,7 +169,7 @@ const fr: Translation = {
   HELP_INFORMATION_1: 'Visitez le wiki en ligne pour obtenir des instructions sur la façon de configurer EMS-ESP.',
   HELP_INFORMATION_2: 'Pour une discussion en direct avec la communauté, rejoignez notre serveur Discord',
   HELP_INFORMATION_3: 'Pour demander une fonctionnalité ou signaler un problème',
-  HELP_INFORMATION_4: 'n\'oubliez pas de télécharger et de joindre les informations relatives à votre système pour obtenir une réponse plus rapide lorsque vous signalez un problème',
+  HELP_INFORMATION_4: 'N\'oubliez pas de télécharger et de joindre les informations relatives à votre système pour obtenir une réponse plus rapide lorsque vous signalez un problème',
   HELP_INFORMATION_5: 'EMS-ESP est un projet libre et open-source. Merci de soutenir son développement futur en lui donnant une étoile sur Github !',
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
@@ -194,13 +194,11 @@ const fr: Translation = {
   RELEASE_IS: 'release est', // TODO translate
   RELEASE_NOTES: 'notes de version',
   EMS_ESP_VER: 'Version EMS-ESP',
-  PLATFORM: 'Appareil (Plateforme / SDK)',
   UPTIME: 'Durée de fonctionnement du système',
-  CPU_FREQ: 'Fréquence du CPU',
   HEAP: 'Heap (Libre / Max Allouée)',
   PSRAM: 'PSRAM (Taille / Libre)',
   FLASH: 'Flash Chip (Taille / Vitesse)',
-  APPSIZE: 'Application (Utilisée / Libre)',
+  APPSIZE: 'Application (Partition: Utilisée / Libre)',
   FILESYSTEM: 'File System (Utilisée / Libre)',
   BUFFER_SIZE: 'Max taille du buffer',
   COMPACT: 'Compact',
@@ -323,7 +321,8 @@ const fr: Translation = {
   WRITEABLE: 'Writeable', // TODO translate
   SHOWING: 'Showing', // TODO translate
   SEARCH: 'Search', // TODO translate
-  CERT: 'TLS root certificate (leave blank to disable TLS)', // TODO translate
+  CERT: 'TLS root certificate (leave blank for insecure)', // TODO translate
+  ENABLE_TLS: 'Activer TLS',
   ON: 'On', // TODO translate
   OFF: 'Off', // TODO translate
   POLARITY: 'Polarity', // TODO translate

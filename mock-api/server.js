@@ -14,7 +14,9 @@ rest_server.use(express.json());
 
 // uploads
 const upload = multer({ dest: '../mock-api/uploads' });
+
 function progress_middleware(req, res, next) {
+  console.log('Uploading file... ');
   let progress = 0;
   const file_size = req.headers['content-length'];
 
@@ -24,7 +26,7 @@ function progress_middleware(req, res, next) {
     const percentage = (progress / file_size) * 100;
     console.log(`Progress: ${Math.round(percentage)}%`);
     // await delay(1000); // slow it down
-    delay_blocking(200); // slow it down
+    delay_blocking(1000); // slow it down
   });
   next(); // invoke next middleware which is multer
 }
@@ -33,7 +35,8 @@ function progress_middleware(req, res, next) {
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 function delay_blocking(milliseconds) {
   var start = new Date().getTime();
-  for (var i = 0; i < 1e7; i++) {
+  // for (var i = 0; i < 1e7; i++) {
+  while (true) {
     if (new Date().getTime() - start > milliseconds) {
       break;
     }
@@ -152,7 +155,7 @@ network_settings = {
   password: 'myPassword',
   hostname: 'ems-esp',
   nosleep: true,
-  tx_power: 20,
+  tx_power: 0,
   bandwidth20: false,
   static_ip_config: false,
   enableMDNS: true,
@@ -2758,7 +2761,7 @@ rest_server.get(ENTITIES_ENDPOINT, (req, res) => {
 
 // start server
 const expressServer = rest_server.listen(port, () =>
-  console.log(`EMS-ESP REST API server running on http://localhost:${port}/`)
+  console.log(`Legacy EMS-ESP REST API server running on http://localhost:${port}/`)
 );
 
 // event source
@@ -2793,5 +2796,5 @@ rest_server.get(ES_LOG_ENDPOINT, function (req, res) {
       log_index = 0;
     }
     fetch_log.events.push(data); // append to buffer
-  }, 300);
+  }, 5000);
 });

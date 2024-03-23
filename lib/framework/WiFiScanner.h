@@ -3,15 +3,13 @@
 
 #include <WiFi.h>
 #include <AsyncTCP.h>
-
 #include <ArduinoJson.h>
 #include <ESPAsyncWebServer.h>
-#include <SecurityManager.h>
+
+#include "SecurityManager.h"
 
 #define SCAN_NETWORKS_SERVICE_PATH "/rest/scanNetworks"
 #define LIST_NETWORKS_SERVICE_PATH "/rest/listNetworks"
-
-#define MAX_WIFI_SCANNER_SIZE 1024
 
 class WiFiScanner {
   public:

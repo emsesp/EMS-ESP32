@@ -94,8 +94,14 @@ const DashboardDevices: FC = () => {
   }, []);
 
   const leftOffset = () => {
-    const left = document.getElementById('devices-window')?.getBoundingClientRect().left;
-    const right = document.getElementById('devices-window')?.getBoundingClientRect().right;
+    const devicesWindow = document.getElementById('devices-window');
+    if (!devicesWindow) {
+      return 0;
+    }
+
+    const clientRect = devicesWindow.getBoundingClientRect();
+    const left = clientRect.left;
+    const right = clientRect.right;
 
     if (!left || !right) {
       return 0;
@@ -416,37 +422,39 @@ const DashboardDevices: FC = () => {
   const renderCoreData = () => (
     <IconContext.Provider value={{ color: 'lightblue', size: '24', style: { verticalAlign: 'middle' } }}>
       {!coreData.connected && <MessageBox my={2} level="error" message={LL.EMS_BUS_WARNING()} />}
-      {coreData.connected && coreData.devices.length === 0 && (
+      {/* {coreData.connected && coreData.devices.length === 0 && (
         <MessageBox my={2} level="warning" message={LL.EMS_BUS_SCANNING()} />
-      )}
+      )} */}
 
-      <Table data={{ nodes: coreData.devices }} select={device_select} theme={device_theme} layout={{ custom: true }}>
-        {(tableList: any) => (
-          <>
-            <Header>
-              <HeaderRow>
-                <HeaderCell stiff />
-                <HeaderCell resize>{LL.DESCRIPTION()}</HeaderCell>
-                <HeaderCell stiff>{LL.TYPE(0)}</HeaderCell>
-              </HeaderRow>
-            </Header>
-            <Body>
-              {tableList.map((device: Device) => (
-                <Row key={device.id} item={device}>
-                  <Cell stiff>
-                    <DeviceIcon type_id={device.t} />
-                  </Cell>
-                  <Cell>
-                    {device.n}
-                    <span style={{ color: 'lightblue' }}>&nbsp;&nbsp;({device.e})</span>
-                  </Cell>
-                  <Cell stiff>{device.tn}</Cell>
-                </Row>
-              ))}
-            </Body>
-          </>
-        )}
-      </Table>
+      {coreData.connected && (
+        <Table data={{ nodes: coreData.devices }} select={device_select} theme={device_theme} layout={{ custom: true }}>
+          {(tableList: any) => (
+            <>
+              <Header>
+                <HeaderRow>
+                  <HeaderCell stiff />
+                  <HeaderCell resize>{LL.DESCRIPTION()}</HeaderCell>
+                  <HeaderCell stiff>{LL.TYPE(0)}</HeaderCell>
+                </HeaderRow>
+              </Header>
+              <Body>
+                {tableList.map((device: Device) => (
+                  <Row key={device.id} item={device}>
+                    <Cell stiff>
+                      <DeviceIcon type_id={device.t} />
+                    </Cell>
+                    <Cell>
+                      {device.n}
+                      <span style={{ color: 'lightblue' }}>&nbsp;&nbsp;({device.e})</span>
+                    </Cell>
+                    <Cell stiff>{device.tn}</Cell>
+                  </Row>
+                ))}
+              </Body>
+            </>
+          )}
+        </Table>
+      )}
     </IconContext.Provider>
   );
 

@@ -1,8 +1,8 @@
 #ifndef OTASettingsService_h
 #define OTASettingsService_h
 
-#include <HttpEndpoint.h>
-#include <FSPersistence.h>
+#include "HttpEndpoint.h"
+#include "FSPersistence.h"
 
 #include <ArduinoOTA.h>
 #include <WiFiUdp.h>
@@ -28,18 +28,8 @@ class OTASettings {
     int    port;
     String password;
 
-    static void read(OTASettings & settings, JsonObject & root) {
-        root["enabled"]  = settings.enabled;
-        root["port"]     = settings.port;
-        root["password"] = settings.password;
-    }
-
-    static StateUpdateResult update(JsonObject & root, OTASettings & settings) {
-        settings.enabled  = root["enabled"] | FACTORY_OTA_ENABLED;
-        settings.port     = root["port"] | FACTORY_OTA_PORT;
-        settings.password = root["password"] | FACTORY_OTA_PASSWORD;
-        return StateUpdateResult::CHANGED;
-    }
+    static void              read(OTASettings & settings, JsonObject root);
+    static StateUpdateResult update(JsonObject root, OTASettings & settings);
 };
 
 class OTASettingsService : public StatefulService<OTASettings> {
@@ -55,7 +45,7 @@ class OTASettingsService : public StatefulService<OTASettings> {
     ArduinoOTAClass *          _arduinoOTA;
 
     void configureArduinoOTA();
-    void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
+    void WiFiEvent(WiFiEvent_t event);
 };
 
 #endif

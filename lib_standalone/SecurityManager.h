@@ -1,18 +1,15 @@
 #ifndef SecurityManager_h
 #define SecurityManager_h
 
-#include <Arduino.h>
-#include <Features.h>
-#include <ESPAsyncWebServer.h>
-#include <AsyncJson.h>
+#include "Arduino.h"
+#include "Features.h"
+#include "ESPAsyncWebServer.h"
+#include "AsyncJson.h"
+
 #include <list>
 
-#ifndef FACTORY_JWT_SECRET
-#define FACTORY_JWT_SECRET ESPUtils::defaultDeviceValue()
-#endif
-
+#define FACTORY_JWT_SECRET "ems-esp"
 #define ACCESS_TOKEN_PARAMATER "access_token"
-
 #define AUTHORIZATION_HEADER "Authorization"
 #define AUTHORIZATION_HEADER_PREFIX "Bearer "
 #define AUTHORIZATION_HEADER_PREFIX_LEN 7
@@ -69,11 +66,6 @@ class AuthenticationPredicates {
 
 class SecurityManager {
   public:
-#if FT_ENABLED(FT_SECURITY)
-    virtual Authentication authenticate(const String & username, const String & password) = 0;
-    virtual String         generateJWT(User * user)                                       = 0;
-#endif
-
     virtual Authentication               authenticateRequest(AsyncWebServerRequest * request)                                    = 0;
     virtual ArRequestFilterFunction      filterRequest(AuthenticationPredicate predicate)                                        = 0;
     virtual ArRequestHandlerFunction     wrapRequest(ArRequestHandlerFunction onRequest, AuthenticationPredicate predicate)      = 0;

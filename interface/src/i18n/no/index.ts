@@ -169,7 +169,7 @@ const no: Translation = {
   HELP_INFORMATION_1: 'Besøk wiki for instruksjoner for å konfigurere EMS-ESP',
   HELP_INFORMATION_2: 'For community-support besøk vår Discord-server',
   HELP_INFORMATION_3: 'For å be om en ny funksjon eller melde feil',
-  HELP_INFORMATION_4: 'husk å laste ned og legg ved din systeminformasjon for en raskere respons når du rapporterer et problem',
+  HELP_INFORMATION_4: 'Husk å laste ned og legg ved din systeminformasjon for en raskere respons når du rapporterer et problem',
   HELP_INFORMATION_5: 'EMS-ESP er gratis og åpen kildekode. Bidra til utviklingen ved å gi oss en stjerne på GitHub!',
   UPLOAD: 'Opplasning',
   DOWNLOAD: '{{N|n|n}}edlasting',
@@ -194,13 +194,11 @@ const no: Translation = {
   RELEASE_IS: 'release er',
   RELEASE_NOTES: 'release notes',
   EMS_ESP_VER: 'EMS-ESP Version',
-  PLATFORM: 'Enhet (Platform / SDK)',
   UPTIME: 'System Oppetid',
-  CPU_FREQ: 'CPU Frekvens',
   HEAP: 'Heap (Ledig / Max Allokert)',
   PSRAM: 'PSRAM (Størrelse / Ledig)',
   FLASH: 'Flash Chip (Størrelse / Hastighet)',
-  APPSIZE: 'Applikasjon (Brukt / Ledig)',
+  APPSIZE: 'Applikasjon (Partition: Brukt / Ledig)',
   FILESYSTEM: 'File System (Brukt / Ledig)',
   BUFFER_SIZE: 'Max Buffer Størrelse',
   COMPACT: 'Komprimere',
@@ -323,7 +321,8 @@ const no: Translation = {
   WRITEABLE: 'Writeable', // TODO translate
   SHOWING: 'Showing', // TODO translate
   SEARCH: 'Search', // TODO translate
-  CERT: 'TLS root certificate (leave blank to disable TLS)', // TODO translate
+  CERT: 'TLS root certificate (leave blank for insecure)', // TODO translate
+  ENABLE_TLS: 'Aktiviser TLS',
   ON: 'On', // TODO translate
   OFF: 'Off', // TODO translate
   POLARITY: 'Polarity', // TODO translate

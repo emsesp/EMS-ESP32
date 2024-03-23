@@ -1,7 +1,6 @@
-
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
-* Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2023  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,12 +24,19 @@ namespace emsesp {
 
 // no shell, called via the API or 'call system test' command
 // or http://ems-esp/api?device=system&cmd=test&data=boiler
-bool Test::run_test(const char * command, int8_t id) {
-    if ((command == nullptr) || (strlen(command) == 0)) {
+bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
+    if (cmd.empty()) {
         return false;
     }
 
-    if (strcmp(command, "memory") == 0) {
+    if (cmd == "add") {
+        Mqtt::entity_format(Mqtt::entityFormat::SINGLE_LONG); // SINGLE_LONG, SINGLE_SHORT, MULTI_SHORT
+        System::test_set_all_active(true);                    // include all entities and give them fake values
+        add_device(id1, id2);
+        return true;
+    }
+
+    if (cmd == "memory") {
         EMSESP::logger().notice("Testing memory by adding lots of devices and entities...");
 
         System::test_set_all_active(true); // include all entities and give them fake values
@@ -43,13 +49,13 @@ bool Test::run_test(const char * command, int8_t id) {
         return true;
     }
 
-    if (strcmp(command, "general") == 0) {
+    if (cmd == "general") {
         EMSESP::logger().info("Testing general. Adding a Boiler and Thermostat");
 
         // System::test_set_all_active(true); // uncomment if we want to show all entities and give them fake values
 
         add_device(0x08, 123); // Nefit Trendline
-        add_device(0x18, 157); // Bosch CR100
+        add_device(0x18, 157); // RC200/CW100
 
         // add_device(0x10, 158); // RC300 - there's no data here
 
@@ -77,7 +83,7 @@ bool Test::run_test(const char * command, int8_t id) {
 //
 #ifdef EMSESP_STANDALONE
 
-    if (strcmp(command, "heat_exchange") == 0) {
+    if (cmd == "heat_exchange") {
         EMSESP::logger().info("Testing heating exchange...");
 
         add_device(0x08, 219); // Greenstar HIU/Logamax kompakt WS170
@@ -89,7 +95,7 @@ bool Test::run_test(const char * command, int8_t id) {
         return true;
     }
 
-    if (strcmp(command, "2thermostats") == 0) {
+    if (cmd == "2thermostats") {
         EMSESP::logger().info("Testing with multiple thermostats...");
 
         add_device(0x08, 123); // GB072
@@ -121,7 +127,7 @@ bool Test::run_test(const char * command, int8_t id) {
         return true;
     }
 
-    if (strcmp(command, "310") == 0) {
+    if (cmd == "310") {
         EMSESP::logger().info("Adding a GB072/RC310 combo...");
 
         add_device(0x08, 123); // GB072
@@ -148,7 +154,7 @@ bool Test::run_test(const char * command, int8_t id) {
         return true;
     }
 
-    if (strcmp(command, "gateway") == 0) {
+    if (cmd == "gateway") {
         EMSESP::logger().info("Adding a Gateway...");
 
         // add 0x48 KM200, via a version command
@@ -168,7 +174,7 @@ bool Test::run_test(const char * command, int8_t id) {
         return true;
     }
 
-    if (strcmp(command, "mixer") == 0) {
+    if (cmd == "mixer") {
         EMSESP::logger().info("Adding a mixer...");
 
         // add controller
@@ -190,7 +196,7 @@ bool Test::run_test(const char * command, int8_t id) {
         return true;
     }
 
-    if (strcmp(command, "boiler") == 0) {
+    if (cmd == "boiler") {
         EMSESP::logger().info("Adding boiler...");
         add_device(0x08, 123); // Nefit Trendline
 
@@ -207,7 +213,7 @@ bool Test::run_test(const char * command, int8_t id) {
         return true;
     }
 
-    if (strcmp(command, "thermostat") == 0) {
+    if (cmd == "thermostat") {
         EMSESP::logger().info("Adding thermostat...");
 
         add_device(0x10, 192); // FW120
@@ -220,7 +226,7 @@ bool Test::run_test(const char * command, int8_t id) {
         return true;
     }
 
-    if (strcmp(command, "solar") == 0) {
+    if (cmd == "solar") {
         EMSESP::logger().info("Adding solar...");
 
         add_device(0x30, 163); // SM100
@@ -239,7 +245,7 @@ bool Test::run_test(const char * command, int8_t id) {
         return true;
     }
 
-    if (strcmp(command, "heatpump") == 0) {
+    if (cmd == "heatpump") {
         EMSESP::logger().info("Adding heatpump...");
 
         add_device(0x38, 200); // Enviline module
@@ -258,11 +264,13 @@ bool Test::run_test(const char * command, int8_t id) {
 }
 
 // These next tests are run from the Consol via the test command, so inherit the Shell
-void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const std::string & data) {
+void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const std::string & id1_s, const std::string & id2_s) {
     shell.add_flags(CommandFlags::ADMIN); // switch to su
 
     // init stuff
     Mqtt::ha_enabled(true);
+    Mqtt::entity_format(Mqtt::entityFormat::SINGLE_SHORT); // SINGLE_LONG, SINGLE_SHORT, MULTI_SHORT
+
     EMSESP::rxservice_.ems_mask(EMSbus::EMS_MASK_BUDERUS);
 
     // EMSESP::watch(EMSESP::Watch::WATCH_RAW); // raw mode
@@ -275,18 +283,41 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         command = cmd;
     }
 
+    // extract params
+    int8_t id1 = -1;
+    int8_t id2 = -1;
+    if (!id1_s.empty()) {
+        if (id1_s[0] == '0' && id1_s[1] == 'x') {
+            id1 = Helpers::hextoint(id1_s.c_str());
+        } else {
+            id1 = Helpers::atoint(id1_s.c_str());
+        }
+    }
+    if (!id2_s.empty()) {
+        id2 = Helpers::atoint(id2_s.c_str());
+    }
+
     bool ok = false;
 
-    if (command == "general") {
-        shell.printfln("Testing adding a boiler, thermostat and sensors...");
-        run_test("general");
+    if (command == "add") {
+        shell.printfln("Testing Adding a device (product_id %d), with all values...", id2);
+        test("add", id1, id2); // e.g. "test add 0x8 172"
+        shell.invoke_command("show values");
+        ok = true;
+    }
 
-        // add sensors
-        emsesp::EMSESP::analogsensor_.test();
-        emsesp::EMSESP::temperaturesensor_.test();
+    if (command == "general") {
+        shell.printfln("Testing adding a boiler, thermostat, all sensors, scheduler and custom entities...");
+        test("general");
+
+        // setup fake data
+        EMSESP::webCustomizationService.test(); // set customizations
+        EMSESP::temperaturesensor_.test();      // add temperature sensors
+        EMSESP::webSchedulerService.test();     // add scheduler items
+        EMSESP::webCustomEntityService.test();  // add custom entities
 
         // shell.invoke_command("show devices");
-        shell.invoke_command("show values");
+        // shell.invoke_command("show values");
         shell.invoke_command("call system allvalues");
         // shell.invoke_command("call system publish");
         // shell.invoke_command("show mqtt");
@@ -296,35 +327,59 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     // https://github.com/emsesp/EMS-ESP32/issues/869
     if (command == "memory") {
         shell.printfln("Testing memory by adding lots of devices and entities...");
-        run_test("memory");
+        test("memory");
         shell.invoke_command("show values");
         ok = true;
     }
 
-    if (command == "custom_entities") {
-        shell.printfln("custom entities...");
-        run_test("general");
+    if (command == "custom") {
+        shell.printfln("Adding custom entities...");
+
+        // add some dummy entities
+        EMSESP::webCustomEntityService.test();
 
 #ifdef EMSESP_STANDALONE
         AsyncWebServerRequest request;
         request.method(HTTP_GET);
         request.url("/api/custom");
-        request.url("/api/custom/boiler_flowtemp");
-        request.url("/api/custom/boiler_flowtemp2");
-        EMSESP::webAPIService.webAPIService_get(&request);
+        EMSESP::webAPIService.webAPIService(&request);
+        request.url("/api/custom/test_custom");
+        EMSESP::webAPIService.webAPIService(&request);
+        request.url("/api/custom/test_read_only");
+        EMSESP::webAPIService.webAPIService(&request);
+        request.url("/api/custom/test_ram");
+        EMSESP::webAPIService.webAPIService(&request);
+        shell.invoke_command("call custom info");
+
+#endif
+        ok = true;
+    }
+
+    if (command == "scheduler") {
+        shell.printfln("Adding Scheduler items...");
+
+        // add some dummy entities
+        EMSESP::webSchedulerService.test();
+
+#ifdef EMSESP_STANDALONE
+        AsyncWebServerRequest request;
+        request.method(HTTP_GET);
+        request.url("/api/scheduler");
+        EMSESP::webAPIService.webAPIService(&request);
+        shell.invoke_command("call scheduler info");
 #endif
         ok = true;
     }
 
     if (command == "coldshot") {
         shell.printfln("Testing coldshot...");
-        run_test("general");
+        test("general");
 
 #ifdef EMSESP_STANDALONE
         AsyncWebServerRequest request;
         request.method(HTTP_GET);
         request.url("/api/boiler/coldshot");
-        EMSESP::webAPIService.webAPIService_get(&request);
+        EMSESP::webAPIService.webAPIService(&request);
 #else
         shell.invoke_command("call boiler coldshot");
 #endif
@@ -370,7 +425,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "modes") {
         shell.printfln("Testing thermostat modes...");
-        run_test("general");
+        test("general");
         shell.invoke_command("call thermostat mode auto");
         shell.invoke_command("call thermostat mode Manuell"); // DE
         shell.invoke_command("call thermostat mode 1");
@@ -506,13 +561,13 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "gateway") {
         shell.printfln("Testing Gateway...");
-        run_test("gateway");
+        test("gateway");
         ok = true;
     }
 
     if (command == "310") {
         shell.printfln("Testing RC310...");
-        run_test("310");
+        test("310");
         shell.invoke_command("show devices");
         shell.invoke_command("show values");
         shell.invoke_command("call system publish");
@@ -522,7 +577,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "heat_exchange") {
         shell.printfln("Testing heat exchange...");
-        run_test("heat_exchange");
+        test("heat_exchange");
         shell.invoke_command("show devices");
         shell.invoke_command("show values");
         ok = true;
@@ -530,7 +585,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "2thermostats") {
         shell.printfln("Testing multiple thermostats...");
-        run_test("2thermostats");
+        test("2thermostats");
         shell.invoke_command("show values");
         shell.invoke_command("show devices");
         ok = true;
@@ -542,10 +597,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         Mqtt::enabled(false);    // turn off mqtt
         Mqtt::ha_enabled(false); // turn off ha
 
-        run_test("boiler");
-        run_test("thermostat");
+        test("boiler");
+        test("thermostat");
 
-        DynamicJsonDocument doc(8000); // some absurd high number
+        JsonDocument doc;
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice) {
                 doc.clear();
@@ -570,8 +625,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
                 serializeJson(doc, Serial);
                 Serial.print(COLOR_RESET);
                 Serial.println();
-                Serial.print("** memoryUsage=");
-                Serial.print(doc.memoryUsage());
                 Serial.print(" measureMsgPack=");
                 Serial.print(measureMsgPack(doc));
                 Serial.print(" measureJson=");
@@ -598,7 +651,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         Mqtt::ha_enabled(true);
         Mqtt::nested_format(1);
 
-        run_test("boiler");
+        test("boiler");
         shell.invoke_command("show devices");
         shell.invoke_command("show values");
         shell.invoke_command("call boiler info");
@@ -624,7 +677,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     if (command == "shower_alert") {
         shell.printfln("Testing Shower Alert...");
 
-        run_test("boiler");
+        test("boiler");
 
         // device type, command, data
         Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "false");
@@ -652,10 +705,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         Mqtt::nested_format(1); // is nested
         // Mqtt::nested_format(2); // not nested
 
-        run_test("boiler");
-        run_test("thermostat");
-        run_test("solar");
-        run_test("mixer");
+        test("boiler");
+        test("thermostat");
+        test("solar");
+        test("mixer");
 
         shell.invoke_command("call system publish");
         shell.invoke_command("show mqtt");
@@ -674,8 +727,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         Mqtt::nested_format(1);
         // Mqtt::send_response(false);
 
-        run_test("boiler");
-        // run_test("thermostat");
+        test("boiler");
+        // test("thermostat");
 
         // 0xC2
         //  [emsesp] Boiler(0x08) -> Me(0x0B), UBAErrorMessage3(0xC2), data: 08 AC 00 10 31 48 30 31 15 80 95 0B 0E 10 38 00 7F FF FF FF 08 AC 00 10 09 41 30
@@ -691,11 +744,15 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Testing device value rendering");
 
         Mqtt::ha_enabled(true);
+        // Mqtt::ha_enabled(false);
+
         Mqtt::nested_format(1);
+        // Mqtt::nested_format(0);
+
         // Mqtt::send_response(false);
 
-        run_test("boiler");
-        run_test("thermostat");
+        test("boiler");
+        test("thermostat");
 
         shell.invoke_command("call boiler wwseltemp");
         shell.invoke_command("call system publish");
@@ -704,7 +761,28 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "temperature") {
         shell.printfln("Testing adding Temperature sensor");
+        shell.invoke_command("show commands");
+
+        // load some EMS data
+        // test("general");
+
         emsesp::EMSESP::temperaturesensor_.test();
+
+        shell.invoke_command("call temperaturesensor");
+        shell.invoke_command("show values");
+        shell.invoke_command("call system allvalues");
+        shell.invoke_command("call temperaturesensor info");
+        shell.invoke_command("call temperaturesensor values");
+
+        AsyncWebServerRequest request;
+        request.method(HTTP_GET);
+        request.url("/api/temperaturesensor/commands");
+        EMSESP::webAPIService.webAPIService(&request);
+        request.url("/api/temperaturesensor/info");
+        EMSESP::webAPIService.webAPIService(&request);
+        request.url("/api/temperaturesensor/01-0203-0405-0607");
+        EMSESP::webAPIService.webAPIService(&request);
+
         ok = true;
     }
 
@@ -729,54 +807,72 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Testing adding Analog sensor");
         Mqtt::ha_enabled(true);
         // Mqtt::ha_enabled(false);
+
         Mqtt::nested_format(1);
         // Mqtt::nested_format(0);
 
-        emsesp::EMSESP::analogsensor_.test();
-        shell.invoke_command("show values");
-        // shell.invoke_command("call system publish");
-        // shell.invoke_command("show mqtt");
+        // Mqtt::send_response(false);
 
-        // rename
-        // bool update(uint8_t id, const std::string & name, int16_t offset, float factor, uint8_t uom, uint8_t type);
-        EMSESP::analogsensor_.update(36, "analogtest", 2, 0.7, 17, 1);
+        // load some EMS data
+        test("general");
+
+        EMSESP::webCustomizationService.test(); // load the analog sensors
+
+        shell.invoke_command("call analogsensor");
         shell.invoke_command("show values");
+        shell.invoke_command("call system allvalues");
+        shell.invoke_command("call analogsensor info");
+        shell.invoke_command("call analogsensor values");
+
+        AsyncWebServerRequest request;
+        request.method(HTTP_GET);
+        request.url("/api/analogsensor/commands");
+        EMSESP::webAPIService.webAPIService(&request);
+        request.url("/api/analogsensor/info");
+        EMSESP::webAPIService.webAPIService(&request);
+        request.url("/api/analogsensor/test_analog1");
+        request.url("/api/analogsensor/36");
+        EMSESP::webAPIService.webAPIService(&request);
+
+        // test renaming it
+        // bool update(uint8_t id, const std::string & name, int16_t offset, float factor, uint8_t uom, uint8_t type);
+        // EMSESP::analogsensor_.update(36, "test_analog1_new", 2, 0.7, 17, 1);
+        // shell.invoke_command("show values");
         // shell.invoke_command("call system publish");
         ok = true;
     }
 
     if (command == "healthcheck") {
-        uint8_t n = 0;
-        if (!data.empty()) {
-            n = Helpers::atoint(data.c_str());
-        }
-
         // n=1 = EMSESP::system_.HEALTHCHECK_NO_BUS
         // n=2 = EMSESP::system_.HEALTHCHECK_NO_NETWORK
-        shell.printfln("Testing healthcheck with %d", n);
-        EMSESP::system_.healthcheck(n);
+        if (id1 == -1) {
+            id1 = 0;
+        }
+        shell.printfln("Testing healthcheck with %d", id1);
+        EMSESP::system_.healthcheck(id1);
         ok = true;
     }
 
-    if (command == "custom") {
-        shell.printfln("Testing custom entities");
+    if (command == "customization") {
+        shell.printfln("Testing customization renaming entity");
 
         Mqtt::ha_enabled(true);
         // Mqtt::send_response(false);
 
-        run_test("thermostat");
+        test("thermostat");
 
+        // before
         // shell.invoke_command("call thermostat seltemp");
         // shell.invoke_command("call system publish");
 
-        // toggle mode
+        // find thermostat
         for (const auto & emsdevice : EMSESP::emsdevices) {
-            Serial.print("Custom: ");
-            Serial.print(emsdevice->device_type_name());
-            Serial.print(" uniqueid=");
-            Serial.println(emsdevice->unique_id());
-
-            if (emsdevice->unique_id() == 1) { // thermostat
+            if (emsdevice->unique_id() == 1) {
+                Serial.println();
+                Serial.print("Custom: ");
+                Serial.print(emsdevice->device_type_name());
+                Serial.print(" uniqueid=");
+                Serial.println(emsdevice->unique_id());
                 std::string a = "00hc1/seltemp|new name>5<52";
                 emsdevice->setCustomizationEntity(a);
                 break;
@@ -795,7 +891,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         Mqtt::ha_enabled(true);
         // Mqtt::send_response(false);
 
-        run_test("boiler");
+        test("boiler");
 
         shell.invoke_command("call boiler wwseltemp");
         shell.invoke_command("call system publish");
@@ -820,7 +916,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         Mqtt::ha_enabled(true);
         // Mqtt::send_response(false);
 
-        run_test("boiler");
+        test("boiler");
 
         shell.invoke_command("call boiler wwseltemp");
         shell.invoke_command("call system publish");
@@ -843,28 +939,28 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // EMSESP::bool_format(BOOL_FORMAT_10); // BOOL_FORMAT_10_STR
         EMSESP::system_.bool_format(BOOL_FORMAT_TRUEFALSE); // BOOL_FORMAT_TRUEFALSE_STR
 
-        run_test("boiler");
-        run_test("thermostat");
+        test("boiler");
+        test("thermostat");
 
         AsyncWebServerRequest request;
-        DynamicJsonDocument   doc(2000);
+        JsonDocument          doc;
         JsonVariant           json;
         request.method(HTTP_GET);
 
         request.url("/api/boiler/values");
-        EMSESP::webAPIService.webAPIService_get(&request);
+        EMSESP::webAPIService.webAPIService(&request);
         request.url("/api/boiler/wwcirc");
-        EMSESP::webAPIService.webAPIService_get(&request);
+        EMSESP::webAPIService.webAPIService(&request);
         request.url("/api/boiler/wwcirc/fullname");
-        EMSESP::webAPIService.webAPIService_get(&request);
+        EMSESP::webAPIService.webAPIService(&request);
         request.url("/api/boiler/selburnpow/value");
-        EMSESP::webAPIService.webAPIService_get(&request);
+        EMSESP::webAPIService.webAPIService(&request);
         request.url("/api/boiler/wwchargetype/writeable");
-        EMSESP::webAPIService.webAPIService_get(&request);
+        EMSESP::webAPIService.webAPIService(&request);
         request.url("/api/boiler/flamecurr/value");
-        EMSESP::webAPIService.webAPIService_get(&request);
+        EMSESP::webAPIService.webAPIService(&request);
         request.url("/api/boiler/flamecurr/bad");
-        EMSESP::webAPIService.webAPIService_get(&request);
+        EMSESP::webAPIService.webAPIService(&request);
         ok = true;
     }
 
@@ -876,8 +972,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::system_.bool_format(BOOL_FORMAT_10); // BOOL_FORMAT_10_STR
         // EMSESP::bool_format(BOOL_FORMAT_TRUEFALSE); // BOOL_FORMAT_TRUEFALSE_STR
 
-        run_test("boiler");
-        run_test("thermostat");
+        test("boiler");
+        test("thermostat");
 
         EMSESP::mqtt_.incoming("ems-esp/boiler/wwseltemp", "59");
         ok = true;
@@ -888,18 +984,18 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Testing API wwmode");
         Mqtt::ha_enabled(false);
         Mqtt::nested_format(1);
-        run_test("310");
+        test("310");
 
         AsyncWebServerRequest request;
         request.method(HTTP_POST);
-        DynamicJsonDocument doc(2000);
-        JsonVariant         json;
+        JsonDocument doc;
+        JsonVariant  json;
 
-        char data[] = "{\"value\":\"off\"}";
-        deserializeJson(doc, data);
+        char odata[] = "{\"value\":\"off\"}";
+        deserializeJson(doc, odata);
         json = doc.as<JsonVariant>();
         request.url("/api/thermostat/wwmode");
-        EMSESP::webAPIService.webAPIService_post(&request, json);
+        EMSESP::webAPIService.webAPIService(&request, json);
         ok = true;
     }
 
@@ -912,87 +1008,87 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         Mqtt::nested_format(1);
         // Mqtt::send_response(true);
 
-        run_test("boiler");
-        run_test("thermostat");
+        test("boiler");
+        test("thermostat");
 
         AsyncWebServerRequest requestX;
-        DynamicJsonDocument   docX(2000);
+        JsonDocument          docX;
         JsonVariant           jsonX;
 
         requestX.method(HTTP_GET);
 
         /*
         requestX.url("/api"); // should fail
-        EMSESP::webAPIService.webAPIService_get(&requestX);
+        EMSESP::webAPIService.webAPIService(&requestX);
         return;
         */
 
         /*
         requestX.url("/api/thermostat/seltemp");
-        EMSESP::webAPIService.webAPIService_get(&requestX);
+        EMSESP::webAPIService.webAPIService(&requestX);
         return;
         */
 
         /*
         requestX.url("/api/thermostat/mode/auto");
-        EMSESP::webAPIService.webAPIService_get(&requestX);
+        EMSESP::webAPIService.webAPIService(&requestX);
         return;
         */
 
         /*
         requestX.url("/api/thermostat"); // check if defaults to info
-        EMSESP::webAPIService.webAPIService_get(&requestX);
+        EMSESP::webAPIService.webAPIService(&requestX);
         requestX.url("/api/thermostat/info");
-        EMSESP::webAPIService.webAPIService_get(&requestX);
+        EMSESP::webAPIService.webAPIService(&requestX);
         requestX.url("/api/thermostat/values");
-        EMSESP::webAPIService.webAPIService_get(&requestX);
+        EMSESP::webAPIService.webAPIService(&requestX);
         return;
 
         requestX.url("/api/thermostat/mode");
-        EMSESP::webAPIService.webAPIService_get(&requestX);
+        EMSESP::webAPIService.webAPIService(&requestX);
         return;
         */
 
         /*
         requestX.url("/api/system"); // check if defaults to info
-        EMSESP::webAPIService.webAPIService_get(&requestX);
+        EMSESP::webAPIService.webAPIService(&requestX);
         emsesp::EMSESP::logger().notice("*");
 
         requestX.url("/api/system/info");
-        EMSESP::webAPIService.webAPIService_get(&requestX);
+        EMSESP::webAPIService.webAPIService(&requestX);
         emsesp::EMSESP::logger().notice("*");
 
         requestX.url("/api/thermostat"); // check if defaults to values
-        EMSESP::webAPIService.webAPIService_get(&requestX);
+        EMSESP::webAPIService.webAPIService(&requestX);
         emsesp::EMSESP::logger().notice("*");
 
         requestX.url("/api/thermostat/info");
-        EMSESP::webAPIService.webAPIService_get(&requestX);
+        EMSESP::webAPIService.webAPIService(&requestX);
         emsesp::EMSESP::logger().notice("*");
 
         requestX.url("/api/thermostat/seltemp");
-        EMSESP::webAPIService.webAPIService_get(&requestX);
+        EMSESP::webAPIService.webAPIService(&requestX);
         return;
         */
 
         /*
         requestX.url("/api/system/restart");
-        EMSESP::webAPIService.webAPIService_get(&requestX);
+        EMSESP::webAPIService.webAPIService(&requestX);
         return;
         */
 
         /*
         requestX.url("/api/temperaturesensor/xxxx");
-        EMSESP::webAPIService.webAPIService_get(&requestX);
+        EMSESP::webAPIService.webAPIService(&requestX);
         emsesp::EMSESP::logger().notice("****");
         requestX.url("/api/temperaturesensor/info");
-        EMSESP::webAPIService.webAPIService_get(&requestX);
+        EMSESP::webAPIService.webAPIService(&requestX);
         return;
         */
 
         /*
         requestX.url("/api"); // should fail
-        EMSESP::webAPIService.webAPIService_get(&requestX);
+        EMSESP::webAPIService.webAPIService(&requestX);
         */
 
         requestX.method(HTTP_POST);
@@ -1002,7 +1098,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         deserializeJson(docX, dataX);
         jsonX = docX.as<JsonVariant>();
         requestX.url("/api");
-        EMSESP::webAPIService.webAPIService_post(&requestX, jsonX);
+        EMSESP::webAPIService.webAPIService(&requestX, jsonX);
         return;
         */
 
@@ -1013,7 +1109,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         jsonX = docX.as<JsonVariant>();
         // requestX.url("/api/system/send");
         requestX.url("/api/thermostat");
-        EMSESP::webAPIService.webAPIService_post(&requestX, jsonX);
+        EMSESP::webAPIService.webAPIService(&requestX, jsonX);
         return;
         */
 
@@ -1022,7 +1118,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         deserializeJson(docX, dataX);
         jsonX = docX.as<JsonVariant>();
         requestX.url("/api/thermostat/mode/auto"); // should fail
-        EMSESP::webAPIService.webAPIService_post(&requestX, jsonX);
+        EMSESP::webAPIService.webAPIService(&requestX, jsonX);
         return;
         */
 
@@ -1089,54 +1185,54 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         request.method(HTTP_GET);
 
         request.url("/api/thermostat"); // check if defaults to info
-        EMSESP::webAPIService.webAPIService_get(&request);
+        EMSESP::webAPIService.webAPIService(&request);
         request.url("/api/thermostat/info");
-        EMSESP::webAPIService.webAPIService_get(&request);
+        EMSESP::webAPIService.webAPIService(&request);
         request.url("/api/thermostat/values");
-        EMSESP::webAPIService.webAPIService_get(&request);
+        EMSESP::webAPIService.webAPIService(&request);
         request.url("/api/thermostat/seltemp");
-        EMSESP::webAPIService.webAPIService_get(&request);
+        EMSESP::webAPIService.webAPIService(&request);
         request.url("/api/system/commands");
-        EMSESP::webAPIService.webAPIService_get(&request);
+        EMSESP::webAPIService.webAPIService(&request);
         request.url("/api/system/info");
-        EMSESP::webAPIService.webAPIService_get(&request);
+        EMSESP::webAPIService.webAPIService(&request);
         request.url("/api/boiler/syspress");
-        EMSESP::webAPIService.webAPIService_get(&request);
+        EMSESP::webAPIService.webAPIService(&request);
         request.url("/api/boiler/wwcurflow");
-        EMSESP::webAPIService.webAPIService_get(&request);
+        EMSESP::webAPIService.webAPIService(&request);
 
         // POST tests
         request.method(HTTP_POST);
-        DynamicJsonDocument doc(2000);
-        JsonVariant         json;
+        JsonDocument doc;
+        JsonVariant  json;
 
         // 1
         char data1[] = "{\"entity\":\"seltemp\",\"value\":11}";
         deserializeJson(doc, data1);
         json = doc.as<JsonVariant>();
         request.url("/api/thermostat");
-        EMSESP::webAPIService.webAPIService_post(&request, json);
+        EMSESP::webAPIService.webAPIService(&request, json);
 
         // 2
         char data2[] = "{\"value\":12}";
         deserializeJson(doc, data2);
         json = doc.as<JsonVariant>();
         request.url("/api/thermostat/seltemp");
-        EMSESP::webAPIService.webAPIService_post(&request, json);
+        EMSESP::webAPIService.webAPIService(&request, json);
 
         // 3
         char data3[] = "{\"device\":\"thermostat\", \"cmd\":\"seltemp\",\"value\":13}";
         deserializeJson(doc, data3);
         json = doc.as<JsonVariant>();
         request.url("/api");
-        EMSESP::webAPIService.webAPIService_post(&request, json);
+        EMSESP::webAPIService.webAPIService(&request, json);
 
         // 4 - system call
         char data4[] = "{\"value\":\"0B 88 19 19 02\"}";
         deserializeJson(doc, data4);
         json = doc.as<JsonVariant>();
         request.url("/api/system/send");
-        EMSESP::webAPIService.webAPIService_post(&request, json);
+        EMSESP::webAPIService.webAPIService(&request, json);
 
         // 5 - test write value
         //  device=3 cmd=hc2/seltemp value=44
@@ -1144,7 +1240,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         deserializeJson(doc, data5);
         json = doc.as<JsonVariant>();
         request.url("/api");
-        EMSESP::webAPIService.webAPIService_post(&request, json);
+        EMSESP::webAPIService.webAPIService(&request, json);
 
         // write value from web - testing hc2/seltemp
         char data6[] = "{\"id\":2,\"devicevalue\":{\"v\":\"44\",\"u\":1,\"n\":\"hc2 selected room temperature\",\"c\":\"hc2/seltemp\"}";
@@ -1158,7 +1254,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         deserializeJson(doc, data7);
         json = doc.as<JsonVariant>();
         request.url("/api");
-        EMSESP::webAPIService.webAPIService_post(&request, json);
+        EMSESP::webAPIService.webAPIService(&request, json);
 
         emsesp::EMSESP::logger().warning("* these next ones should fail *");
 
@@ -1174,7 +1270,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         deserializeJson(doc, data9);
         json = doc.as<JsonVariant>();
         request.url("/api/thermostat/mode/auto");
-        EMSESP::webAPIService.webAPIService_post(&request, json);
+        EMSESP::webAPIService.webAPIService(&request, json);
         ok = true;
     }
 
@@ -1182,10 +1278,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Testing nested MQTT");
         Mqtt::ha_enabled(false); // turn off HA Discovery to stop the chatter
 
-        run_test("boiler");
-        run_test("thermostat");
-        run_test("solar");
-        run_test("mixer");
+        test("boiler");
+        test("thermostat");
+        test("solar");
+        test("mixer");
 
         // first with nested
         Mqtt::nested_format(1);
@@ -1202,7 +1298,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     if (command == "thermostat") {
         shell.printfln("Testing adding a thermostat FW120...");
 
-        run_test("thermostat");
+        test("thermostat");
         shell.invoke_command("show values");
         shell.invoke_command("call system publish");
 
@@ -1230,7 +1326,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "solar") {
         shell.printfln("Testing Solar");
-        run_test("solar");
+        test("solar");
 
         uart_telegram("30 00 FF 0A 02 6A 04"); // SM100 pump on (1)sh
         EMSESP::show_device_values(shell);
@@ -1244,7 +1340,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "heatpump") {
         shell.printfln("Testing Heat Pump");
-        run_test("heatpump");
+        test("heatpump");
         shell.invoke_command("call");
         shell.invoke_command("call heatpump info");
         ok = true;
@@ -1535,7 +1631,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     if (command == "mqtt2") {
         shell.printfln("Testing MQTT large payloads...");
 
-        DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXXLARGE);
+        JsonDocument doc;
 
         char key[8];
         char value[8];
@@ -1548,7 +1644,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         }
         doc.shrinkToFit();
         JsonObject jo = doc.as<JsonObject>();
-        shell.printfln("Size of JSON payload = %d", jo.memoryUsage());
         shell.printfln("Length of JSON payload = %d", measureJson(jo));
 
         Mqtt::queue_publish("test", jo);
@@ -1700,7 +1795,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     if (command == "mixer") {
         shell.printfln("Testing Mixer...");
 
-        run_test("mixer");
+        test("mixer");
 
         // check for error "No telegram type handler found for ID 0x255 (src 0x20)"
         uart_telegram({0xA0, 0x00, 0xFF, 0x00, 0x01, 0x55, 0x00, 0x1A});
@@ -1716,11 +1811,11 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // test API
         AsyncWebServerRequest request;
         request.url("/api/mixer");
-        EMSESP::webAPIService.webAPIService_get(&request);
+        EMSESP::webAPIService.webAPIService(&request);
         request.url("/api/mixer/hc1/pumpstatus");
-        EMSESP::webAPIService.webAPIService_get(&request);
+        EMSESP::webAPIService.webAPIService(&request);
         request.url("/api/mixer/wwc2/pumpstatus");
-        EMSESP::webAPIService.webAPIService_get(&request);
+        EMSESP::webAPIService.webAPIService(&request);
         ok = true;
     }
 
@@ -1883,20 +1978,22 @@ void Test::listDir(fs::FS & fs, const char * dirname, uint8_t levels) {
     File file = root.openNextFile();
     while (file) {
         if (file.isDirectory()) {
-            Serial.print("  DIR : ");
+            Serial.print(" DIR: ");
             Serial.println(file.name());
             if (levels) {
                 listDir(fs, file.name(), levels - 1);
             }
             Serial.println();
         } else {
-            Serial.print("  FILE: ");
+            Serial.print(" ");
             Serial.print(file.name());
-            Serial.print("\tSIZE: ");
-            Serial.println(file.size());
+            Serial.print(" (");
+            Serial.print(file.size());
+            Serial.println(" bytes)");
         }
         file = root.openNextFile();
     }
+    Serial.println();
 }
 #endif
 #endif

@@ -262,7 +262,7 @@ const DashboardSensors: FC = () => {
     setSelectedAnalogSensor({
       id: Math.floor(Math.random() * (Math.floor(200) - 100) + 100),
       n: '',
-      g: 40,
+      g: 21, // default GPIO 21 which is safe for all platforms
       u: 0,
       v: 0,
       o: 0,

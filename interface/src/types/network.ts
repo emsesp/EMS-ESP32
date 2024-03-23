@@ -33,6 +33,7 @@ export interface NetworkStatus {
   gateway_ip: string;
   dns_ip_1: string;
   dns_ip_2: string;
+  hostname: string;
 }
 
 export interface NetworkSettings {
@@ -41,7 +42,7 @@ export interface NetworkSettings {
   password: string;
   hostname: string;
   static_ip_config: boolean;
-  enableIPv6: boolean;
+  enableIPv6?: boolean;
   bandwidth20: boolean;
   nosleep: boolean;
   tx_power: number;

@@ -1,21 +1,19 @@
 #ifndef ESP8266React_h
 #define ESP8266React_h
 
-#include <Arduino.h>
-
-#include <ArduinoJson.h>
-#include <AsyncJson.h>
-
-#include <espMqttClient.h>
-#include <ESPAsyncWebServer.h>
-
 #include <list>
 
-#include <FS.h>
-#include <SecurityManager.h>
-#include <SecuritySettingsService.h>
-#include <StatefulService.h>
-#include <Network.h>
+#include "Arduino.h"
+#include "ArduinoJson.h"
+#include "AsyncJson.h"
+#include "ESPAsyncWebServer.h"
+#include "FS.h"
+#include "SecurityManager.h"
+#include "SecuritySettingsService.h"
+#include "StatefulService.h"
+#include "Network.h"
+
+#include <espMqttClient.h>
 
 #define AP_SETTINGS_FILE "/config/apSettings.json"
 #define MQTT_SETTINGS_FILE "/config/mqttSettings.json"
@@ -59,26 +57,29 @@ class DummySettings {
     uint16_t publish_time_sensor     = 10;
     uint16_t publish_time_heartbeat  = 60;
 
-    String hostname       = "ems-esp";
-    String jwtSecret      = "ems-esp";
-    String ssid           = "ems-esp";
-    String password       = "ems-esp";
-    String bssid          = "";
-    String localIP        = "";
-    String gatewayIP      = "";
-    String subnetMask     = "";
-    bool   staticIPConfig = false;
-    String dnsIP1         = "";
-    String dnsIP2         = "";
-    bool   enableIPv6     = false;
-    bool   enableMDNS     = true;
-    bool   enableCORS     = false;
-    String CORSOrigin     = "*";
+    String  hostname       = "ems-esp";
+    String  jwtSecret      = "ems-esp";
+    String  ssid           = "ems-esp";
+    String  password       = "ems-esp";
+    String  bssid          = "";
+    String  localIP        = "";
+    String  gatewayIP      = "";
+    String  subnetMask     = "";
+    bool    staticIPConfig = false;
+    String  dnsIP1         = "";
+    String  dnsIP2         = "";
+    bool    enableIPv6     = false;
+    bool    enableMDNS     = true;
+    bool    enableCORS     = false;
+    String  CORSOrigin     = "*";
+    uint8_t tx_power       = 0;
 
-    static void read(DummySettings & settings, JsonObject & root){};
+    uint8_t provisionMode = 0;
+
+    static void read(DummySettings & settings, JsonObject root){};
     static void read(DummySettings & settings){};
 
-    static StateUpdateResult update(JsonObject & root, DummySettings & settings) {
+    static StateUpdateResult update(JsonObject root, DummySettings & settings) {
         return StateUpdateResult::CHANGED;
     }
 };
@@ -95,6 +96,9 @@ class DummySettingsService : public StatefulService<DummySettings> {
 #define SecuritySettings DummySettings
 #define MqttSettings DummySettings
 #define NTPSettings DummySettings
+#define OTASettings DummySettings
+#define APSettings DummySettings
+
 
 class ESP8266React {
   public:
@@ -103,7 +107,6 @@ class ESP8266React {
         , _securitySettingsService(server, fs){};
 
     void begin() {
-        // initialize mqtt
         _mqttClient = new espMqttClient();
     };
     void loop(){};
@@ -114,6 +117,10 @@ class ESP8266React {
 
     espMqttClient * getMqttClient() {
         return _mqttClient;
+    }
+
+    bool apStatus() {
+        return false;
     }
 
     void setWill(const char * will_topic) {
@@ -137,6 +144,14 @@ class ESP8266React {
         return &_settings;
     }
 
+    StatefulService<DummySettings> * getOTASettingsService() {
+        return &_settings;
+    }
+
+    StatefulService<DummySettings> * getAPSettingsService() {
+        return &_settings;
+    }
+
   private:
     DummySettingsService    _settings;
     SecuritySettingsService _securitySettingsService;
@@ -152,7 +167,7 @@ class EMSESPSettingsService {
 
 class JsonUtils {
   public:
-    static void writeIP(JsonObject & root, const String & key, const String & ip) {
+    static void writeIP(JsonObject root, const String & key, const String & ip) {
         root[key] = ip;
     }
 };

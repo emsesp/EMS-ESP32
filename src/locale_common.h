@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,6 +65,7 @@ MAKE_WORD(users)
 MAKE_WORD(publish)
 MAKE_WORD(board_profile)
 MAKE_WORD(setvalue)
+MAKE_WORD(service)
 
 // for commands
 MAKE_WORD(call)
@@ -140,6 +141,7 @@ MAKE_WORD_CUSTOM(asterisks, "********")
 MAKE_WORD_CUSTOM(n_mandatory, "<n>")
 MAKE_WORD_CUSTOM(sensorid_optional, "[sensor ID]")
 MAKE_WORD_CUSTOM(id_optional, "[id|hc]")
+MAKE_WORD_CUSTOM(partitionname_optional, "[partitionsname]")
 MAKE_WORD_CUSTOM(data_optional, "[data]")
 MAKE_WORD_CUSTOM(nvs_optional, "[nvs]")
 MAKE_WORD_CUSTOM(offset_optional, "[offset]")
@@ -155,6 +157,8 @@ MAKE_WORD_CUSTOM(new_password_prompt1, "Enter new password: ")
 MAKE_WORD_CUSTOM(new_password_prompt2, "Retype new password: ")
 MAKE_WORD_CUSTOM(password_prompt, "Password: ")
 MAKE_WORD_CUSTOM(unset, "<unset>")
+MAKE_WORD_CUSTOM(enable_mandatory, "<enable | disable>")
+MAKE_WORD_CUSTOM(service_mandatory, "<ota | ap | mqtt | ntp>")
 
 // more common names that don't need translations
 MAKE_NOTRANSLATION(1x3min, "1x3min")
@@ -247,6 +251,7 @@ MAKE_WORD_CUSTOM(uom_l, "l")
 MAKE_WORD_CUSTOM(uom_kmin, "K*min")
 MAKE_WORD_CUSTOM(uom_k, "K")
 MAKE_WORD_CUSTOM(uom_volts, "V")
+MAKE_WORD_CUSTOM(uom_mbar, "mbar")
 
 // MQTT topics and prefixes
 MAKE_WORD_CUSTOM(heating_active, "heating_active")
@@ -283,6 +288,7 @@ MAKE_ENUM(enum_flow, FL_(off), FL_(flow), FL_(bufferedflow), FL_(buffer), FL_(la
 MAKE_ENUM(enum_reset, FL_(dash), FL_(maintenance), FL_(error))
 MAKE_ENUM(enum_maxHeat, FL_(0kW), FL_(2kW), FL_(3kW), FL_(4kW), FL_(6kW), FL_(9kW))
 MAKE_ENUM(enum_pumpMode, FL_(proportional), FL_(deltaP1), FL_(deltaP2), FL_(deltaP3), FL_(deltaP4))
+MAKE_ENUM(enum_hpPumpMode, FL_(auto), FL_(continuous))
 
 // thermostat lists
 MAKE_ENUM(enum_ibaMainDisplay, FL_(internal_temperature), FL_(internal_setpoint), FL_(external_temperature), FL_(burner_temperature), FL_(ww_temperature), FL_(functioning_mode), FL_(time), FL_(date), FL_(smoke_temperature))
@@ -320,7 +326,7 @@ MAKE_ENUM(enum_reducemode1, FL_(outdoor), FL_(room), FL_(reduce)) // RC310 value
 MAKE_ENUM(enum_nofrostmode, FL_(off), FL_(outdoor), FL_(room))
 MAKE_ENUM(enum_nofrostmode1, FL_(room), FL_(outdoor), FL_(room_outdoor))
 
-MAKE_ENUM(enum_controlmode, FL_(off), FL_(optimized), FL_(simple), FL_(mpc), FL_(room), FL_(power), FL_(constant))
+MAKE_ENUM(enum_controlmode, FL_(optimized), FL_(simple), FL_(na), FL_(room), FL_(power))
 MAKE_ENUM(enum_controlmode1, FL_(weather_compensated), FL_(outside_basepoint), FL_(na), FL_(room), FL_(power), FL_(constant)) // RC310 1-4
 MAKE_ENUM(enum_controlmode2, FL_(outdoor), FL_(room))
 MAKE_ENUM(enum_control, FL_(off), FL_(rc20), FL_(rc3x))

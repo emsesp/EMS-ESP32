@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,6 +51,7 @@ class Mixer : public EMSdevice {
     bool set_pump(const char * value, const int8_t id);
     bool set_activated(const char * value, const int8_t id);
     bool set_setValveTime(const char * value, const int8_t id);
+    bool set_flowTempOffset(const char * value, const int8_t id);
 
     bool set_wwMaxTemp(const char * value, const int8_t id);
     bool set_wwDiffTemp(const char * value, const int8_t id);
@@ -80,6 +81,7 @@ class Mixer : public EMSdevice {
     uint8_t  flowSetTemp_;
     uint8_t  activated_;
     uint8_t  setValveTime_;
+    uint8_t  flowTempOffset_;
 
     // MM100wwParam - 0x0313, 0x033B
     uint8_t wwMaxTemp_;

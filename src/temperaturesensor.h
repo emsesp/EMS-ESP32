@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,6 +62,7 @@ class TemperatureSensor {
 
         bool apply_customization();
 
+        // initial values
         int16_t temperature_c = EMS_VALUE_SHORT_NOTSET;
         bool    read          = false;
         bool    ha_registered = false;
@@ -82,7 +83,7 @@ class TemperatureSensor {
     void publish_values(const bool force);
     void reload();
     bool updated_values();
-    bool get_value_info(JsonObject & output, const char * cmd, const int8_t id);
+    bool get_value_info(JsonObject output, const char * cmd, const int8_t id = -1);
 
     // return back reference to the sensor list, used by other classes
     std::vector<Sensor> sensors() const {
@@ -110,8 +111,6 @@ class TemperatureSensor {
     }
 
     bool update(const std::string & id, const std::string & name, int16_t offset);
-
-    bool command_info(const char * value, const int8_t id, JsonObject & output);
 
 #if defined(EMSESP_TEST)
     void test();
@@ -153,8 +152,7 @@ class TemperatureSensor {
     int16_t  get_temperature_c(const uint8_t addr[]);
     uint64_t get_id(const uint8_t addr[]);
     void     remove_ha_topic(const std::string & id);
-
-    bool command_commands(const char * value, const int8_t id, JsonObject & output);
+    void     addSensorJson(JsonObject output, const Sensor & sensor);
 
     std::vector<Sensor> sensors_; // our list of active sensors
 

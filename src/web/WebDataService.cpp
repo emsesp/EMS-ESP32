@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,45 +20,37 @@
 
 namespace emsesp {
 
-using namespace std::placeholders; // for `_1` etc
-
 WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securityManager)
-    : _write_value_handler(WRITE_DEVICE_VALUE_SERVICE_PATH,
-                           securityManager->wrapCallback(std::bind(&WebDataService::write_device_value, this, _1, _2), AuthenticationPredicates::IS_ADMIN))
-    , _write_temperature_handler(WRITE_TEMPERATURE_SENSOR_SERVICE_PATH,
-                                 securityManager->wrapCallback(std::bind(&WebDataService::write_temperature_sensor, this, _1, _2),
-                                                               AuthenticationPredicates::IS_ADMIN))
-    , _write_analog_handler(WRITE_ANALOG_SENSOR_SERVICE_PATH,
-                            securityManager->wrapCallback(std::bind(&WebDataService::write_analog_sensor, this, _1, _2), AuthenticationPredicates::IS_ADMIN)) {
+
+{
+    // write endpoints
+    server->on(WRITE_DEVICE_VALUE_SERVICE_PATH,
+               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_device_value(request, json); },
+                                             AuthenticationPredicates::IS_ADMIN));
+    server->on(WRITE_TEMPERATURE_SENSOR_SERVICE_PATH,
+               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_temperature_sensor(request, json); },
+                                             AuthenticationPredicates::IS_ADMIN));
+    server->on(WRITE_ANALOG_SENSOR_SERVICE_PATH,
+               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_analog_sensor(request, json); },
+                                             AuthenticationPredicates::IS_ADMIN));
     // GET's
     server->on(DEVICE_DATA_SERVICE_PATH,
                HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WebDataService::device_data, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { device_data(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
+
 
     server->on(CORE_DATA_SERVICE_PATH,
                HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WebDataService::core_data, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { core_data(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
 
     server->on(SENSOR_DATA_SERVICE_PATH,
                HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WebDataService::sensor_data, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { sensor_data(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
 
     // POST's
     server->on(SCAN_DEVICES_SERVICE_PATH,
                HTTP_POST,
-               securityManager->wrapRequest(std::bind(&WebDataService::scan_devices, this, _1), AuthenticationPredicates::IS_ADMIN));
-
-    _write_value_handler.setMethod(HTTP_POST);
-    _write_value_handler.setMaxContentLength(256);
-    server->addHandler(&_write_value_handler);
-
-    _write_temperature_handler.setMethod(HTTP_POST);
-    _write_temperature_handler.setMaxContentLength(256);
-    server->addHandler(&_write_temperature_handler);
-
-    _write_analog_handler.setMethod(HTTP_POST);
-    _write_analog_handler.setMaxContentLength(256);
-    server->addHandler(&_write_analog_handler);
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { scan_devices(request); }, AuthenticationPredicates::IS_ADMIN));
 }
 
 // scan devices service
@@ -71,15 +63,15 @@ void WebDataService::scan_devices(AsyncWebServerRequest * request) {
 // this is used in the dashboard and contains all ems device information
 // /coreData endpoint
 void WebDataService::core_data(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE);
+    auto *     response = new AsyncJsonResponse(false);
     JsonObject root     = response->getRoot();
 
     // list is already sorted by device type
-    JsonArray devices = root.createNestedArray("devices");
+    JsonArray devices = root["devices"].to<JsonArray>();
     for (const auto & emsdevice : EMSESP::emsdevices) {
         // ignore controller
         if (emsdevice && (emsdevice->device_type() != EMSdevice::DeviceType::CONTROLLER || emsdevice->count_entities() > 0)) {
-            JsonObject obj = devices.createNestedObject();
+            JsonObject obj = devices.add<JsonObject>();
             obj["id"]      = emsdevice->unique_id();                            // a unique id
             obj["tn"]      = emsdevice->device_type_2_device_name_translated(); // translated device type name
             obj["t"]       = emsdevice->device_type();                          // device type number
@@ -95,7 +87,7 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
     // add any custom entities
     uint8_t customEntities = EMSESP::webCustomEntityService.count_entities();
     if (customEntities) {
-        JsonObject obj = devices.createNestedObject();
+        JsonObject obj = devices.add<JsonObject>();
         obj["id"]      = 99;                                                // the last unique id
         obj["tn"]      = Helpers::translated_word(FL_(custom_device));      // translated device type name
         obj["t"]       = EMSdevice::DeviceType::CUSTOM;                     // device type number
@@ -116,14 +108,14 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
 // sensor data - sends back to web
 // /sensorData endpoint
 void WebDataService::sensor_data(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_XXLARGE);
+    auto *     response = new AsyncJsonResponse(false);
     JsonObject root     = response->getRoot();
 
     // temperature sensors
-    JsonArray sensors = root.createNestedArray("ts");
+    JsonArray sensors = root["ts"].to<JsonArray>();
     if (EMSESP::temperaturesensor_.have_sensors()) {
         for (const auto & sensor : EMSESP::temperaturesensor_.sensors()) {
-            JsonObject obj = sensors.createNestedObject();
+            JsonObject obj = sensors.add<JsonObject>();
             obj["id"]      = sensor.id();   // id as string
             obj["n"]       = sensor.name(); // name
             if (EMSESP::system_.fahrenheit()) {
@@ -143,11 +135,11 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
     }
 
     // analog sensors
-    JsonArray analogs = root.createNestedArray("as");
+    JsonArray analogs = root["as"].to<JsonArray>();
     if (EMSESP::analog_enabled() && EMSESP::analogsensor_.have_sensors()) {
         uint8_t count = 0;
         for (const auto & sensor : EMSESP::analogsensor_.sensors()) {
-            JsonObject obj = analogs.createNestedObject();
+            JsonObject obj = analogs.add<JsonObject>();
             obj["id"]      = ++count; // needed for sorting table
             obj["g"]       = sensor.gpio();
             obj["n"]       = sensor.name();
@@ -178,15 +170,14 @@ void WebDataService::device_data(AsyncWebServerRequest * request) {
     if (request->hasParam(F_(id))) {
         id = Helpers::atoint(request->getParam(F_(id))->value().c_str()); // get id from url
 
-        size_t buffer   = EMSESP_JSON_SIZE_XXXXLARGE;
-        auto * response = new MsgpackAsyncJsonResponse(false, buffer);
+        auto * response = new AsyncJsonResponse(false, true); // use msgPack
 
         // check size
-        while (!response) {
-            delete response;
-            buffer -= 1024;
-            response = new MsgpackAsyncJsonResponse(false, buffer);
-        }
+        // while (!response) {
+        //     delete response;
+        //     buffer -= 1024;
+        //     response = new MsgpackAsyncJsonResponse(false, buffer);
+        // }
 
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice->unique_id() == id) {
@@ -228,7 +219,7 @@ void WebDataService::device_data(AsyncWebServerRequest * request) {
 }
 
 // assumes the service has been checked for admin authentication
-void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVariant & json) {
+void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVariant json) {
     if (json.is<JsonObject>()) {
         uint8_t      unique_id = json["id"]; // unique ID
         const char * cmd       = json["c"];  // the command
@@ -249,7 +240,7 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
                 cmd       = Command::parse_command_string(cmd, id); // extract hc or wwc
 
                 // create JSON for output
-                auto *     response = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
+                auto *     response = new AsyncJsonResponse(false);
                 JsonObject output   = response->getRoot();
 
                 // the data could be in any format, but we need string
@@ -289,7 +280,7 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
             // parse the command as it could have a hc or wwc prefixed, e.g. hc2/seltemp
             int8_t id              = -1;
             cmd                    = Command::parse_command_string(cmd, id);
-            auto *     response    = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
+            auto *     response    = new AsyncJsonResponse(false);
             JsonObject output      = response->getRoot();
             uint8_t    return_code = CommandRet::NOT_FOUND;
             uint8_t    device_type = EMSdevice::DeviceType::CUSTOM;
@@ -324,7 +315,7 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
 
 // takes a temperaturesensor name and optional offset from the WebUI and update the customization settings
 // via the temperaturesensor service
-void WebDataService::write_temperature_sensor(AsyncWebServerRequest * request, JsonVariant & json) {
+void WebDataService::write_temperature_sensor(AsyncWebServerRequest * request, JsonVariant json) {
     bool ok = false;
     if (json.is<JsonObject>()) {
         JsonObject sensor = json;
@@ -347,7 +338,7 @@ void WebDataService::write_temperature_sensor(AsyncWebServerRequest * request, J
 }
 
 // update the analog record, or create a new one
-void WebDataService::write_analog_sensor(AsyncWebServerRequest * request, JsonVariant & json) {
+void WebDataService::write_analog_sensor(AsyncWebServerRequest * request, JsonVariant json) {
     bool ok = false;
     if (json.is<JsonObject>()) {
         JsonObject analog = json;

@@ -1,7 +1,7 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
- * 
+ * Copyright 2020-2024  Paul Derbyshire
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -38,8 +38,7 @@
 #endif
 #include <Preferences.h>
 
-#include <ESP8266React.h>
-
+#include "ESP8266React.h"
 #include "web/WebStatusService.h"
 #include "web/WebDataService.h"
 #include "web/WebSettingsService.h"
@@ -66,28 +65,17 @@
 
 #define WATCH_ID_NONE 0 // no watch id set
 
-// uses StaticJsonDocument
-#define EMSESP_JSON_SIZE_SMALL 256
-#define EMSESP_JSON_SIZE_MEDIUM 768
-#define EMSESP_JSON_SIZE_LARGE 1024 // used in forming HA config payloads, also in *AsyncJsonResponse
-
-// used in larger buffers like DynamicJsonDocument
-#define EMSESP_JSON_SIZE_XLARGE 2048
-#define EMSESP_JSON_SIZE_XXLARGE 4096
-#define EMSESP_JSON_SIZE_XXXLARGE 16384
-#define EMSESP_JSON_SIZE_XXXXLARGE 20480 // web output
-
 // helpers for callback functions
 #define MAKE_PF_CB(__f) [&](std::shared_ptr<const Telegram> t) { __f(t); }                  // for Process Function callbacks to EMSDevice::process_function_p
 #define MAKE_CF_CB(__f) [&](const char * value, const int8_t id) { return __f(value, id); } // for Command Function callbacks Command::cmd_function_p
 
 namespace emsesp {
 
-using DeviceValueUOM   = emsesp::DeviceValue::DeviceValueUOM;
-using DeviceValueType  = emsesp::DeviceValue::DeviceValueType;
-using DeviceValueState = emsesp::DeviceValue::DeviceValueState;
-using DeviceValueTAG   = emsesp::DeviceValue::DeviceValueTAG;
-using DeviceValueNumOp = emsesp::DeviceValue::DeviceValueNumOp;
+using DeviceValueUOM   = DeviceValue::DeviceValueUOM;
+using DeviceValueType  = DeviceValue::DeviceValueType;
+using DeviceValueState = DeviceValue::DeviceValueState;
+using DeviceValueTAG   = DeviceValue::DeviceValueTAG;
+using DeviceValueNumOp = DeviceValue::DeviceValueNumOp;
 
 // forward declarations for compiler
 class EMSESPShell;
@@ -136,7 +124,7 @@ class EMSESP {
     static uint8_t count_devices();
     static uint8_t device_index(const uint8_t device_type, const uint8_t unique_id);
 
-    static bool get_device_value_info(JsonObject & root, const char * cmd, const int8_t id, const uint8_t devicetype);
+    static bool get_device_value_info(JsonObject root, const char * cmd, const int8_t id, const uint8_t devicetype);
 
     static void show_device_values(uuid::console::Shell & shell);
     static void show_sensor_values(uuid::console::Shell & shell);
@@ -245,8 +233,8 @@ class EMSESP {
     static void        process_version(std::shared_ptr<const Telegram> telegram);
     static void        publish_response(std::shared_ptr<const Telegram> telegram);
     static void        publish_all_loop();
-    static bool        command_commands(uint8_t device_type, JsonObject & output, const int8_t id);
-    static bool        command_entities(uint8_t device_type, JsonObject & output, const int8_t id);
+    static bool        command_commands(uint8_t device_type, JsonObject output, const int8_t id);
+    static bool        command_entities(uint8_t device_type, JsonObject output, const int8_t id);
 
     static constexpr uint32_t EMS_FETCH_FREQUENCY = 60000; // check every minute
     static constexpr uint8_t  EMS_WAIT_KM_TIMEOUT = 60;    // wait one minute

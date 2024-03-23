@@ -169,7 +169,7 @@ const nl: Translation = {
   HELP_INFORMATION_1: 'Bezoek de online wiki om instructies te vinden om EMS-ESP te configureren',
   HELP_INFORMATION_2: 'Voor de live community ga naar de Discord server',
   HELP_INFORMATION_3: 'Om een nieuwe feature te vragen of een bug te rapporteren',
-  HELP_INFORMATION_4: 'zorg dat je ook je systeem details zijn toevoeged voor een sneller antwoord',
+  HELP_INFORMATION_4: 'Zorg dat je ook je systeem details zijn toevoeged voor een sneller antwoord',
   HELP_INFORMATION_5: 'EMS-ESP is een gratis en open source project. Steun ons met een Star op Github!',
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
@@ -194,13 +194,11 @@ const nl: Translation = {
   RELEASE_IS: 'release is',
   RELEASE_NOTES: 'release notes',
   EMS_ESP_VER: 'EMS-ESP Versie',
-  PLATFORM: 'Apparaat (Platform / SDK)',
   UPTIME: 'Systeem Uptime',
-  CPU_FREQ: 'CPU Frequency',
   HEAP: 'Heap (Free / Max Alloc)',
   PSRAM: 'PSRAM (Size / Free)',
   FLASH: 'Flash Chip (Size / Speed)',
-  APPSIZE: 'Application (Used / Free)',
+  APPSIZE: 'Application (Partition: Used / Free)',
   FILESYSTEM: 'File System (Used / Free)',
   BUFFER_SIZE: 'Max Buffer Size',
   COMPACT: 'Compact',
@@ -318,12 +316,13 @@ const nl: Translation = {
   SCHEDULE_TIMER_2: 'elke minuut',
   SCHEDULE_TIMER_3: 'elke huur',
   CUSTOM_ENTITIES: 'Aangepaste Entiteiten',
-  ENTITIES_HELP_1: 'Aangepaste entiteiten ophalen uit de EMS-bus',
+  ENTITIES_HELP_1: 'Aangepaste entiteiten ophalen uit de EMS-bus', // TODO translate
   ENTITIES_UPDATED: 'Entiteiten bijgewerkt',
   WRITEABLE: 'Beschrijfbare',
   SHOWING: 'Tonen',
   SEARCH: 'Zoek',
-  CERT: 'TLS rootcertificaat (laat leeg om TLS uit te schakelen)',
+  CERT: 'TLS rootcertificaat (laat leeg om TLS-insecure)', // TODO translate
+  ENABLE_TLS: 'Activeer TLS',
   ON: 'On', // TODO translate
   OFF: 'Off', // TODO translate
   POLARITY: 'Polarity', // TODO translate

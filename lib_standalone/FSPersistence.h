@@ -1,38 +1,32 @@
 #ifndef FSPersistence_h
 #define FSPersistence_h
 
-#include <StatefulService.h>
-#include <FS.h>
+#include "StatefulService.h"
+#include "FS.h"
 
 template <class T>
 class FSPersistence {
   public:
-    FSPersistence(JsonStateReader<T>   stateReader,
-                  JsonStateUpdater<T>  stateUpdater,
-                  StatefulService<T> * statefulService,
-                  FS *                 fs,
-                  const char *         filePath,
-                  size_t               bufferSize = FS_BUFFER_SIZE)
+    FSPersistence(JsonStateReader<T> stateReader, JsonStateUpdater<T> stateUpdater, StatefulService<T> * statefulService, FS * fs, const char * filePath)
         : _stateReader(stateReader)
         , _stateUpdater(stateUpdater)
         , _statefulService(statefulService)
         , _fs(fs)
         , _filePath(filePath)
-        , _bufferSize(bufferSize)
         , _updateHandlerId(0) {
         enableUpdateHandler();
     }
 
     void readFromFS() {
-        Serial.println();
-        Serial.print("Fake reading file ");
-        Serial.println(_filePath);
+        // Serial.println();
+        // Serial.print("Fake reading file ");
+        // Serial.println(_filePath);
         applyDefaults();
     }
 
     bool writeToFS() {
-        DynamicJsonDocument jsonDocument = DynamicJsonDocument(_bufferSize);
-        JsonObject          jsonObject   = jsonDocument.to<JsonObject>();
+        JsonDocument jsonDocument;
+        JsonObject   jsonObject = jsonDocument.to<JsonObject>();
         _statefulService->read(jsonObject, _stateReader);
         return true;
     }
@@ -46,7 +40,7 @@ class FSPersistence {
 
     void enableUpdateHandler() {
         if (!_updateHandlerId) {
-            _updateHandlerId = _statefulService->addUpdateHandler([&](const String & originId) { writeToFS(); });
+            _updateHandlerId = _statefulService->addUpdateHandler([this] { writeToFS(); });
         }
     }
 
@@ -56,13 +50,12 @@ class FSPersistence {
     StatefulService<T> * _statefulService;
     FS *                 _fs;
     const char *         _filePath;
-    size_t               _bufferSize;
     update_handler_id_t  _updateHandlerId;
 
   protected:
     virtual void applyDefaults() {
-        DynamicJsonDocument jsonDocument = DynamicJsonDocument(_bufferSize);
-        JsonObject          jsonObject   = jsonDocument.as<JsonObject>();
+        JsonDocument jsonDocument;
+        JsonObject   jsonObject = jsonDocument.as<JsonObject>();
         _statefulService->updateWithoutPropagation(jsonObject, _stateUpdater);
     }
 };

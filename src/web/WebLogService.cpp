@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,21 +18,17 @@
 
 #include "emsesp.h"
 
-using namespace std::placeholders;
-
 namespace emsesp {
 
 WebLogService::WebLogService(AsyncWebServer * server, SecurityManager * securityManager)
-    : events_(EVENT_SOURCE_LOG_PATH)
-    , setValues_(LOG_SETTINGS_PATH, std::bind(&WebLogService::setValues, this, _1, _2), 256) {
-    events_.setFilter(securityManager->filterRequest(AuthenticationPredicates::IS_ADMIN));
-
-    server->on(LOG_SETTINGS_PATH, HTTP_GET, std::bind(&WebLogService::getValues, this, _1)); // get settings
+    : events_(EVENT_SOURCE_LOG_PATH) {
+    // get & set settings
+    server->on(LOG_SETTINGS_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { getSetValues(request, json); });
 
     // for bring back the whole log - is a command, hence a POST
-    server->on(FETCH_LOG_PATH, HTTP_POST, std::bind(&WebLogService::fetchLog, this, _1));
+    server->on(FETCH_LOG_PATH, HTTP_POST, [this](AsyncWebServerRequest * request) { fetchLog(request); });
 
-    server->addHandler(&setValues_);
+    events_.setFilter(securityManager->filterRequest(AuthenticationPredicates::IS_ADMIN));
     server->addHandler(&events_);
 }
 
@@ -59,12 +55,10 @@ uuid::log::Level WebLogService::log_level() const {
 }
 
 void WebLogService::log_level(uuid::log::Level level) {
-    EMSESP::webSettingsService.update(
-        [&](WebSettings & settings) {
-            settings.weblog_level = level;
-            return StateUpdateResult::CHANGED;
-        },
-        "local");
+    EMSESP::webSettingsService.update([&](WebSettings & settings) {
+        settings.weblog_level = level;
+        return StateUpdateResult::CHANGED;
+    });
     uuid::log::Logger::register_handler(this, level);
     if (level == uuid::log::Level::OFF) {
         log_messages_.clear();
@@ -87,12 +81,10 @@ void WebLogService::maximum_log_messages(size_t count) {
     while (log_messages_.size() > maximum_log_messages_) {
         log_messages_.pop_front();
     }
-    EMSESP::webSettingsService.update(
-        [&](WebSettings & settings) {
-            settings.weblog_buffer = count;
-            return StateUpdateResult::CHANGED;
-        },
-        "local");
+    EMSESP::webSettingsService.update([&](WebSettings & settings) {
+        settings.weblog_buffer = count;
+        return StateUpdateResult::CHANGED;
+    });
 }
 
 bool WebLogService::compact() const {
@@ -101,12 +93,10 @@ bool WebLogService::compact() const {
 
 void WebLogService::compact(bool compact) {
     compact_ = compact;
-    EMSESP::webSettingsService.update(
-        [&](WebSettings & settings) {
-            settings.weblog_compact = compact;
-            return StateUpdateResult::CHANGED;
-        },
-        "local");
+    EMSESP::webSettingsService.update([&](WebSettings & settings) {
+        settings.weblog_compact = compact;
+        return StateUpdateResult::CHANGED;
+    });
 }
 
 WebLogService::QueuedLogMessage::QueuedLogMessage(unsigned long id, std::shared_ptr<uuid::log::Message> && content)
@@ -183,10 +173,8 @@ char * WebLogService::messagetime(char * out, const uint64_t t, const size_t buf
 
 // send to web eventsource
 void WebLogService::transmit(const QueuedLogMessage & message) {
-    DynamicJsonDocument jsonDocument(EMSESP_JSON_SIZE_LARGE);
-    if (jsonDocument.capacity() == 0) {
-        return;
-    }
+    JsonDocument jsonDocument;
+
     JsonObject logEvent = jsonDocument.to<JsonObject>();
     char       time_string[25];
 
@@ -213,11 +201,20 @@ void WebLogService::fetchLog(AsyncWebServerRequest * request) {
 }
 
 // sets the values like level after a POST
-void WebLogService::setValues(AsyncWebServerRequest * request, JsonVariant & json) {
-    if (!json.is<JsonObject>()) {
+void WebLogService::getSetValues(AsyncWebServerRequest * request, JsonVariant json) {
+    if ((request->method() == HTTP_GET) || (!json.is<JsonObject>())) {
+        // GET - return the values
+        auto *     response  = new AsyncJsonResponse(false);
+        JsonObject root      = response->getRoot();
+        root["level"]        = log_level();
+        root["max_messages"] = maximum_log_messages();
+        root["compact"]      = compact();
+        response->setLength();
+        request->send(response);
         return;
     }
 
+    // POST - write the settings
     auto && body = json.as<JsonObject>();
 
     uuid::log::Level level = body["level"];
@@ -230,17 +227,6 @@ void WebLogService::setValues(AsyncWebServerRequest * request, JsonVariant & jso
     compact(comp);
 
     request->send(200); // OK
-}
-
-// return the current value settings after a GET
-void WebLogService::getValues(AsyncWebServerRequest * request) {
-    auto *     response  = new AsyncJsonResponse(false, EMSESP_JSON_SIZE_SMALL);
-    JsonObject root      = response->getRoot();
-    root["level"]        = log_level();
-    root["max_messages"] = maximum_log_messages();
-    root["compact"]      = compact();
-    response->setLength();
-    request->send(response);
 }
 
 } // namespace emsesp

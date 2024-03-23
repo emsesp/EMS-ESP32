@@ -194,13 +194,11 @@ const sv: Translation = {
   RELEASE_IS: 'release är', // TODO translate
   RELEASE_NOTES: 'release-logg',
   EMS_ESP_VER: 'EMS-ESP Version',
-  PLATFORM: 'Enhet (Plattform / SDK)',
   UPTIME: 'Systemets Upptid',
-  CPU_FREQ: 'CPU-frekvens',
   HEAP: 'Heap (Ledigt / Max allokerat)',
   PSRAM: 'PSRAM (Storlek / Ledigt)',
   FLASH: 'Flashminne (Storlek / Hastighet)',
-  APPSIZE: 'Applikationer (Använt / Ledigt)',
+  APPSIZE: 'Applikationer (Partition: Använt / Ledigt)',
   FILESYSTEM: 'Filsystem (Använt / Ledigt)',
   BUFFER_SIZE: 'Max Bufferstorlek',
   COMPACT: 'Komprimera',
@@ -323,7 +321,8 @@ const sv: Translation = {
   WRITEABLE: 'Writeable', // TODO translate
   SHOWING: 'Showing', // TODO translate
   SEARCH: 'Search', // TODO translate
-  CERT: 'TLS root certificate (leave blank to disable TLS)', // TODO translate
+  CERT: 'TLS root certificate (leave blank for insecure)', // TODO translate
+  ENABLE_TLS: 'Aktivera TLS',
   ON: 'On', // TODO translate
   OFF: 'Off', // TODO translate
   POLARITY: 'Polarity', // TODO translate

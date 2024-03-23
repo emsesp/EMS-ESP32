@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,56 +18,61 @@
 
 #include "emsesp.h"
 
-using namespace std::placeholders; // for `_1` etc
-
 namespace emsesp {
 
 uint32_t WebAPIService::api_count_ = 0;
 uint16_t WebAPIService::api_fails_ = 0;
 
 WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * securityManager)
-    : _securityManager(securityManager)
-    , _apiHandler("/api", std::bind(&WebAPIService::webAPIService_post, this, _1, _2), 256) { // for POSTS, must use 'Content-Type: application/json' in header
-    server->on("/api", HTTP_GET, std::bind(&WebAPIService::webAPIService_get, this, _1));     // for GETS
-    server->addHandler(&_apiHandler);
+    : _securityManager(securityManager) {
+    // API
+    server->on(EMSESP_API_SERVICE_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { webAPIService(request, json); });
 
-    // for settings
-    server->on(GET_SETTINGS_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&WebAPIService::getSettings, this, _1), AuthenticationPredicates::IS_ADMIN));
+    // settings
+    server->on(GET_SETTINGS_PATH,
+               HTTP_GET,
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { getSettings(request); }, AuthenticationPredicates::IS_ADMIN));
+
     server->on(GET_CUSTOMIZATIONS_PATH,
                HTTP_GET,
-               securityManager->wrapRequest(std::bind(&WebAPIService::getCustomizations, this, _1), AuthenticationPredicates::IS_ADMIN));
-    server->on(GET_SCHEDULE_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&WebAPIService::getSchedule, this, _1), AuthenticationPredicates::IS_ADMIN));
-    server->on(GET_ENTITIES_PATH, HTTP_GET, securityManager->wrapRequest(std::bind(&WebAPIService::getEntities, this, _1), AuthenticationPredicates::IS_ADMIN));
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { getCustomizations(request); }, AuthenticationPredicates::IS_ADMIN));
+
+    server->on(GET_SCHEDULE_PATH,
+               HTTP_GET,
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { getSchedule(request); }, AuthenticationPredicates::IS_ADMIN));
+
+    server->on(GET_ENTITIES_PATH,
+               HTTP_GET,
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { getEntities(request); }, AuthenticationPredicates::IS_ADMIN));
 }
 
-// HTTP GET
-// GET /{device}
-// GET /{device}/{entity}
-void WebAPIService::webAPIService_get(AsyncWebServerRequest * request) {
-    // has no body JSON so create dummy as empty input object
-    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> input_doc;
-    JsonObject                                 input = input_doc.to<JsonObject>();
-    parse(request, input);
-}
-
-// For HTTP POSTS with an optional JSON body
-// HTTP_POST | HTTP_PUT | HTTP_PATCH
-// POST /{device}[/{hc|id}][/{name}]
-void WebAPIService::webAPIService_post(AsyncWebServerRequest * request, JsonVariant & json) {
+// POST|GET /{device}
+// POST|GET /{device}/{entity}
+void WebAPIService::webAPIService(AsyncWebServerRequest * request, JsonVariant json) {
+    JsonObject input;
     // if no body then treat it as a secure GET
-    if (!json.is<JsonObject>()) {
-        webAPIService_get(request);
-        return;
+    if ((request->method() == HTTP_GET) || (!json.is<JsonObject>())) {
+        // HTTP GET
+        JsonDocument input_doc; // has no body JSON so create dummy as empty input object
+        input = input_doc.to<JsonObject>();
+    } else {
+        // HTTP_POST | HTTP_PUT | HTTP_PATCH
+        input = json.as<JsonObject>(); // extract values from the json. these will be used as default values
     }
-
-    // extract values from the json. these will be used as default values
-    auto && input = json.as<JsonObject>();
     parse(request, input);
 }
+
+#ifdef EMSESP_TEST
+// for test.cpp so we can invoke GETs to test the API
+void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
+    JsonDocument input_doc;
+    parse(request, input_doc.to<JsonObject>());
+}
+#endif
 
 // parse the URL looking for query or path parameters
 // reporting back any errors
-void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
+void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     // check if the user has admin privileges (token is included and authorized)
     bool is_admin = false;
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
@@ -77,7 +82,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
 
     // check for query parameters first, the old style from v2
     // api?device={device}&cmd={name}&data={value}&id={hc}
-    if (request->url() == "/api") {
+    if (request->url() == EMSESP_API_SERVICE_PATH) {
         // get the device
         if (request->hasParam(F_(device))) {
             input["device"] = request->getParam(F_(device))->value().c_str();
@@ -106,13 +111,15 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     emsesp::EMSESP::system_.refreshHeapMem();
 
     // output json buffer
-    size_t buffer   = EMSESP_JSON_SIZE_XXXLARGE;
-    auto * response = new PrettyAsyncJsonResponse(false, buffer);
-    while (!response->getSize()) {
-        delete response;
-        buffer -= 1024;
-        response = new PrettyAsyncJsonResponse(false, buffer);
-    }
+    AsyncJsonResponse * response = new AsyncJsonResponse(false);
+
+    // add more mem if needed - won't be needed in ArduinoJson 7
+    // while (!response->getSize()) {
+    //     delete response;
+    //     buffer -= 1024;
+    //     response = new AsyncJsonResponse(false, buffer);
+    // }
+
     JsonObject output = response->getRoot();
 
     // call command
@@ -132,8 +139,8 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
     // if we're returning single values, just sent as plain text
     // https://github.com/emsesp/EMS-ESP32/issues/462#issuecomment-1093877210
     if (output.containsKey("api_data")) {
-        JsonVariant data = output["api_data"];
-        request->send(200, "text/plain; charset=utf-8", data.as<String>());
+        String data = output["api_data"].as<String>();
+        request->send(200, "text/plain; charset=utf-8", data);
         api_count_++;
         delete response;
         return;
@@ -150,23 +157,24 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject & input) {
 
 #if defined(EMSESP_STANDALONE)
     Serial.print(COLOR_YELLOW);
-    Serial.print("web response code: ");
-    Serial.println(ret_codes[return_code]);
+    Serial.print("data: ");
     if (output.size()) {
-        serializeJsonPretty(output, Serial);
+        serializeJson(output, Serial);
     }
-    Serial.println();
+    Serial.print("  (response code ");
+    Serial.print(ret_codes[return_code]);
+    Serial.println(")");
     Serial.print(COLOR_RESET);
 #endif
 }
 
 void WebAPIService::getSettings(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, FS_BUFFER_SIZE);
+    auto *     response = new AsyncJsonResponse(false);
     JsonObject root     = response->getRoot();
 
     root["type"] = "settings";
 
-    JsonObject node = root.createNestedObject("System");
+    JsonObject node = root["System"].to<JsonObject>();
     node["version"] = EMSESP_APP_VERSION;
 
     System::extractSettings(NETWORK_SETTINGS_FILE, "Network", root);
@@ -182,7 +190,7 @@ void WebAPIService::getSettings(AsyncWebServerRequest * request) {
 }
 
 void WebAPIService::getCustomizations(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, FS_BUFFER_SIZE);
+    auto *     response = new AsyncJsonResponse(false);
     JsonObject root     = response->getRoot();
 
     root["type"] = "customizations";
@@ -194,7 +202,7 @@ void WebAPIService::getCustomizations(AsyncWebServerRequest * request) {
 }
 
 void WebAPIService::getSchedule(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, FS_BUFFER_SIZE);
+    auto *     response = new AsyncJsonResponse(false);
     JsonObject root     = response->getRoot();
 
     root["type"] = "schedule";
@@ -206,7 +214,7 @@ void WebAPIService::getSchedule(AsyncWebServerRequest * request) {
 }
 
 void WebAPIService::getEntities(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false, FS_BUFFER_SIZE);
+    auto *     response = new AsyncJsonResponse(false);
     JsonObject root     = response->getRoot();
 
     root["type"] = "entities";

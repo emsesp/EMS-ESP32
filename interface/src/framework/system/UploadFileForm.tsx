@@ -19,7 +19,7 @@ const UploadFileForm: FC = () => {
   const { send: getSettings, onSuccess: onSuccessGetSettings } = useRequest(EMSESP.getSettings(), {
     immediate: false
   });
-  const { send: getCustomizations, onSuccess: onSuccessgetCustomizations } = useRequest(EMSESP.getCustomizations(), {
+  const { send: getCustomizations, onSuccess: onSuccessGetCustomizations } = useRequest(EMSESP.getCustomizations(), {
     immediate: false
   });
   const { send: getEntities, onSuccess: onSuccessGetEntities } = useRequest(EMSESP.getEntities(), {
@@ -28,7 +28,7 @@ const UploadFileForm: FC = () => {
   const { send: getSchedule, onSuccess: onSuccessGetSchedule } = useRequest(EMSESP.getSchedule(), {
     immediate: false
   });
-  const { send: getInfo, onSuccess: onSuccessGetInfo } = useRequest((data) => EMSESP.API(data), {
+  const { send: getAPI, onSuccess: onGetAPI } = useRequest((data) => EMSESP.API(data), {
     immediate: false
   });
 
@@ -71,26 +71,26 @@ const UploadFileForm: FC = () => {
         type: 'text/plain'
       })
     );
-    anchor.download = 'emsesp_' + endpoint + '.json';
+    anchor.download = 'emsesp_' + endpoint;
     anchor.click();
     URL.revokeObjectURL(anchor.href);
     toast.info(LL.DOWNLOAD_SUCCESSFUL());
   };
 
   onSuccessGetSettings((event) => {
-    saveFile(event.data, 'settings');
+    saveFile(event.data, 'settings.json');
   });
-  onSuccessgetCustomizations((event) => {
-    saveFile(event.data, 'customizations');
+  onSuccessGetCustomizations((event) => {
+    saveFile(event.data, 'customizations.json');
   });
   onSuccessGetEntities((event) => {
-    saveFile(event.data, 'entities');
+    saveFile(event.data, 'entities.json');
   });
   onSuccessGetSchedule((event) => {
-    saveFile(event.data, 'schedule');
+    saveFile(event.data, 'schedule.json');
   });
-  onSuccessGetInfo((event) => {
-    saveFile(event.data, 'info');
+  onGetAPI((event) => {
+    saveFile(event.data, event.sendArgs[0].device + '_' + event.sendArgs[0].entity + '.txt');
   });
 
   const downloadSettings = async () => {
@@ -112,13 +112,17 @@ const UploadFileForm: FC = () => {
   };
 
   const downloadSchedule = async () => {
-    await getSchedule().catch((error) => {
-      toast.error(error.message);
-    });
+    await getSchedule()
+      .catch((error) => {
+        toast.error(error.message);
+      })
+      .finally(() => {
+        toast.info(LL.DOWNLOAD_SUCCESSFUL());
+      });
   };
 
-  const downloadInfo = async () => {
-    await getInfo({ device: 'system', entity: 'info', id: 0 }).catch((error) => {
+  const callAPI = async (device: string, entity: string) => {
+    await getAPI({ device, entity, id: 0 }).catch((error) => {
       toast.error(error.message);
     });
   };
@@ -132,7 +136,8 @@ const UploadFileForm: FC = () => {
         <Typography variant="body2">
           {LL.UPLOAD_TEXT()}
           <br />
-          {LL.RESTART_TEXT()}.
+          <br />
+          {LL.RESTART_TEXT(1)}.
         </Typography>
       </Box>
       {md5 && (
@@ -143,8 +148,34 @@ const UploadFileForm: FC = () => {
       <SingleUpload onDrop={startUpload} onCancel={cancelUpload} isUploading={isUploading} progress={progress} />
       {!isUploading && (
         <>
-          <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
-            {LL.DOWNLOAD(0)}
+          <Typography sx={{ pt: 4, pb: 2 }} variant="h6" color="primary">
+            {LL.DOWNLOAD(0)}&nbsp;{LL.SUPPORT_INFORMATION(1)}
+          </Typography>
+          <Box color="warning.main">
+            <Typography mb={1} variant="body2">
+              {LL.HELP_INFORMATION_4()}
+            </Typography>
+          </Box>
+          <Button
+            startIcon={<DownloadIcon />}
+            variant="outlined"
+            color="primary"
+            onClick={() => callAPI('system', 'info')}
+          >
+            {LL.SUPPORT_INFORMATION(0)}
+          </Button>
+          <Button
+            sx={{ ml: 2 }}
+            startIcon={<DownloadIcon />}
+            variant="outlined"
+            color="primary"
+            onClick={() => callAPI('system', 'allvalues')}
+          >
+            All Values
+          </Button>
+
+          <Typography sx={{ pt: 4, pb: 2 }} variant="h6" color="primary">
+            {LL.DOWNLOAD(0)}&nbsp;{LL.SETTINGS(1)}
           </Typography>
           <Box color="warning.main">
             <Typography mb={1} variant="body2">
@@ -178,14 +209,6 @@ const UploadFileForm: FC = () => {
           </Box>
           <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={downloadSchedule}>
             {LL.SCHEDULE(0)}
-          </Button>
-          <Box color="warning.main">
-            <Typography mt={2} mb={1} variant="body2">
-              {LL.DOWNLOAD(0)}&nbsp;{LL.SUPPORT_INFORMATION()}
-            </Typography>
-          </Box>
-          <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={downloadInfo}>
-            {LL.SUPPORT_INFORMATION()}
           </Button>
         </>
       )}

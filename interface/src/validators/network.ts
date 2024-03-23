@@ -14,9 +14,5 @@ export const createNetworkSettingsValidator = (networkSettings: NetworkSettings)
       subnet_mask: [{ required: true, message: 'Subnet mask is required' }, IP_ADDRESS_VALIDATOR],
       dns_ip_1: IP_ADDRESS_VALIDATOR,
       dns_ip_2: IP_ADDRESS_VALIDATOR
-    }),
-    tx_power: [
-      { required: true, message: 'Tx Power is required' },
-      { type: 'number', min: 0, max: 20, message: 'Tx Power must be between 0 and 20dBm' }
-    ]
+    })
   });

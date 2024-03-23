@@ -70,7 +70,7 @@ const SettingsCustomizationDialog = ({ open, onClose, onSave, selectedItem }: Se
       <DialogContent dividers>
         <Grid container direction="row">
           <Typography variant="body2" color="warning.main">
-            {LL.ENTITY() + ' ID'}:&nbsp;
+            {LL.ID_OF(LL.ENTITY())}:&nbsp;
           </Typography>
           <Typography variant="body2">{editItem.id}</Typography>
         </Grid>

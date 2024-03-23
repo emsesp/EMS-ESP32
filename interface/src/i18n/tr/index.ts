@@ -194,13 +194,11 @@ const tr: Translation = {
   RELEASE_IS: 'release is', // TODO translate
   RELEASE_NOTES: 'yayınlanma notları',
   EMS_ESP_VER: 'EMS-ESP Sürümü',
-  PLATFORM: 'Cihaz (Platform / SDK)',
   UPTIME: 'Sistem Çalışma Süresi',
-  CPU_FREQ: 'İşlemci frekansı',
   HEAP: 'Yığın (Boş / Maksimum Tahsis)',
   PSRAM: 'PSRAM (Boyut / Boş)',
   FLASH: 'Flash Çipi (Boyut / Hız)',
-  APPSIZE: 'Uygulama (Kullanılmış / Boş)',
+  APPSIZE: 'Uygulama (Bölme: Kullanılmış / Boş)',
   FILESYSTEM: 'Dosya Sistemi (Kullanılmış / Boş)',
   BUFFER_SIZE: 'En fazla bellek boyutu',
   COMPACT: 'Sıkışık',
@@ -323,7 +321,8 @@ const tr: Translation = {
   WRITEABLE: 'Writeable', // TODO translate
   SHOWING: 'Showing', // TODO translate
   SEARCH: 'Search', // TODO translate
-  CERT: 'TLS root certificate (leave blank to disable TLS)', // TODO translate
+  CERT: 'TLS root certificate (leave blank for insecure)',
+  ENABLE_TLS: 'TLS deveye al',
   ON: 'On', // TODO translate
   OFF: 'Off', // TODO translate
   POLARITY: 'Polarity', // TODO translate

@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ std::vector<Command::CmdFunction> Command::cmdfunctions_;
 // the path is leading so if duplicate keys are in the input JSON it will be ignored
 // the entry point will be either via the Web API (api/) or MQTT (<base>/)
 // returns a return code and json output
-uint8_t Command::process(const char * path, const bool is_admin, const JsonObject & input, JsonObject & output) {
+uint8_t Command::process(const char * path, const bool is_admin, const JsonObject input, JsonObject output) {
     SUrlParser p; // parse URL for the path names
     p.parse(path);
 
@@ -88,12 +88,12 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         command_p = p.paths()[1].c_str();
     } else if (num_paths == 3) {
         // concatenate the path into one string as it could be in the format 'hc/XXX'
-        char command[50];
+        char command[COMMAND_MAX_LENGTH];
         snprintf(command, sizeof(command), "%s/%s", p.paths()[1].c_str(), p.paths()[2].c_str());
         command_p = command;
     } else if (num_paths > 3) {
         // concatenate the path into one string as it could be in the format 'hc/XXX/attribute'
-        char command[50];
+        char command[COMMAND_MAX_LENGTH];
         snprintf(command, sizeof(command), "%s/%s/%s", p.paths()[1].c_str(), p.paths()[2].c_str(), p.paths()[3].c_str());
         command_p = command;
     } else {
@@ -151,7 +151,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         if (strlen(d)) {
             char * device_end = (char *)strchr(d, '/');
             if (device_end != nullptr) {
-                char         device_s[15] = {'\0'};
+                char         device_s[20] = {'\0'};
                 const char * device_p     = device_s;
                 const char * data_p       = nullptr;
                 strlcpy(device_s, d, device_end - d + 1);
@@ -161,7 +161,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
                 if (data_p == nullptr) {
                     return CommandRet::INVALID;
                 }
-                char data_s[40];
+                char data_s[COMMAND_MAX_LENGTH];
                 strlcpy(data_s, Helpers::toLower(data_p).c_str(), 30);
                 if (strstr(data_s, "/value") == nullptr) {
                     strcat(data_s, "/value");
@@ -173,8 +173,10 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
                 if (!output.containsKey("api_data")) {
                     return CommandRet::INVALID;
                 }
-                data = output["api_data"];
+                String dat = output["api_data"];
                 output.clear();
+                input["data"] = dat.c_str();
+                data          = input["data"];
             }
         }
     }
@@ -278,8 +280,8 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
 // calls a command directly
 uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * value) {
     // create a temporary buffer
-    StaticJsonDocument<EMSESP_JSON_SIZE_SMALL> output_doc;
-    JsonObject                                 output = output_doc.to<JsonObject>();
+    JsonDocument output_doc;
+    JsonObject   output = output_doc.to<JsonObject>();
 
     // authenticated is always true and ID is the default value
     return call(device_type, cmd, value, true, -1, output);
@@ -288,7 +290,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 // calls a command. Takes a json object for output.
 // id may be used to represent a heating circuit for example
 // returns 0 if the command errored, 1 (TRUE) if ok, 2 if not found, 3 if error or 4 if not allowed
-uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * value, const bool is_admin, const int8_t id, JsonObject & output) {
+uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * value, const bool is_admin, const int8_t id, JsonObject output) {
     if (cmd == nullptr) {
         return CommandRet::NOT_FOUND;
     }
@@ -302,6 +304,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 
     // check if its a call to an end-point of a device
     // this is used to fetch the attributes of the device entity, or call a command directly
+    // for example info, values, commands, etc
     bool single_command = (!value || !strlen(value));
     if (single_command) {
         // exception 1: anything that is from System
@@ -363,10 +366,10 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 
     // report back. If not OK show output from error, other return the HTTP code
     if (return_code != CommandRet::OK) {
-        if (value == nullptr) {
+        if ((value == nullptr) || (strlen(value) == 0)) {
             LOG_ERROR("Command '%s' failed with code: %d", cmd, return_code);
         } else {
-            LOG_ERROR("Command '%s:%s' failed with code: %d", cmd, value, return_code);
+            LOG_ERROR("Command '%s/%s' failed with code: %d", cmd, value, return_code);
         }
         return message(return_code, "callback function failed", output);
     }
@@ -435,13 +438,17 @@ void Command::erase_command(const uint8_t device_type, const char * cmd) {
 }
 
 // list all commands for a specific device, output as json
-bool Command::list(const uint8_t device_type, JsonObject & output) {
-    if (cmdfunctions_.empty()) {
+bool Command::list(const uint8_t device_type, JsonObject output) {
+    // force add info and commands for those non-EMS devices
+    if (device_type == EMSdevice::DeviceType::TEMPERATURESENSOR || device_type == EMSdevice::DeviceType::ANALOGSENSOR) {
+        output[F_(info)]     = Helpers::translated_word(FL_(info_cmd));
+        output[F_(commands)] = Helpers::translated_word(FL_(commands_cmd));
+    } else if (cmdfunctions_.empty()) {
         output["message"] = "no commands available";
         return false;
     }
 
-    // create a list of commands, sort them
+    // create a list of commands we have registered, and sort them
     std::list<std::string> sorted_cmds;
     for (const auto & cf : cmdfunctions_) {
         if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN)) {
@@ -474,16 +481,26 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
         return;
     }
 
-    // create a list of commands, sort them
+    // create list of commands we have registered
     std::list<std::string> sorted_cmds;
     for (const auto & cf : cmdfunctions_) {
         if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN)) {
             sorted_cmds.push_back((cf.cmd_));
         }
     }
-    sorted_cmds.sort();
 
-    // if not in verbose mode, just print them on a single line
+    // non EMS devices always have an info and commands command
+    bool show_info = (device_type == EMSdevice::DeviceType::TEMPERATURESENSOR || device_type == EMSdevice::DeviceType::ANALOGSENSOR
+                      || device_type == EMSdevice::DeviceType::SCHEDULER || device_type == EMSdevice::DeviceType::CUSTOM);
+
+    if (!verbose && show_info) {
+        sorted_cmds.push_back(F_(info));
+        sorted_cmds.push_back(F_(commands));
+    }
+
+    sorted_cmds.sort(); // sort them
+
+    // if not in verbose mode, just print them on a single line and exit
     if (!verbose) {
         for (const auto & cl : sorted_cmds) {
             shell.print(cl);
@@ -494,7 +511,16 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
     }
 
     // verbose mode
-    shell.println();
+    shell.printfln("\n%s%s %s:%s", COLOR_BOLD_ON, COLOR_YELLOW, EMSdevice::device_type_2_device_name(device_type), COLOR_RESET);
+
+    // we hard code 'info' and 'commmands' commands so print them first
+    if (show_info) {
+        shell.printf("  info:\t\t\t\t%slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
+        shell.println(COLOR_RESET);
+        shell.printf("  commands:\t\t\t%slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
+        shell.println(COLOR_RESET);
+    }
+
     for (const auto & cl : sorted_cmds) {
         // find and print the description
         for (const auto & cf : cmdfunctions_) {
@@ -529,8 +555,6 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
         }
         shell.println();
     }
-
-    shell.println();
 }
 
 // see if a device_type is active and has associated commands
@@ -598,67 +622,32 @@ void Command::show_devices(uuid::console::Shell & shell) {
     shell.println();
 }
 
-// output list of all commands to console
+// 'show commmands' : output list of all commands to console
 // calls show with verbose mode set
 void Command::show_all(uuid::console::Shell & shell) {
     shell.printfln("Showing all available commands (%s*%s=authentication not required):", COLOR_BRIGHT_GREEN, COLOR_RESET);
 
-    // show system first
-    shell.print(COLOR_BOLD_ON);
-    shell.print(COLOR_YELLOW);
-    shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM));
-    shell.print(COLOR_RESET);
+    // show system ones first
     show(shell, EMSdevice::DeviceType::SYSTEM, true);
-
-    // show Custom
-    shell.print(COLOR_BOLD_ON);
-    shell.print(COLOR_YELLOW);
-    shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::CUSTOM));
-    shell.println(COLOR_RESET);
-    shell.printf("  info:\t\t\t\t%slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
-    shell.println(COLOR_RESET);
-    shell.printf("  commands:\t\t\t%slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
-    shell.print(COLOR_RESET);
     show(shell, EMSdevice::DeviceType::CUSTOM, true);
-
-    // show scheduler
-    shell.print(COLOR_BOLD_ON);
-    shell.print(COLOR_YELLOW);
-    shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SCHEDULER));
-    shell.println(COLOR_RESET);
-    shell.printf("  info:\t\t\t\t%slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
-    shell.println(COLOR_RESET);
-    shell.printf("  commands:\t\t\t%slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
-    shell.print(COLOR_RESET);
     show(shell, EMSdevice::DeviceType::SCHEDULER, true);
 
-    // show sensors
+    // then sensors
     if (EMSESP::sensor_enabled()) {
-        shell.print(COLOR_BOLD_ON);
-        shell.print(COLOR_YELLOW);
-        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::TEMPERATURESENSOR));
-        shell.print(COLOR_RESET);
         show(shell, EMSdevice::DeviceType::TEMPERATURESENSOR, true);
     }
-
     if (EMSESP::analog_enabled()) {
-        shell.print(COLOR_BOLD_ON);
-        shell.print(COLOR_YELLOW);
-        shell.printf(" %s: ", EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::ANALOGSENSOR));
-        shell.print(COLOR_RESET);
         show(shell, EMSdevice::DeviceType::ANALOGSENSOR, true);
     }
 
-    // do this in the order of factory classes to keep a consistent order when displaying
+    // now EMS devices, do this in the order of factory classes to keep a consistent order when displaying
     for (const auto & device_class : EMSFactory::device_handlers()) {
         if (Command::device_has_commands(device_class.first)) {
-            shell.print(COLOR_BOLD_ON);
-            shell.print(COLOR_YELLOW);
-            shell.printf(" %s: ", EMSdevice::device_type_2_device_name(device_class.first));
-            shell.print(COLOR_RESET);
             show(shell, device_class.first, true);
         }
     }
+
+    shell.println();
 }
 
 // Extract only the path component from the passed URI and normalized it

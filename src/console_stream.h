@@ -32,7 +32,7 @@ class EMSESPConsole : public EMSESPShell {
 #endif
     ~EMSESPConsole() override;
 
-    std::string console_name();
+    std::string console_name() override;
 
   private:
 #ifndef EMSESP_STANDALONE

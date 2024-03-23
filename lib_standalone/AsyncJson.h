@@ -1,8 +1,10 @@
 
 #ifndef ASYNC_JSON_H_
 #define ASYNC_JSON_H_
+
 #include <ArduinoJson.h>
-#include <ESPAsyncWebServer.h>
+
+#include "ESPAsyncWebServer.h"
 
 #define DYNAMIC_JSON_DOCUMENT_SIZE 1024
 
@@ -42,71 +44,24 @@ class ChunkPrint : public Print {
 
 class PrettyAsyncJsonResponse {
   protected:
-    DynamicJsonDocument _jsonBuffer;
+    JsonDocument _jsonBuffer;
 
     JsonVariant _root;
     bool        _isValid;
 
   public:
-    PrettyAsyncJsonResponse(bool isArray = false, size_t maxJsonBufferSize = DYNAMIC_JSON_DOCUMENT_SIZE)
-        : _jsonBuffer(maxJsonBufferSize)
-        , _isValid{false} {
+    PrettyAsyncJsonResponse(bool isArray = false)
+        : _isValid{false} {
         if (isArray)
-            _root = _jsonBuffer.createNestedArray();
+            _root = _jsonBuffer.to<JsonArray>();
         else
-            _root = _jsonBuffer.createNestedObject();
+            _root = _jsonBuffer.add<JsonObject>();
     }
 
     ~PrettyAsyncJsonResponse() {
     }
 
-    JsonVariant & getRoot() {
-        return _root;
-    }
-
-    bool _sourceValid() const {
-        return _isValid;
-    }
-
-    size_t setLength() {
-        return 0;
-    }
-
-    void setContentType(const char * s) {
-    }
-
-    size_t getSize() {
-        return _jsonBuffer.size();
-    }
-
-    size_t _fillBuffer(uint8_t * data, size_t len) {
-        return len;
-    }
-
-    void setCode(uint16_t) {
-    }
-};
-
-class MsgpackAsyncJsonResponse {
-  protected:
-    DynamicJsonDocument _jsonBuffer;
-    JsonVariant         _root;
-    bool                _isValid;
-
-  public:
-    MsgpackAsyncJsonResponse(bool isArray = false, size_t maxJsonBufferSize = DYNAMIC_JSON_DOCUMENT_SIZE)
-        : _jsonBuffer(maxJsonBufferSize)
-        , _isValid{false} {
-        if (isArray)
-            _root = _jsonBuffer.createNestedArray();
-        else
-            _root = _jsonBuffer.createNestedObject();
-    }
-
-    ~MsgpackAsyncJsonResponse() {
-    }
-
-    JsonVariant & getRoot() {
+    JsonVariant getRoot() {
         return _root;
     }
 
@@ -135,25 +90,26 @@ class MsgpackAsyncJsonResponse {
 
 class AsyncJsonResponse {
   protected:
-    DynamicJsonDocument _jsonBuffer;
+    JsonDocument _jsonBuffer;
 
     JsonVariant _root;
     bool        _isValid;
+    bool        _isMsgPack;
 
   public:
-    AsyncJsonResponse(bool isArray = false, size_t maxJsonBufferSize = DYNAMIC_JSON_DOCUMENT_SIZE)
-        : _jsonBuffer(maxJsonBufferSize)
-        , _isValid{false} {
+    AsyncJsonResponse(bool isArray = false, bool isMsgPack = false)
+        : _isValid{false}
+        , _isMsgPack{isMsgPack} {
         if (isArray)
-            _root = _jsonBuffer.createNestedArray();
+            _root = _jsonBuffer.to<JsonArray>();
         else
-            _root = _jsonBuffer.createNestedObject();
+            _root = _jsonBuffer.add<JsonObject>();
     }
 
     ~AsyncJsonResponse() {
     }
 
-    JsonVariant & getRoot() {
+    JsonVariant getRoot() {
         return _root;
     }
 
@@ -175,9 +131,12 @@ class AsyncJsonResponse {
 
     void setCode(uint16_t) {
     }
+
+    void setContentType(const char * s) {
+    }
 };
 
-typedef std::function<void(AsyncWebServerRequest * request, JsonVariant & json)> ArJsonRequestHandlerFunction;
+typedef std::function<void(AsyncWebServerRequest * request, JsonVariant json)> ArJsonRequestHandlerFunction;
 
 class AsyncCallbackJsonWebHandler : public AsyncWebHandler {
   private:
@@ -224,7 +183,7 @@ class AsyncCallbackJsonWebHandler : public AsyncWebHandler {
     virtual void handleRequest(AsyncWebServerRequest * request) override final {
         if (_onRequest) {
             if (request->_tempObject != NULL) {
-                DynamicJsonDocument  jsonBuffer(1024);
+                JsonDocument         jsonBuffer;
                 DeserializationError error = deserializeJson(jsonBuffer, (uint8_t *)(request->_tempObject));
                 if (!error) {
                     JsonVariant json = jsonBuffer.as<JsonVariant>();

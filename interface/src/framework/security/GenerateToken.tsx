@@ -37,7 +37,8 @@ const GenerateToken: FC<GenerateTokenProps> = ({ username, onClose }) => {
     if (open) {
       void generateToken();
     }
-  }, [open, generateToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   return (
     <Dialog sx={dialogStyle} onClose={onClose} open={!!username} fullWidth maxWidth="sm">

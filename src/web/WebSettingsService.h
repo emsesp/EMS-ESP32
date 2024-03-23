@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,8 +71,8 @@ class WebSettings {
     uint8_t eth_phy_addr;
     uint8_t eth_clock_mode;
 
-    static void              read(WebSettings & settings, JsonObject & root);
-    static StateUpdateResult update(JsonObject & root, WebSettings & settings);
+    static void              read(WebSettings & settings, JsonObject root);
+    static StateUpdateResult update(JsonObject root, WebSettings & settings);
 
     enum ChangeFlags : uint8_t {
 

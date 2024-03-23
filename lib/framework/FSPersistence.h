@@ -1,24 +1,18 @@
 #ifndef FSPersistence_h
 #define FSPersistence_h
 
-#include <StatefulService.h>
-#include <FS.h>
+#include "StatefulService.h"
+#include "FS.h"
 
 template <class T>
 class FSPersistence {
   public:
-    FSPersistence(JsonStateReader<T>   stateReader,
-                  JsonStateUpdater<T>  stateUpdater,
-                  StatefulService<T> * statefulService,
-                  FS *                 fs,
-                  const char *         filePath,
-                  size_t               bufferSize = FS_BUFFER_SIZE)
+    FSPersistence(JsonStateReader<T> stateReader, JsonStateUpdater<T> stateUpdater, StatefulService<T> * statefulService, FS * fs, const char * filePath)
         : _stateReader(stateReader)
         , _stateUpdater(stateUpdater)
         , _statefulService(statefulService)
         , _fs(fs)
         , _filePath(filePath)
-        , _bufferSize(bufferSize)
         , _updateHandlerId(0) {
         enableUpdateHandler();
     }
@@ -27,8 +21,8 @@ class FSPersistence {
         File settingsFile = _fs->open(_filePath, "r");
 
         if (settingsFile) {
-            DynamicJsonDocument  jsonDocument = DynamicJsonDocument(_bufferSize);
-            DeserializationError error        = deserializeJson(jsonDocument, settingsFile);
+            JsonDocument         jsonDocument;
+            DeserializationError error = deserializeJson(jsonDocument, settingsFile);
             if (error == DeserializationError::Ok && jsonDocument.is<JsonObject>()) {
                 JsonObject jsonObject = jsonDocument.as<JsonObject>();
                 _statefulService->updateWithoutPropagation(jsonObject, _stateUpdater);
@@ -38,23 +32,26 @@ class FSPersistence {
             settingsFile.close();
         }
 
-        // If we reach here we have not been successful in loading the config,
-        // hard-coded emergency defaults are now applied.
+// If we reach here we have not been successful in loading the config,
+// hard-coded emergency defaults are now applied.
+#ifdef EMSESP_DEBUG
+        Serial.println("Applying defaults to " + String(_filePath));
+#endif
         applyDefaults();
         writeToFS(); // added to make sure the initial file is created
     }
 
     bool writeToFS() {
         // create and populate a new json object
-        DynamicJsonDocument jsonDocument = DynamicJsonDocument(_bufferSize);
-        JsonObject          jsonObject   = jsonDocument.to<JsonObject>();
+        JsonDocument jsonDocument;
+        JsonObject   jsonObject = jsonDocument.to<JsonObject>();
         _statefulService->read(jsonObject, _stateReader);
 
         // make directories if required, for new IDF4.2 & LittleFS
         String path(_filePath);
         int    index = 0;
-        while ((index = path.indexOf('/', index + 1)) != -1) {
-            String segment = path.substring(0, index);
+        while ((index = path.indexOf('/', static_cast<unsigned int>(index) + 1)) != -1) {
+            String segment = path.substring(0, static_cast<unsigned int>(index));
             if (!_fs->exists(segment)) {
                 _fs->mkdir(segment);
             }
@@ -68,7 +65,10 @@ class FSPersistence {
             return false;
         }
 
-        // serialize the data to the file
+// serialize the data to the file
+#ifdef EMSESP_DEBUG
+        Serial.println("Writing settings to " + String(_filePath));
+#endif
         serializeJson(jsonDocument, settingsFile);
         settingsFile.close();
         return true;
@@ -83,7 +83,7 @@ class FSPersistence {
 
     void enableUpdateHandler() {
         if (!_updateHandlerId) {
-            _updateHandlerId = _statefulService->addUpdateHandler([&](const String & originId) { writeToFS(); });
+            _updateHandlerId = _statefulService->addUpdateHandler([&] { writeToFS(); });
         }
     }
 
@@ -93,15 +93,14 @@ class FSPersistence {
     StatefulService<T> * _statefulService;
     FS *                 _fs;
     const char *         _filePath;
-    size_t               _bufferSize;
     update_handler_id_t  _updateHandlerId;
 
   protected:
     // We assume the updater supplies sensible defaults if an empty object
     // is supplied, this virtual function allows that to be changed.
     virtual void applyDefaults() {
-        DynamicJsonDocument jsonDocument = DynamicJsonDocument(_bufferSize);
-        JsonObject          jsonObject   = jsonDocument.as<JsonObject>();
+        JsonDocument jsonDocument;
+        JsonObject   jsonObject = jsonDocument.as<JsonObject>();
         _statefulService->updateWithoutPropagation(jsonObject, _stateUpdater);
     }
 };

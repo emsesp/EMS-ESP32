@@ -936,7 +936,7 @@ class Shell : public std::enable_shared_from_this<Shell>, public uuid::log::Hand
 	 * @param[in] message New log message, shared by all handlers.
 	 * @since 0.1.0
 	 */
-    virtual void operator<<(std::shared_ptr<uuid::log::Message> message);
+    virtual void operator<<(std::shared_ptr<uuid::log::Message> message) override;
     /**
 	 * Get the current log level.
 	 *

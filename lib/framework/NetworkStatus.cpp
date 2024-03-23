@@ -1,27 +1,30 @@
-#include <NetworkStatus.h>
+#include "NetworkStatus.h"
 
 #include "../../src/emsesp_stub.hpp"
-
-using namespace std::placeholders; // for `_1` etc
+#ifdef TASMOTA_SDK
+#include "lwip/dns.h"
+#endif
 
 NetworkStatus::NetworkStatus(AsyncWebServer * server, SecurityManager * securityManager) {
     server->on(NETWORK_STATUS_SERVICE_PATH,
                HTTP_GET,
-               securityManager->wrapRequest(std::bind(&NetworkStatus::networkStatus, this, _1), AuthenticationPredicates::IS_AUTHENTICATED));
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { networkStatus(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
 }
 
 void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
-    AsyncJsonResponse * response = new AsyncJsonResponse(false, MAX_NETWORK_STATUS_SIZE);
-    JsonObject          root     = response->getRoot();
+    auto *     response = new AsyncJsonResponse(false);
+    JsonObject root     = response->getRoot();
 
     bool        ethernet_connected = emsesp::EMSESP::system_.ethernet_connected();
     wl_status_t wifi_status        = WiFi.status();
 
     // see if Ethernet is connected
     if (ethernet_connected) {
-        root["status"] = 10; // custom code #10 - ETHERNET_STATUS_CONNECTED
+        root["status"]   = 10; // custom code #10 - ETHERNET_STATUS_CONNECTED
+        root["hostname"] = ETH.getHostname();
     } else {
-        root["status"] = (uint8_t)wifi_status;
+        root["status"]   = static_cast<uint8_t>(wifi_status);
+        root["hostname"] = WiFi.getHostname();
     }
 
     // for both connections show ethernet
@@ -32,8 +35,13 @@ void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
         root["mac_address"] = ETH.macAddress();
         root["subnet_mask"] = ETH.subnetMask().toString();
         root["gateway_ip"]  = ETH.gatewayIP().toString();
-        IPAddress dnsIP1    = ETH.dnsIP(0);
-        IPAddress dnsIP2    = ETH.dnsIP(1);
+#ifdef TASMOTA_SDK
+        IPAddress dnsIP1 = IPAddress(dns_getserver(0));
+        IPAddress dnsIP2 = IPAddress(dns_getserver(1));
+#else
+        IPAddress dnsIP1 = ETH.dnsIP(0);
+        IPAddress dnsIP2 = ETH.dnsIP(1);
+#endif
         if (IPUtils::isSet(dnsIP1)) {
             root["dns_ip_1"] = dnsIP1.toString();
         }
@@ -54,8 +62,13 @@ void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
             root["gateway_ip"] = WiFi.gatewayIP().toString();
         }
 
+#ifdef TASMOTA_SDK
+        IPAddress dnsIP1 = IPAddress(dns_getserver(0));
+        IPAddress dnsIP2 = IPAddress(dns_getserver(1));
+#else
         IPAddress dnsIP1 = WiFi.dnsIP(0);
         IPAddress dnsIP2 = WiFi.dnsIP(1);
+#endif
         if (dnsIP1 != INADDR_NONE) {
             root["dns_ip_1"] = dnsIP1.toString();
         }

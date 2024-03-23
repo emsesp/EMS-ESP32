@@ -2,6 +2,7 @@ import { readdirSync, existsSync, unlinkSync, readFileSync, createWriteStream } 
 import { resolve, relative, sep } from 'path';
 import zlib from 'zlib';
 import mime from 'mime-types';
+import crypto from 'crypto';
 
 const ARDUINO_INCLUDES = '#include <Arduino.h>\n\n';
 const INDENT = '  ';
@@ -11,13 +12,17 @@ const bytesPerLine = 20;
 var totalSize = 0;
 
 const generateWWWClass = () =>
-  `typedef std::function<void(const String& uri, const String& contentType, const uint8_t * content, size_t len)> RouteRegistrationHandler;
+  `typedef std::function<void(const char * uri, const String & contentType, const uint8_t * content, size_t len, const String & hash)> RouteRegistrationHandler;
+// Total size is ${totalSize} bytes
 
 class WWWData {
 ${indent}public:
 ${indent.repeat(2)}static void registerRoutes(RouteRegistrationHandler handler) {
 ${fileInfo
-  .map((file) => `${indent.repeat(3)}handler("${file.uri}", "${file.mimeType}", ${file.variable}, ${file.size});`)
+  .map(
+    (file) =>
+      `${indent.repeat(3)}handler("${file.uri}", "${file.mimeType}", ${file.variable}, ${file.size}, "${file.hash}");`
+  )
   .join('\n')}
 ${indent.repeat(2)}}
 };
@@ -49,6 +54,12 @@ const writeFile = (relativeFilePath, buffer) => {
   writeStream.write('const uint8_t ' + variable + '[] = {');
   // const zipBuffer = zlib.brotliCompressSync(buffer, { quality: 1 });
   const zipBuffer = zlib.gzipSync(buffer, { level: 9 });
+
+  // create sha
+  const hashSum = crypto.createHash('sha256');
+  hashSum.update(zipBuffer);
+  const hash = hashSum.digest('hex');
+
   zipBuffer.forEach((b) => {
     if (!(size % bytesPerLine)) {
       writeStream.write('\n');
@@ -57,15 +68,19 @@ const writeFile = (relativeFilePath, buffer) => {
     writeStream.write('0x' + ('00' + b.toString(16).toUpperCase()).slice(-2) + ',');
     size++;
   });
+
   if (size % bytesPerLine) {
     writeStream.write('\n');
   }
+
   writeStream.write('};\n\n');
+
   fileInfo.push({
     uri: '/' + relativeFilePath.replace(sep, '/'),
     mimeType,
     variable,
-    size
+    size,
+    hash
   });
 
   // console.log(relativeFilePath + ' (size ' + size + ' bytes)');

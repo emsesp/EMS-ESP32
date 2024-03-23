@@ -1,6 +1,7 @@
+
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -127,14 +128,16 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
                           string_vector{"test"},
-                          string_vector{F_(name_optional), F_(data_optional)},
+                          string_vector{F_(name_optional), F_(data_optional), F_(id_optional)},
                           [=](Shell & shell, const std::vector<std::string> & arguments) {
                               if (arguments.empty()) {
                                   Test::run_test(shell, "default");
                               } else if (arguments.size() == 1) {
                                   Test::run_test(shell, arguments.front());
-                              } else {
+                              } else if (arguments.size() == 2) {
                                   Test::run_test(shell, arguments[0].c_str(), arguments[1].c_str());
+                              } else {
+                                  Test::run_test(shell, arguments[0].c_str(), arguments[1].c_str(), arguments[2].c_str());
                               }
                           });
     commands->add_command(ShellContext::MAIN, CommandFlags::USER, string_vector{"t"}, [=](Shell & shell, const std::vector<std::string> & arguments) {
@@ -181,12 +184,10 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                 shell.enter_password(F_(new_password_prompt2), [password1](Shell & shell, bool completed, const std::string & password2) {
                     if (completed) {
                         if (password1 == password2) {
-                            to_app(shell).esp8266React.getSecuritySettingsService()->update(
-                                [&](SecuritySettings & securitySettings) {
-                                    securitySettings.jwtSecret = password2.c_str();
-                                    return StateUpdateResult::CHANGED;
-                                },
-                                "local");
+                            to_app(shell).esp8266React.getSecuritySettingsService()->update([&](SecuritySettings & securitySettings) {
+                                securitySettings.jwtSecret = password2.c_str();
+                                return StateUpdateResult::CHANGED;
+                            });
                             shell.println("Admin password updated");
                         } else {
                             shell.println("Passwords do not match");
@@ -197,9 +198,17 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
         });
     });
 
-    commands->add_command(ShellContext::MAIN, CommandFlags::ADMIN, string_vector{F_(restart)}, [](Shell & shell, const std::vector<std::string> & arguments) {
-        to_app(shell).system_.system_restart();
-    });
+    commands->add_command(ShellContext::MAIN,
+                          CommandFlags::ADMIN,
+                          string_vector{F_(restart)},
+                          string_vector{F_(partitionname_optional)},
+                          [](Shell & shell, const std::vector<std::string> & arguments) {
+                              if (arguments.size()) {
+                                  to_app(shell).system_.system_restart(arguments.front().c_str());
+                              } else {
+                                  to_app(shell).system_.system_restart();
+                              }
+                          });
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::ADMIN,
@@ -237,7 +246,8 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                                           networkSettings.password = password2.c_str();
                                                           return StateUpdateResult::CHANGED;
                                                       });
-                                                  shell.println("Use `wifi reconnect` to save and apply the new settings");
+                                                  shell.println("WiFi password updated. Reconnecting...");
+                                                  to_app(shell).system_.wifi_reconnect();
                                               } else {
                                                   shell.println("Passwords do not match");
                                               }
@@ -255,12 +265,10 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                               shell.println("The network connection will be reset...");
                               Shell::loop_all();
                               delay(1000); // wait a second
-                              to_app(shell).esp8266React.getNetworkSettingsService()->update(
-                                  [&](NetworkSettings & networkSettings) {
-                                      networkSettings.hostname = arguments.front().c_str();
-                                      return StateUpdateResult::CHANGED;
-                                  },
-                                  "local");
+                              to_app(shell).esp8266React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
+                                  networkSettings.hostname = arguments.front().c_str();
+                                  return StateUpdateResult::CHANGED;
+                              });
                           });
 
     commands->add_command(ShellContext::MAIN,
@@ -272,7 +280,8 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                   networkSettings.ssid = arguments.front().c_str();
                                   return StateUpdateResult::CHANGED;
                               });
-                              shell.println("Use `wifi reconnect` to save and apply the new settings");
+                              shell.println("WiFi ssid updated. Reconnecting...");
+                              to_app(shell).system_.wifi_reconnect();
                           });
 
 
@@ -290,21 +299,19 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                               if (arguments.size() == 2 && Helpers::toLower(arguments.back()) == "nvs") {
                                   to_app(shell).nvs_.putString("boot", board_profile.c_str());
                               }
-                              to_app(shell).webSettingsService.update(
-                                  [&](WebSettings & settings) {
-                                      settings.board_profile  = board_profile.c_str();
-                                      settings.led_gpio       = data[0];
-                                      settings.dallas_gpio    = data[1];
-                                      settings.rx_gpio        = data[2];
-                                      settings.tx_gpio        = data[3];
-                                      settings.pbutton_gpio   = data[4];
-                                      settings.phy_type       = data[5];
-                                      settings.eth_power      = data[6]; // can be -1
-                                      settings.eth_phy_addr   = data[7];
-                                      settings.eth_clock_mode = data[8];
-                                      return StateUpdateResult::CHANGED;
-                                  },
-                                  "local");
+                              to_app(shell).webSettingsService.update([&](WebSettings & settings) {
+                                  settings.board_profile  = board_profile.c_str();
+                                  settings.led_gpio       = data[0];
+                                  settings.dallas_gpio    = data[1];
+                                  settings.rx_gpio        = data[2];
+                                  settings.tx_gpio        = data[3];
+                                  settings.pbutton_gpio   = data[4];
+                                  settings.phy_type       = data[5];
+                                  settings.eth_power      = data[6]; // can be -1
+                                  settings.eth_phy_addr   = data[7];
+                                  settings.eth_clock_mode = data[8];
+                                  return StateUpdateResult::CHANGED;
+                              });
                               shell.printfln("Loaded board profile %s", board_profile.c_str());
                               to_app(shell).system_.network_init(true);
                           });
@@ -317,13 +324,11 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
         [](Shell & shell, const std::vector<std::string> & arguments) {
             uint8_t device_id = Helpers::hextoint(arguments.front().c_str());
             if ((device_id == 0x0B) || (device_id == 0x0D) || (device_id == 0x0A) || (device_id == 0x0F) || (device_id == 0x12)) {
-                to_app(shell).webSettingsService.update(
-                    [&](WebSettings & settings) {
-                        settings.ems_bus_id = device_id;
-                        shell.printfln(F_(bus_id_fmt), settings.ems_bus_id);
-                        return StateUpdateResult::CHANGED;
-                    },
-                    "local");
+                to_app(shell).webSettingsService.update([&](WebSettings & settings) {
+                    settings.ems_bus_id = device_id;
+                    shell.printfln(F_(bus_id_fmt), settings.ems_bus_id);
+                    return StateUpdateResult::CHANGED;
+                });
             } else {
                 shell.println("Must be 0B, 0D, 0A, 0E, 0F, or 48 - 4D");
             }
@@ -339,13 +344,49 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               uint8_t tx_mode = std::strtol(arguments[0].c_str(), nullptr, 10);
                               // save the tx_mode
-                              to_app(shell).webSettingsService.update(
-                                  [&](WebSettings & settings) {
-                                      settings.tx_mode = tx_mode;
-                                      shell.printfln(F_(tx_mode_fmt), settings.tx_mode);
-                                      return StateUpdateResult::CHANGED;
-                                  },
-                                  "local");
+                              to_app(shell).webSettingsService.update([&](WebSettings & settings) {
+                                  settings.tx_mode = tx_mode;
+                                  shell.printfln(F_(tx_mode_fmt), settings.tx_mode);
+                                  return StateUpdateResult::CHANGED;
+                              });
+                              to_app(shell).uart_init();
+                          });
+
+    commands->add_command(ShellContext::MAIN,
+                          CommandFlags::ADMIN,
+                          string_vector{F_(set), F_(service)},
+                          string_vector{F_(service_mandatory), F_(enable_mandatory)},
+                          [](Shell & shell, const std::vector<std::string> & arguments) {
+                              if (arguments.back() == "enable" || arguments.back() == "disable") {
+                                  bool enable = arguments.back() == "enable";
+                                  if (arguments.front() == "mqtt") {
+                                      to_app(shell).esp8266React.getMqttSettingsService()->update([&](MqttSettings & Settings) {
+                                          Settings.enabled = enable;
+                                          return StateUpdateResult::CHANGED;
+                                      });
+                                  } else if (arguments.front() == "ota") {
+                                      to_app(shell).esp8266React.getOTASettingsService()->update([&](OTASettings & Settings) {
+                                          Settings.enabled = enable;
+                                          return StateUpdateResult::CHANGED;
+                                      });
+                                  } else if (arguments.front() == "ntp") {
+                                      to_app(shell).esp8266React.getNTPSettingsService()->update([&](NTPSettings & Settings) {
+                                          Settings.enabled = enable;
+                                          return StateUpdateResult::CHANGED;
+                                      });
+                                  } else if (arguments.front() == "ap") {
+                                      to_app(shell).esp8266React.getAPSettingsService()->update([&](APSettings & Settings) {
+                                          Settings.provisionMode = enable ? 0 : 2;
+                                          return StateUpdateResult::CHANGED;
+                                      });
+                                  } else {
+                                      shell.printfln("unknown service: %s", arguments.front().c_str());
+                                      return;
+                                  }
+                                  shell.printfln("service '%s' %sd", arguments.front().c_str(), arguments.back().c_str());
+                              } else {
+                                  shell.println("Must be `enable` or `disable`");
+                              }
                           });
 
     //
@@ -495,11 +536,11 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                 return;
             }
 
-            DynamicJsonDocument doc(EMSESP_JSON_SIZE_XXXLARGE);
-            int8_t              id          = -1;
-            const char *        cmd         = Command::parse_command_string(arguments[1].c_str(), id);
-            uint8_t             return_code = CommandRet::OK;
-            JsonObject          json        = doc.to<JsonObject>();
+            JsonDocument doc;
+            int8_t       id          = -1;
+            const char * cmd         = Command::parse_command_string(arguments[1].c_str(), id);
+            uint8_t      return_code = CommandRet::OK;
+            JsonObject   json        = doc.to<JsonObject>();
 
             if (cmd == nullptr) {
                 cmd = device_type == EMSdevice::DeviceType::SYSTEM ? F_(info) : F_(values);
@@ -529,15 +570,8 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
 
             if (return_code == CommandRet::OK && json.size()) {
                 if (json.containsKey("api_data")) {
-                    JsonVariant data = json["api_data"];
-                    if (data.is<int>()) {
-                        shell.printfln("%d", data.as<int>());
-                    } else if (data.is<float>()) {
-                        char s[10];
-                        shell.println(Helpers::render_value(s, data.as<float>(), 1));
-                    } else {
-                        shell.println(data.as<const char *>());
-                    }
+                    String data = json["api_data"].as<String>();
+                    shell.println(data.c_str());
                     return;
                 }
                 serializeJsonPretty(doc, shell);
@@ -566,9 +600,9 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                 }
                 return devices_list;
             } else if (current_arguments.size() == 1) {
-                std::vector<std::string> command_list;
-                uint8_t                  device_type = EMSdevice::device_name_2_device_type(current_arguments[0].c_str());
+                uint8_t device_type = EMSdevice::device_name_2_device_type(current_arguments[0].c_str());
                 if (Command::device_has_commands(device_type)) {
+                    std::vector<std::string> command_list;
                     for (const auto & cf : Command::commands()) {
                         if (cf.device_type_ == device_type) {
                             command_list.emplace_back(cf.cmd_);
@@ -607,13 +641,15 @@ void EMSESPShell::stopped() {
 // show welcome banner
 void EMSESPShell::display_banner() {
     println();
-    printfln("┌───────────────────────────────────────┐");
-    printfln("│ %sEMS-ESP version %-12s%s          │", COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_BOLD_OFF);
-    printfln("│ %s%shttps://github.com/emsesp/EMS-ESP32%s   │", COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
-    printfln("│                                       │");
-    printfln("│ type %shelp%s to show available commands  │", COLOR_UNDERLINE, COLOR_RESET);
-    printfln("│ use %ssu%s to access Admin commands       │", COLOR_UNDERLINE, COLOR_RESET);
-    printfln("└───────────────────────────────────────┘");
+    printfln("┌──────────────────────────────────────────┐");
+    printfln("│ %sEMS-ESP version %-12s%s             │", COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_BOLD_OFF);
+    printfln("│                                          │");
+    printfln("│ %shelp%s to show available commands          │", COLOR_UNDERLINE, COLOR_RESET);
+    printfln("│ %ssu%s to access admin commands              │", COLOR_UNDERLINE, COLOR_RESET);
+    printfln("│                                          │");
+    printfln("│ %s%shttps://github.com/emsesp/EMS-ESP32%s      │", COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
+    printfln("│                                          │");
+    printfln("└──────────────────────────────────────────┘");
     println();
 
     // set console name

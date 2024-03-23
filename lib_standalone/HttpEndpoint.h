@@ -3,11 +3,11 @@
 
 #include <functional>
 
-#include <AsyncJson.h>
-#include <ESPAsyncWebServer.h>
+#include "AsyncJson.h"
+#include "ESPAsyncWebServer.h"
 
-#include <SecurityManager.h>
-#include <StatefulService.h>
+#include "SecurityManager.h"
+#include "StatefulService.h"
 
 #define HTTP_ENDPOINT_ORIGIN_ID "http"
 
@@ -19,27 +19,19 @@ class HttpGetEndpoint {
                     AsyncWebServer *        server,
                     const String &          servicePath,
                     SecurityManager *       securityManager,
-                    AuthenticationPredicate authenticationPredicate = AuthenticationPredicates::IS_ADMIN,
-                    size_t                  bufferSize              = DEFAULT_BUFFER_SIZE)
+                    AuthenticationPredicate authenticationPredicate = AuthenticationPredicates::IS_ADMIN)
         : _stateReader(stateReader)
-        , _statefulService(statefulService)
-        , _bufferSize(bufferSize) {
+        , _statefulService(statefulService) {
     }
 
-    HttpGetEndpoint(JsonStateReader<T>   stateReader,
-                    StatefulService<T> * statefulService,
-                    AsyncWebServer *     server,
-                    const String &       servicePath,
-                    size_t               bufferSize = DEFAULT_BUFFER_SIZE)
+    HttpGetEndpoint(JsonStateReader<T> stateReader, StatefulService<T> * statefulService, AsyncWebServer * server, const String & servicePath)
         : _stateReader(stateReader)
-        , _statefulService(statefulService)
-        , _bufferSize(bufferSize) {
+        , _statefulService(statefulService) {
     }
 
   protected:
     JsonStateReader<T>   _stateReader;
     StatefulService<T> * _statefulService;
-    size_t               _bufferSize;
 
     void fetchSettings(AsyncWebServerRequest * request) {
     }
@@ -54,33 +46,28 @@ class HttpPostEndpoint {
                      AsyncWebServer *        server,
                      const String &          servicePath,
                      SecurityManager *       securityManager,
-                     AuthenticationPredicate authenticationPredicate = AuthenticationPredicates::IS_ADMIN,
-                     size_t                  bufferSize              = DEFAULT_BUFFER_SIZE)
+                     AuthenticationPredicate authenticationPredicate = AuthenticationPredicates::IS_ADMIN)
         : _stateReader(stateReader)
         , _stateUpdater(stateUpdater)
-        , _statefulService(statefulService)
-        , _bufferSize(bufferSize) {
+        , _statefulService(statefulService) {
     }
 
     HttpPostEndpoint(JsonStateReader<T>   stateReader,
                      JsonStateUpdater<T>  stateUpdater,
                      StatefulService<T> * statefulService,
                      AsyncWebServer *     server,
-                     const String &       servicePath,
-                     size_t               bufferSize = DEFAULT_BUFFER_SIZE)
+                     const String &       servicePath)
         : _stateReader(stateReader)
         , _stateUpdater(stateUpdater)
-        , _statefulService(statefulService)
-        , _bufferSize(bufferSize) {
+        , _statefulService(statefulService) {
     }
 
   protected:
     JsonStateReader<T>   _stateReader;
     JsonStateUpdater<T>  _stateUpdater;
     StatefulService<T> * _statefulService;
-    size_t               _bufferSize;
 
-    void updateSettings(AsyncWebServerRequest * request, JsonVariant & json) {
+    void updateSettings(AsyncWebServerRequest * request, JsonVariant json) {
         if (!json.is<JsonObject>()) {
             return;
         }
@@ -103,20 +90,18 @@ class HttpEndpoint : public HttpGetEndpoint<T>, public HttpPostEndpoint<T> {
                  AsyncWebServer *        server,
                  const String &          servicePath,
                  SecurityManager *       securityManager,
-                 AuthenticationPredicate authenticationPredicate = AuthenticationPredicates::IS_ADMIN,
-                 size_t                  bufferSize              = DEFAULT_BUFFER_SIZE)
-        : HttpGetEndpoint<T>(stateReader, statefulService, server, servicePath, securityManager, authenticationPredicate, bufferSize)
-        , HttpPostEndpoint<T>(stateReader, stateUpdater, statefulService, server, servicePath, securityManager, authenticationPredicate, bufferSize) {
+                 AuthenticationPredicate authenticationPredicate = AuthenticationPredicates::IS_ADMIN)
+        : HttpGetEndpoint<T>(stateReader, statefulService, server, servicePath, securityManager, authenticationPredicate)
+        , HttpPostEndpoint<T>(stateReader, stateUpdater, statefulService, server, servicePath, securityManager, authenticationPredicate) {
     }
 
     HttpEndpoint(JsonStateReader<T>   stateReader,
                  JsonStateUpdater<T>  stateUpdater,
                  StatefulService<T> * statefulService,
                  AsyncWebServer *     server,
-                 const String &       servicePath,
-                 size_t               bufferSize = DEFAULT_BUFFER_SIZE)
-        : HttpGetEndpoint<T>(stateReader, statefulService, server, servicePath, bufferSize)
-        , HttpPostEndpoint<T>(stateReader, stateUpdater, statefulService, server, servicePath, bufferSize) {
+                 const String &       servicePath)
+        : HttpGetEndpoint<T>(stateReader, statefulService, server, servicePath)
+        , HttpPostEndpoint<T>(stateReader, stateUpdater, statefulService, server, servicePath) {
     }
 };
 

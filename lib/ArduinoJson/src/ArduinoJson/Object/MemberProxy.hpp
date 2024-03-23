@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright © 2014-2023, Benoit BLANCHON
+// Copyright © 2014-2024, Benoit BLANCHON
 // MIT License
 
 #pragma once
@@ -9,7 +9,7 @@
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
 // A proxy class to get or set a member of an object.
-// https://arduinojson.org/v6/api/jsonobject/subscript/
+// https://arduinojson.org/v7/api/jsonobject/subscript/
 template <typename TUpstream, typename TStringRef>
 class MemberProxy
     : public VariantRefBase<MemberProxy<TUpstream, TStringRef>>,
@@ -17,43 +17,46 @@ class MemberProxy
   friend class VariantAttorney;
 
  public:
-  FORCE_INLINE MemberProxy(TUpstream upstream, TStringRef key)
+  MemberProxy(TUpstream upstream, TStringRef key)
       : upstream_(upstream), key_(key) {}
 
   MemberProxy(const MemberProxy& src)
       : upstream_(src.upstream_), key_(src.key_) {}
 
-  FORCE_INLINE MemberProxy& operator=(const MemberProxy& src) {
+  MemberProxy& operator=(const MemberProxy& src) {
     this->set(src);
     return *this;
   }
 
   template <typename T>
-  FORCE_INLINE MemberProxy& operator=(const T& src) {
+  MemberProxy& operator=(const T& src) {
     this->set(src);
     return *this;
   }
 
   template <typename T>
-  FORCE_INLINE MemberProxy& operator=(T* src) {
+  MemberProxy& operator=(T* src) {
     this->set(src);
     return *this;
   }
 
  private:
-  FORCE_INLINE MemoryPool* getPool() const {
-    return VariantAttorney::getPool(upstream_);
+  ResourceManager* getResourceManager() const {
+    return VariantAttorney::getResourceManager(upstream_);
   }
 
-  FORCE_INLINE VariantData* getData() const {
-    return variantGetMember(VariantAttorney::getData(upstream_),
-                            adaptString(key_));
+  VariantData* getData() const {
+    return VariantData::getMember(
+        VariantAttorney::getData(upstream_), adaptString(key_),
+        VariantAttorney::getResourceManager(upstream_));
   }
 
-  FORCE_INLINE VariantData* getOrCreateData() const {
-    return variantGetOrAddMember(VariantAttorney::getOrCreateData(upstream_),
-                                 adaptString(key_),
-                                 VariantAttorney::getPool(upstream_));
+  VariantData* getOrCreateData() const {
+    auto data = VariantAttorney::getOrCreateData(upstream_);
+    if (!data)
+      return nullptr;
+    return data->getOrAddMember(adaptString(key_),
+                                VariantAttorney::getResourceManager(upstream_));
   }
 
  private:

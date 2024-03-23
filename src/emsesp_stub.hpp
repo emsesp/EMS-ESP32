@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@
 #include "temperaturesensor.h"
 #include "version.h"
 #include "default_settings.h"
-
-#include <ESP8266React.h>
+#include "helpers.h"
+#include "ESP8266React.h"
 
 #include <uuid/log.h>
 

@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2023  Paul Derbyshire
+ * Copyright 2020-2024  Paul Derbyshire
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #ifndef EMSESP_EMSUART_H
 #define EMSESP_EMSUART_H
 
-#include <Arduino.h>
+#include "Arduino.h"
 
 namespace emsesp {
 
