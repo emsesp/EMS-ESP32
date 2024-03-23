@@ -379,7 +379,7 @@ const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn';
 const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken';
 
 const ESPsystem_status = {
-  emsesp_version: '3.6-demo',
+  emsesp_version: '3.7-demo',
   esp_platform: 'ESP32',
   cpu_type: 'ESP32-S3',
   cpu_rev: '0',
@@ -401,7 +401,7 @@ const ESPsystem_status = {
 };
 
 const system_status = {
-  emsesp_version: '3.6-demo',
+  emsesp_version: '3.7-demo',
   esp_platform: 'ESP32',
   status: 0,
   // status: 2,
@@ -474,7 +474,7 @@ const EMSESP_SYSTEM_INFO_ENDPOINT = API_ENDPOINT_ROOT + 'system/info';
 
 const emsesp_info = {
   System: {
-    version: '3.6-demo',
+    version: '3.7-demo',
     uptime: '001+06:40:34.018',
     'uptime (seconds)': 110434,
     freemem: 131,
