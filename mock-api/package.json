@@ -1,6 +1,6 @@
 {
   "name": "api",
-  "version": "3.6.0",
+  "version": "3.7.0",
   "description": "mock api for EMS-ESP",
   "author": "proddy",
   "main": "server.ts",
