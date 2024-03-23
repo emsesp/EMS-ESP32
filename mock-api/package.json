@@ -12,8 +12,8 @@
   "dependencies": {
     "@msgpack/msgpack": "^2.8.0",
     "compression": "^1.7.4",
-    "express": "^4.18.3",
-    "itty-router": "^4.2.0",
+    "express": "^4.19.1",
+    "itty-router": "^4.2.2",
     "multer": "^1.4.5-lts.1"
   },
   "packageManager": "yarn@4.1.1",
