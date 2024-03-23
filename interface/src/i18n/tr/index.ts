@@ -12,7 +12,6 @@ const tr: Translation = {
   USERNAME: 'Kullanıcı Adı',
   PASSWORD: 'Şifre',
   SU_PASSWORD: 'SK Şifresi',
-  DASHBOARD: 'Gösterge Paneli',
   SETTINGS_OF: '{0} Ayarlar',
   HELP_OF: '{0} Yardım',
   LOGGED_IN: '{name} olarak giriş yapıldı',
@@ -37,8 +36,6 @@ const tr: Translation = {
   BRAND: 'Marka',
   ENTITY_NAME: 'Valık Adı',
   VALUE: '{{Değer|değer}}',
-  DEVICE_DATA: 'Cihaz Bilgisi',
-  SENSOR_DATA: 'Sensör Bilgisi',
   DEVICES: 'Cihazlar',
   SENSORS: 'Sensörler',
   RUN_COMMAND: 'Çalıştırma Komutu',
@@ -83,7 +80,6 @@ const tr: Translation = {
   FAIL: 'HATA',
   QUALITY: 'KALİTE',
   SCAN_DEVICES: 'Yeni cihaz taraması',
-  EMS_BUS_STATUS_TITLE: 'EMS Hattı ve Aktivite Durumu',
   SCAN: 'Tara',
   STATUS_NAMES: [
     'EMS Telegramlar Alındı (Rx)',
@@ -163,9 +159,7 @@ const tr: Translation = {
   OPTIONS: 'Seçenekler',
   NAME: 'İsim',
   CUSTOMIZATIONS_RESET: 'Sıcaklık ve Analog Sensörlerin özelleştirilmiş seçenekleri dahil bütün özelleştirmeleri kaldırmak istediğinizden emin misiniz?',
-  DEVICE_ENTITIES: 'Cihaz Varlıkları',
   SUPPORT_INFORMATION: 'Destek Bilgileri',
-  CLICK_HERE: 'Buraya Tıklayın',
   HELP_INFORMATION_1: 'EMS-ESPnin nasıl ayarlanacağı ile ilgili bilgileri edinmek için çevrimiçi WIKI sayfasını ziyaret edin',
   HELP_INFORMATION_2: 'Canlı topluluk sohbeti için Discord sunucumuza katılın',
   HELP_INFORMATION_3: 'Yeni bir özellik talep etmek yada hata bildirmek için',
@@ -181,13 +175,11 @@ const tr: Translation = {
   STATUS_OF: '{0} Durumu',
   UPLOAD_DOWNLOAD: 'Yükleme/İndirme',
   VERSION_ON: 'You are currently on', // TODO translate
-  SYSTEM_APPLY_FIRMWARE: 'yeni bellenimi uygulamak için',
   CLOSE: 'Kapat',
   USE: 'KUllan',
   FACTORY_RESET: 'Fabrika ayarına dönme',
   SYSTEM_FACTORY_TEXT: 'Cihaz fabrika ayarlarına döndü ve şimdi yendiden başlatılacak',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Cihazı fabrika ayarlarına döndürmek istediğinize emin misiniz?',
-  VERSION_CHECK: 'Sürüm Kontrolü',
   THE_LATEST: 'En son',
   OFFICIAL: 'resmi',
   DEVELOPMENT: 'geliştirme',
@@ -329,7 +321,9 @@ const tr: Translation = {
   ACTIVEHIGH: 'Active High', // TODO translate
   ACTIVELOW: 'Active Low', // TODO translate
   UNCHANGED: 'Unchanged', // TODO translate
-  ALWAYS: 'Always' // TODO translate
+  ALWAYS: 'Always', // TODO translate
+  ACTIVITY: 'Activity', // TODO translate
+  CONFIGURE: 'Configure {0}' // TODO translate
 };
 
 export default tr;

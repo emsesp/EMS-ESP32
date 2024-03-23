@@ -12,7 +12,6 @@ const it: Translation = {
   USERNAME: 'Nome Utente',
   PASSWORD: 'Password',
   SU_PASSWORD: 'su Password',
-  DASHBOARD: 'Pannello di Controllo',
   SETTINGS_OF: 'Impostazioni {0}',
   HELP_OF: '{0} Aiuto',
   LOGGED_IN: 'Registrato come {name}',
@@ -37,8 +36,6 @@ const it: Translation = {
   BRAND: 'Marca',
   ENTITY_NAME: 'Nome Entità',
   VALUE: '{{Valore|valore}}',
-  DEVICE_DATA: 'Device Data',
-  SENSOR_DATA: 'Sensor Data',
   DEVICES: 'Dispositivi',
   SENSORS: 'Sensori',
   RUN_COMMAND: 'Esegui',
@@ -51,7 +48,6 @@ const it: Translation = {
   REMOVE: 'Elimina',
   PROBLEM_UPDATING: 'Problema aggiornamento',
   PROBLEM_LOADING: 'Problema caricamento',
-  ACCESS_DENIED: 'Accesso Negato',
   ANALOG_SENSOR: 'Sensore Analogico',
   ANALOG_SENSORS: 'Sensori Analogici',
   SETTINGS: 'Settings',
@@ -71,7 +67,6 @@ const it: Translation = {
   TEMP_SENSOR: 'Sensore Temperatura',
   TEMP_SENSORS: 'Sensori Temperatura',
   WRITE_CMD_SENT: 'Scrittura comando inviata',
-  WRITE_CMD_FAILED: 'Scittura comando fallita',
   EMS_BUS_WARNING: 'EMS bus disconnesso. Se questo avvertimento persiste dopo alcuni secondi prego verificare impostazioni scheda',
   EMS_BUS_SCANNING: 'Scansione dispositivi EMS ...',
   CONNECTED: 'Connesso',
@@ -85,7 +80,6 @@ const it: Translation = {
   FAIL: 'FALLITO',
   QUALITY: 'QUALITÂ',
   SCAN_DEVICES: 'Scansione per nuovi dispositivi',
-  EMS_BUS_STATUS_TITLE: 'Bus EMS & Stato Attività',
   SCAN: 'Scansione',
   STATUS_NAMES: [
     'Telegrammi EMS Ricevuti (Rx)',
@@ -165,9 +159,7 @@ const it: Translation = {
   OPTIONS: 'Opzioni',
   NAME: 'Nome',
   CUSTOMIZATIONS_RESET: 'Sei sicuro di voler rimuovere tutte le personalizzazioni incluse le impostazioni personalizzate dei sensori di temperatura e analogici?',
-  DEVICE_ENTITIES: 'Entità Dispositivo',
   SUPPORT_INFORMATION: 'Informazioni di Supporto',
-  CLICK_HERE: 'Clicca qui',
   HELP_INFORMATION_1: 'Visita il wiki online per ottenere istruzioni su come configurare EMS-ESP',
   HELP_INFORMATION_2: 'Per la chat della community dal vivo unisciti al nostro server Discord',
   HELP_INFORMATION_3: 'Per richiedere una funzionalità o segnalare un errore',
@@ -183,13 +175,11 @@ const it: Translation = {
   STATUS_OF: 'Stato {0}',
   UPLOAD_DOWNLOAD: 'Caricamento/Scaricamento',
   VERSION_ON: 'Attualmente stai eseguendo la versione',
-  SYSTEM_APPLY_FIRMWARE: 'per applicare il nuovo firmware',
   CLOSE: 'Chiudere',
   USE: 'Usa',
   FACTORY_RESET: 'Impostazioni di fabbrica',
   SYSTEM_FACTORY_TEXT: 'Il dispositivo è stato ripristinato alle impostazioni di fabbrica e ora verrà riavviato',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Sei sicuro di voler ripristinare il dispositivo alle impostazioni di fabbrica??',
-  VERSION_CHECK: 'Verifica Versione',
   THE_LATEST: 'Ultima',
   OFFICIAL: 'ufficiale',
   DEVELOPMENT: 'sviluppo',
@@ -331,7 +321,9 @@ const it: Translation = {
   ACTIVEHIGH: 'Active High', // TODO translate
   ACTIVELOW: 'Active Low', // TODO translate
   UNCHANGED: 'Unchanged', // TODO translate
-  ALWAYS: 'Always' // TODO translate
+  ALWAYS: 'Always', // TODO translate
+  ACTIVITY: 'Activity', // TODO translate
+  CONFIGURE: 'Configure {0}' // TODO translate
 };
 
 export default it;

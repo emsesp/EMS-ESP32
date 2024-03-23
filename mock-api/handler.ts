@@ -187,7 +187,7 @@ let ntp_settings = {
   tz_format: 'CET-1CEST,M3.5.0,M10.5.0/3'
 };
 const ntp_status = {
-  status: 1,
+  status: 2,
   utc_time: '2021-04-01T14:25:42Z',
   local_time: '2021-04-01T16:25:42',
   server: 'time.google.com',
@@ -316,7 +316,7 @@ const list_networks = {
 // OTA
 const OTA_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'otaSettings';
 let ota_settings = {
-  enabled: true,
+  enabled: false,
   port: 8266,
   password: 'ems-esp-neo'
 };
@@ -362,16 +362,23 @@ const mqtt_status = {
   connect_count: 2
 };
 
-// SYSTEM
-const VERIFY_AUTHORIZATION_ENDPOINT = REST_ENDPOINT_ROOT + 'verifyAuthorization';
+// STATUS
 const SYSTEM_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'systemStatus';
+const ACTIVITY_ENDPOINT = REST_ENDPOINT_ROOT + 'activity';
+
+// SETTINGS
+const ESPSYSTEM_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'ESPSystemStatus';
 const SECURITY_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'securitySettings';
 const RESTART_ENDPOINT = REST_ENDPOINT_ROOT + 'restart';
 const FACTORY_RESET_ENDPOINT = REST_ENDPOINT_ROOT + 'factoryReset';
 const UPLOAD_FILE_ENDPOINT = REST_ENDPOINT_ROOT + 'uploadFile';
+
+// SYSTEM SIGNIN
+const VERIFY_AUTHORIZATION_ENDPOINT = REST_ENDPOINT_ROOT + 'verifyAuthorization';
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn';
 const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken';
-const system_status = {
+
+const ESPsystem_status = {
   emsesp_version: '3.6-demo',
   esp_platform: 'ESP32',
   cpu_type: 'ESP32-S3',
@@ -390,9 +397,26 @@ const system_status = {
   partition: 'app0',
   app_used: 1863,
   app_free: 121,
-  uptime: '000+00:15:42.707',
   arduino_version: 'ESP32 Arduino v2.0.14'
 };
+
+const system_status = {
+  emsesp_version: '3.6-demo',
+  esp_platform: 'ESP32',
+  status: 0,
+  // status: 2,
+  uptime: 77186,
+  bus_uptime: 77121,
+  num_devices: 2,
+  num_sensors: 1,
+  num_analogs: 1,
+  free_heap: 143,
+  ntp_status: 2,
+  ota_status: false,
+  mqtt_status: true,
+  ap_status: false
+};
+
 let security_settings = {
   jwt_secret: 'naughty!',
   users: [
@@ -402,10 +426,19 @@ let security_settings = {
 };
 
 const verify_authentication = { access_token: '1234' };
-const signin = {
+
+const admin_signin = {
   access_token:
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiYWRtaW4iOnRydWUsInZlcnNpb24iOiIzLjAuMmIwIn0.MsHSgoJKI1lyYz77EiT5ZN3ECMrb4mPv9FNy3udq0TU'
 };
+const guest_signin = {
+  access_token:
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imd1ZXN0IiwiYWRtaW4iOmZhbHNlfQ.E_lylR_vGIQFZUGNwcl5F6OkHoaELGsC5zqhi0pAiJE'
+};
+// modify here to simulate admin and guest logins
+const signin = admin_signin;
+// const signin = guest_signin;
+
 const generate_token = { token: '1234' };
 
 //
@@ -416,6 +449,7 @@ const EMSESP_CORE_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'coreData';
 const EMSESP_SENSOR_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'sensorData';
 const EMSESP_DEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'devices';
 const EMSESP_SCANDEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'scanDevices';
+// for later
 // const EMSESP_DEVICEDATA_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceData/:id';
 // const EMSESP_DEVICEENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceEntities/:id';
 const EMSESP_DEVICEDATA_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceData';
@@ -739,7 +773,7 @@ const emsesp_coredata = {
       t: 17,
       tn: 'Custom',
       b: '',
-      n: 'User defined entities',
+      n: 'Custom Entities',
       d: 1,
       p: 1,
       v: '',
@@ -766,14 +800,7 @@ const emsesp_sensordata = {
   analog_enabled: true
 };
 
-const status = {
-  status: 0,
-  // status: 2,
-  tx_mode: 1,
-  uptime: 77186,
-  num_devices: 2,
-  num_sensors: 1,
-  num_analogs: 1,
+const activity = {
   stats: [
     { id: 0, s: 56506, f: 11, q: 100 },
     { id: 1, s: 9026, f: 0, q: 100 },
@@ -2363,9 +2390,11 @@ router
     return new Response('OK', { status: 200 });
   });
 
-// SYSTEM
+// SYSTEM and SETTINGS
 router
   .get(SYSTEM_STATUS_ENDPOINT, () => new Response(JSON.stringify(system_status), { headers }))
+  .get(ACTIVITY_ENDPOINT, () => new Response(JSON.stringify(activity), { headers }))
+  .get(ESPSYSTEM_STATUS_ENDPOINT, () => new Response(JSON.stringify(ESPsystem_status), { headers }))
   .get(SECURITY_SETTINGS_ENDPOINT, () => new Response(JSON.stringify(security_settings), { headers }))
   .post(SECURITY_SETTINGS_ENDPOINT, async (request: any) => {
     security_settings = await request.json();

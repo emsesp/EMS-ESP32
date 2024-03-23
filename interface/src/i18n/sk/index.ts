@@ -12,7 +12,6 @@ const sk: Translation = {
   USERNAME: 'Užívateľské meno',
   PASSWORD: 'Heslo',
   SU_PASSWORD: 'su heslo',
-  DASHBOARD: 'Panel',
   SETTINGS_OF: '{0} Nastavenia',
   HELP_OF: '{0} Pomoc',
   LOGGED_IN: 'Prihlásený ako {name}',
@@ -37,8 +36,6 @@ const sk: Translation = {
   BRAND: 'Značka',
   ENTITY_NAME: 'Názov entity',
   VALUE: '{{Value|value}}',
-  DEVICE_DATA: 'Dáta zariadenia',
-  SENSOR_DATA: 'Dáta snímača',
   DEVICES: 'Zariadenia',
   SENSORS: 'Snímače',
   RUN_COMMAND: 'Volať príkaz',
@@ -83,7 +80,6 @@ const sk: Translation = {
   FAIL: 'ZLYHANIE',
   QUALITY: 'KVALITA',
   SCAN_DEVICES: 'Scan pre nové zariadenia',
-  EMS_BUS_STATUS_TITLE: 'EMS zbernica & stav aktivity',
   SCAN: 'Scan',
   STATUS_NAMES: [
     'EMS Telegramy prijaté (Rx)',
@@ -163,9 +159,7 @@ const sk: Translation = {
   OPTIONS: 'Možnosti',
   NAME: 'Názov',
   CUSTOMIZATIONS_RESET: 'Naozaj chcete odstrániť všetky prispôsobenia vrátane vlastných nastavení snímačov teploty a analógových snímačov?',
-  DEVICE_ENTITIES: 'Entity zariadenia',
   SUPPORT_INFORMATION: 'Informácie o podpore',
-  CLICK_HERE: 'Kliknite tu',
   HELP_INFORMATION_1: 'Navštívte online wiki, kde nájdete pokyny na konfiguráciu EMS-ESP',
   HELP_INFORMATION_2: 'Pre živý komunitný chat sa pripojte na náš Discord server',
   HELP_INFORMATION_3: 'Ak chcete požiadať o funkciu alebo nahlásiť chybu',
@@ -181,13 +175,11 @@ const sk: Translation = {
   STATUS_OF: '{0} Stav',
   UPLOAD_DOWNLOAD: 'Nahrať/Stiahnuť',
   VERSION_ON: 'Momentálne ste vo verzii',
-  SYSTEM_APPLY_FIRMWARE: 'na použitie nového firmvéru',
   CLOSE: 'Zatvoriť',
   USE: 'Použiť',
   FACTORY_RESET: 'Továrenské nastavenia',
   SYSTEM_FACTORY_TEXT: 'Zariadenie bolo obnovené z výroby a teraz sa reštartuje',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Naozaj chcete resetovať EMS-ESP na predvolené výrobné nastavenia?',
-  VERSION_CHECK: 'Kontrola verzie',
   THE_LATEST: 'Posledná',
   OFFICIAL: 'officiálna',
   DEVELOPMENT: 'vývojárska',
@@ -316,7 +308,7 @@ const sk: Translation = {
   SCHEDULE_TIMER_2: 'každú minútu',
   SCHEDULE_TIMER_3: 'každú hodinu',
   CUSTOM_ENTITIES: 'Vlastné entity',
-  ENTITIES_HELP_1: 'Získavanie vlastných entít zo zbernice EMS', // TODO translate
+  ENTITIES_HELP_1: 'Získavanie vlastných entít zo zbernice EMS',
   ENTITIES_UPDATED: 'Aktualizované entity',
   WRITEABLE: 'Zapísateľný',
   SHOWING: 'Zobrazenie',
@@ -329,7 +321,9 @@ const sk: Translation = {
   ACTIVEHIGH: 'Aktívny Vysoký',
   ACTIVELOW: 'Aktívny Nízky',
   UNCHANGED: 'Nezmenené',
-  ALWAYS: 'Vždy'
+  ALWAYS: 'Vždy',
+  ACTIVITY: 'Activity', // TODO translate
+  CONFIGURE: 'Configure {0}' // TODO translate
 };
 
 export default sk;

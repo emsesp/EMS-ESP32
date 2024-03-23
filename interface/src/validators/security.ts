@@ -1,6 +1,6 @@
 import Schema from 'async-validator';
 import type { InternalRuleItem } from 'async-validator';
-import type { User } from 'types';
+import type { UserType } from 'types';
 
 export const SECURITY_SETTINGS_VALIDATOR = new Schema({
   jwt_secret: [
@@ -9,7 +9,7 @@ export const SECURITY_SETTINGS_VALIDATOR = new Schema({
   ]
 });
 
-export const createUniqueUsernameValidator = (users: User[]) => ({
+export const createUniqueUsernameValidator = (users: UserType[]) => ({
   validator(rule: InternalRuleItem, username: string, callback: (error?: string) => void) {
     if (username && users.find((u) => u.username === username)) {
       callback('Username already in use');
@@ -19,7 +19,7 @@ export const createUniqueUsernameValidator = (users: User[]) => ({
   }
 });
 
-export const createUserValidator = (users: User[], creating: boolean) =>
+export const createUserValidator = (users: UserType[], creating: boolean) =>
   new Schema({
     username: [
       { required: true, message: 'Username is required' },

@@ -1,9 +1,9 @@
 import Schema from 'async-validator';
 import { IP_ADDRESS_VALIDATOR } from './shared';
-import type { APSettings } from 'types';
-import { isAPEnabled } from 'framework/ap/APSettingsForm';
+import type { APSettingsType } from 'types';
+import { isAPEnabled } from 'framework/ap/APSettings';
 
-export const createAPSettingsValidator = (apSettings: APSettings) =>
+export const createAPSettingsValidator = (apSettings: APSettingsType) =>
   new Schema({
     provision_mode: { required: true, message: 'Please provide a provision mode' },
     ...(isAPEnabled(apSettings) && {

@@ -18,86 +18,114 @@
 
 #include "emsesp.h"
 
+#ifndef EMSESP_STANDALONE
+#include <esp_ota_ops.h>
+#endif
+
 namespace emsesp {
 
 WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * securityManager) {
-    server->on(EMSESP_STATUS_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { webStatusService(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
+    server->on(ESPSYSTEM_STATUS_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { ESPsystemStatus(request); });
+    server->on(SYSTEM_STATUS_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { systemStatus(request); });
 }
 
-void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
+void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
+    EMSESP::system_.refreshHeapMem(); // refresh free heap and max alloc heap
+
     auto *     response = new AsyncJsonResponse(false);
     JsonObject root     = response->getRoot();
 
-    root["status"]      = EMSESP::bus_status(); // 0, 1 or 2
-    root["tx_mode"]     = EMSESP::txservice_.tx_mode();
-    root["uptime"]      = EMSbus::bus_uptime();
-    root["num_devices"] = EMSESP::count_devices(); // excluding Controller
-    root["num_sensors"] = EMSESP::temperaturesensor_.no_sensors();
-    root["num_analogs"] = EMSESP::analogsensor_.no_sensors();
+#ifdef EMSESP_DEBUG
+    root["emsesp_version"] = std::string(EMSESP_APP_VERSION) + " (DEBUG)";
+#else
+#ifdef EMSESP_TEST
+    root["emsesp_version"] = std::string(EMSESP_APP_VERSION) + " (TEST)";
+#else
+    root["emsesp_version"] = EMSESP_APP_VERSION;
+#endif
+#endif
 
-    JsonArray  statsJson = root["stats"].to<JsonArray>();
-    JsonObject statJson;
-
-    statJson       = statsJson.add<JsonObject>();
-    statJson["id"] = 0;
-    statJson["s"]  = EMSESP::rxservice_.telegram_count();
-    statJson["f"]  = EMSESP::rxservice_.telegram_error_count();
-    statJson["q"]  = EMSESP::rxservice_.quality();
-
-    statJson       = statsJson.add<JsonObject>();
-    statJson["id"] = 1;
-    statJson["s"]  = EMSESP::txservice_.telegram_read_count();
-    statJson["f"]  = EMSESP::txservice_.telegram_read_fail_count();
-    statJson["q"]  = EMSESP::txservice_.read_quality();
-
-    statJson       = statsJson.add<JsonObject>();
-    statJson["id"] = 2;
-    statJson["s"]  = EMSESP::txservice_.telegram_write_count();
-    statJson["f"]  = EMSESP::txservice_.telegram_write_fail_count();
-    statJson["q"]  = EMSESP::txservice_.write_quality();
-
-    if (EMSESP::sensor_enabled()) {
-        statJson       = statsJson.add<JsonObject>();
-        statJson["id"] = 3;
-        statJson["s"]  = EMSESP::temperaturesensor_.reads() - EMSESP::temperaturesensor_.fails();
-        statJson["f"]  = EMSESP::temperaturesensor_.fails();
-        statJson["q"] =
-            EMSESP::temperaturesensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::temperaturesensor_.fails()) / EMSESP::temperaturesensor_.reads());
-    }
-    if (EMSESP::analog_enabled()) {
-        statJson       = statsJson.add<JsonObject>();
-        statJson["id"] = 4;
-        statJson["s"]  = EMSESP::analogsensor_.reads() - EMSESP::analogsensor_.fails();
-        statJson["f"]  = EMSESP::analogsensor_.fails();
-        statJson["q"]  = EMSESP::analogsensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::analogsensor_.fails()) / EMSESP::analogsensor_.reads());
-    }
-    if (Mqtt::enabled()) {
-        statJson       = statsJson.add<JsonObject>();
-        statJson["id"] = 5;
-        statJson["s"]  = Mqtt::publish_count() - Mqtt::publish_fails();
-        statJson["f"]  = Mqtt::publish_fails();
-        statJson["q"]  = Mqtt::publish_count() == 0 ? 100 : 100 - (uint8_t)((100 * Mqtt::publish_fails()) / Mqtt::publish_count());
-    }
-
-    statJson       = statsJson.add<JsonObject>();
-    statJson["id"] = 6;
-    statJson["s"]  = WebAPIService::api_count(); // + WebAPIService::api_fails();
-    statJson["f"]  = WebAPIService::api_fails();
-    statJson["q"]  = (WebAPIService::api_count() + WebAPIService::api_fails()) == 0
-                         ? 100
-                         : 100 - (uint8_t)((100 * WebAPIService::api_fails()) / (WebAPIService::api_count() + WebAPIService::api_fails()));
+    root["esp_platform"] = EMSESP_PLATFORM;
+    root["status"]       = EMSESP::bus_status(); // 0, 1 or 2
+    root["bus_uptime"]   = EMSbus::bus_uptime();
+    root["num_devices"]  = EMSESP::count_devices();
+    root["num_sensors"]  = EMSESP::temperaturesensor_.no_sensors();
+    root["num_analogs"]  = EMSESP::analogsensor_.no_sensors();
+    root["free_heap"]    = EMSESP::system_.getHeapMem();
+    root["uptime"]       = uuid::get_uptime_sec();
+    EMSESP::esp8266React.getOTASettingsService()->read([root](OTASettings & otaSettings) { root["ota_status"] = otaSettings.enabled; });
+    root["mqtt_status"] = EMSESP::mqtt_.connected();
 
 #ifndef EMSESP_STANDALONE
-    if (EMSESP::system_.syslog_enabled()) {
-        statJson       = statsJson.add<JsonObject>();
-        statJson["id"] = 7;
-        statJson["s"]  = EMSESP::system_.syslog_count();
-        statJson["f"]  = EMSESP::system_.syslog_fails();
-        statJson["q"]  = (EMSESP::system_.syslog_count() + EMSESP::system_.syslog_fails()) == 0
-                             ? 100
-                             : 100 - (uint8_t)((100 * EMSESP::system_.syslog_fails()) / (EMSESP::system_.syslog_count() + EMSESP::system_.syslog_fails()));
+    root["ntp_status"] = [] {
+        if (esp_sntp_enabled()) {
+            if (emsesp::EMSESP::system_.ntp_connected()) {
+                return 2;
+            } else {
+                return 1;
+            }
+        }
+        return 0;
+    }();
+#endif
+
+    root["ap_status"] = EMSESP::esp8266React.apStatus();
+
+    response->setLength();
+    request->send(response);
+}
+
+void WebStatusService::ESPsystemStatus(AsyncWebServerRequest * request) {
+    EMSESP::system_.refreshHeapMem(); // refresh free heap and max alloc heap
+
+    auto *     response = new AsyncJsonResponse(false);
+    JsonObject root     = response->getRoot();
+
+#ifdef EMSESP_DEBUG
+    root["emsesp_version"] = std::string(EMSESP_APP_VERSION) + " (DEBUG)";
+#else
+#ifdef EMSESP_TEST
+    root["emsesp_version"] = std::string(EMSESP_APP_VERSION) + " (TEST)";
+#else
+    root["emsesp_version"] = EMSESP_APP_VERSION;
+#endif
+#endif
+    root["esp_platform"] = EMSESP_PLATFORM;
+
+#ifndef EMSESP_STANDALONE
+    root["cpu_type"]         = ESP.getChipModel();
+    root["cpu_rev"]          = ESP.getChipRevision();
+    root["cpu_cores"]        = ESP.getChipCores();
+    root["cpu_freq_mhz"]     = ESP.getCpuFreqMHz();
+    root["max_alloc_heap"]   = EMSESP::system_.getMaxAllocMem();
+    root["free_heap"]        = EMSESP::system_.getHeapMem();
+    root["arduino_version"]  = ARDUINO_VERSION;
+    root["sdk_version"]      = ESP.getSdkVersion();
+    root["partition"]        = esp_ota_get_running_partition()->label;
+    root["flash_chip_size"]  = ESP.getFlashChipSize() / 1024;
+    root["flash_chip_speed"] = ESP.getFlashChipSpeed();
+    root["app_used"]         = EMSESP::system_.appUsed();
+    root["app_free"]         = EMSESP::system_.appFree();
+    uint32_t FSused          = LittleFS.usedBytes() / 1024;
+    root["fs_used"]          = FSused;
+    root["fs_free"]          = EMSESP::system_.FStotal() - FSused;
+
+    if (EMSESP::system_.PSram()) {
+        root["psram_size"] = EMSESP::system_.PSram();
+        root["free_psram"] = ESP.getFreePsram() / 1024;
+    }
+
+    const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
+    if (partition != NULL) { // factory partition found
+        root["has_loader"] = true;
+    } else { // check for not empty, smaller OTA partition
+        partition = esp_ota_get_next_update_partition(nullptr);
+        if (partition) {
+            uint64_t buffer;
+            esp_partition_read(partition, 0, &buffer, 8);
+            const esp_partition_t * running = esp_ota_get_running_partition();
+            root["has_loader"]              = (buffer != 0xFFFFFFFFFFFFFFFF && running->size != partition->size);
+        }
     }
 #endif
 

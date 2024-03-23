@@ -12,7 +12,6 @@ const fr: Translation = {
   USERNAME: 'Nom d\'utilisateur',
   PASSWORD: 'Mot de passe',
   SU_PASSWORD: 'Mot de passe su',
-  DASHBOARD: 'Tableau de bord',
   SETTINGS_OF: 'Paramètres {0}',
   HELP_OF: 'Aide {0}',
   LOGGED_IN: 'Connecté en tant que {name}',
@@ -37,8 +36,6 @@ const fr: Translation = {
   BRAND: 'Marque',
   ENTITY_NAME: 'Nom de l\'entité',
   VALUE: 'Valeur',
-  DEVICE_DATA: 'Données des appareils',
-  SENSOR_DATA: 'Données des capteurs',
   DEVICES: 'Appareils',
   SENSORS: 'Capteurs',
   RUN_COMMAND: 'Lancer une commande',
@@ -83,7 +80,6 @@ const fr: Translation = {
   FAIL: 'ÉCHEC',
   QUALITY: 'QUALITÉ',
   SCAN_DEVICES: 'Rechercher de nouveaux appareils',
-  EMS_BUS_STATUS_TITLE: 'Statut du bus et de l\'activité EMS',
   SCAN: 'Scan',
   STATUS_NAMES: [
     'Télégrammes EMS reçus (Rx)',
@@ -163,9 +159,7 @@ const fr: Translation = {
   OPTIONS: 'Options',
   NAME: 'Nom',
   CUSTOMIZATIONS_RESET: 'Êtes-vous sûr de vouloir supprimer toutes les personnalisations, y compris les paramètres personnalisés des capteurs de température et analogiques ?',
-  DEVICE_ENTITIES: 'Entités de l\'appareil',
   SUPPORT_INFORMATION: 'Information de support',
-  CLICK_HERE: 'Cliquez ici',
   HELP_INFORMATION_1: 'Visitez le wiki en ligne pour obtenir des instructions sur la façon de configurer EMS-ESP.',
   HELP_INFORMATION_2: 'Pour une discussion en direct avec la communauté, rejoignez notre serveur Discord',
   HELP_INFORMATION_3: 'Pour demander une fonctionnalité ou signaler un problème',
@@ -181,13 +175,11 @@ const fr: Translation = {
   STATUS_OF: 'Statut {0}',
   UPLOAD_DOWNLOAD: 'Upload/Download',
   VERSION_ON: 'You are currently on', // TODO translate
-  SYSTEM_APPLY_FIRMWARE: 'pour appliquer le nouveau firmware',
   CLOSE: 'Fermer',
   USE: 'Utiliser',
   FACTORY_RESET: 'Réinitialisation',
   SYSTEM_FACTORY_TEXT: 'L\'appareil a été réinitialisé et va maintenant redémarrer',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Êtes-vous sûr de vouloir réinitialiser l\'appareil à ses paramètres d\'usine ?',
-  VERSION_CHECK: 'Vérification de la version',
   THE_LATEST: 'La dernière',
   OFFICIAL: 'officielle',
   DEVELOPMENT: 'développement',
@@ -329,7 +321,9 @@ const fr: Translation = {
   ACTIVEHIGH: 'Active High', // TODO translate
   ACTIVELOW: 'Active Low', // TODO translate
   UNCHANGED: 'Unchanged', // TODO translate
-  ALWAYS: 'Always' // TODO translate
+  ALWAYS: 'Always', // TODO translate
+  ACTIVITY: 'Activity', // TODO translate
+  CONFIGURE: 'Configure {0}' // TODO translate
 };
 
 export default fr;

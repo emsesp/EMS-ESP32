@@ -10,14 +10,14 @@ export enum APNetworkStatus {
   LINGERING = 2
 }
 
-export interface APStatus {
+export interface APStatusType {
   status: APNetworkStatus;
   ip_address: string;
   mac_address: string;
   station_num: number;
 }
 
-export interface APSettings {
+export interface APSettingsType {
   provision_mode: APProvisionMode;
   ssid: string;
   password: string;

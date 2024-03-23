@@ -1389,17 +1389,17 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         node["bus status"] = "unknown";
         break;
     }
-    if (EMSESP::bus_status() != EMSESP::BUS_STATUS_OFFLINE) {
-        node["bus protocol"]                = EMSbus::is_ht3() ? "HT3" : "Buderus";
-        node["bus telegrams received (rx)"] = EMSESP::rxservice_.telegram_count();
-        node["bus reads (tx)"]              = EMSESP::txservice_.telegram_read_count();
-        node["bus writes (tx)"]             = EMSESP::txservice_.telegram_write_count();
-        node["bus incomplete telegrams"]    = EMSESP::rxservice_.telegram_error_count();
-        node["bus reads failed"]            = EMSESP::txservice_.telegram_read_fail_count();
-        node["bus writes failed"]           = EMSESP::txservice_.telegram_write_fail_count();
-        node["bus rx line quality"]         = EMSESP::rxservice_.quality();
-        node["bus tx line quality"]         = (EMSESP::txservice_.read_quality() + EMSESP::txservice_.read_quality()) / 2;
-    }
+    // if (EMSESP::bus_status() != EMSESP::BUS_STATUS_OFFLINE) {
+    node["bus protocol"]                = EMSbus::is_ht3() ? "HT3" : "Buderus";
+    node["bus telegrams received (rx)"] = EMSESP::rxservice_.telegram_count();
+    node["bus reads (tx)"]              = EMSESP::txservice_.telegram_read_count();
+    node["bus writes (tx)"]             = EMSESP::txservice_.telegram_write_count();
+    node["bus incomplete telegrams"]    = EMSESP::rxservice_.telegram_error_count();
+    node["bus reads failed"]            = EMSESP::txservice_.telegram_read_fail_count();
+    node["bus writes failed"]           = EMSESP::txservice_.telegram_write_fail_count();
+    node["bus rx line quality"]         = EMSESP::rxservice_.quality();
+    node["bus tx line quality"]         = (EMSESP::txservice_.read_quality() + EMSESP::txservice_.read_quality()) / 2;
+    // }
 
     // Settings
     node = output["Settings"].to<JsonObject>();

@@ -1,8 +1,8 @@
 import Schema from 'async-validator';
 import { IP_OR_HOSTNAME_VALIDATOR } from './shared';
-import type { MqttSettings } from 'types';
+import type { MqttSettingsType } from 'types';
 
-export const createMqttSettingsValidator = (mqttSettings: MqttSettings) =>
+export const createMqttSettingsValidator = (mqttSettings: MqttSettingsType) =>
   new Schema({
     ...(mqttSettings.enabled && {
       host: [{ required: true, message: 'Host is required' }, IP_OR_HOSTNAME_VALIDATOR],

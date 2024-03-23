@@ -50,13 +50,7 @@ export interface Stat {
   q: number; // quality
 }
 
-export interface Status {
-  status: busConnectionStatus;
-  tx_mode: number;
-  uptime: number;
-  num_devices: number;
-  num_sensors: number;
-  num_analogs: number;
+export interface Activity {
   stats: Stat[];
 }
 

@@ -39,7 +39,9 @@
 #include <Preferences.h>
 
 #include "ESP8266React.h"
+
 #include "web/WebStatusService.h"
+#include "web/WebActivityService.h"
 #include "web/WebDataService.h"
 #include "web/WebSettingsService.h"
 #include "web/WebCustomizationService.h"
@@ -220,6 +222,7 @@ class EMSESP {
     static ESP8266React            esp8266React;
     static WebSettingsService      webSettingsService;
     static WebStatusService        webStatusService;
+    static WebActivityService      webActivityService;
     static WebDataService          webDataService;
     static WebAPIService           webAPIService;
     static WebLogService           webLogService;

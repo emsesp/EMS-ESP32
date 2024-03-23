@@ -12,7 +12,6 @@ const de: Translation = {
   USERNAME: 'Nutzername',
   PASSWORD: 'Passwort',
   SU_PASSWORD: 'su Passwort',
-  DASHBOARD: 'Kontrollzentrum',
   SETTINGS_OF: '{0} Einstellungen',
   HELP_OF: '{0} Hilfe',
   LOGGED_IN: 'Eingeloggt als {name}',
@@ -37,8 +36,6 @@ const de: Translation = {
   BRAND: 'Marke',
   ENTITY_NAME: 'Entitätsname',
   VALUE: '{{Wert|wert}}',
-  DEVICE_DATA: 'Gerätedaten',
-  SENSOR_DATA: 'Sensordaten',
   DEVICES: 'Geräte',
   SENSORS: 'Sensoren',
   RUN_COMMAND: 'Befehl ausführen',
@@ -83,7 +80,6 @@ const de: Translation = {
   FAIL: 'FEHLER',
   QUALITY: 'QUALITÄT',
   SCAN_DEVICES: 'Nach neuen Geräten suchen',
-  EMS_BUS_STATUS_TITLE: 'EMS-Bus- und Aktivitätsstatus',
   SCAN: 'Suche',
   STATUS_NAMES: [
     'EMS-Telegramme empfangen (Rx)',
@@ -163,9 +159,7 @@ const de: Translation = {
   OPTIONS: 'Optionen',
   NAME: 'Name',
   CUSTOMIZATIONS_RESET: 'Möchten Sie wirklich alle Anpassungen entfernen, einschließlich der benutzerdefinierten Einstellungen der Temperatur- und Analogsensoren?',
-  DEVICE_ENTITIES: 'Geräteentitäten',
   SUPPORT_INFORMATION: 'Unterstützende Informationen',
-  CLICK_HERE: 'Hier klicken',
   HELP_INFORMATION_1: 'EMS-ESP Konfigurationsanweisungen und mehr finden Sie im Online-Wiki',
   HELP_INFORMATION_2: 'Für einen Live-Community-Chat besuchen Sie unseren Discord-Server',
   HELP_INFORMATION_3: 'Um neue Funktionen anzufragen oder Fehler zu melden, eröffnen Sie ein Issue auf Github',
@@ -181,13 +175,11 @@ const de: Translation = {
   STATUS_OF: '{0} Status',
   UPLOAD_DOWNLOAD: 'Hoch-/Herunterladen',
   VERSION_ON: 'Sie verwenden derzeit',
-  SYSTEM_APPLY_FIRMWARE: 'um die neue Firmware anzuwenden',
   CLOSE: 'Schließen',
   USE: 'Verwenden Sie',
   FACTORY_RESET: 'Werkseinstellung',
   SYSTEM_FACTORY_TEXT: 'EMS-ESP wurde auf Werkseinstellung gesetzt und startet als Zugangspunkt neu',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Sind Sie sicher alle Einstellungen auf Werkseinstellung zu setzen?',
-  VERSION_CHECK: 'Versionsprüfung',
   THE_LATEST: 'Die neueste',
   OFFICIAL: 'offizielle',
   DEVELOPMENT: 'Entwicklungs',
@@ -329,7 +321,9 @@ const de: Translation = {
   ACTIVEHIGH: 'Aktiv Positiv',
   ACTIVELOW: 'Aktiv Negativ',
   UNCHANGED: 'Unverändert',
-  ALWAYS: 'Immer'
+  ALWAYS: 'Immer',
+  ACTIVITY: 'Activity', // TODO translate
+  CONFIGURE: 'Configure {0}' // TODO translate
 };
 
 export default de;
