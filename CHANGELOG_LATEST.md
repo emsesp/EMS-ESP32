@@ -18,3 +18,5 @@
 ## Changed
 
 - use flag for BC400 compatible thermostats, manage different mode settings
+- use factory partition for 16M flash
+- store digital out states to nvs
