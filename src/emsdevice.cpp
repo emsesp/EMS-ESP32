@@ -1350,6 +1350,29 @@ void EMSdevice::dump_value_info() {
                 Serial.print(entityid);
             }
 
+            Serial.print(",");
+
+            // modbus specific infos
+
+            Serial.print(dv.tag);
+            Serial.print(',');
+
+            // numeric operator -> scale factor
+            if (dv.numeric_operator == 0)
+                Serial.print("1");
+            else if (dv.numeric_operator > 0)
+                Serial.printf("1/%d", dv.numeric_operator);
+            else
+                Serial.print(-dv.numeric_operator);
+            Serial.print(",");
+
+            Serial.printf("%d", EMSESP::modbus_.getRegisterOffset(dv));
+            Serial.print(",");
+
+            Serial.printf("%d", EMSESP::modbus_.getRegisterCount(dv));
+
+            // /modbus specific infos
+
             Serial.println();
         }
     }
@@ -1855,6 +1878,146 @@ void EMSdevice::write_command(const uint16_t type_id, const uint8_t offset, cons
 // send Tx read command to the device
 void EMSdevice::read_command(const uint16_t type_id, const uint8_t offset, const uint8_t length) const {
     EMSESP::send_read_request(type_id, device_id(), offset, length);
+}
+
+// copy a raw value (i.e. without applying the numeric_operator) to the output buffer.
+// returns true on success.
+bool EMSdevice::get_modbus_value(uint8_t tag, const std::string & shortname, std::vector<uint16_t> & result) {
+    // find device value by shortname
+    // TODO linear search is inefficient
+    const auto & it = std::find_if(devicevalues_.begin(), devicevalues_.end(), [&](const DeviceValue & x) { return x.tag == tag && x.short_name == shortname; });
+    if (it == devicevalues_.end())
+        return false;
+
+    auto & dv = *it;
+
+    // check if it exists, there is a value for the entity. Set the flag to ACTIVE
+    // not that this will override any previously removed states
+    (dv.hasValue()) ? dv.add_state(DeviceValueState::DV_ACTIVE) : dv.remove_state(DeviceValueState::DV_ACTIVE);
+
+    if (!dv.has_state(DeviceValueState::DV_ACTIVE))
+        return false;
+
+    // handle Booleans
+    if (dv.type == DeviceValueType::BOOL) {
+        if (result.size() != 1)
+            return false;
+        auto value_bool = *(uint8_t *)(dv.value_p);
+        if (!Helpers::hasValue(value_bool, EMS_VALUE_BOOL))
+            return false;
+        result[0] = value_bool ? 1 : 0;
+    }
+
+    // handle TEXT strings
+    else if (dv.type == DeviceValueType::STRING) {
+        auto value_s           = (char *)dv.value_p;
+        auto length_s          = strlen(value_s) + 1; // length including terminating zero in bytes
+        auto register_length_s = -(-length_s / 2);    // length including terminating zero in uint16_t-registers
+        if (result.size() < register_length_s)
+            return false;
+        for (auto i = 0; i < register_length_s; i++) {
+            auto hi   = (uint8_t)value_s[2 * i];
+            auto lo   = (uint8_t)(2 * i + 1 < length_s ? value_s[2 * i + 1] : 0);
+            result[i] = ((uint16_t)hi << 8) | lo;
+        }
+    }
+
+    // handle ENUMs
+    else if (dv.type == DeviceValueType::ENUM) {
+        if (result.size() != 1)
+            return false;
+        auto value_enum = *(uint8_t *)(dv.value_p);
+        if (value_enum >= dv.options_size)
+            return false;
+        result[0] = (uint16_t)value_enum;
+    }
+
+    // handle Numbers
+    else if (dv.type == DeviceValueType::INT) {
+        if (result.size() != 1)
+            return false;
+        result[0] = (uint16_t)(uint8_t)(*(int8_t *)(dv.value_p));
+    } else if (dv.type == DeviceValueType::UINT) {
+        if (result.size() != 1)
+            return false;
+        result[0] = (uint16_t)(*(uint8_t *)(dv.value_p));
+    } else if (dv.type == DeviceValueType::SHORT) {
+        if (result.size() != 1)
+            return false;
+        result[0] = (uint16_t)(*(int16_t *)(dv.value_p));
+    } else if (dv.type == DeviceValueType::USHORT) {
+        if (result.size() != 1)
+            return false;
+        result[0] = *(uint16_t *)(dv.value_p);
+    } else if (dv.type == DeviceValueType::ULONG || dv.type == DeviceValueType::TIME) {
+        if (result.size() != 2)
+            return false;
+        auto value_uint32 = *(uint32_t *)(dv.value_p);
+        result[0]         = (uint16_t)(value_uint32 >> 16);
+        result[1]         = (uint16_t)(value_uint32 & 0xffff);
+    }
+
+    else {
+        return false;
+    }
+
+    return true;
+}
+
+bool EMSdevice::modbus_value_to_json(uint8_t tag, const std::string & shortname, const std::vector<uint8_t> & modbus_data, JsonObject output) {
+    // find device value by shortname
+    // TODO linear search is inefficient
+    const auto & it = std::find_if(devicevalues_.begin(), devicevalues_.end(), [&](const DeviceValue & x) { return x.tag == tag && x.short_name == shortname; });
+    if (it == devicevalues_.end())
+        return false;
+
+    auto & dv = *it;
+
+    // handle Booleans
+    if (dv.type == DeviceValueType::BOOL) {
+        // bools are 1 16 bit register
+        if (modbus_data.size() != 2)
+            return false;
+        output["value"] = modbus_data[0] || modbus_data[1];
+    }
+
+    // handle TEXT strings
+    else if (dv.type == DeviceValueType::STRING) {
+        // text is optionally nul terminated
+        // check if the data contains a null char
+        auto nul_or_end = std::find(modbus_data.begin(), modbus_data.end(), 0);
+        output["value"] = std::string(modbus_data.begin(), nul_or_end);
+    }
+
+    // handle ENUMs
+    else if (dv.type == DeviceValueType::ENUM) {
+        // these data types are 1 16 bit register
+        if (modbus_data.size() != 2)
+            return false;
+
+        output["value"] = (uint16_t)modbus_data[0] << 8 | (uint16_t)modbus_data[1];
+    }
+
+    // handle Numbers
+    else if (dv.type == DeviceValueType::INT || dv.type == DeviceValueType::UINT || dv.type == DeviceValueType::SHORT || dv.type == DeviceValueType::USHORT) {
+        // these data types are 1 16 bit register
+        if (modbus_data.size() != 2)
+            return false;
+
+        output["value"] = Helpers::numericoperator2scalefactor(dv.numeric_operator) * (float)((uint16_t)modbus_data[0] << 8 | (uint16_t)modbus_data[1]);
+    } else if (dv.type == DeviceValueType::ULONG || dv.type == DeviceValueType::TIME) {
+        // these data types are 2 16 bit register
+        if (modbus_data.size() != 4)
+            return false;
+        output["value"] = Helpers::numericoperator2scalefactor(dv.numeric_operator)
+                          * (float)((uint32_t)modbus_data[0] << 24 | (uint32_t)modbus_data[1] << 16 | (uint32_t)modbus_data[2] << 8 | (uint32_t)modbus_data[3]);
+    }
+
+    else {
+        return false;
+    }
+
+    return true;
 }
 
 } // namespace emsesp
