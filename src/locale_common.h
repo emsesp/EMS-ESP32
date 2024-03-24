@@ -65,6 +65,7 @@ MAKE_WORD(users)
 MAKE_WORD(publish)
 MAKE_WORD(board_profile)
 MAKE_WORD(setvalue)
+MAKE_WORD(service)
 
 // for commands
 MAKE_WORD(call)
@@ -142,6 +143,7 @@ MAKE_WORD_CUSTOM(asterisks, "********")
 MAKE_WORD_CUSTOM(n_mandatory, "<n>")
 MAKE_WORD_CUSTOM(sensorid_optional, "[sensor ID]")
 MAKE_WORD_CUSTOM(id_optional, "[id|hc]")
+MAKE_WORD_CUSTOM(partitionname_optional, "[partitionsname]")
 MAKE_WORD_CUSTOM(data_optional, "[data]")
 MAKE_WORD_CUSTOM(nvs_optional, "[nvs]")
 MAKE_WORD_CUSTOM(offset_optional, "[offset]")
@@ -157,6 +159,8 @@ MAKE_WORD_CUSTOM(new_password_prompt1, "Enter new password: ")
 MAKE_WORD_CUSTOM(new_password_prompt2, "Retype new password: ")
 MAKE_WORD_CUSTOM(password_prompt, "Password: ")
 MAKE_WORD_CUSTOM(unset, "<unset>")
+MAKE_WORD_CUSTOM(enable_mandatory, "<enable | disable>")
+MAKE_WORD_CUSTOM(service_mandatory, "<ota | ap | mqtt | ntp>")
 
 // more common names that don't need translations
 MAKE_NOTRANSLATION(1x3min, "1x3min")
@@ -327,7 +331,7 @@ MAKE_ENUM(enum_reducemode1, FL_(outdoor), FL_(room), FL_(reduce)) // RC310 value
 MAKE_ENUM(enum_nofrostmode, FL_(off), FL_(outdoor), FL_(room))
 MAKE_ENUM(enum_nofrostmode1, FL_(room), FL_(outdoor), FL_(room_outdoor))
 
-MAKE_ENUM(enum_controlmode, FL_(off), FL_(optimized), FL_(simple), FL_(mpc), FL_(room), FL_(power), FL_(constant))
+MAKE_ENUM(enum_controlmode, FL_(optimized), FL_(simple), FL_(na), FL_(room), FL_(power))
 MAKE_ENUM(enum_controlmode1, FL_(weather_compensated), FL_(outside_basepoint), FL_(na), FL_(room), FL_(power), FL_(constant)) // RC310 1-4
 MAKE_ENUM(enum_controlmode2, FL_(outdoor), FL_(room))
 MAKE_ENUM(enum_controlmode3, FL_(off), FL_(unmixed), FL_(unmixedIPM), FL_(mixed))

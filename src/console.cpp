@@ -198,9 +198,17 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
         });
     });
 
-    commands->add_command(ShellContext::MAIN, CommandFlags::ADMIN, string_vector{F_(restart)}, [](Shell & shell, const std::vector<std::string> & arguments) {
-        to_app(shell).system_.system_restart();
-    });
+    commands->add_command(ShellContext::MAIN,
+                          CommandFlags::ADMIN,
+                          string_vector{F_(restart)},
+                          string_vector{F_(partitionname_optional)},
+                          [](Shell & shell, const std::vector<std::string> & arguments) {
+                              if (arguments.size()) {
+                                  to_app(shell).system_.system_restart(arguments.front().c_str());
+                              } else {
+                                  to_app(shell).system_.system_restart();
+                              }
+                          });
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::ADMIN,
@@ -238,7 +246,8 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                                           networkSettings.password = password2.c_str();
                                                           return StateUpdateResult::CHANGED;
                                                       });
-                                                  shell.println("WiFi password updated");
+                                                  shell.println("WiFi password updated. Reconnecting...");
+                                                  to_app(shell).system_.wifi_reconnect();
                                               } else {
                                                   shell.println("Passwords do not match");
                                               }
@@ -271,7 +280,8 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                   networkSettings.ssid = arguments.front().c_str();
                                   return StateUpdateResult::CHANGED;
                               });
-                              shell.println("WiFi ssid updated");
+                              shell.println("WiFi ssid updated. Reconnecting...");
+                              to_app(shell).system_.wifi_reconnect();
                           });
 
 
@@ -340,6 +350,43 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                   return StateUpdateResult::CHANGED;
                               });
                               to_app(shell).uart_init();
+                          });
+
+    commands->add_command(ShellContext::MAIN,
+                          CommandFlags::ADMIN,
+                          string_vector{F_(set), F_(service)},
+                          string_vector{F_(service_mandatory), F_(enable_mandatory)},
+                          [](Shell & shell, const std::vector<std::string> & arguments) {
+                              if (arguments.back() == "enable" || arguments.back() == "disable") {
+                                  bool enable = arguments.back() == "enable";
+                                  if (arguments.front() == "mqtt") {
+                                      to_app(shell).esp8266React.getMqttSettingsService()->update([&](MqttSettings & Settings) {
+                                          Settings.enabled = enable;
+                                          return StateUpdateResult::CHANGED;
+                                      });
+                                  } else if (arguments.front() == "ota") {
+                                      to_app(shell).esp8266React.getOTASettingsService()->update([&](OTASettings & Settings) {
+                                          Settings.enabled = enable;
+                                          return StateUpdateResult::CHANGED;
+                                      });
+                                  } else if (arguments.front() == "ntp") {
+                                      to_app(shell).esp8266React.getNTPSettingsService()->update([&](NTPSettings & Settings) {
+                                          Settings.enabled = enable;
+                                          return StateUpdateResult::CHANGED;
+                                      });
+                                  } else if (arguments.front() == "ap") {
+                                      to_app(shell).esp8266React.getAPSettingsService()->update([&](APSettings & Settings) {
+                                          Settings.provisionMode = enable ? 0 : 2;
+                                          return StateUpdateResult::CHANGED;
+                                      });
+                                  } else {
+                                      shell.printfln("unknown service: %s", arguments.front().c_str());
+                                      return;
+                                  }
+                                  shell.printfln("service '%s' %sd", arguments.front().c_str(), arguments.back().c_str());
+                              } else {
+                                  shell.println("Must be `enable` or `disable`");
+                              }
                           });
 
     //
@@ -594,13 +641,15 @@ void EMSESPShell::stopped() {
 // show welcome banner
 void EMSESPShell::display_banner() {
     println();
-    printfln("┌───────────────────────────────────────┐");
-    printfln("│ %sEMS-ESP version %-12s%s          │", COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_BOLD_OFF);
-    printfln("│ %s%shttps://github.com/emsesp/EMS-ESP32%s   │", COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
-    printfln("│                                       │");
-    printfln("│ type %shelp%s to show available commands  │", COLOR_UNDERLINE, COLOR_RESET);
-    printfln("│ use %ssu%s to access Admin commands       │", COLOR_UNDERLINE, COLOR_RESET);
-    printfln("└───────────────────────────────────────┘");
+    printfln("┌──────────────────────────────────────────┐");
+    printfln("│ %sEMS-ESP version %-12s%s             │", COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_BOLD_OFF);
+    printfln("│                                          │");
+    printfln("│ %shelp%s to show available commands          │", COLOR_UNDERLINE, COLOR_RESET);
+    printfln("│ %ssu%s to access admin commands              │", COLOR_UNDERLINE, COLOR_RESET);
+    printfln("│                                          │");
+    printfln("│ %s%shttps://github.com/emsesp/EMS-ESP32%s      │", COLOR_BRIGHT_GREEN, COLOR_UNDERLINE, COLOR_RESET);
+    printfln("│                                          │");
+    printfln("└──────────────────────────────────────────┘");
     println();
 
     // set console name

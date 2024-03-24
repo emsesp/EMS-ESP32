@@ -56,7 +56,7 @@ const WiFiNetworkScanner: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.NETWORK_SCANNER()}>
+    <SectionContent>
       {renderNetworkScanner()}
       <ButtonRow>
         <Button

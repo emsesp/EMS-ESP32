@@ -32,8 +32,11 @@ class FSPersistence {
             settingsFile.close();
         }
 
-        // If we reach here we have not been successful in loading the config,
-        // hard-coded emergency defaults are now applied.
+// If we reach here we have not been successful in loading the config,
+// hard-coded emergency defaults are now applied.
+#ifdef EMSESP_DEBUG
+        Serial.println("Applying defaults to " + String(_filePath));
+#endif
         applyDefaults();
         writeToFS(); // added to make sure the initial file is created
     }

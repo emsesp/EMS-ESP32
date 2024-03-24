@@ -24,9 +24,8 @@
 #endif
 
 #define NTP_SETTINGS_FILE "/config/ntpSettings.json"
-#define NTP_SETTINGS_SERVICE_PATH "/rest/ntpSettings"
 
-#define MAX_TIME_SIZE 256
+#define NTP_SETTINGS_SERVICE_PATH "/rest/ntpSettings"
 #define TIME_PATH "/rest/time"
 
 class NTPSettings {
@@ -48,10 +47,9 @@ class NTPSettingsService : public StatefulService<NTPSettings> {
     static void ntp_received(struct timeval * tv);
 
   private:
-    HttpEndpoint<NTPSettings>   _httpEndpoint;
-    FSPersistence<NTPSettings>  _fsPersistence;
-    AsyncCallbackJsonWebHandler _timeHandler;
-    bool                        _connected;
+    HttpEndpoint<NTPSettings>  _httpEndpoint;
+    FSPersistence<NTPSettings> _fsPersistence;
+    bool                       _connected;
 
     void WiFiEvent(WiFiEvent_t event);
     void configureNTP();

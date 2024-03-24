@@ -74,6 +74,8 @@ class DummySettings {
     String  CORSOrigin     = "*";
     uint8_t tx_power       = 0;
 
+    uint8_t provisionMode = 0;
+
     static void read(DummySettings & settings, JsonObject root){};
     static void read(DummySettings & settings){};
 
@@ -94,6 +96,9 @@ class DummySettingsService : public StatefulService<DummySettings> {
 #define SecuritySettings DummySettings
 #define MqttSettings DummySettings
 #define NTPSettings DummySettings
+#define OTASettings DummySettings
+#define APSettings DummySettings
+
 
 class ESP8266React {
   public:
@@ -114,6 +119,10 @@ class ESP8266React {
         return _mqttClient;
     }
 
+    bool apStatus() {
+        return false;
+    }
+
     void setWill(const char * will_topic) {
     }
     void onMessage(espMqttClientTypes::OnMessageCallback callback) {
@@ -132,6 +141,14 @@ class ESP8266React {
     }
 
     StatefulService<DummySettings> * getNTPSettingsService() {
+        return &_settings;
+    }
+
+    StatefulService<DummySettings> * getOTASettingsService() {
+        return &_settings;
+    }
+
+    StatefulService<DummySettings> * getAPSettingsService() {
         return &_settings;
     }
 

@@ -12,7 +12,6 @@ const sv: Translation = {
   USERNAME: 'Användarnamn',
   PASSWORD: 'Lösenord',
   SU_PASSWORD: 'su Lösenord',
-  DASHBOARD: 'Kontrollpanel',
   SETTINGS_OF: '{0} Inställningar',
   HELP_OF: '{0} Hjälp',
   LOGGED_IN: 'Inloggad som {name}',
@@ -37,8 +36,6 @@ const sv: Translation = {
   BRAND: 'Fabrikat',
   ENTITY_NAME: 'Entitetsnamn',
   VALUE: '{{Värde|värde}}',
-  DEVICE_DATA: 'Enhets data',
-  SENSOR_DATA: 'Sensor data',
   DEVICES: 'Enheter',
   SENSORS: 'Sensorer',
   RUN_COMMAND: 'Kör Kommando',
@@ -83,7 +80,6 @@ const sv: Translation = {
   FAIL: 'Misslyckades',
   QUALITY: 'Kvalitet',
   SCAN_DEVICES: 'Sök efter nya enheter',
-  EMS_BUS_STATUS_TITLE: 'EMS-buss & aktivitetsstatus',
   SCAN: 'Sök',
   STATUS_NAMES: [
     'EMS-telegram (Rx)',
@@ -163,9 +159,7 @@ const sv: Translation = {
   OPTIONS: 'Alternativ',
   NAME: 'Namn',
   CUSTOMIZATIONS_RESET: 'Är du säker på att du vill ta bort alla anpassningar inklusive inställningar för Temperatur och Analoga sensorer?',
-  DEVICE_ENTITIES: 'Enhets-entiteter',
   SUPPORT_INFORMATION: 'Supportinformation',
-  CLICK_HERE: 'Klicka Här',
   HELP_INFORMATION_1: 'Besök Wikin för instruktioner för hur du kan konfigurera EMS-ESP',
   HELP_INFORMATION_2: 'För community-support besök vår Discord-server',
   HELP_INFORMATION_3: 'Önska en ny funktion eller rapportera en bugg',
@@ -181,13 +175,11 @@ const sv: Translation = {
   STATUS_OF: '{0} Status',
   UPLOAD_DOWNLOAD: 'Upp/Nedladdning',
   VERSION_ON: 'You are currently on', // TODO translate
-  SYSTEM_APPLY_FIRMWARE: 'för att aktivera ny firmware',
   CLOSE: 'Stäng',
   USE: 'Använd',
   FACTORY_RESET: 'Fabriksåterställning',
   SYSTEM_FACTORY_TEXT: 'Enheten har blivit fabriksåterställd och startar nu om',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Är du säker att du vill fabriksåterställa enheten?',
-  VERSION_CHECK: 'Senaste versioner',
   THE_LATEST: 'Den senaste',
   OFFICIAL: 'officiell',
   DEVELOPMENT: 'utveckling',
@@ -330,7 +322,9 @@ const sv: Translation = {
   ACTIVEHIGH: 'Active High', // TODO translate
   ACTIVELOW: 'Active Low', // TODO translate
   UNCHANGED: 'Unchanged', // TODO translate
-  ALWAYS: 'Always' // TODO translate
+  ALWAYS: 'Always', // TODO translate
+  ACTIVITY: 'Activity', // TODO translate
+  CONFIGURE: 'Configure {0}' // TODO translate
 };
 
 export default sv;

@@ -4,14 +4,14 @@ export enum NTPSyncStatus {
   NTP_ACTIVE = 2
 }
 
-export interface NTPStatus {
+export interface NTPStatusType {
   status: NTPSyncStatus;
   utc_time: string;
   local_time: string;
   server: string;
 }
 
-export interface NTPSettings {
+export interface NTPSettingsType {
   enabled: boolean;
   server: string;
   tz_label: string;

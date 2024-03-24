@@ -358,7 +358,7 @@ const EMSESP_WRITE_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'entities';
 
 const emsesp_info = {
   System: {
-    version: '3.6.5',
+    version: '3.7.0',
     uptime: '001+06:40:34.018',
     'uptime (seconds)': 110434,
     freemem: 131,
@@ -552,7 +552,7 @@ const emsesp_coredata = {
       t: 17,
       tn: 'Custom',
       b: '',
-      n: 'User defined entities',
+      n: 'Custom Entities',
       d: 1,
       p: 1,
       v: '',

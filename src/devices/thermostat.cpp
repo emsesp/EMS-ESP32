@@ -239,7 +239,8 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(const ui
             return heating_circuit;
         }
     }
-    LOG_DEBUG("Heating circuit not fond on device 0x%02X", device_id());
+
+    LOG_DEBUG("Heating circuit not found on device 0x%02X", device_id());
     return nullptr; // not found
 }
 
@@ -1863,10 +1864,8 @@ bool Thermostat::set_remotetemp(const char * value, const int8_t id) {
         Roomctrl::set_remotetemp(Roomctrl::RC20, hc->hc(), hc->remotetemp); // RC20
     } else if ((model() == EMSdevice::EMS_DEVICE_FLAG_BC400) || model() == EMSdevice::EMS_DEVICE_FLAG_RC300) {
         if (hc->control == 1) {
-            Roomctrl::set_remotetemp(Roomctrl::RC200, hc->hc(), hc->remotetemp); // RC200
-        } else if (hc->control == 0) {
-            Roomctrl::set_remotetemp(Roomctrl::SENSOR, hc->hc(), hc->remotetemp); // RF Sensor
-        } else { // RC100(2) and RC100H(3)
+            Roomctrl::set_remotetemp(Roomctrl::RC200, hc->hc(), hc->remotetemp);  // RC200
+        } else if (hc->control == 2 || hc->control == 3) {                        // RC100(2) and RC100H(3)
             Roomctrl::set_remotetemp(Roomctrl::RC100H, hc->hc(), hc->remotetemp); // RC100H
         }
     }
@@ -1986,6 +1985,9 @@ bool Thermostat::set_control(const char * value, const int8_t id) {
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400 || model() == EMSdevice::EMS_DEVICE_FLAG_RC300 || model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
         if (Helpers::value2enum(value, ctrl, FL_(enum_control1))) {
             write_command(hpmode_typeids[hc->hc()], 3, ctrl);
+            if (hc->remotetemp != EMS_VALUE_SHORT_NOTSET && ctrl > 0) {
+                Roomctrl::set_remotetemp(ctrl == 1 ? Roomctrl::RC200 : Roomctrl::RC100H, hc->hc(), hc->remotetemp);
+            }
             return true;
         }
     } else if (Helpers::value2enum(value, ctrl, FL_(enum_control))) {
@@ -3022,7 +3024,7 @@ bool Thermostat::set_controlmode(const char * value, const int8_t id) {
         }
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
         if (Helpers::value2enum(value, set, FL_(enum_controlmode))) {
-            write_command(curve_typeids[hc->hc()], 0, set, curve_typeids[hc->hc()]);
+            write_command(curve_typeids[hc->hc()], 0, set + 1, curve_typeids[hc->hc()]);
             return true;
         }
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400 || model() == EMSdevice::EMS_DEVICE_FLAG_RC300) {
@@ -4505,9 +4507,11 @@ void Thermostat::register_device_values() {
         break;
     }
 
-#if defined(EMSESP_STANDALONE_DUMP)
+#if defined(EMSESP_STANDALONE)
     // if we're just dumping out values, create a single dummy hc
-    register_device_values_hc(std::make_shared<Thermostat::HeatingCircuit>(1, this->model())); // hc=1
+    auto new_hc = std::make_shared<Thermostat::HeatingCircuit>(1, this->model()); // hc = 1
+    heating_circuits_.push_back(new_hc);
+    register_device_values_hc(new_hc);
 #endif
 }
 
@@ -4597,8 +4601,13 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               MAKE_CF_CB(set_summermode));
         register_device_value(tag, &hc->summermode, DeviceValueType::ENUM, FL_(enum_summer), FL_(summermode), DeviceValueUOM::NONE);
         register_device_value(tag, &hc->hpoperatingstate, DeviceValueType::ENUM, FL_(enum_operatingstate), FL_(hpoperatingstate), DeviceValueUOM::NONE);
-        register_device_value(
-            tag, &hc->controlmode, DeviceValueType::ENUM, FL_(enum_controlmode1), FL_(controlmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_controlmode));
+        if (model == EMSdevice::EMS_DEVICE_FLAG_RC100) {
+            register_device_value(
+                tag, &hc->controlmode, DeviceValueType::ENUM, FL_(enum_controlmode), FL_(controlmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_controlmode));
+        } else {
+            register_device_value(
+                tag, &hc->controlmode, DeviceValueType::ENUM, FL_(enum_controlmode1), FL_(controlmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_controlmode));
+        }
         register_device_value(tag, &hc->program, DeviceValueType::ENUM, FL_(enum_progMode), FL_(program), DeviceValueUOM::NONE, MAKE_CF_CB(set_program));
         register_device_value(tag,
                               &hc->tempautotemp,

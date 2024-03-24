@@ -24,12 +24,11 @@ uint32_t WebAPIService::api_count_ = 0;
 uint16_t WebAPIService::api_fails_ = 0;
 
 WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * securityManager)
-    : _securityManager(securityManager)
-    , _apiHandler(EMSESP_API_SERVICE_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { webAPIService_post(request, json); }) { // for POSTs
-    server->on(EMSESP_API_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { webAPIService_get(request); });                    // for GETs
-    server->addHandler(&_apiHandler);
+    : _securityManager(securityManager) {
+    // API
+    server->on(EMSESP_API_SERVICE_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { webAPIService(request, json); });
 
-    // for settings
+    // settings
     server->on(GET_SETTINGS_PATH,
                HTTP_GET,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { getSettings(request); }, AuthenticationPredicates::IS_ADMIN));
@@ -47,30 +46,29 @@ WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * security
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { getEntities(request); }, AuthenticationPredicates::IS_ADMIN));
 }
 
-// HTTP GET
-// GET /{device}
-// GET /{device}/{entity}
-void WebAPIService::webAPIService_get(AsyncWebServerRequest * request) {
-    // has no body JSON so create dummy as empty input object
-    JsonDocument input_doc;
-    JsonObject   input = input_doc.to<JsonObject>();
-    parse(request, input);
-}
-
-// For HTTP POSTS with an optional JSON body
-// HTTP_POST | HTTP_PUT | HTTP_PATCH
-// POST /{device}[/{hc|id}][/{name}]
-void WebAPIService::webAPIService_post(AsyncWebServerRequest * request, JsonVariant json) {
+// POST|GET /{device}
+// POST|GET /{device}/{entity}
+void WebAPIService::webAPIService(AsyncWebServerRequest * request, JsonVariant json) {
+    JsonObject input;
     // if no body then treat it as a secure GET
-    if (!json.is<JsonObject>()) {
-        webAPIService_get(request);
-        return;
+    if ((request->method() == HTTP_GET) || (!json.is<JsonObject>())) {
+        // HTTP GET
+        JsonDocument input_doc; // has no body JSON so create dummy as empty input object
+        input = input_doc.to<JsonObject>();
+    } else {
+        // HTTP_POST | HTTP_PUT | HTTP_PATCH
+        input = json.as<JsonObject>(); // extract values from the json. these will be used as default values
     }
-
-    // extract values from the json. these will be used as default values
-    auto && input = json.as<JsonObject>();
     parse(request, input);
 }
+
+#ifdef EMSESP_TEST
+// for test.cpp so we can invoke GETs to test the API
+void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
+    JsonDocument input_doc;
+    parse(request, input_doc.to<JsonObject>());
+}
+#endif
 
 // parse the URL looking for query or path parameters
 // reporting back any errors
@@ -84,7 +82,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
 
     // check for query parameters first, the old style from v2
     // api?device={device}&cmd={name}&data={value}&id={hc}
-    if (request->url() == "/api") {
+    if (request->url() == EMSESP_API_SERVICE_PATH) {
         // get the device
         if (request->hasParam(F_(device))) {
             input["device"] = request->getParam(F_(device))->value().c_str();

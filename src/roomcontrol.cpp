@@ -301,7 +301,7 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[2] = 0xFF;
         data[3] = 0;
         data[4] = 3;
-        data[5] = 0x35;
+        data[5] = 0x35 + hc;
         data[6] = (uint8_t)(remotetemp_[hc] >> 8);
         data[7] = (uint8_t)(remotetemp_[hc] & 0xFF);
         data[8] = EMSbus::calculate_crc(data, 8); // apppend CRC

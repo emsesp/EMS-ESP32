@@ -53,7 +53,7 @@ MAKE_WORD_TRANSLATION(heatsource_device, "Heatsource", "Heizquelle", "Heatsource
 MAKE_WORD_TRANSLATION(sensors_device, "Sensors", "Sensoren", "Sensoren", "Sensorer", "Czujniki", "Sensorer", "Capteurs", "Sensör Cihazı", "Sensori", "Snímače")
 MAKE_WORD_TRANSLATION(unknown_device, "Unknown", "Unbekannt", "Onbekend", "Okänt", "Nieznane urządzenie", "Ukjent", "Inconnu", "Bilinmeyen", "Sconosciuto", "Neznámy")
 MAKE_WORD_TRANSLATION(custom_device, "Custom", "Nutzerdefiniert", "Aangepast", "", "Niestandardowe", "", "", "Özel", "Personalizzato", "Vlastné") // TODO translate
-MAKE_WORD_TRANSLATION(custom_device_name, "User defined entities", "Nutzer deklarierte Entitäten", "Gebruiker gedefineerd", "", "Encje zdefiniowane przez użytkownika", "", "", "Kullanıcı tarafından tanımlanmış varlıklar", "Entità definita da utente", "Používateľom definované entity") // TODO translate
+MAKE_WORD_TRANSLATION(custom_device_name, "Custom Entities", "Nutzer deklarierte Entitäten", "Gebruiker gedefineerd", "", "Encje zdefiniowane przez użytkownika", "", "", "Kullanıcı tarafından tanımlanmış varlıklar", "Entità definita da utente", "Používateľom definované entity") // TODO translate
 MAKE_WORD_TRANSLATION(ventilation_device, "Ventilation", "Lüftung", "Ventilatie", "", "Wentylacja", "", "", "Havalandırma", "Ventilazione", "Vetranie") // TODO translate
 MAKE_WORD_TRANSLATION(water_device, "Water Module", "Wassermodul", "", "", "Moduł wodny", "", "", "", "", "") // TODO translate
 MAKE_WORD_TRANSLATION(pool_device, "Pool Module", "Poolmodul", "", "", "Moduł basenu", "", "", "", "", "") // TODO translate

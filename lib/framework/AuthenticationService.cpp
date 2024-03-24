@@ -1,12 +1,9 @@
 #include "AuthenticationService.h"
 
 AuthenticationService::AuthenticationService(AsyncWebServer * server, SecurityManager * securityManager)
-    : _securityManager(securityManager)
-    , _signInHandler(SIGN_IN_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { signIn(request, json); }) {
+    : _securityManager(securityManager) {
     server->on(VERIFY_AUTHORIZATION_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { verifyAuthorization(request); });
-    _signInHandler.setMethod(HTTP_POST);
-    _signInHandler.setMaxContentLength(MAX_AUTHENTICATION_SIZE);
-    server->addHandler(&_signInHandler);
+    server->on(SIGN_IN_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { signIn(request, json); });
 }
 
 /**

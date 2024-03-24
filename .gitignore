@@ -2,7 +2,7 @@
 .vscode/c_cpp_properties.json
 .vscode/extensions.json
 .vscode/launch.json
-.vscode/settings.json
+#.vscode/settings.json
 
 # c++ compiling
 .clang_complete
@@ -37,7 +37,7 @@ stats.html
 !.yarn/sdks
 !.yarn/versions
 yarn.lock
-interface/analyse.html
+analyse.html
 interface/vite.config.ts.timestamp*
 
 # scripts
@@ -60,3 +60,4 @@ bw-output/
 
 # testing
 emsesp
+

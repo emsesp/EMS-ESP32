@@ -12,7 +12,6 @@ const no: Translation = {
   USERNAME: 'Brukernavn',
   PASSWORD: 'Passord',
   SU_PASSWORD: 'su Passord',
-  DASHBOARD: 'Dashboard',
   SETTINGS_OF: '{0} Innstillinger',
   HELP_OF: '{0} Hjelp',
   LOGGED_IN: 'Logget in som {name}',
@@ -37,8 +36,6 @@ const no: Translation = {
   BRAND: 'Fabrikat',
   ENTITY_NAME: 'Objektsnavn',
   VALUE: '{{Verdi|verdi}}',
-  DEVICE_DATA: 'Enheterdata',
-  SENSOR_DATA: 'Sensordata',
   DEVICES: 'Enheter',
   SENSORS: 'Sensorer',
   RUN_COMMAND: 'Kjør kommando',
@@ -83,7 +80,6 @@ const no: Translation = {
   FAIL: 'MISLYKKET',
   QUALITY: 'KVALITET',
   SCAN_DEVICES: 'Søk etter nye enheter',
-  EMS_BUS_STATUS_TITLE: 'EMS Buss & Aktivitet Status',
   SCAN: 'Søk',
   STATUS_NAMES: [
     'EMS Telegrammer Mottatt (Rx)',
@@ -163,9 +159,7 @@ const no: Translation = {
   OPTIONS: 'Alternativ',
   NAME: 'Navn',
   CUSTOMIZATIONS_RESET: 'Er du sikker på att du vil fjerne tilpassninger inkludert innstillinger for Temperatur og Analoge sensorer?',
-  DEVICE_ENTITIES: 'Enhets objekter',
   SUPPORT_INFORMATION: 'Supportinformasjon',
-  CLICK_HERE: 'Klikk her',
   HELP_INFORMATION_1: 'Besøk wiki for instruksjoner for å konfigurere EMS-ESP',
   HELP_INFORMATION_2: 'For community-support besøk vår Discord-server',
   HELP_INFORMATION_3: 'For å be om en ny funksjon eller melde feil',
@@ -181,13 +175,11 @@ const no: Translation = {
   STATUS_OF: '{0} Status',
   UPLOAD_DOWNLOAD: 'Opp/Nedlasting',
   VERSION_ON: 'You are currently on', // TODO translate
-  SYSTEM_APPLY_FIRMWARE: 'for å aktivere ny firmware',
   CLOSE: 'Steng',
   USE: 'Bruk',
   FACTORY_RESET: 'Sett tilbake til fabrikkinstilling',
   SYSTEM_FACTORY_TEXT: 'Enhet har blitt satt tilbake til fabrikkinstilling og vil restarte',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Er du sikker på at du vil resette enheten til fabrikkinstillinger?',
-  VERSION_CHECK: 'Versjonsjekk',
   THE_LATEST: 'Den nyeste',
   OFFICIAL: 'official',
   DEVELOPMENT: 'development',
@@ -330,7 +322,9 @@ const no: Translation = {
   ACTIVEHIGH: 'Active High', // TODO translate
   ACTIVELOW: 'Active Low', // TODO translate
   UNCHANGED: 'Unchanged', // TODO translate
-  ALWAYS: 'Always' // TODO translate
+  ALWAYS: 'Always', // TODO translate
+  ACTIVITY: 'Activity', // TODO translate
+  CONFIGURE: 'Configure {0}' // TODO translate
 };
 
 export default no;
