@@ -9,3 +9,5 @@
 ## Fixed
 
 ## Changed
+
+- Refresh UI - moving settings to one location [#1665](https://github.com/emsesp/EMS-ESP32/issues/1665)

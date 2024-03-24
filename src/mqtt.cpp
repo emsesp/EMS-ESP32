@@ -1310,18 +1310,18 @@ void Mqtt::add_ha_sections_to_doc(const char *   name,
     JsonArray    avty = config["avty"].to<JsonArray>();
     JsonDocument avty_json;
 
-    const char * tpl_draft = "{{'online' if %s else 'offline'}}";
-
     char tpl[150];
-    // EMS-ESP status check
-    // snprintf(tpl, sizeof(tpl), "%s/status", Mqtt::base().c_str());
-    // avty_json["t"] = tpl;
-    // snprintf(tpl, sizeof(tpl), tpl_draft, "value == 'online'");
-    // avty_json["val_tpl"] = tpl;
-    // avty.add(avty_json); // returns 0 if no mem
 
     // skip conditional Jinja2 templates if not home assistant
     if (discovery_type() == discoveryType::HOMEASSISTANT) {
+        // EMS-ESP status check
+        // snprintf(tpl, sizeof(tpl), "%s/status", Mqtt::base().c_str());
+        // avty_json["t"] = tpl;
+        // snprintf(tpl, sizeof(tpl), tpl_draft, "value == 'online'");
+        // avty_json["val_tpl"] = tpl;
+        // avty.add(avty_json); // returns 0 if no mem
+        const char * tpl_draft = "{{'online' if %s else 'offline'}}";
+
         // condition 1
         avty_json.clear();
         avty_json["t"] = state_t;
