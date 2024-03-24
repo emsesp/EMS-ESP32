@@ -73,7 +73,7 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
     if (root["entities"].is<JsonArray>()) {
         for (const JsonObject ei : root["entities"].as<JsonArray>()) {
             auto entityItem       = CustomEntityItem();
-            entityItem.ram        = ei["ram"] | 0;
+            entityItem.ram        = ei["ram"];
             entityItem.device_id  = ei["device_id"]; // send as numeric, will be converted to string in web
             entityItem.type_id    = ei["type_id"];
             entityItem.offset     = ei["offset"];
