@@ -45,10 +45,11 @@ WebSchedulerService     EMSESP::webSchedulerService     = WebSchedulerService(&w
 WebCustomEntityService  EMSESP::webCustomEntityService  = WebCustomEntityService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
 #endif
 
-WebStatusService EMSESP::webStatusService = WebStatusService(&webServer, EMSESP::esp8266React.getSecurityManager());
-WebDataService   EMSESP::webDataService   = WebDataService(&webServer, EMSESP::esp8266React.getSecurityManager());
-WebAPIService    EMSESP::webAPIService    = WebAPIService(&webServer, EMSESP::esp8266React.getSecurityManager());
-WebLogService    EMSESP::webLogService    = WebLogService(&webServer, EMSESP::esp8266React.getSecurityManager());
+WebActivityService EMSESP::webActivityService = WebActivityService(&webServer, EMSESP::esp8266React.getSecurityManager());
+WebStatusService   EMSESP::webStatusService   = WebStatusService(&webServer, EMSESP::esp8266React.getSecurityManager());
+WebDataService     EMSESP::webDataService     = WebDataService(&webServer, EMSESP::esp8266React.getSecurityManager());
+WebAPIService      EMSESP::webAPIService      = WebAPIService(&webServer, EMSESP::esp8266React.getSecurityManager());
+WebLogService      EMSESP::webLogService      = WebLogService(&webServer, EMSESP::esp8266React.getSecurityManager());
 
 using DeviceFlags = EMSdevice;
 using DeviceType  = EMSdevice::DeviceType;
@@ -407,7 +408,7 @@ void EMSESP::show_device_values(uuid::console::Shell & shell) {
 
     // show any custom entities
     if (webCustomEntityService.count_entities() > 0) {
-        shell.printfln("Custom entities:");
+        shell.printfln("Custom Entities:");
         JsonDocument custom_doc; // use max size
         JsonObject   custom_output = custom_doc.to<JsonObject>();
         webCustomEntityService.show_values(custom_output);

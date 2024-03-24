@@ -1,9 +1,19 @@
 import CommentIcon from '@mui/icons-material/CommentTwoTone';
-import EastIcon from '@mui/icons-material/East';
 import DownloadIcon from '@mui/icons-material/GetApp';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import MenuBookIcon from '@mui/icons-material/MenuBookTwoTone';
-import { Box, List, ListItem, ListItemAvatar, ListItemText, Link, Typography, Button } from '@mui/material';
+import {
+  Box,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Link,
+  Typography,
+  Button,
+  ListItemButton,
+  Avatar
+} from '@mui/material';
 import { useRequest } from 'alova';
 import { toast } from 'react-toastify';
 import type { FC } from 'react';
@@ -39,59 +49,56 @@ const Help: FC = () => {
   };
 
   return (
-    <SectionContent title={LL.SUPPORT_INFORMATION(0)} titleGutter>
-      <List>
+    <SectionContent>
+      <List sx={{ borderRadius: 3, border: '2px solid grey' }}>
         <ListItem>
-          <ListItemAvatar>
-            <MenuBookIcon style={{ fontSize: 24, color: 'lightblue', verticalAlign: 'middle' }} />
-          </ListItemAvatar>
-          <ListItemText>
-            {LL.HELP_INFORMATION_1()}&nbsp;
-            <EastIcon style={{ fontSize: 24, color: 'lightblue', verticalAlign: 'middle' }} />
-            &nbsp;
-            <Link target="_blank" href="https://emsesp.github.io/docs" color="primary">
-              {LL.CLICK_HERE()}
-            </Link>
-          </ListItemText>
+          <ListItemButton component="a" href="https://emsesp.github.io/docs">
+            <ListItemAvatar>
+              <Avatar sx={{ bgcolor: '#72caf9' }}>
+                <MenuBookIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary={LL.HELP_INFORMATION_1()} />
+          </ListItemButton>
         </ListItem>
 
         <ListItem>
-          <ListItemAvatar>
-            <CommentIcon style={{ fontSize: 24, color: 'lightblue', verticalAlign: 'middle' }} />
-          </ListItemAvatar>
-          <ListItemText>
-            {LL.HELP_INFORMATION_2()}&nbsp;
-            <EastIcon style={{ fontSize: 24, color: 'lightblue', verticalAlign: 'middle' }} />
-            &nbsp;
-            <Link target="_blank" href="https://discord.gg/3J3GgnzpyT" color="primary">
-              {LL.CLICK_HERE()}
-            </Link>
-          </ListItemText>
+          <ListItemButton component="a" href="https://discord.gg/3J3GgnzpyT">
+            <ListItemAvatar>
+              <Avatar sx={{ bgcolor: '#72caf9' }}>
+                <CommentIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary={LL.HELP_INFORMATION_2()} />
+          </ListItemButton>
         </ListItem>
 
         <ListItem>
-          <ListItemAvatar>
-            <GitHubIcon style={{ fontSize: 24, color: 'lightblue', verticalAlign: 'middle' }} />
-          </ListItemAvatar>
-          <ListItemText>
-            {LL.HELP_INFORMATION_3()}&nbsp;
-            <EastIcon style={{ fontSize: 24, color: 'lightblue', verticalAlign: 'middle' }} />
-            <Link target="_blank" href="https://github.com/emsesp/EMS-ESP32/issues/new/choose" color="primary">
-              {LL.CLICK_HERE()}
-            </Link>
-            <br />
-          </ListItemText>
+          <ListItemButton component="a" href="https://github.com/emsesp/EMS-ESP32/issues/new/choose">
+            <ListItemAvatar>
+              <Avatar sx={{ bgcolor: '#72caf9' }}>
+                <GitHubIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary={LL.HELP_INFORMATION_3()} />
+          </ListItemButton>
         </ListItem>
       </List>
 
-      <Box color="warning.main">
+      <Box p={2} color="warning.main">
         <Typography mb={1} variant="body2">
           {LL.HELP_INFORMATION_4()}
         </Typography>
+        <Button
+          startIcon={<DownloadIcon />}
+          variant="outlined"
+          color="primary"
+          onClick={() => callAPI('system', 'info')}
+        >
+          {LL.SUPPORT_INFORMATION(0)}
+        </Button>
       </Box>
-      <Button startIcon={<DownloadIcon />} variant="outlined" color="primary" onClick={() => callAPI('system', 'info')}>
-        {LL.SUPPORT_INFORMATION(0)}
-      </Button>
+
       <Button
         sx={{ ml: 2 }}
         startIcon={<DownloadIcon />}
@@ -102,7 +109,7 @@ const Help: FC = () => {
         All Values
       </Button>
 
-      <Box border={1} p={1} mt={4} color="orange">
+      <Box border={1} p={1} mt={4}>
         <Typography align="center" variant="subtitle1" color="orange">
           <b>{LL.HELP_INFORMATION_5()}</b>
         </Typography>

@@ -20,7 +20,7 @@ export enum WiFiEncryptionType {
   WIFI_AUTH_WPA2_WPA3_PSK = 7
 }
 
-export interface NetworkStatus {
+export interface NetworkStatusType {
   status: NetworkConnectionStatus;
   local_ip: string;
   local_ipv6: string;
@@ -36,7 +36,7 @@ export interface NetworkStatus {
   hostname: string;
 }
 
-export interface NetworkSettings {
+export interface NetworkSettingsType {
   ssid: string;
   bssid: string;
   password: string;

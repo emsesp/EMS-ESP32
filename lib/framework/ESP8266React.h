@@ -13,7 +13,6 @@
 #include "UploadFileService.h"
 #include "RestartService.h"
 #include "SecuritySettingsService.h"
-#include "SystemStatus.h"
 #include "WiFiScanner.h"
 #include "NetworkSettingsService.h"
 #include "NetworkStatus.h"
@@ -61,8 +60,17 @@ class ESP8266React {
         return _mqttSettingsService.getMqttClient();
     }
 
+    //
+    // special functions needed outside scope
+    //
+
     void setWill(const char * will_topic) {
         _mqttSettingsService.setWill(will_topic);
+    }
+
+    // true if AP is active
+    bool apStatus() {
+        return _apSettingsService.getAPNetworkStatus() == APNetworkStatus::ACTIVE;
     }
 
 #ifndef EMSESP_STANDALONE
@@ -87,7 +95,6 @@ class ESP8266React {
     AuthenticationService   _authenticationService;
     RestartService          _restartService;
     FactoryResetService     _factoryResetService;
-    SystemStatus            _systemStatus;
 };
 
 #endif

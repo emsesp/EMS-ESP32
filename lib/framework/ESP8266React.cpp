@@ -1,6 +1,6 @@
 #include "ESP8266React.h"
 
-#include "WWWData.h"
+#include "WWWData.h" // include auto-generated static web resources
 
 ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
     : _securitySettingsService(server, fs)
@@ -17,8 +17,7 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
     , _mqttStatus(server, &_mqttSettingsService, &_securitySettingsService)
     , _authenticationService(server, &_securitySettingsService)
     , _restartService(server, &_securitySettingsService)
-    , _factoryResetService(server, fs, &_securitySettingsService)
-    , _systemStatus(server, &_securitySettingsService) {
+    , _factoryResetService(server, fs, &_securitySettingsService) {
     //
     // Serve static web resources
     //

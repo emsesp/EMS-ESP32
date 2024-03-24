@@ -1,7 +1,7 @@
 import type {
   APIcall,
   Settings,
-  Status,
+  Activity,
   CoreData,
   Devices,
   DeviceEntity,
@@ -25,7 +25,7 @@ export const readDeviceData = (id: number) =>
   });
 export const writeDeviceValue = (data: any) => alovaInstance.Post('/rest/writeDeviceValue', data);
 
-// SettingsApplication
+// Application Settings
 export const readSettings = () => alovaInstance.Get<Settings>('/rest/settings');
 export const writeSettings = (data: any) => alovaInstance.Post('/rest/settings', data);
 export const getBoardProfile = (boardProfile: string) =>
@@ -33,17 +33,18 @@ export const getBoardProfile = (boardProfile: string) =>
     params: { boardProfile }
   });
 
-// DashboardSensors
+// Sensors
 export const readSensorData = () => alovaInstance.Get<SensorData>('/rest/sensorData');
 export const writeTemperatureSensor = (ts: WriteTemperatureSensor) =>
   alovaInstance.Post('/rest/writeTemperatureSensor', ts);
 export const writeAnalogSensor = (as: WriteAnalogSensor) => alovaInstance.Post('/rest/writeAnalogSensor', as);
 
-// DashboardStatus
-export const readStatus = () => alovaInstance.Get<Status>('/rest/status');
+// Activity
+export const readActivity = () => alovaInstance.Get<Activity>('/rest/activity');
+
 export const scanDevices = () => alovaInstance.Post('/rest/scanDevices');
 
-// HelpInformation
+// API, used in HelpInformation
 export const API = (apiCall: APIcall) => alovaInstance.Post('/api', apiCall);
 
 // UploadFileForm

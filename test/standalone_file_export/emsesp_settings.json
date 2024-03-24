@@ -1,7 +1,7 @@
 {
   "type": "settings",
   "System": {
-    "version": "3.6.5"
+    "version": "3.7.0"
   },
   "Network": {
     "ssid": "fake",
@@ -83,7 +83,7 @@
     ]
   },
   "Settings": {
-    "version": "3.6.5",
+    "version": "3.7.0",
     "locale": "en",
     "tx_mode": 1,
     "ems_bus_id": 11,

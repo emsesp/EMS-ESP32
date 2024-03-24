@@ -32,7 +32,7 @@ export function fetchLoginRedirect(): Partial<Path> {
   const signInSearch = getStorage().getItem(SIGN_IN_SEARCH);
   clearLoginRedirect();
   return {
-    pathname: signInPathname || `/dashboard`,
+    pathname: signInPathname || `/devices`,
     search: (signInPathname && signInSearch) || undefined
   };
 }

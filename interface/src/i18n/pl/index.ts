@@ -12,7 +12,6 @@ const pl: BaseTranslation = {
   USERNAME: '{{Użytkownik|Nazwa użytkownika|}}',
   PASSWORD: 'Hasło',
   SU_PASSWORD: 'Hasło "su"',
-  DASHBOARD: 'Pulpit',
   SETTINGS_OF: 'Ustawienia {0}',
   HELP_OF: 'Pomoc {0}',
   LOGGED_IN: 'Zalogowano użytkownika {name}.',
@@ -37,8 +36,6 @@ const pl: BaseTranslation = {
   VERSION: 'Wersja',
   ENTITY_NAME: '{{N|n|}}azwa encji',
   VALUE: '{{W|w|}}artość',
-  DEVICE_DATA: 'Dane z urządzeń',
-  SENSOR_DATA: 'Dane z czujników',
   DEVICES: 'Urządzenia',
   SENSORS: 'Czujniki',
   RUN_COMMAND: 'Wykonaj komendę',
@@ -83,7 +80,6 @@ const pl: BaseTranslation = {
   FAIL: 'Nieudane',
   QUALITY: 'Jakość',
   SCAN_DEVICES: 'Wyszukiwanie nowych urządzeń',
-  EMS_BUS_STATUS_TITLE: 'Aktywność',
   SCAN: 'Skanuj',
   STATUS_NAMES: [
     'EMS, telegramy odebrane (Rx)',
@@ -163,9 +159,7 @@ const pl: BaseTranslation = {
   OPTIONS: 'Opcje',
   NAME: '{{Nazwa|nazwa|}}',
   CUSTOMIZATIONS_RESET:  'Na pewno chcesz usunąć wszystkie personalizacje łącznie z ustawieniami dla czujników temperatury 1-Wire® i urządzeń podłączonych do EMS-ESP?',
-  DEVICE_ENTITIES: 'Encje urządzenia',
   SUPPORT_INFORMATION: '{{I|i|}}nformacj{{e|i|}} o systemie',
-  CLICK_HERE: 'Kliknij tu',
   HELP_INFORMATION_1: 'Aby uzyskać instrukcje dotyczące konfiguracji EMS-ESP, skorzystaj z wiki w internecie',
   HELP_INFORMATION_2: 'Aby dołączyć do naszego serwera Discord i komunikować się na żywo ze społecznością',
   HELP_INFORMATION_3: 'Aby zaproponować nową funkcjonalność lub zgłosić problem',
@@ -181,13 +175,11 @@ const pl: BaseTranslation = {
   STATUS_OF: 'Status {0}',
   UPLOAD_DOWNLOAD: 'Przesyłanie plików',
   VERSION_ON: 'Aktualnie używasz',
-  SYSTEM_APPLY_FIRMWARE: '',
   CLOSE: 'Zamknij',
   USE: 'Aby zaktualizować firmware skorzystaj z funkcji',
   FACTORY_RESET: 'Ustawienia fabryczne',
   SYSTEM_FACTORY_TEXT: 'Interfejs EMS-ESP został przywrócony do ustawień fabrycznych i zostanie teraz ponownie uruchomiony.',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Na pewno chcesz przywrócić ustawienia fabryczne interfejsu EMS-ESP? ',
-  VERSION_CHECK: 'Sprawd{{ź|zanie|}} wersj{{ę|i|}}',
   THE_LATEST: 'Najnowsze',
   OFFICIAL: 'oficjalne',
   DEVELOPMENT: 'testowe',
@@ -317,7 +309,7 @@ const pl: BaseTranslation = {
   SCHEDULE_TIMER_2: 'co minutę',
   SCHEDULE_TIMER_3: 'co godzinę',
   CUSTOM_ENTITIES: '{{N|n|}}iestandardowe{{|j|}} encj{{e|i|}}',
-  ENTITIES_HELP_1: 'Zdefiniuj niestandardowe encje dla magistrali EMS.', // TODO translate
+  ENTITIES_HELP_1: 'Zdefiniuj niestandardowe encje dla magistrali EMS.',
   ENTITIES_UPDATED: 'Niestandardowe encje zostały uaktualnione.',
   WRITEABLE: 'Zapisywalna',
   SHOWING: 'Wyświetlane',
@@ -330,7 +322,9 @@ const pl: BaseTranslation = {
   ACTIVEHIGH: 'Wyzwalany stanem wysokim',
   ACTIVELOW: 'Wyzwalany stanem niskim',
   UNCHANGED: 'Zachowaj stan',
-  ALWAYS: 'Zawsze'
+  ALWAYS: 'Zawsze',
+  ACTIVITY: 'Aktywność',
+  CONFIGURE: 'Konfiguracja {0}'
 };
 
 export default pl;

@@ -1,4 +1,6 @@
-export interface SystemStatus {
+import type { busConnectionStatus } from 'project/types';
+
+export interface ESPSystemStatus {
   emsesp_version: string;
   esp_platform: string;
   max_alloc_heap: number;
@@ -16,14 +18,29 @@ export interface SystemStatus {
   app_free: number;
   fs_used: number;
   fs_free: number;
-  uptime: string;
   free_mem: number;
   psram_size?: number;
   free_psram?: number;
   has_loader: boolean;
 }
 
-export interface OTASettings {
+export interface SystemStatus {
+  emsesp_version: string;
+  esp_platform: string;
+  status: busConnectionStatus;
+  uptime: number;
+  bus_uptime: number;
+  num_devices: number;
+  num_sensors: number;
+  num_analogs: number;
+  free_heap: number;
+  ntp_status: number;
+  ota_status: boolean;
+  mqtt_status: boolean;
+  ap_status: boolean;
+}
+
+export interface OTASettingsType {
   enabled: boolean;
   port: number;
   password: string;

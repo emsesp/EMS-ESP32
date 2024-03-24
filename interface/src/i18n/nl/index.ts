@@ -12,7 +12,6 @@ const nl: Translation = {
   USERNAME: 'Gebruikersnaam',
   PASSWORD: 'Wachtwoord',
   SU_PASSWORD: 'su Wachtwoord',
-  DASHBOARD: 'Dashboard',
   SETTINGS_OF: '{0} Instellingen',
   HELP_OF: '{0} Help',
   LOGGED_IN: 'Ingelogd als {name}',
@@ -37,8 +36,6 @@ const nl: Translation = {
   BRAND: 'Merk',
   ENTITY_NAME: 'Entiteit',
   VALUE: '{{Waarde|waarde}}',
-  SENSOR_DATA: 'Sensor data',
-  DEVICE_DATA: 'Apparaat data',
   DEVICES: 'Apparaten',
   SENSORS: 'Sensoren',
   RUN_COMMAND: 'Call commando',
@@ -83,7 +80,6 @@ const nl: Translation = {
   FAIL: 'MISLUKT',
   QUALITY: 'QUALITEIT',
   SCAN_DEVICES: 'Scannen naar nieuwe apparaten',
-  EMS_BUS_STATUS_TITLE: 'EMS Bus & Activiteitenstatus',
   SCAN: 'Scan',
   STATUS_NAMES: [
     'EMS Telegrammen ontvangen (Rx)',
@@ -126,7 +122,7 @@ const nl: Translation = {
   BYPASS_TOKEN: 'API Access Token authenticatie uitschakelen',
   READONLY: 'Activeer read-only modus (blokkeert alle outgaande EMS Tx schrijf commandos)',
   UNDERCLOCK_CPU: 'Underclock CPU snelheid',
-  HEATINGOFF: 'Start boiler with forced heating off', // TODO translate
+  HEATINGOFF: 'Start ketel met geforceerde verwarming uit',
   ENABLE_SHOWER_TIMER: 'Activeer Douche Timer (tijdmeting)',
   ENABLE_SHOWER_ALERT: 'Activeer Douchemelding',
   TRIGGER_TIME: 'Trigger tijd',
@@ -163,9 +159,7 @@ const nl: Translation = {
   OPTIONS: 'Opties',
   NAME: 'Naam',
   CUSTOMIZATIONS_RESET: 'Weet je zeker dat je alle custom aanpassingen wilt verwijderen inclusief de custom instellingen voor analoge temperatuursensoren?',
-  DEVICE_ENTITIES: 'Apparaat Entiteiten',
   SUPPORT_INFORMATION: 'Support Informatie',
-  CLICK_HERE: 'Klik Hier',
   HELP_INFORMATION_1: 'Bezoek de online wiki om instructies te vinden om EMS-ESP te configureren',
   HELP_INFORMATION_2: 'Voor de live community ga naar de Discord server',
   HELP_INFORMATION_3: 'Om een nieuwe feature te vragen of een bug te rapporteren',
@@ -181,13 +175,11 @@ const nl: Translation = {
   STATUS_OF: '{0} Status',
   UPLOAD_DOWNLOAD: 'Upload/Download',
   VERSION_ON: 'U bevindt zich momenteel op versie',
-  SYSTEM_APPLY_FIRMWARE: 'om de nieuwe firmware te activeren',
   CLOSE: 'Sluiten',
   USE: 'Gebruik',
   FACTORY_RESET: 'Fabrieksinstellingen',
   SYSTEM_FACTORY_TEXT: 'Gateway is gereset en start nu weer op met fabrieksinstellingen',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Weet je zeker dat je een reset naar fabrieksinstellingen uit wilt voeren?',
-  VERSION_CHECK: 'Versie Check',
   THE_LATEST: 'De laatste',
   OFFICIAL: 'official',
   DEVELOPMENT: 'development',
@@ -281,7 +273,7 @@ const nl: Translation = {
   NETWORK_SCANNER: 'Netwerk Scanner',
   NETWORK_NO_WIFI: 'Geen WiFi networken gevonden',
   NETWORK_BLANK_SSID: 'laat leeg om WiFi uit te schakelen',
-  NETWORK_BLANK_BSSID: 'leave blank to use only SSID', // TODO translate
+  NETWORK_BLANK_BSSID: 'laat leeg om alleen SSID te bebruiken',
   TX_POWER: 'Tx Vermogen',
   HOSTNAME: 'Hostname',
   NETWORK_DISABLE_SLEEP: 'WiFi Sleep Mode uitzetten',
@@ -317,20 +309,22 @@ const nl: Translation = {
   SCHEDULE_TIMER_2: 'elke minuut',
   SCHEDULE_TIMER_3: 'elke huur',
   CUSTOM_ENTITIES: 'Aangepaste Entiteiten',
-  ENTITIES_HELP_1: 'Aangepaste entiteiten ophalen uit de EMS-bus', // TODO translate
+  ENTITIES_HELP_1: 'Aangepaste entiteiten ophalen uit de EMS-bus',
   ENTITIES_UPDATED: 'Entiteiten bijgewerkt',
   WRITEABLE: 'Beschrijfbare',
   SHOWING: 'Tonen',
   SEARCH: 'Zoek',
-  CERT: 'TLS rootcertificaat (laat leeg om TLS-insecure)', // TODO translate
+  CERT: 'TLS rootcertificaat (laat leeg om TLS-insecure)',
   ENABLE_TLS: 'Activeer TLS',
-  ON: 'On', // TODO translate
-  OFF: 'Off', // TODO translate
-  POLARITY: 'Polarity', // TODO translate
-  ACTIVEHIGH: 'Active High', // TODO translate
-  ACTIVELOW: 'Active Low', // TODO translate
-  UNCHANGED: 'Unchanged', // TODO translate
-  ALWAYS: 'Always' // TODO translate
+  ON: 'Aan',
+  OFF: 'Uit',
+  POLARITY: 'Polariteit',
+  ACTIVEHIGH: 'Actiev Hoog',
+  ACTIVELOW: 'Actiev Laag',
+  UNCHANGED: 'Ongewijzigd',
+  ALWAYS: 'Altijd',
+  ACTIVITY: 'Activiteit',
+  CONFIGURE: '{0} Configureren'
 };
 
 export default nl;

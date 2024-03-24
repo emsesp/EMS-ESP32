@@ -63,7 +63,7 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, isUploading, pr
     <Box
       {...getRootProps({
         sx: {
-          py: 8,
+          py: 4,
           px: 2,
           borderWidth: 2,
           borderRadius: 2,

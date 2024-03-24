@@ -1,6 +1,5 @@
 import MenuIcon from '@mui/icons-material/Menu';
-import { AppBar, Box, IconButton, Toolbar, Typography } from '@mui/material';
-import LayoutAuthMenu from './LayoutAuthMenu';
+import { AppBar, IconButton, Toolbar, Typography } from '@mui/material';
 import type { FC } from 'react';
 
 export const DRAWER_WIDTH = 210;
@@ -27,8 +26,6 @@ const LayoutAppBar: FC<LayoutAppBarProps> = ({ title, onToggleDrawer }) => (
       <Typography variant="h6" noWrap component="div">
         {title}
       </Typography>
-      <Box flexGrow={1} />
-      <LayoutAuthMenu />
     </Toolbar>
   </AppBar>
 );

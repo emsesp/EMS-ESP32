@@ -1,8 +1,8 @@
 import Schema from 'async-validator';
 import { HOSTNAME_VALIDATOR, IP_ADDRESS_VALIDATOR } from './shared';
-import type { NetworkSettings } from 'types';
+import type { NetworkSettingsType } from 'types';
 
-export const createNetworkSettingsValidator = (networkSettings: NetworkSettings) =>
+export const createNetworkSettingsValidator = (networkSettings: NetworkSettingsType) =>
   new Schema({
     ssid: [{ type: 'string', max: 32, message: 'SSID must be 32 characters or less' }],
     bssid: [{ type: 'string', max: 17, message: 'BSSID must be 17 characters or empty' }],
