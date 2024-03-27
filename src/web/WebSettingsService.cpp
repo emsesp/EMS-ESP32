@@ -90,7 +90,12 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
         EMSESP::nvs_.putString("boot", (const char *)EMSESP_DEFAULT_BOARD_PROFILE);
     }
 
-    bool psram = ESP.getPsramSize() > 0; // System::PSram() is initializd later
+#ifndef EMSESP_STANDALONE
+    bool psram = ESP.getPsramSize() > 0; // System::PSram() is initialized later
+#else
+    bool psram = false;
+#endif
+
     if (System::load_board_profile(data, settings.board_profile.c_str())) {
         if (settings.board_profile == "CUSTOM") { //read pins, fallback to S32
             data = {(int8_t)(root["led_gpio"] | 2),

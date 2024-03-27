@@ -41,6 +41,10 @@ class Preferences {
         return 0;
     }
 
+    int getChar(const char * key, uint8_t defaultValue = 0) {
+        return 0;
+    }
+
     double getDouble(const char * key, double defaultValue = NAN) {
         return 0;
     }
