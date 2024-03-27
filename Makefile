@@ -2,7 +2,7 @@
 # GNUMakefile for EMS-ESP
 #
 
-NUMJOBS=${NUMJOBS:-" -j4 "}
+NUMJOBS=${NUMJOBS:-" -j2 "}
 MAKEFLAGS+="j "
 #----------------------------------------------------------------------
 # Project Structure
