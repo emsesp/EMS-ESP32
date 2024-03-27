@@ -1689,7 +1689,7 @@ __metadata:
     react-toastify: "npm:^10.0.5"
     rollup-plugin-visualizer: "npm:^5.12.0"
     sockette: "npm:^2.0.6"
-    terser: "npm:^5.29.2"
+    terser: "npm:^5.30.0"
     typesafe-i18n: "npm:^5.26.2"
     typescript: "npm:^5.4.3"
     vite: "npm:^5.2.6"
@@ -7935,9 +7935,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"terser@npm:^5.29.2":
-  version: 5.29.2
-  resolution: "terser@npm:5.29.2"
+"terser@npm:^5.30.0":
+  version: 5.30.0
+  resolution: "terser@npm:5.30.0"
   dependencies:
     "@jridgewell/source-map": "npm:^0.3.3"
     acorn: "npm:^8.8.2"
@@ -7945,7 +7945,7 @@ __metadata:
     source-map-support: "npm:~0.5.20"
   bin:
     terser: bin/terser
-  checksum: 10/062df6a8f99ea2635d1b3ce41cfd4180dea6e1c83db9b2cf4b525170b2446d10e069d2877d8dcb59fbf6045870efa17b56462b67045ef2d2b420870f9d144690
+  checksum: 10/78e6ce9e95ec7fc40e694da2e749fa80c3a99c916626349361c22d4cf2e510e8e6e49859c955416088e40688f99115cd595cb033fd5a8a7f0fc03c527ed8efe3
   languageName: node
   linkType: hard
 
