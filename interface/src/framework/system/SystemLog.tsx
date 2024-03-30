@@ -93,17 +93,6 @@ const SystemLog: FC = () => {
     document.body.removeChild(a);
   };
 
-  const onMessage = (event: MessageEvent) => {
-    const rawData = event.data;
-    if (typeof rawData === 'string' || rawData instanceof String) {
-      const logentry = JSON.parse(rawData as string) as LogEntry;
-      if (logentry.i > lastIndex) {
-        setLastIndex(logentry.i);
-        setLogEntries((log) => [...log, logentry]);
-      }
-    }
-  };
-
   const saveSettings = async () => {
     await saveData();
   };
@@ -121,16 +110,26 @@ const SystemLog: FC = () => {
 
   useEffect(() => {
     const es = new EventSource(addAccessTokenParameter(LOG_EVENTSOURCE_URL));
-    es.onmessage = onMessage;
+    es.onmessage = (event: MessageEvent) => {
+      const rawData = event.data;
+      if (typeof rawData === 'string' || rawData instanceof String) {
+        const logentry = JSON.parse(rawData as string) as LogEntry;
+        if (logentry.i > lastIndex) {
+          setLastIndex(logentry.i);
+          setLogEntries((log) => [...log, logentry]);
+        }
+      }
+    };
     es.onerror = () => {
       es.close();
-      toast.error('EventSource failed');
+      toast.error('No connection to Log server');
     };
 
     return () => {
       es.close();
     };
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const content = () => {
     if (!data) {

@@ -55,7 +55,7 @@ class Mixer : public EMSdevice {
     uint8_t  setValveTime_;
     uint8_t  flowTempOffset_;
 
-    uint16_t hc_               = EMS_VALUE_USHORT_NOTSET;
+    uint16_t hc_ = EMS_VALUE_USHORT_NOTSET;
 };
 
 } // namespace emsesp

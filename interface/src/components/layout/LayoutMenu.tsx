@@ -94,15 +94,13 @@ const LayoutMenu: FC = () => {
             }}
           >
             <ListItemText
-              // TODO: translate
-              primary="Customize"
+              primary={LL.CUSTOMIZE()}
               primaryTypographyProps={{
                 fontWeight: '600',
                 mb: '2px',
                 color: 'lightblue'
               }}
-              // TODO: translate
-              secondary="Customizations, Scheduler and Custom Entities"
+              secondary={LL.CUSTOMIZATIONS() + ', ' + LL.SCHEDULER() + ', ' + LL.CUSTOM_ENTITIES(0) + '...'}
               secondaryTypographyProps={{
                 noWrap: true,
                 fontSize: 12,

@@ -324,7 +324,12 @@ const nl: Translation = {
   UNCHANGED: 'Ongewijzigd',
   ALWAYS: 'Altijd',
   ACTIVITY: 'Activiteit',
-  CONFIGURE: '{0} Configureren'
+  CONFIGURE: '{0} Configureren',
+  SYSTEM_MEMORY: 'System Memory', // TODO translate
+  APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
+  SECURITY_1: 'Add or remove users', // TODO translate
+  UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', // TODO translate
+  CUSTOMIZE: 'Customize' // TODO translate
 };
 
 export default nl;

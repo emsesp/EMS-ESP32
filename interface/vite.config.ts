@@ -20,7 +20,7 @@ export default defineConfig(({ command, mode }) => {
             secure: false
           },
           '/es': {
-            target: 'http://localhost:3080',
+            target: 'http://localhost:3081',
             changeOrigin: true,
             secure: false
           }

@@ -228,12 +228,11 @@ const SystemStatus: FC = () => {
           />
           <Divider variant="inset" component="li" />
 
-          {/* TODO: translate */}
           <ListMenuItem
             disabled={!me.admin}
             icon={MemoryIcon}
             bgcolor="#68374d"
-            label="System Memory"
+            label={LL.SYSTEM_MEMORY()}
             text={formatNumber(data.free_heap) + ' KB'}
             to="/settings/espsystemstatus"
           />

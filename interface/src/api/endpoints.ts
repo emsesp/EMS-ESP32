@@ -6,7 +6,6 @@ import { unpack } from '../api/unpack';
 export const ACCESS_TOKEN = 'access_token';
 
 const host = window.location.host;
-export const WEB_SOCKET_ROOT = 'ws://' + host + '/ws/';
 export const EVENT_SOURCE_ROOT = 'http://' + host + '/es/';
 
 export const alovaInstance = createAlova({

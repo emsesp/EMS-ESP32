@@ -324,7 +324,12 @@ const en: Translation = {
   UNCHANGED: 'Unchanged',
   ALWAYS: 'Always',
   ACTIVITY: 'Activity',
-  CONFIGURE: 'Configure {0}'
+  CONFIGURE: 'Configure {0}',
+  SYSTEM_MEMORY: 'System Memory', 
+  APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', 
+  SECURITY_1: 'Add or remove users', 
+  UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', 
+  CUSTOMIZE: 'Customize'
 };
 
 export default en;

@@ -154,12 +154,11 @@ const Settings: FC = () => {
   const content = () => (
     <>
       <List sx={{ borderRadius: 3, border: '2px solid grey' }}>
-        {/* TODO: translate */}
         <ListMenuItem
           icon={TuneIcon}
           bgcolor="#134ba2"
           label={LL.APPLICATION_SETTINGS()}
-          text="Modify EMS-ESP Application Settings"
+          text={LL.APPLICATION_SETTINGS_1()}
           to="ems-esp"
         />
 
@@ -188,11 +187,8 @@ const Settings: FC = () => {
         />
 
         <ListMenuItem icon={DeviceHubIcon} bgcolor="#68374d" label="MQTT" text={LL.CONFIGURE('MQTT')} to="mqtt" />
-
         <ListMenuItem icon={CastIcon} bgcolor="#efc34b" label="OTA" text={LL.CONFIGURE('OTA')} to="ota" />
-
-        {/* TODO: translate */}
-        <ListMenuItem icon={LockIcon} label={LL.SECURITY(0)} text="Add/Remove Users" to="security" />
+        <ListMenuItem icon={LockIcon} label={LL.SECURITY(0)} text={LL.SECURITY_1()} to="security" />
 
         <ListMenuItem
           icon={MemoryIcon}
@@ -202,12 +198,11 @@ const Settings: FC = () => {
           to="espsystemstatus"
         />
 
-        {/* TODO: translate */}
         <ListMenuItem
           icon={ImportExportIcon}
           bgcolor="#5d89f7"
           label={LL.UPLOAD_DOWNLOAD()}
-          text="Upload/Download Settings and Firmware"
+          text={LL.UPLOAD_DOWNLOAD_1()}
           to="upload"
         />
       </List>

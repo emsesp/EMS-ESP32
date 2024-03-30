@@ -1,19 +1,19 @@
-import { Router } from 'itty-router';
+import { AutoRouter, error, status } from 'itty-router';
 import { Encoder } from '@msgpack/msgpack';
+
 // import busboy from 'busboy';
 // import multer from 'multer';
+// const upload = multer({ dest: '../mock-api/uploads' });
 
 const encoder = new Encoder();
-const router = Router();
-// const upload = multer({ dest: '../mock-api/uploads' }); // TODO remove muter
+
+const router = AutoRouter({
+  port: 3080,
+  missing: () => error(404, 'Error, not found')
+});
 
 const REST_ENDPOINT_ROOT = '/rest/';
 const API_ENDPOINT_ROOT = '/api/';
-const ES_ENDPOINT_ROOT = '/es/';
-
-const restRouter = Router({ base: REST_ENDPOINT_ROOT });
-const apiRouter = Router({ base: API_ENDPOINT_ROOT });
-const esRouter = Router({ base: ES_ENDPOINT_ROOT });
 
 // HTTP HEADERS
 const headers = {
@@ -125,7 +125,7 @@ const LOG_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'logSettings';
 let log_settings = {
   level: 6,
   max_messages: 50,
-  compact: false
+  compact: true
 };
 
 const FETCH_LOG_ENDPOINT = REST_ENDPOINT_ROOT + 'fetchLog';
@@ -454,7 +454,6 @@ const EMSESP_SCANDEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'scanDevices';
 // const EMSESP_DEVICEENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceEntities/:id';
 const EMSESP_DEVICEDATA_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceData';
 const EMSESP_DEVICEENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'deviceEntities';
-const EMSESP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'status';
 const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile';
 const EMSESP_WRITE_DEVICEVALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceValue';
 const EMSESP_WRITE_TEMPSENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeTemperatureSensor';
@@ -2321,91 +2320,89 @@ const emsesp_deviceentities_4 = [
 // LOG
 router
   .post(FETCH_LOG_ENDPOINT, () => {
-    const encoded = encoder.encode(fetch_log);
-    // TODO check if still need this or just send a 200 since ES will catch up?
-    return new Response(encoded, { headers });
+    return status(200);
   })
-  .get(LOG_SETTINGS_ENDPOINT, () => new Response(JSON.stringify(log_settings), { headers }))
+  .get(LOG_SETTINGS_ENDPOINT, () => log_settings)
   .post(LOG_SETTINGS_ENDPOINT, async (request: any) => {
     log_settings = await request.json();
-    return new Response('OK', { status: 200 });
+    return status(200);
   });
 
 // NETWORK
 router
-  .get(NETWORK_STATUS_ENDPOINT, () => new Response(JSON.stringify(network_status), { headers }))
-  .get(NETWORK_SETTINGS_ENDPOINT, () => new Response(JSON.stringify(network_settings), { headers }))
+  .get(NETWORK_STATUS_ENDPOINT, () => network_status)
+  .get(NETWORK_SETTINGS_ENDPOINT, () => network_settings)
   .get(LIST_NETWORKS_ENDPOINT, () => {
     if (countWifiScanPoll++ === 3) {
       console.log('done, sending list');
-      return new Response(JSON.stringify(list_networks), { headers }); // send list
+      return list_networks; // send list
     } else {
       console.log('...waiting #' + countWifiScanPoll);
-      return new Response('OK', { status: 200 });
+      return status(200);
     }
   })
   .get(SCAN_NETWORKS_ENDPOINT, () => {
     console.log('start scan networks');
     countWifiScanPoll = 0; // stop the poll
-    return new Response('OK', { status: 202 }); // always 202, poll for list
+    return status(202);
   })
   .post(NETWORK_SETTINGS_ENDPOINT, async (request: any) => {
     network_settings = await request.json();
-    return new Response('OK', { status: 200 });
+    return status(200);
   });
 
 // AP
 router
-  .get(AP_SETTINGS_ENDPOINT, () => new Response(JSON.stringify(ap_settings), { headers }))
-  .get(AP_STATUS_ENDPOINT, () => new Response(JSON.stringify(ap_status), { headers }))
+  .get(AP_SETTINGS_ENDPOINT, () => ap_settings)
+  .get(AP_STATUS_ENDPOINT, () => ap_status)
   .post(AP_SETTINGS_ENDPOINT, async (request: any) => {
     ap_settings = await request.json();
-    return new Response('OK', { status: 200 });
+    return status(200);
   });
 
 // OTA
 router
-  .get(OTA_SETTINGS_ENDPOINT, () => new Response(JSON.stringify(ota_settings), { headers }))
+  .get(OTA_SETTINGS_ENDPOINT, () => ota_settings)
   .post(OTA_SETTINGS_ENDPOINT, async (request: any) => {
     ota_settings = await request.json();
-    return new Response('OK', { status: 200 });
+    return status(200);
   });
 
 // MQTT
 router
-  .get(MQTT_SETTINGS_ENDPOINT, () => new Response(JSON.stringify(mqtt_settings), { headers }))
-  .get(MQTT_STATUS_ENDPOINT, () => new Response(JSON.stringify(mqtt_status), { headers }))
+  .get(MQTT_SETTINGS_ENDPOINT, () => mqtt_settings)
+  .get(MQTT_STATUS_ENDPOINT, () => mqtt_status)
   .post(MQTT_SETTINGS_ENDPOINT, async (request: any) => {
     mqtt_settings = await request.json();
-    return new Response('OK', { status: 200 });
+    return status(200);
   });
 
 // NTP
 router
-  .get(NTP_SETTINGS_ENDPOINT, () => new Response(JSON.stringify(ntp_settings), { headers }))
-  .get(NTP_STATUS_ENDPOINT, () => new Response(JSON.stringify(ntp_status), { headers }))
-  .post(TIME_ENDPOINT, () => new Response('OK', { status: 200 }))
+  .get(NTP_SETTINGS_ENDPOINT, () => ntp_settings)
+  .get(NTP_STATUS_ENDPOINT, () => ntp_status)
+  .post(TIME_ENDPOINT, () => status(200))
   .post(NTP_SETTINGS_ENDPOINT, async (request: any) => {
     ntp_settings = await request.json();
-    return new Response('OK', { status: 200 });
+    return status(200);
   });
 
 // SYSTEM and SETTINGS
 router
-  .get(SYSTEM_STATUS_ENDPOINT, () => new Response(JSON.stringify(system_status), { headers }))
-  .get(ACTIVITY_ENDPOINT, () => new Response(JSON.stringify(activity), { headers }))
-  .get(ESPSYSTEM_STATUS_ENDPOINT, () => new Response(JSON.stringify(ESPsystem_status), { headers }))
-  .get(SECURITY_SETTINGS_ENDPOINT, () => new Response(JSON.stringify(security_settings), { headers }))
+  .get(SYSTEM_STATUS_ENDPOINT, () => system_status)
+  .get(ACTIVITY_ENDPOINT, () => activity)
+  .get(ESPSYSTEM_STATUS_ENDPOINT, () => ESPsystem_status)
+  .get(SECURITY_SETTINGS_ENDPOINT, () => security_settings)
   .post(SECURITY_SETTINGS_ENDPOINT, async (request: any) => {
     security_settings = await request.json();
-    return new Response('OK', { status: 200 });
+    return status(200);
   })
-  .get(VERIFY_AUTHORIZATION_ENDPOINT, () => new Response(JSON.stringify(verify_authentication), { headers }))
-  .post(RESTART_ENDPOINT, () => new Response('OK', { status: 200 }))
-  .post(FACTORY_RESET_ENDPOINT, () => new Response('OK', { status: 200 }))
-  .post(UPLOAD_FILE_ENDPOINT, () => new Response('OK', { status: 404 })) // TODO remove upload when fixed
-  .post(SIGN_IN_ENDPOINT, () => new Response(JSON.stringify(signin), { headers }))
-  .get(GENERATE_TOKEN_ENDPOINT, () => new Response(JSON.stringify(generate_token), { headers }));
+  .get(VERIFY_AUTHORIZATION_ENDPOINT, () => verify_authentication)
+  .post(RESTART_ENDPOINT, () => status(200))
+  .post(FACTORY_RESET_ENDPOINT, () => status(200))
+  .post(UPLOAD_FILE_ENDPOINT, () => status(404)) // TODO remove upload when fixed
+  .post(SIGN_IN_ENDPOINT, () => signin)
+  .get(GENERATE_TOKEN_ENDPOINT, () => generate_token);
 
 // uploads // TODO fix uploading later
 
@@ -2510,19 +2507,18 @@ router
 router
 
   // EMS-ESP Settings
-  .get(EMSESP_SETTINGS_ENDPOINT, () => new Response(JSON.stringify(settings), { headers }))
+  .get(EMSESP_SETTINGS_ENDPOINT, () => settings)
   .post(EMSESP_SETTINGS_ENDPOINT, async (request: any) => {
     settings = await request.json();
-    return new Response('OK', { status: 200 }); // no restart needed
-    // return new Response('OK', { status: 205 }); // restart needed
+    status(200); // no restart needed
+    status(205); // restart needed
   })
 
   // Device Dashboard Data
-  .get(EMSESP_CORE_DATA_ENDPOINT, () => new Response(JSON.stringify(emsesp_coredata), { headers }))
-  .get(EMSESP_SENSOR_DATA_ENDPOINT, () => new Response(JSON.stringify(emsesp_sensordata), { headers }))
-  .get(EMSESP_DEVICES_ENDPOINT, () => new Response(JSON.stringify(emsesp_devices), { headers }))
-  .post(EMSESP_SCANDEVICES_ENDPOINT, () => new Response('OK', { status: 200 }))
-  .get(EMSESP_STATUS_ENDPOINT, () => new Response(JSON.stringify(status), { headers }))
+  .get(EMSESP_CORE_DATA_ENDPOINT, () => emsesp_coredata)
+  .get(EMSESP_SENSOR_DATA_ENDPOINT, () => emsesp_sensordata)
+  .get(EMSESP_DEVICES_ENDPOINT, () => emsesp_devices)
+  .post(EMSESP_SCANDEVICES_ENDPOINT, () => status(200))
   .get(EMSESP_DEVICEDATA_ENDPOINT, (request) => {
     // const id = Number(request.params.id); // TODO when using :id
     const id = Number(request.query.id);
@@ -2600,27 +2596,27 @@ router
         updateMask(entity, emsesp_deviceentities_6, emsesp_devicedata_6);
       }
     }
-    return new Response('OK', { status: 200 });
+    return status(200);
   })
   .post(EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT, async (request: any) => {
-    return new Response('OK', { status: 200 });
+    return status(200);
   })
 
   // Scheduler
   .post(EMSESP_SCHEDULE_ENDPOINT, async (request: any) => {
     const content = await request.json();
     emsesp_schedule = content;
-    return new Response('OK', { status: 200 });
+    return status(200);
   })
-  .get(EMSESP_SCHEDULE_ENDPOINT, () => new Response(JSON.stringify(emsesp_schedule), { headers }))
+  .get(EMSESP_SCHEDULE_ENDPOINT, () => emsesp_schedule)
 
   // Custom Entities
   .post(EMSESP_CUSTOMENTITIES_ENDPOINT, async (request: any) => {
     const content = await request.json();
     emsesp_customentities = content;
-    return new Response('OK', { status: 200 });
+    return status(200);
   })
-  .get(EMSESP_CUSTOMENTITIES_ENDPOINT, () => new Response(JSON.stringify(emsesp_customentities), { headers }))
+  .get(EMSESP_CUSTOMENTITIES_ENDPOINT, () => emsesp_customentities)
 
   // Device Dashboard
   .post(EMSESP_WRITE_DEVICEVALUE_ENDPOINT, async (request: any) => {
@@ -2665,7 +2661,7 @@ router
     }
 
     await delay(1000); // wait to show spinner
-    return new Response('OK', { status: 200 }); // or 400 for bad request
+    return status(200);
   })
 
   // Temperature & Analog Sensors
@@ -2676,7 +2672,7 @@ router
       emsesp_sensordata.ts[objIndex].n = ts.name;
       emsesp_sensordata.ts[objIndex].o = ts.offset;
     }
-    return new Response('OK', { status: 200 });
+    return status(200);
   })
   .post(EMSESP_WRITE_ANALOGSENSOR_ENDPOINT, async (request: any) => {
     const as = await request.json();
@@ -2709,7 +2705,7 @@ router
       }
     }
 
-    return new Response('OK', { status: 200 });
+    return status(200);
   })
 
   // Settings - board profile
@@ -2841,103 +2837,30 @@ router
       data.eth_clock_mode = 0;
     }
 
-    return new Response(JSON.stringify(data), { headers });
+    return data;
   })
 
   // Download Settings
-  .get(EMSESP_GET_SETTINGS_ENDPOINT, () => new Response(JSON.stringify(emsesp_info), { headers }))
-  .get(EMSESP_GET_CUSTOMIZATIONS_ENDPOINT, () => new Response(JSON.stringify(emsesp_deviceentities_1), { headers }))
-  .get(EMSESP_GET_ENTITIES_ENDPOINT, () => new Response(JSON.stringify(emsesp_customentities), { headers }))
-  .get(EMSESP_GET_SCHEDULE_ENDPOINT, () => new Response(JSON.stringify(emsesp_schedule), { headers }));
+  .get(EMSESP_GET_SETTINGS_ENDPOINT, () => emsesp_info)
+  .get(EMSESP_GET_CUSTOMIZATIONS_ENDPOINT, () => emsesp_deviceentities_1)
+  .get(EMSESP_GET_ENTITIES_ENDPOINT, () => emsesp_customentities)
+  .get(EMSESP_GET_SCHEDULE_ENDPOINT, () => emsesp_schedule);
 
 // API which are usually POST for security
 router
-  .post(EMSESP_SYSTEM_INFO_ENDPOINT, () => new Response(JSON.stringify(emsesp_info), { headers }))
-  .get(EMSESP_SYSTEM_INFO_ENDPOINT, () => new Response(JSON.stringify(emsesp_info), { headers }))
+  .post(EMSESP_SYSTEM_INFO_ENDPOINT, () => emsesp_info)
+  .get(EMSESP_SYSTEM_INFO_ENDPOINT, () => emsesp_info)
   .post(API_ENDPOINT_ROOT, async (request: any) => {
     const data = await request.json();
     if (data.device === 'system') {
       if (data.entity === 'info') {
-        return new Response(JSON.stringify(emsesp_info), { headers });
+        return emsesp_info;
       }
       if (data.entity === 'allvalues') {
-        return new Response(JSON.stringify(emsesp_allvalues), { headers });
+        return emsesp_allvalues;
       }
     }
-    return new Response('Not Found', { status: 404 });
+    return status(404); // not found
   });
 
-//
-// Event Source // TODO fix event source later
-//
-
-// const data = {
-//   t: '000+00:00:00.000',
-//   l: 3, // error
-//   i: 1,
-//   n: 'system',
-//   m: 'incoming message #1'
-// };
-// const sseFormattedResponse = `data: ${JSON.stringify(data)}\n\n`;
-// router.get('/es/log', () => new Response(sseFormattedResponse, { headers: ESheaders }));
-
-var count = 8;
-var log_index = 0;
-const ES_LOG_ENDPOINT = ES_ENDPOINT_ROOT + 'log';
-
-// new Response({
-//   headers: {
-//     'content-type': 'application/json',
-//     'Content-Type': 'text/event-stream',
-//     'Cache-Control': 'no-cache',
-//     'Access-Control-Allow-Origin': '*',
-//     'Connection': 'keep-alive'
-//   },
-//   body: '{"foo":"bar"}'
-// })
-
-// rest_server.get(ES_LOG_ENDPOINT, function (req, res) {
-//   res.setHeader('Content-Type', 'text/event-stream');
-//   res.setHeader('Cache-Control', 'no-cache');
-//   res.setHeader('Access-Control-Allow-Origin', '*');
-//   res.setHeader('Connection', 'keep-alive');
-//   res.flushHeaders();
-
-let sseFormattedResponse = '';
-
-// var timer = setInterval(function () {
-//   count += 1;
-//   log_index += 1;
-//   const data = {
-//     t: '000+00:00:00.000',
-//     l: 3, // error
-//     i: count,
-//     n: 'system',
-//     m: 'incoming message #' + count + '/' + log_index
-//   };
-//   sseFormattedResponse = `data: ${JSON.stringify(data)}\n\n`;
-//   console.log('done');
-//   // res.write(sseFormattedResponse);
-//   // res.flush(); // this is important
-
-//   // if buffer is full, start over
-//   if (log_index > 50) {
-//     fetch_log.events = [];
-//     log_index = 0;
-//   }
-//   fetch_log.events.push(data); // append to buffer
-// }, 300);
-
-router.get(ES_LOG_ENDPOINT, () => new Response(sseFormattedResponse, { headers: ESheaders }));
-
-// Tie it all together
-const missingHandler = () => new Response('Not found.', { status: 404 });
-
-router
-  .all('/api/*', apiRouter.handle)
-  .all('/rest/*', restRouter.handle)
-  .all('/es/*', esRouter.handle)
-  .all('*', missingHandler);
-
-const errorHandler = (error: any) => new Response(error.message || 'Server Error', { status: error.status || 500 });
-export const handleRequest = (request: any) => router.handle(request).catch(errorHandler);
+export default router;

@@ -71,9 +71,9 @@ class Water : public EMSdevice {
     uint8_t wwStatus2_;
 
     // mixer
-    uint8_t  wwStatus_;
-    int8_t   wwDiffTemp_;
-    uint8_t  wwRequiredTemp_;
+    uint8_t wwStatus_;
+    int8_t  wwDiffTemp_;
+    uint8_t wwRequiredTemp_;
 
     // IPM
     uint16_t HydrTemp_;

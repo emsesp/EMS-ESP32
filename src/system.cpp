@@ -1239,8 +1239,8 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["free mem"]  = getHeapMem();
     node["max alloc"] = getMaxAllocMem();
     node["free caps"] = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024; // includes heap and psram
-    node["used app"]  = EMSESP::system_.appUsed(); // kilobytes
-    node["free app"]  = EMSESP::system_.appFree(); // kilobytes
+    node["used app"]  = EMSESP::system_.appUsed();                       // kilobytes
+    node["free app"]  = EMSESP::system_.appFree();                       // kilobytes
     node["partition"] = esp_ota_get_running_partition()->label;
 #endif
     node["reset reason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
