@@ -5,6 +5,7 @@
 
 @host = http://ems-esp.local
 @host_dev = http://10.10.10.20
+@host_standalone = http://localhost:3080
 
 @token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiYWRtaW4iOnRydWV9.2bHpWya2C7Q12WjNUBD6_7N3RCD7CMl-EGhyQVzFdDg
 
@@ -106,3 +107,10 @@ Authorization: Bearer {{token}}
 
 ###
 GET {{host_dev}}/api/thermostat/seltemp
+
+
+#### STANDALONE ####
+
+GET {{host_standalone}}/api/system/info
+
+###
