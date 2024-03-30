@@ -188,7 +188,6 @@ class Solar : public EMSdevice {
     bool set_cylPriority(const char * value, const int8_t id);
     bool set_heatAssist(const char * value, const int8_t id);
     bool set_diffControl(const char * value, const int8_t id);
-
 };
 
 } // namespace emsesp
