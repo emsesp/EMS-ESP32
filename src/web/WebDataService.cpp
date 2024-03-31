@@ -236,9 +236,9 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
         // using the unique ID from the web find the real device type
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice->unique_id() == unique_id) {
-                // parse the command as it could have a hc or wwc prefixed, e.g. hc2/seltemp
+                // parse the command as it could have a hc or dhw prefixed, e.g. hc2/seltemp
                 int8_t id = -1;                                     // default
-                cmd       = Command::parse_command_string(cmd, id); // extract hc or wwc
+                cmd       = Command::parse_command_string(cmd, id); // extract hc or dhw
 
                 // create JSON for output
                 auto *     response = new AsyncJsonResponse(false);
@@ -278,7 +278,7 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
 
         // special check for custom entities (which have a unique id of 99)
         if (unique_id == 99) {
-            // parse the command as it could have a hc or wwc prefixed, e.g. hc2/seltemp
+            // parse the command as it could have a hc or dhw prefixed, e.g. hc2/seltemp
             int8_t id              = -1;
             cmd                    = Command::parse_command_string(cmd, id);
             auto *     response    = new AsyncJsonResponse(false);

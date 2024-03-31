@@ -33,8 +33,7 @@ namespace emsesp {
 enum CommandFlag : uint8_t {
     MQTT_SUB_FLAG_DEFAULT = 0,        // 0 no flags set, always subscribe to MQTT
     MQTT_SUB_FLAG_HC      = (1 << 0), // 1 TAG_HC1 - TAG_HC8
-    MQTT_SUB_FLAG_WWC     = (1 << 1), // 2 TAG_WWC1 - TAG_WWC4
-    MQTT_SUB_FLAG_WW      = (1 << 2), // 4 TAG_DEVICE_DATA_WW
+    MQTT_SUB_FLAG_DHW     = (1 << 1), // 2 TAG_DHW1 - TAG_DHW4
     HIDDEN                = (1 << 3), // 8 do not show in API or Web
     ADMIN_ONLY            = (1 << 4)  // 16 requires authentication
 

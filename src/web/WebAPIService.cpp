@@ -102,8 +102,8 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
         if (request->hasParam(F_(hc))) {
             input["hc"] = Helpers::atoint(request->getParam(F_(hc))->value().c_str());
         }
-        if (request->hasParam(F_(wwc))) {
-            input["wwc"] = Helpers::atoint(request->getParam(F_(wwc))->value().c_str());
+        if (request->hasParam(F_(dhw))) {
+            input["dhw"] = Helpers::atoint(request->getParam(F_(dhw))->value().c_str());
         }
     }
 

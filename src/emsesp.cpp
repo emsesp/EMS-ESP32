@@ -346,7 +346,7 @@ void EMSESP::dump_all_values(uuid::console::Shell & shell) {
                 if (device.device_type == DeviceType::MIXER) {
                     if (device.flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
                         if (device.product_id == 160) { // MM100
-                            device_id = 0x28;           // wwc
+                            device_id = 0x28;           // dhw
                         } else {
                             device_id = 0x20; // hc
                         }
@@ -567,7 +567,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
     bool         nested       = (Mqtt::is_nested());
 
     // group by device type
-    for (uint8_t tag = DeviceValueTAG::TAG_BOILER_DATA_WW; tag <= DeviceValueTAG::TAG_HS16; tag++) {
+    for (uint8_t tag = DeviceValueTAG::TAG_DEVICE_DATA; tag <= DeviceValueTAG::TAG_HS16; tag++) {
         JsonObject json_tag     = json;
         bool       nest_created = false;
         for (const auto & emsdevice : emsdevices) {
@@ -579,7 +579,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                 need_publish |= emsdevice->generate_values(json_tag, tag, false, EMSdevice::OUTPUT_TARGET::MQTT);
             }
         }
-        if (need_publish && ((!nested && tag >= DeviceValueTAG::TAG_DEVICE_DATA_WW) || (tag == DeviceValueTAG::TAG_BOILER_DATA_WW))) {
+        if (need_publish && (!nested && tag >= DeviceValueTAG::TAG_DEVICE_DATA)) {
             Mqtt::queue_publish(Mqtt::tag_to_topic(device_type, tag), json);
             json         = doc.to<JsonObject>();
             need_publish = false;

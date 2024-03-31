@@ -598,10 +598,8 @@ void EMSdevice::add_device_value(uint8_t               tag,              // to b
 
         if (tag >= DeviceValueTAG::TAG_HC1 && tag <= DeviceValueTAG::TAG_HC8) {
             flags |= CommandFlag::MQTT_SUB_FLAG_HC;
-        } else if (tag >= DeviceValueTAG::TAG_WWC1 && tag <= DeviceValueTAG::TAG_WWC10) {
-            flags |= CommandFlag::MQTT_SUB_FLAG_WWC;
-        } else if (tag == DeviceValueTAG::TAG_DEVICE_DATA_WW || tag == DeviceValueTAG::TAG_BOILER_DATA_WW) {
-            flags |= CommandFlag::MQTT_SUB_FLAG_WW;
+        } else if (tag >= DeviceValueTAG::TAG_DHW1 && tag <= DeviceValueTAG::TAG_DHW10) {
+            flags |= CommandFlag::MQTT_SUB_FLAG_DHW;
         }
 
         // add the command to our library
@@ -863,7 +861,7 @@ bool EMSdevice::export_values(uint8_t device_type, JsonObject output, const int8
     }
 
     // for nested output add for each tag
-    for (tag = DeviceValueTAG::TAG_BOILER_DATA_WW; tag <= DeviceValueTAG::TAG_HS16; tag++) {
+    for (tag = DeviceValueTAG::TAG_DEVICE_DATA; tag <= DeviceValueTAG::TAG_HS16; tag++) {
         JsonObject output_hc    = output;
         bool       nest_created = false;
         for (const auto & emsdevice : EMSESP::emsdevices) {
@@ -1377,7 +1375,7 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
     JsonObject json = output;
     int8_t     tag  = id;
 
-    // check if we have hc or wwc or hs
+    // check if we have hc or dhw or hs
     if (id >= 1 && id <= (1 + DeviceValueTAG::TAG_HS16 - DeviceValueTAG::TAG_HC1)) {
         tag = DeviceValueTAG::TAG_HC1 + id - 1;
     }
@@ -1622,7 +1620,7 @@ bool EMSdevice::generate_values(JsonObject output, const uint8_t tag_filter, con
             } else {
                 strlcpy(name, (dv.short_name), sizeof(name)); // use short name
 
-                // if we have a tag, and its different to the last one create a nested object. only for hc, wwc and hs
+                // if we have a tag, and its different to the last one create a nested object. only for hc, dhw and hs
                 if (dv.tag != old_tag) {
                     old_tag = dv.tag;
                     if (nested && have_tag && dv.tag >= DeviceValueTAG::TAG_HC1) {

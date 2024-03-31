@@ -5,6 +5,7 @@
 ## **IMPORTANT! BREAKING CHANGES**
 
 - new device WATER shows dhw entities from MM100 and SM100 in dhw setting
+- rename WWC to DHW, always create DHW nests/topics, remove ww prefix from mqtt names [#1634](https://github.com/emsesp/EMS-ESP32/issues/1634)
 
 ## Added
 
