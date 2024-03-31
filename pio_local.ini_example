@@ -10,11 +10,13 @@
 ;  -DEMSESP_TEST ; enable the tests. EN language only
 ;  -DEMSESP_DE_ONLY ; only DE translated entity names
 ;  -DEMSESP_EN_ONLY ; only EN translated entity names
+;  -DEMSESP_PINGTEST ; send log message every 1/2 second
 ; my_build_flags = -DEMSESP_TEST
 ; my_build_flags = -DEMSESP_DEBUG -DEMSESP_TEST
+; my_build_flags = -DEMSESP_DEBUG -DEMSESP_TEST -DEMSESP_PINGTEST
 
 [platformio]
-; default_envs = esp32_4M
+default_envs = esp32_4M
 ; default_envs = esp32_16M
 ; default_envs = lolin_s3
 ; default_envs = standalone
@@ -32,13 +34,13 @@
 ; upload_port = /dev/ttyUSB*
 ; upload_port = COM5
 extra_scripts =
-;   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
 
 [env:esp32_16M]
 
 [env:custom]
-; use for baisc ESP boards with 4MB flash
+; use for basic ESP boards with 4MB flash
 ; make sure -D TASMOTA_SDK is also enabled
 platform = https://github.com/tasmota/platform-espressif32/releases/download/2024.01.00/platform-espressif32.zip
 ; use for S3 boards:
@@ -76,7 +78,7 @@ build_flags =
 [env:lolin_s3]
 upload_port = /dev/ttyUSB0
 extra_scripts =
-;   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
 
 ; pio run -e debug

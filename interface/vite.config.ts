@@ -1,4 +1,4 @@
-import { defineConfig, splitVendorChunkPlugin } from 'vite';
+import { defineConfig } from 'vite';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 import preact from '@preact/preset-vite';
 import viteImagemin from 'vite-plugin-imagemin';
@@ -30,6 +30,7 @@ export default defineConfig(({ command, mode }) => {
   }
 
   if (mode === 'hosted') {
+    console.log('Preparing for hosted build');
     return {
       plugins: [preact(), viteTsconfigPaths()],
       build: {
@@ -38,11 +39,12 @@ export default defineConfig(({ command, mode }) => {
     };
   }
 
+  console.log('Preparing for production, optimized build');
+
   return {
     plugins: [
       preact(),
       viteTsconfigPaths(),
-      splitVendorChunkPlugin(),
       {
         ...viteImagemin({
           verbose: false,
