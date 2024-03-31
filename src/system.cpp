@@ -752,6 +752,11 @@ void System::system_check() {
     if (!last_system_check_ || ((uint32_t)(uuid::get_uptime() - last_system_check_) >= SYSTEM_CHECK_FREQUENCY)) {
         last_system_check_ = uuid::get_uptime();
 
+#ifdef EMSESP_PINGTEST
+        static uint64_t ping_count = 0;
+        LOG_NOTICE("Ping test, #%d", ping_count++);
+#endif
+
         // check if we have a valid network connection
         if (!ethernet_connected() && (WiFi.status() != WL_CONNECTED)) {
             healthcheck_ |= HEALTHCHECK_NO_NETWORK;
