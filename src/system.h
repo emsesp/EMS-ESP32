@@ -281,7 +281,11 @@ class System {
     static constexpr uint32_t BUTTON_VLongPressDelay = 9000; // Hold period for a very long press event (in ms)
 
     // healthcheck
-    static constexpr uint32_t SYSTEM_CHECK_FREQUENCY          = 5000; // do a system check every 5 seconds
+#ifdef EMSESP_PINGTEST
+    static constexpr uint32_t SYSTEM_CHECK_FREQUENCY = 500; // do a system check every 1/2 second
+#else
+    static constexpr uint32_t SYSTEM_CHECK_FREQUENCY = 5000; // do a system check every 5 seconds
+#endif
     static constexpr uint32_t HEALTHCHECK_LED_LONG_DUARATION  = 1500;
     static constexpr uint32_t HEALTHCHECK_LED_FLASH_DUARATION = 150;
     static constexpr uint8_t  HEALTHCHECK_NO_BUS              = (1 << 0); // 1
