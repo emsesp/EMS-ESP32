@@ -1553,7 +1553,7 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
 
 // restart command - perform a hard reset
 bool System::command_restart(const char * value, const int8_t id) {
-    if (value != nullptr && value[0] == '\0') {
+    if (value != nullptr && value[0] != '\0') {
         EMSESP::system_.system_restart(value);
     } else {
         EMSESP::system_.system_restart();
