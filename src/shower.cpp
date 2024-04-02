@@ -141,7 +141,7 @@ void Shower::loop() {
 // turn off hot water to send a shot of cold
 void Shower::shower_alert_start() {
     LOG_DEBUG("Shower Alert started");
-    (void)Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "false");
+    (void)Command::call(EMSdevice::DeviceType::BOILER, "dhw/tapactivated", "false");
     doing_cold_shot_   = true;
     force_coldshot     = false;
     alert_timer_start_ = uuid::get_uptime(); // timer starts now
@@ -151,7 +151,7 @@ void Shower::shower_alert_start() {
 void Shower::shower_alert_stop() {
     if (doing_cold_shot_) {
         LOG_DEBUG("Shower Alert stopped");
-        (void)Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "true");
+        (void)Command::call(EMSdevice::DeviceType::BOILER, "dhw/tapactivated", "true");
         doing_cold_shot_ = false;
         force_coldshot   = false;
     }
