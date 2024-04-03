@@ -70,7 +70,7 @@
     "prettier": "^3.2.5",
     "rollup-plugin-visualizer": "^5.12.0",
     "terser": "^5.29.2",
-    "vite": "^5.2.4",
+    "vite": "^5.2.6",
     "vite-plugin-imagemin": "^0.6.1",
     "vite-tsconfig-paths": "^4.3.2"
   },
