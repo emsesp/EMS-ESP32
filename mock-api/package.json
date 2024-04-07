@@ -6,13 +6,14 @@
   "license": "MIT",
   "scripts": {
     "mock-api": "bun --watch rest_server.ts",
-    "mock-es": "bun --watch es_server.ts"
+    "mock-es": "bun --watch es_server.ts",
+    "mock-upload": "bun --watch upload_server.ts"
   },
   "dependencies": {
     "@msgpack/msgpack": "^2.8.0",
     "compression": "^1.7.4",
     "express": "^4.19.2",
-    "itty-router": "^5.0.5",
+    "itty-router": "^5.0.9",
     "multer": "^1.4.5-lts.1"
   },
   "packageManager": "yarn@4.1.1",
