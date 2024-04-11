@@ -1,15 +1,11 @@
 import { AutoRouter, error, status } from 'itty-router';
 import { Encoder } from '@msgpack/msgpack';
 
-// import busboy from 'busboy';
-// import multer from 'multer';
-// const upload = multer({ dest: '../mock-api/uploads' });
-
 const encoder = new Encoder();
 
 const router = AutoRouter({
   port: 3080,
-  missing: () => error(404, 'Error, not found')
+  missing: () => error(404, 'Error, endpoint not found')
 });
 
 const REST_ENDPOINT_ROOT = '/rest/';
@@ -23,17 +19,6 @@ const headers = {
 
 // GLOBAL VARIABLES
 let countWifiScanPoll = 0; // wifi network scan
-
-// FUNCTIONS
-// const delay = (ms) => new Promise((res) => setTimeout(res, ms));
-// function delay_blocking(milliseconds) {
-//   var start = new Date().getTime();
-//   for (var i = 0; i < 1e7; i++) {
-//     if (new Date().getTime() - start > milliseconds) {
-//       break;
-//     }
-//   }
-// }
 
 function updateMask(entity: any, de: any, dd: any) {
   const current_mask = parseInt(entity.slice(0, 2), 16);
@@ -364,7 +349,6 @@ const ESPSYSTEM_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'ESPSystemStatus';
 const SECURITY_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'securitySettings';
 const RESTART_ENDPOINT = REST_ENDPOINT_ROOT + 'restart';
 const FACTORY_RESET_ENDPOINT = REST_ENDPOINT_ROOT + 'factoryReset';
-const UPLOAD_FILE_ENDPOINT = REST_ENDPOINT_ROOT + 'uploadFile';
 
 // SYSTEM SIGNIN
 const VERIFY_AUTHORIZATION_ENDPOINT = REST_ENDPOINT_ROOT + 'verifyAuthorization';
@@ -2394,106 +2378,8 @@ router
   .get(VERIFY_AUTHORIZATION_ENDPOINT, () => verify_authentication)
   .post(RESTART_ENDPOINT, () => status(200))
   .post(FACTORY_RESET_ENDPOINT, () => status(200))
-  .post(UPLOAD_FILE_ENDPOINT, () => status(404)) // TODO remove upload when fixed
   .post(SIGN_IN_ENDPOINT, () => signin)
   .get(GENERATE_TOKEN_ENDPOINT, () => generate_token);
-
-// uploads // TODO fix uploading later
-
-// const progress_middleware = async (req: any) => {
-//   console.log('progress_middleware');
-//   let progress = 0;
-//   const file_size = req.headers['content-length'];
-
-//   // set event listener
-//   req.on('data', async (chunk) => {
-//     progress += chunk.length;
-//     const percentage = (progress / file_size) * 100;
-//     console.log(`Progress: ${Math.round(percentage)}%`);
-//     delay_blocking(200); // slow it down
-//   });
-//   // next(); // invoke next middleware which is multer
-// };
-
-// const withContent = async (request) => {
-//   const { headers } = request;
-//   const type = headers.get('content-type');
-
-//   // console.log(Object.getOwnPropertyNames(Object.getPrototypeOf(request)));
-
-//   if (type?.includes('form-data')) {
-//     console.log('withContent: got formdata');
-//     // request.content = await request.formData();
-
-//     // const bb = busboy({ headers: request.headers });
-//     // console.log('bb created');
-//     // bb.on('file', (name, file, info) => {
-//     //   const { filename, encoding, mimeType } = info;
-//     //   console.log(`File [${name}]: filename: %j, encoding: %j, mimeType: %j`, filename, encoding, mimeType);
-//     //   request.filename = filename;
-
-//     //   file
-//     //     .on('data', (data) => {
-//     //       console.log(`File [${name}] got ${data.length} bytes`);
-//     //     })
-//     //     .on('close', () => {
-//     //       console.log(`File [${name}] done`);
-//     //     });
-//     // });
-//     // bb.on('field', (name, val, info) => {
-//     //   console.log(`Field [${name}]: value: %j`, val);
-//     // });
-//     // bb.on('close', () => {
-//     //   console.log('Done parsing form!');
-//     //   // res.writeHead(303, { Connection: 'close', Location: '/' });
-//     //   // res.end();
-//     // });
-//   }
-// };
-
-// const makeMiddleware = (req) => {
-//   console.log('makeMiddleware');
-//   // const bb = busboy({ headers: req.headers });
-
-//   // bb.on('error', (err) => {
-//   //   // Send this error along to the global error handler
-//   //   console.log('Error' + err);
-//   //   return;
-//   // });
-//   // bb.on('file', (name, file, info) => {
-//   //   const { filename, encoding, mimeType } = info;
-//   //   console.log(`File [${name}]: filename: %j, encoding: %j, mimeType: %j`, filename, encoding, mimeType);
-//   //   req.filename = filename;
-
-//   //   file
-//   //     .on('data', (data) => {
-//   //       console.log(`File [${name}] got ${data.length} bytes`);
-//   //     })
-//   //     .on('close', () => {
-//   //       console.log(`File [${name}] done`);
-//   //     });
-//   // });
-//   // bb.end(req.rawBody);
-//   // req.pipe(bb);
-// };
-
-// router.post(UPLOAD_FILE_ENDPOINT, withContent, makeMiddleware, progress_middleware, ({ filename }) => {
-//   console.log('filename: ' + filename);
-
-//   // if (req.file) {
-//   //   const filename = req.file.originalname;
-//   //   const ext = filename.substring(filename.lastIndexOf('.') + 1);
-//   //   console.log(req.file);
-//   //   console.log('ext: ' + ext);
-
-//   //   if (ext === 'bin' || ext === 'json') {
-//   //     return res.sendStatus(200);
-//   //   } else if (ext === 'md5') {
-//   //     return res.json({ md5: 'ef4304fc4d9025a58dcf25d71c882d2c' });
-//   //   }
-//   // }
-//   return new Response('OK', { status: 200 });
-// });
 
 //
 //  EMS-ESP Project stuff

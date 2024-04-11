@@ -64,4 +64,4 @@ rest_server.get(ES_LOG_ENDPOINT, (_req, res) => {
 });
 
 // start eventsource server
-rest_server.listen(port, () => console.log(`EMS-ESP EventSource server running on http://localhost:${port}/`));
+rest_server.listen(port, () => console.log(`EMS-ESP EventSource mock server running on http://localhost:${port}/`));
