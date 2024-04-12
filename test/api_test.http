@@ -6,6 +6,7 @@
 @host = http://ems-esp.local
 @host_dev = http://10.10.10.20
 @host_standalone = http://localhost:3080
+@host_standalone2 = http://localhost:3082
 
 @token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiYWRtaW4iOnRydWV9.2bHpWya2C7Q12WjNUBD6_7N3RCD7CMl-EGhyQVzFdDg
 
@@ -114,3 +115,18 @@ GET {{host_dev}}/api/thermostat/seltemp
 GET {{host_standalone}}/api/system/info
 
 ###
+
+POST {{host_standalone2}}/rest/uploadFile
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="text"
+
+title
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="emsesp_settings.json"
+Content-Type: application/json
+
+< ./standalone_file_export/emsesp_settings.json
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
