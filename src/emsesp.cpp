@@ -775,23 +775,39 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
         dest_name = device_tostring(dest);
     }
 
-    // check for global/common types like Version & UBADevices
-    if (telegram->type_id == EMSdevice::EMS_TYPE_VERSION) {
-        type_name = "Version";
-    } else if (telegram->type_id == EMSdevice::EMS_TYPE_UBADevices) {
-        type_name = "UBADevices";
-    }
-
     // if we don't know the type show
     if (type_name.empty()) {
-        type_name = "?";
+        // check for global/common types like Version & UBADevices
+        switch (telegram->type_id) {
+        case EMSdevice::EMS_TYPE_VERSION:
+            type_name = "Version";
+            break;
+        case EMSdevice::EMS_TYPE_UBADevices:
+            type_name = "UBADevices";
+            break;
+        case EMSdevice::EMS_TYPE_DEVICEERROR:
+            type_name = "DeviceError";
+            break;
+        case EMSdevice::EMS_TYPE_SYSTEMERROR:
+            type_name = "SystemError";
+            break;
+        case EMSdevice::EMS_TYPE_MENUCONFIG:
+            type_name = "MenuConfig";
+            break;
+        case EMSdevice::EMS_TYPE_VALUECONFIG:
+            type_name = "ValueConfig";
+            break;
+        default:
+            type_name = "?";
+        }
     }
 
     std::string str;
     str.reserve(200);
     if (telegram->operation == Telegram::Operation::RX_READ) {
         str = src_name + "(" + Helpers::hextoa(src) + ") -R-> " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
-              + Helpers::hextoa(telegram->type_id) + "), length: " + Helpers::hextoa(telegram->message_data[0]);
+              + Helpers::hextoa(telegram->type_id) + "), length: " + Helpers::hextoa(telegram->message_data[0])
+              + ((telegram->message_length > 1) ? ", data: " + Helpers::data_to_hex(telegram->message_data + 1, telegram->message_length - 1) : "");
     } else if (telegram->dest == 0) {
         str = src_name + "(" + Helpers::hextoa(src) + ") -B-> " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
               + Helpers::hextoa(telegram->type_id) + "), data: " + telegram->to_string_message();

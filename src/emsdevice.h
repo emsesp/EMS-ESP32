@@ -392,8 +392,12 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_ID_DHW8           = 0x2F; // last DHW module id?
 
     // generic type IDs
-    static constexpr uint16_t EMS_TYPE_VERSION    = 0x02; // type ID for Version information. Generic across all EMS devices.
-    static constexpr uint16_t EMS_TYPE_UBADevices = 0x07; // EMS connected devices
+    static constexpr uint16_t EMS_TYPE_VERSION     = 0x02; // type ID for Version information. Generic across all EMS devices.
+    static constexpr uint16_t EMS_TYPE_UBADevices  = 0x07; // EMS connected devices
+    static constexpr uint16_t EMS_TYPE_DEVICEERROR = 0xBE;
+    static constexpr uint16_t EMS_TYPE_SYSTEMERROR = 0xBF;
+    static constexpr uint16_t EMS_TYPE_MENUCONFIG  = 0xF7;
+    static constexpr uint16_t EMS_TYPE_VALUECONFIG = 0xF9;
 
     // device flags: The lower 4 bits hold the unique identifier, the upper 4 bits are used for specific flags
     static constexpr uint8_t EMS_DEVICE_FLAG_NONE = 0;
