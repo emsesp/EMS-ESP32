@@ -42,7 +42,7 @@ void Roomctrl::set_remotetemp(const uint8_t type, const uint8_t hc, const int16_
         sendcnt[hc]     = 0;
         return;
     }
-    if (hc >= HCS || (type != RC20 && type != FB10 && type != RC100H && type != SENSOR && type != RC200)) {
+    if (hc >= HCS || (type != RC20 && type != FB10 && type != RC100H && type != SENSOR && type != RC200 && type != RC100)) {
         return;
     }
     type_[hc] = type;
@@ -67,11 +67,11 @@ void Roomctrl::set_remotehum(const uint8_t type, const uint8_t hc, const int8_t 
 
 uint8_t Roomctrl::get_hc(uint8_t addr) {
     addr &= 0x7F;
-    if (addr >= 0x40 && addr <= 0x44) {
+    if (addr >= 0x40 && addr <= 0x44 && type_[addr - 0x40] == SENSOR) {
         return addr - 0x40; // SENSOR
-    } else if (addr >= 0x38 && addr <= 0x3B) {
+    } else if (addr >= 0x38 && addr <= 0x3B && (type_[addr - 0x38] == RC100H || type_[addr - 0x38] == RC200 || type_[addr - 0x38] == RC100)) {
         return addr - 0x38; // RC100H, RC200
-    } else if (addr >= 0x18 && addr <= 0x1B) {
+    } else if (addr >= 0x18 && addr <= 0x1B && (type_[addr - 0x18] == RC20 || type_[addr - 0x18] == FB10)) {
         return addr - 0x18; // RC20, FB10
     }
     return 0xFF; // invalid
@@ -109,7 +109,7 @@ void Roomctrl::send(uint8_t addr) {
                 }
                 temperature(addr, 0x10, hc); // send to master-thermostat
             }
-        } else if (type_[hc] == RC200) {
+        } else if (type_[hc] == RC200 || type_[hc] == RC100) {
             rc_time_[hc] = uuid::get_uptime();
             temperature(addr, 0x10, hc);
         } else if (type_[hc] == FB10) {
@@ -223,6 +223,14 @@ void Roomctrl::version(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[9] = EMSbus::calculate_crc(data, 9); // apppend CRC
         EMSuart::transmit(data, 10);
         return;
+    } else if (type_[hc] == RC100) {
+        data[5] = 40; // version 40.03
+        data[6] = 3;
+        data[7] = 0;
+        data[8] = 0xFF;
+        data[9] = EMSbus::calculate_crc(data, 9); // apppend CRC
+        EMSuart::transmit(data, 10);
+        return;
     }
 }
 
@@ -288,7 +296,7 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[10]    = 1;                               // not sure what this is and if we need it, maybe mode?
         data[11]    = EMSbus::calculate_crc(data, 11); // apppend CRC
         EMSuart::transmit(data, 12);
-    } else if (type_[hc] == RC100H) { // RC100H, telegram 42B, ff
+    } else if (type_[hc] == RC100H || type_[hc] == RC100) { // RC100H, telegram 42B, ff
         data[2] = 0xFF;
         data[3] = 0;
         data[4] = 3;
