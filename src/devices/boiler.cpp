@@ -2696,6 +2696,14 @@ bool Boiler::set_reset(const char * value, const int8_t id) {
         // LOG_INFO("Reset boiler error message");
         write_command(0x05, 0x00, 0x5A); // error reset
         return true;
+    } else if (num == 3) {
+        // LOG_INFO("Reset boiler history");
+        write_command(0x05, 42, 0x01); // clear history
+        return true;
+    } else if (num == 4) {
+        // LOG_INFO("Reset boiler message");
+        write_command(0x05, 0x08, 0xFF); // same as maintenance
+        return true;
     }
     return false;
 }

@@ -164,6 +164,8 @@ MAKE_WORD_TRANSLATION(extern, "extern", "extern", "extern", "extern", "zewnętrz
 MAKE_WORD_TRANSLATION(intern, "intern", "intern", "intern", "intern", "wewnętrzny", "intern", "interne", "iç", "interno", "interný")
 MAKE_WORD_TRANSLATION(lower, "lower", "niedirger", "lager", "lägre", "mniejszy", "nedre", "inférieur", "daha düşük", "basso", "nízky")
 MAKE_WORD_TRANSLATION(error, "error", "Fehler", "error", "Fel", "błąd", "feil", "erreur", "Hata", "errore", "error")
+MAKE_WORD_TRANSLATION(history, "history", "Fehlerspeicher", "", "", "", "", "", "", "", "") // ToDo translate
+MAKE_WORD_TRANSLATION(message, "message", "Meldung", "melding", "meddelande", "", "melding", "message", "mesajı", "messaggio", "") // ToDo translate
 MAKE_WORD_TRANSLATION(na, "n/a", "n/a", "n/a", "n/a", "nd.", "n/a", "n/c", "mevcut değil", "n/a", "n/a")
 MAKE_WORD_TRANSLATION(inverted, "inverted", "invertiert", "", "", "", "", "", "", "", "")
 

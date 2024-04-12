@@ -1863,11 +1863,11 @@ bool Thermostat::set_remotetemp(const char * value, const int8_t id) {
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC35 || model() == EMSdevice::EMS_DEVICE_FLAG_RC30_N) {
         Roomctrl::set_remotetemp(Roomctrl::RC20, hc->hc(), hc->remotetemp); // RC20
     } else if ((model() == EMSdevice::EMS_DEVICE_FLAG_BC400) || model() == EMSdevice::EMS_DEVICE_FLAG_RC300) {
-        if (hc->control == 1) {
+        if (hc->control == 1 || hc->control == 0) {
             Roomctrl::set_remotetemp(Roomctrl::RC200, hc->hc(), hc->remotetemp);  // RC200
         } else if (hc->control == 3) {                                            // RC100H(3)
             Roomctrl::set_remotetemp(Roomctrl::RC100H, hc->hc(), hc->remotetemp); // RC100H
-        } else if (hc->control == 2 || hc->control == 0) {                        // RC100(2) and RC310(0)
+        } else if (hc->control == 2) {                                            // RC100(2)
             Roomctrl::set_remotetemp(Roomctrl::RC100, hc->hc(), hc->remotetemp);  // RC100
         } else {
             hc->remotetemp = EMS_VALUE_SHORT_NOTSET;
