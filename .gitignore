@@ -30,7 +30,7 @@ stats.html
 *.sln
 *.sw?
 .pnp.*
-.yarn/*
+*/.yarn/*
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
@@ -39,6 +39,16 @@ stats.html
 yarn.lock
 analyse.html
 interface/vite.config.ts.timestamp*
+*.local
+# i18n generated files
+interface/src/i18n/i18n-react.tsx
+interface/src/i18n/i18n-types.ts
+interface/src/i18n/i18n-util.ts
+interface/src/i18n/i18n-util.sync.ts
+interface/src/i18n/i18n-util.async.ts
+# mock-api uploads
+*/uploads/*
+!uploads/README.md
 
 # scripts
 test.sh
@@ -46,18 +56,10 @@ scripts/run.sh
 scripts/__pycache__
 scripts/stackdmp.txt
 
-# i18n generated files
-interface/src/i18n/i18n-react.tsx
-interface/src/i18n/i18n-types.ts
-interface/src/i18n/i18n-util.ts
-interface/src/i18n/i18n-util.sync.ts
-interface/src/i18n/i18n-util.async.ts
-
 # sonar
 .scannerwork/
 sonar/
 bw-output/
 
-# testing
+# standalone executable for testing
 emsesp
-

@@ -13,7 +13,6 @@ export default defineConfig(({ command, mode }) => {
         open: true,
         port: mode == 'production' ? 4173 : 3000,
         proxy: {
-          '/rest': 'http://localhost:3080',
           '/api': {
             target: 'http://localhost:3080',
             changeOrigin: true,
@@ -23,7 +22,9 @@ export default defineConfig(({ command, mode }) => {
             target: 'http://localhost:3081',
             changeOrigin: true,
             secure: false
-          }
+          },
+          '/rest/uploadFile': 'http://localhost:3082', // this must come first to work!
+          '/rest': 'http://localhost:3080'
         }
       }
     };
