@@ -1867,6 +1867,10 @@ bool Thermostat::set_remotetemp(const char * value, const int8_t id) {
             Roomctrl::set_remotetemp(Roomctrl::RC200, hc->hc(), hc->remotetemp);  // RC200
         } else if (hc->control == 2 || hc->control == 3) {                        // RC100(2) and RC100H(3)
             Roomctrl::set_remotetemp(Roomctrl::RC100H, hc->hc(), hc->remotetemp); // RC100H
+        } else {
+            // test for #1691
+            // Roomctrl::set_remotetemp(Roomctrl::RC200, hc->hc(), hc->remotetemp);  // RC200
+            Roomctrl::set_remotetemp(0, hc->hc(), EMS_VALUE_SHORT_NOTSET); // no remote set, switch off
         }
     }
 
