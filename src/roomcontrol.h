@@ -39,7 +39,7 @@ class Roomctrl {
     static constexpr uint8_t  HCS           = 4;     // max 4 heating circuits
 
     static uint8_t get_hc(const uint8_t addr);
-    static void    version(uint8_t addr, uint8_t dst);
+    static void    version(uint8_t addr, uint8_t dst, uint8_t hc);
     static void    unknown(uint8_t addr, uint8_t dst, uint8_t type, uint8_t offset);
     static void    unknown(uint8_t addr, uint8_t dst, uint8_t offset, uint8_t typeh, uint8_t typel);
     static void    temperature(uint8_t addr, uint8_t dst, uint8_t hc);
@@ -53,7 +53,7 @@ class Roomctrl {
     static int16_t  remotetemp_[HCS];
     static uint8_t  remotehum_[HCS];
     static uint8_t  sendcnt[HCS];
-    static uint8_t  type_; // type is product-id 113 for RC20 or 109 for Junkers FB10
+    static uint8_t  type_[HCS]; // type is product-id 113 for RC20 or 109 for Junkers FB10
 };
 
 } // namespace emsesp
