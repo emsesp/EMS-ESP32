@@ -35,7 +35,6 @@
 //
 // if there is no translation, it will default to en
 //
-// critcal characters: č, ď
 // device types, as display in Web and Console
 MAKE_WORD_TRANSLATION(boiler_device, "Boiler", "Kessel", "CV ketel", "Värmepanna", "Kocioł", "Varmekjele", "", "Kazan", "Caldaia", "Bojler") // TODO translate
 MAKE_WORD_TRANSLATION(thermostat_device, "Thermostat", "Thermostat", "Thermostaat", "Termostat", "Termostat", "Termostat", "", "Termostat", "Termostato", "Termostat") // TODO translate
@@ -479,6 +478,8 @@ MAKE_TRANSLATION(instantstart, "instantstart", "instant start", "Sofortstart", "
 MAKE_TRANSLATION(heatondelay, "heatondelay", "heat-on delay", "Einschaltverzögerung Heizen", "", "", "opóźnienie włączania ogrzewania", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(heatoffdelay, "heatoffdelay", "heat-off delay", "Ausschaltverzögerung Heizen", "", "", "opóźnienie włączania ogrzewania", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(hpSetDiffPress, "hpsetdiffpress", "set differental pressure", "Pumpensolldruck", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(hpFan, "fan", "Fan", "Lüfter", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(hpShutdown, "shutdown", "shutdown", "Abschalten", "", "", "", "", "", "", "", "") // TODO translate
 
 // hybrid heatpump
 MAKE_TRANSLATION(hybridStrategy, "hybridstrategy", "hybrid control strategy", "Hybrid Strategie", "Hybride strategie", "Hybrid kontrollstrategi", "strategia sterowania hybrydowego", "hybrid kontrollstrategi", "stratégie contrôle hybride", "hibrit kontrol stratejisi", "strategia comtrollo ibrido", "hybridná stratégia riadenia")
