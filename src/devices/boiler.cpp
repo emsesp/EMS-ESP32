@@ -1930,6 +1930,7 @@ void Boiler::process_HpPressure(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hpSetDiffPress_, 9);
 }
 
+// boiler(0x08) -W-> Me(0x0B), ?(0x04A5), data: 00 00 3C 1D 09 0A 0A 01 00 28 0A 00 01 00 00
 void Boiler::process_HpFan(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, fan_, 9);
 }
