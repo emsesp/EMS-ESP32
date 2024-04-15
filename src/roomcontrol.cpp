@@ -170,7 +170,7 @@ void Roomctrl::check(uint8_t addr, const uint8_t * data, const uint8_t length) {
         unknown(addr, data[0], data[2], data[3]);
     } else if (length == 8 && data[2] == 0xFF) { // ems+ query
         unknown(addr, data[0], data[3], data[5], data[6]);
-    } else if (data[2] == 0x7F) { // ems+ query with 3 bytes type src dst 7F offset len=FF FF HIGH LOW
+    } else if (data[2] == 0xF7) { // ems+ query with 3 bytes type src dst 7F offset len=FF FF HIGH LOW
         replyF7(addr, data[0], data[3], data[5], data[6], data[7], hc);
     }
 }
