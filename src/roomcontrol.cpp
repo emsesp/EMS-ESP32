@@ -25,8 +25,8 @@ bool     Roomctrl::switch_off_[HCS] = {false, false, false, false};
 uint32_t Roomctrl::rc_time_[HCS]    = {0, 0, 0, 0};
 int16_t  Roomctrl::remotetemp_[HCS] = {EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET};
 uint8_t  Roomctrl::remotehum_[HCS]  = {EMS_VALUE_UINT_NOTSET, EMS_VALUE_UINT_NOTSET, EMS_VALUE_UINT_NOTSET, EMS_VALUE_UINT_NOTSET};
-uint8_t  Roomctrl::sendcnt[HCS]     = {0, 0, 0, 0};
-uint8_t  Roomctrl::type_[HCS]       = {0, 0, 0, 0};
+uint8_t  Roomctrl::sendtype_[HCS]   = {SendType::TEMP, SendType::TEMP, SendType::TEMP, SendType::TEMP};
+uint8_t  Roomctrl::type_[HCS]       = {RemoteType::NONE, RemoteType::NONE, RemoteType::NONE, RemoteType::NONE};
 
 /**
  * set the temperature,
@@ -35,11 +35,11 @@ void Roomctrl::set_remotetemp(const uint8_t type, const uint8_t hc, const int16_
     if (!type_[hc] && !type) {
         return;
     }
-    if (remotetemp_[hc] != EMS_VALUE_SHORT_NOTSET && temp == EMS_VALUE_SHORT_NOTSET) {
+    if (remotetemp_[hc] != EMS_VALUE_SHORT_NOTSET && temp == EMS_VALUE_SHORT_NOTSET) { // switch remote off
         remotetemp_[hc] = EMS_VALUE_SHORT_NOTSET;
         switch_off_[hc] = true;
         rc_time_[hc]    = uuid::get_uptime() - SEND_INTERVAL; // send now
-        sendcnt[hc]     = 0;
+        sendtype_[hc]   = SendType::TEMP;
         return;
     }
     if (hc >= HCS || (type != RC20 && type != FB10 && type != RC100H && type != SENSOR && type != RC200 && type != RC100)) {
@@ -47,8 +47,8 @@ void Roomctrl::set_remotetemp(const uint8_t type, const uint8_t hc, const int16_
     }
     type_[hc] = type;
     if (remotetemp_[hc] != temp) {
-        rc_time_[hc] = uuid::get_uptime() - SEND_INTERVAL; // send now
-        sendcnt[hc]  = 0;
+        rc_time_[hc]  = uuid::get_uptime() - SEND_INTERVAL; // send now
+        sendtype_[hc] = SendType::TEMP;
     }
     remotetemp_[hc] = temp;
 }
@@ -59,8 +59,8 @@ void Roomctrl::set_remotehum(const uint8_t type, const uint8_t hc, const int8_t 
         return;
     }
     if (remotehum_[hc] != hum) {
-        rc_time_[hc] = uuid::get_uptime() - SEND_INTERVAL; // send now
-        sendcnt[hc]  = 1;
+        rc_time_[hc]  = uuid::get_uptime() - SEND_INTERVAL; // send now
+        sendtype_[hc] = SendType::HUMI;
     }
     remotehum_[hc] = hum;
 }
@@ -78,7 +78,7 @@ uint8_t Roomctrl::get_hc(uint8_t addr) {
 }
 
 /**
- * if remote control is active send the temperature every minute
+ * if remote control is active send the temperature every 15 seconds
  */
 void Roomctrl::send(uint8_t addr) {
     addr &= 0x7F;
@@ -92,18 +92,18 @@ void Roomctrl::send(uint8_t addr) {
         return;
     }
 
-    if (uuid::get_uptime() - rc_time_[hc] > SEND_INTERVAL) { // send every minute
+    if (uuid::get_uptime() - rc_time_[hc] > SEND_INTERVAL) { // check interval
         if (type_[hc] == RC100H) {
-            if (sendcnt[hc] == 1) { // second telegram for humidity
+            if (sendtype_[hc] == SendType::HUMI) { // send humidity
                 if (switch_off_[hc]) {
                     remotehum_[hc] = EMS_VALUE_UINT_NOTSET;
                 }
                 rc_time_[hc] = uuid::get_uptime();
                 humidity(addr, 0x10, hc);
-                sendcnt[hc] = 0;
+                sendtype_[hc] = SendType::TEMP;
             } else { // temperature telegram
                 if (remotehum_[hc] != EMS_VALUE_UINT_NOTSET) {
-                    sendcnt[hc] = 1;
+                    sendtype_[hc] = SendType::HUMI;
                 } else {
                     rc_time_[hc] = uuid::get_uptime();
                 }
@@ -121,11 +121,12 @@ void Roomctrl::send(uint8_t addr) {
         }
         if (remotehum_[hc] == EMS_VALUE_UINT_NOTSET && switch_off_[hc]) {
             switch_off_[hc] = false;
-            type_[hc]       = 0;
+            type_[hc]       = RemoteType::NONE;
         }
     } else {
         // acknowledge every poll, otherwise the master shows error A22-816
-        EMSuart::send_poll(addr | EMSbus::ems_mask());
+        // not needed for 15 sec repeat rate, causes incomplete telegrams if poll-ack is sent
+        // EMSuart::send_poll(addr | EMSbus::ems_mask());
     }
 }
 
