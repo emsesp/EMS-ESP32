@@ -124,9 +124,8 @@ void Roomctrl::send(uint8_t addr) {
             type_[hc]       = RemoteType::NONE;
         }
     } else {
-        // acknowledge every poll, otherwise the master shows error A22-816
-        // not needed for 15 sec repeat rate, causes incomplete telegrams if poll-ack is sent
-        // EMSuart::send_poll(addr | EMSbus::ems_mask());
+        // acknowledge every poll
+        EMSuart::send_poll(addr | EMSbus::ems_mask());
     }
 }
 
@@ -171,6 +170,8 @@ void Roomctrl::check(uint8_t addr, const uint8_t * data, const uint8_t length) {
         unknown(addr, data[0], data[2], data[3]);
     } else if (length == 8 && data[2] == 0xFF) { // ems+ query
         unknown(addr, data[0], data[3], data[5], data[6]);
+    } else if (data[2] == 0x7F) { // ems+ query with 3 bytes type src dst 7F offset len=FF FF HIGH LOW
+        replyF7(addr, data[0], data[3], data[5], data[6], data[7], hc);
     }
 }
 
@@ -354,6 +355,30 @@ void Roomctrl::ack_write() {
     uint8_t data[1];
     data[0] = TxService::TX_WRITE_SUCCESS;
     EMSuart::transmit(data, 1);
+}
+void Roomctrl::replyF7(uint8_t addr, uint8_t dst, uint8_t offset, uint8_t typehh, uint8_t typeh, uint8_t typel, uint8_t hc) {
+    uint8_t data[12];
+    data[0] = addr | EMSbus::ems_mask();
+    data[1] = dst & 0x7F;
+    data[2] = 0xF7;
+    data[3] = offset;
+    data[4] = typehh;
+    data[5] = typeh;
+    data[6] = typel;
+    if (typehh == 0x02) {
+        if (type_[hc] == RC200 || type_[hc] == FB10) {
+            data[7] = 0xFF;
+            data[8] = 0x01;
+        } else {
+            data[7] = 0x0F;
+            data[8] = 0x00;
+        }
+    } else {
+        data[7] = 0;
+        data[8] = 0;
+    }
+    data[9] = EMSbus::calculate_crc(data, 9); // apppend CRC
+    EMSuart::transmit(data, 10);
 }
 
 int16_t Roomctrl::calc_dew(int16_t temp, uint8_t humi) {
