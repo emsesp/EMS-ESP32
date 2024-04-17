@@ -81,7 +81,9 @@ uint8_t Roomctrl::get_hc(uint8_t addr) {
  * if remote control is active send the temperature every 15 seconds
  */
 void Roomctrl::send(uint8_t addr) {
-    addr &= 0x7F;
+    if (addr & 0x80) {
+        return;
+    }
     uint8_t hc = get_hc(addr);
     // check address, reply only on addresses 0x18..0x1B or 0x40..0x43
     if (hc >= HCS) {
