@@ -111,7 +111,7 @@ void Shower::loop() {
                             char dt[25];
                             strftime(dt, sizeof(dt), "%FT%T%z", tm_);
                             doc["timestamp"] = dt;
-                            LOG_INFO("shower finished (duration %s)", dt);
+                            LOG_INFO("shower finished %s (duration %lu s)", dt, duration_ / 1000UL);
                         } else {
                             LOG_INFO("shower finished (duration %lu s)", duration_ / 1000UL);
                         }
