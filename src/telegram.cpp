@@ -150,9 +150,9 @@ void RxService::add(uint8_t * data, uint8_t length) {
     if (data[length - 1] != crc) {
         if ((data[0] & 0x7F) != ems_bus_id()) { // do not count echos as errors
             telegram_error_count_++;
-            LOG_WARNING("Incomplete Rx: %s", Helpers::data_to_hex(data, length - 1).c_str()); // exclude CRC
+            LOG_WARNING("Incomplete Rx: %s", Helpers::data_to_hex(data, length).c_str()); // include CRC
         } else {
-            LOG_TRACE("Incomplete Rx: %s", Helpers::data_to_hex(data, length - 1).c_str()); // exclude CRC
+            LOG_TRACE("Incomplete Rx: %s", Helpers::data_to_hex(data, length).c_str()); // include CRC
         }
         return;
     }
