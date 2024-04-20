@@ -92,7 +92,7 @@ const LayoutMenu: FC = () => {
             }}
           >
             <ListItemText
-              primary={LL.CUSTOMIZE()}
+              primary={LL.MODULE()}
               primaryTypographyProps={{
                 fontWeight: '600',
                 mb: '2px',
