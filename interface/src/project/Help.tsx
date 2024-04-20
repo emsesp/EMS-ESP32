@@ -1,31 +1,35 @@
+import type { FC } from 'react';
+import { toast } from 'react-toastify';
+
 import CommentIcon from '@mui/icons-material/CommentTwoTone';
 import DownloadIcon from '@mui/icons-material/GetApp';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import MenuBookIcon from '@mui/icons-material/MenuBookTwoTone';
 import {
+  Avatar,
   Box,
+  Button,
+  Link,
   List,
   ListItem,
   ListItemAvatar,
-  ListItemText,
-  Link,
-  Typography,
-  Button,
   ListItemButton,
-  Avatar
+  ListItemText,
+  Typography
 } from '@mui/material';
+
+import * as EMSESP from 'project/api';
 import { useRequest } from 'alova';
-import { toast } from 'react-toastify';
-import type { FC } from 'react';
 import { SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
-import * as EMSESP from 'project/api';
+
+import type { APIcall } from './types';
 
 const Help: FC = () => {
   const { LL } = useI18nContext();
   useLayoutTitle(LL.HELP_OF(''));
 
-  const { send: getAPI, onSuccess: onGetAPI } = useRequest((data) => EMSESP.API(data), {
+  const { send: getAPI, onSuccess: onGetAPI } = useRequest((data: APIcall) => EMSESP.API(data), {
     immediate: false
   });
 
@@ -36,6 +40,7 @@ const Help: FC = () => {
         type: 'text/plain'
       })
     );
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     anchor.download = 'emsesp_' + event.sendArgs[0].device + '_' + event.sendArgs[0].entity + '.txt';
     anchor.click();
     URL.revokeObjectURL(anchor.href);
@@ -43,7 +48,7 @@ const Help: FC = () => {
   });
 
   const callAPI = async (device: string, entity: string) => {
-    await getAPI({ device, entity, id: 0 }).catch((error) => {
+    await getAPI({ device, entity, id: 0 }).catch((error: Error) => {
       toast.error(error.message);
     });
   };

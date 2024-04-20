@@ -1,3 +1,7 @@
+import { useState } from 'react';
+import type { FC } from 'react';
+import { toast } from 'react-toastify';
+
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DnsIcon from '@mui/icons-material/Dns';
@@ -18,21 +22,18 @@ import {
   ListItemAvatar,
   ListItemText,
   TextField,
-  useTheme,
-  Typography
+  Typography,
+  useTheme
 } from '@mui/material';
-import { useRequest } from 'alova';
-import { useState } from 'react';
-import { toast } from 'react-toastify';
 import type { Theme } from '@mui/material';
-import type { FC } from 'react';
 
-import type { NTPStatusType } from 'types';
-import { dialogStyle } from 'CustomTheme';
 import * as NTPApi from 'api/ntp';
-import { ButtonRow, FormLoader, SectionContent } from 'components';
 
+import { dialogStyle } from 'CustomTheme';
+import { useRequest } from 'alova';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
+import type { NTPStatusType, Time } from 'types';
 import { NTPSyncStatus } from 'types';
 import { formatDateTime, formatLocalDateTime } from 'utils';
 
@@ -45,7 +46,7 @@ const NTPStatus: FC = () => {
 
   const { LL } = useI18nContext();
 
-  const { send: updateTime } = useRequest((local_time) => NTPApi.updateTime(local_time), {
+  const { send: updateTime } = useRequest((local_time: Time) => NTPApi.updateTime(local_time), {
     immediate: false
   });
 

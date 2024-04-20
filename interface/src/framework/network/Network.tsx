@@ -1,15 +1,17 @@
-import { Tab } from '@mui/material';
 import { useCallback, useState } from 'react';
-import { Navigate, Routes, Route, useNavigate } from 'react-router-dom';
+import type { FC } from 'react';
+import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+
+import { Tab } from '@mui/material';
+
+import { RouterTabs, useLayoutTitle, useRouterTab } from 'components';
+import { useI18nContext } from 'i18n/i18n-react';
+import type { WiFiNetwork } from 'types';
+
 import NetworkSettings from './NetworkSettings';
 import NetworkStatus from './NetworkStatus';
 import { WiFiConnectionContext } from './WiFiConnectionContext';
 import WiFiNetworkScanner from './WiFiNetworkScanner';
-import type { FC } from 'react';
-
-import type { WiFiNetwork } from 'types';
-import { RouterTabs, useLayoutTitle, useRouterTab } from 'components';
-import { useI18nContext } from 'i18n/i18n-react';
 
 const Network: FC = () => {
   const { LL } = useI18nContext();

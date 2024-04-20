@@ -1,8 +1,8 @@
-import { defineConfig } from 'vite';
-import viteTsconfigPaths from 'vite-tsconfig-paths';
 import preact from '@preact/preset-vite';
-import viteImagemin from 'vite-plugin-imagemin';
 import { visualizer } from 'rollup-plugin-visualizer';
+import { defineConfig } from 'vite';
+import viteImagemin from 'vite-plugin-imagemin';
+import viteTsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig(({ command, mode }) => {
   if (command === 'serve') {

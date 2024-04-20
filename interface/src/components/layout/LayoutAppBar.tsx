@@ -1,6 +1,7 @@
+import type { FC } from 'react';
+
 import MenuIcon from '@mui/icons-material/Menu';
 import { AppBar, IconButton, Toolbar, Typography } from '@mui/material';
-import type { FC } from 'react';
 
 export const DRAWER_WIDTH = 210;
 

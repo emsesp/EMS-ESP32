@@ -1,38 +1,37 @@
+import { useEffect, useState } from 'react';
+
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
-
 import {
-  Button,
-  Typography,
   Box,
+  Button,
   Dialog,
-  DialogTitle,
-  DialogContent,
   DialogActions,
-  InputAdornment,
+  DialogContent,
+  DialogTitle,
   Grid,
-  TextField
+  InputAdornment,
+  TextField,
+  Typography
 } from '@mui/material';
-import { useState, useEffect } from 'react';
 
-import type { TemperatureSensor } from './types';
+import { dialogStyle } from 'CustomTheme';
 import type Schema from 'async-validator';
 import type { ValidateFieldsError } from 'async-validator';
-import { dialogStyle } from 'CustomTheme';
 import { ValidatedTextField } from 'components';
-
 import { useI18nContext } from 'i18n/i18n-react';
 import { numberValue, updateValue } from 'utils';
-
 import { validate } from 'validators';
 
-type SensorsTemperatureDialogProps = {
+import type { TemperatureSensor } from './types';
+
+interface SensorsTemperatureDialogProps {
   open: boolean;
   onClose: () => void;
   onSave: (ts: TemperatureSensor) => void;
   selectedItem: TemperatureSensor;
   validator: Schema;
-};
+}
 
 const SensorsTemperatureDialog = ({
   open,
@@ -62,8 +61,8 @@ const SensorsTemperatureDialog = ({
       setFieldErrors(undefined);
       await validate(validator, editItem);
       onSave(editItem);
-    } catch (errors: any) {
-      setFieldErrors(errors);
+    } catch (error) {
+      setFieldErrors(error as ValidateFieldsError);
     }
   };
 

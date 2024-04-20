@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 import AddIcon from '@mui/icons-material/Add';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DoneIcon from '@mui/icons-material/Done';
@@ -15,29 +17,26 @@ import {
   MenuItem,
   TextField
 } from '@mui/material';
-import { useEffect, useState } from 'react';
-
-import { DeviceValueUOM_s, DeviceValueType } from './types';
-import type { EntityItem } from './types';
-import type Schema from 'async-validator';
-import type { ValidateFieldsError } from 'async-validator';
 
 import { dialogStyle } from 'CustomTheme';
+import type Schema from 'async-validator';
+import type { ValidateFieldsError } from 'async-validator';
 import { BlockFormControlLabel, ValidatedTextField } from 'components';
-
 import { useI18nContext } from 'i18n/i18n-react';
-
 import { numberValue, updateValue } from 'utils';
 import { validate } from 'validators';
 
-type CustomEntitiesDialogProps = {
+import { DeviceValueType, DeviceValueUOM_s } from './types';
+import type { EntityItem } from './types';
+
+interface CustomEntitiesDialogProps {
   open: boolean;
   creating: boolean;
   onClose: () => void;
   onSave: (ei: EntityItem) => void;
   selectedItem: EntityItem;
   validator: Schema;
-};
+}
 
 const CustomEntitiesDialog = ({
   open,
@@ -80,8 +79,8 @@ const CustomEntitiesDialog = ({
         editItem.type_id = parseInt(editItem.type_id, 16);
       }
       onSave(editItem);
-    } catch (errors: any) {
-      setFieldErrors(errors);
+    } catch (error) {
+      setFieldErrors(error as ValidateFieldsError);
     }
   };
 

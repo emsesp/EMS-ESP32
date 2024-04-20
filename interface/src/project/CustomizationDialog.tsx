@@ -1,7 +1,8 @@
+import { useEffect, useState } from 'react';
+
 import CancelIcon from '@mui/icons-material/Cancel';
 import CloseIcon from '@mui/icons-material/Close';
 import DoneIcon from '@mui/icons-material/Done';
-
 import {
   Box,
   Button,
@@ -13,23 +14,21 @@ import {
   TextField,
   Typography
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+
+import { dialogStyle } from 'CustomTheme';
+import { useI18nContext } from 'i18n/i18n-react';
+import { updateValue } from 'utils';
 
 import EntityMaskToggle from './EntityMaskToggle';
 import { DeviceEntityMask } from './types';
 import type { DeviceEntity } from './types';
 
-import { dialogStyle } from 'CustomTheme';
-import { useI18nContext } from 'i18n/i18n-react';
-
-import { updateValue } from 'utils';
-
-type SettingsCustomizationDialogProps = {
+interface SettingsCustomizationDialogProps {
   open: boolean;
   onClose: () => void;
   onSave: (di: DeviceEntity) => void;
   selectedItem: DeviceEntity;
-};
+}
 
 const CustomizationDialog = ({ open, onClose, onSave, selectedItem }: SettingsCustomizationDialogProps) => {
   const { LL } = useI18nContext();

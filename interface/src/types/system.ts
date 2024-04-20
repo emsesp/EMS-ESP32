@@ -69,3 +69,9 @@ export interface LogSettings {
   max_messages: number;
   compact: false;
 }
+
+export interface OTASettings {
+  enabled: boolean;
+  port: number;
+  password: string;
+}

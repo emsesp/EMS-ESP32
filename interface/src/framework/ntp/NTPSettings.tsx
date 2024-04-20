@@ -1,27 +1,29 @@
+import { useState } from 'react';
+import type { FC } from 'react';
+
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
 import { Button, Checkbox, MenuItem } from '@mui/material';
-// eslint-disable-next-line import/named
-import { updateState } from 'alova';
-import { useState } from 'react';
-import { selectedTimeZone, timeZoneSelectItems, TIME_ZONES } from './TZ';
-import type { ValidateFieldsError } from 'async-validator';
-import type { FC } from 'react';
 
-import type { NTPSettingsType } from 'types';
 import * as NTPApi from 'api/ntp';
+
+import { updateState } from 'alova';
+import type { ValidateFieldsError } from 'async-validator';
 import {
   BlockFormControlLabel,
+  BlockNavigation,
   ButtonRow,
   FormLoader,
   SectionContent,
-  ValidatedTextField,
-  BlockNavigation
+  ValidatedTextField
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
+import type { NTPSettingsType } from 'types';
 import { updateValueDirty, useRest } from 'utils';
 import { validate } from 'validators';
 import { NTP_SETTINGS_VALIDATOR } from 'validators/ntp';
+
+import { TIME_ZONES, selectedTimeZone, timeZoneSelectItems } from './TZ';
 
 const NTPSettings: FC = () => {
   const {
@@ -56,15 +58,15 @@ const NTPSettings: FC = () => {
         setFieldErrors(undefined);
         await validate(NTP_SETTINGS_VALIDATOR, data);
         await saveData();
-      } catch (errors: any) {
-        setFieldErrors(errors);
+      } catch (error) {
+        setFieldErrors(error as ValidateFieldsError);
       }
     };
 
     const changeTimeZone = (event: React.ChangeEvent<HTMLInputElement>) => {
       updateFormValue(event);
 
-      updateState('ntpSettings', (settings) => ({
+      updateState('ntpSettings', (settings: NTPSettingsType) => ({
         ...settings,
         tz_label: event.target.value,
         tz_format: TIME_ZONES[event.target.value]

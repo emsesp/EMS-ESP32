@@ -1,3 +1,7 @@
+import { useContext, useState } from 'react';
+import type { FC } from 'react';
+import { useBlocker } from 'react-router-dom';
+
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
@@ -6,23 +10,21 @@ import EditIcon from '@mui/icons-material/Edit';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import WarningIcon from '@mui/icons-material/Warning';
-import { Button, IconButton, Box } from '@mui/material';
+import { Box, Button, IconButton } from '@mui/material';
 
-import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
-import { useTheme } from '@table-library/react-table-library/theme';
-import { useContext, useState } from 'react';
-
-import { useBlocker } from 'react-router-dom';
-import GenerateToken from './GenerateToken';
-import User from './User';
-import type { FC } from 'react';
-import type { SecuritySettingsType, UserType } from 'types';
 import * as SecurityApi from 'api/security';
-import { ButtonRow, FormLoader, MessageBox, SectionContent, BlockNavigation } from 'components';
+
+import { Body, Cell, Header, HeaderCell, HeaderRow, Row, Table } from '@table-library/react-table-library/table';
+import { useTheme } from '@table-library/react-table-library/theme';
+import { BlockNavigation, ButtonRow, FormLoader, MessageBox, SectionContent } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
+import type { SecuritySettingsType, UserType } from 'types';
 import { useRest } from 'utils';
 import { createUserValidator } from 'validators';
+
+import GenerateToken from './GenerateToken';
+import User from './User';
 
 const ManageUsers: FC = () => {
   const { loadData, saveData, saving, data, updateDataValue, errorMessage } = useRest<SecuritySettingsType>({
@@ -138,12 +140,20 @@ const ManageUsers: FC = () => {
       setChanged(0);
     };
 
-    const user_table = data.users.map((u) => ({ ...u, id: u.username }));
+    interface UserType2 {
+      id: string;
+      username: string;
+      password: string;
+      admin: boolean;
+    }
+
+    // add id to the type, needed for the table
+    const user_table = data.users.map((u) => ({ ...u, id: u.username })) as UserType2[];
 
     return (
       <>
         <Table data={{ nodes: user_table }} theme={table_theme} layout={{ custom: true }}>
-          {(tableList: any) => (
+          {(tableList: UserType2[]) => (
             <>
               <Header>
                 <HeaderRow>
@@ -153,7 +163,7 @@ const ManageUsers: FC = () => {
                 </HeaderRow>
               </Header>
               <Body>
-                {tableList.map((u: any) => (
+                {tableList.map((u: UserType2) => (
                   <Row key={u.id} item={u}>
                     <Cell>{u.username}</Cell>
                     <Cell stiff>{u.admin ? <CheckIcon /> : <CloseIcon />}</Cell>

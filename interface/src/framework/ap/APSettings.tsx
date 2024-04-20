@@ -1,27 +1,27 @@
+import { useState } from 'react';
+import type { FC } from 'react';
+
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
 import { Button, Checkbox, MenuItem } from '@mui/material';
-import { range } from 'lodash-es';
-import { useState } from 'react';
-import type { ValidateFieldsError } from 'async-validator';
-import type { FC } from 'react';
 
-import type { APSettingsType } from 'types';
 import * as APApi from 'api/ap';
+
+import type { ValidateFieldsError } from 'async-validator';
 import {
   BlockFormControlLabel,
+  BlockNavigation,
   ButtonRow,
   FormLoader,
   SectionContent,
   ValidatedPasswordField,
-  ValidatedTextField,
-  BlockNavigation
+  ValidatedTextField
 } from 'components';
-
 import { useI18nContext } from 'i18n/i18n-react';
+import { range } from 'lodash-es';
+import type { APSettingsType } from 'types';
 import { APProvisionMode } from 'types';
 import { numberValue, updateValueDirty, useRest } from 'utils';
-
 import { createAPSettingsValidator, validate } from 'validators';
 
 export const isAPEnabled = ({ provision_mode }: APSettingsType) =>
@@ -60,8 +60,8 @@ const APSettings: FC = () => {
         setFieldErrors(undefined);
         await validate(createAPSettingsValidator(data), data);
         await saveData();
-      } catch (errors: any) {
-        setFieldErrors(errors);
+      } catch (error) {
+        setFieldErrors(error as ValidateFieldsError);
       }
     };
 

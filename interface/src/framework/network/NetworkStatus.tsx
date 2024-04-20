@@ -1,3 +1,5 @@
+import type { FC } from 'react';
+
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import DnsIcon from '@mui/icons-material/Dns';
 import GiteIcon from '@mui/icons-material/Gite';
@@ -7,15 +9,14 @@ import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import SettingsInputComponentIcon from '@mui/icons-material/SettingsInputComponent';
 import WifiIcon from '@mui/icons-material/Wifi';
 import { Avatar, Button, Divider, List, ListItem, ListItemAvatar, ListItemText, useTheme } from '@mui/material';
-import { useRequest } from 'alova';
 import type { Theme } from '@mui/material';
-import type { FC } from 'react';
 
-import type { NetworkStatusType } from 'types';
 import * as NetworkApi from 'api/network';
-import { ButtonRow, FormLoader, SectionContent } from 'components';
 
+import { useRequest } from 'alova';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
+import type { NetworkStatusType } from 'types';
 import { NetworkConnectionStatus } from 'types';
 
 const isConnected = ({ status }: NetworkStatusType) =>

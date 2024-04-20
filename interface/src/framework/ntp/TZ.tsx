@@ -1,8 +1,6 @@
 import { MenuItem } from '@mui/material';
 
-type TimeZones = {
-  [name: string]: string;
-};
+type TimeZones = Record<string, string>;
 
 export const TIME_ZONES: TimeZones = {
   'Africa/Abidjan': 'GMT0',

@@ -1,6 +1,6 @@
 import type { Translation } from '../i18n-types';
+
 /* prettier-ignore */
-/* eslint-disable */
 
 const nl: Translation = {
   LANGUAGE: 'Taal',
@@ -99,7 +99,7 @@ const nl: Translation = {
   NUM_HOURS: '{num} {{uur|uren}}',
   NUM_MINUTES: '{num} {{minuut|minuten}}',
   APPLICATION_SETTINGS: 'Applicatieinstellingen',
-  CUSTOMIZATIONS: 'Custom aanpassingen',
+  CUSTOMIZATIONS: 'User Entities',
   APPLICATION_RESTARTING: 'EMS-ESP herstarten',
   INTERFACE_BOARD_PROFILE: 'Interface Apparaatprofiel',
   BOARD_PROFILE_TEXT: 'Selecteer een vooraf ingesteld apparaat profiel uit de lijst of kies Eigen om zelf uw hardware te configureren',

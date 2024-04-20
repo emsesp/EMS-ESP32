@@ -1,8 +1,9 @@
+import { useEffect, useState } from 'react';
+
 import AddIcon from '@mui/icons-material/Add';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DoneIcon from '@mui/icons-material/Done';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
-
 import {
   Box,
   Button,
@@ -17,22 +18,19 @@ import {
   ToggleButtonGroup,
   Typography
 } from '@mui/material';
-import { useEffect, useState } from 'react';
-
-import { ScheduleFlag } from './types';
-import type { ScheduleItem } from './types';
-import type Schema from 'async-validator';
-import type { ValidateFieldsError } from 'async-validator';
 
 import { dialogStyle } from 'CustomTheme';
+import type Schema from 'async-validator';
+import type { ValidateFieldsError } from 'async-validator';
 import { BlockFormControlLabel, ValidatedTextField } from 'components';
-
 import { useI18nContext } from 'i18n/i18n-react';
-
 import { updateValue } from 'utils';
 import { validate } from 'validators';
 
-type SchedulerDialogProps = {
+import { ScheduleFlag } from './types';
+import type { ScheduleItem } from './types';
+
+interface SchedulerDialogProps {
   open: boolean;
   creating: boolean;
   onClose: () => void;
@@ -40,7 +38,7 @@ type SchedulerDialogProps = {
   selectedItem: ScheduleItem;
   validator: Schema;
   dow: string[];
-};
+}
 
 const SchedulerDialog = ({ open, creating, onClose, onSave, selectedItem, validator, dow }: SchedulerDialogProps) => {
   const { LL } = useI18nContext();
@@ -65,8 +63,8 @@ const SchedulerDialog = ({ open, creating, onClose, onSave, selectedItem, valida
       setFieldErrors(undefined);
       await validate(validator, editItem);
       onSave(editItem);
-    } catch (errors: any) {
-      setFieldErrors(errors);
+    } catch (error) {
+      setFieldErrors(error as ValidateFieldsError);
     }
   };
 
@@ -132,7 +130,7 @@ const SchedulerDialog = ({ open, creating, onClose, onSave, selectedItem, valida
               size="small"
               color="secondary"
               value={getFlagString(editItem.flags)}
-              onChange={(event, flag) => {
+              onChange={(_event, flag: string[]) => {
                 setEditItem({ ...editItem, flags: getFlagNumber(flag) & 127 });
               }}
             >

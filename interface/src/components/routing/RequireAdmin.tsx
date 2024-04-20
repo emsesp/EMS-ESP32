@@ -1,9 +1,9 @@
 import { useContext } from 'react';
-import { Navigate } from 'react-router-dom';
 import type { FC } from 'react';
+import { Navigate } from 'react-router-dom';
 
-import type { RequiredChildrenProps } from 'utils';
 import { AuthenticatedContext } from 'contexts/authentication';
+import type { RequiredChildrenProps } from 'utils';
 
 const RequireAdmin: FC<RequiredChildrenProps> = ({ children }) => {
   const authenticatedContext = useContext(AuthenticatedContext);

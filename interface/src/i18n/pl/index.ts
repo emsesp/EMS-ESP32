@@ -1,6 +1,6 @@
 import type { BaseTranslation } from '../i18n-types';
+
 /* prettier-ignore */
-/* eslint-disable */
 
 const pl: BaseTranslation = {
   LANGUAGE: 'Język',
@@ -287,8 +287,8 @@ const pl: BaseTranslation = {
   NETWORK_SUBNET: 'Maska podsieci',
   NETWORK_DNS: 'Serwery DNS',
   ADDRESS_OF: 'Adres {0}',
-  ADMIN: 'Użytkownik "administrator".',
-  GUEST: 'Użytkownik "gość".',
+  ADMIN: 'Administrator',
+  GUEST: 'Gość',
   NEW: 'nowe{{go|j|}}',
   NEW_NAME_OF: 'Nowa nazwa {0}',
   ENTITY: 'encji',

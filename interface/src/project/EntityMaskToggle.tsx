@@ -1,12 +1,13 @@
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';
+
 import OptionIcon from './OptionIcon';
 import { DeviceEntityMask } from './types';
 import type { DeviceEntity } from './types';
 
-type EntityMaskToggleProps = {
+interface EntityMaskToggleProps {
   onUpdate: (de: DeviceEntity) => void;
   de: DeviceEntity;
-};
+}
 
 const EntityMaskToggle = ({ onUpdate, de }: EntityMaskToggleProps) => {
   const getMaskNumber = (newMask: string[]) => {
@@ -42,7 +43,7 @@ const EntityMaskToggle = ({ onUpdate, de }: EntityMaskToggleProps) => {
       size="small"
       color="secondary"
       value={getMaskString(de.m)}
-      onChange={(event, mask) => {
+      onChange={(event, mask: string[]) => {
         de.m = getMaskNumber(mask);
         if (de.n === '' && de.m & DeviceEntityMask.DV_READONLY) {
           de.m = de.m | DeviceEntityMask.DV_WEB_EXCLUDE;

@@ -1,3 +1,5 @@
+import type { FC } from 'react';
+
 import AppsIcon from '@mui/icons-material/Apps';
 import DeveloperBoardIcon from '@mui/icons-material/DeveloperBoard';
 import DevicesIcon from '@mui/icons-material/Devices';
@@ -8,10 +10,9 @@ import SdCardAlertIcon from '@mui/icons-material/SdCardAlert';
 import SdStorageIcon from '@mui/icons-material/SdStorage';
 import { Avatar, Box, Button, Divider, List, ListItem, ListItemAvatar, ListItemText } from '@mui/material';
 
-import { useRequest } from 'alova';
-import type { FC } from 'react';
-
 import * as SystemApi from 'api/system';
+
+import { useRequest } from 'alova';
 import { ButtonRow, FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 

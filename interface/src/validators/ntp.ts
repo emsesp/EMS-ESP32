@@ -1,4 +1,5 @@
 import Schema from 'async-validator';
+
 import { IP_OR_HOSTNAME_VALIDATOR } from './shared';
 
 export const NTP_SETTINGS_VALIDATOR = new Schema({

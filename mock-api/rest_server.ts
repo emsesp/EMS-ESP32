@@ -2293,8 +2293,6 @@ const emsesp_deviceentities_4 = [
 
 // END DATA
 
-// ROUTING STARTS HERE
-
 // LOG
 router
   .post(FETCH_LOG_ENDPOINT, () => {
@@ -2303,6 +2301,7 @@ router
   .get(LOG_SETTINGS_ENDPOINT, () => log_settings)
   .post(LOG_SETTINGS_ENDPOINT, async (request: any) => {
     log_settings = await request.json();
+    console.log('log settings saved', log_settings);
     return status(200);
   });
 
@@ -2326,6 +2325,7 @@ router
   })
   .post(NETWORK_SETTINGS_ENDPOINT, async (request: any) => {
     network_settings = await request.json();
+    console.log('network settings saved', network_settings);
     return status(200);
   });
 
@@ -2335,6 +2335,7 @@ router
   .get(AP_STATUS_ENDPOINT, () => ap_status)
   .post(AP_SETTINGS_ENDPOINT, async (request: any) => {
     ap_settings = await request.json();
+    console.log('ap settings saved', ap_settings);
     return status(200);
   });
 
@@ -2343,6 +2344,7 @@ router
   .get(OTA_SETTINGS_ENDPOINT, () => ota_settings)
   .post(OTA_SETTINGS_ENDPOINT, async (request: any) => {
     ota_settings = await request.json();
+    console.log('ota settings saved', ota_settings);
     return status(200);
   });
 
@@ -2352,6 +2354,7 @@ router
   .get(MQTT_STATUS_ENDPOINT, () => mqtt_status)
   .post(MQTT_SETTINGS_ENDPOINT, async (request: any) => {
     mqtt_settings = await request.json();
+    console.log('mqtt settings saved', mqtt_settings);
     return status(200);
   });
 
@@ -2362,6 +2365,7 @@ router
   .post(TIME_ENDPOINT, () => status(200))
   .post(NTP_SETTINGS_ENDPOINT, async (request: any) => {
     ntp_settings = await request.json();
+    console.log('ntp settings saved', ntp_settings);
     return status(200);
   });
 
@@ -2373,6 +2377,7 @@ router
   .get(SECURITY_SETTINGS_ENDPOINT, () => security_settings)
   .post(SECURITY_SETTINGS_ENDPOINT, async (request: any) => {
     security_settings = await request.json();
+    console.log('security settings saved', security_settings);
     return status(200);
   })
   .get(VERIFY_AUTHORIZATION_ENDPOINT, () => verify_authentication)
@@ -2442,8 +2447,9 @@ router
   .get(EMSESP_SETTINGS_ENDPOINT, () => settings)
   .post(EMSESP_SETTINGS_ENDPOINT, async (request: any) => {
     settings = await request.json();
+    console.log('settings saved', settings);
     status(200); // no restart needed
-    status(205); // restart needed
+    // status(205); // restart needed
   })
 
   // Device Dashboard Data
@@ -2482,6 +2488,7 @@ router
         updateMask(entity, emsesp_deviceentities_6, emsesp_devicedata_6);
       }
     }
+    console.log('customization saved', content);
     return status(200);
   })
   .post(EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT, async (request: any) => {
@@ -2492,6 +2499,7 @@ router
   .post(EMSESP_SCHEDULE_ENDPOINT, async (request: any) => {
     const content = await request.json();
     emsesp_schedule = content;
+    console.log('schedule saved', emsesp_schedule);
     return status(200);
   })
   .get(EMSESP_SCHEDULE_ENDPOINT, () => emsesp_schedule)
@@ -2500,6 +2508,7 @@ router
   .post(EMSESP_CUSTOMENTITIES_ENDPOINT, async (request: any) => {
     const content = await request.json();
     emsesp_customentities = content;
+    console.log('custom entities saved', emsesp_customentities);
     return status(200);
   })
   .get(EMSESP_CUSTOMENTITIES_ENDPOINT, () => emsesp_customentities)
@@ -2547,6 +2556,7 @@ router
     }
 
     // await delay(1000); // wait to show spinner
+    console.log('device value saved', content);
     return status(200);
   })
 
@@ -2558,6 +2568,7 @@ router
       emsesp_sensordata.ts[objIndex].n = ts.name;
       emsesp_sensordata.ts[objIndex].o = ts.offset;
     }
+    console.log('temp sensor saved', ts);
     return status(200);
   })
   .post(EMSESP_WRITE_ANALOGSENSOR_ENDPOINT, async (request: any) => {
@@ -2590,6 +2601,7 @@ router
         emsesp_sensordata.as[objIndex].t = as.type;
       }
     }
+    console.log('analog sensor saved', as);
 
     return status(200);
   })
@@ -2723,6 +2735,7 @@ router
       data.eth_clock_mode = 0;
     }
 
+    console.log('board profile saved', data);
     return data;
   })
 

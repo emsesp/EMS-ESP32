@@ -1,7 +1,7 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import type { FC } from 'react';
+import type { Blocker } from 'react-router-dom';
 
-import type { unstable_Blocker as Blocker } from 'react-router-dom';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 
 import { dialogStyle } from 'CustomTheme';
 import { useI18nContext } from 'i18n/i18n-react';

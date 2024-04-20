@@ -1,21 +1,22 @@
-import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
-import { AiOutlineControl, AiOutlineGateway, AiOutlineAlert } from 'react-icons/ai';
+import type { FC } from 'react';
+import { AiOutlineAlert, AiOutlineControl, AiOutlineGateway } from 'react-icons/ai';
 import { CgSmartHomeBoiler } from 'react-icons/cg';
 import { FaSolarPanel } from 'react-icons/fa';
 import { GiHeatHaze, GiTap } from 'react-icons/gi';
-import { MdThermostatAuto, MdOutlineSensors, MdOutlineDevices, MdOutlinePool } from 'react-icons/md';
+import { MdOutlineDevices, MdOutlinePool, MdOutlineSensors, MdThermostatAuto } from 'react-icons/md';
 import { TiFlowSwitch } from 'react-icons/ti';
 import { VscVmConnect } from 'react-icons/vsc';
-import { DeviceType } from './types';
 
-import type { FC } from 'react';
+import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
+
+import { DeviceType } from './types';
 
 interface DeviceIconProps {
   type_id: number;
 }
 
 const DeviceIcon: FC<DeviceIconProps> = ({ type_id }) => {
-  switch (type_id) {
+  switch (type_id as DeviceType) {
     case DeviceType.TEMPERATURESENSOR:
     case DeviceType.ANALOGSENSOR:
       return <MdOutlineSensors />;

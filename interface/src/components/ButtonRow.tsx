@@ -1,6 +1,7 @@
+import type { FC } from 'react';
+
 import { Box } from '@mui/material';
 import type { BoxProps } from '@mui/material';
-import type { FC } from 'react';
 
 const ButtonRow: FC<BoxProps> = ({ children, ...rest }) => (
   <Box

@@ -1,5 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+import type { ESPSystemStatus, LogSettings, OTASettings, SystemStatus } from 'types';
+
 import { alovaInstance, alovaInstanceGH } from './endpoints';
-import type { OTASettings, SystemStatus, LogSettings, ESPSystemStatus } from 'types';
 
 // ESPSystemStatus - also used to ping in Restart monitor for pinging
 export const readESPSystemStatus = () => alovaInstance.Get<ESPSystemStatus>('/rest/ESPSystemStatus');
@@ -14,23 +20,24 @@ export const factoryReset = () => alovaInstance.Post('/rest/factoryReset');
 
 // OTA
 export const readOTASettings = () => alovaInstance.Get<OTASettings>(`/rest/otaSettings`);
-export const updateOTASettings = (data: any) => alovaInstance.Post('/rest/otaSettings', data);
+export const updateOTASettings = (data: OTASettings) => alovaInstance.Post('/rest/otaSettings', data);
 
 // SystemLog
 export const readLogSettings = () => alovaInstance.Get<LogSettings>(`/rest/logSettings`);
-export const updateLogSettings = (data: any) => alovaInstance.Post('/rest/logSettings', data);
+export const updateLogSettings = (data: LogSettings) => alovaInstance.Post('/rest/logSettings', data);
 export const fetchLog = () => alovaInstance.Post('/rest/fetchLog');
+export const fetchLogES = () => alovaInstance.Get('/es/log');
 
 // Get versions from github
 export const getStableVersion = () =>
   alovaInstanceGH.Get('latest', {
-    transformData(response: any) {
+    transformData(response) {
       return response.data.name.substring(1);
     }
   });
 export const getDevVersion = () =>
   alovaInstanceGH.Get('tags/latest', {
-    transformData(response: any) {
+    transformData(response) {
       return response.data.name.split(/\s+/).splice(-1)[0].substring(1);
     }
   });

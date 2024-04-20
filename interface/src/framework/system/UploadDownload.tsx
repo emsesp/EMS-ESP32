@@ -1,15 +1,18 @@
-import DownloadIcon from '@mui/icons-material/GetApp';
-import { Typography, Button, Box, Link } from '@mui/material';
-import { useRequest } from 'alova';
-import { useState, type FC } from 'react';
+import { type FC, useState } from 'react';
 import { toast } from 'react-toastify';
-import RestartMonitor from './RestartMonitor';
+
+import DownloadIcon from '@mui/icons-material/GetApp';
+import { Box, Button, Link, Typography } from '@mui/material';
 
 import * as SystemApi from 'api/system';
-import { FormLoader, SectionContent, SingleUpload, useLayoutTitle } from 'components';
 
-import { useI18nContext } from 'i18n/i18n-react';
 import * as EMSESP from 'project/api';
+import { useRequest } from 'alova';
+import { FormLoader, SectionContent, SingleUpload, useLayoutTitle } from 'components';
+import { useI18nContext } from 'i18n/i18n-react';
+import type { APIcall } from 'project/types';
+
+import RestartMonitor from './RestartMonitor';
 
 const UploadDownload: FC = () => {
   const { LL } = useI18nContext();
@@ -28,7 +31,7 @@ const UploadDownload: FC = () => {
   const { send: getSchedule, onSuccess: onSuccessGetSchedule } = useRequest(EMSESP.getSchedule(), {
     immediate: false
   });
-  const { send: getAPI, onSuccess: onGetAPI } = useRequest((data) => EMSESP.API(data), {
+  const { send: getAPI, onSuccess: onGetAPI } = useRequest((data: APIcall) => EMSESP.API(data), {
     immediate: false
   });
 
@@ -64,8 +67,9 @@ const UploadDownload: FC = () => {
     force: true
   });
 
-  onSuccessUpload(({ data }: any) => {
+  onSuccessUpload(({ data }) => {
     if (data) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       setMd5(data.md5);
       toast.success(LL.UPLOAD() + ' MD5 ' + LL.SUCCESSFUL());
     } else {
@@ -74,18 +78,18 @@ const UploadDownload: FC = () => {
   });
 
   const startUpload = async (files: File[]) => {
-    await sendUpload(files[0]).catch((err) => {
-      if (err.message === 'The user aborted a request') {
+    await sendUpload(files[0]).catch((error: Error) => {
+      if (error.message === 'The user aborted a request') {
         toast.warning(LL.UPLOAD() + ' ' + LL.ABORTED());
-      } else if (err.message === 'Network Error') {
+      } else if (error.message === 'Network Error') {
         toast.warning('Invalid file extension or incompatible bin file');
       } else {
-        toast.error(err.message);
+        toast.error(error.message);
       }
     });
   };
 
-  const saveFile = (json: any, endpoint: string) => {
+  const saveFile = (json: unknown, endpoint: string) => {
     const anchor = document.createElement('a');
     anchor.href = URL.createObjectURL(
       new Blob([JSON.stringify(json, null, 2)], {
@@ -111,30 +115,31 @@ const UploadDownload: FC = () => {
     saveFile(event.data, 'schedule.json');
   });
   onGetAPI((event) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     saveFile(event.data, event.sendArgs[0].device + '_' + event.sendArgs[0].entity + '.txt');
   });
 
   const downloadSettings = async () => {
-    await getSettings().catch((error) => {
+    await getSettings().catch((error: Error) => {
       toast.error(error.message);
     });
   };
 
   const downloadCustomizations = async () => {
-    await getCustomizations().catch((error) => {
+    await getCustomizations().catch((error: Error) => {
       toast.error(error.message);
     });
   };
 
   const downloadEntities = async () => {
-    await getEntities().catch((error) => {
+    await getEntities().catch((error: Error) => {
       toast.error(error.message);
     });
   };
 
   const downloadSchedule = async () => {
     await getSchedule()
-      .catch((error) => {
+      .catch((error: Error) => {
         toast.error(error.message);
       })
       .finally(() => {
@@ -143,7 +148,7 @@ const UploadDownload: FC = () => {
   };
 
   const callAPI = async (device: string, entity: string) => {
-    await getAPI({ device, entity, id: 0 }).catch((error) => {
+    await getAPI({ device, entity, id: 0 }).catch((error: Error) => {
       toast.error(error.message);
     });
   };
@@ -173,7 +178,7 @@ const UploadDownload: FC = () => {
               )&nbsp;(
               <Link
                 target="_blank"
-                href={STABLE_URL + 'v' + latestVersion + '/' + getBinURL(latestVersion)}
+                href={STABLE_URL + 'v' + latestVersion + '/' + getBinURL(latestVersion as string)}
                 color="primary"
               >
                 {LL.DOWNLOAD(1)}
@@ -190,7 +195,7 @@ const UploadDownload: FC = () => {
                 {LL.RELEASE_NOTES()}
               </Link>
               )&nbsp;(
-              <Link target="_blank" href={DEV_URL + getBinURL(latestDevVersion)} color="primary">
+              <Link target="_blank" href={DEV_URL + getBinURL(latestDevVersion as string)} color="primary">
                 {LL.DOWNLOAD(1)}
               </Link>
               )

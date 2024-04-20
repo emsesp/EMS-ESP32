@@ -1,12 +1,13 @@
-import { Tab } from '@mui/material';
-import { Navigate, Route, Routes } from 'react-router-dom';
-import NTPSettings from './NTPSettings';
-import NTPStatus from './NTPStatus';
 import type { FC } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
+
+import { Tab } from '@mui/material';
 
 import { RouterTabs, useLayoutTitle, useRouterTab } from 'components';
-
 import { useI18nContext } from 'i18n/i18n-react';
+
+import NTPSettings from './NTPSettings';
+import NTPStatus from './NTPStatus';
 
 const NetworkTime: FC = () => {
   const { LL } = useI18nContext();

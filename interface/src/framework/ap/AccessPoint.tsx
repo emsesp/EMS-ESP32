@@ -1,12 +1,13 @@
+import type { FC } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
+
 import { Tab } from '@mui/material';
-import { Navigate, Routes, Route } from 'react-router-dom';
+
+import { RouterTabs, useLayoutTitle, useRouterTab } from 'components';
+import { useI18nContext } from 'i18n/i18n-react';
 
 import APSettings from './APSettings';
 import APStatus from './APStatus';
-import type { FC } from 'react';
-import { RouterTabs, useLayoutTitle, useRouterTab } from 'components';
-
-import { useI18nContext } from 'i18n/i18n-react';
 
 const AccessPoint: FC = () => {
   const { LL } = useI18nContext();

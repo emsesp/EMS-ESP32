@@ -1,33 +1,35 @@
+import { useState } from 'react';
+import type { FC } from 'react';
+import { toast } from 'react-toastify';
+
 import CancelIcon from '@mui/icons-material/Cancel';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import WarningIcon from '@mui/icons-material/Warning';
-import { Box, Button, Checkbox, MenuItem, Grid, Typography, Divider, InputAdornment, TextField } from '@mui/material';
-import { useRequest } from 'alova';
-import { useState } from 'react';
-import { toast } from 'react-toastify';
+import { Box, Button, Checkbox, Divider, Grid, InputAdornment, MenuItem, TextField, Typography } from '@mui/material';
 
-import * as EMSESP from './api';
-import { BOARD_PROFILES } from './types';
-import { createSettingsValidator } from './validators';
-import type { Settings } from './types';
-import type { ValidateFieldsError } from 'async-validator';
-import type { FC } from 'react';
 import * as SystemApi from 'api/system';
+
+import { useRequest } from 'alova';
+import type { ValidateFieldsError } from 'async-validator';
 import {
-  SectionContent,
-  FormLoader,
   BlockFormControlLabel,
-  ValidatedTextField,
-  ButtonRow,
-  MessageBox,
   BlockNavigation,
+  ButtonRow,
+  FormLoader,
+  MessageBox,
+  SectionContent,
+  ValidatedTextField,
   useLayoutTitle
 } from 'components';
-
 import RestartMonitor from 'framework/system/RestartMonitor';
 import { useI18nContext } from 'i18n/i18n-react';
 import { numberValue, updateValueDirty, useRest } from 'utils';
 import { validate } from 'validators';
+
+import * as EMSESP from './api';
+import { BOARD_PROFILES } from './types';
+import type { Settings } from './types';
+import { createSettingsValidator } from './validators';
 
 export function boardProfileSelectItems() {
   return Object.keys(BOARD_PROFILES).map((code) => (
@@ -67,7 +69,7 @@ const ApplicationSettings: FC = () => {
     loading: processingBoard,
     send: readBoardProfile,
     onSuccess: onSuccessBoardProfile
-  } = useRequest((boardProfile) => EMSESP.getBoardProfile(boardProfile), {
+  } = useRequest((boardProfile: string) => EMSESP.getBoardProfile(boardProfile), {
     immediate: false
   });
 
@@ -93,7 +95,7 @@ const ApplicationSettings: FC = () => {
   });
 
   const updateBoardProfile = async (board_profile: string) => {
-    await readBoardProfile(board_profile).catch((error) => {
+    await readBoardProfile(board_profile).catch((error: Error) => {
       toast.error(error.message);
     });
   };
@@ -109,8 +111,8 @@ const ApplicationSettings: FC = () => {
       try {
         setFieldErrors(undefined);
         await validate(createSettingsValidator(data), data);
-      } catch (errors: any) {
-        setFieldErrors(errors);
+      } catch (error) {
+        setFieldErrors(error as ValidateFieldsError);
       } finally {
         await saveData();
       }
@@ -131,7 +133,7 @@ const ApplicationSettings: FC = () => {
 
     const restart = async () => {
       await validateAndSubmit();
-      await restartCommand().catch((error) => {
+      await restartCommand().catch((error: Error) => {
         toast.error(error.message);
       });
       setRestarting(true);

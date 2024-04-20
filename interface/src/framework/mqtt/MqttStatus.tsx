@@ -1,17 +1,19 @@
+import type { FC } from 'react';
+
 import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import ReportIcon from '@mui/icons-material/Report';
 import SpeakerNotesOffIcon from '@mui/icons-material/SpeakerNotesOff';
 import { Avatar, Button, Divider, List, ListItem, ListItemAvatar, ListItemText, useTheme } from '@mui/material';
-import { useRequest } from 'alova';
 import type { Theme } from '@mui/material';
-import type { FC } from 'react';
 
-import type { MqttStatusType } from 'types';
 import * as MqttApi from 'api/mqtt';
+
+import { useRequest } from 'alova';
 import { ButtonRow, FormLoader, SectionContent } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
+import type { MqttStatusType } from 'types';
 import { MqttDisconnectReason } from 'types';
 
 export const mqttStatusHighlight = ({ enabled, connected }: MqttStatusType, theme: Theme) => {

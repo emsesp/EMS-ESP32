@@ -1,26 +1,26 @@
+import { useState } from 'react';
+import type { FC } from 'react';
+
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
 import { Button, Checkbox } from '@mui/material';
-import { useState } from 'react';
-import type { ValidateFieldsError } from 'async-validator';
-import type { FC } from 'react';
 
-import type { OTASettingsType } from 'types';
 import * as SystemApi from 'api/system';
+
+import type { ValidateFieldsError } from 'async-validator';
 import {
   BlockFormControlLabel,
+  BlockNavigation,
   ButtonRow,
   FormLoader,
   SectionContent,
   ValidatedPasswordField,
   ValidatedTextField,
-  BlockNavigation,
   useLayoutTitle
 } from 'components';
-
 import { useI18nContext } from 'i18n/i18n-react';
+import type { OTASettingsType } from 'types';
 import { numberValue, updateValueDirty, useRest } from 'utils';
-
 import { validate } from 'validators';
 import { OTA_SETTINGS_VALIDATOR } from 'validators/system';
 
@@ -57,8 +57,8 @@ const OTASettings: FC = () => {
         setFieldErrors(undefined);
         await validate(OTA_SETTINGS_VALIDATOR, data);
         await saveData();
-      } catch (errors: any) {
-        setFieldErrors(errors);
+      } catch (error) {
+        setFieldErrors(error as ValidateFieldsError);
       }
     };
 

@@ -1,24 +1,25 @@
-import CancelIcon from '@mui/icons-material/Cancel';
-import WarningIcon from '@mui/icons-material/Warning';
-import { Button, Checkbox, MenuItem, Grid, Typography, InputAdornment, TextField } from '@mui/material';
 import { useState } from 'react';
-import type { ValidateFieldsError } from 'async-validator';
 import type { FC } from 'react';
 
-import type { MqttSettingsType } from 'types';
+import CancelIcon from '@mui/icons-material/Cancel';
+import WarningIcon from '@mui/icons-material/Warning';
+import { Button, Checkbox, Grid, InputAdornment, MenuItem, TextField, Typography } from '@mui/material';
+
 import * as MqttApi from 'api/mqtt';
+
+import type { ValidateFieldsError } from 'async-validator';
 import {
   BlockFormControlLabel,
+  BlockNavigation,
   ButtonRow,
   FormLoader,
   SectionContent,
   ValidatedPasswordField,
-  ValidatedTextField,
-  BlockNavigation
+  ValidatedTextField
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
+import type { MqttSettingsType } from 'types';
 import { numberValue, updateValueDirty, useRest } from 'utils';
-
 import { createMqttSettingsValidator, validate } from 'validators';
 
 const MqttSettings: FC = () => {
@@ -54,8 +55,8 @@ const MqttSettings: FC = () => {
         setFieldErrors(undefined);
         await validate(createMqttSettingsValidator(data), data);
         await saveData();
-      } catch (errors: any) {
-        setFieldErrors(errors);
+      } catch (error) {
+        setFieldErrors(error as ValidateFieldsError);
       }
     };
 

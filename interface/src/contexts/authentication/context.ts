@@ -1,4 +1,5 @@
 import { createContext } from 'react';
+
 import type { Me } from 'types';
 
 export interface AuthenticationContextValue {

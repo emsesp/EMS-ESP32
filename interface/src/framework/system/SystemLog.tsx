@@ -1,23 +1,21 @@
+import { useEffect, useRef, useState } from 'react';
+import type { FC } from 'react';
+import { toast } from 'react-toastify';
+
 import DownloadIcon from '@mui/icons-material/GetApp';
 import WarningIcon from '@mui/icons-material/Warning';
-import { Box, styled, Button, Checkbox, MenuItem, Grid, TextField } from '@mui/material';
-import { useRequest } from 'alova';
-import { useState, useEffect, useRef } from 'react';
-import { toast } from 'react-toastify';
-import type { FC } from 'react';
+import { Box, Button, Checkbox, Grid, MenuItem, TextField, styled } from '@mui/material';
 
-import type { LogSettings, LogEntry } from 'types';
-import { addAccessTokenParameter } from 'api/authentication';
-import { EVENT_SOURCE_ROOT } from 'api/endpoints';
 import * as SystemApi from 'api/system';
+import { fetchLogES } from 'api/system';
 
-import { SectionContent, FormLoader, BlockFormControlLabel, BlockNavigation, useLayoutTitle } from 'components';
-
+import { useSSE } from '@alova/scene-react';
+import { useRequest } from 'alova';
+import { BlockFormControlLabel, BlockNavigation, FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
+import type { LogEntry, LogSettings } from 'types';
 import { LogLevel } from 'types';
 import { updateValueDirty, useRest } from 'utils';
-
-export const LOG_EVENTSOURCE_URL = EVENT_SOURCE_ROOT + 'log';
 
 const LogEntryLine = styled('div')(() => ({
   color: '#bbbbbb',
@@ -58,12 +56,33 @@ const SystemLog: FC = () => {
       update: SystemApi.updateLogSettings
     });
 
-  // called on page load to reset pointer and fetch all log entries
-  useRequest(SystemApi.fetchLog());
   const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
   const [lastIndex, setLastIndex] = useState<number>(0);
 
   const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, updateDataValue);
+
+  // eslint-disable-next-line @typescript-eslint/unbound-method
+  const { onMessage, onError } = useSSE(fetchLogES, {
+    immediate: true,
+    // withCredentials: true,
+    interceptByGlobalResponded: false
+  });
+
+  onMessage((message: { id: number; data: string }) => {
+    const rawData = message.data;
+    const logentry = JSON.parse(rawData) as LogEntry;
+    if (logentry.i > lastIndex) {
+      setLastIndex(logentry.i);
+      setLogEntries((log) => [...log, logentry]);
+    }
+  });
+
+  onError(() => {
+    toast.error('No connection to Log server');
+  });
+
+  // called on page load to reset pointer and fetch all log entries
+  useRequest(SystemApi.fetchLog());
 
   const paddedLevelLabel = (level: LogLevel) => {
     const label = levelLabel(level);
@@ -97,8 +116,8 @@ const SystemLog: FC = () => {
     await saveData();
   };
 
+  // handle scrolling
   const ref = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     if (logEntries.length) {
       ref.current?.scrollIntoView({
@@ -107,29 +126,6 @@ const SystemLog: FC = () => {
       });
     }
   }, [logEntries.length]);
-
-  useEffect(() => {
-    const es = new EventSource(addAccessTokenParameter(LOG_EVENTSOURCE_URL));
-    es.onmessage = (event: MessageEvent) => {
-      const rawData = event.data;
-      if (typeof rawData === 'string' || rawData instanceof String) {
-        const logentry = JSON.parse(rawData as string) as LogEntry;
-        if (logentry.i > lastIndex) {
-          setLastIndex(logentry.i);
-          setLogEntries((log) => [...log, logentry]);
-        }
-      }
-    };
-    es.onerror = () => {
-      es.close();
-      toast.error('No connection to Log server');
-    };
-
-    return () => {
-      es.close();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const content = () => {
     if (!data) {

@@ -1,4 +1,5 @@
 import { createContext } from 'react';
+
 import type { WiFiNetwork } from 'types';
 
 export interface WiFiConnectionContextValue {

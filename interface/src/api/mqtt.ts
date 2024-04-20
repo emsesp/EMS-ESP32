@@ -1,5 +1,6 @@
-import { alovaInstance } from './endpoints';
 import type { MqttSettingsType, MqttStatusType } from 'types';
+
+import { alovaInstance } from './endpoints';
 
 export const readMqttStatus = () => alovaInstance.Get<MqttStatusType>('/rest/mqttStatus');
 export const readMqttSettings = () => alovaInstance.Get<MqttSettingsType>('/rest/mqttSettings');

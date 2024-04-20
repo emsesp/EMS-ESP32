@@ -1,6 +1,6 @@
 import type { Translation } from '../i18n-types';
+
 /* prettier-ignore */
-/* eslint-disable */
 
 const de: Translation = {
   LANGUAGE: 'Sprache',

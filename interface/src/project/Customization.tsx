@@ -1,46 +1,46 @@
+import { useCallback, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import { useBlocker, useLocation } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
 import CancelIcon from '@mui/icons-material/Cancel';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import SearchIcon from '@mui/icons-material/Search';
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import WarningIcon from '@mui/icons-material/Warning';
 import {
-  Button,
-  Typography,
   Box,
-  MenuItem,
+  Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  Grid,
+  InputAdornment,
+  Link,
+  MenuItem,
+  TextField,
   ToggleButton,
   ToggleButtonGroup,
-  Grid,
-  TextField,
-  Link,
-  InputAdornment
+  Typography
 } from '@mui/material';
-import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
-import { useTheme } from '@table-library/react-table-library/theme';
-import { useRequest } from 'alova';
-import { useState, useEffect, useCallback } from 'react';
-import { useBlocker, useLocation } from 'react-router-dom';
-import { toast } from 'react-toastify';
 
+import * as SystemApi from 'api/system';
+
+import { Body, Cell, Header, HeaderCell, HeaderRow, Row, Table } from '@table-library/react-table-library/table';
+import { useTheme } from '@table-library/react-table-library/theme';
+import { dialogStyle } from 'CustomTheme';
+import { useRequest } from 'alova';
+import { BlockNavigation, ButtonRow, MessageBox, SectionContent, useLayoutTitle } from 'components';
+import RestartMonitor from 'framework/system/RestartMonitor';
+import { useI18nContext } from 'i18n/i18n-react';
+
+import * as EMSESP from './api';
 import SettingsCustomizationDialog from './CustomizationDialog';
 import EntityMaskToggle from './EntityMaskToggle';
 import OptionIcon from './OptionIcon';
-
-import * as EMSESP from './api';
-
 import { DeviceEntityMask } from './types';
-import type { DeviceShort, DeviceEntity } from './types';
-import type { FC } from 'react';
-import { dialogStyle } from 'CustomTheme';
-import * as SystemApi from 'api/system';
-import { ButtonRow, SectionContent, MessageBox, BlockNavigation, useLayoutTitle } from 'components';
-
-import RestartMonitor from 'framework/system/RestartMonitor';
-import { useI18nContext } from 'i18n/i18n-react';
+import type { DeviceEntity, DeviceShort } from './types';
 
 export const APIURL = window.location.origin + '/api/';
 
@@ -63,22 +63,27 @@ const Customization: FC = () => {
   // fetch devices first
   const { data: devices } = useRequest(EMSESP.readDevices);
 
-  // const { state } = useLocation();
-  const [selectedDevice, setSelectedDevice] = useState<number>(useLocation().state || -1);
+  const [selectedDevice, setSelectedDevice] = useState<number>(Number(useLocation().state) || -1);
   const [selectedDeviceName, setSelectedDeviceName] = useState<string>('');
 
   const { send: resetCustomizations } = useRequest(EMSESP.resetCustomizations(), {
     immediate: false
   });
 
-  const { send: writeCustomizationEntities } = useRequest((data) => EMSESP.writeCustomizationEntities(data), {
-    immediate: false
-  });
+  const { send: writeCustomizationEntities } = useRequest(
+    (data: { id: number; entity_ids: string[] }) => EMSESP.writeCustomizationEntities(data),
+    {
+      immediate: false
+    }
+  );
 
-  const { send: readDeviceEntities, onSuccess: onSuccess } = useRequest((data) => EMSESP.readDeviceEntities(data), {
-    initialData: [],
-    immediate: false
-  });
+  const { send: readDeviceEntities, onSuccess: onSuccess } = useRequest(
+    (data: number) => EMSESP.readDeviceEntities(data),
+    {
+      initialData: [],
+      immediate: false
+    }
+  );
 
   const setOriginalSettings = (data: DeviceEntity[]) => {
     setDeviceEntities(data.map((de) => ({ ...de, o_m: de.m, o_cn: de.cn, o_mi: de.mi, o_ma: de.ma })));
@@ -195,17 +200,16 @@ const Customization: FC = () => {
         setRestartNeeded(false);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [devices, selectedDevice]);
 
   const restart = async () => {
-    await restartCommand().catch((error) => {
+    await restartCommand().catch((error: Error) => {
       toast.error(error.message);
     });
     setRestarting(true);
   };
 
-  function formatValue(value: any) {
+  function formatValue(value: unknown) {
     if (typeof value === 'number') {
       return new Intl.NumberFormat().format(value);
     } else if (value === undefined) {
@@ -213,7 +217,7 @@ const Customization: FC = () => {
     } else if (typeof value === 'boolean') {
       return value ? 'true' : 'false';
     }
-    return value;
+    return value as string;
   }
 
   const formatName = (de: DeviceEntity, withShortname: boolean) =>
@@ -273,7 +277,7 @@ const Customization: FC = () => {
       await resetCustomizations();
       toast.info(LL.CUSTOMIZATIONS_RESTART());
     } catch (error) {
-      toast.error(error.message);
+      toast.error((error as Error).message);
     } finally {
       setConfirmReset(false);
     }
@@ -326,7 +330,7 @@ const Customization: FC = () => {
         return;
       }
 
-      await writeCustomizationEntities({ id: selectedDevice, entity_ids: masked_entities }).catch((error) => {
+      await writeCustomizationEntities({ id: selectedDevice, entity_ids: masked_entities }).catch((error: Error) => {
         if (error.message === 'Reboot required') {
           setRestartNeeded(true);
         } else {
@@ -402,7 +406,7 @@ const Customization: FC = () => {
               size="small"
               color="secondary"
               value={getMaskString(selectedFilters)}
-              onChange={(event, mask) => {
+              onChange={(event, mask: string[]) => {
                 setSelectedFilters(getMaskNumber(mask));
               }}
             >
@@ -456,7 +460,7 @@ const Customization: FC = () => {
           </Grid>
         </Grid>
         <Table data={{ nodes: shown_data }} theme={entities_theme} layout={{ custom: true }}>
-          {(tableList: any) => (
+          {(tableList: DeviceEntity[]) => (
             <>
               <Header>
                 <HeaderRow>

@@ -1,10 +1,10 @@
-import { useRequest } from 'alova';
-import { useRef, useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { FC } from 'react';
 
 import * as SystemApi from 'api/system';
-import { FormLoader } from 'components';
 
+import { useRequest } from 'alova';
+import { FormLoader } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
 const RESTART_TIMEOUT = 2 * 60 * 1000;

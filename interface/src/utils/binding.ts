@@ -23,19 +23,24 @@ export const updateValue =
   };
 
 export const updateValueDirty =
-  (origData: any, dirtyFlags: any, setDirtyFlags: any, updateDataValue: any) =>
+  (
+    origData,
+    dirtyFlags: string[],
+    setDirtyFlags: React.Dispatch<React.SetStateAction<string[]>>,
+    updateDataValue: (unknown) => void
+  ) =>
   (event: React.ChangeEvent<HTMLInputElement>) => {
     const updated_value = extractEventValue(event);
     const name = event.target.name;
 
-    updateDataValue((prevState) => ({
-      ...prevState,
+    updateDataValue((prevState: unknown) => ({
+      ...(prevState as Record<string, unknown>),
       [name]: updated_value
     }));
 
     const arr: string[] = dirtyFlags;
 
-    if (origData[name] !== updated_value) {
+    if ((origData as Record<string, unknown>)[name] !== updated_value) {
       if (!arr.includes(name)) {
         arr.push(name);
       }

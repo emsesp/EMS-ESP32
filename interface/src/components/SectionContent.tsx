@@ -1,5 +1,6 @@
-import { Paper, Divider } from '@mui/material';
 import type { FC } from 'react';
+
+import { Divider, Paper } from '@mui/material';
 
 import type { RequiredChildrenProps } from 'utils';
 

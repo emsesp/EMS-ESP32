@@ -1,3 +1,7 @@
+import { useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import { toast } from 'react-toastify';
+
 import CancelIcon from '@mui/icons-material/Cancel';
 import DeleteIcon from '@mui/icons-material/Delete';
 import LockIcon from '@mui/icons-material/Lock';
@@ -14,39 +18,35 @@ import {
   ListItemAvatar,
   ListItemSecondaryAction,
   ListItemText,
-  Typography,
+  MenuItem,
   TextField,
-  MenuItem
+  Typography
 } from '@mui/material';
-// eslint-disable-next-line import/named
+
+import * as NetworkApi from 'api/network';
+import * as SystemApi from 'api/system';
+
 import { updateState, useRequest } from 'alova';
-import { useContext, useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
+import type { ValidateFieldsError } from 'async-validator';
+import {
+  BlockFormControlLabel,
+  BlockNavigation,
+  ButtonRow,
+  FormLoader,
+  MessageBox,
+  SectionContent,
+  ValidatedPasswordField,
+  ValidatedTextField
+} from 'components';
+import { useI18nContext } from 'i18n/i18n-react';
+import type { NetworkSettingsType } from 'types';
+import { updateValueDirty, useRest } from 'utils';
+import { validate } from 'validators';
+import { createNetworkSettingsValidator } from 'validators/network';
+
 import RestartMonitor from '../system/RestartMonitor';
 import { WiFiConnectionContext } from './WiFiConnectionContext';
 import { isNetworkOpen, networkSecurityMode } from './WiFiNetworkSelector';
-import type { ValidateFieldsError } from 'async-validator';
-import type { FC } from 'react';
-
-import type { NetworkSettingsType } from 'types';
-import * as NetworkApi from 'api/network';
-import * as SystemApi from 'api/system';
-import {
-  BlockFormControlLabel,
-  ButtonRow,
-  FormLoader,
-  SectionContent,
-  ValidatedPasswordField,
-  ValidatedTextField,
-  MessageBox,
-  BlockNavigation
-} from 'components';
-import { useI18nContext } from 'i18n/i18n-react';
-
-import { updateValueDirty, useRest } from 'utils';
-
-import { validate } from 'validators';
-import { createNetworkSettingsValidator } from 'validators/network';
 
 const NetworkSettings: FC = () => {
   const { LL } = useI18nContext();
@@ -80,7 +80,7 @@ const NetworkSettings: FC = () => {
   useEffect(() => {
     if (!initialized && data) {
       if (selectedNetwork) {
-        updateState('networkSettings', (current_data) => ({
+        updateState('networkSettings', (current_data: NetworkSettingsType) => ({
           ssid: selectedNetwork.ssid,
           bssid: selectedNetwork.bssid,
           password: current_data ? current_data.password : '',
@@ -115,8 +115,8 @@ const NetworkSettings: FC = () => {
         setFieldErrors(undefined);
         await validate(createNetworkSettingsValidator(data), data);
         await saveData();
-      } catch (errors: any) {
-        setFieldErrors(errors);
+      } catch (error) {
+        setFieldErrors(error as ValidateFieldsError);
       }
       deselectNetwork();
     };
@@ -127,7 +127,7 @@ const NetworkSettings: FC = () => {
     };
 
     const restart = async () => {
-      await restartCommand().catch((error) => {
+      await restartCommand().catch((error: Error) => {
         toast.error(error.message);
       });
       setRestarting(true);

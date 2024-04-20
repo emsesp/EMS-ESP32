@@ -1,7 +1,8 @@
 import Schema from 'async-validator';
-import type { AnalogSensor, DeviceValue, ScheduleItem, Settings } from './types';
 import type { InternalRuleItem } from 'async-validator';
 import { IP_OR_HOSTNAME_VALIDATOR } from 'validators/shared';
+
+import type { AnalogSensor, DeviceValue, ScheduleItem, Settings } from './types';
 
 export const GPIO_VALIDATOR = {
   validator(rule: InternalRuleItem, value: number, callback: (error?: string) => void) {
@@ -239,7 +240,7 @@ export const deviceValueItemValidation = (dv: DeviceValue) =>
     v: [
       { required: true, message: 'Value is required' },
       {
-        validator(rule: InternalRuleItem, value: any, callback: (error?: string) => void) {
+        validator(rule: InternalRuleItem, value: unknown, callback: (error?: string) => void) {
           if (typeof value === 'number' && dv.m && dv.x && (value < dv.m || value > dv.x)) {
             callback('Value out of range');
           }

@@ -1,10 +1,11 @@
+import type { FC } from 'react';
+
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import ErrorIcon from '@mui/icons-material/Error';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ReportProblemOutlinedIcon from '@mui/icons-material/ReportProblemOutlined';
 import { Box, Typography, useTheme } from '@mui/material';
 import type { BoxProps, SvgIconProps, Theme } from '@mui/material';
-import type { FC } from 'react';
 
 type MessageBoxLevel = 'warning' | 'success' | 'info' | 'error';
 

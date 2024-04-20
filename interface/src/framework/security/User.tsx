@@ -1,17 +1,17 @@
+import { useEffect, useState } from 'react';
+import type { FC } from 'react';
+
 import CancelIcon from '@mui/icons-material/Cancel';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import SaveIcon from '@mui/icons-material/Save';
-
 import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
-import { useState, useEffect } from 'react';
+
+import { dialogStyle } from 'CustomTheme';
 import type Schema from 'async-validator';
 import type { ValidateFieldsError } from 'async-validator';
-import type { FC } from 'react';
-
-import type { UserType } from 'types';
-import { dialogStyle } from 'CustomTheme';
 import { BlockFormControlLabel, ValidatedPasswordField, ValidatedTextField } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
+import type { UserType } from 'types';
 import { updateValue } from 'utils';
 import { validate } from 'validators';
 
@@ -45,8 +45,8 @@ const User: FC<UserFormProps> = ({ creating, validator, user, setUser, onDoneEdi
         setFieldErrors(undefined);
         await validate(validator, user);
         onDoneEditing();
-      } catch (errors: any) {
-        setFieldErrors(errors);
+      } catch (error) {
+        setFieldErrors(error as ValidateFieldsError);
       }
     }
   };

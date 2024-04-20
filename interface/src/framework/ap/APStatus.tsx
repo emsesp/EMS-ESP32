@@ -1,17 +1,18 @@
+import type { FC } from 'react';
+
 import ComputerIcon from '@mui/icons-material/Computer';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import { Avatar, Button, Divider, List, ListItem, ListItemAvatar, ListItemText, useTheme } from '@mui/material';
-import { useRequest } from 'alova';
 import type { Theme } from '@mui/material';
-import type { FC } from 'react';
 
-import type { APStatusType } from 'types';
 import * as APApi from 'api/ap';
-import { ButtonRow, FormLoader, SectionContent } from 'components';
 
+import { useRequest } from 'alova';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
+import type { APStatusType } from 'types';
 import { APNetworkStatus } from 'types';
 
 export const apStatusHighlight = ({ status }: APStatusType, theme: Theme) => {

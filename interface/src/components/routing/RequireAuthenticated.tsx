@@ -1,12 +1,12 @@
 import { useContext, useEffect } from 'react';
+import type { FC } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 
-import type { AuthenticatedContextValue } from 'contexts/authentication/context';
-import type { FC } from 'react';
-
-import type { RequiredChildrenProps } from 'utils';
 import { storeLoginRedirect } from 'api/authentication';
+
+import type { AuthenticatedContextValue } from 'contexts/authentication/context';
 import { AuthenticatedContext, AuthenticationContext } from 'contexts/authentication/context';
+import type { RequiredChildrenProps } from 'utils';
 
 const RequireAuthenticated: FC<RequiredChildrenProps> = ({ children }) => {
   const authenticationContext = useContext(AuthenticationContext);

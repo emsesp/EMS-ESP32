@@ -1,6 +1,6 @@
 import type { Translation } from '../i18n-types';
+
 /* prettier-ignore */
-/* eslint-disable */
 
 const no: Translation = {
   LANGUAGE: 'Språk',
@@ -324,7 +324,12 @@ const no: Translation = {
   UNCHANGED: 'Unchanged', // TODO translate
   ALWAYS: 'Always', // TODO translate
   ACTIVITY: 'Activity', // TODO translate
-  CONFIGURE: 'Configure {0}' // TODO translate
+  CONFIGURE: 'Configure {0}', // TODO translate
+  SYSTEM_MEMORY: 'System Memory', // TODO translate
+  APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
+  SECURITY_1: 'Add or remove users', // TODO translate
+  UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', // TODO translate
+  CUSTOMIZE: 'Customize' // TODO translate
 };
 
 export default no;

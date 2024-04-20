@@ -1,3 +1,6 @@
+import { type FC, useState } from 'react';
+import { toast } from 'react-toastify';
+
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CastIcon from '@mui/icons-material/Cast';
@@ -10,17 +13,17 @@ import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore
 import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import TuneIcon from '@mui/icons-material/Tune';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, List } from '@mui/material';
 
-import { List, Button, Dialog, DialogActions, DialogContent, DialogTitle, Box } from '@mui/material';
-import { useRequest } from 'alova';
-import { useState, type FC } from 'react';
-import { toast } from 'react-toastify';
-import RestartMonitor from './system/RestartMonitor';
-import { dialogStyle } from 'CustomTheme';
 import * as SystemApi from 'api/system';
+
+import { dialogStyle } from 'CustomTheme';
+import { useRequest } from 'alova';
 import { ButtonRow, SectionContent, useLayoutTitle } from 'components';
 import ListMenuItem from 'components/layout/ListMenuItem';
 import { useI18nContext } from 'i18n/i18n-react';
+
+import RestartMonitor from './system/RestartMonitor';
 
 const Settings: FC = () => {
   const { LL } = useI18nContext();
@@ -49,8 +52,8 @@ const Settings: FC = () => {
       .then(() => {
         setRestarting(true);
       })
-      .catch((err) => {
-        toast.error(err.message);
+      .catch((error: Error) => {
+        toast.error(error.message);
       })
       .finally(() => {
         setConfirmRestart(false);
@@ -64,8 +67,8 @@ const Settings: FC = () => {
       .then(() => {
         setRestarting(true);
       })
-      .catch((err) => {
-        toast.error(err.message);
+      .catch((error: Error) => {
+        toast.error(error.message);
       })
       .finally(() => {
         setConfirmFactoryReset(false);
@@ -79,8 +82,8 @@ const Settings: FC = () => {
       .then(() => {
         setRestarting(true);
       })
-      .catch((err) => {
-        toast.error(err.message);
+      .catch((error: Error) => {
+        toast.error(error.message);
       })
       .finally(() => {
         setConfirmRestart(false);

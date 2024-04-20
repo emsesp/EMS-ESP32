@@ -1,6 +1,7 @@
-import { CircularProgress, Box, Typography } from '@mui/material';
-import type { Theme } from '@mui/material';
 import type { FC } from 'react';
+
+import { Box, CircularProgress, Typography } from '@mui/material';
+import type { Theme } from '@mui/material';
 
 import { useI18nContext } from 'i18n/i18n-react';
 

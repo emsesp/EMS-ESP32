@@ -1,3 +1,6 @@
+import { type FC, useContext, useState } from 'react';
+import { toast } from 'react-toastify';
+
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import BuildIcon from '@mui/icons-material/Build';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -9,7 +12,6 @@ import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import TimerIcon from '@mui/icons-material/Timer';
-
 import {
   Avatar,
   Box,
@@ -26,17 +28,15 @@ import {
   useTheme
 } from '@mui/material';
 
-import { useRequest } from 'alova';
-import { useContext, type FC, useState } from 'react';
-
-import { toast } from 'react-toastify';
-import { dialogStyle } from 'CustomTheme';
 import * as SystemApi from 'api/system';
+
+import * as EMSESP from 'project/api';
+import { dialogStyle } from 'CustomTheme';
+import { useRequest } from 'alova';
 import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import ListMenuItem from 'components/layout/ListMenuItem';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
-import * as EMSESP from 'project/api';
 import { busConnectionStatus } from 'project/types';
 import { NTPSyncStatus } from 'types';
 
@@ -141,8 +141,8 @@ const SystemStatus: FC = () => {
       .then(() => {
         toast.info(LL.SCANNING() + '...');
       })
-      .catch((err) => {
-        toast.error(err.message);
+      .catch((error: Error) => {
+        toast.error(error.message);
       });
     setConfirmScan(false);
   };

@@ -1,23 +1,24 @@
+import { useEffect } from 'react';
+import type { FC } from 'react';
+
 import CloseIcon from '@mui/icons-material/Close';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   LinearProgress,
-  Typography,
   TextField,
-  Button
+  Typography
 } from '@mui/material';
-import { useRequest } from 'alova';
-import { useEffect } from 'react';
 
-import type { FC } from 'react';
-import { dialogStyle } from 'CustomTheme';
 import * as SecurityApi from 'api/security';
-import { MessageBox } from 'components';
 
+import { dialogStyle } from 'CustomTheme';
+import { useRequest } from 'alova';
+import { MessageBox } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
 interface GenerateTokenProps {
@@ -37,7 +38,6 @@ const GenerateToken: FC<GenerateTokenProps> = ({ username, onClose }) => {
     if (open) {
       void generateToken();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   return (

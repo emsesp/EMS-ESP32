@@ -1,3 +1,9 @@
+import { useCallback, useContext, useEffect, useLayoutEffect, useState } from 'react';
+import type { FC } from 'react';
+import { IconContext } from 'react-icons';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
 import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
@@ -12,47 +18,39 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined';
 import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
-
 import {
+  Box,
   Button,
   Dialog,
-  DialogTitle,
-  DialogContent,
   DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
   IconButton,
   List,
   ListItem,
   ListItemText,
-  Box,
-  Grid,
   Typography
 } from '@mui/material';
 
 import { useRowSelect } from '@table-library/react-table-library/select';
-import { useSort, SortToggleType } from '@table-library/react-table-library/sort';
-import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
+import { SortToggleType, useSort } from '@table-library/react-table-library/sort';
+import { Body, Cell, Header, HeaderCell, HeaderRow, Row, Table } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
-import { useRequest } from 'alova';
-import { useState, useEffect, useCallback, useLayoutEffect, useContext } from 'react';
-
-import { IconContext } from 'react-icons';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import DeviceIcon from './DeviceIcon';
-import DashboardDevicesDialog from './DevicesDialog';
-
-import * as EMSESP from './api';
-import { formatValue } from './deviceValue';
-
-import { DeviceValueUOM_s, DeviceEntityMask, DeviceType } from './types';
-import { deviceValueItemValidation } from './validators';
-import type { Device, DeviceValue } from './types';
-import type { FC } from 'react';
+import type { Action, State } from '@table-library/react-table-library/types/common';
 import { dialogStyle } from 'CustomTheme';
-import { ButtonRow, SectionContent, MessageBox, useLayoutTitle } from 'components';
-
+import { useRequest } from 'alova';
+import { ButtonRow, MessageBox, SectionContent, useLayoutTitle } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
+
+import * as EMSESP from './api';
+import DeviceIcon from './DeviceIcon';
+import DashboardDevicesDialog from './DevicesDialog';
+import { formatValue } from './deviceValue';
+import { DeviceEntityMask, DeviceType, DeviceValueUOM_s } from './types';
+import type { Device, DeviceValue } from './types';
+import { deviceValueItemValidation } from './validators';
 
 const Devices: FC = () => {
   const { LL } = useI18nContext();
@@ -76,16 +74,19 @@ const Devices: FC = () => {
     }
   });
 
-  const { data: deviceData, send: readDeviceData } = useRequest((id) => EMSESP.readDeviceData(id), {
+  const { data: deviceData, send: readDeviceData } = useRequest((id: number) => EMSESP.readDeviceData(id), {
     initialData: {
       data: []
     },
     immediate: false
   });
 
-  const { loading: submitting, send: writeDeviceValue } = useRequest((data) => EMSESP.writeDeviceValue(data), {
-    immediate: false
-  });
+  const { loading: submitting, send: writeDeviceValue } = useRequest(
+    (data: { id: number; c: string; v: unknown }) => EMSESP.writeDeviceValue(data),
+    {
+      immediate: false
+    }
+  );
 
   useLayoutEffect(() => {
     function updateSize() {
@@ -213,7 +214,7 @@ const Devices: FC = () => {
     }
   ]);
 
-  const getSortIcon = (state: any, sortKey: any) => {
+  const getSortIcon = (state: State, sortKey: unknown) => {
     if (state.sortKey === sortKey && state.reverse) {
       return <KeyboardArrowDownOutlinedIcon />;
     }
@@ -235,13 +236,14 @@ const Devices: FC = () => {
       sortToggleType: SortToggleType.AlternateWithReset,
       sortFns: {
         NAME: (array) => array.sort((a, b) => a.id.toString().slice(2).localeCompare(b.id.toString().slice(2))),
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         VALUE: (array) => array.sort((a, b) => a.v.toString().localeCompare(b.v.toString()))
       }
     }
   );
 
-  async function onSelectChange(action: any, state: any) {
-    setSelectedDevice(state.id);
+  async function onSelectChange(action: Action, state: State) {
+    setSelectedDevice(state.id as number);
     if (action.type === 'ADD_BY_ID_EXCLUSIVELY') {
       await readDeviceData(state.id);
     }
@@ -259,8 +261,8 @@ const Devices: FC = () => {
   };
 
   const escFunction = useCallback(
-    (event: any) => {
-      if (event.keyCode === 27) {
+    (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
         if (device_select) {
           device_select.fns.onRemoveAll();
         }
@@ -290,7 +292,7 @@ const Devices: FC = () => {
     }
   };
 
-  const escapeCsvCell = (cell: any) => {
+  const escapeCsvCell = (cell: string) => {
     if (cell == null) {
       return '';
     }
@@ -336,9 +338,13 @@ const Devices: FC = () => {
       : deviceData.data;
 
     const csvData = data.reduce(
-      (csvString: any, rowItem: any) =>
-        csvString + columns.map(({ accessor }: any) => escapeCsvCell(accessor(rowItem))).join(';') + '\r\n',
-      columns.map(({ name }: any) => escapeCsvCell(name)).join(';') + '\r\n'
+      (csvString: string, rowItem: DeviceValue) =>
+        csvString +
+        columns
+          .map(({ accessor }: { accessor: (dv: DeviceValue) => unknown }) => escapeCsvCell(accessor(rowItem) as string))
+          .join(';') +
+        '\r\n',
+      columns.map(({ name }: { name: string }) => escapeCsvCell(name)).join(';') + '\r\n'
     );
 
     const csvFile = new Blob([csvData], { type: 'text/csv;charset:utf-8' });
@@ -363,7 +369,7 @@ const Devices: FC = () => {
       .then(() => {
         toast.success(LL.WRITE_CMD_SENT());
       })
-      .catch((error) => {
+      .catch((error: Error) => {
         toast.error(error.message);
       })
       .finally(async () => {
@@ -428,7 +434,7 @@ const Devices: FC = () => {
 
       {coreData.connected && (
         <Table data={{ nodes: coreData.devices }} select={device_select} theme={device_theme} layout={{ custom: true }}>
-          {(tableList: any) => (
+          {(tableList: Device[]) => (
             <>
               <Header>
                 <HeaderRow>
@@ -556,7 +562,7 @@ const Devices: FC = () => {
           sort={dv_sort}
           layout={{ custom: true, fixedHeader: true }}
         >
-          {(tableList: any) => (
+          {(tableList: DeviceValue[]) => (
             <>
               <Header>
                 <HeaderRow>

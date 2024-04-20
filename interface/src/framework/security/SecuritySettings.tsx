@@ -1,16 +1,17 @@
+import { useContext, useState } from 'react';
+import type { FC } from 'react';
+
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
 import { Button } from '@mui/material';
-import { useContext, useState } from 'react';
-import type { ValidateFieldsError } from 'async-validator';
-import type { FC } from 'react';
 
-import type { SecuritySettingsType } from 'types';
 import * as SecurityApi from 'api/security';
-import { ButtonRow, FormLoader, MessageBox, SectionContent, ValidatedPasswordField, BlockNavigation } from 'components';
 
+import type { ValidateFieldsError } from 'async-validator';
+import { BlockNavigation, ButtonRow, FormLoader, MessageBox, SectionContent, ValidatedPasswordField } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
+import type { SecuritySettingsType } from 'types';
 import { updateValueDirty, useRest } from 'utils';
 import { SECURITY_SETTINGS_VALIDATOR, validate } from 'validators';
 
@@ -49,8 +50,8 @@ const SecuritySettings: FC = () => {
         await validate(SECURITY_SETTINGS_VALIDATOR, data);
         await saveData();
         await authenticatedContext.refresh();
-      } catch (errors: any) {
-        setFieldErrors(errors);
+      } catch (error) {
+        setFieldErrors(error as ValidateFieldsError);
       }
     };
 

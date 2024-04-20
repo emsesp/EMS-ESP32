@@ -1,8 +1,8 @@
-import { readdirSync, existsSync, unlinkSync, readFileSync, createWriteStream } from 'fs';
-import { resolve, relative, sep } from 'path';
-import zlib from 'zlib';
-import mime from 'mime-types';
 import crypto from 'crypto';
+import { createWriteStream, existsSync, readFileSync, readdirSync, unlinkSync } from 'fs';
+import mime from 'mime-types';
+import { relative, resolve, sep } from 'path';
+import zlib from 'zlib';
 
 const ARDUINO_INCLUDES = '#include <Arduino.h>\n\n';
 const INDENT = '  ';

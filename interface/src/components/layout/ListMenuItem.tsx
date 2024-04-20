@@ -1,8 +1,9 @@
+import type { FC } from 'react';
+import { Link } from 'react-router-dom';
+
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { Avatar, ListItem, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
-import { Link } from 'react-router-dom';
 import type { SvgIconProps } from '@mui/material';
-import type { FC } from 'react';
 
 interface ListMenuItemProps {
   icon: React.ComponentType<SvgIconProps>;

@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react';
-import { ToastContainer, Slide } from 'react-toastify';
-
+import type { FC } from 'react';
+import { Slide, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
 
-import { localStorageDetector } from 'typesafe-i18n/detectors';
-import type { FC } from 'react';
 import AppRouting from 'AppRouting';
 import CustomTheme from 'CustomTheme';
-
 import TypesafeI18n from 'i18n/i18n-react';
 import { detectLocale } from 'i18n/i18n-util';
 import { loadLocaleAsync } from 'i18n/i18n-util.async';
+import { localStorageDetector } from 'typesafe-i18n/detectors';
 
 const detectedLocale = detectLocale(localStorageDetector);
 

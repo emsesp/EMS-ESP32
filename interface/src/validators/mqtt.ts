@@ -1,6 +1,7 @@
 import Schema from 'async-validator';
-import { IP_OR_HOSTNAME_VALIDATOR } from './shared';
 import type { MqttSettingsType } from 'types';
+
+import { IP_OR_HOSTNAME_VALIDATOR } from './shared';
 
 export const createMqttSettingsValidator = (mqttSettings: MqttSettingsType) =>
   new Schema({
