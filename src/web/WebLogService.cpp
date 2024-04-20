@@ -28,7 +28,7 @@ WebLogService::WebLogService(AsyncWebServer * server, SecurityManager * security
     // for bring back the whole log - is a command, hence a POST
     server->on(FETCH_LOG_PATH, HTTP_POST, [this](AsyncWebServerRequest * request) { fetchLog(request); });
 
-    events_.setFilter(securityManager->filterRequest(AuthenticationPredicates::IS_ADMIN));
+    // events_.setFilter(securityManager->filterRequest(AuthenticationPredicates::IS_ADMIN));
     server->addHandler(&events_);
 }
 
