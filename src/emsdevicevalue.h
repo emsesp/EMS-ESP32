@@ -33,12 +33,13 @@ class DeviceValue {
   public:
     enum DeviceValueType : uint8_t {
         BOOL,
-        INT,
-        UINT,
-        SHORT,
-        USHORT,
-        ULONG,
+        INT8,
+        UINT8,
+        INT16,
+        UINT16,
+        UINT24,
         TIME, // same as ULONG (32 bits)
+        UINT32,
         ENUM,
         STRING,
         CMD // special for commands only

@@ -38,7 +38,7 @@ class Boiler : public EMSdevice {
     void check_active();
     void store_energy();
 
-    uint8_t boilerState_ = EMS_VALUE_UINT_NOTSET; // Boiler state flag - FOR INTERNAL USE
+    uint8_t boilerState_ = EMS_VALUE_UINT8_NOTSET; // Boiler state flag - FOR INTERNAL USE
 
     static constexpr uint8_t  EMS_TYPE_UBASettingsWW      = 0x26;
     static constexpr uint8_t  EMS_TYPE_UBAParameterWW     = 0x33;
@@ -117,7 +117,7 @@ class Boiler : public EMSdevice {
     uint16_t boilTemp_;       // Boiler temperature
     uint16_t exhaustTemp_;    // Exhaust temperature published
     // read second value from E4 and initialize it
-    uint16_t exhaustTemp1_ = EMS_VALUE_USHORT_NOTSET;
+    uint16_t exhaustTemp1_ = EMS_VALUE_UINT16_NOTSET;
     uint8_t  burnGas_;          // Gas on/off
     uint8_t  burnGas2_;         // Gas stage 2 on/off
     uint16_t flameCurr_;        // Flame current in micro amps

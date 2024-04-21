@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 
-import { DeviceValueUOM_s, DeviceValueType } from './types';
+import { DeviceValueUOM_s, DeviceValueType, DeviceValueTypeNames } from './types';
 import type { EntityItem } from './types';
 import type Schema from 'async-validator';
 import type { ValidateFieldsError } from 'async-validator';
@@ -197,14 +197,15 @@ const CustomEntitiesDialog = ({
                   fullWidth
                   select
                 >
-                  <MenuItem value={DeviceValueType.BOOL}>BOOL</MenuItem>
-                  <MenuItem value={DeviceValueType.INT}>INT</MenuItem>
-                  <MenuItem value={DeviceValueType.UINT}>UINT</MenuItem>
-                  <MenuItem value={DeviceValueType.SHORT}>SHORT</MenuItem>
-                  <MenuItem value={DeviceValueType.USHORT}>USHORT</MenuItem>
-                  <MenuItem value={DeviceValueType.ULONG}>ULONG</MenuItem>
-                  <MenuItem value={DeviceValueType.TIME}>TIME</MenuItem>
-                  <MenuItem value={DeviceValueType.STRING}>RAW</MenuItem>
+                  <MenuItem value={DeviceValueType.BOOL}>{DeviceValueTypeNames[DeviceValueType.BOOL]}</MenuItem>
+                  <MenuItem value={DeviceValueType.INT8}>{DeviceValueTypeNames[DeviceValueType.INT8]}</MenuItem>
+                  <MenuItem value={DeviceValueType.UINT8}>{DeviceValueTypeNames[DeviceValueType.UINT8]}</MenuItem>
+                  <MenuItem value={DeviceValueType.INT16}>{DeviceValueTypeNames[DeviceValueType.INT16]}</MenuItem>
+                  <MenuItem value={DeviceValueType.UINT16}>{DeviceValueTypeNames[DeviceValueType.UINT16]}</MenuItem>
+                  <MenuItem value={DeviceValueType.UINT24}>{DeviceValueTypeNames[DeviceValueType.UINT24]}</MenuItem>
+                  <MenuItem value={DeviceValueType.TIME}>{DeviceValueTypeNames[DeviceValueType.TIME]}</MenuItem>
+                  <MenuItem value={DeviceValueType.UINT32}>{DeviceValueTypeNames[DeviceValueType.UINT32]}</MenuItem>
+                  <MenuItem value={DeviceValueType.STRING}>{DeviceValueTypeNames[DeviceValueType.STRING]}</MenuItem>
                 </TextField>
               </Grid>
 

@@ -27,3 +27,4 @@
 - use factory partition for 16M flash
 - store digital out states to nvs
 - Refresh UI - moving settings to one location [#1665](https://github.com/emsesp/EMS-ESP32/issues/1665)
+- rename DeviceValueTypes, add UINT32 for custom entities

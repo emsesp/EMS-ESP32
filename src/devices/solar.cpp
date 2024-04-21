@@ -62,60 +62,60 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
     // common solar values for all modules (except dhw)
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &collectorTemp_,
-                          DeviceValueType::SHORT,
+                          DeviceValueType::INT16,
                           DeviceValueNumOp::DV_NUMOP_DIV10,
                           FL_(collectorTemp),
                           DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &cylBottomTemp_,
-                          DeviceValueType::SHORT,
+                          DeviceValueType::INT16,
                           DeviceValueNumOp::DV_NUMOP_DIV10,
                           FL_(cylBottomTemp),
                           DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &solarPump_, DeviceValueType::BOOL, FL_(solarPump), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pumpWorkTime_, DeviceValueType::TIME, FL_(pumpWorkTime), DeviceValueUOM::MINUTES);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &cylMaxTemp_, DeviceValueType::UINT, FL_(cylMaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_cylMaxTemp));
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &cylMaxTemp_, DeviceValueType::UINT8, FL_(cylMaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_cylMaxTemp));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &collectorShutdown_, DeviceValueType::BOOL, FL_(collectorShutdown), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &cylHeated_, DeviceValueType::BOOL, FL_(cylHeated), DeviceValueUOM::NONE);
 
     // values per device flag
     if (flags == EMSdevice::EMS_DEVICE_FLAG_SM10) {
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &solarPumpMod_, DeviceValueType::UINT, FL_(solarPumpMod), DeviceValueUOM::PERCENT);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &solarPumpMod_, DeviceValueType::UINT8, FL_(solarPumpMod), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &solarPumpMinMod_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               FL_(pumpMinMod),
                               DeviceValueUOM::PERCENT,
                               MAKE_CF_CB(set_PumpMinMod));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &solarPumpTurnonDiff_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               FL_(solarPumpTurnonDiff),
                               DeviceValueUOM::DEGREES_R,
                               MAKE_CF_CB(set_TurnonDiff));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &solarPumpTurnoffDiff_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               FL_(solarPumpTurnoffDiff),
                               DeviceValueUOM::DEGREES_R,
                               MAKE_CF_CB(set_TurnoffDiff));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &solarPower_, DeviceValueType::SHORT, FL_(solarPower), DeviceValueUOM::W);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &solarPower_, DeviceValueType::INT16, FL_(solarPower), DeviceValueUOM::W);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &energyLastHour_,
-                              DeviceValueType::ULONG,
+                              DeviceValueType::UINT24,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(energyLastHour),
                               DeviceValueUOM::WH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &maxFlow_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(maxFlow),
                               DeviceValueUOM::LMIN,
                               MAKE_CF_CB(set_SM10MaxFlow));
         register_device_value(DeviceValueTAG::TAG_DHW1,
                               &wwMinTemp_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               FL_(wwMinTemp),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_wwMinTemp));
@@ -129,125 +129,125 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         /*
         // unknown values for testing and logging. Used by MichaelDvP
         register_device_value(
-            DeviceValueTAG::TAG_DEVICE_DATA, &setting3_, DeviceValueType::UINT, FL_(setting3), DeviceValueUOM::NONE, MAKE_CF_CB(set_CollectorMaxTemp));
+            DeviceValueTAG::TAG_DEVICE_DATA, &setting3_, DeviceValueType::UINT8, FL_(setting3), DeviceValueUOM::NONE, MAKE_CF_CB(set_CollectorMaxTemp));
         register_device_value(
-            DeviceValueTAG::TAG_DEVICE_DATA, &setting4_, DeviceValueType::UINT, FL_(setting4), DeviceValueUOM::NONE, MAKE_CF_CB(set_CollectorMinTemp));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &data11_, DeviceValueType::UINT, FL_(data11), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &data12_, DeviceValueType::UINT, FL_(data12), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &data1_, DeviceValueType::UINT, FL_(data1), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &data0_, DeviceValueType::UINT, FL_(data0), DeviceValueUOM::NONE);
+            DeviceValueTAG::TAG_DEVICE_DATA, &setting4_, DeviceValueType::UINT8, FL_(setting4), DeviceValueUOM::NONE, MAKE_CF_CB(set_CollectorMinTemp));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &data11_, DeviceValueType::UINT8, FL_(data11), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &data12_, DeviceValueType::UINT8, FL_(data12), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &data1_, DeviceValueType::UINT8, FL_(data1), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &data0_, DeviceValueType::UINT8, FL_(data0), DeviceValueUOM::NONE);
 		*/
     }
     if (flags == EMSdevice::EMS_DEVICE_FLAG_ISM) {
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &cylMiddleTemp_,
-                              DeviceValueType::SHORT,
+                              DeviceValueType::INT16,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(cylMiddleTemp),
                               DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &retHeatAssist_,
-                              DeviceValueType::SHORT,
+                              DeviceValueType::INT16,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(retHeatAssist),
                               DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &m1Valve_, DeviceValueType::BOOL, FL_(m1Valve), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &energyLastHour_,
-                              DeviceValueType::ULONG,
+                              DeviceValueType::UINT24,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(energyLastHour),
                               DeviceValueUOM::WH);
     }
 
     if (flags == EMSdevice::EMS_DEVICE_FLAG_SM100) {
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &solarPumpMod_, DeviceValueType::UINT, FL_(solarPumpMod), DeviceValueUOM::PERCENT);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &solarPumpMod_, DeviceValueType::UINT8, FL_(solarPumpMod), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &solarPumpMinMod_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_MUL5,
                               FL_(pumpMinMod),
                               DeviceValueUOM::PERCENT,
                               MAKE_CF_CB(set_PumpMinMod));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &solarPumpTurnonDiff_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(solarPumpTurnonDiff),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_TurnonDiff));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &solarPumpTurnoffDiff_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(solarPumpTurnoffDiff),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_TurnoffDiff));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &collector2Temp_,
-                              DeviceValueType::SHORT,
+                              DeviceValueType::INT16,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(collector2Temp),
                               DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &cylMiddleTemp_,
-                              DeviceValueType::SHORT,
+                              DeviceValueType::INT16,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(cylMiddleTemp),
                               DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &retHeatAssist_,
-                              DeviceValueType::SHORT,
+                              DeviceValueType::INT16,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(retHeatAssist),
                               DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &m1Valve_, DeviceValueType::BOOL, FL_(m1Valve), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &m1Power_, DeviceValueType::UINT, FL_(m1Power), DeviceValueUOM::PERCENT);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &m1Power_, DeviceValueType::UINT8, FL_(m1Power), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &solarPump2_, DeviceValueType::BOOL, FL_(solarPump2), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &solarPump2Mod_, DeviceValueType::UINT, FL_(solarPump2Mod), DeviceValueUOM::PERCENT);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &solarPump2Mod_, DeviceValueType::UINT8, FL_(solarPump2Mod), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &cylBottomTemp2_,
-                              DeviceValueType::SHORT,
+                              DeviceValueType::INT16,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(cyl2BottomTemp),
                               DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &heatExchangerTemp_,
-                              DeviceValueType::SHORT,
+                              DeviceValueType::INT16,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(heatExchangerTemp),
                               DeviceValueUOM::DEGREES);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &cylPumpMod_, DeviceValueType::UINT, FL_(cylPumpMod), DeviceValueUOM::PERCENT);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &cylPumpMod_, DeviceValueType::UINT8, FL_(cylPumpMod), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &valveStatus_, DeviceValueType::BOOL, FL_(valveStatus), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &vs1Status_, DeviceValueType::BOOL, FL_(vs1Status), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &collectorMaxTemp_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               FL_(collectorMaxTemp),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_CollectorMaxTemp));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &collectorMinTemp_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               FL_(collectorMinTemp),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_CollectorMinTemp));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &energyLastHour_,
-                              DeviceValueType::ULONG,
+                              DeviceValueType::UINT24,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(energyLastHour),
                               DeviceValueUOM::WH);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &energyToday_, DeviceValueType::ULONG, FL_(energyToday), DeviceValueUOM::WH);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &energyToday_, DeviceValueType::UINT24, FL_(energyToday), DeviceValueUOM::WH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &energyTotal_,
-                              DeviceValueType::ULONG,
+                              DeviceValueType::UINT24,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(energyTotal),
                               DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pump2WorkTime_, DeviceValueType::TIME, FL_(pump2WorkTime), DeviceValueUOM::MINUTES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &m1WorkTime_, DeviceValueType::TIME, FL_(m1WorkTime), DeviceValueUOM::MINUTES);
-        // register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &cyl2MaxTemp_, DeviceValueType::UINT, nullptr, FL_(cyl2MaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_cyl2MaxTemp));
+        // register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &cyl2MaxTemp_, DeviceValueType::UINT8, nullptr, FL_(cyl2MaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_cyl2MaxTemp));
 
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &heatTransferSystem_,
@@ -312,20 +312,20 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
 
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &solarPump2MinMod_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               FL_(pump2MinMod),
                               DeviceValueUOM::PERCENT,
                               MAKE_CF_CB(set_Pump2MinMod));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &solarPump2TurnonDiff_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(solarPump2TurnonDiff),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_TurnonDiff2));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &solarPump2TurnoffDiff_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(solarPump2TurnoffDiff),
                               DeviceValueUOM::DEGREES,
@@ -341,13 +341,13 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         // telegram 0x380
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &climateZone_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               FL_(climateZone),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_climateZone)); // climate zone identifier
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &collector1Area_,
-                              DeviceValueType::USHORT,
+                              DeviceValueType::UINT16,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(collector1Area),
                               DeviceValueUOM::SQM,
@@ -361,7 +361,7 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
                               MAKE_CF_CB(set_collector1Type)); // Type of collector field 1, 01=flat, 02=vacuum
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &collector2Area_,
-                              DeviceValueType::USHORT,
+                              DeviceValueType::UINT16,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(collector2Area),
                               DeviceValueUOM::SQM,
@@ -382,26 +382,26 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
                               MAKE_CF_CB(set_cylPriority));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &heatCntFlowTemp_,
-                              DeviceValueType::USHORT,
+                              DeviceValueType::UINT16,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(heatCntFlowTemp),
                               DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &heatCntRetTemp_,
-                              DeviceValueType::USHORT,
+                              DeviceValueType::UINT16,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(heatCntRetTemp),
                               DeviceValueUOM::DEGREES);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatCnt_, DeviceValueType::UINT, FL_(heatCnt), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatCnt_, DeviceValueType::UINT8, FL_(heatCnt), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &swapFlowTemp_,
-                              DeviceValueType::USHORT,
+                              DeviceValueType::UINT16,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(swapFlowTemp),
                               DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &swapRetTemp_,
-                              DeviceValueType::USHORT,
+                              DeviceValueType::UINT16,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(swapRetTemp),
                               DeviceValueUOM::DEGREES);
@@ -552,12 +552,12 @@ void Solar::process_SM100Differential(std::shared_ptr<const Telegram> telegram) 
  * e.g. B0 0B F9 00 00 02 5A 00 00 6E
  */
 void Solar::process_SM100ParamCfg(std::shared_ptr<const Telegram> telegram) {
-    uint16_t t_id = EMS_VALUE_USHORT_NOTSET;
-    uint8_t  of   = EMS_VALUE_UINT_NOTSET;
-    int32_t  min  = EMS_VALUE_USHORT_NOTSET;
-    int32_t  def  = EMS_VALUE_USHORT_NOTSET;
-    int32_t  max  = EMS_VALUE_USHORT_NOTSET;
-    int32_t  cur  = EMS_VALUE_USHORT_NOTSET;
+    uint16_t t_id = EMS_VALUE_UINT16_NOTSET;
+    uint8_t  of   = EMS_VALUE_UINT8_NOTSET;
+    int32_t  min  = EMS_VALUE_UINT16_NOTSET;
+    int32_t  def  = EMS_VALUE_UINT16_NOTSET;
+    int32_t  max  = EMS_VALUE_UINT16_NOTSET;
+    int32_t  cur  = EMS_VALUE_UINT16_NOTSET;
     telegram->read_value(t_id, 1);
     telegram->read_value(of, 3);
     telegram->read_value(min, 5);
@@ -679,8 +679,8 @@ void Solar::process_SM100CollectorConfig(std::shared_ptr<const Telegram> telegra
     telegram->read_value(collector2Area_, 6);
     telegram->read_enumvalue(collector2Type_, 8, 1);
     if (collector2Area_ == 0) {
-        collector2Area_ = EMS_VALUE_USHORT_NOTSET;
-        collector2Type_ = EMS_VALUE_UINT_NOTSET;
+        collector2Area_ = EMS_VALUE_UINT16_NOTSET;
+        collector2Type_ = EMS_VALUE_UINT8_NOTSET;
     }
     // has_enumupdate(telegram, collector2Type_, 8, 1);
 }

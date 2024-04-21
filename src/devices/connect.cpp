@@ -28,7 +28,7 @@ Connect::Connect(uint8_t device_type, uint8_t device_id, uint8_t product_id, con
         register_telegram_type(0xD1, "RFOutdoorTemp", false, MAKE_PF_CB(process_OutdoorTemp));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &outdoorTemp_,
-                              DeviceValueType::SHORT,
+                              DeviceValueType::INT16,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(outdoorTemp),
                               DeviceValueUOM::DEGREES);

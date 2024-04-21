@@ -30,12 +30,12 @@ Pool::Pool(uint8_t device_type, uint8_t device_id, uint8_t product_id, const cha
     register_telegram_type(0x5BA, "HpPoolStatus", true, MAKE_PF_CB(process_HpPoolStatus));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &poolTemp_,
-                          DeviceValueType::SHORT,
+                          DeviceValueType::INT16,
                           DeviceValueNumOp::DV_NUMOP_DIV10,
                           FL_(poolTemp),
                           DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &poolShuntStatus_, DeviceValueType::ENUM, FL_(enum_shunt), FL_(poolShuntStatus), DeviceValueUOM::NONE);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &poolShunt_, DeviceValueType::UINT, FL_(poolShunt), DeviceValueUOM::PERCENT);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &poolShunt_, DeviceValueType::UINT8, FL_(poolShunt), DeviceValueUOM::PERCENT);
 }
 
 // Mixer MP100 for pools - 0x5BA

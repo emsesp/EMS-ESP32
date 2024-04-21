@@ -93,16 +93,17 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
 
             if (entityItem.value_type == DeviceValueType::BOOL) {
                 entityItem.value = EMS_VALUE_DEFAULT_BOOL;
-            } else if (entityItem.value_type == DeviceValueType::INT) {
-                entityItem.value = EMS_VALUE_DEFAULT_INT;
-            } else if (entityItem.value_type == DeviceValueType::UINT) {
-                entityItem.value = EMS_VALUE_DEFAULT_UINT;
-            } else if (entityItem.value_type == DeviceValueType::SHORT) {
-                entityItem.value = EMS_VALUE_DEFAULT_SHORT;
-            } else if (entityItem.value_type == DeviceValueType::USHORT) {
-                entityItem.value = EMS_VALUE_DEFAULT_USHORT;
-            } else if (entityItem.value_type == DeviceValueType::ULONG || entityItem.value_type == DeviceValueType::TIME) {
-                entityItem.value = EMS_VALUE_DEFAULT_ULONG;
+            } else if (entityItem.value_type == DeviceValueType::INT8) {
+                entityItem.value = EMS_VALUE_DEFAULT_INT8;
+            } else if (entityItem.value_type == DeviceValueType::UINT8) {
+                entityItem.value = EMS_VALUE_DEFAULT_UINT8;
+            } else if (entityItem.value_type == DeviceValueType::INT16) {
+                entityItem.value = EMS_VALUE_DEFAULT_INT16;
+            } else if (entityItem.value_type == DeviceValueType::UINT16) {
+                entityItem.value = EMS_VALUE_DEFAULT_UINT16;
+            } else if (entityItem.value_type == DeviceValueType::UINT24 || entityItem.value_type == DeviceValueType::TIME
+                       || entityItem.value_type == DeviceValueType::UINT32) {
+                entityItem.value = EMS_VALUE_DEFAULT_UINT24;
             }
 
             if (entityItem.factor == 0) {
@@ -159,9 +160,9 @@ bool WebCustomEntityService::command_setvalue(const char * value, const std::str
                     return false;
                 }
                 int v = f / entityItem.factor;
-                if (entityItem.value_type == DeviceValueType::UINT || entityItem.value_type == DeviceValueType::INT) {
+                if (entityItem.value_type == DeviceValueType::UINT8 || entityItem.value_type == DeviceValueType::INT8) {
                     EMSESP::send_write_request(entityItem.type_id, entityItem.device_id, entityItem.offset, v, 0);
-                } else if (entityItem.value_type == DeviceValueType::USHORT || entityItem.value_type == DeviceValueType::SHORT) {
+                } else if (entityItem.value_type == DeviceValueType::UINT16 || entityItem.value_type == DeviceValueType::INT16) {
                     uint8_t v1[2] = {(uint8_t)(v >> 8), (uint8_t)(v & 0xFF)};
                     EMSESP::send_write_request(entityItem.type_id, entityItem.device_id, entityItem.offset, v1, 2, 0);
                 } else {
@@ -199,33 +200,34 @@ void WebCustomEntityService::render_value(JsonObject output, CustomEntityItem en
             }
         }
         break;
-    case DeviceValueType::INT:
-        if ((int8_t)entity.value != EMS_VALUE_INT_NOTSET) {
+    case DeviceValueType::INT8:
+        if ((int8_t)entity.value != EMS_VALUE_INT8_NOTSET) {
             std::string v = Helpers::render_value(payload, entity.factor * (int8_t)entity.value, 2);
             output[name]  = add_uom ? serialized(v + ' ' + EMSdevice::uom_to_string(entity.uom)) : serialized(v);
         }
         break;
-    case DeviceValueType::UINT:
-        if ((uint8_t)entity.value != EMS_VALUE_UINT_NOTSET) {
+    case DeviceValueType::UINT8:
+        if ((uint8_t)entity.value != EMS_VALUE_UINT8_NOTSET) {
             std::string v = Helpers::render_value(payload, entity.factor * (uint8_t)entity.value, 2);
             output[name]  = add_uom ? serialized(v + ' ' + EMSdevice::uom_to_string(entity.uom)) : serialized(v);
         }
         break;
-    case DeviceValueType::SHORT:
-        if ((int16_t)entity.value != EMS_VALUE_SHORT_NOTSET) {
+    case DeviceValueType::INT16:
+        if ((int16_t)entity.value != EMS_VALUE_INT16_NOTSET) {
             std::string v = Helpers::render_value(payload, entity.factor * (int16_t)entity.value, 2);
             output[name]  = add_uom ? serialized(v + ' ' + EMSdevice::uom_to_string(entity.uom)) : serialized(v);
         }
         break;
-    case DeviceValueType::USHORT:
-        if ((uint16_t)entity.value != EMS_VALUE_USHORT_NOTSET) {
+    case DeviceValueType::UINT16:
+        if ((uint16_t)entity.value != EMS_VALUE_UINT16_NOTSET) {
             std::string v = Helpers::render_value(payload, entity.factor * (uint16_t)entity.value, 2);
             output[name]  = add_uom ? serialized(v + ' ' + EMSdevice::uom_to_string(entity.uom)) : serialized(v);
         }
         break;
-    case DeviceValueType::ULONG:
+    case DeviceValueType::UINT24:
     case DeviceValueType::TIME:
-        if (entity.value != EMS_VALUE_ULONG_NOTSET) {
+    case DeviceValueType::UINT32:
+        if (entity.value != EMS_VALUE_UINT24_NOTSET) {
             std::string v = Helpers::render_value(payload, entity.factor * entity.value, 2);
             output[name]  = add_uom ? serialized(v + ' ' + EMSdevice::uom_to_string(entity.uom)) : serialized(v);
         }
@@ -510,29 +512,30 @@ void WebCustomEntityService::generate_value_web(JsonObject output) {
             l.add(Helpers::render_boolean(s, true, true));
             break;
         }
-        case DeviceValueType::INT:
-            if ((int8_t)entity.value != EMS_VALUE_INT_NOTSET) {
+        case DeviceValueType::INT8:
+            if ((int8_t)entity.value != EMS_VALUE_INT8_NOTSET) {
                 obj["v"] = Helpers::transformNumFloat(entity.factor * (int8_t)entity.value, 0);
             }
             break;
-        case DeviceValueType::UINT:
-            if ((uint8_t)entity.value != EMS_VALUE_UINT_NOTSET) {
+        case DeviceValueType::UINT8:
+            if ((uint8_t)entity.value != EMS_VALUE_UINT8_NOTSET) {
                 obj["v"] = Helpers::transformNumFloat(entity.factor * (uint8_t)entity.value, 0);
             }
             break;
-        case DeviceValueType::SHORT:
-            if ((int16_t)entity.value != EMS_VALUE_SHORT_NOTSET) {
+        case DeviceValueType::INT16:
+            if ((int16_t)entity.value != EMS_VALUE_INT16_NOTSET) {
                 obj["v"] = Helpers::transformNumFloat(entity.factor * (int16_t)entity.value, 0);
             }
             break;
-        case DeviceValueType::USHORT:
-            if ((uint16_t)entity.value != EMS_VALUE_USHORT_NOTSET) {
+        case DeviceValueType::UINT16:
+            if ((uint16_t)entity.value != EMS_VALUE_UINT16_NOTSET) {
                 obj["v"] = Helpers::transformNumFloat(entity.factor * (uint16_t)entity.value, 0);
             }
             break;
-        case DeviceValueType::ULONG:
+        case DeviceValueType::UINT24:
         case DeviceValueType::TIME:
-            if (entity.value != EMS_VALUE_ULONG_NOTSET) {
+        case DeviceValueType::UINT32:
+            if (entity.value != EMS_VALUE_UINT24_NOTSET) {
                 obj["v"] = Helpers::transformNumFloat(entity.factor * entity.value, 0);
             }
             break;
@@ -557,7 +560,7 @@ void WebCustomEntityService::generate_value_web(JsonObject output) {
 // fetch telegram, called from emsesp::fetch
 void WebCustomEntityService::fetch() {
     EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
-    const uint8_t len[] = {1, 1, 1, 2, 2, 3, 3};
+    const uint8_t len[] = {1, 1, 1, 2, 2, 3, 3, 4};
 
     for (auto & entity : *customEntityItems) {
         if (entity.device_id > 0 && entity.type_id > 0) { // ths excludes also RAM type
@@ -589,7 +592,7 @@ bool WebCustomEntityService::get_value(std::shared_ptr<const Telegram> telegram)
     bool has_change = false;
     EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
     // read-length of BOOL, INT, UINT, SHORT, USHORT, ULONG, TIME
-    const uint8_t len[] = {1, 1, 1, 2, 2, 3, 3};
+    const uint8_t len[] = {1, 1, 1, 2, 2, 3, 3, 4};
     for (auto & entity : *customEntityItems) {
         if (entity.value_type == DeviceValueType::STRING && telegram->type_id == entity.type_id && telegram->src == entity.device_id
             && telegram->offset <= entity.offset && (telegram->offset + telegram->message_length) >= (entity.offset + (uint8_t)entity.factor)) {
