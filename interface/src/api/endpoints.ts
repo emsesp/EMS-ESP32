@@ -1,12 +1,10 @@
 import { xhrRequestAdapter } from '@alova/adapter-xhr';
 import { createAlova } from 'alova';
 import ReactHook from 'alova/react';
+
 import { unpack } from '../api/unpack';
 
 export const ACCESS_TOKEN = 'access_token';
-
-const host = window.location.host;
-export const EVENT_SOURCE_ROOT = 'http://' + host + '/es/';
 
 export const alovaInstance = createAlova({
   statesHook: ReactHook,
@@ -21,7 +19,8 @@ export const alovaInstance = createAlova({
   requestAdapter: xhrRequestAdapter(),
   beforeRequest(method) {
     if (localStorage.getItem(ACCESS_TOKEN)) {
-      method.config.headers.Authorization = 'Bearer ' + localStorage.getItem(ACCESS_TOKEN);
+      method.config.headers.Authorization =
+        'Bearer ' + localStorage.getItem(ACCESS_TOKEN);
     }
   },
 
@@ -37,9 +36,9 @@ export const alovaInstance = createAlova({
       } else if (response.status >= 400) {
         throw new Error(response.statusText);
       }
-      const data = await response.data;
+      const data: ArrayBuffer = (await response.data) as ArrayBuffer;
       if (response.data instanceof ArrayBuffer) {
-        return unpack(data);
+        return unpack(data) as ArrayBuffer;
       }
       return data;
     }

@@ -1,3 +1,5 @@
+import type { FC } from 'react';
+
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import DnsIcon from '@mui/icons-material/Dns';
 import GiteIcon from '@mui/icons-material/Gite';
@@ -6,16 +8,24 @@ import RouterIcon from '@mui/icons-material/Router';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import SettingsInputComponentIcon from '@mui/icons-material/SettingsInputComponent';
 import WifiIcon from '@mui/icons-material/Wifi';
-import { Avatar, Button, Divider, List, ListItem, ListItemAvatar, ListItemText, useTheme } from '@mui/material';
-import { useRequest } from 'alova';
+import {
+  Avatar,
+  Button,
+  Divider,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  useTheme
+} from '@mui/material';
 import type { Theme } from '@mui/material';
-import type { FC } from 'react';
 
-import type { NetworkStatusType } from 'types';
 import * as NetworkApi from 'api/network';
-import { ButtonRow, FormLoader, SectionContent } from 'components';
 
+import { useRequest } from 'alova';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
+import type { NetworkStatusType } from 'types';
 import { NetworkConnectionStatus } from 'types';
 
 const isConnected = ({ status }: NetworkStatusType) =>
@@ -48,7 +58,8 @@ const networkQualityHighlight = ({ rssi }: NetworkStatusType, theme: Theme) => {
   return theme.palette.success.main;
 };
 
-export const isWiFi = ({ status }: NetworkStatusType) => status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED;
+export const isWiFi = ({ status }: NetworkStatusType) =>
+  status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED;
 export const isEthernet = ({ status }: NetworkStatusType) =>
   status === NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED;
 
@@ -60,7 +71,10 @@ const dnsServers = ({ dns_ip_1, dns_ip_2 }: NetworkStatusType) => {
 };
 
 const IPs = (status: NetworkStatusType) => {
-  if (!status.local_ipv6 || status.local_ipv6 === '0000:0000:0000:0000:0000:0000:0000:0000') {
+  if (
+    !status.local_ipv6 ||
+    status.local_ipv6 === '0000:0000:0000:0000:0000:0000:0000:0000'
+  ) {
     return status.local_ip;
   }
   if (!status.local_ip || status.local_ip === '0.0.0.0') {
@@ -70,7 +84,11 @@ const IPs = (status: NetworkStatusType) => {
 };
 
 const NetworkStatus: FC = () => {
-  const { data: data, send: loadData, error } = useRequest(NetworkApi.readNetworkStatus);
+  const {
+    data: data,
+    send: loadData,
+    error
+  } = useRequest(NetworkApi.readNetworkStatus);
 
   const { LL } = useI18nContext();
 
@@ -134,7 +152,10 @@ const NetworkStatus: FC = () => {
                     <SettingsInputAntennaIcon />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary="SSID (RSSI)" secondary={data.ssid + ' (' + data.rssi + ' dBm)'} />
+                <ListItemText
+                  primary="SSID (RSSI)"
+                  secondary={data.ssid + ' (' + data.rssi + ' dBm)'}
+                />
               </ListItem>
               <Divider variant="inset" component="li" />
             </>
@@ -154,14 +175,20 @@ const NetworkStatus: FC = () => {
                     <DeviceHubIcon />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary={LL.ADDRESS_OF('MAC')} secondary={data.mac_address} />
+                <ListItemText
+                  primary={LL.ADDRESS_OF('MAC')}
+                  secondary={data.mac_address}
+                />
               </ListItem>
               <Divider variant="inset" component="li" />
               <ListItem>
                 <ListItemAvatar>
                   <Avatar>#</Avatar>
                 </ListItemAvatar>
-                <ListItemText primary={LL.NETWORK_SUBNET()} secondary={data.subnet_mask} />
+                <ListItemText
+                  primary={LL.NETWORK_SUBNET()}
+                  secondary={data.subnet_mask}
+                />
               </ListItem>
               <Divider variant="inset" component="li" />
               <ListItem>
@@ -170,7 +197,10 @@ const NetworkStatus: FC = () => {
                     <SettingsInputComponentIcon />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary={LL.NETWORK_GATEWAY()} secondary={data.gateway_ip || 'none'} />
+                <ListItemText
+                  primary={LL.NETWORK_GATEWAY()}
+                  secondary={data.gateway_ip || 'none'}
+                />
               </ListItem>
               <Divider variant="inset" component="li" />
               <ListItem>
@@ -179,14 +209,22 @@ const NetworkStatus: FC = () => {
                     <DnsIcon />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary={LL.NETWORK_DNS()} secondary={dnsServers(data)} />
+                <ListItemText
+                  primary={LL.NETWORK_DNS()}
+                  secondary={dnsServers(data)}
+                />
               </ListItem>
               <Divider variant="inset" component="li" />
             </>
           )}
         </List>
         <ButtonRow>
-          <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
+          <Button
+            startIcon={<RefreshIcon />}
+            variant="outlined"
+            color="secondary"
+            onClick={loadData}
+          >
             {LL.REFRESH()}
           </Button>
         </ButtonRow>

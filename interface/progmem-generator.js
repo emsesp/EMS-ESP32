@@ -1,8 +1,14 @@
-import { readdirSync, existsSync, unlinkSync, readFileSync, createWriteStream } from 'fs';
-import { resolve, relative, sep } from 'path';
-import zlib from 'zlib';
-import mime from 'mime-types';
 import crypto from 'crypto';
+import {
+  createWriteStream,
+  existsSync,
+  readFileSync,
+  readdirSync,
+  unlinkSync
+} from 'fs';
+import mime from 'mime-types';
+import { relative, resolve, sep } from 'path';
+import zlib from 'zlib';
 
 const ARDUINO_INCLUDES = '#include <Arduino.h>\n\n';
 const INDENT = '  ';
@@ -18,12 +24,7 @@ const generateWWWClass = () =>
 class WWWData {
 ${indent}public:
 ${indent.repeat(2)}static void registerRoutes(RouteRegistrationHandler handler) {
-${fileInfo
-  .map(
-    (file) =>
-      `${indent.repeat(3)}handler("${file.uri}", "${file.mimeType}", ${file.variable}, ${file.size}, "${file.hash}");`
-  )
-  .join('\n')}
+${fileInfo.map((file) => `${indent.repeat(3)}handler("${file.uri}", "${file.mimeType}", ${file.variable}, ${file.size}, "${file.hash}");`).join('\n')}
 ${indent.repeat(2)}}
 };
 `;

@@ -1,6 +1,4 @@
 import type { Translation } from '../i18n-types';
-/* prettier-ignore */
-/* eslint-disable */
 
 const tr: Translation = {
   LANGUAGE: 'Dil',
@@ -208,7 +206,8 @@ const tr: Translation = {
   USER_WARNING: 'En az bir yönetici kullanıcısı ayarlamanız gerekmektedir',
   ADD: 'Ekle',
   ACCESS_TOKEN_FOR: 'Erişim Jetonunun sahibi',
-  ACCESS_TOKEN_TEXT: 'Aşağıdaki Jeton yetki gerektiren REST API çağrıları ile kullanılmaktadır. Taşıyıcı Jeton olarak yetkilendirme başlığında yada erişim jetonu olarak URL sorgu parametresinde kullanılabilir.',
+  ACCESS_TOKEN_TEXT:
+    'Aşağıdaki Jeton yetki gerektiren REST API çağrıları ile kullanılmaktadır. Taşıyıcı Jeton olarak yetkilendirme başlığında yada erişim jetonu olarak URL sorgu parametresinde kullanılabilir.',
   GENERATING_TOKEN: 'Jeton oluşturuluyor',
   USER: 'Kullanıcı',
   MODIFY: 'Düzenle',
@@ -329,7 +328,7 @@ const tr: Translation = {
   APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
   SECURITY_1: 'Add or remove users', // TODO translate
   UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', // TODO translate
-  CUSTOMIZE: 'Customize' // TODO translate
+  MODULE: 'Module' // TODO translate
 };
 
 export default tr;

@@ -1,3 +1,6 @@
+import { type FC, useState } from 'react';
+import { toast } from 'react-toastify';
+
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CastIcon from '@mui/icons-material/Cast';
@@ -10,17 +13,25 @@ import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore
 import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import TuneIcon from '@mui/icons-material/Tune';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  List
+} from '@mui/material';
 
-import { List, Button, Dialog, DialogActions, DialogContent, DialogTitle, Box } from '@mui/material';
-import { useRequest } from 'alova';
-import { useState, type FC } from 'react';
-import { toast } from 'react-toastify';
-import RestartMonitor from './system/RestartMonitor';
-import { dialogStyle } from 'CustomTheme';
 import * as SystemApi from 'api/system';
+
+import { dialogStyle } from 'CustomTheme';
+import { useRequest } from 'alova';
 import { ButtonRow, SectionContent, useLayoutTitle } from 'components';
 import ListMenuItem from 'components/layout/ListMenuItem';
 import { useI18nContext } from 'i18n/i18n-react';
+
+import RestartMonitor from './system/RestartMonitor';
 
 const Settings: FC = () => {
   const { LL } = useI18nContext();
@@ -49,8 +60,8 @@ const Settings: FC = () => {
       .then(() => {
         setRestarting(true);
       })
-      .catch((err) => {
-        toast.error(err.message);
+      .catch((error: Error) => {
+        toast.error(error.message);
       })
       .finally(() => {
         setConfirmRestart(false);
@@ -64,8 +75,8 @@ const Settings: FC = () => {
       .then(() => {
         setRestarting(true);
       })
-      .catch((err) => {
-        toast.error(err.message);
+      .catch((error: Error) => {
+        toast.error(error.message);
       })
       .finally(() => {
         setConfirmFactoryReset(false);
@@ -79,8 +90,8 @@ const Settings: FC = () => {
       .then(() => {
         setRestarting(true);
       })
-      .catch((err) => {
-        toast.error(err.message);
+      .catch((error: Error) => {
+        toast.error(error.message);
       })
       .finally(() => {
         setConfirmRestart(false);
@@ -89,7 +100,11 @@ const Settings: FC = () => {
   };
 
   const renderRestartDialog = () => (
-    <Dialog sx={dialogStyle} open={confirmRestart} onClose={() => setConfirmRestart(false)}>
+    <Dialog
+      sx={dialogStyle}
+      open={confirmRestart}
+      onClose={() => setConfirmRestart(false)}
+    >
       <DialogTitle>{LL.RESTART()}</DialogTitle>
       <DialogContent dividers>{LL.RESTART_CONFIRM()}</DialogContent>
       <DialogActions>
@@ -125,7 +140,11 @@ const Settings: FC = () => {
   );
 
   const renderFactoryResetDialog = () => (
-    <Dialog sx={dialogStyle} open={confirmFactoryReset} onClose={() => setConfirmFactoryReset(false)}>
+    <Dialog
+      sx={dialogStyle}
+      open={confirmFactoryReset}
+      onClose={() => setConfirmFactoryReset(false)}
+    >
       <DialogTitle>{LL.FACTORY_RESET()}</DialogTitle>
       <DialogContent dividers>{LL.SYSTEM_FACTORY_TEXT_DIALOG()}</DialogContent>
       <DialogActions>
@@ -186,9 +205,26 @@ const Settings: FC = () => {
           to="ntp"
         />
 
-        <ListMenuItem icon={DeviceHubIcon} bgcolor="#68374d" label="MQTT" text={LL.CONFIGURE('MQTT')} to="mqtt" />
-        <ListMenuItem icon={CastIcon} bgcolor="#efc34b" label="OTA" text={LL.CONFIGURE('OTA')} to="ota" />
-        <ListMenuItem icon={LockIcon} label={LL.SECURITY(0)} text={LL.SECURITY_1()} to="security" />
+        <ListMenuItem
+          icon={DeviceHubIcon}
+          bgcolor="#68374d"
+          label="MQTT"
+          text={LL.CONFIGURE('MQTT')}
+          to="mqtt"
+        />
+        <ListMenuItem
+          icon={CastIcon}
+          bgcolor="#efc34b"
+          label="OTA"
+          text={LL.CONFIGURE('OTA')}
+          to="ota"
+        />
+        <ListMenuItem
+          icon={LockIcon}
+          label={LL.SECURITY(0)}
+          text={LL.SECURITY_1()}
+          to="security"
+        />
 
         <ListMenuItem
           icon={MemoryIcon}
@@ -239,7 +275,9 @@ const Settings: FC = () => {
     </>
   );
 
-  return <SectionContent>{restarting ? <RestartMonitor /> : content()}</SectionContent>;
+  return (
+    <SectionContent>{restarting ? <RestartMonitor /> : content()}</SectionContent>
+  );
 };
 
 export default Settings;

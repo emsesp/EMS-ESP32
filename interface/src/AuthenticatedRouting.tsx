@@ -1,7 +1,6 @@
-import { useContext, type FC } from 'react';
-import { Navigate, Routes, Route } from 'react-router-dom';
+import { type FC, useContext } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
-import Help from './project/Help';
 import { Layout } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import Settings from 'framework/Settings';
@@ -20,6 +19,8 @@ import Customization from 'project/Customization';
 import Devices from 'project/Devices';
 import Scheduler from 'project/Scheduler';
 import Sensors from 'project/Sensors';
+
+import Help from './project/Help';
 
 const AuthenticatedRouting: FC = () => {
   const { me } = useContext(AuthenticatedContext);
@@ -44,7 +45,10 @@ const AuthenticatedRouting: FC = () => {
             <Route path="/settings/mqtt/*" element={<Mqtt />} />
             <Route path="/settings/ota/*" element={<OTASettings />} />
             <Route path="/settings/security/*" element={<Security />} />
-            <Route path="/settings/espsystemstatus/*" element={<ESPSystemStatus />} />
+            <Route
+              path="/settings/espsystemstatus/*"
+              element={<ESPSystemStatus />}
+            />
             <Route path="/settings/upload/*" element={<UploadDownload />} />
           </>
         )}

@@ -1,6 +1,4 @@
 import type { Translation } from '../i18n-types';
-/* prettier-ignore */
-/* eslint-disable */
 
 const de: Translation = {
   LANGUAGE: 'Sprache',
@@ -208,7 +206,8 @@ const de: Translation = {
   USER_WARNING: 'Sie müssen mindestens einen Admin-Nutzer konfigurieren',
   ADD: 'Hinzufügen',
   ACCESS_TOKEN_FOR: 'Zugangs-Token für',
-  ACCESS_TOKEN_TEXT: 'Dieses Token ist für REST API Aufrufe bestimmt, die eine Authentifizierung benötigen. Es kann entweder als Bearer Token im `Authorization-Header` oder in der Access_Token URL verwendet werden.',
+  ACCESS_TOKEN_TEXT:
+    'Dieses Token ist für REST API Aufrufe bestimmt, die eine Authentifizierung benötigen. Es kann entweder als Bearer Token im `Authorization-Header` oder in der Access_Token URL verwendet werden.',
   GENERATING_TOKEN: 'Erzeuge Token',
   USER: 'Nutzer',
   MODIFY: 'Ändern',
@@ -329,7 +328,7 @@ const de: Translation = {
   APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
   SECURITY_1: 'Add or remove users', // TODO translate
   UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', // TODO translate
-  CUSTOMIZE: 'Customize' // TODO translate
+  MODULE: 'Module' // TODO translate
 };
 
 export default de;

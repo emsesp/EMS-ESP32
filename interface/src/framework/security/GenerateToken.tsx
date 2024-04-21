@@ -1,23 +1,24 @@
+import { useEffect } from 'react';
+import type { FC } from 'react';
+
 import CloseIcon from '@mui/icons-material/Close';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   LinearProgress,
-  Typography,
   TextField,
-  Button
+  Typography
 } from '@mui/material';
-import { useRequest } from 'alova';
-import { useEffect } from 'react';
 
-import type { FC } from 'react';
-import { dialogStyle } from 'CustomTheme';
 import * as SecurityApi from 'api/security';
-import { MessageBox } from 'components';
 
+import { dialogStyle } from 'CustomTheme';
+import { useRequest } from 'alova';
+import { MessageBox } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
 interface GenerateTokenProps {
@@ -29,26 +30,40 @@ const GenerateToken: FC<GenerateTokenProps> = ({ username, onClose }) => {
   const { LL } = useI18nContext();
   const open = !!username;
 
-  const { data: token, send: generateToken } = useRequest(SecurityApi.generateToken(username), {
-    immediate: false
-  });
+  const { data: token, send: generateToken } = useRequest(
+    SecurityApi.generateToken(username),
+    {
+      immediate: false
+    }
+  );
 
   useEffect(() => {
     if (open) {
       void generateToken();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   return (
-    <Dialog sx={dialogStyle} onClose={onClose} open={!!username} fullWidth maxWidth="sm">
+    <Dialog
+      sx={dialogStyle}
+      onClose={onClose}
+      open={!!username}
+      fullWidth
+      maxWidth="sm"
+    >
       <DialogTitle>{LL.ACCESS_TOKEN_FOR() + ' ' + username}</DialogTitle>
       <DialogContent dividers>
         {token ? (
           <>
             <MessageBox message={LL.ACCESS_TOKEN_TEXT()} level="info" my={2} />
             <Box mt={2} mb={2}>
-              <TextField label="Token" multiline value={token.token} fullWidth contentEditable={false} />
+              <TextField
+                label="Token"
+                multiline
+                value={token.token}
+                fullWidth
+                contentEditable={false}
+              />
             </Box>
           </>
         ) : (
@@ -59,7 +74,12 @@ const GenerateToken: FC<GenerateTokenProps> = ({ username, onClose }) => {
         )}
       </DialogContent>
       <DialogActions>
-        <Button startIcon={<CloseIcon />} variant="outlined" onClick={onClose} color="secondary">
+        <Button
+          startIcon={<CloseIcon />}
+          variant="outlined"
+          onClick={onClose}
+          color="secondary"
+        >
           {LL.CLOSE()}
         </Button>
       </DialogActions>

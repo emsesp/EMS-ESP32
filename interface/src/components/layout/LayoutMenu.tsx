@@ -1,3 +1,6 @@
+import { useContext, useState } from 'react';
+import type { ChangeEventHandler, FC } from 'react';
+
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import CategoryIcon from '@mui/icons-material/Category';
@@ -9,28 +12,23 @@ import PersonIcon from '@mui/icons-material/Person';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import SensorsIcon from '@mui/icons-material/Sensors';
 import SettingsIcon from '@mui/icons-material/Settings';
-
 import {
-  Divider,
-  List,
+  Avatar,
   Box,
   Button,
-  Popover,
-  Avatar,
-  MenuItem,
-  TextField,
+  Divider,
+  List,
   ListItem,
   ListItemButton,
   ListItemIcon,
-  ListItemText
+  ListItemText,
+  MenuItem,
+  Popover,
+  TextField
 } from '@mui/material';
 
-import { useContext, useState } from 'react';
-import type { Locales } from 'i18n/i18n-types';
-import type { FC, ChangeEventHandler } from 'react';
 import LayoutMenuItem from 'components/layout/LayoutMenuItem';
 import { AuthenticatedContext } from 'contexts/authentication';
-
 import DEflag from 'i18n/DE.svg';
 import FRflag from 'i18n/FR.svg';
 import GBflag from 'i18n/GB.svg';
@@ -41,8 +39,8 @@ import PLflag from 'i18n/PL.svg';
 import SKflag from 'i18n/SK.svg';
 import SVflag from 'i18n/SV.svg';
 import TRflag from 'i18n/TR.svg';
-
 import { I18nContext } from 'i18n/i18n-react';
+import type { Locales } from 'i18n/i18n-types';
 import { loadLocaleAsync } from 'i18n/i18n-util.async';
 
 const LayoutMenu: FC = () => {
@@ -56,14 +54,16 @@ const LayoutMenu: FC = () => {
 
   const [menuOpen, setMenuOpen] = useState(true);
 
-  const onLocaleSelected: ChangeEventHandler<HTMLInputElement> = async ({ target }) => {
+  const onLocaleSelected: ChangeEventHandler<HTMLInputElement> = async ({
+    target
+  }) => {
     const loc = target.value as Locales;
     localStorage.setItem('lang', loc);
     await loadLocaleAsync(loc);
     setLocale(loc);
   };
 
-  const handleClick = (event: any) => {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -94,13 +94,20 @@ const LayoutMenu: FC = () => {
             }}
           >
             <ListItemText
-              primary={LL.CUSTOMIZE()}
+              primary={LL.MODULE()}
               primaryTypographyProps={{
                 fontWeight: '600',
                 mb: '2px',
                 color: 'lightblue'
               }}
-              secondary={LL.CUSTOMIZATIONS() + ', ' + LL.SCHEDULER() + ', ' + LL.CUSTOM_ENTITIES(0) + '...'}
+              secondary={
+                LL.CUSTOMIZATIONS() +
+                ', ' +
+                LL.SCHEDULER() +
+                ', ' +
+                LL.CUSTOM_ENTITIES(0) +
+                '...'
+              }
               secondaryTypographyProps={{
                 noWrap: true,
                 fontSize: 12,
@@ -125,7 +132,12 @@ const LayoutMenu: FC = () => {
                 disabled={!me.admin}
                 to={`/customizations`}
               />
-              <LayoutMenuItem icon={MoreTimeIcon} label={LL.SCHEDULER()} disabled={!me.admin} to={`/scheduler`} />
+              <LayoutMenuItem
+                icon={MoreTimeIcon}
+                label={LL.SCHEDULER()}
+                disabled={!me.admin}
+                to={`/scheduler`}
+              />
               <LayoutMenuItem
                 icon={PlaylistAddIcon}
                 label={LL.CUSTOM_ENTITIES(0)}
@@ -139,7 +151,12 @@ const LayoutMenu: FC = () => {
 
       <List style={{ marginTop: `auto` }}>
         <LayoutMenuItem icon={AssessmentIcon} label={LL.SYSTEM(0)} to="/system" />
-        <LayoutMenuItem icon={SettingsIcon} label={LL.SETTINGS(0)} disabled={!me.admin} to="/settings" />
+        <LayoutMenuItem
+          icon={SettingsIcon}
+          label={LL.SETTINGS(0)}
+          disabled={!me.admin}
+          to="/settings"
+        />
         <LayoutMenuItem icon={LiveHelpIcon} label={LL.HELP_OF('')} to={`/help`} />
       </List>
       <Divider />
@@ -241,7 +258,12 @@ const LayoutMenu: FC = () => {
             </TextField>
           </Box>
           <Box>
-            <Button variant="outlined" fullWidth color="primary" onClick={() => signOut(true)}>
+            <Button
+              variant="outlined"
+              fullWidth
+              color="primary"
+              onClick={() => signOut(true)}
+            >
               {LL.SIGN_OUT()}
             </Button>
           </Box>

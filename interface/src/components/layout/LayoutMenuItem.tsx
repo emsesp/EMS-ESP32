@@ -1,7 +1,8 @@
-import { ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
-import { Link, useLocation } from 'react-router-dom';
-import type { SvgIconProps } from '@mui/material';
 import type { FC } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+
+import { ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import type { SvgIconProps } from '@mui/material';
 
 import { routeMatches } from 'utils';
 
@@ -12,7 +13,12 @@ interface LayoutMenuItemProps {
   disabled?: boolean;
 }
 
-const LayoutMenuItem: FC<LayoutMenuItemProps> = ({ icon: Icon, label, to, disabled }) => {
+const LayoutMenuItem: FC<LayoutMenuItemProps> = ({
+  icon: Icon,
+  label,
+  to,
+  disabled
+}) => {
   const { pathname } = useLocation();
 
   const selected = routeMatches(to, pathname);
@@ -22,7 +28,9 @@ const LayoutMenuItem: FC<LayoutMenuItemProps> = ({ icon: Icon, label, to, disabl
       <ListItemIcon sx={{ color: selected ? '#90caf9' : '#9e9e9e' }}>
         <Icon />
       </ListItemIcon>
-      <ListItemText sx={{ color: selected ? '#90caf9' : '#f5f5f5' }}>{label}</ListItemText>
+      <ListItemText sx={{ color: selected ? '#90caf9' : '#f5f5f5' }}>
+        {label}
+      </ListItemText>
     </ListItemButton>
   );
 };

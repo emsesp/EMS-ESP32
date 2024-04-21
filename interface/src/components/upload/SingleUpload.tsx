@@ -1,13 +1,14 @@
+import { Fragment } from 'react';
+import type { FC } from 'react';
+import { useDropzone } from 'react-dropzone';
+import type { DropzoneState } from 'react-dropzone';
+
 import CancelIcon from '@mui/icons-material/Cancel';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { Box, Button, LinearProgress, Typography, useTheme } from '@mui/material';
-import { Fragment } from 'react';
-import { useDropzone } from 'react-dropzone';
 import type { Theme } from '@mui/material';
-import type { Progress } from 'alova';
-import type { FC } from 'react';
-import type { DropzoneState } from 'react-dropzone';
 
+import type { Progress } from 'alova';
 import { useI18nContext } from 'i18n/i18n-react';
 
 const getBorderColor = (theme: Theme, props: DropzoneState) => {
@@ -30,7 +31,12 @@ export interface SingleUploadProps {
   progress: Progress;
 }
 
-const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, isUploading, progress }) => {
+const SingleUpload: FC<SingleUploadProps> = ({
+  onDrop,
+  onCancel,
+  isUploading,
+  progress
+}) => {
   const uploading = isUploading && progress.total > 0;
 
   const dropzoneState = useDropzone({
@@ -52,8 +58,14 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, isUploading, pr
     if (uploading) {
       if (progress.total && progress.loaded) {
         return progress.loaded <= progress.total
-          ? LL.UPLOADING() + ': ' + Math.round((progress.loaded * 100) / progress.total) + '%'
-          : LL.UPLOADING() + ': ' + Math.round((progress.total * 100) / progress.loaded) + '%';
+          ? LL.UPLOADING() +
+              ': ' +
+              Math.round((progress.loaded * 100) / progress.total) +
+              '%'
+          : LL.UPLOADING() +
+              ': ' +
+              Math.round((progress.total * 100) / progress.loaded) +
+              '%';
       }
     }
     return LL.UPLOAD_DROP_TEXT();
@@ -94,7 +106,12 @@ const SingleUpload: FC<SingleUploadProps> = ({ onDrop, onCancel, isUploading, pr
                 }
               />
             </Box>
-            <Button startIcon={<CancelIcon />} variant="outlined" color="secondary" onClick={onCancel}>
+            <Button
+              startIcon={<CancelIcon />}
+              variant="outlined"
+              color="secondary"
+              onClick={onCancel}
+            >
               {LL.CANCEL()}
             </Button>
           </Fragment>

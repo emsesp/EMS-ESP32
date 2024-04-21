@@ -1,12 +1,13 @@
+import type { FC } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
+
 import { Tab } from '@mui/material';
-import { Navigate, Routes, Route } from 'react-router-dom';
+
+import { RouterTabs, useLayoutTitle, useRouterTab } from 'components';
+import { useI18nContext } from 'i18n/i18n-react';
+
 import ManageUsers from './ManageUsers';
 import SecuritySettings from './SecuritySettings';
-import type { FC } from 'react';
-
-import { RouterTabs, useRouterTab, useLayoutTitle } from 'components';
-
-import { useI18nContext } from 'i18n/i18n-react';
 
 const Security: FC = () => {
   const { LL } = useI18nContext();

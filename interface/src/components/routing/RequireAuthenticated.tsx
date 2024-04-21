@@ -1,12 +1,15 @@
 import { useContext, useEffect } from 'react';
+import type { FC } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 
-import type { AuthenticatedContextValue } from 'contexts/authentication/context';
-import type { FC } from 'react';
-
-import type { RequiredChildrenProps } from 'utils';
 import { storeLoginRedirect } from 'api/authentication';
-import { AuthenticatedContext, AuthenticationContext } from 'contexts/authentication/context';
+
+import type { AuthenticatedContextValue } from 'contexts/authentication/context';
+import {
+  AuthenticatedContext,
+  AuthenticationContext
+} from 'contexts/authentication/context';
+import type { RequiredChildrenProps } from 'utils';
 
 const RequireAuthenticated: FC<RequiredChildrenProps> = ({ children }) => {
   const authenticationContext = useContext(AuthenticationContext);
@@ -19,7 +22,9 @@ const RequireAuthenticated: FC<RequiredChildrenProps> = ({ children }) => {
   });
 
   return authenticationContext.me ? (
-    <AuthenticatedContext.Provider value={authenticationContext as AuthenticatedContextValue}>
+    <AuthenticatedContext.Provider
+      value={authenticationContext as AuthenticatedContextValue}
+    >
       {children}
     </AuthenticatedContext.Provider>
   ) : (

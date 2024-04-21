@@ -1,14 +1,11 @@
 import { useContext, useEffect } from 'react';
-
-import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
-
-import { toast } from 'react-toastify';
 import type { FC } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 import AuthenticatedRouting from 'AuthenticatedRouting';
 import SignIn from 'SignIn';
 import { RequireAuthenticated, RequireUnauthenticated } from 'components';
-
 import { Authentication, AuthenticationContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 
@@ -47,8 +44,14 @@ const AppRouting: FC = () => {
     <Authentication>
       <RemoveTrailingSlashes />
       <Routes>
-        <Route path="/unauthorized" element={<RootRedirect message={LL.PLEASE_SIGNIN()} signOut />} />
-        <Route path="/fileUpdated" element={<RootRedirect message={LL.UPLOAD_SUCCESSFUL()} />} />
+        <Route
+          path="/unauthorized"
+          element={<RootRedirect message={LL.PLEASE_SIGNIN()} signOut />}
+        />
+        <Route
+          path="/fileUpdated"
+          element={<RootRedirect message={LL.UPLOAD_SUCCESSFUL()} />}
+        />
         <Route
           path="/"
           element={

@@ -1,26 +1,39 @@
+import { useCallback, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import { useBlocker } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
 import AddIcon from '@mui/icons-material/Add';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CircleIcon from '@mui/icons-material/Circle';
 import WarningIcon from '@mui/icons-material/Warning';
+import { Box, Button, Divider, Stack, Typography } from '@mui/material';
 
-import { Box, Typography, Divider, Stack, Button } from '@mui/material';
-import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
+import {
+  Body,
+  Cell,
+  Header,
+  HeaderCell,
+  HeaderRow,
+  Row,
+  Table
+} from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
-// eslint-disable-next-line import/named
 import { updateState, useRequest } from 'alova';
-import { useState, useEffect, useCallback } from 'react';
-import { useBlocker } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import SettingsSchedulerDialog from './SchedulerDialog';
-import * as EMSESP from './api';
-import { ScheduleFlag } from './types';
-import { schedulerItemValidation } from './validators';
-import type { ScheduleItem } from './types';
-import type { FC } from 'react';
-
-import { ButtonRow, FormLoader, SectionContent, BlockNavigation, useLayoutTitle } from 'components';
-
+import {
+  BlockNavigation,
+  ButtonRow,
+  FormLoader,
+  SectionContent,
+  useLayoutTitle
+} from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
+
+import * as EMSESP from './api';
+import SettingsSchedulerDialog from './SchedulerDialog';
+import { ScheduleFlag } from './types';
+import type { Schedule, ScheduleItem } from './types';
+import { schedulerItemValidation } from './validators';
 
 const Scheduler: FC = () => {
   const { LL, locale } = useI18nContext();
@@ -40,7 +53,12 @@ const Scheduler: FC = () => {
     force: true
   });
 
-  const { send: writeSchedule } = useRequest((data) => EMSESP.writeSchedule(data), { immediate: false });
+  const { send: writeSchedule } = useRequest(
+    (data: Schedule) => EMSESP.writeSchedule(data),
+    {
+      immediate: false
+    }
+  );
 
   function hasScheduleChanged(si: ScheduleItem) {
     return (
@@ -56,7 +74,10 @@ const Scheduler: FC = () => {
   }
 
   useEffect(() => {
-    const formatter = new Intl.DateTimeFormat(locale, { weekday: 'short', timeZone: 'UTC' });
+    const formatter = new Intl.DateTimeFormat(locale, {
+      weekday: 'short',
+      timeZone: 'UTC'
+    });
     const days = [1, 2, 3, 4, 5, 6, 7].map((day) => {
       const dd = day < 10 ? `0${day}` : day;
       return new Date(`2017-01-${dd}T00:00:00+00:00`);
@@ -126,8 +147,8 @@ const Scheduler: FC = () => {
       .then(() => {
         toast.success(LL.SCHEDULE_UPDATED());
       })
-      .catch((err) => {
-        toast.error(err.message);
+      .catch((error: Error) => {
+        toast.error(error.message);
       })
       .finally(async () => {
         await fetchSchedule();
@@ -154,11 +175,18 @@ const Scheduler: FC = () => {
   const onDialogSave = (updatedItem: ScheduleItem) => {
     setDialogOpen(false);
 
-    updateState('schedule', (data) => {
+    updateState('schedule', (data: ScheduleItem[]) => {
       const new_data = creating
-        ? [...data.filter((si) => creating || si.o_id !== updatedItem.o_id), updatedItem]
-        : data.map((si) => (si.id === updatedItem.id ? { ...si, ...updatedItem } : si));
+        ? [
+            ...data.filter((si) => creating || si.o_id !== updatedItem.o_id),
+            updatedItem
+          ]
+        : data.map((si) =>
+            si.id === updatedItem.id ? { ...si, ...updatedItem } : si
+          );
+
       setNumChanges(new_data.filter((si) => hasScheduleChanged(si)).length);
+
       return new_data;
     });
   };
@@ -186,8 +214,13 @@ const Scheduler: FC = () => {
     const dayBox = (si: ScheduleItem, flag: number) => (
       <>
         <Box>
-          <Typography sx={{ fontSize: 11 }} color={(si.flags & flag) === flag ? 'primary' : 'grey'}>
-            {flag === ScheduleFlag.SCHEDULE_TIMER ? LL.TIMER(0) : dow[Math.log(flag) / Math.log(2)]}
+          <Typography
+            sx={{ fontSize: 11 }}
+            color={(si.flags & flag) === flag ? 'primary' : 'grey'}
+          >
+            {flag === ScheduleFlag.SCHEDULE_TIMER
+              ? LL.TIMER(0)
+              : dow[Math.log(flag) / Math.log(2)]}
           </Typography>
         </Box>
         <Divider orientation="vertical" flexItem />
@@ -198,11 +231,15 @@ const Scheduler: FC = () => {
 
     return (
       <Table
-        data={{ nodes: schedule.filter((si) => !si.deleted).sort((a, b) => a.time.localeCompare(b.time)) }}
+        data={{
+          nodes: schedule
+            .filter((si) => !si.deleted)
+            .sort((a, b) => a.time.localeCompare(b.time))
+        }}
         theme={schedule_theme}
         layout={{ custom: true }}
       >
-        {(tableList: any) => (
+        {(tableList: ScheduleItem[]) => (
           <>
             <Header>
               <HeaderRow>
@@ -219,9 +256,15 @@ const Scheduler: FC = () => {
                 <Row key={si.id} item={si} onClick={() => editScheduleItem(si)}>
                   <Cell stiff>
                     {si.active ? (
-                      <CircleIcon color="success" sx={{ fontSize: 16, verticalAlign: 'middle' }} />
+                      <CircleIcon
+                        color="success"
+                        sx={{ fontSize: 16, verticalAlign: 'middle' }}
+                      />
                     ) : (
-                      <CircleIcon color="error" sx={{ fontSize: 16, verticalAlign: 'middle' }} />
+                      <CircleIcon
+                        color="error"
+                        sx={{ fontSize: 16, verticalAlign: 'middle' }}
+                      />
                     )}
                   </Cell>
                   <Cell stiff>
@@ -274,7 +317,12 @@ const Scheduler: FC = () => {
         <Box flexGrow={1}>
           {numChanges !== 0 && (
             <ButtonRow>
-              <Button startIcon={<CancelIcon />} variant="outlined" onClick={onDialogCancel} color="secondary">
+              <Button
+                startIcon={<CancelIcon />}
+                variant="outlined"
+                onClick={onDialogCancel}
+                color="secondary"
+              >
                 {LL.CANCEL()}
               </Button>
               <Button
@@ -290,7 +338,12 @@ const Scheduler: FC = () => {
         </Box>
         <Box flexWrap="nowrap" whiteSpace="nowrap">
           <ButtonRow>
-            <Button startIcon={<AddIcon />} variant="outlined" color="secondary" onClick={addScheduleItem}>
+            <Button
+              startIcon={<AddIcon />}
+              variant="outlined"
+              color="secondary"
+              onClick={addScheduleItem}
+            >
               {LL.ADD(0)}
             </Button>
           </ButtonRow>

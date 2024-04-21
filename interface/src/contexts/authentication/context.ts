@@ -1,4 +1,5 @@
 import { createContext } from 'react';
+
 import type { Me } from 'types';
 
 export interface AuthenticationContextValue {
@@ -9,7 +10,9 @@ export interface AuthenticationContextValue {
 }
 
 const AuthenticationContextDefaultValue = {} as AuthenticationContextValue;
-export const AuthenticationContext = createContext(AuthenticationContextDefaultValue);
+export const AuthenticationContext = createContext(
+  AuthenticationContextDefaultValue
+);
 
 export interface AuthenticatedContextValue extends AuthenticationContextValue {
   me: Me;

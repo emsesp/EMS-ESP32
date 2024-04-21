@@ -1,3 +1,15 @@
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useState
+} from 'react';
+import type { FC } from 'react';
+import { IconContext } from 'react-icons';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
 import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
@@ -12,47 +24,47 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined';
 import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
-
 import {
+  Box,
   Button,
   Dialog,
-  DialogTitle,
-  DialogContent,
   DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
   IconButton,
   List,
   ListItem,
   ListItemText,
-  Box,
-  Grid,
   Typography
 } from '@mui/material';
 
 import { useRowSelect } from '@table-library/react-table-library/select';
-import { useSort, SortToggleType } from '@table-library/react-table-library/sort';
-import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
+import { SortToggleType, useSort } from '@table-library/react-table-library/sort';
+import {
+  Body,
+  Cell,
+  Header,
+  HeaderCell,
+  HeaderRow,
+  Row,
+  Table
+} from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
-import { useRequest } from 'alova';
-import { useState, useEffect, useCallback, useLayoutEffect, useContext } from 'react';
-
-import { IconContext } from 'react-icons';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import DeviceIcon from './DeviceIcon';
-import DashboardDevicesDialog from './DevicesDialog';
-
-import * as EMSESP from './api';
-import { formatValue } from './deviceValue';
-
-import { DeviceValueUOM_s, DeviceEntityMask, DeviceType } from './types';
-import { deviceValueItemValidation } from './validators';
-import type { Device, DeviceValue } from './types';
-import type { FC } from 'react';
+import type { Action, State } from '@table-library/react-table-library/types/common';
 import { dialogStyle } from 'CustomTheme';
-import { ButtonRow, SectionContent, MessageBox, useLayoutTitle } from 'components';
-
+import { useRequest } from 'alova';
+import { ButtonRow, MessageBox, SectionContent, useLayoutTitle } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
+
+import * as EMSESP from './api';
+import DeviceIcon from './DeviceIcon';
+import DashboardDevicesDialog from './DevicesDialog';
+import { formatValue } from './deviceValue';
+import { DeviceEntityMask, DeviceType, DeviceValueUOM_s } from './types';
+import type { Device, DeviceValue } from './types';
+import { deviceValueItemValidation } from './validators';
 
 const Devices: FC = () => {
   const { LL } = useI18nContext();
@@ -69,23 +81,32 @@ const Devices: FC = () => {
 
   useLayoutTitle(LL.DEVICES());
 
-  const { data: coreData, send: readCoreData } = useRequest(() => EMSESP.readCoreData(), {
-    initialData: {
-      connected: true,
-      devices: []
+  const { data: coreData, send: readCoreData } = useRequest(
+    () => EMSESP.readCoreData(),
+    {
+      initialData: {
+        connected: true,
+        devices: []
+      }
     }
-  });
+  );
 
-  const { data: deviceData, send: readDeviceData } = useRequest((id) => EMSESP.readDeviceData(id), {
-    initialData: {
-      data: []
-    },
-    immediate: false
-  });
+  const { data: deviceData, send: readDeviceData } = useRequest(
+    (id: number) => EMSESP.readDeviceData(id),
+    {
+      initialData: {
+        data: []
+      },
+      immediate: false
+    }
+  );
 
-  const { loading: submitting, send: writeDeviceValue } = useRequest((data) => EMSESP.writeDeviceValue(data), {
-    immediate: false
-  });
+  const { loading: submitting, send: writeDeviceValue } = useRequest(
+    (data: { id: number; c: string; v: unknown }) => EMSESP.writeDeviceValue(data),
+    {
+      immediate: false
+    }
+  );
 
   useLayoutEffect(() => {
     function updateSize() {
@@ -213,7 +234,7 @@ const Devices: FC = () => {
     }
   ]);
 
-  const getSortIcon = (state: any, sortKey: any) => {
+  const getSortIcon = (state: State, sortKey: unknown) => {
     if (state.sortKey === sortKey && state.reverse) {
       return <KeyboardArrowDownOutlinedIcon />;
     }
@@ -234,14 +255,20 @@ const Devices: FC = () => {
       },
       sortToggleType: SortToggleType.AlternateWithReset,
       sortFns: {
-        NAME: (array) => array.sort((a, b) => a.id.toString().slice(2).localeCompare(b.id.toString().slice(2))),
-        VALUE: (array) => array.sort((a, b) => a.v.toString().localeCompare(b.v.toString()))
+        NAME: (array) =>
+          array.sort((a, b) =>
+            a.id.toString().slice(2).localeCompare(b.id.toString().slice(2))
+          ),
+
+        VALUE: (array) =>
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
+          array.sort((a, b) => a.v.toString().localeCompare(b.v.toString()))
       }
     }
   );
 
-  async function onSelectChange(action: any, state: any) {
-    setSelectedDevice(state.id);
+  async function onSelectChange(action: Action, state: State) {
+    setSelectedDevice(state.id as number);
     if (action.type === 'ADD_BY_ID_EXCLUSIVELY') {
       await readDeviceData(state.id);
     }
@@ -259,8 +286,8 @@ const Devices: FC = () => {
   };
 
   const escFunction = useCallback(
-    (event: any) => {
-      if (event.keyCode === 27) {
+    (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
         if (device_select) {
           device_select.fns.onRemoveAll();
         }
@@ -290,7 +317,7 @@ const Devices: FC = () => {
     }
   };
 
-  const escapeCsvCell = (cell: any) => {
+  const escapeCsvCell = (cell: string) => {
     if (cell == null) {
       return '';
     }
@@ -298,35 +325,59 @@ const Devices: FC = () => {
     if (sc === '' || sc === '""') {
       return sc;
     }
-    if (sc.includes('"') || sc.includes(';') || sc.includes('\n') || sc.includes('\r')) {
+    if (
+      sc.includes('"') ||
+      sc.includes(';') ||
+      sc.includes('\n') ||
+      sc.includes('\r')
+    ) {
       return '"' + sc.replace(/"/g, '""') + '"';
     }
     return sc;
   };
 
-  const hasMask = (id: string, mask: number) => (parseInt(id.slice(0, 2), 16) & mask) === mask;
+  const hasMask = (id: string, mask: number) =>
+    (parseInt(id.slice(0, 2), 16) & mask) === mask;
 
   const handleDownloadCsv = () => {
-    const deviceIndex = coreData.devices.findIndex((d) => d.id === device_select.state.id);
+    const deviceIndex = coreData.devices.findIndex(
+      (d) => d.id === device_select.state.id
+    );
     if (deviceIndex === -1) {
       return;
     }
-    const filename = coreData.devices[deviceIndex].tn + '_' + coreData.devices[deviceIndex].n;
+    const filename =
+      coreData.devices[deviceIndex].tn + '_' + coreData.devices[deviceIndex].n;
 
     const columns = [
-      { accessor: (dv: DeviceValue) => dv.id.slice(2), name: LL.ENTITY_NAME(0) },
       {
-        accessor: (dv: DeviceValue) => (typeof dv.v === 'number' ? new Intl.NumberFormat().format(dv.v) : dv.v),
+        accessor: (dv: DeviceValue) => dv.id.slice(2),
+        name: LL.ENTITY_NAME(0)
+      },
+      {
+        accessor: (dv: DeviceValue) =>
+          typeof dv.v === 'number' ? new Intl.NumberFormat().format(dv.v) : dv.v,
         name: LL.VALUE(1)
       },
-      { accessor: (dv: DeviceValue) => DeviceValueUOM_s[dv.u].replace(/[^a-zA-Z0-9]/g, ''), name: 'UoM' },
       {
-        accessor: (dv: DeviceValue) => (dv.c && !hasMask(dv.id, DeviceEntityMask.DV_READONLY) ? 'yes' : 'no'),
+        accessor: (dv: DeviceValue) =>
+          DeviceValueUOM_s[dv.u].replace(/[^a-zA-Z0-9]/g, ''),
+        name: 'UoM'
+      },
+      {
+        accessor: (dv: DeviceValue) =>
+          dv.c && !hasMask(dv.id, DeviceEntityMask.DV_READONLY) ? 'yes' : 'no',
         name: LL.WRITEABLE()
       },
       {
         accessor: (dv: DeviceValue) =>
-          dv.h ? dv.h : dv.l ? dv.l.join(' | ') : dv.m !== undefined && dv.x !== undefined ? dv.m + ', ' + dv.x : '',
+          dv.h
+            ? dv.h
+            : dv.l
+              ? dv.l.join(' | ')
+              : dv.m !== undefined && dv.x !== undefined
+                ? dv.m + ', ' + dv.x
+                : '',
         name: 'Range'
       }
     ];
@@ -336,9 +387,16 @@ const Devices: FC = () => {
       : deviceData.data;
 
     const csvData = data.reduce(
-      (csvString: any, rowItem: any) =>
-        csvString + columns.map(({ accessor }: any) => escapeCsvCell(accessor(rowItem))).join(';') + '\r\n',
-      columns.map(({ name }: any) => escapeCsvCell(name)).join(';') + '\r\n'
+      (csvString: string, rowItem: DeviceValue) =>
+        csvString +
+        columns
+          .map(({ accessor }: { accessor: (dv: DeviceValue) => unknown }) =>
+            escapeCsvCell(accessor(rowItem) as string)
+          )
+          .join(';') +
+        '\r\n',
+      columns.map(({ name }: { name: string }) => escapeCsvCell(name)).join(';') +
+        '\r\n'
     );
 
     const csvFile = new Blob([csvData], { type: 'text/csv;charset:utf-8' });
@@ -363,7 +421,7 @@ const Devices: FC = () => {
       .then(() => {
         toast.success(LL.WRITE_CMD_SENT());
       })
-      .catch((error) => {
+      .catch((error: Error) => {
         toast.error(error.message);
       })
       .finally(async () => {
@@ -375,45 +433,76 @@ const Devices: FC = () => {
 
   const renderDeviceDetails = () => {
     if (showDeviceInfo) {
-      const deviceIndex = coreData.devices.findIndex((d) => d.id === device_select.state.id);
+      const deviceIndex = coreData.devices.findIndex(
+        (d) => d.id === device_select.state.id
+      );
       if (deviceIndex === -1) {
         return;
       }
 
       return (
-        <Dialog sx={dialogStyle} open={showDeviceInfo} onClose={() => setShowDeviceInfo(false)}>
+        <Dialog
+          sx={dialogStyle}
+          open={showDeviceInfo}
+          onClose={() => setShowDeviceInfo(false)}
+        >
           <DialogTitle>{LL.DEVICE_DETAILS()}</DialogTitle>
           <DialogContent dividers>
             <List dense={true}>
               <ListItem>
-                <ListItemText primary={LL.TYPE(0)} secondary={coreData.devices[deviceIndex].tn} />
+                <ListItemText
+                  primary={LL.TYPE(0)}
+                  secondary={coreData.devices[deviceIndex].tn}
+                />
               </ListItem>
               <ListItem>
-                <ListItemText primary={LL.NAME(0)} secondary={coreData.devices[deviceIndex].n} />
+                <ListItemText
+                  primary={LL.NAME(0)}
+                  secondary={coreData.devices[deviceIndex].n}
+                />
               </ListItem>
               {coreData.devices[deviceIndex].t !== DeviceType.CUSTOM && (
                 <>
                   <ListItem>
-                    <ListItemText primary={LL.BRAND()} secondary={coreData.devices[deviceIndex].b} />
+                    <ListItemText
+                      primary={LL.BRAND()}
+                      secondary={coreData.devices[deviceIndex].b}
+                    />
                   </ListItem>
                   <ListItem>
                     <ListItemText
                       primary={LL.ID_OF(LL.DEVICE())}
-                      secondary={'0x' + ('00' + coreData.devices[deviceIndex].d.toString(16).toUpperCase()).slice(-2)}
+                      secondary={
+                        '0x' +
+                        (
+                          '00' +
+                          coreData.devices[deviceIndex].d.toString(16).toUpperCase()
+                        ).slice(-2)
+                      }
                     />
                   </ListItem>
                   <ListItem>
-                    <ListItemText primary={LL.ID_OF(LL.PRODUCT())} secondary={coreData.devices[deviceIndex].p} />
+                    <ListItemText
+                      primary={LL.ID_OF(LL.PRODUCT())}
+                      secondary={coreData.devices[deviceIndex].p}
+                    />
                   </ListItem>
                   <ListItem>
-                    <ListItemText primary={LL.VERSION()} secondary={coreData.devices[deviceIndex].v} />
+                    <ListItemText
+                      primary={LL.VERSION()}
+                      secondary={coreData.devices[deviceIndex].v}
+                    />
                   </ListItem>
                 </>
               )}
             </List>
           </DialogContent>
           <DialogActions>
-            <Button variant="outlined" onClick={() => setShowDeviceInfo(false)} color="secondary">
+            <Button
+              variant="outlined"
+              onClick={() => setShowDeviceInfo(false)}
+              color="secondary"
+            >
               {LL.CLOSE()}
             </Button>
           </DialogActions>
@@ -423,12 +512,25 @@ const Devices: FC = () => {
   };
 
   const renderCoreData = () => (
-    <IconContext.Provider value={{ color: 'lightblue', size: '18', style: { verticalAlign: 'middle' } }}>
-      {!coreData.connected && <MessageBox my={2} level="error" message={LL.EMS_BUS_WARNING()} />}
+    <IconContext.Provider
+      value={{
+        color: 'lightblue',
+        size: '18',
+        style: { verticalAlign: 'middle' }
+      }}
+    >
+      {!coreData.connected && (
+        <MessageBox my={2} level="error" message={LL.EMS_BUS_WARNING()} />
+      )}
 
       {coreData.connected && (
-        <Table data={{ nodes: coreData.devices }} select={device_select} theme={device_theme} layout={{ custom: true }}>
-          {(tableList: any) => (
+        <Table
+          data={{ nodes: coreData.devices }}
+          select={device_select}
+          theme={device_theme}
+          layout={{ custom: true }}
+        >
+          {(tableList: Device[]) => (
             <>
               <Header>
                 <HeaderRow>
@@ -445,7 +547,9 @@ const Devices: FC = () => {
                     </Cell>
                     <Cell>
                       {device.n}
-                      <span style={{ color: 'lightblue' }}>&nbsp;&nbsp;({device.e})</span>
+                      <span style={{ color: 'lightblue' }}>
+                        &nbsp;&nbsp;({device.e})
+                      </span>
                     </Cell>
                     <Cell stiff>{device.tn}</Cell>
                   </Row>
@@ -475,8 +579,12 @@ const Devices: FC = () => {
     const renderNameCell = (dv: DeviceValue) => (
       <>
         {dv.id.slice(2)}&nbsp;
-        {hasMask(dv.id, DeviceEntityMask.DV_FAVORITE) && <StarIcon color="primary" sx={{ fontSize: 12 }} />}
-        {hasMask(dv.id, DeviceEntityMask.DV_READONLY) && <EditOffOutlinedIcon color="primary" sx={{ fontSize: 12 }} />}
+        {hasMask(dv.id, DeviceEntityMask.DV_FAVORITE) && (
+          <StarIcon color="primary" sx={{ fontSize: 12 }} />
+        )}
+        {hasMask(dv.id, DeviceEntityMask.DV_READONLY) && (
+          <EditOffOutlinedIcon color="primary" sx={{ fontSize: 12 }} />
+        )}
         {hasMask(dv.id, DeviceEntityMask.DV_API_MQTT_EXCLUDE) && (
           <CommentsDisabledOutlinedIcon color="primary" sx={{ fontSize: 12 }} />
         )}
@@ -487,7 +595,9 @@ const Devices: FC = () => {
       ? deviceData.data.filter((dv) => hasMask(dv.id, DeviceEntityMask.DV_FAVORITE))
       : deviceData.data;
 
-    const deviceIndex = coreData.devices.findIndex((d) => d.id === device_select.state.id);
+    const deviceIndex = coreData.devices.findIndex(
+      (d) => d.id === device_select.state.id
+    );
     if (deviceIndex === -1) {
       return;
     }
@@ -508,7 +618,8 @@ const Devices: FC = () => {
       >
         <Box sx={{ border: '1px solid #177ac9' }}>
           <Typography noWrap variant="subtitle1" color="warning.main" sx={{ ml: 1 }}>
-            {coreData.devices[deviceIndex].tn}&nbsp;&#124;&nbsp;{coreData.devices[deviceIndex].n}
+            {coreData.devices[deviceIndex].tn}&nbsp;&#124;&nbsp;
+            {coreData.devices[deviceIndex].n}
           </Typography>
 
           <Grid container justifyContent="space-between">
@@ -521,30 +632,50 @@ const Devices: FC = () => {
                 ' ' +
                 LL.ENTITIES(shown_data.length)}
               <IconButton onClick={() => setShowDeviceInfo(true)}>
-                <InfoOutlinedIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+                <InfoOutlinedIcon
+                  color="primary"
+                  sx={{ fontSize: 18, verticalAlign: 'middle' }}
+                />
               </IconButton>
               {me.admin && (
                 <IconButton onClick={customize}>
-                  <FormatListNumberedIcon sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+                  <FormatListNumberedIcon
+                    sx={{ fontSize: 18, verticalAlign: 'middle' }}
+                  />
                 </IconButton>
               )}
               <IconButton onClick={handleDownloadCsv}>
-                <DownloadIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+                <DownloadIcon
+                  color="primary"
+                  sx={{ fontSize: 18, verticalAlign: 'middle' }}
+                />
               </IconButton>
               <IconButton onClick={() => setOnlyFav(!onlyFav)}>
                 {onlyFav ? (
-                  <StarIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+                  <StarIcon
+                    color="primary"
+                    sx={{ fontSize: 18, verticalAlign: 'middle' }}
+                  />
                 ) : (
-                  <StarBorderOutlinedIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+                  <StarBorderOutlinedIcon
+                    color="primary"
+                    sx={{ fontSize: 18, verticalAlign: 'middle' }}
+                  />
                 )}
               </IconButton>
               <IconButton onClick={refreshData}>
-                <RefreshIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+                <RefreshIcon
+                  color="primary"
+                  sx={{ fontSize: 18, verticalAlign: 'middle' }}
+                />
               </IconButton>
             </Typography>
             <Grid item zeroMinWidth justifyContent="flex-end">
               <IconButton onClick={resetDeviceSelect}>
-                <HighlightOffIcon color="primary" sx={{ fontSize: 18, verticalAlign: 'middle' }} />
+                <HighlightOffIcon
+                  color="primary"
+                  sx={{ fontSize: 18, verticalAlign: 'middle' }}
+                />
               </IconButton>
             </Grid>
           </Grid>
@@ -556,7 +687,7 @@ const Devices: FC = () => {
           sort={dv_sort}
           layout={{ custom: true, fixedHeader: true }}
         >
-          {(tableList: any) => (
+          {(tableList: DeviceValue[]) => (
             <>
               <Header>
                 <HeaderRow>
@@ -589,15 +720,20 @@ const Devices: FC = () => {
                     <Cell>{renderNameCell(dv)}</Cell>
                     <Cell>{formatValue(LL, dv.v, dv.u)}</Cell>
                     <Cell stiff>
-                      {me.admin && dv.c && !hasMask(dv.id, DeviceEntityMask.DV_READONLY) && (
-                        <IconButton size="small" onClick={() => showDeviceValue(dv)}>
-                          {dv.v === '' && dv.c ? (
-                            <PlayArrowIcon color="primary" sx={{ fontSize: 16 }} />
-                          ) : (
-                            <EditIcon color="primary" sx={{ fontSize: 16 }} />
-                          )}
-                        </IconButton>
-                      )}
+                      {me.admin &&
+                        dv.c &&
+                        !hasMask(dv.id, DeviceEntityMask.DV_READONLY) && (
+                          <IconButton
+                            size="small"
+                            onClick={() => showDeviceValue(dv)}
+                          >
+                            {dv.v === '' && dv.c ? (
+                              <PlayArrowIcon color="primary" sx={{ fontSize: 16 }} />
+                            ) : (
+                              <EditIcon color="primary" sx={{ fontSize: 16 }} />
+                            )}
+                          </IconButton>
+                        )}
                     </Cell>
                   </Row>
                 ))}
@@ -621,14 +757,20 @@ const Devices: FC = () => {
           onSave={deviceValueDialogSave}
           selectedItem={selectedDeviceValue}
           writeable={
-            selectedDeviceValue.c !== undefined && !hasMask(selectedDeviceValue.id, DeviceEntityMask.DV_READONLY)
+            selectedDeviceValue.c !== undefined &&
+            !hasMask(selectedDeviceValue.id, DeviceEntityMask.DV_READONLY)
           }
           validator={deviceValueItemValidation(selectedDeviceValue)}
           progress={submitting}
         />
       )}
       <ButtonRow mt={1}>
-        <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={refreshData}>
+        <Button
+          startIcon={<RefreshIcon />}
+          variant="outlined"
+          color="secondary"
+          onClick={refreshData}
+        >
           {LL.REFRESH()}
         </Button>
       </ButtonRow>

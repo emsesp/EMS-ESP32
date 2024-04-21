@@ -204,15 +204,16 @@ class EMSbus {
 
     // checks every 30 seconds if the EMS bus is still alive
     static bool bus_connected() {
-#ifndef EMSESP_STANDALONE
+#if defined(EMSESP_STANDALONE) || defined(EMSESP_TEST)
+        return true;
+#else
         if ((uuid::get_uptime() - last_bus_activity_) > EMS_BUS_TIMEOUT) {
             bus_connected_ = false;
         }
         return bus_connected_;
-#else
-        return true;
 #endif
     }
+
 
     // sets the flag for EMS bus connected
     static void last_bus_activity(uint32_t timestamp) {

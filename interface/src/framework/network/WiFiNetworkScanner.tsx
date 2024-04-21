@@ -1,15 +1,16 @@
+import { useRef, useState } from 'react';
+import type { FC } from 'react';
+
 import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
 import { Button } from '@mui/material';
-// eslint-disable-next-line import/named
+
+import * as NetworkApi from 'api/network';
+
 import { updateState, useRequest } from 'alova';
-import { useState, useRef } from 'react';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
+import { useI18nContext } from 'i18n/i18n-react';
 
 import WiFiNetworkSelector from './WiFiNetworkSelector';
-import type { FC } from 'react';
-import * as NetworkApi from 'api/network';
-import { ButtonRow, FormLoader, SectionContent } from 'components';
-
-import { useI18nContext } from 'i18n/i18n-react';
 
 const NUM_POLLS = 10;
 const POLLING_FREQUENCY = 1000;
@@ -19,7 +20,9 @@ const WiFiNetworkScanner: FC = () => {
   const { LL } = useI18nContext();
   const [errorMessage, setErrorMessage] = useState<string>();
 
-  const { send: scanNetworks, onComplete: onCompleteScanNetworks } = useRequest(NetworkApi.scanNetworks); // is called on page load to start network scan
+  const { send: scanNetworks, onComplete: onCompleteScanNetworks } = useRequest(
+    NetworkApi.scanNetworks
+  ); // is called on page load to start network scan
   const {
     data: networkList,
     send: getNetworkList,
@@ -50,7 +53,9 @@ const WiFiNetworkScanner: FC = () => {
 
   const renderNetworkScanner = () => {
     if (!networkList) {
-      return <FormLoader message={LL.SCANNING() + '...'} errorMessage={errorMessage} />;
+      return (
+        <FormLoader message={LL.SCANNING() + '...'} errorMessage={errorMessage} />
+      );
     }
     return <WiFiNetworkSelector networkList={networkList} />;
   };

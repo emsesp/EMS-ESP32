@@ -1,13 +1,16 @@
-import { Box, Toolbar } from '@mui/material';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import type { FC } from 'react';
 import { useLocation } from 'react-router-dom';
+
+import { Box, Toolbar } from '@mui/material';
+
+import { PROJECT_NAME } from 'api/env';
+
+import type { RequiredChildrenProps } from 'utils';
+
 import LayoutAppBar from './LayoutAppBar';
 import LayoutDrawer from './LayoutDrawer';
 import { LayoutContext } from './context';
-import type { FC } from 'react';
-
-import type { RequiredChildrenProps } from 'utils';
-import { PROJECT_NAME } from 'api/env';
 
 export const DRAWER_WIDTH = 210;
 

@@ -1,56 +1,87 @@
+import { useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import { toast } from 'react-toastify';
+
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
-import { Button, Typography, Box } from '@mui/material';
-import { useSort, SortToggleType } from '@table-library/react-table-library/sort';
-import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
+import { Box, Button, Typography } from '@mui/material';
+
+import { SortToggleType, useSort } from '@table-library/react-table-library/sort';
+import {
+  Body,
+  Cell,
+  Header,
+  HeaderCell,
+  HeaderRow,
+  Row,
+  Table
+} from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
+import type { State } from '@table-library/react-table-library/types/common';
 import { useRequest } from 'alova';
-import { useState, useEffect, useContext } from 'react';
-
-import { toast } from 'react-toastify';
-
-import DashboardSensorsAnalogDialog from './SensorsAnalogDialog';
-import DashboardSensorsTemperatureDialog from './SensorsTemperatureDialog';
-import * as EMSESP from './api';
-
-import { DeviceValueUOM, DeviceValueUOM_s, AnalogTypeNames, AnalogType } from './types';
-import { temperatureSensorItemValidation, analogSensorItemValidation } from './validators';
-import type { TemperatureSensor, AnalogSensor } from './types';
-import type { FC } from 'react';
 import { ButtonRow, SectionContent, useLayoutTitle } from 'components';
-
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
+
+import * as EMSESP from './api';
+import DashboardSensorsAnalogDialog from './SensorsAnalogDialog';
+import DashboardSensorsTemperatureDialog from './SensorsTemperatureDialog';
+import {
+  AnalogType,
+  AnalogTypeNames,
+  DeviceValueUOM,
+  DeviceValueUOM_s
+} from './types';
+import type {
+  AnalogSensor,
+  TemperatureSensor,
+  WriteAnalogSensor,
+  WriteTemperatureSensor
+} from './types';
+import {
+  analogSensorItemValidation,
+  temperatureSensorItemValidation
+} from './validators';
 
 const Sensors: FC = () => {
   const { LL } = useI18nContext();
   const { me } = useContext(AuthenticatedContext);
 
-  const [selectedTemperatureSensor, setSelectedTemperatureSensor] = useState<TemperatureSensor>();
+  const [selectedTemperatureSensor, setSelectedTemperatureSensor] =
+    useState<TemperatureSensor>();
   const [selectedAnalogSensor, setSelectedAnalogSensor] = useState<AnalogSensor>();
   const [temperatureDialogOpen, setTemperatureDialogOpen] = useState<boolean>(false);
   const [analogDialogOpen, setAnalogDialogOpen] = useState<boolean>(false);
   const [creating, setCreating] = useState<boolean>(false);
 
-  const { data: sensorData, send: fetchSensorData } = useRequest(() => EMSESP.readSensorData(), {
-    initialData: {
-      ts: [],
-      as: [],
-      analog_enabled: false,
-      platform: 'ESP32'
+  const { data: sensorData, send: fetchSensorData } = useRequest(
+    () => EMSESP.readSensorData(),
+    {
+      initialData: {
+        ts: [],
+        as: [],
+        analog_enabled: false,
+        platform: 'ESP32'
+      }
     }
-  });
+  );
 
-  const { send: writeTemperatureSensor } = useRequest((data) => EMSESP.writeTemperatureSensor(data), {
-    immediate: false
-  });
+  const { send: writeTemperatureSensor } = useRequest(
+    (data: WriteTemperatureSensor) => EMSESP.writeTemperatureSensor(data),
+    {
+      immediate: false
+    }
+  );
 
-  const { send: writeAnalogSensor } = useRequest((data) => EMSESP.writeAnalogSensor(data), {
-    immediate: false
-  });
+  const { send: writeAnalogSensor } = useRequest(
+    (data: WriteAnalogSensor) => EMSESP.writeAnalogSensor(data),
+    {
+      immediate: false
+    }
+  );
 
   const common_theme = useTheme({
     BaseRow: `
@@ -116,7 +147,7 @@ const Sensors: FC = () => {
     }
   ]);
 
-  const getSortIcon = (state: any, sortKey: any) => {
+  const getSortIcon = (state: State, sortKey: unknown) => {
     if (state.sortKey === sortKey && state.reverse) {
       return <KeyboardArrowDownOutlinedIcon />;
     }
@@ -138,6 +169,7 @@ const Sensors: FC = () => {
       sortToggleType: SortToggleType.AlternateWithReset,
       sortFns: {
         GPIO: (array) => array.sort((a, b) => a.g - b.g),
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         NAME: (array) => array.sort((a, b) => a.n.localeCompare(b.n)),
         TYPE: (array) => array.sort((a, b) => a.t - b.t),
         VALUE: (array) => array.sort((a, b) => a.v - b.v)
@@ -156,6 +188,7 @@ const Sensors: FC = () => {
       },
       sortToggleType: SortToggleType.AlternateWithReset,
       sortFns: {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         NAME: (array) => array.sort((a, b) => a.n.localeCompare(b.n)),
         VALUE: (array) => array.sort((a, b) => a.t - b.t)
       }
@@ -189,9 +222,12 @@ const Sensors: FC = () => {
     return formatted;
   };
 
-  function formatValue(value: any, uom: number) {
+  function formatValue(value: unknown, uom: DeviceValueUOM) {
     if (value === undefined) {
       return '';
+    }
+    if (typeof value !== 'number') {
+      return value as string;
     }
     switch (uom) {
       case DeviceValueUOM.HOURS:
@@ -201,10 +237,7 @@ const Sensors: FC = () => {
       case DeviceValueUOM.SECONDS:
         return LL.NUM_SECONDS({ num: value });
       case DeviceValueUOM.NONE:
-        if (typeof value === 'number') {
-          return new Intl.NumberFormat().format(value);
-        }
-        return value;
+        return new Intl.NumberFormat().format(value);
       case DeviceValueUOM.DEGREES:
       case DeviceValueUOM.DEGREES_R:
       case DeviceValueUOM.FAHRENHEIT:
@@ -299,8 +332,13 @@ const Sensors: FC = () => {
   };
 
   const RenderTemperatureSensors = () => (
-    <Table data={{ nodes: sensorData.ts }} theme={temperature_theme} sort={temperature_sort} layout={{ custom: true }}>
-      {(tableList: any) => (
+    <Table
+      data={{ nodes: sensorData.ts }}
+      theme={temperature_theme}
+      sort={temperature_sort}
+      layout={{ custom: true }}
+    >
+      {(tableList: TemperatureSensor[]) => (
         <>
           <Header>
             <HeaderRow>
@@ -309,7 +347,9 @@ const Sensors: FC = () => {
                   fullWidth
                   style={{ fontSize: '14px', justifyContent: 'flex-start' }}
                   endIcon={getSortIcon(temperature_sort.state, 'NAME')}
-                  onClick={() => temperature_sort.fns.onToggleSort({ sortKey: 'NAME' })}
+                  onClick={() =>
+                    temperature_sort.fns.onToggleSort({ sortKey: 'NAME' })
+                  }
                 >
                   {LL.NAME(0)}
                 </Button>
@@ -319,7 +359,9 @@ const Sensors: FC = () => {
                   fullWidth
                   style={{ fontSize: '14px', justifyContent: 'flex-end' }}
                   endIcon={getSortIcon(temperature_sort.state, 'VALUE')}
-                  onClick={() => temperature_sort.fns.onToggleSort({ sortKey: 'VALUE' })}
+                  onClick={() =>
+                    temperature_sort.fns.onToggleSort({ sortKey: 'VALUE' })
+                  }
                 >
                   {LL.VALUE(0)}
                 </Button>
@@ -340,8 +382,13 @@ const Sensors: FC = () => {
   );
 
   const RenderAnalogSensors = () => (
-    <Table data={{ nodes: sensorData.as }} theme={analog_theme} sort={analog_sort} layout={{ custom: true }}>
-      {(tableList: any) => (
+    <Table
+      data={{ nodes: sensorData.as }}
+      theme={analog_theme}
+      sort={analog_sort}
+      layout={{ custom: true }}
+    >
+      {(tableList: AnalogSensor[]) => (
         <>
           <Header>
             <HeaderRow>
@@ -434,7 +481,11 @@ const Sensors: FC = () => {
               onSave={onAnalogDialogSave}
               creating={creating}
               selectedItem={selectedAnalogSensor}
-              validator={analogSensorItemValidation(sensorData.as, creating, sensorData.platform)}
+              validator={analogSensorItemValidation(
+                sensorData.as,
+                creating,
+                sensorData.platform
+              )}
             />
           )}
         </>
@@ -442,7 +493,12 @@ const Sensors: FC = () => {
       <ButtonRow>
         <Box mt={1} display="flex" flexWrap="wrap">
           <Box flexGrow={1}>
-            <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={fetchSensorData}>
+            <Button
+              startIcon={<RefreshIcon />}
+              variant="outlined"
+              color="secondary"
+              onClick={fetchSensorData}
+            >
               {LL.REFRESH()}
             </Button>
           </Box>

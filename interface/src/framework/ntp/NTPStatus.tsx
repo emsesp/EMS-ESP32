@@ -1,3 +1,7 @@
+import { useState } from 'react';
+import type { FC } from 'react';
+import { toast } from 'react-toastify';
+
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DnsIcon from '@mui/icons-material/Dns';
@@ -18,21 +22,18 @@ import {
   ListItemAvatar,
   ListItemText,
   TextField,
-  useTheme,
-  Typography
+  Typography,
+  useTheme
 } from '@mui/material';
-import { useRequest } from 'alova';
-import { useState } from 'react';
-import { toast } from 'react-toastify';
 import type { Theme } from '@mui/material';
-import type { FC } from 'react';
 
-import type { NTPStatusType } from 'types';
-import { dialogStyle } from 'CustomTheme';
 import * as NTPApi from 'api/ntp';
-import { ButtonRow, FormLoader, SectionContent } from 'components';
 
+import { dialogStyle } from 'CustomTheme';
+import { useRequest } from 'alova';
+import { ButtonRow, FormLoader, SectionContent } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
+import type { NTPStatusType, Time } from 'types';
 import { NTPSyncStatus } from 'types';
 import { formatDateTime, formatLocalDateTime } from 'utils';
 
@@ -45,14 +46,19 @@ const NTPStatus: FC = () => {
 
   const { LL } = useI18nContext();
 
-  const { send: updateTime } = useRequest((local_time) => NTPApi.updateTime(local_time), {
-    immediate: false
-  });
+  const { send: updateTime } = useRequest(
+    (local_time: Time) => NTPApi.updateTime(local_time),
+    {
+      immediate: false
+    }
+  );
 
   NTPApi.updateTime;
 
-  const isNtpActive = ({ status }: NTPStatusType) => status === NTPSyncStatus.NTP_ACTIVE;
-  const isNtpEnabled = ({ status }: NTPStatusType) => status !== NTPSyncStatus.NTP_DISABLED;
+  const isNtpActive = ({ status }: NTPStatusType) =>
+    status === NTPSyncStatus.NTP_ACTIVE;
+  const isNtpEnabled = ({ status }: NTPStatusType) =>
+    status !== NTPSyncStatus.NTP_DISABLED;
 
   const ntpStatusHighlight = ({ status }: NTPStatusType, theme: Theme) => {
     switch (status) {
@@ -67,7 +73,8 @@ const NTPStatus: FC = () => {
     }
   };
 
-  const updateLocalTime = (event: React.ChangeEvent<HTMLInputElement>) => setLocalTime(event.target.value);
+  const updateLocalTime = (event: React.ChangeEvent<HTMLInputElement>) =>
+    setLocalTime(event.target.value);
 
   const openSetTime = () => {
     setLocalTime(formatLocalDateTime(new Date()));
@@ -107,7 +114,11 @@ const NTPStatus: FC = () => {
   };
 
   const renderSetTimeDialog = () => (
-    <Dialog sx={dialogStyle} open={settingTime} onClose={() => setSettingTime(false)}>
+    <Dialog
+      sx={dialogStyle}
+      open={settingTime}
+      onClose={() => setSettingTime(false)}
+    >
       <DialogTitle>{LL.SET_TIME(1)}</DialogTitle>
       <DialogContent dividers>
         <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
@@ -126,7 +137,12 @@ const NTPStatus: FC = () => {
         />
       </DialogContent>
       <DialogActions>
-        <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => setSettingTime(false)} color="secondary">
+        <Button
+          startIcon={<CancelIcon />}
+          variant="outlined"
+          onClick={() => setSettingTime(false)}
+          color="secondary"
+        >
           {LL.CANCEL()}
         </Button>
         <Button
@@ -178,7 +194,10 @@ const NTPStatus: FC = () => {
                 <AccessTimeIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary={LL.LOCAL_TIME()} secondary={formatDateTime(data.local_time)} />
+            <ListItemText
+              primary={LL.LOCAL_TIME()}
+              secondary={formatDateTime(data.local_time)}
+            />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
@@ -187,14 +206,22 @@ const NTPStatus: FC = () => {
                 <SwapVerticalCircleIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary={LL.UTC_TIME()} secondary={formatDateTime(data.utc_time)} />
+            <ListItemText
+              primary={LL.UTC_TIME()}
+              secondary={formatDateTime(data.utc_time)}
+            />
           </ListItem>
           <Divider variant="inset" component="li" />
         </List>
         <Box display="flex" flexWrap="wrap">
           <Box flexGrow={1}>
             <ButtonRow>
-              <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
+              <Button
+                startIcon={<RefreshIcon />}
+                variant="outlined"
+                color="secondary"
+                onClick={loadData}
+              >
                 {LL.REFRESH()}
               </Button>
             </ButtonRow>
@@ -202,7 +229,12 @@ const NTPStatus: FC = () => {
           {data && !isNtpActive(data) && (
             <Box flexWrap="nowrap" whiteSpace="nowrap">
               <ButtonRow>
-                <Button onClick={openSetTime} variant="outlined" color="primary" startIcon={<AccessTimeIcon />}>
+                <Button
+                  onClick={openSetTime}
+                  variant="outlined"
+                  color="primary"
+                  startIcon={<AccessTimeIcon />}
+                >
                   {LL.SET_TIME(0)}
                 </Button>
               </ButtonRow>
