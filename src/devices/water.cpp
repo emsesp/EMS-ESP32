@@ -26,9 +26,9 @@ uuid::log::Logger Water::logger_{F_(water), uuid::log::Facility::CONSOLE};
 
 Water::Water(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
-    uint8_t tag = DeviceValueTAG::TAG_WWC1 + device_id - EMSdevice::EMS_DEVICE_ID_DHW1;
+    uint8_t tag = DeviceValueTAG::TAG_DHW1 + device_id - EMSdevice::EMS_DEVICE_ID_DHW1;
     if (device_id == 0x2A) { // SM100, DHW3
-        wwc_ = 2;
+        dhw_ = 2;
         // telegram handlers
         register_telegram_type(0x07D6, "SM100wwTemperature", false, MAKE_PF_CB(process_SM100wwTemperature));
         register_telegram_type(0x07AA, "SM100wwStatus", false, MAKE_PF_CB(process_SM100wwStatus));
@@ -64,9 +64,9 @@ Water::Water(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         register_device_value(tag, &errorDisp_, DeviceValueType::ENUM, FL_(enum_errorDisp), FL_(errorDisp), DeviceValueUOM::NONE, MAKE_CF_CB(set_errorDisp));
 
     } else if (device_id >= EMSdevice::EMS_DEVICE_ID_DHW1 && device_id <= EMSdevice::EMS_DEVICE_ID_DHW2) {
-        wwc_ = device_id - EMSdevice::EMS_DEVICE_ID_DHW1;
-        register_telegram_type(0x331 + wwc_, "MMPLUSStatusMessage_WWC", false, MAKE_PF_CB(process_MMPLUSStatusMessage_WWC));
-        register_telegram_type(0x313 + wwc_, "MMPLUSConfigMessage_WWC", true, MAKE_PF_CB(process_MMPLUSConfigMessage_WWC));
+        dhw_ = device_id - EMSdevice::EMS_DEVICE_ID_DHW1;
+        register_telegram_type(0x331 + dhw_, "MMPLUSStatusMessage_WWC", false, MAKE_PF_CB(process_MMPLUSStatusMessage_WWC));
+        register_telegram_type(0x313 + dhw_, "MMPLUSConfigMessage_WWC", true, MAKE_PF_CB(process_MMPLUSConfigMessage_WWC));
         // register_telegram_type(0x33B + type_offset, "MMPLUSSetMessage_WWC", true, MAKE_PF_CB(process_MMPLUSSetMessage_WWC));
         // device values...
         register_device_value(tag, &wwTemp_, DeviceValueType::USHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwTemp), DeviceValueUOM::DEGREES);
@@ -80,8 +80,8 @@ Water::Water(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         register_device_value(tag, &wwCirc_, DeviceValueType::BOOL, FL_(wwCirc), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCirc));
         register_device_value(tag, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode), FL_(wwCircMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCircMode));
     } else if (device_id == 0x40) { // flags == EMSdevice::EMS_DEVICE_FLAG_IPM, special DHW pos 10
-        wwc_ = 0;
-        tag  = DeviceValueTAG::TAG_WWC1;
+        dhw_ = 0;
+        tag  = DeviceValueTAG::TAG_DHW1;
         register_telegram_type(0x34, "UBAMonitorWW", false, MAKE_PF_CB(process_IPMMonitorWW));
         register_telegram_type(0x1E, "HydrTemp", false, MAKE_PF_CB(process_IPMHydrTemp));
         register_telegram_type(0x33, "UBAParameterWW", true, MAKE_PF_CB(process_IPMParameterWW));
@@ -270,7 +270,7 @@ bool Water::set_wwMaxTemp(const char * value, const int8_t id) {
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_IPM) {
         return false;
     } else if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
-        write_command(0x313 + wwc_, 10, (uint8_t)temperature, 0x313 + wwc_);
+        write_command(0x313 + dhw_, 10, (uint8_t)temperature, 0x313 + dhw_);
     } else { // SM100
         write_command(0x7A6, 8, (uint8_t)temperature, 0x7A6);
     }
@@ -285,7 +285,7 @@ bool Water::set_wwRedTemp(const char * value, const int8_t id) {
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_IPM) {
         return false;
     } else if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
-        write_command(0x313 + wwc_, 5, (uint8_t)temperature, 0x313 + wwc_);
+        write_command(0x313 + dhw_, 5, (uint8_t)temperature, 0x313 + dhw_);
     } else { // SM100
         write_command(0x7A6, 10, (uint8_t)temperature, 0x7A6);
     }
@@ -318,7 +318,7 @@ bool Water::set_wwDisinfectionTemp(const char * value, const int8_t id) {
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_IPM) {
         write_command(0x33, 8, (uint8_t)temperature, 0x33);
     } else if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
-        write_command(0x313 + wwc_, 9, (uint8_t)temperature, 0x313 + wwc_);
+        write_command(0x313 + dhw_, 9, (uint8_t)temperature, 0x313 + dhw_);
     } else { // SM100
         write_command(0x7A6, 12, (uint8_t)temperature, 0x7A6);
     }
@@ -333,7 +333,7 @@ bool Water::set_wwCirc(const char * value, const int8_t id) {
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_IPM) {
         write_command(0x33, 6, b ? 0xFF : 0x00, 0x33);
     } else if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
-        write_command(0x33B + wwc_, 0, b ? 0x01 : 0x00, 0x33B + wwc_);
+        write_command(0x33B + dhw_, 0, b ? 0x01 : 0x00, 0x33B + dhw_);
     } else { // SM100
         write_command(0x7A5, 0, b ? 0xFF : 0x00, 0x7A5);
     }
@@ -348,7 +348,7 @@ bool Water::set_wwCircMode(const char * value, const int8_t id) {
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_IPM) {
         write_command(0x33, 7, num, 0x33);
     } else if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
-        write_command(0x313 + wwc_, 0, num, 0x313 + wwc_);
+        write_command(0x313 + dhw_, 0, num, 0x313 + dhw_);
     } else { // SM100
         write_command(0x7A5, 3, num, 0x7A5);
     }
@@ -361,7 +361,7 @@ bool Water::set_wwCircTc(const char * value, const int8_t id) {
     if (!Helpers::value2bool(value, b)) {
         return false;
     }
-    write_command(0x33B + wwc_, 4, b ? 0x01 : 0x00, 0x33B + wwc_);
+    write_command(0x33B + dhw_, 4, b ? 0x01 : 0x00, 0x33B + dhw_);
     return true;
 }
 
@@ -375,26 +375,26 @@ bool Water::set_wwKeepWarm(const char * value, const int8_t id) {
 }
 
 bool Water::set_wwDiffTemp(const char * value, const int8_t id) {
-    uint8_t wwc = device_id() - 0x28;
+    uint8_t dhw = device_id() - 0x28;
     float   v;
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
-        write_command(0x313 + wwc, 7, (int8_t)(v * 10), 0x313 + wwc);
+        write_command(0x313 + dhw, 7, (int8_t)(v * 10), 0x313 + dhw);
         return true;
     }
     return false;
 }
 
 bool Water::set_wwRequiredTemp(const char * value, const int8_t id) {
-    uint8_t wwc = device_id() - 0x28;
+    uint8_t dhw = device_id() - 0x28;
     float   v;
     if (!Helpers::value2temperature(value, v)) {
         return false;
     }
     if (flags() == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
-        write_command(0x313 + wwc, 4, (uint8_t)v, 0x313 + wwc);
+        write_command(0x313 + dhw, 4, (uint8_t)v, 0x313 + dhw);
         return true;
     }
     return false;

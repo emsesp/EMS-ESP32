@@ -149,7 +149,7 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
                           MAKE_CF_CB(set_heatDrainPan));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatCable_, DeviceValueType::BOOL, FL_(heatCable), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatCable));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgTotal_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgTotal), DeviceValueUOM::KWH);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW, &nrgWw_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgWw), DeviceValueUOM::KWH);
+    register_device_value(DeviceValueTAG::TAG_DHW1, &nrgWw_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgWw), DeviceValueUOM::KWH);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgHeat_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgHeat), DeviceValueUOM::KWH);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &meterTotal_,
@@ -175,7 +175,7 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
                           DeviceValueNumOp::DV_NUMOP_DIV100,
                           FL_(meterHeat),
                           DeviceValueUOM::KWH);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA_WW, &meterWw_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(meterWw), DeviceValueUOM::KWH);
+    register_device_value(DeviceValueTAG::TAG_DHW1, &meterWw_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(meterWw), DeviceValueUOM::KWH);
 }
 
 /*

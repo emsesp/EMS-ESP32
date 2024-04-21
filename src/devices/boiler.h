@@ -233,6 +233,8 @@ class Boiler : public EMSdevice {
     uint8_t  hpEA0_;
     uint8_t  hpPumpMode_;
     uint8_t  hpSetDiffPress_;
+    uint8_t  fan_;
+    uint8_t  hpshutdown_;
 
     // Pool unit
     int8_t poolSetTemp_;
@@ -364,6 +366,7 @@ class Boiler : public EMSdevice {
     void process_HpEnergy(std::shared_ptr<const Telegram> telegram);
     void process_HpMeters(std::shared_ptr<const Telegram> telegram);
     void process_WeatherComp(std::shared_ptr<const Telegram> telegram);
+    void process_HpFan(std::shared_ptr<const Telegram> telegram);
     // HIU
     void process_HIUSettings(std::shared_ptr<const Telegram> telegram);
     void process_HIUMonitor(std::shared_ptr<const Telegram> telegram);
@@ -551,6 +554,8 @@ class Boiler : public EMSdevice {
     bool set_summerTemp(const char * value, const int8_t id);
     bool set_nofrost(const char * value, const int8_t id);
     bool set_nofrostTemp(const char * value, const int8_t id);
+    bool set_fan(const char * value, const int8_t id);
+    bool set_shutdown(const char * value, const int8_t id);
 
     bool set_nrgHeat(const char * value, const int8_t id);
     bool set_nrgWw(const char * value, const int8_t id);

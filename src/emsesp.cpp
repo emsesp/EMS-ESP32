@@ -346,7 +346,7 @@ void EMSESP::dump_all_values(uuid::console::Shell & shell) {
                 if (device.device_type == DeviceType::MIXER) {
                     if (device.flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
                         if (device.product_id == 160) { // MM100
-                            device_id = 0x28;           // wwc
+                            device_id = 0x28;           // dhw
                         } else {
                             device_id = 0x20; // hc
                         }
@@ -567,7 +567,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
     bool         nested       = (Mqtt::is_nested());
 
     // group by device type
-    for (uint8_t tag = DeviceValueTAG::TAG_BOILER_DATA_WW; tag <= DeviceValueTAG::TAG_HS16; tag++) {
+    for (uint8_t tag = DeviceValueTAG::TAG_DEVICE_DATA; tag <= DeviceValueTAG::TAG_HS16; tag++) {
         JsonObject json_tag     = json;
         bool       nest_created = false;
         for (const auto & emsdevice : emsdevices) {
@@ -579,7 +579,7 @@ void EMSESP::publish_device_values(uint8_t device_type) {
                 need_publish |= emsdevice->generate_values(json_tag, tag, false, EMSdevice::OUTPUT_TARGET::MQTT);
             }
         }
-        if (need_publish && ((!nested && tag >= DeviceValueTAG::TAG_DEVICE_DATA_WW) || (tag == DeviceValueTAG::TAG_BOILER_DATA_WW))) {
+        if (need_publish && (!nested && tag >= DeviceValueTAG::TAG_DEVICE_DATA)) {
             Mqtt::queue_publish(Mqtt::tag_to_topic(device_type, tag), json);
             json         = doc.to<JsonObject>();
             need_publish = false;
@@ -775,23 +775,39 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
         dest_name = device_tostring(dest);
     }
 
-    // check for global/common types like Version & UBADevices
-    if (telegram->type_id == EMSdevice::EMS_TYPE_VERSION) {
-        type_name = "Version";
-    } else if (telegram->type_id == EMSdevice::EMS_TYPE_UBADevices) {
-        type_name = "UBADevices";
-    }
-
     // if we don't know the type show
     if (type_name.empty()) {
-        type_name = "?";
+        // check for global/common types like Version & UBADevices
+        switch (telegram->type_id) {
+        case EMSdevice::EMS_TYPE_VERSION:
+            type_name = "Version";
+            break;
+        case EMSdevice::EMS_TYPE_UBADevices:
+            type_name = "UBADevices";
+            break;
+        case EMSdevice::EMS_TYPE_DEVICEERROR:
+            type_name = "DeviceError";
+            break;
+        case EMSdevice::EMS_TYPE_SYSTEMERROR:
+            type_name = "SystemError";
+            break;
+        case EMSdevice::EMS_TYPE_MENUCONFIG:
+            type_name = "MenuConfig";
+            break;
+        case EMSdevice::EMS_TYPE_VALUECONFIG:
+            type_name = "ValueConfig";
+            break;
+        default:
+            type_name = "?";
+        }
     }
 
     std::string str;
     str.reserve(200);
     if (telegram->operation == Telegram::Operation::RX_READ) {
         str = src_name + "(" + Helpers::hextoa(src) + ") -R-> " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
-              + Helpers::hextoa(telegram->type_id) + "), length: " + Helpers::hextoa(telegram->message_data[0]);
+              + Helpers::hextoa(telegram->type_id) + "), length: " + Helpers::itoa(telegram->message_data[0])
+              + ((telegram->message_length > 1) ? ", data: " + Helpers::data_to_hex(telegram->message_data + 1, telegram->message_length - 1) : "");
     } else if (telegram->dest == 0) {
         str = src_name + "(" + Helpers::hextoa(src) + ") -B-> " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
               + Helpers::hextoa(telegram->type_id) + "), data: " + telegram->to_string_message();

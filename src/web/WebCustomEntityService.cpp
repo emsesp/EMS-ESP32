@@ -561,9 +561,14 @@ void WebCustomEntityService::fetch() {
 
     for (auto & entity : *customEntityItems) {
         if (entity.device_id > 0 && entity.type_id > 0) { // ths excludes also RAM type
-            bool needFetch = true;
+            bool    needFetch  = true;
+            uint8_t fetchblock = entity.type_id > 0x0FF ? 25 : 27;
+            uint8_t start      = entity.offset % fetchblock;
+            uint8_t stop       = (entity.offset + len[entity.value_type]) % fetchblock;
+            bool    is_fetched = start < fetchblock && stop < fetchblock; // make sure the complete value is a a fetched block
             for (const auto & emsdevice : EMSESP::emsdevices) {
-                if (entity.value_type != DeviceValueType::STRING && emsdevice->is_device_id(entity.device_id) && emsdevice->is_fetch(entity.type_id)) {
+                if (entity.value_type != DeviceValueType::STRING && emsdevice->is_device_id(entity.device_id) && emsdevice->is_fetch(entity.type_id)
+                    && is_fetched) {
                     needFetch = false;
                     break;
                 }

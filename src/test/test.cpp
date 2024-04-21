@@ -680,7 +680,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         test("boiler");
 
         // device type, command, data
-        Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "false");
+        Command::call(EMSdevice::DeviceType::BOILER, "tapactivated", "false", 9);
         ok = true;
     }
 
@@ -949,13 +949,13 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         request.url("/api/boiler/values");
         EMSESP::webAPIService.webAPIService(&request);
-        request.url("/api/boiler/wwcirc");
+        request.url("/api/boiler/dhw/circ");
         EMSESP::webAPIService.webAPIService(&request);
-        request.url("/api/boiler/wwcirc/fullname");
+        request.url("/api/boiler/dhw/circ/fullname");
         EMSESP::webAPIService.webAPIService(&request);
         request.url("/api/boiler/selburnpow/value");
         EMSESP::webAPIService.webAPIService(&request);
-        request.url("/api/boiler/wwchargetype/writeable");
+        request.url("/api/boiler/dhw/chargetype/writeable");
         EMSESP::webAPIService.webAPIService(&request);
         request.url("/api/boiler/flamecurr/value");
         EMSESP::webAPIService.webAPIService(&request);
@@ -1139,7 +1139,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         ncmd = Command::parse_command_string(command_s, id_n);
         shell.printfln("test cmd parse cmd=%s id=%d", ncmd, id_n);
         id_n = -1;
-        strlcpy(command_s, "wwc4/seltemp", sizeof(command_s));
+        strlcpy(command_s, "dhw4/seltemp", sizeof(command_s));
         ncmd = Command::parse_command_string(command_s, id_n);
         shell.printfln("test cmd parse cmd=%s id=%d", ncmd, id_n);
         id_n = -1;
@@ -1154,8 +1154,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // MQTT good tests
         EMSESP::mqtt_.incoming("ems-esp/thermostat/mode", "auto");
         EMSESP::mqtt_.incoming("ems-esp/thermostat/hc2/mode", "auto");
-        EMSESP::mqtt_.incoming("ems-esp/thermostat/wwc3/mode", "auto");
-        EMSESP::mqtt_.incoming("ems-esp/boiler/wwcircpump", "off");
+        EMSESP::mqtt_.incoming("ems-esp/thermostat/dhw3/mode", "auto");
+        EMSESP::mqtt_.incoming("ems-esp/boiler/dhw/circpump", "off");
         EMSESP::mqtt_.incoming("ems-esp/thermostat/seltemp");    // empty payload
         EMSESP::mqtt_.incoming("ems-esp/thermostat_hc1", "22");  // HA only
         EMSESP::mqtt_.incoming("ems-esp/thermostat_hc1", "off"); // HA only
@@ -1198,7 +1198,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::webAPIService.webAPIService(&request);
         request.url("/api/boiler/syspress");
         EMSESP::webAPIService.webAPIService(&request);
-        request.url("/api/boiler/wwcurflow");
+        request.url("/api/boiler/dhw/curflow");
         EMSESP::webAPIService.webAPIService(&request);
 
         // POST tests
@@ -1805,8 +1805,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.invoke_command("call system publish");
         shell.invoke_command("show mqtt");
 
-        // shell.invoke_command("call mixer wwc1 info");
-        // shell.invoke_command("call mixer wwc2 info");
+        // shell.invoke_command("call mixer dhw1 info");
+        // shell.invoke_command("call mixer dhw2 info");
 
         // test API
         AsyncWebServerRequest request;
@@ -1814,7 +1814,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::webAPIService.webAPIService(&request);
         request.url("/api/mixer/hc1/pumpstatus");
         EMSESP::webAPIService.webAPIService(&request);
-        request.url("/api/mixer/wwc2/pumpstatus");
+        request.url("/api/mixer/dhw2/pumpstatus");
         EMSESP::webAPIService.webAPIService(&request);
         ok = true;
     }

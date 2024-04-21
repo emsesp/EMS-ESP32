@@ -831,7 +831,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     bool has_tag = ((tag < DeviceValue::NUM_TAGS) && (tag != DeviceValue::DeviceValueTAG::TAG_NONE) && strlen(DeviceValue::DeviceValueTAG_s[tag][0]));
 
-    // create entity by add the hc/wwc tag if present, separating with an _
+    // create entity by add the hc/dhw tag if present, separating with an _
     char entity_with_tag[50];
     if (tag >= DeviceValueTAG::TAG_HC1) {
         snprintf(entity_with_tag, sizeof(entity_with_tag), "%s_%s", EMSdevice::tag_to_mqtt(tag), entity);
@@ -1290,7 +1290,7 @@ std::string Mqtt::tag_to_topic(uint8_t device_type, uint8_t tag) {
     std::string topic = EMSdevice::device_type_2_device_name(device_type);
 
     // if there is a tag add it
-    if ((tag == DeviceValueTAG::TAG_BOILER_DATA_WW) || (!is_nested() && tag >= DeviceValueTAG::TAG_HC1)) {
+    if (!is_nested() && tag >= DeviceValueTAG::TAG_HC1) {
         return topic + "_data_" + EMSdevice::tag_to_mqtt(tag);
     } else {
         return topic + "_data";
