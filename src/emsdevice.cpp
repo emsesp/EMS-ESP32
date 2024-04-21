@@ -742,6 +742,7 @@ void EMSdevice::set_minmax(const void * value_p, int16_t min, uint32_t max) {
         if (dv.value_p == value_p) {
             dv.min = min;
             dv.max = max;
+            dv.set_custom_minmax(); // custom priority
             return;
         }
     }
