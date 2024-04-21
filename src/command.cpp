@@ -281,13 +281,13 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
 }
 
 // calls a command directly
-uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * value) {
+uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id) {
     // create a temporary buffer
     JsonDocument output_doc;
     JsonObject   output = output_doc.to<JsonObject>();
 
     // authenticated is always true and ID is the default value
-    return call(device_type, cmd, value, true, -1, output);
+    return call(device_type, cmd, value, true, id, output);
 }
 
 // calls a command. Takes a json object for output.

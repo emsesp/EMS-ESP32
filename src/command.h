@@ -98,7 +98,7 @@ class Command {
     }
 
     static uint8_t call(const uint8_t device_type, const char * cmd, const char * value, const bool is_admin, const int8_t id, JsonObject output);
-    static uint8_t call(const uint8_t device_type, const char * cmd, const char * value);
+    static uint8_t call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id = -1);
 
     // with normal call back function taking a value and id
     static void add(const uint8_t        device_type,

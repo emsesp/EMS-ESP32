@@ -2474,9 +2474,10 @@ bool Boiler::set_ww_activated(const char * value, const int8_t id) {
 // Note: Using the type 0x1D to put the boiler into Test mode. This may be shown on the boiler with a flashing 'T'
 bool Boiler::set_tapwarmwater_activated(const char * value, const int8_t id) {
     // as it's a command it may not initially exist
-    // if (!Helpers::hasValue(wwTapActivated_, EMS_VALUE_BOOL)) {
-    //     return false;
-    // }
+    if (!Helpers::hasValue(wwTapActivated_, EMS_VALUE_BOOL)) {
+        LOG_WARNING("Coldshot not possible in dhw-buffer systems");
+        return false;
+    }
 
     bool v;
     if (!Helpers::value2bool(value, v)) {

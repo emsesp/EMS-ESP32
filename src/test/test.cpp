@@ -680,7 +680,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         test("boiler");
 
         // device type, command, data
-        Command::call(EMSdevice::DeviceType::BOILER, "tapactivated", "false");
+        Command::call(EMSdevice::DeviceType::BOILER, "tapactivated", "false", 9);
         ok = true;
     }
 

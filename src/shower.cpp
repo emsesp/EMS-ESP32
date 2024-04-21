@@ -74,6 +74,7 @@ void Shower::loop() {
                 doing_cold_shot_ = false;
                 duration_        = 0;
                 shower_state_    = false;
+                next_alert_      = shower_alert_trigger_;
             } else {
                 // hot water has been  on for a while
                 // first check to see if hot water has been on long enough to be recognized as a Shower/Bath
@@ -82,7 +83,7 @@ void Shower::loop() {
                     LOG_DEBUG("hot water still running, starting shower timer");
                 }
                 // check if the shower has been on too long
-                else if ((shower_alert_ && ((time_now - timer_start_) > shower_alert_trigger_)) || force_coldshot) {
+                else if ((shower_alert_ && ((time_now - timer_start_) > next_alert_)) || force_coldshot) {
                     shower_alert_start();
                 }
             }
@@ -141,7 +142,7 @@ void Shower::loop() {
 // turn off hot water to send a shot of cold
 void Shower::shower_alert_start() {
     LOG_DEBUG("Shower Alert started");
-    (void)Command::call(EMSdevice::DeviceType::BOILER, "dhw/tapactivated", "false");
+    (void)Command::call(EMSdevice::DeviceType::BOILER, "tapactivated", "false", 9);
     doing_cold_shot_   = true;
     force_coldshot     = false;
     alert_timer_start_ = uuid::get_uptime(); // timer starts now
@@ -151,9 +152,10 @@ void Shower::shower_alert_start() {
 void Shower::shower_alert_stop() {
     if (doing_cold_shot_) {
         LOG_DEBUG("Shower Alert stopped");
-        (void)Command::call(EMSdevice::DeviceType::BOILER, "dhw/tapactivated", "true");
+        (void)Command::call(EMSdevice::DeviceType::BOILER, "tapactivated", "true", 9);
         doing_cold_shot_ = false;
         force_coldshot   = false;
+        next_alert_ += shower_alert_trigger_;
     }
 }
 
