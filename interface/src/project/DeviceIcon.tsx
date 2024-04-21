@@ -3,7 +3,12 @@ import { AiOutlineAlert, AiOutlineControl, AiOutlineGateway } from 'react-icons/
 import { CgSmartHomeBoiler } from 'react-icons/cg';
 import { FaSolarPanel } from 'react-icons/fa';
 import { GiHeatHaze, GiTap } from 'react-icons/gi';
-import { MdOutlineDevices, MdOutlinePool, MdOutlineSensors, MdThermostatAuto } from 'react-icons/md';
+import {
+  MdOutlineDevices,
+  MdOutlinePool,
+  MdOutlineSensors,
+  MdThermostatAuto
+} from 'react-icons/md';
 import { TiFlowSwitch } from 'react-icons/ti';
 import { VscVmConnect } from 'react-icons/vsc';
 
@@ -47,7 +52,11 @@ const DeviceIcon: FC<DeviceIconProps> = ({ type_id }) => {
     case DeviceType.POOL:
       return <MdOutlinePool />;
     case DeviceType.CUSTOM:
-      return <PlaylistAddIcon sx={{ color: 'lightblue', fontSize: 22, verticalAlign: 'middle' }} />;
+      return (
+        <PlaylistAddIcon
+          sx={{ color: 'lightblue', fontSize: 22, verticalAlign: 'middle' }}
+        />
+      );
     default:
       return null;
   }

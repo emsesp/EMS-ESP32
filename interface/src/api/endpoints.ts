@@ -19,7 +19,8 @@ export const alovaInstance = createAlova({
   requestAdapter: xhrRequestAdapter(),
   beforeRequest(method) {
     if (localStorage.getItem(ACCESS_TOKEN)) {
-      method.config.headers.Authorization = 'Bearer ' + localStorage.getItem(ACCESS_TOKEN);
+      method.config.headers.Authorization =
+        'Bearer ' + localStorage.getItem(ACCESS_TOKEN);
     }
   },
 

@@ -10,7 +10,11 @@ import type { RequiredChildrenProps } from 'utils';
 const RequireUnauthenticated: FC<RequiredChildrenProps> = ({ children }) => {
   const authenticationContext = useContext(AuthenticationContext);
 
-  return authenticationContext.me ? <Navigate to={AuthenticationApi.fetchLoginRedirect()} /> : <>{children}</>;
+  return authenticationContext.me ? (
+    <Navigate to={AuthenticationApi.fetchLoginRedirect()} />
+  ) : (
+    <>{children}</>
+  );
 };
 
 export default RequireUnauthenticated;

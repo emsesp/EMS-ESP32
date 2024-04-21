@@ -1,7 +1,5 @@
 import type { Translation } from '../i18n-types';
 
-/* prettier-ignore */
-
 const nl: Translation = {
   LANGUAGE: 'Taal',
   RETRY: 'Opnieuw proberen',
@@ -208,7 +206,8 @@ const nl: Translation = {
   USER_WARNING: 'U dient tenminste 1 admin gebruiker te configureren',
   ADD: 'Toevoegen',
   ACCESS_TOKEN_FOR: 'Access Token voor',
-  ACCESS_TOKEN_TEXT: 'Het token hieronder wordt gebruikt voor de REST API calls die authorisatie nodig hebben. Het kan zowel als Bearer token in de Authorization header of in acccess_token URL query parameter gebruikt worden',
+  ACCESS_TOKEN_TEXT:
+    'Het token hieronder wordt gebruikt voor de REST API calls die authorisatie nodig hebben. Het kan zowel als Bearer token in de Authorization header of in acccess_token URL query parameter gebruikt worden',
   GENERATING_TOKEN: 'Token aan het genereren',
   USER: 'Gebruiker',
   MODIFY: 'Aanpassen',

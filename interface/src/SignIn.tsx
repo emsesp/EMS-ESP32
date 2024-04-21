@@ -41,9 +41,12 @@ const SignIn: FC = () => {
   const [processing, setProcessing] = useState<boolean>(false);
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  const { send: callSignIn, onSuccess } = useRequest((request: SignInRequest) => AuthenticationApi.signIn(request), {
-    immediate: false
-  });
+  const { send: callSignIn, onSuccess } = useRequest(
+    (request: SignInRequest) => AuthenticationApi.signIn(request),
+    {
+      immediate: false
+    }
+  );
 
   onSuccess((response) => {
     if (response.data) {
@@ -80,7 +83,9 @@ const SignIn: FC = () => {
 
   const submitOnEnter = onEnterCallback(signIn);
 
-  const onLocaleSelected: ChangeEventHandler<HTMLInputElement> = async ({ target }) => {
+  const onLocaleSelected: ChangeEventHandler<HTMLInputElement> = async ({
+    target
+  }) => {
     const loc = target.value as Locales;
     localStorage.setItem('lang', loc);
     await loadLocaleAsync(loc);
@@ -110,7 +115,14 @@ const SignIn: FC = () => {
       >
         <Typography variant="h4">{PROJECT_NAME}</Typography>
 
-        <TextField name="locale" variant="outlined" value={locale} onChange={onLocaleSelected} size="small" select>
+        <TextField
+          name="locale"
+          variant="outlined"
+          value={locale}
+          onChange={onLocaleSelected}
+          size="small"
+          select
+        >
           <MenuItem key="de" value="de">
             <img src={DEflag} style={{ width: 16, verticalAlign: 'middle' }} />
             &nbsp;DE
@@ -182,7 +194,13 @@ const SignIn: FC = () => {
           />
         </Box>
 
-        <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={validateAndSignIn} disabled={processing}>
+        <Button
+          variant="contained"
+          color="primary"
+          sx={{ mt: 2 }}
+          onClick={validateAndSignIn}
+          disabled={processing}
+        >
           <ForwardIcon sx={{ mr: 1 }} />
           {LL.SIGN_IN()}
         </Button>

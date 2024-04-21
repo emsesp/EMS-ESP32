@@ -25,7 +25,11 @@ const formatDurationMin = (LL: TranslationFunctions, duration_min: number) => {
   return formatted;
 };
 
-export function formatValue(LL: TranslationFunctions, value: unknown, uom: DeviceValueUOM) {
+export function formatValue(
+  LL: TranslationFunctions,
+  value: unknown,
+  uom: DeviceValueUOM
+) {
   if (typeof value !== 'number') {
     return '';
   }

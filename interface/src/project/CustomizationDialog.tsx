@@ -30,7 +30,12 @@ interface SettingsCustomizationDialogProps {
   selectedItem: DeviceEntity;
 }
 
-const CustomizationDialog = ({ open, onClose, onSave, selectedItem }: SettingsCustomizationDialogProps) => {
+const CustomizationDialog = ({
+  open,
+  onClose,
+  onSave,
+  selectedItem
+}: SettingsCustomizationDialogProps) => {
   const { LL } = useI18nContext();
   const [editItem, setEditItem] = useState<DeviceEntity>(selectedItem);
   const [error, setError] = useState<boolean>(false);
@@ -38,7 +43,9 @@ const CustomizationDialog = ({ open, onClose, onSave, selectedItem }: SettingsCu
   const updateFormValue = updateValue(setEditItem);
 
   const isWriteableNumber =
-    typeof editItem.v === 'number' && editItem.w && !(editItem.m & DeviceEntityMask.DV_READONLY);
+    typeof editItem.v === 'number' &&
+    editItem.w &&
+    !(editItem.m & DeviceEntityMask.DV_READONLY);
 
   useEffect(() => {
     if (open) {
@@ -52,7 +59,12 @@ const CustomizationDialog = ({ open, onClose, onSave, selectedItem }: SettingsCu
   };
 
   const save = () => {
-    if (isWriteableNumber && editItem.mi && editItem.ma && editItem.mi > editItem?.ma) {
+    if (
+      isWriteableNumber &&
+      editItem.mi &&
+      editItem.ma &&
+      editItem.mi > editItem?.ma
+    ) {
       setError(true);
     } else {
       onSave(editItem);
@@ -140,10 +152,20 @@ const CustomizationDialog = ({ open, onClose, onSave, selectedItem }: SettingsCu
         )}
       </DialogContent>
       <DialogActions>
-        <Button startIcon={<CancelIcon />} variant="outlined" onClick={close} color="secondary">
+        <Button
+          startIcon={<CancelIcon />}
+          variant="outlined"
+          onClick={close}
+          color="secondary"
+        >
           {LL.CANCEL()}
         </Button>
-        <Button startIcon={<DoneIcon />} variant="outlined" onClick={save} color="primary">
+        <Button
+          startIcon={<DoneIcon />}
+          variant="outlined"
+          onClick={save}
+          color="primary"
+        >
           {LL.UPDATE()}
         </Button>
       </DialogActions>

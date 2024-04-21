@@ -20,9 +20,12 @@ const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
   const [initialized, setInitialized] = useState<boolean>(false);
   const [me, setMe] = useState<Me>();
 
-  const { send: verifyAuthorization } = useRequest(AuthenticationApi.verifyAuthorization(), {
-    immediate: false
-  });
+  const { send: verifyAuthorization } = useRequest(
+    AuthenticationApi.verifyAuthorization(),
+    {
+      immediate: false
+    }
+  );
 
   const signIn = (accessToken: string) => {
     try {

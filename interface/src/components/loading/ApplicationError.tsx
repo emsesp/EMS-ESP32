@@ -22,7 +22,13 @@ const ApplicationError: FC<ApplicationErrorProps> = ({ message }) => (
         borderRadius: 0
       }}
     >
-      <Box display="flex" flexDirection="row" justifyContent="center" alignItems="center" mb={2}>
+      <Box
+        display="flex"
+        flexDirection="row"
+        justifyContent="center"
+        alignItems="center"
+        mb={2}
+      >
         <WarningIcon fontSize="large" color="error" />
         <Box ml={2}>
           <Typography variant="h4">Application Error</Typography>

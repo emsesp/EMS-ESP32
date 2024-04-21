@@ -4,7 +4,16 @@ import ComputerIcon from '@mui/icons-material/Computer';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
-import { Avatar, Button, Divider, List, ListItem, ListItemAvatar, ListItemText, useTheme } from '@mui/material';
+import {
+  Avatar,
+  Button,
+  Divider,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  useTheme
+} from '@mui/material';
 import type { Theme } from '@mui/material';
 
 import * as APApi from 'api/ap';
@@ -69,7 +78,10 @@ const APStatus: FC = () => {
             <ListItemAvatar>
               <Avatar>IP</Avatar>
             </ListItemAvatar>
-            <ListItemText primary={LL.ADDRESS_OF('IP')} secondary={data.ip_address} />
+            <ListItemText
+              primary={LL.ADDRESS_OF('IP')}
+              secondary={data.ip_address}
+            />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
@@ -78,7 +90,10 @@ const APStatus: FC = () => {
                 <DeviceHubIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary={LL.ADDRESS_OF('MAC')} secondary={data.mac_address} />
+            <ListItemText
+              primary={LL.ADDRESS_OF('MAC')}
+              secondary={data.mac_address}
+            />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
@@ -92,7 +107,12 @@ const APStatus: FC = () => {
           <Divider variant="inset" component="li" />
         </List>
         <ButtonRow>
-          <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
+          <Button
+            startIcon={<RefreshIcon />}
+            variant="outlined"
+            color="secondary"
+            onClick={loadData}
+          >
             {LL.REFRESH()}
           </Button>
         </ButtonRow>

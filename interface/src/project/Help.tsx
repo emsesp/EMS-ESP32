@@ -29,9 +29,12 @@ const Help: FC = () => {
   const { LL } = useI18nContext();
   useLayoutTitle(LL.HELP_OF(''));
 
-  const { send: getAPI, onSuccess: onGetAPI } = useRequest((data: APIcall) => EMSESP.API(data), {
-    immediate: false
-  });
+  const { send: getAPI, onSuccess: onGetAPI } = useRequest(
+    (data: APIcall) => EMSESP.API(data),
+    {
+      immediate: false
+    }
+  );
 
   onGetAPI((event) => {
     const anchor = document.createElement('a');
@@ -40,8 +43,10 @@ const Help: FC = () => {
         type: 'text/plain'
       })
     );
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    anchor.download = 'emsesp_' + event.sendArgs[0].device + '_' + event.sendArgs[0].entity + '.txt';
+
+    anchor.download =
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      'emsesp_' + event.sendArgs[0].device + '_' + event.sendArgs[0].entity + '.txt';
     anchor.click();
     URL.revokeObjectURL(anchor.href);
     toast.info(LL.DOWNLOAD_SUCCESSFUL());
@@ -79,7 +84,10 @@ const Help: FC = () => {
         </ListItem>
 
         <ListItem>
-          <ListItemButton component="a" href="https://github.com/emsesp/EMS-ESP32/issues/new/choose">
+          <ListItemButton
+            component="a"
+            href="https://github.com/emsesp/EMS-ESP32/issues/new/choose"
+          >
             <ListItemAvatar>
               <Avatar sx={{ bgcolor: '#72caf9' }}>
                 <GitHubIcon />
@@ -119,7 +127,11 @@ const Help: FC = () => {
           <b>{LL.HELP_INFORMATION_5()}</b>
         </Typography>
         <Typography align="center">
-          <Link target="_blank" href="https://github.com/emsesp/EMS-ESP32" color="primary">
+          <Link
+            target="_blank"
+            href="https://github.com/emsesp/EMS-ESP32"
+            color="primary"
+          >
             {'github.com/emsesp/EMS-ESP32'}
           </Link>
         </Typography>

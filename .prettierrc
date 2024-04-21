@@ -4,7 +4,7 @@
   "tabWidth": 2,
   "semi": true,
   "singleQuote": true,
-  "printWidth": 120,
+  "printWidth": 85,
   "bracketSpacing": true,
   "importOrder": ["^react", "^@mui/(.*)$", "^api*/(.*)$", "<THIRD_PARTY_MODULES>", "^[./]"],
   "importOrderSeparation": true,

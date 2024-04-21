@@ -20,7 +20,9 @@ const WiFiNetworkScanner: FC = () => {
   const { LL } = useI18nContext();
   const [errorMessage, setErrorMessage] = useState<string>();
 
-  const { send: scanNetworks, onComplete: onCompleteScanNetworks } = useRequest(NetworkApi.scanNetworks); // is called on page load to start network scan
+  const { send: scanNetworks, onComplete: onCompleteScanNetworks } = useRequest(
+    NetworkApi.scanNetworks
+  ); // is called on page load to start network scan
   const {
     data: networkList,
     send: getNetworkList,
@@ -51,7 +53,9 @@ const WiFiNetworkScanner: FC = () => {
 
   const renderNetworkScanner = () => {
     if (!networkList) {
-      return <FormLoader message={LL.SCANNING() + '...'} errorMessage={errorMessage} />;
+      return (
+        <FormLoader message={LL.SCANNING() + '...'} errorMessage={errorMessage} />
+      );
     }
     return <WiFiNetworkSelector networkList={networkList} />;
   };

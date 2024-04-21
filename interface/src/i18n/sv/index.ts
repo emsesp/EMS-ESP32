@@ -1,7 +1,5 @@
 import type { Translation } from '../i18n-types';
 
-/* prettier-ignore */
-
 const sv: Translation = {
   LANGUAGE: 'Språk',
   RETRY: 'Försök igen',
@@ -208,7 +206,8 @@ const sv: Translation = {
   USER_WARNING: 'Du måste ha minst en admin konfigurerad',
   ADD: 'Lägg till',
   ACCESS_TOKEN_FOR: 'Access Token för',
-  ACCESS_TOKEN_TEXT: 'Nedan Token används med REST API-anrop som kräver auktorisering. Den kan skickas med antingen som en Bearer token i Authorization-headern eller i access_token URL query-parametern.',
+  ACCESS_TOKEN_TEXT:
+    'Nedan Token används med REST API-anrop som kräver auktorisering. Den kan skickas med antingen som en Bearer token i Authorization-headern eller i access_token URL query-parametern.',
   GENERATING_TOKEN: 'Genererar token',
   USER: 'Användare',
   MODIFY: 'Ändra',

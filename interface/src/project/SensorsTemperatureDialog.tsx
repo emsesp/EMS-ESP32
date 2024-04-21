@@ -107,10 +107,20 @@ const SensorsTemperatureDialog = ({
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button startIcon={<CancelIcon />} variant="outlined" onClick={close} color="secondary">
+        <Button
+          startIcon={<CancelIcon />}
+          variant="outlined"
+          onClick={close}
+          color="secondary"
+        >
           {LL.CANCEL()}
         </Button>
-        <Button startIcon={<WarningIcon color="warning" />} variant="contained" onClick={save} color="info">
+        <Button
+          startIcon={<WarningIcon color="warning" />}
+          variant="contained"
+          onClick={save}
+          color="info"
+        >
           {LL.UPDATE()}
         </Button>
       </DialogActions>

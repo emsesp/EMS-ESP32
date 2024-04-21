@@ -13,7 +13,14 @@ const LoadingSpinner: FC<LoadingSpinnerProps> = ({ height = '100%' }) => {
   const { LL } = useI18nContext();
 
   return (
-    <Box display="flex" alignItems="center" justifyContent="center" flexDirection="column" padding={2} height={height}>
+    <Box
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      flexDirection="column"
+      padding={2}
+      height={height}
+    >
       <CircularProgress
         sx={(theme: Theme) => ({
           margin: theme.spacing(4),

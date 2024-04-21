@@ -4,7 +4,16 @@ import type { FC } from 'react';
 import LockIcon from '@mui/icons-material/Lock';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import WifiIcon from '@mui/icons-material/Wifi';
-import { Avatar, Badge, List, ListItem, ListItemAvatar, ListItemIcon, ListItemText, useTheme } from '@mui/material';
+import {
+  Avatar,
+  Badge,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemIcon,
+  ListItemText,
+  useTheme
+} from '@mui/material';
 import type { Theme } from '@mui/material';
 
 import { MessageBox } from 'components';
@@ -60,14 +69,22 @@ const WiFiNetworkSelector: FC<WiFiNetworkSelectorProps> = ({ networkList }) => {
   const wifiConnectionContext = useContext(WiFiConnectionContext);
 
   const renderNetwork = (network: WiFiNetwork) => (
-    <ListItem key={network.bssid} onClick={() => wifiConnectionContext.selectNetwork(network)}>
+    <ListItem
+      key={network.bssid}
+      onClick={() => wifiConnectionContext.selectNetwork(network)}
+    >
       <ListItemAvatar>
         <Avatar>{isNetworkOpen(network) ? <LockOpenIcon /> : <LockIcon />}</Avatar>
       </ListItemAvatar>
       <ListItemText
         primary={network.ssid}
         secondary={
-          'Security: ' + networkSecurityMode(network) + ', Ch: ' + network.channel + ', bssid: ' + network.bssid
+          'Security: ' +
+          networkSecurityMode(network) +
+          ', Ch: ' +
+          network.channel +
+          ', bssid: ' +
+          network.bssid
         }
       />
       <ListItemIcon>

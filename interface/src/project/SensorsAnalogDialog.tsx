@@ -79,7 +79,8 @@ const SensorsAnalogDialog = ({
   return (
     <Dialog sx={dialogStyle} open={open} onClose={close}>
       <DialogTitle>
-        {creating ? LL.ADD(1) + ' ' + LL.NEW(0) : LL.EDIT()}&nbsp;{LL.ANALOG_SENSOR(0)}
+        {creating ? LL.ADD(1) + ' ' + LL.NEW(0) : LL.EDIT()}&nbsp;
+        {LL.ANALOG_SENSOR(0)}
       </DialogTitle>
       <DialogContent dividers>
         <Grid container spacing={2}>
@@ -113,7 +114,14 @@ const SensorsAnalogDialog = ({
             />
           </Grid>
           <Grid item xs={8}>
-            <TextField name="t" label={LL.TYPE(0)} value={editItem.t} fullWidth select onChange={updateFormValue}>
+            <TextField
+              name="t"
+              label={LL.TYPE(0)}
+              value={editItem.t}
+              fullWidth
+              select
+              onChange={updateFormValue}
+            >
               {AnalogTypeNames.map((val, i) => (
                 <MenuItem key={i} value={i}>
                   {val}
@@ -123,7 +131,14 @@ const SensorsAnalogDialog = ({
           </Grid>
           {editItem.t >= AnalogType.COUNTER && editItem.t <= AnalogType.RATE && (
             <Grid item xs={4}>
-              <TextField name="u" label={LL.UNIT()} value={editItem.u} fullWidth select onChange={updateFormValue}>
+              <TextField
+                name="u"
+                label={LL.UNIT()}
+                value={editItem.u}
+                fullWidth
+                select
+                onChange={updateFormValue}
+              >
                 {DeviceValueUOM_s.map((val, i) => (
                   <MenuItem key={i} value={i}>
                     {val}
@@ -144,7 +159,9 @@ const SensorsAnalogDialog = ({
                 onChange={updateFormValue}
                 inputProps={{ min: '0', max: '3300', step: '1' }}
                 InputProps={{
-                  startAdornment: <InputAdornment position="start">mV</InputAdornment>
+                  startAdornment: (
+                    <InputAdornment position="start">mV</InputAdornment>
+                  )
                 }}
               />
             </Grid>
@@ -177,70 +194,75 @@ const SensorsAnalogDialog = ({
               />
             </Grid>
           )}
-          {editItem.t === AnalogType.DIGITAL_OUT && (editItem.g === 25 || editItem.g === 26) && (
-            <Grid item xs={4}>
-              <TextField
-                name="o"
-                label={LL.VALUE(1)}
-                value={numberValue(editItem.o)}
-                fullWidth
-                type="number"
-                variant="outlined"
-                onChange={updateFormValue}
-                inputProps={{ min: '0', max: '255', step: '1' }}
-              />
-            </Grid>
-          )}
-          {editItem.t === AnalogType.DIGITAL_OUT && editItem.g !== 25 && editItem.g !== 26 && (
-            <>
+          {editItem.t === AnalogType.DIGITAL_OUT &&
+            (editItem.g === 25 || editItem.g === 26) && (
               <Grid item xs={4}>
                 <TextField
                   name="o"
                   label={LL.VALUE(1)}
                   value={numberValue(editItem.o)}
                   fullWidth
-                  select
+                  type="number"
                   variant="outlined"
                   onChange={updateFormValue}
-                >
-                  <MenuItem value={0}>{LL.OFF()}</MenuItem>
-                  <MenuItem value={1}>{LL.ON()}</MenuItem>
-                </TextField>
+                  inputProps={{ min: '0', max: '255', step: '1' }}
+                />
               </Grid>
-              <Grid item xs={4}>
-                <TextField
-                  name="f"
-                  label={LL.POLARITY()}
-                  value={editItem.f}
-                  fullWidth
-                  select
-                  onChange={updateFormValue}
-                >
-                  <MenuItem value={1}>{LL.ACTIVEHIGH()}</MenuItem>
-                  <MenuItem value={-1}>{LL.ACTIVELOW()}</MenuItem>
-                </TextField>
-              </Grid>
-              <Grid item xs={4}>
-                <TextField
-                  name="u"
-                  label={LL.STARTVALUE()}
-                  value={editItem.u}
-                  fullWidth
-                  select
-                  onChange={updateFormValue}
-                >
-                  <MenuItem value={0}>{LL.UNCHANGED()}</MenuItem>
-                  <MenuItem value={1}>
-                    {LL.ALWAYS()}&nbsp;{LL.OFF()}
-                  </MenuItem>
-                  <MenuItem value={2}>
-                    {LL.ALWAYS()}&nbsp;{LL.ON()}
-                  </MenuItem>
-                </TextField>
-              </Grid>
-            </>
-          )}
-          {(editItem.t === AnalogType.PWM_0 || editItem.t === AnalogType.PWM_1 || editItem.t === AnalogType.PWM_2) && (
+            )}
+          {editItem.t === AnalogType.DIGITAL_OUT &&
+            editItem.g !== 25 &&
+            editItem.g !== 26 && (
+              <>
+                <Grid item xs={4}>
+                  <TextField
+                    name="o"
+                    label={LL.VALUE(1)}
+                    value={numberValue(editItem.o)}
+                    fullWidth
+                    select
+                    variant="outlined"
+                    onChange={updateFormValue}
+                  >
+                    <MenuItem value={0}>{LL.OFF()}</MenuItem>
+                    <MenuItem value={1}>{LL.ON()}</MenuItem>
+                  </TextField>
+                </Grid>
+                <Grid item xs={4}>
+                  <TextField
+                    name="f"
+                    label={LL.POLARITY()}
+                    value={editItem.f}
+                    fullWidth
+                    select
+                    onChange={updateFormValue}
+                  >
+                    <MenuItem value={1}>{LL.ACTIVEHIGH()}</MenuItem>
+                    <MenuItem value={-1}>{LL.ACTIVELOW()}</MenuItem>
+                  </TextField>
+                </Grid>
+                <Grid item xs={4}>
+                  <TextField
+                    name="u"
+                    label={LL.STARTVALUE()}
+                    value={editItem.u}
+                    fullWidth
+                    select
+                    onChange={updateFormValue}
+                  >
+                    <MenuItem value={0}>{LL.UNCHANGED()}</MenuItem>
+                    <MenuItem value={1}>
+                      {LL.ALWAYS()}&nbsp;{LL.OFF()}
+                    </MenuItem>
+                    <MenuItem value={2}>
+                      {LL.ALWAYS()}&nbsp;{LL.ON()}
+                    </MenuItem>
+                  </TextField>
+                </Grid>
+              </>
+            )}
+          {(editItem.t === AnalogType.PWM_0 ||
+            editItem.t === AnalogType.PWM_1 ||
+            editItem.t === AnalogType.PWM_2) && (
             <>
               <Grid item xs={4}>
                 <TextField
@@ -253,7 +275,9 @@ const SensorsAnalogDialog = ({
                   onChange={updateFormValue}
                   inputProps={{ min: '1', max: '5000', step: '1' }}
                   InputProps={{
-                    startAdornment: <InputAdornment position="start">Hz</InputAdornment>
+                    startAdornment: (
+                      <InputAdornment position="start">Hz</InputAdornment>
+                    )
                   }}
                 />
               </Grid>
@@ -268,7 +292,9 @@ const SensorsAnalogDialog = ({
                   onChange={updateFormValue}
                   inputProps={{ min: '0', max: '100', step: '0.1' }}
                   InputProps={{
-                    startAdornment: <InputAdornment position="start">%</InputAdornment>
+                    startAdornment: (
+                      <InputAdornment position="start">%</InputAdornment>
+                    )
                   }}
                 />
               </Grid>
@@ -279,15 +305,30 @@ const SensorsAnalogDialog = ({
       <DialogActions>
         {!creating && (
           <Box flexGrow={1} sx={{ '& button': { mt: 0 } }}>
-            <Button startIcon={<RemoveIcon />} variant="outlined" color="error" onClick={remove}>
+            <Button
+              startIcon={<RemoveIcon />}
+              variant="outlined"
+              color="error"
+              onClick={remove}
+            >
               {LL.REMOVE()}
             </Button>
           </Box>
         )}
-        <Button startIcon={<CancelIcon />} variant="outlined" onClick={close} color="secondary">
+        <Button
+          startIcon={<CancelIcon />}
+          variant="outlined"
+          onClick={close}
+          color="secondary"
+        >
           {LL.CANCEL()}
         </Button>
-        <Button startIcon={<WarningIcon color="warning" />} variant="contained" onClick={save} color="info">
+        <Button
+          startIcon={<WarningIcon color="warning" />}
+          variant="contained"
+          onClick={save}
+          color="info"
+        >
           {creating ? LL.ADD(0) : LL.UPDATE()}
         </Button>
       </DialogActions>

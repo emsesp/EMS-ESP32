@@ -10,7 +10,9 @@ export interface AuthenticationContextValue {
 }
 
 const AuthenticationContextDefaultValue = {} as AuthenticationContextValue;
-export const AuthenticationContext = createContext(AuthenticationContextDefaultValue);
+export const AuthenticationContext = createContext(
+  AuthenticationContextDefaultValue
+);
 
 export interface AuthenticatedContextValue extends AuthenticationContextValue {
   me: Me;

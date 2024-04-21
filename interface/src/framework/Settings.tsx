@@ -13,7 +13,15 @@ import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore
 import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import TuneIcon from '@mui/icons-material/Tune';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, List } from '@mui/material';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  List
+} from '@mui/material';
 
 import * as SystemApi from 'api/system';
 
@@ -92,7 +100,11 @@ const Settings: FC = () => {
   };
 
   const renderRestartDialog = () => (
-    <Dialog sx={dialogStyle} open={confirmRestart} onClose={() => setConfirmRestart(false)}>
+    <Dialog
+      sx={dialogStyle}
+      open={confirmRestart}
+      onClose={() => setConfirmRestart(false)}
+    >
       <DialogTitle>{LL.RESTART()}</DialogTitle>
       <DialogContent dividers>{LL.RESTART_CONFIRM()}</DialogContent>
       <DialogActions>
@@ -128,7 +140,11 @@ const Settings: FC = () => {
   );
 
   const renderFactoryResetDialog = () => (
-    <Dialog sx={dialogStyle} open={confirmFactoryReset} onClose={() => setConfirmFactoryReset(false)}>
+    <Dialog
+      sx={dialogStyle}
+      open={confirmFactoryReset}
+      onClose={() => setConfirmFactoryReset(false)}
+    >
       <DialogTitle>{LL.FACTORY_RESET()}</DialogTitle>
       <DialogContent dividers>{LL.SYSTEM_FACTORY_TEXT_DIALOG()}</DialogContent>
       <DialogActions>
@@ -189,9 +205,26 @@ const Settings: FC = () => {
           to="ntp"
         />
 
-        <ListMenuItem icon={DeviceHubIcon} bgcolor="#68374d" label="MQTT" text={LL.CONFIGURE('MQTT')} to="mqtt" />
-        <ListMenuItem icon={CastIcon} bgcolor="#efc34b" label="OTA" text={LL.CONFIGURE('OTA')} to="ota" />
-        <ListMenuItem icon={LockIcon} label={LL.SECURITY(0)} text={LL.SECURITY_1()} to="security" />
+        <ListMenuItem
+          icon={DeviceHubIcon}
+          bgcolor="#68374d"
+          label="MQTT"
+          text={LL.CONFIGURE('MQTT')}
+          to="mqtt"
+        />
+        <ListMenuItem
+          icon={CastIcon}
+          bgcolor="#efc34b"
+          label="OTA"
+          text={LL.CONFIGURE('OTA')}
+          to="ota"
+        />
+        <ListMenuItem
+          icon={LockIcon}
+          label={LL.SECURITY(0)}
+          text={LL.SECURITY_1()}
+          to="security"
+        />
 
         <ListMenuItem
           icon={MemoryIcon}
@@ -242,7 +275,9 @@ const Settings: FC = () => {
     </>
   );
 
-  return <SectionContent>{restarting ? <RestartMonitor /> : content()}</SectionContent>;
+  return (
+    <SectionContent>{restarting ? <RestartMonitor /> : content()}</SectionContent>
+  );
 };
 
 export default Settings;

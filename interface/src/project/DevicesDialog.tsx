@@ -102,7 +102,11 @@ const DevicesDialog = ({
   return (
     <Dialog sx={dialogStyle} open={open} onClose={close}>
       <DialogTitle>
-        {selectedItem.v === '' && selectedItem.c ? LL.RUN_COMMAND() : writeable ? LL.CHANGE_VALUE() : LL.VALUE(1)}
+        {selectedItem.v === '' && selectedItem.c
+          ? LL.RUN_COMMAND()
+          : writeable
+            ? LL.CHANGE_VALUE()
+            : LL.VALUE(1)}
       </DialogTitle>
       <DialogContent dividers>
         <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
@@ -138,9 +142,17 @@ const DevicesDialog = ({
                 type="number"
                 sx={{ width: '30ch' }}
                 onChange={updateFormValue}
-                inputProps={editItem.s ? { min: editItem.m, max: editItem.x, step: editItem.s } : {}}
+                inputProps={
+                  editItem.s
+                    ? { min: editItem.m, max: editItem.x, step: editItem.s }
+                    : {}
+                }
                 InputProps={{
-                  startAdornment: <InputAdornment position="start">{setUom(editItem.u)}</InputAdornment>
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      {setUom(editItem.u)}
+                    </InputAdornment>
+                  )
                 }}
               />
             ) : (
@@ -175,10 +187,20 @@ const DevicesDialog = ({
               position: 'relative'
             }}
           >
-            <Button startIcon={<CancelIcon />} variant="outlined" onClick={close} color="secondary">
+            <Button
+              startIcon={<CancelIcon />}
+              variant="outlined"
+              onClick={close}
+              color="secondary"
+            >
               {LL.CANCEL()}
             </Button>
-            <Button startIcon={<WarningIcon color="warning" />} variant="contained" onClick={save} color="info">
+            <Button
+              startIcon={<WarningIcon color="warning" />}
+              variant="contained"
+              onClick={save}
+              color="info"
+            >
               {selectedItem.v === '' && selectedItem.c ? LL.EXECUTE() : LL.UPDATE()}
             </Button>
             {progress && (

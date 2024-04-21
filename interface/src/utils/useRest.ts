@@ -22,7 +22,12 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
   const [dirtyFlags, setDirtyFlags] = useState<string[]>([]);
   const blocker = useBlocker(dirtyFlags.length !== 0);
 
-  const { data, send: readData, update: updateData, onComplete: onReadComplete } = useRequest(read());
+  const {
+    data,
+    send: readData,
+    update: updateData,
+    onComplete: onReadComplete
+  } = useRequest(read());
 
   const {
     loading: saving,

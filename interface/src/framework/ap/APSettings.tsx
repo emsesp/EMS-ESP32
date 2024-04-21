@@ -25,7 +25,8 @@ import { numberValue, updateValueDirty, useRest } from 'utils';
 import { createAPSettingsValidator, validate } from 'validators';
 
 export const isAPEnabled = ({ provision_mode }: APSettingsType) =>
-  provision_mode === APProvisionMode.AP_MODE_ALWAYS || provision_mode === APProvisionMode.AP_MODE_DISCONNECTED;
+  provision_mode === APProvisionMode.AP_MODE_ALWAYS ||
+  provision_mode === APProvisionMode.AP_MODE_DISCONNECTED;
 
 const APSettings: FC = () => {
   const {
@@ -48,7 +49,12 @@ const APSettings: FC = () => {
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, updateDataValue);
+  const updateFormValue = updateValueDirty(
+    origData,
+    dirtyFlags,
+    setDirtyFlags,
+    updateDataValue
+  );
 
   const content = () => {
     if (!data) {
@@ -78,9 +84,15 @@ const APSettings: FC = () => {
           onChange={updateFormValue}
           margin="normal"
         >
-          <MenuItem value={APProvisionMode.AP_MODE_ALWAYS}>{LL.AP_PROVIDE_TEXT_1()}</MenuItem>
-          <MenuItem value={APProvisionMode.AP_MODE_DISCONNECTED}>{LL.AP_PROVIDE_TEXT_2()}</MenuItem>
-          <MenuItem value={APProvisionMode.AP_NEVER}>{LL.AP_PROVIDE_TEXT_3()}</MenuItem>
+          <MenuItem value={APProvisionMode.AP_MODE_ALWAYS}>
+            {LL.AP_PROVIDE_TEXT_1()}
+          </MenuItem>
+          <MenuItem value={APProvisionMode.AP_MODE_DISCONNECTED}>
+            {LL.AP_PROVIDE_TEXT_2()}
+          </MenuItem>
+          <MenuItem value={APProvisionMode.AP_NEVER}>
+            {LL.AP_PROVIDE_TEXT_3()}
+          </MenuItem>
         </ValidatedTextField>
         {isAPEnabled(data) && (
           <>
@@ -123,7 +135,13 @@ const APSettings: FC = () => {
               ))}
             </ValidatedTextField>
             <BlockFormControlLabel
-              control={<Checkbox name="ssid_hidden" checked={data.ssid_hidden} onChange={updateFormValue} />}
+              control={
+                <Checkbox
+                  name="ssid_hidden"
+                  checked={data.ssid_hidden}
+                  onChange={updateFormValue}
+                />
+              }
               label={LL.AP_HIDE_SSID()}
             />
             <ValidatedTextField

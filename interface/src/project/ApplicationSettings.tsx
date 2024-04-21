@@ -5,7 +5,17 @@ import { toast } from 'react-toastify';
 import CancelIcon from '@mui/icons-material/Cancel';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import WarningIcon from '@mui/icons-material/Warning';
-import { Box, Button, Checkbox, Divider, Grid, InputAdornment, MenuItem, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Checkbox,
+  Divider,
+  Grid,
+  InputAdornment,
+  MenuItem,
+  TextField,
+  Typography
+} from '@mui/material';
 
 import * as SystemApi from 'api/system';
 
@@ -61,7 +71,12 @@ const ApplicationSettings: FC = () => {
 
   const { LL } = useI18nContext();
 
-  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, updateDataValue);
+  const updateFormValue = updateValueDirty(
+    origData,
+    dirtyFlags,
+    setDirtyFlags,
+    updateDataValue
+  );
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
@@ -220,7 +235,9 @@ const ApplicationSettings: FC = () => {
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="dallas_gpio"
-                  label={LL.GPIO_OF(LL.TEMPERATURE()) + ' (0=' + LL.DISABLED(1) + ')'}
+                  label={
+                    LL.GPIO_OF(LL.TEMPERATURE()) + ' (0=' + LL.DISABLED(1) + ')'
+                  }
                   fullWidth
                   variant="outlined"
                   value={numberValue(data.dallas_gpio)}
@@ -322,7 +339,13 @@ const ApplicationSettings: FC = () => {
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           {LL.SETTINGS_OF(LL.EMS_BUS(0))}
         </Typography>
-        <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
+        <Grid
+          container
+          spacing={1}
+          direction="row"
+          justifyContent="flex-start"
+          alignItems="flex-start"
+        >
           <Grid item xs={12} sm={6}>
             <TextField
               name="tx_mode"
@@ -396,54 +419,120 @@ const ApplicationSettings: FC = () => {
         </Grid>
         {data.led_gpio !== 0 && (
           <BlockFormControlLabel
-            control={<Checkbox checked={data.hide_led} onChange={updateFormValue} name="hide_led" />}
+            control={
+              <Checkbox
+                checked={data.hide_led}
+                onChange={updateFormValue}
+                name="hide_led"
+              />
+            }
             label={LL.HIDE_LED()}
             disabled={saving}
           />
         )}
         <BlockFormControlLabel
-          control={<Checkbox checked={data.telnet_enabled} onChange={updateFormValue} name="telnet_enabled" />}
+          control={
+            <Checkbox
+              checked={data.telnet_enabled}
+              onChange={updateFormValue}
+              name="telnet_enabled"
+            />
+          }
           label={LL.ENABLE_TELNET()}
           disabled={saving}
         />
         <BlockFormControlLabel
-          control={<Checkbox checked={data.analog_enabled} onChange={updateFormValue} name="analog_enabled" />}
+          control={
+            <Checkbox
+              checked={data.analog_enabled}
+              onChange={updateFormValue}
+              name="analog_enabled"
+            />
+          }
           label={LL.ENABLE_ANALOG()}
           disabled={saving}
         />
         <BlockFormControlLabel
-          control={<Checkbox checked={data.fahrenheit} onChange={updateFormValue} name="fahrenheit" />}
+          control={
+            <Checkbox
+              checked={data.fahrenheit}
+              onChange={updateFormValue}
+              name="fahrenheit"
+            />
+          }
           label={LL.CONVERT_FAHRENHEIT()}
           disabled={saving}
         />
         <BlockFormControlLabel
-          control={<Checkbox checked={data.notoken_api} onChange={updateFormValue} name="notoken_api" />}
+          control={
+            <Checkbox
+              checked={data.notoken_api}
+              onChange={updateFormValue}
+              name="notoken_api"
+            />
+          }
           label={LL.BYPASS_TOKEN()}
           disabled={saving}
         />
         <BlockFormControlLabel
-          control={<Checkbox checked={data.readonly_mode} onChange={updateFormValue} name="readonly_mode" />}
+          control={
+            <Checkbox
+              checked={data.readonly_mode}
+              onChange={updateFormValue}
+              name="readonly_mode"
+            />
+          }
           label={LL.READONLY()}
           disabled={saving}
         />
         <BlockFormControlLabel
-          control={<Checkbox checked={data.low_clock} onChange={updateFormValue} name="low_clock" />}
+          control={
+            <Checkbox
+              checked={data.low_clock}
+              onChange={updateFormValue}
+              name="low_clock"
+            />
+          }
           label={LL.UNDERCLOCK_CPU()}
           disabled={saving}
         />
         <BlockFormControlLabel
-          control={<Checkbox checked={data.boiler_heatingoff} onChange={updateFormValue} name="boiler_heatingoff" />}
+          control={
+            <Checkbox
+              checked={data.boiler_heatingoff}
+              onChange={updateFormValue}
+              name="boiler_heatingoff"
+            />
+          }
           label={LL.HEATINGOFF()}
           disabled={saving}
         />
-        <Grid container spacing={0} direction="row" justifyContent="flex-start" alignItems="flex-start">
+        <Grid
+          container
+          spacing={0}
+          direction="row"
+          justifyContent="flex-start"
+          alignItems="flex-start"
+        >
           <BlockFormControlLabel
-            control={<Checkbox checked={data.shower_timer} onChange={updateFormValue} name="shower_timer" />}
+            control={
+              <Checkbox
+                checked={data.shower_timer}
+                onChange={updateFormValue}
+                name="shower_timer"
+              />
+            }
             label={LL.ENABLE_SHOWER_TIMER()}
             disabled={saving}
           />
           <BlockFormControlLabel
-            control={<Checkbox checked={data.shower_alert} onChange={updateFormValue} name="shower_alert" />}
+            control={
+              <Checkbox
+                checked={data.shower_alert}
+                onChange={updateFormValue}
+                name="shower_alert"
+              />
+            }
             label={LL.ENABLE_SHOWER_ALERT()}
             disabled={!data.shower_timer}
           />
@@ -465,7 +554,9 @@ const ApplicationSettings: FC = () => {
                   name="shower_alert_trigger"
                   label={LL.TRIGGER_TIME()}
                   InputProps={{
-                    endAdornment: <InputAdornment position="end">{LL.MINUTES()}</InputAdornment>
+                    endAdornment: (
+                      <InputAdornment position="end">{LL.MINUTES()}</InputAdornment>
+                    )
                   }}
                   variant="outlined"
                   value={numberValue(data.shower_alert_trigger)}
@@ -481,7 +572,9 @@ const ApplicationSettings: FC = () => {
                   name="shower_alert_coldshot"
                   label={LL.COLD_SHOT_DURATION()}
                   InputProps={{
-                    endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                    endAdornment: (
+                      <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                    )
                   }}
                   variant="outlined"
                   value={numberValue(data.shower_alert_coldshot)}
@@ -497,7 +590,13 @@ const ApplicationSettings: FC = () => {
         <Typography sx={{ pt: 3 }} variant="h6" color="primary">
           {LL.FORMATTING_OPTIONS()}
         </Typography>
-        <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
+        <Grid
+          container
+          spacing={1}
+          direction="row"
+          justifyContent="flex-start"
+          alignItems="flex-start"
+        >
           <Grid item xs={12} sm={6} md={4}>
             <TextField
               name="bool_dashboard"
@@ -556,7 +655,13 @@ const ApplicationSettings: FC = () => {
               {LL.TEMP_SENSORS()}
             </Typography>
             <BlockFormControlLabel
-              control={<Checkbox checked={data.dallas_parasite} onChange={updateFormValue} name="dallas_parasite" />}
+              control={
+                <Checkbox
+                  checked={data.dallas_parasite}
+                  onChange={updateFormValue}
+                  name="dallas_parasite"
+                />
+              }
               label={LL.ENABLE_PARASITE()}
               disabled={saving}
             />
@@ -566,7 +671,13 @@ const ApplicationSettings: FC = () => {
           {LL.LOGGING()}
         </Typography>
         <BlockFormControlLabel
-          control={<Checkbox checked={data.trace_raw} onChange={updateFormValue} name="trace_raw" />}
+          control={
+            <Checkbox
+              checked={data.trace_raw}
+              onChange={updateFormValue}
+              name="trace_raw"
+            />
+          }
           label={LL.LOG_HEX()}
           disabled={saving}
         />
@@ -582,7 +693,13 @@ const ApplicationSettings: FC = () => {
           label={LL.ENABLE_SYSLOG()}
         />
         {data.syslog_enabled && (
-          <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
+          <Grid
+            container
+            spacing={1}
+            direction="row"
+            justifyContent="flex-start"
+            alignItems="flex-start"
+          >
             <Grid item xs={12} sm={6}>
               <ValidatedTextField
                 fieldErrors={fieldErrors}
@@ -636,7 +753,9 @@ const ApplicationSettings: FC = () => {
                 name="syslog_mark_interval"
                 label={LL.MARK_INTERVAL()}
                 InputProps={{
-                  endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                  endAdornment: (
+                    <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                  )
                 }}
                 fullWidth
                 variant="outlined"
@@ -651,7 +770,12 @@ const ApplicationSettings: FC = () => {
         )}
         {restartNeeded && (
           <MessageBox my={2} level="warning" message={LL.RESTART_TEXT(0)}>
-            <Button startIcon={<PowerSettingsNewIcon />} variant="contained" color="error" onClick={restart}>
+            <Button
+              startIcon={<PowerSettingsNewIcon />}
+              variant="contained"
+              color="error"
+              onClick={restart}
+            >
               {LL.RESTART()}
             </Button>
           </MessageBox>

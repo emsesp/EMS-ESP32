@@ -54,7 +54,9 @@ const LayoutMenu: FC = () => {
 
   const [menuOpen, setMenuOpen] = useState(true);
 
-  const onLocaleSelected: ChangeEventHandler<HTMLInputElement> = async ({ target }) => {
+  const onLocaleSelected: ChangeEventHandler<HTMLInputElement> = async ({
+    target
+  }) => {
     const loc = target.value as Locales;
     localStorage.setItem('lang', loc);
     await loadLocaleAsync(loc);
@@ -98,7 +100,14 @@ const LayoutMenu: FC = () => {
                 mb: '2px',
                 color: 'lightblue'
               }}
-              secondary={LL.CUSTOMIZATIONS() + ', ' + LL.SCHEDULER() + ', ' + LL.CUSTOM_ENTITIES(0) + '...'}
+              secondary={
+                LL.CUSTOMIZATIONS() +
+                ', ' +
+                LL.SCHEDULER() +
+                ', ' +
+                LL.CUSTOM_ENTITIES(0) +
+                '...'
+              }
               secondaryTypographyProps={{
                 noWrap: true,
                 fontSize: 12,
@@ -123,7 +132,12 @@ const LayoutMenu: FC = () => {
                 disabled={!me.admin}
                 to={`/customizations`}
               />
-              <LayoutMenuItem icon={MoreTimeIcon} label={LL.SCHEDULER()} disabled={!me.admin} to={`/scheduler`} />
+              <LayoutMenuItem
+                icon={MoreTimeIcon}
+                label={LL.SCHEDULER()}
+                disabled={!me.admin}
+                to={`/scheduler`}
+              />
               <LayoutMenuItem
                 icon={PlaylistAddIcon}
                 label={LL.CUSTOM_ENTITIES(0)}
@@ -137,7 +151,12 @@ const LayoutMenu: FC = () => {
 
       <List style={{ marginTop: `auto` }}>
         <LayoutMenuItem icon={AssessmentIcon} label={LL.SYSTEM(0)} to="/system" />
-        <LayoutMenuItem icon={SettingsIcon} label={LL.SETTINGS(0)} disabled={!me.admin} to="/settings" />
+        <LayoutMenuItem
+          icon={SettingsIcon}
+          label={LL.SETTINGS(0)}
+          disabled={!me.admin}
+          to="/settings"
+        />
         <LayoutMenuItem icon={LiveHelpIcon} label={LL.HELP_OF('')} to={`/help`} />
       </List>
       <Divider />
@@ -239,7 +258,12 @@ const LayoutMenu: FC = () => {
             </TextField>
           </Box>
           <Box>
-            <Button variant="outlined" fullWidth color="primary" onClick={() => signOut(true)}>
+            <Button
+              variant="outlined"
+              fullWidth
+              color="primary"
+              onClick={() => signOut(true)}
+            >
               {LL.SIGN_OUT()}
             </Button>
           </Box>

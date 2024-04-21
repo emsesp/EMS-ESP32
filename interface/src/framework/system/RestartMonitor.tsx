@@ -36,7 +36,12 @@ const RestartMonitor: FC = () => {
 
   useEffect(() => () => timeoutId && clearTimeout(timeoutId), [timeoutId]);
 
-  return <FormLoader message={LL.APPLICATION_RESTARTING() + '...'} errorMessage={failed ? 'Timed out' : undefined} />;
+  return (
+    <FormLoader
+      message={LL.APPLICATION_RESTARTING() + '...'}
+      errorMessage={failed ? 'Timed out' : undefined}
+    />
+  );
 };
 
 export default RestartMonitor;

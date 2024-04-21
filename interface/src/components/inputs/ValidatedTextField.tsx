@@ -12,9 +12,14 @@ interface ValidatedFieldProps {
 
 export type ValidatedTextFieldProps = ValidatedFieldProps & TextFieldProps;
 
-const ValidatedTextField: FC<ValidatedTextFieldProps> = ({ fieldErrors, ...rest }) => {
+const ValidatedTextField: FC<ValidatedTextFieldProps> = ({
+  fieldErrors,
+  ...rest
+}) => {
   const errors = fieldErrors && fieldErrors[rest.name];
-  const renderErrors = () => errors && errors.map((e, i) => <FormHelperText key={i}>{e.message}</FormHelperText>);
+  const renderErrors = () =>
+    errors &&
+    errors.map((e, i) => <FormHelperText key={i}>{e.message}</FormHelperText>);
   return (
     <>
       <TextField error={!!errors} {...rest} />

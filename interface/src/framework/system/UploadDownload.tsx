@@ -8,7 +8,12 @@ import * as SystemApi from 'api/system';
 
 import * as EMSESP from 'project/api';
 import { useRequest } from 'alova';
-import { FormLoader, SectionContent, SingleUpload, useLayoutTitle } from 'components';
+import {
+  FormLoader,
+  SectionContent,
+  SingleUpload,
+  useLayoutTitle
+} from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { APIcall } from 'project/types';
 
@@ -19,23 +24,40 @@ const UploadDownload: FC = () => {
   const [restarting, setRestarting] = useState<boolean>();
   const [md5, setMd5] = useState<string>();
 
-  const { send: getSettings, onSuccess: onSuccessGetSettings } = useRequest(EMSESP.getSettings(), {
-    immediate: false
-  });
-  const { send: getCustomizations, onSuccess: onSuccessGetCustomizations } = useRequest(EMSESP.getCustomizations(), {
-    immediate: false
-  });
-  const { send: getEntities, onSuccess: onSuccessGetEntities } = useRequest(EMSESP.getEntities(), {
-    immediate: false
-  });
-  const { send: getSchedule, onSuccess: onSuccessGetSchedule } = useRequest(EMSESP.getSchedule(), {
-    immediate: false
-  });
-  const { send: getAPI, onSuccess: onGetAPI } = useRequest((data: APIcall) => EMSESP.API(data), {
-    immediate: false
-  });
+  const { send: getSettings, onSuccess: onSuccessGetSettings } = useRequest(
+    EMSESP.getSettings(),
+    {
+      immediate: false
+    }
+  );
+  const { send: getCustomizations, onSuccess: onSuccessGetCustomizations } =
+    useRequest(EMSESP.getCustomizations(), {
+      immediate: false
+    });
+  const { send: getEntities, onSuccess: onSuccessGetEntities } = useRequest(
+    EMSESP.getEntities(),
+    {
+      immediate: false
+    }
+  );
+  const { send: getSchedule, onSuccess: onSuccessGetSchedule } = useRequest(
+    EMSESP.getSchedule(),
+    {
+      immediate: false
+    }
+  );
+  const { send: getAPI, onSuccess: onGetAPI } = useRequest(
+    (data: APIcall) => EMSESP.API(data),
+    {
+      immediate: false
+    }
+  );
 
-  const { data: data, send: loadData, error } = useRequest(SystemApi.readESPSystemStatus, { force: true });
+  const {
+    data: data,
+    send: loadData,
+    error
+  } = useRequest(SystemApi.readESPSystemStatus, { force: true });
 
   const { data: latestVersion } = useRequest(SystemApi.getStableVersion, {
     immediate: true,
@@ -50,11 +72,17 @@ const UploadDownload: FC = () => {
   const STABLE_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/';
   const DEV_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/latest/';
 
-  const STABLE_RELNOTES_URL = 'https://github.com/emsesp/EMS-ESP32/blob/main/CHANGELOG.md';
-  const DEV_RELNOTES_URL = 'https://github.com/emsesp/EMS-ESP32/blob/dev/CHANGELOG_LATEST.md';
+  const STABLE_RELNOTES_URL =
+    'https://github.com/emsesp/EMS-ESP32/blob/main/CHANGELOG.md';
+  const DEV_RELNOTES_URL =
+    'https://github.com/emsesp/EMS-ESP32/blob/dev/CHANGELOG_LATEST.md';
 
   const getBinURL = (v: string) =>
-    'EMS-ESP-' + v.replaceAll('.', '_') + '-' + data.esp_platform.replaceAll('-', '_') + '.bin';
+    'EMS-ESP-' +
+    v.replaceAll('.', '_') +
+    '-' +
+    data.esp_platform.replaceAll('-', '_') +
+    '.bin';
 
   const {
     loading: isUploading,
@@ -115,8 +143,11 @@ const UploadDownload: FC = () => {
     saveFile(event.data, 'schedule.json');
   });
   onGetAPI((event) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    saveFile(event.data, event.sendArgs[0].device + '_' + event.sendArgs[0].entity + '.txt');
+    saveFile(
+      event.data,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      event.sendArgs[0].device + '_' + event.sendArgs[0].entity + '.txt'
+    );
   });
 
   const downloadSettings = async () => {
@@ -170,7 +201,8 @@ const UploadDownload: FC = () => {
           <b>{data.emsesp_version}</b>&nbsp;({data.esp_platform})
           {latestVersion && (
             <Box mt={2}>
-              {LL.THE_LATEST()}&nbsp;{LL.OFFICIAL()}&nbsp;{LL.RELEASE_IS()}&nbsp;<b>{latestVersion}</b>
+              {LL.THE_LATEST()}&nbsp;{LL.OFFICIAL()}&nbsp;{LL.RELEASE_IS()}
+              &nbsp;<b>{latestVersion}</b>
               &nbsp;(
               <Link target="_blank" href={STABLE_RELNOTES_URL} color="primary">
                 {LL.RELEASE_NOTES()}
@@ -178,7 +210,13 @@ const UploadDownload: FC = () => {
               )&nbsp;(
               <Link
                 target="_blank"
-                href={STABLE_URL + 'v' + latestVersion + '/' + getBinURL(latestVersion as string)}
+                href={
+                  STABLE_URL +
+                  'v' +
+                  latestVersion +
+                  '/' +
+                  getBinURL(latestVersion as string)
+                }
                 color="primary"
               >
                 {LL.DOWNLOAD(1)}
@@ -188,14 +226,19 @@ const UploadDownload: FC = () => {
           )}
           {latestDevVersion && (
             <Box mt={2}>
-              {LL.THE_LATEST()}&nbsp;{LL.DEVELOPMENT()}&nbsp;{LL.RELEASE_IS()}&nbsp;
+              {LL.THE_LATEST()}&nbsp;{LL.DEVELOPMENT()}&nbsp;{LL.RELEASE_IS()}
+              &nbsp;
               <b>{latestDevVersion}</b>
               &nbsp;(
               <Link target="_blank" href={DEV_RELNOTES_URL} color="primary">
                 {LL.RELEASE_NOTES()}
               </Link>
               )&nbsp;(
-              <Link target="_blank" href={DEV_URL + getBinURL(latestDevVersion as string)} color="primary">
+              <Link
+                target="_blank"
+                href={DEV_URL + getBinURL(latestDevVersion as string)}
+                color="primary"
+              >
                 {LL.DOWNLOAD(1)}
               </Link>
               )
@@ -219,7 +262,12 @@ const UploadDownload: FC = () => {
             <Typography variant="body2">{'MD5: ' + md5}</Typography>
           </Box>
         )}
-        <SingleUpload onDrop={startUpload} onCancel={cancelUpload} isUploading={isUploading} progress={progress} />
+        <SingleUpload
+          onDrop={startUpload}
+          onCancel={cancelUpload}
+          isUploading={isUploading}
+          progress={progress}
+        />
         {!isUploading && (
           <>
             <Typography sx={{ pt: 4, pb: 2 }} variant="h6" color="primary">
@@ -307,7 +355,9 @@ const UploadDownload: FC = () => {
     );
   };
 
-  return <SectionContent>{restarting ? <RestartMonitor /> : content()}</SectionContent>;
+  return (
+    <SectionContent>{restarting ? <RestartMonitor /> : content()}</SectionContent>
+  );
 };
 
 export default UploadDownload;

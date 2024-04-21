@@ -20,7 +20,11 @@ const RouterTabs: FC<RouterTabsProps> = ({ value, children }) => {
   };
 
   return (
-    <Tabs value={value} onChange={handleTabChange} variant={smallDown ? 'scrollable' : 'fullWidth'}>
+    <Tabs
+      value={value}
+      onChange={handleTabChange}
+      variant={smallDown ? 'scrollable' : 'fullWidth'}
+    >
       {children}
     </Tabs>
   );

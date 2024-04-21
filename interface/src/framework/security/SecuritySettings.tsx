@@ -8,7 +8,14 @@ import { Button } from '@mui/material';
 import * as SecurityApi from 'api/security';
 
 import type { ValidateFieldsError } from 'async-validator';
-import { BlockNavigation, ButtonRow, FormLoader, MessageBox, SectionContent, ValidatedPasswordField } from 'components';
+import {
+  BlockNavigation,
+  ButtonRow,
+  FormLoader,
+  MessageBox,
+  SectionContent,
+  ValidatedPasswordField
+} from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { SecuritySettingsType } from 'types';
@@ -37,7 +44,12 @@ const SecuritySettings: FC = () => {
 
   const authenticatedContext = useContext(AuthenticatedContext);
 
-  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, updateDataValue);
+  const updateFormValue = updateValueDirty(
+    origData,
+    dirtyFlags,
+    setDirtyFlags,
+    updateDataValue
+  );
 
   const content = () => {
     if (!data) {

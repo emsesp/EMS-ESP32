@@ -1,7 +1,5 @@
 import type { Translation } from '../i18n-types';
 
-/* prettier-ignore */
-
 const de: Translation = {
   LANGUAGE: 'Sprache',
   RETRY: 'Neuer Versuch',
@@ -208,7 +206,8 @@ const de: Translation = {
   USER_WARNING: 'Sie müssen mindestens einen Admin-Nutzer konfigurieren',
   ADD: 'Hinzufügen',
   ACCESS_TOKEN_FOR: 'Zugangs-Token für',
-  ACCESS_TOKEN_TEXT: 'Dieses Token ist für REST API Aufrufe bestimmt, die eine Authentifizierung benötigen. Es kann entweder als Bearer Token im `Authorization-Header` oder in der Access_Token URL verwendet werden.',
+  ACCESS_TOKEN_TEXT:
+    'Dieses Token ist für REST API Aufrufe bestimmt, die eine Authentifizierung benötigen. Es kann entweder als Bearer Token im `Authorization-Header` oder in der Access_Token URL verwendet werden.',
   GENERATING_TOKEN: 'Erzeuge Token',
   USER: 'Nutzer',
   MODIFY: 'Ändern',

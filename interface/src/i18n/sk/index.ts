@@ -1,7 +1,5 @@
 import type { Translation } from '../i18n-types';
 
-/* prettier-ignore */
-
 const sk: Translation = {
   LANGUAGE: 'Jazyk',
   RETRY: 'Opakovať',
@@ -209,7 +207,8 @@ const sk: Translation = {
   USER_WARNING: 'Musíte mať nakonfigurovaného aspoň jedného používateľa administrátora',
   ADD: 'Pridať',
   ACCESS_TOKEN_FOR: 'Prístupový token pre',
-  ACCESS_TOKEN_TEXT: 'Nižšie uvedený token sa používa pri volaniach REST API, ktoré vyžadujú autorizáciu. Môže byť odovzdaný buď ako token Bearer v hlavičke Authorization (Autorizácia), alebo v parametri dotazu URL access_token.',
+  ACCESS_TOKEN_TEXT:
+    'Nižšie uvedený token sa používa pri volaniach REST API, ktoré vyžadujú autorizáciu. Môže byť odovzdaný buď ako token Bearer v hlavičke Authorization (Autorizácia), alebo v parametri dotazu URL access_token.',
   GENERATING_TOKEN: 'Generovanie tokenu',
   USER: 'Užívateľ',
   MODIFY: 'Upraviť',
@@ -324,7 +323,7 @@ const sk: Translation = {
   ACTIVELOW: 'Aktívny Nízky',
   UNCHANGED: 'Nezmenené',
   ALWAYS: 'Vždy',
-  ACTIVITY: 'Aktivita', 
+  ACTIVITY: 'Aktivita',
   CONFIGURE: 'Konfiguracia {0}',
   SYSTEM_MEMORY: 'System Memory', // TODO translate
   APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate

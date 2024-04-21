@@ -1,7 +1,5 @@
 import type { Translation } from '../i18n-types';
 
-/* prettier-ignore */
-
 const no: Translation = {
   LANGUAGE: 'Språk',
   RETRY: 'Forsøk igjen',
@@ -208,7 +206,8 @@ const no: Translation = {
   USER_WARNING: 'Du må ha minst en admin bruker konfigurert',
   ADD: 'Legg til',
   ACCESS_TOKEN_FOR: 'Aksess Token for',
-  ACCESS_TOKEN_TEXT: 'Token nedenfor benyttes med REST API-kall som krever autorisering. Den kan sendes med enten som en Bearer token i Authorization-headern eller i access_token URL query-parameter.',
+  ACCESS_TOKEN_TEXT:
+    'Token nedenfor benyttes med REST API-kall som krever autorisering. Den kan sendes med enten som en Bearer token i Authorization-headern eller i access_token URL query-parameter.',
   GENERATING_TOKEN: 'Generer token',
   USER: 'Bruker',
   MODIFY: 'Endre',

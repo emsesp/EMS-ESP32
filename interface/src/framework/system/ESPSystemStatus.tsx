@@ -8,7 +8,16 @@ import MemoryIcon from '@mui/icons-material/Memory';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SdCardAlertIcon from '@mui/icons-material/SdCardAlert';
 import SdStorageIcon from '@mui/icons-material/SdStorage';
-import { Avatar, Box, Button, Divider, List, ListItem, ListItemAvatar, ListItemText } from '@mui/material';
+import {
+  Avatar,
+  Box,
+  Button,
+  Divider,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText
+} from '@mui/material';
 
 import * as SystemApi from 'api/system';
 
@@ -25,7 +34,11 @@ const ESPSystemStatus: FC = () => {
 
   useLayoutTitle(LL.STATUS_OF('ESP32'));
 
-  const { data: data, send: loadData, error } = useRequest(SystemApi.readESPSystemStatus, { force: true });
+  const {
+    data: data,
+    send: loadData,
+    error
+  } = useRequest(SystemApi.readESPSystemStatus, { force: true });
 
   const content = () => {
     if (!data) {
@@ -41,7 +54,10 @@ const ESPSystemStatus: FC = () => {
                 <DevicesIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="SDK" secondary={data.arduino_version + ' / ESP-IDF ' + data.sdk_version} />
+            <ListItemText
+              primary="SDK"
+              secondary={data.arduino_version + ' / ESP-IDF ' + data.sdk_version}
+            />
           </ListItem>
           <Divider variant="inset" component="li" />
           <ListItem>
@@ -75,7 +91,12 @@ const ESPSystemStatus: FC = () => {
             </ListItemAvatar>
             <ListItemText
               primary={LL.HEAP()}
-              secondary={formatNumber(data.free_heap) + ' KB / ' + formatNumber(data.max_alloc_heap) + ' KB '}
+              secondary={
+                formatNumber(data.free_heap) +
+                ' KB / ' +
+                formatNumber(data.max_alloc_heap) +
+                ' KB '
+              }
             />
           </ListItem>
           {data.psram_size !== undefined && data.free_psram !== undefined && (
@@ -89,7 +110,12 @@ const ESPSystemStatus: FC = () => {
                 </ListItemAvatar>
                 <ListItemText
                   primary={LL.PSRAM()}
-                  secondary={formatNumber(data.psram_size) + ' KB / ' + formatNumber(data.free_psram) + ' KB'}
+                  secondary={
+                    formatNumber(data.psram_size) +
+                    ' KB / ' +
+                    formatNumber(data.free_psram) +
+                    ' KB'
+                  }
                 />
               </ListItem>
             </>
@@ -104,7 +130,10 @@ const ESPSystemStatus: FC = () => {
             <ListItemText
               primary={LL.FLASH()}
               secondary={
-                formatNumber(data.flash_chip_size) + ' KB / ' + (data.flash_chip_speed / 1000000).toFixed(0) + ' MHz'
+                formatNumber(data.flash_chip_size) +
+                ' KB / ' +
+                (data.flash_chip_speed / 1000000).toFixed(0) +
+                ' MHz'
               }
             />
           </ListItem>
@@ -118,7 +147,12 @@ const ESPSystemStatus: FC = () => {
             <ListItemText
               primary={LL.APPSIZE()}
               secondary={
-                data.partition + ': ' + formatNumber(data.app_used) + ' KB / ' + formatNumber(data.app_free) + ' KB'
+                data.partition +
+                ': ' +
+                formatNumber(data.app_used) +
+                ' KB / ' +
+                formatNumber(data.app_free) +
+                ' KB'
               }
             />
           </ListItem>
@@ -131,7 +165,12 @@ const ESPSystemStatus: FC = () => {
             </ListItemAvatar>
             <ListItemText
               primary={LL.FILESYSTEM()}
-              secondary={formatNumber(data.fs_used) + ' KB / ' + formatNumber(data.fs_free) + ' KB'}
+              secondary={
+                formatNumber(data.fs_used) +
+                ' KB / ' +
+                formatNumber(data.fs_free) +
+                ' KB'
+              }
             />
           </ListItem>
           <Divider variant="inset" component="li" />
@@ -139,7 +178,12 @@ const ESPSystemStatus: FC = () => {
         <Box display="flex" flexWrap="wrap">
           <Box flexGrow={1} sx={{ '& button': { mt: 2 } }}>
             <ButtonRow>
-              <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
+              <Button
+                startIcon={<RefreshIcon />}
+                variant="outlined"
+                color="secondary"
+                onClick={loadData}
+              >
                 {LL.REFRESH()}
               </Button>
             </ButtonRow>

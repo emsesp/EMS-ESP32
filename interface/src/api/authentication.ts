@@ -9,8 +9,10 @@ import { ACCESS_TOKEN, alovaInstance } from './endpoints';
 export const SIGN_IN_PATHNAME = 'loginPathname';
 export const SIGN_IN_SEARCH = 'loginSearch';
 
-export const verifyAuthorization = () => alovaInstance.Get('/rest/verifyAuthorization');
-export const signIn = (request: SignInRequest) => alovaInstance.Post<SignInResponse>('/rest/signIn', request);
+export const verifyAuthorization = () =>
+  alovaInstance.Get('/rest/verifyAuthorization');
+export const signIn = (request: SignInRequest) =>
+  alovaInstance.Post<SignInResponse>('/rest/signIn', request);
 
 export function getStorage() {
   return localStorage || sessionStorage;

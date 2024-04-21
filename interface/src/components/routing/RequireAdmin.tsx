@@ -7,7 +7,11 @@ import type { RequiredChildrenProps } from 'utils';
 
 const RequireAdmin: FC<RequiredChildrenProps> = ({ children }) => {
   const authenticatedContext = useContext(AuthenticatedContext);
-  return authenticatedContext.me.admin ? <>{children}</> : <Navigate replace to="/" />;
+  return authenticatedContext.me.admin ? (
+    <>{children}</>
+  ) : (
+    <Navigate replace to="/" />
+  );
 };
 
 export default RequireAdmin;

@@ -10,7 +10,10 @@ import type { ValidatedTextFieldProps } from './ValidatedTextField';
 
 type ValidatedPasswordFieldProps = Omit<ValidatedTextFieldProps, 'type'>;
 
-const ValidatedPasswordField: FC<ValidatedPasswordFieldProps> = ({ InputProps, ...props }) => {
+const ValidatedPasswordField: FC<ValidatedPasswordFieldProps> = ({
+  InputProps,
+  ...props
+}) => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
   return (

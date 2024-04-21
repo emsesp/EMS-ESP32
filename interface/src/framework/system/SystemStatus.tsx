@@ -49,7 +49,11 @@ const SystemStatus: FC = () => {
 
   const [confirmScan, setConfirmScan] = useState<boolean>(false);
 
-  const { data: data, send: loadData, error } = useRequest(SystemApi.readSystemStatus, { force: true });
+  const {
+    data: data,
+    send: loadData,
+    error
+  } = useRequest(SystemApi.readSystemStatus, { force: true });
 
   const { send: scanDevices } = useRequest(EMSESP.scanDevices, {
     immediate: false
@@ -134,7 +138,8 @@ const SystemStatus: FC = () => {
     }
   };
 
-  const activeHighlight = (value: boolean) => (value ? theme.palette.success.main : theme.palette.info.main);
+  const activeHighlight = (value: boolean) =>
+    value ? theme.palette.success.main : theme.palette.info.main;
 
   const scan = async () => {
     await scanDevices()
@@ -148,14 +153,28 @@ const SystemStatus: FC = () => {
   };
 
   const renderScanDialog = () => (
-    <Dialog sx={dialogStyle} open={confirmScan} onClose={() => setConfirmScan(false)}>
+    <Dialog
+      sx={dialogStyle}
+      open={confirmScan}
+      onClose={() => setConfirmScan(false)}
+    >
       <DialogTitle>{LL.SCAN_DEVICES()}</DialogTitle>
       <DialogContent dividers>{LL.EMS_SCAN()}</DialogContent>
       <DialogActions>
-        <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => setConfirmScan(false)} color="secondary">
+        <Button
+          startIcon={<CancelIcon />}
+          variant="outlined"
+          onClick={() => setConfirmScan(false)}
+          color="secondary"
+        >
           {LL.CANCEL()}
         </Button>
-        <Button startIcon={<PermScanWifiIcon />} variant="outlined" onClick={scan} color="primary">
+        <Button
+          startIcon={<PermScanWifiIcon />}
+          variant="outlined"
+          onClick={scan}
+          color="primary"
+        >
           {LL.SCAN()}
         </Button>
       </DialogActions>
@@ -282,7 +301,12 @@ const SystemStatus: FC = () => {
         {renderScanDialog()}
 
         <Box mt={2} display="flex" flexWrap="wrap">
-          <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
+          <Button
+            startIcon={<RefreshIcon />}
+            variant="outlined"
+            color="secondary"
+            onClick={loadData}
+          >
             {LL.REFRESH()}
           </Button>
         </Box>

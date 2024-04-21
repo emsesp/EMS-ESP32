@@ -30,17 +30,20 @@ export const writeDeviceValue = (data: { id: number; c: string; v: unknown }) =>
 
 // Application Settings
 export const readSettings = () => alovaInstance.Get<Settings>('/rest/settings');
-export const writeSettings = (data: Settings) => alovaInstance.Post('/rest/settings', data);
+export const writeSettings = (data: Settings) =>
+  alovaInstance.Post('/rest/settings', data);
 export const getBoardProfile = (boardProfile: string) =>
   alovaInstance.Get('/rest/boardProfile', {
     params: { boardProfile }
   });
 
 // Sensors
-export const readSensorData = () => alovaInstance.Get<SensorData>('/rest/sensorData');
+export const readSensorData = () =>
+  alovaInstance.Get<SensorData>('/rest/sensorData');
 export const writeTemperatureSensor = (ts: WriteTemperatureSensor) =>
   alovaInstance.Post('/rest/writeTemperatureSensor', ts);
-export const writeAnalogSensor = (as: WriteAnalogSensor) => alovaInstance.Post('/rest/writeAnalogSensor', as);
+export const writeAnalogSensor = (as: WriteAnalogSensor) =>
+  alovaInstance.Post('/rest/writeAnalogSensor', as);
 
 // Activity
 export const readActivity = () => alovaInstance.Get<Activity>('/rest/activity');
@@ -73,9 +76,12 @@ export const readDeviceEntities = (id: number) =>
     }
   });
 export const readDevices = () => alovaInstance.Get<Devices>('/rest/devices');
-export const resetCustomizations = () => alovaInstance.Post('/rest/resetCustomizations');
-export const writeCustomizationEntities = (data: { id: number; entity_ids: string[] }) =>
-  alovaInstance.Post('/rest/customizationEntities', data);
+export const resetCustomizations = () =>
+  alovaInstance.Post('/rest/resetCustomizations');
+export const writeCustomizationEntities = (data: {
+  id: number;
+  entity_ids: string[];
+}) => alovaInstance.Post('/rest/customizationEntities', data);
 
 // SettingsScheduler
 export const readSchedule = () =>
@@ -95,7 +101,8 @@ export const readSchedule = () =>
       }));
     }
   });
-export const writeSchedule = (data: Schedule) => alovaInstance.Post('/rest/schedule', data);
+export const writeSchedule = (data: Schedule) =>
+  alovaInstance.Post('/rest/schedule', data);
 
 // SettingsEntities
 export const readCustomEntities = () =>

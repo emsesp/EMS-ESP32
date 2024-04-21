@@ -44,7 +44,12 @@ const NTPSettings: FC = () => {
 
   const { LL } = useI18nContext();
 
-  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, updateDataValue);
+  const updateFormValue = updateValueDirty(
+    origData,
+    dirtyFlags,
+    setDirtyFlags,
+    updateDataValue
+  );
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
@@ -76,7 +81,13 @@ const NTPSettings: FC = () => {
     return (
       <>
         <BlockFormControlLabel
-          control={<Checkbox name="enabled" checked={data.enabled} onChange={updateFormValue} />}
+          control={
+            <Checkbox
+              name="enabled"
+              checked={data.enabled}
+              onChange={updateFormValue}
+            />
+          }
           label={LL.ENABLE_NTP()}
         />
         <ValidatedTextField

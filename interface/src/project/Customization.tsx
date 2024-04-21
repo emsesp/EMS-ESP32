@@ -27,11 +27,25 @@ import {
 
 import * as SystemApi from 'api/system';
 
-import { Body, Cell, Header, HeaderCell, HeaderRow, Row, Table } from '@table-library/react-table-library/table';
+import {
+  Body,
+  Cell,
+  Header,
+  HeaderCell,
+  HeaderRow,
+  Row,
+  Table
+} from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
 import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova';
-import { BlockNavigation, ButtonRow, MessageBox, SectionContent, useLayoutTitle } from 'components';
+import {
+  BlockNavigation,
+  ButtonRow,
+  MessageBox,
+  SectionContent,
+  useLayoutTitle
+} from 'components';
 import RestartMonitor from 'framework/system/RestartMonitor';
 import { useI18nContext } from 'i18n/i18n-react';
 
@@ -63,7 +77,9 @@ const Customization: FC = () => {
   // fetch devices first
   const { data: devices } = useRequest(EMSESP.readDevices);
 
-  const [selectedDevice, setSelectedDevice] = useState<number>(Number(useLocation().state) || -1);
+  const [selectedDevice, setSelectedDevice] = useState<number>(
+    Number(useLocation().state) || -1
+  );
   const [selectedDeviceName, setSelectedDeviceName] = useState<string>('');
 
   const { send: resetCustomizations } = useRequest(EMSESP.resetCustomizations(), {
@@ -71,7 +87,8 @@ const Customization: FC = () => {
   });
 
   const { send: writeCustomizationEntities } = useRequest(
-    (data: { id: number; entity_ids: string[] }) => EMSESP.writeCustomizationEntities(data),
+    (data: { id: number; entity_ids: string[] }) =>
+      EMSESP.writeCustomizationEntities(data),
     {
       immediate: false
     }
@@ -86,7 +103,15 @@ const Customization: FC = () => {
   );
 
   const setOriginalSettings = (data: DeviceEntity[]) => {
-    setDeviceEntities(data.map((de) => ({ ...de, o_m: de.m, o_cn: de.cn, o_mi: de.mi, o_ma: de.ma })));
+    setDeviceEntities(
+      data.map((de) => ({
+        ...de,
+        o_m: de.m,
+        o_cn: de.cn,
+        o_mi: de.mi,
+        o_ma: de.ma
+      }))
+    );
   };
 
   onSuccess((event) => {
@@ -166,7 +191,12 @@ const Customization: FC = () => {
   });
 
   function hasEntityChanged(de: DeviceEntity) {
-    return (de?.cn || '') !== (de?.o_cn || '') || de.m !== de.o_m || de.ma !== de.o_ma || de.mi !== de.o_mi;
+    return (
+      (de?.cn || '') !== (de?.o_cn || '') ||
+      de.m !== de.o_m ||
+      de.ma !== de.o_ma ||
+      de.mi !== de.o_mi
+    );
   }
 
   useEffect(() => {
@@ -221,8 +251,11 @@ const Customization: FC = () => {
   }
 
   const formatName = (de: DeviceEntity, withShortname: boolean) =>
-    (de.n && de.n[0] === '!' ? LL.COMMAND(1) + ': ' + de.n.slice(1) : de.cn && de.cn !== '' ? de.cn : de.n) +
-    (withShortname ? ' ' + de.id : '');
+    (de.n && de.n[0] === '!'
+      ? LL.COMMAND(1) + ': ' + de.n.slice(1)
+      : de.cn && de.cn !== ''
+        ? de.cn
+        : de.n) + (withShortname ? ' ' + de.id : '');
 
   const getMaskNumber = (newMask: string[]) => {
     let new_mask = 0;
@@ -253,7 +286,8 @@ const Customization: FC = () => {
   };
 
   const filter_entity = (de: DeviceEntity) =>
-    (de.m & selectedFilters || !selectedFilters) && formatName(de, true).includes(search.toLocaleLowerCase());
+    (de.m & selectedFilters || !selectedFilters) &&
+    formatName(de, true).includes(search.toLocaleLowerCase());
 
   const maskDisabled = (set: boolean) => {
     setDeviceEntities(
@@ -262,8 +296,14 @@ const Customization: FC = () => {
           return {
             ...de,
             m: set
-              ? de.m | (DeviceEntityMask.DV_API_MQTT_EXCLUDE | DeviceEntityMask.DV_WEB_EXCLUDE)
-              : de.m & ~(DeviceEntityMask.DV_API_MQTT_EXCLUDE | DeviceEntityMask.DV_WEB_EXCLUDE)
+              ? de.m |
+                (DeviceEntityMask.DV_API_MQTT_EXCLUDE |
+                  DeviceEntityMask.DV_WEB_EXCLUDE)
+              : de.m &
+                ~(
+                  DeviceEntityMask.DV_API_MQTT_EXCLUDE |
+                  DeviceEntityMask.DV_WEB_EXCLUDE
+                )
           };
         } else {
           return de;
@@ -288,7 +328,11 @@ const Customization: FC = () => {
   };
 
   const updateDeviceEntity = (updatedItem: DeviceEntity) => {
-    setDeviceEntities(deviceEntities?.map((de) => (de.id === updatedItem.id ? { ...de, ...updatedItem } : de)));
+    setDeviceEntities(
+      deviceEntities?.map((de) =>
+        de.id === updatedItem.id ? { ...de, ...updatedItem } : de
+      )
+    );
   };
 
   const onDialogSave = (updatedItem: DeviceEntity) => {
@@ -330,7 +374,10 @@ const Customization: FC = () => {
         return;
       }
 
-      await writeCustomizationEntities({ id: selectedDevice, entity_ids: masked_entities }).catch((error: Error) => {
+      await writeCustomizationEntities({
+        id: selectedDevice,
+        entity_ids: masked_entities
+      }).catch((error: Error) => {
         if (error.message === 'Reboot required') {
           setRestartNeeded(true);
         } else {
@@ -376,14 +423,26 @@ const Customization: FC = () => {
       <>
         <Box color="warning.main">
           <Typography variant="body2" mt={1}>
-            <OptionIcon type="favorite" isSet={true} />={LL.CUSTOMIZATIONS_HELP_2()}&nbsp;&nbsp;
-            <OptionIcon type="readonly" isSet={true} />={LL.CUSTOMIZATIONS_HELP_3()}&nbsp;&nbsp;
-            <OptionIcon type="api_mqtt_exclude" isSet={true} />={LL.CUSTOMIZATIONS_HELP_4()}&nbsp;&nbsp;
-            <OptionIcon type="web_exclude" isSet={true} />={LL.CUSTOMIZATIONS_HELP_5()}&nbsp;&nbsp;
+            <OptionIcon type="favorite" isSet={true} />={LL.CUSTOMIZATIONS_HELP_2()}
+            &nbsp;&nbsp;
+            <OptionIcon type="readonly" isSet={true} />={LL.CUSTOMIZATIONS_HELP_3()}
+            &nbsp;&nbsp;
+            <OptionIcon type="api_mqtt_exclude" isSet={true} />=
+            {LL.CUSTOMIZATIONS_HELP_4()}&nbsp;&nbsp;
+            <OptionIcon type="web_exclude" isSet={true} />=
+            {LL.CUSTOMIZATIONS_HELP_5()}&nbsp;&nbsp;
             <OptionIcon type="deleted" isSet={true} />={LL.CUSTOMIZATIONS_HELP_6()}
           </Typography>
         </Box>
-        <Grid container mb={1} mt={0} spacing={1} direction="row" justifyContent="flex-start" alignItems="center">
+        <Grid
+          container
+          mb={1}
+          mt={0}
+          spacing={1}
+          direction="row"
+          justifyContent="flex-start"
+          alignItems="center"
+        >
           <Grid item xs={2}>
             <TextField
               size="small"
@@ -455,11 +514,16 @@ const Customization: FC = () => {
           </Grid>
           <Grid item>
             <Typography variant="subtitle2" color="primary">
-              {LL.SHOWING()}&nbsp;{shown_data.length}/{deviceEntities.length}&nbsp;{LL.ENTITIES(deviceEntities.length)}
+              {LL.SHOWING()}&nbsp;{shown_data.length}/{deviceEntities.length}
+              &nbsp;{LL.ENTITIES(deviceEntities.length)}
             </Typography>
           </Grid>
         </Grid>
-        <Table data={{ nodes: shown_data }} theme={entities_theme} layout={{ custom: true }}>
+        <Table
+          data={{ nodes: shown_data }}
+          theme={entities_theme}
+          layout={{ custom: true }}
+        >
           {(tableList: DeviceEntity[]) => (
             <>
               <Header>
@@ -479,13 +543,20 @@ const Customization: FC = () => {
                     </Cell>
                     <Cell>
                       {formatName(de, false)}&nbsp;(
-                      <Link target="_blank" href={APIURL + selectedDeviceName + '/' + de.id}>
+                      <Link
+                        target="_blank"
+                        href={APIURL + selectedDeviceName + '/' + de.id}
+                      >
                         {de.id}
                       </Link>
                       )
                     </Cell>
-                    <Cell>{!(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.mi)}</Cell>
-                    <Cell>{!(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.ma)}</Cell>
+                    <Cell>
+                      {!(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.mi)}
+                    </Cell>
+                    <Cell>
+                      {!(de.m & DeviceEntityMask.DV_READONLY) && formatValue(de.ma)}
+                    </Cell>
                     <Cell>{formatValue(de.v)}</Cell>
                   </Row>
                 ))}
@@ -498,14 +569,28 @@ const Customization: FC = () => {
   };
 
   const renderResetDialog = () => (
-    <Dialog sx={dialogStyle} open={confirmReset} onClose={() => setConfirmReset(false)}>
+    <Dialog
+      sx={dialogStyle}
+      open={confirmReset}
+      onClose={() => setConfirmReset(false)}
+    >
       <DialogTitle>{LL.RESET(1)}</DialogTitle>
       <DialogContent dividers>{LL.CUSTOMIZATIONS_RESET()}</DialogContent>
       <DialogActions>
-        <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => setConfirmReset(false)} color="secondary">
+        <Button
+          startIcon={<CancelIcon />}
+          variant="outlined"
+          onClick={() => setConfirmReset(false)}
+          color="secondary"
+        >
           {LL.CANCEL()}
         </Button>
-        <Button startIcon={<SettingsBackupRestoreIcon />} variant="outlined" onClick={resetCustomization} color="error">
+        <Button
+          startIcon={<SettingsBackupRestoreIcon />}
+          variant="outlined"
+          onClick={resetCustomization}
+          color="error"
+        >
           {LL.RESET(0)}
         </Button>
       </DialogActions>
@@ -518,7 +603,12 @@ const Customization: FC = () => {
       {deviceEntities && renderDeviceData()}
       {restartNeeded && (
         <MessageBox my={2} level="warning" message={LL.RESTART_TEXT(0)}>
-          <Button startIcon={<PowerSettingsNewIcon />} variant="contained" color="error" onClick={restart}>
+          <Button
+            startIcon={<PowerSettingsNewIcon />}
+            variant="contained"
+            color="error"
+            onClick={restart}
+          >
             {LL.RESTART()}
           </Button>
         </MessageBox>

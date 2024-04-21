@@ -1,7 +1,5 @@
 import type { Translation } from '../i18n-types';
 
-/* prettier-ignore */
-
 const tr: Translation = {
   LANGUAGE: 'Dil',
   RETRY: 'Tekrar Dene',
@@ -208,7 +206,8 @@ const tr: Translation = {
   USER_WARNING: 'En az bir yönetici kullanıcısı ayarlamanız gerekmektedir',
   ADD: 'Ekle',
   ACCESS_TOKEN_FOR: 'Erişim Jetonunun sahibi',
-  ACCESS_TOKEN_TEXT: 'Aşağıdaki Jeton yetki gerektiren REST API çağrıları ile kullanılmaktadır. Taşıyıcı Jeton olarak yetkilendirme başlığında yada erişim jetonu olarak URL sorgu parametresinde kullanılabilir.',
+  ACCESS_TOKEN_TEXT:
+    'Aşağıdaki Jeton yetki gerektiren REST API çağrıları ile kullanılmaktadır. Taşıyıcı Jeton olarak yetkilendirme başlığında yada erişim jetonu olarak URL sorgu parametresinde kullanılabilir.',
   GENERATING_TOKEN: 'Jeton oluşturuluyor',
   USER: 'Kullanıcı',
   MODIFY: 'Düzenle',

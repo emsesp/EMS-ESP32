@@ -4,7 +4,15 @@ import type { FC } from 'react';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { Button } from '@mui/material';
 
-import { Body, Cell, Header, HeaderCell, HeaderRow, Row, Table } from '@table-library/react-table-library/table';
+import {
+  Body,
+  Cell,
+  Header,
+  HeaderCell,
+  HeaderRow,
+  Row,
+  Table
+} from '@table-library/react-table-library/table';
 import { useTheme as tableTheme } from '@table-library/react-table-library/theme';
 import { useRequest } from 'alova';
 import { ButtonRow, FormLoader, SectionContent, useLayoutTitle } from 'components';
@@ -93,7 +101,11 @@ const SystemActivity: FC = () => {
 
     return (
       <>
-        <Table data={{ nodes: data.stats }} theme={stats_theme} layout={{ custom: true }}>
+        <Table
+          data={{ nodes: data.stats }}
+          theme={stats_theme}
+          layout={{ custom: true }}
+        >
           {(tableList: Stat[]) => (
             <>
               <Header>
@@ -118,7 +130,12 @@ const SystemActivity: FC = () => {
           )}
         </Table>
         <ButtonRow mt={1}>
-          <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
+          <Button
+            startIcon={<RefreshIcon />}
+            variant="outlined"
+            color="secondary"
+            onClick={loadData}
+          >
             {LL.REFRESH()}
           </Button>
         </ButtonRow>

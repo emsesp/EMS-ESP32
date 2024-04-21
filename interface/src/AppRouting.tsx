@@ -44,8 +44,14 @@ const AppRouting: FC = () => {
     <Authentication>
       <RemoveTrailingSlashes />
       <Routes>
-        <Route path="/unauthorized" element={<RootRedirect message={LL.PLEASE_SIGNIN()} signOut />} />
-        <Route path="/fileUpdated" element={<RootRedirect message={LL.UPLOAD_SUCCESSFUL()} />} />
+        <Route
+          path="/unauthorized"
+          element={<RootRedirect message={LL.PLEASE_SIGNIN()} signOut />}
+        />
+        <Route
+          path="/fileUpdated"
+          element={<RootRedirect message={LL.UPLOAD_SUCCESSFUL()} />}
+        />
         <Route
           path="/"
           element={

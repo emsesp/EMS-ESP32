@@ -1,7 +1,5 @@
 import type { Translation } from '../i18n-types';
 
-/* prettier-ignore */
-
 const en: Translation = {
   LANGUAGE: 'Language',
   RETRY: 'Retry',
@@ -208,7 +206,8 @@ const en: Translation = {
   USER_WARNING: 'You must have at least one admin user configured',
   ADD: 'Add',
   ACCESS_TOKEN_FOR: 'Access Token for',
-  ACCESS_TOKEN_TEXT: 'The token below is used with REST API calls that require authorization. It can be passed either as a Bearer token in the Authorization header or in the access_token URL query parameter.',
+  ACCESS_TOKEN_TEXT:
+    'The token below is used with REST API calls that require authorization. It can be passed either as a Bearer token in the Authorization header or in the access_token URL query parameter.',
   GENERATING_TOKEN: 'Generating token',
   USER: 'User',
   MODIFY: 'Modify',
@@ -325,10 +324,10 @@ const en: Translation = {
   ALWAYS: 'Always',
   ACTIVITY: 'Activity',
   CONFIGURE: 'Configure {0}',
-  SYSTEM_MEMORY: 'System Memory', 
-  APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', 
-  SECURITY_1: 'Add or remove users', 
-  UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', 
+  SYSTEM_MEMORY: 'System Memory',
+  APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings',
+  SECURITY_1: 'Add or remove users',
+  UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware',
   MODULE: 'Module' // TODO translate
 };
 

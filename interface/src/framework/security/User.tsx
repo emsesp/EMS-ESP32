@@ -4,12 +4,23 @@ import type { FC } from 'react';
 import CancelIcon from '@mui/icons-material/Cancel';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import SaveIcon from '@mui/icons-material/Save';
-import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import {
+  Button,
+  Checkbox,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle
+} from '@mui/material';
 
 import { dialogStyle } from 'CustomTheme';
 import type Schema from 'async-validator';
 import type { ValidateFieldsError } from 'async-validator';
-import { BlockFormControlLabel, ValidatedPasswordField, ValidatedTextField } from 'components';
+import {
+  BlockFormControlLabel,
+  ValidatedPasswordField,
+  ValidatedTextField
+} from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { UserType } from 'types';
 import { updateValue } from 'utils';
@@ -26,7 +37,14 @@ interface UserFormProps {
   onCancelEditing: () => void;
 }
 
-const User: FC<UserFormProps> = ({ creating, validator, user, setUser, onDoneEditing, onCancelEditing }) => {
+const User: FC<UserFormProps> = ({
+  creating,
+  validator,
+  user,
+  setUser,
+  onDoneEditing,
+  onCancelEditing
+}) => {
   const { LL } = useI18nContext();
 
   const updateFormValue = updateValue(setUser);
@@ -52,7 +70,13 @@ const User: FC<UserFormProps> = ({ creating, validator, user, setUser, onDoneEdi
   };
 
   return (
-    <Dialog sx={dialogStyle} onClose={onCancelEditing} open={!!user} fullWidth maxWidth="sm">
+    <Dialog
+      sx={dialogStyle}
+      onClose={onCancelEditing}
+      open={!!user}
+      fullWidth
+      maxWidth="sm"
+    >
       {user && (
         <>
           <DialogTitle id="user-form-dialog-title">
@@ -81,12 +105,23 @@ const User: FC<UserFormProps> = ({ creating, validator, user, setUser, onDoneEdi
               margin="normal"
             />
             <BlockFormControlLabel
-              control={<Checkbox name="admin" checked={user.admin} onChange={updateFormValue} />}
+              control={
+                <Checkbox
+                  name="admin"
+                  checked={user.admin}
+                  onChange={updateFormValue}
+                />
+              }
               label={LL.IS_ADMIN(1)}
             />
           </DialogContent>
           <DialogActions>
-            <Button startIcon={<CancelIcon />} variant="outlined" onClick={onCancelEditing} color="secondary">
+            <Button
+              startIcon={<CancelIcon />}
+              variant="outlined"
+              onClick={onCancelEditing}
+              color="secondary"
+            >
               {LL.CANCEL()}
             </Button>
             <Button

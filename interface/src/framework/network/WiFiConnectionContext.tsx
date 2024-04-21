@@ -9,4 +9,6 @@ export interface WiFiConnectionContextValue {
 }
 
 const WiFiConnectionContextDefaultValue = {} as WiFiConnectionContextValue;
-export const WiFiConnectionContext = createContext(WiFiConnectionContextDefaultValue);
+export const WiFiConnectionContext = createContext(
+  WiFiConnectionContextDefaultValue
+);

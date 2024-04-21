@@ -24,7 +24,11 @@ const System: FC = () => {
       <RouterTabs value={routerTab}>
         <Tab value="status" label={LL.STATUS_OF('')} />
         <Tab value="activity" label={LL.ACTIVITY()} />
-        <Tab disabled={!me.admin} value="log" label={me.admin ? LL.LOG_OF('') : ''} />
+        <Tab
+          disabled={!me.admin}
+          value="log"
+          label={me.admin ? LL.LOG_OF('') : ''}
+        />
       </RouterTabs>
       <Routes>
         <Route path="status" element={<SystemStatus />} />

@@ -12,14 +12,23 @@ interface FormLoaderProps {
   onRetry?: () => void;
 }
 
-const FormLoader: FC<FormLoaderProps> = ({ errorMessage, onRetry, message = 'Loading…' }) => {
+const FormLoader: FC<FormLoaderProps> = ({
+  errorMessage,
+  onRetry,
+  message = 'Loading…'
+}) => {
   const { LL } = useI18nContext();
 
   if (errorMessage) {
     return (
       <MessageBox my={2} level="error" message={errorMessage}>
         {onRetry && (
-          <Button startIcon={<RefreshIcon />} variant="contained" color="error" onClick={onRetry}>
+          <Button
+            startIcon={<RefreshIcon />}
+            variant="contained"
+            color="error"
+            onClick={onRetry}
+          >
             {LL.RETRY()}
           </Button>
         )}

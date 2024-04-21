@@ -5,7 +5,16 @@ import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import ReportIcon from '@mui/icons-material/Report';
 import SpeakerNotesOffIcon from '@mui/icons-material/SpeakerNotesOff';
-import { Avatar, Button, Divider, List, ListItem, ListItemAvatar, ListItemText, useTheme } from '@mui/material';
+import {
+  Avatar,
+  Button,
+  Divider,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  useTheme
+} from '@mui/material';
 import type { Theme } from '@mui/material';
 
 import * as MqttApi from 'api/mqtt';
@@ -16,7 +25,10 @@ import { useI18nContext } from 'i18n/i18n-react';
 import type { MqttStatusType } from 'types';
 import { MqttDisconnectReason } from 'types';
 
-export const mqttStatusHighlight = ({ enabled, connected }: MqttStatusType, theme: Theme) => {
+export const mqttStatusHighlight = (
+  { enabled, connected }: MqttStatusType,
+  theme: Theme
+) => {
   if (!enabled) {
     return theme.palette.info.main;
   }
@@ -26,14 +38,20 @@ export const mqttStatusHighlight = ({ enabled, connected }: MqttStatusType, them
   return theme.palette.error.main;
 };
 
-export const mqttPublishHighlight = ({ mqtt_fails }: MqttStatusType, theme: Theme) => {
+export const mqttPublishHighlight = (
+  { mqtt_fails }: MqttStatusType,
+  theme: Theme
+) => {
   if (mqtt_fails === 0) return theme.palette.success.main;
   if (mqtt_fails < 10) return theme.palette.warning.main;
 
   return theme.palette.error.main;
 };
 
-export const mqttQueueHighlight = ({ mqtt_queued }: MqttStatusType, theme: Theme) => {
+export const mqttQueueHighlight = (
+  { mqtt_queued }: MqttStatusType,
+  theme: Theme
+) => {
   if (mqtt_queued <= 1) return theme.palette.success.main;
 
   return theme.palette.warning.main;
@@ -92,7 +110,10 @@ const MqttStatus: FC = () => {
                   <ReportIcon />
                 </Avatar>
               </ListItemAvatar>
-              <ListItemText primary={LL.DISCONNECT_REASON()} secondary={disconnectReason(data)} />
+              <ListItemText
+                primary={LL.DISCONNECT_REASON()}
+                secondary={disconnectReason(data)}
+              />
             </ListItem>
             <Divider variant="inset" component="li" />
           </>
@@ -140,7 +161,12 @@ const MqttStatus: FC = () => {
           {data.enabled && renderConnectionStatus()}
         </List>
         <ButtonRow>
-          <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
+          <Button
+            startIcon={<RefreshIcon />}
+            variant="outlined"
+            color="secondary"
+            onClick={loadData}
+          >
             {LL.REFRESH()}
           </Button>
         </ButtonRow>

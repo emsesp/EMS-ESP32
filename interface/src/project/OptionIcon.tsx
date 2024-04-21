@@ -12,9 +12,19 @@ import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import type { SvgIconProps } from '@mui/material';
 
-type OptionType = 'deleted' | 'readonly' | 'web_exclude' | 'api_mqtt_exclude' | 'favorite';
+type OptionType =
+  | 'deleted'
+  | 'readonly'
+  | 'web_exclude'
+  | 'api_mqtt_exclude'
+  | 'favorite';
 
-const OPTION_ICONS: { [type in OptionType]: [React.ComponentType<SvgIconProps>, React.ComponentType<SvgIconProps>] } = {
+const OPTION_ICONS: {
+  [type in OptionType]: [
+    React.ComponentType<SvgIconProps>,
+    React.ComponentType<SvgIconProps>
+  ];
+} = {
   deleted: [DeleteForeverIcon, DeleteOutlineIcon],
   readonly: [EditOffOutlinedIcon, EditOutlinedIcon],
   web_exclude: [VisibilityOffOutlinedIcon, VisibilityOutlinedIcon],

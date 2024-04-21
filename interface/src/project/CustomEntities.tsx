@@ -10,10 +10,24 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Typography } from '@mui/material';
 
-import { Body, Cell, Header, HeaderCell, HeaderRow, Row, Table } from '@table-library/react-table-library/table';
+import {
+  Body,
+  Cell,
+  Header,
+  HeaderCell,
+  HeaderRow,
+  Row,
+  Table
+} from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
 import { updateState, useRequest } from 'alova';
-import { BlockNavigation, ButtonRow, FormLoader, SectionContent, useLayoutTitle } from 'components';
+import {
+  BlockNavigation,
+  ButtonRow,
+  FormLoader,
+  SectionContent,
+  useLayoutTitle
+} from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import * as EMSESP from './api';
@@ -171,8 +185,13 @@ const CustomEntities: FC = () => {
 
     updateState('entities', (data: EntityItem[]) => {
       const new_data = creating
-        ? [...data.filter((ei) => creating || ei.o_id !== updatedItem.o_id), updatedItem]
-        : data.map((ei) => (ei.id === updatedItem.id ? { ...ei, ...updatedItem } : ei));
+        ? [
+            ...data.filter((ei) => creating || ei.o_id !== updatedItem.o_id),
+            updatedItem
+          ]
+        : data.map((ei) =>
+            ei.id === updatedItem.id ? { ...ei, ...updatedItem } : ei
+          );
       setNumChanges(new_data.filter((ei) => hasEntityChanged(ei)).length);
       return new_data;
     });
@@ -201,7 +220,8 @@ const CustomEntities: FC = () => {
     return value === undefined
       ? ''
       : typeof value === 'number'
-        ? new Intl.NumberFormat().format(value) + (uom === 0 ? '' : ' ' + DeviceValueUOM_s[uom])
+        ? new Intl.NumberFormat().format(value) +
+          (uom === 0 ? '' : ' ' + DeviceValueUOM_s[uom])
         : (value as string);
   }
 
@@ -215,7 +235,11 @@ const CustomEntities: FC = () => {
     }
 
     return (
-      <Table data={{ nodes: entities.filter((ei) => !ei.deleted) }} theme={entity_theme} layout={{ custom: true }}>
+      <Table
+        data={{ nodes: entities.filter((ei) => !ei.deleted) }}
+        theme={entity_theme}
+        layout={{ custom: true }}
+      >
         {(tableList: EntityItem[]) => (
           <>
             <Header>
@@ -233,12 +257,18 @@ const CustomEntities: FC = () => {
                 <Row key={ei.name} item={ei} onClick={() => editEntityItem(ei)}>
                   <Cell>
                     {ei.name}&nbsp;
-                    {ei.writeable && <EditOutlinedIcon color="primary" sx={{ fontSize: 12 }} />}
+                    {ei.writeable && (
+                      <EditOutlinedIcon color="primary" sx={{ fontSize: 12 }} />
+                    )}
                   </Cell>
-                  <Cell>{ei.ram === 1 ? '' : showHex(ei.device_id as number, 2)}</Cell>
+                  <Cell>
+                    {ei.ram === 1 ? '' : showHex(ei.device_id as number, 2)}
+                  </Cell>
                   <Cell>{ei.ram === 1 ? '' : showHex(ei.type_id as number, 3)}</Cell>
                   <Cell>{ei.ram === 1 ? '' : ei.offset}</Cell>
-                  <Cell>{ei.ram === 1 ? 'RAM' : DeviceValueTypeNames[ei.value_type]}</Cell>
+                  <Cell>
+                    {ei.ram === 1 ? 'RAM' : DeviceValueTypeNames[ei.value_type]}
+                  </Cell>
                   <Cell>{formatValue(ei.value, ei.uom)}</Cell>
                 </Row>
               ))}
@@ -273,7 +303,12 @@ const CustomEntities: FC = () => {
         <Box flexGrow={1}>
           {numChanges > 0 && (
             <ButtonRow>
-              <Button startIcon={<CancelIcon />} variant="outlined" onClick={onDialogCancel} color="secondary">
+              <Button
+                startIcon={<CancelIcon />}
+                variant="outlined"
+                onClick={onDialogCancel}
+                color="secondary"
+              >
                 {LL.CANCEL()}
               </Button>
               <Button
@@ -289,10 +324,20 @@ const CustomEntities: FC = () => {
         </Box>
         <Box flexWrap="nowrap" whiteSpace="nowrap">
           <ButtonRow>
-            <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={fetchEntities}>
+            <Button
+              startIcon={<RefreshIcon />}
+              variant="outlined"
+              color="secondary"
+              onClick={fetchEntities}
+            >
               {LL.REFRESH()}
             </Button>
-            <Button startIcon={<AddIcon />} variant="outlined" color="primary" onClick={addEntityItem}>
+            <Button
+              startIcon={<AddIcon />}
+              variant="outlined"
+              color="primary"
+              onClick={addEntityItem}
+            >
               {LL.ADD(0)}
             </Button>
           </ButtonRow>
