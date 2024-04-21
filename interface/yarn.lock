@@ -1792,7 +1792,7 @@ __metadata:
     "@types/react": "npm:^18.2.79"
     "@types/react-dom": "npm:^18.2.25"
     "@types/react-router-dom": "npm:^5.3.3"
-    alova: "npm:^2.20.0"
+    alova: "npm:2.19.2"
     async-validator: "npm:^4.2.5"
     concurrently: "npm:^8.2.2"
     eslint: "npm:^9.1.0"
@@ -1876,10 +1876,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"alova@npm:^2.20.0":
-  version: 2.20.0
-  resolution: "alova@npm:2.20.0"
-  checksum: 10/a1258e0e0cc72106b49164adb71e03872244a69740dd479d9e4b8366d9f8a6808551f926e953a3cf5c3a0de256a913f20924efc5e72c4b2853c39e72ebad743d
+"alova@npm:2.19.2":
+  version: 2.19.2
+  resolution: "alova@npm:2.19.2"
+  checksum: 10/8790c82dd5c1345397d4074c9730eb2ccf3363cffa64009943531fc36091170287de7271531262d5d096c88bcaebe0ebdc7efca5f52cc60aa438abc0818d6cee
   languageName: node
   linkType: hard
 

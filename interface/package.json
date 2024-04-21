@@ -18,7 +18,7 @@
     "standalone": "concurrently -c \"auto\" \"typesafe-i18n\" \"npm:mock-api\" \"npm:mock-es\" \"npm:mock-upload\" \"vite\"",
     "typesafe-i18n": "typesafe-i18n --no-watch",
     "webUI": "node progmem-generator.js",
-    "format": "prettier --write '**/*.{ts,tsx,js,css,json,md}'",
+    "format": "prettier -l -w '**/*.{ts,tsx,js,css,json,md}'",
     "lint": "eslint . --fix"
   },
   "dependencies": {
@@ -35,7 +35,7 @@
     "@types/react": "^18.2.79",
     "@types/react-dom": "^18.2.25",
     "@types/react-router-dom": "^5.3.3",
-    "alova": "^2.20.0",
+    "alova": "2.19.2",
     "async-validator": "^4.2.5",
     "history": "^5.3.0",
     "jwt-decode": "^4.0.0",
