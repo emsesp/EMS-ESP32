@@ -30,7 +30,7 @@ class Water : public EMSdevice {
   private:
     static uuid::log::Logger logger_;
 
-    uint8_t wwc_;
+    uint8_t dhw_;
 
     // SM100wwTemperature - 0x07D6
     uint16_t wwTemp_;

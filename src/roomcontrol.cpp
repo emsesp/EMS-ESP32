@@ -25,62 +25,65 @@ bool     Roomctrl::switch_off_[HCS] = {false, false, false, false};
 uint32_t Roomctrl::rc_time_[HCS]    = {0, 0, 0, 0};
 int16_t  Roomctrl::remotetemp_[HCS] = {EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET};
 uint8_t  Roomctrl::remotehum_[HCS]  = {EMS_VALUE_UINT_NOTSET, EMS_VALUE_UINT_NOTSET, EMS_VALUE_UINT_NOTSET, EMS_VALUE_UINT_NOTSET};
-uint8_t  Roomctrl::sendcnt[]        = {0, 0, 0, 0};
-uint8_t  Roomctrl::type_            = RC20;
+uint8_t  Roomctrl::sendtype_[HCS]   = {SendType::TEMP, SendType::TEMP, SendType::TEMP, SendType::TEMP};
+uint8_t  Roomctrl::type_[HCS]       = {RemoteType::NONE, RemoteType::NONE, RemoteType::NONE, RemoteType::NONE};
 
 /**
  * set the temperature,
  */
 void Roomctrl::set_remotetemp(const uint8_t type, const uint8_t hc, const int16_t temp) {
-    if (hc >= HCS || (type != RC20 && type != FB10 && type != RC100H && type != SENSOR && type != RC200)) {
+    if (!type_[hc] && !type) {
         return;
     }
-    type_ = type;
-    if (remotetemp_[hc] != EMS_VALUE_SHORT_NOTSET && temp == EMS_VALUE_SHORT_NOTSET) {
+    if (remotetemp_[hc] != EMS_VALUE_SHORT_NOTSET && temp == EMS_VALUE_SHORT_NOTSET) { // switch remote off
+        remotetemp_[hc] = EMS_VALUE_SHORT_NOTSET;
         switch_off_[hc] = true;
+        rc_time_[hc]    = uuid::get_uptime() - SEND_INTERVAL; // send now
+        sendtype_[hc]   = SendType::TEMP;
+        return;
     }
+    if (hc >= HCS || (type != RC20 && type != FB10 && type != RC100H && type != SENSOR && type != RC200 && type != RC100)) {
+        return;
+    }
+    type_[hc] = type;
     if (remotetemp_[hc] != temp) {
-        rc_time_[hc] = uuid::get_uptime() - SEND_INTERVAL; // send now
-        sendcnt[hc]  = 0;
+        rc_time_[hc]  = uuid::get_uptime() - SEND_INTERVAL; // send now
+        sendtype_[hc] = SendType::TEMP;
     }
     remotetemp_[hc] = temp;
 }
 
+// set humidity for RC100H emulation
 void Roomctrl::set_remotehum(const uint8_t type, const uint8_t hc, const int8_t hum) {
-    if (hc >= HCS || (type != RC20 && type != FB10 && type != RC100H && type != SENSOR)) {
+    if (hc >= HCS || (type != RC100H) || type != type_[hc]) {
         return;
     }
-    type_ = type;
-    if (remotehum_[hc] != EMS_VALUE_UINT_NOTSET && (uint8_t)hum == EMS_VALUE_UINT_NOTSET) {
-        switch_off_[hc] = true;
-    }
     if (remotehum_[hc] != hum) {
-        rc_time_[hc] = uuid::get_uptime() - SEND_INTERVAL; // send now
-        sendcnt[hc]  = 1;
+        rc_time_[hc]  = uuid::get_uptime() - SEND_INTERVAL; // send now
+        sendtype_[hc] = SendType::HUMI;
     }
     remotehum_[hc] = hum;
 }
 
 uint8_t Roomctrl::get_hc(uint8_t addr) {
     addr &= 0x7F;
-    switch (type_) {
-    case SENSOR:
-        return addr - 0x40;
-    case RC200:
-    case RC100H:
-        return addr - 0x38;
-    case FB10:
-    case RC20:
-    default:
-        return addr - 0x18;
+    if (addr >= 0x40 && addr <= 0x44 && type_[addr - 0x40] == SENSOR) {
+        return addr - 0x40; // SENSOR
+    } else if (addr >= 0x38 && addr <= 0x3B && (type_[addr - 0x38] == RC100H || type_[addr - 0x38] == RC200 || type_[addr - 0x38] == RC100)) {
+        return addr - 0x38; // RC100H, RC200
+    } else if (addr >= 0x18 && addr <= 0x1B && (type_[addr - 0x18] == RC20 || type_[addr - 0x18] == FB10)) {
+        return addr - 0x18; // RC20, FB10
     }
+    return 0xFF; // invalid
 }
 
 /**
- * if remote control is active send the temperature every minute
+ * if remote control is active send the temperature every 15 seconds
  */
 void Roomctrl::send(uint8_t addr) {
-    addr &= 0x7F;
+    if (addr & 0x80) {
+        return;
+    }
     uint8_t hc = get_hc(addr);
     // check address, reply only on addresses 0x18..0x1B or 0x40..0x43
     if (hc >= HCS) {
@@ -91,38 +94,39 @@ void Roomctrl::send(uint8_t addr) {
         return;
     }
 
-    if (uuid::get_uptime() - rc_time_[hc] > SEND_INTERVAL) { // send every minute
-        if (type_ == RC100H) {
-            if (sendcnt[hc] == 1) { // second telegram for humidity
+    if (uuid::get_uptime() - rc_time_[hc] > SEND_INTERVAL) { // check interval
+        if (type_[hc] == RC100H) {
+            if (sendtype_[hc] == SendType::HUMI) { // send humidity
                 if (switch_off_[hc]) {
                     remotehum_[hc] = EMS_VALUE_UINT_NOTSET;
                 }
                 rc_time_[hc] = uuid::get_uptime();
                 humidity(addr, 0x10, hc);
-                sendcnt[hc] = 0;
+                sendtype_[hc] = SendType::TEMP;
             } else { // temperature telegram
                 if (remotehum_[hc] != EMS_VALUE_UINT_NOTSET) {
-                    sendcnt[hc] = 1;
+                    sendtype_[hc] = SendType::HUMI;
                 } else {
                     rc_time_[hc] = uuid::get_uptime();
                 }
                 temperature(addr, 0x10, hc); // send to master-thermostat
             }
-        } else if (type_ == RC200) {
+        } else if (type_[hc] == RC200 || type_[hc] == RC100) {
             rc_time_[hc] = uuid::get_uptime();
             temperature(addr, 0x10, hc);
-        } else if (type_ == FB10) {
+        } else if (type_[hc] == FB10) {
             rc_time_[hc] = uuid::get_uptime();
             temperature(addr, 0x10, hc); // send to master-thermostat (https://github.com/emsesp/EMS-ESP32/issues/336)
         } else {                         // type==RC20 or SENSOR
             rc_time_[hc] = uuid::get_uptime();
             temperature(addr, 0x00, hc); // send to all
         }
-        if (remotehum_[hc] == EMS_VALUE_UINT_NOTSET) {
+        if (remotehum_[hc] == EMS_VALUE_UINT_NOTSET && switch_off_[hc]) {
             switch_off_[hc] = false;
+            type_[hc]       = RemoteType::NONE;
         }
     } else {
-        // acknowledge every poll, otherwise the master shows error A22-816
+        // acknowledge every poll
         EMSuart::send_poll(addr | EMSbus::ems_mask());
     }
 }
@@ -131,13 +135,11 @@ void Roomctrl::send(uint8_t addr) {
  * check if there is a message for the remote room controller
  */
 void Roomctrl::check(uint8_t addr, const uint8_t * data, const uint8_t length) {
-    if (type_ == SENSOR) {
+    uint8_t hc = get_hc(addr);
+    if (hc >= HCS || length < 5) {
         return;
     }
-
-    uint8_t hc = get_hc(addr);
-    // check address, reply only on addresses 0x18..0x1B
-    if (hc >= HCS || length < 5) {
+    if (type_[hc] == SENSOR) {
         return;
     }
     // no reply if the temperature is not set
@@ -153,7 +155,7 @@ void Roomctrl::check(uint8_t addr, const uint8_t * data, const uint8_t length) {
     // reads: for now we only reply to version and remote temperature
     // empty message back if temperature not set or unknown message type
     if (data[2] == EMSdevice::EMS_TYPE_VERSION) {
-        version(addr, data[0]);
+        version(addr, data[0], hc);
     } else if (length == 6 && remotetemp_[hc] == EMS_VALUE_SHORT_NOTSET) {
         unknown(addr, data[0], data[2], data[3]);
     } else if (length == 8 && remotetemp_[hc] == EMS_VALUE_SHORT_NOTSET) {
@@ -170,26 +172,28 @@ void Roomctrl::check(uint8_t addr, const uint8_t * data, const uint8_t length) {
         unknown(addr, data[0], data[2], data[3]);
     } else if (length == 8 && data[2] == 0xFF) { // ems+ query
         unknown(addr, data[0], data[3], data[5], data[6]);
+    } else if (data[2] == 0xF7) { // ems+ query with 3 bytes type src dst 7F offset len=FF FF HIGH LOW
+        replyF7(addr, data[0], data[3], data[5], data[6], data[7], hc);
     }
 }
 
 /**
- * send version info RC20 (Prod. 113, Ver. 02.01) or RC20RF (Prod. 93, Ver. 02.00)
+ * send version info
  */
-void Roomctrl::version(uint8_t addr, uint8_t dst) {
+void Roomctrl::version(uint8_t addr, uint8_t dst, uint8_t hc) {
     uint8_t data[20];
     data[0] = addr | EMSbus::ems_mask();
     data[1] = dst & 0x7F;
     data[2] = 0x02;
     data[3] = 0;
-    data[4] = type_; // set RC20 id 113, Ver 02.01 or Junkers FB10 id 109, Ver 16.05, RC100H id 200 ver 40.04
-    if (type_ == RC20) {
+    data[4] = type_[hc]; // set RC20 id 113, Ver 02.01 or Junkers FB10 id 109, Ver 16.05, RC100H id 200 ver 40.04
+    if (type_[hc] == RC20) {
         data[5] = 2; // version 2.01
         data[6] = 1;
         data[7] = EMSbus::calculate_crc(data, 7); // apppend CRC
         EMSuart::transmit(data, 8);
         return;
-    } else if (type_ == FB10) {
+    } else if (type_[hc] == FB10) {
         data[5]  = 16; // version 16.05
         data[6]  = 5;
         data[7]  = 0;
@@ -202,7 +206,7 @@ void Roomctrl::version(uint8_t addr, uint8_t dst) {
         data[14] = EMSbus::calculate_crc(data, 14); // apppend CRC
         EMSuart::transmit(data, 15);
         return;
-    } else if (type_ == RC200) {
+    } else if (type_[hc] == RC200) {
         data[5]  = 32; // version 32.02 see #1611
         data[6]  = 2;
         data[7]  = 0;
@@ -215,9 +219,17 @@ void Roomctrl::version(uint8_t addr, uint8_t dst) {
         data[14] = EMSbus::calculate_crc(data, 14); // apppend CRC
         EMSuart::transmit(data, 15);
         return;
-    } else if (type_ == RC100H) {
+    } else if (type_[hc] == RC100H) {
         data[5] = 40; // version 40.04
         data[6] = 4;
+        data[7] = 0;
+        data[8] = 0xFF;
+        data[9] = EMSbus::calculate_crc(data, 9); // apppend CRC
+        EMSuart::transmit(data, 10);
+        return;
+    } else if (type_[hc] == RC100) {
+        data[5] = 40; // version 40.03
+        data[6] = 3;
         data[7] = 0;
         data[8] = 0xFF;
         data[9] = EMSbus::calculate_crc(data, 9); // apppend CRC
@@ -258,7 +270,7 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
     uint8_t data[12];
     data[0] = addr | EMSbus::ems_mask();
     data[1] = dst & 0x7F;
-    if (type_ == RC20) { // RC20, telegram 0xAF
+    if (type_[hc] == RC20) { // RC20, telegram 0xAF
         data[2] = 0xAF;
         data[3] = 0;
         data[4] = (uint8_t)(remotetemp_[hc] >> 8);
@@ -266,7 +278,7 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[6] = 0;
         data[7] = EMSbus::calculate_crc(data, 7); // apppend CRC
         EMSuart::transmit(data, 8);
-    } else if (type_ == FB10) { // Junkers FB10, telegram 0x0123
+    } else if (type_[hc] == FB10) { // Junkers FB10, telegram 0x0123
         data[2] = 0xFF;
         data[3] = 0;
         data[4] = 0;
@@ -275,7 +287,7 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[7] = (uint8_t)(remotetemp_[hc] & 0xFF);
         data[8] = EMSbus::calculate_crc(data, 8); // apppend CRC
         EMSuart::transmit(data, 9);
-    } else if (type_ == RC200) { // RC200, telegram 42B, ff
+    } else if (type_[hc] == RC200) { // RC200, telegram 42B, ff
         data[2]     = 0xFF;
         data[3]     = 0;
         data[4]     = 3;
@@ -288,7 +300,7 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[10]    = 1;                               // not sure what this is and if we need it, maybe mode?
         data[11]    = EMSbus::calculate_crc(data, 11); // apppend CRC
         EMSuart::transmit(data, 12);
-    } else if (type_ == RC100H) { // RC100H, telegram 42B, ff
+    } else if (type_[hc] == RC100H || type_[hc] == RC100) { // RC100H, telegram 42B, ff
         data[2] = 0xFF;
         data[3] = 0;
         data[4] = 3;
@@ -297,7 +309,7 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[7] = (uint8_t)(remotetemp_[hc] & 0xFF);
         data[8] = EMSbus::calculate_crc(data, 8); // apppend CRC
         EMSuart::transmit(data, 9);
-    } else if (type_ == SENSOR) { // wireless sensor, broadcast id 435
+    } else if (type_[hc] == SENSOR) { // wireless sensor, broadcast id 435
         data[2] = 0xFF;
         data[3] = 0;
         data[4] = 3;
@@ -315,7 +327,7 @@ void Roomctrl::humidity(uint8_t addr, uint8_t dst, uint8_t hc) {
     data[0]      = addr | EMSbus::ems_mask();
     data[1]      = dst & 0x7F;
     uint16_t dew = calc_dew(remotetemp_[hc], remotehum_[hc]);
-    if (type_ == RC100H) { // RC100H, telegram 47B
+    if (type_[hc] == RC100H) { // RC100H, telegram 47B
         data[2]  = 0xFF;
         data[3]  = 0;
         data[4]  = 3;
@@ -345,6 +357,30 @@ void Roomctrl::ack_write() {
     uint8_t data[1];
     data[0] = TxService::TX_WRITE_SUCCESS;
     EMSuart::transmit(data, 1);
+}
+void Roomctrl::replyF7(uint8_t addr, uint8_t dst, uint8_t offset, uint8_t typehh, uint8_t typeh, uint8_t typel, uint8_t hc) {
+    uint8_t data[12];
+    data[0] = addr | EMSbus::ems_mask();
+    data[1] = dst & 0x7F;
+    data[2] = 0xF7;
+    data[3] = offset;
+    data[4] = typehh;
+    data[5] = typeh;
+    data[6] = typel;
+    if (typehh == 0x02) {
+        if (type_[hc] == RC200 || type_[hc] == FB10) {
+            data[7] = 0xFF;
+            data[8] = 0x01;
+        } else {
+            data[7] = 0x0F;
+            data[8] = 0x00;
+        }
+    } else {
+        data[7] = 0;
+        data[8] = 0;
+    }
+    data[9] = EMSbus::calculate_crc(data, 9); // apppend CRC
+    EMSuart::transmit(data, 10);
 }
 
 int16_t Roomctrl::calc_dew(int16_t temp, uint8_t humi) {

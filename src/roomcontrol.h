@@ -24,36 +24,39 @@ namespace emsesp {
 
 class Roomctrl {
   public:
+    // Product-Id of the remote
+    enum RemoteType : uint8_t { NONE = 0, RC20 = 113, FB10 = 109, RC100H = 200, SENSOR = 0x40, RC200 = 157, RC100 = 165 };
+
     static void send(uint8_t addr);
     static void check(uint8_t addr, const uint8_t * data, const uint8_t length);
     static void set_remotetemp(const uint8_t type, const uint8_t hc, const int16_t temp);
     static void set_remotehum(const uint8_t type, const uint8_t hc, const int8_t hum);
-    enum : uint8_t { RC20 = 113, FB10 = 109, RC100H = 200, SENSOR = 0x40, RC200 = 157 };
     static bool is_remote(const uint8_t hc) {
         return (hc < 4 && remotetemp_[hc] != EMS_VALUE_SHORT_NOTSET);
     }
 
   private:
-    static constexpr uint8_t  ADDR          = 0x18;  // address for hc1
-    static constexpr uint32_t SEND_INTERVAL = 55000; // ~1 minute
+    static constexpr uint32_t SEND_INTERVAL = 15000; // 15 sec
     static constexpr uint8_t  HCS           = 4;     // max 4 heating circuits
+    enum SendType : uint8_t { TEMP, HUMI };
 
     static uint8_t get_hc(const uint8_t addr);
-    static void    version(uint8_t addr, uint8_t dst);
+    static void    version(uint8_t addr, uint8_t dst, uint8_t hc);
     static void    unknown(uint8_t addr, uint8_t dst, uint8_t type, uint8_t offset);
     static void    unknown(uint8_t addr, uint8_t dst, uint8_t offset, uint8_t typeh, uint8_t typel);
     static void    temperature(uint8_t addr, uint8_t dst, uint8_t hc);
     static void    humidity(uint8_t addr, uint8_t dst, uint8_t hc);
     static void    nack_write();
     static void    ack_write();
+    static void    replyF7(uint8_t addr, uint8_t dst, uint8_t offset, uint8_t typehh, uint8_t typeh, uint8_t typel, uint8_t hc);
     static int16_t calc_dew(int16_t temp, uint8_t hum);
 
     static bool     switch_off_[HCS];
     static uint32_t rc_time_[HCS];
     static int16_t  remotetemp_[HCS];
     static uint8_t  remotehum_[HCS];
-    static uint8_t  sendcnt[HCS];
-    static uint8_t  type_; // type is product-id 113 for RC20 or 109 for Junkers FB10
+    static uint8_t  sendtype_[HCS];
+    static uint8_t  type_[HCS]; // type is product-id 113 for RC20 or 109 for Junkers FB10
 };
 
 } // namespace emsesp

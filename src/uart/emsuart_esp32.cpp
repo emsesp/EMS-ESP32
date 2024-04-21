@@ -111,6 +111,18 @@ void EMSuart::stop() {
 };
 
 /*
+ * generate <BRK> by inverting tx
+ */
+void IRAM_ATTR EMSuart::uart_gen_break(uint32_t length_us) {
+    portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
+    portENTER_CRITICAL(&mux);
+    uart_set_line_inverse(EMSUART_NUM, UART_SIGNAL_TXD_INV ^ inverse_mask);
+    delayMicroseconds(length_us);
+    uart_set_line_inverse(EMSUART_NUM, inverse_mask);
+    portEXIT_CRITICAL(&mux);
+}
+
+/*
  * Sends a 1-byte poll, ending with a <BRK>
  */
 void EMSuart::send_poll(const uint8_t data) {
@@ -141,9 +153,7 @@ uint16_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
             uart_write_bytes(EMSUART_NUM, &buf[i], 1);
             delayMicroseconds(EMSUART_TX_WAIT_PLUS);
         }
-        uart_set_line_inverse(EMSUART_NUM, UART_SIGNAL_TXD_INV ^ inverse_mask);
-        delayMicroseconds(EMSUART_TX_BRK_PLUS);
-        uart_set_line_inverse(EMSUART_NUM, inverse_mask);
+        uart_gen_break(EMSUART_TX_BRK_PLUS);
         return EMS_TX_STATUS_OK;
     }
 
@@ -152,9 +162,7 @@ uint16_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
             uart_write_bytes(EMSUART_NUM, &buf[i], 1);
             delayMicroseconds(EMSUART_TX_WAIT_HT3);
         }
-        uart_set_line_inverse(EMSUART_NUM, UART_SIGNAL_TXD_INV ^ inverse_mask);
-        delayMicroseconds(EMSUART_TX_BRK_HT3);
-        uart_set_line_inverse(EMSUART_NUM, inverse_mask);
+        uart_gen_break(EMSUART_TX_BRK_HT3);
         return EMS_TX_STATUS_OK;
     }
 
@@ -169,9 +177,7 @@ uint16_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
             uart_get_buffered_data_len(EMSUART_NUM, &rx1);
         } while ((rx1 == rx0) && (--timeoutcnt));
     }
-    uart_set_line_inverse(EMSUART_NUM, UART_SIGNAL_TXD_INV ^ inverse_mask);
-    delayMicroseconds(EMSUART_TX_BRK_EMS);
-    uart_set_line_inverse(EMSUART_NUM, inverse_mask);
+    uart_gen_break(EMSUART_TX_BRK_EMS);
     return EMS_TX_STATUS_OK;
 }
 

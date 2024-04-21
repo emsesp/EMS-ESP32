@@ -864,49 +864,49 @@ const emsesp_devicedata_1 = {
       v: 'auto',
       u: 0,
       id: '00dhw mode',
-      c: 'wwmode',
+      c: 'dhw/mode',
       l: ['off', 'on', 'auto']
     },
     {
       v: 'off',
       u: 0,
       id: '00dhw circulation pump mode',
-      c: 'wwcircmode',
+      c: 'dhw/circmode',
       l: ['off', 'on', 'auto']
     },
     {
       v: 'std prog',
       u: 0,
       id: '00dhw program',
-      c: 'wwprogmode',
+      c: 'dhw/progmode',
       l: ['std prog', 'own prog']
     },
     {
       v: 'std prog',
       u: 0,
       id: '00dhw circulation program',
-      c: 'wwcircprog',
+      c: 'dhw/circprog',
       l: ['std prog', 'own prog']
     },
     {
       v: 'off',
       u: 0,
       id: '00dhw disinfecting',
-      c: 'wwdisinfecting',
+      c: 'dhw/disinfecting',
       l: ['off', 'on']
     },
     {
       v: 'tu',
       u: 0,
       id: '00dhw disinfection day',
-      c: 'wwdisinfectday',
+      c: 'dhw/disinfectday',
       l: ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su', 'all']
     },
     {
       v: 1,
       u: 0,
       id: '00dhw disinfection hour',
-      c: 'wwdisinfecthour',
+      c: 'dhw/disinfecthour',
       m: 0,
       x: 23,
       s: 1
@@ -915,7 +915,7 @@ const emsesp_devicedata_1 = {
       v: 60,
       u: 1,
       id: '00dhw maximmu temperature',
-      c: 'wwmaxtemp',
+      c: 'dhw/maxtemp',
       m: 60,
       x: 80,
       s: 1
@@ -924,35 +924,35 @@ const emsesp_devicedata_1 = {
       v: 'on',
       u: 0,
       id: '00dhw one time key function',
-      c: 'wwonetimekey',
+      c: 'dhw/onetimekey',
       l: ['off', 'on']
     },
     {
       v: '00 mo 06:00 on',
       u: 0,
       id: '00dhw program switchtime',
-      c: 'wwswitchtime',
+      c: 'dhw/switchtime',
       h: '<nn> [ not_set | day hh:mm on|off ]'
     },
     {
       v: '00 mo 06:30 on',
       u: 0,
       id: '00dhw circulation program switchtime',
-      c: 'wwcircswitchtime',
+      c: 'dhw/circswitchtime',
       h: '<nn> [ not_set | day hh:mm on|off ]'
     },
     {
       v: '01.01.2000-01.01.2000',
       u: 0,
       id: '00dhw holiday dates',
-      c: 'wwholidays',
+      c: 'dhw/holidays',
       h: 'dd.mm.yyyy-dd.mm.yyyy'
     },
     {
       v: '01.01.2019-12.01.2019',
       u: 0,
       id: '00dhw vacation dates',
-      c: 'wwvacations',
+      c: 'dhw/vacations',
       h: 'dd.mm.yyyy-dd.mm.yyyy'
     },
     {
@@ -1588,7 +1588,7 @@ const emsesp_devicedata_3 = {
       v: 47,
       u: 1,
       id: '00dhw selected temperature',
-      c: 'wwseltemp',
+      c: 'dhw/seltemp',
       m: 0,
       x: 254,
       s: 1
@@ -1602,14 +1602,14 @@ const emsesp_devicedata_3 = {
       v: 'hot',
       u: 0,
       id: '00dhw comfort',
-      c: 'wwcomfort',
+      c: 'dhw/comfort',
       l: ['hot', 'eco', 'intelligent']
     },
     {
       v: 40,
       u: 2,
       id: '00dhw flow temperature offset',
-      c: 'wwflowtempoffset',
+      c: 'dhw/flowtempoffset',
       m: 0,
       x: 100,
       s: 1
@@ -1618,7 +1618,7 @@ const emsesp_devicedata_3 = {
       v: 'on',
       u: 0,
       id: '00dhw circulation pump available',
-      c: 'wwcircpump',
+      c: 'dhw/circpump',
       l: ['off', 'on']
     },
     {
@@ -1630,7 +1630,7 @@ const emsesp_devicedata_3 = {
       v: -5,
       u: 2,
       id: '00dhw hysteresis on temperature',
-      c: 'wwhyston',
+      c: 'dhw/hyston',
       m: -126,
       x: 126,
       s: 1
@@ -1639,7 +1639,7 @@ const emsesp_devicedata_3 = {
       v: -1,
       u: 2,
       id: '00dhw hysteresis off temperature',
-      c: 'wwhystoff',
+      c: 'dhw/hystoff',
       m: -126,
       x: 126,
       s: 1
@@ -1648,7 +1648,7 @@ const emsesp_devicedata_3 = {
       v: 70,
       u: 1,
       id: '00dhw disinfection temperature',
-      c: 'wwdisinfectiontemp',
+      c: 'dhw/disinfectiontemp',
       m: 0,
       x: 254,
       s: 1
@@ -1657,14 +1657,14 @@ const emsesp_devicedata_3 = {
       v: 'continuous',
       u: 0,
       id: '00dhw circulation pump mode',
-      c: 'wwcircmode',
+      c: 'dhw/circmode',
       l: ['off', '1x3min', '2x3min', '3x3min', '4x3min', '5x3min', '6x3min', 'continuous']
     },
     {
       v: 'off',
       u: 0,
       id: '00dhw circulation active',
-      c: 'wwcirc',
+      c: 'dhw/circ',
       l: ['off', 'on']
     },
     {
@@ -1686,21 +1686,21 @@ const emsesp_devicedata_3 = {
       v: 'on',
       u: 0,
       id: '00dhw activated',
-      c: 'wwactivated',
+      c: 'dhw/activated',
       l: ['off', 'on']
     },
     {
       v: 'off',
       u: 0,
       id: '00dhw one time charging',
-      c: 'wwonetime',
+      c: 'dhw/onetime',
       l: ['off', 'on']
     },
     {
       v: 'off',
       u: 0,
       id: '00dhw disinfecting',
-      c: 'wwdisinfecting',
+      c: 'dhw/disinfecting',
       l: ['off', 'on']
     },
     {
@@ -1913,7 +1913,7 @@ const emsesp_devicedata_6 = {
       v: 37,
       u: 1,
       id: '00dhw minimum temperature',
-      c: 'wwmintemp',
+      c: 'dhwmintemp',
       m: 0,
       x: 254,
       s: 1
@@ -2009,32 +2009,32 @@ const emsesp_devicedata_7 = {
     { v: 'manual', u: 0, id: '00maintenance scheduled', c: 'maintenance', l: ['off', 'time', 'date', 'manual'] },
     { v: 6000, u: 7, id: '00time to next maintenance', c: 'maintenancetime' },
     { v: '01.01.2012', u: 0, id: '00next maintenance date', c: 'maintenancedate', h: 'dd.mm.yyyy' },
-    { v: 'on', u: 0, id: '00dhw turn on/off', c: 'wwtapactivated', l: ['off', 'on'] },
+    { v: 'on', u: 0, id: '00dhw turn on/off', c: 'dhw/tapactivated', l: ['off', 'on'] },
     { v: 62, u: 1, id: '00dhw set temperature' },
-    { v: 60, u: 1, id: '00dhw selected temperature', c: 'wwseltemp' },
+    { v: 60, u: 1, id: '00dhw selected temperature', c: 'dhw/seltemp' },
     { v: 'flow', u: 0, id: '00dhw type' },
-    { v: 'hot', u: 0, id: '00dhw comfort', c: 'wwcomfort', l: ['hot', 'eco', 'intelligent'] },
-    { v: 40, u: 2, id: '00dhw flow temperature offset', c: 'wwflowtempoffset' },
-    { v: 100, u: 3, id: '00dhw max power', c: 'wwmaxpower' },
-    { v: 'off', u: 0, id: '00dhw circulation pump available', c: 'wwcircpump', l: ['off', 'on'] },
+    { v: 'hot', u: 0, id: '00dhw comfort', c: 'dhw/comfort', l: ['hot', 'eco', 'intelligent'] },
+    { v: 40, u: 2, id: '00dhw flow temperature offset', c: 'dhw/flowtempoffset' },
+    { v: 100, u: 3, id: '00dhw max power', c: 'dhw/maxpower' },
+    { v: 'off', u: 0, id: '00dhw circulation pump available', c: 'dhw/circpump', l: ['off', 'on'] },
     { v: '3-way valve', u: 0, id: '00dhw charging type' },
-    { v: -5, u: 2, id: '00dhw hysteresis on temperature', c: 'wwhyston' },
-    { v: 0, u: 2, id: '00dhw hysteresis off temperature', c: 'wwhystoff' },
-    { v: 70, u: 1, id: '00dhw disinfection temperature', c: 'wwdisinfectiontemp' },
+    { v: -5, u: 2, id: '00dhw hysteresis on temperature', c: 'dhw/hyston' },
+    { v: 0, u: 2, id: '00dhw hysteresis off temperature', c: 'dhw/hystoff' },
+    { v: 70, u: 1, id: '00dhw disinfection temperature', c: 'dhw/disinfectiontemp' },
     {
       v: 'off',
       u: 0,
       id: '00dhw circulation pump mode',
-      c: 'wwcircmode',
+      c: 'dhw/circmode',
       l: ['off', '1x3min', '2x3min', '3x3min', '4x3min', '5x3min', '6x3min', 'continuous']
     },
-    { v: 'off', u: 0, id: '00dhw circulation active', c: 'wwcirc', l: ['off', 'on'] },
+    { v: 'off', u: 0, id: '00dhw circulation active', c: 'dhw/circ', l: ['off', 'on'] },
     { v: 47.3, u: 1, id: '00dhw current intern temperature' },
     { v: 0, u: 4, id: '00dhw current tap water flow' },
     { v: 47.3, u: 1, id: '00dhw storage intern temperature' },
-    { v: 'on', u: 0, id: '00dhw activated', c: 'wwactivated', l: ['off', 'on'] },
-    { v: 'off', u: 0, id: '00dhw one time charging', c: 'wwonetime', l: ['off', 'on'] },
-    { v: 'off', u: 0, id: '00dhw disinfecting', c: 'wwdisinfecting', l: ['off', 'on'] },
+    { v: 'on', u: 0, id: '00dhw activated', c: 'dhw/activated', l: ['off', 'on'] },
+    { v: 'off', u: 0, id: '00dhw one time charging', c: 'dhw/onetime', l: ['off', 'on'] },
+    { v: 'off', u: 0, id: '00dhw disinfecting', c: 'dhw/disinfecting', l: ['off', 'on'] },
     { v: 'off', u: 0, id: '00dhw charging' },
     { v: 'off', u: 0, id: '00dhw recharging' },
     { v: 'on', u: 0, id: '00dhw temperature ok' },
@@ -2057,7 +2057,7 @@ const emsesp_devicedata_99 = {
     {
       v: 0,
       u: 0,
-      id: '00wwExtra1'
+      id: '00Extra1'
     }
   ]
 };
@@ -2086,7 +2086,7 @@ let emsesp_customentities = {
       type_id: 797,
       offset: 0,
       factor: 1,
-      name: 'wwExtra1',
+      name: 'Extra1',
       uom: 0,
       value_type: 0,
       writeable: false,
@@ -2230,41 +2230,41 @@ const emsesp_deviceentities_7 = [
   { v: 'manual', n: 'maintenance scheduled', id: 'maintenance', m: 0, w: false },
   { v: 6000, n: 'time to next maintenance', id: 'maintenancetime', m: 0, w: false },
   { v: '01.01.2012', n: 'next maintenance date', id: 'maintenancedate', m: 0, w: false },
-  { v: true, n: 'dhw turn on/off', id: 'wwtapactivated', m: 0, w: false },
-  { v: 62, n: 'dhw set temperature', id: 'wwsettemp', m: 0, w: false },
-  { v: 60, n: 'dhw selected temperature', id: 'wwseltemp', m: 0, w: true },
-  { n: 'dhw selected lower temperature', id: 'wwseltemplow', m: 2 },
-  { n: 'dhw selected temperature for off', id: 'wwseltempoff', m: 2 },
-  { n: 'dhw single charge temperature', id: 'wwseltempsingle', m: 2 },
-  { v: 'flow', n: 'dhw type', id: 'wwtype', m: 0, w: false },
-  { v: 'hot', n: 'dhw comfort', id: 'wwcomfort', m: 0, w: false },
-  { v: 40, n: 'dhw flow temperature offset', id: 'wwflowtempoffset', m: 0, w: false },
-  { v: 100, n: 'dhw max power', id: 'wwmaxpower', m: 0, w: false },
-  { v: false, n: 'dhw circulation pump available', id: 'wwcircpump', m: 0, w: false },
-  { v: '3-way valve', n: 'dhw charging type', id: 'wwchargetype', m: 0, w: false },
-  { v: -5, n: 'dhw hysteresis on temperature', id: 'wwhyston', m: 0, w: false },
-  { v: 0, n: 'dhw hysteresis off temperature', id: 'wwhystoff', m: 0, w: false },
-  { v: 70, n: 'dhw disinfection temperature', id: 'wwdisinfectiontemp', m: 0, w: false },
-  { v: 'off', n: 'dhw circulation pump mode', id: 'wwcircmode', m: 0, w: false },
-  { v: false, n: 'dhw circulation active', id: 'wwcirc', m: 0, w: false },
-  { v: 46.4, n: 'dhw current intern temperature', id: 'wwcurtemp', m: 0, w: false },
-  { n: 'dhw current extern temperature', id: 'wwcurtemp2', m: 2 },
-  { v: 0, n: 'dhw current tap water flow', id: 'wwcurflow', m: 0, w: false },
-  { v: 46.3, n: 'dhw storage intern temperature', id: 'wwstoragetemp1', m: 0, w: false },
-  { n: 'dhw storage extern temperature', id: 'wwstoragetemp2', m: 2 },
-  { v: true, n: 'dhw activated', id: 'wwactivated', m: 0, w: false },
-  { v: false, n: 'dhw one time charging', id: 'wwonetime', m: 0, w: false },
-  { v: false, n: 'dhw disinfecting', id: 'wwdisinfecting', m: 0, w: false },
-  { v: false, n: 'dhw charging', id: 'wwcharging', m: 0, w: false },
-  { v: false, n: 'dhw recharging', id: 'wwrecharging', m: 0, w: false },
-  { v: true, n: 'dhw temperature ok', id: 'wwtempok', m: 0, w: false },
-  { v: false, n: 'dhw active', id: 'wwactive', m: 0, w: false },
-  { v: true, n: 'dhw 3way valve active', id: 'ww3wayvalve', m: 0, w: false },
-  { v: 0, n: 'dhw set pump power', id: 'wwsetpumppower', m: 0, w: true },
-  { n: 'dhw mixer temperature', id: 'wwmixertemp', m: 2 },
-  { n: 'dhw cylinder middle temperature (TS3)', id: 'wwcylmiddletemp', m: 2 },
-  { v: 288768, n: 'dhw starts', id: 'wwstarts', m: 0, w: false },
-  { v: 102151, n: 'dhw active time', id: 'wwworkm', m: 0, w: false }
+  { v: true, n: 'dhw turn on/off', id: 'dhw/tapactivated', m: 0, w: false },
+  { v: 62, n: 'dhw set temperature', id: 'dhw/settemp', m: 0, w: false },
+  { v: 60, n: 'dhw selected temperature', id: 'dhw/seltemp', m: 0, w: true },
+  { n: 'dhw selected lower temperature', id: 'dhw/seltemplow', m: 2 },
+  { n: 'dhw selected temperature for off', id: 'dhw/seltempoff', m: 2 },
+  { n: 'dhw single charge temperature', id: 'dhw/seltempsingle', m: 2 },
+  { v: 'flow', n: 'dhw type', id: 'dhw/type', m: 0, w: false },
+  { v: 'hot', n: 'dhw comfort', id: 'dhw/comfort', m: 0, w: false },
+  { v: 40, n: 'dhw flow temperature offset', id: 'dhw/flowtempoffset', m: 0, w: false },
+  { v: 100, n: 'dhw max power', id: 'dhw/maxpower', m: 0, w: false },
+  { v: false, n: 'dhw circulation pump available', id: 'dhw/circpump', m: 0, w: false },
+  { v: '3-way valve', n: 'dhw charging type', id: 'dhw/chargetype', m: 0, w: false },
+  { v: -5, n: 'dhw hysteresis on temperature', id: 'dhw/hyston', m: 0, w: false },
+  { v: 0, n: 'dhw hysteresis off temperature', id: 'dhw/hystoff', m: 0, w: false },
+  { v: 70, n: 'dhw disinfection temperature', id: 'dhw/disinfectiontemp', m: 0, w: false },
+  { v: 'off', n: 'dhw circulation pump mode', id: 'dhw/circmode', m: 0, w: false },
+  { v: false, n: 'dhw circulation active', id: 'dhw/circ', m: 0, w: false },
+  { v: 46.4, n: 'dhw current intern temperature', id: 'dhw/curtemp', m: 0, w: false },
+  { n: 'dhw current extern temperature', id: 'dhw/curtemp2', m: 2 },
+  { v: 0, n: 'dhw current tap water flow', id: 'dhw/curflow', m: 0, w: false },
+  { v: 46.3, n: 'dhw storage intern temperature', id: 'dhw/storagetemp1', m: 0, w: false },
+  { n: 'dhw storage extern temperature', id: 'dhw/storagetemp2', m: 2 },
+  { v: true, n: 'dhw activated', id: 'dhw/activated', m: 0, w: false },
+  { v: false, n: 'dhw one time charging', id: 'dhw/onetime', m: 0, w: false },
+  { v: false, n: 'dhw disinfecting', id: 'dhw/disinfecting', m: 0, w: false },
+  { v: false, n: 'dhw charging', id: 'dhw/charging', m: 0, w: false },
+  { v: false, n: 'dhw recharging', id: 'dhw/recharging', m: 0, w: false },
+  { v: true, n: 'dhw temperature ok', id: 'dhw/tempok', m: 0, w: false },
+  { v: false, n: 'dhw active', id: 'dhw/active', m: 0, w: false },
+  { v: true, n: 'dhw 3way valve active', id: 'dhw/3wayvalve', m: 0, w: false },
+  { v: 0, n: 'dhw set pump power', id: 'dhw/setpumppower', m: 0, w: true },
+  { n: 'dhw mixer temperature', id: 'dhw/mixertemp', m: 2 },
+  { n: 'dhw cylinder middle temperature (TS3)', id: 'dhw/cylmiddletemp', m: 2 },
+  { v: 288768, n: 'dhw starts', id: 'dhw/starts', m: 0, w: false },
+  { v: 102151, n: 'dhw active time', id: 'dhw/workm', m: 0, w: false }
 ];
 
 const emsesp_deviceentities_4 = [

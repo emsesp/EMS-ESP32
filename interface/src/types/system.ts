@@ -67,7 +67,7 @@ export interface LogEntry {
 export interface LogSettings {
   level: number;
   max_messages: number;
-  compact: false;
+  compact: boolean;
 }
 
 export interface OTASettings {

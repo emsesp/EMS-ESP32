@@ -105,7 +105,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         }
     }
 
-    // some commands may be prefixed with hc. wwc. or hc/ or wwc/ so extract these if they exist
+    // some commands may be prefixed with hc. dhw. or hc/ or dhw/ so extract these if they exist
     // parse_command_string returns the extracted command
     command_p = parse_command_string(command_p, id_n);
     if (command_p == nullptr) {
@@ -118,14 +118,14 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         }
     }
 
-    // if we don't have an id/hc/wwc try and get it from the JSON input
+    // if we don't have an id/hc/dhw try and get it from the JSON input
     // it's allowed to have no id, and then keep the default to -1
     if (id_n == -1) {
         if (input.containsKey("hc")) {
             id_n = input["hc"];
-        } else if (input.containsKey("wwc")) {
-            id_n = input["wwc"];
-            id_n += DeviceValueTAG::TAG_WWC1 - DeviceValueTAG::TAG_HC1; // wwc1 has id 9
+        } else if (input.containsKey("dhw")) {
+            id_n = input["dhw"];
+            id_n += DeviceValueTAG::TAG_DHW1 - DeviceValueTAG::TAG_HC1; // dhw1 has id 9
         } else if (input.containsKey("id")) {
             id_n = input["id"];
         } else if (input.containsKey("ahs")) {
@@ -222,7 +222,7 @@ std::string Command::return_code_string(const uint8_t return_code) {
     return Helpers::smallitoa(s, return_code);
 }
 
-// takes a string like "hc1/seltemp" or "seltemp" or "wwc2.seltemp" and tries to get the id and cmd
+// takes a string like "hc1/seltemp" or "seltemp" or "dhw2.seltemp" and tries to get the id and cmd
 // returns start position of the command string
 const char * Command::parse_command_string(const char * command, int8_t & id) {
     if (command == nullptr) {
@@ -239,11 +239,11 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
     if (!strncmp(lowerCmd, "hc", 2) && command[2] >= '1' && command[2] <= '8') {
         id = command[2] - '0';
         command += 3;
-    } else if (!strncmp(lowerCmd, "wwc", 3) && command[3] == '1' && command[4] == '0') {
-        id = DeviceValueTAG::TAG_WWC10 - DeviceValueTAG::TAG_HC1 + 1; //18;
+    } else if (!strncmp(lowerCmd, "dhw", 3) && command[3] == '1' && command[4] == '0') {
+        id = DeviceValueTAG::TAG_DHW10 - DeviceValueTAG::TAG_HC1 + 1; //18;
         command += 5;
-    } else if (!strncmp(lowerCmd, "wwc", 3) && command[3] >= '1' && command[3] <= '9') {
-        id = command[3] - '1' + DeviceValueTAG::TAG_WWC1 - DeviceValueTAG::TAG_HC1 + 1; //9;
+    } else if (!strncmp(lowerCmd, "dhw", 3) && command[3] >= '1' && command[3] <= '9') {
+        id = command[3] - '1' + DeviceValueTAG::TAG_DHW1 - DeviceValueTAG::TAG_HC1 + 1; //9;
         command += 4;
     } else if (!strncmp(lowerCmd, "id", 2) && command[2] == '1' && command[3] >= '0' && command[3] <= '9') {
         id = command[3] - '0' + 10;
@@ -259,6 +259,9 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
         command += 4;
     } else if (!strncmp(lowerCmd, "hs", 2) && command[2] >= '1' && command[2] <= '9') {
         id = command[2] - '1' + DeviceValueTAG::TAG_HS1 - DeviceValueTAG::TAG_HC1 + 1; //20;
+        command += 3;
+    } else if (!strncmp(lowerCmd, "dhw", 3)) { // no number
+        id = 9;
         command += 3;
     }
 
@@ -278,13 +281,13 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
 }
 
 // calls a command directly
-uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * value) {
+uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id) {
     // create a temporary buffer
     JsonDocument output_doc;
     JsonObject   output = output_doc.to<JsonObject>();
 
     // authenticated is always true and ID is the default value
-    return call(device_type, cmd, value, true, -1, output);
+    return call(device_type, cmd, value, true, id, output);
 }
 
 // calls a command. Takes a json object for output.
@@ -460,9 +463,9 @@ bool Command::list(const uint8_t device_type, JsonObject output) {
     for (const auto & cl : sorted_cmds) {
         for (const auto & cf : cmdfunctions_) {
             if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN) && cf.description_ && (cl == std::string(cf.cmd_))) {
-                if (cf.has_flags(CommandFlag::MQTT_SUB_FLAG_WW)) {
+                if (cf.has_flags(CommandFlag::MQTT_SUB_FLAG_DHW)) {
                     char s[100];
-                    snprintf(s, sizeof(s), "%s %s", EMSdevice::tag_to_string(DeviceValueTAG::TAG_DEVICE_DATA_WW), Helpers::translated_word(cf.description_));
+                    snprintf(s, sizeof(s), "%s %s", EMSdevice::tag_to_string(DeviceValueTAG::TAG_DHW1), Helpers::translated_word(cf.description_));
                     output[cl] = s;
                 } else {
                     output[cl] = Helpers::translated_word(cf.description_);
@@ -530,8 +533,8 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
                 if (cf.has_flags(MQTT_SUB_FLAG_HC)) {
                     shell.print("[hc<n>.]");
                     i += 8;
-                } else if (cf.has_flags(MQTT_SUB_FLAG_WWC)) {
-                    shell.print("[wwc<n>.]");
+                } else if (cf.has_flags(MQTT_SUB_FLAG_DHW)) {
+                    shell.print("[dhw<n>.]");
                     i += 9;
                 }
                 shell.print(cl);
@@ -540,10 +543,6 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
                     shell.print(' ');
                 }
                 shell.print(COLOR_BRIGHT_CYAN);
-                if (cf.has_flags(MQTT_SUB_FLAG_WW)) {
-                    shell.print(EMSdevice::tag_to_string(DeviceValueTAG::TAG_DEVICE_DATA_WW));
-                    shell.print(' ');
-                }
                 shell.print(Helpers::translated_word(cf.description_));
                 if (!cf.has_flags(CommandFlag::ADMIN_ONLY)) {
                     shell.print(' ');

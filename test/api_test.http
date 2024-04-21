@@ -45,7 +45,7 @@ Authorization: Bearer {{token}}
 
 {
     "device" : "boiler",
-    "entity" : "wwtapactivated",
+    "entity" : "dhw/tapactivated",
     "value" : "on"
 }
 
