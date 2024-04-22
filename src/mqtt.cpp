@@ -879,6 +879,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         case DeviceValueType::INT16:
         case DeviceValueType::UINT16:
         case DeviceValueType::UINT24:
+        case DeviceValueType::UINT32:
             // number - https://www.home-assistant.io/integrations/number.mqtt
             // older Domoticz does not support number, use sensor
             if (discovery_type() == discoveryType::HOMEASSISTANT || discovery_type() == discoveryType::DOMOTICZ_LATEST) {
@@ -1152,12 +1153,12 @@ void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, con
         // for device entities which have numerical values, with no UOM
         if ((type != DeviceValueType::STRING)
             && (type == DeviceValueType::INT8 || type == DeviceValueType::UINT8 || type == DeviceValueType::INT16 || type == DeviceValueType::UINT16
-                || type == DeviceValueType::UINT24)) {
+                || type == DeviceValueType::UINT24 || type == DeviceValueType::UINT32)) {
             doc["ic"] = F_(iconnum); // set icon
             // determine if its a measurement or total increasing
             // most of the values are measurement. for example Tx Reads will increment but can be reset to 0 after a restart
             // all the starts are increasing, and they are ULONGs
-            if (type == DeviceValueType::UINT24) {
+            if (type == DeviceValueType::UINT24 || type == DeviceValueType::UINT32) {
                 doc[sc_ha] = F_(total_increasing);
             } else {
                 doc[sc_ha] = F_(measurement); // default to measurement
