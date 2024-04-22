@@ -519,16 +519,16 @@ void EMSdevice::add_device_value(uint8_t               tag,              // to b
 
     if (type == DeviceValueType::STRING) {
         *(char *)(value_p) = {'\0'}; // this is important for string functions like strlen() to work later
-    } else if (type == DeviceValueType::INT) {
-        *(int8_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_INT_DUMMY : EMS_VALUE_DEFAULT_INT;
-    } else if (type == DeviceValueType::UINT) {
-        *(uint8_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_UINT_DUMMY : EMS_VALUE_DEFAULT_UINT;
-    } else if (type == DeviceValueType::SHORT) {
-        *(int16_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_SHORT_DUMMY : EMS_VALUE_DEFAULT_SHORT;
-    } else if (type == DeviceValueType::USHORT) {
-        *(uint16_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_USHORT_DUMMY : EMS_VALUE_DEFAULT_USHORT;
-    } else if ((type == DeviceValueType::ULONG) || (type == DeviceValueType::TIME)) {
-        *(uint32_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_ULONG_DUMMY : EMS_VALUE_DEFAULT_ULONG;
+    } else if (type == DeviceValueType::INT8) {
+        *(int8_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_INT8_DUMMY : EMS_VALUE_DEFAULT_INT8;
+    } else if (type == DeviceValueType::UINT8) {
+        *(uint8_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_UINT8_DUMMY : EMS_VALUE_DEFAULT_UINT8;
+    } else if (type == DeviceValueType::INT16) {
+        *(int16_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_INT16_DUMMY : EMS_VALUE_DEFAULT_INT16;
+    } else if (type == DeviceValueType::UINT16) {
+        *(uint16_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_UINT16_DUMMY : EMS_VALUE_DEFAULT_UINT16;
+    } else if ((type == DeviceValueType::UINT24) || (type == DeviceValueType::TIME) || (type == DeviceValueType::UINT32)) {
+        *(uint32_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_UINT24_DUMMY : EMS_VALUE_DEFAULT_UINT24;
     } else if (type == DeviceValueType::BOOL) {
         *(int8_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_BOOL_DUMMY : EMS_VALUE_DEFAULT_BOOL; // bool is uint8_t, but other initial value
     } else if (type == DeviceValueType::ENUM) {
@@ -789,26 +789,25 @@ void EMSdevice::publish_value(void * value_p) const {
                 }
                 break;
             }
-            case DeviceValueType::USHORT:
+            case DeviceValueType::UINT16:
                 Helpers::render_value(payload, *(uint16_t *)(value_p), num_op, fahrenheit);
                 break;
-            case DeviceValueType::UINT:
+            case DeviceValueType::UINT8:
                 Helpers::render_value(payload, *(uint8_t *)(value_p), num_op, fahrenheit);
                 break;
-            case DeviceValueType::SHORT:
+            case DeviceValueType::INT16:
                 Helpers::render_value(payload, *(int16_t *)(value_p), num_op, fahrenheit);
                 break;
-            case DeviceValueType::INT:
+            case DeviceValueType::INT8:
                 Helpers::render_value(payload, *(int8_t *)(value_p), num_op, fahrenheit);
                 break;
-            case DeviceValueType::ULONG:
-                Helpers::render_value(payload, *(uint32_t *)(value_p), num_op, fahrenheit);
+            case DeviceValueType::UINT24:
+            case DeviceValueType::TIME:
+            case DeviceValueType::UINT32:
+                Helpers::render_value(payload, *(uint32_t *)(value_p), num_op);
                 break;
             case DeviceValueType::BOOL:
                 Helpers::render_boolean(payload, (bool)*(uint8_t *)(value_p));
-                break;
-            case DeviceValueType::TIME:
-                Helpers::render_value(payload, *(uint32_t *)(value_p), num_op);
                 break;
             case DeviceValueType::STRING:
                 if (Helpers::hasValue((char *)(value_p))) {
@@ -920,17 +919,19 @@ void EMSdevice::generate_values_web(JsonObject output) {
                 // note, the nested if's is necessary due to the way the ArduinoJson templates are pre-processed by the compiler
                 fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 
-                if ((dv.type == DeviceValueType::INT) && Helpers::hasValue(*(int8_t *)(dv.value_p))) {
+                if ((dv.type == DeviceValueType::INT8) && Helpers::hasValue(*(int8_t *)(dv.value_p))) {
                     obj["v"] = Helpers::transformNumFloat(*(int8_t *)(dv.value_p), dv.numeric_operator, fahrenheit);
-                } else if ((dv.type == DeviceValueType::UINT) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
+                } else if ((dv.type == DeviceValueType::UINT8) && Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
                     obj["v"] = Helpers::transformNumFloat(*(uint8_t *)(dv.value_p), dv.numeric_operator, fahrenheit);
-                } else if ((dv.type == DeviceValueType::SHORT) && Helpers::hasValue(*(int16_t *)(dv.value_p))) {
+                } else if ((dv.type == DeviceValueType::INT16) && Helpers::hasValue(*(int16_t *)(dv.value_p))) {
                     obj["v"] = Helpers::transformNumFloat(*(int16_t *)(dv.value_p), dv.numeric_operator, fahrenheit);
-                } else if ((dv.type == DeviceValueType::USHORT) && Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
+                } else if ((dv.type == DeviceValueType::UINT16) && Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
                     obj["v"] = Helpers::transformNumFloat(*(uint16_t *)(dv.value_p), dv.numeric_operator, fahrenheit);
-                } else if ((dv.type == DeviceValueType::ULONG) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
+                } else if ((dv.type == DeviceValueType::UINT24) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
                     obj["v"] = dv.numeric_operator > 0 ? *(uint32_t *)(dv.value_p) / dv.numeric_operator : *(uint32_t *)(dv.value_p);
                 } else if ((dv.type == DeviceValueType::TIME) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
+                    obj["v"] = dv.numeric_operator > 0 ? *(uint32_t *)(dv.value_p) / dv.numeric_operator : *(uint32_t *)(dv.value_p);
+                } else if ((dv.type == DeviceValueType::UINT32) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
                     obj["v"] = dv.numeric_operator > 0 ? *(uint32_t *)(dv.value_p) / dv.numeric_operator : *(uint32_t *)(dv.value_p);
                 } else {
                     obj["v"] = ""; // must have a value for sorting to work
@@ -1027,15 +1028,15 @@ void EMSdevice::generate_values_web_customization(JsonArray output) {
 
             // handle Integers and Floats
             else {
-                if (dv.type == DeviceValueType::INT) {
+                if (dv.type == DeviceValueType::INT8) {
                     obj["v"] = Helpers::transformNumFloat(*(int8_t *)(dv.value_p), dv.numeric_operator, fahrenheit);
-                } else if (dv.type == DeviceValueType::UINT) {
+                } else if (dv.type == DeviceValueType::UINT8) {
                     obj["v"] = Helpers::transformNumFloat(*(uint8_t *)(dv.value_p), dv.numeric_operator, fahrenheit);
-                } else if (dv.type == DeviceValueType::SHORT) {
+                } else if (dv.type == DeviceValueType::INT16) {
                     obj["v"] = Helpers::transformNumFloat(*(int16_t *)(dv.value_p), dv.numeric_operator, fahrenheit);
-                } else if (dv.type == DeviceValueType::USHORT) {
+                } else if (dv.type == DeviceValueType::UINT16) {
                     obj["v"] = Helpers::transformNumFloat(*(uint16_t *)(dv.value_p), dv.numeric_operator, fahrenheit);
-                } else if (dv.type == DeviceValueType::ULONG) {
+                } else if (dv.type == DeviceValueType::UINT24 || dv.type == DeviceValueType::UINT32) {
                     obj["v"] = dv.numeric_operator > 0 ? *(uint32_t *)(dv.value_p) / dv.numeric_operator : *(uint32_t *)(dv.value_p);
                 } else if (dv.type == DeviceValueType::TIME) {
                     obj["v"] = dv.numeric_operator > 0 ? *(uint32_t *)(dv.value_p) / dv.numeric_operator : *(uint32_t *)(dv.value_p);
@@ -1243,24 +1244,28 @@ void EMSdevice::dump_value_info() {
                 Serial.print(']');
                 break;
 
-            case DeviceValueType::USHORT:
-                Serial.print("ushort");
+            case DeviceValueType::UINT16:
+                Serial.print("uint16");
                 break;
 
-            case DeviceValueType::UINT:
-                Serial.print("uint");
+            case DeviceValueType::UINT8:
+                Serial.print("uint8");
                 break;
 
-            case DeviceValueType::SHORT:
-                Serial.print("short");
+            case DeviceValueType::INT16:
+                Serial.print("int16");
                 break;
 
-            case DeviceValueType::INT:
-                Serial.print("int");
+            case DeviceValueType::INT8:
+                Serial.print("int8");
                 break;
 
-            case DeviceValueType::ULONG:
-                Serial.print("ulong");
+            case DeviceValueType::UINT24:
+                Serial.print("uint24");
+                break;
+
+            case DeviceValueType::UINT32:
+                Serial.print("uint32");
                 break;
 
             case DeviceValueType::BOOL:
@@ -1335,11 +1340,12 @@ void EMSdevice::dump_value_info() {
 
                 if (dv.has_cmd) {
                     switch (dv.type) {
-                    case DeviceValueType::INT:
-                    case DeviceValueType::UINT:
-                    case DeviceValueType::SHORT:
-                    case DeviceValueType::USHORT:
-                    case DeviceValueType::ULONG:
+                    case DeviceValueType::INT8:
+                    case DeviceValueType::UINT8:
+                    case DeviceValueType::INT16:
+                    case DeviceValueType::UINT16:
+                    case DeviceValueType::UINT24:
+                    case DeviceValueType::UINT32:
                         snprintf(entityid, sizeof(entityid), "number.%s", entity_with_tag);
                         break;
                     case DeviceValueType::BOOL:
@@ -1433,35 +1439,36 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
                 break;
             }
 
-            case DeviceValueType::USHORT:
+            case DeviceValueType::UINT16:
                 if (Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
                     json[value] = serialized(Helpers::render_value(val, *(uint16_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
                 }
                 json[type] = F_(number);
                 break;
 
-            case DeviceValueType::UINT:
+            case DeviceValueType::UINT8:
                 if (Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
                     json[value] = serialized(Helpers::render_value(val, *(uint8_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
                 }
                 json[type] = F_(number);
                 break;
 
-            case DeviceValueType::SHORT:
+            case DeviceValueType::INT16:
                 if (Helpers::hasValue(*(int16_t *)(dv.value_p))) {
                     json[value] = serialized(Helpers::render_value(val, *(int16_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
                 }
                 json[type] = F_(number);
                 break;
 
-            case DeviceValueType::INT:
+            case DeviceValueType::INT8:
                 if (Helpers::hasValue(*(int8_t *)(dv.value_p))) {
                     json[value] = serialized(Helpers::render_value(val, *(int8_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
                 }
                 json[type] = F_(number);
                 break;
 
-            case DeviceValueType::ULONG:
+            case DeviceValueType::UINT24:
+            case DeviceValueType::UINT32:
                 if (Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
                     json[value] = serialized(Helpers::render_value(val, *(uint32_t *)(dv.value_p), dv.numeric_operator));
                 }
@@ -1678,15 +1685,15 @@ bool EMSdevice::generate_values(JsonObject output, const uint8_t tag_filter, con
                                      : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1
                                                                              : 0;
                 char    val[10]    = {'\0'};
-                if (dv.type == DeviceValueType::INT) {
+                if (dv.type == DeviceValueType::INT8) {
                     json[name] = serialized(Helpers::render_value(val, *(int8_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
-                } else if (dv.type == DeviceValueType::UINT) {
+                } else if (dv.type == DeviceValueType::UINT8) {
                     json[name] = serialized(Helpers::render_value(val, *(uint8_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
-                } else if (dv.type == DeviceValueType::SHORT) {
+                } else if (dv.type == DeviceValueType::INT16) {
                     json[name] = serialized(Helpers::render_value(val, *(int16_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
-                } else if (dv.type == DeviceValueType::USHORT) {
+                } else if (dv.type == DeviceValueType::UINT16) {
                     json[name] = serialized(Helpers::render_value(val, *(uint16_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
-                } else if (dv.type == DeviceValueType::ULONG) {
+                } else if (dv.type == DeviceValueType::UINT24 || dv.type == DeviceValueType::UINT32) {
                     json[name] = serialized(Helpers::render_value(val, *(uint32_t *)(dv.value_p), dv.numeric_operator));
                 } else if ((dv.type == DeviceValueType::TIME) && Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
                     uint32_t time_value = *(uint32_t *)(dv.value_p);

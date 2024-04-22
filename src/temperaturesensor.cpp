@@ -95,7 +95,7 @@ void TemperatureSensor::loop() {
 #ifndef EMSESP_TEST
                         // don't reset if running in test mode where we simulate sensors
                         for (auto & sensor : sensors_) {
-                            sensor.temperature_c = EMS_VALUE_SHORT_NOTSET;
+                            sensor.temperature_c = EMS_VALUE_INT16_NOTSET;
                         }
 #endif
                     }
@@ -191,7 +191,7 @@ void TemperatureSensor::loop() {
                 if (++scancnt_ > SCAN_MAX) {
                     for (auto & sensor : sensors_) {
                         if (!sensor.read) {
-                            sensor.temperature_c = EMS_VALUE_SHORT_NOTSET;
+                            sensor.temperature_c = EMS_VALUE_INT16_NOTSET;
                             changed_             = true;
                         }
                         sensor.read = false;
@@ -226,7 +226,7 @@ int16_t TemperatureSensor::get_temperature_c(const uint8_t addr[]) {
 #ifndef EMSESP_STANDALONE
     if (!bus_.reset()) {
         LOG_ERROR("Bus reset failed before reading scratchpad from %s", Sensor(addr).id().c_str());
-        return EMS_VALUE_SHORT_NOTSET;
+        return EMS_VALUE_INT16_NOTSET;
     }
     YIELD;
 
@@ -238,7 +238,7 @@ int16_t TemperatureSensor::get_temperature_c(const uint8_t addr[]) {
 
     if (!bus_.reset()) {
         LOG_ERROR("Bus reset failed after reading scratchpad from %s", Sensor(addr).id().c_str());
-        return EMS_VALUE_SHORT_NOTSET;
+        return EMS_VALUE_INT16_NOTSET;
     }
     YIELD;
 
@@ -254,7 +254,7 @@ int16_t TemperatureSensor::get_temperature_c(const uint8_t addr[]) {
                     scratchpad[7],
                     scratchpad[8],
                     Sensor(addr).id().c_str());
-        return EMS_VALUE_SHORT_NOTSET;
+        return EMS_VALUE_INT16_NOTSET;
     }
 
     int16_t raw_value = ((int16_t)scratchpad[SCRATCHPAD_TEMP_MSB] << 8) | scratchpad[SCRATCHPAD_TEMP_LSB];
@@ -281,7 +281,7 @@ int16_t TemperatureSensor::get_temperature_c(const uint8_t addr[]) {
     raw_value = ((int32_t)raw_value * 625 + 500) / 1000; // round to 0.1
     return raw_value;
 #else
-    return EMS_VALUE_SHORT_NOTSET;
+    return EMS_VALUE_INT16_NOTSET;
 #endif
 }
 

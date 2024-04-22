@@ -574,23 +574,23 @@ void Mqtt::ha_status() {
 // these are all from the heartbeat MQTT topic
 #ifndef EMSESP_STANDALONE
     if (!EMSESP::system_.ethernet_connected() || WiFi.isConnected()) {
-        publish_system_ha_sensor_config(DeviceValueType::INT, "WiFi RSSI", "rssi", DeviceValueUOM::DBM);
-        publish_system_ha_sensor_config(DeviceValueType::INT, "WiFi strength", "wifistrength", DeviceValueUOM::PERCENT);
+        publish_system_ha_sensor_config(DeviceValueType::INT8, "WiFi RSSI", "rssi", DeviceValueUOM::DBM);
+        publish_system_ha_sensor_config(DeviceValueType::INT8, "WiFi strength", "wifistrength", DeviceValueUOM::PERCENT);
     }
 #endif
 
     publish_system_ha_sensor_config(DeviceValueType::STRING, "EMS Bus", "bus_status", DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::STRING, "Uptime", "uptime", DeviceValueUOM::NONE);
-    publish_system_ha_sensor_config(DeviceValueType::INT, "Uptime (sec)", "uptime_sec", DeviceValueUOM::SECONDS);
+    publish_system_ha_sensor_config(DeviceValueType::INT8, "Uptime (sec)", "uptime_sec", DeviceValueUOM::SECONDS);
     publish_system_ha_sensor_config(DeviceValueType::BOOL, "NTP status", "ntp_status", DeviceValueUOM::CONNECTIVITY);
-    publish_system_ha_sensor_config(DeviceValueType::INT, "Free memory", "freemem", DeviceValueUOM::KB);
-    publish_system_ha_sensor_config(DeviceValueType::INT, "Max Alloc", "max_alloc", DeviceValueUOM::KB);
-    publish_system_ha_sensor_config(DeviceValueType::INT, "MQTT fails", "mqttfails", DeviceValueUOM::NONE);
-    publish_system_ha_sensor_config(DeviceValueType::INT, "Rx received", "rxreceived", DeviceValueUOM::NONE);
-    publish_system_ha_sensor_config(DeviceValueType::INT, "Rx fails", "rxfails", DeviceValueUOM::NONE);
-    publish_system_ha_sensor_config(DeviceValueType::INT, "Tx reads", "txreads", DeviceValueUOM::NONE);
-    publish_system_ha_sensor_config(DeviceValueType::INT, "Tx writes", "txwrites", DeviceValueUOM::NONE);
-    publish_system_ha_sensor_config(DeviceValueType::INT, "Tx fails", "txfails", DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::INT8, "Free memory", "freemem", DeviceValueUOM::KB);
+    publish_system_ha_sensor_config(DeviceValueType::INT8, "Max Alloc", "max_alloc", DeviceValueUOM::KB);
+    publish_system_ha_sensor_config(DeviceValueType::INT8, "MQTT fails", "mqttfails", DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::INT8, "Rx received", "rxreceived", DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::INT8, "Rx fails", "rxfails", DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::INT8, "Tx reads", "txreads", DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::INT8, "Tx writes", "txwrites", DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::INT8, "Tx fails", "txfails", DeviceValueUOM::NONE);
 }
 
 // add sub or pub task to the queue.
@@ -874,11 +874,12 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // if it's a command then we can use Number, Switch, Select or Text. Otherwise stick to Sensor
     if (has_cmd) {
         switch (type) {
-        case DeviceValueType::INT:
-        case DeviceValueType::UINT:
-        case DeviceValueType::SHORT:
-        case DeviceValueType::USHORT:
-        case DeviceValueType::ULONG:
+        case DeviceValueType::INT8:
+        case DeviceValueType::UINT8:
+        case DeviceValueType::INT16:
+        case DeviceValueType::UINT16:
+        case DeviceValueType::UINT24:
+        case DeviceValueType::UINT32:
             // number - https://www.home-assistant.io/integrations/number.mqtt
             // older Domoticz does not support number, use sensor
             if (discovery_type() == discoveryType::HOMEASSISTANT || discovery_type() == discoveryType::DOMOTICZ_LATEST) {
@@ -1151,13 +1152,13 @@ void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, con
     case DeviceValueUOM::NONE:
         // for device entities which have numerical values, with no UOM
         if ((type != DeviceValueType::STRING)
-            && (type == DeviceValueType::INT || type == DeviceValueType::UINT || type == DeviceValueType::SHORT || type == DeviceValueType::USHORT
-                || type == DeviceValueType::ULONG)) {
+            && (type == DeviceValueType::INT8 || type == DeviceValueType::UINT8 || type == DeviceValueType::INT16 || type == DeviceValueType::UINT16
+                || type == DeviceValueType::UINT24 || type == DeviceValueType::UINT32)) {
             doc["ic"] = F_(iconnum); // set icon
             // determine if its a measurement or total increasing
             // most of the values are measurement. for example Tx Reads will increment but can be reset to 0 after a restart
             // all the starts are increasing, and they are ULONGs
-            if (type == DeviceValueType::ULONG) {
+            if (type == DeviceValueType::UINT24 || type == DeviceValueType::UINT32) {
                 doc[sc_ha] = F_(total_increasing);
             } else {
                 doc[sc_ha] = F_(measurement); // default to measurement

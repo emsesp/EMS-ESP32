@@ -439,47 +439,47 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         uint8_t message_data[] = {1, 2, 3, 4, 5, 6, 7, 8, 9}; // message_length is 9
         auto    telegram       = std::make_shared<Telegram>(Telegram::Operation::RX, 0x10, 0x11, 0x1234, 0, message_data, sizeof(message_data));
 
-        uint8_t uint8b = EMS_VALUE_UINT_NOTSET;
+        uint8_t uint8b = EMS_VALUE_UINT8_NOTSET;
         telegram->read_value(uint8b, 0);
         shell.printfln("uint8: expecting %02X, got:%02X", 1, uint8b);
 
-        int8_t int8b = EMS_VALUE_INT_NOTSET;
+        int8_t int8b = EMS_VALUE_INT8_NOTSET;
         telegram->read_value(int8b, 0);
         shell.printfln("int8: expecting %02X, got:%02X", 1, int8b);
 
-        uint16_t uint16b = EMS_VALUE_USHORT_NOTSET;
+        uint16_t uint16b = EMS_VALUE_UINT16_NOTSET;
         telegram->read_value(uint16b, 1);
         shell.printfln("uint16: expecting %02X, got:%02X", 0x0203, uint16b);
 
-        int16_t int16b = EMS_VALUE_SHORT_NOTSET;
+        int16_t int16b = EMS_VALUE_INT16_NOTSET;
         telegram->read_value(int16b, 1);
         shell.printfln("int16: expecting %02X, got:%02X", 0x0203, int16b);
 
-        int16_t int16b8 = EMS_VALUE_SHORT_NOTSET;
+        int16_t int16b8 = EMS_VALUE_INT16_NOTSET;
         telegram->read_value(int16b8, 1, 1); // force to 1 byte
         shell.printfln("int16 1 byte: expecting %02X, got:%02X", 0x02, int16b8);
 
-        uint32_t uint32b = EMS_VALUE_ULONG_NOTSET;
+        uint32_t uint32b = EMS_VALUE_UINT24_NOTSET;
         telegram->read_value(uint32b, 1, 3);
         shell.printfln("uint32 3 bytes: expecting %02X, got:%02X", 0x020304, uint32b);
 
-        uint32b = EMS_VALUE_ULONG_NOTSET;
+        uint32b = EMS_VALUE_UINT24_NOTSET;
         telegram->read_value(uint32b, 1);
         shell.printfln("uint32 4 bytes: expecting %02X, got:%02X", 0x02030405, uint32b);
 
         // check out of bounds
-        uint16_t uint16 = EMS_VALUE_USHORT_NOTSET;
+        uint16_t uint16 = EMS_VALUE_UINT16_NOTSET;
         telegram->read_value(uint16, 9);
-        shell.printfln("uint16 out-of-bounds: was:%02X, new:%02X", EMS_VALUE_USHORT_NOTSET, uint16);
-        uint8_t uint8oob = EMS_VALUE_UINT_NOTSET;
+        shell.printfln("uint16 out-of-bounds: was:%02X, new:%02X", EMS_VALUE_UINT16_NOTSET, uint16);
+        uint8_t uint8oob = EMS_VALUE_UINT8_NOTSET;
         telegram->read_value(uint8oob, 9);
-        shell.printfln("uint8 out-of-bounds: was:%02X, new:%02X", EMS_VALUE_UINT_NOTSET, uint8oob);
+        shell.printfln("uint8 out-of-bounds: was:%02X, new:%02X", EMS_VALUE_UINT8_NOTSET, uint8oob);
 
         // check read bit
-        uint8_t uint8bitb = EMS_VALUE_UINT_NOTSET;
+        uint8_t uint8bitb = EMS_VALUE_UINT8_NOTSET;
         telegram->read_bitvalue(uint8bitb, 1, 1); // value is 0x02 = 0000 0010
         shell.printfln("uint8 bit read: expecting 1, got:%d", uint8bitb);
-        uint8bitb = EMS_VALUE_UINT_NOTSET;
+        uint8bitb = EMS_VALUE_UINT8_NOTSET;
         telegram->read_bitvalue(uint8bitb, 0, 0); // value is 0x01 = 0000 0001
         shell.printfln("uint8 bit read: expecting 1, got:%d", uint8bitb);
 

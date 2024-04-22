@@ -379,12 +379,13 @@ export const enum DeviceType {
 // matches emsdevicevalue.h
 export const enum DeviceValueType {
   BOOL,
-  INT,
-  UINT,
-  SHORT,
-  USHORT,
-  ULONG,
-  TIME, // same as ULONG (32 bits)
+  INT8,
+  UINT8,
+  INT16,
+  UINT16,
+  UINT24,
+  TIME, // same as UINT24
+  UINT32,
   ENUM,
   STRING,
   CMD
@@ -393,12 +394,13 @@ export const enum DeviceValueType {
 export const DeviceValueTypeNames = [
   //
   'BOOL',
-  'INT',
-  'UINT',
-  'SHORT',
-  'USHORT',
-  'ULONG',
+  'INT8',
+  'UINT8',
+  'INT16',
+  'UINT16',
+  'UINT24',
   'TIME',
+  'UINT32',
   'ENUM',
   'RAW',
   'CMD'

@@ -32,7 +32,7 @@ class Roomctrl {
     static void set_remotetemp(const uint8_t type, const uint8_t hc, const int16_t temp);
     static void set_remotehum(const uint8_t type, const uint8_t hc, const int8_t hum);
     static bool is_remote(const uint8_t hc) {
-        return (hc < 4 && remotetemp_[hc] != EMS_VALUE_SHORT_NOTSET);
+        return (hc < 4 && remotetemp_[hc] != EMS_VALUE_INT16_NOTSET);
     }
 
   private:

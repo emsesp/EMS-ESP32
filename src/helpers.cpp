@@ -500,11 +500,11 @@ bool Helpers::hasValue(const uint8_t & value, const uint8_t isBool) {
     if (isBool == EMS_VALUE_BOOL) {
         return (value != EMS_VALUE_BOOL_NOTSET);
     }
-    return (value != EMS_VALUE_UINT_NOTSET);
+    return (value != EMS_VALUE_UINT8_NOTSET);
 }
 
 bool Helpers::hasValue(const int8_t & value) {
-    return (value != EMS_VALUE_INT_NOTSET);
+    return (value != EMS_VALUE_INT8_NOTSET);
 }
 
 bool Helpers::hasValue(const char * value) {
@@ -517,15 +517,15 @@ bool Helpers::hasValue(const char * value) {
 
 // for short these are typically 0x8300, 0x7D00 and sometimes 0x8000
 bool Helpers::hasValue(const int16_t & value) {
-    return (abs(value) < EMS_VALUE_USHORT_NOTSET);
+    return (abs(value) < EMS_VALUE_UINT16_NOTSET);
 }
 
 bool Helpers::hasValue(const uint16_t & value) {
-    return (value < EMS_VALUE_USHORT_NOTSET);
+    return (value < EMS_VALUE_UINT16_NOTSET);
 }
 
 bool Helpers::hasValue(const uint32_t & value) {
-    return (value != EMS_VALUE_ULONG_NOTSET && value != EMS_VALUE_ULLONG_NOTSET);
+    return (value != EMS_VALUE_UINT24_NOTSET && value != EMS_VALUE_UINT32_NOTSET);
 }
 
 // checks if we can convert a char string to an int value

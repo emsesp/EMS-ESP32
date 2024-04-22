@@ -23,8 +23,8 @@ namespace emsesp {
 // init statics
 bool     Roomctrl::switch_off_[HCS] = {false, false, false, false};
 uint32_t Roomctrl::rc_time_[HCS]    = {0, 0, 0, 0};
-int16_t  Roomctrl::remotetemp_[HCS] = {EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET, EMS_VALUE_SHORT_NOTSET};
-uint8_t  Roomctrl::remotehum_[HCS]  = {EMS_VALUE_UINT_NOTSET, EMS_VALUE_UINT_NOTSET, EMS_VALUE_UINT_NOTSET, EMS_VALUE_UINT_NOTSET};
+int16_t  Roomctrl::remotetemp_[HCS] = {EMS_VALUE_INT16_NOTSET, EMS_VALUE_INT16_NOTSET, EMS_VALUE_INT16_NOTSET, EMS_VALUE_INT16_NOTSET};
+uint8_t  Roomctrl::remotehum_[HCS]  = {EMS_VALUE_UINT8_NOTSET, EMS_VALUE_UINT8_NOTSET, EMS_VALUE_UINT8_NOTSET, EMS_VALUE_UINT8_NOTSET};
 uint8_t  Roomctrl::sendtype_[HCS]   = {SendType::TEMP, SendType::TEMP, SendType::TEMP, SendType::TEMP};
 uint8_t  Roomctrl::type_[HCS]       = {RemoteType::NONE, RemoteType::NONE, RemoteType::NONE, RemoteType::NONE};
 
@@ -35,8 +35,8 @@ void Roomctrl::set_remotetemp(const uint8_t type, const uint8_t hc, const int16_
     if (!type_[hc] && !type) {
         return;
     }
-    if (remotetemp_[hc] != EMS_VALUE_SHORT_NOTSET && temp == EMS_VALUE_SHORT_NOTSET) { // switch remote off
-        remotetemp_[hc] = EMS_VALUE_SHORT_NOTSET;
+    if (remotetemp_[hc] != EMS_VALUE_INT16_NOTSET && temp == EMS_VALUE_INT16_NOTSET) { // switch remote off
+        remotetemp_[hc] = EMS_VALUE_INT16_NOTSET;
         switch_off_[hc] = true;
         rc_time_[hc]    = uuid::get_uptime() - SEND_INTERVAL; // send now
         sendtype_[hc]   = SendType::TEMP;
@@ -90,7 +90,7 @@ void Roomctrl::send(uint8_t addr) {
         return;
     }
     // no reply if the temperature is not set
-    if (!switch_off_[hc] && remotetemp_[hc] == EMS_VALUE_SHORT_NOTSET && remotehum_[hc] == EMS_VALUE_UINT_NOTSET) {
+    if (!switch_off_[hc] && remotetemp_[hc] == EMS_VALUE_INT16_NOTSET && remotehum_[hc] == EMS_VALUE_UINT8_NOTSET) {
         return;
     }
 
@@ -98,13 +98,13 @@ void Roomctrl::send(uint8_t addr) {
         if (type_[hc] == RC100H) {
             if (sendtype_[hc] == SendType::HUMI) { // send humidity
                 if (switch_off_[hc]) {
-                    remotehum_[hc] = EMS_VALUE_UINT_NOTSET;
+                    remotehum_[hc] = EMS_VALUE_UINT8_NOTSET;
                 }
                 rc_time_[hc] = uuid::get_uptime();
                 humidity(addr, 0x10, hc);
                 sendtype_[hc] = SendType::TEMP;
             } else { // temperature telegram
-                if (remotehum_[hc] != EMS_VALUE_UINT_NOTSET) {
+                if (remotehum_[hc] != EMS_VALUE_UINT8_NOTSET) {
                     sendtype_[hc] = SendType::HUMI;
                 } else {
                     rc_time_[hc] = uuid::get_uptime();
@@ -121,7 +121,7 @@ void Roomctrl::send(uint8_t addr) {
             rc_time_[hc] = uuid::get_uptime();
             temperature(addr, 0x00, hc); // send to all
         }
-        if (remotehum_[hc] == EMS_VALUE_UINT_NOTSET && switch_off_[hc]) {
+        if (remotehum_[hc] == EMS_VALUE_UINT8_NOTSET && switch_off_[hc]) {
             switch_off_[hc] = false;
             type_[hc]       = RemoteType::NONE;
         }
@@ -143,7 +143,7 @@ void Roomctrl::check(uint8_t addr, const uint8_t * data, const uint8_t length) {
         return;
     }
     // no reply if the temperature is not set
-    if (remotetemp_[hc] == EMS_VALUE_SHORT_NOTSET) {
+    if (remotetemp_[hc] == EMS_VALUE_INT16_NOTSET) {
         return;
     }
     // reply to writes with write nack byte
@@ -156,9 +156,9 @@ void Roomctrl::check(uint8_t addr, const uint8_t * data, const uint8_t length) {
     // empty message back if temperature not set or unknown message type
     if (data[2] == EMSdevice::EMS_TYPE_VERSION) {
         version(addr, data[0], hc);
-    } else if (length == 6 && remotetemp_[hc] == EMS_VALUE_SHORT_NOTSET) {
+    } else if (length == 6 && remotetemp_[hc] == EMS_VALUE_INT16_NOTSET) {
         unknown(addr, data[0], data[2], data[3]);
-    } else if (length == 8 && remotetemp_[hc] == EMS_VALUE_SHORT_NOTSET) {
+    } else if (length == 8 && remotetemp_[hc] == EMS_VALUE_INT16_NOTSET) {
         unknown(addr, data[0], data[3], data[5], data[6]);
     } else if (data[2] == 0xAF && data[3] == 0) {
         temperature(addr, data[0], hc);
@@ -166,7 +166,7 @@ void Roomctrl::check(uint8_t addr, const uint8_t * data, const uint8_t length) {
         temperature(addr, data[0], hc);
     } else if (length == 8 && data[2] == 0xFF && data[3] == 0 && data[5] == 3 && data[6] == 0x2B + hc) { // EMS+ temperature
         temperature(addr, data[0], hc);
-    } else if (length == 8 && data[2] == 0xFF && data[3] == 0 && data[5] == 3 && data[6] == 0x7B + hc && remotehum_[hc] != EMS_VALUE_UINT_NOTSET) { // EMS+ humidity
+    } else if (length == 8 && data[2] == 0xFF && data[3] == 0 && data[5] == 3 && data[6] == 0x7B + hc && remotehum_[hc] != EMS_VALUE_UINT8_NOTSET) { // EMS+ humidity
         humidity(addr, data[0], hc);
     } else if (length == 6) { // ems query
         unknown(addr, data[0], data[2], data[3]);
@@ -332,7 +332,7 @@ void Roomctrl::humidity(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[3]  = 0;
         data[4]  = 3;
         data[5]  = 0x7B + hc;
-        data[6]  = dew == EMS_VALUE_SHORT_NOTSET ? EMS_VALUE_INT_NOTSET : (uint8_t)((dew + 5) / 10);
+        data[6]  = dew == EMS_VALUE_INT16_NOTSET ? EMS_VALUE_INT8_NOTSET : (uint8_t)((dew + 5) / 10);
         data[7]  = remotehum_[hc];
         data[8]  = (uint8_t)(dew << 8);
         data[9]  = (uint8_t)(dew & 0xFF);
@@ -384,8 +384,8 @@ void Roomctrl::replyF7(uint8_t addr, uint8_t dst, uint8_t offset, uint8_t typehh
 }
 
 int16_t Roomctrl::calc_dew(int16_t temp, uint8_t humi) {
-    if (humi == EMS_VALUE_UINT_NOTSET || temp == EMS_VALUE_SHORT_NOTSET) {
-        return EMS_VALUE_SHORT_NOTSET;
+    if (humi == EMS_VALUE_UINT8_NOTSET || temp == EMS_VALUE_INT16_NOTSET) {
+        return EMS_VALUE_INT16_NOTSET;
     }
     const float k2 = 17.62;
     const float k3 = 243.12;

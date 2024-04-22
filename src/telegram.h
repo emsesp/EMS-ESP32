@@ -40,30 +40,32 @@ static constexpr uint8_t  EMS_VALUE_BOOL          = 0xFF;       // used to mark 
 static constexpr uint8_t  EMS_VALUE_BOOL_OFF      = 0x00;       // boolean false
 static constexpr uint8_t  EMS_VALUE_BOOL_ON       = 0x01;       // boolean true. True can be 0x01 or 0xFF sometimes
 static constexpr uint8_t  EMS_VALUE_BOOL_NOTSET   = 0xFE;       // random number for booleans, that's not 0, 1 or FF
-static constexpr uint8_t  EMS_VALUE_UINT_NOTSET   = 0xFF;       // for 8-bit unsigned ints/bytes
-static constexpr int8_t   EMS_VALUE_INT_NOTSET    = 0x7F;       // for signed 8-bit ints/bytes
-static constexpr uint16_t EMS_VALUE_USHORT_NOTSET = 0x7D00;     // 32000: for 2-byte unsigned shorts
-static constexpr int16_t  EMS_VALUE_SHORT_NOTSET  = 0x7D00;     // 32000: for 2-byte signed shorts
-static constexpr uint32_t EMS_VALUE_ULONG_NOTSET  = 0x00FFFFFF; // for 3-byte longs
-static constexpr uint32_t EMS_VALUE_ULLONG_NOTSET = 0xFFFFFFFF; // for 4-byte longs
+static constexpr uint8_t  EMS_VALUE_UINT8_NOTSET  = 0xFF;       // for 8-bit unsigned ints/bytes
+static constexpr int8_t   EMS_VALUE_INT8_NOTSET   = 0x7F;       // for signed 8-bit ints/bytes
+static constexpr uint16_t EMS_VALUE_UINT16_NOTSET = 0x7D00;     // 32000: for 2-byte unsigned shorts
+static constexpr int16_t  EMS_VALUE_INT16_NOTSET  = 0x7D00;     // 32000: for 2-byte signed shorts
+static constexpr uint32_t EMS_VALUE_UINT24_NOTSET = 0x00FFFFFF; // for 3-byte longs
+static constexpr uint32_t EMS_VALUE_UINT32_NOTSET = 0xFFFFFFFF; // for 4-byte longs
 
 static constexpr uint8_t EMS_MAX_TELEGRAM_LENGTH         = 32; // max length of a complete EMS telegram
 static constexpr uint8_t EMS_MAX_TELEGRAM_MESSAGE_LENGTH = 27; // max length of message block, assuming EMS1.0
 
-#define EMS_VALUE_DEFAULT_INT EMS_VALUE_INT_NOTSET
-#define EMS_VALUE_DEFAULT_UINT EMS_VALUE_UINT_NOTSET
-#define EMS_VALUE_DEFAULT_SHORT EMS_VALUE_SHORT_NOTSET
-#define EMS_VALUE_DEFAULT_USHORT EMS_VALUE_USHORT_NOTSET
-#define EMS_VALUE_DEFAULT_ULONG EMS_VALUE_ULONG_NOTSET
+#define EMS_VALUE_DEFAULT_INT8 EMS_VALUE_INT8_NOTSET
+#define EMS_VALUE_DEFAULT_UINT8 EMS_VALUE_UINT8_NOTSET
+#define EMS_VALUE_DEFAULT_INT16 EMS_VALUE_INT16_NOTSET
+#define EMS_VALUE_DEFAULT_UINT16 EMS_VALUE_UINT16_NOTSET
+#define EMS_VALUE_DEFAULT_UINT24 EMS_VALUE_UINT24_NOTSET
+#define EMS_VALUE_DEFAULT_UIN32 EMS_VALUE_UINT32_NOTSET
 #define EMS_VALUE_DEFAULT_BOOL EMS_VALUE_BOOL_NOTSET
-#define EMS_VALUE_DEFAULT_ENUM EMS_VALUE_UINT_NOTSET
+#define EMS_VALUE_DEFAULT_ENUM EMS_VALUE_UINT8_NOTSET
 
 // used when System::test_set_all_active() is set
-#define EMS_VALUE_DEFAULT_INT_DUMMY 11
-#define EMS_VALUE_DEFAULT_UINT_DUMMY -12
-#define EMS_VALUE_DEFAULT_SHORT_DUMMY -1234
-#define EMS_VALUE_DEFAULT_USHORT_DUMMY 1235
-#define EMS_VALUE_DEFAULT_ULONG_DUMMY 12456
+#define EMS_VALUE_DEFAULT_INT8_DUMMY 11
+#define EMS_VALUE_DEFAULT_UINT8_DUMMY -12
+#define EMS_VALUE_DEFAULT_INT16_DUMMY -1234
+#define EMS_VALUE_DEFAULT_UINT16_DUMMY 1235
+#define EMS_VALUE_DEFAULT_UINT24_DUMMY 12456
+#define EMS_VALUE_DEFAULT_UINT32_DUMMY 124567
 #define EMS_VALUE_DEFAULT_BOOL_DUMMY 1
 #define EMS_VALUE_DEFAULT_ENUM_DUMMY 1
 

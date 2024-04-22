@@ -38,31 +38,31 @@ Extension::Extension(uint8_t device_type, uint8_t device_id, uint8_t product_id,
 
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &headerTemp_,
-                          DeviceValueType::SHORT,
+                          DeviceValueType::INT16,
                           DeviceValueNumOp::DV_NUMOP_DIV10,
                           FL_(flowTempVf),
                           DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &input_, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(input), DeviceValueUOM::VOLTS);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &outPower_, DeviceValueType::UINT, FL_(outPower), DeviceValueUOM::PERCENT);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setPower_, DeviceValueType::UINT, FL_(setPower), DeviceValueUOM::PERCENT);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setPoint_, DeviceValueType::UINT, FL_(setPoint), DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &input_, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(input), DeviceValueUOM::VOLTS);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &outPower_, DeviceValueType::UINT8, FL_(outPower), DeviceValueUOM::PERCENT);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setPower_, DeviceValueType::UINT8, FL_(setPower), DeviceValueUOM::PERCENT);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setPoint_, DeviceValueType::UINT8, FL_(setPoint), DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &minV_,
-                          DeviceValueType::UINT,
+                          DeviceValueType::UINT8,
                           DeviceValueNumOp::DV_NUMOP_DIV10,
                           FL_(minV),
                           DeviceValueUOM::VOLTS,
                           MAKE_CF_CB(set_minV));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &maxV_,
-                          DeviceValueType::UINT,
+                          DeviceValueType::UINT8,
                           DeviceValueNumOp::DV_NUMOP_DIV10,
                           FL_(maxV),
                           DeviceValueUOM::VOLTS,
                           MAKE_CF_CB(set_maxV));
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &minT_, DeviceValueType::UINT, FL_(minT), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_minT));
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &maxT_, DeviceValueType::UINT, FL_(maxT), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_maxT));
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &dip_, DeviceValueType::UINT, FL_(mode), DeviceValueUOM::NONE);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &minT_, DeviceValueType::UINT8, FL_(minT), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_minT));
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &maxT_, DeviceValueType::UINT8, FL_(maxT), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_maxT));
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &dip_, DeviceValueType::UINT8, FL_(mode), DeviceValueUOM::NONE);
     // register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &errorState_, DeviceValueType::BOOL, FL_(error), DeviceValueUOM::NONE);
 }
 

@@ -438,7 +438,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
 // add the HVAC/Climate HA component for the HC
 void Thermostat::add_ha_climate(std::shared_ptr<HeatingCircuit> hc) const {
     if (!Mqtt::ha_enabled()) {
-        hc->climate = EMS_VALUE_UINT_NOTSET;
+        hc->climate = EMS_VALUE_UINT8_NOTSET;
         return;
     }
 
@@ -449,7 +449,7 @@ void Thermostat::add_ha_climate(std::shared_ptr<HeatingCircuit> hc) const {
             hc->climate = 0; // use selTemp, as there is no sensor present in the thermostat
         }
     } else {
-        hc->climate = EMS_VALUE_UINT_NOTSET;
+        hc->climate = EMS_VALUE_UINT8_NOTSET;
     }
 }
 
@@ -734,7 +734,7 @@ void Thermostat::process_RemoteHumidity(std::shared_ptr<const Telegram> telegram
     if (telegram->offset == 0 && telegram->message_length < 4) {
         int8_t dew = dewtemperature_ / 10;
         telegram->read_value(dew, 0);
-        if (dew != EMS_VALUE_INT_NOTSET && dewtemperature_ != dew * 10) {
+        if (dew != EMS_VALUE_INT8_NOTSET && dewtemperature_ != dew * 10) {
             dewtemperature_ = dew * 10;
             has_update(dewtemperature_);
         }
@@ -1036,10 +1036,10 @@ void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) 
     // use summertemp or hpoperatingstate, https://github.com/emsesp/EMS-ESP32/issues/747, #550, #503
     if ((hc->statusbyte & 1) || !is_received(summer2_typeids[hc->hc()])) {
         has_update(hc->summermode, hc->statusbyte & 0x50 ? 1 : 0);
-        has_update(hc->hpoperatingstate, EMS_VALUE_UINT_NOTSET);
+        has_update(hc->hpoperatingstate, EMS_VALUE_UINT8_NOTSET);
     } else {
         has_enumupdate(telegram, hc->hpoperatingstate, 20, 1); // 1:heating, 2:off, 3:cooling
-        has_update(hc->summermode, EMS_VALUE_UINT_NOTSET);
+        has_update(hc->summermode, EMS_VALUE_UINT8_NOTSET);
     }
     has_update(telegram, hc->targetflowtemp, 4);
     has_update(telegram, hc->curroominfl, 27);
@@ -1137,10 +1137,10 @@ void Thermostat::process_RC300Summer2(std::shared_ptr<const Telegram> telegram) 
     }
     if (hc->statusbyte & 1) {
         has_update(telegram, hc->summersetmode, 0);
-        has_update(hc->hpoperatingmode, EMS_VALUE_UINT_NOTSET);
+        has_update(hc->hpoperatingmode, EMS_VALUE_UINT8_NOTSET);
     } else {
         has_update(telegram, hc->hpoperatingmode, 0);
-        has_update(hc->summersetmode, EMS_VALUE_UINT_NOTSET);
+        has_update(hc->summersetmode, EMS_VALUE_UINT8_NOTSET);
     }
     has_update(telegram, hc->summertemp, 1);
     has_update(telegram, hc->heatondelay, 2);
@@ -1183,10 +1183,10 @@ void Thermostat::process_RC300WWmode(std::shared_ptr<const Telegram> telegram) {
 
     if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400) {
         const uint8_t modes[] = {0, 5, 1, 2, 4}; // off, eco+, eco, comfort, auto
-        uint8_t       wwmode  = wwMode_ < sizeof(modes) ? modes[wwMode_] : EMS_VALUE_UINT_NOTSET;
+        uint8_t       wwmode  = wwMode_ < sizeof(modes) ? modes[wwMode_] : EMS_VALUE_UINT8_NOTSET;
         telegram->read_value(wwmode, 2);
         const uint8_t modes1[] = {0, 2, 3, 0, 4, 1};
-        has_update(wwMode_, wwmode < sizeof(modes1) ? modes1[wwmode] : EMS_VALUE_UINT_NOTSET);
+        has_update(wwMode_, wwmode < sizeof(modes1) ? modes1[wwmode] : EMS_VALUE_UINT8_NOTSET);
     } else {
         has_update(telegram, wwMode_, 2); // 0=off, 1=low, 2=high, 3=auto, 4=own prog
     }
@@ -1207,10 +1207,10 @@ void Thermostat::process_RC300WW2mode(std::shared_ptr<const Telegram> telegram) 
 
     if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400) {
         const uint8_t modes[] = {0, 5, 1, 2, 4}; // off, eco+, eco, comfort, auto
-        uint8_t       wwmode  = wwMode_ < sizeof(modes) ? modes[wwMode2_] : EMS_VALUE_UINT_NOTSET;
+        uint8_t       wwmode  = wwMode_ < sizeof(modes) ? modes[wwMode2_] : EMS_VALUE_UINT8_NOTSET;
         telegram->read_value(wwmode, 2);
         const uint8_t modes1[] = {0, 2, 3, 0, 4, 1};
-        has_update(wwMode2_, wwmode < sizeof(modes1) ? modes1[wwmode] : EMS_VALUE_UINT_NOTSET);
+        has_update(wwMode2_, wwmode < sizeof(modes1) ? modes1[wwmode] : EMS_VALUE_UINT8_NOTSET);
     } else {
         has_update(telegram, wwMode2_, 2); // 0=off, 1=low, 2=high, 3=auto, 4=own prog
     }
@@ -1582,7 +1582,7 @@ void Thermostat::process_RCErrorMessage(std::shared_ptr<const Telegram> telegram
     if (telegram->message_data[4] & 0x80) {          // valid date
         static uint32_t lastCodeDate_           = 0; // last code date
         char            code[sizeof(lastCode_)] = {0};
-        uint16_t        codeNo                  = EMS_VALUE_USHORT_NOTSET;
+        uint16_t        codeNo                  = EMS_VALUE_UINT16_NOTSET;
         code[0]                                 = telegram->message_data[0];
         code[1]                                 = telegram->message_data[1];
         code[2]                                 = 0;
@@ -1592,7 +1592,7 @@ void Thermostat::process_RCErrorMessage(std::shared_ptr<const Telegram> telegram
         uint8_t  day      = telegram->message_data[7];
         uint8_t  hour     = telegram->message_data[6];
         uint8_t  min      = telegram->message_data[8];
-        uint16_t duration = EMS_VALUE_SHORT_NOTSET;
+        uint16_t duration = EMS_VALUE_INT16_NOTSET;
         uint32_t date     = (year - 2000) * 535680UL + month * 44640UL + day * 1440UL + hour * 60 + min;
         telegram->read_value(duration, 9);
         // store only the newest code from telegrams 12 and 13
@@ -1853,7 +1853,7 @@ bool Thermostat::set_remotetemp(const char * value, const int8_t id) {
     }
 
     if (f > 100 || f < 0) {
-        hc->remotetemp = EMS_VALUE_SHORT_NOTSET;
+        hc->remotetemp = EMS_VALUE_INT16_NOTSET;
     } else {
         hc->remotetemp = (int16_t)(f * 10);
     }
@@ -1870,8 +1870,8 @@ bool Thermostat::set_remotetemp(const char * value, const int8_t id) {
         } else if (hc->control == 2) {                                            // RC100(2)
             Roomctrl::set_remotetemp(Roomctrl::RC100, hc->hc(), hc->remotetemp);  // RC100
         } else {
-            hc->remotetemp = EMS_VALUE_SHORT_NOTSET;
-            Roomctrl::set_remotetemp(0, hc->hc(), EMS_VALUE_SHORT_NOTSET); // unknown remote set, switch off
+            hc->remotetemp = EMS_VALUE_INT16_NOTSET;
+            Roomctrl::set_remotetemp(0, hc->hc(), EMS_VALUE_INT16_NOTSET); // unknown remote set, switch off
         }
     }
 
@@ -1891,7 +1891,7 @@ bool Thermostat::set_remotehum(const char * value, const int8_t id) {
     }
 
     if (h > 100 || h < 0) {
-        hc->remotehum = EMS_VALUE_UINT_NOTSET;
+        hc->remotehum = EMS_VALUE_UINT8_NOTSET;
     } else {
         hc->remotehum = h;
     }
@@ -1990,7 +1990,7 @@ bool Thermostat::set_control(const char * value, const int8_t id) {
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400 || model() == EMSdevice::EMS_DEVICE_FLAG_RC300 || model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
         if (Helpers::value2enum(value, ctrl, FL_(enum_control1))) {
             write_command(hpmode_typeids[hc->hc()], 3, ctrl);
-            if (hc->remotetemp != EMS_VALUE_SHORT_NOTSET && ctrl > 0) {
+            if (hc->remotetemp != EMS_VALUE_INT16_NOTSET && ctrl > 0) {
                 if (ctrl == 1) {
                     Roomctrl::set_remotetemp(Roomctrl::RC200, hc->hc(), hc->remotetemp);
                 } else if (ctrl == 2) {
@@ -1998,7 +1998,7 @@ bool Thermostat::set_control(const char * value, const int8_t id) {
                 } else if (ctrl == 3) {
                     Roomctrl::set_remotetemp(Roomctrl::RC100H, hc->hc(), hc->remotetemp);
                 } else {
-                    hc->remotetemp = EMS_VALUE_SHORT_NOTSET;
+                    hc->remotetemp = EMS_VALUE_INT16_NOTSET;
                     Roomctrl::set_remotetemp(0, hc->hc(), hc->remotetemp);
                 }
                 // Roomctrl::set_remotetemp(ctrl == 1 ? Roomctrl::RC200 : ctrl == 3 ? Roomctrl::RC100H : Roomctrl::RC100, hc->hc(), hc->remotetemp);
@@ -3783,30 +3783,30 @@ void Thermostat::register_device_values() {
     // RF remote sensor seen at 0x40, maybe this is also for different hc with id 0x40 - 0x47? emsesp.cpp maps only 0x40
     if (device_id() >= 0x40 && device_id() <= 0x47) {
         uint8_t tag = DeviceValueTAG::TAG_HC1 + device_id() - 0x40;
-        register_device_value(tag, &tempsensor1_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(RFTemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &tempsensor1_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(RFTemp), DeviceValueUOM::DEGREES);
         return;
     }
     // RC100H remote with humidity, this is also EMSdevice::EMS_DEVICE_FLAG_RC100 for set_calinttemp
     if (device_id() >= 0x38 && device_id() <= 0x3F) {
         // each device controls only one hc, so we tag the values
         uint8_t tag = DeviceValueTAG::TAG_HC1 + device_id() - 0x38;
-        register_device_value(tag, &tempsensor1_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(remotetemp), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &dewtemperature_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(dewTemperature), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &humidity_, DeviceValueType::UINT, FL_(airHumidity), DeviceValueUOM::PERCENT);
+        register_device_value(tag, &tempsensor1_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(remotetemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &dewtemperature_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(dewTemperature), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &humidity_, DeviceValueType::UINT8, FL_(airHumidity), DeviceValueUOM::PERCENT);
         register_device_value(tag,
                               &ibaCalIntTemperature_,
-                              DeviceValueType::INT,
+                              DeviceValueType::INT8,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(ibaCalIntTemperature),
                               DeviceValueUOM::DEGREES_R,
                               MAKE_CF_CB(set_calinttemp));
-        register_device_value(tag, &battery_, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(battery), DeviceValueUOM::PERCENT);
+        register_device_value(tag, &battery_, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(battery), DeviceValueUOM::PERCENT);
         return;
     }
     // Junkers FB10 remote, show only internal sensor
     if (this->model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS && device_id() >= 0x18 && device_id() <= 0x1B) {
         uint8_t tag = DeviceValueTAG::TAG_HC1 + device_id() - 0x18;
-        register_device_value(tag, &tempsensor1_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(remotetemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &tempsensor1_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(remotetemp), DeviceValueUOM::DEGREES);
         return;
     }
     // Common for all thermostats
@@ -3826,7 +3826,7 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_datetime));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &ibaCalIntTemperature_,
-                              DeviceValueType::INT,
+                              DeviceValueType::INT8,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(ibaCalIntTemperature),
                               DeviceValueUOM::DEGREES_R,
@@ -3839,11 +3839,11 @@ void Thermostat::register_device_values() {
                               DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &dampedoutdoortemp2_,
-                              DeviceValueType::SHORT,
+                              DeviceValueType::INT16,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(dampedoutdoortemp),
                               DeviceValueUOM::DEGREES);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &floordrytemp_, DeviceValueType::UINT, FL_(floordrytemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &floordrytemp_, DeviceValueType::UINT8, FL_(floordrytemp), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &ibaBuildingType_,
                               DeviceValueType::ENUM,
@@ -3853,12 +3853,12 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_building));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &ibaMinExtTemperature_,
-                              DeviceValueType::INT,
+                              DeviceValueType::INT8,
                               FL_(ibaMinExtTemperature),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_minexttemp));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &ibaDamping_, DeviceValueType::BOOL, FL_(damping), DeviceValueUOM::NONE, MAKE_CF_CB(set_damping));
-        register_device_value(DeviceValueTAG::TAG_DHW1, &wwSetTemp_, DeviceValueType::UINT, FL_(wwSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwtemp));
+        register_device_value(DeviceValueTAG::TAG_DHW1, &wwSetTemp_, DeviceValueType::UINT8, FL_(wwSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwtemp));
         if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400) {
             register_device_value(
                 DeviceValueTAG::TAG_DHW1, &wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode4), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));
@@ -3871,7 +3871,7 @@ void Thermostat::register_device_values() {
             register_device_value(
                 DeviceValueTAG::TAG_DHW2, &wwMode2_, DeviceValueType::ENUM, FL_(enum_wwMode), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));
         }
-        register_device_value(DeviceValueTAG::TAG_DHW1, &wwSetTempLow_, DeviceValueType::UINT, FL_(wwSetTempLow), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwtemplow));
+        register_device_value(DeviceValueTAG::TAG_DHW1, &wwSetTempLow_, DeviceValueType::UINT8, FL_(wwSetTempLow), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwtemplow));
         register_device_value(DeviceValueTAG::TAG_DHW1,
                               &wwCircMode_,
                               DeviceValueType::ENUM,
@@ -3881,13 +3881,13 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_wwcircmode));
         register_device_value(DeviceValueTAG::TAG_DHW1,
                               &wwChargeDuration_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_MUL15,
                               FL_(wwChargeDuration),
                               DeviceValueUOM::MINUTES,
                               MAKE_CF_CB(set_wwchargeduration));
         register_device_value(DeviceValueTAG::TAG_DHW1, &wwCharge_, DeviceValueType::BOOL, FL_(wwCharge), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwcharge));
-        register_device_value(DeviceValueTAG::TAG_DHW1, &wwExtra1_, DeviceValueType::UINT, FL_(wwExtra1), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DHW1, &wwExtra1_, DeviceValueType::UINT8, FL_(wwExtra1), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DHW1,
                               &wwDisinfecting_,
                               DeviceValueType::BOOL,
@@ -3903,7 +3903,7 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_wwDisinfectDay));
         register_device_value(DeviceValueTAG::TAG_DHW1,
                               &wwDisinfectHour_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_MUL15,
                               FL_(wwDisinfectTime),
                               DeviceValueUOM::MINUTES,
@@ -3918,7 +3918,7 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_wwDailyHeating));
         register_device_value(DeviceValueTAG::TAG_DHW1,
                               &wwDailyHeatTime_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_MUL15,
                               FL_(wwDailyHeatTime),
                               DeviceValueUOM::MINUTES,
@@ -3934,13 +3934,13 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_wwcircmode));
         register_device_value(DeviceValueTAG::TAG_DHW2,
                               &wwChargeDuration2_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_MUL15,
                               FL_(wwChargeDuration),
                               DeviceValueUOM::MINUTES,
                               MAKE_CF_CB(set_wwchargeduration));
         register_device_value(DeviceValueTAG::TAG_DHW2, &wwCharge2_, DeviceValueType::BOOL, FL_(wwCharge), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwcharge));
-        register_device_value(DeviceValueTAG::TAG_DHW2, &wwExtra2_, DeviceValueType::UINT, FL_(wwExtra2), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DHW2, &wwExtra2_, DeviceValueType::UINT8, FL_(wwExtra2), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DHW2,
                               &wwDisinfecting2_,
                               DeviceValueType::BOOL,
@@ -3956,7 +3956,7 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_wwDisinfectDay));
         register_device_value(DeviceValueTAG::TAG_DHW2,
                               &wwDisinfectHour2_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_MUL15,
                               FL_(wwDisinfectTime),
                               DeviceValueUOM::MINUTES,
@@ -3971,7 +3971,7 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_wwDailyHeating));
         register_device_value(DeviceValueTAG::TAG_DHW2,
                               &wwDailyHeatTime2_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_MUL15,
                               FL_(wwDailyHeatTime),
                               DeviceValueUOM::MINUTES,
@@ -3987,7 +3987,7 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_hybridStrategy));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &switchOverTemp_,
-                              DeviceValueType::INT,
+                              DeviceValueType::INT8,
                               FL_(switchOverTemp),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_switchOverTemp),
@@ -3995,7 +3995,7 @@ void Thermostat::register_device_values() {
                               20);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &energyCostRatio_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(energyCostRatio),
                               DeviceValueUOM::NONE,
@@ -4004,7 +4004,7 @@ void Thermostat::register_device_values() {
                               20);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &fossileFactor_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(fossileFactor),
                               DeviceValueUOM::NONE,
@@ -4013,7 +4013,7 @@ void Thermostat::register_device_values() {
                               5);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &electricFactor_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(electricFactor),
                               DeviceValueUOM::NONE,
@@ -4022,7 +4022,7 @@ void Thermostat::register_device_values() {
                               5);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &delayBoiler_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               FL_(delayBoiler),
                               DeviceValueUOM::MINUTES,
                               MAKE_CF_CB(set_delayBoiler),
@@ -4030,7 +4030,7 @@ void Thermostat::register_device_values() {
                               120);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &tempDiffBoiler_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               FL_(tempDiffBoiler),
                               DeviceValueUOM::DEGREES_R,
                               MAKE_CF_CB(set_tempDiffBoiler),
@@ -4038,14 +4038,14 @@ void Thermostat::register_device_values() {
                               99);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pvEnableWw_, DeviceValueType::BOOL, FL_(pvEnableWw), DeviceValueUOM::NONE, MAKE_CF_CB(set_pvEnableWw));
         register_device_value(
-            DeviceValueTAG::TAG_DEVICE_DATA, &pvRaiseHeat_, DeviceValueType::INT, FL_(pvRaiseHeat), DeviceValueUOM::K, MAKE_CF_CB(set_pvRaiseHeat), 0, 5);
+            DeviceValueTAG::TAG_DEVICE_DATA, &pvRaiseHeat_, DeviceValueType::INT8, FL_(pvRaiseHeat), DeviceValueUOM::K, MAKE_CF_CB(set_pvRaiseHeat), 0, 5);
         register_device_value(
-            DeviceValueTAG::TAG_DEVICE_DATA, &pvLowerCool_, DeviceValueType::INT, FL_(pvLowerCool), DeviceValueUOM::K, MAKE_CF_CB(set_pvLowerCool), -5, 0);
+            DeviceValueTAG::TAG_DEVICE_DATA, &pvLowerCool_, DeviceValueType::INT8, FL_(pvLowerCool), DeviceValueUOM::K, MAKE_CF_CB(set_pvLowerCool), -5, 0);
         break;
     case EMSdevice::EMS_DEVICE_FLAG_RC10:
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &ibaCalIntTemperature_,
-                              DeviceValueType::INT,
+                              DeviceValueType::INT8,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(ibaCalIntTemperature),
                               DeviceValueUOM::DEGREES_R,
@@ -4065,7 +4065,7 @@ void Thermostat::register_device_values() {
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &dateTime_, DeviceValueType::STRING, FL_(dateTime), DeviceValueUOM::NONE); // can't set datetime
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &ibaMinExtTemperature_,
-                              DeviceValueType::INT,
+                              DeviceValueType::INT8,
                               FL_(ibaMinExtTemperature),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_minexttemp));
@@ -4077,7 +4077,7 @@ void Thermostat::register_device_values() {
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &dateTime_, DeviceValueType::STRING, FL_(dateTime), DeviceValueUOM::NONE); // can't set datetime
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &ibaClockOffset_,
-                              DeviceValueType::INT,
+                              DeviceValueType::INT8,
                               FL_(ibaClockOffset),
                               DeviceValueUOM::SECONDS,
                               MAKE_CF_CB(set_clockoffset)); // offset (in sec) to clock, 0xff=-1s, 0x02=2s
@@ -4091,9 +4091,9 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_language));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &backlight_, DeviceValueType::BOOL, FL_(backlight), DeviceValueUOM::NONE, MAKE_CF_CB(set_backlight));
         register_device_value(
-            DeviceValueTAG::TAG_DEVICE_DATA, &brightness_, DeviceValueType::INT, FL_(brightness), DeviceValueUOM::NONE, MAKE_CF_CB(set_brightness), -15, 15);
+            DeviceValueTAG::TAG_DEVICE_DATA, &brightness_, DeviceValueType::INT8, FL_(brightness), DeviceValueUOM::NONE, MAKE_CF_CB(set_brightness), -15, 15);
         register_device_value(
-            DeviceValueTAG::TAG_DEVICE_DATA, &mixingvalves_, DeviceValueType::UINT, FL_(mixingvalves), DeviceValueUOM::NONE, MAKE_CF_CB(set_mixingvalves), 0, 2);
+            DeviceValueTAG::TAG_DEVICE_DATA, &mixingvalves_, DeviceValueType::UINT8, FL_(mixingvalves), DeviceValueUOM::NONE, MAKE_CF_CB(set_mixingvalves), 0, 2);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &ibaBuildingType_,
                               DeviceValueType::ENUM,
@@ -4111,7 +4111,7 @@ void Thermostat::register_device_values() {
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &preheating_, DeviceValueType::BOOL, FL_(preheating), DeviceValueUOM::NONE, MAKE_CF_CB(set_preheating));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &ibaCalIntTemperature_,
-                              DeviceValueType::INT,
+                              DeviceValueType::INT8,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(ibaCalIntTemperature),
                               DeviceValueUOM::DEGREES_R,
@@ -4138,7 +4138,7 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_wwDisinfectDay));
         register_device_value(DeviceValueTAG::TAG_DHW1,
                               &wwDisinfectHour_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               FL_(wwDisinfectHour),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_wwDisinfectHour),
@@ -4171,37 +4171,37 @@ void Thermostat::register_device_values() {
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &ibaLanguage_, DeviceValueType::ENUM, FL_(enum_ibaLanguage), FL_(ibaLanguage), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &ibaClockOffset_,
-                              DeviceValueType::INT,
+                              DeviceValueType::INT8,
                               FL_(ibaClockOffset),
                               DeviceValueUOM::SECONDS,
                               MAKE_CF_CB(set_clockoffset)); // offset (in sec) to clock, 0xff=-1s, 0x02=2s
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &ibaCalIntTemperature_,
-                              DeviceValueType::INT,
+                              DeviceValueType::INT8,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(ibaCalIntTemperature),
                               DeviceValueUOM::DEGREES_R,
                               MAKE_CF_CB(set_calinttemp));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &ibaMinExtTemperature_,
-                              DeviceValueType::INT,
+                              DeviceValueType::INT8,
                               FL_(ibaMinExtTemperature),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_minexttemp));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &tempsensor1_,
-                              DeviceValueType::SHORT,
+                              DeviceValueType::INT16,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(tempsensor1),
                               DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &tempsensor2_,
-                              DeviceValueType::SHORT,
+                              DeviceValueType::INT16,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(tempsensor2),
                               DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &ibaDamping_, DeviceValueType::BOOL, FL_(damping), DeviceValueUOM::NONE, MAKE_CF_CB(set_damping));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &dampedoutdoortemp_, DeviceValueType::INT, FL_(dampedoutdoortemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &dampedoutdoortemp_, DeviceValueType::INT8, FL_(dampedoutdoortemp), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &ibaBuildingType_,
                               DeviceValueType::ENUM,
@@ -4246,13 +4246,13 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_wwDisinfectDay));
         register_device_value(DeviceValueTAG::TAG_DHW1,
                               &wwDisinfectHour_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               FL_(wwDisinfectHour),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_wwDisinfectHour),
                               0,
                               23);
-        register_device_value(DeviceValueTAG::TAG_DHW1, &wwMaxTemp_, DeviceValueType::UINT, FL_(wwMaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwMaxTemp));
+        register_device_value(DeviceValueTAG::TAG_DHW1, &wwMaxTemp_, DeviceValueType::UINT8, FL_(wwMaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwMaxTemp));
         register_device_value(DeviceValueTAG::TAG_DHW1, &wwOneTimeKey_, DeviceValueType::BOOL, FL_(wwOneTimeKey), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwOneTimeKey));
         register_device_value(DeviceValueTAG::TAG_DHW1,
                               &wwSwitchTime_,
@@ -4293,7 +4293,7 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_datetime));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &ibaCalIntTemperature_,
-                              DeviceValueType::INT,
+                              DeviceValueType::INT8,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(ibaCalIntTemperature),
                               DeviceValueUOM::DEGREES_R,
@@ -4302,7 +4302,7 @@ void Thermostat::register_device_values() {
                               5);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &ibaMinExtTemperature_,
-                              DeviceValueType::INT,
+                              DeviceValueType::INT8,
                               FL_(ibaMinExtTemperature),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_minexttemp),
@@ -4310,18 +4310,18 @@ void Thermostat::register_device_values() {
                               0);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &tempsensor1_,
-                              DeviceValueType::SHORT,
+                              DeviceValueType::INT16,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(tempsensor1),
                               DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &tempsensor2_,
-                              DeviceValueType::SHORT,
+                              DeviceValueType::INT16,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(tempsensor2),
                               DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &ibaDamping_, DeviceValueType::BOOL, FL_(damping), DeviceValueUOM::NONE, MAKE_CF_CB(set_damping));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &dampedoutdoortemp_, DeviceValueType::INT, FL_(dampedoutdoortemp), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &dampedoutdoortemp_, DeviceValueType::INT8, FL_(dampedoutdoortemp), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &ibaBuildingType_,
                               DeviceValueType::ENUM,
@@ -4366,14 +4366,14 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_wwDisinfectDay));
         register_device_value(DeviceValueTAG::TAG_DHW1,
                               &wwDisinfectHour_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               FL_(wwDisinfectHour),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_wwDisinfectHour),
                               0,
                               23);
         register_device_value(
-            DeviceValueTAG::TAG_DHW1, &wwMaxTemp_, DeviceValueType::UINT, FL_(wwMaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwMaxTemp), 60, 80);
+            DeviceValueTAG::TAG_DHW1, &wwMaxTemp_, DeviceValueType::UINT8, FL_(wwMaxTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwMaxTemp), 60, 80);
         register_device_value(DeviceValueTAG::TAG_DHW1, &wwOneTimeKey_, DeviceValueType::BOOL, FL_(wwOneTimeKey), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwOneTimeKey));
         register_device_value(DeviceValueTAG::TAG_DHW1,
                               &wwSwitchTime_,
@@ -4427,7 +4427,7 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_hybridStrategy));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &switchOverTemp_,
-                              DeviceValueType::INT,
+                              DeviceValueType::INT8,
                               FL_(switchOverTemp),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_switchOverTemp),
@@ -4435,7 +4435,7 @@ void Thermostat::register_device_values() {
                               20);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &energyCostRatio_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(energyCostRatio),
                               DeviceValueUOM::NONE,
@@ -4444,7 +4444,7 @@ void Thermostat::register_device_values() {
                               20);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &fossileFactor_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(fossileFactor),
                               DeviceValueUOM::NONE,
@@ -4453,7 +4453,7 @@ void Thermostat::register_device_values() {
                               5);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &electricFactor_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(electricFactor),
                               DeviceValueUOM::NONE,
@@ -4462,7 +4462,7 @@ void Thermostat::register_device_values() {
                               5);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &delayBoiler_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               FL_(delayBoiler),
                               DeviceValueUOM::MINUTES,
                               MAKE_CF_CB(set_delayBoiler),
@@ -4470,7 +4470,7 @@ void Thermostat::register_device_values() {
                               120);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &tempDiffBoiler_,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               FL_(tempDiffBoiler),
                               DeviceValueUOM::DEGREES_R,
                               MAKE_CF_CB(set_tempDiffBoiler),
@@ -4519,22 +4519,22 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
     }
 
     if (has_flags(EMSdevice::EMS_DEVICE_FLAG_NO_WRITE)) {
-        register_device_value(tag, &hc->selTemp, DeviceValueType::SHORT, seltemp_divider, FL_(selRoomTemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &hc->selTemp, DeviceValueType::INT16, seltemp_divider, FL_(selRoomTemp), DeviceValueUOM::DEGREES);
     } else {
-        register_device_value(tag, &hc->selTemp, DeviceValueType::SHORT, seltemp_divider, FL_(selRoomTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_temp), 0, 30);
+        register_device_value(tag, &hc->selTemp, DeviceValueType::INT16, seltemp_divider, FL_(selRoomTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_temp), 0, 30);
     }
-    register_device_value(tag, &hc->roomTemp, DeviceValueType::SHORT, roomtemp_divider, FL_(roomTemp), DeviceValueUOM::DEGREES);
+    register_device_value(tag, &hc->roomTemp, DeviceValueType::INT16, roomtemp_divider, FL_(roomTemp), DeviceValueUOM::DEGREES);
     register_device_value(tag, &hc->climate, DeviceValueType::ENUM, FL_(enum_climate), FL_(haclimate), DeviceValueUOM::NONE, nullptr, 5, 30);
 
     switch (model) {
     case EMSdevice::EMS_DEVICE_FLAG_RC10:
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode6), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
         register_device_value(
-            tag, &hc->daytemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(daytemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daytemp));
+            tag, &hc->daytemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(daytemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daytemp));
         register_device_value(
-            tag, &hc->nighttemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(nighttemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_nighttemp));
-        register_device_value(tag, &hc->reducehours, DeviceValueType::UINT, FL_(reducehours), DeviceValueUOM::HOURS, MAKE_CF_CB(set_reducehours));
-        register_device_value(tag, &hc->reduceminutes, DeviceValueType::USHORT, FL_(reduceminutes), DeviceValueUOM::MINUTES);
+            tag, &hc->nighttemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(nighttemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_nighttemp));
+        register_device_value(tag, &hc->reducehours, DeviceValueType::UINT8, FL_(reducehours), DeviceValueUOM::HOURS, MAKE_CF_CB(set_reducehours));
+        register_device_value(tag, &hc->reduceminutes, DeviceValueType::UINT16, FL_(reduceminutes), DeviceValueUOM::MINUTES);
         break;
     case EMSdevice::EMS_DEVICE_FLAG_RC100:
     case EMSdevice::EMS_DEVICE_FLAG_RC300:
@@ -4546,29 +4546,29 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         }
         register_device_value(tag, &hc->modetype, DeviceValueType::ENUM, FL_(enum_modetype), FL_(modetype), DeviceValueUOM::NONE);
         register_device_value(
-            tag, &hc->nighttemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(ecotemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_ecotemp));
+            tag, &hc->nighttemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(ecotemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_ecotemp));
         register_device_value(
-            tag, &hc->manualtemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(manualtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_manualtemp));
+            tag, &hc->manualtemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(manualtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_manualtemp));
         register_device_value(
-            tag, &hc->daytemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(comforttemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_comforttemp));
-        register_device_value(tag, &hc->summertemp, DeviceValueType::UINT, FL_(summertemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_summertemp), 10, 30);
-        register_device_value(tag, &hc->designtemp, DeviceValueType::UINT, FL_(designtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_designtemp));
-        register_device_value(tag, &hc->offsettemp, DeviceValueType::INT, FL_(offsettemp), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_offsettemp));
-        register_device_value(tag, &hc->minflowtemp, DeviceValueType::UINT, FL_(minflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_minflowtemp));
-        register_device_value(tag, &hc->maxflowtemp, DeviceValueType::UINT, FL_(maxflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_maxflowtemp));
-        register_device_value(tag, &hc->roominfluence, DeviceValueType::UINT, FL_(roominfluence), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_roominfluence));
+            tag, &hc->daytemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(comforttemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_comforttemp));
+        register_device_value(tag, &hc->summertemp, DeviceValueType::UINT8, FL_(summertemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_summertemp), 10, 30);
+        register_device_value(tag, &hc->designtemp, DeviceValueType::UINT8, FL_(designtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_designtemp));
+        register_device_value(tag, &hc->offsettemp, DeviceValueType::INT8, FL_(offsettemp), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_offsettemp));
+        register_device_value(tag, &hc->minflowtemp, DeviceValueType::UINT8, FL_(minflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_minflowtemp));
+        register_device_value(tag, &hc->maxflowtemp, DeviceValueType::UINT8, FL_(maxflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_maxflowtemp));
+        register_device_value(tag, &hc->roominfluence, DeviceValueType::UINT8, FL_(roominfluence), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_roominfluence));
         register_device_value(tag,
                               &hc->roominfl_factor,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(roominfl_factor),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_roominfl_factor));
-        register_device_value(tag, &hc->curroominfl, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(curroominfl), DeviceValueUOM::DEGREES_R);
+        register_device_value(tag, &hc->curroominfl, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(curroominfl), DeviceValueUOM::DEGREES_R);
         register_device_value(
             tag, &hc->nofrostmode, DeviceValueType::ENUM, FL_(enum_nofrostmode1), FL_(nofrostmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_nofrostmode));
-        register_device_value(tag, &hc->nofrosttemp, DeviceValueType::INT, FL_(nofrosttemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_nofrosttemp));
-        register_device_value(tag, &hc->targetflowtemp, DeviceValueType::UINT, FL_(targetflowtemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &hc->nofrosttemp, DeviceValueType::INT8, FL_(nofrosttemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_nofrosttemp));
+        register_device_value(tag, &hc->targetflowtemp, DeviceValueType::UINT8, FL_(targetflowtemp), DeviceValueUOM::DEGREES);
         register_device_value(
             tag, &hc->heatingtype, DeviceValueType::ENUM, FL_(enum_heatingtype), FL_(heatingtype), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatingtype));
         register_device_value(
@@ -4592,16 +4592,16 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->program, DeviceValueType::ENUM, FL_(enum_progMode), FL_(program), DeviceValueUOM::NONE, MAKE_CF_CB(set_program));
         register_device_value(tag,
                               &hc->tempautotemp,
-                              DeviceValueType::INT,
+                              DeviceValueType::INT8,
                               DeviceValueNumOp::DV_NUMOP_DIV2,
                               FL_(tempautotemp),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_tempautotemp),
                               -1,
                               30);
-        register_device_value(tag, &hc->remoteseltemp, DeviceValueType::INT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(remoteseltemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &hc->remoteseltemp, DeviceValueType::INT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(remoteseltemp), DeviceValueUOM::DEGREES);
         // a command is only accepted from the remote device, not from ems-esp.
-        register_device_value(tag, &hc->fastHeatup, DeviceValueType::UINT, FL_(fastheatup), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_fastheatup));
+        register_device_value(tag, &hc->fastHeatup, DeviceValueType::UINT8, FL_(fastheatup), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_fastheatup));
         register_device_value(tag,
                               &hc->switchonoptimization,
                               DeviceValueType::BOOL,
@@ -4609,53 +4609,53 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_switchonoptimization));
         register_device_value(tag, &hc->reducemode, DeviceValueType::ENUM, FL_(enum_reducemode1), FL_(reducemode), DeviceValueUOM::NONE, MAKE_CF_CB(set_reducemode));
-        register_device_value(tag, &hc->noreducetemp, DeviceValueType::INT, FL_(noreducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_noreducetemp));
-        register_device_value(tag, &hc->reducetemp, DeviceValueType::INT, FL_(reducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_reducetemp));
+        register_device_value(tag, &hc->noreducetemp, DeviceValueType::INT8, FL_(noreducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_noreducetemp));
+        register_device_value(tag, &hc->reducetemp, DeviceValueType::INT8, FL_(reducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_reducetemp));
         register_device_value(tag, &hc->wwprio, DeviceValueType::BOOL, FL_(wwprio), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwprio));
         register_device_value(tag, &hc->cooling, DeviceValueType::BOOL, FL_(hpcooling), DeviceValueUOM::NONE, MAKE_CF_CB(set_cooling));
         register_device_value(tag, &hc->coolingon, DeviceValueType::BOOL, FL_(coolingOn), DeviceValueUOM::NONE);
 
         register_device_value(tag, &hc->hpmode, DeviceValueType::ENUM, FL_(enum_hpmode), FL_(hpmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_hpmode));
-        register_device_value(tag, &hc->dewoffset, DeviceValueType::UINT, FL_(dewoffset), DeviceValueUOM::K, MAKE_CF_CB(set_dewoffset), 2, 10);
-        register_device_value(tag, &hc->roomtempdiff, DeviceValueType::UINT, FL_(roomtempdiff), DeviceValueUOM::K, MAKE_CF_CB(set_roomtempdiff));
-        register_device_value(tag, &hc->hpminflowtemp, DeviceValueType::UINT, FL_(hpminflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_hpminflowtemp));
+        register_device_value(tag, &hc->dewoffset, DeviceValueType::UINT8, FL_(dewoffset), DeviceValueUOM::K, MAKE_CF_CB(set_dewoffset), 2, 10);
+        register_device_value(tag, &hc->roomtempdiff, DeviceValueType::UINT8, FL_(roomtempdiff), DeviceValueUOM::K, MAKE_CF_CB(set_roomtempdiff));
+        register_device_value(tag, &hc->hpminflowtemp, DeviceValueType::UINT8, FL_(hpminflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_hpminflowtemp));
         register_device_value(tag, &hc->control, DeviceValueType::ENUM, FL_(enum_control1), FL_(control), DeviceValueUOM::NONE, MAKE_CF_CB(set_control));
         register_device_value(tag,
                               &hc->remotetemp,
-                              DeviceValueType::SHORT,
+                              DeviceValueType::INT16,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(remotetemp),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_remotetemp),
                               -1,
                               101);
-        register_device_value(tag, &hc->remotehum, DeviceValueType::UINT, FL_(remotehum), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_remotehum), -1, 101);
-        register_device_value(tag, &hc->heatondelay, DeviceValueType::UINT, FL_(heatondelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_heatondelay), 1, 48);
-        register_device_value(tag, &hc->heatoffdelay, DeviceValueType::UINT, FL_(heatoffdelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_heatoffdelay), 1, 48);
-        register_device_value(tag, &hc->instantstart, DeviceValueType::UINT, FL_(instantstart), DeviceValueUOM::K, MAKE_CF_CB(set_instantstart), 1, 10);
+        register_device_value(tag, &hc->remotehum, DeviceValueType::UINT8, FL_(remotehum), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_remotehum), -1, 101);
+        register_device_value(tag, &hc->heatondelay, DeviceValueType::UINT8, FL_(heatondelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_heatondelay), 1, 48);
+        register_device_value(tag, &hc->heatoffdelay, DeviceValueType::UINT8, FL_(heatoffdelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_heatoffdelay), 1, 48);
+        register_device_value(tag, &hc->instantstart, DeviceValueType::UINT8, FL_(instantstart), DeviceValueUOM::K, MAKE_CF_CB(set_instantstart), 1, 10);
         register_device_value(tag, &hc->boost, DeviceValueType::BOOL, FL_(boost), DeviceValueUOM::NONE, MAKE_CF_CB(set_boost));
-        register_device_value(tag, &hc->boosttime, DeviceValueType::UINT, FL_(boosttime), DeviceValueUOM::HOURS, MAKE_CF_CB(set_boosttime));
+        register_device_value(tag, &hc->boosttime, DeviceValueType::UINT8, FL_(boosttime), DeviceValueUOM::HOURS, MAKE_CF_CB(set_boosttime));
 
         break;
     case EMSdevice::EMS_DEVICE_FLAG_CRF:
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode5), FL_(mode), DeviceValueUOM::NONE);
         register_device_value(tag, &hc->modetype, DeviceValueType::ENUM, FL_(enum_modetype5), FL_(modetype), DeviceValueUOM::NONE);
-        register_device_value(tag, &hc->targetflowtemp, DeviceValueType::UINT, FL_(targetflowtemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &hc->targetflowtemp, DeviceValueType::UINT8, FL_(targetflowtemp), DeviceValueUOM::DEGREES);
         break;
     case EMSdevice::EMS_DEVICE_FLAG_RC20:
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode2), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
         register_device_value(
-            tag, &hc->manualtemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(manualtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_manualtemp));
+            tag, &hc->manualtemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(manualtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_manualtemp));
         register_device_value(
-            tag, &hc->nofrosttemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(offtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_offtemp));
+            tag, &hc->nofrosttemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(offtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_offtemp));
         register_device_value(
-            tag, &hc->daylowtemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(daylowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daylowtemp));
+            tag, &hc->daylowtemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(daylowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daylowtemp));
         register_device_value(
-            tag, &hc->daymidtemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(daymidtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daymidtemp));
+            tag, &hc->daymidtemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(daymidtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daymidtemp));
         register_device_value(
-            tag, &hc->daytemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(dayhightemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daytemp));
+            tag, &hc->daytemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(dayhightemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daytemp));
         register_device_value(
-            tag, &hc->nighttemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(nighttemp2), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_nighttemp));
+            tag, &hc->nighttemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(nighttemp2), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_nighttemp));
         register_device_value(
             tag, &hc->switchtime1, DeviceValueType::STRING, FL_(tpl_switchtime1), FL_(switchtime), DeviceValueUOM::NONE, MAKE_CF_CB(set_switchtime1));
         break;
@@ -4663,45 +4663,45 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode3), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
         register_device_value(tag, &hc->modetype, DeviceValueType::ENUM, FL_(enum_modetype3), FL_(modetype), DeviceValueUOM::NONE);
         register_device_value(
-            tag, &hc->daytemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(daytemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daytemp));
+            tag, &hc->daytemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(daytemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daytemp));
         register_device_value(
-            tag, &hc->nighttemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(nighttemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_nighttemp));
+            tag, &hc->nighttemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(nighttemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_nighttemp));
         register_device_value(tag, &hc->program, DeviceValueType::ENUM, FL_(enum_progMode3), FL_(program), DeviceValueUOM::NONE, MAKE_CF_CB(set_program));
-        register_device_value(tag, &hc->minflowtemp, DeviceValueType::UINT, FL_(minflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_minflowtemp));
-        register_device_value(tag, &hc->maxflowtemp, DeviceValueType::UINT, FL_(maxflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_maxflowtemp));
+        register_device_value(tag, &hc->minflowtemp, DeviceValueType::UINT8, FL_(minflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_minflowtemp));
+        register_device_value(tag, &hc->maxflowtemp, DeviceValueType::UINT8, FL_(maxflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_maxflowtemp));
         register_device_value(tag,
                               &hc->tempautotemp,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_DIV2,
                               FL_(tempautotemp),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_tempautotemp));
         register_device_value(
             tag, &hc->heatingtype, DeviceValueType::ENUM, FL_(enum_heatingtype), FL_(heatingtype), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatingtype));
-        register_device_value(tag, &hc->summertemp, DeviceValueType::UINT, FL_(summertemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_summertemp), 10, 30);
+        register_device_value(tag, &hc->summertemp, DeviceValueType::UINT8, FL_(summertemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_summertemp), 10, 30);
         register_device_value(tag, &hc->summermode, DeviceValueType::ENUM, FL_(enum_summer), FL_(summermode), DeviceValueUOM::NONE);
-        register_device_value(tag, &hc->remotetemp, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(remotetemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &hc->remotetemp, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(remotetemp), DeviceValueUOM::DEGREES);
         break;
     case EMSdevice::EMS_DEVICE_FLAG_RC25:
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode3), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
         register_device_value(tag, &hc->modetype, DeviceValueType::ENUM, FL_(enum_modetype3), FL_(modetype), DeviceValueUOM::NONE);
         register_device_value(
-            tag, &hc->daytemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(daytemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daytemp));
+            tag, &hc->daytemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(daytemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daytemp));
         register_device_value(
-            tag, &hc->nighttemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(nighttemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_nighttemp));
+            tag, &hc->nighttemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(nighttemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_nighttemp));
         register_device_value(tag, &hc->program, DeviceValueType::ENUM, FL_(enum_progMode3), FL_(program), DeviceValueUOM::NONE, MAKE_CF_CB(set_program));
-        register_device_value(tag, &hc->minflowtemp, DeviceValueType::UINT, FL_(minflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_minflowtemp));
-        register_device_value(tag, &hc->maxflowtemp, DeviceValueType::UINT, FL_(maxflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_maxflowtemp));
+        register_device_value(tag, &hc->minflowtemp, DeviceValueType::UINT8, FL_(minflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_minflowtemp));
+        register_device_value(tag, &hc->maxflowtemp, DeviceValueType::UINT8, FL_(maxflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_maxflowtemp));
         register_device_value(tag,
                               &hc->tempautotemp,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_DIV2,
                               FL_(tempautotemp),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_tempautotemp));
         register_device_value(
             tag, &hc->heatingtype, DeviceValueType::ENUM, FL_(enum_heatingtype), FL_(heatingtype), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatingtype));
-        register_device_value(tag, &hc->summertemp, DeviceValueType::UINT, FL_(summertemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_summertemp), 9, 25);
+        register_device_value(tag, &hc->summertemp, DeviceValueType::UINT8, FL_(summertemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_summertemp), 9, 25);
         register_device_value(tag, &hc->summermode, DeviceValueType::ENUM, FL_(enum_summer), FL_(summermode), DeviceValueUOM::NONE);
         break;
     case EMSdevice::EMS_DEVICE_FLAG_RC30:
@@ -4709,8 +4709,8 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->holiday, DeviceValueType::STRING, FL_(tpl_holidays), FL_(holidays), DeviceValueUOM::NONE, MAKE_CF_CB(set_holiday));
         register_device_value(tag, &hc->vacation, DeviceValueType::STRING, FL_(tpl_holidays), FL_(vacations), DeviceValueUOM::NONE, MAKE_CF_CB(set_vacation));
         register_device_value(tag, &hc->program, DeviceValueType::ENUM, FL_(enum_progMode2), FL_(program), DeviceValueUOM::NONE, MAKE_CF_CB(set_program));
-        register_device_value(tag, &hc->pause, DeviceValueType::UINT, FL_(pause), DeviceValueUOM::HOURS, MAKE_CF_CB(set_pause));
-        register_device_value(tag, &hc->party, DeviceValueType::UINT, FL_(party), DeviceValueUOM::HOURS, MAKE_CF_CB(set_party));
+        register_device_value(tag, &hc->pause, DeviceValueType::UINT8, FL_(pause), DeviceValueUOM::HOURS, MAKE_CF_CB(set_pause));
+        register_device_value(tag, &hc->party, DeviceValueType::UINT8, FL_(party), DeviceValueUOM::HOURS, MAKE_CF_CB(set_party));
         register_device_value(
             tag, &hc->switchtime1, DeviceValueType::STRING, FL_(tpl_switchtime1), FL_(switchtime1), DeviceValueUOM::NONE, MAKE_CF_CB(set_switchtime1));
         register_device_value(
@@ -4719,43 +4719,43 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
             tag, &hc->controlmode, DeviceValueType::ENUM, FL_(enum_controlmode2), FL_(controlmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_controlmode));
         register_device_value(tag,
                               &hc->holidaytemp,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_DIV2,
                               FL_(holidaytemp),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_holidaytemp));
         register_device_value(
-            tag, &hc->nighttemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(nighttemp2), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_nighttemp));
+            tag, &hc->nighttemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(nighttemp2), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_nighttemp));
         register_device_value(
-            tag, &hc->daylowtemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(daylowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daylowtemp));
+            tag, &hc->daylowtemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(daylowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daylowtemp));
         register_device_value(
-            tag, &hc->daymidtemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(daymidtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daymidtemp));
+            tag, &hc->daymidtemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(daymidtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daymidtemp));
         register_device_value(
-            tag, &hc->daytemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(dayhightemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daytemp));
+            tag, &hc->daytemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(dayhightemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daytemp));
         register_device_value(
-            tag, &hc->manualtemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(manualtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_manualtemp));
+            tag, &hc->manualtemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(manualtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_manualtemp));
         register_device_value(
-            tag, &hc->nofrosttemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(offtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_offtemp));
+            tag, &hc->nofrosttemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(offtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_offtemp));
         break;
     case EMSdevice::EMS_DEVICE_FLAG_RC30_N:
     case EMSdevice::EMS_DEVICE_FLAG_RC35:
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode3), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
         register_device_value(tag, &hc->modetype, DeviceValueType::ENUM, FL_(enum_modetype3), FL_(modetype), DeviceValueUOM::NONE);
         register_device_value(
-            tag, &hc->daytemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(daytemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daytemp), 10, 30);
+            tag, &hc->daytemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(daytemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_daytemp), 10, 30);
         register_device_value(tag,
                               &hc->nighttemp,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_DIV2,
                               FL_(nighttemp),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_nighttemp),
                               10,
                               30);
-        register_device_value(tag, &hc->designtemp, DeviceValueType::UINT, FL_(designtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_designtemp), 30, 90);
+        register_device_value(tag, &hc->designtemp, DeviceValueType::UINT8, FL_(designtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_designtemp), 30, 90);
         register_device_value(tag,
                               &hc->offsettemp,
-                              DeviceValueType::INT,
+                              DeviceValueType::INT8,
                               DeviceValueNumOp::DV_NUMOP_DIV2,
                               FL_(offsettemp),
                               DeviceValueUOM::DEGREES_R,
@@ -4764,24 +4764,24 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               5);
         register_device_value(tag,
                               &hc->holidaytemp,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_DIV2,
                               FL_(holidaytemp),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_holidaytemp),
                               5,
                               30);
-        register_device_value(tag, &hc->targetflowtemp, DeviceValueType::UINT, FL_(targetflowtemp), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &hc->summertemp, DeviceValueType::UINT, FL_(summertemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_summertemp), 9, 25);
+        register_device_value(tag, &hc->targetflowtemp, DeviceValueType::UINT8, FL_(targetflowtemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &hc->summertemp, DeviceValueType::UINT8, FL_(summertemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_summertemp), 9, 25);
         register_device_value(tag, &hc->summermode, DeviceValueType::ENUM, FL_(enum_summer), FL_(summermode), DeviceValueUOM::NONE);
         register_device_value(tag, &hc->holidaymode, DeviceValueType::BOOL, FL_(holidaymode), DeviceValueUOM::NONE);
-        register_device_value(tag, &hc->nofrosttemp, DeviceValueType::INT, FL_(nofrosttemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_nofrosttemp), -20, 10);
+        register_device_value(tag, &hc->nofrosttemp, DeviceValueType::INT8, FL_(nofrosttemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_nofrosttemp), -20, 10);
         register_device_value(
             tag, &hc->nofrostmode, DeviceValueType::ENUM, FL_(enum_nofrostmode), FL_(nofrostmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_nofrostmode));
-        register_device_value(tag, &hc->roominfluence, DeviceValueType::UINT, FL_(roominfluence), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_roominfluence), 0, 10);
-        register_device_value(tag, &hc->minflowtemp, DeviceValueType::UINT, FL_(minflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_minflowtemp), 5, 70);
-        register_device_value(tag, &hc->maxflowtemp, DeviceValueType::UINT, FL_(maxflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_maxflowtemp), 30, 90);
-        register_device_value(tag, &hc->flowtempoffset, DeviceValueType::UINT, FL_(flowtempoffset), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_flowtempoffset), 0, 20);
+        register_device_value(tag, &hc->roominfluence, DeviceValueType::UINT8, FL_(roominfluence), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_roominfluence), 0, 10);
+        register_device_value(tag, &hc->minflowtemp, DeviceValueType::UINT8, FL_(minflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_minflowtemp), 5, 70);
+        register_device_value(tag, &hc->maxflowtemp, DeviceValueType::UINT8, FL_(maxflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_maxflowtemp), 30, 90);
+        register_device_value(tag, &hc->flowtempoffset, DeviceValueType::UINT8, FL_(flowtempoffset), DeviceValueUOM::DEGREES_R, MAKE_CF_CB(set_flowtempoffset), 0, 20);
         register_device_value(
             tag, &hc->heatingtype, DeviceValueType::ENUM, FL_(enum_heatingtype), FL_(heatingtype), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatingtype));
         register_device_value(tag, &hc->reducemode, DeviceValueType::ENUM, FL_(enum_reducemode), FL_(reducemode), DeviceValueUOM::NONE, MAKE_CF_CB(set_reducemode));
@@ -4791,25 +4791,25 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->holiday, DeviceValueType::STRING, FL_(tpl_holidays), FL_(holidays), DeviceValueUOM::NONE, MAKE_CF_CB(set_holiday));
         register_device_value(tag, &hc->vacation, DeviceValueType::STRING, FL_(tpl_holidays), FL_(vacations), DeviceValueUOM::NONE, MAKE_CF_CB(set_vacation));
         register_device_value(tag, &hc->program, DeviceValueType::ENUM, FL_(enum_progMode2), FL_(program), DeviceValueUOM::NONE, MAKE_CF_CB(set_program));
-        register_device_value(tag, &hc->pause, DeviceValueType::UINT, FL_(pause), DeviceValueUOM::HOURS, MAKE_CF_CB(set_pause), 0, 99);
-        register_device_value(tag, &hc->party, DeviceValueType::UINT, FL_(party), DeviceValueUOM::HOURS, MAKE_CF_CB(set_party), 0, 99);
+        register_device_value(tag, &hc->pause, DeviceValueType::UINT8, FL_(pause), DeviceValueUOM::HOURS, MAKE_CF_CB(set_pause), 0, 99);
+        register_device_value(tag, &hc->party, DeviceValueType::UINT8, FL_(party), DeviceValueUOM::HOURS, MAKE_CF_CB(set_party), 0, 99);
         register_device_value(tag,
                               &hc->tempautotemp,
-                              DeviceValueType::UINT,
+                              DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_DIV2,
                               FL_(tempautotemp),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_tempautotemp),
                               0,
                               30);
-        register_device_value(tag, &hc->noreducetemp, DeviceValueType::INT, FL_(noreducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_noreducetemp), -31, 10);
-        register_device_value(tag, &hc->reducetemp, DeviceValueType::INT, FL_(reducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_reducetemp), -20, 10);
-        register_device_value(tag, &hc->vacreducetemp, DeviceValueType::INT, FL_(vacreducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_vacreducetemp), -20, 10);
+        register_device_value(tag, &hc->noreducetemp, DeviceValueType::INT8, FL_(noreducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_noreducetemp), -31, 10);
+        register_device_value(tag, &hc->reducetemp, DeviceValueType::INT8, FL_(reducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_reducetemp), -20, 10);
+        register_device_value(tag, &hc->vacreducetemp, DeviceValueType::INT8, FL_(vacreducetemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_vacreducetemp), -20, 10);
         register_device_value(
             tag, &hc->vacreducemode, DeviceValueType::ENUM, FL_(enum_reducemode), FL_(vacreducemode), DeviceValueUOM::NONE, MAKE_CF_CB(set_vacreducemode));
         register_device_value(tag,
                               &hc->remotetemp,
-                              DeviceValueType::SHORT,
+                              DeviceValueType::INT16,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(remotetemp),
                               DeviceValueUOM::DEGREES,
@@ -4832,12 +4832,12 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode4), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
         register_device_value(tag, &hc->modetype, DeviceValueType::ENUM, FL_(enum_modetype4), FL_(modetype), DeviceValueUOM::NONE);
         register_device_value(
-            tag, &hc->daytemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(heattemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_heattemp));
+            tag, &hc->daytemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(heattemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_heattemp));
         register_device_value(
-            tag, &hc->nighttemp, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(ecotemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_ecotemp));
+            tag, &hc->nighttemp, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(ecotemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_ecotemp));
         register_device_value(tag,
                               &hc->nofrosttemp,
-                              DeviceValueType::INT,
+                              DeviceValueType::INT8,
                               DeviceValueNumOp::DV_NUMOP_DIV2,
                               FL_(nofrosttemp),
                               DeviceValueUOM::DEGREES,
@@ -4846,15 +4846,15 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->program, DeviceValueType::ENUM, FL_(enum_progMode4), FL_(program), DeviceValueUOM::NONE, MAKE_CF_CB(set_program));
         register_device_value(tag,
                               &hc->remotetemp,
-                              DeviceValueType::SHORT,
+                              DeviceValueType::INT16,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(remotetemp),
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_remotetemp),
                               -1,
                               101);
-        register_device_value(tag, &hc->targetflowtemp, DeviceValueType::UINT, FL_(targetflowtemp), DeviceValueUOM::DEGREES);
-        register_device_value(tag, &hc->summertemp, DeviceValueType::UINT, FL_(summertemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_summertemp), 9, 25);
+        register_device_value(tag, &hc->targetflowtemp, DeviceValueType::UINT8, FL_(targetflowtemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &hc->summertemp, DeviceValueType::UINT8, FL_(summertemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_summertemp), 9, 25);
         register_device_value(tag, &hc->roomsensor, DeviceValueType::ENUM, FL_(enum_roomsensor), FL_(roomsensor), DeviceValueUOM::NONE, MAKE_CF_CB(set_roomsensor));
         register_device_value(tag, &hc->holidaymode, DeviceValueType::ENUM, FL_(enum_mode4), FL_(holidaymode), DeviceValueUOM::NONE, MAKE_CF_CB(set_holidaymode));
         register_device_value(tag,
@@ -4864,12 +4864,12 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_switchonoptimization));
         register_device_value(tag, &hc->fastHeatup, DeviceValueType::ENUM, FL_(enum_heatup), FL_(heatup), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatup));
-        register_device_value(tag, &hc->minflowtemp, DeviceValueType::UINT, FL_(minflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_minflowtemp), 5, 70);
-        register_device_value(tag, &hc->maxflowtemp, DeviceValueType::UINT, FL_(maxflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_maxflowtemp), 30, 90);
-        register_device_value(tag, &hc->designtemp, DeviceValueType::UINT, FL_(designtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_designtemp), 30, 90);
+        register_device_value(tag, &hc->minflowtemp, DeviceValueType::UINT8, FL_(minflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_minflowtemp), 5, 70);
+        register_device_value(tag, &hc->maxflowtemp, DeviceValueType::UINT8, FL_(maxflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_maxflowtemp), 30, 90);
+        register_device_value(tag, &hc->designtemp, DeviceValueType::UINT8, FL_(designtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_designtemp), 30, 90);
         register_device_value(
             tag, &hc->roominfluence, DeviceValueType::ENUM, FL_(enum_roominfluence), FL_(roominfluence), DeviceValueUOM::NONE, MAKE_CF_CB(set_roominfl_mode));
-        register_device_value(tag, &hc->roominfl_factor, DeviceValueType::UINT, FL_(roominfl_factor), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_roominfl_factor));
+        register_device_value(tag, &hc->roominfl_factor, DeviceValueType::UINT8, FL_(roominfl_factor), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_roominfl_factor));
         register_device_value(
             tag, &hc->heatingtype, DeviceValueType::ENUM, FL_(enum_heatingtype1), FL_(heatingtype), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatingtype));
         register_device_value(

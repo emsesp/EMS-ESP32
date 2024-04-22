@@ -38,7 +38,7 @@ class Pool : public EMSdevice {
     uint8_t poolShuntStatus_;
     uint8_t poolShunt_;
 
-    uint8_t poolShuntStatus__ = EMS_VALUE_UINT_NOTSET; // temp value
+    uint8_t poolShuntStatus__ = EMS_VALUE_UINT8_NOTSET; // temp value
 };
 
 } // namespace emsesp
