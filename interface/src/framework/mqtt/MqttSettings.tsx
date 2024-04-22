@@ -1,24 +1,33 @@
-import CancelIcon from '@mui/icons-material/Cancel';
-import WarningIcon from '@mui/icons-material/Warning';
-import { Button, Checkbox, MenuItem, Grid, Typography, InputAdornment, TextField } from '@mui/material';
 import { useState } from 'react';
-import type { ValidateFieldsError } from 'async-validator';
 import type { FC } from 'react';
 
-import type { MqttSettingsType } from 'types';
+import CancelIcon from '@mui/icons-material/Cancel';
+import WarningIcon from '@mui/icons-material/Warning';
+import {
+  Button,
+  Checkbox,
+  Grid,
+  InputAdornment,
+  MenuItem,
+  TextField,
+  Typography
+} from '@mui/material';
+
 import * as MqttApi from 'api/mqtt';
+
+import type { ValidateFieldsError } from 'async-validator';
 import {
   BlockFormControlLabel,
+  BlockNavigation,
   ButtonRow,
   FormLoader,
   SectionContent,
   ValidatedPasswordField,
-  ValidatedTextField,
-  BlockNavigation
+  ValidatedTextField
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
+import type { MqttSettingsType } from 'types';
 import { numberValue, updateValueDirty, useRest } from 'utils';
-
 import { createMqttSettingsValidator, validate } from 'validators';
 
 const MqttSettings: FC = () => {
@@ -42,7 +51,12 @@ const MqttSettings: FC = () => {
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, updateDataValue);
+  const updateFormValue = updateValueDirty(
+    origData,
+    dirtyFlags,
+    setDirtyFlags,
+    updateDataValue
+  );
 
   const content = () => {
     if (!data) {
@@ -54,18 +68,30 @@ const MqttSettings: FC = () => {
         setFieldErrors(undefined);
         await validate(createMqttSettingsValidator(data), data);
         await saveData();
-      } catch (errors: any) {
-        setFieldErrors(errors);
+      } catch (error) {
+        setFieldErrors(error as ValidateFieldsError);
       }
     };
 
     return (
       <>
         <BlockFormControlLabel
-          control={<Checkbox name="enabled" checked={data.enabled} onChange={updateFormValue} />}
+          control={
+            <Checkbox
+              name="enabled"
+              checked={data.enabled}
+              onChange={updateFormValue}
+            />
+          }
           label={LL.ENABLE_MQTT()}
         />
-        <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
+        <Grid
+          container
+          spacing={1}
+          direction="row"
+          justifyContent="flex-start"
+          alignItems="flex-start"
+        >
           <Grid item xs={12} sm={6}>
             <ValidatedTextField
               fieldErrors={fieldErrors}
@@ -143,7 +169,9 @@ const MqttSettings: FC = () => {
               name="keep_alive"
               label="Keep Alive"
               InputProps={{
-                endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                endAdornment: (
+                  <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                )
               }}
               fullWidth
               variant="outlined"
@@ -172,7 +200,13 @@ const MqttSettings: FC = () => {
         </Grid>
         {data.enableTLS !== undefined && (
           <BlockFormControlLabel
-            control={<Checkbox name="enableTLS" checked={data.enableTLS} onChange={updateFormValue} />}
+            control={
+              <Checkbox
+                name="enableTLS"
+                checked={data.enableTLS}
+                onChange={updateFormValue}
+              />
+            }
             label={LL.ENABLE_TLS()}
           />
         )}
@@ -189,11 +223,23 @@ const MqttSettings: FC = () => {
         )}
 
         <BlockFormControlLabel
-          control={<Checkbox name="clean_session" checked={data.clean_session} onChange={updateFormValue} />}
+          control={
+            <Checkbox
+              name="clean_session"
+              checked={data.clean_session}
+              onChange={updateFormValue}
+            />
+          }
           label={LL.MQTT_CLEAN_SESSION()}
         />
         <BlockFormControlLabel
-          control={<Checkbox name="mqtt_retain" checked={data.mqtt_retain} onChange={updateFormValue} />}
+          control={
+            <Checkbox
+              name="mqtt_retain"
+              checked={data.mqtt_retain}
+              onChange={updateFormValue}
+            />
+          }
           label={LL.MQTT_RETAIN_FLAG()}
         />
 
@@ -214,7 +260,13 @@ const MqttSettings: FC = () => {
           <MenuItem value={2}>{LL.MQTT_NEST_2()}</MenuItem>
         </TextField>
         <BlockFormControlLabel
-          control={<Checkbox name="send_response" checked={data.send_response} onChange={updateFormValue} />}
+          control={
+            <Checkbox
+              name="send_response"
+              checked={data.send_response}
+              onChange={updateFormValue}
+            />
+          }
           label={LL.MQTT_RESPONSE()}
         />
         {!data.ha_enabled && (
@@ -228,7 +280,13 @@ const MqttSettings: FC = () => {
           >
             <Grid item>
               <BlockFormControlLabel
-                control={<Checkbox name="publish_single" checked={data.publish_single} onChange={updateFormValue} />}
+                control={
+                  <Checkbox
+                    name="publish_single"
+                    checked={data.publish_single}
+                    onChange={updateFormValue}
+                  />
+                }
                 label={LL.MQTT_PUBLISH_TEXT_1()}
               />
             </Grid>
@@ -236,7 +294,11 @@ const MqttSettings: FC = () => {
               <Grid item>
                 <BlockFormControlLabel
                   control={
-                    <Checkbox name="publish_single2cmd" checked={data.publish_single2cmd} onChange={updateFormValue} />
+                    <Checkbox
+                      name="publish_single2cmd"
+                      checked={data.publish_single2cmd}
+                      onChange={updateFormValue}
+                    />
                   }
                   label={LL.MQTT_PUBLISH_TEXT_2()}
                 />
@@ -245,10 +307,22 @@ const MqttSettings: FC = () => {
           </Grid>
         )}
         {!data.publish_single && (
-          <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
+          <Grid
+            container
+            spacing={1}
+            direction="row"
+            justifyContent="flex-start"
+            alignItems="flex-start"
+          >
             <Grid item>
               <BlockFormControlLabel
-                control={<Checkbox name="ha_enabled" checked={data.ha_enabled} onChange={updateFormValue} />}
+                control={
+                  <Checkbox
+                    name="ha_enabled"
+                    checked={data.ha_enabled}
+                    onChange={updateFormValue}
+                  />
+                }
                 label={LL.MQTT_PUBLISH_TEXT_3()}
               />
             </Grid>
@@ -311,14 +385,22 @@ const MqttSettings: FC = () => {
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           {LL.MQTT_PUBLISH_INTERVALS()}&nbsp;(0=auto)
         </Typography>
-        <Grid container spacing={1} direction="row" justifyContent="flex-start" alignItems="flex-start">
+        <Grid
+          container
+          spacing={1}
+          direction="row"
+          justifyContent="flex-start"
+          alignItems="flex-start"
+        >
           <Grid item xs={12} sm={6} md={4}>
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="publish_time_heartbeat"
               label="Heartbeat"
               InputProps={{
-                endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                endAdornment: (
+                  <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                )
               }}
               fullWidth
               variant="outlined"
@@ -333,7 +415,9 @@ const MqttSettings: FC = () => {
               name="publish_time_boiler"
               label={LL.MQTT_INT_BOILER()}
               InputProps={{
-                endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                endAdornment: (
+                  <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                )
               }}
               fullWidth
               variant="outlined"
@@ -348,7 +432,9 @@ const MqttSettings: FC = () => {
               name="publish_time_thermostat"
               label={LL.MQTT_INT_THERMOSTATS()}
               InputProps={{
-                endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                endAdornment: (
+                  <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                )
               }}
               fullWidth
               variant="outlined"
@@ -363,7 +449,9 @@ const MqttSettings: FC = () => {
               name="publish_time_solar"
               label={LL.MQTT_INT_SOLAR()}
               InputProps={{
-                endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                endAdornment: (
+                  <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                )
               }}
               fullWidth
               variant="outlined"
@@ -378,7 +466,9 @@ const MqttSettings: FC = () => {
               name="publish_time_mixer"
               label={LL.MQTT_INT_MIXER()}
               InputProps={{
-                endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                endAdornment: (
+                  <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                )
               }}
               fullWidth
               variant="outlined"
@@ -393,7 +483,9 @@ const MqttSettings: FC = () => {
               name="publish_time_water"
               label={LL.MQTT_INT_WATER()}
               InputProps={{
-                endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                endAdornment: (
+                  <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                )
               }}
               fullWidth
               variant="outlined"
@@ -408,7 +500,9 @@ const MqttSettings: FC = () => {
               name="publish_time_sensor"
               label={LL.TEMP_SENSORS()}
               InputProps={{
-                endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                endAdornment: (
+                  <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                )
               }}
               fullWidth
               variant="outlined"
@@ -422,7 +516,9 @@ const MqttSettings: FC = () => {
             <TextField
               name="publish_time_other"
               InputProps={{
-                endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                endAdornment: (
+                  <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                )
               }}
               label={LL.DEFAULT(0)}
               fullWidth

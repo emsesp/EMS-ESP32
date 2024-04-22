@@ -1,36 +1,35 @@
+import { useEffect, useState } from 'react';
+
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
-
 import {
+  Box,
   Button,
+  CircularProgress,
   Dialog,
-  DialogTitle,
-  DialogContent,
   DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormHelperText,
+  Grid,
   InputAdornment,
   MenuItem,
   TextField,
-  FormHelperText,
-  Grid,
-  Box,
-  Typography,
-  CircularProgress
+  Typography
 } from '@mui/material';
-import { useState, useEffect } from 'react';
+
+import { dialogStyle } from 'CustomTheme';
+import type Schema from 'async-validator';
+import type { ValidateFieldsError } from 'async-validator';
+import { ValidatedTextField } from 'components';
+import { useI18nContext } from 'i18n/i18n-react';
+import { numberValue, updateValue } from 'utils';
+import { validate } from 'validators';
 
 import { DeviceValueUOM, DeviceValueUOM_s } from './types';
 import type { DeviceValue } from './types';
-import type Schema from 'async-validator';
 
-import type { ValidateFieldsError } from 'async-validator';
-import { dialogStyle } from 'CustomTheme';
-import { ValidatedTextField } from 'components';
-import { useI18nContext } from 'i18n/i18n-react';
-import { updateValue, numberValue } from 'utils';
-
-import { validate } from 'validators';
-
-type DashboardDevicesDialogProps = {
+interface DashboardDevicesDialogProps {
   open: boolean;
   onClose: () => void;
   onSave: (as: DeviceValue) => void;
@@ -38,7 +37,7 @@ type DashboardDevicesDialogProps = {
   writeable: boolean;
   validator: Schema;
   progress: boolean;
-};
+}
 
 const DevicesDialog = ({
   open,
@@ -71,12 +70,12 @@ const DevicesDialog = ({
       setFieldErrors(undefined);
       await validate(validator, editItem);
       onSave(editItem);
-    } catch (errors: any) {
-      setFieldErrors(errors);
+    } catch (error) {
+      setFieldErrors(error as ValidateFieldsError);
     }
   };
 
-  const setUom = (uom: number) => {
+  const setUom = (uom: DeviceValueUOM) => {
     switch (uom) {
       case DeviceValueUOM.HOURS:
         return LL.HOURS();
@@ -103,7 +102,11 @@ const DevicesDialog = ({
   return (
     <Dialog sx={dialogStyle} open={open} onClose={close}>
       <DialogTitle>
-        {selectedItem.v === '' && selectedItem.c ? LL.RUN_COMMAND() : writeable ? LL.CHANGE_VALUE() : LL.VALUE(1)}
+        {selectedItem.v === '' && selectedItem.c
+          ? LL.RUN_COMMAND()
+          : writeable
+            ? LL.CHANGE_VALUE()
+            : LL.VALUE(1)}
       </DialogTitle>
       <DialogContent dividers>
         <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
@@ -133,15 +136,23 @@ const DevicesDialog = ({
                 fieldErrors={fieldErrors}
                 name="v"
                 label={LL.VALUE(1)}
-                value={numberValue(Math.round(editItem.v * 10) / 10)}
+                value={numberValue(Math.round((editItem.v as number) * 10) / 10)}
                 autoFocus
                 disabled={!writeable}
                 type="number"
                 sx={{ width: '30ch' }}
                 onChange={updateFormValue}
-                inputProps={editItem.s ? { min: editItem.m, max: editItem.x, step: editItem.s } : {}}
+                inputProps={
+                  editItem.s
+                    ? { min: editItem.m, max: editItem.x, step: editItem.s }
+                    : {}
+                }
                 InputProps={{
-                  startAdornment: <InputAdornment position="start">{setUom(editItem.u)}</InputAdornment>
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      {setUom(editItem.u)}
+                    </InputAdornment>
+                  )
                 }}
               />
             ) : (
@@ -176,10 +187,20 @@ const DevicesDialog = ({
               position: 'relative'
             }}
           >
-            <Button startIcon={<CancelIcon />} variant="outlined" onClick={close} color="secondary">
+            <Button
+              startIcon={<CancelIcon />}
+              variant="outlined"
+              onClick={close}
+              color="secondary"
+            >
               {LL.CANCEL()}
             </Button>
-            <Button startIcon={<WarningIcon color="warning" />} variant="contained" onClick={save} color="info">
+            <Button
+              startIcon={<WarningIcon color="warning" />}
+              variant="contained"
+              onClick={save}
+              color="info"
+            >
               {selectedItem.v === '' && selectedItem.c ? LL.EXECUTE() : LL.UPDATE()}
             </Button>
             {progress && (

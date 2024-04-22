@@ -1,3 +1,6 @@
+import { type FC, useContext, useState } from 'react';
+import { toast } from 'react-toastify';
+
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import BuildIcon from '@mui/icons-material/Build';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -9,7 +12,6 @@ import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import TimerIcon from '@mui/icons-material/Timer';
-
 import {
   Avatar,
   Box,
@@ -26,17 +28,15 @@ import {
   useTheme
 } from '@mui/material';
 
-import { useRequest } from 'alova';
-import { useContext, type FC, useState } from 'react';
-
-import { toast } from 'react-toastify';
-import { dialogStyle } from 'CustomTheme';
 import * as SystemApi from 'api/system';
+
+import * as EMSESP from 'project/api';
+import { dialogStyle } from 'CustomTheme';
+import { useRequest } from 'alova';
 import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import ListMenuItem from 'components/layout/ListMenuItem';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
-import * as EMSESP from 'project/api';
 import { busConnectionStatus } from 'project/types';
 import { NTPSyncStatus } from 'types';
 
@@ -49,7 +49,11 @@ const SystemStatus: FC = () => {
 
   const [confirmScan, setConfirmScan] = useState<boolean>(false);
 
-  const { data: data, send: loadData, error } = useRequest(SystemApi.readSystemStatus, { force: true });
+  const {
+    data: data,
+    send: loadData,
+    error
+  } = useRequest(SystemApi.readSystemStatus, { force: true });
 
   const { send: scanDevices } = useRequest(EMSESP.scanDevices, {
     immediate: false
@@ -134,28 +138,43 @@ const SystemStatus: FC = () => {
     }
   };
 
-  const activeHighlight = (value: boolean) => (value ? theme.palette.success.main : theme.palette.info.main);
+  const activeHighlight = (value: boolean) =>
+    value ? theme.palette.success.main : theme.palette.info.main;
 
   const scan = async () => {
     await scanDevices()
       .then(() => {
         toast.info(LL.SCANNING() + '...');
       })
-      .catch((err) => {
-        toast.error(err.message);
+      .catch((error: Error) => {
+        toast.error(error.message);
       });
     setConfirmScan(false);
   };
 
   const renderScanDialog = () => (
-    <Dialog sx={dialogStyle} open={confirmScan} onClose={() => setConfirmScan(false)}>
+    <Dialog
+      sx={dialogStyle}
+      open={confirmScan}
+      onClose={() => setConfirmScan(false)}
+    >
       <DialogTitle>{LL.SCAN_DEVICES()}</DialogTitle>
       <DialogContent dividers>{LL.EMS_SCAN()}</DialogContent>
       <DialogActions>
-        <Button startIcon={<CancelIcon />} variant="outlined" onClick={() => setConfirmScan(false)} color="secondary">
+        <Button
+          startIcon={<CancelIcon />}
+          variant="outlined"
+          onClick={() => setConfirmScan(false)}
+          color="secondary"
+        >
           {LL.CANCEL()}
         </Button>
-        <Button startIcon={<PermScanWifiIcon />} variant="outlined" onClick={scan} color="primary">
+        <Button
+          startIcon={<PermScanWifiIcon />}
+          variant="outlined"
+          onClick={scan}
+          color="primary"
+        >
           {LL.SCAN()}
         </Button>
       </DialogActions>
@@ -282,7 +301,12 @@ const SystemStatus: FC = () => {
         {renderScanDialog()}
 
         <Box mt={2} display="flex" flexWrap="wrap">
-          <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
+          <Button
+            startIcon={<RefreshIcon />}
+            variant="outlined"
+            color="secondary"
+            onClick={loadData}
+          >
             {LL.REFRESH()}
           </Button>
         </Box>

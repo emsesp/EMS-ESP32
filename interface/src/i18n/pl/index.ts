@@ -1,6 +1,4 @@
 import type { BaseTranslation } from '../i18n-types';
-/* prettier-ignore */
-/* eslint-disable */
 
 const pl: BaseTranslation = {
   LANGUAGE: 'Język',
@@ -122,7 +120,7 @@ const pl: BaseTranslation = {
   BYPASS_TOKEN: 'Pomiń autoryzację tokenem w wywołaniach API',
   READONLY: 'Tryb pracy "tylko do odczytu" (blokuje wszystkie komendy zapisu na magistralę EMS)',
   UNDERCLOCK_CPU: 'Obniż taktowanie CPU',
-  HEATINGOFF: 'Uruchom kocioł z wymuszonym wyłączonym grzaniem', 
+  HEATINGOFF: 'Uruchom kocioł z wymuszonym wyłączonym grzaniem',
   ENABLE_SHOWER_TIMER: 'Aktywuj minutnik prysznica',
   ENABLE_SHOWER_ALERT: 'Aktywuj alarm prysznica',
   TRIGGER_TIME: 'Wyzwalaj po czasie',
@@ -158,7 +156,7 @@ const pl: BaseTranslation = {
   SET_ALL: 'Ustaw wszystko jako',
   OPTIONS: 'Opcje',
   NAME: '{{Nazwa|nazwa|}}',
-  CUSTOMIZATIONS_RESET:  'Na pewno chcesz usunąć wszystkie personalizacje łącznie z ustawieniami dla czujników temperatury 1-Wire® i urządzeń podłączonych do EMS-ESP?',
+  CUSTOMIZATIONS_RESET: 'Na pewno chcesz usunąć wszystkie personalizacje łącznie z ustawieniami dla czujników temperatury 1-Wire® i urządzeń podłączonych do EMS-ESP?',
   SUPPORT_INFORMATION: '{{I|i|}}nformacj{{e|i|}} o systemie',
   HELP_INFORMATION_1: 'Aby uzyskać instrukcje dotyczące konfiguracji EMS-ESP, skorzystaj z wiki w internecie',
   HELP_INFORMATION_2: 'Aby dołączyć do naszego serwera Discord i komunikować się na żywo ze społecznością',
@@ -287,8 +285,8 @@ const pl: BaseTranslation = {
   NETWORK_SUBNET: 'Maska podsieci',
   NETWORK_DNS: 'Serwery DNS',
   ADDRESS_OF: 'Adres {0}',
-  ADMIN: 'Użytkownik "administrator".',
-  GUEST: 'Użytkownik "gość".',
+  ADMIN: 'Administrator',
+  GUEST: 'Gość',
   NEW: 'nowe{{go|j|}}',
   NEW_NAME_OF: 'Nowa nazwa {0}',
   ENTITY: 'encji',
@@ -329,7 +327,7 @@ const pl: BaseTranslation = {
   APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
   SECURITY_1: 'Add or remove users', // TODO translate
   UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', // TODO translate
-  CUSTOMIZE: 'Customize', // TODO translate
+  MODULE: 'Module' // TODO translate
 };
 
 export default pl;

@@ -1,15 +1,19 @@
+import { useState } from 'react';
+import type { FC } from 'react';
+
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { IconButton, InputAdornment } from '@mui/material';
-import { useState } from 'react';
 
 import ValidatedTextField from './ValidatedTextField';
 import type { ValidatedTextFieldProps } from './ValidatedTextField';
-import type { FC } from 'react';
 
 type ValidatedPasswordFieldProps = Omit<ValidatedTextFieldProps, 'type'>;
 
-const ValidatedPasswordField: FC<ValidatedPasswordFieldProps> = ({ InputProps, ...props }) => {
+const ValidatedPasswordField: FC<ValidatedPasswordFieldProps> = ({
+  InputProps,
+  ...props
+}) => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
   return (

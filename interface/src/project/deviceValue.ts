@@ -1,5 +1,6 @@
-import { DeviceValueUOM, DeviceValueUOM_s } from './types';
 import type { TranslationFunctions } from 'i18n/i18n-types';
+
+import { DeviceValueUOM, DeviceValueUOM_s } from './types';
 
 const formatDurationMin = (LL: TranslationFunctions, duration_min: number) => {
   const days = Math.trunc((duration_min * 60000) / 86400000);
@@ -24,8 +25,12 @@ const formatDurationMin = (LL: TranslationFunctions, duration_min: number) => {
   return formatted;
 };
 
-export function formatValue(LL: TranslationFunctions, value: any, uom: number) {
-  if (value === undefined) {
+export function formatValue(
+  LL: TranslationFunctions,
+  value: unknown,
+  uom: DeviceValueUOM
+) {
+  if (typeof value !== 'number') {
     return '';
   }
   switch (uom) {

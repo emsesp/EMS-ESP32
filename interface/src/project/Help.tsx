@@ -1,33 +1,40 @@
+import type { FC } from 'react';
+import { toast } from 'react-toastify';
+
 import CommentIcon from '@mui/icons-material/CommentTwoTone';
 import DownloadIcon from '@mui/icons-material/GetApp';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import MenuBookIcon from '@mui/icons-material/MenuBookTwoTone';
 import {
+  Avatar,
   Box,
+  Button,
+  Link,
   List,
   ListItem,
   ListItemAvatar,
-  ListItemText,
-  Link,
-  Typography,
-  Button,
   ListItemButton,
-  Avatar
+  ListItemText,
+  Typography
 } from '@mui/material';
+
+import * as EMSESP from 'project/api';
 import { useRequest } from 'alova';
-import { toast } from 'react-toastify';
-import type { FC } from 'react';
 import { SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
-import * as EMSESP from 'project/api';
+
+import type { APIcall } from './types';
 
 const Help: FC = () => {
   const { LL } = useI18nContext();
   useLayoutTitle(LL.HELP_OF(''));
 
-  const { send: getAPI, onSuccess: onGetAPI } = useRequest((data) => EMSESP.API(data), {
-    immediate: false
-  });
+  const { send: getAPI, onSuccess: onGetAPI } = useRequest(
+    (data: APIcall) => EMSESP.API(data),
+    {
+      immediate: false
+    }
+  );
 
   onGetAPI((event) => {
     const anchor = document.createElement('a');
@@ -36,14 +43,17 @@ const Help: FC = () => {
         type: 'text/plain'
       })
     );
-    anchor.download = 'emsesp_' + event.sendArgs[0].device + '_' + event.sendArgs[0].entity + '.txt';
+
+    anchor.download =
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      'emsesp_' + event.sendArgs[0].device + '_' + event.sendArgs[0].entity + '.txt';
     anchor.click();
     URL.revokeObjectURL(anchor.href);
     toast.info(LL.DOWNLOAD_SUCCESSFUL());
   });
 
   const callAPI = async (device: string, entity: string) => {
-    await getAPI({ device, entity, id: 0 }).catch((error) => {
+    await getAPI({ device, entity, id: 0 }).catch((error: Error) => {
       toast.error(error.message);
     });
   };
@@ -74,7 +84,10 @@ const Help: FC = () => {
         </ListItem>
 
         <ListItem>
-          <ListItemButton component="a" href="https://github.com/emsesp/EMS-ESP32/issues/new/choose">
+          <ListItemButton
+            component="a"
+            href="https://github.com/emsesp/EMS-ESP32/issues/new/choose"
+          >
             <ListItemAvatar>
               <Avatar sx={{ bgcolor: '#72caf9' }}>
                 <GitHubIcon />
@@ -114,7 +127,11 @@ const Help: FC = () => {
           <b>{LL.HELP_INFORMATION_5()}</b>
         </Typography>
         <Typography align="center">
-          <Link target="_blank" href="https://github.com/emsesp/EMS-ESP32" color="primary">
+          <Link
+            target="_blank"
+            href="https://github.com/emsesp/EMS-ESP32"
+            color="primary"
+          >
             {'github.com/emsesp/EMS-ESP32'}
           </Link>
         </Typography>

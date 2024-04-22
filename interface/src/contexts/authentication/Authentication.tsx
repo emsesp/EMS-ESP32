@@ -1,16 +1,18 @@
-import { useRequest } from 'alova';
 import { useCallback, useEffect, useState } from 'react';
+import type { FC } from 'react';
 import { redirect } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { AuthenticationContext } from './context';
-import type { FC } from 'react';
 
-import type { Me } from 'types';
-import type { RequiredChildrenProps } from 'utils';
 import * as AuthenticationApi from 'api/authentication';
 import { ACCESS_TOKEN } from 'api/endpoints';
+
+import { useRequest } from 'alova';
 import { LoadingSpinner } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
+import type { Me } from 'types';
+import type { RequiredChildrenProps } from 'utils';
+
+import { AuthenticationContext } from './context';
 
 const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
   const { LL } = useI18nContext();
@@ -18,9 +20,12 @@ const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
   const [initialized, setInitialized] = useState<boolean>(false);
   const [me, setMe] = useState<Me>();
 
-  const { send: verifyAuthorization } = useRequest(AuthenticationApi.verifyAuthorization(), {
-    immediate: false
-  });
+  const { send: verifyAuthorization } = useRequest(
+    AuthenticationApi.verifyAuthorization(),
+    {
+      immediate: false
+    }
+  );
 
   const signIn = (accessToken: string) => {
     try {
@@ -59,7 +64,6 @@ const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
       setMe(undefined);
       setInitialized(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

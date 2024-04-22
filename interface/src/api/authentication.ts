@@ -1,15 +1,18 @@
-import { jwtDecode } from 'jwt-decode';
-import { ACCESS_TOKEN, alovaInstance } from './endpoints';
-import type * as H from 'history';
 import type { Path } from 'react-router-dom';
 
+import type * as H from 'history';
+import { jwtDecode } from 'jwt-decode';
 import type { Me, SignInRequest, SignInResponse } from 'types';
+
+import { ACCESS_TOKEN, alovaInstance } from './endpoints';
 
 export const SIGN_IN_PATHNAME = 'loginPathname';
 export const SIGN_IN_SEARCH = 'loginSearch';
 
-export const verifyAuthorization = () => alovaInstance.Get('/rest/verifyAuthorization');
-export const signIn = (request: SignInRequest) => alovaInstance.Post<SignInResponse>('/rest/signIn', request);
+export const verifyAuthorization = () =>
+  alovaInstance.Get('/rest/verifyAuthorization');
+export const signIn = (request: SignInRequest) =>
+  alovaInstance.Post<SignInResponse>('/rest/signIn', request);
 
 export function getStorage() {
   return localStorage || sessionStorage;

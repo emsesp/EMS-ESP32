@@ -1,6 +1,7 @@
+import type { FC } from 'react';
+
 import MenuIcon from '@mui/icons-material/Menu';
 import { AppBar, IconButton, Toolbar, Typography } from '@mui/material';
-import type { FC } from 'react';
 
 export const DRAWER_WIDTH = 210;
 
@@ -20,7 +21,12 @@ const LayoutAppBar: FC<LayoutAppBarProps> = ({ title, onToggleDrawer }) => (
     }}
   >
     <Toolbar>
-      <IconButton color="inherit" edge="start" onClick={onToggleDrawer} sx={{ mr: 2, display: { md: 'none' } }}>
+      <IconButton
+        color="inherit"
+        edge="start"
+        onClick={onToggleDrawer}
+        sx={{ mr: 2, display: { md: 'none' } }}
+      >
         <MenuIcon />
       </IconButton>
       <Typography variant="h6" noWrap component="div">

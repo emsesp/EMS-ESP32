@@ -1,17 +1,27 @@
+import { useContext } from 'react';
+import type { FC } from 'react';
+
 import LockIcon from '@mui/icons-material/Lock';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import WifiIcon from '@mui/icons-material/Wifi';
-import { Avatar, Badge, List, ListItem, ListItemAvatar, ListItemIcon, ListItemText, useTheme } from '@mui/material';
-import { useContext } from 'react';
+import {
+  Avatar,
+  Badge,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemIcon,
+  ListItemText,
+  useTheme
+} from '@mui/material';
+import type { Theme } from '@mui/material';
+
+import { MessageBox } from 'components';
+import { useI18nContext } from 'i18n/i18n-react';
+import type { WiFiNetwork, WiFiNetworkList } from 'types';
+import { WiFiEncryptionType } from 'types';
 
 import { WiFiConnectionContext } from './WiFiConnectionContext';
-import type { Theme } from '@mui/material';
-import type { FC } from 'react';
-import type { WiFiNetwork, WiFiNetworkList } from 'types';
-import { MessageBox } from 'components';
-
-import { useI18nContext } from 'i18n/i18n-react';
-import { WiFiEncryptionType } from 'types';
 
 interface WiFiNetworkSelectorProps {
   networkList: WiFiNetworkList;
@@ -39,7 +49,7 @@ export const networkSecurityMode = ({ encryption_type }: WiFiNetwork) => {
     case WiFiEncryptionType.WIFI_AUTH_WPA2_WPA3_PSK:
       return 'WPA2/WPA3';
     default:
-      return 'Unknown: ' + encryption_type;
+      return 'Unknown: ' + String(encryption_type);
   }
 };
 
@@ -59,14 +69,22 @@ const WiFiNetworkSelector: FC<WiFiNetworkSelectorProps> = ({ networkList }) => {
   const wifiConnectionContext = useContext(WiFiConnectionContext);
 
   const renderNetwork = (network: WiFiNetwork) => (
-    <ListItem key={network.bssid} onClick={() => wifiConnectionContext.selectNetwork(network)}>
+    <ListItem
+      key={network.bssid}
+      onClick={() => wifiConnectionContext.selectNetwork(network)}
+    >
       <ListItemAvatar>
         <Avatar>{isNetworkOpen(network) ? <LockOpenIcon /> : <LockIcon />}</Avatar>
       </ListItemAvatar>
       <ListItemText
         primary={network.ssid}
         secondary={
-          'Security: ' + networkSecurityMode(network) + ', Ch: ' + network.channel + ', bssid: ' + network.bssid
+          'Security: ' +
+          networkSecurityMode(network) +
+          ', Ch: ' +
+          network.channel +
+          ', bssid: ' +
+          network.bssid
         }
       />
       <ListItemIcon>

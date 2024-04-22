@@ -1,8 +1,8 @@
-import { defineConfig } from 'vite';
-import viteTsconfigPaths from 'vite-tsconfig-paths';
 import preact from '@preact/preset-vite';
-import viteImagemin from 'vite-plugin-imagemin';
 import { visualizer } from 'rollup-plugin-visualizer';
+import { defineConfig } from 'vite';
+import viteImagemin from 'vite-plugin-imagemin';
+import viteTsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig(({ command, mode }) => {
   if (command === 'serve') {
@@ -121,7 +121,11 @@ export default defineConfig(({ command, mode }) => {
           manualChunks(id: string) {
             if (id.includes('node_modules')) {
               // creating a chunk to react routes deps. Reducing the vendor chunk size
-              if (id.includes('react-router-dom') || id.includes('@remix-run') || id.includes('react-router')) {
+              if (
+                id.includes('react-router-dom') ||
+                id.includes('@remix-run') ||
+                id.includes('react-router')
+              ) {
                 return '@react-router';
               }
               return 'vendor';

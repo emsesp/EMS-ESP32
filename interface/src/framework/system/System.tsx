@@ -1,14 +1,15 @@
+import { type FC, useContext } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
+
 import { Tab } from '@mui/material';
-import { useContext, type FC } from 'react';
-import { Navigate, Routes, Route } from 'react-router-dom';
-import SystemLog from './SystemLog';
-import SystemStatus from './SystemStatus';
 
-import { useRouterTab, RouterTabs, useLayoutTitle, RequireAdmin } from 'components';
-
+import { RequireAdmin, RouterTabs, useLayoutTitle, useRouterTab } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import SystemActivity from 'project/SystemActivity';
+
+import SystemLog from './SystemLog';
+import SystemStatus from './SystemStatus';
 
 const System: FC = () => {
   const { LL } = useI18nContext();
@@ -23,7 +24,11 @@ const System: FC = () => {
       <RouterTabs value={routerTab}>
         <Tab value="status" label={LL.STATUS_OF('')} />
         <Tab value="activity" label={LL.ACTIVITY()} />
-        <Tab disabled={!me.admin} value="log" label={me.admin ? LL.LOG_OF('') : ''} />
+        <Tab
+          disabled={!me.admin}
+          value="log"
+          label={me.admin ? LL.LOG_OF('') : ''}
+        />
       </RouterTabs>
       <Routes>
         <Route path="status" element={<SystemStatus />} />

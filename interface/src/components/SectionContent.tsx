@@ -1,5 +1,6 @@
-import { Paper, Divider } from '@mui/material';
 import type { FC } from 'react';
+
+import { Divider, Paper } from '@mui/material';
 
 import type { RequiredChildrenProps } from 'utils';
 
@@ -13,7 +14,16 @@ const SectionContent: FC<SectionContentProps> = (props) => {
   return (
     <Paper id={id} sx={{ p: 2, m: 2 }}>
       {title && (
-        <Divider sx={{ pb: 2, borderColor: 'primary.main', fontSize: 20, color: 'primary.main' }}>{title}</Divider>
+        <Divider
+          sx={{
+            pb: 2,
+            borderColor: 'primary.main',
+            fontSize: 20,
+            color: 'primary.main'
+          }}
+        >
+          {title}
+        </Divider>
       )}
       {children}
     </Paper>

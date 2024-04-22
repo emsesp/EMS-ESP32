@@ -1,6 +1,4 @@
 import type { Translation } from '../i18n-types';
-/* prettier-ignore */
-/* eslint-disable */
 
 const nl: Translation = {
   LANGUAGE: 'Taal',
@@ -99,7 +97,7 @@ const nl: Translation = {
   NUM_HOURS: '{num} {{uur|uren}}',
   NUM_MINUTES: '{num} {{minuut|minuten}}',
   APPLICATION_SETTINGS: 'Applicatieinstellingen',
-  CUSTOMIZATIONS: 'Custom aanpassingen',
+  CUSTOMIZATIONS: 'User Entities',
   APPLICATION_RESTARTING: 'EMS-ESP herstarten',
   INTERFACE_BOARD_PROFILE: 'Interface Apparaatprofiel',
   BOARD_PROFILE_TEXT: 'Selecteer een vooraf ingesteld apparaat profiel uit de lijst of kies Eigen om zelf uw hardware te configureren',
@@ -208,7 +206,8 @@ const nl: Translation = {
   USER_WARNING: 'U dient tenminste 1 admin gebruiker te configureren',
   ADD: 'Toevoegen',
   ACCESS_TOKEN_FOR: 'Access Token voor',
-  ACCESS_TOKEN_TEXT: 'Het token hieronder wordt gebruikt voor de REST API calls die authorisatie nodig hebben. Het kan zowel als Bearer token in de Authorization header of in acccess_token URL query parameter gebruikt worden',
+  ACCESS_TOKEN_TEXT:
+    'Het token hieronder wordt gebruikt voor de REST API calls die authorisatie nodig hebben. Het kan zowel als Bearer token in de Authorization header of in acccess_token URL query parameter gebruikt worden',
   GENERATING_TOKEN: 'Token aan het genereren',
   USER: 'Gebruiker',
   MODIFY: 'Aanpassen',
@@ -329,7 +328,7 @@ const nl: Translation = {
   APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
   SECURITY_1: 'Add or remove users', // TODO translate
   UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', // TODO translate
-  CUSTOMIZE: 'Customize' // TODO translate
+  MODULE: 'Module' // TODO translate
 };
 
 export default nl;

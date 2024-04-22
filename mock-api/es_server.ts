@@ -7,7 +7,7 @@ const port = 3081;
 const ES_ENDPOINT_ROOT = '/es/';
 const ES_LOG_ENDPOINT = ES_ENDPOINT_ROOT + 'log';
 
-const INTERVAL = 2000;
+const INTERVAL = 1000;
 
 function pad(number) {
   var r = String(number);

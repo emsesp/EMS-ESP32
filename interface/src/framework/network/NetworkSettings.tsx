@@ -1,3 +1,7 @@
+import { useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import { toast } from 'react-toastify';
+
 import CancelIcon from '@mui/icons-material/Cancel';
 import DeleteIcon from '@mui/icons-material/Delete';
 import LockIcon from '@mui/icons-material/Lock';
@@ -14,39 +18,35 @@ import {
   ListItemAvatar,
   ListItemSecondaryAction,
   ListItemText,
-  Typography,
+  MenuItem,
   TextField,
-  MenuItem
+  Typography
 } from '@mui/material';
-// eslint-disable-next-line import/named
+
+import * as NetworkApi from 'api/network';
+import * as SystemApi from 'api/system';
+
 import { updateState, useRequest } from 'alova';
-import { useContext, useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
+import type { ValidateFieldsError } from 'async-validator';
+import {
+  BlockFormControlLabel,
+  BlockNavigation,
+  ButtonRow,
+  FormLoader,
+  MessageBox,
+  SectionContent,
+  ValidatedPasswordField,
+  ValidatedTextField
+} from 'components';
+import { useI18nContext } from 'i18n/i18n-react';
+import type { NetworkSettingsType } from 'types';
+import { updateValueDirty, useRest } from 'utils';
+import { validate } from 'validators';
+import { createNetworkSettingsValidator } from 'validators/network';
+
 import RestartMonitor from '../system/RestartMonitor';
 import { WiFiConnectionContext } from './WiFiConnectionContext';
 import { isNetworkOpen, networkSecurityMode } from './WiFiNetworkSelector';
-import type { ValidateFieldsError } from 'async-validator';
-import type { FC } from 'react';
-
-import type { NetworkSettingsType } from 'types';
-import * as NetworkApi from 'api/network';
-import * as SystemApi from 'api/system';
-import {
-  BlockFormControlLabel,
-  ButtonRow,
-  FormLoader,
-  SectionContent,
-  ValidatedPasswordField,
-  ValidatedTextField,
-  MessageBox,
-  BlockNavigation
-} from 'components';
-import { useI18nContext } from 'i18n/i18n-react';
-
-import { updateValueDirty, useRest } from 'utils';
-
-import { validate } from 'validators';
-import { createNetworkSettingsValidator } from 'validators/network';
 
 const NetworkSettings: FC = () => {
   const { LL } = useI18nContext();
@@ -80,7 +80,7 @@ const NetworkSettings: FC = () => {
   useEffect(() => {
     if (!initialized && data) {
       if (selectedNetwork) {
-        updateState('networkSettings', (current_data) => ({
+        updateState('networkSettings', (current_data: NetworkSettingsType) => ({
           ssid: selectedNetwork.ssid,
           bssid: selectedNetwork.bssid,
           password: current_data ? current_data.password : '',
@@ -99,7 +99,12 @@ const NetworkSettings: FC = () => {
     }
   }, [initialized, setInitialized, data, selectedNetwork]);
 
-  const updateFormValue = updateValueDirty(origData, dirtyFlags, setDirtyFlags, updateDataValue);
+  const updateFormValue = updateValueDirty(
+    origData,
+    dirtyFlags,
+    setDirtyFlags,
+    updateDataValue
+  );
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
@@ -115,8 +120,8 @@ const NetworkSettings: FC = () => {
         setFieldErrors(undefined);
         await validate(createNetworkSettingsValidator(data), data);
         await saveData();
-      } catch (errors: any) {
-        setFieldErrors(errors);
+      } catch (error) {
+        setFieldErrors(error as ValidateFieldsError);
       }
       deselectNetwork();
     };
@@ -127,7 +132,7 @@ const NetworkSettings: FC = () => {
     };
 
     const restart = async () => {
-      await restartCommand().catch((error) => {
+      await restartCommand().catch((error: Error) => {
         toast.error(error.message);
       });
       setRestarting(true);
@@ -142,7 +147,9 @@ const NetworkSettings: FC = () => {
           <List>
             <ListItem>
               <ListItemAvatar>
-                <Avatar>{isNetworkOpen(selectedNetwork) ? <LockOpenIcon /> : <LockIcon />}</Avatar>
+                <Avatar>
+                  {isNetworkOpen(selectedNetwork) ? <LockOpenIcon /> : <LockIcon />}
+                </Avatar>
               </ListItemAvatar>
               <ListItemText
                 primary={selectedNetwork.ssid}
@@ -220,11 +227,23 @@ const NetworkSettings: FC = () => {
           <MenuItem value={8}>2 dBm</MenuItem>
         </TextField>
         <BlockFormControlLabel
-          control={<Checkbox name="nosleep" checked={data.nosleep} onChange={updateFormValue} />}
+          control={
+            <Checkbox
+              name="nosleep"
+              checked={data.nosleep}
+              onChange={updateFormValue}
+            />
+          }
           label={LL.NETWORK_DISABLE_SLEEP()}
         />
         <BlockFormControlLabel
-          control={<Checkbox name="bandwidth20" checked={data.bandwidth20} onChange={updateFormValue} />}
+          control={
+            <Checkbox
+              name="bandwidth20"
+              checked={data.bandwidth20}
+              onChange={updateFormValue}
+            />
+          }
           label={LL.NETWORK_LOW_BAND()}
         />
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
@@ -241,11 +260,23 @@ const NetworkSettings: FC = () => {
           margin="normal"
         />
         <BlockFormControlLabel
-          control={<Checkbox name="enableMDNS" checked={data.enableMDNS} onChange={updateFormValue} />}
+          control={
+            <Checkbox
+              name="enableMDNS"
+              checked={data.enableMDNS}
+              onChange={updateFormValue}
+            />
+          }
           label={LL.NETWORK_USE_DNS()}
         />
         <BlockFormControlLabel
-          control={<Checkbox name="enableCORS" checked={data.enableCORS} onChange={updateFormValue} />}
+          control={
+            <Checkbox
+              name="enableCORS"
+              checked={data.enableCORS}
+              onChange={updateFormValue}
+            />
+          }
           label={LL.NETWORK_ENABLE_CORS()}
         />
         {data.enableCORS && (
@@ -261,12 +292,24 @@ const NetworkSettings: FC = () => {
         )}
         {data.enableIPv6 !== undefined && (
           <BlockFormControlLabel
-            control={<Checkbox name="enableIPv6" checked={data.enableIPv6} onChange={updateFormValue} />}
+            control={
+              <Checkbox
+                name="enableIPv6"
+                checked={data.enableIPv6}
+                onChange={updateFormValue}
+              />
+            }
             label={LL.NETWORK_ENABLE_IPV6()}
           />
         )}
         <BlockFormControlLabel
-          control={<Checkbox name="static_ip_config" checked={data.static_ip_config} onChange={updateFormValue} />}
+          control={
+            <Checkbox
+              name="static_ip_config"
+              checked={data.static_ip_config}
+              onChange={updateFormValue}
+            />
+          }
           label={LL.NETWORK_FIXED_IP()}
         />
         {data.static_ip_config && (
@@ -325,36 +368,42 @@ const NetworkSettings: FC = () => {
         )}
         {restartNeeded && (
           <MessageBox my={2} level="warning" message={LL.RESTART_TEXT(0)}>
-            <Button startIcon={<PowerSettingsNewIcon />} variant="contained" color="error" onClick={restart}>
+            <Button
+              startIcon={<PowerSettingsNewIcon />}
+              variant="contained"
+              color="error"
+              onClick={restart}
+            >
               {LL.RESTART()}
             </Button>
           </MessageBox>
         )}
 
-        {!restartNeeded && (selectedNetwork || (dirtyFlags && dirtyFlags.length !== 0)) && (
-          <ButtonRow>
-            <Button
-              startIcon={<CancelIcon />}
-              disabled={saving}
-              variant="outlined"
-              color="primary"
-              type="submit"
-              onClick={loadData}
-            >
-              {LL.CANCEL()}
-            </Button>
-            <Button
-              startIcon={<WarningIcon color="warning" />}
-              disabled={saving}
-              variant="contained"
-              color="info"
-              type="submit"
-              onClick={validateAndSubmit}
-            >
-              {LL.APPLY_CHANGES(dirtyFlags.length)}
-            </Button>
-          </ButtonRow>
-        )}
+        {!restartNeeded &&
+          (selectedNetwork || (dirtyFlags && dirtyFlags.length !== 0)) && (
+            <ButtonRow>
+              <Button
+                startIcon={<CancelIcon />}
+                disabled={saving}
+                variant="outlined"
+                color="primary"
+                type="submit"
+                onClick={loadData}
+              >
+                {LL.CANCEL()}
+              </Button>
+              <Button
+                startIcon={<WarningIcon color="warning" />}
+                disabled={saving}
+                variant="contained"
+                color="info"
+                type="submit"
+                onClick={validateAndSubmit}
+              >
+                {LL.APPLY_CHANGES(dirtyFlags.length)}
+              </Button>
+            </ButtonRow>
+          )}
       </>
     );
   };

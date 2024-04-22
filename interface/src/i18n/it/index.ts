@@ -1,6 +1,4 @@
 import type { Translation } from '../i18n-types';
-/* prettier-ignore */
-/* eslint-disable */
 
 const it: Translation = {
   LANGUAGE: 'Lingua',
@@ -102,7 +100,8 @@ const it: Translation = {
   CUSTOMIZATIONS: 'Personalizzazione',
   APPLICATION_RESTARTING: 'EMS-ESP sta riavviando',
   INTERFACE_BOARD_PROFILE: 'Profilo scheda di interfaccia',
-  BOARD_PROFILE_TEXT: 'Selezionare un profilo di interfaccia pre-configurato dalla lista sottostante o scegliere un profilo personalizzato per configurare le impostazioni del tuo hardware',
+  BOARD_PROFILE_TEXT:
+    'Selezionare un profilo di interfaccia pre-configurato dalla lista sottostante o scegliere un profilo personalizzato per configurare le impostazioni del tuo hardware',
   BOARD_PROFILE: 'Profilo Scheda',
   CUSTOM: 'Personalizzazione',
   GPIO_OF: 'GPIO {0}',
@@ -197,8 +196,10 @@ const it: Translation = {
   ENABLE_OTA: 'Abilita aggiornamenti OTA',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Scarica personalizzazioni entità',
   DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events',
-  DOWNLOAD_SETTINGS_TEXT: 'Scarica le impostazioni dell applicazione. Fai attenzione quando condividi le tue impostazioni poiché questo file contiene password e altre informazioni di sistema riservate',
-  UPLOAD_TEXT: 'Carica un nuovo file firmware (.bin) , file delle impostazioni o delle personalizzazioni (.json) di seguito, per un opzione di convalida scaricare dapprima un file "*.MD5" ',
+  DOWNLOAD_SETTINGS_TEXT:
+    'Scarica le impostazioni dell applicazione. Fai attenzione quando condividi le tue impostazioni poiché questo file contiene password e altre informazioni di sistema riservate',
+  UPLOAD_TEXT:
+    'Carica un nuovo file firmware (.bin) , file delle impostazioni o delle personalizzazioni (.json) di seguito, per un opzione di convalida scaricare dapprima un file "*.MD5" ',
   UPLOADING: 'Caricamento',
   UPLOAD_DROP_TEXT: 'Trascina il file o clicca qui',
   ERROR: 'Errore Inaspettato, prego tenta ancora',
@@ -208,7 +209,8 @@ const it: Translation = {
   USER_WARNING: 'Devi avere configurato almeno un utente amministratore',
   ADD: 'Aggiungi',
   ACCESS_TOKEN_FOR: 'Token di accesso per',
-  ACCESS_TOKEN_TEXT: 'Il token seguente viene utilizzato con le chiamate API REST che richiedono l autorizzazione. Può essere passato come token Bearer nell intestazione di autorizzazione o nel parametro di query URL access_token.',
+  ACCESS_TOKEN_TEXT:
+    'Il token seguente viene utilizzato con le chiamate API REST che richiedono l autorizzazione. Può essere passato come token Bearer nell intestazione di autorizzazione o nel parametro di query URL access_token.',
   GENERATING_TOKEN: 'Generazione token',
   USER: 'Utente',
   MODIFY: 'Modifica',
@@ -329,7 +331,7 @@ const it: Translation = {
   APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
   SECURITY_1: 'Add or remove users', // TODO translate
   UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', // TODO translate
-  CUSTOMIZE: 'Customize' // TODO translate
+  MODULE: 'Module' // TODO translate
 };
 
 export default it;

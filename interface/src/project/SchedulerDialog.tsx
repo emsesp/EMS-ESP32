@@ -1,8 +1,9 @@
+import { useEffect, useState } from 'react';
+
 import AddIcon from '@mui/icons-material/Add';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DoneIcon from '@mui/icons-material/Done';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
-
 import {
   Box,
   Button,
@@ -17,22 +18,19 @@ import {
   ToggleButtonGroup,
   Typography
 } from '@mui/material';
-import { useEffect, useState } from 'react';
-
-import { ScheduleFlag } from './types';
-import type { ScheduleItem } from './types';
-import type Schema from 'async-validator';
-import type { ValidateFieldsError } from 'async-validator';
 
 import { dialogStyle } from 'CustomTheme';
+import type Schema from 'async-validator';
+import type { ValidateFieldsError } from 'async-validator';
 import { BlockFormControlLabel, ValidatedTextField } from 'components';
-
 import { useI18nContext } from 'i18n/i18n-react';
-
 import { updateValue } from 'utils';
 import { validate } from 'validators';
 
-type SchedulerDialogProps = {
+import { ScheduleFlag } from './types';
+import type { ScheduleItem } from './types';
+
+interface SchedulerDialogProps {
   open: boolean;
   creating: boolean;
   onClose: () => void;
@@ -40,9 +38,17 @@ type SchedulerDialogProps = {
   selectedItem: ScheduleItem;
   validator: Schema;
   dow: string[];
-};
+}
 
-const SchedulerDialog = ({ open, creating, onClose, onSave, selectedItem, validator, dow }: SchedulerDialogProps) => {
+const SchedulerDialog = ({
+  open,
+  creating,
+  onClose,
+  onSave,
+  selectedItem,
+  validator,
+  dow
+}: SchedulerDialogProps) => {
   const { LL } = useI18nContext();
   const [editItem, setEditItem] = useState<ScheduleItem>(selectedItem);
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
@@ -65,8 +71,8 @@ const SchedulerDialog = ({ open, creating, onClose, onSave, selectedItem, valida
       setFieldErrors(undefined);
       await validate(validator, editItem);
       onSave(editItem);
-    } catch (errors: any) {
-      setFieldErrors(errors);
+    } catch (error) {
+      setFieldErrors(error as ValidateFieldsError);
     }
   };
 
@@ -113,8 +119,14 @@ const SchedulerDialog = ({ open, creating, onClose, onSave, selectedItem, valida
   };
 
   const showFlag = (si: ScheduleItem, flag: number) => (
-    <Typography variant="button" sx={{ fontSize: 10 }} color={(si.flags & flag) === flag ? 'primary' : 'grey'}>
-      {flag === ScheduleFlag.SCHEDULE_TIMER ? LL.TIMER(0) : dow[Math.log(flag) / Math.log(2)]}
+    <Typography
+      variant="button"
+      sx={{ fontSize: 10 }}
+      color={(si.flags & flag) === flag ? 'primary' : 'grey'}
+    >
+      {flag === ScheduleFlag.SCHEDULE_TIMER
+        ? LL.TIMER(0)
+        : dow[Math.log(flag) / Math.log(2)]}
     </Typography>
   );
 
@@ -123,7 +135,8 @@ const SchedulerDialog = ({ open, creating, onClose, onSave, selectedItem, valida
   return (
     <Dialog sx={dialogStyle} open={open} onClose={close}>
       <DialogTitle>
-        {creating ? LL.ADD(1) + ' ' + LL.NEW(0) : LL.EDIT()}&nbsp;{LL.SCHEDULE(1)}
+        {creating ? LL.ADD(1) + ' ' + LL.NEW(0) : LL.EDIT()}&nbsp;
+        {LL.SCHEDULE(1)}
       </DialogTitle>
       <DialogContent dividers>
         <Box display="flex" flexWrap="wrap" mb={1}>
@@ -132,17 +145,31 @@ const SchedulerDialog = ({ open, creating, onClose, onSave, selectedItem, valida
               size="small"
               color="secondary"
               value={getFlagString(editItem.flags)}
-              onChange={(event, flag) => {
+              onChange={(_event, flag: string[]) => {
                 setEditItem({ ...editItem, flags: getFlagNumber(flag) & 127 });
               }}
             >
-              <ToggleButton value="2">{showFlag(editItem, ScheduleFlag.SCHEDULE_MON)}</ToggleButton>
-              <ToggleButton value="4">{showFlag(editItem, ScheduleFlag.SCHEDULE_TUE)}</ToggleButton>
-              <ToggleButton value="8">{showFlag(editItem, ScheduleFlag.SCHEDULE_WED)}</ToggleButton>
-              <ToggleButton value="16">{showFlag(editItem, ScheduleFlag.SCHEDULE_THU)}</ToggleButton>
-              <ToggleButton value="32">{showFlag(editItem, ScheduleFlag.SCHEDULE_FRI)}</ToggleButton>
-              <ToggleButton value="64">{showFlag(editItem, ScheduleFlag.SCHEDULE_SAT)}</ToggleButton>
-              <ToggleButton value="1">{showFlag(editItem, ScheduleFlag.SCHEDULE_SUN)}</ToggleButton>
+              <ToggleButton value="2">
+                {showFlag(editItem, ScheduleFlag.SCHEDULE_MON)}
+              </ToggleButton>
+              <ToggleButton value="4">
+                {showFlag(editItem, ScheduleFlag.SCHEDULE_TUE)}
+              </ToggleButton>
+              <ToggleButton value="8">
+                {showFlag(editItem, ScheduleFlag.SCHEDULE_WED)}
+              </ToggleButton>
+              <ToggleButton value="16">
+                {showFlag(editItem, ScheduleFlag.SCHEDULE_THU)}
+              </ToggleButton>
+              <ToggleButton value="32">
+                {showFlag(editItem, ScheduleFlag.SCHEDULE_FRI)}
+              </ToggleButton>
+              <ToggleButton value="64">
+                {showFlag(editItem, ScheduleFlag.SCHEDULE_SAT)}
+              </ToggleButton>
+              <ToggleButton value="1">
+                {showFlag(editItem, ScheduleFlag.SCHEDULE_SUN)}
+              </ToggleButton>
             </ToggleButtonGroup>
           </Box>
           <Box flexWrap="nowrap" whiteSpace="nowrap">
@@ -162,7 +189,10 @@ const SchedulerDialog = ({ open, creating, onClose, onSave, selectedItem, valida
                 size="large"
                 variant="outlined"
                 onClick={() => {
-                  setEditItem({ ...editItem, flags: ScheduleFlag.SCHEDULE_TIMER });
+                  setEditItem({
+                    ...editItem,
+                    flags: ScheduleFlag.SCHEDULE_TIMER
+                  });
                 }}
               >
                 {showFlag(editItem, ScheduleFlag.SCHEDULE_TIMER)}
@@ -172,7 +202,13 @@ const SchedulerDialog = ({ open, creating, onClose, onSave, selectedItem, valida
         </Box>
         <Grid container>
           <BlockFormControlLabel
-            control={<Checkbox checked={editItem.active} onChange={updateFormValue} name="active" />}
+            control={
+              <Checkbox
+                checked={editItem.active}
+                onChange={updateFormValue}
+                name="active"
+              />
+            }
             label={LL.ACTIVE()}
           />
         </Grid>
@@ -222,15 +258,30 @@ const SchedulerDialog = ({ open, creating, onClose, onSave, selectedItem, valida
       <DialogActions>
         {!creating && (
           <Box flexGrow={1}>
-            <Button startIcon={<RemoveIcon />} variant="outlined" color="warning" onClick={remove}>
+            <Button
+              startIcon={<RemoveIcon />}
+              variant="outlined"
+              color="warning"
+              onClick={remove}
+            >
               {LL.REMOVE()}
             </Button>
           </Box>
         )}
-        <Button startIcon={<CancelIcon />} variant="outlined" onClick={close} color="secondary">
+        <Button
+          startIcon={<CancelIcon />}
+          variant="outlined"
+          onClick={close}
+          color="secondary"
+        >
           {LL.CANCEL()}
         </Button>
-        <Button startIcon={creating ? <AddIcon /> : <DoneIcon />} variant="outlined" onClick={save} color="primary">
+        <Button
+          startIcon={creating ? <AddIcon /> : <DoneIcon />}
+          variant="outlined"
+          onClick={save}
+          color="primary"
+        >
           {creating ? LL.ADD(0) : LL.UPDATE()}
         </Button>
       </DialogActions>

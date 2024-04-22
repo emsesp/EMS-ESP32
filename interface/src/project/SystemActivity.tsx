@@ -1,17 +1,26 @@
+import { useEffect } from 'react';
+import type { FC } from 'react';
+
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { Button } from '@mui/material';
-import { Body, Cell, Header, HeaderCell, HeaderRow, Row, Table } from '@table-library/react-table-library/table';
+
+import {
+  Body,
+  Cell,
+  Header,
+  HeaderCell,
+  HeaderRow,
+  Row,
+  Table
+} from '@table-library/react-table-library/table';
 import { useTheme as tableTheme } from '@table-library/react-table-library/theme';
 import { useRequest } from 'alova';
-import { useEffect } from 'react';
+import { ButtonRow, FormLoader, SectionContent, useLayoutTitle } from 'components';
+import { useI18nContext } from 'i18n/i18n-react';
+import type { Translation } from 'i18n/i18n-types';
 
 import * as EMSESP from './api';
 import type { Stat } from './types';
-
-import type { Translation } from 'i18n/i18n-types';
-import type { FC } from 'react';
-import { ButtonRow, FormLoader, SectionContent, useLayoutTitle } from 'components';
-import { useI18nContext } from 'i18n/i18n-react';
 
 const SystemActivity: FC = () => {
   const { data: data, send: loadData, error } = useRequest(EMSESP.readActivity);
@@ -65,7 +74,8 @@ const SystemActivity: FC = () => {
     };
   });
 
-  const showName = (id: any) => {
+  const showName = (id: number) => {
+    // TODO fix this
     const name: keyof Translation['STATUS_NAMES'] = id;
     return LL.STATUS_NAMES[name]();
   };
@@ -91,8 +101,12 @@ const SystemActivity: FC = () => {
 
     return (
       <>
-        <Table data={{ nodes: data.stats }} theme={stats_theme} layout={{ custom: true }}>
-          {(tableList: any) => (
+        <Table
+          data={{ nodes: data.stats }}
+          theme={stats_theme}
+          layout={{ custom: true }}
+        >
+          {(tableList: Stat[]) => (
             <>
               <Header>
                 <HeaderRow>
@@ -116,7 +130,12 @@ const SystemActivity: FC = () => {
           )}
         </Table>
         <ButtonRow mt={1}>
-          <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={loadData}>
+          <Button
+            startIcon={<RefreshIcon />}
+            variant="outlined"
+            color="secondary"
+            onClick={loadData}
+          >
             {LL.REFRESH()}
           </Button>
         </ButtonRow>

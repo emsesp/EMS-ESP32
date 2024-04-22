@@ -1,16 +1,18 @@
-import { useRequest, type Method } from 'alova';
 import { useState } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
+import { type Method, useRequest } from 'alova';
 import { useI18nContext } from 'i18n/i18n-react';
 
-export interface RestRequestOptions2<D> {
+export interface RestRequestOptions<D> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   read: () => Method<any, any, any, any, any, any, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   update: (value: D) => Method<any, any, any, any, any, any, any>;
 }
 
-export const useRest = <D>({ read, update }: RestRequestOptions2<D>) => {
+export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
   const { LL } = useI18nContext();
 
   const [errorMessage, setErrorMessage] = useState<string>();
@@ -20,7 +22,12 @@ export const useRest = <D>({ read, update }: RestRequestOptions2<D>) => {
   const [dirtyFlags, setDirtyFlags] = useState<string[]>([]);
   const blocker = useBlocker(dirtyFlags.length !== 0);
 
-  const { data: data, send: readData, update: updateData, onComplete: onReadComplete } = useRequest(read());
+  const {
+    data,
+    send: readData,
+    update: updateData,
+    onComplete: onReadComplete
+  } = useRequest(read());
 
   const {
     loading: saving,
@@ -38,13 +45,13 @@ export const useRest = <D>({ read, update }: RestRequestOptions2<D>) => {
   });
 
   onReadComplete((event) => {
-    setOrigData(event.data);
+    setOrigData(event.data as D);
   });
 
   const loadData = async () => {
     setDirtyFlags([]);
     setErrorMessage(undefined);
-    await readData().catch((error) => {
+    await readData().catch((error: Error) => {
       toast.error(error.message);
       setErrorMessage(error.message);
     });
@@ -57,8 +64,8 @@ export const useRest = <D>({ read, update }: RestRequestOptions2<D>) => {
     setRestartNeeded(false);
     setErrorMessage(undefined);
     setDirtyFlags([]);
-    setOrigData(data);
-    await writeData(data).catch((error) => {
+    setOrigData(data as D);
+    await writeData(data).catch((error: Error) => {
       if (error.message === 'Reboot required') {
         setRestartNeeded(true);
       } else {
@@ -71,10 +78,10 @@ export const useRest = <D>({ read, update }: RestRequestOptions2<D>) => {
   return {
     loadData,
     saveData,
-    saving,
+    saving: saving as boolean,
     updateDataValue,
-    data,
-    origData,
+    data: data as D, // Explicitly define the type of 'data'
+    origData: origData as D, // Explicitly define the type of 'origData' to 'D'
     dirtyFlags,
     setDirtyFlags,
     setOrigData,

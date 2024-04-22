@@ -1,27 +1,40 @@
+import { useCallback, useState } from 'react';
+import type { FC } from 'react';
+import { useBlocker } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
 import AddIcon from '@mui/icons-material/Add';
 import CancelIcon from '@mui/icons-material/Cancel';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import WarningIcon from '@mui/icons-material/Warning';
-import { Button, Typography, Box } from '@mui/material';
-import { Table, Header, HeaderRow, HeaderCell, Body, Row, Cell } from '@table-library/react-table-library/table';
+import { Box, Button, Typography } from '@mui/material';
+
+import {
+  Body,
+  Cell,
+  Header,
+  HeaderCell,
+  HeaderRow,
+  Row,
+  Table
+} from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
-// eslint-disable-next-line import/named
 import { updateState, useRequest } from 'alova';
-import { useState, useCallback } from 'react';
-import { useBlocker } from 'react-router-dom';
-
-import { toast } from 'react-toastify';
-
-import SettingsCustomEntitiesDialog from './CustomEntitiesDialog';
-import * as EMSESP from './api';
-import { DeviceValueTypeNames, DeviceValueUOM_s } from './types';
-import { entityItemValidation } from './validators';
-import type { EntityItem } from './types';
-import type { FC } from 'react';
-import { ButtonRow, FormLoader, SectionContent, BlockNavigation, useLayoutTitle } from 'components';
-
+import {
+  BlockNavigation,
+  ButtonRow,
+  FormLoader,
+  SectionContent,
+  useLayoutTitle
+} from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
+
+import * as EMSESP from './api';
+import SettingsCustomEntitiesDialog from './CustomEntitiesDialog';
+import { DeviceValueTypeNames, DeviceValueUOM_s } from './types';
+import type { EntityItem } from './types';
+import { entityItemValidation } from './validators';
 
 const CustomEntities: FC = () => {
   const { LL } = useI18nContext();
@@ -42,7 +55,10 @@ const CustomEntities: FC = () => {
     force: true
   });
 
-  const { send: writeEntities } = useRequest((data) => EMSESP.writeCustomEntities(data), { immediate: false });
+  const { send: writeEntities } = useRequest(
+    (data: { id: number; entity_ids: string[] }) => EMSESP.writeCustomEntities(data),
+    { immediate: false }
+  );
 
   function hasEntityChanged(ei: EntityItem) {
     return (
@@ -139,8 +155,8 @@ const CustomEntities: FC = () => {
       .then(() => {
         toast.success(LL.ENTITIES_UPDATED());
       })
-      .catch((err) => {
-        toast.error(err.message);
+      .catch((error: Error) => {
+        toast.error(error.message);
       })
       .finally(async () => {
         await fetchEntities();
@@ -167,10 +183,15 @@ const CustomEntities: FC = () => {
   const onDialogSave = (updatedItem: EntityItem) => {
     setDialogOpen(false);
 
-    updateState('entities', (data) => {
+    updateState('entities', (data: EntityItem[]) => {
       const new_data = creating
-        ? [...data.filter((ei) => creating || ei.o_id !== updatedItem.o_id), updatedItem]
-        : data.map((ei) => (ei.id === updatedItem.id ? { ...ei, ...updatedItem } : ei));
+        ? [
+            ...data.filter((ei) => creating || ei.o_id !== updatedItem.o_id),
+            updatedItem
+          ]
+        : data.map((ei) =>
+            ei.id === updatedItem.id ? { ...ei, ...updatedItem } : ei
+          );
       setNumChanges(new_data.filter((ei) => hasEntityChanged(ei)).length);
       return new_data;
     });
@@ -195,12 +216,13 @@ const CustomEntities: FC = () => {
     setDialogOpen(true);
   };
 
-  function formatValue(value: any, uom: number) {
-    return value === undefined || uom === undefined
+  function formatValue(value: unknown, uom: number) {
+    return value === undefined
       ? ''
       : typeof value === 'number'
-        ? new Intl.NumberFormat().format(value) + (uom === 0 ? '' : ' ' + DeviceValueUOM_s[uom])
-        : value;
+        ? new Intl.NumberFormat().format(value) +
+          (uom === 0 ? '' : ' ' + DeviceValueUOM_s[uom])
+        : (value as string);
   }
 
   function showHex(value: number, digit: number) {
@@ -213,8 +235,12 @@ const CustomEntities: FC = () => {
     }
 
     return (
-      <Table data={{ nodes: entities.filter((ei) => !ei.deleted) }} theme={entity_theme} layout={{ custom: true }}>
-        {(tableList: any) => (
+      <Table
+        data={{ nodes: entities.filter((ei) => !ei.deleted) }}
+        theme={entity_theme}
+        layout={{ custom: true }}
+      >
+        {(tableList: EntityItem[]) => (
           <>
             <Header>
               <HeaderRow>
@@ -231,12 +257,18 @@ const CustomEntities: FC = () => {
                 <Row key={ei.name} item={ei} onClick={() => editEntityItem(ei)}>
                   <Cell>
                     {ei.name}&nbsp;
-                    {ei.writeable && <EditOutlinedIcon color="primary" sx={{ fontSize: 12 }} />}
+                    {ei.writeable && (
+                      <EditOutlinedIcon color="primary" sx={{ fontSize: 12 }} />
+                    )}
                   </Cell>
-                  <Cell>{ei.ram === 1 ? '' : showHex(ei.device_id as number, 2)}</Cell>
+                  <Cell>
+                    {ei.ram === 1 ? '' : showHex(ei.device_id as number, 2)}
+                  </Cell>
                   <Cell>{ei.ram === 1 ? '' : showHex(ei.type_id as number, 3)}</Cell>
                   <Cell>{ei.ram === 1 ? '' : ei.offset}</Cell>
-                  <Cell>{ei.ram === 1 ? 'RAM' : DeviceValueTypeNames[ei.value_type]}</Cell>
+                  <Cell>
+                    {ei.ram === 1 ? 'RAM' : DeviceValueTypeNames[ei.value_type]}
+                  </Cell>
                   <Cell>{formatValue(ei.value, ei.uom)}</Cell>
                 </Row>
               ))}
@@ -271,7 +303,12 @@ const CustomEntities: FC = () => {
         <Box flexGrow={1}>
           {numChanges > 0 && (
             <ButtonRow>
-              <Button startIcon={<CancelIcon />} variant="outlined" onClick={onDialogCancel} color="secondary">
+              <Button
+                startIcon={<CancelIcon />}
+                variant="outlined"
+                onClick={onDialogCancel}
+                color="secondary"
+              >
                 {LL.CANCEL()}
               </Button>
               <Button
@@ -287,10 +324,20 @@ const CustomEntities: FC = () => {
         </Box>
         <Box flexWrap="nowrap" whiteSpace="nowrap">
           <ButtonRow>
-            <Button startIcon={<RefreshIcon />} variant="outlined" color="secondary" onClick={fetchEntities}>
+            <Button
+              startIcon={<RefreshIcon />}
+              variant="outlined"
+              color="secondary"
+              onClick={fetchEntities}
+            >
               {LL.REFRESH()}
             </Button>
-            <Button startIcon={<AddIcon />} variant="outlined" color="primary" onClick={addEntityItem}>
+            <Button
+              startIcon={<AddIcon />}
+              variant="outlined"
+              color="primary"
+              onClick={addEntityItem}
+            >
               {LL.ADD(0)}
             </Button>
           </ButtonRow>

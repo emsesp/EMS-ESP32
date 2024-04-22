@@ -119,7 +119,7 @@ export interface Devices {
 
 export interface DeviceValue {
   id: string; // index, contains mask+name
-  v: any; // value, Number or String
+  v: unknown; // value, Number or String
   u: number; // uom
   c?: string; // command, optional
   l?: string[]; // list, optional
@@ -134,10 +134,10 @@ export interface DeviceData {
 
 export interface DeviceEntity {
   id: string; // shortname
-  v?: any; // value, in any format, optional
+  v?: unknown; // value, in any format, optional
   n?: string; // fullname, optional
   cn?: string; // custom fullname, optional
-  m: number; // mask
+  m: DeviceEntityMask; // mask
   w: boolean; // writeable
   mi?: number; // min value
   ma?: number; // max value
@@ -230,9 +230,7 @@ export const AnalogTypeNames = [
   'PWM 2'
 ];
 
-type BoardProfiles = {
-  [name: string]: string;
-};
+type BoardProfiles = Record<string, string>;
 
 export const BOARD_PROFILES: BoardProfiles = {
   S32: 'BBQKees Gateway S32',
@@ -265,7 +263,7 @@ export interface BoardProfile {
 export interface APIcall {
   device: string;
   entity: string;
-  id: any;
+  id: unknown;
 }
 export interface WriteAnalogSensor {
   id: number;
@@ -306,6 +304,10 @@ export interface ScheduleItem {
   o_name?: string;
 }
 
+export interface Schedule {
+  schedule: ScheduleItem[];
+}
+
 export enum ScheduleFlag {
   SCHEDULE_SUN = 1,
   SCHEDULE_MON = 2,
@@ -327,7 +329,7 @@ export interface EntityItem {
   factor: number;
   uom: number;
   value_type: number;
-  value?: any;
+  value?: unknown;
   writeable: boolean;
   deleted?: boolean;
   o_id?: number;
@@ -341,7 +343,7 @@ export interface EntityItem {
   o_value_type?: number;
   o_deleted?: boolean;
   o_writeable?: boolean;
-  o_value?: any;
+  o_value?: unknown;
 }
 
 export interface Entities {

@@ -6,6 +6,10 @@
     "editor.codeActionsOnSave": {
       "source.fixAll": "explicit"
     },
+    "eslint.validate": [
+      "typescript"
+    ],
+    "eslint.codeActionsOnSave.rules": null,
     "eslint.nodePath": "interface/.yarn/sdks",
     "eslint.workingDirectories": ["interface"],
     "prettier.prettierPath": "",
@@ -87,5 +91,6 @@
     "cSpell.enableFiletypes": [
       "!cpp",
       "!typescript"
-    ]
+    ],
+    "typescript.preferences.preferTypeOnlyAutoImports": true
   }
