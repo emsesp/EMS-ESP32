@@ -1163,10 +1163,12 @@ void Boiler::process_UBAFactory(std::shared_ptr<const Telegram> telegram) {
     if (nomPower > 0 && nomPower_ == 0) {
         has_update(nomPower_, nomPower);
     }
-    set_minmax(&burnMinPower_, 0, max);
-    set_minmax(&burnMaxPower_, min, max);
-    set_minmax(&wwMaxPower_, min, max);
-    set_minmax(&selBurnPow_, 0, max);
+    if (min <= max) {
+        set_minmax(&burnMinPower_, 0, max);
+        set_minmax(&burnMaxPower_, min, max);
+        set_minmax(&wwMaxPower_, min, max);
+        set_minmax(&selBurnPow_, 0, max);
+    }
 }
 
 // 0x18
