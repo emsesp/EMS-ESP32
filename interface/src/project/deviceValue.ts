@@ -31,7 +31,7 @@ export function formatValue(
   uom: DeviceValueUOM
 ) {
   if (typeof value !== 'number') {
-    return '';
+    return value;
   }
   switch (uom) {
     case DeviceValueUOM.HOURS:
@@ -41,10 +41,7 @@ export function formatValue(
     case DeviceValueUOM.SECONDS:
       return LL.NUM_SECONDS({ num: value });
     case DeviceValueUOM.NONE:
-      if (typeof value === 'number') {
-        return new Intl.NumberFormat().format(value);
-      }
-      return value;
+      return new Intl.NumberFormat().format(value);
     case DeviceValueUOM.DEGREES:
     case DeviceValueUOM.DEGREES_R:
     case DeviceValueUOM.FAHRENHEIT:

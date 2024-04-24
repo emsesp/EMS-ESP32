@@ -543,12 +543,16 @@ MAKE_TRANSLATION(releaseWait, "releasewait", "boiler release wait time", "Wartez
 MAKE_TRANSLATION(nrgTotal, "nrgtotal", "total energy", "Energie gesamt", "", "", "całkowita energia", "", "", "", "", "celková energia") // TODO translate
 MAKE_TRANSLATION(nrgHeat, "nrgheat", "energy heating", "Energie Heizen", "", "", "energia na ogrzewanie", "", "", "ısıtma enerjisi", "", "energetické vykurovanie") // TODO translate
 MAKE_TRANSLATION(nrgWw, "nrgdhw", "energy", "Energie", "", "", "energia", "", "", "sıcak kullanım suyu enerjisi", "", "energia") // TODO translate
+MAKE_TRANSLATION(nrgHeat2, "nrgheat2", "energy heating 2", "Energie Heizen 2", "", "", "energia na ogrzewanie 2", "", "", "ısıtma enerjisi 2", "", "energetické vykurovanie") // TODO translate
+MAKE_TRANSLATION(nrgWw2, "nrgdhw2", "energy 2", "Energie 2", "", "", "energia 2", "", "", "sıcak kullanım suyu enerjisi 2", "", "energia 2") // TODO translate
 MAKE_TRANSLATION(nomPower, "nompower", "nominal Power", "Brennerleistung", "", "", "moc nominalna", "", "", "nominal güç", "", "nominálny výkon") // TODO translate
 MAKE_TRANSLATION(meterTotal, "metertotal", "meter total", "Messung gesamt", "", "", "licznik całkowity", "", "", "", "", "meter celkom") // TODO translate
 MAKE_TRANSLATION(meterComp, "metercomp", "meter compressor", "Messung Kompressor", "", "", "licznik sprężarki", "", "", "", "", "meter kompresor") // TODO translate
 MAKE_TRANSLATION(meterEHeat, "metereheat", "meter e-heater", "Messung E-Heizer", "", "", "licznik dogrzewacza", "", "", "", "", "elektrický ohrievač") // TODO translate
 MAKE_TRANSLATION(meterHeat, "meterheat", "meter heating", "Messung Heizen", "", "", "licznik ogrzewania", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(meterWw, "meterdhw", "meter", "Messung", "", "", "licznik", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(gasMeterHeat, "gasmeterheat", "gas meter heating", "Gas Messung Heizen", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(gasMeterWw, "gasmeterdhw", "gas meter", "Gas Messung", "", "", "", "", "", "", "", "") // TODO translate
 
 // HIU
 MAKE_TRANSLATION(netFlowTemp, "netflowtemp", "heat network flow temp", "System Vorlauftemperatur", "Netto aanvoertemperatuur", "", "temp. zasilania sieci cieplnej", "", "", "ısıtma şebekesi akış derecesi", "temperatura di mandata della rete di riscaldamento", "teplota prívodu tepelnej siete") // TODO translate
@@ -636,8 +640,7 @@ MAKE_TRANSLATION(pvLowerCool, "pvlowercool", "lower cooling with PV", "Kühlabse
 MAKE_TRANSLATION(wwMode, "mode", "mode", "Modus", "Modus", "Läge", "tryb pracy", "modus", "mode", "mod", "modalità", "režim")
 MAKE_TRANSLATION(wwSetTempLow, "settemplow", "set low temperature", "untere Solltemperatur", "Onderste streeftemperatuur", "Nedre Börvärde", "zadana temperatura obniżona", "nedre settverdi", "réglage température basse", "hedef düşük sıcaklık", "imposta bassa temperatura", "nastaviť nízku teplotu")
 MAKE_TRANSLATION(wwWhenModeOff, "whenmodeoff", "when thermostat mode off", "bei Thermostatmodus AUS", "Als Thermostaat op UIT", "när Termostatläge är AV", "gdy wyłączono na termostacie", "når modus er av", "lorsque mode thermostat off", "termostat modu kapalı olduğunda", "quando termostato modalita OFF", "keď je režim termostatu vypnutý")
-MAKE_TRANSLATION(wwExtra1, "extra1", "circuit 1 extra", "Kreis 1 Extra", "Circuit 1 extra", "Krets 1 Extra", "obieg dodatkowy 1", "ekstra krets 1", "circuit 1 extra", "devre 1 ekstra", "Circuito 1 extra", "okruh 1 extra")
-MAKE_TRANSLATION(wwExtra2, "extra2", "circuit 2 extra", "Kreis 2 Extra", "Circuit 2 extra", "Kets 2 Extra", "obieg dodatkowy 2", "ekstra krets 2", "circuit 2 extra", "devre 2 ekstra", "Circuito 2 extra", "okruh 2 extra")
+MAKE_TRANSLATION(wwExtra, "extra", "extra", "Extra", "extra", "Extra", "obieg", "ekstra", "extra", "ekstra", "extra", "extra")
 MAKE_TRANSLATION(wwCharge, "charge", "charge", "Laden", "Laden", "Ladda", "grzanie", "lade", "charge", "doldurma", "carica", "nabiť")
 MAKE_TRANSLATION(wwChargeDuration, "chargeduration", "charge duration", "Ladedauer", "Laadtijd", "Laddtid", "czas grzania dodatkowej ciepłej wody", "ladetid", "durée charge", "doldurma süresi", "durata carica", "doba nabíjania")
 MAKE_TRANSLATION(wwDisinfect, "disinfect", "disinfection", "Desinfektion", "Desinfectie", "Desinfektion", "dezynfekcja termiczna", "desinfeksjon", "désinfection", "dezenfeksiyon", "disinfezione", "dezinfekcia")

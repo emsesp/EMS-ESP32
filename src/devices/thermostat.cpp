@@ -1203,6 +1203,12 @@ void Thermostat::process_RC300WWmode(std::shared_ptr<const Telegram> telegram) {
 // type 02F6
 // RC300WWmode(0x2F6), data: 02 FF 04 00 00 00 08 05 00 08 04 00 00 00 00 00 00 00 00 00 01
 void Thermostat::process_RC300WW2mode(std::shared_ptr<const Telegram> telegram) {
+    telegram->read_value(wwCircuit2_, 0);
+    if (wwCircuit2_ == 0) {
+        toggle_fetch(telegram->type_id, false);
+        return;
+    }
+    toggle_fetch(telegram->type_id, true);
     has_update(telegram, wwCircPump2_, 1); // FF=off, 0=on ?
 
     if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400) {
@@ -1227,6 +1233,9 @@ void Thermostat::process_RC300WW2mode(std::shared_ptr<const Telegram> telegram) 
 // types 0x31D and 0x31E
 // RC300WWmode2(0x31D), data: 00 00 09 07
 void Thermostat::process_RC300WWmode2(std::shared_ptr<const Telegram> telegram) {
+    if (telegram->type_id == 0x31E && wwCircuit2_ == 0) {
+        return;
+    }
     // 0x31D for WW system 1, 0x31E for WW system 2
     // pos 1 = holiday mode
     // pos 2 = current status of DHW setpoint
@@ -3887,7 +3896,7 @@ void Thermostat::register_device_values() {
                               DeviceValueUOM::MINUTES,
                               MAKE_CF_CB(set_wwchargeduration));
         register_device_value(DeviceValueTAG::TAG_DHW1, &wwCharge_, DeviceValueType::BOOL, FL_(wwCharge), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwcharge));
-        register_device_value(DeviceValueTAG::TAG_DHW1, &wwExtra1_, DeviceValueType::UINT8, FL_(wwExtra1), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DHW1, &wwExtra1_, DeviceValueType::UINT8, FL_(wwExtra), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DHW1,
                               &wwDisinfecting_,
                               DeviceValueType::BOOL,
@@ -3940,7 +3949,7 @@ void Thermostat::register_device_values() {
                               DeviceValueUOM::MINUTES,
                               MAKE_CF_CB(set_wwchargeduration));
         register_device_value(DeviceValueTAG::TAG_DHW2, &wwCharge2_, DeviceValueType::BOOL, FL_(wwCharge), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwcharge));
-        register_device_value(DeviceValueTAG::TAG_DHW2, &wwExtra2_, DeviceValueType::UINT8, FL_(wwExtra2), DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DHW2, &wwExtra2_, DeviceValueType::UINT8, FL_(wwExtra), DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DHW2,
                               &wwDisinfecting2_,
                               DeviceValueType::BOOL,

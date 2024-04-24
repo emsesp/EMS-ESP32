@@ -225,11 +225,15 @@ class Boiler : public EMSdevice {
     uint32_t nrgTotal_;
     uint32_t nrgWw_;
     uint32_t nrgHeat_;
+    uint32_t nrgWw2_;
+    uint32_t nrgHeat2_;
     uint32_t meterTotal_;
     uint32_t meterComp_;
     uint32_t meterEHeat_;
     uint32_t meterHeat_;
     uint32_t meterWw_;
+    uint32_t gasMeterHeat_;
+    uint32_t gasMeterWw_;
     uint8_t  hpEA0_;
     uint8_t  hpPumpMode_;
     uint8_t  hpSetDiffPress_;
@@ -367,6 +371,10 @@ class Boiler : public EMSdevice {
     void process_HpMeters(std::shared_ptr<const Telegram> telegram);
     void process_WeatherComp(std::shared_ptr<const Telegram> telegram);
     void process_HpFan(std::shared_ptr<const Telegram> telegram);
+
+    void process_Meters(std::shared_ptr<const Telegram> telegram);
+    void process_Energy(std::shared_ptr<const Telegram> telegram);
+
     // HIU
     void process_HIUSettings(std::shared_ptr<const Telegram> telegram);
     void process_HIUMonitor(std::shared_ptr<const Telegram> telegram);

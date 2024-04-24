@@ -220,6 +220,7 @@ class Thermostat : public EMSdevice {
     uint8_t humidity_;
     uint8_t battery_;
 
+    uint8_t wwCircuit2_ = EMS_VALUE_UINT8_NOTSET; // not published, initialize here
     uint8_t wwExtra1_; // wwExtra active for wwSystem 1
     uint8_t wwExtra2_;
     uint8_t wwMode_;
