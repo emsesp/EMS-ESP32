@@ -91,6 +91,12 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x4A5, "HPFan", true, MAKE_PF_CB(process_HpFan));
     }
 
+    // some gas boilers, see #1701
+    if (model() != EMSdevice::EMS_DEVICE_FLAG_HEATPUMP) {
+        register_telegram_type(0x2E, "Meters", false, MAKE_PF_CB(process_Meters));
+        register_telegram_type(0x3B, "Energy", false, MAKE_PF_CB(process_Energy));
+    }
+
     if (model() == EMSdevice::EMS_DEVICE_FLAG_HIU) {
         register_telegram_type(0x772, "HIUSettings", false, MAKE_PF_CB(process_HIUSettings));
         register_telegram_type(0x779, "HIUMonitor", false, MAKE_PF_CB(process_HIUMonitor));
@@ -389,6 +395,29 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               99);
     }
     */
+    if (model() != EMSdevice::EMS_DEVICE_FLAG_HEATPUMP) {
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &meterHeat_,
+                              DeviceValueType::UINT24,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(meterHeat),
+                              DeviceValueUOM::KWH);
+        register_device_value(DeviceValueTAG::TAG_DHW1, &meterWw_, DeviceValueType::UINT24, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(meterWw), DeviceValueUOM::KWH);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &gasMeterHeat_,
+                              DeviceValueType::UINT24,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(gasMeterHeat),
+                              DeviceValueUOM::KWH);
+        register_device_value(DeviceValueTAG::TAG_DHW1, &gasMeterWw_, DeviceValueType::UINT24, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(gasMeterWw), DeviceValueUOM::KWH);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &nrgHeat2_,
+                              DeviceValueType::UINT24,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(nrgHeat2),
+                              DeviceValueUOM::KWH);
+        register_device_value(DeviceValueTAG::TAG_DHW1, &nrgWw2_, DeviceValueType::UINT24, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(nrgWw2), DeviceValueUOM::KWH);
+    }
 
     // heatpump info
     if (model() == EMSdevice::EMS_DEVICE_FLAG_HEATPUMP) {
@@ -1947,6 +1976,20 @@ void Boiler::process_HpPressure(std::shared_ptr<const Telegram> telegram) {
 // boiler(0x08) -W-> Me(0x0B), ?(0x04A5), data: 00 00 3C 1D 09 0A 0A 01 00 28 0A 00 01 00 00
 void Boiler::process_HpFan(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, fan_, 9);
+}
+
+// Boiler(0x08) -B-> All(0x00), ?(0x2E), data: 00 00 1C CE 00 00 05 E8 00 00 00 18 00 00 00 02
+void Boiler::process_Meters(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, gasMeterHeat_, 0);
+    has_update(telegram, gasMeterWw_, 4);
+    has_update(telegram, meterHeat_, 8);
+    has_update(telegram, meterWw_, 12);
+}
+
+// boiler(0x08) -B-> All(0x00), ?(0x3B), data: 00 00 1B D1 00 00 05 7F
+void Boiler::process_Energy(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, nrgHeat2_, 0);
+    has_update(telegram, nrgWw2_, 4);
 }
 
 // HIU unit

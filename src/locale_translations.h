@@ -543,12 +543,16 @@ MAKE_TRANSLATION(releaseWait, "releasewait", "boiler release wait time", "Wartez
 MAKE_TRANSLATION(nrgTotal, "nrgtotal", "total energy", "Energie gesamt", "", "", "całkowita energia", "", "", "", "", "celková energia") // TODO translate
 MAKE_TRANSLATION(nrgHeat, "nrgheat", "energy heating", "Energie Heizen", "", "", "energia na ogrzewanie", "", "", "ısıtma enerjisi", "", "energetické vykurovanie") // TODO translate
 MAKE_TRANSLATION(nrgWw, "nrgdhw", "energy", "Energie", "", "", "energia", "", "", "sıcak kullanım suyu enerjisi", "", "energia") // TODO translate
+MAKE_TRANSLATION(nrgHeat2, "nrgheat2", "energy heating 2", "Energie Heizen 2", "", "", "energia na ogrzewanie 2", "", "", "ısıtma enerjisi 2", "", "energetické vykurovanie") // TODO translate
+MAKE_TRANSLATION(nrgWw2, "nrgdhw2", "energy 2", "Energie 2", "", "", "energia 2", "", "", "sıcak kullanım suyu enerjisi 2", "", "energia 2") // TODO translate
 MAKE_TRANSLATION(nomPower, "nompower", "nominal Power", "Brennerleistung", "", "", "moc nominalna", "", "", "nominal güç", "", "nominálny výkon") // TODO translate
 MAKE_TRANSLATION(meterTotal, "metertotal", "meter total", "Messung gesamt", "", "", "licznik całkowity", "", "", "", "", "meter celkom") // TODO translate
 MAKE_TRANSLATION(meterComp, "metercomp", "meter compressor", "Messung Kompressor", "", "", "licznik sprężarki", "", "", "", "", "meter kompresor") // TODO translate
 MAKE_TRANSLATION(meterEHeat, "metereheat", "meter e-heater", "Messung E-Heizer", "", "", "licznik dogrzewacza", "", "", "", "", "elektrický ohrievač") // TODO translate
 MAKE_TRANSLATION(meterHeat, "meterheat", "meter heating", "Messung Heizen", "", "", "licznik ogrzewania", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(meterWw, "meterdhw", "meter", "Messung", "", "", "licznik", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(gasMeterHeat, "gasmeterheat", "gas meter heating", "Gas Messung Heizen", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(gasMeterWw, "gasmeterdhw", "gas meter", "Gas Messung", "", "", "", "", "", "", "", "") // TODO translate
 
 // HIU
 MAKE_TRANSLATION(netFlowTemp, "netflowtemp", "heat network flow temp", "System Vorlauftemperatur", "Netto aanvoertemperatuur", "", "temp. zasilania sieci cieplnej", "", "", "ısıtma şebekesi akış derecesi", "temperatura di mandata della rete di riscaldamento", "teplota prívodu tepelnej siete") // TODO translate
