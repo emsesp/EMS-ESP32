@@ -1059,10 +1059,10 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         char val_obj[100];
         char val_cond[200];
         if (is_nested() && tag >= DeviceValueTAG::TAG_HC1) {
-            snprintf(val_obj, sizeof(val_obj), "value_json.%s.%s", EMSdevice::tag_to_mqtt(tag), entity);
+            snprintf(val_obj, sizeof(val_obj), "value_json.%s['%s']", EMSdevice::tag_to_mqtt(tag), entity);
             snprintf(val_cond, sizeof(val_cond), "value_json.%s is defined and %s is defined", EMSdevice::tag_to_mqtt(tag), val_obj);
         } else {
-            snprintf(val_obj, sizeof(val_obj), "value_json.%s", entity);
+            snprintf(val_obj, sizeof(val_obj), "value_json['%s']", entity);
             snprintf(val_cond, sizeof(val_cond), "%s is defined", val_obj);
         }
 
