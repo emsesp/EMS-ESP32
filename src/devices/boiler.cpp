@@ -1755,19 +1755,15 @@ void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
     }
     // data: displaycode(2), errornumber(2), year, month, hour, day, minute, duration(2), src-addr
     static uint32_t lastCodeDate_ = 0; // last code date
-    char            code[3]       = {0};
-    uint16_t        codeNo        = EMS_VALUE_INT16_NOTSET;
-    code[0]                       = telegram->message_data[0];
-    code[1]                       = telegram->message_data[1];
-    code[2]                       = 0;
-    telegram->read_value(codeNo, 2);
-    uint16_t year     = (telegram->message_data[4] & 0x7F) + 2000;
-    uint8_t  month    = telegram->message_data[5];
-    uint8_t  day      = telegram->message_data[7];
-    uint8_t  hour     = telegram->message_data[6];
-    uint8_t  min      = telegram->message_data[8];
-    uint16_t duration = telegram->message_data[9];
-    uint32_t date     = (year - 2000) * 535680UL + month * 44640UL + day * 1440UL + hour * 60 + min + duration;
+    char            code[3]       = {telegram->message_data[0], telegram->message_data[1], 0};
+    uint16_t        codeNo        = telegram->message_data[2] * 256 + telegram->message_data[3];
+    uint16_t        year          = (telegram->message_data[4] & 0x7F) + 2000;
+    uint8_t         month         = telegram->message_data[5];
+    uint8_t         day           = telegram->message_data[7];
+    uint8_t         hour          = telegram->message_data[6];
+    uint8_t         min           = telegram->message_data[8];
+    uint16_t        duration      = telegram->message_data[9] * 256 + telegram->message_data[10];
+    uint32_t        date          = (year - 2000) * 535680UL + month * 44640UL + day * 1440UL + hour * 60 + min + duration;
     // store only the newest code from telegrams 10 and 11
     if (date > lastCodeDate_ && lastCodeDate_) {
         lastCodeDate_ = date;
