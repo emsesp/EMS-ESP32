@@ -1154,13 +1154,18 @@ bool System::check_upgrade(bool factory_settings) {
                 mqttSettings.entity_format = 0; // use old Entity ID format from v3.4
                 return StateUpdateResult::CHANGED;
             });
-        } else if (settings_version.major()== 3 && settings_version.minor() <= 6) {
+        } else if (settings_version.major() == 3 && settings_version.minor() <= 6) {
             LOG_INFO("Setting MQTT Entity ID format to v3.6 format");
             EMSESP::esp8266React.getMqttSettingsService()->update([&](MqttSettings & mqttSettings) {
-                mqttSettings.entity_format = 3; // use old Entity ID format from v3.6
-                return StateUpdateResult::CHANGED;
+                if (mqttSettings.entity_format == 1) {
+                    mqttSettings.entity_format = 3; // use old Entity ID format from v3.6
+                    return StateUpdateResult::CHANGED;
+                } else if (mqttSettings.entity_format == 2) {
+                    mqttSettings.entity_format = 4; // use old Entity ID format from v3.6
+                    return StateUpdateResult::CHANGED;
+                }
+                return StateUpdateResult::UNCHANGED;
             });
-
         }
 
         // Network Settings Wifi tx_power is now using the value * 4.

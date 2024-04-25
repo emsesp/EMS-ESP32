@@ -36,7 +36,7 @@ using mqtt_sub_function_p = std::function<bool(const char * message)>;
 class Mqtt {
   public:
     enum discoveryType : uint8_t { HOMEASSISTANT, DOMOTICZ, DOMOTICZ_LATEST };
-    enum entityFormat : uint8_t { SINGLE_LONG, SINGLE_SHORT, MULTI_SHORT, SINGLE_OLD };
+    enum entityFormat : uint8_t { SINGLE_LONG, SINGLE_SHORT, MULTI_SHORT, SINGLE_OLD, MULTI_OLD };
 
     void loop();
     void start();
