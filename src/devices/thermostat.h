@@ -165,6 +165,48 @@ class Thermostat : public EMSdevice {
         uint8_t model_;  // the model type
     };
 
+    class DhwCircuit {
+      public:
+        DhwCircuit(const uint8_t offset, const uint8_t dhw_num)
+            : offset_(offset)
+            , dhw_num_(dhw_num) {
+        }
+        ~DhwCircuit() = default;
+        uint8_t wwExtra_;
+        uint8_t wwMode_;
+        uint8_t wwCircPump_;
+        uint8_t wwCircMode_;
+        uint8_t wwSetTemp_;
+        uint8_t wwSetTempLow_;
+        uint8_t wwCharge_;
+        uint8_t wwChargeDuration_;
+        uint8_t wwDisinfecting_;
+        uint8_t wwDisinfectDay_;
+        uint8_t wwDisinfectHour_;
+        uint8_t wwMaxTemp_;
+        uint8_t wwOneTimeKey_;
+        uint8_t wwProgMode_;
+        uint8_t wwCircProg_;
+        char    wwSwitchTime_[20];
+        char    wwCircSwitchTime_[20];
+        uint8_t wwDailyHeating_;
+        uint8_t wwDailyHeatTime_;
+        uint8_t wwWhenModeOff_;
+        char    wwHoliday_[26];
+        char    wwVacation_[26];
+
+        uint8_t dhw() const {
+            return dhw_num_ - 1;
+        }
+        uint8_t offset() const {
+            return offset_;
+        }
+
+      private:
+        uint8_t offset_;  // telegram offset to base telegram
+        uint8_t dhw_num_; // dhw circuit number 1..10
+    };
+
   private:
     static uuid::log::Logger logger_;
 
@@ -190,7 +232,7 @@ class Thermostat : public EMSdevice {
 
     // standard for all thermostats
     char     status_[20];    // online or offline
-    char     dateTime_[25];  // date and time stamp
+    char     dateTime_[30];  // date and time stamp
     char     errorCode_[15]; // code from 0xA2 as string i.e. "A22(816)"
     uint16_t errorNumber_;   // used internally to build error code
     char     lastCode_[50];  // error log
@@ -220,41 +262,6 @@ class Thermostat : public EMSdevice {
     uint8_t humidity_;
     uint8_t battery_;
 
-    uint8_t wwCircuit2_ = EMS_VALUE_UINT8_NOTSET; // not published, initialize here
-    uint8_t wwExtra1_; // wwExtra active for wwSystem 1
-    uint8_t wwExtra2_;
-    uint8_t wwMode_;
-    uint8_t wwMode2_;
-    uint8_t wwCircPump_;
-    uint8_t wwCircPump2_;
-    uint8_t wwCircMode_;
-    uint8_t wwCircMode2_;
-    uint8_t wwSetTemp_;
-    uint8_t wwSetTempLow_;
-    uint8_t wwCharge_;
-    uint8_t wwCharge2_;
-    uint8_t wwChargeDuration_;
-    uint8_t wwChargeDuration2_;
-    uint8_t wwDisinfecting_;
-    uint8_t wwDisinfecting2_;
-    uint8_t wwDisinfectDay_;
-    uint8_t wwDisinfectHour_;
-    uint8_t wwDisinfectDay2_;
-    uint8_t wwDisinfectHour2_;
-    uint8_t wwMaxTemp_;
-    uint8_t wwOneTimeKey_;
-    uint8_t wwProgMode_;
-    uint8_t wwCircProg_;
-    char    wwSwitchTime_[16];
-    char    wwCircSwitchTime_[16];
-    uint8_t wwDailyHeating_;
-    uint8_t wwDailyHeatTime_;
-    uint8_t wwDailyHeating2_;
-    uint8_t wwDailyHeatTime2_;
-    uint8_t wwWhenModeOff_;
-    char    wwHoliday_[26];
-    char    wwVacation_[26];
-
     // HybridHP
     uint8_t hybridStrategy_;  // co2 = 1, cost = 2, temperature = 3, mix = 4
     int8_t  switchOverTemp_;  // degrees
@@ -270,6 +277,7 @@ class Thermostat : public EMSdevice {
     uint8_t pvLowerCool_;
 
     std::vector<std::shared_ptr<HeatingCircuit>> heating_circuits_; // each thermostat can have multiple heating circuits
+    std::vector<std::shared_ptr<DhwCircuit>>     dhw_circuits_;     // each thermostat can have multiple dhw circuits
 
     // Generic Types
     static constexpr uint16_t EMS_TYPE_RCTime        = 0x06; // time
@@ -285,7 +293,7 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_OFFSET_RC20Set_mode               = 23; // position of thermostat mode
     static constexpr uint8_t EMS_OFFSET_RC20Set_temp_off           = 24; // position of thermostat setpoint mode:off
     static constexpr uint8_t EMS_OFFSET_RC20Set_temp_auto          = 28; // position of thermostat setpoint temperature
-    static constexpr uint8_t EMS_OFFSET_RC20Set_temp_manual        = 29; // position of thermostat setpoint temperature
+    static constexpr uint8_t EMS_OFFSET_RC20Set_temp_manual        = 29; // position of thermostat setpoint manual
 
     static constexpr uint8_t EMS_OFFSET_RC20_2_Set_mode       = 3; // ES72 - see https://github.com/emsesp/EMS-ESP/issues/334
     static constexpr uint8_t EMS_OFFSET_RC20_2_Set_temp_night = 1; // ES72
@@ -368,8 +376,10 @@ class Thermostat : public EMSdevice {
 
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(std::shared_ptr<const Telegram> telegram);
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(const uint8_t hc_num);
+    std::shared_ptr<Thermostat::DhwCircuit>     dhw_circuit(const uint8_t offset = 0, const uint8_t dhw_num = 255, const bool create = false);
 
     void register_device_values_hc(std::shared_ptr<Thermostat::HeatingCircuit> hc);
+    void register_device_values_dhw(std::shared_ptr<Thermostat::DhwCircuit> dhw);
 
     void add_ha_climate(std::shared_ptr<HeatingCircuit> hc) const;
 
@@ -404,7 +414,6 @@ class Thermostat : public EMSdevice {
     void process_RC300Summer(std::shared_ptr<const Telegram> telegram);
     void process_RC300Summer2(std::shared_ptr<const Telegram> telegram);
     void process_RC300WWmode(std::shared_ptr<const Telegram> telegram);
-    void process_RC300WW2mode(std::shared_ptr<const Telegram> telegram);
     void process_RC300WWmode2(std::shared_ptr<const Telegram> telegram);
     void process_RC300WWtemp(std::shared_ptr<const Telegram> telegram);
     void process_RC300OutdoorTemp(std::shared_ptr<const Telegram> telegram);
