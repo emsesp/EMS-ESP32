@@ -499,8 +499,9 @@ void TemperatureSensor::publish_values(const bool force) {
             } else if (!sensor.ha_registered || force) {
                 LOG_DEBUG("Recreating HA config for sensor ID %s", sensor.id().c_str());
 
-                JsonDocument config; // this needs to be large because of all the copying in add_ha_sections_to_doc()
-                config["dev_cla"] = "temperature";
+                JsonDocument config;
+                config["dev_cla"]  = "temperature";
+                config["stat_cla"] = "measurement";
 
                 char stat_t[50];
                 snprintf(stat_t, sizeof(stat_t), "%s/%s_data", Mqtt::base().c_str(), F_(temperaturesensor)); // use base path
