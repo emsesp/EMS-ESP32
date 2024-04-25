@@ -847,6 +847,20 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     } else if (Mqtt::entity_format() == entityFormat::SINGLE_SHORT) {
         // shortname, no mqtt base. This is the default version.
         snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, entity_with_tag);
+    } else if (Mqtt::entity_format() == entityFormat::SINGLE_OLD) {
+        // shortname, remap to 3.6.
+        if (has_tag && (device_type == EMSdevice::DeviceType::BOILER || device_type == EMSdevice::DeviceType::THERMOSTAT) && tag == DeviceValue::DeviceValueTAG::TAG_DHW1) {
+            snprintf(uniq_id, sizeof(uniq_id), "%s_ww%s", device_name, entity);
+            if (strcmp(entity, "nrgdhw") == 0) { // special case for tp1de #1714
+                strcpy(uniq_id, "boiler_nrgww");
+            }
+        } else if (has_tag && device_type == EMSdevice::DeviceType::WATER && tag >= DeviceValue::DeviceValueTAG::TAG_DHW3) {
+            snprintf(uniq_id, sizeof(uniq_id), "solar_wwc%d_%s", tag - DeviceValue::DeviceValueTAG::TAG_DHW1 + 1, entity);
+        } else if (has_tag && device_type == EMSdevice::DeviceType::WATER && tag >= DeviceValue::DeviceValueTAG::TAG_DHW1) {
+            snprintf(uniq_id, sizeof(uniq_id), "mixer_wwc%d_%s", tag - DeviceValue::DeviceValueTAG::TAG_DHW1 + 1, entity);
+        } else {
+            snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, entity_with_tag);
+        }
     } else {
         // entity_format is 0, the old v3.4 style
         // take en_name and replace all spaces
@@ -854,7 +868,13 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         strlcpy(uniq_s, en_name, sizeof(uniq_s));
         Helpers::replace_char(uniq_s, ' ', '_');
         Helpers::replace_char(uniq_s, '+', '2'); //changes 'eco+_switch_off' to 'eco2_switch_off' (HA ignores '+')
-        if (has_tag) {
+        if (has_tag && (device_type == EMSdevice::DeviceType::BOILER || device_type == EMSdevice::DeviceType::THERMOSTAT) && tag == DeviceValue::DeviceValueTAG::TAG_DHW1) {
+            snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, Helpers::toLower(uniq_s).c_str());
+        } else if (has_tag && device_type == EMSdevice::DeviceType::WATER && tag >= DeviceValue::DeviceValueTAG::TAG_DHW3) {
+            snprintf(uniq_id, sizeof(uniq_id), "solar_wwc%d_%s", tag - DeviceValue::DeviceValueTAG::TAG_DHW1 + 1, Helpers::toLower(uniq_s).c_str());
+        } else if (has_tag && device_type == EMSdevice::DeviceType::WATER && tag >= DeviceValue::DeviceValueTAG::TAG_DHW1) {
+            snprintf(uniq_id, sizeof(uniq_id), "mixer_wwc%d_%s", tag - DeviceValue::DeviceValueTAG::TAG_DHW1 + 1, Helpers::toLower(uniq_s).c_str());
+        } else if (has_tag) {
             snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", device_name, DeviceValue::DeviceValueTAG_s[tag][0], Helpers::toLower(uniq_s).c_str());
         } else {
             snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, Helpers::toLower(uniq_s).c_str());

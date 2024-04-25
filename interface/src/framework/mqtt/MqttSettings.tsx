@@ -374,6 +374,7 @@ const MqttSettings: FC = () => {
                     select
                   >
                     <MenuItem value={0}>{LL.MQTT_ENTITY_FORMAT_0()}</MenuItem>
+                    <MenuItem value={3}>{LL.MQTT_ENTITY_FORMAT_1()}&nbsp;(v3.6)</MenuItem>
                     <MenuItem value={1}>{LL.MQTT_ENTITY_FORMAT_1()}</MenuItem>
                     <MenuItem value={2}>{LL.MQTT_ENTITY_FORMAT_2()}</MenuItem>
                   </TextField>
