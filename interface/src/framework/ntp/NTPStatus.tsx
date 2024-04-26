@@ -125,7 +125,7 @@ const NTPStatus: FC = () => {
           <Typography variant="body2">{LL.SET_TIME_TEXT()}</Typography>
         </Box>
         <TextField
-          label={LL.LOCAL_TIME()}
+          label={LL.LOCAL_TIME(0)}
           type="datetime-local"
           value={localTime}
           onChange={updateLocalTime}
@@ -195,7 +195,7 @@ const NTPStatus: FC = () => {
               </Avatar>
             </ListItemAvatar>
             <ListItemText
-              primary={LL.LOCAL_TIME()}
+              primary={LL.LOCAL_TIME(0)}
               secondary={formatDateTime(data.local_time)}
             />
           </ListItem>

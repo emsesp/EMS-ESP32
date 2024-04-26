@@ -644,7 +644,7 @@ const ApplicationSettings: FC = () => {
               margin="normal"
               select
             >
-              <MenuItem value={1}>{LL.VALUE(1)}</MenuItem>
+              <MenuItem value={1}>{LL.VALUE(5)}</MenuItem>
               <MenuItem value={2}>{LL.INDEX()}</MenuItem>
             </TextField>
           </Grid>

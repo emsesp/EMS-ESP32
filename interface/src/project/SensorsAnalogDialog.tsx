@@ -199,7 +199,7 @@ const SensorsAnalogDialog = ({
               <Grid item xs={4}>
                 <TextField
                   name="o"
-                  label={LL.VALUE(1)}
+                  label={LL.VALUE(0)}
                   value={numberValue(editItem.o)}
                   fullWidth
                   type="number"
@@ -216,7 +216,7 @@ const SensorsAnalogDialog = ({
                 <Grid item xs={4}>
                   <TextField
                     name="o"
-                    label={LL.VALUE(1)}
+                    label={LL.VALUE(0)}
                     value={numberValue(editItem.o)}
                     fullWidth
                     select
