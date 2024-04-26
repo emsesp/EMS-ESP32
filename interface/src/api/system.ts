@@ -52,7 +52,6 @@ export const uploadFile = (file: File) => {
   const formData = new FormData();
   formData.append('file', file);
   return alovaInstance.Post('/rest/uploadFile', formData, {
-    timeout: 60000, // override timeout for uploading firmware - 1 minute
-    enableUpload: true // can be removed with Alova 2.20+
+    timeout: 60000 // override timeout for uploading firmware - 1 minute
   });
 };
