@@ -65,7 +65,8 @@ const nl: Translation = {
   TEMP_SENSOR: 'Temperatuur sensor',
   TEMP_SENSORS: 'Temperatuur Sensoren',
   WRITE_CMD_SENT: 'Schrijf commando gestuurd',
-  EMS_BUS_WARNING: 'EMS bus niet gevonden. Als deze waarschuwing blijft staan na een paar seconden dan loop de instellingen na en in het bijzonder het apparaat type profiel na.',
+  EMS_BUS_WARNING:
+    'EMS bus niet gevonden. Als deze waarschuwing blijft staan na een paar seconden dan loop de instellingen na en in het bijzonder het apparaat type profiel na.',
   EMS_BUS_SCANNING: 'Scannen naar EMS apparaten...',
   CONNECTED: 'Verbonden',
   TX_ISSUES: 'Tx bus probleem. Probeer een andere Tx verzendmodus',
@@ -100,7 +101,8 @@ const nl: Translation = {
   CUSTOMIZATIONS: 'User Entities',
   APPLICATION_RESTARTING: 'EMS-ESP herstarten',
   INTERFACE_BOARD_PROFILE: 'Interface Apparaatprofiel',
-  BOARD_PROFILE_TEXT: 'Selecteer een vooraf ingesteld apparaat profiel uit de lijst of kies Eigen om zelf uw hardware te configureren',
+  BOARD_PROFILE_TEXT:
+    'Selecteer een vooraf ingesteld apparaat profiel uit de lijst of kies Eigen om zelf uw hardware te configureren',
   BOARD_PROFILE: 'Apparaatprofiel',
   CUSTOM: 'Custom',
   GPIO_OF: '{0} GPIO',
@@ -118,7 +120,8 @@ const nl: Translation = {
   ENABLE_ANALOG: 'Activeer analoge sensoren',
   CONVERT_FAHRENHEIT: 'Converteer temperatuurwaarden naar Fahrenheit',
   BYPASS_TOKEN: 'API Access Token authenticatie uitschakelen',
-  READONLY: 'Activeer read-only modus (blokkeert alle outgaande EMS Tx schrijf commandos)',
+  READONLY:
+    'Activeer read-only modus (blokkeert alle outgaande EMS Tx schrijf commandos)',
   UNDERCLOCK_CPU: 'Underclock CPU snelheid',
   HEATINGOFF: 'Start ketel met geforceerde verwarming uit',
   ENABLE_SHOWER_TIMER: 'Activeer Douche Timer (tijdmeting)',
@@ -140,13 +143,15 @@ const nl: Translation = {
   MINUTES: 'minuten',
   HOURS: 'uren',
   RESTART: 'Herstarten',
-  RESTART_TEXT: 'EMS-ESP dient opnieuw gestart te worden om de wijzingen toe te passen',
+  RESTART_TEXT:
+    'EMS-ESP dient opnieuw gestart te worden om de wijzingen toe te passen',
   RESTART_CONFIRM: 'Weet je zeker dat je EMS-ESP wilt herstarten?',
   COMMAND: 'Commando',
   CUSTOMIZATIONS_RESTART: 'Alle custom profielen worden verwijderd. Herstarten...',
   CUSTOMIZATIONS_FULL: 'Te veel entiteiten geselecteerd. Sla op in delen aub',
   CUSTOMIZATIONS_SAVED: 'Custom aanpassingen opgeslagen',
-  CUSTOMIZATIONS_HELP_1: 'Selecteer een apparaat en pas de entiteiten aan door middel van de opties',
+  CUSTOMIZATIONS_HELP_1:
+    'Selecteer een apparaat en pas de entiteiten aan door middel van de opties',
   CUSTOMIZATIONS_HELP_2: 'Markeer as favoriet',
   CUSTOMIZATIONS_HELP_3: 'Zet schrijfacties uit',
   CUSTOMIZATIONS_HELP_4: 'Uitsluiten van MQTT en API',
@@ -156,13 +161,17 @@ const nl: Translation = {
   SET_ALL: 'Alles aanzetten',
   OPTIONS: 'Opties',
   NAME: 'Naam',
-  CUSTOMIZATIONS_RESET: 'Weet je zeker dat je alle custom aanpassingen wilt verwijderen inclusief de custom instellingen voor analoge temperatuursensoren?',
+  CUSTOMIZATIONS_RESET:
+    'Weet je zeker dat je alle custom aanpassingen wilt verwijderen inclusief de custom instellingen voor analoge temperatuursensoren?',
   SUPPORT_INFORMATION: 'Support Informatie',
-  HELP_INFORMATION_1: 'Bezoek de online wiki om instructies te vinden om EMS-ESP te configureren',
+  HELP_INFORMATION_1:
+    'Bezoek de online wiki om instructies te vinden om EMS-ESP te configureren',
   HELP_INFORMATION_2: 'Voor de live community ga naar de Discord server',
   HELP_INFORMATION_3: 'Om een nieuwe feature te vragen of een bug te rapporteren',
-  HELP_INFORMATION_4: 'Zorg dat je ook je systeem details zijn toevoeged voor een sneller antwoord',
-  HELP_INFORMATION_5: 'EMS-ESP is een gratis en open source project. Steun ons met een Star op Github!',
+  HELP_INFORMATION_4:
+    'Zorg dat je ook je systeem details zijn toevoeged voor een sneller antwoord',
+  HELP_INFORMATION_5:
+    'EMS-ESP is een gratis en open source project. Steun ons met een Star op Github!',
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
   ABORTED: 'afgebroken',
@@ -176,8 +185,10 @@ const nl: Translation = {
   CLOSE: 'Sluiten',
   USE: 'Gebruik',
   FACTORY_RESET: 'Fabrieksinstellingen',
-  SYSTEM_FACTORY_TEXT: 'Gateway is gereset en start nu weer op met fabrieksinstellingen',
-  SYSTEM_FACTORY_TEXT_DIALOG: 'Weet je zeker dat je een reset naar fabrieksinstellingen uit wilt voeren?',
+  SYSTEM_FACTORY_TEXT:
+    'Gateway is gereset en start nu weer op met fabrieksinstellingen',
+  SYSTEM_FACTORY_TEXT_DIALOG:
+    'Weet je zeker dat je een reset naar fabrieksinstellingen uit wilt voeren?',
   THE_LATEST: 'De laatste',
   OFFICIAL: 'official',
   DEVELOPMENT: 'development',
@@ -195,8 +206,10 @@ const nl: Translation = {
   ENABLE_OTA: 'Acitveer OTA Updates',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Download alle custom instellingen',
   DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events',
-  DOWNLOAD_SETTINGS_TEXT: 'Download de applicatie settings. Wees voorzichting met het delen van dit bestand want het bevat o.a. de wachtwoorden in plain text',
-  UPLOAD_TEXT: 'Upload een nieuwe firmware (.bin) file, instellingen of custom instellingen (.json) bestand hieronder',
+  DOWNLOAD_SETTINGS_TEXT:
+    'Download de applicatie settings. Wees voorzichting met het delen van dit bestand want het bevat o.a. de wachtwoorden in plain text',
+  UPLOAD_TEXT:
+    'Upload een nieuwe firmware (.bin) file, instellingen of custom instellingen (.json) bestand hieronder',
   UPLOADING: 'Uploading',
   UPLOAD_DROP_TEXT: 'Sleep bestand hierheen of klik hier',
   ERROR: 'Onverwachte fout, probeer opnieuw',
@@ -211,7 +224,8 @@ const nl: Translation = {
   GENERATING_TOKEN: 'Token aan het genereren',
   USER: 'Gebruiker',
   MODIFY: 'Aanpassen',
-  SU_TEXT: 'Het su (super user) wachtwoord wordt gebruikt om authorisatie tokens te signeren en ook om admin privileges te activeren in de console.',
+  SU_TEXT:
+    'Het su (super user) wachtwoord wordt gebruikt om authorisatie tokens te signeren en ook om admin privileges te activeren in de console.',
   NOT_ENABLED: 'Niet geactiveerd',
   ERRORS_OF: '{0} Foutmeldingen',
   DISCONNECT_REASON: 'Verbinding verbroken vanwege',
@@ -286,19 +300,21 @@ const nl: Translation = {
   NETWORK_SUBNET: 'Subnetmasker',
   NETWORK_DNS: 'DNS Servers',
   ADDRESS_OF: '{0} Address',
-  ADMIN: 'Admin Account',  // TODO translate
-  GUEST: 'Gast Account',  // TODO translate
+  ADMIN: 'Admin',
+  GUEST: 'Gast',
   NEW: 'Nieuwe',
   NEW_NAME_OF: 'Hernoem {0}',
   ENTITY: 'Entiteit',
   MIN: 'min',
   MAX: 'max',
   BLOCK_NAVIGATE_1: 'U hebt niet-opgeslagen wijzigingen',
-  BLOCK_NAVIGATE_2: 'Als u naar een andere pagina navigeert, gaan uw niet-opgeslagen wijzigingen verloren. Weet je zeker dat je deze pagina wilt verlaten?',
+  BLOCK_NAVIGATE_2:
+    'Als u naar een andere pagina navigeert, gaan uw niet-opgeslagen wijzigingen verloren. Weet je zeker dat je deze pagina wilt verlaten?',
   STAY: 'Blijven',
   LEAVE: 'Verlaten',
   SCHEDULER: 'Scheduler',
-  SCHEDULER_HELP_1: 'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT.',
+  SCHEDULER_HELP_1:
+    'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT.',
   SCHEDULER_HELP_2: 'Gebruik 00:00 om eenmaal te activeren bij het opstarten',
   SCHEDULE: 'Schedule',
   TIME: 'Tijd',

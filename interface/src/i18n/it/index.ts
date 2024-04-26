@@ -65,7 +65,8 @@ const it: Translation = {
   TEMP_SENSOR: 'Sensore Temperatura',
   TEMP_SENSORS: 'Sensori Temperatura',
   WRITE_CMD_SENT: 'Scrittura comando inviata',
-  EMS_BUS_WARNING: 'EMS bus disconnesso. Se questo avvertimento persiste dopo alcuni secondi prego verificare impostazioni scheda',
+  EMS_BUS_WARNING:
+    'EMS bus disconnesso. Se questo avvertimento persiste dopo alcuni secondi prego verificare impostazioni scheda',
   EMS_BUS_SCANNING: 'Scansione dispositivi EMS ...',
   CONNECTED: 'Connesso',
   TX_ISSUES: 'Problema di Tx - prova una modalità differente',
@@ -119,7 +120,8 @@ const it: Translation = {
   ENABLE_ANALOG: 'Abilita Sensori Analogici',
   CONVERT_FAHRENHEIT: 'Converti valori temperatura in Fahrenheit',
   BYPASS_TOKEN: 'Ignora autorizzazione del token di accesso sulle chiamate API',
-  READONLY: 'Abilita modalità sola-lettura (blocca tutti i comandi di scrittura EMS Tx in uscita)',
+  READONLY:
+    'Abilita modalità sola-lettura (blocca tutti i comandi di scrittura EMS Tx in uscita)',
   UNDERCLOCK_CPU: 'Abbassa velocità della CPU',
   HEATINGOFF: 'Avviamento caldaia con riscaldamento forzato spento',
   ENABLE_SHOWER_TIMER: 'Abilita timer doccia',
@@ -141,13 +143,17 @@ const it: Translation = {
   MINUTES: 'minuti',
   HOURS: 'ore',
   RESTART: 'Riavvia',
-  RESTART_TEXT: 'EMS-ESP necessita di essere riavviato per applicare il cambio impostazioni del sistema',
+  RESTART_TEXT:
+    'EMS-ESP necessita di essere riavviato per applicare il cambio impostazioni del sistema',
   RESTART_CONFIRM: 'Sei sicuro di voler riavviare EMS-ESP?',
   COMMAND: 'Comando',
-  CUSTOMIZATIONS_RESTART: 'Tutte le personalizzazioni sono state rimosse. Riavvio ...',
-  CUSTOMIZATIONS_FULL: 'Le entità selezionate hanno superato il limite. Si prega di salvare in batch',
+  CUSTOMIZATIONS_RESTART:
+    'Tutte le personalizzazioni sono state rimosse. Riavvio ...',
+  CUSTOMIZATIONS_FULL:
+    'Le entità selezionate hanno superato il limite. Si prega di salvare in batch',
   CUSTOMIZATIONS_SAVED: 'Personalizzazioni salvate',
-  CUSTOMIZATIONS_HELP_1: 'Seleziona un dispositivo e personalizza le opzioni delle entità o fai clic per rinominarlo',
+  CUSTOMIZATIONS_HELP_1:
+    'Seleziona un dispositivo e personalizza le opzioni delle entità o fai clic per rinominarlo',
   CUSTOMIZATIONS_HELP_2: 'seleziona come preferito',
   CUSTOMIZATIONS_HELP_3: 'disabilita azione scrittura',
   CUSTOMIZATIONS_HELP_4: 'esculdi da MQTT e API',
@@ -157,13 +163,18 @@ const it: Translation = {
   SET_ALL: 'imposta tutto',
   OPTIONS: 'Opzioni',
   NAME: 'Nome',
-  CUSTOMIZATIONS_RESET: 'Sei sicuro di voler rimuovere tutte le personalizzazioni incluse le impostazioni personalizzate dei sensori di temperatura e analogici?',
+  CUSTOMIZATIONS_RESET:
+    'Sei sicuro di voler rimuovere tutte le personalizzazioni incluse le impostazioni personalizzate dei sensori di temperatura e analogici?',
   SUPPORT_INFORMATION: 'Informazioni di Supporto',
-  HELP_INFORMATION_1: 'Visita il wiki online per ottenere istruzioni su come configurare EMS-ESP',
-  HELP_INFORMATION_2: 'Per la chat della community dal vivo unisciti al nostro server Discord',
+  HELP_INFORMATION_1:
+    'Visita il wiki online per ottenere istruzioni su come configurare EMS-ESP',
+  HELP_INFORMATION_2:
+    'Per la chat della community dal vivo unisciti al nostro server Discord',
   HELP_INFORMATION_3: 'Per richiedere una funzionalità o segnalare un errore',
-  HELP_INFORMATION_4: 'Ricordati di scaricare e allegare le informazioni del tuo sistema per una risposta più rapida quando segnali un problema',
-  HELP_INFORMATION_5: 'EMS-ESP è un progetto gratuito e open-source. Supporta il suo sviluppo futuro assegnandogli una stella su Github!',
+  HELP_INFORMATION_4:
+    'Ricordati di scaricare e allegare le informazioni del tuo sistema per una risposta più rapida quando segnali un problema',
+  HELP_INFORMATION_5:
+    'EMS-ESP è un progetto gratuito e open-source. Supporta il suo sviluppo futuro assegnandogli una stella su Github!',
   UPLOAD: 'Carica',
   DOWNLOAD: 'Scarica',
   ABORTED: 'Annullato',
@@ -177,8 +188,10 @@ const it: Translation = {
   CLOSE: 'Chiudere',
   USE: 'Usa',
   FACTORY_RESET: 'Impostazioni di fabbrica',
-  SYSTEM_FACTORY_TEXT: 'Il dispositivo è stato ripristinato alle impostazioni di fabbrica e ora verrà riavviato',
-  SYSTEM_FACTORY_TEXT_DIALOG: 'Sei sicuro di voler ripristinare il dispositivo alle impostazioni di fabbrica??',
+  SYSTEM_FACTORY_TEXT:
+    'Il dispositivo è stato ripristinato alle impostazioni di fabbrica e ora verrà riavviato',
+  SYSTEM_FACTORY_TEXT_DIALOG:
+    'Sei sicuro di voler ripristinare il dispositivo alle impostazioni di fabbrica??',
   THE_LATEST: 'Ultima',
   OFFICIAL: 'ufficiale',
   DEVELOPMENT: 'sviluppo',
@@ -214,7 +227,8 @@ const it: Translation = {
   GENERATING_TOKEN: 'Generazione token',
   USER: 'Utente',
   MODIFY: 'Modifica',
-  SU_TEXT: 'La password su (super utente) viene utilizzata per firmare i token di autenticazione e abilitare anche i privilegi di amministratore all interno della console.',
+  SU_TEXT:
+    'La password su (super utente) viene utilizzata per firmare i token di autenticazione e abilitare anche i privilegi di amministratore all interno della console.',
   NOT_ENABLED: 'Non abilitato',
   ERRORS_OF: 'Errori {0}',
   DISCONNECT_REASON: 'Motivo disconnessione',
@@ -289,19 +303,21 @@ const it: Translation = {
   NETWORK_SUBNET: 'Maschera Sottorete',
   NETWORK_DNS: 'Server DNS',
   ADDRESS_OF: 'Indirizzo {0}',
-  ADMIN: 'Amministratore Account',  // TODO translate
-  GUEST: 'Ospite Account',  // TODO translate
+  ADMIN: 'Amministratore',
+  GUEST: 'Ospite',
   NEW: 'Nuovo',
   NEW_NAME_OF: 'Nuovo nome {0}',
   ENTITY: 'entità',
   MIN: 'min',
   MAX: 'max',
   BLOCK_NAVIGATE_1: 'Hai modifiche non salvate',
-  BLOCK_NAVIGATE_2: 'Se passi a una pagina diversa, le modifiche non salvate andranno perse. Sei sicuro di voler lasciare questa pagina?',
+  BLOCK_NAVIGATE_2:
+    'Se passi a una pagina diversa, le modifiche non salvate andranno perse. Sei sicuro di voler lasciare questa pagina?',
   STAY: 'Stai',
   LEAVE: 'Esci',
   SCHEDULER: 'Programma eventi',
-  SCHEDULER_HELP_1: "Automatizza i comandi aggiungendo gli eventi programmati di seguito. Imposta un nome univoco per abilitare/disabilitare l'attivazione tramite API/MQTT.",
+  SCHEDULER_HELP_1:
+    "Automatizza i comandi aggiungendo gli eventi programmati di seguito. Imposta un nome univoco per abilitare/disabilitare l'attivazione tramite API/MQTT.",
   SCHEDULER_HELP_2: "per attivare una volta all'avvio",
   SCHEDULE: 'Programma',
   TIME: 'Ora',

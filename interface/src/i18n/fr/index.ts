@@ -65,7 +65,8 @@ const fr: Translation = {
   TEMP_SENSOR: 'Capteur de température',
   TEMP_SENSORS: 'Capteurs de température',
   WRITE_CMD_SENT: 'Envoyer la commande sent', // TODO translate
-  EMS_BUS_WARNING: 'Bus EMS déconnecté. Si ce message persiste après quelques secondes, vérifiez les paramètres et la configuration de la carte.',
+  EMS_BUS_WARNING:
+    'Bus EMS déconnecté. Si ce message persiste après quelques secondes, vérifiez les paramètres et la configuration de la carte.',
   EMS_BUS_SCANNING: 'Scan des appareils EMS...',
   CONNECTED: 'Connecté',
   TX_ISSUES: 'Problèmes de transmission (Tx) - Essayez un autre mode Tx',
@@ -100,7 +101,8 @@ const fr: Translation = {
   CUSTOMIZATIONS: 'Personnalisation',
   APPLICATION_RESTARTING: 'EMS-ESP redémarre',
   INTERFACE_BOARD_PROFILE: "Profile de carte d'interface",
-  BOARD_PROFILE_TEXT: "Sélectionnez un profil de carte d'interface préconfiguré dans la liste ci-dessous ou choisissez Personnalisé pour configurer vos propres paramètres matériels",
+  BOARD_PROFILE_TEXT:
+    "Sélectionnez un profil de carte d'interface préconfiguré dans la liste ci-dessous ou choisissez Personnalisé pour configurer vos propres paramètres matériels",
   BOARD_PROFILE: 'Profil de carte',
   CUSTOM: 'Personnalisé',
   GPIO_OF: 'GPIO {0}',
@@ -118,7 +120,8 @@ const fr: Translation = {
   ENABLE_ANALOG: 'Activer les capteurs analogiques',
   CONVERT_FAHRENHEIT: 'Convertir les températures en Fahrenheit',
   BYPASS_TOKEN: "Contourner l'autorisation du jeton d'accès sur les appels API",
-  READONLY: 'Activer le mode lecture uniquement (bloque toutes les commandes EMS sortantes en écriture Tx)',
+  READONLY:
+    'Activer le mode lecture uniquement (bloque toutes les commandes EMS sortantes en écriture Tx)',
   UNDERCLOCK_CPU: 'Underclock du CPU',
   HEATINGOFF: 'Start boiler with forced heating off', // TODO translate
   ENABLE_SHOWER_TIMER: 'Activer la minuterie de la douche',
@@ -140,13 +143,17 @@ const fr: Translation = {
   MINUTES: 'minutes',
   HOURS: 'heures',
   RESTART: 'Redémarrer',
-  RESTART_TEXT: 'EMS-ESP a besoin de redémarrer pour appliquer les changements de paramètres du système',
+  RESTART_TEXT:
+    'EMS-ESP a besoin de redémarrer pour appliquer les changements de paramètres du système',
   RESTART_CONFIRM: 'Etes-vous sûr de vouloir redémarrer EMS-ESP ?',
   COMMAND: 'Commande',
-  CUSTOMIZATIONS_RESTART: 'Toutes les personnalisations ont été supprimées. Redémarrage...',
-  CUSTOMIZATIONS_FULL: 'Les entités sélectionnées ont dépassé la limite. Veuillez sauvegarder par lots',
+  CUSTOMIZATIONS_RESTART:
+    'Toutes les personnalisations ont été supprimées. Redémarrage...',
+  CUSTOMIZATIONS_FULL:
+    'Les entités sélectionnées ont dépassé la limite. Veuillez sauvegarder par lots',
   CUSTOMIZATIONS_SAVED: 'Personnalisations enregistrées',
-  CUSTOMIZATIONS_HELP_1: 'Sélectionnez un appareil et personnalisez les options des entités ou cliquez pour renommer',
+  CUSTOMIZATIONS_HELP_1:
+    'Sélectionnez un appareil et personnalisez les options des entités ou cliquez pour renommer',
   CUSTOMIZATIONS_HELP_2: 'marquer comme favori',
   CUSTOMIZATIONS_HELP_3: "désactiver l'action d'écriture",
   CUSTOMIZATIONS_HELP_4: "exclure de MQTT et de l'API",
@@ -156,13 +163,18 @@ const fr: Translation = {
   SET_ALL: 'tout régler',
   OPTIONS: 'Options',
   NAME: 'Nom',
-  CUSTOMIZATIONS_RESET: 'Êtes-vous sûr de vouloir supprimer toutes les personnalisations, y compris les paramètres personnalisés des capteurs de température et analogiques ?',
+  CUSTOMIZATIONS_RESET:
+    'Êtes-vous sûr de vouloir supprimer toutes les personnalisations, y compris les paramètres personnalisés des capteurs de température et analogiques ?',
   SUPPORT_INFORMATION: 'Information de support',
-  HELP_INFORMATION_1: 'Visitez le wiki en ligne pour obtenir des instructions sur la façon de configurer EMS-ESP.',
-  HELP_INFORMATION_2: 'Pour une discussion en direct avec la communauté, rejoignez notre serveur Discord',
+  HELP_INFORMATION_1:
+    'Visitez le wiki en ligne pour obtenir des instructions sur la façon de configurer EMS-ESP.',
+  HELP_INFORMATION_2:
+    'Pour une discussion en direct avec la communauté, rejoignez notre serveur Discord',
   HELP_INFORMATION_3: 'Pour demander une fonctionnalité ou signaler un problème',
-  HELP_INFORMATION_4: "N'oubliez pas de télécharger et de joindre les informations relatives à votre système pour obtenir une réponse plus rapide lorsque vous signalez un problème",
-  HELP_INFORMATION_5: 'EMS-ESP est un projet libre et open-source. Merci de soutenir son développement futur en lui donnant une étoile sur Github !',
+  HELP_INFORMATION_4:
+    "N'oubliez pas de télécharger et de joindre les informations relatives à votre système pour obtenir une réponse plus rapide lorsque vous signalez un problème",
+  HELP_INFORMATION_5:
+    'EMS-ESP est un projet libre et open-source. Merci de soutenir son développement futur en lui donnant une étoile sur Github !',
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
   ABORTED: 'annulé',
@@ -177,7 +189,8 @@ const fr: Translation = {
   USE: 'Utiliser',
   FACTORY_RESET: 'Réinitialisation',
   SYSTEM_FACTORY_TEXT: "L'appareil a été réinitialisé et va maintenant redémarrer",
-  SYSTEM_FACTORY_TEXT_DIALOG: "Êtes-vous sûr de vouloir réinitialiser l'appareil à ses paramètres d'usine ?",
+  SYSTEM_FACTORY_TEXT_DIALOG:
+    "Êtes-vous sûr de vouloir réinitialiser l'appareil à ses paramètres d'usine ?",
   THE_LATEST: 'La dernière',
   OFFICIAL: 'officielle',
   DEVELOPMENT: 'développement',
@@ -213,7 +226,8 @@ const fr: Translation = {
   GENERATING_TOKEN: 'Génération de jeton',
   USER: 'Utilisateur',
   MODIFY: 'Modifier',
-  SU_TEXT: "Le mot de passe su (super utilisateur) est utilisé pour signer les jetons d'authentification et activer les privilèges d'administrateur dans la console.",
+  SU_TEXT:
+    "Le mot de passe su (super utilisateur) est utilisé pour signer les jetons d'authentification et activer les privilèges d'administrateur dans la console.",
   NOT_ENABLED: 'Non activé',
   ERRORS_OF: 'Erreurs {0}',
   DISCONNECT_REASON: 'Raison de la déconnexion',
@@ -288,19 +302,21 @@ const fr: Translation = {
   NETWORK_SUBNET: 'Masque de sous-réseau',
   NETWORK_DNS: 'Serveurs DNS',
   ADDRESS_OF: 'Adresse de {0}',
-  ADMIN: 'Admin Account',  // TODO translate
-  GUEST: 'Invité Account',  // TODO translate
+  ADMIN: 'Admin',
+  GUEST: 'Invité',
   NEW: 'Nouveau',
   NEW_NAME_OF: 'Nouveau nom de {0}',
   ENTITY: 'entité',
   MIN: 'min',
   MAX: 'max',
   BLOCK_NAVIGATE_1: 'You have unsaved changes', // TODO translate
-  BLOCK_NAVIGATE_2: 'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?', // TODO translate
+  BLOCK_NAVIGATE_2:
+    'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?', // TODO translate
   STAY: 'Stay', // TODO translate
   LEAVE: 'Leave', // TODO translate
   SCHEDULER: 'Scheduler', // TODO translate
-  SCHEDULER_HELP_1: 'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT.', // TODO translate
+  SCHEDULER_HELP_1:
+    'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT.', // TODO translate
   SCHEDULER_HELP_2: 'Use 00:00 to trigger once on start-up', // TODO translate
   SCHEDULE: 'Schedule', // TODO translate
   TIME: 'Time', // TODO translate

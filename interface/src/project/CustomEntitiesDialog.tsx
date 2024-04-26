@@ -26,7 +26,7 @@ import { useI18nContext } from 'i18n/i18n-react';
 import { numberValue, updateValue } from 'utils';
 import { validate } from 'validators';
 
-import { DeviceValueType, DeviceValueUOM_s, DeviceValueTypeNames } from './types';
+import { DeviceValueType, DeviceValueTypeNames, DeviceValueUOM_s } from './types';
 import type { EntityItem } from './types';
 
 interface CustomEntitiesDialogProps {
@@ -210,15 +210,33 @@ const CustomEntitiesDialog = ({
                   fullWidth
                   select
                 >
-                  <MenuItem value={DeviceValueType.BOOL}>{DeviceValueTypeNames[DeviceValueType.BOOL]}</MenuItem>
-                  <MenuItem value={DeviceValueType.INT8}>{DeviceValueTypeNames[DeviceValueType.INT8]}</MenuItem>
-                  <MenuItem value={DeviceValueType.UINT8}>{DeviceValueTypeNames[DeviceValueType.UINT8]}</MenuItem>
-                  <MenuItem value={DeviceValueType.INT16}>{DeviceValueTypeNames[DeviceValueType.INT16]}</MenuItem>
-                  <MenuItem value={DeviceValueType.UINT16}>{DeviceValueTypeNames[DeviceValueType.UINT16]}</MenuItem>
-                  <MenuItem value={DeviceValueType.UINT24}>{DeviceValueTypeNames[DeviceValueType.UINT24]}</MenuItem>
-                  <MenuItem value={DeviceValueType.TIME}>{DeviceValueTypeNames[DeviceValueType.TIME]}</MenuItem>
-                  <MenuItem value={DeviceValueType.UINT32}>{DeviceValueTypeNames[DeviceValueType.UINT32]}</MenuItem>
-                  <MenuItem value={DeviceValueType.STRING}>{DeviceValueTypeNames[DeviceValueType.STRING]}</MenuItem>
+                  <MenuItem value={DeviceValueType.BOOL}>
+                    {DeviceValueTypeNames[DeviceValueType.BOOL]}
+                  </MenuItem>
+                  <MenuItem value={DeviceValueType.INT8}>
+                    {DeviceValueTypeNames[DeviceValueType.INT8]}
+                  </MenuItem>
+                  <MenuItem value={DeviceValueType.UINT8}>
+                    {DeviceValueTypeNames[DeviceValueType.UINT8]}
+                  </MenuItem>
+                  <MenuItem value={DeviceValueType.INT16}>
+                    {DeviceValueTypeNames[DeviceValueType.INT16]}
+                  </MenuItem>
+                  <MenuItem value={DeviceValueType.UINT16}>
+                    {DeviceValueTypeNames[DeviceValueType.UINT16]}
+                  </MenuItem>
+                  <MenuItem value={DeviceValueType.UINT24}>
+                    {DeviceValueTypeNames[DeviceValueType.UINT24]}
+                  </MenuItem>
+                  <MenuItem value={DeviceValueType.TIME}>
+                    {DeviceValueTypeNames[DeviceValueType.TIME]}
+                  </MenuItem>
+                  <MenuItem value={DeviceValueType.UINT32}>
+                    {DeviceValueTypeNames[DeviceValueType.UINT32]}
+                  </MenuItem>
+                  <MenuItem value={DeviceValueType.STRING}>
+                    {DeviceValueTypeNames[DeviceValueType.STRING]}
+                  </MenuItem>
                 </TextField>
               </Grid>
 

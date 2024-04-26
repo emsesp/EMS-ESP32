@@ -1755,7 +1755,7 @@ void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
     }
     // data: displaycode(2), errornumber(2), year, month, hour, day, minute, duration(2), src-addr
     static uint32_t lastCodeDate_ = 0; // last code date
-    char            code[3]       = {telegram->message_data[0], telegram->message_data[1], 0};
+    uint8_t         code[3]       = {telegram->message_data[0], telegram->message_data[1], 0};
     uint16_t        codeNo        = telegram->message_data[2] * 256 + telegram->message_data[3];
     uint16_t        year          = (telegram->message_data[4] & 0x7F) + 2000;
     uint8_t         month         = telegram->message_data[5];

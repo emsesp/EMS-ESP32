@@ -287,11 +287,11 @@ void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) {
         if (output.size()) {
             snprintf(error,
                      sizeof(error),
-                     "MQTT command failed with error: %s (%s)",
+                     "MQTT command failed with error %s (%s)",
                      (const char *)output["message"],
                      Command::return_code_string(return_code).c_str());
         } else {
-            snprintf(error, sizeof(error), "MQTT command failed with error code (%s)", Command::return_code_string(return_code).c_str());
+            snprintf(error, sizeof(error), "MQTT command failed with error %s", Command::return_code_string(return_code).c_str());
         }
         LOG_ERROR(error);
         Mqtt::queue_publish("response", error);

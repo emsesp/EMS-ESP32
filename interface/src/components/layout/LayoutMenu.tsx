@@ -201,7 +201,7 @@ const LayoutMenu: FC = () => {
               <ListItemText
                 sx={{ pl: 2 }}
                 primary={me.username}
-                secondary={(me.admin ? LL.ADMIN() : LL.GUEST())}
+                secondary={me.admin ? LL.ADMIN() : LL.GUEST()}
               />
             </ListItem>
           </List>

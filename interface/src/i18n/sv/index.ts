@@ -65,7 +65,8 @@ const sv: Translation = {
   TEMP_SENSOR: 'Temperatursensor',
   TEMP_SENSORS: 'Temperatursensorer',
   WRITE_CMD_SENT: 'Skrivkommandon skickade',
-  EMS_BUS_WARNING: 'EMS-buss nedkopplad. Om denna varning kvarstår efter några sekunder, kontrollera inställningar och enhets-profil.',
+  EMS_BUS_WARNING:
+    'EMS-buss nedkopplad. Om denna varning kvarstår efter några sekunder, kontrollera inställningar och enhets-profil.',
   EMS_BUS_SCANNING: 'Söker efter EMS-enheter...',
   CONNECTED: 'Ansluten',
   TX_ISSUES: 'Sändfel - Prova ett annat TX-läge',
@@ -100,7 +101,8 @@ const sv: Translation = {
   CUSTOMIZATIONS: 'Anpassningr',
   APPLICATION_RESTARTING: 'EMS-ESP startar om',
   INTERFACE_BOARD_PROFILE: 'Interface Hårdvaruprofil',
-  BOARD_PROFILE_TEXT: 'Välj en förkonfigurerad hårdvaruprofil från listan nedan eller välj Anpassad för att konfigurera dina egna hårdvaruinställningar',
+  BOARD_PROFILE_TEXT:
+    'Välj en förkonfigurerad hårdvaruprofil från listan nedan eller välj Anpassad för att konfigurera dina egna hårdvaruinställningar',
   BOARD_PROFILE: 'Hårdvarutyp',
   CUSTOM: 'Anpassa',
   GPIO_OF: '{0} GPIO',
@@ -118,7 +120,8 @@ const sv: Translation = {
   ENABLE_ANALOG: 'Aktivera Analoga Sensorer',
   CONVERT_FAHRENHEIT: 'Konvertera temperaturer till Fahrenheit',
   BYPASS_TOKEN: 'Inaktivera Token-autensiering för API-anrop',
-  READONLY: 'Aktivera read-only (blockerar alla utgående skrivkommandon mot EMS-bussen)',
+  READONLY:
+    'Aktivera read-only (blockerar alla utgående skrivkommandon mot EMS-bussen)',
   UNDERCLOCK_CPU: 'Nedklocka Processorhastighet',
   HEATINGOFF: 'Start boiler with forced heating off', // TODO translate
   ENABLE_SHOWER_TIMER: 'Aktivera Dusch-timer',
@@ -140,13 +143,16 @@ const sv: Translation = {
   MINUTES: 'minuter',
   HOURS: 'timmar',
   RESTART: 'Starta om',
-  RESTART_TEXT: 'EMS-ESP kräver en omstart för att applicera förändrade systeminställningar',
+  RESTART_TEXT:
+    'EMS-ESP kräver en omstart för att applicera förändrade systeminställningar',
   RESTART_CONFIRM: 'Är du säker på att du vill starta om EMS-ESP?',
   COMMAND: 'Kommando',
   CUSTOMIZATIONS_RESTART: 'Alla anpassningr har raderats. Startar om...',
-  CUSTOMIZATIONS_FULL: 'Antal valda enheter för högt. Vänligen spara i mindre antal åt gången.',
+  CUSTOMIZATIONS_FULL:
+    'Antal valda enheter för högt. Vänligen spara i mindre antal åt gången.',
   CUSTOMIZATIONS_SAVED: 'Anpassningar sparade',
-  CUSTOMIZATIONS_HELP_1: 'Välj en enhet och anpassa underenheter med hjälp av alternativen',
+  CUSTOMIZATIONS_HELP_1:
+    'Välj en enhet och anpassa underenheter med hjälp av alternativen',
   CUSTOMIZATIONS_HELP_2: 'Favorit',
   CUSTOMIZATIONS_HELP_3: 'Inaktivera skrivningar',
   CUSTOMIZATIONS_HELP_4: 'Exkludera från MQTT & API',
@@ -156,13 +162,17 @@ const sv: Translation = {
   SET_ALL: 'ställ in alla',
   OPTIONS: 'Alternativ',
   NAME: 'Namn',
-  CUSTOMIZATIONS_RESET: 'Är du säker på att du vill ta bort alla anpassningar inklusive inställningar för Temperatur och Analoga sensorer?',
+  CUSTOMIZATIONS_RESET:
+    'Är du säker på att du vill ta bort alla anpassningar inklusive inställningar för Temperatur och Analoga sensorer?',
   SUPPORT_INFORMATION: 'Supportinformation',
-  HELP_INFORMATION_1: 'Besök Wikin för instruktioner för hur du kan konfigurera EMS-ESP',
+  HELP_INFORMATION_1:
+    'Besök Wikin för instruktioner för hur du kan konfigurera EMS-ESP',
   HELP_INFORMATION_2: 'För community-support besök vår Discord-server',
   HELP_INFORMATION_3: 'Önska en ny funktion eller rapportera en bugg',
-  HELP_INFORMATION_4: 'Bifoga din systeminformation för snabbare hantering när du rapporterar ett problem',
-  HELP_INFORMATION_5: 'EMS-ESP är gratis och är öppen källkod. Bidra till utvecklingen genom att ge oss en stjärna på GitHub!',
+  HELP_INFORMATION_4:
+    'Bifoga din systeminformation för snabbare hantering när du rapporterar ett problem',
+  HELP_INFORMATION_5:
+    'EMS-ESP är gratis och är öppen källkod. Bidra till utvecklingen genom att ge oss en stjärna på GitHub!',
   UPLOAD: 'Uppladdning',
   DOWNLOAD: '{{N|n|n}}edladdning',
   ABORTED: 'Avbruten',
@@ -195,8 +205,10 @@ const sv: Translation = {
   ENABLE_OTA: 'Aktivera OTA-uppdateringar',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Ladda ner entitetsanpassningar',
   DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
-  DOWNLOAD_SETTINGS_TEXT: 'Ladda ner applikationsinställningar. Var försiktig om du delar dina iställlningar då de innehåller lösenord och annan känslig systeminformation',
-  UPLOAD_TEXT: 'Ladda upp ett nytt firmware (.bin), inställningar eller anpassningar (.json) nedan',
+  DOWNLOAD_SETTINGS_TEXT:
+    'Ladda ner applikationsinställningar. Var försiktig om du delar dina iställlningar då de innehåller lösenord och annan känslig systeminformation',
+  UPLOAD_TEXT:
+    'Ladda upp ett nytt firmware (.bin), inställningar eller anpassningar (.json) nedan',
   UPLOADING: 'Laddar upp',
   UPLOAD_DROP_TEXT: 'Släpp fil eller klicka här',
   ERROR: 'Okänt Fel, var god försök igen',
@@ -211,7 +223,8 @@ const sv: Translation = {
   GENERATING_TOKEN: 'Genererar token',
   USER: 'Användare',
   MODIFY: 'Ändra',
-  SU_TEXT: 'SU-användarens (super user) lösenord används för att signera autensierings-tokens samt för att aktivera administratörsprivilegier i Console-läge',
+  SU_TEXT:
+    'SU-användarens (super user) lösenord används för att signera autensierings-tokens samt för att aktivera administratörsprivilegier i Console-läge',
   NOT_ENABLED: 'Ej aktiv',
   ERRORS_OF: '{0} fel',
   DISCONNECT_REASON: 'Anledning till nedkoppling',
@@ -286,19 +299,21 @@ const sv: Translation = {
   NETWORK_SUBNET: 'Subnätmask',
   NETWORK_DNS: 'DNS-Server',
   ADDRESS_OF: '{0} Adress',
-  ADMIN: 'Admin Account',  // TODO translate
-  GUEST: 'Gäst Account',  // TODO translate
+  ADMIN: 'Admin',
+  GUEST: 'Gäst',
   NEW: 'Ny',
   NEW_NAME_OF: 'Byt namn {0}',
   ENTITY: 'Entitet',
   MIN: 'min',
   MAX: 'max',
   BLOCK_NAVIGATE_1: 'You have unsaved changes', // TODO translate
-  BLOCK_NAVIGATE_2: 'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?', // TODO translate
+  BLOCK_NAVIGATE_2:
+    'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?', // TODO translate
   STAY: 'Stay', // TODO translate
   LEAVE: 'Leave', // TODO translate
   SCHEDULER: 'Scheduler', // TODO translate
-  SCHEDULER_HELP_1: 'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT.', // TODO translate
+  SCHEDULER_HELP_1:
+    'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT.', // TODO translate
   SCHEDULER_HELP_2: 'Use 00:00 to trigger once on start-up', // TODO translate
   SCHEDULE: 'Schedule', // TODO translate
   TIME: 'Time', // TODO translate

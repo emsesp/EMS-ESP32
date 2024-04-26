@@ -65,12 +65,14 @@ const tr: Translation = {
   TEMP_SENSOR: 'Sıcaklık Sensörü',
   TEMP_SENSORS: 'Sıcaklık Sensörleri',
   WRITE_CMD_SENT: 'Yazma komutu gönderildi',
-  EMS_BUS_WARNING: 'EMS hat bağlantısı kesildi. Eğer bu uyarı birkaç saniye sonra devam ediyorsa lütfen ayarları ve kart tipini kontrol edin',
+  EMS_BUS_WARNING:
+    'EMS hat bağlantısı kesildi. Eğer bu uyarı birkaç saniye sonra devam ediyorsa lütfen ayarları ve kart tipini kontrol edin',
   EMS_BUS_SCANNING: 'EMS cihazları aranıyor...',
   CONNECTED: 'Bağlandı',
   TX_ISSUES: 'Tx sorunu - başka bir Tx Modu deneyin',
   DISCONNECTED: 'Bağlantı kesildi',
-  EMS_SCAN: 'EMS Hattında tam bir cihaz taraması başlatmak istediğinizden emin misiniz?',
+  EMS_SCAN:
+    'EMS Hattında tam bir cihaz taraması başlatmak istediğinizden emin misiniz?',
   EMS_BUS_STATUS: 'EMS Hattı Durumu',
   ACTIVE_DEVICES: 'Aktif Cihazlar ve Sensörler',
   EMS_DEVICE: 'EMS Cihazı',
@@ -100,7 +102,8 @@ const tr: Translation = {
   CUSTOMIZATIONS: 'Özelleştirme',
   APPLICATION_RESTARTING: 'EMS-ESP yeniden başlatılıyor',
   INTERFACE_BOARD_PROFILE: 'Arabirim Kart Profili',
-  BOARD_PROFILE_TEXT: 'Aşağıdan hazır kart profillerinden birini seçin yada kendi donanımınızı ayarlamak için Özeli tercih edin',
+  BOARD_PROFILE_TEXT:
+    'Aşağıdan hazır kart profillerinden birini seçin yada kendi donanımınızı ayarlamak için Özeli tercih edin',
   BOARD_PROFILE: 'Kart Profili',
   CUSTOM: 'Özel',
   GPIO_OF: '{0} GPIO',
@@ -118,7 +121,8 @@ const tr: Translation = {
   ENABLE_ANALOG: 'Analog Sensörleri Aktif Hale Getir',
   CONVERT_FAHRENHEIT: 'Sıcaklık değerlerini Fahrenheit a çevir',
   BYPASS_TOKEN: 'API bağlantılarında Erişim Jeton onaylamasını geç',
-  READONLY: 'Salt okunur modu devreye al (bütün giden EMS Tx Yazma komutlarını engeller)',
+  READONLY:
+    'Salt okunur modu devreye al (bütün giden EMS Tx Yazma komutlarını engeller)',
   UNDERCLOCK_CPU: 'İşlemci hızını düşür',
   HEATINGOFF: 'Start boiler with forced heating off', // TODO translate
   ENABLE_SHOWER_TIMER: 'Duş Sayacını Devreye Al',
@@ -140,13 +144,17 @@ const tr: Translation = {
   MINUTES: 'dakikalar',
   HOURS: 'saatler',
   RESTART: 'Yeniden Başlat',
-  RESTART_TEXT: 'EMS-ESP Sistem ayarlarının uygulanabilmesi için yeinden başlatılmalı',
+  RESTART_TEXT:
+    'EMS-ESP Sistem ayarlarının uygulanabilmesi için yeinden başlatılmalı',
   RESTART_CONFIRM: 'EMS-ESP yeniden başlatmak istediğinize emin misiniz?',
   COMMAND: 'Komut',
-  CUSTOMIZATIONS_RESTART: 'Bütün özelleştirmeler kaldırıldı. Yeniden başlatılıyor...',
-  CUSTOMIZATIONS_FULL: 'Seçilen varlıklar sınırı aşmaktadır. Lütfen parçalar halinde kaydedin',
+  CUSTOMIZATIONS_RESTART:
+    'Bütün özelleştirmeler kaldırıldı. Yeniden başlatılıyor...',
+  CUSTOMIZATIONS_FULL:
+    'Seçilen varlıklar sınırı aşmaktadır. Lütfen parçalar halinde kaydedin',
   CUSTOMIZATIONS_SAVED: 'Özelleştirmeler kaydedildi',
-  CUSTOMIZATIONS_HELP_1: 'Bir cihaz seçip varlıkların seçeneklerini özelleştirin veya yeniden adlandırmak için tıklayın',
+  CUSTOMIZATIONS_HELP_1:
+    'Bir cihaz seçip varlıkların seçeneklerini özelleştirin veya yeniden adlandırmak için tıklayın',
   CUSTOMIZATIONS_HELP_2: 'favori olarak işaretle',
   CUSTOMIZATIONS_HELP_3: 'yazma işlemini devre dışı bırak',
   CUSTOMIZATIONS_HELP_4: 'MQTT ve APInin dışında bırak',
@@ -156,13 +164,17 @@ const tr: Translation = {
   SET_ALL: 'hepsini ayarla',
   OPTIONS: 'Seçenekler',
   NAME: 'İsim',
-  CUSTOMIZATIONS_RESET: 'Sıcaklık ve Analog Sensörlerin özelleştirilmiş seçenekleri dahil bütün özelleştirmeleri kaldırmak istediğinizden emin misiniz?',
+  CUSTOMIZATIONS_RESET:
+    'Sıcaklık ve Analog Sensörlerin özelleştirilmiş seçenekleri dahil bütün özelleştirmeleri kaldırmak istediğinizden emin misiniz?',
   SUPPORT_INFORMATION: 'Destek Bilgileri',
-  HELP_INFORMATION_1: 'EMS-ESPnin nasıl ayarlanacağı ile ilgili bilgileri edinmek için çevrimiçi WIKI sayfasını ziyaret edin',
+  HELP_INFORMATION_1:
+    'EMS-ESPnin nasıl ayarlanacağı ile ilgili bilgileri edinmek için çevrimiçi WIKI sayfasını ziyaret edin',
   HELP_INFORMATION_2: 'Canlı topluluk sohbeti için Discord sunucumuza katılın',
   HELP_INFORMATION_3: 'Yeni bir özellik talep etmek yada hata bildirmek için',
-  HELP_INFORMATION_4: 'Bir sorun bildirirken daha hızlı bir dönüş için sistem bilginizi indirip eklemeyi unutmayın',
-  HELP_INFORMATION_5: 'EMS-ESP ücretsiz ve açık kaynaklı bir projedir. Lütfen geliştirmeyi desteklemek için Githubda projeye yıldız verin!',
+  HELP_INFORMATION_4:
+    'Bir sorun bildirirken daha hızlı bir dönüş için sistem bilginizi indirip eklemeyi unutmayın',
+  HELP_INFORMATION_5:
+    'EMS-ESP ücretsiz ve açık kaynaklı bir projedir. Lütfen geliştirmeyi desteklemek için Githubda projeye yıldız verin!',
   UPLOAD: 'Yükleme',
   DOWNLOAD: '{{İ|i|i}}İndirme',
   ABORTED: 'iptal edildi',
@@ -176,8 +188,10 @@ const tr: Translation = {
   CLOSE: 'Kapat',
   USE: 'KUllan',
   FACTORY_RESET: 'Fabrika ayarına dönme',
-  SYSTEM_FACTORY_TEXT: 'Cihaz fabrika ayarlarına döndü ve şimdi yendiden başlatılacak',
-  SYSTEM_FACTORY_TEXT_DIALOG: 'Cihazı fabrika ayarlarına döndürmek istediğinize emin misiniz?',
+  SYSTEM_FACTORY_TEXT:
+    'Cihaz fabrika ayarlarına döndü ve şimdi yendiden başlatılacak',
+  SYSTEM_FACTORY_TEXT_DIALOG:
+    'Cihazı fabrika ayarlarına döndürmek istediğinize emin misiniz?',
   THE_LATEST: 'En son',
   OFFICIAL: 'resmi',
   DEVELOPMENT: 'geliştirme',
@@ -195,8 +209,10 @@ const tr: Translation = {
   ENABLE_OTA: 'OTA Güncellemelerine izin ver',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Varlık özelleştirmelerini indir',
   DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
-  DOWNLOAD_SETTINGS_TEXT: 'Uygulama ayarlarını indir. Bu dosya hassas sistem bilgileri ve şifrelerinizi içerdiğinden ayarlarınızı paylaşırken dikkatli olun',
-  UPLOAD_TEXT: 'Yeni bir bellenim(.bin) dosyası yükleyin, ayarlar ve özelleştirmeler(.json) dosyası aşağıda, sçenekli denetim yüklemesi(.md5) için önce',
+  DOWNLOAD_SETTINGS_TEXT:
+    'Uygulama ayarlarını indir. Bu dosya hassas sistem bilgileri ve şifrelerinizi içerdiğinden ayarlarınızı paylaşırken dikkatli olun',
+  UPLOAD_TEXT:
+    'Yeni bir bellenim(.bin) dosyası yükleyin, ayarlar ve özelleştirmeler(.json) dosyası aşağıda, sçenekli denetim yüklemesi(.md5) için önce',
   UPLOADING: 'Yüklüyor',
   UPLOAD_DROP_TEXT: 'Buraya tıklayın yada dosyayı sürükleyip bırakın',
   ERROR: 'Beklenemedik hata, lütfen tekrar deneyin.',
@@ -211,7 +227,8 @@ const tr: Translation = {
   GENERATING_TOKEN: 'Jeton oluşturuluyor',
   USER: 'Kullanıcı',
   MODIFY: 'Düzenle',
-  SU_TEXT: 'SU(Süper kullanıcı şifresi yetkilendirme jetonlarını imzalamaya ve ayrıca konsolda yönetici ayrıcalıklarını etkinleştirmek için kullanılabilir',
+  SU_TEXT:
+    'SU(Süper kullanıcı şifresi yetkilendirme jetonlarını imzalamaya ve ayrıca konsolda yönetici ayrıcalıklarını etkinleştirmek için kullanılabilir',
   NOT_ENABLED: 'Etkinleştirilmedi',
   ERRORS_OF: '{0} Hata(ları)',
   DISCONNECT_REASON: 'Bağlantının kopma nedeni',
@@ -286,19 +303,21 @@ const tr: Translation = {
   NETWORK_SUBNET: 'Ağ Alt Maskesi',
   NETWORK_DNS: 'DNS Sunucuları',
   ADDRESS_OF: '{0} Adresi',
-  ADMIN: 'Yönetici Account',  // TODO translate
-  GUEST: 'Misafir Account',  // TODO translate
+  ADMIN: 'Yönetici',
+  GUEST: 'Misafir',
   NEW: 'Yeni',
   NEW_NAME_OF: 'Yeni {0} adı',
   ENTITY: 'varlık',
   MIN: 'min',
   MAX: 'maks',
   BLOCK_NAVIGATE_1: 'You have unsaved changes', // TODO translate
-  BLOCK_NAVIGATE_2: 'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?', // TODO translate
+  BLOCK_NAVIGATE_2:
+    'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?', // TODO translate
   STAY: 'Stay', // TODO translate
   LEAVE: 'Leave', // TODO translate
   SCHEDULER: 'Scheduler', // TODO translate
-  SCHEDULER_HELP_1: 'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT.', // TODO translate
+  SCHEDULER_HELP_1:
+    'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT.', // TODO translate
   SCHEDULER_HELP_2: 'Use 00:00 to trigger once on start-up', // TODO translate
   SCHEDULE: 'Schedule', // TODO translate
   TIME: 'Time', // TODO translate
