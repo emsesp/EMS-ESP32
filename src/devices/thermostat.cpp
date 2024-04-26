@@ -223,9 +223,9 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
 
 // returns the heating circuit object based on the hc number
 // of nullptr if it doesn't exist yet
-std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(const uint8_t hc_num) {
+std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(const int8_t id) {
     // if hc_num is 0 then return the first existing hc in the list
-    if (hc_num == AUTO_HEATING_CIRCUIT) {
+    if (id == AUTO_HEATING_CIRCUIT) {
         for (const auto & heating_circuit : heating_circuits_) {
             if (heating_circuit->is_active()) {
                 return heating_circuit;
@@ -234,6 +234,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(const ui
     }
 
     // otherwise find a match
+    uint8_t hc_num = (uint8_t)id;
     for (const auto & heating_circuit : heating_circuits_) {
         if ((heating_circuit->hc_num() == hc_num) && heating_circuit->is_active()) {
             return heating_circuit;
@@ -1620,8 +1621,7 @@ void Thermostat::process_RCErrorMessage(std::shared_ptr<const Telegram> telegram
 
 // hp mode RC300
 bool Thermostat::set_roomtempdiff(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -1633,8 +1633,7 @@ bool Thermostat::set_roomtempdiff(const char * value, const int8_t id) {
     return false;
 }
 bool Thermostat::set_dewoffset(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -1647,8 +1646,7 @@ bool Thermostat::set_dewoffset(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_hpminflowtemp(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -1661,8 +1659,7 @@ bool Thermostat::set_hpminflowtemp(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_hpmode(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -1854,8 +1851,7 @@ bool Thermostat::set_remotetemp(const char * value, const int8_t id) {
         return false;
     }
 
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -1893,8 +1889,7 @@ bool Thermostat::set_remotehum(const char * value, const int8_t id) {
         return false;
     }
 
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -1984,8 +1979,7 @@ bool Thermostat::set_language(const char * value, const int8_t id) {
 
 // Set the control-mode for hc 0-off, 1-RC20, 2-RC3x
 bool Thermostat::set_control(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -2024,8 +2018,7 @@ bool Thermostat::set_control(const char * value, const int8_t id) {
 
 // Set sensor for Junkers, 1-external (from remote), 2-internal, 3-minimum value from int/ext
 bool Thermostat::set_roomsensor(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -2144,8 +2137,7 @@ bool Thermostat::set_wwchargeduration(const char * value, const int8_t id) {
 
 // set ww prio
 bool Thermostat::set_wwprio(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -2165,7 +2157,7 @@ bool Thermostat::set_wwprio(const char * value, const int8_t id) {
 
 // set cooling
 bool Thermostat::set_cooling(const char * value, const int8_t id) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit((id == -1) ? AUTO_HEATING_CIRCUIT : id);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -2382,8 +2374,7 @@ bool Thermostat::set_wwCircProg(const char * value, const int8_t id) {
 
 // set the holiday or vacations as string dd.mm.yyyy-dd.mm.yyyy
 bool Thermostat::set_holiday(const char * value, const int8_t id, const bool vacation) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
 
     if (value == nullptr) {
         return false;
@@ -2427,8 +2418,7 @@ bool Thermostat::set_holiday(const char * value, const int8_t id, const bool vac
 
 // set pause in hours
 bool Thermostat::set_pause(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -2448,8 +2438,7 @@ bool Thermostat::set_pause(const char * value, const int8_t id) {
 
 // set partymode in hours
 bool Thermostat::set_party(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
 
     if (hc == nullptr) {
         return false;
@@ -2531,8 +2520,7 @@ bool Thermostat::set_datetime(const char * value, const int8_t id) {
 
 // set RC300 roominfluence factor
 bool Thermostat::set_roominfl_factor(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -2552,8 +2540,7 @@ bool Thermostat::set_roominfl_factor(const char * value, const int8_t id) {
 
 // set Junkers roominfluence mode
 bool Thermostat::set_roominfl_mode(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -2617,39 +2604,37 @@ bool Thermostat::set_mode(const char * value, const int8_t id) {
         }
     }
 
-    uint8_t hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id; // heating circuit
-
     // compare the english string
     auto mode = mode_list[enum_index][0];
     if (!strcmp(mode, FL_(auto)[0])) {
-        return set_mode_n(HeatingCircuit::Mode::AUTO, hc_num);
+        return set_mode_n(HeatingCircuit::Mode::AUTO, id);
     }
     if (!strcmp(mode, FL_(off)[0])) {
-        return set_mode_n(HeatingCircuit::Mode::OFF, hc_num);
+        return set_mode_n(HeatingCircuit::Mode::OFF, id);
     }
     if (!strcmp(mode, FL_(manual)[0])) {
-        return set_mode_n(HeatingCircuit::Mode::MANUAL, hc_num);
+        return set_mode_n(HeatingCircuit::Mode::MANUAL, id);
     }
     if (!strcmp(mode, FL_(day)[0])) {
-        return set_mode_n(HeatingCircuit::Mode::DAY, hc_num);
+        return set_mode_n(HeatingCircuit::Mode::DAY, id);
     }
     if (!strcmp(mode, FL_(night)[0])) {
-        return set_mode_n(HeatingCircuit::Mode::NIGHT, hc_num);
+        return set_mode_n(HeatingCircuit::Mode::NIGHT, id);
     }
     if (!strcmp(mode, FL_(heat)[0])) {
-        return set_mode_n(HeatingCircuit::Mode::HEAT, hc_num);
+        return set_mode_n(HeatingCircuit::Mode::HEAT, id);
     }
     if (!strcmp(mode, FL_(nofrost)[0])) {
-        return set_mode_n(HeatingCircuit::Mode::NOFROST, hc_num);
+        return set_mode_n(HeatingCircuit::Mode::NOFROST, id);
     }
     if (!strcmp(mode, FL_(eco)[0])) {
-        return set_mode_n(HeatingCircuit::Mode::ECO, hc_num);
+        return set_mode_n(HeatingCircuit::Mode::ECO, id);
     }
     if (!strcmp(mode, FL_(holiday)[0])) {
-        return set_mode_n(HeatingCircuit::Mode::HOLIDAY, hc_num);
+        return set_mode_n(HeatingCircuit::Mode::HOLIDAY, id);
     }
     if (!strcmp(mode, FL_(comfort)[0])) {
-        return set_mode_n(HeatingCircuit::Mode::COMFORT, hc_num);
+        return set_mode_n(HeatingCircuit::Mode::COMFORT, id);
     }
 
     return false; // not found
@@ -2657,9 +2642,8 @@ bool Thermostat::set_mode(const char * value, const int8_t id) {
 
 // Set the thermostat working mode
 // mode is HeatingCircuit::Mode
-bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
-    // get hc based on number
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(hc_num);
+bool Thermostat::set_mode_n(const uint8_t mode, const int8_t id) {
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -2767,8 +2751,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const uint8_t hc_num) {
 
 // sets the thermostat summermode for RC300
 bool Thermostat::set_summermode(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -2793,8 +2776,7 @@ bool Thermostat::set_summermode(const char * value, const int8_t id) {
 
 // Set fastheatupfactor, ems+
 bool Thermostat::set_fastheatup(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -2811,8 +2793,7 @@ bool Thermostat::set_fastheatup(const char * value, const int8_t id) {
 
 // Set holidaymode Junkers
 bool Thermostat::set_holidaymode(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -2832,8 +2813,7 @@ bool Thermostat::set_holidaymode(const char * value, const int8_t id) {
 
 // Set heatup mode Junkers
 bool Thermostat::set_heatup(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -2849,8 +2829,7 @@ bool Thermostat::set_heatup(const char * value, const int8_t id) {
 
 // Set switchonoptimization RC310
 bool Thermostat::set_switchonoptimization(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -2871,8 +2850,7 @@ bool Thermostat::set_switchonoptimization(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_boost(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -2885,8 +2863,7 @@ bool Thermostat::set_boost(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_boosttime(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -2899,8 +2876,7 @@ bool Thermostat::set_boosttime(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_heatondelay(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -2913,8 +2889,7 @@ bool Thermostat::set_heatondelay(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_heatoffdelay(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -2927,8 +2902,7 @@ bool Thermostat::set_heatoffdelay(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_instantstart(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -2942,8 +2916,7 @@ bool Thermostat::set_instantstart(const char * value, const int8_t id) {
 
 // sets the thermostat reducemode for RC35 and RC310
 bool Thermostat::set_reducemode(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -2966,8 +2939,7 @@ bool Thermostat::set_reducemode(const char * value, const int8_t id) {
 
 // sets the thermostat reducemode for RC35 vacations
 bool Thermostat::set_vacreducemode(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -2983,8 +2955,7 @@ bool Thermostat::set_vacreducemode(const char * value, const int8_t id) {
 
 // sets the thermostat nofrost mode for RC35, RC300/RC310
 bool Thermostat::set_nofrostmode(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -3005,8 +2976,7 @@ bool Thermostat::set_nofrostmode(const char * value, const int8_t id) {
 
 // sets the thermostat heatingtype for RC35, RC300
 bool Thermostat::set_heatingtype(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -3034,8 +3004,7 @@ bool Thermostat::set_heatingtype(const char * value, const int8_t id) {
 
 // sets the thermostat controlmode for RC35, RC300
 bool Thermostat::set_controlmode(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -3073,8 +3042,7 @@ bool Thermostat::set_controlmode(const char * value, const int8_t id) {
 
 // sets the thermostat time for nightmode for RC10, telegram 0xB0
 bool Thermostat::set_reducehours(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -3223,8 +3191,7 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
 
 // set switchtime for own1 program
 bool Thermostat::set_switchtime1(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -3241,8 +3208,7 @@ bool Thermostat::set_switchtime1(const char * value, const int8_t id) {
 
 // set switchtime for own2 program
 bool Thermostat::set_switchtime2(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -3293,8 +3259,7 @@ bool Thermostat::set_wwSwitchTime(const char * value, const int8_t id) {
 
 // sets the thermostat program for RC35 and RC20
 bool Thermostat::set_program(const char * value, const int8_t id) {
-    uint8_t                                     hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
-    std::shared_ptr<Thermostat::HeatingCircuit> hc     = heating_circuit(hc_num);
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -3330,9 +3295,8 @@ bool Thermostat::set_program(const char * value, const int8_t id) {
 
 // Set the temperature of the thermostat
 // the id passed into this function is the heating circuit number
-bool Thermostat::set_temperature(const float temperature, const uint8_t mode, const uint8_t hc_num) {
-    // get hc based on number
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(hc_num);
+bool Thermostat::set_temperature(const float temperature, const uint8_t mode, const int8_t id) {
+    auto hc = heating_circuit(id);
     if (hc == nullptr) {
         return false;
     }
@@ -3787,10 +3751,9 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
 }
 
 bool Thermostat::set_temperature_value(const char * value, const int8_t id, const uint8_t mode, bool relative) {
-    float   f;
-    uint8_t hc_num = (id == -1) ? AUTO_HEATING_CIRCUIT : id;
+    float f;
     if (Helpers::value2temperature(value, f, relative)) {
-        return set_temperature(f, mode, hc_num);
+        return set_temperature(f, mode, id);
     }
     return false;
 }

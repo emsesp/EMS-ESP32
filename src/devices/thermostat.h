@@ -365,7 +365,7 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_OFFSET_JunkersSetMessage2_eco_temp      = 6;
     static constexpr uint8_t EMS_OFFSET_JunkersSetMessage2_heat_temp     = 7;
 
-    static constexpr uint8_t AUTO_HEATING_CIRCUIT = 0;
+    static constexpr int8_t AUTO_HEATING_CIRCUIT = -1; // id
 
     // Installation settings
     static constexpr uint8_t EMS_TYPE_IBASettings    = 0xA5; // installation settings
@@ -375,7 +375,7 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_TYPE_time           = 0x06; // time
 
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(std::shared_ptr<const Telegram> telegram);
-    std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(const uint8_t hc_num);
+    std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(const int8_t id);
     std::shared_ptr<Thermostat::DhwCircuit>     dhw_circuit(const uint8_t offset = 0, const uint8_t dhw_num = 255, const bool create = false);
 
     void register_device_values_hc(std::shared_ptr<Thermostat::HeatingCircuit> hc);
@@ -437,10 +437,10 @@ class Thermostat : public EMSdevice {
     void process_HPMode(std::shared_ptr<const Telegram> telegram);
 
     // internal helper functions
-    bool set_mode_n(const uint8_t mode, const uint8_t hc_num);
+    bool set_mode_n(const uint8_t mode, const int8_t id);
 
     bool set_temperature_value(const char * value, const int8_t id, const uint8_t mode, bool relative = false);
-    bool set_temperature(const float temperature, const uint8_t mode, const uint8_t hc_num);
+    bool set_temperature(const float temperature, const uint8_t mode, const int8_t id);
     bool set_switchtime(const char * value, const uint16_t type_id, char * out, size_t len);
 
     // set functions - these use the id/hc
