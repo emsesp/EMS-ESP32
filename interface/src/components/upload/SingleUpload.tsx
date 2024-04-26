@@ -55,7 +55,6 @@ const SingleUpload: FC<SingleUploadProps> = ({
   const { LL } = useI18nContext();
 
   const progressText = () => {
-    console.log(progress);
     if (uploading) {
       return (
         LL.UPLOADING() +

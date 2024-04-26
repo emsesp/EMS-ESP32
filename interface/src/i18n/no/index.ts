@@ -65,7 +65,8 @@ const no: Translation = {
   TEMP_SENSOR: 'Temperatursensor',
   TEMP_SENSORS: 'Temperaturesensorer',
   WRITE_CMD_SENT: 'Skriv kommando sent',
-  EMS_BUS_WARNING: 'EMS bussen koblet ned. Hvis denne advarselen fortsetter etter noen f¨sekunder sjekk instillinger og  prosessorkort',
+  EMS_BUS_WARNING:
+    'EMS bussen koblet ned. Hvis denne advarselen fortsetter etter noen f¨sekunder sjekk instillinger og  prosessorkort',
   EMS_BUS_SCANNING: 'Søker etter EMS enheter...',
   CONNECTED: 'Tilkoblet',
   TX_ISSUES: 'Tx problemer - prøv en annen Tx Modus',
@@ -100,7 +101,8 @@ const no: Translation = {
   CUSTOMIZATIONS: 'Tilpasninger',
   APPLICATION_RESTARTING: 'EMS-ESP restarter',
   INTERFACE_BOARD_PROFILE: 'Interface Prosessor Profil',
-  BOARD_PROFILE_TEXT: 'Velg en pre-konfigurert prosessor profil fra listen under eller velg  Tilpasset for å konfigurere dine egne innstillinger',
+  BOARD_PROFILE_TEXT:
+    'Velg en pre-konfigurert prosessor profil fra listen under eller velg  Tilpasset for å konfigurere dine egne innstillinger',
   BOARD_PROFILE: 'Prosessor Profil',
   CUSTOM: 'Custom',
   GPIO_OF: '{0} GPIO',
@@ -144,9 +146,11 @@ const no: Translation = {
   RESTART_CONFIRM: 'Er du sikker på at du vil omstarte EMS-ESP?',
   COMMAND: 'Kommando',
   CUSTOMIZATIONS_RESTART: 'Alle tilpasninger har blitt slettet. Restarter...',
-  CUSTOMIZATIONS_FULL: 'Antall valgte objekter for høyt. Largre i mindre antall om gangen',
+  CUSTOMIZATIONS_FULL:
+    'Antall valgte objekter for høyt. Largre i mindre antall om gangen',
   CUSTOMIZATIONS_SAVED: 'Tilpasninger lagret',
-  CUSTOMIZATIONS_HELP_1: 'Velg en enhet og tilpass underenheter med hjelp av alternativer eller velg å gi nytt navn',
+  CUSTOMIZATIONS_HELP_1:
+    'Velg en enhet og tilpass underenheter med hjelp av alternativer eller velg å gi nytt navn',
   CUSTOMIZATIONS_HELP_2: 'merk som favoritt',
   CUSTOMIZATIONS_HELP_3: 'inaktiviser skriving',
   CUSTOMIZATIONS_HELP_4: 'ekskludere fra MQTT og API',
@@ -156,13 +160,16 @@ const no: Translation = {
   SET_ALL: 'sett alle',
   OPTIONS: 'Alternativ',
   NAME: 'Navn',
-  CUSTOMIZATIONS_RESET: 'Er du sikker på att du vil fjerne tilpassninger inkludert innstillinger for Temperatur og Analoge sensorer?',
+  CUSTOMIZATIONS_RESET:
+    'Er du sikker på att du vil fjerne tilpassninger inkludert innstillinger for Temperatur og Analoge sensorer?',
   SUPPORT_INFORMATION: 'Supportinformasjon',
   HELP_INFORMATION_1: 'Besøk wiki for instruksjoner for å konfigurere EMS-ESP',
   HELP_INFORMATION_2: 'For community-support besøk vår Discord-server',
   HELP_INFORMATION_3: 'For å be om en ny funksjon eller melde feil',
-  HELP_INFORMATION_4: 'Husk å laste ned og legg ved din systeminformasjon for en raskere respons når du rapporterer et problem',
-  HELP_INFORMATION_5: 'EMS-ESP er gratis og åpen kildekode. Bidra til utviklingen ved å gi oss en stjerne på GitHub!',
+  HELP_INFORMATION_4:
+    'Husk å laste ned og legg ved din systeminformasjon for en raskere respons når du rapporterer et problem',
+  HELP_INFORMATION_5:
+    'EMS-ESP er gratis og åpen kildekode. Bidra til utviklingen ved å gi oss en stjerne på GitHub!',
   UPLOAD: 'Opplasning',
   DOWNLOAD: '{{N|n|n}}edlasting',
   ABORTED: 'avbrutt',
@@ -176,8 +183,10 @@ const no: Translation = {
   CLOSE: 'Steng',
   USE: 'Bruk',
   FACTORY_RESET: 'Sett tilbake til fabrikkinstilling',
-  SYSTEM_FACTORY_TEXT: 'Enhet har blitt satt tilbake til fabrikkinstilling og vil restarte',
-  SYSTEM_FACTORY_TEXT_DIALOG: 'Er du sikker på at du vil resette enheten til fabrikkinstillinger?',
+  SYSTEM_FACTORY_TEXT:
+    'Enhet har blitt satt tilbake til fabrikkinstilling og vil restarte',
+  SYSTEM_FACTORY_TEXT_DIALOG:
+    'Er du sikker på at du vil resette enheten til fabrikkinstillinger?',
   THE_LATEST: 'Den nyeste',
   OFFICIAL: 'official',
   DEVELOPMENT: 'development',
@@ -195,8 +204,10 @@ const no: Translation = {
   ENABLE_OTA: 'Aktiviser OTA oppdateringer',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Last ned objektstilpasninger',
   DOWNLOAD_SCHEDULE_TEXT: 'Last ned planlagte oppgaver',
-  DOWNLOAD_SETTINGS_TEXT: 'Last ned applikasjonskonfigurasjon. Vær varsom med å dele fila da den inneholder passord og annen sensitiv system informasjon',
-  UPLOAD_TEXT: 'Last opp en ny firmware (.bin) fil, innstillinger eller tilpassninger (.json) fil nedenfor',
+  DOWNLOAD_SETTINGS_TEXT:
+    'Last ned applikasjonskonfigurasjon. Vær varsom med å dele fila da den inneholder passord og annen sensitiv system informasjon',
+  UPLOAD_TEXT:
+    'Last opp en ny firmware (.bin) fil, innstillinger eller tilpassninger (.json) fil nedenfor',
   UPLOADING: 'Opplasting',
   UPLOAD_DROP_TEXT: 'Slipp fil eller klikk her',
   ERROR: 'Ukjent feil, prøv igjen',
@@ -211,7 +222,8 @@ const no: Translation = {
   GENERATING_TOKEN: 'Generer token',
   USER: 'Bruker',
   MODIFY: 'Endre',
-  SU_TEXT: 'su brukeren (super user) passord benyttes for å signere autentiserings token samt å tillate admin privileger i konsoll modus.',
+  SU_TEXT:
+    'su brukeren (super user) passord benyttes for å signere autentiserings token samt å tillate admin privileger i konsoll modus.',
   NOT_ENABLED: 'Ikke aktiv',
   ERRORS_OF: '{0} Feil',
   DISCONNECT_REASON: 'Årsak til nedkobling',
@@ -286,19 +298,21 @@ const no: Translation = {
   NETWORK_SUBNET: 'Nettverksmaske',
   NETWORK_DNS: 'DNS Servers',
   ADDRESS_OF: '{0} Address',
-  ADMIN: 'Admin Account',  // TODO translate
-  GUEST: 'Gjest Account',  // TODO translate
+  ADMIN: 'Admin',
+  GUEST: 'Gjest',
   NEW: 'Ny',
   NEW_NAME_OF: 'Bytt navn {0}',
   ENTITY: 'Entitet',
   MIN: 'min',
   MAX: 'max',
   BLOCK_NAVIGATE_1: 'You har ulagrede endringer',
-  BLOCK_NAVIGATE_2: 'Hvis du navigerer til en annen side blir dine ikke lagrede endringer gå tapt. Are du sikker på at du vil forlate denne siden ?',
+  BLOCK_NAVIGATE_2:
+    'Hvis du navigerer til en annen side blir dine ikke lagrede endringer gå tapt. Are du sikker på at du vil forlate denne siden ?',
   STAY: 'Bli her',
   LEAVE: 'Forlat',
   SCHEDULER: 'Planlegger',
-  SCHEDULER_HELP_1: 'Automatiser kommandoer ved å legge til skedulerte hendelser nedenfor. Sett et unikt navn for å slå på/av aktivering via API/MQTT.',
+  SCHEDULER_HELP_1:
+    'Automatiser kommandoer ved å legge til skedulerte hendelser nedenfor. Sett et unikt navn for å slå på/av aktivering via API/MQTT.',
   SCHEDULER_HELP_2: 'Bruk 00:00 for å kjøre en gang ved oppstart',
   SCHEDULE: 'Planlegg',
   TIME: 'Tid',
