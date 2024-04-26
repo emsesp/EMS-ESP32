@@ -370,9 +370,9 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     // report back. If not OK show output from error, other return the HTTP code
     if (return_code != CommandRet::OK) {
         if ((value == nullptr) || (strlen(value) == 0)) {
-            LOG_ERROR("Command '%s' failed with code: %d", cmd, return_code);
+            LOG_ERROR("Command '%s' failed with error code %d", cmd, return_code);
         } else {
-            LOG_ERROR("Command '%s/%s' failed with code: %d", cmd, value, return_code);
+            LOG_ERROR("Command '%s/%s' failed with error code %d", cmd, value, return_code);
         }
         return message(return_code, "callback function failed", output);
     }

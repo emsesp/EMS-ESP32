@@ -12,10 +12,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@alova/adapter-xhr@npm:^1.0.3":
-  version: 1.0.3
-  resolution: "@alova/adapter-xhr@npm:1.0.3"
-  checksum: 10/53923b0b7f833bbbda662ad28f29bb8226d2126ab7dcc57c9aa5486212cb02f0cfa19760d33ab63334688458138fc3c4713084c2f6a558c969d83efda7828601
+"@alova/adapter-xhr@npm:^1.0.6":
+  version: 1.0.6
+  resolution: "@alova/adapter-xhr@npm:1.0.6"
+  checksum: 10/4d1c589e589d1972a6007e156026e93ed3d2b1373cc5667dfa46c4b50ee8fd6a489a71b56e2ef492445bb33816c55eeac0e10288edd3b4e0ab4e9976f1c57b54
   languageName: node
   linkType: hard
 
@@ -1775,7 +1775,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "EMS-ESP@workspace:."
   dependencies:
-    "@alova/adapter-xhr": "npm:^1.0.3"
+    "@alova/adapter-xhr": "npm:^1.0.6"
     "@alova/scene-react": "npm:^1.5.0"
     "@babel/core": "npm:^7.24.4"
     "@emotion/react": "npm:^11.11.4"
@@ -1792,7 +1792,7 @@ __metadata:
     "@types/react": "npm:^18.3.0"
     "@types/react-dom": "npm:^18.3.0"
     "@types/react-router-dom": "npm:^5.3.3"
-    alova: "npm:^2.20.2"
+    alova: "npm:^2.20.3"
     async-validator: "npm:^4.2.5"
     concurrently: "npm:^8.2.2"
     eslint: "npm:^9.1.1"
@@ -1876,10 +1876,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"alova@npm:^2.20.2":
-  version: 2.20.2
-  resolution: "alova@npm:2.20.2"
-  checksum: 10/355350451828e9ce473ba1eafeb7a93dc3177cb768cb7734ecb7f42aeda1440ba19aecb22b6d896f4f314235e1c18c55267251fbb9f2c47f79ace5f11d947644
+"alova@npm:^2.20.3":
+  version: 2.20.3
+  resolution: "alova@npm:2.20.3"
+  checksum: 10/2717765e445ed1dfc7ad0b9456c43e82bccce874103188d8a986335dda9dec22bc45c3a5551b16580ced7fb940e3904d8e507b0e30d3ad81703913e7f4c866ac
   languageName: node
   linkType: hard
 

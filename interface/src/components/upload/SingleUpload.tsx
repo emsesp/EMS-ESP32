@@ -55,18 +55,14 @@ const SingleUpload: FC<SingleUploadProps> = ({
   const { LL } = useI18nContext();
 
   const progressText = () => {
+    console.log(progress);
     if (uploading) {
-      if (progress.total && progress.loaded) {
-        return progress.loaded <= progress.total
-          ? LL.UPLOADING() +
-              ': ' +
-              Math.round((progress.loaded * 100) / progress.total) +
-              '%'
-          : LL.UPLOADING() +
-              ': ' +
-              Math.round((progress.total * 100) / progress.loaded) +
-              '%';
-      }
+      return (
+        LL.UPLOADING() +
+        ': ' +
+        Math.round((progress.loaded * 100) / progress.total) +
+        '%'
+      );
     }
     return LL.UPLOAD_DROP_TEXT();
   };
