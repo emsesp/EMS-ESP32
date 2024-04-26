@@ -33,7 +33,7 @@ const sk: Translation = {
   VERSION: 'Verzia',
   BRAND: 'Značka',
   ENTITY_NAME: 'Názov entity',
-  VALUE: '{{Hodnota|hodnota}}',
+  VALUE: '{{hodnota|Hodnota}}',
   DEVICES: 'Zariadenia',
   SENSORS: 'Snímače',
   RUN_COMMAND: 'Volať príkaz',
@@ -287,8 +287,8 @@ const sk: Translation = {
   NETWORK_SUBNET: 'Maska podsiete',
   NETWORK_DNS: 'DNS servery',
   ADDRESS_OF: '{0} adresa',
-  ADMIN: 'Admin',
-  GUEST: 'Hosť',
+  ADMIN: 'Admin Account',  // TODO translate
+  GUEST: 'Hosť Account',  // TODO translate
   NEW: 'Nová',
   NEW_NAME_OF: 'Nový názov {0}',
   ENTITY: 'entita',

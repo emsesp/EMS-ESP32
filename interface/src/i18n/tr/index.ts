@@ -33,7 +33,7 @@ const tr: Translation = {
   VERSION: 'Sürüm',
   BRAND: 'Marka',
   ENTITY_NAME: 'Valık Adı',
-  VALUE: '{{Değer|değer}}',
+  VALUE: '{{değer|Değer}}',
   DEVICES: 'Cihazlar',
   SENSORS: 'Sensörler',
   RUN_COMMAND: 'Çalıştırma Komutu',
@@ -286,8 +286,8 @@ const tr: Translation = {
   NETWORK_SUBNET: 'Ağ Alt Maskesi',
   NETWORK_DNS: 'DNS Sunucuları',
   ADDRESS_OF: '{0} Adresi',
-  ADMIN: 'Yönetici',
-  GUEST: 'Misafir',
+  ADMIN: 'Yönetici Account',  // TODO translate
+  GUEST: 'Misafir Account',  // TODO translate
   NEW: 'Yeni',
   NEW_NAME_OF: 'Yeni {0} adı',
   ENTITY: 'varlık',

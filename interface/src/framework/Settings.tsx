@@ -185,7 +185,7 @@ const Settings: FC = () => {
           icon={SettingsEthernetIcon}
           bgcolor="#40828f"
           label={LL.NETWORK(0)}
-          text={LL.CONFIGURE(LL.SETTINGS_OF(LL.NETWORK(0)))}
+          text={LL.CONFIGURE(LL.SETTINGS_OF(LL.NETWORK(1)))}
           to="network"
         />
 
@@ -193,7 +193,7 @@ const Settings: FC = () => {
           icon={SettingsInputAntennaIcon}
           bgcolor="#5f9a5f"
           label={LL.ACCESS_POINT(0)}
-          text={LL.CONFIGURE(LL.ACCESS_POINT(0))}
+          text={LL.CONFIGURE(LL.ACCESS_POINT(1))}
           to="ap"
         />
 
@@ -201,7 +201,7 @@ const Settings: FC = () => {
           icon={AccessTimeIcon}
           bgcolor="#c5572c"
           label="NTP"
-          text={LL.CONFIGURE(LL.LOCAL_TIME())}
+          text={LL.CONFIGURE(LL.LOCAL_TIME(1))}
           to="ntp"
         />
 

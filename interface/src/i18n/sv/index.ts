@@ -33,7 +33,7 @@ const sv: Translation = {
   VERSION: 'Version',
   BRAND: 'Fabrikat',
   ENTITY_NAME: 'Entitetsnamn',
-  VALUE: '{{Värde|värde}}',
+  VALUE: '{{värde|Värde}}',
   DEVICES: 'Enheter',
   SENSORS: 'Sensorer',
   RUN_COMMAND: 'Kör Kommando',
@@ -286,8 +286,8 @@ const sv: Translation = {
   NETWORK_SUBNET: 'Subnätmask',
   NETWORK_DNS: 'DNS-Server',
   ADDRESS_OF: '{0} Adress',
-  ADMIN: 'Admin',
-  GUEST: 'Gäst',
+  ADMIN: 'Admin Account',  // TODO translate
+  GUEST: 'Gäst Account',  // TODO translate
   NEW: 'Ny',
   NEW_NAME_OF: 'Byt namn {0}',
   ENTITY: 'Entitet',

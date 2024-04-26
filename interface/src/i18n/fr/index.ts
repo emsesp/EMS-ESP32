@@ -288,8 +288,8 @@ const fr: Translation = {
   NETWORK_SUBNET: 'Masque de sous-réseau',
   NETWORK_DNS: 'Serveurs DNS',
   ADDRESS_OF: 'Adresse de {0}',
-  ADMIN: 'Admin',
-  GUEST: 'Invité',
+  ADMIN: 'Admin Account',  // TODO translate
+  GUEST: 'Invité Account',  // TODO translate
   NEW: 'Nouveau',
   NEW_NAME_OF: 'Nouveau nom de {0}',
   ENTITY: 'entité',

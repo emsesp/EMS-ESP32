@@ -357,7 +357,7 @@ const Devices: FC = () => {
       {
         accessor: (dv: DeviceValue) =>
           typeof dv.v === 'number' ? new Intl.NumberFormat().format(dv.v) : dv.v,
-        name: LL.VALUE(1)
+        name: LL.VALUE(0)
       },
       {
         accessor: (dv: DeviceValue) =>

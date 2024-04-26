@@ -113,7 +113,7 @@ const CustomEntitiesDialog = ({
           <Grid item xs={4}>
             <TextField
               name="ram"
-              label={LL.VALUE(1) + ' ' + LL.TYPE(1)}
+              label={LL.VALUE(0) + ' ' + LL.TYPE(1)}
               value={editItem.ram}
               variant="outlined"
               onChange={updateFormValue}
@@ -129,7 +129,7 @@ const CustomEntitiesDialog = ({
             <Grid item xs={4}>
               <TextField
                 name="value"
-                label={LL.DEFAULT(0) + ' ' + LL.VALUE(1)}
+                label={LL.DEFAULT(0) + ' ' + LL.VALUE(0)}
                 value={editItem.value}
                 variant="outlined"
                 onChange={updateFormValue}
@@ -202,7 +202,7 @@ const CustomEntitiesDialog = ({
               <Grid item xs={4}>
                 <TextField
                   name="value_type"
-                  label={LL.VALUE(1) + ' ' + LL.TYPE(1)}
+                  label={LL.VALUE(0) + ' ' + LL.TYPE(1)}
                   value={editItem.value_type}
                   variant="outlined"
                   onChange={updateFormValue}

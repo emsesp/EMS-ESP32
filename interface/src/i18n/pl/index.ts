@@ -33,7 +33,7 @@ const pl: BaseTranslation = {
   BRAND: 'Marka',
   VERSION: 'Wersja',
   ENTITY_NAME: '{{N|n|}}azwa encji',
-  VALUE: '{{W|w|}}artość',
+  VALUE: '{{W|w|w}}artość',
   DEVICES: 'Urządzenia',
   SENSORS: 'Czujniki',
   RUN_COMMAND: 'Wykonaj komendę',
@@ -48,7 +48,7 @@ const pl: BaseTranslation = {
   PROBLEM_LOADING: 'Problem z załadowaniem!',
   ANALOG_SENSOR: '{{u|u||ustawienia u|ustawień u}}rządzeni{{a podłączonego do EMS-ESP|e||a podłączonego do EMS-ESP|a podłączonego do EMS-ESP}}',
   ANALOG_SENSORS: 'Urządzenia podłączone do EMS-ESP',
-  SETTINGS: 'ustawie{{nia|ń|}}',
+  SETTINGS: '{{U|u|}}stawienia',
   UPDATED_OF: 'Zaktualizowano {0}.',
   UPDATE_OF: 'Aktualizacja {0}',
   REMOVED_OF: 'Usunięto ustawienia {0}.',
@@ -144,7 +144,7 @@ const pl: BaseTranslation = {
   RESTART_CONFIRM: 'Na pewno chcesz zrestartować interfejs EMS-ESP?',
   COMMAND: '{{Komenda|KOMENDA|}}',
   CUSTOMIZATIONS_RESTART: 'Wszystkie personalizacje zostały usunięte. Restartuję...',
-  CUSTOMIZATIONS_FULL: 'Wybrano za dużo obiektów. Wprowadź zmiany w mniejszych partiach.',
+  CUSTOMIZATIONS_FULL: 'Wybrano za dużo obiektów. Wprowadzaj zmiany w mniejszych partiach.',
   CUSTOMIZATIONS_SAVED: 'Personalizacje zostały zapisane.',
   CUSTOMIZATIONS_HELP_1: 'Wybierz urządzenie EMS, a następnie dostosuj opcje lub kliknij na nazwie encji by tę nazwę zmienić',
   CUSTOMIZATIONS_HELP_2: 'oznacz jako ulubioną',
@@ -158,9 +158,9 @@ const pl: BaseTranslation = {
   NAME: '{{Nazwa|nazwa|}}',
   CUSTOMIZATIONS_RESET: 'Na pewno chcesz usunąć wszystkie personalizacje łącznie z ustawieniami dla czujników temperatury 1-Wire® i urządzeń podłączonych do EMS-ESP?',
   SUPPORT_INFORMATION: '{{I|i|}}nformacj{{e|i|}} o systemie',
-  HELP_INFORMATION_1: 'Aby uzyskać instrukcje dotyczące konfiguracji EMS-ESP, skorzystaj z wiki w internecie',
-  HELP_INFORMATION_2: 'Aby dołączyć do naszego serwera Discord i komunikować się na żywo ze społecznością',
-  HELP_INFORMATION_3: 'Aby zaproponować nową funkcjonalność lub zgłosić problem',
+  HELP_INFORMATION_1: 'Skorzystaj z wiki w internecie aby uzyskać instrukcje dotyczące konfiguracji EMS-ESP.',
+  HELP_INFORMATION_2: 'Dołącz do naszego serwera Discord by komunikować się na żywo ze społecznością.',
+  HELP_INFORMATION_3: 'Zaproponuj nową funkcjonalność lub zgłoś problem.',
   HELP_INFORMATION_4: 'Zgłaszając problem, nie zapomnij pobrać i dołączyć informacji o swoim systemie!',
   HELP_INFORMATION_5: 'EMS-ESP jest darmowym projektem typu open-source. Aby go wesprzeć, rozważ przyznanie nam gwiazdki na Github!',
   UPLOAD: 'Wysyłanie',
@@ -248,7 +248,7 @@ const pl: BaseTranslation = {
   UNKNOWN: 'nieznany',
   SET_TIME: '{{Ustaw zegar|Ustawianie zegara|}}',
   SET_TIME_TEXT: 'Wprowadź aktualną datę i godzinę',
-  LOCAL_TIME: 'Czas lokalny',
+  LOCAL_TIME: '{{Czas|czasu|}} lokaln{{y|ego|}}',
   UTC_TIME: 'Czas UTC',
   ENABLE_NTP: 'Aktywuj NTP (data i godzina będą automatycznie synchronizowane z poniższym serwerem czasu)',
   NTP_SERVER: 'Serwer NTP',
@@ -285,8 +285,8 @@ const pl: BaseTranslation = {
   NETWORK_SUBNET: 'Maska podsieci',
   NETWORK_DNS: 'Serwery DNS',
   ADDRESS_OF: 'Adres {0}',
-  ADMIN: 'Administrator',
-  GUEST: 'Gość',
+  ADMIN: 'Konto administratora',
+  GUEST: 'Konto gościa',
   NEW: 'nowe{{go|j|}}',
   NEW_NAME_OF: 'Nowa nazwa {0}',
   ENTITY: 'encji',
@@ -323,11 +323,11 @@ const pl: BaseTranslation = {
   ALWAYS: 'Zawsze',
   ACTIVITY: 'Aktywność',
   CONFIGURE: 'Konfiguracja {0}',
-  SYSTEM_MEMORY: 'System Memory', // TODO translate
-  APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
-  SECURITY_1: 'Add or remove users', // TODO translate
-  UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', // TODO translate
-  MODULE: 'Module' // TODO translate
+  SYSTEM_MEMORY: 'Pamięć systemowa',
+  APPLICATION_SETTINGS_1: 'Modyfikacja ustawień aplikacji EMS-ESP',
+  SECURITY_1: 'Dodawanie i usuwanie użytkowników',
+  UPLOAD_DOWNLOAD_1: 'Wysyłanie/pobieranie ustawień i firmware',
+  MODULE: 'Moduł'
 };
 
 export default pl;

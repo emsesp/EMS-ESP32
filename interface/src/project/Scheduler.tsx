@@ -247,7 +247,7 @@ const Scheduler: FC = () => {
                 <HeaderCell stiff>{LL.SCHEDULE(0)}</HeaderCell>
                 <HeaderCell stiff>{LL.TIME(0)}</HeaderCell>
                 <HeaderCell stiff>{LL.COMMAND(0)}</HeaderCell>
-                <HeaderCell stiff>{LL.VALUE(1)}</HeaderCell>
+                <HeaderCell stiff>{LL.VALUE(0)}</HeaderCell>
                 <HeaderCell stiff>{LL.NAME(0)}</HeaderCell>
               </HeaderRow>
             </Header>
