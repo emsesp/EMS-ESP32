@@ -15,6 +15,7 @@
 - heatpump dhw stop temperatures [#1624](https://github.com/emsesp/EMS-ESP32/issues/1624)
 - reset history [#1695](https://github.com/emsesp/EMS-ESP32/issues/1695)
 - heatpump entities `fan` and `shutdown` [#1690](https://github.com/emsesp/EMS-ESP32/discussions/1690)
+- mqtt HA-mode 3 for v3.6 compatible HA entities, set on update v3.6->v3.7
 
 ## Fixed
 
@@ -28,3 +29,4 @@
 - store digital out states to nvs
 - Refresh UI - moving settings to one location [#1665](https://github.com/emsesp/EMS-ESP32/issues/1665)
 - rename DeviceValueTypes, add UINT32 for custom entities
+- dynamic register dhw circuits for thermostat
