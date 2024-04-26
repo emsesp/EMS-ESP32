@@ -141,7 +141,7 @@ const NetworkStatus: FC = () => {
                 <GiteIcon />
               </Avatar>
             </ListItemAvatar>
-            <ListItemText primary="Hostname" secondary={data.hostname} />
+            <ListItemText primary={LL.HOSTNAME()} secondary={data.hostname} />
           </ListItem>
           <Divider variant="inset" component="li" />
           {isWiFi(data) && (

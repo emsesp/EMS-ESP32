@@ -106,7 +106,7 @@ const DevicesDialog = ({
           ? LL.RUN_COMMAND()
           : writeable
             ? LL.CHANGE_VALUE()
-            : LL.VALUE(1)}
+            : LL.VALUE(0)}
       </DialogTitle>
       <DialogContent dividers>
         <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
@@ -117,7 +117,7 @@ const DevicesDialog = ({
             {editItem.l ? (
               <TextField
                 name="v"
-                label={LL.VALUE(1)}
+                label={LL.VALUE(0)}
                 value={editItem.v}
                 disabled={!writeable}
                 autoFocus
@@ -135,7 +135,7 @@ const DevicesDialog = ({
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="v"
-                label={LL.VALUE(1)}
+                label={LL.VALUE(0)}
                 value={numberValue(Math.round((editItem.v as number) * 10) / 10)}
                 autoFocus
                 disabled={!writeable}
@@ -159,7 +159,7 @@ const DevicesDialog = ({
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="v"
-                label={LL.VALUE(1)}
+                label={LL.VALUE(0)}
                 value={editItem.v}
                 disabled={!writeable}
                 autoFocus

@@ -33,7 +33,7 @@ const de: Translation = {
   VERSION: 'Version',
   BRAND: 'Marke',
   ENTITY_NAME: 'Entitätsname',
-  VALUE: '{{Wert|wert}}',
+  VALUE: '{{wert|Wert}}',
   DEVICES: 'Geräte',
   SENSORS: 'Sensoren',
   RUN_COMMAND: 'Befehl ausführen',
@@ -286,8 +286,8 @@ const de: Translation = {
   NETWORK_SUBNET: 'Subnetz Maske',
   NETWORK_DNS: 'DNS Server',
   ADDRESS_OF: '{0} Adresse',
-  ADMIN: 'Administrator',
-  GUEST: 'Gast',
+  ADMIN: 'Administrator Account',  // TODO translate
+  GUEST: 'Gast Account',  // TODO translate
   NEW: 'Neuer',
   NEW_NAME_OF: 'Ändere {0}',
   ENTITY: 'Entität',

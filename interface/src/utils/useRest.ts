@@ -40,7 +40,7 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
   };
 
   onWriteSuccess(() => {
-    toast.success(LL.UPDATED_OF(LL.SETTINGS(0)));
+    toast.success(LL.UPDATED_OF(LL.SETTINGS(1)));
     setDirtyFlags([]);
   });
 

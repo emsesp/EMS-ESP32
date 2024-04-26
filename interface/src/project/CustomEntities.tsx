@@ -248,8 +248,8 @@ const CustomEntities: FC = () => {
                 <HeaderCell stiff>{LL.ID_OF(LL.DEVICE())}</HeaderCell>
                 <HeaderCell stiff>{LL.ID_OF(LL.TYPE(1))}</HeaderCell>
                 <HeaderCell stiff>{LL.OFFSET()}</HeaderCell>
-                <HeaderCell stiff>{LL.TYPE(1)}</HeaderCell>
-                <HeaderCell stiff>{LL.VALUE(1)}</HeaderCell>
+                <HeaderCell stiff>{LL.TYPE(0)}</HeaderCell>
+                <HeaderCell stiff>{LL.VALUE(0)}</HeaderCell>
               </HeaderRow>
             </Header>
             <Body>

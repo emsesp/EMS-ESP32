@@ -33,7 +33,7 @@ const no: Translation = {
   VERSION: 'Versjon',
   BRAND: 'Fabrikat',
   ENTITY_NAME: 'Objektsnavn',
-  VALUE: '{{Verdi|verdi}}',
+  VALUE: '{{verdi|Verdi}}',
   DEVICES: 'Enheter',
   SENSORS: 'Sensorer',
   RUN_COMMAND: 'Kjør kommando',
@@ -286,8 +286,8 @@ const no: Translation = {
   NETWORK_SUBNET: 'Nettverksmaske',
   NETWORK_DNS: 'DNS Servers',
   ADDRESS_OF: '{0} Address',
-  ADMIN: 'Admin',
-  GUEST: 'Gjest',
+  ADMIN: 'Admin Account',  // TODO translate
+  GUEST: 'Gjest Account',  // TODO translate
   NEW: 'Ny',
   NEW_NAME_OF: 'Bytt navn {0}',
   ENTITY: 'Entitet',

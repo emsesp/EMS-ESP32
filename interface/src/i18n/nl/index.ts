@@ -33,7 +33,7 @@ const nl: Translation = {
   VERSION: 'Versie',
   BRAND: 'Merk',
   ENTITY_NAME: 'Entiteit',
-  VALUE: '{{Waarde|waarde}}',
+  VALUE: '{{waarde|Waarde}}',
   DEVICES: 'Apparaten',
   SENSORS: 'Sensoren',
   RUN_COMMAND: 'Call commando',
@@ -286,8 +286,8 @@ const nl: Translation = {
   NETWORK_SUBNET: 'Subnetmasker',
   NETWORK_DNS: 'DNS Servers',
   ADDRESS_OF: '{0} Address',
-  ADMIN: 'Admin',
-  GUEST: 'Gast',
+  ADMIN: 'Admin Account',  // TODO translate
+  GUEST: 'Gast Account',  // TODO translate
   NEW: 'Nieuwe',
   NEW_NAME_OF: 'Hernoem {0}',
   ENTITY: 'Entiteit',
