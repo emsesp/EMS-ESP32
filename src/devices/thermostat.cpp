@@ -1880,6 +1880,7 @@ bool Thermostat::set_remotetemp(const char * value, const int8_t id) {
         } else {
             hc->remotetemp = EMS_VALUE_INT16_NOTSET;
             Roomctrl::set_remotetemp(0, hc->hc(), EMS_VALUE_INT16_NOTSET); // unknown remote set, switch off
+            return false;
         }
     }
 

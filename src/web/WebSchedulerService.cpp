@@ -366,7 +366,7 @@ bool WebSchedulerService::command(const char * cmd, const char * data) {
         snprintf(error, sizeof(error), "Scheduled command %s failed with error code (%s)", cmd, Command::return_code_string(return_code).c_str());
     }
 
-    emsesp::EMSESP::logger().err(error);
+    emsesp::EMSESP::logger().warning(error);
     return false;
 }
 
