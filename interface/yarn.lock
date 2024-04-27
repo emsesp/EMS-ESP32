@@ -1606,13 +1606,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:^18.3.0":
-  version: 18.3.0
-  resolution: "@types/react@npm:18.3.0"
+"@types/react@npm:^18.3.1":
+  version: 18.3.1
+  resolution: "@types/react@npm:18.3.1"
   dependencies:
     "@types/prop-types": "npm:*"
     csstype: "npm:^3.0.2"
-  checksum: 10/2444294740016d61721df9adeb8635658c660c13b0782df9f067260ac6b0a4b71e68245089814ab53264843eb75f81d90f770253b94a13955cc1ddccf3593301
+  checksum: 10/baa6b8a75c471c89ebf3477b4feab57102ced25f0c1e553dd04ef6a1f0def28d5e0172fa626a631f22e223f840b5aaa2403b2d4bb671c83c5a9d6c7ae39c7a05
   languageName: node
   linkType: hard
 
@@ -1789,7 +1789,7 @@ __metadata:
     "@trivago/prettier-plugin-sort-imports": "npm:^4.3.0"
     "@types/lodash-es": "npm:^4.17.12"
     "@types/node": "npm:^20.12.7"
-    "@types/react": "npm:^18.3.0"
+    "@types/react": "npm:^18.3.1"
     "@types/react-dom": "npm:^18.3.0"
     "@types/react-router-dom": "npm:^5.3.3"
     alova: "npm:^2.20.3"
