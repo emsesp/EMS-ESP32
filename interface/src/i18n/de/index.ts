@@ -65,14 +65,12 @@ const de: Translation = {
   TEMP_SENSOR: 'Temperatursensor',
   TEMP_SENSORS: 'Temperatursensoren',
   WRITE_CMD_SENT: 'Befehl schreiben wurde gesendet',
-  EMS_BUS_WARNING:
-    'EMS-Bus getrennt. Wenn diese Warnung nach einigen Sekunden immer noch besteht, überprüfen Sie bitte die Einstellungen und das Board-Profil',
+  EMS_BUS_WARNING: 'EMS-Bus getrennt. Wenn diese Warnung nach einigen Sekunden immer noch besteht, überprüfen Sie bitte die Einstellungen und das Board-Profil',
   EMS_BUS_SCANNING: 'Suche nach EMS Geräten...',
   CONNECTED: 'Verbunden',
   TX_ISSUES: 'Tx-Probleme - versuchen Sie einen anderen Tx-Modus',
   DISCONNECTED: 'Getrennt',
-  EMS_SCAN:
-    'Möchten Sie wirklich eine vollständige Gerätesuche des EMS-Busses starten?',
+  EMS_SCAN: 'Möchten Sie wirklich eine vollständige Gerätesuche des EMS-Busses starten?',
   EMS_BUS_STATUS: 'EMS-Busstatus',
   ACTIVE_DEVICES: 'Aktive Geräte und Sensoren',
   EMS_DEVICE: 'EMS Gerät',
@@ -102,8 +100,7 @@ const de: Translation = {
   CUSTOMIZATIONS: 'Anpassungen',
   APPLICATION_RESTARTING: 'EMS-ESP startet neu',
   INTERFACE_BOARD_PROFILE: 'Interface Platinenprofil',
-  BOARD_PROFILE_TEXT:
-    'Wählen Sie ein vorkonfiguriertes Platinenprofil aus der Liste unten aus oder wählen Sie "Custom", um Ihre eigenen Hardwareeinstellungen zu konfigurieren',
+  BOARD_PROFILE_TEXT: 'Wählen Sie ein vorkonfiguriertes Platinenprofil aus der Liste unten aus oder wählen Sie "Custom", um Ihre eigenen Hardwareeinstellungen zu konfigurieren',
   BOARD_PROFILE: 'Platinenprofil',
   CUSTOM: 'Custom',
   GPIO_OF: '{0} GPIO',
@@ -121,8 +118,7 @@ const de: Translation = {
   ENABLE_ANALOG: 'Aktiviere Analogsensoren',
   CONVERT_FAHRENHEIT: 'Konvertiere Temperaturwerte in Fahrenheit',
   BYPASS_TOKEN: 'Zugriffstoken-Autorisierung bei API-Aufrufen umgehen',
-  READONLY:
-    'Nur-Lese-Modus aktivieren (blockiert alle ausgehenden EMS Tx Write-Befehle)',
+  READONLY: 'Nur-Lese-Modus aktivieren (blockiert alle ausgehenden EMS Tx Write-Befehle)',
   UNDERCLOCK_CPU: 'CPU-Geschwindigkeit untertakten',
   HEATINGOFF: 'Heizen ausschalten beim EMS-ESP Start',
   ENABLE_SHOWER_TIMER: 'Duschtimer aktivieren',
@@ -144,16 +140,13 @@ const de: Translation = {
   MINUTES: 'Minuten',
   HOURS: 'Stunden',
   RESTART: 'Neu starten',
-  RESTART_TEXT:
-    'EMS-ESP muss neu gestartet werden, um geänderte Systemeinstellungen zu übernehmen',
+  RESTART_TEXT: 'EMS-ESP muss neu gestartet werden, um geänderte Systemeinstellungen zu übernehmen',
   RESTART_CONFIRM: 'EMS-ESP wirklich neu starten?',
   COMMAND: 'Befehl',
   CUSTOMIZATIONS_RESTART: 'Alle Anpassungen wurden entfernt. Neustart...',
-  CUSTOMIZATIONS_FULL:
-    'Ausgewählte Entitäten haben das Limit überschritten. Bitte stapelweise speichern',
+  CUSTOMIZATIONS_FULL: 'Ausgewählte Entitäten haben das Limit überschritten. Bitte stapelweise speichern',
   CUSTOMIZATIONS_SAVED: 'Anpassungen gespeichert',
-  CUSTOMIZATIONS_HELP_1:
-    'Wählen Sie ein Gerät aus und passen Sie die Entitäten mithilfe der Optionen an',
+  CUSTOMIZATIONS_HELP_1: 'Wählen Sie ein Gerät aus und passen Sie die Entitäten mithilfe der Optionen an',
   CUSTOMIZATIONS_HELP_2: 'als Favorit markieren',
   CUSTOMIZATIONS_HELP_3: 'Schreibaktion deaktivieren',
   CUSTOMIZATIONS_HELP_4: 'von MQTT und API ausschließen',
@@ -163,19 +156,13 @@ const de: Translation = {
   SET_ALL: 'setzen Sie alle',
   OPTIONS: 'Optionen',
   NAME: 'Name',
-  CUSTOMIZATIONS_RESET:
-    'Möchten Sie wirklich alle Anpassungen entfernen, einschließlich der benutzerdefinierten Einstellungen der Temperatur- und Analogsensoren?',
+  CUSTOMIZATIONS_RESET: 'Möchten Sie wirklich alle Anpassungen entfernen, einschließlich der benutzerdefinierten Einstellungen der Temperatur- und Analogsensoren?',
   SUPPORT_INFORMATION: 'Unterstützende Informationen',
-  HELP_INFORMATION_1:
-    'EMS-ESP Konfigurationsanweisungen und mehr finden Sie im Online-Wiki',
-  HELP_INFORMATION_2:
-    'Für einen Live-Community-Chat besuchen Sie unseren Discord-Server',
-  HELP_INFORMATION_3:
-    'Um neue Funktionen anzufragen oder Fehler zu melden, eröffnen Sie ein Issue auf Github',
-  HELP_INFORMATION_4:
-    'Bitte laden Sie die System-Details und hängen Sie sie an das Support-Issue an. ',
-  HELP_INFORMATION_5:
-    'EMS-ESP ist ein freies Open-Source Projekt. Bitte unterstützen Sie die zukünftige Entwicklung mit einem "Star" auf Github!',
+  HELP_INFORMATION_1: 'EMS-ESP Konfigurationsanweisungen und mehr finden Sie im Online-Wiki',
+  HELP_INFORMATION_2: 'Für einen Live-Community-Chat besuchen Sie unseren Discord-Server',
+  HELP_INFORMATION_3: 'Um neue Funktionen anzufragen oder Fehler zu melden, eröffnen Sie ein Issue auf Github',
+  HELP_INFORMATION_4: 'Bitte laden Sie die System-Details und hängen Sie sie an das Support-Issue an. ',
+  HELP_INFORMATION_5: 'EMS-ESP ist ein freies Open-Source Projekt. Bitte unterstützen Sie die zukünftige Entwicklung mit einem "Star" auf Github!',
   UPLOAD: 'Hochladen',
   DOWNLOAD: '{{H|h|h}}erunterladen',
   ABORTED: 'abgebrochen',
@@ -189,10 +176,8 @@ const de: Translation = {
   CLOSE: 'Schließen',
   USE: 'Verwenden Sie',
   FACTORY_RESET: 'Werkseinstellung',
-  SYSTEM_FACTORY_TEXT:
-    'EMS-ESP wurde auf Werkseinstellung gesetzt und startet als Zugangspunkt neu',
-  SYSTEM_FACTORY_TEXT_DIALOG:
-    'Sind Sie sicher alle Einstellungen auf Werkseinstellung zu setzen?',
+  SYSTEM_FACTORY_TEXT: 'EMS-ESP wurde auf Werkseinstellung gesetzt und startet als Zugangspunkt neu',
+  SYSTEM_FACTORY_TEXT_DIALOG: 'Sind Sie sicher alle Einstellungen auf Werkseinstellung zu setzen?',
   THE_LATEST: 'Die neueste',
   OFFICIAL: 'offizielle',
   DEVELOPMENT: 'Entwicklungs',
@@ -210,10 +195,8 @@ const de: Translation = {
   ENABLE_OTA: 'OTA Updates verwenden',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Herunterladen der individuellen Entitätsanpassungen',
   DOWNLOAD_SCHEDULE_TEXT: 'Herunterladen geplanter Befehle',
-  DOWNLOAD_SETTINGS_TEXT:
-    'Herunterladen der Anwendungseinstellungen. Vorsicht beim Teilen der Einstellungen, da sie Passwörter und andere sensitive Einstellungen enthalten',
-  UPLOAD_TEXT:
-    'Hochladen von neuer Firmware (.bin), Geräte- oder Entitätseinstellungen (.json), zur optionalen Validitätsprüfung zuerst die (.md5) Datei hochladen',
+  DOWNLOAD_SETTINGS_TEXT: 'Herunterladen der Anwendungseinstellungen. Vorsicht beim Teilen der Einstellungen, da sie Passwörter und andere sensitive Einstellungen enthalten',
+  UPLOAD_TEXT: 'Hochladen von neuer Firmware (.bin), Geräte- oder Entitätseinstellungen (.json), zur optionalen Validitätsprüfung zuerst die (.md5) Datei hochladen',
   UPLOADING: 'Hochladen',
   UPLOAD_DROP_TEXT: 'Klicken Sie hier, oder ziehen eine Datei hierher',
   ERROR: 'Unerwarteter Fehler, bitter versuchen Sie es erneut',
@@ -223,13 +206,11 @@ const de: Translation = {
   USER_WARNING: 'Sie müssen mindestens einen Admin-Nutzer konfigurieren',
   ADD: 'Hinzufügen',
   ACCESS_TOKEN_FOR: 'Zugangs-Token für',
-  ACCESS_TOKEN_TEXT:
-    'Dieses Token ist für REST API Aufrufe bestimmt, die eine Authentifizierung benötigen. Es kann entweder als Bearer Token im `Authorization-Header` oder in der Access_Token URL verwendet werden.',
+  ACCESS_TOKEN_TEXT: 'Dieses Token ist für REST API Aufrufe bestimmt, die eine Authentifizierung benötigen. Es kann entweder als Bearer Token im `Authorization-Header` oder in der Access_Token URL verwendet werden.',
   GENERATING_TOKEN: 'Erzeuge Token',
   USER: 'Nutzer',
   MODIFY: 'Ändern',
-  SU_TEXT:
-    'Das su (super user) Passwort wird zum Signieren der Authentifikations-Tokens verwendet und ermöglicht Admin-Berechtigung in der Konsole.',
+  SU_TEXT: 'Das su (super user) Passwort wird zum Signieren der Authentifikations-Tokens verwendet und ermöglicht Admin-Berechtigung in der Konsole.',
   NOT_ENABLED: 'Nicht aktiviert',
   ERRORS_OF: '{0} Fehler',
   DISCONNECT_REASON: 'Grund der Verbindungsunterbrechung',
@@ -243,8 +224,7 @@ const de: Translation = {
   MQTT_NEST_1: 'Eingebettet in einem Gesamttopic',
   MQTT_NEST_2: 'Als einzelne Topics',
   MQTT_RESPONSE: 'Veröffentliche die Kommandoantwort als `response` Topic',
-  MQTT_PUBLISH_TEXT_1:
-    'Veröffentliche einzelne Werte bei Veränderung als eigene Topics',
+  MQTT_PUBLISH_TEXT_1: 'Veröffentliche einzelne Werte bei Veränderung als eigene Topics',
   MQTT_PUBLISH_TEXT_2: 'Veröffentliche als Kommando-Topic (ioBroker)',
   MQTT_PUBLISH_TEXT_3: 'Aktiviere `MQTT Discovery`',
   MQTT_PUBLISH_TEXT_4: 'Prefix für die `Discovery`-Topics',
@@ -305,7 +285,7 @@ const de: Translation = {
   NETWORK_SUBNET: 'Subnetz Maske',
   NETWORK_DNS: 'DNS Server',
   ADDRESS_OF: '{0} Adresse',
-  ADMIN: 'Administrator',
+  ADMINISTRATOR: 'Administrator',
   GUEST: 'Gast',
   NEW: 'Neuer',
   NEW_NAME_OF: 'Ändere {0}',
@@ -313,13 +293,11 @@ const de: Translation = {
   MIN: 'min',
   MAX: 'max',
   BLOCK_NAVIGATE_1: 'Sie haben ungesicherte Änderungen',
-  BLOCK_NAVIGATE_2:
-    'Beim verlassen der Seite verlieren Sie ungesicherte Einstellungen. Wollen Sie die Seite wirklich verlassen?',
+  BLOCK_NAVIGATE_2: 'Beim verlassen der Seite verlieren Sie ungesicherte Einstellungen. Wollen Sie die Seite wirklich verlassen?',
   STAY: 'Bleiben',
   LEAVE: 'Verlassen',
   SCHEDULER: 'Planer',
-  SCHEDULER_HELP_1:
-    'Fügen Sie eigene, geplante Befehle zur Automatisierung hinzu. Vergeben Sie einen Entitätsnamen um die Aktivierung über API/Mqtt zu steuern',
+  SCHEDULER_HELP_1: 'Fügen Sie eigene, geplante Befehle zur Automatisierung hinzu. Vergeben Sie einen Entitätsnamen um die Aktivierung über API/Mqtt zu steuern',
   SCHEDULER_HELP_2: '00:00 aktiviert einmalige Ausführung am Start',
   SCHEDULE: 'Zeitplan',
   TIME: 'Zeit',
@@ -349,7 +327,7 @@ const de: Translation = {
   APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
   SECURITY_1: 'Add or remove users', // TODO translate
   UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', // TODO translate
-  MODULE: 'Module' // TODO translate
+  MODULES: 'Module'
 };
 
 export default de;

@@ -65,8 +65,7 @@ const sk: Translation = {
   TEMP_SENSOR: 'Snímač teploty',
   TEMP_SENSORS: 'Snímače teploty',
   WRITE_CMD_SENT: 'Príkaz zápisu bol odoslaný',
-  EMS_BUS_WARNING:
-    'Zbernica EMS odpojená. Ak toto upozornenie pretrváva aj po niekoľkých sekundách, skontrolujte nastavenia a profil dosky',
+  EMS_BUS_WARNING: 'Zbernica EMS odpojená. Ak toto upozornenie pretrváva aj po niekoľkých sekundách, skontrolujte nastavenia a profil dosky',
   EMS_BUS_SCANNING: 'Zisťovanie EMS zariadení...',
   CONNECTED: 'Pripojené',
   TX_ISSUES: 'Problémy s Tx – skontrolujte Tx režim',
@@ -91,10 +90,8 @@ const sk: Translation = {
     'Syslog správy'
   ],
   NUM_DEVICES: '{num} Zariaden{{í|ie|ia|ia|í|í}}',
-  NUM_TEMP_SENSORS:
-    '{num} Teplotn{{ých|ý|é|é|ých|ých}} sníma{{čov|č|če|če|čov|čov}}',
-  NUM_ANALOG_SENSORS:
-    '{num} Analogov{{ých|ý|é|é|ých|ých}} sníma{{čov|č|če|če|čov|čov}}',
+  NUM_TEMP_SENSORS: '{num} Teplotn{{ých|ý|é|é|ých|ých}} sníma{{čov|č|če|če|čov|čov}}',
+  NUM_ANALOG_SENSORS: '{num} Analogov{{ých|ý|é|é|ých|ých}} sníma{{čov|č|če|če|čov|čov}}',
   NUM_DAYS: '{num} d{{ní|eň|ní|ní|ní|ní}}',
   NUM_SECONDS: '{num} sek{{únd|unda|undy|undy|únd|únd}}',
   NUM_HOURS: '{num} hod{{ín|ina|iny|iny|ín|ín}}',
@@ -103,8 +100,7 @@ const sk: Translation = {
   CUSTOMIZATIONS: 'Prispôsobenia',
   APPLICATION_RESTARTING: 'EMS-ESP sa reštartuje',
   INTERFACE_BOARD_PROFILE: 'Profil dosky rozhrania',
-  BOARD_PROFILE_TEXT:
-    'Vyberte vopred nakonfigurovaný profil dosky rozhrania zo zoznamu nižšie, alebo vyberte možnosť Vlastné a nakonfigurujte svoje vlastné hardvérové nastavenia',
+  BOARD_PROFILE_TEXT: 'Vyberte vopred nakonfigurovaný profil dosky rozhrania zo zoznamu nižšie, alebo vyberte možnosť Vlastné a nakonfigurujte svoje vlastné hardvérové nastavenia',
   BOARD_PROFILE: 'Profil dosky',
   CUSTOM: 'Vlastné',
   GPIO_OF: '{0} GPIO',
@@ -122,11 +118,9 @@ const sk: Translation = {
   ENABLE_ANALOG: 'Povoliť analógové snímače',
   CONVERT_FAHRENHEIT: 'Previesť hodnoty teploty na °F',
   BYPASS_TOKEN: 'Vynechajte autorizáciu prístupového tokenu pri volaniach API',
-  READONLY:
-    'Povoliť režim len na čítanie (blokuje všetky odchádzajúce príkazy EMS Tx Write)',
+  READONLY: 'Povoliť režim len na čítanie (blokuje všetky odchádzajúce príkazy EMS Tx Write)',
   UNDERCLOCK_CPU: 'Podtaktovanie rýchlosti procesora',
   HEATINGOFF: 'Spustiť kotol s vynúteným vykurovaním',
-
   ENABLE_SHOWER_TIMER: 'Povoliť časovač sprchovania',
   ENABLE_SHOWER_ALERT: 'Povoliť upozornenie na sprchu',
   TRIGGER_TIME: 'Čas spustenia',
@@ -146,16 +140,13 @@ const sk: Translation = {
   MINUTES: 'minúty',
   HOURS: 'hodiny',
   RESTART: 'Reštart',
-  RESTART_TEXT:
-    'EMS-ESP sa musí reštartovať, aby sa použili zmenené systémové nastavenia',
+  RESTART_TEXT: 'EMS-ESP sa musí reštartovať, aby sa použili zmenené systémové nastavenia',
   RESTART_CONFIRM: 'Ste si istí, že chcete reštartovať EMS-ESP?',
   COMMAND: 'Príkaz',
   CUSTOMIZATIONS_RESTART: 'Ste si istí, že chcete reštartovať EMS-ESP?',
-  CUSTOMIZATIONS_FULL:
-    'Vybrané subjekty prekročili limit. Prosím, ukladajte v dávkach',
+  CUSTOMIZATIONS_FULL: 'Vybrané subjekty prekročili limit. Prosím, ukladajte v dávkach',
   CUSTOMIZATIONS_SAVED: 'Uložené prispôsobenia',
-  CUSTOMIZATIONS_HELP_1:
-    'Vyberte zariadenie a prispôsobte možnosti entít alebo kliknutím premenujte',
+  CUSTOMIZATIONS_HELP_1: 'Vyberte zariadenie a prispôsobte možnosti entít alebo kliknutím premenujte',
   CUSTOMIZATIONS_HELP_2: 'označiť ako obľúbené',
   CUSTOMIZATIONS_HELP_3: 'zakázať akciu zápisu',
   CUSTOMIZATIONS_HELP_4: 'vylúčiť z MQTT a API',
@@ -165,17 +156,13 @@ const sk: Translation = {
   SET_ALL: 'nastaviť všetko',
   OPTIONS: 'Možnosti',
   NAME: 'Názov',
-  CUSTOMIZATIONS_RESET:
-    'Naozaj chcete odstrániť všetky prispôsobenia vrátane vlastných nastavení snímačov teploty a analógových snímačov?',
+  CUSTOMIZATIONS_RESET: 'Naozaj chcete odstrániť všetky prispôsobenia vrátane vlastných nastavení snímačov teploty a analógových snímačov?',
   SUPPORT_INFORMATION: 'Informácie pre podporu',
-  HELP_INFORMATION_1:
-    'Navštívte online wiki, kde nájdete pokyny na konfiguráciu EMS-ESP',
+  HELP_INFORMATION_1:  'Navštívte online wiki, kde nájdete pokyny na konfiguráciu EMS-ESP',
   HELP_INFORMATION_2: 'Pre živý komunitný chat sa pripojte na náš Discord server',
   HELP_INFORMATION_3: 'Ak chcete požiadať o funkciu alebo nahlásiť chybu',
-  HELP_INFORMATION_4:
-    'nezabudnite si stiahnuť a pripojiť informácie o vašom systéme, aby ste mohli rýchlejšie reagovať pri nahlasovaní problému',
-  HELP_INFORMATION_5:
-    'EMS-ESP je bezplatný a open source projekt. Podporte jeho budúci vývoj tým, že mu dáte hviezdičku na Github!',
+  HELP_INFORMATION_4: 'nezabudnite si stiahnuť a pripojiť informácie o vašom systéme, aby ste mohli rýchlejšie reagovať pri nahlasovaní problému',
+  HELP_INFORMATION_5: 'EMS-ESP je bezplatný a open source projekt. Podporte jeho budúci vývoj tým, že mu dáte hviezdičku na Github!',
   UPLOAD: 'Nahrať',
   DOWNLOAD: '{{S|s|s}}tiahnuť',
   ABORTED: 'zrušené',
@@ -190,8 +177,7 @@ const sk: Translation = {
   USE: 'Použiť',
   FACTORY_RESET: 'Továrenské nastavenia',
   SYSTEM_FACTORY_TEXT: 'Zariadenie bolo obnovené z výroby a teraz sa reštartuje',
-  SYSTEM_FACTORY_TEXT_DIALOG:
-    'Naozaj chcete resetovať EMS-ESP na predvolené výrobné nastavenia?',
+  SYSTEM_FACTORY_TEXT_DIALOG: 'Naozaj chcete resetovať EMS-ESP na predvolené výrobné nastavenia?',
   THE_LATEST: 'Posledná',
   OFFICIAL: 'officiálna',
   DEVELOPMENT: 'vývojárska',
@@ -209,27 +195,22 @@ const sk: Translation = {
   ENABLE_OTA: 'Povoliť OTA aktualizácie',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Stiahnutie prispôsobení entity',
   DOWNLOAD_SCHEDULE_TEXT: 'Stiahnutie plánovača udalostí',
-  DOWNLOAD_SETTINGS_TEXT:
-    'Stiahnite si nastavenia aplikácie. Pri zdieľaní nastavení buďte opatrní, pretože tento súbor obsahuje heslá a iné citlivé systémové informácie.',
-  UPLOAD_TEXT:
-    'Najskôr nahrajte nový súbor firmvéru (.bin), nastavenia alebo prispôsobenia (.json), pre voliteľné overenie nahrajte súbor (.md5)',
+  DOWNLOAD_SETTINGS_TEXT: 'Stiahnite si nastavenia aplikácie. Pri zdieľaní nastavení buďte opatrní, pretože tento súbor obsahuje heslá a iné citlivé systémové informácie.',
+  UPLOAD_TEXT: 'Najskôr nahrajte nový súbor firmvéru (.bin), nastavenia alebo prispôsobenia (.json), pre voliteľné overenie nahrajte súbor (.md5)',
   UPLOADING: 'Nahrávanie',
   UPLOAD_DROP_TEXT: 'Potiahnúť a pripnúť súbor alebo kliknúť sem',
   ERROR: 'Neočakávaná chyba, prosím skúste to znova',
   TIME_SET: 'Nastavený čas',
   MANAGE_USERS: 'Správa používateľov',
   IS_ADMIN: 'je Admin',
-  USER_WARNING:
-    'Musíte mať nakonfigurovaného aspoň jedného používateľa administrátora',
+  USER_WARNING: 'Musíte mať nakonfigurovaného aspoň jedného používateľa administrátora',
   ADD: 'Pridať',
   ACCESS_TOKEN_FOR: 'Prístupový token pre',
-  ACCESS_TOKEN_TEXT:
-    'Nižšie uvedený token sa používa pri volaniach REST API, ktoré vyžadujú autorizáciu. Môže byť odovzdaný buď ako token Bearer v hlavičke Authorization (Autorizácia), alebo v parametri dotazu URL access_token.',
+  ACCESS_TOKEN_TEXT: 'Nižšie uvedený token sa používa pri volaniach REST API, ktoré vyžadujú autorizáciu. Môže byť odovzdaný buď ako token Bearer v hlavičke Authorization (Autorizácia), alebo v parametri dotazu URL access_token.',
   GENERATING_TOKEN: 'Generovanie tokenu',
   USER: 'Užívateľ',
   MODIFY: 'Upraviť',
-  SU_TEXT:
-    'Heslo su (superužívateľ) sa používa na podpisovanie autentifikačných tokenov a tiež na povolenie oprávnení správcu v rámci konzoly.',
+  SU_TEXT: 'Heslo su (superužívateľ) sa používa na podpisovanie autentifikačných tokenov a tiež na povolenie oprávnení správcu v rámci konzoly.',
   NOT_ENABLED: 'Nie je povolené',
   ERRORS_OF: '{0} errory',
   DISCONNECT_REASON: 'Dôvod odpojenia',
@@ -304,7 +285,7 @@ const sk: Translation = {
   NETWORK_SUBNET: 'Maska podsiete',
   NETWORK_DNS: 'DNS servery',
   ADDRESS_OF: '{0} adresa',
-  ADMIN: 'Admin',
+  ADMINISTRATOR: 'Administrator',
   GUEST: 'Hosť',
   NEW: 'Nová',
   NEW_NAME_OF: 'Nový názov {0}',
@@ -312,13 +293,11 @@ const sk: Translation = {
   MIN: 'min',
   MAX: 'max',
   BLOCK_NAVIGATE_1: 'Máte neuložené zmeny',
-  BLOCK_NAVIGATE_2:
-    'Ak prejdete na inú stránku, neuložené zmeny sa stratia. Ste si istí, že chcete opustiť túto stránku?',
+  BLOCK_NAVIGATE_2: 'Ak prejdete na inú stránku, neuložené zmeny sa stratia. Ste si istí, že chcete opustiť túto stránku?',
   STAY: 'Zostať',
   LEAVE: 'Opustiť',
   SCHEDULER: 'Plánovač',
-  SCHEDULER_HELP_1:
-    'Automatizujte príkazy pridaním naplánovaných udalostí nižšie. Nastavte jedinečné meno na aktiváciu/deaktiváciu cez API/MQTT.',
+  SCHEDULER_HELP_1: 'Automatizujte príkazy pridaním naplánovaných udalostí nižšie. Nastavte jedinečné meno na aktiváciu/deaktiváciu cez API/MQTT.',
   SCHEDULER_HELP_2: 'Použite 00:00 na jednorazové spustenie pri štarte',
   SCHEDULE: 'Plánovač',
   TIME: 'Čas',
@@ -348,7 +327,7 @@ const sk: Translation = {
   APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
   SECURITY_1: 'Add or remove users', // TODO translate
   UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', // TODO translate
-  MODULE: 'Module' // TODO translate
+  MODULES: 'Modules' // TODO translate
 };
 
 export default sk;

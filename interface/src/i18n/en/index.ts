@@ -65,8 +65,7 @@ const en: Translation = {
   TEMP_SENSOR: 'Temperature Sensor',
   TEMP_SENSORS: 'Temperature Sensors',
   WRITE_CMD_SENT: 'Write command sent',
-  EMS_BUS_WARNING:
-    'EMS bus disconnected. If this warning still persists after a few seconds please check settings and board profile',
+  EMS_BUS_WARNING: 'EMS bus disconnected. If this warning still persists after a few seconds please check settings and board profile',
   EMS_BUS_SCANNING: 'Scanning for EMS devices...',
   CONNECTED: 'Connected',
   TX_ISSUES: 'Tx issues - check Tx Mode',
@@ -101,8 +100,7 @@ const en: Translation = {
   CUSTOMIZATIONS: 'Customizations',
   APPLICATION_RESTARTING: 'EMS-ESP is restarting',
   INTERFACE_BOARD_PROFILE: 'Interface Board Profile',
-  BOARD_PROFILE_TEXT:
-    'Select a pre-configured interface board profile from the list below or choose Custom to configure your own hardware settings',
+  BOARD_PROFILE_TEXT: 'Select a pre-configured interface board profile from the list below or choose Custom to configure your own hardware settings',
   BOARD_PROFILE: 'Board Profile',
   CUSTOM: 'Custom',
   GPIO_OF: '{0} GPIO',
@@ -148,8 +146,7 @@ const en: Translation = {
   CUSTOMIZATIONS_RESTART: 'All customizations have been removed. Restarting...',
   CUSTOMIZATIONS_FULL: 'Selected entities exceeded limit. Please save in batches',
   CUSTOMIZATIONS_SAVED: 'Customizations saved',
-  CUSTOMIZATIONS_HELP_1:
-    'Select a device and customize the entities options or click to rename',
+  CUSTOMIZATIONS_HELP_1: 'Select a device and customize the entities options or click to rename',
   CUSTOMIZATIONS_HELP_2: 'mark as favorite',
   CUSTOMIZATIONS_HELP_3: 'disable write action',
   CUSTOMIZATIONS_HELP_4: 'exclude from MQTT and API',
@@ -159,17 +156,13 @@ const en: Translation = {
   SET_ALL: 'set all',
   OPTIONS: 'Options',
   NAME: 'Name',
-  CUSTOMIZATIONS_RESET:
-    'Are you sure you want remove all customizations including the custom settings of the Temperature and Analog sensors?',
+  CUSTOMIZATIONS_RESET: 'Are you sure you want remove all customizations including the custom settings of the Temperature and Analog sensors?',
   SUPPORT_INFORMATION: 'Support Information',
-  HELP_INFORMATION_1:
-    'Visit the online wiki to get instructions on how to configure EMS-ESP',
+  HELP_INFORMATION_1: 'Visit the online wiki to get instructions on how to configure EMS-ESP',
   HELP_INFORMATION_2: 'For live community chat join our Discord server',
   HELP_INFORMATION_3: 'To request a feature or report a bug',
-  HELP_INFORMATION_4:
-    'Download and attach your support information for a faster response when reporting an issue',
-  HELP_INFORMATION_5:
-    'EMS-ESP is a free and open-source project. Please support its future development by giving it a star on Github!',
+  HELP_INFORMATION_4: 'Download and attach your support information for a faster response when reporting an issue',
+  HELP_INFORMATION_5: 'EMS-ESP is a free and open-source project. Please support its future development by giving it a star on Github!',
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
   ABORTED: 'aborted',
@@ -184,8 +177,7 @@ const en: Translation = {
   USE: 'Use',
   FACTORY_RESET: 'Factory Reset',
   SYSTEM_FACTORY_TEXT: 'Device has been factory reset and will now restart',
-  SYSTEM_FACTORY_TEXT_DIALOG:
-    'Are you sure you want to reset EMS-ESP to its factory defaults?',
+  SYSTEM_FACTORY_TEXT_DIALOG: 'Are you sure you want to reset EMS-ESP to its factory defaults?',
   THE_LATEST: 'The latest',
   OFFICIAL: 'official',
   DEVELOPMENT: 'development',
@@ -203,10 +195,8 @@ const en: Translation = {
   ENABLE_OTA: 'Enable OTA Updates',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Download the entity customizations',
   DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events',
-  DOWNLOAD_SETTINGS_TEXT:
-    'Download the application settings. Be careful when sharing your settings as this file contains passwords and other sensitive system information',
-  UPLOAD_TEXT:
-    'Upload a new firmware (.bin) file, settings or customizations (.json) file below, for optional validation upload (.md5) first',
+  DOWNLOAD_SETTINGS_TEXT: 'Download the application settings. Be careful when sharing your settings as this file contains passwords and other sensitive system information',
+  UPLOAD_TEXT: 'Upload a new firmware (.bin) file, settings or customizations (.json) file below, for optional validation upload (.md5) first',
   UPLOADING: 'Uploading',
   UPLOAD_DROP_TEXT: 'Drop file or click here',
   ERROR: 'Unexpected Error, please try again',
@@ -216,13 +206,11 @@ const en: Translation = {
   USER_WARNING: 'You must have at least one admin user configured',
   ADD: 'Add',
   ACCESS_TOKEN_FOR: 'Access Token for',
-  ACCESS_TOKEN_TEXT:
-    'The token below is used with REST API calls that require authorization. It can be passed either as a Bearer token in the Authorization header or in the access_token URL query parameter.',
+  ACCESS_TOKEN_TEXT: 'The token below is used with REST API calls that require authorization. It can be passed either as a Bearer token in the Authorization header or in the access_token URL query parameter.',
   GENERATING_TOKEN: 'Generating token',
   USER: 'User',
   MODIFY: 'Modify',
-  SU_TEXT:
-    'The su (super user) password is used to sign authentication tokens and also enable admin privileges within the Console.',
+  SU_TEXT: 'The su (super user) password is used to sign authentication tokens and also enable admin privileges within the Console.',
   NOT_ENABLED: 'Not enabled',
   ERRORS_OF: '{0} Errors',
   DISCONNECT_REASON: 'Disconnect Reason',
@@ -297,7 +285,7 @@ const en: Translation = {
   NETWORK_SUBNET: 'Subnet Mask',
   NETWORK_DNS: 'DNS Servers',
   ADDRESS_OF: '{0} Address',
-  ADMIN: 'Admin',
+  ADMINISTRATOR: 'Administrator',
   GUEST: 'Guest',
   NEW: 'New',
   NEW_NAME_OF: 'New {0} name',
@@ -305,13 +293,11 @@ const en: Translation = {
   MIN: 'min',
   MAX: 'max',
   BLOCK_NAVIGATE_1: 'You have unsaved changes',
-  BLOCK_NAVIGATE_2:
-    'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?',
+  BLOCK_NAVIGATE_2: 'If you navigate to a different page, your unsaved changes will be lost. Are you sure you want to leave this page?',
   STAY: 'Stay',
   LEAVE: 'Leave',
   SCHEDULER: 'Scheduler',
-  SCHEDULER_HELP_1:
-    'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT.',
+  SCHEDULER_HELP_1: 'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT.',
   SCHEDULER_HELP_2: 'Use 00:00 to trigger once on start-up',
   SCHEDULE: 'Schedule',
   TIME: 'Time',
@@ -341,7 +327,7 @@ const en: Translation = {
   APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings',
   SECURITY_1: 'Add or remove users',
   UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware',
-  MODULE: 'Module' // TODO translate
+  MODULES: 'Modules'
 };
 
 export default en;
