@@ -218,6 +218,11 @@ class Thermostat : public EMSdevice {
         return (flags() & 0x0F);
     }
 
+    // check to see if the thermostat is a hybrid of the R300
+    inline bool isRC300() const {
+        return ((model() == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) || (model() == EMSdevice::EMS_DEVICE_FLAG_BC400));
+    }
+
     // each thermostat has a list of heating controller type IDs for reading and writing
     std::vector<uint16_t> monitor_typeids;
     std::vector<uint16_t> set_typeids;
