@@ -299,9 +299,14 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     bool ok = false;
 
+    // e.g. "test add 0x10 172"
     if (command == "add") {
+        if (id1 == -1 || id2 == -1) {
+            shell.printfln("Usage: test add <device_id> <product_id>");
+            return;
+        }
         shell.printfln("Testing Adding a device (product_id %d), with all values...", id2);
-        test("add", id1, id2); // e.g. "test add 0x8 172"
+        test("add", id1, id2);
         shell.invoke_command("show values");
         ok = true;
     }
