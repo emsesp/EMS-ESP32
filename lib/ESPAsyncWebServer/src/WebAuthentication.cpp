@@ -76,7 +76,7 @@ static bool getMD5(uint8_t * data, uint16_t len, char * output){//33 bytes or mo
     return false;
   memset(_buf, 0x00, 16);
 #ifdef ESP32
-#if ESP_ARDUINO_VERSION_MAJOR < 3
+#if ESP_IDF_VERSION_MAJOR < 5
   mbedtls_md5_init(&_ctx);
   mbedtls_md5_starts_ret(&_ctx);
   mbedtls_md5_update_ret(&_ctx, data, len);

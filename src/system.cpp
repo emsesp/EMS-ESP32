@@ -610,7 +610,7 @@ void System::send_info_mqtt() {
         doc["IPv4 address"]    = uuid::printable_to_string(ETH.localIP()) + "/" + uuid::printable_to_string(ETH.subnetMask());
         doc["IPv4 gateway"]    = uuid::printable_to_string(ETH.gatewayIP());
         doc["IPv4 nameserver"] = uuid::printable_to_string(ETH.dnsIP());
-        if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
+        if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000" && ETH.localIPv6().toString() != "::") {
             doc["IPv6 address"] = uuid::printable_to_string(ETH.localIPv6());
     }
             */
@@ -624,9 +624,17 @@ void System::send_info_mqtt() {
         doc["IPv4 address"]    = uuid::printable_to_string(WiFi.localIP()) + "/" + uuid::printable_to_string(WiFi.subnetMask());
         doc["IPv4 gateway"]    = uuid::printable_to_string(WiFi.gatewayIP());
         doc["IPv4 nameserver"] = uuid::printable_to_string(WiFi.dnsIP());
-        if (WiFi.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
+
+#if ESP_IDF_VERSION_MAJOR < 5
+        if (WiFi.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000" && WiFi.localIPv6().toString() != "::") {
             doc["IPv6 address"] = uuid::printable_to_string(WiFi.localIPv6());
         }
+#else
+        if (WiFi.linkLocalIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000" && WiFi.linkLocalIPv6().toString() != "::") {
+            doc["IPv6 address"] = uuid::printable_to_string(WiFi.linkLocalIPv6());
+        }
+
+#endif
     }
 #endif
     Mqtt::queue_publish_retain(F_(info), doc.as<JsonObject>(), true); // topic called "info" and it's Retained
@@ -739,7 +747,7 @@ void System::network_init(bool refresh) {
     //  ETH_CLOCK_GPIO17_OUT = 3  RMII clock output from GPIO17, for 50hz inverted clock
     auto clock_mode = (eth_clock_mode_t)eth_clock_mode_;
 
-#if ESP_ARDUINO_VERSION_MAJOR < 3
+#if ESP_IDF_VERSION_MAJOR < 5
     eth_present_ = ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode);
 #else
     eth_present_ = ETH.begin(type, phy_addr, mdc, mdio, power, clock_mode);
@@ -998,9 +1006,16 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.printfln(" IPv4 address: %s/%s", uuid::printable_to_string(WiFi.localIP()).c_str(), uuid::printable_to_string(WiFi.subnetMask()).c_str());
         shell.printfln(" IPv4 gateway: %s", uuid::printable_to_string(WiFi.gatewayIP()).c_str());
         shell.printfln(" IPv4 nameserver: %s", uuid::printable_to_string(WiFi.dnsIP()).c_str());
-        if (WiFi.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
+#if ESP_IDF_VERSION_MAJOR < 5
+        if (WiFi.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000" && WiFi.localIPv6().toString() != "::") {
             shell.printfln(" IPv6 address: %s", uuid::printable_to_string(WiFi.localIPv6()).c_str());
         }
+#else
+        if (WiFi.linkLocalIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000" && WiFi.linkLocalIPv6().toString() != "::") {
+            shell.printfln(" IPv6 address: %s", uuid::printable_to_string(WiFi.linkLocalIPv6()).c_str());
+        }
+#endif
+
         break;
 
     case WL_CONNECT_FAILED:
@@ -1031,9 +1046,15 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.printfln(" IPv4 address: %s/%s", uuid::printable_to_string(ETH.localIP()).c_str(), uuid::printable_to_string(ETH.subnetMask()).c_str());
         shell.printfln(" IPv4 gateway: %s", uuid::printable_to_string(ETH.gatewayIP()).c_str());
         shell.printfln(" IPv4 nameserver: %s", uuid::printable_to_string(ETH.dnsIP()).c_str());
-        if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000") {
+#if ESP_IDF_VERSION_MAJOR < 5
+        if (ETH.localIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000" && ETH.localIPv6().toString() != "::") {
             shell.printfln(" IPv6 address: %s", uuid::printable_to_string(ETH.localIPv6()).c_str());
         }
+#else
+        if (ETH.linkLocalIPv6().toString() != "0000:0000:0000:0000:0000:0000:0000:0000" && ETH.linkLocalIPv6().toString() != "::") {
+            shell.printfln(" IPv6 address: %s", uuid::printable_to_string(ETH.linkLocalIPv6()).c_str());
+        }
+#endif
     }
     shell.println();
 
