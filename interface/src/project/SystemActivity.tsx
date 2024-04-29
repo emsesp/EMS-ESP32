@@ -75,7 +75,6 @@ const SystemActivity: FC = () => {
   });
 
   const showName = (id: number) => {
-    // TODO fix this
     const name: keyof Translation['STATUS_NAMES'] = id;
     return LL.STATUS_NAMES[name]();
   };
