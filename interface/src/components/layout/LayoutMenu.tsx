@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import type { ChangeEventHandler, FC } from 'react';
+import type { FC } from 'react';
 
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AssessmentIcon from '@mui/icons-material/Assessment';
@@ -22,30 +22,17 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  MenuItem,
-  Popover,
-  TextField
+  Popover
 } from '@mui/material';
 
+import { LanguageSelector } from 'components/inputs';
 import LayoutMenuItem from 'components/layout/LayoutMenuItem';
 import { AuthenticatedContext } from 'contexts/authentication';
-import DEflag from 'i18n/DE.svg';
-import FRflag from 'i18n/FR.svg';
-import GBflag from 'i18n/GB.svg';
-import ITflag from 'i18n/IT.svg';
-import NLflag from 'i18n/NL.svg';
-import NOflag from 'i18n/NO.svg';
-import PLflag from 'i18n/PL.svg';
-import SKflag from 'i18n/SK.svg';
-import SVflag from 'i18n/SV.svg';
-import TRflag from 'i18n/TR.svg';
-import { I18nContext } from 'i18n/i18n-react';
-import type { Locales } from 'i18n/i18n-types';
-import { loadLocaleAsync } from 'i18n/i18n-util.async';
+import { useI18nContext } from 'i18n/i18n-react';
 
 const LayoutMenu: FC = () => {
   const { me, signOut } = useContext(AuthenticatedContext);
-  const { locale, LL, setLocale } = useContext(I18nContext);
+  const { LL } = useI18nContext();
 
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
@@ -53,15 +40,6 @@ const LayoutMenu: FC = () => {
   const id = anchorEl ? 'app-menu-popover' : undefined;
 
   const [menuOpen, setMenuOpen] = useState(true);
-
-  const onLocaleSelected: ChangeEventHandler<HTMLInputElement> = async ({
-    target
-  }) => {
-    const loc = target.value as Locales;
-    localStorage.setItem('lang', loc);
-    await loadLocaleAsync(loc);
-    setLocale(loc);
-  };
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -94,7 +72,7 @@ const LayoutMenu: FC = () => {
             }}
           >
             <ListItemText
-              primary={LL.MODULE()}
+              primary={LL.MODULES()}
               primaryTypographyProps={{
                 fontWeight: '600',
                 mb: '2px',
@@ -173,7 +151,7 @@ const LayoutMenu: FC = () => {
 
       <Popover
         id={id}
-        sx={{ mt: 1 }}
+        // sx={{ mb: 10 }}
         open={open}
         anchorEl={anchorEl}
         onClose={handleClose}
@@ -187,12 +165,22 @@ const LayoutMenu: FC = () => {
         }}
       >
         <Box
-          p={2}
+          padding={2}
+          justifyContent="center"
+          flexDirection="column"
           sx={{
-            borderRadius: 2,
-            border: '2px solid grey'
+            borderRadius: 3,
+            border: '3px solid grey'
           }}
         >
+          <Button
+            variant="outlined"
+            fullWidth
+            color="primary"
+            onClick={() => signOut(true)}
+          >
+            {LL.SIGN_OUT()}
+          </Button>
           <List>
             <ListItem disablePadding>
               <Avatar sx={{ bgcolor: '#b1395f', color: 'white' }}>
@@ -201,72 +189,13 @@ const LayoutMenu: FC = () => {
               <ListItemText
                 sx={{ pl: 2 }}
                 primary={me.username}
-                secondary={me.admin ? LL.ADMIN() : LL.GUEST()}
+                secondary={'(' + (me.admin ? LL.ADMINISTRATOR() : LL.GUEST()) + ')'}
               />
             </ListItem>
           </List>
-          <Box p={2}>
-            <TextField
-              name="locale"
-              InputProps={{ style: { fontSize: 10 } }}
-              variant="outlined"
-              value={locale}
-              onChange={onLocaleSelected}
-              size="small"
-              select
-            >
-              <MenuItem key="de" value="de">
-                <img src={DEflag} style={{ width: 16, verticalAlign: 'middle' }} />
-                &nbsp;DE
-              </MenuItem>
-              <MenuItem key="en" value="en">
-                <img src={GBflag} style={{ width: 16, verticalAlign: 'middle' }} />
-                &nbsp;EN
-              </MenuItem>
-              <MenuItem key="fr" value="fr">
-                <img src={FRflag} style={{ width: 16, verticalAlign: 'middle' }} />
-                &nbsp;FR
-              </MenuItem>
-              <MenuItem key="it" value="it">
-                <img src={ITflag} style={{ width: 16, verticalAlign: 'middle' }} />
-                &nbsp;IT
-              </MenuItem>
-              <MenuItem key="nl" value="nl">
-                <img src={NLflag} style={{ width: 16, verticalAlign: 'middle' }} />
-                &nbsp;NL
-              </MenuItem>
-              <MenuItem key="no" value="no">
-                <img src={NOflag} style={{ width: 16, verticalAlign: 'middle' }} />
-                &nbsp;NO
-              </MenuItem>
-              <MenuItem key="pl" value="pl">
-                <img src={PLflag} style={{ width: 16, verticalAlign: 'middle' }} />
-                &nbsp;PL
-              </MenuItem>
-              <MenuItem key="sk" value="sk">
-                <img src={SKflag} style={{ width: 16, verticalAlign: 'middle' }} />
-                &nbsp;SK
-              </MenuItem>
-              <MenuItem key="sv" value="sv">
-                <img src={SVflag} style={{ width: 16, verticalAlign: 'middle' }} />
-                &nbsp;SV
-              </MenuItem>
-              <MenuItem key="tr" value="tr">
-                <img src={TRflag} style={{ width: 16, verticalAlign: 'middle' }} />
-                &nbsp;TR
-              </MenuItem>
-            </TextField>
-          </Box>
-          <Box>
-            <Button
-              variant="outlined"
-              fullWidth
-              color="primary"
-              onClick={() => signOut(true)}
-            >
-              {LL.SIGN_OUT()}
-            </Button>
-          </Box>
+          {/* <Box p={2}> */}
+          <LanguageSelector />
+          {/* </Box> */}
         </Box>
       </Popover>
     </>

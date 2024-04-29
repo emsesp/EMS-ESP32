@@ -441,6 +441,7 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_CRF         = 12; // CRF200 only monitor
     static constexpr uint8_t EMS_DEVICE_FLAG_RC100H      = 13; // with humidity
     static constexpr uint8_t EMS_DEVICE_FLAG_BC400       = 14; // mostly like RC300, but some changes
+    static constexpr uint8_t EMS_DEVICE_FLAG_R3000       = 15; // Rego3000, same as RC300 with different wwmodes
 
     uint8_t count_entities();
     bool    has_entities() const;

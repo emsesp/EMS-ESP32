@@ -1,0 +1,6 @@
+*/node_modules/
+build/
+dist/*
+interface/src/i18n/*
+
+.typesafe-i18n.json
