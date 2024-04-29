@@ -375,7 +375,7 @@ void EMSESP::dump_all_telegrams(uuid::console::Shell & shell) {
 
     Serial.println("---- CSV START ----"); // marker use by py script
     // add header for CSV
-    Serial.println("telegram_type_id,name,is_fetched,is_received,is_cmd");
+    Serial.println("telegram_type_id,name,is_fetched,is_cmd");
 
     for (const auto & device_class : EMSFactory::device_handlers()) {
         // go through each device type so they are sorted
@@ -420,17 +420,14 @@ void EMSESP::dump_all_telegrams(uuid::console::Shell & shell) {
     // Use erase method to remove all the duplicates from the vector
     telegram_functions_dump.erase(it, telegram_functions_dump.end());
 
-
     for (const auto & tf : telegram_functions_dump) {
         Serial.printf(Helpers::hextoa(tf.type_id_, true).c_str());
         Serial.print(',');
         Serial.print(tf.name_);
         Serial.print(',');
-        Serial.print(tf.fetch_ ? "fetched" : "");
+        Serial.print(tf.fetch_ ? "fetched" : " ");
         Serial.print(',');
-        Serial.print(tf.received_ ? "received" : "");
-        Serial.print(',');
-        Serial.print(tf.cmd_ ? "cmd" : "");
+        Serial.print(tf.cmd_ ? "cmd" : " ");
         Serial.println();
     }
 

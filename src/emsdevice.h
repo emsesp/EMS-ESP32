@@ -461,13 +461,11 @@ class EMSdevice {
         uint16_t     type_id_;
         const char * name_;
         bool         fetch_;
-        bool         received_;
         bool         cmd_;
-        TelegramFunctionDump(uint16_t type_id, const char * name, bool fetch, bool received, bool cmd)
+        TelegramFunctionDump(uint16_t type_id, const char * name, bool fetch, bool cmd)
             : type_id_(type_id)
             , name_(name)
             , fetch_(fetch)
-            , received_(received)
             , cmd_(cmd) {
         }
     };

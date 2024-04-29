@@ -1380,7 +1380,7 @@ void EMSdevice::dump_value_info() {
 #if defined(EMSESP_STANDALONE)
 void EMSdevice::dump_telegram_info(std::vector<TelegramFunctionDump> & telegram_functions_dump) {
     for (auto & tf : telegram_functions_) {
-        telegram_functions_dump.emplace_back(tf.telegram_type_id_, tf.telegram_type_name_, tf.fetch_, tf.received_, tf.process_function_ != nullptr);
+        telegram_functions_dump.emplace_back(tf.telegram_type_id_, tf.telegram_type_name_, tf.fetch_, tf.process_function_ != nullptr);
     }
 }
 #endif
