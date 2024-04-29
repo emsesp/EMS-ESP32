@@ -332,9 +332,8 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
 void EMSESP::dump_all_values(uuid::console::Shell & shell) {
     Serial.println("---- CSV START ----"); // marker use by py script
     // add header for CSV
-    Serial.print(
+    Serial.println(
         "device name,device type,product id,shortname,fullname,type [options...] \\| (min/max),uom,writeable,discovery entityid v3.4, discovery entityid");
-    Serial.println();
 
     for (const auto & device_class : EMSFactory::device_handlers()) {
         // go through each device type so they are sorted
@@ -356,17 +355,89 @@ void EMSESP::dump_all_values(uuid::console::Shell & shell) {
                 }
 
                 // add the device and print out all the entities
-
-                // if (device.product_id == 69) { // only for testing mixer
+                // for testing the mixer use ... if (device.product_id == 69) {
                 emsdevices.push_back(
                     EMSFactory::add(device.device_type, device_id, device.product_id, "1.0", device.name, device.flags, EMSdevice::Brand::NO_BRAND));
                 emsdevices.back()->dump_value_info();
-                // } // only for testing mixer
             }
         }
     }
 
     Serial.println("---- CSV END ----"); // marker use by py script
+}
+#endif
+
+// Dump all telegrams to Serial out
+// this is intended to run within the OS with lots of available memory!
+#if defined(EMSESP_STANDALONE)
+void EMSESP::dump_all_telegrams(uuid::console::Shell & shell) {
+    std::vector<EMSdevice::TelegramFunctionDump> telegram_functions_dump;
+
+    Serial.println("---- CSV START ----"); // marker use by py script
+    // add header for CSV
+    Serial.println("telegram_type_id,name,is_fetched,is_received,is_cmd");
+
+    for (const auto & device_class : EMSFactory::device_handlers()) {
+        // go through each device type so they are sorted
+        for (const auto & device : device_library_) {
+            if (device_class.first == device.device_type) {
+                uint8_t device_id = 0;
+                // Mixer class looks at device_id to determine type and the tag
+                // so fixing to 0x28 which will give all the settings except flowSetTemp
+                if (device.device_type == DeviceType::MIXER) {
+                    if (device.flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
+                        if (device.product_id == 160) { // MM100
+                            device_id = 0x28;           // dhw
+                        } else {
+                            device_id = 0x20; // hc
+                        }
+                    } else {
+                        device_id = 0x20; // should cover all the other device types
+                    }
+                }
+
+                // add the device and print out all the entities
+                emsdevices.push_back(
+                    EMSFactory::add(device.device_type, device_id, device.product_id, "1.0", device.name, device.flags, EMSdevice::Brand::NO_BRAND));
+                // add to our vector list
+                emsdevices.back()->dump_telegram_info(telegram_functions_dump);
+            }
+        }
+    }
+
+    auto num_entries = telegram_functions_dump.size();
+
+    // sort based on typeID
+    std::sort(telegram_functions_dump.begin(),
+              telegram_functions_dump.end(),
+              [](const EMSdevice::TelegramFunctionDump & a, const EMSdevice::TelegramFunctionDump & b) { return a.type_id_ < b.type_id_; });
+
+    // Get the iterator for the modified vector
+    auto it = std::unique(telegram_functions_dump.begin(),
+                          telegram_functions_dump.end(),
+                          [](const EMSdevice::TelegramFunctionDump & a, const EMSdevice::TelegramFunctionDump & b) { return a.type_id_ == b.type_id_; });
+
+    // Use erase method to remove all the duplicates from the vector
+    telegram_functions_dump.erase(it, telegram_functions_dump.end());
+
+
+    for (const auto & tf : telegram_functions_dump) {
+        Serial.printf(Helpers::hextoa(tf.type_id_, true).c_str());
+        Serial.print(',');
+        Serial.print(tf.name_);
+        Serial.print(',');
+        Serial.print(tf.fetch_ ? "fetched" : "");
+        Serial.print(',');
+        Serial.print(tf.received_ ? "received" : "");
+        Serial.print(',');
+        Serial.print(tf.cmd_ ? "cmd" : "");
+        Serial.println();
+    }
+
+    Serial.println("---- CSV END ----"); // marker used by py script
+
+    Serial.printf("Total telegrams = %d, total unique telegrams = %d", num_entries, telegram_functions_dump.size());
+    Serial.println();
 }
 #endif
 
@@ -647,7 +718,7 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
     strlcat(buffer, Helpers::data_to_hex(telegram->message_data, telegram->message_length).c_str(), 768);
     if (response_id_ != 0) {
         strlcat(buffer, " ", 768);
-        return;
+        return; // do not delete buffer
     }
     JsonDocument doc;
     char         s[10];

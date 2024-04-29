@@ -457,6 +457,21 @@ class EMSdevice {
     */
 
 #if defined(EMSESP_STANDALONE)
+    struct TelegramFunctionDump {
+        uint16_t     type_id_;
+        const char * name_;
+        bool         fetch_;
+        bool         received_;
+        bool         cmd_;
+        TelegramFunctionDump(uint16_t type_id, const char * name, bool fetch, bool received, bool cmd)
+            : type_id_(type_id)
+            , name_(name)
+            , fetch_(fetch)
+            , received_(received)
+            , cmd_(cmd) {
+        }
+    };
+    void dump_telegram_info(std::vector<TelegramFunctionDump> & telegram_functions_dump);
     void dump_value_info();
 #endif
 
