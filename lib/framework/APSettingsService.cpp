@@ -148,9 +148,9 @@ StateUpdateResult APSettings::update(JsonObject root, APSettings & settings) {
     newSettings.ssidHidden = root["ssid_hidden"] | FACTORY_AP_SSID_HIDDEN;
     newSettings.maxClients = static_cast<uint8_t>(root["max_clients"] | FACTORY_AP_MAX_CLIENTS);
 
-    JsonUtils::readIP(root, "local_ip", newSettings.localIP, FACTORY_AP_LOCAL_IP);
-    JsonUtils::readIP(root, "gateway_ip", newSettings.gatewayIP, FACTORY_AP_GATEWAY_IP);
-    JsonUtils::readIP(root, "subnet_mask", newSettings.subnetMask, FACTORY_AP_SUBNET_MASK);
+    JsonUtils::readIP(root, "local_ip", newSettings.localIP, String(FACTORY_AP_LOCAL_IP));
+    JsonUtils::readIP(root, "gateway_ip", newSettings.gatewayIP,String(FACTORY_AP_GATEWAY_IP));
+    JsonUtils::readIP(root, "subnet_mask", newSettings.subnetMask, String(FACTORY_AP_SUBNET_MASK));
 
     if (newSettings == settings) {
         return StateUpdateResult::UNCHANGED;

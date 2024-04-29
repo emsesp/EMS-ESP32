@@ -30,8 +30,12 @@ void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
     // for both connections show ethernet
     if (ethernet_connected) {
         // Ethernet
-        root["local_ip"]    = ETH.localIP().toString();
-        root["local_ipv6"]  = ETH.localIPv6().toString();
+        root["local_ip"] = ETH.localIP().toString();
+#if ESP_IDF_VERSION_MAJOR < 5
+        root["local_ipv6"] = ETH.localIPv6().toString();
+#else
+        root["local_ipv6"] = ETH.linkLocalIPv6().toString();
+#endif
         root["mac_address"] = ETH.macAddress();
         root["subnet_mask"] = ETH.subnetMask().toString();
         root["gateway_ip"]  = ETH.gatewayIP().toString();
@@ -49,8 +53,13 @@ void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
             root["dns_ip_2"] = dnsIP2.toString();
         }
     } else if (wifi_status == WL_CONNECTED) {
-        root["local_ip"]    = WiFi.localIP().toString();
-        root["local_ipv6"]  = WiFi.localIPv6().toString();
+        root["local_ip"] = WiFi.localIP().toString();
+// #if ESP_ARDUINO_VERSION_MAJOR < 3
+#if ESP_IDF_VERSION_MAJOR < 5
+        root["local_ipv6"] = WiFi.localIPv6().toString();
+#else
+        root["local_ipv6"] = WiFi.linkLocalIPv6().toString();
+#endif
         root["mac_address"] = WiFi.macAddress();
         root["rssi"]        = WiFi.RSSI();
         root["ssid"]        = WiFi.SSID();

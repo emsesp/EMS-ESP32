@@ -65,12 +65,17 @@ void NetworkSettingsService::loop() {
 void NetworkSettingsService::manageSTA() {
     // Abort if already connected, or if we have no SSID
     if (WiFi.isConnected() || _state.ssid.length() == 0) {
+#if ESP_IDF_VERSION_MAJOR >= 5
+        if (_state.ssid.length() == 0) {
+            ETH.enableIPv6(_state.enableIPv6);
+        }
+#endif
         return;
     }
 
     // Connect or reconnect as required
     if ((WiFi.getMode() & WIFI_STA) == 0) {
-#ifdef TASMOTA_SDK
+#if ESP_IDF_VERSION_MAJOR >= 5
         WiFi.enableIPv6(_state.enableIPv6);
 #endif
         if (_state.staticIPConfig) {
@@ -352,25 +357,27 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) 
         if (_state.tx_power == 0) {
             setWiFiPowerOnRSSI();
         }
+#if ESP_IDF_VERSION_MAJOR < 5
         if (_state.enableIPv6) {
             WiFi.enableIpV6();
         }
+#endif
         break;
 
     case ARDUINO_EVENT_ETH_CONNECTED:
+#if ESP_IDF_VERSION_MAJOR < 5
         if (_state.enableIPv6) {
             ETH.enableIpV6();
         }
+#endif
         break;
 
         // IPv6 specific
     case ARDUINO_EVENT_WIFI_STA_GOT_IP6:
     case ARDUINO_EVENT_ETH_GOT_IP6:
-        if (emsesp::EMSESP::system_.ethernet_connected()) {
-            emsesp::EMSESP::logger().info("Ethernet connected (IPv6=%s, speed %d Mbps)", ETH.localIPv6().toString().c_str(), ETH.linkSpeed());
-        }
+        emsesp::EMSESP::logger().info("IPv6=%s", IPAddress(IPv6, (uint8_t *)info.got_ip6.ip6_info.ip.addr, 0).toString().c_str());
         emsesp::EMSESP::system_.has_ipv6(true);
-        break;
+    break;
 
     default:
         break;
