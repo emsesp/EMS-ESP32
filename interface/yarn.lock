@@ -46,7 +46,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/core@npm:^7.22.1, @babel/core@npm:^7.24.4":
+"@babel/core@npm:^7.22.1":
   version: 7.24.4
   resolution: "@babel/core@npm:7.24.4"
   dependencies:
@@ -1696,7 +1696,6 @@ __metadata:
   dependencies:
     "@alova/adapter-xhr": "npm:^1.0.6"
     "@alova/scene-react": "npm:^1.5.0"
-    "@babel/core": "npm:^7.24.4"
     "@emotion/react": "npm:^11.11.4"
     "@emotion/styled": "npm:^11.11.5"
     "@eslint/js": "npm:^9.1.1"

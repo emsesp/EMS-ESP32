@@ -24,7 +24,6 @@
   "dependencies": {
     "@alova/adapter-xhr": "^1.0.6",
     "@alova/scene-react": "^1.5.0",
-    "@babel/core": "^7.24.4",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@mui/icons-material": "^5.15.15",
