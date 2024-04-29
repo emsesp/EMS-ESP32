@@ -422,9 +422,14 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     // all tests with EMSESP_STANDALONE
 
     if (command == "entity_dump") {
-        shell.printfln("Adding all devices and entities...");
         System::test_set_all_active(true);
         EMSESP::dump_all_values(shell);
+        ok = true;
+    }
+
+    if (command == "telegram_dump") {
+        System::test_set_all_active(true);
+        EMSESP::dump_all_telegrams(shell);
         ok = true;
     }
 

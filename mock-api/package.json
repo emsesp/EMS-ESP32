@@ -13,7 +13,7 @@
     "@msgpack/msgpack": "^2.8.0",
     "compression": "^1.7.4",
     "express": "^4.19.2",
-    "itty-router": "^5.0.16",
+    "itty-router": "^5.0.17",
     "multer": "^1.4.5-lts.1"
   },
   "packageManager": "yarn@4.1.1",
