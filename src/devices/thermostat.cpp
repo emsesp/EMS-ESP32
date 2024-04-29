@@ -1221,16 +1221,23 @@ void Thermostat::process_RC300WWmode(std::shared_ptr<const Telegram> telegram) {
         telegram->read_value(wwmode, 2);
         const uint8_t modes1[] = {0, 2, 3, 0, 4, 1};
         has_update(dhw->wwMode_, wwmode < sizeof(modes1) ? modes1[wwmode] : EMS_VALUE_UINT8_NOTSET);
+    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) {
+        // https://github.com/emsesp/EMS-ESP32/pull/1722#discussion_r1582823521
+        const uint8_t modes[] = {1, 2, 5}; // normal, comfort, eco+
+        uint8_t       wwmode  = dhw->wwMode_ < sizeof(modes) ? modes[dhw->wwMode_] : EMS_VALUE_UINT8_NOTSET;
+        telegram->read_value(wwmode, 2);
+        const uint8_t modes1[] = {0, 0, 1, 0, 0, 2}; // 0=normal (1), 1=comfort(2), 2=eco+(5)
+        has_update(dhw->wwMode_, wwmode < sizeof(modes1) ? modes1[wwmode] : EMS_VALUE_UINT8_NOTSET);
     } else {
         has_update(telegram, dhw->wwMode_, 2); // 0=off, 1=low, 2=high, 3=auto, 4=own prog
     }
     has_update(telegram, dhw->wwCircMode_, 3);        // 0=off, 1=on, 2=auto, 4=own?
     has_update(telegram, dhw->wwChargeDuration_, 10); // value in steps of 15 min
-    has_update(telegram, dhw->wwCharge_, 11);         // bool 0xFF on
-    has_update(telegram, dhw->wwDisinfecting_, 5);    // 0-off, 0xFF on
+    has_update(telegram, dhw->wwCharge_, 11);         // 0=off, 0xFF=on
+    has_update(telegram, dhw->wwDisinfecting_, 5);    // 0=off, 0xFF=on
     has_update(telegram, dhw->wwDisinfectHour_, 6);   // value in steps of 15 min
     has_update(telegram, dhw->wwDisinfectDay_, 7);    // 0-6 Day of week, 7 every day
-    has_update(telegram, dhw->wwDailyHeating_, 8);    // 0-off, 0xFF on
+    has_update(telegram, dhw->wwDailyHeating_, 8);    // 0=off, 0xFF=on
     has_update(telegram, dhw->wwDailyHeatTime_, 9);   // value in steps of 15 min
 }
 
@@ -2054,7 +2061,7 @@ bool Thermostat::set_wwmode(const char * value, const int8_t id) {
         if (!Helpers::value2enum(value, set, FL_(enum_wwMode5))) {
             return false;
         }
-        const uint8_t modes[] = {1, 2, 0, 0, 5};
+        const uint8_t modes[] = {1, 2, 5};
         write_command(0x02F5 + dhw, 2, modes[set], 0x02F5 + dhw);
     } else if ((model() == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model() == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
         if (!Helpers::value2enum(value, set, FL_(enum_wwMode))) {
@@ -4170,13 +4177,13 @@ void Thermostat::register_device_values() {
 
 #if defined(EMSESP_STANDALONE)
     // if we're just dumping out values, create a single dummy hc
-    auto new_hc = std::make_shared<Thermostat::HeatingCircuit>(1, this->model()); // hc = 1
+    auto new_hc = std::make_shared<Thermostat::HeatingCircuit>(1, this->model()); // hc 1
     heating_circuits_.push_back(new_hc);
     register_device_values_hc(new_hc);
-    // TODO also a dhw circuit...
-    auto new_dhw = std::make_shared<Thermostat::DhwCircuit>(0, 1);
+
+    // also a dhw circuit...
+    auto new_dhw = std::make_shared<Thermostat::DhwCircuit>(0, 1); // offset 0, dhw num 1
     dhw_circuits_.push_back(new_dhw);
-    // register the device values
     register_device_values_dhw(new_dhw);
 #endif
 }
