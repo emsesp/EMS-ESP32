@@ -600,6 +600,10 @@ void EMSdevice::add_device_value(uint8_t               tag,              // to b
             flags |= CommandFlag::MQTT_SUB_FLAG_HC;
         } else if (tag >= DeviceValueTAG::TAG_DHW1 && tag <= DeviceValueTAG::TAG_DHW10) {
             flags |= CommandFlag::MQTT_SUB_FLAG_DHW;
+        } else if (tag >= DeviceValueTAG::TAG_HS1 && tag <= DeviceValueTAG::TAG_HS16) {
+            flags |= CommandFlag::MQTT_SUB_FLAG_HS;
+        } else if (tag >= DeviceValueTAG::TAG_AHS1 && tag <= DeviceValueTAG::TAG_AHS1) {
+            flags |= CommandFlag::MQTT_SUB_FLAG_AHS;
         }
 
         // add the command to our library
