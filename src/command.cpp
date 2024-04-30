@@ -302,8 +302,19 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     auto    dname     = EMSdevice::device_type_2_device_name(device_type);
     uint8_t device_id = EMSESP::device_id_from_cmd(device_type, cmd, id);
 
+    uint8_t flag = 0;
+    uint8_t tag = id - 1 + DeviceValueTAG::TAG_HC1;
+    if (tag >= DeviceValueTAG::TAG_HC1 && tag <= DeviceValueTAG::TAG_HC8) {
+        flag = CommandFlag::MQTT_SUB_FLAG_HC;
+    } else if (tag >= DeviceValueTAG::TAG_DHW1 && tag <= DeviceValueTAG::TAG_DHW10) {
+        flag = CommandFlag::MQTT_SUB_FLAG_DHW;
+    } else if (tag >= DeviceValueTAG::TAG_HS1 && tag <= DeviceValueTAG::TAG_HS16) {
+        flag = CommandFlag::MQTT_SUB_FLAG_HS;
+    } else if (tag >= DeviceValueTAG::TAG_AHS1 && tag <= DeviceValueTAG::TAG_AHS1) {
+        flag = CommandFlag::MQTT_SUB_FLAG_AHS;
+    }
     // see if there is a command registered
-    auto cf = find_command(device_type, device_id, cmd);
+    auto cf = find_command(device_type, device_id, cmd, flag);
 
     // check if its a call to an end-point of a device
     // this is used to fetch the attributes of the device entity, or call a command directly
@@ -370,9 +381,9 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     // report back. If not OK show output from error, other return the HTTP code
     if (return_code != CommandRet::OK) {
         if ((value == nullptr) || (strlen(value) == 0)) {
-            LOG_ERROR("Command '%s' failed with error code %d", cmd, return_code);
+            LOG_ERROR("Command '%s' failed with error code %d", cmd, FL_(cmdRet)[return_code]);
         } else {
-            LOG_ERROR("Command '%s/%s' failed with error code %d", cmd, value, return_code);
+            LOG_ERROR("Command '%s/%s' failed with error code %c", cmd, value, return_code);
         }
         return message(return_code, "callback function failed", output);
     }
@@ -382,7 +393,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 // add a command to the list, which does not return json
 void Command::add(const uint8_t device_type, const uint8_t device_id, const char * cmd, const cmd_function_p cb, const char * const * description, uint8_t flags) {
     // if the command already exists for that device type don't add it
-    if (find_command(device_type, device_id, cmd) != nullptr) {
+    if (find_command(device_type, device_id, cmd, flags) != nullptr) {
         return;
     }
 
@@ -403,7 +414,7 @@ void Command::add(const uint8_t device_type, const char * cmd, const cmd_functio
 // add a command to the list, which does return a json object as output
 void Command::add(const uint8_t device_type, const char * cmd, const cmd_json_function_p cb, const char * const * description, uint8_t flags) {
     // if the command already exists for that device type don't add it
-    if (find_command(device_type, 0, cmd) != nullptr) {
+    if (find_command(device_type, 0, cmd, flags) != nullptr) {
         return;
     }
 
@@ -412,13 +423,14 @@ void Command::add(const uint8_t device_type, const char * cmd, const cmd_json_fu
 
 // see if a command exists for that device type
 // is not case sensitive
-Command::CmdFunction * Command::find_command(const uint8_t device_type, const uint8_t device_id, const char * cmd) {
+Command::CmdFunction * Command::find_command(const uint8_t device_type, const uint8_t device_id, const char * cmd, const uint8_t flag) {
     if ((cmd == nullptr) || (strlen(cmd) == 0) || (cmdfunctions_.empty())) {
         return nullptr;
     }
 
     for (auto & cf : cmdfunctions_) {
-        if (Helpers::toLower(cmd) == Helpers::toLower(cf.cmd_) && (cf.device_type_ == device_type) && (!device_id || cf.device_id_ == device_id)) {
+        if (Helpers::toLower(cmd) == Helpers::toLower(cf.cmd_) && (cf.device_type_ == device_type) && (!device_id || cf.device_id_ == device_id)
+            && (!(flag & 0x3F) || (flag & 0x3F) == (cf.flags_ & 0x3F))) {
             return &cf;
         }
     }
@@ -536,6 +548,12 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
                 } else if (cf.has_flags(MQTT_SUB_FLAG_DHW)) {
                     shell.print("[dhw<n>.]");
                     i += 9;
+                } else if (cf.has_flags(MQTT_SUB_FLAG_AHS)) {
+                    shell.print("[ahs<n>.]");
+                    i += 9;
+                } else if (cf.has_flags(MQTT_SUB_FLAG_HS)) {
+                    shell.print("[hs<n>.]");
+                    i += 8;
                 }
                 shell.print(cl);
                 // pad with spaces

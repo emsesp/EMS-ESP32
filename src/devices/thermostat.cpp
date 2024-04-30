@@ -123,6 +123,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
             register_telegram_type(curve_typeids[i], "RC30Temp", false, MAKE_PF_CB(process_RC30Temp));
             register_telegram_type(timer_typeids[i], "RC30Timer", false, MAKE_PF_CB(process_RC35Timer));
         }
+        register_telegram_type(0xA9, "RC30Vacation", true, MAKE_PF_CB(process_RC30Vacation));
         register_telegram_type(EMS_TYPE_RC30wwSettings, "RC30WWSettings", true, MAKE_PF_CB(process_RC30wwSettings));
         register_telegram_type(0x38, "WWTimer", true, MAKE_PF_CB(process_RC35wwTimer));
         register_telegram_type(0x39, "WWCircTimer", true, MAKE_PF_CB(process_RC35wwTimer));
@@ -1514,7 +1515,29 @@ void Thermostat::process_RC35Timer(std::shared_ptr<const Telegram> telegram) {
     }
 }
 
-// process_RCTime - type 0x06 - date and time from a thermostat - 14 bytes long
+// type 0x9A (HC1)
+void Thermostat::process_RC30Vacation(std::shared_ptr<const Telegram> telegram) {
+    auto hc = heating_circuit(0x9A - telegram->type_id + 1);
+    if (hc == nullptr) {
+        return;
+    }
+
+    if (telegram->message_length + telegram->offset >= 7 && telegram->offset <= 1) {
+        char data[sizeof(hc->vacation)];
+        snprintf(data,
+                 sizeof(data),
+                 "%02d.%02d.%04d-%02d.%02d.%04d",
+                 telegram->message_data[1 - telegram->offset],
+                 telegram->message_data[2 - telegram->offset],
+                 telegram->message_data[3 - telegram->offset] + 2000,
+                 telegram->message_data[4 - telegram->offset],
+                 telegram->message_data[5 - telegram->offset],
+                 telegram->message_data[7 - telegram->offset] + 2000);
+        has_update(hc->vacation, data, sizeof(hc->vacation));
+    }
+}
+
+// process_RCTime - type 0x06 - date and time from a thermostat - 12 or 15 bytes long
 void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
     if (telegram->offset > 0 || telegram->message_length < 8) {
         return;
@@ -1912,6 +1935,7 @@ bool Thermostat::set_remotehum(const char * value, const int8_t id) {
         Roomctrl::set_remotehum(Roomctrl::RC100H, hc->hc(), hc->remotehum); // RC100H
         return true;
     }
+    Roomctrl::set_remotehum(Roomctrl::RC100H, hc->hc(), EMS_VALUE_UINT8_NOTSET); // RC100H
     return false;
 }
 
@@ -2044,7 +2068,7 @@ bool Thermostat::set_roomsensor(const char * value, const int8_t id) {
 
 // sets the thermostat ww working mode, where mode is a string, ems and ems+
 bool Thermostat::set_wwmode(const char * value, const int8_t id) {
-    uint8_t dhw = id - DeviceValueTAG::TAG_DHW1;
+    uint8_t dhw = id2dhw(id);
     uint8_t set;
 
     if (model() == EMSdevice::EMS_DEVICE_FLAG_RC10) {
@@ -2122,7 +2146,7 @@ bool Thermostat::set_wwtemplow(const char * value, const int8_t id) {
 
 // Set ww charge RC300, ems+
 bool Thermostat::set_wwcharge(const char * value, const int8_t id) {
-    uint8_t dhw = id - DeviceValueTAG::TAG_DHW1;
+    uint8_t dhw = id2dhw(id);
     bool    b;
     if (!Helpers::value2bool(value, b)) {
         return false;
@@ -2139,7 +2163,7 @@ bool Thermostat::set_wwcharge(const char * value, const int8_t id) {
 
 // Set ww charge duration in steps of 15 min, ems+
 bool Thermostat::set_wwchargeduration(const char * value, const int8_t id) {
-    uint8_t dhw = id - DeviceValueTAG::TAG_DHW1;
+    uint8_t dhw = id2dhw(id);
     int     t;
     if (!Helpers::value2number(value, t)) {
         return false;
@@ -2187,7 +2211,7 @@ bool Thermostat::set_cooling(const char * value, const int8_t id) {
 
 // sets the thermostat ww circulation working mode, where mode is a string
 bool Thermostat::set_wwcircmode(const char * value, const int8_t id) {
-    uint8_t dhw = id - DeviceValueTAG::TAG_DHW1;
+    uint8_t dhw = id2dhw(id);
     uint8_t set;
 
     if (isRC300() || (model() == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
@@ -2207,7 +2231,7 @@ bool Thermostat::set_wwcircmode(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_wwDailyHeating(const char * value, const int8_t id) {
-    uint8_t dhw = id - DeviceValueTAG::TAG_DHW1;
+    uint8_t dhw = id2dhw(id);
     bool    b;
     if (!Helpers::value2bool(value, b)) {
         return false;
@@ -2218,7 +2242,7 @@ bool Thermostat::set_wwDailyHeating(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_wwDailyHeatTime(const char * value, const int8_t id) {
-    uint8_t dhw = id - DeviceValueTAG::TAG_DHW1;
+    uint8_t dhw = id2dhw(id);
     int     set;
     if (!Helpers::value2number(value, set)) {
         return false;
@@ -2236,7 +2260,7 @@ bool Thermostat::set_wwDailyHeatTime(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_wwDisinfect(const char * value, const int8_t id) {
-    uint8_t dhw = id - DeviceValueTAG::TAG_DHW1;
+    uint8_t dhw = id2dhw(id);
     bool    b;
     if (!Helpers::value2bool(value, b)) {
         return false;
@@ -2254,7 +2278,7 @@ bool Thermostat::set_wwDisinfect(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_wwDisinfectDay(const char * value, const int8_t id) {
-    uint8_t dhw = id - DeviceValueTAG::TAG_DHW1;
+    uint8_t dhw = id2dhw(id);
     uint8_t set;
     if (!Helpers::value2enum(value, set, FL_(enum_dayOfWeek))) {
         return false;
@@ -2272,7 +2296,7 @@ bool Thermostat::set_wwDisinfectDay(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_wwDisinfectHour(const char * value, const int8_t id) {
-    uint8_t dhw = id - DeviceValueTAG::TAG_DHW1;
+    uint8_t dhw = id2dhw(id);
     int     set;
     if (isRC300() || (model() == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
         if (!Helpers::value2number(value, set, 0, 1431)) {
@@ -2409,6 +2433,10 @@ bool Thermostat::set_holiday(const char * value, const int8_t id, const bool vac
 
     if (data[0] > 31 || data[1] > 12 || data[3] > 31 || data[4] > 12) {
         return false;
+    }
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_RC30) {
+        write_command(0xA9 + hc->hc(), 1, data, 6, 0x9A + hc->hc());
+        return true;
     }
 
     if (!vacation || value[10] == '+') { // + for compatibility
@@ -3241,7 +3269,7 @@ bool Thermostat::set_switchtime2(const char * value, const int8_t id) {
 }
 // sets a single switchtime in the thermostat dhw program for RC35
 bool Thermostat::set_wwCircSwitchTime(const char * value, const int8_t id) {
-    auto dhw = dhw_circuit(255, id - DeviceValueTAG::TAG_DHW1 + 1);
+    auto dhw = dhw_circuit(255, id2dhw(id));
     if (dhw == nullptr) {
         return false;
     }
@@ -3258,7 +3286,7 @@ bool Thermostat::set_wwCircSwitchTime(const char * value, const int8_t id) {
 
 // sets a single switchtime in the thermostat circulation program for RC35
 bool Thermostat::set_wwSwitchTime(const char * value, const int8_t id) {
-    auto dhw = dhw_circuit(255, id - DeviceValueTAG::TAG_DHW1 + 1);
+    auto dhw = dhw_circuit(255, id2dhw(id));
     if (dhw != nullptr) {
         return false;
     }

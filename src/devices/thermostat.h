@@ -213,14 +213,18 @@ class Thermostat : public EMSdevice {
     void register_device_values();
     void register_device_values(uint8_t hc_num);
 
-    // specific thermostat characteristics, stripping the top 4 bits
+    // specific thermostat characteristics, stripping the top 2 bits
     inline uint8_t model() const {
-        return (flags() & 0x0F);
+        return (flags() & 0x3F);
     }
 
     // check to see if the thermostat is a hybrid of the R300
     inline bool isRC300() const {
         return ((model() == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) || (model() == EMSdevice::EMS_DEVICE_FLAG_BC400));
+    }
+
+    inline uint8_t id2dhw(const int8_t id) const {
+        return id - DeviceValueTAG::TAG_DHW1 + DeviceValueTAG::TAG_HC1 - 1;
     }
 
     // each thermostat has a list of heating controller type IDs for reading and writing
@@ -398,6 +402,7 @@ class Thermostat : public EMSdevice {
     void process_RC35Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC35Set(std::shared_ptr<const Telegram> telegram);
     void process_RC35Timer(std::shared_ptr<const Telegram> telegram);
+    void process_RC30Vacation(std::shared_ptr<const Telegram> telegram);
     void process_RC30Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC30Set(std::shared_ptr<const Telegram> telegram);
     void process_RC30Temp(std::shared_ptr<const Telegram> telegram);
