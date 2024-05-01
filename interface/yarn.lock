@@ -870,16 +870,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/core-downloads-tracker@npm:^5.15.15":
-  version: 5.15.15
-  resolution: "@mui/core-downloads-tracker@npm:5.15.15"
-  checksum: 10c0/6bbe71e00b1a1c20984a8b5e3b194cc6114f5eee54b37ac463ecfd47e3b83aacdb500f6f5f201ed24237679fb52b256cc6a7e81d4dcfcf29f2a151852b81d160
+"@mui/core-downloads-tracker@npm:^5.15.16":
+  version: 5.15.16
+  resolution: "@mui/core-downloads-tracker@npm:5.15.16"
+  checksum: 10c0/74e89bdc1ef103be01338792aeef3b916549f34b6816fa51ab8bdfbc8b96504ead36d98bd3b3585818362fb55274297cb69994bd1717ff0ec4e87b172859e369
   languageName: node
   linkType: hard
 
-"@mui/icons-material@npm:^5.15.15":
-  version: 5.15.15
-  resolution: "@mui/icons-material@npm:5.15.15"
+"@mui/icons-material@npm:^5.15.16":
+  version: 5.15.16
+  resolution: "@mui/icons-material@npm:5.15.16"
   dependencies:
     "@babel/runtime": "npm:^7.23.9"
   peerDependencies:
@@ -889,17 +889,17 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10c0/71f352cbd505e2e86793c0e0254276abecf7b7a467f21cff7e2d845994ec60f6b52c2c9b3a582dab159d9f7886f966a401d90bc7ee52555bfd2e98e40aa1e243
+  checksum: 10c0/bc5b627298e4df75eb03f564c7eb6e84a9ed31073b328f52934ff0880c159b088c86693671dc0dd2000e16f0a737ca3d179b9b42f3d785c0ddfee9551e7d2fb9
   languageName: node
   linkType: hard
 
-"@mui/material@npm:^5.15.15":
-  version: 5.15.15
-  resolution: "@mui/material@npm:5.15.15"
+"@mui/material@npm:^5.15.16":
+  version: 5.15.16
+  resolution: "@mui/material@npm:5.15.16"
   dependencies:
     "@babel/runtime": "npm:^7.23.9"
     "@mui/base": "npm:5.0.0-beta.40"
-    "@mui/core-downloads-tracker": "npm:^5.15.15"
+    "@mui/core-downloads-tracker": "npm:^5.15.16"
     "@mui/system": "npm:^5.15.15"
     "@mui/types": "npm:^7.2.14"
     "@mui/utils": "npm:^5.15.14"
@@ -922,7 +922,7 @@ __metadata:
       optional: true
     "@types/react":
       optional: true
-  checksum: 10c0/ed463112556e45ffa6cd1045eb08c412e9b9d80f049be069b557fa41703be437ab9cd7ae0816adf8bcbef73d11f9cd1df2ae82502d4b905fa483642ac01e1b62
+  checksum: 10c0/0ca3a4b40b57577528b548b4d16569d01ae5c498c84e6508f18c76d278d896480ce4a88603e3d7230a18ef6be85cb29abfbf44e9ec1d094c5220c89be1c5b1c9
   languageName: node
   linkType: hard
 
@@ -1470,12 +1470,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^20.12.7":
+"@types/node@npm:*":
   version: 20.12.7
   resolution: "@types/node@npm:20.12.7"
   dependencies:
     undici-types: "npm:~5.26.4"
   checksum: 10c0/dce80d63a3b91892b321af823d624995c61e39c6a223cc0ac481a44d337640cc46931d33efb3beeed75f5c85c3bda1d97cef4c5cd4ec333caf5dee59cff6eca0
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^20.12.8":
+  version: 20.12.8
+  resolution: "@types/node@npm:20.12.8"
+  dependencies:
+    undici-types: "npm:~5.26.4"
+  checksum: 10c0/840002d20654e38a9af8cdffa215598fdb28ac4f96c5701ed672ec365ed6ccc66da299edddaa409baf13cd71bbf1128901f633b5e44e070fc236e26415805b78
   languageName: node
   linkType: hard
 
@@ -1699,14 +1708,14 @@ __metadata:
     "@emotion/react": "npm:^11.11.4"
     "@emotion/styled": "npm:^11.11.5"
     "@eslint/js": "npm:^9.1.1"
-    "@mui/icons-material": "npm:^5.15.15"
-    "@mui/material": "npm:^5.15.15"
+    "@mui/icons-material": "npm:^5.15.16"
+    "@mui/material": "npm:^5.15.16"
     "@preact/compat": "npm:^17.1.2"
     "@preact/preset-vite": "npm:^2.8.2"
     "@table-library/react-table-library": "npm:4.1.7"
     "@trivago/prettier-plugin-sort-imports": "npm:^4.3.0"
     "@types/lodash-es": "npm:^4.17.12"
-    "@types/node": "npm:^20.12.7"
+    "@types/node": "npm:^20.12.8"
     "@types/react": "npm:^18.3.1"
     "@types/react-dom": "npm:^18.3.0"
     "@types/react-router-dom": "npm:^5.3.3"
@@ -1719,12 +1728,12 @@ __metadata:
     jwt-decode: "npm:^4.0.0"
     lodash-es: "npm:^4.17.21"
     mime-types: "npm:^2.1.35"
-    preact: "npm:^10.20.2"
+    preact: "npm:^10.21.0"
     prettier: "npm:^3.2.5"
     react: "npm:latest"
     react-dom: "npm:latest"
     react-dropzone: "npm:^14.2.3"
-    react-icons: "npm:^5.1.0"
+    react-icons: "npm:^5.2.0"
     react-router-dom: "npm:^6.23.0"
     react-toastify: "npm:^10.0.5"
     rollup-plugin-visualizer: "npm:^5.12.0"
@@ -5644,10 +5653,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"preact@npm:^10.20.2":
-  version: 10.20.2
-  resolution: "preact@npm:10.20.2"
-  checksum: 10c0/e79c1e3ab0bab6a08dce157fc33a537487365a9093bcdc1a60612be8073a354e84648df9ee1eef5306b640461c99c9ef024720405e3e8219c03ed17e95de981e
+"preact@npm:^10.21.0":
+  version: 10.21.0
+  resolution: "preact@npm:10.21.0"
+  checksum: 10c0/1f3cfcb5ca83b780b53593bcb917ae2e8d10a37405c32fb6774be1b5f1f3167d2156bd22c058627388330acc54da35fe8d4bbe7d38ae567a10e5d8fd943a1a06
   languageName: node
   linkType: hard
 
@@ -5790,12 +5799,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-icons@npm:^5.1.0":
-  version: 5.1.0
-  resolution: "react-icons@npm:5.1.0"
+"react-icons@npm:^5.2.0":
+  version: 5.2.0
+  resolution: "react-icons@npm:5.2.0"
   peerDependencies:
     react: "*"
-  checksum: 10c0/f01648bbf37854510a568c1ac4aeb1c23f734f2ff3a9e94d624bc039ff6291d83ea83281a1380e8105b3f1819bb359a6f34326a5cefbfbced1024b4b81493e01
+  checksum: 10c0/bd9176b1aa6ddaa99b2abea2cecb523443b39a470912725e12da0b478697312fdefb55daaee921cf28bd9d76f580f0fa879d127c8f63fa1ca4516d44817eb6f4
   languageName: node
   linkType: hard
 
