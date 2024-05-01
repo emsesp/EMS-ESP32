@@ -1379,7 +1379,6 @@ void EMSdevice::dump_value_info() {
 }
 #endif
 
-
 // dumps all telegram details to a new vector
 #if defined(EMSESP_STANDALONE)
 void EMSdevice::dump_telegram_info(std::vector<TelegramFunctionDump> & telegram_functions_dump) {
