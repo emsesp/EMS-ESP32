@@ -1206,11 +1206,11 @@ void EMSdevice::getCustomizationEntities(std::vector<std::string> & entity_ids) 
     }
 }
 
-#if defined(EMSESP_STANDALONE)
 // dumps all entity values in native English
 // the code is intended to run only once standalone, outside the ESP32 so not optimized for memory efficiency
 // pipe symbols (|) are escaped so they can be converted to Markdown in the Wiki
 // format is: device name,device type,product id,shortname,fullname,type [options...] \\| (min/max),uom,writeable,discovery entityid v3.4, discovery entityid
+#if defined(EMSESP_STANDALONE)
 void EMSdevice::dump_value_info() {
     for (auto & dv : devicevalues_) {
         if (dv.fullname != nullptr) {
@@ -1375,6 +1375,15 @@ void EMSdevice::dump_value_info() {
 
             Serial.println();
         }
+    }
+}
+#endif
+
+// dumps all telegram details to a new vector
+#if defined(EMSESP_STANDALONE)
+void EMSdevice::dump_telegram_info(std::vector<TelegramFunctionDump> & telegram_functions_dump) {
+    for (auto & tf : telegram_functions_) {
+        telegram_functions_dump.emplace_back(tf.telegram_type_id_, tf.telegram_type_name_, tf.fetch_, tf.process_function_ != nullptr);
     }
 }
 #endif

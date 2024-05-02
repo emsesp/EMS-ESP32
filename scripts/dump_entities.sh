@@ -5,5 +5,5 @@
 rm -f dump_entities.csv
 make clean
 make ARGS=-DEMSESP_STANDALONE
-echo "test entity_dump" | ./emsesp | python3 ./scripts/dump_entities.py > dump_entities.csv
+echo "test entity_dump" | ./emsesp | python3 ./scripts/strip_csv.py > dump_entities.csv
 cat dump_entities.csv

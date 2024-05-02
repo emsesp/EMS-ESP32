@@ -1,8 +1,5 @@
 # strips out lines between two markers
-# pipe a file into, for example:
-#  make clean; make; echo "test entity_dump" | ./emsesp | python3 ./scripts/dump_entities.py > dump_entities.csv
-# see dump_entities.sh
-
+# pipe a file into, for example: 'cat x | python3 strip_csv.py'
 import fileinput
 with fileinput.input() as f_input:
     inRecordingMode = False

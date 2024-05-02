@@ -52,6 +52,7 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "api_wwmode"
 // #define EMSESP_DEBUG_DEFAULT "customization"
 // #define EMSESP_DEBUG_DEFAULT "entity_dump"
+// #define EMSESP_DEBUG_DEFAULT "telegram_dump"
 // #define EMSESP_DEBUG_DEFAULT "memory"
 // #define EMSESP_DEBUG_DEFAULT "coldshot"
 // #define EMSESP_DEBUG_DEFAULT "custom"

@@ -131,6 +131,7 @@ class EMSESP {
     static void show_device_values(uuid::console::Shell & shell);
     static void show_sensor_values(uuid::console::Shell & shell);
     static void dump_all_values(uuid::console::Shell & shell);
+    static void dump_all_telegrams(uuid::console::Shell & shell);
 
     static void show_devices(uuid::console::Shell & shell);
     static void show_ems(uuid::console::Shell & shell);
