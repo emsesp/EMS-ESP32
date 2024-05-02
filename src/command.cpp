@@ -187,7 +187,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         return_code = Command::call(device_type, command_p, data.as<const char *>(), is_admin, id_n, output);
     } else if (data.is<int>()) {
         char data_str[10];
-        return_code = Command::call(device_type, command_p, Helpers::itoa((int16_t)data.as<int>(), data_str), is_admin, id_n, output);
+        return_code = Command::call(device_type, command_p, Helpers::itoa(data.as<int32_t>(), data_str), is_admin, id_n, output);
     } else if (data.is<float>()) {
         char data_str[10];
         return_code = Command::call(device_type, command_p, Helpers::render_value(data_str, data.as<float>(), 2), is_admin, id_n, output);
@@ -302,16 +302,16 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     auto    dname     = EMSdevice::device_type_2_device_name(device_type);
     uint8_t device_id = EMSESP::device_id_from_cmd(device_type, cmd, id);
 
-    uint8_t flag = 0;
-    uint8_t tag = id - 1 + DeviceValueTAG::TAG_HC1;
+    uint8_t flag = CommandFlag::CMD_FLAG_DEFAULT;
+    uint8_t tag  = id - 1 + DeviceValueTAG::TAG_HC1;
     if (tag >= DeviceValueTAG::TAG_HC1 && tag <= DeviceValueTAG::TAG_HC8) {
-        flag = CommandFlag::MQTT_SUB_FLAG_HC;
+        flag = CommandFlag::CMD_FLAG_HC;
     } else if (tag >= DeviceValueTAG::TAG_DHW1 && tag <= DeviceValueTAG::TAG_DHW10) {
-        flag = CommandFlag::MQTT_SUB_FLAG_DHW;
+        flag = CommandFlag::CMD_FLAG_DHW;
     } else if (tag >= DeviceValueTAG::TAG_HS1 && tag <= DeviceValueTAG::TAG_HS16) {
-        flag = CommandFlag::MQTT_SUB_FLAG_HS;
+        flag = CommandFlag::CMD_FLAG_HS;
     } else if (tag >= DeviceValueTAG::TAG_AHS1 && tag <= DeviceValueTAG::TAG_AHS1) {
-        flag = CommandFlag::MQTT_SUB_FLAG_AHS;
+        flag = CommandFlag::CMD_FLAG_AHS;
     }
     // see if there is a command registered
     auto cf = find_command(device_type, device_id, cmd, flag);
@@ -381,9 +381,9 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     // report back. If not OK show output from error, other return the HTTP code
     if (return_code != CommandRet::OK) {
         if ((value == nullptr) || (strlen(value) == 0)) {
-            LOG_ERROR("Command '%s' failed with error code %d", cmd, FL_(cmdRet)[return_code]);
+            LOG_ERROR("Command '%s' failed with error '%s'", cmd, FL_(cmdRet)[return_code]);
         } else {
-            LOG_ERROR("Command '%s/%s' failed with error code %c", cmd, value, return_code);
+            LOG_ERROR("Command '%s/%s' failed with error '%s'", cmd, value, FL_(cmdRet)[return_code]);
         }
         return message(return_code, "callback function failed", output);
     }
@@ -430,7 +430,7 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, const ui
 
     for (auto & cf : cmdfunctions_) {
         if (Helpers::toLower(cmd) == Helpers::toLower(cf.cmd_) && (cf.device_type_ == device_type) && (!device_id || cf.device_id_ == device_id)
-            && (!(flag & 0x3F) || (flag & 0x3F) == (cf.flags_ & 0x3F))) {
+            && (flag & 0x3F) == (cf.flags_ & 0x3F)) {
             return &cf;
         }
     }
@@ -438,17 +438,33 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, const ui
     return nullptr; // command not found
 }
 
-void Command::erase_command(const uint8_t device_type, const char * cmd) {
+void Command::erase_command(const uint8_t device_type, const char * cmd, uint8_t flag) {
     if ((cmd == nullptr) || (strlen(cmd) == 0) || (cmdfunctions_.empty())) {
         return;
     }
     auto it = cmdfunctions_.begin();
     for (auto & cf : cmdfunctions_) {
-        if (Helpers::toLower(cmd) == Helpers::toLower(cf.cmd_) && (cf.device_type_ == device_type)) {
+        if (Helpers::toLower(cmd) == Helpers::toLower(cf.cmd_) && (cf.device_type_ == device_type) && ((flag & 0x3F) == (cf.flags_ & 0x3F))) {
             cmdfunctions_.erase(it);
             return;
         }
         it++;
+    }
+}
+
+// get the tagged command
+std::string Command::tagged_cmd(std::string cmd, const uint8_t flag) {
+    switch (flag & 0x3F) {
+    case CommandFlag::CMD_FLAG_HC:
+        return "[hc<n>.]" + cmd;
+    case CommandFlag::CMD_FLAG_DHW:
+        return "dhw[n]." + cmd;
+    case CommandFlag::CMD_FLAG_HS:
+        return "hs<n>." + cmd;
+    case CommandFlag::CMD_FLAG_AHS:
+        return "ahs<n>." + cmd;
+    default:
+        return cmd;
     }
 }
 
@@ -467,40 +483,28 @@ bool Command::list(const uint8_t device_type, JsonObject output) {
     std::list<std::string> sorted_cmds;
     for (const auto & cf : cmdfunctions_) {
         if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN)) {
-            sorted_cmds.push_back((cf.cmd_));
+            sorted_cmds.push_back(tagged_cmd(cf.cmd_, cf.flags_));
         }
     }
     sorted_cmds.sort();
 
     for (const auto & cl : sorted_cmds) {
         for (const auto & cf : cmdfunctions_) {
-            if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN) && cf.description_ && (cl == std::string(cf.cmd_))) {
-                if (cf.has_flags(CommandFlag::MQTT_SUB_FLAG_DHW)) {
-                    char s[100];
-                    snprintf(s, sizeof(s), "%s %s", EMSdevice::tag_to_string(DeviceValueTAG::TAG_DHW1), Helpers::translated_word(cf.description_));
-                    output[cl] = s;
-                } else {
-                    output[cl] = Helpers::translated_word(cf.description_);
-                }
+            if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN) && cf.description_ && (cl == tagged_cmd(cf.cmd_, cf.flags_))) {
+                output[cl] = Helpers::translated_word(cf.description_);
             }
         }
     }
-
     return true;
 }
 
 // output list of all commands to console for a specific DeviceType
 void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbose) {
-    if (cmdfunctions_.empty()) {
-        shell.println("No commands available");
-        return;
-    }
-
     // create list of commands we have registered
     std::list<std::string> sorted_cmds;
     for (const auto & cf : cmdfunctions_) {
         if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN)) {
-            sorted_cmds.push_back((cf.cmd_));
+            sorted_cmds.push_back(tagged_cmd(cf.cmd_, cf.flags_));
         }
     }
 
@@ -539,22 +543,9 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
     for (const auto & cl : sorted_cmds) {
         // find and print the description
         for (const auto & cf : cmdfunctions_) {
-            if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN) && cf.description_ && (cl == std::string(cf.cmd_))) {
+            if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN) && cf.description_ && (cl == tagged_cmd(cf.cmd_, cf.flags_))) {
                 uint8_t i = cl.length();
                 shell.print("  ");
-                if (cf.has_flags(MQTT_SUB_FLAG_HC)) {
-                    shell.print("[hc<n>.]");
-                    i += 8;
-                } else if (cf.has_flags(MQTT_SUB_FLAG_DHW)) {
-                    shell.print("[dhw<n>.]");
-                    i += 9;
-                } else if (cf.has_flags(MQTT_SUB_FLAG_AHS)) {
-                    shell.print("[ahs<n>.]");
-                    i += 9;
-                } else if (cf.has_flags(MQTT_SUB_FLAG_HS)) {
-                    shell.print("[hs<n>.]");
-                    i += 8;
-                }
                 shell.print(cl);
                 // pad with spaces
                 while (i++ < 30) {
