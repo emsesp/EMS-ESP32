@@ -582,7 +582,7 @@ std::shared_ptr<Thermostat::DhwCircuit> Thermostat::dhw_circuit(const uint8_t of
 // type 0xB1 - data from the RC10 thermostat (0x17)
 // Data: 04 23 00 BA 00 00 00 BA
 void Thermostat::process_RC10Monitor(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -599,7 +599,7 @@ void Thermostat::process_RC10Monitor(std::shared_ptr<const Telegram> telegram) {
 // type 0xB0 - for reading the mode from the RC10 thermostat (0x17)
 // Data: 00 FF 00 1C 20 08 01
 void Thermostat::process_RC10Set(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -619,7 +619,7 @@ void Thermostat::process_RC10Set(std::shared_ptr<const Telegram> telegram) {
 // type 0xB2, mode setting Data: 04 00
 // not used, we read mode from monitor 0xB1
 void Thermostat::process_RC10Set_2(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -633,7 +633,7 @@ void Thermostat::process_RC10Set_2(std::shared_ptr<const Telegram> telegram) {
 // 0xA8 - for reading the mode from the RC20 thermostat (0x17)
 // RC20Set(0xA8), data: 01 00 FF F6 01 06 00 01 0D 01 00 FF FF 01 02 02 02 00 00 05 1E 05 1E 02 1C 00 FF 00 00 26 02
 void Thermostat::process_RC20Set(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -646,7 +646,7 @@ void Thermostat::process_RC20Set(std::shared_ptr<const Telegram> telegram) {
 // 0x90 - for reading curve temperature from the RC20 thermostat (0x17)
 //
 void Thermostat::process_RC20Temp(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -662,7 +662,7 @@ void Thermostat::process_RC20Temp(std::shared_ptr<const Telegram> telegram) {
 // data: E7 90 E7 90 E7 90 E7 90 E7 90 E7 90 E7 90 E7 90 E7 90 E7 90 E7 90 E7 90 E7 90 E7 (offset 54)
 // data: 90 E7 90 01 00 00 01 01 00 01 01 00 01 01 00 01 01 00 00 (offset 81)
 void Thermostat::process_RC20Timer(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -690,7 +690,7 @@ void Thermostat::process_RC20Timer(std::shared_ptr<const Telegram> telegram) {
 // 17 00 AE 00 80 12 2E 00 D0 00 00 64 (#data=8)
 // https://github.com/emsesp/EMS-ESP/issues/361
 void Thermostat::process_RC20Monitor_2(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -709,7 +709,7 @@ void Thermostat::process_RC20Monitor_2(std::shared_ptr<const Telegram> telegram)
 // 17 00 AD 00 01 27 29 01 4B 05 01 FF 28 19 0A 02 00 00
 // RC25(0x17) -> All(0x00), ?(0xAD), data: 01 27 2D 00 44 05 01 FF 28 19 0A 07 00 00 F6 12 5A 11 00 28 05 05 00
 void Thermostat::process_RC20Set_2(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -729,7 +729,7 @@ void Thermostat::process_RC20Set_2(std::shared_ptr<const Telegram> telegram) {
 
 // 0xAF - for reading the roomtemperature from the RC20/ES72 thermostat (0x18, 0x19, ..)
 void Thermostat::process_RC20Remote(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -777,7 +777,7 @@ void Thermostat::process_RemoteBattery(std::shared_ptr<const Telegram> telegram)
 
 // type 0x0165, ff
 void Thermostat::process_JunkersSet(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -805,7 +805,7 @@ void Thermostat::process_JunkersSet(std::shared_ptr<const Telegram> telegram) {
 
 // type 0x0179, ff for Junkers_OLD
 void Thermostat::process_JunkersSet2(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -839,7 +839,7 @@ void Thermostat::process_RCOutdoorTemp(std::shared_ptr<const Telegram> telegram)
 // RC20Monitor(0x91), data: 90 2A 00 D5 1A 00 00 05 00 5A 04 00 D6 00
 // offset 8: setburnpower to boiler, offset 9: setflowtemp to boiler (thermostat: targetflowtemp) send via 0x1A
 void Thermostat::process_RC20Monitor(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -852,7 +852,7 @@ void Thermostat::process_RC20Monitor(std::shared_ptr<const Telegram> telegram) {
 
 // type 0x0A - data from the Nefit Easy/TC100 thermostat (0x18) - 31 bytes long
 void Thermostat::process_EasyMonitor(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -971,7 +971,7 @@ void Thermostat::process_JunkersMonitor(std::shared_ptr<const Telegram> telegram
         return;
     }
 
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -1008,7 +1008,7 @@ void Thermostat::process_PVSettings(std::shared_ptr<const Telegram> telegram) {
 }
 
 void Thermostat::process_JunkersSetMixer(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -1022,7 +1022,7 @@ void Thermostat::process_JunkersWW(std::shared_ptr<const Telegram> telegram) {
 
 // type 0x02A5 - data from Worchester CRF200
 void Thermostat::process_CRFMonitor(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -1039,7 +1039,7 @@ void Thermostat::process_CRFMonitor(std::shared_ptr<const Telegram> telegram) {
 // type 0x02A5 - data from the Nefit RC1010/3000 thermostat (0x18) and RC300/310s on 0x10
 // Rx: 10 0B FF 00 01 A5 80 00 01 30 23 00 30 28 01 E7 03 03 01 01 E7 02 33 00 00 11 01 03 FF FF 00 04
 void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -1078,7 +1078,7 @@ void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) 
 // type 0x02B9 EMS+ for reading from RC300/RC310 thermostat
 // Thermostat(0x10) -> Me(0x0B), RC300Set(0x2B9), data: FF 2E 2A 26 1E 02 4E FF FF 00 1C 01 E1 20 01 0F 05 00 00 02 1F
 void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -1132,7 +1132,7 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
 // types 0x2AF ff
 // RC300Summer(0x02AF), data: 00 28 00 00 3C 26 00 00 19 0F 00 (from a heatpump)
 void Thermostat::process_RC300Summer(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -1158,7 +1158,7 @@ void Thermostat::process_RC300Summer(std::shared_ptr<const Telegram> telegram) {
 // types 0x471 ff
 // (0x473), data: 00 11 04 01 01 1C 08 04
 void Thermostat::process_RC300Summer2(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -1178,7 +1178,7 @@ void Thermostat::process_RC300Summer2(std::shared_ptr<const Telegram> telegram) 
 // types 0x29B ff
 // Thermostat(0x10) -> Me(0x0B), RC300Curves(0x29B), data: 01 01 00 FF FF 01 05 30 52
 void Thermostat::process_RC300Curve(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -1276,7 +1276,7 @@ void Thermostat::process_RC300Set2(std::shared_ptr<const Telegram> telegram) {
     // telegram is either offset 3 with data length of 1 and values 0/1 (radiators) - 10 0B FF 03 01 CC 01 F6
     // or offset 0 with data length of 6 bytes - offset 3 values are 0x00 or 0xFF - 10 0B FF 00 01 CE FF 13 0A FF 1E 00 20
 
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -1292,7 +1292,7 @@ void Thermostat::process_RC300Floordry(std::shared_ptr<const Telegram> telegram)
 // 0x291 ff.  HP mode
 // thermostat(0x10) -W-> Me(0x0B), HPMode(0x0291), data: 01 00 00 03 FF 00
 void Thermostat::process_HPMode(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -1302,7 +1302,7 @@ void Thermostat::process_HPMode(std::shared_ptr<const Telegram> telegram) {
 
 // 0x467 ff HP settings
 void Thermostat::process_HPSet(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -1314,7 +1314,7 @@ void Thermostat::process_HPSet(std::shared_ptr<const Telegram> telegram) {
 // type 0x41 - data from the RC30 thermostat(0x10) - 14 bytes long
 // RC30Monitor(0x41), data: 80 20 00 AC 00 00 00 02 00 05 09 00 AC 00
 void Thermostat::process_RC30Monitor(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -1329,7 +1329,7 @@ void Thermostat::process_RC30Monitor(std::shared_ptr<const Telegram> telegram) {
 // RC30Set(0xA7), data: 01 00 FF F6 01 06 00 01 0D 00 00 FF FF 01 02 02 02 00 00 05 1F 05 1F 01 0E 00 FF
 // RC30Set(0xA7), data: 00 00 20 02 (offset 27)
 void Thermostat::process_RC30Set(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -1357,7 +1357,7 @@ void Thermostat::process_RC30Temp(std::shared_ptr<const Telegram> telegram) {
         return;
     }
 
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -1380,7 +1380,7 @@ void Thermostat::process_RC35Monitor(std::shared_ptr<const Telegram> telegram) {
         return;
     }
 
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -1404,7 +1404,7 @@ void Thermostat::process_RC35Set(std::shared_ptr<const Telegram> telegram) {
         return;
     }
 
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -1446,7 +1446,7 @@ void Thermostat::process_RC35Set(std::shared_ptr<const Telegram> telegram) {
 
 // type 0x3F (HC1), 0x49 (HC2), 0x53 (HC3), 0x5D (HC4) - timer setting
 void Thermostat::process_RC35Timer(std::shared_ptr<const Telegram> telegram) {
-    std::shared_ptr<Thermostat::HeatingCircuit> hc = heating_circuit(telegram);
+    auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
@@ -1517,23 +1517,26 @@ void Thermostat::process_RC35Timer(std::shared_ptr<const Telegram> telegram) {
 
 // type 0x9A (HC1)
 void Thermostat::process_RC30Vacation(std::shared_ptr<const Telegram> telegram) {
-    auto hc = heating_circuit(0x9A - telegram->type_id + 1);
-    if (hc == nullptr) {
+    uint8_t index = 0;
+    if ((telegram->offset + telegram->message_length) > 57) {
         return;
     }
-
-    if (telegram->message_length + telegram->offset >= 7 && telegram->offset <= 1) {
-        char data[sizeof(hc->vacation)];
+    static uint8_t vacation_telegram[57] = {0}; // make a copy of the whole telegram to access blocks
+    memcpy(&vacation_telegram[telegram->offset], telegram->message_data, telegram->message_length);
+    for (uint8_t index = 0; index < 8; index++) {
+        char data[sizeof(vacation[0])];
         snprintf(data,
                  sizeof(data),
                  "%02d.%02d.%04d-%02d.%02d.%04d",
-                 telegram->message_data[1 - telegram->offset],
-                 telegram->message_data[2 - telegram->offset],
-                 telegram->message_data[3 - telegram->offset] + 2000,
-                 telegram->message_data[4 - telegram->offset],
-                 telegram->message_data[5 - telegram->offset],
-                 telegram->message_data[7 - telegram->offset] + 2000);
-        has_update(hc->vacation, data, sizeof(hc->vacation));
+                 vacation_telegram[1 + 7 * index],
+                 vacation_telegram[2 + 7 * index],
+                 vacation_telegram[3 + 7 * index] + 2000,
+                 vacation_telegram[4 + 7 * index],
+                 vacation_telegram[5 + 7 * index],
+                 vacation_telegram[6 + 7 * index] + 2000);
+        if (data[1] > '0') {
+            has_update(vacation[index], data, sizeof(vacation[0]));
+        }
     }
 }
 
@@ -2456,6 +2459,27 @@ bool Thermostat::set_holiday(const char * value, const int8_t id, const bool vac
         }
     }
 
+    return true;
+}
+
+// set vacations as string dd.mm.yyyy-dd.mm.yyyy
+bool Thermostat::set_RC30Vacation(const char * value, const int8_t id) {
+    if (strlen(value) != 21) {
+        return false;
+    }
+
+    uint8_t data[6];
+    data[0] = (value[0] - '0') * 10 + (value[1] - '0');
+    data[1] = (value[3] - '0') * 10 + (value[4] - '0');
+    data[2] = (value[7] - '0') * 100 + (value[8] - '0') * 10 + (value[9] - '0');
+    data[3] = (value[11] - '0') * 10 + (value[12] - '0');
+    data[4] = (value[14] - '0') * 10 + (value[15] - '0');
+    data[5] = (value[18] - '0') * 100 + (value[19] - '0') * 10 + (value[20] - '0');
+
+    if (!data[0] || data[0] > 31 || !data[1] || data[1] > 12 || !data[3] || data[3] > 31 || !data[4] || data[4] > 12) {
+        return false;
+    }
+    write_command(0xA9, 1 + 7 * (id - 1), data, 6, 0x9A);
     return true;
 }
 
@@ -3808,14 +3832,14 @@ bool Thermostat::set_temperature_value(const char * value, const int8_t id, cons
 void Thermostat::register_device_values() {
     // RF remote sensor seen at 0x40, maybe this is also for different hc with id 0x40 - 0x47? emsesp.cpp maps only 0x40
     if (device_id() >= 0x40 && device_id() <= 0x47) {
-        uint8_t tag = DeviceValueTAG::TAG_HC1 + device_id() - 0x40;
+        int8_t tag = DeviceValueTAG::TAG_HC1 + device_id() - 0x40;
         register_device_value(tag, &tempsensor1_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(RFTemp), DeviceValueUOM::DEGREES);
         return;
     }
     // RC100H remote with humidity, this is also EMSdevice::EMS_DEVICE_FLAG_RC100 for set_calinttemp
     if (device_id() >= 0x38 && device_id() <= 0x3F) {
         // each device controls only one hc, so we tag the values
-        uint8_t tag = DeviceValueTAG::TAG_HC1 + device_id() - 0x38;
+        int8_t tag = DeviceValueTAG::TAG_HC1 + device_id() - 0x38;
         register_device_value(tag, &tempsensor1_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(remotetemp), DeviceValueUOM::DEGREES);
         register_device_value(tag, &dewtemperature_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(dewTemperature), DeviceValueUOM::DEGREES);
         register_device_value(tag, &humidity_, DeviceValueType::UINT8, FL_(airHumidity), DeviceValueUOM::PERCENT);
@@ -3831,7 +3855,7 @@ void Thermostat::register_device_values() {
     }
     // Junkers FB10 remote, show only internal sensor
     if (this->model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS && device_id() >= 0x18 && device_id() <= 0x1B) {
-        uint8_t tag = DeviceValueTAG::TAG_HC1 + device_id() - 0x18;
+        int8_t tag = DeviceValueTAG::TAG_HC1 + device_id() - 0x18;
         register_device_value(tag, &tempsensor1_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(remotetemp), DeviceValueUOM::DEGREES);
         return;
     }
@@ -4222,7 +4246,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
     uint8_t model = hc->get_model();
 
     // heating circuit
-    uint8_t tag = DeviceValueTAG::TAG_HC1 + hc->hc();
+    int8_t tag = DeviceValueTAG::TAG_HC1 + hc->hc();
 
     // different logic on how temperature values are stored, depending on model
     uint8_t seltemp_divider;
@@ -4448,11 +4472,18 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         break;
     case EMSdevice::EMS_DEVICE_FLAG_RC30:
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode2), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
-        register_device_value(tag, &hc->holiday, DeviceValueType::STRING, FL_(tpl_holidays), FL_(holidays), DeviceValueUOM::NONE, MAKE_CF_CB(set_holiday));
-        register_device_value(tag, &hc->vacation, DeviceValueType::STRING, FL_(tpl_holidays), FL_(vacations), DeviceValueUOM::NONE, MAKE_CF_CB(set_vacation));
+        // register_device_value(tag, &hc->holiday, DeviceValueType::STRING, FL_(tpl_holidays), FL_(holidays), DeviceValueUOM::NONE, MAKE_CF_CB(set_holiday));
+        // register_device_value(tag, &hc->vacation, DeviceValueType::STRING, FL_(tpl_holidays), FL_(vacations), DeviceValueUOM::NONE, MAKE_CF_CB(set_vacation));
+        // register_device_value(tag, &hc->pause, DeviceValueType::UINT8, FL_(pause), DeviceValueUOM::HOURS, MAKE_CF_CB(set_pause));
+        // register_device_value(tag, &hc->party, DeviceValueType::UINT8, FL_(party), DeviceValueUOM::HOURS, MAKE_CF_CB(set_party));
+        register_device_value(tag, &vacation[0], DeviceValueType::STRING, FL_(tpl_holidays), FL_(vacations1), DeviceValueUOM::NONE, MAKE_CF_CB(set_RC30Vacation1));
+        register_device_value(tag, &vacation[1], DeviceValueType::STRING, FL_(tpl_holidays), FL_(vacations2), DeviceValueUOM::NONE, MAKE_CF_CB(set_RC30Vacation2));
+        register_device_value(tag, &vacation[2], DeviceValueType::STRING, FL_(tpl_holidays), FL_(vacations3), DeviceValueUOM::NONE, MAKE_CF_CB(set_RC30Vacation3));
+        register_device_value(tag, &vacation[3], DeviceValueType::STRING, FL_(tpl_holidays), FL_(vacations4), DeviceValueUOM::NONE, MAKE_CF_CB(set_RC30Vacation4));
+        register_device_value(tag, &vacation[4], DeviceValueType::STRING, FL_(tpl_holidays), FL_(vacations5), DeviceValueUOM::NONE, MAKE_CF_CB(set_RC30Vacation5));
+        register_device_value(tag, &vacation[5], DeviceValueType::STRING, FL_(tpl_holidays), FL_(vacations6), DeviceValueUOM::NONE, MAKE_CF_CB(set_RC30Vacation6));
+        register_device_value(tag, &vacation[6], DeviceValueType::STRING, FL_(tpl_holidays), FL_(vacations7), DeviceValueUOM::NONE, MAKE_CF_CB(set_RC30Vacation7));
         register_device_value(tag, &hc->program, DeviceValueType::ENUM, FL_(enum_progMode2), FL_(program), DeviceValueUOM::NONE, MAKE_CF_CB(set_program));
-        register_device_value(tag, &hc->pause, DeviceValueType::UINT8, FL_(pause), DeviceValueUOM::HOURS, MAKE_CF_CB(set_pause));
-        register_device_value(tag, &hc->party, DeviceValueType::UINT8, FL_(party), DeviceValueUOM::HOURS, MAKE_CF_CB(set_party));
         register_device_value(
             tag, &hc->switchtime1, DeviceValueType::STRING, FL_(tpl_switchtime1), FL_(switchtime1), DeviceValueUOM::NONE, MAKE_CF_CB(set_switchtime1));
         register_device_value(
@@ -4639,7 +4670,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
 
 // registers the values for a heating circuit
 void Thermostat::register_device_values_dhw(std::shared_ptr<Thermostat::DhwCircuit> dhw) {
-    uint8_t tag = DeviceValueTAG::TAG_DHW1 + dhw->dhw();
+    int8_t tag = DeviceValueTAG::TAG_DHW1 + dhw->dhw();
     switch (this->model()) {
     case EMSdevice::EMS_DEVICE_FLAG_RC100:
     case EMSdevice::EMS_DEVICE_FLAG_RC300:
@@ -4702,8 +4733,8 @@ void Thermostat::register_device_values_dhw(std::shared_ptr<Thermostat::DhwCircu
         register_device_value(
             tag, &dhw->wwDisinfectDay_, DeviceValueType::ENUM, FL_(enum_dayOfWeek), FL_(wwDisinfectDay), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwDisinfectDay));
         register_device_value(tag, &dhw->wwDisinfectHour_, DeviceValueType::UINT8, FL_(wwDisinfectHour), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwDisinfectHour), 0, 23);
-        register_device_value(tag, &dhw->wwHoliday_, DeviceValueType::STRING, FL_(tpl_holidays), FL_(wwHolidays), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwHoliday));
-        register_device_value(tag, &dhw->wwVacation_, DeviceValueType::STRING, FL_(tpl_holidays), FL_(wwVacations), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwVacation));
+        // register_device_value(tag, &dhw->wwHoliday_, DeviceValueType::STRING, FL_(tpl_holidays), FL_(wwHolidays), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwHoliday));
+        // register_device_value(tag, &dhw->wwVacation_, DeviceValueType::STRING, FL_(tpl_holidays), FL_(wwVacations), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwVacation));
         break;
     case EMSdevice::EMS_DEVICE_FLAG_RC30_N:
         register_device_value(tag, &dhw->wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode2), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));

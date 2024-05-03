@@ -24,7 +24,7 @@ namespace emsesp {
 
 // constructor
 DeviceValue::DeviceValue(uint8_t               device_type,
-                         uint8_t               tag,
+                         int8_t                tag,
                          void *                value_p,
                          uint8_t               type,
                          const char * const ** options,
@@ -117,8 +117,6 @@ const char * DeviceValue::DeviceValueUOM_s[] = {
 // mapping of TAGs, to match order in DeviceValueTAG enum in emsdevicevalue.h
 const char * const * DeviceValue::DeviceValueTAG_s[] = {
 
-    FL_(tag_none),        // ""
-    FL_(tag_heartbeat),   // ""
     FL_(tag_device_data), // ""
     FL_(tag_hc1),         // "hc1"
     FL_(tag_hc2),         // "hc2"
@@ -128,7 +126,7 @@ const char * const * DeviceValue::DeviceValueTAG_s[] = {
     FL_(tag_hc6),         // "hc6"
     FL_(tag_hc7),         // "hc7"
     FL_(tag_hc8),         // "hc8"
-    FL_(tag_dhw1),        // "dhw1"
+    FL_(tag_dhw1),        // "dhw"
     FL_(tag_dhw2),        // "dhw2"
     FL_(tag_dhw3),        // "dhw3"
     FL_(tag_dhw4),        // "dhw4"
@@ -161,8 +159,6 @@ const char * const * DeviceValue::DeviceValueTAG_s[] = {
 // tags used in MQTT topic names. Macthes sequence from DeviceValueTAG_s
 const char * const DeviceValue::DeviceValueTAG_mqtt[] = {
 
-    FL_(tag_none)[0],        // ""
-    F_(heartbeat),           // "heartbeat"
     FL_(tag_device_data)[0], // ""
     FL_(tag_hc1)[0],         // "hc1"
     FL_(tag_hc2)[0],         // "hc2"
@@ -172,7 +168,7 @@ const char * const DeviceValue::DeviceValueTAG_mqtt[] = {
     FL_(tag_hc6)[0],         // "hc6"
     FL_(tag_hc7)[0],         // "hc7"
     FL_(tag_hc8)[0],         // "hc8"
-    FL_(tag_dhw1)[0],        // "dhw1"
+    FL_(tag_dhw1)[0],        // "dhw"
     FL_(tag_dhw2)[0],        // "dhw2"
     FL_(tag_dhw3)[0],        // "dhw3"
     FL_(tag_dhw4)[0],        // "dhw4"
@@ -317,11 +313,11 @@ bool DeviceValue::get_custom_min(int16_t & val) {
     bool    has_min    = (min_pos != std::string::npos);
     uint8_t fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (uom == DeviceValueUOM::DEGREES) ? 2 : (uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
     if (has_min) {
-        int16_t v = Helpers::atoint(custom_fullname.substr(min_pos + 1).c_str());
+        int32_t v = Helpers::atoint(custom_fullname.substr(min_pos + 1).c_str());
         if (fahrenheit) {
             v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
         }
-        if (max > 0 && v > max) {
+        if (max > 0 && v > 0 && (uint32_t)v > max) {
             return false;
         }
         val = v;
@@ -339,7 +335,7 @@ bool DeviceValue::get_custom_max(uint32_t & val) {
         if (fahrenheit) {
             v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
         }
-        if (v < 0 || v < min) {
+        if (v < 0 || v < (int32_t)min) {
             return false;
         }
         val = v;

@@ -26,9 +26,9 @@ Heatsource::Heatsource(uint8_t device_type, uint8_t device_id, uint8_t product_i
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     // AM200 alternative heatsource
     if (device_id == EMSdevice::EMS_DEVICE_ID_BOILER || (device_id >= EMSdevice::EMS_DEVICE_ID_AHS1 && device_id < EMSdevice::EMS_DEVICE_ID_HS1)) {
-        uint8_t tag = device_id == EMSdevice::EMS_DEVICE_ID_BOILER
-                          ? DeviceValueTAG::TAG_DEVICE_DATA
-                          : DeviceValueTAG::TAG_AHS1 + device_id - EMSdevice::EMS_DEVICE_ID_AHS1; // heating source id, count from 0
+        int8_t tag = device_id == EMSdevice::EMS_DEVICE_ID_BOILER
+                         ? DeviceValueTAG::TAG_DEVICE_DATA
+                         : DeviceValueTAG::TAG_AHS1 + device_id - EMSdevice::EMS_DEVICE_ID_AHS1; // heating source id, count from 0
         register_telegram_type(0x54D, "AmTemperatures", false, MAKE_PF_CB(process_amTempMessage));
         register_telegram_type(0x54E, "AmStatus", false, MAKE_PF_CB(process_amStatusMessage));
         register_telegram_type(0x54F, "AmCommand", false, MAKE_PF_CB(process_amCommandMessage)); // not broadcasted, but actually not used
@@ -75,23 +75,18 @@ Heatsource::Heatsource(uint8_t device_type, uint8_t device_id, uint8_t product_i
 
     // cascaded heating sources, only some values per individual heatsource (hs)
     if (device_id >= EMSdevice::EMS_DEVICE_ID_HS1) {
-        uint8_t hs = device_id - EMSdevice::EMS_DEVICE_ID_HS1; // heating source id, count from 0
+        int8_t tag = DeviceValueTAG::TAG_HS1 + device_id - EMSdevice::EMS_DEVICE_ID_HS1; // heating source id, count from 0
         // Runtime of each heatingsource in 0x06DC, ff
-        register_telegram_type(0x6DC + hs, "CascadeMessage", false, MAKE_PF_CB(process_CascadeMessage));
-        register_device_value(DeviceValueTAG::TAG_HS1 + hs, &burnWorkMin_, DeviceValueType::TIME, FL_(burnWorkMin), DeviceValueUOM::MINUTES);
+        register_telegram_type(0x6DC + device_id - EMSdevice::EMS_DEVICE_ID_HS1, "CascadeMessage", false, MAKE_PF_CB(process_CascadeMessage));
+        register_device_value(tag, &burnWorkMin_, DeviceValueType::TIME, FL_(burnWorkMin), DeviceValueUOM::MINUTES);
         // selBurnpower in D2 and E4
         // register_telegram_type(0xD2, "CascadePowerMessage", false, MAKE_PF_CB(process_CascadePowerMessage));
         // individual Flowtemps and powervalues for each heatingsource in E4
         register_telegram_type(0xE4, "UBAMonitorFastPlus", false, MAKE_PF_CB(process_UBAMonitorFastPlus));
-        register_device_value(DeviceValueTAG::TAG_HS1 + hs, &setFlowTemp_, DeviceValueType::UINT8, FL_(setFlowTemp), DeviceValueUOM::DEGREES);
-        register_device_value(DeviceValueTAG::TAG_HS1 + hs, &selBurnPow_, DeviceValueType::UINT8, FL_(selBurnPow), DeviceValueUOM::PERCENT);
-        register_device_value(DeviceValueTAG::TAG_HS1 + hs,
-                              &curFlowTemp_,
-                              DeviceValueType::UINT16,
-                              DeviceValueNumOp::DV_NUMOP_DIV10,
-                              FL_(curFlowTemp),
-                              DeviceValueUOM::DEGREES);
-        register_device_value(DeviceValueTAG::TAG_HS1 + hs, &curBurnPow_, DeviceValueType::UINT8, FL_(curBurnPow), DeviceValueUOM::PERCENT);
+        register_device_value(tag, &setFlowTemp_, DeviceValueType::UINT8, FL_(setFlowTemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &selBurnPow_, DeviceValueType::UINT8, FL_(selBurnPow), DeviceValueUOM::PERCENT);
+        register_device_value(tag, &curFlowTemp_, DeviceValueType::UINT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(curFlowTemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &curBurnPow_, DeviceValueType::UINT8, FL_(curBurnPow), DeviceValueUOM::PERCENT);
         return;
     }
 }

@@ -79,7 +79,7 @@ class Mqtt {
 
     static bool publish_ha_sensor_config(DeviceValue & dv, const char * model, const char * brand, const bool remove, const bool create_device_config = false);
     static bool publish_ha_sensor_config(uint8_t               type,
-                                         uint8_t               tag,
+                                         int8_t                tag,
                                          const char * const    fullname,
                                          const char * const    en_name,
                                          const uint8_t         device_type,
@@ -95,7 +95,7 @@ class Mqtt {
                                          const JsonObjectConst dev_json);
 
     static bool publish_system_ha_sensor_config(uint8_t type, const char * name, const char * entity, const uint8_t uom);
-    static bool publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp, const bool remove = false, const int16_t min = 5, const uint32_t max = 30);
+    static bool publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, const bool remove = false, const int16_t min = 5, const uint32_t max = 30);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
     static void show_mqtt(uuid::console::Shell & shell);
@@ -220,7 +220,7 @@ class Mqtt {
         mqtt_retain_ = mqtt_retain;
     }
 
-    static std::string tag_to_topic(uint8_t device_type, uint8_t tag);
+    static std::string tag_to_topic(uint8_t device_type, int8_t tag);
 
     static void add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, const char * entity = nullptr);
 

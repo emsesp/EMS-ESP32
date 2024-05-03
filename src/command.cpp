@@ -240,10 +240,10 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
         id = command[2] - '0';
         command += 3;
     } else if (!strncmp(lowerCmd, "dhw", 3) && command[3] == '1' && command[4] == '0') {
-        id = DeviceValueTAG::TAG_DHW10 - DeviceValueTAG::TAG_HC1 + 1; //18;
+        id = DeviceValueTAG::TAG_DHW10; //18;
         command += 5;
     } else if (!strncmp(lowerCmd, "dhw", 3) && command[3] >= '1' && command[3] <= '9') {
-        id = command[3] - '1' + DeviceValueTAG::TAG_DHW1 - DeviceValueTAG::TAG_HC1 + 1; //9;
+        id = command[3] - '1' + DeviceValueTAG::TAG_DHW1; //9;
         command += 4;
     } else if (!strncmp(lowerCmd, "id", 2) && command[2] == '1' && command[3] >= '0' && command[3] <= '9') {
         id = command[3] - '0' + 10;
@@ -252,16 +252,16 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
         id = command[2] - '0';
         command += 3;
     } else if (!strncmp(lowerCmd, "ahs", 3) && command[3] >= '1' && command[3] <= '1') { // only ahs1 for now
-        id = command[3] - '1' + DeviceValueTAG::TAG_AHS1 - DeviceValueTAG::TAG_HC1 + 1;  // 19;
+        id = command[3] - '1' + DeviceValueTAG::TAG_AHS1;                                // 19;
         command += 4;
     } else if (!strncmp(lowerCmd, "hs", 2) && command[2] == '1' && command[3] >= '0' && command[3] <= '6') {
-        id = command[3] - '0' + DeviceValueTAG::TAG_HS10 - DeviceValueTAG::TAG_HC1 + 1; //29;
+        id = command[3] - '0' + DeviceValueTAG::TAG_HS10; //29;
         command += 4;
     } else if (!strncmp(lowerCmd, "hs", 2) && command[2] >= '1' && command[2] <= '9') {
-        id = command[2] - '1' + DeviceValueTAG::TAG_HS1 - DeviceValueTAG::TAG_HC1 + 1; //20;
+        id = command[2] - '1' + DeviceValueTAG::TAG_HS1; //20;
         command += 3;
     } else if (!strncmp(lowerCmd, "dhw", 3)) { // no number
-        id = 9;
+        id = DeviceValueTAG::TAG_DHW1;
         command += 3;
     }
 
@@ -303,7 +303,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     uint8_t device_id = EMSESP::device_id_from_cmd(device_type, cmd, id);
 
     uint8_t flag = CommandFlag::CMD_FLAG_DEFAULT;
-    uint8_t tag  = id - 1 + DeviceValueTAG::TAG_HC1;
+    int8_t  tag  = id;
     if (tag >= DeviceValueTAG::TAG_HC1 && tag <= DeviceValueTAG::TAG_HC8) {
         flag = CommandFlag::CMD_FLAG_HC;
     } else if (tag >= DeviceValueTAG::TAG_DHW1 && tag <= DeviceValueTAG::TAG_DHW10) {

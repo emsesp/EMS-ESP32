@@ -224,7 +224,7 @@ class Thermostat : public EMSdevice {
     }
 
     inline uint8_t id2dhw(const int8_t id) const {
-        return id - DeviceValueTAG::TAG_DHW1 + DeviceValueTAG::TAG_HC1 - 1;
+        return id - DeviceValueTAG::TAG_DHW1;
     }
 
     // each thermostat has a list of heating controller type IDs for reading and writing
@@ -270,6 +270,8 @@ class Thermostat : public EMSdevice {
     int16_t dewtemperature_;
     uint8_t humidity_;
     uint8_t battery_;
+
+    char vacation[8][21]; // RC30 only, only one hc
 
     // HybridHP
     uint8_t hybridStrategy_;  // co2 = 1, cost = 2, temperature = 3, mix = 4
@@ -583,7 +585,28 @@ class Thermostat : public EMSdevice {
     inline bool set_wwHoliday(const char * value, const int8_t id) {
         return set_holiday(value, DeviceValueTAG::TAG_DHW1);
     }
-
+    bool        set_RC30Vacation(const char * value, const int8_t id);
+    inline bool set_RC30Vacation1(const char * value, const int8_t id) {
+        return set_RC30Vacation(value, 1);
+    }
+    inline bool set_RC30Vacation2(const char * value, const int8_t id) {
+        return set_RC30Vacation(value, 2);
+    }
+    inline bool set_RC30Vacation3(const char * value, const int8_t id) {
+        return set_RC30Vacation(value, 3);
+    }
+    inline bool set_RC30Vacation4(const char * value, const int8_t id) {
+        return set_RC30Vacation(value, 4);
+    }
+    inline bool set_RC30Vacation5(const char * value, const int8_t id) {
+        return set_RC30Vacation(value, 5);
+    }
+    inline bool set_RC30Vacation6(const char * value, const int8_t id) {
+        return set_RC30Vacation(value, 6);
+    }
+    inline bool set_RC30Vacation7(const char * value, const int8_t id) {
+        return set_RC30Vacation(value, 7);
+    }
     bool set_datetime(const char * value, const int8_t id);
     bool set_minexttemp(const char * value, const int8_t id);
     bool set_clockoffset(const char * value, const int8_t id);

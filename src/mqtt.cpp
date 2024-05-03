@@ -800,14 +800,14 @@ bool Mqtt::publish_system_ha_sensor_config(uint8_t type, const char * name, cons
     ids.add(Mqtt::basename());
 
     return publish_ha_sensor_config(
-        type, DeviceValueTAG::TAG_HEARTBEAT, name, name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, 0, dev_json);
+        type, DeviceValueTAG::TAG_DEVICE_DATA, name, name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, 0, dev_json);
 }
 
 // MQTT discovery configs
 // entity must match the key/value pair in the *_data topic
 // note: some extra string copying done here, it looks messy but does help with heap fragmentation issues
 bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdevice::DeviceValueType
-                                    uint8_t               tag,         // EMSdevice::DeviceValueTAG
+                                    int8_t                tag,         // EMSdevice::DeviceValueTAG
                                     const char * const    fullname,    // fullname, already translated
                                     const char * const    en_name,     // original name in english
                                     const uint8_t         device_type, // EMSdevice::DeviceType
@@ -1229,8 +1229,8 @@ void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, con
     }
 }
 
-bool Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp, const bool remove, const int16_t min, const uint32_t max) {
-    uint8_t hc_num = tag - DeviceValueTAG::TAG_HC1 + 1;
+bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, const bool remove, const int16_t min, const uint32_t max) {
+    uint8_t hc_num = tag;
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
     char topic_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
@@ -1341,10 +1341,10 @@ bool Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
 // based on the device and tag, create the MQTT topic name (without the basename)
 // differs based on whether MQTT nested is enabled
 // tag = EMSdevice::DeviceValueTAG
-std::string Mqtt::tag_to_topic(uint8_t device_type, uint8_t tag) {
+std::string Mqtt::tag_to_topic(uint8_t device_type, int8_t tag) {
     // the system device is treated differently. The topic is 'heartbeat' and doesn't follow the usual convention
     if (device_type == EMSdevice::DeviceType::SYSTEM) {
-        return EMSdevice::tag_to_mqtt(tag);
+        return F_(heartbeat);
     }
 
     std::string topic = EMSdevice::device_type_2_device_name(device_type);

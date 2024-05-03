@@ -47,9 +47,9 @@ class EMSdevice {
     // static functions, used outside the class like in console.cpp, command.cpp, emsesp.cpp, mqtt.cpp
     static const char * device_type_2_device_name(const uint8_t device_type);
     static uint8_t      device_name_2_device_type(const char * topic);
-    static const char * tag_to_string(uint8_t tag, const bool translate = true);
+    static const char * tag_to_string(int8_t tag, const bool translate = true);
     static const char * uom_to_string(uint8_t uom);
-    static const char * tag_to_mqtt(uint8_t tag);
+    static const char * tag_to_mqtt(int8_t tag);
     static uint8_t      decode_brand(uint8_t value);
     static bool         export_values(uint8_t device_type, JsonObject output, const int8_t id, const uint8_t output_target);
 
@@ -58,7 +58,7 @@ class EMSdevice {
     const char * device_type_name();                     // returns short non-translated device type name
     const char * device_type_2_device_name_translated(); // returns translated device type name
 
-    bool has_tags(const uint8_t tag) const;
+    bool has_tags(const int8_t tag) const;
     bool has_cmd(const char * cmd, const int8_t id) const;
 
     inline uint8_t device_id() const {
@@ -207,7 +207,7 @@ class EMSdevice {
     void   list_device_entries(JsonObject output) const;
     void   add_handlers_ignored(const uint16_t handler);
 
-    void set_climate_minmax(uint8_t tag, int16_t min, uint32_t max);
+    void set_climate_minmax(int8_t tag, int16_t min, uint32_t max);
     void setCustomizationEntity(const std::string & entity_id);
     void getCustomizationEntities(std::vector<std::string> & entity_ids);
 
@@ -220,11 +220,11 @@ class EMSdevice {
     void get_dv_info(JsonObject json);
 
     enum OUTPUT_TARGET : uint8_t { API_VERBOSE, API_SHORTNAMES, MQTT, CONSOLE };
-    bool generate_values(JsonObject output, const uint8_t tag_filter, const bool nested, const uint8_t output_target);
+    bool generate_values(JsonObject output, const int8_t tag_filter, const bool nested, const uint8_t output_target);
     void generate_values_web(JsonObject output);
     void generate_values_web_customization(JsonArray output);
 
-    void add_device_value(uint8_t               tag,
+    void add_device_value(int8_t                tag,
                           void *                value_p,
                           uint8_t               type,
                           const char * const ** options,
@@ -236,7 +236,7 @@ class EMSdevice {
                           int16_t               min,
                           uint32_t              max);
 
-    void register_device_value(uint8_t               tag,
+    void register_device_value(int8_t                tag,
                                void *                value_p,
                                uint8_t               type,
                                const char * const ** options,
@@ -247,11 +247,11 @@ class EMSdevice {
                                uint32_t              max);
 
     void
-    register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const ** options, const char * const * name, uint8_t uom, const cmd_function_p f);
+    register_device_value(int8_t tag, void * value_p, uint8_t type, const char * const ** options, const char * const * name, uint8_t uom, const cmd_function_p f);
 
-    void register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const ** options, const char * const * name, uint8_t uom);
+    void register_device_value(int8_t tag, void * value_p, uint8_t type, const char * const ** options, const char * const * name, uint8_t uom);
 
-    void register_device_value(uint8_t              tag,
+    void register_device_value(int8_t               tag,
                                void *               value_p,
                                uint8_t              type,
                                int8_t               numeric_operator,
@@ -259,7 +259,7 @@ class EMSdevice {
                                uint8_t              uom,
                                const cmd_function_p f = nullptr);
 
-    void register_device_value(uint8_t              tag,
+    void register_device_value(int8_t               tag,
                                void *               value_p,
                                uint8_t              type,
                                int8_t               numeric_operator,
@@ -270,7 +270,7 @@ class EMSdevice {
                                uint32_t             max);
 
     // single list of options
-    void register_device_value(uint8_t              tag,
+    void register_device_value(int8_t               tag,
                                void *               value_p,
                                uint8_t              type,
                                const char * const * options_single,
@@ -279,7 +279,7 @@ class EMSdevice {
                                const cmd_function_p f = nullptr);
 
     // single list of options, with no translations, with min and max
-    void register_device_value(uint8_t              tag,
+    void register_device_value(int8_t               tag,
                                void *               value_p,
                                uint8_t              type,
                                const char * const * options_single,
@@ -290,11 +290,10 @@ class EMSdevice {
                                uint32_t             max);
 
     // no options, optional function f
-    void register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const * name, uint8_t uom, const cmd_function_p f = nullptr);
+    void register_device_value(int8_t tag, void * value_p, uint8_t type, const char * const * name, uint8_t uom, const cmd_function_p f = nullptr);
 
     // no options, with min/max
-    void
-    register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const * name, uint8_t uom, const cmd_function_p f, int16_t min, uint32_t max);
+    void register_device_value(int8_t tag, void * value_p, uint8_t type, const char * const * name, uint8_t uom, const cmd_function_p f, int16_t min, uint32_t max);
 
     void write_command(const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid) const;
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid) const;

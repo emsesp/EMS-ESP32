@@ -77,10 +77,9 @@ class DeviceValue {
     };
 
     // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
-    enum DeviceValueTAG : uint8_t {
-        TAG_NONE = 0, // wild card
-        TAG_HEARTBEAT,
-        TAG_DEVICE_DATA,
+    enum DeviceValueTAG : int8_t {
+        TAG_NONE        = -1, // wild card
+        TAG_DEVICE_DATA = 0,
         TAG_HC1,
         TAG_HC2,
         TAG_HC3,
@@ -148,7 +147,7 @@ class DeviceValue {
     };
 
     uint8_t               device_type;    // EMSdevice::DeviceType
-    uint8_t               tag;            // DeviceValueTAG::*
+    int8_t                tag;            // DeviceValueTAG::*
     void *                value_p;        // pointer to variable of any type
     uint8_t               type;           // DeviceValueType::*
     const char * const ** options;        // options as a flash char array
@@ -165,7 +164,7 @@ class DeviceValue {
     uint8_t               state;           // DeviceValueState::*
 
     DeviceValue(uint8_t               device_type,
-                uint8_t               tag,
+                int8_t                tag,
                 void *                value_p,
                 uint8_t               type,
                 const char * const ** options,
