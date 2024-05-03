@@ -271,7 +271,7 @@ class Thermostat : public EMSdevice {
     uint8_t humidity_;
     uint8_t battery_;
 
-    char vacation[8][21]; // RC30 only, only one hc
+    char vacation[8][22]; // RC30 only, only one hc
 
     // HybridHP
     uint8_t hybridStrategy_;  // co2 = 1, cost = 2, temperature = 3, mix = 4

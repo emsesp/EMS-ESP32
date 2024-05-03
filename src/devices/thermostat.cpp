@@ -1517,7 +1517,6 @@ void Thermostat::process_RC35Timer(std::shared_ptr<const Telegram> telegram) {
 
 // type 0x9A (HC1)
 void Thermostat::process_RC30Vacation(std::shared_ptr<const Telegram> telegram) {
-    uint8_t index = 0;
     if ((telegram->offset + telegram->message_length) > 57) {
         return;
     }
