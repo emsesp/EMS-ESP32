@@ -26,13 +26,12 @@ uuid::log::Logger Mixer::logger_{F_(mixer), uuid::log::Facility::CONSOLE};
 
 Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
+    int8_t tag = DeviceValueTAG::TAG_HC1 + device_id - 0x20;
     // EMS+
     if (flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
-        register_telegram_type(device_id - 0x20 + 0x02D7, "MMPLUSStatusMessage_HC", false, MAKE_PF_CB(process_MMPLUSStatusMessage_HC));
-        // register_telegram_type(device_id - 0x20 + 0x02E1, "MMPLUSSetMessage_HC", true, MAKE_PF_CB(process_MMPLUSSetMessage_HC));
-        register_telegram_type(device_id - 0x20 + 0x02CD, "MMPLUSSetMessage_HC", true, MAKE_PF_CB(process_MMPLUSSetMessage_HC));
-        hc_         = device_id - 0x20 + 1;
-        uint8_t tag = DeviceValueTAG::TAG_HC1 + hc_ - 1;
+        register_telegram_type(device_id - 0x20 + 0x02D7, "MMPLUSStatusMessage", false, MAKE_PF_CB(process_MMPLUSStatusMessage_HC));
+        // register_telegram_type(device_id - 0x20 + 0x02E1, "MMPLUSSetMessage", true, MAKE_PF_CB(process_MMPLUSSetMessage_HC));
+        register_telegram_type(device_id - 0x20 + 0x02CD, "MMPLUSConfigMessage", true, MAKE_PF_CB(process_MMPLUSConfigMessage_HC));
         register_device_value(tag, &flowTempHc_, DeviceValueType::UINT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(flowTempHc), DeviceValueUOM::DEGREES);
         register_device_value(tag, &status_, DeviceValueType::UINT8, FL_(mixerStatus), DeviceValueUOM::PERCENT);
         register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT8, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
@@ -55,8 +54,6 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         register_telegram_type(0x00AA, "MMConfigMessage", true, MAKE_PF_CB(process_MMConfigMessage));
         register_telegram_type(0x00AB, "MMStatusMessage", false, MAKE_PF_CB(process_MMStatusMessage));
         register_telegram_type(0x00AC, "MMSetMessage", false, MAKE_PF_CB(process_MMSetMessage));
-        hc_         = device_id - 0x20 + 1;
-        uint8_t tag = DeviceValueTAG::TAG_HC1 + hc_ - 1;
         register_device_value(tag, &flowTempHc_, DeviceValueType::UINT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(flowTempHc), DeviceValueUOM::DEGREES);
         register_device_value(tag, &status_, DeviceValueType::INT8, FL_(mixerStatus), DeviceValueUOM::PERCENT);
         register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT8, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
@@ -70,7 +67,7 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
                               DeviceValueUOM::SECONDS,
                               MAKE_CF_CB(set_setValveTime),
                               10,
-                              120);
+                              600);
     }
 
     // HT3
@@ -78,8 +75,6 @@ Mixer::Mixer(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         register_telegram_type(0x010C, "IPMStatusMessage", false, MAKE_PF_CB(process_IPMStatusMessage));
         register_telegram_type(0x011E, "IPMTempMessage", false, MAKE_PF_CB(process_IPMTempMessage));
         // register_telegram_type(0x0123, "IPMSetMessage", false, MAKE_PF_CB(process_IPMSetMessage));
-        hc_         = device_id - 0x20 + 1;
-        uint8_t tag = DeviceValueTAG::TAG_HC1 + hc_ - 1;
         register_device_value(tag, &flowTempHc_, DeviceValueType::UINT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(flowTempHc), DeviceValueUOM::DEGREES);
         register_device_value(tag, &status_, DeviceValueType::UINT8, FL_(mixerStatus), DeviceValueUOM::PERCENT);
         register_device_value(tag, &flowSetTemp_, DeviceValueType::UINT8, FL_(flowSetTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_flowSetTemp));
@@ -151,10 +146,11 @@ void Mixer::process_MMConfigMessage(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, setValveTime_, 1); // valve runtime in 10 sec, max 120 s
 }
 
-// Mixer Setting 0x2DC, ..
-void Mixer::process_MMPLUSSetMessage_HC(std::shared_ptr<const Telegram> telegram) {
+// Mixer Config 0x2CD, ..
+// mixer(0x20) -W-> Me(0x0B), ?(0x02CD), data: FF 0E 05 FF 1E 00
+void Mixer::process_MMPLUSConfigMessage_HC(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, activated_, 0);      // on = 0xFF
-    has_update(telegram, setValveTime_, 1);   // valve runtime in 10 sec, max 120 s
+    has_update(telegram, setValveTime_, 1);   // valve runtime in 10 sec, default 120 s, max 600 s
     has_update(telegram, flowTempOffset_, 2); // Mixer increase [0-20 K]
 }
 

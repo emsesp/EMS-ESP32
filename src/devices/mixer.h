@@ -31,6 +31,7 @@ class Mixer : public EMSdevice {
     static uuid::log::Logger logger_;
 
     void process_MMPLUSStatusMessage_HC(std::shared_ptr<const Telegram> telegram);
+    void process_MMPLUSConfigMessage_HC(std::shared_ptr<const Telegram> telegram);
     void process_MMPLUSSetMessage_HC(std::shared_ptr<const Telegram> telegram);
     void process_IPMStatusMessage(std::shared_ptr<const Telegram> telegram);
     void process_IPMTempMessage(std::shared_ptr<const Telegram> telegram);
@@ -54,8 +55,6 @@ class Mixer : public EMSdevice {
     uint8_t  activated_;
     uint8_t  setValveTime_;
     uint8_t  flowTempOffset_;
-
-    uint16_t hc_ = EMS_VALUE_UINT16_NOTSET;
 };
 
 } // namespace emsesp

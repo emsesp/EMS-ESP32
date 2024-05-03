@@ -53,12 +53,12 @@ bool EMSdevice::has_entities() const {
 }
 
 // return translated tag name based on tag id
-const char * EMSdevice::tag_to_string(uint8_t tag, const bool translate) {
-    uint8_t tag_n = tag > DeviceValue::NUM_TAGS ? 0 : tag;
+const char * EMSdevice::tag_to_string(int8_t tag, const bool translate) {
+    int8_t tag_n = tag > DeviceValue::NUM_TAGS ? 0 : tag;
     return (translate ? Helpers::translated_word(DeviceValue::DeviceValueTAG_s[tag_n]) : DeviceValue::DeviceValueTAG_s[tag_n][0]);
 }
 
-const char * EMSdevice::tag_to_mqtt(uint8_t tag) {
+const char * EMSdevice::tag_to_mqtt(int8_t tag) {
     return (DeviceValue::DeviceValueTAG_mqtt[tag > DeviceValue::NUM_TAGS ? 0 : tag]);
 }
 
@@ -358,7 +358,7 @@ bool EMSdevice::is_received(uint16_t telegram_id) const {
 }
 
 // check for a tag to create a nest
-bool EMSdevice::has_tags(const uint8_t tag) const {
+bool EMSdevice::has_tags(const int8_t tag) const {
     for (const auto & dv : devicevalues_) {
         if (dv.tag == tag && tag >= DeviceValueTAG::TAG_HC1) {
             return true;
@@ -369,7 +369,7 @@ bool EMSdevice::has_tags(const uint8_t tag) const {
 
 // check if the device has a command with this tag.
 bool EMSdevice::has_cmd(const char * cmd, const int8_t id) const {
-    uint8_t tag = DeviceValueTAG::TAG_HC1 + id - 1;
+    int8_t tag = id;
     for (const auto & dv : devicevalues_) {
         if ((id < 1 || dv.tag == tag) && dv.has_cmd && strcmp(dv.short_name, cmd) == 0) {
             return true;
@@ -502,7 +502,7 @@ void EMSdevice::register_telegram_type(const uint16_t telegram_type_id, const ch
 }
 
 // add to device value library, also know now as a "device entity"
-void EMSdevice::add_device_value(uint8_t               tag,              // to be used to group mqtt together, either as separate topics as a nested object
+void EMSdevice::add_device_value(int8_t                tag,              // to be used to group mqtt together, either as separate topics as a nested object
                                  void *                value_p,          // pointer to the value from the .h file
                                  uint8_t               type,             // one of DeviceValueType
                                  const char * const ** options,          // options for enum, which are translated as a list of lists
@@ -597,13 +597,13 @@ void EMSdevice::add_device_value(uint8_t               tag,              // to b
         uint8_t flags = CommandFlag::ADMIN_ONLY; // executing commands require admin privileges
 
         if (tag >= DeviceValueTAG::TAG_HC1 && tag <= DeviceValueTAG::TAG_HC8) {
-            flags |= CommandFlag::MQTT_SUB_FLAG_HC;
+            flags |= CommandFlag::CMD_FLAG_HC;
         } else if (tag >= DeviceValueTAG::TAG_DHW1 && tag <= DeviceValueTAG::TAG_DHW10) {
-            flags |= CommandFlag::MQTT_SUB_FLAG_DHW;
+            flags |= CommandFlag::CMD_FLAG_DHW;
         } else if (tag >= DeviceValueTAG::TAG_HS1 && tag <= DeviceValueTAG::TAG_HS16) {
-            flags |= CommandFlag::MQTT_SUB_FLAG_HS;
+            flags |= CommandFlag::CMD_FLAG_HS;
         } else if (tag >= DeviceValueTAG::TAG_AHS1 && tag <= DeviceValueTAG::TAG_AHS1) {
-            flags |= CommandFlag::MQTT_SUB_FLAG_AHS;
+            flags |= CommandFlag::CMD_FLAG_AHS;
         }
 
         // add the command to our library
@@ -612,7 +612,7 @@ void EMSdevice::add_device_value(uint8_t               tag,              // to b
 }
 
 // single list of options
-void EMSdevice::register_device_value(uint8_t              tag,
+void EMSdevice::register_device_value(int8_t               tag,
                                       void *               value_p,
                                       uint8_t              type,
                                       const char * const * options_single,
@@ -624,7 +624,7 @@ void EMSdevice::register_device_value(uint8_t              tag,
 };
 
 // single list of options, with no translations, with min and max
-void EMSdevice::register_device_value(uint8_t              tag,
+void EMSdevice::register_device_value(int8_t               tag,
                                       void *               value_p,
                                       uint8_t              type,
                                       const char * const * options_single,
@@ -637,7 +637,7 @@ void EMSdevice::register_device_value(uint8_t              tag,
     add_device_value(tag, value_p, type, nullptr, options_single, 0, name, uom, f, min, max);
 };
 
-void EMSdevice::register_device_value(uint8_t              tag,
+void EMSdevice::register_device_value(int8_t               tag,
                                       void *               value_p,
                                       uint8_t              type,
                                       int8_t               numeric_operator,
@@ -647,7 +647,7 @@ void EMSdevice::register_device_value(uint8_t              tag,
     add_device_value(tag, value_p, type, nullptr, nullptr, numeric_operator, name, uom, f, 0, 0);
 }
 
-void EMSdevice::register_device_value(uint8_t              tag,
+void EMSdevice::register_device_value(int8_t               tag,
                                       void *               value_p,
                                       uint8_t              type,
                                       int8_t               numeric_operator,
@@ -660,12 +660,12 @@ void EMSdevice::register_device_value(uint8_t              tag,
 }
 
 // no options, no function
-void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const * name, uint8_t uom, const cmd_function_p f) {
+void EMSdevice::register_device_value(int8_t tag, void * value_p, uint8_t type, const char * const * name, uint8_t uom, const cmd_function_p f) {
     add_device_value(tag, value_p, type, nullptr, nullptr, 0, name, uom, f, 0, 0);
 };
 
 // no options, with min/max
-void EMSdevice::register_device_value(uint8_t              tag,
+void EMSdevice::register_device_value(int8_t               tag,
                                       void *               value_p,
                                       uint8_t              type,
                                       const char * const * name,
@@ -679,7 +679,7 @@ void EMSdevice::register_device_value(uint8_t              tag,
 // function with min and max values
 // adds a new command to the command list
 // in this function we separate out the short and long names and take any translations
-void EMSdevice::register_device_value(uint8_t               tag,
+void EMSdevice::register_device_value(int8_t                tag,
                                       void *                value_p,
                                       uint8_t               type,
                                       const char * const ** options,
@@ -692,7 +692,7 @@ void EMSdevice::register_device_value(uint8_t               tag,
 }
 
 // function with no min and max values (set to 0)
-void EMSdevice::register_device_value(uint8_t               tag,
+void EMSdevice::register_device_value(int8_t                tag,
                                       void *                value_p,
                                       uint8_t               type,
                                       const char * const ** options,
@@ -703,7 +703,7 @@ void EMSdevice::register_device_value(uint8_t               tag,
 }
 
 // no associated command function, or min/max values
-void EMSdevice::register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const ** options, const char * const * name, uint8_t uom) {
+void EMSdevice::register_device_value(int8_t tag, void * value_p, uint8_t type, const char * const ** options, const char * const * name, uint8_t uom) {
     add_device_value(tag, value_p, type, options, nullptr, 0, name, uom, nullptr, 0, 0);
 }
 
@@ -720,7 +720,7 @@ bool EMSdevice::is_readable(const void * value_p) const {
 // check if value/command is readonly
 // matches valid tags too
 bool EMSdevice::is_readonly(const std::string & cmd, const int8_t id) const {
-    uint8_t tag = id > 0 ? DeviceValueTAG::TAG_HC1 + id - 1 : DeviceValueTAG::TAG_NONE;
+    int8_t tag = id > 0 ? id : DeviceValueTAG::TAG_NONE;
     for (const auto & dv : devicevalues_) {
         // check command name and tag, id -1 is default hc and only checks name
         if (dv.has_cmd && std::string(dv.short_name) == cmd && (dv.tag < DeviceValueTAG::TAG_HC1 || dv.tag == tag || id == -1)) {
@@ -845,10 +845,10 @@ std::string EMSdevice::get_value_uom(const std::string & shortname) const {
 }
 
 bool EMSdevice::export_values(uint8_t device_type, JsonObject output, const int8_t id, const uint8_t output_target) {
-    bool    has_value = false;
-    uint8_t tag;
-    if (id >= 1 && id <= (1 + DeviceValueTAG::TAG_HS16 - DeviceValueTAG::TAG_HC1)) {
-        tag = DeviceValueTAG::TAG_HC1 + id - 1; // this sets also WWC and HS
+    bool   has_value = false;
+    int8_t tag;
+    if (id >= 1 && id <= DeviceValueTAG::TAG_HS16) {
+        tag = id; // this sets also DHW and HS
     } else if (id == -1 || id == 0) {
         tag = DeviceValueTAG::TAG_NONE;
     } else {
@@ -1109,7 +1109,7 @@ void EMSdevice::generate_values_web_customization(JsonArray output) {
     });
 }
 
-void EMSdevice::set_climate_minmax(uint8_t tag, int16_t min, uint32_t max) {
+void EMSdevice::set_climate_minmax(int8_t tag, int16_t min, uint32_t max) {
     for (auto & dv : devicevalues_) {
         if (dv.tag == tag && (strcmp(dv.short_name, FL_(haclimate[0])) == 0)) {
             if (dv.min != min || dv.max != max) {
@@ -1395,11 +1395,6 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
     JsonObject json = output;
     int8_t     tag  = id;
 
-    // check if we have hc or dhw or hs
-    if (id >= 1 && id <= (1 + DeviceValueTAG::TAG_HS16 - DeviceValueTAG::TAG_HC1)) {
-        tag = DeviceValueTAG::TAG_HC1 + id - 1;
-    }
-
     // make a copy of the string command for parsing
     char command_s[30];
     strlcpy(command_s, cmd, sizeof(command_s));
@@ -1595,7 +1590,7 @@ void EMSdevice::publish_all_values() {
 // For each value in the device create the json object pair and add it to given json
 // return false if empty
 // this is used to create the MQTT payloads, Console messages and Web API call responses
-bool EMSdevice::generate_values(JsonObject output, const uint8_t tag_filter, const bool nested, const uint8_t output_target) {
+bool EMSdevice::generate_values(JsonObject output, const int8_t tag_filter, const bool nested, const uint8_t output_target) {
     bool       has_values = false; // to see if we've added a value. it's faster than doing a json.size() at the end
     uint8_t    old_tag    = 255;   // NAN
     JsonObject json       = output;

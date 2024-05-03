@@ -579,7 +579,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_pool_temp));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hp4wayValve_, DeviceValueType::ENUM, FL_(enum_4way), FL_(hp4wayValve), DeviceValueUOM::NONE);
-        // register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpInput[0].state, DeviceValueType::BOOL, FL_(hpInput1), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpInput[0].state, DeviceValueType::BOOL, FL_(hpInput1), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &hpInput[0].option,
                               DeviceValueType::STRING,
@@ -587,7 +587,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(hpIn1Opt),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_HpIn1Logic));
-        // register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpInput[1].state, DeviceValueType::BOOL, FL_(hpInput2), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpInput[1].state, DeviceValueType::BOOL, FL_(hpInput2), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &hpInput[1].option,
                               DeviceValueType::STRING,
@@ -595,7 +595,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(hpIn2Opt),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_HpIn2Logic));
-        // register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpInput[2].state, DeviceValueType::BOOL, FL_(hpInput3), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpInput[2].state, DeviceValueType::BOOL, FL_(hpInput3), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &hpInput[2].option,
                               DeviceValueType::STRING,
@@ -603,7 +603,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(hpIn3Opt),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_HpIn3Logic));
-        // register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpInput[3].state, DeviceValueType::BOOL, FL_(hpInput4), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpInput[3].state, DeviceValueType::BOOL, FL_(hpInput4), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &hpInput[3].option,
                               DeviceValueType::STRING,
@@ -1603,6 +1603,11 @@ void Boiler::process_HpPower(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hpPower_, 11);
     has_update(telegram, hpCompSpd_, 17);
 
+    has_bitupdate(telegram, hpInput[0].state, 1, 4);
+    has_bitupdate(telegram, hpInput[1].state, 1, 5);
+    has_bitupdate(telegram, hpInput[2].state, 1, 6);
+    has_bitupdate(telegram, hpInput[3].state, 1, 7);
+
     // has_update(hpHeatingOn_, hpActivity_ == 1 ? 0xFF : 0);
     // has_update(hpCoolingOn_, hpActivity_ == 2 ? 0xFF : 0);
     // has_update(hpWwOn_, hpActivity_ == 3 ? 0xFF : 0);
@@ -1722,7 +1727,7 @@ void Boiler::process_UBASetPoints(std::shared_ptr<const Telegram> telegram) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-// 0x35 - not yet implemented
+// 0x35 - not yet implemented, not readable, only for settings
 void Boiler::process_UBAFlags(std::shared_ptr<const Telegram> telegram) {
 }
 

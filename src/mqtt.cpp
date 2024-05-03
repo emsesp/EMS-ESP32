@@ -800,14 +800,14 @@ bool Mqtt::publish_system_ha_sensor_config(uint8_t type, const char * name, cons
     ids.add(Mqtt::basename());
 
     return publish_ha_sensor_config(
-        type, DeviceValueTAG::TAG_HEARTBEAT, name, name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, 0, dev_json);
+        type, DeviceValueTAG::TAG_DEVICE_DATA, name, name, EMSdevice::DeviceType::SYSTEM, entity, uom, false, false, nullptr, 0, 0, 0, 0, dev_json);
 }
 
 // MQTT discovery configs
 // entity must match the key/value pair in the *_data topic
 // note: some extra string copying done here, it looks messy but does help with heap fragmentation issues
 bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdevice::DeviceValueType
-                                    uint8_t               tag,         // EMSdevice::DeviceValueTAG
+                                    int8_t                tag,         // EMSdevice::DeviceValueTAG
                                     const char * const    fullname,    // fullname, already translated
                                     const char * const    en_name,     // original name in english
                                     const uint8_t         device_type, // EMSdevice::DeviceType
@@ -841,6 +841,10 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // build unique identifier also used as object_id which also becomes the Entity ID in HA
     char uniq_id[80];
+    // list of boiler entities that need conversion for 3.6 compatibility, add ww suffix
+    const char * dhw_old[] =
+        {FL_(nrgWw)[0], FL_(upTimeCompWw)[0], FL_(nrgConsCompWw)[0], FL_(auxElecHeatNrgConsWw)[0], FL_(nrgSuppWw)[0], FL_(wwAltOpPrioWw)[0], FL_(hpCircPumpWw)[0]};
+    uint8_t num_dhw_old = sizeof(dhw_old) / sizeof(dhw_old[0]);
     if (Mqtt::entity_format() == entityFormat::MULTI_SHORT) {
         // prefix base name to each uniq_id and use the shortname
         snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
@@ -852,11 +856,12 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         if (has_tag && (device_type == EMSdevice::DeviceType::BOILER || device_type == EMSdevice::DeviceType::THERMOSTAT)
             && tag == DeviceValue::DeviceValueTAG::TAG_DHW1) {
             snprintf(entity_with_tag, sizeof(entity_with_tag), "ww%s", entity);
-            snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, entity_with_tag);
-            if (strcmp(entity, "nrgdhw") == 0) { // special case for tp1de #1714
-                strcpy(uniq_id, "boiler_nrgww");
-                strcpy(entity_with_tag, "nrgww");
+            for (uint8_t i = 0; i < num_dhw_old; i++) {
+                if (strcmp(entity, dhw_old[i]) == 0) { // special case for tp1de #1714
+                    snprintf(entity_with_tag, sizeof(entity_with_tag), "%sww", dhw_old[i]);
+                }
             }
+            snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, entity_with_tag);
         } else if (has_tag && device_type == EMSdevice::DeviceType::WATER && tag >= DeviceValue::DeviceValueTAG::TAG_DHW3) {
             snprintf(entity_with_tag, sizeof(entity_with_tag), "wwc%d_%s", tag - DeviceValue::DeviceValueTAG::TAG_DHW1 + 1, entity);
             snprintf(uniq_id, sizeof(uniq_id), "solar_%s", entity_with_tag);
@@ -871,10 +876,12 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         if (has_tag && (device_type == EMSdevice::DeviceType::BOILER || device_type == EMSdevice::DeviceType::THERMOSTAT)
             && tag == DeviceValue::DeviceValueTAG::TAG_DHW1) {
             snprintf(entity_with_tag, sizeof(entity_with_tag), "ww%s", entity);
-            snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
-            if (strcmp(entity, "nrgdhw") == 0) { // special case for tp1de #1714
-                snprintf(uniq_id, sizeof(uniq_id), "%s_boiler_nrgww", mqtt_basename_.c_str());
+            for (uint8_t i = 0; i < num_dhw_old; i++) {
+                if (strcmp(entity, dhw_old[i]) == 0) { // special case for tp1de #1714
+                    snprintf(entity_with_tag, sizeof(entity_with_tag), "%sww", dhw_old[i]);
+                }
             }
+            snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
         } else if (has_tag && device_type == EMSdevice::DeviceType::WATER && tag >= DeviceValue::DeviceValueTAG::TAG_DHW3) {
             snprintf(entity_with_tag, sizeof(entity_with_tag), "wwc%d_%s", tag - DeviceValue::DeviceValueTAG::TAG_DHW1 + 1, entity);
             snprintf(uniq_id, sizeof(uniq_id), "%s_solar_%s", mqtt_basename_.c_str(), entity_with_tag);
@@ -895,6 +902,11 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             && tag == DeviceValue::DeviceValueTAG::TAG_DHW1) {
             snprintf(entity_with_tag, sizeof(entity_with_tag), "ww%s", entity);
             snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, Helpers::toLower(uniq_s).c_str());
+            for (uint8_t i = 0; i < num_dhw_old; i++) {
+                if (strcmp(entity, dhw_old[i]) == 0) { // special case for tp1de #1714
+                    snprintf(entity_with_tag, sizeof(entity_with_tag), "%sww", dhw_old[i]);
+                }
+            }
         } else if (has_tag && device_type == EMSdevice::DeviceType::WATER && tag >= DeviceValue::DeviceValueTAG::TAG_DHW3) {
             snprintf(entity_with_tag, sizeof(entity_with_tag), "wwc%d_%s", tag - DeviceValue::DeviceValueTAG::TAG_DHW1 + 1, entity);
             snprintf(uniq_id, sizeof(uniq_id), "solar_wwc%d_%s", tag - DeviceValue::DeviceValueTAG::TAG_DHW1 + 1, Helpers::toLower(uniq_s).c_str());
@@ -1217,8 +1229,8 @@ void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, con
     }
 }
 
-bool Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp, const bool remove, const int16_t min, const uint32_t max) {
-    uint8_t hc_num = tag - DeviceValueTAG::TAG_HC1 + 1;
+bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, const bool remove, const int16_t min, const uint32_t max) {
+    uint8_t hc_num = tag;
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
     char topic_t[Mqtt::MQTT_TOPIC_MAX_SIZE];
@@ -1329,10 +1341,10 @@ bool Mqtt::publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp,
 // based on the device and tag, create the MQTT topic name (without the basename)
 // differs based on whether MQTT nested is enabled
 // tag = EMSdevice::DeviceValueTAG
-std::string Mqtt::tag_to_topic(uint8_t device_type, uint8_t tag) {
+std::string Mqtt::tag_to_topic(uint8_t device_type, int8_t tag) {
     // the system device is treated differently. The topic is 'heartbeat' and doesn't follow the usual convention
     if (device_type == EMSdevice::DeviceType::SYSTEM) {
-        return EMSdevice::tag_to_mqtt(tag);
+        return F_(heartbeat);
     }
 
     std::string topic = EMSdevice::device_type_2_device_name(device_type);
