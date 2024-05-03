@@ -936,7 +936,7 @@ void Thermostat::process_RC35wwTimer(std::shared_ptr<const Telegram> telegram) {
     }
 
     if (telegram->message_length + telegram->offset >= 92 && telegram->offset <= 87) {
-        char data[sizeof(dhw->wwVacation_)];
+        char data[sizeof(dhw->wwVacation_) + 4]; // avoid compiler warning
         snprintf(data,
                  sizeof(data),
                  "%02d.%02d.%04d-%02d.%02d.%04d",
@@ -950,7 +950,7 @@ void Thermostat::process_RC35wwTimer(std::shared_ptr<const Telegram> telegram) {
     }
 
     if (telegram->message_length + telegram->offset >= 98 && telegram->offset <= 93) {
-        char data[sizeof(dhw->wwHoliday_)];
+        char data[sizeof(dhw->wwHoliday_) + 4]; // avoid compiler warning
         snprintf(data,
                  sizeof(data),
                  "%02d.%02d.%04d-%02d.%02d.%04d",
@@ -1487,7 +1487,7 @@ void Thermostat::process_RC35Timer(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hc->party, 86);   // time in hours
 
     if (telegram->message_length + telegram->offset >= 92 && telegram->offset <= 87) {
-        char data[sizeof(hc->vacation)];
+        char data[sizeof(hc->vacation) + 4]; // avoid compiler warning
         snprintf(data,
                  sizeof(data),
                  "%02d.%02d.%04d-%02d.%02d.%04d",
@@ -1501,7 +1501,7 @@ void Thermostat::process_RC35Timer(std::shared_ptr<const Telegram> telegram) {
     }
 
     if (telegram->message_length + telegram->offset >= 98 && telegram->offset <= 93) {
-        char data[sizeof(hc->holiday)];
+        char data[sizeof(hc->holiday) + 4]; // avoid compiler warning
         snprintf(data,
                  sizeof(data),
                  "%02d.%02d.%04d-%02d.%02d.%04d",
@@ -1523,7 +1523,7 @@ void Thermostat::process_RC30Vacation(std::shared_ptr<const Telegram> telegram) 
     static uint8_t vacation_telegram[57] = {0}; // make a copy of the whole telegram to access blocks
     memcpy(&vacation_telegram[telegram->offset], telegram->message_data, telegram->message_length);
     for (uint8_t index = 0; index < 8; index++) {
-        char data[sizeof(vacation[0])];
+        char data[sizeof(vacation[0]) + 4]; // avoid compiler warning
         snprintf(data,
                  sizeof(data),
                  "%02d.%02d.%04d-%02d.%02d.%04d",
@@ -4473,8 +4473,8 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode2), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
         // register_device_value(tag, &hc->holiday, DeviceValueType::STRING, FL_(tpl_holidays), FL_(holidays), DeviceValueUOM::NONE, MAKE_CF_CB(set_holiday));
         // register_device_value(tag, &hc->vacation, DeviceValueType::STRING, FL_(tpl_holidays), FL_(vacations), DeviceValueUOM::NONE, MAKE_CF_CB(set_vacation));
-        // register_device_value(tag, &hc->pause, DeviceValueType::UINT8, FL_(pause), DeviceValueUOM::HOURS, MAKE_CF_CB(set_pause));
-        // register_device_value(tag, &hc->party, DeviceValueType::UINT8, FL_(party), DeviceValueUOM::HOURS, MAKE_CF_CB(set_party));
+        register_device_value(tag, &hc->pause, DeviceValueType::UINT8, FL_(pause), DeviceValueUOM::HOURS, MAKE_CF_CB(set_pause));
+        register_device_value(tag, &hc->party, DeviceValueType::UINT8, FL_(party), DeviceValueUOM::HOURS, MAKE_CF_CB(set_party));
         register_device_value(tag, &vacation[0], DeviceValueType::STRING, FL_(tpl_holidays), FL_(vacations1), DeviceValueUOM::NONE, MAKE_CF_CB(set_RC30Vacation1));
         register_device_value(tag, &vacation[1], DeviceValueType::STRING, FL_(tpl_holidays), FL_(vacations2), DeviceValueUOM::NONE, MAKE_CF_CB(set_RC30Vacation2));
         register_device_value(tag, &vacation[2], DeviceValueType::STRING, FL_(tpl_holidays), FL_(vacations3), DeviceValueUOM::NONE, MAKE_CF_CB(set_RC30Vacation3));
