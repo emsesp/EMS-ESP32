@@ -369,9 +369,8 @@ bool EMSdevice::has_tags(const int8_t tag) const {
 
 // check if the device has a command with this tag.
 bool EMSdevice::has_cmd(const char * cmd, const int8_t id) const {
-    int8_t tag = id;
     for (const auto & dv : devicevalues_) {
-        if ((id < 1 || dv.tag == tag) && dv.has_cmd && strcmp(dv.short_name, cmd) == 0) {
+        if ((id < 1 || dv.tag == id) && dv.has_cmd && strcmp(dv.short_name, cmd) == 0) {
             return true;
         }
     }
@@ -720,10 +719,9 @@ bool EMSdevice::is_readable(const void * value_p) const {
 // check if value/command is readonly
 // matches valid tags too
 bool EMSdevice::is_readonly(const std::string & cmd, const int8_t id) const {
-    int8_t tag = id > 0 ? id : DeviceValueTAG::TAG_NONE;
     for (const auto & dv : devicevalues_) {
         // check command name and tag, id -1 is default hc and only checks name
-        if (dv.has_cmd && std::string(dv.short_name) == cmd && (dv.tag < DeviceValueTAG::TAG_HC1 || dv.tag == tag || id == -1)) {
+        if (dv.has_cmd && std::string(dv.short_name) == cmd && (dv.tag < DeviceValueTAG::TAG_HC1 || dv.tag == id || id == -1)) {
             return dv.has_state(DeviceValueState::DV_READONLY);
         }
     }
@@ -845,27 +843,19 @@ std::string EMSdevice::get_value_uom(const std::string & shortname) const {
 }
 
 bool EMSdevice::export_values(uint8_t device_type, JsonObject output, const int8_t id, const uint8_t output_target) {
-    bool   has_value = false;
-    int8_t tag;
-    if (id >= 1 && id <= DeviceValueTAG::TAG_HS16) {
-        tag = id; // this sets also DHW and HS
-    } else if (id == -1 || id == 0) {
-        tag = DeviceValueTAG::TAG_NONE;
-    } else {
-        return false;
-    }
+    bool has_value = false;
 
     if (id > 0 || output_target == EMSdevice::OUTPUT_TARGET::API_VERBOSE) {
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice && (emsdevice->device_type() == device_type)) {
-                has_value |= emsdevice->generate_values(output, tag, (id < 1), output_target); // use nested for id -1 and 0
+                has_value |= emsdevice->generate_values(output, id, (id < 1), output_target); // use nested for id -1 and 0
             }
         }
         return has_value;
     }
 
     // for nested output add for each tag
-    for (tag = DeviceValueTAG::TAG_DEVICE_DATA; tag <= DeviceValueTAG::TAG_HS16; tag++) {
+    for (int8_t tag = DeviceValueTAG::TAG_DEVICE_DATA; tag <= DeviceValueTAG::TAG_HS16; tag++) {
         JsonObject output_hc    = output;
         bool       nest_created = false;
         for (const auto & emsdevice : EMSESP::emsdevices) {
@@ -1391,9 +1381,8 @@ void EMSdevice::dump_telegram_info(std::vector<TelegramFunctionDump> & telegram_
 // builds json for a specific device value / entity
 // cmd is the endpoint or name of the device entity
 // returns false if failed, otherwise true
-bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t id) {
+bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t tag) {
     JsonObject json = output;
-    int8_t     tag  = id;
 
     // make a copy of the string command for parsing
     char command_s[30];

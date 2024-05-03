@@ -79,8 +79,8 @@ class Thermostat : public EMSdevice {
         uint8_t vacreducemode;
         uint8_t wwprio;
         uint8_t fastHeatup;
-        char    holiday[26];
-        char    vacation[26];
+        char    holiday[22];
+        char    vacation[22];
         char    switchtime1[16];
         char    switchtime2[16];
         uint8_t climate;
@@ -192,8 +192,8 @@ class Thermostat : public EMSdevice {
         uint8_t wwDailyHeating_;
         uint8_t wwDailyHeatTime_;
         uint8_t wwWhenModeOff_;
-        char    wwHoliday_[26];
-        char    wwVacation_[26];
+        char    wwHoliday_[22];
+        char    wwVacation_[22];
 
         uint8_t dhw() const {
             return dhw_num_ - 1;
