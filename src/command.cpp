@@ -453,7 +453,7 @@ void Command::erase_command(const uint8_t device_type, const char * cmd, uint8_t
 }
 
 // get the tagged command
-std::string Command::tagged_cmd(std::string cmd, const uint8_t flag) {
+std::string Command::tagged_cmd(const std::string & cmd, const uint8_t flag) {
     switch (flag & 0x3F) {
     case CommandFlag::CMD_FLAG_HC:
         return "[hc<n>.]" + cmd;
