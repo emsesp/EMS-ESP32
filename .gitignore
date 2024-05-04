@@ -64,3 +64,6 @@ bw-output/
 # standalone executable for testing
 emsesp
 interface/tsconfig.tsbuildinfo
+
+# python virtual environment
+venv/

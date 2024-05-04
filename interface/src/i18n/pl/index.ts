@@ -192,7 +192,6 @@ const pl: BaseTranslation = {
   FILESYSTEM: 'System plików (wykorzystane / wolne)',
   BUFFER_SIZE: 'Maksymalna pojemność bufora (ilość wpisów)',
   COMPACT: 'Kompaktowy',
-  ENABLE_OTA: 'Aktywuj aktualizację OTA',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Pobierz personalizacje.',
   DOWNLOAD_SCHEDULE_TEXT: 'Pobierz harmonogram zdarzeń.',
   DOWNLOAD_SETTINGS_TEXT: 'Pobierz ustawienia aplikacji. Uwaga! Plik z ustawieniami zawiera hasła oraz inne wrażliwe informacje systemowe! Nie udostepniaj go pochopnie!',

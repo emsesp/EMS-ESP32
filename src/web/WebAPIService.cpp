@@ -181,7 +181,6 @@ void WebAPIService::getSettings(AsyncWebServerRequest * request) {
     System::extractSettings(AP_SETTINGS_FILE, "AP", root);
     System::extractSettings(MQTT_SETTINGS_FILE, "MQTT", root);
     System::extractSettings(NTP_SETTINGS_FILE, "NTP", root);
-    System::extractSettings(OTA_SETTINGS_FILE, "OTA", root);
     System::extractSettings(SECURITY_SETTINGS_FILE, "Security", root);
     System::extractSettings(EMSESP_SETTINGS_FILE, "Settings", root);
 

@@ -192,7 +192,6 @@ const sv: Translation = {
   FILESYSTEM: 'Filsystem (Använt / Ledigt)',
   BUFFER_SIZE: 'Max Bufferstorlek',
   COMPACT: 'Komprimera',
-  ENABLE_OTA: 'Aktivera OTA-uppdateringar',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Ladda ner entitetsanpassningar',
   DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
   DOWNLOAD_SETTINGS_TEXT: 'Ladda ner applikationsinställningar. Var försiktig om du delar dina iställlningar då de innehåller lösenord och annan känslig systeminformation',

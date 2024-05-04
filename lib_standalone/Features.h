@@ -21,11 +21,6 @@
 #define FT_NTP 0
 #endif
 
-// mqtt feature on by default
-#ifndef FT_OTA
-#define FT_OTA 0
-#endif
-
 // upload firmware/file feature off by default
 #ifndef FT_UPLOAD_FIRMWARE
 #define FT_UPLOAD_FIRMWARE 0

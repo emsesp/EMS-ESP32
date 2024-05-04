@@ -11,7 +11,6 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
     , _apStatus(server, &_securitySettingsService, &_apSettingsService)
     , _ntpSettingsService(server, fs, &_securitySettingsService)
     , _ntpStatus(server, &_securitySettingsService)
-    , _otaSettingsService(server, fs, &_securitySettingsService)
     , _uploadFileService(server, &_securitySettingsService)
     , _mqttSettingsService(server, fs, &_securitySettingsService)
     , _mqttStatus(server, &_mqttSettingsService, &_securitySettingsService)
@@ -76,7 +75,6 @@ void ESP8266React::begin() {
     });
     _apSettingsService.begin();
     _ntpSettingsService.begin();
-    _otaSettingsService.begin();
     _mqttSettingsService.begin();
     _securitySettingsService.begin();
 }
@@ -84,6 +82,5 @@ void ESP8266React::begin() {
 void ESP8266React::loop() {
     _networkSettingsService.loop();
     _apSettingsService.loop();
-    _otaSettingsService.loop();
     _mqttSettingsService.loop();
 }

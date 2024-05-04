@@ -8,7 +8,6 @@ import AccessPoint from 'framework/ap/AccessPoint';
 import Mqtt from 'framework/mqtt/Mqtt';
 import Network from 'framework/network/Network';
 import NetworkTime from 'framework/ntp/NetworkTime';
-import OTASettings from 'framework/ota/OTASettings';
 import Security from 'framework/security/Security';
 import ESPSystemStatus from 'framework/system/ESPSystemStatus';
 import System from 'framework/system/System';
@@ -43,7 +42,6 @@ const AuthenticatedRouting: FC = () => {
             <Route path="/settings/ap/*" element={<AccessPoint />} />
             <Route path="/settings/ntp/*" element={<NetworkTime />} />
             <Route path="/settings/mqtt/*" element={<Mqtt />} />
-            <Route path="/settings/ota/*" element={<OTASettings />} />
             <Route path="/settings/security/*" element={<Security />} />
             <Route
               path="/settings/espsystemstatus/*"

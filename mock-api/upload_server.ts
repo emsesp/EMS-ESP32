@@ -9,10 +9,8 @@ const UPLOAD_FILE_ENDPOINT = '/rest/uploadFile';
 
 // delay functions, 2 different types
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
-
 function delay_blocking(milliseconds) {
   var start = new Date().getTime();
-  // for (var i = 0; i < 1e7; i++) {
   while (true) {
     if (new Date().getTime() - start > milliseconds) {
       break;
@@ -20,7 +18,7 @@ function delay_blocking(milliseconds) {
   }
 }
 
-function progress_middleware(req, res, next) {
+function progress_middleware(req, _res, next) {
   let progress = 0;
   const file_size = req.headers['content-length'];
   console.log('Uploading file. Size ' + file_size + ' bytes');

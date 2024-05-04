@@ -192,7 +192,6 @@ const en: Translation = {
   FILESYSTEM: 'File System (Used / Free)',
   BUFFER_SIZE: 'Max Buffer Size',
   COMPACT: 'Compact',
-  ENABLE_OTA: 'Enable OTA Updates',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Download the entity customizations',
   DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events',
   DOWNLOAD_SETTINGS_TEXT: 'Download the application settings. Be careful when sharing your settings as this file contains passwords and other sensitive system information',

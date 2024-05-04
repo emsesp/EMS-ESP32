@@ -160,7 +160,7 @@ MAKE_WORD_CUSTOM(new_password_prompt2, "Retype new password: ")
 MAKE_WORD_CUSTOM(password_prompt, "Password: ")
 MAKE_WORD_CUSTOM(unset, "<unset>")
 MAKE_WORD_CUSTOM(enable_mandatory, "<enable | disable>")
-MAKE_WORD_CUSTOM(service_mandatory, "<ota | ap | mqtt | ntp>")
+MAKE_WORD_CUSTOM(service_mandatory, "<ap | mqtt | ntp>")
 
 // more common names that don't need translations
 MAKE_NOTRANSLATION(1x3min, "1x3min")

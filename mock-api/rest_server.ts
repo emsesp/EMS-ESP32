@@ -291,14 +291,6 @@ const list_networks = {
   ]
 };
 
-// OTA
-const OTA_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'otaSettings';
-let ota_settings = {
-  enabled: false,
-  port: 8266,
-  password: 'ems-esp-neo'
-};
-
 // MQTT
 const MQTT_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'mqttSettings';
 const MQTT_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'mqttStatus';
@@ -389,7 +381,6 @@ const system_status = {
   num_analogs: 1,
   free_heap: 143,
   ntp_status: 2,
-  ota_status: false,
   mqtt_status: true,
   ap_status: false
 };
@@ -2336,15 +2327,6 @@ router
   .post(AP_SETTINGS_ENDPOINT, async (request: any) => {
     ap_settings = await request.json();
     console.log('ap settings saved', ap_settings);
-    return status(200);
-  });
-
-// OTA
-router
-  .get(OTA_SETTINGS_ENDPOINT, () => ota_settings)
-  .post(OTA_SETTINGS_ENDPOINT, async (request: any) => {
-    ota_settings = await request.json();
-    console.log('ota settings saved', ota_settings);
     return status(200);
   });
 

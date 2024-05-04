@@ -23,21 +23,24 @@ default_envs = esp32_4M
 ; default_envs = debug
 ; default_envs = custom
 
+[env]
+; upload settings
+upload_protocol = custom
+custom_emsesp_ip = 10.10.10.173
+custom_username = admin
+custom_password = admin
+upload_port = /dev/ttyUSB*
+
 [env:esp32_4M]
-; if using OTA enter your details below
-;  upload_protocol = espota
-;  upload_flags =
-;    --port=8266
-;    --auth=ems-esp-neo
-;  upload_port = ems-esp.local
-; for USB, here are some examples:
-; upload_port = /dev/ttyUSB*
-; upload_port = COM5
 extra_scripts =
   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
+  scripts/upload.py
 
-[env:esp32_16M]
+[env:lolin_s3]
+extra_scripts =
+;   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+  scripts/rename_fw.py
 
 [env:custom]
 ; use for basic ESP boards with 4MB flash
@@ -74,12 +77,6 @@ build_flags =
  	-D CONFIG_ETH_ENABLED
 	-D CONFIG_ASYNC_TCP_STACK_SIZE=8192
 	'-DEMSESP_DEFAULT_BOARD_PROFILE="Test"'
-
-[env:lolin_s3]
-upload_port = /dev/ttyUSB0
-extra_scripts =
-  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
-  scripts/rename_fw.py
 
 ; pio run -e debug
 ; or from Visual Studio Code do PIO -> Project Tasks -> debug -> General -> Upload and Monitor

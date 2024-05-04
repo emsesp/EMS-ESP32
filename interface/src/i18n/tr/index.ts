@@ -192,7 +192,6 @@ const tr: Translation = {
   FILESYSTEM: 'Dosya Sistemi (Kullanılmış / Boş)',
   BUFFER_SIZE: 'En fazla bellek boyutu',
   COMPACT: 'Sıkışık',
-  ENABLE_OTA: 'OTA Güncellemelerine izin ver',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Varlık özelleştirmelerini indir',
   DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
   DOWNLOAD_SETTINGS_TEXT: 'Uygulama ayarlarını indir. Bu dosya hassas sistem bilgileri ve şifrelerinizi içerdiğinden ayarlarınızı paylaşırken dikkatli olun',
