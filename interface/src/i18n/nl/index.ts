@@ -192,7 +192,6 @@ const nl: Translation = {
   FILESYSTEM: 'File System (Used / Free)',
   BUFFER_SIZE: 'Max Buffer Size',
   COMPACT: 'Compact',
-  ENABLE_OTA: 'Acitveer OTA Updates',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Download alle custom instellingen',
   DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events',
   DOWNLOAD_SETTINGS_TEXT: 'Download de applicatie settings. Wees voorzichting met het delen van dit bestand want het bevat o.a. de wachtwoorden in plain text',

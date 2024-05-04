@@ -836,6 +836,9 @@ void System::commands_init() {
 }
 
 // uses LED to show system health
+// 1 x flash = the EMS bus is not connected
+// 2 x flash = the network (wifi or ethernet) is not connected
+// 3 x flash = both EMS bus and network are failing. This is a critical error!
 void System::led_monitor() {
     // we only need to run the LED healthcheck if there are errors
     if (!healthcheck_ || !led_gpio_) {
@@ -849,7 +852,6 @@ void System::led_monitor() {
 
     // first long pause before we start flashing
     if (led_long_timer_ && (uint32_t)(current_time - led_long_timer_) >= HEALTHCHECK_LED_LONG_DUARATION) {
-        // Serial.println("starting the flash check");
         led_short_timer_ = current_time; // start the short timer
         led_long_timer_  = 0;            // stop long timer
         led_flash_step_  = 1;            // enable the short flash timer
@@ -863,7 +865,6 @@ void System::led_monitor() {
 
         if (++led_flash_step_ == 8) {
             // reset the whole sequence
-            // Serial.println("resetting flash check");
             led_long_timer_ = uuid::get_uptime();
             led_flash_step_ = 0;
 #if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
@@ -1100,7 +1101,6 @@ bool System::check_restore() {
                 reboot_required |= saveSettings(NTP_SETTINGS_FILE, "NTP", input);
                 reboot_required |= saveSettings(SECURITY_SETTINGS_FILE, "Security", input);
                 reboot_required |= saveSettings(EMSESP_SETTINGS_FILE, "Settings", input);
-                reboot_required |= saveSettings(OTA_SETTINGS_FILE, "OTA", input);
             } else if (settings_type == "customizations") {
                 // it's a customization file, just replace it and there's no need to reboot
                 saveSettings(EMSESP_CUSTOMIZATION_FILE, "Customizations", input);
@@ -1342,13 +1342,6 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         node["server"]   = settings.server;
         node["tz label"] = settings.tzLabel;
         // node["tz format"] = settings.tzFormat;
-    });
-
-    // OTA status
-    node = output["OTA Info"].to<JsonObject>();
-    EMSESP::esp8266React.getOTASettingsService()->read([&](OTASettings & settings) {
-        node["enabled"] = settings.enabled;
-        node["port"]    = settings.port;
     });
 #endif
 

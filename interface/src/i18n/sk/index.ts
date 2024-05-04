@@ -192,7 +192,6 @@ const sk: Translation = {
   FILESYSTEM: 'Súborový systém (Použité / Voľné)',
   BUFFER_SIZE: 'Buffer-max.veľkosť',
   COMPACT: 'Kompaktné',
-  ENABLE_OTA: 'Povoliť OTA aktualizácie',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Stiahnutie prispôsobení entity',
   DOWNLOAD_SCHEDULE_TEXT: 'Stiahnutie plánovača udalostí',
   DOWNLOAD_SETTINGS_TEXT: 'Stiahnite si nastavenia aplikácie. Pri zdieľaní nastavení buďte opatrní, pretože tento súbor obsahuje heslá a iné citlivé systémové informácie.',

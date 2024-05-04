@@ -1,4 +1,5 @@
 #include "UploadFileService.h"
+
 #include "../../src/emsesp_stub.hpp"
 
 #include <esp_app_format.h>
@@ -84,6 +85,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
                     Update.setMD5(_md5.data());
                     _md5.front() = '\0';
                 }
+                // emsesp::EMSESP::system_.upload_status(true);                // force just in case, this is stop UART, MQTT and other services
                 request->onDisconnect([this] { handleEarlyDisconnect(); }); // success, let's make sure we end the update if the client hangs up
             } else {
                 handleError(request, 507); // failed to begin, send an error response Insufficient Storage
@@ -101,11 +103,11 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
         }
     } else if (!request->_tempObject) { // if we haven't delt with an error, continue with the firmware update
         if (Update.write(data, len) != len) {
-            handleError(request, 500);
+            handleError(request, 500); // internal error, failed
             return;
         }
         if (final && !Update.end(true)) {
-            handleError(request, 500);
+            handleError(request, 500); // internal error, failed
         }
     }
 }

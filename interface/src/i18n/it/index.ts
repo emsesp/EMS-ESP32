@@ -192,7 +192,6 @@ const it: Translation = {
   FILESYSTEM: 'Memoria Sistema (Usata / Libera)',
   BUFFER_SIZE: 'Max Buffer Size',
   COMPACT: 'Compact',
-  ENABLE_OTA: 'Abilita aggiornamenti OTA',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Scarica personalizzazioni entità',
   DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events',
   DOWNLOAD_SETTINGS_TEXT: 'Scarica le impostazioni dell applicazione. Fai attenzione quando condividi le tue impostazioni poiché questo file contiene password e altre informazioni di sistema riservate',

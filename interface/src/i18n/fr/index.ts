@@ -192,7 +192,6 @@ const fr: Translation = {
   FILESYSTEM: 'File System (Utilisée / Libre)',
   BUFFER_SIZE: 'Max taille du buffer',
   COMPACT: 'Compact',
-  ENABLE_OTA: 'Activer les updates OTA',
   DOWNLOAD_CUSTOMIZATION_TEXT: "Télécharger les personnalisations d'entités",
   DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
   DOWNLOAD_SETTINGS_TEXT: "Téléchargez les paramètres de l'application. Soyez prudent lorsque vous partagez vos paramètres car ce fichier contient des mots de passe et d'autres informations système sensibles.",

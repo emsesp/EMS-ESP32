@@ -53,8 +53,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     root["num_analogs"]  = EMSESP::analogsensor_.no_sensors();
     root["free_heap"]    = EMSESP::system_.getHeapMem();
     root["uptime"]       = uuid::get_uptime_sec();
-    EMSESP::esp8266React.getOTASettingsService()->read([root](OTASettings & otaSettings) { root["ota_status"] = otaSettings.enabled; });
-    root["mqtt_status"] = EMSESP::mqtt_.connected();
+    root["mqtt_status"]  = EMSESP::mqtt_.connected();
 
 #ifndef EMSESP_STANDALONE
     root["ntp_status"] = [] {

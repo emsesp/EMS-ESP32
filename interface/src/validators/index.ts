@@ -4,5 +4,4 @@ export * from './mqtt';
 export * from './ntp';
 export * from './security';
 export * from './shared';
-export * from './system';
 export * from './network';

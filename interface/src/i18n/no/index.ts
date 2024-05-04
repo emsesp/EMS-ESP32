@@ -192,7 +192,6 @@ const no: Translation = {
   FILESYSTEM: 'File System (Brukt / Ledig)',
   BUFFER_SIZE: 'Max Buffer Størrelse',
   COMPACT: 'Komprimere',
-  ENABLE_OTA: 'Aktiviser OTA oppdateringer',
   DOWNLOAD_CUSTOMIZATION_TEXT: 'Last ned objektstilpasninger',
   DOWNLOAD_SCHEDULE_TEXT: 'Last ned planlagte oppgaver',
   DOWNLOAD_SETTINGS_TEXT: 'Last ned applikasjonskonfigurasjon. Vær varsom med å dele fila da den inneholder passord og annen sensitiv system informasjon',

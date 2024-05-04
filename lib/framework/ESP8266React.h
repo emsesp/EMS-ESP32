@@ -9,7 +9,6 @@
 #include "MqttStatus.h"
 #include "NTPSettingsService.h"
 #include "NTPStatus.h"
-#include "OTASettingsService.h"
 #include "UploadFileService.h"
 #include "RestartService.h"
 #include "SecuritySettingsService.h"
@@ -48,10 +47,6 @@ class ESP8266React {
         return &_ntpSettingsService;
     }
 
-    StatefulService<OTASettings> * getOTASettingsService() {
-        return &_otaSettingsService;
-    }
-
     StatefulService<MqttSettings> * getMqttSettingsService() {
         return &_mqttSettingsService;
     }
@@ -88,7 +83,6 @@ class ESP8266React {
     APStatus                _apStatus;
     NTPSettingsService      _ntpSettingsService;
     NTPStatus               _ntpStatus;
-    OTASettingsService      _otaSettingsService;
     UploadFileService       _uploadFileService;
     MqttSettingsService     _mqttSettingsService;
     MqttStatus              _mqttStatus;
