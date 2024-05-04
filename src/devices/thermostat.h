@@ -271,7 +271,7 @@ class Thermostat : public EMSdevice {
     uint8_t humidity_;
     uint8_t battery_;
 
-    char vacation[8][22]; // RC30 only, only one hc
+    char vacation[8][22]; // RC30, R3000 only, only one hc
 
     // HybridHP
     uint8_t hybridStrategy_;  // co2 = 1, cost = 2, temperature = 3, mix = 4
@@ -431,6 +431,7 @@ class Thermostat : public EMSdevice {
     void process_RC300OutdoorTemp(std::shared_ptr<const Telegram> telegram);
     void process_RC300Settings(std::shared_ptr<const Telegram> telegram);
     void process_RC300Floordry(std::shared_ptr<const Telegram> telegram);
+    void process_RC300Holiday(std::shared_ptr<const Telegram> telegram);
     void process_RC300Curve(std::shared_ptr<const Telegram> telegram);
     void process_JunkersMonitor(std::shared_ptr<const Telegram> telegram);
     void process_JunkersSet(std::shared_ptr<const Telegram> telegram);
