@@ -3,7 +3,6 @@ import os
 
 Import("env")
 
-
 def buildWeb():
     os.chdir("interface")
     print("Building web interface...")
