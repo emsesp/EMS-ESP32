@@ -6,18 +6,13 @@ AuthenticationService::AuthenticationService(AsyncWebServer * server, SecurityMa
     server->on(SIGN_IN_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { signIn(request, json); });
 }
 
-/**
- * Verifies that the request supplied a valid JWT.
- */
+// Verifies that the request supplied a valid JWT.
 void AuthenticationService::verifyAuthorization(AsyncWebServerRequest * request) {
     Authentication authentication = _securityManager->authenticateRequest(request);
     request->send(authentication.authenticated ? 200 : 401);
 }
 
-/**
- * Signs in a user if the username and password match. Provides a JWT to be used in the Authorization header in
- * subsequent requests.
- */
+// Signs in a user if the username and password match. Provides a JWT to be used in the Authorization header in subsequent requests.
 void AuthenticationService::signIn(AsyncWebServerRequest * request, JsonVariant json) {
     if (json.is<JsonObject>()) {
         String         username       = json["username"];
@@ -33,6 +28,7 @@ void AuthenticationService::signIn(AsyncWebServerRequest * request, JsonVariant 
             return;
         }
     }
+
     AsyncWebServerResponse * response = request->beginResponse(401);
     request->send(response);
 }

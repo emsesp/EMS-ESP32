@@ -20,9 +20,7 @@
 
 namespace emsesp {
 
-WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securityManager)
-
-{
+WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securityManager) {
     // write endpoints
     server->on(WRITE_DEVICE_VALUE_SERVICE_PATH,
                securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_device_value(request, json); },

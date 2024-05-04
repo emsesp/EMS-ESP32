@@ -20,7 +20,6 @@
 #define NETWORK_SETTINGS_FILE "/config/networkSettings.json"
 #define NTP_SETTINGS_FILE "/config/ntpSettings.json"
 #define EMSESP_SETTINGS_FILE "/config/emsespSettings.json"
-#define OTA_SETTINGS_FILE "/config/otaSettings.json"
 
 class DummySettings {
   public:
@@ -77,8 +76,8 @@ class DummySettings {
     uint8_t  provisionMode      = 0;
     uint32_t publish_time_water = 0;
 
-    static void read(DummySettings & settings, JsonObject root) {};
-    static void read(DummySettings & settings) {};
+    static void read(DummySettings & settings, JsonObject root){};
+    static void read(DummySettings & settings){};
 
     static StateUpdateResult update(JsonObject root, DummySettings & settings) {
         return StateUpdateResult::CHANGED;
@@ -97,9 +96,7 @@ class DummySettingsService : public StatefulService<DummySettings> {
 #define SecuritySettings DummySettings
 #define MqttSettings DummySettings
 #define NTPSettings DummySettings
-#define OTASettings DummySettings
 #define APSettings DummySettings
-
 
 class ESP8266React {
   public:
@@ -110,7 +107,7 @@ class ESP8266React {
     void begin() {
         _mqttClient = new espMqttClient();
     };
-    void loop() {};
+    void loop(){};
 
     SecurityManager * getSecurityManager() {
         return &_securitySettingsService;
@@ -142,10 +139,6 @@ class ESP8266React {
     }
 
     StatefulService<DummySettings> * getNTPSettingsService() {
-        return &_settings;
-    }
-
-    StatefulService<DummySettings> * getOTASettingsService() {
         return &_settings;
     }
 

@@ -4,7 +4,6 @@ import { toast } from 'react-toastify';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import BuildIcon from '@mui/icons-material/Build';
 import CancelIcon from '@mui/icons-material/Cancel';
-import CastIcon from '@mui/icons-material/Cast';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import MemoryIcon from '@mui/icons-material/Memory';
@@ -279,18 +278,8 @@ const SystemStatus: FC = () => {
 
           <ListMenuItem
             disabled={!me.admin}
-            icon={CastIcon}
-            bgcolor={activeHighlight(data.ota_status)}
-            label={LL.STATUS_OF('OTA')}
-            text={data.ota_status ? LL.ACTIVE() : LL.INACTIVE(0)}
-            to="/settings/ota"
-          />
-          <Divider variant="inset" component="li" />
-
-          <ListMenuItem
-            disabled={!me.admin}
             icon={SettingsInputAntennaIcon}
-            bgcolor={activeHighlight(data.ota_status)}
+            bgcolor={activeHighlight(data.ap_status)}
             label={LL.ACCESS_POINT(0)}
             text={data.ap_status ? LL.ACTIVE() : LL.INACTIVE(0)}
             to="/settings/ap/status"

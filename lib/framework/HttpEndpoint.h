@@ -40,14 +40,14 @@ class HttpEndpoint {
         if (request->method() == HTTP_POST) {
             // Handle POST
             if (!json.is<JsonObject>()) {
-                request->send(400);
+                request->send(400); // error, bad request
                 return;
             }
 
             StateUpdateResult outcome = _statefulService->updateWithoutPropagation(json.as<JsonObject>(), _stateUpdater);
 
             if (outcome == StateUpdateResult::ERROR) {
-                request->send(400); // error
+                request->send(400); // error, bad request
                 return;
             } else if (outcome == StateUpdateResult::CHANGED || outcome == StateUpdateResult::CHANGED_RESTART) {
                 // persist changes

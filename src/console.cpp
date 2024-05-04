@@ -364,11 +364,6 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                           Settings.enabled = enable;
                                           return StateUpdateResult::CHANGED;
                                       });
-                                  } else if (arguments.front() == "ota") {
-                                      to_app(shell).esp8266React.getOTASettingsService()->update([&](OTASettings & Settings) {
-                                          Settings.enabled = enable;
-                                          return StateUpdateResult::CHANGED;
-                                      });
                                   } else if (arguments.front() == "ntp") {
                                       to_app(shell).esp8266React.getNTPSettingsService()->update([&](NTPSettings & Settings) {
                                           Settings.enabled = enable;

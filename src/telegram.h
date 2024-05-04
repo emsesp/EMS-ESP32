@@ -225,8 +225,7 @@ class EMSbus {
         }
 
         last_bus_activity_ = timestamp;
-
-        bus_connected_ = true;
+        bus_connected_     = true;
     }
 
     // return bus uptime in seconds

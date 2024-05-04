@@ -3,7 +3,6 @@ import { toast } from 'react-toastify';
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CancelIcon from '@mui/icons-material/Cancel';
-import CastIcon from '@mui/icons-material/Cast';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import ImportExportIcon from '@mui/icons-material/ImportExport';
 import LockIcon from '@mui/icons-material/Lock';
@@ -212,13 +211,7 @@ const Settings: FC = () => {
           text={LL.CONFIGURE('MQTT')}
           to="mqtt"
         />
-        <ListMenuItem
-          icon={CastIcon}
-          bgcolor="#efc34b"
-          label="OTA"
-          text={LL.CONFIGURE('OTA')}
-          to="ota"
-        />
+
         <ListMenuItem
           icon={LockIcon}
           label={LL.SECURITY(0)}

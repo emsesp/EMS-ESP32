@@ -4,7 +4,7 @@
 # The response will be shown in the right panel
 
 @host = http://ems-esp.local
-@host_dev = http://10.10.10.20
+@host_dev = http://10.10.10.173
 @host_standalone = http://localhost:3080
 @host_standalone2 = http://localhost:3082
 
@@ -109,6 +109,14 @@ Authorization: Bearer {{token}}
 ###
 GET {{host_dev}}/api/thermostat/seltemp
 
+###
+POST {{host_dev}}/rest/signIn
+Content-Type: application/json
+
+{
+    "username" : "admin",
+    "password" : "admin"
+}
 
 #### STANDALONE ####
 

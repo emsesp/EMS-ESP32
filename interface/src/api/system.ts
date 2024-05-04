@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-import type { ESPSystemStatus, LogSettings, OTASettings, SystemStatus } from 'types';
+import type { ESPSystemStatus, LogSettings, SystemStatus } from 'types';
 
 import { alovaInstance, alovaInstanceGH } from './endpoints';
 
@@ -19,12 +19,6 @@ export const readSystemStatus = () =>
 export const restart = () => alovaInstance.Post('/rest/restart');
 export const partition = () => alovaInstance.Post('/rest/partition');
 export const factoryReset = () => alovaInstance.Post('/rest/factoryReset');
-
-// OTA
-export const readOTASettings = () =>
-  alovaInstance.Get<OTASettings>(`/rest/otaSettings`);
-export const updateOTASettings = (data: OTASettings) =>
-  alovaInstance.Post('/rest/otaSettings', data);
 
 // SystemLog
 export const readLogSettings = () =>

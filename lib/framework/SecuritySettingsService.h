@@ -71,7 +71,6 @@ class SecuritySettingsService final : public StatefulService<SecuritySettings>, 
 
     void begin();
 
-    // Functions to implement SecurityManager
     Authentication               authenticate(const String & username, const String & password) override;
     Authentication               authenticateRequest(AsyncWebServerRequest * request) override;
     String                       generateJWT(const User * user) override;
@@ -88,15 +87,9 @@ class SecuritySettingsService final : public StatefulService<SecuritySettings>, 
 
     void configureJWTHandler();
 
-    /*
-   * Lookup the user by JWT
-   */
-    Authentication authenticateJWT(String & jwt);
+    Authentication authenticateJWT(String & jwt); // Lookup the user by JWT
 
-    /*
-   * Verify the payload is correct
-   */
-    boolean validatePayload(JsonObject parsedPayload, const User * user);
+    boolean validatePayload(JsonObject parsedPayload, const User * user); // Verify the payload is correct
 };
 
 #endif

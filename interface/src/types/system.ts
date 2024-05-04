@@ -35,15 +35,8 @@ export interface SystemStatus {
   num_analogs: number;
   free_heap: number;
   ntp_status: number;
-  ota_status: boolean;
   mqtt_status: boolean;
   ap_status: boolean;
-}
-
-export interface OTASettingsType {
-  enabled: boolean;
-  port: number;
-  password: string;
 }
 
 export enum LogLevel {
@@ -68,10 +61,4 @@ export interface LogSettings {
   level: number;
   max_messages: number;
   compact: boolean;
-}
-
-export interface OTASettings {
-  enabled: boolean;
-  port: number;
-  password: string;
 }

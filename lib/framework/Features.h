@@ -21,15 +21,9 @@
 #define FT_NTP 1
 #endif
 
-// ota feature on by default
-#ifndef FT_OTA
-#define FT_OTA 1
-#endif
-
 // upload firmware/file feature on by default
 #ifndef FT_UPLOAD_FIRMWARE
 #define FT_UPLOAD_FIRMWARE 1
 #endif
-
 
 #endif
