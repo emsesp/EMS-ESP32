@@ -96,7 +96,7 @@ const pl: BaseTranslation = {
   NUM_SECONDS: '{num} sekun{{d|da|dy|dy|d}}',
   NUM_HOURS: '{num} godzi{{n|na|ny|ny|n}}',
   NUM_MINUTES: '{num} minu{{t|ta|ty|ty|t}}',
-  APPLICATION_SETTINGS: 'Ustawienia aplikacji',
+  APPLICATION: 'Aplikacji',
   CUSTOMIZATIONS: 'Personalizacja',
   APPLICATION_RESTARTING: 'Trwa ponowne uruchamianie',
   INTERFACE_BOARD_PROFILE: 'Profil płytki interfejsu',

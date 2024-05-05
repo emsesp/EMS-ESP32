@@ -79,7 +79,7 @@ const Settings: FC = () => {
         <ListMenuItem
           icon={TuneIcon}
           bgcolor="#134ba2"
-          label={LL.APPLICATION_SETTINGS()}
+          label={LL.APPLICATION()}
           text={LL.APPLICATION_SETTINGS_1()}
           to="ems-esp"
         />
@@ -124,14 +124,6 @@ const Settings: FC = () => {
         />
 
         <Divider />
-
-        <ListMenuItem
-          icon={MemoryIcon}
-          bgcolor="#b1395f"
-          label={LL.STATUS_OF('ESP32')}
-          text="ESP32 Information"
-          to="espsystemstatus"
-        />
 
         <ListMenuItem
           icon={ImportExportIcon}

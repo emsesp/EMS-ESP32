@@ -96,7 +96,7 @@ const de: Translation = {
   NUM_SECONDS: '{num} Sekunde{{n}}',
   NUM_HOURS: '{num} Stunde{{n}}',
   NUM_MINUTES: '{num} Minute{{n}}',
-  APPLICATION_SETTINGS: 'Anwendungseinstellungen',
+  APPLICATION: 'Anwendungseinstellungen',
   CUSTOMIZATIONS: 'Anpassungen',
   APPLICATION_RESTARTING: 'EMS-ESP startet neu',
   INTERFACE_BOARD_PROFILE: 'Interface Platinenprofil',
