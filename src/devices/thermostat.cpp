@@ -174,6 +174,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         register_telegram_type(0x240, "RC300Settings", true, MAKE_PF_CB(process_RC300Settings));
         register_telegram_type(0xBB, "HybridSettings", true, MAKE_PF_CB(process_HybridSettings));
         register_telegram_type(0x23E, "PVSettings", true, MAKE_PF_CB(process_PVSettings));
+        register_telegram_type(0x269, "RC300Holiday1", true, MAKE_PF_CB(process_RC300Holiday));
 
         // JUNKERS/HT3
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
@@ -1287,6 +1288,25 @@ void Thermostat::process_RC300Set2(std::shared_ptr<const Telegram> telegram) {
 void Thermostat::process_RC300Floordry(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, floordrystatus_, 0);
     has_update(telegram, floordrytemp_, 1);
+}
+
+// 0x269 - 0x26D  RC300 EMS+ holidaymodes 1 to 5
+// special case R3000 only date in 0x269
+void Thermostat::process_RC300Holiday(std::shared_ptr<const Telegram> telegram) {
+    if (telegram->offset || telegram->message_length < 6) {
+        return;
+    }
+    char data[sizeof(vacation[0]) + 4];
+    snprintf(data,
+             sizeof(data),
+             "%02d.%02d.%04d-%02d.%02d.%04d",
+             telegram->message_data[2],
+             telegram->message_data[1],
+             telegram->message_data[0] + 2000,
+             telegram->message_data[5],
+             telegram->message_data[4],
+             telegram->message_data[3] + 2000);
+    has_update(vacation[0], data, sizeof(vacation[0]));
 }
 
 // 0x291 ff.  HP mode
@@ -2433,14 +2453,9 @@ bool Thermostat::set_holiday(const char * value, const int8_t id, const bool vac
     data[4] = (value[14] - '0') * 10 + (value[15] - '0');
     data[5] = (value[18] - '0') * 100 + (value[19] - '0') * 10 + (value[20] - '0');
 
-    if (data[0] > 31 || data[1] > 12 || data[3] > 31 || data[4] > 12) {
+    if (!data[0] || data[0] > 31 || !data[1] || data[1] > 12 || !data[3] || data[3] > 31 || !data[4] || data[4] > 12) {
         return false;
     }
-    if (model() == EMSdevice::EMS_DEVICE_FLAG_RC30) {
-        write_command(0xA9 + hc->hc(), 1, data, 6, 0x9A + hc->hc());
-        return true;
-    }
-
     if (!vacation || value[10] == '+') { // + for compatibility
         if (hc) {
             write_command(timer_typeids[hc->hc()], 93, data, 6, timer_typeids[hc->hc()]);
@@ -2462,6 +2477,7 @@ bool Thermostat::set_holiday(const char * value, const int8_t id, const bool vac
 }
 
 // set vacations as string dd.mm.yyyy-dd.mm.yyyy
+// RC30 and rego 3000
 bool Thermostat::set_RC30Vacation(const char * value, const int8_t id) {
     if (strlen(value) != 21) {
         return false;
@@ -2478,9 +2494,37 @@ bool Thermostat::set_RC30Vacation(const char * value, const int8_t id) {
     if (!data[0] || data[0] > 31 || !data[1] || data[1] > 12 || !data[3] || data[3] > 31 || !data[4] || data[4] > 12) {
         return false;
     }
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) {
+        write_command(0x269, 0, data, 6, 0x269);
+        return true;
+    }
+    // RC30
     write_command(0xA9, 1 + 7 * (id - 1), data, 6, 0x9A);
     return true;
 }
+
+// set R3000 holiday as string dd.mm.yyyy-dd.mm.yyyy
+// RC30 and rego 3000
+bool Thermostat::set_R3000Holiday(const char * value, const int8_t id) {
+    if (strlen(value) != 21) {
+        return false;
+    }
+
+    uint8_t data[6];
+    data[2] = (value[0] - '0') * 10 + (value[1] - '0');
+    data[1] = (value[3] - '0') * 10 + (value[4] - '0');
+    data[0] = (value[7] - '0') * 100 + (value[8] - '0') * 10 + (value[9] - '0');
+    data[5] = (value[11] - '0') * 10 + (value[12] - '0');
+    data[4] = (value[14] - '0') * 10 + (value[15] - '0');
+    data[3] = (value[18] - '0') * 100 + (value[19] - '0') * 10 + (value[20] - '0');
+
+    if (!data[2] || data[2] > 31 || !data[1] || data[1] > 12 || !data[5] || data[5] > 31 || !data[4] || data[4] > 12) {
+        return false;
+    }
+    write_command(0x269, 0, data, 6, 0x269);
+    return true;
+}
+
 
 // set pause in hours
 bool Thermostat::set_pause(const char * value, const int8_t id) {
@@ -3908,6 +3952,15 @@ void Thermostat::register_device_values() {
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_minexttemp));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &ibaDamping_, DeviceValueType::BOOL, FL_(damping), DeviceValueUOM::NONE, MAKE_CF_CB(set_damping));
+        if (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) {
+            register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                                  &vacation[0],
+                                  DeviceValueType::STRING,
+                                  FL_(tpl_holidays),
+                                  FL_(vacations),
+                                  DeviceValueUOM::NONE,
+                                  MAKE_CF_CB(set_R3000Holiday));
+        }
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &hybridStrategy_,
                               DeviceValueType::ENUM,

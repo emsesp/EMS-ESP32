@@ -17,6 +17,7 @@
 - heatpump entities `fan` and `shutdown` [#1690](https://github.com/emsesp/EMS-ESP32/discussions/1690)
 - mqtt HA-mode 3 for v3.6 compatible HA entities, set on update v3.6->v3.7
 - HP input states [#1723](https://github.com/emsesp/EMS-ESP32/discussions/1723)
+- holiday settings for rego 3000  [#1735](https://github.com/emsesp/EMS-ESP32/issues/1735)
 - Added scripts for OTA (scripts/upload.py and upload_cli.py) [#1738](https://github.com/emsesp/EMS-ESP32/issues/1738)
 
 ## Fixed
