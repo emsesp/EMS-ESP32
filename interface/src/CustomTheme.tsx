@@ -15,8 +15,7 @@ export const dialogStyle = {
     borderColor: '#565656',
     borderStyle: 'solid',
     borderWidth: '1px'
-  },
-  backdropFilter: 'blur(1px)'
+  }
 };
 
 const theme = responsiveFontSizes(
