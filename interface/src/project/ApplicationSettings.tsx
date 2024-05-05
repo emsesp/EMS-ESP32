@@ -115,7 +115,7 @@ const ApplicationSettings: FC = () => {
     });
   };
 
-  useLayoutTitle(LL.APPLICATION_SETTINGS());
+  useLayoutTitle(LL.APPLICATION());
 
   const content = () => {
     if (!data) {

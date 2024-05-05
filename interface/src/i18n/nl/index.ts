@@ -96,7 +96,7 @@ const nl: Translation = {
   NUM_SECONDS: '{num} second{{en}}',
   NUM_HOURS: '{num} {{uur|uren}}',
   NUM_MINUTES: '{num} {{minuut|minuten}}',
-  APPLICATION_SETTINGS: 'Applicatieinstellingen',
+  APPLICATION: 'Applicatie',
   CUSTOMIZATIONS: 'Aanpassingen van entiteiten',
   APPLICATION_RESTARTING: 'EMS-ESP herstarten',
   INTERFACE_BOARD_PROFILE: 'Interface Apparaatprofiel',

@@ -351,7 +351,7 @@ const SystemStatus: FC = () => {
             bgcolor="#68374d"
             label={LL.SYSTEM_MEMORY()}
             text={formatNumber(data.free_heap) + ' KB'}
-            to="/settings/espsystemstatus"
+            to="/system/espsystemstatus"
           />
           <Divider variant="inset" component="li" />
 
