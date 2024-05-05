@@ -1,5 +1,4 @@
 import { type FC, useState } from 'react';
-import { toast } from 'react-toastify';
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -7,7 +6,6 @@ import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import ImportExportIcon from '@mui/icons-material/ImportExport';
 import LockIcon from '@mui/icons-material/Lock';
 import MemoryIcon from '@mui/icons-material/Memory';
-import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
@@ -19,6 +17,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   List
 } from '@mui/material';
 
@@ -26,117 +25,24 @@ import * as SystemApi from 'api/system';
 
 import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova';
-import { ButtonRow, SectionContent, useLayoutTitle } from 'components';
+import { SectionContent, useLayoutTitle } from 'components';
 import ListMenuItem from 'components/layout/ListMenuItem';
 import { useI18nContext } from 'i18n/i18n-react';
-
-import RestartMonitor from './system/RestartMonitor';
 
 const Settings: FC = () => {
   const { LL } = useI18nContext();
   useLayoutTitle(LL.SETTINGS(0));
 
-  const [confirmRestart, setConfirmRestart] = useState<boolean>(false);
   const [confirmFactoryReset, setConfirmFactoryReset] = useState<boolean>(false);
-  const [processing, setProcessing] = useState<boolean>(false);
-  const [restarting, setRestarting] = useState<boolean>();
-
-  const { send: restartCommand } = useRequest(SystemApi.restart(), {
-    immediate: false
-  });
 
   const { send: factoryResetCommand } = useRequest(SystemApi.factoryReset(), {
     immediate: false
   });
 
-  const { send: partitionCommand } = useRequest(SystemApi.partition(), {
-    immediate: false
-  });
-
-  const restart = async () => {
-    setProcessing(true);
-    await restartCommand()
-      .then(() => {
-        setRestarting(true);
-      })
-      .catch((error: Error) => {
-        toast.error(error.message);
-      })
-      .finally(() => {
-        setConfirmRestart(false);
-        setProcessing(false);
-      });
-  };
-
   const factoryReset = async () => {
-    setProcessing(true);
-    await factoryResetCommand()
-      .then(() => {
-        setRestarting(true);
-      })
-      .catch((error: Error) => {
-        toast.error(error.message);
-      })
-      .finally(() => {
-        setConfirmFactoryReset(false);
-        setProcessing(false);
-      });
+    await factoryResetCommand();
+    setConfirmFactoryReset(false);
   };
-
-  const partition = async () => {
-    setProcessing(true);
-    await partitionCommand()
-      .then(() => {
-        setRestarting(true);
-      })
-      .catch((error: Error) => {
-        toast.error(error.message);
-      })
-      .finally(() => {
-        setConfirmRestart(false);
-        setProcessing(false);
-      });
-  };
-
-  const renderRestartDialog = () => (
-    <Dialog
-      sx={dialogStyle}
-      open={confirmRestart}
-      onClose={() => setConfirmRestart(false)}
-    >
-      <DialogTitle>{LL.RESTART()}</DialogTitle>
-      <DialogContent dividers>{LL.RESTART_CONFIRM()}</DialogContent>
-      <DialogActions>
-        <Button
-          startIcon={<CancelIcon />}
-          variant="outlined"
-          onClick={() => setConfirmRestart(false)}
-          disabled={processing}
-          color="secondary"
-        >
-          {LL.CANCEL()}
-        </Button>
-        <Button
-          startIcon={<PowerSettingsNewIcon />}
-          variant="outlined"
-          onClick={restart}
-          disabled={processing}
-          color="primary"
-        >
-          {LL.RESTART()}
-        </Button>
-        <Button
-          startIcon={<PowerSettingsNewIcon />}
-          variant="outlined"
-          onClick={partition}
-          disabled={processing}
-          color="primary"
-        >
-          EMS-ESP Loader
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
 
   const renderFactoryResetDialog = () => (
     <Dialog
@@ -151,7 +57,6 @@ const Settings: FC = () => {
           startIcon={<CancelIcon />}
           variant="outlined"
           onClick={() => setConfirmFactoryReset(false)}
-          disabled={processing}
           color="secondary"
         >
           {LL.CANCEL()}
@@ -160,7 +65,6 @@ const Settings: FC = () => {
           startIcon={<SettingsBackupRestoreIcon />}
           variant="outlined"
           onClick={factoryReset}
-          disabled={processing}
           color="error"
         >
           {LL.FACTORY_RESET()}
@@ -219,6 +123,8 @@ const Settings: FC = () => {
           to="security"
         />
 
+        <Divider />
+
         <ListMenuItem
           icon={MemoryIcon}
           bgcolor="#b1395f"
@@ -236,41 +142,22 @@ const Settings: FC = () => {
         />
       </List>
 
-      {renderRestartDialog()}
       {renderFactoryResetDialog()}
 
-      <Box mt={1} display="flex" flexWrap="wrap">
-        <Box flexGrow={1} sx={{ '& button': { mt: 2 } }}>
-          <ButtonRow>
-            <Button
-              startIcon={<PowerSettingsNewIcon />}
-              variant="outlined"
-              color="primary"
-              onClick={() => setConfirmRestart(true)}
-            >
-              {LL.RESTART()}
-            </Button>
-          </ButtonRow>
-        </Box>
-        <Box flexWrap="nowrap" whiteSpace="nowrap">
-          <ButtonRow>
-            <Button
-              startIcon={<SettingsBackupRestoreIcon />}
-              variant="outlined"
-              onClick={() => setConfirmFactoryReset(true)}
-              color="error"
-            >
-              {LL.FACTORY_RESET()}
-            </Button>
-          </ButtonRow>
-        </Box>
+      <Box mt={2} display="flex" flexWrap="wrap">
+        <Button
+          startIcon={<SettingsBackupRestoreIcon />}
+          variant="outlined"
+          onClick={() => setConfirmFactoryReset(true)}
+          color="error"
+        >
+          {LL.FACTORY_RESET()}
+        </Button>
       </Box>
     </>
   );
 
-  return (
-    <SectionContent>{restarting ? <RestartMonitor /> : content()}</SectionContent>
-  );
+  return <SectionContent>{content()}</SectionContent>;
 };
 
 export default Settings;
