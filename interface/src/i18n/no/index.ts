@@ -96,7 +96,7 @@ const no: Translation = {
   NUM_SECONDS: '{num} Sekund{{er}}',
   NUM_HOURS: '{num} Time{{r}}',
   NUM_MINUTES: '{num} Minutt{{er}}',
-  APPLICATION_SETTINGS: 'Innstillinger',
+  APPLICATION: 'Søknad',
   CUSTOMIZATIONS: 'Tilpasninger',
   APPLICATION_RESTARTING: 'EMS-ESP restarter',
   INTERFACE_BOARD_PROFILE: 'Interface Prosessor Profil',

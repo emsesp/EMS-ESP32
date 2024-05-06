@@ -26,10 +26,11 @@ default_envs = esp32_4M
 [env]
 ; upload settings
 upload_protocol = custom
-custom_emsesp_ip = 10.10.10.173
+custom_emsesp_ip = ems-esp.local
 custom_username = admin
 custom_password = admin
 upload_port = /dev/ttyUSB*
+; upload_port = COM5
 
 [env:esp32_4M]
 extra_scripts =

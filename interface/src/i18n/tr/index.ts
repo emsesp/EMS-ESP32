@@ -96,7 +96,7 @@ const tr: Translation = {
   NUM_SECONDS: '{num} saniye{{ler}}',
   NUM_HOURS: '{num} saat{{ler}}',
   NUM_MINUTES: '{num} dakika{{lar}}',
-  APPLICATION_SETTINGS: 'Uygulama Ayarları',
+  APPLICATION: 'Uygulama',
   CUSTOMIZATIONS: 'Özelleştirme',
   APPLICATION_RESTARTING: 'EMS-ESP yeniden başlatılıyor',
   INTERFACE_BOARD_PROFILE: 'Arabirim Kart Profili',

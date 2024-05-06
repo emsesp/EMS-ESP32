@@ -96,7 +96,7 @@ const sk: Translation = {
   NUM_SECONDS: '{num} sek{{únd|unda|undy|undy|únd|únd}}',
   NUM_HOURS: '{num} hod{{ín|ina|iny|iny|ín|ín}}',
   NUM_MINUTES: '{num} minú{{t|ta|ty|ty|t|t}}',
-  APPLICATION_SETTINGS: 'Nastavenia aplikácie',
+  APPLICATION: 'Aplikácie',
   CUSTOMIZATIONS: 'Prispôsobenia',
   APPLICATION_RESTARTING: 'EMS-ESP sa reštartuje',
   INTERFACE_BOARD_PROFILE: 'Profil dosky rozhrania',

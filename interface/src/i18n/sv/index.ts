@@ -96,7 +96,7 @@ const sv: Translation = {
   NUM_SECONDS: '{num} sekund{{er}}',
   NUM_HOURS: '{num} timmar',
   NUM_MINUTES: '{num} minut{{er}}',
-  APPLICATION_SETTINGS: 'Inställningar',
+  APPLICATION: 'Apliká',
   CUSTOMIZATIONS: 'Anpassningr',
   APPLICATION_RESTARTING: 'EMS-ESP startar om',
   INTERFACE_BOARD_PROFILE: 'Interface Hårdvaruprofil',

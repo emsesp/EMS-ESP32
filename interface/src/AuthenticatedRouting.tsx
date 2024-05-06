@@ -43,10 +43,7 @@ const AuthenticatedRouting: FC = () => {
             <Route path="/settings/ntp/*" element={<NetworkTime />} />
             <Route path="/settings/mqtt/*" element={<Mqtt />} />
             <Route path="/settings/security/*" element={<Security />} />
-            <Route
-              path="/settings/espsystemstatus/*"
-              element={<ESPSystemStatus />}
-            />
+            <Route path="/system/espsystemstatus/*" element={<ESPSystemStatus />} />
             <Route path="/settings/upload/*" element={<UploadDownload />} />
           </>
         )}

@@ -96,7 +96,7 @@ const fr: Translation = {
   NUM_SECONDS: '{num} seconde{{s}}',
   NUM_HOURS: '{num} heure{{s}}',
   NUM_MINUTES: '{num} minute{{s}}',
-  APPLICATION_SETTINGS: "Paramètres de l'application",
+  APPLICATION: "l'application",
   CUSTOMIZATIONS: 'Personnalisation',
   APPLICATION_RESTARTING: 'EMS-ESP redémarre',
   INTERFACE_BOARD_PROFILE: "Profile de carte d'interface",

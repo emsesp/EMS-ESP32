@@ -8,6 +8,7 @@ import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import MemoryIcon from '@mui/icons-material/Memory';
 import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import TimerIcon from '@mui/icons-material/Timer';
@@ -39,6 +40,8 @@ import { useI18nContext } from 'i18n/i18n-react';
 import { busConnectionStatus } from 'project/types';
 import { NTPSyncStatus } from 'types';
 
+import RestartMonitor from './RestartMonitor';
+
 const SystemStatus: FC = () => {
   const { LL } = useI18nContext();
 
@@ -46,7 +49,18 @@ const SystemStatus: FC = () => {
 
   const { me } = useContext(AuthenticatedContext);
 
+  const [confirmRestart, setConfirmRestart] = useState<boolean>(false);
   const [confirmScan, setConfirmScan] = useState<boolean>(false);
+  const [processing, setProcessing] = useState<boolean>(false);
+  const [restarting, setRestarting] = useState<boolean>();
+
+  const { send: restartCommand } = useRequest(SystemApi.restart(), {
+    immediate: false
+  });
+
+  const { send: partitionCommand } = useRequest(SystemApi.partition(), {
+    immediate: false
+  });
 
   const {
     data: data,
@@ -180,6 +194,76 @@ const SystemStatus: FC = () => {
     </Dialog>
   );
 
+  const restart = async () => {
+    setProcessing(true);
+    await restartCommand()
+      .then(() => {
+        setRestarting(true);
+      })
+      .catch((error: Error) => {
+        toast.error(error.message);
+      })
+      .finally(() => {
+        setConfirmRestart(false);
+        setProcessing(false);
+      });
+  };
+
+  const partition = async () => {
+    setProcessing(true);
+    await partitionCommand()
+      .then(() => {
+        setRestarting(true);
+      })
+      .catch((error: Error) => {
+        toast.error(error.message);
+      })
+      .finally(() => {
+        setConfirmRestart(false);
+        setProcessing(false);
+      });
+  };
+
+  const renderRestartDialog = () => (
+    <Dialog
+      sx={dialogStyle}
+      open={confirmRestart}
+      onClose={() => setConfirmRestart(false)}
+    >
+      <DialogTitle>{LL.RESTART()}</DialogTitle>
+      <DialogContent dividers>{LL.RESTART_CONFIRM()}</DialogContent>
+      <DialogActions>
+        <Button
+          startIcon={<CancelIcon />}
+          variant="outlined"
+          onClick={() => setConfirmRestart(false)}
+          disabled={processing}
+          color="secondary"
+        >
+          {LL.CANCEL()}
+        </Button>
+        <Button
+          startIcon={<PowerSettingsNewIcon />}
+          variant="outlined"
+          onClick={restart}
+          disabled={processing}
+          color="primary"
+        >
+          {LL.RESTART()}
+        </Button>
+        <Button
+          startIcon={<PowerSettingsNewIcon />}
+          variant="outlined"
+          onClick={partition}
+          disabled={processing}
+          color="primary"
+        >
+          EMS-ESP Loader
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+
   const content = () => {
     if (!data) {
       return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
@@ -198,13 +282,28 @@ const SystemStatus: FC = () => {
           </ListItem>
           <Divider variant="inset" component="li" />
 
-          <ListMenuItem
-            disabled={!me.admin}
-            icon={TimerIcon}
-            bgcolor="#c5572c"
-            label={LL.UPTIME()}
-            text={formatDurationSec(data.uptime)}
-          />
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar sx={{ bgcolor: '#c5572c', color: 'white' }}>
+                <TimerIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText
+              primary={LL.UPTIME()}
+              secondary={formatDurationSec(data.uptime)}
+            />
+            {me.admin && (
+              <Button
+                startIcon={<PowerSettingsNewIcon />}
+                variant="outlined"
+                color="primary"
+                onClick={() => setConfirmRestart(true)}
+              >
+                {LL.RESTART()}
+              </Button>
+            )}
+          </ListItem>
+
           <Divider variant="inset" component="li" />
 
           <ListItem>
@@ -252,7 +351,7 @@ const SystemStatus: FC = () => {
             bgcolor="#68374d"
             label={LL.SYSTEM_MEMORY()}
             text={formatNumber(data.free_heap) + ' KB'}
-            to="/settings/espsystemstatus"
+            to="/system/espsystemstatus"
           />
           <Divider variant="inset" component="li" />
 
@@ -288,6 +387,7 @@ const SystemStatus: FC = () => {
         </List>
 
         {renderScanDialog()}
+        {renderRestartDialog()}
 
         <Box mt={2} display="flex" flexWrap="wrap">
           <Button
@@ -303,7 +403,9 @@ const SystemStatus: FC = () => {
     );
   };
 
-  return <SectionContent>{content()}</SectionContent>;
+  return (
+    <SectionContent>{restarting ? <RestartMonitor /> : content()}</SectionContent>
+  );
 };
 
 export default SystemStatus;
