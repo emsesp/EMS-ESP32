@@ -8,9 +8,6 @@ const router = AutoRouter({
   missing: () => error(404, 'Error, endpoint not found')
 });
 
-const REST_ENDPOINT_ROOT = '/rest/';
-const API_ENDPOINT_ROOT = '/api/';
-
 // HTTP HEADERS
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -19,6 +16,61 @@ const headers = {
 
 // GLOBAL VARIABLES
 let countWifiScanPoll = 0; // wifi network scan
+
+//
+// Functions
+//
+
+function deviceData(id: number) {
+  if (id == 1) {
+    return new Response(encoder.encode(emsesp_devicedata_1), { headers });
+  }
+  if (id == 2) {
+    return new Response(encoder.encode(emsesp_devicedata_2), { headers });
+  }
+  if (id == 3) {
+    return new Response(encoder.encode(emsesp_devicedata_3), { headers });
+  }
+  if (id == 4) {
+    return new Response(encoder.encode(emsesp_devicedata_4), { headers });
+  }
+  if (id == 5) {
+    return new Response(encoder.encode(emsesp_devicedata_5), { headers });
+  }
+  if (id == 6) {
+    return new Response(encoder.encode(emsesp_devicedata_6), { headers });
+  }
+  if (id == 7) {
+    return new Response(encoder.encode(emsesp_devicedata_7), { headers });
+  }
+  if (id == 99) {
+    return new Response(encoder.encode(emsesp_devicedata_99), { headers });
+  }
+}
+
+function deviceEntities(id: number) {
+  if (id == 1) {
+    return new Response(encoder.encode(emsesp_deviceentities_1), { headers });
+  }
+  if (id == 2) {
+    return new Response(encoder.encode(emsesp_deviceentities_2), { headers });
+  }
+  if (id == 3) {
+    return new Response(encoder.encode(emsesp_deviceentities_3), { headers });
+  }
+  if (id == 4) {
+    return new Response(encoder.encode(emsesp_deviceentities_4), { headers });
+  }
+  if (id == 5) {
+    return new Response(encoder.encode(emsesp_deviceentities_5), { headers });
+  }
+  if (id == 6) {
+    return new Response(encoder.encode(emsesp_deviceentities_6), { headers });
+  }
+  if (id == 7) {
+    return new Response(encoder.encode(emsesp_deviceentities_7), { headers });
+  }
+}
 
 function updateMask(entity: any, de: any, dd: any) {
   const current_mask = parseInt(entity.slice(0, 2), 16);
@@ -96,17 +148,70 @@ function updateMask(entity: any, de: any, dd: any) {
   }
 }
 
-// START DATA
+//
+// URL endpoints
+//
+
+const REST_ENDPOINT_ROOT = '/rest/';
+const API_ENDPOINT_ROOT = '/api/';
+
+const EMSESP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'settings';
+const EMSESP_CORE_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'coreData';
+const EMSESP_SENSOR_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'sensorData';
+const EMSESP_DEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'devices';
+const EMSESP_SCANDEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'scanDevices';
+const EMSESP_DEVICEDATA_ENDPOINT1 = REST_ENDPOINT_ROOT + 'deviceData';
+const EMSESP_DEVICEDATA_ENDPOINT2 = REST_ENDPOINT_ROOT + 'deviceData/:id?';
+const EMSESP_DEVICEENTITIES_ENDPOINT1 = REST_ENDPOINT_ROOT + 'deviceEntities';
+const EMSESP_DEVICEENTITIES_ENDPOINT2 = REST_ENDPOINT_ROOT + 'deviceEntities/:id?';
+const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile';
+const EMSESP_WRITE_DEVICEVALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceValue';
+const EMSESP_WRITE_TEMPSENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeTemperatureSensor';
+const EMSESP_WRITE_ANALOGSENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeAnalogSensor';
+const EMSESP_CUSTOMIZATION_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customizationEntities';
+const EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'resetCustomizations';
+const EMSESP_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
+const EMSESP_CUSTOMENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customEntities';
+const EMSESP_GET_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'getSettings';
+const EMSESP_GET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'getCustomizations';
+const EMSESP_GET_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'getEntities';
+const EMSESP_GET_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'getSchedule';
+const EMSESP_SYSTEM_INFO_ENDPOINT = API_ENDPOINT_ROOT + 'system/info';
+
+const LOG_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'logSettings';
+const FETCH_LOG_ENDPOINT = REST_ENDPOINT_ROOT + 'fetchLog';
+const NTP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'ntpStatus';
+const NTP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'ntpSettings';
+const TIME_ENDPOINT = REST_ENDPOINT_ROOT + 'time';
+const AP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'apSettings';
+const AP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'apStatus';
+const NETWORK_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'networkSettings';
+const NETWORK_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'networkStatus';
+const SCAN_NETWORKS_ENDPOINT = REST_ENDPOINT_ROOT + 'scanNetworks';
+const LIST_NETWORKS_ENDPOINT = REST_ENDPOINT_ROOT + 'listNetworks';
+const MQTT_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'mqttSettings';
+const MQTT_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'mqttStatus';
+const SYSTEM_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'systemStatus';
+const ACTIVITY_ENDPOINT = REST_ENDPOINT_ROOT + 'activity';
+const ESPSYSTEM_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'ESPSystemStatus';
+const SECURITY_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'securitySettings';
+const RESTART_ENDPOINT = REST_ENDPOINT_ROOT + 'restart';
+const FACTORY_RESET_ENDPOINT = REST_ENDPOINT_ROOT + 'factoryReset';
+const VERIFY_AUTHORIZATION_ENDPOINT = REST_ENDPOINT_ROOT + 'verifyAuthorization';
+const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn';
+const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken';
+
+//
+// DATA
+//
 
 // LOG
-const LOG_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'logSettings';
 let log_settings = {
   level: 6,
   max_messages: 50,
   compact: true
 };
 
-const FETCH_LOG_ENDPOINT = REST_ENDPOINT_ROOT + 'fetchLog';
 const fetch_log = {
   events: [
     {
@@ -155,9 +260,6 @@ const fetch_log = {
 };
 
 // NTP
-const NTP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'ntpStatus';
-const NTP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'ntpSettings';
-const TIME_ENDPOINT = REST_ENDPOINT_ROOT + 'time';
 let ntp_settings = {
   enabled: true,
   server: 'time.google.com',
@@ -173,8 +275,6 @@ const ntp_status = {
 };
 
 // AP
-const AP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'apSettings';
-const AP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'apStatus';
 let ap_settings = {
   provision_mode: 1,
   ssid: 'ems-esp',
@@ -194,10 +294,6 @@ const ap_status = {
 };
 
 // NETWORK
-const NETWORK_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'networkSettings';
-const NETWORK_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'networkStatus';
-const SCAN_NETWORKS_ENDPOINT = REST_ENDPOINT_ROOT + 'scanNetworks';
-const LIST_NETWORKS_ENDPOINT = REST_ENDPOINT_ROOT + 'listNetworks';
 let network_settings = {
   ssid: 'myWifi',
   password: 'myPassword',
@@ -292,8 +388,6 @@ const list_networks = {
 };
 
 // MQTT
-const MQTT_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'mqttSettings';
-const MQTT_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'mqttStatus';
 let mqtt_settings = {
   enabled: true,
   host: '192.168.1.4',
@@ -331,21 +425,6 @@ const mqtt_status = {
   mqtt_queued: 1,
   connect_count: 2
 };
-
-// STATUS
-const SYSTEM_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'systemStatus';
-const ACTIVITY_ENDPOINT = REST_ENDPOINT_ROOT + 'activity';
-
-// SETTINGS
-const ESPSYSTEM_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'ESPSystemStatus';
-const SECURITY_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'securitySettings';
-const RESTART_ENDPOINT = REST_ENDPOINT_ROOT + 'restart';
-const FACTORY_RESET_ENDPOINT = REST_ENDPOINT_ROOT + 'factoryReset';
-
-// SYSTEM SIGNIN
-const VERIFY_AUTHORIZATION_ENDPOINT = REST_ENDPOINT_ROOT + 'verifyAuthorization';
-const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn';
-const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken';
 
 const ESPsystem_status = {
   emsesp_version: '3.7-demo',
@@ -408,37 +487,6 @@ const signin = admin_signin;
 // const signin = guest_signin;
 
 const generate_token = { token: '1234' };
-
-//
-// EMS-ESP Project specific
-//
-const EMSESP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'settings';
-const EMSESP_CORE_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'coreData';
-const EMSESP_SENSOR_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'sensorData';
-const EMSESP_DEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'devices';
-const EMSESP_SCANDEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'scanDevices';
-
-const EMSESP_DEVICEDATA_ENDPOINT1 = REST_ENDPOINT_ROOT + 'deviceData';
-const EMSESP_DEVICEDATA_ENDPOINT2 = REST_ENDPOINT_ROOT + 'deviceData/:id?';
-const EMSESP_DEVICEENTITIES_ENDPOINT1 = REST_ENDPOINT_ROOT + 'deviceEntities';
-const EMSESP_DEVICEENTITIES_ENDPOINT2 = REST_ENDPOINT_ROOT + 'deviceEntities/:id?';
-
-const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile';
-const EMSESP_WRITE_DEVICEVALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceValue';
-const EMSESP_WRITE_TEMPSENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeTemperatureSensor';
-const EMSESP_WRITE_ANALOGSENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeAnalogSensor';
-const EMSESP_CUSTOMIZATION_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customizationEntities';
-const EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'resetCustomizations';
-
-const EMSESP_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
-const EMSESP_CUSTOMENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customEntities';
-
-const EMSESP_GET_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'getSettings';
-const EMSESP_GET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'getCustomizations';
-const EMSESP_GET_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'getEntities';
-const EMSESP_GET_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'getSchedule';
-
-const EMSESP_SYSTEM_INFO_ENDPOINT = API_ENDPOINT_ROOT + 'system/info';
 
 const emsesp_info = {
   System: {
@@ -627,7 +675,11 @@ let settings = {
   bool_format: 1,
   bool_dashboard: 1,
   enum_format: 1,
-  fahrenheit: false
+  fahrenheit: false,
+  modbus_enabled: false,
+  modbus_port: 502,
+  modbus_max_clients: 10,
+  modbus_timeout: 10000
 };
 
 const emsesp_devices = {
@@ -2282,7 +2334,9 @@ const emsesp_deviceentities_4 = [
   }
 ];
 
-// END DATA
+//
+// Router
+//
 
 // LOG
 router
@@ -2368,70 +2422,15 @@ router
   .post(SIGN_IN_ENDPOINT, () => signin)
   .get(GENERATE_TOKEN_ENDPOINT, () => generate_token);
 
-//
-//  EMS-ESP Project stuff
-//
 
-function deviceData(id: number) {
-  if (id == 1) {
-    return new Response(encoder.encode(emsesp_devicedata_1), { headers });
-  }
-  if (id == 2) {
-    return new Response(encoder.encode(emsesp_devicedata_2), { headers });
-  }
-  if (id == 3) {
-    return new Response(encoder.encode(emsesp_devicedata_3), { headers });
-  }
-  if (id == 4) {
-    return new Response(encoder.encode(emsesp_devicedata_4), { headers });
-  }
-  if (id == 5) {
-    return new Response(encoder.encode(emsesp_devicedata_5), { headers });
-  }
-  if (id == 6) {
-    return new Response(encoder.encode(emsesp_devicedata_6), { headers });
-  }
-  if (id == 7) {
-    return new Response(encoder.encode(emsesp_devicedata_7), { headers });
-  }
-  if (id == 99) {
-    return new Response(encoder.encode(emsesp_devicedata_99), { headers });
-  }
-}
-
-function deviceEntities(id: number) {
-  if (id == 1) {
-    return new Response(encoder.encode(emsesp_deviceentities_1), { headers });
-  }
-  if (id == 2) {
-    return new Response(encoder.encode(emsesp_deviceentities_2), { headers });
-  }
-  if (id == 3) {
-    return new Response(encoder.encode(emsesp_deviceentities_3), { headers });
-  }
-  if (id == 4) {
-    return new Response(encoder.encode(emsesp_deviceentities_4), { headers });
-  }
-  if (id == 5) {
-    return new Response(encoder.encode(emsesp_deviceentities_5), { headers });
-  }
-  if (id == 6) {
-    return new Response(encoder.encode(emsesp_deviceentities_6), { headers });
-  }
-  if (id == 7) {
-    return new Response(encoder.encode(emsesp_deviceentities_7), { headers });
-  }
-}
-
+// EMS-ESP Settings
 router
-
-  // EMS-ESP Settings
   .get(EMSESP_SETTINGS_ENDPOINT, () => settings)
   .post(EMSESP_SETTINGS_ENDPOINT, async (request: any) => {
     settings = await request.json();
-    console.log('settings saved', settings);
-    status(200); // no restart needed
-    // status(205); // restart needed
+    console.log('application settings saved', settings);
+    return status(200); // no restart needed
+    // return status(205); // restart needed
   })
 
   // Device Dashboard Data
@@ -2745,6 +2744,5 @@ router
   });
 
 export default router;
-
-// use this with cloudflare workers instead
+// Note: use this with cloudflare workers instead....
 // export default { ...router };

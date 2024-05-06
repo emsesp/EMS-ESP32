@@ -326,7 +326,9 @@ const pl: BaseTranslation = {
   APPLICATION_SETTINGS_1: 'Modyfikacja ustawień aplikacji EMS-ESP',
   SECURITY_1: 'Dodawanie i usuwanie użytkowników',
   UPLOAD_DOWNLOAD_1: 'Wysyłanie/pobieranie ustawień i firmware',
-  MODULES: 'Moduły'
+  MODULES: 'Moduły',
+  ENABLE_MODBUS: 'Aktywuj Modbus'
+
 };
 
 export default pl;

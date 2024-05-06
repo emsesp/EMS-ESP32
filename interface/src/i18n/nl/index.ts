@@ -326,7 +326,9 @@ const nl: Translation = {
   APPLICATION_SETTINGS_1: 'Applicatie-instellingen wijzigen',
   SECURITY_1: 'Gebruikers toevoegen of verwijderen',
   UPLOAD_DOWNLOAD_1: 'Upload-/downloadinstellingen en firmware',
-  MODULES: 'Modules'
+  MODULES: 'Modules',
+  ENABLE_MODBUS: 'Activeer Modbus'
+
 };
 
 export default nl;

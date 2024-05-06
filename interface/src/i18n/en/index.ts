@@ -326,7 +326,9 @@ const en: Translation = {
   APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings',
   SECURITY_1: 'Add or remove users',
   UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware',
-  MODULES: 'Modules'
+  MODULES: 'Modules',
+  ENABLE_MODBUS: 'Enable Modbus'
+
 };
 
 export default en;

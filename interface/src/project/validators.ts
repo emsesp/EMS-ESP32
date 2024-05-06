@@ -234,6 +234,25 @@ export const createSettingsValidator = (settings: Settings) =>
         { type: 'number', min: 0, max: 10, message: 'Must be between 0 and 10' }
       ]
     }),
+    ...(settings.modbus_enabled && {
+      modbus_max_clients: [
+        { required: true, message: 'Max clients is required' },
+        { type: 'number', min: 0, max: 50, message: 'Invalid number' }
+      ],
+      modbus_port: [
+        { required: true, message: 'Port is required' },
+        { type: 'number', min: 0, max: 65535, message: 'Invalid Port' }
+      ],
+      modbus_timeout: [
+        { required: true, message: 'Timeout is required' },
+        {
+          type: 'number',
+          min: 100,
+          max: 20000,
+          message: 'Must be between 100 and 20000'
+        }
+      ]
+    }),
     ...(settings.shower_alert && {
       shower_alert_trigger: [
         {

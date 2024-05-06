@@ -768,6 +768,75 @@ const ApplicationSettings: FC = () => {
             </Grid>
           </Grid>
         )}
+        <Typography sx={{ pt: 2 }} variant="h6" color="primary">
+          Modbus
+        </Typography>
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={data.modbus_enabled}
+              onChange={updateFormValue}
+              name="modbus_enabled"
+              disabled={saving}
+            />
+          }
+          label={LL.ENABLE_MODBUS()}
+        />
+        {data.modbus_enabled && (
+          <Grid
+            container
+            spacing={1}
+            direction="row"
+            justifyContent="flex-start"
+            alignItems="flex-start"
+          >
+            <Grid item xs={12} sm={6}>
+              <ValidatedTextField
+                fieldErrors={fieldErrors}
+                name="modbus_max_clients"
+                label={LL.AP_MAX_CLIENTS()}
+                fullWidth
+                variant="outlined"
+                value={numberValue(data.modbus_max_clients)}
+                type="number"
+                onChange={updateFormValue}
+                margin="normal"
+                disabled={saving}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <ValidatedTextField
+                fieldErrors={fieldErrors}
+                name="modbus_port"
+                label="Port"
+                fullWidth
+                variant="outlined"
+                value={numberValue(data.modbus_port)}
+                type="number"
+                onChange={updateFormValue}
+                margin="normal"
+                disabled={saving}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <ValidatedTextField
+                fieldErrors={fieldErrors}
+                name="modbus_timeout"
+                label="Timeout"
+                InputProps={{
+                  endAdornment: <InputAdornment position="end">ms</InputAdornment>
+                }}
+                fullWidth
+                variant="outlined"
+                value={numberValue(data.modbus_timeout)}
+                type="number"
+                onChange={updateFormValue}
+                margin="normal"
+                disabled={saving}
+              />
+            </Grid>
+          </Grid>
+        )}
         {restartNeeded && (
           <MessageBox my={2} level="warning" message={LL.RESTART_TEXT(0)}>
             <Button

@@ -326,7 +326,9 @@ const de: Translation = {
   APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
   SECURITY_1: 'Add or remove users', // TODO translate
   UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', // TODO translate
-  MODULES: 'Module'
+  MODULES: 'Module',
+  ENABLE_MODBUS: 'Modbus aktivieren',
+
 };
 
 export default de;

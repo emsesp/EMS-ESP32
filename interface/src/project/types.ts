@@ -35,6 +35,10 @@ export interface Settings {
   eth_phy_addr: number;
   eth_clock_mode: number;
   platform: string;
+  modbus_enabled: boolean;
+  modbus_port: number;
+  modbus_max_clients: number;
+  modbus_timeout: number;
 }
 
 export enum busConnectionStatus {
