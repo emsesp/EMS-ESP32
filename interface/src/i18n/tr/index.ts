@@ -278,7 +278,6 @@ const tr: Translation = {
   NETWORK_USE_DNS: 'mDNS Servisini deveye al',
   NETWORK_ENABLE_CORS: 'CORS u devreye al',
   NETWORK_CORS_ORIGIN: 'CORS kaynağı',
-  NETWORK_ENABLE_IPV6: 'IPv6 desteğini devreye al',
   NETWORK_FIXED_IP: 'Sabit IP adresi kullan',
   NETWORK_GATEWAY: 'Aü geçidi',
   NETWORK_SUBNET: 'Ağ Alt Maskesi',
