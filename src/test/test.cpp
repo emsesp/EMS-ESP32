@@ -1756,6 +1756,215 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         ok = true;
     }
 
+    if (command == "modbus") {
+        shell.printfln("Testing Modbus...");
+
+        System::test_set_all_active(true);
+        add_device(0x08, 172); // boiler: Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i
+
+        const auto & it = std::find_if(EMSESP::emsdevices.begin(), EMSESP::emsdevices.end(), [&](const std::unique_ptr<EMSdevice> & dev) {
+            return dev && dev->device_id() == 0x08;
+        });
+
+        if (it == EMSESP::emsdevices.end()) {
+            EMSESP::logger().err("ERROR - can not find mocked heatpump device");
+            return;
+        }
+
+        const auto & device = *it;
+
+        {
+            auto test_int8 = [&](const std::unique_ptr<EMSdevice> & device, uint8_t tag, const std::string & shortname) {
+                std::vector<uint16_t> modbus_regs(1);
+                if (auto result = device->get_modbus_value(tag, shortname, modbus_regs)) {
+                    shell.printf("INT8   %s FAILED (ERROR %d)\n", shortname.c_str(), result);
+                } else {
+                    shell.printf("INT8   %s: %d ", shortname.c_str(), (int8_t)modbus_regs[0]);
+                    if ((int8_t)modbus_regs[0] == (int8_t)EMS_VALUE_DEFAULT_INT8_DUMMY)
+                        shell.printfln("[OK]");
+                    else
+                        shell.printfln("[ERROR] - expected %d, got %d", (int8_t)EMS_VALUE_DEFAULT_INT8_DUMMY, (int8_t)modbus_regs[0]);
+                }
+            };
+
+            auto test_uint8 = [&](const std::unique_ptr<EMSdevice> & device, uint8_t tag, const std::string & shortname) {
+                std::vector<uint16_t> modbus_regs(1);
+                if (auto result = device->get_modbus_value(tag, shortname, modbus_regs)) {
+                    shell.printf("UINT8  %s FAILED (ERROR %d)\n", shortname.c_str(), result);
+                } else {
+                    shell.printf("UINT8  %s: %d ", shortname.c_str(), (uint8_t)modbus_regs[0]);
+                    if ((uint8_t)modbus_regs[0] == (uint8_t)EMS_VALUE_DEFAULT_UINT8_DUMMY)
+                        shell.printfln("[OK]");
+                    else
+                        shell.printfln("[ERROR] - expected %d, got %d", (uint8_t)EMS_VALUE_DEFAULT_UINT8_DUMMY, (uint8_t)modbus_regs[0]);
+                }
+            };
+
+            auto test_int16 = [&](const std::unique_ptr<EMSdevice> & device, uint8_t tag, const std::string & shortname) {
+                std::vector<uint16_t> modbus_regs(1);
+                if (auto result = device->get_modbus_value(tag, shortname, modbus_regs)) {
+                    shell.printf("INT16  %s FAILED (ERROR %d)\n", shortname.c_str(), result);
+                } else {
+                    shell.printf("INT16  %s: %d ", shortname.c_str(), (int16_t)modbus_regs[0]);
+                    if ((int16_t)modbus_regs[0] == (int16_t)EMS_VALUE_DEFAULT_INT16_DUMMY)
+                        shell.printfln("[OK]");
+                    else
+                        shell.printfln("[ERROR] - expected %d, got %d", (int16_t)EMS_VALUE_DEFAULT_INT16_DUMMY, (int16_t)modbus_regs[0]);
+                }
+            };
+
+            auto test_uint16 = [&](const std::unique_ptr<EMSdevice> & device, uint8_t tag, const std::string & shortname) {
+                std::vector<uint16_t> modbus_regs(1);
+                if (auto result = device->get_modbus_value(tag, shortname, modbus_regs)) {
+                    shell.printf("UINT16 %s FAILED (ERROR %d)\n", shortname.c_str(), result);
+                } else {
+                    shell.printf("UINT16 %s: %d ", shortname.c_str(), (uint16_t)modbus_regs[0]);
+                    if ((uint16_t)modbus_regs[0] == (uint16_t)EMS_VALUE_DEFAULT_UINT16_DUMMY)
+                        shell.printfln("[OK]");
+                    else
+                        shell.printfln("[ERROR] - expected %d, got %d", (uint16_t)EMS_VALUE_DEFAULT_UINT16_DUMMY, (uint16_t)modbus_regs[0]);
+                }
+            };
+
+            auto test_uint24 = [&](const std::unique_ptr<EMSdevice> & device, uint8_t tag, const std::string & shortname) {
+                std::vector<uint16_t> modbus_regs(2);
+                if (auto result = device->get_modbus_value(tag, shortname, modbus_regs)) {
+                    shell.printf("UINT24 %s FAILED (ERROR %d)\n", shortname.c_str(), result);
+                } else {
+                    uint32_t value = ((uint32_t)modbus_regs[0] << 16) | (uint32_t)modbus_regs[1];
+                    shell.printf("UINT24 %s: %d ", shortname.c_str(), value);
+                    if (value == (uint32_t)EMS_VALUE_DEFAULT_UINT24_DUMMY)
+                        shell.printfln("[OK]");
+                    else
+                        shell.printfln("[ERROR] - expected %d, got %d", (uint32_t)EMS_VALUE_DEFAULT_UINT24_DUMMY, value);
+                }
+            };
+
+            /* there seem to be no uint32 entities to run this test on.
+            auto test_uint32 = [&](const std::unique_ptr<EMSdevice> & device, uint8_t tag, const std::string & shortname) {
+                std::vector<uint16_t> modbus_regs(2);
+                if (auto result = device->get_modbus_value(tag, shortname, modbus_regs)) {
+                    shell.printf("UINT32  %s FAILED (ERROR %d)\n", shortname.c_str(), result);
+                } else {
+                    uint32_t value = ((uint32_t)modbus_regs[0] << 16) | (uint32_t)modbus_regs[1];
+                    shell.printf("UINT32  %s: %d ", shortname.c_str(), value);
+                    if (value == (uint32_t)EMS_VALUE_DEFAULT_UINT32_DUMMY)
+                        shell.printfln("[OK]");
+                    else
+                        shell.printfln("[ERROR] - expected %d, got %d", (uint32_t)EMS_VALUE_DEFAULT_UINT32_DUMMY, value);
+                }
+            };
+            */
+
+            auto test_bool = [&](const std::unique_ptr<EMSdevice> & device, uint8_t tag, const std::string & shortname) {
+                std::vector<uint16_t> modbus_regs(1);
+                if (auto result = device->get_modbus_value(tag, shortname, modbus_regs)) {
+                    shell.printf("BOOL   %s FAILED (ERROR %d)\n", shortname.c_str(), result);
+                } else {
+                    shell.printf("BOOL   %s: %d ", shortname.c_str(), (uint8_t)modbus_regs[0]);
+                    if ((uint8_t)modbus_regs[0] == (uint8_t)EMS_VALUE_DEFAULT_BOOL_DUMMY)
+                        shell.printfln("[OK]");
+                    else
+                        shell.printfln("[ERROR] - expected %d, got %d", (uint8_t)EMS_VALUE_DEFAULT_BOOL_DUMMY, (uint8_t)modbus_regs[0]);
+                }
+            };
+
+            auto test_enum = [&](const std::unique_ptr<EMSdevice> & device, uint8_t tag, const std::string & shortname) {
+                std::vector<uint16_t> modbus_regs(1);
+                if (auto result = device->get_modbus_value(tag, shortname, modbus_regs)) {
+                    shell.printf("ENUM   %s FAILED (ERROR %d)\n", shortname.c_str(), result);
+                } else {
+                    shell.printf("ENUM   %s: %d ", shortname.c_str(), (uint8_t)modbus_regs[0]);
+                    if ((uint8_t)modbus_regs[0] == (uint8_t)EMS_VALUE_DEFAULT_ENUM_DUMMY)
+                        shell.printfln("[OK]");
+                    else
+                        shell.printfln("[ERROR] - expected %d, got %d", (uint8_t)EMS_VALUE_DEFAULT_ENUM_DUMMY, (uint8_t)modbus_regs[0]);
+                }
+            };
+
+            shell.println();
+            shell.printfln("Testing device->get_modbus_value():");
+            test_int8(device, DeviceValueTAG::TAG_DEVICE_DATA, "mintempsilent");
+            test_uint8(device, DeviceValueTAG::TAG_DEVICE_DATA, "selflowtemp");
+            test_int16(device, DeviceValueTAG::TAG_DEVICE_DATA, "outdoortemp");
+            test_uint16(device, DeviceValueTAG::TAG_DEVICE_DATA, "rettemp");
+            // test_uint32(device, DeviceValueTAG::TAG_DEVICE_DATA, "heatstarts"); // apparently there are no uint32 entities?
+            test_uint24(device, DeviceValueTAG::TAG_DEVICE_DATA, "heatstarts");
+            test_bool(device, DeviceValueTAG::TAG_DEVICE_DATA, "heatingactivated");
+            test_enum(device, DeviceValueTAG::TAG_DEVICE_DATA, "pumpmode");
+        }
+
+        // modbus_value_to_json
+        {
+            shell.println();
+            shell.printfln("Testing device->modbus_value_to_json():");
+
+            std::vector<uint8_t> modbus_bytes(2);
+            JsonDocument         input;
+            JsonObject           inputObject = input.to<JsonObject>();
+            modbus_bytes[0]                  = 0;
+            modbus_bytes[1]                  = EMS_VALUE_DEFAULT_UINT8_DUMMY;
+            device->modbus_value_to_json(DeviceValueTAG::TAG_DEVICE_DATA, "selflowtemp", modbus_bytes, inputObject);
+
+            std::string jsonString;
+            serializeJson(inputObject, jsonString);
+            shell.printf("UINT8   %s: %s (%d) ", "selflowtemp", jsonString.c_str(), inputObject["value"].as<int>());
+
+            if (inputObject["value"] == (uint8_t)EMS_VALUE_DEFAULT_UINT8_DUMMY)
+                shell.println("[OK]");
+            else
+                shell.println("[ERROR]");
+        }
+
+        // handleRead
+        {
+            shell.println();
+            shell.printfln("Testing modbus->handleRead():");
+
+            uint16_t reg = Modbus::REGISTER_BLOCK_SIZE * DeviceValueTAG::TAG_DEVICE_DATA + 209; // mintempsilent is tag 2 (TAG_DEVICE_DATA), offset 209
+
+            ModbusMessage request({device->device_type(), 0x03, static_cast<unsigned char>(reg >> 8), static_cast<unsigned char>(reg & 0xff), 0, 1});
+            auto          response = EMSESP::modbus_.handleRead(request);
+
+            if (response.getError() == SUCCESS) {
+                shell.print("mintempsilent MODBUS response:");
+                for (const auto & d : response._data) {
+                    shell.printf(" %d", d);
+                }
+                if (response._data.size() == 5 && response._data[3] == 0 && response._data[4] == (uint8_t)EMS_VALUE_DEFAULT_INT8_DUMMY) {
+                    shell.printf(" [OK]");
+                } else {
+                    shell.printf(" [ERROR - invalid response]");
+                }
+                shell.println();
+            } else {
+                shell.printf("mintempsilent [MODBUS ERROR %d]\n", response.getError());
+            }
+        }
+
+        // handleWrite
+        {
+            shell.println();
+            shell.printfln("Testing modbus->handleWrite():");
+
+            uint16_t      reg = Modbus::REGISTER_BLOCK_SIZE * DeviceValueTAG::TAG_DEVICE_DATA + 4; // selflowtemp is tag 2 (TAG_DEVICE_DATA), offset 4
+            ModbusMessage request({device->device_type(), 0x06, static_cast<unsigned char>(reg >> 8), static_cast<unsigned char>(reg & 0xff), 0, 1, 2, 0, 45});
+            auto          response = EMSESP::modbus_.handleWrite(request);
+
+            if (response.getError() == SUCCESS) {
+                shell.print("selflowtemp MODBUS response:");
+                for (const auto & d : response._data) {
+                    shell.printf(" %d", d);
+                }
+                shell.println(" [OK]");
+            } else {
+                shell.printf("selflowtemp [MODBUS ERROR %d]\n", response.getError());
+            }
+        }
+
+        ok = true;
+    }
+
     if (command == "poll2") {
         shell.printfln("Testing Tx Sending last message on queue...");
 

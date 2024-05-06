@@ -119,6 +119,22 @@ class System {
         return telnet_enabled_;
     }
 
+    bool modbus_enabled() {
+        return modbus_enabled_;
+    }
+
+    uint16_t modbus_port() {
+        return modbus_port_;
+    }
+
+    uint8_t modbus_maxClients() {
+        return modbus_maxClients_;
+    }
+
+    uint32_t modbus_timeoutMillis() {
+        return modbus_timeoutMillis_;
+    }
+
     bool analog_enabled() {
         return analog_enabled_;
     }
@@ -338,6 +354,10 @@ class System {
     uint8_t     enum_format_;
     bool        readonly_mode_;
     String      version_;
+    bool        modbus_enabled_;
+    uint16_t    modbus_port_;
+    uint8_t     modbus_maxClients_;
+    uint32_t    modbus_timeoutMillis_;
 
     // ethernet
     uint8_t phy_type_;

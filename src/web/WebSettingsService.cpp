@@ -267,6 +267,22 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     settings.low_clock = root["low_clock"];
     check_flag(prev, settings.low_clock, ChangeFlags::RESTART);
 
+    prev                    = settings.modbus_enabled;
+    settings.modbus_enabled = root["modbus_enabled"] | EMSESP_DEFAULT_MODBUS_ENABLED;
+    check_flag(prev, settings.modbus_enabled, ChangeFlags::RESTART);
+
+    prev                 = settings.modbus_port;
+    settings.modbus_port = root["modbus_port"] | EMSESP_DEFAULT_MODBUS_PORT;
+    check_flag(prev, settings.modbus_port, ChangeFlags::RESTART);
+
+    prev                       = settings.modbus_maxClients;
+    settings.modbus_maxClients = root["modbus_maxClients"] | EMSESP_DEFAULT_MODBUS_MAX_CLIENTS;
+    check_flag(prev, settings.modbus_maxClients, ChangeFlags::RESTART);
+
+    prev                          = settings.modbus_timeoutMillis;
+    settings.modbus_timeoutMillis = root["modbus_timeoutMillis"] | EMSESP_DEFAULT_MODBUS_TIMEOUT;
+    check_flag(prev, settings.modbus_timeoutMillis, ChangeFlags::RESTART);
+
     //
     // these may need mqtt restart to rebuild HA discovery topics
     //
