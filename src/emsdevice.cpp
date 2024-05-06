@@ -1931,7 +1931,7 @@ int EMSdevice::get_modbus_value(uint8_t tag, const std::string & shortname, std:
 
     // handle TEXT strings
     else if (dv.type == DeviceValueType::STRING) {
-        auto value_s           = (char *)dv.value_p;
+        auto   value_s           = (char *)dv.value_p;
         size_t length_s          = strlen(value_s) + 1; // length including terminating zero in bytes
         size_t register_length_s = (length_s + 1) / 2;  // length including terminating zero in uint16_t-registers
 
@@ -2012,7 +2012,7 @@ bool EMSdevice::modbus_value_to_json(uint8_t tag, const std::string & shortname,
     else if (dv.type == DeviceValueType::STRING) {
         // text is optionally nul terminated
         // check if the data contains a null char
-        auto nul_or_end = std::find(modbus_data.begin(), modbus_data.end(), 0);
+        auto nul_or_end    = std::find(modbus_data.begin(), modbus_data.end(), 0);
         jsonValue["value"] = std::string(modbus_data.begin(), nul_or_end);
     }
 
@@ -2042,7 +2042,7 @@ bool EMSdevice::modbus_value_to_json(uint8_t tag, const std::string & shortname,
 
         jsonValue["value"] =
             Helpers::numericoperator2scalefactor(dv.numeric_operator)
-                          * (float)((uint32_t)modbus_data[0] << 24 | (uint32_t)modbus_data[1] << 16 | (uint32_t)modbus_data[2] << 8 | (uint32_t)modbus_data[3]);
+            * (float)((uint32_t)modbus_data[0] << 24 | (uint32_t)modbus_data[1] << 16 | (uint32_t)modbus_data[2] << 8 | (uint32_t)modbus_data[3]);
     }
 
     else {
