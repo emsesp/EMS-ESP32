@@ -278,7 +278,6 @@ const de: Translation = {
   NETWORK_USE_DNS: 'Aktiviere mDNS Service',
   NETWORK_ENABLE_CORS: 'Aktiviere CORS',
   NETWORK_CORS_ORIGIN: 'CORS origin',
-  NETWORK_ENABLE_IPV6: 'Aktiviere IPv6 Unterstützung',
   NETWORK_FIXED_IP: 'Feste IP Adresse',
   NETWORK_GATEWAY: 'Gateway',
   NETWORK_SUBNET: 'Subnetz Maske',

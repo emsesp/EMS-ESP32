@@ -278,7 +278,6 @@ const pl: BaseTranslation = {
   NETWORK_USE_DNS: 'Włącz wsparcie dla mDNS',
   NETWORK_ENABLE_CORS: 'Włącz wsparcie dla CORS',
   NETWORK_CORS_ORIGIN: 'CORS Origin',
-  NETWORK_ENABLE_IPV6: 'Włącz wsparcie dla IPv6',
   NETWORK_FIXED_IP: 'Użyj stałego adresu IP',
   NETWORK_GATEWAY: 'Brama',
   NETWORK_SUBNET: 'Maska podsieci',

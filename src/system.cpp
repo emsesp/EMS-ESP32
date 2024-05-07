@@ -1315,7 +1315,6 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         }
         node["TxPower setting"]  = settings.tx_power;
         node["static ip config"] = settings.staticIPConfig;
-        node["enable IPv6"]      = settings.enableIPv6;
         node["low bandwidth"]    = settings.bandwidth20;
         node["disable sleep"]    = settings.nosleep;
         node["enable MDNS"]      = settings.enableMDNS;

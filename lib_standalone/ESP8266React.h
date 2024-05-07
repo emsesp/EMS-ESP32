@@ -67,7 +67,6 @@ class DummySettings {
     bool    staticIPConfig = false;
     String  dnsIP1         = "";
     String  dnsIP2         = "";
-    bool    enableIPv6     = false;
     bool    enableMDNS     = true;
     bool    enableCORS     = false;
     String  CORSOrigin     = "*";

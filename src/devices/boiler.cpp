@@ -803,7 +803,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_hpPumpMode));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &fan_, DeviceValueType::UINT8, FL_(hpFan), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_fan), 20, 100);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpshutdown_, DeviceValueType::BOOL, FL_(hpShutdown), DeviceValueUOM::NONE, MAKE_CF_CB(set_shutdown));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpshutdown_, DeviceValueType::CMD, FL_(enum_modetype5), FL_(hpShutdown), DeviceValueUOM::NONE, MAKE_CF_CB(set_shutdown));
         // heatpump DHW settings
         register_device_value(DeviceValueTAG::TAG_DHW1,
                               &wwAlternatingOper_,

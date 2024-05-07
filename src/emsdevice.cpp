@@ -1744,7 +1744,8 @@ bool EMSdevice::generate_values(JsonObject output, const int8_t tag_filter, cons
 // create the Home Assistant configs for each device value / entity
 // this is called when an MQTT publish is done via an EMS Device in emsesp.cpp::publish_device_values()
 void EMSdevice::mqtt_ha_entity_config_create() {
-    bool create_device_config = !ha_config_done(); // do we need to create the main Discovery device config with this entity?
+    bool     create_device_config = !ha_config_done(); // do we need to create the main Discovery device config with this entity?
+    uint16_t count                = 0;
 
     // check the state of each of the device values
     // create climate if roomtemp is visible
@@ -1755,12 +1756,14 @@ void EMSdevice::mqtt_ha_entity_config_create() {
                 if (Mqtt::publish_ha_climate_config(dv.tag, true, false, dv.min, dv.max)) { // roomTemp
                     dv.remove_state(DeviceValueState::DV_HA_CLIMATE_NO_RT);
                     dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);
+                    count++;
                 }
             } else if (*(int8_t *)(dv.value_p) == 0
                        && (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) || !dv.has_state(DeviceValueState::DV_HA_CLIMATE_NO_RT))) {
                 if (Mqtt::publish_ha_climate_config(dv.tag, false, false, dv.min, dv.max)) { // no roomTemp
                     dv.add_state(DeviceValueState::DV_HA_CLIMATE_NO_RT);
                     dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);
+                    count++;
                 }
             }
         }
@@ -1771,16 +1774,21 @@ void EMSdevice::mqtt_ha_entity_config_create() {
             if (Mqtt::publish_ha_sensor_config(dv, name(), brand_to_char(), false, create_device_config)) {
                 dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);
                 create_device_config = false; // only create the main config once
+                count++;
             }
 #ifndef EMSESP_STANDALONE
             // always create minimum one config
-            if (ESP.getMaxAllocHeap() < (6 * 1024) || (!EMSESP::system_.PSram() && ESP.getFreeHeap() < (65 * 1024))) {
+            if (count && (heap_caps_get_free_size(MALLOC_CAP_8BIT) < 65 * 1024)) { // checks free Heap+PSRAM
                 break;
             }
 #endif
         }
     }
-
+#ifdef EMSESP_DEBUG
+    if (count) {
+        EMSESP::logger().debug("Created %d HA-%s-configs", count, device_type_name());
+    }
+#endif
     ha_config_done(!create_device_config);
 }
 

@@ -278,7 +278,6 @@ const sk: Translation = {
   NETWORK_USE_DNS: 'Povoliť mDNS službu',
   NETWORK_ENABLE_CORS: 'Povoliť CORS',
   NETWORK_CORS_ORIGIN: 'CORS origin',
-  NETWORK_ENABLE_IPV6: 'Povoliť podporu IPv6',
   NETWORK_FIXED_IP: 'Použiť fixnú IP adresu',
   NETWORK_GATEWAY: 'Brána',
   NETWORK_SUBNET: 'Maska podsiete',

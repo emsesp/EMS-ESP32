@@ -209,7 +209,6 @@ let network_settings = {
   enableMDNS: true,
   enableCORS: false,
   CORSOrigin: '*',
-  enableIPv6: false,
   local_ip: '',
   gateway_ip: '',
   subnet_mask: '',
