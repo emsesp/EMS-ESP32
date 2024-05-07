@@ -901,7 +901,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         if (has_tag && (device_type == EMSdevice::DeviceType::BOILER || device_type == EMSdevice::DeviceType::THERMOSTAT)
             && tag == DeviceValue::DeviceValueTAG::TAG_DHW1) {
             snprintf(entity_with_tag, sizeof(entity_with_tag), "ww%s", entity);
-            snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, Helpers::toLower(uniq_s).c_str());
+            snprintf(uniq_id, sizeof(uniq_id), "%s_dhw_%s", device_name, Helpers::toLower(uniq_s).c_str());
             for (uint8_t i = 0; i < num_dhw_old; i++) {
                 if (strcmp(entity, dhw_old[i]) == 0) { // special case for tp1de #1714
                     snprintf(entity_with_tag, sizeof(entity_with_tag), "%sww", dhw_old[i]);
