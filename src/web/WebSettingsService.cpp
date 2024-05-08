@@ -74,6 +74,10 @@ void WebSettings::read(WebSettings & settings, JsonObject root) {
     root["eth_clock_mode"]        = settings.eth_clock_mode;
     String platform               = EMSESP_PLATFORM;
     root["platform"]              = (platform == "ESP32" && EMSESP::system_.PSram()) ? "ESP32R" : platform;
+    root["modbus_enabled"]        = settings.modbus_enabled;
+    root["modbus_port"]           = settings.modbus_port;
+    root["modbus_maxClients"]     = settings.modbus_maxClients;
+    root["modbus_timeoutMillis"]  = settings.modbus_timeoutMillis;
 }
 
 // call on initialization and also when settings are updated via web or console

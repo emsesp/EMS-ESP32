@@ -70,7 +70,7 @@ uuid::syslog::SyslogService System::syslog_;
 RxService         EMSESP::rxservice_;         // incoming Telegram Rx handler
 TxService         EMSESP::txservice_;         // outgoing Telegram Tx handler
 Mqtt              EMSESP::mqtt_;              // mqtt handler
-Modbus            EMSESP::modbus_;            // modbus handler
+Modbus *          EMSESP::modbus_;            // modbus handler
 System            EMSESP::system_;            // core system services
 TemperatureSensor EMSESP::temperaturesensor_; // Temperature sensors
 AnalogSensor      EMSESP::analogsensor_;      // Analog sensors
@@ -1629,7 +1629,8 @@ void EMSESP::start() {
     }
 
     if (system_.modbus_enabled()) {
-        modbus_.start(1, system_.modbus_port(), system_.modbus_maxClients(), system_.modbus_timeoutMillis());
+        modbus_ = new Modbus;
+        modbus_->start(1, system_.modbus_port(), system_.modbus_maxClients(), system_.modbus_timeoutMillis());
     }
 
     mqtt_.start();              // mqtt init

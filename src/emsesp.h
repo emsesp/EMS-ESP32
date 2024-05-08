@@ -212,7 +212,7 @@ class EMSESP {
 
     // services
     static Mqtt              mqtt_;
-    static Modbus            modbus_;
+    static Modbus *          modbus_;
     static System            system_;
     static TemperatureSensor temperaturesensor_;
     static AnalogSensor      analogsensor_;
