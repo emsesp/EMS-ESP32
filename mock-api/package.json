@@ -1,23 +1,21 @@
 {
-  "name": "api",
+  "name": "mock-api",
   "version": "3.7.0",
   "description": "mock api for EMS-ESP",
   "author": "proddy",
   "license": "MIT",
   "scripts": {
-    "mock-api": "bun --watch rest_server.ts",
+    "mock-rest": "bun --watch rest_server.ts",
     "mock-es": "bun --watch es_server.ts",
     "mock-upload": "bun --watch upload_server.ts"
   },
   "dependencies": {
     "@msgpack/msgpack": "^2.8.0",
+    "@types/multer": "^1.4.11",
     "compression": "^1.7.4",
     "express": "^4.19.2",
     "itty-router": "^5.0.17",
     "multer": "^1.4.5-lts.1"
   },
-  "packageManager": "yarn@4.2.1",
-  "devDependencies": {
-    "@types/multer": "^1.4.11"
-  }
+  "packageManager": "yarn@4.2.1"
 }

@@ -79,11 +79,11 @@ __metadata:
   linkType: hard
 
 "@types/node@npm:*":
-  version: 20.12.7
-  resolution: "@types/node@npm:20.12.7"
+  version: 20.12.10
+  resolution: "@types/node@npm:20.12.10"
   dependencies:
     undici-types: "npm:~5.26.4"
-  checksum: 10c0/dce80d63a3b91892b321af823d624995c61e39c6a223cc0ac481a44d337640cc46931d33efb3beeed75f5c85c3bda1d97cef4c5cd4ec333caf5dee59cff6eca0
+  checksum: 10c0/2cc3b6ea09894ed1a3cf39f6491ec539281580f4ff83216e7d26ce85c83237fe0543c0ca49e25b2515ccdb6c8814b488d17a64a05f536dcaea94f9d32a60c7d7
   languageName: node
   linkType: hard
 
@@ -131,19 +131,6 @@ __metadata:
   checksum: 10c0/3a35c5f5586cfb9a21163ca47a5f77ac34fa8ceb5d17d2fa2c0d81f41cbd7f8c6fa52c77e2c039acc0f4d09e71abdc51144246900f6bef5e3c4b333f77d89362
   languageName: node
   linkType: hard
-
-"api@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "api@workspace:."
-  dependencies:
-    "@msgpack/msgpack": "npm:^2.8.0"
-    "@types/multer": "npm:^1.4.11"
-    compression: "npm:^1.7.4"
-    express: "npm:^4.19.2"
-    itty-router: "npm:^5.0.17"
-    multer: "npm:^1.4.5-lts.1"
-  languageName: unknown
-  linkType: soft
 
 "append-field@npm:^1.0.0":
   version: 1.0.0
@@ -615,6 +602,19 @@ __metadata:
   checksum: 10c0/e2e2be789218807b58abced04e7b49851d9e46e88a2f9539242cc8a92c9b5c3a0b9bab360bd3014e02a140fc4fbc58e31176c408b493f8a2a6f4986bd7527b01
   languageName: node
   linkType: hard
+
+"mock-api@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "mock-api@workspace:."
+  dependencies:
+    "@msgpack/msgpack": "npm:^2.8.0"
+    "@types/multer": "npm:^1.4.11"
+    compression: "npm:^1.7.4"
+    express: "npm:^4.19.2"
+    itty-router: "npm:^5.0.17"
+    multer: "npm:^1.4.5-lts.1"
+  languageName: unknown
+  linkType: soft
 
 "ms@npm:2.0.0":
   version: 2.0.0
