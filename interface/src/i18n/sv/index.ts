@@ -278,7 +278,6 @@ const sv: Translation = {
   NETWORK_USE_DNS: 'Aktivera mDNS-tjänsten',
   NETWORK_ENABLE_CORS: 'Aktivera CORS',
   NETWORK_CORS_ORIGIN: 'CORS origin',
-  NETWORK_ENABLE_IPV6: 'Aktivera IPv6-support',
   NETWORK_FIXED_IP: 'Använd statiskt IP',
   NETWORK_GATEWAY: 'Gateway',
   NETWORK_SUBNET: 'Subnätmask',

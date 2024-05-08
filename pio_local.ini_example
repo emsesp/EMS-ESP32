@@ -16,9 +16,9 @@
 ; my_build_flags = -DEMSESP_DEBUG -DEMSESP_TEST -DEMSESP_PINGTEST
 
 [platformio]
-default_envs = esp32_4M
+; default_envs = esp32_4M
 ; default_envs = esp32_16M
-; default_envs = lolin_s3
+default_envs = lolin_s3
 ; default_envs = standalone
 ; default_envs = debug
 ; default_envs = custom
@@ -26,22 +26,23 @@ default_envs = esp32_4M
 [env]
 ; upload settings
 upload_protocol = custom
-custom_emsesp_ip = ems-esp.local
+custom_emsesp_ip = 10.10.10.173
+; custom_emsesp_ip = ems-esp.local
 custom_username = admin
 custom_password = admin
 upload_port = /dev/ttyUSB*
-; upload_port = COM5
 
 [env:esp32_4M]
 extra_scripts =
   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
-  scripts/upload.py
+;   scripts/upload.py
 
 [env:lolin_s3]
 extra_scripts =
-;   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
+;   scripts/upload.py
 
 [env:custom]
 ; use for basic ESP boards with 4MB flash

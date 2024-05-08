@@ -69,7 +69,6 @@ class NetworkSettings {
     String  password;
     String  hostname;
     bool    staticIPConfig;
-    bool    enableIPv6;
     bool    bandwidth20;
     uint8_t tx_power;
     bool    nosleep;

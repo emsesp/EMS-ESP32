@@ -67,7 +67,7 @@ void NetworkSettingsService::manageSTA() {
     if (WiFi.isConnected() || _state.ssid.length() == 0) {
 #if ESP_IDF_VERSION_MAJOR >= 5
         if (_state.ssid.length() == 0) {
-            ETH.enableIPv6(_state.enableIPv6);
+            ETH.enableIPv6(true);
         }
 #endif
         return;
@@ -76,7 +76,7 @@ void NetworkSettingsService::manageSTA() {
     // Connect or reconnect as required
     if ((WiFi.getMode() & WIFI_STA) == 0) {
 #if ESP_IDF_VERSION_MAJOR >= 5
-        WiFi.enableIPv6(_state.enableIPv6);
+        WiFi.enableIPv6(true);
 #endif
         if (_state.staticIPConfig) {
             WiFi.config(_state.localIP, _state.gatewayIP, _state.subnetMask, _state.dnsIP1, _state.dnsIP2); // configure for static IP
@@ -358,17 +358,13 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) 
             setWiFiPowerOnRSSI();
         }
 #if ESP_IDF_VERSION_MAJOR < 5
-        if (_state.enableIPv6) {
             WiFi.enableIpV6();
-        }
 #endif
         break;
 
     case ARDUINO_EVENT_ETH_CONNECTED:
 #if ESP_IDF_VERSION_MAJOR < 5
-        if (_state.enableIPv6) {
             ETH.enableIpV6();
-        }
 #endif
         break;
 
@@ -406,9 +402,6 @@ void NetworkSettings::read(NetworkSettings & settings, JsonObject root) {
     root["enableCORS"]       = settings.enableCORS;
     root["CORSOrigin"]       = settings.CORSOrigin;
     root["tx_power"]         = settings.tx_power;
-#ifndef TASMOTA_SDK
-    root["enableIPv6"] = settings.enableIPv6;
-#endif
 
     // extended settings
     JsonUtils::writeIP(root, "local_ip", settings.localIP);
@@ -436,11 +429,6 @@ StateUpdateResult NetworkSettings::update(JsonObject root, NetworkSettings & set
     settings.enableMDNS     = root["enableMDNS"] | true;
     settings.enableCORS     = root["enableCORS"] | false;
     settings.CORSOrigin     = root["CORSOrigin"] | "*";
-#ifdef TASMOTA_SDK
-    settings.enableIPv6 = true;
-#else
-    settings.enableIPv6 = root["enableIPv6"] | false;
-#endif
     // extended settings
     JsonUtils::readIP(root, "local_ip", settings.localIP);
     JsonUtils::readIP(root, "gateway_ip", settings.gatewayIP);

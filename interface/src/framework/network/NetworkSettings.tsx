@@ -86,7 +86,6 @@ const NetworkSettings: FC = () => {
           password: current_data ? current_data.password : '',
           hostname: current_data?.hostname,
           static_ip_config: false,
-          enableIPv6: false,
           bandwidth20: false,
           tx_power: 0,
           nosleep: false,
@@ -288,18 +287,6 @@ const NetworkSettings: FC = () => {
             value={data.CORSOrigin}
             onChange={updateFormValue}
             margin="normal"
-          />
-        )}
-        {data.enableIPv6 !== undefined && (
-          <BlockFormControlLabel
-            control={
-              <Checkbox
-                name="enableIPv6"
-                checked={data.enableIPv6}
-                onChange={updateFormValue}
-              />
-            }
-            label={LL.NETWORK_ENABLE_IPV6()}
           />
         )}
         <BlockFormControlLabel
