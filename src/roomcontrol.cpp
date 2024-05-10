@@ -21,12 +21,13 @@
 namespace emsesp {
 
 // init statics
-bool     Roomctrl::switch_off_[HCS] = {false, false, false, false};
-uint32_t Roomctrl::rc_time_[HCS]    = {0, 0, 0, 0};
-int16_t  Roomctrl::remotetemp_[HCS] = {EMS_VALUE_INT16_NOTSET, EMS_VALUE_INT16_NOTSET, EMS_VALUE_INT16_NOTSET, EMS_VALUE_INT16_NOTSET};
-uint8_t  Roomctrl::remotehum_[HCS]  = {EMS_VALUE_UINT8_NOTSET, EMS_VALUE_UINT8_NOTSET, EMS_VALUE_UINT8_NOTSET, EMS_VALUE_UINT8_NOTSET};
-uint8_t  Roomctrl::sendtype_[HCS]   = {SendType::TEMP, SendType::TEMP, SendType::TEMP, SendType::TEMP};
-uint8_t  Roomctrl::type_[HCS]       = {RemoteType::NONE, RemoteType::NONE, RemoteType::NONE, RemoteType::NONE};
+bool     Roomctrl::switch_off_[HCS]   = {false, false, false, false};
+uint32_t Roomctrl::send_time_[HCS]    = {0, 0, 0, 0};
+uint32_t Roomctrl::receive_time_[HCS] = {0, 0, 0, 0};
+int16_t  Roomctrl::remotetemp_[HCS]   = {EMS_VALUE_INT16_NOTSET, EMS_VALUE_INT16_NOTSET, EMS_VALUE_INT16_NOTSET, EMS_VALUE_INT16_NOTSET};
+uint8_t  Roomctrl::remotehum_[HCS]    = {EMS_VALUE_UINT8_NOTSET, EMS_VALUE_UINT8_NOTSET, EMS_VALUE_UINT8_NOTSET, EMS_VALUE_UINT8_NOTSET};
+uint8_t  Roomctrl::sendtype_[HCS]     = {SendType::TEMP, SendType::TEMP, SendType::TEMP, SendType::TEMP};
+uint8_t  Roomctrl::type_[HCS]         = {RemoteType::NONE, RemoteType::NONE, RemoteType::NONE, RemoteType::NONE};
 
 /**
  * set the temperature,
@@ -38,19 +39,20 @@ void Roomctrl::set_remotetemp(const uint8_t type, const uint8_t hc, const int16_
     if (remotetemp_[hc] != EMS_VALUE_INT16_NOTSET && temp == EMS_VALUE_INT16_NOTSET) { // switch remote off
         remotetemp_[hc] = EMS_VALUE_INT16_NOTSET;
         switch_off_[hc] = true;
-        rc_time_[hc]    = uuid::get_uptime() - SEND_INTERVAL; // send now
+        send_time_[hc]  = uuid::get_uptime() - SEND_INTERVAL; // send now
         sendtype_[hc]   = SendType::TEMP;
         return;
     }
     if (hc >= HCS || (type != RC20 && type != FB10 && type != RC100H && type != SENSOR && type != RC200 && type != RC100)) {
         return;
     }
-    type_[hc] = type;
     if (remotetemp_[hc] != temp) {
-        rc_time_[hc]  = uuid::get_uptime() - SEND_INTERVAL; // send now
-        sendtype_[hc] = SendType::TEMP;
+        send_time_[hc] = uuid::get_uptime() - SEND_INTERVAL; // send now
+        sendtype_[hc]  = SendType::TEMP;
     }
-    remotetemp_[hc] = temp;
+    type_[hc]         = type;
+    remotetemp_[hc]   = temp;
+    receive_time_[hc] = uuid::get_uptime();
 }
 
 // set humidity for RC100H emulation
@@ -59,8 +61,8 @@ void Roomctrl::set_remotehum(const uint8_t type, const uint8_t hc, const int8_t 
         return;
     }
     if (remotehum_[hc] != hum) {
-        rc_time_[hc]  = uuid::get_uptime() - SEND_INTERVAL; // send now
-        sendtype_[hc] = SendType::HUMI;
+        send_time_[hc] = uuid::get_uptime() - SEND_INTERVAL; // send now
+        sendtype_[hc]  = SendType::HUMI;
     }
     remotehum_[hc] = hum;
 }
@@ -94,31 +96,38 @@ void Roomctrl::send(uint8_t addr) {
         return;
     }
 
-    if (uuid::get_uptime() - rc_time_[hc] > SEND_INTERVAL) { // check interval
+    if ((uuid::get_uptime() - receive_time_[hc]) > TIMEOUT) {
+        remotetemp_[hc] = EMS_VALUE_INT16_NOTSET;
+        switch_off_[hc] = true;
+        send_time_[hc]  = uuid::get_uptime() - SEND_INTERVAL; // send now
+        sendtype_[hc]   = SendType::TEMP;
+        EMSESP::logger().warning("remotetemp timeout hc%d, stop sending roomtemperature to thermostat", hc);
+    }
+    if (uuid::get_uptime() - send_time_[hc] > SEND_INTERVAL) { // check interval
         if (type_[hc] == RC100H) {
             if (sendtype_[hc] == SendType::HUMI) { // send humidity
                 if (switch_off_[hc]) {
                     remotehum_[hc] = EMS_VALUE_UINT8_NOTSET;
                 }
-                rc_time_[hc] = uuid::get_uptime();
+                send_time_[hc] = uuid::get_uptime();
                 humidity(addr, 0x10, hc);
                 sendtype_[hc] = SendType::TEMP;
             } else { // temperature telegram
                 if (remotehum_[hc] != EMS_VALUE_UINT8_NOTSET) {
                     sendtype_[hc] = SendType::HUMI;
                 } else {
-                    rc_time_[hc] = uuid::get_uptime();
+                    send_time_[hc] = uuid::get_uptime();
                 }
                 temperature(addr, 0x10, hc); // send to master-thermostat
             }
         } else if (type_[hc] == RC200 || type_[hc] == RC100) {
-            rc_time_[hc] = uuid::get_uptime();
+            send_time_[hc] = uuid::get_uptime();
             temperature(addr, 0x10, hc);
         } else if (type_[hc] == FB10) {
-            rc_time_[hc] = uuid::get_uptime();
+            send_time_[hc] = uuid::get_uptime();
             temperature(addr, 0x10, hc); // send to master-thermostat (https://github.com/emsesp/EMS-ESP32/issues/336)
         } else {                         // type==RC20 or SENSOR
-            rc_time_[hc] = uuid::get_uptime();
+            send_time_[hc] = uuid::get_uptime();
             temperature(addr, 0x00, hc); // send to all
         }
         if (remotehum_[hc] == EMS_VALUE_UINT8_NOTSET && switch_off_[hc]) {
