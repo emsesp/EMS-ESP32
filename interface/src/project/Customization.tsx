@@ -600,7 +600,7 @@ const Customization: FC = () => {
   const renderContent = () => (
     <>
       {devices && renderDeviceList()}
-      {deviceEntities && renderDeviceData()}
+      {selectedDevice !== -1 && renderDeviceData()}
       {restartNeeded && (
         <MessageBox my={2} level="warning" message={LL.RESTART_TEXT(0)}>
           <Button
