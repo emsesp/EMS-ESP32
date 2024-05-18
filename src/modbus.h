@@ -54,11 +54,6 @@ class Modbus {
         bool equals(const EntityModbusInfoKey & other) const {
             return device_type == other.device_type && device_value_tag_type == other.device_value_tag_type && registerOffset == other.registerOffset;
         }
-
-        virtual std::string toString() const {
-            return std::string("{ device_type=") + std::to_string(device_type) + "; " + std::string("device_value_tag_type=")
-                   + std::to_string(device_value_tag_type) + "; " + std::string("registerOffset=") + std::to_string(registerOffset) + std::string(" }");
-        }
     };
 
     struct EntityModbusInfo {
@@ -80,12 +75,6 @@ class Modbus {
         bool isLessThan(const EntityModbusInfo & other) const {
             return device_type < other.device_type || ((device_type == other.device_type) && (device_value_tag_type < other.device_value_tag_type))
                    || ((device_type == other.device_type) && (device_value_tag_type == other.device_value_tag_type) && (registerOffset < other.registerOffset));
-        }
-
-        [[nodiscard]] std::string toString() const {
-            return std::string("{") + std::string("device_type=") + std::to_string(device_type) + "; " + std::string("device_value_tag_type=")
-                   + std::to_string(device_value_tag_type) + "; " + std::string("short_name=") + std::string(short_name) + "; " + std::string("registerCount=")
-                   + std::to_string(registerCount) + "; " + std::string("registerOffset=") + std::to_string(registerOffset) + std::string(" }");
         }
     };
 

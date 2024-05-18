@@ -96,7 +96,7 @@ bool Modbus::check_parameter_order() {
         if (isFirst) {
             isFirst = false;
         } else if (prev == nullptr || !prev->isLessThan(mi)) {
-            LOG_ERROR("Error in modbus parameters: %s must be listed before %s.", mi.toString().c_str(), prev->toString().c_str());
+            LOG_ERROR("Error in modbus parameters: %s must be listed before %s.", mi.short_name, prev->short_name);
             return false;
         }
         prev = &mi;
