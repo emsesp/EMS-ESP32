@@ -61,8 +61,8 @@ class Modbus {
         const uint8_t      device_type;
         const uint8_t      device_value_tag_type;
         const char * const short_name;
-        const uint16_t     registerCount;
         const uint16_t     registerOffset;
+        const uint16_t     registerCount;
 
         bool equals(const EntityModbusInfoKey & other) const {
             return device_type == other.device_type && device_value_tag_type == other.device_value_tag_type && registerOffset == other.registerOffset;
