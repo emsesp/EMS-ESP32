@@ -85,17 +85,18 @@ class Modbus {
         TAG_TYPE_HC          = DeviceValue::DeviceValueTAG::TAG_HC1,
         TAG_TYPE_DHW         = DeviceValue::DeviceValueTAG::TAG_DHW1,
         TAG_TYPE_AHS         = DeviceValue::DeviceValueTAG::TAG_AHS1,
-        TAG_TYPE_HS          = DeviceValue::DeviceValueTAG::TAG_HS1
+        TAG_TYPE_HS          = DeviceValue::DeviceValueTAG::TAG_HS1,
+        INVALID_TAG_TYPE     = -2
     };
 
-    static std::map<uint8_t, uint8_t> tag_to_type;
-    static const EntityModbusInfo     modbus_register_mappings[];
+    static const EntityModbusInfo modbus_register_mappings[];
     //static const std::initializer_list<EntityModbusInfo> modbus_register_mappings;
 
+    static int8_t tag_to_type(int8_t tag);
     static bool check_parameter_order();
 
 #ifndef EMSESP_STANDALONE
-    ModbusServerTCPasync* modbusServer_;
+    ModbusServerTCPasync * modbusServer_;
 #endif
 
 #if defined(EMSESP_STANDALONE) || defined(EMSESP_TEST)
