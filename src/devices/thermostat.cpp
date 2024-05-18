@@ -1542,18 +1542,18 @@ void Thermostat::process_RC30Vacation(std::shared_ptr<const Telegram> telegram) 
     }
     static uint8_t vacation_telegram[57] = {0}; // make a copy of the whole telegram to access blocks
     memcpy(&vacation_telegram[telegram->offset], telegram->message_data, telegram->message_length);
-    for (uint8_t index = 0; index < 8; index++) {
+    for (uint8_t index = 0, pos = 0; index < 8; index++, pos += 7) {
         char data[sizeof(vacation[0]) + 4]; // avoid compiler warning
         snprintf(data,
                  sizeof(data),
                  "%02d.%02d.%04d-%02d.%02d.%04d",
-                 vacation_telegram[1 + 7 * index],
-                 vacation_telegram[2 + 7 * index],
-                 vacation_telegram[3 + 7 * index] + 2000,
-                 vacation_telegram[4 + 7 * index],
-                 vacation_telegram[5 + 7 * index],
-                 vacation_telegram[6 + 7 * index] + 2000);
-        if (data[1] > '0') {
+                 vacation_telegram[1 + pos],
+                 vacation_telegram[2 + pos],
+                 vacation_telegram[3 + pos] + 2000,
+                 vacation_telegram[4 + pos],
+                 vacation_telegram[5 + pos],
+                 vacation_telegram[6 + pos] + 2000);
+        if (vacation_telegram[1 + pos]) { // data is set (day >  0)
             has_update(vacation[index], data, sizeof(vacation[0]));
         }
     }

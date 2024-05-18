@@ -96,14 +96,13 @@ void Roomctrl::send(uint8_t addr) {
         return;
     }
 
-    if ((uuid::get_uptime() - receive_time_[hc]) > TIMEOUT) {
+    if (!switch_off_[hc] && (uuid::get_uptime() - receive_time_[hc]) > TIMEOUT) {
         remotetemp_[hc] = EMS_VALUE_INT16_NOTSET;
         switch_off_[hc] = true;
-        send_time_[hc]  = uuid::get_uptime() - SEND_INTERVAL; // send now
         sendtype_[hc]   = SendType::TEMP;
         EMSESP::logger().warning("remotetemp timeout hc%d, stop sending roomtemperature to thermostat", hc);
     }
-    if (uuid::get_uptime() - send_time_[hc] > SEND_INTERVAL) { // check interval
+    if (switch_off_[hc] || (uuid::get_uptime() - send_time_[hc]) > SEND_INTERVAL) { // check interval
         if (type_[hc] == RC100H) {
             if (sendtype_[hc] == SendType::HUMI) { // send humidity
                 if (switch_off_[hc]) {
