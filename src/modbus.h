@@ -30,6 +30,7 @@ class Modbus {
     static const int REGISTER_BLOCK_SIZE = 1000;
 
     void start(uint8_t systemServerId, uint16_t port, uint8_t maxClients, uint32_t timeoutMillis);
+    void stop();
 
 #if defined(EMSESP_STANDALONE)
     int getRegisterOffset(const DeviceValue & dv);
@@ -94,7 +95,7 @@ class Modbus {
     static bool check_parameter_order();
 
 #ifndef EMSESP_STANDALONE
-    static ModbusServerTCPasync modbusServer_;
+    ModbusServerTCPasync* modbusServer_;
 #endif
 
 #if defined(EMSESP_STANDALONE) || defined(EMSESP_TEST)

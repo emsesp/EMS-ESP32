@@ -13,9 +13,7 @@
 
 namespace emsesp {
 
-#ifndef EMSESP_STANDALONE
-ModbusServerTCPasync Modbus::modbusServer_;
-#else
+#ifdef EMSESP_STANDALONE
 // no eModbus lib in standalone build
 enum FunctionCode : uint8_t { WRITE_HOLD_REGISTER = 0x06, WRITE_MULT_REGISTERS = 0x10 };
 #endif
@@ -68,17 +66,18 @@ void Modbus::start(uint8_t systemServerId, uint16_t port, uint8_t maxClients, ui
         return;
     }
 
-    modbusServer_.registerWorker(systemServerId, READ_INPUT_REGISTER, [this](auto && request) { return handleSystemRead(request); });
+    modbusServer_ = new ModbusServerTCPasync();
+    modbusServer_->registerWorker(systemServerId, READ_INPUT_REGISTER, [this](auto && request) { return handleSystemRead(request); });
 
     for (uint8_t i = EMSdevice::DeviceType::BOILER; i < EMSdevice::DeviceType::UNKNOWN; i++) {
         if (i != systemServerId) {
-            modbusServer_.registerWorker(i, READ_INPUT_REGISTER, [this](auto && request) { return handleRead(request); });
-            modbusServer_.registerWorker(i, READ_HOLD_REGISTER, [this](auto && request) { return handleRead(request); });
-            modbusServer_.registerWorker(i, WRITE_HOLD_REGISTER, [this](auto && request) { return handleWrite(request); });
-            modbusServer_.registerWorker(i, WRITE_MULT_REGISTERS, [this](auto && request) { return handleWrite(request); });
+            modbusServer_->registerWorker(i, READ_INPUT_REGISTER, [this](auto && request) { return handleRead(request); });
+            modbusServer_->registerWorker(i, READ_HOLD_REGISTER, [this](auto && request) { return handleRead(request); });
+            modbusServer_->registerWorker(i, WRITE_HOLD_REGISTER, [this](auto && request) { return handleWrite(request); });
+            modbusServer_->registerWorker(i, WRITE_MULT_REGISTERS, [this](auto && request) { return handleWrite(request); });
         }
     }
-    modbusServer_.start(port, maxClients, timeoutMillis);
+    modbusServer_->start(port, maxClients, timeoutMillis);
     LOG_INFO("Modbus server with ID %d started on port %d", systemServerId, port);
 #else
     if (!check_parameter_order()) {
@@ -86,6 +85,13 @@ void Modbus::start(uint8_t systemServerId, uint16_t port, uint8_t maxClients, ui
     }
     LOG_INFO("Modbus deactivated in standalone build.");
 #endif
+}
+
+// this is currently never called, just for good measure
+void Modbus::stop() {
+    modbusServer_->stop();
+    delete modbusServer_;
+    modbusServer_ = nullptr;
 }
 
 // Check that the Modbus parameters defined in modbus_entity_parameters.cpp are correctly ordered
