@@ -3,6 +3,7 @@
  * - verwendete libs in readme hinzufügen
  */
 #include "modbus.h"
+#include "modbus_entity_parameters.hpp"
 #include "emsesp.h"
 #include "emsdevice.h"
 
@@ -22,51 +23,45 @@ enum FunctionCode : uint8_t { WRITE_HOLD_REGISTER = 0x06, WRITE_MULT_REGISTERS =
 uuid::log::Logger Modbus::logger_{F_(modbus), uuid::log::Facility::DAEMON};
 
 // Map DeviceValue tags to tag types.
-std::map<uint8_t, uint8_t> Modbus::tag_to_type{
-
-    {DeviceValue::TAG_NONE, TAG_TYPE_NONE}, // -1
-    {DeviceValue::TAG_DEVICE_DATA, TAG_TYPE_DEVICE_DATA},
-    {DeviceValue::TAG_HC1, TAG_TYPE_HC},
-    {DeviceValue::TAG_HC2, TAG_TYPE_HC},
-    {DeviceValue::TAG_HC3, TAG_TYPE_HC},
-    {DeviceValue::TAG_HC4, TAG_TYPE_HC},
-    {DeviceValue::TAG_HC5, TAG_TYPE_HC},
-    {DeviceValue::TAG_HC6, TAG_TYPE_HC},
-    {DeviceValue::TAG_HC7, TAG_TYPE_HC},
-    {DeviceValue::TAG_HC8, TAG_TYPE_HC},
-    {DeviceValue::TAG_DHW1, TAG_TYPE_DHW},
-    {DeviceValue::TAG_DHW2, TAG_TYPE_DHW},
-    {DeviceValue::TAG_DHW3, TAG_TYPE_DHW},
-    {DeviceValue::TAG_DHW4, TAG_TYPE_DHW},
-    {DeviceValue::TAG_DHW5, TAG_TYPE_DHW},
-    {DeviceValue::TAG_DHW6, TAG_TYPE_DHW},
-    {DeviceValue::TAG_DHW7, TAG_TYPE_DHW},
-    {DeviceValue::TAG_DHW8, TAG_TYPE_DHW},
-    {DeviceValue::TAG_DHW9, TAG_TYPE_DHW},
-    {DeviceValue::TAG_DHW10, TAG_TYPE_DHW},
-    {DeviceValue::TAG_AHS1, TAG_TYPE_AHS},
-    {DeviceValue::TAG_HS1, TAG_TYPE_HS},
-    {DeviceValue::TAG_HS2, TAG_TYPE_HS},
-    {DeviceValue::TAG_HS3, TAG_TYPE_HS},
-    {DeviceValue::TAG_HS4, TAG_TYPE_HS},
-    {DeviceValue::TAG_HS5, TAG_TYPE_HS},
-    {DeviceValue::TAG_HS6, TAG_TYPE_HS},
-    {DeviceValue::TAG_HS7, TAG_TYPE_HS},
-    {DeviceValue::TAG_HS8, TAG_TYPE_HS},
-    {DeviceValue::TAG_HS9, TAG_TYPE_HS},
-    {DeviceValue::TAG_HS10, TAG_TYPE_HS},
-    {DeviceValue::TAG_HS11, TAG_TYPE_HS},
-    {DeviceValue::TAG_HS12, TAG_TYPE_HS},
-    {DeviceValue::TAG_HS13, TAG_TYPE_HS},
-    {DeviceValue::TAG_HS14, TAG_TYPE_HS},
-    {DeviceValue::TAG_HS15, TAG_TYPE_HS},
-    {DeviceValue::TAG_HS16, TAG_TYPE_HS}
-
-};
+std::map<uint8_t, uint8_t> Modbus::tag_to_type{{DeviceValue::TAG_NONE, TAG_TYPE_NONE}, // -1
+                                               {DeviceValue::TAG_DEVICE_DATA, TAG_TYPE_DEVICE_DATA},
+                                               {DeviceValue::TAG_HC1, TAG_TYPE_HC},
+                                               {DeviceValue::TAG_HC2, TAG_TYPE_HC},
+                                               {DeviceValue::TAG_HC3, TAG_TYPE_HC},
+                                               {DeviceValue::TAG_HC4, TAG_TYPE_HC},
+                                               {DeviceValue::TAG_HC5, TAG_TYPE_HC},
+                                               {DeviceValue::TAG_HC6, TAG_TYPE_HC},
+                                               {DeviceValue::TAG_HC7, TAG_TYPE_HC},
+                                               {DeviceValue::TAG_HC8, TAG_TYPE_HC},
+                                               {DeviceValue::TAG_DHW1, TAG_TYPE_DHW},
+                                               {DeviceValue::TAG_DHW2, TAG_TYPE_DHW},
+                                               {DeviceValue::TAG_DHW3, TAG_TYPE_DHW},
+                                               {DeviceValue::TAG_DHW4, TAG_TYPE_DHW},
+                                               {DeviceValue::TAG_DHW5, TAG_TYPE_DHW},
+                                               {DeviceValue::TAG_DHW6, TAG_TYPE_DHW},
+                                               {DeviceValue::TAG_DHW7, TAG_TYPE_DHW},
+                                               {DeviceValue::TAG_DHW8, TAG_TYPE_DHW},
+                                               {DeviceValue::TAG_DHW9, TAG_TYPE_DHW},
+                                               {DeviceValue::TAG_DHW10, TAG_TYPE_DHW},
+                                               {DeviceValue::TAG_AHS1, TAG_TYPE_AHS},
+                                               {DeviceValue::TAG_HS1, TAG_TYPE_HS},
+                                               {DeviceValue::TAG_HS2, TAG_TYPE_HS},
+                                               {DeviceValue::TAG_HS3, TAG_TYPE_HS},
+                                               {DeviceValue::TAG_HS4, TAG_TYPE_HS},
+                                               {DeviceValue::TAG_HS5, TAG_TYPE_HS},
+                                               {DeviceValue::TAG_HS6, TAG_TYPE_HS},
+                                               {DeviceValue::TAG_HS7, TAG_TYPE_HS},
+                                               {DeviceValue::TAG_HS8, TAG_TYPE_HS},
+                                               {DeviceValue::TAG_HS9, TAG_TYPE_HS},
+                                               {DeviceValue::TAG_HS10, TAG_TYPE_HS},
+                                               {DeviceValue::TAG_HS11, TAG_TYPE_HS},
+                                               {DeviceValue::TAG_HS12, TAG_TYPE_HS},
+                                               {DeviceValue::TAG_HS13, TAG_TYPE_HS},
+                                               {DeviceValue::TAG_HS14, TAG_TYPE_HS},
+                                               {DeviceValue::TAG_HS15, TAG_TYPE_HS},
+                                               {DeviceValue::TAG_HS16, TAG_TYPE_HS}};
 
 void Modbus::start(uint8_t systemServerId, uint16_t port, uint8_t maxClients, uint32_t timeoutMillis) {
-    Serial.println("Starting Modbus");
-
 #ifndef EMSESP_STANDALONE
     if (!check_parameter_order()) {
         LOG_ERROR("Unable to enable Modbus - the parameter list order is corrupt. This is a firmware bug.");
@@ -95,16 +90,16 @@ void Modbus::start(uint8_t systemServerId, uint16_t port, uint8_t maxClients, ui
 
 // Check that the Modbus parameters defined in modbus_entity_parameters.cpp are correctly ordered
 bool Modbus::check_parameter_order() {
-    EntityModbusInfo prev;
-    bool             isFirst = true;
+    EntityModbusInfo const * prev    = nullptr;
+    bool                     isFirst = true;
     for (const auto & mi : modbus_register_mappings) {
         if (isFirst) {
             isFirst = false;
-        } else if (!prev.isLessThan(mi)) {
-            LOG_ERROR("Error in modbus parameters: %s must be listed before %s.", mi.toString().c_str(), prev.toString().c_str());
+        } else if (prev == nullptr || !prev->isLessThan(mi)) {
+            LOG_ERROR("Error in modbus parameters: %s must be listed before %s.", mi.toString().c_str(), prev->toString().c_str());
             return false;
         }
-        prev = mi;
+        prev = &mi;
     }
     return true;
 }
@@ -205,13 +200,13 @@ ModbusMessage Modbus::handleRead(const ModbusMessage & request) {
     // binary search in modbus infos
     auto key = EntityModbusInfoKey(dev->device_type(), tag_type, register_offset);
 
-    const auto & modbusInfo =
-        std::lower_bound(modbus_register_mappings.begin(), modbus_register_mappings.end(), key, [](const EntityModbusInfo & a, const EntityModbusInfoKey & b) {
-            return a.isLessThan(b);
-        });
+    const auto & modbusInfo = std::lower_bound(std::begin(modbus_register_mappings),
+                                               std::end(modbus_register_mappings),
+                                               key,
+                                               [](const EntityModbusInfo & a, const EntityModbusInfoKey & b) { return a.isLessThan(b); });
 
 
-    if (modbusInfo == modbus_register_mappings.end() || !modbusInfo->equals(key)) {
+    if (modbusInfo == std::end(modbus_register_mappings) || !modbusInfo->equals(key)) {
         // combination of device_type/tag_type/register_offset does not exist
         LOG_ERROR("combination of device_type/tag_type/register_offset does not exist");
         response.setError(request.getServerID(), request.getFunctionCode(), ILLEGAL_DATA_ADDRESS);
@@ -267,8 +262,6 @@ ModbusMessage Modbus::handleWrite(const ModbusMessage & request) {
         return response;
     }
 
-    Serial.printf("extracted %d bytes\n", data.size());
-
     LOG_DEBUG("Got write request for serverId %d, startAddress %d, numWords %d, byteCount %d", device_type, start_address, num_words, byte_count);
 
     // each register block corresponds to a device value tag
@@ -298,13 +291,13 @@ ModbusMessage Modbus::handleWrite(const ModbusMessage & request) {
     const auto & dev = *dev_it;
 
     // binary search in modbus infos
-    auto key = EntityModbusInfoKey(dev->device_type(), tag_type, register_offset);
-    auto modbusInfo =
-        std::lower_bound(modbus_register_mappings.begin(), modbus_register_mappings.end(), key, [](const EntityModbusInfo & mi, const EntityModbusInfoKey & k) {
-            return mi.isLessThan(k);
-        });
+    auto key        = EntityModbusInfoKey(dev->device_type(), tag_type, register_offset);
+    auto modbusInfo = std::lower_bound(std::begin(modbus_register_mappings),
+                                       std::end(modbus_register_mappings),
+                                       key,
+                                       [](const EntityModbusInfo & mi, const EntityModbusInfoKey & k) { return mi.isLessThan(k); });
 
-    if (modbusInfo == modbus_register_mappings.end() || !modbusInfo->equals(key)) {
+    if (modbusInfo == std::end(modbus_register_mappings) || !modbusInfo->equals(key)) {
         // combination of device_type/tag_type/register_offset does not exist
         LOG_ERROR("combination of device_type (%d)/tag_type (%d)/register_offset (%d) does not exist",
                   key.device_type,

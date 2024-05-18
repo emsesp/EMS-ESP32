@@ -41,9 +41,9 @@ class Modbus {
     static uuid::log::Logger logger_;
 
     struct EntityModbusInfoKey {
-        uint8_t  device_type;
-        uint8_t  device_value_tag_type;
-        uint16_t registerOffset;
+        const uint8_t  device_type;
+        const uint8_t  device_value_tag_type;
+        const uint16_t registerOffset;
 
         EntityModbusInfoKey(uint8_t deviceType, uint8_t deviceValueTagType, uint16_t registerOffset)
             : device_type(deviceType)
@@ -55,34 +55,37 @@ class Modbus {
             return device_type == other.device_type && device_value_tag_type == other.device_value_tag_type && registerOffset == other.registerOffset;
         }
 
-        bool isLessThan(const EntityModbusInfoKey & other) const {
-            return device_type < other.device_type || ((device_type == other.device_type) && (device_value_tag_type < other.device_value_tag_type))
-                   || ((device_type == other.device_type) && (device_value_tag_type == other.device_value_tag_type) && (registerOffset < other.registerOffset));
-        }
-
         virtual std::string toString() const {
             return std::string("{ device_type=") + std::to_string(device_type) + "; " + std::string("device_value_tag_type=")
                    + std::to_string(device_value_tag_type) + "; " + std::string("registerOffset=") + std::to_string(registerOffset) + std::string(" }");
         }
     };
 
-    struct EntityModbusInfo : EntityModbusInfoKey {
-        uint16_t     registerCount;
-        const char * short_name;
+    struct EntityModbusInfo {
+        const uint8_t      device_type;
+        const uint8_t      device_value_tag_type;
+        const char * const short_name;
+        const uint16_t     registerCount;
+        const uint16_t     registerOffset;
 
-        EntityModbusInfo(uint8_t device_type, uint8_t device_value_tag_type, const char * const short_name, uint16_t registerOffset, uint16_t registerCount)
-            : EntityModbusInfoKey(device_type, device_value_tag_type, registerOffset)
-            , registerCount(registerCount)
-            , short_name(short_name) {
+        bool equals(const EntityModbusInfoKey & other) const {
+            return device_type == other.device_type && device_value_tag_type == other.device_value_tag_type && registerOffset == other.registerOffset;
         }
 
-        EntityModbusInfo()
-            : EntityModbusInfo(0, 0, "", 0, 0) {
+        bool isLessThan(const EntityModbusInfoKey & other) const {
+            return device_type < other.device_type || ((device_type == other.device_type) && (device_value_tag_type < other.device_value_tag_type))
+                   || ((device_type == other.device_type) && (device_value_tag_type == other.device_value_tag_type) && (registerOffset < other.registerOffset));
         }
 
-        std::string toString() const override {
-            return std::string("{ key=") + EntityModbusInfoKey::toString() + "; " + std::string("registerCount=") + std::to_string(registerCount) + "; "
-                   + std::string("short_name=") + std::string(short_name) + std::string(" }");
+        bool isLessThan(const EntityModbusInfo & other) const {
+            return device_type < other.device_type || ((device_type == other.device_type) && (device_value_tag_type < other.device_value_tag_type))
+                   || ((device_type == other.device_type) && (device_value_tag_type == other.device_value_tag_type) && (registerOffset < other.registerOffset));
+        }
+
+        [[nodiscard]] std::string toString() const {
+            return std::string("{") + std::string("device_type=") + std::to_string(device_type) + "; " + std::string("device_value_tag_type=")
+                   + std::to_string(device_value_tag_type) + "; " + std::string("short_name=") + std::string(short_name) + "; " + std::string("registerCount=")
+                   + std::to_string(registerCount) + "; " + std::string("registerOffset=") + std::to_string(registerOffset) + std::string(" }");
         }
     };
 
@@ -95,8 +98,9 @@ class Modbus {
         TAG_TYPE_HS          = DeviceValue::DeviceValueTAG::TAG_HS1
     };
 
-    static std::map<uint8_t, uint8_t>              tag_to_type;
-    static std::initializer_list<EntityModbusInfo> modbus_register_mappings;
+    static std::map<uint8_t, uint8_t> tag_to_type;
+    static const EntityModbusInfo     modbus_register_mappings[];
+    //static const std::initializer_list<EntityModbusInfo> modbus_register_mappings;
 
     static bool check_parameter_order();
 
@@ -108,9 +112,9 @@ class Modbus {
   public:
 #endif
 
-    ModbusMessage handleSystemRead(const ModbusMessage & request);
-    ModbusMessage handleRead(const ModbusMessage & request);
-    ModbusMessage handleWrite(const ModbusMessage & request);
+    static ModbusMessage handleSystemRead(const ModbusMessage & request);
+    static ModbusMessage handleRead(const ModbusMessage & request);
+    static ModbusMessage handleWrite(const ModbusMessage & request);
 };
 
 } // namespace emsesp
