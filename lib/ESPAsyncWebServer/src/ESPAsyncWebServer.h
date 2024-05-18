@@ -354,7 +354,7 @@ class AsyncWebServerRequest {
 
     size_t args() const {
         return params();
-    }                                                              // get arguments count
+    } // get arguments count
     const String & arg(const String & name) const;                 // get request argument value by name
     const String & arg(const __FlashStringHelper * data) const;    // get request argument value by F(name)
     const String & arg(size_t i) const;                            // get request argument value by number
@@ -446,6 +446,11 @@ class AsyncWebHandler {
         _filter = fn;
         return *this;
     }
+    AsyncWebHandler & setAuthentication(const String & username, const String & password) {
+        _username = username;
+        _password = password;
+        return *this;
+    };
     AsyncWebHandler & setAuthentication(const char * username, const char * password) {
         _username = String(username);
         _password = String(password);
