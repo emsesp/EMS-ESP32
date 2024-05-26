@@ -16,33 +16,43 @@
 ; my_build_flags = -DEMSESP_DEBUG -DEMSESP_TEST -DEMSESP_PINGTEST
 
 [platformio]
-; default_envs = esp32_4M
+default_envs = esp32_4M
 ; default_envs = esp32_16M
-default_envs = lolin_s3
-; default_envs = standalone
+; default_envs = lolin_s3
+; default_envs = native
 ; default_envs = debug
 ; default_envs = custom
 
 [env]
 ; upload settings
-upload_protocol = custom
+; for USB
+upload_protocol = esptool
+upload_port = /dev/ttyUSB*
+; for OTA
+; upload_protocol = custom
 custom_emsesp_ip = 10.10.10.173
 ; custom_emsesp_ip = ems-esp.local
 custom_username = admin
 custom_password = admin
-upload_port = /dev/ttyUSB*
+; uncomment this next line if using the github repo
+lib_deps = file://../../modules/EMS-ESP-Modules
+
+[env:native]
+extra_scripts = 
+;   pre:scripts/refresh_module_library_native.py
+;   post:scripts/run_native.py
 
 [env:esp32_4M]
 extra_scripts =
-  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+;   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
-;   scripts/upload.py
+  scripts/upload.py
 
 [env:lolin_s3]
 extra_scripts =
   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
-;   scripts/upload.py
+  scripts/upload.py
 
 [env:custom]
 ; use for basic ESP boards with 4MB flash
@@ -60,7 +70,7 @@ board_upload.use_1200bps_touch = false
 board_upload.wait_for_upload_port = true
 upload_port = /dev/ttyUSB0
 extra_scripts = 
-	; pre:scripts/build_interface.py
+	pre:scripts/build_interface.py
 	scripts/rename_fw.py
 build_unflags = ${common.unbuild_flags}
 build_flags = 

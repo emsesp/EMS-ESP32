@@ -75,6 +75,7 @@ TemperatureSensor EMSESP::temperaturesensor_; // Temperature sensors
 AnalogSensor      EMSESP::analogsensor_;      // Analog sensors
 Shower            EMSESP::shower_;            // Shower logic
 Preferences       EMSESP::nvs_;               // NV Storage
+ModuleLibrary     EMSESP::module_;            // Module Library
 
 // static/common variables
 uint16_t EMSESP::watch_id_         = WATCH_ID_NONE; // for when log is TRACE. 0 means no trace set
@@ -1645,6 +1646,8 @@ void EMSESP::start() {
 #endif
 
     webServer.begin(); // start the web server
+
+    module_.setup(this); // setup the external library modules
 }
 
 // main loop calling all services
