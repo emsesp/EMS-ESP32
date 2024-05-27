@@ -1651,4 +1651,12 @@ bool System::ntp_connected() {
     return ntp_connected_;
 }
 
+std::string System::getMacAddress() const {
+#ifndef EMSESP_STANDALONE
+    return WiFi.macAddress().c_str();
+#else
+    return "10:10:10:10:10:10";
+#endif
+}
+
 } // namespace emsesp
