@@ -12,7 +12,7 @@
 ;  -DEMSESP_EN_ONLY ; only EN translated entity names
 ;  -DEMSESP_PINGTEST ; send log message every 1/2 second
 ; my_build_flags = -DEMSESP_TEST
-; my_build_flags = -DEMSESP_DEBUG -DEMSESP_TEST
+my_build_flags = -DEMSESP_DEBUG -DEMSESP_TEST
 ; my_build_flags = -DEMSESP_DEBUG -DEMSESP_TEST -DEMSESP_PINGTEST
 
 [platformio]
@@ -35,6 +35,8 @@ custom_emsesp_ip = 10.10.10.173
 custom_username = admin
 custom_password = admin
 ; uncomment this next line if using the github repo
+; use with 
+;    rm -rf .pio/libdeps/native/EMS-ESP-Modules; pio run -e native -t clean; pio run -e native -t exec
 lib_deps = file://../../modules/EMS-ESP-Modules
 
 [env:native]
