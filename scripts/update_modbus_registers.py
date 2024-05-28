@@ -4,7 +4,7 @@
 #
 # Usage:
 # - first, dump all entities to csv by running 'scripts/dump_entities.sh'
-# - then run 'cat ../dump_entities.csv | python3 update_modbus_registers.py > ../src/modbus_entity_parameters.cpp'
+# - then run 'cat ../dump_entities.csv | python3 update_modbus_registers.py > ../src/modbus_entity_parameters.hpp'
 #   from the "scripts" folder
 
 import fileinput

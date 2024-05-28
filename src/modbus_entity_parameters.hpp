@@ -6,10 +6,11 @@ namespace emsesp {
 using dt = EMSdevice::DeviceType;
 
 #define REGISTER_MAPPING(device_type, device_value_tag_type, long_name, modbus_register_offset, modbus_register_count)                                         \
-    Modbus::EntityModbusInfo(device_type, device_value_tag_type, long_name[0], modbus_register_offset, modbus_register_count)
+    { device_type, device_value_tag_type, long_name[0], modbus_register_offset, modbus_register_count }
 
 // IMPORTANT: This list MUST be ordered by keys "device_type", "device_value_tag_type" and "modbus_register_offset" in this order.
-std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_mappings = {
+const Modbus::EntityModbusInfo Modbus::modbus_register_mappings[] = {
+//const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_mappings = {
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(reset), 0, 1),                       // reset
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(forceHeatingOff), 1, 1),             // heatingoff
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(heatingActive), 2, 1),               // heatingactive
