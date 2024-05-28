@@ -1647,7 +1647,7 @@ void EMSESP::start() {
 
     webServer.begin(); // start the web server
 
-    module_.setup(this); // setup the external library modules
+    module_.start(this); // setup the external library modules
 }
 
 // main loop calling all services
