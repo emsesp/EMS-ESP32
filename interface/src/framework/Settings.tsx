@@ -9,6 +9,7 @@ import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore
 import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import TuneIcon from '@mui/icons-material/Tune';
+import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import {
   Box,
   Button,
@@ -120,6 +121,14 @@ const Settings: FC = () => {
           label={LL.SECURITY(0)}
           text={LL.SECURITY_1()}
           to="security"
+        />
+
+        <ListMenuItem
+          icon={ViewModuleIcon}
+          bgcolor="#efc34b"
+          label="Modules"
+          text="Activate or deactivate external modules"
+          to="modules"
         />
 
         <Divider />

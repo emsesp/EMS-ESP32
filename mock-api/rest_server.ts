@@ -428,10 +428,11 @@ const EMSESP_WRITE_TEMPSENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeTemperatureS
 const EMSESP_WRITE_ANALOGSENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeAnalogSensor';
 const EMSESP_CUSTOMIZATION_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customizationEntities';
 const EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'resetCustomizations';
-
 const EMSESP_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
 const EMSESP_CUSTOMENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customEntities';
+const EMSESP_MODULES_ENDPOINT = REST_ENDPOINT_ROOT + 'modules';
 
+// these are used in the API calls only
 const EMSESP_GET_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'getSettings';
 const EMSESP_GET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'getCustomizations';
 const EMSESP_GET_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'getEntities';
@@ -2127,6 +2128,28 @@ let emsesp_schedule = {
   ]
 };
 
+// SCHEDULE
+let emsesp_modules = {
+  "modules": [
+    {
+      id: 1,
+      "name": "ModuleTest1",
+      "author": "proddy",
+      "version": "1.0.0",
+      "enabled": true,
+      "status": "active"
+    },
+    {
+      id: 2,
+      "name": "ModuleTest2",
+      "author": "proddy",
+      "version": "1.0.0",
+      "enabled": true,
+      "status": "active"
+    }
+  ]
+}
+
 // CUSTOMIZATION
 const emsesp_deviceentities_1 = [{ v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }];
 const emsesp_deviceentities_3 = [{ v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }];
@@ -2484,6 +2507,22 @@ router
     return status(200);
   })
   .get(EMSESP_SCHEDULE_ENDPOINT, () => emsesp_schedule)
+
+  // Modules
+  .post(EMSESP_MODULES_ENDPOINT, async (request: any) => {
+    const content = await request.json();
+    // TODO find the one and toggle it
+    console.log('modules saved', emsesp_modules);
+    /*
+        const dd_objIndex = dd.data.findIndex((obj: any) => obj.id.slice(2) === fullname);
+    if (dd_objIndex !== -1) {
+      let changed = new Boolean(false);
+          emsesp_modules = content;
+
+      */
+    return status(200);
+  })
+  .get(EMSESP_MODULES_ENDPOINT, () => emsesp_modules)  
 
   // Custom Entities
   .post(EMSESP_CUSTOMENTITIES_ENDPOINT, async (request: any) => {

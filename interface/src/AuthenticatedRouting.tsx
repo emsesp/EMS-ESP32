@@ -16,6 +16,7 @@ import ApplicationSettings from 'project/ApplicationSettings';
 import CustomEntities from 'project/CustomEntities';
 import Customization from 'project/Customization';
 import Devices from 'project/Devices';
+import Modules from 'project/Modules';
 import Scheduler from 'project/Scheduler';
 import Sensors from 'project/Sensors';
 
@@ -43,6 +44,7 @@ const AuthenticatedRouting: FC = () => {
             <Route path="/settings/ntp/*" element={<NetworkTime />} />
             <Route path="/settings/mqtt/*" element={<Mqtt />} />
             <Route path="/settings/security/*" element={<Security />} />
+            <Route path="/settings/modules/*" element={<Modules />} />
             <Route path="/system/espsystemstatus/*" element={<ESPSystemStatus />} />
             <Route path="/settings/upload/*" element={<UploadDownload />} />
           </>
