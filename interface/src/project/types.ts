@@ -308,6 +308,20 @@ export interface Schedule {
   schedule: ScheduleItem[];
 }
 
+export interface ModuleItem {
+  id: number; // unique index
+  name: string;
+  author: string;
+  version: string;
+  status: string;
+  enabled: boolean;
+  o_enabled?: boolean;
+}
+
+export interface Modules {
+  modules: ModuleItem[];
+}
+
 export enum ScheduleFlag {
   SCHEDULE_SUN = 1,
   SCHEDULE_MON = 2,

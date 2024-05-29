@@ -65,6 +65,10 @@
 #include "command.h"
 #include "version.h"
 
+// Load external modules
+class Module {}; // forward declaration
+#include <ModuleLibrary.h>
+
 #define WATCH_ID_NONE 0 // no watch id set
 
 // helpers for callback functions
@@ -218,6 +222,7 @@ class EMSESP {
     static RxService         rxservice_;
     static TxService         txservice_;
     static Preferences       nvs_;
+    static ModuleLibrary     module_;
 
     // web controllers
     static ESP8266React            esp8266React;

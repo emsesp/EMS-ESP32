@@ -75,6 +75,7 @@ TemperatureSensor EMSESP::temperaturesensor_; // Temperature sensors
 AnalogSensor      EMSESP::analogsensor_;      // Analog sensors
 Shower            EMSESP::shower_;            // Shower logic
 Preferences       EMSESP::nvs_;               // NV Storage
+ModuleLibrary     EMSESP::module_;            // Module Library
 
 // static/common variables
 uint16_t EMSESP::watch_id_         = WATCH_ID_NONE; // for when log is TRACE. 0 means no trace set
@@ -1645,6 +1646,8 @@ void EMSESP::start() {
 #endif
 
     webServer.begin(); // start the web server
+
+    module_.start(this); // setup the external library modules
 }
 
 // main loop calling all services
@@ -1663,6 +1666,7 @@ void EMSESP::loop() {
         publish_all_loop();         // with HA messages in parts to avoid flooding the mqtt queue
         mqtt_.loop();               // sends out anything in the MQTT queue
         webSchedulerService.loop(); // handle any scheduled jobs
+        module_.loop();             // loop the external library modules
 
         // force a query on the EMS devices to fetch latest data at a set interval (1 min)
         scheduled_fetch_values();
