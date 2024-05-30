@@ -2821,12 +2821,12 @@ bool Thermostat::set_mode_n(const uint8_t mode, const int8_t id) {
     case EMSdevice::EMS_DEVICE_FLAG_RC100:
     case EMSdevice::EMS_DEVICE_FLAG_R3000:
         // CR120, https://github.com/emsesp/EMS-ESP32/discussions/1779
-        if (Helpers::hasValue(hc->mode_new)) { // enum: 0- off, 1- manual, 2- auto
+        if (Helpers::hasValue(hc->mode_new)) {
             offset         = EMS_OFFSET_RCPLUSSet_mode_new;
-            set_mode_value = set_mode_value == 1 ? 2 : 1;
-        } else { // enum: 0- manual, 1- auto
+            set_mode_value = set_mode_value == 2 ? 2 : 1;
+        } else {
             offset         = EMS_OFFSET_RCPLUSSet_mode;
-            set_mode_value = set_mode_value == 1 ? 0xFF : 0;
+            set_mode_value = set_mode_value == 2 ? 0xFF : 0;
         }
         break;
     case EMSdevice::EMS_DEVICE_FLAG_JUNKERS:
