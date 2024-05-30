@@ -41,8 +41,7 @@ const Modules: FC = () => {
     send: fetchModules,
     error
   } = useRequest(EMSESP.readModules, {
-    initialData: [],
-    force: true
+    initialData: []
   });
 
   const { send: writeModules } = useRequest(
@@ -128,8 +127,7 @@ const Modules: FC = () => {
       .catch((error: Error) => {
         toast.error(error.message);
       })
-      .finally(async () => {
-        await fetchModules();
+      .finally(() => {
         setNumChanges(0);
       });
   };
