@@ -49,6 +49,7 @@
 #include "web/WebAPIService.h"
 #include "web/WebLogService.h"
 #include "web/WebCustomEntityService.h"
+#include "web/WebModulesService.h"
 
 #include "emsdevicevalue.h"
 #include "emsdevice.h"
@@ -222,7 +223,6 @@ class EMSESP {
     static RxService         rxservice_;
     static TxService         txservice_;
     static Preferences       nvs_;
-    static ModuleLibrary     module_;
 
     // web controllers
     static ESP8266React            esp8266React;
@@ -235,6 +235,7 @@ class EMSESP {
     static WebCustomizationService webCustomizationService;
     static WebSchedulerService     webSchedulerService;
     static WebCustomEntityService  webCustomEntityService;
+    static WebModulesService       webModulesService;
 
   private:
     static std::string device_tostring(const uint8_t device_id);
@@ -280,7 +281,6 @@ class EMSESP {
 #endif
 
   protected:
-    //  EMSESP();
     static uuid::log::Logger logger_;
 };
 
