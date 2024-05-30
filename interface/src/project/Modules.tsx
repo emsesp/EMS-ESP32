@@ -141,6 +141,14 @@ const Modules: FC = () => {
 
     useLayoutTitle('Modules');
 
+    if (modules.length === 0) {
+      return (
+        <Typography variant="body2" color="error">
+          No modules detected
+        </Typography>
+      );
+    }
+
     return (
       <Table
         data={{ nodes: modules }}
@@ -192,7 +200,8 @@ const Modules: FC = () => {
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       <Box mb={2} color="warning.main">
         <Typography variant="body2">
-          Activate or de-activate EMS-ESP library modules (** experimental **)
+          Activate or de-activate EMS-ESP library modules by selecting (**
+          experimental **)
         </Typography>
       </Box>
       {renderModules()}

@@ -2130,6 +2130,7 @@ let emsesp_schedule = {
 
 // SCHEDULE
 let emsesp_modules = {
+  // 'modules': []
   "modules": [
     {
       id: 1,
@@ -2511,15 +2512,15 @@ router
   // Modules
   .post(EMSESP_MODULES_ENDPOINT, async (request: any) => {
     const content = await request.json();
-    // TODO find the one and toggle it
-    console.log('modules saved', emsesp_modules);
-    /*
-        const dd_objIndex = dd.data.findIndex((obj: any) => obj.id.slice(2) === fullname);
-    if (dd_objIndex !== -1) {
-      let changed = new Boolean(false);
-          emsesp_modules = content;
-
-      */
+    let modules = content.modules;
+    for (let i = 0; i < modules.length; i++) {
+      const name = modules[i].name;
+      const objIndex = emsesp_modules.modules.findIndex((obj: any) => obj.name === name);
+      if (objIndex !== -1) {
+        emsesp_modules.modules[objIndex].enabled = modules[i].enabled;
+      }
+    }
+    console.log('modules updated', emsesp_modules);
     return status(200);
   })
   .get(EMSESP_MODULES_ENDPOINT, () => emsesp_modules)  
