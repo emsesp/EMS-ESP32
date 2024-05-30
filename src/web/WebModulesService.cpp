@@ -44,7 +44,9 @@ void WebModulesService::loop() {
 // this creates the modules file, saving it to the FS
 // and also calls when the Modules web page is refreshed
 void WebModules::read(WebModules & webModules, JsonObject root) {
-    // EMSESP::logger().debug("module read called"); // TODO remove
+#ifdef EMSESP_DEBUG
+    EMSESP::logger().debug("module read called");
+#endif
 
     JsonDocument doc_modules;
     JsonObject   root_modules = doc_modules.to<JsonObject>();
@@ -67,7 +69,9 @@ void WebModules::read(WebModules & webModules, JsonObject root) {
 // and then apply the enable/disable
 // it's also called on a save
 StateUpdateResult WebModules::update(JsonObject root, WebModules & webModules) {
-    // EMSESP::logger().debug("module update called"); // TODO remove
+#ifdef EMSESP_DEBUG
+    EMSESP::logger().debug("module update called");
+#endif
 
     if (root["modules"].is<JsonArray>()) {
         for (const JsonObject module : root["modules"].as<JsonArray>()) {
@@ -76,7 +80,7 @@ StateUpdateResult WebModules::update(JsonObject root, WebModules & webModules) {
         }
     }
 
-    return StateUpdateResult::CHANGED;
+    return StateUpdateResult::CHANGED_RESTART;
 }
 
 } // namespace emsesp
