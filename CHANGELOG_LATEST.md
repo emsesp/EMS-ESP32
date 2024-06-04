@@ -21,7 +21,7 @@
 - Added scripts for OTA (scripts/upload.py and upload_cli.py) [#1738](https://github.com/emsesp/EMS-ESP32/issues/1738)
 - timeout for remote thermostat emulation [#1680](https://github.com/emsesp/EMS-ESP32/discussions/1680), [#1774](https://github.com/emsesp/EMS-ESP32/issues/1774)
 - seltemp/mode for CR120 [#1779](https://github.com/emsesp/EMS-ESP32/discussions/1779)
-- Moodules [#1778](https://github.com/emsesp/EMS-ESP32/issues/1778)
+- Modules - external linkable module library [#1778](https://github.com/emsesp/EMS-ESP32/issues/1778)
 
 ## Fixed
 
