@@ -1093,8 +1093,13 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     // has_update(telegram, hc->selTemp, 8, 1);  // single byte conversion, value is * 2 - auto?
     // has_update(telegram, hc->selTemp, 10, 1); // single byte conversion, value is * 2 - manual
 
-    has_update(telegram, hc->mode_new, 21);  // for BC400
-    has_bitupdate(telegram, hc->mode, 0, 0); // RC300, RC100
+    has_update(telegram, hc->mode_new, 21); // for BC400
+    // set mode for CR120, https://github.com/emsesp/EMS-ESP32/discussions/1779
+    if (Helpers::hasValue(hc->mode_new)) {
+        has_update(hc->mode, hc->mode_new == 2 ? 1 : 0);
+    } else {
+        has_bitupdate(telegram, hc->mode, 0, 0); // RC300, RC100
+    }
     /*
     telegram->read_value(hc->mode_new, 21); // 0-off, 1-manual, 2-auto
     if (Helpers::hasValue(hc->mode_new)) {
@@ -1542,18 +1547,18 @@ void Thermostat::process_RC30Vacation(std::shared_ptr<const Telegram> telegram) 
     }
     static uint8_t vacation_telegram[57] = {0}; // make a copy of the whole telegram to access blocks
     memcpy(&vacation_telegram[telegram->offset], telegram->message_data, telegram->message_length);
-    for (uint8_t index = 0; index < 8; index++) {
+    for (uint8_t index = 0, pos = 0; index < 8; index++, pos += 7) {
         char data[sizeof(vacation[0]) + 4]; // avoid compiler warning
         snprintf(data,
                  sizeof(data),
                  "%02d.%02d.%04d-%02d.%02d.%04d",
-                 vacation_telegram[1 + 7 * index],
-                 vacation_telegram[2 + 7 * index],
-                 vacation_telegram[3 + 7 * index] + 2000,
-                 vacation_telegram[4 + 7 * index],
-                 vacation_telegram[5 + 7 * index],
-                 vacation_telegram[6 + 7 * index] + 2000);
-        if (data[1] > '0') {
+                 vacation_telegram[1 + pos],
+                 vacation_telegram[2 + pos],
+                 vacation_telegram[3 + pos] + 2000,
+                 vacation_telegram[4 + pos],
+                 vacation_telegram[5 + pos],
+                 vacation_telegram[6 + pos] + 2000);
+        if (vacation_telegram[1 + pos]) { // data is set (day >  0)
             has_update(vacation[index], data, sizeof(vacation[0]));
         }
     }
@@ -2815,8 +2820,14 @@ bool Thermostat::set_mode_n(const uint8_t mode, const int8_t id) {
     case EMSdevice::EMS_DEVICE_FLAG_RC300:
     case EMSdevice::EMS_DEVICE_FLAG_RC100:
     case EMSdevice::EMS_DEVICE_FLAG_R3000:
-        offset         = EMS_OFFSET_RCPLUSSet_mode;
-        set_mode_value = set_mode_value == 2 ? 0xFF : 0;
+        // CR120, https://github.com/emsesp/EMS-ESP32/discussions/1779
+        if (Helpers::hasValue(hc->mode_new)) {
+            offset         = EMS_OFFSET_RCPLUSSet_mode_new;
+            set_mode_value = set_mode_value == 2 ? 2 : 1;
+        } else {
+            offset         = EMS_OFFSET_RCPLUSSet_mode;
+            set_mode_value = set_mode_value == 2 ? 0xFF : 0;
+        }
         break;
     case EMSdevice::EMS_DEVICE_FLAG_JUNKERS:
         if (has_flags(EMSdevice::EMS_DEVICE_FLAG_JUNKERS_OLD)) {
@@ -3546,7 +3557,11 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             factor          = 1;
             break;
         case HeatingCircuit::Mode::MANUAL:
-            offset = 0x0A; // manual offset
+            if (Helpers::hasValue(hc->mode_new)) {
+                offset = 22; // manual offset CR120
+            } else {
+                offset = 10; // manual offset
+            }
             break;
         case HeatingCircuit::Mode::TEMPAUTO:
             offset = 0x08; // auto offset
@@ -3617,13 +3632,14 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             offset          = 9;
             factor          = 1;
             break;
-        default:
-            // HeatingCircuit::Mode::AUTO:
+        default: // seltemp
             uint8_t mode_ = hc->get_mode();
-            if (mode_ == HeatingCircuit::Mode::MANUAL) {
-                offset = 0x0A; // manual offset
+            if (Helpers::hasValue(hc->mode_new) && mode_ == HeatingCircuit::Mode::MANUAL) {
+                offset = 22; // manual offset CR120
+            } else if (mode_ == HeatingCircuit::Mode::MANUAL) {
+                offset = 10; // manual offset
             } else {
-                offset = 0x08; // auto offset
+                offset = 8; // auto offset
                 // special case to reactivate auto temperature, see #737, #746
                 if (temperature == -1) {
                     factor = 1;

@@ -1630,7 +1630,7 @@ void EMSESP::start() {
 
     if (system_.modbus_enabled()) {
         modbus_ = new Modbus;
-        modbus_->start(1, system_.modbus_port(), system_.modbus_maxClients(), system_.modbus_timeoutMillis());
+        modbus_->start(1, system_.modbus_port(), system_.modbus_max_clients(), system_.modbus_timeout());
     }
 
     mqtt_.start();              // mqtt init

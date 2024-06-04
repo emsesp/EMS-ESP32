@@ -14,7 +14,7 @@
 #endif
 #include <vector>
 
-#include <Arduino.h>  // for millis()
+#include <Arduino.h> // for millis()
 
 #if defined(ESP32)
 #include <AsyncTCP.h>
@@ -29,64 +29,64 @@ using std::lock_guard;
 #endif
 
 class ModbusServerTCPasync : public ModbusServer {
+  private:
+    class mb_client {
+        friend class ModbusServerTCPasync;
 
- private:
-  class mb_client {
-   friend class ModbusServerTCPasync;
-   
-   public:
-    mb_client(ModbusServerTCPasync* s, AsyncClient* c);
-    ~mb_client();
+      public:
+        mb_client(ModbusServerTCPasync * s, AsyncClient * c);
+        ~mb_client();
 
-   private:
-    void onData(uint8_t* data, size_t len);
-    void onPoll();
-    void onDisconnect();
-    void addResponseToOutbox(ModbusMessage* response);
-    void handleOutbox();
-    ModbusServerTCPasync* server;
-    AsyncClient* client;
-    uint32_t lastActiveTime;
-    ModbusMessage* message;
-    Modbus::Error error;
-    std::queue<ModbusMessage*> outbox;
-    #if USE_MUTEX
-    std::mutex obLock;  // outbox protection
-    #endif
-  };
+      private:
+        void                        onData(uint8_t * data, size_t len);
+        void                        onPoll();
+        void                        onDisconnect();
+        void                        addResponseToOutbox(ModbusMessage * response);
+        void                        handleOutbox();
+        ModbusServerTCPasync *      server;
+        AsyncClient *               client;
+        uint32_t                    lastActiveTime;
+        ModbusMessage *             message;
+        Modbus::Error               error;
+        std::queue<ModbusMessage *> outbox;
+#if USE_MUTEX
+        std::mutex obLock; // outbox protection
+#endif
+    };
 
 
- public:
-  // Constructor
-  ModbusServerTCPasync();
+  public:
+    // Constructor
+    ModbusServerTCPasync();
 
-  // Destructor: closes the connections
-  ~ModbusServerTCPasync();
+    // Destructor: closes the connections
+    ~ModbusServerTCPasync();
 
-  // activeClients: return number of clients currently employed
-  uint16_t activeClients();
+    // activeClients: return number of clients currently employed
+    uint16_t activeClients();
 
-  // start: create task with TCP server to accept requests
-  bool start(uint16_t port, uint8_t maxClients, uint32_t timeout, int coreID = -1);
+    // start: create task with TCP server to accept requests
+    bool start(uint16_t port, uint8_t max_clients, uint32_t timeout, int coreID = -1);
 
-  // stop: drop all connections and kill server task
-  bool stop();
- 
-  // isRunning: return true is server is running
-  bool isRunning();
+    // stop: drop all connections and kill server task
+    bool stop();
 
- protected:
-  inline void isInstance() { }
-  void onClientConnect(AsyncClient* client);
-  void onClientDisconnect(mb_client* client);
+    // isRunning: return true is server is running
+    bool isRunning();
 
-  AsyncServer* server;
-  std::list<mb_client*> clients;
-  uint8_t maxNoClients;
-  uint32_t idle_timeout;
-  #if USE_MUTEX
-  std::mutex cListLock;  // client list protection
-  #endif
+  protected:
+    inline void isInstance() {
+    }
+    void onClientConnect(AsyncClient * client);
+    void onClientDisconnect(mb_client * client);
+
+    AsyncServer *          server;
+    std::list<mb_client *> clients;
+    uint8_t                maxNoClients;
+    uint32_t               idle_timeout;
+#if USE_MUTEX
+    std::mutex cListLock; // client list protection
+#endif
 };
 
 #endif

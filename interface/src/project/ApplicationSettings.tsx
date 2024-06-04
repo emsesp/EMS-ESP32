@@ -793,11 +793,11 @@ const ApplicationSettings: FC = () => {
             <Grid item xs={12} sm={6}>
               <ValidatedTextField
                 fieldErrors={fieldErrors}
-                name="modbus_maxClients"
+                name="modbus_max_clients"
                 label={LL.AP_MAX_CLIENTS()}
                 fullWidth
                 variant="outlined"
-                value={numberValue(data.modbus_maxClients)}
+                value={numberValue(data.modbus_max_clients)}
                 type="number"
                 onChange={updateFormValue}
                 margin="normal"
@@ -821,14 +821,14 @@ const ApplicationSettings: FC = () => {
             <Grid item xs={12} sm={6}>
               <ValidatedTextField
                 fieldErrors={fieldErrors}
-                name="modbus_timeoutMillis"
+                name="modbus_timeout"
                 label="Timeout"
                 InputProps={{
                   endAdornment: <InputAdornment position="end">ms</InputAdornment>
                 }}
                 fullWidth
                 variant="outlined"
-                value={numberValue(data.modbus_timeoutMillis)}
+                value={numberValue(data.modbus_timeout)}
                 type="number"
                 onChange={updateFormValue}
                 margin="normal"

@@ -36,8 +36,9 @@ class Roomctrl {
     }
 
   private:
-    static constexpr uint32_t SEND_INTERVAL = 15000; // 15 sec
-    static constexpr uint8_t  HCS           = 4;     // max 4 heating circuits
+    static constexpr uint32_t SEND_INTERVAL = 15000;    // 15 sec
+    static constexpr uint32_t TIMEOUT       = 86400000; // 24 hour
+    static constexpr uint8_t  HCS           = 4;        // max 4 heating circuits
     enum SendType : uint8_t { TEMP, HUMI };
 
     static uint8_t get_hc(const uint8_t addr);
@@ -52,7 +53,8 @@ class Roomctrl {
     static int16_t calc_dew(int16_t temp, uint8_t hum);
 
     static bool     switch_off_[HCS];
-    static uint32_t rc_time_[HCS];
+    static uint32_t send_time_[HCS];
+    static uint32_t receive_time_[HCS];
     static int16_t  remotetemp_[HCS];
     static uint8_t  remotehum_[HCS];
     static uint8_t  sendtype_[HCS];

@@ -640,6 +640,7 @@ const Devices: FC = () => {
               {me.admin && (
                 <IconButton onClick={customize}>
                   <FormatListNumberedIcon
+                    color="primary"
                     sx={{ fontSize: 18, verticalAlign: 'middle' }}
                   />
                 </IconButton>
