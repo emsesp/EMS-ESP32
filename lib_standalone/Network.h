@@ -4,7 +4,7 @@
 #include "Arduino.h"
 
 #include <functional>
-#include <IPAddress.h>
+#include <ClientPosixIPAddress.h>
 
 #define WiFiMode_t wifi_mode_t
 #define WIFI_OFF WIFI_MODE_NULL
@@ -162,7 +162,7 @@ class WiFiClass {
         return 0;
     };
 
-    void disconnect(bool v){};
+    void disconnect(bool v) {};
 
     char * getHostname() {
         return nullptr;
@@ -183,7 +183,7 @@ class ETHClass {
         return false;
     };
 
-    void setHostname(const char * s){};
+    void setHostname(const char * s) {};
 
     char * getHostname() {
         return nullptr;
