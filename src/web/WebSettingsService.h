@@ -67,8 +67,8 @@ class WebSettings {
     bool     fahrenheit;
     bool     modbus_enabled;
     uint16_t modbus_port;
-    uint8_t  modbus_maxClients;
-    uint32_t modbus_timeoutMillis;
+    uint8_t  modbus_max_clients;
+    uint32_t modbus_timeout;
 
     uint8_t phy_type;
     int8_t  eth_power; // -1 means disabled

@@ -5,12 +5,14 @@
 # To use create a pio_local.ini file in the project root and add the following:
 #  [env]
 #  upload_protocol = custom
-#  custom_emsesp_ip = 10.10.10.173
+#  custom_emsesp_ip = ems-esp.local
 #  custom_username = admin
 #  custom_password = admin
 # 
 # and
 #  extra_scripts = scripts/upload.py
+#
+# This only works when the PlatformIO target is upload
 
 import requests
 import hashlib

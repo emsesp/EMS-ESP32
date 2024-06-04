@@ -29,7 +29,7 @@ class Modbus {
   public:
     static const int REGISTER_BLOCK_SIZE = 1000;
 
-    void start(uint8_t systemServerId, uint16_t port, uint8_t maxClients, uint32_t timeoutMillis);
+    void start(uint8_t systemServerId, uint16_t port, uint8_t max_clients, uint32_t timeout);
     void stop();
 
 #if defined(EMSESP_STANDALONE)
@@ -93,7 +93,7 @@ class Modbus {
     //static const std::initializer_list<EntityModbusInfo> modbus_register_mappings;
 
     static int8_t tag_to_type(int8_t tag);
-    static bool check_parameter_order();
+    static bool   check_parameter_order();
 
 #ifndef EMSESP_STANDALONE
     ModbusServerTCPasync * modbusServer_;

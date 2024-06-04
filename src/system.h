@@ -127,12 +127,12 @@ class System {
         return modbus_port_;
     }
 
-    uint8_t modbus_maxClients() {
-        return modbus_maxClients_;
+    uint8_t modbus_max_clients() {
+        return modbus_max_clients_;
     }
 
-    uint32_t modbus_timeoutMillis() {
-        return modbus_timeoutMillis_;
+    uint32_t modbus_timeout() {
+        return modbus_timeout_;
     }
 
     bool analog_enabled() {
@@ -356,8 +356,8 @@ class System {
     String      version_;
     bool        modbus_enabled_;
     uint16_t    modbus_port_;
-    uint8_t     modbus_maxClients_;
-    uint32_t    modbus_timeoutMillis_;
+    uint8_t     modbus_max_clients_;
+    uint32_t    modbus_timeout_;
 
     // ethernet
     uint8_t phy_type_;

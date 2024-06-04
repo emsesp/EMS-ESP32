@@ -1924,7 +1924,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             uint16_t reg = Modbus::REGISTER_BLOCK_SIZE * DeviceValueTAG::TAG_DEVICE_DATA + 209; // mintempsilent is tag 2 (TAG_DEVICE_DATA), offset 209
 
             ModbusMessage request({device->device_type(), 0x03, static_cast<unsigned char>(reg >> 8), static_cast<unsigned char>(reg & 0xff), 0, 1});
-            auto          response = EMSESP::modbus_.handleRead(request);
+            auto          response = EMSESP::modbus_->handleRead(request);
 
             if (response.getError() == SUCCESS) {
                 shell.print("mintempsilent MODBUS response:");
@@ -1949,7 +1949,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
             uint16_t      reg = Modbus::REGISTER_BLOCK_SIZE * DeviceValueTAG::TAG_DEVICE_DATA + 4; // selflowtemp is tag 2 (TAG_DEVICE_DATA), offset 4
             ModbusMessage request({device->device_type(), 0x06, static_cast<unsigned char>(reg >> 8), static_cast<unsigned char>(reg & 0xff), 0, 1, 2, 0, 45});
-            auto          response = EMSESP::modbus_.handleWrite(request);
+            auto          response = EMSESP::modbus_->handleWrite(request);
 
             if (response.getError() == SUCCESS) {
                 shell.print("selflowtemp MODBUS response:");

@@ -1383,10 +1383,10 @@ void EMSdevice::dump_value_info() {
                 Serial.print(-dv.numeric_operator);
             Serial.print(",");
 
-            Serial.printf("%d", EMSESP::modbus_.getRegisterOffset(dv));
+            Serial.printf("%d", EMSESP::modbus_->getRegisterOffset(dv));
             Serial.print(",");
 
-            Serial.printf("%d", EMSESP::modbus_.getRegisterCount(dv));
+            Serial.printf("%d", EMSESP::modbus_->getRegisterCount(dv));
 
             // /modbus specific infos
 

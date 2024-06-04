@@ -20,7 +20,7 @@ enum FunctionCode : uint8_t { WRITE_HOLD_REGISTER = 0x06, WRITE_MULT_REGISTERS =
 
 uuid::log::Logger Modbus::logger_{F_(modbus), uuid::log::Facility::DAEMON};
 
-void Modbus::start(uint8_t systemServerId, uint16_t port, uint8_t maxClients, uint32_t timeoutMillis) {
+void Modbus::start(uint8_t systemServerId, uint16_t port, uint8_t max_clients, uint32_t timeout) {
 #ifndef EMSESP_STANDALONE
     if (!check_parameter_order()) {
         LOG_ERROR("Unable to enable Modbus - the parameter list order is corrupt. This is a firmware bug.");
@@ -38,7 +38,7 @@ void Modbus::start(uint8_t systemServerId, uint16_t port, uint8_t maxClients, ui
             modbusServer_->registerWorker(i, WRITE_MULT_REGISTERS, [this](auto && request) { return handleWrite(request); });
         }
     }
-    modbusServer_->start(port, maxClients, timeoutMillis);
+    modbusServer_->start(port, max_clients, timeout);
     LOG_INFO("Modbus server with ID %d started on port %d", systemServerId, port);
 #else
     if (!check_parameter_order()) {
@@ -48,12 +48,13 @@ void Modbus::start(uint8_t systemServerId, uint16_t port, uint8_t maxClients, ui
 #endif
 }
 
-
 // this is currently never called, just for good measure
 void Modbus::stop() {
+#ifndef EMSESP_STANDALONE
     modbusServer_->stop();
     delete modbusServer_;
     modbusServer_ = nullptr;
+#endif
 }
 
 // Check that the Modbus parameters defined in modbus_entity_parameters.cpp are correctly ordered
@@ -77,115 +78,115 @@ int8_t Modbus::tag_to_type(int8_t tag) {
     switch (tag) {
     case DeviceValue::TAG_NONE:
         return TAG_TYPE_NONE;
-        
+
     case DeviceValue::TAG_DEVICE_DATA:
         return TAG_TYPE_DEVICE_DATA;
-        
+
     case DeviceValue::TAG_HC1:
         return TAG_TYPE_HC;
-        
+
     case DeviceValue::TAG_HC2:
         return TAG_TYPE_HC;
-        
+
     case DeviceValue::TAG_HC3:
         return TAG_TYPE_HC;
-        
+
     case DeviceValue::TAG_HC4:
         return TAG_TYPE_HC;
-        
+
     case DeviceValue::TAG_HC5:
         return TAG_TYPE_HC;
-        
+
     case DeviceValue::TAG_HC6:
         return TAG_TYPE_HC;
-        
+
     case DeviceValue::TAG_HC7:
         return TAG_TYPE_HC;
-        
+
     case DeviceValue::TAG_HC8:
         return TAG_TYPE_HC;
-        
+
     case DeviceValue::TAG_DHW1:
         return TAG_TYPE_DHW;
-        
+
     case DeviceValue::TAG_DHW2:
         return TAG_TYPE_DHW;
-        
+
     case DeviceValue::TAG_DHW3:
         return TAG_TYPE_DHW;
-        
+
     case DeviceValue::TAG_DHW4:
         return TAG_TYPE_DHW;
-        
+
     case DeviceValue::TAG_DHW5:
         return TAG_TYPE_DHW;
-        
+
     case DeviceValue::TAG_DHW6:
         return TAG_TYPE_DHW;
-        
+
     case DeviceValue::TAG_DHW7:
         return TAG_TYPE_DHW;
-        
+
     case DeviceValue::TAG_DHW8:
         return TAG_TYPE_DHW;
-        
+
     case DeviceValue::TAG_DHW9:
         return TAG_TYPE_DHW;
-        
+
     case DeviceValue::TAG_DHW10:
         return TAG_TYPE_DHW;
-        
+
     case DeviceValue::TAG_AHS1:
         return TAG_TYPE_AHS;
-        
+
     case DeviceValue::TAG_HS1:
         return TAG_TYPE_HS;
-        
+
     case DeviceValue::TAG_HS2:
         return TAG_TYPE_HS;
-        
+
     case DeviceValue::TAG_HS3:
         return TAG_TYPE_HS;
-        
+
     case DeviceValue::TAG_HS4:
         return TAG_TYPE_HS;
-        
+
     case DeviceValue::TAG_HS5:
         return TAG_TYPE_HS;
-        
+
     case DeviceValue::TAG_HS6:
         return TAG_TYPE_HS;
-        
+
     case DeviceValue::TAG_HS7:
         return TAG_TYPE_HS;
-        
+
     case DeviceValue::TAG_HS8:
         return TAG_TYPE_HS;
-        
+
     case DeviceValue::TAG_HS9:
         return TAG_TYPE_HS;
-        
+
     case DeviceValue::TAG_HS10:
         return TAG_TYPE_HS;
-        
+
     case DeviceValue::TAG_HS11:
         return TAG_TYPE_HS;
-        
+
     case DeviceValue::TAG_HS12:
         return TAG_TYPE_HS;
-        
+
     case DeviceValue::TAG_HS13:
         return TAG_TYPE_HS;
-        
+
     case DeviceValue::TAG_HS14:
         return TAG_TYPE_HS;
-        
+
     case DeviceValue::TAG_HS15:
         return TAG_TYPE_HS;
-        
+
     case DeviceValue::TAG_HS16:
         return TAG_TYPE_HS;
-        
+
     default:
         return INVALID_TAG_TYPE;
     }
@@ -453,14 +454,13 @@ ModbusMessage Modbus::handleWrite(const ModbusMessage & request) {
 }
 
 #if defined(EMSESP_STANDALONE)
-
 // return the relative register start offset for a DeviceValue, i.e. the address within the
 // register block corresponding to the value's tag type.
 int Modbus::getRegisterOffset(const DeviceValue & dv) {
-    auto it = std::find_if(modbus_register_mappings.begin(), modbus_register_mappings.end(), [&](const EntityModbusInfo & mi) {
+    auto it = std::find_if(std::begin(modbus_register_mappings), std::end(modbus_register_mappings), [&](const EntityModbusInfo & mi) {
         return mi.device_type == dv.device_type && mi.device_value_tag_type == tag_to_type(dv.tag) && !strcmp(mi.short_name, dv.short_name);
     });
-    if (it != modbus_register_mappings.end()) {
+    if (it != std::end(modbus_register_mappings)) {
         return it->registerOffset;
     }
 
@@ -469,10 +469,10 @@ int Modbus::getRegisterOffset(const DeviceValue & dv) {
 
 // return the number of registers
 int Modbus::getRegisterCount(const DeviceValue & dv) {
-    auto it = std::find_if(modbus_register_mappings.begin(), modbus_register_mappings.end(), [&](const EntityModbusInfo & mi) {
+    auto it = std::find_if(std::begin(modbus_register_mappings), std::end(modbus_register_mappings), [&](const EntityModbusInfo & mi) {
         return mi.device_type == dv.device_type && mi.device_value_tag_type == tag_to_type(dv.tag) && !strcmp(mi.short_name, dv.short_name);
     });
-    if (it != modbus_register_mappings.end()) {
+    if (it != std::end(modbus_register_mappings)) {
         // look up actual size
         return it->registerCount;
     } else {
@@ -504,7 +504,6 @@ int Modbus::getRegisterCount(const DeviceValue & dv) {
 int Modbus::getRegisterStartAddress(const DeviceValue & dv) {
     return dv.tag * REGISTER_BLOCK_SIZE + getRegisterOffset(dv);
 }
-
 #endif
 
 } // namespace emsesp

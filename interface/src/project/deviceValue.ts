@@ -31,7 +31,7 @@ export function formatValue(
   uom: DeviceValueUOM
 ) {
   if (typeof value !== 'number') {
-    return value;
+    return (value === undefined ? '' : value) as string;
   }
   switch (uom) {
     case DeviceValueUOM.HOURS:

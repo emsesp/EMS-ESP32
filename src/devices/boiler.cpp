@@ -250,7 +250,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_device_value(
             DeviceValueTAG::TAG_DEVICE_DATA, &curveEnd_, DeviceValueType::UINT8, FL_(curveEnd), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_curveEnd), 20, 90);
         register_device_value(
-            DeviceValueTAG::TAG_DEVICE_DATA, &summerTemp_, DeviceValueType::UINT8, FL_(summertemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_summerTemp), 0, 30);
+            DeviceValueTAG::TAG_DEVICE_DATA, &summerTemp_, DeviceValueType::UINT8, FL_(summertemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_summerTemp), 0, 45);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nofrost_, DeviceValueType::BOOL, FL_(nofrostmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_nofrost));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &nofrostTemp_,
@@ -803,7 +803,13 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_hpPumpMode));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &fan_, DeviceValueType::UINT8, FL_(hpFan), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_fan), 20, 100);
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpshutdown_, DeviceValueType::CMD, FL_(enum_modetype5), FL_(hpShutdown), DeviceValueUOM::NONE, MAKE_CF_CB(set_shutdown));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &hpshutdown_,
+                              DeviceValueType::CMD,
+                              FL_(enum_modetype5),
+                              FL_(hpShutdown),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_shutdown));
         // heatpump DHW settings
         register_device_value(DeviceValueTAG::TAG_DHW1,
                               &wwAlternatingOper_,

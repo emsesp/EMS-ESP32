@@ -37,8 +37,8 @@ export interface Settings {
   platform: string;
   modbus_enabled: boolean;
   modbus_port: number;
-  modbus_maxClients: number;
-  modbus_timeoutMillis: number;
+  modbus_max_clients: number;
+  modbus_timeout: number;
 }
 
 export enum busConnectionStatus {
