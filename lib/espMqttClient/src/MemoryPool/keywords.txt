@@ -1,0 +1,16 @@
+# Datatypes (KEYWORD1)
+Fixed	KEYWORD1
+Variable	KEYWORD1
+
+# Methods and Functions (KEYWORD2)
+malloc	KEYWORD2
+free	KEYWORD2
+freeMemory	KEYWORD2
+maxBlockSize	KEYWORD2
+print	KEYWORD2
+
+# Structures (KEYWORD3)
+# structure	KEYWORD3
+
+# Constants (LITERAL1)
+MemoryPool	LITERAL1

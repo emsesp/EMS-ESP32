@@ -1,0 +1,21 @@
+{
+    "name": "MemoryPool",
+    "keywords": "memory",
+    "description": "A simple memory pool for fixed and variable sizes",
+    "authors":
+    {
+      "name": "Bert Melis",
+      "url": "https://github.com/bertmelis"
+    },
+    "license": "MIT",
+    "homepage": "https://github.com/bertmelis/MemoryPool",
+    "repository":
+    {
+      "type": "git",
+      "url": "https://github.com/bertmelis/MemoryPool.git"
+    },
+    "version": "0.1.0",
+    "frameworks": "*",
+    "platforms": "*",
+    "headers": ["MemoryPool.h"]
+  }

@@ -38,9 +38,10 @@ bool ClientPosix::connect(IPAddress ip, uint16_t port) {
   memset(&_host, 0, sizeof(_host));
   _host.sin_family = AF_INET;
   _host.sin_addr.s_addr = htonl(uint32_t(ip));
-  _host.sin_port = htons(port); // modified by proddy for EMS-ESP compiling standalone
+  _host.sin_port = ::htons(port);
 
   int ret = ::connect(_sockfd, reinterpret_cast<sockaddr*>(&_host), sizeof(_host));
+
   if (ret < 0) {
     emc_log_e("Error connecting: %d - (%d) %s", ret, errno, strerror(errno));
     return false;
