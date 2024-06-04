@@ -76,7 +76,7 @@ void WebSettings::read(WebSettings & settings, JsonObject root) {
     root["platform"]              = (platform == "ESP32" && EMSESP::system_.PSram()) ? "ESP32R" : platform;
     root["modbus_enabled"]        = settings.modbus_enabled;
     root["modbus_port"]           = settings.modbus_port;
-    root["modbus_max_lients"]     = settings.modbus_max_clients;
+    root["modbus_max_clients"]    = settings.modbus_max_clients;
     root["modbus_timeout"]        = settings.modbus_timeout;
 }
 
