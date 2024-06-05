@@ -336,8 +336,8 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
         telegram_raw[3] = telegram->offset;
 
         // EMS+ has different format for read and write
-        if (telegram->operation == Telegram::Operation::TX_WRITE) {
-            // WRITE
+        if (telegram->operation != Telegram::Operation::TX_READ) {
+            // WRITE/NONE
             telegram_raw[4] = (telegram->type_id >> 8) - 1; // type, 1st byte, high-byte, subtract 0x100
             telegram_raw[5] = telegram->type_id & 0xFF;     // type, 2nd byte, low-byte
             message_p       = 6;
@@ -382,7 +382,7 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
     }
 
     LOG_DEBUG("Sending %s Tx [#%d], telegram: %s",
-              (telegram->operation == Telegram::Operation::TX_WRITE) ? ("write") : ("read"),
+              (telegram->operation != Telegram::Operation::TX_READ) ? ("write") : ("read"),
               tx_telegram.id_,
               Helpers::data_to_hex(telegram_raw, length - 1).c_str()); // exclude the last CRC byte
 
