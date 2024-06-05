@@ -4356,6 +4356,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         if (model == EMSdevice::EMS_DEVICE_FLAG_BC400) {
             register_device_value(tag, &hc->mode_new, DeviceValueType::ENUM, FL_(enum_mode2), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
         } else {
+            hc->mode_new = EMS_VALUE_UINT8_NOTSET;
             register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
         }
         register_device_value(tag, &hc->modetype, DeviceValueType::ENUM, FL_(enum_modetype), FL_(modetype), DeviceValueUOM::NONE);
