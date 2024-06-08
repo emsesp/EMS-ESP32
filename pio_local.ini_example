@@ -11,13 +11,13 @@
 ;  -DEMSESP_DE_ONLY ; only DE translated entity names
 ;  -DEMSESP_EN_ONLY ; only EN translated entity names
 ;  -DEMSESP_PINGTEST ; send log message every 1/2 second
-; my_build_flags = -DEMSESP_TEST
+my_build_flags = -DEMSESP_TEST
 ; my_build_flags = -DEMSESP_DEBUG -DEMSESP_TEST
 ; my_build_flags = -DEMSESP_DEBUG -DEMSESP_TEST -DEMSESP_PINGTEST
 
 [platformio]
-default_envs = esp32_4M
-; default_envs = esp32_16M
+; default_envs = esp32_4M
+default_envs = esp32_16M
 ; default_envs = lolin_s3
 ; default_envs = native
 ; default_envs = debug
@@ -26,10 +26,10 @@ default_envs = esp32_4M
 [env]
 ; upload settings
 ; for USB
-; upload_protocol = esptool
-; upload_port = /dev/ttyUSB*
-; for OTA
-upload_protocol = custom
+upload_protocol = esptool
+upload_port = /dev/ttyUSB*
+; for OTA add scripts/upload.py to extra_scripts
+; upload_protocol = custom
 custom_emsesp_ip = 10.10.10.173
 ; custom_emsesp_ip = ems-esp.local
 custom_username = admin
@@ -39,7 +39,6 @@ custom_password = admin
 lib_deps =
   file://../../modules/EMS-ESP-Modules
   bblanchon/ArduinoJson@^7.0.4
-  https://github.com/mathieucarbou/AsyncTCP.git ; based on ESPHome
 
 [env:native]
 extra_scripts = 
@@ -54,9 +53,15 @@ extra_scripts =
 
 [env:lolin_s3]
 extra_scripts =
-;   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
   scripts/upload.py
+
+[env:esp32_16M]
+extra_scripts =
+;   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+  scripts/rename_fw.py
+;   scripts/upload.py
 
 [env:custom]
 ; use for basic ESP boards with 4MB flash
