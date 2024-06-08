@@ -381,7 +381,11 @@ const system_status = {
   free_heap: 143,
   ntp_status: 2,
   mqtt_status: true,
-  ap_status: false
+  ap_status: false,
+  network_status: 3, // wifi connected
+  // network_status: 10, // ethernet connected
+  // network_status: 6, // wifi disconnected
+  wifi_rssi: -41
 };
 
 let security_settings = {
@@ -2134,19 +2138,26 @@ let emsesp_modules = {
   "modules": [
     {
       id: 1,
-      "name": "ModuleTest1",
+      "key": "ModuleTest1",
+      "name": "Module Test 1",
       "author": "proddy",
       "version": "1.0.0",
       "enabled": true,
-      "status": "active"
+      "status": 1,
+      "message": "Ready",
+      "license": "1234567890"
     },
     {
       id: 2,
-      "name": "ModuleTest2",
+      "key": "ModuleTest2",
+      "name": "Module Test 2",
       "author": "proddy",
       "version": "1.0.0",
       "enabled": true,
-      "status": "active"
+      "status": 2,
+      "message": "Ready",
+      "license": "ABCDEFGHIJKL"
+
     }
   ]
 }
@@ -2386,7 +2397,9 @@ router
     return status(200);
   })
   .get(VERIFY_AUTHORIZATION_ENDPOINT, () => verify_authentication)
-  .post(RESTART_ENDPOINT, () => status(200))
+  .post(RESTART_ENDPOINT, () => {
+    console.log('restarting...');
+    return status(200);})
   .post(FACTORY_RESET_ENDPOINT, () => status(200))
   .post(SIGN_IN_ENDPOINT, () => signin)
   .get(GENERATE_TOKEN_ENDPOINT, () => generate_token);
@@ -2514,10 +2527,11 @@ router
     const content = await request.json();
     let modules = content.modules;
     for (let i = 0; i < modules.length; i++) {
-      const name = modules[i].name;
-      const objIndex = emsesp_modules.modules.findIndex((obj: any) => obj.name === name);
+      const key = modules[i].key;
+      const objIndex = emsesp_modules.modules.findIndex((obj: any) => obj.key === key);
       if (objIndex !== -1) {
         emsesp_modules.modules[objIndex].enabled = modules[i].enabled;
+        emsesp_modules.modules[objIndex].license = modules[i].license;
       }
     }
     console.log('modules updated', emsesp_modules);

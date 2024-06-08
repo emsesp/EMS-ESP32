@@ -32,55 +32,62 @@ WebModulesService::WebModulesService(AsyncWebServer * server, FS * fs, SecurityM
 // load the settings when the service starts
 void WebModulesService::begin() {
     EMSESP::logger().info("Starting Modules service");
-    moduleLibrary.start(emsesp_);
 
-    _fsPersistence.readFromFS(); // read the file from FS
+#ifdef EMSESP_TEST
+    moduleLibrary.start(emsesp_, true); // hot load the test modules as well
+#else
+    moduleLibrary.start(emsesp_);
+#endif
+
+    _fsPersistence.readFromFS(); // read the file from FS - this will call the update function WebModules::update()
 }
 
 void WebModulesService::loop() {
     moduleLibrary.loop(); // loop the external library modules
 }
 
-// this creates the modules file, saving it to the FS
-// and also calls when the Modules web page is refreshed
+// this creates the modules settings file, saving it to the file system
+// it adds data to an empty 'root' json object
+// and also calls when the Modules web page is refreshed/loaded
 void WebModules::read(WebModules & webModules, JsonObject root) {
-#ifdef EMSESP_DEBUG
-    EMSESP::logger().debug("module read called");
-#endif
-
+    emsesp_->logger().err("debug: in WebModules::read()"); // TODO remove
     JsonDocument doc_modules;
     JsonObject   root_modules = doc_modules.to<JsonObject>();
-    moduleLibrary.list(root_modules); // get list the external library modules, put in root json object
+    moduleLibrary.list(root_modules); // get list the external library modules, put in a json object
 
     JsonArray modules = root["modules"].to<JsonArray>();
     uint8_t   counter = 0;
     for (const JsonObject module : root_modules["modules"].as<JsonArray>()) {
         JsonObject mi = modules.add<JsonObject>();
         mi["id"]      = counter++; // id is only used to render the table and must be unique
+        mi["key"]     = module["key"].as<std::string>();
         mi["name"]    = module["name"].as<std::string>();
         mi["author"]  = module["author"].as<std::string>();
         mi["version"] = module["version"].as<std::string>();
-        mi["status"]  = module["status"].as<std::string>();
+        mi["status"]  = module["status"].as<uint8_t>();
         mi["enabled"] = module["enabled"].as<bool>();
+        mi["message"] = module["message"].as<std::string>();
+        mi["license"] = module["license"].as<std::string>();
     }
 }
 
-// read any Module settings from the FS settings
-// and then apply the enable/disable
-// it's also called on a save
+// read any Module settings from the settings file
+// and then apply the enable/disable that is set by the user
+// This function is called when ems-esp boots and also on a save from the Modules web page
 StateUpdateResult WebModules::update(JsonObject root, WebModules & webModules) {
-#ifdef EMSESP_DEBUG
-    EMSESP::logger().debug("module update called");
-#endif
-
     if (root["modules"].is<JsonArray>()) {
         for (const JsonObject module : root["modules"].as<JsonArray>()) {
-            // set enabled/disabled
-            moduleLibrary.enable(module["name"], module["enabled"].as<bool>());
+            auto key     = module["key"].as<const char *>();
+            auto license = module["license"].as<const char *>();
+            auto enable  = module["enabled"].as<bool>();
+
+            if (!moduleLibrary.enable(key, license, enable)) {
+                return StateUpdateResult::ERROR;
+            }
         }
     }
 
-    return StateUpdateResult::CHANGED_RESTART;
+    return StateUpdateResult::CHANGED;
 }
 
 } // namespace emsesp

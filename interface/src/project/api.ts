@@ -113,7 +113,8 @@ export const readModules = () =>
     transformData(data) {
       return (data as Modules).modules.map((mi: ModuleItem) => ({
         ...mi,
-        o_enabled: mi.enabled
+        o_enabled: mi.enabled,
+        o_license: mi.license
       }));
     }
   });
