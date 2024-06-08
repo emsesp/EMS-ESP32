@@ -327,7 +327,7 @@ const de: Translation = {
   UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', // TODO translate
   MODULES: 'Module', // TODO translate
   MODULES_UPDATED: 'Modules updated', // TODO translate
-  MODULES_DESCRIPTION: 'Click on the Module to Activate or de-activate EMS-ESP library modules', // TODO translate
+  MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
   MODULES_NONE: 'No external modules detected' // TODO translate
 };
 

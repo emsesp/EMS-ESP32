@@ -327,7 +327,7 @@ const en: Translation = {
   UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware',
   MODULES: 'Modules',
   MODULES_UPDATED: 'Modules updated',
-  MODULES_DESCRIPTION: 'Click on the Module to Activate or de-activate EMS-ESP library modules',
+  MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules',
   MODULES_NONE: 'No external modules detected'
 };
 
