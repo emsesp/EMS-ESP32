@@ -218,7 +218,7 @@
 #endif
 
 #ifndef EMSESP_DEFAULT_ENTITY_FORMAT
-#define EMSESP_DEFAULT_ENTITY_FORMAT 1 // in MQTT discovery, use shortnames and not multiple (prefixed with base)
+#define EMSESP_DEFAULT_ENTITY_FORMAT 3 // in MQTT discovery, single instance, shortname, v3.6
 #endif
 
 // matches Web UI settings
