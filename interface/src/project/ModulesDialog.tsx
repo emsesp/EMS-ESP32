@@ -55,9 +55,7 @@ const ModulesDialog = ({
 
   return (
     <Dialog sx={dialogStyle} open={open} onClose={onClose}>
-      <DialogTitle>
-        {LL.EDIT() + ' ' + LL.MODULES() + ' : ' + editItem.key}
-      </DialogTitle>
+      <DialogTitle>{LL.EDIT() + ' ' + editItem.key}</DialogTitle>
       <DialogContent dividers>
         <Grid container>
           <BlockFormControlLabel
