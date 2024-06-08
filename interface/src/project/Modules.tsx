@@ -5,11 +5,8 @@ import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import CircleIcon from '@mui/icons-material/Circle';
-import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Typography } from '@mui/material';
-
-import * as SystemApi from 'api/system';
 
 import {
   Body,
@@ -26,11 +23,9 @@ import {
   BlockNavigation,
   ButtonRow,
   FormLoader,
-  MessageBox,
   SectionContent,
   useLayoutTitle
 } from 'components';
-import RestartMonitor from 'framework/system/RestartMonitor';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import * as EMSESP from './api';
@@ -40,13 +35,10 @@ import type { ModuleItem, Modules } from './types';
 const Modules: FC = () => {
   const { LL } = useI18nContext();
   const [numChanges, setNumChanges] = useState<number>(0);
-  const [licenseChanges, setLicenseChanges] = useState<number>(0);
   const blocker = useBlocker(numChanges !== 0);
 
   const [selectedModuleItem, setSelectedModuleItem] = useState<ModuleItem>();
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-  const [restarting, setRestarting] = useState<boolean>(false);
-  const [restartNeeded, setRestartNeeded] = useState<boolean>(false);
 
   const {
     data: modules,
@@ -55,17 +47,6 @@ const Modules: FC = () => {
   } = useRequest(EMSESP.readModules, {
     initialData: []
   });
-
-  const { send: restartCommand } = useRequest(SystemApi.restart(), {
-    immediate: false
-  });
-
-  const restart = async () => {
-    await restartCommand().catch((error: Error) => {
-      toast.error(error.message);
-    });
-    setRestarting(true);
-  };
 
   const { send: writeModules } = useRequest(
     (data: Modules) => EMSESP.writeModules(data),
@@ -140,17 +121,12 @@ const Modules: FC = () => {
     return mi.enabled !== mi.o_enabled || mi.license !== mi.o_license;
   }
 
-  function hasModuleLicenseChanged(mi: ModuleItem) {
-    return mi.license !== mi.o_license;
-  }
-
   const updateModuleItem = (updatedItem: ModuleItem) => {
     updateState('modules', (data: ModuleItem[]) => {
       const new_data = data.map((mi) =>
         mi.id === updatedItem.id ? { ...mi, ...updatedItem } : mi
       );
       setNumChanges(new_data.filter((mi) => hasModulesChanged(mi)).length);
-      setLicenseChanges(new_data.filter((mi) => hasModuleLicenseChanged(mi)).length);
       return new_data;
     });
   };
@@ -172,7 +148,6 @@ const Modules: FC = () => {
       .finally(() => {
         setNumChanges(0);
       });
-    setRestartNeeded(licenseChanges > 0);
   };
 
   const renderContent = () => {
@@ -213,8 +188,10 @@ const Modules: FC = () => {
                 <HeaderRow>
                   <HeaderCell />
                   <HeaderCell>{LL.NAME(0)}</HeaderCell>
+                  {/* TODO translate */}
                   <HeaderCell>Author</HeaderCell>
                   <HeaderCell>{LL.VERSION()}</HeaderCell>
+                  {/* TODO translate */}
                   <HeaderCell>Message</HeaderCell>
                   <HeaderCell>{LL.STATUS_OF('')}</HeaderCell>
                 </HeaderRow>
@@ -247,43 +224,30 @@ const Modules: FC = () => {
           )}
         </Table>
 
-        {restartNeeded ? (
-          <MessageBox my={2} level="warning" message={LL.RESTART_TEXT(0)}>
-            <Button
-              startIcon={<PowerSettingsNewIcon />}
-              variant="contained"
-              color="error"
-              onClick={restart}
-            >
-              {LL.RESTART()}
-            </Button>
-          </MessageBox>
-        ) : (
-          <Box mt={1} display="flex" flexWrap="wrap">
-            <Box flexGrow={1}>
-              {numChanges !== 0 && (
-                <ButtonRow>
-                  <Button
-                    startIcon={<CancelIcon />}
-                    variant="outlined"
-                    onClick={onCancel}
-                    color="secondary"
-                  >
-                    {LL.CANCEL()}
-                  </Button>
-                  <Button
-                    startIcon={<WarningIcon color="warning" />}
-                    variant="contained"
-                    color="info"
-                    onClick={saveModules}
-                  >
-                    {LL.APPLY_CHANGES(numChanges)}
-                  </Button>
-                </ButtonRow>
-              )}
-            </Box>
+        <Box mt={1} display="flex" flexWrap="wrap">
+          <Box flexGrow={1}>
+            {numChanges !== 0 && (
+              <ButtonRow>
+                <Button
+                  startIcon={<CancelIcon />}
+                  variant="outlined"
+                  onClick={onCancel}
+                  color="secondary"
+                >
+                  {LL.CANCEL()}
+                </Button>
+                <Button
+                  startIcon={<WarningIcon color="warning" />}
+                  variant="contained"
+                  color="info"
+                  onClick={saveModules}
+                >
+                  {LL.APPLY_CHANGES(numChanges)}
+                </Button>
+              </ButtonRow>
+            )}
           </Box>
-        )}
+        </Box>
       </>
     );
   };
@@ -291,7 +255,7 @@ const Modules: FC = () => {
   return (
     <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
-      {restarting ? <RestartMonitor /> : renderContent()}
+      {renderContent()}
       {selectedModuleItem && (
         <ModulesDialog
           open={dialogOpen}
