@@ -17,7 +17,6 @@ the LICENSE file.
 #else
 #include <WiFiClient.h>
 #endif
-
 #include "Transport.h"
 
 namespace espMqttClientInternals {
@@ -32,6 +31,7 @@ class ClientSecureSync : public Transport {
     void   stop() override;
     bool   connected() override;
     bool   disconnected() override;
+    // added for EMS-ESP
 #if defined(EMC_CLIENT_SECURE)
     WiFiClientSecure client;
 #else

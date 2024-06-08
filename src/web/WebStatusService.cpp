@@ -70,6 +70,14 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
 
     root["ap_status"] = EMSESP::esp8266React.apStatus();
 
+    if (emsesp::EMSESP::system_.ethernet_connected()) {
+        root["network_status"] = 10; // custom code #10 - ETHERNET_STATUS_CONNECTED
+        root["wifi_rssi"]      = 0;
+    } else {
+        root["network_status"] = static_cast<uint8_t>(WiFi.status());
+        root["wifi_rssi"]      = WiFi.RSSI();
+    }
+
     response->setLength();
     request->send(response);
 }

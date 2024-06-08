@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { FC } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import CircleIcon from '@mui/icons-material/Circle';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Typography } from '@mui/material';
+
+import * as SystemApi from 'api/system';
 
 import {
   Body,
@@ -23,18 +26,27 @@ import {
   BlockNavigation,
   ButtonRow,
   FormLoader,
+  MessageBox,
   SectionContent,
   useLayoutTitle
 } from 'components';
+import RestartMonitor from 'framework/system/RestartMonitor';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import * as EMSESP from './api';
+import ModulesDialog from './ModulesDialog';
 import type { ModuleItem, Modules } from './types';
 
 const Modules: FC = () => {
   const { LL } = useI18nContext();
   const [numChanges, setNumChanges] = useState<number>(0);
+  const [licenseChanges, setLicenseChanges] = useState<number>(0);
   const blocker = useBlocker(numChanges !== 0);
+
+  const [selectedModuleItem, setSelectedModuleItem] = useState<ModuleItem>();
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const [restarting, setRestarting] = useState<boolean>(false);
+  const [restartNeeded, setRestartNeeded] = useState<boolean>(false);
 
   const {
     data: modules,
@@ -43,6 +55,17 @@ const Modules: FC = () => {
   } = useRequest(EMSESP.readModules, {
     initialData: []
   });
+
+  const { send: restartCommand } = useRequest(SystemApi.restart(), {
+    immediate: false
+  });
+
+  const restart = async () => {
+    await restartCommand().catch((error: Error) => {
+      toast.error(error.message);
+    });
+    setRestarting(true);
+  };
 
   const { send: writeModules } = useRequest(
     (data: Modules) => EMSESP.writeModules(data),
@@ -53,7 +76,7 @@ const Modules: FC = () => {
 
   const modules_theme = useTheme({
     Table: `
-      --data-table-library_grid-template-columns: 48px 180px 120px 100px repeat(1, minmax(160px, 1fr));
+      --data-table-library_grid-template-columns: 48px 180px 120px 100px repeat(1, minmax(160px, 1fr)) 180px;
     `,
     BaseRow: `
       font-size: 14px;
@@ -93,6 +116,20 @@ const Modules: FC = () => {
     `
   });
 
+  const onDialogClose = () => {
+    setDialogOpen(false);
+  };
+
+  const onDialogSave = (updatedItem: ModuleItem) => {
+    setDialogOpen(false);
+    updateModuleItem(updatedItem);
+  };
+
+  const editModuleItem = useCallback((mi: ModuleItem) => {
+    setSelectedModuleItem(mi);
+    setDialogOpen(true);
+  }, []);
+
   const onCancel = async () => {
     await fetchModules().then(() => {
       setNumChanges(0);
@@ -100,16 +137,20 @@ const Modules: FC = () => {
   };
 
   function hasModulesChanged(mi: ModuleItem) {
-    return mi.enabled !== mi.o_enabled;
+    return mi.enabled !== mi.o_enabled || mi.license !== mi.o_license;
   }
 
-  const selectModule = (updatedItem: ModuleItem) => {
-    updatedItem.enabled = !updatedItem.enabled;
+  function hasModuleLicenseChanged(mi: ModuleItem) {
+    return mi.license !== mi.o_license;
+  }
+
+  const updateModuleItem = (updatedItem: ModuleItem) => {
     updateState('modules', (data: ModuleItem[]) => {
       const new_data = data.map((mi) =>
         mi.id === updatedItem.id ? { ...mi, ...updatedItem } : mi
       );
       setNumChanges(new_data.filter((mi) => hasModulesChanged(mi)).length);
+      setLicenseChanges(new_data.filter((mi) => hasModuleLicenseChanged(mi)).length);
       return new_data;
     });
   };
@@ -117,12 +158,13 @@ const Modules: FC = () => {
   const saveModules = async () => {
     await writeModules({
       modules: modules.map((condensed_mi) => ({
-        name: condensed_mi.name,
-        enabled: condensed_mi.enabled
+        key: condensed_mi.key,
+        enabled: condensed_mi.enabled,
+        license: condensed_mi.license
       }))
     })
       .then(() => {
-        toast.success('Modules saved');
+        toast.success(LL.MODULES_UPDATED());
       })
       .catch((error: Error) => {
         toast.error(error.message);
@@ -130,104 +172,134 @@ const Modules: FC = () => {
       .finally(() => {
         setNumChanges(0);
       });
+    setRestartNeeded(licenseChanges > 0);
   };
 
-  const renderModules = () => {
+  const renderContent = () => {
     if (!modules) {
       return <FormLoader onRetry={fetchModules} errorMessage={error?.message} />;
     }
 
-    useLayoutTitle('Modules');
+    useLayoutTitle(LL.MODULES());
 
     if (modules.length === 0) {
       return (
         <Typography variant="body2" color="error">
-          No modules detected
+          {LL.MODULES_NONE()}
         </Typography>
       );
     }
 
+    const colorStatus = (status: number) => {
+      if (status === 1) {
+        return <div style={{ color: 'red' }}>Pending Activation</div>;
+      }
+      return <div style={{ color: '#00FF7F' }}>Activated</div>;
+    };
+
     return (
-      <Table
-        data={{ nodes: modules }}
-        theme={modules_theme}
-        layout={{ custom: true }}
-      >
-        {(tableList: ModuleItem[]) => (
-          <>
-            <Header>
-              <HeaderRow>
-                <HeaderCell />
-                <HeaderCell stiff>{LL.NAME(0)}</HeaderCell>
-                <HeaderCell stiff>Author</HeaderCell>
-                <HeaderCell stiff>{LL.VERSION()}</HeaderCell>
-                <HeaderCell stiff>{LL.STATUS_OF('')}</HeaderCell>
-              </HeaderRow>
-            </Header>
-            <Body>
-              {tableList.map((mi: ModuleItem) => (
-                <Row key={mi.id} item={mi} onClick={() => selectModule(mi)}>
-                  <Cell stiff>
-                    {mi.enabled ? (
-                      <CircleIcon
-                        color="success"
-                        sx={{ fontSize: 16, verticalAlign: 'middle' }}
-                      />
-                    ) : (
-                      <CircleIcon
-                        color="error"
-                        sx={{ fontSize: 16, verticalAlign: 'middle' }}
-                      />
-                    )}
-                  </Cell>
-                  <Cell>{mi.name}</Cell>
-                  <Cell>{mi.author}</Cell>
-                  <Cell>{mi.version}</Cell>
-                  <Cell>{mi.status}</Cell>
-                </Row>
-              ))}
-            </Body>
-          </>
+      <>
+        <Box mb={2} color="warning.main">
+          <Typography variant="body2">{LL.MODULES_DESCRIPTION()}</Typography>
+        </Box>
+        <Table
+          data={{ nodes: modules }}
+          theme={modules_theme}
+          layout={{ custom: true }}
+        >
+          {(tableList: ModuleItem[]) => (
+            <>
+              <Header>
+                <HeaderRow>
+                  <HeaderCell />
+                  <HeaderCell>{LL.NAME(0)}</HeaderCell>
+                  <HeaderCell>Author</HeaderCell>
+                  <HeaderCell>{LL.VERSION()}</HeaderCell>
+                  <HeaderCell>Message</HeaderCell>
+                  <HeaderCell>{LL.STATUS_OF('')}</HeaderCell>
+                </HeaderRow>
+              </Header>
+              <Body>
+                {tableList.map((mi: ModuleItem) => (
+                  <Row key={mi.id} item={mi} onClick={() => editModuleItem(mi)}>
+                    <Cell stiff>
+                      {mi.enabled ? (
+                        <CircleIcon
+                          color="success"
+                          sx={{ fontSize: 16, verticalAlign: 'middle' }}
+                        />
+                      ) : (
+                        <CircleIcon
+                          color="error"
+                          sx={{ fontSize: 16, verticalAlign: 'middle' }}
+                        />
+                      )}
+                    </Cell>
+                    <Cell>{mi.name}</Cell>
+                    <Cell>{mi.author}</Cell>
+                    <Cell>{mi.version}</Cell>
+                    <Cell>{mi.message}</Cell>
+                    <Cell>{colorStatus(mi.status)}</Cell>
+                  </Row>
+                ))}
+              </Body>
+            </>
+          )}
+        </Table>
+
+        {restartNeeded ? (
+          <MessageBox my={2} level="warning" message={LL.RESTART_TEXT(0)}>
+            <Button
+              startIcon={<PowerSettingsNewIcon />}
+              variant="contained"
+              color="error"
+              onClick={restart}
+            >
+              {LL.RESTART()}
+            </Button>
+          </MessageBox>
+        ) : (
+          <Box mt={1} display="flex" flexWrap="wrap">
+            <Box flexGrow={1}>
+              {numChanges !== 0 && (
+                <ButtonRow>
+                  <Button
+                    startIcon={<CancelIcon />}
+                    variant="outlined"
+                    onClick={onCancel}
+                    color="secondary"
+                  >
+                    {LL.CANCEL()}
+                  </Button>
+                  <Button
+                    startIcon={<WarningIcon color="warning" />}
+                    variant="contained"
+                    color="info"
+                    onClick={saveModules}
+                  >
+                    {LL.APPLY_CHANGES(numChanges)}
+                  </Button>
+                </ButtonRow>
+              )}
+            </Box>
+          </Box>
         )}
-      </Table>
+      </>
     );
   };
 
   return (
     <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
-      <Box mb={2} color="warning.main">
-        <Typography variant="body2">
-          Activate or de-activate EMS-ESP library modules by selecting (**
-          experimental **)
-        </Typography>
-      </Box>
-      {renderModules()}
-
-      <Box mt={1} display="flex" flexWrap="wrap">
-        <Box flexGrow={1}>
-          {numChanges !== 0 && (
-            <ButtonRow>
-              <Button
-                startIcon={<CancelIcon />}
-                variant="outlined"
-                onClick={onCancel}
-                color="secondary"
-              >
-                {LL.CANCEL()}
-              </Button>
-              <Button
-                startIcon={<WarningIcon color="warning" />}
-                variant="contained"
-                color="info"
-                onClick={saveModules}
-              >
-                {LL.APPLY_CHANGES(numChanges)}
-              </Button>
-            </ButtonRow>
-          )}
-        </Box>
-      </Box>
+      {restarting ? <RestartMonitor /> : renderContent()}
+      {selectedModuleItem && (
+        <ModulesDialog
+          open={dialogOpen}
+          onClose={onDialogClose}
+          onSave={onDialogSave}
+          selectedItem={selectedModuleItem}
+        />
+      )}
     </SectionContent>
   );
 };

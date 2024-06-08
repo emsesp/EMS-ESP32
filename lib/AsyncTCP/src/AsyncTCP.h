@@ -48,7 +48,7 @@ extern "C" {
 //If core is not defined, then we are running in Arduino or PIO
 #ifndef CONFIG_ASYNC_TCP_RUNNING_CORE
 #define CONFIG_ASYNC_TCP_RUNNING_CORE -1 //any available core
-// Note default was 1 and previously set to 0 for EMS-ESP32
+// Note default was 1 and previously set to 0 for EMS-ESP
 #define CONFIG_ASYNC_TCP_USE_WDT 1 //if enabled, adds between 33us and 200us per event
 #endif
 
@@ -56,13 +56,13 @@ extern "C" {
 #define CONFIG_ASYNC_TCP_TASK_PRIORITY 5
 #endif
 
-// EMS-ESP32: stack usage measured: ESP32: ~2.3K, ESP32S3: ~3.5k
+// EMS-ESP: stack usage measured: ESP32: ~2.3K, ESP32S3: ~3.5k
 #ifndef CONFIG_ASYNC_TCP_STACK_SIZE
 #define CONFIG_ASYNC_TCP_STACK_SIZE 5120
 #endif
 
 
-// EMS-ESP32: maybe enlarge queue to 64 or 128 see https://github.com/emsesp/EMS-ESP32/issues/177
+// EMS-ESP: maybe enlarge queue to 64 or 128 see https://github.com/emsesp/EMS-ESP32/issues/177
 #ifndef CONFIG_ASYNC_TCP_QUEUE
 #define CONFIG_ASYNC_TCP_QUEUE 32
 #endif

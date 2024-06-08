@@ -310,12 +310,16 @@ export interface Schedule {
 
 export interface ModuleItem {
   id: number; // unique index
+  key: string;
   name: string;
   author: string;
   version: string;
-  status: string;
+  status: number;
+  message: string;
   enabled: boolean;
+  license: string;
   o_enabled?: boolean;
+  o_license?: string;
 }
 
 export interface Modules {

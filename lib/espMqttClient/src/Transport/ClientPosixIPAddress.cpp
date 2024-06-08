@@ -8,7 +8,7 @@ the LICENSE file.
 
 #if defined(__linux__)
 
-#include "IPAddress.h"
+#include "ClientPosixIPAddress.h"
 
 IPAddress::IPAddress()
 : _address(0) {
