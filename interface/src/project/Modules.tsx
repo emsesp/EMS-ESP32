@@ -167,6 +167,7 @@ const Modules: FC = () => {
 
     const colorStatus = (status: number) => {
       if (status === 1) {
+        // TODO translate
         return <div style={{ color: 'red' }}>Pending Activation</div>;
       }
       return <div style={{ color: '#00FF7F' }}>Activated</div>;
