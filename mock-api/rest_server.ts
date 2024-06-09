@@ -2144,7 +2144,7 @@ let emsesp_modules = {
       "version": "1.0.0",
       "enabled": true,
       "status": 1,
-      "message": "Ready",
+      "message": "Running",
       "license": "1234567890"
     },
     {
@@ -2155,7 +2155,7 @@ let emsesp_modules = {
       "version": "1.0.0",
       "enabled": true,
       "status": 2,
-      "message": "Ready",
+      "message": "Running",
       "license": "ABCDEFGHIJKL"
 
     }

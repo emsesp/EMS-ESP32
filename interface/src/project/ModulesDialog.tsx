@@ -54,7 +54,7 @@ const ModulesDialog = ({
   };
 
   return (
-    <Dialog sx={dialogStyle} open={open} onClose={onClose}>
+    <Dialog sx={dialogStyle} fullWidth maxWidth="xs" open={open} onClose={onClose}>
       <DialogTitle>{LL.EDIT() + ' ' + editItem.key}</DialogTitle>
       <DialogContent dividers>
         <Grid container>
@@ -66,15 +66,17 @@ const ModulesDialog = ({
                 name="enabled"
               />
             }
-            label={LL.ACTIVE()}
+            // TODO translate
+            label="Enabled"
           />
         </Grid>
-        <Box mt={1} mb={1}>
+        <Box mt={2} mb={1}>
           <TextField
             name="license"
             label="License Key"
             multiline
             rows={6}
+            columns={40}
             fullWidth
             value={editItem.license}
             onChange={updateFormValue}
