@@ -11,14 +11,14 @@
 ;  -DEMSESP_DE_ONLY ; only DE translated entity names
 ;  -DEMSESP_EN_ONLY ; only EN translated entity names
 ;  -DEMSESP_PINGTEST ; send log message every 1/2 second
-my_build_flags = -DEMSESP_TEST
+; my_build_flags = -DEMSESP_TEST
 ; my_build_flags = -DEMSESP_DEBUG -DEMSESP_TEST
 ; my_build_flags = -DEMSESP_DEBUG -DEMSESP_TEST -DEMSESP_PINGTEST
 
 [platformio]
 ; default_envs = esp32_4M
-default_envs = esp32_16M
-; default_envs = lolin_s3
+; default_envs = esp32_16M
+default_envs = lolin_s3
 ; default_envs = native
 ; default_envs = debug
 ; default_envs = custom
@@ -36,9 +36,9 @@ custom_username = admin
 custom_password = admin
 ; example below is using a locally built version of EMS-ESP-Modules. You can also test with:
 ;    rm -rf .pio/libdeps/native/EMS-ESP-Modules; pio run -e native -t clean; pio run -e native -t exec
-lib_deps =
-  file://../../modules/EMS-ESP-Modules
-  bblanchon/ArduinoJson@^7.0.4
+; lib_deps =
+;   file://../modules/EMS-ESP-Modules
+;   bblanchon/ArduinoJson@^7.0.4
 
 [env:native]
 extra_scripts = 
@@ -47,15 +47,15 @@ extra_scripts =
 
 [env:esp32_4M]
 extra_scripts =
-  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+;   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
-  scripts/upload.py
+;   scripts/upload.py
 
 [env:lolin_s3]
 extra_scripts =
-  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+;   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
-  scripts/upload.py
+;   scripts/upload.py
 
 [env:esp32_16M]
 extra_scripts =
