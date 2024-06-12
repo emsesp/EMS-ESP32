@@ -1176,7 +1176,8 @@ void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, con
         doc[sc_ha] = F_(measurement);
         break;
     case DeviceValueUOM::WH:
-        if (entity == FL_(energyToday)[0]) {
+        // https://github.com/emsesp/EMS-ESP32/issues/1796
+        if ((entity == FL_(energyToday)[0]) || entity == FL_(energyLastHour)[0]) {
             doc[sc_ha] = F_(total_increasing);
         } else {
             doc[sc_ha] = F_(measurement);
