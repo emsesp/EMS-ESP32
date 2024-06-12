@@ -82,8 +82,6 @@ class System {
     void send_heartbeat();
     void send_info_mqtt();
 
-    std::string getMacAddress() const;
-
     bool syslog_enabled() {
         return syslog_enabled_;
     }
