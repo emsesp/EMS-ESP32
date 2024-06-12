@@ -49,7 +49,8 @@ const Modules: FC = () => {
   });
 
   const { send: writeModules } = useRequest(
-    (data: Modules) => EMSESP.writeModules(data),
+    (data: { key: string; enabled: boolean; license: string }) =>
+      EMSESP.writeModules(data),
     {
       immediate: false
     }
@@ -145,7 +146,8 @@ const Modules: FC = () => {
       .catch((error: Error) => {
         toast.error(error.message);
       })
-      .finally(() => {
+      .finally(async () => {
+        await fetchModules();
         setNumChanges(0);
       });
   };

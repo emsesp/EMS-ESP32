@@ -81,7 +81,7 @@ StateUpdateResult WebModules::update(JsonObject root, WebModules & webModules) {
             auto enable  = module["enabled"].as<bool>();
 
             if (!moduleLibrary.enable(key, license, enable)) {
-                return StateUpdateResult::ERROR;
+                return StateUpdateResult::ERROR; // throw a 400 error
             }
         }
     }

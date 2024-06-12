@@ -964,6 +964,7 @@ void System::show_system(uuid::console::Shell & shell) {
 
     shell.println("System:");
     shell.printfln(" Version: %s", EMSESP_APP_VERSION);
+    shell.printfln(" Platform: %s", EMSESP_PLATFORM);
     shell.printfln(" Language: %s", locale().c_str());
     shell.printfln(" Board profile: %s", board_profile().c_str());
     shell.printfln(" Uptime: %s", uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3).c_str());

@@ -50,6 +50,7 @@ export const writeAnalogSensor = (as: WriteAnalogSensor) =>
 // Activity
 export const readActivity = () => alovaInstance.Get<Activity>('/rest/activity');
 
+// Scan devices
 export const scanDevices = () => alovaInstance.Post('/rest/scanDevices');
 
 // API, used in HelpInformation
@@ -118,8 +119,11 @@ export const readModules = () =>
       }));
     }
   });
-export const writeModules = (data: Modules) =>
-  alovaInstance.Post('/rest/modules', data);
+export const writeModules = (data: {
+  key: string;
+  enabled: boolean;
+  license: string;
+}) => alovaInstance.Post('/rest/modules', data);
 
 // SettingsEntities
 export const readCustomEntities = () =>
