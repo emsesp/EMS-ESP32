@@ -75,7 +75,9 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
         root["wifi_rssi"]      = 0;
     } else {
         root["network_status"] = static_cast<uint8_t>(WiFi.status());
-        root["wifi_rssi"]      = WiFi.RSSI();
+#ifndef EMSESP_STANDALONE
+        root["wifi_rssi"] = WiFi.RSSI();
+#endif
     }
 
     response->setLength();
