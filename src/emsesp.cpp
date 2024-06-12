@@ -1591,7 +1591,7 @@ void EMSESP::start() {
         nvs_.begin("ems-esp", false, "nvs");     // fallback to small nvs
     }
 #ifndef EMSESP_STANDALONE
-    LOG_INFO("Starting EMS-ESP version %s from partition %s", EMSESP_APP_VERSION, esp_ota_get_running_partition()->label); // welcome message
+    LOG_INFO("Starting EMS-ESP version %s from %s partition", EMSESP_APP_VERSION, esp_ota_get_running_partition()->label); // welcome message
 #else
     LOG_INFO("Starting EMS-ESP version %s", EMSESP_APP_VERSION); // welcome message
 #endif
