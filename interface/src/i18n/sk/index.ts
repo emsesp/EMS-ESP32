@@ -325,7 +325,10 @@ const sk: Translation = {
   APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
   SECURITY_1: 'Add or remove users', // TODO translate
   UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', // TODO translate
-  MODULES: 'Modules' // TODO translate
+  MODULES: 'Module', // TODO translate
+  MODULES_UPDATED: 'Modules updated', // TODO translate
+  MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
+  MODULES_NONE: 'No external modules detected' // TODO translate
 };
 
 export default sk;

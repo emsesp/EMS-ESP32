@@ -37,12 +37,14 @@ WebSettingsService      EMSESP::webSettingsService      = WebSettingsService(&we
 WebCustomizationService EMSESP::webCustomizationService = WebCustomizationService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
 WebSchedulerService     EMSESP::webSchedulerService     = WebSchedulerService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
 WebCustomEntityService  EMSESP::webCustomEntityService  = WebCustomEntityService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
+WebModulesService       EMSESP::webModulesService       = WebModulesService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
 #else
 ESP8266React            EMSESP::esp8266React(&webServer, &LittleFS);
 WebSettingsService      EMSESP::webSettingsService      = WebSettingsService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
 WebCustomizationService EMSESP::webCustomizationService = WebCustomizationService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
 WebSchedulerService     EMSESP::webSchedulerService     = WebSchedulerService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
 WebCustomEntityService  EMSESP::webCustomEntityService  = WebCustomEntityService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
+WebModulesService       EMSESP::webModulesService       = WebModulesService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
 #endif
 
 WebActivityService EMSESP::webActivityService = WebActivityService(&webServer, EMSESP::esp8266React.getSecurityManager());
@@ -1589,7 +1591,7 @@ void EMSESP::start() {
         nvs_.begin("ems-esp", false, "nvs");     // fallback to small nvs
     }
 #ifndef EMSESP_STANDALONE
-    LOG_INFO("Starting EMS-ESP version %s from partition %s", EMSESP_APP_VERSION, esp_ota_get_running_partition()->label); // welcome message
+    LOG_INFO("Starting EMS-ESP version %s from %s partition", EMSESP_APP_VERSION, esp_ota_get_running_partition()->label); // welcome message
 #else
     LOG_INFO("Starting EMS-ESP version %s", EMSESP_APP_VERSION); // welcome message
 #endif
@@ -1634,6 +1636,8 @@ void EMSESP::start() {
     analogsensor_.start();      // Analog external sensors
     webLogService.start();      // apply settings to weblog service
 
+    webModulesService.begin(); // setup the external library modules
+
     // Load our library of known devices into stack mem. Names are stored in Flash memory
     device_library_ = {
 #include "device_library.h"
@@ -1663,6 +1667,7 @@ void EMSESP::loop() {
         publish_all_loop();         // with HA messages in parts to avoid flooding the mqtt queue
         mqtt_.loop();               // sends out anything in the MQTT queue
         webSchedulerService.loop(); // handle any scheduled jobs
+        webModulesService.loop();   // loop through the external library modules
 
         // force a query on the EMS devices to fetch latest data at a set interval (1 min)
         scheduled_fetch_values();

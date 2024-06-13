@@ -218,7 +218,7 @@
 #endif
 
 #ifndef EMSESP_DEFAULT_ENTITY_FORMAT
-#define EMSESP_DEFAULT_ENTITY_FORMAT 1 // in MQTT discovery, use shortnames and not multiple (prefixed with base)
+#define EMSESP_DEFAULT_ENTITY_FORMAT 3 // in MQTT discovery, single instance, shortname, v3.6
 #endif
 
 // matches Web UI settings
@@ -241,13 +241,13 @@ enum {
 };
 
 #if CONFIG_IDF_TARGET_ESP32C3
-#define EMSESP_PLATFORM "ESP32-C3";
+#define EMSESP_PLATFORM "ESP32-C3"
 #elif CONFIG_IDF_TARGET_ESP32S2
-#define EMSESP_PLATFORM "ESP32-S2";
+#define EMSESP_PLATFORM "ESP32-S2"
 #elif CONFIG_IDF_TARGET_ESP32S3
-#define EMSESP_PLATFORM "ESP32-S3";
+#define EMSESP_PLATFORM "ESP32-S3"
 #elif CONFIG_IDF_TARGET_ESP32 || EMSESP_STANDALONE
-#define EMSESP_PLATFORM "ESP32";
+#define EMSESP_PLATFORM "ESP32"
 #else
 #error Target CONFIG_IDF_TARGET is not supported
 #endif

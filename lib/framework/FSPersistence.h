@@ -26,6 +26,12 @@ class FSPersistence {
             if (error == DeserializationError::Ok && jsonDocument.is<JsonObject>()) {
                 JsonObject jsonObject = jsonDocument.as<JsonObject>();
                 _statefulService->updateWithoutPropagation(jsonObject, _stateUpdater);
+#ifdef EMSESP_DEBUG
+                Serial.println();
+                Serial.printf("Reading settings from %s ", _filePath);
+                serializeJson(jsonDocument, Serial);
+                Serial.println();
+#endif
                 settingsFile.close();
                 return;
             }
@@ -35,7 +41,9 @@ class FSPersistence {
 // If we reach here we have not been successful in loading the config,
 // hard-coded emergency defaults are now applied.
 #ifdef EMSESP_DEBUG
-        Serial.println("Applying defaults to " + String(_filePath));
+        Serial.println();
+        Serial.printf("Applying defaults to %s ", _filePath);
+        Serial.println();
 #endif
         applyDefaults();
         writeToFS(); // added to make sure the initial file is created
@@ -65,9 +73,12 @@ class FSPersistence {
             return false;
         }
 
-// serialize the data to the file
+        // serialize the data to the file
 #ifdef EMSESP_DEBUG
-        Serial.println("Writing settings to " + String(_filePath));
+        Serial.println();
+        Serial.printf("Writing settings to %s ", _filePath);
+        serializeJson(jsonDocument, Serial);
+        Serial.println();
 #endif
         serializeJson(jsonDocument, settingsFile);
         settingsFile.close();

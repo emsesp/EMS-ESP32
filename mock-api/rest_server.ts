@@ -381,7 +381,11 @@ const system_status = {
   free_heap: 143,
   ntp_status: 2,
   mqtt_status: true,
-  ap_status: false
+  ap_status: false,
+  network_status: 3, // wifi connected
+  // network_status: 10, // ethernet connected
+  // network_status: 6, // wifi disconnected
+  wifi_rssi: -41
 };
 
 let security_settings = {
@@ -428,10 +432,11 @@ const EMSESP_WRITE_TEMPSENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeTemperatureS
 const EMSESP_WRITE_ANALOGSENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeAnalogSensor';
 const EMSESP_CUSTOMIZATION_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customizationEntities';
 const EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'resetCustomizations';
-
 const EMSESP_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
 const EMSESP_CUSTOMENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customEntities';
+const EMSESP_MODULES_ENDPOINT = REST_ENDPOINT_ROOT + 'modules';
 
+// these are used in the API calls only
 const EMSESP_GET_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'getSettings';
 const EMSESP_GET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'getCustomizations';
 const EMSESP_GET_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'getEntities';
@@ -2127,6 +2132,36 @@ let emsesp_schedule = {
   ]
 };
 
+// SCHEDULE
+let emsesp_modules = {
+  // 'modules': []
+  "modules": [
+    {
+      id: 1,
+      "key": "ModuleTest1",
+      "name": "Module Test 1",
+      "author": "proddy",
+      "version": "1.0.0",
+      "enabled": true,
+      "status": 1,
+      "message": "Running",
+      "license": "1234567890"
+    },
+    {
+      id: 2,
+      "key": "ModuleTest2",
+      "name": "Module Test 2",
+      "author": "proddy",
+      "version": "1.0.0",
+      "enabled": true,
+      "status": 2,
+      "message": "Running",
+      "license": "ABCDEFGHIJKL"
+
+    }
+  ]
+}
+
 // CUSTOMIZATION
 const emsesp_deviceentities_1 = [{ v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }];
 const emsesp_deviceentities_3 = [{ v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }];
@@ -2362,7 +2397,9 @@ router
     return status(200);
   })
   .get(VERIFY_AUTHORIZATION_ENDPOINT, () => verify_authentication)
-  .post(RESTART_ENDPOINT, () => status(200))
+  .post(RESTART_ENDPOINT, () => {
+    console.log('restarting...');
+    return status(200);})
   .post(FACTORY_RESET_ENDPOINT, () => status(200))
   .post(SIGN_IN_ENDPOINT, () => signin)
   .get(GENERATE_TOKEN_ENDPOINT, () => generate_token);
@@ -2484,6 +2521,23 @@ router
     return status(200);
   })
   .get(EMSESP_SCHEDULE_ENDPOINT, () => emsesp_schedule)
+
+  // Modules
+  .post(EMSESP_MODULES_ENDPOINT, async (request: any) => {
+    const content = await request.json();
+    let modules = content.modules;
+    for (let i = 0; i < modules.length; i++) {
+      const key = modules[i].key;
+      const objIndex = emsesp_modules.modules.findIndex((obj: any) => obj.key === key);
+      if (objIndex !== -1) {
+        emsesp_modules.modules[objIndex].enabled = modules[i].enabled;
+        emsesp_modules.modules[objIndex].license = modules[i].license;
+      }
+    }
+    console.log('modules updated', emsesp_modules);
+    return status(200);
+  })
+  .get(EMSESP_MODULES_ENDPOINT, () => emsesp_modules)  
 
   // Custom Entities
   .post(EMSESP_CUSTOMENTITIES_ENDPOINT, async (request: any) => {

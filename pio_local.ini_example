@@ -19,28 +19,47 @@
 ; default_envs = esp32_4M
 ; default_envs = esp32_16M
 default_envs = lolin_s3
-; default_envs = standalone
+; default_envs = native
 ; default_envs = debug
 ; default_envs = custom
 
 [env]
 ; upload settings
-upload_protocol = custom
+; for USB
+upload_protocol = esptool
+upload_port = /dev/ttyUSB*
+; for OTA add scripts/upload.py to extra_scripts
+; upload_protocol = custom
 custom_emsesp_ip = 10.10.10.173
 ; custom_emsesp_ip = ems-esp.local
 custom_username = admin
 custom_password = admin
-upload_port = /dev/ttyUSB*
+; example below is using a locally built version of EMS-ESP-Modules. You can also test with:
+;    rm -rf .pio/libdeps/native/EMS-ESP-Modules; pio run -e native -t clean; pio run -e native -t exec
+; lib_deps =
+;   file://../modules/EMS-ESP-Modules
+;   bblanchon/ArduinoJson@^7.0.4
+
+[env:native]
+extra_scripts = 
+;   pre:scripts/refresh_module_library_native.py
+;   post:scripts/run_native.py
 
 [env:esp32_4M]
 extra_scripts =
-  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+;   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
 ;   scripts/upload.py
 
 [env:lolin_s3]
 extra_scripts =
-  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+;   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+  scripts/rename_fw.py
+;   scripts/upload.py
+
+[env:esp32_16M]
+extra_scripts =
+;   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
 ;   scripts/upload.py
 
@@ -60,7 +79,7 @@ board_upload.use_1200bps_touch = false
 board_upload.wait_for_upload_port = true
 upload_port = /dev/ttyUSB0
 extra_scripts = 
-	; pre:scripts/build_interface.py
+	pre:scripts/build_interface.py
 	scripts/rename_fw.py
 build_unflags = ${common.unbuild_flags}
 build_flags = 
@@ -70,8 +89,6 @@ build_flags =
 	-D ONEWIRE_CRC16=0
 	-D NO_GLOBAL_ARDUINOOTA
 	-D ARDUINOJSON_ENABLE_STD_STRING=1
-	-D ARDUINOJSON_USE_DOUBLE=0
-	; -D ARDUINOTRACE_ENABLE=1
 	-D TASMOTA_SDK
 	; -D CORE_DEBUG_LEVEL=ARDUHAL_LOG_LEVEL_WARN
 	-D EMSESP_TEST

@@ -28,7 +28,7 @@
 #include <vector>
 #include "FS.h"
 
-#include <ArduinoJson.h> // added by proddy
+#include <ArduinoJson.h> // added by proddy for EMS-ESP
 
 #include "StringArray.h"
 
@@ -330,7 +330,7 @@ class AsyncWebServerRequest {
     AsyncWebServerResponse * beginResponse_P(int code, const String & contentType, const uint8_t * content, size_t len, AwsTemplateProcessor callback = nullptr);
     AsyncWebServerResponse * beginResponse_P(int code, const String & contentType, PGM_P content, AwsTemplateProcessor callback = nullptr);
 
-    // added by proddy
+    // added by proddy for EMS-ESP
     AsyncWebServerResponse * beginResponse(const String & contentType, const uint8_t * content, size_t len);
 
     size_t headers() const;                                   // get header count
@@ -532,7 +532,7 @@ typedef std::function<void(AsyncWebServerRequest * request)> ArRequestHandlerFun
 typedef std::function<void(AsyncWebServerRequest * request, const String & filename, size_t index, uint8_t * data, size_t len, bool final)> ArUploadHandlerFunction;
 typedef std::function<void(AsyncWebServerRequest * request, uint8_t * data, size_t len, size_t index, size_t total)> ArBodyHandlerFunction;
 
-typedef std::function<void(AsyncWebServerRequest * request, JsonVariant json)> ArJsonRequestHandlerFunction; // added by proddy
+typedef std::function<void(AsyncWebServerRequest * request, JsonVariant json)> ArJsonRequestHandlerFunction; // added by proddy for EMS-ESP
 
 class AsyncWebServer {
   protected:
@@ -566,7 +566,7 @@ class AsyncWebServer {
     AsyncCallbackWebHandler &
     on(const char * uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest, ArUploadHandlerFunction onUpload, ArBodyHandlerFunction onBody);
 
-    void on(const char * uri, ArJsonRequestHandlerFunction onRequest); // added by proddy
+    void on(const char * uri, ArJsonRequestHandlerFunction onRequest); // added by proddy for EMS-ESP
 
     AsyncStaticWebHandler & serveStatic(const char * uri, fs::FS & fs, const char * path, const char * cache_control = NULL);
 

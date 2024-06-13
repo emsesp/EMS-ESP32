@@ -45,7 +45,6 @@ const Help: FC = () => {
     );
 
     anchor.download =
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       'emsesp_' + event.sendArgs[0].device + '_' + event.sendArgs[0].entity + '.txt';
     anchor.click();
     URL.revokeObjectURL(anchor.href);

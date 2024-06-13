@@ -64,7 +64,7 @@ namespace uuid {
  * - <a href="https://mcu-uuid-log.readthedocs.io/">Documentation</a>
  */
 
-// ANSI Colors - added by Proddy
+// ANSI Colors - added by Proddy for EMS-ESP
 // See https://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html
 #define COLOR_RESET "\x1B[0m"
 #define COLOR_BLACK "\x1B[0;30m"

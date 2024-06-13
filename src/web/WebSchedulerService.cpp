@@ -31,10 +31,7 @@ void WebSchedulerService::begin() {
     _fsPersistence.readFromFS();
 
     // save a local pointer to the scheduler item list
-    EMSESP::webSchedulerService.read([&](WebScheduler & webScheduler) {
-        //
-        scheduleItems_ = &webScheduler.scheduleItems;
-    });
+    EMSESP::webSchedulerService.read([&](WebScheduler & webScheduler) { scheduleItems_ = &webScheduler.scheduleItems; });
 
     EMSESP::logger().info("Starting Scheduler service");
     Mqtt::subscribe(EMSdevice::DeviceType::SCHEDULER, "scheduler/#", nullptr); // use empty function callback

@@ -270,7 +270,7 @@ const Devices: FC = () => {
   async function onSelectChange(action: Action, state: State) {
     setSelectedDevice(state.id as number);
     if (action.type === 'ADD_BY_ID_EXCLUSIVELY') {
-      await readDeviceData(state.id);
+      await readDeviceData(state.id as number);
     }
   }
 
@@ -417,7 +417,7 @@ const Devices: FC = () => {
 
   const deviceValueDialogSave = async (devicevalue: DeviceValue) => {
     const id = Number(device_select.state.id);
-    await writeDeviceValue({ id, c: devicevalue.c, v: devicevalue.v })
+    await writeDeviceValue({ id, c: devicevalue.c ?? '', v: devicevalue.v })
       .then(() => {
         toast.success(LL.WRITE_CMD_SENT());
       })

@@ -676,14 +676,14 @@ bool Mqtt::queue_publish(const std::string & topic, const std::string & payload)
     return queue_publish_message(topic, payload, mqtt_retain_);
 }
 
-// MQTT Publish, using a user's retain flag - except for char * strings
+// MQTT Publish, using a user's retain flag - except for char * strings payload
 bool Mqtt::queue_publish(const char * topic, const char * payload) {
-    return queue_publish_message((topic), payload, mqtt_retain_);
+    return queue_publish_message(topic, payload, mqtt_retain_);
 }
 
-// MQTT Publish, using a specific retain flag, topic is a flash string
+// MQTT Publish, using a user's retain flag - std::string payload
 bool Mqtt::queue_publish(const char * topic, const std::string & payload) {
-    return queue_publish_message((topic), payload, mqtt_retain_);
+    return queue_publish_message(topic, payload, mqtt_retain_);
 }
 
 bool Mqtt::queue_publish(const char * topic, const JsonObjectConst payload) {
@@ -697,7 +697,7 @@ bool Mqtt::queue_publish(const std::string & topic, const JsonObjectConst payloa
 
 // MQTT Publish, using a specific retain flag, topic is a flash string, forcing retain flag
 bool Mqtt::queue_publish_retain(const char * topic, const std::string & payload, const bool retain) {
-    return queue_publish_message((topic), payload, retain);
+    return queue_publish_message(topic, payload, retain);
 }
 
 // publish json doc, only if its not empty, using the retain flag
@@ -1176,8 +1176,11 @@ void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, con
         doc[sc_ha] = F_(measurement);
         break;
     case DeviceValueUOM::WH:
+        // https://github.com/emsesp/EMS-ESP32/issues/1796
         if (entity == FL_(energyToday)[0]) {
             doc[sc_ha] = F_(total_increasing);
+        } else if (entity == FL_(energyLastHour)[0]) {
+            doc[sc_ha] = "total";
         } else {
             doc[sc_ha] = F_(measurement);
         }
