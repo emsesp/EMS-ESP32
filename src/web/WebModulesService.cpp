@@ -74,19 +74,18 @@ void WebModules::read(WebModules & webModules, JsonObject root) {
 // and then apply the enable/disable that is set by the user
 // This function is called when ems-esp boots and also on a save from the Modules web page
 StateUpdateResult WebModules::update(JsonObject root, WebModules & webModules) {
+    bool err = false;
     if (root["modules"].is<JsonArray>()) {
         for (const JsonObject module : root["modules"].as<JsonArray>()) {
             auto key     = module["key"].as<const char *>();
             auto license = module["license"].as<const char *>();
             auto enable  = module["enabled"].as<bool>();
 
-            if (!moduleLibrary.enable(key, license, enable)) {
-                return StateUpdateResult::ERROR; // throw a 400 error
-            }
+            err &= moduleLibrary.enable(key, license, enable);
         }
     }
 
-    return StateUpdateResult::CHANGED;
+    return err ? StateUpdateResult::ERROR : StateUpdateResult::CHANGED;
 }
 
 } // namespace emsesp
