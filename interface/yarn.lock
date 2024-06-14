@@ -2000,7 +2000,7 @@ __metadata:
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"
     "@types/react-router-dom": "npm:^5.3.3"
-    alova: "npm:^2.21.2"
+    alova: "npm:^2.21.3"
     async-validator: "npm:^4.2.5"
     concurrently: "npm:^8.2.2"
     eslint: "npm:^9.4.0"
@@ -2022,7 +2022,7 @@ __metadata:
     typesafe-i18n: "npm:^5.26.2"
     typescript: "npm:^5.4.5"
     typescript-eslint: "npm:^7.13.0"
-    vite: "npm:^5.3.0"
+    vite: "npm:^5.3.1"
     vite-plugin-imagemin: "npm:^0.6.1"
     vite-tsconfig-paths: "npm:^4.3.2"
   languageName: unknown
@@ -2084,10 +2084,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"alova@npm:^2.21.2":
-  version: 2.21.2
-  resolution: "alova@npm:2.21.2"
-  checksum: 10c0/5e0e7e8cc6ac1972798f600c26b2adbc3bef0985d07e545898457cbc3f6b925d4ef0bec4a67c75676e8725da3a3c961d35706cd2553540c87ff891391ca8d25f
+"alova@npm:^2.21.3":
+  version: 2.21.3
+  resolution: "alova@npm:2.21.3"
+  checksum: 10c0/ce03ced33660f15ec667e24df5c7fbeff223dace95a7d50d657dd038f21dc865d8a9290914edbc5a980c8573daa4354ac714f97ae58650ea5b8fefd8fc2d313c
   languageName: node
   linkType: hard
 
@@ -7340,9 +7340,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^5.3.0":
-  version: 5.3.0
-  resolution: "vite@npm:5.3.0"
+"vite@npm:^5.3.1":
+  version: 5.3.1
+  resolution: "vite@npm:5.3.1"
   dependencies:
     esbuild: "npm:^0.21.3"
     fsevents: "npm:~2.3.3"
@@ -7376,7 +7376,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10c0/d07e1a2ce713d3f73cb83f6289c9ff320da5953f37c35edb8c1388d610e8ca1c98edd642d5c3f163f8771dae294d3d430356a09285e344f0de9fa4b058c541f0
+  checksum: 10c0/9317262c02ea2dc324dfdbc20c3c450cd89cc9a16399a41a4bf820a3a1f31cf400878c015135e355ee034853cc2399b5499899d5b1bc462d57642d71083e74b6
   languageName: node
   linkType: hard
 
