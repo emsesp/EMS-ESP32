@@ -614,9 +614,6 @@ void Thermostat::process_RC10Set(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, heatingpid_, 6);
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 // type 0xB2, mode setting Data: 04 00
 // not used, we read mode from monitor 0xB1
 void Thermostat::process_RC10Set_2(std::shared_ptr<const Telegram> telegram) {
@@ -628,8 +625,6 @@ void Thermostat::process_RC10Set_2(std::shared_ptr<const Telegram> telegram) {
     // telegram->read_value(mode, 0);           // 1: nofrost, 2: night, 4: day
     // has_update(hc->mode, mode >> 1);          // store as enum 0, 1, 2
 }
-
-#pragma GCC diagnostic pop
 
 // 0xA8 - for reading the mode from the RC20 thermostat (0x17)
 // RC20Set(0xA8), data: 01 00 FF F6 01 06 00 01 0D 01 00 FF FF 01 02 02 02 00 00 05 1E 05 1E 02 1C 00 FF 00 00 26 02
@@ -1613,7 +1608,7 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
             tm_->tm_isdst = -1;          // determine dst
             ttime         = mktime(tm_); // thermostat time
         }
-        struct timeval newnow = {.tv_sec = ttime};
+        struct timeval newnow = {.tv_sec = ttime, .tv_usec = 0};
         settimeofday(&newnow, nullptr);
         LOG_INFO("ems-esp time set from thermostat");
     }

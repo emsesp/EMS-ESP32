@@ -187,9 +187,6 @@ void Heatpump::process_HPMonitor2(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, airHumidity_, 1);
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 /*
  * Type 0x42B- HeatPump Monitor 1
  * e.g. "38 10 FF 00 03 2B 00 D1 08 2A 01"
@@ -197,8 +194,6 @@ void Heatpump::process_HPMonitor2(std::shared_ptr<const Telegram> telegram) {
 void Heatpump::process_HPMonitor1(std::shared_ptr<const Telegram> telegram) {
     // still to implement
 }
-
-#pragma GCC diagnostic pop
 
 // 0x09A0
 // Heatpump(0x53) -> All(0x00), ?(0x09A0), data: 02 23 01 3E 01 39 00 5D 01 DE 01 38 00 40 00 5E 00 58 00 3F 01 34 00 02
