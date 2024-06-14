@@ -289,7 +289,7 @@ const SystemStatus: FC = () => {
           variant="outlined"
           onClick={restart}
           disabled={processing}
-          color="primary"
+          color="error"
         >
           {LL.RESTART()}
         </Button>
@@ -298,7 +298,7 @@ const SystemStatus: FC = () => {
           variant="outlined"
           onClick={partition}
           disabled={processing}
-          color="primary"
+          color="warning"
         >
           EMS-ESP Loader
         </Button>
