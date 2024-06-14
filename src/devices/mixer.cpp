@@ -154,9 +154,6 @@ void Mixer::process_MMPLUSConfigMessage_HC(std::shared_ptr<const Telegram> teleg
     has_update(telegram, flowTempOffset_, 2); // Mixer increase [0-20 K]
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 // Thermostat(0x10) -> Mixer(0x20), ?(0x2E1), data: 01 1C 64 00 01
 // Thermostat(0x10) -> Mixing Module(0x20), (0x2E1), data: 01 00 00 00 01
 // Thermostat(0x10) -> Mixing Module(0x20), (0x2EB), data: 00
@@ -179,8 +176,6 @@ void Mixer::process_IPMSetMessage(std::shared_ptr<const Telegram> telegram) {
     // pos 0: flowtemp setpoint 1A = 26°C
     // pos 1: pump in %?
 }
-
-#pragma GCC diagnostic pop
 
 bool Mixer::set_flowSetTemp(const char * value, const int8_t id) {
     int v;

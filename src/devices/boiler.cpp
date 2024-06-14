@@ -1730,14 +1730,9 @@ void Boiler::process_UBASetPoints(std::shared_ptr<const Telegram> telegram) {
     }
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 // 0x35 - not yet implemented, not readable, only for settings
 void Boiler::process_UBAFlags(std::shared_ptr<const Telegram> telegram) {
 }
-
-#pragma GCC diagnostic pop
 
 // 0x1C
 // 08 00 1C 94 0B 0A 1D 31 08 00 80 00 00 00 -> message for 29.11.2020
