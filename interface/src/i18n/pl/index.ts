@@ -325,7 +325,10 @@ const pl: BaseTranslation = {
   APPLICATION_SETTINGS_1: 'Modyfikacja ustawień aplikacji EMS-ESP',
   SECURITY_1: 'Dodawanie i usuwanie użytkowników',
   UPLOAD_DOWNLOAD_1: 'Wysyłanie/pobieranie ustawień i firmware',
-  MODULES: 'Moduły'
+  MODULES: 'Module', // TODO translate
+  MODULES_UPDATED: 'Modules updated', // TODO translate
+  MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
+  MODULES_NONE: 'No external modules detected' // TODO translate
 };
 
 export default pl;

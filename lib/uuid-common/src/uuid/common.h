@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// compare_flash_string added by Proddy
+// compare_flash_string added by Proddy for EMS-ESP
 
 #ifndef UUID_COMMON_H_
 #define UUID_COMMON_H_
@@ -102,8 +102,8 @@ void loop();
  */
 uint64_t get_uptime_ms();
 
-uint32_t get_uptime();     
-uint32_t get_uptime_sec(); 
+uint32_t get_uptime();
+uint32_t get_uptime_sec();
 
 void set_uptime();
 

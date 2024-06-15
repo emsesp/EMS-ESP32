@@ -138,10 +138,6 @@ class Mqtt {
         return discovery_prefix_ + "/";
     }
 
-    static void base(const char * base) {
-        mqtt_base_ = base;
-    }
-
     static uint32_t publish_count() {
         return mqtt_message_id_;
     }

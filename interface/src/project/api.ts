@@ -9,6 +9,8 @@ import type {
   Devices,
   Entities,
   EntityItem,
+  ModuleItem,
+  Modules,
   Schedule,
   ScheduleItem,
   SensorData,
@@ -48,6 +50,7 @@ export const writeAnalogSensor = (as: WriteAnalogSensor) =>
 // Activity
 export const readActivity = () => alovaInstance.Get<Activity>('/rest/activity');
 
+// Scan devices
 export const scanDevices = () => alovaInstance.Post('/rest/scanDevices');
 
 // API, used in HelpInformation
@@ -103,6 +106,24 @@ export const readSchedule = () =>
   });
 export const writeSchedule = (data: Schedule) =>
   alovaInstance.Post('/rest/schedule', data);
+
+// Modules
+export const readModules = () =>
+  alovaInstance.Get<ModuleItem[]>('/rest/modules', {
+    name: 'modules',
+    transformData(data) {
+      return (data as Modules).modules.map((mi: ModuleItem) => ({
+        ...mi,
+        o_enabled: mi.enabled,
+        o_license: mi.license
+      }));
+    }
+  });
+export const writeModules = (data: {
+  key: string;
+  enabled: boolean;
+  license: string;
+}) => alovaInstance.Post('/rest/modules', data);
 
 // SettingsEntities
 export const readCustomEntities = () =>

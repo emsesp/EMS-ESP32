@@ -10,7 +10,7 @@ the LICENSE file.
 
 #include <stddef.h>  // size_t
 
-#include "IPAddress.h"
+#include "ClientPosixIPAddress.h"
 
 namespace espMqttClientInternals {
 

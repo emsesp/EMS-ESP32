@@ -10,8 +10,10 @@ import MemoryIcon from '@mui/icons-material/Memory';
 import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import RouterIcon from '@mui/icons-material/Router';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import TimerIcon from '@mui/icons-material/Timer';
+import WifiIcon from '@mui/icons-material/Wifi';
 import {
   Avatar,
   Box,
@@ -38,7 +40,7 @@ import ListMenuItem from 'components/layout/ListMenuItem';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import { busConnectionStatus } from 'project/types';
-import { NTPSyncStatus } from 'types';
+import { NTPSyncStatus, NetworkConnectionStatus } from 'types';
 
 import RestartMonitor from './RestartMonitor';
 
@@ -151,6 +153,46 @@ const SystemStatus: FC = () => {
     }
   };
 
+  const networkStatusHighlight = () => {
+    switch (data.network_status) {
+      case NetworkConnectionStatus.WIFI_STATUS_IDLE:
+      case NetworkConnectionStatus.WIFI_STATUS_DISCONNECTED:
+      case NetworkConnectionStatus.WIFI_STATUS_NO_SHIELD:
+        return theme.palette.info.main;
+      case NetworkConnectionStatus.WIFI_STATUS_CONNECTED:
+      case NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED:
+        return theme.palette.success.main;
+      case NetworkConnectionStatus.WIFI_STATUS_CONNECT_FAILED:
+      case NetworkConnectionStatus.WIFI_STATUS_CONNECTION_LOST:
+        return theme.palette.error.main;
+      default:
+        return theme.palette.warning.main;
+    }
+  };
+
+  const networkStatus = () => {
+    switch (data.network_status) {
+      case NetworkConnectionStatus.WIFI_STATUS_NO_SHIELD:
+        return LL.INACTIVE(1);
+      case NetworkConnectionStatus.WIFI_STATUS_IDLE:
+        return LL.IDLE();
+      case NetworkConnectionStatus.WIFI_STATUS_NO_SSID_AVAIL:
+        return 'No SSID Available';
+      case NetworkConnectionStatus.WIFI_STATUS_CONNECTED:
+        return LL.CONNECTED(0) + ' (WiFi, ' + data.wifi_rssi + ' dBm)';
+      case NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED:
+        return LL.CONNECTED(0) + ' (Ethernet)';
+      case NetworkConnectionStatus.WIFI_STATUS_CONNECT_FAILED:
+        return LL.CONNECTED(1) + ' ' + LL.FAILED(0);
+      case NetworkConnectionStatus.WIFI_STATUS_CONNECTION_LOST:
+        return LL.CONNECTED(1) + ' ' + LL.LOST();
+      case NetworkConnectionStatus.WIFI_STATUS_DISCONNECTED:
+        return LL.DISCONNECTED();
+      default:
+        return LL.UNKNOWN();
+    }
+  };
+
   const activeHighlight = (value: boolean) =>
     value ? theme.palette.success.main : theme.palette.info.main;
 
@@ -247,7 +289,7 @@ const SystemStatus: FC = () => {
           variant="outlined"
           onClick={restart}
           disabled={processing}
-          color="primary"
+          color="error"
         >
           {LL.RESTART()}
         </Button>
@@ -256,7 +298,7 @@ const SystemStatus: FC = () => {
           variant="outlined"
           onClick={partition}
           disabled={processing}
-          color="primary"
+          color="warning"
         >
           EMS-ESP Loader
         </Button>
@@ -296,7 +338,7 @@ const SystemStatus: FC = () => {
               <Button
                 startIcon={<PowerSettingsNewIcon />}
                 variant="outlined"
-                color="primary"
+                color="error"
                 onClick={() => setConfirmRestart(true)}
               >
                 {LL.RESTART()}
@@ -352,6 +394,20 @@ const SystemStatus: FC = () => {
             label={LL.SYSTEM_MEMORY()}
             text={formatNumber(data.free_heap) + ' KB'}
             to="/system/espsystemstatus"
+          />
+          <Divider variant="inset" component="li" />
+
+          <ListMenuItem
+            disabled={!me.admin}
+            icon={
+              data.network_status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED
+                ? WifiIcon
+                : RouterIcon
+            }
+            bgcolor={networkStatusHighlight()}
+            label={LL.STATUS_OF(LL.NETWORK(1))}
+            text={networkStatus()}
+            to="/settings/network/status"
           />
           <Divider variant="inset" component="li" />
 

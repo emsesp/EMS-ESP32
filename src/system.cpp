@@ -45,6 +45,7 @@
 #else // ESP32 Before IDF 4.0
 #include "../rom/rtc.h"
 #endif
+#include <esp_mac.h>
 #endif
 
 namespace emsesp {
@@ -291,7 +292,7 @@ void System::system_restart(const char * partitionname) {
             }
             esp_ota_set_boot_partition(partition);
         }
-        LOG_INFO("Restarting EMS-ESP from partition '%s'", partitionname);
+        LOG_INFO("Restarting EMS-ESP from %s partition", partitionname);
     } else {
         LOG_INFO("Restarting EMS-ESP...");
     }
@@ -963,10 +964,17 @@ void System::show_system(uuid::console::Shell & shell) {
 
     shell.println("System:");
     shell.printfln(" Version: %s", EMSESP_APP_VERSION);
+    shell.printfln(" Platform: %s", EMSESP_PLATFORM);
     shell.printfln(" Language: %s", locale().c_str());
     shell.printfln(" Board profile: %s", board_profile().c_str());
     shell.printfln(" Uptime: %s", uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3).c_str());
 #ifndef EMSESP_STANDALONE
+    // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/misc_system_api.html
+    unsigned char mac_base[6] = {0};
+    esp_efuse_mac_get_default(mac_base);
+    esp_read_mac(mac_base, ESP_MAC_WIFI_STA);
+    shell.printfln(" Base MAC Address: %02X:%02X:%02X:%02X:%02X:%02X", mac_base[0], mac_base[1], mac_base[2], mac_base[3], mac_base[4], mac_base[5]);
+
     shell.printfln(" SDK version: %s", ESP.getSdkVersion());
     shell.printfln(" CPU frequency: %lu MHz", ESP.getCpuFreqMHz());
     shell.printfln(" Free heap/Max alloc: %lu KB / %lu KB", getHeapMem(), getMaxAllocMem());

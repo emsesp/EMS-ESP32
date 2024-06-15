@@ -251,7 +251,6 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     settings.analog_enabled = root["analog_enabled"] | EMSESP_DEFAULT_ANALOG_ENABLED;
     check_flag(prev, settings.analog_enabled, ChangeFlags::ADC);
 
-
     //
     // these need system restarts first before settings are activated...
     //
@@ -294,7 +293,6 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     //
     // without checks or necessary restarts...
     //
-
     settings.trace_raw = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
     EMSESP::trace_raw(settings.trace_raw);
 

@@ -168,14 +168,11 @@ void Water::process_SM100wwStatus2(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, wwPumpMod_, 9);
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 // SM100wwCommand - 0x07AB
 // Thermostat(0x10) -> Solar Module(0x2A), (0x7AB), data: 01 00 01
 void Water::process_SM100wwCommand(std::shared_ptr<const Telegram> telegram) {
     // not implemented yet
 }
-#pragma GCC diagnostic pop
 
 /*
  * MM100 messages

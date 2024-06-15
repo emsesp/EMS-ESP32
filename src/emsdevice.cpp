@@ -1701,7 +1701,7 @@ bool EMSdevice::generate_values(JsonObject output, const int8_t tag_filter, cons
                         char time_s[60];
                         snprintf(time_s,
                                  sizeof(time_s),
-                                 "%d %s %d %s %d %s",
+                                 "%lu %s %lu %s %lu %s",
                                  (time_value / 1440),
                                  Helpers::translated_word(FL_(days)),
                                  ((time_value % 1440) / 60),

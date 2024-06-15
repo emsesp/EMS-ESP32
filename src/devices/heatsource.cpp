@@ -162,9 +162,6 @@ void Heatsource::process_amSettingMessage(std::shared_ptr<const Telegram> telegr
     has_update(telegram, releaseWait_, 15);   // pos 15: Boiler release wait time (min)
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 // 0x054F AM200 not broadcasted message, 7 bytes long
 // Boiler(0x60) -> Me(0x0B), amCommand(0x054F), data: 00 00 00 00 00 00 00
 void Heatsource::process_amCommandMessage(std::shared_ptr<const Telegram> telegram) {
@@ -181,8 +178,6 @@ void Heatsource::process_amExtraMessage(std::shared_ptr<const Telegram> telegram
     has_update(telegram, blockRemain_, 24);   // minutes
     has_update(telegram, blockRemainWw_, 25); // minutes
 }
-
-#pragma GCC diagnostic pop
 
 // Settings AM200
 

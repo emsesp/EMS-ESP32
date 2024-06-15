@@ -65,7 +65,7 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
     setErrorMessage(undefined);
     setDirtyFlags([]);
     setOrigData(data as D);
-    await writeData(data).catch((error: Error) => {
+    await writeData(data as D).catch((error: Error) => {
       if (error.message === 'Reboot required') {
         setRestartNeeded(true);
       } else {

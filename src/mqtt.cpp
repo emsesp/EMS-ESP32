@@ -676,14 +676,14 @@ bool Mqtt::queue_publish(const std::string & topic, const std::string & payload)
     return queue_publish_message(topic, payload, mqtt_retain_);
 }
 
-// MQTT Publish, using a user's retain flag - except for char * strings
+// MQTT Publish, using a user's retain flag - except for char * strings payload
 bool Mqtt::queue_publish(const char * topic, const char * payload) {
-    return queue_publish_message((topic), payload, mqtt_retain_);
+    return queue_publish_message(topic, payload, mqtt_retain_);
 }
 
-// MQTT Publish, using a specific retain flag, topic is a flash string
+// MQTT Publish, using a user's retain flag - std::string payload
 bool Mqtt::queue_publish(const char * topic, const std::string & payload) {
-    return queue_publish_message((topic), payload, mqtt_retain_);
+    return queue_publish_message(topic, payload, mqtt_retain_);
 }
 
 bool Mqtt::queue_publish(const char * topic, const JsonObjectConst payload) {
@@ -697,7 +697,7 @@ bool Mqtt::queue_publish(const std::string & topic, const JsonObjectConst payloa
 
 // MQTT Publish, using a specific retain flag, topic is a flash string, forcing retain flag
 bool Mqtt::queue_publish_retain(const char * topic, const std::string & payload, const bool retain) {
-    return queue_publish_message((topic), payload, retain);
+    return queue_publish_message(topic, payload, retain);
 }
 
 // publish json doc, only if its not empty, using the retain flag
@@ -841,18 +841,23 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
     // build unique identifier also used as object_id which also becomes the Entity ID in HA
     char uniq_id[80];
+
     // list of boiler entities that need conversion for 3.6 compatibility, add ww suffix
+    // used when entity_format is SINGLE_OLD or MULTI_OLD to keep with 3.6.5
+    // see #1714 - https://github.com/emsesp/EMS-ESP32/issues/1714
     const char * dhw_old[] =
         {FL_(nrgWw)[0], FL_(upTimeCompWw)[0], FL_(nrgConsCompWw)[0], FL_(auxElecHeatNrgConsWw)[0], FL_(nrgSuppWw)[0], FL_(wwAltOpPrioWw)[0], FL_(hpCircPumpWw)[0]};
     uint8_t num_dhw_old = sizeof(dhw_old) / sizeof(dhw_old[0]);
+
+    // create the uniq_d based on the entity format
     if (Mqtt::entity_format() == entityFormat::MULTI_SHORT) {
-        // prefix base name to each uniq_id and use the shortname
+        // base name + shortname
         snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
     } else if (Mqtt::entity_format() == entityFormat::SINGLE_SHORT) {
-        // shortname, no mqtt base. This is the default version.
+        // shortname (default)
         snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, entity_with_tag);
     } else if (Mqtt::entity_format() == entityFormat::SINGLE_OLD) {
-        // shortname, remap to 3.6.
+        // shortname, remap to 3.6
         if (has_tag && (device_type == EMSdevice::DeviceType::BOILER || device_type == EMSdevice::DeviceType::THERMOSTAT)
             && tag == DeviceValue::DeviceValueTAG::TAG_DHW1) {
             snprintf(entity_with_tag, sizeof(entity_with_tag), "ww%s", entity);
@@ -872,7 +877,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, entity_with_tag);
         }
     } else if (Mqtt::entity_format() == entityFormat::MULTI_OLD) {
-        // shortname, remap to 3.6.
+        // base name + shortname, remap to 3.6
         if (has_tag && (device_type == EMSdevice::DeviceType::BOILER || device_type == EMSdevice::DeviceType::THERMOSTAT)
             && tag == DeviceValue::DeviceValueTAG::TAG_DHW1) {
             snprintf(entity_with_tag, sizeof(entity_with_tag), "ww%s", entity);
@@ -1176,8 +1181,11 @@ void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, con
         doc[sc_ha] = F_(measurement);
         break;
     case DeviceValueUOM::WH:
+        // https://github.com/emsesp/EMS-ESP32/issues/1796
         if (entity == FL_(energyToday)[0]) {
             doc[sc_ha] = F_(total_increasing);
+        } else if (entity == FL_(energyLastHour)[0]) {
+            doc[sc_ha] = "total";
         } else {
             doc[sc_ha] = F_(measurement);
         }
@@ -1388,19 +1396,17 @@ void Mqtt::add_ha_sections_to_doc(const char *   name,
 
     char tpl[150];
 
+    // make local copy of state, as the pointer will get derefenced
+    char state[50];
+    strcpy(state, state_t);
+
     // skip conditional Jinja2 templates if not home assistant
     if (discovery_type() == discoveryType::HOMEASSISTANT) {
-        // EMS-ESP status check
-        // snprintf(tpl, sizeof(tpl), "%s/status", Mqtt::base().c_str());
-        // avty_json["t"] = tpl;
-        // snprintf(tpl, sizeof(tpl), tpl_draft, "value == 'online'");
-        // avty_json["val_tpl"] = tpl;
-        // avty.add(avty_json); // returns 0 if no mem
         const char * tpl_draft = "{{'online' if %s else 'offline'}}";
 
         // condition 1
         avty_json.clear();
-        avty_json["t"] = state_t;
+        avty_json["t"] = state;
         snprintf(tpl, sizeof(tpl), tpl_draft, cond1 == nullptr ? "value is defined" : cond1);
         avty_json["val_tpl"] = tpl;
         avty.add(avty_json); // returns 0 if no mem
@@ -1408,7 +1414,7 @@ void Mqtt::add_ha_sections_to_doc(const char *   name,
         // condition 2
         if (cond2 != nullptr) {
             avty_json.clear();
-            avty_json["t"] = state_t;
+            avty_json["t"] = state;
             snprintf(tpl, sizeof(tpl), tpl_draft, cond2);
             avty_json["val_tpl"] = tpl;
             avty.add(avty_json); // returns 0 if no mem
@@ -1417,7 +1423,7 @@ void Mqtt::add_ha_sections_to_doc(const char *   name,
         // negative condition
         if (negcond != nullptr) {
             avty_json.clear();
-            avty_json["t"] = state_t;
+            avty_json["t"] = state;
             snprintf(tpl, sizeof(tpl), "{{'offline' if %s else 'online'}}", negcond);
             avty_json["val_tpl"] = tpl;
             avty.add(avty_json); // returns 0 if no mem

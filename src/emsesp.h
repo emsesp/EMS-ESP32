@@ -49,6 +49,7 @@
 #include "web/WebAPIService.h"
 #include "web/WebLogService.h"
 #include "web/WebCustomEntityService.h"
+#include "web/WebModulesService.h"
 
 #include "emsdevicevalue.h"
 #include "emsdevice.h"
@@ -64,6 +65,10 @@
 #include "roomcontrol.h"
 #include "command.h"
 #include "version.h"
+
+// Load external modules
+class Module {}; // forward declaration
+#include <ModuleLibrary.h>
 
 #define WATCH_ID_NONE 0 // no watch id set
 
@@ -230,6 +235,7 @@ class EMSESP {
     static WebCustomizationService webCustomizationService;
     static WebSchedulerService     webSchedulerService;
     static WebCustomEntityService  webCustomEntityService;
+    static WebModulesService       webModulesService;
 
   private:
     static std::string device_tostring(const uint8_t device_id);
@@ -275,7 +281,6 @@ class EMSESP {
 #endif
 
   protected:
-    //  EMSESP();
     static uuid::log::Logger logger_;
 };
 

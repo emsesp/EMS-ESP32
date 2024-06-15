@@ -145,7 +145,7 @@ const UploadDownload: FC = () => {
   onGetAPI((event) => {
     saveFile(
       event.data,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
       event.sendArgs[0].device + '_' + event.sendArgs[0].entity + '.txt'
     );
   });

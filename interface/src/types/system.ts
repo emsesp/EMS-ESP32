@@ -1,5 +1,7 @@
 import type { busConnectionStatus } from 'project/types';
 
+import type { NetworkConnectionStatus } from './network';
+
 export interface ESPSystemStatus {
   emsesp_version: string;
   esp_platform: string;
@@ -37,6 +39,8 @@ export interface SystemStatus {
   ntp_status: number;
   mqtt_status: boolean;
   ap_status: boolean;
+  network_status: NetworkConnectionStatus;
+  wifi_rssi: number;
 }
 
 export enum LogLevel {

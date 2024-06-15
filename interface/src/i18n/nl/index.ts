@@ -325,7 +325,10 @@ const nl: Translation = {
   APPLICATION_SETTINGS_1: 'Applicatie-instellingen wijzigen',
   SECURITY_1: 'Gebruikers toevoegen of verwijderen',
   UPLOAD_DOWNLOAD_1: 'Upload-/downloadinstellingen en firmware',
-  MODULES: 'Modules'
+  MODULES: 'Module',
+  MODULES_UPDATED: 'Modules geüpdatet', 
+  MODULES_DESCRIPTION: 'Klik op de module om EMS-ESP library modules te activeren of te deactiveren',
+  MODULES_NONE: 'Geen externe modules gedetecteerd'
 };
 
 export default nl;

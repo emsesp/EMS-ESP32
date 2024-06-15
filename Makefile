@@ -29,8 +29,7 @@ CHECKFLAGS = -q --force --std=c++11
 # Languages Standard
 #----------------------------------------------------------------------
 C_STANDARD   := -std=c17
-# CXX_STANDARD := -std=c++17
-CXX_STANDARD := -std=gnu++11
+CXX_STANDARD := -std=gnu++14
 
 # C_STANDARD   := -std=c11
 # CXX_STANDARD := -std=c++11
@@ -38,7 +37,7 @@ CXX_STANDARD := -std=gnu++11
 #----------------------------------------------------------------------
 # Defined Symbols
 #----------------------------------------------------------------------
-DEFINES += -DARDUINOJSON_ENABLE_STD_STRING=1 -DARDUINOJSON_ENABLE_PROGMEM=1 -DARDUINOJSON_ENABLE_ARDUINO_STRING -DARDUINOJSON_USE_DOUBLE=0
+DEFINES += -DARDUINOJSON_ENABLE -DARDUINOJSON_ENABLE_ARDUINO_STRING -DARDUINOJSON_USE_DOUBLE=0
 DEFINES += -DEMSESP_DEBUG -DEMSESP_STANDALONE -DEMSESP_TEST -D__linux__ -DEMC_RX_BUFFER_SIZE=1500
 DEFINES += $(ARGS)
 

@@ -1186,7 +1186,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::mqtt_.incoming("ems-esp/thermostat/mode/auto", "auto"); // invalid, not allowed
 
         // check extended MQTT base
-        Mqtt::base("home/cellar/heating");
+        // Mqtt::base("home/cellar/heating");
         EMSESP::mqtt_.incoming("home/cellar/heating/thermostat/mode"); // empty payload
 
         // Web API TESTS
