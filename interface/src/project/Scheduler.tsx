@@ -87,7 +87,7 @@ const Scheduler: FC = () => {
 
   const schedule_theme = useTheme({
     Table: `
-      --data-table-library_grid-template-columns: 36px 324px 50px 192px repeat(1, minmax(100px, 1fr)) 160px;
+      --data-table-library_grid-template-columns: 36px 210px 100px 192px repeat(1, minmax(100px, 1fr)) 160px;
     `,
     BaseRow: `
       font-size: 14px;
@@ -198,7 +198,7 @@ const Scheduler: FC = () => {
       active: false,
       deleted: false,
       flags: 0,
-      time: '12:00',
+      time: '',
       cmd: '',
       value: '',
       name: ''
@@ -216,11 +216,21 @@ const Scheduler: FC = () => {
         <Box>
           <Typography
             sx={{ fontSize: 11 }}
-            color={(si.flags & flag) === flag ? 'primary' : 'grey'}
+            color={
+              si.flags >= ScheduleFlag.SCHEDULE_TIMER && si.flags !== flag
+                ? 'gray'
+                : (si.flags & flag) === flag
+                  ? 'primary'
+                  : 'grey'
+            }
           >
             {flag === ScheduleFlag.SCHEDULE_TIMER
               ? LL.TIMER(0)
-              : dow[Math.log(flag) / Math.log(2)]}
+              : flag === ScheduleFlag.SCHEDULE_ONCHANGE
+                ? 'OnChange'
+                : flag === ScheduleFlag.SCHEDULE_CONDITION
+                  ? 'Condition'
+                  : dow[Math.log(flag) / Math.log(2)]}
           </Typography>
         </Box>
         <Divider orientation="vertical" flexItem />
@@ -245,7 +255,7 @@ const Scheduler: FC = () => {
               <HeaderRow>
                 <HeaderCell />
                 <HeaderCell stiff>{LL.SCHEDULE(0)}</HeaderCell>
-                <HeaderCell stiff>{LL.TIME(0)}</HeaderCell>
+                <HeaderCell stiff>{LL.TIME(0)}/Cond.</HeaderCell>
                 <HeaderCell stiff>{LL.COMMAND(0)}</HeaderCell>
                 <HeaderCell stiff>{LL.VALUE(0)}</HeaderCell>
                 <HeaderCell stiff>{LL.NAME(0)}</HeaderCell>
@@ -268,16 +278,25 @@ const Scheduler: FC = () => {
                     )}
                   </Cell>
                   <Cell stiff>
-                    <Stack spacing={1} direction="row">
+                    <Stack spacing={0.5} direction="row">
                       <Divider orientation="vertical" flexItem />
-                      {dayBox(si, ScheduleFlag.SCHEDULE_MON)}
-                      {dayBox(si, ScheduleFlag.SCHEDULE_TUE)}
-                      {dayBox(si, ScheduleFlag.SCHEDULE_WED)}
-                      {dayBox(si, ScheduleFlag.SCHEDULE_THU)}
-                      {dayBox(si, ScheduleFlag.SCHEDULE_FRI)}
-                      {dayBox(si, ScheduleFlag.SCHEDULE_SAT)}
-                      {dayBox(si, ScheduleFlag.SCHEDULE_SUN)}
-                      {dayBox(si, ScheduleFlag.SCHEDULE_TIMER)}
+                      {si.flags < ScheduleFlag.SCHEDULE_TIMER ? (
+                        <>
+                          {dayBox(si, ScheduleFlag.SCHEDULE_MON)}
+                          {dayBox(si, ScheduleFlag.SCHEDULE_TUE)}
+                          {dayBox(si, ScheduleFlag.SCHEDULE_WED)}
+                          {dayBox(si, ScheduleFlag.SCHEDULE_THU)}
+                          {dayBox(si, ScheduleFlag.SCHEDULE_FRI)}
+                          {dayBox(si, ScheduleFlag.SCHEDULE_SAT)}
+                          {dayBox(si, ScheduleFlag.SCHEDULE_SUN)}
+                        </>
+                      ) : (
+                        <>
+                          {dayBox(si, ScheduleFlag.SCHEDULE_TIMER)}
+                          {dayBox(si, ScheduleFlag.SCHEDULE_ONCHANGE)}
+                          {dayBox(si, ScheduleFlag.SCHEDULE_CONDITION)}
+                        </>
+                      )}
                     </Stack>
                   </Cell>
                   <Cell>{si.time}</Cell>
@@ -341,7 +360,7 @@ const Scheduler: FC = () => {
             <Button
               startIcon={<AddIcon />}
               variant="outlined"
-              color="secondary"
+              color="primary"
               onClick={addScheduleItem}
             >
               {LL.ADD(0)}

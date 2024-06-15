@@ -441,6 +441,9 @@ void TemperatureSensor::publish_sensor(const Sensor & sensor) {
         char payload[10];
         Mqtt::queue_publish(topic, Helpers::render_value(payload, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
     }
+    char cmd[COMMAND_MAX_LENGTH];
+    snprintf(cmd, sizeof(cmd), "%s/%s", F_(temperaturesensor), sensor.name().c_str());
+    EMSESP::webSchedulerService.onChange(cmd);
 }
 
 // send empty config topic to remove the entry from HA

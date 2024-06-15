@@ -105,6 +105,10 @@ const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
     switch (device_type) {
     case DeviceType::SYSTEM:
         return F_(system);
+    case DeviceType::TEMPERATURESENSOR:
+        return F_(temperaturesensor);
+    case DeviceType::ANALOGSENSOR:
+        return F_(analogsensor);
     case DeviceType::SCHEDULER:
         return F_(scheduler);
     case DeviceType::CUSTOM:
@@ -113,28 +117,26 @@ const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
         return F_(boiler);
     case DeviceType::THERMOSTAT:
         return F_(thermostat);
-    case DeviceType::HEATPUMP:
-        return F_(heatpump);
-    case DeviceType::SOLAR:
-        return F_(solar);
-    case DeviceType::CONNECT:
-        return F_(connect);
     case DeviceType::MIXER:
         return F_(mixer);
-    case DeviceType::TEMPERATURESENSOR:
-        return F_(temperaturesensor);
-    case DeviceType::ANALOGSENSOR:
-        return F_(analogsensor);
-    case DeviceType::CONTROLLER:
-        return F_(controller);
-    case DeviceType::SWITCH:
-        return F_(switch);
+    case DeviceType::SOLAR:
+        return F_(solar);
+    case DeviceType::HEATPUMP:
+        return F_(heatpump);
     case DeviceType::GATEWAY:
         return F_(gateway);
+    case DeviceType::SWITCH:
+        return F_(switch);
+    case DeviceType::CONTROLLER:
+        return F_(controller);
+    case DeviceType::CONNECT:
+        return F_(connect);
     case DeviceType::ALERT:
         return F_(alert);
     case DeviceType::EXTENSION:
         return F_(extension);
+    case DeviceType::GENERIC:
+        return F_(generic);
     case DeviceType::HEATSOURCE:
         return F_(heatsource);
     case DeviceType::VENTILATION:
@@ -752,7 +754,8 @@ void EMSdevice::set_minmax(const void * value_p, int16_t min, uint32_t max) {
 
 // publish a single value on change
 void EMSdevice::publish_value(void * value_p) const {
-    if (!Mqtt::publish_single() || value_p == nullptr) {
+    // if (!Mqtt::publish_single() || value_p == nullptr) {
+    if (value_p == nullptr) {
         return;
     }
 
@@ -820,9 +823,17 @@ void EMSdevice::publish_value(void * value_p) const {
                 break;
             }
 
-            if (payload[0] != '\0') {
+            if (Mqtt::publish_single() && payload[0] != '\0') {
                 Mqtt::queue_publish(topic, payload);
             }
+            // check scheduler for on change
+            char cmd[COMMAND_MAX_LENGTH];
+            if (dv.tag >= DeviceValueTAG::TAG_HC1) {
+                snprintf(cmd, sizeof(cmd), "%s/%s/%s", device_type_2_device_name(device_type_), tag_to_mqtt(dv.tag), dv.short_name);
+            } else {
+                snprintf(cmd, sizeof(cmd), "%s/%s", device_type_2_device_name(device_type_), (dv.short_name));
+            }
+            EMSESP::webSchedulerService.onChange(cmd);
         }
     }
 }
