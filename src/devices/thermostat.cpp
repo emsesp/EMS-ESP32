@@ -487,7 +487,7 @@ uint8_t Thermostat::HeatingCircuit::get_mode() const {
         } else if (mode == 1) {
             return HeatingCircuit::Mode::OFF;
         }
-    } else if (model == EMSdevice::EMS_DEVICE_FLAG_BC400) {
+    } else if (model == EMSdevice::EMS_DEVICE_FLAG_BC400 || model == EMSdevice::EMS_DEVICE_FLAG_CR120) {
         if (mode == 0) {
             return HeatingCircuit::Mode::OFF;
         } else if (mode == 1) {
@@ -495,8 +495,7 @@ uint8_t Thermostat::HeatingCircuit::get_mode() const {
         } else if (mode == 2) {
             return HeatingCircuit::Mode::AUTO;
         }
-    } else if ((model == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model == EMSdevice::EMS_DEVICE_FLAG_R3000) || (model == EMSdevice::EMS_DEVICE_FLAG_BC400)
-               || (model == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
+    } else if ((model == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model == EMSdevice::EMS_DEVICE_FLAG_R3000) || (model == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
         if (mode == 0) {
             return HeatingCircuit::Mode::MANUAL;
         } else if (mode == 1) {
@@ -554,7 +553,7 @@ uint8_t Thermostat::HeatingCircuit::get_mode_type() const {
         } else if (modetype == 1) {
             return HeatingCircuit::Mode::COMFORT;
         }
-    } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC100) {
+    } else if (model == EMSdevice::EMS_DEVICE_FLAG_RC100 || model == EMSdevice::EMS_DEVICE_FLAG_CR120) {
         return HeatingCircuit::Mode::DAY; // no other modes on these devices
     }
 
@@ -1088,25 +1087,11 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     // has_update(telegram, hc->selTemp, 8, 1);  // single byte conversion, value is * 2 - auto?
     // has_update(telegram, hc->selTemp, 10, 1); // single byte conversion, value is * 2 - manual
 
-    has_update(telegram, hc->mode_new, 21); // for BC400
-    // set mode for CR120, https://github.com/emsesp/EMS-ESP32/discussions/1779
-    if (Helpers::hasValue(hc->mode_new)) {
-        has_update(hc->mode, hc->mode_new == 2 ? 1 : 0);
-    } else {
-        has_bitupdate(telegram, hc->mode, 0, 0); // RC300, RC100
-    }
-    /*
-    telegram->read_value(hc->mode_new, 21); // 0-off, 1-manual, 2-auto
-    if (Helpers::hasValue(hc->mode_new)) {
-        has_update(hc->mode, hc->mode_new);
-    } else {
-        uint8_t mode = hc->mode == 2 ? 0xFF : 0; // auto : manual
-        telegram->read_value(mode, 0);
-        has_update(hc->mode, mode == 0xFF ? 2 : 1);
-    }
-    */
-    has_update(telegram, hc->daytemp, 2);   // is * 2
-    has_update(telegram, hc->nighttemp, 4); // is * 2
+    // set mode for CR120, BC400, https://github.com/emsesp/EMS-ESP32/discussions/1779
+    has_update(telegram, hc->mode_new, 21);  // for BC400, CR120
+    has_bitupdate(telegram, hc->mode, 0, 0); // RC300, RC100
+    has_update(telegram, hc->daytemp, 2);    // is * 2
+    has_update(telegram, hc->nighttemp, 4);  // is * 2
 
     // has_update(telegram, hc->tempautotemp, 8); // is * 2
     // manipulate tempautotemp to show -1°C (with scale 0.5°C) if value is 0xFF
@@ -1229,6 +1214,12 @@ void Thermostat::process_RC300WWmode(std::shared_ptr<const Telegram> telegram) {
         uint8_t       wwmode  = dhw->wwMode_ < sizeof(modes) ? modes[dhw->wwMode_] : EMS_VALUE_UINT8_NOTSET;
         telegram->read_value(wwmode, 2);
         const uint8_t modes1[] = {0, 0, 1, 0, 0, 2}; // 0=normal (1), 1=comfort(2), 2=eco+(5)
+        has_update(dhw->wwMode_, wwmode < sizeof(modes1) ? modes1[wwmode] : EMS_VALUE_UINT8_NOTSET);
+    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_CR120) {
+        const uint8_t modes[] = {1, 2, 4}; //// 0=normal (1), 1=comfort(2), 2=auto(4)
+        uint8_t       wwmode  = dhw->wwMode_ < sizeof(modes) ? modes[dhw->wwMode_] : EMS_VALUE_UINT8_NOTSET;
+        telegram->read_value(wwmode, 2);
+        const uint8_t modes1[] = {0, 0, 1, 0, 2, 0};
         has_update(dhw->wwMode_, wwmode < sizeof(modes1) ? modes1[wwmode] : EMS_VALUE_UINT8_NOTSET);
     } else {
         has_update(telegram, dhw->wwMode_, 2); // 0=off, 1=low, 2=high, 3=auto, 4=own prog
@@ -2099,10 +2090,16 @@ bool Thermostat::set_wwmode(const char * value, const int8_t id) {
         }
         write_command(0xB0, 2, set, 0xB0);
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400) {
-        if (!Helpers::value2enum(value, set, FL_(enum_wwMode4))) {
+        if (!Helpers::value2enum(value, set, FL_(enum_wwMode4))) { // off, eco+, eco, comfort, auto
             return false;
         }
         const uint8_t modes[] = {0, 5, 1, 2, 4};
+        write_command(0x02F5 + dhw, 2, modes[set], 0x02F5 + dhw);
+    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_CR120) {
+        if (!Helpers::value2enum(value, set, FL_(enum_wwMode6))) { // normal, comfort, auto
+            return false;
+        }
+        const uint8_t modes[] = {0, 2, 4};
         write_command(0x02F5 + dhw, 2, modes[set], 0x02F5 + dhw);
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) { // Rego3000 - https://github.com/emsesp/EMS-ESP32/issues/1692
         if (!Helpers::value2enum(value, set, FL_(enum_wwMode5))) {
@@ -2686,6 +2683,7 @@ bool Thermostat::set_mode(const char * value, const int8_t id) {
         mode_list = FL_(enum_mode3);
         break;
     case EMSdevice::EMS_DEVICE_FLAG_BC400:
+    case EMSdevice::EMS_DEVICE_FLAG_CR120:
         mode_list = FL_(enum_mode2);
         break;
     case EMSdevice::EMS_DEVICE_FLAG_RC300:
@@ -2810,19 +2808,14 @@ bool Thermostat::set_mode_n(const uint8_t mode, const int8_t id) {
         offset = EMS_OFFSET_RC35Set_mode;
         break;
     case EMSdevice::EMS_DEVICE_FLAG_BC400:
+    case EMSdevice::EMS_DEVICE_FLAG_CR120:
         offset = EMS_OFFSET_RCPLUSSet_mode_new;
         break;
     case EMSdevice::EMS_DEVICE_FLAG_RC300:
     case EMSdevice::EMS_DEVICE_FLAG_RC100:
     case EMSdevice::EMS_DEVICE_FLAG_R3000:
-        // CR120, https://github.com/emsesp/EMS-ESP32/discussions/1779
-        if (Helpers::hasValue(hc->mode_new)) {
-            offset         = EMS_OFFSET_RCPLUSSet_mode_new;
-            set_mode_value = set_mode_value == 2 ? 2 : 1;
-        } else {
-            offset         = EMS_OFFSET_RCPLUSSet_mode;
-            set_mode_value = set_mode_value == 2 ? 0xFF : 0;
-        }
+        offset         = EMS_OFFSET_RCPLUSSet_mode;
+        set_mode_value = set_mode_value == 2 ? 0xFF : 0;
         break;
     case EMSdevice::EMS_DEVICE_FLAG_JUNKERS:
         if (has_flags(EMSdevice::EMS_DEVICE_FLAG_JUNKERS_OLD)) {
@@ -2853,7 +2846,7 @@ bool Thermostat::set_mode_n(const uint8_t mode, const int8_t id) {
     // set hc->mode temporary until validate is received
     if (model_ == EMSdevice::EMS_DEVICE_FLAG_RC10) {
         hc->mode = set_mode_value >> 1;
-    } else if (model_ == EMSdevice::EMS_DEVICE_FLAG_BC400) {
+    } else if (model_ == EMSdevice::EMS_DEVICE_FLAG_BC400 || model_ == EMSdevice::EMS_DEVICE_FLAG_CR120) {
         hc->mode_new = set_mode_value;
     } else if (model_ == EMSdevice::EMS_DEVICE_FLAG_RC300 || model_ == EMSdevice::EMS_DEVICE_FLAG_R3000 || model_ == EMSdevice::EMS_DEVICE_FLAG_RC100) {
         hc->mode = set_mode_value == 0xFF ? 1 : 0;
@@ -3133,7 +3126,7 @@ bool Thermostat::set_controlmode(const char * value, const int8_t id) {
             write_command(set_typeids[hc->hc()], 0, set, set_typeids[hc->hc()]);
             return true;
         }
-    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
+    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100 || model() == EMSdevice::EMS_DEVICE_FLAG_CR120) {
         if (Helpers::value2enum(value, set, FL_(enum_controlmode))) {
             write_command(curve_typeids[hc->hc()], 0, set + 1, curve_typeids[hc->hc()]);
             return true;
@@ -3552,7 +3545,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             factor          = 1;
             break;
         case HeatingCircuit::Mode::MANUAL:
-            if (Helpers::hasValue(hc->mode_new)) {
+            if (model == EMSdevice::EMS_DEVICE_FLAG_CR120) {
                 offset = 22; // manual offset CR120
             } else {
                 offset = 10; // manual offset
@@ -3629,7 +3622,7 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             break;
         default: // seltemp
             uint8_t mode_ = hc->get_mode();
-            if (Helpers::hasValue(hc->mode_new) && mode_ == HeatingCircuit::Mode::MANUAL) {
+            if (model == EMSdevice::EMS_DEVICE_FLAG_CR120 && mode_ == HeatingCircuit::Mode::MANUAL) {
                 offset = 22; // manual offset CR120
             } else if (mode_ == HeatingCircuit::Mode::MANUAL) {
                 offset = 10; // manual offset
@@ -3922,6 +3915,7 @@ void Thermostat::register_device_values() {
     case EMSdevice::EMS_DEVICE_FLAG_RC300:
     case EMSdevice::EMS_DEVICE_FLAG_R3000:
     case EMSdevice::EMS_DEVICE_FLAG_BC400:
+    case EMSdevice::EMS_DEVICE_FLAG_CR120:
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &dateTime_,
                               DeviceValueType::STRING,
@@ -4348,10 +4342,10 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
     case EMSdevice::EMS_DEVICE_FLAG_RC300:
     case EMSdevice::EMS_DEVICE_FLAG_R3000:
     case EMSdevice::EMS_DEVICE_FLAG_BC400:
-        if (model == EMSdevice::EMS_DEVICE_FLAG_BC400) {
+    case EMSdevice::EMS_DEVICE_FLAG_CR120:
+        if (model == EMSdevice::EMS_DEVICE_FLAG_BC400 || model == EMSdevice::EMS_DEVICE_FLAG_CR120) {
             register_device_value(tag, &hc->mode_new, DeviceValueType::ENUM, FL_(enum_mode2), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
         } else {
-            hc->mode_new = EMS_VALUE_UINT8_NOTSET;
             register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
         }
         register_device_value(tag, &hc->modetype, DeviceValueType::ENUM, FL_(enum_modetype), FL_(modetype), DeviceValueUOM::NONE);
@@ -4397,7 +4391,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               MAKE_CF_CB(set_summermode));
         register_device_value(tag, &hc->summermode, DeviceValueType::ENUM, FL_(enum_summer), FL_(summermode), DeviceValueUOM::NONE);
         register_device_value(tag, &hc->hpoperatingstate, DeviceValueType::ENUM, FL_(enum_operatingstate), FL_(hpoperatingstate), DeviceValueUOM::NONE);
-        if (model == EMSdevice::EMS_DEVICE_FLAG_RC100) {
+        if (model == EMSdevice::EMS_DEVICE_FLAG_RC100 || model == EMSdevice::EMS_DEVICE_FLAG_CR120) {
             register_device_value(
                 tag, &hc->controlmode, DeviceValueType::ENUM, FL_(enum_controlmode), FL_(controlmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_controlmode));
         } else {
@@ -4740,10 +4734,13 @@ void Thermostat::register_device_values_dhw(std::shared_ptr<Thermostat::DhwCircu
     case EMSdevice::EMS_DEVICE_FLAG_RC300:
     case EMSdevice::EMS_DEVICE_FLAG_R3000:
     case EMSdevice::EMS_DEVICE_FLAG_BC400:
+    case EMSdevice::EMS_DEVICE_FLAG_CR120:
         if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400) {
             register_device_value(tag, &dhw->wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode4), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));
         } else if (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) {
             register_device_value(tag, &dhw->wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode5), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));
+        } else if (model() == EMSdevice::EMS_DEVICE_FLAG_CR120) {
+            register_device_value(tag, &dhw->wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode6), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));
         } else {
             register_device_value(tag, &dhw->wwMode_, DeviceValueType::ENUM, FL_(enum_wwMode), FL_(wwMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwmode));
         }
