@@ -1232,7 +1232,11 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     if (device_id >= EMSdevice::EMS_DEVICE_ID_DHW1 && device_id <= EMSdevice::EMS_DEVICE_ID_DHW8) {
         device_type = DeviceType::WATER;
     }
-
+    // CR120 have version 22.xx, RC400/CW100 uses version 42.xx, see https://github.com/emsesp/EMS-ESP32/discussions/1779
+    if (product_id == 157 && version[0] == '2') {
+        flags = DeviceFlags::EMS_DEVICE_FLAG_CR120;
+        name  = "CR120";
+    }
     // empty reply to version, read a generic device from database
     if (product_id == 0) {
         // check for known device IDs
