@@ -220,7 +220,8 @@ class Thermostat : public EMSdevice {
 
     // check to see if the thermostat is a hybrid of the R300
     inline bool isRC300() const {
-        return ((model() == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) || (model() == EMSdevice::EMS_DEVICE_FLAG_BC400));
+        return ((model() == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) || (model() == EMSdevice::EMS_DEVICE_FLAG_BC400)
+                || (model() == EMSdevice::EMS_DEVICE_FLAG_CR120));
     }
 
     inline uint8_t id2dhw(const int8_t id) const {
