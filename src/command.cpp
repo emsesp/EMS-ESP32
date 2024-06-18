@@ -437,6 +437,19 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, const ui
     return nullptr; // command not found
 }
 
+void Command::erase_device_commands(const uint8_t device_type) {
+    if (cmdfunctions_.empty()) {
+        return;
+    }
+    auto it = cmdfunctions_.end();
+    do {
+        int i = it - cmdfunctions_.begin();
+        if (cmdfunctions_[i].device_type_==device_type) {
+            cmdfunctions_.erase(it);
+        }
+    } while (it-- > cmdfunctions_.begin());
+}
+
 void Command::erase_command(const uint8_t device_type, const char * cmd, uint8_t flag) {
     if ((cmd == nullptr) || (strlen(cmd) == 0) || (cmdfunctions_.empty())) {
         return;

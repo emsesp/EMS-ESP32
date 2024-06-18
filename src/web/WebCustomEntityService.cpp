@@ -34,6 +34,8 @@ WebCustomEntityService::WebCustomEntityService(AsyncWebServer * server, FS * fs,
 // load the settings when the service starts
 void WebCustomEntityService::begin() {
     _fsPersistence.readFromFS();
+    // save a local pointer to the item list
+    EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems_ = &webEntity.customEntityItems; });
     EMSESP::logger().info("Starting Custom Entity service");
     Mqtt::subscribe(EMSdevice::DeviceType::CUSTOM, "custom/#", nullptr); // use empty function callback
 }
@@ -63,9 +65,7 @@ void WebCustomEntity::read(WebCustomEntity & webEntity, JsonObject root) {
 // this loads the data into the internal class
 StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & webCustomEntity) {
     // reset everything to start fresh
-    for (CustomEntityItem & entityItem : webCustomEntity.customEntityItems) {
-        Command::erase_command(EMSdevice::DeviceType::CUSTOM, entityItem.name.c_str());
-    }
+    Command::erase_device_commands(EMSdevice::DeviceType::CUSTOM);
     webCustomEntity.customEntityItems.clear();
     EMSESP::webCustomEntityService.ha_reset();
 
@@ -112,12 +112,12 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
 
             webCustomEntity.customEntityItems.push_back(entityItem); // add to list
 
-            if (entityItem.writeable) {
+            if (webCustomEntity.customEntityItems.back().writeable && !webCustomEntity.customEntityItems.back().name.empty()) {
                 Command::add(
                     EMSdevice::DeviceType::CUSTOM,
                     webCustomEntity.customEntityItems.back().name.c_str(),
                     [webCustomEntity](const char * value, const int8_t id) {
-                        return EMSESP::webCustomEntityService.command_setvalue(value, webCustomEntity.customEntityItems.back().name);
+                        return EMSESP::webCustomEntityService.command_setvalue(value, id, webCustomEntity.customEntityItems.back().name.c_str());
                     },
                     FL_(entity_cmd),
                     CommandFlag::ADMIN_ONLY);
@@ -128,9 +128,8 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
 }
 
 // set value by api command
-bool WebCustomEntityService::command_setvalue(const char * value, const std::string name) {
-    EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
-    for (CustomEntityItem & entityItem : *customEntityItems) {
+bool WebCustomEntityService::command_setvalue(const char * value, const int8_t id, const char * name) {
+    for (CustomEntityItem & entityItem : *customEntityItems_) {
         if (Helpers::toLower(entityItem.name) == Helpers::toLower(name)) {
             if (entityItem.ram == 1) {
                 entityItem.data = value;
@@ -249,20 +248,18 @@ void WebCustomEntityService::render_value(JsonObject output, CustomEntityItem en
 // display all custom entities
 // adding each one, with UOM to a json object string
 void WebCustomEntityService::show_values(JsonObject output) {
-    for (const CustomEntityItem & entity : *customEntityItems) {
+    for (const CustomEntityItem & entity : *customEntityItems_) {
         render_value(output, entity, false, false, true); // with add_uom
     }
 }
 
 // process json output for info/commands and value_info
 bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd) {
-    EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
-
     // if it's commands...
     if (Helpers::toLower(cmd) == F_(commands)) {
         output[F_(info)]     = Helpers::translated_word(FL_(info_cmd));
         output[F_(commands)] = Helpers::translated_word(FL_(commands_cmd));
-        for (const auto & entity : *customEntityItems) {
+        for (const auto & entity : *customEntityItems_) {
             output[entity.name] = "custom entity";
         }
         return true;
@@ -270,14 +267,14 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
 
     // if no entries, return empty json
     // https://github.com/emsesp/EMS-ESP32/issues/1297
-    if (customEntityItems->size() == 0) {
+    if (customEntityItems_->size() == 0) {
         return true;
     }
 
     // if it's info or values...
     if (strlen(cmd) == 0 || Helpers::toLower(cmd) == F_(values) || Helpers::toLower(cmd) == F_(info)) {
         // list all names
-        for (const CustomEntityItem & entity : *customEntityItems) {
+        for (const CustomEntityItem & entity : *customEntityItems_) {
             render_value(output, entity);
         }
         return true;
@@ -293,7 +290,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
         attribute_s = breakp + 1;
     }
 
-    for (const auto & entity : *customEntityItems) {
+    for (const auto & entity : *customEntityItems_) {
         if (Helpers::toLower(entity.name) == command_s) {
             output["name"] = entity.name;
             output["ram"]  = entity.ram;
@@ -370,12 +367,11 @@ void WebCustomEntityService::publish(const bool force) {
         return;
     }
 
-    EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
-    if (customEntityItems->size() == 0) {
+    if (customEntityItems_->size() == 0) {
         return;
     }
     if (Mqtt::publish_single() && force) {
-        for (const CustomEntityItem & entityItem : *customEntityItems) {
+        for (const CustomEntityItem & entityItem : *customEntityItems_) {
             publish_single(entityItem);
         }
     }
@@ -384,7 +380,7 @@ void WebCustomEntityService::publish(const bool force) {
     JsonObject   output     = doc.to<JsonObject>();
     bool         ha_created = ha_registered_;
 
-    for (const CustomEntityItem & entityItem : *customEntityItems) {
+    for (const CustomEntityItem & entityItem : *customEntityItems_) {
         render_value(output, entityItem);
         // create HA config
         if (Mqtt::ha_enabled() && !ha_registered_) {
@@ -461,15 +457,14 @@ void WebCustomEntityService::publish(const bool force) {
 
 // count only entities with valid value or command to show in dashboard
 uint8_t WebCustomEntityService::count_entities() {
-    EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
-    if (customEntityItems->size() == 0) {
+    if (customEntityItems_->size() == 0) {
         return 0;
     }
 
     JsonDocument doc;
     JsonObject   output = doc.to<JsonObject>();
     uint8_t      count  = 0;
-    for (const CustomEntityItem & entity : *customEntityItems) {
+    for (const CustomEntityItem & entity : *customEntityItems_) {
         render_value(output, entity);
         count += (output.containsKey(entity.name) || entity.writeable) ? 1 : 0;
     }
@@ -478,9 +473,8 @@ uint8_t WebCustomEntityService::count_entities() {
 }
 
 uint8_t WebCustomEntityService::has_commands() {
-    EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
     uint8_t count = 0;
-    for (const CustomEntityItem & entity : *customEntityItems) {
+    for (const CustomEntityItem & entity : *customEntityItems_) {
         count += entity.writeable ? 1 : 0;
     }
 
@@ -489,12 +483,10 @@ uint8_t WebCustomEntityService::has_commands() {
 
 // send to dashboard, msgpack don't like serialized, use number
 void WebCustomEntityService::generate_value_web(JsonObject output) {
-    EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
-
     output["label"] = (std::string) "Custom Entities";
     JsonArray data  = output["data"].to<JsonArray>();
     uint8_t   index = 0;
-    for (const CustomEntityItem & entity : *customEntityItems) {
+    for (const CustomEntityItem & entity : *customEntityItems_) {
         JsonObject obj = data.add<JsonObject>(); // create the object, we know there is a value
         obj["id"]      = "00" + entity.name;
         obj["u"]       = entity.uom;
@@ -562,10 +554,9 @@ void WebCustomEntityService::generate_value_web(JsonObject output) {
 
 // fetch telegram, called from emsesp::fetch
 void WebCustomEntityService::fetch() {
-    EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
     const uint8_t len[] = {1, 1, 1, 2, 2, 3, 3, 4};
 
-    for (auto & entity : *customEntityItems) {
+    for (auto & entity : *customEntityItems_) {
         if (entity.device_id > 0 && entity.type_id > 0) { // ths excludes also RAM type
             bool    needFetch  = true;
             uint8_t fetchblock = entity.type_id > 0x0FF ? 25 : 27;
@@ -593,10 +584,9 @@ void WebCustomEntityService::fetch() {
 // called on process telegram, read from telegram
 bool WebCustomEntityService::get_value(std::shared_ptr<const Telegram> telegram) {
     bool has_change = false;
-    EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems = &webEntity.customEntityItems; });
     // read-length of BOOL, INT8, UINT8, INT16, UINT16, UINT24, TIME, UINT32
     const uint8_t len[] = {1, 1, 1, 2, 2, 3, 3, 4};
-    for (auto & entity : *customEntityItems) {
+    for (auto & entity : *customEntityItems_) {
         if (entity.value_type == DeviceValueType::STRING && telegram->type_id == entity.type_id && telegram->src == entity.device_id
             && telegram->offset <= entity.offset && (telegram->offset + telegram->message_length) >= (entity.offset + (uint8_t)entity.factor)) {
             auto data = Helpers::data_to_hex(telegram->message_data, (uint8_t)entity.factor);

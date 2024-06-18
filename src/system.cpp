@@ -124,6 +124,10 @@ bool System::command_allvalues(const char * value, const int8_t id, JsonObject o
     device_output = output["Custom Entities"].to<JsonObject>();
     EMSESP::webCustomEntityService.get_value_info(device_output, "");
 
+    // Scheduler
+    device_output = output["Scheduler"].to<JsonObject>();
+    EMSESP::webSchedulerService.get_value_info(device_output, "");
+
     // Sensors
     device_output = output["Analog Sensors"].to<JsonObject>();
     EMSESP::analogsensor_.get_value_info(device_output, "values");

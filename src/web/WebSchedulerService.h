@@ -58,7 +58,7 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
     void publish_single(const char * name, const bool state);
     void publish(const bool force = false);
     bool has_commands();
-    bool command_setvalue(const char * value, const std::string name);
+    bool command_setvalue(const char * value, const int8_t id, const char * name);
     bool get_value_info(JsonObject output, const char * cmd);
     void ha_reset() {
         ha_registered_ = false;

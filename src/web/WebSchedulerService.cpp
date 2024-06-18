@@ -57,11 +57,8 @@ void WebScheduler::read(WebScheduler & webScheduler, JsonObject root) {
 // call on initialization and also when the Schedule web page is saved
 // this loads the data into the internal class
 StateUpdateResult WebScheduler::update(JsonObject root, WebScheduler & webScheduler) {
-    for (ScheduleItem & scheduleItem : webScheduler.scheduleItems) {
-        Command::erase_command(EMSdevice::DeviceType::SCHEDULER, scheduleItem.name.c_str());
-    }
-
     // reset the list
+    Command::erase_device_commands(EMSdevice::DeviceType::SCHEDULER);
     webScheduler.scheduleItems.clear();
     EMSESP::webSchedulerService.ha_reset();
 
@@ -88,7 +85,7 @@ StateUpdateResult WebScheduler::update(JsonObject root, WebScheduler & webSchedu
                     EMSdevice::DeviceType::SCHEDULER,
                     webScheduler.scheduleItems.back().name.c_str(),
                     [webScheduler](const char * value, const int8_t id) {
-                        return EMSESP::webSchedulerService.command_setvalue(value, webScheduler.scheduleItems.back().name);
+                        return EMSESP::webSchedulerService.command_setvalue(value, id, webScheduler.scheduleItems.back().name.c_str());
                     },
                     FL_(schedule_cmd),
                     CommandFlag::ADMIN_ONLY);
@@ -102,20 +99,20 @@ StateUpdateResult WebScheduler::update(JsonObject root, WebScheduler & webSchedu
 }
 
 // set active by api command
-bool WebSchedulerService::command_setvalue(const char * value, const std::string name) {
+bool WebSchedulerService::command_setvalue(const char * value, const int8_t id, const char * name) {
     bool v;
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
 
     for (ScheduleItem & scheduleItem : *scheduleItems_) {
-        if (scheduleItem.name == name) {
+        if (Helpers::toLower(scheduleItem.name) == Helpers::toLower(name)) {
             if (scheduleItem.active == v) {
                 return true;
             }
 
             scheduleItem.active = v;
-            publish_single(name.c_str(), v);
+            publish_single(name, v);
 
             if (EMSESP::mqtt_.get_publish_onchange(0)) {
                 publish();
@@ -212,7 +209,7 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
 
 // publish single value
 void WebSchedulerService::publish_single(const char * name, const bool state) {
-    if (!Mqtt::publish_single() || name == nullptr || name[0] == '\0') {
+    if (!Mqtt::enabled() || !Mqtt::publish_single() || name == nullptr || name[0] == '\0') {
         return;
     }
 
@@ -386,7 +383,7 @@ void WebSchedulerService::condition() {
 #ifdef EMESESP_DEBUG
             emsesp::EMSESP::logger().debug("condition match: %s", match.c_str());
 #endif
-            if (!match.empty() && match.c_str()[0] == '1') {
+            if (!match.empty() && match[0] == '1') {
                 if (scheduleItem.retry_cnt == 0xFF) { // default unswitched
                     scheduleItem.retry_cnt = command(scheduleItem.cmd.c_str(), compute(scheduleItem.value.c_str()).c_str()) ? 1 : 0xFF;
                 }

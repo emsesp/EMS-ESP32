@@ -34,24 +34,26 @@ class Token {
     enum class Type {
         Unknown,
         Number,
+        String,
         Operator,
+        Compare,
+        Logic,
+        Unary,
         LeftParen,
         RightParen,
     };
 
-    Token(Type type, const std::string & s, int8_t precedence = -1, bool rightAssociative = false, bool unary = false)
+    Token(Type type, const std::string & s, int8_t precedence = -1, bool rightAssociative = false)
         : type{type}
         , str(s)
         , precedence{precedence}
-        , rightAssociative{rightAssociative}
-        , unary{unary} {
+        , rightAssociative{rightAssociative} {
     }
 
     const Type        type;
     const std::string str;
     const int8_t      precedence;
     const bool        rightAssociative;
-    const bool        unary;
 };
 
 std::deque<Token> exprToTokens(const std::string & expr) {
@@ -60,22 +62,48 @@ std::deque<Token> exprToTokens(const std::string & expr) {
     for (const auto * p = expr.c_str(); *p; ++p) {
         if (isblank(*p)) {
             // do nothing
-        } else if ((*p >= 'a' && *p <= 'z')) {
-            tokens.clear();
-            return tokens;
+        } else if (*p >= 'a' && *p <= 'z') {
+            const auto * b = p;
+            while ((*p >= 'a' && *p <= 'z') || (*p == '_')) {
+                ++p;
+            }
+            const auto s = std::string(b, p);
+            tokens.push_back(Token{Token::Type::String, s, -2});
+            --p;
+        } else if (*p == '"') {
+            ++p;
+            const auto * b = p;
+            while (*p && *p != '"') {
+                ++p;
+            }
+            const auto s = std::string(b, p);
+            tokens.push_back(Token{Token::Type::String, s, -3});
+            if (*p == '\0') {
+                --p;
+            }
+        } else if (*p == '\'') {
+            ++p;
+            const auto * b = p;
+            while (*p && *p != '\'') {
+                ++p;
+            }
+            const auto s = std::string(b, p);
+            tokens.push_back(Token{Token::Type::String, s, -3});
+            if (*p == '\0') {
+                --p;
+            }
         } else if (isdigit(*p)) {
             const auto * b = p;
             while (isdigit(*p) || *p == '.') {
                 ++p;
             }
             const auto s = std::string(b, p);
-            tokens.push_back(Token{Token::Type::Number, s});
+            tokens.push_back(Token{Token::Type::Number, s, -4});
             --p;
         } else {
             Token::Type token            = Token::Type::Operator;
             int8_t      precedence       = -1;
             bool        rightAssociative = false;
-            bool        unary            = false;
             char        c                = *p;
             switch (c) {
             default:
@@ -106,11 +134,16 @@ std::deque<Token> exprToTokens(const std::string & expr) {
             case '-':
                 // If current token is '-'
                 // and if it is the first token, or preceded by another operator, or left-paren,
-                if (tokens.empty() || tokens.back().type == Token::Type::Operator || tokens.back().type == Token::Type::LeftParen) {
+                if (tokens.empty() || tokens.back().type == Token::Type::Operator || tokens.back().type == Token::Type::Compare
+                    || tokens.back().type == Token::Type::Logic || tokens.back().type == Token::Type::Unary || tokens.back().type == Token::Type::LeftParen) {
                     // it's unary '-'
                     // note#1 : 'm' is a special operator name for unary '-'
                     // note#2 : It has highest precedence than any of the infix operators
-                    unary      = true;
+                    if (!tokens.empty() && tokens.back().str[0] == 'm') { // double unary minus
+                        tokens.pop_back();
+                        continue;
+                    }
+                    token      = Token::Type::Unary;
                     c          = 'm';
                     precedence = 5;
                 } else {
@@ -122,15 +155,23 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                 if (p[1] == '&')
                     ++p;
                 precedence = 0;
+                token      = Token::Type::Logic;
                 break;
             case '|':
                 if (p[1] == '|')
                     ++p;
                 precedence = 0;
+                token      = Token::Type::Logic;
                 break;
             case '!':
-                unary      = true;
-                precedence = 1;
+                if (p[1] == '=') {
+                    ++p;
+                    precedence = 1;
+                    token      = Token::Type::Compare;
+                } else {
+                    precedence = 1;
+                    token      = Token::Type::Unary;
+                }
                 break;
             case '<':
                 if (p[1] == '=') {
@@ -138,6 +179,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                     c = '{';
                 }
                 precedence = 1;
+                token      = Token::Type::Compare;
                 break;
             case '>':
                 if (p[1] == '=') {
@@ -145,15 +187,17 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                     c = '}';
                 }
                 precedence = 1;
+                token      = Token::Type::Compare;
                 break;
             case '=':
                 if (p[1] == '=')
                     ++p;
                 precedence = 1;
+                token      = Token::Type::Compare;
                 break;
             }
             const auto s = std::string(1, c);
-            tokens.push_back(Token{token, s, precedence, rightAssociative, unary});
+            tokens.push_back(Token{token, s, precedence, rightAssociative});
         }
     }
 
@@ -170,10 +214,14 @@ std::deque<Token> shuntingYard(const std::deque<Token> & tokens) {
         // Read a token
         switch (token.type) {
         case Token::Type::Number:
+        case Token::Type::String:
             // If the token is a number, then add it to the output queue
             queue.push_back(token);
             break;
 
+        case Token::Type::Unary:
+        case Token::Type::Compare:
+        case Token::Type::Logic:
         case Token::Type::Operator: {
             // If the token is operator, o1, then:
             const auto o1 = token;
@@ -209,32 +257,30 @@ std::deque<Token> shuntingYard(const std::deque<Token> & tokens) {
             stack.push_back(token);
             break;
 
-        case Token::Type::RightParen:
+        case Token::Type::RightParen: {
             // If token is right parenthesis:
-            {
-                bool match = false;
+            bool match = false;
 
-                // Until the token at the top of the stack
-                // is a left parenthesis,
-                while (!stack.empty() && stack.back().type != Token::Type::LeftParen) {
-                    // pop operators off the stack
-                    // onto the output queue.
-                    queue.push_back(stack.back());
-                    stack.pop_back();
-                    match = true;
-                }
-
-                if (!match && stack.empty()) {
-                    // If the stack runs out without finding a left parenthesis,
-                    // then there are mismatched parentheses.
-                    return {};
-                }
-
-                // Pop the left parenthesis from the stack,
-                // but not onto the output queue.
+            // Until the token at the top of the stack
+            // is a left parenthesis,
+            while (!stack.empty() && stack.back().type != Token::Type::LeftParen) {
+                // pop operators off the stack
+                // onto the output queue.
+                queue.push_back(stack.back());
                 stack.pop_back();
+                match = true;
             }
-            break;
+
+            if (!match && stack.empty()) {
+                // If the stack runs out without finding a left parenthesis,
+                // then there are mismatched parentheses.
+                return {};
+            }
+
+            // Pop the left parenthesis from the stack,
+            // but not onto the output queue.
+            stack.pop_back();
+        } break;
 
         default:
             return {};
@@ -263,7 +309,7 @@ std::string commands(std::string & expr) {
         const char * d = emsesp::EMSdevice::device_type_2_device_name(device);
         auto         f = expr.find(d);
         while (f != std::string::npos) {
-            auto e = expr.find_first_of(" )=<>|&+-*\0", f);
+            auto e = expr.find_first_of(" )=<>|&+-*", f);
             if (e == std::string::npos) {
                 e = expr.length();
             }
@@ -284,14 +330,15 @@ std::string commands(std::string & expr) {
             emsesp::Command::process(cmd_s.c_str(), true, input, output);
             if (output.containsKey("api_data")) {
                 std::string data = output["api_data"].as<std::string>();
-                if (data == "true" || data == "ON" || data == "on") {
-                    data = "1";
-                }
-                if (data == "false" || data == "OFF" || data == "off") {
-                    data = "0";
+                // set strings in quotations for something like "3-way-valve"
+                if (isdigit(data[0] == 0 && data[0] != '-')) {
+                    data.insert(data.begin(), '"');
+                    data.insert(data.end(), '"');
                 }
                 expr.replace(f, l, data);
                 e = f + data.length();
+            } else {
+                return expr = "";
             }
             f = expr.find(d, e);
         }
@@ -299,97 +346,179 @@ std::string commands(std::string & expr) {
     return expr;
 }
 
+int islogic(const std::string & s) {
+    if (s[0] == '1' || s == "on" || s == "ON" || s == "true") {
+        return 1;
+    }
+    if (s[0] == '0' || s == "off" || s == "OFF" || s == "false") {
+        return 0;
+    }
+    return 0;
+}
+
+bool isnum(const std::string & s) {
+    if (isdigit(s[0]) || (s[0] == '-' && isdigit(s[1]))) {
+        return true;
+    }
+    return false;
+}
+
 std::string compute(const std::string & expr) {
     auto expr_new = emsesp::Helpers::toLower(expr);
-#ifdef EMESESP_DEBUG
-    emsesp::EMSESP::logger().debug("calculate: %s", expr_new.c_str());
-#endif
     commands(expr_new);
-#ifdef EMESESP_DEBUG
-    emsesp::EMSESP::logger().debug("calculate: %s", expr_new.c_str());
-#endif
+    // emsesp::EMSESP::logger().info("calculate: %s", expr_new.c_str());
     const auto tokens = exprToTokens(expr_new);
     if (tokens.empty()) {
-        return "Error: no tokens";
+        return "";
     }
-    auto                queue = shuntingYard(tokens);
-    std::vector<double> stack;
+    auto queue = shuntingYard(tokens);
+    if (queue.empty()) {
+        return "";
+    }
+    std::vector<std::string> stack;
 
     while (!queue.empty()) {
         const auto token = queue.front();
         queue.pop_front();
         switch (token.type) {
         case Token::Type::Number:
-            stack.push_back(std::stod(token.str));
+        case Token::Type::String:
+            stack.push_back(token.str);
             break;
+        case Token::Type::Unary: {
+            if (stack.empty()) {
+                return "";
+            }
+            const auto rhs = stack.back();
+            stack.pop_back();
+            switch (token.str[0]) {
+            default:
+                return "";
+                break;
+            case 'm': // Special operator name for unary '-'
+                if (!isnum(rhs)) {
+                    return "";
+                }
+                stack.push_back(std::to_string(-1 * std::stod(rhs)));
+                break;
+            case '!':
+                stack.push_back(islogic(rhs) == 0 ? "1" : "0");
+                break;
+            }
 
+        } break;
+        case Token::Type::Compare: {
+            if (stack.size() < 2) {
+                return "";
+            }
+            const auto rhs = stack.back();
+            stack.pop_back();
+            const auto lhs = stack.back();
+            stack.pop_back();
+            switch (token.str[0]) {
+            default:
+                return "";
+                break;
+            case '<':
+                if (isnum(rhs) && isnum(lhs)) {
+                    stack.push_back((std::stod(lhs) < std::stod(rhs)) ? "1" : "0");
+                    break;
+                }
+                stack.push_back((lhs < rhs) ? "1" : "0");
+                break;
+            case '{':
+                if (isnum(rhs) && isnum(lhs)) {
+                    stack.push_back((std::stod(lhs) <= std::stod(rhs)) ? "1" : "0");
+                    break;
+                }
+                stack.push_back((lhs <= rhs) ? "1" : "0");
+                break;
+            case '>':
+                if (isnum(rhs) && isnum(lhs)) {
+                    stack.push_back((std::stod(lhs) > std::stod(rhs)) ? "1" : "0");
+                    break;
+                }
+                stack.push_back((lhs > rhs) ? "1" : "0");
+                break;
+            case '}':
+                if (isnum(rhs) && isnum(lhs)) {
+                    stack.push_back((std::stod(lhs) >= std::stod(rhs)) ? "1" : "0");
+                    break;
+                }
+                stack.push_back((lhs >= rhs) ? "1" : "0");
+                break;
+            case '=':
+                if (isnum(rhs) && isnum(lhs)) {
+                    stack.push_back((std::stod(lhs) == std::stod(rhs)) ? "1" : "0");
+                    break;
+                }
+                stack.push_back((lhs == rhs) ? "1" : "0");
+                break;
+            case '!':
+                if (isnum(rhs) && isnum(lhs)) {
+                    stack.push_back((std::stod(lhs) != std::stod(rhs)) ? "1" : "0");
+                    break;
+                }
+                stack.push_back((lhs != rhs) ? "1" : "0");
+                break;
+            }
+        } break;
+        case Token::Type::Logic: {
+            // binary operators
+            if (stack.size() < 2) {
+                return "";
+            }
+            const auto rhs = islogic(stack.back());
+            stack.pop_back();
+            const auto lhs = islogic(stack.back());
+            stack.pop_back();
+            switch (token.str[0]) {
+            default:
+                return "";
+                break;
+            case '&':
+                stack.push_back((lhs && rhs) ? "1" : "0");
+                break;
+            case '|':
+                stack.push_back((lhs || rhs) ? "1" : "0");
+                break;
+            }
+        } break;
         case Token::Type::Operator: {
-            if (token.unary) {
-                // unray operators
-                const auto rhs = stack.back();
-                stack.pop_back();
-                switch (token.str[0]) {
-                default:
-                    return "";
-                    break;
-                case 'm': // Special operator name for unary '-'
-                    stack.push_back(-rhs);
-                    break;
-                case '!':
-                    stack.push_back(!(int)rhs);
-                    break;
-                }
-            } else {
-                // binary operators
-                const auto rhs = stack.back();
-                stack.pop_back();
-                const auto lhs = stack.back();
-                stack.pop_back();
+            // binary operators
+            if (stack.empty() || !isnum(stack.back())) {
+                return "";
+            }
+            const auto rhs = std::stod(stack.back());
+            stack.pop_back();
+            if (stack.empty() || !isnum(stack.back())) {
+                return "";
+            }
+            const auto lhs = std::stod(stack.back());
+            stack.pop_back();
 
-                switch (token.str[0]) {
-                default:
-                    return "";
-                    break;
-                case '^':
-                    stack.push_back(static_cast<int>(pow(lhs, rhs)));
-                    break;
-                case '*':
-                    stack.push_back(lhs * rhs);
-                    break;
-                case '/':
-                    stack.push_back(lhs / rhs);
-                    break;
-                case '%':
-                    stack.push_back((int)lhs % (int)rhs);
-                    break;
-                case '+':
-                    stack.push_back(lhs + rhs);
-                    break;
-                case '-':
-                    stack.push_back(lhs - rhs);
-                    break;
-                case '&':
-                    stack.push_back(((int)lhs && (int)rhs) ? 1 : 0);
-                    break;
-                case '|':
-                    stack.push_back(((int)lhs || (int)rhs) ? 1 : 0);
-                    break;
-                case '<':
-                    stack.push_back(((int)lhs < (int)rhs) ? 1 : 0);
-                    break;
-                case '{':
-                    stack.push_back(((int)lhs <= (int)rhs) ? 1 : 0);
-                    break;
-                case '>':
-                    stack.push_back(((int)lhs > (int)rhs) ? 1 : 0);
-                    break;
-                case '}':
-                    stack.push_back(((int)lhs >= (int)rhs) ? 1 : 0);
-                    break;
-                case '=':
-                    stack.push_back(((int)lhs == (int)rhs) ? 1 : 0);
-                    break;
-                }
+            switch (token.str[0]) {
+            default:
+                return "";
+                break;
+            case '^':
+                stack.push_back(std::to_string(pow(lhs, rhs)));
+                break;
+            case '*':
+                stack.push_back(std::to_string(lhs * rhs));
+                break;
+            case '/':
+                stack.push_back(std::to_string(lhs / rhs));
+                break;
+            case '%':
+                stack.push_back(std::to_string(static_cast<int>(lhs) % static_cast<int>(rhs)));
+                break;
+            case '+':
+                stack.push_back(std::to_string(lhs + rhs));
+                break;
+            case '-':
+                stack.push_back(std::to_string(lhs - rhs));
+                break;
             }
         } break;
 
@@ -397,8 +526,5 @@ std::string compute(const std::string & expr) {
             return "";
         }
     }
-    if (stack.back() == (int)stack.back()) {
-        return (std::to_string((int)stack.back()));
-    }
-    return std::to_string(stack.back());
+    return stack.back();
 }

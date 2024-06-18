@@ -43,8 +43,7 @@ class CustomEntityItem {
 
 class WebCustomEntity {
   public:
-    std::vector<CustomEntityItem> customEntityItems;
-    // std::list<CustomEntityItem> customEntityItems;
+    std::list<CustomEntityItem> customEntityItems;
 
     static void              read(WebCustomEntity & webEntity, JsonObject root);
     static StateUpdateResult update(JsonObject root, WebCustomEntity & webEntity);
@@ -57,7 +56,7 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
     void begin();
     void publish_single(const CustomEntityItem & entity);
     void publish(const bool force = false);
-    bool command_setvalue(const char * value, const std::string name);
+    bool command_setvalue(const char * value, const int8_t id, const char * name);
     bool get_value_info(JsonObject output, const char * cmd);
     bool get_value(std::shared_ptr<const Telegram> telegram);
     void fetch();
@@ -79,8 +78,7 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
     HttpEndpoint<WebCustomEntity>  _httpEndpoint;
     FSPersistence<WebCustomEntity> _fsPersistence;
 
-    std::vector<CustomEntityItem> * customEntityItems; // pointer to the list of entity items
-    // std::list<CustomEntityItem> * customEntityItems; // pointer to the list of entity items
+    std::list<CustomEntityItem> * customEntityItems_; // pointer to the list of entity items
 
     bool ha_registered_ = false;
 };
