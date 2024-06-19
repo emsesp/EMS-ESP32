@@ -546,6 +546,26 @@ const ApplicationSettings: FC = () => {
           justifyContent="flex-start"
           alignItems="flex-start"
         >
+          {data.shower_timer && (
+            <Grid item xs={12} sm={6}>
+              <ValidatedTextField
+                fieldErrors={fieldErrors}
+                name="shower_min_duration"
+                // TODO translate
+                label="Dp this"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                  )
+                }}
+                variant="outlined"
+                value={numberValue(data.shower_min_duration)}
+                fullWidth
+                type="number"
+                onChange={updateFormValue}
+              />
+            </Grid>
+          )}
           {data.shower_alert && (
             <>
               <Grid item xs={12} sm={6}>

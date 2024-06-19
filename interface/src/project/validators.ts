@@ -234,6 +234,16 @@ export const createSettingsValidator = (settings: Settings) =>
         { type: 'number', min: 0, max: 10, message: 'Must be between 0 and 10' }
       ]
     }),
+    ...(settings.shower_timer && {
+      shower_min_duration: [
+        {
+          type: 'number',
+          min: 1,
+          max: 3000,
+          message: 'Time must be between 1 and 3000 seconds'
+        }
+      ]
+    }),
     ...(settings.shower_alert && {
       shower_alert_trigger: [
         {
