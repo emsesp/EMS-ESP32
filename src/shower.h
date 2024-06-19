@@ -46,7 +46,7 @@ class Shower {
     bool     shower_alert_;          // true if we want the alert of cold water
     uint32_t shower_alert_trigger_;  // default 7 minutes, before trigger a shot of cold water
     uint32_t shower_alert_coldshot_; // default 10 seconds for cold water before turning back hot water
-    uint32_t shower_min_duration_;   // default 2 minutes (1200 seconds), before recognizing its a shower
+    uint32_t shower_min_duration_;   // default 2 minutes (120 seconds), before recognizing its a shower
     uint32_t next_alert_;
     bool     ha_configdone_ = false; // for HA MQTT Discovery
     bool     shower_state_;

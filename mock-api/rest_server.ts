@@ -610,7 +610,7 @@ let settings = {
   shower_alert: true,
   shower_alert_trigger: 7,
   shower_alert_coldshot: 10,
-  shower_min_duration: 1200,
+  shower_min_duration: 120,
   rx_gpio: 23,
   tx_gpio: 5,
   phy_type: 0,
