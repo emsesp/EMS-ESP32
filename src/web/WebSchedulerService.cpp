@@ -369,7 +369,9 @@ bool WebSchedulerService::command(const char * cmd, const char * data) {
 bool WebSchedulerService::onChange(const char * cmd) {
     for (const ScheduleItem & scheduleItem : *scheduleItems_) {
         if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_ONCHANGE && Helpers::toLower(scheduleItem.time) == Helpers::toLower(cmd)) {
+#ifdef EMESESP_DEBUG
             // emsesp::EMSESP::logger().debug(scheduleItem.cmd.c_str());
+#endif
             return command(scheduleItem.cmd.c_str(), compute(scheduleItem.value.c_str()).c_str());
         }
     }
@@ -381,7 +383,7 @@ void WebSchedulerService::condition() {
         if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_CONDITION) {
             auto match = compute(scheduleItem.time.c_str());
 #ifdef EMESESP_DEBUG
-            emsesp::EMSESP::logger().debug("condition match: %s", match.c_str());
+            // emsesp::EMSESP::logger().debug("condition match: %s", match.c_str());
 #endif
             if (!match.empty() && match[0] == '1') {
                 if (scheduleItem.retry_cnt == 0xFF) { // default unswitched

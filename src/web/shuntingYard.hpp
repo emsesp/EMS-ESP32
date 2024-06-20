@@ -303,15 +303,26 @@ std::deque<Token> shuntingYard(const std::deque<Token> & tokens) {
     return queue;
 }
 
+bool isnum(const std::string & s) {
+    if (s.find_first_not_of("0123456789.") == std::string::npos || (s[0] == '-' && s.find_first_not_of("0123456789.", 1) == std::string::npos)) {
+        return true;
+    }
+    return false;
+}
+
+
 // replace commands like "<device>/<hc>/<cmd>" with its value"
 std::string commands(std::string & expr) {
     for (uint8_t device = 0; device < emsesp::EMSdevice::DeviceType::UNKNOWN; device++) {
         const char * d = emsesp::EMSdevice::device_type_2_device_name(device);
         auto         f = expr.find(d);
         while (f != std::string::npos) {
-            auto e = expr.find_first_of(" )=<>|&+-*", f);
+            auto e = expr.find_first_of(")=<>|&+-*!", f);
             if (e == std::string::npos) {
                 e = expr.length();
+            }
+            while (e > 0 && expr[e - 1] == ' ') { // remove blanks from end
+                e--;
             }
             char   cmd[COMMAND_MAX_LENGTH];
             size_t l = e - f;
@@ -330,8 +341,7 @@ std::string commands(std::string & expr) {
             emsesp::Command::process(cmd_s.c_str(), true, input, output);
             if (output.containsKey("api_data")) {
                 std::string data = output["api_data"].as<std::string>();
-                // set strings in quotations for something like "3-way-valve"
-                if (isdigit(data[0] == 0 && data[0] != '-')) {
+                if (!isnum(data)) {
                     data.insert(data.begin(), '"');
                     data.insert(data.end(), '"');
                 }
@@ -346,7 +356,7 @@ std::string commands(std::string & expr) {
     return expr;
 }
 
-int islogic(const std::string & s) {
+int to_logic(const std::string & s) {
     if (s[0] == '1' || s == "on" || s == "ON" || s == "true") {
         return 1;
     }
@@ -356,15 +366,16 @@ int islogic(const std::string & s) {
     return 0;
 }
 
-bool isnum(const std::string & s) {
-    if (isdigit(s[0]) || (s[0] == '-' && isdigit(s[1]))) {
-        return true;
+std::string to_string(double d) {
+    if (d == static_cast<int>(d)) {
+        return std::to_string(static_cast<int>(d));
     }
-    return false;
+    return std::to_string(d);
 }
 
 std::string compute(const std::string & expr) {
-    auto expr_new = emsesp::Helpers::toLower(expr);
+    auto expr_new = expr; //emsesp::Helpers::toLower(expr);
+    // emsesp::EMSESP::logger().info("calculate: %s", expr_new.c_str());
     commands(expr_new);
     // emsesp::EMSESP::logger().info("calculate: %s", expr_new.c_str());
     const auto tokens = exprToTokens(expr_new);
@@ -399,10 +410,10 @@ std::string compute(const std::string & expr) {
                 if (!isnum(rhs)) {
                     return "";
                 }
-                stack.push_back(std::to_string(-1 * std::stod(rhs)));
+                stack.push_back(to_string(-1 * std::stod(rhs)));
                 break;
             case '!':
-                stack.push_back(islogic(rhs) == 0 ? "1" : "0");
+                stack.push_back(to_logic(rhs) == 0 ? "1" : "0");
                 break;
             }
 
@@ -468,9 +479,9 @@ std::string compute(const std::string & expr) {
             if (stack.size() < 2) {
                 return "";
             }
-            const auto rhs = islogic(stack.back());
+            const auto rhs = to_logic(stack.back());
             stack.pop_back();
-            const auto lhs = islogic(stack.back());
+            const auto lhs = to_logic(stack.back());
             stack.pop_back();
             switch (token.str[0]) {
             default:
@@ -502,22 +513,22 @@ std::string compute(const std::string & expr) {
                 return "";
                 break;
             case '^':
-                stack.push_back(std::to_string(pow(lhs, rhs)));
+                stack.push_back(to_string(pow(lhs, rhs)));
                 break;
             case '*':
-                stack.push_back(std::to_string(lhs * rhs));
+                stack.push_back(to_string(lhs * rhs));
                 break;
             case '/':
-                stack.push_back(std::to_string(lhs / rhs));
+                stack.push_back(to_string(lhs / rhs));
                 break;
             case '%':
                 stack.push_back(std::to_string(static_cast<int>(lhs) % static_cast<int>(rhs)));
                 break;
             case '+':
-                stack.push_back(std::to_string(lhs + rhs));
+                stack.push_back(to_string(lhs + rhs));
                 break;
             case '-':
-                stack.push_back(std::to_string(lhs - rhs));
+                stack.push_back(to_string(lhs - rhs));
                 break;
             }
         } break;

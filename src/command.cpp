@@ -322,7 +322,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     if (single_command) {
         // exception 1: anything that is from System
         // exception 2: boiler coldshot command
-        bool get_attributes = (!cf || !cf->cmdfunction_json_) && (device_type > EMSdevice::DeviceType::SYSTEM) && (strcmp(cmd, F_(coldshot)) != 0);
+        bool get_attributes = (!cf || !cf->cmdfunction_json_) && (strcmp(cmd, F_(coldshot)) != 0);
 
         if (get_attributes) {
             LOG_DEBUG("Calling %s command '%s' to retrieve attributes", dname, cmd);

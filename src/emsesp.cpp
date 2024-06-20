@@ -771,6 +771,10 @@ bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8
         return webCustomEntityService.get_value_info(root, cmd);
     }
 
+    if (devicetype == DeviceType::SYSTEM) {
+        return system_.get_value_info(root, cmd);
+    }
+
     char error[100];
     snprintf(error, sizeof(error), "cannot find values for entity '%s'", cmd);
     root["message"] = error;
