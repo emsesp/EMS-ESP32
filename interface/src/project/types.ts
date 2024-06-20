@@ -12,6 +12,7 @@ export interface Settings {
   shower_alert: boolean;
   shower_alert_coldshot: number;
   shower_alert_trigger: number;
+  shower_min_duration: number;
   rx_gpio: number;
   tx_gpio: number;
   telnet_enabled: boolean;

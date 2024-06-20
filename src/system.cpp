@@ -1452,12 +1452,13 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     // Settings
     node = output["Settings"].to<JsonObject>();
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        node["board profile"] = settings.board_profile;
-        node["locale"]        = settings.locale;
-        node["tx mode"]       = settings.tx_mode;
-        node["ems bus id"]    = settings.ems_bus_id;
-        node["shower timer"]  = settings.shower_timer;
-        node["shower alert"]  = settings.shower_alert;
+        node["board profile"]      = settings.board_profile;
+        node["locale"]             = settings.locale;
+        node["tx mode"]            = settings.tx_mode;
+        node["ems bus id"]         = settings.ems_bus_id;
+        node["shower timer"]       = settings.shower_timer;
+        node["shower alert"]       = settings.shower_alert;
+        node["shpwe_min_duration"] = settings.shower_min_duration; // seconds
         if (settings.shower_alert) {
             node["shower alert coldshot"] = settings.shower_alert_coldshot; // seconds
             node["shower alert trigger"]  = settings.shower_alert_trigger;  // minutes

@@ -47,6 +47,7 @@ void WebSettings::read(WebSettings & settings, JsonObject root) {
     root["shower_alert"]          = settings.shower_alert;
     root["shower_alert_coldshot"] = settings.shower_alert_coldshot;
     root["shower_alert_trigger"]  = settings.shower_alert_trigger;
+    root["shower_min_duration"]   = settings.shower_min_duration;
     root["rx_gpio"]               = settings.rx_gpio;
     root["tx_gpio"]               = settings.tx_gpio;
     root["dallas_gpio"]           = settings.dallas_gpio;
@@ -237,6 +238,9 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     prev                          = settings.shower_alert_trigger;
     settings.shower_alert_trigger = root["shower_alert_trigger"] | EMSESP_DEFAULT_SHOWER_ALERT_TRIGGER;
     check_flag(prev, settings.shower_alert_trigger, ChangeFlags::SHOWER);
+        prev                          = settings.shower_min_duration;
+    settings.shower_min_duration = root["shower_min_duration"] | EMSESP_DEFAULT_SHOWER_MIN_DURATION;
+    check_flag(prev, settings.shower_min_duration, ChangeFlags::SHOWER);
     prev                           = settings.shower_alert_coldshot;
     settings.shower_alert_coldshot = root["shower_alert_coldshot"] | EMSESP_DEFAULT_SHOWER_ALERT_COLDSHOT;
     check_flag(prev, settings.shower_alert_coldshot, ChangeFlags::SHOWER);
