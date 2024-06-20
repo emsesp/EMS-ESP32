@@ -28,10 +28,14 @@ int16_t  Roomctrl::remotetemp_[HCS]   = {EMS_VALUE_INT16_NOTSET, EMS_VALUE_INT16
 uint8_t  Roomctrl::remotehum_[HCS]    = {EMS_VALUE_UINT8_NOTSET, EMS_VALUE_UINT8_NOTSET, EMS_VALUE_UINT8_NOTSET, EMS_VALUE_UINT8_NOTSET};
 uint8_t  Roomctrl::sendtype_[HCS]     = {SendType::TEMP, SendType::TEMP, SendType::TEMP, SendType::TEMP};
 uint8_t  Roomctrl::type_[HCS]         = {RemoteType::NONE, RemoteType::NONE, RemoteType::NONE, RemoteType::NONE};
+uint32_t Roomctrl::timeout_           = 0;
 
 /**
  * set the temperature,
  */
+void Roomctrl::set_timeout(uint8_t t) {
+    timeout_ = t * 3600;
+}
 void Roomctrl::set_remotetemp(const uint8_t type, const uint8_t hc, const int16_t temp) {
     if (!type_[hc] && !type) {
         return;
@@ -96,7 +100,7 @@ void Roomctrl::send(uint8_t addr) {
         return;
     }
 
-    if (!switch_off_[hc] && (uuid::get_uptime() - receive_time_[hc]) > TIMEOUT) {
+    if (!switch_off_[hc] && timeout_ && (uuid::get_uptime() - receive_time_[hc]) > timeout_) {
         remotetemp_[hc] = EMS_VALUE_INT16_NOTSET;
         switch_off_[hc] = true;
         sendtype_[hc]   = SendType::TEMP;
@@ -366,6 +370,7 @@ void Roomctrl::ack_write() {
     data[0] = TxService::TX_WRITE_SUCCESS;
     EMSuart::transmit(data, 1);
 }
+
 void Roomctrl::replyF7(uint8_t addr, uint8_t dst, uint8_t offset, uint8_t typehh, uint8_t typeh, uint8_t typel, uint8_t hc) {
     uint8_t data[12];
     data[0] = addr | EMSbus::ems_mask();

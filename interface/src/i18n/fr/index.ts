@@ -121,6 +121,9 @@ const fr: Translation = {
   READONLY: 'Activer le mode lecture uniquement (bloque toutes les commandes EMS sortantes en écriture Tx)',
   UNDERCLOCK_CPU: 'Underclock du CPU',
   HEATINGOFF: 'Start boiler with forced heating off', // TODO translate
+  REMOTE_TIMEOUT: 'Remote timeout',
+  REMOTE_TIMEOUT_EN: 'Disable remote on missing roomtemperature',
+  MIN_DURATION: 'Time for detection shower',
   ENABLE_SHOWER_TIMER: 'Activer la minuterie de la douche',
   ENABLE_SHOWER_ALERT: 'Activer les alertes de durée de douche',
   TRIGGER_TIME: 'Durée avant déclenchement',
