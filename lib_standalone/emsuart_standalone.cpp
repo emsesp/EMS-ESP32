@@ -84,6 +84,4 @@ char * EMSuart::hextoa(char * result, const uint8_t value) {
 
 } // namespace emsesp
 
-#pragma GCC diagnostic pop
-
 #endif
