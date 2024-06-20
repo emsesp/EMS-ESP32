@@ -35,7 +35,7 @@ class WebSettings {
     uint8_t  ems_bus_id;
     bool     boiler_heatingoff;
     uint8_t  remote_timeout;
-    uint8_t  remote_timeout_enabled;
+    bool     remote_timeout_enabled;
     bool     shower_timer;
     bool     shower_alert;
     uint8_t  shower_alert_trigger;  // minutes
