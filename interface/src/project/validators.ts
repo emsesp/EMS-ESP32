@@ -238,9 +238,9 @@ export const createSettingsValidator = (settings: Settings) =>
       shower_min_duration: [
         {
           type: 'number',
-          min: 1,
-          max: 3000,
-          message: 'Time must be between 1 and 3000 seconds'
+          min: 10,
+          max: 360,
+          message: 'Time must be between 10 and 360 seconds'
         }
       ]
     }),
