@@ -37,3 +37,4 @@
 - rename DeviceValueTypes, add UINT32 for custom entities
 - dynamic register dhw circuits for thermostat
 - removed OTA feature [#1738](https://github.com/emsesp/EMS-ESP32/issues/1738)
+- added shower min duration [[#1801](https://github.com/emsesp/EMS-ESP32/issues/1801)]
