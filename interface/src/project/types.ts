@@ -8,6 +8,8 @@ export interface Settings {
   syslog_host: string;
   syslog_port: number;
   boiler_heatingoff: boolean;
+  remote_timeout_en: boolean;
+  remote_timeout: number;
   shower_timer: boolean;
   shower_alert: boolean;
   shower_alert_coldshot: number;

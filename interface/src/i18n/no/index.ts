@@ -120,7 +120,10 @@ const no: Translation = {
   BYPASS_TOKEN: 'Utelat Aksess Token authorisering av API kall',
   READONLY: 'Aktiver read-only modus (blokker all EMS Tx Skriving)',
   UNDERCLOCK_CPU: 'Underklokking av prosessorhastighet',
+  REMOTE_TIMEOUT: 'Remote timeout',
+  REMOTE_TIMEOUT_EN: 'Disable remote control on missing roomtemperature',
   HEATINGOFF: 'Start boiler with forced heating off', // TODO translate
+  MIN_DURATION: 'Time for detection shower',
   ENABLE_SHOWER_TIMER: 'Aktiver Dusjtimer',
   ENABLE_SHOWER_ALERT: 'Aktiver Dusj-varsling',
   TRIGGER_TIME: 'Aktiveringstid',
