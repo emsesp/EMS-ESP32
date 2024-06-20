@@ -337,7 +337,9 @@ export enum ScheduleFlag {
   SCHEDULE_THU = 16,
   SCHEDULE_FRI = 32,
   SCHEDULE_SAT = 64,
-  SCHEDULE_TIMER = 128
+  SCHEDULE_TIMER = 128,
+  SCHEDULE_ONCHANGE = 129,
+  SCHEDULE_CONDITION = 130
 }
 
 export interface EntityItem {

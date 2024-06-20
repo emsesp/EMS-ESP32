@@ -57,11 +57,8 @@ void WebScheduler::read(WebScheduler & webScheduler, JsonObject root) {
 // call on initialization and also when the Schedule web page is saved
 // this loads the data into the internal class
 StateUpdateResult WebScheduler::update(JsonObject root, WebScheduler & webScheduler) {
-    for (ScheduleItem & scheduleItem : webScheduler.scheduleItems) {
-        Command::erase_command(EMSdevice::DeviceType::SCHEDULER, scheduleItem.name.c_str());
-    }
-
     // reset the list
+    Command::erase_device_commands(EMSdevice::DeviceType::SCHEDULER);
     webScheduler.scheduleItems.clear();
     EMSESP::webSchedulerService.ha_reset();
 
@@ -88,7 +85,7 @@ StateUpdateResult WebScheduler::update(JsonObject root, WebScheduler & webSchedu
                     EMSdevice::DeviceType::SCHEDULER,
                     webScheduler.scheduleItems.back().name.c_str(),
                     [webScheduler](const char * value, const int8_t id) {
-                        return EMSESP::webSchedulerService.command_setvalue(value, webScheduler.scheduleItems.back().name);
+                        return EMSESP::webSchedulerService.command_setvalue(value, id, webScheduler.scheduleItems.back().name.c_str());
                     },
                     FL_(schedule_cmd),
                     CommandFlag::ADMIN_ONLY);
@@ -102,20 +99,20 @@ StateUpdateResult WebScheduler::update(JsonObject root, WebScheduler & webSchedu
 }
 
 // set active by api command
-bool WebSchedulerService::command_setvalue(const char * value, const std::string name) {
+bool WebSchedulerService::command_setvalue(const char * value, const int8_t id, const char * name) {
     bool v;
     if (!Helpers::value2bool(value, v)) {
         return false;
     }
 
     for (ScheduleItem & scheduleItem : *scheduleItems_) {
-        if (scheduleItem.name == name) {
+        if (Helpers::toLower(scheduleItem.name) == Helpers::toLower(name)) {
             if (scheduleItem.active == v) {
                 return true;
             }
 
             scheduleItem.active = v;
-            publish_single(name.c_str(), v);
+            publish_single(name, v);
 
             if (EMSESP::mqtt_.get_publish_onchange(0)) {
                 publish();
@@ -212,7 +209,7 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
 
 // publish single value
 void WebSchedulerService::publish_single(const char * name, const bool state) {
-    if (!Mqtt::publish_single() || name == nullptr || name[0] == '\0') {
+    if (!Mqtt::enabled() || !Mqtt::publish_single() || name == nullptr || name[0] == '\0') {
         return;
     }
 
@@ -367,26 +364,66 @@ bool WebSchedulerService::command(const char * cmd, const char * data) {
     return false;
 }
 
+#include "shuntingYard.hpp"
+
+bool WebSchedulerService::onChange(const char * cmd) {
+    for (const ScheduleItem & scheduleItem : *scheduleItems_) {
+        if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_ONCHANGE && Helpers::toLower(scheduleItem.time) == Helpers::toLower(cmd)) {
+#ifdef EMESESP_DEBUG
+            // emsesp::EMSESP::logger().debug(scheduleItem.cmd.c_str());
+#endif
+            return command(scheduleItem.cmd.c_str(), compute(scheduleItem.value.c_str()).c_str());
+        }
+    }
+    return false;
+}
+
+void WebSchedulerService::condition() {
+    for (ScheduleItem & scheduleItem : *scheduleItems_) {
+        if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_CONDITION) {
+            auto match = compute(scheduleItem.time.c_str());
+#ifdef EMESESP_DEBUG
+            // emsesp::EMSESP::logger().debug("condition match: %s", match.c_str());
+#endif
+            if (!match.empty() && match[0] == '1') {
+                if (scheduleItem.retry_cnt == 0xFF) { // default unswitched
+                    scheduleItem.retry_cnt = command(scheduleItem.cmd.c_str(), compute(scheduleItem.value.c_str()).c_str()) ? 1 : 0xFF;
+                }
+            } else if (scheduleItem.retry_cnt == 1) {
+                scheduleItem.retry_cnt = 0xFF;
+            }
+        }
+    }
+}
+
 // process any scheduled jobs
 // checks on the minute and at startup
 void WebSchedulerService::loop() {
     // initialize static value on startup
-    static int8_t   last_tm_min     = -1; // invalid value also used for startup commands
+    static int8_t   last_tm_min     = -2; // invalid value also used for startup commands
     static uint32_t last_uptime_min = 0;
+    static uint32_t last_uptime_sec = 0;
 
     // get list of scheduler events and exit if it's empty
     if (scheduleItems_->size() == 0) {
         return;
     }
 
+    // check conditions every 10 seconds
+    uint32_t uptime_sec = uuid::get_uptime_sec() / 10;
+    if (last_uptime_sec != uptime_sec) {
+        condition();
+        last_uptime_sec = uptime_sec;
+    }
+
     // check startup commands
-    if (last_tm_min == -1) {
+    if (last_tm_min == -2) {
         for (ScheduleItem & scheduleItem : *scheduleItems_) {
             if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min == 0) {
-                scheduleItem.retry_cnt = command(scheduleItem.cmd.c_str(), scheduleItem.value.c_str()) ? 0xFF : 0;
+                scheduleItem.retry_cnt = command(scheduleItem.cmd.c_str(), compute(scheduleItem.value.c_str()).c_str()) ? 0xFF : 0;
             }
         }
-        last_tm_min = 0; // startup done, now use for RTC
+        last_tm_min = -1; // startup done, now use for RTC
     }
 
     // check timer every minute, sync to EMS-ESP clock
@@ -401,7 +438,7 @@ void WebSchedulerService::loop() {
             // scheduled timer commands
             if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min > 0
                 && (uptime_min % scheduleItem.elapsed_min == 0)) {
-                command(scheduleItem.cmd.c_str(), scheduleItem.value.c_str());
+                command(scheduleItem.cmd.c_str(), compute(scheduleItem.value.c_str()).c_str());
             }
         }
         last_uptime_min = uptime_min;
@@ -416,8 +453,9 @@ void WebSchedulerService::loop() {
         uint16_t real_min = tm->tm_hour * 60 + tm->tm_min;
 
         for (const ScheduleItem & scheduleItem : *scheduleItems_) {
-            if (scheduleItem.active && (real_dow & scheduleItem.flags) && real_min == scheduleItem.elapsed_min) {
-                command(scheduleItem.cmd.c_str(), scheduleItem.value.c_str());
+            uint8_t dow = scheduleItem.flags & SCHEDULEFLAG_SCHEDULE_TIMER ? 0 : scheduleItem.flags;
+            if (scheduleItem.active && (real_dow & dow) && real_min == scheduleItem.elapsed_min) {
+                command(scheduleItem.cmd.c_str(), compute(scheduleItem.value.c_str()).c_str());
             }
         }
         last_tm_min = tm->tm_min;

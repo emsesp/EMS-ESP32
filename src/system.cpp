@@ -124,6 +124,10 @@ bool System::command_allvalues(const char * value, const int8_t id, JsonObject o
     device_output = output["Custom Entities"].to<JsonObject>();
     EMSESP::webCustomEntityService.get_value_info(device_output, "");
 
+    // Scheduler
+    device_output = output["Scheduler"].to<JsonObject>();
+    EMSESP::webSchedulerService.get_value_info(device_output, "");
+
     // Sensors
     device_output = output["Analog Sensors"].to<JsonObject>();
     EMSESP::analogsensor_.get_value_info(device_output, "values");
@@ -1268,6 +1272,44 @@ bool System::saveSettings(const char * filename, const char * section, JsonObjec
     return false; // not found
 }
 
+bool System::get_value_info(JsonObject root, const char * command) {
+    if (command == nullptr || strlen(command) == 0) {
+        LOG_ERROR("empty system command");
+        return false;
+    }
+    char cmd[COMMAND_MAX_LENGTH];
+    strlcpy(cmd, command, sizeof(cmd));
+    char * val = strstr(cmd, "/value");
+    if (val) {
+        val[0] = '\0';
+    }
+    char * dash = strchr(cmd, '/');
+    if (dash) {
+        *dash = '\0';
+        dash++;
+    }
+    if (command_info("", 0, root)) {
+        std::string s;
+        if (dash && root[cmd].containsKey(dash)) {
+            s = root[cmd][dash].as<std::string>();
+        } else if (root.containsKey(cmd)) {
+            s = root[cmd].as<std::string>();
+        }
+        if (!s.empty()) {
+            root.clear();
+            if (val) {
+                root["api_data"] = s;
+            } else {
+                root["value"] = s;
+            }
+            return true;
+        }
+    }
+    root.clear();
+    LOG_ERROR("system command not found: %s from %s", cmd, command);
+    return false;
+}
+
 // export status information including the device information
 // http://ems-esp/api/system/info
 bool System::command_info(const char * value, const int8_t id, JsonObject output) {
@@ -1448,13 +1490,13 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     // Settings
     node = output["Settings"].to<JsonObject>();
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        node["board profile"]      = settings.board_profile;
-        node["locale"]             = settings.locale;
-        node["tx mode"]            = settings.tx_mode;
-        node["ems bus id"]         = settings.ems_bus_id;
-        node["shower timer"]       = settings.shower_timer;
-        node["shower alert"]       = settings.shower_alert;
-        node["shpwe_min_duration"] = settings.shower_min_duration; // seconds
+        node["board profile"]       = settings.board_profile;
+        node["locale"]              = settings.locale;
+        node["tx mode"]             = settings.tx_mode;
+        node["ems bus id"]          = settings.ems_bus_id;
+        node["shower timer"]        = settings.shower_timer;
+        node["shower min duration"] = settings.shower_min_duration; // seconds
+        node["shower alert"]        = settings.shower_alert;
         if (settings.shower_alert) {
             node["shower alert coldshot"] = settings.shower_alert_coldshot; // seconds
             node["shower alert trigger"]  = settings.shower_alert_trigger;  // minutes
@@ -1499,7 +1541,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
                     obj["product id"] = emsdevice->product_id();
                     obj["version"]    = emsdevice->version();
                     obj["entities"]   = emsdevice->count_entities();
-                    char result[300];
+                    char result[500];
                     (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::RECEIVED);
                     if (result[0] != '\0') {
                         obj["handlers received"] = result; // don't show handlers if there aren't any

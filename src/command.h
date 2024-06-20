@@ -126,6 +126,7 @@ class Command {
     static Command::CmdFunction * find_command(const uint8_t device_type, const uint8_t device_id, const char * cmd, const uint8_t flag);
     static std::string            tagged_cmd(const std::string & cmd, const uint8_t flag);
 
+    static void erase_device_commands(const uint8_t device_type);
     static void erase_command(const uint8_t device_type, const char * cmd, uint8_t flag = CommandFlag::CMD_FLAG_DEFAULT);
     static void show(uuid::console::Shell & shell, uint8_t device_type, bool verbose);
     static void show_devices(uuid::console::Shell & shell);

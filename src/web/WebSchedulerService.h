@@ -22,8 +22,10 @@
 #define EMSESP_SCHEDULER_FILE "/config/emsespScheduler.json"
 #define EMSESP_SCHEDULER_SERVICE_PATH "/rest/schedule" // GET and POST
 
-#define SCHEDULEFLAG_SCHEDULE_TIMER 0x80 // 7th bit for Timer
-#define MAX_STARTUP_RETRIES 3            // retry the start-up commands x times
+#define SCHEDULEFLAG_SCHEDULE_TIMER 0x80     // 7th bit for Timer
+#define SCHEDULEFLAG_SCHEDULE_ONCHANGE 0x81  // 7th+1st bit for OnChange
+#define SCHEDULEFLAG_SCHEDULE_CONDITION 0x82 // 7th+2nd bit for Condition
+#define MAX_STARTUP_RETRIES 3                // retry the start-up commands x times
 
 namespace emsesp {
 
@@ -56,11 +58,12 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
     void publish_single(const char * name, const bool state);
     void publish(const bool force = false);
     bool has_commands();
-    bool command_setvalue(const char * value, const std::string name);
+    bool command_setvalue(const char * value, const int8_t id, const char * name);
     bool get_value_info(JsonObject output, const char * cmd);
     void ha_reset() {
         ha_registered_ = false;
     }
+    bool onChange(const char * cmd);
 
 #if defined(EMSESP_TEST)
     void test();
@@ -71,6 +74,7 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
   private:
 #endif
     bool command(const char * cmd, const char * data);
+    void condition();
 
     HttpEndpoint<WebScheduler>  _httpEndpoint;
     FSPersistence<WebScheduler> _fsPersistence;

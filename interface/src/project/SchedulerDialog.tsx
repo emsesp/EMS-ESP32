@@ -91,10 +91,10 @@ const SchedulerDialog = ({
 
   const getFlagString = (f: number) => {
     const new_flags: string[] = [];
-    if ((f & 1) === 1) {
+    if ((f & 129) === 1) {
       new_flags.push('1');
     }
-    if ((f & 2) === 2) {
+    if ((f & 130) === 2) {
       new_flags.push('2');
     }
     if ((f & 4) === 4) {
@@ -112,25 +112,44 @@ const SchedulerDialog = ({
     if ((f & 64) === 64) {
       new_flags.push('64');
     }
-    if ((f & 128) === 128) {
+    if ((f & 131) === 128) {
       new_flags.push('128');
+    }
+    if ((f & 131) === 129) {
+      new_flags.push('129');
+    }
+    if ((f & 131) === 130) {
+      new_flags.push('130');
     }
     return new_flags;
   };
+
+  const isTimer = editItem.flags === ScheduleFlag.SCHEDULE_TIMER;
+  const isCondition = editItem.flags === ScheduleFlag.SCHEDULE_CONDITION;
+  const isOnChange = editItem.flags === ScheduleFlag.SCHEDULE_ONCHANGE;
 
   const showFlag = (si: ScheduleItem, flag: number) => (
     <Typography
       variant="button"
       sx={{ fontSize: 10 }}
-      color={(si.flags & flag) === flag ? 'primary' : 'grey'}
+      color={
+        (isOnChange && flag !== ScheduleFlag.SCHEDULE_ONCHANGE) ||
+        (isCondition && flag !== ScheduleFlag.SCHEDULE_CONDITION)
+          ? 'grey'
+          : (si.flags & flag) === flag
+            ? 'primary'
+            : 'grey'
+      }
     >
       {flag === ScheduleFlag.SCHEDULE_TIMER
         ? LL.TIMER(0)
-        : dow[Math.log(flag) / Math.log(2)]}
+        : flag === ScheduleFlag.SCHEDULE_ONCHANGE
+          ? 'On Change'
+          : flag === ScheduleFlag.SCHEDULE_CONDITION
+            ? 'Condition'
+            : dow[Math.log(flag) / Math.log(2)]}
     </Typography>
   );
-
-  const isTimer = editItem.flags === ScheduleFlag.SCHEDULE_TIMER;
 
   return (
     <Dialog sx={dialogStyle} open={open} onClose={close}>
@@ -179,7 +198,7 @@ const SchedulerDialog = ({
                 sx={{ bgcolor: '#334f65' }}
                 variant="contained"
                 onClick={() => {
-                  setEditItem({ ...editItem, flags: 0 });
+                  setEditItem({ ...editItem, flags: ScheduleFlag.SCHEDULE_TIMER });
                 }}
               >
                 {showFlag(editItem, ScheduleFlag.SCHEDULE_TIMER)}
@@ -199,6 +218,66 @@ const SchedulerDialog = ({
               </Button>
             )}
           </Box>
+          <Box>
+            {isOnChange ? (
+              <Button
+                size="large"
+                sx={{ bgcolor: '#334f65' }}
+                variant="contained"
+                onClick={() => {
+                  setEditItem({
+                    ...editItem,
+                    flags: ScheduleFlag.SCHEDULE_ONCHANGE
+                  });
+                }}
+              >
+                {showFlag(editItem, ScheduleFlag.SCHEDULE_ONCHANGE)}
+              </Button>
+            ) : (
+              <Button
+                size="large"
+                variant="outlined"
+                onClick={() => {
+                  setEditItem({
+                    ...editItem,
+                    flags: ScheduleFlag.SCHEDULE_ONCHANGE
+                  });
+                }}
+              >
+                {showFlag(editItem, ScheduleFlag.SCHEDULE_ONCHANGE)}
+              </Button>
+            )}
+          </Box>
+          <Box>
+            {isCondition ? (
+              <Button
+                size="large"
+                sx={{ bgcolor: '#334f65' }}
+                variant="contained"
+                onClick={() => {
+                  setEditItem({
+                    ...editItem,
+                    flags: ScheduleFlag.SCHEDULE_CONDITION
+                  });
+                }}
+              >
+                {showFlag(editItem, ScheduleFlag.SCHEDULE_CONDITION)}
+              </Button>
+            ) : (
+              <Button
+                size="large"
+                variant="outlined"
+                onClick={() => {
+                  setEditItem({
+                    ...editItem,
+                    flags: ScheduleFlag.SCHEDULE_CONDITION
+                  });
+                }}
+              >
+                {showFlag(editItem, ScheduleFlag.SCHEDULE_CONDITION)}
+              </Button>
+            )}
+          </Box>
         </Box>
         <Grid container>
           <BlockFormControlLabel
@@ -213,18 +292,31 @@ const SchedulerDialog = ({
           />
         </Grid>
         <Grid container>
-          <TextField
-            name="time"
-            type="time"
-            label={isTimer ? LL.TIMER(1) : LL.TIME(1)}
-            value={editItem.time}
-            margin="normal"
-            onChange={updateFormValue}
-          />
-          {isTimer && (
-            <Box color="warning.main" ml={2} mt={4}>
-              <Typography variant="body2">{LL.SCHEDULER_HELP_2()}</Typography>
-            </Box>
+          {isCondition || isOnChange ? (
+            <TextField
+              name="time"
+              label={isCondition ? 'Condition' : 'On Change Value'}
+              fullWidth
+              value={editItem.time}
+              margin="normal"
+              onChange={updateFormValue}
+            />
+          ) : (
+            <>
+              <TextField
+                name="time"
+                type="time"
+                label={isTimer ? LL.TIMER(1) : LL.TIME(1)}
+                value={editItem.time}
+                margin="normal"
+                onChange={updateFormValue}
+              />
+              {isTimer && (
+                <Box color="warning.main" ml={2} mt={4}>
+                  <Typography variant="body2">{LL.SCHEDULER_HELP_2()}</Typography>
+                </Box>
+              )}
+            </>
           )}
         </Grid>
         <ValidatedTextField
