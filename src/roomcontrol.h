@@ -34,6 +34,7 @@ class Roomctrl {
     static bool is_remote(const uint8_t hc) {
         return (hc < 4 && remotetemp_[hc] != EMS_VALUE_INT16_NOTSET);
     }
+    static void set_timeout(uint8_t t);
 
   private:
     static constexpr uint32_t SEND_INTERVAL = 15000;    // 15 sec
@@ -59,6 +60,7 @@ class Roomctrl {
     static uint8_t  remotehum_[HCS];
     static uint8_t  sendtype_[HCS];
     static uint8_t  type_[HCS]; // type is product-id 113 for RC20 or 109 for Junkers FB10
+    static uint32_t timeout_;
 };
 
 } // namespace emsesp

@@ -43,6 +43,8 @@ void WebSettings::read(WebSettings & settings, JsonObject root) {
     root["syslog_host"]           = settings.syslog_host;
     root["syslog_port"]           = settings.syslog_port;
     root["boiler_heatingoff"]     = settings.boiler_heatingoff;
+    root["remote_timeout"]        = settings.remote_timeout;
+    root["remote_timeout_en"]     = settings.remote_timeout_enabled;
     root["shower_timer"]          = settings.shower_timer;
     root["shower_alert"]          = settings.shower_alert;
     root["shower_alert_coldshot"] = settings.shower_alert_coldshot;
@@ -238,7 +240,7 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     prev                          = settings.shower_alert_trigger;
     settings.shower_alert_trigger = root["shower_alert_trigger"] | EMSESP_DEFAULT_SHOWER_ALERT_TRIGGER;
     check_flag(prev, settings.shower_alert_trigger, ChangeFlags::SHOWER);
-        prev                          = settings.shower_min_duration;
+    prev                         = settings.shower_min_duration;
     settings.shower_min_duration = root["shower_min_duration"] | EMSESP_DEFAULT_SHOWER_MIN_DURATION;
     check_flag(prev, settings.shower_min_duration, ChangeFlags::SHOWER);
     prev                           = settings.shower_alert_coldshot;
@@ -300,9 +302,12 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     settings.trace_raw = root["trace_raw"] | EMSESP_DEFAULT_TRACELOG_RAW;
     EMSESP::trace_raw(settings.trace_raw);
 
-    settings.notoken_api       = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
-    settings.solar_maxflow     = root["solar_maxflow"] | EMSESP_DEFAULT_SOLAR_MAXFLOW;
-    settings.boiler_heatingoff = root["boiler_heatingoff"] | EMSESP_DEFAULT_BOILER_HEATINGOFF;
+    settings.notoken_api            = root["notoken_api"] | EMSESP_DEFAULT_NOTOKEN_API;
+    settings.solar_maxflow          = root["solar_maxflow"] | EMSESP_DEFAULT_SOLAR_MAXFLOW;
+    settings.boiler_heatingoff      = root["boiler_heatingoff"] | EMSESP_DEFAULT_BOILER_HEATINGOFF;
+    settings.remote_timeout         = root["remote_timeout"] | EMSESP_DEFAULT_REMOTE_TIMEOUT;
+    settings.remote_timeout_enabled = root["remote_timeout_en"] | EMSESP_DEFAULT_REMOTE_TIMEOUT_EN;
+    emsesp::Roomctrl::set_timeout(settings.remote_timeout_enabled ? settings.remote_timeout : 0);
 
     settings.fahrenheit = root["fahrenheit"];
     EMSESP::system_.fahrenheit(settings.fahrenheit);

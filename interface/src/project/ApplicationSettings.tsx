@@ -509,6 +509,45 @@ const ApplicationSettings: FC = () => {
         />
         <Grid
           container
+          spacing={1}
+          direction="row"
+          justifyContent="flex-start"
+          alignItems="flex-start"
+        >
+          <Grid item xs={12} sm={6} md={4}>
+            <BlockFormControlLabel
+              control={
+                <Checkbox
+                  checked={data.remote_timeout_en}
+                  onChange={updateFormValue}
+                  name="remote_timeout_en"
+                />
+              }
+              label={LL.REMOTE_TIMEOUT_EN()}
+            />
+          </Grid>
+          {data.remote_timeout_en && (
+            <Grid item xs={12} sm={6} md={4}>
+              <ValidatedTextField
+                fieldErrors={fieldErrors}
+                name="remote_timeout"
+                label={LL.REMOTE_TIMEOUT()}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">{LL.HOURS()}</InputAdornment>
+                  )
+                }}
+                fullWidth
+                variant="outlined"
+                value={numberValue(data.remote_timeout)}
+                type="number"
+                onChange={updateFormValue}
+              />
+            </Grid>
+          )}
+        </Grid>
+        <Grid
+          container
           spacing={0}
           direction="row"
           justifyContent="flex-start"
@@ -551,8 +590,7 @@ const ApplicationSettings: FC = () => {
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="shower_min_duration"
-                // TODO translate
-                label="Dp this"
+                  label={LL.MIN_DURATION()}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>

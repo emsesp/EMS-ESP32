@@ -34,11 +34,13 @@ class WebSettings {
     uint8_t  tx_mode;
     uint8_t  ems_bus_id;
     bool     boiler_heatingoff;
+    uint8_t  remote_timeout;
+    uint8_t  remote_timeout_enabled;
     bool     shower_timer;
     bool     shower_alert;
-    uint8_t  shower_alert_trigger; // minutes
+    uint8_t  shower_alert_trigger;  // minutes
     uint8_t  shower_alert_coldshot; // seconds
-    uint32_t shower_min_duration; // seconds
+    uint32_t shower_min_duration;   // seconds
     bool     syslog_enabled;
     int8_t   syslog_level; // uuid::log::Level
     uint32_t syslog_mark_interval;

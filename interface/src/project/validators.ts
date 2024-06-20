@@ -261,6 +261,16 @@ export const createSettingsValidator = (settings: Settings) =>
           message: 'Time must be between 1 and 10 seconds'
         }
       ]
+    }),
+    ...(settings.remote_timeout_en && {
+      remote_timeout: [
+        {
+          type: 'number',
+          min: 1,
+          max: 240,
+          message: 'Timeout must be between 1 and 240 hours'
+        }
+      ]
     })
   });
 
