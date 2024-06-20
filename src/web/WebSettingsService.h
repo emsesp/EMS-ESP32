@@ -36,8 +36,9 @@ class WebSettings {
     bool     boiler_heatingoff;
     bool     shower_timer;
     bool     shower_alert;
-    uint8_t  shower_alert_trigger;
-    uint8_t  shower_alert_coldshot;
+    uint8_t  shower_alert_trigger; // minutes
+    uint8_t  shower_alert_coldshot; // seconds
+    uint32_t shower_min_duration; // seconds
     bool     syslog_enabled;
     int8_t   syslog_level; // uuid::log::Level
     uint32_t syslog_mark_interval;

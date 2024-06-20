@@ -28,8 +28,9 @@ void Shower::start() {
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
         shower_timer_          = settings.shower_timer;
         shower_alert_          = settings.shower_alert;
-        shower_alert_trigger_  = settings.shower_alert_trigger * 60000; // convert from minutes
-        shower_alert_coldshot_ = settings.shower_alert_coldshot * 1000; // convert from seconds
+        shower_alert_trigger_  = settings.shower_alert_trigger * 60; // convert from minutes to seconds
+        shower_alert_coldshot_ = settings.shower_alert_coldshot;     // in seconds
+        shower_min_duration_   = settings.shower_min_duration;       // in seconds
     });
 
     Command::add(
@@ -60,7 +61,8 @@ void Shower::loop() {
         return;
     }
 
-    uint32_t time_now = uuid::get_uptime();
+    // uint32_t time_now = uuid::get_uptime(); // in ms
+    auto time_now = uuid::get_uptime_sec(); // in sec
 
     // if already in cold mode, ignore all this logic until we're out of the cold blast
     if (!doing_cold_shot_) {
@@ -78,7 +80,7 @@ void Shower::loop() {
             } else {
                 // hot water has been  on for a while
                 // first check to see if hot water has been on long enough to be recognized as a Shower/Bath
-                if (!shower_state_ && (time_now - timer_start_) > SHOWER_MIN_DURATION) {
+                if (!shower_state_ && (time_now - timer_start_) > shower_min_duration_) {
                     set_shower_state(true);
                     LOG_DEBUG("hot water still running, starting shower timer");
                 }
@@ -99,7 +101,7 @@ void Shower::loop() {
                 // because its unsigned long, can't have negative so check if length is less than OFFSET_TIME
                 if ((timer_pause_ - timer_start_) > SHOWER_OFFSET_TIME) {
                     duration_ = (timer_pause_ - timer_start_ - SHOWER_OFFSET_TIME);
-                    if (duration_ > SHOWER_MIN_DURATION) {
+                    if (duration_ > shower_min_duration_) {
                         JsonDocument doc;
 
                         // duration in seconds
@@ -145,7 +147,7 @@ void Shower::shower_alert_start() {
     (void)Command::call(EMSdevice::DeviceType::BOILER, "tapactivated", "false", 9);
     doing_cold_shot_   = true;
     force_coldshot     = false;
-    alert_timer_start_ = uuid::get_uptime(); // timer starts now
+    alert_timer_start_ = uuid::get_uptime_sec(); // timer starts now
 }
 
 // turn back on the hot water for the shower
