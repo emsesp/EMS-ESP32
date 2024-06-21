@@ -56,6 +56,7 @@ class Token {
     const bool        rightAssociative;
 };
 
+// find tokens
 std::deque<Token> exprToTokens(const std::string & expr) {
     std::deque<Token> tokens;
 
@@ -204,7 +205,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
     return tokens;
 }
 
-
+// sort tokens to RPN form
 std::deque<Token> shuntingYard(const std::deque<Token> & tokens) {
     std::deque<Token>  queue;
     std::vector<Token> stack;
@@ -282,8 +283,10 @@ std::deque<Token> shuntingYard(const std::deque<Token> & tokens) {
             stack.pop_back();
         } break;
 
+        case Token::Type::Unknown:
         default:
             return {};
+            break;
         }
     }
 
@@ -303,6 +306,7 @@ std::deque<Token> shuntingYard(const std::deque<Token> & tokens) {
     return queue;
 }
 
+// check if string is a number
 bool isnum(const std::string & s) {
     if (s.find_first_not_of("0123456789.") == std::string::npos || (s[0] == '-' && s.find_first_not_of("0123456789.", 1) == std::string::npos)) {
         return true;
@@ -356,6 +360,7 @@ std::string commands(std::string & expr) {
     return expr;
 }
 
+// checks for logic value
 int to_logic(const std::string & s) {
     if (s[0] == '1' || s == "on" || s == "ON" || s == "true") {
         return 1;
@@ -363,9 +368,10 @@ int to_logic(const std::string & s) {
     if (s[0] == '0' || s == "off" || s == "OFF" || s == "false") {
         return 0;
     }
-    return 0;
+    return -1;
 }
 
+// number to string
 std::string to_string(double d) {
     if (d == static_cast<int>(d)) {
         return std::to_string(static_cast<int>(d));
@@ -373,8 +379,9 @@ std::string to_string(double d) {
     return std::to_string(d);
 }
 
+// RPN calculator
 std::string compute(const std::string & expr) {
-    auto expr_new = expr; //emsesp::Helpers::toLower(expr);
+    auto expr_new = emsesp::Helpers::toLower(expr);
     // emsesp::EMSESP::logger().info("calculate: %s", expr_new.c_str());
     commands(expr_new);
     // emsesp::EMSESP::logger().info("calculate: %s", expr_new.c_str());
@@ -413,10 +420,12 @@ std::string compute(const std::string & expr) {
                 stack.push_back(to_string(-1 * std::stod(rhs)));
                 break;
             case '!':
+                if (to_logic(rhs) < 0) {
+                    return "";
+                }
                 stack.push_back(to_logic(rhs) == 0 ? "1" : "0");
                 break;
             }
-
         } break;
         case Token::Type::Compare: {
             if (stack.size() < 2) {
@@ -483,6 +492,9 @@ std::string compute(const std::string & expr) {
             stack.pop_back();
             const auto lhs = to_logic(stack.back());
             stack.pop_back();
+            if (rhs < 0 || lhs < 0) {
+                return "";
+            }
             switch (token.str[0]) {
             default:
                 return "";
@@ -532,9 +544,12 @@ std::string compute(const std::string & expr) {
                 break;
             }
         } break;
-
+        case Token::Type::LeftParen:
+        case Token::Type::RightParen:
+        case Token::Type::Unknown:
         default:
             return "";
+            break;
         }
     }
     return stack.back();

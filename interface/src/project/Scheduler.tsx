@@ -227,7 +227,7 @@ const Scheduler: FC = () => {
             {flag === ScheduleFlag.SCHEDULE_TIMER
               ? LL.TIMER(0)
               : flag === ScheduleFlag.SCHEDULE_ONCHANGE
-                ? 'OnChange'
+                ? 'On Change'
                 : flag === ScheduleFlag.SCHEDULE_CONDITION
                   ? 'Condition'
                   : dow[Math.log(flag) / Math.log(2)]}
@@ -244,7 +244,7 @@ const Scheduler: FC = () => {
         data={{
           nodes: schedule
             .filter((si) => !si.deleted)
-            .sort((a, b) => a.time.localeCompare(b.time))
+            .sort((a, b) => a.cmd.localeCompare(b.cmd))
         }}
         theme={schedule_theme}
         layout={{ custom: true }}

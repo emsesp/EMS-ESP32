@@ -2087,6 +2087,19 @@ let emsesp_customentities = {
       value_type: 0,
       writeable: false,
       value: 0
+    },
+    {
+      id: 2,
+      ram: 1,
+      device_id: 0,
+      type_id: 0,
+      offset: 0,
+      factor: 1,
+      name: 'setpoint',
+      uom: 1,
+      value_type: 0,
+      writeable: true,
+      value: 21
     }
   ]
 };
@@ -2129,11 +2142,29 @@ let emsesp_schedule = {
       cmd: 'system/restart',
       value: '',
       name: 'auto_restart'
+    },
+    {
+      id: 5,
+      active: false,
+      flags: 130,
+      time: 'system/network info/rssi < -70',
+      cmd: 'system/restart',
+      value: '',
+      name: 'bad_wifi'
+    },
+    {
+      id: 6,
+      active: false,
+      flags: 129,
+      time: 'boiler/outdoortemp',
+      cmd: 'boiler/selflowtemp',
+      value: '(custom/setpoint - boiler/outdoortemp) * 2.8 + 3',
+      name: 'heatingcurve'
     }
   ]
 };
 
-// SCHEDULE
+// MODULES
 let emsesp_modules = {
   // 'modules': []
   "modules": [
