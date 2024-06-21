@@ -372,7 +372,7 @@ bool WebSchedulerService::onChange(const char * cmd) {
 #ifdef EMESESP_DEBUG
             // emsesp::EMSESP::logger().debug(scheduleItem.cmd.c_str());
 #endif
-            return command(scheduleItem.cmd.c_str(), compute(scheduleItem.value.c_str()).c_str());
+            return command(scheduleItem.cmd.c_str(), compute(scheduleItem.value).c_str());
         }
     }
     return false;
@@ -381,13 +381,13 @@ bool WebSchedulerService::onChange(const char * cmd) {
 void WebSchedulerService::condition() {
     for (ScheduleItem & scheduleItem : *scheduleItems_) {
         if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_CONDITION) {
-            auto match = compute(scheduleItem.time.c_str());
+            auto match = compute(scheduleItem.time);
 #ifdef EMESESP_DEBUG
             // emsesp::EMSESP::logger().debug("condition match: %s", match.c_str());
 #endif
             if (!match.empty() && match[0] == '1') {
                 if (scheduleItem.retry_cnt == 0xFF) { // default unswitched
-                    scheduleItem.retry_cnt = command(scheduleItem.cmd.c_str(), compute(scheduleItem.value.c_str()).c_str()) ? 1 : 0xFF;
+                    scheduleItem.retry_cnt = command(scheduleItem.cmd.c_str(), compute(scheduleItem.value).c_str()) ? 1 : 0xFF;
                 }
             } else if (scheduleItem.retry_cnt == 1) {
                 scheduleItem.retry_cnt = 0xFF;
@@ -420,7 +420,7 @@ void WebSchedulerService::loop() {
     if (last_tm_min == -2) {
         for (ScheduleItem & scheduleItem : *scheduleItems_) {
             if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min == 0) {
-                scheduleItem.retry_cnt = command(scheduleItem.cmd.c_str(), compute(scheduleItem.value.c_str()).c_str()) ? 0xFF : 0;
+                scheduleItem.retry_cnt = command(scheduleItem.cmd.c_str(), compute(scheduleItem.value).c_str()) ? 0xFF : 0;
             }
         }
         last_tm_min = -1; // startup done, now use for RTC
@@ -438,7 +438,7 @@ void WebSchedulerService::loop() {
             // scheduled timer commands
             if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min > 0
                 && (uptime_min % scheduleItem.elapsed_min == 0)) {
-                command(scheduleItem.cmd.c_str(), compute(scheduleItem.value.c_str()).c_str());
+                command(scheduleItem.cmd.c_str(), compute(scheduleItem.value).c_str());
             }
         }
         last_uptime_min = uptime_min;
@@ -455,7 +455,7 @@ void WebSchedulerService::loop() {
         for (const ScheduleItem & scheduleItem : *scheduleItems_) {
             uint8_t dow = scheduleItem.flags & SCHEDULEFLAG_SCHEDULE_TIMER ? 0 : scheduleItem.flags;
             if (scheduleItem.active && (real_dow & dow) && real_min == scheduleItem.elapsed_min) {
-                command(scheduleItem.cmd.c_str(), compute(scheduleItem.value.c_str()).c_str());
+                command(scheduleItem.cmd.c_str(), compute(scheduleItem.value).c_str());
             }
         }
         last_tm_min = tm->tm_min;
