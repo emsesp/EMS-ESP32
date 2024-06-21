@@ -590,7 +590,7 @@ const ApplicationSettings: FC = () => {
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="shower_min_duration"
-                  label={LL.MIN_DURATION()}
+                label={LL.MIN_DURATION()}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
