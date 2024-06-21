@@ -1290,10 +1290,25 @@ bool System::get_value_info(JsonObject root, const char * command) {
     }
     if (command_info("", 0, root)) {
         std::string s;
-        if (dash && root[cmd].containsKey(dash)) {
-            s = root[cmd][dash].as<std::string>();
-        } else if (root.containsKey(cmd)) {
-            s = root[cmd].as<std::string>();
+        // Loop through all the key-value pairs in root to find the key case independent
+        if (dash) { // search the nest first
+            for (JsonPair p : root) {
+                if (p.value().is<JsonObject>() && Helpers::toLower(p.key().c_str()) == cmd) {
+                    for (JsonPair p1 : p.value().as<JsonObject>()) {
+                        if (Helpers::toLower(p1.key().c_str()) == dash && !p1.value().is<JsonObject>()) {
+                            s = p1.value().as<std::string>();
+                            break;
+                        }
+                    }
+                }
+            }
+        } else {
+            for (JsonPair p : root) {
+                if (Helpers::toLower(p.key().c_str()) == cmd && !p.value().is<JsonObject>()) {
+                    s = p.value().as<std::string>();
+                    break;
+                }
+            }
         }
         if (!s.empty()) {
             root.clear();
@@ -1306,7 +1321,7 @@ bool System::get_value_info(JsonObject root, const char * command) {
         }
     }
     root.clear();
-    LOG_ERROR("system command not found: %s from %s", cmd, command);
+    LOG_ERROR("system command '%s' not found", command);
     return false;
 }
 

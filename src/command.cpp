@@ -320,8 +320,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     // for example info, values, commands, etc
     bool single_command = (!value || !strlen(value));
     if (single_command) {
-        // exception 1: anything that is from System
-        // exception 2: boiler coldshot command
+        // exception: boiler coldshot command
         bool get_attributes = (!cf || !cf->cmdfunction_json_) && (strcmp(cmd, F_(coldshot)) != 0);
 
         if (get_attributes) {
@@ -444,7 +443,7 @@ void Command::erase_device_commands(const uint8_t device_type) {
     auto it = cmdfunctions_.end();
     do {
         int i = it - cmdfunctions_.begin();
-        if (cmdfunctions_[i].device_type_==device_type) {
+        if (cmdfunctions_[i].device_type_ == device_type) {
             cmdfunctions_.erase(it);
         }
     } while (it-- > cmdfunctions_.begin());
