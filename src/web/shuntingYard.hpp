@@ -283,8 +283,10 @@ std::deque<Token> shuntingYard(const std::deque<Token> & tokens) {
             stack.pop_back();
         } break;
 
+        case Token::Type::Unknown:
         default:
             return {};
+            break;
         }
     }
 
@@ -424,7 +426,6 @@ std::string compute(const std::string & expr) {
                 stack.push_back(to_logic(rhs) == 0 ? "1" : "0");
                 break;
             }
-
         } break;
         case Token::Type::Compare: {
             if (stack.size() < 2) {
@@ -543,9 +544,12 @@ std::string compute(const std::string & expr) {
                 break;
             }
         } break;
-
+        case Token::Type::LeftParen:
+        case Token::Type::RightParen:
+        case Token::Type::Unknown:
         default:
             return "";
+            break;
         }
     }
     return stack.back();
