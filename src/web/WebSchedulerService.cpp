@@ -34,7 +34,9 @@ void WebSchedulerService::begin() {
     EMSESP::webSchedulerService.read([&](WebScheduler & webScheduler) { scheduleItems_ = &webScheduler.scheduleItems; });
 
     EMSESP::logger().info("Starting Scheduler service");
-    Mqtt::subscribe(EMSdevice::DeviceType::SCHEDULER, "scheduler/#", nullptr); // use empty function callback
+    char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+    snprintf(topic, sizeof(topic), "%s/#", F_(scheduler));
+    Mqtt::subscribe(EMSdevice::DeviceType::SCHEDULER, topic, nullptr); // use empty function callback
 }
 
 // this creates the scheduler file, saving it to the FS
@@ -261,7 +263,7 @@ void WebSchedulerService::publish(const bool force) {
             if (Mqtt::ha_enabled() && !ha_registered_) {
                 JsonDocument config;
                 char         stat_t[50];
-                snprintf(stat_t, sizeof(stat_t), "%s/scheduler_data", Mqtt::base().c_str());
+                snprintf(stat_t, sizeof(stat_t), "%s/%s_data", Mqtt::base().c_str(), F_(scheduler));
                 config["stat_t"] = stat_t;
 
                 char val_obj[50];
@@ -271,7 +273,7 @@ void WebSchedulerService::publish(const bool force) {
                 config["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + "}}";
 
                 char uniq_s[70];
-                snprintf(uniq_s, sizeof(uniq_s), "scheduler_%s", scheduleItem.name.c_str());
+                snprintf(uniq_s, sizeof(uniq_s), "%s_%s", F_(scheduler), scheduleItem.name.c_str());
 
                 config["obj_id"]  = uniq_s;
                 config["uniq_id"] = uniq_s; // same as object_id
@@ -280,8 +282,8 @@ void WebSchedulerService::publish(const bool force) {
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
                 char command_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
 
-                snprintf(topic, sizeof(topic), "switch/%s/scheduler_%s/config", Mqtt::basename().c_str(), scheduleItem.name.c_str());
-                snprintf(command_topic, sizeof(command_topic), "%s/scheduler/%s", Mqtt::base().c_str(), scheduleItem.name.c_str());
+                snprintf(topic, sizeof(topic), "switch/%s/%s_%s/config", Mqtt::basename().c_str(), F_(scheduler), scheduleItem.name.c_str());
+                snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), F_(scheduler), scheduleItem.name.c_str());
                 config["cmd_t"] = command_topic;
 
                 if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
@@ -296,7 +298,7 @@ void WebSchedulerService::publish(const bool force) {
                     config["pl_off"] = Helpers::render_boolean(result, false);
                 }
 
-                Mqtt::add_ha_sections_to_doc("scheduler", stat_t, config, !ha_created, val_cond);
+                Mqtt::add_ha_sections_to_doc(F_(scheduler), stat_t, config, !ha_created, val_cond);
 
                 ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
             }
@@ -304,7 +306,9 @@ void WebSchedulerService::publish(const bool force) {
     }
     ha_registered_ = ha_created;
     if (doc.size() > 0) {
-        Mqtt::queue_publish("scheduler_data", doc.as<JsonObject>());
+        char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+        snprintf(topic, sizeof(topic), "%s_data", F_(scheduler));
+        Mqtt::queue_publish(topic, doc.as<JsonObject>());
     }
 }
 
@@ -334,7 +338,7 @@ bool WebSchedulerService::command(const char * cmd, const char * data) {
     JsonObject   output = doc_output.to<JsonObject>();
 
     // prefix "api/" to command string
-    char command_str[100];
+    char command_str[COMMAND_MAX_LENGTH];
     snprintf(command_str, sizeof(command_str), "/api/%s", cmd);
     uint8_t return_code = Command::process(command_str, true, input, output); // admin set
 
@@ -368,7 +372,8 @@ bool WebSchedulerService::command(const char * cmd, const char * data) {
 
 bool WebSchedulerService::onChange(const char * cmd) {
     for (const ScheduleItem & scheduleItem : *scheduleItems_) {
-        if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_ONCHANGE && Helpers::toLower(scheduleItem.time) == Helpers::toLower(cmd)) {
+        if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_ONCHANGE
+            && Helpers::toLower(scheduleItem.time).find(Helpers::toLower(cmd)) != std::string::npos) {
 #ifdef EMESESP_DEBUG
             // emsesp::EMSESP::logger().debug(scheduleItem.cmd.c_str());
 #endif

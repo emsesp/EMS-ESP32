@@ -37,7 +37,9 @@ void WebCustomEntityService::begin() {
     // save a local pointer to the item list
     EMSESP::webCustomEntityService.read([&](WebCustomEntity & webEntity) { customEntityItems_ = &webEntity.customEntityItems; });
     EMSESP::logger().info("Starting Custom Entity service");
-    Mqtt::subscribe(EMSdevice::DeviceType::CUSTOM, "custom/#", nullptr); // use empty function callback
+    char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+    snprintf(topic, sizeof(topic), "%s/#", F_(custom));
+    Mqtt::subscribe(EMSdevice::DeviceType::CUSTOM, topic, nullptr); // use empty function callback
 }
 
 // this creates the entity file, saving it to the FS
@@ -175,7 +177,7 @@ bool WebCustomEntityService::command_setvalue(const char * value, const int8_t i
                 publish();
             }
             char cmd[COMMAND_MAX_LENGTH];
-            snprintf(cmd, sizeof(cmd_function_p), "custom/%s", entityItem.name.c_str());
+            snprintf(cmd, sizeof(cmd), "%s/%s", F_(custom), entityItem.name.c_str());
             EMSESP::webSchedulerService.onChange(cmd);
             return true;
         }
@@ -260,7 +262,9 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
         output[F_(info)]     = Helpers::translated_word(FL_(info_cmd));
         output[F_(commands)] = Helpers::translated_word(FL_(commands_cmd));
         for (const auto & entity : *customEntityItems_) {
-            output[entity.name] = "custom entity";
+            if (entity.writeable) {
+                output[entity.name] = "custom entity";
+            }
         }
         return true;
     }
@@ -346,9 +350,9 @@ void WebCustomEntityService::publish_single(const CustomEntityItem & entity) {
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
     if (Mqtt::publish_single2cmd()) {
-        snprintf(topic, sizeof(topic), "%s/%s", "custom", entity.name.c_str());
+        snprintf(topic, sizeof(topic), "%s/%s", F_(custom), entity.name.c_str());
     } else {
-        snprintf(topic, sizeof(topic), "%s/%s", "custom_data", entity.name.c_str());
+        snprintf(topic, sizeof(topic), "%s_data/%s", F_(custom), entity.name.c_str());
     }
 
     JsonDocument doc;
@@ -386,7 +390,7 @@ void WebCustomEntityService::publish(const bool force) {
         if (Mqtt::ha_enabled() && !ha_registered_) {
             JsonDocument config;
             char         stat_t[50];
-            snprintf(stat_t, sizeof(stat_t), "%s/custom_data", Mqtt::base().c_str());
+            snprintf(stat_t, sizeof(stat_t), "%s/%s_data", Mqtt::base().c_str(), F_(custom));
             config["stat_t"] = stat_t;
 
             char val_obj[50];
@@ -396,7 +400,7 @@ void WebCustomEntityService::publish(const bool force) {
             config["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + "}}";
 
             char uniq_s[70];
-            snprintf(uniq_s, sizeof(uniq_s), "custom_%s", entityItem.name.c_str());
+            snprintf(uniq_s, sizeof(uniq_s), "%s_%s", F_(custom), entityItem.name.c_str());
 
             config["obj_id"]  = uniq_s;
             config["uniq_id"] = uniq_s; // same as object_id
@@ -406,22 +410,22 @@ void WebCustomEntityService::publish(const bool force) {
 
             if (entityItem.writeable) {
                 if (entityItem.value_type == DeviceValueType::BOOL) {
-                    snprintf(topic, sizeof(topic), "switch/%s/custom_%s/config", Mqtt::basename().c_str(), entityItem.name.c_str());
+                    snprintf(topic, sizeof(topic), "switch/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name.c_str());
                 } else if (entityItem.value_type == DeviceValueType::STRING) {
-                    snprintf(topic, sizeof(topic), "sensor/%s/custom_%s/config", Mqtt::basename().c_str(), entityItem.name.c_str());
+                    snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name.c_str());
                 } else if (Mqtt::discovery_type() == Mqtt::discoveryType::HOMEASSISTANT || Mqtt::discovery_type() == Mqtt::discoveryType::DOMOTICZ_LATEST) {
-                    snprintf(topic, sizeof(topic), "number/%s/custom_%s/config", Mqtt::basename().c_str(), entityItem.name.c_str());
+                    snprintf(topic, sizeof(topic), "number/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name.c_str());
                 } else {
-                    snprintf(topic, sizeof(topic), "sensor/%s/custom_%s/config", Mqtt::basename().c_str(), entityItem.name.c_str());
+                    snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name.c_str());
                 }
                 char command_topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-                snprintf(command_topic, sizeof(command_topic), "%s/custom/%s", Mqtt::basename().c_str(), entityItem.name.c_str());
+                snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::basename().c_str(), F_(custom), entityItem.name.c_str());
                 config["cmd_t"] = command_topic;
             } else {
                 if (entityItem.value_type == DeviceValueType::BOOL) {
-                    snprintf(topic, sizeof(topic), "binary_sensor/%s/custom_%s/config", Mqtt::basename().c_str(), entityItem.name.c_str());
+                    snprintf(topic, sizeof(topic), "binary_sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name.c_str());
                 } else {
-                    snprintf(topic, sizeof(topic), "sensor/%s/custom_%s/config", Mqtt::basename().c_str(), entityItem.name.c_str());
+                    snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(custom), entityItem.name.c_str());
                 }
             }
 
@@ -442,7 +446,7 @@ void WebCustomEntityService::publish(const bool force) {
 
             Mqtt::add_ha_uom(config.as<JsonObject>(), entityItem.value_type, entityItem.uom); // add uom
 
-            Mqtt::add_ha_sections_to_doc("custom", stat_t, config, !ha_created, val_cond);
+            Mqtt::add_ha_sections_to_doc(F_(custom), stat_t, config, !ha_created, val_cond);
 
             ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
         }
@@ -450,7 +454,9 @@ void WebCustomEntityService::publish(const bool force) {
 
     ha_registered_ = ha_created;
     if (output.size() > 0) {
-        Mqtt::queue_publish("custom_data", output);
+        char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
+        sprintf(topic, "%s_data", F_(custom));
+        Mqtt::queue_publish(topic, output);
     }
     // EMSESP::logger().debug("publish %d custom entities", output.size());
 }
@@ -598,7 +604,7 @@ bool WebCustomEntityService::get_value(std::shared_ptr<const Telegram> telegram)
                     has_change = true;
                 }
                 char cmd[COMMAND_MAX_LENGTH];
-                snprintf(cmd, sizeof(cmd_function_p), "custom/%s", entity.name.c_str());
+                snprintf(cmd, sizeof(cmd), "%s/%s", F_(custom), entity.name.c_str());
                 EMSESP::webSchedulerService.onChange(cmd);
             }
         } else if (entity.value_type != DeviceValueType::STRING && telegram->type_id == entity.type_id && telegram->src == entity.device_id
@@ -615,7 +621,7 @@ bool WebCustomEntityService::get_value(std::shared_ptr<const Telegram> telegram)
                     has_change = true;
                 }
                 char cmd[COMMAND_MAX_LENGTH];
-                snprintf(cmd, sizeof(cmd_function_p), "%s/%s", "custom", entity.name.c_str());
+                snprintf(cmd, sizeof(cmd), "%s/%s", F_(custom), entity.name.c_str());
                 EMSESP::webSchedulerService.onChange(cmd);
             }
             // EMSESP::logger().debug("custom entity %s received with value %d", entity.name.c_str(), (int)entity.val);

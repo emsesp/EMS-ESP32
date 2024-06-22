@@ -38,7 +38,6 @@ class Roomctrl {
 
   private:
     static constexpr uint32_t SEND_INTERVAL = 15000;    // 15 sec
-    static constexpr uint32_t TIMEOUT       = 86400000; // 24 hour
     static constexpr uint8_t  HCS           = 4;        // max 4 heating circuits
     enum SendType : uint8_t { TEMP, HUMI };
 

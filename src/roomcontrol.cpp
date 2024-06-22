@@ -34,7 +34,7 @@ uint32_t Roomctrl::timeout_           = 0;
  * set the temperature,
  */
 void Roomctrl::set_timeout(uint8_t t) {
-    timeout_ = t * 3600;
+    timeout_ = t * 3600000; // ms
 }
 void Roomctrl::set_remotetemp(const uint8_t type, const uint8_t hc, const int16_t temp) {
     if (!type_[hc] && !type) {
