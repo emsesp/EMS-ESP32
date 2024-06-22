@@ -371,16 +371,20 @@ int to_logic(const std::string & s) {
     return -1;
 }
 
-// number to string
+// number to string, remove trailing zeros
 std::string to_string(double d) {
-    if (d == static_cast<int>(d)) {
-        return std::to_string(static_cast<int>(d));
+    std::string s = std::to_string(d);
+    while (!s.empty() && s.back() == '0') {
+        s.pop_back();
     }
-    return std::to_string(d);
+    if (!s.empty() && s.back() == '.') {
+        s.pop_back();
+    }
+    return s;
 }
 
 // RPN calculator
-std::string compute(const std::string & expr) {
+std::string calculate(const std::string & expr) {
     auto expr_new = emsesp::Helpers::toLower(expr);
     // emsesp::EMSESP::logger().info("calculate: %s", expr_new.c_str());
     commands(expr_new);
@@ -553,4 +557,17 @@ std::string compute(const std::string & expr) {
         }
     }
     return stack.back();
+}
+// check for <expr> ? <expr1> : <expr2>
+std::string compute(const std::string & expr) {
+    auto q = expr.find_first_of("?");
+    auto p = expr.find_first_of(":", q);
+    if (p != std::string::npos && q != std::string::npos) {
+        if (calculate(expr.substr(0, q))[0] == '1') {
+            return calculate(expr.substr(q + 1, p - q - 1));
+        } else {
+            return calculate(expr.substr(p + 1));
+        }
+    }
+    return calculate(expr);
 }

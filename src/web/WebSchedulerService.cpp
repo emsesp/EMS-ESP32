@@ -368,7 +368,8 @@ bool WebSchedulerService::command(const char * cmd, const char * data) {
 
 bool WebSchedulerService::onChange(const char * cmd) {
     for (const ScheduleItem & scheduleItem : *scheduleItems_) {
-        if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_ONCHANGE && Helpers::toLower(scheduleItem.time) == Helpers::toLower(cmd)) {
+        if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_ONCHANGE
+            && Helpers::toLower(scheduleItem.time).find(Helpers::toLower(cmd)) != std::string::npos) {
 #ifdef EMESESP_DEBUG
             // emsesp::EMSESP::logger().debug(scheduleItem.cmd.c_str());
 #endif
