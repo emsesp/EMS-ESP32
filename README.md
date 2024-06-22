@@ -4,7 +4,7 @@
 [![release-date](https://img.shields.io/github/release-date/emsesp/EMS-ESP32.svg?label=Released)](https://github.com/emsesp/EMS-ESP32/commits/main)
 [![license](https://img.shields.io/github/license/emsesp/EMS-ESP32.svg)](LICENSE)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=emsesp_EMS-ESP32&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=emsesp_EMS-ESP32)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/9441142f49424ef891e8f5251866ee6b)](https://www.codacy.com/gh/emsesp/EMS-ESP32/dashboard?utm_source=github.com&utm_medium=referral&utm_content=emsesp/EMS-ESP32&utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/9441142f49424ef891e8f5251866ee6b)](https://app.codacy.com/gh/emsesp/EMS-ESP32/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![downloads](https://img.shields.io/github/downloads/emsesp/EMS-ESP32/total.svg)](https://github.com/emsesp/EMS-ESP32/releases)
 [![chat](https://img.shields.io/discord/816637840644505620.svg?style=flat-square&color=blueviolet)](https://discord.gg/3J3GgnzpyT)
 
@@ -59,14 +59,14 @@ This program is licensed under GPL-3.0
 
 |                                    |                                  |
 | ---------------------------------- | -------------------------------- |
-| <img src="media/web_settings.png"> | <img src="media/web_status.png"> |
-| <img src="media/web_devices.png">  | <img src="media/web_mqtt.png">   |
-| <img src="media/web_edit.png">     | <img src="media/web_log.png">    |
+| ![Web Settings](media/web_settings.png) | ![Web Status](media/web_status.png) |
+| ![Web Devices](media/web_devices.png)  | ![Web MQTT](media/web_mqtt.png)   |
+| ![Web Edit](media/web_edit.png)     | ![Web Log](media/web_log.png)    |
 
 ### Telnet Console
 
-<img src="media/console0.png" width=80% height=80%>
+![Console](media/console0.png)
 
 ### In Home Assistant
 
-<img src="media/ha_lovelace.png" width=80% height=80%>
+![Home Assistant](media/ha_lovelace.png)

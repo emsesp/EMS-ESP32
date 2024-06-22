@@ -76,7 +76,6 @@ const ModulesDialog = ({
             label="License Key"
             multiline
             rows={6}
-            columns={40}
             fullWidth
             value={editItem.license}
             onChange={updateFormValue}
