@@ -2,7 +2,13 @@ import Schema from 'async-validator';
 import type { InternalRuleItem } from 'async-validator';
 import { IP_OR_HOSTNAME_VALIDATOR } from 'validators/shared';
 
-import type { AnalogSensor, DeviceValue, ScheduleItem, Settings } from './types';
+import type {
+  AnalogSensor,
+  DeviceValue,
+  EntityItem,
+  ScheduleItem,
+  Settings
+} from './types';
 
 export const GPIO_VALIDATOR = {
   validator(
@@ -297,10 +303,10 @@ export const schedulerItemValidation = (
 ) =>
   new Schema({
     name: [
+      { required: true, message: 'Name is required' },
       {
-        required: true,
         type: 'string',
-        pattern: /^[a-zA-Z0-9_\\.]{0,15}$/,
+        pattern: /^[a-zA-Z0-9_\\.]{1,15}$/,
         message: "Must be <15 characters: alpha numeric, '_' or '.'"
       },
       ...[uniqueNameValidator(schedule, scheduleItem.o_name)]
@@ -316,7 +322,27 @@ export const schedulerItemValidation = (
     ]
   });
 
-export const entityItemValidation = () =>
+export const uniqueCustomNameValidator = (
+  entity: EntityItem[],
+  o_name?: string
+) => ({
+  validator(
+    rule: InternalRuleItem,
+    name: string,
+    callback: (error?: string) => void
+  ) {
+    if (
+      (o_name === undefined || o_name !== name) &&
+      entity.find((ei) => ei.name === name)
+    ) {
+      callback('Name already in use');
+    } else {
+      callback();
+    }
+  }
+});
+
+export const entityItemValidation = (entity: EntityItem[], entityItem: EntityItem) =>
   new Schema({
     name: [
       { required: true, message: 'Name is required' },
@@ -324,7 +350,8 @@ export const entityItemValidation = () =>
         type: 'string',
         pattern: /^[a-zA-Z0-9_\\.]{1,15}$/,
         message: "Must be <15 characters: alpha numeric, '_' or '.'"
-      }
+      },
+      ...[uniqueCustomNameValidator(entity, entityItem.o_name)]
     ],
     device_id: [
       {

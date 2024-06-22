@@ -244,7 +244,7 @@ const Scheduler: FC = () => {
         data={{
           nodes: schedule
             .filter((si) => !si.deleted)
-            .sort((a, b) => a.cmd.localeCompare(b.cmd))
+            .sort((a, b) => a.name.localeCompare(b.name))
         }}
         theme={schedule_theme}
         layout={{ custom: true }}

@@ -33,7 +33,7 @@ import { useI18nContext } from 'i18n/i18n-react';
 import * as EMSESP from './api';
 import SettingsCustomEntitiesDialog from './CustomEntitiesDialog';
 import { DeviceValueTypeNames, DeviceValueUOM_s } from './types';
-import type { EntityItem } from './types';
+import type { Entities, EntityItem } from './types';
 import { entityItemValidation } from './validators';
 
 const CustomEntities: FC = () => {
@@ -56,7 +56,7 @@ const CustomEntities: FC = () => {
   });
 
   const { send: writeEntities } = useRequest(
-    (data: { id: number; entity_ids: string[] }) => EMSESP.writeCustomEntities(data),
+    (data: Entities) => EMSESP.writeCustomEntities(data),
     { immediate: false }
   );
 
@@ -236,7 +236,11 @@ const CustomEntities: FC = () => {
 
     return (
       <Table
-        data={{ nodes: entities.filter((ei) => !ei.deleted) }}
+        data={{
+          nodes: entities
+            .filter((ei) => !ei.deleted)
+            .sort((a, b) => a.name.localeCompare(b.name))
+        }}
         theme={entity_theme}
         layout={{ custom: true }}
       >
@@ -295,7 +299,7 @@ const CustomEntities: FC = () => {
           onClose={onDialogClose}
           onSave={onDialogSave}
           selectedItem={selectedEntityItem}
-          validator={entityItemValidation()}
+          validator={entityItemValidation(entities, selectedEntityItem)}
         />
       )}
 
