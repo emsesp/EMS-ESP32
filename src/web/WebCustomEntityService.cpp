@@ -455,7 +455,7 @@ void WebCustomEntityService::publish(const bool force) {
     ha_registered_ = ha_created;
     if (output.size() > 0) {
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-        sprintf(topic, "%s_data", F_(custom));
+        snprintf(topic, sizeof(topic), "%s_data", F_(custom));
         Mqtt::queue_publish(topic, output);
     }
     // EMSESP::logger().debug("publish %d custom entities", output.size());
