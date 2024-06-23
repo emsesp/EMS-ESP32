@@ -297,7 +297,7 @@ const SchedulerDialog = ({
               name="time"
               label={isCondition ? 'Condition' : 'On Change Value'}
               fullWidth
-              value={editItem.time == "00:00" ? editItem.time = "" : editItem.time}
+              value={editItem.time == '00:00' ? (editItem.time = '') : editItem.time}
               margin="normal"
               onChange={updateFormValue}
             />
@@ -307,7 +307,9 @@ const SchedulerDialog = ({
                 name="time"
                 type="time"
                 label={isTimer ? LL.TIMER(1) : LL.TIME(1)}
-                value={editItem.time == "" ? editItem.time = "00:00" : editItem.time}
+                value={
+                  editItem.time == '' ? (editItem.time = '00:00') : editItem.time
+                }
                 margin="normal"
                 onChange={updateFormValue}
               />
