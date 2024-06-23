@@ -133,6 +133,7 @@ export const readCustomEntities = () =>
       return (data as Entities).entities.map((ei: EntityItem) => ({
         ...ei,
         o_id: ei.id,
+        o_ram: ei.ram,
         o_device_id: ei.device_id,
         o_type_id: ei.type_id,
         o_offset: ei.offset,
@@ -141,9 +142,10 @@ export const readCustomEntities = () =>
         o_value_type: ei.value_type,
         o_name: ei.name,
         o_writeable: ei.writeable,
+        o_value: ei.value,
         o_deleted: ei.deleted
       }));
     }
   });
-export const writeCustomEntities = (data: { id: number; entity_ids: string[] }) =>
+export const writeCustomEntities = (data: Entities) =>
   alovaInstance.Post('/rest/customEntities', data);

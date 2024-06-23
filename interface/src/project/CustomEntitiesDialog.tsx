@@ -130,7 +130,8 @@ const CustomEntitiesDialog = ({
               <TextField
                 name="value"
                 label={LL.DEFAULT(0) + ' ' + LL.VALUE(0)}
-                value={editItem.value}
+                type="string"
+                value={editItem.value as string}
                 variant="outlined"
                 onChange={updateFormValue}
                 fullWidth
@@ -177,7 +178,8 @@ const CustomEntitiesDialog = ({
                   label={LL.ID_OF(LL.TYPE(1))}
                   margin="normal"
                   fullWidth
-                  value={editItem.type_id}
+                  type="string"
+                  value={editItem.type_id as string}
                   onChange={updateFormValue}
                   inputProps={{ style: { textTransform: 'uppercase' } }}
                   InputProps={{
