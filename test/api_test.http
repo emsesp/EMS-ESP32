@@ -65,6 +65,14 @@ GET {{host}}/api/temperaturesensor/info
 
 ###
 
+GET {{host}}/rest/deviceData?id=3
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+
+GET {{host}}/api/boiler/commands
+
 #
 # Test on dev
 #
