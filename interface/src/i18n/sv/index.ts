@@ -23,7 +23,7 @@ const sv: Translation = {
   ONOFF: 'på/av',
   TYPE: 'Typ',
   DESCRIPTION: 'Beskrivning',
-  ENTITIES: 'Entiteter',
+  ENTITIES: 'entiteter',
   REFRESH: 'Uppdatera',
   EXPORT: 'Exportera',
   DEVICE_DETAILS: 'Enhetsdetaljer',
