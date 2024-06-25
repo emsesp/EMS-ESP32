@@ -53,7 +53,7 @@ const de: Translation = {
   UPDATE_OF: '{0} Aktualisieren',
   REMOVED_OF: '{0} Entfernt',
   DELETION_OF: '{0} Löschung',
-  OFFSET: 'Addition',
+  OFFSET: 'Position',
   FACTOR: 'Faktor',
   FREQ: 'Frequenz',
   DUTY_CYCLE: 'Duty Cycle',
