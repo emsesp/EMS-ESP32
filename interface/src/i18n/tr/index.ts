@@ -23,7 +23,7 @@ const tr: Translation = {
   ONOFF: 'açık/kapalı',
   TYPE: 'Tür',
   DESCRIPTION: 'Açıklama',
-  ENTITIES: 'Varlıklar',
+  ENTITIES: 'varlıklar',
   REFRESH: 'Yenile',
   EXPORT: 'Dışarı al',
   DEVICE_DETAILS: 'Cihaz Ayrıntıları',

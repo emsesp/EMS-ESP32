@@ -23,7 +23,7 @@ const it: Translation = {
   ONOFF: 'on/off',
   TYPE: 'Tipo',
   DESCRIPTION: 'Descrizione',
-  ENTITIES: 'Entità',
+  ENTITIES: 'entità',
   REFRESH: 'Ricaricare',
   EXPORT: 'Esporta',
   DEVICE_DETAILS: 'Dettagli dispositivo',

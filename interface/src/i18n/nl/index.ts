@@ -23,7 +23,7 @@ const nl: Translation = {
   ONOFF: 'aan/uit',
   TYPE: 'Type',
   DESCRIPTION: 'Beschrijving',
-  ENTITIES: 'Entiteiten',
+  ENTITIES: 'entiteiten',
   REFRESH: 'Ververs',
   EXPORT: 'Export',
   DEVICE_DETAILS: 'Device Gegevens',

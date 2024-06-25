@@ -426,8 +426,9 @@ const Devices: FC = () => {
       document.body.removeChild(downloadLink);
     };
 
+    const device = { ...{ device: coreData.devices[deviceIndex] }, ...deviceData };
     downloadBlob(
-      new Blob([JSON.stringify(deviceData, null, 2)], {
+      new Blob([JSON.stringify(device, null, 2)], {
         type: 'text;charset:utf-8'
       })
     );
@@ -650,7 +651,7 @@ const Devices: FC = () => {
           </Typography>
 
           <Grid container justifyContent="space-between">
-            <Typography sx={{ ml: 1 }} variant="subtitle2" color="primary">
+            <Typography sx={{ ml: 1 }} variant="subtitle2" color="grey">
               {LL.SHOWING() +
                 ' ' +
                 shown_data.length +
@@ -660,61 +661,40 @@ const Devices: FC = () => {
                 LL.ENTITIES(shown_data.length)}
               <ButtonTooltip title="Info">
                 <IconButton onClick={() => setShowDeviceInfo(true)}>
-                  <InfoOutlinedIcon
-                    color="primary"
-                    sx={{ fontSize: 18, verticalAlign: 'middle' }}
-                  />
+                  <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
                 </IconButton>
               </ButtonTooltip>
               {me.admin && (
                 <ButtonTooltip title={LL.CUSTOMIZATIONS()}>
                   <IconButton onClick={customize}>
-                    <FormatListNumberedIcon
-                      color="primary"
-                      sx={{ fontSize: 18, verticalAlign: 'middle' }}
-                    />
+                    <FormatListNumberedIcon color="primary" sx={{ fontSize: 18 }} />
                   </IconButton>
                 </ButtonTooltip>
               )}
               <ButtonTooltip title={LL.EXPORT()}>
                 <IconButton onClick={handleDownloadCsv}>
-                  <DownloadIcon
-                    color="primary"
-                    sx={{ fontSize: 18, verticalAlign: 'middle' }}
-                  />
+                  <DownloadIcon color="primary" sx={{ fontSize: 18 }} />
                 </IconButton>
               </ButtonTooltip>
               <ButtonTooltip title="Favorites">
                 <IconButton onClick={() => setOnlyFav(!onlyFav)}>
                   {onlyFav ? (
-                    <StarIcon
-                      color="primary"
-                      sx={{ fontSize: 18, verticalAlign: 'middle' }}
-                    />
+                    <StarIcon color="primary" sx={{ fontSize: 18 }} />
                   ) : (
-                    <StarBorderOutlinedIcon
-                      color="primary"
-                      sx={{ fontSize: 18, verticalAlign: 'middle' }}
-                    />
+                    <StarBorderOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
                   )}
                 </IconButton>
               </ButtonTooltip>
               <ButtonTooltip title={LL.REFRESH()}>
                 <IconButton onClick={refreshData}>
-                  <RefreshIcon
-                    color="primary"
-                    sx={{ fontSize: 18, verticalAlign: 'middle' }}
-                  />
+                  <RefreshIcon color="primary" sx={{ fontSize: 18 }} />
                 </IconButton>
               </ButtonTooltip>
             </Typography>
             <Grid item zeroMinWidth justifyContent="flex-end">
               <ButtonTooltip title={LL.CANCEL()}>
                 <IconButton onClick={resetDeviceSelect}>
-                  <HighlightOffIcon
-                    color="primary"
-                    sx={{ fontSize: 18, verticalAlign: 'middle' }}
-                  />
+                  <HighlightOffIcon color="primary" sx={{ fontSize: 18 }} />
                 </IconButton>
               </ButtonTooltip>
             </Grid>

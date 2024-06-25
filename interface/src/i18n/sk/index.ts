@@ -23,7 +23,7 @@ const sk: Translation = {
   ONOFF: 'zap/vyp',
   TYPE: 'Typ',
   DESCRIPTION: 'Popis',
-  ENTITIES: 'Entity',
+  ENTITIES: 'entity',
   REFRESH: 'Obnoviť',
   EXPORT: 'Export',
   DEVICE_DETAILS: 'Detaily zariadenia',

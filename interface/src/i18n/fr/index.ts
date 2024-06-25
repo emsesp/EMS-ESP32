@@ -23,7 +23,7 @@ const fr: Translation = {
   ONOFF: 'on/off',
   TYPE: 'Type',
   DESCRIPTION: 'Description',
-  ENTITIES: 'Entités',
+  ENTITIES: 'entités',
   REFRESH: 'Rafraîchir',
   EXPORT: 'Exporter',
   DEVICE_DETAILS: "Détails de l'appareil",
