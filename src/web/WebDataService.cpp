@@ -36,7 +36,6 @@ WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securi
                HTTP_GET,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { device_data(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
 
-
     server->on(CORE_DATA_SERVICE_PATH,
                HTTP_GET,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { core_data(request); }, AuthenticationPredicates::IS_AUTHENTICATED));

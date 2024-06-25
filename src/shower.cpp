@@ -100,12 +100,12 @@ void Shower::loop() {
                 // it is over the wait period, so assume that the shower has finished and calculate the total time and publish
                 // because its unsigned long, can't have negative so check if length is less than OFFSET_TIME
                 if ((timer_pause_ - timer_start_) > SHOWER_OFFSET_TIME) {
-                    duration_ = (timer_pause_ - timer_start_ - SHOWER_OFFSET_TIME);
+                    duration_ = (timer_pause_ - timer_start_ - SHOWER_OFFSET_TIME); // duration in seconds
                     if (duration_ > shower_min_duration_) {
                         JsonDocument doc;
 
                         // duration in seconds
-                        doc["duration"] = (duration_ / 1000UL); // seconds
+                        doc["duration"] = duration_; // seconds
                         time_t now      = time(nullptr);
                         // if NTP enabled, publish timestamp
                         if (now > 1576800000) { // year 2020
@@ -114,9 +114,9 @@ void Shower::loop() {
                             char dt[25];
                             strftime(dt, sizeof(dt), "%FT%T%z", tm_);
                             doc["timestamp"] = dt;
-                            LOG_INFO("shower finished %s (duration %lu s)", dt, duration_ / 1000UL);
+                            LOG_INFO("shower finished %s (duration %lu s)", dt, duration_);
                         } else {
-                            LOG_INFO("shower finished (duration %lu s)", duration_ / 1000UL);
+                            LOG_INFO("shower finished (duration %lu s)", duration_);
                         }
                         Mqtt::queue_publish("shower_data", doc.as<JsonObject>());
                     }

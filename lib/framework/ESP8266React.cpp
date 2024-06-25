@@ -39,6 +39,7 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
             response->addHeader("Content-Encoding", "gzip");
             // response->addHeader("Content-Encoding", "br"); // only works over HTTPS
             // response->addHeader("Cache-Control", "public, immutable, max-age=31536000");
+            response->addHeader("Cache-Control", "must-revalidate"); // ensure that a client will check the server for a change
             response->addHeader("Last-Modified", last_modified);
             response->addHeader("ETag", hash);
 
@@ -46,6 +47,7 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
         };
 
         server->on(uri, HTTP_GET, requestHandler);
+
         // Serving non matching get requests with "/index.html"
         // OPTIONS get a straight up 200 response
         if (strncmp(uri, "/index.html", 11) == 0) {

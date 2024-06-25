@@ -165,7 +165,7 @@ const pl: BaseTranslation = {
   HELP_INFORMATION_2: 'Dołącz do naszego serwera Discord by komunikować się na żywo ze społecznością.',
   HELP_INFORMATION_3: 'Zaproponuj nową funkcjonalność lub zgłoś problem.',
   HELP_INFORMATION_4: 'Zgłaszając problem, nie zapomnij pobrać i dołączyć informacji o swoim systemie!',
-  HELP_INFORMATION_5: 'EMS-ESP jest darmowym projektem typu open-source. Aby go wesprzeć, rozważ przyznanie nam gwiazdki na Github!',
+  HELP_INFORMATION_5: 'EMS-ESP jest darmowym projektem typu open-source. Aby go wesprzeć, rozważ przyznanie nam gwiazdki na GitHub!',
   UPLOAD: 'Wysyłanie',
   DOWNLOAD: '{{P|p||P}}obier{{anie|z||z}}',
   ABORTED: 'zostało przerwane!',

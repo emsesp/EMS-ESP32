@@ -5,7 +5,7 @@
 ## **IMPORTANT! BREAKING CHANGES**
 
 - new device WATER shows dhw entities from MM100 and SM100 in dhw setting
-- rename WWC to DHW, always create DHW nests/topics, remove ww prefix from mqtt names [#1634](https://github.com/emsesp/EMS-ESP32/issues/1634)
+- renamed WWC to DHW, always create DHW nests/topics, remove ww prefix from mqtt names [#1634](https://github.com/emsesp/EMS-ESP32/issues/1634)
 
 ## Added
 
@@ -40,3 +40,4 @@
 - dynamic register dhw circuits for thermostat
 - removed OTA feature [#1738](https://github.com/emsesp/EMS-ESP32/issues/1738)
 - added shower min duration [[#1801](https://github.com/emsesp/EMS-ESP32/issues/1801)]
+- Include TXT file along with the generated CSV for Device Data export/download
