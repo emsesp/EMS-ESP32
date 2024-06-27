@@ -101,7 +101,7 @@ class AnalogSensor {
         double      factor_;
         uint8_t     uom_;
         double      value_; // double because of the factor is a double
-        int8_t      type_;
+        int8_t      type_;  // one of the AnalogType enum
     };
 
     AnalogSensor()  = default;
