@@ -1079,7 +1079,7 @@ void Boiler::check_active() {
     b   = ((boilerState_ & 0x09) == 0x09);
     val = b ? EMS_VALUE_BOOL_ON : EMS_VALUE_BOOL_OFF;
     if (heatingActive_ != val) {
-        heatingActive_ = val;
+        has_update(heatingActive_, val);
         char s[12];
         Mqtt::queue_publish(F_(heating_active), Helpers::render_boolean(s, b));
     }
@@ -1103,7 +1103,7 @@ void Boiler::check_active() {
 
     val = b ? EMS_VALUE_BOOL_ON : EMS_VALUE_BOOL_OFF;
     if (tapwaterActive_ != val) {
-        tapwaterActive_ = val;
+        has_update(tapwaterActive_, val);
         char s[12];
         Mqtt::queue_publish(F_(tapwater_active), Helpers::render_boolean(s, b));
         // if (flowsensor) {
