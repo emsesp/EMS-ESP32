@@ -558,16 +558,33 @@ std::string calculate(const std::string & expr) {
     }
     return stack.back();
 }
-// check for <expr> ? <expr1> : <expr2>
+
+// check for multiple instances of <cond> ? <expr1> : <expr2>
 std::string compute(const std::string & expr) {
-    auto q = expr.find_first_of("?");
-    auto p = expr.find_first_of(":", q);
-    if (p != std::string::npos && q != std::string::npos) {
-        if (calculate(expr.substr(0, q))[0] == '1') {
-            return calculate(expr.substr(q + 1, p - q - 1));
-        } else {
-            return calculate(expr.substr(p + 1));
+    auto expr_new = expr;
+    // positions: q-questionmark, c-colon
+    auto q = expr_new.find_first_of("?");
+    while (q != std::string::npos) {
+        // find corresponding colon
+        auto c1 = expr_new.find_first_of(":", q + 1);
+        auto q1 = expr_new.find_first_of("?", q + 1);
+        while (q1 < c1 && q1 != std::string::npos && c1 != std::string::npos) {
+            q1 = expr_new.find_first_of("?", q1 + 1);
+            c1 = expr_new.find_first_of(":", c1 + 1);
         }
+        if (c1 == std::string::npos) {
+            return ""; // error: missing colon
+        }
+        std::string cond = calculate(expr_new.substr(0, q));
+        if (cond[0] == '1') {
+            expr_new.erase(c1);       // remove second expression after colon
+            expr_new.erase(0, q + 1); // remove condition before questionmark
+        } else if (cond[0] == '0') {
+            expr_new.erase(0, c1 + 1); // remove condition and first expression
+        } else {
+            return ""; // error
+        }
+        q = expr_new.find_first_of("?"); // search next instance
     }
-    return calculate(expr);
+    return calculate(expr_new);
 }
