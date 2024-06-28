@@ -428,7 +428,7 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, const ui
 
     for (auto & cf : cmdfunctions_) {
         if (Helpers::toLower(cmd) == Helpers::toLower(cf.cmd_) && (cf.device_type_ == device_type) && (!device_id || cf.device_id_ == device_id)
-            && (flag & 0x3F) == (cf.flags_ & 0x3F)) {
+            && (flag == CommandFlag::CMD_FLAG_DEFAULT || (flag & 0x3F) == (cf.flags_ & 0x3F))) {
             return &cf;
         }
     }
