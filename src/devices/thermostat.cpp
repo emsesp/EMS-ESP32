@@ -461,10 +461,6 @@ void Thermostat::add_ha_climate(std::shared_ptr<HeatingCircuit> hc) const {
 uint8_t Thermostat::HeatingCircuit::get_mode() const {
     uint8_t model = get_model();
 
-    if (!Helpers::hasValue(mode)) {
-        return HeatingCircuit::Mode::UNKNOWN;
-    }
-
     if (model == EMSdevice::EMS_DEVICE_FLAG_RC10) {
         if (mode == 2) {
             return HeatingCircuit::Mode::DAY;
@@ -488,11 +484,11 @@ uint8_t Thermostat::HeatingCircuit::get_mode() const {
             return HeatingCircuit::Mode::OFF;
         }
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_BC400 || model == EMSdevice::EMS_DEVICE_FLAG_CR120) {
-        if (mode == 0) {
+        if (mode_new == 0) {
             return HeatingCircuit::Mode::OFF;
-        } else if (mode == 1) {
+        } else if (mode_new == 1) {
             return HeatingCircuit::Mode::MANUAL;
-        } else if (mode == 2) {
+        } else if (mode_new == 2) {
             return HeatingCircuit::Mode::AUTO;
         }
     } else if ((model == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model == EMSdevice::EMS_DEVICE_FLAG_R3000) || (model == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
@@ -1103,7 +1099,11 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     }
     has_update(hc->tempautotemp, tat);
 
-    has_update(telegram, hc->manualtemp, 10);     // is * 2
+    if (model() == EMS_DEVICE_FLAG_CR120) {
+        has_update(telegram, hc->manualtemp, 22); // is * 2
+    } else {
+        has_update(telegram, hc->manualtemp, 10); // is * 2
+    }
     has_enumupdate(telegram, hc->program, 11, 1); // timer program 1 or 2
 
     has_enumupdate(telegram, hc->reducemode, 5, 1); // 1-outdoor temp threshold, 2-room temp threshold, 3-reduced mode
