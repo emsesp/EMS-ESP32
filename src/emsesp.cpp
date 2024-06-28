@@ -1164,7 +1164,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     // first check to see if we already have it, if so update the record
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && emsdevice->is_device_id(device_id)) {
-            if (product_id == 0) { // update only with valid product_id
+            if (product_id == 0 || emsdevice->product_id() != 0) { // update only with valid product_id
                 return true;
             }
             LOG_DEBUG("Updating details for already active deviceID 0x%02X", device_id);
