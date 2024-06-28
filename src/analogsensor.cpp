@@ -57,10 +57,12 @@ void AnalogSensor::reload(bool get_nvs) {
         remove_ha_topic(sensor.type(), sensor.gpio());
         sensor.ha_registered = false;
     }
+
     if (!analog_enabled_) {
         sensors_.clear();
         return;
     }
+
     // load the list of analog sensors from the customization service
     // and store them locally and then activate them
     EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
@@ -68,8 +70,8 @@ void AnalogSensor::reload(bool get_nvs) {
         for (auto & sensor_ : sensors_) {
             // update existing sensors
             bool found = false;
-            for (const auto & sensor : settings.analogCustomizations) { //search customlist
-                if (System::is_valid_gpio(sensor.gpio) && sensor_.gpio() == sensor.gpio) {
+            for (const auto & sensor : settings.analogCustomizations) { // search customlist
+                if (sensor_.gpio() == sensor.gpio) {
                     // for output sensors set value to new start-value
                     if ((sensor.type == AnalogType::COUNTER || sensor.type >= AnalogType::DIGITAL_OUT)
                         && (sensor_.type() != sensor.type || sensor_.offset() != sensor.offset || sensor_.factor() != sensor.factor)) {
@@ -94,14 +96,14 @@ void AnalogSensor::reload(bool get_nvs) {
         for (const auto & sensor : settings.analogCustomizations) {
             bool found = false;
             for (const auto & sensor_ : sensors_) {
-                if (System::is_valid_gpio(sensor.gpio) && sensor_.gpio() == sensor.gpio) {
+                if (sensor_.gpio() == sensor.gpio) {
                     found = true;
                 }
             }
             if (!found) {
-                if (!System::is_valid_gpio(sensor.gpio)) {
-                    continue;
-                }
+                // if (!System::is_valid_gpio(sensor.gpio)) {
+                //     continue;
+                // }
                 sensors_.emplace_back(sensor.gpio, sensor.name, sensor.offset, sensor.factor, sensor.uom, sensor.type);
                 sensors_.back().ha_registered = false; // this will trigger recreate of the HA config
                 if (sensor.type == AnalogType::COUNTER || sensor.type >= AnalogType::DIGITAL_OUT) {
@@ -130,6 +132,14 @@ void AnalogSensor::reload(bool get_nvs) {
     // activate each sensor
     for (auto & sensor : sensors_) {
         sensor.ha_registered = false; // force HA configs to be re-created
+
+        // first check if the GPIO is valid. If not, force set it to disabled
+        if (!System::is_valid_gpio(sensor.gpio())) {
+            LOG_WARNING("Bad GPIO %d for Sensor %s", sensor.gpio(), sensor.name().c_str());
+            sensor.set_type(AnalogType::NOTUSED);
+            continue;
+        }
+
         if (sensor.type() == AnalogType::ADC) {
             LOG_DEBUG("ADC Sensor on GPIO %02d", sensor.gpio());
             // analogSetPinAttenuation does not work with analogReadMilliVolts
@@ -261,6 +271,7 @@ void AnalogSensor::measure() {
             }
         }
     }
+
     // poll digital io every time with debounce
     // go through the list of digital sensors
     for (auto & sensor : sensors_) {

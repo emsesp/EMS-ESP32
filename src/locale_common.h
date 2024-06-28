@@ -266,7 +266,7 @@ MAKE_ENUM_FIXED(list_syslog_level, "off", "emerg", "alert", "crit", "error", "wa
 // sensors
 MAKE_ENUM_FIXED(counter, "counter")
 MAKE_ENUM_FIXED(digital_out, "digital_out")
-MAKE_ENUM_FIXED(list_sensortype, "none", "digital in", "counter", "adc", "timer", "rate", "digital out", "pwm 0", "pwm 1", "pwm 2")
+MAKE_ENUM_FIXED(list_sensortype, "disabled", "digital in", "counter", "adc", "timer", "rate", "digital out", "pwm 0", "pwm 1", "pwm 2")
 
 // watch
 MAKE_ENUM_FIXED(list_watch, "off", "on", "raw", "unknown")

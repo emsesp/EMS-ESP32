@@ -440,6 +440,11 @@ bool System::is_valid_gpio(uint8_t pin, bool has_psram) {
 #endif
         return false; // bad pin
     }
+
+    // extra check for pins 21 and 22 (I2C) when ethernet is enabled
+    if ((EMSESP::system_.ethernet_connected()) && (pin >= 21 && pin <= 22)) {
+        return false; // bad pin
+    }
     return true;
 }
 
