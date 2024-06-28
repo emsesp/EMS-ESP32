@@ -1,7 +1,7 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
  * Copyright 2020-2024  Paul Derbyshire
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -288,6 +288,7 @@ MAKE_ENUM(enum_flow, FL_(off), FL_(flow), FL_(bufferedflow), FL_(buffer), FL_(la
 MAKE_ENUM(enum_reset, FL_(dash), FL_(maintenance), FL_(error), FL_(history), FL_(message))
 MAKE_ENUM(enum_maxHeat, FL_(0kW), FL_(2kW), FL_(3kW), FL_(4kW), FL_(6kW), FL_(9kW))
 MAKE_ENUM(enum_pumpMode, FL_(proportional), FL_(deltaP1), FL_(deltaP2), FL_(deltaP3), FL_(deltaP4))
+MAKE_ENUM(enum_pumpCharacter, FL_(proportional), FL_(pressure1), FL_(pressure2), FL_(pressure3), FL_(pressure4), FL_(pressure5), FL_(pressure6))
 MAKE_ENUM(enum_hpPumpMode, FL_(auto), FL_(continuous))
 
 // thermostat lists

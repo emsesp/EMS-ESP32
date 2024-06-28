@@ -1417,6 +1417,13 @@ const emsesp_devicedata_3 = {
       l: ['proportional', 'deltaP-1', 'deltaP-2', 'deltaP-3', 'deltaP-4']
     },
     {
+      v: 'pressure3',
+      u: 0,
+      id: '00boiler pump characteristic',
+      c: 'pumpcharacter',
+      l: ['proportional', 'pressure1', 'pressure2', 'pressure3', 'pressure4', 'pressure5', 'pressure6']
+    },
+    {
       v: 6,
       u: 8,
       id: '00pump delay',

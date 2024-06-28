@@ -275,6 +275,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(
         DeviceValueTAG::TAG_DEVICE_DATA, &pumpMode_, DeviceValueType::ENUM, FL_(enum_pumpMode), FL_(pumpMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_pumpMode));
     register_device_value(
+        DeviceValueTAG::TAG_DEVICE_DATA, &pumpCharacter_, DeviceValueType::ENUM, FL_(enum_pumpCharacter), FL_(pumpCharacter), DeviceValueUOM::NONE, MAKE_CF_CB(set_pumpCharacter));
+    register_device_value(
         DeviceValueTAG::TAG_DEVICE_DATA, &pumpDelay_, DeviceValueType::UINT8, FL_(pumpDelay), DeviceValueUOM::MINUTES, MAKE_CF_CB(set_pump_delay), 0, 60);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setFlowTemp_, DeviceValueType::UINT8, FL_(setFlowTemp), DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setBurnPow_, DeviceValueType::UINT8, FL_(setBurnPow), DeviceValueUOM::PERCENT);
@@ -1397,7 +1399,7 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
  * UBAMonitorSlow - type 0x19 - central heating monitor part 2 (27 bytes long)
  * received every 60 seconds
  * e.g. 08 00 19 00 80 00 02 41 80 00 00 00 00 00 03 91 7B 05 B8 40 00 00 00 04 92 AD 00 5E EE 80 00
- *      08 0B 19 00 FF EA 02 47 80 00 00 00 00 62 03 CA 24 2C D6 23 00 00 00 27 4A B6 03 6E 43 
+ *      08 0B 19 00 FF EA 02 47 80 00 00 00 00 62 03 CA 24 2C D6 23 00 00 00 27 4A B6 03 6E 43
  *                  00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 17 19 20 21 22 23 24
  */
 void Boiler::process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram) {
@@ -1478,8 +1480,9 @@ void Boiler::process_UBAParametersPlus(std::shared_ptr<const Telegram> telegram)
 
     // has_update(telegram, pumpType_, 11);   // guess, RC300 manual: power controlled, pressure controlled 1-4?
     // has_update(telegram, pumpDelay_, 12);  // guess
-    // has_update(telegram, pumpModMax_, 13); // guess
-    // has_update(telegram, pumpModMin_, 14); // guess
+    has_update(telegram, pumpModMax_, 13);
+    has_update(telegram, pumpModMin_, 14);
+    has_update(telegram, pumpCharacter_, 15);
 }
 
 // 0xEA
@@ -2417,6 +2420,15 @@ bool Boiler::set_pumpMode(const char * value, const int8_t id) {
     uint8_t v;
     if (Helpers::value2enum(value, v, FL_(enum_pumpMode))) {
         write_command(EMS_TYPE_UBAParameters, 11, v, EMS_TYPE_UBAParameters);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_pumpCharacter(const char * value, const int8_t id) {
+    uint8_t v;
+    if (Helpers::value2enum(value, v, FL_(enum_pumpCharacter))) {
+        write_command(EMS_TYPE_UBAParametersPlus, 15, v, EMS_TYPE_UBAParametersPlus);
         return true;
     }
     return false;

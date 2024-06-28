@@ -197,6 +197,12 @@ MAKE_WORD_TRANSLATION(deltaP1, "deltaP-1", "deltaP-1", "deltaP-1", "", "delta P-
 MAKE_WORD_TRANSLATION(deltaP2, "deltaP-2", "deltaP-2", "deltaP-2", "", "delta P-2", "deltaP-2", "", "deltaP-2", "deltaP-2", "deltaP-2") // TODO translate
 MAKE_WORD_TRANSLATION(deltaP3, "deltaP-3", "deltaP-3", "deltaP-3", "", "delta P-3", "deltaP-3", "", "deltaP-3", "deltaP-3", "deltaP-3") // TODO translate
 MAKE_WORD_TRANSLATION(deltaP4, "deltaP-4", "deltaP-4", "deltaP-4", "", "delta P-4", "deltaP-4", "", "deltaP-4", "deltaP-4", "deltaP-4") // TODO translate
+MAKE_WORD_TRANSLATION(pressure1, "150mbar", "150mbar", "150mbar", "150mbar", "150mbar", "150mbar", "150mbar", "150mbar", "150mbar", "150mbar") // TODO translate
+MAKE_WORD_TRANSLATION(pressure2, "200mbar", "200mbar", "200mbar", "200mbar", "200mbar", "200mbar", "200mbar", "200mbar", "200mbar", "200mbar") // TODO translate
+MAKE_WORD_TRANSLATION(pressure3, "250mbar", "250mbar", "250mbar", "250mbar", "250mbar", "250mbar", "250mbar", "250mbar", "250mbar", "250mbar") // TODO translate
+MAKE_WORD_TRANSLATION(pressure4, "300mbar", "300mbar", "300mbar", "300mbar", "300mbar", "300mbar", "300mbar", "300mbar", "300mbar", "300mbar") // TODO translate
+MAKE_WORD_TRANSLATION(pressure5, "350mbar", "350mbar", "350mbar", "350mbar", "350mbar", "350mbar", "350mbar", "350mbar", "350mbar", "350mbar") // TODO translate
+MAKE_WORD_TRANSLATION(pressure6, "400mbar", "400mbar", "400mbar", "400mbar", "400mbar", "400mbar", "400mbar", "400mbar", "400mbar", "400mbar") // TODO translate
 
 // heatpump
 MAKE_WORD_TRANSLATION(none, "none", "keine", "geen", "ingen", "brak", "ingen", "aucun", "hiçbiri", "nessuno", "žiadny")
@@ -349,6 +355,7 @@ MAKE_TRANSLATION(maintenanceTime, "maintenancetime", "time to next maintenance",
 MAKE_TRANSLATION(emergencyOps, "emergencyops", "emergency operation", "Notoperation", "Noodoperatie", "Nöddrift", "praca w trybie awaryjnym", "nøddrift", "opération d'urgence", "acil durum çalışması", "operazione di emergenza", "núdzová prevádzka")
 MAKE_TRANSLATION(emergencyTemp, "emergencytemp", "emergency temperature", "Nottemperatur", "Noodtemperatuur", "Nöddrift temperatur", "temperatura w trybie awaryjnym", "nødtemperatur", "température d'urgence", "acil durum sıcaklığı", "temperatura di emergenza", "núdzová teplota")
 MAKE_TRANSLATION(pumpMode, "pumpmode", "boiler pump mode", "Kesselpumpen Modus", "Ketelpomp modus", "", "tryb pracy pompy kotła", "pumpemodus", "", "pompa modu", "modalità pompa caldaia", "režim kotlového čerpadla") // TODO translate
+MAKE_TRANSLATION(pumpCharacter, "pumpcharacter", "boiler pump characteristic", "boiler pump characteristic", "boiler pump characteristic", "boiler pump characteristic", "boiler pump characteristic", "boiler pump characteristic", "boiler pump characteristic", "boiler pump characteristic", "boiler pump characteristic", "boiler pump characteristic") // TODO translate
 MAKE_TRANSLATION(headertemp, "headertemp", "low loss header", "Hydr. Weiche", "open verdeler", "", "sprzęgło hydrauliczne", "", "bouteille de déc. hydr.", "isı bloğu gidiş suyu sıc.", "comp. idr.", "nízkostratová hlavica") // TODO translate
 MAKE_TRANSLATION(heatblock, "heatblock", "heating block", "Wärmezelle", "Aanvoertemp. warmtecel", "", "blok grzewczy", "", "départ corps de chauffe", "Hid.denge kabı sıcaklığı", "mandata scamb. pr.", "vykurovací blok") // TODO translate
 
@@ -779,7 +786,7 @@ MAKE_TRANSLATION(pumpWorkTime, "pumpworktime", "pump working time", "Pumpenlaufz
 MAKE_TRANSLATION(pump2WorkTime, "pump2worktime", "pump 2 working time", "Pumpe 2 Laufzeit", "Looptijd pomp 2", "Pump 2 Drifttid", "czas pracy pompy 2", "driftstid pumpe2", "durée fonctionnement pompe 2", "pompa 2 çalışma süresi", "tempo funzionamento pompa 2", "pracovný čas čerpadla 2")
 MAKE_TRANSLATION(m1WorkTime, "m1worktime", "differential control working time", "Differenzregelung Arbeitszeit", "Verschilregeling arbeidstijd", "Differentialreglering Drifttid", "czas pracy regulacji różnicowej", "differentialreguleringssrifttid", "durée fonctionnement contrôle différentiel", "çalışma saatlerinin farklı düzenlenmesi", "controllo differenziale durata funzionamento", "pracovný čas diferenciálnej kontroly")
 MAKE_TRANSLATION(energyLastHour, "energylasthour", "energy last hour", "Energie letzte Std", "Energie laatste uur", "Energi Senaste Timmen", "energia w ciągu ostatniej godziny", "energi siste time", "énergie dernière heure", "son saat enerji", "Eenergia ultima ora", "energia za poslednú hodinu")
-MAKE_TRANSLATION(energyTotal, "energytotal", "total energy", "Gesamtenergie", "Totale energie", "Total Energi", "energia całkowita", "total energi", "énergie totale", "toplam enerji", "energia totale", "celková energia") 
+MAKE_TRANSLATION(energyTotal, "energytotal", "total energy", "Gesamtenergie", "Totale energie", "Total Energi", "energia całkowita", "total energi", "énergie totale", "toplam enerji", "energia totale", "celková energia")
 MAKE_TRANSLATION(energyToday, "energytoday", "total energy today", "Energie heute", "Energie vandaag", "Total Energi Idag", "energia całkowita dzisiaj", "total energi i dag", "énergie totale aujourd'hui", "bugün toplam enerji", "totale energia giornaliera", "celková energia dnes")
 
 // solar dhw
