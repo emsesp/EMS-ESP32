@@ -381,7 +381,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
         if ((value == nullptr) || (strlen(value) == 0)) {
             LOG_ERROR("Command '%s' failed with error '%s'", cmd, FL_(cmdRet)[return_code]);
         } else {
-            LOG_ERROR("Command '%s/%s' failed with error '%s'", cmd, value, FL_(cmdRet)[return_code]);
+            LOG_ERROR("Command '%s: %s' failed with error '%s'", cmd, value, FL_(cmdRet)[return_code]);
         }
         return message(return_code, "callback function failed", output);
     }
@@ -428,7 +428,7 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, const ui
 
     for (auto & cf : cmdfunctions_) {
         if (Helpers::toLower(cmd) == Helpers::toLower(cf.cmd_) && (cf.device_type_ == device_type) && (!device_id || cf.device_id_ == device_id)
-            && (flag & 0x3F) == (cf.flags_ & 0x3F)) {
+            && (flag == CommandFlag::CMD_FLAG_DEFAULT || (flag & 0x3F) == (cf.flags_ & 0x3F))) {
             return &cf;
         }
     }
