@@ -24,6 +24,7 @@
 - Modules - external linkable module library [#1778](https://github.com/emsesp/EMS-ESP32/issues/1778)
 - Scheduler onChange and Conditions [#1806](https://github.com/emsesp/EMS-ESP32/issues/1806)
 - make remote control timeout editable [#1774](https://github.com/emsesp/EMS-ESP32/issues/1774)
+- added extra pump characteristics (mode and pressure for EMS+) by @SLTKA [#1802](https://github.com/emsesp/EMS-ESP32/pull/1802)
 
 ## Fixed
 
