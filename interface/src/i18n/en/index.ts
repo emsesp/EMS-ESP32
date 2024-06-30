@@ -332,7 +332,8 @@ const en: Translation = {
   MODULES_UPDATED: 'Modules updated',
   MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules',
   MODULES_NONE: 'No external modules detected',
-  RENAME: 'Rename'
+  RENAME: 'Rename',
+  ENABLE_MODBUS: 'Enable Modbus'
 };
 
 export default en;
