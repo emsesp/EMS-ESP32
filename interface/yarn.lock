@@ -2010,7 +2010,7 @@ __metadata:
     jwt-decode: "npm:^4.0.0"
     lodash-es: "npm:^4.17.21"
     mime-types: "npm:^2.1.35"
-    preact: "npm:^10.22.0"
+    preact: "npm:^10.22.1"
     prettier: "npm:^3.3.2"
     react: "npm:latest"
     react-dom: "npm:latest"
@@ -5947,10 +5947,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"preact@npm:^10.22.0":
-  version: 10.22.0
-  resolution: "preact@npm:10.22.0"
-  checksum: 10c0/dc5466c5968c56997e917580c00983cec2f6486a89ea9ba29f1bb88dcfd2f9ff67c8d561a69a1b3acdab17f2bb36b311fef0c348b62e89c332d00c674f7871f0
+"preact@npm:^10.22.1":
+  version: 10.22.1
+  resolution: "preact@npm:10.22.1"
+  checksum: 10c0/9163b97d6fc0ce6b945ed77695d00c4fa07e317d0723e7b9d10c748153d30596abab8b26861ae45591e47bff25515da91406ce7f1c9e66cd9cac7e7f6c927930
   languageName: node
   linkType: hard
 

@@ -428,6 +428,7 @@ const EMSESP_DEVICEENTITIES_ENDPOINT2 = REST_ENDPOINT_ROOT + 'deviceEntities/:id
 
 const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile';
 const EMSESP_WRITE_DEVICEVALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceValue';
+const EMSESP_WRITE_DEVICENAME_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceName';
 const EMSESP_WRITE_TEMPSENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeTemperatureSensor';
 const EMSESP_WRITE_ANALOGSENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeAnalogSensor';
 const EMSESP_CUSTOMIZATION_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customizationEntities';
@@ -2549,6 +2550,12 @@ router
     return status(200);
   })
   .post(EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT, async (request: any) => {
+    return status(200);
+  })
+  .post(EMSESP_WRITE_DEVICENAME_ENDPOINT, async (request: any) => {
+    const content = await request.json();
+    const id = content.id;
+    console.log("Renaming device ID " + id + " to " + content.name);
     return status(200);
   })
 

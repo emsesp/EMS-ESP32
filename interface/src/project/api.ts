@@ -85,6 +85,8 @@ export const writeCustomizationEntities = (data: {
   id: number;
   entity_ids: string[];
 }) => alovaInstance.Post('/rest/customizationEntities', data);
+export const writeDeviceName = (data: { id: number; name: string }) =>
+  alovaInstance.Post('/rest/writeDeviceName', data);
 
 // SettingsScheduler
 export const readSchedule = () =>
