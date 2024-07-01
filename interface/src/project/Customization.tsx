@@ -83,7 +83,7 @@ const Customization: FC = () => {
   const [selectedDevice, setSelectedDevice] = useState<number>(
     Number(useLocation().state) || -1
   );
-  const [selectedDeviceTypeName, setSelectedDeviceTypeName] = useState<string>('');
+  const [selectedDeviceTypeName, setSelectedDeviceTypeName] = useState<string>(''); // needed for API URL
   const [selectedDeviceName, setSelectedDeviceName] = useState<string>('');
 
   const { send: resetCustomizations } = useRequest(EMSESP.resetCustomizations(), {
