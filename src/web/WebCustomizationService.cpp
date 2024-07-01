@@ -163,10 +163,10 @@ void WebCustomizationService::devices(AsyncWebServerRequest * request) {
     for (const auto & emsdevice : EMSESP::emsdevices) {
         if (emsdevice->has_entities()) {
             JsonObject obj = devices.add<JsonObject>();
-            obj["i"]       = emsdevice->unique_id();                                                                     // its unique id
-            obj["s"]  = std::string(emsdevice->device_type_2_device_name_translated()) + " (" + emsdevice->name() + ")"; // shortname, is device type translated
-            obj["tn"] = emsdevice->device_type_name();                                                                   // non-translated, lower-case
-            obj["t"]  = emsdevice->device_type();                                                                        // internal device type ID
+            obj["i"]       = emsdevice->unique_id(); // its unique id
+            obj["s"]       = emsdevice->name();
+            obj["tn"]      = emsdevice->device_type_name(); // non-translated, lower-case
+            obj["t"]       = emsdevice->device_type();      // internal device type ID
         }
     }
 
