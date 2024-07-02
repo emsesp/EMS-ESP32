@@ -77,6 +77,10 @@ void WebSettings::read(WebSettings & settings, JsonObject root) {
     root["eth_clock_mode"]        = settings.eth_clock_mode;
     String platform               = EMSESP_PLATFORM;
     root["platform"]              = (platform == "ESP32" && EMSESP::system_.PSram()) ? "ESP32R" : platform;
+    root["modbus_enabled"]        = settings.modbus_enabled;
+    root["modbus_port"]           = settings.modbus_port;
+    root["modbus_max_clients"]    = settings.modbus_max_clients;
+    root["modbus_timeout"]        = settings.modbus_timeout;
 }
 
 // call on initialization and also when settings are updated via web or console
@@ -271,6 +275,22 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     prev               = settings.low_clock;
     settings.low_clock = root["low_clock"];
     check_flag(prev, settings.low_clock, ChangeFlags::RESTART);
+
+    prev                    = settings.modbus_enabled;
+    settings.modbus_enabled = root["modbus_enabled"] | EMSESP_DEFAULT_MODBUS_ENABLED;
+    check_flag(prev, settings.modbus_enabled, ChangeFlags::RESTART);
+
+    prev                 = settings.modbus_port;
+    settings.modbus_port = root["modbus_port"] | EMSESP_DEFAULT_MODBUS_PORT;
+    check_flag(prev, settings.modbus_port, ChangeFlags::RESTART);
+
+    prev                        = settings.modbus_max_clients;
+    settings.modbus_max_clients = root["modbus_max_clients"] | EMSESP_DEFAULT_MODBUS_MAX_CLIENTS;
+    check_flag(prev, settings.modbus_max_clients, ChangeFlags::RESTART);
+
+    prev                    = settings.modbus_timeout;
+    settings.modbus_timeout = root["modbus_timeout"] | EMSESP_DEFAULT_MODBUS_TIMEOUT;
+    check_flag(prev, settings.modbus_timeout, ChangeFlags::RESTART);
 
     //
     // these may need mqtt restart to rebuild HA discovery topics
