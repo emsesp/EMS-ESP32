@@ -313,17 +313,20 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "general") {
         shell.printfln("Testing adding a boiler, thermostat, all sensors, scheduler and custom entities...");
-        test("general");
 
         // setup fake data
-        EMSESP::webCustomizationService.test(); // set customizations
-        EMSESP::temperaturesensor_.test();      // add temperature sensors
-        EMSESP::webSchedulerService.test();     // add scheduler items
-        EMSESP::webCustomEntityService.test();  // add custom entities
+        EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the file
 
-        // shell.invoke_command("show devices");
+        // add devices
+        test("general");
+
+        EMSESP::temperaturesensor_.test();     // add temperature sensors
+        EMSESP::webSchedulerService.test();    // add scheduler items
+        EMSESP::webCustomEntityService.test(); // add custom entities
+
+        shell.invoke_command("show devices");
         // shell.invoke_command("show values");
-        shell.invoke_command("call system allvalues");
+        // shell.invoke_command("call system allvalues");
         // shell.invoke_command("call system publish");
         // shell.invoke_command("show mqtt");
         ok = true;
