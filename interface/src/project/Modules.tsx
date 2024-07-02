@@ -169,7 +169,6 @@ const Modules: FC = () => {
 
     const colorStatus = (status: number) => {
       if (status === 1) {
-        // TODO translate
         return <div style={{ color: 'red' }}>Pending Activation</div>;
       }
       return <div style={{ color: '#00FF7F' }}>Activated</div>;
@@ -191,10 +190,8 @@ const Modules: FC = () => {
                 <HeaderRow>
                   <HeaderCell />
                   <HeaderCell>{LL.NAME(0)}</HeaderCell>
-                  {/* TODO translate */}
                   <HeaderCell>Author</HeaderCell>
                   <HeaderCell>{LL.VERSION()}</HeaderCell>
-                  {/* TODO translate */}
                   <HeaderCell>Message</HeaderCell>
                   <HeaderCell>{LL.STATUS_OF('')}</HeaderCell>
                 </HeaderRow>
