@@ -252,7 +252,7 @@ class EMSESP {
     struct Device_record {
         uint8_t               product_id;
         EMSdevice::DeviceType device_type;
-        const char *          name;
+        const char *          default_name;
         uint8_t               flags;
     };
     static std::vector<Device_record> device_library_;

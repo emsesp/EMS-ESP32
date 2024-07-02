@@ -34,14 +34,15 @@ class EMSdevice {
     using process_function_p = std::function<void(std::shared_ptr<const Telegram>)>;
 
     // device_type defines which derived class to use, e.g. BOILER, THERMOSTAT etc..
-    EMSdevice(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
+    EMSdevice(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * default_name, uint8_t flags, uint8_t brand)
         : device_type_(device_type)
         , device_id_(device_id)
         , product_id_(product_id)
-        , name_(name)
+        , default_name_(default_name)
         , flags_(flags)
         , brand_(brand) {
         strlcpy(version_, version, sizeof(version_));
+        custom_name_ = ""; // init custom name to blank
     }
 
     // static functions, used outside the class like in console.cpp, command.cpp, emsesp.cpp, mqtt.cpp
@@ -111,12 +112,18 @@ class EMSdevice {
         return brand_;
     }
 
-    inline void name(const char * name) {
-        name_ = name;
+    // set custom device name
+    inline void custom_name(std::string & custom_name) {
+        custom_name_ = custom_name;
     }
+    std::string name(); // returns either default or custom name if defined
 
-    inline const char * name() const {
-        return name_;
+    // default name
+    inline void default_name(const char * default_name) {
+        default_name_ = default_name;
+    }
+    inline const char * default_name() const {
+        return default_name_;
     }
 
     inline uint8_t unique_id() const {
@@ -479,7 +486,8 @@ class EMSdevice {
     uint8_t      device_id_   = 0;
     uint8_t      product_id_  = 0;
     char         version_[6];
-    const char * name_; // the long name for the EMS model
+    const char * default_name_; // the fixed name the EMS model taken from the device library
+    std::string  custom_name_;  // custom name
     uint8_t      flags_ = 0;
     uint8_t      brand_ = Brand::NO_BRAND;
 

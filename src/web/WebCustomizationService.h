@@ -28,6 +28,7 @@
 // POST
 #define CUSTOMIZATION_ENTITIES_PATH "/rest/customizationEntities"
 #define RESET_CUSTOMIZATION_SERVICE_PATH "/rest/resetCustomizations"
+#define WRITE_DEVICE_NAME_PATH "/rest/writeDeviceName"
 
 namespace emsesp {
 
@@ -60,9 +61,10 @@ class AnalogCustomization {
 // we use product_id and device_id to make the device unique
 class EntityCustomization {
   public:
-    uint8_t                  product_id; // device's product id
-    uint8_t                  device_id;  // device's device id
-    std::vector<std::string> entity_ids; // array of entity ids with masks and optional custom fullname
+    uint8_t                  product_id;  // device's product id
+    uint8_t                  device_id;   // device's device id
+    std::string              custom_name; // custom device name
+    std::vector<std::string> entity_ids;  // array of entity ids with masks and optional custom fullname
 };
 
 class WebCustomization {
@@ -100,6 +102,7 @@ class WebCustomizationService : public StatefulService<WebCustomization> {
 
     // POST
     void customization_entities(AsyncWebServerRequest * request, JsonVariant json);
+    void writeDeviceName(AsyncWebServerRequest * request, JsonVariant json);
     void reset_customization(AsyncWebServerRequest * request); // command
 };
 

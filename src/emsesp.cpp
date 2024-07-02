@@ -359,7 +359,7 @@ void EMSESP::dump_all_values(uuid::console::Shell & shell) {
                 // add the device and print out all the entities
                 // for testing the mixer use ... if (device.product_id == 69) {
                 emsdevices.push_back(
-                    EMSFactory::add(device.device_type, device_id, device.product_id, "1.0", device.name, device.flags, EMSdevice::Brand::NO_BRAND));
+                    EMSFactory::add(device.device_type, device_id, device.product_id, "1.0", device.default_name, device.flags, EMSdevice::Brand::NO_BRAND));
                 emsdevices.back()->dump_value_info();
             }
         }
@@ -400,7 +400,7 @@ void EMSESP::dump_all_telegrams(uuid::console::Shell & shell) {
 
                 // add the device and print out all the entities
                 emsdevices.push_back(
-                    EMSFactory::add(device.device_type, device_id, device.product_id, "1.0", device.name, device.flags, EMSdevice::Brand::NO_BRAND));
+                    EMSFactory::add(device.device_type, device_id, device.product_id, "1.0", device.default_name, device.flags, EMSdevice::Brand::NO_BRAND));
                 // add to our vector list
                 emsdevices.back()->dump_telegram_info(telegram_functions_dump);
             }
@@ -1167,17 +1167,20 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
             if (product_id == 0 || emsdevice->product_id() != 0) { // update only with valid product_id
                 return true;
             }
+
             LOG_DEBUG("Updating details for already active deviceID 0x%02X", device_id);
             emsdevice->product_id(product_id);
             emsdevice->version(version);
+
             // only set brand if it doesn't already exist
             if (emsdevice->brand() == EMSdevice::Brand::NO_BRAND) {
                 emsdevice->brand(brand);
             }
-            // find the name and flags in our database
+
+            // find the name and flags in our device library database
             for (const auto & device : device_library_) {
                 if (device.product_id == product_id && device.device_type == emsdevice->device_type()) {
-                    emsdevice->name(device.name);
+                    emsdevice->default_name(device.default_name); // custom name is set later
                     emsdevice->add_flags(device.flags);
                 }
             }
@@ -1192,7 +1195,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
         if (device.product_id == product_id) {
             // sometimes boilers share the same productID as controllers
             // so only add boilers if the device_id is 0x08
-            // cascaded boilers with 0x70.., map to heatsources
+            // cascaded boilers with 0x70..., map to heatsources
             if (device.device_type == DeviceType::BOILER) {
                 if (device_id == EMSdevice::EMS_DEVICE_ID_BOILER) {
                     device_p = &device;
@@ -1204,7 +1207,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
                     break;
                 }
             } else {
-                // it's not a boiler, but we have a match
+                // it's not a boiler, but we still have a match
                 device_p = &device;
                 break;
             }
@@ -1219,84 +1222,99 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
         return false; // not found
     }
 
-    auto name        = device_p->name;
-    auto device_type = device_p->device_type;
-    auto flags       = device_p->flags;
+    auto default_name = device_p->default_name;
+    auto device_type  = device_p->device_type;
+    auto flags        = device_p->flags;
 
     // check for integrated modules with same product id, but different function (device_id)
+    // and force set the correct device type and hardcoded name
     if (device_type == DeviceType::HEATPUMP) {
         if (device_id == EMSdevice::EMS_DEVICE_ID_MODEM) {
-            device_type = DeviceType::GATEWAY;
-            name        = "WiFi module";
+            device_type  = DeviceType::GATEWAY;
+            default_name = "WiFi module";
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_RFBASE) {
-            device_type = DeviceType::CONNECT;
-            name        = "Wireless sensor base";
+            device_type  = DeviceType::CONNECT;
+            default_name = "Wireless sensor base";
         }
     }
+
     if (device_id >= EMSdevice::EMS_DEVICE_ID_DHW1 && device_id <= EMSdevice::EMS_DEVICE_ID_DHW8) {
         device_type = DeviceType::WATER;
     }
+
     // CR120 have version 22.xx, RC400/CW100 uses version 42.xx, see https://github.com/emsesp/EMS-ESP32/discussions/1779
     if (product_id == 157 && version[0] == '2') {
-        flags = DeviceFlags::EMS_DEVICE_FLAG_CR120;
-        name  = "CR120";
+        flags        = DeviceFlags::EMS_DEVICE_FLAG_CR120;
+        default_name = "CR120";
     }
+
     // empty reply to version, read a generic device from database
     if (product_id == 0) {
         // check for known device IDs
         if (device_id == EMSdevice::EMS_DEVICE_ID_RFSENSOR) {
             // see: https://github.com/emsesp/EMS-ESP32/issues/103#issuecomment-911717342 and https://github.com/emsesp/EMS-ESP32/issues/624
-            name        = "RF room temperature sensor";
-            device_type = DeviceType::THERMOSTAT;
+            default_name = "RF room temperature sensor";
+            device_type  = DeviceType::THERMOSTAT;
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_ROOMTHERMOSTAT || device_id == EMSdevice::EMS_DEVICE_ID_TADO_OLD) {
             // see https://github.com/emsesp/EMS-ESP32/issues/174
-            name        = "Generic thermostat";
-            device_type = DeviceType::THERMOSTAT;
-            flags       = DeviceFlags::EMS_DEVICE_FLAG_RC10 | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE;
+            default_name = "Generic Thermostat";
+            device_type  = DeviceType::THERMOSTAT;
+            flags        = DeviceFlags::EMS_DEVICE_FLAG_RC10 | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE;
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_RS232) {
-            name        = "RS232";
-            device_type = DeviceType::CONNECT;
+            default_name = "RS232";
+            device_type  = DeviceType::CONNECT;
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_TERMINAL) {
-            name        = "Terminal";
-            device_type = DeviceType::CONNECT;
+            default_name = "Terminal";
+            device_type  = DeviceType::CONNECT;
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_SERVICEKEY) {
-            name        = "Service Key";
-            device_type = DeviceType::CONNECT;
+            default_name = "Service Key";
+            device_type  = DeviceType::CONNECT;
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_CASCADE) {
-            name        = "Cascade";
-            device_type = DeviceType::CONNECT;
+            default_name = "Cascade";
+            device_type  = DeviceType::CONNECT;
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_EASYCOM
                    || (device_id >= EMSdevice::EMS_DEVICE_ID_MODEM && device_id <= EMSdevice::EMS_DEVICE_ID_MODEM + 5)) {
             // see https://github.com/emsesp/EMS-ESP/issues/460#issuecomment-709553012
-            name        = "Modem";
-            device_type = DeviceType::CONNECT;
+            default_name = "Modem";
+            device_type  = DeviceType::CONNECT;
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_CONVERTER) {
-            name = "Converter"; // generic
+            default_name = "Converter"; // generic
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_CLOCK) {
-            name        = "Clock"; // generic
-            device_type = DeviceType::CONTROLLER;
+            default_name = "Clock"; // generic
+            device_type  = DeviceType::CONTROLLER;
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_CONTROLLER) {
-            name        = "Generic Controller";
-            device_type = DeviceType::CONTROLLER;
+            default_name = "Generic Controller";
+            device_type  = DeviceType::CONTROLLER;
         } else if (device_id == EMSdevice::EMS_DEVICE_ID_BOILER) {
-            name        = "Generic Boiler";
-            device_type = DeviceType::BOILER;
-            flags       = DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP;
+            default_name = "Generic Boiler";
+            device_type  = DeviceType::BOILER;
+            flags        = DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP;
             LOG_WARNING("Unknown EMS boiler. Using generic profile. Please report on GitHub.");
         } else if (device_id >= 0x68 && device_id <= 0x6F) {
             // test for https://github.com/emsesp/EMS-ESP32/issues/882
-            name        = "Cascaded Controller";
-            device_type = DeviceType::CONTROLLER;
+            default_name = "Cascaded Controller";
+            device_type  = DeviceType::CONTROLLER;
         } else {
             LOG_WARNING("Unrecognized EMS device (device ID 0x%02X, no product ID). Please report on GitHub.", device_id);
             return false;
         }
     }
 
-    LOG_DEBUG("Adding new device %s (deviceID 0x%02X, productID %d, version %s)", name, device_id, product_id, version);
-    emsdevices.push_back(EMSFactory::add(device_type, device_id, product_id, version, name, flags, brand));
+    LOG_DEBUG("Adding new device %s (deviceID 0x%02X, productID %d, version %s)", default_name, device_id, product_id, version);
+    emsdevices.push_back(EMSFactory::add(device_type, device_id, product_id, version, default_name, flags, brand));
 
-    // assign a unique ID. Note that this is not actual unique after a restart as it's dependent on the order that devices are found
+    // see if we have a custom device name in our Customizations list, and if so set it
+    webCustomizationService.read([&](WebCustomization & settings) {
+        for (EntityCustomization e : settings.entityCustomizations) {
+            if ((e.device_id == device_id) && (e.product_id == product_id)) {
+                LOG_DEBUG("Have customizations for %s with deviceID 0x%02X productID %d", e.custom_name.c_str(), device_id, product_id);
+                emsdevices.back()->custom_name(e.custom_name);
+                break;
+            }
+        }
+    });
+
+    // assign a unique ID. Note that this is not actual remain unique after a restart as it's dependent on the order that devices are found
     // can't be 0 otherwise web won't work
     emsdevices.back()->unique_id(++unique_id_count_);
 
@@ -1305,7 +1323,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
         return a->device_type() < b->device_type();
     });
 
-    fetch_device_values(device_id); // go and fetch its data
+    fetch_device_values(device_id); // go and fetch its device entity data
 
     // Print to LOG showing we've added a new device
     LOG_INFO("Recognized new %s with deviceID 0x%02X", EMSdevice::device_type_2_device_name(device_type), device_id);
