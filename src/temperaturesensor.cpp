@@ -611,8 +611,8 @@ bool TemperatureSensor::Sensor::apply_customization() {
         auto sensors = settings.sensorCustomizations;
         if (!sensors.empty()) {
             for (const auto & sensor : sensors) {
-                LOG_DEBUG("Loading customization for temperature sensor %s", sensor.id.c_str());
                 if (id_ == sensor.id) {
+                    LOG_DEBUG("Loading customization for temperature sensor %s", sensor.id.c_str());
                     set_name(sensor.name);
                     set_offset(sensor.offset);
                     return true;
