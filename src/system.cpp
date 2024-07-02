@@ -1102,6 +1102,7 @@ bool System::check_restore() {
 
 #ifndef EMSESP_STANDALONE
     // see if we have a temp file, if so try and read it
+    // TODO find a nicer way to see if a file exists without reporting an error
     File new_file = LittleFS.open(TEMP_FILENAME_PATH);
     if (new_file) {
         JsonDocument         jsonDocument;
@@ -1556,7 +1557,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
                 if (emsdevice && (emsdevice->device_type() == device_class.first)) {
                     JsonObject obj    = devices.add<JsonObject>();
                     obj["type"]       = emsdevice->device_type_name(); // non translated name
-                    obj["name"]       = emsdevice->name();
+                    obj["name"]       = emsdevice->name();             // custom name
                     obj["device id"]  = Helpers::hextoa(emsdevice->device_id());
                     obj["product id"] = emsdevice->product_id();
                     obj["version"]    = emsdevice->version();
