@@ -292,14 +292,14 @@ uint8_t EMSdevice::decode_brand(uint8_t value) {
 const std::string EMSdevice::to_string() {
     // for devices that haven't been lookup yet, don't show all details
     if (product_id_ == 0) {
-        return std::string(name_) + " (DeviceID:" + Helpers::hextoa(device_id_) + ")";
+        return std::string(name()) + " (DeviceID:" + Helpers::hextoa(device_id_) + ")";
     }
 
     if (brand_ == Brand::NO_BRAND) {
-        return std::string(name_) + " (DeviceID:" + Helpers::hextoa(device_id_) + ", ProductID:" + Helpers::itoa(product_id_) + ", Version:" + version_ + ")";
+        return std::string(name()) + " (DeviceID:" + Helpers::hextoa(device_id_) + ", ProductID:" + Helpers::itoa(product_id_) + ", Version:" + version_ + ")";
     }
 
-    return std::string(brand_to_char()) + " " + name_ + " (DeviceID:" + Helpers::hextoa(device_id_) + ", ProductID:" + Helpers::itoa(product_id_)
+    return std::string(brand_to_char()) + " " + name() + " (DeviceID:" + Helpers::hextoa(device_id_) + ", ProductID:" + Helpers::itoa(product_id_)
            + ", Version:" + version_ + ")";
 }
 
@@ -307,10 +307,10 @@ const std::string EMSdevice::to_string() {
 // translated
 const std::string EMSdevice::to_string_short() {
     if (brand_ == Brand::NO_BRAND) {
-        return std::string(device_type_2_device_name_translated()) + ": " + name_;
+        return std::string(device_type_2_device_name_translated()) + ": " + name();
     }
 
-    return std::string(device_type_2_device_name_translated()) + ": " + brand_to_char() + " " + name_;
+    return std::string(device_type_2_device_name_translated()) + ": " + brand_to_char() + " " + name();
 }
 
 // for each telegram that has the fetch value set (true) do a read request
@@ -1176,7 +1176,7 @@ void EMSdevice::setCustomizationEntity(const std::string & entity_id) {
     }
 }
 
-// populate a string vector with entities that have masks set or have a custom name
+// populate a string vector with entities that have masks set or have a custom entity name
 void EMSdevice::getCustomizationEntities(std::vector<std::string> & entity_ids) {
     for (const auto & dv : devicevalues_) {
         char name[100];
@@ -1215,7 +1215,7 @@ void EMSdevice::getCustomizationEntities(std::vector<std::string> & entity_ids) 
 void EMSdevice::dump_value_info() {
     for (auto & dv : devicevalues_) {
         if (dv.fullname != nullptr) {
-            Serial.print(name_);
+            Serial.print(default_name());
             Serial.print(',');
             Serial.print(device_type_name());
             Serial.print(',');
@@ -1782,7 +1782,7 @@ void EMSdevice::mqtt_ha_entity_config_create() {
         if (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) && dv.has_state(DeviceValueState::DV_ACTIVE)
             && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE)) {
             // create_device_config is only done once for the EMS device. It can added to any entity, so we take the first
-            if (Mqtt::publish_ha_sensor_config(dv, name(), brand_to_char(), false, create_device_config)) {
+            if (Mqtt::publish_ha_sensor_config(dv, name().c_str(), brand_to_char(), false, create_device_config)) {
                 dv.add_state(DeviceValueState::DV_HA_CONFIG_CREATED);
                 create_device_config = false; // only create the main config once
                 count++;
@@ -1891,6 +1891,14 @@ void EMSdevice::write_command(const uint16_t type_id, const uint8_t offset, cons
 // send Tx read command to the device
 void EMSdevice::read_command(const uint16_t type_id, const uint8_t offset, const uint8_t length) const {
     EMSESP::send_read_request(type_id, device_id(), offset, length);
+}
+
+// returns either default or custom name
+std::string EMSdevice::name() {
+    if (custom_name_.empty()) {
+        return default_name_;
+    }
+    return custom_name_;
 }
 
 } // namespace emsesp
