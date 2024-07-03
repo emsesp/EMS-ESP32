@@ -837,7 +837,7 @@ uint16_t Helpers::string2minutes(const std::string & str) {
     }
 }
 
-float Helpers::numericoperator2scalefactor(uint8_t numeric_operator) {
+float Helpers::numericoperator2scalefactor(int8_t numeric_operator) {
     if (numeric_operator == 0)
         return 1.0f;
     else if (numeric_operator > 0)
