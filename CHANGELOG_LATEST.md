@@ -26,6 +26,7 @@
 - make remote control timeout editable [#1774](https://github.com/emsesp/EMS-ESP32/issues/1774)
 - added extra pump characteristics (mode and pressure for EMS+) by @SLTKA [#1802](https://github.com/emsesp/EMS-ESP32/pull/1802)
 - allow device name to be customized [#1174](https://github.com/emsesp/EMS-ESP32/issues/1174)
+- Modbus support by @mheyse [#1744](https://github.com/emsesp/EMS-ESP32/issues/1744)
 
 ## Fixed
 

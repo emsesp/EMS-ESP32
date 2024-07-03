@@ -52,7 +52,8 @@ void Modbus::start(uint8_t systemServerId, uint16_t port, uint8_t max_clients, u
 void Modbus::stop() {
 #ifndef EMSESP_STANDALONE
     modbusServer_->stop();
-    delete modbusServer_;
+    //     virtual ~ModbusServerTCPasync() = default;
+    // delete modbusServer_;
     modbusServer_ = nullptr;
 #endif
 }
@@ -65,6 +66,7 @@ bool Modbus::check_parameter_order() {
         if (isFirst) {
             isFirst = false;
         } else if (prev == nullptr || !prev->isLessThan(mi)) {
+            // TODO fix nullptr dereference when printing
             LOG_ERROR("Error in modbus parameters: %s must be listed before %s.", mi.short_name, prev->short_name);
             return false;
         }
