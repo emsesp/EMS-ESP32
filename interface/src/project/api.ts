@@ -24,7 +24,7 @@ export const readCoreData = () => alovaInstance.Get<CoreData>(`/rest/coreData`);
 export const readDeviceData = (id: number) =>
   alovaInstance.Get<DeviceData>('/rest/deviceData', {
     // alovaInstance.Get<DeviceData>(`/rest/deviceData/${id}`, {
-    params: { id }, // TODO replace later with id
+    params: { id },
     responseType: 'arraybuffer' // uses msgpack
   });
 export const writeDeviceValue = (data: { id: number; c: string; v: unknown }) =>
@@ -66,7 +66,7 @@ export const getSchedule = () => alovaInstance.Get('/rest/getSchedule');
 export const readDeviceEntities = (id: number) =>
   // alovaInstance.Get<DeviceEntity[]>(`/rest/deviceEntities/${id}`, {
   alovaInstance.Get<DeviceEntity[]>(`/rest/deviceEntities`, {
-    params: { id }, // TODO replace later with id
+    params: { id },
     responseType: 'arraybuffer',
     transformData(data) {
       return (data as DeviceEntity[]).map((de: DeviceEntity) => ({
@@ -85,6 +85,8 @@ export const writeCustomizationEntities = (data: {
   id: number;
   entity_ids: string[];
 }) => alovaInstance.Post('/rest/customizationEntities', data);
+export const writeDeviceName = (data: { id: number; name: string }) =>
+  alovaInstance.Post('/rest/writeDeviceName', data);
 
 // SettingsScheduler
 export const readSchedule = () =>

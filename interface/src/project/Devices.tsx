@@ -646,8 +646,8 @@ const Devices: FC = () => {
       >
         <Box sx={{ border: '1px solid #177ac9' }}>
           <Typography noWrap variant="subtitle1" color="warning.main" sx={{ ml: 1 }}>
-            {coreData.devices[deviceIndex].tn}&nbsp;&#124;&nbsp;
-            {coreData.devices[deviceIndex].n}
+            {coreData.devices[deviceIndex].n}&nbsp;(
+            {coreData.devices[deviceIndex].tn})
           </Typography>
 
           <Grid container justifyContent="space-between">

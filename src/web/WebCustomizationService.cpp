@@ -24,6 +24,7 @@ bool WebCustomization::_start = true;
 
 WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _fsPersistence(WebCustomization::read, WebCustomization::update, this, fs, EMSESP_CUSTOMIZATION_FILE) {
+    // GET
     server->on(DEVICE_ENTITIES_PATH,
                HTTP_GET,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { device_entities(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
@@ -32,9 +33,14 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
                HTTP_GET,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { devices(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
 
+    // POST
     server->on(RESET_CUSTOMIZATION_SERVICE_PATH,
                HTTP_POST,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { reset_customization(request); }, AuthenticationPredicates::IS_ADMIN));
+
+    server->on(WRITE_DEVICE_NAME_PATH,
+               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { writeDeviceName(request, json); },
+                                             AuthenticationPredicates::IS_AUTHENTICATED));
 
     server->on(CUSTOMIZATION_ENTITIES_PATH,
                securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { customization_entities(request, json); },
@@ -65,12 +71,13 @@ void WebCustomization::read(WebCustomization & customizations, JsonObject root) 
         sensorJson["type"]    = sensor.type;   // t
     }
 
-    // Masked entities customization
+    // Masked entities customization and custom device name (optional)
     JsonArray masked_entitiesJson = root["masked_entities"].to<JsonArray>();
     for (const EntityCustomization & entityCustomization : customizations.entityCustomizations) {
-        JsonObject entityJson    = masked_entitiesJson.add<JsonObject>();
-        entityJson["product_id"] = entityCustomization.product_id;
-        entityJson["device_id"]  = entityCustomization.device_id;
+        JsonObject entityJson     = masked_entitiesJson.add<JsonObject>();
+        entityJson["product_id"]  = entityCustomization.product_id;
+        entityJson["device_id"]   = entityCustomization.device_id;
+        entityJson["custom_name"] = entityCustomization.custom_name;
 
         // entries are in the form <XX><shortname>[optional customname] e.g "08heatingactive|heating is on"
         JsonArray masked_entityJson = entityJson["entity_ids"].to<JsonArray>();
@@ -120,9 +127,10 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
     customizations.entityCustomizations.clear();
     if (root["masked_entities"].is<JsonArray>()) {
         for (const JsonObject masked_entities : root["masked_entities"].as<JsonArray>()) {
-            auto emsEntity       = EntityCustomization();
-            emsEntity.product_id = masked_entities["product_id"];
-            emsEntity.device_id  = masked_entities["device_id"];
+            auto emsEntity        = EntityCustomization();
+            emsEntity.product_id  = masked_entities["product_id"];
+            emsEntity.device_id   = masked_entities["device_id"];
+            emsEntity.custom_name = masked_entities["custom_name"].as<std::string>();
 
             for (const JsonVariant masked_entity_id : masked_entities["entity_ids"].as<JsonArray>()) {
                 if (masked_entity_id.is<std::string>()) {
@@ -163,10 +171,11 @@ void WebCustomizationService::devices(AsyncWebServerRequest * request) {
     for (const auto & emsdevice : EMSESP::emsdevices) {
         if (emsdevice->has_entities()) {
             JsonObject obj = devices.add<JsonObject>();
-            obj["i"]       = emsdevice->unique_id();                                                                     // its unique id
-            obj["s"]  = std::string(emsdevice->device_type_2_device_name_translated()) + " (" + emsdevice->name() + ")"; // shortname, is device type translated
-            obj["tn"] = emsdevice->device_type_name();                                                                   // non-translated, lower-case
-            obj["t"]  = emsdevice->device_type();                                                                        // internal device type ID
+            obj["i"]       = emsdevice->unique_id();                                         // its unique id
+            obj["s"]       = emsdevice->name();                                              // custom name
+            obj["t"]       = emsdevice->device_type();                                       // internal device type ID
+            obj["tn"]      = std::string(emsdevice->device_type_2_device_name_translated()); // translated device type name
+            obj["url"]     = emsdevice->device_type_name();                                  // non-translated, lower-case, used for API URL
         }
     }
 
@@ -211,6 +220,58 @@ void WebCustomizationService::device_entities(AsyncWebServerRequest * request) {
     request->send(response);
 }
 
+// renames a device
+// takes the unique ID and the custom name
+void WebCustomizationService::writeDeviceName(AsyncWebServerRequest * request, JsonVariant json) {
+    if (json.is<JsonObject>()) {
+        // find the device using the unique_id
+        for (const auto & emsdevice : EMSESP::emsdevices) {
+            if (emsdevice) {
+                uint8_t unique_device_id = json["id"];
+                // find product id and device id using the unique id
+                if (emsdevice->unique_id() == unique_device_id) {
+                    uint8_t product_id  = emsdevice->product_id();
+                    uint8_t device_id   = emsdevice->device_id();
+                    auto    custom_name = json["name"].as<std::string>();
+
+                    // emsesp::EMSESP::logger().info("Found Device ID: %d, Product ID: %d", device_id, product_id);
+
+                    // updates current record or creates a new one
+                    bool entry_exists = false;
+                    update([&](WebCustomization & settings) {
+                        for (auto it = settings.entityCustomizations.begin(); it != settings.entityCustomizations.end();) {
+                            if ((*it).product_id == product_id && (*it).device_id == device_id) {
+                                (*it).custom_name = custom_name;
+                                entry_exists      = true;
+                                break;
+                            } else {
+                                ++it;
+                            }
+                        }
+
+                        // if we don't have any customization for this device, create a new entry
+                        if (!entry_exists) {
+                            EntityCustomization new_entry;
+                            new_entry.product_id  = product_id;
+                            new_entry.device_id   = device_id;
+                            new_entry.custom_name = custom_name;
+                            settings.entityCustomizations.push_back(new_entry);
+                        }
+
+                        return StateUpdateResult::CHANGED;
+                    });
+
+                    // update the EMS Device record real-time
+                    emsdevice->custom_name(custom_name);
+                }
+            }
+        }
+    }
+
+    AsyncWebServerResponse * response = request->beginResponse(200);
+    request->send(response);
+}
+
 // takes a list of updated entities with new masks from the web UI
 // saves it in the customization service
 // and updates the entity list real-time
@@ -236,7 +297,6 @@ void WebCustomizationService::customization_entities(AsyncWebServerRequest * req
                         } else {
                             emsdevice->setCustomizationEntity(id_s);
                         }
-                        // emsesp::EMSESP::logger().info(id.as<const char *>());
                     }
 
                     // add deleted entities from file
@@ -271,7 +331,7 @@ void WebCustomizationService::customization_entities(AsyncWebServerRequest * req
 
                     // Save the list to the customization file
                     update([&](WebCustomization & settings) {
-                        // see if we already have a mask list for this device, if so remove it
+                        // see if we already have a mask list for this device, if so remove the entry
                         for (auto it = settings.entityCustomizations.begin(); it != settings.entityCustomizations.end();) {
                             if ((*it).product_id == product_id && (*it).device_id == device_id) {
                                 it = settings.entityCustomizations.erase(it);
@@ -281,16 +341,14 @@ void WebCustomizationService::customization_entities(AsyncWebServerRequest * req
                             }
                         }
 
-                        // create a new entry for this device if there are values
+                        // re-create a new entry
                         EntityCustomization new_entry;
                         new_entry.product_id = product_id;
                         new_entry.device_id  = device_id;
-
                         new_entry.entity_ids = entity_ids;
-
-                        // add the record and save
                         settings.entityCustomizations.push_back(new_entry);
-                        return StateUpdateResult::CHANGED;
+
+                        return StateUpdateResult::CHANGED; // save the changes
                     });
 
                     break;
@@ -308,7 +366,6 @@ void WebCustomizationService::begin() {
     _fsPersistence.readFromFS();
 }
 
-
 // hard coded tests
 #ifdef EMSESP_TEST
 void WebCustomizationService::test() {
@@ -321,11 +378,11 @@ void WebCustomizationService::test() {
         sensor.offset = 0;
         webCustomization.sensorCustomizations.push_back(sensor);
 
-        sensor        = SensorCustomization();
-        sensor.id     = "0B-0C0D-0E0F-1011";
-        sensor.name   = "test_sensor2";
-        sensor.offset = 4;
-        webCustomization.sensorCustomizations.push_back(sensor);
+        auto sensor2   = SensorCustomization();
+        sensor2.id     = "0B-0C0D-0E0F-1011";
+        sensor2.name   = "test_sensor2";
+        sensor2.offset = 4;
+        webCustomization.sensorCustomizations.push_back(sensor2);
 
         // Analog sensors
         // This actually adds the sensors as we use customizations to store them
@@ -350,9 +407,10 @@ void WebCustomizationService::test() {
 
         // EMS entities
         webCustomization.entityCustomizations.clear();
-        auto emsEntity       = EntityCustomization();
-        emsEntity.product_id = 123;
-        emsEntity.device_id  = 8;
+        auto emsEntity        = EntityCustomization();
+        emsEntity.product_id  = 123;
+        emsEntity.device_id   = 8;
+        emsEntity.custom_name = "Custom Name!!";
         emsEntity.entity_ids.push_back("08heatingactive|is my heating on?");
         webCustomization.entityCustomizations.push_back(emsEntity);
 

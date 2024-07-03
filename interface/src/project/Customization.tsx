@@ -4,7 +4,9 @@ import { useBlocker, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';
+import EditIcon from '@mui/icons-material/Edit';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import SaveIcon from '@mui/icons-material/Save';
 import SearchIcon from '@mui/icons-material/Search';
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -71,20 +73,30 @@ const Customization: FC = () => {
   const [search, setSearch] = useState('');
   const [selectedDeviceEntity, setSelectedDeviceEntity] = useState<DeviceEntity>();
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+  const [rename, setRename] = useState<boolean>(false);
 
   useLayoutTitle(LL.CUSTOMIZATIONS());
 
   // fetch devices first
-  const { data: devices } = useRequest(EMSESP.readDevices);
+  const { data: devices, send: fetchDevices } = useRequest(EMSESP.readDevices);
 
   const [selectedDevice, setSelectedDevice] = useState<number>(
     Number(useLocation().state) || -1
   );
+  const [selectedDeviceTypeNameURL, setSelectedDeviceTypeNameURL] =
+    useState<string>(''); // needed for API URL
   const [selectedDeviceName, setSelectedDeviceName] = useState<string>('');
 
   const { send: resetCustomizations } = useRequest(EMSESP.resetCustomizations(), {
     immediate: false
   });
+
+  const { send: writeDeviceName } = useRequest(
+    (data: { id: number; name: string }) => EMSESP.writeDeviceName(data),
+    {
+      immediate: false
+    }
+  );
 
   const { send: writeCustomizationEntities } = useRequest(
     (data: { id: number; entity_ids: string[] }) =>
@@ -223,9 +235,10 @@ const Customization: FC = () => {
       const id = devices.devices.findIndex((d) => d.i === selectedDevice);
       if (id === -1) {
         setSelectedDevice(-1);
-        setSelectedDeviceName('');
+        setSelectedDeviceTypeNameURL('');
       } else {
-        setSelectedDeviceName(devices.devices[id].tn || '');
+        setSelectedDeviceTypeNameURL(devices.devices[id].url || '');
+        setSelectedDeviceName(devices.devices[id].s);
         setNumChanges(0);
         setRestartNeeded(false);
       }
@@ -388,31 +401,87 @@ const Customization: FC = () => {
     }
   };
 
+  const renameDevice = async () => {
+    await writeDeviceName({ id: selectedDevice, name: selectedDeviceName })
+      .then(() => {
+        toast.success(LL.UPDATED_OF(LL.NAME(1)));
+      })
+      .catch(() => {
+        toast.error(LL.UPDATE_OF(LL.NAME(1)) + ' ' + LL.FAILED(1));
+      })
+      .finally(async () => {
+        setRename(false);
+        await fetchDevices();
+      });
+  };
+
   const renderDeviceList = () => (
     <>
       <Box mb={1} color="warning.main">
         <Typography variant="body2">{LL.CUSTOMIZATIONS_HELP_1()}.</Typography>
       </Box>
-      <TextField
-        name="device"
-        label={LL.EMS_DEVICE()}
-        variant="outlined"
-        fullWidth
-        value={selectedDevice}
-        disabled={numChanges !== 0}
-        onChange={(e) => setSelectedDevice(parseInt(e.target.value))}
-        margin="normal"
-        select
-      >
-        <MenuItem disabled key={-1} value={-1}>
-          {LL.SELECT_DEVICE()}...
-        </MenuItem>
-        {devices.devices.map((device: DeviceShort) => (
-          <MenuItem key={device.i} value={device.i}>
-            {device.s}
-          </MenuItem>
-        ))}
-      </TextField>
+      <Box display="flex" flexWrap="wrap" alignItems="center" gap={2}>
+        {rename ? (
+          <TextField
+            name="device"
+            label={LL.EMS_DEVICE()}
+            fullWidth
+            variant="outlined"
+            value={selectedDeviceName}
+            onChange={(e) => setSelectedDeviceName(e.target.value)}
+            margin="normal"
+          />
+        ) : (
+          <TextField
+            name="device"
+            label={LL.EMS_DEVICE()}
+            variant="outlined"
+            value={selectedDevice}
+            disabled={numChanges !== 0}
+            onChange={(e) => setSelectedDevice(parseInt(e.target.value))}
+            margin="normal"
+            style={{ minWidth: '50%' }}
+            select
+          >
+            <MenuItem disabled key={-1} value={-1}>
+              {LL.SELECT_DEVICE()}...
+            </MenuItem>
+            {devices.devices.map((device: DeviceShort) => (
+              <MenuItem key={device.i} value={device.i}>
+                {device.s}&nbsp;({device.tn})
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
+        {selectedDevice !== -1 &&
+          (rename ? (
+            <ButtonRow>
+              <Button
+                startIcon={<SaveIcon />}
+                variant="contained"
+                onClick={() => renameDevice()}
+              >
+                {LL.UPDATE()}
+              </Button>
+              <Button
+                startIcon={<CancelIcon />}
+                variant="outlined"
+                color="secondary"
+                onClick={() => setRename(false)}
+              >
+                {LL.CANCEL()}
+              </Button>
+            </ButtonRow>
+          ) : (
+            <Button
+              startIcon={<EditIcon />}
+              variant="outlined"
+              onClick={() => setRename(true)}
+            >
+              {LL.RENAME()}
+            </Button>
+          ))}
+      </Box>
     </>
   );
 
@@ -545,7 +614,7 @@ const Customization: FC = () => {
                       {formatName(de, false)}&nbsp;(
                       <Link
                         target="_blank"
-                        href={APIURL + selectedDeviceName + '/' + de.id}
+                        href={APIURL + selectedDeviceTypeNameURL + '/' + de.id}
                       >
                         {de.id}
                       </Link>
@@ -600,7 +669,7 @@ const Customization: FC = () => {
   const renderContent = () => (
     <>
       {devices && renderDeviceList()}
-      {selectedDevice !== -1 && renderDeviceData()}
+      {selectedDevice !== -1 && !rename && renderDeviceData()}
       {restartNeeded && (
         <MessageBox my={2} level="warning" message={LL.RESTART_TEXT(0)}>
           <Button

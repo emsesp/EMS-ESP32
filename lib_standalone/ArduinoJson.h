@@ -4076,7 +4076,7 @@ template <typename T, typename Enable = void>
 struct Comparer;
 template <typename T>
 struct Comparer<T, enable_if_t<IsString<T>::value>> : ComparerBase {
-    T rhs; // TODO: store adapted string?
+    T rhs;
     explicit Comparer(T value)
         : rhs(value) {
     }
@@ -5143,7 +5143,7 @@ class StringBuilder {
             append(*s++);
     }
     void append(const char * s, size_t n) {
-        while (n-- > 0) // TODO: memcpy
+        while (n-- > 0)
             append(*s++);
     }
     void append(char c) {

@@ -331,7 +331,8 @@ const en: Translation = {
   MODULES: 'Modules',
   MODULES_UPDATED: 'Modules updated',
   MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules',
-  MODULES_NONE: 'No external modules detected'
+  MODULES_NONE: 'No external modules detected',
+  RENAME: 'Rename'
 };
 
 export default en;

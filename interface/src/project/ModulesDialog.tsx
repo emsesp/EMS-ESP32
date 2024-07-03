@@ -66,7 +66,6 @@ const ModulesDialog = ({
                 name="enabled"
               />
             }
-            // TODO translate
             label="Enabled"
           />
         </Grid>

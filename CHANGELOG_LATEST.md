@@ -21,10 +21,11 @@
 - Added scripts for OTA (scripts/upload.py and upload_cli.py) [#1738](https://github.com/emsesp/EMS-ESP32/issues/1738)
 - timeout for remote thermostat emulation [#1680](https://github.com/emsesp/EMS-ESP32/discussions/1680), [#1774](https://github.com/emsesp/EMS-ESP32/issues/1774)
 - CR120 thermostat as own model() [#1779](https://github.com/emsesp/EMS-ESP32/discussions/1779)
-- Modules - external linkable module library [#1778](https://github.com/emsesp/EMS-ESP32/issues/1778)
-- Scheduler onChange and Conditions [#1806](https://github.com/emsesp/EMS-ESP32/issues/1806)
+- modules - external linkable module library [#1778](https://github.com/emsesp/EMS-ESP32/issues/1778)
+- scheduler onChange and Conditions [#1806](https://github.com/emsesp/EMS-ESP32/issues/1806)
 - make remote control timeout editable [#1774](https://github.com/emsesp/EMS-ESP32/issues/1774)
 - added extra pump characteristics (mode and pressure for EMS+) by @SLTKA [#1802](https://github.com/emsesp/EMS-ESP32/pull/1802)
+- allow device name to be customized [#1174](https://github.com/emsesp/EMS-ESP32/issues/1174)
 
 ## Fixed
 

@@ -274,8 +274,13 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pumpModMin_, DeviceValueType::UINT8, FL_(pumpModMin), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_min_pump));
     register_device_value(
         DeviceValueTAG::TAG_DEVICE_DATA, &pumpMode_, DeviceValueType::ENUM, FL_(enum_pumpMode), FL_(pumpMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_pumpMode));
-    register_device_value(
-        DeviceValueTAG::TAG_DEVICE_DATA, &pumpCharacter_, DeviceValueType::ENUM, FL_(enum_pumpCharacter), FL_(pumpCharacter), DeviceValueUOM::NONE, MAKE_CF_CB(set_pumpCharacter));
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &pumpCharacter_,
+                          DeviceValueType::ENUM,
+                          FL_(enum_pumpCharacter),
+                          FL_(pumpCharacter),
+                          DeviceValueUOM::NONE,
+                          MAKE_CF_CB(set_pumpCharacter));
     register_device_value(
         DeviceValueTAG::TAG_DEVICE_DATA, &pumpDelay_, DeviceValueType::UINT8, FL_(pumpDelay), DeviceValueUOM::MINUTES, MAKE_CF_CB(set_pump_delay), 0, 60);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setFlowTemp_, DeviceValueType::UINT8, FL_(setFlowTemp), DeviceValueUOM::DEGREES);
