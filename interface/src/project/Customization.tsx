@@ -83,7 +83,8 @@ const Customization: FC = () => {
   const [selectedDevice, setSelectedDevice] = useState<number>(
     Number(useLocation().state) || -1
   );
-  const [selectedDeviceTypeName, setSelectedDeviceTypeName] = useState<string>(''); // needed for API URL
+  const [selectedDeviceTypeNameURL, setSelectedDeviceTypeNameURL] =
+    useState<string>(''); // needed for API URL
   const [selectedDeviceName, setSelectedDeviceName] = useState<string>('');
 
   const { send: resetCustomizations } = useRequest(EMSESP.resetCustomizations(), {
@@ -234,9 +235,9 @@ const Customization: FC = () => {
       const id = devices.devices.findIndex((d) => d.i === selectedDevice);
       if (id === -1) {
         setSelectedDevice(-1);
-        setSelectedDeviceTypeName('');
+        setSelectedDeviceTypeNameURL('');
       } else {
-        setSelectedDeviceTypeName(devices.devices[id].tn || '');
+        setSelectedDeviceTypeNameURL(devices.devices[id].url || '');
         setSelectedDeviceName(devices.devices[id].s);
         setNumChanges(0);
         setRestartNeeded(false);
@@ -439,6 +440,7 @@ const Customization: FC = () => {
             disabled={numChanges !== 0}
             onChange={(e) => setSelectedDevice(parseInt(e.target.value))}
             margin="normal"
+            style={{ minWidth: '50%' }}
             select
           >
             <MenuItem disabled key={-1} value={-1}>
@@ -446,7 +448,7 @@ const Customization: FC = () => {
             </MenuItem>
             {devices.devices.map((device: DeviceShort) => (
               <MenuItem key={device.i} value={device.i}>
-                {device.s}
+                {device.s}&nbsp;({device.tn})
               </MenuItem>
             ))}
           </TextField>
@@ -612,7 +614,7 @@ const Customization: FC = () => {
                       {formatName(de, false)}&nbsp;(
                       <Link
                         target="_blank"
-                        href={APIURL + selectedDeviceTypeName + '/' + de.id}
+                        href={APIURL + selectedDeviceTypeNameURL + '/' + de.id}
                       >
                         {de.id}
                       </Link>

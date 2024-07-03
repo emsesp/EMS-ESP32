@@ -642,55 +642,64 @@ const emsesp_devices = {
       i: 2,
       s: 'RC20',
       t: 5,
-      tn: 'thermostat'
+      tn: 'Thermostat',
+      url: 'thermostat'
     },
     {
       i: 3,
       s: 'GB125',
       t: 5,
-      tn: 'boiler'
+      tn: 'Boiler',
+      url: 'boiler'
     },
     {
       i: 4,
       s: 'Moduline 1000',
       t: 5,
-      tn: 'thermostat'
+      tn: 'Thermostat',
+      url: 'thermostat'
     },
     {
       i: 5,
       s: 'MM10',
       t: 7,
-      tn: 'mixer'
+      tn: 'Mixer Module',
+      url: 'mixer'
     },
     {
       i: 6,
       s: 'SM10',
       t: 8,
-      tn: 'solar'
+      tn: 'Solar Module',
+      url: 'solar'
     },
     {
       i: 7,
       s: 'Trendline HRC30',
       t: 4,
-      tn: 'boiler'
+      tn: 'Boiler',
+      url: 'boiler'
     },
     {
       i: 8,
       s: 'Bosch Compress 7000i AW Heat Pump',
       t: 5,
-      tn: 'boiler'
+      tn: 'Boiler',
+      url: 'boiler'
     },
     {
       i: 9,
       s: 'RC100H',
       t: 6,
-      tn: 'thermostat'
+      tn: 'Thermostat',
+      url: 'thermostat'
     },
     {
       i: 10,
       s: 'RC310',
       t: 6,
-      tn: 'thermostat'
+      tn: 'Thermostat',
+      url: 'thermostat'
     },
   ]
 };

@@ -113,7 +113,8 @@ export interface DeviceShort {
   p?: number; // productid
   s: string; // shortname
   t?: number; // device type id
-  tn?: string; // device type internal name
+  tn?: string; // device type internal name (translated)
+  url?: string; // lowercase type name used in API URL
 }
 
 export interface Devices {
