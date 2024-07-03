@@ -72,6 +72,7 @@ uuid::syslog::SyslogService System::syslog_;
 RxService         EMSESP::rxservice_;         // incoming Telegram Rx handler
 TxService         EMSESP::txservice_;         // outgoing Telegram Tx handler
 Mqtt              EMSESP::mqtt_;              // mqtt handler
+Modbus *          EMSESP::modbus_;            // modbus handler
 System            EMSESP::system_;            // core system services
 TemperatureSensor EMSESP::temperaturesensor_; // Temperature sensors
 AnalogSensor      EMSESP::analogsensor_;      // Analog sensors
@@ -334,8 +335,8 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
 void EMSESP::dump_all_values(uuid::console::Shell & shell) {
     Serial.println("---- CSV START ----"); // marker use by py script
     // add header for CSV
-    Serial.println(
-        "device name,device type,product id,shortname,fullname,type [options...] \\| (min/max),uom,writeable,discovery entityid v3.4, discovery entityid");
+    Serial.println("device name,device type,product id,shortname,fullname,type [options...] \\| (min/max),uom,writeable,discovery entityid v3.4,discovery "
+                   "entityid,modbus unit identifier,modbus block,modbus scale factor,modbus offset,modbus count");
 
     for (const auto & device_class : EMSFactory::device_handlers()) {
         // go through each device type so they are sorted
@@ -1653,6 +1654,11 @@ void EMSESP::start() {
         telnet_.initial_idle_timeout(3600);  // in sec, one hour idle timeout
         telnet_.default_write_timeout(1000); // in ms, socket timeout 1 second
 #endif
+    }
+
+    if (system_.modbus_enabled()) {
+        modbus_ = new Modbus;
+        modbus_->start(1, system_.modbus_port(), system_.modbus_max_clients(), system_.modbus_timeout());
     }
 
     mqtt_.start();              // mqtt init

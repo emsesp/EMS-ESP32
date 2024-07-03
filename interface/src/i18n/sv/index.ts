@@ -332,7 +332,8 @@ const sv: Translation = {
   MODULES_UPDATED: 'Modules updated', // TODO translate
   MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
   MODULES_NONE: 'No external modules detected', // TODO translate
-  RENAME: 'Rename' // TODO translate 
+  RENAME: 'Rename', // TODO translate
+  ENABLE_MODBUS: 'Aktivera Modbus'
 };
 
 export default sv;

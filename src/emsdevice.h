@@ -202,6 +202,9 @@ class EMSdevice {
         }
     }
 
+    int  get_modbus_value(uint8_t tag, const std::string & shortname, std::vector<uint16_t> & result);
+    bool modbus_value_to_json(uint8_t tag, const std::string & shortname, const std::vector<uint8_t> & modbus_data, JsonObject & jsonValue);
+
     const char *      brand_to_char();
     const std::string to_string();
     const std::string to_string_short();
