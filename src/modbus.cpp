@@ -65,8 +65,10 @@ bool Modbus::check_parameter_order() {
     for (const auto & mi : modbus_register_mappings) {
         if (isFirst) {
             isFirst = false;
-        } else if (prev == nullptr || !prev->isLessThan(mi)) {
-            // TODO fix nullptr dereference when printing
+        } else if (prev == nullptr) {
+            LOG_ERROR("Error checking modbus parameters %s.", mi.short_name);
+            return false;
+        } else if(!prev->isLessThan(mi)) {
             LOG_ERROR("Error in modbus parameters: %s must be listed before %s.", mi.short_name, prev->short_name);
             return false;
         }
