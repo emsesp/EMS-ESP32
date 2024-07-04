@@ -2035,6 +2035,22 @@ bool Thermostat::set_control(const char * value, const int8_t id) {
             write_command(set_typeids[hc->hc()], 1, ctrl);
             return true;
         }
+    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400) {
+        if (Helpers::value2enum(value, ctrl, FL_(enum_control2))) {
+            write_command(hpmode_typeids[hc->hc()], 3, ctrl);
+            hc->control = ctrl; // set in advance, dont wait for verify
+            if (hc->remotetemp != EMS_VALUE_INT16_NOTSET && ctrl > 0) {
+                if (ctrl == 2) {
+                    Roomctrl::set_remotetemp(Roomctrl::RC100, hc->hc(), hc->remotetemp);
+                } else if (ctrl == 3) {
+                    Roomctrl::set_remotetemp(Roomctrl::RC100H, hc->hc(), hc->remotetemp);
+                } else {
+                    hc->remotetemp = EMS_VALUE_INT16_NOTSET;
+                    Roomctrl::set_remotetemp(0, hc->hc(), hc->remotetemp);
+                }
+            }
+            return true;
+        }
     } else if (isRC300() || model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
         if (Helpers::value2enum(value, ctrl, FL_(enum_control1))) {
             write_command(hpmode_typeids[hc->hc()], 3, ctrl);
@@ -4428,7 +4444,11 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->dewoffset, DeviceValueType::UINT8, FL_(dewoffset), DeviceValueUOM::K, MAKE_CF_CB(set_dewoffset), 2, 10);
         register_device_value(tag, &hc->roomtempdiff, DeviceValueType::UINT8, FL_(roomtempdiff), DeviceValueUOM::K, MAKE_CF_CB(set_roomtempdiff));
         register_device_value(tag, &hc->hpminflowtemp, DeviceValueType::UINT8, FL_(hpminflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_hpminflowtemp));
-        register_device_value(tag, &hc->control, DeviceValueType::ENUM, FL_(enum_control1), FL_(control), DeviceValueUOM::NONE, MAKE_CF_CB(set_control));
+        if (model == EMSdevice::EMS_DEVICE_FLAG_BC400) {
+            register_device_value(tag, &hc->control, DeviceValueType::ENUM, FL_(enum_control2), FL_(control), DeviceValueUOM::NONE, MAKE_CF_CB(set_control));
+        } else {
+            register_device_value(tag, &hc->control, DeviceValueType::ENUM, FL_(enum_control1), FL_(control), DeviceValueUOM::NONE, MAKE_CF_CB(set_control));
+        }
         register_device_value(tag,
                               &hc->remotetemp,
                               DeviceValueType::INT16,
