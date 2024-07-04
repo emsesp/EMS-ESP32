@@ -3899,7 +3899,7 @@ void Thermostat::register_device_values() {
     if (device_id() >= 0x38 && device_id() <= 0x3F) {
         // each device controls only one hc, so we tag the values
         int8_t tag = DeviceValueTAG::TAG_HC1 + device_id() - 0x38;
-        register_device_value(tag, &tempsensor1_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(remotetemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &tempsensor1_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(RFTemp), DeviceValueUOM::DEGREES);
         register_device_value(tag, &dewtemperature_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(dewTemperature), DeviceValueUOM::DEGREES);
         register_device_value(tag, &humidity_, DeviceValueType::UINT8, FL_(airHumidity), DeviceValueUOM::PERCENT);
         register_device_value(tag,
@@ -3912,10 +3912,12 @@ void Thermostat::register_device_values() {
         register_device_value(tag, &battery_, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(battery), DeviceValueUOM::PERCENT);
         return;
     }
-    // Junkers FB10 remote, show only internal sensor
-    if (this->model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS && device_id() >= 0x18 && device_id() <= 0x1B) {
+    // Remotes RC20 and Junkers FB10, show only internal sensor
+    if ((this->model() == EMSdevice::EMS_DEVICE_FLAG_RC20_N || this->model() == EMSdevice::EMS_DEVICE_FLAG_RC20
+         || this->model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS)
+        && device_id() >= 0x18 && device_id() <= 0x1B) {
         int8_t tag = DeviceValueTAG::TAG_HC1 + device_id() - 0x18;
-        register_device_value(tag, &tempsensor1_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(remotetemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &tempsensor1_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(RFTemp), DeviceValueUOM::DEGREES);
         return;
     }
     // Common for all thermostats
@@ -4520,7 +4522,6 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
             tag, &hc->heatingtype, DeviceValueType::ENUM, FL_(enum_heatingtype), FL_(heatingtype), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatingtype));
         register_device_value(tag, &hc->summertemp, DeviceValueType::UINT8, FL_(summertemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_summertemp), 10, 30);
         register_device_value(tag, &hc->summermode, DeviceValueType::ENUM, FL_(enum_summer), FL_(summermode), DeviceValueUOM::NONE);
-        register_device_value(tag, &tempsensor1_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(remotetemp), DeviceValueUOM::DEGREES);
         break;
     case EMSdevice::EMS_DEVICE_FLAG_RC25:
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode3), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
