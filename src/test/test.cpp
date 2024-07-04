@@ -793,7 +793,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::webAPIService.webAPIService(&request);
         request.url("/api/temperaturesensor/info");
         EMSESP::webAPIService.webAPIService(&request);
-        request.url("/api/temperaturesensor/01-0203-0405-0607");
+        request.url("/api/temperaturesensor/01_0203_0405_0607");
         EMSESP::webAPIService.webAPIService(&request);
 
         ok = true;
@@ -810,7 +810,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.invoke_command("call system publish");
 
         // rename
-        EMSESP::temperaturesensor_.update("01-0203-0405-0607", "testtemperature", 2);
+        EMSESP::temperaturesensor_.update("01_0203_0405_0607", "testtemperature", 2);
         shell.invoke_command("show values");
         shell.invoke_command("call system publish");
         ok = true;

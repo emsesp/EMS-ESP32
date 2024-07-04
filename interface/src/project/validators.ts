@@ -389,7 +389,13 @@ export const entityItemValidation = (entity: EntityItem[], entityItem: EntityIte
 
 export const temperatureSensorItemValidation = () =>
   new Schema({
-    n: [{ required: true, message: 'Name is required' }]
+    n: [
+      {
+        type: 'string',
+        pattern: /^[a-zA-Z0-9_\\.]{0,15}$/,
+        message: "Must be <15 characters: alpha numeric, '_' or '.'"
+      }
+    ]
   });
 
 export const isGPIOUniqueValidator = (sensors: AnalogSensor[]) => ({

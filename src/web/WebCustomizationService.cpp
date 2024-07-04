@@ -99,6 +99,10 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
             sensor.id     = sensorJson["id"].as<std::string>();
             sensor.name   = sensorJson["name"].as<std::string>();
             sensor.offset = sensorJson["offset"];
+            if (sensor.id == sensor.name) {
+                sensor.name = ""; // no need to store id as name
+            }
+            std::replace(sensor.id.begin(), sensor.id.end(), '-', '_'); // change old ids to v3.7 style
             customizations.sensorCustomizations.push_back(sensor); // add to list
         }
     }
