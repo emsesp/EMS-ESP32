@@ -11,6 +11,7 @@ on:
 jobs:
   build:
     name: Build and analyze
+    if: github.repository == 'emsesp/EMS-ESP32'
     runs-on: ubuntu-latest
     env:
       BUILD_WRAPPER_OUT_DIR: bw-output
