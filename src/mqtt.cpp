@@ -959,9 +959,18 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             readonly_sensors = false;
             break;
         case DeviceValueType::ENUM:
+            snprintf(topic, sizeof(topic), "select/%s", config_topic);
+            readonly_sensors = false;
+            break;
         case DeviceValueType::CMD: // hardcoded commands are always ENUMS
             // select - https://www.home-assistant.io/integrations/select.mqtt
-            snprintf(topic, sizeof(topic), "select/%s", config_topic);
+            if (uom == DeviceValueUOM::NONE) {
+                snprintf(topic, sizeof(topic), "select/%s", config_topic);
+            } else if (discovery_type() == discoveryType::HOMEASSISTANT || discovery_type() == discoveryType::DOMOTICZ_LATEST) {
+                snprintf(topic, sizeof(topic), "number/%s", config_topic);
+            } else {
+                snprintf(topic, sizeof(topic), "sensor/%s", config_topic);
+            }
             readonly_sensors = false;
             break;
         case DeviceValueType::STRING:

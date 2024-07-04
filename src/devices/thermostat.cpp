@@ -4451,7 +4451,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         }
         register_device_value(tag,
                               &hc->remotetemp,
-                              DeviceValueType::INT16,
+                              DeviceValueType::CMD,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(remotetemp),
                               DeviceValueUOM::DEGREES,
@@ -4524,7 +4524,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
             tag, &hc->heatingtype, DeviceValueType::ENUM, FL_(enum_heatingtype), FL_(heatingtype), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatingtype));
         register_device_value(tag, &hc->summertemp, DeviceValueType::UINT8, FL_(summertemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_summertemp), 10, 30);
         register_device_value(tag, &hc->summermode, DeviceValueType::ENUM, FL_(enum_summer), FL_(summermode), DeviceValueUOM::NONE);
-        register_device_value(tag, &hc->remotetemp, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(remotetemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &hc->remotetemp, DeviceValueType::CMD, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(remotetemp), DeviceValueUOM::DEGREES);
         break;
     case EMSdevice::EMS_DEVICE_FLAG_RC25:
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode3), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
@@ -4675,7 +4675,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
             tag, &hc->vacreducemode, DeviceValueType::ENUM, FL_(enum_reducemode), FL_(vacreducemode), DeviceValueUOM::NONE, MAKE_CF_CB(set_vacreducemode));
         register_device_value(tag,
                               &hc->remotetemp,
-                              DeviceValueType::INT16,
+                              DeviceValueType::CMD,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(remotetemp),
                               DeviceValueUOM::DEGREES,
@@ -4712,7 +4712,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->program, DeviceValueType::ENUM, FL_(enum_progMode4), FL_(program), DeviceValueUOM::NONE, MAKE_CF_CB(set_program));
         register_device_value(tag,
                               &hc->remotetemp,
-                              DeviceValueType::INT16,
+                              DeviceValueType::CMD,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(remotetemp),
                               DeviceValueUOM::DEGREES,

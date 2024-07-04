@@ -534,6 +534,12 @@ void EMSdevice::add_device_value(int8_t                tag,              // to b
         *(int8_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_BOOL_DUMMY : EMS_VALUE_DEFAULT_BOOL; // bool is uint8_t, but other initial value
     } else if (type == DeviceValueType::ENUM) {
         *(uint8_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_ENUM_DUMMY : EMS_VALUE_DEFAULT_ENUM; // enums behave as uint8_t
+    } else if (type == DeviceValueType::CMD) {
+        if (uom == DeviceValueUOM::NONE) {
+            *(uint8_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_ENUM_DUMMY : EMS_VALUE_DEFAULT_ENUM; // enums behave as uint8_t
+        } else if (uom == DeviceValueUOM::DEGREES) {
+            *(int16_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_INT16_DUMMY : EMS_VALUE_DEFAULT_INT16;
+        }
     }
 
     uint8_t     state           = DeviceValueState::DV_DEFAULT; // determine state
@@ -981,7 +987,7 @@ void EMSdevice::generate_values_web(JsonObject output) {
                     l.add(Helpers::render_boolean(result, true, true));
                 }
                 // add command help template
-                else if (dv.type == DeviceValueType::STRING || dv.type == DeviceValueType::CMD) {
+                else if (dv.type == DeviceValueType::STRING || (dv.type == DeviceValueType::CMD && dv.uom == DeviceValueUOM::NONE)) {
                     if (dv.options_size == 1) {
                         obj["h"] = dv.options_single[0]; // NOT translated
                     }
