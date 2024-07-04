@@ -556,11 +556,7 @@ void TemperatureSensor::publish_values(const bool force) {
                 Mqtt::add_ha_sections_to_doc("temperature", stat_t, config, !is_ha_device_created, val_cond);
 
                 char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
-                // use '_' as HA doesn't like '-' in the topic name
-                std::string sensorid = sensor.id();
-                std::replace(sensorid.begin(), sensorid.end(), '-', '_');
-
-                snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(temperaturesensor), sensorid.c_str());
+                snprintf(topic, sizeof(topic), "sensor/%s/%s_%s/config", Mqtt::basename().c_str(), F_(temperaturesensor), sensor.id().c_str());
 
                 sensor.ha_registered = Mqtt::queue_ha(topic, config.as<JsonObject>());
             }
@@ -580,7 +576,7 @@ TemperatureSensor::Sensor::Sensor(const uint8_t addr[])
     char id_s[20];
     snprintf(id_s,
              sizeof(id_s),
-             "%02X-%04X-%04X-%04X",
+             "%02X_%04X_%04X_%04X",
              (unsigned int)(internal_id_ >> 48) & 0xFF,
              (unsigned int)(internal_id_ >> 32) & 0xFFFF,
              (unsigned int)(internal_id_ >> 16) & 0xFFFF,

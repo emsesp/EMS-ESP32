@@ -6,6 +6,7 @@
 
 - new device WATER shows dhw entities from MM100 and SM100 in dhw setting
 - renamed WWC to DHW, always create DHW nests/topics, remove ww prefix from mqtt names [#1634](https://github.com/emsesp/EMS-ESP32/issues/1634)
+- change temperaturesensor id to underscore
 
 ## Added
 
@@ -42,5 +43,7 @@
 - rename DeviceValueTypes, add UINT32 for custom entities
 - dynamic register dhw circuits for thermostat
 - removed OTA feature [#1738](https://github.com/emsesp/EMS-ESP32/issues/1738)
-- added shower min duration [[#1801](https://github.com/emsesp/EMS-ESP32/issues/1801)]
+- added shower min duration [#1801](https://github.com/emsesp/EMS-ESP32/issues/1801)
 - Include TXT file along with the generated CSV for Device Data export/download
+- thermostat/remotetemp as command [#1835](https://github.com/emsesp/EMS-ESP32/discussions/1835)
+- temperaturesensor id notation with underscore [#1794](https://github.com/emsesp/EMS-ESP32/discussions/1794)

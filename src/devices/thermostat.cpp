@@ -720,11 +720,7 @@ void Thermostat::process_RC20Set_2(std::shared_ptr<const Telegram> telegram) {
 
 // 0xAF - for reading the roomtemperature from the RC20/ES72 thermostat (0x18, 0x19, ..)
 void Thermostat::process_RC20Remote(std::shared_ptr<const Telegram> telegram) {
-    auto hc = heating_circuit(telegram);
-    if (hc == nullptr) {
-        return;
-    }
-    has_update(telegram, hc->remotetemp, 0);
+    has_update(telegram, tempsensor1_, 0);
 }
 
 // 0x42B - for reading the roomtemperature from the RC100H remote thermostat (0x38, 0x39, ..)
@@ -2033,6 +2029,22 @@ bool Thermostat::set_control(const char * value, const int8_t id) {
     if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS && !has_flags(EMSdevice::EMS_DEVICE_FLAG_JUNKERS_OLD)) {
         if (Helpers::value2enum(value, ctrl, FL_(enum_j_control))) {
             write_command(set_typeids[hc->hc()], 1, ctrl);
+            return true;
+        }
+    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400) {
+        if (Helpers::value2enum(value, ctrl, FL_(enum_control2))) {
+            write_command(hpmode_typeids[hc->hc()], 3, ctrl);
+            hc->control = ctrl; // set in advance, dont wait for verify
+            if (hc->remotetemp != EMS_VALUE_INT16_NOTSET && ctrl > 0) {
+                if (ctrl == 2) {
+                    Roomctrl::set_remotetemp(Roomctrl::RC100, hc->hc(), hc->remotetemp);
+                } else if (ctrl == 3) {
+                    Roomctrl::set_remotetemp(Roomctrl::RC100H, hc->hc(), hc->remotetemp);
+                } else {
+                    hc->remotetemp = EMS_VALUE_INT16_NOTSET;
+                    Roomctrl::set_remotetemp(0, hc->hc(), hc->remotetemp);
+                }
+            }
             return true;
         }
     } else if (isRC300() || model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
@@ -4428,10 +4440,14 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->dewoffset, DeviceValueType::UINT8, FL_(dewoffset), DeviceValueUOM::K, MAKE_CF_CB(set_dewoffset), 2, 10);
         register_device_value(tag, &hc->roomtempdiff, DeviceValueType::UINT8, FL_(roomtempdiff), DeviceValueUOM::K, MAKE_CF_CB(set_roomtempdiff));
         register_device_value(tag, &hc->hpminflowtemp, DeviceValueType::UINT8, FL_(hpminflowtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_hpminflowtemp));
-        register_device_value(tag, &hc->control, DeviceValueType::ENUM, FL_(enum_control1), FL_(control), DeviceValueUOM::NONE, MAKE_CF_CB(set_control));
+        if (model == EMSdevice::EMS_DEVICE_FLAG_BC400) {
+            register_device_value(tag, &hc->control, DeviceValueType::ENUM, FL_(enum_control2), FL_(control), DeviceValueUOM::NONE, MAKE_CF_CB(set_control));
+        } else {
+            register_device_value(tag, &hc->control, DeviceValueType::ENUM, FL_(enum_control1), FL_(control), DeviceValueUOM::NONE, MAKE_CF_CB(set_control));
+        }
         register_device_value(tag,
                               &hc->remotetemp,
-                              DeviceValueType::INT16,
+                              DeviceValueType::CMD,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(remotetemp),
                               DeviceValueUOM::DEGREES,
@@ -4504,7 +4520,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
             tag, &hc->heatingtype, DeviceValueType::ENUM, FL_(enum_heatingtype), FL_(heatingtype), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatingtype));
         register_device_value(tag, &hc->summertemp, DeviceValueType::UINT8, FL_(summertemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_summertemp), 10, 30);
         register_device_value(tag, &hc->summermode, DeviceValueType::ENUM, FL_(enum_summer), FL_(summermode), DeviceValueUOM::NONE);
-        register_device_value(tag, &hc->remotetemp, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(remotetemp), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &tempsensor1_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(remotetemp), DeviceValueUOM::DEGREES);
         break;
     case EMSdevice::EMS_DEVICE_FLAG_RC25:
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode3), FL_(mode), DeviceValueUOM::NONE, MAKE_CF_CB(set_mode));
@@ -4655,7 +4671,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
             tag, &hc->vacreducemode, DeviceValueType::ENUM, FL_(enum_reducemode), FL_(vacreducemode), DeviceValueUOM::NONE, MAKE_CF_CB(set_vacreducemode));
         register_device_value(tag,
                               &hc->remotetemp,
-                              DeviceValueType::INT16,
+                              DeviceValueType::CMD,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(remotetemp),
                               DeviceValueUOM::DEGREES,
@@ -4692,7 +4708,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->program, DeviceValueType::ENUM, FL_(enum_progMode4), FL_(program), DeviceValueUOM::NONE, MAKE_CF_CB(set_program));
         register_device_value(tag,
                               &hc->remotetemp,
-                              DeviceValueType::INT16,
+                              DeviceValueType::CMD,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
                               FL_(remotetemp),
                               DeviceValueUOM::DEGREES,
