@@ -36,6 +36,7 @@
 // if there is no translation, it will default to en
 //
 // device types, as display in Web and Console
+MAKE_WORD_TRANSLATION(boiler_hp_device, "Boiler/HP", "Kessel/WP", "CV ketel/WP", "Värmepanna/VP", "Kocioł/PC", "Varmekjele/VP", "", "Kazan/IP", "Caldaia/PC", "Bojler/Tč") // TODO translate
 MAKE_WORD_TRANSLATION(boiler_device, "Boiler", "Kessel", "CV ketel", "Värmepanna", "Kocioł", "Varmekjele", "", "Kazan", "Caldaia", "Bojler") // TODO translate
 MAKE_WORD_TRANSLATION(thermostat_device, "Thermostat", "Thermostat", "Thermostaat", "Termostat", "Termostat", "Termostat", "", "Termostat", "Termostato", "Termostat") // TODO translate
 MAKE_WORD_TRANSLATION(heatpump_device, "Heat Pump", "Wärmepumpe", "Warmtepomp", "Värmepump", "Pompa ciepła", "Varmepumpe", "", "Isı Pompası", "Pompa di Calore", "Tepelné čerpadlo") // TODO translate

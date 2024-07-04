@@ -155,6 +155,9 @@ const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
 const char * EMSdevice::device_type_2_device_name_translated() {
     switch (device_type_) {
     case DeviceType::BOILER:
+        if (flags_ == EMS_DEVICE_FLAG_HEATPUMP) {
+            return Helpers::translated_word(FL_(boiler_hp_device));
+        }
         return Helpers::translated_word(FL_(boiler_device));
     case DeviceType::THERMOSTAT:
         return Helpers::translated_word(FL_(thermostat_device));
