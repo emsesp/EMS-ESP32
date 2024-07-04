@@ -3,12 +3,12 @@
   "Customizations": {
     "ts": [
       {
-        "id": "01-0203-0405-0607",
+        "id": "01_0203_0405_0607",
         "name": "test_sensor1",
         "offset": 0
       },
       {
-        "id": "0B-0C0D-0E0F-1011",
+        "id": "0B_0C0D_0E0F_1011",
         "name": "test_sensor2",
         "offset": 4
       }
@@ -18,6 +18,7 @@
       {
         "product_id": 123,
         "device_id": 8,
+        "custom_name": "Trendline",
         "entity_ids": [
           "08heatingactive|is my heating on?"
         ]

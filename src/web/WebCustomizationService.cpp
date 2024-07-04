@@ -103,7 +103,7 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
                 sensor.name = ""; // no need to store id as name
             }
             std::replace(sensor.id.begin(), sensor.id.end(), '-', '_'); // change old ids to v3.7 style
-            customizations.sensorCustomizations.push_back(sensor); // add to list
+            customizations.sensorCustomizations.push_back(sensor);      // add to list
         }
     }
 
@@ -377,13 +377,13 @@ void WebCustomizationService::test() {
         // Temperature sensors
         webCustomization.sensorCustomizations.clear();
         auto sensor   = SensorCustomization();
-        sensor.id     = "01-0203-0405-0607";
+        sensor.id     = "01_0203_0405_0607";
         sensor.name   = "test_sensor1";
         sensor.offset = 0;
         webCustomization.sensorCustomizations.push_back(sensor);
 
         auto sensor2   = SensorCustomization();
-        sensor2.id     = "0B-0C0D-0E0F-1011";
+        sensor2.id     = "0B_0C0D_0E0F_1011";
         sensor2.name   = "test_sensor2";
         sensor2.offset = 4;
         webCustomization.sensorCustomizations.push_back(sensor2);
