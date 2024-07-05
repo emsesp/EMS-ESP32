@@ -123,7 +123,7 @@ const it: Translation = {
   REMOTE_TIMEOUT: 'Remote timeout',
   REMOTE_TIMEOUT_EN: 'Disable remote on missing roomtemperature',
   HEATINGOFF: 'Avviamento caldaia con riscaldamento forzato spento',
-  MIN_DURATION: 'Time for detection shower',
+  MIN_DURATION: 'Wait time',
   ENABLE_SHOWER_TIMER: 'Abilita timer doccia',
   ENABLE_SHOWER_ALERT: 'Abilita avviso doccia',
   TRIGGER_TIME: 'Tempo di avvio',

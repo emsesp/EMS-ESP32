@@ -123,7 +123,7 @@ const no: Translation = {
   REMOTE_TIMEOUT: 'Remote timeout',
   REMOTE_TIMEOUT_EN: 'Disable remote control on missing roomtemperature',
   HEATINGOFF: 'Start boiler with forced heating off', // TODO translate
-  MIN_DURATION: 'Time for detection shower',
+  MIN_DURATION: 'Wait time',
   ENABLE_SHOWER_TIMER: 'Aktiver Dusjtimer',
   ENABLE_SHOWER_ALERT: 'Aktiver Dusj-varsling',
   TRIGGER_TIME: 'Aktiveringstid',

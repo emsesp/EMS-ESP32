@@ -123,7 +123,7 @@ const nl: Translation = {
   REMOTE_TIMEOUT: 'Remote timeout',
   REMOTE_TIMEOUT_EN: 'Disable remote on missing roomtemperature',
   HEATINGOFF: 'Start ketel met geforceerde verwarming uit',
-  MIN_DURATION: 'Time for detection shower',
+  MIN_DURATION: 'Wait time',
   ENABLE_SHOWER_TIMER: 'Activeer Douche Timer (tijdmeting)',
   ENABLE_SHOWER_ALERT: 'Activeer Douchemelding',
   TRIGGER_TIME: 'Trigger tijd',

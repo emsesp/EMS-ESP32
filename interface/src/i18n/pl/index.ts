@@ -123,7 +123,7 @@ const pl: BaseTranslation = {
   REMOTE_TIMEOUT: 'Remote timeout',
   REMOTE_TIMEOUT_EN: 'Disable remote control on missing roomtemperature',
   HEATINGOFF: 'Uruchom kocioł z wymuszonym wyłączonym grzaniem',
-  MIN_DURATION: 'Time for detection shower',
+  MIN_DURATION: 'Wait time',
   ENABLE_SHOWER_TIMER: 'Aktywuj minutnik prysznica',
   ENABLE_SHOWER_ALERT: 'Aktywuj alarm prysznica',
   TRIGGER_TIME: 'Wyzwalaj po czasie',

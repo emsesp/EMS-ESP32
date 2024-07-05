@@ -123,7 +123,7 @@ const sk: Translation = {
   REMOTE_TIMEOUT: 'Remote timeout',
   REMOTE_TIMEOUT_EN: 'Disable remote on missing roomtemperature',
   HEATINGOFF: 'Spustiť kotol s vynúteným vykurovaním',
-  MIN_DURATION: 'Time for detection shower',
+  MIN_DURATION: 'Wait time',
   ENABLE_SHOWER_TIMER: 'Povoliť časovač sprchovania',
   ENABLE_SHOWER_ALERT: 'Povoliť upozornenie na sprchu',
   TRIGGER_TIME: 'Čas spustenia',
