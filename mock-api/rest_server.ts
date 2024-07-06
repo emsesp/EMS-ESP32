@@ -339,6 +339,7 @@ const ACTIVITY_ENDPOINT = REST_ENDPOINT_ROOT + 'activity';
 const ESPSYSTEM_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'ESPSystemStatus';
 const SECURITY_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'securitySettings';
 const RESTART_ENDPOINT = REST_ENDPOINT_ROOT + 'restart';
+const RESTART_PARTITION_ENDPOINT = REST_ENDPOINT_ROOT + 'partition';
 const FACTORY_RESET_ENDPOINT = REST_ENDPOINT_ROOT + 'factoryReset';
 
 // SYSTEM SIGNIN
@@ -4206,6 +4207,10 @@ router
   })
   .get(VERIFY_AUTHORIZATION_ENDPOINT, () => verify_authentication)
   .post(RESTART_ENDPOINT, () => {
+    console.log('restarting...');
+    return status(200);
+  })
+  .post(RESTART_PARTITION_ENDPOINT, () => {
     console.log('restarting...');
     return status(200);
   })
