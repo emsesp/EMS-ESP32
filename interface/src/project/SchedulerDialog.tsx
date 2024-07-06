@@ -159,7 +159,7 @@ const SchedulerDialog = ({
       </DialogTitle>
       <DialogContent dividers>
         <Box display="flex" flexWrap="wrap" mb={1}>
-          <Box flexGrow={1}>
+          <Box>
             <ToggleButtonGroup
               size="small"
               color="secondary"
@@ -191,7 +191,7 @@ const SchedulerDialog = ({
               </ToggleButton>
             </ToggleButtonGroup>
           </Box>
-          <Box flexWrap="nowrap" whiteSpace="nowrap">
+          <Box sx={{ '& button, & a, & .MuiCard-root': { ml: 1 } }}>
             {isTimer ? (
               <Button
                 size="large"
@@ -217,8 +217,6 @@ const SchedulerDialog = ({
                 {showFlag(editItem, ScheduleFlag.SCHEDULE_TIMER)}
               </Button>
             )}
-          </Box>
-          <Box>
             {isOnChange ? (
               <Button
                 size="large"
@@ -247,8 +245,6 @@ const SchedulerDialog = ({
                 {showFlag(editItem, ScheduleFlag.SCHEDULE_ONCHANGE)}
               </Button>
             )}
-          </Box>
-          <Box>
             {isCondition ? (
               <Button
                 size="large"
@@ -279,75 +275,83 @@ const SchedulerDialog = ({
             )}
           </Box>
         </Box>
-        <Grid container>
-          <BlockFormControlLabel
-            control={
-              <Checkbox
-                checked={editItem.active}
-                onChange={updateFormValue}
-                name="active"
+        {editItem.flags !== 0 && (
+          <>
+            <Grid container>
+              <BlockFormControlLabel
+                control={
+                  <Checkbox
+                    checked={editItem.active}
+                    onChange={updateFormValue}
+                    name="active"
+                  />
+                }
+                label={LL.ACTIVE()}
               />
-            }
-            label={LL.ACTIVE()}
-          />
-        </Grid>
-        <Grid container>
-          {isCondition || isOnChange ? (
-            <TextField
-              name="time"
-              label={isCondition ? 'Condition' : 'On Change Value'}
+            </Grid>
+            <Grid container>
+              {isCondition || isOnChange ? (
+                <TextField
+                  name="time"
+                  label={isCondition ? 'Condition' : 'On Change Value'}
+                  fullWidth
+                  value={
+                    editItem.time == '00:00' ? (editItem.time = '') : editItem.time
+                  }
+                  margin="normal"
+                  onChange={updateFormValue}
+                />
+              ) : (
+                <>
+                  <TextField
+                    name="time"
+                    type="time"
+                    label={isTimer ? LL.TIMER(1) : LL.TIME(1)}
+                    value={
+                      editItem.time == '' ? (editItem.time = '00:00') : editItem.time
+                    }
+                    margin="normal"
+                    onChange={updateFormValue}
+                  />
+                  {isTimer && (
+                    <Box color="warning.main" ml={2} mt={4}>
+                      <Typography variant="body2">
+                        {LL.SCHEDULER_HELP_2()}
+                      </Typography>
+                    </Box>
+                  )}
+                </>
+              )}
+            </Grid>
+            <ValidatedTextField
+              fieldErrors={fieldErrors}
+              name="cmd"
+              label={LL.COMMAND(0)}
               fullWidth
-              value={editItem.time == '00:00' ? (editItem.time = '') : editItem.time}
+              value={editItem.cmd}
               margin="normal"
               onChange={updateFormValue}
             />
-          ) : (
-            <>
-              <TextField
-                name="time"
-                type="time"
-                label={isTimer ? LL.TIMER(1) : LL.TIME(1)}
-                value={
-                  editItem.time == '' ? (editItem.time = '00:00') : editItem.time
-                }
-                margin="normal"
-                onChange={updateFormValue}
-              />
-              {isTimer && (
-                <Box color="warning.main" ml={2} mt={4}>
-                  <Typography variant="body2">{LL.SCHEDULER_HELP_2()}</Typography>
-                </Box>
-              )}
-            </>
-          )}
-        </Grid>
-        <ValidatedTextField
-          fieldErrors={fieldErrors}
-          name="cmd"
-          label={LL.COMMAND(0)}
-          fullWidth
-          value={editItem.cmd}
-          margin="normal"
-          onChange={updateFormValue}
-        />
-        <TextField
-          name="value"
-          label={LL.VALUE(0)}
-          multiline
-          margin="normal"
-          fullWidth
-          value={editItem.value}
-          onChange={updateFormValue}
-        />
-        <ValidatedTextField
-          fieldErrors={fieldErrors}
-          name="name"
-          label={LL.NAME(0)}
-          value={editItem.name}
-          fullWidth
-          margin="normal"
-          onChange={updateFormValue}
-        />
+            <TextField
+              name="value"
+              label={LL.VALUE(0)}
+              multiline
+              margin="normal"
+              fullWidth
+              value={editItem.value}
+              onChange={updateFormValue}
+            />
+            <ValidatedTextField
+              fieldErrors={fieldErrors}
+              name="name"
+              label={LL.NAME(0)}
+              value={editItem.name}
+              fullWidth
+              margin="normal"
+              onChange={updateFormValue}
+            />
+          </>
+        )}
       </DialogContent>
       <DialogActions>
         {!creating && (
