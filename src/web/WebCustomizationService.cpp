@@ -134,7 +134,7 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
             auto emsEntity        = EntityCustomization();
             emsEntity.product_id  = masked_entities["product_id"];
             emsEntity.device_id   = masked_entities["device_id"];
-            emsEntity.custom_name = masked_entities["custom_name"].as<std::string>();
+            emsEntity.custom_name = masked_entities["custom_name"] | "";
 
             for (const JsonVariant masked_entity_id : masked_entities["entity_ids"].as<JsonArray>()) {
                 if (masked_entity_id.is<std::string>()) {
