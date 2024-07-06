@@ -21,7 +21,7 @@ const RestartMonitor: FC = () => {
     try {
       await send();
       document.location.href = '/';
-    } catch (error) {
+    } catch {
       if (new Date().getTime() < timeoutAt.current) {
         setTimeoutId(setTimeout(poll.current, POLL_INTERVAL));
       } else {

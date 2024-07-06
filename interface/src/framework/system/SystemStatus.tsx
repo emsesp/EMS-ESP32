@@ -287,20 +287,20 @@ const SystemStatus: FC = () => {
         <Button
           startIcon={<PowerSettingsNewIcon />}
           variant="outlined"
-          onClick={restart}
-          disabled={processing}
-          color="error"
-        >
-          {LL.RESTART()}
-        </Button>
-        <Button
-          startIcon={<PowerSettingsNewIcon />}
-          variant="outlined"
           onClick={partition}
           disabled={processing}
           color="warning"
         >
           EMS-ESP Loader
+        </Button>
+        <Button
+          startIcon={<PowerSettingsNewIcon />}
+          variant="outlined"
+          onClick={restart}
+          disabled={processing}
+          color="error"
+        >
+          {LL.RESTART()}
         </Button>
       </DialogActions>
     </Dialog>

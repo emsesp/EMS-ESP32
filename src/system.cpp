@@ -604,7 +604,7 @@ void System::send_info_mqtt() {
     }
     _connection = connection;
     JsonDocument doc;
-    doc["event"]   = "connected";
+    // doc["event"]   = "connected";
     doc["version"] = EMSESP_APP_VERSION;
 
     // if NTP is enabled send the boot_time in local time in ISO 8601 format (eg: 2022-11-15 20:46:38)
