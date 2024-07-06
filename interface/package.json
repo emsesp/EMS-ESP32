@@ -63,7 +63,7 @@
     "prettier": "^3.3.2",
     "rollup-plugin-visualizer": "^5.12.0",
     "terser": "^5.31.1",
-    "typescript-eslint": "^7.15.0",
+    "typescript-eslint": "8.0.0-alpha.10",
     "vite": "^5.3.3",
     "vite-plugin-imagemin": "^0.6.1",
     "vite-tsconfig-paths": "^4.3.2"
