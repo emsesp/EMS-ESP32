@@ -33,7 +33,7 @@ const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
       const decodedMe = AuthenticationApi.decodeMeJWT(accessToken);
       setMe(decodedMe);
       toast.success(LL.LOGGED_IN({ name: decodedMe.username }));
-    } catch (error) {
+    } catch {
       setMe(undefined);
       throw new Error('Failed to parse JWT');
     }
