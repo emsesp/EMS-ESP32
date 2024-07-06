@@ -169,13 +169,9 @@ const UploadDownload: FC = () => {
   };
 
   const downloadSchedule = async () => {
-    await getSchedule()
-      .catch((error: Error) => {
-        toast.error(error.message);
-      })
-      .finally(() => {
-        toast.info(LL.DOWNLOAD_SUCCESSFUL());
-      });
+    await getSchedule().catch((error: Error) => {
+      toast.error(error.message);
+    });
   };
 
   const callAPI = async (device: string, entity: string) => {
