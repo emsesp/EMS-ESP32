@@ -1019,7 +1019,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         doc["cmd_t"] = command_topic;
 
         // extend for enums and also commands, add options
-        if ((type == DeviceValueType::ENUM) || (type == DeviceValueType::CMD)) {
+        if ((type == DeviceValueType::ENUM) || (type == DeviceValueType::CMD && uom == DeviceValueUOM::NONE)) {
             JsonArray option_list = doc["ops"].to<JsonArray>();
             if (EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX) {
                 // use index numbers
