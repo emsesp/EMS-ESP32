@@ -13,7 +13,7 @@
 #include <map>
 #include <utility>
 
-#if defined(EMSESP_STANDALONE) || defined(EMSESP_TEST)
+#if defined(EMSESP_STANDALONE)
 
 #include <modbus_test.h>
 
