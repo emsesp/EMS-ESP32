@@ -67,6 +67,7 @@ MAKE_WORD(publish)
 MAKE_WORD(board_profile)
 MAKE_WORD(setvalue)
 MAKE_WORD(service)
+MAKE_WORD(message)
 
 // for commands
 MAKE_WORD(call)

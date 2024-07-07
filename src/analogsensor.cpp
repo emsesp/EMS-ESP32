@@ -715,6 +715,7 @@ bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int
             return true; // found a match, exit
         }
     }
+
     return false; // not found
 }
 

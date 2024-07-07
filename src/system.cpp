@@ -226,6 +226,18 @@ bool System::command_syslog_level(const char * value, const int8_t id) {
 }
 */
 
+// send message - to log and MQTT
+bool System::command_message(const char * value, const int8_t id) {
+    if (value == nullptr || value[0] == '\0') {
+        return false; // must have a string value
+    }
+
+    LOG_INFO("Message: %s", value);
+    Mqtt::queue_publish(F_(message), value);
+
+    return true;
+}
+
 // watch
 bool System::command_watch(const char * value, const int8_t id) {
     uint8_t  w = 0xff;
@@ -831,10 +843,10 @@ void System::commands_init() {
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send, FL_(send_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, FL_(fetch_cmd), CommandFlag::ADMIN_ONLY);
 
-    // restart and watch (and test) are also exposed as Console commands
+    // restart, watch, message (and test) are also exposed as Console commands
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), System::command_restart, FL_(restart_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), System::command_watch, FL_(watch_cmd));
-
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(message), System::command_message, FL_(message_cmd));
 #if defined(EMSESP_TEST)
     Command::add(EMSdevice::DeviceType::SYSTEM, ("test"), System::command_test, FL_(test_cmd));
 #endif
@@ -1107,7 +1119,7 @@ bool System::check_restore() {
 
 #ifndef EMSESP_STANDALONE
     // see if we have a temp file, if so try and read it
-    // TODO find a nicer way to see if a file exists without reporting an error
+    // TODO find a nicer way to see if a file exists without reporting an error, like using lfs_stat. exists() uses open so same problem.
     File new_file = LittleFS.open(TEMP_FILENAME_PATH);
     if (new_file) {
         JsonDocument         jsonDocument;
@@ -1301,7 +1313,7 @@ bool System::get_value_info(JsonObject root, const char * command) {
     }
     if (command_info("", 0, root)) {
         std::string s;
-        // Loop through all the key-value pairs in root to find the key case independent
+        // Loop through all the key-value pairs in root to find the key, case independent
         if (dash) { // search the nest first
             for (JsonPair p : root) {
                 if (p.value().is<JsonObject>() && Helpers::toLower(p.key().c_str()) == cmd) {
@@ -1331,9 +1343,10 @@ bool System::get_value_info(JsonObject root, const char * command) {
             return true;
         }
     }
+
     root.clear();
-    LOG_ERROR("system command '%s' not found", command);
-    return false;
+
+    return false; // not found
 }
 
 // export status information including the device information
@@ -1342,7 +1355,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     JsonObject node;
 
     // System
-    node                     = output["System Info"].to<JsonObject>();
+    node                     = output["System"].to<JsonObject>();
     node["version"]          = EMSESP_APP_VERSION;
     node["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     node["uptime (seconds)"] = uuid::get_uptime_sec();
@@ -1361,7 +1374,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
 
 #ifndef EMSESP_STANDALONE
     // Network Status
-    node = output["Network Info"].to<JsonObject>();
+    node = output["Network"].to<JsonObject>();
     if (EMSESP::system_.ethernet_connected()) {
         node["network"]  = "Ethernet";
         node["hostname"] = ETH.getHostname();
@@ -1409,7 +1422,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
 #endif
 
     // NTP status
-    node = output["NTP Info"].to<JsonObject>();
+    node = output["NTP"].to<JsonObject>();
 #ifndef EMSESP_STANDALONE
     node["NTP status"] = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
     EMSESP::esp8266React.getNTPSettingsService()->read([&](NTPSettings & settings) {
@@ -1421,7 +1434,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
 #endif
 
     // MQTT Status
-    node                = output["MQTT Info"].to<JsonObject>();
+    node                = output["MQTT"].to<JsonObject>();
     node["MQTT status"] = Mqtt::connected() ? F_(connected) : F_(disconnected);
     if (Mqtt::enabled()) {
         node["MQTT publishes"]     = Mqtt::publish_count();
@@ -1456,7 +1469,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     });
 
     // Syslog Status
-    node            = output["Syslog Info"].to<JsonObject>();
+    node            = output["Syslog"].to<JsonObject>();
     node["enabled"] = EMSESP::system_.syslog_enabled_;
 #ifndef EMSESP_STANDALONE
     if (EMSESP::system_.syslog_enabled_) {
@@ -1468,7 +1481,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
 #endif
 
     // Sensor Status
-    node = output["Sensor Info"].to<JsonObject>();
+    node = output["Sensor"].to<JsonObject>();
     if (EMSESP::sensor_enabled()) {
         node["temperature sensors"]      = EMSESP::temperaturesensor_.no_sensors();
         node["temperature sensor reads"] = EMSESP::temperaturesensor_.reads();
@@ -1481,12 +1494,12 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     }
 
     // API Status
-    node              = output["API Info"].to<JsonObject>();
+    node              = output["API"].to<JsonObject>();
     node["API calls"] = WebAPIService::api_count();
     node["API fails"] = WebAPIService::api_fails();
 
     // EMS Bus Status
-    node = output["Bus Info"].to<JsonObject>();
+    node = output["Bus"].to<JsonObject>();
     switch (EMSESP::bus_status()) {
     case EMSESP::BUS_STATUS_OFFLINE:
         node["bus status"] = "disconnected";

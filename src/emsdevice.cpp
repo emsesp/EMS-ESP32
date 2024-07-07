@@ -100,7 +100,7 @@ const char * EMSdevice::brand_to_char() {
     }
 }
 
-// returns the short name of the device, used in MQTT and console commands, all lowercase
+// returns the short name of the device, used in MQTT and console commands, all lowercase, no translated
 const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
     switch (device_type) {
     case DeviceType::SYSTEM:

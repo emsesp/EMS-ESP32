@@ -338,8 +338,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
         }
     }
 
-    output["message"] = "unknown command";
-    return false;
+    return false; // not found
 }
 
 // publish single value

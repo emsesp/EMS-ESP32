@@ -740,7 +740,7 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
     buffer = nullptr;
 }
 
-// builds json with the detail of each value, for an EMS device
+// builds json with the detail of each value, for a given EMS device
 // for other types like sensors, scheduler, custom entities it will process single commands like 'info', 'values', 'commands'...
 bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8_t id, const uint8_t devicetype) {
     // check first for EMS devices
@@ -752,7 +752,7 @@ bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8
         }
     }
 
-    // temperaturesensor
+    // temperature sensor
     if (devicetype == DeviceType::TEMPERATURESENSOR) {
         return temperaturesensor_.get_value_info(root, cmd, id);
     }
@@ -772,15 +772,12 @@ bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8
         return webCustomEntityService.get_value_info(root, cmd);
     }
 
+    // system
     if (devicetype == DeviceType::SYSTEM) {
         return system_.get_value_info(root, cmd);
     }
 
-    char error[100];
-    snprintf(error, sizeof(error), "cannot find values for entity '%s'", cmd);
-    root["message"] = error;
-
-    return false;
+    return false; // not found
 }
 
 // search for recognized device_ids : Me, All, otherwise print hex value

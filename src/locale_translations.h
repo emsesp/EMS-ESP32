@@ -75,6 +75,7 @@ MAKE_WORD_TRANSLATION(entity_cmd, "set custom value on ems", "Sende eigene Entit
 MAKE_WORD_TRANSLATION(commands_response, "get response", "Hole Antwort", "Verzoek om antwoord", "", "uzyskaj odpowiedź", "", "", "gelen cevap", "", "získať odpoveď") // TODO translate
 MAKE_WORD_TRANSLATION(coldshot_cmd, "send a cold shot of water", "", "", "", "uruchom tryśnięcie zimnej wody", "", "", "soğuk su gönder", "", "pošlite studenú dávku vody") // TODO translate
 MAKE_WORD_TRANSLATION(allvalues_cmd, "output all values", "", "", "", "wyświetl wszystkie wartości", "", "", "", "", "vypísať všetky hodnoty") // TODO translate
+MAKE_WORD_TRANSLATION(message_cmd, "send message", "", "", "", "", "", "", "", "", "") // TODO translate
 
 // tags
 MAKE_WORD_TRANSLATION(tag_hc1, "hc1", "HK1", "hc1", "VK1", "OG1", "hc1", "hc1", "ID1", "hc1", "hc1")

@@ -296,11 +296,25 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     if (cmd == nullptr) {
         return CommandRet::NOT_FOUND;
     }
-    uint8_t return_code = CommandRet::OK;
 
-    auto    dname     = EMSdevice::device_type_2_device_name(device_type);
+    auto dname = EMSdevice::device_type_2_device_name(device_type); // device name, not translated
+
+    // check first if there is a command given as it may be calling a device's attribute (e.g. /api/boiler/nrgheat)
+    bool single_command = (!value || !strlen(value));
+    if (single_command) {
+        if (EMSESP::get_device_value_info(output, cmd, id, device_type)) { // entity = cmd
+            LOG_DEBUG("Fetched device entity attributes for %s/%s", dname, cmd);
+            return CommandRet::OK;
+        } else {
+            // char error[100];
+            // snprintf(error, sizeof(error), "no data for device %s", dname);
+            // output["message"] = error;
+        }
+    }
+
     uint8_t device_id = EMSESP::device_id_from_cmd(device_type, cmd, id);
 
+    // determine flags based on id (which is the tag)
     uint8_t flag = CommandFlag::CMD_FLAG_DEFAULT;
     int8_t  tag  = id;
     if (tag >= DeviceValueTAG::TAG_HC1 && tag <= DeviceValueTAG::TAG_HC8) {
@@ -312,31 +326,15 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     } else if (tag >= DeviceValueTAG::TAG_AHS1 && tag <= DeviceValueTAG::TAG_AHS1) {
         flag = CommandFlag::CMD_FLAG_AHS;
     }
-    // see if there is a command registered
+
+    // first see if there is a command registered and it's valid
     auto cf = find_command(device_type, device_id, cmd, flag);
-
-    // check if its a call to an end-point of a device
-    // this is used to fetch the attributes of the device entity, or call a command directly
-    // for example info, values, commands, etc
-    bool single_command = (!value || !strlen(value));
-    if (single_command) {
-        // exception: boiler coldshot command
-        bool get_attributes = (!cf || !cf->cmdfunction_json_) && (strcmp(cmd, F_(coldshot)) != 0);
-
-        if (get_attributes) {
-            LOG_DEBUG("Calling %s command '%s' to retrieve attributes", dname, cmd);
-            return EMSESP::get_device_value_info(output, cmd, id, device_type) ? CommandRet::OK : CommandRet::ERROR; // entity = cmd
-        }
-    }
-
-    // check if we have a matching command
     if (!cf) {
-        // we didn't find the command, report error
         LOG_WARNING("Command failed: invalid command '%s'", cmd ? cmd : "");
-        return message(CommandRet::NOT_FOUND, "invalid command", output);
+        return CommandRet::ERROR;
     }
 
-    // check permissions and abort if not authorized
+    // before calling the command, check permissions and abort if not authorized
     if (cf->has_flags(CommandFlag::ADMIN_ONLY) && !is_admin) {
         LOG_WARNING("Command failed: authentication failed");
         output["message"] = "authentication failed";
@@ -353,7 +351,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     } else {
         snprintf(info_s, sizeof(info_s), "'%s/%s'", dname, cmd);
     }
-    if ((value == nullptr) || (strlen(value) == 0)) {
+    if (single_command) {
         LOG_DEBUG(("%sCalling command %s"), ro.c_str(), info_s);
     } else {
         if (id > 0) {
@@ -364,6 +362,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     }
 
     // call the function based on type, either with a json package or no parameters
+    uint8_t return_code = CommandRet::OK;
     if (cf->cmdfunction_json_) {
         // JSON
         return_code = ((cf->cmdfunction_json_)(value, id, output)) ? CommandRet::OK : CommandRet::ERROR;
@@ -378,7 +377,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 
     // report back. If not OK show output from error, other return the HTTP code
     if (return_code != CommandRet::OK) {
-        if ((value == nullptr) || (strlen(value) == 0)) {
+        if (single_command) {
             LOG_ERROR("Command '%s' failed with error '%s'", cmd, FL_(cmdRet)[return_code]);
         } else {
             LOG_ERROR("Command '%s: %s' failed with error '%s'", cmd, value, FL_(cmdRet)[return_code]);

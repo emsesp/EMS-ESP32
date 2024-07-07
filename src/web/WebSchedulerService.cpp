@@ -205,8 +205,7 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
         return true;
     }
 
-    output["message"] = "unknown command";
-    return false;
+    return false; // not found
 }
 
 // publish single value
@@ -472,7 +471,7 @@ void WebSchedulerService::loop() {
 #if defined(EMSESP_TEST)
 void WebSchedulerService::test() {
     update([&](WebScheduler & webScheduler) {
-        webScheduler.scheduleItems.clear();
+        // webScheduler.scheduleItems.clear();
         // test 1
         auto si        = ScheduleItem();
         si.active      = true;

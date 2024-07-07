@@ -324,11 +324,12 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::webSchedulerService.test();    // add scheduler items
         EMSESP::webCustomEntityService.test(); // add custom entities
 
-        shell.invoke_command("show devices");
+        // shell.invoke_command("show devices");
         // shell.invoke_command("show values");
         // shell.invoke_command("call system allvalues");
         // shell.invoke_command("call system publish");
         // shell.invoke_command("show mqtt");
+        shell.invoke_command("call boiler nrgheat");
         ok = true;
     }
 
@@ -974,6 +975,71 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::webAPIService.webAPIService(&request);
         request.url("/api/boiler/flamecurr/bad");
         EMSESP::webAPIService.webAPIService(&request);
+
+        ok = true;
+    }
+
+    if (command == "api2") {
+        shell.printfln("Testing API getting values");
+        Mqtt::ha_enabled(false);
+        Mqtt::nested_format(1);
+        // Mqtt::send_response(false);
+        // EMSESP::bool_format(BOOL_FORMAT_10); // BOOL_FORMAT_10_STR
+        EMSESP::system_.bool_format(BOOL_FORMAT_TRUEFALSE); // BOOL_FORMAT_TRUEFALSE_STR
+
+        test("boiler");
+        test("thermostat");
+
+        AsyncWebServerRequest request;
+        JsonDocument          doc;
+        JsonVariant           json;
+        request.method(HTTP_GET);
+
+        request.url("/api/boiler");
+        EMSESP::webAPIService.webAPIService(&request);
+
+        request.url("/api/boiler/comfort");
+        EMSESP::webAPIService.webAPIService(&request);
+
+        shell.invoke_command("call boiler comfort");
+        shell.invoke_command("call boiler coldshot");
+
+        request.url("/api/boiler/values");
+        EMSESP::webAPIService.webAPIService(&request);
+
+        request.url("/api/boiler/flamecurr/bad");
+        EMSESP::webAPIService.webAPIService(&request);
+
+        shell.invoke_command("call system message test");
+
+        shell.invoke_command("call system message");
+
+        ok = true;
+    }
+
+    if (command == "api3") {
+        shell.printfln("Testing API getting values");
+        EMSESP::system_.bool_format(BOOL_FORMAT_TRUEFALSE); // BOOL_FORMAT_TRUEFALSE_STR
+
+        // test("boiler");
+        // test("thermostat");
+
+        AsyncWebServerRequest request;
+        JsonDocument          doc;
+        JsonVariant           json;
+        request.method(HTTP_GET);
+
+        request.url("/api/system");
+        EMSESP::webAPIService.webAPIService(&request);
+
+        request.url("/api/system/locale");
+        EMSESP::webAPIService.webAPIService(&request);
+
+        request.url("/api/system/locale/value");
+        EMSESP::webAPIService.webAPIService(&request);
+
+        shell.invoke_command("call system locale");
+
         ok = true;
     }
 
