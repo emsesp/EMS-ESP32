@@ -1767,7 +1767,11 @@ bool EMSdevice::generate_values(JsonObject output, const int8_t tag_filter, cons
 
                 // we don't want Commands in Console ('show values')
                 else if (dv.type == DeviceValueType::CMD && output_target != EMSdevice::OUTPUT_TARGET::CONSOLE) {
-                    json[name] = "";
+                    if (dv.uom == DeviceValueUOM::NONE) {
+                        json[name] = "";
+                    } else {
+                        json[name] = NAN;
+                    }
                 }
 
                 // check for value outside min/max range and adapt the limits to avoid HA complains
