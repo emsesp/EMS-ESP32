@@ -342,8 +342,6 @@ bool WebSchedulerService::command(const char * cmd, const char * data) {
     char command_str[COMMAND_MAX_LENGTH];
     snprintf(command_str, sizeof(command_str), "/api/%s", cmd);
 
-    EMSESP::logger().debug("** command: %s", command_str); //TODO remove
-
     uint8_t return_code = Command::process(command_str, true, input, output); // admin set
 
     if (return_code == CommandRet::OK) {
@@ -498,6 +496,7 @@ void WebSchedulerService::test() {
     }
 
     // test shunting yard
+    std::string test_cmd = "system/message";
     std::string test_value;
 
     test_value = "1+2*3";
@@ -511,6 +510,11 @@ void WebSchedulerService::test() {
 
     test_value = "locale is system/settings/locale";
     EMSESP::logger().warning("Shunting yard test 4: %s = %s", test_value.c_str(), compute(test_value).c_str());
+    command(test_cmd.c_str(), compute(test_value).c_str());
+
+    // test with negative value
+    test_value = "rssi is 0+system/network/rssi";
+    command(test_cmd.c_str(), compute(test_value).c_str());
 }
 #endif
 
