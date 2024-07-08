@@ -47,7 +47,7 @@ rest_server.get(ES_LOG_ENDPOINT, (_req, res) => {
   const interval = setInterval(() => {
     const data = {
       t: new Date().toISOString(),
-      l: 3, // error
+      l: 7, // debug
       i: count,
       n: 'system',
       m: 'message #' + count++
