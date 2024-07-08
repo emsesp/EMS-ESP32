@@ -563,6 +563,7 @@ void EMSESP::publish_all(bool force) {
         publish_device_values(EMSdevice::DeviceType::WATER);
         publish_other_values();      // switch and heat pump, ...
         publish_sensor_values(true); // includes temperature and analog sensors
+
         system_.send_heartbeat();
     }
 }
@@ -683,10 +684,11 @@ void EMSESP::publish_other_values() {
     publish_device_values(EMSdevice::DeviceType::EXTENSION);
     publish_device_values(EMSdevice::DeviceType::ALERT);
     publish_device_values(EMSdevice::DeviceType::POOL);
-    // other devices without values yet
+    // other EMS devices without values yet
     // publish_device_values(EMSdevice::DeviceType::GATEWAY);
     // publish_device_values(EMSdevice::DeviceType::CONNECT);
     // publish_device_values(EMSdevice::DeviceType::GENERIC);
+
     webSchedulerService.publish();
     webCustomEntityService.publish();
 }
