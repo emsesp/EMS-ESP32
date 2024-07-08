@@ -303,7 +303,6 @@ export const schedulerItemValidation = (
 ) =>
   new Schema({
     name: [
-      { required: true, message: 'Name is required' },
       {
         type: 'string',
         pattern: /^[a-zA-Z0-9_\\.]{1,15}$/,
