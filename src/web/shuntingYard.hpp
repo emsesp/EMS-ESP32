@@ -386,9 +386,8 @@ std::string to_string(double d) {
 // RPN calculator
 std::string calculate(const std::string & expr) {
     auto expr_new = emsesp::Helpers::toLower(expr);
-    // emsesp::EMSESP::logger().info("calculate: %s", expr_new.c_str());
     commands(expr_new);
-    // emsesp::EMSESP::logger().info("calculate: %s", expr_new.c_str());
+
     const auto tokens = exprToTokens(expr_new);
     if (tokens.empty()) {
         return "";
@@ -397,6 +396,16 @@ std::string calculate(const std::string & expr) {
     if (queue.empty()) {
         return "";
     }
+
+    /*
+    // debug only print tokens
+    #ifdef EMSESP_STANDALONE
+    for (const auto & t : queue) {
+        emsesp::EMSESP::logger().debug("shunt token: %s(%d)", t.str.c_str(), t.type);
+    }
+    #endif
+    */
+
     std::vector<std::string> stack;
 
     while (!queue.empty()) {
@@ -556,7 +565,19 @@ std::string calculate(const std::string & expr) {
             break;
         }
     }
-    return stack.back();
+
+    // concatenate all elements in stack to a single string, separated by spaces and return
+    // experimental - for MDvP to check
+    std::string result = "";
+    for (const auto & s : stack) {
+        result += s;
+        if (s != stack.back()) {
+            result += " ";
+        }
+    }
+
+    return result;
+    // return stack.back();
 }
 
 // check for multiple instances of <cond> ? <expr1> : <expr2>
@@ -586,5 +607,6 @@ std::string compute(const std::string & expr) {
         }
         q = expr_new.find_first_of("?"); // search next instance
     }
+
     return calculate(expr_new);
 }
