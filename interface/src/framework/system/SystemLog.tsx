@@ -54,6 +54,8 @@ const levelLabel = (level: LogLevel) => {
       return 'NOTICE';
     case LogLevel.INFO:
       return 'INFO';
+    case LogLevel.DEBUG:
+      return 'DEBUG';
     case LogLevel.TRACE:
       return 'TRACE';
     default:
@@ -266,8 +268,7 @@ const SystemLog: FC = () => {
           {logEntries.map((e) => (
             <LogEntryLine key={e.i}>
               <span>{e.t}</span>
-              {data.compact && <span>{paddedLevelLabel(e.l)} </span>}
-              {!data.compact && <span>{paddedLevelLabel(e.l)}&nbsp;</span>}
+              <span>{paddedLevelLabel(e.l)}&nbsp;</span>
               <span>{paddedIDLabel(e.i)} </span>
               <span>{paddedNameLabel(e.n)} </span>
               <span>{e.m}</span>
