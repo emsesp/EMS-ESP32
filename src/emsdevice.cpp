@@ -1548,12 +1548,16 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
                 break;
 
             case DeviceValueType::CMD:
-                json[type] = F_(command);
                 if (dv.options_size > 1) {
+                    json[type]      = F_(enum);
                     JsonArray enum_ = json[F_(enum)].to<JsonArray>();
                     for (uint8_t i = 0; i < dv.options_size; i++) {
                         enum_.add(Helpers::translated_word(dv.options[i]));
                     }
+                } else if (dv.uom != DeviceValueUOM::NONE) {
+                    json[type] = F_(number);
+                } else {
+                    json[type] = F_(command);
                 }
                 break;
 
@@ -1581,10 +1585,11 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
             json["writeable"] = dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY);
             json["visible"]   = !dv.has_state(DeviceValueState::DV_WEB_EXCLUDE);
 
+            // commented out, leads to issues if type is set to number
             // if there is no value, mention it
-            if (!json.containsKey(value)) {
-                json[value] = "not set";
-            }
+            // if (!json.containsKey(value)) {
+            //     json[value] = "not set";
+            // }
 
             // if we're filtering on an attribute, go find it
             if (attribute_s) {

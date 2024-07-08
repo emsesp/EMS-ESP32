@@ -161,7 +161,7 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
             }
         }
 
-        return (output.size() > 0);
+        return true;
     }
 
     char command_s[COMMAND_MAX_LENGTH];
