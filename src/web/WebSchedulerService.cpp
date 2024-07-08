@@ -303,7 +303,9 @@ void WebSchedulerService::publish(const bool force) {
             }
         }
     }
+
     ha_registered_ = ha_created;
+
     if (doc.size() > 0) {
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         snprintf(topic, sizeof(topic), "%s_data", F_(scheduler));
@@ -339,6 +341,9 @@ bool WebSchedulerService::command(const char * cmd, const char * data) {
     // prefix "api/" to command string
     char command_str[COMMAND_MAX_LENGTH];
     snprintf(command_str, sizeof(command_str), "/api/%s", cmd);
+
+    EMSESP::logger().debug("** command: %s", command_str); //TODO remove
+
     uint8_t return_code = Command::process(command_str, true, input, output); // admin set
 
     if (return_code == CommandRet::OK) {
@@ -470,23 +475,42 @@ void WebSchedulerService::loop() {
 // hard coded tests
 #if defined(EMSESP_TEST)
 void WebSchedulerService::test() {
-    update([&](WebScheduler & webScheduler) {
-        // webScheduler.scheduleItems.clear();
-        // test 1
-        auto si        = ScheduleItem();
-        si.active      = true;
-        si.flags       = 1;
-        si.time        = "12:00";
-        si.cmd         = "system/fetch";
-        si.value       = "10";
-        si.name        = "test_scheduler";
-        si.elapsed_min = 0;
-        si.retry_cnt   = 0xFF; // no startup retries
+    static bool already_added = false;
+    if (!already_added) {
+        update([&](WebScheduler & webScheduler) {
+            // webScheduler.scheduleItems.clear();
+            // test 1
+            auto si        = ScheduleItem();
+            si.active      = true;
+            si.flags       = 1;
+            si.time        = "12:00";
+            si.cmd         = "system/fetch";
+            si.value       = "10";
+            si.name        = "test_scheduler";
+            si.elapsed_min = 0;
+            si.retry_cnt   = 0xFF; // no startup retries
 
-        webScheduler.scheduleItems.push_back(si);
+            webScheduler.scheduleItems.push_back(si);
+            already_added = true;
 
-        return StateUpdateResult::CHANGED; // persist the changes
-    });
+            return StateUpdateResult::CHANGED; // persist the changes
+        });
+    }
+
+    // test shunting yard
+    std::string test_value;
+
+    test_value = "1+2*3";
+    EMSESP::logger().warning("Shunting yard test 1: %s = %s", test_value.c_str(), compute(test_value).c_str());
+
+    test_value = "system/settings/locale";
+    EMSESP::logger().warning("Shunting yard test 2: %s = %s", test_value.c_str(), compute(test_value).c_str());
+
+    test_value = "hello";
+    EMSESP::logger().warning("Shunting yard test 3: %s = %s", test_value.c_str(), compute(test_value).c_str());
+
+    test_value = "locale is system/settings/locale";
+    EMSESP::logger().warning("Shunting yard test 4: %s = %s", test_value.c_str(), compute(test_value).c_str());
 }
 #endif
 
