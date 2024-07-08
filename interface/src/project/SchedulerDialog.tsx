@@ -344,7 +344,7 @@ const SchedulerDialog = ({
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="name"
-              label={LL.NAME(0)}
+              label={LL.NAME(0) + ' (' + LL.OPTIONAL() + ')'}
               value={editItem.name}
               fullWidth
               margin="normal"
