@@ -329,7 +329,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // shell.invoke_command("call system allvalues");
         // shell.invoke_command("call system publish");
         // shell.invoke_command("show mqtt");
-        shell.invoke_command("call boiler nrgheat");
         ok = true;
     }
 
