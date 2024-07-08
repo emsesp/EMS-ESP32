@@ -1300,17 +1300,20 @@ bool System::get_value_info(JsonObject root, const char * command) {
         LOG_ERROR("empty system command");
         return false;
     }
+
     char cmd[COMMAND_MAX_LENGTH];
     strlcpy(cmd, command, sizeof(cmd));
     char * val = strstr(cmd, "/value");
     if (val) {
         val[0] = '\0';
     }
+
     char * dash = strchr(cmd, '/');
     if (dash) {
         *dash = '\0';
         dash++;
     }
+
     if (command_info("", 0, root)) {
         std::string s;
         // Loop through all the key-value pairs in root to find the key, case independent
@@ -1333,6 +1336,7 @@ bool System::get_value_info(JsonObject root, const char * command) {
                 }
             }
         }
+
         if (!s.empty()) {
             root.clear();
             if (val) {
@@ -1372,9 +1376,9 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
 #endif
     node["reset reason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 
-#ifndef EMSESP_STANDALONE
     // Network Status
     node = output["Network"].to<JsonObject>();
+#ifndef EMSESP_STANDALONE
     if (EMSESP::system_.ethernet_connected()) {
         node["network"]  = "Ethernet";
         node["hostname"] = ETH.getHostname();
@@ -1397,6 +1401,11 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         //     node["IPv6 address"] = uuid::printable_to_string(WiFi.localIPv6());
         // }
     }
+#else
+    // for testing
+    node["network"]  = "WiFi";
+    node["hostname"] = "ems-esp";
+    node["RSSI"]     = -23;
 #endif
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
         if (WiFi.status() == WL_CONNECTED && !settings.bssid.isEmpty()) {
