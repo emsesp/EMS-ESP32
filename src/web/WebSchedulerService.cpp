@@ -306,7 +306,7 @@ void WebSchedulerService::publish(const bool force) {
 
     ha_registered_ = ha_created;
 
-    if (doc.size() > 0) {
+    if (!doc.isNull()) {
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         snprintf(topic, sizeof(topic), "%s_data", F_(scheduler));
         Mqtt::queue_publish(topic, doc.as<JsonObject>());
