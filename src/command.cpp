@@ -351,6 +351,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     } else {
         snprintf(info_s, sizeof(info_s), "'%s/%s'", dname, cmd);
     }
+
     if (single_command) {
         LOG_DEBUG(("%sCalling command %s"), ro.c_str(), info_s);
     } else {
@@ -542,7 +543,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
     // verbose mode
     shell.printfln("\n%s%s %s:%s", COLOR_BOLD_ON, COLOR_YELLOW, EMSdevice::device_type_2_device_name(device_type), COLOR_RESET);
 
-    // we hard code 'info' and 'commmands' commands so print them first
+    // we hard code 'info' and 'commands' commands so print them first
     if (show_info) {
         shell.printf("  info:\t\t\t\t%slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
         shell.println(COLOR_RESET);
