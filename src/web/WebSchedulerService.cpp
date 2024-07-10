@@ -508,12 +508,17 @@ void WebSchedulerService::test() {
     test_value = "hello";
     EMSESP::logger().warning("Shunting yard test 3: %s = %s", test_value.c_str(), compute(test_value).c_str());
 
-    test_value = "locale is system/settings/locale";
-    EMSESP::logger().warning("Shunting yard test 4: %s = %s", test_value.c_str(), compute(test_value).c_str());
+    // should output 'locale is en'
+    test_value = "\"locale is \"system/settings/locale";
     command(test_cmd.c_str(), compute(test_value).c_str());
 
     // test with negative value
-    test_value = "rssi is 0+system/network/rssi";
+    // should output 'rssi is -23'
+    test_value = "\"rssi is \"0+system/network/rssi";
+    command(test_cmd.c_str(), compute(test_value).c_str());
+
+    // should output 'rssi is -23 dbm'
+    test_value = "\"rssi is \"(system/network/rssi)\" dBm\"";
     command(test_cmd.c_str(), compute(test_value).c_str());
 }
 #endif

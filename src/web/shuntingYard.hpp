@@ -571,12 +571,9 @@ std::string calculate(const std::string & expr) {
     std::string result = "";
     for (const auto & s : stack) {
         result += s;
-        if (s != stack.back()) {
-            result += " ";
-        }
     }
-
     return result;
+
     // return stack.back();
 }
 
