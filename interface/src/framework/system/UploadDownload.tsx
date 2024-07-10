@@ -2,7 +2,7 @@ import { type FC, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
-import { Box, Button, Link, Typography } from '@mui/material';
+import { Box, Button, Divider, Link, Typography } from '@mui/material';
 
 import * as SystemApi from 'api/system';
 
@@ -195,6 +195,8 @@ const UploadDownload: FC = () => {
         <Box p={2} border="2px solid grey" borderRadius={2}>
           {LL.VERSION_ON() + ' '}
           <b>{data.emsesp_version}</b>&nbsp;({data.esp_platform})
+          {data.model.length > 0 && <p>Gateway Hardware:&nbsp;{data.model}</p>}
+          <Divider />
           {latestVersion && (
             <Box mt={2}>
               {LL.THE_LATEST()}&nbsp;{LL.OFFICIAL()}&nbsp;{LL.RELEASE_IS()}

@@ -350,23 +350,26 @@ const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken';
 const ESPsystem_status = {
   emsesp_version: '3.7-demo',
   esp_platform: 'ESP32',
+  max_alloc_heap: 89,
   cpu_type: 'ESP32-S3',
   cpu_rev: '0',
   cpu_cores: 2,
-  max_alloc_heap: 89,
-  psram_size: 0,
-  free_psram: 0,
   cpu_freq_mhz: 240,
   free_heap: 143,
+  arduino_version: 'ESP32 Arduino v2.0.14',
   sdk_version: 'v4.4.2',
+  partition: 'app0',
   flash_chip_size: 4096,
   flash_chip_speed: 40000000,
-  fs_used: 40,
-  fs_free: 24,
-  partition: 'app0',
   app_used: 1863,
   app_free: 121,
-  arduino_version: 'ESP32 Arduino v2.0.14'
+  fs_used: 40,
+  fs_free: 24,
+  free_mem: 100,
+  psram_size: 0,
+  free_psram: 0,
+  has_loader: true,
+  model: 'BBQKees Gateway Model E32V2 vE32V2.0P3/2024011'
 };
 
 const system_status = {

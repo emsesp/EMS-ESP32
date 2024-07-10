@@ -1750,4 +1750,18 @@ bool System::ntp_connected() {
     return ntp_connected_;
 }
 
+String System::getBBQKeesGatewayDetails() {
+#ifndef EMSESP_STANDALONE
+    if (!EMSESP::nvs_.isKey("mfg")) {
+        return "";
+    }
+    if (EMSESP::nvs_.getString("mfg") != "BBQKees") {
+        return "";
+    }
+    return "BBQKees Gateway Model " + EMSESP::nvs_.getString("model") + " v" + EMSESP::nvs_.getString("hwrevision") + "/" + EMSESP::nvs_.getString("batch");
+#else
+    return "";
+#endif
+}
+
 } // namespace emsesp

@@ -1616,6 +1616,8 @@ void EMSESP::start() {
     if (!nvs_.begin("ems-esp", false, "nvs1")) { // try bigger nvs partition on 16M flash first
         nvs_.begin("ems-esp", false, "nvs");     // fallback to small nvs
     }
+    LOG_DEBUG("NVS device information: %s", system_.getBBQKeesGatewayDetails().c_str());
+
 #ifndef EMSESP_STANDALONE
     LOG_INFO("Starting EMS-ESP version %s from %s partition", EMSESP_APP_VERSION, esp_ota_get_running_partition()->label); // welcome message
 #else
@@ -1629,6 +1631,8 @@ void EMSESP::start() {
         LOG_WARNING("System needs a restart to apply new settings. Please wait.");
         system_.system_restart();
     };
+
+
 
     webSettingsService.begin(); // load EMS-ESP Application settings...
 
