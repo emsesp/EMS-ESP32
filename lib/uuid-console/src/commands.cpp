@@ -119,7 +119,7 @@ Commands::Execution Commands::execute_command(Shell & shell, CommandLine && comm
     result.error = nullptr;
 
     if (commands.exact.empty()) {
-        result.error = "Command not found";
+        result.error = "Command not found. Try 'help' for a list of commands.";
     } else if (commands.exact.count(longest->first) == 1) {
         auto &                   command = longest->second;
         std::vector<std::string> arguments;
@@ -130,7 +130,7 @@ Commands::Execution Commands::execute_command(Shell & shell, CommandLine && comm
         command_line.reset();
 
         if (commands.partial.upper_bound(longest->first) != commands.partial.end() && !arguments.empty()) {
-            result.error = "Command not found";
+            result.error = "Command not found. Try 'help' for a list of commands.";
         } else if (arguments.size() < command->minimum_arguments()) {
             result.error = "Not enough arguments for command";
         } else if (arguments.size() > command->maximum_arguments()) {
