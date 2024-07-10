@@ -305,6 +305,8 @@ export const schedulerItemValidation = (
     name: [
       {
         type: 'string',
+        min: 0,
+        max: 15,
         pattern: /^[a-zA-Z0-9_\\.]{1,15}$/,
         message: "Must be <15 characters: alpha numeric, '_' or '.'"
       },
