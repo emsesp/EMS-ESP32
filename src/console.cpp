@@ -637,7 +637,11 @@ void EMSESPShell::stopped() {
 void EMSESPShell::display_banner() {
     println();
     printfln("┌───────────────────────────────────────┐");
+#ifndef EMSESP_DEBUG
     printfln("│  %sEMS-ESP version %-20s%s │", COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_BOLD_OFF);
+#else
+    printfln("│  %sEMS-ESP version %s%-8s%s │", COLOR_BOLD_ON, EMSESP_APP_VERSION, " (D)", COLOR_BOLD_OFF);
+#endif
     printfln("│                                       │");
     printfln("│  %shelp%s to show available commands      │", COLOR_UNDERLINE, COLOR_RESET);
     printfln("│  %ssu%s to access admin commands          │", COLOR_UNDERLINE, COLOR_RESET);
@@ -685,6 +689,9 @@ void EMSESPShell::end_of_transmission() {
 }
 
 void EMSESPShell::main_help_function(Shell & shell, const std::vector<std::string> & arguments) {
+    shell.println();
+    shell.printfln("%s%sEMS-ESP version %s%s", COLOR_BRIGHT_GREEN, COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_RESET);
+    shell.println();
     shell.print_all_available_commands();
 }
 
