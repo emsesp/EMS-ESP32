@@ -98,6 +98,8 @@ class System {
     }
 #endif
 
+    String getBBQKeesGatewayDetails();
+
     void led_init(bool refresh);
     void network_init(bool refresh);
     void button_init(bool refresh);
