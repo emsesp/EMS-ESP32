@@ -315,7 +315,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Testing adding a boiler, thermostat, all sensors, scheduler and custom entities...");
 
         // setup fake data
-        EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the file
+        EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
 
         // add devices
         test("general");
@@ -972,6 +972,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::webAPIService.webAPIService(&request);
         request.url("/api/boiler/flamecurr/value");
         EMSESP::webAPIService.webAPIService(&request);
+
+        // This should fail
         request.url("/api/boiler/flamecurr/bad");
         EMSESP::webAPIService.webAPIService(&request);
 
@@ -1017,11 +1019,14 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "api3") {
-        shell.printfln("Testing API getting values");
+        shell.printfln("Testing API getting values from system");
         EMSESP::system_.bool_format(BOOL_FORMAT_TRUEFALSE); // BOOL_FORMAT_TRUEFALSE_STR
 
-        // test("boiler");
+        test("boiler");
         // test("thermostat");
+
+        EMSESP::temperaturesensor_.test();  // add temperature sensors
+        EMSESP::webSchedulerService.test(); // add scheduler items
 
         AsyncWebServerRequest request;
         JsonDocument          doc;
@@ -1031,13 +1036,38 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         request.url("/api/system");
         EMSESP::webAPIService.webAPIService(&request);
 
-        request.url("/api/system/locale");
+        request.url("/api/system/settings/locale");
         EMSESP::webAPIService.webAPIService(&request);
 
-        request.url("/api/system/locale/value");
+        request.url("/api/boiler/comfort");
         EMSESP::webAPIService.webAPIService(&request);
 
-        shell.invoke_command("call system locale");
+        request.url("/api/boiler/comfort/value");
+        EMSESP::webAPIService.webAPIService(&request);
+
+        request.url("/api/scheduler/info");
+        EMSESP::webAPIService.webAPIService(&request);
+
+        request.url("/api/scheduler/test_scheduler");
+        EMSESP::webAPIService.webAPIService(&request);
+
+        // This next lot should all fail
+
+        request.url("/api/system/settings/locale2");
+        EMSESP::webAPIService.webAPIService(&request);
+
+        // API failed with error unknown device (Error)
+        request.url("/api/boiler2/bad");
+        EMSESP::webAPIService.webAPIService(&request);
+
+        request.url("/api/boiler/bad");
+        EMSESP::webAPIService.webAPIService(&request);
+
+        request.url("/api/boiler/bad/value");
+        EMSESP::webAPIService.webAPIService(&request);
+
+        request.url("/api/scheduler/test_scheduler2");
+        EMSESP::webAPIService.webAPIService(&request);
 
         ok = true;
     }
