@@ -705,18 +705,14 @@ bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int
                     output["api_data"] = data;
                     return true;
                 } else {
-                    char error[100];
-                    snprintf(error, sizeof(error), "cannot find attribute %s in entity %s", attribute_s, sensor_name);
-                    output.clear();
-                    output["message"] = error;
-                    return false;
+                    return EMSESP::return_not_found(output, "attribute", sensor_name); // not found
                 }
             }
             return true; // found a match, exit
         }
     }
 
-    return false; // not found
+    return EMSESP::return_not_found(output, "analog sensor", cmd); // not found
 }
 
 void AnalogSensor::addSensorJson(JsonObject output, const Sensor & sensor) {

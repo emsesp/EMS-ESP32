@@ -1348,9 +1348,7 @@ bool System::get_value_info(JsonObject root, const char * command) {
         }
     }
 
-    root.clear();
-
-    return false; // not found
+    return EMSESP::return_not_found(root, "data", command); // not found
 }
 
 // export status information including the device information

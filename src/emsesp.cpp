@@ -782,6 +782,15 @@ bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8
     return false; // not found
 }
 
+// sends JSON error message, used with API calls
+bool EMSESP::return_not_found(JsonObject output, const char * msg, const char * cmd) {
+    output.clear();
+    char error[100];
+    snprintf(error, sizeof(error), "cannot find %s for '%s'", msg, cmd);
+    output["message"] = error;
+    return false; // always return false
+}
+
 // search for recognized device_ids : Me, All, otherwise print hex value
 std::string EMSESP::device_tostring(const uint8_t device_id) {
     if ((device_id & 0x7F) == EMSbus::ems_bus_id()) {

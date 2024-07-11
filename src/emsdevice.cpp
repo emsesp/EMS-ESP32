@@ -1590,7 +1590,7 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
             // if we're filtering on an attribute, go find it
             if (attribute_s) {
 #if defined(EMSESP_DEBUG)
-                EMSESP::logger().debug("Attribute '%s'", attribute_s);
+                EMSESP::logger().debug("[DEBUG] single attribute '%s'", attribute_s);
 #endif
                 if (json.containsKey(attribute_s)) {
                     String data = json[attribute_s].as<String>();
@@ -1598,11 +1598,7 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
                     output["api_data"] = data;
                     return true;
                 } else {
-                    char error[100];
-                    snprintf(error, sizeof(error), "cannot find attribute %s in entity %s", attribute_s, command_s);
-                    output.clear();
-                    output["message"] = error;
-                    return false;
+                    return EMSESP::return_not_found(output, "attribute", command_s); // not found
                 }
             }
 
@@ -1610,10 +1606,7 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
         }
     }
 
-    char error[100];
-    snprintf(error, sizeof(error), "cannot find values for entity '%s'", cmd);
-    json["message"] = error;
-    return false;
+    return EMSESP::return_not_found(output, "entity data", cmd); // not found
 }
 
 // mqtt publish all single values from one device (used for time schedule)

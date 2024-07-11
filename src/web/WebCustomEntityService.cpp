@@ -272,6 +272,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
     // if no entries, return empty json
     // https://github.com/emsesp/EMS-ESP32/issues/1297
     if (customEntityItems_->size() == 0) {
+        // TODO or should this report back the message[] ?
         return true;
     }
 
@@ -324,11 +325,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
                     output["api_data"] = data;
                     return true;
                 } else {
-                    char error[100];
-                    snprintf(error, sizeof(error), "cannot find attribute %s in entity %s", attribute_s, command_s);
-                    output.clear();
-                    output["message"] = error;
-                    return false;
+                    return EMSESP::return_not_found(output, "attribute", command_s); // not found
                 }
             }
         }
@@ -338,7 +335,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
         }
     }
 
-    return false; // not found
+    return EMSESP::return_not_found(output, "custom entity", cmd); // not found
 }
 
 // publish single value

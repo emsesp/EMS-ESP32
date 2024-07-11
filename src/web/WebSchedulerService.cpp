@@ -161,7 +161,11 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
             }
         }
 
-        return (output.size() > 0);
+        if (output.size()) {
+            return true;
+        }
+
+        return EMSESP::return_not_found(output, "scheduler", cmd); // not found
     }
 
     char command_s[COMMAND_MAX_LENGTH];
@@ -205,7 +209,7 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
         return true;
     }
 
-    return false; // not found
+    return EMSESP::return_not_found(output, "scheduler", cmd); // not found
 }
 
 // publish single value
@@ -498,15 +502,6 @@ void WebSchedulerService::test() {
     // test shunting yard
     std::string test_cmd = "system/message";
     std::string test_value;
-
-    test_value = "1+2*3";
-    EMSESP::logger().warning("Shunting yard test 1: %s = %s", test_value.c_str(), compute(test_value).c_str());
-
-    test_value = "system/settings/locale";
-    EMSESP::logger().warning("Shunting yard test 2: %s = %s", test_value.c_str(), compute(test_value).c_str());
-
-    test_value = "hello";
-    EMSESP::logger().warning("Shunting yard test 3: %s = %s", test_value.c_str(), compute(test_value).c_str());
 
     // should output 'locale is en'
     test_value = "\"locale is \"system/settings/locale";

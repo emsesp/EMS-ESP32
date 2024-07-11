@@ -343,7 +343,7 @@ bool TemperatureSensor::updated_values() {
 
 // called from emsesp.cpp for commands
 bool TemperatureSensor::get_value_info(JsonObject output, const char * cmd, const int8_t id) {
-    // check of it a 'commmands' command
+    // check of it a 'commands' command
     if (Helpers::toLower(cmd) == F_(commands)) {
         return Command::list(EMSdevice::DeviceType::TEMPERATURESENSOR, output);
     }
@@ -401,18 +401,14 @@ bool TemperatureSensor::get_value_info(JsonObject output, const char * cmd, cons
                     output["api_data"] = data;
                     return true;
                 } else {
-                    char error[100];
-                    snprintf(error, sizeof(error), "cannot find attribute %s in entity %s", attribute_s, sensor_name);
-                    output.clear();
-                    output["message"] = error;
-                    return false;
+                    return EMSESP::return_not_found(output, "attribute", sensor_name); // not found
                 }
             }
             return true; // found a match, exit
         }
     }
 
-    return false; // not found
+    return EMSESP::return_not_found(output, "temperature sensor", cmd); // not found
 }
 
 void TemperatureSensor::addSensorJson(JsonObject output, const Sensor & sensor) {

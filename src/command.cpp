@@ -79,7 +79,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     uint8_t device_type = EMSdevice::device_name_2_device_type(device_s);
     if (!device_has_commands(device_type)) {
         LOG_DEBUG("Command failed: unknown device '%s'", device_s);
-        return message(CommandRet::ERROR, "unknown device", output);
+        return message(CommandRet::NOT_FOUND, "unknown device", output);
     }
 
     // the next value on the path should be the command or entity name
@@ -161,18 +161,23 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
                 if (data_p == nullptr) {
                     return CommandRet::INVALID;
                 }
+
                 char data_s[COMMAND_MAX_LENGTH];
                 strlcpy(data_s, Helpers::toLower(data_p).c_str(), 30);
                 if (strstr(data_s, "/value") == nullptr) {
                     strcat(data_s, "/value");
                 }
+
                 uint8_t device_type = EMSdevice::device_name_2_device_type(device_p);
                 if (CommandRet::OK != Command::call(device_type, data_s, "", true, id_d, output)) {
                     return CommandRet::INVALID;
                 }
+
+                // TODO refactor containsKey - not recommended to use
                 if (!output.containsKey("api_data")) {
                     return CommandRet::INVALID;
                 }
+
                 String dat = output["api_data"].as<String>();
                 output.clear();
                 return Command::call(device_type, command_p, dat.c_str(), is_admin, id_n, output);
