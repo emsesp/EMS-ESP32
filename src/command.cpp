@@ -646,7 +646,7 @@ void Command::show_devices(uuid::console::Shell & shell) {
     shell.println();
 }
 
-// 'show commmands' : output list of all commands to console
+// 'show commands' : output list of all commands to console
 // calls show with verbose mode set
 void Command::show_all(uuid::console::Shell & shell) {
     shell.printfln("Showing all available commands (%s*%s=authentication not required):", COLOR_BRIGHT_GREEN, COLOR_RESET);
