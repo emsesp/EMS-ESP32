@@ -287,6 +287,7 @@ export const uniqueNameValidator = (schedule: ScheduleItem[], o_name?: string) =
     callback: (error?: string) => void
   ) {
     if (
+      name !== '' &&
       (o_name === undefined || o_name !== name) &&
       schedule.find((si) => si.name === name)
     ) {
@@ -305,9 +306,7 @@ export const schedulerItemValidation = (
     name: [
       {
         type: 'string',
-        min: 0,
-        max: 15,
-        pattern: /^[a-zA-Z0-9_\\.]{1,15}$/,
+        pattern: /^[a-zA-Z0-9_\\.]{0,15}$/,
         message: "Must be <15 characters: alpha numeric, '_' or '.'"
       },
       ...[uniqueNameValidator(schedule, scheduleItem.o_name)]
