@@ -165,7 +165,7 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
             return true;
         }
 
-        return EMSESP::return_not_found(output, "scheduler", cmd); // not found
+        return EMSESP::return_not_found(output, "schedule", cmd); // not found
     }
 
     char command_s[COMMAND_MAX_LENGTH];
@@ -200,16 +200,17 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
     }
 
     if (attribute_s && output.containsKey(attribute_s)) {
-        String data = output[attribute_s].as<String>();
+        std::string data = output[attribute_s].as<std::string>();
         output.clear();
-        output["api_data"] = data;
+        output["api_data"] = data; // always as a string
+        return true;
     }
 
     if (output.size()) {
         return true;
     }
 
-    return EMSESP::return_not_found(output, "scheduler", cmd); // not found
+    return EMSESP::return_not_found(output, "schedule", cmd); // not found
 }
 
 // publish single value
@@ -514,6 +515,31 @@ void WebSchedulerService::test() {
 
     // should output 'rssi is -23 dbm'
     test_value = "\"rssi is \"(system/network/rssi)\" dBm\"";
+    command(test_cmd.c_str(), compute(test_value).c_str());
+
+    test_value = "(custom/seltemp/value)";
+    command(test_cmd.c_str(), compute(test_value).c_str());
+
+    test_value = "\"seltemp=\"(custom/seltemp/value)";
+    command(test_cmd.c_str(), compute(test_value).c_str());
+
+    test_value = "(custom/seltemp)";
+    command(test_cmd.c_str(), compute(test_value).c_str());
+
+    test_value = "(boiler/outdoortemp)";
+    command(test_cmd.c_str(), compute(test_value).c_str());
+
+    test_value = "boiler/flowtempoffset";
+    command(test_cmd.c_str(), compute(test_value).c_str());
+
+    test_value = "(boiler/flowtempoffset/value)";
+    command(test_cmd.c_str(), compute(test_value).c_str());
+
+    test_value = "(boiler/storagetemp1/value)";
+    command(test_cmd.c_str(), compute(test_value).c_str());
+
+    // (14 - 40) * 2.8 + 5 = -67.8
+    test_value = "(custom/seltemp - boiler/flowtempoffset) * 2.8 + 5";
     command(test_cmd.c_str(), compute(test_value).c_str());
 }
 #endif

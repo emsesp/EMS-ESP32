@@ -748,12 +748,11 @@ bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8
     // check first for EMS devices
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice->device_type() == devicetype) {
-            // found device, call its device info
-            if (emsdevice->get_value_info(root, cmd, id)) {
-                return true;
-            }
+            return emsdevice->get_value_info(root, cmd, id);
         }
     }
+
+    // check for other devices...
 
     // temperature sensor
     if (devicetype == DeviceType::TEMPERATURESENSOR) {
@@ -785,15 +784,11 @@ bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8
 
 // sends JSON error message, used with API calls
 bool EMSESP::return_not_found(JsonObject output, const char * msg, const char * cmd) {
-    // special case for "info" and "values" which are hardcoded
-    if ((strncmp(cmd, "info", 4)) && strncmp(cmd, "values", 6)) {
-        output.clear();
-        char error[100];
-        snprintf(error, sizeof(error), "cannot find %s for '%s'", msg, cmd);
-        output["message"] = error;
-    }
-
-    return false; // always return false
+    output.clear();
+    char error[100];
+    snprintf(error, sizeof(error), "cannot find %s in '%s'", msg, cmd);
+    output["message"] = error;
+    return false;
 }
 
 // search for recognized device_ids : Me, All, otherwise print hex value

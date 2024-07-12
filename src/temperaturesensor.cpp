@@ -348,8 +348,9 @@ bool TemperatureSensor::get_value_info(JsonObject output, const char * cmd, cons
         return Command::list(EMSdevice::DeviceType::TEMPERATURESENSOR, output);
     }
 
+    // return empty json if there are no sensors
     if (sensors_.empty()) {
-        return true; // no sensors, return true
+        return true;
     }
 
     uint8_t show_all = 0;
@@ -391,18 +392,17 @@ bool TemperatureSensor::get_value_info(JsonObject output, const char * cmd, cons
     for (const auto & sensor : sensors_) {
         // match custom name or sensor ID
         if (sensor_name == Helpers::toLower(sensor.name()) || sensor_name == Helpers::toLower(sensor.id())) {
-            // add values
+            // add all the data elements
             addSensorJson(output, sensor);
             // if we're filtering on an attribute, go find it
             if (attribute_s) {
                 if (output.containsKey(attribute_s)) {
-                    String data = output[attribute_s].as<String>();
+                    std::string data = output[attribute_s].as<std::string>();
                     output.clear();
-                    output["api_data"] = data;
+                    output["api_data"] = data; // always as string
                     return true;
-                } else {
-                    return EMSESP::return_not_found(output, "attribute", sensor_name); // not found
                 }
+                return EMSESP::return_not_found(output, "attribute", sensor_name); // not found
             }
             return true; // found a match, exit
         }
@@ -625,15 +625,15 @@ void TemperatureSensor::test() {
     uint8_t addr[ADDR_LEN] = {1, 2, 3, 4, 5, 6, 7, 8};
     sensors_.emplace_back(addr);
     sensors_.back().apply_customization();
-    sensors_.back().temperature_c = 123;
+    sensors_.back().temperature_c = 123; // 12.3
     sensors_.back().read          = true;
     publish_sensor(sensors_.back()); // call publish single
 
-    // Sensor ID: 0B-0C0D-0E0F-1011
+    // Sensor ID: 0B_0C0D_0E0F_1011
     uint8_t addr2[ADDR_LEN] = {11, 12, 13, 14, 15, 16, 17, 18};
     sensors_.emplace_back(addr2);
     sensors_.back().apply_customization();
-    sensors_.back().temperature_c = 456;
+    sensors_.back().temperature_c = 456; // 45.6
     sensors_.back().read          = true;
     publish_sensor(sensors_.back()); // call publish single
 }

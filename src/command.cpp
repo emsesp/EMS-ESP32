@@ -173,14 +173,13 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
                     return CommandRet::INVALID;
                 }
 
-                // TODO refactor containsKey - not recommended to use
-                if (!output.containsKey("api_data")) {
-                    return CommandRet::INVALID;
+                const char * api_data = output["api_data"];
+                if (api_data) {
+                    output.clear();
+                    return Command::call(device_type, command_p, api_data, is_admin, id_n, output);
                 }
 
-                String dat = output["api_data"].as<String>();
-                output.clear();
-                return Command::call(device_type, command_p, dat.c_str(), is_admin, id_n, output);
+                return CommandRet::INVALID;
             }
         }
     }
@@ -304,16 +303,14 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 
     auto dname = EMSdevice::device_type_2_device_name(device_type); // device name, not translated
 
-    // check first if there is a command given as it may be calling a device's attribute (e.g. /api/boiler/nrgheat)
+    // check first if there is only a command being called without a value
+    // it could be an endpoint like a device's entity or attribute e.g. api/boiler/nrgheat or /api/boiler/nrgheat/value
+    // or a special command like 'info', 'values', 'commands', 'entities' etc
     bool single_command = (!value || !strlen(value));
     if (single_command) {
         if (EMSESP::get_device_value_info(output, cmd, id, device_type)) { // entity = cmd
             LOG_DEBUG("Fetched device entity attributes for %s/%s", dname, cmd);
             return CommandRet::OK;
-        } else {
-            // char error[100];
-            // snprintf(error, sizeof(error), "no data for device %s", dname);
-            // output["message"] = error;
         }
     }
 
@@ -336,6 +333,10 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     auto cf = find_command(device_type, device_id, cmd, flag);
     if (!cf) {
         LOG_WARNING("Command failed: invalid command '%s'", cmd ? cmd : "");
+        // if we don't alread have a message set, set it to invalid command
+        if (!output["message"]) {
+            output["message"] = "invalid command";
+        }
         return CommandRet::ERROR;
     }
 

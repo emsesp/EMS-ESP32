@@ -142,12 +142,10 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     if (api_data) {
         request->send(200, "text/plain; charset=utf-8", api_data);
 #if defined(EMSESP_STANDALONE)
-        Serial.print(COLOR_YELLOW);
-        Serial.print("web output: ");
-        if (output.size()) {
-            serializeJson(output, Serial);
-        }
+        Serial.printf("%sweb output: %s[%s] %s(200)%s ", COLOR_WHITE, COLOR_BRIGHT_CYAN, request->url().c_str(), COLOR_BRIGHT_GREEN, COLOR_MAGENTA);
+        serializeJson(output, Serial);
         Serial.println(COLOR_RESET);
+        Serial.println();
 #endif
         api_count_++;
         delete response;
@@ -168,15 +166,11 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     api_count_++;
 
 #if defined(EMSESP_STANDALONE)
-    Serial.print(COLOR_YELLOW);
-    Serial.print("web output: ");
-    if (output.size()) {
-        serializeJson(output, Serial);
-    }
-    Serial.print("  (response code ");
-    Serial.print(ret_codes[return_code]);
-    Serial.print(")");
+    Serial.printf("%sweb output: %s[%s]", COLOR_WHITE, COLOR_BRIGHT_CYAN, request->url().c_str());
+    Serial.printf(" %s(%d)%s ", ret_codes[return_code] == 200 ? COLOR_BRIGHT_GREEN : COLOR_BRIGHT_RED, ret_codes[return_code], COLOR_YELLOW);
+    serializeJson(output, Serial);
     Serial.println(COLOR_RESET);
+    Serial.println();
 #endif
 }
 

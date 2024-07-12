@@ -1308,44 +1308,50 @@ bool System::get_value_info(JsonObject root, const char * command) {
         val[0] = '\0';
     }
 
-    char * dash = strchr(cmd, '/');
-    if (dash) {
-        *dash = '\0';
-        dash++;
+    char * slash = strchr(cmd, '/');
+    if (slash) {
+        *slash = '\0';
+        slash++;
     }
 
-    if (command_info("", 0, root)) {
-        std::string s;
-        // Loop through all the key-value pairs in root to find the key, case independent
-        if (dash) { // search the nest first
-            for (JsonPair p : root) {
-                if (p.value().is<JsonObject>() && Helpers::toLower(p.key().c_str()) == cmd) {
-                    for (JsonPair p1 : p.value().as<JsonObject>()) {
-                        if (Helpers::toLower(p1.key().c_str()) == dash && !p1.value().is<JsonObject>()) {
-                            s = p1.value().as<std::string>();
-                            break;
-                        }
+    // fetch all the data from the system
+    (void)command_info("", 0, root);
+
+    // check for hardcoded "info"
+    if (Helpers::toLower(cmd) == F_(info)) {
+        return true;
+    }
+
+    std::string s;
+    // Loop through all the key-value pairs in root to find the key, case independent
+    if (slash) { // search the top level first
+        for (JsonPair p : root) {
+            if (p.value().is<JsonObject>() && Helpers::toLower(p.key().c_str()) == cmd) {
+                for (JsonPair p1 : p.value().as<JsonObject>()) {
+                    if (Helpers::toLower(p1.key().c_str()) == slash && !p1.value().is<JsonObject>()) {
+                        s = p1.value().as<std::string>();
+                        break;
                     }
                 }
             }
-        } else {
-            for (JsonPair p : root) {
-                if (Helpers::toLower(p.key().c_str()) == cmd && !p.value().is<JsonObject>()) {
-                    s = p.value().as<std::string>();
-                    break;
-                }
+        }
+    } else {
+        for (JsonPair p : root) {
+            if (Helpers::toLower(p.key().c_str()) == cmd && !p.value().is<JsonObject>()) {
+                s = p.value().as<std::string>();
+                break;
             }
         }
+    }
 
-        if (!s.empty()) {
-            root.clear();
-            if (val) {
-                root["api_data"] = s;
-            } else {
-                root["value"] = s;
-            }
-            return true;
+    if (!s.empty()) {
+        root.clear();
+        if (val) {
+            root["api_data"] = s;
+        } else {
+            root["value"] = s;
         }
+        return true; // found
     }
 
     return EMSESP::return_not_found(root, "data", command); // not found
@@ -1609,7 +1615,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         }
     }
 
-    return true;
+    return true; // this function always returns true!
 }
 
 #if defined(EMSESP_TEST)

@@ -700,13 +700,12 @@ bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int
             // if we're filtering on an attribute, go find it
             if (attribute_s) {
                 if (output.containsKey(attribute_s)) {
-                    String data = output[attribute_s].as<String>();
+                    std::string data = output[attribute_s].as<std::string>();
                     output.clear();
-                    output["api_data"] = data;
+                    output["api_data"] = data; // always as a string
                     return true;
-                } else {
-                    return EMSESP::return_not_found(output, "attribute", sensor_name); // not found
                 }
+                return EMSESP::return_not_found(output, "attribute", sensor_name); // not found
             }
             return true; // found a match, exit
         }
