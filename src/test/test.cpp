@@ -944,153 +944,149 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         ok = true;
     }
 
-    if (command == "api_values") {
-        shell.printfln("Testing API getting values");
-        Mqtt::ha_enabled(false);
-        Mqtt::nested_format(1);
-        // Mqtt::send_response(false);
-        // EMSESP::bool_format(BOOL_FORMAT_10); // BOOL_FORMAT_10_STR
-        EMSESP::system_.bool_format(BOOL_FORMAT_TRUEFALSE); // BOOL_FORMAT_TRUEFALSE_STR
-
-        test("boiler");
-        test("thermostat");
-
-        AsyncWebServerRequest request;
-        JsonDocument          doc;
-        JsonVariant           json;
-        request.method(HTTP_GET);
-
-        request.url("/api/boiler/values");
-        EMSESP::webAPIService.webAPIService(&request);
-        request.url("/api/boiler/dhw/circ");
-        EMSESP::webAPIService.webAPIService(&request);
-        request.url("/api/boiler/dhw/circ/fullname");
-        EMSESP::webAPIService.webAPIService(&request);
-        request.url("/api/boiler/selburnpow/value");
-        EMSESP::webAPIService.webAPIService(&request);
-        request.url("/api/boiler/dhw/chargetype/writeable");
-        EMSESP::webAPIService.webAPIService(&request);
-        request.url("/api/boiler/flamecurr/value");
-        EMSESP::webAPIService.webAPIService(&request);
-
-        // This should fail
-        request.url("/api/boiler/flamecurr/bad");
-        EMSESP::webAPIService.webAPIService(&request);
-
-        ok = true;
-    }
-
-    if (command == "api2") {
-        shell.printfln("Testing API getting values");
-        Mqtt::ha_enabled(false);
-        Mqtt::nested_format(1);
-        // Mqtt::send_response(false);
-        // EMSESP::bool_format(BOOL_FORMAT_10); // BOOL_FORMAT_10_STR
-        EMSESP::system_.bool_format(BOOL_FORMAT_TRUEFALSE); // BOOL_FORMAT_TRUEFALSE_STR
-
-        test("boiler");
-        test("thermostat");
-
-        AsyncWebServerRequest request;
-        JsonDocument          doc;
-        JsonVariant           json;
-        request.method(HTTP_GET);
-
-        request.url("/api/boiler");
-        EMSESP::webAPIService.webAPIService(&request);
-
-        request.url("/api/boiler/comfort");
-        EMSESP::webAPIService.webAPIService(&request);
-
-        shell.invoke_command("call boiler comfort");
-        shell.invoke_command("call boiler coldshot");
-
-        request.url("/api/boiler/values");
-        EMSESP::webAPIService.webAPIService(&request);
-
-        request.url("/api/boiler/flamecurr/bad");
-        EMSESP::webAPIService.webAPIService(&request);
-
-        shell.invoke_command("call system message test");
-
-        shell.invoke_command("call system message");
-
-        ok = true;
-    }
-
     if (command == "api3") {
-        ok = true;
         shell.printfln("Testing API getting values from system");
         EMSESP::system_.bool_format(BOOL_FORMAT_TRUEFALSE); // BOOL_FORMAT_TRUEFALSE_STR
 
-        test("boiler");
-        // test("thermostat");
+        ok = true;
 
-        EMSESP::temperaturesensor_.test();  // add temperature sensors
-        EMSESP::webSchedulerService.test(); // add scheduler items
+        bool single;
+
+        // single = true;
+        single = false;
 
         AsyncWebServerRequest request;
         JsonDocument          doc;
         JsonVariant           json;
         request.method(HTTP_GET);
 
-        request.url("/api/system");
-        EMSESP::webAPIService.webAPIService(&request);
+        // load devices
+        test("boiler");
+        // test("thermostat");
 
-        request.url("/api/boiler");
-        EMSESP::webAPIService.webAPIService(&request);
+        if (single) {
+            // run dedicated tests only
+            EMSESP::webCustomEntityService.test();  // custom entities
+            EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
+            EMSESP::temperaturesensor_.test();      // add temperature sensors
+            EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
 
-        request.url("/api/boiler/values");
-        EMSESP::webAPIService.webAPIService(&request);
+            // request.url("/api/analogsensor/test_analog10/bad");
+            // EMSESP::webAPIService.webAPIService(&request);
 
-        request.url("/api/system");
-        EMSESP::webAPIService.webAPIService(&request);
+        } else {
+            EMSESP::webCustomEntityService.test();  // custom entities
+            EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
+            EMSESP::temperaturesensor_.test();      // add temperature sensors
+            EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
 
-        request.url("/api/system/settings/locale");
-        EMSESP::webAPIService.webAPIService(&request);
+            // boiler
+            request.url("/api/boiler");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/boiler/commands");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/boiler/values");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/boiler/info");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/boiler/entities");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/boiler/comfort");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/boiler/comfort/value");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/boiler/comfort/fullname");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/boiler/outdoortemp");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/boiler/dhw/chargetype/writeable");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/boiler/flamecurr/value");
+            EMSESP::webAPIService.webAPIService(&request);
 
-        request.url("/api/boiler/values");
-        EMSESP::webAPIService.webAPIService(&request);
+            // custom
+            request.url("/api/custom");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/custom/seltemp");
+            EMSESP::webAPIService.webAPIService(&request);
 
-        request.url("/api/boiler/comfort");
-        EMSESP::webAPIService.webAPIService(&request);
+            // system
+            request.url("/api/system");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/system/settings/locale");
+            EMSESP::webAPIService.webAPIService(&request);
 
-        request.url("/api/boiler/comfort/value");
-        EMSESP::webAPIService.webAPIService(&request);
+            // scheduler
+            request.url("/api/scheduler/info");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/scheduler/test_scheduler");
+            EMSESP::webAPIService.webAPIService(&request);
 
-        request.url("/api/scheduler/info");
-        EMSESP::webAPIService.webAPIService(&request);
+            // temperaturesensor
+            request.url("/api/temperaturesensor/test_sensor2");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/temperaturesensor/0B_0C0D_0E0F_1011");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/temperaturesensor/test_sensor2/value");
+            EMSESP::webAPIService.webAPIService(&request);
 
-        request.url("/api/scheduler/test_scheduler");
-        EMSESP::webAPIService.webAPIService(&request);
+            // analogsensor
+            request.url("/api/analogsensor");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/analogsensor/test_analog1");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/analogsensor/test_analog1/offset");
+            EMSESP::webAPIService.webAPIService(&request);
 
-        //
-        // This next batch should all fail
-        //
+            //
+            // This next batch should all fail
+            //
 
-        request.url("/api/boiler/bad");
-        EMSESP::webAPIService.webAPIService(&request);
+            Serial.printf("%s**** Testing bad urls ****\n%s", COLOR_RED, COLOR_RESET);
+            Serial.println();
 
-        request.url("/api/boiler/bad/value");
-        EMSESP::webAPIService.webAPIService(&request);
+            // boiler
+            request.url("/api/boiler/bad");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/boiler/bad/value");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/boiler2/bad");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/boiler/bad");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/boiler/bad/value");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/boiler/comfort/valu");
+            EMSESP::webAPIService.webAPIService(&request);
 
-        request.url("/api/system/settings/locale2");
-        EMSESP::webAPIService.webAPIService(&request);
+            // system
+            request.url("/api/system/settings/locale2");
+            EMSESP::webAPIService.webAPIService(&request);
 
-        request.url("/api/boiler2/bad");
-        EMSESP::webAPIService.webAPIService(&request);
+            // scheduler
+            request.url("/api/scheduler/test_scheduler2");
+            EMSESP::webAPIService.webAPIService(&request);
 
-        request.url("/api/boiler/bad");
-        EMSESP::webAPIService.webAPIService(&request);
+            // custom
+            request.url("/api/custom/seltemp2");
+            EMSESP::webAPIService.webAPIService(&request);
 
-        request.url("/api/boiler/bad/value");
-        EMSESP::webAPIService.webAPIService(&request);
+            // temperaturesensor
+            request.url("/api/temperaturesensor/test_sensor20");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/temperaturesensor/0B_0C0D_0E0F_XXXX");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/temperaturesensor/test_sensor2/bad");
+            EMSESP::webAPIService.webAPIService(&request);
 
-        request.url("/api/scheduler/test_scheduler2");
-        EMSESP::webAPIService.webAPIService(&request);
-
-        request.url("/api/boiler/comfort/valu");
-        EMSESP::webAPIService.webAPIService(&request);
+            // analogsensor
+            request.url("/api/analogsensor/test_analog1/bad");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/analogsensor/test_analog10");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/analogsensor/test_analog10/bad");
+            EMSESP::webAPIService.webAPIService(&request);
+        }
     }
 
     if (command == "mqtt_post") {
