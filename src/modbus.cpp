@@ -68,7 +68,7 @@ bool Modbus::check_parameter_order() {
         } else if (prev == nullptr) {
             LOG_ERROR("Error checking modbus parameters %s.", mi.short_name);
             return false;
-        } else if(!prev->isLessThan(mi)) {
+        } else if (!prev->isLessThan(mi)) {
             LOG_ERROR("Error in modbus parameters: %s must be listed before %s.", mi.short_name, prev->short_name);
             return false;
         }
