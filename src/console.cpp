@@ -563,15 +563,21 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                 }
             }
 
-            if (return_code == CommandRet::OK && json.size()) {
-                if (json.containsKey("api_data")) {
-                    String data = json["api_data"].as<String>();
-                    shell.println(data.c_str());
+            if (return_code == CommandRet::OK) {
+                if (json.size()) {
+                    if (json.containsKey("api_data")) {
+                        String data = json["api_data"].as<String>();
+                        shell.println(data.c_str());
+                        return;
+                    }
+                    serializeJsonPretty(doc, shell);
+                    shell.println();
+                    return;
+                } else {
+                    // show message if no data returned (e.g. for analogsensor, temperaturesensor, custom)
+                    shell.println("No data.");
                     return;
                 }
-                serializeJsonPretty(doc, shell);
-                shell.println();
-                return;
             }
 
             if (return_code == CommandRet::NOT_FOUND) {
