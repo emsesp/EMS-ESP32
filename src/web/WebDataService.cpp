@@ -212,7 +212,7 @@ void WebDataService::device_data(AsyncWebServerRequest * request) {
     }
 
     // invalid
-    AsyncWebServerResponse * response = request->beginResponse(400);
+    AsyncWebServerResponse * response = request->beginResponse(400); // bad request
     request->send(response);
 }
 

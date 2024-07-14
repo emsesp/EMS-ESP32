@@ -563,6 +563,7 @@ void EMSESP::publish_all(bool force) {
         publish_device_values(EMSdevice::DeviceType::WATER);
         publish_other_values();      // switch and heat pump, ...
         publish_sensor_values(true); // includes temperature and analog sensors
+
         system_.send_heartbeat();
     }
 }
@@ -683,10 +684,11 @@ void EMSESP::publish_other_values() {
     publish_device_values(EMSdevice::DeviceType::EXTENSION);
     publish_device_values(EMSdevice::DeviceType::ALERT);
     publish_device_values(EMSdevice::DeviceType::POOL);
-    // other devices without values yet
+    // other EMS devices without values yet
     // publish_device_values(EMSdevice::DeviceType::GATEWAY);
     // publish_device_values(EMSdevice::DeviceType::CONNECT);
     // publish_device_values(EMSdevice::DeviceType::GENERIC);
+
     webSchedulerService.publish();
     webCustomEntityService.publish();
 }
@@ -740,19 +742,19 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
     buffer = nullptr;
 }
 
-// builds json with the detail of each value, for an EMS device
+// builds json with the detail of each value, for a given EMS device
 // for other types like sensors, scheduler, custom entities it will process single commands like 'info', 'values', 'commands'...
 bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8_t id, const uint8_t devicetype) {
     // check first for EMS devices
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice->device_type() == devicetype) {
-            if (emsdevice->get_value_info(root, cmd, id)) {
-                return true;
-            }
+            return emsdevice->get_value_info(root, cmd, id);
         }
     }
 
-    // temperaturesensor
+    // check for other devices...
+
+    // temperature sensor
     if (devicetype == DeviceType::TEMPERATURESENSOR) {
         return temperaturesensor_.get_value_info(root, cmd, id);
     }
@@ -772,14 +774,20 @@ bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8
         return webCustomEntityService.get_value_info(root, cmd);
     }
 
+    // system
     if (devicetype == DeviceType::SYSTEM) {
         return system_.get_value_info(root, cmd);
     }
 
-    char error[100];
-    snprintf(error, sizeof(error), "cannot find values for entity '%s'", cmd);
-    root["message"] = error;
+    return false; // not found
+}
 
+// sends JSON error message, used with API calls
+bool EMSESP::return_not_found(JsonObject output, const char * msg, const char * cmd) {
+    output.clear();
+    char error[100];
+    snprintf(error, sizeof(error), "cannot find %s in '%s'", msg, cmd);
+    output["message"] = error;
     return false;
 }
 
@@ -1617,6 +1625,8 @@ void EMSESP::start() {
     if (!nvs_.begin("ems-esp", false, "nvs1")) { // try bigger nvs partition on 16M flash first
         nvs_.begin("ems-esp", false, "nvs");     // fallback to small nvs
     }
+    LOG_DEBUG("NVS device information: %s", system_.getBBQKeesGatewayDetails().c_str());
+
 #ifndef EMSESP_STANDALONE
     LOG_INFO("Starting EMS-ESP version %s from %s partition", EMSESP_APP_VERSION, esp_ota_get_running_partition()->label); // welcome message
 #else
@@ -1630,6 +1640,8 @@ void EMSESP::start() {
         LOG_WARNING("System needs a restart to apply new settings. Please wait.");
         system_.system_restart();
     };
+
+
 
     webSettingsService.begin(); // load EMS-ESP Application settings...
 

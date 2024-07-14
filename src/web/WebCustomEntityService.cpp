@@ -237,12 +237,11 @@ void WebCustomEntityService::render_value(JsonObject output, CustomEntityItem en
         }
         break;
     case DeviceValueType::STRING:
+    default:
+        // if no type treat it as a string
         if (entity.data.length() > 0) {
             output[name] = entity.data;
         }
-        break;
-    default:
-        // EMSESP::logger().warning("unknown value type");
         break;
     }
 }
@@ -269,7 +268,8 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
         return true;
     }
 
-    // if no entries, return empty json
+    // if no custom entries, return empty json
+    // even if we're looking for a specific entity
     // https://github.com/emsesp/EMS-ESP32/issues/1297
     if (customEntityItems_->size() == 0) {
         return true;
@@ -287,6 +287,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
     char command_s[COMMAND_MAX_LENGTH];
     strlcpy(command_s, Helpers::toLower(cmd).c_str(), sizeof(command_s));
     char * attribute_s = nullptr;
+
     // check specific attribute to fetch instead of the complete record
     char * breakp = strchr(command_s, '/');
     if (breakp) {
@@ -315,21 +316,16 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
                     output["bytes"] = (uint8_t)entity.factor;
                 }
             }
-            render_value(output, entity, true);
+            render_value(output, entity, true); // create the "value" field
 
             if (attribute_s) {
                 if (output.containsKey(attribute_s)) {
-                    String data = output[attribute_s].as<String>();
+                    std::string data = output[attribute_s].as<std::string>();
                     output.clear();
-                    output["api_data"] = data;
+                    output["api_data"] = data; // always as string
                     return true;
-                } else {
-                    char error[100];
-                    snprintf(error, sizeof(error), "cannot find attribute %s in entity %s", attribute_s, command_s);
-                    output.clear();
-                    output["message"] = error;
-                    return false;
                 }
+                return EMSESP::return_not_found(output, "attribute", command_s); // not found
             }
         }
 
@@ -338,8 +334,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
         }
     }
 
-    output["message"] = "unknown command";
-    return false;
+    return EMSESP::return_not_found(output, "custom entity", cmd); // not found
 }
 
 // publish single value
@@ -641,8 +636,10 @@ bool WebCustomEntityService::get_value(std::shared_ptr<const Telegram> telegram)
 void WebCustomEntityService::test() {
     update([&](WebCustomEntity & webCustomEntity) {
         webCustomEntity.customEntityItems.clear();
+        auto entityItem = CustomEntityItem();
+
         // test 1
-        auto entityItem       = CustomEntityItem();
+        entityItem.id         = 1;
         entityItem.ram        = 0;
         entityItem.device_id  = 8;
         entityItem.type_id    = 24;
@@ -656,6 +653,7 @@ void WebCustomEntityService::test() {
         webCustomEntity.customEntityItems.push_back(entityItem);
 
         // test 2
+        entityItem.id         = 2;
         entityItem.ram        = 0;
         entityItem.device_id  = 24;
         entityItem.type_id    = 677;
@@ -668,7 +666,8 @@ void WebCustomEntityService::test() {
         entityItem.data       = "48";
         webCustomEntity.customEntityItems.push_back(entityItem);
 
-        // test 2
+        // test 3
+        entityItem.id         = 3;
         entityItem.ram        = 1;
         entityItem.device_id  = 0;
         entityItem.type_id    = 0;
@@ -679,6 +678,21 @@ void WebCustomEntityService::test() {
         entityItem.value_type = 8;
         entityItem.writeable  = true;
         entityItem.data       = "14";
+        webCustomEntity.customEntityItems.push_back(entityItem);
+
+        // test 4
+        entityItem.id         = 4;
+        entityItem.ram        = 1;
+        entityItem.device_id  = 0;
+        entityItem.type_id    = 0;
+        entityItem.offset     = 0;
+        entityItem.factor     = 1;
+        entityItem.name       = "seltemp";
+        entityItem.uom        = 0;
+        entityItem.value_type = 8;
+        entityItem.writeable  = true;
+        entityItem.data       = "14";
+        entityItem.value      = 12;
         webCustomEntity.customEntityItems.push_back(entityItem);
 
         return StateUpdateResult::CHANGED; // persist the changes

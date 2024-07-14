@@ -7,6 +7,7 @@
 - new device WATER shows dhw entities from MM100 and SM100 in dhw setting
 - renamed WWC to DHW, always create DHW nests/topics, remove ww prefix from mqtt names [#1634](https://github.com/emsesp/EMS-ESP32/issues/1634)
 - change temperaturesensor id to underscore
+- system/info API command has the word 'Info' removed from the object name for each section (E.g. 'Network Info' is now just 'Network')
 
 ## Added
 
@@ -28,6 +29,7 @@
 - added extra pump characteristics (mode and pressure for EMS+) by @SLTKA [#1802](https://github.com/emsesp/EMS-ESP32/pull/1802)
 - allow device name to be customized [#1174](https://github.com/emsesp/EMS-ESP32/issues/1174)
 - Modbus support by @mheyse [#1744](https://github.com/emsesp/EMS-ESP32/issues/1744)
+- System Message command [#1854](https://github.com/emsesp/EMS-ESP32/issues/1854)
 
 ## Fixed
 

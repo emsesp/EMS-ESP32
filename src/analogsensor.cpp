@@ -643,7 +643,7 @@ void AnalogSensor::publish_values(const bool force) {
 // called from emsesp.cpp for commands
 // searches sensor by name
 bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int8_t id) {
-    // check of it a 'commmands' command
+    // check of it a 'commands' command
     if (Helpers::toLower(cmd) == F_(commands)) {
         return Command::list(EMSdevice::DeviceType::ANALOGSENSOR, output);
     }
@@ -700,22 +700,18 @@ bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int
             // if we're filtering on an attribute, go find it
             if (attribute_s) {
                 if (output.containsKey(attribute_s)) {
-                    String data = output[attribute_s].as<String>();
+                    std::string data = output[attribute_s].as<std::string>();
                     output.clear();
-                    output["api_data"] = data;
+                    output["api_data"] = data; // always as a string
                     return true;
-                } else {
-                    char error[100];
-                    snprintf(error, sizeof(error), "cannot find attribute %s in entity %s", attribute_s, sensor_name);
-                    output.clear();
-                    output["message"] = error;
-                    return false;
                 }
+                return EMSESP::return_not_found(output, "attribute", sensor_name); // not found
             }
             return true; // found a match, exit
         }
     }
-    return false; // not found
+
+    return EMSESP::return_not_found(output, "analog sensor", cmd); // not found
 }
 
 void AnalogSensor::addSensorJson(JsonObject output, const Sensor & sensor) {

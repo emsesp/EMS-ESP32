@@ -287,6 +287,7 @@ export const uniqueNameValidator = (schedule: ScheduleItem[], o_name?: string) =
     callback: (error?: string) => void
   ) {
     if (
+      name !== '' &&
       (o_name === undefined || o_name !== name) &&
       schedule.find((si) => si.name === name)
     ) {
@@ -303,10 +304,9 @@ export const schedulerItemValidation = (
 ) =>
   new Schema({
     name: [
-      { required: true, message: 'Name is required' },
       {
         type: 'string',
-        pattern: /^[a-zA-Z0-9_\\.]{1,15}$/,
+        pattern: /^[a-zA-Z0-9_\\.]{0,15}$/,
         message: "Must be <15 characters: alpha numeric, '_' or '.'"
       },
       ...[uniqueNameValidator(schedule, scheduleItem.o_name)]
@@ -392,8 +392,8 @@ export const temperatureSensorItemValidation = () =>
     n: [
       {
         type: 'string',
-        pattern: /^[a-zA-Z0-9_\\.]{0,15}$/,
-        message: "Must be <15 characters: alpha numeric, '_' or '.'"
+        pattern: /^[a-zA-Z0-9_\\.]{0,17}$/,
+        message: "Must be <18 characters: alpha numeric, '_' or '.'"
       }
     ]
   });
