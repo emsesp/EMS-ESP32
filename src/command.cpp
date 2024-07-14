@@ -309,7 +309,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     bool single_command = (!value || !strlen(value));
     if (single_command) {
         if (EMSESP::get_device_value_info(output, cmd, id, device_type)) { // entity = cmd
-            LOG_DEBUG("Fetched device entity attributes for %s/%s", dname, cmd);
+            LOG_DEBUG("Fetched device entity/attributes for %s/%s", dname, cmd);
             return CommandRet::OK;
         }
     }
