@@ -158,6 +158,7 @@ void WebCustomizationService::reset_customization(AsyncWebServerRequest * reques
         EMSESP::system_.restart_requested(true);
         return;
     }
+
     // failed
     AsyncWebServerResponse * response = request->beginResponse(400); // bad request
     request->send(response);

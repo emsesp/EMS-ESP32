@@ -79,7 +79,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     uint8_t device_type = EMSdevice::device_name_2_device_type(device_s);
     if (!device_has_commands(device_type)) {
         LOG_DEBUG("Command failed: unknown device '%s'", device_s);
-        return message(CommandRet::ERROR, "unknown device", output);
+        return message(CommandRet::NOT_FOUND, "unknown device", output);
     }
 
     // the next value on the path should be the command or entity name
@@ -161,21 +161,25 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
                 if (data_p == nullptr) {
                     return CommandRet::INVALID;
                 }
+
                 char data_s[COMMAND_MAX_LENGTH];
                 strlcpy(data_s, Helpers::toLower(data_p).c_str(), 30);
                 if (strstr(data_s, "/value") == nullptr) {
                     strcat(data_s, "/value");
                 }
+
                 uint8_t device_type = EMSdevice::device_name_2_device_type(device_p);
                 if (CommandRet::OK != Command::call(device_type, data_s, "", true, id_d, output)) {
                     return CommandRet::INVALID;
                 }
-                if (!output.containsKey("api_data")) {
-                    return CommandRet::INVALID;
+
+                const char * api_data = output["api_data"];
+                if (api_data) {
+                    output.clear();
+                    return Command::call(device_type, command_p, api_data, is_admin, id_n, output);
                 }
-                String dat = output["api_data"].as<String>();
-                output.clear();
-                return Command::call(device_type, command_p, dat.c_str(), is_admin, id_n, output);
+
+                return CommandRet::INVALID;
             }
         }
     }
@@ -296,11 +300,23 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     if (cmd == nullptr) {
         return CommandRet::NOT_FOUND;
     }
-    uint8_t return_code = CommandRet::OK;
 
-    auto    dname     = EMSdevice::device_type_2_device_name(device_type);
+    auto dname = EMSdevice::device_type_2_device_name(device_type); // device name, not translated
+
+    // check first if there is only a command being called without a value
+    // it could be an endpoint like a device's entity or attribute e.g. api/boiler/nrgheat or /api/boiler/nrgheat/value
+    // or a special command like 'info', 'values', 'commands', 'entities' etc
+    bool single_command = (!value || !strlen(value));
+    if (single_command) {
+        if (EMSESP::get_device_value_info(output, cmd, id, device_type)) { // entity = cmd
+            LOG_DEBUG("Fetched device entity/attributes for %s/%s", dname, cmd);
+            return CommandRet::OK;
+        }
+    }
+
     uint8_t device_id = EMSESP::device_id_from_cmd(device_type, cmd, id);
 
+    // determine flags based on id (which is the tag)
     uint8_t flag = CommandFlag::CMD_FLAG_DEFAULT;
     int8_t  tag  = id;
     if (tag >= DeviceValueTAG::TAG_HC1 && tag <= DeviceValueTAG::TAG_HC8) {
@@ -312,31 +328,19 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     } else if (tag >= DeviceValueTAG::TAG_AHS1 && tag <= DeviceValueTAG::TAG_AHS1) {
         flag = CommandFlag::CMD_FLAG_AHS;
     }
-    // see if there is a command registered
+
+    // first see if there is a command registered and it's valid
     auto cf = find_command(device_type, device_id, cmd, flag);
-
-    // check if its a call to an end-point of a device
-    // this is used to fetch the attributes of the device entity, or call a command directly
-    // for example info, values, commands, etc
-    bool single_command = (!value || !strlen(value));
-    if (single_command) {
-        // exception: boiler coldshot command
-        bool get_attributes = (!cf || !cf->cmdfunction_json_) && (strcmp(cmd, F_(coldshot)) != 0);
-
-        if (get_attributes) {
-            LOG_DEBUG("Calling %s command '%s' to retrieve attributes", dname, cmd);
-            return EMSESP::get_device_value_info(output, cmd, id, device_type) ? CommandRet::OK : CommandRet::ERROR; // entity = cmd
-        }
-    }
-
-    // check if we have a matching command
     if (!cf) {
-        // we didn't find the command, report error
         LOG_WARNING("Command failed: invalid command '%s'", cmd ? cmd : "");
-        return message(CommandRet::NOT_FOUND, "invalid command", output);
+        // if we don't alread have a message set, set it to invalid command
+        if (!output["message"]) {
+            output["message"] = "invalid command";
+        }
+        return CommandRet::ERROR;
     }
 
-    // check permissions and abort if not authorized
+    // before calling the command, check permissions and abort if not authorized
     if (cf->has_flags(CommandFlag::ADMIN_ONLY) && !is_admin) {
         LOG_WARNING("Command failed: authentication failed");
         output["message"] = "authentication failed";
@@ -353,7 +357,8 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     } else {
         snprintf(info_s, sizeof(info_s), "'%s/%s'", dname, cmd);
     }
-    if ((value == nullptr) || (strlen(value) == 0)) {
+
+    if (single_command) {
         LOG_DEBUG(("%sCalling command %s"), ro.c_str(), info_s);
     } else {
         if (id > 0) {
@@ -364,6 +369,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     }
 
     // call the function based on type, either with a json package or no parameters
+    uint8_t return_code = CommandRet::OK;
     if (cf->cmdfunction_json_) {
         // JSON
         return_code = ((cf->cmdfunction_json_)(value, id, output)) ? CommandRet::OK : CommandRet::ERROR;
@@ -378,7 +384,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 
     // report back. If not OK show output from error, other return the HTTP code
     if (return_code != CommandRet::OK) {
-        if ((value == nullptr) || (strlen(value) == 0)) {
+        if (single_command) {
             LOG_ERROR("Command '%s' failed with error '%s'", cmd, FL_(cmdRet)[return_code]);
         } else {
             LOG_ERROR("Command '%s: %s' failed with error '%s'", cmd, value, FL_(cmdRet)[return_code]);
@@ -543,7 +549,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
     // verbose mode
     shell.printfln("\n%s%s %s:%s", COLOR_BOLD_ON, COLOR_YELLOW, EMSdevice::device_type_2_device_name(device_type), COLOR_RESET);
 
-    // we hard code 'info' and 'commmands' commands so print them first
+    // we hard code 'info' and 'commands' commands so print them first
     if (show_info) {
         shell.printf("  info:\t\t\t\t%slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
         shell.println(COLOR_RESET);
@@ -641,7 +647,7 @@ void Command::show_devices(uuid::console::Shell & shell) {
     shell.println();
 }
 
-// 'show commmands' : output list of all commands to console
+// 'show commands' : output list of all commands to console
 // calls show with verbose mode set
 void Command::show_all(uuid::console::Shell & shell) {
     shell.printfln("Showing all available commands (%s*%s=authentication not required):", COLOR_BRIGHT_GREEN, COLOR_RESET);

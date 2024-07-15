@@ -53,6 +53,7 @@ telegram_type_id,name,is_fetched,is_cmd
 0xA3,RCOutdoorTemp, ,cmd
 0xA5,IBASettings,fetched,cmd
 0xA7,RC30Set, ,cmd
+0xA9,RC30Vacation,fetched,cmd
 0xAA,MMConfigMessage,fetched,cmd
 0xAB,MMStatusMessage, ,cmd
 0xAC,MMSetMessage, ,cmd
@@ -91,6 +92,7 @@ telegram_type_id,name,is_fetched,is_cmd
 0x023E,PVSettings,fetched,cmd
 0x0240,RC300Settings,fetched,cmd
 0x0267,RC300Floordry, ,cmd
+0x0269,RC300Holiday1,fetched,cmd
 0x0291,HPMode,fetched,cmd
 0x0292,HPMode,fetched,cmd
 0x0293,HPMode,fetched,cmd
@@ -103,9 +105,9 @@ telegram_type_id,name,is_fetched,is_cmd
 0x02A0,RC300Curves, ,cmd
 0x02A1,RC300Curves, ,cmd
 0x02A2,RC300Curves, ,cmd
-0x02A5,RC300Monitor, ,cmd
+0x02A5,CRFMonitor, ,cmd
 0x02A6,RC300Monitor, ,cmd
-0x02A7,CRFMonitor, ,cmd
+0x02A7,RC300Monitor, ,cmd
 0x02A8,RC300Monitor, ,cmd
 0x02A9,RC300Monitor, ,cmd
 0x02AA,RC300Monitor, ,cmd
@@ -127,14 +129,14 @@ telegram_type_id,name,is_fetched,is_cmd
 0x02BE,RC300Set, ,cmd
 0x02BF,RC300Set, ,cmd
 0x02C0,RC300Set, ,cmd
-0x02CC,HPPressure,fetched,cmd
-0x02CD,MMPLUSSetMessage_HC,fetched,cmd
+0x02CC,RC300Set2, ,cmd
+0x02CD,MMPLUSConfigMessage,fetched,cmd
 0x02CE,RC300Set2, ,cmd
 0x02D0,RC300Set2, ,cmd
 0x02D2,RC300Set2, ,cmd
-0x02D5,MMPLUSSetMessage_HC,fetched,cmd
-0x02D7,MMPLUSStatusMessage_HC, ,cmd
-0x02DF,MMPLUSStatusMessage_HC, ,cmd
+0x02D5,MMPLUSConfigMessage,fetched,cmd
+0x02D7,MMPLUSStatusMessage, ,cmd
+0x02DF,MMPLUSStatusMessage, ,cmd
 0x02F5,RC300WWmode,fetched,cmd
 0x02F6,RC300WW2mode,fetched,cmd
 0x031B,RC300WWtemp,fetched,cmd

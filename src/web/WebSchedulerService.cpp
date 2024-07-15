@@ -128,7 +128,7 @@ bool WebSchedulerService::command_setvalue(const char * value, const int8_t id, 
 
 // process json output for info/commands and value_info
 bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
-    // check of it a 'commmands' command
+    // check of it a 'commands' command
     if (Helpers::toLower(cmd) == F_(commands)) {
         output[F_(info)]     = Helpers::translated_word(FL_(info_cmd));
         output[F_(commands)] = Helpers::translated_word(FL_(commands_cmd));
@@ -196,17 +196,17 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
     }
 
     if (attribute_s && output.containsKey(attribute_s)) {
-        String data = output[attribute_s].as<String>();
+        std::string data = output[attribute_s].as<std::string>();
         output.clear();
-        output["api_data"] = data;
+        output["api_data"] = data; // always as a string
+        return true;
     }
 
     if (output.size()) {
         return true;
     }
 
-    output["message"] = "unknown command";
-    return false;
+    return EMSESP::return_not_found(output, "schedule", cmd); // not found
 }
 
 // publish single value
@@ -304,8 +304,10 @@ void WebSchedulerService::publish(const bool force) {
             }
         }
     }
+
     ha_registered_ = ha_created;
-    if (doc.size() > 0) {
+
+    if (!doc.isNull()) {
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         snprintf(topic, sizeof(topic), "%s_data", F_(scheduler));
         Mqtt::queue_publish(topic, doc.as<JsonObject>());
@@ -340,6 +342,7 @@ bool WebSchedulerService::command(const char * cmd, const char * data) {
     // prefix "api/" to command string
     char command_str[COMMAND_MAX_LENGTH];
     snprintf(command_str, sizeof(command_str), "/api/%s", cmd);
+
     uint8_t return_code = Command::process(command_str, true, input, output); // admin set
 
     if (return_code == CommandRet::OK) {
@@ -471,23 +474,69 @@ void WebSchedulerService::loop() {
 // hard coded tests
 #if defined(EMSESP_TEST)
 void WebSchedulerService::test() {
-    update([&](WebScheduler & webScheduler) {
-        webScheduler.scheduleItems.clear();
-        // test 1
-        auto si        = ScheduleItem();
-        si.active      = true;
-        si.flags       = 1;
-        si.time        = "12:00";
-        si.cmd         = "system/fetch";
-        si.value       = "10";
-        si.name        = "test_scheduler";
-        si.elapsed_min = 0;
-        si.retry_cnt   = 0xFF; // no startup retries
+    static bool already_added = false;
+    if (!already_added) {
+        update([&](WebScheduler & webScheduler) {
+            // webScheduler.scheduleItems.clear();
+            // test 1
+            auto si        = ScheduleItem();
+            si.active      = true;
+            si.flags       = 1;
+            si.time        = "12:00";
+            si.cmd         = "system/fetch";
+            si.value       = "10";
+            si.name        = "test_scheduler";
+            si.elapsed_min = 0;
+            si.retry_cnt   = 0xFF; // no startup retries
 
-        webScheduler.scheduleItems.push_back(si);
+            webScheduler.scheduleItems.push_back(si);
+            already_added = true;
 
-        return StateUpdateResult::CHANGED; // persist the changes
-    });
+            return StateUpdateResult::CHANGED; // persist the changes
+        });
+    }
+
+    // test shunting yard
+    std::string test_cmd = "system/message";
+    std::string test_value;
+
+    // should output 'locale is en'
+    test_value = "\"locale is \"system/settings/locale";
+    command(test_cmd.c_str(), compute(test_value).c_str());
+
+    // test with negative value
+    // should output 'rssi is -23'
+    test_value = "\"rssi is \"0+system/network/rssi";
+    command(test_cmd.c_str(), compute(test_value).c_str());
+
+    // should output 'rssi is -23 dbm'
+    test_value = "\"rssi is \"(system/network/rssi)\" dBm\"";
+    command(test_cmd.c_str(), compute(test_value).c_str());
+
+    test_value = "(custom/seltemp/value)";
+    command(test_cmd.c_str(), compute(test_value).c_str());
+
+    test_value = "\"seltemp=\"(custom/seltemp/value)";
+    command(test_cmd.c_str(), compute(test_value).c_str());
+
+    test_value = "(custom/seltemp)";
+    command(test_cmd.c_str(), compute(test_value).c_str());
+
+    test_value = "(boiler/outdoortemp)";
+    command(test_cmd.c_str(), compute(test_value).c_str());
+
+    test_value = "boiler/flowtempoffset";
+    command(test_cmd.c_str(), compute(test_value).c_str());
+
+    test_value = "(boiler/flowtempoffset/value)";
+    command(test_cmd.c_str(), compute(test_value).c_str());
+
+    test_value = "(boiler/storagetemp1/value)";
+    command(test_cmd.c_str(), compute(test_value).c_str());
+
+    // (14 - 40) * 2.8 + 5 = -67.8
+    test_value = "(custom/seltemp - boiler/flowtempoffset) * 2.8 + 5";
+    command(test_cmd.c_str(), compute(test_value).c_str());
 }
 #endif
 

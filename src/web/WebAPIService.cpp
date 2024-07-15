@@ -128,9 +128,9 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     if (return_code != CommandRet::OK) {
         char error[100];
         if (output.size()) {
-            snprintf(error, sizeof(error), "API failed with error %s (%s)", (const char *)output["message"], Command::return_code_string(return_code).c_str());
+            snprintf(error, sizeof(error), "API call failed. %s (%s)", (const char *)output["message"], Command::return_code_string(return_code).c_str());
         } else {
-            snprintf(error, sizeof(error), "API failed with error %s", Command::return_code_string(return_code).c_str());
+            snprintf(error, sizeof(error), "API call failed (%s)", Command::return_code_string(return_code).c_str());
         }
         emsesp::EMSESP::logger().err(error);
         api_fails_++;
@@ -138,17 +138,27 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
 
     // if we're returning single values, just sent as plain text
     // https://github.com/emsesp/EMS-ESP32/issues/462#issuecomment-1093877210
-    if (output.containsKey("api_data")) {
-        String data = output["api_data"].as<String>();
-        request->send(200, "text/plain; charset=utf-8", data);
+    const char * api_data = output["api_data"];
+    if (api_data) {
+        request->send(200, "text/plain; charset=utf-8", api_data);
+#if defined(EMSESP_STANDALONE)
+        Serial.printf("%sweb output: %s[%s] %s(200)%s ", COLOR_WHITE, COLOR_BRIGHT_CYAN, request->url().c_str(), COLOR_BRIGHT_GREEN, COLOR_MAGENTA);
+        serializeJson(output, Serial);
+        Serial.println(COLOR_RESET);
+        Serial.println();
+#endif
         api_count_++;
         delete response;
         return;
     }
 
     // send the json that came back from the command call
-    // FAIL, OK, NOT_FOUND, ERROR, NOT_ALLOWED = 400 (bad request), 200 (OK), 400 (not found), 400 (bad request), 401 (unauthorized)
-    int ret_codes[6] = {400, 200, 400, 400, 401, 400};
+    // sequence is FAIL, OK, NOT_FOUND, ERROR, NOT_ALLOWED, INVALID
+    // 400 (bad request)
+    // 200 (OK)
+    // 404 (not found)
+    // 401 (unauthorized)
+    int ret_codes[6] = {400, 200, 404, 400, 401, 400};
     response->setCode(ret_codes[return_code]);
     response->setLength();
     response->setContentType("application/json; charset=utf-8");
@@ -156,15 +166,11 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     api_count_++;
 
 #if defined(EMSESP_STANDALONE)
-    Serial.print(COLOR_YELLOW);
-    Serial.print("data: ");
-    if (output.size()) {
-        serializeJson(output, Serial);
-    }
-    Serial.print("  (response code ");
-    Serial.print(ret_codes[return_code]);
-    Serial.println(")");
-    Serial.print(COLOR_RESET);
+    Serial.printf("%sweb output: %s[%s]", COLOR_WHITE, COLOR_BRIGHT_CYAN, request->url().c_str());
+    Serial.printf(" %s(%d)%s ", ret_codes[return_code] == 200 ? COLOR_BRIGHT_GREEN : COLOR_BRIGHT_RED, ret_codes[return_code], COLOR_YELLOW);
+    serializeJson(output, Serial);
+    Serial.println(COLOR_RESET);
+    Serial.println();
 #endif
 }
 

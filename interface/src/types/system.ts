@@ -24,6 +24,7 @@ export interface ESPSystemStatus {
   psram_size?: number;
   free_psram?: number;
   has_loader: boolean;
+  model: string;
 }
 
 export interface SystemStatus {

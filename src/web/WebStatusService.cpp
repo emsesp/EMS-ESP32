@@ -136,6 +136,9 @@ void WebStatusService::ESPsystemStatus(AsyncWebServerRequest * request) {
             root["has_loader"]              = (buffer != 0xFFFFFFFFFFFFFFFF && running->size != partition->size);
         }
     }
+
+    root["model"] = EMSESP::system_.getBBQKeesGatewayDetails();
+
 #endif
 
     response->setLength();

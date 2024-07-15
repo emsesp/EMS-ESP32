@@ -54,6 +54,8 @@ const levelLabel = (level: LogLevel) => {
       return 'NOTICE';
     case LogLevel.INFO:
       return 'INFO';
+    case LogLevel.DEBUG:
+      return 'DEBUG';
     case LogLevel.TRACE:
       return 'TRACE';
     default:
@@ -175,7 +177,7 @@ const SystemLog: FC = () => {
           justifyContent="flex-start"
           alignItems="center"
         >
-          <Grid item xs={2}>
+          <Grid item xs={4}>
             <TextField
               name="level"
               label={LL.LOG_LEVEL()}
@@ -194,7 +196,7 @@ const SystemLog: FC = () => {
               <MenuItem value={9}>ALL</MenuItem>
             </TextField>
           </Grid>
-          <Grid item xs={2}>
+          <Grid item xs={4}>
             <TextField
               name="max_messages"
               label={LL.BUFFER_SIZE()}
@@ -211,7 +213,7 @@ const SystemLog: FC = () => {
               <MenuItem value={100}>100</MenuItem>
             </TextField>
           </Grid>
-          <Grid item>
+          <Grid item xs={2}>
             <BlockFormControlLabel
               control={
                 <Checkbox
@@ -226,8 +228,7 @@ const SystemLog: FC = () => {
           <Box
             sx={{
               '& button, & a, & .MuiCard-root': {
-                mt: 3,
-                mx: 0.6
+                ml: 3
               }
             }}
           >
@@ -266,8 +267,7 @@ const SystemLog: FC = () => {
           {logEntries.map((e) => (
             <LogEntryLine key={e.i}>
               <span>{e.t}</span>
-              {data.compact && <span>{paddedLevelLabel(e.l)} </span>}
-              {!data.compact && <span>{paddedLevelLabel(e.l)}&nbsp;</span>}
+              <span>{paddedLevelLabel(e.l)}&nbsp;</span>
               <span>{paddedIDLabel(e.i)} </span>
               <span>{paddedNameLabel(e.n)} </span>
               <span>{e.m}</span>

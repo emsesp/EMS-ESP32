@@ -100,7 +100,7 @@ const char * EMSdevice::brand_to_char() {
     }
 }
 
-// returns the short name of the device, used in MQTT and console commands, all lowercase
+// returns the short name of the device, used in MQTT and console commands, all lowercase, no translated
 const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
     switch (device_type) {
     case DeviceType::SYSTEM:
@@ -1424,7 +1424,7 @@ void EMSdevice::dump_telegram_info(std::vector<TelegramFunctionDump> & telegram_
 }
 #endif
 
-// builds json for a specific device value / entity
+// builds json for a specific EMS device value / entity
 // cmd is the endpoint or name of the device entity
 // returns false if failed, otherwise true
 bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t tag) {
@@ -1585,6 +1585,9 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
             json["writeable"] = dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY);
             json["visible"]   = !dv.has_state(DeviceValueState::DV_WEB_EXCLUDE);
 
+            // TODO refactor to remove containsKey as it's costly and not advisable to use it
+            // https://arduinojson.org/v7/api/jsonobject/containskey/#avoid
+
             // commented out, leads to issues if type is set to number
             // if there is no value, mention it
             // if (!json.containsKey(value)) {
@@ -1594,30 +1597,22 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
             // if we're filtering on an attribute, go find it
             if (attribute_s) {
 #if defined(EMSESP_DEBUG)
-                EMSESP::logger().debug("Attribute '%s'", attribute_s);
+                EMSESP::logger().debug("[DEBUG] fetching single attribute '%s'", attribute_s);
 #endif
                 if (json.containsKey(attribute_s)) {
-                    String data = json[attribute_s].as<String>();
+                    std::string data = json[attribute_s].as<std::string>();
                     output.clear();
-                    output["api_data"] = data;
+                    output["api_data"] = data; // always as string
                     return true;
-                } else {
-                    char error[100];
-                    snprintf(error, sizeof(error), "cannot find attribute %s in entity %s", attribute_s, command_s);
-                    output.clear();
-                    output["message"] = error;
-                    return false;
                 }
+                return EMSESP::return_not_found(output, "attribute", command_s); // not found
             }
 
             return true;
         }
     }
 
-    char error[100];
-    snprintf(error, sizeof(error), "cannot find values for entity '%s'", cmd);
-    json["message"] = error;
-    return false;
+    return false; // not found, but don't return a message error yet
 }
 
 // mqtt publish all single values from one device (used for time schedule)
@@ -1949,7 +1944,7 @@ std::string EMSdevice::name() {
 // returns true on success.
 int EMSdevice::get_modbus_value(uint8_t tag, const std::string & shortname, std::vector<uint16_t> & result) {
     // find device value by shortname
-    // TODO linear search is inefficient
+    // TODO replace linear search which is inefficient
     const auto & it = std::find_if(devicevalues_.begin(), devicevalues_.end(), [&](const DeviceValue & x) { return x.tag == tag && x.short_name == shortname; });
     if (it == devicevalues_.end())
         return -1;
