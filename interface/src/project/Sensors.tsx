@@ -465,7 +465,7 @@ const Sensors: FC = () => {
           onClose={onTemperatureDialogClose}
           onSave={onTemperatureDialogSave}
           selectedItem={selectedTemperatureSensor}
-          validator={temperatureSensorItemValidation()}
+          validator={temperatureSensorItemValidation(sensorData.ts)}
         />
       )}
       {sensorData?.analog_enabled === true && (

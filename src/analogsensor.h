@@ -27,6 +27,9 @@
 
 namespace emsesp {
 
+// names, same order as AnalogType
+MAKE_ENUM_FIXED(AnalogTypeName, "disabled", "dig_in", "counter", "adc", "timer", "rate", "pwm0", "pwm1", "pwm2")
+
 class AnalogSensor {
   public:
     class Sensor {

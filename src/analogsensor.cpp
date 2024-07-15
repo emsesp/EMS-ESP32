@@ -759,8 +759,8 @@ AnalogSensor::Sensor::Sensor(const uint8_t gpio, const std::string & name, const
 // returns name of the analog sensor or creates one if its empty
 std::string AnalogSensor::Sensor::name() const {
     if (name_.empty()) {
-        char name[50];
-        snprintf(name, sizeof(name), "Analog Sensor GPIO %02d", gpio_);
+        char name[20];
+        snprintf(name, sizeof(name), "%s_%02d", FL_(AnalogTypeName)[type_], gpio_);
         return name;
     }
     return name_;

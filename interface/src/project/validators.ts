@@ -7,7 +7,8 @@ import type {
   DeviceValue,
   EntityItem,
   ScheduleItem,
-  Settings
+  Settings,
+  TemperatureSensor
 } from './types';
 
 export const GPIO_VALIDATOR = {
@@ -289,7 +290,6 @@ export const uniqueNameValidator = (schedule: ScheduleItem[], o_name?: string) =
     if (
       name !== '' &&
       (o_name === undefined || o_name !== name) &&
-      name !== '' &&
       schedule.find((si) => si.name === name)
     ) {
       callback('Name already in use');
@@ -307,8 +307,8 @@ export const schedulerItemValidation = (
     name: [
       {
         type: 'string',
-        pattern: /^[a-zA-Z0-9_\\.]{0,15}$/,
-        message: "Must be <15 characters: alpha numeric, '_' or '.'"
+        pattern: /^[a-zA-Z0-9_\\.]{0,19}$/,
+        message: "Must be <20 characters: alpha numeric, '_' or '.'"
       },
       ...[uniqueNameValidator(schedule, scheduleItem.o_name)]
     ],
@@ -349,8 +349,8 @@ export const entityItemValidation = (entity: EntityItem[], entityItem: EntityIte
       { required: true, message: 'Name is required' },
       {
         type: 'string',
-        pattern: /^[a-zA-Z0-9_\\.]{1,15}$/,
-        message: "Must be <15 characters: alpha numeric, '_' or '.'"
+        pattern: /^[a-zA-Z0-9_\\.]{1,19}$/,
+        message: "Must be <20 characters: alpha numeric, '_' or '.'"
       },
       ...[uniqueCustomNameValidator(entity, entityItem.o_name)]
     ],
@@ -388,14 +388,25 @@ export const entityItemValidation = (entity: EntityItem[], entityItem: EntityIte
     ]
   });
 
-export const temperatureSensorItemValidation = () =>
+export const uniqueTemperatureNameValidator = (sensors: TemperatureSensor[]) => ({
+  validator(rule: InternalRuleItem, n: string, callback: (error?: string) => void) {
+    if (n !== '' && sensors.find((ts) => ts.n === n)) {
+      callback('Name already in use');
+    } else {
+      callback();
+    }
+  }
+});
+
+export const temperatureSensorItemValidation = (sensors: TemperatureSensor[]) =>
   new Schema({
     n: [
       {
         type: 'string',
-        pattern: /^[a-zA-Z0-9_\\.]{0,17}$/,
-        message: "Must be <18 characters: alpha numeric, '_' or '.'"
-      }
+        pattern: /^[a-zA-Z0-9_\\.]{0,19}$/,
+        message: "Must be <20 characters: alpha numeric, '_' or '.'"
+      },
+      ...[uniqueTemperatureNameValidator(sensors)]
     ]
   });
 
@@ -413,13 +424,30 @@ export const isGPIOUniqueValidator = (sensors: AnalogSensor[]) => ({
   }
 });
 
+export const uniqueAnalogNameValidator = (sensors: AnalogSensor[]) => ({
+  validator(rule: InternalRuleItem, n: string, callback: (error?: string) => void) {
+    if (n !== '' && sensors.find((as) => as.n === n)) {
+      callback('Name already in use');
+    } else {
+      callback();
+    }
+  }
+});
+
 export const analogSensorItemValidation = (
   sensors: AnalogSensor[],
   creating: boolean,
   platform: string
 ) =>
   new Schema({
-    n: [{ required: true, message: 'Name is required' }],
+    n: [
+      {
+        type: 'string',
+        pattern: /^[a-zA-Z0-9_\\.]{0,19}$/,
+        message: "Must be <20 characters: alpha numeric, '_' or '.'"
+      },
+      ...[uniqueAnalogNameValidator(sensors)]
+    ],
     g: [
       { required: true, message: 'GPIO is required' },
       platform === 'ESP32-S3'
