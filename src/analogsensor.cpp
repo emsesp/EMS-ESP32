@@ -711,7 +711,7 @@ bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int
         }
     }
 
-    return EMSESP::return_not_found(output, "analog sensor", cmd); // not found
+    return EMSESP::return_not_found(output, cmd, F_(analogsensor)); // not found
 }
 
 void AnalogSensor::addSensorJson(JsonObject output, const Sensor & sensor) {

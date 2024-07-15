@@ -334,7 +334,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
         }
     }
 
-    return EMSESP::return_not_found(output, "custom entity", cmd); // not found
+    return EMSESP::return_not_found(output, cmd, F_(custom)); // not found
 }
 
 // publish single value
