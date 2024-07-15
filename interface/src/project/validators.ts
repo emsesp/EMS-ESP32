@@ -289,8 +289,8 @@ export const uniqueNameValidator = (schedule: ScheduleItem[], o_name?: string) =
   ) {
     if (
       name !== '' &&
-      (o_name === undefined || o_name !== name) &&
-      schedule.find((si) => si.name === name)
+      (o_name === undefined || o_name.toLowerCase() !== name.toLowerCase()) &&
+      schedule.find((si) => si.name.toLowerCase() === name.toLowerCase())
     ) {
       callback('Name already in use');
     } else {
@@ -333,8 +333,8 @@ export const uniqueCustomNameValidator = (
     callback: (error?: string) => void
   ) {
     if (
-      (o_name === undefined || o_name !== name) &&
-      entity.find((ei) => ei.name === name)
+      (o_name === undefined || o_name.toLowerCase() !== name.toLowerCase()) &&
+      entity.find((ei) => ei.name.toLowerCase() === name.toLowerCase())
     ) {
       callback('Name already in use');
     } else {
@@ -390,7 +390,7 @@ export const entityItemValidation = (entity: EntityItem[], entityItem: EntityIte
 
 export const uniqueTemperatureNameValidator = (sensors: TemperatureSensor[]) => ({
   validator(rule: InternalRuleItem, n: string, callback: (error?: string) => void) {
-    if (n !== '' && sensors.find((ts) => ts.n === n)) {
+    if (n !== '' && sensors.find((ts) => ts.n.toLowerCase() === n.toLowerCase())) {
       callback('Name already in use');
     } else {
       callback();
@@ -426,7 +426,7 @@ export const isGPIOUniqueValidator = (sensors: AnalogSensor[]) => ({
 
 export const uniqueAnalogNameValidator = (sensors: AnalogSensor[]) => ({
   validator(rule: InternalRuleItem, n: string, callback: (error?: string) => void) {
-    if (n !== '' && sensors.find((as) => as.n === n)) {
+    if (n !== '' && sensors.find((as) => as.n.toLowerCase() === n.toLowerCase())) {
       callback('Name already in use');
     } else {
       callback();
