@@ -161,11 +161,7 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
             }
         }
 
-        if (output.size()) {
-            return true;
-        }
-
-        return EMSESP::return_not_found(output, "schedule", cmd); // not found
+        return true;
     }
 
     char command_s[COMMAND_MAX_LENGTH];
@@ -210,7 +206,7 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
         return true;
     }
 
-    return EMSESP::return_not_found(output, "schedule", cmd); // not found
+    return EMSESP::return_not_found(output, cmd, F_(scheduler)); // not found
 }
 
 // publish single value

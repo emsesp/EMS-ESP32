@@ -519,7 +519,6 @@ void EMSdevice::add_device_value(int8_t                tag,              // to b
                                  uint32_t              max               // max allowed value
 ) {
     // initialize the device value depending on it's type
-    // ignoring DeviceValueType::CMD
 
     if (type == DeviceValueType::STRING) {
         *(char *)(value_p) = {'\0'}; // this is important for string functions like strlen() to work later
@@ -1549,12 +1548,16 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
                 break;
 
             case DeviceValueType::CMD:
-                json[type] = F_(command);
                 if (dv.options_size > 1) {
+                    json[type]      = F_(enum);
                     JsonArray enum_ = json[F_(enum)].to<JsonArray>();
                     for (uint8_t i = 0; i < dv.options_size; i++) {
                         enum_.add(Helpers::translated_word(dv.options[i]));
                     }
+                } else if (dv.uom != DeviceValueUOM::NONE) {
+                    json[type] = F_(number);
+                } else {
+                    json[type] = F_(command);
                 }
                 break;
 
@@ -1585,10 +1588,11 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
             // TODO refactor to remove containsKey as it's costly and not advisable to use it
             // https://arduinojson.org/v7/api/jsonobject/containskey/#avoid
 
+            // commented out, leads to issues if type is set to number
             // if there is no value, mention it
-            if (!json.containsKey(value)) {
-                json[value] = "not set";
-            }
+            // if (!json.containsKey(value)) {
+            //     json[value] = "not set";
+            // }
 
             // if we're filtering on an attribute, go find it
             if (attribute_s) {
@@ -1756,10 +1760,14 @@ bool EMSdevice::generate_values(JsonObject output, const int8_t tag_filter, cons
                     }
                 }
 
-                // commenting out as we don't want Commands in Console ('show values')
-                // else if (dv.type == DeviceValueType::CMD && output_target != EMSdevice::OUTPUT_TARGET::MQTT) {
-                //     json[name] = "";
-                // }
+                // we don't want Commands in Console ('show values')
+                else if (dv.type == DeviceValueType::CMD && output_target != EMSdevice::OUTPUT_TARGET::CONSOLE) {
+                    if (dv.uom == DeviceValueUOM::NONE) {
+                        json[name] = "";
+                    } else {
+                        json[name] = NAN;
+                    }
+                }
 
                 // check for value outside min/max range and adapt the limits to avoid HA complains
                 // Should this also check for api output?

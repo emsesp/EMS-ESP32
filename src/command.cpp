@@ -318,15 +318,17 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 
     // determine flags based on id (which is the tag)
     uint8_t flag = CommandFlag::CMD_FLAG_DEFAULT;
-    int8_t  tag  = id;
-    if (tag >= DeviceValueTAG::TAG_HC1 && tag <= DeviceValueTAG::TAG_HC8) {
-        flag = CommandFlag::CMD_FLAG_HC;
-    } else if (tag >= DeviceValueTAG::TAG_DHW1 && tag <= DeviceValueTAG::TAG_DHW10) {
-        flag = CommandFlag::CMD_FLAG_DHW;
-    } else if (tag >= DeviceValueTAG::TAG_HS1 && tag <= DeviceValueTAG::TAG_HS16) {
-        flag = CommandFlag::CMD_FLAG_HS;
-    } else if (tag >= DeviceValueTAG::TAG_AHS1 && tag <= DeviceValueTAG::TAG_AHS1) {
-        flag = CommandFlag::CMD_FLAG_AHS;
+    // info and values works with all tags, keep it default
+    if (std::string(cmd) != F_(values) && std::string(cmd) != F_(info)) {
+        if (id >= DeviceValueTAG::TAG_HC1 && id <= DeviceValueTAG::TAG_HC8) {
+            flag = CommandFlag::CMD_FLAG_HC;
+        } else if (id >= DeviceValueTAG::TAG_DHW1 && id <= DeviceValueTAG::TAG_DHW10) {
+            flag = CommandFlag::CMD_FLAG_DHW;
+        } else if (id >= DeviceValueTAG::TAG_HS1 && id <= DeviceValueTAG::TAG_HS16) {
+            flag = CommandFlag::CMD_FLAG_HS;
+        } else if (id >= DeviceValueTAG::TAG_AHS1 && id <= DeviceValueTAG::TAG_AHS1) {
+            flag = CommandFlag::CMD_FLAG_AHS;
+        }
     }
 
     // first see if there is a command registered and it's valid

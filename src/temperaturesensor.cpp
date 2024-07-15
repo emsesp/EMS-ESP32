@@ -408,7 +408,7 @@ bool TemperatureSensor::get_value_info(JsonObject output, const char * cmd, cons
         }
     }
 
-    return EMSESP::return_not_found(output, "temperature sensor", cmd); // not found
+    return EMSESP::return_not_found(output, cmd, F_(temperaturesensor)); // not found
 }
 
 void TemperatureSensor::addSensorJson(JsonObject output, const Sensor & sensor) {
