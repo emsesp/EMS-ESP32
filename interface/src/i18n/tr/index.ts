@@ -188,9 +188,9 @@ const tr: Translation = {
   RELEASE_NOTES: 'yayınlanma notları',
   EMS_ESP_VER: 'EMS-ESP Sürümü',
   UPTIME: 'Sistem Çalışma Süresi',
-  HEAP: 'Yığın (Boş / Maksimum Tahsis)',
+  FREE_MEMORY: 'Yığın Memory', // TODO translate
   PSRAM: 'PSRAM (Boyut / Boş)',
-  FLASH: 'Flash Çipi (Boyut / Hız)',
+  FLASH: 'Flash Çipi (Boyut , Hız)',
   APPSIZE: 'Uygulama (Bölme: Kullanılmış / Boş)',
   FILESYSTEM: 'Dosya Sistemi (Kullanılmış / Boş)',
   BUFFER_SIZE: 'En fazla bellek boyutu',

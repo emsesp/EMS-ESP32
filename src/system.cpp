@@ -668,6 +668,7 @@ void System::send_info_mqtt() {
 }
 
 // create the json for heartbeat
+// TODO camelCase
 void System::heartbeat_json(JsonObject output) {
     switch (EMSESP::bus_status()) {
     case EMSESP::BUS_STATUS_OFFLINE:
