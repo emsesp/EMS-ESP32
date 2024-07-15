@@ -195,7 +195,6 @@ const UploadDownload: FC = () => {
         <Box p={2} border="2px solid grey" borderRadius={2}>
           {LL.VERSION_ON() + ' '}
           <b>{data.emsesp_version}</b>&nbsp;({data.esp_platform})
-          {data.model.length > 0 && <p>Gateway Hardware:&nbsp;{data.model}</p>}
           <Divider />
           {latestVersion && (
             <Box mt={2}>

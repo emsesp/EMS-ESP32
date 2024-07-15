@@ -188,9 +188,9 @@ const sk: Translation = {
   RELEASE_NOTES: 'poznámky k verzii',
   EMS_ESP_VER: 'EMS-ESP verzia',
   UPTIME: 'Beh systému',
-  HEAP: 'Zásobník (voľné / max pridelenie)',
+  FREE_MEMORY: 'Voľné Memory', // TODO translate
   PSRAM: 'PSRAM (Veľkosť / Voľné)',
-  FLASH: 'Flash chip (Veľkosť / Rýchlosť)',
+  FLASH: 'Flash chip (Veľkosť , Rýchlosť)',
   APPSIZE: 'Applikácia (Oddiel: Použité / Voľné)',
   FILESYSTEM: 'Súborový systém (Použité / Voľné)',
   BUFFER_SIZE: 'Buffer-max.veľkosť',
