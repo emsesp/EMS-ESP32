@@ -541,6 +541,8 @@ void EMSdevice::add_device_value(int8_t                tag,              // to b
             *(uint8_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_ENUM_DUMMY : EMS_VALUE_DEFAULT_ENUM; // enums behave as uint8_t
         } else if (uom == DeviceValueUOM::DEGREES) {
             *(int16_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_INT16_DUMMY : EMS_VALUE_DEFAULT_INT16;
+        } else if (uom == DeviceValueUOM::PERCENT) {
+            *(uint8_t *)(value_p) = System::test_set_all_active() ? EMS_VALUE_DEFAULT_UINT8_DUMMY : EMS_VALUE_DEFAULT_UINT8;
         }
     }
 
