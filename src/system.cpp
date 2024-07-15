@@ -1302,7 +1302,7 @@ bool System::get_value_info(JsonObject root, const char * command) {
     }
 
     char cmd[COMMAND_MAX_LENGTH];
-    strlcpy(cmd, command, sizeof(cmd));
+    strlcpy(cmd, Helpers::toLower(command).c_str(), sizeof(cmd));
     char * val = strstr(cmd, "/value");
     if (val) {
         val[0] = '\0';
