@@ -369,7 +369,7 @@ const ESPsystem_status = {
   psram_size: 0,
   free_psram: 0,
   has_loader: true,
-  model: 'BBQKees Gateway Model E32V2 vE32V2.0P3/2024011'
+  model: 'BBQKees Electronics EMS Gateway E32 V2 (E32 V2.0 P3/2024011)'
 };
 
 const system_status = {
@@ -651,7 +651,7 @@ const emsesp_devices = {
     },
     {
       i: 3,
-      s: 'GB125',
+      s: 'Buderus GB125',
       t: 5,
       tn: 'Boiler',
       url: 'boiler'
@@ -679,7 +679,7 @@ const emsesp_devices = {
     },
     {
       i: 7,
-      s: 'Trendline HRC30',
+      s: 'Trendline HRC30/Generic Heatronic 3',
       t: 4,
       tn: 'Boiler',
       url: 'boiler'
@@ -688,7 +688,7 @@ const emsesp_devices = {
       i: 8,
       s: 'Bosch Compress 7000i AW Heat Pump',
       t: 5,
-      tn: 'Boiler',
+      tn: 'Boiler/HP',
       url: 'boiler'
     },
     {
@@ -718,7 +718,7 @@ const emsesp_coredata = {
       t: 5,
       tn: 'Boiler',
       b: 'Nefit',
-      n: 'Nefit Trendline HRC30',
+      n: 'Nefit Trendline HRC30/Generic Heatronic 3',
       d: 8,
       p: 123,
       v: '06.01',
@@ -729,7 +729,7 @@ const emsesp_coredata = {
       t: 5,
       tn: 'Boiler',
       b: 'Buderus',
-      n: 'GB125',
+      n: 'Buderus GB125',
       d: 8,
       p: 123,
       v: '06.01',
@@ -792,7 +792,7 @@ const emsesp_coredata = {
     },
     {
       "id": 8,
-      "tn": "Boiler",
+      "tn": "Boiler/HP",
       "t": 5,
       "b": "",
       "n": "Bosch Compress 7000i AW Heat Pump",
@@ -822,19 +822,20 @@ const emsesp_coredata = {
       "p": 158,
       "v": "73.03",
       "e": 63
-    },
-    {
-      id: 99,
-      t: 4,
-      tn: 'Custom',
-      b: '',
-      n: 'Custom Entities',
-      d: 1,
-      p: 1,
-      v: '',
-      e: 2
     }
   ]
+};
+
+const emsesp_coredata_custom = {
+  id: 99,
+  t: 4,
+  tn: 'Custom',
+  b: '',
+  n: 'Custom Entities',
+  d: 1,
+  p: 1,
+  v: '',
+  e: 2
 };
 
 const emsesp_sensordata = {
@@ -4309,14 +4310,16 @@ router
 
   // Device Dashboard Data
   .get(EMSESP_CORE_DATA_ENDPOINT, () => {
-    // sort by type
-    const sorted_devices = emsesp_coredata.devices.sort((a, b) => b.t - a.t);
+    // sort by type, like its done in the C++ code
+    let sorted_devices = [...emsesp_coredata.devices].sort((a, b) => a.t - b.t);
+    // append emsesp_coredata to sorted_devices so Custom is always at the end of the list
+    sorted_devices.push(emsesp_coredata_custom);
     return { connected: true, devices: sorted_devices };
   })
   .get(EMSESP_SENSOR_DATA_ENDPOINT, () => emsesp_sensordata)
   .get(EMSESP_DEVICES_ENDPOINT, () => {
     // sort by type
-    const sorted_devices = emsesp_devices.devices.sort((a, b) => b.t - a.t);
+    const sorted_devices = emsesp_devices.devices.sort((a, b) => a.t - b.t);
     return { devices: sorted_devices };
     
   })

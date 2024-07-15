@@ -8,6 +8,7 @@ import MemoryIcon from '@mui/icons-material/Memory';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SdCardAlertIcon from '@mui/icons-material/SdCardAlert';
 import SdStorageIcon from '@mui/icons-material/SdStorage';
+import TapAndPlayIcon from '@mui/icons-material/TapAndPlay';
 import {
   Avatar,
   Box,
@@ -32,7 +33,7 @@ function formatNumber(num: number) {
 const ESPSystemStatus: FC = () => {
   const { LL } = useI18nContext();
 
-  useLayoutTitle(LL.STATUS_OF('ESP32'));
+  useLayoutTitle(LL.STATUS_OF(LL.HARDWARE()));
 
   const {
     data: data,
@@ -48,6 +49,18 @@ const ESPSystemStatus: FC = () => {
     return (
       <>
         <List>
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar sx={{ bgcolor: '#68374d', color: 'white' }}>
+                <TapAndPlayIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText
+              primary={LL.HARDWARE() + ' ' + LL.DEVICE()}
+              secondary={data.model ? data.model : data.cpu_type}
+            />
+          </ListItem>
+          <Divider variant="inset" component="li" />
           <ListItem>
             <ListItemAvatar>
               <Avatar sx={{ bgcolor: '#5f9a5f', color: 'white' }}>
@@ -90,12 +103,12 @@ const ESPSystemStatus: FC = () => {
               </Avatar>
             </ListItemAvatar>
             <ListItemText
-              primary={LL.HEAP()}
+              primary={LL.FREE_MEMORY()}
               secondary={
                 formatNumber(data.free_heap) +
-                ' KB / ' +
+                ' KB (' +
                 formatNumber(data.max_alloc_heap) +
-                ' KB '
+                ' KB alloc)'
               }
             />
           </ListItem>
@@ -131,7 +144,7 @@ const ESPSystemStatus: FC = () => {
               primary={LL.FLASH()}
               secondary={
                 formatNumber(data.flash_chip_size) +
-                ' KB / ' +
+                ' KB , ' +
                 (data.flash_chip_speed / 1000000).toFixed(0) +
                 ' MHz'
               }

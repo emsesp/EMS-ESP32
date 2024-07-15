@@ -188,9 +188,9 @@ const pl: BaseTranslation = {
   RELEASE_NOTES: 'lista zmian',
   EMS_ESP_VER: 'Wersja EMS-ESP',
   UPTIME: 'Czas działania systemu',
-  HEAP: 'HEAP (wolne / maksymalny przydział)',
+  FREE_MEMORY: 'Wolne Memory', // TODO translate
   PSRAM: 'PSRAM (rozmiar / wolne)',
-  FLASH: 'FLASH (rozmiar / taktowanie)',
+  FLASH: 'FLASH (rozmiar , taktowanie)',
   APPSIZE: 'Aplikacja (partycja: wykorzystane / wolne)',
   FILESYSTEM: 'System plików (wykorzystane / wolne)',
   BUFFER_SIZE: 'Maksymalna pojemność bufora (ilość wpisów)',
