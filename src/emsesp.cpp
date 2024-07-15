@@ -748,7 +748,9 @@ bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8
     // check first for EMS devices
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice->device_type() == devicetype) {
-            return emsdevice->get_value_info(root, cmd, id);
+            if (emsdevice->get_value_info(root, cmd, id)) {
+                return true;
+            }
         }
     }
 
