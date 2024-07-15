@@ -391,7 +391,7 @@ const SystemStatus: FC = () => {
             disabled={!me.admin}
             icon={MemoryIcon}
             bgcolor="#68374d"
-            label={LL.STATUS_OF(LL.SYSTEM(1))}
+            label={LL.STATUS_OF(LL.HARDWARE())}
             text={formatNumber(data.free_heap) + ' KB' + ' ' + LL.FREE_MEMORY()}
             to="/system/espsystemstatus"
           />

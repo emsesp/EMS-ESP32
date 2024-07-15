@@ -33,7 +33,7 @@ function formatNumber(num: number) {
 const ESPSystemStatus: FC = () => {
   const { LL } = useI18nContext();
 
-  useLayoutTitle(LL.HARDWARE());
+  useLayoutTitle(LL.STATUS_OF(LL.HARDWARE()));
 
   const {
     data: data,
