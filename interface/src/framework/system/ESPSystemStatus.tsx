@@ -117,7 +117,7 @@ const ESPSystemStatus: FC = () => {
                 formatNumber(data.free_heap) +
                 ' KB (' +
                 formatNumber(data.max_alloc_heap) +
-                ' KB alloc)'
+                ' KB max alloc)'
               }
             />
           </ListItem>
