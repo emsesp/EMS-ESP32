@@ -475,7 +475,7 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
     }
 
     // build header. src, dest and offset have fixed positions
-    uint8_t src    = operation == Telegram::Operation::TX_RAW ? data[0] : ems_bus_id();
+    uint8_t src    = operation == Telegram::Operation::TX_RAW && data[0] ? data[0] : ems_bus_id();
     uint8_t dest   = data[1];
     uint8_t offset = data[3];
 
