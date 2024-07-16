@@ -109,6 +109,7 @@ class Thermostat : public EMSdevice {
             return hc_num_;
         }
 
+        // returns heating circuit number 0..9
         uint8_t hc() const {
             return hc_num_ - 1;
         }

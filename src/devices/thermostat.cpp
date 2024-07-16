@@ -252,7 +252,7 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(const in
 // if its a new one, the heating circuit object will be created and also the fetch flags set
 std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::shared_ptr<const Telegram> telegram) {
     // look through the Monitor and Set arrays to see if there is a match
-    uint8_t hc_num  = 0;
+    uint8_t hc_num  = 0; // 0 means we haven't found it yet
     bool    toggle_ = false;
 
     // search device-id types for remote thermostats first, they have only a single typeid for all hcs
@@ -269,8 +269,10 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
                 toggle_ = true;
                 break;
             }
+            Serial.println();
         }
     }
+
     // not found, search status message/set types
     if (hc_num == 0) {
         for (uint8_t i = 0; i < set_typeids.size(); i++) {
