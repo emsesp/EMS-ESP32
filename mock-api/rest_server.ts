@@ -369,6 +369,7 @@ const ESPsystem_status = {
   psram_size: 0,
   free_psram: 0,
   has_loader: true,
+  // model: ''
   model: 'BBQKees Electronics EMS Gateway E32 V2 (E32 V2.0 P3/2024011)'
 };
 

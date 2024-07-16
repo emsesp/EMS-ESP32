@@ -26,6 +26,8 @@ import { useRequest } from 'alova';
 import { ButtonRow, FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
+import BBQKeesIcon from '../../project/bbqkees.svg';
+
 function formatNumber(num: number) {
   return new Intl.NumberFormat().format(num);
 }
@@ -51,8 +53,15 @@ const ESPSystemStatus: FC = () => {
         <List>
           <ListItem>
             <ListItemAvatar>
-              <Avatar sx={{ bgcolor: '#68374d', color: 'white' }}>
-                <TapAndPlayIcon />
+              <Avatar sx={{ bgcolor: '#003289', color: 'white' }}>
+                {data.model ? (
+                  <img
+                    src={BBQKeesIcon}
+                    style={{ width: 16, verticalAlign: 'middle' }}
+                  />
+                ) : (
+                  <TapAndPlayIcon />
+                )}
               </Avatar>
             </ListItemAvatar>
             <ListItemText
