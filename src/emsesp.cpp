@@ -746,10 +746,18 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
 // for other types like sensors, scheduler, custom entities it will process single commands like 'info', 'values', 'commands'...
 bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8_t id, const uint8_t devicetype) {
     // check first for EMS devices
+    bool found_device = false;
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice->device_type() == devicetype) {
-            return emsdevice->get_value_info(root, cmd, id);
+            found_device = true;
+            if (emsdevice->get_value_info(root, cmd, id)) {
+                return true;
+            }
         }
+    }
+    // if the EMS device was valid, but the cmd not found show an error
+    if (found_device) {
+        // return EMSESP::return_not_found(root, "poep", cmd); // not found
     }
 
     // check for other devices...
@@ -786,7 +794,7 @@ bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8
 bool EMSESP::return_not_found(JsonObject output, const char * msg, const char * cmd) {
     output.clear();
     char error[100];
-    snprintf(error, sizeof(error), "cannot find %s in '%s'", msg, cmd);
+    snprintf(error, sizeof(error), "cannot find %s in %s", msg, cmd);
     output["message"] = error;
     return false;
 }
