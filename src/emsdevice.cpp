@@ -332,7 +332,7 @@ void EMSdevice::fetch_values() {
 // toggle on/off automatic fetch for a telegramID
 void EMSdevice::toggle_fetch(uint16_t telegram_id, bool toggle) {
 #if defined(EMSESP_DEBUG)
-    EMSESP::logger().debug("Toggling fetch for deviceID 0x%02X, telegramID 0x%02X to %d", device_id(), telegram_id, toggle);
+    EMSESP::logger().debug("Setting fetch to %d for deviceID 0x%02X, telegramID 0x%02X to %d", toggle, device_id(), telegram_id);
 #endif
 
     for (auto & tf : telegram_functions_) {
