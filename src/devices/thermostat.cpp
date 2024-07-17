@@ -269,7 +269,6 @@ std::shared_ptr<Thermostat::HeatingCircuit> Thermostat::heating_circuit(std::sha
                 toggle_ = true;
                 break;
             }
-            Serial.println();
         }
     }
 
