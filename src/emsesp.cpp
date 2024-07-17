@@ -757,10 +757,11 @@ bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8
     }
     // if the EMS device was valid, but the cmd not found show an error
     if (found_device) {
-        // return EMSESP::return_not_found(root, "poep", cmd); // not found
+        root["message"] = std::string("unknown command ") + cmd;
+        return false;
     }
 
-    // check for other devices...
+    // check for other non EMS devices...
 
     // temperature sensor
     if (devicetype == DeviceType::TEMPERATURESENSOR) {
