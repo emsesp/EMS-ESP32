@@ -529,13 +529,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
     std::list<std::string> sorted_cmds;
     for (const auto & cf : cmdfunctions_) {
         if ((cf.device_type_ == device_type) && !cf.has_flags(CommandFlag::HIDDEN)) {
-            // remove duplicates
-            auto line = tagged_cmd(cf.cmd_, cf.flags_);
-            // only add if not already in list
-            // removes duplicates if having more than one device (e.g. 2 thermostats)
-            if (std::find(sorted_cmds.begin(), sorted_cmds.end(), line) == sorted_cmds.end()) {
-                sorted_cmds.push_back(line);
-            }
+            sorted_cmds.push_back(tagged_cmd(cf.cmd_, cf.flags_));
         }
     }
 
