@@ -316,16 +316,6 @@ const SystemStatus: FC = () => {
         <List>
           <ListItem>
             <ListItemAvatar>
-              <Avatar sx={{ bgcolor: busStatusHighlight(), color: 'white' }}>
-                <DirectionsBusIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary={LL.EMS_BUS_STATUS()} secondary={busStatus()} />
-          </ListItem>
-          <Divider variant="inset" component="li" />
-
-          <ListItem>
-            <ListItemAvatar>
               <Avatar sx={{ bgcolor: '#c5572c', color: 'white' }}>
                 <TimerIcon />
               </Avatar>
@@ -347,7 +337,6 @@ const SystemStatus: FC = () => {
           </ListItem>
 
           <Divider variant="inset" component="li" />
-
           <ListItem>
             <ListItemAvatar>
               <Avatar sx={{ bgcolor: '#5d89f7', color: 'white' }}>
@@ -375,8 +364,8 @@ const SystemStatus: FC = () => {
               </Button>
             )}
           </ListItem>
-          <Divider variant="inset" component="li" />
 
+          <Divider variant="inset" component="li" />
           <ListMenuItem
             disabled={!me.admin}
             icon={BuildIcon}
@@ -385,8 +374,18 @@ const SystemStatus: FC = () => {
             text={data.emsesp_version}
             to="/settings/upload"
           />
-          <Divider variant="inset" component="li" />
 
+          <Divider variant="inset" component="li" />
+          <ListMenuItem
+            disabled={!me.admin}
+            icon={DirectionsBusIcon}
+            bgcolor={busStatusHighlight()}
+            label={LL.EMS_BUS_STATUS()}
+            text={busStatus()}
+            to="/system/activity"
+          />
+
+          <Divider variant="inset" component="li" />
           <ListMenuItem
             disabled={!me.admin}
             icon={MemoryIcon}
@@ -395,8 +394,8 @@ const SystemStatus: FC = () => {
             text={formatNumber(data.free_heap) + ' KB' + ' ' + LL.FREE_MEMORY()}
             to="/system/espsystemstatus"
           />
-          <Divider variant="inset" component="li" />
 
+          <Divider variant="inset" component="li" />
           <ListMenuItem
             disabled={!me.admin}
             icon={
@@ -409,8 +408,8 @@ const SystemStatus: FC = () => {
             text={networkStatus()}
             to="/settings/network/status"
           />
-          <Divider variant="inset" component="li" />
 
+          <Divider variant="inset" component="li" />
           <ListMenuItem
             disabled={!me.admin}
             icon={DeviceHubIcon}
@@ -419,8 +418,8 @@ const SystemStatus: FC = () => {
             text={data.mqtt_status ? LL.ACTIVE() : LL.INACTIVE(0)}
             to="/settings/mqtt/status"
           />
-          <Divider variant="inset" component="li" />
 
+          <Divider variant="inset" component="li" />
           <ListMenuItem
             disabled={!me.admin}
             icon={AccessTimeIcon}
@@ -429,8 +428,8 @@ const SystemStatus: FC = () => {
             text={ntpStatus()}
             to="/settings/ntp/status"
           />
-          <Divider variant="inset" component="li" />
 
+          <Divider variant="inset" component="li" />
           <ListMenuItem
             disabled={!me.admin}
             icon={SettingsInputAntennaIcon}
