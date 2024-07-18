@@ -334,10 +334,10 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     // first see if there is a command registered and it's valid
     auto cf = find_command(device_type, device_id, cmd, flag);
     if (!cf) {
-        LOG_WARNING("Command failed: invalid command '%s'", cmd ? cmd : "");
+        LOG_WARNING("Command failed: unknown command '%s'", cmd ? cmd : "");
         // if we don't alread have a message set, set it to invalid command
         if (!output["message"]) {
-            output["message"] = "invalid command";
+            output["message"] = "unknown command";
         }
         return CommandRet::ERROR;
     }
@@ -360,39 +360,45 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
         snprintf(info_s, sizeof(info_s), "'%s/%s'", dname, cmd);
     }
 
-    if (single_command) {
-        LOG_DEBUG(("%sCalling command %s"), ro.c_str(), info_s);
-    } else {
-        if (id > 0) {
-            LOG_INFO(("%sCalling command %s with value %s and id %d on device 0x%02X"), ro.c_str(), info_s, value, id, device_id);
-        } else {
-            LOG_INFO(("%sCalling command %s with value %s"), ro.c_str(), info_s, value);
-        }
-    }
-
-    // call the function based on type, either with a json package or no parameters
+    // call the function based on command function type
+    // commands return true or false only (bool)
     uint8_t return_code = CommandRet::OK;
     if (cf->cmdfunction_json_) {
-        // JSON
+        // handle commands that report back a JSON body
         return_code = ((cf->cmdfunction_json_)(value, id, output)) ? CommandRet::OK : CommandRet::ERROR;
     } else if (cf->cmdfunction_) {
-        // Normal command
+        // if it's a read only command and we're trying to set a value, return an error
         if (!single_command && EMSESP::cmd_is_readonly(device_type, device_id, cmd, id)) {
             return_code = CommandRet::INVALID; // error on readonly or invalid hc
         } else {
+            // call it...
             return_code = ((cf->cmdfunction_)(value, id)) ? CommandRet::OK : CommandRet::ERROR;
         }
     }
 
-    // report back. If not OK show output from error, other return the HTTP code
+    // report back. If not OK show output from error, otherwise return the HTTP code
     if (return_code != CommandRet::OK) {
+        char error[100];
         if (single_command) {
-            LOG_ERROR("Command '%s' failed with error '%s'", cmd, FL_(cmdRet)[return_code]);
+            snprintf(error, sizeof(error), "Command '%s' failed (%s)", cmd, FL_(cmdRet)[return_code]);
         } else {
-            LOG_ERROR("Command '%s: %s' failed with error '%s'", cmd, value, FL_(cmdRet)[return_code]);
+            snprintf(error, sizeof(error), "Command '%s: %s' failed (%s)", cmd, value, FL_(cmdRet)[return_code]);
         }
-        return message(return_code, "callback function failed", output);
+        output.clear();
+        output["message"] = error;
+        LOG_WARNING(error);
+    } else {
+        if (single_command) {
+            LOG_DEBUG(("%sCalling command %s"), ro.c_str(), info_s);
+        } else {
+            if (id > 0) {
+                LOG_INFO(("%sCalling command %s with value %s and id %d on device 0x%02X"), ro.c_str(), info_s, value, id, device_id);
+            } else {
+                LOG_INFO(("%sCalling command %s with value %s"), ro.c_str(), info_s, value);
+            }
+        }
     }
+
     return return_code;
 }
 

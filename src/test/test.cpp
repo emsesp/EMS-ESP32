@@ -119,8 +119,8 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
         // RC300WWmode2(0x31D), data: 00 00 09 07
         uart_telegram({0x10, 00, 0xFF, 00, 02, 0x1D, 00, 00, 0x09, 0x07});
 
-        // 2nd thermostat
-        // Thermostat RCPLUSStatusMessage_HC2(0x01A6)
+        // 2nd thermostat on HC2
+        // Thermostat RC300Monitor(0x02A6)
         uart_telegram({0x98, 0x00, 0xFF, 0x00, 0x01, 0xA6, 0x00, 0xCF, 0x21, 0x2E, 0x00, 0x00, 0x2E, 0x24,
                        0x03, 0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03});
 
@@ -599,8 +599,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     if (command == "2thermostats") {
         shell.printfln("Testing multiple thermostats...");
         test("2thermostats");
-        shell.invoke_command("show values");
-        shell.invoke_command("show devices");
+        // shell.invoke_command("show values");
+        // shell.invoke_command("show devices");
         ok = true;
     }
 
@@ -963,16 +963,26 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // load devices
         test("boiler");
         // test("thermostat");
+        test("2thermostats");
 
         if (single) {
             // run dedicated tests only
-            EMSESP::webCustomEntityService.test();  // custom entities
-            EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
-            EMSESP::temperaturesensor_.test();      // add temperature sensors
-            EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
+            // EMSESP::webCustomEntityService.test();  // custom entities
+            // EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
+            // EMSESP::temperaturesensor_.test();      // add temperature sensors
+            // EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
 
-            // request.url("/api/analogsensor/test_analog10/bad");
+            // request.url("/api/thermostat/commands");
             // EMSESP::webAPIService.webAPIService(&request);
+
+            request.url("/api/thermostat/hc1/mode2");
+            EMSESP::webAPIService.webAPIService(&request);
+
+            request.url("/api/thermostat/hc2/mode");
+            EMSESP::webAPIService.webAPIService(&request);
+
+            request.url("/api/thermostat/hc1/mode");
+            EMSESP::webAPIService.webAPIService(&request);
 
         } else {
             EMSESP::webCustomEntityService.test();  // custom entities

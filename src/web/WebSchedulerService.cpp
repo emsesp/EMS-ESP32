@@ -329,7 +329,7 @@ bool WebSchedulerService::has_commands() {
 }
 
 // execute scheduled command
-bool WebSchedulerService::command(const char * cmd, const char * data) {
+bool WebSchedulerService::command(const char * name, const char * cmd, const char * data) {
     JsonDocument doc_input;
     JsonObject   input = doc_input.to<JsonObject>();
     if (strlen(data)) { // empty data queries a value
@@ -347,7 +347,7 @@ bool WebSchedulerService::command(const char * cmd, const char * data) {
 
     if (return_code == CommandRet::OK) {
 #if defined(EMSESP_DEBUG)
-        EMSESP::logger().debug("Scheduled command '%s' with data '%s' was successful", cmd, data);
+        EMSESP::logger().debug("Schedule command '%s' with data '%s' was successful", cmd, data);
 #endif
         if (strlen(data) == 0 && output.size()) {
             Mqtt::queue_publish("response", output);
@@ -357,14 +357,10 @@ bool WebSchedulerService::command(const char * cmd, const char * data) {
 
     char error[100];
     if (output.size()) {
-        snprintf(error,
-                 sizeof(error),
-                 "Scheduled command %s failed with error: %s (%s)",
-                 cmd,
-                 (const char *)output["message"],
-                 Command::return_code_string(return_code).c_str());
+        // check for empty name
+        snprintf(error, sizeof(error), "Schedule %s: %s", name ? name : "", (const char *)output["message"]); // use error message if we have it
     } else {
-        snprintf(error, sizeof(error), "Scheduled command %s failed with error %s", cmd, Command::return_code_string(return_code).c_str());
+        snprintf(error, sizeof(error), "Schedule %s: command %s failed with error %s", name, cmd, Command::return_code_string(return_code).c_str());
     }
 
     emsesp::EMSESP::logger().warning(error);
@@ -381,7 +377,7 @@ bool WebSchedulerService::onChange(const char * cmd) {
 #ifdef EMESESP_DEBUG
             // emsesp::EMSESP::logger().debug(scheduleItem.cmd.c_str());
 #endif
-            cmd_ok |= command(scheduleItem.cmd.c_str(), compute(scheduleItem.value).c_str());
+            cmd_ok |= command(scheduleItem.name.c_str(), scheduleItem.cmd.c_str(), compute(scheduleItem.value).c_str());
         }
     }
     return cmd_ok;
@@ -396,7 +392,7 @@ void WebSchedulerService::condition() {
 #endif
             if (!match.empty() && match[0] == '1') {
                 if (scheduleItem.retry_cnt == 0xFF) { // default unswitched
-                    scheduleItem.retry_cnt = command(scheduleItem.cmd.c_str(), compute(scheduleItem.value).c_str()) ? 1 : 0xFF;
+                    scheduleItem.retry_cnt = command(scheduleItem.name.c_str(), scheduleItem.cmd.c_str(), compute(scheduleItem.value).c_str()) ? 1 : 0xFF;
                 }
             } else if (scheduleItem.retry_cnt == 1) {
                 scheduleItem.retry_cnt = 0xFF;
@@ -429,7 +425,7 @@ void WebSchedulerService::loop() {
     if (last_tm_min == -2) {
         for (ScheduleItem & scheduleItem : *scheduleItems_) {
             if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min == 0) {
-                scheduleItem.retry_cnt = command(scheduleItem.cmd.c_str(), compute(scheduleItem.value).c_str()) ? 0xFF : 0;
+                scheduleItem.retry_cnt = command(scheduleItem.name.c_str(), scheduleItem.cmd.c_str(), compute(scheduleItem.value).c_str()) ? 0xFF : 0;
             }
         }
         last_tm_min = -1; // startup done, now use for RTC
@@ -442,12 +438,13 @@ void WebSchedulerService::loop() {
             // retry startup commands not yet executed
             if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min == 0
                 && scheduleItem.retry_cnt < MAX_STARTUP_RETRIES) {
-                scheduleItem.retry_cnt = command(scheduleItem.cmd.c_str(), scheduleItem.value.c_str()) ? 0xFF : scheduleItem.retry_cnt + 1;
+                scheduleItem.retry_cnt =
+                    command(scheduleItem.name.c_str(), scheduleItem.cmd.c_str(), scheduleItem.value.c_str()) ? 0xFF : scheduleItem.retry_cnt + 1;
             }
             // scheduled timer commands
             if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min > 0
                 && (uptime_min % scheduleItem.elapsed_min == 0)) {
-                command(scheduleItem.cmd.c_str(), compute(scheduleItem.value).c_str());
+                command(scheduleItem.name.c_str(), scheduleItem.cmd.c_str(), compute(scheduleItem.value).c_str());
             }
         }
         last_uptime_min = uptime_min;
@@ -464,7 +461,7 @@ void WebSchedulerService::loop() {
         for (const ScheduleItem & scheduleItem : *scheduleItems_) {
             uint8_t dow = scheduleItem.flags & SCHEDULEFLAG_SCHEDULE_TIMER ? 0 : scheduleItem.flags;
             if (scheduleItem.active && (real_dow & dow) && real_min == scheduleItem.elapsed_min) {
-                command(scheduleItem.cmd.c_str(), compute(scheduleItem.value).c_str());
+                command(scheduleItem.name.c_str(), scheduleItem.cmd.c_str(), compute(scheduleItem.value).c_str());
             }
         }
         last_tm_min = tm->tm_min;
@@ -502,41 +499,41 @@ void WebSchedulerService::test() {
 
     // should output 'locale is en'
     test_value = "\"locale is \"system/settings/locale";
-    command(test_cmd.c_str(), compute(test_value).c_str());
+    command("test", test_cmd.c_str(), compute(test_value).c_str());
 
     // test with negative value
     // should output 'rssi is -23'
     test_value = "\"rssi is \"0+system/network/rssi";
-    command(test_cmd.c_str(), compute(test_value).c_str());
+    command("test", test_cmd.c_str(), compute(test_value).c_str());
 
     // should output 'rssi is -23 dbm'
     test_value = "\"rssi is \"(system/network/rssi)\" dBm\"";
-    command(test_cmd.c_str(), compute(test_value).c_str());
+    command("test", test_cmd.c_str(), compute(test_value).c_str());
 
     test_value = "(custom/seltemp/value)";
-    command(test_cmd.c_str(), compute(test_value).c_str());
+    command("test", test_cmd.c_str(), compute(test_value).c_str());
 
     test_value = "\"seltemp=\"(custom/seltemp/value)";
-    command(test_cmd.c_str(), compute(test_value).c_str());
+    command("test", test_cmd.c_str(), compute(test_value).c_str());
 
     test_value = "(custom/seltemp)";
-    command(test_cmd.c_str(), compute(test_value).c_str());
+    command("test", test_cmd.c_str(), compute(test_value).c_str());
 
     test_value = "(boiler/outdoortemp)";
-    command(test_cmd.c_str(), compute(test_value).c_str());
+    command("test", test_cmd.c_str(), compute(test_value).c_str());
 
     test_value = "boiler/flowtempoffset";
-    command(test_cmd.c_str(), compute(test_value).c_str());
+    command("test", test_cmd.c_str(), compute(test_value).c_str());
 
     test_value = "(boiler/flowtempoffset/value)";
-    command(test_cmd.c_str(), compute(test_value).c_str());
+    command("test", test_cmd.c_str(), compute(test_value).c_str());
 
     test_value = "(boiler/storagetemp1/value)";
-    command(test_cmd.c_str(), compute(test_value).c_str());
+    command("test", test_cmd.c_str(), compute(test_value).c_str());
 
     // (14 - 40) * 2.8 + 5 = -67.8
     test_value = "(custom/seltemp - boiler/flowtempoffset) * 2.8 + 5";
-    command(test_cmd.c_str(), compute(test_value).c_str());
+    command("test", test_cmd.c_str(), compute(test_value).c_str());
 }
 #endif
 

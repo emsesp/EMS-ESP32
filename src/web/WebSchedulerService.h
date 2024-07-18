@@ -73,7 +73,7 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
 #ifndef EMSESP_STANDALONE
   private:
 #endif
-    bool command(const char * cmd, const char * data);
+    bool command(const char * name, const char * cmd, const char * data);
     void condition();
 
     HttpEndpoint<WebScheduler>  _httpEndpoint;
