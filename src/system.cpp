@@ -668,7 +668,6 @@ void System::send_info_mqtt() {
 }
 
 // create the json for heartbeat
-// TODO camelCase
 void System::heartbeat_json(JsonObject output) {
     switch (EMSESP::bus_status()) {
     case EMSESP::BUS_STATUS_OFFLINE:
@@ -1414,7 +1413,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
 #endif
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
         if (WiFi.status() == WL_CONNECTED && !settings.bssid.isEmpty()) {
-            node["BSSID"] = "set"; // TODO why is this not the actual value?
+            node["BSSID"] = "set"; // TODO why is this not the actual value??
         }
         node["TxPower setting"]  = settings.tx_power;
         node["static ip config"] = settings.staticIPConfig;
