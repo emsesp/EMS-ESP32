@@ -124,15 +124,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
 
     // call command
     uint8_t return_code = Command::process(request->url().c_str(), is_admin, input, output);
-
     if (return_code != CommandRet::OK) {
-        char error[100];
-        if (output.size()) {
-            snprintf(error, sizeof(error), "API call failed. %s (%s)", (const char *)output["message"], Command::return_code_string(return_code).c_str());
-        } else {
-            snprintf(error, sizeof(error), "API call failed (%s)", Command::return_code_string(return_code).c_str());
-        }
-        emsesp::EMSESP::logger().err(error);
         api_fails_++;
     }
 
@@ -142,10 +134,10 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     if (api_data) {
         request->send(200, "text/plain; charset=utf-8", api_data);
 #if defined(EMSESP_STANDALONE)
+        Serial.println();
         Serial.printf("%sweb output: %s[%s] %s(200)%s ", COLOR_WHITE, COLOR_BRIGHT_CYAN, request->url().c_str(), COLOR_BRIGHT_GREEN, COLOR_MAGENTA);
         serializeJson(output, Serial);
         Serial.println(COLOR_RESET);
-        Serial.println();
 #endif
         api_count_++;
         delete response;
@@ -166,11 +158,11 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     api_count_++;
 
 #if defined(EMSESP_STANDALONE)
+    Serial.println();
     Serial.printf("%sweb output: %s[%s]", COLOR_WHITE, COLOR_BRIGHT_CYAN, request->url().c_str());
     Serial.printf(" %s(%d)%s ", ret_codes[return_code] == 200 ? COLOR_BRIGHT_GREEN : COLOR_BRIGHT_RED, ret_codes[return_code], COLOR_YELLOW);
     serializeJson(output, Serial);
     Serial.println(COLOR_RESET);
-    Serial.println();
 #endif
 }
 

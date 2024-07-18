@@ -579,7 +579,7 @@ void Mqtt::ha_status() {
     }
 #endif
 
-    // TODO camelCase
+    // These come from the heartbeat MQTT topic
     publish_system_ha_sensor_config(DeviceValueType::STRING, "EMS Bus", "bus_status", DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::STRING, "Uptime", "uptime", DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::INT8, "Uptime (sec)", "uptime_sec", DeviceValueUOM::SECONDS);
@@ -592,6 +592,9 @@ void Mqtt::ha_status() {
     publish_system_ha_sensor_config(DeviceValueType::INT8, "Tx reads", "txreads", DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::INT8, "Tx writes", "txwrites", DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::INT8, "Tx fails", "txfails", DeviceValueUOM::NONE);
+
+    // This comes from the info MQTT topic
+    publish_system_ha_sensor_config(DeviceValueType::STRING, "Version", "version", DeviceValueUOM::NONE);
 }
 
 // add sub or pub task to the queue.
@@ -980,7 +983,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             readonly_sensors = false;
             break;
         default:
-            // plain old sensor, and make read-only
+            // plain old sensor, and make it read-only
             break;
         }
     }
@@ -1083,12 +1086,18 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     free(F_name); // very important!
     doc["name"] = ha_name;
 
-
     // not needed for commands
     if (type != DeviceValueType::CMD) {
         // state topic, except for commands
         char stat_t[MQTT_TOPIC_MAX_SIZE];
-        snprintf(stat_t, sizeof(stat_t), "%s/%s", Mqtt::base().c_str(), tag_to_topic(device_type, tag).c_str());
+
+        // This is where we determine which MQTT topic to pull the data from
+        // There is one exception for DeviceType::SYSTEM, which uses the heartbeat topic, and when fetching the version we want to take this from the info topic instead
+        if ((device_type == EMSdevice::DeviceType::SYSTEM) && (strncmp(entity, "version", 7) == 0)) {
+            snprintf(stat_t, sizeof(stat_t), "%s/%s", Mqtt::base().c_str(), F_(info));
+        } else {
+            snprintf(stat_t, sizeof(stat_t), "%s/%s", Mqtt::base().c_str(), tag_to_topic(device_type, tag).c_str());
+        }
         doc["stat_t"] = stat_t;
 
         // value template
