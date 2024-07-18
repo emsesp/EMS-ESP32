@@ -25,7 +25,7 @@ namespace emsesp {
 class Roomctrl {
   public:
     // Product-Id of the remote
-    enum RemoteType : uint8_t { NONE = 0, RC20 = 113, FB10 = 109, RC100H = 200, SENSOR = 0x40, RC200 = 157, RC100 = 165 };
+    enum RemoteType : uint8_t { NONE = 0, RC20 = 113, FB10 = 109, RC100H = 200, SENSOR = 0x40, RC200 = 157, RC100 = 165, RT800 = 3 };
 
     static void send(uint8_t addr);
     static void check(uint8_t addr, const uint8_t * data, const uint8_t length);
