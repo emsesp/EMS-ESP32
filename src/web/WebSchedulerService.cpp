@@ -18,6 +18,7 @@
 
 #include "emsesp.h"
 #include "WebSchedulerService.h"
+#include <HTTPClient.h>
 
 namespace emsesp {
 
@@ -330,6 +331,33 @@ bool WebSchedulerService::has_commands() {
 
 // execute scheduled command
 bool WebSchedulerService::command(const char * name, const char * cmd, const char * data) {
+    // check http commands. e.g.
+    // tasmota(get): http://<tasmotsIP>/cm?cmnd=power%20ON
+    // shelly(get): http://<shellyIP>/relais/0?turn=on
+    const char * c = strchr(cmd, '{');
+    if (c) { // parse json
+        JsonDocument doc;
+        int          httpResult = 0;
+        if (DeserializationError::Ok == deserializeJson(doc, c)) {
+            HTTPClient http;
+            String     url = doc["url"];
+            if (http.begin(url)) {
+                for (JsonPair p : doc["header"].as<JsonObject>()) {
+                    http.addHeader(p.key().c_str(), p.value().as<String>().c_str());
+                }
+                String value = doc["value"] | "";
+                if (value.length()) {
+                    httpResult = http.POST(value);
+                } else if (data && data[0] != '\0') { // post
+                    httpResult = http.POST(String(data));
+                } else {
+                    httpResult = http.GET();
+                }
+                http.end();
+            }
+        }
+        return httpResult > 0;
+    }
     JsonDocument doc_input;
     JsonObject   input = doc_input.to<JsonObject>();
     if (strlen(data)) { // empty data queries a value
@@ -390,12 +418,12 @@ void WebSchedulerService::condition() {
 #ifdef EMESESP_DEBUG
             // emsesp::EMSESP::logger().debug("condition match: %s", match.c_str());
 #endif
-            if (!match.empty() && match[0] == '1') {
-                if (scheduleItem.retry_cnt == 0xFF) { // default unswitched
-                    scheduleItem.retry_cnt = command(scheduleItem.name.c_str(), scheduleItem.cmd.c_str(), compute(scheduleItem.value).c_str()) ? 1 : 0xFF;
-                }
-            } else if (scheduleItem.retry_cnt == 1) {
+            if (match.length() == 1 && match[0] == '1' && scheduleItem.retry_cnt == 0xFF) {
+                scheduleItem.retry_cnt = command(scheduleItem.name.c_str(), scheduleItem.cmd.c_str(), compute(scheduleItem.value).c_str()) ? 1 : 0xFF;
+            } else if (match.length() == 1 && match[0] == '0' && scheduleItem.retry_cnt == 1) {
                 scheduleItem.retry_cnt = 0xFF;
+            } else if (match.length() != 1) { // the match is not boolean
+                emsesp::EMSESP::logger().debug("condition result: %s", match.c_str());
             }
         }
     }
