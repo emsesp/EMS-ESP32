@@ -329,9 +329,7 @@ class AsyncWebServerRequest {
     AsyncResponseStream *    beginResponseStream(const String & contentType, size_t bufferSize = 1460);
     AsyncWebServerResponse * beginResponse_P(int code, const String & contentType, const uint8_t * content, size_t len, AwsTemplateProcessor callback = nullptr);
     AsyncWebServerResponse * beginResponse_P(int code, const String & contentType, PGM_P content, AwsTemplateProcessor callback = nullptr);
-
-    // added by proddy for EMS-ESP
-    AsyncWebServerResponse * beginResponse(const String & contentType, const uint8_t * content, size_t len);
+    AsyncWebServerResponse * beginResponse(const String & contentType, const uint8_t * content, size_t len); // added by proddy for EMS-ESP
 
     size_t headers() const;                                   // get header count
     bool   hasHeader(const String & name) const;              // check if header exists

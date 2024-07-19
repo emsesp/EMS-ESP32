@@ -580,6 +580,7 @@ void Mqtt::ha_status() {
 #endif
 
     // These come from the heartbeat MQTT topic
+    // we don't use camelCase as it would change the HA entity_id and impact historic data
     publish_system_ha_sensor_config(DeviceValueType::STRING, "EMS Bus", "bus_status", DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::STRING, "Uptime", "uptime", DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::INT8, "Uptime (sec)", "uptime_sec", DeviceValueUOM::SECONDS);
