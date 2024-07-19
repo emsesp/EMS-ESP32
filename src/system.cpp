@@ -1359,6 +1359,7 @@ bool System::get_value_info(JsonObject root, const char * command) {
 
 // export status information including the device information
 // http://ems-esp/api/system/info
+// TODO camelCase - #1860
 bool System::command_info(const char * value, const int8_t id, JsonObject output) {
     JsonObject node;
 
@@ -1413,7 +1414,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
 #endif
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
         if (WiFi.status() == WL_CONNECTED && !settings.bssid.isEmpty()) {
-            node["BSSID"] = "set"; // TODO why is this not the actual value??
+            node["BSSID"] = "set"; // we don't disclose the name
         }
         node["TxPower setting"]  = settings.tx_power;
         node["static ip config"] = settings.staticIPConfig;
@@ -1591,6 +1592,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
                     obj["name"]       = emsdevice->name();             // custom name
                     obj["device id"]  = Helpers::hextoa(emsdevice->device_id());
                     obj["product id"] = emsdevice->product_id();
+                    obj["brand"]      = emsdevice->brand_to_char();
                     obj["version"]    = emsdevice->version();
                     obj["entities"]   = emsdevice->count_entities();
                     char result[500];
