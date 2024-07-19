@@ -182,8 +182,7 @@ MAKE_NOTRANSLATION(rc100, "RC100")
 MAKE_NOTRANSLATION(rc100h, "RC100H")
 MAKE_NOTRANSLATION(tc100, "TC100")
 MAKE_NOTRANSLATION(rc120rf, "RC120RF")
-MAKE_NOTRANSLATION(rc220, "RC220")
-MAKE_NOTRANSLATION(rt800, "RT800")
+MAKE_NOTRANSLATION(rc220, "RC220/RT800")
 MAKE_NOTRANSLATION(single, "single")
 MAKE_NOTRANSLATION(dash, "-")
 MAKE_NOTRANSLATION(BLANK, "")
@@ -347,7 +346,7 @@ MAKE_ENUM(enum_j_control, FL_(off), FL_(fb10), FL_(fb100))
 MAKE_ENUM(enum_roomsensor, FL_(extern), FL_(intern), FL_(auto))
 MAKE_ENUM(enum_roominfluence, FL_(off), FL_(intern), FL_(extern), FL_(auto))
 MAKE_ENUM(enum_control1, FL_(rc310), FL_(rc200), FL_(rc100), FL_(rc100h), FL_(tc100))
-MAKE_ENUM(enum_control2, FL_(off), FL_(dash), FL_(rc100), FL_(rc100h), FL_(dash), FL_(rc120rf), FL_(rt800), FL_(single)) // BC400
+MAKE_ENUM(enum_control2, FL_(off), FL_(dash), FL_(rc100), FL_(rc100h), FL_(dash), FL_(rc120rf), FL_(rc220), FL_(single)) // BC400
 
 MAKE_ENUM(enum_switchmode, FL_(off), FL_(eco), FL_(comfort), FL_(heat))
 
