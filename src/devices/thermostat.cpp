@@ -1138,7 +1138,7 @@ void Thermostat::process_RC300Summer(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hc->fastHeatup, 10);
 }
 
-// types 0x471 ff
+// types 0x471 ff summer2_typeids
 // (0x473), data: 00 11 04 01 01 1C 08 04
 void Thermostat::process_RC300Summer2(std::shared_ptr<const Telegram> telegram) {
     auto hc = heating_circuit(telegram);
@@ -1156,6 +1156,9 @@ void Thermostat::process_RC300Summer2(std::shared_ptr<const Telegram> telegram) 
     has_update(telegram, hc->heatondelay, 2);
     has_update(telegram, hc->heatoffdelay, 3);
     has_update(telegram, hc->instantstart, 4);
+    has_update(telegram, hc->coolstart, 5);
+    has_update(telegram, hc->coolondelay, 6);
+    has_update(telegram, hc->cooloffdelay, 7);
 }
 
 // types 0x29B ff
@@ -2245,6 +2248,35 @@ bool Thermostat::set_cooling(const char * value, const int8_t id) {
         return false;
     }
     write_command(set_typeids[hc->hc()], 28, b ? 0x01 : 0x00, set_typeids[hc->hc()]);
+    return true;
+}
+
+// set cooling delays
+bool Thermostat::set_coolondelay(const char * value, const int8_t id) {
+    auto hc = heating_circuit(id);
+    if (hc == nullptr) {
+        return false;
+    }
+
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+    write_command(summer2_typeids[hc->hc()], 6, v, summer2_typeids[hc->hc()]);
+    return true;
+}
+
+bool Thermostat::set_cooloffdelay(const char * value, const int8_t id) {
+    auto hc = heating_circuit(id);
+    if (hc == nullptr) {
+        return false;
+    }
+
+    int v;
+    if (!Helpers::value2number(value, v)) {
+        return false;
+    }
+    write_command(summer2_typeids[hc->hc()], 7, v, summer2_typeids[hc->hc()]);
     return true;
 }
 
@@ -3564,6 +3596,12 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             validate_typeid = set_typeid;
             factor          = 1;
             break;
+        case HeatingCircuit::Mode::COOLSTART:
+            offset          = 5;
+            set_typeid      = summer2_typeids[hc->hc()];
+            validate_typeid = set_typeid;
+            factor          = 1;
+            break;
         case HeatingCircuit::Mode::MANUAL:
             if (model == EMSdevice::EMS_DEVICE_FLAG_CR120) {
                 offset = 22; // manual offset CR120
@@ -4470,6 +4508,9 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->instantstart, DeviceValueType::UINT8, FL_(instantstart), DeviceValueUOM::K, MAKE_CF_CB(set_instantstart), 1, 10);
         register_device_value(tag, &hc->boost, DeviceValueType::BOOL, FL_(boost), DeviceValueUOM::NONE, MAKE_CF_CB(set_boost));
         register_device_value(tag, &hc->boosttime, DeviceValueType::UINT8, FL_(boosttime), DeviceValueUOM::HOURS, MAKE_CF_CB(set_boosttime));
+        register_device_value(tag, &hc->coolstart, DeviceValueType::UINT8, FL_(coolstart), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_coolstart), 20, 35);
+        register_device_value(tag, &hc->coolondelay, DeviceValueType::UINT8, FL_(coolondelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_coolondelay), 1, 48);
+        register_device_value(tag, &hc->cooloffdelay, DeviceValueType::UINT8, FL_(cooloffdelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_cooloffdelay), 1, 48);
 
         break;
     case EMSdevice::EMS_DEVICE_FLAG_CRF:
