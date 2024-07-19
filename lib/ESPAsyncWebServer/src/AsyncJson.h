@@ -41,7 +41,7 @@ class ChunkPrint : public Print {
     }
 };
 
-// added msgPack by Proddy
+// added msgPack by proddy for EMS-ESP
 class AsyncJsonResponse : public AsyncAbstractResponse {
   protected:
     JsonDocument _jsonBuffer;
