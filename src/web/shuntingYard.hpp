@@ -618,12 +618,25 @@ std::string compute(const std::string & expr) {
                 for (JsonPair p : doc["header"].as<JsonObject>()) {
                     http.addHeader(p.key().c_str(), p.value().as<std::string>().c_str());
                 }
-                String data = doc["value"] | "";
-                if (data.length()) {
-                    httpResult = http.POST(data);
+                String value  = doc["value"] | "";
+                String method = doc["method"] | "GET"; // default GET
+
+                // if there is data, force a POST
+                if (value.length()) {
+                    if (value.startsWith("{")) {
+                        http.addHeader("Content-Type", "application/json"); // auto-set to JSON
+                    }
+                    httpResult = http.POST(value);
                 } else {
-                    httpResult = http.GET();
+                    // no value, but check if it still a POST request
+                    if (method == "POST") {
+                        httpResult = http.POST(value);
+                    } else {
+                        httpResult = http.GET(); // normal GET
+                    }
                 }
+                http.end();
+
                 if (httpResult > 0) {
                     std::string result = emsesp::Helpers::toLower(http.getString().c_str());
                     String      key    = doc["key"] | "";
@@ -633,7 +646,6 @@ std::string compute(const std::string & expr) {
                     }
                     expr_new.replace(f, e - f, result.c_str());
                 }
-                http.end();
             }
         }
         f = expr_new.find_first_of("{", e);
