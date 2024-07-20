@@ -259,7 +259,7 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
 
                 // write debug
                 if (return_code != CommandRet::OK) {
-                    EMSESP::logger().err("Write command failed %s (%s)", (const char *)output["message"], Command::return_code_string(return_code).c_str());
+                    EMSESP::logger().err("Write command failed %s (%s)", (const char *)output["message"], Command::return_code_string(return_code));
                 } else {
 #if defined(EMSESP_DEBUG)
                     EMSESP::logger().debug("Write command successful");
@@ -292,7 +292,7 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
                 return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<float>(), 1), true, id, output);
             }
             if (return_code != CommandRet::OK) {
-                EMSESP::logger().err("Write command failed %s (%s)", (const char *)output["message"], Command::return_code_string(return_code).c_str());
+                EMSESP::logger().err("Write command failed %s (%s)", (const char *)output["message"], Command::return_code_string(return_code));
             } else {
 #if defined(EMSESP_DEBUG)
                 EMSESP::logger().debug("Write command successful");

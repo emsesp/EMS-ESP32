@@ -38,6 +38,7 @@ void WebSchedulerService::begin() {
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
     snprintf(topic, sizeof(topic), "%s/#", F_(scheduler));
     Mqtt::subscribe(EMSdevice::DeviceType::SCHEDULER, topic, nullptr); // use empty function callback
+    xTaskCreate((TaskFunction_t)scheduler_task, "scheduler_task", 4096, NULL, 3, NULL);
 }
 
 // this creates the scheduler file, saving it to the FS
@@ -330,65 +331,60 @@ bool WebSchedulerService::has_commands() {
 }
 
 // execute scheduled command
-bool WebSchedulerService::command(const char * name, const char * cmd, const char * data) {
+bool WebSchedulerService::command(const char * name, const std::string & command, const std::string & data) {
+    std::string cmd = Helpers::toLower(command);
+
     // check http commands. e.g.
     // tasmota(get): http://<tasmotsIP>/cm?cmnd=power%20ON
     // shelly(get): http://<shellyIP>/relais/0?turn=on
-    const char * c = strchr(cmd, '{');
-    if (c) {
-        // parse json
-        JsonDocument doc;
-        int          httpResult = 0;
-        if (DeserializationError::Ok == deserializeJson(doc, c)) {
-            HTTPClient http;
-            String     url = doc["url"];
-            if (http.begin(url)) {
-                // It's an HTTP call
+    // parse json
+    JsonDocument doc;
+    if (DeserializationError::Ok == deserializeJson(doc, cmd)) {
+        HTTPClient http;
+        int        httpResult = 0;
+        String     url        = doc["url"];
+        if (http.begin(url)) {
+            // It's an HTTP call
 
-                // add any given headers
-                for (JsonPair p : doc["header"].as<JsonObject>()) {
-                    http.addHeader(p.key().c_str(), p.value().as<String>().c_str());
-                }
-                String value  = doc["value"] | data;   // extract value if its in the command, or take the data
-                String method = doc["method"] | "GET"; // default GET
-
-                // if there is data, force a POST
-                if (value.length()) {
-                    if (value.startsWith("{")) {
-                        http.addHeader("Content-Type", "application/json"); // auto-set to JSON
-                    }
-                    httpResult = http.POST(value);
-                } else {
-                    // no value, but check if it still a POST request
-                    if (method == "POST") {
-                        httpResult = http.POST(value);
-                    } else {
-                        httpResult = http.GET(); // normal GET
-                    }
-                }
-
-                http.end();
-
-                // check HTTP return code
-                if (httpResult != 200) {
-                    char error[100];
-                    snprintf(error, sizeof(error), "Schedule %s: URL command failed with http code %d", name, httpResult);
-                    emsesp::EMSESP::logger().warning(error);
-                    return false;
-                }
-#if defined(EMSESP_DEBUG)
-                char msg[100];
-                snprintf(msg, sizeof(msg), "Schedule %s: URL command successful with http code %d", name, httpResult);
-                emsesp::EMSESP::logger().debug(msg);
-#endif
-                return true;
+            // add any given headers
+            for (JsonPair p : doc["header"].as<JsonObject>()) {
+                http.addHeader(p.key().c_str(), p.value().as<String>().c_str());
             }
+            String value  = doc["value"] | data.c_str(); // extract value if its in the command, or take the data
+            String method = doc["method"] | "GET";       // default GET
+
+            // if there is data, force a POST
+            if (value.length() || method == "post") { // we have all lowercase
+                if (value.startsWith("{")) {
+                    http.addHeader("Content-Type", "application/json"); // auto-set to JSON
+                }
+                httpResult = http.POST(value);
+            } else {
+                httpResult = http.GET(); // normal GET
+            }
+
+            http.end();
+
+            // check HTTP return code
+            if (httpResult != 200) {
+                char error[100];
+                snprintf(error, sizeof(error), "Schedule %s: URL command failed with http code %d", name, httpResult);
+                emsesp::EMSESP::logger().warning(error);
+                return false;
+            }
+#if defined(EMSESP_DEBUG)
+            char msg[100];
+            snprintf(msg, sizeof(msg), "Schedule %s: URL command successful with http code %d", name, httpResult);
+            emsesp::EMSESP::logger().debug(msg);
+#endif
+            return true;
         }
+        // we can add other json tests here
     }
 
-    JsonDocument doc_input;
-    JsonObject   input = doc_input.to<JsonObject>();
-    if (strlen(data)) { // empty data queries a value
+    doc.clear();
+    JsonObject input = doc.to<JsonObject>();
+    if (!data.empty()) { // empty data queries a value
         input["data"] = data;
     }
 
@@ -397,15 +393,15 @@ bool WebSchedulerService::command(const char * name, const char * cmd, const cha
 
     // prefix "api/" to command string
     char command_str[COMMAND_MAX_LENGTH];
-    snprintf(command_str, sizeof(command_str), "/api/%s", cmd);
+    snprintf(command_str, sizeof(command_str), "/api/%s", cmd.c_str());
 
     uint8_t return_code = Command::process(command_str, true, input, output); // admin set
 
     if (return_code == CommandRet::OK) {
 #if defined(EMSESP_DEBUG)
-        EMSESP::logger().debug("Schedule command '%s' with data '%s' was successful", cmd, data);
+        EMSESP::logger().debug("Schedule command '%s' with data '%s' was successful", cmd.c_str(), data.c_str());
 #endif
-        if (strlen(data) == 0 && output.size()) {
+        if (data.empty() && output.size()) {
             Mqtt::queue_publish("response", output);
         }
         return true;
@@ -416,7 +412,7 @@ bool WebSchedulerService::command(const char * name, const char * cmd, const cha
         // check for empty name
         snprintf(error, sizeof(error), "Schedule %s: %s", name ? name : "", (const char *)output["message"]); // use error message if we have it
     } else {
-        snprintf(error, sizeof(error), "Schedule %s: command %s failed with error %s", name, cmd, Command::return_code_string(return_code).c_str());
+        snprintf(error, sizeof(error), "Schedule %s: command %s failed with error %s", name, cmd.c_str(), Command::return_code_string(return_code));
     }
 
     emsesp::EMSESP::logger().warning(error);
@@ -426,17 +422,8 @@ bool WebSchedulerService::command(const char * name, const char * cmd, const cha
 #include "shuntingYard.hpp"
 
 bool WebSchedulerService::onChange(const char * cmd) {
-    bool cmd_ok = false;
-    for (const ScheduleItem & scheduleItem : *scheduleItems_) {
-        if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_ONCHANGE
-            && Helpers::toLower(scheduleItem.time).find(Helpers::toLower(cmd)) != std::string::npos) {
-#ifdef EMESESP_DEBUG
-            // emsesp::EMSESP::logger().debug(scheduleItem.cmd.c_str());
-#endif
-            cmd_ok |= command(scheduleItem.name.c_str(), scheduleItem.cmd.c_str(), compute(scheduleItem.value).c_str());
-        }
-    }
-    return cmd_ok;
+    cmd_changed_.push_back(Helpers::toLower(cmd));
+    return true;
 }
 
 void WebSchedulerService::condition() {
@@ -447,7 +434,7 @@ void WebSchedulerService::condition() {
             // emsesp::EMSESP::logger().debug("condition match: %s", match.c_str());
 #endif
             if (match.length() == 1 && match[0] == '1' && scheduleItem.retry_cnt == 0xFF) {
-                scheduleItem.retry_cnt = command(scheduleItem.name.c_str(), scheduleItem.cmd.c_str(), compute(scheduleItem.value).c_str()) ? 1 : 0xFF;
+                scheduleItem.retry_cnt = command(scheduleItem.name.c_str(), scheduleItem.cmd, compute(scheduleItem.value)) ? 1 : 0xFF;
             } else if (match.length() == 1 && match[0] == '0' && scheduleItem.retry_cnt == 1) {
                 scheduleItem.retry_cnt = 0xFF;
             } else if (match.length() != 1) { // the match is not boolean
@@ -458,7 +445,6 @@ void WebSchedulerService::condition() {
 }
 
 // process any scheduled jobs
-// checks on the minute and at startup
 void WebSchedulerService::loop() {
     // initialize static value on startup
     static int8_t   last_tm_min     = -2; // invalid value also used for startup commands
@@ -468,6 +454,17 @@ void WebSchedulerService::loop() {
     // get list of scheduler events and exit if it's empty
     if (scheduleItems_->size() == 0) {
         return;
+    }
+
+    // check if we have onChange events
+    while (!cmd_changed_.empty()) {
+        for (const ScheduleItem & scheduleItem : *scheduleItems_) {
+            if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_ONCHANGE
+                && Helpers::toLower(scheduleItem.time).find(cmd_changed_.front()) != std::string::npos) {
+                command(scheduleItem.name.c_str(), scheduleItem.cmd, compute(scheduleItem.value));
+            }
+        }
+        cmd_changed_.pop_front();
     }
 
     // check conditions every 10 seconds
@@ -481,7 +478,7 @@ void WebSchedulerService::loop() {
     if (last_tm_min == -2) {
         for (ScheduleItem & scheduleItem : *scheduleItems_) {
             if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min == 0) {
-                scheduleItem.retry_cnt = command(scheduleItem.name.c_str(), scheduleItem.cmd.c_str(), compute(scheduleItem.value).c_str()) ? 0xFF : 0;
+                scheduleItem.retry_cnt = command(scheduleItem.name.c_str(), scheduleItem.cmd, compute(scheduleItem.value)) ? 0xFF : 0;
             }
         }
         last_tm_min = -1; // startup done, now use for RTC
@@ -494,13 +491,12 @@ void WebSchedulerService::loop() {
             // retry startup commands not yet executed
             if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min == 0
                 && scheduleItem.retry_cnt < MAX_STARTUP_RETRIES) {
-                scheduleItem.retry_cnt =
-                    command(scheduleItem.name.c_str(), scheduleItem.cmd.c_str(), scheduleItem.value.c_str()) ? 0xFF : scheduleItem.retry_cnt + 1;
+                scheduleItem.retry_cnt = command(scheduleItem.name.c_str(), scheduleItem.cmd, scheduleItem.value) ? 0xFF : scheduleItem.retry_cnt + 1;
             }
             // scheduled timer commands
             if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER && scheduleItem.elapsed_min > 0
                 && (uptime_min % scheduleItem.elapsed_min == 0)) {
-                command(scheduleItem.name.c_str(), scheduleItem.cmd.c_str(), compute(scheduleItem.value).c_str());
+                command(scheduleItem.name.c_str(), scheduleItem.cmd, compute(scheduleItem.value));
             }
         }
         last_uptime_min = uptime_min;
@@ -517,11 +513,21 @@ void WebSchedulerService::loop() {
         for (const ScheduleItem & scheduleItem : *scheduleItems_) {
             uint8_t dow = scheduleItem.flags & SCHEDULEFLAG_SCHEDULE_TIMER ? 0 : scheduleItem.flags;
             if (scheduleItem.active && (real_dow & dow) && real_min == scheduleItem.elapsed_min) {
-                command(scheduleItem.name.c_str(), scheduleItem.cmd.c_str(), compute(scheduleItem.value).c_str());
+                command(scheduleItem.name.c_str(), scheduleItem.cmd, compute(scheduleItem.value));
             }
         }
         last_tm_min = tm->tm_min;
     }
+}
+
+void WebSchedulerService::scheduler_task(void * pvParameters) {
+    while (1) {
+        delay(100); // no need to hurry
+        if (!EMSESP::system_.upload_status()) {
+            EMSESP::webSchedulerService.loop();
+        }
+    }
+    vTaskDelete(NULL);
 }
 
 // hard coded tests

@@ -204,7 +204,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     return return_code;
 }
 
-std::string Command::return_code_string(const uint8_t return_code) {
+const char * Command::return_code_string(const uint8_t return_code) {
     switch (return_code) {
     case CommandRet::ERROR:
         return "Error";
@@ -380,9 +380,9 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     if (return_code != CommandRet::OK) {
         char error[100];
         if (single_command) {
-            snprintf(error, sizeof(error), "Command '%s' failed (%s)", cmd, FL_(cmdRet)[return_code]);
+            snprintf(error, sizeof(error), "Command '%s' failed (%s)", cmd, return_code_string(return_code));
         } else {
-            snprintf(error, sizeof(error), "Command '%s: %s' failed (%s)", cmd, value, FL_(cmdRet)[return_code]);
+            snprintf(error, sizeof(error), "Command '%s: %s' failed (%s)", cmd, value, return_code_string(return_code));
         }
         output.clear();
         output["message"] = error;

@@ -440,9 +440,9 @@ ModbusMessage Modbus::handleWrite(const ModbusMessage & request) {
                      sizeof(error),
                      "Modbus write command failed with error: %s (%s)",
                      (const char *)output["message"],
-                     Command::return_code_string(return_code).c_str());
+                     Command::return_code_string(return_code));
         } else {
-            snprintf(error, sizeof(error), "Modbus write command failed with error code (%s)", Command::return_code_string(return_code).c_str());
+            snprintf(error, sizeof(error), "Modbus write command failed with error code (%s)", Command::return_code_string(return_code));
         }
         LOG_ERROR(error);
         response.setError(request.getServerID(), request.getFunctionCode(), ILLEGAL_DATA_VALUE);

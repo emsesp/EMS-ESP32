@@ -73,7 +73,9 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
 #ifndef EMSESP_STANDALONE
   private:
 #endif
-    bool command(const char * name, const char * cmd, const char * data);
+    static void scheduler_task(void * pvParameters);
+
+    bool command(const char * name, const std::string & cmd, const std::string & data);
     void condition();
 
     HttpEndpoint<WebScheduler>  _httpEndpoint;
@@ -81,6 +83,7 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
 
     std::list<ScheduleItem> * scheduleItems_; // pointer to the list of schedule events
     bool                      ha_registered_ = false;
+    std::deque<std::string>   cmd_changed_;
 };
 
 } // namespace emsesp

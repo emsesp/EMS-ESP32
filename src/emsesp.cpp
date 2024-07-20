@@ -1719,7 +1719,6 @@ void EMSESP::loop() {
         analogsensor_.loop();       // read analog sensor values
         publish_all_loop();         // with HA messages in parts to avoid flooding the mqtt queue
         mqtt_.loop();               // sends out anything in the MQTT queue
-        webSchedulerService.loop(); // handle any scheduled jobs
         webModulesService.loop();   // loop through the external library modules
 
         // force a query on the EMS devices to fetch latest data at a set interval (1 min)
