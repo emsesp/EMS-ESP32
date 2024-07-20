@@ -57,8 +57,10 @@ const SensorsAnalogDialog = ({
     }
   }, [open, selectedItem]);
 
-  const close = () => {
-    onClose();
+  const handleClose = (event: {}, reason: 'backdropClick' | 'escapeKeyDown') => {
+    if (reason !== 'backdropClick') {
+      onClose();
+    }
   };
 
   const save = async () => {
@@ -77,7 +79,7 @@ const SensorsAnalogDialog = ({
   };
 
   return (
-    <Dialog sx={dialogStyle} open={open} onClose={close}>
+    <Dialog sx={dialogStyle} open={open} onClose={handleClose}>
       <DialogTitle>
         {creating ? LL.ADD(1) + ' ' + LL.NEW(0) : LL.EDIT()}&nbsp;
         {LL.ANALOG_SENSOR(0)}
@@ -318,7 +320,7 @@ const SensorsAnalogDialog = ({
         <Button
           startIcon={<CancelIcon />}
           variant="outlined"
-          onClick={close}
+          onClick={onClose}
           color="secondary"
         >
           {LL.CANCEL()}

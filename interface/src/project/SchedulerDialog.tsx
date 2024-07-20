@@ -62,10 +62,6 @@ const SchedulerDialog = ({
     }
   }, [open, selectedItem]);
 
-  const close = () => {
-    onClose();
-  };
-
   const save = async () => {
     try {
       setFieldErrors(undefined);
@@ -151,8 +147,14 @@ const SchedulerDialog = ({
     </Typography>
   );
 
+  const handleClose = (event: {}, reason: 'backdropClick' | 'escapeKeyDown') => {
+    if (reason !== 'backdropClick') {
+      onClose();
+    }
+  };
+
   return (
-    <Dialog sx={dialogStyle} open={open} onClose={close}>
+    <Dialog sx={dialogStyle} open={open} onClose={handleClose}>
       <DialogTitle>
         {creating ? LL.ADD(1) + ' ' + LL.NEW(0) : LL.EDIT()}&nbsp;
         {LL.SCHEDULE(1)}
@@ -294,6 +296,7 @@ const SchedulerDialog = ({
                 <TextField
                   name="time"
                   label={isCondition ? 'Condition' : 'On Change Value'}
+                  multiline
                   fullWidth
                   value={
                     editItem.time == '00:00' ? (editItem.time = '') : editItem.time
@@ -327,6 +330,7 @@ const SchedulerDialog = ({
               fieldErrors={fieldErrors}
               name="cmd"
               label={LL.COMMAND(0)}
+              multiline
               fullWidth
               value={editItem.cmd}
               margin="normal"
@@ -369,7 +373,7 @@ const SchedulerDialog = ({
         <Button
           startIcon={<CancelIcon />}
           variant="outlined"
-          onClick={close}
+          onClick={onClose}
           color="secondary"
         >
           {LL.CANCEL()}
