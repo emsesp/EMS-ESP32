@@ -1489,7 +1489,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 
                 // if telegram is longer read next part with offset +25 for ems+ or +27 for ems1.0
                 // not for response to raw send commands without read_id set
-                if ((response_id_ == 0 || read_id_ > 0) && (length >= 31) && (txservice_.read_next_tx(data[3], length) == read_id_)) {
+                if ((response_id_ == 0 || read_id_ > 0) && (txservice_.read_next_tx(data[3], length) == read_id_)) {
                     read_next_ = true;
                     txservice_.send();
                 } else {

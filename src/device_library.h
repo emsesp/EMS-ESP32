@@ -122,7 +122,7 @@
 {192, DeviceType::THERMOSTAT, "FW120", DeviceFlags::EMS_DEVICE_FLAG_JUNKERS},
 
 // Thermostat remote - 0x38
-{  3, DeviceType::THERMOSTAT, "RT800", DeviceFlags::EMS_DEVICE_FLAG_RC100H},
+{  3, DeviceType::THERMOSTAT, "RT800/RC220", DeviceFlags::EMS_DEVICE_FLAG_RC100H},
 {200, DeviceType::THERMOSTAT, "RC100H", DeviceFlags::EMS_DEVICE_FLAG_RC100H},
 {249, DeviceType::THERMOSTAT, "TR120RF/CR20RF", DeviceFlags::EMS_DEVICE_FLAG_RC100H},
 

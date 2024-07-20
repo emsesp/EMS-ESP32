@@ -30,6 +30,9 @@
 - allow device name to be customized [#1174](https://github.com/emsesp/EMS-ESP32/issues/1174)
 - Modbus support by @mheyse [#1744](https://github.com/emsesp/EMS-ESP32/issues/1744)
 - System Message command [#1854](https://github.com/emsesp/EMS-ESP32/issues/1854)
+- scheduler can use web get/post for values and commands [#1806](https://github.com/emsesp/EMS-ESP32/issues/1806)
+- RT800 remote emulation [#1867](https://github.com/emsesp/EMS-ESP32/issues/1867)
+- RC310 cooling parameters [#1857](https://github.com/emsesp/EMS-ESP32/issues/1857)
 
 ## Fixed
 

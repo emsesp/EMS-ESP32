@@ -63,6 +63,22 @@ std::deque<Token> exprToTokens(const std::string & expr) {
     for (const auto * p = expr.c_str(); *p; ++p) {
         if (isblank(*p)) {
             // do nothing
+        } else if (*p == '{') { // json is stored as string including {}
+            const auto * b = p;
+            ++p;
+            uint8_t i = 1;
+            while (*p && i > 0) {
+                i += (*p == '{') ? 1 : (*p == '}') ? -1 : 0;
+                ++p;
+            }
+            if (*p) {
+                ++p;
+            }
+            const auto s = std::string(b, p);
+            tokens.push_back(Token{Token::Type::String, s, -3});
+            if (*p == '\0') {
+                --p;
+            }
         } else if (*p >= 'a' && *p <= 'z') {
             const auto * b = p;
             while ((*p >= 'a' && *p <= 'z') || (*p == '_')) {
@@ -579,7 +595,52 @@ std::string calculate(const std::string & expr) {
 
 // check for multiple instances of <cond> ? <expr1> : <expr2>
 std::string compute(const std::string & expr) {
-    auto expr_new = expr;
+    auto expr_new = emsesp::Helpers::toLower(expr);
+
+    // search json with url:
+    auto f = expr_new.find_first_of("{");
+    while (f != std::string::npos) {
+        auto e = f + 1;
+        for (uint8_t i = 1; i > 0; e++) {
+            if (e >= expr_new.length()) {
+                return "";
+            } else if (expr_new[e] == '}') {
+                i--;
+            } else if (expr_new[e] == '{') {
+                i++;
+            }
+        }
+        std::string  cmd = expr_new.substr(f, e - f).c_str();
+        JsonDocument doc;
+        if (DeserializationError::Ok == deserializeJson(doc, cmd)) {
+            HTTPClient http;
+            String     url = doc["url"];
+            if (http.begin(url)) {
+                int httpResult = 0;
+                for (JsonPair p : doc["header"].as<JsonObject>()) {
+                    http.addHeader(p.key().c_str(), p.value().as<std::string>().c_str());
+                }
+                String data = doc["value"] | "";
+                if (data.length()) {
+                    httpResult = http.POST(data);
+                } else {
+                    httpResult = http.GET();
+                }
+                if (httpResult > 0) {
+                    std::string result = emsesp::Helpers::toLower(http.getString().c_str());
+                    String      key    = doc["key"] | "";
+                    doc.clear();
+                    if (key.length() && DeserializationError::Ok == deserializeJson(doc, result)) {
+                        result = doc[key.c_str()].as<std::string>();
+                    }
+                    expr_new.replace(f, e - f, result.c_str());
+                }
+                http.end();
+            }
+        }
+        f = expr_new.find_first_of("{", e);
+    }
+
     // positions: q-questionmark, c-colon
     auto q = expr_new.find_first_of("?");
     while (q != std::string::npos) {

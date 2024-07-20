@@ -638,11 +638,12 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
 uint16_t TxService::read_next_tx(const uint8_t offset, const uint8_t length) {
     uint8_t old_length   = telegram_last_->type_id > 0xFF ? length - 7 : length - 5;
     uint8_t next_length  = telegram_last_->type_id > 0xFF ? EMS_MAX_TELEGRAM_MESSAGE_LENGTH - 2 : EMS_MAX_TELEGRAM_MESSAGE_LENGTH;
-    uint8_t next_offset  = telegram_last_->offset + old_length;
+    uint8_t next_offset  = offset + old_length;
     uint8_t message_data = (UINT8_MAX - next_offset) >= next_length ? next_length : UINT8_MAX - next_offset;
     // check telegram, offset and overflow
     // some telegrams only reply with one byte less, but have higher offsets (0x10)
-    if (old_length >= (next_length - 1) && telegram_last_->offset == offset) {
+    // some reply with higher offset than requestes and have not_set values intermediate (0xEA)
+    if (old_length >= (next_length - 1) || telegram_last_->offset < offset) {
         add(Telegram::Operation::TX_READ, telegram_last_->dest, telegram_last_->type_id, next_offset, &message_data, 1, 0, true);
         return telegram_last_->type_id;
     }

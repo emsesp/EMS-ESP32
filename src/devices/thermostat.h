@@ -98,6 +98,9 @@ class Thermostat : public EMSdevice {
         uint8_t hpmode;
         uint8_t cooling;
         uint8_t coolingon;
+        uint8_t coolstart;    // starttemperature 20-35°C
+        uint8_t coolondelay;  // 1-48 hours
+        uint8_t cooloffdelay; // 1-48 hours
         // RC300
         uint8_t heatoffdelay; // 1-48h
         uint8_t heatondelay;  // 1-48h
@@ -152,6 +155,7 @@ class Thermostat : public EMSdevice {
             DAYLOW,
             DAYMID,
             REMOTESELTEMP,
+            COOLSTART,
             UNKNOWN
 
         };
@@ -562,6 +566,9 @@ class Thermostat : public EMSdevice {
     inline bool set_remoteseltemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::REMOTESELTEMP);
     }
+    inline bool set_coolstart(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::COOLSTART);
+    }
 
     // set functions - these don't use the id/hc, the parameters are ignored
     bool        set_wwmode(const char * value, const int8_t id);
@@ -646,6 +653,8 @@ class Thermostat : public EMSdevice {
     bool set_hpminflowtemp(const char * value, const int8_t id);
     bool set_hpmode(const char * value, const int8_t id);
     bool set_cooling(const char * value, const int8_t id);
+    bool set_coolondelay(const char * value, const int8_t id);
+    bool set_cooloffdelay(const char * value, const int8_t id);
 };
 
 } // namespace emsesp
