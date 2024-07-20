@@ -51,8 +51,6 @@ enum CommandRet : uint8_t {
     INVALID      // 5 - invalid (tag)
 };
 
-MAKE_ENUM_FIXED(cmdRet, "fail", "ok", "not found", "error", "not allowed", "invalid")
-
 using cmd_function_p      = std::function<bool(const char * data, const int8_t id)>;
 using cmd_json_function_p = std::function<bool(const char * data, const int8_t id, JsonObject output)>;
 
@@ -138,7 +136,7 @@ class Command {
 
     static const char * parse_command_string(const char * command, int8_t & id);
 
-    static std::string return_code_string(const uint8_t return_code);
+    static const char * return_code_string(const uint8_t return_code);
 
   private:
     static uuid::log::Logger logger_;

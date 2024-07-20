@@ -622,20 +622,14 @@ std::string compute(const std::string & expr) {
                 String method = doc["method"] | "GET"; // default GET
 
                 // if there is data, force a POST
-                if (value.length()) {
+                if (value.length() || method == "post") {
                     if (value.startsWith("{")) {
                         http.addHeader("Content-Type", "application/json"); // auto-set to JSON
                     }
                     httpResult = http.POST(value);
                 } else {
-                    // no value, but check if it still a POST request
-                    if (method == "POST") {
-                        httpResult = http.POST(value);
-                    } else {
-                        httpResult = http.GET(); // normal GET
-                    }
+                    httpResult = http.GET(); // normal GET
                 }
-                http.end();
 
                 if (httpResult > 0) {
                     std::string result = emsesp::Helpers::toLower(http.getString().c_str());
@@ -646,6 +640,7 @@ std::string compute(const std::string & expr) {
                     }
                     expr_new.replace(f, e - f, result.c_str());
                 }
+                http.end();
             }
         }
         f = expr_new.find_first_of("{", e);
