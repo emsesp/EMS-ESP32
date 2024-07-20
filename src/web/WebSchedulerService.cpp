@@ -335,7 +335,8 @@ bool WebSchedulerService::command(const char * name, const char * cmd, const cha
     // tasmota(get): http://<tasmotsIP>/cm?cmnd=power%20ON
     // shelly(get): http://<shellyIP>/relais/0?turn=on
     const char * c = strchr(cmd, '{');
-    if (c) { // parse json
+    if (c) {
+        // parse json
         JsonDocument doc;
         int          httpResult = 0;
         if (DeserializationError::Ok == deserializeJson(doc, c)) {
@@ -375,6 +376,11 @@ bool WebSchedulerService::command(const char * name, const char * cmd, const cha
                     emsesp::EMSESP::logger().warning(error);
                     return false;
                 }
+#if defined(EMSESP_DEBUG)
+                char msg[100];
+                snprintf(msg, sizeof(msg), "Schedule %s: URL command successful with http code %d", name, httpResult);
+                emsesp::EMSESP::logger().debug(msg);
+#endif
                 return true;
             }
         }
@@ -554,38 +560,43 @@ void WebSchedulerService::test() {
     // test with negative value
     // should output 'rssi is -23'
     test_value = "\"rssi is \"0+system/network/rssi";
-    command("test", test_cmd.c_str(), compute(test_value).c_str());
+    command("test1", test_cmd.c_str(), compute(test_value).c_str());
 
     // should output 'rssi is -23 dbm'
     test_value = "\"rssi is \"(system/network/rssi)\" dBm\"";
-    command("test", test_cmd.c_str(), compute(test_value).c_str());
+    command("test2", test_cmd.c_str(), compute(test_value).c_str());
 
     test_value = "(custom/seltemp/value)";
-    command("test", test_cmd.c_str(), compute(test_value).c_str());
+    command("test3", test_cmd.c_str(), compute(test_value).c_str());
 
     test_value = "\"seltemp=\"(custom/seltemp/value)";
-    command("test", test_cmd.c_str(), compute(test_value).c_str());
+    command("test4", test_cmd.c_str(), compute(test_value).c_str());
 
     test_value = "(custom/seltemp)";
-    command("test", test_cmd.c_str(), compute(test_value).c_str());
+    command("test5", test_cmd.c_str(), compute(test_value).c_str());
 
+    // this will fail unless test("boiler") is loaded
     test_value = "(boiler/outdoortemp)";
-    command("test", test_cmd.c_str(), compute(test_value).c_str());
+    command("test6", test_cmd.c_str(), compute(test_value).c_str());
 
     test_value = "boiler/flowtempoffset";
-    command("test", test_cmd.c_str(), compute(test_value).c_str());
+    command("test7", test_cmd.c_str(), compute(test_value).c_str());
 
     test_value = "(boiler/flowtempoffset/value)";
-    command("test", test_cmd.c_str(), compute(test_value).c_str());
+    command("test8", test_cmd.c_str(), compute(test_value).c_str());
 
     test_value = "(boiler/storagetemp1/value)";
-    command("test", test_cmd.c_str(), compute(test_value).c_str());
+    command("test9", test_cmd.c_str(), compute(test_value).c_str());
 
     // (14 - 40) * 2.8 + 5 = -67.8
     test_value = "(custom/seltemp - boiler/flowtempoffset) * 2.8 + 5";
-    command("test", test_cmd.c_str(), compute(test_value).c_str());
+    command("test10", test_cmd.c_str(), compute(test_value).c_str());
 
     // TODO add some HTTP/URI tests
+    test_cmd = "{\"method\":\"POST\",\"url\":\"http://192.168.1.42:8123/api/services/script/test_notify2\", \"header\":{\"authorization\":\"Bearer "
+               "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhMmNlYWI5NDgzMmI0ODE2YWQ2NzU4MjkzZDE2YWMxZSIsImlhdCI6MTcyMTM5MTI0NCwiZXhwIjoyMDM2NzUxMjQ0fQ."
+               "S5sago1tEI6lNhrDCO0dM_WsVQHkD_laAjcks8tWAqo\"}}";
+    command("test11", test_cmd.c_str(), "");
 }
 #endif
 

@@ -320,9 +320,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // add devices
         test("general");
 
-        EMSESP::temperaturesensor_.test();     // add temperature sensors
-        EMSESP::webSchedulerService.test();    // add scheduler items
-        EMSESP::webCustomEntityService.test(); // add custom entities
+        EMSESP::webCustomEntityService.test();  // add custom entities
+        EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
+        EMSESP::temperaturesensor_.test();      // add temperature sensors
+        EMSESP::webSchedulerService.test();     // add scheduler items
 
         // shell.invoke_command("show devices");
         // shell.invoke_command("show values");
