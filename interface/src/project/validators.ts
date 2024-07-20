@@ -308,7 +308,7 @@ export const schedulerItemValidation = (
       {
         type: 'string',
         pattern: /^[a-zA-Z0-9_\\.]{0,19}$/,
-        message: "Must be <20 characters: alpha numeric, '_' or '.'"
+        message: "Must be <20 characters: alphanumeric, '_' or '.'"
       },
       ...[uniqueNameValidator(schedule, scheduleItem.o_name)]
     ],
@@ -317,8 +317,8 @@ export const schedulerItemValidation = (
       {
         type: 'string',
         min: 1,
-        max: 64,
-        message: 'Command must be 1-64 characters'
+        max: 300,
+        message: 'Command must be 1-300 characters'
       }
     ]
   });
@@ -350,7 +350,7 @@ export const entityItemValidation = (entity: EntityItem[], entityItem: EntityIte
       {
         type: 'string',
         pattern: /^[a-zA-Z0-9_\\.]{1,19}$/,
-        message: "Must be <20 characters: alpha numeric, '_' or '.'"
+        message: "Must be <20 characters: alphanumeric, '_' or '.'"
       },
       ...[uniqueCustomNameValidator(entity, entityItem.o_name)]
     ],
@@ -404,7 +404,7 @@ export const temperatureSensorItemValidation = (sensors: TemperatureSensor[]) =>
       {
         type: 'string',
         pattern: /^[a-zA-Z0-9_\\.]{0,19}$/,
-        message: "Must be <20 characters: alpha numeric, '_' or '.'"
+        message: "Must be <20 characters: alphanumeric, '_' or '.'"
       },
       ...[uniqueTemperatureNameValidator(sensors)]
     ]
@@ -444,7 +444,7 @@ export const analogSensorItemValidation = (
       {
         type: 'string',
         pattern: /^[a-zA-Z0-9_\\.]{0,19}$/,
-        message: "Must be <20 characters: alpha numeric, '_' or '.'"
+        message: "Must be <20 characters: alphanumeric, '_' or '.'"
       },
       ...[uniqueAnalogNameValidator(sensors)]
     ],

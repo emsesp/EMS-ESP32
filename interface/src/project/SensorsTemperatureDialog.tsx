@@ -52,8 +52,10 @@ const SensorsTemperatureDialog = ({
     }
   }, [open, selectedItem]);
 
-  const close = () => {
-    onClose();
+  const handleClose = (event: {}, reason: 'backdropClick' | 'escapeKeyDown') => {
+    if (reason !== 'backdropClick') {
+      onClose();
+    }
   };
 
   const save = async () => {
@@ -67,7 +69,7 @@ const SensorsTemperatureDialog = ({
   };
 
   return (
-    <Dialog sx={dialogStyle} open={open} onClose={close}>
+    <Dialog sx={dialogStyle} open={open} onClose={handleClose}>
       <DialogTitle>
         {LL.EDIT()}&nbsp;{LL.TEMP_SENSOR()}
       </DialogTitle>
@@ -84,7 +86,7 @@ const SensorsTemperatureDialog = ({
               name="n"
               label={LL.NAME(0)}
               value={editItem.n}
-              autoFocus
+              // autoFocus
               sx={{ width: '30ch' }}
               onChange={updateFormValue}
             />
@@ -110,7 +112,7 @@ const SensorsTemperatureDialog = ({
         <Button
           startIcon={<CancelIcon />}
           variant="outlined"
-          onClick={close}
+          onClick={onClose}
           color="secondary"
         >
           {LL.CANCEL()}

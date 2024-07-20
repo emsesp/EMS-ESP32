@@ -31,13 +31,22 @@ import type { LogEntry, LogSettings } from 'types';
 import { LogLevel } from 'types';
 import { updateValueDirty, useRest } from 'utils';
 
-const LogEntryLine = styled('div')(() => ({
-  color: '#bbbbbb',
-  fontFamily: 'monospace',
-  fontSize: '14px',
-  letterSpacing: 'normal',
-  whiteSpace: 'nowrap'
-}));
+const ButtonTextColors = {
+  [LogLevel.ERROR]: '#ff0000', // red
+  [LogLevel.WARNING]: '#ffcc00', // yellow
+  [LogLevel.NOTICE]: '#ffffff', // white
+  [LogLevel.INFO]: '#ffffff', // yellow
+  [LogLevel.DEBUG]: '#00ffff', // cyan
+  [LogLevel.TRACE]: '#00ffff' // cyan
+};
+
+const LogEntryLine = styled('div')(
+  ({ details: { level } }: { details: { level: LogLevel } }) => ({
+    color: ButtonTextColors[level],
+    font: '14px monospace',
+    whiteSpace: 'nowrap'
+  })
+);
 
 const topOffset = () =>
   document.getElementById('log-window')?.getBoundingClientRect().bottom || 0;
@@ -265,7 +274,7 @@ const SystemLog: FC = () => {
           }}
         >
           {logEntries.map((e) => (
-            <LogEntryLine key={e.i}>
+            <LogEntryLine details={{ level: e.l }} key={e.i}>
               <span>{e.t}</span>
               <span>{paddedLevelLabel(e.l)}&nbsp;</span>
               <span>{paddedIDLabel(e.i)} </span>

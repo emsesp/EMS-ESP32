@@ -54,8 +54,10 @@ const CustomizationDialog = ({
     }
   }, [open, selectedItem]);
 
-  const close = () => {
-    onClose();
+  const handleClose = (event: {}, reason: 'backdropClick' | 'escapeKeyDown') => {
+    if (reason !== 'backdropClick') {
+      onClose();
+    }
   };
 
   const save = () => {
@@ -76,7 +78,7 @@ const CustomizationDialog = ({
   };
 
   return (
-    <Dialog sx={dialogStyle} open={open} onClose={close}>
+    <Dialog sx={dialogStyle} open={open} onClose={handleClose}>
       <DialogTitle>{LL.EDIT() + ' ' + LL.ENTITY()}</DialogTitle>
       <DialogContent dividers>
         <Grid container direction="row">
@@ -115,7 +117,7 @@ const CustomizationDialog = ({
               name="cn"
               label={LL.NEW_NAME_OF(LL.ENTITY())}
               value={editItem.cn}
-              autoFocus
+              // autoFocus
               sx={{ width: '30ch' }}
               onChange={updateFormValue}
             />
@@ -155,7 +157,7 @@ const CustomizationDialog = ({
         <Button
           startIcon={<CancelIcon />}
           variant="outlined"
-          onClick={close}
+          onClick={onClose}
           color="secondary"
         >
           {LL.CANCEL()}

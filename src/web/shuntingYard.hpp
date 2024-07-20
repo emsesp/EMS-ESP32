@@ -583,13 +583,11 @@ std::string calculate(const std::string & expr) {
     }
 
     // concatenate all elements in stack to a single string, separated by spaces and return
-    // experimental - for MDvP to check
     std::string result = "";
     for (const auto & s : stack) {
         result += s;
     }
     return result;
-
     // return stack.back();
 }
 

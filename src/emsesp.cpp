@@ -985,7 +985,7 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
     // some devices store the protocol type (HT3, Buderus) in the last byte
     uint8_t brand;
     if (telegram->message_length >= 10) {
-        brand = EMSdevice::decode_brand(telegram->message_data[9]);
+        brand = EMSdevice::decode_brand(telegram->message_data[9]); // TODO should be offset + 9?
     } else {
         brand = EMSdevice::Brand::NO_BRAND; // unknown
     }

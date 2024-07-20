@@ -47,13 +47,15 @@ rest_server.get(ES_LOG_ENDPOINT, (_req, res) => {
   const interval = setInterval(() => {
     const data = {
       t: new Date().toISOString(),
-      l: 7, // debug
+      l: (3 + (count % 6)),
       i: count,
       n: 'system',
       m: 'message #' + count++
     };
     res.write(`data: ${JSON.stringify(data)}\n\n`);
   }, INTERVAL);
+
+
 
   // if client closes connection
   res.on('close', () => {

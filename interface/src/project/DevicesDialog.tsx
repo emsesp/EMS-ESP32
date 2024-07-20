@@ -120,7 +120,7 @@ const DevicesDialog = ({
                 label={LL.VALUE(0)}
                 value={editItem.v}
                 disabled={!writeable}
-                autoFocus
+                // autoFocus
                 sx={{ width: '30ch' }}
                 select
                 onChange={updateFormValue}
@@ -162,7 +162,7 @@ const DevicesDialog = ({
                 label={LL.VALUE(0)}
                 value={editItem.v}
                 disabled={!writeable}
-                autoFocus
+                // autoFocus
                 sx={{ width: '30ch' }}
                 multiline={editItem.u ? false : true}
                 onChange={updateFormValue}

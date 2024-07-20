@@ -342,22 +342,44 @@ bool WebSchedulerService::command(const char * name, const char * cmd, const cha
             HTTPClient http;
             String     url = doc["url"];
             if (http.begin(url)) {
+                // It's an HTTP call
+
+                // add any given headers
                 for (JsonPair p : doc["header"].as<JsonObject>()) {
                     http.addHeader(p.key().c_str(), p.value().as<String>().c_str());
                 }
-                String value = doc["value"] | "";
+                String value  = doc["value"] | data;   // extract value if its in the command, or take the data
+                String method = doc["method"] | "GET"; // default GET
+
+                // if there is data, force a POST
                 if (value.length()) {
+                    if (value.startsWith("{")) {
+                        http.addHeader("Content-Type", "application/json"); // auto-set to JSON
+                    }
                     httpResult = http.POST(value);
-                } else if (data && data[0] != '\0') { // post
-                    httpResult = http.POST(String(data));
                 } else {
-                    httpResult = http.GET();
+                    // no value, but check if it still a POST request
+                    if (method == "POST") {
+                        httpResult = http.POST(value);
+                    } else {
+                        httpResult = http.GET(); // normal GET
+                    }
                 }
+
                 http.end();
+
+                // check HTTP return code
+                if (httpResult != 200) {
+                    char error[100];
+                    snprintf(error, sizeof(error), "Schedule %s: URL command failed with http code %d", name, httpResult);
+                    emsesp::EMSESP::logger().warning(error);
+                    return false;
+                }
+                return true;
             }
         }
-        return httpResult > 0;
     }
+
     JsonDocument doc_input;
     JsonObject   input = doc_input.to<JsonObject>();
     if (strlen(data)) { // empty data queries a value
@@ -562,6 +584,8 @@ void WebSchedulerService::test() {
     // (14 - 40) * 2.8 + 5 = -67.8
     test_value = "(custom/seltemp - boiler/flowtempoffset) * 2.8 + 5";
     command("test", test_cmd.c_str(), compute(test_value).c_str());
+
+    // TODO add some HTTP/URI tests
 }
 #endif
 

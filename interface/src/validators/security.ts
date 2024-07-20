@@ -35,7 +35,7 @@ export const createUserValidator = (users: UserType[], creating: boolean) =>
       {
         type: 'string',
         pattern: /^[a-zA-Z0-9_\\.]{1,24}$/,
-        message: "Must be 1-24 characters: alpha numeric, '_' or '.'"
+        message: "Must be 1-24 characters: alphanumeric, '_' or '.'"
       },
       ...(creating ? [createUniqueUsernameValidator(users)] : [])
     ],
