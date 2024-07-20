@@ -630,7 +630,6 @@ std::string compute(const std::string & expr) {
                 } else {
                     httpResult = http.GET(); // normal GET
                 }
-                http.end();
 
                 if (httpResult > 0) {
                     std::string result = emsesp::Helpers::toLower(http.getString().c_str());
@@ -641,6 +640,7 @@ std::string compute(const std::string & expr) {
                     }
                     expr_new.replace(f, e - f, result.c_str());
                 }
+                http.end();
             }
         }
         f = expr_new.find_first_of("{", e);
