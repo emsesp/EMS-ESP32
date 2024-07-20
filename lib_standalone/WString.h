@@ -53,6 +53,14 @@ class String {
         return 1;
     }
 
+    int len() const {
+        return _str.size();
+    }
+
+    bool startsWith(const char * prefix) const {
+        return _str.find(prefix) == 0;
+    }
+
   private:
     std::string _str;
 };
