@@ -422,8 +422,14 @@ bool WebSchedulerService::command(const char * name, const std::string & command
 #include "shuntingYard.hpp"
 
 bool WebSchedulerService::onChange(const char * cmd) {
-    cmd_changed_.push_back(Helpers::toLower(cmd));
-    return true;
+    for (ScheduleItem & scheduleItem : *scheduleItems_) {
+        if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_ONCHANGE
+            && Helpers::toLower(scheduleItem.time).find(Helpers::toLower(cmd)) != std::string::npos) {
+            cmd_changed_.push_back(&scheduleItem);
+            return true;
+        }
+    }
+    return false;
 }
 
 void WebSchedulerService::condition() {
@@ -458,12 +464,8 @@ void WebSchedulerService::loop() {
 
     // check if we have onChange events
     while (!cmd_changed_.empty()) {
-        for (const ScheduleItem & scheduleItem : *scheduleItems_) {
-            if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_ONCHANGE
-                && Helpers::toLower(scheduleItem.time).find(cmd_changed_.front()) != std::string::npos) {
-                command(scheduleItem.name.c_str(), scheduleItem.cmd, compute(scheduleItem.value));
-            }
-        }
+        ScheduleItem si = *cmd_changed_.front();
+        command(si.name.c_str(), si.cmd, compute(si.value));
         cmd_changed_.pop_front();
     }
 
