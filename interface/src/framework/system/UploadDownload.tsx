@@ -81,8 +81,15 @@ const UploadDownload: FC = () => {
     'EMS-ESP-' +
     v.replaceAll('.', '_') +
     '-' +
-    data.esp_platform.replaceAll('-', '_') +
+    getPlatform().replaceAll('-', '_') +
     '.bin';
+
+  const getPlatform = () => {
+    if (data.flash_chip_size === 16384) {
+      return data.esp_platform + '-16M';
+    }
+    return data.esp_platform;
+  };
 
   const {
     loading: isUploading,
@@ -194,7 +201,7 @@ const UploadDownload: FC = () => {
         </Typography>
         <Box p={2} border="2px solid grey" borderRadius={2}>
           {LL.VERSION_ON() + ' '}
-          <b>{data.emsesp_version}</b>&nbsp;({data.esp_platform})
+          <b>{data.emsesp_version}</b>&nbsp;({getPlatform()})
           <Divider />
           {latestVersion && (
             <Box mt={2}>
