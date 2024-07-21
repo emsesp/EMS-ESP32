@@ -81,9 +81,9 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
     HttpEndpoint<WebScheduler>  _httpEndpoint;
     FSPersistence<WebScheduler> _fsPersistence;
 
-    std::list<ScheduleItem> * scheduleItems_; // pointer to the list of schedule events
-    bool                      ha_registered_ = false;
-    std::deque<std::string>   cmd_changed_;
+    std::list<ScheduleItem> *  scheduleItems_; // pointer to the list of schedule events
+    bool                       ha_registered_ = false;
+    std::deque<ScheduleItem *> cmd_changed_;
 };
 
 } // namespace emsesp
