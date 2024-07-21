@@ -47,7 +47,7 @@ import RestartMonitor from './RestartMonitor';
 const SystemStatus: FC = () => {
   const { LL } = useI18nContext();
 
-  useLayoutTitle(LL.STATUS_OF(''));
+  useLayoutTitle(LL.SYSTEM(0));
 
   const { me } = useContext(AuthenticatedContext);
 
