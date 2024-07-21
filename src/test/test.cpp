@@ -1053,16 +1053,13 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             // This next batch should all fail
             //
 
-            Serial.printf("%s**** Testing bad urls ****\n%s", COLOR_RED, COLOR_RESET);
             Serial.println();
+            Serial.printf("%s**** Testing bad urls ****\n%s", COLOR_RED, COLOR_RESET);
+
+            request.url("/api/boiler2");
+            EMSESP::webAPIService.webAPIService(&request);
 
             // boiler
-            request.url("/api/boiler/bad");
-            EMSESP::webAPIService.webAPIService(&request);
-            request.url("/api/boiler/bad/value");
-            EMSESP::webAPIService.webAPIService(&request);
-            request.url("/api/boiler2/bad");
-            EMSESP::webAPIService.webAPIService(&request);
             request.url("/api/boiler/bad");
             EMSESP::webAPIService.webAPIService(&request);
             request.url("/api/boiler/bad/value");
