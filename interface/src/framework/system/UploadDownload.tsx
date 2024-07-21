@@ -16,7 +16,6 @@ import {
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { APIcall } from 'project/types';
-import type { ESPSystemStatus } from 'types';
 
 import RestartMonitor from './RestartMonitor';
 
