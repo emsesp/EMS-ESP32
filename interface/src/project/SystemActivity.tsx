@@ -27,7 +27,7 @@ const SystemActivity: FC = () => {
 
   const { LL } = useI18nContext();
 
-  useLayoutTitle(LL.ACTIVITY());
+  useLayoutTitle(LL.SYSTEM(0));
 
   const stats_theme = tableTheme({
     Table: `
