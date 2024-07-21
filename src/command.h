@@ -143,11 +143,7 @@ class Command {
 
     static std::vector<CmdFunction> cmdfunctions_; // the list of commands
 
-    inline static uint8_t message(uint8_t error_code, const char * message, const JsonObject output) {
-        output.clear();
-        output["message"] = message;
-        return error_code;
-    }
+    static uint8_t json_message(uint8_t error_code, const char * message, const JsonObject output);
 };
 
 class SUrlParser {

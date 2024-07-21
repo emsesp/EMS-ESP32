@@ -57,7 +57,7 @@ const SensorsAnalogDialog = ({
     }
   }, [open, selectedItem]);
 
-  const handleClose = (event: {}, reason: 'backdropClick' | 'escapeKeyDown') => {
+  const handleClose = (event: object, reason: 'backdropClick' | 'escapeKeyDown') => {
     if (reason !== 'backdropClick') {
       onClose();
     }

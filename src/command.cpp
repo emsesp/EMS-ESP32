@@ -35,7 +35,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     p.parse(path);
 
     if (!p.paths().size()) {
-        return message(CommandRet::ERROR, "invalid path", output);
+        return json_message(CommandRet::ERROR, "invalid path", output);
     }
 
     // check first if it's from API, if so strip the "api/"
@@ -48,7 +48,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
             strlcpy(new_path, path, sizeof(new_path));
             p.parse(new_path + Mqtt::base().length() + 1); // re-parse the stripped path
         } else {
-            return message(CommandRet::ERROR, "unrecognized path", output); // error
+            return json_message(CommandRet::ERROR, "unrecognized path", output); // error
         }
     }
 
@@ -56,7 +56,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     // if there is only a path (URL) and no body then error!
     size_t num_paths = p.paths().size();
     if (!num_paths && !input.size()) {
-        return message(CommandRet::ERROR, "missing command in path", output);
+        return json_message(CommandRet::ERROR, "missing command in path", output);
     }
 
     std::string cmd_s;
@@ -78,8 +78,11 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     // validate the device, make sure it exists
     uint8_t device_type = EMSdevice::device_name_2_device_type(device_s);
     if (!device_has_commands(device_type)) {
-        LOG_DEBUG("Command failed: unknown device '%s'", device_s);
-        return message(CommandRet::NOT_FOUND, "unknown device", output);
+        char err[100];
+        snprintf(err, sizeof(err), "unknown device %s", device_s);
+        LOG_WARNING("Command failed: %s", err);
+        output["message"] = err;
+        return CommandRet::NOT_FOUND;
     }
 
     // the next value on the path should be the command or entity name
@@ -114,7 +117,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         if (num_paths < (id_n > 0 ? 4 : 3)) {
             command_p = device_type == EMSdevice::DeviceType::SYSTEM ? F_(info) : F_(values);
         } else {
-            return message(CommandRet::NOT_FOUND, "missing or bad command", output);
+            return json_message(CommandRet::NOT_FOUND, "missing or bad command", output);
         }
     }
 
@@ -199,7 +202,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     } else if (data.isNull()) {
         return_code = Command::call(device_type, command_p, "", is_admin, id_n, output); // empty, will do a query instead
     } else {
-        return message(CommandRet::ERROR, "cannot parse command", output); // can't process
+        return json_message(CommandRet::ERROR, "cannot parse command", output); // can't process
     }
     return return_code;
 }
@@ -334,10 +337,12 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     // first see if there is a command registered and it's valid
     auto cf = find_command(device_type, device_id, cmd, flag);
     if (!cf) {
-        LOG_WARNING("Command failed: unknown command '%s'", cmd ? cmd : "");
+        std::string err = std::string("unknown command ") + cmd;
+        LOG_WARNING("Command failed: %s", err.c_str());
+
         // if we don't alread have a message set, set it to invalid command
         if (!output["message"]) {
-            output["message"] = "unknown command";
+            output["message"] = err;
         }
         return CommandRet::ERROR;
     }
@@ -355,9 +360,9 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     auto        description = Helpers::translated_word(cf->description_);
     char        info_s[100];
     if (strlen(description)) {
-        snprintf(info_s, sizeof(info_s), "'%s/%s' (%s)", dname, cmd, description);
+        snprintf(info_s, sizeof(info_s), "%s/%s (%s)", dname, cmd, description);
     } else {
-        snprintf(info_s, sizeof(info_s), "'%s/%s'", dname, cmd);
+        snprintf(info_s, sizeof(info_s), "%s/%s", dname, cmd);
     }
 
     // call the function based on command function type
@@ -380,9 +385,9 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     if (return_code != CommandRet::OK) {
         char error[100];
         if (single_command) {
-            snprintf(error, sizeof(error), "Command '%s' failed (%s)", cmd, return_code_string(return_code));
+            snprintf(error, sizeof(error), "Command %s failed (%s)", cmd, return_code_string(return_code));
         } else {
-            snprintf(error, sizeof(error), "Command '%s: %s' failed (%s)", cmd, value, return_code_string(return_code));
+            snprintf(error, sizeof(error), "Command %s: %s failed (%s)", cmd, value, return_code_string(return_code));
         }
         output.clear();
         output["message"] = error;
@@ -682,6 +687,16 @@ void Command::show_all(uuid::console::Shell & shell) {
 
     shell.println();
 }
+
+uint8_t Command::json_message(uint8_t error_code, const char * message, const JsonObject output) {
+    output.clear();
+    output["message"] = message;
+    return error_code;
+}
+
+//
+// SUrlParser class
+//
 
 // Extract only the path component from the passed URI and normalized it
 // e.g. //one/two////three/// becomes /one/two/three
