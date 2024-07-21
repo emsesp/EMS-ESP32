@@ -365,8 +365,10 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     uint8_t return_code = CommandRet::OK;
     if (cf->cmdfunction_json_) {
         // handle commands that report back a JSON body
+        output.clear(); // remove message from device_value_info fail
         return_code = ((cf->cmdfunction_json_)(value, id, output)) ? CommandRet::OK : CommandRet::ERROR;
     } else if (cf->cmdfunction_) {
+        output.clear(); // remove message from device_value_info fail
         // if it's a read only command and we're trying to set a value, return an error
         if (!single_command && EMSESP::cmd_is_readonly(device_type, device_id, cmd, id)) {
             return_code = CommandRet::INVALID; // error on readonly or invalid hc
