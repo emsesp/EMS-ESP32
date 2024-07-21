@@ -38,7 +38,9 @@ void WebSchedulerService::begin() {
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
     snprintf(topic, sizeof(topic), "%s/#", F_(scheduler));
     Mqtt::subscribe(EMSdevice::DeviceType::SCHEDULER, topic, nullptr); // use empty function callback
+#ifndef EMSESP_STANDALONE
     xTaskCreate((TaskFunction_t)scheduler_task, "scheduler_task", 4096, NULL, 3, NULL);
+#endif
 }
 
 // this creates the scheduler file, saving it to the FS
@@ -529,7 +531,9 @@ void WebSchedulerService::scheduler_task(void * pvParameters) {
             EMSESP::webSchedulerService.loop();
         }
     }
+#ifndef EMSESP_STANDALONE
     vTaskDelete(NULL);
+#endif
 }
 
 // hard coded tests
@@ -600,7 +604,7 @@ void WebSchedulerService::test() {
     test_value = "(custom/seltemp - boiler/flowtempoffset) * 2.8 + 5";
     command("test10", test_cmd.c_str(), compute(test_value).c_str());
 
-    // TODO add some HTTP/URI tests
+    // TODO add some more HTTP/URI tests
     test_cmd = "{\"method\":\"POST\",\"url\":\"http://192.168.1.42:8123/api/services/script/test_notify2\", \"header\":{\"authorization\":\"Bearer "
                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhMmNlYWI5NDgzMmI0ODE2YWQ2NzU4MjkzZDE2YWMxZSIsImlhdCI6MTcyMTM5MTI0NCwiZXhwIjoyMDM2NzUxMjQ0fQ."
                "S5sago1tEI6lNhrDCO0dM_WsVQHkD_laAjcks8tWAqo\"}}";
