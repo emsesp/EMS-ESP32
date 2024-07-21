@@ -45,7 +45,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
 #endif
 #endif
 
-    root["esp_platform"] = EMSESP_PLATFORM;
+    root["esp_platform"] = EMSESP_PLATFORM;      // from default_settings.h: ESP32, ESP32-C3, ESP32-S2, ESP32-S3
     root["status"]       = EMSESP::bus_status(); // 0, 1 or 2
     root["bus_uptime"]   = EMSbus::bus_uptime();
     root["num_devices"]  = EMSESP::count_devices();
