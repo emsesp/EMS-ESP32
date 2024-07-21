@@ -235,6 +235,10 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
         return nullptr;
     }
 
+    // remember unchanged command
+    const char * cmd_org = command;
+    int8_t       id_org  = id;
+
     // convert cmd to lowercase and compare
     char * lowerCmd = strdup(command);
     for (char * p = lowerCmd; *p; p++) {
@@ -271,12 +275,14 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
         command += 3;
     }
 
-    // remove separator
-    if (command[0] == '/' || command[0] == '.' || command[0] == '_') {
-        command++;
-    }
-
     free(lowerCmd);
+
+    // return original if no seperator
+    if (command[0] != '/' && command[0] != '.') {
+        id = id_org;
+        return cmd_org;
+    }
+    command++;
 
     // return null for empty command
     if (command[0] == '\0') {
