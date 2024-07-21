@@ -743,7 +743,7 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
 }
 
 // builds json with the detail of each value, for a given EMS device
-// for other types like sensors, scheduler, custom entities it will process single commands like 'info', 'values', 'commands'...
+// for other types like sensors, scheduler, custom entities it will process single commands like 'info', 'values', 'commands', 'entities'...
 bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8_t id, const uint8_t devicetype) {
     // check first for EMS devices
     bool found_device = false;
@@ -755,9 +755,8 @@ bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8
             }
         }
     }
-    // if the EMS device was valid, but the cmd not found show an error
+    // if the EMS device was valid, but the cmd not found exit. it will be handled upstream.
     if (found_device) {
-        root["message"] = std::string("unknown command ") + cmd;
         return false;
     }
 
@@ -1712,14 +1711,14 @@ void EMSESP::loop() {
     // if we're doing an OTA upload, skip everything except from console refresh
     if (!system_.upload_status()) {
         // service loops
-        webLogService.loop();       // log in Web UI
-        rxservice_.loop();          // process any incoming Rx telegrams
-        shower_.loop();             // check for shower on/off
-        temperaturesensor_.loop();  // read sensor temperatures
-        analogsensor_.loop();       // read analog sensor values
-        publish_all_loop();         // with HA messages in parts to avoid flooding the mqtt queue
-        mqtt_.loop();               // sends out anything in the MQTT queue
-        webModulesService.loop();   // loop through the external library modules
+        webLogService.loop();      // log in Web UI
+        rxservice_.loop();         // process any incoming Rx telegrams
+        shower_.loop();            // check for shower on/off
+        temperaturesensor_.loop(); // read sensor temperatures
+        analogsensor_.loop();      // read analog sensor values
+        publish_all_loop();        // with HA messages in parts to avoid flooding the mqtt queue
+        mqtt_.loop();              // sends out anything in the MQTT queue
+        webModulesService.loop();  // loop through the external library modules
 
         // force a query on the EMS devices to fetch latest data at a set interval (1 min)
         scheduled_fetch_values();
