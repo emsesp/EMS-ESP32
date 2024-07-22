@@ -333,7 +333,8 @@ const fr: Translation = {
   MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
   MODULES_NONE: 'No external modules detected', // TODO translate
   RENAME: 'Rename', // TODO translate
-  ENABLE_MODBUS: 'Activer Modbus'
+  ENABLE_MODBUS: 'Activer Modbus',
+  VIEW_LOG: 'View log to diagnose issues' // TODO translate
 };
 
 export default fr;

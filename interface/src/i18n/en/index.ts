@@ -333,7 +333,8 @@ const en: Translation = {
   MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules',
   MODULES_NONE: 'No external modules detected',
   RENAME: 'Rename',
-  ENABLE_MODBUS: 'Enable Modbus'
+  ENABLE_MODBUS: 'Enable Modbus',
+  VIEW_LOG: 'View log to diagnose issues'
 };
 
 export default en;
