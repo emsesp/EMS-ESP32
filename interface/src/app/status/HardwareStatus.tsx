@@ -26,7 +26,7 @@ import { useRequest } from 'alova';
 import { ButtonRow, FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
-import BBQKeesIcon from '../../project/bbqkees.svg';
+import BBQKeesIcon from './bbqkees.svg';
 
 function formatNumber(num: number) {
   return new Intl.NumberFormat().format(num);

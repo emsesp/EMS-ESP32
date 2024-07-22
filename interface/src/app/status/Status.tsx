@@ -1,4 +1,5 @@
 import { type FC, useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
@@ -6,6 +7,7 @@ import BuildIcon from '@mui/icons-material/Build';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+import LogoDevIcon from '@mui/icons-material/LogoDev';
 import MemoryIcon from '@mui/icons-material/Memory';
 import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
@@ -13,6 +15,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import RouterIcon from '@mui/icons-material/Router';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import TimerIcon from '@mui/icons-material/Timer';
+import UpgradeIcon from '@mui/icons-material/Upgrade';
 import WifiIcon from '@mui/icons-material/Wifi';
 import {
   Avatar,
@@ -32,14 +35,14 @@ import {
 
 import * as SystemApi from 'api/system';
 
-import * as EMSESP from 'project/api';
+import * as EMSESP from 'app/main/api';
 import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova';
+import { busConnectionStatus } from 'app/main/types';
 import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import ListMenuItem from 'components/layout/ListMenuItem';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
-import { busConnectionStatus } from 'project/types';
 import { NTPSyncStatus, NetworkConnectionStatus } from 'types';
 
 import RestartMonitor from './RestartMonitor';
@@ -47,7 +50,9 @@ import RestartMonitor from './RestartMonitor';
 const SystemStatus: FC = () => {
   const { LL } = useI18nContext();
 
-  useLayoutTitle(LL.SYSTEM(0));
+  const navigate = useNavigate();
+
+  useLayoutTitle(LL.STATUS_OF(''));
 
   const { me } = useContext(AuthenticatedContext);
 
@@ -313,7 +318,7 @@ const SystemStatus: FC = () => {
 
     return (
       <>
-        <List>
+        <List sx={{ borderRadius: 3, border: '2px solid grey' }}>
           <ListItem>
             <ListItemAvatar>
               <Avatar sx={{ bgcolor: '#c5572c', color: 'white' }}>
@@ -335,6 +340,16 @@ const SystemStatus: FC = () => {
               </Button>
             )}
           </ListItem>
+
+          <Divider variant="inset" component="li" />
+          <ListMenuItem
+            disabled={!me.admin}
+            icon={LogoDevIcon}
+            bgcolor="#40828f"
+            label={LL.LOG_OF(LL.SYSTEM(0))}
+            text={data.emsesp_version}
+            to="/status/log"
+          />
 
           <Divider variant="inset" component="li" />
           <ListItem>
@@ -366,14 +381,27 @@ const SystemStatus: FC = () => {
           </ListItem>
 
           <Divider variant="inset" component="li" />
-          <ListMenuItem
-            disabled={!me.admin}
-            icon={BuildIcon}
-            bgcolor="#134ba2"
-            label={LL.EMS_ESP_VER()}
-            text={data.emsesp_version}
-            to="/settings/upload"
-          />
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar sx={{ bgcolor: '#134ba2', color: 'white' }}>
+                <BuildIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText
+              primary={LL.EMS_ESP_VER()}
+              secondary={data.emsesp_version}
+            />
+            {me.admin && (
+              <Button
+                startIcon={<UpgradeIcon />}
+                variant="outlined"
+                color="primary"
+                onClick={() => navigate('/settings/upload')}
+              >
+                {LL.UPDATE()}
+              </Button>
+            )}
+          </ListItem>
 
           <Divider variant="inset" component="li" />
           <ListMenuItem
@@ -382,7 +410,7 @@ const SystemStatus: FC = () => {
             bgcolor={busStatusHighlight()}
             label={LL.EMS_BUS_STATUS()}
             text={busStatus()}
-            to="/system/activity"
+            to="/status/activity"
           />
 
           <Divider variant="inset" component="li" />
@@ -392,7 +420,7 @@ const SystemStatus: FC = () => {
             bgcolor="#68374d"
             label={LL.STATUS_OF(LL.HARDWARE())}
             text={formatNumber(data.free_heap) + ' KB' + ' ' + LL.FREE_MEMORY()}
-            to="/system/espsystemstatus"
+            to="/status/hardwarestatus"
           />
 
           <Divider variant="inset" component="li" />
@@ -406,7 +434,7 @@ const SystemStatus: FC = () => {
             bgcolor={networkStatusHighlight()}
             label={LL.STATUS_OF(LL.NETWORK(1))}
             text={networkStatus()}
-            to="/settings/network/status"
+            to="/status/network"
           />
 
           <Divider variant="inset" component="li" />
@@ -416,7 +444,7 @@ const SystemStatus: FC = () => {
             bgcolor={activeHighlight(data.mqtt_status)}
             label={LL.STATUS_OF('MQTT')}
             text={data.mqtt_status ? LL.ACTIVE() : LL.INACTIVE(0)}
-            to="/settings/mqtt/status"
+            to="/status/mqtt"
           />
 
           <Divider variant="inset" component="li" />
@@ -426,7 +454,7 @@ const SystemStatus: FC = () => {
             bgcolor={ntpStatusHighlight()}
             label={LL.STATUS_OF('NTP')}
             text={ntpStatus()}
-            to="/settings/ntp/status"
+            to="/status/ntp"
           />
 
           <Divider variant="inset" component="li" />
@@ -434,11 +462,10 @@ const SystemStatus: FC = () => {
             disabled={!me.admin}
             icon={SettingsInputAntennaIcon}
             bgcolor={activeHighlight(data.ap_status)}
-            label={LL.ACCESS_POINT(0)}
+            label={LL.STATUS_OF(LL.ACCESS_POINT(0))}
             text={data.ap_status ? LL.ACTIVE() : LL.INACTIVE(0)}
-            to="/settings/ap/status"
+            to="/status/ap"
           />
-          <Divider variant="inset" component="li" />
         </List>
 
         {renderScanDialog()}

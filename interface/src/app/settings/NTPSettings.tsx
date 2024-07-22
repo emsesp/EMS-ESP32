@@ -15,7 +15,8 @@ import {
   ButtonRow,
   FormLoader,
   SectionContent,
-  ValidatedTextField
+  ValidatedTextField,
+  useLayoutTitle
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { NTPSettingsType } from 'types';
@@ -43,6 +44,7 @@ const NTPSettings: FC = () => {
   });
 
   const { LL } = useI18nContext();
+  useLayoutTitle(LL.SETTINGS_OF('NTP'));
 
   const updateFormValue = updateValueDirty(
     origData,

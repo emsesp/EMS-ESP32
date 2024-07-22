@@ -1,4 +1,4 @@
-import type { busConnectionStatus } from 'project/types';
+import type { busConnectionStatus } from 'app/main/types';
 
 import type { NetworkConnectionStatus } from './network';
 

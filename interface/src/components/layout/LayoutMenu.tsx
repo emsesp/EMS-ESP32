@@ -128,7 +128,11 @@ const LayoutMenu: FC = () => {
       </List>
 
       <List style={{ marginTop: `auto` }}>
-        <LayoutMenuItem icon={AssessmentIcon} label={LL.SYSTEM(0)} to="/system" />
+        <LayoutMenuItem
+          icon={AssessmentIcon}
+          label={LL.STATUS_OF('')}
+          to="/status"
+        />
         <LayoutMenuItem
           icon={SettingsIcon}
           label={LL.SETTINGS(0)}

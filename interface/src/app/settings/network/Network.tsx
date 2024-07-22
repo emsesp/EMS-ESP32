@@ -9,13 +9,12 @@ import { useI18nContext } from 'i18n/i18n-react';
 import type { WiFiNetwork } from 'types';
 
 import NetworkSettings from './NetworkSettings';
-import NetworkStatus from './NetworkStatus';
 import { WiFiConnectionContext } from './WiFiConnectionContext';
 import WiFiNetworkScanner from './WiFiNetworkScanner';
 
 const Network: FC = () => {
   const { LL } = useI18nContext();
-  useLayoutTitle(LL.NETWORK(0));
+  useLayoutTitle(LL.SETTINGS_OF(LL.NETWORK(0)));
 
   const { routerTab } = useRouterTab();
 
@@ -45,11 +44,9 @@ const Network: FC = () => {
     >
       <RouterTabs value={routerTab}>
         <Tab value="settings" label={LL.SETTINGS_OF(LL.NETWORK(1))} />
-        <Tab value="status" label={LL.STATUS_OF(LL.NETWORK(1))} />
         <Tab value="scan" label={LL.NETWORK_SCAN()} />
       </RouterTabs>
       <Routes>
-        <Route path="status" element={<NetworkStatus />} />
         <Route path="scan" element={<WiFiNetworkScanner />} />
         <Route path="settings" element={<NetworkSettings />} />
         <Route path="*" element={<Navigate replace to="settings" />} />

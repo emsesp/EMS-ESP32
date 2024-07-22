@@ -23,7 +23,7 @@ import type { Theme } from '@mui/material';
 import * as NetworkApi from 'api/network';
 
 import { useRequest } from 'alova';
-import { ButtonRow, FormLoader, SectionContent } from 'components';
+import { ButtonRow, FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { NetworkStatusType } from 'types';
 import { NetworkConnectionStatus } from 'types';
@@ -91,6 +91,7 @@ const NetworkStatus: FC = () => {
   } = useRequest(NetworkApi.readNetworkStatus);
 
   const { LL } = useI18nContext();
+  useLayoutTitle(LL.STATUS_OF(LL.NETWORK(1)));
 
   const theme = useTheme();
 

@@ -15,7 +15,8 @@ import {
   FormLoader,
   SectionContent,
   ValidatedPasswordField,
-  ValidatedTextField
+  ValidatedTextField,
+  useLayoutTitle
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import { range } from 'lodash-es';
@@ -46,6 +47,8 @@ const APSettings: FC = () => {
   });
 
   const { LL } = useI18nContext();
+
+  useLayoutTitle(LL.SETTINGS_OF(LL.ACCESS_POINT(0)));
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 

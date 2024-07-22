@@ -19,15 +19,15 @@ import { ButtonRow, FormLoader, SectionContent, useLayoutTitle } from 'component
 import { useI18nContext } from 'i18n/i18n-react';
 import type { Translation } from 'i18n/i18n-types';
 
-import * as EMSESP from './api';
-import type { Stat } from './types';
+import * as EMSESP from '../main/api';
+import type { Stat } from '../main/types';
 
 const SystemActivity: FC = () => {
   const { data: data, send: loadData, error } = useRequest(EMSESP.readActivity);
 
   const { LL } = useI18nContext();
 
-  useLayoutTitle(LL.SYSTEM(0));
+  useLayoutTitle(LL.EMS_BUS_STATUS());
 
   const stats_theme = tableTheme({
     Table: `
