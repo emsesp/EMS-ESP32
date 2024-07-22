@@ -27,7 +27,7 @@ const SystemActivity: FC = () => {
 
   const { LL } = useI18nContext();
 
-  useLayoutTitle(LL.EMS_BUS_STATUS());
+  useLayoutTitle(LL.DATA_TRAFFIC());
 
   const stats_theme = tableTheme({
     Table: `

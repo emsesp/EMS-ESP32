@@ -71,13 +71,11 @@ const no: Translation = {
   TX_ISSUES: 'Tx problemer - prøv en annen Tx Modus',
   DISCONNECTED: 'Frakoblet',
   EMS_SCAN: 'Er du sikker på du vil starte full søking av EMS bussen?',
-  EMS_BUS_STATUS: 'EMS Buss Status',
-  ACTIVE_DEVICES: 'Aktive Enheter og Sensorer',
+  DATA_TRAFFIC: 'Data Traffic', // TODO Translate
   EMS_DEVICE: 'EMS Enhet',
   SUCCESS: 'VELLYKKET',
   FAIL: 'MISLYKKET',
   QUALITY: 'KVALITET',
-  SCAN_DEVICES: 'Søk etter nye enheter',
   SCAN: 'Søk',
   STATUS_NAMES: [
     'EMS Telegrammer Mottatt (Rx)',
@@ -89,9 +87,6 @@ const no: Translation = {
     'API Anrop',
     'Syslog Meldinger'
   ],
-  NUM_DEVICES: '{num} Enhet{{er}}',
-  NUM_TEMP_SENSORS: '{num} Temperatursensor{{er}}',
-  NUM_ANALOG_SENSORS: '{num} Analogsensor{{er}}',
   NUM_DAYS: '{num} Dag{{er}}',
   NUM_SECONDS: '{num} Sekund{{er}}',
   NUM_HOURS: '{num} Time{{r}}',

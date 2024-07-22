@@ -71,13 +71,11 @@ const sv: Translation = {
   TX_ISSUES: 'Sändfel - Prova ett annat TX-läge',
   DISCONNECTED: 'Nedkopplad',
   EMS_SCAN: 'Är du säker att du vill initiera en full genomsökning av EMS-bussen?',
-  EMS_BUS_STATUS: 'Status',
-  ACTIVE_DEVICES: 'Aktiva Enheter',
+  DATA_TRAFFIC: 'Data Traffic', // TODO Translate
   EMS_DEVICE: 'EMS Enhet',
   SUCCESS: 'Lyckades',
   FAIL: 'Misslyckades',
   QUALITY: 'Kvalitet',
-  SCAN_DEVICES: 'Sök efter nya enheter',
   SCAN: 'Sök',
   STATUS_NAMES: [
     'EMS-telegram (Rx)',
@@ -89,9 +87,6 @@ const sv: Translation = {
     'API-anrop',
     'Syslog-meddelanden'
   ],
-  NUM_DEVICES: '{num} Enhet{{er}}',
-  NUM_TEMP_SENSORS: '{num} Temperatur-sensor{{er}}',
-  NUM_ANALOG_SENSORS: '{num} Analoga Sensor{{er}}',
   NUM_DAYS: '{num} dag{{ar}}',
   NUM_SECONDS: '{num} sekund{{er}}',
   NUM_HOURS: '{num} timmar',

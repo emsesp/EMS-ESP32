@@ -71,13 +71,11 @@ const nl: Translation = {
   TX_ISSUES: 'Tx bus probleem. Probeer een andere Tx verzendmodus',
   DISCONNECTED: 'Niet verbonden',
   EMS_SCAN: 'Weet je zeker dat je een volledige EMS bus scan uit wilt voeren?',
-  EMS_BUS_STATUS: 'EMS busstatus',
-  ACTIVE_DEVICES: 'Actieve Apparaten & Sensoren',
+  DATA_TRAFFIC: 'Data Traffic', // TODO Translate
   EMS_DEVICE: 'EMS Apparaat',
   SUCCESS: 'SUCCESS',
   FAIL: 'MISLUKT',
   QUALITY: 'QUALITEIT',
-  SCAN_DEVICES: 'Scannen naar nieuwe apparaten',
   SCAN: 'Scan',
   STATUS_NAMES: [
     'EMS Telegrammen ontvangen (Rx)',
@@ -89,9 +87,6 @@ const nl: Translation = {
     'API calls',
     'Syslog berichten'
   ],
-  NUM_DEVICES: '{num} Apparaat{{en}}',
-  NUM_TEMP_SENSORS: '{num} Temperatuursensor{{en}}',
-  NUM_ANALOG_SENSORS: '{num} Analoge sensor{{en}}',
   NUM_DAYS: '{num} dag{{en}}',
   NUM_SECONDS: '{num} second{{en}}',
   NUM_HOURS: '{num} {{uur|uren}}',

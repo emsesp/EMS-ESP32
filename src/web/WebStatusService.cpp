@@ -24,6 +24,7 @@
 
 namespace emsesp {
 
+// /rest/ESPSystemStatus
 WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * securityManager) {
     server->on(ESPSYSTEM_STATUS_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { ESPsystemStatus(request); });
     server->on(SYSTEM_STATUS_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { systemStatus(request); });

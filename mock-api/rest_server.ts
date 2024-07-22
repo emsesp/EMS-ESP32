@@ -425,7 +425,6 @@ const EMSESP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'settings';
 const EMSESP_CORE_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'coreData';
 const EMSESP_SENSOR_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'sensorData';
 const EMSESP_DEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'devices';
-const EMSESP_SCANDEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'scanDevices';
 
 const EMSESP_DEVICEDATA_ENDPOINT1 = REST_ENDPOINT_ROOT + 'deviceData';
 const EMSESP_DEVICEDATA_ENDPOINT2 = REST_ENDPOINT_ROOT + 'deviceData/:id?';
@@ -4325,8 +4324,6 @@ router
     return { devices: sorted_devices };
     
   })
-  .post(EMSESP_SCANDEVICES_ENDPOINT, () => status(200))
-
   .get(EMSESP_DEVICEDATA_ENDPOINT1, (request) =>
     request.query.id ? deviceData(Number(request.query.id)) : status(404)
   )

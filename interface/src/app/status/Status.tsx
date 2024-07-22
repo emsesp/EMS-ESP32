@@ -56,7 +56,6 @@ const SystemStatus: FC = () => {
   const { me } = useContext(AuthenticatedContext);
 
   const [confirmRestart, setConfirmRestart] = useState<boolean>(false);
-  const [confirmScan, setConfirmScan] = useState<boolean>(false);
   const [processing, setProcessing] = useState<boolean>(false);
   const [restarting, setRestarting] = useState<boolean>();
 
@@ -73,10 +72,6 @@ const SystemStatus: FC = () => {
     send: loadData,
     error
   } = useRequest(SystemApi.readSystemStatus, { force: true });
-
-  const { send: scanDevices } = useRequest(EMSESP.scanDevices, {
-    immediate: false
-  });
 
   const theme = useTheme();
 
@@ -108,14 +103,20 @@ const SystemStatus: FC = () => {
     if (data) {
       switch (data.status) {
         case busConnectionStatus.BUS_STATUS_CONNECTED:
-          return LL.CONNECTED(0) + ' (' + formatDurationSec(data.bus_uptime) + ')';
+          return (
+            'EMS ' +
+            LL.CONNECTED(0) +
+            ' (' +
+            formatDurationSec(data.bus_uptime) +
+            ')'
+          );
         case busConnectionStatus.BUS_STATUS_TX_ERRORS:
-          return LL.TX_ISSUES();
+          return 'EMS ' + LL.TX_ISSUES();
         case busConnectionStatus.BUS_STATUS_OFFLINE:
-          return LL.DISCONNECTED();
+          return 'EMS ' + LL.DISCONNECTED();
       }
     }
-    return 'Unknown';
+    return 'EMS state unknown';
   };
 
   const busStatusHighlight = () => {
@@ -200,46 +201,6 @@ const SystemStatus: FC = () => {
   const activeHighlight = (value: boolean) =>
     value ? theme.palette.success.main : theme.palette.info.main;
 
-  const scan = async () => {
-    await scanDevices()
-      .then(() => {
-        toast.info(LL.SCANNING() + '...');
-      })
-      .catch((error: Error) => {
-        toast.error(error.message);
-      });
-    setConfirmScan(false);
-  };
-
-  const renderScanDialog = () => (
-    <Dialog
-      sx={dialogStyle}
-      open={confirmScan}
-      onClose={() => setConfirmScan(false)}
-    >
-      <DialogTitle>{LL.SCAN_DEVICES()}</DialogTitle>
-      <DialogContent dividers>{LL.EMS_SCAN()}</DialogContent>
-      <DialogActions>
-        <Button
-          startIcon={<CancelIcon />}
-          variant="outlined"
-          onClick={() => setConfirmScan(false)}
-          color="secondary"
-        >
-          {LL.CANCEL()}
-        </Button>
-        <Button
-          startIcon={<PermScanWifiIcon />}
-          variant="outlined"
-          onClick={scan}
-          color="primary"
-        >
-          {LL.SCAN()}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-
   const restart = async () => {
     setProcessing(true);
     await restartCommand()
@@ -320,56 +281,6 @@ const SystemStatus: FC = () => {
         <List sx={{ borderRadius: 3, border: '2px solid grey' }}>
           <ListItem>
             <ListItemAvatar>
-              <Avatar sx={{ bgcolor: '#c5572c', color: 'white' }}>
-                <TimerIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText
-              primary={LL.UPTIME()}
-              secondary={formatDurationSec(data.uptime)}
-            />
-            {me.admin && (
-              <Button
-                startIcon={<PowerSettingsNewIcon />}
-                variant="outlined"
-                color="error"
-                onClick={() => setConfirmRestart(true)}
-              >
-                {LL.RESTART()}
-              </Button>
-            )}
-          </ListItem>
-
-          <ListItem>
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: '#5d89f7', color: 'white' }}>
-                <DeviceHubIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText
-              primary={LL.ACTIVE_DEVICES()}
-              secondary={
-                LL.NUM_DEVICES({ num: data.num_devices }) +
-                ', ' +
-                LL.NUM_TEMP_SENSORS({ num: data.num_sensors }) +
-                ', ' +
-                LL.NUM_ANALOG_SENSORS({ num: data.num_analogs })
-              }
-            />
-            {me.admin && (
-              <Button
-                startIcon={<PermScanWifiIcon />}
-                variant="outlined"
-                color="primary"
-                onClick={() => setConfirmScan(true)}
-              >
-                {LL.SCAN_DEVICES()}
-              </Button>
-            )}
-          </ListItem>
-
-          <ListItem>
-            <ListItemAvatar>
               <Avatar sx={{ bgcolor: '#134ba2', color: 'white' }}>
                 <BuildIcon />
               </Avatar>
@@ -390,11 +301,33 @@ const SystemStatus: FC = () => {
             )}
           </ListItem>
 
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar sx={{ bgcolor: '#c5572c', color: 'white' }}>
+                <TimerIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText
+              primary={LL.UPTIME()}
+              secondary={formatDurationSec(data.uptime)}
+            />
+            {me.admin && (
+              <Button
+                startIcon={<PowerSettingsNewIcon />}
+                variant="outlined"
+                color="error"
+                onClick={() => setConfirmRestart(true)}
+              >
+                {LL.RESTART()}
+              </Button>
+            )}
+          </ListItem>
+
           <ListMenuItem
             disabled={!me.admin}
             icon={DirectionsBusIcon}
             bgcolor={busStatusHighlight()}
-            label={LL.EMS_BUS_STATUS()}
+            label={LL.DATA_TRAFFIC()}
             text={busStatus()}
             to="/status/activity"
           />
@@ -458,7 +391,6 @@ const SystemStatus: FC = () => {
           />
         </List>
 
-        {renderScanDialog()}
         {renderRestartDialog()}
 
         <Box mt={2} display="flex" flexWrap="wrap">

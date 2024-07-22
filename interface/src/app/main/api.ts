@@ -50,9 +50,6 @@ export const writeAnalogSensor = (as: WriteAnalogSensor) =>
 // Activity
 export const readActivity = () => alovaInstance.Get<Activity>('/rest/activity');
 
-// Scan devices
-export const scanDevices = () => alovaInstance.Post('/rest/scanDevices');
-
 // API, used in HelpInformation
 export const API = (apiCall: APIcall) => alovaInstance.Post('/api', apiCall);
 
