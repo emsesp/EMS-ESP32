@@ -853,7 +853,6 @@ void System::commands_init() {
     Command::add(EMSdevice::DeviceType::SYSTEM, F("response"), System::command_response, FL_(commands_response));
     Command::add(EMSdevice::DeviceType::SYSTEM, F("allvalues"), System::command_allvalues, FL_(allvalues_cmd));
 
-
     // MQTT subscribe "ems-esp/system/#"
     Mqtt::subscribe(EMSdevice::DeviceType::SYSTEM, "system/#", nullptr); // use empty function callback
 }
@@ -1621,7 +1620,11 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
 #if defined(EMSESP_TEST)
 // run a test, e.g. http://ems-esp/api?device=system&cmd=test&data=boiler
 bool System::command_test(const char * value, const int8_t id) {
-    return Test::test(value, id);
+    if (value) {
+        return Test::test(value, id);
+    } else {
+        return false;
+    }
 }
 #endif
 
