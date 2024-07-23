@@ -1312,7 +1312,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
             default_name = "Cascaded Controller";
             device_type  = DeviceType::CONTROLLER;
         } else {
-            LOG_WARNING("Unrecognized EMS device (device ID 0x%02X, no product ID). Please report on GitHub.", device_id);
+            LOG_WARNING("Unrecognized EMS device (deviceID 0x%02X, no productID). Please report on GitHub.", device_id);
             return false;
         }
     }
