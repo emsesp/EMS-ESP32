@@ -973,38 +973,13 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             EMSESP::temperaturesensor_.test();      // add temperature sensors
             EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
 
-            request.method(HTTP_POST);
-
-            char data[] = "{\"cmd\":\"send\",\"data\":\"0B 90 FF 13 01 01 B9 01\"}";
-            deserializeJson(doc, data);
-            json = doc.as<JsonVariant>();
-            request.url("/api/system");
-            EMSESP::webAPIService.webAPIService(&request, json);
-
-            char data2[] = "{\"device\":\"system\", \"cmd\":\"send\",\"value\":\"0B 90 FF 13 01 01 B9 02\"}";
-            deserializeJson(doc, data2);
-            json = doc.as<JsonVariant>();
-            request.url("/api");
-            EMSESP::webAPIService.webAPIService(&request, json);
-
-            char data4[] = "{\"value\":\"0B 90 FF 13 01 01 B9 03\"}";
-            deserializeJson(doc, data4);
-            json = doc.as<JsonVariant>();
-            request.url("/api/system/send");
-            EMSESP::webAPIService.webAPIService(&request, json);
-
             request.method(HTTP_GET);
 
-            request.url("/api/thermostat/commands");
+            request.url("/api/boiler/bad");
             EMSESP::webAPIService.webAPIService(&request);
-
-            request.url("/api/thermostat/hc1/mode2");
+            request.url("/api/boiler/bad/value");
             EMSESP::webAPIService.webAPIService(&request);
-
-            request.url("/api/thermostat/hc2/mode");
-            EMSESP::webAPIService.webAPIService(&request);
-
-            request.url("/api/thermostat/hc1/mode");
+            request.url("/api/boiler/bad/valu");
             EMSESP::webAPIService.webAPIService(&request);
 
         } else {
@@ -1042,22 +1017,32 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             // custom
             request.url("/api/custom");
             EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/custom/info");
+            EMSESP::webAPIService.webAPIService(&request);
             request.url("/api/custom/seltemp");
             EMSESP::webAPIService.webAPIService(&request);
 
             // system
             request.url("/api/system");
             EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/system/info");
+            EMSESP::webAPIService.webAPIService(&request);
             request.url("/api/system/settings/locale");
             EMSESP::webAPIService.webAPIService(&request);
 
             // scheduler
+            request.url("/api/scheduler");
+            EMSESP::webAPIService.webAPIService(&request);
             request.url("/api/scheduler/info");
             EMSESP::webAPIService.webAPIService(&request);
             request.url("/api/scheduler/test_scheduler");
             EMSESP::webAPIService.webAPIService(&request);
 
             // temperaturesensor
+            request.url("/api/temperaturesensor");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/temperaturesensor/info");
+            EMSESP::webAPIService.webAPIService(&request);
             request.url("/api/temperaturesensor/test_sensor2");
             EMSESP::webAPIService.webAPIService(&request);
             request.url("/api/temperaturesensor/0B_0C0D_0E0F_1011");
@@ -1067,6 +1052,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
             // analogsensor
             request.url("/api/analogsensor");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/analogsensor/info");
             EMSESP::webAPIService.webAPIService(&request);
             request.url("/api/analogsensor/test_analog1");
             EMSESP::webAPIService.webAPIService(&request);
@@ -1120,13 +1107,23 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             // system
             request.url("/api/system/settings/locale2");
             EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/system/settings2");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/system/settings2/locale2");
+            EMSESP::webAPIService.webAPIService(&request);
 
             // scheduler
             request.url("/api/scheduler/test_scheduler2");
             EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/scheduler/test_scheduler/val");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/scheduler/test_scheduler2/val2");
+            EMSESP::webAPIService.webAPIService(&request);
 
             // custom
             request.url("/api/custom/seltemp2");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/custom/seltemp/val");
             EMSESP::webAPIService.webAPIService(&request);
 
             // temperaturesensor
@@ -1142,7 +1139,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             EMSESP::webAPIService.webAPIService(&request);
             request.url("/api/analogsensor/test_analog10");
             EMSESP::webAPIService.webAPIService(&request);
-            request.url("/api/analogsensor/test_analog10/bad");
+            request.url("/api/analogsensor/test_analog10/bad2");
             EMSESP::webAPIService.webAPIService(&request);
         }
     }
