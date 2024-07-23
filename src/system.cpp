@@ -144,24 +144,20 @@ bool System::command_fetch(const char * value, const int8_t id) {
         if (value_s == "all") {
             LOG_INFO("Requesting data from EMS devices");
             EMSESP::fetch_device_values();
-            return true;
         } else if (value_s == (F_(boiler))) {
             EMSESP::fetch_device_values_type(EMSdevice::DeviceType::BOILER);
-            return true;
         } else if (value_s == (F_(thermostat))) {
             EMSESP::fetch_device_values_type(EMSdevice::DeviceType::THERMOSTAT);
-            return true;
         } else if (value_s == (F_(solar))) {
             EMSESP::fetch_device_values_type(EMSdevice::DeviceType::SOLAR);
-            return true;
         } else if (value_s == (F_(mixer))) {
             EMSESP::fetch_device_values_type(EMSdevice::DeviceType::MIXER);
-            return true;
         }
+    } else {
+        EMSESP::fetch_device_values(); // default if no name or id is given
     }
 
-    EMSESP::fetch_device_values(); // default if no name or id is given
-    return true;
+    return true; // always true
 }
 
 // mqtt publish
@@ -1295,6 +1291,7 @@ bool System::saveSettings(const char * filename, const char * section, JsonObjec
     return false; // not found
 }
 
+// return back a system value
 bool System::get_value_info(JsonObject root, const char * command) {
     if (command == nullptr || strlen(command) == 0) {
         LOG_ERROR("empty system command");
@@ -1344,8 +1341,9 @@ bool System::get_value_info(JsonObject root, const char * command) {
         }
     }
 
+    root.clear(); // empty json output, as it may have the default output from an info command earlier
+
     if (!s.empty()) {
-        root.clear();
         if (val) {
             root["api_data"] = s;
         } else {
@@ -1354,7 +1352,7 @@ bool System::get_value_info(JsonObject root, const char * command) {
         return true; // found
     }
 
-    return EMSESP::return_not_found(root, "data", command); // not found
+    return false; // not found
 }
 
 // export status information including the device information
