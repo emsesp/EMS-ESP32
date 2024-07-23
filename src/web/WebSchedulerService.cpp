@@ -196,14 +196,18 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
             output["readable"]  = true;
             output["writeable"] = true;
             output["visible"]   = true;
+            break;
         }
     }
 
-    if (attribute_s && output.containsKey(attribute_s)) {
-        std::string data = output[attribute_s].as<std::string>();
-        output.clear();
-        output["api_data"] = data; // always as a string
-        return true;
+    if (attribute_s) {
+        if (output.containsKey(attribute_s)) {
+            std::string data = output[attribute_s].as<std::string>();
+            output.clear();
+            output["api_data"] = data; // always as a string
+            return true;
+        }
+        return EMSESP::return_not_found(output, attribute_s, command_s); // not found
     }
 
     if (output.size()) {
