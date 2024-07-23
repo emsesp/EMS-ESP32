@@ -74,8 +74,9 @@ MAKE_WORD_TRANSLATION(schedule_cmd, "enable schedule item", "Aktiviere Zeitplan"
 MAKE_WORD_TRANSLATION(entity_cmd, "set custom value on ems", "Sende eigene Entitäten zu EMS", "verstuur custom waarde naar EMS", "", "wyślij własną wartość na EMS", "", "", "emp üzerinde özel değer ayarla", "imposta valori personalizzati su EMS", "nastaviť vlastnú hodnotu na ems") // TODO translate
 MAKE_WORD_TRANSLATION(commands_response, "get response", "Hole Antwort", "Verzoek om antwoord", "", "uzyskaj odpowiedź", "", "", "gelen cevap", "", "získať odpoveď") // TODO translate
 MAKE_WORD_TRANSLATION(coldshot_cmd, "send a cold shot of water", "", "", "", "uruchom tryśnięcie zimnej wody", "", "", "soğuk su gönder", "", "pošlite studenú dávku vody") // TODO translate
-MAKE_WORD_TRANSLATION(allvalues_cmd, "output all values", "", "", "", "wyświetl wszystkie wartości", "", "", "", "", "vypísať všetky hodnoty") // TODO translate
+MAKE_WORD_TRANSLATION(allvalues_cmd, "output all values in system", "", "", "", "wyświetl wszystkie wartości", "", "", "", "", "vypísať všetky hodnoty") // TODO translate
 MAKE_WORD_TRANSLATION(message_cmd, "send a message", "", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_WORD_TRANSLATION(values_cmd, "list all values", "", "", "", "", "", "", "", "", "") // TODO translate
 
 // tags
 MAKE_WORD_TRANSLATION(tag_hc1, "hc1", "HK1", "hc1", "VK1", "OG1", "hc1", "hc1", "ID1", "hc1", "hc1")
