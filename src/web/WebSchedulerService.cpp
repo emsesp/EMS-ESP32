@@ -136,6 +136,7 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
     if (Helpers::toLower(cmd) == F_(commands)) {
         output[F_(info)]     = Helpers::translated_word(FL_(info_cmd));
         output[F_(commands)] = Helpers::translated_word(FL_(commands_cmd));
+        output[F_(values)]   = Helpers::translated_word(FL_(values_cmd));
 
         for (const ScheduleItem & scheduleItem : *scheduleItems_) {
             if (!scheduleItem.name.empty()) {

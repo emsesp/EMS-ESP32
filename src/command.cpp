@@ -510,10 +510,11 @@ std::string Command::tagged_cmd(const std::string & cmd, const uint8_t flag) {
 
 // list all commands for a specific device, output as json
 bool Command::list(const uint8_t device_type, JsonObject output) {
-    // force add info and commands for those non-EMS devices
+    // check of it a 'commands' command
     if (device_type == EMSdevice::DeviceType::TEMPERATURESENSOR || device_type == EMSdevice::DeviceType::ANALOGSENSOR) {
         output[F_(info)]     = Helpers::translated_word(FL_(info_cmd));
         output[F_(commands)] = Helpers::translated_word(FL_(commands_cmd));
+        output[F_(values)]   = Helpers::translated_word(FL_(values_cmd));
     } else if (cmdfunctions_.empty()) {
         output["message"] = "no commands available";
         return false;
@@ -555,6 +556,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
     if (!verbose && show_info) {
         sorted_cmds.push_back(F_(info));
         sorted_cmds.push_back(F_(commands));
+        sorted_cmds.push_back(F_(values));
     }
 
     sorted_cmds.sort(); // sort them

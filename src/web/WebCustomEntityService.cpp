@@ -256,10 +256,12 @@ void WebCustomEntityService::show_values(JsonObject output) {
 
 // process json output for info/commands and value_info
 bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd) {
-    // if it's commands...
+    // check of it a 'commands' command
     if (Helpers::toLower(cmd) == F_(commands)) {
         output[F_(info)]     = Helpers::translated_word(FL_(info_cmd));
         output[F_(commands)] = Helpers::translated_word(FL_(commands_cmd));
+        output[F_(values)]   = Helpers::translated_word(FL_(values_cmd));
+
         for (const auto & entity : *customEntityItems_) {
             if (entity.writeable) {
                 output[entity.name] = "custom entity";
