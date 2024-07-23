@@ -1839,12 +1839,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^20.14.11":
-  version: 20.14.11
-  resolution: "@types/node@npm:20.14.11"
+"@types/node@npm:^20.14.12":
+  version: 20.14.12
+  resolution: "@types/node@npm:20.14.12"
   dependencies:
     undici-types: "npm:~5.26.4"
-  checksum: 10c0/5306becc0ff41d81b1e31524bd376e958d0741d1ce892dffd586b9ae0cb6553c62b0d62abd16da8bea6b9a2c17572d360450535d7c073794b0cef9cb4e39691e
+  checksum: 10c0/59bc5fa11fdd23fd517f859063118f54a1ab53d3399ef63c926f8902429d7453abc0db22ef4b0a6110026b6ab81b6472fee894e1d235c24b01a0b3e10cfae0bb
   languageName: node
   linkType: hard
 
@@ -2085,7 +2085,7 @@ __metadata:
     "@trivago/prettier-plugin-sort-imports": "npm:^4.3.0"
     "@types/babel__core": "npm:^7"
     "@types/lodash-es": "npm:^4.17.12"
-    "@types/node": "npm:^20.14.11"
+    "@types/node": "npm:^20.14.12"
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"
     "@types/react-router-dom": "npm:^5.3.3"
@@ -2098,7 +2098,7 @@ __metadata:
     jwt-decode: "npm:^4.0.0"
     lodash-es: "npm:^4.17.21"
     mime-types: "npm:^2.1.35"
-    preact: "npm:^10.22.1"
+    preact: "npm:^10.23.0"
     prettier: "npm:^3.3.3"
     react: "npm:latest"
     react-dom: "npm:latest"
@@ -6070,10 +6070,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"preact@npm:^10.22.1":
-  version: 10.22.1
-  resolution: "preact@npm:10.22.1"
-  checksum: 10c0/9163b97d6fc0ce6b945ed77695d00c4fa07e317d0723e7b9d10c748153d30596abab8b26861ae45591e47bff25515da91406ce7f1c9e66cd9cac7e7f6c927930
+"preact@npm:^10.23.0":
+  version: 10.23.0
+  resolution: "preact@npm:10.23.0"
+  checksum: 10c0/00bcf490ce13c0fd70e3d2e2418466419b31f201b28d35f173d7ddcb66b421a3f6ca569541de581cbbf4ec7b2adef3f391d631dca7a4fd86708d81ca08259c1c
   languageName: node
   linkType: hard
 
