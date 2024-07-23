@@ -575,10 +575,11 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                     return;
                 } else {
                     // show message if no data returned (e.g. for analogsensor, temperaturesensor, custom)
-                    shell.println("No data.");
+                    shell.println("No data returned.");
                     return;
                 }
             }
+
 
             if (return_code == CommandRet::NOT_FOUND) {
                 shell.println("Unknown command");

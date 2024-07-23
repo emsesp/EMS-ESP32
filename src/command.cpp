@@ -172,7 +172,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
                 }
 
                 uint8_t device_type = EMSdevice::device_name_2_device_type(device_p);
-                if (CommandRet::OK != Command::call(device_type, data_s, "", true, id_d, output)) {
+                if (Command::call(device_type, data_s, "", true, id_d, output) != CommandRet::OK) {
                     return CommandRet::INVALID;
                 }
 
@@ -334,7 +334,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
         }
     }
 
-    // first see if there is a command registered and it's valid
+    // see if there is a command registered and it's valid
     auto cf = find_command(device_type, device_id, cmd, flag);
     if (!cf) {
         std::string err = std::string("unknown command ") + cmd;
@@ -376,7 +376,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
         if (!single_command && EMSESP::cmd_is_readonly(device_type, device_id, cmd, id)) {
             return_code = CommandRet::INVALID; // error on readonly or invalid hc
         } else {
-            // call it...
+            // call the command...
             return_code = ((cf->cmdfunction_)(value, id)) ? CommandRet::OK : CommandRet::ERROR;
         }
     }
@@ -394,12 +394,12 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
         LOG_WARNING(error);
     } else {
         if (single_command) {
-            LOG_DEBUG(("%sCalling command %s"), ro.c_str(), info_s);
+            LOG_DEBUG(("%sCalled command %s"), ro.c_str(), info_s);
         } else {
             if (id > 0) {
-                LOG_INFO(("%sCalling command %s with value %s and id %d on device 0x%02X"), ro.c_str(), info_s, value, id, device_id);
+                LOG_INFO(("%sCalled command %s with value %s and id %d on device 0x%02X"), ro.c_str(), info_s, value, id, device_id);
             } else {
-                LOG_INFO(("%sCalling command %s with value %s"), ro.c_str(), info_s, value);
+                LOG_INFO(("%sCalled command %s with value %s"), ro.c_str(), info_s, value);
             }
         }
     }

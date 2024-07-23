@@ -742,8 +742,8 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
     buffer = nullptr;
 }
 
-// builds json with the detail of each value, for a given EMS device
-// for other types like sensors, scheduler, custom entities it will process single commands like 'info', 'values', 'commands', 'entities'...
+// builds json with the detail of each value, for a given device type
+// device type can be EMS devices looking for entities, or a sensor/scheduler/custom entity etc looking for values extracted from the info command
 bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8_t id, const uint8_t devicetype) {
     // check first for EMS devices
     bool found_device = false;

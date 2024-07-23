@@ -55,8 +55,9 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request, JsonVariant j
         // HTTP GET
         JsonDocument input_doc; // has no body JSON so create dummy as empty input object
         input = input_doc.to<JsonObject>();
+
     } else {
-        // HTTP_POST | HTTP_PUT | HTTP_PATCH
+        // HTTP_POST
         input = json.as<JsonObject>(); // extract values from the json. these will be used as default values
     }
     parse(request, input);
