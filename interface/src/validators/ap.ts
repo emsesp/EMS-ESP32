@@ -1,5 +1,5 @@
+import { isAPEnabled } from 'app/settings/APSettings';
 import Schema from 'async-validator';
-import { isAPEnabled } from 'framework/ap/APSettings';
 import type { APSettingsType } from 'types';
 
 import { IP_ADDRESS_VALIDATOR } from './shared';

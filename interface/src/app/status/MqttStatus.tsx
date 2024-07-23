@@ -20,7 +20,7 @@ import type { Theme } from '@mui/material';
 import * as MqttApi from 'api/mqtt';
 
 import { useRequest } from 'alova';
-import { ButtonRow, FormLoader, SectionContent } from 'components';
+import { ButtonRow, FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { MqttStatusType } from 'types';
 import { MqttDisconnectReason } from 'types';
@@ -61,6 +61,7 @@ const MqttStatus: FC = () => {
   const { data: data, send: loadData, error } = useRequest(MqttApi.readMqttStatus);
 
   const { LL } = useI18nContext();
+  useLayoutTitle(LL.STATUS_OF('MQTT'));
 
   const theme = useTheme();
 

@@ -59,18 +59,12 @@ const LayoutMenuItem: FC<ListMenuItemProps> = ({
         }
       >
         <ListItemButton component={Link} to={to}>
-          <RenderIcon
-            icon={icon}
-            bgcolor={bgcolor}
-            label={label}
-            text={text}
-            to=""
-          />
+          <RenderIcon icon={icon} bgcolor={bgcolor} label={label} text={text} />
         </ListItemButton>
       </ListItem>
     ) : (
       <ListItem>
-        <RenderIcon icon={icon} bgcolor={bgcolor} label={label} text={text} to="" />
+        <RenderIcon icon={icon} bgcolor={bgcolor} label={label} text={text} />
       </ListItem>
     )}
   </>

@@ -71,13 +71,11 @@ const tr: Translation = {
   TX_ISSUES: 'Tx sorunu - başka bir Tx Modu deneyin',
   DISCONNECTED: 'Bağlantı kesildi',
   EMS_SCAN: 'EMS Hattında tam bir cihaz taraması başlatmak istediğinizden emin misiniz?',
-  EMS_BUS_STATUS: 'EMS Hattı Durumu',
-  ACTIVE_DEVICES: 'Aktif Cihazlar ve Sensörler',
+  DATA_TRAFFIC: 'Data Traffic', // TODO Translate
   EMS_DEVICE: 'EMS Cihazı',
   SUCCESS: 'BAŞARILI',
   FAIL: 'HATA',
   QUALITY: 'KALİTE',
-  SCAN_DEVICES: 'Yeni cihaz taraması',
   SCAN: 'Tara',
   STATUS_NAMES: [
     'EMS Telegramlar Alındı (Rx)',
@@ -89,9 +87,6 @@ const tr: Translation = {
     'API Aramaları',
     'Sistem Kayıt Mesajları'
   ],
-  NUM_DEVICES: '{num} Cihaz{{ları}}',
-  NUM_TEMP_SENSORS: '{num} Sıcaklık Sensör{{leri}}',
-  NUM_ANALOG_SENSORS: '{num} Analog Sensör{{ler}}',
   NUM_DAYS: '{num} gün{{ler}}',
   NUM_SECONDS: '{num} saniye{{ler}}',
   NUM_HOURS: '{num} saat{{ler}}',
@@ -333,7 +328,8 @@ const tr: Translation = {
   MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
   MODULES_NONE: 'No external modules detected', // TODO translate
   RENAME: 'Rename', // TODO translate 
-  ENABLE_MODBUS: 'Enable Modbus' // TODO translate
+  ENABLE_MODBUS: 'Enable Modbus', // TODO translate
+  VIEW_LOG: 'View log to diagnose issues' // TODO translate
 };
 
 export default tr;

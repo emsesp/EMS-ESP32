@@ -71,13 +71,11 @@ const pl: BaseTranslation = {
   TX_ISSUES: 'problem z zapisem na magistralę EMS, spróbuj wybrać inny "Tryb transmisji (Tx)"',
   DISCONNECTED: 'brak połączenia',
   EMS_SCAN: 'Czy na pewno wykonać pełne skanowanie magistrali EMS?',
-  EMS_BUS_STATUS: 'Status magistrali EMS',
-  ACTIVE_DEVICES: 'Aktywne urządzenia i czujniki',
+  DATA_TRAFFIC: 'Data Traffic', // TODO Translate
   EMS_DEVICE: 'Urządzenie EMS',
   SUCCESS: 'Udane',
   FAIL: 'Nieudane',
   QUALITY: 'Jakość',
-  SCAN_DEVICES: 'Wyszukiwanie nowych urządzeń',
   SCAN: 'Skanuj',
   STATUS_NAMES: [
     'EMS, telegramy odebrane (Rx)',
@@ -89,9 +87,6 @@ const pl: BaseTranslation = {
     'Wywołania API',
     'Wpisy w SysLog'
   ],
-  NUM_DEVICES: '{num} urządze{{ń|nie|nia|nia|ń}} EMS',
-  NUM_TEMP_SENSORS: '{num} czujni{{ków|k|ki|ki|ków}} temperatury',
-  NUM_ANALOG_SENSORS: '{num} inn{{ych|e|e|e|ych}} urządze{{ń|nie|nia(two)|nia|ń}} podłączon{{ych|e|e|e|ych}} do EMS-ESP',
   NUM_DAYS: '{num} d{{ni|zień|ni|ni|ni}}',
   NUM_SECONDS: '{num} sekun{{d|da|dy|dy|d}}',
   NUM_HOURS: '{num} godzi{{n|na|ny|ny|n}}',
@@ -333,7 +328,8 @@ const pl: BaseTranslation = {
   MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
   MODULES_NONE: 'No external modules detected', // TODO translate
   RENAME: 'Rename', // TODO translate 
-  ENABLE_MODBUS: 'Aktywuj Modbus'
+  ENABLE_MODBUS: 'Aktywuj Modbus',
+  VIEW_LOG: 'View log to diagnose issues' // TODO translate
 };
 
 export default pl;

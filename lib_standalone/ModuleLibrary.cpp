@@ -16,37 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MODULELIBRARY_H
-#define MODULELIBRARY_H
-
 #include <Arduino.h>
-
-#include <memory>
-#include <vector>
 
 #include <emsesp.h>
 
-class ModuleLibrary {
-  public:
-    class Modules {
-      public:
-        Modules(const char * key, std::unique_ptr<Module> module)
-            : key(key)
-            , module(std::move(module)) {
-        }
-        const char *            key;
-        std::unique_ptr<Module> module;
-    };
+void ModuleLibrary::list(JsonObject output) {};
 
-    void start(emsesp::EMSESP * emsesp_main, bool test_mode = false);
-    void loop();
-    void list(JsonObject output);
-    bool enable(const char * key, const char * license, bool enable);
+void ModuleLibrary::loop() {};
 
-    static uuid::log::Logger logger_;
+void ModuleLibrary::start(emsesp::EMSESP * emsesp_main, bool test_mode) {};
 
-  private:
-    std::vector<Modules> modules_;
+bool ModuleLibrary::enable(const char * key, const char * license, bool enable) {
+    return true;
 };
-
-#endif

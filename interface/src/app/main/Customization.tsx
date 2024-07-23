@@ -41,6 +41,7 @@ import {
 import { useTheme } from '@table-library/react-table-library/theme';
 import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova';
+import RestartMonitor from 'app/status/RestartMonitor';
 import {
   BlockNavigation,
   ButtonRow,
@@ -48,7 +49,6 @@ import {
   SectionContent,
   useLayoutTitle
 } from 'components';
-import RestartMonitor from 'framework/system/RestartMonitor';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import * as EMSESP from './api';

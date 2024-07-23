@@ -75,7 +75,7 @@ const levelLabel = (level: LogLevel) => {
 const SystemLog: FC = () => {
   const { LL } = useI18nContext();
 
-  useLayoutTitle(LL.SYSTEM(0));
+  useLayoutTitle(LL.LOG_OF(LL.SYSTEM(0)));
 
   const {
     loadData,

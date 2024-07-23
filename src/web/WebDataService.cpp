@@ -43,18 +43,6 @@ WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securi
     server->on(SENSOR_DATA_SERVICE_PATH,
                HTTP_GET,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { sensor_data(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
-
-    // POST's
-    server->on(SCAN_DEVICES_SERVICE_PATH,
-               HTTP_POST,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { scan_devices(request); }, AuthenticationPredicates::IS_ADMIN));
-}
-
-// scan devices service
-void WebDataService::scan_devices(AsyncWebServerRequest * request) {
-    EMSESP::logger().info("Scanning devices...");
-    EMSESP::scan_devices();
-    request->send(200);
 }
 
 // this is used in the dashboard and contains all ems device information

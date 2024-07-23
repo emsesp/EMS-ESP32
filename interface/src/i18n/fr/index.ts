@@ -71,13 +71,11 @@ const fr: Translation = {
   TX_ISSUES: 'Problèmes de transmission (Tx) - Essayez un autre mode Tx',
   DISCONNECTED: 'Déconnecté',
   EMS_SCAN: 'Etes-vous sûr de vouloir lancer un scan complet du bus EMS ?',
-  EMS_BUS_STATUS: 'Statut du bus EMS',
-  ACTIVE_DEVICES: 'Appareils et capteurs actifs',
+  DATA_TRAFFIC: 'Data Traffic', // TODO Translate
   EMS_DEVICE: 'Appareils EMS',
   SUCCESS: 'SUCCÈS',
   FAIL: 'ÉCHEC',
   QUALITY: 'QUALITÉ',
-  SCAN_DEVICES: 'Rechercher de nouveaux appareils',
   SCAN: 'Scan',
   STATUS_NAMES: [
     'Télégrammes EMS reçus (Rx)',
@@ -89,9 +87,6 @@ const fr: Translation = {
     "Appels à l'API",
     'Messages Syslog'
   ],
-  NUM_DEVICES: '{num} Appareil{{s}}',
-  NUM_TEMP_SENSORS: '{num} Capteur{{s}} de température',
-  NUM_ANALOG_SENSORS: '{num} Capteur{{s}} analogique{{s}}',
   NUM_DAYS: '{num} jour{{s}}',
   NUM_SECONDS: '{num} seconde{{s}}',
   NUM_HOURS: '{num} heure{{s}}',
@@ -333,7 +328,8 @@ const fr: Translation = {
   MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
   MODULES_NONE: 'No external modules detected', // TODO translate
   RENAME: 'Rename', // TODO translate
-  ENABLE_MODBUS: 'Activer Modbus'
+  ENABLE_MODBUS: 'Activer Modbus',
+  VIEW_LOG: 'View log to diagnose issues' // TODO translate
 };
 
 export default fr;

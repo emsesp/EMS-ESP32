@@ -79,15 +79,15 @@ const Settings: FC = () => {
         <ListMenuItem
           icon={TuneIcon}
           bgcolor="#134ba2"
-          label={LL.APPLICATION()}
+          label={LL.SETTINGS_OF(LL.APPLICATION())}
           text={LL.APPLICATION_SETTINGS_1()}
-          to="ems-esp"
+          to="application"
         />
 
         <ListMenuItem
           icon={SettingsEthernetIcon}
           bgcolor="#40828f"
-          label={LL.NETWORK(0)}
+          label={LL.SETTINGS_OF(LL.NETWORK(0))}
           text={LL.CONFIGURE(LL.SETTINGS_OF(LL.NETWORK(1)))}
           to="network"
         />
@@ -95,7 +95,7 @@ const Settings: FC = () => {
         <ListMenuItem
           icon={SettingsInputAntennaIcon}
           bgcolor="#5f9a5f"
-          label={LL.ACCESS_POINT(0)}
+          label={LL.SETTINGS_OF(LL.ACCESS_POINT(0))}
           text={LL.CONFIGURE(LL.ACCESS_POINT(1))}
           to="ap"
         />
@@ -103,7 +103,7 @@ const Settings: FC = () => {
         <ListMenuItem
           icon={AccessTimeIcon}
           bgcolor="#c5572c"
-          label="NTP"
+          label={LL.SETTINGS_OF('NTP')}
           text={LL.CONFIGURE(LL.LOCAL_TIME(1))}
           to="ntp"
         />
@@ -111,14 +111,14 @@ const Settings: FC = () => {
         <ListMenuItem
           icon={DeviceHubIcon}
           bgcolor="#68374d"
-          label="MQTT"
+          label={LL.SETTINGS_OF('MQTT')}
           text={LL.CONFIGURE('MQTT')}
           to="mqtt"
         />
 
         <ListMenuItem
           icon={LockIcon}
-          label={LL.SECURITY(0)}
+          label={LL.SETTINGS_OF(LL.SECURITY(0))}
           text={LL.SECURITY_1()}
           to="security"
         />
