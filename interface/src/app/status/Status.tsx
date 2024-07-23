@@ -9,7 +9,6 @@ import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import LogoDevIcon from '@mui/icons-material/LogoDev';
 import MemoryIcon from '@mui/icons-material/Memory';
-import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import RouterIcon from '@mui/icons-material/Router';
@@ -34,7 +33,6 @@ import {
 
 import * as SystemApi from 'api/system';
 
-import * as EMSESP from 'app/main/api';
 import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova';
 import { busConnectionStatus } from 'app/main/types';
