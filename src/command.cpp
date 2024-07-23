@@ -353,6 +353,8 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
         return CommandRet::ERROR;
     }
 
+    output.clear(); // we have a command function, clear messages from device_value_info
+
     // before calling the command, check permissions and abort if not authorized
     if (cf->has_flags(CommandFlag::ADMIN_ONLY) && !is_admin) {
         LOG_WARNING("Command failed: authentication failed");
