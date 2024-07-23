@@ -968,13 +968,35 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         if (single) {
             // run dedicated tests only
-            // EMSESP::webCustomEntityService.test();  // custom entities
-            // EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
-            // EMSESP::temperaturesensor_.test();      // add temperature sensors
-            // EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
+            EMSESP::webCustomEntityService.test();  // custom entities
+            EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
+            EMSESP::temperaturesensor_.test();      // add temperature sensors
+            EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
 
-            // request.url("/api/thermostat/commands");
-            // EMSESP::webAPIService.webAPIService(&request);
+            request.method(HTTP_POST);
+
+            char data[] = "{\"cmd\":\"send\",\"data\":\"0B 90 FF 13 01 01 B9 01\"}";
+            deserializeJson(doc, data);
+            json = doc.as<JsonVariant>();
+            request.url("/api/system");
+            EMSESP::webAPIService.webAPIService(&request, json);
+
+            char data2[] = "{\"device\":\"system\", \"cmd\":\"send\",\"value\":\"0B 90 FF 13 01 01 B9 02\"}";
+            deserializeJson(doc, data2);
+            json = doc.as<JsonVariant>();
+            request.url("/api");
+            EMSESP::webAPIService.webAPIService(&request, json);
+
+            char data4[] = "{\"value\":\"0B 90 FF 13 01 01 B9 03\"}";
+            deserializeJson(doc, data4);
+            json = doc.as<JsonVariant>();
+            request.url("/api/system/send");
+            EMSESP::webAPIService.webAPIService(&request, json);
+
+            request.method(HTTP_GET);
+
+            request.url("/api/thermostat/commands");
+            EMSESP::webAPIService.webAPIService(&request);
 
             request.url("/api/thermostat/hc1/mode2");
             EMSESP::webAPIService.webAPIService(&request);
@@ -990,6 +1012,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
             EMSESP::temperaturesensor_.test();      // add temperature sensors
             EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
+
+            request.method(HTTP_GET);
 
             // boiler
             request.url("/api/boiler");
@@ -1048,6 +1072,32 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             EMSESP::webAPIService.webAPIService(&request);
             request.url("/api/analogsensor/test_analog1/offset");
             EMSESP::webAPIService.webAPIService(&request);
+
+            // system calls with POST
+            request.method(HTTP_POST);
+
+            // these next 3 should return empty JSON in their response
+            char data[] = "{\"cmd\":\"send\",\"data\":\"0B 90 FF 13 01 01 B9 01\"}";
+            deserializeJson(doc, data);
+            json = doc.as<JsonVariant>();
+            request.url("/api/system");
+            EMSESP::webAPIService.webAPIService(&request, json);
+
+            char data2[] = "{\"device\":\"system\", \"cmd\":\"send\",\"value\":\"0B 90 FF 13 01 01 B9 02\"}";
+            deserializeJson(doc, data2);
+            json = doc.as<JsonVariant>();
+            request.url("/api");
+            EMSESP::webAPIService.webAPIService(&request, json);
+
+            char data4[] = "{\"value\":\"0B 90 FF 13 01 01 B9 03\"}";
+            deserializeJson(doc, data4);
+            json = doc.as<JsonVariant>();
+            request.url("/api/system/send");
+            EMSESP::webAPIService.webAPIService(&request, json);
+
+            // console commands
+            shell.invoke_command("call system fetch");
+            shell.invoke_command("call system send \"0B 90 FF 13 01 01 B9\"");
 
             //
             // This next batch should all fail
