@@ -6,8 +6,9 @@ import { Box, Button, Divider, Link, Typography } from '@mui/material';
 
 import * as SystemApi from 'api/system';
 
-import * as EMSESP from 'project/api';
+import * as EMSESP from 'app/main/api';
 import { useRequest } from 'alova';
+import type { APIcall } from 'app/main/types';
 import {
   FormLoader,
   SectionContent,
@@ -15,9 +16,8 @@ import {
   useLayoutTitle
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
-import type { APIcall } from 'project/types';
 
-import RestartMonitor from './RestartMonitor';
+import RestartMonitor from '../status/RestartMonitor';
 
 const UploadDownload: FC = () => {
   const { LL } = useI18nContext();

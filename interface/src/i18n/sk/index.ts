@@ -71,13 +71,11 @@ const sk: Translation = {
   TX_ISSUES: 'Problémy s Tx – skontrolujte Tx režim',
   DISCONNECTED: 'Odpojené',
   EMS_SCAN: 'Naozaj chcete spustiť úplnú kontrolu zariadenia zbernice EMS?',
-  EMS_BUS_STATUS: 'Stav zbernice EMS',
-  ACTIVE_DEVICES: 'Aktívne zariadenia a snímače',
+  DATA_TRAFFIC: 'Data Traffic', // TODO Translate
   EMS_DEVICE: 'EMS zariadenie',
   SUCCESS: 'ÚSPEŠNÉ',
   FAIL: 'ZLÝHANIE',
   QUALITY: 'KVALITA',
-  SCAN_DEVICES: 'Scan pre nové zariadenia',
   SCAN: 'Scan',
   STATUS_NAMES: [
     'EMS Telegramy prijaté (Rx)',
@@ -89,9 +87,6 @@ const sk: Translation = {
     'Externé API volania',
     'Syslog správy'
   ],
-  NUM_DEVICES: '{num} Zariaden{{í|ie|ia|ia|í|í}}',
-  NUM_TEMP_SENSORS: '{num} Teplotn{{ých|ý|é|é|ých|ých}} sníma{{čov|č|če|če|čov|čov}}',
-  NUM_ANALOG_SENSORS: '{num} Analogov{{ých|ý|é|é|ých|ých}} sníma{{čov|č|če|če|čov|čov}}',
   NUM_DAYS: '{num} d{{ní|eň|ní|ní|ní|ní}}',
   NUM_SECONDS: '{num} sek{{únd|unda|undy|undy|únd|únd}}',
   NUM_HOURS: '{num} hod{{ín|ina|iny|iny|ín|ín}}',
@@ -333,7 +328,8 @@ const sk: Translation = {
   MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
   MODULES_NONE: 'No external modules detected', // TODO translate
   RENAME: 'Rename', // TODO translate 
-  ENABLE_MODBUS: 'Povoliť Modbus'
+  ENABLE_MODBUS: 'Povoliť Modbus',
+  VIEW_LOG: 'View log to diagnose issues' // TODO translate
 };
 
 export default sk;

@@ -1,4 +1,5 @@
 import { type FC, useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
@@ -6,6 +7,7 @@ import BuildIcon from '@mui/icons-material/Build';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+import LogoDevIcon from '@mui/icons-material/LogoDev';
 import MemoryIcon from '@mui/icons-material/Memory';
 import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
@@ -13,6 +15,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import RouterIcon from '@mui/icons-material/Router';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import TimerIcon from '@mui/icons-material/Timer';
+import UpgradeIcon from '@mui/icons-material/Upgrade';
 import WifiIcon from '@mui/icons-material/Wifi';
 import {
   Avatar,
@@ -22,7 +25,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
   List,
   ListItem,
   ListItemAvatar,
@@ -32,14 +34,14 @@ import {
 
 import * as SystemApi from 'api/system';
 
-import * as EMSESP from 'project/api';
+import * as EMSESP from 'app/main/api';
 import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova';
+import { busConnectionStatus } from 'app/main/types';
 import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import ListMenuItem from 'components/layout/ListMenuItem';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
-import { busConnectionStatus } from 'project/types';
 import { NTPSyncStatus, NetworkConnectionStatus } from 'types';
 
 import RestartMonitor from './RestartMonitor';
@@ -47,12 +49,13 @@ import RestartMonitor from './RestartMonitor';
 const SystemStatus: FC = () => {
   const { LL } = useI18nContext();
 
-  useLayoutTitle(LL.SYSTEM(0));
+  const navigate = useNavigate();
+
+  useLayoutTitle(LL.STATUS_OF(''));
 
   const { me } = useContext(AuthenticatedContext);
 
   const [confirmRestart, setConfirmRestart] = useState<boolean>(false);
-  const [confirmScan, setConfirmScan] = useState<boolean>(false);
   const [processing, setProcessing] = useState<boolean>(false);
   const [restarting, setRestarting] = useState<boolean>();
 
@@ -69,10 +72,6 @@ const SystemStatus: FC = () => {
     send: loadData,
     error
   } = useRequest(SystemApi.readSystemStatus, { force: true });
-
-  const { send: scanDevices } = useRequest(EMSESP.scanDevices, {
-    immediate: false
-  });
 
   const theme = useTheme();
 
@@ -104,14 +103,20 @@ const SystemStatus: FC = () => {
     if (data) {
       switch (data.status) {
         case busConnectionStatus.BUS_STATUS_CONNECTED:
-          return LL.CONNECTED(0) + ' (' + formatDurationSec(data.bus_uptime) + ')';
+          return (
+            'EMS ' +
+            LL.CONNECTED(0) +
+            ' (' +
+            formatDurationSec(data.bus_uptime) +
+            ')'
+          );
         case busConnectionStatus.BUS_STATUS_TX_ERRORS:
-          return LL.TX_ISSUES();
+          return 'EMS ' + LL.TX_ISSUES();
         case busConnectionStatus.BUS_STATUS_OFFLINE:
-          return LL.DISCONNECTED();
+          return 'EMS ' + LL.DISCONNECTED();
       }
     }
-    return 'Unknown';
+    return 'EMS state unknown';
   };
 
   const busStatusHighlight = () => {
@@ -196,46 +201,6 @@ const SystemStatus: FC = () => {
   const activeHighlight = (value: boolean) =>
     value ? theme.palette.success.main : theme.palette.info.main;
 
-  const scan = async () => {
-    await scanDevices()
-      .then(() => {
-        toast.info(LL.SCANNING() + '...');
-      })
-      .catch((error: Error) => {
-        toast.error(error.message);
-      });
-    setConfirmScan(false);
-  };
-
-  const renderScanDialog = () => (
-    <Dialog
-      sx={dialogStyle}
-      open={confirmScan}
-      onClose={() => setConfirmScan(false)}
-    >
-      <DialogTitle>{LL.SCAN_DEVICES()}</DialogTitle>
-      <DialogContent dividers>{LL.EMS_SCAN()}</DialogContent>
-      <DialogActions>
-        <Button
-          startIcon={<CancelIcon />}
-          variant="outlined"
-          onClick={() => setConfirmScan(false)}
-          color="secondary"
-        >
-          {LL.CANCEL()}
-        </Button>
-        <Button
-          startIcon={<PermScanWifiIcon />}
-          variant="outlined"
-          onClick={scan}
-          color="primary"
-        >
-          {LL.SCAN()}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-
   const restart = async () => {
     setProcessing(true);
     await restartCommand()
@@ -313,7 +278,29 @@ const SystemStatus: FC = () => {
 
     return (
       <>
-        <List>
+        <List sx={{ borderRadius: 3, border: '2px solid grey' }}>
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar sx={{ bgcolor: '#134ba2', color: 'white' }}>
+                <BuildIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText
+              primary={LL.EMS_ESP_VER()}
+              secondary={data.emsesp_version}
+            />
+            {me.admin && (
+              <Button
+                startIcon={<UpgradeIcon />}
+                variant="outlined"
+                color="primary"
+                onClick={() => navigate('/settings/upload')}
+              >
+                {LL.UPDATE()}
+              </Button>
+            )}
+          </ListItem>
+
           <ListItem>
             <ListItemAvatar>
               <Avatar sx={{ bgcolor: '#c5572c', color: 'white' }}>
@@ -336,66 +323,24 @@ const SystemStatus: FC = () => {
             )}
           </ListItem>
 
-          <Divider variant="inset" component="li" />
-          <ListItem>
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: '#5d89f7', color: 'white' }}>
-                <DeviceHubIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText
-              primary={LL.ACTIVE_DEVICES()}
-              secondary={
-                LL.NUM_DEVICES({ num: data.num_devices }) +
-                ', ' +
-                LL.NUM_TEMP_SENSORS({ num: data.num_sensors }) +
-                ', ' +
-                LL.NUM_ANALOG_SENSORS({ num: data.num_analogs })
-              }
-            />
-            {me.admin && (
-              <Button
-                startIcon={<PermScanWifiIcon />}
-                variant="outlined"
-                color="primary"
-                onClick={() => setConfirmScan(true)}
-              >
-                {LL.SCAN_DEVICES()}
-              </Button>
-            )}
-          </ListItem>
-
-          <Divider variant="inset" component="li" />
-          <ListMenuItem
-            disabled={!me.admin}
-            icon={BuildIcon}
-            bgcolor="#134ba2"
-            label={LL.EMS_ESP_VER()}
-            text={data.emsesp_version}
-            to="/settings/upload"
-          />
-
-          <Divider variant="inset" component="li" />
           <ListMenuItem
             disabled={!me.admin}
             icon={DirectionsBusIcon}
             bgcolor={busStatusHighlight()}
-            label={LL.EMS_BUS_STATUS()}
+            label={LL.DATA_TRAFFIC()}
             text={busStatus()}
-            to="/system/activity"
+            to="/status/activity"
           />
 
-          <Divider variant="inset" component="li" />
           <ListMenuItem
             disabled={!me.admin}
             icon={MemoryIcon}
             bgcolor="#68374d"
             label={LL.STATUS_OF(LL.HARDWARE())}
             text={formatNumber(data.free_heap) + ' KB' + ' ' + LL.FREE_MEMORY()}
-            to="/system/espsystemstatus"
+            to="/status/hardwarestatus"
           />
 
-          <Divider variant="inset" component="li" />
           <ListMenuItem
             disabled={!me.admin}
             icon={
@@ -406,42 +351,46 @@ const SystemStatus: FC = () => {
             bgcolor={networkStatusHighlight()}
             label={LL.STATUS_OF(LL.NETWORK(1))}
             text={networkStatus()}
-            to="/settings/network/status"
+            to="/status/network"
           />
 
-          <Divider variant="inset" component="li" />
           <ListMenuItem
             disabled={!me.admin}
             icon={DeviceHubIcon}
             bgcolor={activeHighlight(data.mqtt_status)}
             label={LL.STATUS_OF('MQTT')}
             text={data.mqtt_status ? LL.ACTIVE() : LL.INACTIVE(0)}
-            to="/settings/mqtt/status"
+            to="/status/mqtt"
           />
 
-          <Divider variant="inset" component="li" />
           <ListMenuItem
             disabled={!me.admin}
             icon={AccessTimeIcon}
             bgcolor={ntpStatusHighlight()}
             label={LL.STATUS_OF('NTP')}
             text={ntpStatus()}
-            to="/settings/ntp/status"
+            to="/status/ntp"
           />
 
-          <Divider variant="inset" component="li" />
           <ListMenuItem
             disabled={!me.admin}
             icon={SettingsInputAntennaIcon}
             bgcolor={activeHighlight(data.ap_status)}
-            label={LL.ACCESS_POINT(0)}
+            label={LL.STATUS_OF(LL.ACCESS_POINT(0))}
             text={data.ap_status ? LL.ACTIVE() : LL.INACTIVE(0)}
-            to="/settings/ap/status"
+            to="/status/ap"
           />
-          <Divider variant="inset" component="li" />
+
+          <ListMenuItem
+            disabled={!me.admin}
+            icon={LogoDevIcon}
+            bgcolor="#40828f"
+            label={LL.LOG_OF(LL.SYSTEM(0))}
+            text={LL.VIEW_LOG()}
+            to="/status/log"
+          />
         </List>
 
-        {renderScanDialog()}
         {renderRestartDialog()}
 
         <Box mt={2} display="flex" flexWrap="wrap">

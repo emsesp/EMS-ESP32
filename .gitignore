@@ -40,6 +40,7 @@ yarn.lock
 analyse.html
 interface/vite.config.ts.timestamp*
 *.local
+
 # i18n generated files
 interface/src/i18n/i18n-react.tsx
 interface/src/i18n/i18n-types.ts

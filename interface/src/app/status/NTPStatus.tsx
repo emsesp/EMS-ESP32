@@ -31,7 +31,7 @@ import * as NTPApi from 'api/ntp';
 
 import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova';
-import { ButtonRow, FormLoader, SectionContent } from 'components';
+import { ButtonRow, FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { NTPStatusType, Time } from 'types';
 import { NTPSyncStatus } from 'types';
@@ -45,6 +45,7 @@ const NTPStatus: FC = () => {
   const [processing, setProcessing] = useState<boolean>(false);
 
   const { LL } = useI18nContext();
+  useLayoutTitle(LL.STATUS_OF('NTP'));
 
   const { send: updateTime } = useRequest(
     (local_time: Time) => NTPApi.updateTime(local_time),

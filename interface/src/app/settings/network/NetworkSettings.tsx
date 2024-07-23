@@ -44,7 +44,7 @@ import { updateValueDirty, useRest } from 'utils';
 import { validate } from 'validators';
 import { createNetworkSettingsValidator } from 'validators/network';
 
-import RestartMonitor from '../system/RestartMonitor';
+import RestartMonitor from '../../status/RestartMonitor';
 import { WiFiConnectionContext } from './WiFiConnectionContext';
 import { isNetworkOpen, networkSecurityMode } from './WiFiNetworkSelector';
 

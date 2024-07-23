@@ -20,6 +20,7 @@ import {
 import * as SystemApi from 'api/system';
 
 import { useRequest } from 'alova';
+import RestartMonitor from 'app/status/RestartMonitor';
 import type { ValidateFieldsError } from 'async-validator';
 import {
   BlockFormControlLabel,
@@ -31,15 +32,14 @@ import {
   ValidatedTextField,
   useLayoutTitle
 } from 'components';
-import RestartMonitor from 'framework/system/RestartMonitor';
 import { useI18nContext } from 'i18n/i18n-react';
 import { numberValue, updateValueDirty, useRest } from 'utils';
 import { validate } from 'validators';
 
-import * as EMSESP from './api';
-import { BOARD_PROFILES } from './types';
-import type { Settings } from './types';
-import { createSettingsValidator } from './validators';
+import * as EMSESP from '../main/api';
+import { BOARD_PROFILES } from '../main/types';
+import type { Settings } from '../main/types';
+import { createSettingsValidator } from '../main/validators';
 
 export function boardProfileSelectItems() {
   return Object.keys(BOARD_PROFILES).map((code) => (
@@ -115,7 +115,7 @@ const ApplicationSettings: FC = () => {
     });
   };
 
-  useLayoutTitle(LL.APPLICATION());
+  useLayoutTitle(LL.SETTINGS_OF(LL.APPLICATION()));
 
   const content = () => {
     if (!data) {

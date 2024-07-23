@@ -16,11 +16,9 @@ const LayoutAppBar: FC<LayoutAppBarProps> = ({ title, onToggleDrawer }) => {
   const pathnames = useLocation()
     .pathname.split('/')
     .filter((x) => x);
+  const show_back = pathnames.length > 1;
+
   const navigate = useNavigate();
-  let show_back = false;
-  if (pathnames.length > 1) {
-    show_back = pathnames[0] !== 'system' || pathnames[1] === 'espsystemstatus';
-  }
 
   return (
     <AppBar

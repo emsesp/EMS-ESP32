@@ -19,7 +19,7 @@ import type { Theme } from '@mui/material';
 import * as APApi from 'api/ap';
 
 import { useRequest } from 'alova';
-import { ButtonRow, FormLoader, SectionContent } from 'components';
+import { ButtonRow, FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { APStatusType } from 'types';
 import { APNetworkStatus } from 'types';
@@ -41,6 +41,7 @@ const APStatus: FC = () => {
   const { data: data, send: loadData, error } = useRequest(APApi.readAPStatus);
 
   const { LL } = useI18nContext();
+  useLayoutTitle(LL.STATUS_OF(LL.ACCESS_POINT(0)));
 
   const theme = useTheme();
 

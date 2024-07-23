@@ -71,13 +71,11 @@ const en: Translation = {
   TX_ISSUES: 'Tx issues - check Tx Mode',
   DISCONNECTED: 'Disconnected',
   EMS_SCAN: 'Are you sure you want to initiate a full device scan of the EMS bus?',
-  EMS_BUS_STATUS: 'EMS Bus Status',
-  ACTIVE_DEVICES: 'Active Devices & Sensors',
+  DATA_TRAFFIC: 'Data Traffic',
   EMS_DEVICE: 'EMS Device',
   SUCCESS: 'SUCCESS',
   FAIL: 'FAIL',
   QUALITY: 'QUALITY',
-  SCAN_DEVICES: 'Scan for new devices',
   SCAN: 'Scan',
   STATUS_NAMES: [
     'EMS Telegrams Received (Rx)',
@@ -89,9 +87,6 @@ const en: Translation = {
     'API Calls',
     'Syslog Messages'
   ],
-  NUM_DEVICES: '{num} Device{{s}}',
-  NUM_TEMP_SENSORS: '{num} Temperature Sensor{{s}}',
-  NUM_ANALOG_SENSORS: '{num} Analog Sensor{{s}}',
   NUM_DAYS: '{num} day{{s}}',
   NUM_SECONDS: '{num} second{{s}}',
   NUM_HOURS: '{num} hour{{s}}',
@@ -333,7 +328,8 @@ const en: Translation = {
   MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules',
   MODULES_NONE: 'No external modules detected',
   RENAME: 'Rename',
-  ENABLE_MODBUS: 'Enable Modbus'
+  ENABLE_MODBUS: 'Enable Modbus',
+  VIEW_LOG: 'View log to diagnose issues'
 };
 
 export default en;
