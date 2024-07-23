@@ -343,15 +343,19 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     // see if there is a command registered and it's valid
     auto cf = find_command(device_type, device_id, cmd, flag);
     if (!cf) {
-        std::string err = std::string("unknown command ") + cmd;
-        LOG_WARNING("Command failed: %s", err.c_str());
-
-        // if we don't alread have a message set, set it to invalid command
-        if (!output["message"]) {
+        // if we don't already have a message set, set it to invalid command
+        if (output["message"]) {
+            LOG_WARNING("Command failed: %s", output["message"].as<const char *>());
+        } else {
+            std::string err   = "no command " + std::string(cmd) + " in " + dname;
             output["message"] = err;
+            LOG_WARNING("Command failed: %s", err.c_str());
         }
         return CommandRet::ERROR;
     }
+
+    // TODO here
+    output.clear(); // we have a command function, clear messages from device_value_info
 
     // before calling the command, check permissions and abort if not authorized
     if (cf->has_flags(CommandFlag::ADMIN_ONLY) && !is_admin) {
