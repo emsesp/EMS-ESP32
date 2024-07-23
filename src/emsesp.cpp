@@ -794,7 +794,7 @@ bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8
 bool EMSESP::return_not_found(JsonObject output, const char * msg, const char * cmd) {
     output.clear();
     char error[100];
-    snprintf(error, sizeof(error), "cannot find %s in %s", msg, cmd);
+    snprintf(error, sizeof(error), "%s not found in %s", msg, cmd);
     output["message"] = error;
     return false;
 }
