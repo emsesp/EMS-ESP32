@@ -325,7 +325,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
                     output["api_data"] = data; // always as string
                     return true;
                 }
-                return EMSESP::return_not_found(output, "attribute", command_s); // not found
+                return EMSESP::return_not_found(output, attribute_s, command_s); // not found
             }
         }
 

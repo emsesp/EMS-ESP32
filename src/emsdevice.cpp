@@ -1598,16 +1598,13 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
 
             // if we're filtering on an attribute, go find it
             if (attribute_s) {
-#if defined(EMSESP_DEBUG)
-                EMSESP::logger().debug("[DEBUG] fetching single attribute %s", attribute_s);
-#endif
                 if (json.containsKey(attribute_s)) {
                     std::string data = json[attribute_s].as<std::string>();
                     output.clear();
                     output["api_data"] = data; // always as string
                     return true;
                 }
-                return EMSESP::return_not_found(output, "attribute", command_s); // not found
+                return EMSESP::return_not_found(output, attribute_s, command_s); // not found
             }
 
             return true;
