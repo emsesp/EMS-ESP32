@@ -1492,6 +1492,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                     read_next_ = true;
                     txservice_.send();
                 } else {
+                    read_next_ = false;
                     txservice_.send_poll(); // close the bus
                 }
             }
