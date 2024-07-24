@@ -400,15 +400,13 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
         LOG_WARNING(error);
     } else {
         if (single_command) {
-            // TODO not sure if these should go to INFO as there may be a lot of calls, e.g. ioBroker
-            // TODO for now using debug (regarles if compiled with EMSESP_DEBUG)
-            // TODO mvdp ?
+            // log as DEBUG (TRACE) regarless if compiled with EMSESP_DEBUG
             logger_.debug(("%sCalled command %s"), ro.c_str(), info_s);
         } else {
             if (id > 0) {
-                logger_.debug(("%sCalled command %s with value %s and id %d on device 0x%02X"), ro.c_str(), info_s, value, id, device_id);
+                LOG_INFO(("%sCalled command %s with value %s and id %d on device 0x%02X"), ro.c_str(), info_s, value, id, device_id);
             } else {
-                logger_.debug(("%sCalled command %s with value %s"), ro.c_str(), info_s, value);
+                LOG_INFO(("%sCalled command %s with value %s"), ro.c_str(), info_s, value);
             }
         }
     }
