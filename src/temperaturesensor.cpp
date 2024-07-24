@@ -402,13 +402,13 @@ bool TemperatureSensor::get_value_info(JsonObject output, const char * cmd, cons
                     output["api_data"] = data; // always as string
                     return true;
                 }
-                return EMSESP::return_not_found(output, "attribute", sensor_name); // not found
+                return EMSESP::return_not_found(output, attribute_s, sensor_name); // not found
             }
             return true; // found a match, exit
         }
     }
 
-    return EMSESP::return_not_found(output, cmd, F_(temperaturesensor)); // not found
+    return false; // not found
 }
 
 void TemperatureSensor::addSensorJson(JsonObject output, const Sensor & sensor) {

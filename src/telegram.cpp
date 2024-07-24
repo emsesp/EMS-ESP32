@@ -554,7 +554,7 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
 
 // send a Tx telegram to request data from an EMS device
 void TxService::read_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t length, const bool front) {
-    LOG_DEBUG("Tx read request to device 0x%02X for type ID 0x%02X", dest, type_id);
+    LOG_DEBUG("Tx read request to deviceID 0x%02X for typeID 0x%02X", dest, type_id);
 
     uint8_t message_data = (type_id > 0xFF) ? (EMS_MAX_TELEGRAM_MESSAGE_LENGTH - 2) : EMS_MAX_TELEGRAM_MESSAGE_LENGTH;
     if (length > 0 && length < message_data) {

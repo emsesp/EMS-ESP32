@@ -742,8 +742,8 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
     buffer = nullptr;
 }
 
-// builds json with the detail of each value, for a given EMS device
-// for other types like sensors, scheduler, custom entities it will process single commands like 'info', 'values', 'commands', 'entities'...
+// builds json with the detail of each value, for a given device type
+// device type can be EMS devices looking for entities, or a sensor/scheduler/custom entity etc looking for values extracted from the info command
 bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8_t id, const uint8_t devicetype) {
     // check first for EMS devices
     bool found_device = false;
@@ -794,7 +794,7 @@ bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8
 bool EMSESP::return_not_found(JsonObject output, const char * msg, const char * cmd) {
     output.clear();
     char error[100];
-    snprintf(error, sizeof(error), "cannot find %s in %s", msg, cmd);
+    snprintf(error, sizeof(error), "no %s in %s", msg, cmd);
     output["message"] = error;
     return false;
 }
@@ -1312,7 +1312,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
             default_name = "Cascaded Controller";
             device_type  = DeviceType::CONTROLLER;
         } else {
-            LOG_WARNING("Unrecognized EMS device (device ID 0x%02X, no product ID). Please report on GitHub.", device_id);
+            LOG_WARNING("Unrecognized EMS device (deviceID 0x%02X, no productID). Please report on GitHub.", device_id);
             return false;
         }
     }
@@ -1363,13 +1363,9 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
         device_type,
         F_(values),
         [device_type](const char * value, const int8_t id, JsonObject output) {
-            return EMSdevice::export_values(device_type,
-                                            output,
-                                            id,
-                                            EMSdevice::OUTPUT_TARGET::API_SHORTNAMES); // HIDDEN command showing short names, used in e.g. /api/boiler
+            return EMSdevice::export_values(device_type, output, id, EMSdevice::OUTPUT_TARGET::API_SHORTNAMES);
         },
-        nullptr,
-        CommandFlag::HIDDEN); // this command is hidden
+        FL_(values_cmd));
     Command::add(
         device_type,
         F_(commands),

@@ -245,7 +245,7 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
                     return_code = Command::call(device_type, cmd, data.as<bool>() ? "true" : "false", true, id, output);
                 }
 
-                // write debug
+                // write log
                 if (return_code != CommandRet::OK) {
                     EMSESP::logger().err("Write command failed %s (%s)", (const char *)output["message"], Command::return_code_string(return_code));
                 } else {
