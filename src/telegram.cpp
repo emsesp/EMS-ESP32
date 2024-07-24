@@ -644,11 +644,13 @@ uint16_t TxService::read_next_tx(const uint8_t offset, const uint8_t length) {
     uint8_t max_length  = telegram_last_->type_id > 0xFF ? EMS_MAX_TELEGRAM_MESSAGE_LENGTH - 2 : EMS_MAX_TELEGRAM_MESSAGE_LENGTH;
     uint8_t next_length = telegram_last_->message_data[0] - old_length - offset + telegram_last_->offset;
     uint8_t next_offset = offset + old_length;
-
-    // check telegram, offset and overflow
-    // some telegrams only reply with one byte less, but have higher offsets (0x10)
-    // some reply with higher offset than requestes and have not_set values intermediate (0xEA)
-    if (offset >= telegram_last_->offset && old_length > 0 && next_length > 0) { // } || telegram_last_->offset < offset) {
+    // check telegram, length, offset and overflow
+    // some telegrams only reply with one byte less, but have higher offsets (boiler 0x10)
+    // some reply with higher offset than requestes and have not_set values intermediate (boiler 0xEA)
+    if ((next_length + next_offset) == 0xFF && old_length < max_length - 1 && offset <= telegram_last_->offset) {
+        return 0;
+    }
+    if (offset >= telegram_last_->offset && old_length > 0 && next_length > 0) {
         add(Telegram::Operation::TX_READ, telegram_last_->dest, telegram_last_->type_id, next_offset, &next_length, 1, 0, true);
         return telegram_last_->type_id;
     }
@@ -671,11 +673,10 @@ uint16_t TxService::post_send_query() {
 
     if (post_typeid) {
         uint8_t dest = (this->telegram_last_->dest & 0x7F);
-        // when set a value with large offset before and validate on same type, we have to add offset 0, 26, 52, ...
-        uint8_t offset = (this->telegram_last_->type_id == post_typeid) ? ((this->telegram_last_->offset / 26) * 26) : 0;
-        uint8_t message_data =
-            (this->telegram_last_->type_id > 0xFF) ? (EMS_MAX_TELEGRAM_MESSAGE_LENGTH - 2) : EMS_MAX_TELEGRAM_MESSAGE_LENGTH; // request all data, 32 bytes
-        this->add(Telegram::Operation::TX_READ, dest, post_typeid, offset, &message_data, 1, 0, true);                        // add to top/front of queue
+        // when set a value with large offset before and validate on same type and offset, or complete telegram
+        uint8_t length    = (this->telegram_last_->type_id == post_typeid) ? this->telegram_last_->message_length : 0xFF;
+        uint8_t offset    = (this->telegram_last_->type_id == post_typeid) ? this->telegram_last_->offset : 0;
+        this->add(Telegram::Operation::TX_READ, dest, post_typeid, offset, &length, 1, 0, true); // add to top/front of queue
         // read_request(telegram_last_post_send_query_, dest, 0); // no offset
         LOG_DEBUG("Sending post validate read, type ID 0x%02X to dest 0x%02X", post_typeid, dest);
         set_post_send_query(0); // reset
