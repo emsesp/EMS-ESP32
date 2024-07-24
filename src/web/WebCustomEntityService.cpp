@@ -278,7 +278,6 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
     }
 
     // if it's info or values...
-    // TODO make a function
     if (strlen(cmd) == 0 || Helpers::toLower(cmd) == F_(values) || Helpers::toLower(cmd) == F_(info)) {
         // list all names
         for (const CustomEntityItem & entity : *customEntityItems_) {

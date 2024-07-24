@@ -635,8 +635,6 @@ bool Command::device_has_commands(const uint8_t device_type) {
 
     for (const auto & emsdevice : EMSESP::emsdevices) {
         if (emsdevice && (emsdevice->device_type() == device_type)) {
-            // TODO will this work for info, values etc??
-            // device found, now see if it has any commands
             for (const auto & cf : cmdfunctions_) {
                 if (cf.device_type_ == device_type) {
                     return true;
