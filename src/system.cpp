@@ -144,24 +144,20 @@ bool System::command_fetch(const char * value, const int8_t id) {
         if (value_s == "all") {
             LOG_INFO("Requesting data from EMS devices");
             EMSESP::fetch_device_values();
-            return true;
         } else if (value_s == (F_(boiler))) {
             EMSESP::fetch_device_values_type(EMSdevice::DeviceType::BOILER);
-            return true;
         } else if (value_s == (F_(thermostat))) {
             EMSESP::fetch_device_values_type(EMSdevice::DeviceType::THERMOSTAT);
-            return true;
         } else if (value_s == (F_(solar))) {
             EMSESP::fetch_device_values_type(EMSdevice::DeviceType::SOLAR);
-            return true;
         } else if (value_s == (F_(mixer))) {
             EMSESP::fetch_device_values_type(EMSdevice::DeviceType::MIXER);
-            return true;
         }
+    } else {
+        EMSESP::fetch_device_values(); // default if no name or id is given
     }
 
-    EMSESP::fetch_device_values(); // default if no name or id is given
-    return true;
+    return true; // always true
 }
 
 // mqtt publish
@@ -857,7 +853,6 @@ void System::commands_init() {
     Command::add(EMSdevice::DeviceType::SYSTEM, F("response"), System::command_response, FL_(commands_response));
     Command::add(EMSdevice::DeviceType::SYSTEM, F("allvalues"), System::command_allvalues, FL_(allvalues_cmd));
 
-
     // MQTT subscribe "ems-esp/system/#"
     Mqtt::subscribe(EMSdevice::DeviceType::SYSTEM, "system/#", nullptr); // use empty function callback
 }
@@ -1295,14 +1290,25 @@ bool System::saveSettings(const char * filename, const char * section, JsonObjec
     return false; // not found
 }
 
+// return back a system value
 bool System::get_value_info(JsonObject root, const char * command) {
     if (command == nullptr || strlen(command) == 0) {
         LOG_ERROR("empty system command");
         return false;
     }
 
+    // cmd is lower case of the command
     char cmd[COMMAND_MAX_LENGTH];
     strlcpy(cmd, Helpers::toLower(command).c_str(), sizeof(cmd));
+
+    // fetch all the data from the system
+    (void)command_info("", 0, root);
+
+    // check for hardcoded "info"
+    if (!strcmp(cmd, F_(info))) {
+        return true;
+    }
+
     char * val = strstr(cmd, "/value");
     if (val) {
         val[0] = '\0';
@@ -1312,14 +1318,6 @@ bool System::get_value_info(JsonObject root, const char * command) {
     if (slash) {
         *slash = '\0';
         slash++;
-    }
-
-    // fetch all the data from the system
-    (void)command_info("", 0, root);
-
-    // check for hardcoded "info"
-    if (Helpers::toLower(cmd) == F_(info)) {
-        return true;
     }
 
     std::string s;
@@ -1344,8 +1342,9 @@ bool System::get_value_info(JsonObject root, const char * command) {
         }
     }
 
+    root.clear(); // clear json, we only one a single value
+
     if (!s.empty()) {
-        root.clear();
         if (val) {
             root["api_data"] = s;
         } else {
@@ -1354,7 +1353,7 @@ bool System::get_value_info(JsonObject root, const char * command) {
         return true; // found
     }
 
-    return EMSESP::return_not_found(root, "data", command); // not found
+    return false; // not found
 }
 
 // export status information including the device information
@@ -1623,7 +1622,11 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
 #if defined(EMSESP_TEST)
 // run a test, e.g. http://ems-esp/api?device=system&cmd=test&data=boiler
 bool System::command_test(const char * value, const int8_t id) {
-    return Test::test(value, id);
+    if (value) {
+        return Test::test(value, id);
+    } else {
+        return false;
+    }
 }
 #endif
 

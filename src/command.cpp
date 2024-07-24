@@ -63,7 +63,6 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     int8_t      id_n = -1; // default hc
 
     // check for a device as first item in the path
-    // if its not a known device (thermostat, boiler etc) look for any special MQTT subscriptions
     const char * device_s = nullptr;
     if (!num_paths) {
         // we must look for the device in the JSON body
@@ -72,7 +71,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         }
     } else {
         // extract it from the path
-        device_s = p.paths().front().c_str(); // get the device (boiler, thermostat, system etc)
+        device_s = p.paths().front().c_str(); // get the device type name (boiler, thermostat, system etc)
     }
 
     // validate the device, make sure it exists
@@ -172,7 +171,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
                 }
 
                 uint8_t device_type = EMSdevice::device_name_2_device_type(device_p);
-                if (CommandRet::OK != Command::call(device_type, data_s, "", true, id_d, output)) {
+                if (Command::call(device_type, data_s, "", true, id_d, output) != CommandRet::OK) {
                     return CommandRet::INVALID;
                 }
 
@@ -340,20 +339,19 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
         }
     }
 
-    // first see if there is a command registered and it's valid
+    // see if there is a command registered and it's valid
     auto cf = find_command(device_type, device_id, cmd, flag);
     if (!cf) {
-        std::string err = std::string("unknown command ") + cmd;
-        LOG_WARNING("Command failed: %s", err.c_str());
-
-        // if we don't alread have a message set, set it to invalid command
-        if (!output["message"]) {
+        // if we don't already have a message set, set it to invalid command
+        if (output["message"]) {
+            LOG_WARNING("Command failed: %s", output["message"].as<const char *>());
+        } else {
+            std::string err   = "no " + std::string(cmd) + " in " + dname;
             output["message"] = err;
+            LOG_WARNING("Command failed: %s", err.c_str());
         }
         return CommandRet::ERROR;
     }
-
-    output.clear(); // we have a command function, clear messages from device_value_info
 
     // before calling the command, check permissions and abort if not authorized
     if (cf->has_flags(CommandFlag::ADMIN_ONLY) && !is_admin) {
@@ -384,7 +382,7 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
         if (!single_command && EMSESP::cmd_is_readonly(device_type, device_id, cmd, id)) {
             return_code = CommandRet::INVALID; // error on readonly or invalid hc
         } else {
-            // call it...
+            // call the command...
             return_code = ((cf->cmdfunction_)(value, id)) ? CommandRet::OK : CommandRet::ERROR;
         }
     }
@@ -402,12 +400,13 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
         LOG_WARNING(error);
     } else {
         if (single_command) {
-            LOG_DEBUG(("%sCalling command %s"), ro.c_str(), info_s);
+            // log as DEBUG (TRACE) regarless if compiled with EMSESP_DEBUG
+            logger_.debug(("%sCalled command %s"), ro.c_str(), info_s);
         } else {
             if (id > 0) {
-                LOG_INFO(("%sCalling command %s with value %s and id %d on device 0x%02X"), ro.c_str(), info_s, value, id, device_id);
+                LOG_INFO(("%sCalled command %s with value %s and id %d on device 0x%02X"), ro.c_str(), info_s, value, id, device_id);
             } else {
-                LOG_INFO(("%sCalling command %s with value %s"), ro.c_str(), info_s, value);
+                LOG_INFO(("%sCalled command %s with value %s"), ro.c_str(), info_s, value);
             }
         }
     }
@@ -508,10 +507,11 @@ std::string Command::tagged_cmd(const std::string & cmd, const uint8_t flag) {
 
 // list all commands for a specific device, output as json
 bool Command::list(const uint8_t device_type, JsonObject output) {
-    // force add info and commands for those non-EMS devices
+    // check of it a 'commands' command
     if (device_type == EMSdevice::DeviceType::TEMPERATURESENSOR || device_type == EMSdevice::DeviceType::ANALOGSENSOR) {
         output[F_(info)]     = Helpers::translated_word(FL_(info_cmd));
         output[F_(commands)] = Helpers::translated_word(FL_(commands_cmd));
+        output[F_(values)]   = Helpers::translated_word(FL_(values_cmd));
     } else if (cmdfunctions_.empty()) {
         output["message"] = "no commands available";
         return false;
@@ -546,13 +546,14 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
         }
     }
 
-    // non EMS devices always have an info and commands command
+    // non EMS devices always have an info, commands and values
     bool show_info = (device_type == EMSdevice::DeviceType::TEMPERATURESENSOR || device_type == EMSdevice::DeviceType::ANALOGSENSOR
                       || device_type == EMSdevice::DeviceType::SCHEDULER || device_type == EMSdevice::DeviceType::CUSTOM);
 
     if (!verbose && show_info) {
         sorted_cmds.push_back(F_(info));
         sorted_cmds.push_back(F_(commands));
+        sorted_cmds.push_back(F_(values));
     }
 
     sorted_cmds.sort(); // sort them
@@ -572,9 +573,11 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
 
     // we hard code 'info' and 'commands' commands so print them first
     if (show_info) {
-        shell.printf("  info:\t\t\t\t%slists all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
+        shell.printf("  info:\t\t\t\t%slist all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
         shell.println(COLOR_RESET);
-        shell.printf("  commands:\t\t\t%slists all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
+        shell.printf("  commands:\t\t\t%slist all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
+        shell.println(COLOR_RESET);
+        shell.printf("  values:\t\t\t%slist all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
         shell.println(COLOR_RESET);
     }
 
@@ -614,7 +617,6 @@ bool Command::device_has_commands(const uint8_t device_type) {
         return true; // we always have System
     }
 
-    // if there are no entries to scheduler/custom/temperaturesensor/analogsensor, don't error but return a message
     if (device_type == EMSdevice::DeviceType::SCHEDULER) {
         return true;
     }
@@ -633,7 +635,6 @@ bool Command::device_has_commands(const uint8_t device_type) {
 
     for (const auto & emsdevice : EMSESP::emsdevices) {
         if (emsdevice && (emsdevice->device_type() == device_type)) {
-            // device found, now see if it has any commands
             for (const auto & cf : cmdfunctions_) {
                 if (cf.device_type_ == device_type) {
                     return true;

@@ -239,8 +239,6 @@ void WebCustomizationService::writeDeviceName(AsyncWebServerRequest * request, J
                     uint8_t device_id   = emsdevice->device_id();
                     auto    custom_name = json["name"].as<std::string>();
 
-                    // emsesp::EMSESP::logger().info("Found Device ID: %d, Product ID: %d", device_id, product_id);
-
                     // updates current record or creates a new one
                     bool entry_exists = false;
                     update([&](WebCustomization & settings) {

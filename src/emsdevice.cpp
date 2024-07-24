@@ -212,9 +212,6 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
     if (!strcmp(lowtopic, F_(thermostat))) {
         return DeviceType::THERMOSTAT;
     }
-    if (!strcmp(lowtopic, F_(system))) {
-        return DeviceType::SYSTEM;
-    }
     if (!strcmp(lowtopic, F_(scheduler))) {
         return DeviceType::SCHEDULER;
     }
@@ -226,12 +223,6 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
     }
     if (!strcmp(lowtopic, F_(mixer))) {
         return DeviceType::MIXER;
-    }
-    if (!strcmp(lowtopic, F_(temperaturesensor))) {
-        return DeviceType::TEMPERATURESENSOR;
-    }
-    if (!strcmp(lowtopic, F_(analogsensor))) {
-        return DeviceType::ANALOGSENSOR;
     }
     if (!strcmp(lowtopic, F_(switch))) {
         return DeviceType::SWITCH;
@@ -248,9 +239,6 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
     if (!strcmp(lowtopic, F_(heatsource))) {
         return DeviceType::HEATSOURCE;
     }
-    if (!strcmp(lowtopic, F_(custom))) {
-        return DeviceType::CUSTOM;
-    }
     if (!strcmp(lowtopic, F_(ventilation))) {
         return DeviceType::VENTILATION;
     }
@@ -259,6 +247,23 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
     }
     if (!strcmp(lowtopic, F_(pool))) {
         return DeviceType::POOL;
+    }
+
+    // non EMS
+    if (!strcmp(lowtopic, F_(custom))) {
+        return DeviceType::CUSTOM;
+    }
+    if (!strcmp(lowtopic, F_(temperaturesensor))) {
+        return DeviceType::TEMPERATURESENSOR;
+    }
+    if (!strcmp(lowtopic, F_(analogsensor))) {
+        return DeviceType::ANALOGSENSOR;
+    }
+    if (!strcmp(lowtopic, F_(scheduler))) {
+        return DeviceType::SCHEDULER;
+    }
+    if (!strcmp(lowtopic, F_(system))) {
+        return DeviceType::SYSTEM;
     }
 
     return DeviceType::UNKNOWN;
@@ -1598,18 +1603,14 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
 
             // if we're filtering on an attribute, go find it
             if (attribute_s) {
-#if defined(EMSESP_DEBUG)
-                EMSESP::logger().debug("[DEBUG] fetching single attribute %s", attribute_s);
-#endif
                 if (json.containsKey(attribute_s)) {
                     std::string data = json[attribute_s].as<std::string>();
                     output.clear();
                     output["api_data"] = data; // always as string
                     return true;
                 }
-                return EMSESP::return_not_found(output, "attribute", command_s); // not found
+                return EMSESP::return_not_found(output, attribute_s, command_s); // not found
             }
-
             return true;
         }
     }
