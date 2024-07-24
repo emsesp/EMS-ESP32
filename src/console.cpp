@@ -575,18 +575,17 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                     return;
                 } else {
                     // show message if no data returned (e.g. for analogsensor, temperaturesensor, custom)
-                    shell.println("No data returned.");
+                    shell.println("Command executed. Check log for messages.");
                     return;
                 }
-            }
-
-
-            if (return_code == CommandRet::NOT_FOUND) {
+            } else if (return_code == CommandRet::NOT_FOUND) {
                 shell.println("Unknown command");
                 shell.print("Available commands are: ");
                 Command::show(shell, device_type, false); // non-verbose mode
-            } else if (return_code != CommandRet::OK) {
-                shell.printfln("Bad syntax (error code %d)", return_code);
+            } else if ((return_code == CommandRet::ERROR) || (return_code == CommandRet::FAIL)) {
+                shell.printfln("Bad syntax. Check arguments.");
+            } else {
+                shell.printfln("Command failed with error code %d", return_code);
             }
         },
         [](Shell & shell, const std::vector<std::string> & current_arguments, const std::string & next_argument) -> std::vector<std::string> {

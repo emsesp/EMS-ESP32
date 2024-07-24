@@ -215,7 +215,7 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
         return true;
     }
 
-    return EMSESP::return_not_found(output, cmd, F_(scheduler)); // not found
+    return false; // not found
 }
 
 // publish single value

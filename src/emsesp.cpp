@@ -794,7 +794,7 @@ bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8
 bool EMSESP::return_not_found(JsonObject output, const char * msg, const char * cmd) {
     output.clear();
     char error[100];
-    snprintf(error, sizeof(error), "%s not found in %s", msg, cmd);
+    snprintf(error, sizeof(error), "no %s in %s", msg, cmd);
     output["message"] = error;
     return false;
 }
@@ -1363,13 +1363,9 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
         device_type,
         F_(values),
         [device_type](const char * value, const int8_t id, JsonObject output) {
-            return EMSdevice::export_values(device_type,
-                                            output,
-                                            id,
-                                            EMSdevice::OUTPUT_TARGET::API_SHORTNAMES); // HIDDEN command showing short names, used in e.g. /api/boiler
+            return EMSdevice::export_values(device_type, output, id, EMSdevice::OUTPUT_TARGET::API_SHORTNAMES);
         },
-        nullptr,
-        CommandFlag::HIDDEN); // this command is hidden
+        FL_(values_cmd));
     Command::add(
         device_type,
         F_(commands),

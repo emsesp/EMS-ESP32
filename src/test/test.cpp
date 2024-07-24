@@ -953,8 +953,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         bool single;
 
-        single = true;
-        // single = false;
+        // single = true;
+        single = false;
 
         AsyncWebServerRequest request;
         JsonDocument          doc;
@@ -963,20 +963,38 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         // load devices
         test("boiler");
-        // test("thermostat");
-        test("2thermostats");
+        test("thermostat");
+        // test("2thermostats");
 
         if (single) {
             // run dedicated tests only
-            // EMSESP::webCustomEntityService.test();  // custom entities
-            // EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
-            // EMSESP::temperaturesensor_.test();      // add temperature sensors
-            // EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
+            EMSESP::webCustomEntityService.test();  // custom entities
+            EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
+            EMSESP::temperaturesensor_.test();      // add temperature sensors
+            EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
 
             shell.invoke_command("call system fetch");
-            request.method(HTTP_GET);
             request.url("/api/system/fetch");
             EMSESP::webAPIService.webAPIService(&request);
+
+            // request.url("/api/system");
+            // EMSESP::webAPIService.webAPIService(&request);
+            // request.url("/api/system/system/version");
+            // EMSESP::webAPIService.webAPIService(&request);
+            // request.url("/api/system/bad");
+            // EMSESP::webAPIService.webAPIService(&request);
+
+            // request.url("/api/boiler");
+            // EMSESP::webAPIService.webAPIService(&request);
+            // request.url("/api/boiler/bad");
+            // EMSESP::webAPIService.webAPIService(&request);
+
+            // request.url("/api/custom");
+            // EMSESP::webAPIService.webAPIService(&request);
+            // request.url("/api/custom/seltemp");
+            // EMSESP::webAPIService.webAPIService(&request);
+            // request.url("/api/custom/bad");
+            // EMSESP::webAPIService.webAPIService(&request);
 
         } else {
             EMSESP::webCustomEntityService.test();  // custom entities
@@ -1062,6 +1080,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             request.method(HTTP_POST);
 
             // these next 3 should return empty JSON in their response
+            // but there will be a log message
             char data[] = "{\"cmd\":\"send\",\"data\":\"0B 90 FF 13 01 01 B9 01\"}";
             deserializeJson(doc, data);
             json = doc.as<JsonVariant>();

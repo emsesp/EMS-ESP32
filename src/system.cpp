@@ -1297,8 +1297,18 @@ bool System::get_value_info(JsonObject root, const char * command) {
         return false;
     }
 
+    // cmd is lower case of the command
     char cmd[COMMAND_MAX_LENGTH];
     strlcpy(cmd, Helpers::toLower(command).c_str(), sizeof(cmd));
+
+    // fetch all the data from the system
+    (void)command_info("", 0, root);
+
+    // check for hardcoded "info"
+    if (!strcmp(cmd, F_(info))) {
+        return true;
+    }
+
     char * val = strstr(cmd, "/value");
     if (val) {
         val[0] = '\0';
@@ -1308,14 +1318,6 @@ bool System::get_value_info(JsonObject root, const char * command) {
     if (slash) {
         *slash = '\0';
         slash++;
-    }
-
-    // fetch all the data from the system
-    (void)command_info("", 0, root);
-
-    // check for hardcoded "info"
-    if (Helpers::toLower(cmd) == F_(info)) {
-        return true;
     }
 
     std::string s;
@@ -1340,7 +1342,7 @@ bool System::get_value_info(JsonObject root, const char * command) {
         }
     }
 
-    root.clear(); // empty json output, as it may have the default output from an info command earlier
+    root.clear(); // clear json, we only one a single value
 
     if (!s.empty()) {
         if (val) {
