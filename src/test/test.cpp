@@ -953,8 +953,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         bool single;
 
-        // single = true;
-        single = false;
+        single = true;
+        // single = false;
 
         AsyncWebServerRequest request;
         JsonDocument          doc;
@@ -968,18 +968,14 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         if (single) {
             // run dedicated tests only
-            EMSESP::webCustomEntityService.test();  // custom entities
-            EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
-            EMSESP::temperaturesensor_.test();      // add temperature sensors
-            EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
+            // EMSESP::webCustomEntityService.test();  // custom entities
+            // EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
+            // EMSESP::temperaturesensor_.test();      // add temperature sensors
+            // EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
 
+            shell.invoke_command("call system fetch");
             request.method(HTTP_GET);
-
-            request.url("/api/boiler/bad");
-            EMSESP::webAPIService.webAPIService(&request);
-            request.url("/api/boiler/bad/value");
-            EMSESP::webAPIService.webAPIService(&request);
-            request.url("/api/boiler/bad/valu");
+            request.url("/api/system/fetch");
             EMSESP::webAPIService.webAPIService(&request);
 
         } else {
@@ -1028,6 +1024,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             request.url("/api/system/info");
             EMSESP::webAPIService.webAPIService(&request);
             request.url("/api/system/settings/locale");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/system/fetch");
             EMSESP::webAPIService.webAPIService(&request);
 
             // scheduler
