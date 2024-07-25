@@ -1,7 +1,7 @@
 #ifndef WebStatusService_h
 #define WebStatusService_h
 
-#define ESPSYSTEM_STATUS_SERVICE_PATH "/rest/ESPSystemStatus"
+#define HARDWARE_STATUS_SERVICE_PATH "/rest/HardwareStatus"
 #define SYSTEM_STATUS_SERVICE_PATH "/rest/systemStatus"
 
 namespace emsesp {
@@ -12,7 +12,7 @@ class WebStatusService {
 
   private:
     void systemStatus(AsyncWebServerRequest * request);
-    void ESPsystemStatus(AsyncWebServerRequest * request);
+    void HardwareStatus(AsyncWebServerRequest * request);
 };
 
 } // namespace emsesp

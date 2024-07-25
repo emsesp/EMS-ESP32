@@ -24,9 +24,9 @@
 
 namespace emsesp {
 
-// /rest/ESPSystemStatus
+// /rest/HardwareStatus
 WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * securityManager) {
-    server->on(ESPSYSTEM_STATUS_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { ESPsystemStatus(request); });
+    server->on(HARDWARE_STATUS_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { HardwareStatus(request); });
     server->on(SYSTEM_STATUS_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { systemStatus(request); });
 }
 
@@ -85,7 +85,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     request->send(response);
 }
 
-void WebStatusService::ESPsystemStatus(AsyncWebServerRequest * request) {
+void WebStatusService::HardwareStatus(AsyncWebServerRequest * request) {
     EMSESP::system_.refreshHeapMem(); // refresh free heap and max alloc heap
 
     auto *     response = new AsyncJsonResponse(false);
