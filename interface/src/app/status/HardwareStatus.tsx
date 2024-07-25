@@ -32,7 +32,7 @@ function formatNumber(num: number) {
   return new Intl.NumberFormat().format(num);
 }
 
-const ESPSystemStatus: FC = () => {
+const HardwareStatus: FC = () => {
   const { LL } = useI18nContext();
 
   useLayoutTitle(LL.STATUS_OF(LL.HARDWARE()));
@@ -41,7 +41,7 @@ const ESPSystemStatus: FC = () => {
     data: data,
     send: loadData,
     error
-  } = useRequest(SystemApi.readESPSystemStatus, { force: true });
+  } = useRequest(SystemApi.readHardwareStatus, { force: true });
 
   const content = () => {
     if (!data) {
@@ -117,7 +117,9 @@ const ESPSystemStatus: FC = () => {
                 formatNumber(data.free_heap) +
                 ' KB (' +
                 formatNumber(data.max_alloc_heap) +
-                ' KB max alloc)'
+                ' KB max alloc, ' +
+                formatNumber(data.free_caps) +
+                ' KB caps)'
               }
             />
           </ListItem>
@@ -218,4 +220,4 @@ const ESPSystemStatus: FC = () => {
   return <SectionContent>{content()}</SectionContent>;
 };
 
-export default ESPSystemStatus;
+export default HardwareStatus;

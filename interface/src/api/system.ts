@@ -3,13 +3,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-import type { ESPSystemStatus, LogSettings, SystemStatus } from 'types';
+import type { HardwareStatus, LogSettings, SystemStatus } from 'types';
 
 import { alovaInstance, alovaInstanceGH } from './endpoints';
 
-// ESPSystemStatus - also used to ping in Restart monitor for pinging
-export const readESPSystemStatus = () =>
-  alovaInstance.Get<ESPSystemStatus>('/rest/ESPSystemStatus');
+// HardwareStatus - also used to ping in Restart monitor for pinging
+export const readHardwareStatus = () =>
+  alovaInstance.Get<HardwareStatus>('/rest/HardwareStatus');
 
 // SystemStatus
 export const readSystemStatus = () =>
