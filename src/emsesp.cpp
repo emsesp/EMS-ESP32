@@ -710,17 +710,31 @@ void EMSESP::publish_sensor_values(const bool time, const bool force) {
 
 // MQTT publish a telegram as raw data to the topic 'response'
 void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
-    static char *  buffer = nullptr;
-    static uint8_t offset;
-    if (buffer == nullptr) {
-        offset    = telegram->offset; // store offset from first part
-        buffer    = new char[768];    // max 256 hex-codes, 255 spaces, 1 termination
-        buffer[0] = '\0';
+    static char *   buffer = nullptr;
+    static uint8_t  offset = 0;
+    static uint16_t type   = 0;
+    // restart on mismatch while collecting telegram
+    if (buffer && (telegram->offset < offset || telegram->type_id != type)) {
+        delete[] buffer;
+        buffer = nullptr;
     }
-    strlcat(buffer, Helpers::data_to_hex(telegram->message_data, telegram->message_length).c_str(), 768);
+    if (buffer == nullptr) {
+        offset = telegram->offset; // store offset from first part
+        type   = telegram->type_id;
+        buffer = new char[768]; // max 256 hex-codes, 255 spaces, 1 termination
+        for (uint16_t i = 0; i < 256; i++) {
+            buffer[i * 3]     = '0';
+            buffer[i * 3 + 1] = '0';
+            buffer[i * 3 + 2] = ' ';
+        }
+        buffer[267] = '\0';
+    }
+    if (telegram->message_length > 0) {
+        strlcpy(&buffer[(telegram->offset - offset) * 3], Helpers::data_to_hex(telegram->message_data, telegram->message_length).c_str(), 768);
+    }
     if (response_id_ != 0) {
-        strlcat(buffer, " ", 768);
-        return; // do not delete buffer
+        buffer[strlen(buffer)] = ' '; // overwrite termination \0
+        return;                       // do not delete buffer
     }
     JsonDocument doc;
     char         s[10];
@@ -1179,31 +1193,16 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     }
 
     // first check to see if we already have it, if so update the record
+    auto it = emsdevices.begin();
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice && emsdevice->is_device_id(device_id)) {
             if (product_id == 0 || emsdevice->product_id() != 0) { // update only with valid product_id
                 return true;
             }
-
-            LOG_DEBUG("Updating details for already active deviceID 0x%02X", device_id);
-            emsdevice->product_id(product_id);
-            emsdevice->version(version);
-
-            // only set brand if it doesn't already exist
-            if (emsdevice->brand() == EMSdevice::Brand::NO_BRAND) {
-                emsdevice->brand(brand);
-            }
-
-            // find the name and flags in our device library database
-            for (const auto & device : device_library_) {
-                if (device.product_id == product_id && device.device_type == emsdevice->device_type()) {
-                    emsdevice->default_name(device.default_name); // custom name is set later
-                    emsdevice->add_flags(device.flags);
-                }
-            }
-
-            return true; // finish up
+            emsdevices.erase(it); // erase the old device without product_id and re detect
+            break;
         }
+        it++;
     }
 
     // look up the rest of the details using the product_id and create the new device object

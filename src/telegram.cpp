@@ -336,7 +336,7 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
         telegram_raw[3] = telegram->offset;
 
         // EMS+ has different format for read and write
-        if (telegram->operation != Telegram::Operation::TX_READ) {
+        if (telegram->operation != Telegram::Operation::TX_READ && telegram->operation != Telegram::Operation::TX_RAW) {
             // WRITE/NONE
             telegram_raw[4] = (telegram->type_id >> 8) - 1; // type, 1st byte, high-byte, subtract 0x100
             telegram_raw[5] = telegram->type_id & 0xFF;     // type, 2nd byte, low-byte
@@ -404,6 +404,17 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
         return;
     }
 
+    if (telegram->operation == Telegram::Operation::TX_RAW) {
+        tx_state(Telegram::Operation::TX_READ);
+        if (EMSESP::response_id() == 0) {
+            Mqtt::clear_response();
+            EMSESP::set_response_id(telegram->type_id);
+            if (telegram->message_data[0] >= (telegram->type_id > 0xFF ? 25 : 27)) {
+                EMSESP::set_read_id(telegram->type_id);
+            }
+        }
+        return;
+    }
     tx_state(telegram->operation); // tx now in a wait state
 }
 
@@ -512,14 +523,7 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
         if (src != ems_bus_id() || dest == 0) {
             operation = Telegram::Operation::NONE; // do not check reply/ack for other ids and broadcasts
         } else if (dest & 0x80) {
-            operation = Telegram::Operation::TX_READ;
-            EMSESP::set_response_id(type_id);
-            // trigger read of all parts of telegram if requested length is more than 32
-            // compatibility to earlier versions
-            const uint8_t part_length = type_id > 0xFF ? 25 : 27;
-            if (message_data[0] >= part_length) {
-                EMSESP::set_read_id(type_id);
-            }
+            // keep RAW to set the response when sending
         } else {
             operation   = Telegram::Operation::TX_WRITE;
             validate_id = type_id;
@@ -541,7 +545,7 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
 
     LOG_DEBUG("New Tx [#%d] telegram, length %d", tx_telegram_id_, message_length);
 
-    if (front) {
+    if (front && (operation != Telegram::Operation::TX_RAW || EMSESP::response_id() == 0)) {
         // tx_telegrams_.push_front(qtxt); // add to front of queue
         tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram), false, validate_id); // add to front of queue
     } else {
@@ -674,8 +678,8 @@ uint16_t TxService::post_send_query() {
     if (post_typeid) {
         uint8_t dest = (this->telegram_last_->dest & 0x7F);
         // when set a value with large offset before and validate on same type and offset, or complete telegram
-        uint8_t length    = (this->telegram_last_->type_id == post_typeid) ? this->telegram_last_->message_length : 0xFF;
-        uint8_t offset    = (this->telegram_last_->type_id == post_typeid) ? this->telegram_last_->offset : 0;
+        uint8_t length = (this->telegram_last_->type_id == post_typeid) ? this->telegram_last_->message_length : 0xFF;
+        uint8_t offset = (this->telegram_last_->type_id == post_typeid) ? this->telegram_last_->offset : 0;
         this->add(Telegram::Operation::TX_READ, dest, post_typeid, offset, &length, 1, 0, true); // add to top/front of queue
         // read_request(telegram_last_post_send_query_, dest, 0); // no offset
         LOG_DEBUG("Sending post validate read, type ID 0x%02X to dest 0x%02X", post_typeid, dest);
