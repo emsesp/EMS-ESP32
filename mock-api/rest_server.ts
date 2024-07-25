@@ -336,7 +336,7 @@ const SYSTEM_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'systemStatus';
 const ACTIVITY_ENDPOINT = REST_ENDPOINT_ROOT + 'activity';
 
 // SETTINGS
-const ESPSYSTEM_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'ESPSystemStatus';
+const HARDWARE_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'HardwareStatus';
 const SECURITY_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'securitySettings';
 const RESTART_ENDPOINT = REST_ENDPOINT_ROOT + 'restart';
 const RESTART_PARTITION_ENDPOINT = REST_ENDPOINT_ROOT + 'partition';
@@ -347,28 +347,29 @@ const VERIFY_AUTHORIZATION_ENDPOINT = REST_ENDPOINT_ROOT + 'verifyAuthorization'
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn';
 const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken';
 
-const ESPsystem_status = {
+const hardware_status = {
   emsesp_version: '3.7-demo',
   esp_platform: 'ESP32',
-  max_alloc_heap: 89,
+  max_alloc_heap: 107,
   cpu_type: 'ESP32-S3',
-  cpu_rev: '0',
+  cpu_rev: 3,
   cpu_cores: 2,
   cpu_freq_mhz: 240,
-  free_heap: 143,
-  arduino_version: 'ESP32 Arduino v2.0.14',
-  sdk_version: 'v4.4.2',
+  free_heap: 166,
+  arduino_version: 'ESP32 Arduino v2.0.16',
+  sdk_version: 'v4.4.7',
   partition: 'app0',
   flash_chip_size: 4096,
   flash_chip_speed: 40000000,
   app_used: 1863,
   app_free: 121,
-  fs_used: 40,
-  fs_free: 24,
+  fs_used: 24,
+  fs_free: 2024,
   free_mem: 100,
-  psram_size: 0,
-  free_psram: 0,
+  psram_size: 4093,
+  free_psram: 4074,
   has_loader: true,
+  free_caps: 4204,
   // model: ''
   model: 'BBQKees Electronics EMS Gateway E32 V2 (E32 V2.0 P3/2024011)'
 };
@@ -4203,7 +4204,7 @@ router
 router
   .get(SYSTEM_STATUS_ENDPOINT, () => system_status)
   .get(ACTIVITY_ENDPOINT, () => activity)
-  .get(ESPSYSTEM_STATUS_ENDPOINT, () => ESPsystem_status)
+  .get(HARDWARE_STATUS_ENDPOINT, () => hardware_status)
   .get(SECURITY_SETTINGS_ENDPOINT, () => security_settings)
   .post(SECURITY_SETTINGS_ENDPOINT, async (request: any) => {
     security_settings = await request.json();

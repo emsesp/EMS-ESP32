@@ -2,12 +2,12 @@
 
 ## [3.7.0]
 
-## **IMPORTANT! BREAKING CHANGES**
+## **IMPORTANT! BREAKING CHANGES with 3.6.5**
 
 - new device WATER shows dhw entities from MM100 and SM100 in dhw setting
 - renamed WWC to DHW, always create DHW nests/topics, remove ww prefix from mqtt names [#1634](https://github.com/emsesp/EMS-ESP32/issues/1634)
 - change temperaturesensor id to underscore
-- system/info API command has the word 'Info' removed from the object name for each section (E.g. 'Network Info' is now just 'Network')
+- system/info API command has it's JSON keys and names changed to camelCase
 
 ## Added
 
@@ -52,3 +52,4 @@
 - Include TXT file along with the generated CSV for Device Data export/download
 - thermostat/remotetemp as command [#1835](https://github.com/emsesp/EMS-ESP32/discussions/1835)
 - temperaturesensor id notation with underscore [#1794](https://github.com/emsesp/EMS-ESP32/discussions/1794)
+- Change key-names in JSON to be compliant and consistent [#1860](https://github.com/emsesp/EMS-ESP32/issues/1860)

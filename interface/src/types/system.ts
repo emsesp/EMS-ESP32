@@ -2,7 +2,7 @@ import type { busConnectionStatus } from 'app/main/types';
 
 import type { NetworkConnectionStatus } from './network';
 
-export interface ESPSystemStatus {
+export interface HardwareStatus {
   emsesp_version: string;
   esp_platform: string;
   max_alloc_heap: number;
@@ -24,6 +24,7 @@ export interface ESPSystemStatus {
   psram_size?: number;
   free_psram?: number;
   has_loader: boolean;
+  free_caps: number;
   model: string;
 }
 

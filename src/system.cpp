@@ -1358,30 +1358,29 @@ bool System::get_value_info(JsonObject root, const char * command) {
 
 // export status information including the device information
 // http://ems-esp/api/system/info
-// TODO camelCase - #1860
 bool System::command_info(const char * value, const int8_t id, JsonObject output) {
     JsonObject node;
 
     // System
-    node                     = output["System"].to<JsonObject>();
-    node["version"]          = EMSESP_APP_VERSION;
-    node["uptime"]           = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
-    node["uptime (seconds)"] = uuid::get_uptime_sec();
+    node              = output["system"].to<JsonObject>();
+    node["version"]   = EMSESP_APP_VERSION;
+    node["uptime"]    = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
+    node["uptimeSec"] = uuid::get_uptime_sec();
 #ifndef EMSESP_STANDALONE
     node["platform"]  = EMSESP_PLATFORM;
     node["arduino"]   = ARDUINO_VERSION;
     node["sdk"]       = ESP.getSdkVersion();
-    node["free mem"]  = getHeapMem();
-    node["max alloc"] = getMaxAllocMem();
-    node["free caps"] = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024; // includes heap and psram
-    node["used app"]  = EMSESP::system_.appUsed();                       // kilobytes
-    node["free app"]  = EMSESP::system_.appFree();                       // kilobytes
+    node["freeMem"]   = getHeapMem();
+    node["maxAlloc"]  = getMaxAllocMem();
+    node["freeCaps"]  = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024; // includes heap and psram
+    node["usedApp"]   = EMSESP::system_.appUsed();                       // kilobytes
+    node["freeApp"]   = EMSESP::system_.appFree();                       // kilobytes
     node["partition"] = esp_ota_get_running_partition()->label;
 #endif
-    node["reset reason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
+    node["resetReason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 
     // Network Status
-    node = output["Network"].to<JsonObject>();
+    node = output["network"].to<JsonObject>();
 #ifndef EMSESP_STANDALONE
     if (EMSESP::system_.ethernet_connected()) {
         node["network"]  = "Ethernet";
@@ -1415,201 +1414,202 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         if (WiFi.status() == WL_CONNECTED && !settings.bssid.isEmpty()) {
             node["BSSID"] = "set"; // we don't disclose the name
         }
-        node["TxPower setting"]  = settings.tx_power;
-        node["static ip config"] = settings.staticIPConfig;
-        node["low bandwidth"]    = settings.bandwidth20;
-        node["disable sleep"]    = settings.nosleep;
-        node["enable MDNS"]      = settings.enableMDNS;
-        node["enable CORS"]      = settings.enableCORS;
+        node["TxPowerSetting"] = settings.tx_power;
+        node["staticIP"]       = settings.staticIPConfig;
+        node["lowBandwidth"]   = settings.bandwidth20;
+        node["disableSleep"]   = settings.nosleep;
+        node["enableMDNS"]     = settings.enableMDNS;
+        node["enableCORS"]     = settings.enableCORS;
         if (settings.enableCORS) {
-            node["CORS origin"] = settings.CORSOrigin;
+            node["CORSOrigin"] = settings.CORSOrigin;
         }
     });
 #ifndef EMSESP_STANDALONE
     EMSESP::esp8266React.getAPSettingsService()->read([&](APSettings & settings) {
-        const char * pM[]         = {"always", "disconnected", "never"};
-        node["AP provision mode"] = pM[settings.provisionMode];
-        node["AP security"]       = settings.password.length() ? "wpa2" : "open";
-        node["AP ssid"]           = settings.ssid;
+        const char * pM[]       = {"always", "disconnected", "never"};
+        node["APProvisionMode"] = pM[settings.provisionMode];
+        node["APSecurity"]      = settings.password.length() ? "wpa2" : "open";
+        node["APSSID"]          = settings.ssid;
     });
 #endif
 
     // NTP status
-    node = output["NTP"].to<JsonObject>();
+    node = output["ntp"].to<JsonObject>();
 #ifndef EMSESP_STANDALONE
-    node["NTP status"] = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
+    node["NTPStatus"] = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
     EMSESP::esp8266React.getNTPSettingsService()->read([&](NTPSettings & settings) {
-        node["enabled"]  = settings.enabled;
-        node["server"]   = settings.server;
-        node["tz label"] = settings.tzLabel;
+        node["enabled"] = settings.enabled;
+        node["server"]  = settings.server;
+        node["tzLabel"] = settings.tzLabel;
         // node["tz format"] = settings.tzFormat;
     });
 #endif
 
     // MQTT Status
-    node                = output["MQTT"].to<JsonObject>();
-    node["MQTT status"] = Mqtt::connected() ? F_(connected) : F_(disconnected);
+    node               = output["mqtt"].to<JsonObject>();
+    node["MQTTStatus"] = Mqtt::connected() ? F_(connected) : F_(disconnected);
     if (Mqtt::enabled()) {
-        node["MQTT publishes"]     = Mqtt::publish_count();
-        node["MQTT queued"]        = Mqtt::publish_queued();
-        node["MQTT publish fails"] = Mqtt::publish_fails();
-        node["MQTT connects"]      = Mqtt::connect_count();
+        node["MQTTPublishes"]    = Mqtt::publish_count();
+        node["MQTTQueued"]       = Mqtt::publish_queued();
+        node["MQTTPublishFails"] = Mqtt::publish_fails();
+        node["MQTTConnects"]     = Mqtt::connect_count();
     }
     EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
-        node["enabled"]                 = settings.enabled;
-        node["client id"]               = settings.clientId;
-        node["keep alive"]              = settings.keepAlive;
-        node["clean session"]           = settings.cleanSession;
-        node["entity format"]           = settings.entity_format;
-        node["base"]                    = settings.base;
-        node["discovery prefix"]        = settings.discovery_prefix;
-        node["discovery type"]          = settings.discovery_type;
-        node["nested format"]           = settings.nested_format;
-        node["ha enabled"]              = settings.ha_enabled;
-        node["mqtt qos"]                = settings.mqtt_qos;
-        node["mqtt retain"]             = settings.mqtt_retain;
-        node["publish time heartbeat"]  = settings.publish_time_heartbeat;
-        node["publish time boiler"]     = settings.publish_time_boiler;
-        node["publish time thermostat"] = settings.publish_time_thermostat;
-        node["publish time solar"]      = settings.publish_time_solar;
-        node["publish time mixer"]      = settings.publish_time_mixer;
-        node["publish time water"]      = settings.publish_time_water;
-        node["publish time other"]      = settings.publish_time_other;
-        node["publish time sensor"]     = settings.publish_time_sensor;
-        node["publish single"]          = settings.publish_single;
-        node["publish2command"]         = settings.publish_single2cmd;
-        node["send response"]           = settings.send_response;
+        node["enabled"]               = settings.enabled;
+        node["clientID"]              = settings.clientId;
+        node["keepAlive"]             = settings.keepAlive;
+        node["cleanSession"]          = settings.cleanSession;
+        node["entityFormat"]          = settings.entity_format;
+        node["base"]                  = settings.base;
+        node["discoveryPrefix"]       = settings.discovery_prefix;
+        node["discoveryType"]         = settings.discovery_type;
+        node["nestedFormat"]          = settings.nested_format;
+        node["haEnabled"]             = settings.ha_enabled;
+        node["mqttQos"]               = settings.mqtt_qos;
+        node["mqttRetain"]            = settings.mqtt_retain;
+        node["publishTimeHeartbeat"]  = settings.publish_time_heartbeat;
+        node["publishTimeBoiler"]     = settings.publish_time_boiler;
+        node["publishTimeThermostat"] = settings.publish_time_thermostat;
+        node["publishTimeSolar"]      = settings.publish_time_solar;
+        node["publishTimeMixer"]      = settings.publish_time_mixer;
+        node["publishTimeWater"]      = settings.publish_time_water;
+        node["publishTimeOther"]      = settings.publish_time_other;
+        node["publishTimeSensor"]     = settings.publish_time_sensor;
+        node["publishSingle"]         = settings.publish_single;
+        node["publish2command"]       = settings.publish_single2cmd;
+        node["sendResponse"]          = settings.send_response;
     });
 
     // Syslog Status
-    node            = output["Syslog"].to<JsonObject>();
+    node            = output["syslog"].to<JsonObject>();
     node["enabled"] = EMSESP::system_.syslog_enabled_;
 #ifndef EMSESP_STANDALONE
     if (EMSESP::system_.syslog_enabled_) {
-        node["syslog started"] = syslog_.started();
-        node["syslog level"]   = FL_(list_syslog_level)[syslog_.log_level() + 1];
-        node["syslog ip"]      = syslog_.ip();
-        node["syslog queue"]   = syslog_.queued();
+        node["syslogStarted"] = syslog_.started();
+        node["syslogLevel"]   = FL_(list_syslog_level)[syslog_.log_level() + 1];
+        node["syslogIP"]      = syslog_.ip();
+        node["syslogQueue"]   = syslog_.queued();
     }
 #endif
 
     // Sensor Status
-    node = output["Sensor"].to<JsonObject>();
+    node = output["sensor"].to<JsonObject>();
     if (EMSESP::sensor_enabled()) {
-        node["temperature sensors"]      = EMSESP::temperaturesensor_.no_sensors();
-        node["temperature sensor reads"] = EMSESP::temperaturesensor_.reads();
-        node["temperature sensor fails"] = EMSESP::temperaturesensor_.fails();
+        node["temperatureSensors"]     = EMSESP::temperaturesensor_.no_sensors();
+        node["temperatureSensorReads"] = EMSESP::temperaturesensor_.reads();
+        node["temperatureSensorFails"] = EMSESP::temperaturesensor_.fails();
     }
     if (EMSESP::analog_enabled()) {
-        node["analog sensors"]      = EMSESP::analogsensor_.no_sensors();
-        node["analog sensor reads"] = EMSESP::analogsensor_.reads();
-        node["analog sensor fails"] = EMSESP::analogsensor_.fails();
+        node["analogSensors"]     = EMSESP::analogsensor_.no_sensors();
+        node["analogSensorReads"] = EMSESP::analogsensor_.reads();
+        node["analogSensorFails"] = EMSESP::analogsensor_.fails();
     }
 
     // API Status
-    node              = output["API"].to<JsonObject>();
-    node["API calls"] = WebAPIService::api_count();
-    node["API fails"] = WebAPIService::api_fails();
+    node             = output["api"].to<JsonObject>();
+    node["APICalls"] = WebAPIService::api_count();
+    node["APIFails"] = WebAPIService::api_fails();
 
     // EMS Bus Status
-    node = output["Bus"].to<JsonObject>();
+    node = output["bus"].to<JsonObject>();
     switch (EMSESP::bus_status()) {
     case EMSESP::BUS_STATUS_OFFLINE:
-        node["bus status"] = "disconnected";
+        node["busStatus"] = "disconnected";
         break;
     case EMSESP::BUS_STATUS_TX_ERRORS:
-        node["bus status"] = "connected, tx issues - try a different Tx Mode";
+        node["busStatus"] = "connected, tx issues - try a different Tx Mode";
         break;
     case EMSESP::BUS_STATUS_CONNECTED:
-        node["bus status"] = "connected";
+        node["busStatus"] = "connected";
         break;
     default:
-        node["bus status"] = "unknown";
+        node["busStatus"] = "unknown";
         break;
     }
     // if (EMSESP::bus_status() != EMSESP::BUS_STATUS_OFFLINE) {
-    node["bus protocol"]                = EMSbus::is_ht3() ? "HT3" : "Buderus";
-    node["bus telegrams received (rx)"] = EMSESP::rxservice_.telegram_count();
-    node["bus reads (tx)"]              = EMSESP::txservice_.telegram_read_count();
-    node["bus writes (tx)"]             = EMSESP::txservice_.telegram_write_count();
-    node["bus incomplete telegrams"]    = EMSESP::rxservice_.telegram_error_count();
-    node["bus reads failed"]            = EMSESP::txservice_.telegram_read_fail_count();
-    node["bus writes failed"]           = EMSESP::txservice_.telegram_write_fail_count();
-    node["bus rx line quality"]         = EMSESP::rxservice_.quality();
-    node["bus tx line quality"]         = (EMSESP::txservice_.read_quality() + EMSESP::txservice_.read_quality()) / 2;
+    node["busProtocol"]            = EMSbus::is_ht3() ? "HT3" : "Buderus";
+    node["busTelegramsReceived"]   = EMSESP::rxservice_.telegram_count();
+    node["busReads"]               = EMSESP::txservice_.telegram_read_count();
+    node["busWrites"]              = EMSESP::txservice_.telegram_write_count();
+    node["busIncompleteTelegrams"] = EMSESP::rxservice_.telegram_error_count();
+    node["busReadsFailed"]         = EMSESP::txservice_.telegram_read_fail_count();
+    node["busWritesFailed"]        = EMSESP::txservice_.telegram_write_fail_count();
+    node["busRxLineQuality"]       = EMSESP::rxservice_.quality();
+    node["busTxLineQuality"]       = (EMSESP::txservice_.read_quality() + EMSESP::txservice_.read_quality()) / 2;
     // }
 
     // Settings
-    node = output["Settings"].to<JsonObject>();
+    node = output["settings"].to<JsonObject>();
     EMSESP::webSettingsService.read([&](WebSettings & settings) {
-        node["board profile"]       = settings.board_profile;
-        node["locale"]              = settings.locale;
-        node["tx mode"]             = settings.tx_mode;
-        node["ems bus id"]          = settings.ems_bus_id;
-        node["shower timer"]        = settings.shower_timer;
-        node["shower min duration"] = settings.shower_min_duration; // seconds
-        node["shower alert"]        = settings.shower_alert;
+        node["boardProfile"]      = settings.board_profile;
+        node["locale"]            = settings.locale;
+        node["txMode"]            = settings.tx_mode;
+        node["emsBusID"]          = settings.ems_bus_id;
+        node["showerTimer"]       = settings.shower_timer;
+        node["showerMinDuration"] = settings.shower_min_duration; // seconds
+        node["showerAlert"]       = settings.shower_alert;
         if (settings.shower_alert) {
-            node["shower alert coldshot"] = settings.shower_alert_coldshot; // seconds
-            node["shower alert trigger"]  = settings.shower_alert_trigger;  // minutes
+            node["showerAlertColdshot"] = settings.shower_alert_coldshot; // seconds
+            node["showerAlertTrigger"]  = settings.shower_alert_trigger;  // minutes
         }
         if (settings.board_profile == "CUSTOM") {
-            node["phy type"] = settings.phy_type;
+            node["phyType"] = settings.phy_type;
             if (settings.phy_type != PHY_type::PHY_TYPE_NONE) {
-                node["eth power"]      = settings.eth_power;
-                node["eth phy addr"]   = settings.eth_phy_addr;
-                node["eth clock_mode"] = settings.eth_clock_mode;
+                node["ethPower"]      = settings.eth_power;
+                node["ethPhyAddr"]    = settings.eth_phy_addr;
+                node["ethClockMmode"] = settings.eth_clock_mode;
             }
-            node["rx gpio"]      = settings.rx_gpio;
-            node["tx gpio"]      = settings.tx_gpio;
-            node["dallas gpio"]  = settings.dallas_gpio;
-            node["pbutton gpio"] = settings.pbutton_gpio;
-            node["led gpio"]     = settings.led_gpio;
+            node["rxGPIO"]      = settings.rx_gpio;
+            node["txGPIO"]      = settings.tx_gpio;
+            node["dallasGPIO"]  = settings.dallas_gpio;
+            node["pbuttonGPIO"] = settings.pbutton_gpio;
+            node["ledGPIO"]     = settings.led_gpio;
         }
-        node["hide led"]           = settings.hide_led;
-        node["notoken api"]        = settings.notoken_api;
-        node["readonly mode"]      = settings.readonly_mode;
-        node["fahrenheit"]         = settings.fahrenheit;
-        node["dallas parasite"]    = settings.dallas_parasite;
-        node["bool format"]        = settings.bool_format;
-        node["bool dashboard"]     = settings.bool_dashboard;
-        node["enum format"]        = settings.enum_format;
-        node["analog enabled"]     = settings.analog_enabled;
-        node["telnet enabled"]     = settings.telnet_enabled;
-        node["max web log buffer"] = settings.weblog_buffer;
-        node["web log buffer"]     = EMSESP::webLogService.num_log_messages();
+        node["hideLed"]         = settings.hide_led;
+        node["noTokenApi"]      = settings.notoken_api;
+        node["readonlyMode"]    = settings.readonly_mode;
+        node["fahrenheit"]      = settings.fahrenheit;
+        node["dallasParasite"]  = settings.dallas_parasite;
+        node["boolFormat"]      = settings.bool_format;
+        node["boolDashboard"]   = settings.bool_dashboard;
+        node["enumFormat"]      = settings.enum_format;
+        node["analogEnabled"]   = settings.analog_enabled;
+        node["telnetEnabled"]   = settings.telnet_enabled;
+        node["maxWebLogBuffer"] = settings.weblog_buffer;
+        node["webLogBuffer"]    = EMSESP::webLogService.num_log_messages();
+        node["modbusEnabled"]   = settings.modbus_enabled;
     });
 
     // Devices - show EMS devices if we have any
     if (!EMSESP::emsdevices.empty()) {
-        JsonArray devices = output["Devices"].to<JsonArray>();
+        JsonArray devices = output["devices"].to<JsonArray>();
         for (const auto & device_class : EMSFactory::device_handlers()) {
             for (const auto & emsdevice : EMSESP::emsdevices) {
                 if (emsdevice && (emsdevice->device_type() == device_class.first)) {
-                    JsonObject obj    = devices.add<JsonObject>();
-                    obj["type"]       = emsdevice->device_type_name(); // non translated name
-                    obj["name"]       = emsdevice->name();             // custom name
-                    obj["device id"]  = Helpers::hextoa(emsdevice->device_id());
-                    obj["product id"] = emsdevice->product_id();
-                    obj["brand"]      = emsdevice->brand_to_char();
-                    obj["version"]    = emsdevice->version();
-                    obj["entities"]   = emsdevice->count_entities();
+                    JsonObject obj   = devices.add<JsonObject>();
+                    obj["type"]      = emsdevice->device_type_name(); // non translated name
+                    obj["name"]      = emsdevice->name();             // custom name
+                    obj["deviceID"]  = Helpers::hextoa(emsdevice->device_id());
+                    obj["productID"] = emsdevice->product_id();
+                    obj["brand"]     = emsdevice->brand_to_char();
+                    obj["version"]   = emsdevice->version();
+                    obj["entities"]  = emsdevice->count_entities();
                     char result[500];
                     (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::RECEIVED);
                     if (result[0] != '\0') {
-                        obj["handlers received"] = result; // don't show handlers if there aren't any
+                        obj["handlersReceived"] = result; // don't show handlers if there aren't any
                     }
                     (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::FETCHED);
                     if (result[0] != '\0') {
-                        obj["handlers fetched"] = result;
+                        obj["handlersFetched"] = result;
                     }
                     (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::PENDING);
                     if (result[0] != '\0') {
-                        obj["handlers pending"] = result;
+                        obj["handlersPending"] = result;
                     }
                     (void)emsdevice->show_telegram_handlers(result, sizeof(result), EMSdevice::Handlers::IGNORED);
                     if (result[0] != '\0') {
-                        obj["handlers ignored"] = result;
+                        obj["handlersIgnored"] = result;
                     }
                 }
             }

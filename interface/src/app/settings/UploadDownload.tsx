@@ -57,7 +57,7 @@ const UploadDownload: FC = () => {
     data: data,
     send: loadData,
     error
-  } = useRequest(SystemApi.readESPSystemStatus, { force: true });
+  } = useRequest(SystemApi.readHardwareStatus, { force: true });
 
   const { data: latestVersion } = useRequest(SystemApi.getStableVersion, {
     immediate: true,
