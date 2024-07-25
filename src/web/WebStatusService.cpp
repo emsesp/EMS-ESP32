@@ -119,6 +119,7 @@ void WebStatusService::HardwareStatus(AsyncWebServerRequest * request) {
     uint32_t FSused          = LittleFS.usedBytes() / 1024;
     root["fs_used"]          = FSused;
     root["fs_free"]          = EMSESP::system_.FStotal() - FSused;
+    root["free_caps"]        = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024; // includes heap and psram
 
     if (EMSESP::system_.PSram()) {
         root["psram_size"] = EMSESP::system_.PSram();
