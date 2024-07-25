@@ -67,13 +67,14 @@ const dnsServers = ({ dns_ip_1, dns_ip_2 }: NetworkStatusType) => {
   if (!dns_ip_1) {
     return 'none';
   }
-  return dns_ip_1 + (!dns_ip_2 || dns_ip_2 === '0.0.0.0' ? '' : ',' + dns_ip_2);
+  return dns_ip_1 + (!dns_ip_2 || dns_ip_2 === '0.0.0.0' ? '' : ', ' + dns_ip_2);
 };
 
 const IPs = (status: NetworkStatusType) => {
   if (
     !status.local_ipv6 ||
-    status.local_ipv6 === '0000:0000:0000:0000:0000:0000:0000:0000'
+    status.local_ipv6 === '0000:0000:0000:0000:0000:0000:0000:0000' ||
+    status.local_ipv6 === '::'
   ) {
     return status.local_ip;
   }

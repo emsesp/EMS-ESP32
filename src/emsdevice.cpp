@@ -2030,7 +2030,7 @@ int EMSdevice::get_modbus_value(uint8_t tag, const std::string & shortname, std:
     return 0;
 }
 
-bool EMSdevice::modbus_value_to_json(uint8_t tag, const std::string & shortname, const std::vector<uint8_t> & modbus_data, JsonObject & jsonValue) {
+bool EMSdevice::modbus_value_to_json(uint8_t tag, const std::string & shortname, const std::vector<uint8_t> & modbus_data, JsonObject jsonValue) {
     //Serial.printf("modbus_value_to_json(%d,%s,[%d bytes])\n", tag, shortname.c_str(), modbus_data.size());
 
     // find device value by shortname
