@@ -160,6 +160,9 @@ const Scheduler: FC = () => {
     setCreating(false);
     setSelectedScheduleItem(si);
     setDialogOpen(true);
+    if (si.o_name === undefined) {
+      si.o_name = si.name;
+    }
   }, []);
 
   const onDialogClose = () => {
