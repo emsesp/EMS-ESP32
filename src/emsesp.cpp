@@ -729,8 +729,10 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
         }
         buffer[267] = '\0';
     }
-    if (telegram->message_length > 0) {
+    if (telegram->message_length > 0 || telegram->offset == offset) {
         strlcpy(&buffer[(telegram->offset - offset) * 3], Helpers::data_to_hex(telegram->message_data, telegram->message_length).c_str(), 768);
+    } else {
+        strlcpy(&buffer[(telegram->offset - offset) * 3], "", 768);
     }
     if (response_id_ != 0) {
         buffer[strlen(buffer)] = ' '; // overwrite termination \0
