@@ -1370,7 +1370,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["platform"]  = EMSESP_PLATFORM;
     node["arduino"]   = ARDUINO_VERSION;
     node["sdk"]       = ESP.getSdkVersion();
-    node["freMem"]    = getHeapMem();
+    node["freeMem"]   = getHeapMem();
     node["maxAlloc"]  = getMaxAllocMem();
     node["freeCaps"]  = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024; // includes heap and psram
     node["usedApp"]   = EMSESP::system_.appUsed();                       // kilobytes
