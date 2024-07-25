@@ -23,10 +23,10 @@ _Make sure your have performed every step and checked the applicable boxes befor
 - [ ] Searched the issue in [discussions](https://github.com/emsesp/EMS-ESP32/discussions)
 - [ ] Searched the issue in the [docs](https://emsesp.github.io/docs/Troubleshooting/)
 - [ ] Searched the issue in the [chat](https://discord.gg/3J3GgnzpyT)
-- [ ] Provide the output of <http://ems-esp.local/api/system> :
+- [ ] Provide the System information in the area below, taken from `http://<IP>/api/system`
 
-```lua
-  System information output here:
+```json
+  Paste System information here....
 
 
 ```
@@ -47,4 +47,4 @@ _If applicable, add screenshots to help explain your issue._
 
 _Add any other context about the issue here._
 
-**(Please, remember to close the issue when it has been addressed)**
+**(Please remember to close the issue when it has been addressed)**
