@@ -411,6 +411,7 @@ uint32_t Helpers::hextoint(const char * hex) {
         // get current character then increment
         char byte = *hex++;
         // transform hex character to the 4bit equivalent number, using the ascii table indexes
+        if (byte == ' ') byte = *hex++; // skip spaces
         if (byte >= '0' && byte <= '9')
             byte = byte - '0';
         else if (byte >= 'a' && byte <= 'f')

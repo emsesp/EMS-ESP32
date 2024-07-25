@@ -729,7 +729,7 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
         }
         buffer[267] = '\0';
     }
-    if (telegram->message_length > 0 || telegram->offset == offset) {
+    if (telegram->message_length) {
         strlcpy(&buffer[(telegram->offset - offset) * 3], Helpers::data_to_hex(telegram->message_data, telegram->message_length).c_str(), 768);
     } else {
         strlcpy(&buffer[(telegram->offset - offset) * 3], "", 768);
@@ -746,11 +746,8 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
     doc["offset"] = Helpers::hextoa(s, offset);
     doc["data"]   = buffer;
 
-    if (telegram->message_length <= 4 && strlen(buffer) <= 11) {
-        uint32_t value = 0;
-        for (uint8_t i = 0; i < telegram->message_length; i++) {
-            value = (value << 8) + telegram->message_data[i];
-        }
+    if (strlen(buffer) && strlen(buffer) <= 11) {
+        uint32_t value = Helpers::hextoint(buffer);
         doc["value"] = value;
     }
     Mqtt::queue_publish("response", doc.as<JsonObject>());
