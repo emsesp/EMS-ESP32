@@ -21,6 +21,7 @@ export interface HardwareStatus {
   fs_used: number;
   fs_free: number;
   free_mem: number;
+  psram: boolean;
   psram_size?: number;
   free_psram?: number;
   has_loader: boolean;
