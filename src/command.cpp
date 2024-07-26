@@ -26,7 +26,7 @@ uuid::log::Logger Command::logger_{F_(command), uuid::log::Facility::DAEMON};
 
 std::vector<Command::CmdFunction> Command::cmdfunctions_;
 
-// takes a path and a json body, parses the data and calls the command
+// takes a URI path and a json body, parses the data and calls the command
 // the path is leading so if duplicate keys are in the input JSON it will be ignored
 // the entry point will be either via the Web API (api/) or MQTT (<base>/)
 // returns a return code and json output
@@ -34,22 +34,11 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     SUrlParser p; // parse URL for the path names
     p.parse(path);
 
-    if (!p.paths().size()) {
-        return json_message(CommandRet::ERROR, "invalid path", output);
-    }
-
-    // check first if it's from API, if so strip the "api/"
-    if (p.paths().front() == "api") {
+    // check first if it's from API or MQTT, if so strip the "api/" or "<base>/" from the path
+    if (p.paths().size() && ((p.paths().front() == "api") || (p.paths().front() == Mqtt::base()))) {
         p.paths().erase(p.paths().begin());
     } else {
-        // not /api, so must be MQTT path. Check for base and remove it.
-        if (!strncmp(path, Mqtt::base().c_str(), Mqtt::base().length())) {
-            char new_path[Mqtt::MQTT_TOPIC_MAX_SIZE];
-            strlcpy(new_path, path, sizeof(new_path));
-            p.parse(new_path + Mqtt::base().length() + 1); // re-parse the stripped path
-        } else {
-            return json_message(CommandRet::ERROR, "unrecognized path", output); // error
-        }
+        return json_message(CommandRet::ERROR, "invalid path", output, path); // error
     }
 
     // re-calculate new path
@@ -697,15 +686,21 @@ void Command::show_all(uuid::console::Shell & shell) {
     shell.println();
 }
 
-uint8_t Command::json_message(uint8_t error_code, const char * message, const JsonObject output) {
+// creates a single json document with an error message
+// object is optional
+uint8_t Command::json_message(uint8_t error_code, const char * message, const JsonObject output, const char * object) {
     output.clear();
-    output["message"] = message;
+    if (object) {
+        output["message"] = std::string(message) + " " + object;
+    } else {
+        output["message"] = message;
+    }
     return error_code;
 }
 
-//
-// SUrlParser class
-//
+// **************************
+// **** SUrlParser class ****
+// **************************
 
 // Extract only the path component from the passed URI and normalized it
 // e.g. //one/two////three/// becomes /one/two/three
