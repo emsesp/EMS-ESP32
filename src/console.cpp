@@ -532,10 +532,14 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
 
             JsonDocument doc;
             int8_t       id          = -1;
-            const char * cmd         = Command::parse_command_string(arguments[1].c_str(), id);
+            const char * cmd         = Helpers::toLower(arguments[1]).c_str();
             uint8_t      return_code = CommandRet::OK;
             JsonObject   json        = doc.to<JsonObject>();
+            bool         has_data    = false;
 
+            if (device_type >= EMSdevice::DeviceType::BOILER) {
+                cmd = Command::parse_command_string(cmd, id); // extract hc or dhw
+            }
             if (cmd == nullptr) {
                 cmd = device_type == EMSdevice::DeviceType::SYSTEM ? F_(info) : F_(values);
             }
@@ -550,6 +554,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                 } else if (arguments[2] == "?") {
                     return_code = Command::call(device_type, cmd, nullptr, true, id, json);
                 } else {
+                    has_data = true;
                     // has a value but no id so use -1
                     return_code = Command::call(device_type, cmd, arguments.back().c_str(), true, id, json);
                 }
@@ -558,6 +563,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                 if (arguments[2] == "?") {
                     return_code = Command::call(device_type, cmd, nullptr, true, atoi(arguments[3].c_str()), json);
                 } else {
+                    has_data    = true;
                     return_code = Command::call(device_type, cmd, arguments[2].c_str(), true, atoi(arguments[3].c_str()), json);
                 }
             }
@@ -572,9 +578,11 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                     serializeJsonPretty(doc, shell);
                     shell.println();
                     return;
-                } else {
+                } else if (has_data) {
                     // show message if no data returned (e.g. for analogsensor, temperaturesensor, custom)
                     shell.println("Command executed. Check log for messages.");
+                    return;
+                } else {
                     return;
                 }
             } else if (return_code == CommandRet::NOT_FOUND) {

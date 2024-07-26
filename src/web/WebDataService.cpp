@@ -221,10 +221,6 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
         // using the unique ID from the web find the real device type
         for (const auto & emsdevice : EMSESP::emsdevices) {
             if (emsdevice->unique_id() == unique_id) {
-                // parse the command as it could have a hc or dhw prefixed, e.g. hc2/seltemp
-                int8_t id = -1;                                     // default
-                cmd       = Command::parse_command_string(cmd, id); // extract hc or dhw
-
                 // create JSON for output
                 auto *     response = new AsyncJsonResponse(false);
                 JsonObject output   = response->getRoot();
@@ -233,6 +229,11 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
                 // authenticated is always true
                 uint8_t return_code = CommandRet::NOT_FOUND;
                 uint8_t device_type = emsdevice->device_type();
+                // parse the command as it could have a hc or dhw prefixed, e.g. hc2/seltemp
+                int8_t id = -1; // default
+                if (device_type >= EMSdevice::DeviceType::BOILER) {
+                    cmd = Command::parse_command_string(cmd, id); // extract hc or dhw
+                }
                 if (data.is<const char *>()) {
                     return_code = Command::call(device_type, cmd, data.as<const char *>(), true, id, output);
                 } else if (data.is<int>()) {
@@ -263,13 +264,15 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
 
         // special check for custom entities (which have a unique id of 99)
         if (unique_id == 99) {
-            // parse the command as it could have a hc or dhw prefixed, e.g. hc2/seltemp
-            int8_t id              = -1;
-            cmd                    = Command::parse_command_string(cmd, id);
             auto *     response    = new AsyncJsonResponse(false);
             JsonObject output      = response->getRoot();
             uint8_t    return_code = CommandRet::NOT_FOUND;
             uint8_t    device_type = EMSdevice::DeviceType::CUSTOM;
+            // parse the command as it could have a hc or dhw prefixed, e.g. hc2/seltemp
+            int8_t id = -1;
+            if (device_type >= EMSdevice::DeviceType::BOILER) {
+                cmd = Command::parse_command_string(cmd, id); // extract hc or dhw
+            }
             if (data.is<const char *>()) {
                 return_code = Command::call(device_type, cmd, data.as<const char *>(), true, id, output);
             } else if (data.is<int>()) {
