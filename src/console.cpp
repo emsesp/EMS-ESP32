@@ -578,7 +578,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                     serializeJsonPretty(doc, shell);
                     shell.println();
                     return;
-                } else if (has_data) {
+                } else if (!has_data) {
                     // show message if no data returned (e.g. for analogsensor, temperaturesensor, custom)
                     shell.println("Command executed. Check log for messages.");
                     return;
