@@ -438,7 +438,7 @@ ModbusMessage Modbus::handleWrite(const ModbusMessage & request) {
         if (output.size()) {
             snprintf(error,
                      sizeof(error),
-                     "Modbus write command failed with error: %s (%s)",
+                     "Modbus write command failed with error %s (%s)",
                      (const char *)output["message"],
                      Command::return_code_string(return_code));
         } else {

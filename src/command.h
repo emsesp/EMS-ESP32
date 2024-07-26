@@ -143,7 +143,7 @@ class Command {
 
     static std::vector<CmdFunction> cmdfunctions_; // the list of commands
 
-    static uint8_t json_message(uint8_t error_code, const char * message, const JsonObject output);
+    static uint8_t json_message(uint8_t error_code, const char * message, JsonObject output, const char * object = nullptr);
 };
 
 class SUrlParser {

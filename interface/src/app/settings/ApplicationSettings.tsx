@@ -50,6 +50,10 @@ export function boardProfileSelectItems() {
 }
 
 const ApplicationSettings: FC = () => {
+  const { data: hardwareData, error } = useRequest(SystemApi.readHardwareStatus, {
+    force: true
+  });
+
   const {
     loadData,
     saveData,
@@ -835,7 +839,7 @@ const ApplicationSettings: FC = () => {
               checked={data.modbus_enabled}
               onChange={updateFormValue}
               name="modbus_enabled"
-              disabled={saving}
+              disabled={!hardwareData.psram}
             />
           }
           label={LL.ENABLE_MODBUS()}

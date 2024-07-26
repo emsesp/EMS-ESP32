@@ -228,9 +228,9 @@ void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) {
 
 #if defined(EMSESP_DEBUG)
     if (len) {
-        LOG_DEBUG("Received topic `%s` => payload `%s` (length %d)", topic, message, len);
+        LOG_DEBUG("Received topic %s => payload '%s' (length %d)", topic, message, len);
     } else {
-        LOG_DEBUG("Received topic `%s`", topic);
+        LOG_DEBUG("Received topic %s", topic);
     }
 #endif
     // remove HA topics if we don't use discovery
