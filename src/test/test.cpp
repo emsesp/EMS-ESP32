@@ -1172,7 +1172,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         test("boiler");
         test("thermostat");
 
-        EMSESP::mqtt_.incoming("ems-esp/boiler/wwseltemp", "59");
+        EMSESP::mqtt_.incoming("ems-esp/boiler/seltemp", "59");
+        EMSESP::mqtt_.incoming("badems-esp/boiler/seltemp", "59"); // should fail
+
         ok = true;
     }
 
