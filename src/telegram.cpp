@@ -523,7 +523,8 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
         if (src != ems_bus_id() || dest == 0) {
             operation = Telegram::Operation::NONE; // do not check reply/ack for other ids and broadcasts
         } else if (dest & 0x80) {
-            // keep RAW to set the response when sending
+            // keep operation RAW to set the response when sending
+            // Mqtt::clear_response(); // set here when receiving command or when sending?
         } else {
             operation   = Telegram::Operation::TX_WRITE;
             validate_id = type_id;
@@ -607,6 +608,10 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
         if (operation == Telegram::Operation::TX_READ) {
             if (telegram_last_->offset > 0) { // ignore errors for higher offsets
                 LOG_DEBUG("Last Tx Read operation failed after %d retries. Ignoring request: %s", MAXIMUM_TX_RETRIES, telegram_last_->to_string().c_str());
+                if (EMSESP::response_id()) {
+                    EMSESP::set_response_id(0);
+                    EMSESP::set_read_id(0);
+                }
                 return;
             }
             increment_telegram_read_fail_count(); // another Tx fail
@@ -646,11 +651,18 @@ void TxService::retry_tx(const uint8_t operation, const uint8_t * data, const ui
 uint16_t TxService::read_next_tx(const uint8_t offset, const uint8_t length) {
     uint8_t old_length  = telegram_last_->type_id > 0xFF ? length - 7 : length - 5;
     uint8_t max_length  = telegram_last_->type_id > 0xFF ? EMS_MAX_TELEGRAM_MESSAGE_LENGTH - 2 : EMS_MAX_TELEGRAM_MESSAGE_LENGTH;
-    uint8_t next_length = telegram_last_->message_data[0] - old_length - offset + telegram_last_->offset;
+    uint8_t next_length = telegram_last_->message_data[0] > old_length ? telegram_last_->message_data[0] - old_length - offset + telegram_last_->offset : 0;
     uint8_t next_offset = offset + old_length;
+
     // check telegram, length, offset and overflow
     // some telegrams only reply with one byte less, but have higher offsets (boiler 0x10)
     // some reply with higher offset than requestes and have not_set values intermediate (boiler 0xEA)
+
+    // We have th last byte received
+    if (offset + old_length >= telegram_last_->offset + telegram_last_->message_data[0]) {
+        return 0;
+    }
+    // we request all and get a short telegram with requested offset
     if ((next_length + next_offset) == 0xFF && old_length < max_length - 1 && offset <= telegram_last_->offset) {
         return 0;
     }

@@ -748,7 +748,7 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
 
     if (strlen(buffer) && strlen(buffer) <= 11) {
         uint32_t value = Helpers::hextoint(buffer);
-        doc["value"] = value;
+        doc["value"]   = value;
     }
     Mqtt::queue_publish("response", doc.as<JsonObject>());
     delete[] buffer;
