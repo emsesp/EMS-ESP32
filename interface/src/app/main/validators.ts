@@ -241,6 +241,25 @@ export const createSettingsValidator = (settings: Settings) =>
         { type: 'number', min: 0, max: 10, message: 'Must be between 0 and 10' }
       ]
     }),
+    ...(settings.modbus_enabled && {
+      modbus_max_clients: [
+        { required: true, message: 'Max clients is required' },
+        { type: 'number', min: 0, max: 50, message: 'Invalid number' }
+      ],
+      modbus_port: [
+        { required: true, message: 'Port is required' },
+        { type: 'number', min: 0, max: 65535, message: 'Invalid Port' }
+      ],
+      modbus_timeout: [
+        { required: true, message: 'Timeout is required' },
+        {
+          type: 'number',
+          min: 100,
+          max: 20000,
+          message: 'Must be between 100 and 20000'
+        }
+      ]
+    }),
     ...(settings.shower_timer && {
       shower_min_duration: [
         {
@@ -388,9 +407,16 @@ export const entityItemValidation = (entity: EntityItem[], entityItem: EntityIte
     ]
   });
 
-export const uniqueTemperatureNameValidator = (sensors: TemperatureSensor[]) => ({
+export const uniqueTemperatureNameValidator = (
+  sensors: TemperatureSensor[],
+  o_name?: string
+) => ({
   validator(rule: InternalRuleItem, n: string, callback: (error?: string) => void) {
-    if (n !== '' && sensors.find((ts) => ts.n.toLowerCase() === n.toLowerCase())) {
+    if (
+      (o_name === undefined || o_name.toLowerCase() !== n.toLowerCase()) &&
+      n !== '' &&
+      sensors.find((ts) => ts.n.toLowerCase() === n.toLowerCase())
+    ) {
       callback('Name already in use');
     } else {
       callback();
@@ -398,7 +424,10 @@ export const uniqueTemperatureNameValidator = (sensors: TemperatureSensor[]) => 
   }
 });
 
-export const temperatureSensorItemValidation = (sensors: TemperatureSensor[]) =>
+export const temperatureSensorItemValidation = (
+  sensors: TemperatureSensor[],
+  sensor: TemperatureSensor
+) =>
   new Schema({
     n: [
       {
@@ -406,7 +435,7 @@ export const temperatureSensorItemValidation = (sensors: TemperatureSensor[]) =>
         pattern: /^[a-zA-Z0-9_]{0,19}$/,
         message: "Must be <20 characters: alphanumeric or '_'"
       },
-      ...[uniqueTemperatureNameValidator(sensors)]
+      ...[uniqueTemperatureNameValidator(sensors, sensor.o_n)]
     ]
   });
 
@@ -424,9 +453,16 @@ export const isGPIOUniqueValidator = (sensors: AnalogSensor[]) => ({
   }
 });
 
-export const uniqueAnalogNameValidator = (sensors: AnalogSensor[]) => ({
+export const uniqueAnalogNameValidator = (
+  sensors: AnalogSensor[],
+  o_name?: string
+) => ({
   validator(rule: InternalRuleItem, n: string, callback: (error?: string) => void) {
-    if (n !== '' && sensors.find((as) => as.n.toLowerCase() === n.toLowerCase())) {
+    if (
+      (o_name === undefined || o_name.toLowerCase() !== n.toLowerCase()) &&
+      n !== '' &&
+      sensors.find((as) => as.n.toLowerCase() === n.toLowerCase())
+    ) {
       callback('Name already in use');
     } else {
       callback();
@@ -436,6 +472,7 @@ export const uniqueAnalogNameValidator = (sensors: AnalogSensor[]) => ({
 
 export const analogSensorItemValidation = (
   sensors: AnalogSensor[],
+  sensor: AnalogSensor,
   creating: boolean,
   platform: string
 ) =>
@@ -446,7 +483,7 @@ export const analogSensorItemValidation = (
         pattern: /^[a-zA-Z0-9_]{0,19}$/,
         message: "Must be <20 characters: alphanumeric or '_'"
       },
-      ...[uniqueAnalogNameValidator(sensors)]
+      ...[uniqueAnalogNameValidator(sensors, sensor.o_n)]
     ],
     g: [
       { required: true, message: 'GPIO is required' },

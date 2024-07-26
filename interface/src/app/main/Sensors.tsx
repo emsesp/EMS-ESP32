@@ -255,6 +255,7 @@ const Sensors: FC = () => {
 
   const updateTemperatureSensor = (ts: TemperatureSensor) => {
     if (me.admin) {
+      ts.o_n = ts.n;
       setSelectedTemperatureSensor(ts);
       setTemperatureDialogOpen(true);
     }
@@ -282,6 +283,7 @@ const Sensors: FC = () => {
   const updateAnalogSensor = (as: AnalogSensor) => {
     if (me.admin) {
       setCreating(false);
+      as.o_n = as.n;
       setSelectedAnalogSensor(as);
       setAnalogDialogOpen(true);
     }
@@ -302,7 +304,8 @@ const Sensors: FC = () => {
       o: 0,
       t: 0,
       f: 1,
-      d: false
+      d: false,
+      o_n: ''
     });
     setAnalogDialogOpen(true);
   };
@@ -465,7 +468,10 @@ const Sensors: FC = () => {
           onClose={onTemperatureDialogClose}
           onSave={onTemperatureDialogSave}
           selectedItem={selectedTemperatureSensor}
-          validator={temperatureSensorItemValidation(sensorData.ts)}
+          validator={temperatureSensorItemValidation(
+            sensorData.ts,
+            selectedTemperatureSensor
+          )}
         />
       )}
       {sensorData?.analog_enabled === true && (
@@ -483,6 +489,7 @@ const Sensors: FC = () => {
               selectedItem={selectedAnalogSensor}
               validator={analogSensorItemValidation(
                 sensorData.as,
+                selectedAnalogSensor,
                 creating,
                 sensorData.platform
               )}

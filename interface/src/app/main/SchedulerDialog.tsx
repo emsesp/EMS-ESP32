@@ -72,6 +72,17 @@ const SchedulerDialog = ({
     }
   };
 
+  const saveandactivate = async () => {
+    editItem.active = true;
+    try {
+      setFieldErrors(undefined);
+      await validate(validator, editItem);
+      onSave(editItem);
+    } catch (error) {
+      setFieldErrors(error as ValidateFieldsError);
+    }
+  };
+
   const remove = () => {
     editItem.deleted = true;
     onSave(editItem);
@@ -326,36 +337,36 @@ const SchedulerDialog = ({
                 </>
               )}
             </Grid>
-            <ValidatedTextField
-              fieldErrors={fieldErrors}
-              name="cmd"
-              label={LL.COMMAND(0)}
-              multiline
-              fullWidth
-              value={editItem.cmd}
-              margin="normal"
-              onChange={updateFormValue}
-            />
-            <TextField
-              name="value"
-              label={LL.VALUE(0)}
-              multiline
-              margin="normal"
-              fullWidth
-              value={editItem.value}
-              onChange={updateFormValue}
-            />
-            <ValidatedTextField
-              fieldErrors={fieldErrors}
-              name="name"
-              label={LL.NAME(0) + ' (' + LL.OPTIONAL() + ')'}
-              value={editItem.name}
-              fullWidth
-              margin="normal"
-              onChange={updateFormValue}
-            />
           </>
         )}
+        <ValidatedTextField
+          fieldErrors={fieldErrors}
+          name="cmd"
+          label={LL.COMMAND(0)}
+          multiline
+          fullWidth
+          value={editItem.cmd}
+          margin="normal"
+          onChange={updateFormValue}
+        />
+        <TextField
+          name="value"
+          label={LL.VALUE(0)}
+          multiline
+          margin="normal"
+          fullWidth
+          value={editItem.value}
+          onChange={updateFormValue}
+        />
+        <ValidatedTextField
+          fieldErrors={fieldErrors}
+          name="name"
+          label={LL.NAME(0) + ' (' + LL.OPTIONAL() + ')'}
+          value={editItem.name}
+          fullWidth
+          margin="normal"
+          onChange={updateFormValue}
+        />
       </DialogContent>
       <DialogActions>
         {!creating && (
@@ -386,6 +397,16 @@ const SchedulerDialog = ({
         >
           {creating ? LL.ADD(0) : LL.UPDATE()}
         </Button>
+        {editItem.flags === 0 && editItem.cmd !== '' && (
+          <Button
+            startIcon={<DoneIcon />}
+            variant="outlined"
+            onClick={saveandactivate}
+            color="warning"
+          >
+            {LL.EXECUTE()}
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );

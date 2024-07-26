@@ -339,13 +339,18 @@ void AnalogSensor::loop() {
 
 // update analog information name and offset
 // a type value of -1 is used to delete the sensor
-bool AnalogSensor::update(uint8_t gpio, const std::string & name, double offset, double factor, uint8_t uom, int8_t type, bool deleted) {
+bool AnalogSensor::update(uint8_t gpio, std::string & name, double offset, double factor, uint8_t uom, int8_t type, bool deleted) {
     // first see if we can find the sensor in our customization list
     bool found_sensor = false;
     EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
         for (auto & AnalogCustomization : settings.analogCustomizations) {
             if (AnalogCustomization.type == AnalogType::COUNTER || AnalogCustomization.type >= AnalogType::DIGITAL_OUT) {
                 Command::erase_command(EMSdevice::DeviceType::ANALOGSENSOR, AnalogCustomization.name.c_str());
+            }
+            if (name.empty()) {
+                char n[20];
+                snprintf(n, sizeof(n), "%s_%02d", FL_(AnalogTypeName)[type], gpio);
+                name = n;
             }
             if (AnalogCustomization.gpio == gpio) {
                 found_sensor = true; // found the record
@@ -754,16 +759,6 @@ AnalogSensor::Sensor::Sensor(const uint8_t gpio, const std::string & name, const
     , uom_(uom)
     , type_(type) {
     value_ = 0; // init value to 0 always
-}
-
-// returns name of the analog sensor or creates one if its empty
-std::string AnalogSensor::Sensor::name() const {
-    if (name_.empty()) {
-        char name[20];
-        snprintf(name, sizeof(name), "%s_%02d", FL_(AnalogTypeName)[type_], gpio_);
-        return name;
-    }
-    return name_;
 }
 
 // set the dig_out/counter/DAC/PWM value, id is gpio-no

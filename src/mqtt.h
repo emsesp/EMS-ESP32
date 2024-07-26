@@ -208,6 +208,10 @@ class Mqtt {
         return lastresponse_;
     }
 
+    static void clear_response() {
+        lastresponse_.clear();
+    }
+
     void set_qos(uint8_t mqtt_qos) const {
         mqtt_qos_ = mqtt_qos;
     }

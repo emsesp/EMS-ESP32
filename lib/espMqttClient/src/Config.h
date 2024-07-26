@@ -73,3 +73,7 @@ the LICENSE file.
     #define EMC_SIZE_POOL_ELEMENTS 128
   #endif
 #endif
+
+#ifndef  TASMOTA_SDK
+#define EMC_CLIENT_SECURE
+#endif

@@ -39,7 +39,7 @@ void WebSchedulerService::begin() {
     snprintf(topic, sizeof(topic), "%s/#", F_(scheduler));
     Mqtt::subscribe(EMSdevice::DeviceType::SCHEDULER, topic, nullptr); // use empty function callback
 #ifndef EMSESP_STANDALONE
-    xTaskCreate((TaskFunction_t)scheduler_task, "scheduler_task", 4096, NULL, 3, NULL);
+    xTaskCreate((TaskFunction_t)scheduler_task, "scheduler_task", 4096, NULL, 1, NULL);
 #endif
 }
 
@@ -51,7 +51,7 @@ void WebScheduler::read(WebScheduler & webScheduler, JsonObject root) {
     for (const ScheduleItem & scheduleItem : webScheduler.scheduleItems) {
         JsonObject si = schedule.add<JsonObject>();
         si["id"]      = counter++; // id is only used to render the table and must be unique
-        si["active"]  = scheduleItem.active;
+        si["active"]  = scheduleItem.flags ? scheduleItem.active : false;
         si["flags"]   = scheduleItem.flags;
         si["time"]    = scheduleItem.time;
         si["cmd"]     = scheduleItem.cmd;
@@ -191,6 +191,15 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
             } else {
                 char result[12];
                 output["value"] = Helpers::render_boolean(result, scheduleItem.active);
+            }
+            if (scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_CONDITION) {
+                output["condition"] = scheduleItem.time;
+            } else if (scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_ONCHANGE) {
+                output["onchange"] = scheduleItem.time;
+            } else if (scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER) {
+                output["timer"] = scheduleItem.time;
+            } else if (scheduleItem.flags != 0){
+                output["time"] = scheduleItem.time;
             }
             output["command"]   = scheduleItem.cmd;
             output["cmd_data"]  = scheduleItem.value;
@@ -426,8 +435,8 @@ bool WebSchedulerService::command(const char * name, const std::string & command
     return false;
 }
 
-#include "shuntingYard.hpp"
-
+// called from emsesp.cpp on every entity-change
+// queue schedules to be handled executed in scheduler-loop
 bool WebSchedulerService::onChange(const char * cmd) {
     for (ScheduleItem & scheduleItem : *scheduleItems_) {
         if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_ONCHANGE
@@ -439,6 +448,9 @@ bool WebSchedulerService::onChange(const char * cmd) {
     return false;
 }
 
+#include "shuntingYard.hpp"
+
+// handle condition schedules, parse string stored in schedule.time field
 void WebSchedulerService::condition() {
     for (ScheduleItem & scheduleItem : *scheduleItems_) {
         if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_CONDITION) {
@@ -474,6 +486,13 @@ void WebSchedulerService::loop() {
         ScheduleItem si = *cmd_changed_.front();
         command(si.name.c_str(), si.cmd, compute(si.value));
         cmd_changed_.pop_front();
+    }
+
+    for (ScheduleItem & scheduleItem : *scheduleItems_) {
+        if (scheduleItem.active && scheduleItem.flags == 0) {
+            command(scheduleItem.name.c_str(), scheduleItem.cmd, compute(scheduleItem.value));
+            scheduleItem.active = false;
+        }
     }
 
     // check conditions every 10 seconds
@@ -529,9 +548,10 @@ void WebSchedulerService::loop() {
     }
 }
 
+// process schedules async
 void WebSchedulerService::scheduler_task(void * pvParameters) {
     while (1) {
-        delay(100); // no need to hurry
+        delay(10); // no need to hurry
         if (!EMSESP::system_.upload_status()) {
             EMSESP::webSchedulerService.loop();
         }

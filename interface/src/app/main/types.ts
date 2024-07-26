@@ -79,6 +79,7 @@ export interface TemperatureSensor {
   t?: number; // temp, optional
   o: number; // offset
   u: number; // uom
+  o_n?: string;
 }
 
 export interface AnalogSensor {
@@ -91,6 +92,7 @@ export interface AnalogSensor {
   f: number;
   t: number;
   d: boolean; // deleted flag
+  o_n?: string;
 }
 
 export interface WriteTemperatureSensor {

@@ -28,7 +28,7 @@
 namespace emsesp {
 
 // names, same order as AnalogType
-MAKE_ENUM_FIXED(AnalogTypeName, "disabled", "dig_in", "counter", "adc", "timer", "rate", "pwm0", "pwm1", "pwm2")
+MAKE_ENUM_FIXED(AnalogTypeName, "disabled", "dig_in", "counter", "adc", "timer", "rate", "dig_out", "pwm0", "pwm1", "pwm2")
 
 class AnalogSensor {
   public:
@@ -41,7 +41,9 @@ class AnalogSensor {
             offset_ = offset;
         }
 
-        std::string name() const;
+        std::string name() const {
+            return name_;
+        }
 
         void set_name(const std::string & name) {
             name_ = name;
@@ -155,7 +157,7 @@ class AnalogSensor {
         return sensors_.size();
     }
 
-    bool update(uint8_t gpio, const std::string & name, double offset, double factor, uint8_t uom, int8_t type, bool deleted = false);
+    bool update(uint8_t gpio, std::string & name, double offset, double factor, uint8_t uom, int8_t type, bool deleted = false);
     bool get_value_info(JsonObject output, const char * cmd, const int8_t id = -1);
     void store_counters();
 

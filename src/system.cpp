@@ -1305,7 +1305,7 @@ bool System::get_value_info(JsonObject root, const char * command) {
     (void)command_info("", 0, root);
 
     // check for hardcoded "info"
-    if (!strcmp(cmd, F_(info))) {
+    if (!strcmp(cmd, F_(info)) || !strcmp(cmd, F_(value))) {
         return true;
     }
 

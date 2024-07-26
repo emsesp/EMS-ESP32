@@ -178,6 +178,10 @@ class EMSESP {
         response_id_ = id;
     }
 
+    static uint16_t response_id() {
+        return response_id_;
+    }
+
     static bool wait_validate() {
         return (wait_validate_ != 0);
     }
