@@ -24,9 +24,9 @@
 
 namespace emsesp {
 
-// /rest/HardwareStatus
+// /rest/hardwareStatus
 WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * securityManager) {
-    server->on(HARDWARE_STATUS_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { HardwareStatus(request); });
+    server->on(HARDWARE_STATUS_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { hardwareStatus(request); });
     server->on(SYSTEM_STATUS_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { systemStatus(request); });
 }
 
@@ -85,7 +85,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     request->send(response);
 }
 
-void WebStatusService::HardwareStatus(AsyncWebServerRequest * request) {
+void WebStatusService::hardwareStatus(AsyncWebServerRequest * request) {
     EMSESP::system_.refreshHeapMem(); // refresh free heap and max alloc heap
 
     auto *     response = new AsyncJsonResponse(false);
@@ -121,6 +121,7 @@ void WebStatusService::HardwareStatus(AsyncWebServerRequest * request) {
     root["fs_free"]          = EMSESP::system_.FStotal() - FSused;
     root["free_caps"]        = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024; // includes heap and psram
 
+    root["psram"] = EMSESP::system_.PSram();
     if (EMSESP::system_.PSram()) {
         root["psram_size"] = EMSESP::system_.PSram();
         root["free_psram"] = ESP.getFreePsram() / 1024;
