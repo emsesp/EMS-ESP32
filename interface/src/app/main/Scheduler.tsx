@@ -283,7 +283,9 @@ const Scheduler: FC = () => {
                   <Cell stiff>
                     <Stack spacing={0.5} direction="row">
                       <Divider orientation="vertical" flexItem />
-                      {si.flags < ScheduleFlag.SCHEDULE_TIMER ? (
+                      {si.flags === 0 ? (
+                        <></>
+                      ) : si.flags < ScheduleFlag.SCHEDULE_TIMER ? (
                         <>
                           {dayBox(si, ScheduleFlag.SCHEDULE_MON)}
                           {dayBox(si, ScheduleFlag.SCHEDULE_TUE)}

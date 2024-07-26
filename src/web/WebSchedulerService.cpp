@@ -51,7 +51,7 @@ void WebScheduler::read(WebScheduler & webScheduler, JsonObject root) {
     for (const ScheduleItem & scheduleItem : webScheduler.scheduleItems) {
         JsonObject si = schedule.add<JsonObject>();
         si["id"]      = counter++; // id is only used to render the table and must be unique
-        si["active"]  = scheduleItem.active;
+        si["active"]  = scheduleItem.flags ? scheduleItem.active : false;
         si["flags"]   = scheduleItem.flags;
         si["time"]    = scheduleItem.time;
         si["cmd"]     = scheduleItem.cmd;
@@ -198,7 +198,7 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
                 output["onchange"] = scheduleItem.time;
             } else if (scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER) {
                 output["timer"] = scheduleItem.time;
-            } else {
+            } else if (scheduleItem.flags != 0){
                 output["time"] = scheduleItem.time;
             }
             output["command"]   = scheduleItem.cmd;
@@ -488,6 +488,13 @@ void WebSchedulerService::loop() {
         cmd_changed_.pop_front();
     }
 
+    for (ScheduleItem & scheduleItem : *scheduleItems_) {
+        if (scheduleItem.active && scheduleItem.flags == 0) {
+            command(scheduleItem.name.c_str(), scheduleItem.cmd, compute(scheduleItem.value));
+            scheduleItem.active = false;
+        }
+    }
+
     // check conditions every 10 seconds
     uint32_t uptime_sec = uuid::get_uptime_sec() / 10;
     if (last_uptime_sec != uptime_sec) {
@@ -544,7 +551,7 @@ void WebSchedulerService::loop() {
 // process schedules async
 void WebSchedulerService::scheduler_task(void * pvParameters) {
     while (1) {
-        delay(100); // no need to hurry
+        delay(10); // no need to hurry
         if (!EMSESP::system_.upload_status()) {
             EMSESP::webSchedulerService.loop();
         }
