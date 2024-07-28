@@ -64,7 +64,7 @@ const CustomEntitiesDialog = ({
     }
   }, [open, selectedItem]);
 
-  const handleClose = (event: object, reason: 'backdropClick' | 'escapeKeyDown') => {
+  const handleClose = (_event, reason: 'backdropClick' | 'escapeKeyDown') => {
     if (reason !== 'backdropClick') {
       onClose();
     }

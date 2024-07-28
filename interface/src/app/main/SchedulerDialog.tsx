@@ -144,7 +144,7 @@ const SchedulerDialog = ({
     </Typography>
   );
 
-  const handleClose = (event: object, reason: 'backdropClick' | 'escapeKeyDown') => {
+  const handleClose = (_event, reason: 'backdropClick' | 'escapeKeyDown') => {
     if (reason !== 'backdropClick') {
       onClose();
     }
@@ -164,6 +164,7 @@ const SchedulerDialog = ({
           exclusive
           disabled={!creating}
           onChange={(_event, flag: ScheduleFlag) => {
+            setFieldErrors(undefined); // clear any validation errors
             setScheduleType(flag);
             // wipe the time field when changing the schedule type
             setEditItem({ ...editItem, time: '' });
