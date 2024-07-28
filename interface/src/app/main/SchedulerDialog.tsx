@@ -144,7 +144,7 @@ const SchedulerDialog = ({
     </Typography>
   );
 
-  const handleClose = (event: object, reason: 'backdropClick' | 'escapeKeyDown') => {
+  const handleClose = (_event, reason: 'backdropClick' | 'escapeKeyDown') => {
     if (reason !== 'backdropClick') {
       onClose();
     }
@@ -164,20 +164,23 @@ const SchedulerDialog = ({
           exclusive
           disabled={!creating}
           onChange={(_event, flag: ScheduleFlag) => {
-            setScheduleType(flag);
-            // wipe the time field when changing the schedule type
-            setEditItem({ ...editItem, time: '' });
-            // set the flags based on type
-            // 0-127 is day schedule
-            // 128 is timer
-            // 129 is on change
-            // 130 is on condition
-            // 132 is immediate
-            setEditItem(
-              flag === ScheduleFlag.SCHEDULE_DAY
-                ? { ...editItem, flags: 0 }
-                : { ...editItem, flags: flag }
-            );
+            if (flag !== null) {
+              setFieldErrors(undefined); // clear any validation errors
+              setScheduleType(flag);
+              // wipe the time field when changing the schedule type
+              setEditItem({ ...editItem, time: '' });
+              // set the flags based on type
+              // 0-127 is day schedule
+              // 128 is timer
+              // 129 is on change
+              // 130 is on condition
+              // 132 is immediate
+              setEditItem(
+                flag === ScheduleFlag.SCHEDULE_DAY
+                  ? { ...editItem, flags: 0 }
+                  : { ...editItem, flags: flag }
+              );
+            }
           }}
         >
           <ToggleButton value={ScheduleFlag.SCHEDULE_DAY}>

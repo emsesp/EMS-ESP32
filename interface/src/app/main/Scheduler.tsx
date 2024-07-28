@@ -219,25 +219,31 @@ const Scheduler: FC = () => {
         <Box>
           <Typography
             sx={{ fontSize: 11 }}
-            color={
-              si.flags >= ScheduleFlag.SCHEDULE_TIMER && si.flags !== flag
-                ? 'gray'
-                : (si.flags & flag) === flag
-                  ? 'primary'
-                  : 'grey'
-            }
+            color={(si.flags & flag) === flag ? 'primary' : 'grey'}
           >
-            {flag === ScheduleFlag.SCHEDULE_TIMER
-              ? LL.TIMER(0)
-              : flag === ScheduleFlag.SCHEDULE_ONCHANGE
-                ? 'On Change'
-                : flag === ScheduleFlag.SCHEDULE_CONDITION
-                  ? 'Condition'
-                  : dow[Math.log(flag) / Math.log(2)]}
+            {dow[Math.log(flag) / Math.log(2)]}
           </Typography>
         </Box>
         <Divider orientation="vertical" flexItem />
       </>
+    );
+
+    const scheduleType = (si: ScheduleItem) => (
+      <Box>
+        <Typography sx={{ fontSize: 11 }} color="primary">
+          {si.flags === ScheduleFlag.SCHEDULE_IMMEDIATE ? (
+            <>Immediate</>
+          ) : si.flags === ScheduleFlag.SCHEDULE_TIMER ? (
+            <>Timer</>
+          ) : si.flags === ScheduleFlag.SCHEDULE_CONDITION ? (
+            <>Condition</>
+          ) : si.flags === ScheduleFlag.SCHEDULE_ONCHANGE ? (
+            <>On Change</>
+          ) : (
+            <></>
+          )}
+        </Typography>
+      </Box>
     );
 
     useLayoutTitle(LL.SCHEDULER());
@@ -283,9 +289,9 @@ const Scheduler: FC = () => {
                   <Cell stiff>
                     <Stack spacing={0.5} direction="row">
                       <Divider orientation="vertical" flexItem />
-                      {si.flags === ScheduleFlag.SCHEDULE_IMMEDIATE ? (
-                        <></>
-                      ) : si.flags < ScheduleFlag.SCHEDULE_TIMER ? (
+                      {si.flags > 127 ? (
+                        scheduleType(si)
+                      ) : (
                         <>
                           {dayBox(si, ScheduleFlag.SCHEDULE_MON)}
                           {dayBox(si, ScheduleFlag.SCHEDULE_TUE)}
@@ -294,12 +300,6 @@ const Scheduler: FC = () => {
                           {dayBox(si, ScheduleFlag.SCHEDULE_FRI)}
                           {dayBox(si, ScheduleFlag.SCHEDULE_SAT)}
                           {dayBox(si, ScheduleFlag.SCHEDULE_SUN)}
-                        </>
-                      ) : (
-                        <>
-                          {dayBox(si, ScheduleFlag.SCHEDULE_TIMER)}
-                          {dayBox(si, ScheduleFlag.SCHEDULE_ONCHANGE)}
-                          {dayBox(si, ScheduleFlag.SCHEDULE_CONDITION)}
                         </>
                       )}
                     </Stack>
