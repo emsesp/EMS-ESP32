@@ -200,7 +200,7 @@ const Scheduler: FC = () => {
       id: Math.floor(Math.random() * (Math.floor(200) - 100) + 100),
       active: false,
       deleted: false,
-      flags: 0,
+      flags: ScheduleFlag.SCHEDULE_DAY,
       time: '',
       cmd: '',
       value: '',
@@ -283,7 +283,7 @@ const Scheduler: FC = () => {
                   <Cell stiff>
                     <Stack spacing={0.5} direction="row">
                       <Divider orientation="vertical" flexItem />
-                      {si.flags === 0 ? (
+                      {si.flags === ScheduleFlag.SCHEDULE_IMMEDIATE ? (
                         <></>
                       ) : si.flags < ScheduleFlag.SCHEDULE_TIMER ? (
                         <>

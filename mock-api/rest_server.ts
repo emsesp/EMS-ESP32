@@ -3946,6 +3946,15 @@ let emsesp_schedule = {
       cmd: 'boiler/selflowtemp',
       value: '(custom/setpoint - boiler/outdoortemp) * 2.8 + 3',
       name: 'heatingcurve'
+    },
+    {
+      id: 7,
+      active: false,
+      flags: 132,
+      time: '',
+      cmd: 'system/message',
+      value: '\"hello world\"',
+      name: 'immediate'
     }
   ]
 };

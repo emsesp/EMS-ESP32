@@ -50,7 +50,7 @@ export function boardProfileSelectItems() {
 }
 
 const ApplicationSettings: FC = () => {
-  const { data: hardwareData, error } = useRequest(SystemApi.readHardwareStatus, {
+  const { data: hardwareData } = useRequest(SystemApi.readHardwareStatus, {
     force: true
   });
 

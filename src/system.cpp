@@ -1170,7 +1170,7 @@ bool System::check_upgrade(bool factory_settings) {
         // see if we're missing a version, will be < 3.5.0b13 from Dec 23 2022
         missing_version = (settingsVersion.empty() || (settingsVersion.length() < 5));
         if (missing_version) {
-            LOG_WARNING("No version information found (%s)", settingsVersion.c_str());
+            LOG_WARNING("No version information found");
             settingsVersion = "3.5.0"; // this was the last stable version without version info
         }
     }
@@ -1200,13 +1200,13 @@ bool System::check_upgrade(bool factory_settings) {
 
         // if we're coming from 3.4.4 or 3.5.0b14 which had no version stored then we need to apply new settings
         if (missing_version) {
-            LOG_INFO("Setting MQTT Entity ID format to v3.4 format");
+            LOG_INFO("Upgrade: Setting MQTT Entity ID format to v3.4 format");
             EMSESP::esp8266React.getMqttSettingsService()->update([&](MqttSettings & mqttSettings) {
                 mqttSettings.entity_format = 0; // use old Entity ID format from v3.4
                 return StateUpdateResult::CHANGED;
             });
         } else if (settings_version.major() == 3 && settings_version.minor() <= 6) {
-            LOG_INFO("Setting MQTT Entity ID format to v3.6 format");
+            LOG_INFO("Upgrade: Setting MQTT Entity ID format to v3.6 format");
             EMSESP::esp8266React.getMqttSettingsService()->update([&](MqttSettings & mqttSettings) {
                 if (mqttSettings.entity_format == 1) {
                     mqttSettings.entity_format = 3; // use old Entity ID format from v3.6
@@ -1223,7 +1223,7 @@ bool System::check_upgrade(bool factory_settings) {
         EMSESP::esp8266React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
             if (networkSettings.tx_power == 20) {
                 networkSettings.tx_power = WIFI_POWER_19_5dBm; // use 19.5 as we don't have 20 anymore
-                LOG_INFO("Setting WiFi TX Power to Auto");
+                LOG_INFO("Upgrade: Setting WiFi TX Power to Auto");
                 return StateUpdateResult::CHANGED;
             }
             return StateUpdateResult::UNCHANGED;
@@ -1237,7 +1237,7 @@ bool System::check_upgrade(bool factory_settings) {
         save_version = false;
     }
 
-    // if we did a change, set the new version and reboot
+    // if we did a change, set the new version and save it, then reboot
     if (save_version) {
         EMSESP::webSettingsService.update([&](WebSettings & settings) {
             settings.version = EMSESP_APP_VERSION;

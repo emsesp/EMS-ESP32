@@ -22,10 +22,18 @@
 #define EMSESP_SCHEDULER_FILE "/config/emsespScheduler.json"
 #define EMSESP_SCHEDULER_SERVICE_PATH "/rest/schedule" // GET and POST
 
+// bit flags for the schedule items. Matches those in interface/src/app/main/SchedulerDialog.tsx
+// 0-127 (0->0x7F) is day schedule
+// 128/0x80 is timer
+// 129/0x81 is on change
+// 130/0x82 is on condition
+// 132/0x84 is immediate
 #define SCHEDULEFLAG_SCHEDULE_TIMER 0x80     // 7th bit for Timer
 #define SCHEDULEFLAG_SCHEDULE_ONCHANGE 0x81  // 7th+1st bit for OnChange
 #define SCHEDULEFLAG_SCHEDULE_CONDITION 0x82 // 7th+2nd bit for Condition
-#define MAX_STARTUP_RETRIES 3                // retry the start-up commands x times
+#define SCHEDULEFLAG_SCHEDULE_IMMEDIATE 0x84 // 7th+3rd bit for Condition
+
+#define MAX_STARTUP_RETRIES 3 // retry the start-up commands x times
 
 namespace emsesp {
 

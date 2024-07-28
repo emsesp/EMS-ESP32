@@ -198,7 +198,7 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
                 output["onchange"] = scheduleItem.time;
             } else if (scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER) {
                 output["timer"] = scheduleItem.time;
-            } else if (scheduleItem.flags != 0){
+            } else if (scheduleItem.flags != 0) {
                 output["time"] = scheduleItem.time;
             }
             output["command"]   = scheduleItem.cmd;
@@ -489,7 +489,7 @@ void WebSchedulerService::loop() {
     }
 
     for (ScheduleItem & scheduleItem : *scheduleItems_) {
-        if (scheduleItem.active && scheduleItem.flags == 0) {
+        if (scheduleItem.active && scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_IMMEDIATE) {
             command(scheduleItem.name.c_str(), scheduleItem.cmd, compute(scheduleItem.value));
             scheduleItem.active = false;
         }
