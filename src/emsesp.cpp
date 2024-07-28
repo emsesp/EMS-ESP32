@@ -1601,7 +1601,7 @@ void EMSESP::start() {
 // start the file system
 #ifndef EMSESP_STANDALONE
     if (!LittleFS.begin(true)) {
-        Serial.println("LittleFS Mount Failed. Using default settings.");
+        LOG_INFO("LittleFS Mount Failed. Using default settings.");
         return;
     }
 #endif
@@ -1612,9 +1612,7 @@ void EMSESP::start() {
     File root             = LittleFS.open("/config");
     bool factory_settings = !root;
     if (!root) {
-#if defined(EMSESP_DEBUG)
-        Serial.println("No config found, assuming factory settings");
-#endif
+        LOG_INFO("No config found, assuming factory settings");
     }
     root.close();
 #else
@@ -1643,8 +1641,6 @@ void EMSESP::start() {
         LOG_WARNING("System needs a restart to apply new settings. Please wait.");
         system_.system_restart();
     };
-
-
 
     webSettingsService.begin(); // load EMS-ESP Application settings...
 
