@@ -1607,7 +1607,11 @@ void Boiler::process_UBAEnergySupplied(std::shared_ptr<const Telegram> telegram)
 //XR1A050001   A05 Pump Heat circuit (1.0 ) 1 >> 1 & 0x01 ?
 //XR1A040001   A04 Pump Cold circuit (1.0 ) 1 & 0x1 ?
 void Boiler::process_HpPower(std::shared_ptr<const Telegram> telegram) {
+    has_bitupdate(telegram, VC0valve_, 0, 7);
+    has_bitupdate(telegram, hp3wayValve_, 0, 6);
+    // has_bitupdate(telegram, heating_, 0, 0); // heating on? https://github.com/emsesp/EMS-ESP32/discussions/1898
     has_bitupdate(telegram, hpSwitchValve_, 0, 4);
+
     has_bitupdate(telegram, hpCompOn_, 3, 4);
     has_bitupdate(telegram, hpEA0_, 3, 6);
     has_update(telegram, hpCircSpd_, 4);
@@ -1953,10 +1957,10 @@ void Boiler::process_HpSettings2(std::shared_ptr<const Telegram> telegram) {
 // Boiler(0x08) -B-> All(0x00), ?(0x049D), data: 00 00 00 00 00 00 00 00 00 00 00 00
 void Boiler::process_HpSettings3(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, heatCable_, 2);
-    has_update(telegram, VC0valve_, 3);
+    // has_update(telegram, VC0valve_, 3); // read in 48D
     has_update(telegram, primePump_, 4);
     has_update(telegram, primePumpMod_, 5);
-    has_update(telegram, hp3wayValve_, 6);
+    // has_update(telegram, hp3wayValve_, 6); // read in 48D
     has_update(telegram, elHeatStep1_, 7);
     has_update(telegram, elHeatStep2_, 8);
     has_update(telegram, elHeatStep3_, 9);
