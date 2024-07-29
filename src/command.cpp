@@ -148,8 +148,8 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
                 const char * device_p     = device_s;
                 const char * data_p       = nullptr;
                 strlcpy(device_s, d, device_end - d + 1);
-                data_p      = device_end + 1;
-                int8_t id_d = -1;
+                data_p              = device_end + 1;
+                int8_t  id_d        = -1;
                 uint8_t device_type = EMSdevice::device_name_2_device_type(device_p);
                 if (device_type > EMSdevice::DeviceType::BOILER) {
                     data_p = parse_command_string(data_p, id_d);
