@@ -132,26 +132,11 @@ bool WebSchedulerService::command_setvalue(const char * value, const int8_t id, 
 
 // process json output for info/commands and value_info
 bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
-    // check of it a 'commands' command
-    if (Helpers::toLower(cmd) == F_(commands)) {
-        output[F_(info)]     = Helpers::translated_word(FL_(info_cmd));
-        output[F_(commands)] = Helpers::translated_word(FL_(commands_cmd));
-        output[F_(values)]   = Helpers::translated_word(FL_(values_cmd));
-
-        for (const ScheduleItem & scheduleItem : *scheduleItems_) {
-            if (!scheduleItem.name.empty()) {
-                output[scheduleItem.name] = "activate schedule";
-            }
-        }
-
-        return true;
-    }
-
     if (scheduleItems_->size() == 0) {
         return true;
     }
 
-    if (strlen(cmd) == 0 || Helpers::toLower(cmd) == F_(values) || Helpers::toLower(cmd) == F_(info)) {
+    if (!strlen(cmd) || !strcmp(cmd, F_(values)) || !strcmp(cmd, F_(info))) {
         // list all names
         for (const ScheduleItem & scheduleItem : *scheduleItems_) {
             if (!scheduleItem.name.empty()) {
@@ -165,66 +150,57 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
                 }
             }
         }
-
         return true;
     }
 
-    char command_s[COMMAND_MAX_LENGTH];
-    strlcpy(command_s, Helpers::toLower(cmd).c_str(), sizeof(command_s));
-    char * attribute_s = nullptr;
+    const char * attribute_s = Command::get_attribute(cmd);
 
-    // check specific attribute to fetch instead of the complete record
-    char * breakp = strchr(command_s, '/');
-    if (breakp) {
-        *breakp     = '\0';
-        attribute_s = breakp + 1;
+    if (!strcmp(cmd, F_(entities))) {
+        uint8_t i = 0;
+        char    name[30];
+        for (const ScheduleItem & scheduleItem : *scheduleItems_) {
+            strlcpy(name, scheduleItem.name == "" ? Helpers::smallitoa(name, i++) : scheduleItem.name.c_str(), sizeof(name));
+            get_value_json(output[name].to<JsonObject>(), scheduleItem);
+        }
+        return true;
     }
-
     for (const ScheduleItem & scheduleItem : *scheduleItems_) {
-        if (Helpers::toLower(scheduleItem.name) == command_s) {
-            output["name"] = scheduleItem.name;
-            output["type"] = "boolean";
-            if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                output["value"] = scheduleItem.active;
-            } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-                output["value"] = scheduleItem.active ? 1 : 0;
-            } else {
-                char result[12];
-                output["value"] = Helpers::render_boolean(result, scheduleItem.active);
-            }
-            if (scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_CONDITION) {
-                output["condition"] = scheduleItem.time;
-            } else if (scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_ONCHANGE) {
-                output["onchange"] = scheduleItem.time;
-            } else if (scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER) {
-                output["timer"] = scheduleItem.time;
-            } else if (scheduleItem.flags != 0) {
-                output["time"] = scheduleItem.time;
-            }
-            output["command"]   = scheduleItem.cmd;
-            output["cmd_data"]  = scheduleItem.value;
-            output["readable"]  = true;
-            output["writeable"] = true;
-            output["visible"]   = true;
-            break;
+        if (Helpers::toLower(scheduleItem.name) == cmd) {
+            get_value_json(output, scheduleItem);
+            return Command::set_attirbute(output, cmd, attribute_s);
         }
-    }
-
-    if (attribute_s) {
-        if (output.containsKey(attribute_s)) {
-            std::string data = output[attribute_s].as<std::string>();
-            output.clear();
-            output["api_data"] = data; // always as a string
-            return true;
-        }
-        return EMSESP::return_not_found(output, attribute_s, command_s); // not found
-    }
-
-    if (output.size()) {
-        return true;
     }
 
     return false; // not found
+}
+
+// build the json for specific entity
+void WebSchedulerService::get_value_json(JsonObject output, const ScheduleItem & scheduleItem) {
+    output["name"] = scheduleItem.name;
+    output["type"] = "boolean";
+    if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+        output["value"] = scheduleItem.active;
+    } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+        output["value"] = scheduleItem.active ? 1 : 0;
+    } else {
+        char result[12];
+        output["value"] = Helpers::render_boolean(result, scheduleItem.active);
+    }
+    if (scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_CONDITION) {
+        output["condition"] = scheduleItem.time;
+    } else if (scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_ONCHANGE) {
+        output["onchange"] = scheduleItem.time;
+    } else if (scheduleItem.flags == SCHEDULEFLAG_SCHEDULE_TIMER) {
+        output["timer"] = scheduleItem.time;
+    } else if (scheduleItem.flags != SCHEDULEFLAG_SCHEDULE_IMMEDIATE) {
+        output["time"] = scheduleItem.time;
+    }
+    output["command"]   = scheduleItem.cmd;
+    output["cmd_data"]  = scheduleItem.value;
+    bool hasName        = scheduleItem.name != "";
+    output["readable"]  = hasName;
+    output["writeable"] = hasName;
+    output["visible"]   = hasName;
 }
 
 // publish single value

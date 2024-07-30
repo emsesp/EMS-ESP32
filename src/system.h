@@ -59,10 +59,10 @@ class System {
     static bool command_watch(const char * value, const int8_t id);
     static bool command_message(const char * value, const int8_t id);
     static bool command_info(const char * value, const int8_t id, JsonObject output);
-    static bool command_commands(const char * value, const int8_t id, JsonObject output);
     static bool command_response(const char * value, const int8_t id, JsonObject output);
     static bool command_allvalues(const char * value, const int8_t id, JsonObject output);
     static bool get_value_info(JsonObject root, const char * cmd);
+    static void get_value_json(JsonObject output, const std::string & circuit, const std::string & name, JsonVariant val);
 
 #if defined(EMSESP_TEST)
     static bool command_test(const char * value, const int8_t id);

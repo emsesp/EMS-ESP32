@@ -848,8 +848,6 @@ void System::commands_init() {
 #endif
 
     // these commands will return data in JSON format
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(info), System::command_info, FL_(system_info_cmd));
-    Command::add(EMSdevice::DeviceType::SYSTEM, F_(commands), System::command_commands, FL_(commands_cmd));
     Command::add(EMSdevice::DeviceType::SYSTEM, F("response"), System::command_response, FL_(commands_response));
     Command::add(EMSdevice::DeviceType::SYSTEM, F("allvalues"), System::command_allvalues, FL_(allvalues_cmd));
 
@@ -1249,11 +1247,6 @@ bool System::check_upgrade(bool factory_settings) {
     return false;
 }
 
-// list commands
-bool System::command_commands(const char * value, const int8_t id, JsonObject output) {
-    return Command::list(EMSdevice::DeviceType::SYSTEM, output);
-}
-
 // convert settings file into json object
 void System::extractSettings(const char * filename, const char * section, JsonObject output) {
 #ifndef EMSESP_STANDALONE
@@ -1291,27 +1284,41 @@ bool System::saveSettings(const char * filename, const char * section, JsonObjec
 }
 
 // return back a system value
-bool System::get_value_info(JsonObject root, const char * command) {
-    if (command == nullptr || strlen(command) == 0) {
+bool System::get_value_info(JsonObject output, const char * cmd) {
+    if (cmd == nullptr || strlen(cmd) == 0) {
         LOG_ERROR("empty system command");
         return false;
     }
 
-    // cmd is lower case of the command
-    char cmd[COMMAND_MAX_LENGTH];
-    strlcpy(cmd, Helpers::toLower(command).c_str(), sizeof(cmd));
+    // check for hardcoded "info"/"value"
+    if (!strcmp(cmd, F_(info)) || !strcmp(cmd, F_(value))) {
+        return command_info("", 0, output);
+    }
 
-    // fetch all the data from the system
+    // fetch all the data from the system in a different json
+    JsonDocument doc;
+    JsonObject   root = doc.to<JsonObject>();
     (void)command_info("", 0, root);
 
-    // check for hardcoded "info"
-    if (!strcmp(cmd, F_(info)) || !strcmp(cmd, F_(value))) {
+    // list all entities
+    if (!strcmp(cmd, F_(entities))) {
+        for (JsonPair p : root) {
+            if (p.value().is<JsonObject>()) {
+                // String prefix = p.key().c_str();
+                for (JsonPair p1 : p.value().as<JsonObject>()) {
+                    JsonObject entity = output[String(p.key().c_str()) + '.' + p1.key().c_str()].to<JsonObject>();
+                    get_value_json(entity, p.key().c_str(), p1.key().c_str(), p1.value());
+                }
+            } // else { // we don't have pairs in json root object
+            //    get_value_json(entity, "", p.key().c_str(), p.value());
+            // }
+        }
         return true;
     }
 
     char * val = strstr(cmd, "/value");
     if (val) {
-        val[0] = '\0';
+        *val = '\0';
     }
 
     char * slash = strchr(cmd, '/');
@@ -1320,40 +1327,58 @@ bool System::get_value_info(JsonObject root, const char * command) {
         slash++;
     }
 
-    std::string s;
+    // list values for a jsonObject in system, e.g. /api/system/network
+    if (!slash || !strcmp(slash, F_(info)) || !strcmp(slash, F_(values))) {
+        for (JsonPair p : root) {
+            if (Helpers::toLower(p.key().c_str()) == cmd && p.value().is<JsonObject>()) {
+                for (JsonPair p1 : p.value().as<JsonObject>()) {
+                    output[p1.key().c_str()] = p1.value().as<std::string>();
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // value info or api_data for a single value
     // Loop through all the key-value pairs in root to find the key, case independent
     if (slash) { // search the top level first
         for (JsonPair p : root) {
             if (p.value().is<JsonObject>() && Helpers::toLower(p.key().c_str()) == cmd) {
                 for (JsonPair p1 : p.value().as<JsonObject>()) {
                     if (Helpers::toLower(p1.key().c_str()) == slash && !p1.value().is<JsonObject>()) {
-                        s = p1.value().as<std::string>();
-                        break;
+                        if (val) {
+                            output["api_data"] = p1.value().as<std::string>();
+                            return true;
+                        }
+                        get_value_json(output, p.key().c_str(), p1.key().c_str(), p1.value());
+                        return true;
                     }
                 }
-            }
+            } // else skipt, but we don't have value pairs in system root
         }
+    }
+    return false;
+}
+
+void System::get_value_json(JsonObject output, const std::string & circuit, const std::string & name, JsonVariant val) {
+    output["name"] = name;
+    if (circuit.length()) {
+        output["circuit"] = circuit;
+    }
+    output["readable"] = true;
+    output["writable"] = false;
+    output["visible"]  = true;
+    if (val.is<bool>()) {
+        output["value"] = val.as<bool>();
+        output["type"]  = "boolean";
+    } else if (val.is<String>() || val.is<const char *>() || val.is<std::string>()) {
+        output["value"] = val.as<std::string>();
+        output["type"]  = "string";
     } else {
-        for (JsonPair p : root) {
-            if (Helpers::toLower(p.key().c_str()) == cmd && !p.value().is<JsonObject>()) {
-                s = p.value().as<std::string>();
-                break;
-            }
-        }
+        output["value"] = val.as<float>();
+        output["type"]  = "number";
     }
-
-    root.clear(); // clear json, we only one a single value
-
-    if (!s.empty()) {
-        if (val) {
-            root["api_data"] = s;
-        } else {
-            root["value"] = s;
-        }
-        return true; // found
-    }
-
-    return false; // not found
 }
 
 // export status information including the device information

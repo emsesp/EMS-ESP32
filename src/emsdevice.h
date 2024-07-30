@@ -214,7 +214,7 @@ class EMSdevice {
     void   show_telegram_handlers(uuid::console::Shell & shell) const;
     char * show_telegram_handlers(char * result, const size_t len, const uint8_t handlers);
     void   show_mqtt_handlers(uuid::console::Shell & shell) const;
-    void   list_device_entries(JsonObject output) const;
+    // void   list_device_entries(JsonObject output) const;
     void   add_handlers_ignored(const uint16_t handler);
 
     void set_climate_minmax(int8_t tag, int16_t min, uint32_t max);
@@ -227,6 +227,7 @@ class EMSdevice {
     std::string get_value_uom(const std::string & shortname) const;
 
     bool get_value_info(JsonObject root, const char * cmd, const int8_t id);
+    void get_value_json(JsonObject output, DeviceValue & dv);
     void get_dv_info(JsonObject json);
 
     enum OUTPUT_TARGET : uint8_t { API_VERBOSE, API_SHORTNAMES, MQTT, CONSOLE };
@@ -353,8 +354,7 @@ class EMSdevice {
         ANALOGSENSOR,      // for internal analog sensors
         SCHEDULER,         // for internal schedule
         CUSTOM,            // for user defined entities
-
-        BOILER,
+        BOILER,            // frome here on enum the ems-devices
         THERMOSTAT,
         MIXER,
         SOLAR,

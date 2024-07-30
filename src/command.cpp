@@ -284,6 +284,29 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
     return command;
 }
 
+// check if command contains an attribute
+const char * Command::get_attribute(const char * cmd) {
+    char * breakp = strchr(cmd, '/');
+    if (breakp) {
+        *breakp = '\0';
+        return breakp + 1;
+    }
+    return nullptr;
+}
+
+bool Command::set_attirbute(JsonObject output, const char * cmd, const char * attribute) {
+    if (attribute == nullptr) {
+        return true;
+    }
+    if (output.containsKey(attribute)) {
+        std::string data = output[attribute].as<std::string>();
+        output.clear();
+        output["api_data"] = data; // always as a string
+        return true;
+    }
+    return EMSESP::return_not_found(output, attribute, cmd); // not found
+}
+
 // calls a command directly
 uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * value, const int8_t id) {
     // create a temporary buffer
@@ -297,10 +320,12 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 // calls a command. Takes a json object for output.
 // id may be used to represent a heating circuit for example
 // returns 0 if the command errored, 1 (TRUE) if ok, 2 if not found, 3 if error or 4 if not allowed
-uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * value, const bool is_admin, const int8_t id, JsonObject output) {
-    if (cmd == nullptr) {
+uint8_t Command::call(const uint8_t device_type, const char * command, const char * value, const bool is_admin, const int8_t id, JsonObject output) {
+    if (command == nullptr) {
         return CommandRet::NOT_FOUND;
     }
+    char cmd[COMMAND_MAX_LENGTH];
+    strcpy(cmd, Helpers::toLower(command).c_str());
 
     auto dname = EMSdevice::device_type_2_device_name(device_type); // device name, not translated
 
@@ -309,6 +334,9 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
     // or a special command like 'info', 'values', 'commands', 'entities' etc
     bool single_command = (!value || !strlen(value));
     if (single_command) {
+        if (!strcmp(cmd, F_(commands))) {
+            return Command::list(device_type, output);
+        }
         if (EMSESP::get_device_value_info(output, cmd, id, device_type)) { // entity = cmd
             LOG_DEBUG("Fetched device entity/attributes for %s/%s", dname, cmd);
             return CommandRet::OK;
@@ -319,17 +347,14 @@ uint8_t Command::call(const uint8_t device_type, const char * cmd, const char * 
 
     // determine flags based on id (which is the tag)
     uint8_t flag = CommandFlag::CMD_FLAG_DEFAULT;
-    // info and values works with all tags, keep it default
-    if (std::string(cmd) != F_(values) && std::string(cmd) != F_(info)) {
-        if (id >= DeviceValueTAG::TAG_HC1 && id <= DeviceValueTAG::TAG_HC8) {
-            flag = CommandFlag::CMD_FLAG_HC;
-        } else if (id >= DeviceValueTAG::TAG_DHW1 && id <= DeviceValueTAG::TAG_DHW10) {
-            flag = CommandFlag::CMD_FLAG_DHW;
-        } else if (id >= DeviceValueTAG::TAG_HS1 && id <= DeviceValueTAG::TAG_HS16) {
-            flag = CommandFlag::CMD_FLAG_HS;
-        } else if (id >= DeviceValueTAG::TAG_AHS1 && id <= DeviceValueTAG::TAG_AHS1) {
-            flag = CommandFlag::CMD_FLAG_AHS;
-        }
+    if (id >= DeviceValueTAG::TAG_HC1 && id <= DeviceValueTAG::TAG_HC8) {
+        flag = CommandFlag::CMD_FLAG_HC;
+    } else if (id >= DeviceValueTAG::TAG_DHW1 && id <= DeviceValueTAG::TAG_DHW10) {
+        flag = CommandFlag::CMD_FLAG_DHW;
+    } else if (id >= DeviceValueTAG::TAG_HS1 && id <= DeviceValueTAG::TAG_HS16) {
+        flag = CommandFlag::CMD_FLAG_HS;
+    } else if (id >= DeviceValueTAG::TAG_AHS1 && id <= DeviceValueTAG::TAG_AHS1) {
+        flag = CommandFlag::CMD_FLAG_AHS;
     }
 
     // see if there is a command registered and it's valid
@@ -500,15 +525,11 @@ std::string Command::tagged_cmd(const std::string & cmd, const uint8_t flag) {
 
 // list all commands for a specific device, output as json
 bool Command::list(const uint8_t device_type, JsonObject output) {
-    // check of it a 'commands' command
-    if (device_type == EMSdevice::DeviceType::TEMPERATURESENSOR || device_type == EMSdevice::DeviceType::ANALOGSENSOR) {
-        output[F_(info)]     = Helpers::translated_word(FL_(info_cmd));
-        output[F_(commands)] = Helpers::translated_word(FL_(commands_cmd));
-        output[F_(values)]   = Helpers::translated_word(FL_(values_cmd));
-    } else if (cmdfunctions_.empty()) {
-        output["message"] = "no commands available";
-        return false;
-    }
+    // common commands
+    output[F_(info)]     = Helpers::translated_word(FL_(info_cmd));
+    output[F_(values)]   = Helpers::translated_word(FL_(values_cmd));
+    output[F_(commands)] = Helpers::translated_word(FL_(commands_cmd));
+    output[F_(entities)] = Helpers::translated_word(FL_(entities_cmd));
 
     // create a list of commands we have registered, and sort them
     std::list<std::string> sorted_cmds;

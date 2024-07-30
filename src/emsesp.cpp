@@ -1343,62 +1343,17 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     // Print to LOG showing we've added a new device
     LOG_INFO("Recognized new %s with deviceID 0x%02X", EMSdevice::device_type_2_device_name(device_type), device_id);
 
-    // add commands 'info', 'commands', 'values', 'entities' for all EMS devices
-    // and register the MQTT subscribe topic for this device
+    // register the MQTT subscribe topic for this device
     // except for connect, controller and gateway
     if ((device_type == DeviceType::CONNECT) || (device_type == DeviceType::CONTROLLER) || (device_type == DeviceType::GATEWAY)) {
         return true;
     }
-
-    Command::add(
-        device_type,
-        F_(info),
-        [device_type](const char * value, const int8_t id, JsonObject output) {
-            return EMSdevice::export_values(device_type, output, id, EMSdevice::OUTPUT_TARGET::API_VERBOSE);
-        },
-        FL_(info_cmd));
-    Command::add(
-        device_type,
-        F_(values),
-        [device_type](const char * value, const int8_t id, JsonObject output) {
-            return EMSdevice::export_values(device_type, output, id, EMSdevice::OUTPUT_TARGET::API_SHORTNAMES);
-        },
-        FL_(values_cmd));
-    Command::add(
-        device_type,
-        F_(commands),
-        [device_type](const char * value, const int8_t id, JsonObject output) { return command_commands(device_type, output, id); },
-        FL_(commands_cmd));
-    Command::add(
-        device_type,
-        F_(entities),
-        [device_type](const char * value, const int8_t id, JsonObject output) { return command_entities(device_type, output, id); },
-        FL_(entities_cmd));
 
     // MQTT subscribe to the device e.g. "ems-esp/boiler/#"
     auto topic = std::string(EMSdevice::device_type_2_device_name(device_type)) + "/#";
     Mqtt::subscribe(device_type, topic, nullptr);
 
     return true;
-}
-
-// list device entities
-bool EMSESP::command_entities(uint8_t device_type, JsonObject output, const int8_t id) {
-    JsonObject node;
-
-    for (const auto & emsdevice : emsdevices) {
-        if (emsdevice && (emsdevice->device_type() == device_type)) {
-            emsdevice->list_device_entries(output);
-            return true;
-        }
-    }
-
-    return false;
-}
-
-// list all available commands, return as json
-bool EMSESP::command_commands(uint8_t device_type, JsonObject output, const int8_t id) {
-    return Command::list(device_type, output);
 }
 
 // send a read request, passing it into to the Tx Service, with optional offset and length

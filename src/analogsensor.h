@@ -171,6 +171,7 @@ class AnalogSensor {
     bool command_setvalue(const char * value, const int8_t gpio);
     void measure();
     void addSensorJson(JsonObject output, const Sensor & sensor);
+    void get_value_json(JsonObject output, const Sensor & sensor);
 
     std::vector<Sensor> sensors_; // our list of sensors
 

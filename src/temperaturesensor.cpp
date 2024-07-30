@@ -343,75 +343,43 @@ bool TemperatureSensor::updated_values() {
 
 // called from emsesp.cpp for commands
 bool TemperatureSensor::get_value_info(JsonObject output, const char * cmd, const int8_t id) {
-    // check of it a 'commands' command
-    if (Helpers::toLower(cmd) == F_(commands)) {
-        return Command::list(EMSdevice::DeviceType::TEMPERATURESENSOR, output);
-    }
-
     // return empty json if there are no sensors
     if (sensors_.empty()) {
         return true;
     }
 
-    uint8_t show_all = 0;
-    if (Helpers::hasValue(cmd)) {
-        show_all = (strncmp(cmd, F_(info), 4) == 0) ? 1 : (strncmp(cmd, F_(values), 6) == 0) ? 2 : 0;
-    }
-
-    // see if we're showing all sensors
-    if (show_all) {
+    if (!strcmp(cmd, F_(info)) || !strcmp(cmd, F_(values))) {
         for (const auto & sensor : sensors_) {
-            if (show_all == 1) {
-                // info
-                JsonObject dataSensor = output[sensor.name()].to<JsonObject>();
-                addSensorJson(dataSensor, sensor);
-            } else {
-                // values, shortname version. Also used in 'system allvalues'
-                if (Helpers::hasValue(sensor.temperature_c)) {
-                    char val[10];
-                    output[sensor.name()] = serialized(Helpers::render_value(val, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
-                }
+            if (Helpers::hasValue(sensor.temperature_c)) {
+                char val[10];
+                output[sensor.name()] = serialized(Helpers::render_value(val, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
             }
         }
         return true;
     }
 
-    // this is for a specific sensor
-    // make a copy of the string command for parsing, and lowercase it
-    char   sensor_name[COMMAND_MAX_LENGTH] = {'\0'};
-    char * attribute_s                     = nullptr;
-    strlcpy(sensor_name, Helpers::toLower(cmd).c_str(), sizeof(sensor_name));
-
-    // check for a specific attribute to fetch instead of the complete record
-    char * breakp = strchr(sensor_name, '/');
-    if (breakp) {
-        *breakp     = '\0';
-        attribute_s = breakp + 1;
+    if (!strcmp(cmd, F_(entities))) {
+        for (const auto & sensor : sensors_) {
+            get_value_json(output[sensor.name()].to<JsonObject>(), sensor);
+        }
+        return true;
     }
+
+    // this is for a specific sensor
+    const char * attribute_s = Command::get_attribute(cmd);
 
     for (const auto & sensor : sensors_) {
         // match custom name or sensor ID
-        if (sensor_name == Helpers::toLower(sensor.name()) || sensor_name == Helpers::toLower(sensor.id())) {
-            // add all the data elements
-            addSensorJson(output, sensor);
-            // if we're filtering on an attribute, go find it
-            if (attribute_s) {
-                if (output.containsKey(attribute_s)) {
-                    std::string data = output[attribute_s].as<std::string>();
-                    output.clear();
-                    output["api_data"] = data; // always as string
-                    return true;
-                }
-                return EMSESP::return_not_found(output, attribute_s, sensor_name); // not found
-            }
-            return true; // found a match, exit
+        if (cmd == Helpers::toLower(sensor.name()) || cmd == Helpers::toLower(sensor.id())) {
+            get_value_json(output, sensor);
+            return Command::set_attirbute(output, cmd, attribute_s);
         }
     }
 
     return false; // not found
 }
 
-void TemperatureSensor::addSensorJson(JsonObject output, const Sensor & sensor) {
+void TemperatureSensor::get_value_json(JsonObject output, const Sensor & sensor) {
     output["id"]   = sensor.id();
     output["name"] = sensor.name();
     if (Helpers::hasValue(sensor.temperature_c)) {
