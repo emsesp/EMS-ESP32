@@ -113,33 +113,37 @@ bool System::command_response(const char * value, const int8_t id, JsonObject ou
 bool System::command_allvalues(const char * value, const int8_t id, JsonObject output) {
     JsonDocument doc;
     JsonObject   device_output;
+    // default to values
+    if (value == nullptr || strlen(value) == 0) {
+        value = F_(values);
+    }
 
     // System Entities
     // device_output = output["System"].to<JsonObject>();
-    // get_value_info(device_output, F_(values));
+    // get_value_info(device_output, value);
 
     // EMS-Device Entities
     for (const auto & emsdevice : EMSESP::emsdevices) {
         std::string title = emsdevice->device_type_2_device_name_translated() + std::string(" ") + emsdevice->to_string();
         device_output     = output[title].to<JsonObject>();
-        emsdevice->get_value_info(device_output, F_(values), DeviceValueTAG::TAG_NONE);
+        emsdevice->get_value_info(device_output, value, DeviceValueTAG::TAG_NONE);
     }
 
     // Custom Entities
     device_output = output["Custom Entities"].to<JsonObject>();
-    EMSESP::webCustomEntityService.get_value_info(device_output, F_(values));
+    EMSESP::webCustomEntityService.get_value_info(device_output, value);
 
     // Scheduler
     device_output = output["Scheduler"].to<JsonObject>();
-    EMSESP::webSchedulerService.get_value_info(device_output, F_(values));
+    EMSESP::webSchedulerService.get_value_info(device_output, value);
 
     // Sensors
     device_output = output["Analog Sensors"].to<JsonObject>();
-    EMSESP::analogsensor_.get_value_info(device_output, F_(values));
+    EMSESP::analogsensor_.get_value_info(device_output, value);
     device_output = output["Temperature Sensors"].to<JsonObject>();
-    EMSESP::temperaturesensor_.get_value_info(device_output, F_(values));
+    EMSESP::temperaturesensor_.get_value_info(device_output, value);
 
-    return device_output.size() > 0;
+    return true;
 }
 
 // fetch device values
