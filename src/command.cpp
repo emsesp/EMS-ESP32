@@ -103,9 +103,9 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     }
     if (command_p == nullptr) {
         // handle dead endpoints like api/system or api/boiler
-        // default to 'info' for SYSTEM, the other devices to 'values' for shortname version
+        // default to 'value' for all devices
         if (num_paths < (id_n > 0 ? 4 : 3)) {
-            command_p = device_type == EMSdevice::DeviceType::SYSTEM ? F_(info) : F_(values);
+            command_p = F_(values);
         } else {
             return json_message(CommandRet::NOT_FOUND, "missing or bad command", output);
         }
