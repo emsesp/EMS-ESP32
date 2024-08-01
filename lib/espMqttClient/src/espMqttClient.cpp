@@ -120,4 +120,9 @@ espMqttClient::espMqttClient()
     , _client() {
     _transport = &_client;
 }
+#elif defined(_WIN32)
+// Windows
+espMqttClient::espMqttClient()
+    : MqttClientSetup(espMqttClientTypes::UseInternalTask::NO) {
+}
 #endif
