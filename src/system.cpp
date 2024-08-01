@@ -1200,19 +1200,19 @@ bool System::check_upgrade(bool factory_settings) {
 
         // if we're coming from 3.4.4 or 3.5.0b14 which had no version stored then we need to apply new settings
         if (missing_version) {
-            LOG_INFO("Upgrade: Setting MQTT Entity ID format to v3.4 format");
+            LOG_INFO("Upgrade: Setting MQTT Entity ID format to older v3.4 format");
             EMSESP::esp8266React.getMqttSettingsService()->update([&](MqttSettings & mqttSettings) {
-                mqttSettings.entity_format = 0; // use old Entity ID format from v3.4
+                mqttSettings.entity_format = Mqtt::entityFormat::SINGLE_LONG; // use old Entity ID format from v3.4
                 return StateUpdateResult::CHANGED;
             });
         } else if (settings_version.major() == 3 && settings_version.minor() <= 6) {
             LOG_INFO("Upgrade: Setting MQTT Entity ID format to v3.6 format");
             EMSESP::esp8266React.getMqttSettingsService()->update([&](MqttSettings & mqttSettings) {
                 if (mqttSettings.entity_format == 1) {
-                    mqttSettings.entity_format = 3; // use old Entity ID format from v3.6
+                    mqttSettings.entity_format = Mqtt::entityFormat::SINGLE_OLD; // use old Entity ID format from v3.6
                     return StateUpdateResult::CHANGED;
                 } else if (mqttSettings.entity_format == 2) {
-                    mqttSettings.entity_format = 4; // use old Entity ID format from v3.6
+                    mqttSettings.entity_format = Mqtt::entityFormat::MULTI_OLD; // use old Entity ID format from v3.6
                     return StateUpdateResult::CHANGED;
                 }
                 return StateUpdateResult::UNCHANGED;
@@ -1243,6 +1243,7 @@ bool System::check_upgrade(bool factory_settings) {
             settings.version = EMSESP_APP_VERSION;
             return StateUpdateResult::CHANGED;
         });
+        LOG_INFO("Upgrade: Setting version to %s", EMSESP_APP_VERSION);
         return true; // need reboot
     }
 
@@ -1764,9 +1765,12 @@ String System::getBBQKeesGatewayDetails() {
     if (!EMSESP::nvs_.isKey("mfg")) {
         return "";
     }
+
+    // TODO add to header as a define
     if (EMSESP::nvs_.getString("mfg") != "BBQKees") {
         return "";
     }
+
     return "BBQKees Gateway Model " + EMSESP::nvs_.getString("model") + " v" + EMSESP::nvs_.getString("hwrevision") + "/" + EMSESP::nvs_.getString("batch");
 #else
     return "";

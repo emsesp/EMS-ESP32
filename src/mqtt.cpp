@@ -855,7 +855,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         // base name + shortname
         snprintf(uniq_id, sizeof(uniq_id), "%s_%s_%s", mqtt_basename_.c_str(), device_name, entity_with_tag);
     } else if (Mqtt::entity_format() == entityFormat::SINGLE_SHORT) {
-        // shortname (default)
+        // shortname only (=default)
         snprintf(uniq_id, sizeof(uniq_id), "%s_%s", device_name, entity_with_tag);
     } else if (Mqtt::entity_format() == entityFormat::SINGLE_OLD) {
         // shortname, remap to 3.6
