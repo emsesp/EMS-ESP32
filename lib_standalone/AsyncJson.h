@@ -42,64 +42,66 @@ class ChunkPrint : public Print {
     }
 };
 
-class PrettyAsyncJsonResponse {
-  protected:
-    JsonDocument _jsonBuffer;
+// class PrettyAsyncJsonResponse {
+//   protected:
+//     JsonDocument _jsonBuffer;
 
-    JsonVariant _root;
-    bool        _isValid;
+//     JsonVariant _root;
+//     bool        _isValid;
 
-  public:
-    PrettyAsyncJsonResponse(bool isArray = false)
-        : _isValid{false} {
-        if (isArray)
-            _root = _jsonBuffer.to<JsonArray>();
-        else
-            _root = _jsonBuffer.add<JsonObject>();
-    }
+//   public:
+//     PrettyAsyncJsonResponse(bool isArray = false)
+//         : _isValid{false} {
+//         if (isArray)
+//             _root = _jsonBuffer.to<JsonArray>();
+//         else
+//             _root = _jsonBuffer.add<JsonObject>();
+//     }
 
-    ~PrettyAsyncJsonResponse() {
-    }
+//     ~PrettyAsyncJsonResponse() {
+//     }
 
-    JsonVariant getRoot() {
-        return _root;
-    }
+//     JsonVariant getRoot() {
+//         return _root;
+//     }
 
-    bool _sourceValid() const {
-        return _isValid;
-    }
+//     bool _sourceValid() const {
+//         return _isValid;
+//     }
 
-    size_t setLength() {
-        return 0;
-    }
+//     size_t setLength() {
+//         return 0;
+//     }
 
-    void setContentType(const char * s) {
-    }
+//     void setContentType(const char * s) {
+//     }
 
-    size_t getSize() {
-        return _jsonBuffer.size();
-    }
+//     size_t getSize() {
+//         return _jsonBuffer.size();
+//     }
 
-    size_t _fillBuffer(uint8_t * data, size_t len) {
-        return len;
-    }
+//     size_t _fillBuffer(uint8_t * data, size_t len) {
+//         return len;
+//     }
 
-    void setCode(uint16_t) {
-    }
-};
+//     void setCode(uint16_t) {
+//     }
+// };
 
 class AsyncJsonResponse {
   protected:
     JsonDocument _jsonBuffer;
-
-    JsonVariant _root;
-    bool        _isValid;
-    bool        _isMsgPack;
+    JsonVariant  _root;
+    bool         _isValid;
+    bool         _isMsgPack;
+    int          _code;
+    size_t       _contentLength;
 
   public:
     AsyncJsonResponse(bool isArray = false, bool isMsgPack = false)
         : _isValid{false}
         , _isMsgPack{isMsgPack} {
+        _code = 200;
         if (isArray)
             _root = _jsonBuffer.to<JsonArray>();
         else
@@ -118,7 +120,12 @@ class AsyncJsonResponse {
     }
 
     size_t setLength() {
-        return 0;
+        _contentLength = _isMsgPack ? measureMsgPack(_root) : measureJson(_root);
+
+        if (_contentLength) {
+            _isValid = true;
+        }
+        return _contentLength;
     }
 
     size_t getSize() {
@@ -126,10 +133,12 @@ class AsyncJsonResponse {
     }
 
     size_t _fillBuffer(uint8_t * data, size_t len) {
+        // _isMsgPack ? serializeMsgPack(_root, data) : serializeJson(_root, data);
         return len;
     }
 
-    void setCode(uint16_t) {
+    void setCode(uint16_t c) {
+        _code = c;
     }
 
     void setContentType(const char * s) {

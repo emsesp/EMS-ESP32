@@ -265,6 +265,8 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
 
 // These next tests are run from the Consol via the test command, so inherit the Shell
 void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const std::string & id1_s, const std::string & id2_s) {
+    bool ok = false; // default tests fail
+
     shell.add_flags(CommandFlags::ADMIN); // switch to su
 
     // init stuff
@@ -296,8 +298,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     if (!id2_s.empty()) {
         id2 = Helpers::atoint(id2_s.c_str());
     }
-
-    bool ok = false;
 
     // e.g. "test add 0x10 172"
     if (command == "add") {
@@ -638,11 +638,11 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
                 Serial.print(COLOR_BRIGHT_MAGENTA);
                 serializeJson(doc, Serial);
                 Serial.print(COLOR_RESET);
-                Serial.println();
-                Serial.print(" measureMsgPack=");
-                Serial.print(measureMsgPack(doc));
-                Serial.print(" measureJson=");
-                Serial.print(measureJson(doc));
+                // Serial.println();
+                // Serial.print(" measureMsgPack=");
+                // Serial.print(measureMsgPack(doc));
+                // Serial.print(" measureJson=");
+                // Serial.print(measureJson(doc));
                 Serial.println(" **");
             }
         }
