@@ -51,9 +51,9 @@ void WebScheduler::read(WebScheduler & webScheduler, JsonObject root) {
     for (const ScheduleItem & scheduleItem : webScheduler.scheduleItems) {
         JsonObject si = schedule.add<JsonObject>();
         si["id"]      = counter++; // id is only used to render the table and must be unique
-        si["active"]  = scheduleItem.flags ? scheduleItem.active : false;
         si["flags"]   = scheduleItem.flags;
-        si["time"]    = scheduleItem.time;
+        si["active"]  = scheduleItem.flags != SCHEDULEFLAG_SCHEDULE_IMMEDIATE ? scheduleItem.active : false;
+        si["time"]    = scheduleItem.flags != SCHEDULEFLAG_SCHEDULE_IMMEDIATE ? scheduleItem.time : "";
         si["cmd"]     = scheduleItem.cmd;
         si["value"]   = scheduleItem.value;
         si["name"]    = scheduleItem.name;
@@ -76,7 +76,7 @@ StateUpdateResult WebScheduler::update(JsonObject root, WebScheduler & webSchedu
             auto si   = ScheduleItem();
             si.active = schedule["active"];
             si.flags  = schedule["flags"];
-            si.time   = schedule["time"].as<std::string>();
+            si.time   = si.flags == SCHEDULEFLAG_SCHEDULE_IMMEDIATE ? "" : schedule["time"].as<std::string>();
             si.cmd    = schedule["cmd"].as<std::string>();
             si.value  = schedule["value"].as<std::string>();
             si.name   = schedule["name"].as<std::string>();
@@ -322,6 +322,8 @@ bool WebSchedulerService::has_commands() {
     return false;
 }
 
+#include "shuntingYard.hpp"
+
 // execute scheduled command
 bool WebSchedulerService::command(const char * name, const std::string & command, const std::string & data) {
     std::string cmd = Helpers::toLower(command);
@@ -331,13 +333,19 @@ bool WebSchedulerService::command(const char * name, const std::string & command
     // shelly(get): http://<shellyIP>/relais/0?turn=on
     // parse json
     JsonDocument doc;
-    if (DeserializationError::Ok == deserializeJson(doc, cmd)) {
+    if (deserializeJson(doc, cmd) == DeserializationError::Ok) {
         HTTPClient http;
         int        httpResult = 0;
-        String     url        = doc["url"];
-        if (http.begin(url)) {
-            // It's an HTTP call
-
+        String     url        = doc["url"] | "";
+        // for a GET with parameters replace commands with values
+        auto q = url.indexOf('?');
+        if (q != -1) {
+            auto s = url.substring(q + 1);
+            std::string v = s.c_str();
+            commands(v, false);
+            url.replace(s, v.c_str());
+        }
+        if (url.startsWith("http") && http.begin(url)) {
             // add any given headers
             for (JsonPair p : doc["header"].as<JsonObject>()) {
                 http.addHeader(p.key().c_str(), p.value().as<String>().c_str());
@@ -423,8 +431,6 @@ bool WebSchedulerService::onChange(const char * cmd) {
     }
     return false;
 }
-
-#include "shuntingYard.hpp"
 
 // handle condition schedules, parse string stored in schedule.time field
 void WebSchedulerService::condition() {
