@@ -33,6 +33,8 @@
 - scheduler can use web get/post for values and commands [#1806](https://github.com/emsesp/EMS-ESP32/issues/1806)
 - RT800 remote emulation [#1867](https://github.com/emsesp/EMS-ESP32/issues/1867)
 - RC310 cooling parameters [#1857](https://github.com/emsesp/EMS-ESP32/issues/1857)
+- command `api/device/entities` [#1897](https://github.com/emsesp/EMS-ESP32/issues/1897)
+- switchprogmode [#1903]<https://github.com/emsesp/EMS-ESP32/discussions/1903>
 
 ## Fixed
 

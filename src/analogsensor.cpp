@@ -648,78 +648,39 @@ void AnalogSensor::publish_values(const bool force) {
 // called from emsesp.cpp for commands
 // searches sensor by name
 bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int8_t id) {
-    // check of it a 'commands' command
-    if (Helpers::toLower(cmd) == F_(commands)) {
-        return Command::list(EMSdevice::DeviceType::ANALOGSENSOR, output);
-    }
-
     if (sensors_.empty()) {
         return true; // no sensors, return true
     }
 
-    uint8_t show_all = 0;
-    if (Helpers::hasValue(cmd)) {
-        show_all = (strncmp(cmd, F_(info), 4) == 0) ? 1 : (strncmp(cmd, F_(values), 6) == 0) ? 2 : 0;
+    if (!strcmp(cmd, F_(info)) || !strcmp(cmd, F_(values))) {
+        for (const auto & sensor : sensors_) {
+            output[sensor.name()] = sensor.value();
+        }
+        return true;
     }
 
-    // see if we're showing all sensors
-    if (show_all) {
+    if (!strcmp(cmd, F_(entities))) {
         for (const auto & sensor : sensors_) {
-            if (show_all == 1) {
-                // info
-                JsonObject dataSensor = output[sensor.name()].to<JsonObject>();
-                addSensorJson(dataSensor, sensor);
-            } else {
-                // values, shortname version. Also used in 'system allvalues'
-                output[sensor.name()] = sensor.value();
-            }
+            get_value_json(output[sensor.name()].to<JsonObject>(), sensor);
         }
         return true;
     }
 
     // this is for a specific sensor
-    // make a copy of the string command for parsing, and lowercase it
-    char   sensor_name[COMMAND_MAX_LENGTH] = {'\0'};
-    char * attribute_s                     = nullptr;
-    strlcpy(sensor_name, Helpers::toLower(cmd).c_str(), sizeof(sensor_name));
-
-    // check specific attribute to fetch instead of the complete record
-    char * breakp = strchr(sensor_name, '/');
-    if (breakp) {
-        *breakp     = '\0';
-        attribute_s = breakp + 1;
-    }
+    const char * attribute_s = Command::get_attribute(cmd);
 
     for (const auto & sensor : sensors_) {
-        if (sensor_name == Helpers::toLower(sensor.name()) || Helpers::atoint(sensor_name) == sensor.gpio()) {
-            // add the details
-            addSensorJson(output, sensor);
-
-            /*
-            // if someone wants gpio numbers
-            char gpio_str[9];
-            snprintf(gpio_str, sizeof(gpio_str), "gpio_%02d", sensor.gpio());
-            output[gpio_str] = sensor.value();
-            */
-
-            // if we're filtering on an attribute, go find it
-            if (attribute_s) {
-                if (output.containsKey(attribute_s)) {
-                    std::string data = output[attribute_s].as<std::string>();
-                    output.clear();
-                    output["api_data"] = data; // always as a string
-                    return true;
-                }
-                return EMSESP::return_not_found(output, attribute_s, sensor_name); // not found
-            }
-            return true; // found a match, exit
+        // match custom name or sensor GPIO
+        if (cmd == Helpers::toLower(sensor.name()) || Helpers::atoint(cmd) == sensor.gpio()) {
+            get_value_json(output, sensor);
+            return Command::set_attirbute(output, cmd, attribute_s);
         }
     }
 
     return false; // not found
 }
 
-void AnalogSensor::addSensorJson(JsonObject output, const Sensor & sensor) {
+void AnalogSensor::get_value_json(JsonObject output, const Sensor & sensor) {
     output["gpio"]      = sensor.gpio();
     output["type"]      = F_(number);
     output["analog"]    = FL_(list_sensortype)[sensor.type()];

@@ -68,6 +68,7 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
     bool has_commands();
     bool command_setvalue(const char * value, const int8_t id, const char * name);
     bool get_value_info(JsonObject output, const char * cmd);
+    void get_value_json(JsonObject output, const ScheduleItem & scheduleItem);
     void ha_reset() {
         ha_registered_ = false;
     }

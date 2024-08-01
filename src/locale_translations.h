@@ -279,6 +279,8 @@ MAKE_WORD_TRANSLATION(functioning_mode, "functioning mode", "Funktionsweise", "f
 MAKE_WORD_TRANSLATION(unmixed, "unmixed", "ungemischt", "", "", "niezmieszany", "", "", "", "", "") // TODO translate
 MAKE_WORD_TRANSLATION(unmixedIPM, "unmixed IPM", "ungemischt IPM", "", "", "niezmieszany IPM", "", "", "", "", "") // TODO translate
 MAKE_WORD_TRANSLATION(mixed, "mixed IPM", "gemischt IPM", "", "", "zmieszany IPM", "", "", "", "", "") // TODO translate
+MAKE_WORD_TRANSLATION(level, "level", "Level") // TODO translate
+MAKE_WORD_TRANSLATION(absolute, "absolute", "Absolut") // TODO translate
 
 // mixer
 MAKE_WORD_TRANSLATION(stopped, "stopped", "gestoppt", "gestopt", "stoppad", "zatrzymany", "stoppet", "arrêté", "durdu", "fermato", "zastavený")

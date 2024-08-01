@@ -389,6 +389,7 @@ bool EMSdevice::has_cmd(const char * cmd, const int8_t id) const {
 
 // list of registered device entries
 // called from the command 'entities'
+/*
 void EMSdevice::list_device_entries(JsonObject output) const {
     for (const auto & dv : devicevalues_) {
         auto fullname = dv.get_fullname();
@@ -414,6 +415,7 @@ void EMSdevice::list_device_entries(JsonObject output) const {
         }
     }
 }
+*/
 
 // list all the telegram type IDs for this device
 void EMSdevice::show_telegram_handlers(uuid::console::Shell & shell) const {
@@ -1435,187 +1437,182 @@ void EMSdevice::dump_telegram_info(std::vector<TelegramFunctionDump> & telegram_
 // cmd is the endpoint or name of the device entity
 // returns false if failed, otherwise true
 bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t tag) {
-    JsonObject json = output;
-
-    // make a copy of the string command for parsing
-    char command_s[30];
-    strlcpy(command_s, cmd, sizeof(command_s));
-    char * attribute_s = nullptr;
-
-    // check specific attribute to fetch instead of the complete record
-    char * breakp = strchr(command_s, '/');
-    if (breakp) {
-        *breakp     = '\0';
-        attribute_s = breakp + 1;
+    if (!strcmp(cmd, F_(info))) {
+        return export_values(device_type(), output, tag, EMSdevice::OUTPUT_TARGET::API_VERBOSE);
+    }
+    if (!strcmp(cmd, F_(values))) {
+        return export_values(device_type(), output, tag, EMSdevice::OUTPUT_TARGET::API_SHORTNAMES);
+    }
+    if (!strcmp(cmd, F_(entities))) {
+        char name[30];
+        for (auto & dv : devicevalues_) {
+            if (tag < 0 || tag == dv.tag) {
+                strlcpy(name, tag < 0 ? tag_to_mqtt(dv.tag) : "", sizeof(name));
+                strlcat(name, tag < 0 && dv.tag > 0 ? "." : "", sizeof(name));
+                strlcat(name, dv.short_name, sizeof(name));
+                get_value_json(output[name].to<JsonObject>(), dv);
+            }
+        }
+        return true;
     }
 
     // search device value with this tag
+    const char * attribute_s = Command::get_attribute(cmd);
     for (auto & dv : devicevalues_) {
-        if (Helpers::toLower(command_s) == Helpers::toLower(dv.short_name) && (tag <= 0 || tag == dv.tag)) {
-            uint8_t fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
-
-            const char * type  = "type";
-            const char * value = "value";
-
-            json["name"] = dv.short_name;
-
-            auto fullname = dv.get_fullname();
-            if (!fullname.empty()) {
-                json["fullname"] = dv.has_tag() ? fullname + " " + tag_to_string(dv.tag) : fullname; // suffix tag
-
-                // TAG https://github.com/emsesp/EMS-ESP32/issues/1338
-                json["fullname"] = dv.has_tag() ? std::string(tag_to_string(dv.tag)) + " " + fullname.c_str() : fullname; // prefix tag
-            }
-
-            if (dv.tag != DeviceValueTAG::TAG_NONE) {
-                json["circuit"] = tag_to_mqtt(dv.tag);
-            }
-
-            char val[10];
-            switch (dv.type) {
-            case DeviceValueType::ENUM: {
-                if (*(uint8_t *)(dv.value_p) < dv.options_size) {
-                    if (EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX) {
-                        json[value] = (uint8_t)(*(uint8_t *)(dv.value_p));
-                    } else {
-                        json[value] = Helpers::translated_word(dv.options[*(uint8_t *)(dv.value_p)]); // text
-                    }
-                }
-                json[type]      = F_(enum);
-                JsonArray enum_ = json[F_(enum)].to<JsonArray>();
-                for (uint8_t i = 0; i < dv.options_size; i++) {
-                    enum_.add(Helpers::translated_word(dv.options[i]));
-                }
-                break;
-            }
-
-            case DeviceValueType::UINT16:
-                if (Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
-                    json[value] = serialized(Helpers::render_value(val, *(uint16_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
-                }
-                json[type] = F_(number);
-                break;
-
-            case DeviceValueType::UINT8:
-                if (Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
-                    json[value] = serialized(Helpers::render_value(val, *(uint8_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
-                }
-                json[type] = F_(number);
-                break;
-
-            case DeviceValueType::INT16:
-                if (Helpers::hasValue(*(int16_t *)(dv.value_p))) {
-                    json[value] = serialized(Helpers::render_value(val, *(int16_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
-                }
-                json[type] = F_(number);
-                break;
-
-            case DeviceValueType::INT8:
-                if (Helpers::hasValue(*(int8_t *)(dv.value_p))) {
-                    json[value] = serialized(Helpers::render_value(val, *(int8_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
-                }
-                json[type] = F_(number);
-                break;
-
-            case DeviceValueType::UINT24:
-            case DeviceValueType::UINT32:
-                if (Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
-                    json[value] = serialized(Helpers::render_value(val, *(uint32_t *)(dv.value_p), dv.numeric_operator));
-                }
-                json[type] = F_(number);
-                break;
-
-            case DeviceValueType::BOOL:
-                if (Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
-                    auto value_b = (bool)*(uint8_t *)(dv.value_p);
-                    if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                        json[value] = value_b;
-                    } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-                        json[value] = value_b ? 1 : 0;
-                    } else {
-                        char s[12];
-                        json[value] = Helpers::render_boolean(s, value_b);
-                    }
-                }
-                json[type] = ("boolean");
-                break;
-
-            case DeviceValueType::TIME:
-                if (Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
-                    json[value] = serialized(Helpers::render_value(val, *(uint32_t *)(dv.value_p), dv.numeric_operator));
-                }
-                json[type] = F_(number);
-                break;
-
-            case DeviceValueType::STRING:
-                if (Helpers::hasValue((char *)(dv.value_p))) {
-                    json[value] = (char *)(dv.value_p);
-                }
-                json[type] = ("string");
-                break;
-
-            case DeviceValueType::CMD:
-                if (dv.options_size > 1) {
-                    json[type]      = F_(enum);
-                    JsonArray enum_ = json[F_(enum)].to<JsonArray>();
-                    for (uint8_t i = 0; i < dv.options_size; i++) {
-                        enum_.add(Helpers::translated_word(dv.options[i]));
-                    }
-                } else if (dv.uom != DeviceValueUOM::NONE) {
-                    json[type] = F_(number);
-                } else {
-                    json[type] = F_(command);
-                }
-                break;
-
-            default:
-                json[type] = Helpers::translated_word(FL_(unknown));
-                break;
-            }
-
-            // set the min and max only for commands
-            if (dv.has_cmd) {
-                int16_t  dv_set_min;
-                uint32_t dv_set_max;
-                if (dv.get_min_max(dv_set_min, dv_set_max)) {
-                    json["min"] = dv_set_min;
-                    json["max"] = dv_set_max;
-                }
-            }
-
-            // add uom if it's not a " " (single space)
-            if (dv.uom != DeviceValueUOM::NONE) {
-                json["uom"] = uom_to_string(dv.uom);
-            }
-
-            json["readable"]  = !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE);
-            json["writeable"] = dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY);
-            json["visible"]   = !dv.has_state(DeviceValueState::DV_WEB_EXCLUDE);
-
-            // TODO refactor to remove containsKey as it's costly and not advisable to use it
-            // https://arduinojson.org/v7/api/jsonobject/containskey/#avoid
-
-            // commented out, leads to issues if type is set to number
-            // if there is no value, mention it
-            // if (!json.containsKey(value)) {
-            //     json[value] = "not set";
-            // }
-
+        if (cmd == Helpers::toLower(dv.short_name) && (tag <= 0 || tag == dv.tag)) {
+            get_value_json(output, dv);
             // if we're filtering on an attribute, go find it
-            if (attribute_s) {
-                if (json.containsKey(attribute_s)) {
-                    std::string data = json[attribute_s].as<std::string>();
-                    output.clear();
-                    output["api_data"] = data; // always as string
-                    return true;
-                }
-                return EMSESP::return_not_found(output, attribute_s, command_s); // not found
+            return Command::set_attirbute(output, cmd, attribute_s);
+        }
+    }
+    return false; // not found, but don't return a message error yet
+}
+
+// build the json for a specific entity
+void EMSdevice::get_value_json(JsonObject json, DeviceValue & dv) {
+    uint8_t fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
+
+    const char * type  = "type";
+    const char * value = "value";
+
+    json["name"] = dv.short_name;
+
+    auto fullname = dv.get_fullname();
+    if (!fullname.empty()) {
+        json["fullname"] = dv.has_tag() ? fullname + " " + tag_to_string(dv.tag) : fullname; // suffix tag
+
+        // TAG https://github.com/emsesp/EMS-ESP32/issues/1338
+        json["fullname"] = dv.has_tag() ? std::string(tag_to_string(dv.tag)) + " " + fullname.c_str() : fullname; // prefix tag
+    }
+
+    if (dv.tag != DeviceValueTAG::TAG_NONE) {
+        json["circuit"] = tag_to_mqtt(dv.tag);
+    }
+
+    char val[10];
+    switch (dv.type) {
+    case DeviceValueType::ENUM: {
+        if (*(uint8_t *)(dv.value_p) < dv.options_size) {
+            json["index"] = (uint8_t)(*(uint8_t *)(dv.value_p));
+            json["enum"]  = Helpers::translated_word(dv.options[*(uint8_t *)(dv.value_p)]); // text
+            if (EMSESP::system_.enum_format() == ENUM_FORMAT_INDEX) {
+                json[value] = (uint8_t)(*(uint8_t *)(dv.value_p));
+            } else {
+                json[value] = Helpers::translated_word(dv.options[*(uint8_t *)(dv.value_p)]); // text
             }
-            return true;
+        }
+        json[type]      = F_(enum);
+        JsonArray enum_ = json[F_(enum)].to<JsonArray>();
+        for (uint8_t i = 0; i < dv.options_size; i++) {
+            enum_.add(Helpers::translated_word(dv.options[i]));
+        }
+        break;
+    }
+
+    case DeviceValueType::UINT16:
+        if (Helpers::hasValue(*(uint16_t *)(dv.value_p))) {
+            json[value] = serialized(Helpers::render_value(val, *(uint16_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
+        }
+        json[type] = F_(number);
+        break;
+
+    case DeviceValueType::UINT8:
+        if (Helpers::hasValue(*(uint8_t *)(dv.value_p))) {
+            json[value] = serialized(Helpers::render_value(val, *(uint8_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
+        }
+        json[type] = F_(number);
+        break;
+
+    case DeviceValueType::INT16:
+        if (Helpers::hasValue(*(int16_t *)(dv.value_p))) {
+            json[value] = serialized(Helpers::render_value(val, *(int16_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
+        }
+        json[type] = F_(number);
+        break;
+
+    case DeviceValueType::INT8:
+        if (Helpers::hasValue(*(int8_t *)(dv.value_p))) {
+            json[value] = serialized(Helpers::render_value(val, *(int8_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
+        }
+        json[type] = F_(number);
+        break;
+
+    case DeviceValueType::UINT24:
+    case DeviceValueType::UINT32:
+        if (Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
+            json[value] = serialized(Helpers::render_value(val, *(uint32_t *)(dv.value_p), dv.numeric_operator));
+        }
+        json[type] = F_(number);
+        break;
+
+    case DeviceValueType::BOOL:
+        if (Helpers::hasValue(*(uint8_t *)(dv.value_p), EMS_VALUE_BOOL)) {
+            auto value_b  = (bool)*(uint8_t *)(dv.value_p);
+            json["bool"]  = value_b;
+            json["index"] = value_b ? 1 : 0;
+            if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+                json[value] = value_b;
+            } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+                json[value] = value_b ? 1 : 0;
+            } else {
+                char s[12];
+                json[value] = Helpers::render_boolean(s, value_b);
+            }
+        }
+        json[type] = ("boolean");
+        break;
+
+    case DeviceValueType::TIME:
+        if (Helpers::hasValue(*(uint32_t *)(dv.value_p))) {
+            json[value] = serialized(Helpers::render_value(val, *(uint32_t *)(dv.value_p), dv.numeric_operator));
+        }
+        json[type] = F_(number);
+        break;
+
+    case DeviceValueType::STRING:
+        if (Helpers::hasValue((char *)(dv.value_p))) {
+            json[value] = (char *)(dv.value_p);
+        }
+        json[type] = ("string");
+        break;
+
+    case DeviceValueType::CMD:
+        if (dv.options_size > 1) {
+            json[type]      = F_(enum);
+            JsonArray enum_ = json[F_(enum)].to<JsonArray>();
+            for (uint8_t i = 0; i < dv.options_size; i++) {
+                enum_.add(Helpers::translated_word(dv.options[i]));
+            }
+        } else if (dv.uom != DeviceValueUOM::NONE) {
+            json[type] = F_(number);
+        } else {
+            json[type] = F_(command);
+        }
+        break;
+
+    default:
+        json[type] = Helpers::translated_word(FL_(unknown));
+        break;
+    }
+
+    // set the min and max only for commands
+    if (dv.has_cmd) {
+        int16_t  dv_set_min;
+        uint32_t dv_set_max;
+        if (dv.get_min_max(dv_set_min, dv_set_max)) {
+            json["min"] = dv_set_min;
+            json["max"] = dv_set_max;
         }
     }
 
-    return false; // not found, but don't return a message error yet
+    // add uom if it's not a " " (single space)
+    if (dv.uom != DeviceValueUOM::NONE) {
+        json["uom"] = uom_to_string(dv.uom);
+    }
+
+    json["readable"]  = !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE);
+    json["writeable"] = dv.has_cmd && !dv.has_state(DeviceValueState::DV_READONLY);
+    json["visible"]   = !dv.has_state(DeviceValueState::DV_WEB_EXCLUDE);
 }
 
 // mqtt publish all single values from one device (used for time schedule)

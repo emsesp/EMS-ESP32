@@ -86,6 +86,7 @@ class Thermostat : public EMSdevice {
         uint8_t climate;
         uint8_t switchonoptimization;
         uint8_t statusbyte; // from RC300monitor
+        uint8_t switchProgMode;
         // RC 10
         uint8_t  reducehours;   // night reduce duration
         uint16_t reduceminutes; // remaining minutes to night->day
@@ -655,6 +656,7 @@ class Thermostat : public EMSdevice {
     bool set_cooling(const char * value, const int8_t id);
     bool set_coolondelay(const char * value, const int8_t id);
     bool set_cooloffdelay(const char * value, const int8_t id);
+    bool set_switchProgMode(const char * value, const int8_t id);
 };
 
 } // namespace emsesp
