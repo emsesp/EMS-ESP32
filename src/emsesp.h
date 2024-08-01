@@ -251,8 +251,6 @@ class EMSESP {
     static void        process_version(std::shared_ptr<const Telegram> telegram);
     static void        publish_response(std::shared_ptr<const Telegram> telegram);
     static void        publish_all_loop();
-    static bool        command_commands(uint8_t device_type, JsonObject output, const int8_t id);
-    static bool        command_entities(uint8_t device_type, JsonObject output, const int8_t id);
 
     static constexpr uint32_t EMS_FETCH_FREQUENCY = 60000; // check every minute
     static constexpr uint8_t  EMS_WAIT_KM_TIMEOUT = 60;    // wait one minute

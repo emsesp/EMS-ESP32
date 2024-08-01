@@ -31,7 +31,7 @@
 
 class Token {
   public:
-    enum class Type {
+    enum class Type : uint8_t {
         Unknown,
         Number,
         String,
@@ -332,12 +332,13 @@ bool isnum(const std::string & s) {
 
 
 // replace commands like "<device>/<hc>/<cmd>" with its value"
-std::string commands(std::string & expr) {
+std::string commands(std::string & expr, bool quotes = true) {
     for (uint8_t device = 0; device < emsesp::EMSdevice::DeviceType::UNKNOWN; device++) {
         const char * d = emsesp::EMSdevice::device_type_2_device_name(device);
         auto         f = expr.find(d);
         while (f != std::string::npos) {
-            auto e = expr.find_first_of(")=<>|&+-*!", f);
+            // entity names are alphanumeric or _
+            auto e = expr.find_first_not_of("/._abcdefghijklmnopqrstuvwxyz0123456789", f);
             if (e == std::string::npos) {
                 e = expr.length();
             }
@@ -361,7 +362,7 @@ std::string commands(std::string & expr) {
             emsesp::Command::process(cmd_s.c_str(), true, input, output);
             if (output.containsKey("api_data")) {
                 std::string data = output["api_data"].as<std::string>();
-                if (!isnum(data)) {
+                if (!isnum(data) && quotes) {
                     data.insert(data.begin(), '"');
                     data.insert(data.end(), '"');
                 }
@@ -596,7 +597,7 @@ std::string compute(const std::string & expr) {
     auto expr_new = emsesp::Helpers::toLower(expr);
 
     // search json with url:
-    auto f = expr_new.find_first_of("{");
+    auto f = expr_new.find_first_of('{');
     while (f != std::string::npos) {
         auto e = f + 1;
         for (uint8_t i = 1; i > 0; e++) {
@@ -612,8 +613,8 @@ std::string compute(const std::string & expr) {
         JsonDocument doc;
         if (DeserializationError::Ok == deserializeJson(doc, cmd)) {
             HTTPClient http;
-            String     url = doc["url"];
-            if (http.begin(url)) {
+            String     url = doc["url"] | "";
+            if (url.startsWith("http") && http.begin(url)) {
                 int httpResult = 0;
                 for (JsonPair p : doc["header"].as<JsonObject>()) {
                     http.addHeader(p.key().c_str(), p.value().as<std::string>().c_str());
@@ -647,20 +648,22 @@ std::string compute(const std::string & expr) {
     }
 
     // positions: q-questionmark, c-colon
-    auto q = expr_new.find_first_of("?");
+    auto q = expr_new.find_first_of('?');
     while (q != std::string::npos) {
         // find corresponding colon
-        auto c1 = expr_new.find_first_of(":", q + 1);
-        auto q1 = expr_new.find_first_of("?", q + 1);
+        auto c1 = expr_new.find_first_of(':', q + 1);
+        auto q1 = expr_new.find_first_of('?', q + 1);
         while (q1 < c1 && q1 != std::string::npos && c1 != std::string::npos) {
-            q1 = expr_new.find_first_of("?", q1 + 1);
-            c1 = expr_new.find_first_of(":", c1 + 1);
+            q1 = expr_new.find_first_of('?', q1 + 1);
+            c1 = expr_new.find_first_of(':', c1 + 1);
         }
         if (c1 == std::string::npos) {
             return ""; // error: missing colon
         }
         std::string cond = calculate(expr_new.substr(0, q));
-        if (cond[0] == '1') {
+        if (cond.length() == 0) {
+            return "";
+        } else if (cond[0] == '1') {
             expr_new.erase(c1);       // remove second expression after colon
             expr_new.erase(0, q + 1); // remove condition before questionmark
         } else if (cond[0] == '0') {
@@ -668,7 +671,7 @@ std::string compute(const std::string & expr) {
         } else {
             return ""; // error
         }
-        q = expr_new.find_first_of("?"); // search next instance
+        q = expr_new.find_first_of('?'); // search next instance
     }
 
     return calculate(expr_new);

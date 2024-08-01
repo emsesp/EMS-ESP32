@@ -256,20 +256,6 @@ void WebCustomEntityService::show_values(JsonObject output) {
 
 // process json output for info/commands and value_info
 bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd) {
-    // check of it a 'commands' command
-    if (Helpers::toLower(cmd) == F_(commands)) {
-        output[F_(info)]     = Helpers::translated_word(FL_(info_cmd));
-        output[F_(commands)] = Helpers::translated_word(FL_(commands_cmd));
-        output[F_(values)]   = Helpers::translated_word(FL_(values_cmd));
-
-        for (const auto & entity : *customEntityItems_) {
-            if (entity.writeable) {
-                output[entity.name] = "custom entity";
-            }
-        }
-        return true;
-    }
-
     // if no custom entries, return empty json
     // even if we're looking for a specific entity
     // https://github.com/emsesp/EMS-ESP32/issues/1297
@@ -278,7 +264,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
     }
 
     // if it's info or values...
-    if (strlen(cmd) == 0 || Helpers::toLower(cmd) == F_(values) || Helpers::toLower(cmd) == F_(info)) {
+    if (!strlen(cmd) || !strcmp(cmd, F_(values)) || !strcmp(cmd, F_(info))) {
         // list all names
         for (const CustomEntityItem & entity : *customEntityItems_) {
             render_value(output, entity);
@@ -286,57 +272,48 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
         return true;
     }
 
-    char command_s[COMMAND_MAX_LENGTH];
-    strlcpy(command_s, Helpers::toLower(cmd).c_str(), sizeof(command_s));
-    char * attribute_s = nullptr;
-
-    // check specific attribute to fetch instead of the complete record
-    char * breakp = strchr(command_s, '/');
-    if (breakp) {
-        *breakp     = '\0';
-        attribute_s = breakp + 1;
+    // list all entities
+    if (!strcmp(cmd, F_(entities))) {
+        for (const auto & entity : *customEntityItems_) {
+            auto nest = output[entity.name].to<JsonObject>();
+            get_value_json(nest, entity);
+        }
+        return true;
     }
 
+    // specific value info
+    const char * attribute_s = Command::get_attribute(cmd);
     for (const auto & entity : *customEntityItems_) {
-        if (Helpers::toLower(entity.name) == command_s) {
-            output["name"] = entity.name;
-            output["ram"]  = entity.ram;
-            output["type"] = entity.value_type == DeviceValueType::BOOL ? "boolean" : entity.value_type == DeviceValueType::STRING ? "string" : F_(number);
-            if (entity.uom > 0) {
-                output["uom"] = EMSdevice::uom_to_string(entity.uom);
-            }
-            output["readable"]  = true;
-            output["writeable"] = entity.writeable;
-            output["visible"]   = true;
-            if (entity.ram == 0) {
-                output["device_id"] = Helpers::hextoa(entity.device_id);
-                output["type_id"]   = Helpers::hextoa(entity.type_id);
-                output["offset"]    = entity.offset;
-                if (entity.value_type != DeviceValueType::BOOL && entity.value_type != DeviceValueType::STRING) {
-                    output["factor"] = entity.factor;
-                } else if (entity.value_type == DeviceValueType::STRING) {
-                    output["bytes"] = (uint8_t)entity.factor;
-                }
-            }
-            render_value(output, entity, true); // create the "value" field
-
-            if (attribute_s) {
-                if (output.containsKey(attribute_s)) {
-                    std::string data = output[attribute_s].as<std::string>();
-                    output.clear();
-                    output["api_data"] = data; // always as string
-                    return true;
-                }
-                return EMSESP::return_not_found(output, attribute_s, command_s); // not found
-            }
-        }
-
-        if (output.size()) {
-            return true;
+        if (Helpers::toLower(entity.name) == cmd) {
+            get_value_json(output, entity);
+            return Command::set_attirbute(output, cmd, attribute_s);
         }
     }
-
     return false; // not found
+}
+
+// build the json for specific entity
+void WebCustomEntityService::get_value_json(JsonObject output, const CustomEntityItem & entity) {
+    output["name"]    = entity.name;
+    output["storage"] = entity.ram ? "ram" : "ems";
+    output["type"]    = entity.value_type == DeviceValueType::BOOL ? "boolean" : entity.value_type == DeviceValueType::STRING ? "string" : F_(number);
+    if (entity.uom > 0) {
+        output["uom"] = EMSdevice::uom_to_string(entity.uom);
+    }
+    output["readable"]  = true;
+    output["writeable"] = entity.writeable;
+    output["visible"]   = true;
+    if (entity.ram == 0) {
+        output["device_id"] = Helpers::hextoa(entity.device_id);
+        output["type_id"]   = Helpers::hextoa(entity.type_id);
+        output["offset"]    = entity.offset;
+        if (entity.value_type != DeviceValueType::BOOL && entity.value_type != DeviceValueType::STRING) {
+            output["factor"] = entity.factor;
+        } else if (entity.value_type == DeviceValueType::STRING) {
+            output["bytes"] = (uint8_t)entity.factor;
+        }
+    }
+    render_value(output, entity, true); // create the "value" field
 }
 
 // publish single value
