@@ -280,18 +280,7 @@ void WebSchedulerService::publish(const bool force) {
                 snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), F_(scheduler), scheduleItem.name.c_str());
                 config["cmd_t"] = command_topic;
 
-                if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                    config["pl_on"]  = true;
-                    config["pl_off"] = false;
-                } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-                    config["pl_on"]  = 1;
-                    config["pl_off"] = 0;
-                } else {
-                    char result[12];
-                    config["pl_on"]  = Helpers::render_boolean(result, true);
-                    config["pl_off"] = Helpers::render_boolean(result, false);
-                }
-
+                Mqtt::add_ha_bool(config);
                 Mqtt::add_ha_sections_to_doc(F_(scheduler), stat_t, config, !ha_created, val_cond);
 
                 ha_created |= Mqtt::queue_ha(topic, config.as<JsonObject>());
