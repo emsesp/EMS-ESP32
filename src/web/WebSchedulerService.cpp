@@ -334,31 +334,32 @@ bool WebSchedulerService::command(const char * name, const std::string & command
     // parse json
     JsonDocument doc;
     if (deserializeJson(doc, cmd) == DeserializationError::Ok) {
-        HTTPClient http;
-        int        httpResult = 0;
-        String     url        = doc["url"] | "";
+        HTTPClient  http;
+        int         httpResult = 0;
+        std::string url        = doc["url"] | "";
         // for a GET with parameters replace commands with values
-        auto q = url.indexOf('?');
-        if (q != -1) {
-            auto s = url.substring(q + 1);
-            std::string v = s.c_str();
-            commands(v, false);
-            url.replace(s, v.c_str());
+        // don't search the complete url, it may contain a devicename in path
+        auto q = url.find_first_of('?');
+        if (q != std::string::npos) {
+            auto s = url.substr(q + 1); // copy only parameters
+            auto l = s.length();
+            commands(s, false);
+            url.replace(q + 1, l, s);
         }
-        if (url.startsWith("http") && http.begin(url)) {
+        if (!url.find("http") && http.begin(url.c_str())) {
             // add any given headers
             for (JsonPair p : doc["header"].as<JsonObject>()) {
                 http.addHeader(p.key().c_str(), p.value().as<String>().c_str());
             }
-            String value  = doc["value"] | data.c_str(); // extract value if its in the command, or take the data
-            String method = doc["method"] | "GET";       // default GET
+            std::string value  = doc["value"] | data.c_str(); // extract value if its in the command, or take the data
+            std::string method = doc["method"] | "GET";       // default GET
 
             // if there is data, force a POST
             if (value.length() || method == "post") { // we have all lowercase
-                if (value.startsWith("{")) {
+                if (value.find_first_of('{') != std::string::npos) {
                     http.addHeader("Content-Type", "application/json"); // auto-set to JSON
                 }
-                httpResult = http.POST(value);
+                httpResult = http.POST(value.c_str());
             } else {
                 httpResult = http.GET(); // normal GET
             }
