@@ -1800,9 +1800,12 @@ String System::getBBQKeesGatewayDetails() {
         return "";
     }
 
-    // TODO add to header as a define
-    if (EMSESP::nvs_.getString("mfg") != "BBQKees") {
-        return "";
+    // mfg can be either "BBQKees" or "BBQKees Electronics"
+    auto mfg = EMSESP::nvs_.getString("mfg");
+    if (mfg) {
+        if (!mfg.startsWith("BBQKees")) {
+            return "";
+        }
     }
 
     return "BBQKees Gateway Model " + EMSESP::nvs_.getString("model") + " v" + EMSESP::nvs_.getString("hwrevision") + "/" + EMSESP::nvs_.getString("batch");
