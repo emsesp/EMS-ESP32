@@ -127,40 +127,71 @@ void test1() {
     get_url("/api/system");
 
     // escape strings with https://dolitools.com/text-tools/escape-unescape-string/
-    auto a =
-        "[{\"system\":{\"version\":\"3.7.0-dev.28\",\"uptime\":\"000+00:00:00.000\",\"uptimeSec\":0,\"resetReason\":\"Unknown / "
+    auto response =
+        "[{\"system\":{\"version\":\"3.7.0-dev.29\",\"uptime\":\"000+00:00:00.000\",\"uptimeSec\":0,\"resetReason\":\"Unknown / "
         "Unknown\"},\"network\":{\"network\":\"WiFi\",\"hostname\":\"ems-esp\",\"RSSI\":-23,\"TxPowerSetting\":0,\"staticIP\":false,\"lowBandwidth\":false,"
         "\"disableSleep\":false,\"enableMDNS\":true,\"enableCORS\":false},\"ntp\":{},\"mqtt\":{\"MQTTStatus\":\"disconnected\",\"MQTTPublishes\":0,"
-        "\"MQTTQueued\":0,\"MQTTPublishFails\":0,\"MQTTConnects\":1,\"enabled\":true,\"clientID\":\"ems-esp\",\"keepAlive\":60,\"cleanSession\":false,"
-        "\"entityFormat\":1,\"base\":\"ems-esp\",\"discoveryPrefix\":\"homeassistant\",\"discoveryType\":0,\"nestedFormat\":1,\"haEnabled\":true,\"mqttQos\":0,"
-        "\"mqttRetain\":false,\"publishTimeHeartbeat\":60,\"publishTimeBoiler\":10,\"publishTimeThermostat\":10,\"publishTimeSolar\":10,\"publishTimeMixer\":"
-        "10,\"publishTimeWater\":0,\"publishTimeOther\":10,\"publishTimeSensor\":10,\"publishSingle\":false,\"publish2command\":false,\"sendResponse\":false},"
-        "\"syslog\":{\"enabled\":false},\"sensor\":{\"temperatureSensors\":2,\"temperatureSensorReads\":0,\"temperatureSensorFails\":0,\"analogSensors\":2,"
-        "\"analogSensorReads\":0,\"analogSensorFails\":0},\"api\":{\"APICalls\":0,\"APIFails\":0},\"bus\":{\"busStatus\":\"connected\",\"busProtocol\":"
-        "\"Buderus\",\"busTelegramsReceived\":8,\"busReads\":0,\"busWrites\":0,\"busIncompleteTelegrams\":0,\"busReadsFailed\":0,\"busWritesFailed\":0,"
-        "\"busRxLineQuality\":100,\"busTxLineQuality\":100},\"settings\":{\"boardProfile\":\"S32\",\"locale\":\"en\",\"txMode\":8,\"emsBusID\":11,"
-        "\"showerTimer\":false,\"showerMinDuration\":180,\"showerAlert\":false,\"hideLed\":false,\"noTokenApi\":false,\"readonlyMode\":false,\"fahrenheit\":"
-        "false,\"dallasParasite\":false,\"boolFormat\":1,\"boolDashboard\":1,\"enumFormat\":1,\"analogEnabled\":true,\"telnetEnabled\":true,"
-        "\"maxWebLogBuffer\":50,\"webLogBuffer\":33,\"modbusEnabled\":false},\"devices\":[{\"type\":\"boiler\",\"name\":\"Custom "
+        "\"MQTTQueued\":"
+        "0,\"MQTTPublishFails\":0,\"MQTTConnects\":1,\"enabled\":true,\"clientID\":\"ems-esp\",\"keepAlive\":60,\"cleanSession\":false,\"entityFormat\":1,"
+        "\"base\":"
+        "\"ems-esp\",\"discoveryPrefix\":\"homeassistant\",\"discoveryType\":0,\"nestedFormat\":1,\"haEnabled\":true,\"mqttQos\":0,\"mqttRetain\":false,"
+        "\"publishTimeHeartbeat\":60,\"publishTimeBoiler\":10,\"publishTimeThermostat\":10,\"publishTimeSolar\":10,\"publishTimeMixer\":10,"
+        "\"publishTimeWater\":0,"
+        "\"publishTimeOther\":10,\"publishTimeSensor\":10,\"publishSingle\":false,\"publish2command\":false,\"sendResponse\":false},\"syslog\":{\"enabled\":"
+        "false},"
+        "\"sensor\":{\"temperatureSensors\":2,\"temperatureSensorReads\":0,\"temperatureSensorFails\":0,\"analogSensors\":2,\"analogSensorReads\":0,"
+        "\"analogSensorFails\":0},\"api\":{\"APICalls\":0,\"APIFails\":0},\"bus\":{\"busStatus\":\"connected\",\"busProtocol\":\"Buderus\","
+        "\"busTelegramsReceived\":8,\"busReads\":0,\"busWrites\":0,\"busIncompleteTelegrams\":0,\"busReadsFailed\":0,\"busWritesFailed\":0,"
+        "\"busRxLineQuality\":"
+        "100,\"busTxLineQuality\":100},\"settings\":{\"boardProfile\":\"S32\",\"locale\":\"en\",\"txMode\":8,\"emsBusID\":11,\"showerTimer\":false,"
+        "\"showerMinDuration\":180,\"showerAlert\":false,\"hideLed\":false,\"noTokenApi\":false,\"readonlyMode\":false,\"fahrenheit\":false,\"dallasParasite\":"
+        "false,\"boolFormat\":1,\"boolDashboard\":1,\"enumFormat\":1,\"analogEnabled\":true,\"telnetEnabled\":true,\"maxWebLogBuffer\":50,\"webLogBuffer\":33,"
+        "\"modbusEnabled\":false},\"devices\":[{\"type\":\"boiler\",\"name\":\"Custom "
         "Name!!\",\"deviceID\":\"0x08\",\"productID\":123,\"brand\":\"\",\"version\":\"01.00\",\"entities\":37,\"handlersReceived\":\"0x18\","
-        "\"handlersFetched\":\"0x14 0x33\",\"handlersPending\":\"0xBF 0x10 0x11 0xC2 0x15 0x1C 0x19 0x1A 0x35 0x34 0x2A 0xD1 0xE3 0xE4 0xE5 0xE9 0x2E "
+        "\"handlersFetched\":"
+        "\"0x14 0x33\",\"handlersPending\":\"0xBF 0x10 0x11 0xC2 0x15 0x1C 0x19 0x1A 0x35 0x34 0x2A 0xD1 0xE3 0xE4 0xE5 0xE9 0x2E "
         "0x3B\"},{\"type\":\"thermostat\",\"name\":\"FW120\",\"deviceID\":\"0x10\",\"productID\":192,\"brand\":\"\",\"version\":\"01.00\",\"entities\":15,"
         "\"handlersReceived\":\"0x016F\",\"handlersFetched\":\"0x0170 0x0171\",\"handlersPending\":\"0xA3 0x06 0xA2 0x12 0x13 0x0172 0x0165 0x0168\"}]}]";
 
-    TEST_ASSERT_EQUAL_STRING(a, webAPIService->getResponse());
+    TEST_ASSERT_EQUAL_STRING(response, webAPIService->getResponse());
 }
 
-void test2() {
+void test_custom1() {
     get_url("/api/custom");
-    auto a = "[{\"test_custom\":0.00,\"test_read_only\":0.00,\"test_ram\":\"14\",\"seltemp\":\"14\"}]";
-    TEST_ASSERT_EQUAL_STRING(a, webAPIService->getResponse());
+    auto response = "[{\"test_custom\":0.00,\"test_read_only\":0.00,\"test_ram\":\"14\",\"seltemp\":\"14\"}]";
+    TEST_ASSERT_EQUAL_STRING(response, webAPIService->getResponse());
+}
+
+void test_custom2() {
+    get_url("/api/custom/seltemp");
+    auto response = "[{\"name\":\"seltemp\",\"storage\":\"ram\",\"type\":\"number\",\"readable\":true,\"writeable\":true,\"visible\":true,\"value\":\"14\"}]";
+    TEST_ASSERT_EQUAL_STRING(response, webAPIService->getResponse());
 }
 
 int main() {
     UNITY_BEGIN();
 
     RUN_TEST(test1);
-    RUN_TEST(test2);
+    RUN_TEST(test_custom1);
+    RUN_TEST(test_custom2);
+
+    // TODO add all the remaining tests from test.cpp "api3"
+    // and Michaels' tests...
+
+    /*
+api/device
+api/device/info
+api/device/value
+api/device/entities
+api/device/commands
+api/thermostat/hc2/values (info/entities) to get single circuit info
+api/system/network/values (info/entities) to get single circuit info same as for ems devices
+api/device/name
+api/device/name/attribute
+api/device/circuit/name
+api/device/circuit/name/attribute
+*/
+
 
     return UNITY_END();
 }
