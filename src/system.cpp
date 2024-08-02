@@ -1315,7 +1315,7 @@ bool System::get_value_info(JsonObject output, const char * cmd) {
             if (p.value().is<JsonObject>()) {
                 // String prefix = p.key().c_str();
                 for (JsonPair p1 : p.value().as<JsonObject>()) {
-                    JsonObject entity = output[String(p.key().c_str()) + '.' + p1.key().c_str()].to<JsonObject>();
+                    JsonObject entity = output[std::string(p.key().c_str()) + "." + p1.key().c_str()].to<JsonObject>();
                     get_value_json(entity, p.key().c_str(), p1.key().c_str(), p1.value());
                 }
             } // else { // we don't have pairs in json root object
@@ -1325,12 +1325,12 @@ bool System::get_value_info(JsonObject output, const char * cmd) {
         return true;
     }
 
-    char * val = strstr(cmd, "/value");
+    char * val = (char *)strstr(cmd, "/value");
     if (val) {
         *val = '\0';
     }
 
-    char * slash = strchr(cmd, '/');
+    char * slash = (char *)strchr(cmd, '/');
     if (slash) {
         *slash = '\0';
         slash++;
