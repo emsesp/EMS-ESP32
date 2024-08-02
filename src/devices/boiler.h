@@ -81,7 +81,6 @@ class Boiler : public EMSdevice {
     uint8_t  wwTempOK_;             // DHW temperature ok on/off
     uint8_t  wwActive_;             //
     uint8_t  ww3wayValve_;          // 3-way valve on WW
-    uint8_t  wwSetPumpPower_;       // ww pump speed/power?
     uint8_t  wwFlowTempOffset_;     // Boiler offset for ww heating
     uint8_t  wwMaxPower_;           // DHW maximum power
     uint8_t  wwMaxTemp_;            // DHW maximum temperature
@@ -139,9 +138,7 @@ class Boiler : public EMSdevice {
     int8_t   boilHystOff_;
     int8_t   boil2HystOn_;
     int8_t   boil2HystOff_;
-    uint8_t  setFlowTemp_;       // boiler setpoint temp
     uint8_t  curBurnPow_;        // Burner current power %
-    uint8_t  setBurnPow_;        // max output power in %
     uint32_t burnStarts_;        // burner restarts
     uint32_t heatStarts_;        // burner starts for heating
     uint32_t burnWorkMin_;       // Total burner operating time
