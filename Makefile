@@ -1,5 +1,6 @@
 #
 # GNUMakefile for EMS-ESP
+# This is mainly used to generate the .o files for SonarQube analysis
 #
 
 NUMJOBS=${NUMJOBS:-" -j2 "}
