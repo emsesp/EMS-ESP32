@@ -612,29 +612,29 @@ std::string compute(const std::string & expr) {
         std::string  cmd = expr_new.substr(f, e - f).c_str();
         JsonDocument doc;
         if (DeserializationError::Ok == deserializeJson(doc, cmd)) {
-            HTTPClient http;
-            String     url = doc["url"] | "";
-            if (url.startsWith("http") && http.begin(url)) {
+            HTTPClient  http;
+            std::string url = doc["url"] | "";
+            if (!url.find("http") && http.begin(url.c_str())) {
                 int httpResult = 0;
                 for (JsonPair p : doc["header"].as<JsonObject>()) {
                     http.addHeader(p.key().c_str(), p.value().as<std::string>().c_str());
                 }
-                String value  = doc["value"] | "";
-                String method = doc["method"] | "GET"; // default GET
+                std::string value  = doc["value"] | "";
+                std::string method = doc["method"] | "GET"; // default GET
 
                 // if there is data, force a POST
                 if (value.length() || method == "post") {
-                    if (value.startsWith("{")) {
+                    if (value.find_first_of('{') != std::string::npos) {
                         http.addHeader("Content-Type", "application/json"); // auto-set to JSON
                     }
-                    httpResult = http.POST(value);
+                    httpResult = http.POST(value.c_str());
                 } else {
                     httpResult = http.GET(); // normal GET
                 }
 
                 if (httpResult > 0) {
                     std::string result = emsesp::Helpers::toLower(http.getString().c_str());
-                    String      key    = doc["key"] | "";
+                    std::string key    = doc["key"] | "";
                     doc.clear();
                     if (key.length() && DeserializationError::Ok == deserializeJson(doc, result)) {
                         result = doc[key.c_str()].as<std::string>();
@@ -644,7 +644,7 @@ std::string compute(const std::string & expr) {
                 http.end();
             }
         }
-        f = expr_new.find_first_of("{", e);
+        f = expr_new.find_first_of('{', e);
     }
 
     // positions: q-questionmark, c-colon
