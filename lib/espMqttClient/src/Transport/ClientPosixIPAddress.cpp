@@ -6,8 +6,6 @@ For a copy, see <https://opensource.org/licenses/MIT> or
 the LICENSE file.
 */
 
-#if defined(__linux__) || defined(_WIN32)
-
 #include "ClientPosixIPAddress.h"
 
 IPAddress::IPAddress()
@@ -28,5 +26,3 @@ IPAddress::IPAddress(uint32_t address)
 IPAddress::operator uint32_t() {
     return _address;
 }
-
-#endif

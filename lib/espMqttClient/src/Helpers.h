@@ -47,7 +47,7 @@ the LICENSE file.
 #include <mutex> // NOLINT [build/c++11]
 #define EMC_SEMAPHORE_TAKE() mtx.lock();
 #define EMC_SEMAPHORE_GIVE() mtx.unlock();
-#elif defined(_WIN32)
+#elif defined(_WIN32) || defined(__APPLE__)
 #include <Arduino.h>
 #define EMC_SEMAPHORE_TAKE()
 #define EMC_SEMAPHORE_GIVE()

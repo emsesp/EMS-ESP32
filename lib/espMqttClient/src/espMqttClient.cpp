@@ -120,7 +120,7 @@ espMqttClient::espMqttClient()
     , _client() {
     _transport = &_client;
 }
-#elif defined(_WIN32)
+#elif defined(_WIN32) || defined(__APPLE__)
 // Windows
 espMqttClient::espMqttClient()
     : MqttClientSetup(espMqttClientTypes::UseInternalTask::NO) {

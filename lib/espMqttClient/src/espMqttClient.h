@@ -76,7 +76,7 @@ class espMqttClient : public MqttClientSetup<espMqttClient> {
   protected:
     espMqttClientInternals::ClientPosix _client;
 };
-#elif defined(_WIN32)
+#elif defined(_WIN32) || defined(__APPLE__)
 class espMqttClient : public MqttClientSetup<espMqttClient> {
   public:
     espMqttClient();

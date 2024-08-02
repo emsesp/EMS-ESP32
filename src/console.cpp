@@ -532,7 +532,8 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
 
             JsonDocument doc;
             int8_t       id          = -1;
-            const char * cmd         = Helpers::toLower(arguments[1]).c_str();
+            auto         arg         = Helpers::toLower(arguments[1]);
+            const char * cmd         = arg.c_str(); // prevent loosing pointer after object destruction
             uint8_t      return_code = CommandRet::OK;
             JsonObject   json        = doc.to<JsonObject>();
             bool         has_data    = false;
