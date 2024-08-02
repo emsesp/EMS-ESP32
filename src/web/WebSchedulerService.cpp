@@ -346,7 +346,7 @@ bool WebSchedulerService::command(const char * name, const std::string & command
             commands(s, false);
             url.replace(q + 1, l, s);
         }
-        if (!url.find("http") && http.begin(url.c_str())) {
+        if (http.begin(url.c_str())) {
             // add any given headers
             for (JsonPair p : doc["header"].as<JsonObject>()) {
                 http.addHeader(p.key().c_str(), p.value().as<String>().c_str());
