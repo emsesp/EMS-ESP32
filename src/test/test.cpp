@@ -964,7 +964,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // load devices
         test("boiler");
         test("thermostat");
-        // test("2thermostats");
 
         if (single) {
             // run dedicated tests only
@@ -973,28 +972,14 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             EMSESP::temperaturesensor_.test();      // add temperature sensors
             EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
 
-            shell.invoke_command("call system fetch");
-            request.url("/api/system/fetch");
+            // shell.invoke_command("call system fetch");
+            // request.url("/api/system/fetch");
+            // EMSESP::webAPIService.webAPIService(&request);
+
+            request.url("/api/thermostat");
             EMSESP::webAPIService.webAPIService(&request);
-
-            // request.url("/api/system");
-            // EMSESP::webAPIService.webAPIService(&request);
-            // request.url("/api/system/system/version");
-            // EMSESP::webAPIService.webAPIService(&request);
-            // request.url("/api/system/bad");
-            // EMSESP::webAPIService.webAPIService(&request);
-
-            // request.url("/api/boiler");
-            // EMSESP::webAPIService.webAPIService(&request);
-            // request.url("/api/boiler/bad");
-            // EMSESP::webAPIService.webAPIService(&request);
-
-            // request.url("/api/custom");
-            // EMSESP::webAPIService.webAPIService(&request);
-            // request.url("/api/custom/seltemp");
-            // EMSESP::webAPIService.webAPIService(&request);
-            // request.url("/api/custom/bad");
-            // EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/thermostat/hc1");
+            EMSESP::webAPIService.webAPIService(&request);
 
         } else {
             EMSESP::webCustomEntityService.test();  // custom entities
@@ -1023,9 +1008,21 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             EMSESP::webAPIService.webAPIService(&request);
             request.url("/api/boiler/outdoortemp");
             EMSESP::webAPIService.webAPIService(&request);
-            request.url("/api/boiler/dhw/chargetype/writeable");
+            request.url("/api/boiler/dhw/chargetype");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/boiler/dhw.chargetype/writeable");
             EMSESP::webAPIService.webAPIService(&request);
             request.url("/api/boiler/flamecurr/value");
+            EMSESP::webAPIService.webAPIService(&request);
+
+            // thermostat
+            request.url("/api/thermostat");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/thermostat/hc1/values");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/thermostat/hc1/seltemp");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/thermostat/hc2/seltemp");
             EMSESP::webAPIService.webAPIService(&request);
 
             // custom
@@ -1044,6 +1041,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             request.url("/api/system/settings/locale");
             EMSESP::webAPIService.webAPIService(&request);
             request.url("/api/system/fetch");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("api/system/network/values");
             EMSESP::webAPIService.webAPIService(&request);
 
             // scheduler
