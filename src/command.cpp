@@ -98,7 +98,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
 
     // some commands may be prefixed with hc. dhw. or hc/ or dhw/ so extract these if they exist
     // parse_command_string returns the extracted command
-    if (device_type > EMSdevice::DeviceType::BOILER) {
+    if (device_type >= EMSdevice::DeviceType::BOILER) {
         command_p = parse_command_string(command_p, id_n);
     }
     if (command_p == nullptr) {
@@ -151,7 +151,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
                 data_p              = device_end + 1;
                 int8_t  id_d        = -1;
                 uint8_t device_type = EMSdevice::device_name_2_device_type(device_p);
-                if (device_type > EMSdevice::DeviceType::BOILER) {
+                if (device_type >= EMSdevice::DeviceType::BOILER) {
                     data_p = parse_command_string(data_p, id_d);
                 }
                 if (data_p == nullptr) {
