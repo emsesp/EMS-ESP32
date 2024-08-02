@@ -286,7 +286,7 @@ const char * Command::parse_command_string(const char * command, int8_t & id) {
 
 // check if command contains an attribute
 const char * Command::get_attribute(const char * cmd) {
-    char * breakp = strchr(cmd, '/');
+    char * breakp = (char *)strchr(cmd, '/');
     if (breakp) {
         *breakp = '\0';
         return breakp + 1;

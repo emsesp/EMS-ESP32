@@ -541,14 +541,14 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                 cmd = Command::parse_command_string(cmd, id); // extract hc or dhw
             }
             if (cmd == nullptr) {
-                cmd = device_type == EMSdevice::DeviceType::SYSTEM ? F_(info) : F_(values);
+                cmd = F_(values);
             }
 
             if (arguments.size() == 2) {
                 // no value specified, just the cmd
                 return_code = Command::call(device_type, cmd, nullptr, true, id, json);
             } else if (arguments.size() == 3) {
-                if ((strncmp(cmd, F_(info), 4) == 0) || strncmp(cmd, F_(values), 6) == 0) {
+                if (!strcmp(cmd, F_(info)) || !strcmp(cmd, F_(values))) {
                     // info has a id but no value
                     return_code = Command::call(device_type, cmd, nullptr, true, atoi(arguments.back().c_str()), json);
                 } else if (arguments[2] == "?") {
