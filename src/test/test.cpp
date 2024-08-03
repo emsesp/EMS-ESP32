@@ -1209,117 +1209,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         test("boiler");
         test("thermostat");
 
-        AsyncWebServerRequest requestX;
-        JsonDocument          docX;
-        JsonVariant           jsonX;
-
-        requestX.method(HTTP_GET);
-
-        /*
-        requestX.url("/api"); // should fail
-        EMSESP::webAPIService.webAPIService(&requestX);
-        return;
-        */
-
-        /*
-        requestX.url("/api/thermostat/seltemp");
-        EMSESP::webAPIService.webAPIService(&requestX);
-        return;
-        */
-
-        /*
-        requestX.url("/api/thermostat/mode/auto");
-        EMSESP::webAPIService.webAPIService(&requestX);
-        return;
-        */
-
-        /*
-        requestX.url("/api/thermostat"); // check if defaults to info
-        EMSESP::webAPIService.webAPIService(&requestX);
-        requestX.url("/api/thermostat/info");
-        EMSESP::webAPIService.webAPIService(&requestX);
-        requestX.url("/api/thermostat/values");
-        EMSESP::webAPIService.webAPIService(&requestX);
-        return;
-
-        requestX.url("/api/thermostat/mode");
-        EMSESP::webAPIService.webAPIService(&requestX);
-        return;
-        */
-
-        /*
-        requestX.url("/api/system"); // check if defaults to info
-        EMSESP::webAPIService.webAPIService(&requestX);
-        emsesp::EMSESP::logger().notice("*");
-
-        requestX.url("/api/system/info");
-        EMSESP::webAPIService.webAPIService(&requestX);
-        emsesp::EMSESP::logger().notice("*");
-
-        requestX.url("/api/thermostat"); // check if defaults to values
-        EMSESP::webAPIService.webAPIService(&requestX);
-        emsesp::EMSESP::logger().notice("*");
-
-        requestX.url("/api/thermostat/info");
-        EMSESP::webAPIService.webAPIService(&requestX);
-        emsesp::EMSESP::logger().notice("*");
-
-        requestX.url("/api/thermostat/seltemp");
-        EMSESP::webAPIService.webAPIService(&requestX);
-        return;
-        */
-
-        /*
-        requestX.url("/api/system/restart");
-        EMSESP::webAPIService.webAPIService(&requestX);
-        return;
-        */
-
-        /*
-        requestX.url("/api/temperaturesensor/xxxx");
-        EMSESP::webAPIService.webAPIService(&requestX);
-        emsesp::EMSESP::logger().notice("****");
-        requestX.url("/api/temperaturesensor/info");
-        EMSESP::webAPIService.webAPIService(&requestX);
-        return;
-        */
-
-        /*
-        requestX.url("/api"); // should fail
-        EMSESP::webAPIService.webAPIService(&requestX);
-        */
-
-        requestX.method(HTTP_POST);
-
-        /*
-        char dataX[] = "{\"device\":\"system\", \"entity\":\"settings\"}";
-        deserializeJson(docX, dataX);
-        jsonX = docX.as<JsonVariant>();
-        requestX.url("/api");
-        EMSESP::webAPIService.webAPIService(&requestX, jsonX);
-        return;
-        */
-
-        /*
-        // char                dataX[] = "{\"value\":\"0B 88 19 19 02\"}";
-        char dataX[] = "{\"name\":\"temp\",\"value\":11}";
-        deserializeJson(docX, dataX);
-        jsonX = docX.as<JsonVariant>();
-        // requestX.url("/api/system/send");
-        requestX.url("/api/thermostat");
-        EMSESP::webAPIService.webAPIService(&requestX, jsonX);
-        return;
-        */
-
-        /*
-        char dataX[] = "{}";
-        deserializeJson(docX, dataX);
-        jsonX = docX.as<JsonVariant>();
-        requestX.url("/api/thermostat/mode/auto"); // should fail
-        EMSESP::webAPIService.webAPIService(&requestX, jsonX);
-        return;
-        */
-
         // test command parse
         int8_t       id_n;
         const char * ncmd;
@@ -1379,7 +1268,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         // Web API TESTS
         AsyncWebServerRequest request;
-
         request.method(HTTP_GET);
 
         request.url("/api/thermostat"); // check if defaults to info
