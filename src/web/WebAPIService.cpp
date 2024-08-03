@@ -64,7 +64,7 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request, JsonVariant j
 }
 
 #ifdef EMSESP_TEST
-// for test.cpp so we can invoke GETs to test the API
+// for test.cpp and unit tests so we can invoke GETs to test the API
 void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
     JsonDocument input_doc;
     parse(request, input_doc.to<JsonObject>());
@@ -134,7 +134,11 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     const char * api_data = output["api_data"];
     if (api_data) {
         request->send(200, "text/plain; charset=utf-8", api_data);
-#if defined(EMSESP_STANDALONE)
+#if defined(EMSESP_TEST)
+        // store the result so we can test with Unity later
+        storeResponse(output);
+#endif
+#if defined(EMSESP_STANDALONE) && !defined(UNITY_INCLUDE_CONFIG_H)
         Serial.printf("%sweb output: %s[%s] %s(200)%s ", COLOR_WHITE, COLOR_BRIGHT_CYAN, request->url().c_str(), COLOR_BRIGHT_GREEN, COLOR_MAGENTA);
         serializeJson(output, Serial);
         Serial.println(COLOR_RESET);
@@ -157,7 +161,11 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     request->send(response);
     api_count_++;
 
-#if defined(EMSESP_STANDALONE)
+#if defined(EMSESP_TEST)
+    // store the result so we can test with Unity later
+    storeResponse(output);
+#endif
+#if defined(EMSESP_STANDALONE) && !defined(UNITY_INCLUDE_CONFIG_H)
     Serial.printf("%sweb output: %s[%s]", COLOR_WHITE, COLOR_BRIGHT_CYAN, request->url().c_str());
     Serial.printf(" %s(%d)%s ", ret_codes[return_code] == 200 ? COLOR_BRIGHT_GREEN : COLOR_BRIGHT_RED, ret_codes[return_code], COLOR_YELLOW);
     serializeJson(output, Serial);
@@ -220,5 +228,20 @@ void WebAPIService::getEntities(AsyncWebServerRequest * request) {
     response->setLength();
     request->send(response);
 }
+
+#if defined(EMSESP_TEST)
+// store the result so we can test with Unity later
+static JsonDocument storeResponseDoc_;
+
+void WebAPIService::storeResponse(JsonObject response) {
+    storeResponseDoc_.clear();       // clear it, so can only recall once
+    storeResponseDoc_.add(response); // add the object to our doc
+}
+const char * WebAPIService::getResponse() {
+    static std::string buffer;
+    serializeJson(storeResponseDoc_, buffer);
+    return buffer.c_str();
+}
+#endif
 
 } // namespace emsesp

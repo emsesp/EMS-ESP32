@@ -35,8 +35,12 @@ using mqtt_sub_function_p = std::function<bool(const char * message)>;
 
 class Mqtt {
   public:
-    enum discoveryType : uint8_t { HOMEASSISTANT, DOMOTICZ, DOMOTICZ_LATEST };
-    enum entityFormat : uint8_t { SINGLE_LONG, SINGLE_SHORT, MULTI_SHORT, SINGLE_OLD, MULTI_OLD };
+    enum discoveryType : uint8_t { HOMEASSISTANT = 0, DOMOTICZ, DOMOTICZ_LATEST };
+
+    // SINGLE_SHORT (1) and MULTI_SHORT (2) are the latest. Default is SINGLE_SHORT.
+    // SINGLE_LONG (0) is v3.4 only
+    // SINGLE_OLD (3) and MULTI_OLD (4) are for backwards compatibility with the older v3.6 style. https://github.com/emsesp/EMS-ESP32/issues/1714
+    enum entityFormat : uint8_t { SINGLE_LONG = 0, SINGLE_SHORT, MULTI_SHORT, SINGLE_OLD, MULTI_OLD };
 
     void loop();
     void start();

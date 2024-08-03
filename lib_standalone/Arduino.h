@@ -32,6 +32,10 @@
 #include <iostream>
 
 #include "WString.h"
+#include "Network.h"
+
+extern ETHClass  ETH;
+extern WiFiClass WiFi;
 
 typedef double double_t;
 
@@ -86,6 +90,21 @@ int vsnprintf_P(char * str, size_t size, const char * format, va_list ap);
 #define pgm_read_float(addr) (*(const float *)(addr))
 #define pgm_read_ptr(addr) (*(const void **)(addr))
 
+// #if defined(__linux__)
+#include <chrono> // NOLINT [build/c++11]
+#include <thread> // NOLINT [build/c++11] for yield()
+#define millis() std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count()
+// #endif
+
+int64_t esp_timer_get_time();
+
+void delay(unsigned long millis);
+
+void yield(void);
+
+void setup(void);
+void loop(void);
+
 class Print;
 
 class NativeConsole : public Stream {
@@ -94,6 +113,11 @@ class NativeConsole : public Stream {
     }
 
     int available() override {
+#if defined(_WIN32)
+        // added for EMS-ESP
+        return 1;
+#else
+
         if (peek_ != -1)
             return 1;
 
@@ -107,6 +131,7 @@ class NativeConsole : public Stream {
         timeout.tv_usec = 1000;
 
         return ::select(STDIN_FILENO + 1, &rfds, NULL, NULL, &timeout) > 0 ? 1 : 0;
+#endif
     }
 
     int read() override {
@@ -163,27 +188,6 @@ class NativeConsole : public Stream {
     int peek_ = -1;
 };
 
-#include "Network.h"
-
 extern NativeConsole Serial;
-extern ETHClass      ETH;
-extern WiFiClass     WiFi;
-
-// unsigned long millis();
-
-#if defined(__linux__)
-#include <chrono> // NOLINT [build/c++11]
-#include <thread> // NOLINT [build/c++11] for yield()
-#define millis() std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count()
-#endif
-
-int64_t esp_timer_get_time();
-
-void delay(unsigned long millis);
-
-void yield(void);
-
-void setup(void);
-void loop(void);
 
 #endif

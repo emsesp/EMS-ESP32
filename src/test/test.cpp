@@ -265,6 +265,8 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
 
 // These next tests are run from the Consol via the test command, so inherit the Shell
 void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const std::string & id1_s, const std::string & id2_s) {
+    bool ok = false; // default tests fail
+
     shell.add_flags(CommandFlags::ADMIN); // switch to su
 
     // init stuff
@@ -296,8 +298,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     if (!id2_s.empty()) {
         id2 = Helpers::atoint(id2_s.c_str());
     }
-
-    bool ok = false;
 
     // e.g. "test add 0x10 172"
     if (command == "add") {
@@ -638,11 +638,11 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
                 Serial.print(COLOR_BRIGHT_MAGENTA);
                 serializeJson(doc, Serial);
                 Serial.print(COLOR_RESET);
-                Serial.println();
-                Serial.print(" measureMsgPack=");
-                Serial.print(measureMsgPack(doc));
-                Serial.print(" measureJson=");
-                Serial.print(measureJson(doc));
+                // Serial.println();
+                // Serial.print(" measureMsgPack=");
+                // Serial.print(measureMsgPack(doc));
+                // Serial.print(" measureJson=");
+                // Serial.print(measureJson(doc));
                 Serial.println(" **");
             }
         }
@@ -964,7 +964,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         // load devices
         test("boiler");
         test("thermostat");
-        // test("2thermostats");
 
         if (single) {
             // run dedicated tests only
@@ -973,28 +972,14 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             EMSESP::temperaturesensor_.test();      // add temperature sensors
             EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
 
-            shell.invoke_command("call system fetch");
-            request.url("/api/system/fetch");
+            // shell.invoke_command("call system fetch");
+            // request.url("/api/system/fetch");
+            // EMSESP::webAPIService.webAPIService(&request);
+
+            request.url("/api/thermostat");
             EMSESP::webAPIService.webAPIService(&request);
-
-            // request.url("/api/system");
-            // EMSESP::webAPIService.webAPIService(&request);
-            // request.url("/api/system/system/version");
-            // EMSESP::webAPIService.webAPIService(&request);
-            // request.url("/api/system/bad");
-            // EMSESP::webAPIService.webAPIService(&request);
-
-            // request.url("/api/boiler");
-            // EMSESP::webAPIService.webAPIService(&request);
-            // request.url("/api/boiler/bad");
-            // EMSESP::webAPIService.webAPIService(&request);
-
-            // request.url("/api/custom");
-            // EMSESP::webAPIService.webAPIService(&request);
-            // request.url("/api/custom/seltemp");
-            // EMSESP::webAPIService.webAPIService(&request);
-            // request.url("/api/custom/bad");
-            // EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/thermostat/hc1");
+            EMSESP::webAPIService.webAPIService(&request);
 
         } else {
             EMSESP::webCustomEntityService.test();  // custom entities
@@ -1023,9 +1008,21 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             EMSESP::webAPIService.webAPIService(&request);
             request.url("/api/boiler/outdoortemp");
             EMSESP::webAPIService.webAPIService(&request);
-            request.url("/api/boiler/dhw/chargetype/writeable");
+            request.url("/api/boiler/dhw/chargetype");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/boiler/dhw.chargetype/writeable");
             EMSESP::webAPIService.webAPIService(&request);
             request.url("/api/boiler/flamecurr/value");
+            EMSESP::webAPIService.webAPIService(&request);
+
+            // thermostat
+            request.url("/api/thermostat");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/thermostat/hc1/values");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/thermostat/hc1/seltemp");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("/api/thermostat/hc2/seltemp");
             EMSESP::webAPIService.webAPIService(&request);
 
             // custom
@@ -1044,6 +1041,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             request.url("/api/system/settings/locale");
             EMSESP::webAPIService.webAPIService(&request);
             request.url("/api/system/fetch");
+            EMSESP::webAPIService.webAPIService(&request);
+            request.url("api/system/network/values");
             EMSESP::webAPIService.webAPIService(&request);
 
             // scheduler
@@ -1210,117 +1209,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         test("boiler");
         test("thermostat");
 
-        AsyncWebServerRequest requestX;
-        JsonDocument          docX;
-        JsonVariant           jsonX;
-
-        requestX.method(HTTP_GET);
-
-        /*
-        requestX.url("/api"); // should fail
-        EMSESP::webAPIService.webAPIService(&requestX);
-        return;
-        */
-
-        /*
-        requestX.url("/api/thermostat/seltemp");
-        EMSESP::webAPIService.webAPIService(&requestX);
-        return;
-        */
-
-        /*
-        requestX.url("/api/thermostat/mode/auto");
-        EMSESP::webAPIService.webAPIService(&requestX);
-        return;
-        */
-
-        /*
-        requestX.url("/api/thermostat"); // check if defaults to info
-        EMSESP::webAPIService.webAPIService(&requestX);
-        requestX.url("/api/thermostat/info");
-        EMSESP::webAPIService.webAPIService(&requestX);
-        requestX.url("/api/thermostat/values");
-        EMSESP::webAPIService.webAPIService(&requestX);
-        return;
-
-        requestX.url("/api/thermostat/mode");
-        EMSESP::webAPIService.webAPIService(&requestX);
-        return;
-        */
-
-        /*
-        requestX.url("/api/system"); // check if defaults to info
-        EMSESP::webAPIService.webAPIService(&requestX);
-        emsesp::EMSESP::logger().notice("*");
-
-        requestX.url("/api/system/info");
-        EMSESP::webAPIService.webAPIService(&requestX);
-        emsesp::EMSESP::logger().notice("*");
-
-        requestX.url("/api/thermostat"); // check if defaults to values
-        EMSESP::webAPIService.webAPIService(&requestX);
-        emsesp::EMSESP::logger().notice("*");
-
-        requestX.url("/api/thermostat/info");
-        EMSESP::webAPIService.webAPIService(&requestX);
-        emsesp::EMSESP::logger().notice("*");
-
-        requestX.url("/api/thermostat/seltemp");
-        EMSESP::webAPIService.webAPIService(&requestX);
-        return;
-        */
-
-        /*
-        requestX.url("/api/system/restart");
-        EMSESP::webAPIService.webAPIService(&requestX);
-        return;
-        */
-
-        /*
-        requestX.url("/api/temperaturesensor/xxxx");
-        EMSESP::webAPIService.webAPIService(&requestX);
-        emsesp::EMSESP::logger().notice("****");
-        requestX.url("/api/temperaturesensor/info");
-        EMSESP::webAPIService.webAPIService(&requestX);
-        return;
-        */
-
-        /*
-        requestX.url("/api"); // should fail
-        EMSESP::webAPIService.webAPIService(&requestX);
-        */
-
-        requestX.method(HTTP_POST);
-
-        /*
-        char dataX[] = "{\"device\":\"system\", \"entity\":\"settings\"}";
-        deserializeJson(docX, dataX);
-        jsonX = docX.as<JsonVariant>();
-        requestX.url("/api");
-        EMSESP::webAPIService.webAPIService(&requestX, jsonX);
-        return;
-        */
-
-        /*
-        // char                dataX[] = "{\"value\":\"0B 88 19 19 02\"}";
-        char dataX[] = "{\"name\":\"temp\",\"value\":11}";
-        deserializeJson(docX, dataX);
-        jsonX = docX.as<JsonVariant>();
-        // requestX.url("/api/system/send");
-        requestX.url("/api/thermostat");
-        EMSESP::webAPIService.webAPIService(&requestX, jsonX);
-        return;
-        */
-
-        /*
-        char dataX[] = "{}";
-        deserializeJson(docX, dataX);
-        jsonX = docX.as<JsonVariant>();
-        requestX.url("/api/thermostat/mode/auto"); // should fail
-        EMSESP::webAPIService.webAPIService(&requestX, jsonX);
-        return;
-        */
-
         // test command parse
         int8_t       id_n;
         const char * ncmd;
@@ -1380,7 +1268,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         // Web API TESTS
         AsyncWebServerRequest request;
-
         request.method(HTTP_GET);
 
         request.url("/api/thermostat"); // check if defaults to info

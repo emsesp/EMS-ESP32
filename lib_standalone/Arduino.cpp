@@ -17,7 +17,6 @@
 
 #ifdef EMSESP_STANDALONE
 
-
 #include <stdio.h>
 #include <stdarg.h>
 #include <iostream>
@@ -57,8 +56,11 @@ void ClientLoop(void * arg) {
     }
 }
 
+#ifndef UNITY_INCLUDE_CONFIG_H
+// we have another main that overrides this when using Unity in test_api.cpp
 int main(int argc __attribute__((unused)), char * argv[] __attribute__((unused))) {
     setup();
+
     std::thread t = std::thread(ClientLoop, nullptr);
     // while (millis() <= 10 * 1000) {
     while (1) {
@@ -69,10 +71,7 @@ int main(int argc __attribute__((unused)), char * argv[] __attribute__((unused))
     t.join();
     return EXIT_SUCCESS;
 }
-
-// unsigned long millis() {
-//     return __millis;
-// }
+#endif
 
 int64_t esp_timer_get_time() {
     return __millis;
@@ -139,13 +138,13 @@ uint32_t analogReadMilliVolts(uint8_t pin) {
     return 0;
 }
 
-void   analogSetPinAttenuation(uint8_t pin, adc_attenuation_t attenuation){};
-void   analogSetAttenuation(adc_attenuation_t attenuation){};
-void   dacWrite(uint8_t pin, uint8_t value){};
+void   analogSetPinAttenuation(uint8_t pin, adc_attenuation_t attenuation) {};
+void   analogSetAttenuation(adc_attenuation_t attenuation) {};
+void   dacWrite(uint8_t pin, uint8_t value) {};
 double ledcSetup(uint8_t chan, double freq, uint8_t bit_num) {
     return 0;
 };
-void ledcAttachPin(uint8_t pin, uint8_t chan){};
-void ledcWrite(uint8_t chan, uint32_t duty){};
+void ledcAttachPin(uint8_t pin, uint8_t chan) {};
+void ledcWrite(uint8_t chan, uint32_t duty) {};
 
 #endif

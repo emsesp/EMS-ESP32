@@ -89,24 +89,24 @@ class AsyncJsonResponse : public AsyncAbstractResponse {
     }
 };
 
-class PrettyAsyncJsonResponse : public AsyncJsonResponse {
-  public:
-    PrettyAsyncJsonResponse(bool isArray = false)
-        : AsyncJsonResponse{isArray} {
-    }
-    size_t setLength() {
-        _contentLength = measureJsonPretty(_root);
-        if (_contentLength) {
-            _isValid = true;
-        }
-        return _contentLength;
-    }
-    size_t _fillBuffer(uint8_t * data, size_t len) {
-        ChunkPrint dest(data, _sentLength, len);
-        serializeJsonPretty(_root, dest);
-        return len;
-    }
-};
+// class PrettyAsyncJsonResponse : public AsyncJsonResponse {
+//   public:
+//     PrettyAsyncJsonResponse(bool isArray = false)
+//         : AsyncJsonResponse{isArray} {
+//     }
+//     size_t setLength() {
+//         _contentLength = measureJsonPretty(_root);
+//         if (_contentLength) {
+//             _isValid = true;
+//         }
+//         return _contentLength;
+//     }
+//     size_t _fillBuffer(uint8_t * data, size_t len) {
+//         ChunkPrint dest(data, _sentLength, len);
+//         serializeJsonPretty(_root, dest);
+//         return len;
+//     }
+// };
 
 typedef std::function<void(AsyncWebServerRequest * request, JsonVariant json)> ArJsonRequestHandlerFunction;
 

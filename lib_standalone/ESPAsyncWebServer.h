@@ -11,8 +11,8 @@ class AsyncWebServer;
 class AsyncWebServerRequest;
 class AsyncWebServerResponse;
 class AsyncJsonResponse;
-class PrettyAsyncJsonResponse;
-class MsgpackAsyncJsonResponse;
+// class PrettyAsyncJsonResponse;
+// class MsgpackAsyncJsonResponse;
 class AsyncEventSource;
 
 class AsyncWebParameter {
@@ -76,9 +76,9 @@ class AsyncWebServerRequest {
   public:
     void * _tempObject;
 
-    AsyncWebServerRequest(AsyncWebServer *, AsyncClient *){};
-    AsyncWebServerRequest(){};
-    ~AsyncWebServerRequest(){};
+    AsyncWebServerRequest(AsyncWebServer *, AsyncClient *) {};
+    AsyncWebServerRequest() {};
+    ~AsyncWebServerRequest() {};
 
     AsyncClient * client() {
         return _client;
@@ -99,9 +99,11 @@ class AsyncWebServerRequest {
     }
 
     void send(AsyncWebServerResponse * response) {};
+
     void send(AsyncJsonResponse * response) {};
-    void send(PrettyAsyncJsonResponse * response) {};
-    void send(MsgpackAsyncJsonResponse * response) {};
+
+    // void send(PrettyAsyncJsonResponse * response) {};
+    // void send(MsgpackAsyncJsonResponse * response) {};
     void send(int code, const String & contentType = String(), const String & content = String()) {};
     void send(int code, const String & contentType, const __FlashStringHelper *) {};
 
@@ -205,6 +207,17 @@ class AsyncWebHandler {
 };
 
 class AsyncWebServerResponse {
+  protected:
+    int    _code;
+    String _contentType;
+    size_t _contentLength;
+    bool   _sendContentLength;
+    bool   _chunked;
+    size_t _headLength;
+    size_t _sentLength;
+    size_t _ackedLength;
+    size_t _writtenLength;
+
   public:
     AsyncWebServerResponse();
     virtual ~AsyncWebServerResponse();
@@ -221,9 +234,9 @@ class AsyncWebServer {
 
   public:
     AsyncWebServer(uint16_t port)
-        : _server(port){};
+        : _server(port) {};
 
-    ~AsyncWebServer(){};
+    ~AsyncWebServer() {};
 
     void begin() {};
     void end();
@@ -239,8 +252,8 @@ class AsyncWebServer {
 
 class AsyncEventSource : public AsyncWebHandler {
   public:
-    AsyncEventSource(const String & url){};
-    ~AsyncEventSource(){};
+    AsyncEventSource(const String & url) {};
+    ~AsyncEventSource() {};
 
     size_t count() const {
         return 1;

@@ -1207,19 +1207,19 @@ bool System::check_upgrade(bool factory_settings) {
 
         // if we're coming from 3.4.4 or 3.5.0b14 which had no version stored then we need to apply new settings
         if (missing_version) {
-            LOG_INFO("Upgrade: Setting MQTT Entity ID format to v3.4 format");
+            LOG_INFO("Upgrade: Setting MQTT Entity ID format to older v3.4 format");
             EMSESP::esp8266React.getMqttSettingsService()->update([&](MqttSettings & mqttSettings) {
-                mqttSettings.entity_format = 0; // use old Entity ID format from v3.4
+                mqttSettings.entity_format = Mqtt::entityFormat::SINGLE_LONG; // use old Entity ID format from v3.4
                 return StateUpdateResult::CHANGED;
             });
         } else if (settings_version.major() == 3 && settings_version.minor() <= 6) {
             LOG_INFO("Upgrade: Setting MQTT Entity ID format to v3.6 format");
             EMSESP::esp8266React.getMqttSettingsService()->update([&](MqttSettings & mqttSettings) {
                 if (mqttSettings.entity_format == 1) {
-                    mqttSettings.entity_format = 3; // use old Entity ID format from v3.6
+                    mqttSettings.entity_format = Mqtt::entityFormat::SINGLE_OLD; // use old Entity ID format from v3.6
                     return StateUpdateResult::CHANGED;
                 } else if (mqttSettings.entity_format == 2) {
-                    mqttSettings.entity_format = 4; // use old Entity ID format from v3.6
+                    mqttSettings.entity_format = Mqtt::entityFormat::MULTI_OLD; // use old Entity ID format from v3.6
                     return StateUpdateResult::CHANGED;
                 }
                 return StateUpdateResult::UNCHANGED;
@@ -1250,6 +1250,7 @@ bool System::check_upgrade(bool factory_settings) {
             settings.version = EMSESP_APP_VERSION;
             return StateUpdateResult::CHANGED;
         });
+        LOG_INFO("Upgrade: Setting version to %s", EMSESP_APP_VERSION);
         return true; // need reboot
     }
 
@@ -1540,9 +1541,16 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     }
 
     // API Status
-    node             = output["api"].to<JsonObject>();
+    node = output["api"].to<JsonObject>();
+
+// if we're generating test data for Unit Tests we dont want to count these API calls as it will pollute the data response
+#if defined(UNITY_INCLUDE_CONFIG_H)
+    node["APICalls"] = 0;
+    node["APIFails"] = 0;
+#else
     node["APICalls"] = WebAPIService::api_count();
     node["APIFails"] = WebAPIService::api_fails();
+#endif
 
     // EMS Bus Status
     node = output["bus"].to<JsonObject>();
@@ -1610,8 +1618,12 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         node["analogEnabled"]   = settings.analog_enabled;
         node["telnetEnabled"]   = settings.telnet_enabled;
         node["maxWebLogBuffer"] = settings.weblog_buffer;
-        node["webLogBuffer"]    = EMSESP::webLogService.num_log_messages();
-        node["modbusEnabled"]   = settings.modbus_enabled;
+#if defined(UNITY_INCLUDE_CONFIG_H)
+        node["webLogBuffer"] = 0;
+#else
+        node["webLogBuffer"] = EMSESP::webLogService.num_log_messages();
+#endif
+        node["modbusEnabled"] = settings.modbus_enabled;
     });
 
     // Devices - show EMS devices if we have any
@@ -1798,9 +1810,15 @@ String System::getBBQKeesGatewayDetails() {
     if (!EMSESP::nvs_.isKey("mfg")) {
         return "";
     }
-    if (EMSESP::nvs_.getString("mfg") != "BBQKees") {
-        return "";
+
+    // mfg can be either "BBQKees" or "BBQKees Electronics"
+    auto mfg = EMSESP::nvs_.getString("mfg");
+    if (mfg) {
+        if (!mfg.startsWith("BBQKees")) {
+            return "";
+        }
     }
+
     return "BBQKees Gateway Model " + EMSESP::nvs_.getString("model") + " v" + EMSESP::nvs_.getString("hwrevision") + "/" + EMSESP::nvs_.getString("batch");
 #else
     return "";
