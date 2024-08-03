@@ -572,17 +572,7 @@ void AnalogSensor::publish_values(const bool force) {
                     snprintf(topic, sizeof(topic), "switch/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
                     snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), F_(analogsensor), sensor.name().c_str());
                     config["cmd_t"] = command_topic;
-                    if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                        config["pl_on"]  = true;
-                        config["pl_off"] = false;
-                    } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-                        config["pl_on"]  = 1;
-                        config["pl_off"] = 0;
-                    } else {
-                        char result[12];
-                        config["pl_on"]  = Helpers::render_boolean(result, true);
-                        config["pl_off"] = Helpers::render_boolean(result, false);
-                    }
+                    Mqtt::add_ha_bool(config);
                 } else if (sensor.type() == AnalogType::DIGITAL_OUT) { // DAC
                     snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
                     snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), F_(analogsensor), sensor.name().c_str());
@@ -608,17 +598,7 @@ void AnalogSensor::publish_values(const bool force) {
                     // config["step"]  = sensor.factor();
                 } else if (sensor.type() == AnalogType::DIGITAL_IN) {
                     snprintf(topic, sizeof(topic), "binary_sensor/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
-                    if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                        config["pl_on"]  = true;
-                        config["pl_off"] = false;
-                    } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-                        config["pl_on"]  = 1;
-                        config["pl_off"] = 0;
-                    } else {
-                        char result[12];
-                        config["pl_on"]  = Helpers::render_boolean(result, true);
-                        config["pl_off"] = Helpers::render_boolean(result, false);
-                    }
+                    Mqtt::add_ha_bool(config);
                 } else {
                     snprintf(topic, sizeof(topic), "sensor/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
                     config["stat_cla"] = "measurement";

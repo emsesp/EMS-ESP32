@@ -37,8 +37,8 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(pumpMode), 18, 1), // pumpmode
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(pumpCharacter), 19, 1), // pumpcharacter
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(pumpDelay), 20, 1), // pumpdelay
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(setFlowTemp), 21, 1), // setflowtemp
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(setBurnPow), 22, 1), // setburnpow
+    // REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(setFlowTemp), 21, 1), // setflowtemp
+    // REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(setBurnPow), 22, 1), // setburnpow
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(selBurnPow), 23, 1), // selburnpow
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(curBurnPow), 24, 1), // curburnpow
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(burnStarts), 25, 2), // burnstarts
@@ -239,7 +239,7 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwTempOK), 60, 1), // tempok
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwActive), 61, 1), // active
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(ww3wayValve), 62, 1), // 3wayvalve
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwSetPumpPower), 63, 1), // setpumppower
+    // REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwSetPumpPower), 63, 1), // setpumppower
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwMixerTemp), 64, 1), // mixertemp
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(cylMiddleTemp), 65, 1), // cylmiddletemp
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwStarts), 66, 2), // starts

@@ -614,7 +614,7 @@ std::string compute(const std::string & expr) {
         if (DeserializationError::Ok == deserializeJson(doc, cmd)) {
             HTTPClient  http;
             std::string url = doc["url"] | "";
-            if (!url.find("http") && http.begin(url.c_str())) {
+            if (http.begin(url.c_str())) {
                 int httpResult = 0;
                 for (JsonPair p : doc["header"].as<JsonObject>()) {
                     http.addHeader(p.key().c_str(), p.value().as<std::string>().c_str());

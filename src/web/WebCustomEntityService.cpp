@@ -405,17 +405,7 @@ void WebCustomEntityService::publish(const bool force) {
 
             if (entityItem.value_type == DeviceValueType::BOOL) {
                 // applies to both Binary Sensor (read only) and a Switch (for a command)
-                if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                    config["pl_on"]  = true;
-                    config["pl_off"] = false;
-                } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-                    config["pl_on"]  = 1;
-                    config["pl_off"] = 0;
-                } else {
-                    char result[12];
-                    config["pl_on"]  = Helpers::render_boolean(result, true);
-                    config["pl_off"] = Helpers::render_boolean(result, false);
-                }
+                Mqtt::add_ha_bool(config);
             }
 
             Mqtt::add_ha_uom(config.as<JsonObject>(), entityItem.value_type, entityItem.uom); // add uom
