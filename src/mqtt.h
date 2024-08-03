@@ -235,6 +235,7 @@ class Mqtt {
                                        const char *   cond1    = nullptr,
                                        const char *   cond2    = nullptr,
                                        const char *   negcond  = nullptr);
+    static void add_ha_bool(JsonDocument & config);
 
   private:
     static uuid::log::Logger logger_;

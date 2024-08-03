@@ -1113,19 +1113,8 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         // applies to both Binary Sensor (read only) and a Switch (for a command)
         // has no unit of measure or icon
         if (type == DeviceValueType::BOOL) {
-            if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                doc["pl_on"]  = true;
-                doc["pl_off"] = false;
-                snprintf(sample_val, sizeof(sample_val), "false");
-            } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-                doc["pl_on"]  = 1;
-                doc["pl_off"] = 0;
-            } else {
-                char result[12];
-                doc["pl_on"]  = Helpers::render_boolean(result, true);
-                doc["pl_off"] = Helpers::render_boolean(result, false);
-                snprintf(sample_val, sizeof(sample_val), "'%s'", Helpers::render_boolean(result, false));
-            }
+            add_ha_bool(doc);
+            Helpers::render_boolean(sample_val, false);
         }
         doc["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else " + sample_val + "}}";
 
@@ -1446,6 +1435,22 @@ void Mqtt::add_ha_sections_to_doc(const char *   name,
         }
 
         config["avty_mode"] = "all";
+    }
+}
+
+void Mqtt::add_ha_bool(JsonDocument & config) {
+    const char * pl_on  = "pl_on";
+    const char * pl_off = "pl_off";
+    if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
+        config[pl_on]  = true;
+        config[pl_off] = false;
+    } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
+        config[pl_on]  = 1;
+        config[pl_off] = 0;
+    } else {
+        char result[12];
+        config[pl_on]  = Helpers::render_boolean(result, true);
+        config[pl_off] = Helpers::render_boolean(result, false);
     }
 }
 

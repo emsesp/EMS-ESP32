@@ -202,17 +202,7 @@ void Shower::set_shower_state(bool state, bool force) {
         snprintf(stat_t, sizeof(stat_t), "%s/shower_active", Mqtt::base().c_str());
         doc["stat_t"] = stat_t;
 
-        if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-            doc["pl_on"]  = "true";
-            doc["pl_off"] = "false";
-        } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-            doc["pl_on"]  = 1;
-            doc["pl_off"] = 0;
-        } else {
-            char result[12];
-            doc["pl_on"]  = Helpers::render_boolean(result, true);
-            doc["pl_off"] = Helpers::render_boolean(result, false);
-        }
+        Mqtt::add_ha_bool(doc);
 
         Mqtt::add_ha_sections_to_doc("shower", stat_t, doc, true); // create first dev & ids
 
