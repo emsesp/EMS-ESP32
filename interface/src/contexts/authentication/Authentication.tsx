@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 import * as AuthenticationApi from 'api/authentication';
 import { ACCESS_TOKEN } from 'api/endpoints';
 
-import { useRequest } from 'alova';
+import { useRequest } from 'alova/client';
 import { LoadingSpinner } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { Me } from 'types';

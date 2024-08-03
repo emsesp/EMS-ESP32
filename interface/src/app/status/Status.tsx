@@ -34,7 +34,7 @@ import {
 import * as SystemApi from 'api/system';
 
 import { dialogStyle } from 'CustomTheme';
-import { useRequest } from 'alova';
+import { useRequest } from 'alova/client';
 import { busConnectionStatus } from 'app/main/types';
 import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import ListMenuItem from 'components/layout/ListMenuItem';
@@ -67,9 +67,11 @@ const SystemStatus: FC = () => {
 
   const {
     data: data,
-    send: loadData,
-    error
-  } = useRequest(SystemApi.readSystemStatus, { force: true });
+    loading,
+    send: loadData
+  } = useRequest(SystemApi.readSystemStatus, {
+    initialData: []
+  });
 
   const theme = useTheme();
 
@@ -270,8 +272,12 @@ const SystemStatus: FC = () => {
   );
 
   const content = () => {
-    if (!data) {
-      return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
+    // if (!data) {
+    //   return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
+    // }
+
+    if (loading) {
+      return <>fddfdd</>;
     }
 
     return (
@@ -405,9 +411,7 @@ const SystemStatus: FC = () => {
     );
   };
 
-  return (
-    <SectionContent>{restarting ? <RestartMonitor /> : content()}</SectionContent>
-  );
+  return <SectionContent>{content()}</SectionContent>;
 };
 
 export default SystemStatus;

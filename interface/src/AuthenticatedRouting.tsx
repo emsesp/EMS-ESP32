@@ -4,6 +4,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import CustomEntities from 'app/main/CustomEntities';
 import Customization from 'app/main/Customization';
 import Devices from 'app/main/Devices';
+import Help from 'app/main/Help';
 import Modules from 'app/main/Modules';
 import Scheduler from 'app/main/Scheduler';
 import Sensors from 'app/main/Sensors';
@@ -25,8 +26,6 @@ import Status from 'app/status/Status';
 import SystemLog from 'app/status/SystemLog';
 import { Layout } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
-
-import Help from './app/main/Help';
 
 const AuthenticatedRouting: FC = () => {
   const { me } = useContext(AuthenticatedContext);

@@ -19,7 +19,7 @@ import {
   Table
 } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
-import { updateState, useRequest } from 'alova';
+import { updateState, useRequest } from 'alova/client';
 import {
   BlockNavigation,
   ButtonRow,
@@ -177,7 +177,6 @@ const Scheduler: FC = () => {
 
   const onDialogSave = (updatedItem: ScheduleItem) => {
     setDialogOpen(false);
-
     updateState('schedule', (data: ScheduleItem[]) => {
       const new_data = creating
         ? [

@@ -17,8 +17,7 @@ import {
 import * as SystemApi from 'api/system';
 import { fetchLogES } from 'api/system';
 
-import { useSSE } from '@alova/scene-react';
-import { useRequest } from 'alova';
+import { useRequest, useSSE } from 'alova/client';
 import {
   BlockFormControlLabel,
   BlockNavigation,

@@ -40,7 +40,7 @@ import {
 } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
 import { dialogStyle } from 'CustomTheme';
-import { useRequest } from 'alova';
+import { useRequest } from 'alova/client';
 import RestartMonitor from 'app/status/RestartMonitor';
 import {
   BlockNavigation,

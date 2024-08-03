@@ -3,7 +3,7 @@ import type { FC } from 'react';
 
 import * as SystemApi from 'api/system';
 
-import { useRequest } from 'alova';
+import { useRequest } from 'alova/client';
 import { FormLoader } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 

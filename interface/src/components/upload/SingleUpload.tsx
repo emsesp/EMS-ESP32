@@ -8,7 +8,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { Box, Button, LinearProgress, Typography, useTheme } from '@mui/material';
 import type { Theme } from '@mui/material';
 
-import type { Progress } from 'alova';
+import type { Progress } from 'alova/client';
 import { useI18nContext } from 'i18n/i18n-react';
 
 const getBorderColor = (theme: Theme, props: DropzoneState) => {

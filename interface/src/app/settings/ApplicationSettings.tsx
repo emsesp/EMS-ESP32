@@ -19,7 +19,7 @@ import {
 
 import * as SystemApi from 'api/system';
 
-import { useRequest } from 'alova';
+import { useRequest } from 'alova/client';
 import RestartMonitor from 'app/status/RestartMonitor';
 import type { ValidateFieldsError } from 'async-validator';
 import {

@@ -19,7 +19,7 @@ import type { Theme } from '@mui/material';
 
 import * as MqttApi from 'api/mqtt';
 
-import { useRequest } from 'alova';
+import { useRequest } from 'alova/client';
 import { ButtonRow, FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { MqttStatusType } from 'types';

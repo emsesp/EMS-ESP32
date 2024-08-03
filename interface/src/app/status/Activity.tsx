@@ -14,7 +14,7 @@ import {
   Table
 } from '@table-library/react-table-library/table';
 import { useTheme as tableTheme } from '@table-library/react-table-library/theme';
-import { useRequest } from 'alova';
+import { useRequest } from 'alova/client';
 import { ButtonRow, FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { Translation } from 'i18n/i18n-types';

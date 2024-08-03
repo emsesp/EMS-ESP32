@@ -17,7 +17,7 @@ import {
 import * as SecurityApi from 'api/security';
 
 import { dialogStyle } from 'CustomTheme';
-import { useRequest } from 'alova';
+import { useRequest } from 'alova/client';
 import { MessageBox } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 

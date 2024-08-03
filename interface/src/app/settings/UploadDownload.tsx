@@ -7,7 +7,7 @@ import { Box, Button, Divider, Link, Typography } from '@mui/material';
 import * as SystemApi from 'api/system';
 
 import * as EMSESP from 'app/main/api';
-import { useRequest } from 'alova';
+import { useRequest } from 'alova/client';
 import type { APIcall } from 'app/main/types';
 import {
   FormLoader,
@@ -150,11 +150,7 @@ const UploadDownload: FC = () => {
     saveFile(event.data, 'schedule.json');
   });
   onGetAPI((event) => {
-    saveFile(
-      event.data,
-
-      event.sendArgs[0].device + '_' + event.sendArgs[0].entity + '.txt'
-    );
+    saveFile(event.data, event.args[0].device + '_' + event.args[0].entity + '.txt');
   });
 
   const downloadSettings = async () => {

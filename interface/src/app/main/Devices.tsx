@@ -57,7 +57,7 @@ import {
 import { useTheme } from '@table-library/react-table-library/theme';
 import type { Action, State } from '@table-library/react-table-library/types/common';
 import { dialogStyle } from 'CustomTheme';
-import { useRequest } from 'alova';
+import { useRequest } from 'alova/client';
 import { ButtonRow, MessageBox, SectionContent, useLayoutTitle } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';

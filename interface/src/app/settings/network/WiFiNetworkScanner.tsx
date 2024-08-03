@@ -6,7 +6,7 @@ import { Button } from '@mui/material';
 
 import * as NetworkApi from 'api/network';
 
-import { updateState, useRequest } from 'alova';
+import { updateState, useRequest } from 'alova/client';
 import { ButtonRow, FormLoader, SectionContent } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
@@ -47,6 +47,7 @@ const WiFiNetworkScanner: FC = () => {
   onCompleteScanNetworks(() => {
     pollCount.current = 0;
     setErrorMessage(undefined);
+    // TODO fix
     updateState('listNetworks', () => undefined);
     void getNetworkList();
   });

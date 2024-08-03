@@ -7,7 +7,7 @@ import { Button, Checkbox, MenuItem } from '@mui/material';
 
 import * as NTPApi from 'api/ntp';
 
-import { updateState } from 'alova';
+import { updateState } from 'alova/client';
 import type { ValidateFieldsError } from 'async-validator';
 import {
   BlockFormControlLabel,
@@ -73,6 +73,7 @@ const NTPSettings: FC = () => {
     const changeTimeZone = (event: React.ChangeEvent<HTMLInputElement>) => {
       updateFormValue(event);
 
+      // TODO fix
       updateState('ntpSettings', (settings: NTPSettingsType) => ({
         ...settings,
         tz_label: event.target.value,

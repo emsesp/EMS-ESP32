@@ -8,6 +8,8 @@ import CircleIcon from '@mui/icons-material/Circle';
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Typography } from '@mui/material';
 
+import { alovaInstance } from 'api/endpoints';
+
 import {
   Body,
   Cell,
@@ -18,7 +20,7 @@ import {
   Table
 } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
-import { updateState, useRequest } from 'alova';
+import { updateState, useRequest } from 'alova/client';
 import {
   BlockNavigation,
   ButtonRow,
@@ -122,14 +124,19 @@ const Modules: FC = () => {
     return mi.enabled !== mi.o_enabled || mi.license !== mi.o_license;
   }
 
+  // TODO example of how to use updateState
+  // TODO see https://alova.js.org/api/states/#updatestate
   const updateModuleItem = (updatedItem: ModuleItem) => {
-    updateState('modules', (data: ModuleItem[]) => {
-      const new_data = data.map((mi) =>
-        mi.id === updatedItem.id ? { ...mi, ...updatedItem } : mi
-      );
-      setNumChanges(new_data.filter((mi) => hasModulesChanged(mi)).length);
-      return new_data;
-    });
+    updateState<ModuleItem[]>(
+      [alovaInstance.snapshots.match('modules', true)] as any,
+      (data: ModuleItem[]) => {
+        const new_data = data.map((mi) =>
+          mi.id === updatedItem.id ? { ...mi, ...updatedItem } : mi
+        );
+        setNumChanges(new_data.filter((mi) => hasModulesChanged(mi)).length);
+        return new_data;
+      }
+    );
   };
 
   const saveModules = async () => {

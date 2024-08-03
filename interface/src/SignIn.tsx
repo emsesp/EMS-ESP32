@@ -8,7 +8,7 @@ import { Box, Button, Paper, Typography } from '@mui/material';
 import * as AuthenticationApi from 'api/authentication';
 import { PROJECT_NAME } from 'api/env';
 
-import { useRequest } from 'alova';
+import { useRequest } from 'alova/client';
 import type { ValidateFieldsError } from 'async-validator';
 import {
   LanguageSelector,
