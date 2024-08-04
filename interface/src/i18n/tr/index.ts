@@ -324,6 +324,7 @@ const tr: Translation = {
   SECURITY_1: 'Add or remove users', // TODO translate
   UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', // TODO translate
   MODULES: 'Module', // TODO translate
+  MODULES_1: 'Harici modülleri etkinleştirin veya devre dışı bırakın', // TODO translate
   MODULES_UPDATED: 'Modules updated', // TODO translate
   MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
   MODULES_NONE: 'No external modules detected', // TODO translate

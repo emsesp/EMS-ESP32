@@ -324,6 +324,7 @@ const nl: Translation = {
   SECURITY_1: 'Gebruikers toevoegen of verwijderen',
   UPLOAD_DOWNLOAD_1: 'Upload-/downloadinstellingen en firmware',
   MODULES: 'Module',
+  MODULES_1: 'Externe modules activeren of deactiveren', // TODO translate
   MODULES_UPDATED: 'Modules geüpdatet', 
   MODULES_DESCRIPTION: 'Klik op de module om EMS-ESP library modules te activeren of te deactiveren',
   MODULES_NONE: 'Geen externe modules gedetecteerd',

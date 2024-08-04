@@ -1106,8 +1106,8 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     has_enumupdate(telegram, hc->reducemode, 5, 1); // 1-outdoor temp threshold, 2-room temp threshold, 3-reduced mode
     has_update(telegram, hc->reducetemp, 9);
     has_update(telegram, hc->noreducetemp, 12);
-    has_enumupdate(telegram, hc->switchProgMode, 13, 1); // 1-level, 2-absolute
     has_update(telegram, hc->remoteseltemp, 17);         // see https://github.com/emsesp/EMS-ESP32/issues/590
+    has_enumupdate(telegram, hc->switchProgMode, 19, 1); // 1-level, 2-absolute
     has_update(telegram, hc->boost, 23);
     has_update(telegram, hc->boosttime, 24);
     has_update(telegram, hc->cooling, 28);
@@ -2290,7 +2290,7 @@ bool Thermostat::set_switchProgMode(const char * value, const int8_t id) {
     if (!Helpers::value2enum(value, set, FL_(enum_switchProgMode))) {
         return false;
     }
-    write_command(set_typeids[hc->hc()], 13, set + 1, set_typeids[hc->hc()]);
+    write_command(set_typeids[hc->hc()], 19, set + 1, set_typeids[hc->hc()]);
     return true;
 }
 
@@ -4526,7 +4526,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->coolondelay, DeviceValueType::UINT8, FL_(coolondelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_coolondelay), 1, 48);
         register_device_value(tag, &hc->cooloffdelay, DeviceValueType::UINT8, FL_(cooloffdelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_cooloffdelay), 1, 48);
         register_device_value(
-            tag, &hc->switchProgMode, DeviceValueType::ENUM, FL_(enum_switchProgMode), FL_(control), DeviceValueUOM::NONE, MAKE_CF_CB(set_switchProgMode));
+            tag, &hc->switchProgMode, DeviceValueType::ENUM, FL_(enum_switchProgMode), FL_(switchProgMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_switchProgMode));
 
         break;
     case EMSdevice::EMS_DEVICE_FLAG_CRF:

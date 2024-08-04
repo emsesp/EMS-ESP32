@@ -71,7 +71,7 @@ const de: Translation = {
   TX_ISSUES: 'Tx-Probleme - versuchen Sie einen anderen Tx-Modus',
   DISCONNECTED: 'Getrennt',
   EMS_SCAN: 'Möchten Sie wirklich eine vollständige Gerätesuche des EMS-Busses starten?',
-  DATA_TRAFFIC: 'Data Traffic', // TODO Translate
+  DATA_TRAFFIC: 'Datenverkehr',
   EMS_DEVICE: 'EMS Gerät',
   SUCCESS: 'ERFOLG',
   FAIL: 'FEHLER',
@@ -91,7 +91,7 @@ const de: Translation = {
   NUM_SECONDS: '{num} Sekunde{{n}}',
   NUM_HOURS: '{num} Stunde{{n}}',
   NUM_MINUTES: '{num} Minute{{n}}',
-  APPLICATION: 'Anwendungseinstellungen',
+  APPLICATION: 'Anwendung',
   CUSTOMIZATIONS: 'Anpassungen',
   APPLICATION_RESTARTING: 'EMS-ESP startet neu',
   INTERFACE_BOARD_PROFILE: 'Interface Platinenprofil',
@@ -132,7 +132,7 @@ const de: Translation = {
   LOGGING: 'Protokollierung',
   LOG_HEX: 'EMS-Telegramme hexadezimal protokollieren',
   ENABLE_SYSLOG: 'Syslog aktivieren',
-  LOG_LEVEL: 'Log Level',
+  LOG_LEVEL: 'Protokollebene',
   MARK_INTERVAL: 'Intervallmarke',
   SECONDS: 'Sekunden',
   MINUTES: 'Minuten',
@@ -145,13 +145,13 @@ const de: Translation = {
   CUSTOMIZATIONS_FULL: 'Ausgewählte Entitäten haben das Limit überschritten. Bitte stapelweise speichern',
   CUSTOMIZATIONS_SAVED: 'Anpassungen gespeichert',
   CUSTOMIZATIONS_HELP_1: 'Wählen Sie ein Gerät aus und passen Sie die Entitäten mithilfe der Optionen an',
-  CUSTOMIZATIONS_HELP_2: 'als Favorit markieren',
+  CUSTOMIZATIONS_HELP_2: 'Als Favorit markieren',
   CUSTOMIZATIONS_HELP_3: 'Schreibaktion deaktivieren',
   CUSTOMIZATIONS_HELP_4: 'von MQTT und API ausschließen',
   CUSTOMIZATIONS_HELP_5: 'Aus dem Kontrollzentrum ausblenden',
   CUSTOMIZATIONS_HELP_6: 'Aus dem Speicher löschen',
   SELECT_DEVICE: 'Wählen Sie ein Gerät aus',
-  SET_ALL: 'setzen Sie alle',
+  SET_ALL: 'Setzen Sie alle',
   OPTIONS: 'Optionen',
   NAME: 'Name',
   CUSTOMIZATIONS_RESET: 'Möchten Sie wirklich alle Anpassungen entfernen, einschließlich der benutzerdefinierten Einstellungen der Temperatur- und Analogsensoren?',
@@ -167,7 +167,7 @@ const de: Translation = {
   FAILED: 'gescheitert',
   SUCCESSFUL: 'erfolgreich',
   SYSTEM: 'System',
-  LOG_OF: '{0} Log',
+  LOG_OF: '{0}protokoll',
   STATUS_OF: '{0} Status',
   UPLOAD_DOWNLOAD: 'Hoch-/Herunterladen',
   VERSION_ON: 'Sie verwenden derzeit',
@@ -199,7 +199,7 @@ const de: Translation = {
   ERROR: 'Unerwarteter Fehler, bitter versuchen Sie es erneut',
   TIME_SET: 'Zeit gesetzt',
   MANAGE_USERS: 'Nutzerverwaltung',
-  IS_ADMIN: 'ist Admin',
+  IS_ADMIN: 'Ist Admin',
   USER_WARNING: 'Sie müssen mindestens einen Admin-Nutzer konfigurieren',
   ADD: 'Hinzufügen',
   ACCESS_TOKEN_FOR: 'Zugangs-Token für',
@@ -317,19 +317,20 @@ const de: Translation = {
   ACTIVELOW: 'Aktiv Negativ',
   UNCHANGED: 'Unverändert',
   ALWAYS: 'Immer',
-  ACTIVITY: 'Activity', // TODO translate
-  CONFIGURE: 'Configure {0}', // TODO translate
-  SYSTEM_MEMORY: 'System Memory', // TODO translate
-  APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
-  SECURITY_1: 'Add or remove users', // TODO translate
-  UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', // TODO translate
-  MODULES: 'Module', // TODO translate
-  MODULES_UPDATED: 'Modules updated', // TODO translate
-  MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
-  MODULES_NONE: 'No external modules detected', // TODO translate
-  RENAME: 'Rename', // TODO translate
+  ACTIVITY: 'Aktivität',
+  CONFIGURE: 'Konfiguriere {0}',
+  SYSTEM_MEMORY: 'Systemspeicher',
+  APPLICATION_SETTINGS_1: 'Ändern Sie die EMS-ESP-Anwendungseinstellungen',
+  SECURITY_1: 'Benutzer hinzufügen oder entfernen',
+  UPLOAD_DOWNLOAD_1: 'Einstellungen und Firmware hochladen/herunterladen',
+  MODULES: 'Module',
+  MODULES_1: 'Externe Module aktivieren oder deaktivieren',
+  MODULES_UPDATED: 'Module aktualisiert',
+  MODULES_DESCRIPTION: 'Klicken Sie auf das Modul, um EMS-ESP-Bibliotheksmodule zu aktivieren oder zu deaktivieren',
+  MODULES_NONE: 'Keine externen Module erkannt',
+  RENAME: 'Umbenennen',
   ENABLE_MODBUS: 'Modbus aktivieren',
-  VIEW_LOG: 'View log to diagnose issues' // TODO translate
+  VIEW_LOG: 'Sehen Sie sich das Protokoll an, um Probleme zu diagnostizieren'
 };
 
 export default de;

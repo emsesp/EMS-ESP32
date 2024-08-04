@@ -39,6 +39,7 @@ class CustomEntityItem {
     uint32_t    value;
     std::string data;
     uint8_t     ram;
+    uint8_t *   raw;
 };
 
 class WebCustomEntity {

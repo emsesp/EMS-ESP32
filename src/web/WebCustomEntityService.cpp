@@ -68,6 +68,11 @@ void WebCustomEntity::read(WebCustomEntity & webEntity, JsonObject root) {
 StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & webCustomEntity) {
     // reset everything to start fresh
     Command::erase_device_commands(EMSdevice::DeviceType::CUSTOM);
+    for (CustomEntityItem & entityItem : webCustomEntity.customEntityItems) {
+        if (entityItem.raw) {
+            delete[] entityItem.raw;
+        }
+    }
     webCustomEntity.customEntityItems.clear();
     EMSESP::webCustomEntityService.ha_reset();
 
@@ -92,8 +97,10 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
                 entityItem.value_type = DeviceValueType::STRING;
                 entityItem.writeable  = true;
             }
-
-            if (entityItem.value_type == DeviceValueType::BOOL) {
+            entityItem.raw = nullptr;
+            if (entityItem.value_type == DeviceValueType::STRING) {
+                entityItem.raw = new uint8_t[(int)entityItem.factor + 1];
+            } else if (entityItem.value_type == DeviceValueType::BOOL) {
                 entityItem.value = EMS_VALUE_DEFAULT_BOOL;
             } else if (entityItem.value_type == DeviceValueType::INT8) {
                 entityItem.value = EMS_VALUE_DEFAULT_INT8;
@@ -136,19 +143,26 @@ bool WebCustomEntityService::command_setvalue(const char * value, const int8_t i
             if (entityItem.ram == 1) {
                 entityItem.data = value;
             } else if (entityItem.value_type == DeviceValueType::STRING) {
-                char telegram[84];
-                strlcpy(telegram, value, sizeof(telegram));
-                uint8_t data[EMS_MAX_TELEGRAM_LENGTH];
-                uint8_t count = 0;
-                char *  p     = strtok(telegram, " ,"); // delimiter
+                auto      telegram = strdup(value);
+                uint8_t * data     = new uint8_t[(strlen(telegram)) / 3 + 1];
+                uint8_t   count    = 0;
+                char *    p        = strtok(telegram, " ,"); // delimiter
                 while (p != nullptr) {
                     data[count++] = (uint8_t)strtol(p, 0, 16);
                     p             = strtok(nullptr, " ,");
                 }
-                if (count == 0) {
-                    return false;
+                free(telegram);
+                uint8_t   offset = entityItem.offset;
+                uint8_t * dat    = data;
+                while (count > 0) {
+                    uint8_t len = std::min((int)count, 25);
+                    EMSESP::send_write_request(entityItem.type_id, entityItem.device_id, offset, dat, len, 0);
+                    offset += len;
+                    count -= len;
+                    dat += len;
                 }
-                EMSESP::send_write_request(entityItem.type_id, entityItem.device_id, entityItem.offset, data, count, 0);
+                delete[] data;
+                return true;
             } else if (entityItem.value_type == DeviceValueType::BOOL) {
                 bool v;
                 if (!Helpers::value2bool(value, v)) {
@@ -558,18 +572,23 @@ bool WebCustomEntityService::get_value(std::shared_ptr<const Telegram> telegram)
     const uint8_t len[] = {1, 1, 1, 2, 2, 3, 3, 4};
     for (auto & entity : *customEntityItems_) {
         if (entity.value_type == DeviceValueType::STRING && telegram->type_id == entity.type_id && telegram->src == entity.device_id
-            && telegram->offset <= entity.offset && (telegram->offset + telegram->message_length) >= (entity.offset + (uint8_t)entity.factor)) {
-            auto data = Helpers::data_to_hex(telegram->message_data, (uint8_t)entity.factor);
-            if (entity.data != data) {
-                entity.data = data;
-                if (Mqtt::publish_single()) {
-                    publish_single(entity);
-                } else if (EMSESP::mqtt_.get_publish_onchange(0)) {
-                    has_change = true;
+            && telegram->offset >= entity.offset) {
+            auto length = std::min((int)telegram->offset - entity.offset + telegram->message_length, (int)entity.factor);
+            auto rest   = std::min((int)entity.factor - telegram->offset + entity.offset, (int)telegram->message_length);
+            if (rest > 0) {
+                memcpy(&entity.raw[telegram->offset - entity.offset], telegram->message_data, rest);
+                auto data = Helpers::data_to_hex(entity.raw, (uint8_t)length);
+                if (entity.data != data) {
+                    entity.data = data;
+                    if (Mqtt::publish_single()) {
+                        publish_single(entity);
+                    } else if (EMSESP::mqtt_.get_publish_onchange(0)) {
+                        has_change = true;
+                    }
+                    char cmd[COMMAND_MAX_LENGTH];
+                    snprintf(cmd, sizeof(cmd), "%s/%s", F_(custom), entity.name.c_str());
+                    EMSESP::webSchedulerService.onChange(cmd);
                 }
-                char cmd[COMMAND_MAX_LENGTH];
-                snprintf(cmd, sizeof(cmd), "%s/%s", F_(custom), entity.name.c_str());
-                EMSESP::webSchedulerService.onChange(cmd);
             }
         } else if (entity.value_type != DeviceValueType::STRING && telegram->type_id == entity.type_id && telegram->src == entity.device_id
                    && telegram->offset <= entity.offset && (telegram->offset + telegram->message_length) >= (entity.offset + len[entity.value_type])) {

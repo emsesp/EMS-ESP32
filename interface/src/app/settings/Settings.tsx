@@ -127,7 +127,7 @@ const Settings: FC = () => {
           icon={ViewModuleIcon}
           bgcolor="#efc34b"
           label="Modules"
-          text="Activate or deactivate external modules"
+          text={LL.MODULES_1()}
           to="modules"
         />
 

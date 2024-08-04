@@ -360,7 +360,7 @@ MAKE_TRANSLATION(maintenanceTime, "maintenancetime", "time to next maintenance",
 MAKE_TRANSLATION(emergencyOps, "emergencyops", "emergency operation", "Notoperation", "Noodoperatie", "Nöddrift", "praca w trybie awaryjnym", "nøddrift", "opération d'urgence", "acil durum çalışması", "operazione di emergenza", "núdzová prevádzka")
 MAKE_TRANSLATION(emergencyTemp, "emergencytemp", "emergency temperature", "Nottemperatur", "Noodtemperatuur", "Nöddrift temperatur", "temperatura w trybie awaryjnym", "nødtemperatur", "température d'urgence", "acil durum sıcaklığı", "temperatura di emergenza", "núdzová teplota")
 MAKE_TRANSLATION(pumpMode, "pumpmode", "boiler pump mode", "Kesselpumpen Modus", "Ketelpomp modus", "", "tryb pracy pompy kotła", "pumpemodus", "", "pompa modu", "modalità pompa caldaia", "režim kotlového čerpadla") // TODO translate
-MAKE_TRANSLATION(pumpCharacter, "pumpcharacter", "boiler pump characteristic", "boiler pump characteristic", "boiler pump characteristic", "boiler pump characteristic", "boiler pump characteristic", "boiler pump characteristic", "boiler pump characteristic", "boiler pump characteristic", "boiler pump characteristic", "boiler pump characteristic") // TODO translate
+MAKE_TRANSLATION(pumpCharacter, "pumpcharacter", "boiler pump characteristic", "Charakteristik der Kesselpumpe", "karakteristiek ketelpomp", "pannpumpsegenskaper", "charakterystyka pompy kotłowej", "kjelepumpekarakteristikk", "caractéristique de la pompe de la chaudière", "gazan nasosy", "caratteristica della pompa della caldaia", "charakteristika kotlového čerpadla") // TODO translate
 MAKE_TRANSLATION(headertemp, "headertemp", "low loss header", "Hydr. Weiche", "open verdeler", "", "sprzęgło hydrauliczne", "", "bouteille de déc. hydr.", "isı bloğu gidiş suyu sıc.", "comp. idr.", "nízkostratová hlavica") // TODO translate
 MAKE_TRANSLATION(heatblock, "heatblock", "heating block", "Wärmezelle", "Aanvoertemp. warmtecel", "", "blok grzewczy", "", "départ corps de chauffe", "Hid.denge kabı sıcaklığı", "mandata scamb. pr.", "vykurovací blok") // TODO translate
 
@@ -738,6 +738,7 @@ MAKE_TRANSLATION(hpcooling, "cooling", "cooling", "Kühlen", "Koelen", "Kyler", 
 MAKE_TRANSLATION(coolstart, "coolstart", "cooling starttemp", "Kühlbetrieb ab") // TODO translate
 MAKE_TRANSLATION(coolondelay, "coolondelay", "cooling on delay", "Einschaltverzögerung Kühlen") // TODO translate
 MAKE_TRANSLATION(cooloffdelay, "cooloffdelay", "cooling off delay", "Ausschaltverzögerung Kühlen") // TODO translate
+MAKE_TRANSLATION(switchProgMode, "switchprogmode", "switch program mode", "Schaltprogram Modus") // TODO translate
 
 // heatpump and RC100H
 MAKE_TRANSLATION(airHumidity, "airhumidity", "relative air humidity", "relative Luftfeuchte", "Relatieve luchtvochtigheid", "Relativ Luftfuktighet", "wilgotność względna w pomieszczeniu", "luftfuktighet", "humidité relative air", "havadaki bağıl nem", "umidità relativa aria", "relatívna vlhkosť vzduchu")

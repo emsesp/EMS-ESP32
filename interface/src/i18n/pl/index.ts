@@ -324,6 +324,7 @@ const pl: BaseTranslation = {
   SECURITY_1: 'Dodawanie i usuwanie użytkowników',
   UPLOAD_DOWNLOAD_1: 'Wysyłanie/pobieranie ustawień i firmware',
   MODULES: 'Module', // TODO translate
+  MODULES_1: 'Aktywuj lub dezaktywuj moduły zewnętrzne', // TODO translate
   MODULES_UPDATED: 'Modules updated', // TODO translate
   MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
   MODULES_NONE: 'No external modules detected', // TODO translate
