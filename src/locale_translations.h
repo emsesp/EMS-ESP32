@@ -738,6 +738,7 @@ MAKE_TRANSLATION(hpcooling, "cooling", "cooling", "Kühlen", "Koelen", "Kyler", 
 MAKE_TRANSLATION(coolstart, "coolstart", "cooling starttemp", "Kühlbetrieb ab") // TODO translate
 MAKE_TRANSLATION(coolondelay, "coolondelay", "cooling on delay", "Einschaltverzögerung Kühlen") // TODO translate
 MAKE_TRANSLATION(cooloffdelay, "cooloffdelay", "cooling off delay", "Ausschaltverzögerung Kühlen") // TODO translate
+MAKE_TRANSLATION(switchProgMode, "switchprogmode", "switch program mode", "Schaltprogram Modus") // TODO translate
 
 // heatpump and RC100H
 MAKE_TRANSLATION(airHumidity, "airhumidity", "relative air humidity", "relative Luftfeuchte", "Relatieve luchtvochtigheid", "Relativ Luftfuktighet", "wilgotność względna w pomieszczeniu", "luftfuktighet", "humidité relative air", "havadaki bağıl nem", "umidità relativa aria", "relatívna vlhkosť vzduchu")
