@@ -324,6 +324,7 @@ const de: Translation = {
   SECURITY_1: 'Benutzer hinzufügen oder entfernen',
   UPLOAD_DOWNLOAD_1: 'Einstellungen und Firmware hochladen/herunterladen',
   MODULES: 'Module',
+  MODULES_1: 'Externe Module aktivieren oder deaktivieren',
   MODULES_UPDATED: 'Module aktualisiert',
   MODULES_DESCRIPTION: 'Klicken Sie auf das Modul, um EMS-ESP-Bibliotheksmodule zu aktivieren oder zu deaktivieren',
   MODULES_NONE: 'Keine externen Module erkannt',
