@@ -126,7 +126,7 @@ const Settings: FC = () => {
         <ListMenuItem
           icon={ViewModuleIcon}
           bgcolor="#efc34b"
-          label="Modules"
+          label={LL.MODULES()}
           text={LL.MODULES_1()}
           to="modules"
         />
