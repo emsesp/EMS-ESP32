@@ -1544,7 +1544,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node = output["api"].to<JsonObject>();
 
 // if we're generating test data for Unit Tests we dont want to count these API calls as it will pollute the data response
-#if defined(UNITY_INCLUDE_CONFIG_H)
+#if defined(EMSESP_UNITY)
     node["APICalls"] = 0;
     node["APIFails"] = 0;
 #else
@@ -1618,7 +1618,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         node["analogEnabled"]   = settings.analog_enabled;
         node["telnetEnabled"]   = settings.telnet_enabled;
         node["maxWebLogBuffer"] = settings.weblog_buffer;
-#if defined(UNITY_INCLUDE_CONFIG_H)
+#if defined(EMSESP_UNITY)
         node["webLogBuffer"] = 0;
 #else
         node["webLogBuffer"] = EMSESP::webLogService.num_log_messages();

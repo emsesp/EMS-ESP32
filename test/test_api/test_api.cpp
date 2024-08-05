@@ -38,7 +38,7 @@ void         run_tests();
 const char * call_url(const char * url);
 
 // load the tests
-// this is generated from this file when compiled with -DUNITY_CREATE
+// this is generated from this file when compiled with -DEMSESP_UNITY_CREATE
 // copy the output to the test_api.h file
 #include "test_api.h" // generated test functions
 
@@ -165,7 +165,7 @@ const char * call_url(const char * url, const char * data) {
 }
 
 // capture the response and print it out as a test, auto-generates the test functions
-// use with -DUNITY_CREATE in the platformio build flags
+// use with -DEMSESP_UNITY_CREATE in the platformio build flags
 // only needs to be done once
 void capture(const char * url = nullptr) {
     static uint8_t count = 1;
@@ -263,7 +263,7 @@ int main() {
 
     add_devices(); // add devices
 
-#if defined(UNITY_CREATE)
+#if defined(EMSESP_UNITY_CREATE)
 
     // These tests should all pass....
 

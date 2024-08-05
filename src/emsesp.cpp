@@ -1539,25 +1539,22 @@ EMSESP::EMSESP()
 // the services must be loaded in the correct order
 void EMSESP::start() {
 // don't need shell if running unit tests
-#if !defined(UNITY_INCLUDE_CONFIG_H)
-
+#ifndef EMSESP_UNITY
+    // Serial console's shell
     serial_console_.begin(SERIAL_CONSOLE_BAUD_RATE);
-
     shell_ = std::make_shared<EMSESPConsole>(*this, serial_console_, true);
     shell_->maximum_log_messages(100);
-
     shell_->start();
-
 #if defined(EMSESP_DEBUG)
     shell_->log_level(uuid::log::Level::DEBUG);
 #else
     shell_->log_level(uuid::log::Level::TRACE);
 #endif
-
 #if defined(EMSESP_STANDALONE)
     shell_->add_flags(CommandFlags::ADMIN); // always start in su/admin mode when running tests
 #endif
-
+#else
+#warning "Shell is disabled when running Unity tests."
 #endif
 
 // start the file system
