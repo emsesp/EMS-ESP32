@@ -1,6 +1,6 @@
 // **************************************************************************************************
 //
-// Compile with -DUNITY_CREATE to generate the test functions
+// Compile with -DEMSESP_UNITY_CREATE to generate the test functions
 // and copy the output and paste below.
 //
 // TODO: convert output to JSON and compare, showing differences

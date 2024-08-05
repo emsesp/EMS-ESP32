@@ -138,7 +138,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
         // store the result so we can test with Unity later
         storeResponse(output);
 #endif
-#if defined(EMSESP_STANDALONE) && !defined(UNITY_INCLUDE_CONFIG_H)
+#if defined(EMSESP_STANDALONE) && !defined(EMSESP_UNITY)
         Serial.printf("%sweb output: %s[%s] %s(200)%s ", COLOR_WHITE, COLOR_BRIGHT_CYAN, request->url().c_str(), COLOR_BRIGHT_GREEN, COLOR_MAGENTA);
         serializeJson(output, Serial);
         Serial.println(COLOR_RESET);
@@ -165,7 +165,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     // store the result so we can test with Unity later
     storeResponse(output);
 #endif
-#if defined(EMSESP_STANDALONE) && !defined(UNITY_INCLUDE_CONFIG_H)
+#if defined(EMSESP_STANDALONE) && !defined(EMSESP_UNITY)
     Serial.printf("%sweb output: %s[%s]", COLOR_WHITE, COLOR_BRIGHT_CYAN, request->url().c_str());
     Serial.printf(" %s(%d)%s ", ret_codes[return_code] == 200 ? COLOR_BRIGHT_GREEN : COLOR_BRIGHT_RED, ret_codes[return_code], COLOR_YELLOW);
     serializeJson(output, Serial);

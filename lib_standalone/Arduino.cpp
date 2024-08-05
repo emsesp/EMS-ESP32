@@ -56,7 +56,7 @@ void ClientLoop(void * arg) {
     }
 }
 
-#ifndef UNITY_INCLUDE_CONFIG_H
+#ifndef EMSESP_UNITY
 // we have another main that overrides this when using Unity in test_api.cpp
 int main(int argc __attribute__((unused)), char * argv[] __attribute__((unused))) {
     setup();
