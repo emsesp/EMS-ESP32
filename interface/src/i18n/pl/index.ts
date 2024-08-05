@@ -298,6 +298,9 @@ const pl: BaseTranslation = {
   SCHEDULE: '{{H|h|}}armonogram{{|u|}}',
   TIME: '{{Czas|Godzina|}}',
   TIMER: '{{m|M|}}inutnik',
+  ONCHANGE: 'O zmianie', // TODO translate
+  CONDITION: 'Stan', // TODO translate
+  IMMEDIATE: 'Natychmiastowy', // TODO translate
   SCHEDULE_UPDATED: 'Harmonogram został uaktualniony.',
   SCHEDULE_TIMER_1: 'przy starcie',
   SCHEDULE_TIMER_2: 'co minutę',

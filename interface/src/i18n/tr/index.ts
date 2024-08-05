@@ -298,6 +298,9 @@ const tr: Translation = {
   SCHEDULE: 'Schedule', // TODO translate
   TIME: 'Time', // TODO translate
   TIMER: 'Timer', // TODO translate
+  ONCHANGE: 'Değişimde', // TODO translate
+  CONDITION: 'Durum', // TODO translate
+  IMMEDIATE: 'hemen', // TODO translate
   SCHEDULE_UPDATED: 'Schedule updated', // TODO translate
   SCHEDULE_TIMER_1: 'on startup', // TODO translate
   SCHEDULE_TIMER_2: 'every minute', // TODO translate

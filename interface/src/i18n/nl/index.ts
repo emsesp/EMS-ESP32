@@ -298,6 +298,9 @@ const nl: Translation = {
   SCHEDULE: 'Schedule',
   TIME: 'Tijd',
   TIMER: 'Timer',
+  ONCHANGE: 'Op verandering', // TODO translate
+  CONDITION: 'Voorwaarde', // TODO translate
+  IMMEDIATE: 'Onmiddellijk', // TODO translate
   SCHEDULE_UPDATED: 'Schema bijgewerkt',
   SCHEDULE_TIMER_1: 'bij het opstarten',
   SCHEDULE_TIMER_2: 'elke minuut',

@@ -208,8 +208,7 @@ const SchedulerDialog = ({
                 scheduleType === ScheduleFlag.SCHEDULE_ONCHANGE ? 'primary' : 'grey'
               }
             >
-              {/* TODO translate */}
-              On Change
+              {LL.ONCHANGE(0)}
             </Typography>
           </ToggleButton>
           <ToggleButton value={ScheduleFlag.SCHEDULE_CONDITION}>
@@ -219,8 +218,7 @@ const SchedulerDialog = ({
                 scheduleType === ScheduleFlag.SCHEDULE_CONDITION ? 'primary' : 'grey'
               }
             >
-              {/* TODO translate */}
-              Condition
+              {LL.CONDITION(0)}
             </Typography>
           </ToggleButton>
           <ToggleButton value={ScheduleFlag.SCHEDULE_IMMEDIATE}>
@@ -230,8 +228,7 @@ const SchedulerDialog = ({
                 scheduleType === ScheduleFlag.SCHEDULE_IMMEDIATE ? 'primary' : 'grey'
               }
             >
-              {/* TODO translate */}
-              Immediate
+              {LL.IMMEDIATE(0)}
             </Typography>
           </ToggleButton>
         </ToggleButtonGroup>
@@ -285,7 +282,7 @@ const SchedulerDialog = ({
             </Grid>
             <Grid container>
               {scheduleType === ScheduleFlag.SCHEDULE_DAY ||
-              scheduleType === ScheduleFlag.SCHEDULE_TIMER ? (
+                scheduleType === ScheduleFlag.SCHEDULE_TIMER ? (
                 <>
                   <TextField
                     name="time"
@@ -313,12 +310,11 @@ const SchedulerDialog = ({
                 <TextField
                   name="time"
                   label={
-                    // TODO translate
                     scheduleType === ScheduleFlag.SCHEDULE_CONDITION
-                      ? 'Condition'
+                      ? LL.CONDITION(1)
                       : scheduleType === ScheduleFlag.SCHEDULE_ONCHANGE
-                        ? 'On Change Value'
-                        : 'Immediate'
+                        ? LL.ONCHANGE(1)
+                        : LL.IMMEDIATE(1)
                   }
                   multiline
                   fullWidth
