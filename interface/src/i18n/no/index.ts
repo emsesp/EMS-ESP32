@@ -298,6 +298,9 @@ const no: Translation = {
   SCHEDULE: 'Planlegg',
   TIME: 'Tid',
   TIMER: 'Timer',
+  ONCHANGE: 'På endring', // TODO translate
+  CONDITION: 'Betingelse', // TODO translate
+  IMMEDIATE: 'Umiddelbar', // TODO translate
   SCHEDULE_UPDATED: 'Planlegger er oppdatert',
   SCHEDULE_TIMER_1: 'ved oppstart',
   SCHEDULE_TIMER_2: 'hvert minutt',

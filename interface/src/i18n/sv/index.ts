@@ -298,6 +298,9 @@ const sv: Translation = {
   SCHEDULE: 'Schedule', // TODO translate
   TIME: 'Time', // TODO translate
   TIMER: 'Timer', // TODO translate
+  ONCHANGE: 'På förändring', // TODO translate
+  CONDITION: 'Skick', // TODO translate
+  IMMEDIATE: 'Omedelbar', // TODO translate
   SCHEDULE_UPDATED: 'Schedule updated', // TODO translate
   SCHEDULE_TIMER_1: 'on startup', // TODO translate
   SCHEDULE_TIMER_2: 'every minute', // TODO translate

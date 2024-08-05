@@ -298,6 +298,9 @@ const it: Translation = {
   SCHEDULE: 'Programma',
   TIME: 'Ora',
   TIMER: 'Orologio',
+  ONCHANGE: 'Sul cambiamento', // TODO translate
+  CONDITION: 'Condizione', // TODO translate
+  IMMEDIATE: 'Immediata', // TODO translate
   SCHEDULE_UPDATED: 'Calendario aggiornato',
   SCHEDULE_TIMER_1: 'All avvio',
   SCHEDULE_TIMER_2: 'Ogni minuto',
