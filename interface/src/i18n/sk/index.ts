@@ -298,6 +298,9 @@ const sk: Translation = {
   SCHEDULE: 'Plánovač',
   TIME: 'Čas',
   TIMER: 'Časovač',
+  ONCHANGE: 'Na zmenu', // TODO translate
+  CONDITION: 'Podmienka', // TODO translate
+  IMMEDIATE: 'Okamžitá', // TODO translate
   SCHEDULE_UPDATED: 'Plánovanie aktualizované',
   SCHEDULE_TIMER_1: 'pri spustení',
   SCHEDULE_TIMER_2: 'každú minútu',
