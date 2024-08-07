@@ -85,7 +85,7 @@ void Shell::stop() {
 
         blocking_data->stop_ = true;
     } else {
-        if (running()) {
+        if (running() && !has_flags(CommandFlags::LOCAL)) { // do not close local shell
             stopped_ = true;
             stopped();
         }
