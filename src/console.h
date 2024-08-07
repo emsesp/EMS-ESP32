@@ -32,8 +32,6 @@
 
 namespace emsesp {
 
-enum CommandFlags : uint8_t { USER = 0, ADMIN = (1 << 0), LOCAL = (1 << 1) };
-
 enum ShellContext : uint8_t { MAIN = 0, SYSTEM, END };
 
 class EMSESP;

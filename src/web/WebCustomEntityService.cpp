@@ -541,7 +541,7 @@ void WebCustomEntityService::fetch() {
     const uint8_t len[] = {1, 1, 1, 2, 2, 3, 3, 4};
 
     for (auto & entity : *customEntityItems_) {
-        if (entity.device_id > 0 && entity.type_id > 0) { // ths excludes also RAM type
+        if (entity.device_id > 0 && entity.type_id > 0) { // this excludes also RAM type
             bool    needFetch  = true;
             uint8_t fetchblock = entity.type_id > 0x0FF ? 25 : 27;
             uint8_t start      = entity.offset % fetchblock;
@@ -572,11 +572,17 @@ bool WebCustomEntityService::get_value(std::shared_ptr<const Telegram> telegram)
     const uint8_t len[] = {1, 1, 1, 2, 2, 3, 3, 4};
     for (auto & entity : *customEntityItems_) {
         if (entity.value_type == DeviceValueType::STRING && telegram->type_id == entity.type_id && telegram->src == entity.device_id
-            && telegram->offset >= entity.offset) {
+            && (telegram->offset >= entity.offset || entity.offset < telegram->offset + telegram->message_length)) {
+            auto message_length = telegram->message_length;
+            auto message_data   = telegram->message_data;
+            if (telegram->offset < entity.offset) {
+                message_data = &telegram->message_data[entity.offset - telegram->offset];
+                message_length -= entity.offset - telegram->offset;
+            }
             auto length = std::min((int)telegram->offset - entity.offset + telegram->message_length, (int)entity.factor);
-            auto rest   = std::min((int)entity.factor - telegram->offset + entity.offset, (int)telegram->message_length);
+            auto rest   = std::min((int)entity.factor - telegram->offset + entity.offset, (int)message_length);
             if (rest > 0) {
-                memcpy(&entity.raw[telegram->offset - entity.offset], telegram->message_data, rest);
+                memcpy(&entity.raw[telegram->offset - entity.offset], message_data, rest);
                 auto data = Helpers::data_to_hex(entity.raw, (uint8_t)length);
                 if (entity.data != data) {
                     entity.data = data;
