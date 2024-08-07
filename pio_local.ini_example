@@ -19,6 +19,7 @@
 ; default_envs = esp32_4M
 ; default_envs = esp32_16M
 default_envs = lolin_s3
+; default_envs = lolin_c3_mini
 ; default_envs = native
 ; default_envs = debug
 ; default_envs = custom
@@ -26,11 +27,11 @@ default_envs = lolin_s3
 [env]
 ; upload settings
 ; for USB
-upload_protocol = esptool
-upload_port = /dev/ttyUSB*
+; upload_protocol = esptool
+; upload_port = /dev/ttyUSB*
 ; for OTA add scripts/upload.py to extra_scripts
-; upload_protocol = custom
-custom_emsesp_ip = 10.10.10.173
+upload_protocol = custom
+custom_emsesp_ip = 10.10.10.175
 ; custom_emsesp_ip = ems-esp.local
 custom_username = admin
 custom_password = admin
@@ -42,59 +43,25 @@ custom_password = admin
 [env:native]
 extra_scripts = 
 ;   pre:scripts/refresh_module_library_native.py
-;   post:scripts/run_native.py
-
-[env:esp32_4M]
-extra_scripts =
-;   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
-  scripts/rename_fw.py
-;   scripts/upload.py
+  post:scripts/run_native.py
 
 [env:lolin_s3]
 extra_scripts =
-;   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
-;   scripts/upload.py
+  scripts/upload.py
 
 [env:esp32_16M]
 extra_scripts =
-;   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
 ;   scripts/upload.py
 
-[env:custom]
-; use for basic ESP boards with 4MB flash
-; make sure -D TASMOTA_SDK is also enabled
-platform = https://github.com/tasmota/platform-espressif32/releases/download/2024.01.00/platform-espressif32.zip
-; use for S3 boards:
-; platform = espressif32
-framework = arduino
-board = esp32dev
-board_build.filesystem = littlefs
-board_build.f_cpu = 240000000L
-board_upload.flash_size = 4MB
-board_build.partitions = esp32_partition_4M.csv
-board_upload.use_1200bps_touch = false
-board_upload.wait_for_upload_port = true
-upload_port = /dev/ttyUSB0
-extra_scripts = 
-	pre:scripts/build_interface.py
-	scripts/rename_fw.py
-build_unflags = ${common.unbuild_flags}
-build_flags = 
-	${common.core_build_flags}
-	${factory_settings.build_flags}
-	${common.my_build_flags}
-	-D ONEWIRE_CRC16=0
-	-D NO_GLOBAL_ARDUINOOTA
-	-D ARDUINOJSON_ENABLE_STD_STRING=1
-	-D TASMOTA_SDK
-	; -D CORE_DEBUG_LEVEL=ARDUHAL_LOG_LEVEL_WARN
-	-D EMSESP_TEST
-	-D EMSESP_DEBUG
- 	-D CONFIG_ETH_ENABLED
-	-D CONFIG_ASYNC_TCP_STACK_SIZE=8192
-	'-DEMSESP_DEFAULT_BOARD_PROFILE="Test"'
+[env:lolin_c3_mini]
+extra_scripts =
+;   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+  scripts/rename_fw.py
+  scripts/upload.py
 
 ; pio run -e debug
 ; or from Visual Studio Code do PIO -> Project Tasks -> debug -> General -> Upload and Monitor
