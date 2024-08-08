@@ -1,5 +1,4 @@
 import { useContext, useEffect } from 'react';
-import type { FC } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -14,7 +13,7 @@ interface SecurityRedirectProps {
   signOut?: boolean;
 }
 
-const RootRedirect: FC<SecurityRedirectProps> = ({ message, signOut }) => {
+const RootRedirect = ({ message, signOut }: SecurityRedirectProps) => {
   const authenticationContext = useContext(AuthenticationContext);
   useEffect(() => {
     signOut && authenticationContext.signOut(false);
@@ -23,26 +22,11 @@ const RootRedirect: FC<SecurityRedirectProps> = ({ message, signOut }) => {
   return <Navigate to="/" />;
 };
 
-export const RemoveTrailingSlashes = () => {
-  const location = useLocation();
-  return (
-    location.pathname.match('/.*/$') && (
-      <Navigate
-        to={{
-          pathname: location.pathname.replace(/\/+$/, ''),
-          search: location.search
-        }}
-      />
-    )
-  );
-};
-
-const AppRouting = () => {
+export default function AppRouting() {
   const { LL } = useI18nContext();
 
   return (
     <Authentication>
-      <RemoveTrailingSlashes />
       <Routes>
         <Route
           path="/unauthorized"
@@ -71,6 +55,4 @@ const AppRouting = () => {
       </Routes>
     </Authentication>
   );
-};
-
-export default AppRouting;
+}

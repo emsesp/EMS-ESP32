@@ -1,5 +1,3 @@
-import type { FC } from 'react';
-
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { Box, Button, CircularProgress, Typography } from '@mui/material';
 
@@ -12,11 +10,11 @@ interface FormLoaderProps {
   onRetry?: () => void;
 }
 
-const FormLoader: FC<FormLoaderProps> = ({
+const FormLoader = ({
   errorMessage,
   onRetry,
   message = 'Loading…'
-}) => {
+}: FormLoaderProps) => {
   const { LL } = useI18nContext();
 
   if (errorMessage) {

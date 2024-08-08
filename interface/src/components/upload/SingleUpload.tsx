@@ -1,5 +1,4 @@
 import { Fragment } from 'react';
-import type { FC } from 'react';
 import { useDropzone } from 'react-dropzone';
 import type { DropzoneState } from 'react-dropzone';
 
@@ -31,12 +30,12 @@ export interface SingleUploadProps {
   progress: Progress;
 }
 
-const SingleUpload: FC<SingleUploadProps> = ({
+const SingleUpload = ({
   onDrop,
   onCancel,
   isUploading,
   progress
-}) => {
+}: SingleUploadProps) => {
   const uploading = isUploading && progress.total > 0;
 
   const dropzoneState = useDropzone({
