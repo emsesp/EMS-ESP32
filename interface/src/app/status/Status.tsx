@@ -1,4 +1,4 @@
-import { type FC, useContext, useState } from 'react';
+import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -44,7 +44,7 @@ import { NTPSyncStatus, NetworkConnectionStatus } from 'types';
 
 import RestartMonitor from './RestartMonitor';
 
-const SystemStatus: FC = () => {
+const SystemStatus = () => {
   const { LL } = useI18nContext();
 
   const navigate = useNavigate();
@@ -272,12 +272,13 @@ const SystemStatus: FC = () => {
   );
 
   const content = () => {
-    // if (!data) {
-    //   return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
-    // }
-
+    // TODO remove test code
     if (loading) {
-      return <>fddfdd</>;
+      return <>not loaded!</>;
+    }
+
+    if (!data) {
+      return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
     }
 
     return (
@@ -411,7 +412,9 @@ const SystemStatus: FC = () => {
     );
   };
 
-  return <SectionContent>{content()}</SectionContent>;
+  return (
+    <SectionContent>{restarting ? <RestartMonitor /> : content()}</SectionContent>
+  );
 };
 
 export default SystemStatus;

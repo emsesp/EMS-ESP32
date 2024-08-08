@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import type { FC } from 'react';
 import { toast } from 'react-toastify';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
@@ -71,7 +70,7 @@ const levelLabel = (level: LogLevel) => {
   }
 };
 
-const SystemLog: FC = () => {
+const SystemLog = () => {
   const { LL } = useI18nContext();
 
   useLayoutTitle(LL.LOG_OF(LL.SYSTEM(0)));

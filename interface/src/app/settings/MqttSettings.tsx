@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import type { FC } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -31,7 +30,7 @@ import type { MqttSettingsType } from 'types';
 import { numberValue, updateValueDirty, useRest } from 'utils';
 import { createMqttSettingsValidator, validate } from 'validators';
 
-const MqttSettings: FC = () => {
+const MqttSettings = () => {
   const {
     loadData,
     saving,

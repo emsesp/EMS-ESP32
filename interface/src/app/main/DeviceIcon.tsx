@@ -1,4 +1,3 @@
-import type { FC } from 'react';
 import { AiOutlineAlert, AiOutlineControl, AiOutlineGateway } from 'react-icons/ai';
 import { CgSmartHomeBoiler } from 'react-icons/cg';
 import { FaSolarPanel } from 'react-icons/fa';
@@ -16,11 +15,7 @@ import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 
 import { DeviceType } from './types';
 
-interface DeviceIconProps {
-  type_id: number;
-}
-
-const DeviceIcon: FC<DeviceIconProps> = ({ type_id }) => {
+export default function DeviceIcon({ type_id }) {
   switch (type_id as DeviceType) {
     case DeviceType.TEMPERATURESENSOR:
     case DeviceType.ANALOGSENSOR:
@@ -60,6 +55,4 @@ const DeviceIcon: FC<DeviceIconProps> = ({ type_id }) => {
     default:
       return null;
   }
-};
-
-export default DeviceIcon;
+}

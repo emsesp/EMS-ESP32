@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState } from 'react';
-import type { FC } from 'react';
 import { toast } from 'react-toastify';
 
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
@@ -46,7 +45,7 @@ import {
   temperatureSensorItemValidation
 } from './validators';
 
-const Sensors: FC = () => {
+const Sensors = () => {
   const { LL } = useI18nContext();
   const { me } = useContext(AuthenticatedContext);
 

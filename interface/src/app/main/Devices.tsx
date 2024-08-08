@@ -5,7 +5,6 @@ import {
   useLayoutEffect,
   useState
 } from 'react';
-import type { FC } from 'react';
 import { IconContext } from 'react-icons';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -70,7 +69,7 @@ import { DeviceEntityMask, DeviceType, DeviceValueUOM_s } from './types';
 import type { Device, DeviceValue } from './types';
 import { deviceValueItemValidation } from './validators';
 
-const Devices: FC = () => {
+const Devices = () => {
   const { LL } = useI18nContext();
   const { me } = useContext(AuthenticatedContext);
 

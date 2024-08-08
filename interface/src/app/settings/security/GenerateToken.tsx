@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import type { FC } from 'react';
 
 import CloseIcon from '@mui/icons-material/Close';
 import {
@@ -21,12 +20,7 @@ import { useRequest } from 'alova/client';
 import { MessageBox } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
-interface GenerateTokenProps {
-  username?: string;
-  onClose: () => void;
-}
-
-const GenerateToken: FC<GenerateTokenProps> = ({ username, onClose }) => {
+export default function GenerateToken({ username, onClose }) {
   const { LL } = useI18nContext();
   const open = !!username;
 
@@ -85,6 +79,4 @@ const GenerateToken: FC<GenerateTokenProps> = ({ username, onClose }) => {
       </DialogActions>
     </Dialog>
   );
-};
-
-export default GenerateToken;
+}

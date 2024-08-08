@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import type { FC } from 'react';
 import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -49,9 +48,9 @@ export function boardProfileSelectItems() {
   ));
 }
 
-const ApplicationSettings: FC = () => {
+const ApplicationSettings = () => {
   const { data: hardwareData } = useRequest(SystemApi.readHardwareStatus, {
-    force: true
+    initialData: { psram: false }
   });
 
   const {
@@ -84,19 +83,12 @@ const ApplicationSettings: FC = () => {
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  const {
-    loading: processingBoard,
-    send: readBoardProfile,
-    onSuccess: onSuccessBoardProfile
-  } = useRequest((boardProfile: string) => EMSESP.getBoardProfile(boardProfile), {
-    immediate: false
-  });
-
-  const { send: restartCommand } = useRequest(SystemApi.restart(), {
-    immediate: false
-  });
-
-  onSuccessBoardProfile((event) => {
+  const { loading: processingBoard, send: readBoardProfile } = useRequest(
+    (boardProfile: string) => EMSESP.getBoardProfile(boardProfile),
+    {
+      immediate: false
+    }
+  ).onSuccess((event) => {
     const response = event.data as Settings;
     updateDataValue({
       ...data,
@@ -111,6 +103,10 @@ const ApplicationSettings: FC = () => {
       eth_phy_addr: response.eth_phy_addr,
       eth_clock_mode: response.eth_clock_mode
     });
+  });
+
+  const { send: restartCommand } = useRequest(SystemApi.restart(), {
+    immediate: false
   });
 
   const updateBoardProfile = async (board_profile: string) => {

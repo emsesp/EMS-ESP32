@@ -1,5 +1,3 @@
-import type { FC } from 'react';
-
 import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -57,7 +55,7 @@ export const mqttQueueHighlight = (
   return theme.palette.warning.main;
 };
 
-const MqttStatus: FC = () => {
+const MqttStatus = () => {
   const { data: data, send: loadData, error } = useRequest(MqttApi.readMqttStatus);
 
   const { LL } = useI18nContext();

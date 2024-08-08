@@ -37,7 +37,7 @@ export const RemoveTrailingSlashes = () => {
   );
 };
 
-const AppRouting: FC = () => {
+const AppRouting = () => {
   const { LL } = useI18nContext();
 
   return (

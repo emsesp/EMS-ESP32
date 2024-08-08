@@ -1,5 +1,3 @@
-import type { FC } from 'react';
-
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import DnsIcon from '@mui/icons-material/Dns';
 import GiteIcon from '@mui/icons-material/Gite';
@@ -84,7 +82,7 @@ const IPs = (status: NetworkStatusType) => {
   return status.local_ip + ', ' + status.local_ipv6;
 };
 
-const NetworkStatus: FC = () => {
+const NetworkStatus = () => {
   const {
     data: data,
     send: loadData,

@@ -1,5 +1,4 @@
 import { useRef, useState } from 'react';
-import type { FC } from 'react';
 
 import PermScanWifiIcon from '@mui/icons-material/PermScanWifi';
 import { Button } from '@mui/material';
@@ -15,23 +14,28 @@ import WiFiNetworkSelector from './WiFiNetworkSelector';
 const NUM_POLLS = 10;
 const POLLING_FREQUENCY = 1000;
 
-const WiFiNetworkScanner: FC = () => {
+const WiFiNetworkScanner = () => {
   const pollCount = useRef(0);
   const { LL } = useI18nContext();
   const [errorMessage, setErrorMessage] = useState<string>();
 
-  const { send: scanNetworks, onComplete: onCompleteScanNetworks } = useRequest(
-    NetworkApi.scanNetworks
-  ); // is called on page load to start network scan
-  const {
-    data: networkList,
-    send: getNetworkList,
-    onSuccess: onSuccessNetworkList
-  } = useRequest(NetworkApi.listNetworks, {
-    immediate: false
-  });
+  // is called on page load to start network scan
+  const { send: scanNetworks } = useRequest(NetworkApi.scanNetworks).onComplete(
+    () => {
+      pollCount.current = 0;
+      setErrorMessage(undefined);
+      void updateState(NetworkApi.listNetworks(), () => undefined);
+      void getNetworkList();
+    }
+  );
 
-  onSuccessNetworkList((event) => {
+  const { data: networkList, send: getNetworkList } = useRequest(
+    NetworkApi.listNetworks,
+    {
+      immediate: false
+    }
+  ).onSuccess((event) => {
+    // is called when network scan is completed
     if (!event.data) {
       const completedPollCount = pollCount.current + 1;
       if (completedPollCount < NUM_POLLS) {
@@ -42,14 +46,6 @@ const WiFiNetworkScanner: FC = () => {
         pollCount.current = 0;
       }
     }
-  });
-
-  onCompleteScanNetworks(() => {
-    pollCount.current = 0;
-    setErrorMessage(undefined);
-    // TODO fix
-    updateState('listNetworks', () => undefined);
-    void getNetworkList();
   });
 
   const renderNetworkScanner = () => {

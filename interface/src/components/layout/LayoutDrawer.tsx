@@ -1,5 +1,3 @@
-import type { FC } from 'react';
-
 import { Box, Divider, Drawer, Toolbar, Typography, styled } from '@mui/material';
 
 import { PROJECT_NAME } from 'api/env';
@@ -18,12 +16,7 @@ const LayoutDrawerLogo = styled('img')(({ theme }) => ({
   }
 }));
 
-interface LayoutDrawerProps {
-  mobileOpen: boolean;
-  onClose: () => void;
-}
-
-const LayoutDrawer: FC<LayoutDrawerProps> = ({ mobileOpen, onClose }) => {
+export default function LayoutDrawerProps({ mobileOpen, onClose }) {
   const drawer = (
     <>
       <Toolbar disableGutters>
@@ -66,6 +59,4 @@ const LayoutDrawer: FC<LayoutDrawerProps> = ({ mobileOpen, onClose }) => {
       </Drawer>
     </Box>
   );
-};
-
-export default LayoutDrawer;
+}

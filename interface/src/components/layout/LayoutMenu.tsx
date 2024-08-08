@@ -1,5 +1,4 @@
 import { useContext, useState } from 'react';
-import type { FC } from 'react';
 
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AssessmentIcon from '@mui/icons-material/Assessment';
@@ -30,7 +29,7 @@ import LayoutMenuItem from 'components/layout/LayoutMenuItem';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 
-const LayoutMenu: FC = () => {
+const LayoutMenu = () => {
   const { me, signOut } = useContext(AuthenticatedContext);
   const { LL } = useI18nContext();
 

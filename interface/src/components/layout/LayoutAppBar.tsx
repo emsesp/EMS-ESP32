@@ -1,4 +1,3 @@
-import type { FC } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -7,12 +6,7 @@ import { AppBar, IconButton, Toolbar, Typography } from '@mui/material';
 
 export const DRAWER_WIDTH = 210;
 
-interface LayoutAppBarProps {
-  title: string;
-  onToggleDrawer: () => void;
-}
-
-const LayoutAppBar: FC<LayoutAppBarProps> = ({ title, onToggleDrawer }) => {
+export default function LayoutAppBar({ title, onToggleDrawer }) {
   const pathnames = useLocation()
     .pathname.split('/')
     .filter((x) => x);
@@ -56,6 +50,4 @@ const LayoutAppBar: FC<LayoutAppBarProps> = ({ title, onToggleDrawer }) => {
       </Toolbar>
     </AppBar>
   );
-};
-
-export default LayoutAppBar;
+}

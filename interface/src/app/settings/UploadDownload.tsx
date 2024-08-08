@@ -1,4 +1,4 @@
-import { type FC, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'react-toastify';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
@@ -19,61 +19,59 @@ import { useI18nContext } from 'i18n/i18n-react';
 
 import RestartMonitor from '../status/RestartMonitor';
 
-const UploadDownload: FC = () => {
+const UploadDownload = () => {
   const { LL } = useI18nContext();
   const [restarting, setRestarting] = useState<boolean>();
   const [md5, setMd5] = useState<string>();
 
-  const { send: getSettings, onSuccess: onSuccessGetSettings } = useRequest(
-    EMSESP.getSettings(),
-    {
-      immediate: false
-    }
-  );
-  const { send: getCustomizations, onSuccess: onSuccessGetCustomizations } =
-    useRequest(EMSESP.getCustomizations(), {
-      immediate: false
-    });
-  const { send: getEntities, onSuccess: onSuccessGetEntities } = useRequest(
-    EMSESP.getEntities(),
-    {
-      immediate: false
-    }
-  );
-  const { send: getSchedule, onSuccess: onSuccessGetSchedule } = useRequest(
-    EMSESP.getSchedule(),
-    {
-      immediate: false
-    }
-  );
-  const { send: getAPI, onSuccess: onGetAPI } = useRequest(
-    (data: APIcall) => EMSESP.API(data),
-    {
-      immediate: false
-    }
-  );
+  const { send: getSettings } = useRequest(EMSESP.getSettings(), {
+    immediate: false
+  }).onSuccess((event) => {
+    saveFile(event.data, 'settings.json');
+  });
+
+  const { send: getCustomizations } = useRequest(EMSESP.getCustomizations(), {
+    immediate: false
+  }).onSuccess((event) => {
+    saveFile(event.data, 'customizations.json');
+  });
+
+  const { send: getEntities } = useRequest(EMSESP.getEntities(), {
+    immediate: false
+  }).onSuccess((event) => {
+    saveFile(event.data, 'entities.json');
+  });
+
+  const { send: getSchedule } = useRequest(EMSESP.getSchedule(), {
+    immediate: false
+  }).onSuccess((event) => {
+    saveFile(event.data, 'schedule.json');
+  });
+
+  const { send: getAPI } = useRequest((data: APIcall) => EMSESP.API(data), {
+    immediate: false
+  }).onSuccess((event) => {
+    saveFile(
+      event.data,
+      String(event.args[0].device) + '_' + String(event.args[0].entity) + '.txt'
+    );
+  });
 
   const {
     data: data,
     send: loadData,
     error
-  } = useRequest(SystemApi.readHardwareStatus, { force: true });
+  } = useRequest(SystemApi.readHardwareStatus);
 
-  const { data: latestVersion } = useRequest(SystemApi.getStableVersion, {
-    immediate: true,
-    force: true
-  });
-
-  const { data: latestDevVersion } = useRequest(SystemApi.getDevVersion, {
-    immediate: true,
-    force: true
-  });
+  // called immediately to get the latest version, on page load
+  const { data: latestVersion } = useRequest(SystemApi.getStableVersion);
+  const { data: latestDevVersion } = useRequest(SystemApi.getDevVersion);
 
   const STABLE_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/';
-  const DEV_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/latest/';
-
   const STABLE_RELNOTES_URL =
     'https://github.com/emsesp/EMS-ESP32/blob/main/CHANGELOG.md';
+
+  const DEV_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/latest/';
   const DEV_RELNOTES_URL =
     'https://github.com/emsesp/EMS-ESP32/blob/dev/CHANGELOG_LATEST.md';
 
@@ -95,16 +93,11 @@ const UploadDownload: FC = () => {
     loading: isUploading,
     uploading: progress,
     send: sendUpload,
-    onSuccess: onSuccessUpload,
     abort: cancelUpload
   } = useRequest(SystemApi.uploadFile, {
-    immediate: false,
-    force: true
-  });
-
-  onSuccessUpload(({ data }) => {
+    immediate: false
+  }).onSuccess(({ data }) => {
     if (data) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       setMd5(data.md5);
       toast.success(LL.UPLOAD() + ' MD5 ' + LL.SUCCESSFUL());
     } else {
@@ -136,22 +129,6 @@ const UploadDownload: FC = () => {
     URL.revokeObjectURL(anchor.href);
     toast.info(LL.DOWNLOAD_SUCCESSFUL());
   };
-
-  onSuccessGetSettings((event) => {
-    saveFile(event.data, 'settings.json');
-  });
-  onSuccessGetCustomizations((event) => {
-    saveFile(event.data, 'customizations.json');
-  });
-  onSuccessGetEntities((event) => {
-    saveFile(event.data, 'entities.json');
-  });
-  onSuccessGetSchedule((event) => {
-    saveFile(event.data, 'schedule.json');
-  });
-  onGetAPI((event) => {
-    saveFile(event.data, event.args[0].device + '_' + event.args[0].entity + '.txt');
-  });
 
   const downloadSettings = async () => {
     await getSettings().catch((error: Error) => {
@@ -211,11 +188,7 @@ const UploadDownload: FC = () => {
               <Link
                 target="_blank"
                 href={
-                  STABLE_URL +
-                  'v' +
-                  latestVersion +
-                  '/' +
-                  getBinURL(latestVersion as string)
+                  STABLE_URL + 'v' + latestVersion + '/' + getBinURL(latestVersion)
                 }
                 color="primary"
               >
@@ -236,7 +209,7 @@ const UploadDownload: FC = () => {
               )&nbsp;(
               <Link
                 target="_blank"
-                href={DEV_URL + getBinURL(latestDevVersion as string)}
+                href={DEV_URL + getBinURL(latestDevVersion)}
                 color="primary"
               >
                 {LL.DOWNLOAD(1)}

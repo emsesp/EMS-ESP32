@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { FC } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -29,13 +28,13 @@ import {
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
-import * as EMSESP from './api';
 import SettingsSchedulerDialog from './SchedulerDialog';
+import { readSchedule, writeSchedule } from './api';
 import { ScheduleFlag } from './types';
 import type { Schedule, ScheduleItem } from './types';
 import { schedulerItemValidation } from './validators';
 
-const Scheduler: FC = () => {
+const Scheduler = () => {
   const { LL, locale } = useI18nContext();
   const [numChanges, setNumChanges] = useState<number>(0);
   const blocker = useBlocker(numChanges !== 0);
@@ -48,13 +47,12 @@ const Scheduler: FC = () => {
     data: schedule,
     send: fetchSchedule,
     error
-  } = useRequest(EMSESP.readSchedule, {
-    initialData: [],
-    force: true
+  } = useRequest(readSchedule, {
+    initialData: []
   });
 
-  const { send: writeSchedule } = useRequest(
-    (data: Schedule) => EMSESP.writeSchedule(data),
+  const { send: updateSchedule } = useRequest(
+    (data: Schedule) => writeSchedule(data),
     {
       immediate: false
     }
@@ -131,7 +129,7 @@ const Scheduler: FC = () => {
   });
 
   const saveSchedule = async () => {
-    await writeSchedule({
+    await updateSchedule({
       schedule: schedule
         .filter((si) => !si.deleted)
         .map((condensed_si) => ({
@@ -177,7 +175,7 @@ const Scheduler: FC = () => {
 
   const onDialogSave = (updatedItem: ScheduleItem) => {
     setDialogOpen(false);
-    updateState('schedule', (data: ScheduleItem[]) => {
+    void updateState(readSchedule(), (data: ScheduleItem[]) => {
       const new_data = creating
         ? [
             ...data.filter((si) => creating || si.o_id !== updatedItem.o_id),

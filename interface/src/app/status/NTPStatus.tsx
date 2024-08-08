@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import type { FC } from 'react';
 import { toast } from 'react-toastify';
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
@@ -37,7 +36,7 @@ import type { NTPStatusType, Time } from 'types';
 import { NTPSyncStatus } from 'types';
 import { formatDateTime, formatLocalDateTime } from 'utils';
 
-const NTPStatus: FC = () => {
+const NTPStatus = () => {
   const { data: data, send: loadData, error } = useRequest(NTPApi.readNTPStatus);
 
   const [localTime, setLocalTime] = useState<string>('');

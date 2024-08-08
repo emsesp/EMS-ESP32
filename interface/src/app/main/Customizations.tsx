@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { FC } from 'react';
 import { useBlocker, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -52,7 +51,7 @@ import {
 import { useI18nContext } from 'i18n/i18n-react';
 
 import * as EMSESP from './api';
-import SettingsCustomizationDialog from './CustomizationDialog';
+import SettingsCustomizationsDialog from './CustomizationsDialog';
 import EntityMaskToggle from './EntityMaskToggle';
 import OptionIcon from './OptionIcon';
 import { DeviceEntityMask } from './types';
@@ -60,7 +59,7 @@ import type { DeviceEntity, DeviceShort } from './types';
 
 export const APIURL = window.location.origin + '/api/';
 
-const Customization: FC = () => {
+const Customizations = () => {
   const { LL } = useI18nContext();
   const [numChanges, setNumChanges] = useState<number>(0);
   const blocker = useBlocker(numChanges !== 0);
@@ -106,13 +105,15 @@ const Customization: FC = () => {
     }
   );
 
-  const { send: readDeviceEntities, onSuccess: onSuccess } = useRequest(
+  const { send: readDeviceEntities } = useRequest(
     (data: number) => EMSESP.readDeviceEntities(data),
     {
       initialData: [],
       immediate: false
     }
-  );
+  ).onSuccess((event) => {
+    setOriginalSettings(event.data);
+  });
 
   const setOriginalSettings = (data: DeviceEntity[]) => {
     setDeviceEntities(
@@ -125,10 +126,6 @@ const Customization: FC = () => {
       }))
     );
   };
-
-  onSuccess((event) => {
-    setOriginalSettings(event.data);
-  });
 
   const { send: restartCommand } = useRequest(SystemApi.restart(), {
     immediate: false
@@ -727,7 +724,7 @@ const Customization: FC = () => {
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {restarting ? <RestartMonitor /> : renderContent()}
       {selectedDeviceEntity && (
-        <SettingsCustomizationDialog
+        <SettingsCustomizationsDialog
           open={dialogOpen}
           onClose={onDialogClose}
           onSave={onDialogSave}
@@ -738,4 +735,4 @@ const Customization: FC = () => {
   );
 };
 
-export default Customization;
+export default Customizations;

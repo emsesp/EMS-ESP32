@@ -1,4 +1,3 @@
-import type { FC } from 'react';
 import { toast } from 'react-toastify';
 
 import CommentIcon from '@mui/icons-material/CommentTwoTone';
@@ -21,27 +20,19 @@ import {
 import * as SystemApi from 'api/system';
 
 import * as EMSESP from 'app/main/api';
-import { useAutoRequest, useRequest } from 'alova/client';
+import { useRequest } from 'alova/client';
 import { SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import type { APIcall } from './types';
 
-const Help: FC = () => {
+const Help = () => {
   const { LL } = useI18nContext();
   useLayoutTitle(LL.HELP_OF(''));
 
-  const { send: getAPI, onSuccess: onGetAPI } = useRequest(
-    (data: APIcall) => EMSESP.API(data),
-    {
-      immediate: false
-    }
-  );
-
-  // TODO check useAutoRequest - https://alova.js.org/tutorial/client/strategy/use-auto-request/#basic-usage
-  const { data, loading } = useAutoRequest(SystemApi.readSystemStatus);
-
-  onGetAPI((event) => {
+  const { send: getAPI } = useRequest((data: APIcall) => EMSESP.API(data), {
+    immediate: false
+  }).onSuccess((event) => {
     const anchor = document.createElement('a');
     anchor.href = URL.createObjectURL(
       new Blob([JSON.stringify(event.data, null, 2)], {
@@ -56,14 +47,16 @@ const Help: FC = () => {
     toast.info(LL.DOWNLOAD_SUCCESSFUL());
   });
 
+  const { data, loading } = useRequest(SystemApi.readSystemStatus);
+
   const callAPI = async (device: string, entity: string) => {
     await getAPI({ device, entity, id: 0 }).catch((error: Error) => {
       toast.error(error.message);
     });
   };
 
+  // TODO remove debug testing useRequest preact hook
   console.log('loading: ' + loading + ' data2: ' + data);
-
   if (loading) {
     return <div>Loading...</div>;
   }

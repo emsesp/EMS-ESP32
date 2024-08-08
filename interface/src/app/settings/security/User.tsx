@@ -29,10 +29,8 @@ import { validate } from 'validators';
 interface UserFormProps {
   creating: boolean;
   validator: Schema;
-
   user?: UserType;
   setUser: React.Dispatch<React.SetStateAction<UserType | undefined>>;
-
   onDoneEditing: () => void;
   onCancelEditing: () => void;
 }

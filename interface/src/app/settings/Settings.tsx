@@ -1,4 +1,4 @@
-import { type FC, useState } from 'react';
+import { useState } from 'react';
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -29,7 +29,7 @@ import { SectionContent, useLayoutTitle } from 'components';
 import ListMenuItem from 'components/layout/ListMenuItem';
 import { useI18nContext } from 'i18n/i18n-react';
 
-const Settings: FC = () => {
+const Settings = () => {
   const { LL } = useI18nContext();
   useLayoutTitle(LL.SETTINGS(0));
 

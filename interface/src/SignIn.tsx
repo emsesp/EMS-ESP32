@@ -1,5 +1,4 @@
 import { useContext, useState } from 'react';
-import type { FC } from 'react';
 import { toast } from 'react-toastify';
 
 import ForwardIcon from '@mui/icons-material/Forward';
@@ -21,7 +20,7 @@ import type { SignInRequest } from 'types';
 import { onEnterCallback, updateValue } from 'utils';
 import { SIGN_IN_REQUEST_VALIDATOR, validate } from 'validators';
 
-const SignIn: FC = () => {
+const SignIn = () => {
   const authenticationContext = useContext(AuthenticationContext);
 
   const { LL } = useI18nContext();
@@ -33,14 +32,12 @@ const SignIn: FC = () => {
   const [processing, setProcessing] = useState<boolean>(false);
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  const { send: callSignIn, onSuccess } = useRequest(
+  const { send: callSignIn } = useRequest(
     (request: SignInRequest) => AuthenticationApi.signIn(request),
     {
       immediate: false
     }
-  );
-
-  onSuccess((response) => {
+  ).onSuccess((response) => {
     if (response.data) {
       authenticationContext.signIn(response.data.access_token);
     }

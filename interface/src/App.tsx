@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import type { FC } from 'react';
 import { Slide, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
 
@@ -12,7 +11,7 @@ import { localStorageDetector } from 'typesafe-i18n/detectors';
 
 const detectedLocale = detectLocale(localStorageDetector);
 
-const App: FC = () => {
+const App = () => {
   const [wasLoaded, setWasLoaded] = useState(false);
 
   useEffect(() => {

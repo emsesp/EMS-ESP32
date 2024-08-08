@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import type { FC } from 'react';
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 
 import { Tab } from '@mui/material';
@@ -12,7 +11,7 @@ import NetworkSettings from './NetworkSettings';
 import { WiFiConnectionContext } from './WiFiConnectionContext';
 import WiFiNetworkScanner from './WiFiNetworkScanner';
 
-const Network: FC = () => {
+const Network = () => {
   const { LL } = useI18nContext();
   useLayoutTitle(LL.SETTINGS_OF(LL.NETWORK(0)));
 

@@ -1,5 +1,4 @@
 import { useContext, useState } from 'react';
-import type { FC } from 'react';
 import { useBlocker } from 'react-router-dom';
 
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -40,7 +39,7 @@ import { createUserValidator } from 'validators';
 import GenerateToken from './GenerateToken';
 import User from './User';
 
-const ManageUsers: FC = () => {
+const ManageUsers = () => {
   const { loadData, saveData, saving, data, updateDataValue, errorMessage } =
     useRest<SecuritySettingsType>({
       read: SecurityApi.readSecuritySettings,

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import type { FC } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -29,7 +28,7 @@ export const isAPEnabled = ({ provision_mode }: APSettingsType) =>
   provision_mode === APProvisionMode.AP_MODE_ALWAYS ||
   provision_mode === APProvisionMode.AP_MODE_DISCONNECTED;
 
-const APSettings: FC = () => {
+const APSettings = () => {
   const {
     loadData,
     saving,

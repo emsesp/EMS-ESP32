@@ -24,30 +24,22 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
   const {
     data,
     send: readData,
-    update: updateData,
-    // TODO refactor
-    onComplete: onReadComplete
-  } = useRequest(read());
+    update: updateData
+  } = useRequest(read()).onComplete((event) => {
+    setOrigData(event.data as D);
+  });
 
-  const {
-    loading: saving,
-    send: writeData,
-    // TODO refactor
-    onSuccess: onWriteSuccess
-  } = useRequest((newData: D) => update(newData), { immediate: false });
-
-  const updateDataValue = (new_data: D) => {
-    updateData({ data: new_data });
-  };
-
-  onWriteSuccess(() => {
+  const { loading: saving, send: writeData } = useRequest(
+    (newData: D) => update(newData),
+    { immediate: false }
+  ).onSuccess(() => {
     toast.success(LL.UPDATED_OF(LL.SETTINGS(1)));
     setDirtyFlags([]);
   });
 
-  onReadComplete((event) => {
-    setOrigData(event.data as D);
-  });
+  const updateDataValue = (new_data: D) => {
+    updateData({ data: new_data });
+  };
 
   const loadData = async () => {
     setDirtyFlags([]);

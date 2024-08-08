@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import type { FC } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -30,13 +29,13 @@ import {
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
-import * as EMSESP from './api';
 import SettingsCustomEntitiesDialog from './CustomEntitiesDialog';
+import { readCustomEntities, writeCustomEntities } from './api';
 import { DeviceValueTypeNames, DeviceValueUOM_s } from './types';
 import type { Entities, EntityItem } from './types';
 import { entityItemValidation } from './validators';
 
-const CustomEntities: FC = () => {
+const CustomEntities = () => {
   const { LL } = useI18nContext();
   const [numChanges, setNumChanges] = useState<number>(0);
   const blocker = useBlocker(numChanges !== 0);
@@ -50,13 +49,12 @@ const CustomEntities: FC = () => {
     data: entities,
     send: fetchEntities,
     error
-  } = useRequest(EMSESP.readCustomEntities, {
-    initialData: [],
-    force: true
+  } = useRequest(readCustomEntities, {
+    initialData: []
   });
 
   const { send: writeEntities } = useRequest(
-    (data: Entities) => EMSESP.writeCustomEntities(data),
+    (data: Entities) => writeCustomEntities(data),
     { immediate: false }
   );
 
@@ -182,7 +180,7 @@ const CustomEntities: FC = () => {
 
   const onDialogSave = (updatedItem: EntityItem) => {
     setDialogOpen(false);
-    updateState('entities', (data: EntityItem[]) => {
+    void updateState(readCustomEntities(), (data: EntityItem[]) => {
       const new_data = creating
         ? [
             ...data.filter((ei) => creating || ei.o_id !== updatedItem.o_id),

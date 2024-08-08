@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState } from 'react';
-import type { FC } from 'react';
 import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -48,7 +47,7 @@ import RestartMonitor from '../../status/RestartMonitor';
 import { WiFiConnectionContext } from './WiFiConnectionContext';
 import { isNetworkOpen, networkSecurityMode } from './WiFiNetworkSelector';
 
-const NetworkSettings: FC = () => {
+const NetworkSettings = () => {
   const { LL } = useI18nContext();
 
   const { selectedNetwork, deselectNetwork } = useContext(WiFiConnectionContext);
@@ -80,19 +79,22 @@ const NetworkSettings: FC = () => {
   useEffect(() => {
     if (!initialized && data) {
       if (selectedNetwork) {
-        updateState('networkSettings', (current_data: NetworkSettingsType) => ({
-          ssid: selectedNetwork.ssid,
-          bssid: selectedNetwork.bssid,
-          password: current_data ? current_data.password : '',
-          hostname: current_data?.hostname,
-          static_ip_config: false,
-          bandwidth20: false,
-          tx_power: 0,
-          nosleep: false,
-          enableMDNS: true,
-          enableCORS: false,
-          CORSOrigin: '*'
-        }));
+        void updateState(
+          NetworkApi.readNetworkSettings(),
+          (current_data: NetworkSettingsType) => ({
+            ssid: selectedNetwork.ssid,
+            bssid: selectedNetwork.bssid,
+            password: current_data ? current_data.password : '',
+            hostname: current_data?.hostname,
+            static_ip_config: false,
+            bandwidth20: false,
+            tx_power: 0,
+            nosleep: false,
+            enableMDNS: true,
+            enableCORS: false,
+            CORSOrigin: '*'
+          })
+        );
       }
       setInitialized(true);
     }

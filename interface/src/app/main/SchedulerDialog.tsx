@@ -208,7 +208,7 @@ const SchedulerDialog = ({
                 scheduleType === ScheduleFlag.SCHEDULE_ONCHANGE ? 'primary' : 'grey'
               }
             >
-              {LL.ONCHANGE(0)}
+              {LL.ONCHANGE()}
             </Typography>
           </ToggleButton>
           <ToggleButton value={ScheduleFlag.SCHEDULE_CONDITION}>
@@ -218,7 +218,7 @@ const SchedulerDialog = ({
                 scheduleType === ScheduleFlag.SCHEDULE_CONDITION ? 'primary' : 'grey'
               }
             >
-              {LL.CONDITION(0)}
+              {LL.CONDITION()}
             </Typography>
           </ToggleButton>
           <ToggleButton value={ScheduleFlag.SCHEDULE_IMMEDIATE}>
@@ -228,7 +228,7 @@ const SchedulerDialog = ({
                 scheduleType === ScheduleFlag.SCHEDULE_IMMEDIATE ? 'primary' : 'grey'
               }
             >
-              {LL.IMMEDIATE(0)}
+              {LL.IMMEDIATE()}
             </Typography>
           </ToggleButton>
         </ToggleButtonGroup>
@@ -282,7 +282,7 @@ const SchedulerDialog = ({
             </Grid>
             <Grid container>
               {scheduleType === ScheduleFlag.SCHEDULE_DAY ||
-                scheduleType === ScheduleFlag.SCHEDULE_TIMER ? (
+              scheduleType === ScheduleFlag.SCHEDULE_TIMER ? (
                 <>
                   <TextField
                     name="time"
@@ -311,10 +311,10 @@ const SchedulerDialog = ({
                   name="time"
                   label={
                     scheduleType === ScheduleFlag.SCHEDULE_CONDITION
-                      ? LL.CONDITION(1)
+                      ? LL.CONDITION()
                       : scheduleType === ScheduleFlag.SCHEDULE_ONCHANGE
-                        ? LL.ONCHANGE(1)
-                        : LL.IMMEDIATE(1)
+                        ? LL.ONCHANGE()
+                        : LL.IMMEDIATE()
                   }
                   multiline
                   fullWidth

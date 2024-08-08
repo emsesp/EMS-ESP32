@@ -88,7 +88,6 @@ export const writeDeviceName = (data: { id: number; name: string }) =>
 // SettingsScheduler
 export const readSchedule = () =>
   alovaInstance.Get<ScheduleItem[]>('/rest/schedule', {
-    name: 'schedule',
     transform(data) {
       return (data as Schedule).schedule.map((si: ScheduleItem) => ({
         ...si,
@@ -109,7 +108,6 @@ export const writeSchedule = (data: Schedule) =>
 // Modules
 export const readModules = () =>
   alovaInstance.Get<ModuleItem[]>('/rest/modules', {
-    name: 'modules',
     transform(data) {
       return (data as Modules).modules.map((mi: ModuleItem) => ({
         ...mi,
@@ -127,7 +125,6 @@ export const writeModules = (data: {
 // SettingsEntities
 export const readCustomEntities = () =>
   alovaInstance.Get<EntityItem[]>('/rest/customEntities', {
-    name: 'entities',
     transform(data) {
       return (data as Entities).entities.map((ei: EntityItem) => ({
         ...ei,

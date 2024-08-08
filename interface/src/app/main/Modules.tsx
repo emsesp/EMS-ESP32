@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import type { FC } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -7,8 +6,6 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import CircleIcon from '@mui/icons-material/Circle';
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Typography } from '@mui/material';
-
-import { alovaInstance } from 'api/endpoints';
 
 import {
   Body,
@@ -30,11 +27,11 @@ import {
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
-import * as EMSESP from './api';
 import ModulesDialog from './ModulesDialog';
+import { readModules, writeModules } from './api';
 import type { ModuleItem, Modules } from './types';
 
-const Modules: FC = () => {
+const Modules = () => {
   const { LL } = useI18nContext();
   const [numChanges, setNumChanges] = useState<number>(0);
   const blocker = useBlocker(numChanges !== 0);
@@ -46,13 +43,12 @@ const Modules: FC = () => {
     data: modules,
     send: fetchModules,
     error
-  } = useRequest(EMSESP.readModules, {
+  } = useRequest(readModules, {
     initialData: []
   });
 
-  const { send: writeModules } = useRequest(
-    (data: { key: string; enabled: boolean; license: string }) =>
-      EMSESP.writeModules(data),
+  const { send: updateModules } = useRequest(
+    (data: { key: string; enabled: boolean; license: string }) => writeModules(data),
     {
       immediate: false
     }
@@ -124,23 +120,18 @@ const Modules: FC = () => {
     return mi.enabled !== mi.o_enabled || mi.license !== mi.o_license;
   }
 
-  // TODO example of how to use updateState
-  // TODO see https://alova.js.org/api/states/#updatestate
   const updateModuleItem = (updatedItem: ModuleItem) => {
-    updateState<ModuleItem[]>(
-      [alovaInstance.snapshots.match('modules', true)] as any,
-      (data: ModuleItem[]) => {
-        const new_data = data.map((mi) =>
-          mi.id === updatedItem.id ? { ...mi, ...updatedItem } : mi
-        );
-        setNumChanges(new_data.filter((mi) => hasModulesChanged(mi)).length);
-        return new_data;
-      }
-    );
+    void updateState(readModules(), (data: ModuleItem[]) => {
+      const new_data = data.map((mi) =>
+        mi.id === updatedItem.id ? { ...mi, ...updatedItem } : mi
+      );
+      setNumChanges(new_data.filter((mi) => hasModulesChanged(mi)).length);
+      return new_data;
+    });
   };
 
   const saveModules = async () => {
-    await writeModules({
+    await updateModules({
       modules: modules.map((condensed_mi) => ({
         key: condensed_mi.key,
         enabled: condensed_mi.enabled,

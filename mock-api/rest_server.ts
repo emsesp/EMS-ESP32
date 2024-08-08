@@ -4356,7 +4356,7 @@ router
   )
   .get(EMSESP_DEVICEENTITIES_ENDPOINT2, ({ params }) => (params.id ? deviceEntities(Number(params.id)) : status(404)))
 
-  // Customization
+  // Customizations
   .post(EMSESP_CUSTOMIZATION_ENTITIES_ENDPOINT, async (request: any) => {
     const content = await request.json();
     const id = content.id;

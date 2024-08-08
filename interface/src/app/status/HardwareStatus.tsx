@@ -1,5 +1,3 @@
-import type { FC } from 'react';
-
 import AppsIcon from '@mui/icons-material/Apps';
 import DeveloperBoardIcon from '@mui/icons-material/DeveloperBoard';
 import DevicesIcon from '@mui/icons-material/Devices';
@@ -32,7 +30,7 @@ function formatNumber(num: number) {
   return new Intl.NumberFormat().format(num);
 }
 
-const HardwareStatus: FC = () => {
+const HardwareStatus = () => {
   const { LL } = useI18nContext();
 
   useLayoutTitle(LL.STATUS_OF(LL.HARDWARE()));
@@ -41,7 +39,7 @@ const HardwareStatus: FC = () => {
     data: data,
     send: loadData,
     error
-  } = useRequest(SystemApi.readHardwareStatus, { force: true });
+  } = useRequest(SystemApi.readHardwareStatus);
 
   const content = () => {
     if (!data) {

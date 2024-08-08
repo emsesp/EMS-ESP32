@@ -1,5 +1,3 @@
-import type { FC } from 'react';
-
 import ComputerIcon from '@mui/icons-material/Computer';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -37,7 +35,7 @@ export const apStatusHighlight = ({ status }: APStatusType, theme: Theme) => {
   }
 };
 
-const APStatus: FC = () => {
+const APStatus = () => {
   const { data: data, send: loadData, error } = useRequest(APApi.readAPStatus);
 
   const { LL } = useI18nContext();

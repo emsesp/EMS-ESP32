@@ -1,6 +1,3 @@
-import type { FC } from 'react';
-import type { Blocker } from 'react-router-dom';
-
 import {
   Button,
   Dialog,
@@ -12,11 +9,7 @@ import {
 import { dialogStyle } from 'CustomTheme';
 import { useI18nContext } from 'i18n/i18n-react';
 
-interface BlockNavigationProps {
-  blocker: Blocker;
-}
-
-const BlockNavigation: FC<BlockNavigationProps> = ({ blocker }) => {
+export default function BlockNavigation({ blocker }) {
   const { LL } = useI18nContext();
 
   return (
@@ -41,6 +34,4 @@ const BlockNavigation: FC<BlockNavigationProps> = ({ blocker }) => {
       </DialogActions>
     </Dialog>
   );
-};
-
-export default BlockNavigation;
+}
