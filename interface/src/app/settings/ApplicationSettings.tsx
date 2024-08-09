@@ -166,7 +166,7 @@ const ApplicationSettings = () => {
           name="board_profile"
           label={LL.BOARD_PROFILE()}
           value={data.board_profile}
-          disabled={processingBoard}
+          disabled={processingBoard || hardwareData.model.startsWith('BBQKees')}
           fullWidth
           variant="outlined"
           onChange={changeBoardProfile}
