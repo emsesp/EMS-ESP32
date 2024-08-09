@@ -110,6 +110,10 @@ const SignIn = () => {
             onChange={updateLoginRequestValue}
             margin="normal"
             variant="outlined"
+            inputProps={{
+              autoCapitalize: 'none',
+              autoCorrect: 'off'
+            }}
           />
           <ValidatedPasswordField
             fieldErrors={fieldErrors}
