@@ -2,7 +2,7 @@ import { xhrRequestAdapter } from '@alova/adapter-xhr';
 import { createAlova } from 'alova';
 import ReactHook from 'alova/react';
 
-import { unpack } from '../api/unpack';
+import { unpack } from './unpack';
 
 export const ACCESS_TOKEN = 'access_token';
 

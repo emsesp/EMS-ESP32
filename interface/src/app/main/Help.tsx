@@ -17,20 +17,20 @@ import {
   Typography
 } from '@mui/material';
 
-import * as SystemApi from 'api/system';
+import { readSystemStatus } from 'api/system';
 
-import * as EMSESP from 'app/main/api';
 import { useRequest } from 'alova/client';
 import { SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
+import { API } from '../../api/app';
 import type { APIcall } from './types';
 
 const Help = () => {
   const { LL } = useI18nContext();
   useLayoutTitle(LL.HELP_OF(''));
 
-  const { send: getAPI } = useRequest((data: APIcall) => EMSESP.API(data), {
+  const { send: getAPI } = useRequest((data: APIcall) => API(data), {
     immediate: false
   }).onSuccess((event) => {
     const anchor = document.createElement('a');
@@ -47,7 +47,7 @@ const Help = () => {
     toast.info(LL.DOWNLOAD_SUCCESSFUL());
   });
 
-  const { data, loading } = useRequest(SystemApi.readSystemStatus);
+  const { data, loading } = useRequest(readSystemStatus);
 
   const callAPI = async (device: string, entity: string) => {
     await getAPI({ device, entity, id: 0 }).catch((error: Error) => {

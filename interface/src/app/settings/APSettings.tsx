@@ -18,7 +18,6 @@ import {
   useLayoutTitle
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
-import { range } from 'lodash-es';
 import type { APSettingsType } from 'types';
 import { APProvisionMode } from 'types';
 import { numberValue, updateValueDirty, useRest } from 'utils';
@@ -72,6 +71,11 @@ const APSettings = () => {
         setFieldErrors(error as ValidateFieldsError);
       }
     };
+
+    // no lodash - https://asleepace.com/blog/typescript-range-without-a-loop/
+    function range(a: number, b: number): number[] {
+      return a < b ? [a, ...range(a + 1, b)] : [b];
+    }
 
     return (
       <>

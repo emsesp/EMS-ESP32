@@ -5,8 +5,15 @@ import DownloadIcon from '@mui/icons-material/GetApp';
 import { Box, Button, Divider, Link, Typography } from '@mui/material';
 
 import * as SystemApi from 'api/system';
+import {
+  API,
+  getCustomizations,
+  getEntities,
+  getSchedule,
+  getSettings
+} from 'api/app';
+import { getDevVersion, getStableVersion } from 'api/system';
 
-import * as EMSESP from 'app/main/api';
 import { useRequest } from 'alova/client';
 import type { APIcall } from 'app/main/types';
 import {
@@ -24,31 +31,31 @@ const UploadDownload = () => {
   const [restarting, setRestarting] = useState<boolean>();
   const [md5, setMd5] = useState<string>();
 
-  const { send: getSettings } = useRequest(EMSESP.getSettings(), {
+  const { send: sendSettings } = useRequest(getSettings(), {
     immediate: false
   }).onSuccess((event) => {
     saveFile(event.data, 'settings.json');
   });
 
-  const { send: getCustomizations } = useRequest(EMSESP.getCustomizations(), {
+  const { send: sendCustomizations } = useRequest(getCustomizations(), {
     immediate: false
   }).onSuccess((event) => {
     saveFile(event.data, 'customizations.json');
   });
 
-  const { send: getEntities } = useRequest(EMSESP.getEntities(), {
+  const { send: sendEntities } = useRequest(getEntities(), {
     immediate: false
   }).onSuccess((event) => {
     saveFile(event.data, 'entities.json');
   });
 
-  const { send: getSchedule } = useRequest(EMSESP.getSchedule(), {
+  const { send: sendSchedule } = useRequest(getSchedule(), {
     immediate: false
   }).onSuccess((event) => {
     saveFile(event.data, 'schedule.json');
   });
 
-  const { send: getAPI } = useRequest((data: APIcall) => EMSESP.API(data), {
+  const { send: getAPI } = useRequest((data: APIcall) => API(data), {
     immediate: false
   }).onSuccess((event) => {
     saveFile(
@@ -64,8 +71,8 @@ const UploadDownload = () => {
   } = useRequest(SystemApi.readHardwareStatus);
 
   // called immediately to get the latest version, on page load
-  const { data: latestVersion } = useRequest(SystemApi.getStableVersion);
-  const { data: latestDevVersion } = useRequest(SystemApi.getDevVersion);
+  const { data: latestVersion } = useRequest(getStableVersion);
+  const { data: latestDevVersion } = useRequest(getDevVersion);
 
   const STABLE_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/';
   const STABLE_RELNOTES_URL =
@@ -131,25 +138,25 @@ const UploadDownload = () => {
   };
 
   const downloadSettings = async () => {
-    await getSettings().catch((error: Error) => {
+    await sendSettings().catch((error: Error) => {
       toast.error(error.message);
     });
   };
 
   const downloadCustomizations = async () => {
-    await getCustomizations().catch((error: Error) => {
+    await sendCustomizations().catch((error: Error) => {
       toast.error(error.message);
     });
   };
 
   const downloadEntities = async () => {
-    await getEntities().catch((error: Error) => {
+    await sendEntities().catch((error: Error) => {
       toast.error(error.message);
     });
   };
 
   const downloadSchedule = async () => {
-    await getSchedule().catch((error: Error) => {
+    await sendSchedule().catch((error: Error) => {
       toast.error(error.message);
     });
   };

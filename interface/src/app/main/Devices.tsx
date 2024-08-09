@@ -61,7 +61,7 @@ import { ButtonRow, MessageBox, SectionContent, useLayoutTitle } from 'component
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 
-import * as EMSESP from './api';
+import { readCoreData, readDeviceData, writeDeviceValue } from '../../api/app';
 import DeviceIcon from './DeviceIcon';
 import DashboardDevicesDialog from './DevicesDialog';
 import { formatValue } from './deviceValue';
@@ -84,18 +84,15 @@ const Devices = () => {
 
   useLayoutTitle(LL.DEVICES());
 
-  const { data: coreData, send: readCoreData } = useRequest(
-    () => EMSESP.readCoreData(),
-    {
-      initialData: {
-        connected: true,
-        devices: []
-      }
+  const { data: coreData, send: sendCoreData } = useRequest(() => readCoreData(), {
+    initialData: {
+      connected: true,
+      devices: []
     }
-  );
+  });
 
-  const { data: deviceData, send: readDeviceData } = useRequest(
-    (id: number) => EMSESP.readDeviceData(id),
+  const { data: deviceData, send: sendDeviceData } = useRequest(
+    (id: number) => readDeviceData(id),
     {
       initialData: {
         data: []
@@ -104,8 +101,8 @@ const Devices = () => {
     }
   );
 
-  const { loading: submitting, send: writeDeviceValue } = useRequest(
-    (data: { id: number; c: string; v: unknown }) => EMSESP.writeDeviceValue(data),
+  const { loading: submitting, send: sendDeviceValue } = useRequest(
+    (data: { id: number; c: string; v: unknown }) => writeDeviceValue(data),
     {
       immediate: false
     }
@@ -287,7 +284,7 @@ const Devices = () => {
   async function onSelectChange(action: Action, state: State) {
     setSelectedDevice(state.id as number);
     if (action.type === 'ADD_BY_ID_EXCLUSIVELY') {
-      await readDeviceData(state.id as number);
+      await sendDeviceData(state.id as number);
     }
   }
 
@@ -322,7 +319,7 @@ const Devices = () => {
 
   const refreshData = () => {
     if (!deviceValueDialogOpen) {
-      selectedDevice ? void readDeviceData(selectedDevice) : void readCoreData();
+      selectedDevice ? void sendDeviceData(selectedDevice) : void sendCoreData();
     }
   };
 
@@ -444,7 +441,7 @@ const Devices = () => {
 
   const deviceValueDialogSave = async (devicevalue: DeviceValue) => {
     const id = Number(device_select.state.id);
-    await writeDeviceValue({ id, c: devicevalue.c ?? '', v: devicevalue.v })
+    await sendDeviceValue({ id, c: devicevalue.c ?? '', v: devicevalue.v })
       .then(() => {
         toast.success(LL.WRITE_CMD_SENT());
       })
@@ -453,7 +450,7 @@ const Devices = () => {
       })
       .finally(async () => {
         setDeviceValueDialogOpen(false);
-        await readDeviceData(id);
+        await sendDeviceData(id);
         setSelectedDeviceValue(undefined);
       });
   };

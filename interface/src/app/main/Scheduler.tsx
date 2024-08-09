@@ -28,8 +28,8 @@ import {
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
+import { readSchedule, writeSchedule } from '../../api/app';
 import SettingsSchedulerDialog from './SchedulerDialog';
-import { readSchedule, writeSchedule } from './api';
 import { ScheduleFlag } from './types';
 import type { Schedule, ScheduleItem } from './types';
 import { schedulerItemValidation } from './validators';

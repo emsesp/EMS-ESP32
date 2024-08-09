@@ -25,7 +25,11 @@ import { ButtonRow, SectionContent, useLayoutTitle } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 
-import * as EMSESP from './api';
+import {
+  readSensorData,
+  writeAnalogSensor,
+  writeTemperatureSensor
+} from '../../api/app';
 import DashboardSensorsAnalogDialog from './SensorsAnalogDialog';
 import DashboardSensorsTemperatureDialog from './SensorsTemperatureDialog';
 import {
@@ -56,8 +60,8 @@ const Sensors = () => {
   const [analogDialogOpen, setAnalogDialogOpen] = useState<boolean>(false);
   const [creating, setCreating] = useState<boolean>(false);
 
-  const { data: sensorData, send: fetchSensorData } = useRequest(
-    () => EMSESP.readSensorData(),
+  const { data: sensorData, send: sendSensorData } = useRequest(
+    () => readSensorData(),
     {
       initialData: {
         ts: [],
@@ -68,15 +72,15 @@ const Sensors = () => {
     }
   );
 
-  const { send: writeTemperatureSensor } = useRequest(
-    (data: WriteTemperatureSensor) => EMSESP.writeTemperatureSensor(data),
+  const { send: sendTemperatureSensor } = useRequest(
+    (data: WriteTemperatureSensor) => writeTemperatureSensor(data),
     {
       immediate: false
     }
   );
 
-  const { send: writeAnalogSensor } = useRequest(
-    (data: WriteAnalogSensor) => EMSESP.writeAnalogSensor(data),
+  const { send: sendAnalogSensor } = useRequest(
+    (data: WriteAnalogSensor) => writeAnalogSensor(data),
     {
       immediate: false
     }
@@ -195,7 +199,7 @@ const Sensors = () => {
   );
 
   useEffect(() => {
-    const timer = setInterval(() => fetchSensorData(), 30000);
+    const timer = setInterval(() => sendSensorData(), 30000);
     return () => {
       clearInterval(timer);
     };
@@ -265,7 +269,7 @@ const Sensors = () => {
   };
 
   const onTemperatureDialogSave = async (ts: TemperatureSensor) => {
-    await writeTemperatureSensor({ id: ts.id, name: ts.n, offset: ts.o })
+    await sendTemperatureSensor({ id: ts.id, name: ts.n, offset: ts.o })
       .then(() => {
         toast.success(LL.UPDATED_OF(LL.SENSOR(1)));
       })
@@ -275,7 +279,7 @@ const Sensors = () => {
       .finally(async () => {
         setTemperatureDialogOpen(false);
         setSelectedTemperatureSensor(undefined);
-        await fetchSensorData();
+        await sendSensorData();
       });
   };
 
@@ -310,7 +314,7 @@ const Sensors = () => {
   };
 
   const onAnalogDialogSave = async (as: AnalogSensor) => {
-    await writeAnalogSensor({
+    await sendAnalogSensor({
       id: as.id,
       gpio: as.g,
       name: as.n,
@@ -329,7 +333,7 @@ const Sensors = () => {
       .finally(async () => {
         setAnalogDialogOpen(false);
         setSelectedAnalogSensor(undefined);
-        await fetchSensorData();
+        await sendSensorData();
       });
   };
 
@@ -503,7 +507,7 @@ const Sensors = () => {
               startIcon={<RefreshIcon />}
               variant="outlined"
               color="secondary"
-              onClick={fetchSensorData}
+              onClick={sendSensorData}
             >
               {LL.REFRESH()}
             </Button>

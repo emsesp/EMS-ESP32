@@ -29,8 +29,8 @@ import {
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
+import { readCustomEntities, writeCustomEntities } from '../../api/app';
 import SettingsCustomEntitiesDialog from './CustomEntitiesDialog';
-import { readCustomEntities, writeCustomEntities } from './api';
 import { DeviceValueTypeNames, DeviceValueUOM_s } from './types';
 import type { Entities, EntityItem } from './types';
 import { entityItemValidation } from './validators';

@@ -815,16 +815,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/core-downloads-tracker@npm:^5.16.6":
-  version: 5.16.6
-  resolution: "@mui/core-downloads-tracker@npm:5.16.6"
-  checksum: 10c0/ee7655eda56e8eeb18ae600b24182c10caab4468d33179de3e76a783a827be9577afe114750835f7c9c7f555c0de0845c0500e91ed2e669b16399a1ffe41c33d
+"@mui/core-downloads-tracker@npm:^5.16.7":
+  version: 5.16.7
+  resolution: "@mui/core-downloads-tracker@npm:5.16.7"
+  checksum: 10c0/4644c850160d01232c1abdbed141e4fa70e155891a9c68f0c2cc3054b4a3cdc1d28cf2d6665366fd8c725b2b091db677e11831552889a4e4e14f1e44450cf654
   languageName: node
   linkType: hard
 
-"@mui/icons-material@npm:^5.16.6":
-  version: 5.16.6
-  resolution: "@mui/icons-material@npm:5.16.6"
+"@mui/icons-material@npm:^5.16.7":
+  version: 5.16.7
+  resolution: "@mui/icons-material@npm:5.16.7"
   dependencies:
     "@babel/runtime": "npm:^7.23.9"
   peerDependencies:
@@ -834,17 +834,17 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10c0/9d24d95e8b4606b5fa2a2e40319255e2e6da52845db50d2d3ca6fd526102be3c498ec1aa9be8d33aad52cf531749b15d490abca5f23af92afc86cf45dc62ce24
+  checksum: 10c0/49bab1754334798acaf93187d27200cf90d7c50b6a019531594aeac9e5ced9168281fec70bb040792dc86c8bc0d3bf9a876f22cfbf86ad07941ca6bc6c564921
   languageName: node
   linkType: hard
 
-"@mui/material@npm:^5.16.6":
-  version: 5.16.6
-  resolution: "@mui/material@npm:5.16.6"
+"@mui/material@npm:^5.16.7":
+  version: 5.16.7
+  resolution: "@mui/material@npm:5.16.7"
   dependencies:
     "@babel/runtime": "npm:^7.23.9"
-    "@mui/core-downloads-tracker": "npm:^5.16.6"
-    "@mui/system": "npm:^5.16.6"
+    "@mui/core-downloads-tracker": "npm:^5.16.7"
+    "@mui/system": "npm:^5.16.7"
     "@mui/types": "npm:^7.2.15"
     "@mui/utils": "npm:^5.16.6"
     "@popperjs/core": "npm:^2.11.8"
@@ -867,7 +867,7 @@ __metadata:
       optional: true
     "@types/react":
       optional: true
-  checksum: 10c0/52cbffd87a36b9f8e16ba59030e89501e680ddea4d3dcf3db5d8fb7b86205444b00162e656c79571824a74769f879f39df2e7671d1e7ca8bc23602a7bf588dc5
+  checksum: 10c0/b11419c1a77835413471f9352586fed65fb5de19c6737e121669da0484c441c7dd9939aa73fdad779482c30efaa694fb9fdcf18dcf418af07881e60eaff92b4f
   languageName: node
   linkType: hard
 
@@ -909,9 +909,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/system@npm:^5.16.6":
-  version: 5.16.6
-  resolution: "@mui/system@npm:5.16.6"
+"@mui/system@npm:^5.16.7":
+  version: 5.16.7
+  resolution: "@mui/system@npm:5.16.7"
   dependencies:
     "@babel/runtime": "npm:^7.23.9"
     "@mui/private-theming": "npm:^5.16.6"
@@ -933,7 +933,7 @@ __metadata:
       optional: true
     "@types/react":
       optional: true
-  checksum: 10c0/493900594f51d1fc84994042e5cfa000b2d7664f86c8c0d62b87dbbb51cf7e789a700512f98e18c82e605beab38c20d0714ec25c46e2f6a5024f79f16db743f7
+  checksum: 10c0/c07479c0728433847c1e3d7f57b96d9e0770cc814dfd1c9e070304955984a0b706832703b22388eb83906d1a01691f37047e2bac6a5e5c083e8c29a54302d476
   languageName: node
   linkType: hard
 
@@ -1429,22 +1429,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash-es@npm:^4.17.12":
-  version: 4.17.12
-  resolution: "@types/lodash-es@npm:4.17.12"
-  dependencies:
-    "@types/lodash": "npm:*"
-  checksum: 10c0/5d12d2cede07f07ab067541371ed1b838a33edb3c35cb81b73284e93c6fd0c4bbeaefee984e69294bffb53f62d7272c5d679fdba8e595ff71e11d00f2601dde0
-  languageName: node
-  linkType: hard
-
-"@types/lodash@npm:*":
-  version: 4.17.7
-  resolution: "@types/lodash@npm:4.17.7"
-  checksum: 10c0/40c965b5ffdcf7ff5c9105307ee08b782da228c01b5c0529122c554c64f6b7168fc8f11dc79aa7bae4e67e17efafaba685dc3a47e294dbf52a65ed2b67100561
-  languageName: node
-  linkType: hard
-
 "@types/minimatch@npm:*":
   version: 5.1.2
   resolution: "@types/minimatch@npm:5.1.2"
@@ -1676,14 +1660,13 @@ __metadata:
     "@emotion/react": "npm:^11.13.0"
     "@emotion/styled": "npm:^11.13.0"
     "@eslint/js": "npm:^9.8.0"
-    "@mui/icons-material": "npm:^5.16.6"
-    "@mui/material": "npm:^5.16.6"
+    "@mui/icons-material": "npm:^5.16.7"
+    "@mui/material": "npm:^5.16.7"
     "@preact/compat": "npm:^17.1.2"
     "@preact/preset-vite": "npm:^2.9.0"
     "@table-library/react-table-library": "npm:4.1.7"
     "@trivago/prettier-plugin-sort-imports": "npm:^4.3.0"
     "@types/babel__core": "npm:^7"
-    "@types/lodash-es": "npm:^4.17.12"
     "@types/node": "npm:^22.1.0"
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"
@@ -1694,7 +1677,6 @@ __metadata:
     eslint: "npm:^9.8.0"
     eslint-config-prettier: "npm:^9.1.0"
     jwt-decode: "npm:^4.0.0"
-    lodash-es: "npm:^4.17.21"
     mime-types: "npm:^2.1.35"
     preact: "npm:^10.23.1"
     prettier: "npm:^3.3.3"
@@ -4692,13 +4674,6 @@ __metadata:
   dependencies:
     p-locate: "npm:^5.0.0"
   checksum: 10c0/d3972ab70dfe58ce620e64265f90162d247e87159b6126b01314dd67be43d50e96a50b517bce2d9452a79409c7614054c277b5232377de50416564a77ac7aad3
-  languageName: node
-  linkType: hard
-
-"lodash-es@npm:^4.17.21":
-  version: 4.17.21
-  resolution: "lodash-es@npm:4.17.21"
-  checksum: 10c0/fb407355f7e6cd523a9383e76e6b455321f0f153a6c9625e21a8827d10c54c2a2341bd2ae8d034358b60e07325e1330c14c224ff582d04612a46a4f0479ff2f2
   languageName: node
   linkType: hard
 

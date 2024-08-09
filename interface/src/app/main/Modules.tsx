@@ -27,8 +27,8 @@ import {
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
+import { readModules, writeModules } from '../../api/app';
 import ModulesDialog from './ModulesDialog';
-import { readModules, writeModules } from './api';
 import type { ModuleItem, Modules } from './types';
 
 const Modules = () => {

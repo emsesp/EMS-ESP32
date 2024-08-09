@@ -16,7 +16,7 @@ import {
   Typography
 } from '@mui/material';
 
-import * as SystemApi from 'api/system';
+import { readHardwareStatus, restart } from 'api/system';
 
 import { useRequest } from 'alova/client';
 import RestartMonitor from 'app/status/RestartMonitor';
@@ -35,7 +35,7 @@ import { useI18nContext } from 'i18n/i18n-react';
 import { numberValue, updateValueDirty, useRest } from 'utils';
 import { validate } from 'validators';
 
-import * as EMSESP from '../main/api';
+import { getBoardProfile, readSettings, writeSettings } from '../../api/app';
 import { BOARD_PROFILES } from '../main/types';
 import type { Settings } from '../main/types';
 import { createSettingsValidator } from '../main/validators';
@@ -49,7 +49,7 @@ export function boardProfileSelectItems() {
 }
 
 const ApplicationSettings = () => {
-  const { data: hardwareData } = useRequest(SystemApi.readHardwareStatus, {
+  const { data: hardwareData } = useRequest(readHardwareStatus, {
     initialData: { psram: false }
   });
 
@@ -66,8 +66,8 @@ const ApplicationSettings = () => {
     errorMessage,
     restartNeeded
   } = useRest<Settings>({
-    read: EMSESP.readSettings,
-    update: EMSESP.writeSettings
+    read: readSettings,
+    update: writeSettings
   });
 
   const [restarting, setRestarting] = useState<boolean>();
@@ -84,7 +84,7 @@ const ApplicationSettings = () => {
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
   const { loading: processingBoard, send: readBoardProfile } = useRequest(
-    (boardProfile: string) => EMSESP.getBoardProfile(boardProfile),
+    (boardProfile: string) => getBoardProfile(boardProfile),
     {
       immediate: false
     }
@@ -105,7 +105,7 @@ const ApplicationSettings = () => {
     });
   });
 
-  const { send: restartCommand } = useRequest(SystemApi.restart(), {
+  const { send: restartCommand } = useRequest(restart(), {
     immediate: false
   });
 

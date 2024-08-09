@@ -4,9 +4,7 @@ import { toast } from 'react-toastify';
 import ForwardIcon from '@mui/icons-material/Forward';
 import { Box, Button, Paper, Typography } from '@mui/material';
 
-import * as AuthenticationApi from 'api/authentication';
-import { PROJECT_NAME } from 'api/env';
-
+import * as AuthenticationApi from 'components/routing/authentication';
 import { useRequest } from 'alova/client';
 import type { ValidateFieldsError } from 'async-validator';
 import {
@@ -15,6 +13,7 @@ import {
   ValidatedTextField
 } from 'components';
 import { AuthenticationContext } from 'contexts/authentication';
+import { PROJECT_NAME } from 'env';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { SignInRequest } from 'types';
 import { onEnterCallback, updateValue } from 'utils';

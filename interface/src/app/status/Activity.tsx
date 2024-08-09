@@ -18,7 +18,7 @@ import { ButtonRow, FormLoader, SectionContent, useLayoutTitle } from 'component
 import { useI18nContext } from 'i18n/i18n-react';
 import type { Translation } from 'i18n/i18n-types';
 
-import * as EMSESP from '../main/api';
+import * as EMSESP from '../../api/app';
 import type { Stat } from '../main/types';
 
 const SystemActivity = () => {

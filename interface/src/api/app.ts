@@ -17,7 +17,7 @@ import type {
   Settings,
   WriteAnalogSensor,
   WriteTemperatureSensor
-} from './types';
+} from '../app/main/types';
 
 // DashboardDevices
 export const readCoreData = () => alovaInstance.Get<CoreData>(`/rest/coreData`);
