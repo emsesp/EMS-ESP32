@@ -25,7 +25,7 @@
 
 ## **Documentation**
 
-For the complete documentation on how to install, configure and get support visit the [EMS-ESP Wiki](https://emsesp.github.io/docs).
+For the complete documentation on how to install, configure and get support visit the [EMS-ESP Wiki](https://emsesp.org).
 
 ## **Support**
 
@@ -35,7 +35,7 @@ If you like **EMS-ESP**, please give it a star, or fork it and contribute or off
 
 ## **Demo**
 
-For a live demo of the Web UI click [here](https://ems-esp.derbyshire.nl) and log in with any username/password.
+For a live demo of the Web UI click [here](https://demo.emsesp.org) and log in with any username/password.
 
 ## **Contributors ✨**
 
