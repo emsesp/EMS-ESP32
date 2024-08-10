@@ -39,7 +39,8 @@ import {
 } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
 import { dialogStyle } from 'CustomTheme';
-import { useRequest } from 'alova/client';
+import { useRequest } from 'alova';
+// import { useRequest } from 'alova/client'  // TODO replace when Alova 3 is released
 import RestartMonitor from 'app/status/RestartMonitor';
 import {
   BlockNavigation,
@@ -110,13 +111,25 @@ const Customizations = () => {
     }
   );
 
-  const { send: sendDeviceEntities } = useRequest(
+  // TODO Alova 3 code...
+  // const { send: sendDeviceEntities } = useRequest(
+  //   (data: number) => readDeviceEntities(data),
+  //   {
+  //     initialData: [],
+  //     immediate: false
+  //   }
+  // ).onSuccess((event) => {
+  //   setOriginalSettings(event.data);
+  // });
+
+  const { send: sendDeviceEntities, onSuccess } = useRequest(
     (data: number) => readDeviceEntities(data),
     {
       initialData: [],
       immediate: false
     }
-  ).onSuccess((event) => {
+  );
+  onSuccess((event) => {
     setOriginalSettings(event.data);
   });
 

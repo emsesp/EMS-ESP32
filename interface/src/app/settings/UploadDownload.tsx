@@ -14,7 +14,8 @@ import {
 } from 'api/app';
 import { getDevVersion, getStableVersion } from 'api/system';
 
-import { useRequest } from 'alova/client';
+// import { useRequest } from 'alova/client'  // TODO replace when Alova 3 is released
+import { useRequest } from 'alova';
 import type { APIcall } from 'app/main/types';
 import {
   FormLoader,
@@ -31,6 +32,92 @@ const UploadDownload = () => {
   const [restarting, setRestarting] = useState<boolean>();
   const [md5, setMd5] = useState<string>();
 
+  const { send: sendSettings, onSuccess: onSuccessGetSettings } = useRequest(
+    getSettings(),
+    {
+      immediate: false
+    }
+  );
+  const { send: sendCustomizations, onSuccess: onSuccessGetCustomizations } =
+    useRequest(getCustomizations(), {
+      immediate: false
+    });
+  const { send: sendEntities, onSuccess: onSuccessGetEntities } = useRequest(
+    getEntities(),
+    {
+      immediate: false
+    }
+  );
+  const { send: sendSchedule, onSuccess: onSuccessGetSchedule } = useRequest(
+    getSchedule(),
+    {
+      immediate: false
+    }
+  );
+  const { send: getAPI, onSuccess: onGetAPI } = useRequest(
+    (data: APIcall) => API(data),
+    {
+      immediate: false
+    }
+  );
+
+  // Alova 3 code...
+  // const {
+  //   loading: isUploading,
+  //   uploading: progress,
+  //   send: sendUpload,
+  //   abort: cancelUpload
+  // } = useRequest(SystemApi.uploadFile, {
+  //   immediate: false
+  // }).onSuccess(({ data }) => {
+  //   if (data) {
+  //     setMd5(data.md5);
+  //     toast.success(LL.UPLOAD() + ' MD5 ' + LL.SUCCESSFUL());
+  //   } else {
+  //     setRestarting(true);
+  //   }
+  // });
+  const {
+    loading: isUploading,
+    uploading: progress,
+    send: sendUpload,
+    onSuccess: onSuccessUpload,
+    abort: cancelUpload
+  } = useRequest(SystemApi.uploadFile, {
+    immediate: false
+  });
+
+  onSuccessUpload(({ data }) => {
+    if (data) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      setMd5(data.md5);
+      toast.success(LL.UPLOAD() + ' MD5 ' + LL.SUCCESSFUL());
+    } else {
+      setRestarting(true);
+    }
+  });
+  onSuccessGetSettings((event) => {
+    saveFile(event.data, 'settings.json');
+  });
+  onSuccessGetCustomizations((event) => {
+    saveFile(event.data, 'customizations.json');
+  });
+  onSuccessGetEntities((event) => {
+    saveFile(event.data, 'entities.json');
+  });
+  onSuccessGetSchedule((event) => {
+    saveFile(event.data, 'schedule.json');
+  });
+  onGetAPI((event) => {
+    saveFile(
+      event.data,
+      event.sendArgs[0].device + '_' + event.sendArgs[0].entity + '.txt'
+    );
+  });
+
+  // TODO Alova 3 code...
+  /*
+  
   const { send: sendSettings } = useRequest(getSettings(), {
     immediate: false
   }).onSuccess((event) => {
@@ -64,6 +151,8 @@ const UploadDownload = () => {
     );
   });
 
+  */
+
   const {
     data: data,
     send: loadData,
@@ -95,22 +184,6 @@ const UploadDownload = () => {
     }
     return data.esp_platform;
   };
-
-  const {
-    loading: isUploading,
-    uploading: progress,
-    send: sendUpload,
-    abort: cancelUpload
-  } = useRequest(SystemApi.uploadFile, {
-    immediate: false
-  }).onSuccess(({ data }) => {
-    if (data) {
-      setMd5(data.md5);
-      toast.success(LL.UPLOAD() + ' MD5 ' + LL.SUCCESSFUL());
-    } else {
-      setRestarting(true);
-    }
-  });
 
   const startUpload = async (files: File[]) => {
     await sendUpload(files[0]).catch((error: Error) => {

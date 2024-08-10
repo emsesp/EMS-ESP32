@@ -5,7 +5,8 @@ import { Button } from '@mui/material';
 
 import * as NetworkApi from 'api/network';
 
-import { updateState, useRequest } from 'alova/client';
+// import { updateState, useRequest } from 'alova/client'; // TODO replace when Alova 3 is released
+import { updateState, useRequest } from 'alova';
 import { ButtonRow, FormLoader, SectionContent } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
@@ -20,22 +21,18 @@ const WiFiNetworkScanner = () => {
   const [errorMessage, setErrorMessage] = useState<string>();
 
   // is called on page load to start network scan
-  const { send: scanNetworks } = useRequest(NetworkApi.scanNetworks).onComplete(
-    () => {
-      pollCount.current = 0;
-      setErrorMessage(undefined);
-      void updateState(NetworkApi.listNetworks(), () => undefined);
-      void getNetworkList();
-    }
-  );
 
-  const { data: networkList, send: getNetworkList } = useRequest(
-    NetworkApi.listNetworks,
-    {
-      immediate: false
-    }
-  ).onSuccess((event) => {
-    // is called when network scan is completed
+  const { send: scanNetworks, onComplete: onCompleteScanNetworks } = useRequest(
+    NetworkApi.scanNetworks
+  );
+  const {
+    data: networkList,
+    send: getNetworkList,
+    onSuccess: onSuccessNetworkList
+  } = useRequest(NetworkApi.listNetworks, {
+    immediate: false
+  });
+  onSuccessNetworkList((event) => {
     if (!event.data) {
       const completedPollCount = pollCount.current + 1;
       if (completedPollCount < NUM_POLLS) {
@@ -47,6 +44,42 @@ const WiFiNetworkScanner = () => {
       }
     }
   });
+
+  onCompleteScanNetworks(() => {
+    pollCount.current = 0;
+    setErrorMessage(undefined);
+    updateState('listNetworks', () => undefined);
+    void getNetworkList();
+  });
+
+  // Alova 3 code...
+  // const { send: scanNetworks } = useRequest(NetworkApi.scanNetworks).onComplete(
+  //   () => {
+  //     pollCount.current = 0;
+  //     setErrorMessage(undefined);
+  //     void updateState(NetworkApi.listNetworks(), () => undefined);
+  //     void getNetworkList();
+  //   }
+  // );
+
+  // const { data: networkList, send: getNetworkList } = useRequest(
+  //   NetworkApi.listNetworks,
+  //   {
+  //     immediate: false
+  //   }
+  // ).onSuccess((event) => {
+  //   // is called when network scan is completed
+  //   if (!event.data) {
+  //     const completedPollCount = pollCount.current + 1;
+  //     if (completedPollCount < NUM_POLLS) {
+  //       pollCount.current = completedPollCount;
+  //       setTimeout(getNetworkList, POLLING_FREQUENCY);
+  //     } else {
+  //       setErrorMessage(LL.PROBLEM_LOADING());
+  //       pollCount.current = 0;
+  //     }
+  //   }
+  // });
 
   const renderNetworkScanner = () => {
     if (!networkList) {

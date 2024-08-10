@@ -16,11 +16,17 @@ import {
 import * as SecurityApi from 'api/security';
 
 import { dialogStyle } from 'CustomTheme';
-import { useRequest } from 'alova/client';
+// import { useRequest } from 'alova/client'  // TODO replace when Alova 3 is released
+import { useRequest } from 'alova';
 import { MessageBox } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
-export default function GenerateToken({ username, onClose }) {
+interface GenerateTokenProps {
+  username?: string;
+  onClose: () => void;
+}
+
+const GenerateToken = ({ username, onClose }: GenerateTokenProps) => {
   const { LL } = useI18nContext();
   const open = !!username;
 
@@ -79,4 +85,6 @@ export default function GenerateToken({ username, onClose }) {
       </DialogActions>
     </Dialog>
   );
-}
+};
+
+export default GenerateToken;

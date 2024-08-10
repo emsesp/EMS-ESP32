@@ -30,11 +30,13 @@ const OPTION_ICONS: {
   favorite: [StarIcon, StarOutlineIcon]
 };
 
-export default function OptionIcon({ type, isSet }) {
+const OptionIcon = ({ type, isSet }: { type: OptionType; isSet: boolean }) => {
   const Icon = OPTION_ICONS[type][isSet ? 0 : 1];
   return isSet ? (
     <Icon color="primary" sx={{ fontSize: 16, verticalAlign: 'middle' }} />
   ) : (
     <Icon sx={{ fontSize: 16, verticalAlign: 'middle' }} />
   );
-}
+};
+
+export default OptionIcon;

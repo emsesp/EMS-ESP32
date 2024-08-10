@@ -8,25 +8,10 @@ export const ACCESS_TOKEN = 'access_token';
 
 export const alovaInstance = createAlova({
   statesHook: ReactHook,
-  cacheFor: null,
-  // TODO fix cache
-  // cacheFor: {
-  //   // Set the cache mode for POST uniformly
-  //   POST: {
-  //     mode: 'restore',
-  //     expire: 60 * 10 * 1000
-  //   },
-  //   // Set the cache mode for HEAD requests uniformly
-  //   HEAD: 60 * 10 * 1000
-  // },
-  // timeout: 3000, // 3 seconds but throwing a timeout error
-  // localCache: null,
-  // localCache: {
-  //   GET: {
-  //     mode: 'placeholder', // see https://alova.js.org/learning/response-cache/#cache-replaceholder-mode
-  //     expire: 2000
-  //   }
-  // },
+  timeout: 3000, // 3 seconds but throwing a timeout error
+  localCache: null,
+  // TODO Alova v3 code...
+  // cacheFor: null,
   requestAdapter: xhrRequestAdapter(),
   beforeRequest(method) {
     if (localStorage.getItem(ACCESS_TOKEN)) {

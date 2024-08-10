@@ -29,7 +29,8 @@ import type { Theme } from '@mui/material';
 import * as NTPApi from 'api/ntp';
 
 import { dialogStyle } from 'CustomTheme';
-import { useRequest } from 'alova/client';
+// import { useRequest } from 'alova/client'  // TODO replace when Alova 3 is released
+import { useRequest } from 'alova';
 import { ButtonRow, FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { NTPStatusType, Time } from 'types';

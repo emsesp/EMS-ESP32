@@ -15,8 +15,8 @@ import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 
 import { DeviceType } from './types';
 
-export default function DeviceIcon({ type_id }) {
-  switch (type_id as DeviceType) {
+const DeviceIcon = ({ type_id }: { type_id: DeviceType }) => {
+  switch (type_id) {
     case DeviceType.TEMPERATURESENSOR:
     case DeviceType.ANALOGSENSOR:
       return <MdOutlineSensors />;
@@ -55,4 +55,6 @@ export default function DeviceIcon({ type_id }) {
     default:
       return null;
   }
-}
+};
+
+export default DeviceIcon;

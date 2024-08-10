@@ -16,7 +16,12 @@ const LayoutDrawerLogo = styled('img')(({ theme }) => ({
   }
 }));
 
-export default function LayoutDrawerProps({ mobileOpen, onClose }) {
+interface LayoutDrawerProps {
+  mobileOpen: boolean;
+  onClose: () => void;
+}
+
+const LayoutDrawerProps = ({ mobileOpen, onClose }: LayoutDrawerProps) => {
   const drawer = (
     <>
       <Toolbar disableGutters>
@@ -59,4 +64,6 @@ export default function LayoutDrawerProps({ mobileOpen, onClose }) {
       </Drawer>
     </Box>
   );
-}
+};
+
+export default LayoutDrawerProps;

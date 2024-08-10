@@ -6,7 +6,12 @@ import { AppBar, IconButton, Toolbar, Typography } from '@mui/material';
 
 export const DRAWER_WIDTH = 210;
 
-export default function LayoutAppBar({ title, onToggleDrawer }) {
+interface LayoutAppBarProps {
+  title: string;
+  onToggleDrawer: () => void;
+}
+
+const LayoutAppBar = ({ title, onToggleDrawer }: LayoutAppBarProps) => {
   const pathnames = useLocation()
     .pathname.split('/')
     .filter((x) => x);
@@ -50,4 +55,6 @@ export default function LayoutAppBar({ title, onToggleDrawer }) {
       </Toolbar>
     </AppBar>
   );
-}
+};
+
+export default LayoutAppBar;

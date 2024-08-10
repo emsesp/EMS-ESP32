@@ -24,15 +24,29 @@ export const fetchLog = () => alovaInstance.Post('/rest/fetchLog');
 export const fetchLogES = () => alovaInstance.Get('/es/log');
 
 // Get versions from github
+
+// Alova 3 code...
+// export const getStableVersion = () =>
+//   alovaInstanceGH.Get('latest', {
+//     transform(response: { data: { name: string } }) {
+//       return response.data.name.substring(1);
+//     }
+//   });
+// export const getDevVersion = () =>
+//   alovaInstanceGH.Get('tags/latest', {
+//     transform(response: { data: { name: string } }) {
+//       return response.data.name.split(/\s+/).splice(-1)[0].substring(1);
+//     }
+//   });
 export const getStableVersion = () =>
   alovaInstanceGH.Get('latest', {
-    transform(response: { data: { name: string } }) {
+    transformData(response: { data: { name: string } }) {
       return response.data.name.substring(1);
     }
   });
 export const getDevVersion = () =>
   alovaInstanceGH.Get('tags/latest', {
-    transform(response: { data: { name: string } }) {
+    transformData(response: { data: { name: string } }) {
       return response.data.name.split(/\s+/).splice(-1)[0].substring(1);
     }
   });

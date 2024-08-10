@@ -22,7 +22,7 @@ const RootRedirect = ({ message, signOut }: SecurityRedirectProps) => {
   return <Navigate to="/" />;
 };
 
-export default function AppRouting() {
+const AppRouting = () => {
   const { LL } = useI18nContext();
 
   return (
@@ -55,4 +55,6 @@ export default function AppRouting() {
       </Routes>
     </Authentication>
   );
-}
+};
+
+export default AppRouting;

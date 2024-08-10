@@ -6,7 +6,8 @@ import { toast } from 'react-toastify';
 import { ACCESS_TOKEN } from 'api/endpoints';
 
 import * as AuthenticationApi from 'components/routing/authentication';
-import { useRequest } from 'alova/client';
+// import { useRequest } from 'alova/client'  // TODO replace when Alova 3 is released
+import { useRequest } from 'alova';
 import { LoadingSpinner } from 'components';
 import { verifyAuthorization } from 'components/routing/authentication';
 import { useI18nContext } from 'i18n/i18n-react';

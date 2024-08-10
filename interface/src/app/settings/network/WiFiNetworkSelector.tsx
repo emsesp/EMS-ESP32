@@ -17,7 +17,7 @@ import type { Theme } from '@mui/material';
 
 import { MessageBox } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
-import type { WiFiNetwork } from 'types';
+import type { WiFiNetwork, WiFiNetworkList } from 'types';
 import { WiFiEncryptionType } from 'types';
 
 import { WiFiConnectionContext } from './WiFiConnectionContext';
@@ -57,7 +57,7 @@ const networkQualityHighlight = ({ rssi }: WiFiNetwork, theme: Theme) => {
   return theme.palette.success.main;
 };
 
-function WiFiNetworkSelector({ networkList }) {
+const WiFiNetworkSelector = ({ networkList }: { networkList: WiFiNetworkList }) => {
   const { LL } = useI18nContext();
   const theme = useTheme();
 
@@ -95,6 +95,6 @@ function WiFiNetworkSelector({ networkList }) {
   }
 
   return <List>{networkList.networks.map(renderNetwork)}</List>;
-}
+};
 
 export default WiFiNetworkSelector;

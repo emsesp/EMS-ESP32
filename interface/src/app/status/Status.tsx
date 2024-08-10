@@ -34,7 +34,8 @@ import {
 import * as SystemApi from 'api/system';
 
 import { dialogStyle } from 'CustomTheme';
-import { useRequest } from 'alova/client';
+// import { useRequest } from 'alova/client'  // TODO replace when Alova 3 is released
+import { useRequest } from 'alova';
 import { busConnectionStatus } from 'app/main/types';
 import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import ListMenuItem from 'components/layout/ListMenuItem';
@@ -67,8 +68,8 @@ const SystemStatus = () => {
 
   const {
     data: data,
-    loading,
-    send: loadData
+    send: loadData,
+    error
   } = useRequest(SystemApi.readSystemStatus, {
     initialData: []
   });
@@ -272,11 +273,6 @@ const SystemStatus = () => {
   );
 
   const content = () => {
-    // TODO remove test code
-    if (loading) {
-      return <>not loaded!</>;
-    }
-
     if (!data) {
       return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
     }

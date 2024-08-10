@@ -18,7 +18,8 @@ import {
 
 import { readHardwareStatus, restart } from 'api/system';
 
-import { useRequest } from 'alova/client';
+// import { useRequest } from 'alova/client'  // TODO replace when Alova 3 is released
+import { useRequest } from 'alova';
 import RestartMonitor from 'app/status/RestartMonitor';
 import type { ValidateFieldsError } from 'async-validator';
 import {
@@ -49,9 +50,7 @@ export function boardProfileSelectItems() {
 }
 
 const ApplicationSettings = () => {
-  const { data: hardwareData } = useRequest(readHardwareStatus, {
-    initialData: { psram: false }
-  });
+  const { data: hardwareData } = useRequest(readHardwareStatus);
 
   const {
     loadData,
@@ -83,12 +82,15 @@ const ApplicationSettings = () => {
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  const { loading: processingBoard, send: readBoardProfile } = useRequest(
-    (boardProfile: string) => getBoardProfile(boardProfile),
-    {
-      immediate: false
-    }
-  ).onSuccess((event) => {
+  const {
+    loading: processingBoard,
+    send: readBoardProfile,
+    onSuccess: onSuccessBoardProfile
+  } = useRequest((boardProfile: string) => getBoardProfile(boardProfile), {
+    immediate: false
+  });
+
+  onSuccessBoardProfile((event) => {
     const response = event.data as Settings;
     updateDataValue({
       ...data,
@@ -105,6 +107,29 @@ const ApplicationSettings = () => {
     });
   });
 
+  // TODO replace with Alova 3
+  // const { loading: processingBoard, send: readBoardProfile } = useRequest(
+  //   (boardProfile: string) => getBoardProfile(boardProfile),
+  //   {
+  //     immediate: false
+  //   }
+  // ).onSuccess((event) => {
+  //   const response = event.data as Settings;
+  //   updateDataValue({
+  //     ...data,
+  //     board_profile: response.board_profile,
+  //     led_gpio: response.led_gpio,
+  //     dallas_gpio: response.dallas_gpio,
+  //     rx_gpio: response.rx_gpio,
+  //     tx_gpio: response.tx_gpio,
+  //     pbutton_gpio: response.pbutton_gpio,
+  //     phy_type: response.phy_type,
+  //     eth_power: response.eth_power,
+  //     eth_phy_addr: response.eth_phy_addr,
+  //     eth_clock_mode: response.eth_clock_mode
+  //   });
+  // });
+
   const { send: restartCommand } = useRequest(restart(), {
     immediate: false
   });
@@ -118,7 +143,7 @@ const ApplicationSettings = () => {
   useLayoutTitle(LL.SETTINGS_OF(LL.APPLICATION()));
 
   const content = () => {
-    if (!data) {
+    if (!data || !hardwareData) {
       return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
     }
 

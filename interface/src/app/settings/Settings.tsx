@@ -24,7 +24,8 @@ import {
 import * as SystemApi from 'api/system';
 
 import { dialogStyle } from 'CustomTheme';
-import { useRequest } from 'alova/client';
+// import { useRequest } from 'alova/client'  // TODO replace when Alova 3 is released
+import { useRequest } from 'alova';
 import { SectionContent, useLayoutTitle } from 'components';
 import ListMenuItem from 'components/layout/ListMenuItem';
 import { useI18nContext } from 'i18n/i18n-react';

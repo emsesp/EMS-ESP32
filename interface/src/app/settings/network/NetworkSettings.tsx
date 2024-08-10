@@ -25,7 +25,8 @@ import {
 import * as NetworkApi from 'api/network';
 import * as SystemApi from 'api/system';
 
-import { updateState, useRequest } from 'alova/client';
+import { updateState, useRequest } from 'alova';
+// import { updateState, useRequest } from 'alova/client'; // TODO replace when Alova 3 is released
 import type { ValidateFieldsError } from 'async-validator';
 import {
   BlockFormControlLabel,

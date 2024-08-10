@@ -7,7 +7,8 @@ import { Button, Checkbox, MenuItem } from '@mui/material';
 import * as NTPApi from 'api/ntp';
 import { readNTPSettings } from 'api/ntp';
 
-import { updateState } from 'alova/client';
+// import { updateState } from 'alova/client'; // TODO replace when Alova 3 is released
+import { updateState } from 'alova';
 import type { ValidateFieldsError } from 'async-validator';
 import {
   BlockFormControlLabel,
