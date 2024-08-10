@@ -4,7 +4,6 @@ import { toast } from 'react-toastify';
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
 import { Box, Button, Typography } from '@mui/material';
 
@@ -20,8 +19,8 @@ import {
 } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
 import type { State } from '@table-library/react-table-library/types/common';
-import { useRequest } from 'alova/client';
-import { ButtonRow, SectionContent, useLayoutTitle } from 'components';
+import { useAutoRequest, useRequest } from 'alova/client';
+import { SectionContent, useLayoutTitle } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 
@@ -60,7 +59,7 @@ const Sensors = () => {
   const [analogDialogOpen, setAnalogDialogOpen] = useState<boolean>(false);
   const [creating, setCreating] = useState<boolean>(false);
 
-  const { data: sensorData, send: sendSensorData } = useRequest(
+  const { data: sensorData, send: sendSensorData } = useAutoRequest(
     () => readSensorData(),
     {
       initialData: {
@@ -68,7 +67,8 @@ const Sensors = () => {
         as: [],
         analog_enabled: false,
         platform: 'ESP32'
-      }
+      },
+      pollingTime: 2000
     }
   );
 
@@ -500,30 +500,18 @@ const Sensors = () => {
           )}
         </>
       )}
-      <ButtonRow>
-        <Box mt={1} display="flex" flexWrap="wrap">
-          <Box flexGrow={1}>
-            <Button
-              startIcon={<RefreshIcon />}
-              variant="outlined"
-              color="secondary"
-              onClick={sendSensorData}
-            >
-              {LL.REFRESH()}
-            </Button>
-          </Box>
-          {sensorData?.analog_enabled === true && me.admin && (
-            <Button
-              variant="outlined"
-              color="primary"
-              startIcon={<AddCircleOutlineOutlinedIcon />}
-              onClick={addAnalogSensor}
-            >
-              {LL.ADD(0) + ' ' + LL.ANALOG_SENSOR(1)}
-            </Button>
-          )}
-        </Box>
-      </ButtonRow>
+      <Box mt={1} display="flex" flexWrap="wrap">
+        {sensorData?.analog_enabled === true && me.admin && (
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<AddCircleOutlineOutlinedIcon />}
+            onClick={addAnalogSensor}
+          >
+            {LL.ADD(0) + ' ' + LL.ANALOG_SENSOR(1)}
+          </Button>
+        )}
+      </Box>
     </SectionContent>
   );
 };

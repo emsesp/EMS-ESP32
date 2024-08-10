@@ -5,7 +5,6 @@ import { toast } from 'react-toastify';
 import AddIcon from '@mui/icons-material/Add';
 import CancelIcon from '@mui/icons-material/Cancel';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Typography } from '@mui/material';
 
@@ -19,7 +18,7 @@ import {
   Table
 } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
-import { updateState, useRequest } from 'alova/client';
+import { updateState, useAutoRequest, useRequest } from 'alova/client';
 import {
   BlockNavigation,
   ButtonRow,
@@ -49,8 +48,9 @@ const CustomEntities = () => {
     data: entities,
     send: fetchEntities,
     error
-  } = useRequest(readCustomEntities, {
-    initialData: []
+  } = useAutoRequest(readCustomEntities, {
+    initialData: [],
+    pollingTime: 2000
   });
 
   const { send: writeEntities } = useRequest(
@@ -324,24 +324,14 @@ const CustomEntities = () => {
           )}
         </Box>
         <Box flexWrap="nowrap" whiteSpace="nowrap">
-          <ButtonRow>
-            <Button
-              startIcon={<RefreshIcon />}
-              variant="outlined"
-              color="secondary"
-              onClick={fetchEntities}
-            >
-              {LL.REFRESH()}
-            </Button>
-            <Button
-              startIcon={<AddIcon />}
-              variant="outlined"
-              color="primary"
-              onClick={addEntityItem}
-            >
-              {LL.ADD(0)}
-            </Button>
-          </ButtonRow>
+          <Button
+            startIcon={<AddIcon />}
+            variant="outlined"
+            color="primary"
+            onClick={addEntityItem}
+          >
+            {LL.ADD(0)}
+          </Button>
         </Box>
       </Box>
     </SectionContent>

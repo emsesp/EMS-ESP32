@@ -19,7 +19,6 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined';
 import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
@@ -56,8 +55,8 @@ import {
 import { useTheme } from '@table-library/react-table-library/theme';
 import type { Action, State } from '@table-library/react-table-library/types/common';
 import { dialogStyle } from 'CustomTheme';
-import { useRequest } from 'alova/client';
-import { ButtonRow, MessageBox, SectionContent, useLayoutTitle } from 'components';
+import { useAutoRequest, useRequest } from 'alova/client';
+import { MessageBox, SectionContent, useLayoutTitle } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 
@@ -84,12 +83,16 @@ const Devices = () => {
 
   useLayoutTitle(LL.DEVICES());
 
-  const { data: coreData, send: sendCoreData } = useRequest(() => readCoreData(), {
-    initialData: {
-      connected: true,
-      devices: []
+  const { data: coreData, send: sendCoreData } = useAutoRequest(
+    () => readCoreData(),
+    {
+      initialData: {
+        connected: true,
+        devices: []
+      },
+      pollingTime: 2000
     }
-  });
+  );
 
   const { data: deviceData, send: sendDeviceData } = useRequest(
     (id: number) => readDeviceData(id),
@@ -681,11 +684,6 @@ const Devices = () => {
                   )}
                 </IconButton>
               </ButtonTooltip>
-              <ButtonTooltip title={LL.REFRESH()}>
-                <IconButton onClick={refreshData}>
-                  <RefreshIcon color="primary" sx={{ fontSize: 18 }} />
-                </IconButton>
-              </ButtonTooltip>
             </Typography>
             <Grid item zeroMinWidth justifyContent="flex-end">
               <ButtonTooltip title={LL.CANCEL()}>
@@ -780,16 +778,6 @@ const Devices = () => {
           progress={submitting}
         />
       )}
-      <ButtonRow mt={1}>
-        <Button
-          startIcon={<RefreshIcon />}
-          variant="outlined"
-          color="secondary"
-          onClick={refreshData}
-        >
-          {LL.REFRESH()}
-        </Button>
-      </ButtonRow>
     </SectionContent>
   );
 };

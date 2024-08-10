@@ -1,11 +1,9 @@
 import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import ReportIcon from '@mui/icons-material/Report';
 import SpeakerNotesOffIcon from '@mui/icons-material/SpeakerNotesOff';
 import {
   Avatar,
-  Button,
   Divider,
   List,
   ListItem,
@@ -17,8 +15,8 @@ import type { Theme } from '@mui/material';
 
 import * as MqttApi from 'api/mqtt';
 
-import { useRequest } from 'alova/client';
-import { ButtonRow, FormLoader, SectionContent, useLayoutTitle } from 'components';
+import { useAutoRequest } from 'alova/client';
+import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { MqttStatusType } from 'types';
 import { MqttDisconnectReason } from 'types';
@@ -56,7 +54,11 @@ export const mqttQueueHighlight = (
 };
 
 const MqttStatus = () => {
-  const { data: data, send: loadData, error } = useRequest(MqttApi.readMqttStatus);
+  const {
+    data: data,
+    send: loadData,
+    error
+  } = useAutoRequest(MqttApi.readMqttStatus, { pollingTime: 5000 });
 
   const { LL } = useI18nContext();
   useLayoutTitle(LL.STATUS_OF('MQTT'));
@@ -146,30 +148,18 @@ const MqttStatus = () => {
     );
 
     return (
-      <>
-        <List>
-          <ListItem>
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: mqttStatusHighlight(data, theme) }}>
-                <DeviceHubIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary={LL.STATUS_OF('')} secondary={mqttStatus(data)} />
-          </ListItem>
-          <Divider variant="inset" component="li" />
-          {data.enabled && renderConnectionStatus()}
-        </List>
-        <ButtonRow>
-          <Button
-            startIcon={<RefreshIcon />}
-            variant="outlined"
-            color="secondary"
-            onClick={loadData}
-          >
-            {LL.REFRESH()}
-          </Button>
-        </ButtonRow>
-      </>
+      <List>
+        <ListItem>
+          <ListItemAvatar>
+            <Avatar sx={{ bgcolor: mqttStatusHighlight(data, theme) }}>
+              <DeviceHubIcon />
+            </Avatar>
+          </ListItemAvatar>
+          <ListItemText primary={LL.STATUS_OF('')} secondary={mqttStatus(data)} />
+        </ListItem>
+        <Divider variant="inset" component="li" />
+        {data.enabled && renderConnectionStatus()}
+      </List>
     );
   };
 
