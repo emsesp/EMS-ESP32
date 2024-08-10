@@ -16,9 +16,7 @@ import {
 import * as SystemApi from 'api/system';
 import { fetchLogES } from 'api/system';
 
-// import { useRequest, useSSE } from 'alova/client'; // TODO replace when Alova 3 is released
-import { useSSE } from '@alova/scene-react';
-import { useRequest } from 'alova';
+import { useRequest, useSSE } from 'alova/client';
 import {
   BlockFormControlLabel,
   BlockNavigation,

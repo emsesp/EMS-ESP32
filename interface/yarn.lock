@@ -5,17 +5,21 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
-"@alova/adapter-xhr@npm:1.0.6":
-  version: 1.0.6
-  resolution: "@alova/adapter-xhr@npm:1.0.6"
-  checksum: 10c0/1cd4f2da4f1c58865e14999d9cf367635f72f8e6bd41497366c25681154ffc7a4dedd70f234610c5e028c01418992dab709c777d986a6432d7d9783beeeb150e
+"@alova/adapter-xhr@npm:2.0.4":
+  version: 2.0.4
+  resolution: "@alova/adapter-xhr@npm:2.0.4"
+  dependencies:
+    "@alova/shared": "npm:^1.0.4"
+  peerDependencies:
+    alova: ^3.0.5
+  checksum: 10c0/c68f51b83c75844cf2cddc47d6e08fa7a6f0af83cc6213b60d0d8ac32988f8e7b44f321b1f926fa282a2cda02757ce3cbfe94e86f140fd025ab22f0dfee9bed9
   languageName: node
   linkType: hard
 
-"@alova/scene-react@npm:1.6.2":
-  version: 1.6.2
-  resolution: "@alova/scene-react@npm:1.6.2"
-  checksum: 10c0/dac01605df824e66dba92c5d7073e33f98ad47367a7180bd0ddc78c01f1e672ac665c1ff0445df7299be1426ca92e325cf0b9fa459984125d6391e9e9eb9d439
+"@alova/shared@npm:^1.0.4":
+  version: 1.0.4
+  resolution: "@alova/shared@npm:1.0.4"
+  checksum: 10c0/308b3163ee81fe98bb8372bd8a7df2a053be508167c86c6cfa2b3610c79389621e9a3466c391210e3f058799733465cf7dd153fcae536b03ea58dabff9d6eab4
   languageName: node
   linkType: hard
 
@@ -1651,8 +1655,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "EMS-ESP@workspace:."
   dependencies:
-    "@alova/adapter-xhr": "npm:1.0.6"
-    "@alova/scene-react": "npm:1.6.2"
+    "@alova/adapter-xhr": "npm:2.0.4"
     "@babel/core": "npm:^7.25.2"
     "@emotion/react": "npm:^11.13.0"
     "@emotion/styled": "npm:^11.13.0"
@@ -1668,7 +1671,7 @@ __metadata:
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"
     "@types/react-router-dom": "npm:^5.3.3"
-    alova: "npm:2.21.4"
+    alova: "npm:3.0.6"
     async-validator: "npm:^4.2.5"
     concurrently: "npm:^8.2.2"
     eslint: "npm:^9.9.0"
@@ -1750,10 +1753,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"alova@npm:2.21.4":
-  version: 2.21.4
-  resolution: "alova@npm:2.21.4"
-  checksum: 10c0/6600826747eecc85f750904cd5a9f75361bd5b542615b027fae072cafe72cb27b9f7b260a834063c0734a9b41a7aa8b15396a190f8ce9a46713d01b073296a50
+"alova@npm:3.0.6":
+  version: 3.0.6
+  resolution: "alova@npm:3.0.6"
+  dependencies:
+    "@alova/shared": "npm:^1.0.4"
+    rate-limiter-flexible: "npm:^5.0.3"
+  checksum: 10c0/dec1ceabaedc4c3c42237e03e4fdcd41ada8ad8aeb856ab2a1d428a1daf4559125767a9bd2d20f193ae013063baa59641a6c34dddf7794f7bba1a31e7258968f
   languageName: node
   linkType: hard
 
@@ -5714,6 +5720,13 @@ __metadata:
   version: 1.2.3
   resolution: "queue-microtask@npm:1.2.3"
   checksum: 10c0/900a93d3cdae3acd7d16f642c29a642aea32c2026446151f0778c62ac089d4b8e6c986811076e1ae180a694cedf077d453a11b58ff0a865629a4f82ab558e102
+  languageName: node
+  linkType: hard
+
+"rate-limiter-flexible@npm:^5.0.3":
+  version: 5.0.3
+  resolution: "rate-limiter-flexible@npm:5.0.3"
+  checksum: 10c0/4ae8290cf57cbd9bc8dfd9829ed821ffad2bc6d4699170608b4b85b010059981e591803a4b1974f25755f1cbf25ff8208795cc325d5bed9d2315717865e25697
   languageName: node
   linkType: hard
 

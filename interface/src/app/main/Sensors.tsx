@@ -20,8 +20,7 @@ import {
 } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
 import type { State } from '@table-library/react-table-library/types/common';
-// import { useRequest } from 'alova/client'  // TODO replace when Alova 3 is released
-import { useRequest } from 'alova';
+import { useRequest } from 'alova/client';
 import { ButtonRow, SectionContent, useLayoutTitle } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';

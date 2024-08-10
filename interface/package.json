@@ -22,14 +22,13 @@
     "lint": "eslint . --fix"
   },
   "dependencies": {
-    "@alova/adapter-xhr": "1.0.6",
-    "@alova/scene-react": "1.6.2",
+    "@alova/adapter-xhr": "2.0.4",
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "^5.16.7",
     "@mui/material": "^5.16.7",
     "@table-library/react-table-library": "4.1.7",
-    "alova": "2.21.4",
+    "alova": "3.0.6",
     "async-validator": "^4.2.5",
     "jwt-decode": "^4.0.0",
     "mime-types": "^2.1.35",

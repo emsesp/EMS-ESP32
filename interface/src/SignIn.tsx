@@ -5,8 +5,7 @@ import ForwardIcon from '@mui/icons-material/Forward';
 import { Box, Button, Paper, Typography } from '@mui/material';
 
 import * as AuthenticationApi from 'components/routing/authentication';
-// import { useRequest } from 'alova/client'  // TODO replace when Alova 3 is released
-import { useRequest } from 'alova';
+import { useRequest } from 'alova/client';
 import type { ValidateFieldsError } from 'async-validator';
 import {
   LanguageSelector,
@@ -32,26 +31,12 @@ const SignIn = () => {
   const [processing, setProcessing] = useState<boolean>(false);
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  // TODO ALova 3 code...
-  // const { send: callSignIn } = useRequest(
-  //   (request: SignInRequest) => AuthenticationApi.signIn(request),
-  //   {
-  //     immediate: false
-  //   }
-  // ).onSuccess((response) => {
-  //   if (response.data) {
-  //     authenticationContext.signIn(response.data.access_token);
-  //   }
-  // });
-
-  const { send: callSignIn, onSuccess } = useRequest(
+  const { send: callSignIn } = useRequest(
     (request: SignInRequest) => AuthenticationApi.signIn(request),
     {
       immediate: false
     }
-  );
-
-  onSuccess((response) => {
+  ).onSuccess((response) => {
     if (response.data) {
       authenticationContext.signIn(response.data.access_token);
     }

@@ -17,8 +17,7 @@ import {
   Table
 } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
-import { updateState, useRequest } from 'alova';
-// import { updateState, useRequest } from 'alova/client'; // TODO replace when Alova 3 is released
+import { updateState, useRequest } from 'alova/client';
 import {
   BlockNavigation,
   ButtonRow,

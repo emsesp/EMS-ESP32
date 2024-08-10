@@ -20,8 +20,7 @@ import {
 
 import * as SystemApi from 'api/system';
 
-// import { useRequest } from 'alova/client'  // TODO replace when Alova 3 is released
-import { useRequest } from 'alova';
+import { useRequest } from 'alova/client';
 import { ButtonRow, FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 

@@ -65,8 +65,7 @@ export const readDeviceEntities = (id: number) =>
   alovaInstance.Get<DeviceEntity[]>(`/rest/deviceEntities`, {
     params: { id },
     responseType: 'arraybuffer',
-    // transform(data) { // TODO alova 3
-    transformData(data) {
+    transform(data) {
       return (data as DeviceEntity[]).map((de: DeviceEntity) => ({
         ...de,
         o_m: de.m,
@@ -89,8 +88,7 @@ export const writeDeviceName = (data: { id: number; name: string }) =>
 // SettingsScheduler
 export const readSchedule = () =>
   alovaInstance.Get<ScheduleItem[]>('/rest/schedule', {
-    // transform(data) { // TODO alova 3
-    transformData(data) {
+    transform(data) {
       return (data as Schedule).schedule.map((si: ScheduleItem) => ({
         ...si,
         o_id: si.id,
@@ -110,8 +108,7 @@ export const writeSchedule = (data: Schedule) =>
 // Modules
 export const readModules = () =>
   alovaInstance.Get<ModuleItem[]>('/rest/modules', {
-    // transform(data) { // TODO alova 3
-    transformData(data) {
+    transform(data) {
       return (data as Modules).modules.map((mi: ModuleItem) => ({
         ...mi,
         o_enabled: mi.enabled,
@@ -128,8 +125,7 @@ export const writeModules = (data: {
 // SettingsEntities
 export const readCustomEntities = () =>
   alovaInstance.Get<EntityItem[]>('/rest/customEntities', {
-    // transform(data) { // TODO alova 3
-    transformData(data) {
+    transform(data) {
       return (data as Entities).entities.map((ei: EntityItem) => ({
         ...ei,
         o_id: ei.id,

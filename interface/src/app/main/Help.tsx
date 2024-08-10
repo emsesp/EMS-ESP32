@@ -17,8 +17,7 @@ import {
   Typography
 } from '@mui/material';
 
-// import { useRequest } from 'alova/client'  // TODO replace when Alova 3 is released
-import { useRequest } from 'alova';
+import { useRequest } from 'alova/client';
 import { SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
@@ -29,43 +28,22 @@ const Help = () => {
   const { LL } = useI18nContext();
   useLayoutTitle(LL.HELP_OF(''));
 
-  const { send: getAPI, onSuccess: onGetAPI } = useRequest(
-    (data: APIcall) => API(data),
-    {
-      immediate: false
-    }
-  );
-  onGetAPI((event) => {
+  const { send: getAPI } = useRequest((data: APIcall) => API(data), {
+    immediate: false
+  }).onSuccess((event) => {
     const anchor = document.createElement('a');
     anchor.href = URL.createObjectURL(
       new Blob([JSON.stringify(event.data, null, 2)], {
         type: 'text/plain'
       })
     );
+
     anchor.download =
-      'emsesp_' + event.sendArgs[0].device + '_' + event.sendArgs[0].entity + '.txt';
+      'emsesp_' + event.args[0].device + '_' + event.args[0].entity + '.txt';
     anchor.click();
     URL.revokeObjectURL(anchor.href);
     toast.info(LL.DOWNLOAD_SUCCESSFUL());
   });
-
-  // Alova 3 code...
-  // const { send: getAPI } = useRequest((data: APIcall) => API(data), {
-  //   immediate: false
-  // }).onSuccess((event) => {
-  //   const anchor = document.createElement('a');
-  //   anchor.href = URL.createObjectURL(
-  //     new Blob([JSON.stringify(event.data, null, 2)], {
-  //       type: 'text/plain'
-  //     })
-  //   );
-  //
-  //   anchor.download =
-  //     'emsesp_' + event.args[0].device + '_' + event.args[0].entity + '.txt';
-  //   anchor.click();
-  //   URL.revokeObjectURL(anchor.href);
-  //   toast.info(LL.DOWNLOAD_SUCCESSFUL());
-  // });
 
   const callAPI = async (device: string, entity: string) => {
     await getAPI({ device, entity, id: 0 }).catch((error: Error) => {

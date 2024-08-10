@@ -1,4 +1,4 @@
-import { xhrRequestAdapter } from '@alova/adapter-xhr';
+import { type AlovaXHRResponse, xhrRequestAdapter } from '@alova/adapter-xhr';
 import { createAlova } from 'alova';
 import ReactHook from 'alova/react';
 
@@ -8,10 +8,13 @@ export const ACCESS_TOKEN = 'access_token';
 
 export const alovaInstance = createAlova({
   statesHook: ReactHook,
-  timeout: 3000, // 3 seconds but throwing a timeout error
-  localCache: null,
-  // TODO Alova v3 code...
-  // cacheFor: null,
+  timeout: 3000, // 3 seconds before throwing a timeout error
+  cacheFor: {
+    GET: {
+      mode: 'memory',
+      expire: 60 * 10 * 1000 // 60 seconds in cache
+    }
+  },
   requestAdapter: xhrRequestAdapter(),
   beforeRequest(method) {
     if (localStorage.getItem(ACCESS_TOKEN)) {
@@ -21,7 +24,7 @@ export const alovaInstance = createAlova({
   },
 
   responded: {
-    onSuccess: async (response) => {
+    onSuccess: async (response: AlovaXHRResponse) => {
       // if (response.status === 202) {
       //   throw new Error('Wait'); // wifi scan in progress
       // } else
