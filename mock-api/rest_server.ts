@@ -1,11 +1,23 @@
-import { AutoRouter, error, status } from 'itty-router';
+import { AutoRouter, error, status, type ResponseHandler } from 'itty-router';
 import { Encoder } from '@msgpack/msgpack';
 
 const encoder = new Encoder();
 
+const logger: ResponseHandler = (response, request) => { 
+  console.log(
+    response.status,
+    request.url,
+    request.method,
+    'at',
+    new Date().toLocaleString(),
+  )
+}
+
 const router = AutoRouter({
   port: 3080,
-  missing: () => error(404, 'Error, endpoint not found')
+  missing: () => error(404, 'Error, endpoint not found'),
+  finally: [logger]
+
 });
 
 const REST_ENDPOINT_ROOT = '/rest/';
@@ -4327,9 +4339,9 @@ router
   .get(EMSESP_SETTINGS_ENDPOINT, () => settings)
   .post(EMSESP_SETTINGS_ENDPOINT, async (request: any) => {
     settings = await request.json();
-    console.log('settings saved', settings);
-    status(200); // no restart needed
-    // status(205); // restart needed
+    console.log('application settings saved', settings);
+    return status(200); // no restart needed
+    // return status(205); // restart needed
   })
 
   // Device Dashboard Data
