@@ -53,18 +53,18 @@ const Help = () => {
 
   return (
     <>
-      <SectionContent>
-        <List sx={{ borderRadius: 3, border: '2px solid grey' }}>
-          <ListItem>
-            <ListItemButton component="a" href="https://emsesp.github.io/docs">
-              <ListItemAvatar>
-                <Avatar sx={{ bgcolor: '#72caf9' }}>
-                  <MenuBookIcon />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText primary={LL.HELP_INFORMATION_1()} />
-            </ListItemButton>
-          </ListItem>
+    <SectionContent>
+      <List sx={{ borderRadius: 3, border: '2px solid grey' }}>
+        <ListItem>
+          <ListItemButton component="a" href="https://emsesp.org">
+            <ListItemAvatar>
+              <Avatar sx={{ bgcolor: '#72caf9' }}>
+                <MenuBookIcon />
+              </Avatar>
+            </ListItemAvatar>
+            <ListItemText primary={LL.HELP_INFORMATION_1()} />
+          </ListItemButton>
+        </ListItem>
 
           <ListItem>
             <ListItemButton component="a" href="https://discord.gg/3J3GgnzpyT">

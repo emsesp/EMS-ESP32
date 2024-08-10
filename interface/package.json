@@ -2,7 +2,7 @@
   "name": "EMS-ESP",
   "version": "3.7",
   "description": "Build the EMS-ESP WebUI",
-  "homepage": "https://emsesp.github.io/docs",
+  "homepage": "https://emsesp.org",
   "author": "proddy",
   "license": "MIT",
   "private": true,
