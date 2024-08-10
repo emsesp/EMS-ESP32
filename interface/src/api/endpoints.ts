@@ -9,12 +9,13 @@ export const ACCESS_TOKEN = 'access_token';
 export const alovaInstance = createAlova({
   statesHook: ReactHook,
   timeout: 3000, // 3 seconds before throwing a timeout error
-  cacheFor: {
-    GET: {
-      mode: 'memory',
-      expire: 60 * 10 * 1000 // 60 seconds in cache
-    }
-  },
+  cacheFor: null, // disable cache
+  // cacheFor: {
+  //   GET: {
+  //     mode: 'memory',
+  //     expire: 60 * 10 * 1000 // 60 seconds in cache
+  //   }
+  // },
   requestAdapter: xhrRequestAdapter(),
   beforeRequest(method) {
     if (localStorage.getItem(ACCESS_TOKEN)) {
