@@ -61,7 +61,7 @@ const Help: FC = () => {
     <SectionContent>
       <List sx={{ borderRadius: 3, border: '2px solid grey' }}>
         <ListItem>
-          <ListItemButton component="a" href="https://emsesp.github.io/docs">
+          <ListItemButton component="a" href="https://emsesp.org">
             <ListItemAvatar>
               <Avatar sx={{ bgcolor: '#72caf9' }}>
                 <MenuBookIcon />
