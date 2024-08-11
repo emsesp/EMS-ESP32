@@ -55,7 +55,7 @@ import {
 import { useTheme } from '@table-library/react-table-library/theme';
 import type { Action, State } from '@table-library/react-table-library/types/common';
 import { dialogStyle } from 'CustomTheme';
-import { useAutoRequest, useRequest } from 'alova/client';
+import { useRequest } from 'alova/client';
 import { MessageBox, SectionContent, useLayoutTitle } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
@@ -83,16 +83,12 @@ const Devices = () => {
 
   useLayoutTitle(LL.DEVICES());
 
-  const { data: coreData, send: sendCoreData } = useAutoRequest(
-    () => readCoreData(),
-    {
-      initialData: {
-        connected: true,
-        devices: []
-      },
-      pollingTime: 2000
+  const { data: coreData, send: sendCoreData } = useRequest(() => readCoreData(), {
+    initialData: {
+      connected: true,
+      devices: []
     }
-  );
+  });
 
   const { data: deviceData, send: sendDeviceData } = useRequest(
     (id: number) => readDeviceData(id),
@@ -320,12 +316,6 @@ const Devices = () => {
     };
   }, [escFunction]);
 
-  const refreshData = () => {
-    if (!deviceValueDialogOpen) {
-      selectedDevice ? void sendDeviceData(selectedDevice) : void sendCoreData();
-    }
-  };
-
   const customize = () => {
     if (selectedDevice == 99) {
       navigate('/customentities');
@@ -436,7 +426,12 @@ const Devices = () => {
   };
 
   useEffect(() => {
-    const timer = setInterval(() => refreshData(), 60000);
+    const timer = setInterval(() => {
+      if (deviceValueDialogOpen) {
+        return;
+      }
+      selectedDevice ? void sendDeviceData(selectedDevice) : void sendCoreData();
+    }, 2000);
     return () => {
       clearInterval(timer);
     };
@@ -591,6 +586,7 @@ const Devices = () => {
 
   const deviceValueDialogClose = () => {
     setDeviceValueDialogOpen(false);
+    void sendDeviceData(selectedDevice);
   };
 
   const renderDeviceData = () => {

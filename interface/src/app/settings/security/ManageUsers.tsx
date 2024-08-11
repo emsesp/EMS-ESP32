@@ -220,8 +220,8 @@ const ManageUsers = () => {
         )}
 
         <Box display="flex" flexWrap="wrap">
-          <Box flexGrow={1} sx={{ '& button': { mt: 2 } }}>
-            {changed !== 0 && (
+          {changed !== 0 && (
+            <Box flexGrow={1} sx={{ '& button': { mt: 2 } }}>
               <ButtonRow>
                 <Button
                   startIcon={<CancelIcon />}
@@ -244,9 +244,8 @@ const ManageUsers = () => {
                   {LL.APPLY_CHANGES(changed)}
                 </Button>
               </ButtonRow>
-            )}
-          </Box>
-
+            </Box>
+          )}
           <Box flexWrap="nowrap" whiteSpace="nowrap">
             <ButtonRow>
               <Button

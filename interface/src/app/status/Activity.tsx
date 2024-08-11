@@ -1,5 +1,3 @@
-import { useEffect } from 'react';
-
 import {
   Body,
   Cell,
@@ -65,13 +63,6 @@ const SystemActivity = () => {
         text-align: center;
       }
     `
-  });
-
-  useEffect(() => {
-    const timer = setInterval(() => loadData(), 30000);
-    return () => {
-      clearInterval(timer);
-    };
   });
 
   const showName = (id: number) => {

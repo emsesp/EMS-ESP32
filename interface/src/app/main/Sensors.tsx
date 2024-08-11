@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
@@ -59,18 +59,15 @@ const Sensors = () => {
   const [analogDialogOpen, setAnalogDialogOpen] = useState<boolean>(false);
   const [creating, setCreating] = useState<boolean>(false);
 
-  const { data: sensorData, send: sendSensorData } = useAutoRequest(
-    () => readSensorData(),
-    {
-      initialData: {
-        ts: [],
-        as: [],
-        analog_enabled: false,
-        platform: 'ESP32'
-      },
-      pollingTime: 2000
-    }
-  );
+  const { data: sensorData } = useAutoRequest(() => readSensorData(), {
+    initialData: {
+      ts: [],
+      as: [],
+      analog_enabled: false,
+      platform: 'ESP32'
+    },
+    pollingTime: 2000
+  });
 
   const { send: sendTemperatureSensor } = useRequest(
     (data: WriteTemperatureSensor) => writeTemperatureSensor(data),
@@ -198,13 +195,6 @@ const Sensors = () => {
     }
   );
 
-  useEffect(() => {
-    const timer = setInterval(() => sendSensorData(), 30000);
-    return () => {
-      clearInterval(timer);
-    };
-  });
-
   useLayoutTitle(LL.SENSORS());
 
   const formatDurationMin = (duration_min: number) => {
@@ -276,10 +266,9 @@ const Sensors = () => {
       .catch(() => {
         toast.error(LL.UPDATE_OF(LL.SENSOR(2)) + ' ' + LL.FAILED(1));
       })
-      .finally(async () => {
+      .finally(() => {
         setTemperatureDialogOpen(false);
         setSelectedTemperatureSensor(undefined);
-        await sendSensorData();
       });
   };
 
@@ -330,10 +319,9 @@ const Sensors = () => {
       .catch(() => {
         toast.error(LL.UPDATE_OF(LL.ANALOG_SENSOR(5)) + ' ' + LL.FAILED(1));
       })
-      .finally(async () => {
+      .finally(() => {
         setAnalogDialogOpen(false);
         setSelectedAnalogSensor(undefined);
-        await sendSensorData();
       });
   };
 
@@ -477,41 +465,37 @@ const Sensors = () => {
           )}
         />
       )}
-      {sensorData?.analog_enabled === true && (
-        <>
-          <Typography sx={{ pt: 4, pb: 1 }} variant="h6" color="secondary">
-            {LL.ANALOG_SENSORS()}
-          </Typography>
-          <RenderAnalogSensors />
-          {selectedAnalogSensor && (
-            <DashboardSensorsAnalogDialog
-              open={analogDialogOpen}
-              onClose={onAnalogDialogClose}
-              onSave={onAnalogDialogSave}
-              creating={creating}
-              selectedItem={selectedAnalogSensor}
-              validator={analogSensorItemValidation(
-                sensorData.as,
-                selectedAnalogSensor,
-                creating,
-                sensorData.platform
-              )}
-            />
+      <Typography sx={{ pt: 4, pb: 1 }} variant="h6" color="secondary">
+        {LL.ANALOG_SENSORS()}
+      </Typography>
+      <RenderAnalogSensors />
+      {selectedAnalogSensor && (
+        <DashboardSensorsAnalogDialog
+          open={analogDialogOpen}
+          onClose={onAnalogDialogClose}
+          onSave={onAnalogDialogSave}
+          creating={creating}
+          selectedItem={selectedAnalogSensor}
+          validator={analogSensorItemValidation(
+            sensorData.as,
+            selectedAnalogSensor,
+            creating,
+            sensorData.platform
           )}
-        </>
+        />
       )}
-      <Box mt={1} display="flex" flexWrap="wrap">
-        {sensorData?.analog_enabled === true && me.admin && (
+      {sensorData?.analog_enabled === true && me.admin && (
+        <Box mt={1} display="flex" flexWrap="wrap" justifyContent="flex-end">
           <Button
             variant="outlined"
             color="primary"
             startIcon={<AddCircleOutlineOutlinedIcon />}
             onClick={addAnalogSensor}
           >
-            {LL.ADD(0) + ' ' + LL.ANALOG_SENSOR(1)}
+            {LL.ADD(0)}
           </Button>
-        )}
-      </Box>
+        </Box>
+      )}
     </SectionContent>
   );
 };

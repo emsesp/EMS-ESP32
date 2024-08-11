@@ -15,9 +15,8 @@ const logger: ResponseHandler = (response, request) => {
 
 const router = AutoRouter({
   port: 3080,
-  missing: () => error(404, 'Error, endpoint not found'),
-  finally: [logger]
-
+  missing: () => error(404, 'Error, endpoint not found')
+  // finally: [logger]
 });
 
 const REST_ENDPOINT_ROOT = '/rest/';
@@ -870,7 +869,7 @@ const emsesp_sensordata = {
   ts: [
     { id: '28-233D-9497-0C03', n: 'Dallas 1', t: 25.7, o: 1.2, u: 1 },
     { id: '28-243D-7437-1E3A', n: 'Dallas 2 outside', t: 26.1, o: 0, u: 1 },
-    { id: '28-243E-7437-1E3B', n: 'Zolder', t: 27.1, o: 0, u: 16 },
+    { id: '28-243E-7437-1E3B', n: 'Zolder', t: 27.1, o: 0, u: 1 },
     { id: '28-183D-1892-0C33', n: 'Roof', o: 2, u: 1 } // no temperature
   ],
   // as: [],
@@ -4285,6 +4284,8 @@ function deviceData(id: number) {
     return new Response(encoder.encode(emsesp_devicedata_7), { headers });
   }
   if (id == 8) {
+    // test changing the selected flow temp on a Bosch Compress 7000i AW Heat Pump (Boiler/HP)
+    emsesp_devicedata_8.data[4].v = Math.floor(Math.random() * 100);
     return new Response(encoder.encode(emsesp_devicedata_8), { headers });
   }
   if (id == 9) {
@@ -4352,12 +4353,14 @@ router
     sorted_devices.push(emsesp_coredata_custom);
     return { connected: true, devices: sorted_devices };
   })
-  .get(EMSESP_SENSOR_DATA_ENDPOINT, () => emsesp_sensordata)
+  .get(EMSESP_SENSOR_DATA_ENDPOINT, () => { 
+    // random change the zolder temperature 0-100
+    emsesp_sensordata.ts[2].t = Math.floor(Math.random() * 100);
+    return emsesp_sensordata })
   .get(EMSESP_DEVICES_ENDPOINT, () => {
     // sort by type
     const sorted_devices = emsesp_devices.devices.sort((a, b) => a.t - b.t);
     return { devices: sorted_devices };
-    
   })
   .get(EMSESP_DEVICEDATA_ENDPOINT1, (request) =>
     request.query.id ? deviceData(Number(request.query.id)) : status(404)
