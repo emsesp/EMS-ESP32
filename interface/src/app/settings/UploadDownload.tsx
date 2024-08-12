@@ -106,7 +106,11 @@ const UploadDownload = () => {
     '.bin';
 
   const getPlatform = () => {
-    if (data.flash_chip_size === 16384 && data.esp_platform !== 'ESP32-S3') {
+    if (
+      data.flash_chip_size >= 16384 &&
+      data.esp_platform === 'ESP32' &&
+      data.psram
+    ) {
       return data.esp_platform + '-16M';
     }
     return data.esp_platform;
