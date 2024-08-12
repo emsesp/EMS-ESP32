@@ -81,6 +81,17 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
 #endif
     }
 
+    const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
+    root["has_loader"]                = partition != NULL;
+    partition                         = esp_ota_get_next_update_partition(nullptr);
+    if (partition) {
+        uint64_t buffer;
+        esp_partition_read(partition, 0, &buffer, 8);
+        root["has_partition"] = (buffer != 0xFFFFFFFFFFFFFFFF);
+    } else {
+        root["has_partition"] = false;
+    }
+
     response->setLength();
     request->send(response);
 }
@@ -125,19 +136,6 @@ void WebStatusService::hardwareStatus(AsyncWebServerRequest * request) {
     if (EMSESP::system_.PSram()) {
         root["psram_size"] = EMSESP::system_.PSram();
         root["free_psram"] = ESP.getFreePsram() / 1024;
-    }
-
-    const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
-    if (partition != NULL) { // factory partition found
-        root["has_loader"] = true;
-    } else { // check for not empty, smaller OTA partition
-        partition = esp_ota_get_next_update_partition(nullptr);
-        if (partition) {
-            uint64_t buffer;
-            esp_partition_read(partition, 0, &buffer, 8);
-            const esp_partition_t * running = esp_ota_get_running_partition();
-            root["has_loader"]              = (buffer != 0xFFFFFFFFFFFFFFFF && running->size != partition->size);
-        }
     }
 
     root["model"] = EMSESP::system_.getBBQKeesGatewayDetails();

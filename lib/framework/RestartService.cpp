@@ -11,6 +11,9 @@ RestartService::RestartService(AsyncWebServer * server, SecurityManager * securi
     server->on(PARTITION_SERVICE_PATH,
                HTTP_POST,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { partition(request); }, AuthenticationPredicates::IS_ADMIN));
+    server->on(FACTORYPARTITION_SERVICE_PATH,
+               HTTP_POST,
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { factory(request); }, AuthenticationPredicates::IS_ADMIN));
 }
 
 void RestartService::restartNow() {
@@ -26,14 +29,6 @@ void RestartService::restart(AsyncWebServerRequest * request) {
 }
 
 void RestartService::partition(AsyncWebServerRequest * request) {
-    const esp_partition_t * factory_partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
-    if (factory_partition) {
-        esp_ota_set_boot_partition(factory_partition);
-        emsesp::EMSESP::system_.store_nvs_values();
-        request->onDisconnect(RestartService::restartNow);
-        request->send(200);
-        return;
-    }
     const esp_partition_t * ota_partition = esp_ota_get_next_update_partition(nullptr);
     if (!ota_partition) {
         request->send(400); // bad request
@@ -46,6 +41,18 @@ void RestartService::partition(AsyncWebServerRequest * request) {
         return;
     }
     esp_ota_set_boot_partition(ota_partition);
+    emsesp::EMSESP::system_.store_nvs_values();
+    request->onDisconnect(RestartService::restartNow);
+    request->send(200);
+}
+
+void RestartService::factory(AsyncWebServerRequest * request) {
+    const esp_partition_t * factory_partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
+    if (!factory_partition) {
+        request->send(400);
+        return;
+    }
+    esp_ota_set_boot_partition(factory_partition);
     emsesp::EMSESP::system_.store_nvs_values();
     request->onDisconnect(RestartService::restartNow);
     request->send(200);
