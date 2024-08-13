@@ -82,7 +82,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     }
 
     const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
-    root["has_loader"]                = partition != NULL;
+    root["has_loader"]                = partition != NULL && partition != esp_ota_get_running_partition();
     partition                         = esp_ota_get_next_update_partition(nullptr);
     if (partition) {
         uint64_t buffer;
