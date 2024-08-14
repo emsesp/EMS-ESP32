@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { toast } from 'react-toastify';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
@@ -24,28 +23,8 @@ import {
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
-import RestartMonitor from '../status/RestartMonitor';
-
 const UploadDownload = () => {
   const { LL } = useI18nContext();
-  const [restarting, setRestarting] = useState<boolean>();
-  const [md5, setMd5] = useState<string>();
-
-  const {
-    loading: isUploading,
-    uploading: progress,
-    send: sendUpload,
-    abort: cancelUpload
-  } = useRequest(SystemApi.uploadFile, {
-    immediate: false
-  }).onSuccess(({ data }) => {
-    if (data) {
-      setMd5(data.md5 as string);
-      toast.success(LL.UPLOAD() + ' MD5 ' + LL.SUCCESSFUL());
-    } else {
-      setRestarting(true);
-    }
-  });
 
   const { send: sendSettings } = useRequest(getSettings(), {
     immediate: false
@@ -114,18 +93,6 @@ const UploadDownload = () => {
       return data.esp_platform + '-16M';
     }
     return data.esp_platform;
-  };
-
-  const startUpload = async (files: File[]) => {
-    await sendUpload(files[0]).catch((error: Error) => {
-      if (error.message === 'The user aborted a request') {
-        toast.warning(LL.UPLOAD() + ' ' + LL.ABORTED());
-      } else if (error.message === 'Network Error') {
-        toast.warning('Invalid file extension or incompatible bin file');
-      } else {
-        toast.error(error.message);
-      }
-    });
   };
 
   const saveFile = (json: unknown, endpoint: string) => {
@@ -241,107 +208,93 @@ const UploadDownload = () => {
             {LL.RESTART_TEXT(1)}.
           </Typography>
         </Box>
-        {md5 && (
-          <Box mb={2}>
-            <Typography variant="body2">{'MD5: ' + md5}</Typography>
-          </Box>
-        )}
-        <SingleUpload
-          onDrop={startUpload}
-          onCancel={cancelUpload}
-          isUploading={isUploading}
-          progress={progress}
-        />
-        {!isUploading && (
-          <>
-            <Typography sx={{ pt: 4, pb: 2 }} variant="h6" color="primary">
-              {LL.DOWNLOAD(0)}
+
+        <SingleUpload />
+
+        <Typography sx={{ pt: 4, pb: 2 }} variant="h6" color="primary">
+          {LL.DOWNLOAD(0)}
+        </Typography>
+        <Box color="warning.main">
+          <Typography mb={1} variant="body2">
+            {LL.HELP_INFORMATION_4()}
+          </Typography>
+          <Button
+            sx={{ ml: 2 }}
+            startIcon={<DownloadIcon />}
+            variant="outlined"
+            color="primary"
+            onClick={() => callAPI('system', 'info')}
+          >
+            {LL.SUPPORT_INFORMATION(0)}
+          </Button>
+          <Button
+            sx={{ ml: 2 }}
+            startIcon={<DownloadIcon />}
+            variant="outlined"
+            color="primary"
+            onClick={() => callAPI('system', 'allvalues')}
+          >
+            All Values
+          </Button>
+        </Box>
+
+        <Box color="warning.main">
+          <Typography mt={2} mb={1} variant="body2">
+            {LL.DOWNLOAD_SETTINGS_TEXT()}
+          </Typography>
+          <Button
+            sx={{ ml: 2 }}
+            startIcon={<DownloadIcon />}
+            variant="outlined"
+            color="primary"
+            onClick={downloadSettings}
+          >
+            {LL.SETTINGS_OF('')}
+          </Button>
+        </Box>
+
+        <Box color="warning.main">
+          <Typography mt={2} mb={1} variant="body2">
+            {LL.DOWNLOAD_CUSTOMIZATION_TEXT()}
+          </Typography>
+          <Button
+            sx={{ ml: 2 }}
+            startIcon={<DownloadIcon />}
+            variant="outlined"
+            color="primary"
+            onClick={downloadCustomizations}
+          >
+            {LL.CUSTOMIZATIONS()}
+          </Button>
+          <Button
+            sx={{ ml: 2 }}
+            startIcon={<DownloadIcon />}
+            variant="outlined"
+            color="primary"
+            onClick={downloadEntities}
+          >
+            {LL.CUSTOM_ENTITIES(0)}
+          </Button>
+          <Box color="warning.main">
+            <Typography mt={2} mb={1} variant="body2">
+              {LL.DOWNLOAD_SCHEDULE_TEXT()}
             </Typography>
-            <Box color="warning.main">
-              <Typography mb={1} variant="body2">
-                {LL.HELP_INFORMATION_4()}
-              </Typography>
-              <Button
-                sx={{ ml: 2 }}
-                startIcon={<DownloadIcon />}
-                variant="outlined"
-                color="primary"
-                onClick={() => callAPI('system', 'info')}
-              >
-                {LL.SUPPORT_INFORMATION(0)}
-              </Button>
-              <Button
-                sx={{ ml: 2 }}
-                startIcon={<DownloadIcon />}
-                variant="outlined"
-                color="primary"
-                onClick={() => callAPI('system', 'allvalues')}
-              >
-                All Values
-              </Button>
-            </Box>
-
-            <Box color="warning.main">
-              <Typography mt={2} mb={1} variant="body2">
-                {LL.DOWNLOAD_SETTINGS_TEXT()}
-              </Typography>
-              <Button
-                sx={{ ml: 2 }}
-                startIcon={<DownloadIcon />}
-                variant="outlined"
-                color="primary"
-                onClick={downloadSettings}
-              >
-                {LL.SETTINGS_OF('')}
-              </Button>
-            </Box>
-
-            <Box color="warning.main">
-              <Typography mt={2} mb={1} variant="body2">
-                {LL.DOWNLOAD_CUSTOMIZATION_TEXT()}
-              </Typography>
-              <Button
-                sx={{ ml: 2 }}
-                startIcon={<DownloadIcon />}
-                variant="outlined"
-                color="primary"
-                onClick={downloadCustomizations}
-              >
-                {LL.CUSTOMIZATIONS()}
-              </Button>
-              <Button
-                sx={{ ml: 2 }}
-                startIcon={<DownloadIcon />}
-                variant="outlined"
-                color="primary"
-                onClick={downloadEntities}
-              >
-                {LL.CUSTOM_ENTITIES(0)}
-              </Button>
-              <Box color="warning.main">
-                <Typography mt={2} mb={1} variant="body2">
-                  {LL.DOWNLOAD_SCHEDULE_TEXT()}
-                </Typography>
-              </Box>
-              <Button
-                sx={{ ml: 2 }}
-                startIcon={<DownloadIcon />}
-                variant="outlined"
-                color="primary"
-                onClick={downloadSchedule}
-              >
-                {LL.SCHEDULE(0)}
-              </Button>
-            </Box>
-          </>
-        )}
+          </Box>
+          <Button
+            sx={{ ml: 2 }}
+            startIcon={<DownloadIcon />}
+            variant="outlined"
+            color="primary"
+            onClick={downloadSchedule}
+          >
+            {LL.SCHEDULE(0)}
+          </Button>
+        </Box>
       </>
     );
   };
 
-  return (
-    <SectionContent>{restarting ? <RestartMonitor /> : content()}</SectionContent>
-  );
+  return <SectionContent>{content()}</SectionContent>;
 };
 
 export default UploadDownload;

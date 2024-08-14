@@ -11,10 +11,9 @@
   },
   "dependencies": {
     "@msgpack/msgpack": "^2.8.0",
-    "@types/multer": "^1.4.11",
     "express": "^4.19.2",
-    "itty-router": "^5.0.17",
-    "multer": "^1.4.5-lts.1"
+    "formidable": "^3.5.1",
+    "itty-router": "^5.0.17"
   },
-  "packageManager": "yarn@4.2.1"
+  "packageManager": "yarn@4.4.0"
 }
