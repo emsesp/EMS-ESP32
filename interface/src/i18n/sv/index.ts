@@ -194,7 +194,6 @@ const sv: Translation = {
   DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
   DOWNLOAD_SETTINGS_TEXT: 'Ladda ner applikationsinställningar. Var försiktig om du delar dina iställlningar då de innehåller lösenord och annan känslig systeminformation',
   UPLOAD_TEXT: 'Ladda upp ett nytt firmware (.bin), inställningar eller anpassningar (.json) nedan',
-  UPLOADING: 'Laddar upp',
   UPLOAD_DROP_TEXT: 'Släpp fil eller klicka här',
   ERROR: 'Okänt Fel, var god försök igen',
   TIME_SET: 'Ställ in tid',

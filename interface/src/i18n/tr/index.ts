@@ -194,7 +194,6 @@ const tr: Translation = {
   DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
   DOWNLOAD_SETTINGS_TEXT: 'Uygulama ayarlarını indir. Bu dosya hassas sistem bilgileri ve şifrelerinizi içerdiğinden ayarlarınızı paylaşırken dikkatli olun',
   UPLOAD_TEXT: 'Yeni bir bellenim(.bin) dosyası yükleyin, ayarlar ve özelleştirmeler(.json) dosyası aşağıda, sçenekli denetim yüklemesi(.md5) için önce',
-  UPLOADING: 'Yüklüyor',
   UPLOAD_DROP_TEXT: 'Buraya tıklayın yada dosyayı sürükleyip bırakın',
   ERROR: 'Beklenemedik hata, lütfen tekrar deneyin.',
   TIME_SET: 'Zaman ayarı',

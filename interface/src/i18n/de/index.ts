@@ -194,7 +194,6 @@ const de: Translation = {
   DOWNLOAD_SCHEDULE_TEXT: 'Herunterladen geplanter Befehle',
   DOWNLOAD_SETTINGS_TEXT: 'Herunterladen der Anwendungseinstellungen. Vorsicht beim Teilen der Einstellungen, da sie Passwörter und andere sensitive Einstellungen enthalten',
   UPLOAD_TEXT: 'Hochladen von neuer Firmware (.bin), Geräte- oder Entitätseinstellungen (.json), zur optionalen Validitätsprüfung zuerst die (.md5) Datei hochladen',
-  UPLOADING: 'Hochladen',
   UPLOAD_DROP_TEXT: 'Klicken Sie hier, oder ziehen eine Datei hierher',
   ERROR: 'Unerwarteter Fehler, bitter versuchen Sie es erneut',
   TIME_SET: 'Zeit gesetzt',

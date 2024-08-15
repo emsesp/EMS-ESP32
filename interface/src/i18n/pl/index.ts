@@ -194,7 +194,6 @@ const pl: BaseTranslation = {
   DOWNLOAD_SCHEDULE_TEXT: 'Pobierz harmonogram zdarzeń.',
   DOWNLOAD_SETTINGS_TEXT: 'Pobierz ustawienia aplikacji. Uwaga! Plik z ustawieniami zawiera hasła oraz inne wrażliwe informacje systemowe! Nie udostepniaj go pochopnie!',
   UPLOAD_TEXT: 'Wyślij firmware (.bin), ustawienia lub personalizacje (.json). Opcjonalnie, wyślij wcześniej plik walidacji z sumą kontrolną (.md5).',
-  UPLOADING: 'Wysłano',
   UPLOAD_DROP_TEXT: 'Przeciągnij tutaj plik lub kliknij',
   ERROR: 'Nieoczekiwany błąd, spróbuj ponownie!',
   TIME_SET: 'Zegar został ustawiony.',

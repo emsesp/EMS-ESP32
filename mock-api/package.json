@@ -5,11 +5,17 @@
   "author": "proddy",
   "license": "MIT",
   "scripts": {
-    "mock-rest": "bun --watch rest_server.ts"
+    "mock-rest": "bun --watch rest_server.ts",
+    "format": "prettier -l -w '**/*.{ts,tsx,js,css,json,md}'"
   },
   "dependencies": {
     "@msgpack/msgpack": "^2.8.0",
-    "itty-router": "^5.0.17"
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "eslint": "^9.9.0",
+    "eslint-config-prettier": "^9.1.0",
+    "formidable": "^3.5.1",
+    "itty-router": "^5.0.17",
+    "prettier": "^3.3.3"
   },
   "packageManager": "yarn@4.4.0"
 }

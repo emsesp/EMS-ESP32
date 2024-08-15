@@ -1,17 +1,17 @@
-import { AutoRouter, error, status, type ResponseHandler } from 'itty-router';
 import { Encoder } from '@msgpack/msgpack';
+import { AutoRouter, type ResponseHandler, error, status } from 'itty-router';
 
 const encoder = new Encoder();
 
-const logger: ResponseHandler = (response, request) => { 
+const logger: ResponseHandler = (response, request) => {
   console.log(
     response.status,
     request.url,
     request.method,
     'at',
-    new Date().toLocaleString(),
-  )
-}
+    new Date().toLocaleString()
+  );
+};
 
 const router = AutoRouter({
   port: 3080,
@@ -54,7 +54,9 @@ function updateMask(entity: any, de: any, dd: any) {
 
     // find in dd, either looking for fullname or custom name
     // console.log('looking for ' + fullname + ' in ' + dd.data);
-    const dd_objIndex = dd.data.findIndex((obj: any) => obj.id.slice(2) === fullname);
+    const dd_objIndex = dd.data.findIndex(
+      (obj: any) => obj.id.slice(2) === fullname
+    );
     if (dd_objIndex !== -1) {
       let changed = new Boolean(false);
 
@@ -67,7 +69,13 @@ function updateMask(entity: any, de: any, dd: any) {
 
       // see if the custom name has changed
       const old_custom_name = dd.data[dd_objIndex].cn;
-      console.log('comparing names, old (' + old_custom_name + ') with new (' + new_custom_name + ')');
+      console.log(
+        'comparing names, old (' +
+          old_custom_name +
+          ') with new (' +
+          new_custom_name +
+          ')'
+      );
       if (old_custom_name !== new_custom_name) {
         changed = true;
         new_fullname = new_custom_name;
@@ -100,7 +108,8 @@ function updateMask(entity: any, de: any, dd: any) {
         if (new_max) {
           de[de_objIndex].ma = new_max;
         }
-        dd.data[dd_objIndex].id = current_mask.toString(16).padStart(2, '0') + new_fullname;
+        dd.data[dd_objIndex].id =
+          current_mask.toString(16).padStart(2, '0') + new_fullname;
         dd.data[dd_objIndex].cn = new_fullname;
       }
     }
@@ -448,10 +457,13 @@ const EMSESP_DEVICEENTITIES_ENDPOINT2 = REST_ENDPOINT_ROOT + 'deviceEntities/:id
 const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile';
 const EMSESP_WRITE_DEVICEVALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceValue';
 const EMSESP_WRITE_DEVICENAME_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceName';
-const EMSESP_WRITE_TEMPSENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeTemperatureSensor';
+const EMSESP_WRITE_TEMPSENSOR_ENDPOINT =
+  REST_ENDPOINT_ROOT + 'writeTemperatureSensor';
 const EMSESP_WRITE_ANALOGSENSOR_ENDPOINT = REST_ENDPOINT_ROOT + 'writeAnalogSensor';
-const EMSESP_CUSTOMIZATION_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customizationEntities';
-const EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'resetCustomizations';
+const EMSESP_CUSTOMIZATION_ENTITIES_ENDPOINT =
+  REST_ENDPOINT_ROOT + 'customizationEntities';
+const EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT =
+  REST_ENDPOINT_ROOT + 'resetCustomizations';
 const EMSESP_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
 const EMSESP_CUSTOMENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customEntities';
 const EMSESP_MODULES_ENDPOINT = REST_ENDPOINT_ROOT + 'modules';
@@ -617,53 +629,53 @@ const emsesp_allvalues = {
 };
 
 let settings = {
-  "locale": "en",
-  "tx_mode": 1,
-  "ems_bus_id": 11,
-  "syslog_enabled": false,
-  "syslog_level": 3,
-  "trace_raw": false,
-  "syslog_mark_interval": 0,
-  "syslog_host": "192.168.1.8",
-  "syslog_port": 514,
-  "boiler_heatingoff": false,
-  "remote_timeout": 24,
-  "remote_timeout_en": false,
-  "shower_timer": true,
-  "shower_alert": false,
-  "shower_alert_coldshot": 10,
-  "shower_alert_trigger": 7,
-  "shower_min_duration": 180,
-  "rx_gpio": 4,
-  "tx_gpio": 5,
-  "dallas_gpio": 14,
-  "dallas_parasite": false,
-  "led_gpio": 2,
-  "hide_led": true,
-  "low_clock": false,
-  "telnet_enabled": true,
-  "notoken_api": false,
-  "readonly_mode": false,
-  "analog_enabled": true,
-  "pbutton_gpio": 34,
-  "solar_maxflow": 30,
-  "board_profile": "E32V2",
-  "fahrenheit": false,
-  "bool_format": 1,
-  "bool_dashboard": 1,
-  "enum_format": 1,
-  "weblog_level": 6,
-  "weblog_buffer": 50,
-  "weblog_compact": true,
-  "phy_type": 1,
-  "eth_power": 15,
-  "eth_phy_addr": 0,
-  "eth_clock_mode": 1,
-  "platform": "ESP32R",
-  "modbus_enabled": false,
-  "modbus_port": 502,
-  "modbus_max_clients": 10,
-  "modbus_timeout": 10000
+  locale: 'en',
+  tx_mode: 1,
+  ems_bus_id: 11,
+  syslog_enabled: false,
+  syslog_level: 3,
+  trace_raw: false,
+  syslog_mark_interval: 0,
+  syslog_host: '192.168.1.8',
+  syslog_port: 514,
+  boiler_heatingoff: false,
+  remote_timeout: 24,
+  remote_timeout_en: false,
+  shower_timer: true,
+  shower_alert: false,
+  shower_alert_coldshot: 10,
+  shower_alert_trigger: 7,
+  shower_min_duration: 180,
+  rx_gpio: 4,
+  tx_gpio: 5,
+  dallas_gpio: 14,
+  dallas_parasite: false,
+  led_gpio: 2,
+  hide_led: true,
+  low_clock: false,
+  telnet_enabled: true,
+  notoken_api: false,
+  readonly_mode: false,
+  analog_enabled: true,
+  pbutton_gpio: 34,
+  solar_maxflow: 30,
+  board_profile: 'E32V2',
+  fahrenheit: false,
+  bool_format: 1,
+  bool_dashboard: 1,
+  enum_format: 1,
+  weblog_level: 6,
+  weblog_buffer: 50,
+  weblog_compact: true,
+  phy_type: 1,
+  eth_power: 15,
+  eth_phy_addr: 0,
+  eth_clock_mode: 1,
+  platform: 'ESP32R',
+  modbus_enabled: false,
+  modbus_port: 502,
+  modbus_max_clients: 10,
+  modbus_timeout: 10000
 };
 
 const emsesp_devices = {
@@ -730,7 +742,7 @@ const emsesp_devices = {
       t: 6,
       tn: 'Thermostat',
       url: 'thermostat'
-    },
+    }
   ]
 };
 
@@ -817,37 +829,37 @@ const emsesp_coredata = {
       e: 22
     },
     {
-      "id": 8,
-      "tn": "Boiler/HP",
-      "t": 5,
-      "b": "",
-      "n": "Bosch Compress 7000i AW Heat Pump",
-      "d": 8,
-      "p": 172,
-      "v": "01.20",
-      "e": 152
+      id: 8,
+      tn: 'Boiler/HP',
+      t: 5,
+      b: '',
+      n: 'Bosch Compress 7000i AW Heat Pump',
+      d: 8,
+      p: 172,
+      v: '01.20',
+      e: 152
     },
     {
-      "id": 9,
-      "tn": "Thermostat",
-      "t": 6,
-      "b": "",
-      "n": "RC100H",
-      "d": 56,
-      "p": 200,
-      "v": "40.07",
-      "e": 4
+      id: 9,
+      tn: 'Thermostat',
+      t: 6,
+      b: '',
+      n: 'RC100H',
+      d: 56,
+      p: 200,
+      v: '40.07',
+      e: 4
     },
     {
-      "id": 10,
-      "tn": "Thermostat",
-      "t": 6,
-      "b": "",
-      "n": "RC310",
-      "d": 16,
-      "p": 158,
-      "v": "73.03",
-      "e": 63
+      id: 10,
+      tn: 'Thermostat',
+      t: 6,
+      b: '',
+      n: 'RC310',
+      d: 16,
+      p: 158,
+      v: '73.03',
+      e: 63
     }
   ]
 };
@@ -1249,7 +1261,19 @@ const emsesp_devicedata_1 = {
       u: 0,
       id: '00hc2 program',
       c: 'hc2/program',
-      l: ['own 1', 'family', 'morning', 'evening', 'am', 'pm', 'midday', 'singles', 'seniors', 'new', 'own 2']
+      l: [
+        'own 1',
+        'family',
+        'morning',
+        'evening',
+        'am',
+        'pm',
+        'midday',
+        'singles',
+        'seniors',
+        'new',
+        'own 2'
+      ]
     },
     {
       v: 0,
@@ -1530,7 +1554,15 @@ const emsesp_devicedata_3 = {
       u: 0,
       id: '00boiler pump characteristic',
       c: 'pumpcharacter',
-      l: ['proportional', 'pressure1', 'pressure2', 'pressure3', 'pressure4', 'pressure5', 'pressure6']
+      l: [
+        'proportional',
+        'pressure1',
+        'pressure2',
+        'pressure3',
+        'pressure4',
+        'pressure5',
+        'pressure6'
+      ]
     },
     {
       v: 6,
@@ -1770,7 +1802,16 @@ const emsesp_devicedata_3 = {
       u: 0,
       id: '00dhw circulation pump mode',
       c: 'dhw/circmode',
-      l: ['off', '1x3min', '2x3min', '3x3min', '4x3min', '5x3min', '6x3min', 'continuous']
+      l: [
+        'off',
+        '1x3min',
+        '2x3min',
+        '3x3min',
+        '4x3min',
+        '5x3min',
+        '6x3min',
+        'continuous'
+      ]
     },
     {
       v: 'off',
@@ -2097,7 +2138,13 @@ const emsesp_devicedata_7 = {
     { v: 'off', u: 0, id: '00fan' },
     { v: 'off', u: 0, id: '00ignition' },
     { v: 'off', u: 0, id: '00oil preheating' },
-    { v: 'on', u: 0, id: '00heating activated', c: 'heatingactivated', l: ['off', 'on'] },
+    {
+      v: 'on',
+      u: 0,
+      id: '00heating activated',
+      c: 'heatingactivated',
+      l: ['off', 'on']
+    },
     { v: 80, u: 1, id: '00heating temperature', c: 'heatingtemp' },
     { v: 70, u: 3, id: '00burner pump max power', c: 'pumpmodmax' },
     { v: 30, u: 3, id: '00burner pump min power', c: 'pumpmodmin' },
@@ -2118,17 +2165,47 @@ const emsesp_devicedata_7 = {
     { v: '0H', u: 0, id: '00service code' },
     { v: 203, u: 0, id: '00service code number' },
     { v: 'H00', u: 0, id: '00maintenance message' },
-    { v: 'manual', u: 0, id: '00maintenance scheduled', c: 'maintenance', l: ['off', 'time', 'date', 'manual'] },
+    {
+      v: 'manual',
+      u: 0,
+      id: '00maintenance scheduled',
+      c: 'maintenance',
+      l: ['off', 'time', 'date', 'manual']
+    },
     { v: 6000, u: 7, id: '00time to next maintenance', c: 'maintenancetime' },
-    { v: '01.01.2012', u: 0, id: '00next maintenance date', c: 'maintenancedate', h: 'dd.mm.yyyy' },
-    { v: 'on', u: 0, id: '00dhw turn on/off', c: 'dhw/tapactivated', l: ['off', 'on'] },
+    {
+      v: '01.01.2012',
+      u: 0,
+      id: '00next maintenance date',
+      c: 'maintenancedate',
+      h: 'dd.mm.yyyy'
+    },
+    {
+      v: 'on',
+      u: 0,
+      id: '00dhw turn on/off',
+      c: 'dhw/tapactivated',
+      l: ['off', 'on']
+    },
     { v: 62, u: 1, id: '00dhw set temperature' },
     { v: 60, u: 1, id: '00dhw selected temperature', c: 'dhw/seltemp' },
     { v: 'flow', u: 0, id: '00dhw type' },
-    { v: 'hot', u: 0, id: '00dhw comfort', c: 'dhw/comfort', l: ['hot', 'eco', 'intelligent'] },
+    {
+      v: 'hot',
+      u: 0,
+      id: '00dhw comfort',
+      c: 'dhw/comfort',
+      l: ['hot', 'eco', 'intelligent']
+    },
     { v: 40, u: 2, id: '00dhw flow temperature offset', c: 'dhw/flowtempoffset' },
     { v: 100, u: 3, id: '00dhw max power', c: 'dhw/maxpower' },
-    { v: 'off', u: 0, id: '00dhw circulation pump available', c: 'dhw/circpump', l: ['off', 'on'] },
+    {
+      v: 'off',
+      u: 0,
+      id: '00dhw circulation pump available',
+      c: 'dhw/circpump',
+      l: ['off', 'on']
+    },
     { v: '3-way valve', u: 0, id: '00dhw charging type' },
     { v: -5, u: 2, id: '00dhw hysteresis on temperature', c: 'dhw/hyston' },
     { v: 0, u: 2, id: '00dhw hysteresis off temperature', c: 'dhw/hystoff' },
@@ -2138,15 +2215,42 @@ const emsesp_devicedata_7 = {
       u: 0,
       id: '00dhw circulation pump mode',
       c: 'dhw/circmode',
-      l: ['off', '1x3min', '2x3min', '3x3min', '4x3min', '5x3min', '6x3min', 'continuous']
+      l: [
+        'off',
+        '1x3min',
+        '2x3min',
+        '3x3min',
+        '4x3min',
+        '5x3min',
+        '6x3min',
+        'continuous'
+      ]
     },
-    { v: 'off', u: 0, id: '00dhw circulation active', c: 'dhw/circ', l: ['off', 'on'] },
+    {
+      v: 'off',
+      u: 0,
+      id: '00dhw circulation active',
+      c: 'dhw/circ',
+      l: ['off', 'on']
+    },
     { v: 47.3, u: 1, id: '00dhw current intern temperature' },
     { v: 0, u: 4, id: '00dhw current tap water flow' },
     { v: 47.3, u: 1, id: '00dhw storage intern temperature' },
     { v: 'on', u: 0, id: '00dhw activated', c: 'dhw/activated', l: ['off', 'on'] },
-    { v: 'off', u: 0, id: '00dhw one time charging', c: 'dhw/onetime', l: ['off', 'on'] },
-    { v: 'off', u: 0, id: '00dhw disinfecting', c: 'dhw/disinfecting', l: ['off', 'on'] },
+    {
+      v: 'off',
+      u: 0,
+      id: '00dhw one time charging',
+      c: 'dhw/onetime',
+      l: ['off', 'on']
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00dhw disinfecting',
+      c: 'dhw/disinfecting',
+      l: ['off', 'on']
+    },
     { v: 'off', u: 0, id: '00dhw charging' },
     { v: 'off', u: 0, id: '00dhw recharging' },
     { v: 'on', u: 0, id: '00dhw temperature ok' },
@@ -2159,1685 +2263,1496 @@ const emsesp_devicedata_7 = {
 };
 
 const emsesp_devicedata_8 = {
-  "data": [
+  data: [
     {
-      "v": "",
-      "u": 0,
-      "id": "00reset",
-      "c": "reset",
-      "l": [
-        "-",
-        "maintenance",
-        "error",
-        "history",
-        "message"
+      v: '',
+      u: 0,
+      id: '00reset',
+      c: 'reset',
+      l: ['-', 'maintenance', 'error', 'history', 'message']
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00force heating off',
+      c: 'heatingoff',
+      l: ['off', 'on']
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00heating active'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00tapwater active'
+    },
+    {
+      v: 19,
+      u: 1,
+      id: '00selected flow temperature',
+      c: 'selflowtemp',
+      m: 0,
+      x: 90,
+      s: '1'
+    },
+    {
+      v: 0,
+      u: 3,
+      id: '00heating pump modulation'
+    },
+    {
+      v: 30.299999237060547,
+      u: 1,
+      id: '00outside temperature'
+    },
+    {
+      v: 18.700000762939453,
+      u: 1,
+      id: '00current flow temperature'
+    },
+    {
+      v: 21.399999618530273,
+      u: 1,
+      id: '00return temperature'
+    },
+    {
+      v: 18.700000762939453,
+      u: 1,
+      id: '00low loss header'
+    },
+    {
+      v: 'on',
+      u: 0,
+      id: '00heating activated',
+      c: 'heatingactivated',
+      l: ['off', 'on']
+    },
+    {
+      v: 85,
+      u: 1,
+      id: '00heating temperature',
+      c: 'heatingtemp',
+      m: 0,
+      x: 90,
+      s: '1'
+    },
+    {
+      v: 'on',
+      u: 0,
+      id: '00heating pump'
+    },
+    {
+      v: 44,
+      u: 3,
+      id: '00burner selected max power',
+      c: 'selburnpow',
+      m: 0,
+      x: 254,
+      s: '1'
+    },
+    {
+      v: 45,
+      u: 3,
+      id: '00burner current power'
+    },
+    {
+      v: 0,
+      u: 0,
+      id: '00burner starts'
+    },
+    {
+      v: 0,
+      u: 8,
+      id: '00total burner operating time'
+    },
+    {
+      v: 0,
+      u: 8,
+      id: '00burner stage 2 operating time'
+    },
+    {
+      v: 0,
+      u: 8,
+      id: '00total heat operating time'
+    },
+    {
+      v: 0,
+      u: 0,
+      id: '00burner starts heating'
+    },
+    {
+      v: 764598,
+      u: 8,
+      id: '00total UBA operating time'
+    },
+    {
+      v: 'A01(5453) 01.06.2023 09:23 - 01.06.2023 09:31',
+      u: 0,
+      id: '00last error code'
+    },
+    {
+      v: ' 0H',
+      u: 0,
+      id: '00service code'
+    },
+    {
+      v: 203,
+      u: 0,
+      id: '00service code number'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00emergency operation',
+      c: 'emergencyops',
+      l: ['off', 'on']
+    },
+    {
+      v: 0,
+      u: 1,
+      id: '00emergency temperature',
+      c: 'emergencytemp',
+      m: 0,
+      x: 70,
+      s: '1'
+    },
+    {
+      v: 763575,
+      u: 8,
+      id: '00heatpump total uptime'
+    },
+    {
+      v: 309983,
+      u: 8,
+      id: '00total operating time heat'
+    },
+    {
+      v: 203673,
+      u: 8,
+      id: '00operating time compressor heating'
+    },
+    {
+      v: 29682,
+      u: 8,
+      id: '00operating time compressor cooling'
+    },
+    {
+      v: 76627,
+      u: 8,
+      id: '00dhw operating time compressor'
+    },
+    {
+      v: 0,
+      u: 8,
+      id: '00operating time compressor pool'
+    },
+    {
+      v: 2054,
+      u: 0,
+      id: '00total compressor control starts'
+    },
+    {
+      v: 1287,
+      u: 0,
+      id: '00heating control starts'
+    },
+    {
+      v: 160,
+      u: 0,
+      id: '00cooling control starts'
+    },
+    {
+      v: 607,
+      u: 0,
+      id: '00dhw control starts2'
+    },
+    {
+      v: 0,
+      u: 0,
+      id: '00pool control starts'
+    },
+    {
+      v: 5368,
+      u: 5,
+      id: '00total energy consumption'
+    },
+    {
+      v: 5336,
+      u: 5,
+      id: '00total energy consumption compressor'
+    },
+    {
+      v: 2977,
+      u: 5,
+      id: '00energy consumption compressor heating'
+    },
+    {
+      v: 2047,
+      u: 5,
+      id: '00dhw energy consumption compressor'
+    },
+    {
+      v: 295,
+      u: 5,
+      id: '00energy consumption compressor cooling'
+    },
+    {
+      v: 0,
+      u: 5,
+      id: '00energy consumption compressor pool'
+    },
+    {
+      v: 32,
+      u: 5,
+      id: '00total aux elec. heater energy consumption'
+    },
+    {
+      v: 0,
+      u: 5,
+      id: '00aux elec. heater energy consumption heating'
+    },
+    {
+      v: 32,
+      u: 5,
+      id: '00dhw aux elec. heater energy consumption'
+    },
+    {
+      v: 0,
+      u: 5,
+      id: '00aux elec. heater energy consumption pool'
+    },
+    {
+      v: 19052,
+      u: 5,
+      id: '00total energy supplied'
+    },
+    {
+      v: 11053,
+      u: 5,
+      id: '00total energy supplied heating'
+    },
+    {
+      v: 5978,
+      u: 5,
+      id: '00dhw total energy warm supplied'
+    },
+    {
+      v: 2019,
+      u: 5,
+      id: '00total energy supplied cooling'
+    },
+    {
+      v: 0,
+      u: 5,
+      id: '00total energy supplied pool'
+    },
+    {
+      v: 4.5,
+      u: 11,
+      id: '00compressor power output'
+    },
+    {
+      v: 100,
+      u: 3,
+      id: '00compressor max power',
+      c: 'hpmaxpower',
+      m: 0,
+      x: 100,
+      s: '1'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00hp compressor'
+    },
+    {
+      v: 'cooling',
+      u: 0,
+      id: '00compressor activity'
+    },
+    {
+      v: 0,
+      u: 3,
+      id: '00brine pump speed'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00switch valve'
+    },
+    {
+      v: 45,
+      u: 3,
+      id: '00compressor speed'
+    },
+    {
+      v: 33,
+      u: 3,
+      id: '00circulation pump speed'
+    },
+    {
+      v: 0,
+      u: 1,
+      id: '00brine in/evaporator'
+    },
+    {
+      v: 0,
+      u: 1,
+      id: '00brine out/condenser'
+    },
+    {
+      v: 21.399999618530273,
+      u: 1,
+      id: '00heat carrier return (TC0)'
+    },
+    {
+      v: 17.5,
+      u: 1,
+      id: '00heat carrier forward (TC1)'
+    },
+    {
+      v: 18,
+      u: 1,
+      id: '00condenser temperature (TC3)'
+    },
+    {
+      v: 51.599998474121094,
+      u: 1,
+      id: '00compressor temperature (TR1)'
+    },
+    {
+      v: 14.600000381469727,
+      u: 1,
+      id: '00refrigerant temperature liquid side (condenser output) (TR3)'
+    },
+    {
+      v: 37,
+      u: 1,
+      id: '00evaporator inlet temperature (TR4)'
+    },
+    {
+      v: 20.200000762939453,
+      u: 1,
+      id: '00compressor inlet temperature (TR5)'
+    },
+    {
+      v: 54.599998474121094,
+      u: 1,
+      id: '00compressor outlet temperature (TR6)'
+    },
+    {
+      v: 29.600000381469727,
+      u: 1,
+      id: '00air inlet temperature (TL2)'
+    },
+    {
+      v: 13.899999618530273,
+      u: 1,
+      id: '00low pressure side temperature (PL1)'
+    },
+    {
+      v: 37.79999923706055,
+      u: 1,
+      id: '00high pressure side temperature (PH1)'
+    },
+    {
+      v: 25.600000381469727,
+      u: 1,
+      id: '00drain pan temp (TA4)'
+    },
+    {
+      v: 58.5,
+      u: 1,
+      id: '00reservoir temp (TW1)'
+    },
+    {
+      v: 28,
+      u: 1,
+      id: '00pool set temperature',
+      c: 'poolsettemp',
+      m: 0,
+      x: 127,
+      s: '0.5'
+    },
+    {
+      v: 'cooling & defrost',
+      u: 0,
+      id: '004-way valve (VR4)'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00input 1 state'
+    },
+    {
+      v: '000000000000000',
+      u: 0,
+      id: '00input 1 options',
+      c: 'hpin1opt',
+      h: '<inv>[<evu1><evu2><evu3><comp><aux><cool><heat><dhw><pv>]'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00input 2 state'
+    },
+    {
+      v: '000000000000000',
+      u: 0,
+      id: '00input 2 options',
+      c: 'hpin2opt',
+      h: '<inv>[<evu1><evu2><evu3><comp><aux><cool><heat><dhw><pv>]'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00input 3 state'
+    },
+    {
+      v: '000000000000000',
+      u: 0,
+      id: '00input 3 options',
+      c: 'hpin3opt',
+      h: '<inv>[<evu1><evu2><evu3><comp><aux><cool><heat><dhw><pv>]'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00input 4 state'
+    },
+    {
+      v: '000000000000',
+      u: 0,
+      id: '00input 4 options',
+      c: 'hpin4opt',
+      h: '<inv>[<comp><aux><cool><heat><dhw><pv>]'
+    },
+    {
+      v: '6 kW',
+      u: 0,
+      id: '00heat limit compressor',
+      c: 'maxheatcomp',
+      l: ['0 kW', '2 kW', '3 kW', '4 kW', '6 kW', '9 kW']
+    },
+    {
+      v: '9 kW',
+      u: 0,
+      id: '00heat limit heating',
+      c: 'maxheatheat',
+      l: ['0 kW', '2 kW', '3 kW', '4 kW', '6 kW', '9 kW']
+    },
+    {
+      v: '9 kW',
+      u: 0,
+      id: '00dhw heat limit',
+      c: 'dhw/maxheat',
+      l: ['0 kW', '2 kW', '3 kW', '4 kW', '6 kW', '9 kW']
+    },
+    {
+      v: 'on',
+      u: 0,
+      id: '00manual defrost',
+      c: 'mandefrost',
+      l: ['off', 'on']
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00cooling only with PV',
+      c: 'pvcooling',
+      l: ['off', 'on']
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00aux heater only',
+      c: 'auxheateronly',
+      l: ['off', 'on']
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00disable aux heater',
+      c: 'auxheateroff',
+      l: ['off', 'on']
+    },
+    {
+      v: 0,
+      u: 3,
+      id: '00aux heater status'
+    },
+    {
+      v: 500,
+      u: 21,
+      id: '00aux heater on delay',
+      c: 'auxheaterdelay',
+      m: 10,
+      x: 1000,
+      s: '10'
+    },
+    {
+      v: 0,
+      u: 22,
+      id: '00aux heater max limit',
+      c: 'auxmaxlimit',
+      m: 0,
+      x: 10,
+      s: '0.1'
+    },
+    {
+      v: 0.10000000149011612,
+      u: 22,
+      id: '00aux heater limit start',
+      c: 'auxlimitstart',
+      m: 0,
+      x: 10,
+      s: '0.1'
+    },
+    {
+      v: 'eco',
+      u: 0,
+      id: '00aux heater mode',
+      c: 'auxheatrmode',
+      l: ['eco', 'comfort']
+    },
+    {
+      v: 0,
+      u: 21,
+      id: '00on/off hyst heat',
+      c: 'hphystheat',
+      m: 0,
+      x: 1500,
+      s: '5'
+    },
+    {
+      v: 0,
+      u: 21,
+      id: '00on/off hyst cool',
+      c: 'hphystcool',
+      m: 0,
+      x: 1500,
+      s: '5'
+    },
+    {
+      v: 1125,
+      u: 21,
+      id: '00on/off hyst pool',
+      c: 'hphystpool',
+      m: 50,
+      x: 1500,
+      s: '5'
+    },
+    {
+      v: 'auto',
+      u: 0,
+      id: '00silent mode',
+      c: 'silentmode',
+      l: ['off', 'auto', 'on']
+    },
+    {
+      v: 1320,
+      u: 8,
+      id: '00silent mode from',
+      c: 'silentfrom',
+      m: 0,
+      x: 3810,
+      s: '15'
+    },
+    {
+      v: 360,
+      u: 8,
+      id: '00silent mode to',
+      c: 'silentto',
+      m: 0,
+      x: 3810,
+      s: '15'
+    },
+    {
+      v: -10,
+      u: 1,
+      id: '00min outside temp for silent mode',
+      c: 'mintempsilent',
+      m: -126,
+      x: 126,
+      s: '1'
+    },
+    {
+      v: -5,
+      u: 1,
+      id: '00outside temp parallel mode',
+      c: 'tempparmode',
+      m: -126,
+      x: 126,
+      s: '1'
+    },
+    {
+      v: 0,
+      u: 3,
+      id: '00aux heater mixing valve'
+    },
+    {
+      v: 7,
+      u: 22,
+      id: '00temp diff TC3/TC0 heat',
+      c: 'tempdiffheat',
+      m: 2,
+      x: 10,
+      s: '0.1'
+    },
+    {
+      v: 3,
+      u: 22,
+      id: '00temp diff TC3/TC0 cool',
+      c: 'tempdiffcool',
+      m: 2,
+      x: 10,
+      s: '0.1'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00valve/pump cooling',
+      c: 'vpcooling',
+      l: ['off', 'on']
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00heating cable',
+      c: 'heatcable',
+      l: ['off', 'on']
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00VC0 valve',
+      c: 'vc0valve',
+      l: ['off', 'on']
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00primary heatpump',
+      c: 'primepump',
+      l: ['off', 'on']
+    },
+    {
+      v: 0,
+      u: 3,
+      id: '00primary heatpump modulation',
+      c: 'primepumpmod',
+      m: 0,
+      x: 100,
+      s: '1'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '003-way valve',
+      c: 'hp3way',
+      l: ['off', 'on']
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00el. heater step 1',
+      c: 'elheatstep1',
+      l: ['off', 'on']
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00el. heater step 2',
+      c: 'elheatstep2',
+      l: ['off', 'on']
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00el. heater step 3',
+      c: 'elheatstep3',
+      l: ['off', 'on']
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00condensate reservoir heating (EA0)'
+    },
+    {
+      v: 'auto',
+      u: 0,
+      id: '00primary heatpump mode',
+      c: 'hppumpmode',
+      l: ['auto', 'continuous']
+    },
+    {
+      v: '',
+      u: 0,
+      id: '00shutdown',
+      c: 'shutdown',
+      l: ['off', 'on']
+    },
+    {
+      v: 'on',
+      u: 0,
+      id: '00dhw alternating operation',
+      c: 'dhw/alternatingop',
+      l: ['off', 'on']
+    },
+    {
+      v: 35,
+      u: 8,
+      id: '00dhw prioritise heating during dhw',
+      c: 'dhw/altopprioheat',
+      m: 20,
+      x: 120,
+      s: '1'
+    },
+    {
+      v: 45,
+      u: 8,
+      id: '00dhw prioritise dhw during heating',
+      c: 'dhw/altopprio',
+      m: 30,
+      x: 120,
+      s: '1'
+    },
+    {
+      v: 57,
+      u: 1,
+      id: '00dhw comfort switch off',
+      c: 'dhw/comfoff',
+      m: 15,
+      x: 65,
+      s: '1'
+    },
+    {
+      v: 54,
+      u: 1,
+      id: '00dhw eco switch off',
+      c: 'dhw/ecooff',
+      m: 15,
+      x: 65,
+      s: '1'
+    },
+    {
+      v: 50,
+      u: 1,
+      id: '00dhw eco+ switch off',
+      c: 'dhw/ecoplusoff',
+      m: 48,
+      x: 63,
+      s: '1'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00dhw circulation pump available during dhw',
+      c: 'dhw/hpcircpump',
+      l: ['off', 'on']
+    },
+    {
+      v: 54,
+      u: 1,
+      id: '00dhw set temperature'
+    },
+    {
+      v: 45,
+      u: 1,
+      id: '00dhw selected temperature',
+      c: 'dhw/seltemp',
+      m: 0,
+      x: 254,
+      s: '1'
+    },
+    {
+      v: 42,
+      u: 1,
+      id: '00dhw selected lower temperature',
+      c: 'dhw/seltemplow',
+      m: 0,
+      x: 254,
+      s: '1'
+    },
+    {
+      v: 65,
+      u: 1,
+      id: '00dhw single charge temperature',
+      c: 'dhw/seltempsingle',
+      m: 0,
+      x: 254,
+      s: '1'
+    },
+    {
+      v: 'high comfort',
+      u: 0,
+      id: '00dhw comfort mode',
+      c: 'dhw/comfort1',
+      l: ['high comfort', 'eco']
+    },
+    {
+      v: 25,
+      u: 2,
+      id: '00dhw flow temperature offset',
+      c: 'dhw/flowtempoffset',
+      m: 0,
+      x: 100,
+      s: '1'
+    },
+    {
+      v: 56,
+      u: 1,
+      id: '00dhw maximum temperature',
+      c: 'dhw/maxtemp',
+      m: 0,
+      x: 80,
+      s: '1'
+    },
+    {
+      v: 'on',
+      u: 0,
+      id: '00dhw circulation pump available',
+      c: 'dhw/circpump',
+      l: ['off', 'on']
+    },
+    {
+      v: -2,
+      u: 2,
+      id: '00dhw hysteresis on temperature',
+      c: 'dhw/hyston',
+      m: -126,
+      x: 126,
+      s: '1'
+    },
+    {
+      v: 0,
+      u: 2,
+      id: '00dhw hysteresis off temperature',
+      c: 'dhw/hystoff',
+      m: -126,
+      x: 126,
+      s: '1'
+    },
+    {
+      v: 65,
+      u: 1,
+      id: '00dhw disinfection temperature',
+      c: 'dhw/disinfectiontemp',
+      m: 60,
+      x: 80,
+      s: '1'
+    },
+    {
+      v: '3x3min',
+      u: 0,
+      id: '00dhw circulation pump mode',
+      c: 'dhw/circmode',
+      l: [
+        'off',
+        '1x3min',
+        '2x3min',
+        '3x3min',
+        '4x3min',
+        '5x3min',
+        '6x3min',
+        'continuous'
       ]
     },
     {
-      "v": "off",
-      "u": 0,
-      "id": "00force heating off",
-      "c": "heatingoff",
-      "l": [
-        "off",
-        "on"
-      ]
+      v: 'off',
+      u: 0,
+      id: '00dhw circulation active',
+      c: 'dhw/circ',
+      l: ['off', 'on']
     },
     {
-      "v": "off",
-      "u": 0,
-      "id": "00heating active"
+      v: 58.70000076293945,
+      u: 1,
+      id: '00dhw current intern temperature'
     },
     {
-      "v": "off",
-      "u": 0,
-      "id": "00tapwater active"
+      v: 58.5,
+      u: 1,
+      id: '00dhw current extern temperature'
     },
     {
-      "v": 19,
-      "u": 1,
-      "id": "00selected flow temperature",
-      "c": "selflowtemp",
-      "m": 0,
-      "x": 90,
-      "s": "1"
+      v: 0,
+      u: 4,
+      id: '00dhw current tap water flow'
     },
     {
-      "v": 0,
-      "u": 3,
-      "id": "00heating pump modulation"
+      v: 'on',
+      u: 0,
+      id: '00dhw activated',
+      c: 'dhw/activated',
+      l: ['off', 'on']
     },
     {
-      "v": 30.299999237060547,
-      "u": 1,
-      "id": "00outside temperature"
+      v: 'off',
+      u: 0,
+      id: '00dhw one time charging',
+      c: 'dhw/onetime',
+      l: ['off', 'on']
     },
     {
-      "v": 18.700000762939453,
-      "u": 1,
-      "id": "00current flow temperature"
+      v: 'off',
+      u: 0,
+      id: '00dhw disinfecting',
+      c: 'dhw/disinfecting',
+      l: ['off', 'on']
     },
     {
-      "v": 21.399999618530273,
-      "u": 1,
-      "id": "00return temperature"
+      v: 'off',
+      u: 0,
+      id: '00dhw charging'
     },
     {
-      "v": 18.700000762939453,
-      "u": 1,
-      "id": "00low loss header"
+      v: 'off',
+      u: 0,
+      id: '00dhw recharging'
     },
     {
-      "v": "on",
-      "u": 0,
-      "id": "00heating activated",
-      "c": "heatingactivated",
-      "l": [
-        "off",
-        "on"
-      ]
+      v: 'off',
+      u: 0,
+      id: '00dhw temperature ok'
     },
     {
-      "v": 85,
-      "u": 1,
-      "id": "00heating temperature",
-      "c": "heatingtemp",
-      "m": 0,
-      "x": 90,
-      "s": "1"
+      v: 'off',
+      u: 0,
+      id: '00dhw 3-way valve active'
     },
     {
-      "v": "on",
-      "u": 0,
-      "id": "00heating pump"
+      v: 0,
+      u: 0,
+      id: '00dhw starts'
     },
     {
-      "v": 44,
-      "u": 3,
-      "id": "00burner selected max power",
-      "c": "selburnpow",
-      "m": 0,
-      "x": 254,
-      "s": "1"
-    },
-    {
-      "v": 45,
-      "u": 3,
-      "id": "00burner current power"
-    },
-    {
-      "v": 0,
-      "u": 0,
-      "id": "00burner starts"
-    },
-    {
-      "v": 0,
-      "u": 8,
-      "id": "00total burner operating time"
-    },
-    {
-      "v": 0,
-      "u": 8,
-      "id": "00burner stage 2 operating time"
-    },
-    {
-      "v": 0,
-      "u": 8,
-      "id": "00total heat operating time"
-    },
-    {
-      "v": 0,
-      "u": 0,
-      "id": "00burner starts heating"
-    },
-    {
-      "v": 764598,
-      "u": 8,
-      "id": "00total UBA operating time"
-    },
-    {
-      "v": "A01(5453) 01.06.2023 09:23 - 01.06.2023 09:31",
-      "u": 0,
-      "id": "00last error code"
-    },
-    {
-      "v": " 0H",
-      "u": 0,
-      "id": "00service code"
-    },
-    {
-      "v": 203,
-      "u": 0,
-      "id": "00service code number"
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00emergency operation",
-      "c": "emergencyops",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": 0,
-      "u": 1,
-      "id": "00emergency temperature",
-      "c": "emergencytemp",
-      "m": 0,
-      "x": 70,
-      "s": "1"
-    },
-    {
-      "v": 763575,
-      "u": 8,
-      "id": "00heatpump total uptime"
-    },
-    {
-      "v": 309983,
-      "u": 8,
-      "id": "00total operating time heat"
-    },
-    {
-      "v": 203673,
-      "u": 8,
-      "id": "00operating time compressor heating"
-    },
-    {
-      "v": 29682,
-      "u": 8,
-      "id": "00operating time compressor cooling"
-    },
-    {
-      "v": 76627,
-      "u": 8,
-      "id": "00dhw operating time compressor"
-    },
-    {
-      "v": 0,
-      "u": 8,
-      "id": "00operating time compressor pool"
-    },
-    {
-      "v": 2054,
-      "u": 0,
-      "id": "00total compressor control starts"
-    },
-    {
-      "v": 1287,
-      "u": 0,
-      "id": "00heating control starts"
-    },
-    {
-      "v": 160,
-      "u": 0,
-      "id": "00cooling control starts"
-    },
-    {
-      "v": 607,
-      "u": 0,
-      "id": "00dhw control starts2"
-    },
-    {
-      "v": 0,
-      "u": 0,
-      "id": "00pool control starts"
-    },
-    {
-      "v": 5368,
-      "u": 5,
-      "id": "00total energy consumption"
-    },
-    {
-      "v": 5336,
-      "u": 5,
-      "id": "00total energy consumption compressor"
-    },
-    {
-      "v": 2977,
-      "u": 5,
-      "id": "00energy consumption compressor heating"
-    },
-    {
-      "v": 2047,
-      "u": 5,
-      "id": "00dhw energy consumption compressor"
-    },
-    {
-      "v": 295,
-      "u": 5,
-      "id": "00energy consumption compressor cooling"
-    },
-    {
-      "v": 0,
-      "u": 5,
-      "id": "00energy consumption compressor pool"
-    },
-    {
-      "v": 32,
-      "u": 5,
-      "id": "00total aux elec. heater energy consumption"
-    },
-    {
-      "v": 0,
-      "u": 5,
-      "id": "00aux elec. heater energy consumption heating"
-    },
-    {
-      "v": 32,
-      "u": 5,
-      "id": "00dhw aux elec. heater energy consumption"
-    },
-    {
-      "v": 0,
-      "u": 5,
-      "id": "00aux elec. heater energy consumption pool"
-    },
-    {
-      "v": 19052,
-      "u": 5,
-      "id": "00total energy supplied"
-    },
-    {
-      "v": 11053,
-      "u": 5,
-      "id": "00total energy supplied heating"
-    },
-    {
-      "v": 5978,
-      "u": 5,
-      "id": "00dhw total energy warm supplied"
-    },
-    {
-      "v": 2019,
-      "u": 5,
-      "id": "00total energy supplied cooling"
-    },
-    {
-      "v": 0,
-      "u": 5,
-      "id": "00total energy supplied pool"
-    },
-    {
-      "v": 4.5,
-      "u": 11,
-      "id": "00compressor power output"
-    },
-    {
-      "v": 100,
-      "u": 3,
-      "id": "00compressor max power",
-      "c": "hpmaxpower",
-      "m": 0,
-      "x": 100,
-      "s": "1"
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00hp compressor"
-    },
-    {
-      "v": "cooling",
-      "u": 0,
-      "id": "00compressor activity"
-    },
-    {
-      "v": 0,
-      "u": 3,
-      "id": "00brine pump speed"
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00switch valve"
-    },
-    {
-      "v": 45,
-      "u": 3,
-      "id": "00compressor speed"
-    },
-    {
-      "v": 33,
-      "u": 3,
-      "id": "00circulation pump speed"
-    },
-    {
-      "v": 0,
-      "u": 1,
-      "id": "00brine in/evaporator"
-    },
-    {
-      "v": 0,
-      "u": 1,
-      "id": "00brine out/condenser"
-    },
-    {
-      "v": 21.399999618530273,
-      "u": 1,
-      "id": "00heat carrier return (TC0)"
-    },
-    {
-      "v": 17.5,
-      "u": 1,
-      "id": "00heat carrier forward (TC1)"
-    },
-    {
-      "v": 18,
-      "u": 1,
-      "id": "00condenser temperature (TC3)"
-    },
-    {
-      "v": 51.599998474121094,
-      "u": 1,
-      "id": "00compressor temperature (TR1)"
-    },
-    {
-      "v": 14.600000381469727,
-      "u": 1,
-      "id": "00refrigerant temperature liquid side (condenser output) (TR3)"
-    },
-    {
-      "v": 37,
-      "u": 1,
-      "id": "00evaporator inlet temperature (TR4)"
-    },
-    {
-      "v": 20.200000762939453,
-      "u": 1,
-      "id": "00compressor inlet temperature (TR5)"
-    },
-    {
-      "v": 54.599998474121094,
-      "u": 1,
-      "id": "00compressor outlet temperature (TR6)"
-    },
-    {
-      "v": 29.600000381469727,
-      "u": 1,
-      "id": "00air inlet temperature (TL2)"
-    },
-    {
-      "v": 13.899999618530273,
-      "u": 1,
-      "id": "00low pressure side temperature (PL1)"
-    },
-    {
-      "v": 37.79999923706055,
-      "u": 1,
-      "id": "00high pressure side temperature (PH1)"
-    },
-    {
-      "v": 25.600000381469727,
-      "u": 1,
-      "id": "00drain pan temp (TA4)"
-    },
-    {
-      "v": 58.5,
-      "u": 1,
-      "id": "00reservoir temp (TW1)"
-    },
-    {
-      "v": 28,
-      "u": 1,
-      "id": "00pool set temperature",
-      "c": "poolsettemp",
-      "m": 0,
-      "x": 127,
-      "s": "0.5"
-    },
-    {
-      "v": "cooling & defrost",
-      "u": 0,
-      "id": "004-way valve (VR4)"
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00input 1 state"
-    },
-    {
-      "v": "000000000000000",
-      "u": 0,
-      "id": "00input 1 options",
-      "c": "hpin1opt",
-      "h": "<inv>[<evu1><evu2><evu3><comp><aux><cool><heat><dhw><pv>]"
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00input 2 state"
-    },
-    {
-      "v": "000000000000000",
-      "u": 0,
-      "id": "00input 2 options",
-      "c": "hpin2opt",
-      "h": "<inv>[<evu1><evu2><evu3><comp><aux><cool><heat><dhw><pv>]"
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00input 3 state"
-    },
-    {
-      "v": "000000000000000",
-      "u": 0,
-      "id": "00input 3 options",
-      "c": "hpin3opt",
-      "h": "<inv>[<evu1><evu2><evu3><comp><aux><cool><heat><dhw><pv>]"
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00input 4 state"
-    },
-    {
-      "v": "000000000000",
-      "u": 0,
-      "id": "00input 4 options",
-      "c": "hpin4opt",
-      "h": "<inv>[<comp><aux><cool><heat><dhw><pv>]"
-    },
-    {
-      "v": "6 kW",
-      "u": 0,
-      "id": "00heat limit compressor",
-      "c": "maxheatcomp",
-      "l": [
-        "0 kW",
-        "2 kW",
-        "3 kW",
-        "4 kW",
-        "6 kW",
-        "9 kW"
-      ]
-    },
-    {
-      "v": "9 kW",
-      "u": 0,
-      "id": "00heat limit heating",
-      "c": "maxheatheat",
-      "l": [
-        "0 kW",
-        "2 kW",
-        "3 kW",
-        "4 kW",
-        "6 kW",
-        "9 kW"
-      ]
-    },
-    {
-      "v": "9 kW",
-      "u": 0,
-      "id": "00dhw heat limit",
-      "c": "dhw/maxheat",
-      "l": [
-        "0 kW",
-        "2 kW",
-        "3 kW",
-        "4 kW",
-        "6 kW",
-        "9 kW"
-      ]
-    },
-    {
-      "v": "on",
-      "u": 0,
-      "id": "00manual defrost",
-      "c": "mandefrost",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00cooling only with PV",
-      "c": "pvcooling",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00aux heater only",
-      "c": "auxheateronly",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00disable aux heater",
-      "c": "auxheateroff",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": 0,
-      "u": 3,
-      "id": "00aux heater status"
-    },
-    {
-      "v": 500,
-      "u": 21,
-      "id": "00aux heater on delay",
-      "c": "auxheaterdelay",
-      "m": 10,
-      "x": 1000,
-      "s": "10"
-    },
-    {
-      "v": 0,
-      "u": 22,
-      "id": "00aux heater max limit",
-      "c": "auxmaxlimit",
-      "m": 0,
-      "x": 10,
-      "s": "0.1"
-    },
-    {
-      "v": 0.10000000149011612,
-      "u": 22,
-      "id": "00aux heater limit start",
-      "c": "auxlimitstart",
-      "m": 0,
-      "x": 10,
-      "s": "0.1"
-    },
-    {
-      "v": "eco",
-      "u": 0,
-      "id": "00aux heater mode",
-      "c": "auxheatrmode",
-      "l": [
-        "eco",
-        "comfort"
-      ]
-    },
-    {
-      "v": 0,
-      "u": 21,
-      "id": "00on/off hyst heat",
-      "c": "hphystheat",
-      "m": 0,
-      "x": 1500,
-      "s": "5"
-    },
-    {
-      "v": 0,
-      "u": 21,
-      "id": "00on/off hyst cool",
-      "c": "hphystcool",
-      "m": 0,
-      "x": 1500,
-      "s": "5"
-    },
-    {
-      "v": 1125,
-      "u": 21,
-      "id": "00on/off hyst pool",
-      "c": "hphystpool",
-      "m": 50,
-      "x": 1500,
-      "s": "5"
-    },
-    {
-      "v": "auto",
-      "u": 0,
-      "id": "00silent mode",
-      "c": "silentmode",
-      "l": [
-        "off",
-        "auto",
-        "on"
-      ]
-    },
-    {
-      "v": 1320,
-      "u": 8,
-      "id": "00silent mode from",
-      "c": "silentfrom",
-      "m": 0,
-      "x": 3810,
-      "s": "15"
-    },
-    {
-      "v": 360,
-      "u": 8,
-      "id": "00silent mode to",
-      "c": "silentto",
-      "m": 0,
-      "x": 3810,
-      "s": "15"
-    },
-    {
-      "v": -10,
-      "u": 1,
-      "id": "00min outside temp for silent mode",
-      "c": "mintempsilent",
-      "m": -126,
-      "x": 126,
-      "s": "1"
-    },
-    {
-      "v": -5,
-      "u": 1,
-      "id": "00outside temp parallel mode",
-      "c": "tempparmode",
-      "m": -126,
-      "x": 126,
-      "s": "1"
-    },
-    {
-      "v": 0,
-      "u": 3,
-      "id": "00aux heater mixing valve"
-    },
-    {
-      "v": 7,
-      "u": 22,
-      "id": "00temp diff TC3/TC0 heat",
-      "c": "tempdiffheat",
-      "m": 2,
-      "x": 10,
-      "s": "0.1"
-    },
-    {
-      "v": 3,
-      "u": 22,
-      "id": "00temp diff TC3/TC0 cool",
-      "c": "tempdiffcool",
-      "m": 2,
-      "x": 10,
-      "s": "0.1"
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00valve/pump cooling",
-      "c": "vpcooling",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00heating cable",
-      "c": "heatcable",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00VC0 valve",
-      "c": "vc0valve",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00primary heatpump",
-      "c": "primepump",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": 0,
-      "u": 3,
-      "id": "00primary heatpump modulation",
-      "c": "primepumpmod",
-      "m": 0,
-      "x": 100,
-      "s": "1"
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "003-way valve",
-      "c": "hp3way",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00el. heater step 1",
-      "c": "elheatstep1",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00el. heater step 2",
-      "c": "elheatstep2",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00el. heater step 3",
-      "c": "elheatstep3",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00condensate reservoir heating (EA0)"
-    },
-    {
-      "v": "auto",
-      "u": 0,
-      "id": "00primary heatpump mode",
-      "c": "hppumpmode",
-      "l": [
-        "auto",
-        "continuous"
-      ]
-    },
-    {
-      "v": "",
-      "u": 0,
-      "id": "00shutdown",
-      "c": "shutdown",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": "on",
-      "u": 0,
-      "id": "00dhw alternating operation",
-      "c": "dhw/alternatingop",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": 35,
-      "u": 8,
-      "id": "00dhw prioritise heating during dhw",
-      "c": "dhw/altopprioheat",
-      "m": 20,
-      "x": 120,
-      "s": "1"
-    },
-    {
-      "v": 45,
-      "u": 8,
-      "id": "00dhw prioritise dhw during heating",
-      "c": "dhw/altopprio",
-      "m": 30,
-      "x": 120,
-      "s": "1"
-    },
-    {
-      "v": 57,
-      "u": 1,
-      "id": "00dhw comfort switch off",
-      "c": "dhw/comfoff",
-      "m": 15,
-      "x": 65,
-      "s": "1"
-    },
-    {
-      "v": 54,
-      "u": 1,
-      "id": "00dhw eco switch off",
-      "c": "dhw/ecooff",
-      "m": 15,
-      "x": 65,
-      "s": "1"
-    },
-    {
-      "v": 50,
-      "u": 1,
-      "id": "00dhw eco+ switch off",
-      "c": "dhw/ecoplusoff",
-      "m": 48,
-      "x": 63,
-      "s": "1"
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00dhw circulation pump available during dhw",
-      "c": "dhw/hpcircpump",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": 54,
-      "u": 1,
-      "id": "00dhw set temperature"
-    },
-    {
-      "v": 45,
-      "u": 1,
-      "id": "00dhw selected temperature",
-      "c": "dhw/seltemp",
-      "m": 0,
-      "x": 254,
-      "s": "1"
-    },
-    {
-      "v": 42,
-      "u": 1,
-      "id": "00dhw selected lower temperature",
-      "c": "dhw/seltemplow",
-      "m": 0,
-      "x": 254,
-      "s": "1"
-    },
-    {
-      "v": 65,
-      "u": 1,
-      "id": "00dhw single charge temperature",
-      "c": "dhw/seltempsingle",
-      "m": 0,
-      "x": 254,
-      "s": "1"
-    },
-    {
-      "v": "high comfort",
-      "u": 0,
-      "id": "00dhw comfort mode",
-      "c": "dhw/comfort1",
-      "l": [
-        "high comfort",
-        "eco"
-      ]
-    },
-    {
-      "v": 25,
-      "u": 2,
-      "id": "00dhw flow temperature offset",
-      "c": "dhw/flowtempoffset",
-      "m": 0,
-      "x": 100,
-      "s": "1"
-    },
-    {
-      "v": 56,
-      "u": 1,
-      "id": "00dhw maximum temperature",
-      "c": "dhw/maxtemp",
-      "m": 0,
-      "x": 80,
-      "s": "1"
-    },
-    {
-      "v": "on",
-      "u": 0,
-      "id": "00dhw circulation pump available",
-      "c": "dhw/circpump",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": -2,
-      "u": 2,
-      "id": "00dhw hysteresis on temperature",
-      "c": "dhw/hyston",
-      "m": -126,
-      "x": 126,
-      "s": "1"
-    },
-    {
-      "v": 0,
-      "u": 2,
-      "id": "00dhw hysteresis off temperature",
-      "c": "dhw/hystoff",
-      "m": -126,
-      "x": 126,
-      "s": "1"
-    },
-    {
-      "v": 65,
-      "u": 1,
-      "id": "00dhw disinfection temperature",
-      "c": "dhw/disinfectiontemp",
-      "m": 60,
-      "x": 80,
-      "s": "1"
-    },
-    {
-      "v": "3x3min",
-      "u": 0,
-      "id": "00dhw circulation pump mode",
-      "c": "dhw/circmode",
-      "l": [
-        "off",
-        "1x3min",
-        "2x3min",
-        "3x3min",
-        "4x3min",
-        "5x3min",
-        "6x3min",
-        "continuous"
-      ]
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00dhw circulation active",
-      "c": "dhw/circ",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": 58.70000076293945,
-      "u": 1,
-      "id": "00dhw current intern temperature"
-    },
-    {
-      "v": 58.5,
-      "u": 1,
-      "id": "00dhw current extern temperature"
-    },
-    {
-      "v": 0,
-      "u": 4,
-      "id": "00dhw current tap water flow"
-    },
-    {
-      "v": "on",
-      "u": 0,
-      "id": "00dhw activated",
-      "c": "dhw/activated",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00dhw one time charging",
-      "c": "dhw/onetime",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00dhw disinfecting",
-      "c": "dhw/disinfecting",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00dhw charging"
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00dhw recharging"
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00dhw temperature ok"
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00dhw 3-way valve active"
-    },
-    {
-      "v": 0,
-      "u": 0,
-      "id": "00dhw starts"
-    },
-    {
-      "v": 0,
-      "u": 8,
-      "id": "00dhw active time"
+      v: 0,
+      u: 8,
+      id: '00dhw active time'
     }
   ]
-
 };
 
 const emsesp_devicedata_9 = {
-  "data": [
+  data: [
     {
-      "v": 24,
-      "u": 1,
-      "id": "00hc1 room temperature from remote"
+      v: 24,
+      u: 1,
+      id: '00hc1 room temperature from remote'
     },
     {
-      "v": 14,
-      "u": 1,
-      "id": "00hc1 dew point temperature"
+      v: 14,
+      u: 1,
+      id: '00hc1 dew point temperature'
     },
     {
-      "v": 46,
-      "u": 3,
-      "id": "00hc1 relative air humidity"
+      v: 46,
+      u: 3,
+      id: '00hc1 relative air humidity'
     },
     {
-      "v": 0,
-      "u": 2,
-      "id": "00hc1 internal temperature offset",
-      "c": "hc1/intoffset",
-      "m": -12,
-      "x": 12,
-      "s": "0.1"
+      v: 0,
+      u: 2,
+      id: '00hc1 internal temperature offset',
+      c: 'hc1/intoffset',
+      m: -12,
+      x: 12,
+      s: '0.1'
     }
   ]
 };
 
 const emsesp_devicedata_10 = {
-  "data": [
+  data: [
     {
-      "v": "26.06.2024 14:49",
-      "u": 0,
-      "id": "00date/time",
-      "c": "datetime",
-      "h": "NTP | dd.mm.yyyy-hh:mm:ss-day(0-6)-dst(0/1)"
+      v: '26.06.2024 14:49',
+      u: 0,
+      id: '00date/time',
+      c: 'datetime',
+      h: 'NTP | dd.mm.yyyy-hh:mm:ss-day(0-6)-dst(0/1)'
     },
     {
-      "v": 0,
-      "u": 2,
-      "id": "00internal temperature offset",
-      "c": "intoffset",
-      "m": -12,
-      "x": 12,
-      "s": "0.1"
+      v: 0,
+      u: 2,
+      id: '00internal temperature offset',
+      c: 'intoffset',
+      m: -12,
+      x: 12,
+      s: '0.1'
     },
     {
-      "v": "off",
-      "u": 0,
-      "id": "00floor drying"
+      v: 'off',
+      u: 0,
+      id: '00floor drying'
     },
     {
-      "v": 30.299999237060547,
-      "u": 1,
-      "id": "00damped outdoor temperature"
+      v: 30.299999237060547,
+      u: 1,
+      id: '00damped outdoor temperature'
     },
     {
-      "v": 0,
-      "u": 1,
-      "id": "00floor drying temperature"
+      v: 0,
+      u: 1,
+      id: '00floor drying temperature'
     },
     {
-      "v": "heavy",
-      "u": 0,
-      "id": "00building type",
-      "c": "building",
-      "l": [
-        "light",
-        "medium",
-        "heavy"
+      v: 'heavy',
+      u: 0,
+      id: '00building type',
+      c: 'building',
+      l: ['light', 'medium', 'heavy']
+    },
+    {
+      v: -12,
+      u: 1,
+      id: '00minimal external temperature',
+      c: 'minexttemp',
+      m: -126,
+      x: 126,
+      s: '1'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00damping outdoor temperature',
+      c: 'damping',
+      l: ['off', 'on']
+    },
+    {
+      v: 3.299999952316284,
+      u: 0,
+      id: '00energy cost ratio',
+      c: 'energycostratio',
+      m: 0,
+      x: 20,
+      s: '0.1'
+    },
+    {
+      v: 'off',
+      u: 0,
+      id: '00enable raise dhw',
+      c: 'pvenabledhw',
+      l: ['off', 'on']
+    },
+    {
+      v: 3,
+      u: 22,
+      id: '00raise heating with PV',
+      c: 'pvraiseheat',
+      m: 0,
+      x: 5,
+      s: '1'
+    },
+    {
+      v: 0,
+      u: 22,
+      id: '00lower cooling with PV',
+      c: 'pvlowercool',
+      m: -5,
+      x: 0,
+      s: '1'
+    },
+    {
+      v: 21,
+      u: 1,
+      id: '00hc1 selected room temperature',
+      c: 'hc1/seltemp',
+      m: 0,
+      x: 30,
+      s: '0.5'
+    },
+    {
+      v: 24,
+      u: 1,
+      id: '00hc1 current room temperature'
+    },
+    {
+      v: 'roomTemp',
+      u: 0,
+      id: '00hc1 mqtt discovery current room temperature'
+    },
+    {
+      v: 'manual',
+      u: 0,
+      id: '00hc1 mode',
+      c: 'hc1/mode',
+      l: ['manual', 'auto']
+    },
+    {
+      v: 'comfort',
+      u: 0,
+      id: '00hc1 mode type'
+    },
+    {
+      v: 15,
+      u: 1,
+      id: '00hc1 eco temperature',
+      c: 'hc1/ecotemp',
+      m: 0,
+      x: 127,
+      s: '0.5'
+    },
+    {
+      v: 22.5,
+      u: 1,
+      id: '00hc1 manual temperature',
+      c: 'hc1/manualtemp',
+      m: 0,
+      x: 127,
+      s: '0.5'
+    },
+    {
+      v: 19,
+      u: 1,
+      id: '00hc1 comfort temperature',
+      c: 'hc1/comforttemp',
+      m: 0,
+      x: 127,
+      s: '0.5'
+    },
+    {
+      v: 11,
+      u: 1,
+      id: '00hc1 summer temperature',
+      c: 'hc1/summertemp',
+      m: 10,
+      x: 30,
+      s: '1'
+    },
+    {
+      v: 35,
+      u: 1,
+      id: '00hc1 design temperature',
+      c: 'hc1/designtemp',
+      m: 0,
+      x: 254,
+      s: '1'
+    },
+    {
+      v: 0,
+      u: 2,
+      id: '00hc1 offset temperature',
+      c: 'hc1/offsettemp',
+      m: -126,
+      x: 126,
+      s: '1'
+    },
+    {
+      v: 22,
+      u: 1,
+      id: '00hc1 min flow temperature',
+      c: 'hc1/minflowtemp',
+      m: 0,
+      x: 254,
+      s: '1'
+    },
+    {
+      v: 60,
+      u: 1,
+      id: '00hc1 max flow temperature',
+      c: 'hc1/maxflowtemp',
+      m: 0,
+      x: 254,
+      s: '1'
+    },
+    {
+      v: 0,
+      u: 2,
+      id: '00hc1 room influence',
+      c: 'hc1/roominfluence',
+      m: 0,
+      x: 254,
+      s: '1'
+    },
+    {
+      v: 4,
+      u: 0,
+      id: '00hc1 room influence factor',
+      c: 'hc1/roominflfactor',
+      m: 0,
+      x: 25,
+      s: '0.1'
+    },
+    {
+      v: 0,
+      u: 2,
+      id: '00hc1 current room influence'
+    },
+    {
+      v: 'outdoor',
+      u: 0,
+      id: '00hc1 nofrost mode',
+      c: 'hc1/nofrostmode',
+      l: ['room', 'outdoor', 'room outdoor']
+    },
+    {
+      v: 2,
+      u: 1,
+      id: '00hc1 nofrost temperature',
+      c: 'hc1/nofrosttemp',
+      m: -126,
+      x: 126,
+      s: '1'
+    },
+    {
+      v: 19,
+      u: 1,
+      id: '00hc1 target flow temperature'
+    },
+    {
+      v: 'floor',
+      u: 0,
+      id: '00hc1 heating type',
+      c: 'hc1/heatingtype',
+      l: ['off', 'radiator', 'convector', 'floor']
+    },
+    {
+      v: 'auto',
+      u: 0,
+      id: '00hc1 heatpump operating mode',
+      c: 'hc1/hpoperatingmode',
+      l: ['off', 'auto', 'heating', 'cooling']
+    },
+    {
+      v: 'cooling',
+      u: 0,
+      id: '00hc1 heatpump operating state'
+    },
+    {
+      v: 'weather compensated',
+      u: 0,
+      id: '00hc1 control mode',
+      c: 'hc1/controlmode',
+      l: [
+        'weather compensated',
+        'outside basepoint',
+        'n/a',
+        'room',
+        'power',
+        'constant'
       ]
     },
     {
-      "v": -12,
-      "u": 1,
-      "id": "00minimal external temperature",
-      "c": "minexttemp",
-      "m": -126,
-      "x": 126,
-      "s": "1"
+      v: 'prog 1',
+      u: 0,
+      id: '00hc1 program',
+      c: 'hc1/program',
+      l: ['prog 1', 'prog 2']
     },
     {
-      "v": "off",
-      "u": 0,
-      "id": "00damping outdoor temperature",
-      "c": "damping",
-      "l": [
-        "off",
-        "on"
-      ]
+      v: -1,
+      u: 1,
+      id: '00hc1 temporary set temperature automode',
+      c: 'hc1/tempautotemp',
+      m: -1,
+      x: 30,
+      s: '0.5'
     },
     {
-      "v": 3.299999952316284,
-      "u": 0,
-      "id": "00energy cost ratio",
-      "c": "energycostratio",
-      "m": 0,
-      "x": 20,
-      "s": "0.1"
+      v: 21,
+      u: 1,
+      id: '00hc1 temporary set temperature from remote'
     },
     {
-      "v": "off",
-      "u": 0,
-      "id": "00enable raise dhw",
-      "c": "pvenabledhw",
-      "l": [
-        "off",
-        "on"
-      ]
+      v: 0,
+      u: 3,
+      id: '00hc1 fast heatup',
+      c: 'hc1/fastheatup',
+      m: 0,
+      x: 100,
+      s: '1'
     },
     {
-      "v": 3,
-      "u": 22,
-      "id": "00raise heating with PV",
-      "c": "pvraiseheat",
-      "m": 0,
-      "x": 5,
-      "s": "1"
+      v: 'off',
+      u: 0,
+      id: '00hc1 switch-on optimization',
+      c: 'hc1/switchonoptimization',
+      l: ['off', 'on']
     },
     {
-      "v": 0,
-      "u": 22,
-      "id": "00lower cooling with PV",
-      "c": "pvlowercool",
-      "m": -5,
-      "x": 0,
-      "s": "1"
+      v: 'reduce',
+      u: 0,
+      id: '00hc1 reduce mode',
+      c: 'hc1/reducemode',
+      l: ['outdoor', 'room', 'reduce']
     },
     {
-      "v": 21,
-      "u": 1,
-      "id": "00hc1 selected room temperature",
-      "c": "hc1/seltemp",
-      "m": 0,
-      "x": 30,
-      "s": "0.5"
+      v: -31,
+      u: 1,
+      id: '00hc1 no reduce below temperature',
+      c: 'hc1/noreducetemp',
+      m: -126,
+      x: 126,
+      s: '1'
     },
     {
-      "v": 24,
-      "u": 1,
-      "id": "00hc1 current room temperature"
+      v: 5,
+      u: 1,
+      id: '00hc1 off/reduce switch temperature',
+      c: 'hc1/reducetemp',
+      m: -126,
+      x: 126,
+      s: '1'
     },
     {
-      "v": "roomTemp",
-      "u": 0,
-      "id": "00hc1 mqtt discovery current room temperature"
+      v: 'off',
+      u: 0,
+      id: '00hc1 dhw priority',
+      c: 'hc1/dhwprio',
+      l: ['off', 'on']
     },
     {
-      "v": "manual",
-      "u": 0,
-      "id": "00hc1 mode",
-      "c": "hc1/mode",
-      "l": [
-        "manual",
-        "auto"
-      ]
+      v: 'on',
+      u: 0,
+      id: '00hc1 cooling'
     },
     {
-      "v": "comfort",
-      "u": 0,
-      "id": "00hc1 mode type"
+      v: 'heating&cooling',
+      u: 0,
+      id: '00hc1 HP Mode',
+      c: 'hc1/hpmode',
+      l: ['heating', 'cooling', 'heating&cooling']
     },
     {
-      "v": 15,
-      "u": 1,
-      "id": "00hc1 eco temperature",
-      "c": "hc1/ecotemp",
-      "m": 0,
-      "x": 127,
-      "s": "0.5"
+      v: 5,
+      u: 22,
+      id: '00hc1 dew point offset',
+      c: 'hc1/dewoffset',
+      m: 2,
+      x: 10,
+      s: '1'
     },
     {
-      "v": 22.5,
-      "u": 1,
-      "id": "00hc1 manual temperature",
-      "c": "hc1/manualtemp",
-      "m": 0,
-      "x": 127,
-      "s": "0.5"
+      v: 1,
+      u: 22,
+      id: '00hc1 room temp difference',
+      c: 'hc1/roomtempdiff',
+      m: 0,
+      x: 254,
+      s: '1'
     },
     {
-      "v": 19,
-      "u": 1,
-      "id": "00hc1 comfort temperature",
-      "c": "hc1/comforttemp",
-      "m": 0,
-      "x": 127,
-      "s": "0.5"
+      v: 11,
+      u: 1,
+      id: '00hc1 HP min. flow temp.',
+      c: 'hc1/hpminflowtemp',
+      m: 0,
+      x: 254,
+      s: '1'
     },
     {
-      "v": 11,
-      "u": 1,
-      "id": "00hc1 summer temperature",
-      "c": "hc1/summertemp",
-      "m": 10,
-      "x": 30,
-      "s": "1"
+      v: 'RC100H',
+      u: 0,
+      id: '00hc1 control device',
+      c: 'hc1/control',
+      l: ['RC310', 'RC200', 'RC100', 'RC100H', 'TC100']
     },
     {
-      "v": 35,
-      "u": 1,
-      "id": "00hc1 design temperature",
-      "c": "hc1/designtemp",
-      "m": 0,
-      "x": 254,
-      "s": "1"
+      v: 1,
+      u: 7,
+      id: '00hc1 heat-on delay',
+      c: 'hc1/heatondelay',
+      m: 1,
+      x: 48,
+      s: '1'
     },
     {
-      "v": 0,
-      "u": 2,
-      "id": "00hc1 offset temperature",
-      "c": "hc1/offsettemp",
-      "m": -126,
-      "x": 126,
-      "s": "1"
+      v: 1,
+      u: 7,
+      id: '00hc1 heat-off delay',
+      c: 'hc1/heatoffdelay',
+      m: 1,
+      x: 48,
+      s: '1'
     },
     {
-      "v": 22,
-      "u": 1,
-      "id": "00hc1 min flow temperature",
-      "c": "hc1/minflowtemp",
-      "m": 0,
-      "x": 254,
-      "s": "1"
+      v: 1,
+      u: 22,
+      id: '00hc1 instant start',
+      c: 'hc1/instantstart',
+      m: 1,
+      x: 10,
+      s: '1'
     },
     {
-      "v": 60,
-      "u": 1,
-      "id": "00hc1 max flow temperature",
-      "c": "hc1/maxflowtemp",
-      "m": 0,
-      "x": 254,
-      "s": "1"
+      v: 'normal',
+      u: 0,
+      id: '00dhw mode',
+      c: 'dhw/mode',
+      l: ['off', 'normal', 'comfort', 'auto', 'own prog']
     },
     {
-      "v": 0,
-      "u": 2,
-      "id": "00hc1 room influence",
-      "c": "hc1/roominfluence",
-      "m": 0,
-      "x": 254,
-      "s": "1"
+      v: 'on',
+      u: 0,
+      id: '00dhw circulation pump mode',
+      c: 'dhw/circmode',
+      l: ['off', 'on', 'auto', 'own prog']
     },
     {
-      "v": 4,
-      "u": 0,
-      "id": "00hc1 room influence factor",
-      "c": "hc1/roominflfactor",
-      "m": 0,
-      "x": 25,
-      "s": "0.1"
+      v: 15,
+      u: 8,
+      id: '00dhw charge duration',
+      c: 'dhw/chargeduration',
+      m: 0,
+      x: 3810,
+      s: '15'
     },
     {
-      "v": 0,
-      "u": 2,
-      "id": "00hc1 current room influence"
+      v: 'off',
+      u: 0,
+      id: '00dhw charge',
+      c: 'dhw/charge',
+      l: ['off', 'on']
     },
     {
-      "v": "outdoor",
-      "u": 0,
-      "id": "00hc1 nofrost mode",
-      "c": "hc1/nofrostmode",
-      "l": [
-        "room",
-        "outdoor",
-        "room outdoor"
-      ]
+      v: 0,
+      u: 1,
+      id: '00dhw extra'
     },
     {
-      "v": 2,
-      "u": 1,
-      "id": "00hc1 nofrost temperature",
-      "c": "hc1/nofrosttemp",
-      "m": -126,
-      "x": 126,
-      "s": "1"
+      v: 'off',
+      u: 0,
+      id: '00dhw disinfecting',
+      c: 'dhw/disinfecting',
+      l: ['off', 'on']
     },
     {
-      "v": 19,
-      "u": 1,
-      "id": "00hc1 target flow temperature"
+      v: 'tu',
+      u: 0,
+      id: '00dhw disinfection day',
+      c: 'dhw/disinfectday',
+      l: ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su', 'all']
     },
     {
-      "v": "floor",
-      "u": 0,
-      "id": "00hc1 heating type",
-      "c": "hc1/heatingtype",
-      "l": [
-        "off",
-        "radiator",
-        "convector",
-        "floor"
-      ]
+      v: 120,
+      u: 8,
+      id: '00dhw disinfection time',
+      c: 'dhw/disinfecttime',
+      m: 0,
+      x: 1431,
+      s: '15'
     },
     {
-      "v": "auto",
-      "u": 0,
-      "id": "00hc1 heatpump operating mode",
-      "c": "hc1/hpoperatingmode",
-      "l": [
-        "off",
-        "auto",
-        "heating",
-        "cooling"
-      ]
+      v: 'off',
+      u: 0,
+      id: '00dhw daily heating',
+      c: 'dhw/dailyheating',
+      l: ['off', 'on']
     },
     {
-      "v": "cooling",
-      "u": 0,
-      "id": "00hc1 heatpump operating state"
-    },
-    {
-      "v": "weather compensated",
-      "u": 0,
-      "id": "00hc1 control mode",
-      "c": "hc1/controlmode",
-      "l": [
-        "weather compensated",
-        "outside basepoint",
-        "n/a",
-        "room",
-        "power",
-        "constant"
-      ]
-    },
-    {
-      "v": "prog 1",
-      "u": 0,
-      "id": "00hc1 program",
-      "c": "hc1/program",
-      "l": [
-        "prog 1",
-        "prog 2"
-      ]
-    },
-    {
-      "v": -1,
-      "u": 1,
-      "id": "00hc1 temporary set temperature automode",
-      "c": "hc1/tempautotemp",
-      "m": -1,
-      "x": 30,
-      "s": "0.5"
-    },
-    {
-      "v": 21,
-      "u": 1,
-      "id": "00hc1 temporary set temperature from remote"
-    },
-    {
-      "v": 0,
-      "u": 3,
-      "id": "00hc1 fast heatup",
-      "c": "hc1/fastheatup",
-      "m": 0,
-      "x": 100,
-      "s": "1"
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00hc1 switch-on optimization",
-      "c": "hc1/switchonoptimization",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": "reduce",
-      "u": 0,
-      "id": "00hc1 reduce mode",
-      "c": "hc1/reducemode",
-      "l": [
-        "outdoor",
-        "room",
-        "reduce"
-      ]
-    },
-    {
-      "v": -31,
-      "u": 1,
-      "id": "00hc1 no reduce below temperature",
-      "c": "hc1/noreducetemp",
-      "m": -126,
-      "x": 126,
-      "s": "1"
-    },
-    {
-      "v": 5,
-      "u": 1,
-      "id": "00hc1 off/reduce switch temperature",
-      "c": "hc1/reducetemp",
-      "m": -126,
-      "x": 126,
-      "s": "1"
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00hc1 dhw priority",
-      "c": "hc1/dhwprio",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": "on",
-      "u": 0,
-      "id": "00hc1 cooling"
-    },
-    {
-      "v": "heating&cooling",
-      "u": 0,
-      "id": "00hc1 HP Mode",
-      "c": "hc1/hpmode",
-      "l": [
-        "heating",
-        "cooling",
-        "heating&cooling"
-      ]
-    },
-    {
-      "v": 5,
-      "u": 22,
-      "id": "00hc1 dew point offset",
-      "c": "hc1/dewoffset",
-      "m": 2,
-      "x": 10,
-      "s": "1"
-    },
-    {
-      "v": 1,
-      "u": 22,
-      "id": "00hc1 room temp difference",
-      "c": "hc1/roomtempdiff",
-      "m": 0,
-      "x": 254,
-      "s": "1"
-    },
-    {
-      "v": 11,
-      "u": 1,
-      "id": "00hc1 HP min. flow temp.",
-      "c": "hc1/hpminflowtemp",
-      "m": 0,
-      "x": 254,
-      "s": "1"
-    },
-    {
-      "v": "RC100H",
-      "u": 0,
-      "id": "00hc1 control device",
-      "c": "hc1/control",
-      "l": [
-        "RC310",
-        "RC200",
-        "RC100",
-        "RC100H",
-        "TC100"
-      ]
-    },
-    {
-      "v": 1,
-      "u": 7,
-      "id": "00hc1 heat-on delay",
-      "c": "hc1/heatondelay",
-      "m": 1,
-      "x": 48,
-      "s": "1"
-    },
-    {
-      "v": 1,
-      "u": 7,
-      "id": "00hc1 heat-off delay",
-      "c": "hc1/heatoffdelay",
-      "m": 1,
-      "x": 48,
-      "s": "1"
-    },
-    {
-      "v": 1,
-      "u": 22,
-      "id": "00hc1 instant start",
-      "c": "hc1/instantstart",
-      "m": 1,
-      "x": 10,
-      "s": "1"
-    },
-    {
-      "v": "normal",
-      "u": 0,
-      "id": "00dhw mode",
-      "c": "dhw/mode",
-      "l": [
-        "off",
-        "normal",
-        "comfort",
-        "auto",
-        "own prog"
-      ]
-    },
-    {
-      "v": "on",
-      "u": 0,
-      "id": "00dhw circulation pump mode",
-      "c": "dhw/circmode",
-      "l": [
-        "off",
-        "on",
-        "auto",
-        "own prog"
-      ]
-    },
-    {
-      "v": 15,
-      "u": 8,
-      "id": "00dhw charge duration",
-      "c": "dhw/chargeduration",
-      "m": 0,
-      "x": 3810,
-      "s": "15"
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00dhw charge",
-      "c": "dhw/charge",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": 0,
-      "u": 1,
-      "id": "00dhw extra"
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00dhw disinfecting",
-      "c": "dhw/disinfecting",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": "tu",
-      "u": 0,
-      "id": "00dhw disinfection day",
-      "c": "dhw/disinfectday",
-      "l": [
-        "mo",
-        "tu",
-        "we",
-        "th",
-        "fr",
-        "sa",
-        "su",
-        "all"
-      ]
-    },
-    {
-      "v": 120,
-      "u": 8,
-      "id": "00dhw disinfection time",
-      "c": "dhw/disinfecttime",
-      "m": 0,
-      "x": 1431,
-      "s": "15"
-    },
-    {
-      "v": "off",
-      "u": 0,
-      "id": "00dhw daily heating",
-      "c": "dhw/dailyheating",
-      "l": [
-        "off",
-        "on"
-      ]
-    },
-    {
-      "v": 120,
-      "u": 8,
-      "id": "00dhw daily heating time",
-      "c": "dhw/dailyheattime",
-      "m": 0,
-      "x": 1431,
-      "s": "15"
+      v: 120,
+      u: 8,
+      id: '00dhw daily heating time',
+      c: 'dhw/dailyheattime',
+      m: 0,
+      x: 1431,
+      s: '15'
     }
   ]
-}
+};
 
 const emsesp_devicedata_99 = {
   data: [
@@ -3964,7 +3879,7 @@ let emsesp_schedule = {
       flags: 132,
       time: '',
       cmd: 'system/message',
-      value: '\"hello world\"',
+      value: '"hello world"',
       name: 'immediate'
     }
   ]
@@ -3973,35 +3888,36 @@ let emsesp_schedule = {
 // MODULES
 let emsesp_modules = {
   // 'modules': []
-  "modules": [
+  modules: [
     {
       id: 1,
-      "key": "ModuleTest1",
-      "name": "Module Test 1",
-      "author": "proddy",
-      "version": "1.0.0",
-      "enabled": true,
-      "status": 1,
-      "message": "Running",
-      "license": "1234567890"
+      key: 'ModuleTest1',
+      name: 'Module Test 1',
+      author: 'proddy',
+      version: '1.0.0',
+      enabled: true,
+      status: 1,
+      message: 'Running',
+      license: '1234567890'
     },
     {
       id: 2,
-      "key": "ModuleTest2",
-      "name": "Module Test 2",
-      "author": "proddy",
-      "version": "1.0.0",
-      "enabled": true,
-      "status": 2,
-      "message": "Running",
-      "license": "ABCDEFGHIJKL"
-
+      key: 'ModuleTest2',
+      name: 'Module Test 2',
+      author: 'proddy',
+      version: '1.0.0',
+      enabled: true,
+      status: 2,
+      message: 'Running',
+      license: 'ABCDEFGHIJKL'
     }
   ]
-}
+};
 
 // CUSTOMIZATION
-const emsesp_deviceentities_1 = [{ v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }];
+const emsesp_deviceentities_1 = [
+  { v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }
+];
 
 const emsesp_deviceentities_2 = [
   {
@@ -4044,7 +3960,9 @@ const emsesp_deviceentities_2 = [
   }
 ];
 
-const emsesp_deviceentities_3 = [{ v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }];
+const emsesp_deviceentities_3 = [
+  { v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }
+];
 
 const emsesp_deviceentities_4 = [
   {
@@ -4069,9 +3987,13 @@ const emsesp_deviceentities_4 = [
     w: true
   }
 ];
-const emsesp_deviceentities_5 = [{ v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }];
+const emsesp_deviceentities_5 = [
+  { v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }
+];
 
-const emsesp_deviceentities_6 = [{ v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }];
+const emsesp_deviceentities_6 = [
+  { v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }
+];
 
 const emsesp_deviceentities_7 = [
   { u: 0, n: '!reset', id: 'reset', m: 8, w: false },
@@ -4112,13 +4034,25 @@ const emsesp_deviceentities_7 = [
   { v: 553437, n: 'total burner operating time', id: 'burnworkmin', m: 0, w: false },
   { v: 451286, n: 'total heat operating time', id: 'heatworkmin', m: 0, w: false },
   { v: 4672175, n: 'total UBA operating time', id: 'ubauptime', m: 0, w: false },
-  { v: '1C(210) 06.06.2020 12:07 (0 min)', n: 'last error code', id: 'lastcode', m: 0, w: false },
+  {
+    v: '1C(210) 06.06.2020 12:07 (0 min)',
+    n: 'last error code',
+    id: 'lastcode',
+    m: 0,
+    w: false
+  },
   { v: '0H', n: 'service code', id: 'servicecode', m: 0, w: false },
   { v: 203, n: 'service code number', id: 'servicecodenumber', m: 0, w: false },
   { v: 'H00', n: 'maintenance message', id: 'maintenancemessage', m: 0, w: false },
   { v: 'manual', n: 'maintenance scheduled', id: 'maintenance', m: 0, w: false },
   { v: 6000, n: 'time to next maintenance', id: 'maintenancetime', m: 0, w: false },
-  { v: '01.01.2012', n: 'next maintenance date', id: 'maintenancedate', m: 0, w: false },
+  {
+    v: '01.01.2012',
+    n: 'next maintenance date',
+    id: 'maintenancedate',
+    m: 0,
+    w: false
+  },
   { v: true, n: 'dhw turn on/off', id: 'dhw/tapactivated', m: 0, w: false },
   { v: 62, n: 'dhw set temperature', id: 'dhw/settemp', m: 0, w: false },
   { v: 60, n: 'dhw selected temperature', id: 'dhw/seltemp', m: 0, w: true },
@@ -4127,19 +4061,49 @@ const emsesp_deviceentities_7 = [
   { n: 'dhw single charge temperature', id: 'dhw/seltempsingle', m: 2 },
   { v: 'flow', n: 'dhw type', id: 'dhw/type', m: 0, w: false },
   { v: 'hot', n: 'dhw comfort', id: 'dhw/comfort', m: 0, w: false },
-  { v: 40, n: 'dhw flow temperature offset', id: 'dhw/flowtempoffset', m: 0, w: false },
+  {
+    v: 40,
+    n: 'dhw flow temperature offset',
+    id: 'dhw/flowtempoffset',
+    m: 0,
+    w: false
+  },
   { v: 100, n: 'dhw max power', id: 'dhw/maxpower', m: 0, w: false },
-  { v: false, n: 'dhw circulation pump available', id: 'dhw/circpump', m: 0, w: false },
+  {
+    v: false,
+    n: 'dhw circulation pump available',
+    id: 'dhw/circpump',
+    m: 0,
+    w: false
+  },
   { v: '3-way valve', n: 'dhw charging type', id: 'dhw/chargetype', m: 0, w: false },
   { v: -5, n: 'dhw hysteresis on temperature', id: 'dhw/hyston', m: 0, w: false },
   { v: 0, n: 'dhw hysteresis off temperature', id: 'dhw/hystoff', m: 0, w: false },
-  { v: 70, n: 'dhw disinfection temperature', id: 'dhw/disinfectiontemp', m: 0, w: false },
+  {
+    v: 70,
+    n: 'dhw disinfection temperature',
+    id: 'dhw/disinfectiontemp',
+    m: 0,
+    w: false
+  },
   { v: 'off', n: 'dhw circulation pump mode', id: 'dhw/circmode', m: 0, w: false },
   { v: false, n: 'dhw circulation active', id: 'dhw/circ', m: 0, w: false },
-  { v: 46.4, n: 'dhw current intern temperature', id: 'dhw/curtemp', m: 0, w: false },
+  {
+    v: 46.4,
+    n: 'dhw current intern temperature',
+    id: 'dhw/curtemp',
+    m: 0,
+    w: false
+  },
   { n: 'dhw current extern temperature', id: 'dhw/curtemp2', m: 2 },
   { v: 0, n: 'dhw current tap water flow', id: 'dhw/curflow', m: 0, w: false },
-  { v: 46.3, n: 'dhw storage intern temperature', id: 'dhw/storagetemp1', m: 0, w: false },
+  {
+    v: 46.3,
+    n: 'dhw storage intern temperature',
+    id: 'dhw/storagetemp1',
+    m: 0,
+    w: false
+  },
   { n: 'dhw storage extern temperature', id: 'dhw/storagetemp2', m: 2 },
   { v: true, n: 'dhw activated', id: 'dhw/activated', m: 0, w: false },
   { v: false, n: 'dhw one time charging', id: 'dhw/onetime', m: 0, w: false },
@@ -4156,13 +4120,21 @@ const emsesp_deviceentities_7 = [
   { v: 102151, n: 'dhw active time', id: 'dhw/workm', m: 0, w: false }
 ];
 
-const emsesp_deviceentities_8 = [{ v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }];
+const emsesp_deviceentities_8 = [
+  { v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }
+];
 
-const emsesp_deviceentities_9 = [{ v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }];
+const emsesp_deviceentities_9 = [
+  { v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }
+];
 
-const emsesp_deviceentities_10 = [{ v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }];
+const emsesp_deviceentities_10 = [
+  { v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }
+];
 
-const emsesp_deviceentities_none = [{ v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }];
+const emsesp_deviceentities_none = [
+  { v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }
+];
 
 // END DATA
 
@@ -4353,10 +4325,11 @@ router
     sorted_devices.push(emsesp_coredata_custom);
     return { connected: true, devices: sorted_devices };
   })
-  .get(EMSESP_SENSOR_DATA_ENDPOINT, () => { 
+  .get(EMSESP_SENSOR_DATA_ENDPOINT, () => {
     // random change the zolder temperature 0-100
     emsesp_sensordata.ts[2].t = Math.floor(Math.random() * 100);
-    return emsesp_sensordata })
+    return emsesp_sensordata;
+  })
   .get(EMSESP_DEVICES_ENDPOINT, () => {
     // sort by type
     const sorted_devices = emsesp_devices.devices.sort((a, b) => a.t - b.t);
@@ -4365,11 +4338,15 @@ router
   .get(EMSESP_DEVICEDATA_ENDPOINT1, (request) =>
     request.query.id ? deviceData(Number(request.query.id)) : status(404)
   )
-  .get(EMSESP_DEVICEDATA_ENDPOINT2, ({ params }) => (params.id ? deviceData(Number(params.id)) : status(404)))
+  .get(EMSESP_DEVICEDATA_ENDPOINT2, ({ params }) =>
+    params.id ? deviceData(Number(params.id)) : status(404)
+  )
   .get(EMSESP_DEVICEENTITIES_ENDPOINT1, (request) =>
     request.query.id ? deviceEntities(Number(request.query.id)) : status(404)
   )
-  .get(EMSESP_DEVICEENTITIES_ENDPOINT2, ({ params }) => (params.id ? deviceEntities(Number(params.id)) : status(404)))
+  .get(EMSESP_DEVICEENTITIES_ENDPOINT2, ({ params }) =>
+    params.id ? deviceEntities(Number(params.id)) : status(404)
+  )
 
   // Customizations
   .post(EMSESP_CUSTOMIZATION_ENTITIES_ENDPOINT, async (request: any) => {
@@ -4407,7 +4384,7 @@ router
   .post(EMSESP_WRITE_DEVICENAME_ENDPOINT, async (request: any) => {
     const content = await request.json();
     const id = content.id;
-    console.log("Renaming device ID " + id + " to " + content.name);
+    console.log('Renaming device ID ' + id + ' to ' + content.name);
     return status(200);
   })
 
@@ -4426,7 +4403,9 @@ router
     let modules = content.modules;
     for (let i = 0; i < modules.length; i++) {
       const key = modules[i].key;
-      const objIndex = emsesp_modules.modules.findIndex((obj: any) => obj.key === key);
+      const objIndex = emsesp_modules.modules.findIndex(
+        (obj: any) => obj.key === key
+      );
       if (objIndex !== -1) {
         emsesp_modules.modules[objIndex].enabled = modules[i].enabled;
         emsesp_modules.modules[objIndex].license = modules[i].license;

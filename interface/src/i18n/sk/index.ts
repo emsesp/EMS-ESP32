@@ -194,7 +194,6 @@ const sk: Translation = {
   DOWNLOAD_SCHEDULE_TEXT: 'Stiahnutie plánovača udalostí',
   DOWNLOAD_SETTINGS_TEXT: 'Stiahnite si nastavenia aplikácie. Pri zdieľaní nastavení buďte opatrní, pretože tento súbor obsahuje heslá a iné citlivé systémové informácie.',
   UPLOAD_TEXT: 'Najskôr nahrajte nový súbor firmvéru (.bin), nastavenia alebo prispôsobenia (.json), pre voliteľné overenie nahrajte súbor (.md5)',
-  UPLOADING: 'Nahrávanie',
   UPLOAD_DROP_TEXT: 'Potiahnúť a pripnúť súbor alebo kliknúť sem',
   ERROR: 'Neočakávaná chyba, prosím skúste to znova',
   TIME_SET: 'Nastavený čas',

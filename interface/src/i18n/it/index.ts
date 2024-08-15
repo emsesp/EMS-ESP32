@@ -194,7 +194,6 @@ const it: Translation = {
   DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events',
   DOWNLOAD_SETTINGS_TEXT: 'Scarica le impostazioni dell applicazione. Fai attenzione quando condividi le tue impostazioni poiché questo file contiene password e altre informazioni di sistema riservate',
   UPLOAD_TEXT: 'Carica un nuovo file firmware (.bin) , file delle impostazioni o delle personalizzazioni (.json) di seguito, per un opzione di convalida scaricare dapprima un file "*.MD5" ',
-  UPLOADING: 'Caricamento',
   UPLOAD_DROP_TEXT: 'Trascina il file o clicca qui',
   ERROR: 'Errore Inaspettato, prego tenta ancora',
   TIME_SET: 'Imposta Ora',

@@ -194,7 +194,6 @@ const fr: Translation = {
   DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
   DOWNLOAD_SETTINGS_TEXT: "Téléchargez les paramètres de l'application. Soyez prudent lorsque vous partagez vos paramètres car ce fichier contient des mots de passe et d'autres informations système sensibles.",
   UPLOAD_TEXT: "Téléchargez un nouveau fichier de firmware (.bin), un fichier de paramètres ou de personnalisations (.json) ci-dessous, pour une validation optionnelle téléchargez d'abord un fichier (.md5)",
-  UPLOADING: 'Téléchargement',
   UPLOAD_DROP_TEXT: 'Déposer le fichier ou cliquer ici',
   ERROR: 'Erreur inattendue, veuillez réessayer',
   TIME_SET: 'Time set',

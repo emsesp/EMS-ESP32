@@ -194,7 +194,6 @@ const en: Translation = {
   DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events',
   DOWNLOAD_SETTINGS_TEXT: 'Download the application settings. Be careful when sharing your settings as this file contains passwords and other sensitive system information',
   UPLOAD_TEXT: 'Upload a new firmware (.bin) file, settings or customizations (.json) file below, for optional validation upload (.md5) first',
-  UPLOADING: 'Uploading',
   UPLOAD_DROP_TEXT: 'Drop file or click here',
   ERROR: 'Unexpected Error, please try again',
   TIME_SET: 'Time set',

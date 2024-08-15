@@ -1,0 +1,83 @@
+.drag-drop {
+  /* background: #fff; */
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.document-uploader {
+  border: 2px dashed #4282fe;
+  /* background-color: #f4fbff; */
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &.active {
+    border-color: #6dc24b;
+  }
+
+  .upload-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    svg {
+      font-size: 36px;
+      margin-right: 1rem;
+    }
+
+    div {
+      p {
+        margin: 0;
+        font-size: 14px;
+      }
+    }
+  }
+
+  .file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+
+    .file-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      flex: 1;
+
+      p {
+        margin: 0;
+        font-size: 14px;
+        color: #6dc24b;
+      }
+    }
+
+    .file-actions {
+      cursor: pointer;
+
+      &:hover {
+        svg {
+          color: #d44;
+        }
+      }
+    }
+  }
+
+  input[type='file'] {
+    display: none;
+  }
+}

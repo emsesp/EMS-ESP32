@@ -194,7 +194,6 @@ const no: Translation = {
   DOWNLOAD_SCHEDULE_TEXT: 'Last ned planlagte oppgaver',
   DOWNLOAD_SETTINGS_TEXT: 'Last ned applikasjonskonfigurasjon. Vær varsom med å dele fila da den inneholder passord og annen sensitiv system informasjon',
   UPLOAD_TEXT: 'Last opp en ny firmware (.bin) fil, innstillinger eller tilpassninger (.json) fil nedenfor',
-  UPLOADING: 'Opplasting',
   UPLOAD_DROP_TEXT: 'Slipp fil eller klikk her',
   ERROR: 'Ukjent feil, prøv igjen',
   TIME_SET: 'Still in tid',

@@ -194,7 +194,6 @@ const nl: Translation = {
   DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events',
   DOWNLOAD_SETTINGS_TEXT: 'Download de applicatie settings. Wees voorzichting met het delen van dit bestand want het bevat o.a. de wachtwoorden in plain text',
   UPLOAD_TEXT: 'Upload een nieuwe firmware (.bin) file, instellingen of custom instellingen (.json) bestand hieronder',
-  UPLOADING: 'Uploading',
   UPLOAD_DROP_TEXT: 'Sleep bestand hierheen of klik hier',
   ERROR: 'Onverwachte fout, probeer opnieuw',
   TIME_SET: 'Tijd ingesteld',
