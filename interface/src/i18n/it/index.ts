@@ -94,8 +94,6 @@ const it: Translation = {
   APPLICATION: 'Applicazione',
   CUSTOMIZATIONS: 'Personalizzazione',
   APPLICATION_RESTARTING: 'EMS-ESP sta riavviando',
-  INTERFACE_BOARD_PROFILE: 'Profilo scheda di interfaccia',
-  BOARD_PROFILE_TEXT: 'Selezionare un profilo di interfaccia pre-configurato dalla lista sottostante o scegliere un profilo personalizzato per configurare le impostazioni del tuo hardware',
   BOARD_PROFILE: 'Profilo Scheda',
   CUSTOM: 'Personalizzazione',
   GPIO_OF: 'GPIO {0}',
@@ -103,7 +101,7 @@ const it: Translation = {
   TEMPERATURE: 'Temperatura',
   PHY_TYPE: 'Eth PHY Type',
   DISABLED: 'disattivato',
-  TX_MODE: 'Modo Tx ',
+  TX_MODE: 'EMS Modo Tx ',
   HARDWARE: 'Hardware',
   EMS_BUS: '{{BUS|EMS BUS}}',
   GENERAL_OPTIONS: 'Opzioni Generali',
@@ -128,7 +126,7 @@ const it: Translation = {
   BOOLEAN_FORMAT_API: 'Formato booleano API/MQTT',
   ENUM_FORMAT: 'Enum Format API/MQTT',
   INDEX: 'Indice',
-  ENABLE_PARASITE: 'Abilita potenza parassita',
+  ENABLE_PARASITE: 'Abilita potenza 1-wire parassita',
   LOGGING: 'Registrazione',
   LOG_HEX: 'Registra telegrammi EMS in esadecimale',
   ENABLE_SYSLOG: 'Abilita Syslog',
@@ -333,7 +331,9 @@ const it: Translation = {
   RENAME: 'Rename', // TODO translate  
   ENABLE_MODBUS: 'Abilita Modbus',
   VIEW_LOG: 'View log to diagnose issues', // TODO translate
-  UPLOAD_DRAG: 'drag and drop a file here or click to select one' // TODO translate
+  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
+  SERVICES: 'Services', // TODO translate
+  ALLVALUES: 'All Values' // TODO translate
 };
 
 export default it;

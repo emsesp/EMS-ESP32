@@ -94,8 +94,6 @@ const pl: BaseTranslation = {
   APPLICATION: 'Aplikacji',
   CUSTOMIZATIONS: 'Personalizacja',
   APPLICATION_RESTARTING: 'Trwa ponowne uruchamianie',
-  INTERFACE_BOARD_PROFILE: 'Profil płytki interfejsu',
-  BOARD_PROFILE_TEXT: 'Wybierz z listy gotowy profil płytki interfejsu lub "własny..." i samodzielnie skonfiguruj posiadany sprzęt.',
   BOARD_PROFILE: 'Profil płytki',
   CUSTOM: 'własny',
   GPIO_OF: 'GPIO {0}',
@@ -103,7 +101,7 @@ const pl: BaseTranslation = {
   TEMPERATURE: '1-Wire®',
   PHY_TYPE: 'Typ układu ethernetowego (PHY)',
   DISABLED: '{{wyłączono|brak|}}',
-  TX_MODE: 'Tryb transmisji (Tx)',
+  TX_MODE: 'EMS Tryb transmisji (Tx)',
   EMS_BUS: '{{magistrali EMS|na magistrali|}}',
   HARDWARE: 'sprzętowy',
   GENERAL_OPTIONS: 'Opcje podstawowe',
@@ -128,7 +126,7 @@ const pl: BaseTranslation = {
   BOOLEAN_FORMAT_API: 'Wartości dwustanowe w API/MQTT',
   ENUM_FORMAT: 'Wartości z listy w API/MQTT',
   INDEX: 'indeks',
-  ENABLE_PARASITE: 'Aktywuj zasilanie pasożytnicze',
+  ENABLE_PARASITE: 'Aktywuj zasilanie 1-wire pasożytnicze',
   LOGGING: 'Logowanie',
   LOG_HEX: 'Loguj telegramy EMS w systemie szesnastkowym (hex)',
   ENABLE_SYSLOG: 'Aktywuj SysLog',
@@ -333,7 +331,9 @@ const pl: BaseTranslation = {
   RENAME: 'Rename', // TODO translate 
   ENABLE_MODBUS: 'Aktywuj Modbus',
   VIEW_LOG: 'View log to diagnose issues', // TODO translate
-  UPLOAD_DRAG: 'drag and drop a file here or click to select one' // TODO translate
+  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
+  SERVICES: 'Services', // TODO translate
+  ALLVALUES: 'All Values' // TODO translate
 };
 
 export default pl;

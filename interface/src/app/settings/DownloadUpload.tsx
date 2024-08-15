@@ -168,7 +168,6 @@ const DownloadUpload = () => {
           >
             {LL.SUPPORT_INFORMATION(0)}
           </Button>
-          {/* TODO translate All Values */}
           <Button
             sx={{ ml: 2 }}
             startIcon={<DownloadIcon />}
@@ -176,7 +175,7 @@ const DownloadUpload = () => {
             color="primary"
             onClick={() => callAPI('system', 'allvalues')}
           >
-            All Values
+            {LL.ALLVALUES()}
           </Button>
         </Box>
 

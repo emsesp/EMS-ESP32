@@ -94,8 +94,6 @@ const no: Translation = {
   APPLICATION: 'Søknad',
   CUSTOMIZATIONS: 'Tilpasninger',
   APPLICATION_RESTARTING: 'EMS-ESP restarter',
-  INTERFACE_BOARD_PROFILE: 'Interface Prosessor Profil',
-  BOARD_PROFILE_TEXT: 'Velg en pre-konfigurert prosessor profil fra listen under eller velg  Tilpasset for å konfigurere dine egne innstillinger',
   BOARD_PROFILE: 'Prosessor Profil',
   CUSTOM: 'Custom',
   GPIO_OF: '{0} GPIO',
@@ -103,7 +101,7 @@ const no: Translation = {
   TEMPERATURE: 'Temperatur',
   PHY_TYPE: 'Eth PHY Type',
   DISABLED: 'avslått',
-  TX_MODE: 'Tx Mode',
+  TX_MODE: 'EMS Tx Mode',
   HARDWARE: 'Hardware',
   EMS_BUS: '{{BUS|EMS BUS}}',
   GENERAL_OPTIONS: 'Generelle Innstillinger',
@@ -124,11 +122,11 @@ const no: Translation = {
   TRIGGER_TIME: 'Aktiveringstid',
   COLD_SHOT_DURATION: 'Tid på kaldt vann',
   FORMATTING_OPTIONS: 'Formatteringsalternativs',
-  BOOLEAN_FORMAT_DASHBOARD: 'Bool Format Dashboard',
+  BOOLEAN_FORMAT_DASHBOARD: 'Bool Format Web',
   BOOLEAN_FORMAT_API: 'Bool Format API/MQTT',
   ENUM_FORMAT: 'Enum Format API/MQTT',
   INDEX: 'Indeks',
-  ENABLE_PARASITE: 'Aktiver parasitt strømforsyning',
+  ENABLE_PARASITE: 'Aktiver 1-wire parasitt strømforsyning',
   LOGGING: 'Logging',
   LOG_HEX: 'Logg EMS telegrammer i hexadesimal',
   ENABLE_SYSLOG: 'Aktiver Syslog',
@@ -333,7 +331,9 @@ const no: Translation = {
   RENAME: 'Rename', // TODO translate 
   ENABLE_MODBUS: 'Aktiver Modbus',
   VIEW_LOG: 'View log to diagnose issues', // TODO translate
-  UPLOAD_DRAG: 'drag and drop a file here or click to select one' // TODO translate
+  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
+  SERVICES: 'Services', // TODO translate
+  ALLVALUES: 'All Values' // TODO translate
 };
 
 export default no;

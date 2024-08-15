@@ -94,8 +94,6 @@ const de: Translation = {
   APPLICATION: 'Anwendung',
   CUSTOMIZATIONS: 'Anpassungen',
   APPLICATION_RESTARTING: 'EMS-ESP startet neu',
-  INTERFACE_BOARD_PROFILE: 'Interface Platinenprofil',
-  BOARD_PROFILE_TEXT: 'Wählen Sie ein vorkonfiguriertes Platinenprofil aus der Liste unten aus oder wählen Sie "Custom", um Ihre eigenen Hardwareeinstellungen zu konfigurieren',
   BOARD_PROFILE: 'Platinenprofil',
   CUSTOM: 'Custom',
   GPIO_OF: '{0} GPIO',
@@ -103,7 +101,7 @@ const de: Translation = {
   TEMPERATURE: 'Temperatur',
   PHY_TYPE: 'Eth PHY Typ',
   DISABLED: 'deaktiviert',
-  TX_MODE: 'Tx Modus',
+  TX_MODE: 'EMS Tx Modus',
   HARDWARE: 'Hardware',
   EMS_BUS: '{{BUS|EMS BUS}}',
   GENERAL_OPTIONS: 'Allgemeine Optionen',
@@ -128,7 +126,7 @@ const de: Translation = {
   BOOLEAN_FORMAT_API: 'Boolesches Format API/MQTT',
   ENUM_FORMAT: 'Enum Format API/MQTT',
   INDEX: 'Index',
-  ENABLE_PARASITE: 'Parasitäre Stomversorgung',
+  ENABLE_PARASITE: '1-wire Parasitäre Stomversorgung',
   LOGGING: 'Protokollierung',
   LOG_HEX: 'EMS-Telegramme hexadezimal protokollieren',
   ENABLE_SYSLOG: 'Syslog aktivieren',
@@ -333,7 +331,9 @@ const de: Translation = {
   RENAME: 'Umbenennen',
   ENABLE_MODBUS: 'Modbus aktivieren',
   VIEW_LOG: 'Sehen Sie sich das Protokoll an, um Probleme zu diagnostizieren',
-  UPLOAD_DRAG: 'drag and drop a file here or click to select one' // TODO translate
+  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
+  SERVICES: 'Services', // TODO translate
+  ALLVALUES: 'All Values' // TODO translate
 };
 
 export default de;

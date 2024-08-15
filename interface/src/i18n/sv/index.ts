@@ -94,8 +94,6 @@ const sv: Translation = {
   APPLICATION: 'Apliká',
   CUSTOMIZATIONS: 'Anpassningr',
   APPLICATION_RESTARTING: 'EMS-ESP startar om',
-  INTERFACE_BOARD_PROFILE: 'Interface Hårdvaruprofil',
-  BOARD_PROFILE_TEXT: 'Välj en förkonfigurerad hårdvaruprofil från listan nedan eller välj Anpassad för att konfigurera dina egna hårdvaruinställningar',
   BOARD_PROFILE: 'Hårdvarutyp',
   CUSTOM: 'Anpassa',
   GPIO_OF: '{0} GPIO',
@@ -103,7 +101,7 @@ const sv: Translation = {
   TEMPERATURE: 'Temperatur',
   PHY_TYPE: 'Eth PHY-typ',
   DISABLED: 'inaktiverad',
-  TX_MODE: 'Tx-läge',
+  TX_MODE: 'EMS Tx-läge',
   HARDWARE: 'Hårdvara',
   EMS_BUS: '{{BUSS|EMS-BUSS}}',
   GENERAL_OPTIONS: 'Allmänna Inställningar',
@@ -128,7 +126,7 @@ const sv: Translation = {
   BOOLEAN_FORMAT_API: 'Bool-format API/MQTT',
   ENUM_FORMAT: 'Enum-format API/MQTT',
   INDEX: 'Index',
-  ENABLE_PARASITE: 'Aktivera parasitström',
+  ENABLE_PARASITE: 'Aktivera 1-wire parasitström',
   LOGGING: 'Loggning',
   LOG_HEX: 'Logga EMS-telegram i hexadecimal',
   ENABLE_SYSLOG: 'Aktivera Syslog',
@@ -333,7 +331,9 @@ const sv: Translation = {
   RENAME: 'Rename', // TODO translate
   ENABLE_MODBUS: 'Aktivera Modbus',
   VIEW_LOG: 'View log to diagnose issues', // TODO translate
-  UPLOAD_DRAG: 'drag and drop a file here or click to select one' // TODO translate
+  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
+  SERVICES: 'Services', // TODO translate
+  ALLVALUES: 'All Values' // TODO translate
 };
 
 export default sv;

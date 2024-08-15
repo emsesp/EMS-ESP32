@@ -94,8 +94,6 @@ const sk: Translation = {
   APPLICATION: 'Aplikácie',
   CUSTOMIZATIONS: 'Prispôsobenia',
   APPLICATION_RESTARTING: 'EMS-ESP sa reštartuje',
-  INTERFACE_BOARD_PROFILE: 'Profil dosky rozhrania',
-  BOARD_PROFILE_TEXT: 'Vyberte vopred nakonfigurovaný profil dosky rozhrania zo zoznamu nižšie, alebo vyberte možnosť Vlastné a nakonfigurujte svoje vlastné hardvérové nastavenia',
   BOARD_PROFILE: 'Profil dosky',
   CUSTOM: 'Vlastné',
   GPIO_OF: '{0} GPIO',
@@ -103,7 +101,7 @@ const sk: Translation = {
   TEMPERATURE: 'Teplota',
   PHY_TYPE: 'Eth PHY Typ',
   DISABLED: 'zakázané',
-  TX_MODE: 'Tx režim',
+  TX_MODE: 'EMS Tx režim',
   HARDWARE: 'Hardware',
   EMS_BUS: '{{BUS|EMS BUS}}',
   GENERAL_OPTIONS: 'Všeobecné možnosti',
@@ -124,11 +122,11 @@ const sk: Translation = {
   TRIGGER_TIME: 'Čas spustenia',
   COLD_SHOT_DURATION: 'Trvanie studeného záberu',
   FORMATTING_OPTIONS: 'Možnosti formátovania',
-  BOOLEAN_FORMAT_DASHBOARD: 'Panel Boolean formát',
+  BOOLEAN_FORMAT_DASHBOARD: 'Web panel Boolean formát',
   BOOLEAN_FORMAT_API: 'Boolean formát API/MQTT',
   ENUM_FORMAT: 'Enum formát API/MQTT',
   INDEX: 'Index',
-  ENABLE_PARASITE: 'Povoliť parazité napájanie DS18B20',
+  ENABLE_PARASITE: 'Povoliť 1-wire parazité napájanie DS18B20',
   LOGGING: 'Logovanie',
   LOG_HEX: 'Záznam telegramov EMS v hexadecimálnej sústave',
   ENABLE_SYSLOG: 'Povoliť Syslog',
@@ -333,7 +331,9 @@ const sk: Translation = {
   RENAME: 'Rename', // TODO translate 
   ENABLE_MODBUS: 'Povoliť Modbus',
   VIEW_LOG: 'View log to diagnose issues', // TODO translate
-  UPLOAD_DRAG: 'drag and drop a file here or click to select one' // TODO translate
+  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
+  SERVICES: 'Services', // TODO translate
+  ALLVALUES: 'All Values' // TODO translate
 };
 
 export default sk;

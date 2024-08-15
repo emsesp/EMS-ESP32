@@ -94,8 +94,6 @@ const tr: Translation = {
   APPLICATION: 'Uygulama',
   CUSTOMIZATIONS: 'Özelleştirme',
   APPLICATION_RESTARTING: 'EMS-ESP yeniden başlatılıyor',
-  INTERFACE_BOARD_PROFILE: 'Arabirim Kart Profili',
-  BOARD_PROFILE_TEXT: 'Aşağıdan hazır kart profillerinden birini seçin yada kendi donanımınızı ayarlamak için Özeli tercih edin',
   BOARD_PROFILE: 'Kart Profili',
   CUSTOM: 'Özel',
   GPIO_OF: '{0} GPIO',
@@ -103,7 +101,7 @@ const tr: Translation = {
   TEMPERATURE: 'Sıcaklık',
   PHY_TYPE: 'Eth PHY Tipi',
   DISABLED: 'devre dışı',
-  TX_MODE: 'Tx Modu',
+  TX_MODE: 'EMS Tx Modu',
   HARDWARE: 'Donanım',
   EMS_BUS: '{{HAT|EMS HATTI}}',
   GENERAL_OPTIONS: 'Genel Seçenekler',
@@ -128,7 +126,7 @@ const tr: Translation = {
   BOOLEAN_FORMAT_API: 'Boolean Biçimleme API/MQTT',
   ENUM_FORMAT: 'Enum Biçimleme API/MQTT',
   INDEX: 'İndeks',
-  ENABLE_PARASITE: 'Parazit gücü devreye al',
+  ENABLE_PARASITE: '1-wire parazit gücü devreye al',
   LOGGING: 'Kayıt ediliyor',
   LOG_HEX: 'EMS telegramlarını hexadecimal olarak kayıt et',
   ENABLE_SYSLOG: 'Sistem Kaydını Devreye Al',
@@ -333,7 +331,9 @@ const tr: Translation = {
   RENAME: 'Rename', // TODO translate 
   ENABLE_MODBUS: 'Enable Modbus', // TODO translate
   VIEW_LOG: 'View log to diagnose issues', // TODO translate
-  UPLOAD_DRAG: 'drag and drop a file here or click to select one' // TODO translate
+  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
+  SERVICES: 'Services', // TODO translate
+  ALLVALUES: 'All Values' // TODO translate
 };
 
 export default tr;

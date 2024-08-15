@@ -94,8 +94,6 @@ const en: Translation = {
   APPLICATION: 'Application',
   CUSTOMIZATIONS: 'Customizations',
   APPLICATION_RESTARTING: 'EMS-ESP is restarting',
-  INTERFACE_BOARD_PROFILE: 'Interface Board Profile',
-  BOARD_PROFILE_TEXT: 'Select a pre-configured interface board profile from the list below or choose Custom to configure your own hardware settings',
   BOARD_PROFILE: 'Board Profile',
   CUSTOM: 'Custom',
   GPIO_OF: '{0} GPIO',
@@ -103,7 +101,7 @@ const en: Translation = {
   TEMPERATURE: 'Temperature',
   PHY_TYPE: 'Eth PHY Type',
   DISABLED: 'disabled',
-  TX_MODE: 'Tx Mode',
+  TX_MODE: 'EMS Tx Mode',
   HARDWARE: 'Hardware',
   EMS_BUS: '{{BUS|EMS BUS}}',
   GENERAL_OPTIONS: 'General Options',
@@ -124,11 +122,11 @@ const en: Translation = {
   TRIGGER_TIME: 'Trigger Time',
   COLD_SHOT_DURATION: 'Cold Shot Duration',
   FORMATTING_OPTIONS: 'Formatting Options',
-  BOOLEAN_FORMAT_DASHBOARD: 'Boolean Format Dashboard',
+  BOOLEAN_FORMAT_DASHBOARD: 'Boolean Format Web',
   BOOLEAN_FORMAT_API: 'Boolean Format API/MQTT',
   ENUM_FORMAT: 'Enum Format API/MQTT',
   INDEX: 'Index',
-  ENABLE_PARASITE: 'Enable parasite power',
+  ENABLE_PARASITE: 'Enable 1-Wire Parasite-Power',
   LOGGING: 'Logging',
   LOG_HEX: 'Log EMS telegrams in hexadecimal',
   ENABLE_SYSLOG: 'Enable Syslog',
@@ -333,7 +331,9 @@ const en: Translation = {
   RENAME: 'Rename',
   ENABLE_MODBUS: 'Enable Modbus',
   VIEW_LOG: 'View log to diagnose issues',
-  UPLOAD_DRAG: 'drag and drop a file here or click to select one' // TODO translate
+  UPLOAD_DRAG: 'drag and drop a file here or click to select one',
+  SERVICES: 'Services',
+  ALLVALUES: 'All Values'
 };
 
 export default en;
