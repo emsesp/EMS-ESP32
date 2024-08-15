@@ -37,8 +37,6 @@ const SingleUpload = () => {
 
   const { LL } = useI18nContext();
 
-  console.log(progress); // TODO remove
-
   const handleUploadClick = () => {
     inputRef.current?.click();
   };
@@ -96,6 +94,7 @@ const SingleUpload = () => {
           </Box>
 
           <Button
+            sx={{ ml: 2 }}
             startIcon={<CancelIcon />}
             variant="outlined"
             color="secondary"

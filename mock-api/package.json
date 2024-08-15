@@ -5,14 +5,10 @@
   "author": "proddy",
   "license": "MIT",
   "scripts": {
-    "mock-rest": "bun --watch rest_server.ts",
-    "mock-es": "bun --watch es_server.ts",
-    "mock-upload": "bun --watch upload_server.ts"
+    "mock-rest": "bun --watch rest_server.ts"
   },
   "dependencies": {
     "@msgpack/msgpack": "^2.8.0",
-    "express": "^4.19.2",
-    "formidable": "^3.5.1",
     "itty-router": "^5.0.17"
   },
   "packageManager": "yarn@4.4.0"

@@ -20,11 +20,6 @@ export default defineConfig(({ command, mode }) => {
             changeOrigin: true,
             secure: false
           },
-          '/es': {
-            target: 'http://localhost:3081',
-            changeOrigin: true,
-            secure: false
-          },
           '/rest': 'http://localhost:3080'
         }
       }
