@@ -16,11 +16,22 @@ const DragNdrop = ({ onFileSelected }) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const { LL } = useI18nContext();
 
+  const checkFileExtension = (file: File) => {
+    const validExtensions = ['.json', '.txt', '.csv', '.bin', '.md5'];
+    const fileName = file.name;
+    const fileExtension = fileName.substring(fileName.lastIndexOf('.'));
+    if (validExtensions.includes(fileExtension)) {
+      setFile(file);
+    } else {
+      alert('Invalid file type');
+    }
+  };
+
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) {
       return;
     }
-    setFile(e.target.files[0]);
+    checkFileExtension(e.target.files[0]);
     e.target.value = ''; // this is to allow the same file to be selected again
   };
 
@@ -28,7 +39,7 @@ const DragNdrop = ({ onFileSelected }) => {
     event.preventDefault();
     const droppedFiles = event.dataTransfer.files;
     if (droppedFiles.length > 0) {
-      setFile(droppedFiles[0]);
+      checkFileExtension(droppedFiles[0]);
     }
   };
 
@@ -63,7 +74,7 @@ const DragNdrop = ({ onFileSelected }) => {
         hidden
         onChange={handleFileChange}
         ref={inputRef}
-        accept=".json,.txt,.csv,.bin"
+        accept=".json,.txt,.csv,.bin,.md5"
         multiple={false}
         style={{ display: 'none' }}
       />
