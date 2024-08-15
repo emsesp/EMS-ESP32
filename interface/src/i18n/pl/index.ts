@@ -169,7 +169,7 @@ const pl: BaseTranslation = {
   SYSTEM: '{{S|s||s}}yste{{m|mu||mowy}}',
   LOG_OF: 'Log {0}',
   STATUS_OF: 'Status {0}',
-  UPLOAD_DOWNLOAD: 'Przesyłanie plików',
+  DOWNLOAD_UPLOAD: 'Plików przesyłanie',
   VERSION_ON: 'Aktualnie używasz',
   CLOSE: 'Zamknij',
   USE: 'Aby zaktualizować firmware skorzystaj z funkcji',
@@ -324,7 +324,7 @@ const pl: BaseTranslation = {
   SYSTEM_MEMORY: 'Pamięć systemowa',
   APPLICATION_SETTINGS_1: 'Modyfikacja ustawień aplikacji EMS-ESP',
   SECURITY_1: 'Dodawanie i usuwanie użytkowników',
-  UPLOAD_DOWNLOAD_1: 'Wysyłanie/pobieranie ustawień i firmware',
+  DOWNLOAD_UPLOAD_1: 'Pobieranie/wysyłanie ustawień i firmware',
   MODULES: 'Module', // TODO translate
   MODULES_1: 'Aktywuj lub dezaktywuj moduły zewnętrzne', // TODO translate
   MODULES_UPDATED: 'Modules updated', // TODO translate

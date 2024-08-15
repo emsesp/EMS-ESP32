@@ -136,8 +136,8 @@ const Settings = () => {
         <ListMenuItem
           icon={ImportExportIcon}
           bgcolor="#5d89f7"
-          label={LL.UPLOAD_DOWNLOAD()}
-          text={LL.UPLOAD_DOWNLOAD_1()}
+          label={LL.DOWNLOAD_UPLOAD()}
+          text={LL.DOWNLOAD_UPLOAD_1()}
           to="upload"
         />
       </List>

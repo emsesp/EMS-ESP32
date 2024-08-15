@@ -169,7 +169,7 @@ const nl: Translation = {
   SYSTEM: 'Systeem',
   LOG_OF: '{0} Log',
   STATUS_OF: '{0} Status',
-  UPLOAD_DOWNLOAD: 'Upload/Download',
+  DOWNLOAD_UPLOAD: 'Download/Upload',
   VERSION_ON: 'U bevindt zich momenteel op versie',
   CLOSE: 'Sluiten',
   USE: 'Gebruik',
@@ -324,7 +324,7 @@ const nl: Translation = {
   SYSTEM_MEMORY: 'System Geheugen',
   APPLICATION_SETTINGS_1: 'Applicatie-instellingen wijzigen',
   SECURITY_1: 'Gebruikers toevoegen of verwijderen',
-  UPLOAD_DOWNLOAD_1: 'Upload-/downloadinstellingen en firmware',
+  DOWNLOAD_UPLOAD_1: 'Download en upload instellingen en firmware',
   MODULES: 'Module',
   MODULES_1: 'Externe modules activeren of deactiveren', // TODO translate
   MODULES_UPDATED: 'Modules geüpdatet', 

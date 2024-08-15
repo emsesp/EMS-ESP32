@@ -103,7 +103,7 @@ const SingleUpload = () => {
           )}
         </>
       ) : (
-        <DragNdrop onFileSelected={setFile} width="340px" height="140px" />
+        <DragNdrop onFileSelected={setFile} />
       )}
 
       {md5 && (

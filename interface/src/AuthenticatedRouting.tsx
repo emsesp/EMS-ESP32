@@ -10,10 +10,10 @@ import Scheduler from 'app/main/Scheduler';
 import Sensors from 'app/main/Sensors';
 import APSettings from 'app/settings/APSettings';
 import ApplicationSettings from 'app/settings/ApplicationSettings';
+import DownloadUpload from 'app/settings/DownloadUpload';
 import MqttSettings from 'app/settings/MqttSettings';
 import NTPSettings from 'app/settings/NTPSettings';
 import Settings from 'app/settings/Settings';
-import UploadDownload from 'app/settings/UploadDownload';
 import Network from 'app/settings/network/Network';
 import Security from 'app/settings/security/Security';
 import APStatus from 'app/status/APStatus';
@@ -54,7 +54,7 @@ const AuthenticatedRouting = () => {
             <Route path="/settings/ntp" element={<NTPSettings />} />
             <Route path="/settings/ap" element={<APSettings />} />
             <Route path="/settings/modules" element={<Modules />} />
-            <Route path="/settings/upload" element={<UploadDownload />} />
+            <Route path="/settings/upload" element={<DownloadUpload />} />
 
             <Route path="/settings/network/*" element={<Network />} />
             <Route path="/settings/security/*" element={<Security />} />

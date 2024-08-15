@@ -1,15 +1,17 @@
+// Code inspired by https://medium.com/@dprincecoder/creating-a-drag-and-drop-file-upload-component-in-react-a-step-by-step-guide-4d93b6cc21e0
+// (c) Prince Azubuike
 import { type ChangeEvent, useRef, useState } from 'react';
-import { AiOutlineCloudUpload } from 'react-icons/ai';
-import { MdClear } from 'react-icons/md';
 
+import CancelIcon from '@mui/icons-material/Cancel';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import UploadIcon from '@mui/icons-material/Upload';
-import { Button } from '@mui/material';
+import { Box, Button } from '@mui/material';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
 import './drag-drop.css';
 
-const DragNdrop = ({ onFileSelected, width, height }) => {
+const DragNdrop = ({ onFileSelected }) => {
   const [file, setFile] = useState<File>();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const { LL } = useI18nContext();
@@ -19,6 +21,7 @@ const DragNdrop = ({ onFileSelected, width, height }) => {
       return;
     }
     setFile(e.target.files[0]);
+    e.target.value = ''; // this is to allow the same file to be selected again
   };
 
   const handleDrop = (event) => {
@@ -44,60 +47,55 @@ const DragNdrop = ({ onFileSelected, width, height }) => {
   };
 
   return (
-    <section className="drag-drop" style={{ width: width, height: height }}>
-      <div
-        className={`document-uploader ${file ? 'upload-box active' : 'upload-box'}`}
-        onDrop={handleDrop}
-        onDragOver={(event) => event.preventDefault()}
-        onClick={handleBrowseClick}
-      >
+    <div
+      className={`document-uploader ${file ? 'upload-box active' : 'upload-box'}`}
+      onDrop={handleDrop}
+      onDragOver={(event) => event.preventDefault()}
+      onClick={handleBrowseClick}
+    >
+      <div className="upload-info">
+        <CloudUploadIcon sx={{ marginRight: 4 }} color="primary" fontSize="large" />
+        {/* TODO translate */}
+        <p>drag and drop a file here or click to select one</p>
+      </div>
+
+      <input
+        type="file"
+        hidden
+        onChange={handleFileChange}
+        ref={inputRef}
+        accept=".json,.txt,.csv,.bin"
+        multiple={false}
+        style={{ display: 'none' }}
+      />
+
+      {file && (
         <>
-          <div className="upload-info">
-            <AiOutlineCloudUpload />
-            <div>
-              <p>Drag and drop a file here or click to select one</p>
-            </div>
+          <div className="file-info">
+            <p>{file.name}</p>
           </div>
-
-          <input
-            type="file"
-            hidden
-            id="browse"
-            onChange={handleFileChange}
-            ref={inputRef}
-            accept=".json,.txt,.csv,.bin"
-            multiple={false}
-          />
-        </>
-
-        {file && (
-          <>
-            <div className="file-list">
-              <div className="file-item">
-                <div className="file-info">
-                  <p>{file.name}</p>
-                </div>
-                <div className="file-actions">
-                  <MdClear
-                    style={{ width: 18, verticalAlign: 'middle' }}
-                    onClick={(e) => handleRemoveFile(e)}
-                  />
-                </div>
-              </div>
-            </div>
-
+          <Box>
             <Button
+              startIcon={<CancelIcon />}
+              variant="outlined"
+              color="error"
+              onClick={(e) => handleRemoveFile(e)}
+            >
+              {LL.CANCEL()}
+            </Button>
+            <Button
+              sx={{ ml: 2 }}
               startIcon={<UploadIcon />}
               variant="outlined"
-              color="secondary"
+              color="primary"
               onClick={handleUploadClick}
             >
               {LL.UPLOAD()}
             </Button>
-          </>
-        )}
-      </div>
-    </section>
+          </Box>
+        </>
+      )}
+    </div>
   );
 };
 

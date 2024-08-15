@@ -169,7 +169,7 @@ const sk: Translation = {
   SYSTEM: 'Systém',
   LOG_OF: '{0} Log',
   STATUS_OF: '{0} Stav',
-  UPLOAD_DOWNLOAD: 'Nahrať/Stiahnuť',
+  DOWNLOAD_UPLOAD: 'Stiahnuť/Nahrať',
   VERSION_ON: 'Momentálne nainštalovaná verzia: ',
   CLOSE: 'Zatvoriť',
   USE: 'Použiť',
@@ -324,7 +324,7 @@ const sk: Translation = {
   SYSTEM_MEMORY: 'System Memory', // TODO translate
   APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
   SECURITY_1: 'Add or remove users', // TODO translate
-  UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', // TODO translate
+  DOWNLOAD_UPLOAD_1: 'Download and Upload Settings and Firmware', // TODO translate
   MODULES: 'Module', // TODO translate
   MODULES_1: 'Aktivujte alebo deaktivujte externé moduly', // TODO translate
   MODULES_UPDATED: 'Modules updated', // TODO translate

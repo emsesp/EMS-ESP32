@@ -169,7 +169,7 @@ const fr: Translation = {
   SYSTEM: 'Système',
   LOG_OF: '{0} Log',
   STATUS_OF: 'Statut {0}',
-  UPLOAD_DOWNLOAD: 'Upload/Download',
+  DOWNLOAD_UPLOAD: 'Download/Upload', // TODO translate
   VERSION_ON: 'You are currently on', // TODO translate
   CLOSE: 'Fermer',
   USE: 'Utiliser',
@@ -324,7 +324,7 @@ const fr: Translation = {
   SYSTEM_MEMORY: 'System Memory', // TODO translate
   APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
   SECURITY_1: 'Add or remove users', // TODO translate
-  UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', // TODO translate
+  DOWNLOAD_UPLOAD_1: 'Download and Upload Settings and Firmware', // TODO translate
   MODULES: 'Module', // TODO translate
   MODULES_1: 'Activer ou désactiver les modules externes', // TODO translate
   MODULES_UPDATED: 'Modules updated', // TODO translate

@@ -23,7 +23,7 @@ import {
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
-const UploadDownload = () => {
+const DownloadUpload = () => {
   const { LL } = useI18nContext();
 
   const { send: sendSettings } = useRequest(getSettings(), {
@@ -66,8 +66,13 @@ const UploadDownload = () => {
   } = useRequest(SystemApi.readHardwareStatus);
 
   // called immediately to get the latest version, on page load
-  const { data: latestVersion } = useRequest(getStableVersion);
-  const { data: latestDevVersion } = useRequest(getDevVersion);
+  // set immediate to false to avoid calling the API on page load and GH blocking while testing!
+  const { data: latestVersion } = useRequest(getStableVersion, {
+    immediate: true
+  });
+  const { data: latestDevVersion } = useRequest(getDevVersion, {
+    immediate: true
+  });
 
   const STABLE_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/';
   const STABLE_RELNOTES_URL =
@@ -138,7 +143,7 @@ const UploadDownload = () => {
     });
   };
 
-  useLayoutTitle(LL.UPLOAD_DOWNLOAD());
+  useLayoutTitle(LL.DOWNLOAD_UPLOAD());
 
   const content = () => {
     if (!data) {
@@ -148,58 +153,6 @@ const UploadDownload = () => {
     return (
       <>
         <Typography sx={{ pb: 2 }} variant="h6" color="primary">
-          {LL.EMS_ESP_VER()}
-        </Typography>
-        <Box p={2} border="2px solid grey" borderRadius={2}>
-          {LL.VERSION_ON() + ' '}
-          <b>{data.emsesp_version}</b>&nbsp;({getPlatform()})
-          <Divider />
-          {latestVersion && (
-            <Box mt={2}>
-              {LL.THE_LATEST()}&nbsp;{LL.OFFICIAL()}&nbsp;{LL.RELEASE_IS()}
-              &nbsp;<b>{latestVersion}</b>
-              &nbsp;(
-              <Link target="_blank" href={STABLE_RELNOTES_URL} color="primary">
-                {LL.RELEASE_NOTES()}
-              </Link>
-              )&nbsp;(
-              <Link
-                target="_blank"
-                href={
-                  STABLE_URL + 'v' + latestVersion + '/' + getBinURL(latestVersion)
-                }
-                color="primary"
-              >
-                {LL.DOWNLOAD(1)}
-              </Link>
-              )
-            </Box>
-          )}
-          {latestDevVersion && (
-            <Box mt={2}>
-              {LL.THE_LATEST()}&nbsp;{LL.DEVELOPMENT()}&nbsp;{LL.RELEASE_IS()}
-              &nbsp;
-              <b>{latestDevVersion}</b>
-              &nbsp;(
-              <Link target="_blank" href={DEV_RELNOTES_URL} color="primary">
-                {LL.RELEASE_NOTES()}
-              </Link>
-              )&nbsp;(
-              <Link
-                target="_blank"
-                href={DEV_URL + getBinURL(latestDevVersion)}
-                color="primary"
-              >
-                {LL.DOWNLOAD(1)}
-              </Link>
-              )
-            </Box>
-          )}
-        </Box>
-
-        <SingleUpload />
-
-        <Typography sx={{ pt: 4, pb: 2 }} variant="h6" color="primary">
           {LL.DOWNLOAD(0)}
         </Typography>
         <Box color="warning.main">
@@ -215,6 +168,7 @@ const UploadDownload = () => {
           >
             {LL.SUPPORT_INFORMATION(0)}
           </Button>
+          {/* TODO translate All Values */}
           <Button
             sx={{ ml: 2 }}
             startIcon={<DownloadIcon />}
@@ -278,6 +232,60 @@ const UploadDownload = () => {
             {LL.SCHEDULE(0)}
           </Button>
         </Box>
+
+        <Box color="warning.main">
+          <Typography mt={2} variant="body2">
+            {LL.EMS_ESP_VER()}
+          </Typography>
+        </Box>
+        <Box p={2} mt={2} border="1px solid grey" borderRadius={2}>
+          {LL.VERSION_ON() + ' '}
+          <b>{data.emsesp_version}</b>&nbsp;({getPlatform()})
+          <Divider />
+          {latestVersion && (
+            <Box mt={2}>
+              {LL.THE_LATEST()}&nbsp;{LL.OFFICIAL()}&nbsp;{LL.RELEASE_IS()}
+              &nbsp;<b>{latestVersion}</b>
+              &nbsp;(
+              <Link target="_blank" href={STABLE_RELNOTES_URL} color="primary">
+                {LL.RELEASE_NOTES()}
+              </Link>
+              )&nbsp;(
+              <Link
+                target="_blank"
+                href={
+                  STABLE_URL + 'v' + latestVersion + '/' + getBinURL(latestVersion)
+                }
+                color="primary"
+              >
+                {LL.DOWNLOAD(1)}
+              </Link>
+              )
+            </Box>
+          )}
+          {latestDevVersion && (
+            <Box mt={2}>
+              {LL.THE_LATEST()}&nbsp;{LL.DEVELOPMENT()}&nbsp;{LL.RELEASE_IS()}
+              &nbsp;
+              <b>{latestDevVersion}</b>
+              &nbsp;(
+              <Link target="_blank" href={DEV_RELNOTES_URL} color="primary">
+                {LL.RELEASE_NOTES()}
+              </Link>
+              )&nbsp;(
+              <Link
+                target="_blank"
+                href={DEV_URL + getBinURL(latestDevVersion)}
+                color="primary"
+              >
+                {LL.DOWNLOAD(1)}
+              </Link>
+              )
+            </Box>
+          )}
+        </Box>
+
+        <SingleUpload />
       </>
     );
   };
@@ -285,4 +293,4 @@ const UploadDownload = () => {
   return <SectionContent>{content()}</SectionContent>;
 };
 
-export default UploadDownload;
+export default DownloadUpload;

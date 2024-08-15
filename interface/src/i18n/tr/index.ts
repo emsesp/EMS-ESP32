@@ -169,7 +169,7 @@ const tr: Translation = {
   SYSTEM: 'Sistem',
   LOG_OF: '{0} Kaydı',
   STATUS_OF: '{0} Durumu',
-  UPLOAD_DOWNLOAD: 'Yükleme/İndirme',
+  DOWNLOAD_UPLOAD: 'İndirme/Yükleme',
   VERSION_ON: 'You are currently on', // TODO translate
   CLOSE: 'Kapat',
   USE: 'KUllan',
@@ -324,7 +324,7 @@ const tr: Translation = {
   SYSTEM_MEMORY: 'System Memory', // TODO translate
   APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
   SECURITY_1: 'Add or remove users', // TODO translate
-  UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', // TODO translate
+  DOWNLOAD_UPLOAD_1: 'Download and Upload Settings and Firmware', // TODO translate
   MODULES: 'Module', // TODO translate
   MODULES_1: 'Harici modülleri etkinleştirin veya devre dışı bırakın', // TODO translate
   MODULES_UPDATED: 'Modules updated', // TODO translate
