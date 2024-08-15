@@ -36,7 +36,6 @@ const SingleUpload = () => {
       setFile(undefined);
     } else {
       setRestartNeeded(true);
-      // setRestarting(true);
     }
   });
 
@@ -68,9 +67,15 @@ const SingleUpload = () => {
 
   return (
     <>
-      <DragNdrop onFileSelected={setFile} width="340px" height="140px" />
+      <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
+        {LL.UPLOAD()}
+      </Typography>
 
-      {isUploading && (
+      <Box mb={2} color="warning.main">
+        <Typography variant="body2">{LL.UPLOAD_TEXT()}</Typography>
+      </Box>
+
+      {isUploading || restartNeeded ? (
         <>
           <Box width="100%" p={2}>
             <LinearProgress
@@ -85,16 +90,20 @@ const SingleUpload = () => {
             />
           </Box>
 
-          <Button
-            sx={{ ml: 2 }}
-            startIcon={<CancelIcon />}
-            variant="outlined"
-            color="secondary"
-            onClick={cancelUpload}
-          >
-            {LL.CANCEL()}
-          </Button>
+          {!restartNeeded && (
+            <Button
+              sx={{ ml: 2 }}
+              startIcon={<CancelIcon />}
+              variant="outlined"
+              color="secondary"
+              onClick={cancelUpload}
+            >
+              {LL.CANCEL()}
+            </Button>
+          )}
         </>
+      ) : (
+        <DragNdrop onFileSelected={setFile} width="340px" height="140px" />
       )}
 
       {md5 && (
@@ -104,7 +113,7 @@ const SingleUpload = () => {
       )}
 
       {restartNeeded && (
-        <MessageBox mt={4} level="warning" message={LL.RESTART_TEXT(0)}>
+        <MessageBox mt={2} level="warning" message={LL.RESTART_TEXT(0)}>
           <Button
             startIcon={<PowerSettingsNewIcon />}
             variant="contained"

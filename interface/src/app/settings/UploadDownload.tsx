@@ -197,18 +197,6 @@ const UploadDownload = () => {
           )}
         </Box>
 
-        <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
-          {LL.UPLOAD()}
-        </Typography>
-        <Box mb={2} color="warning.main">
-          <Typography variant="body2">
-            {LL.UPLOAD_TEXT()}
-            <br />
-            <br />
-            {LL.RESTART_TEXT(1)}.
-          </Typography>
-        </Box>
-
         <SingleUpload />
 
         <Typography sx={{ pt: 4, pb: 2 }} variant="h6" color="primary">
