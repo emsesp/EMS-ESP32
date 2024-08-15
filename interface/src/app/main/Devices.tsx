@@ -25,6 +25,7 @@ import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
 import {
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -562,6 +563,9 @@ const Devices = () => {
                 </HeaderRow>
               </Header>
               <Body>
+                {tableList.length === 0 && (
+                  <CircularProgress sx={{ margin: 1 }} size={24} />
+                )}
                 {tableList.map((device: Device) => (
                   <Row key={device.id} item={device}>
                     <Cell stiff>
