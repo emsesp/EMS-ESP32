@@ -55,8 +55,7 @@ const DragNdrop = ({ onFileSelected }) => {
     >
       <div className="upload-info">
         <CloudUploadIcon sx={{ marginRight: 4 }} color="primary" fontSize="large" />
-        {/* TODO translate */}
-        <p>drag and drop a file here or click to select one</p>
+        <p>{LL.UPLOAD_DRAG()}</p>
       </div>
 
       <input

@@ -332,7 +332,8 @@ const it: Translation = {
   MODULES_NONE: 'No external modules detected', // TODO translate
   RENAME: 'Rename', // TODO translate  
   ENABLE_MODBUS: 'Abilita Modbus',
-  VIEW_LOG: 'View log to diagnose issues' // TODO translate
+  VIEW_LOG: 'View log to diagnose issues', // TODO translate
+  UPLOAD_DRAG: 'drag and drop a file here or click to select one' // TODO translate
 };
 
 export default it;

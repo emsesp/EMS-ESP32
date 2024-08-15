@@ -95,7 +95,7 @@ const SingleUpload = () => {
               sx={{ ml: 2 }}
               startIcon={<CancelIcon />}
               variant="outlined"
-              color="secondary"
+              color="error"
               onClick={cancelUpload}
             >
               {LL.CANCEL()}

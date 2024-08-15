@@ -332,7 +332,8 @@ const nl: Translation = {
   MODULES_NONE: 'Geen externe modules gedetecteerd',
   RENAME: 'Hernoemen',
   ENABLE_MODBUS: 'Activeer Modbus',
-  VIEW_LOG: 'View log to diagnose issues' // TODO translate
+  VIEW_LOG: 'View log to diagnose issues', // TODO translate
+  UPLOAD_DRAG: 'drag and drop a file here or click to select one' // TODO translate
 };
 
 export default nl;
