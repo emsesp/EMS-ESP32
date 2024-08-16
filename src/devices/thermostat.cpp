@@ -4525,8 +4525,13 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->coolstart, DeviceValueType::UINT8, FL_(coolstart), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_coolstart), 20, 35);
         register_device_value(tag, &hc->coolondelay, DeviceValueType::UINT8, FL_(coolondelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_coolondelay), 1, 48);
         register_device_value(tag, &hc->cooloffdelay, DeviceValueType::UINT8, FL_(cooloffdelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_cooloffdelay), 1, 48);
-        register_device_value(
-            tag, &hc->switchProgMode, DeviceValueType::ENUM, FL_(enum_switchProgMode), FL_(switchProgMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_switchProgMode));
+        register_device_value(tag,
+                              &hc->switchProgMode,
+                              DeviceValueType::ENUM,
+                              FL_(enum_switchProgMode),
+                              FL_(switchProgMode),
+                              DeviceValueUOM::NONE,
+                              MAKE_CF_CB(set_switchProgMode));
 
         break;
     case EMSdevice::EMS_DEVICE_FLAG_CRF:

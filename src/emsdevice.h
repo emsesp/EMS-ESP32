@@ -215,7 +215,7 @@ class EMSdevice {
     char * show_telegram_handlers(char * result, const size_t len, const uint8_t handlers);
     void   show_mqtt_handlers(uuid::console::Shell & shell) const;
     // void   list_device_entries(JsonObject output) const;
-    void   add_handlers_ignored(const uint16_t handler);
+    void add_handlers_ignored(const uint16_t handler);
 
     void set_climate_minmax(int8_t tag, int16_t min, uint32_t max);
     void setCustomizationEntity(const std::string & entity_id);
