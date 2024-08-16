@@ -333,7 +333,8 @@ const de: Translation = {
   VIEW_LOG: 'Sehen Sie sich das Protokoll an, um Probleme zu diagnostizieren',
   UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
   SERVICES: 'Services', // TODO translate
-  ALLVALUES: 'All Values' // TODO translate
+  ALLVALUES: 'All Values', // TODO translate
+  SPECIAL_FUNCTIONS: 'Special Functions' // TODO translate
 };
 
 export default de;

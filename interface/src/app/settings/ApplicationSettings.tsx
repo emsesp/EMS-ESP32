@@ -712,7 +712,7 @@ const ApplicationSettings = () => {
         />
 
         <Typography sx={{ pb: 1, pt: 2 }} variant="h6" color="primary">
-          {LL.GENERAL_OPTIONS()}
+          {LL.SPECIAL_FUNCTIONS()}
         </Typography>
         <BlockFormControlLabel
           control={
