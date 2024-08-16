@@ -5,7 +5,6 @@ import {
   useLayoutEffect,
   useState
 } from 'react';
-import type { FC } from 'react';
 import { IconContext } from 'react-icons';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -20,13 +19,13 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined';
 import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
 import {
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -57,12 +56,12 @@ import {
 import { useTheme } from '@table-library/react-table-library/theme';
 import type { Action, State } from '@table-library/react-table-library/types/common';
 import { dialogStyle } from 'CustomTheme';
-import { useRequest } from 'alova';
-import { ButtonRow, MessageBox, SectionContent, useLayoutTitle } from 'components';
+import { useRequest } from 'alova/client';
+import { MessageBox, SectionContent, useLayoutTitle } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 
-import * as EMSESP from './api';
+import { readCoreData, readDeviceData, writeDeviceValue } from '../../api/app';
 import DeviceIcon from './DeviceIcon';
 import DashboardDevicesDialog from './DevicesDialog';
 import { formatValue } from './deviceValue';
@@ -70,7 +69,7 @@ import { DeviceEntityMask, DeviceType, DeviceValueUOM_s } from './types';
 import type { Device, DeviceValue } from './types';
 import { deviceValueItemValidation } from './validators';
 
-const Devices: FC = () => {
+const Devices = () => {
   const { LL } = useI18nContext();
   const { me } = useContext(AuthenticatedContext);
 
@@ -85,18 +84,15 @@ const Devices: FC = () => {
 
   useLayoutTitle(LL.DEVICES());
 
-  const { data: coreData, send: readCoreData } = useRequest(
-    () => EMSESP.readCoreData(),
-    {
-      initialData: {
-        connected: true,
-        devices: []
-      }
+  const { data: coreData, send: sendCoreData } = useRequest(() => readCoreData(), {
+    initialData: {
+      connected: true,
+      devices: []
     }
-  );
+  });
 
-  const { data: deviceData, send: readDeviceData } = useRequest(
-    (id: number) => EMSESP.readDeviceData(id),
+  const { data: deviceData, send: sendDeviceData } = useRequest(
+    (id: number) => readDeviceData(id),
     {
       initialData: {
         data: []
@@ -105,8 +101,8 @@ const Devices: FC = () => {
     }
   );
 
-  const { loading: submitting, send: writeDeviceValue } = useRequest(
-    (data: { id: number; c: string; v: unknown }) => EMSESP.writeDeviceValue(data),
+  const { loading: submitting, send: sendDeviceValue } = useRequest(
+    (data: { id: number; c: string; v: unknown }) => writeDeviceValue(data),
     {
       immediate: false
     }
@@ -288,7 +284,7 @@ const Devices: FC = () => {
   async function onSelectChange(action: Action, state: State) {
     setSelectedDevice(state.id as number);
     if (action.type === 'ADD_BY_ID_EXCLUSIVELY') {
-      await readDeviceData(state.id as number);
+      await sendDeviceData(state.id as number);
     }
   }
 
@@ -320,12 +316,6 @@ const Devices: FC = () => {
       document.removeEventListener('keydown', escFunction);
     };
   }, [escFunction]);
-
-  const refreshData = () => {
-    if (!deviceValueDialogOpen) {
-      selectedDevice ? void readDeviceData(selectedDevice) : void readCoreData();
-    }
-  };
 
   const customize = () => {
     if (selectedDevice == 99) {
@@ -437,7 +427,12 @@ const Devices: FC = () => {
   };
 
   useEffect(() => {
-    const timer = setInterval(() => refreshData(), 60000);
+    const timer = setInterval(() => {
+      if (deviceValueDialogOpen) {
+        return;
+      }
+      selectedDevice ? void sendDeviceData(selectedDevice) : void sendCoreData();
+    }, 2000);
     return () => {
       clearInterval(timer);
     };
@@ -445,7 +440,7 @@ const Devices: FC = () => {
 
   const deviceValueDialogSave = async (devicevalue: DeviceValue) => {
     const id = Number(device_select.state.id);
-    await writeDeviceValue({ id, c: devicevalue.c ?? '', v: devicevalue.v })
+    await sendDeviceValue({ id, c: devicevalue.c ?? '', v: devicevalue.v })
       .then(() => {
         toast.success(LL.WRITE_CMD_SENT());
       })
@@ -454,7 +449,7 @@ const Devices: FC = () => {
       })
       .finally(async () => {
         setDeviceValueDialogOpen(false);
-        await readDeviceData(id);
+        await sendDeviceData(id);
         setSelectedDeviceValue(undefined);
       });
   };
@@ -568,6 +563,9 @@ const Devices: FC = () => {
                 </HeaderRow>
               </Header>
               <Body>
+                {tableList.length === 0 && (
+                  <CircularProgress sx={{ margin: 1 }} size={24} />
+                )}
                 {tableList.map((device: Device) => (
                   <Row key={device.id} item={device}>
                     <Cell stiff>
@@ -592,6 +590,7 @@ const Devices: FC = () => {
 
   const deviceValueDialogClose = () => {
     setDeviceValueDialogOpen(false);
+    void sendDeviceData(selectedDevice);
   };
 
   const renderDeviceData = () => {
@@ -683,11 +682,6 @@ const Devices: FC = () => {
                   ) : (
                     <StarBorderOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
                   )}
-                </IconButton>
-              </ButtonTooltip>
-              <ButtonTooltip title={LL.REFRESH()}>
-                <IconButton onClick={refreshData}>
-                  <RefreshIcon color="primary" sx={{ fontSize: 18 }} />
                 </IconButton>
               </ButtonTooltip>
             </Typography>
@@ -784,16 +778,6 @@ const Devices: FC = () => {
           progress={submitting}
         />
       )}
-      <ButtonRow mt={1}>
-        <Button
-          startIcon={<RefreshIcon />}
-          variant="outlined"
-          color="secondary"
-          onClick={refreshData}
-        >
-          {LL.REFRESH()}
-        </Button>
-      </ButtonRow>
     </SectionContent>
   );
 };

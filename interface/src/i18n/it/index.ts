@@ -94,8 +94,6 @@ const it: Translation = {
   APPLICATION: 'Applicazione',
   CUSTOMIZATIONS: 'Personalizzazione',
   APPLICATION_RESTARTING: 'EMS-ESP sta riavviando',
-  INTERFACE_BOARD_PROFILE: 'Profilo scheda di interfaccia',
-  BOARD_PROFILE_TEXT: 'Selezionare un profilo di interfaccia pre-configurato dalla lista sottostante o scegliere un profilo personalizzato per configurare le impostazioni del tuo hardware',
   BOARD_PROFILE: 'Profilo Scheda',
   CUSTOM: 'Personalizzazione',
   GPIO_OF: 'GPIO {0}',
@@ -103,7 +101,7 @@ const it: Translation = {
   TEMPERATURE: 'Temperatura',
   PHY_TYPE: 'Eth PHY Type',
   DISABLED: 'disattivato',
-  TX_MODE: 'Modo Tx ',
+  TX_MODE: 'EMS Modo Tx ',
   HARDWARE: 'Hardware',
   EMS_BUS: '{{BUS|EMS BUS}}',
   GENERAL_OPTIONS: 'Opzioni Generali',
@@ -128,7 +126,7 @@ const it: Translation = {
   BOOLEAN_FORMAT_API: 'Formato booleano API/MQTT',
   ENUM_FORMAT: 'Enum Format API/MQTT',
   INDEX: 'Indice',
-  ENABLE_PARASITE: 'Abilita potenza parassita',
+  ENABLE_PARASITE: 'Abilita potenza 1-wire parassita',
   LOGGING: 'Registrazione',
   LOG_HEX: 'Registra telegrammi EMS in esadecimale',
   ENABLE_SYSLOG: 'Abilita Syslog',
@@ -169,7 +167,7 @@ const it: Translation = {
   SYSTEM: 'Sistema',
   LOG_OF: 'Registro {0}',
   STATUS_OF: 'Stato {0}',
-  UPLOAD_DOWNLOAD: 'Caricamento/Scaricamento',
+  DOWNLOAD_UPLOAD: 'Scaricamento/Caricamento',
   VERSION_ON: 'Attualmente stai eseguendo la versione',
   CLOSE: 'Chiudere',
   USE: 'Usa',
@@ -194,7 +192,6 @@ const it: Translation = {
   DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events',
   DOWNLOAD_SETTINGS_TEXT: 'Scarica le impostazioni dell applicazione. Fai attenzione quando condividi le tue impostazioni poiché questo file contiene password e altre informazioni di sistema riservate',
   UPLOAD_TEXT: 'Carica un nuovo file firmware (.bin) , file delle impostazioni o delle personalizzazioni (.json) di seguito, per un opzione di convalida scaricare dapprima un file "*.MD5" ',
-  UPLOADING: 'Caricamento',
   UPLOAD_DROP_TEXT: 'Trascina il file o clicca qui',
   ERROR: 'Errore Inaspettato, prego tenta ancora',
   TIME_SET: 'Imposta Ora',
@@ -325,7 +322,7 @@ const it: Translation = {
   SYSTEM_MEMORY: 'System Memory', // TODO translate
   APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
   SECURITY_1: 'Add or remove users', // TODO translate
-  UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', // TODO translate
+  DOWNLOAD_UPLOAD_1: 'Download and Upload Settings and Firmware', // TODO translate
   MODULES: 'Module', // TODO translate
   MODULES_1: 'Attiva o disattiva i moduli esterni', // TODO translate
   MODULES_UPDATED: 'Modules updated', // TODO translate
@@ -333,7 +330,10 @@ const it: Translation = {
   MODULES_NONE: 'No external modules detected', // TODO translate
   RENAME: 'Rename', // TODO translate  
   ENABLE_MODBUS: 'Abilita Modbus',
-  VIEW_LOG: 'View log to diagnose issues' // TODO translate
+  VIEW_LOG: 'View log to diagnose issues', // TODO translate
+  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
+  SERVICES: 'Services', // TODO translate
+  ALLVALUES: 'All Values' // TODO translate
 };
 
 export default it;

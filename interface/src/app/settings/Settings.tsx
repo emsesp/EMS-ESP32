@@ -1,4 +1,4 @@
-import { type FC, useState } from 'react';
+import { useState } from 'react';
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -24,12 +24,12 @@ import {
 import * as SystemApi from 'api/system';
 
 import { dialogStyle } from 'CustomTheme';
-import { useRequest } from 'alova';
+import { useRequest } from 'alova/client';
 import { SectionContent, useLayoutTitle } from 'components';
 import ListMenuItem from 'components/layout/ListMenuItem';
 import { useI18nContext } from 'i18n/i18n-react';
 
-const Settings: FC = () => {
+const Settings = () => {
   const { LL } = useI18nContext();
   useLayoutTitle(LL.SETTINGS(0));
 
@@ -136,8 +136,8 @@ const Settings: FC = () => {
         <ListMenuItem
           icon={ImportExportIcon}
           bgcolor="#5d89f7"
-          label={LL.UPLOAD_DOWNLOAD()}
-          text={LL.UPLOAD_DOWNLOAD_1()}
+          label={LL.DOWNLOAD_UPLOAD()}
+          text={LL.DOWNLOAD_UPLOAD_1()}
           to="upload"
         />
       </List>

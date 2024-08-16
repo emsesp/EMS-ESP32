@@ -1,20 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
-import type { FC } from 'react';
 
 import * as SystemApi from 'api/system';
 
-import { useRequest } from 'alova';
+import { useRequest } from 'alova/client';
 import { FormLoader } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
 const RESTART_TIMEOUT = 2 * 60 * 1000;
 const POLL_INTERVAL = 3000;
 
-const RestartMonitor: FC = () => {
+const RestartMonitor = () => {
   const [failed, setFailed] = useState<boolean>(false);
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout>();
   const { LL } = useI18nContext();
-  const { send } = useRequest(SystemApi.readSystemStatus, { force: true });
+  const { send } = useRequest(SystemApi.readSystemStatus);
   const timeoutAt = useRef(new Date().getTime() + RESTART_TIMEOUT);
 
   const poll = useRef(async () => {

@@ -1,9 +1,3 @@
-import { useEffect } from 'react';
-import type { FC } from 'react';
-
-import RefreshIcon from '@mui/icons-material/Refresh';
-import { Button } from '@mui/material';
-
 import {
   Body,
   Cell,
@@ -14,16 +8,20 @@ import {
   Table
 } from '@table-library/react-table-library/table';
 import { useTheme as tableTheme } from '@table-library/react-table-library/theme';
-import { useRequest } from 'alova';
-import { ButtonRow, FormLoader, SectionContent, useLayoutTitle } from 'components';
+import { useAutoRequest } from 'alova/client';
+import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { Translation } from 'i18n/i18n-types';
 
-import * as EMSESP from '../main/api';
+import { readActivity } from '../../api/app';
 import type { Stat } from '../main/types';
 
-const SystemActivity: FC = () => {
-  const { data: data, send: loadData, error } = useRequest(EMSESP.readActivity);
+const SystemActivity = () => {
+  const {
+    data: data,
+    send: loadData,
+    error
+  } = useAutoRequest(readActivity, { pollingTime: 2000 });
 
   const { LL } = useI18nContext();
 
@@ -67,13 +65,6 @@ const SystemActivity: FC = () => {
     `
   });
 
-  useEffect(() => {
-    const timer = setInterval(() => loadData(), 30000);
-    return () => {
-      clearInterval(timer);
-    };
-  });
-
   const showName = (id: number) => {
     const name: keyof Translation['STATUS_NAMES'] = id;
     return LL.STATUS_NAMES[name]();
@@ -99,46 +90,34 @@ const SystemActivity: FC = () => {
     }
 
     return (
-      <>
-        <Table
-          data={{ nodes: data.stats }}
-          theme={stats_theme}
-          layout={{ custom: true }}
-        >
-          {(tableList: Stat[]) => (
-            <>
-              <Header>
-                <HeaderRow>
-                  <HeaderCell resize />
-                  <HeaderCell stiff>{LL.SUCCESS()}</HeaderCell>
-                  <HeaderCell stiff>{LL.FAIL()}</HeaderCell>
-                  <HeaderCell stiff>{LL.QUALITY()}</HeaderCell>
-                </HeaderRow>
-              </Header>
-              <Body>
-                {tableList.map((stat: Stat) => (
-                  <Row key={stat.id} item={stat}>
-                    <Cell>{showName(stat.id)}</Cell>
-                    <Cell stiff>{Intl.NumberFormat().format(stat.s)}</Cell>
-                    <Cell stiff>{Intl.NumberFormat().format(stat.f)}</Cell>
-                    <Cell stiff>{showQuality(stat)}</Cell>
-                  </Row>
-                ))}
-              </Body>
-            </>
-          )}
-        </Table>
-        <ButtonRow mt={1}>
-          <Button
-            startIcon={<RefreshIcon />}
-            variant="outlined"
-            color="secondary"
-            onClick={loadData}
-          >
-            {LL.REFRESH()}
-          </Button>
-        </ButtonRow>
-      </>
+      <Table
+        data={{ nodes: data.stats }}
+        theme={stats_theme}
+        layout={{ custom: true }}
+      >
+        {(tableList: Stat[]) => (
+          <>
+            <Header>
+              <HeaderRow>
+                <HeaderCell resize />
+                <HeaderCell stiff>{LL.SUCCESS()}</HeaderCell>
+                <HeaderCell stiff>{LL.FAIL()}</HeaderCell>
+                <HeaderCell stiff>{LL.QUALITY()}</HeaderCell>
+              </HeaderRow>
+            </Header>
+            <Body>
+              {tableList.map((stat: Stat) => (
+                <Row key={stat.id} item={stat}>
+                  <Cell>{showName(stat.id)}</Cell>
+                  <Cell stiff>{Intl.NumberFormat().format(stat.s)}</Cell>
+                  <Cell stiff>{Intl.NumberFormat().format(stat.f)}</Cell>
+                  <Cell stiff>{showQuality(stat)}</Cell>
+                </Row>
+              ))}
+            </Body>
+          </>
+        )}
+      </Table>
     );
   };
 

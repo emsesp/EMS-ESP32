@@ -94,8 +94,6 @@ const de: Translation = {
   APPLICATION: 'Anwendung',
   CUSTOMIZATIONS: 'Anpassungen',
   APPLICATION_RESTARTING: 'EMS-ESP startet neu',
-  INTERFACE_BOARD_PROFILE: 'Interface Platinenprofil',
-  BOARD_PROFILE_TEXT: 'Wählen Sie ein vorkonfiguriertes Platinenprofil aus der Liste unten aus oder wählen Sie "Custom", um Ihre eigenen Hardwareeinstellungen zu konfigurieren',
   BOARD_PROFILE: 'Platinenprofil',
   CUSTOM: 'Custom',
   GPIO_OF: '{0} GPIO',
@@ -103,7 +101,7 @@ const de: Translation = {
   TEMPERATURE: 'Temperatur',
   PHY_TYPE: 'Eth PHY Typ',
   DISABLED: 'deaktiviert',
-  TX_MODE: 'Tx Modus',
+  TX_MODE: 'EMS Tx Modus',
   HARDWARE: 'Hardware',
   EMS_BUS: '{{BUS|EMS BUS}}',
   GENERAL_OPTIONS: 'Allgemeine Optionen',
@@ -128,7 +126,7 @@ const de: Translation = {
   BOOLEAN_FORMAT_API: 'Boolesches Format API/MQTT',
   ENUM_FORMAT: 'Enum Format API/MQTT',
   INDEX: 'Index',
-  ENABLE_PARASITE: 'Parasitäre Stomversorgung',
+  ENABLE_PARASITE: '1-wire Parasitäre Stomversorgung',
   LOGGING: 'Protokollierung',
   LOG_HEX: 'EMS-Telegramme hexadezimal protokollieren',
   ENABLE_SYSLOG: 'Syslog aktivieren',
@@ -169,7 +167,7 @@ const de: Translation = {
   SYSTEM: 'System',
   LOG_OF: '{0}protokoll',
   STATUS_OF: '{0} Status',
-  UPLOAD_DOWNLOAD: 'Hoch-/Herunterladen',
+  DOWNLOAD_UPLOAD: 'Herunterladen/Hochladen',
   VERSION_ON: 'Sie verwenden derzeit',
   CLOSE: 'Schließen',
   USE: 'Verwenden Sie',
@@ -194,7 +192,6 @@ const de: Translation = {
   DOWNLOAD_SCHEDULE_TEXT: 'Herunterladen geplanter Befehle',
   DOWNLOAD_SETTINGS_TEXT: 'Herunterladen der Anwendungseinstellungen. Vorsicht beim Teilen der Einstellungen, da sie Passwörter und andere sensitive Einstellungen enthalten',
   UPLOAD_TEXT: 'Hochladen von neuer Firmware (.bin), Geräte- oder Entitätseinstellungen (.json), zur optionalen Validitätsprüfung zuerst die (.md5) Datei hochladen',
-  UPLOADING: 'Hochladen',
   UPLOAD_DROP_TEXT: 'Klicken Sie hier, oder ziehen eine Datei hierher',
   ERROR: 'Unerwarteter Fehler, bitter versuchen Sie es erneut',
   TIME_SET: 'Zeit gesetzt',
@@ -325,7 +322,7 @@ const de: Translation = {
   SYSTEM_MEMORY: 'Systemspeicher',
   APPLICATION_SETTINGS_1: 'Ändern Sie die EMS-ESP-Anwendungseinstellungen',
   SECURITY_1: 'Benutzer hinzufügen oder entfernen',
-  UPLOAD_DOWNLOAD_1: 'Einstellungen und Firmware hochladen/herunterladen',
+  DOWNLOAD_UPLOAD_1: 'Einstellungen und Firmware herunterladen/hochladen',
   MODULES: 'Module',
   MODULES_1: 'Externe Module aktivieren oder deaktivieren',
   MODULES_UPDATED: 'Module aktualisiert',
@@ -333,7 +330,10 @@ const de: Translation = {
   MODULES_NONE: 'Keine externen Module erkannt',
   RENAME: 'Umbenennen',
   ENABLE_MODBUS: 'Modbus aktivieren',
-  VIEW_LOG: 'Sehen Sie sich das Protokoll an, um Probleme zu diagnostizieren'
+  VIEW_LOG: 'Sehen Sie sich das Protokoll an, um Probleme zu diagnostizieren',
+  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
+  SERVICES: 'Services', // TODO translate
+  ALLVALUES: 'All Values' // TODO translate
 };
 
 export default de;

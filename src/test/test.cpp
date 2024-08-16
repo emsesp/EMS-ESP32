@@ -1109,6 +1109,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             Serial.println();
             Serial.printf("%s**** Testing bad urls ****\n%s", COLOR_RED, COLOR_RESET);
 
+            request.method(HTTP_GET);
+
             request.url("/api/boiler2");
             EMSESP::webAPIService.webAPIService(&request);
 

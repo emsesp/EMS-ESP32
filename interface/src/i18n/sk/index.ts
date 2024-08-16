@@ -94,8 +94,6 @@ const sk: Translation = {
   APPLICATION: 'Aplikácie',
   CUSTOMIZATIONS: 'Prispôsobenia',
   APPLICATION_RESTARTING: 'EMS-ESP sa reštartuje',
-  INTERFACE_BOARD_PROFILE: 'Profil dosky rozhrania',
-  BOARD_PROFILE_TEXT: 'Vyberte vopred nakonfigurovaný profil dosky rozhrania zo zoznamu nižšie, alebo vyberte možnosť Vlastné a nakonfigurujte svoje vlastné hardvérové nastavenia',
   BOARD_PROFILE: 'Profil dosky',
   CUSTOM: 'Vlastné',
   GPIO_OF: '{0} GPIO',
@@ -103,7 +101,7 @@ const sk: Translation = {
   TEMPERATURE: 'Teplota',
   PHY_TYPE: 'Eth PHY Typ',
   DISABLED: 'zakázané',
-  TX_MODE: 'Tx režim',
+  TX_MODE: 'EMS Tx režim',
   HARDWARE: 'Hardware',
   EMS_BUS: '{{BUS|EMS BUS}}',
   GENERAL_OPTIONS: 'Všeobecné možnosti',
@@ -124,11 +122,11 @@ const sk: Translation = {
   TRIGGER_TIME: 'Čas spustenia',
   COLD_SHOT_DURATION: 'Trvanie studeného záberu',
   FORMATTING_OPTIONS: 'Možnosti formátovania',
-  BOOLEAN_FORMAT_DASHBOARD: 'Panel Boolean formát',
+  BOOLEAN_FORMAT_DASHBOARD: 'Web panel Boolean formát',
   BOOLEAN_FORMAT_API: 'Boolean formát API/MQTT',
   ENUM_FORMAT: 'Enum formát API/MQTT',
   INDEX: 'Index',
-  ENABLE_PARASITE: 'Povoliť parazité napájanie DS18B20',
+  ENABLE_PARASITE: 'Povoliť 1-wire parazité napájanie DS18B20',
   LOGGING: 'Logovanie',
   LOG_HEX: 'Záznam telegramov EMS v hexadecimálnej sústave',
   ENABLE_SYSLOG: 'Povoliť Syslog',
@@ -169,7 +167,7 @@ const sk: Translation = {
   SYSTEM: 'Systém',
   LOG_OF: '{0} Log',
   STATUS_OF: '{0} Stav',
-  UPLOAD_DOWNLOAD: 'Nahrať/Stiahnuť',
+  DOWNLOAD_UPLOAD: 'Stiahnuť/Nahrať',
   VERSION_ON: 'Momentálne nainštalovaná verzia: ',
   CLOSE: 'Zatvoriť',
   USE: 'Použiť',
@@ -194,7 +192,6 @@ const sk: Translation = {
   DOWNLOAD_SCHEDULE_TEXT: 'Stiahnutie plánovača udalostí',
   DOWNLOAD_SETTINGS_TEXT: 'Stiahnite si nastavenia aplikácie. Pri zdieľaní nastavení buďte opatrní, pretože tento súbor obsahuje heslá a iné citlivé systémové informácie.',
   UPLOAD_TEXT: 'Najskôr nahrajte nový súbor firmvéru (.bin), nastavenia alebo prispôsobenia (.json), pre voliteľné overenie nahrajte súbor (.md5)',
-  UPLOADING: 'Nahrávanie',
   UPLOAD_DROP_TEXT: 'Potiahnúť a pripnúť súbor alebo kliknúť sem',
   ERROR: 'Neočakávaná chyba, prosím skúste to znova',
   TIME_SET: 'Nastavený čas',
@@ -325,7 +322,7 @@ const sk: Translation = {
   SYSTEM_MEMORY: 'System Memory', // TODO translate
   APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
   SECURITY_1: 'Add or remove users', // TODO translate
-  UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', // TODO translate
+  DOWNLOAD_UPLOAD_1: 'Download and Upload Settings and Firmware', // TODO translate
   MODULES: 'Module', // TODO translate
   MODULES_1: 'Aktivujte alebo deaktivujte externé moduly', // TODO translate
   MODULES_UPDATED: 'Modules updated', // TODO translate
@@ -333,7 +330,10 @@ const sk: Translation = {
   MODULES_NONE: 'No external modules detected', // TODO translate
   RENAME: 'Rename', // TODO translate 
   ENABLE_MODBUS: 'Povoliť Modbus',
-  VIEW_LOG: 'View log to diagnose issues' // TODO translate
+  VIEW_LOG: 'View log to diagnose issues', // TODO translate
+  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
+  SERVICES: 'Services', // TODO translate
+  ALLVALUES: 'All Values' // TODO translate
 };
 
 export default sk;

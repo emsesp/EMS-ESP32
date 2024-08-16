@@ -4,7 +4,7 @@ import type * as H from 'history';
 import { jwtDecode } from 'jwt-decode';
 import type { Me, SignInRequest, SignInResponse } from 'types';
 
-import { ACCESS_TOKEN, alovaInstance } from './endpoints';
+import { ACCESS_TOKEN, alovaInstance } from '../../api/endpoints';
 
 export const SIGN_IN_PATHNAME = 'loginPathname';
 export const SIGN_IN_SEARCH = 'loginSearch';

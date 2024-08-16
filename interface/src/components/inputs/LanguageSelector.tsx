@@ -1,4 +1,4 @@
-import { type ChangeEventHandler, type FC, useContext } from 'react';
+import { type ChangeEventHandler, useContext } from 'react';
 
 import { MenuItem, TextField } from '@mui/material';
 
@@ -16,7 +16,7 @@ import { I18nContext } from 'i18n/i18n-react';
 import type { Locales } from 'i18n/i18n-types';
 import { loadLocaleAsync } from 'i18n/i18n-util.async';
 
-const LanguageSelector: FC = () => {
+const LanguageSelector = () => {
   const { setLocale, locale } = useContext(I18nContext);
 
   const onLocaleSelected: ChangeEventHandler<HTMLInputElement> = async ({

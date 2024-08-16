@@ -94,8 +94,6 @@ const tr: Translation = {
   APPLICATION: 'Uygulama',
   CUSTOMIZATIONS: 'Özelleştirme',
   APPLICATION_RESTARTING: 'EMS-ESP yeniden başlatılıyor',
-  INTERFACE_BOARD_PROFILE: 'Arabirim Kart Profili',
-  BOARD_PROFILE_TEXT: 'Aşağıdan hazır kart profillerinden birini seçin yada kendi donanımınızı ayarlamak için Özeli tercih edin',
   BOARD_PROFILE: 'Kart Profili',
   CUSTOM: 'Özel',
   GPIO_OF: '{0} GPIO',
@@ -103,7 +101,7 @@ const tr: Translation = {
   TEMPERATURE: 'Sıcaklık',
   PHY_TYPE: 'Eth PHY Tipi',
   DISABLED: 'devre dışı',
-  TX_MODE: 'Tx Modu',
+  TX_MODE: 'EMS Tx Modu',
   HARDWARE: 'Donanım',
   EMS_BUS: '{{HAT|EMS HATTI}}',
   GENERAL_OPTIONS: 'Genel Seçenekler',
@@ -128,7 +126,7 @@ const tr: Translation = {
   BOOLEAN_FORMAT_API: 'Boolean Biçimleme API/MQTT',
   ENUM_FORMAT: 'Enum Biçimleme API/MQTT',
   INDEX: 'İndeks',
-  ENABLE_PARASITE: 'Parazit gücü devreye al',
+  ENABLE_PARASITE: '1-wire parazit gücü devreye al',
   LOGGING: 'Kayıt ediliyor',
   LOG_HEX: 'EMS telegramlarını hexadecimal olarak kayıt et',
   ENABLE_SYSLOG: 'Sistem Kaydını Devreye Al',
@@ -169,7 +167,7 @@ const tr: Translation = {
   SYSTEM: 'Sistem',
   LOG_OF: '{0} Kaydı',
   STATUS_OF: '{0} Durumu',
-  UPLOAD_DOWNLOAD: 'Yükleme/İndirme',
+  DOWNLOAD_UPLOAD: 'İndirme/Yükleme',
   VERSION_ON: 'You are currently on', // TODO translate
   CLOSE: 'Kapat',
   USE: 'KUllan',
@@ -194,7 +192,6 @@ const tr: Translation = {
   DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
   DOWNLOAD_SETTINGS_TEXT: 'Uygulama ayarlarını indir. Bu dosya hassas sistem bilgileri ve şifrelerinizi içerdiğinden ayarlarınızı paylaşırken dikkatli olun',
   UPLOAD_TEXT: 'Yeni bir bellenim(.bin) dosyası yükleyin, ayarlar ve özelleştirmeler(.json) dosyası aşağıda, sçenekli denetim yüklemesi(.md5) için önce',
-  UPLOADING: 'Yüklüyor',
   UPLOAD_DROP_TEXT: 'Buraya tıklayın yada dosyayı sürükleyip bırakın',
   ERROR: 'Beklenemedik hata, lütfen tekrar deneyin.',
   TIME_SET: 'Zaman ayarı',
@@ -325,7 +322,7 @@ const tr: Translation = {
   SYSTEM_MEMORY: 'System Memory', // TODO translate
   APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
   SECURITY_1: 'Add or remove users', // TODO translate
-  UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', // TODO translate
+  DOWNLOAD_UPLOAD_1: 'Download and Upload Settings and Firmware', // TODO translate
   MODULES: 'Module', // TODO translate
   MODULES_1: 'Harici modülleri etkinleştirin veya devre dışı bırakın', // TODO translate
   MODULES_UPDATED: 'Modules updated', // TODO translate
@@ -333,7 +330,10 @@ const tr: Translation = {
   MODULES_NONE: 'No external modules detected', // TODO translate
   RENAME: 'Rename', // TODO translate 
   ENABLE_MODBUS: 'Enable Modbus', // TODO translate
-  VIEW_LOG: 'View log to diagnose issues' // TODO translate
+  VIEW_LOG: 'View log to diagnose issues', // TODO translate
+  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
+  SERVICES: 'Services', // TODO translate
+  ALLVALUES: 'All Values' // TODO translate
 };
 
 export default tr;

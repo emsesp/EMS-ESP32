@@ -1,19 +1,19 @@
-import { xhrRequestAdapter } from '@alova/adapter-xhr';
+import { type AlovaXHRResponse, xhrRequestAdapter } from '@alova/adapter-xhr';
 import { createAlova } from 'alova';
 import ReactHook from 'alova/react';
 
-import { unpack } from '../api/unpack';
+import { unpack } from './unpack';
 
 export const ACCESS_TOKEN = 'access_token';
 
 export const alovaInstance = createAlova({
   statesHook: ReactHook,
-  timeout: 3000, // 3 seconds but throwing a timeout error
-  localCache: null,
-  // localCache: {
+  timeout: 3000, // 3 seconds before throwing a timeout error
+  cacheFor: null, // disable cache
+  // cacheFor: {
   //   GET: {
-  //     mode: 'placeholder', // see https://alova.js.org/learning/response-cache/#cache-replaceholder-mode
-  //     expire: 2000
+  //     mode: 'memory',
+  //     expire: 60 * 10 * 1000 // 60 seconds in cache
   //   }
   // },
   requestAdapter: xhrRequestAdapter(),
@@ -22,10 +22,15 @@ export const alovaInstance = createAlova({
       method.config.headers.Authorization =
         'Bearer ' + localStorage.getItem(ACCESS_TOKEN);
     }
+    // for simualting vrey slow networks
+    // return new Promise((resolve) => {
+    //   const random = 3000 + Math.random() * 2000;
+    //   setTimeout(resolve, Math.floor(random));
+    // });
   },
 
   responded: {
-    onSuccess: async (response) => {
+    onSuccess: async (response: AlovaXHRResponse) => {
       // if (response.status === 202) {
       //   throw new Error('Wait'); // wifi scan in progress
       // } else

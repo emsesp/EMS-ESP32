@@ -4,10 +4,9 @@ import { alovaInstance } from './endpoints';
 
 export const readNTPStatus = () =>
   alovaInstance.Get<NTPStatusType>('/rest/ntpStatus');
+
 export const readNTPSettings = () =>
-  alovaInstance.Get<NTPSettingsType>('/rest/ntpSettings', {
-    name: 'ntpSettings'
-  });
+  alovaInstance.Get<NTPSettingsType>('/rest/ntpSettings', {});
 export const updateNTPSettings = (data: NTPSettingsType) =>
   alovaInstance.Post<NTPSettingsType>('/rest/ntpSettings', data);
 

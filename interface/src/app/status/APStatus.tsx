@@ -1,12 +1,8 @@
-import type { FC } from 'react';
-
 import ComputerIcon from '@mui/icons-material/Computer';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import {
   Avatar,
-  Button,
   Divider,
   List,
   ListItem,
@@ -18,8 +14,8 @@ import type { Theme } from '@mui/material';
 
 import * as APApi from 'api/ap';
 
-import { useRequest } from 'alova';
-import { ButtonRow, FormLoader, SectionContent, useLayoutTitle } from 'components';
+import { useAutoRequest } from 'alova/client';
+import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { APStatusType } from 'types';
 import { APNetworkStatus } from 'types';
@@ -37,8 +33,12 @@ export const apStatusHighlight = ({ status }: APStatusType, theme: Theme) => {
   }
 };
 
-const APStatus: FC = () => {
-  const { data: data, send: loadData, error } = useRequest(APApi.readAPStatus);
+const APStatus = () => {
+  const {
+    data: data,
+    send: loadData,
+    error
+  } = useAutoRequest(APApi.readAPStatus, { pollingTime: 5000 });
 
   const { LL } = useI18nContext();
   useLayoutTitle(LL.STATUS_OF(LL.ACCESS_POINT(0)));
@@ -64,60 +64,45 @@ const APStatus: FC = () => {
     }
 
     return (
-      <>
-        <List>
-          <ListItem>
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: apStatusHighlight(data, theme) }}>
-                <SettingsInputAntennaIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary={LL.STATUS_OF('')} secondary={apStatus(data)} />
-          </ListItem>
-          <Divider variant="inset" component="li" />
-          <ListItem>
-            <ListItemAvatar>
-              <Avatar>IP</Avatar>
-            </ListItemAvatar>
-            <ListItemText
-              primary={LL.ADDRESS_OF('IP')}
-              secondary={data.ip_address}
-            />
-          </ListItem>
-          <Divider variant="inset" component="li" />
-          <ListItem>
-            <ListItemAvatar>
-              <Avatar>
-                <DeviceHubIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText
-              primary={LL.ADDRESS_OF('MAC')}
-              secondary={data.mac_address}
-            />
-          </ListItem>
-          <Divider variant="inset" component="li" />
-          <ListItem>
-            <ListItemAvatar>
-              <Avatar>
-                <ComputerIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary={LL.AP_CLIENTS()} secondary={data.station_num} />
-          </ListItem>
-          <Divider variant="inset" component="li" />
-        </List>
-        <ButtonRow>
-          <Button
-            startIcon={<RefreshIcon />}
-            variant="outlined"
-            color="secondary"
-            onClick={loadData}
-          >
-            {LL.REFRESH()}
-          </Button>
-        </ButtonRow>
-      </>
+      <List>
+        <ListItem>
+          <ListItemAvatar>
+            <Avatar sx={{ bgcolor: apStatusHighlight(data, theme) }}>
+              <SettingsInputAntennaIcon />
+            </Avatar>
+          </ListItemAvatar>
+          <ListItemText primary={LL.STATUS_OF('')} secondary={apStatus(data)} />
+        </ListItem>
+        <Divider variant="inset" component="li" />
+        <ListItem>
+          <ListItemAvatar>
+            <Avatar>IP</Avatar>
+          </ListItemAvatar>
+          <ListItemText primary={LL.ADDRESS_OF('IP')} secondary={data.ip_address} />
+        </ListItem>
+        <Divider variant="inset" component="li" />
+        <ListItem>
+          <ListItemAvatar>
+            <Avatar>
+              <DeviceHubIcon />
+            </Avatar>
+          </ListItemAvatar>
+          <ListItemText
+            primary={LL.ADDRESS_OF('MAC')}
+            secondary={data.mac_address}
+          />
+        </ListItem>
+        <Divider variant="inset" component="li" />
+        <ListItem>
+          <ListItemAvatar>
+            <Avatar>
+              <ComputerIcon />
+            </Avatar>
+          </ListItemAvatar>
+          <ListItemText primary={LL.AP_CLIENTS()} secondary={data.station_num} />
+        </ListItem>
+        <Divider variant="inset" component="li" />
+      </List>
     );
   };
 

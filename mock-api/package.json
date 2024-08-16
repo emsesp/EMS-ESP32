@@ -6,15 +6,16 @@
   "license": "MIT",
   "scripts": {
     "mock-rest": "bun --watch rest_server.ts",
-    "mock-es": "bun --watch es_server.ts",
-    "mock-upload": "bun --watch upload_server.ts"
+    "format": "prettier -l -w '**/*.{ts,tsx,js,css,json,md}'"
   },
   "dependencies": {
     "@msgpack/msgpack": "^2.8.0",
-    "@types/multer": "^1.4.11",
-    "express": "^4.19.2",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "eslint": "^9.9.0",
+    "eslint-config-prettier": "^9.1.0",
+    "formidable": "^3.5.1",
     "itty-router": "^5.0.17",
-    "multer": "^1.4.5-lts.1"
+    "prettier": "^3.3.3"
   },
-  "packageManager": "yarn@4.2.1"
+  "packageManager": "yarn@4.4.0"
 }

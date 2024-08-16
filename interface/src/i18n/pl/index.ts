@@ -94,8 +94,6 @@ const pl: BaseTranslation = {
   APPLICATION: 'Aplikacji',
   CUSTOMIZATIONS: 'Personalizacja',
   APPLICATION_RESTARTING: 'Trwa ponowne uruchamianie',
-  INTERFACE_BOARD_PROFILE: 'Profil płytki interfejsu',
-  BOARD_PROFILE_TEXT: 'Wybierz z listy gotowy profil płytki interfejsu lub "własny..." i samodzielnie skonfiguruj posiadany sprzęt.',
   BOARD_PROFILE: 'Profil płytki',
   CUSTOM: 'własny',
   GPIO_OF: 'GPIO {0}',
@@ -103,7 +101,7 @@ const pl: BaseTranslation = {
   TEMPERATURE: '1-Wire®',
   PHY_TYPE: 'Typ układu ethernetowego (PHY)',
   DISABLED: '{{wyłączono|brak|}}',
-  TX_MODE: 'Tryb transmisji (Tx)',
+  TX_MODE: 'EMS Tryb transmisji (Tx)',
   EMS_BUS: '{{magistrali EMS|na magistrali|}}',
   HARDWARE: 'sprzętowy',
   GENERAL_OPTIONS: 'Opcje podstawowe',
@@ -128,7 +126,7 @@ const pl: BaseTranslation = {
   BOOLEAN_FORMAT_API: 'Wartości dwustanowe w API/MQTT',
   ENUM_FORMAT: 'Wartości z listy w API/MQTT',
   INDEX: 'indeks',
-  ENABLE_PARASITE: 'Aktywuj zasilanie pasożytnicze',
+  ENABLE_PARASITE: 'Aktywuj zasilanie 1-wire pasożytnicze',
   LOGGING: 'Logowanie',
   LOG_HEX: 'Loguj telegramy EMS w systemie szesnastkowym (hex)',
   ENABLE_SYSLOG: 'Aktywuj SysLog',
@@ -169,7 +167,7 @@ const pl: BaseTranslation = {
   SYSTEM: '{{S|s||s}}yste{{m|mu||mowy}}',
   LOG_OF: 'Log {0}',
   STATUS_OF: 'Status {0}',
-  UPLOAD_DOWNLOAD: 'Przesyłanie plików',
+  DOWNLOAD_UPLOAD: 'Plików przesyłanie',
   VERSION_ON: 'Aktualnie używasz',
   CLOSE: 'Zamknij',
   USE: 'Aby zaktualizować firmware skorzystaj z funkcji',
@@ -194,7 +192,6 @@ const pl: BaseTranslation = {
   DOWNLOAD_SCHEDULE_TEXT: 'Pobierz harmonogram zdarzeń.',
   DOWNLOAD_SETTINGS_TEXT: 'Pobierz ustawienia aplikacji. Uwaga! Plik z ustawieniami zawiera hasła oraz inne wrażliwe informacje systemowe! Nie udostepniaj go pochopnie!',
   UPLOAD_TEXT: 'Wyślij firmware (.bin), ustawienia lub personalizacje (.json). Opcjonalnie, wyślij wcześniej plik walidacji z sumą kontrolną (.md5).',
-  UPLOADING: 'Wysłano',
   UPLOAD_DROP_TEXT: 'Przeciągnij tutaj plik lub kliknij',
   ERROR: 'Nieoczekiwany błąd, spróbuj ponownie!',
   TIME_SET: 'Zegar został ustawiony.',
@@ -325,7 +322,7 @@ const pl: BaseTranslation = {
   SYSTEM_MEMORY: 'Pamięć systemowa',
   APPLICATION_SETTINGS_1: 'Modyfikacja ustawień aplikacji EMS-ESP',
   SECURITY_1: 'Dodawanie i usuwanie użytkowników',
-  UPLOAD_DOWNLOAD_1: 'Wysyłanie/pobieranie ustawień i firmware',
+  DOWNLOAD_UPLOAD_1: 'Pobieranie/wysyłanie ustawień i firmware',
   MODULES: 'Module', // TODO translate
   MODULES_1: 'Aktywuj lub dezaktywuj moduły zewnętrzne', // TODO translate
   MODULES_UPDATED: 'Modules updated', // TODO translate
@@ -333,7 +330,10 @@ const pl: BaseTranslation = {
   MODULES_NONE: 'No external modules detected', // TODO translate
   RENAME: 'Rename', // TODO translate 
   ENABLE_MODBUS: 'Aktywuj Modbus',
-  VIEW_LOG: 'View log to diagnose issues' // TODO translate
+  VIEW_LOG: 'View log to diagnose issues', // TODO translate
+  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
+  SERVICES: 'Services', // TODO translate
+  ALLVALUES: 'All Values' // TODO translate
 };
 
 export default pl;

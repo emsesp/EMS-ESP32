@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import type { FC } from 'react';
 import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -17,9 +16,9 @@ import {
   Typography
 } from '@mui/material';
 
-import * as SystemApi from 'api/system';
+import { readHardwareStatus, restart } from 'api/system';
 
-import { useRequest } from 'alova';
+import { useRequest } from 'alova/client';
 import RestartMonitor from 'app/status/RestartMonitor';
 import type { ValidateFieldsError } from 'async-validator';
 import {
@@ -36,7 +35,7 @@ import { useI18nContext } from 'i18n/i18n-react';
 import { numberValue, updateValueDirty, useRest } from 'utils';
 import { validate } from 'validators';
 
-import * as EMSESP from '../main/api';
+import { getBoardProfile, readSettings, writeSettings } from '../../api/app';
 import { BOARD_PROFILES } from '../main/types';
 import type { Settings } from '../main/types';
 import { createSettingsValidator } from '../main/validators';
@@ -49,15 +48,12 @@ export function boardProfileSelectItems() {
   ));
 }
 
-const ApplicationSettings: FC = () => {
-  const { data: hardwareData } = useRequest(SystemApi.readHardwareStatus, {
-    force: true
-  });
+const ApplicationSettings = () => {
+  const { data: hardwareData } = useRequest(readHardwareStatus);
 
   const {
     loadData,
     saveData,
-    saving,
     updateDataValue,
     data,
     origData,
@@ -67,8 +63,8 @@ const ApplicationSettings: FC = () => {
     errorMessage,
     restartNeeded
   } = useRest<Settings>({
-    read: EMSESP.readSettings,
-    update: EMSESP.writeSettings
+    read: readSettings,
+    update: writeSettings
   });
 
   const [restarting, setRestarting] = useState<boolean>();
@@ -84,19 +80,12 @@ const ApplicationSettings: FC = () => {
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
-  const {
-    loading: processingBoard,
-    send: readBoardProfile,
-    onSuccess: onSuccessBoardProfile
-  } = useRequest((boardProfile: string) => EMSESP.getBoardProfile(boardProfile), {
-    immediate: false
-  });
-
-  const { send: restartCommand } = useRequest(SystemApi.restart(), {
-    immediate: false
-  });
-
-  onSuccessBoardProfile((event) => {
+  const { loading: processingBoard, send: readBoardProfile } = useRequest(
+    (boardProfile: string) => getBoardProfile(boardProfile),
+    {
+      immediate: false
+    }
+  ).onSuccess((event) => {
     const response = event.data as Settings;
     updateDataValue({
       ...data,
@@ -113,6 +102,10 @@ const ApplicationSettings: FC = () => {
     });
   });
 
+  const { send: restartCommand } = useRequest(restart(), {
+    immediate: false
+  });
+
   const updateBoardProfile = async (board_profile: string) => {
     await readBoardProfile(board_profile).catch((error: Error) => {
       toast.error(error.message);
@@ -122,7 +115,7 @@ const ApplicationSettings: FC = () => {
   useLayoutTitle(LL.SETTINGS_OF(LL.APPLICATION()));
 
   const content = () => {
-    if (!data) {
+    if (!data || !hardwareData) {
       return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
     }
 
@@ -161,16 +154,321 @@ const ApplicationSettings: FC = () => {
     return (
       <>
         <Typography sx={{ pb: 1 }} variant="h6" color="primary">
-          {LL.INTERFACE_BOARD_PROFILE()}
+          {LL.SERVICES()}
         </Typography>
-        <Box color="warning.main">
-          <Typography variant="body2">{LL.BOARD_PROFILE_TEXT()}</Typography>
-        </Box>
+        <Typography color="secondary">API</Typography>
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={data.notoken_api}
+              onChange={updateFormValue}
+              name="notoken_api"
+            />
+          }
+          label={LL.BYPASS_TOKEN()}
+        />
+        <Typography color="secondary">Console</Typography>
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={data.telnet_enabled}
+              onChange={updateFormValue}
+              name="telnet_enabled"
+            />
+          }
+          label={LL.ENABLE_TELNET()}
+        />
+        <Typography color="secondary">Modbus</Typography>
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={data.modbus_enabled}
+              onChange={updateFormValue}
+              name="modbus_enabled"
+              disabled={!hardwareData.psram}
+            />
+          }
+          label={LL.ENABLE_MODBUS()}
+        />
+        {data.modbus_enabled && (
+          <Grid
+            container
+            spacing={1}
+            direction="row"
+            justifyContent="flex-start"
+            alignItems="flex-start"
+          >
+            <Grid item xs={12} sm={6}>
+              <ValidatedTextField
+                fieldErrors={fieldErrors}
+                name="modbus_max_clients"
+                label={LL.AP_MAX_CLIENTS()}
+                fullWidth
+                variant="outlined"
+                value={numberValue(data.modbus_max_clients)}
+                type="number"
+                onChange={updateFormValue}
+                margin="normal"
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <ValidatedTextField
+                fieldErrors={fieldErrors}
+                name="modbus_port"
+                label="Port"
+                fullWidth
+                variant="outlined"
+                value={numberValue(data.modbus_port)}
+                type="number"
+                onChange={updateFormValue}
+                margin="normal"
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <ValidatedTextField
+                fieldErrors={fieldErrors}
+                name="modbus_timeout"
+                label="Timeout"
+                InputProps={{
+                  endAdornment: <InputAdornment position="end">ms</InputAdornment>
+                }}
+                fullWidth
+                variant="outlined"
+                value={numberValue(data.modbus_timeout)}
+                type="number"
+                onChange={updateFormValue}
+                margin="normal"
+              />
+            </Grid>
+          </Grid>
+        )}
+        <Typography color="secondary">Syslog</Typography>
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={data.syslog_enabled}
+              onChange={updateFormValue}
+              name="syslog_enabled"
+            />
+          }
+          label={LL.ENABLE_SYSLOG()}
+        />
+        {data.syslog_enabled && (
+          <Grid
+            container
+            spacing={1}
+            direction="row"
+            justifyContent="flex-start"
+            alignItems="flex-start"
+          >
+            <Grid item xs={12} sm={6}>
+              <ValidatedTextField
+                fieldErrors={fieldErrors}
+                name="syslog_host"
+                label="Host"
+                fullWidth
+                variant="outlined"
+                value={data.syslog_host}
+                onChange={updateFormValue}
+                margin="normal"
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <ValidatedTextField
+                fieldErrors={fieldErrors}
+                name="syslog_port"
+                label="Port"
+                fullWidth
+                variant="outlined"
+                value={numberValue(data.syslog_port)}
+                type="number"
+                onChange={updateFormValue}
+                margin="normal"
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                name="syslog_level"
+                label={LL.LOG_LEVEL()}
+                value={data.syslog_level}
+                fullWidth
+                variant="outlined"
+                onChange={updateFormValue}
+                margin="normal"
+                select
+              >
+                <MenuItem value={-1}>OFF</MenuItem>
+                <MenuItem value={3}>ERR</MenuItem>
+                <MenuItem value={5}>NOTICE</MenuItem>
+                <MenuItem value={6}>INFO</MenuItem>
+                <MenuItem value={7}>DEBUG</MenuItem>
+                <MenuItem value={9}>ALL</MenuItem>
+              </TextField>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <ValidatedTextField
+                fieldErrors={fieldErrors}
+                name="syslog_mark_interval"
+                label={LL.MARK_INTERVAL()}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+                  )
+                }}
+                fullWidth
+                variant="outlined"
+                value={numberValue(data.syslog_mark_interval)}
+                type="number"
+                onChange={updateFormValue}
+                margin="normal"
+              />
+            </Grid>
+          </Grid>
+        )}
+        <Typography sx={{ pb: 1, pt: 2 }} variant="h6" color="primary">
+          {LL.SENSORS()}
+        </Typography>
+        <Typography color="secondary">Analog</Typography>
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={data.analog_enabled}
+              onChange={updateFormValue}
+              name="analog_enabled"
+            />
+          }
+          label={LL.ENABLE_ANALOG()}
+        />
+        {data.dallas_gpio !== 0 && (
+          <>
+            <Typography color="secondary">{LL.TEMPERATURE()}</Typography>
+            <BlockFormControlLabel
+              control={
+                <Checkbox
+                  checked={data.dallas_parasite}
+                  onChange={updateFormValue}
+                  name="dallas_parasite"
+                />
+              }
+              label={LL.ENABLE_PARASITE()}
+            />
+          </>
+        )}
+
+        <Typography sx={{ pb: 1, pt: 2 }} variant="h6" color="primary">
+          {LL.FORMATTING_OPTIONS()}
+        </Typography>
+        <Grid item>
+          <TextField
+            name="locale"
+            label={LL.LANGUAGE_ENTITIES()}
+            value={data.locale}
+            fullWidth
+            variant="outlined"
+            onChange={updateFormValue}
+            margin="normal"
+            select
+          >
+            <MenuItem value="de">Deutsch (DE)</MenuItem>
+            <MenuItem value="en">English (EN)</MenuItem>
+            <MenuItem value="fr">Français (FR)</MenuItem>
+            <MenuItem value="it">Italiano (IT)</MenuItem>
+            <MenuItem value="nl">Nederlands (NL)</MenuItem>
+            <MenuItem value="no">Norsk (NO)</MenuItem>
+            <MenuItem value="pl">Polski (PL)</MenuItem>
+            <MenuItem value="sk">Slovenčina (SK)</MenuItem>
+            <MenuItem value="sv">Svenska (SV)</MenuItem>
+            <MenuItem value="tr">Türk (TR)</MenuItem>
+          </TextField>
+        </Grid>
+        <Grid
+          container
+          spacing={1}
+          direction="row"
+          justifyContent="flex-start"
+          alignItems="flex-start"
+        >
+          <Grid item xs={12} sm={6} md={4}>
+            <TextField
+              name="bool_dashboard"
+              label={LL.BOOLEAN_FORMAT_DASHBOARD()}
+              value={data.bool_dashboard}
+              fullWidth
+              variant="outlined"
+              onChange={updateFormValue}
+              margin="normal"
+              select
+            >
+              <MenuItem value={1}>{LL.ONOFF()}</MenuItem>
+              <MenuItem value={2}>{LL.ONOFF_CAP()}</MenuItem>
+              <MenuItem value={3}>true/false</MenuItem>
+              <MenuItem value={5}>1/0</MenuItem>
+            </TextField>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <TextField
+              name="bool_format"
+              label={LL.BOOLEAN_FORMAT_API()}
+              value={data.bool_format}
+              fullWidth
+              variant="outlined"
+              onChange={updateFormValue}
+              margin="normal"
+              select
+            >
+              <MenuItem value={1}>{LL.ONOFF()}</MenuItem>
+              <MenuItem value={2}>{LL.ONOFF_CAP()}</MenuItem>
+              <MenuItem value={3}>&quot;true&quot;/&quot;false&quot;</MenuItem>
+              <MenuItem value={4}>true/false</MenuItem>
+              <MenuItem value={5}>&quot;1&quot;/&quot;0&quot;</MenuItem>
+              <MenuItem value={6}>1/0</MenuItem>
+            </TextField>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <TextField
+              name="enum_format"
+              label={LL.ENUM_FORMAT()}
+              value={data.enum_format}
+              fullWidth
+              variant="outlined"
+              onChange={updateFormValue}
+              margin="normal"
+              select
+            >
+              <MenuItem value={1}>{LL.VALUE(5)}</MenuItem>
+              <MenuItem value={2}>{LL.INDEX()}</MenuItem>
+            </TextField>
+          </Grid>
+        </Grid>
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={data.fahrenheit}
+              onChange={updateFormValue}
+              name="fahrenheit"
+            />
+          }
+          label={LL.CONVERT_FAHRENHEIT()}
+        />
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={data.trace_raw}
+              onChange={updateFormValue}
+              name="trace_raw"
+            />
+          }
+          label={LL.LOG_HEX()}
+        />
+
+        <Typography sx={{ pb: 1, pt: 2 }} variant="h6" color="primary">
+          {LL.SETTINGS_OF(LL.HARDWARE())}
+        </Typography>
         <TextField
           name="board_profile"
           label={LL.BOARD_PROFILE()}
           value={data.board_profile}
-          disabled={processingBoard}
+          disabled={processingBoard || hardwareData.model.startsWith('BBQKees')}
           fullWidth
           variant="outlined"
           onChange={changeBoardProfile}
@@ -204,7 +502,6 @@ const ApplicationSettings: FC = () => {
                   type="number"
                   onChange={updateFormValue}
                   margin="normal"
-                  disabled={saving}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -218,7 +515,6 @@ const ApplicationSettings: FC = () => {
                   type="number"
                   onChange={updateFormValue}
                   margin="normal"
-                  disabled={saving}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -232,7 +528,6 @@ const ApplicationSettings: FC = () => {
                   type="number"
                   onChange={updateFormValue}
                   margin="normal"
-                  disabled={saving}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -248,7 +543,6 @@ const ApplicationSettings: FC = () => {
                   type="number"
                   onChange={updateFormValue}
                   margin="normal"
-                  disabled={saving}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
@@ -262,14 +556,12 @@ const ApplicationSettings: FC = () => {
                   type="number"
                   onChange={updateFormValue}
                   margin="normal"
-                  disabled={saving}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={4}>
                 <TextField
                   name="phy_type"
                   label={LL.PHY_TYPE()}
-                  disabled={saving}
                   value={data.phy_type}
                   fullWidth
                   variant="outlined"
@@ -302,7 +594,6 @@ const ApplicationSettings: FC = () => {
                     type="number"
                     onChange={updateFormValue}
                     margin="normal"
-                    disabled={saving}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
@@ -315,14 +606,12 @@ const ApplicationSettings: FC = () => {
                     type="number"
                     onChange={updateFormValue}
                     margin="normal"
-                    disabled={saving}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                   <TextField
                     name="eth_clock_mode"
                     label="PHY Clk"
-                    disabled={saving}
                     value={data.eth_clock_mode}
                     fullWidth
                     variant="outlined"
@@ -340,9 +629,6 @@ const ApplicationSettings: FC = () => {
             )}
           </>
         )}
-        <Typography sx={{ pt: 2 }} variant="h6" color="primary">
-          {LL.SETTINGS_OF(LL.EMS_BUS(0))}
-        </Typography>
         <Grid
           container
           spacing={1}
@@ -354,7 +640,6 @@ const ApplicationSettings: FC = () => {
             <TextField
               name="tx_mode"
               label={LL.TX_MODE()}
-              disabled={saving}
               value={data.tx_mode}
               fullWidth
               variant="outlined"
@@ -371,8 +656,7 @@ const ApplicationSettings: FC = () => {
           <Grid item xs={12} sm={6}>
             <TextField
               name="ems_bus_id"
-              label={LL.ID_OF(LL.EMS_BUS(1))}
-              disabled={saving}
+              label={LL.ID_OF(LL.EMS_BUS(0))}
               value={data.ems_bus_id}
               fullWidth
               variant="outlined"
@@ -394,33 +678,16 @@ const ApplicationSettings: FC = () => {
             </TextField>
           </Grid>
         </Grid>
-        <Typography sx={{ pt: 2 }} variant="h6" color="primary">
-          {LL.GENERAL_OPTIONS()}
-        </Typography>
-        <Grid item>
-          <TextField
-            name="locale"
-            label={LL.LANGUAGE_ENTITIES()}
-            disabled={saving}
-            value={data.locale}
-            fullWidth
-            variant="outlined"
-            onChange={updateFormValue}
-            margin="normal"
-            select
-          >
-            <MenuItem value="de">Deutsch (DE)</MenuItem>
-            <MenuItem value="en">English (EN)</MenuItem>
-            <MenuItem value="fr">Français (FR)</MenuItem>
-            <MenuItem value="it">Italiano (IT)</MenuItem>
-            <MenuItem value="nl">Nederlands (NL)</MenuItem>
-            <MenuItem value="no">Norsk (NO)</MenuItem>
-            <MenuItem value="pl">Polski (PL)</MenuItem>
-            <MenuItem value="sk">Slovenčina (SK)</MenuItem>
-            <MenuItem value="sv">Svenska (SV)</MenuItem>
-            <MenuItem value="tr">Türk (TR)</MenuItem>
-          </TextField>
-        </Grid>
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={data.readonly_mode}
+              onChange={updateFormValue}
+              name="readonly_mode"
+            />
+          }
+          label={LL.READONLY()}
+        />
         {data.led_gpio !== 0 && (
           <BlockFormControlLabel
             control={
@@ -431,64 +698,8 @@ const ApplicationSettings: FC = () => {
               />
             }
             label={LL.HIDE_LED()}
-            disabled={saving}
           />
         )}
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.telnet_enabled}
-              onChange={updateFormValue}
-              name="telnet_enabled"
-            />
-          }
-          label={LL.ENABLE_TELNET()}
-          disabled={saving}
-        />
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.analog_enabled}
-              onChange={updateFormValue}
-              name="analog_enabled"
-            />
-          }
-          label={LL.ENABLE_ANALOG()}
-          disabled={saving}
-        />
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.fahrenheit}
-              onChange={updateFormValue}
-              name="fahrenheit"
-            />
-          }
-          label={LL.CONVERT_FAHRENHEIT()}
-          disabled={saving}
-        />
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.notoken_api}
-              onChange={updateFormValue}
-              name="notoken_api"
-            />
-          }
-          label={LL.BYPASS_TOKEN()}
-          disabled={saving}
-        />
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.readonly_mode}
-              onChange={updateFormValue}
-              name="readonly_mode"
-            />
-          }
-          label={LL.READONLY()}
-          disabled={saving}
-        />
         <BlockFormControlLabel
           control={
             <Checkbox
@@ -498,8 +709,11 @@ const ApplicationSettings: FC = () => {
             />
           }
           label={LL.UNDERCLOCK_CPU()}
-          disabled={saving}
         />
+
+        <Typography sx={{ pb: 1, pt: 2 }} variant="h6" color="primary">
+          {LL.GENERAL_OPTIONS()}
+        </Typography>
         <BlockFormControlLabel
           control={
             <Checkbox
@@ -509,47 +723,36 @@ const ApplicationSettings: FC = () => {
             />
           }
           label={LL.HEATINGOFF()}
-          disabled={saving}
         />
-        <Grid
-          container
-          spacing={1}
-          direction="row"
-          justifyContent="flex-start"
-          alignItems="flex-start"
-        >
-          <Grid item xs={12} sm={6} md={4}>
-            <BlockFormControlLabel
-              control={
-                <Checkbox
-                  checked={data.remote_timeout_en}
-                  onChange={updateFormValue}
-                  name="remote_timeout_en"
-                />
-              }
-              label={LL.REMOTE_TIMEOUT_EN()}
+
+        <BlockFormControlLabel
+          control={
+            <Checkbox
+              checked={data.remote_timeout_en}
+              onChange={updateFormValue}
+              name="remote_timeout_en"
             />
-          </Grid>
-          {data.remote_timeout_en && (
-            <Grid item xs={12} sm={6} md={4}>
-              <ValidatedTextField
-                fieldErrors={fieldErrors}
-                name="remote_timeout"
-                label={LL.REMOTE_TIMEOUT()}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">{LL.HOURS()}</InputAdornment>
-                  )
-                }}
-                fullWidth
-                variant="outlined"
-                value={numberValue(data.remote_timeout)}
-                type="number"
-                onChange={updateFormValue}
-              />
-            </Grid>
-          )}
-        </Grid>
+          }
+          label={LL.REMOTE_TIMEOUT_EN()}
+        />
+        {data.remote_timeout_en && (
+          <Box mt={2}>
+            <ValidatedTextField
+              fieldErrors={fieldErrors}
+              name="remote_timeout"
+              label={LL.REMOTE_TIMEOUT()}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">{LL.HOURS()}</InputAdornment>
+                )
+              }}
+              variant="outlined"
+              value={numberValue(data.remote_timeout)}
+              type="number"
+              onChange={updateFormValue}
+            />
+          </Box>
+        )}
         <Grid
           container
           spacing={0}
@@ -566,7 +769,6 @@ const ApplicationSettings: FC = () => {
               />
             }
             label={LL.ENABLE_SHOWER_TIMER()}
-            disabled={saving}
           />
           <BlockFormControlLabel
             control={
@@ -649,256 +851,7 @@ const ApplicationSettings: FC = () => {
             </>
           )}
         </Grid>
-        <Typography sx={{ pt: 3 }} variant="h6" color="primary">
-          {LL.FORMATTING_OPTIONS()}
-        </Typography>
-        <Grid
-          container
-          spacing={1}
-          direction="row"
-          justifyContent="flex-start"
-          alignItems="flex-start"
-        >
-          <Grid item xs={12} sm={6} md={4}>
-            <TextField
-              name="bool_dashboard"
-              label={LL.BOOLEAN_FORMAT_DASHBOARD()}
-              value={data.bool_dashboard}
-              fullWidth
-              variant="outlined"
-              onChange={updateFormValue}
-              margin="normal"
-              select
-            >
-              <MenuItem value={1}>{LL.ONOFF()}</MenuItem>
-              <MenuItem value={2}>{LL.ONOFF_CAP()}</MenuItem>
-              <MenuItem value={3}>true/false</MenuItem>
-              <MenuItem value={5}>1/0</MenuItem>
-            </TextField>
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <TextField
-              name="bool_format"
-              label={LL.BOOLEAN_FORMAT_API()}
-              value={data.bool_format}
-              fullWidth
-              variant="outlined"
-              onChange={updateFormValue}
-              margin="normal"
-              select
-            >
-              <MenuItem value={1}>{LL.ONOFF()}</MenuItem>
-              <MenuItem value={2}>{LL.ONOFF_CAP()}</MenuItem>
-              <MenuItem value={3}>&quot;true&quot;/&quot;false&quot;</MenuItem>
-              <MenuItem value={4}>true/false</MenuItem>
-              <MenuItem value={5}>&quot;1&quot;/&quot;0&quot;</MenuItem>
-              <MenuItem value={6}>1/0</MenuItem>
-            </TextField>
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <TextField
-              name="enum_format"
-              label={LL.ENUM_FORMAT()}
-              value={data.enum_format}
-              fullWidth
-              variant="outlined"
-              onChange={updateFormValue}
-              margin="normal"
-              select
-            >
-              <MenuItem value={1}>{LL.VALUE(5)}</MenuItem>
-              <MenuItem value={2}>{LL.INDEX()}</MenuItem>
-            </TextField>
-          </Grid>
-        </Grid>
-        {data.dallas_gpio !== 0 && (
-          <>
-            <Typography sx={{ pt: 2 }} variant="h6" color="primary">
-              {LL.TEMP_SENSORS()}
-            </Typography>
-            <BlockFormControlLabel
-              control={
-                <Checkbox
-                  checked={data.dallas_parasite}
-                  onChange={updateFormValue}
-                  name="dallas_parasite"
-                />
-              }
-              label={LL.ENABLE_PARASITE()}
-              disabled={saving}
-            />
-          </>
-        )}
-        <Typography sx={{ pt: 2 }} variant="h6" color="primary">
-          {LL.LOGGING()}
-        </Typography>
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.trace_raw}
-              onChange={updateFormValue}
-              name="trace_raw"
-            />
-          }
-          label={LL.LOG_HEX()}
-          disabled={saving}
-        />
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.syslog_enabled}
-              onChange={updateFormValue}
-              name="syslog_enabled"
-              disabled={saving}
-            />
-          }
-          label={LL.ENABLE_SYSLOG()}
-        />
-        {data.syslog_enabled && (
-          <Grid
-            container
-            spacing={1}
-            direction="row"
-            justifyContent="flex-start"
-            alignItems="flex-start"
-          >
-            <Grid item xs={12} sm={6}>
-              <ValidatedTextField
-                fieldErrors={fieldErrors}
-                name="syslog_host"
-                label="Host"
-                fullWidth
-                variant="outlined"
-                value={data.syslog_host}
-                onChange={updateFormValue}
-                margin="normal"
-                disabled={saving}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <ValidatedTextField
-                fieldErrors={fieldErrors}
-                name="syslog_port"
-                label="Port"
-                fullWidth
-                variant="outlined"
-                value={numberValue(data.syslog_port)}
-                type="number"
-                onChange={updateFormValue}
-                margin="normal"
-                disabled={saving}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                name="syslog_level"
-                label={LL.LOG_LEVEL()}
-                value={data.syslog_level}
-                fullWidth
-                variant="outlined"
-                onChange={updateFormValue}
-                margin="normal"
-                select
-                disabled={saving}
-              >
-                <MenuItem value={-1}>OFF</MenuItem>
-                <MenuItem value={3}>ERR</MenuItem>
-                <MenuItem value={5}>NOTICE</MenuItem>
-                <MenuItem value={6}>INFO</MenuItem>
-                <MenuItem value={7}>DEBUG</MenuItem>
-                <MenuItem value={9}>ALL</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <ValidatedTextField
-                fieldErrors={fieldErrors}
-                name="syslog_mark_interval"
-                label={LL.MARK_INTERVAL()}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
-                  )
-                }}
-                fullWidth
-                variant="outlined"
-                value={numberValue(data.syslog_mark_interval)}
-                type="number"
-                onChange={updateFormValue}
-                margin="normal"
-                disabled={saving}
-              />
-            </Grid>
-          </Grid>
-        )}
-        <Typography sx={{ pt: 2 }} variant="h6" color="primary">
-          Modbus
-        </Typography>
-        <BlockFormControlLabel
-          control={
-            <Checkbox
-              checked={data.modbus_enabled}
-              onChange={updateFormValue}
-              name="modbus_enabled"
-              disabled={!hardwareData.psram}
-            />
-          }
-          label={LL.ENABLE_MODBUS()}
-        />
-        {data.modbus_enabled && (
-          <Grid
-            container
-            spacing={1}
-            direction="row"
-            justifyContent="flex-start"
-            alignItems="flex-start"
-          >
-            <Grid item xs={12} sm={6}>
-              <ValidatedTextField
-                fieldErrors={fieldErrors}
-                name="modbus_max_clients"
-                label={LL.AP_MAX_CLIENTS()}
-                fullWidth
-                variant="outlined"
-                value={numberValue(data.modbus_max_clients)}
-                type="number"
-                onChange={updateFormValue}
-                margin="normal"
-                disabled={saving}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <ValidatedTextField
-                fieldErrors={fieldErrors}
-                name="modbus_port"
-                label="Port"
-                fullWidth
-                variant="outlined"
-                value={numberValue(data.modbus_port)}
-                type="number"
-                onChange={updateFormValue}
-                margin="normal"
-                disabled={saving}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <ValidatedTextField
-                fieldErrors={fieldErrors}
-                name="modbus_timeout"
-                label="Timeout"
-                InputProps={{
-                  endAdornment: <InputAdornment position="end">ms</InputAdornment>
-                }}
-                fullWidth
-                variant="outlined"
-                value={numberValue(data.modbus_timeout)}
-                type="number"
-                onChange={updateFormValue}
-                margin="normal"
-                disabled={saving}
-              />
-            </Grid>
-          </Grid>
-        )}
+
         {restartNeeded && (
           <MessageBox my={2} level="warning" message={LL.RESTART_TEXT(0)}>
             <Button
@@ -915,7 +868,6 @@ const ApplicationSettings: FC = () => {
           <ButtonRow>
             <Button
               startIcon={<CancelIcon />}
-              disabled={saving}
               variant="outlined"
               color="primary"
               type="submit"
@@ -925,7 +877,6 @@ const ApplicationSettings: FC = () => {
             </Button>
             <Button
               startIcon={<WarningIcon color="warning" />}
-              disabled={saving}
               variant="contained"
               color="info"
               type="submit"

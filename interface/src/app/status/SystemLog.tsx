@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import type { FC } from 'react';
 import { toast } from 'react-toastify';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
@@ -17,8 +16,7 @@ import {
 import * as SystemApi from 'api/system';
 import { fetchLogES } from 'api/system';
 
-import { useSSE } from '@alova/scene-react';
-import { useRequest } from 'alova';
+import { useRequest, useSSE } from 'alova/client';
 import {
   BlockFormControlLabel,
   BlockNavigation,
@@ -72,7 +70,7 @@ const levelLabel = (level: LogLevel) => {
   }
 };
 
-const SystemLog: FC = () => {
+const SystemLog = () => {
   const { LL } = useI18nContext();
 
   useLayoutTitle(LL.LOG_OF(LL.SYSTEM(0)));

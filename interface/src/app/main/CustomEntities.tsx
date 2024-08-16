@@ -1,12 +1,10 @@
 import { useCallback, useState } from 'react';
-import type { FC } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 import AddIcon from '@mui/icons-material/Add';
 import CancelIcon from '@mui/icons-material/Cancel';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Typography } from '@mui/material';
 
@@ -20,7 +18,7 @@ import {
   Table
 } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
-import { updateState, useRequest } from 'alova';
+import { updateState, useAutoRequest, useRequest } from 'alova/client';
 import {
   BlockNavigation,
   ButtonRow,
@@ -30,13 +28,13 @@ import {
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
-import * as EMSESP from './api';
+import { readCustomEntities, writeCustomEntities } from '../../api/app';
 import SettingsCustomEntitiesDialog from './CustomEntitiesDialog';
 import { DeviceValueTypeNames, DeviceValueUOM_s } from './types';
 import type { Entities, EntityItem } from './types';
 import { entityItemValidation } from './validators';
 
-const CustomEntities: FC = () => {
+const CustomEntities = () => {
   const { LL } = useI18nContext();
   const [numChanges, setNumChanges] = useState<number>(0);
   const blocker = useBlocker(numChanges !== 0);
@@ -50,13 +48,13 @@ const CustomEntities: FC = () => {
     data: entities,
     send: fetchEntities,
     error
-  } = useRequest(EMSESP.readCustomEntities, {
+  } = useAutoRequest(readCustomEntities, {
     initialData: [],
-    force: true
+    pollingTime: 2000
   });
 
   const { send: writeEntities } = useRequest(
-    (data: Entities) => EMSESP.writeCustomEntities(data),
+    (data: Entities) => writeCustomEntities(data),
     { immediate: false }
   );
 
@@ -182,8 +180,7 @@ const CustomEntities: FC = () => {
 
   const onDialogSave = (updatedItem: EntityItem) => {
     setDialogOpen(false);
-
-    updateState('entities', (data: EntityItem[]) => {
+    void updateState(readCustomEntities(), (data: EntityItem[]) => {
       const new_data = creating
         ? [
             ...data.filter((ei) => creating || ei.o_id !== updatedItem.o_id),
@@ -327,24 +324,14 @@ const CustomEntities: FC = () => {
           )}
         </Box>
         <Box flexWrap="nowrap" whiteSpace="nowrap">
-          <ButtonRow>
-            <Button
-              startIcon={<RefreshIcon />}
-              variant="outlined"
-              color="secondary"
-              onClick={fetchEntities}
-            >
-              {LL.REFRESH()}
-            </Button>
-            <Button
-              startIcon={<AddIcon />}
-              variant="outlined"
-              color="primary"
-              onClick={addEntityItem}
-            >
-              {LL.ADD(0)}
-            </Button>
-          </ButtonRow>
+          <Button
+            startIcon={<AddIcon />}
+            variant="outlined"
+            color="primary"
+            onClick={addEntityItem}
+          >
+            {LL.ADD(0)}
+          </Button>
         </Box>
       </Box>
     </SectionContent>

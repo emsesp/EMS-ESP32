@@ -691,11 +691,16 @@ std::string EMSESPShell::context_text() {
 
 // when in su (admin) show # as the prompt suffix
 std::string EMSESPShell::prompt_suffix() {
+#ifndef EMSESP_UNITY
     if (has_flags(CommandFlags::ADMIN)) {
         return std::string{'#'};
     } else {
         return std::string{'$'};
     }
+#else
+    // don't bother with prompt suffix if we're testing Unity output
+    return "";
+#endif
 }
 
 void EMSESPShell::end_of_transmission() {
