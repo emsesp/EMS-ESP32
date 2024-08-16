@@ -39,7 +39,9 @@ void WebSchedulerService::begin() {
     snprintf(topic, sizeof(topic), "%s/#", F_(scheduler));
     Mqtt::subscribe(EMSdevice::DeviceType::SCHEDULER, topic, nullptr); // use empty function callback
 #ifndef EMSESP_STANDALONE
-    xTaskCreate((TaskFunction_t)scheduler_task, "scheduler_task", 4096, NULL, 1, NULL);
+    if (EMSESP::system_.PSram()) {
+        xTaskCreate((TaskFunction_t)scheduler_task, "scheduler_task", 4096, NULL, 1, NULL);
+    }
 #endif
 }
 
@@ -467,9 +469,9 @@ void WebSchedulerService::loop() {
         }
     }
 
-    // check conditions every 10 seconds
+    // check conditions every 10 seconds, start after one minute
     uint32_t uptime_sec = uuid::get_uptime_sec() / 10;
-    if (last_uptime_sec != uptime_sec) {
+    if (last_uptime_sec != uptime_sec && uptime_sec > 5) {
         condition();
         last_uptime_sec = uptime_sec;
     }

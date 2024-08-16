@@ -1538,6 +1538,7 @@ EMSESP::EMSESP()
 // start all the core services
 // the services must be loaded in the correct order
 void EMSESP::start() {
+    system_.PSram(ESP.getPsramSize());
 // don't need shell if running unit tests
 #ifndef EMSESP_UNITY
     // Serial console's shell
@@ -1667,6 +1668,9 @@ void EMSESP::loop() {
         publish_all_loop();        // with HA messages in parts to avoid flooding the mqtt queue
         mqtt_.loop();              // sends out anything in the MQTT queue
         webModulesService.loop();  // loop through the external library modules
+        if (system_.PSram() == 0) {
+            webSchedulerService.loop();
+        }
 
         // force a query on the EMS devices to fetch latest data at a set interval (1 min)
         scheduled_fetch_values();

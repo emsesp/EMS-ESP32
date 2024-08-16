@@ -68,9 +68,13 @@ void WebCustomEntity::read(WebCustomEntity & webEntity, JsonObject root) {
 StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & webCustomEntity) {
     // reset everything to start fresh
     Command::erase_device_commands(EMSdevice::DeviceType::CUSTOM);
+    JsonDocument doc;
     for (CustomEntityItem & entityItem : webCustomEntity.customEntityItems) {
         if (entityItem.raw) {
             delete[] entityItem.raw;
+        }
+        if (entityItem.ram) { // save name/value pairs for change checking
+            doc[entityItem.name] = entityItem.value;
         }
     }
     webCustomEntity.customEntityItems.clear();
@@ -98,8 +102,9 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
                 entityItem.writeable  = true;
             }
             entityItem.raw = nullptr;
-            if (entityItem.value_type == DeviceValueType::STRING) {
-                entityItem.raw = new uint8_t[(int)entityItem.factor + 1];
+            if (entityItem.ram == 0 && entityItem.value_type == DeviceValueType::STRING) {
+                entityItem.raw  = new uint8_t[(size_t)entityItem.factor + 1];
+                entityItem.data = "";
             } else if (entityItem.value_type == DeviceValueType::BOOL) {
                 entityItem.value = EMS_VALUE_DEFAULT_BOOL;
             } else if (entityItem.value_type == DeviceValueType::INT8) {
@@ -131,6 +136,12 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
                     FL_(entity_cmd),
                     CommandFlag::ADMIN_ONLY);
             }
+            if (webCustomEntity.customEntityItems.back().ram && doc.containsKey(webCustomEntity.customEntityItems.back().name)
+                && doc[webCustomEntity.customEntityItems.back().name] != webCustomEntity.customEntityItems.back().value) {
+                char cmd[COMMAND_MAX_LENGTH];
+                snprintf(cmd, sizeof(cmd), "%s/%s", F_(custom), webCustomEntity.customEntityItems.back().name.c_str());
+                EMSESP::webSchedulerService.onChange(cmd);
+            }
         }
     }
     return StateUpdateResult::CHANGED;
@@ -144,10 +155,11 @@ bool WebCustomEntityService::command_setvalue(const char * value, const int8_t i
                 entityItem.data = value;
             } else if (entityItem.value_type == DeviceValueType::STRING) {
                 auto      telegram = strdup(value);
-                uint8_t * data     = new uint8_t[(strlen(telegram)) / 3 + 1];
+                uint8_t   length   = strlen(telegram) / 3 + 1;
+                uint8_t * data     = new uint8_t[length];
                 uint8_t   count    = 0;
                 char *    p        = strtok(telegram, " ,"); // delimiter
-                while (p != nullptr) {
+                while (p != nullptr && count < length) {
                     data[count++] = (uint8_t)strtol(p, 0, 16);
                     p             = strtok(nullptr, " ,");
                 }
@@ -467,7 +479,7 @@ uint8_t WebCustomEntityService::has_commands() {
 
 // send to dashboard, msgpack don't like serialized, use number
 void WebCustomEntityService::generate_value_web(JsonObject output) {
-    output["label"] = (std::string) "Custom Entities";
+    // output["label"] = (std::string) "Custom Entities";
     JsonArray data  = output["data"].to<JsonArray>();
     uint8_t   index = 0;
     for (const CustomEntityItem & entity : *customEntityItems_) {
@@ -548,8 +560,8 @@ void WebCustomEntityService::fetch() {
             uint8_t stop       = (entity.offset + len[entity.value_type]) % fetchblock;
             bool    is_fetched = start < fetchblock && stop < fetchblock; // make sure the complete value is a a fetched block
             for (const auto & emsdevice : EMSESP::emsdevices) {
-                if (entity.value_type != DeviceValueType::STRING && emsdevice->is_device_id(entity.device_id) && emsdevice->is_fetch(entity.type_id)
-                    && is_fetched) {
+                if (emsdevice->is_device_id(entity.device_id) && emsdevice->is_fetch(entity.type_id)
+                    && (is_fetched || entity.value_type == DeviceValueType::STRING)) {
                     needFetch = false;
                     break;
                 }
@@ -571,20 +583,22 @@ bool WebCustomEntityService::get_value(std::shared_ptr<const Telegram> telegram)
     // read-length of BOOL, INT8, UINT8, INT16, UINT16, UINT24, TIME, UINT32
     const uint8_t len[] = {1, 1, 1, 2, 2, 3, 3, 4};
     for (auto & entity : *customEntityItems_) {
-        if (entity.value_type == DeviceValueType::STRING && telegram->type_id == entity.type_id && telegram->src == entity.device_id
+        if (entity.value_type == DeviceValueType::STRING && entity.raw && telegram->type_id == entity.type_id && telegram->src == entity.device_id
             && (telegram->offset >= entity.offset || entity.offset < telegram->offset + telegram->message_length)) {
             auto message_length = telegram->message_length;
             auto message_data   = telegram->message_data;
+            auto offset         = telegram->offset - entity.offset;
             if (telegram->offset < entity.offset) {
                 message_data = &telegram->message_data[entity.offset - telegram->offset];
                 message_length -= entity.offset - telegram->offset;
+                offset = 0;
             }
-            auto length = std::min((int)telegram->offset - entity.offset + telegram->message_length, (int)entity.factor);
-            auto rest   = std::min((int)entity.factor - telegram->offset + entity.offset, (int)message_length);
+            auto length = std::min(offset + message_length, (int)entity.factor);
+            auto rest   = std::min((int)entity.factor - offset, (int)message_length);
             if (rest > 0) {
-                memcpy(&entity.raw[telegram->offset - entity.offset], message_data, rest);
+                memcpy(&entity.raw[offset], message_data, rest);
                 auto data = Helpers::data_to_hex(entity.raw, (uint8_t)length);
-                if (entity.data != data) {
+                if (entity.data != data && length == (int)entity.factor) {
                     entity.data = data;
                     if (Mqtt::publish_single()) {
                         publish_single(entity);

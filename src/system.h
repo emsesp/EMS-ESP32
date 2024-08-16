@@ -246,6 +246,10 @@ class System {
     uint32_t FStotal() {
         return fstotal_;
     }
+
+    void PSram(uint32_t psram) {
+        psram_ = psram / 1024;
+    }
     uint32_t PSram() {
         return psram_;
     }

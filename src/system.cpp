@@ -485,7 +485,6 @@ void System::start() {
 
     // get current memory values
     fstotal_ = LittleFS.totalBytes() / 1024; // read only once, it takes 500 ms to read
-    psram_   = ESP.getPsramSize() / 1024;
     appused_ = ESP.getSketchSize() / 1024;
     appfree_ = esp_ota_get_running_partition()->size / 1024 - appused_;
     refreshHeapMem(); // refresh free heap and max alloc heap
