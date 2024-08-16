@@ -1538,7 +1538,9 @@ EMSESP::EMSESP()
 // start all the core services
 // the services must be loaded in the correct order
 void EMSESP::start() {
+#ifndef EMSESP_STANDALONE
     system_.PSram(ESP.getPsramSize());
+#endif
 // don't need shell if running unit tests
 #ifndef EMSESP_UNITY
     // Serial console's shell

@@ -81,6 +81,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
 #endif
     }
 
+#ifndef EMSESP_STANDALONE
     const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
     root["has_loader"]                = partition != NULL && partition != esp_ota_get_running_partition();
     partition                         = esp_ota_get_next_update_partition(nullptr);
@@ -91,6 +92,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     } else {
         root["has_partition"] = false;
     }
+#endif
 
     response->setLength();
     request->send(response);
