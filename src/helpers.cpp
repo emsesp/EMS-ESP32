@@ -379,7 +379,7 @@ std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
         return "<empty>";
     }
 
-    char   str[160] = {0};
+    char   str[length * 3] = {0};
     char   buffer[4];
     char * p = &str[0];
     for (uint8_t i = 0; i < length; i++) {
@@ -456,16 +456,16 @@ float Helpers::transformNumFloat(float value, const int8_t numeric_operator, con
 
     switch (numeric_operator) {
     case DeviceValueNumOp::DV_NUMOP_DIV2:
-        val = ((value / 2) * 100 + 0.5);
+        val = (value * 100 / 2 + 0.5);
         break;
     case DeviceValueNumOp::DV_NUMOP_DIV10:
-        val = ((value / 10) * 100 + 0.5);
+        val = (value * 10 + 0.5);
         break;
     case DeviceValueNumOp::DV_NUMOP_DIV60:
-        val = ((value / 60) * 100 + 0.5);
+        val = (value * 10 / 6 + 0.5);
         break;
     case DeviceValueNumOp::DV_NUMOP_DIV100:
-        val = ((value / 100) * 100 + 0.5);
+        val = (value + 0.5);
         break;
     case DeviceValueNumOp::DV_NUMOP_MUL5:
         val = value * 100 * 5;
@@ -635,6 +635,7 @@ bool Helpers::value2enum(const char * value, uint8_t & value_ui, const char * co
             return true;
         }
     }
+    value_ui = 0;
 
     return false;
 }
@@ -810,9 +811,9 @@ uint16_t Helpers::string2minutes(const std::string & str) {
                 if (tmp > 60) {
                     return 0;
                 }
-                Serial.print("*");
-                Serial.print(tmp);
-                Serial.println("*");
+                // Serial.print("*");
+                // Serial.print(tmp);
+                // Serial.println("*");
 
                 res += tmp;
             }

@@ -41,8 +41,12 @@ void MqttSettingsService::startClient() {
     }
 #ifndef TASMOTA_SDK
     if (_state.enableTLS) {
-        isSecure    = true;
-        _mqttClient = new espMqttClientSecure(espMqttClientTypes::UseInternalTask::NO);
+        isSecure = true;
+        if (emsesp::EMSESP::system_.PSram() > 0) {
+            _mqttClient = new espMqttClientSecure(espMqttClientTypes::UseInternalTask::YES);
+        } else {
+            _mqttClient = new espMqttClientSecure(espMqttClientTypes::UseInternalTask::NO);
+        }
         if (_state.rootCA == "insecure") {
             static_cast<espMqttClientSecure *>(_mqttClient)->setInsecure();
         } else {
@@ -59,8 +63,12 @@ void MqttSettingsService::startClient() {
         return;
     }
 #endif
-    isSecure    = false;
-    _mqttClient = new espMqttClient(espMqttClientTypes::UseInternalTask::NO);
+    isSecure = false;
+    if (emsesp::EMSESP::system_.PSram() > 0) {
+        _mqttClient = new espMqttClient(espMqttClientTypes::UseInternalTask::YES);
+    } else {
+        _mqttClient = new espMqttClient(espMqttClientTypes::UseInternalTask::NO);
+    }
     static_cast<espMqttClient *>(_mqttClient)->onConnect([this](bool sessionPresent) { onMqttConnect(sessionPresent); });
     static_cast<espMqttClient *>(_mqttClient)->onDisconnect([this](espMqttClientTypes::DisconnectReason reason) { onMqttDisconnect(reason); });
     static_cast<espMqttClient *>(_mqttClient)
@@ -76,7 +84,9 @@ void MqttSettingsService::loop() {
         _disconnectedAt  = configureMqtt() ? 0 : uuid::get_uptime();
         _reconfigureMqtt = false;
     }
-    _mqttClient->loop();
+    if (emsesp::EMSESP::system_.PSram() == 0) {
+        _mqttClient->loop();
+    }
 }
 
 bool MqttSettingsService::isEnabled() {

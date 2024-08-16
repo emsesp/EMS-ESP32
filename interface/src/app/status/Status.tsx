@@ -63,6 +63,10 @@ const SystemStatus = () => {
     immediate: false
   });
 
+  const { send: factoryPartitionCommand } = useRequest(SystemApi.factoryPartition(), {
+    immediate: false
+  });
+
   const {
     data: data,
     send: loadData,
@@ -230,6 +234,21 @@ const SystemStatus = () => {
       });
   };
 
+  const factoryPartition = async () => {
+    setProcessing(true);
+    await factoryPartitionCommand()
+      .then(() => {
+        setRestarting(true);
+      })
+      .catch((error: Error) => {
+        toast.error(error.message);
+      })
+      .finally(() => {
+        setConfirmRestart(false);
+        setProcessing(false);
+      });
+  };
+
   const renderRestartDialog = () => (
     <Dialog
       sx={dialogStyle}
@@ -248,15 +267,28 @@ const SystemStatus = () => {
         >
           {LL.CANCEL()}
         </Button>
-        <Button
-          startIcon={<PowerSettingsNewIcon />}
-          variant="outlined"
-          onClick={partition}
-          disabled={processing}
-          color="warning"
-        >
-          EMS-ESP Loader
-        </Button>
+        {data.has_loader && (
+          <Button
+            startIcon={<PowerSettingsNewIcon />}
+            variant="outlined"
+            onClick={factoryPartition}
+            disabled={processing}
+            color="warning"
+          >
+            EMS-ESP Boot
+          </Button>
+        )}
+        {data.has_partition && (
+          <Button
+            startIcon={<PowerSettingsNewIcon />}
+            variant="outlined"
+            onClick={partition}
+            disabled={processing}
+            color="warning"
+          >
+            Partition
+          </Button>
+        )}
         <Button
           startIcon={<PowerSettingsNewIcon />}
           variant="outlined"

@@ -1035,9 +1035,9 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               0,
                               10000000UL);
 
-        nrgHeatF_ = EMSESP::nvs_.getDouble(FL_(nrgHeat)[0], 0);
-        nrgWwF_   = EMSESP::nvs_.getDouble(FL_(nrgWw)[0], 0);
-        nomPower_ = EMSESP::nvs_.getUChar(FL_(nomPower)[0], 0);
+        nrgHeatF_ = EMSESP::nvs_.getDouble("nrgheat", 0);
+        nrgWwF_   = EMSESP::nvs_.getDouble("nrgww", 0);
+        nomPower_ = EMSESP::nvs_.getUChar("nompower", 0);
         if (nrgHeatF_ < 0 || nrgHeatF_ >= EMS_VALUE_UINT32_NOTSET) {
             nrgHeatF_ = 0;
         }
@@ -1057,14 +1057,14 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
 
 void Boiler::store_energy() {
     // only write if something is changed
-    if (nrgHeatF_ != EMSESP::nvs_.getDouble(FL_(nrgHeat)[0])) {
-        EMSESP::nvs_.putDouble(FL_(nrgHeat)[0], nrgHeatF_);
+    if (nrgHeatF_ != EMSESP::nvs_.getDouble("nrgheat")) {
+        EMSESP::nvs_.putDouble("nrgheat", nrgHeatF_);
     }
-    if (nrgWwF_ != EMSESP::nvs_.getDouble(FL_(nrgWw)[0])) {
-        EMSESP::nvs_.putDouble(FL_(nrgWw)[0], nrgWwF_);
+    if (nrgWwF_ != EMSESP::nvs_.getDouble("nrgww")) {
+        EMSESP::nvs_.putDouble("nrgww", nrgWwF_);
     }
-    if (nomPower_ != EMSESP::nvs_.getUChar(FL_(nomPower)[0])) {
-        EMSESP::nvs_.putUChar(FL_(nomPower)[0], nomPower_);
+    if (nomPower_ != EMSESP::nvs_.getUChar("nopower")) {
+        EMSESP::nvs_.putUChar("nompower", nomPower_);
     }
     // LOG_DEBUG("energy values stored");
 }
