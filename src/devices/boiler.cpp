@@ -1075,7 +1075,7 @@ void Boiler::store_energy() {
     if (nrgWwF_ != EMSESP::nvs_.getDouble("nrgww")) {
         EMSESP::nvs_.putDouble("nrgww", nrgWwF_);
     }
-    if (nomPower_ != EMSESP::nvs_.getUChar("nopower")) {
+    if (nomPower_ != EMSESP::nvs_.getUChar("nompower")) {
         EMSESP::nvs_.putUChar("nompower", nomPower_);
     }
     // LOG_DEBUG("energy values stored");
