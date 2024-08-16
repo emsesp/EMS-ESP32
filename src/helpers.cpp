@@ -379,7 +379,9 @@ std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
         return "<empty>";
     }
 
-    char   str[length * 3] = {0};
+    char str[length * 3];
+    memset(str, 0, length * sizeof(char));
+
     char   buffer[4];
     char * p = &str[0];
     for (uint8_t i = 0; i < length; i++) {

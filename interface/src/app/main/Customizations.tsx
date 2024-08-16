@@ -672,7 +672,7 @@ const Customizations = () => {
     <>
       {devices && renderDeviceList()}
       {selectedDevice !== -1 && !rename && renderDeviceData()}
-      {restartNeeded && (
+      {restartNeeded ? (
         <MessageBox my={2} level="warning" message={LL.RESTART_TEXT(0)}>
           <Button
             startIcon={<PowerSettingsNewIcon />}
@@ -683,8 +683,7 @@ const Customizations = () => {
             {LL.RESTART()}
           </Button>
         </MessageBox>
-      )}
-      {!restartNeeded && (
+      ) : (
         <Box display="flex" flexWrap="wrap">
           <Box flexGrow={1}>
             {numChanges !== 0 && (

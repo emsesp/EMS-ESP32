@@ -333,7 +333,8 @@ const en: Translation = {
   VIEW_LOG: 'View log to diagnose issues',
   UPLOAD_DRAG: 'drag and drop a file here or click to select one',
   SERVICES: 'Services',
-  ALLVALUES: 'All Values'
+  ALLVALUES: 'All Values',
+  SPECIAL_FUNCTIONS: 'Special Functions'
 };
 
 export default en;

@@ -1,5 +1,4 @@
-// Code inspired by https://medium.com/@dprincecoder/creating-a-drag-and-drop-file-upload-component-in-react-a-step-by-step-guide-4d93b6cc21e0
-// (c) Prince Azubuike
+// Code inspired by Prince Azubuike from https://medium.com/@dprincecoder/creating-a-drag-and-drop-file-upload-component-in-react-a-step-by-step-guide-4d93b6cc21e0
 import { type ChangeEvent, useRef, useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';

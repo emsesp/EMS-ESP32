@@ -46,7 +46,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
 #endif
 #endif
 
-    root["esp_platform"] = EMSESP_PLATFORM;      // from default_settings.h: ESP32, ESP32-C3, ESP32-S2, ESP32-S3
+    root["esp_platform"] = EMSESP_PLATFORM;      // from default_settings.h: ESP32, ESP32C3, ESP32S2, ESP32S3
     root["status"]       = EMSESP::bus_status(); // 0, 1 or 2
     root["bus_uptime"]   = EMSbus::bus_uptime();
     root["num_devices"]  = EMSESP::count_devices();
@@ -81,6 +81,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
 #endif
     }
 
+#ifndef EMSESP_STANDALONE
     const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
     root["has_loader"]                = partition != NULL && partition != esp_ota_get_running_partition();
     partition                         = esp_ota_get_next_update_partition(nullptr);
@@ -91,6 +92,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     } else {
         root["has_partition"] = false;
     }
+#endif
 
     response->setLength();
     request->send(response);

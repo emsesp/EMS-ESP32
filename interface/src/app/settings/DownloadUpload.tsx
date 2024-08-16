@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { toast } from 'react-toastify';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import { Box, Button, Divider, Link, Typography } from '@mui/material';
 
 import * as SystemApi from 'api/system';
@@ -15,8 +17,10 @@ import { getDevVersion, getStableVersion } from 'api/system';
 
 import { useRequest } from 'alova/client';
 import type { APIcall } from 'app/main/types';
+import RestartMonitor from 'app/status/RestartMonitor';
 import {
   FormLoader,
+  MessageBox,
   SectionContent,
   SingleUpload,
   useLayoutTitle
@@ -25,6 +29,9 @@ import { useI18nContext } from 'i18n/i18n-react';
 
 const DownloadUpload = () => {
   const { LL } = useI18nContext();
+
+  const [restarting, setRestarting] = useState<boolean>(false);
+  const [restartNeeded, setRestartNeeded] = useState<boolean>(false);
 
   const { send: sendSettings } = useRequest(getSettings(), {
     immediate: false
@@ -41,7 +48,7 @@ const DownloadUpload = () => {
   const { send: sendEntities } = useRequest(getEntities(), {
     immediate: false
   }).onSuccess((event) => {
-    saveFile(event.data, 'entities.json');
+    saveFile(event.data, 'custom_entities.json');
   });
 
   const { send: sendSchedule } = useRequest(getSchedule(), {
@@ -65,13 +72,29 @@ const DownloadUpload = () => {
     error
   } = useRequest(SystemApi.readHardwareStatus);
 
+  const { send: restartCommand } = useRequest(SystemApi.restart(), {
+    immediate: false
+  });
+
+  const restart = async () => {
+    await restartCommand()
+      .then(() => {
+        setRestarting(true);
+      })
+      .catch((error: Error) => {
+        toast.error(error.message);
+      });
+  };
+
   // called immediately to get the latest version, on page load
   // set immediate to false to avoid calling the API on page load and GH blocking while testing!
   const { data: latestVersion } = useRequest(getStableVersion, {
     immediate: true
+    // immediate: false
   });
   const { data: latestDevVersion } = useRequest(getDevVersion, {
     immediate: true
+    // immediate: false
   });
 
   const STABLE_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/';
@@ -83,31 +106,23 @@ const DownloadUpload = () => {
     'https://github.com/emsesp/EMS-ESP32/blob/dev/CHANGELOG_LATEST.md';
 
   const getBinURL = (v: string) =>
-    'EMS-ESP-' +
-    v.replaceAll('.', '_') +
-    '-' +
-    getPlatform().replaceAll('-', '_') +
-    '.bin';
+    'EMS-ESP-' + v.replaceAll('.', '_') + '-' + getPlatform() + '.bin';
 
   const getPlatform = () => {
-    if (
-      data.flash_chip_size >= 16384 &&
-      data.esp_platform === 'ESP32' &&
-      data.psram
-    ) {
-      return data.esp_platform + '-16M';
-    }
-    return data.esp_platform;
+    return (
+      [data.esp_platform, data.flash_chip_size >= 16384 ? '16MB' : '4MB'].join('-') +
+      (data.psram ? '+' : '')
+    );
   };
 
-  const saveFile = (json: unknown, endpoint: string) => {
+  const saveFile = (json: unknown, filename: string) => {
     const anchor = document.createElement('a');
     anchor.href = URL.createObjectURL(
       new Blob([JSON.stringify(json, null, 2)], {
         type: 'text/plain'
       })
     );
-    anchor.download = 'emsesp_' + endpoint;
+    anchor.download = 'emsesp_' + filename;
     anchor.click();
     URL.revokeObjectURL(anchor.href);
     toast.info(LL.DOWNLOAD_SUCCESSFUL());
@@ -284,12 +299,27 @@ const DownloadUpload = () => {
           )}
         </Box>
 
-        <SingleUpload />
+        <SingleUpload setRestartNeeded={setRestartNeeded} />
+
+        {restartNeeded && (
+          <MessageBox mt={2} level="warning" message={LL.RESTART_TEXT(0)}>
+            <Button
+              startIcon={<PowerSettingsNewIcon />}
+              variant="contained"
+              color="error"
+              onClick={restart}
+            >
+              {LL.RESTART()}
+            </Button>
+          </MessageBox>
+        )}
       </>
     );
   };
 
-  return <SectionContent>{content()}</SectionContent>;
+  return (
+    <SectionContent>{restarting ? <RestartMonitor /> : content()}</SectionContent>
+  );
 };
 
 export default DownloadUpload;

@@ -1834,7 +1834,7 @@ void EMSdevice::mqtt_ha_entity_config_create() {
 #endif
         }
     }
-#ifdef EMSESP_DEBUG
+#if defined(EMSESP_DEBUG) || defined(EMSESP_STANDALONE)
     if (count) {
         EMSESP::logger().debug("Created %d HA-%s-configs", count, device_type_name());
     }

@@ -333,7 +333,8 @@ const sk: Translation = {
   VIEW_LOG: 'View log to diagnose issues', // TODO translate
   UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
   SERVICES: 'Services', // TODO translate
-  ALLVALUES: 'All Values' // TODO translate
+  ALLVALUES: 'All Values', // TODO translate
+  SPECIAL_FUNCTIONS: 'Special Functions' // TODO translate
 };
 
 export default sk;

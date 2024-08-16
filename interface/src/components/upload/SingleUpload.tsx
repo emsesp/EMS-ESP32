@@ -2,23 +2,17 @@ import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';
-import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import { Box, Button, LinearProgress, Typography } from '@mui/material';
 
 import * as SystemApi from 'api/system';
 
 import { useRequest } from 'alova/client';
-import RestartMonitor from 'app/status/RestartMonitor';
-import MessageBox from 'components/MessageBox';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import DragNdrop from './DragNdrop';
 
-const SingleUpload = () => {
+const SingleUpload = ({ setRestartNeeded }) => {
   const [md5, setMd5] = useState<string>();
-  const [restarting, setRestarting] = useState<boolean>(false);
-  const [restartNeeded, setRestartNeeded] = useState<boolean>(false);
-
   const [file, setFile] = useState<File>();
   const { LL } = useI18nContext();
 
@@ -38,17 +32,6 @@ const SingleUpload = () => {
       setRestartNeeded(true);
     }
   });
-
-  const { send: restartCommand } = useRequest(SystemApi.restart(), {
-    immediate: false
-  });
-
-  const restart = async () => {
-    await restartCommand().catch((error: Error) => {
-      toast.error(error.message);
-    });
-    setRestarting(true);
-  };
 
   useEffect(async () => {
     if (file) {
@@ -75,7 +58,7 @@ const SingleUpload = () => {
         <Typography variant="body2">{LL.UPLOAD_TEXT()}</Typography>
       </Box>
 
-      {isUploading || restartNeeded ? (
+      {isUploading ? (
         <>
           <Box width="100%" p={2}>
             <LinearProgress
@@ -90,17 +73,15 @@ const SingleUpload = () => {
             />
           </Box>
 
-          {!restartNeeded && (
-            <Button
-              sx={{ ml: 2 }}
-              startIcon={<CancelIcon />}
-              variant="outlined"
-              color="error"
-              onClick={cancelUpload}
-            >
-              {LL.CANCEL()}
-            </Button>
-          )}
+          <Button
+            sx={{ ml: 2 }}
+            startIcon={<CancelIcon />}
+            variant="outlined"
+            color="error"
+            onClick={cancelUpload}
+          >
+            {LL.CANCEL()}
+          </Button>
         </>
       ) : (
         <DragNdrop onFileSelected={setFile} />
@@ -111,21 +92,6 @@ const SingleUpload = () => {
           <Typography variant="body2">{'MD5: ' + md5}</Typography>
         </Box>
       )}
-
-      {restartNeeded && (
-        <MessageBox mt={2} level="warning" message={LL.RESTART_TEXT(0)}>
-          <Button
-            startIcon={<PowerSettingsNewIcon />}
-            variant="contained"
-            color="error"
-            onClick={restart}
-          >
-            {LL.RESTART()}
-          </Button>
-        </MessageBox>
-      )}
-
-      {restarting && <RestartMonitor />}
     </>
   );
 };
