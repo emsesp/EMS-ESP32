@@ -440,6 +440,12 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(nrgHeat),
                               DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &nrgCool_,
+                              DeviceValueType::UINT24,
+                              DeviceValueNumOp::DV_NUMOP_DIV100,
+                              FL_(nrgCool),
+                              DeviceValueUOM::KWH);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &meterTotal_,
                               DeviceValueType::UINT24,
                               DeviceValueNumOp::DV_NUMOP_DIV100,
@@ -462,6 +468,12 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueType::UINT24,
                               DeviceValueNumOp::DV_NUMOP_DIV100,
                               FL_(meterHeat),
+                              DeviceValueUOM::KWH);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &meterCool_,
+                              DeviceValueType::UINT24,
+                              DeviceValueNumOp::DV_NUMOP_DIV100,
+                              FL_(meterCool),
                               DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DHW1, &meterWw_, DeviceValueType::UINT24, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(meterWw), DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
@@ -1970,6 +1982,7 @@ void Boiler::process_HpEnergy(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, nrgTotal_, 0);
     has_update(telegram, nrgHeat_, 4);
     has_update(telegram, nrgWw_, 12);
+    has_update(telegram, nrgCool_, 20);
 }
 
 // boiler(0x08) -W-> Me(0x0B), ?(0x04AF), data: 00 00 48 B2 00 00 48 55 00 00 00 5D 00 00 01 78 00 00 00 00 00 00 07 61
@@ -1981,6 +1994,7 @@ void Boiler::process_HpMeters(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, meterEHeat_, 8);
     has_update(telegram, meterHeat_, 24);
     has_update(telegram, meterWw_, 32);
+    has_update(telegram, meterCool_, 40);
 }
 
 void Boiler::process_HpPressure(std::shared_ptr<const Telegram> telegram) {

@@ -554,6 +554,7 @@ MAKE_TRANSLATION(releaseWait, "releasewait", "boiler release wait time", "Wartez
 // energy
 MAKE_TRANSLATION(nrgTotal, "nrgtotal", "total energy", "Energie gesamt", "", "", "całkowita energia", "", "", "", "", "celková energia") // TODO translate
 MAKE_TRANSLATION(nrgHeat, "nrgheat", "energy heating", "Energie Heizen", "", "", "energia na ogrzewanie", "", "", "ısıtma enerjisi", "", "energetické vykurovanie") // TODO translate
+MAKE_TRANSLATION(nrgCool, "nrgcool", "energy cooling", "Energie Kühlen", "", "", "", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(nrgWw, "nrg", "energy", "Energie", "", "", "energia", "", "", "sıcak kullanım suyu enerjisi", "", "energia") // TODO translate
 MAKE_TRANSLATION(nrgHeat2, "nrgheat2", "energy heating 2", "Energie Heizen 2", "", "", "energia na ogrzewanie 2", "", "", "ısıtma enerjisi 2", "", "energetické vykurovanie") // TODO translate
 MAKE_TRANSLATION(nrgWw2, "nrg2", "energy 2", "Energie 2", "", "", "energia 2", "", "", "sıcak kullanım suyu enerjisi 2", "", "energia 2") // TODO translate
@@ -562,6 +563,7 @@ MAKE_TRANSLATION(meterTotal, "metertotal", "meter total", "Messung gesamt", "", 
 MAKE_TRANSLATION(meterComp, "metercomp", "meter compressor", "Messung Kompressor", "", "", "licznik sprężarki", "", "", "", "", "meter kompresor") // TODO translate
 MAKE_TRANSLATION(meterEHeat, "metereheat", "meter e-heater", "Messung E-Heizer", "", "", "licznik dogrzewacza", "", "", "", "", "elektrický ohrievač") // TODO translate
 MAKE_TRANSLATION(meterHeat, "meterheat", "meter heating", "Messung Heizen", "", "", "licznik ogrzewania", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(meterCool, "metercool", "meter cooling", "Messung Kühlen", "", "", "", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(meterWw, "meter", "meter", "Messung", "", "", "licznik", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(gasMeterHeat, "gasmeterheat", "gas meter heating", "Gas Messung Heizen", "", "", "licznik gazu na ogrzewanie", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(gasMeterWw, "gasmeter", "gas meter", "Gas Messung", "", "", "licznik gazu", "", "", "", "", "") // TODO translate

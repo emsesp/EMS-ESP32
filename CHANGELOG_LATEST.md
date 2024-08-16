@@ -5,7 +5,7 @@
 ## **IMPORTANT! BREAKING CHANGES with 3.6.5**
 
 - new device WATER shows dhw entities from MM100 and SM100 in dhw setting
-- renamed WWC to DHW, always create DHW nests/topics, remove ww prefix from mqtt names [#1634](https://github.com/emsesp/EMS-ESP32/issues/1634)
+- renamed WWC to DHW, always create DHW nests/topics, remove ww prefix from mqtt names [#1634](https://github.com/emsesp/EMS-ESP32/issues/1634). To preserve current value of dhw energy (nrgww), follow ([#1938]https://github.com/emsesp/EMS-ESP32/issues/1938) 
 - change temperaturesensor id to underscore
 - system/info API command has it's JSON keys and names changed to camelCase
 
