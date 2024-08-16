@@ -331,9 +331,9 @@ const de: Translation = {
   RENAME: 'Umbenennen',
   ENABLE_MODBUS: 'Modbus aktivieren',
   VIEW_LOG: 'Sehen Sie sich das Protokoll an, um Probleme zu diagnostizieren',
-  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
-  SERVICES: 'Services', // TODO translate
-  ALLVALUES: 'All Values' // TODO translate
+  UPLOAD_DRAG: 'Ziehen Sie eine Datei hierher oder klicken Sie, um eine auszuwählen', // TODO translate
+  SERVICES: 'Dienstleistungen', // TODO translate
+  ALLVALUES: 'Alle Werte' // TODO translate
 };
 
 export default de;
