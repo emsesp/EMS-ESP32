@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -18,7 +18,7 @@ import {
   Table
 } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
-import { updateState, useAutoRequest, useRequest } from 'alova/client';
+import { updateState, useRequest } from 'alova/client';
 import {
   BlockNavigation,
   ButtonRow,
@@ -48,9 +48,20 @@ const CustomEntities = () => {
     data: entities,
     send: fetchEntities,
     error
-  } = useAutoRequest(readCustomEntities, {
-    initialData: [],
-    pollingTime: 2000
+  } = useRequest(readCustomEntities, {
+    initialData: []
+  });
+
+  useEffect(() => {
+    const timer = setInterval(async () => {
+      if (dialogOpen) {
+        return;
+      }
+      await fetchEntities();
+    }, 2000);
+    return () => {
+      clearInterval(timer);
+    };
   });
 
   const { send: writeEntities } = useRequest(
