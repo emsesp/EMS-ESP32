@@ -8,7 +8,7 @@ OUTPUT_DIR = "build{}".format(os.path.sep)
 
 def bin_copy(source, target, env):
 
-    # get the build info
+    # get the application version from version.h
     bag = {}
     exprs = [(re.compile(r'^#define EMSESP_APP_VERSION\s+"(\S+)"'), 'app_version')]
     with open('./src/version.h', 'r') as f:
@@ -19,27 +19,48 @@ def bin_copy(source, target, env):
                     bag[var] = m.group(1)
 
     app_version = bag.get('app_version')
-    platform = "ESP32"
-    chip_target = env.get('PIOENV').upper()
-
-    # this breaks the CI so removed
-    # flash_size = env["PIOENV"].split('_')[1]
-
-    # print(env.Dump())
-    # my_flags = env.ParseFlags(env['BUILD_FLAGS'])
-    # defines = {k: v for (k, v) in my_flags.get("CPPDEFINES")}
-    # print(my_flags)
-    # print(my_flags.get("CPPDEFINES")
-
+    
+    # get the chip type, in uppercase
+    mcu = env.get('BOARD_MCU').upper()
     # alternatively take platform from the pio target
     # platform = str(target[0]).split(os.path.sep)[2]
-
-    print("app version: " + app_version)
-    print("platform: " + platform)
-    print("chip_target: " + chip_target)
+    
+    # work out the flash memory from the PIO env name (sloppy but works)
+    # unfortunately the board_upload.flash_size is not passed down
+    flash_mem = "4MB"
+    pio_env = env.get('PIOENV').upper()
+    parts = pio_env.split('_')
+    # if it ends with a _P skip (we use this to denote PSRAM)
+    if parts[-1].endswith("P"):
+        index = -2
+    else:
+        index = -1
+        
+    # if doesn't have an M at the end 
+    if parts[index].endswith("M"):
+        flash_mem = parts[index] + "B"
+    
+    # print(env.Dump())
+    
+    # my_flags = env.ParseFlags(env['BUILD_FLAGS'])
+    # defines = {k: v for (k, v) in my_flags.get("CPPDEFINES")}
+    
+    # find if BOARD_HAS_PSRAM is in the cppdefines
+    cppdefines = env.get("CPPDEFINES")
+    if 'BOARD_HAS_PSRAM' in cppdefines:
+        psram = True
+    else:
+        psram = False
+        
+    print("*********************************************")
+    print("EMS-ESP version: " + app_version)
+    print("Has PSRAM: "+str(psram))
+    print("mcu: "+str(mcu))
+    print("Flash Mem: " + flash_mem)
 
     # convert . to _ so Windows doesn't complain
-    variant = "EMS-ESP-" + app_version.replace(".", "_") + "-" +  chip_target.replace("CI","ESP32")
+    # Format is EMS-ESP-<version>-<mcu>-<flash> with + at the end if it has PSRAM
+    variant = "EMS-ESP-" + app_version.replace(".", "_") + "-" +  mcu + "-" + flash_mem + ("+" if psram else "")
 
     # check if output directories exist and create if necessary
     if not os.path.isdir(OUTPUT_DIR):

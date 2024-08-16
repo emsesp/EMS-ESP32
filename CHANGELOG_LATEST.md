@@ -55,3 +55,6 @@
 - thermostat/remotetemp as command [#1835](https://github.com/emsesp/EMS-ESP32/discussions/1835)
 - temperaturesensor id notation with underscore [#1794](https://github.com/emsesp/EMS-ESP32/discussions/1794)
 - Change key-names in JSON to be compliant and consistent [#1860](https://github.com/emsesp/EMS-ESP32/issues/1860)
+- Updates to webUI [#1920](https://github.com/emsesp/EMS-ESP32/issues/1920)
+- Correct firmware naming #1933 [#1933](https://github.com/emsesp/EMS-ESP32/issues/1933)
+  

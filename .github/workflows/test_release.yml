@@ -38,16 +38,10 @@ jobs:
           sed -i "s/= 'pl'/= 'en'/" ./src/i18n/i18n-util.ts
           yarn build
           yarn webUI
-      - name: Build ESP32 4M firmware
+      - name: Build all target environments from default_envs
         run: |
-          platformio run -e ci
-      - name: Build ESP32-S3 16M firmware
-        run: |
-          platformio run -e ci_s3
-      - name: Build ESP32 16M firmware
-        run: |
-          platformio run -e ci_16M
-      - name: Create a GH Release
+          platformio run
+      - name: Create GitHub Release
         id: 'automatic_releases'
         uses: 'marvinpinto/action-automatic-releases@latest'
         with:

@@ -90,9 +90,11 @@ const DownloadUpload = () => {
   // set immediate to false to avoid calling the API on page load and GH blocking while testing!
   const { data: latestVersion } = useRequest(getStableVersion, {
     immediate: true
+    // immediate: false
   });
   const { data: latestDevVersion } = useRequest(getDevVersion, {
     immediate: true
+    // immediate: false
   });
 
   const STABLE_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/';
@@ -104,21 +106,13 @@ const DownloadUpload = () => {
     'https://github.com/emsesp/EMS-ESP32/blob/dev/CHANGELOG_LATEST.md';
 
   const getBinURL = (v: string) =>
-    'EMS-ESP-' +
-    v.replaceAll('.', '_') +
-    '-' +
-    getPlatform().replaceAll('-', '_') +
-    '.bin';
+    'EMS-ESP-' + v.replaceAll('.', '_') + '-' + getPlatform() + '.bin';
 
   const getPlatform = () => {
-    if (
-      data.flash_chip_size >= 16384 &&
-      data.esp_platform === 'ESP32' &&
-      data.psram
-    ) {
-      return data.esp_platform + '-16M';
-    }
-    return data.esp_platform;
+    return (
+      [data.esp_platform, data.flash_chip_size >= 16384 ? '16MB' : '4MB'].join('-') +
+      (data.psram ? '+' : '')
+    );
   };
 
   const saveFile = (json: unknown, filename: string) => {
