@@ -469,9 +469,9 @@ void WebSchedulerService::loop() {
         }
     }
 
-    // check conditions every 10 seconds
+    // check conditions every 10 seconds, start after one minute
     uint32_t uptime_sec = uuid::get_uptime_sec() / 10;
-    if (last_uptime_sec != uptime_sec) {
+    if (last_uptime_sec != uptime_sec && uptime_sec > 5) {
         condition();
         last_uptime_sec = uptime_sec;
     }
