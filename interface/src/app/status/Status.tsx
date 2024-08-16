@@ -1,4 +1,4 @@
-import { type FC, useContext, useState } from 'react';
+import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -10,7 +10,6 @@ import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import LogoDevIcon from '@mui/icons-material/LogoDev';
 import MemoryIcon from '@mui/icons-material/Memory';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import RouterIcon from '@mui/icons-material/Router';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import TimerIcon from '@mui/icons-material/Timer';
@@ -18,7 +17,6 @@ import UpgradeIcon from '@mui/icons-material/Upgrade';
 import WifiIcon from '@mui/icons-material/Wifi';
 import {
   Avatar,
-  Box,
   Button,
   Dialog,
   DialogActions,
@@ -34,7 +32,7 @@ import {
 import * as SystemApi from 'api/system';
 
 import { dialogStyle } from 'CustomTheme';
-import { useRequest } from 'alova';
+import { useAutoRequest, useRequest } from 'alova/client';
 import { busConnectionStatus } from 'app/main/types';
 import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import ListMenuItem from 'components/layout/ListMenuItem';
@@ -44,7 +42,7 @@ import { NTPSyncStatus, NetworkConnectionStatus } from 'types';
 
 import RestartMonitor from './RestartMonitor';
 
-const SystemStatus: FC = () => {
+const SystemStatus = () => {
   const { LL } = useI18nContext();
 
   const navigate = useNavigate();
@@ -69,7 +67,10 @@ const SystemStatus: FC = () => {
     data: data,
     send: loadData,
     error
-  } = useRequest(SystemApi.readSystemStatus, { force: true });
+  } = useAutoRequest(SystemApi.readSystemStatus, {
+    initialData: [],
+    pollingTime: 5000
+  });
 
   const theme = useTheme();
 
@@ -390,17 +391,6 @@ const SystemStatus: FC = () => {
         </List>
 
         {renderRestartDialog()}
-
-        <Box mt={2} display="flex" flexWrap="wrap">
-          <Button
-            startIcon={<RefreshIcon />}
-            variant="outlined"
-            color="secondary"
-            onClick={loadData}
-          >
-            {LL.REFRESH()}
-          </Button>
-        </Box>
       </>
     );
   };

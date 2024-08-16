@@ -23,19 +23,19 @@ import EntityMaskToggle from './EntityMaskToggle';
 import { DeviceEntityMask } from './types';
 import type { DeviceEntity } from './types';
 
-interface SettingsCustomizationDialogProps {
+interface SettingsCustomizationsDialogProps {
   open: boolean;
   onClose: () => void;
   onSave: (di: DeviceEntity) => void;
   selectedItem: DeviceEntity;
 }
 
-const CustomizationDialog = ({
+const CustomizationsDialog = ({
   open,
   onClose,
   onSave,
   selectedItem
-}: SettingsCustomizationDialogProps) => {
+}: SettingsCustomizationsDialogProps) => {
   const { LL } = useI18nContext();
   const [editItem, setEditItem] = useState<DeviceEntity>(selectedItem);
   const [error, setError] = useState<boolean>(false);
@@ -175,4 +175,4 @@ const CustomizationDialog = ({
   );
 };
 
-export default CustomizationDialog;
+export default CustomizationsDialog;

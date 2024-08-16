@@ -94,8 +94,6 @@ const no: Translation = {
   APPLICATION: 'Søknad',
   CUSTOMIZATIONS: 'Tilpasninger',
   APPLICATION_RESTARTING: 'EMS-ESP restarter',
-  INTERFACE_BOARD_PROFILE: 'Interface Prosessor Profil',
-  BOARD_PROFILE_TEXT: 'Velg en pre-konfigurert prosessor profil fra listen under eller velg  Tilpasset for å konfigurere dine egne innstillinger',
   BOARD_PROFILE: 'Prosessor Profil',
   CUSTOM: 'Custom',
   GPIO_OF: '{0} GPIO',
@@ -103,7 +101,7 @@ const no: Translation = {
   TEMPERATURE: 'Temperatur',
   PHY_TYPE: 'Eth PHY Type',
   DISABLED: 'avslått',
-  TX_MODE: 'Tx Mode',
+  TX_MODE: 'EMS Tx Mode',
   HARDWARE: 'Hardware',
   EMS_BUS: '{{BUS|EMS BUS}}',
   GENERAL_OPTIONS: 'Generelle Innstillinger',
@@ -124,11 +122,11 @@ const no: Translation = {
   TRIGGER_TIME: 'Aktiveringstid',
   COLD_SHOT_DURATION: 'Tid på kaldt vann',
   FORMATTING_OPTIONS: 'Formatteringsalternativs',
-  BOOLEAN_FORMAT_DASHBOARD: 'Bool Format Dashboard',
+  BOOLEAN_FORMAT_DASHBOARD: 'Bool Format Web',
   BOOLEAN_FORMAT_API: 'Bool Format API/MQTT',
   ENUM_FORMAT: 'Enum Format API/MQTT',
   INDEX: 'Indeks',
-  ENABLE_PARASITE: 'Aktiver parasitt strømforsyning',
+  ENABLE_PARASITE: 'Aktiver 1-wire parasitt strømforsyning',
   LOGGING: 'Logging',
   LOG_HEX: 'Logg EMS telegrammer i hexadesimal',
   ENABLE_SYSLOG: 'Aktiver Syslog',
@@ -169,7 +167,7 @@ const no: Translation = {
   SYSTEM: 'System',
   LOG_OF: '{0} Logg',
   STATUS_OF: '{0} Status',
-  UPLOAD_DOWNLOAD: 'Opp/Nedlasting',
+  DOWNLOAD_UPLOAD: 'Nedlasting/Opp',
   VERSION_ON: 'You are currently on', // TODO translate
   CLOSE: 'Steng',
   USE: 'Bruk',
@@ -194,7 +192,6 @@ const no: Translation = {
   DOWNLOAD_SCHEDULE_TEXT: 'Last ned planlagte oppgaver',
   DOWNLOAD_SETTINGS_TEXT: 'Last ned applikasjonskonfigurasjon. Vær varsom med å dele fila da den inneholder passord og annen sensitiv system informasjon',
   UPLOAD_TEXT: 'Last opp en ny firmware (.bin) fil, innstillinger eller tilpassninger (.json) fil nedenfor',
-  UPLOADING: 'Opplasting',
   UPLOAD_DROP_TEXT: 'Slipp fil eller klikk her',
   ERROR: 'Ukjent feil, prøv igjen',
   TIME_SET: 'Still in tid',
@@ -325,7 +322,7 @@ const no: Translation = {
   SYSTEM_MEMORY: 'System Memory', // TODO translate
   APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
   SECURITY_1: 'Add or remove users', // TODO translate
-  UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', // TODO translate
+  DOWNLOAD_UPLOAD_1: 'Download and Upload Settings and Firmware', // TODO translate
   MODULES: 'Module', // TODO translate
   MODULES_1: 'Aktiver eller deaktiver eksterne moduler', // TODO translate
   MODULES_UPDATED: 'Modules updated', // TODO translate
@@ -333,7 +330,10 @@ const no: Translation = {
   MODULES_NONE: 'No external modules detected', // TODO translate
   RENAME: 'Rename', // TODO translate 
   ENABLE_MODBUS: 'Aktiver Modbus',
-  VIEW_LOG: 'View log to diagnose issues' // TODO translate
+  VIEW_LOG: 'View log to diagnose issues', // TODO translate
+  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
+  SERVICES: 'Services', // TODO translate
+  ALLVALUES: 'All Values' // TODO translate
 };
 
 export default no;

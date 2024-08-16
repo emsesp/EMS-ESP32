@@ -1553,8 +1553,6 @@ void EMSESP::start() {
 #if defined(EMSESP_STANDALONE)
     shell_->add_flags(CommandFlags::ADMIN); // always start in su/admin mode when running tests
 #endif
-#else
-#warning "Shell is disabled when running Unity tests."
 #endif
 
 // start the file system

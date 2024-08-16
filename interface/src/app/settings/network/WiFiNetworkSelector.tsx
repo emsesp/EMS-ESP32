@@ -1,5 +1,4 @@
 import { useContext } from 'react';
-import type { FC } from 'react';
 
 import LockIcon from '@mui/icons-material/Lock';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
@@ -22,10 +21,6 @@ import type { WiFiNetwork, WiFiNetworkList } from 'types';
 import { WiFiEncryptionType } from 'types';
 
 import { WiFiConnectionContext } from './WiFiConnectionContext';
-
-interface WiFiNetworkSelectorProps {
-  networkList: WiFiNetworkList;
-}
 
 export const isNetworkOpen = ({ encryption_type }: WiFiNetwork) =>
   encryption_type === WiFiEncryptionType.WIFI_AUTH_OPEN;
@@ -62,7 +57,7 @@ const networkQualityHighlight = ({ rssi }: WiFiNetwork, theme: Theme) => {
   return theme.palette.success.main;
 };
 
-const WiFiNetworkSelector: FC<WiFiNetworkSelectorProps> = ({ networkList }) => {
+const WiFiNetworkSelector = ({ networkList }: { networkList: WiFiNetworkList }) => {
   const { LL } = useI18nContext();
   const theme = useTheme();
 

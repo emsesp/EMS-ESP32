@@ -1,5 +1,3 @@
-import type { FC } from 'react';
-
 import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -32,12 +30,7 @@ const OPTION_ICONS: {
   favorite: [StarIcon, StarOutlineIcon]
 };
 
-interface OptionIconProps {
-  type: OptionType;
-  isSet: boolean;
-}
-
-const OptionIcon: FC<OptionIconProps> = ({ type, isSet }) => {
+const OptionIcon = ({ type, isSet }: { type: OptionType; isSet: boolean }) => {
   const Icon = OPTION_ICONS[type][isSet ? 0 : 1];
   return isSet ? (
     <Icon color="primary" sx={{ fontSize: 16, verticalAlign: 'middle' }} />

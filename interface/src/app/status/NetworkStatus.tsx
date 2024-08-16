@@ -1,16 +1,12 @@
-import type { FC } from 'react';
-
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import DnsIcon from '@mui/icons-material/Dns';
 import GiteIcon from '@mui/icons-material/Gite';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import RouterIcon from '@mui/icons-material/Router';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import SettingsInputComponentIcon from '@mui/icons-material/SettingsInputComponent';
 import WifiIcon from '@mui/icons-material/Wifi';
 import {
   Avatar,
-  Button,
   Divider,
   List,
   ListItem,
@@ -22,8 +18,8 @@ import type { Theme } from '@mui/material';
 
 import * as NetworkApi from 'api/network';
 
-import { useRequest } from 'alova';
-import { ButtonRow, FormLoader, SectionContent, useLayoutTitle } from 'components';
+import { useAutoRequest } from 'alova/client';
+import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { NetworkStatusType } from 'types';
 import { NetworkConnectionStatus } from 'types';
@@ -84,12 +80,12 @@ const IPs = (status: NetworkStatusType) => {
   return status.local_ip + ', ' + status.local_ipv6;
 };
 
-const NetworkStatus: FC = () => {
+const NetworkStatus = () => {
   const {
     data: data,
     send: loadData,
     error
-  } = useRequest(NetworkApi.readNetworkStatus);
+  } = useAutoRequest(NetworkApi.readNetworkStatus, { pollingTime: 5000 });
 
   const { LL } = useI18nContext();
   useLayoutTitle(LL.STATUS_OF(LL.NETWORK(1)));
@@ -125,112 +121,99 @@ const NetworkStatus: FC = () => {
     }
 
     return (
-      <>
-        <List>
-          <ListItem>
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: networkStatusHighlight(data, theme) }}>
-                {isWiFi(data) && <WifiIcon />}
-                {isEthernet(data) && <RouterIcon />}
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary="Status" secondary={networkStatus(data)} />
-          </ListItem>
-          <Divider variant="inset" component="li" />
-          <ListItem>
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: networkStatusHighlight(data, theme) }}>
-                <GiteIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary={LL.HOSTNAME()} secondary={data.hostname} />
-          </ListItem>
-          <Divider variant="inset" component="li" />
-          {isWiFi(data) && (
-            <>
-              <ListItem>
-                <ListItemAvatar>
-                  <Avatar sx={{ bgcolor: networkQualityHighlight(data, theme) }}>
-                    <SettingsInputAntennaIcon />
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary="SSID (RSSI)"
-                  secondary={data.ssid + ' (' + data.rssi + ' dBm)'}
-                />
-              </ListItem>
-              <Divider variant="inset" component="li" />
-            </>
-          )}
-          {isConnected(data) && (
-            <>
-              <ListItem>
-                <ListItemAvatar>
-                  <Avatar>IP</Avatar>
-                </ListItemAvatar>
-                <ListItemText primary={LL.ADDRESS_OF('IP')} secondary={IPs(data)} />
-              </ListItem>
-              <Divider variant="inset" component="li" />
-              <ListItem>
-                <ListItemAvatar>
-                  <Avatar>
-                    <DeviceHubIcon />
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary={LL.ADDRESS_OF('MAC')}
-                  secondary={data.mac_address}
-                />
-              </ListItem>
-              <Divider variant="inset" component="li" />
-              <ListItem>
-                <ListItemAvatar>
-                  <Avatar>#</Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary={LL.NETWORK_SUBNET()}
-                  secondary={data.subnet_mask}
-                />
-              </ListItem>
-              <Divider variant="inset" component="li" />
-              <ListItem>
-                <ListItemAvatar>
-                  <Avatar>
-                    <SettingsInputComponentIcon />
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary={LL.NETWORK_GATEWAY()}
-                  secondary={data.gateway_ip || 'none'}
-                />
-              </ListItem>
-              <Divider variant="inset" component="li" />
-              <ListItem>
-                <ListItemAvatar>
-                  <Avatar>
-                    <DnsIcon />
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary={LL.NETWORK_DNS()}
-                  secondary={dnsServers(data)}
-                />
-              </ListItem>
-              <Divider variant="inset" component="li" />
-            </>
-          )}
-        </List>
-        <ButtonRow>
-          <Button
-            startIcon={<RefreshIcon />}
-            variant="outlined"
-            color="secondary"
-            onClick={loadData}
-          >
-            {LL.REFRESH()}
-          </Button>
-        </ButtonRow>
-      </>
+      <List>
+        <ListItem>
+          <ListItemAvatar>
+            <Avatar sx={{ bgcolor: networkStatusHighlight(data, theme) }}>
+              {isWiFi(data) && <WifiIcon />}
+              {isEthernet(data) && <RouterIcon />}
+            </Avatar>
+          </ListItemAvatar>
+          <ListItemText primary="Status" secondary={networkStatus(data)} />
+        </ListItem>
+        <Divider variant="inset" component="li" />
+        <ListItem>
+          <ListItemAvatar>
+            <Avatar sx={{ bgcolor: networkStatusHighlight(data, theme) }}>
+              <GiteIcon />
+            </Avatar>
+          </ListItemAvatar>
+          <ListItemText primary={LL.HOSTNAME()} secondary={data.hostname} />
+        </ListItem>
+        <Divider variant="inset" component="li" />
+        {isWiFi(data) && (
+          <>
+            <ListItem>
+              <ListItemAvatar>
+                <Avatar sx={{ bgcolor: networkQualityHighlight(data, theme) }}>
+                  <SettingsInputAntennaIcon />
+                </Avatar>
+              </ListItemAvatar>
+              <ListItemText
+                primary="SSID (RSSI)"
+                secondary={data.ssid + ' (' + data.rssi + ' dBm)'}
+              />
+            </ListItem>
+            <Divider variant="inset" component="li" />
+          </>
+        )}
+        {isConnected(data) && (
+          <>
+            <ListItem>
+              <ListItemAvatar>
+                <Avatar>IP</Avatar>
+              </ListItemAvatar>
+              <ListItemText primary={LL.ADDRESS_OF('IP')} secondary={IPs(data)} />
+            </ListItem>
+            <Divider variant="inset" component="li" />
+            <ListItem>
+              <ListItemAvatar>
+                <Avatar>
+                  <DeviceHubIcon />
+                </Avatar>
+              </ListItemAvatar>
+              <ListItemText
+                primary={LL.ADDRESS_OF('MAC')}
+                secondary={data.mac_address}
+              />
+            </ListItem>
+            <Divider variant="inset" component="li" />
+            <ListItem>
+              <ListItemAvatar>
+                <Avatar>#</Avatar>
+              </ListItemAvatar>
+              <ListItemText
+                primary={LL.NETWORK_SUBNET()}
+                secondary={data.subnet_mask}
+              />
+            </ListItem>
+            <Divider variant="inset" component="li" />
+            <ListItem>
+              <ListItemAvatar>
+                <Avatar>
+                  <SettingsInputComponentIcon />
+                </Avatar>
+              </ListItemAvatar>
+              <ListItemText
+                primary={LL.NETWORK_GATEWAY()}
+                secondary={data.gateway_ip || 'none'}
+              />
+            </ListItem>
+            <Divider variant="inset" component="li" />
+            <ListItem>
+              <ListItemAvatar>
+                <Avatar>
+                  <DnsIcon />
+                </Avatar>
+              </ListItemAvatar>
+              <ListItemText
+                primary={LL.NETWORK_DNS()}
+                secondary={dnsServers(data)}
+              />
+            </ListItem>
+          </>
+        )}
+      </List>
     );
   };
 

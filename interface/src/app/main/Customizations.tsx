@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { FC } from 'react';
 import { useBlocker, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -27,7 +26,7 @@ import {
   Typography
 } from '@mui/material';
 
-import * as SystemApi from 'api/system';
+import { restart } from 'api/system';
 
 import {
   Body,
@@ -40,7 +39,7 @@ import {
 } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
 import { dialogStyle } from 'CustomTheme';
-import { useRequest } from 'alova';
+import { useRequest } from 'alova/client';
 import RestartMonitor from 'app/status/RestartMonitor';
 import {
   BlockNavigation,
@@ -51,8 +50,14 @@ import {
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
-import * as EMSESP from './api';
-import SettingsCustomizationDialog from './CustomizationDialog';
+import {
+  readDeviceEntities,
+  readDevices,
+  resetCustomizations,
+  writeCustomizationEntities,
+  writeDeviceName
+} from '../../api/app';
+import SettingsCustomizationsDialog from './CustomizationsDialog';
 import EntityMaskToggle from './EntityMaskToggle';
 import OptionIcon from './OptionIcon';
 import { DeviceEntityMask } from './types';
@@ -60,7 +65,7 @@ import type { DeviceEntity, DeviceShort } from './types';
 
 export const APIURL = window.location.origin + '/api/';
 
-const Customization: FC = () => {
+const Customizations = () => {
   const { LL } = useI18nContext();
   const [numChanges, setNumChanges] = useState<number>(0);
   const blocker = useBlocker(numChanges !== 0);
@@ -78,7 +83,7 @@ const Customization: FC = () => {
   useLayoutTitle(LL.CUSTOMIZATIONS());
 
   // fetch devices first
-  const { data: devices, send: fetchDevices } = useRequest(EMSESP.readDevices);
+  const { data: devices, send: fetchDevices } = useRequest(readDevices);
 
   const [selectedDevice, setSelectedDevice] = useState<number>(
     Number(useLocation().state) || -1
@@ -87,32 +92,33 @@ const Customization: FC = () => {
     useState<string>(''); // needed for API URL
   const [selectedDeviceName, setSelectedDeviceName] = useState<string>('');
 
-  const { send: resetCustomizations } = useRequest(EMSESP.resetCustomizations(), {
+  const { send: sendResetCustomizations } = useRequest(resetCustomizations(), {
     immediate: false
   });
 
-  const { send: writeDeviceName } = useRequest(
-    (data: { id: number; name: string }) => EMSESP.writeDeviceName(data),
+  const { send: sendDeviceName } = useRequest(
+    (data: { id: number; name: string }) => writeDeviceName(data),
     {
       immediate: false
     }
   );
 
-  const { send: writeCustomizationEntities } = useRequest(
-    (data: { id: number; entity_ids: string[] }) =>
-      EMSESP.writeCustomizationEntities(data),
+  const { send: sendCustomizationEntities } = useRequest(
+    (data: { id: number; entity_ids: string[] }) => writeCustomizationEntities(data),
     {
       immediate: false
     }
   );
 
-  const { send: readDeviceEntities, onSuccess: onSuccess } = useRequest(
-    (data: number) => EMSESP.readDeviceEntities(data),
+  const { send: sendDeviceEntities } = useRequest(
+    (data: number) => readDeviceEntities(data),
     {
       initialData: [],
       immediate: false
     }
-  );
+  ).onSuccess((event) => {
+    setOriginalSettings(event.data);
+  });
 
   const setOriginalSettings = (data: DeviceEntity[]) => {
     setDeviceEntities(
@@ -126,11 +132,7 @@ const Customization: FC = () => {
     );
   };
 
-  onSuccess((event) => {
-    setOriginalSettings(event.data);
-  });
-
-  const { send: restartCommand } = useRequest(SystemApi.restart(), {
+  const { send: sendRestart } = useRequest(restart(), {
     immediate: false
   });
 
@@ -231,7 +233,7 @@ const Customization: FC = () => {
 
   useEffect(() => {
     if (devices && selectedDevice !== -1) {
-      void readDeviceEntities(selectedDevice);
+      void sendDeviceEntities(selectedDevice);
       const id = devices.devices.findIndex((d) => d.i === selectedDevice);
       if (id === -1) {
         setSelectedDevice(-1);
@@ -245,8 +247,8 @@ const Customization: FC = () => {
     }
   }, [devices, selectedDevice]);
 
-  const restart = async () => {
-    await restartCommand().catch((error: Error) => {
+  const doRestart = async () => {
+    await sendRestart().catch((error: Error) => {
       toast.error(error.message);
     });
     setRestarting(true);
@@ -327,7 +329,7 @@ const Customization: FC = () => {
 
   const resetCustomization = async () => {
     try {
-      await resetCustomizations();
+      await sendResetCustomizations();
       toast.info(LL.CUSTOMIZATIONS_RESTART());
     } catch (error) {
       toast.error((error as Error).message);
@@ -387,7 +389,7 @@ const Customization: FC = () => {
         return;
       }
 
-      await writeCustomizationEntities({
+      await sendCustomizationEntities({
         id: selectedDevice,
         entity_ids: masked_entities
       }).catch((error: Error) => {
@@ -402,7 +404,7 @@ const Customization: FC = () => {
   };
 
   const renameDevice = async () => {
-    await writeDeviceName({ id: selectedDevice, name: selectedDeviceName })
+    await sendDeviceName({ id: selectedDevice, name: selectedDeviceName })
       .then(() => {
         toast.success(LL.UPDATED_OF(LL.NAME(1)));
       })
@@ -676,7 +678,7 @@ const Customization: FC = () => {
             startIcon={<PowerSettingsNewIcon />}
             variant="contained"
             color="error"
-            onClick={restart}
+            onClick={doRestart}
           >
             {LL.RESTART()}
           </Button>
@@ -691,7 +693,7 @@ const Customization: FC = () => {
                   startIcon={<CancelIcon />}
                   variant="outlined"
                   color="secondary"
-                  onClick={() => devices && readDeviceEntities(selectedDevice)}
+                  onClick={() => devices && sendDeviceEntities(selectedDevice)}
                 >
                   {LL.CANCEL()}
                 </Button>
@@ -727,7 +729,7 @@ const Customization: FC = () => {
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       {restarting ? <RestartMonitor /> : renderContent()}
       {selectedDeviceEntity && (
-        <SettingsCustomizationDialog
+        <SettingsCustomizationsDialog
           open={dialogOpen}
           onClose={onDialogClose}
           onSave={onDialogSave}
@@ -738,4 +740,4 @@ const Customization: FC = () => {
   );
 };
 
-export default Customization;
+export default Customizations;

@@ -1,8 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import type { HardwareStatus, LogSettings, SystemStatus } from 'types';
 
 import { alovaInstance, alovaInstanceGH } from './endpoints';
@@ -31,13 +26,13 @@ export const fetchLogES = () => alovaInstance.Get('/es/log');
 // Get versions from github
 export const getStableVersion = () =>
   alovaInstanceGH.Get('latest', {
-    transformData(response) {
+    transform(response: { data: { name: string } }) {
       return response.data.name.substring(1);
     }
   });
 export const getDevVersion = () =>
   alovaInstanceGH.Get('tags/latest', {
-    transformData(response) {
+    transform(response: { data: { name: string } }) {
       return response.data.name.split(/\s+/).splice(-1)[0].substring(1);
     }
   });

@@ -156,7 +156,7 @@ void test_18() {
 
 void test_19() {
     auto expected_response =
-        "[{\"system\":{\"version\":\"3.7.0-dev.29\",\"uptime\":\"000+00:00:00.000\",\"uptimeSec\":0,\"resetReason\":\"Unknown / "
+        "[{\"system\":{\"version\":\"dev\",\"uptime\":\"000+00:00:00.000\",\"uptimeSec\":0,\"resetReason\":\"Unknown / "
         "Unknown\"},\"network\":{\"network\":\"WiFi\",\"hostname\":\"ems-esp\",\"RSSI\":-23,\"TxPowerSetting\":0,\"staticIP\":false,\"lowBandwidth\":false,"
         "\"disableSleep\":false,\"enableMDNS\":true,\"enableCORS\":false},\"ntp\":{},\"mqtt\":{\"MQTTStatus\":\"disconnected\",\"MQTTPublishes\":0,"
         "\"MQTTQueued\":0,\"MQTTPublishFails\":0,\"MQTTConnects\":1,\"enabled\":true,\"clientID\":\"ems-esp\",\"keepAlive\":60,\"cleanSession\":false,"
@@ -179,7 +179,7 @@ void test_19() {
 
 void test_20() {
     auto expected_response =
-        "[{\"system\":{\"version\":\"3.7.0-dev.29\",\"uptime\":\"000+00:00:00.000\",\"uptimeSec\":0,\"resetReason\":\"Unknown / "
+        "[{\"system\":{\"version\":\"dev\",\"uptime\":\"000+00:00:00.000\",\"uptimeSec\":0,\"resetReason\":\"Unknown / "
         "Unknown\"},\"network\":{\"network\":\"WiFi\",\"hostname\":\"ems-esp\",\"RSSI\":-23,\"TxPowerSetting\":0,\"staticIP\":false,\"lowBandwidth\":false,"
         "\"disableSleep\":false,\"enableMDNS\":true,\"enableCORS\":false},\"ntp\":{},\"mqtt\":{\"MQTTStatus\":\"disconnected\",\"MQTTPublishes\":0,"
         "\"MQTTQueued\":0,\"MQTTPublishFails\":0,\"MQTTConnects\":1,\"enabled\":true,\"clientID\":\"ems-esp\",\"keepAlive\":60,\"cleanSession\":false,"

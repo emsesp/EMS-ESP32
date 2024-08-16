@@ -1,5 +1,3 @@
-import type { FC } from 'react';
-
 import { Box, CircularProgress, Typography } from '@mui/material';
 import type { Theme } from '@mui/material';
 
@@ -9,7 +7,7 @@ interface LoadingSpinnerProps {
   height?: number | string;
 }
 
-const LoadingSpinner: FC<LoadingSpinnerProps> = ({ height = '100%' }) => {
+const LoadingSpinner = ({ height = '100%' }: LoadingSpinnerProps) => {
   const { LL } = useI18nContext();
 
   return (

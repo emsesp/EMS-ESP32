@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import type { FC } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -19,7 +18,6 @@ import {
   useLayoutTitle
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
-import { range } from 'lodash-es';
 import type { APSettingsType } from 'types';
 import { APProvisionMode } from 'types';
 import { numberValue, updateValueDirty, useRest } from 'utils';
@@ -29,7 +27,7 @@ export const isAPEnabled = ({ provision_mode }: APSettingsType) =>
   provision_mode === APProvisionMode.AP_MODE_ALWAYS ||
   provision_mode === APProvisionMode.AP_MODE_DISCONNECTED;
 
-const APSettings: FC = () => {
+const APSettings = () => {
   const {
     loadData,
     saving,
@@ -73,6 +71,11 @@ const APSettings: FC = () => {
         setFieldErrors(error as ValidateFieldsError);
       }
     };
+
+    // no lodash - https://asleepace.com/blog/typescript-range-without-a-loop/
+    function range(a: number, b: number): number[] {
+      return a < b ? [a, ...range(a + 1, b)] : [b];
+    }
 
     return (
       <>

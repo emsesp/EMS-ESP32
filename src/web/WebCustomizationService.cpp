@@ -210,7 +210,7 @@ void WebCustomizationService::device_entities(AsyncWebServerRequest * request) {
 #endif
 #if defined(EMSESP_DEBUG)
                 size_t length = response->setLength();
-                EMSESP::logger().debug("Customization buffer used: %d", length);
+                EMSESP::logger().debug("Customizations buffer used: %d", length);
 #else
                 response->setLength();
 #endif

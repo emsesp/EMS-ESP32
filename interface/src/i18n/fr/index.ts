@@ -94,8 +94,6 @@ const fr: Translation = {
   APPLICATION: "l'application",
   CUSTOMIZATIONS: 'Personnalisation',
   APPLICATION_RESTARTING: 'EMS-ESP redémarre',
-  INTERFACE_BOARD_PROFILE: "Profile de carte d'interface",
-  BOARD_PROFILE_TEXT: "Sélectionnez un profil de carte d'interface préconfiguré dans la liste ci-dessous ou choisissez Personnalisé pour configurer vos propres paramètres matériels",
   BOARD_PROFILE: 'Profil de carte',
   CUSTOM: 'Personnalisé',
   GPIO_OF: 'GPIO {0}',
@@ -103,7 +101,7 @@ const fr: Translation = {
   TEMPERATURE: 'Température',
   PHY_TYPE: 'Eth PHY Type',
   DISABLED: 'désactivé',
-  TX_MODE: 'Tx Mode',
+  TX_MODE: 'EMS Tx Mode',
   HARDWARE: 'Hardware',
   EMS_BUS: '{{BUS|EMS BUS}}',
   GENERAL_OPTIONS: 'Options générales',
@@ -128,7 +126,7 @@ const fr: Translation = {
   BOOLEAN_FORMAT_API: 'Format booléen API/MQTT',
   ENUM_FORMAT: 'Format enum API/MQTT',
   INDEX: 'Index',
-  ENABLE_PARASITE: 'Activer la puissance parasite',
+  ENABLE_PARASITE: 'Activer la puissance 1-wire parasite',
   LOGGING: 'Journal',
   LOG_HEX: 'Enregistrer les télégrammes EMS en hexadécimal',
   ENABLE_SYSLOG: 'Activer les logs système',
@@ -169,7 +167,7 @@ const fr: Translation = {
   SYSTEM: 'Système',
   LOG_OF: '{0} Log',
   STATUS_OF: 'Statut {0}',
-  UPLOAD_DOWNLOAD: 'Upload/Download',
+  DOWNLOAD_UPLOAD: 'Download/Upload', // TODO translate
   VERSION_ON: 'You are currently on', // TODO translate
   CLOSE: 'Fermer',
   USE: 'Utiliser',
@@ -194,7 +192,6 @@ const fr: Translation = {
   DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
   DOWNLOAD_SETTINGS_TEXT: "Téléchargez les paramètres de l'application. Soyez prudent lorsque vous partagez vos paramètres car ce fichier contient des mots de passe et d'autres informations système sensibles.",
   UPLOAD_TEXT: "Téléchargez un nouveau fichier de firmware (.bin), un fichier de paramètres ou de personnalisations (.json) ci-dessous, pour une validation optionnelle téléchargez d'abord un fichier (.md5)",
-  UPLOADING: 'Téléchargement',
   UPLOAD_DROP_TEXT: 'Déposer le fichier ou cliquer ici',
   ERROR: 'Erreur inattendue, veuillez réessayer',
   TIME_SET: 'Time set',
@@ -325,7 +322,7 @@ const fr: Translation = {
   SYSTEM_MEMORY: 'System Memory', // TODO translate
   APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
   SECURITY_1: 'Add or remove users', // TODO translate
-  UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', // TODO translate
+  DOWNLOAD_UPLOAD_1: 'Download and Upload Settings and Firmware', // TODO translate
   MODULES: 'Module', // TODO translate
   MODULES_1: 'Activer ou désactiver les modules externes', // TODO translate
   MODULES_UPDATED: 'Modules updated', // TODO translate
@@ -333,7 +330,10 @@ const fr: Translation = {
   MODULES_NONE: 'No external modules detected', // TODO translate
   RENAME: 'Rename', // TODO translate
   ENABLE_MODBUS: 'Activer Modbus',
-  VIEW_LOG: 'View log to diagnose issues' // TODO translate
+  VIEW_LOG: 'View log to diagnose issues', // TODO translate
+  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
+  SERVICES: 'Services', // TODO translate
+  ALLVALUES: 'All Values' // TODO translate
 };
 
 export default fr;

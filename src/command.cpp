@@ -418,7 +418,7 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
         LOG_WARNING(error);
     } else {
         if (single_command) {
-            // log as DEBUG (TRACE) regarless if compiled with EMSESP_DEBUG
+            // log as DEBUG (TRACE) regardless if compiled with EMSESP_DEBUG
             logger_.debug(("%sCalled command %s"), ro.c_str(), info_s);
         } else {
             if (id > 0) {

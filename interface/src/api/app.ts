@@ -17,7 +17,7 @@ import type {
   Settings,
   WriteAnalogSensor,
   WriteTemperatureSensor
-} from './types';
+} from '../app/main/types';
 
 // DashboardDevices
 export const readCoreData = () => alovaInstance.Get<CoreData>(`/rest/coreData`);
@@ -65,7 +65,7 @@ export const readDeviceEntities = (id: number) =>
   alovaInstance.Get<DeviceEntity[]>(`/rest/deviceEntities`, {
     params: { id },
     responseType: 'arraybuffer',
-    transformData(data) {
+    transform(data) {
       return (data as DeviceEntity[]).map((de: DeviceEntity) => ({
         ...de,
         o_m: de.m,
@@ -88,8 +88,7 @@ export const writeDeviceName = (data: { id: number; name: string }) =>
 // SettingsScheduler
 export const readSchedule = () =>
   alovaInstance.Get<ScheduleItem[]>('/rest/schedule', {
-    name: 'schedule',
-    transformData(data) {
+    transform(data) {
       return (data as Schedule).schedule.map((si: ScheduleItem) => ({
         ...si,
         o_id: si.id,
@@ -109,8 +108,7 @@ export const writeSchedule = (data: Schedule) =>
 // Modules
 export const readModules = () =>
   alovaInstance.Get<ModuleItem[]>('/rest/modules', {
-    name: 'modules',
-    transformData(data) {
+    transform(data) {
       return (data as Modules).modules.map((mi: ModuleItem) => ({
         ...mi,
         o_enabled: mi.enabled,
@@ -127,8 +125,7 @@ export const writeModules = (data: {
 // SettingsEntities
 export const readCustomEntities = () =>
   alovaInstance.Get<EntityItem[]>('/rest/customEntities', {
-    name: 'entities',
-    transformData(data) {
+    transform(data) {
       return (data as Entities).entities.map((ei: EntityItem) => ({
         ...ei,
         o_id: ei.id,

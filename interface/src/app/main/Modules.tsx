@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import type { FC } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -18,7 +17,7 @@ import {
   Table
 } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
-import { updateState, useRequest } from 'alova';
+import { updateState, useRequest } from 'alova/client';
 import {
   BlockNavigation,
   ButtonRow,
@@ -28,11 +27,11 @@ import {
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
-import * as EMSESP from './api';
+import { readModules, writeModules } from '../../api/app';
 import ModulesDialog from './ModulesDialog';
 import type { ModuleItem, Modules } from './types';
 
-const Modules: FC = () => {
+const Modules = () => {
   const { LL } = useI18nContext();
   const [numChanges, setNumChanges] = useState<number>(0);
   const blocker = useBlocker(numChanges !== 0);
@@ -44,13 +43,12 @@ const Modules: FC = () => {
     data: modules,
     send: fetchModules,
     error
-  } = useRequest(EMSESP.readModules, {
+  } = useRequest(readModules, {
     initialData: []
   });
 
-  const { send: writeModules } = useRequest(
-    (data: { key: string; enabled: boolean; license: string }) =>
-      EMSESP.writeModules(data),
+  const { send: updateModules } = useRequest(
+    (data: { key: string; enabled: boolean; license: string }) => writeModules(data),
     {
       immediate: false
     }
@@ -123,7 +121,7 @@ const Modules: FC = () => {
   }
 
   const updateModuleItem = (updatedItem: ModuleItem) => {
-    updateState('modules', (data: ModuleItem[]) => {
+    void updateState(readModules(), (data: ModuleItem[]) => {
       const new_data = data.map((mi) =>
         mi.id === updatedItem.id ? { ...mi, ...updatedItem } : mi
       );
@@ -133,7 +131,7 @@ const Modules: FC = () => {
   };
 
   const saveModules = async () => {
-    await writeModules({
+    await updateModules({
       modules: modules.map((condensed_mi) => ({
         key: condensed_mi.key,
         enabled: condensed_mi.enabled,

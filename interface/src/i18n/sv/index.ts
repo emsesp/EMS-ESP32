@@ -94,8 +94,6 @@ const sv: Translation = {
   APPLICATION: 'Apliká',
   CUSTOMIZATIONS: 'Anpassningr',
   APPLICATION_RESTARTING: 'EMS-ESP startar om',
-  INTERFACE_BOARD_PROFILE: 'Interface Hårdvaruprofil',
-  BOARD_PROFILE_TEXT: 'Välj en förkonfigurerad hårdvaruprofil från listan nedan eller välj Anpassad för att konfigurera dina egna hårdvaruinställningar',
   BOARD_PROFILE: 'Hårdvarutyp',
   CUSTOM: 'Anpassa',
   GPIO_OF: '{0} GPIO',
@@ -103,7 +101,7 @@ const sv: Translation = {
   TEMPERATURE: 'Temperatur',
   PHY_TYPE: 'Eth PHY-typ',
   DISABLED: 'inaktiverad',
-  TX_MODE: 'Tx-läge',
+  TX_MODE: 'EMS Tx-läge',
   HARDWARE: 'Hårdvara',
   EMS_BUS: '{{BUSS|EMS-BUSS}}',
   GENERAL_OPTIONS: 'Allmänna Inställningar',
@@ -128,7 +126,7 @@ const sv: Translation = {
   BOOLEAN_FORMAT_API: 'Bool-format API/MQTT',
   ENUM_FORMAT: 'Enum-format API/MQTT',
   INDEX: 'Index',
-  ENABLE_PARASITE: 'Aktivera parasitström',
+  ENABLE_PARASITE: 'Aktivera 1-wire parasitström',
   LOGGING: 'Loggning',
   LOG_HEX: 'Logga EMS-telegram i hexadecimal',
   ENABLE_SYSLOG: 'Aktivera Syslog',
@@ -169,7 +167,7 @@ const sv: Translation = {
   SYSTEM: 'System',
   LOG_OF: '{0} Logg',
   STATUS_OF: '{0} Status',
-  UPLOAD_DOWNLOAD: 'Upp/Nedladdning',
+  DOWNLOAD_UPLOAD: 'Nedladdning/Upp',
   VERSION_ON: 'You are currently on', // TODO translate
   CLOSE: 'Stäng',
   USE: 'Använd',
@@ -194,7 +192,6 @@ const sv: Translation = {
   DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
   DOWNLOAD_SETTINGS_TEXT: 'Ladda ner applikationsinställningar. Var försiktig om du delar dina iställlningar då de innehåller lösenord och annan känslig systeminformation',
   UPLOAD_TEXT: 'Ladda upp ett nytt firmware (.bin), inställningar eller anpassningar (.json) nedan',
-  UPLOADING: 'Laddar upp',
   UPLOAD_DROP_TEXT: 'Släpp fil eller klicka här',
   ERROR: 'Okänt Fel, var god försök igen',
   TIME_SET: 'Ställ in tid',
@@ -325,7 +322,7 @@ const sv: Translation = {
   SYSTEM_MEMORY: 'System Memory', // TODO translate
   APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
   SECURITY_1: 'Add or remove users', // TODO translate
-  UPLOAD_DOWNLOAD_1: 'Upload/Download Settings and Firmware', // TODO translate
+  DOWNLOAD_UPLOAD_1: 'Download and Upload Settings and Firmware', // TODO translate
   MODULES: 'Module', // TODO translate
   MODULES_1: 'Aktivera eller avaktivera externa moduler', // TODO translate
   MODULES_UPDATED: 'Modules updated', // TODO translate
@@ -333,7 +330,10 @@ const sv: Translation = {
   MODULES_NONE: 'No external modules detected', // TODO translate
   RENAME: 'Rename', // TODO translate
   ENABLE_MODBUS: 'Aktivera Modbus',
-  VIEW_LOG: 'View log to diagnose issues' // TODO translate
+  VIEW_LOG: 'View log to diagnose issues', // TODO translate
+  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
+  SERVICES: 'Services', // TODO translate
+  ALLVALUES: 'All Values' // TODO translate
 };
 
 export default sv;

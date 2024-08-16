@@ -94,15 +94,13 @@ const nl: Translation = {
   APPLICATION: 'Applicatie',
   CUSTOMIZATIONS: 'Aanpassingen van entiteiten',
   APPLICATION_RESTARTING: 'EMS-ESP herstarten',
-  INTERFACE_BOARD_PROFILE: 'Interface Apparaatprofiel',
-  BOARD_PROFILE_TEXT: 'Selecteer een vooraf ingesteld apparaat profiel uit de lijst of kies Eigen om zelf uw hardware te configureren',
   BOARD_PROFILE: 'Apparaatprofiel',
   CUSTOM: 'Custom',
   GPIO_OF: '{0} GPIO',
   BUTTON: 'Toets',
   TEMPERATURE: 'Temperatuur',
   PHY_TYPE: 'Eth PHY Type',
-  TX_MODE: 'Tx Mode',
+  TX_MODE: 'EMS Tx Mode',
   HARDWARE: 'Hardware',
   EMS_BUS: '{{BUS|EMS BUS}}',
   DISABLED: 'Uitgeschakeld',
@@ -124,11 +122,11 @@ const nl: Translation = {
   TRIGGER_TIME: 'Trigger tijd',
   COLD_SHOT_DURATION: 'Tijd Shot koud water',
   FORMATTING_OPTIONS: 'Formatteringsopties',
-  BOOLEAN_FORMAT_DASHBOARD: 'Boolean formaat dashboard',
+  BOOLEAN_FORMAT_DASHBOARD: 'Boolean formaat web',
   BOOLEAN_FORMAT_API: 'Boolean formaat API/MQTT',
   ENUM_FORMAT: 'Enum formaat API/MQTT',
   INDEX: 'Index',
-  ENABLE_PARASITE: 'Activeer parasitaire modus',
+  ENABLE_PARASITE: 'Activeer 1-wire parasitaire modus',
   LOGGING: 'Logging',
   LOG_HEX: 'Log EMS telegrammen in hexadecimaal',
   ENABLE_SYSLOG: 'Activeer Syslog',
@@ -169,7 +167,7 @@ const nl: Translation = {
   SYSTEM: 'Systeem',
   LOG_OF: '{0} Log',
   STATUS_OF: '{0} Status',
-  UPLOAD_DOWNLOAD: 'Upload/Download',
+  DOWNLOAD_UPLOAD: 'Download/Upload',
   VERSION_ON: 'U bevindt zich momenteel op versie',
   CLOSE: 'Sluiten',
   USE: 'Gebruik',
@@ -194,7 +192,6 @@ const nl: Translation = {
   DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events',
   DOWNLOAD_SETTINGS_TEXT: 'Download de applicatie settings. Wees voorzichting met het delen van dit bestand want het bevat o.a. de wachtwoorden in plain text',
   UPLOAD_TEXT: 'Upload een nieuwe firmware (.bin) file, instellingen of custom instellingen (.json) bestand hieronder',
-  UPLOADING: 'Uploading',
   UPLOAD_DROP_TEXT: 'Sleep bestand hierheen of klik hier',
   ERROR: 'Onverwachte fout, probeer opnieuw',
   TIME_SET: 'Tijd ingesteld',
@@ -325,7 +322,7 @@ const nl: Translation = {
   SYSTEM_MEMORY: 'System Geheugen',
   APPLICATION_SETTINGS_1: 'Applicatie-instellingen wijzigen',
   SECURITY_1: 'Gebruikers toevoegen of verwijderen',
-  UPLOAD_DOWNLOAD_1: 'Upload-/downloadinstellingen en firmware',
+  DOWNLOAD_UPLOAD_1: 'Download en upload instellingen en firmware',
   MODULES: 'Module',
   MODULES_1: 'Externe modules activeren of deactiveren', // TODO translate
   MODULES_UPDATED: 'Modules geüpdatet', 
@@ -333,7 +330,10 @@ const nl: Translation = {
   MODULES_NONE: 'Geen externe modules gedetecteerd',
   RENAME: 'Hernoemen',
   ENABLE_MODBUS: 'Activeer Modbus',
-  VIEW_LOG: 'View log to diagnose issues' // TODO translate
+  VIEW_LOG: 'View log to diagnose issues', // TODO translate
+  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
+  SERVICES: 'Services', // TODO translate
+  ALLVALUES: 'All Values' // TODO translate
 };
 
 export default nl;

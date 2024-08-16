@@ -1,5 +1,4 @@
 import { useContext, useState } from 'react';
-import type { FC } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -22,7 +21,7 @@ import type { SecuritySettingsType } from 'types';
 import { updateValueDirty, useRest } from 'utils';
 import { SECURITY_SETTINGS_VALIDATOR, validate } from 'validators';
 
-const SecuritySettings: FC = () => {
+const SecuritySettings = () => {
   const { LL } = useI18nContext();
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();

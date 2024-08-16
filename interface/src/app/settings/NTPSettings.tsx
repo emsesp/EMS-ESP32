@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import type { FC } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
 import WarningIcon from '@mui/icons-material/Warning';
 import { Button, Checkbox, MenuItem } from '@mui/material';
 
 import * as NTPApi from 'api/ntp';
+import { readNTPSettings } from 'api/ntp';
 
-import { updateState } from 'alova';
+import { updateState } from 'alova/client';
 import type { ValidateFieldsError } from 'async-validator';
 import {
   BlockFormControlLabel,
@@ -26,7 +26,7 @@ import { NTP_SETTINGS_VALIDATOR } from 'validators/ntp';
 
 import { TIME_ZONES, selectedTimeZone, timeZoneSelectItems } from './TZ';
 
-const NTPSettings: FC = () => {
+const NTPSettings = () => {
   const {
     loadData,
     saving,
@@ -72,8 +72,7 @@ const NTPSettings: FC = () => {
 
     const changeTimeZone = (event: React.ChangeEvent<HTMLInputElement>) => {
       updateFormValue(event);
-
-      updateState('ntpSettings', (settings: NTPSettingsType) => ({
+      void updateState(readNTPSettings(), (settings: NTPSettingsType) => ({
         ...settings,
         tz_label: event.target.value,
         tz_format: TIME_ZONES[event.target.value]

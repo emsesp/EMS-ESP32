@@ -1,11 +1,9 @@
-import { useContext, useEffect, useState } from 'react';
-import type { FC } from 'react';
+import { useContext, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
 import { Box, Button, Typography } from '@mui/material';
 
@@ -21,12 +19,16 @@ import {
 } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
 import type { State } from '@table-library/react-table-library/types/common';
-import { useRequest } from 'alova';
-import { ButtonRow, SectionContent, useLayoutTitle } from 'components';
+import { useAutoRequest, useRequest } from 'alova/client';
+import { SectionContent, useLayoutTitle } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 
-import * as EMSESP from './api';
+import {
+  readSensorData,
+  writeAnalogSensor,
+  writeTemperatureSensor
+} from '../../api/app';
 import DashboardSensorsAnalogDialog from './SensorsAnalogDialog';
 import DashboardSensorsTemperatureDialog from './SensorsTemperatureDialog';
 import {
@@ -46,7 +48,7 @@ import {
   temperatureSensorItemValidation
 } from './validators';
 
-const Sensors: FC = () => {
+const Sensors = () => {
   const { LL } = useI18nContext();
   const { me } = useContext(AuthenticatedContext);
 
@@ -57,27 +59,25 @@ const Sensors: FC = () => {
   const [analogDialogOpen, setAnalogDialogOpen] = useState<boolean>(false);
   const [creating, setCreating] = useState<boolean>(false);
 
-  const { data: sensorData, send: fetchSensorData } = useRequest(
-    () => EMSESP.readSensorData(),
-    {
-      initialData: {
-        ts: [],
-        as: [],
-        analog_enabled: false,
-        platform: 'ESP32'
-      }
-    }
-  );
+  const { data: sensorData } = useAutoRequest(() => readSensorData(), {
+    initialData: {
+      ts: [],
+      as: [],
+      analog_enabled: false,
+      platform: 'ESP32'
+    },
+    pollingTime: 2000
+  });
 
-  const { send: writeTemperatureSensor } = useRequest(
-    (data: WriteTemperatureSensor) => EMSESP.writeTemperatureSensor(data),
+  const { send: sendTemperatureSensor } = useRequest(
+    (data: WriteTemperatureSensor) => writeTemperatureSensor(data),
     {
       immediate: false
     }
   );
 
-  const { send: writeAnalogSensor } = useRequest(
-    (data: WriteAnalogSensor) => EMSESP.writeAnalogSensor(data),
+  const { send: sendAnalogSensor } = useRequest(
+    (data: WriteAnalogSensor) => writeAnalogSensor(data),
     {
       immediate: false
     }
@@ -195,13 +195,6 @@ const Sensors: FC = () => {
     }
   );
 
-  useEffect(() => {
-    const timer = setInterval(() => fetchSensorData(), 30000);
-    return () => {
-      clearInterval(timer);
-    };
-  });
-
   useLayoutTitle(LL.SENSORS());
 
   const formatDurationMin = (duration_min: number) => {
@@ -266,17 +259,16 @@ const Sensors: FC = () => {
   };
 
   const onTemperatureDialogSave = async (ts: TemperatureSensor) => {
-    await writeTemperatureSensor({ id: ts.id, name: ts.n, offset: ts.o })
+    await sendTemperatureSensor({ id: ts.id, name: ts.n, offset: ts.o })
       .then(() => {
         toast.success(LL.UPDATED_OF(LL.SENSOR(1)));
       })
       .catch(() => {
         toast.error(LL.UPDATE_OF(LL.SENSOR(2)) + ' ' + LL.FAILED(1));
       })
-      .finally(async () => {
+      .finally(() => {
         setTemperatureDialogOpen(false);
         setSelectedTemperatureSensor(undefined);
-        await fetchSensorData();
       });
   };
 
@@ -311,7 +303,7 @@ const Sensors: FC = () => {
   };
 
   const onAnalogDialogSave = async (as: AnalogSensor) => {
-    await writeAnalogSensor({
+    await sendAnalogSensor({
       id: as.id,
       gpio: as.g,
       name: as.n,
@@ -327,10 +319,9 @@ const Sensors: FC = () => {
       .catch(() => {
         toast.error(LL.UPDATE_OF(LL.ANALOG_SENSOR(5)) + ' ' + LL.FAILED(1));
       })
-      .finally(async () => {
+      .finally(() => {
         setAnalogDialogOpen(false);
         setSelectedAnalogSensor(undefined);
-        await fetchSensorData();
       });
   };
 
@@ -474,53 +465,37 @@ const Sensors: FC = () => {
           )}
         />
       )}
-      {sensorData?.analog_enabled === true && (
-        <>
-          <Typography sx={{ pt: 4, pb: 1 }} variant="h6" color="secondary">
-            {LL.ANALOG_SENSORS()}
-          </Typography>
-          <RenderAnalogSensors />
-          {selectedAnalogSensor && (
-            <DashboardSensorsAnalogDialog
-              open={analogDialogOpen}
-              onClose={onAnalogDialogClose}
-              onSave={onAnalogDialogSave}
-              creating={creating}
-              selectedItem={selectedAnalogSensor}
-              validator={analogSensorItemValidation(
-                sensorData.as,
-                selectedAnalogSensor,
-                creating,
-                sensorData.platform
-              )}
-            />
+      <Typography sx={{ pt: 4, pb: 1 }} variant="h6" color="secondary">
+        {LL.ANALOG_SENSORS()}
+      </Typography>
+      <RenderAnalogSensors />
+      {selectedAnalogSensor && (
+        <DashboardSensorsAnalogDialog
+          open={analogDialogOpen}
+          onClose={onAnalogDialogClose}
+          onSave={onAnalogDialogSave}
+          creating={creating}
+          selectedItem={selectedAnalogSensor}
+          validator={analogSensorItemValidation(
+            sensorData.as,
+            selectedAnalogSensor,
+            creating,
+            sensorData.platform
           )}
-        </>
+        />
       )}
-      <ButtonRow>
-        <Box mt={1} display="flex" flexWrap="wrap">
-          <Box flexGrow={1}>
-            <Button
-              startIcon={<RefreshIcon />}
-              variant="outlined"
-              color="secondary"
-              onClick={fetchSensorData}
-            >
-              {LL.REFRESH()}
-            </Button>
-          </Box>
-          {sensorData?.analog_enabled === true && me.admin && (
-            <Button
-              variant="outlined"
-              color="primary"
-              startIcon={<AddCircleOutlineOutlinedIcon />}
-              onClick={addAnalogSensor}
-            >
-              {LL.ADD(0) + ' ' + LL.ANALOG_SENSOR(1)}
-            </Button>
-          )}
+      {sensorData?.analog_enabled === true && me.admin && (
+        <Box mt={1} display="flex" flexWrap="wrap" justifyContent="flex-end">
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<AddCircleOutlineOutlinedIcon />}
+            onClick={addAnalogSensor}
+          >
+            {LL.ADD(0)}
+          </Button>
         </Box>
-      </ButtonRow>
+      )}
     </SectionContent>
   );
 };

@@ -1397,8 +1397,13 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     JsonObject node;
 
     // System
-    node              = output["system"].to<JsonObject>();
-    node["version"]   = EMSESP_APP_VERSION;
+    node = output["system"].to<JsonObject>();
+// prevent false negataive in Unity tests everytime the version changes
+#if defined(EMSESP_UNITY)
+    node["version"] = "dev";
+#else
+    node["version"] = EMSESP_APP_VERSION;
+#endif
     node["uptime"]    = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     node["uptimeSec"] = uuid::get_uptime_sec();
 #ifndef EMSESP_STANDALONE

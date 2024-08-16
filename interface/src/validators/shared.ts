@@ -12,7 +12,7 @@ export const validate = <T extends object>(
       options ? options : {},
       (errors, fieldErrors) => {
         if (errors) {
-          reject(fieldErrors);
+          reject(fieldErrors as Error);
         } else {
           resolve(source as T);
         }

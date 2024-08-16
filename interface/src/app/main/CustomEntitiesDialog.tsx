@@ -291,7 +291,11 @@ const CustomEntitiesDialog = ({
                       fullWidth
                       margin="normal"
                       type="number"
-                      inputProps={{ min: '1', max: String(256 - editItem.offset), step: '1' }}
+                      inputProps={{
+                        min: '1',
+                        max: String(256 - editItem.offset),
+                        step: '1'
+                      }}
                     />
                   </Grid>
                 )}

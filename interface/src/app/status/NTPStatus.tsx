@@ -1,11 +1,9 @@
 import { useState } from 'react';
-import type { FC } from 'react';
 import { toast } from 'react-toastify';
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DnsIcon from '@mui/icons-material/Dns';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import SwapVerticalCircleIcon from '@mui/icons-material/SwapVerticalCircle';
 import UpdateIcon from '@mui/icons-material/Update';
 import {
@@ -30,15 +28,19 @@ import type { Theme } from '@mui/material';
 import * as NTPApi from 'api/ntp';
 
 import { dialogStyle } from 'CustomTheme';
-import { useRequest } from 'alova';
+import { useAutoRequest, useRequest } from 'alova/client';
 import { ButtonRow, FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { NTPStatusType, Time } from 'types';
 import { NTPSyncStatus } from 'types';
 import { formatDateTime, formatLocalDateTime } from 'utils';
 
-const NTPStatus: FC = () => {
-  const { data: data, send: loadData, error } = useRequest(NTPApi.readNTPStatus);
+const NTPStatus = () => {
+  const {
+    data: data,
+    send: loadData,
+    error
+  } = useAutoRequest(NTPApi.readNTPStatus, { pollingTime: 5000 });
 
   const [localTime, setLocalTime] = useState<string>('');
   const [settingTime, setSettingTime] = useState<boolean>(false);
@@ -215,18 +217,6 @@ const NTPStatus: FC = () => {
           <Divider variant="inset" component="li" />
         </List>
         <Box display="flex" flexWrap="wrap">
-          <Box flexGrow={1}>
-            <ButtonRow>
-              <Button
-                startIcon={<RefreshIcon />}
-                variant="outlined"
-                color="secondary"
-                onClick={loadData}
-              >
-                {LL.REFRESH()}
-              </Button>
-            </ButtonRow>
-          </Box>
           {data && !isNtpActive(data) && (
             <Box flexWrap="nowrap" whiteSpace="nowrap">
               <ButtonRow>

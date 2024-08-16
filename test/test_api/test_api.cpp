@@ -27,15 +27,42 @@
 
 using namespace emsesp;
 
+// forward declarations
+void         run_tests();
+const char * call_url(const char * url);
+
 AsyncWebServer * webServer;
 ESP8266React *   esp8266React;
 WebAPIService *  webAPIService;
 EMSESP           application;
 FS               dummyFS;
 
-// forward declarations
-void         run_tests();
-const char * call_url(const char * url);
+std::shared_ptr<emsesp::EMSESPConsole> shell;
+char                                   output_buffer[4096];
+
+class TestStream : public Stream {
+  public:
+    int available() override {
+        return 1;
+    }
+    int read() override {
+        return '\n';
+    };
+    int peek() override {
+        return '\n';
+    };
+    size_t write(uint8_t data __attribute__((unused))) override {
+        return 1;
+    }
+    size_t write(const uint8_t * buffer __attribute__((unused)), size_t size) override {
+        strcat(output_buffer, (const char *)buffer); // store output in our temp buffer, strings only
+        return size;
+    }
+    void flush() override {
+        output_buffer[0] = '\0'; // empty the temp buffer
+    }
+};
+static TestStream stream;
 
 // load the tests
 // this is generated from this file when compiled with -DEMSESP_UNITY_CREATE
@@ -248,23 +275,49 @@ void run_manual_tests() {
     RUN_TEST(manual_test4);
 }
 
-// Main entry point
-int main() {
-    webServer     = new AsyncWebServer(80);
-    esp8266React  = new ESP8266React(webServer, &dummyFS);
-    webAPIService = new WebAPIService(webServer, esp8266React->getSecurityManager());
+const char * run_console_command(const char * command) {
+    output_buffer[0] = '\0'; // empty the temp buffer
+    shell->invoke_command(command);
+    // remove everything before \r\n
+    char * p = strstr(output_buffer, "\r\n");
+    if (p) {
+        p += 2; // skip the \r\n
+    }
+    // remove the \r\n at the end
+    p[strlen(p) - 2] = '\0';
 
-    application.start(); // calls begin()
+    // Serial.println("Output:");
+    // Serial.print(p);
+    // Serial.println();
 
-    EMSESP::webCustomEntityService.test();  // custom entities
-    EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
-    EMSESP::temperaturesensor_.test();      // add temperature sensors
-    EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
+    return p;
+}
 
-    add_devices(); // add devices
+void console_test1() {
+    auto expected_response = "Log level: DEBUG";
+    TEST_ASSERT_EQUAL_STRING(expected_response, run_console_command("log"));
+}
 
-#if defined(EMSESP_UNITY_CREATE)
+void console_test2() {
+    auto expected_response = "";
+    TEST_ASSERT_EQUAL_STRING(expected_response, run_console_command("call thermostat mode auto"));
+}
 
+void console_test3() {
+    // test bad command
+    auto expected_response = "Bad syntax. Check arguments.";
+    TEST_ASSERT_EQUAL_STRING(expected_response, run_console_command("call thermostat mode bad"));
+}
+
+// simulate console commands
+void run_console_tests() {
+    RUN_TEST(console_test1);
+    RUN_TEST(console_test2);
+    RUN_TEST(console_test3);
+}
+
+// auto-generate the tests
+void create_tests() {
     // These tests should all pass....
 
     capture("/api/boiler");
@@ -326,7 +379,6 @@ int main() {
     capture("/api/system/settings2");
     capture("/api/system/settings2/locale2");
 
-
     // scheduler
     capture("/api/scheduler/test_scheduler2");
     capture("/api/scheduler/test_scheduler/val");
@@ -349,13 +401,41 @@ int main() {
     // **************************************************************************************************
     // Finish
     capture(); // always end with this, this will create the run_test() function
+}
+
+// Main entry point
+int main() {
+    webServer     = new AsyncWebServer(80);
+    esp8266React  = new ESP8266React(webServer, &dummyFS);
+    webAPIService = new WebAPIService(webServer, esp8266React->getSecurityManager());
+
+    // Serial console for commands
+    Serial.begin(115200);
+    shell = std::make_shared<EMSESPConsole>(application, stream, true);
+    shell->log_level(uuid::log::Level::DEBUG);
+    shell->add_flags(CommandFlags::ADMIN);
+
+    application.start(); // calls begin()
+
+    EMSESP::webCustomEntityService.test();  // custom entities
+    EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
+    EMSESP::temperaturesensor_.test();      // add temperature sensors
+    EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
+
+    add_devices(); // add devices
+
+#if defined(EMSESP_UNITY_CREATE)
+    create_tests();
 #endif
 
-    // always run the tests
+    //
+    // Run the tests
+    //
     UNITY_BEGIN();
 
-    run_tests();        // execute the generated tests
-    run_manual_tests(); // execute some other manual tests from this file
+    run_tests();         // execute the generated tests
+    run_manual_tests();  // execute some other manual tests from this file
+    run_console_tests(); // execute some console tests
 
     return UNITY_END();
 }

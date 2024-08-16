@@ -134,7 +134,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     const char * api_data = output["api_data"];
     if (api_data) {
         request->send(200, "text/plain; charset=utf-8", api_data);
-#if defined(EMSESP_TEST)
+#if defined(EMSESP_UNITY)
         // store the result so we can test with Unity later
         storeResponse(output);
 #endif
@@ -161,7 +161,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     request->send(response);
     api_count_++;
 
-#if defined(EMSESP_TEST)
+#if defined(EMSESP_UNITY)
     // store the result so we can test with Unity later
     storeResponse(output);
 #endif
@@ -229,7 +229,7 @@ void WebAPIService::getEntities(AsyncWebServerRequest * request) {
     request->send(response);
 }
 
-#if defined(EMSESP_TEST)
+#if defined(EMSESP_UNITY)
 // store the result so we can test with Unity later
 static JsonDocument storeResponseDoc_;
 

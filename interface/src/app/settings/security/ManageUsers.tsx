@@ -1,5 +1,4 @@
 import { useContext, useState } from 'react';
-import type { FC } from 'react';
 import { useBlocker } from 'react-router-dom';
 
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -40,7 +39,7 @@ import { createUserValidator } from 'validators';
 import GenerateToken from './GenerateToken';
 import User from './User';
 
-const ManageUsers: FC = () => {
+const ManageUsers = () => {
   const { loadData, saveData, saving, data, updateDataValue, errorMessage } =
     useRest<SecuritySettingsType>({
       read: SecurityApi.readSecuritySettings,
@@ -221,8 +220,8 @@ const ManageUsers: FC = () => {
         )}
 
         <Box display="flex" flexWrap="wrap">
-          <Box flexGrow={1} sx={{ '& button': { mt: 2 } }}>
-            {changed !== 0 && (
+          {changed !== 0 && (
+            <Box flexGrow={1} sx={{ '& button': { mt: 2 } }}>
               <ButtonRow>
                 <Button
                   startIcon={<CancelIcon />}
@@ -245,9 +244,8 @@ const ManageUsers: FC = () => {
                   {LL.APPLY_CHANGES(changed)}
                 </Button>
               </ButtonRow>
-            )}
-          </Box>
-
+            </Box>
+          )}
           <Box flexWrap="nowrap" whiteSpace="nowrap">
             <ButtonRow>
               <Button
