@@ -113,7 +113,7 @@ const Help = () => {
           color="primary"
           onClick={() => callAPI('system', 'allvalues')}
         >
-          All Values
+            {LL.ALLVALUES(0)}
         </Button>
 
         <Box border={1} p={1} mt={4}>
