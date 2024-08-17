@@ -63,9 +63,12 @@ const SystemStatus = () => {
     immediate: false
   });
 
-  const { send: factoryPartitionCommand } = useRequest(SystemApi.factoryPartition(), {
-    immediate: false
-  });
+  const { send: factoryPartitionCommand } = useRequest(
+    SystemApi.factoryPartition(),
+    {
+      immediate: false
+    }
+  );
 
   const {
     data: data,
