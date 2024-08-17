@@ -89,12 +89,12 @@ const DownloadUpload = () => {
   // called immediately to get the latest version, on page load
   // set immediate to false to avoid calling the API on page load and GH blocking while testing!
   const { data: latestVersion } = useRequest(getStableVersion, {
-    // immediate: true
-    immediate: false
+    immediate: true
+    // immediate: false
   });
   const { data: latestDevVersion } = useRequest(getDevVersion, {
-    // immediate: true
-    immediate: false
+    immediate: true
+    // immediate: false
   });
 
   const STABLE_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/';
