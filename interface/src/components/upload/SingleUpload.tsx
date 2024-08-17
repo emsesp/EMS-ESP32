@@ -2,7 +2,13 @@ import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';
-import { Box, Button, LinearProgress, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  LinearProgress,
+  type LinearProgressProps,
+  Typography
+} from '@mui/material';
 
 import * as SystemApi from 'api/system';
 
@@ -10,6 +16,21 @@ import { useRequest } from 'alova/client';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import DragNdrop from './DragNdrop';
+
+function LinearProgressWithLabel(props: LinearProgressProps & { value: number }) {
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      <Box sx={{ width: '100%', mr: 1 }}>
+        <LinearProgress variant="determinate" {...props} />
+      </Box>
+      <Box sx={{ minWidth: 35 }}>
+        <Typography variant="body2" color="text.secondary">{`${Math.round(
+          props.value
+        )}%`}</Typography>
+      </Box>
+    </Box>
+  );
+}
 
 const SingleUpload = ({ setRestartNeeded }) => {
   const [md5, setMd5] = useState<string>();
@@ -50,19 +71,10 @@ const SingleUpload = ({ setRestartNeeded }) => {
 
   return (
     <>
-      <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
-        {LL.UPLOAD()}
-      </Typography>
-
-      <Box mb={2} color="warning.main">
-        <Typography variant="body2">{LL.UPLOAD_TEXT()}</Typography>
-      </Box>
-
       {isUploading ? (
         <>
           <Box width="100%" p={2}>
-            <LinearProgress
-              variant="determinate"
+            <LinearProgressWithLabel
               value={
                 progress.total === 0 || progress.loaded === 0
                   ? 0

@@ -177,14 +177,6 @@ const Devices = () => {
           height: 42px;
         }
       `,
-      BaseCell: `
-        &:nth-of-type(2) {
-          text-align: left;
-        },
-        &:nth-of-type(4) {
-          text-align: center;
-        }
-      `,
       HeaderRow: `
         .th {
           padding: 8px;

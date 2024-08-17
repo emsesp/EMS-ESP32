@@ -299,9 +299,15 @@ const DownloadUpload = () => {
           )}
         </Box>
 
-        <SingleUpload setRestartNeeded={setRestartNeeded} />
+        <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
+          {LL.UPLOAD()}
+        </Typography>
 
-        {restartNeeded && (
+        <Box mb={2} color="warning.main">
+          <Typography variant="body2">{LL.UPLOAD_TEXT()}</Typography>
+        </Box>
+
+        {restartNeeded ? (
           <MessageBox mt={2} level="warning" message={LL.RESTART_TEXT(0)}>
             <Button
               startIcon={<PowerSettingsNewIcon />}
@@ -312,6 +318,8 @@ const DownloadUpload = () => {
               {LL.RESTART()}
             </Button>
           </MessageBox>
+        ) : (
+          <SingleUpload setRestartNeeded={setRestartNeeded} />
         )}
       </>
     );

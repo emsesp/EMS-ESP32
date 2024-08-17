@@ -156,7 +156,7 @@ const char * const * DeviceValue::DeviceValueTAG_s[] = {
 
 };
 
-// tags used in MQTT topic names. Macthes sequence from DeviceValueTAG_s
+// tags used in MQTT topic names. Matches sequence from DeviceValueTAG_s
 const char * const DeviceValue::DeviceValueTAG_mqtt[] = {
 
     FL_(tag_device_data)[0], // ""
