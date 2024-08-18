@@ -48,6 +48,8 @@
 #include <esp_mac.h>
 #endif
 
+#include <HTTPClient.h>
+
 namespace emsesp {
 
 // Languages supported. Note: the order is important and must match locale_translations.h
@@ -504,11 +506,12 @@ void System::start() {
 
 // button single click
 void System::button_OnClick(PButton & b) {
-    LOG_NOTICE("Button pressed - single click - show settings folders");
+    LOG_NOTICE("Button pressed - single click");
 
 #if defined(EMSESP_TEST)
 #ifndef EMSESP_STANDALONE
-    Test::listDir(LittleFS, FS_CONFIG_DIRECTORY, 3);
+    // show filesystem
+    Test::listDir(LittleFS, "/", 3);
 #endif
 #endif
 }
@@ -1150,7 +1153,7 @@ bool System::check_restore() {
                 LOG_ERROR("Unrecognized file uploaded");
             }
         } else {
-            LOG_ERROR("Unrecognized file uploaded, not json");
+            LOG_ERROR("Unrecognized file uploaded, not json. Will be removed.");
         }
 
         // close (just in case) and remove the temp file
@@ -1809,6 +1812,7 @@ bool System::ntp_connected() {
     return ntp_connected_;
 }
 
+// see if its a BBQKees Gateway by checking the nvs values
 String System::getBBQKeesGatewayDetails() {
 #ifndef EMSESP_STANDALONE
     if (!EMSESP::nvs_.isKey("mfg")) {
@@ -1827,6 +1831,90 @@ String System::getBBQKeesGatewayDetails() {
 #else
     return "";
 #endif
+}
+
+// Stream from an URL and send straight to OTA uploader
+bool System::uploadFirmwareURL(const char * url) {
+#ifndef EMSESP_STANDALONE
+    // configure temporary server and url
+    HTTPClient http;
+    http.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS); // important for GitHub
+    http.useHTTP10(true);
+    http.begin(String(url));
+
+    // start connection
+    int httpCode = http.GET();
+    if (httpCode != HTTP_CODE_OK) {
+        LOG_ERROR("Firmware upload failed - HTTP code %u", httpCode);
+        return false;
+    }
+
+    // check we have enough space
+    int firmware_size = http.getSize();
+    LOG_INFO("Firmware uploading (file: %s, size: %d bytes)", url, firmware_size);
+    if (!Update.begin(firmware_size)) {
+        LOG_ERROR("Firmware upload failed - no space");
+        return false;
+    }
+
+    EMSESP::system_.upload_status(true); // tell EMS-ESP we're uploading
+
+    // get tcp stream and send it to Updater
+    WiFiClient * stream = http.getStreamPtr();
+    if (Update.writeStream(*stream) != firmware_size) {
+        LOG_ERROR("Firmware upload failed - size differences");
+        return false;
+    }
+
+    if (!Update.end(true)) {
+        LOG_ERROR("Firmware upload error");
+        return false;
+    }
+
+    http.end();
+
+    LOG_INFO("Firmware uploaded successfully. Restarting...");
+
+    restart_requested(true); // not sure this is needed?
+
+#endif
+
+    return true; // OK
+
+    /*
+    TODO backup code to save firmware to LittleFS first, in case of slow networks
+
+    // create buffer for reading in 128 byte chunks
+    const size_t buffer_size = 1024;
+    uint8_t buff[buffer_size] = {0};
+
+    File file = LittleFS.open("/new_firmware", "w"); // TODO find new name
+    if (!file) {
+        Serial.println("Failed to open file for writing");
+    return false;
+    }
+
+    // read all data from server
+    while (http.connected() && (firmware_size > 0 || firmware_size == -1)) {
+        // get available data size
+        size_t size = stream->available();
+
+        if (size) {
+            // read up to 128 byte
+            int c = stream->readBytes(buff, ((size > sizeof(buff)) ? sizeof(buff) : size));
+
+            file.write(buff, c);
+            if (firmware_size > 0) {
+                firmware_size -= c;
+            }
+        }
+        yield();
+        // delay(1); // so not to hurt WTD or timeout
+    }
+
+    file.close();
+
+    */
 }
 
 } // namespace emsesp

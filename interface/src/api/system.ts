@@ -45,3 +45,6 @@ export const uploadFile = (file: File) => {
     timeout: 60000 // override timeout for uploading firmware - 1 minute
   });
 };
+
+export const uploadURL = (data: { url: string }) =>
+  alovaInstance.Post('/rest/uploadURL', data);

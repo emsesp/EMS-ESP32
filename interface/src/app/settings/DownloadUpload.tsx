@@ -3,7 +3,18 @@ import { toast } from 'react-toastify';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
-import { Box, Button, Divider, Link, Typography } from '@mui/material';
+import WarningIcon from '@mui/icons-material/Warning';
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Link,
+  Typography
+} from '@mui/material';
 
 import * as SystemApi from 'api/system';
 import {
@@ -15,6 +26,7 @@ import {
 } from 'api/app';
 import { getDevVersion, getStableVersion } from 'api/system';
 
+import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova/client';
 import type { APIcall } from 'app/main/types';
 import RestartMonitor from 'app/status/RestartMonitor';
@@ -32,6 +44,7 @@ const DownloadUpload = () => {
 
   const [restarting, setRestarting] = useState<boolean>(false);
   const [restartNeeded, setRestartNeeded] = useState<boolean>(false);
+  const [showWaiting, setShowWaiting] = useState<boolean>(false);
 
   const { send: sendSettings } = useRequest(getSettings(), {
     immediate: false
@@ -72,6 +85,13 @@ const DownloadUpload = () => {
     error
   } = useRequest(SystemApi.readHardwareStatus);
 
+  const { send: sendUploadURL } = useRequest(
+    (data: { url: string }) => SystemApi.uploadURL(data),
+    {
+      immediate: false
+    }
+  );
+
   const { send: restartCommand } = useRequest(SystemApi.restart(), {
     immediate: false
   });
@@ -87,14 +107,19 @@ const DownloadUpload = () => {
   };
 
   // called immediately to get the latest version, on page load
-  // set immediate to false to avoid calling the API on page load and GH blocking while testing!
   const { data: latestVersion } = useRequest(getStableVersion, {
-    immediate: true
-    // immediate: false
+    // immediate: true
+    // uncomment for testing
+    // https://github.com/emsesp/EMS-ESP32/releases/download/v3.6.5/EMS-ESP-3_6_5-ESP32-16MB+.bin
+    immediate: false,
+    initialData: '3.6.5'
   });
   const { data: latestDevVersion } = useRequest(getDevVersion, {
-    immediate: true
-    // immediate: false
+    // immediate: true
+    // uncomment for testing
+    // https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_7_0-dev_31-ESP32-16MB+.bin
+    immediate: false,
+    initialData: '3.7.0-dev.31'
   });
 
   const STABLE_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/';
@@ -113,6 +138,13 @@ const DownloadUpload = () => {
       [data.esp_platform, data.flash_chip_size >= 16384 ? '16MB' : '4MB'].join('-') +
       (data.psram ? '+' : '')
     );
+  };
+
+  const installFirmwareURL = async (url: string) => {
+    setShowWaiting(true);
+    await sendUploadURL({ url: url }).catch((error: Error) => {
+      toast.error(error.message);
+    });
   };
 
   const saveFile = (json: unknown, filename: string) => {
@@ -275,6 +307,20 @@ const DownloadUpload = () => {
                 {LL.DOWNLOAD(1)}
               </Link>
               )
+              <Button
+                sx={{ ml: 2 }}
+                size="small"
+                startIcon={<WarningIcon color="warning" />}
+                variant="outlined"
+                color="primary"
+                onClick={() =>
+                  installFirmwareURL(
+                    STABLE_URL + 'v' + latestVersion + '/' + getBinURL(latestVersion)
+                  )
+                }
+              >
+                Install
+              </Button>
             </Box>
           )}
           {latestDevVersion && (
@@ -295,9 +341,42 @@ const DownloadUpload = () => {
                 {LL.DOWNLOAD(1)}
               </Link>
               )
+              <Button
+                sx={{ ml: 2 }}
+                size="small"
+                startIcon={<WarningIcon color="warning" />}
+                variant="outlined"
+                color="primary"
+                onClick={() =>
+                  installFirmwareURL(DEV_URL + getBinURL(latestDevVersion))
+                }
+              >
+                Install
+              </Button>
             </Box>
           )}
         </Box>
+
+        <Dialog sx={dialogStyle} open={showWaiting}>
+          {/* TODO translate all this text*/}
+          <DialogTitle>Uploading</DialogTitle>
+          <DialogContent dividers>
+            <Typography sx={{ ml: 2, flexGrow: 1 }} color="warning.main">
+              Please wait while the firmware is being uploaded and installed. This
+              can take a few minutes. EMS-ESP will automatically restart when
+              completed.
+            </Typography>
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              flexDirection="column"
+              padding={2}
+            >
+              <CircularProgress sx={{ margin: 4 }} size={36} />
+            </Box>
+          </DialogContent>
+        </Dialog>
 
         <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
           {LL.UPLOAD()}

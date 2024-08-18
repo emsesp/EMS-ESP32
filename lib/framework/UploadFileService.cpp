@@ -16,6 +16,7 @@ UploadFileService::UploadFileService(AsyncWebServer * server, SecurityManager * 
     : _securityManager(securityManager)
     , _is_firmware(false)
     , _md5() {
+    // end-points
     server->on(
         UPLOAD_FILE_PATH,
         HTTP_POST,
@@ -23,6 +24,10 @@ UploadFileService::UploadFileService(AsyncWebServer * server, SecurityManager * 
         [this](AsyncWebServerRequest * request, const String & filename, size_t index, uint8_t * data, size_t len, bool final) {
             handleUpload(request, filename, index, data, len, final);
         });
+
+    server->on(UPLOAD_URL_PATH,
+               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { uploadURL(request, json); },
+                                             AuthenticationPredicates::IS_AUTHENTICATED));
 }
 
 void UploadFileService::handleUpload(AsyncWebServerRequest * request, const String & filename, size_t index, uint8_t * data, size_t len, bool final) {
@@ -113,7 +118,7 @@ void UploadFileService::handleUpload(AsyncWebServerRequest * request, const Stri
 }
 
 void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
-    // did we complete uploading a json file?
+    // did we just complete uploading a json file?
     if (request->_tempFile) {
         request->_tempFile.close(); // close the file handle as the upload is now done
         emsesp::EMSESP::system_.store_nvs_values();
@@ -166,4 +171,42 @@ void UploadFileService::handleError(AsyncWebServerRequest * request, int code) {
 void UploadFileService::handleEarlyDisconnect() {
     _is_firmware = false;
     Update.abort();
+}
+
+// upload firmware from a URL, like GitHub Release assets, Cloudflare R2 or Amazon S3
+void UploadFileService::uploadURL(AsyncWebServerRequest * request, JsonVariant json) {
+    if (json.is<JsonObject>()) {
+        String url = json["url"].as<String>();
+
+        // TODO fix this from WDT crashing
+        // calling from "test upload" in a console, it works
+        // but via the web it crashes with the error message:
+        //  E (253289) task_wdt: Task watchdog got triggered. The following tasks did not reset the watchdog in time:
+        //  E (253289) task_wdt:  - async_tcp (CPU 0/1)
+        //  E (253289) task_wdt: Tasks currently running:
+        //  E (253289) task_wdt: CPU 0: ipc0
+        //  E (253289) task_wdt: CPU 1: loopTask
+        //  E (253289) task_wdt: Aborting.
+        //
+        // I think we need to stop all async services before uploading the firmware. Like MQTT?
+
+        // force close the connection
+        request->client()->close(true);
+
+        // start the upload
+        if (!emsesp::EMSESP::system_.uploadFirmwareURL(url.c_str())) {
+            emsesp::EMSESP::system_.upload_status(false); // tell ems-esp we're not uploading anymore
+        }
+
+        /*
+        if (!emsesp::EMSESP::system_.uploadFirmwareURL(url.c_str())) {
+            emsesp::EMSESP::system_.upload_status(false);
+            handleError(request, 500); // internal error, failed
+        } else {
+            request->onDisconnect(RestartService::restartNow);
+            AsyncWebServerResponse * response = request->beginResponse(200);
+            request->send(response);
+        }
+        */
+    }
 }

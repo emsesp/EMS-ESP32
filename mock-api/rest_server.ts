@@ -4666,10 +4666,15 @@ router
   .get(EMSESP_GET_SETTINGS_ENDPOINT, () => emsesp_info)
   .get(EMSESP_GET_CUSTOMIZATIONS_ENDPOINT, () => emsesp_deviceentities_1)
   .get(EMSESP_GET_ENTITIES_ENDPOINT, () => emsesp_customentities)
-  .get(EMSESP_GET_SCHEDULE_ENDPOINT, () => emsesp_schedule);
+  .get(EMSESP_GET_SCHEDULE_ENDPOINT, () => emsesp_schedule)
 
-// API which are usually POST for security
-router
+  // upload URL
+  .post('/rest/uploadURL', () => {
+    console.log('upload File from URL');
+    return status(200);
+  })
+
+  // API which are usually POST for security
   .post(EMSESP_SYSTEM_INFO_ENDPOINT, () => emsesp_info)
   .get(EMSESP_SYSTEM_INFO_ENDPOINT, () => emsesp_info)
   .post(API_ENDPOINT_ROOT, async (request: any) => {
