@@ -48,6 +48,8 @@
 #include <esp_mac.h>
 #endif
 
+#include <HTTPClient.h>
+
 namespace emsesp {
 
 // Languages supported. Note: the order is important and must match locale_translations.h
@@ -504,11 +506,12 @@ void System::start() {
 
 // button single click
 void System::button_OnClick(PButton & b) {
-    LOG_NOTICE("Button pressed - single click - show settings folders");
+    LOG_NOTICE("Button pressed - single click");
 
 #if defined(EMSESP_TEST)
 #ifndef EMSESP_STANDALONE
-    Test::listDir(LittleFS, FS_CONFIG_DIRECTORY, 3);
+    // show filesystem
+    Test::listDir(LittleFS, "/", 3);
 #endif
 #endif
 }
@@ -1150,7 +1153,7 @@ bool System::check_restore() {
                 LOG_ERROR("Unrecognized file uploaded");
             }
         } else {
-            LOG_ERROR("Unrecognized file uploaded, not json");
+            LOG_ERROR("Unrecognized file uploaded, not json. Will be removed.");
         }
 
         // close (just in case) and remove the temp file
@@ -1809,6 +1812,7 @@ bool System::ntp_connected() {
     return ntp_connected_;
 }
 
+// see if its a BBQKees Gateway by checking the nvs values
 String System::getBBQKeesGatewayDetails() {
 #ifndef EMSESP_STANDALONE
     if (!EMSESP::nvs_.isKey("mfg")) {
@@ -1827,6 +1831,78 @@ String System::getBBQKeesGatewayDetails() {
 #else
     return "";
 #endif
+}
+
+// Stream from an URL and send straight to OTA uploader service.
+//
+// This function needs to be called twice, once with a url to persist it, and second with no arguments to start the upload
+// This is to avoid timeouts in callback functions, like calling from a web hook.
+bool System::uploadFirmwareURL(const char * url) {
+#ifndef EMSESP_STANDALONE
+
+    static String saved_url;
+
+    // if the URL is not empty, save it for later
+    if (url && strlen(url) > 0) {
+        saved_url = url;
+        EMSESP::system_.upload_status(true); // tell EMS-ESP we're ready to start the uploading process
+        return true;
+    }
+
+    // make sure we have a valid URL
+    if (saved_url.isEmpty()) {
+        LOG_ERROR("Firmware upload failed - no URL");
+        return false;
+    }
+
+    // Configure temporary client
+    HTTPClient http;
+    http.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS); // important for GitHub 302's
+    http.useHTTP10(true);
+    http.begin(saved_url);
+
+    // start a connection
+    int httpCode = http.GET();
+    if (httpCode != HTTP_CODE_OK) {
+        LOG_ERROR("Firmware upload failed - HTTP code %u", httpCode);
+        return false;
+    }
+
+    // check we have enough space for the upload in the ota partition
+    int firmware_size = http.getSize();
+    LOG_INFO("Firmware uploading (file: %s, size: %d bytes). Please wait...", saved_url.c_str(), firmware_size);
+    if (!Update.begin(firmware_size)) {
+        LOG_ERROR("Firmware upload failed - no space");
+        return false;
+    }
+
+    // flush buffers so latest log messages are shown
+    Shell::loop_all();
+
+    // get tcp stream and send it to Updater
+    WiFiClient * stream = http.getStreamPtr();
+    if (Update.writeStream(*stream) != firmware_size) {
+        LOG_ERROR("Firmware upload failed - size differences");
+        return false;
+    }
+
+    if (!Update.end(true)) {
+        LOG_ERROR("Firmware upload failed - general error");
+        return false;
+    }
+
+    http.end();
+
+    EMSESP::system_.upload_status(false);
+    saved_url.clear(); // prevent from downloading again
+
+    LOG_INFO("Firmware uploaded successfully. Restarting...");
+
+    restart_requested(true);
+
+#endif
+
+    return true; // OK
 }
 
 } // namespace emsesp

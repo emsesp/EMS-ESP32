@@ -24,7 +24,6 @@ export interface HardwareStatus {
   psram: boolean;
   psram_size?: number;
   free_psram?: number;
-
   free_caps: number;
   model: string;
 }

@@ -100,6 +100,8 @@ class System {
 
     String getBBQKeesGatewayDetails();
 
+    static bool uploadFirmwareURL(const char * url = nullptr);
+
     void led_init(bool refresh);
     void network_init(bool refresh);
     void button_init(bool refresh);
