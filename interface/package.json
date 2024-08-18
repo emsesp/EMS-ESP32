@@ -21,7 +21,7 @@
     "lint": "eslint . --fix"
   },
   "dependencies": {
-    "@alova/adapter-xhr": "2.0.4",
+    "@alova/adapter-xhr": "2.0.5",
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "^5.16.7",
