@@ -5,14 +5,14 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
-"@alova/adapter-xhr@npm:2.0.4":
-  version: 2.0.4
-  resolution: "@alova/adapter-xhr@npm:2.0.4"
+"@alova/adapter-xhr@npm:2.0.5":
+  version: 2.0.5
+  resolution: "@alova/adapter-xhr@npm:2.0.5"
   dependencies:
     "@alova/shared": "npm:^1.0.4"
   peerDependencies:
-    alova: ^3.0.5
-  checksum: 10c0/c68f51b83c75844cf2cddc47d6e08fa7a6f0af83cc6213b60d0d8ac32988f8e7b44f321b1f926fa282a2cda02757ce3cbfe94e86f140fd025ab22f0dfee9bed9
+    alova: ^3.0.9
+  checksum: 10c0/9c48689e7dd081843726c4d8a93abbb7aca8b4654c606e67b81ab23de42542d5c17f2fbff7b65d4b75c7d484b42a74e76ba77e61446021620a256051eb82496c
   languageName: node
   linkType: hard
 
@@ -1664,7 +1664,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "EMS-ESP@workspace:."
   dependencies:
-    "@alova/adapter-xhr": "npm:2.0.4"
+    "@alova/adapter-xhr": "npm:2.0.5"
     "@babel/core": "npm:^7.25.2"
     "@emotion/react": "npm:^11.13.0"
     "@emotion/styled": "npm:^11.13.0"

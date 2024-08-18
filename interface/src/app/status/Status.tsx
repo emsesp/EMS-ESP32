@@ -306,7 +306,7 @@ const SystemStatus = () => {
   );
 
   const content = () => {
-    if (!data) {
+    if (!data || !LL) {
       return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
     }
 
@@ -321,7 +321,7 @@ const SystemStatus = () => {
             </ListItemAvatar>
             <ListItemText
               primary={LL.EMS_ESP_VER()}
-              secondary={data.emsesp_version}
+              secondary={'' + data.emsesp_version}
             />
             {me.admin && (
               <Button

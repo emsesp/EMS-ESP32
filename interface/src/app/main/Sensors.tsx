@@ -59,15 +59,18 @@ const Sensors = () => {
   const [analogDialogOpen, setAnalogDialogOpen] = useState<boolean>(false);
   const [creating, setCreating] = useState<boolean>(false);
 
-  const { data: sensorData } = useAutoRequest(() => readSensorData(), {
-    initialData: {
-      ts: [],
-      as: [],
-      analog_enabled: false,
-      platform: 'ESP32'
-    },
-    pollingTime: 2000
-  });
+  const { data: sensorData, send: fetchSensorData } = useAutoRequest(
+    () => readSensorData(),
+    {
+      initialData: {
+        ts: [],
+        as: [],
+        analog_enabled: false,
+        platform: 'ESP32'
+      },
+      pollingTime: 2000
+    }
+  );
 
   const { send: sendTemperatureSensor } = useRequest(
     (data: WriteTemperatureSensor) => writeTemperatureSensor(data),
@@ -256,6 +259,7 @@ const Sensors = () => {
 
   const onTemperatureDialogClose = () => {
     setTemperatureDialogOpen(false);
+    void fetchSensorData();
   };
 
   const onTemperatureDialogSave = async (ts: TemperatureSensor) => {
@@ -269,6 +273,7 @@ const Sensors = () => {
       .finally(() => {
         setTemperatureDialogOpen(false);
         setSelectedTemperatureSensor(undefined);
+        void fetchSensorData();
       });
   };
 
@@ -283,6 +288,7 @@ const Sensors = () => {
 
   const onAnalogDialogClose = () => {
     setAnalogDialogOpen(false);
+    void fetchSensorData();
   };
 
   const addAnalogSensor = () => {
@@ -322,6 +328,7 @@ const Sensors = () => {
       .finally(() => {
         setAnalogDialogOpen(false);
         setSelectedAnalogSensor(undefined);
+        void fetchSensorData();
       });
   };
 

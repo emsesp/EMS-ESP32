@@ -47,9 +47,6 @@ interface/src/i18n/i18n-types.ts
 interface/src/i18n/i18n-util.ts
 interface/src/i18n/i18n-util.sync.ts
 interface/src/i18n/i18n-util.async.ts
-# mock-api uploads
-*/uploads/*
-!uploads/README.md
 
 # scripts
 test.sh

@@ -1671,11 +1671,13 @@ void EMSESP::loop() {
         mqtt_.loop();              // sends out anything in the MQTT queue
         webModulesService.loop();  // loop through the external library modules
         if (system_.PSram() == 0) {
-            webSchedulerService.loop();
+            webSchedulerService.loop(); // run non-async if there is no PSRAM available
         }
 
         // force a query on the EMS devices to fetch latest data at a set interval (1 min)
         scheduled_fetch_values();
+    } else {
+        emsesp::EMSESP::system_.uploadFirmwareURL(); // start an upload from a URL. This is blocking.
     }
 
     uuid::loop();

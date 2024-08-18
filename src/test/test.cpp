@@ -408,11 +408,16 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         ok = true;
     }
 
-// THESE ONLY WORK WITH AN ESP32, not in standalone mode
+// THESE ONLY WORK WITH AN ESP32, not in standalone/native mode
 #ifndef EMSESP_STANDALONE
     if (command == "ls") {
         listDir(LittleFS, "/", 3);
-        Serial.println();
+        ok = true;
+    }
+
+    if (command == "upload") {
+        // S3 has 16MB flash
+        EMSESP::system_.uploadFirmwareURL("https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_7_0-dev_31-ESP32S3-16MB+.bin"); // TODO remove
         ok = true;
     }
 #endif
@@ -2278,7 +2283,9 @@ void Test::listDir(fs::FS & fs, const char * dirname, uint8_t levels) {
             Serial.print(" DIR: ");
             Serial.println(file.name());
             if (levels) {
-                listDir(fs, file.name(), levels - 1);
+                // prefix a / to the name to make it a full path
+                listDir(fs, ("/" + String(file.name())).c_str(), levels - 1);
+                // listDir(fs, file.name(), levels - 1);
             }
             Serial.println();
         } else {
