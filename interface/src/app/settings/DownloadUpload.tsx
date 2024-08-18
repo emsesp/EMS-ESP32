@@ -340,7 +340,7 @@ const DownloadUpload = () => {
                   installFirmwareURL(DEV_URL + getBinURL(latestDevVersion))
                 }
               >
-                Install
+                {LL.INSTALL(0)}
               </Button>
             </Box>
           )}

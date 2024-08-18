@@ -161,6 +161,7 @@ const sv: Translation = {
   HELP_INFORMATION_5: 'EMS-ESP är gratis och är öppen källkod. Bidra till utvecklingen genom att ge oss en stjärna på GitHub!',
   UPLOAD: 'Uppladdning',
   DOWNLOAD: '{{N|n|n}}edladdning',
+  INSTALL: 'Installera',
   ABORTED: 'Avbruten',
   FAILED: 'Misslyckades',
   SUCCESSFUL: 'Lyckades',
