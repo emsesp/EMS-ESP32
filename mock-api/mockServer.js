@@ -34,9 +34,10 @@ export default () => {
       server.middlewares.use(async (req, res, next) => {
         // catch any file uploads
         if (req.url.startsWith('/rest/uploadFile')) {
+          // show progress
           let progress = 0;
           const file_size = req.headers['content-length'];
-
+          console.log('File size: ' + file_size);
           req.on('data', async (chunk) => {
             progress += chunk.length;
             const percentage = (progress / file_size) * 100;
@@ -50,7 +51,7 @@ export default () => {
           try {
             [fields, files] = await form.parse(req);
           } catch (err) {
-            console.error(err);
+            console.error('Not json form content');
             res.writeHead(err.httpCode || 400, {
               'Content-Type': 'text/plain'
             });
