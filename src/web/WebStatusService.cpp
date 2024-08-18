@@ -31,6 +31,12 @@ WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * se
 }
 
 void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
+    // This is a litle trick for the OTA upload. We don't want the React RestartService to think we're finished
+    // with the upload so we fake it and pretent the /rest/systemStatus is not available. That way the spinner keeps spinning.
+    if (EMSESP::system_.upload_status()) {
+        return; // ignore endpoint
+    }
+
     EMSESP::system_.refreshHeapMem(); // refresh free heap and max alloc heap
 
     auto *     response = new AsyncJsonResponse(false);

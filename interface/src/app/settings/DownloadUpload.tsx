@@ -4,17 +4,7 @@ import { toast } from 'react-toastify';
 import DownloadIcon from '@mui/icons-material/GetApp';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import WarningIcon from '@mui/icons-material/Warning';
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Link,
-  Typography
-} from '@mui/material';
+import { Box, Button, Divider, Link, Typography } from '@mui/material';
 
 import * as SystemApi from 'api/system';
 import {
@@ -44,7 +34,6 @@ const DownloadUpload = () => {
 
   const [restarting, setRestarting] = useState<boolean>(false);
   const [restartNeeded, setRestartNeeded] = useState<boolean>(false);
-  const [showWaiting, setShowWaiting] = useState<boolean>(false);
 
   const { send: sendSettings } = useRequest(getSettings(), {
     immediate: false
@@ -141,10 +130,10 @@ const DownloadUpload = () => {
   };
 
   const installFirmwareURL = async (url: string) => {
-    setShowWaiting(true);
     await sendUploadURL({ url: url }).catch((error: Error) => {
       toast.error(error.message);
     });
+    setRestarting(true);
   };
 
   const saveFile = (json: unknown, filename: string) => {
@@ -357,27 +346,6 @@ const DownloadUpload = () => {
           )}
         </Box>
 
-        <Dialog sx={dialogStyle} open={showWaiting}>
-          {/* TODO translate all this text*/}
-          <DialogTitle>Uploading</DialogTitle>
-          <DialogContent dividers>
-            <Typography sx={{ ml: 2, flexGrow: 1 }} color="warning.main">
-              Please wait while the firmware is being uploaded and installed. This
-              can take a few minutes. EMS-ESP will automatically restart when
-              completed.
-            </Typography>
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              flexDirection="column"
-              padding={2}
-            >
-              <CircularProgress sx={{ margin: 4 }} size={36} />
-            </Box>
-          </DialogContent>
-        </Dialog>
-
         <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
           {LL.UPLOAD()}
         </Typography>
@@ -405,7 +373,13 @@ const DownloadUpload = () => {
   };
 
   return (
-    <SectionContent>{restarting ? <RestartMonitor /> : content()}</SectionContent>
+    <SectionContent>
+      {restarting ? (
+        <RestartMonitor message="Please wait while the firmware is being uploaded and installed. This can take a few minutes. EMS-ESP will automatically restart when completed." />
+      ) : (
+        content()
+      )}
+    </SectionContent>
   );
 };
 
