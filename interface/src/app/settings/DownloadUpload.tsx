@@ -97,18 +97,18 @@ const DownloadUpload = () => {
 
   // called immediately to get the latest version, on page load
   const { data: latestVersion } = useRequest(getStableVersion, {
-    // immediate: true
+    immediate: true
     // uncomment for testing
     // https://github.com/emsesp/EMS-ESP32/releases/download/v3.6.5/EMS-ESP-3_6_5-ESP32-16MB+.bin
-    immediate: false,
-    initialData: '3.6.5'
+    // immediate: false,
+    // initialData: '3.6.5'
   });
   const { data: latestDevVersion } = useRequest(getDevVersion, {
-    // immediate: true
+    immediate: true
     // uncomment for testing
     // https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_7_0-dev_31-ESP32-16MB+.bin
-    immediate: false,
-    initialData: '3.7.0-dev.31'
+    // immediate: false,
+    // initialData: '3.7.0-dev.31'
   });
 
   const STABLE_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/';
