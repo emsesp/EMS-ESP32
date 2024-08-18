@@ -1196,10 +1196,10 @@ void Thermostat::process_RC300WWtemp(std::shared_ptr<const Telegram> telegram) {
 void Thermostat::process_RC300WWmode(std::shared_ptr<const Telegram> telegram) {
     uint8_t circuit = 0;
     telegram->read_value(circuit, 0);
-    if (!circuit) {
+    auto dhw = dhw_circuit(telegram->type_id - 0x2F5, circuit, circuit != 0);
+    if (dhw == nullptr) {
         return;
     }
-    auto dhw = dhw_circuit(telegram->type_id - 0x2F5, circuit, true);
     // circulation pump see: https://github.com/Th3M3/buderus_ems-wiki/blob/master/Einstellungen%20der%20Bedieneinheit%20RC310.md
     has_update(telegram, dhw->wwCircPump_, 1); // FF=off, 0=on ?
 
