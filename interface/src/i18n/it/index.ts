@@ -161,6 +161,7 @@ const it: Translation = {
   HELP_INFORMATION_5: 'EMS-ESP è un progetto gratuito e open-source. Supporta il suo sviluppo futuro assegnandogli una stella su GitHub!',
   UPLOAD: 'Carica',
   DOWNLOAD: 'Scarica',
+  INSTALL: 'Installare',
   ABORTED: 'Annullato',
   FAILED: 'Fallito',
   SUCCESSFUL: 'Riuscito',

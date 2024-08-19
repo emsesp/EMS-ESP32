@@ -161,6 +161,7 @@ const nl: Translation = {
   HELP_INFORMATION_5: 'EMS-ESP is een gratis en open source project. Steun ons met een Star op GitHub!',
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
+  INSTALL: 'Installeren',
   ABORTED: 'afgebroken',
   FAILED: 'mislukt',
   SUCCESSFUL: 'successvol',

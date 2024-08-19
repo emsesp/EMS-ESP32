@@ -161,6 +161,7 @@ const fr: Translation = {
   HELP_INFORMATION_5: 'EMS-ESP est un projet libre et open-source. Merci de soutenir son développement futur en lui donnant une étoile sur GitHub !',
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
+  INSTALL: 'Installer',
   ABORTED: 'annulé',
   FAILED: 'échoué',
   SUCCESSFUL: 'réussi',
