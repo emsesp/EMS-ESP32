@@ -308,7 +308,7 @@ const DownloadUpload = () => {
                   )
                 }
               >
-                Install
+                {LL.INSTALL(0)}
               </Button>
             </Box>
           )}
