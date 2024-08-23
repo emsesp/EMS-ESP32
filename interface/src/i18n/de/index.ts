@@ -145,7 +145,7 @@ const de: Translation = {
   CUSTOMIZATIONS_HELP_1: 'Wählen Sie ein Gerät aus und passen Sie die Entitäten mithilfe der Optionen an',
   CUSTOMIZATIONS_HELP_2: 'Als Favorit markieren',
   CUSTOMIZATIONS_HELP_3: 'Schreibaktion deaktivieren',
-  CUSTOMIZATIONS_HELP_4: 'von MQTT und API ausschließen',
+  CUSTOMIZATIONS_HELP_4: 'Von MQTT und API ausschließen',
   CUSTOMIZATIONS_HELP_5: 'Aus dem Kontrollzentrum ausblenden',
   CUSTOMIZATIONS_HELP_6: 'Aus dem Speicher löschen',
   SELECT_DEVICE: 'Wählen Sie ein Gerät aus',
@@ -175,7 +175,7 @@ const de: Translation = {
   FACTORY_RESET: 'Werkseinstellung',
   SYSTEM_FACTORY_TEXT: 'EMS-ESP wurde auf Werkseinstellung gesetzt und startet als Zugangspunkt neu',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Sind Sie sicher alle Einstellungen auf Werkseinstellung zu setzen?',
-  THE_LATEST: 'Die neueste',
+  THE_LATEST: 'Das neueste',
   OFFICIAL: 'offizielle',
   DEVELOPMENT: 'Entwicklungs',
   RELEASE_IS: 'Release ist',
@@ -333,9 +333,9 @@ const de: Translation = {
   ENABLE_MODBUS: 'Modbus aktivieren',
   VIEW_LOG: 'Sehen Sie sich das Protokoll an, um Probleme zu diagnostizieren',
   UPLOAD_DRAG: 'Ziehen Sie eine Datei hierher oder klicken Sie, um eine auszuwählen',
-  SERVICES: 'Dienstleistungen',
+  SERVICES: 'Dienste',
   ALLVALUES: 'Alle Werte',
-  SPECIAL_FUNCTIONS: 'Special Functions' // TODO translate
+  SPECIAL_FUNCTIONS: 'Sonderfunktionen'
 };
 
 export default de;
