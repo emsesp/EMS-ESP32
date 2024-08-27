@@ -161,6 +161,7 @@ const sk: Translation = {
   HELP_INFORMATION_5: 'EMS-ESP je bezplatný a open source projekt. Podporte jeho budúci vývoj tým, že mu dáte hviezdičku na GitHub!',
   UPLOAD: 'Nahrať',
   DOWNLOAD: '{{S|s|s}}tiahnuť',
+  INSTALL: 'Inštalovať',
   ABORTED: 'zrušené',
   FAILED: 'chybné',
   SUCCESSFUL: 'úspešné',
