@@ -102,7 +102,6 @@ const SystemLog = () => {
 
   // eslint-disable-next-line @typescript-eslint/unbound-method
   const { onMessage, onError } = useSSE(fetchLogES, {
-    immediate: true,
     // withCredentials: true,
     interceptByGlobalResponded: false
   });
