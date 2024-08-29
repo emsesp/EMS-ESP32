@@ -161,7 +161,7 @@ const nl: Translation = {
   HELP_INFORMATION_5: 'EMS-ESP is een gratis en open source project. Steun ons met een Star op GitHub!',
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
-  INSTALL: 'Installeren',
+  INSTALL: 'Installeren {0}',
   ABORTED: 'afgebroken',
   FAILED: 'mislukt',
   SUCCESSFUL: 'successvol',
@@ -169,16 +169,13 @@ const nl: Translation = {
   LOG_OF: '{0} Log',
   STATUS_OF: '{0} Status',
   DOWNLOAD_UPLOAD: 'Download/Upload',
-  VERSION_ON: 'U bevindt zich momenteel op versie',
   CLOSE: 'Sluiten',
   USE: 'Gebruik',
   FACTORY_RESET: 'Fabrieksinstellingen',
   SYSTEM_FACTORY_TEXT: 'Gateway is gereset en start nu weer op met fabrieksinstellingen',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Weet je zeker dat je een reset naar fabrieksinstellingen uit wilt voeren?',
-  THE_LATEST: 'De laatste',
-  OFFICIAL: 'official',
-  DEVELOPMENT: 'development',
-  RELEASE_IS: 'release is',
+  STABLE: 'Stable',
+  DEVELOPMENT: 'Development',
   RELEASE_NOTES: 'release notes',
   EMS_ESP_VER: 'EMS-ESP Versie',
   UPTIME: 'Systeem Uptime',
@@ -335,7 +332,12 @@ const nl: Translation = {
   UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
   SERVICES: 'Services', // TODO translate
   ALLVALUES: 'All Values', // TODO translate
-  SPECIAL_FUNCTIONS: 'Special Functions' // TODO translate
+  SPECIAL_FUNCTIONS: 'Special Functions', // TODO translate
+  WAIT_FIRMWARE: 'Please wait while the firmware is being uploaded. The device will restart automatically.', // TODO translate
+  INSTALL_VERSION: 'This will install vesion {0}. Are you sure?', // TODO translate
+  SWITCH_DEV: 'Switch to development version', // TODO translate
+  UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
+  LATEST_VERSION: 'You are using the latest version.' // TODO translate
 };
 
 export default nl;

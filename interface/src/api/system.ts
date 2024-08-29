@@ -48,3 +48,6 @@ export const uploadFile = (file: File) => {
 
 export const uploadURL = (data: { url: string }) =>
   alovaInstance.Post('/rest/uploadURL', data);
+
+export const checkUpgrade = (data: { version: string }) =>
+  alovaInstance.Post('/rest/checkUpgrade', data);

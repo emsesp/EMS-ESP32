@@ -4,6 +4,7 @@ import type { NetworkConnectionStatus } from './network';
 
 export interface HardwareStatus {
   emsesp_version: string;
+  build_flags: string;
   esp_platform: string;
   max_alloc_heap: number;
   cpu_type: string;
@@ -30,7 +31,6 @@ export interface HardwareStatus {
 
 export interface SystemStatus {
   emsesp_version: string;
-  esp_platform: string;
   status: busConnectionStatus;
   uptime: number;
   bus_uptime: number;

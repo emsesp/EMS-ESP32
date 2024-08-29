@@ -161,7 +161,7 @@ const it: Translation = {
   HELP_INFORMATION_5: 'EMS-ESP è un progetto gratuito e open-source. Supporta il suo sviluppo futuro assegnandogli una stella su GitHub!',
   UPLOAD: 'Carica',
   DOWNLOAD: 'Scarica',
-  INSTALL: 'Installare',
+  INSTALL: 'Installare {0}',
   ABORTED: 'Annullato',
   FAILED: 'Fallito',
   SUCCESSFUL: 'Riuscito',
@@ -169,16 +169,13 @@ const it: Translation = {
   LOG_OF: 'Registro {0}',
   STATUS_OF: 'Stato {0}',
   DOWNLOAD_UPLOAD: 'Scaricamento/Caricamento',
-  VERSION_ON: 'Attualmente stai eseguendo la versione',
   CLOSE: 'Chiudere',
   USE: 'Usa',
   FACTORY_RESET: 'Impostazioni di fabbrica',
   SYSTEM_FACTORY_TEXT: 'Il dispositivo è stato ripristinato alle impostazioni di fabbrica e ora verrà riavviato',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Sei sicuro di voler ripristinare il dispositivo alle impostazioni di fabbrica??',
-  THE_LATEST: 'Ultima',
-  OFFICIAL: 'ufficiale',
-  DEVELOPMENT: 'sviluppo',
-  RELEASE_IS: 'rilascio é',
+  STABLE: 'Stable', // TODO translate
+  DEVELOPMENT: 'Sviluppo',
   RELEASE_NOTES: 'note rilascio',
   EMS_ESP_VER: 'Versione EMS-ESP',
   UPTIME: 'Tempo di attività del sistema',
@@ -335,7 +332,12 @@ const it: Translation = {
   UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
   SERVICES: 'Services', // TODO translate
   ALLVALUES: 'All Values', // TODO translate
-  SPECIAL_FUNCTIONS: 'Special Functions' // TODO translate
+  SPECIAL_FUNCTIONS: 'Special Functions', // TODO translate
+  WAIT_FIRMWARE: 'Please wait while the firmware is being uploaded. The device will restart automatically.', // TODO translate
+  INSTALL_VERSION: 'This will install vesion {0}. Are you sure?', // TODO translate
+  SWITCH_DEV: 'Switch to development version', // TODO translate
+  UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
+  LATEST_VERSION: 'You are using the latest version.' // TODO translate
 };
 
 export default it;

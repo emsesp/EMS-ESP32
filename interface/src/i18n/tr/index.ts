@@ -161,7 +161,7 @@ const tr: Translation = {
   HELP_INFORMATION_5: 'EMS-ESP ücretsiz ve açık kaynaklı bir projedir. Lütfen geliştirmeyi desteklemek için GitHubda projeye yıldız verin!',
   UPLOAD: 'Yükleme',
   DOWNLOAD: '{{İ|i|i}}İndirme',
-  INSTALL: 'Düzenlemek',
+  INSTALL: 'Düzenlemek {0}',
   ABORTED: 'iptal edildi',
   FAILED: 'başarısız',
   SUCCESSFUL: 'başarılı',
@@ -169,16 +169,13 @@ const tr: Translation = {
   LOG_OF: '{0} Kaydı',
   STATUS_OF: '{0} Durumu',
   DOWNLOAD_UPLOAD: 'İndirme/Yükleme',
-  VERSION_ON: 'You are currently on', // TODO translate
   CLOSE: 'Kapat',
   USE: 'KUllan',
   FACTORY_RESET: 'Fabrika ayarına dönme',
   SYSTEM_FACTORY_TEXT: 'Cihaz fabrika ayarlarına döndü ve şimdi yendiden başlatılacak',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Cihazı fabrika ayarlarına döndürmek istediğinize emin misiniz?',
-  THE_LATEST: 'En son',
-  OFFICIAL: 'resmi',
-  DEVELOPMENT: 'geliştirme',
-  RELEASE_IS: 'release is', // TODO translate
+  STABLE: 'Stable', // TODO translate
+  DEVELOPMENT: 'Geliştirme',
   RELEASE_NOTES: 'yayınlanma notları',
   EMS_ESP_VER: 'EMS-ESP Sürümü',
   UPTIME: 'Sistem Çalışma Süresi',
@@ -335,7 +332,12 @@ const tr: Translation = {
   UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
   SERVICES: 'Services', // TODO translate
   ALLVALUES: 'All Values', // TODO translate
-  SPECIAL_FUNCTIONS: 'Special Functions' // TODO translate
+  SPECIAL_FUNCTIONS: 'Special Functions', // TODO translate
+  WAIT_FIRMWARE: 'Please wait while the firmware is being uploaded. The device will restart automatically.', // TODO translate
+  INSTALL_VERSION: 'This will install vesion {0}. Are you sure?', // TODO translate
+  SWITCH_DEV: 'Switch to development version', // TODO translate
+  UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
+  LATEST_VERSION: 'You are using the latest version.' // TODO translate
 };
 
 export default tr;

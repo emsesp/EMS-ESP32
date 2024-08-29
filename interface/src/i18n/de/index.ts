@@ -145,7 +145,7 @@ const de: Translation = {
   CUSTOMIZATIONS_HELP_1: 'Wählen Sie ein Gerät aus und passen Sie die Entitäten mithilfe der Optionen an',
   CUSTOMIZATIONS_HELP_2: 'Als Favorit markieren',
   CUSTOMIZATIONS_HELP_3: 'Schreibaktion deaktivieren',
-  CUSTOMIZATIONS_HELP_4: 'von MQTT und API ausschließen',
+  CUSTOMIZATIONS_HELP_4: 'Von MQTT und API ausschließen',
   CUSTOMIZATIONS_HELP_5: 'Aus dem Kontrollzentrum ausblenden',
   CUSTOMIZATIONS_HELP_6: 'Aus dem Speicher löschen',
   SELECT_DEVICE: 'Wählen Sie ein Gerät aus',
@@ -161,7 +161,7 @@ const de: Translation = {
   HELP_INFORMATION_5: 'EMS-ESP ist ein freies Open-Source Projekt. Bitte unterstützen Sie die zukünftige Entwicklung mit einem "Star" auf GitHub!',
   UPLOAD: 'Hochladen',
   DOWNLOAD: '{{H|h|h}}erunterladen',
-  INSTALL: 'Installieren',
+  INSTALL: 'Installieren {0}',
   ABORTED: 'abgebrochen',
   FAILED: 'gescheitert',
   SUCCESSFUL: 'erfolgreich',
@@ -169,16 +169,13 @@ const de: Translation = {
   LOG_OF: '{0}protokoll',
   STATUS_OF: '{0} Status',
   DOWNLOAD_UPLOAD: 'Herunterladen/Hochladen',
-  VERSION_ON: 'Sie verwenden derzeit',
   CLOSE: 'Schließen',
   USE: 'Verwenden Sie',
   FACTORY_RESET: 'Werkseinstellung',
   SYSTEM_FACTORY_TEXT: 'EMS-ESP wurde auf Werkseinstellung gesetzt und startet als Zugangspunkt neu',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Sind Sie sicher alle Einstellungen auf Werkseinstellung zu setzen?',
-  THE_LATEST: 'Die neueste',
-  OFFICIAL: 'offizielle',
+  STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Entwicklungs',
-  RELEASE_IS: 'Release ist',
   RELEASE_NOTES: 'Versionshinweise',
   EMS_ESP_VER: 'EMS-ESP Version',
   UPTIME: 'System Betriebszeit',
@@ -333,9 +330,14 @@ const de: Translation = {
   ENABLE_MODBUS: 'Modbus aktivieren',
   VIEW_LOG: 'Sehen Sie sich das Protokoll an, um Probleme zu diagnostizieren',
   UPLOAD_DRAG: 'Ziehen Sie eine Datei hierher oder klicken Sie, um eine auszuwählen',
-  SERVICES: 'Dienstleistungen',
+  SERVICES: 'Dienste',
   ALLVALUES: 'Alle Werte',
-  SPECIAL_FUNCTIONS: 'Special Functions' // TODO translate
+  SPECIAL_FUNCTIONS: 'Sonderfunktionen',
+  WAIT_FIRMWARE: 'Please wait while the firmware is being uploaded. The device will restart automatically.', // TODO translate
+  INSTALL_VERSION: 'This will install vesion {0}. Are you sure?', // TODO translate
+  SWITCH_DEV: 'Switch to development version', // TODO translate
+  UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
+  LATEST_VERSION: 'You are using the latest version.' // TODO translate
 };
 
 export default de;

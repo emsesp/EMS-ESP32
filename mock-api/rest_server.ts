@@ -368,8 +368,10 @@ const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn';
 const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken';
 
 const hardware_status = {
-  emsesp_version: '3.7-demo',
+  emsesp_version: '3.7.0-dev.33',
+  // emsesp_version: '3.6.5',
   esp_platform: 'ESP32S3',
+  build_flags: 'DEMO',
   cpu_type: 'ESP32-S3',
   cpu_rev: 0,
   cpu_cores: 2,
@@ -395,8 +397,8 @@ const hardware_status = {
 };
 
 const system_status = {
-  emsesp_version: '3.7-demo',
-  esp_platform: 'ESP32',
+  emsesp_version: '3.7.0-dev.33',
+  // emsesp_version: '3.6.5',
   status: 0,
   // status: 2,
   uptime: 77186,
@@ -452,6 +454,7 @@ const EMSESP_DEVICEDATA_ENDPOINT2 = REST_ENDPOINT_ROOT + 'deviceData/:id?';
 const EMSESP_DEVICEENTITIES_ENDPOINT1 = REST_ENDPOINT_ROOT + 'deviceEntities';
 const EMSESP_DEVICEENTITIES_ENDPOINT2 = REST_ENDPOINT_ROOT + 'deviceEntities/:id?';
 
+const EMSESP_CHECK_UPGRADE_ENDPOINT = REST_ENDPOINT_ROOT + 'checkUpgrade';
 const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile';
 const EMSESP_WRITE_DEVICEVALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceValue';
 const EMSESP_WRITE_DEVICENAME_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceName';
@@ -4527,6 +4530,17 @@ router
     console.log('analog sensor saved', as);
 
     return status(200);
+  })
+
+  // check upgrade
+  .post(EMSESP_CHECK_UPGRADE_ENDPOINT, async (request: any) => {
+    const content = await request.json();
+    console.log('check upgrade', content.version);
+    const data = {
+      upgradeable: true
+      // upgradeable: false
+    };
+    return data;
   })
 
   // Settings - board profile

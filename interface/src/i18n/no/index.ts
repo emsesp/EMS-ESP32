@@ -161,7 +161,7 @@ const no: Translation = {
   HELP_INFORMATION_5: 'EMS-ESP er gratis og åpen kildekode. Bidra til utviklingen ved å gi oss en stjerne på GitHub!',
   UPLOAD: 'Opplasning',
   DOWNLOAD: '{{N|n|n}}edlasting',
-  INSTALL: 'Installer',
+  INSTALL: 'Installer {0}',
   ABORTED: 'avbrutt',
   FAILED: 'feilet',
   SUCCESSFUL: 'vellykket',
@@ -169,16 +169,13 @@ const no: Translation = {
   LOG_OF: '{0} Logg',
   STATUS_OF: '{0} Status',
   DOWNLOAD_UPLOAD: 'Nedlasting/Opp',
-  VERSION_ON: 'You are currently on', // TODO translate
   CLOSE: 'Steng',
   USE: 'Bruk',
   FACTORY_RESET: 'Sett tilbake til fabrikkinstilling',
   SYSTEM_FACTORY_TEXT: 'Enhet har blitt satt tilbake til fabrikkinstilling og vil restarte',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Er du sikker på at du vil resette enheten til fabrikkinstillinger?',
-  THE_LATEST: 'Den nyeste',
-  OFFICIAL: 'official',
-  DEVELOPMENT: 'development',
-  RELEASE_IS: 'release er',
+  STABLE: 'Stable', // TODO translate
+  DEVELOPMENT: 'Development',
   RELEASE_NOTES: 'release notes',
   EMS_ESP_VER: 'EMS-ESP Version',
   UPTIME: 'System Oppetid',
@@ -335,7 +332,12 @@ const no: Translation = {
   UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
   SERVICES: 'Services', // TODO translate
   ALLVALUES: 'All Values', // TODO translate
-  SPECIAL_FUNCTIONS: 'Special Functions' // TODO translate
+  SPECIAL_FUNCTIONS: 'Special Functions', // TODO translate
+  WAIT_FIRMWARE: 'Please wait while the firmware is being uploaded. The device will restart automatically.', // TODO translate
+  INSTALL_VERSION: 'This will install vesion {0}. Are you sure?', // TODO translate
+  SWITCH_DEV: 'Switch to development version', // TODO translate
+  UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
+  LATEST_VERSION: 'You are using the latest version.' // TODO translate
 };
 
 export default no;
