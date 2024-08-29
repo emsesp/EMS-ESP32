@@ -22,6 +22,7 @@
 
 #define EMSESP_CUSTOMENTITY_FILE "/config/emsespEntity.json"
 #define EMSESP_CUSTOMENTITY_SERVICE_PATH "/rest/customEntities" // GET and POST
+#define EMSESP_GET_ENTITIES_PATH "/rest/getEntities"
 
 namespace emsesp {
 
@@ -79,6 +80,8 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
   private:
     HttpEndpoint<WebCustomEntity>  _httpEndpoint;
     FSPersistence<WebCustomEntity> _fsPersistence;
+
+    void getEntities(AsyncWebServerRequest * request);
 
     std::list<CustomEntityItem> * customEntityItems_; // pointer to the list of entity items
 

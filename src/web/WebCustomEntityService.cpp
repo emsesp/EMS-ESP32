@@ -29,6 +29,9 @@ WebCustomEntityService::WebCustomEntityService(AsyncWebServer * server, FS * fs,
                     securityManager,
                     AuthenticationPredicates::IS_AUTHENTICATED)
     , _fsPersistence(WebCustomEntity::read, WebCustomEntity::update, this, fs, EMSESP_CUSTOMENTITY_FILE) {
+    server->on(EMSESP_GET_ENTITIES_PATH,
+               HTTP_GET,
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { getEntities(request); }, AuthenticationPredicates::IS_ADMIN));
 }
 
 // load the settings when the service starts
@@ -707,5 +710,18 @@ void WebCustomEntityService::test() {
     });
 }
 #endif
+
+// return entities as a json object
+void WebCustomEntityService::getEntities(AsyncWebServerRequest * request) {
+    auto *     response = new AsyncJsonResponse(false);
+    JsonObject root     = response->getRoot();
+
+    root["type"] = "entities";
+
+    System::extractSettings(EMSESP_CUSTOMENTITY_FILE, "Entities", root);
+
+    response->setLength();
+    request->send(response);
+}
 
 } // namespace emsesp

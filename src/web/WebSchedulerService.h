@@ -21,6 +21,7 @@
 
 #define EMSESP_SCHEDULER_FILE "/config/emsespScheduler.json"
 #define EMSESP_SCHEDULER_SERVICE_PATH "/rest/schedule" // GET and POST
+#define EMSESP_GET_SCHEDULE_PATH "/rest/getSchedule"
 
 // bit flags for the schedule items. Matches those in interface/src/app/main/SchedulerDialog.tsx
 // 0-127 (0->0x7F) is day schedule
@@ -89,6 +90,8 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
 
     HttpEndpoint<WebScheduler>  _httpEndpoint;
     FSPersistence<WebScheduler> _fsPersistence;
+
+    void getSchedule(AsyncWebServerRequest * request);
 
     std::list<ScheduleItem> *  scheduleItems_; // pointer to the list of schedule events
     bool                       ha_registered_ = false;

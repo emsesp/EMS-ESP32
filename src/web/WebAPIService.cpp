@@ -25,25 +25,7 @@ uint16_t WebAPIService::api_fails_ = 0;
 
 WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager) {
-    // API
     server->on(EMSESP_API_SERVICE_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { webAPIService(request, json); });
-
-    // settings
-    server->on(GET_SETTINGS_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { getSettings(request); }, AuthenticationPredicates::IS_ADMIN));
-
-    server->on(GET_CUSTOMIZATIONS_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { getCustomizations(request); }, AuthenticationPredicates::IS_ADMIN));
-
-    server->on(GET_SCHEDULE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { getSchedule(request); }, AuthenticationPredicates::IS_ADMIN));
-
-    server->on(GET_ENTITIES_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { getEntities(request); }, AuthenticationPredicates::IS_ADMIN));
 }
 
 // POST|GET /{device}
@@ -171,62 +153,6 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     serializeJson(output, Serial);
     Serial.println(COLOR_RESET);
 #endif
-}
-
-void WebAPIService::getSettings(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false);
-    JsonObject root     = response->getRoot();
-
-    root["type"] = "settings";
-
-    JsonObject node = root["System"].to<JsonObject>();
-    node["version"] = EMSESP_APP_VERSION;
-
-    System::extractSettings(NETWORK_SETTINGS_FILE, "Network", root);
-    System::extractSettings(AP_SETTINGS_FILE, "AP", root);
-    System::extractSettings(MQTT_SETTINGS_FILE, "MQTT", root);
-    System::extractSettings(NTP_SETTINGS_FILE, "NTP", root);
-    System::extractSettings(SECURITY_SETTINGS_FILE, "Security", root);
-    System::extractSettings(EMSESP_SETTINGS_FILE, "Settings", root);
-
-    response->setLength();
-    request->send(response);
-}
-
-void WebAPIService::getCustomizations(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false);
-    JsonObject root     = response->getRoot();
-
-    root["type"] = "customizations";
-
-    System::extractSettings(EMSESP_CUSTOMIZATION_FILE, "Customizations", root);
-
-    response->setLength();
-    request->send(response);
-}
-
-void WebAPIService::getSchedule(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false);
-    JsonObject root     = response->getRoot();
-
-    root["type"] = "schedule";
-
-    System::extractSettings(EMSESP_SCHEDULER_FILE, "Schedule", root);
-
-    response->setLength();
-    request->send(response);
-}
-
-void WebAPIService::getEntities(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false);
-    JsonObject root     = response->getRoot();
-
-    root["type"] = "entities";
-
-    System::extractSettings(EMSESP_CUSTOMENTITY_FILE, "Entities", root);
-
-    response->setLength();
-    request->send(response);
 }
 
 #if defined(EMSESP_UNITY)

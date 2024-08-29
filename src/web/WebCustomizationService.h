@@ -22,13 +22,14 @@
 #define EMSESP_CUSTOMIZATION_FILE "/config/emsespCustomization.json"
 
 // GET
-#define DEVICES_SERVICE_PATH "/rest/devices"
-#define DEVICE_ENTITIES_PATH "/rest/deviceEntities"
+#define EMSESP_DEVICES_SERVICE_PATH "/rest/devices"
+#define EMSESP_DEVICE_ENTITIES_PATH "/rest/deviceEntities"
+#define EMSESP_GET_CUSTOMIZATIONS_PATH "/rest/getCustomizations"
 
 // POST
-#define CUSTOMIZATION_ENTITIES_PATH "/rest/customizationEntities"
-#define RESET_CUSTOMIZATION_SERVICE_PATH "/rest/resetCustomizations"
-#define WRITE_DEVICE_NAME_PATH "/rest/writeDeviceName"
+#define EMSESP_CUSTOMIZATION_ENTITIES_PATH "/rest/customizationEntities"
+#define EMSESP_RESET_CUSTOMIZATION_SERVICE_PATH "/rest/resetCustomizations"
+#define EMSESP_WRITE_DEVICE_NAME_PATH "/rest/writeDeviceName"
 
 namespace emsesp {
 
@@ -99,6 +100,7 @@ class WebCustomizationService : public StatefulService<WebCustomization> {
     // GET
     void devices(AsyncWebServerRequest * request);
     void device_entities(AsyncWebServerRequest * request);
+    void getCustomizations(AsyncWebServerRequest * request);
 
     // POST
     void customization_entities(AsyncWebServerRequest * request, JsonVariant json);
