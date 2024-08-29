@@ -1851,7 +1851,6 @@ bool System::uploadFirmwareURL(const char * url) {
 
     // make sure we have a valid URL
     if (saved_url.isEmpty()) {
-        LOG_ERROR("Firmware upload failed - no URL");
         return false;
     }
 
