@@ -163,11 +163,9 @@ const NetworkSettings = () => {
                   selectedNetwork.bssid
                 }
               />
-              <ListItemSecondaryAction>
-                <IconButton onClick={setCancel}>
-                  <DeleteIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
+              <IconButton onClick={setCancel}>
+                <DeleteIcon />
+              </IconButton>
             </ListItem>
           </List>
         ) : (
