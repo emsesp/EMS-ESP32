@@ -1844,17 +1844,28 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         System::test_set_all_active(true);
         add_device(0x08, 172); // boiler: Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i
+        add_device(0x10, 158); // thermostat: RC310
 
-        const auto & it = std::find_if(EMSESP::emsdevices.begin(), EMSESP::emsdevices.end(), [&](const std::unique_ptr<EMSdevice> & dev) {
+        const auto & boiler_it = std::find_if(EMSESP::emsdevices.begin(), EMSESP::emsdevices.end(), [&](const std::unique_ptr<EMSdevice> & dev) {
             return dev && dev->device_id() == 0x08;
         });
 
-        if (it == EMSESP::emsdevices.end()) {
-            EMSESP::logger().err("ERROR - can not find mocked heatpump device");
+        if (boiler_it == EMSESP::emsdevices.end()) {
+            EMSESP::logger().err("ERROR - can not find mocked boiler device");
             return;
         }
 
-        const auto & device = *it;
+        const auto & thermostat_it = std::find_if(EMSESP::emsdevices.begin(), EMSESP::emsdevices.end(), [&](const std::unique_ptr<EMSdevice> & dev) {
+            return dev && dev->device_id() == 0x10;
+        });
+
+        if (thermostat_it == EMSESP::emsdevices.end()) {
+            EMSESP::logger().err("ERROR - can not find mocked thermostat device");
+            return;
+        }
+
+        const auto & boiler_dev = *boiler_it;
+        const auto & thermostat_dev = *thermostat_it;
 
         {
             auto test_int8 = [&](const std::unique_ptr<EMSdevice> & device, uint8_t tag, const std::string & shortname) {
@@ -1967,14 +1978,14 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
             shell.println();
             shell.printfln("Testing device->get_modbus_value():");
-            test_int8(device, DeviceValueTAG::TAG_DEVICE_DATA, "mintempsilent");
-            test_uint8(device, DeviceValueTAG::TAG_DEVICE_DATA, "selflowtemp");
-            test_int16(device, DeviceValueTAG::TAG_DEVICE_DATA, "outdoortemp");
-            test_uint16(device, DeviceValueTAG::TAG_DEVICE_DATA, "rettemp");
+            test_int8(boiler_dev, DeviceValueTAG::TAG_DEVICE_DATA, "mintempsilent");
+            test_uint8(boiler_dev, DeviceValueTAG::TAG_DEVICE_DATA, "selflowtemp");
+            test_int16(boiler_dev, DeviceValueTAG::TAG_DEVICE_DATA, "outdoortemp");
+            test_uint16(boiler_dev, DeviceValueTAG::TAG_DEVICE_DATA, "rettemp");
             // test_uint32(device, DeviceValueTAG::TAG_DEVICE_DATA, "heatstarts"); // apparently there are no uint32 entities?
-            test_uint24(device, DeviceValueTAG::TAG_DEVICE_DATA, "heatstarts");
-            test_bool(device, DeviceValueTAG::TAG_DEVICE_DATA, "heatingactivated");
-            test_enum(device, DeviceValueTAG::TAG_DEVICE_DATA, "pumpmode");
+            test_uint24(boiler_dev, DeviceValueTAG::TAG_DEVICE_DATA, "heatstarts");
+            test_bool(boiler_dev, DeviceValueTAG::TAG_DEVICE_DATA, "heatingactivated");
+            test_enum(boiler_dev, DeviceValueTAG::TAG_DEVICE_DATA, "pumpmode");
         }
 
         // modbus_value_to_json
@@ -1987,7 +1998,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             JsonObject           inputObject = input.to<JsonObject>();
             modbus_bytes[0]                  = 0;
             modbus_bytes[1]                  = EMS_VALUE_DEFAULT_UINT8_DUMMY;
-            device->modbus_value_to_json(DeviceValueTAG::TAG_DEVICE_DATA, "selflowtemp", modbus_bytes, inputObject);
+            boiler_dev->modbus_value_to_json(DeviceValueTAG::TAG_DEVICE_DATA, "selflowtemp", modbus_bytes, inputObject);
 
             std::string jsonString;
             serializeJson(inputObject, jsonString);
@@ -2004,9 +2015,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             shell.println();
             shell.printfln("Testing modbus->handleRead():");
 
-            uint16_t reg = Modbus::REGISTER_BLOCK_SIZE * DeviceValueTAG::TAG_DEVICE_DATA + 209; // mintempsilent is tag 2 (TAG_DEVICE_DATA), offset 209
+            uint16_t reg = Modbus::REGISTER_BLOCK_SIZE * DeviceValueTAG::TAG_DEVICE_DATA + 214; // mintempsilent is tag 2 (TAG_DEVICE_DATA), offset 214
 
-            ModbusMessage request({device->device_type(), 0x03, static_cast<unsigned char>(reg >> 8), static_cast<unsigned char>(reg & 0xff), 0, 1});
+            ModbusMessage request({boiler_dev->device_type(), 0x03, static_cast<unsigned char>(reg >> 8), static_cast<unsigned char>(reg & 0xff), 0, 1});
             auto          response = EMSESP::modbus_->handleRead(request);
 
             if (response.getError() == SUCCESS) {
@@ -2025,13 +2036,13 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             }
         }
 
-        // handleWrite
+        // handleWrite boiler
         {
             shell.println();
-            shell.printfln("Testing modbus->handleWrite():");
+            shell.printfln("Testing modbus->handleWrite() for boiler:");
 
-            uint16_t      reg = Modbus::REGISTER_BLOCK_SIZE * DeviceValueTAG::TAG_DEVICE_DATA + 4; // selflowtemp is tag 2 (TAG_DEVICE_DATA), offset 4
-            ModbusMessage request({device->device_type(), 0x06, static_cast<unsigned char>(reg >> 8), static_cast<unsigned char>(reg & 0xff), 0, 1, 2, 0, 45});
+            uint16_t      reg = Modbus::REGISTER_BLOCK_SIZE * DeviceValueTAG::TAG_DEVICE_DATA + 4; // selflowtemp
+            ModbusMessage request({boiler_dev->device_type(), 0x06, static_cast<unsigned char>(reg >> 8), static_cast<unsigned char>(reg & 0xff), 0, 1, 2, 0, 45});
             auto          response = EMSESP::modbus_->handleWrite(request);
 
             if (response.getError() == SUCCESS) {
@@ -2042,6 +2053,26 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
                 shell.println(" [OK]");
             } else {
                 shell.printf("selflowtemp [MODBUS ERROR %d]\n", response.getError());
+            }
+        }
+
+        // handleWrite thermostat
+        {
+            shell.println();
+            shell.printfln("Testing modbus->handleWrite() for thermostat:");
+
+            uint16_t      reg = Modbus::REGISTER_BLOCK_SIZE * DeviceValueTAG::TAG_HC1 + 41; // remotetemp
+            ModbusMessage request({thermostat_dev->device_type(), 0x06, static_cast<unsigned char>(reg >> 8), static_cast<unsigned char>(reg & 0xff), 0, 1, 2, 0, 45});
+            auto          response = EMSESP::modbus_->handleWrite(request);
+
+            if (response.getError() == SUCCESS) {
+                shell.print("remotetemp MODBUS response:");
+                for (const auto & d : response._data) {
+                    shell.printf(" %d", d);
+                }
+                shell.println(" [OK]");
+            } else {
+                shell.printf("remotetemp [MODBUS ERROR %d]\n", response.getError());
             }
         }
 
