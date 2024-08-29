@@ -4223,7 +4223,7 @@ router
     return status(200);
   })
   .post(RESTART_PARTITION_ENDPOINT, () => {
-    console.log('restarting...');
+    console.log('restarting.from partition...');
     return status(200);
   })
   .post(FACTORY_RESET_ENDPOINT, () => status(200))
