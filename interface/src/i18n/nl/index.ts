@@ -11,7 +11,7 @@ const nl: Translation = {
   PASSWORD: 'Wachtwoord',
   SU_PASSWORD: 'su Wachtwoord',
   SETTINGS_OF: '{0} Instellingen',
-  HELP_OF: '{0} Help',
+  HELP: 'Help',
   LOGGED_IN: 'Ingelogd als {name}',
   PLEASE_SIGNIN: 'Log in om verder te gaan',
   UPLOAD_SUCCESSFUL: 'Upload successvol',

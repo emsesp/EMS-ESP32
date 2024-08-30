@@ -11,7 +11,7 @@ const sv: Translation = {
   PASSWORD: 'Lösenord',
   SU_PASSWORD: 'su Lösenord',
   SETTINGS_OF: '{0} Inställningar',
-  HELP_OF: '{0} Hjälp',
+  HELP: 'Hjälp',
   LOGGED_IN: 'Inloggad som {name}',
   PLEASE_SIGNIN: 'Vänligen logga in för att fortsätta',
   UPLOAD_SUCCESSFUL: 'Uppladdning lyckades',

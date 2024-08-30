@@ -26,7 +26,7 @@ import type { APIcall } from './types';
 
 const Help = () => {
   const { LL } = useI18nContext();
-  useLayoutTitle(LL.HELP_OF(''));
+  useLayoutTitle(LL.HELP());
 
   const { send: getAPI } = useRequest((data: APIcall) => API(data), {
     immediate: false

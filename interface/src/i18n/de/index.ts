@@ -11,7 +11,7 @@ const de: Translation = {
   PASSWORD: 'Passwort',
   SU_PASSWORD: 'su Passwort',
   SETTINGS_OF: '{0} Einstellungen',
-  HELP_OF: '{0} Hilfe',
+  HELP: 'Hilfe',
   LOGGED_IN: 'Eingeloggt als {name}',
   PLEASE_SIGNIN: 'Bitte einloggen, um fortzufahren',
   UPLOAD_SUCCESSFUL: 'Hochladen erfolgreich',

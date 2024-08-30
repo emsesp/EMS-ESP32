@@ -11,7 +11,7 @@ const no: Translation = {
   PASSWORD: 'Passord',
   SU_PASSWORD: 'su Passord',
   SETTINGS_OF: '{0} Innstillinger',
-  HELP_OF: '{0} Hjelp',
+  HELP: 'Hjelp',
   LOGGED_IN: 'Logget in som {name}',
   PLEASE_SIGNIN: 'Venligst logge inn for å fortsetta',
   UPLOAD_SUCCESSFUL: 'Opplasting lykkes',

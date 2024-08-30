@@ -11,7 +11,7 @@ const it: Translation = {
   PASSWORD: 'Password',
   SU_PASSWORD: 'su Password',
   SETTINGS_OF: 'Impostazioni {0}',
-  HELP_OF: '{0} Aiuto',
+  HELP: 'Aiuto',
   LOGGED_IN: 'Registrato come {name}',
   PLEASE_SIGNIN: 'Prego registrarsi per continuare',
   UPLOAD_SUCCESSFUL: 'Caricamento finito',

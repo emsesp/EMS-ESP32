@@ -11,7 +11,7 @@ const tr: Translation = {
   PASSWORD: 'Şifre',
   SU_PASSWORD: 'SK Şifresi',
   SETTINGS_OF: '{0} Ayarlar',
-  HELP_OF: '{0} Yardım',
+  HELP: 'Yardım',
   LOGGED_IN: '{name} olarak giriş yapıldı',
   PLEASE_SIGNIN: 'Lütfen devam etmek için giriş yapın',
   UPLOAD_SUCCESSFUL: 'Yükleme tamamlandı',

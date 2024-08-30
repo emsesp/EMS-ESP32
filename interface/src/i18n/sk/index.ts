@@ -11,7 +11,7 @@ const sk: Translation = {
   PASSWORD: 'Heslo',
   SU_PASSWORD: 'su heslo',
   SETTINGS_OF: '{0} Nastavenia',
-  HELP_OF: '{0} Pomoc',
+  HELP: 'Pomoc',
   LOGGED_IN: 'Prihlásený ako {name}',
   PLEASE_SIGNIN: 'Ak chcete pokračovať, prihláste sa',
   UPLOAD_SUCCESSFUL: 'Nahratie úspešné',

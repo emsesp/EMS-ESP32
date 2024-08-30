@@ -11,7 +11,7 @@ const pl: BaseTranslation = {
   PASSWORD: 'Hasło',
   SU_PASSWORD: 'Hasło "su"',
   SETTINGS_OF: 'Ustawienia {0}',
-  HELP_OF: 'Pomoc {0}',
+  HELP: 'Pomoc',
   LOGGED_IN: 'Zalogowano użytkownika {name}.',
   PLEASE_SIGNIN: 'Zaloguj się aby kontynuować.',
   UPLOAD_SUCCESSFUL: 'Wysyłanie zakończone.',
