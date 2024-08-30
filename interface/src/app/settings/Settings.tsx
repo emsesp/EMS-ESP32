@@ -17,7 +17,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
   List
 } from '@mui/material';
 
@@ -130,8 +129,6 @@ const Settings = () => {
           text={LL.MODULES_1()}
           to="modules"
         />
-
-        <Divider />
 
         <ListMenuItem
           icon={ImportExportIcon}
