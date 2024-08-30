@@ -27,6 +27,8 @@ export interface HardwareStatus {
   free_psram?: number;
   free_caps: number;
   model: string;
+  has_loader: boolean;
+  has_partition: boolean;
 }
 
 export interface SystemStatus {
@@ -43,8 +45,6 @@ export interface SystemStatus {
   ap_status: boolean;
   network_status: NetworkConnectionStatus;
   wifi_rssi: number;
-  has_loader: boolean;
-  has_partition: boolean;
 }
 
 export enum LogLevel {
