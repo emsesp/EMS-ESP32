@@ -331,6 +331,7 @@ let mqtt_settings = {
   publish_time_other: 10,
   publish_time_sensor: 10,
   publish_time_heartbeat: 60,
+  publish_time_water: 60,
   mqtt_qos: 0,
   rootCA: '',
   mqtt_retain: false,
@@ -367,9 +368,11 @@ const VERIFY_AUTHORIZATION_ENDPOINT = REST_ENDPOINT_ROOT + 'verifyAuthorization'
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn';
 const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken';
 
+const VERSION = '3.7.0-dev.0';
+// const VERSION = '3.6.4';
+
 const hardware_status = {
-  emsesp_version: '3.7.0-dev.33',
-  // emsesp_version: '3.6.5',
+  emsesp_version: VERSION,
   esp_platform: 'ESP32S3',
   build_flags: 'DEMO',
   cpu_type: 'ESP32-S3',
@@ -397,8 +400,7 @@ const hardware_status = {
 };
 
 const system_status = {
-  emsesp_version: '3.7.0-dev.33',
-  // emsesp_version: '3.6.5',
+  emsesp_version: VERSION,
   status: 0,
   // status: 2,
   uptime: 77186,

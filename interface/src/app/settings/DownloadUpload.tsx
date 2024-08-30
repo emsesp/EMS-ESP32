@@ -137,14 +137,14 @@ const DownloadUpload = () => {
   const DEV_RELNOTES_URL =
     'https://github.com/emsesp/EMS-ESP32/blob/dev/CHANGELOG_LATEST.md';
 
-  const getBinURL = (useDev: boolean) => {
+  const getBinURL = (useDevVersion: boolean) => {
     const filename =
       'EMS-ESP-' +
-      (useDev ? latestDevVersion : latestVersion).replaceAll('.', '_') +
+      (useDevVersion ? latestDevVersion : latestVersion).replaceAll('.', '_') +
       '-' +
       getPlatform() +
       '.bin';
-    return useDev
+    return useDevVersion
       ? DEV_URL + filename
       : STABLE_URL + 'v' + latestVersion + '/' + filename;
   };
@@ -262,8 +262,11 @@ const DownloadUpload = () => {
     );
   };
 
-  const showFirmwareDialog = (useDev: boolean) => {
-    setUseDev(useDev);
+  // useDev = true to force using the dev version
+  const showFirmwareDialog = (useDevVersion: boolean) => {
+    if (useDevVersion || data.emsesp_version.includes('dev')) {
+      setUseDev(true);
+    }
     setOpenDialog(true);
   };
 
@@ -393,13 +396,15 @@ const DownloadUpload = () => {
             {upgradeAvailable ? LL.UPGRADE_AVAILABLE() : LL.LATEST_VERSION()}
             {upgradeAvailable && (
               <Button
-                sx={{ ml: 2 }}
+                sx={{ ml: 2, textTransform: 'none' }}
                 size="small"
                 variant="outlined"
                 color="primary"
-                onClick={() => showFirmwareDialog(true)}
+                onClick={() => showFirmwareDialog(false)}
               >
-                {LL.INSTALL('v' + isDev ? latestDevVersion : latestVersion)}
+                {isDev
+                  ? LL.INSTALL('v' + latestDevVersion)
+                  : LL.INSTALL('v' + latestVersion)}
               </Button>
             )}
           </Typography>

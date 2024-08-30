@@ -335,7 +335,7 @@ const it: Translation = {
   SPECIAL_FUNCTIONS: 'Special Functions', // TODO translate
   WAIT_FIRMWARE: 'Please wait while the firmware is being uploaded. The device will restart automatically.', // TODO translate
   INSTALL_VERSION: 'This will install vesion {0}. Are you sure?', // TODO translate
-  SWITCH_DEV: 'Switch to development version', // TODO translate
+  SWITCH_DEV: 'switch to the development version', // TODO translate
   UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
   LATEST_VERSION: 'You are using the latest version.' // TODO translate
 };
