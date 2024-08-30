@@ -1,7 +1,9 @@
 
 # Modified from https://github.com/ayushsharma82/ElegantOTA
-
-# This is called during the platformIO upload process
+#
+# This is called during the PlatformIO upload process, when the target is 'upload'.
+# Use the file upload_cli.py for manual uploads outside PIO.
+#
 # To use create a pio_local.ini file in the project root and add the following:
 #  [env]
 #  upload_protocol = custom
@@ -12,7 +14,6 @@
 # and
 #  extra_scripts = scripts/upload.py
 #
-# This only works when the PlatformIO target is upload
 
 import requests
 import hashlib
