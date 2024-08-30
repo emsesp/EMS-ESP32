@@ -80,19 +80,6 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
 #endif
     }
 
-#ifndef EMSESP_STANDALONE
-    const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
-    root["has_loader"]                = partition != NULL && partition != esp_ota_get_running_partition();
-    partition                         = esp_ota_get_next_update_partition(nullptr);
-    if (partition) {
-        uint64_t buffer;
-        esp_partition_read(partition, 0, &buffer, 8);
-        root["has_partition"] = (buffer != 0xFFFFFFFFFFFFFFFF);
-    } else {
-        root["has_partition"] = false;
-    }
-#endif
-
     response->setLength();
     request->send(response);
 }
@@ -145,6 +132,18 @@ void WebStatusService::hardwareStatus(AsyncWebServerRequest * request) {
 
     root["model"] = EMSESP::system_.getBBQKeesGatewayDetails();
 
+    // check for a factory partition first
+    const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
+    root["has_loader"]                = partition != NULL && partition != esp_ota_get_running_partition();
+    partition                         = esp_ota_get_next_update_partition(nullptr);
+    if (partition) {
+        uint64_t buffer;
+        esp_partition_read(partition, 0, &buffer, 8);
+        root["has_partition"] = (buffer != 0xFFFFFFFFFFFFFFFF);
+    } else {
+        root["has_partition"] = false;
+    }
+
 #endif
 
     response->setLength();
@@ -160,7 +159,9 @@ void WebStatusService::checkUpgrade(AsyncWebServerRequest * request, JsonVariant
     std::string                latest_version = json["version"] | EMSESP_APP_VERSION;
     version::Semver200_version this_version(latest_version);
 
+#ifdef EMSESP_DEBUG
     emsesp::EMSESP::logger().debug("Checking for upgrade: %s > %s", EMSESP_APP_VERSION, latest_version.c_str());
+#endif
 
     root["upgradeable"] = (this_version > settings_version);
 
