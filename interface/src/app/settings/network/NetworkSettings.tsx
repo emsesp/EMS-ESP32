@@ -372,7 +372,7 @@ const NetworkSettings = () => {
                 startIcon={<CancelIcon />}
                 disabled={saving}
                 variant="outlined"
-                color="primary"
+                color="secondary"
                 type="submit"
                 onClick={loadData}
               >

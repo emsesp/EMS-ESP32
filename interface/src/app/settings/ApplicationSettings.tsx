@@ -813,7 +813,7 @@ const ApplicationSettings = () => {
             <Button
               startIcon={<CancelIcon />}
               variant="outlined"
-              color="primary"
+              color="secondary"
               type="submit"
               onClick={loadData}
             >

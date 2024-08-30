@@ -87,7 +87,7 @@ const DragNdrop = ({ onFileSelected }) => {
             <Button
               startIcon={<CancelIcon />}
               variant="outlined"
-              color="error"
+              color="secondary"
               onClick={(e) => handleRemoveFile(e)}
             >
               {LL.CANCEL()}
