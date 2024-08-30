@@ -47,16 +47,18 @@ const HardwareStatus = () => {
       <List>
         <ListItem>
           <ListItemAvatar>
-            <Avatar sx={{ bgcolor: '#003289', color: 'white' }}>
-              {data.model ? (
+            {data.model ? (
+              <Avatar sx={{ bgcolor: '#003289', color: 'white' }}>
                 <img
                   src={BBQKeesIcon}
                   style={{ width: 16, verticalAlign: 'middle' }}
                 />
-              ) : (
+              </Avatar>
+            ) : (
+              <Avatar sx={{ bgcolor: '#5f9a5f', color: 'white' }}>
                 <TapAndPlayIcon />
-              )}
-            </Avatar>
+              </Avatar>
+            )}
           </ListItemAvatar>
           <ListItemText
             primary={LL.HARDWARE() + ' ' + LL.DEVICE()}
