@@ -121,20 +121,18 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
     // did we just complete uploading a json file?
     if (request->_tempFile) {
         request->_tempFile.close(); // close the file handle as the upload is now done
-        emsesp::EMSESP::system_.store_nvs_values();
-        request->onDisconnect(RestartService::restartNow);
         AsyncWebServerResponse * response = request->beginResponse(200);
         request->send(response);
+        request->onDisconnect(RestartService::restartNow);
         return;
     }
 
     // check if it was a firmware upgrade
     // if no error, send the success response as a JSON
     if (_is_firmware && !request->_tempObject) {
-        emsesp::EMSESP::system_.store_nvs_values();
-        request->onDisconnect(RestartService::restartNow);
         AsyncWebServerResponse * response = request->beginResponse(200);
         request->send(response);
+        request->onDisconnect(RestartService::restartNow);
         return;
     }
 

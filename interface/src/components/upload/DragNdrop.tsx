@@ -8,7 +8,7 @@ import { Box, Button } from '@mui/material';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
-import './drag-drop.css';
+import './dragNdrop.css';
 
 const DragNdrop = ({ onFileSelected }) => {
   const [file, setFile] = useState<File>();

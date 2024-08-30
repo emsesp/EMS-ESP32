@@ -1,13 +1,13 @@
 import { type FC, useEffect, useRef, useState } from 'react';
 
-import * as SystemApi from 'api/system';
+import { readHardwareStatus } from 'api/system';
 
 import { useRequest } from 'alova/client';
 import { FormLoader } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
 const RESTART_TIMEOUT = 2 * 60 * 1000; // 2 minutes
-const POLL_INTERVAL = 1000; // every 1 second
+const POLL_INTERVAL = 2000; // every 2 seconds
 
 export interface RestartMonitorProps {
   message?: string;
@@ -16,10 +16,12 @@ export interface RestartMonitorProps {
 const RestartMonitor: FC<RestartMonitorProps> = ({ message }) => {
   const [failed, setFailed] = useState<boolean>(false);
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout>();
+
   const { LL } = useI18nContext();
+
   const timeoutAt = useRef(new Date().getTime() + RESTART_TIMEOUT);
 
-  const { send } = useRequest(SystemApi.readSystemStatus);
+  const { send } = useRequest(readHardwareStatus, { immediate: false });
 
   const poll = useRef(async () => {
     try {
@@ -35,7 +37,7 @@ const RestartMonitor: FC<RestartMonitorProps> = ({ message }) => {
   });
 
   useEffect(() => {
-    void poll.current();
+    setTimeoutId(setTimeout(poll.current, POLL_INTERVAL));
   }, []);
 
   useEffect(() => () => timeoutId && clearTimeout(timeoutId), [timeoutId]);

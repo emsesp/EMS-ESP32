@@ -52,23 +52,11 @@ const SystemStatus = () => {
   const { me } = useContext(AuthenticatedContext);
 
   const [confirmRestart, setConfirmRestart] = useState<boolean>(false);
-  const [processing, setProcessing] = useState<boolean>(false);
   const [restarting, setRestarting] = useState<boolean>();
 
   const { send: restartCommand } = useRequest(SystemApi.restart(), {
     immediate: false
   });
-
-  const { send: partitionCommand } = useRequest(SystemApi.partition(), {
-    immediate: false
-  });
-
-  const { send: factoryPartitionCommand } = useRequest(
-    SystemApi.factoryPartition(),
-    {
-      immediate: false
-    }
-  );
 
   const {
     data: data,
@@ -208,7 +196,6 @@ const SystemStatus = () => {
     value ? theme.palette.success.main : theme.palette.info.main;
 
   const restart = async () => {
-    setProcessing(true);
     await restartCommand()
       .then(() => {
         setRestarting(true);
@@ -218,37 +205,6 @@ const SystemStatus = () => {
       })
       .finally(() => {
         setConfirmRestart(false);
-        setProcessing(false);
-      });
-  };
-
-  const partition = async () => {
-    setProcessing(true);
-    await partitionCommand()
-      .then(() => {
-        setRestarting(true);
-      })
-      .catch((error: Error) => {
-        toast.error(error.message);
-      })
-      .finally(() => {
-        setConfirmRestart(false);
-        setProcessing(false);
-      });
-  };
-
-  const factoryPartition = async () => {
-    setProcessing(true);
-    await factoryPartitionCommand()
-      .then(() => {
-        setRestarting(true);
-      })
-      .catch((error: Error) => {
-        toast.error(error.message);
-      })
-      .finally(() => {
-        setConfirmRestart(false);
-        setProcessing(false);
       });
   };
 
@@ -265,38 +221,14 @@ const SystemStatus = () => {
           startIcon={<CancelIcon />}
           variant="outlined"
           onClick={() => setConfirmRestart(false)}
-          disabled={processing}
           color="secondary"
         >
           {LL.CANCEL()}
         </Button>
-        {data.has_loader && (
-          <Button
-            startIcon={<PowerSettingsNewIcon />}
-            variant="outlined"
-            onClick={factoryPartition}
-            disabled={processing}
-            color="warning"
-          >
-            EMS-ESP Boot
-          </Button>
-        )}
-        {data.has_partition && (
-          <Button
-            startIcon={<PowerSettingsNewIcon />}
-            variant="outlined"
-            onClick={partition}
-            disabled={processing}
-            color="warning"
-          >
-            Partition
-          </Button>
-        )}
         <Button
           startIcon={<PowerSettingsNewIcon />}
           variant="outlined"
           onClick={restart}
-          disabled={processing}
           color="error"
         >
           {LL.RESTART()}

@@ -8,8 +8,6 @@
 #include "SecurityManager.h"
 
 #define RESTART_SERVICE_PATH "/rest/restart"
-#define PARTITION_SERVICE_PATH "/rest/partition"
-#define FACTORYPARTITION_SERVICE_PATH "/rest/factoryPartition"
 
 class RestartService {
   public:
@@ -19,8 +17,6 @@ class RestartService {
 
   private:
     void restart(AsyncWebServerRequest * request);
-    void partition(AsyncWebServerRequest * request);
-    void factory(AsyncWebServerRequest * request);
 };
 
 #endif

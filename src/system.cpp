@@ -288,40 +288,50 @@ void System::store_nvs_values() {
 }
 
 // restart EMS-ESP
+// app0 or app1
+// on 16MB we have the additional boot and factory partitions
 void System::system_restart(const char * partitionname) {
 #ifndef EMSESP_STANDALONE
+    // see if we are forcing a partition to use
     if (partitionname != nullptr) {
+        // Factory partition - label will be "factory"
         const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, NULL);
         if (partition && strcmp(partition->label, partitionname) == 0) {
             esp_ota_set_boot_partition(partition);
-        } else if (strcmp(esp_ota_get_running_partition()->label, partitionname) != 0) {
-            partition = esp_ota_get_next_update_partition(NULL);
-            if (!partition) {
-                LOG_ERROR("Partition '%s' not found", partitionname);
-                return;
-            }
-            if (strcmp(partition->label, partitionname) != 0 && strcmp(partitionname, "boot") != 0) {
-                partition = esp_ota_get_next_update_partition(partition);
-                if (!partition || strcmp(partition->label, partitionname)) {
+        } else
+            // try and find the parition by name
+            if (strcmp(esp_ota_get_running_partition()->label, partitionname) != 0) {
+                partition = esp_ota_get_next_update_partition(nullptr);
+                if (!partition) {
                     LOG_ERROR("Partition '%s' not found", partitionname);
                     return;
                 }
+                if (strcmp(partition->label, partitionname) != 0 && strcmp(partitionname, "boot") != 0) {
+                    partition = esp_ota_get_next_update_partition(partition);
+                    if (!partition || strcmp(partition->label, partitionname)) {
+                        LOG_ERROR("Partition '%s' not found", partitionname);
+                        return;
+                    }
+                }
+                // check if partition is empty
+                uint64_t buffer;
+                esp_partition_read(partition, 0, &buffer, 8);
+                if (buffer == 0xFFFFFFFFFFFFFFFF) {
+                    LOG_ERROR("Partition '%s' is empty, not bootable", partition->label);
+                    return;
+                }
+                // set the boot partition
+                esp_ota_set_boot_partition(partition);
             }
-            uint64_t buffer;
-            esp_partition_read(partition, 0, &buffer, 8);
-            if (buffer == 0xFFFFFFFFFFFFFFFF) { // partition empty
-                LOG_ERROR("Partition '%s' is empty, not bootable", partition->label);
-                return;
-            }
-            esp_ota_set_boot_partition(partition);
-        }
         LOG_INFO("Restarting EMS-ESP from %s partition", partitionname);
     } else {
         LOG_INFO("Restarting EMS-ESP...");
     }
-    store_nvs_values();
-    Shell::loop_all();
-    delay(1000); // wait a second
+
+    restart_requested(false); // make sure it's not repeated
+    store_nvs_values();       // save any NVS values
+    Shell::loop_all();        // flush log to output
+    delay(1000);              // wait 1 second
     ESP.restart();
 #endif
 }
@@ -597,12 +607,13 @@ void System::upload_status(bool in_progress) {
 void System::loop() {
     // check if we're supposed to do a reset/restart
     if (restart_requested()) {
-        this->system_restart();
+        system_restart();
     }
 
 #ifndef EMSESP_STANDALONE
     myPButton_.check(); // check button press
 
+    // syslog
     if (syslog_enabled_) {
         syslog_.loop();
     }
@@ -1875,7 +1886,7 @@ bool System::uploadFirmwareURL(const char * url) {
         return false;
     }
 
-    // flush buffers so latest log messages are shown
+    // flush log buffers so latest messages are shown
     Shell::loop_all();
 
     // get tcp stream and send it to Updater

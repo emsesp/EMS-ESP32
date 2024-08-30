@@ -4,7 +4,6 @@ import { toast } from 'react-toastify';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DownloadIcon from '@mui/icons-material/GetApp';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
@@ -25,7 +24,13 @@ import {
   getSchedule,
   getSettings
 } from 'api/app';
-import { checkUpgrade, getDevVersion, getStableVersion } from 'api/system';
+import {
+  checkUpgrade,
+  getDevVersion,
+  getStableVersion,
+  restart,
+  uploadURL
+} from 'api/system';
 
 import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova/client';
@@ -33,7 +38,6 @@ import type { APIcall } from 'app/main/types';
 import RestartMonitor from 'app/status/RestartMonitor';
 import {
   FormLoader,
-  MessageBox,
   SectionContent,
   SingleUpload,
   useLayoutTitle
@@ -44,7 +48,6 @@ const DownloadUpload = () => {
   const { LL } = useI18nContext();
 
   const [restarting, setRestarting] = useState<boolean>(false);
-  const [restartNeeded, setRestartNeeded] = useState<boolean>(false);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [useDev, setUseDev] = useState<boolean>(false);
   const [upgradeAvailable, setUpgradeAvailable] = useState<boolean>(false);
@@ -89,24 +92,21 @@ const DownloadUpload = () => {
   } = useRequest(SystemApi.readHardwareStatus);
 
   const { send: sendUploadURL } = useRequest(
-    (data: { url: string }) => SystemApi.uploadURL(data),
+    (data: { url: string }) => uploadURL(data),
     {
       immediate: false
     }
   );
 
-  const { send: restartCommand } = useRequest(SystemApi.restart(), {
+  const { send: restartCommand } = useRequest(restart(), {
     immediate: false
   });
 
-  const restart = async () => {
-    await restartCommand()
-      .then(() => {
-        setRestarting(true);
-      })
-      .catch((error: Error) => {
-        toast.error(error.message);
-      });
+  const callRestart = async () => {
+    setRestarting(true);
+    await restartCommand().catch((error: Error) => {
+      toast.error(error.message);
+    });
   };
 
   const { send: sendCheckUpgrade } = useRequest(checkUpgrade, {
@@ -387,10 +387,11 @@ const DownloadUpload = () => {
               </Button>
             )}
           </Typography>
-          {upgradeAvailable ? (
-            <Typography mt={2} color="secondary">
-              <InfoOutlinedIcon color="secondary" sx={{ verticalAlign: 'middle' }} />
-              &nbsp;&nbsp;{LL.UPGRADE_AVAILABLE()}
+          <Typography mt={2} color="secondary">
+            <InfoOutlinedIcon color="secondary" sx={{ verticalAlign: 'middle' }} />
+            &nbsp;&nbsp;
+            {upgradeAvailable ? LL.UPGRADE_AVAILABLE() : LL.LATEST_VERSION()}
+            {upgradeAvailable && (
               <Button
                 sx={{ ml: 2 }}
                 size="small"
@@ -400,10 +401,9 @@ const DownloadUpload = () => {
               >
                 {LL.INSTALL('v' + isDev ? latestDevVersion : latestVersion)}
               </Button>
-            </Typography>
-          ) : (
-            <Typography mt={2}>{LL.LATEST_VERSION()}</Typography>
-          )}
+            )}
+          </Typography>
+
           {renderUploadDialog()}
         </Box>
 
@@ -411,24 +411,11 @@ const DownloadUpload = () => {
           {LL.UPLOAD()}
         </Typography>
 
-        <Box mb={2} color="warning.main">
+        <Box color="warning.main" sx={{ pb: 2 }}>
           <Typography variant="body2">{LL.UPLOAD_TEXT()}</Typography>
         </Box>
 
-        {restartNeeded ? (
-          <MessageBox mt={2} level="warning" message={LL.RESTART_TEXT(0)}>
-            <Button
-              startIcon={<PowerSettingsNewIcon />}
-              variant="contained"
-              color="error"
-              onClick={restart}
-            >
-              {LL.RESTART()}
-            </Button>
-          </MessageBox>
-        ) : (
-          <SingleUpload setRestartNeeded={setRestartNeeded} />
-        )}
+        <SingleUpload callRestart={callRestart} />
       </>
     );
   };
