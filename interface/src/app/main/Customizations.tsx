@@ -16,7 +16,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
   InputAdornment,
   Link,
   MenuItem,
@@ -25,6 +24,7 @@ import {
   ToggleButtonGroup,
   Typography
 } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 
 import { restart } from 'api/system';
 
@@ -514,7 +514,7 @@ const Customizations = () => {
           justifyContent="flex-start"
           alignItems="center"
         >
-          <Grid item xs={2}>
+          <Grid>
             <TextField
               size="small"
               variant="outlined"
@@ -522,16 +522,18 @@ const Customizations = () => {
               onChange={(event) => {
                 setSearch(event.target.value);
               }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon color="primary" sx={{ fontSize: 16 }} />
-                  </InputAdornment>
-                )
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon color="primary" sx={{ fontSize: 16 }} />
+                    </InputAdornment>
+                  )
+                }
               }}
             />
           </Grid>
-          <Grid item>
+          <Grid>
             <ToggleButtonGroup
               size="small"
               color="secondary"
@@ -557,7 +559,7 @@ const Customizations = () => {
               </ToggleButton>
             </ToggleButtonGroup>
           </Grid>
-          <Grid item>
+          <Grid>
             <Button
               size="small"
               sx={{ fontSize: 10 }}
@@ -570,7 +572,7 @@ const Customizations = () => {
               <OptionIcon type="web_exclude" isSet={false} />
             </Button>
           </Grid>
-          <Grid item>
+          <Grid>
             <Button
               size="small"
               sx={{ fontSize: 10 }}
@@ -583,7 +585,7 @@ const Customizations = () => {
               <OptionIcon type="web_exclude" isSet={true} />
             </Button>
           </Grid>
-          <Grid item>
+          <Grid>
             <Typography variant="subtitle2" color="primary">
               {LL.SHOWING()}&nbsp;{shown_data.length}/{deviceEntities.length}
               &nbsp;{LL.ENTITIES(deviceEntities.length)}

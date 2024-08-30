@@ -109,9 +109,11 @@ const SignIn = () => {
             onChange={updateLoginRequestValue}
             margin="normal"
             variant="outlined"
-            inputProps={{
-              autoCapitalize: 'none',
-              autoCorrect: 'off'
+            slotProps={{
+              input: {
+                autoCapitalize: 'none',
+                autoCorrect: 'off'
+              }
             }}
           />
           <ValidatedPasswordField

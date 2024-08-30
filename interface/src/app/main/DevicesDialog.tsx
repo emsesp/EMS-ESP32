@@ -11,12 +11,12 @@ import {
   DialogContent,
   DialogTitle,
   FormHelperText,
-  Grid,
   InputAdornment,
   MenuItem,
   TextField,
   Typography
 } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 
 import { dialogStyle } from 'CustomTheme';
 import type Schema from 'async-validator';
@@ -112,15 +112,14 @@ const DevicesDialog = ({
         <Box color="warning.main" p={0} pl={0} pr={0} mt={0} mb={2}>
           <Typography variant="body2">{editItem.id.slice(2)}</Typography>
         </Box>
-        <Grid>
-          <Grid item>
+        <Grid container>
+          <Grid size={12}>
             {editItem.l ? (
               <TextField
                 name="v"
                 label={LL.VALUE(0)}
                 value={editItem.v}
                 disabled={!writeable}
-                // autoFocus
                 sx={{ width: '30ch' }}
                 select
                 onChange={updateFormValue}
@@ -142,17 +141,17 @@ const DevicesDialog = ({
                 type="number"
                 sx={{ width: '30ch' }}
                 onChange={updateFormValue}
-                inputProps={
-                  editItem.s
+                slotProps={{
+                  htmlInput: editItem.s
                     ? { min: editItem.m, max: editItem.x, step: editItem.s }
-                    : {}
-                }
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      {setUom(editItem.u)}
-                    </InputAdornment>
-                  )
+                    : {},
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        {setUom(editItem.u)}
+                      </InputAdornment>
+                    )
+                  }
                 }}
               />
             ) : (
@@ -162,7 +161,6 @@ const DevicesDialog = ({
                 label={LL.VALUE(0)}
                 value={editItem.v}
                 disabled={!writeable}
-                // autoFocus
                 sx={{ width: '30ch' }}
                 multiline={editItem.u ? false : true}
                 onChange={updateFormValue}
@@ -170,7 +168,7 @@ const DevicesDialog = ({
             )}
           </Grid>
           {writeable && (
-            <Grid item>
+            <Grid>
               <FormHelperText>{showHelperText(editItem)}</FormHelperText>
             </Grid>
           )}

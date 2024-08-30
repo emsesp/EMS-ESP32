@@ -420,12 +420,11 @@ export const enum DeviceValueType {
   TIME, // same as UINT24
   UINT32,
   ENUM,
-  STRING,
+  STRING, // RAW
   CMD
 }
 
 export const DeviceValueTypeNames = [
-  //
   'BOOL',
   'INT8',
   'UINT8',

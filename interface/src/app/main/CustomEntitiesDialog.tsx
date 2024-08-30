@@ -12,11 +12,11 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
   InputAdornment,
   MenuItem,
   TextField
 } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 
 import { dialogStyle } from 'CustomTheme';
 import type Schema from 'async-validator';
@@ -100,8 +100,8 @@ const CustomEntitiesDialog = ({
         <Box display="flex" flexWrap="wrap" mb={1}>
           <Box flexWrap="nowrap" whiteSpace="nowrap" />
         </Box>
-        <Grid container spacing={2}>
-          <Grid item xs={4}>
+        <Grid container spacing={1} rowSpacing={0}>
+          <Grid size={12}>
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="name"
@@ -112,7 +112,7 @@ const CustomEntitiesDialog = ({
               onChange={updateFormValue}
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid>
             <TextField
               name="ram"
               label={LL.VALUE(0) + ' ' + LL.TYPE(1)}
@@ -128,7 +128,7 @@ const CustomEntitiesDialog = ({
             </TextField>
           </Grid>
           {editItem.ram === 1 && (
-            <Grid item xs={4}>
+            <Grid>
               <TextField
                 name="value"
                 label={LL.DEFAULT(0) + ' ' + LL.VALUE(0)}
@@ -143,7 +143,7 @@ const CustomEntitiesDialog = ({
           )}
           {editItem.ram === 0 && (
             <>
-              <Grid item xs={4} mt={3}>
+              <Grid mt={3} size={9}>
                 <BlockFormControlLabel
                   control={
                     <Checkbox
@@ -155,63 +155,67 @@ const CustomEntitiesDialog = ({
                   label={LL.WRITEABLE()}
                 />
               </Grid>
-              <Grid item xs={4}>
+              <Grid>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="device_id"
                   label={LL.ID_OF(LL.DEVICE())}
                   margin="normal"
+                  sx={{ width: '11ch' }}
                   type="string"
-                  fullWidth
                   value={editItem.device_id as string}
                   onChange={updateFormValue}
-                  inputProps={{ style: { textTransform: 'uppercase' } }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">0x</InputAdornment>
-                    )
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">0x</InputAdornment>
+                      )
+                    },
+                    htmlInput: { style: { textTransform: 'uppercase' } }
                   }}
                 />
               </Grid>
-              <Grid item xs={4}>
+              <Grid>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="type_id"
                   label={LL.ID_OF(LL.TYPE(1))}
                   margin="normal"
-                  fullWidth
+                  sx={{ width: '11ch' }}
                   type="string"
                   value={editItem.type_id as string}
                   onChange={updateFormValue}
-                  inputProps={{ style: { textTransform: 'uppercase' } }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">0x</InputAdornment>
-                    )
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">0x</InputAdornment>
+                      )
+                    },
+                    htmlInput: { style: { textTransform: 'uppercase' } }
                   }}
                 />
               </Grid>
-              <Grid item xs={4}>
+              <Grid>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="offset"
                   label={LL.OFFSET()}
                   margin="normal"
-                  fullWidth
+                  sx={{ width: '11ch' }}
                   type="number"
                   value={editItem.offset}
                   onChange={updateFormValue}
                 />
               </Grid>
-              <Grid item xs={4}>
+              <Grid>
                 <TextField
                   name="value_type"
                   label={LL.VALUE(0) + ' ' + LL.TYPE(1)}
                   value={editItem.value_type}
                   variant="outlined"
+                  sx={{ width: '11ch' }}
                   onChange={updateFormValue}
                   margin="normal"
-                  fullWidth
                   select
                 >
                   <MenuItem value={DeviceValueType.BOOL}>
@@ -247,26 +251,28 @@ const CustomEntitiesDialog = ({
               {editItem.value_type !== DeviceValueType.BOOL &&
                 editItem.value_type !== DeviceValueType.STRING && (
                   <>
-                    <Grid item xs={4}>
+                    <Grid>
                       <TextField
                         name="factor"
                         label={LL.FACTOR()}
                         value={numberValue(editItem.factor)}
                         variant="outlined"
                         onChange={updateFormValue}
-                        fullWidth
+                        sx={{ width: '11ch' }}
                         margin="normal"
                         type="number"
-                        inputProps={{ step: '0.001' }}
+                        slotProps={{
+                          htmlInput: { step: '0.001' }
+                        }}
                       />
                     </Grid>
-                    <Grid item xs={4}>
+                    <Grid>
                       <TextField
                         name="uom"
                         label={LL.UNIT()}
                         value={editItem.uom}
                         margin="normal"
-                        fullWidth
+                        sx={{ width: '11ch' }}
                         onChange={updateFormValue}
                         select
                       >
@@ -281,20 +287,21 @@ const CustomEntitiesDialog = ({
                 )}
               {editItem.value_type === DeviceValueType.STRING &&
                 editItem.device_id !== '0' && (
-                  <Grid item xs={4}>
+                  <Grid>
                     <TextField
                       name="factor"
                       label="Bytes"
                       value={editItem.factor}
                       variant="outlined"
                       onChange={updateFormValue}
-                      fullWidth
                       margin="normal"
                       type="number"
-                      inputProps={{
-                        min: '1',
-                        max: String(256 - editItem.offset),
-                        step: '1'
+                      slotProps={{
+                        htmlInput: {
+                          min: '1',
+                          max: String(256 - editItem.offset),
+                          step: '1'
+                        }
                       }}
                     />
                   </Grid>
@@ -303,7 +310,6 @@ const CustomEntitiesDialog = ({
           )}
         </Grid>
       </DialogContent>
-
       <DialogActions>
         {!creating && (
           <Box flexGrow={1}>

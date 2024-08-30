@@ -9,12 +9,12 @@ import {
   Button,
   Checkbox,
   Divider,
-  Grid,
   InputAdornment,
   MenuItem,
   TextField,
   Typography
 } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 
 import { readHardwareStatus, restart } from 'api/system';
 
@@ -114,6 +114,19 @@ const ApplicationSettings = () => {
 
   useLayoutTitle(LL.SETTINGS_OF(LL.APPLICATION()));
 
+  const SecondsInputProps = {
+    endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
+  };
+  const MilliSecondsInputProps = {
+    endAdornment: <InputAdornment position="end">ms</InputAdornment>
+  };
+  const MinutesInputProps = {
+    endAdornment: <InputAdornment position="end">{LL.MINUTES()}</InputAdornment>
+  };
+  const HoursInputProps = {
+    endAdornment: <InputAdornment position="end">{LL.HOURS()}</InputAdornment>
+  };
+
   const content = () => {
     if (!data || !hardwareData) {
       return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
@@ -191,19 +204,12 @@ const ApplicationSettings = () => {
           label={LL.ENABLE_MODBUS()}
         />
         {data.modbus_enabled && (
-          <Grid
-            container
-            spacing={1}
-            direction="row"
-            justifyContent="flex-start"
-            alignItems="flex-start"
-          >
-            <Grid item xs={12} sm={6}>
+          <Grid container spacing={1} rowSpacing={0}>
+            <Grid>
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="modbus_max_clients"
                 label={LL.AP_MAX_CLIENTS()}
-                fullWidth
                 variant="outlined"
                 value={numberValue(data.modbus_max_clients)}
                 type="number"
@@ -211,12 +217,11 @@ const ApplicationSettings = () => {
                 margin="normal"
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid>
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="modbus_port"
                 label="Port"
-                fullWidth
                 variant="outlined"
                 value={numberValue(data.modbus_port)}
                 type="number"
@@ -224,15 +229,14 @@ const ApplicationSettings = () => {
                 margin="normal"
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid>
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="modbus_timeout"
                 label="Timeout"
-                InputProps={{
-                  endAdornment: <InputAdornment position="end">ms</InputAdornment>
+                slotProps={{
+                  input: MilliSecondsInputProps
                 }}
-                fullWidth
                 variant="outlined"
                 value={numberValue(data.modbus_timeout)}
                 type="number"
@@ -254,31 +258,23 @@ const ApplicationSettings = () => {
           label={LL.ENABLE_SYSLOG()}
         />
         {data.syslog_enabled && (
-          <Grid
-            container
-            spacing={1}
-            direction="row"
-            justifyContent="flex-start"
-            alignItems="flex-start"
-          >
-            <Grid item xs={12} sm={6}>
+          <Grid container spacing={1} rowSpacing={0}>
+            <Grid>
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="syslog_host"
                 label="Host"
-                fullWidth
                 variant="outlined"
                 value={data.syslog_host}
                 onChange={updateFormValue}
                 margin="normal"
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid>
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="syslog_port"
                 label="Port"
-                fullWidth
                 variant="outlined"
                 value={numberValue(data.syslog_port)}
                 type="number"
@@ -286,7 +282,7 @@ const ApplicationSettings = () => {
                 margin="normal"
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid>
               <TextField
                 name="syslog_level"
                 label={LL.LOG_LEVEL()}
@@ -305,17 +301,14 @@ const ApplicationSettings = () => {
                 <MenuItem value={9}>ALL</MenuItem>
               </TextField>
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid>
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="syslog_mark_interval"
                 label={LL.MARK_INTERVAL()}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
-                  )
+                slotProps={{
+                  input: SecondsInputProps
                 }}
-                fullWidth
                 variant="outlined"
                 value={numberValue(data.syslog_mark_interval)}
                 type="number"
@@ -358,43 +351,37 @@ const ApplicationSettings = () => {
         <Typography sx={{ pb: 1, pt: 2 }} variant="h6" color="primary">
           {LL.FORMATTING_OPTIONS()}
         </Typography>
-        <Grid item>
-          <TextField
-            name="locale"
-            label={LL.LANGUAGE_ENTITIES()}
-            value={data.locale}
-            fullWidth
-            variant="outlined"
-            onChange={updateFormValue}
-            margin="normal"
-            select
-          >
-            <MenuItem value="de">Deutsch (DE)</MenuItem>
-            <MenuItem value="en">English (EN)</MenuItem>
-            <MenuItem value="fr">Français (FR)</MenuItem>
-            <MenuItem value="it">Italiano (IT)</MenuItem>
-            <MenuItem value="nl">Nederlands (NL)</MenuItem>
-            <MenuItem value="no">Norsk (NO)</MenuItem>
-            <MenuItem value="pl">Polski (PL)</MenuItem>
-            <MenuItem value="sk">Slovenčina (SK)</MenuItem>
-            <MenuItem value="sv">Svenska (SV)</MenuItem>
-            <MenuItem value="tr">Türk (TR)</MenuItem>
-          </TextField>
-        </Grid>
-        <Grid
-          container
-          spacing={1}
-          direction="row"
-          justifyContent="flex-start"
-          alignItems="flex-start"
-        >
-          <Grid item xs={12} sm={6} md={4}>
+        <Grid container spacing={1}>
+          <Grid size={3}>
+            <TextField
+              name="locale"
+              label={LL.LANGUAGE_ENTITIES()}
+              value={data.locale}
+              fullWidth
+              variant="outlined"
+              onChange={updateFormValue}
+              margin="normal"
+              select
+            >
+              <MenuItem value="de">Deutsch (DE)</MenuItem>
+              <MenuItem value="en">English (EN)</MenuItem>
+              <MenuItem value="fr">Français (FR)</MenuItem>
+              <MenuItem value="it">Italiano (IT)</MenuItem>
+              <MenuItem value="nl">Nederlands (NL)</MenuItem>
+              <MenuItem value="no">Norsk (NO)</MenuItem>
+              <MenuItem value="pl">Polski (PL)</MenuItem>
+              <MenuItem value="sk">Slovenčina (SK)</MenuItem>
+              <MenuItem value="sv">Svenska (SV)</MenuItem>
+              <MenuItem value="tr">Türk (TR)</MenuItem>
+            </TextField>
+          </Grid>
+          <Grid size={3}>
             <TextField
               name="bool_dashboard"
               label={LL.BOOLEAN_FORMAT_DASHBOARD()}
               value={data.bool_dashboard}
-              fullWidth
               variant="outlined"
+              fullWidth
               onChange={updateFormValue}
               margin="normal"
               select
@@ -405,13 +392,13 @@ const ApplicationSettings = () => {
               <MenuItem value={5}>1/0</MenuItem>
             </TextField>
           </Grid>
-          <Grid item xs={12} sm={6} md={4}>
+          <Grid size={3}>
             <TextField
               name="bool_format"
               label={LL.BOOLEAN_FORMAT_API()}
               value={data.bool_format}
-              fullWidth
               variant="outlined"
+              fullWidth
               onChange={updateFormValue}
               margin="normal"
               select
@@ -424,13 +411,13 @@ const ApplicationSettings = () => {
               <MenuItem value={6}>1/0</MenuItem>
             </TextField>
           </Grid>
-          <Grid item xs={12} sm={6} md={4}>
+          <Grid size={3}>
             <TextField
               name="enum_format"
               label={LL.ENUM_FORMAT()}
               value={data.enum_format}
-              fullWidth
               variant="outlined"
+              fullWidth
               onChange={updateFormValue}
               margin="normal"
               select
@@ -469,7 +456,6 @@ const ApplicationSettings = () => {
           label={LL.BOARD_PROFILE()}
           value={data.board_profile}
           disabled={processingBoard || hardwareData.model.startsWith('BBQKees')}
-          fullWidth
           variant="outlined"
           onChange={changeBoardProfile}
           margin="normal"
@@ -483,15 +469,8 @@ const ApplicationSettings = () => {
         </TextField>
         {data.board_profile === 'CUSTOM' && (
           <>
-            <Grid
-              container
-              spacing={1}
-              sx={{ pt: 1 }}
-              direction="row"
-              justifyContent="flex-start"
-              alignItems="flex-start"
-            >
-              <Grid item xs={12} sm={6} md={4}>
+            <Grid container spacing={1} rowSpacing={0}>
+              <Grid>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="rx_gpio"
@@ -504,7 +483,7 @@ const ApplicationSettings = () => {
                   margin="normal"
                 />
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="tx_gpio"
@@ -517,7 +496,7 @@ const ApplicationSettings = () => {
                   margin="normal"
                 />
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="pbutton_gpio"
@@ -530,7 +509,7 @@ const ApplicationSettings = () => {
                   margin="normal"
                 />
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="dallas_gpio"
@@ -545,7 +524,7 @@ const ApplicationSettings = () => {
                   margin="normal"
                 />
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="led_gpio"
@@ -558,7 +537,7 @@ const ApplicationSettings = () => {
                   margin="normal"
                 />
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid>
                 <TextField
                   name="phy_type"
                   label={LL.PHY_TYPE()}
@@ -576,15 +555,8 @@ const ApplicationSettings = () => {
               </Grid>
             </Grid>
             {data.phy_type !== 0 && (
-              <Grid
-                container
-                spacing={1}
-                sx={{ pt: 1 }}
-                direction="row"
-                justifyContent="flex-start"
-                alignItems="flex-start"
-              >
-                <Grid item xs={12} sm={6} md={4}>
+              <Grid container spacing={1} rowSpacing={0}>
+                <Grid>
                   <TextField
                     name="eth_power"
                     label={LL.GPIO_OF('PHY Power') + ' (-1=' + LL.DISABLED(1) + ')'}
@@ -596,7 +568,7 @@ const ApplicationSettings = () => {
                     margin="normal"
                   />
                 </Grid>
-                <Grid item xs={12} sm={6} md={4}>
+                <Grid>
                   <TextField
                     name="eth_phy_addr"
                     label={LL.ADDRESS_OF('PHY I²C')}
@@ -608,7 +580,7 @@ const ApplicationSettings = () => {
                     margin="normal"
                   />
                 </Grid>
-                <Grid item xs={12} sm={6} md={4}>
+                <Grid>
                   <TextField
                     name="eth_clock_mode"
                     label="PHY Clk"
@@ -629,14 +601,8 @@ const ApplicationSettings = () => {
             )}
           </>
         )}
-        <Grid
-          container
-          spacing={1}
-          direction="row"
-          justifyContent="flex-start"
-          alignItems="flex-start"
-        >
-          <Grid item xs={12} sm={6}>
+        <Grid container spacing={1} rowSpacing={0}>
+          <Grid>
             <TextField
               name="tx_mode"
               label={LL.TX_MODE()}
@@ -653,7 +619,7 @@ const ApplicationSettings = () => {
               <MenuItem value={4}>{LL.HARDWARE()}</MenuItem>
             </TextField>
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid>
             <TextField
               name="ems_bus_id"
               label={LL.ID_OF(LL.EMS_BUS(0))}
@@ -741,10 +707,8 @@ const ApplicationSettings = () => {
               fieldErrors={fieldErrors}
               name="remote_timeout"
               label={LL.REMOTE_TIMEOUT()}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">{LL.HOURS()}</InputAdornment>
-                )
+              slotProps={{
+                input: HoursInputProps
               }}
               variant="outlined"
               value={numberValue(data.remote_timeout)}
@@ -753,13 +717,7 @@ const ApplicationSettings = () => {
             />
           </Box>
         )}
-        <Grid
-          container
-          spacing={0}
-          direction="row"
-          justifyContent="flex-start"
-          alignItems="flex-start"
-        >
+        <Grid container spacing={1} rowSpacing={0}>
           <BlockFormControlLabel
             control={
               <Checkbox
@@ -782,25 +740,15 @@ const ApplicationSettings = () => {
             disabled={!data.shower_timer}
           />
         </Grid>
-        <Grid
-          container
-          sx={{ pt: 2 }}
-          rowSpacing={3}
-          spacing={1}
-          direction="row"
-          justifyContent="flex-start"
-          alignItems="flex-start"
-        >
+        <Grid container spacing={1} rowSpacing={2} sx={{ pt: 2 }}>
           {data.shower_timer && (
-            <Grid item xs={12} sm={6}>
+            <Grid>
               <ValidatedTextField
                 fieldErrors={fieldErrors}
                 name="shower_min_duration"
                 label={LL.MIN_DURATION()}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
-                  )
+                slotProps={{
+                  input: SecondsInputProps
                 }}
                 variant="outlined"
                 value={numberValue(data.shower_min_duration)}
@@ -812,15 +760,13 @@ const ApplicationSettings = () => {
           )}
           {data.shower_alert && (
             <>
-              <Grid item xs={12} sm={6}>
+              <Grid>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="shower_alert_trigger"
                   label={LL.TRIGGER_TIME()}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">{LL.MINUTES()}</InputAdornment>
-                    )
+                  slotProps={{
+                    input: MinutesInputProps
                   }}
                   variant="outlined"
                   value={numberValue(data.shower_alert_trigger)}
@@ -830,15 +776,13 @@ const ApplicationSettings = () => {
                   disabled={!data.shower_timer}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
                   name="shower_alert_coldshot"
                   label={LL.COLD_SHOT_DURATION()}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
-                    )
+                  slotProps={{
+                    input: SecondsInputProps
                   }}
                   variant="outlined"
                   value={numberValue(data.shower_alert_coldshot)}

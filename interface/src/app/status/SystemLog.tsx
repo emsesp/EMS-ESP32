@@ -3,15 +3,8 @@ import { toast } from 'react-toastify';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
 import WarningIcon from '@mui/icons-material/Warning';
-import {
-  Box,
-  Button,
-  Checkbox,
-  Grid,
-  MenuItem,
-  TextField,
-  styled
-} from '@mui/material';
+import { Box, Button, Checkbox, MenuItem, TextField, styled } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 
 import * as SystemApi from 'api/system';
 import { fetchLogES } from 'api/system';
@@ -177,14 +170,8 @@ const SystemLog = () => {
 
     return (
       <>
-        <Grid
-          container
-          spacing={3}
-          direction="row"
-          justifyContent="flex-start"
-          alignItems="center"
-        >
-          <Grid item xs={4}>
+        <Grid container spacing={1} alignItems="center">
+          <Grid size={2}>
             <TextField
               name="level"
               label={LL.LOG_LEVEL()}
@@ -203,7 +190,7 @@ const SystemLog = () => {
               <MenuItem value={9}>ALL</MenuItem>
             </TextField>
           </Grid>
-          <Grid item xs={4}>
+          <Grid size={2}>
             <TextField
               name="max_messages"
               label={LL.BUFFER_SIZE()}
@@ -220,7 +207,7 @@ const SystemLog = () => {
               <MenuItem value={100}>100</MenuItem>
             </TextField>
           </Grid>
-          <Grid item xs={2}>
+          <Grid>
             <BlockFormControlLabel
               control={
                 <Checkbox
@@ -232,32 +219,24 @@ const SystemLog = () => {
               label={LL.COMPACT()}
             />
           </Grid>
-          <Box
-            sx={{
-              '& button, & a, & .MuiCard-root': {
-                ml: 3
-              }
-            }}
+          <Button
+            startIcon={<DownloadIcon />}
+            variant="outlined"
+            color="secondary"
+            onClick={onDownload}
           >
+            {LL.EXPORT()}
+          </Button>
+          {dirtyFlags && dirtyFlags.length !== 0 && (
             <Button
-              startIcon={<DownloadIcon />}
-              variant="outlined"
-              color="secondary"
-              onClick={onDownload}
+              startIcon={<WarningIcon color="warning" />}
+              variant="contained"
+              color="info"
+              onClick={saveSettings}
             >
-              {LL.EXPORT()}
+              {LL.APPLY_CHANGES(dirtyFlags.length)}
             </Button>
-            {dirtyFlags && dirtyFlags.length !== 0 && (
-              <Button
-                startIcon={<WarningIcon color="warning" />}
-                variant="contained"
-                color="info"
-                onClick={saveSettings}
-              >
-                {LL.APPLY_CHANGES(dirtyFlags.length)}
-              </Button>
-            )}
-          </Box>
+          )}
         </Grid>
         <Box
           sx={{

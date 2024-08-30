@@ -10,10 +10,10 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
   TextField,
   Typography
 } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 
 import { dialogStyle } from 'CustomTheme';
 import { useI18nContext } from 'i18n/i18n-react';
@@ -81,7 +81,7 @@ const CustomizationsDialog = ({
     <Dialog sx={dialogStyle} open={open} onClose={handleClose}>
       <DialogTitle>{LL.EDIT() + ' ' + LL.ENTITY()}</DialogTitle>
       <DialogContent dividers>
-        <Grid container direction="row">
+        <Grid container>
           <Typography variant="body2" color="warning.main">
             {LL.ID_OF(LL.ENTITY())}:&nbsp;
           </Typography>
@@ -112,19 +112,18 @@ const CustomizationsDialog = ({
           <EntityMaskToggle onUpdate={updateDeviceEntity} de={editItem} />
         </Box>
         <Grid container spacing={1}>
-          <Grid item>
+          <Grid>
             <TextField
               name="cn"
               label={LL.NEW_NAME_OF(LL.ENTITY())}
               value={editItem.cn}
-              // autoFocus
               sx={{ width: '30ch' }}
               onChange={updateFormValue}
             />
           </Grid>
           {isWriteableNumber && (
             <>
-              <Grid item>
+              <Grid>
                 <TextField
                   name="mi"
                   label={LL.MIN()}
@@ -134,7 +133,7 @@ const CustomizationsDialog = ({
                   onChange={updateFormValue}
                 />
               </Grid>
-              <Grid item>
+              <Grid>
                 <TextField
                   name="ma"
                   label={LL.MAX()}

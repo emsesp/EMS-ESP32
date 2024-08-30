@@ -134,8 +134,10 @@ const NTPStatus = () => {
           onChange={updateLocalTime}
           disabled={processing}
           fullWidth
-          InputLabelProps={{
-            shrink: true
+          slotProps={{
+            inputLabel: {
+              shrink: true
+            }
           }}
         />
       </DialogContent>
