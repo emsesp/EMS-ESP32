@@ -556,7 +556,7 @@ const Devices = () => {
               </Header>
               <Body>
                 {tableList.length === 0 && (
-                  <CircularProgress sx={{ margin: 1 }} size={24} />
+                  <CircularProgress sx={{ margin: 1 }} size={18} />
                 )}
                 {tableList.map((device: Device) => (
                   <Row key={device.id} item={device}>
