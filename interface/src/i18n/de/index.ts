@@ -174,7 +174,7 @@ const de: Translation = {
   FACTORY_RESET: 'Werkseinstellung',
   SYSTEM_FACTORY_TEXT: 'EMS-ESP wurde auf Werkseinstellung gesetzt und startet als Zugangspunkt neu',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Sind Sie sicher alle Einstellungen auf Werkseinstellung zu setzen?',
-  STABLE: 'Stable', // TODO translate
+  STABLE: 'Stabil',
   DEVELOPMENT: 'Entwicklungs',
   RELEASE_NOTES: 'Versionshinweise',
   EMS_ESP_VER: 'EMS-ESP Version',
@@ -333,11 +333,11 @@ const de: Translation = {
   SERVICES: 'Dienste',
   ALLVALUES: 'Alle Werte',
   SPECIAL_FUNCTIONS: 'Sonderfunktionen',
-  WAIT_FIRMWARE: 'Please wait while the firmware is being uploaded. The device will restart automatically.', // TODO translate
-  INSTALL_VERSION: 'This will install vesion {0}. Are you sure?', // TODO translate
-  SWITCH_DEV: 'Switch to development version', // TODO translate
-  UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
-  LATEST_VERSION: 'You are using the latest version.' // TODO translate
+  WAIT_FIRMWARE: 'Bitte warten Sie, während die Firmware hochgeladen wird. Das Gerät wird automatisch neu gestartet.',
+  INSTALL_VERSION: 'Dadurch wird die Version installiert {0}. Sind Sie sicher?',
+  SWITCH_DEV: 'Wechseln Sie zur Entwicklungsversion',
+  UPGRADE_AVAILABLE: 'Es ist ein Firmware-Upgrade verfügbar!',
+  LATEST_VERSION: 'Sie verwenden die neueste Version.'
 };
 
 export default de;
