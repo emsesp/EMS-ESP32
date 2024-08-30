@@ -54,7 +54,7 @@ const CustomEntities = () => {
 
   useEffect(() => {
     const timer = setInterval(async () => {
-      if (dialogOpen) {
+      if (dialogOpen || numChanges > 0) {
         return;
       }
       await fetchEntities();
