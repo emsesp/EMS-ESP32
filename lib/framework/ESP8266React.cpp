@@ -14,9 +14,7 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
     , _uploadFileService(server, &_securitySettingsService)
     , _mqttSettingsService(server, fs, &_securitySettingsService)
     , _mqttStatus(server, &_mqttSettingsService, &_securitySettingsService)
-    , _authenticationService(server, &_securitySettingsService)
-    , _restartService(server, &_securitySettingsService)
-    , _factoryResetService(server, fs, &_securitySettingsService) {
+    , _authenticationService(server, &_securitySettingsService) {
     //
     // Serve static web resources
     //

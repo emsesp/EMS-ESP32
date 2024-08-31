@@ -1,7 +1,6 @@
 #ifndef UploadFileService_h
 #define UploadFileService_h
 
-#include "RestartService.h"
 #include "SecurityManager.h"
 
 #include <Arduino.h>
