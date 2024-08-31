@@ -10,12 +10,6 @@ export const readHardwareStatus = () =>
 export const readSystemStatus = () =>
   alovaInstance.Get<SystemStatus>('/rest/systemStatus');
 
-// commands
-export const restart = () => alovaInstance.Post('/rest/restart');
-export const partition = () => alovaInstance.Post('/rest/partition');
-export const factoryPartition = () => alovaInstance.Post('/rest/factoryPartition');
-export const factoryReset = () => alovaInstance.Post('/rest/factoryReset');
-
 // SystemLog
 export const readLogSettings = () =>
   alovaInstance.Get<LogSettings>(`/rest/logSettings`);

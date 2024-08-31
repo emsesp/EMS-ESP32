@@ -26,8 +26,6 @@ import {
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 
-import { restart } from 'api/system';
-
 import {
   Body,
   Cell,
@@ -51,6 +49,7 @@ import {
 import { useI18nContext } from 'i18n/i18n-react';
 
 import {
+  API,
   readDeviceEntities,
   readDevices,
   resetCustomizations,
@@ -61,7 +60,7 @@ import SettingsCustomizationsDialog from './CustomizationsDialog';
 import EntityMaskToggle from './EntityMaskToggle';
 import OptionIcon from './OptionIcon';
 import { DeviceEntityMask } from './types';
-import type { DeviceEntity, DeviceShort } from './types';
+import type { APIcall, DeviceEntity, DeviceShort } from './types';
 
 export const APIURL = window.location.origin + '/api/';
 
@@ -84,6 +83,10 @@ const Customizations = () => {
 
   // fetch devices first
   const { data: devices, send: fetchDevices } = useRequest(readDevices);
+
+  const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
+    immediate: false
+  });
 
   const [selectedDevice, setSelectedDevice] = useState<number>(
     Number(useLocation().state) || -1
@@ -132,9 +135,14 @@ const Customizations = () => {
     );
   };
 
-  const { send: sendRestart } = useRequest(restart(), {
-    immediate: false
-  });
+  const doRestart = async () => {
+    setRestarting(true);
+    await sendAPI({ device: 'system', cmd: 'restart', id: -1 }).catch(
+      (error: Error) => {
+        toast.error(error.message);
+      }
+    );
+  };
 
   const entities_theme = useTheme({
     Table: `
@@ -246,13 +254,6 @@ const Customizations = () => {
       }
     }
   }, [devices, selectedDevice]);
-
-  const doRestart = async () => {
-    await sendRestart().catch((error: Error) => {
-      toast.error(error.message);
-    });
-    setRestarting(true);
-  };
 
   function formatValue(value: unknown) {
     if (typeof value === 'number') {
@@ -509,7 +510,7 @@ const Customizations = () => {
           container
           mb={1}
           mt={0}
-          spacing={1}
+          spacing={2}
           direction="row"
           justifyContent="flex-start"
           alignItems="center"

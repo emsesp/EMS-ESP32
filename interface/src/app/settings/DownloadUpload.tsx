@@ -28,7 +28,6 @@ import {
   checkUpgrade,
   getDevVersion,
   getStableVersion,
-  restart,
   uploadURL
 } from 'api/system';
 
@@ -76,7 +75,11 @@ const DownloadUpload = () => {
     saveFile(event.data, 'schedule.json');
   });
 
-  const { send: getAPI } = useRequest((data: APIcall) => API(data), {
+  const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
+    immediate: false
+  });
+
+  const { send: sendAPIandSave } = useRequest((data: APIcall) => API(data), {
     immediate: false
   }).onSuccess((event) => {
     saveFile(
@@ -98,15 +101,13 @@ const DownloadUpload = () => {
     }
   );
 
-  const { send: restartCommand } = useRequest(restart(), {
-    immediate: false
-  });
-
-  const callRestart = async () => {
+  const doRestart = async () => {
     setRestarting(true);
-    await restartCommand().catch((error: Error) => {
-      toast.error(error.message);
-    });
+    await sendAPI({ device: 'system', cmd: 'restart', id: -1 }).catch(
+      (error: Error) => {
+        toast.error(error.message);
+      }
+    );
   };
 
   const { send: sendCheckUpgrade } = useRequest(checkUpgrade, {
@@ -200,8 +201,8 @@ const DownloadUpload = () => {
     });
   };
 
-  const callAPI = async (device: string, entity: string) => {
-    await getAPI({ device, entity, id: 0 }).catch((error: Error) => {
+  const callAPIandSave = async (device: string, cmd: string) => {
+    await sendAPIandSave({ device, cmd, id: 0 }).catch((error: Error) => {
       toast.error(error.message);
     });
   };
@@ -291,7 +292,7 @@ const DownloadUpload = () => {
             startIcon={<DownloadIcon />}
             variant="outlined"
             color="primary"
-            onClick={() => callAPI('system', 'info')}
+            onClick={() => callAPIandSave('system', 'info')}
           >
             {LL.SUPPORT_INFORMATION(0)}
           </Button>
@@ -300,7 +301,7 @@ const DownloadUpload = () => {
             startIcon={<DownloadIcon />}
             variant="outlined"
             color="primary"
-            onClick={() => callAPI('system', 'allvalues')}
+            onClick={() => callAPIandSave('system', 'allvalues')}
           >
             {LL.ALLVALUES()}
           </Button>
@@ -420,15 +421,13 @@ const DownloadUpload = () => {
           <Typography variant="body2">{LL.UPLOAD_TEXT()}</Typography>
         </Box>
 
-        <SingleUpload callRestart={callRestart} />
+        <SingleUpload doRestart={doRestart} />
       </>
     );
   };
 
   return (
-    <SectionContent>
-      {restarting ? <RestartMonitor message={LL.WAIT_FIRMWARE()} /> : content()}
-    </SectionContent>
+    <SectionContent>{restarting ? <RestartMonitor /> : content()}</SectionContent>
   );
 };
 

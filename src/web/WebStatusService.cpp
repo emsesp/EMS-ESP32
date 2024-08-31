@@ -34,12 +34,6 @@ WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * se
 
 // /rest/systemStatus
 void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
-    // This is a litle trick for the OTA upload. We don't want the React RestartService to think we're finished
-    // with the upload so we fake it and pretent the /rest/systemStatus is not available. That way the spinner keeps spinning.
-    if (EMSESP::system_.upload_status()) {
-        return; // ignore endpoint
-    }
-
     EMSESP::system_.refreshHeapMem(); // refresh free heap and max alloc heap
 
     auto *     response = new AsyncJsonResponse(false);
@@ -85,6 +79,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
 }
 
 // /rest/hardwareStatus
+// This is also used for polling
 void WebStatusService::hardwareStatus(AsyncWebServerRequest * request) {
     EMSESP::system_.refreshHeapMem(); // refresh free heap and max alloc heap
 
@@ -142,6 +137,14 @@ void WebStatusService::hardwareStatus(AsyncWebServerRequest * request) {
         root["has_partition"] = (buffer != 0xFFFFFFFFFFFFFFFF);
     } else {
         root["has_partition"] = false;
+    }
+
+    // Matches RestartMonitor.tsx
+    if (EMSESP::system_.restart_pending()) {
+        root["status"] = "restarting";
+        EMSESP::system_.restart_requested(true); // tell emsesp loop to start restart
+    } else {
+        root["status"] = EMSESP::system_.upload_status() ? "uploading" : "ready";
     }
 
 #endif

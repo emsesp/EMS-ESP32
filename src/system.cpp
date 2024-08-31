@@ -78,6 +78,7 @@ uuid::log::Logger System::logger_{F_(system), uuid::log::Facility::KERN};
 // init statics
 PButton  System::myPButton_;
 bool     System::restart_requested_   = false;
+bool     System::restart_pending_     = false;
 bool     System::test_set_all_active_ = false;
 uint32_t System::max_alloc_mem_;
 uint32_t System::heap_mem_;
@@ -328,10 +329,13 @@ void System::system_restart(const char * partitionname) {
         LOG_INFO("Restarting EMS-ESP...");
     }
 
-    restart_requested(false); // make sure it's not repeated
-    store_nvs_values();       // save any NVS values
-    Shell::loop_all();        // flush log to output
-    delay(1000);              // wait 1 second
+    // make sure it's only executed once
+    restart_requested(false);
+    restart_pending(false);
+
+    store_nvs_values(); // save any NVS values
+    Shell::loop_all();  // flush log to output
+    delay(1000);        // wait 1 second
     ESP.restart();
 #endif
 }
@@ -344,19 +348,6 @@ void System::wifi_reconnect() {
     delay(1000);                                                            // wait a second
     EMSESP::webSettingsService.save();                                      // save local settings
     EMSESP::esp8266React.getNetworkSettingsService()->callUpdateHandlers(); // in case we've changed ssid or password
-}
-
-// format the FS. Wipes everything.
-void System::format(uuid::console::Shell & shell) {
-    auto msg = ("Formatting file system. This will reset all settings to their defaults");
-    shell.logger().warning(msg);
-    EMSuart::stop();
-
-#ifndef EMSESP_STANDALONE
-    LittleFS.format();
-#endif
-
-    System::system_restart();
 }
 
 void System::syslog_init() {
@@ -538,12 +529,9 @@ void System::button_OnLongPress(PButton & b) {
     EMSESP::system_.system_restart("boot");
 }
 
-// button indefinite press
+// button indefinite press - do nothing for now
 void System::button_OnVLongPress(PButton & b) {
-    LOG_NOTICE("Button pressed - very long press - factory reset");
-#ifndef EMSESP_STANDALONE
-    EMSESP::esp8266React.factoryReset();
-#endif
+    LOG_NOTICE("Button pressed - very long press");
 }
 
 // push button
@@ -860,9 +848,8 @@ void System::system_check() {
 void System::commands_init() {
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send, FL_(send_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, FL_(fetch_cmd), CommandFlag::ADMIN_ONLY);
-
-    // restart, watch, message (and test) are also exposed as Console commands
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), System::command_restart, FL_(restart_cmd), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(format), System::command_format, FL_(format_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), System::command_watch, FL_(watch_cmd));
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(message), System::command_message, FL_(message_cmd));
 #if defined(EMSESP_TEST)
@@ -1748,13 +1735,35 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
     return true;
 }
 
+// format command - factory reset, removing all config files
+bool System::command_format(const char * value, const int8_t id) {
+    LOG_INFO("Removing all config files");
+#ifndef EMSESP_STANDALONE
+    // TODO To replaced with fs.rmdir(FS_CONFIG_DIRECTORY) now we're using IDF 4.2+
+    File root = LittleFS.open(EMSESP_FS_CONFIG_DIRECTORY);
+    File file;
+    while ((file = root.openNextFile())) {
+        String path = file.path();
+        file.close();
+        LittleFS.remove(path);
+    }
+#endif
+
+    EMSESP::system_.restart_requested(true); // will be handled by the main loop
+
+    return true;
+}
+
 // restart command - perform a hard reset
 bool System::command_restart(const char * value, const int8_t id) {
-    if (value != nullptr && value[0] != '\0') {
-        EMSESP::system_.system_restart(value);
-    } else {
-        EMSESP::system_.system_restart();
+    if (id != 0) {
+        // if it has an id then it's a web call and we need to queue the restart
+        LOG_INFO("Preparing to restart system");
+        EMSESP::system_.restart_pending(true);
+        return true;
     }
+    LOG_INFO("Restarting system");
+    EMSESP::system_.restart_requested(true); // will be handled by the main loop
     return true;
 }
 
@@ -1908,7 +1917,7 @@ bool System::uploadFirmwareURL(const char * url) {
 
     LOG_INFO("Firmware uploaded successfully. Restarting...");
 
-    restart_requested(true);
+    restart_pending(true);
 
 #endif
 

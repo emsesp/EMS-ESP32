@@ -215,20 +215,6 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                           string_vector{F_(wifi), F_(reconnect)},
                           [](Shell & shell, const std::vector<std::string> & arguments) { to_app(shell).system_.wifi_reconnect(); });
 
-    commands->add_command(ShellContext::MAIN, CommandFlags::ADMIN, string_vector{F_(format)}, [](Shell & shell, const std::vector<std::string> & arguments) {
-        shell.enter_password(F_(password_prompt), [=](Shell & shell, bool completed, const std::string & password) {
-            if (completed) {
-                to_app(shell).esp8266React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
-                    if (securitySettings.jwtSecret.equals(password.c_str())) {
-                        to_app(shell).system_.format(shell);
-                    } else {
-                        shell.println("incorrect password");
-                    }
-                });
-            }
-        });
-    });
-
     //
     // SET commands
     //
@@ -651,11 +637,7 @@ void EMSESPShell::stopped() {
 void EMSESPShell::display_banner() {
     println();
     printfln("┌───────────────────────────────────────┐");
-#ifndef EMSESP_DEBUG
     printfln("│  %sEMS-ESP version %-20s%s │", COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_BOLD_OFF);
-#else
-    printfln("│  %sEMS-ESP version %s%-8s%s │", COLOR_BOLD_ON, EMSESP_APP_VERSION, " (D)", COLOR_BOLD_OFF);
-#endif
     printfln("│                                       │");
     printfln("│  %shelp%s to show available commands      │", COLOR_UNDERLINE, COLOR_RESET);
     printfln("│  %ssu%s to access admin commands          │", COLOR_UNDERLINE, COLOR_RESET);

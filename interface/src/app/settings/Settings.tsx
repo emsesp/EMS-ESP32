@@ -21,9 +21,11 @@ import {
 } from '@mui/material';
 
 import * as SystemApi from 'api/system';
+import { API } from 'api/app';
 
 import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova/client';
+import type { APIcall } from 'app/main/types';
 import { SectionContent, useLayoutTitle } from 'components';
 import ListMenuItem from 'components/layout/ListMenuItem';
 import { useI18nContext } from 'i18n/i18n-react';
@@ -34,13 +36,14 @@ const Settings = () => {
 
   const [confirmFactoryReset, setConfirmFactoryReset] = useState<boolean>(false);
 
-  const { send: factoryResetCommand } = useRequest(SystemApi.factoryReset(), {
+  const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
     immediate: false
   });
 
-  const factoryReset = async () => {
-    await factoryResetCommand();
-    setConfirmFactoryReset(false);
+  const doFormat = async () => {
+    await sendAPI({ device: 'system', cmd: 'format', id: 0 }).then(() => {
+      setConfirmFactoryReset(false);
+    });
   };
 
   const renderFactoryResetDialog = () => (
@@ -63,7 +66,7 @@ const Settings = () => {
         <Button
           startIcon={<SettingsBackupRestoreIcon />}
           variant="outlined"
-          onClick={factoryReset}
+          onClick={doFormat}
           color="error"
         >
           {LL.FACTORY_RESET()}

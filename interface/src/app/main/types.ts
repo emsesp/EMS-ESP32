@@ -272,8 +272,8 @@ export interface BoardProfile {
 
 export interface APIcall {
   device: string;
-  entity: string;
-  id: unknown;
+  cmd: string;
+  id: number;
 }
 export interface WriteAnalogSensor {
   id: number;

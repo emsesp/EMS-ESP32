@@ -16,7 +16,7 @@ UploadFileService::UploadFileService(AsyncWebServer * server, SecurityManager * 
     : _securityManager(securityManager)
     , _is_firmware(false)
     , _md5() {
-    // end-points
+    // upload a file via a form
     server->on(
         UPLOAD_FILE_PATH,
         HTTP_POST,
@@ -25,6 +25,7 @@ UploadFileService::UploadFileService(AsyncWebServer * server, SecurityManager * 
             handleUpload(request, filename, index, data, len, final);
         });
 
+    // upload from a URL
     server->on(UPLOAD_URL_PATH,
                securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { uploadURL(request, json); },
                                              AuthenticationPredicates::IS_AUTHENTICATED));
@@ -123,7 +124,7 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
         request->_tempFile.close(); // close the file handle as the upload is now done
         AsyncWebServerResponse * response = request->beginResponse(200);
         request->send(response);
-        request->onDisconnect(RestartService::restartNow);
+        emsesp::EMSESP::system_.restart_pending(true); // will be handled by the main loop
         return;
     }
 
@@ -132,7 +133,7 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
     if (_is_firmware && !request->_tempObject) {
         AsyncWebServerResponse * response = request->beginResponse(200);
         request->send(response);
-        request->onDisconnect(RestartService::restartNow);
+        emsesp::EMSESP::system_.restart_pending(true); // will be handled by the main loop
         return;
     }
 

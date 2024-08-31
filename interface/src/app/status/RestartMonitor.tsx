@@ -1,52 +1,80 @@
-import { type FC, useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
+
+import {
+  Box,
+  CircularProgress,
+  Dialog,
+  DialogContent,
+  Typography
+} from '@mui/material';
 
 import { readHardwareStatus } from 'api/system';
 
-import { useRequest } from 'alova/client';
-import { FormLoader } from 'components';
+import { dialogStyle } from 'CustomTheme';
+import { useAutoRequest } from 'alova/client';
+import MessageBox from 'components/MessageBox';
 import { useI18nContext } from 'i18n/i18n-react';
 
-const RESTART_TIMEOUT = 2 * 60 * 1000; // 2 minutes
-const POLL_INTERVAL = 2000; // every 2 seconds
-
-export interface RestartMonitorProps {
-  message?: string;
-}
-
-const RestartMonitor: FC<RestartMonitorProps> = ({ message }) => {
-  const [failed, setFailed] = useState<boolean>(false);
-  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout>();
+const RestartMonitor = () => {
+  const [errorMessage, setErrorMessage] = useState<string>();
 
   const { LL } = useI18nContext();
 
-  const timeoutAt = useRef(new Date().getTime() + RESTART_TIMEOUT);
+  let count = 0;
 
-  const { send } = useRequest(readHardwareStatus, { immediate: false });
-
-  const poll = useRef(async () => {
-    try {
-      await send();
-      document.location.href = '/';
-    } catch {
-      if (new Date().getTime() < timeoutAt.current) {
-        setTimeoutId(setTimeout(poll.current, POLL_INTERVAL));
-      } else {
-        setFailed(true);
+  const { data } = useAutoRequest(readHardwareStatus, {
+    pollingTime: 1000,
+    force: true,
+    initialData: { status: 'Getting ready...' },
+    async middleware(_, next) {
+      if (count++ >= 1) {
+        // skip first request (1 seconds) to allow AsyncWS to send its response
+        await next();
       }
     }
-  });
-
-  useEffect(() => {
-    setTimeoutId(setTimeout(poll.current, POLL_INTERVAL));
-  }, []);
-
-  useEffect(() => () => timeoutId && clearTimeout(timeoutId), [timeoutId]);
+  })
+    .onSuccess((event) => {
+      console.log(event.data.status); // TODO remove
+      if (event.data.status === 'ready' || event.data.status === undefined) {
+        document.location.href = '/';
+      }
+    })
+    .onError((error, _method) => {
+      setErrorMessage(error.message);
+    });
 
   return (
-    <FormLoader
-      message={message ? message : LL.APPLICATION_RESTARTING() + '...'}
-      errorMessage={failed ? 'Timed out' : undefined}
-    />
+    <Dialog fullWidth={true} sx={dialogStyle} open={true}>
+      <DialogContent dividers>
+        <Box m={2} py={2} display="flex" alignItems="center" flexDirection="column">
+          <Typography
+            color="secondary"
+            variant="h6"
+            fontWeight={400}
+            textAlign="center"
+          >
+            {data?.status === 'uploading'
+              ? LL.WAIT_FIRMWARE()
+              : data?.status === 'restarting'
+                ? LL.APPLICATION_RESTARTING()
+                : data?.status === 'ready'
+                  ? 'Reloading'
+                  : 'Preparing'}
+          </Typography>
+          <Typography mt={2} variant="h6" fontWeight={400} textAlign="center">
+            {LL.PLEASE_WAIT()}&hellip;
+          </Typography>
+
+          {errorMessage ? (
+            <MessageBox my={2} level="error" message={errorMessage} />
+          ) : (
+            <Box py={2}>
+              <CircularProgress size={48} />
+            </Box>
+          )}
+        </Box>
+      </DialogContent>
+    </Dialog>
   );
 };
 

@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 
-import { readHardwareStatus, restart } from 'api/system';
+import { readHardwareStatus } from 'api/system';
 
 import { useRequest } from 'alova/client';
 import RestartMonitor from 'app/status/RestartMonitor';
@@ -35,9 +35,9 @@ import { useI18nContext } from 'i18n/i18n-react';
 import { numberValue, updateValueDirty, useRest } from 'utils';
 import { validate } from 'validators';
 
-import { getBoardProfile, readSettings, writeSettings } from '../../api/app';
+import { API, getBoardProfile, readSettings, writeSettings } from '../../api/app';
 import { BOARD_PROFILES } from '../main/types';
-import type { Settings } from '../main/types';
+import type { APIcall, Settings } from '../main/types';
 import { createSettingsValidator } from '../main/validators';
 
 export function boardProfileSelectItems() {
@@ -80,6 +80,10 @@ const ApplicationSettings = () => {
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 
+  const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
+    immediate: false
+  });
+
   const { loading: processingBoard, send: readBoardProfile } = useRequest(
     (boardProfile: string) => getBoardProfile(boardProfile),
     {
@@ -102,9 +106,14 @@ const ApplicationSettings = () => {
     });
   });
 
-  const { send: restartCommand } = useRequest(restart(), {
-    immediate: false
-  });
+  const doRestart = async () => {
+    setRestarting(true);
+    await sendAPI({ device: 'system', cmd: 'restart', id: -1 }).catch(
+      (error: Error) => {
+        toast.error(error.message);
+      }
+    );
+  };
 
   const updateBoardProfile = async (board_profile: string) => {
     await readBoardProfile(board_profile).catch((error: Error) => {
@@ -158,10 +167,7 @@ const ApplicationSettings = () => {
 
     const restart = async () => {
       await validateAndSubmit();
-      await restartCommand().catch((error: Error) => {
-        toast.error(error.message);
-      });
-      setRestarting(true);
+      await doRestart();
     };
 
     return (
@@ -204,7 +210,7 @@ const ApplicationSettings = () => {
           label={LL.ENABLE_MODBUS()}
         />
         {data.modbus_enabled && (
-          <Grid container spacing={1} rowSpacing={0}>
+          <Grid container spacing={2} rowSpacing={0}>
             <Grid>
               <ValidatedTextField
                 fieldErrors={fieldErrors}
@@ -258,7 +264,7 @@ const ApplicationSettings = () => {
           label={LL.ENABLE_SYSLOG()}
         />
         {data.syslog_enabled && (
-          <Grid container spacing={1} rowSpacing={0}>
+          <Grid container spacing={2} rowSpacing={0}>
             <Grid>
               <ValidatedTextField
                 fieldErrors={fieldErrors}
@@ -351,7 +357,7 @@ const ApplicationSettings = () => {
         <Typography sx={{ pb: 1, pt: 2 }} variant="h6" color="primary">
           {LL.FORMATTING_OPTIONS()}
         </Typography>
-        <Grid container spacing={1}>
+        <Grid container spacing={2}>
           <Grid size={3}>
             <TextField
               name="locale"
@@ -469,7 +475,7 @@ const ApplicationSettings = () => {
         </TextField>
         {data.board_profile === 'CUSTOM' && (
           <>
-            <Grid container spacing={1} rowSpacing={0}>
+            <Grid container spacing={2} rowSpacing={0}>
               <Grid>
                 <ValidatedTextField
                   fieldErrors={fieldErrors}
@@ -555,7 +561,7 @@ const ApplicationSettings = () => {
               </Grid>
             </Grid>
             {data.phy_type !== 0 && (
-              <Grid container spacing={1} rowSpacing={0}>
+              <Grid container spacing={2} rowSpacing={0}>
                 <Grid>
                   <TextField
                     name="eth_power"
@@ -601,7 +607,7 @@ const ApplicationSettings = () => {
             )}
           </>
         )}
-        <Grid container spacing={1} rowSpacing={0}>
+        <Grid container spacing={2} rowSpacing={0}>
           <Grid>
             <TextField
               name="tx_mode"
@@ -717,7 +723,7 @@ const ApplicationSettings = () => {
             />
           </Box>
         )}
-        <Grid container spacing={1} rowSpacing={0}>
+        <Grid container spacing={2} rowSpacing={0}>
           <BlockFormControlLabel
             control={
               <Checkbox
@@ -740,7 +746,7 @@ const ApplicationSettings = () => {
             disabled={!data.shower_timer}
           />
         </Grid>
-        <Grid container spacing={1} rowSpacing={2} sx={{ pt: 2 }}>
+        <Grid container spacing={2} sx={{ pt: 2 }}>
           {data.shower_timer && (
             <Grid>
               <ValidatedTextField

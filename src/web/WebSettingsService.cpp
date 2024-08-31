@@ -156,7 +156,8 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
             } else {
                 EMSESP::nvs_.putString("boot", "S32");
             }
-            ESP.restart();
+            // ESP.restart();
+            EMSESP::system_.restart_requested(true);
 #elif CONFIG_IDF_TARGET_ESP32C3
             settings.board_profile = "C3MINI";
 #elif CONFIG_IDF_TARGET_ESP32S2

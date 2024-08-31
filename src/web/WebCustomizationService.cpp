@@ -156,7 +156,7 @@ void WebCustomizationService::reset_customization(AsyncWebServerRequest * reques
     if (LittleFS.remove(EMSESP_CUSTOMIZATION_FILE)) {
         AsyncWebServerResponse * response = request->beginResponse(205); // restart needed
         request->send(response);
-        EMSESP::system_.restart_requested(true);
+        EMSESP::system_.restart_pending(true);
         return;
     }
 

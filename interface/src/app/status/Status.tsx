@@ -30,10 +30,11 @@ import {
 } from '@mui/material';
 
 import * as SystemApi from 'api/system';
+import { API } from 'api/app';
 
 import { dialogStyle } from 'CustomTheme';
 import { useAutoRequest, useRequest } from 'alova/client';
-import { busConnectionStatus } from 'app/main/types';
+import { type APIcall, busConnectionStatus } from 'app/main/types';
 import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import ListMenuItem from 'components/layout/ListMenuItem';
 import { AuthenticatedContext } from 'contexts/authentication';
@@ -54,7 +55,7 @@ const SystemStatus = () => {
   const [confirmRestart, setConfirmRestart] = useState<boolean>(false);
   const [restarting, setRestarting] = useState<boolean>();
 
-  const { send: restartCommand } = useRequest(SystemApi.restart(), {
+  const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
     immediate: false
   });
 
@@ -64,7 +65,12 @@ const SystemStatus = () => {
     error
   } = useAutoRequest(SystemApi.readSystemStatus, {
     initialData: [],
-    pollingTime: 5000
+    pollingTime: 5000,
+    async middleware(_, next) {
+      if (!restarting) {
+        await next();
+      }
+    }
   });
 
   const theme = useTheme();
@@ -195,17 +201,14 @@ const SystemStatus = () => {
   const activeHighlight = (value: boolean) =>
     value ? theme.palette.success.main : theme.palette.info.main;
 
-  const restart = async () => {
-    await restartCommand()
-      .then(() => {
-        setRestarting(true);
-      })
-      .catch((error: Error) => {
+  const doRestart = async () => {
+    setConfirmRestart(false);
+    setRestarting(true);
+    await sendAPI({ device: 'system', cmd: 'restart', id: -1 }).catch(
+      (error: Error) => {
         toast.error(error.message);
-      })
-      .finally(() => {
-        setConfirmRestart(false);
-      });
+      }
+    );
   };
 
   const renderRestartDialog = () => (
@@ -228,7 +231,7 @@ const SystemStatus = () => {
         <Button
           startIcon={<PowerSettingsNewIcon />}
           variant="outlined"
-          onClick={restart}
+          onClick={doRestart}
           color="error"
         >
           {LL.RESTART()}
