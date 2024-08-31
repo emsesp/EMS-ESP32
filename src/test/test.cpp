@@ -1878,7 +1878,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             return;
         }
 
-        const auto & boiler_dev = *boiler_it;
+        const auto & boiler_dev     = *boiler_it;
         const auto & thermostat_dev = *thermostat_it;
 
         {
@@ -2055,9 +2055,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             shell.println();
             shell.printfln("Testing modbus->handleWrite() for boiler:");
 
-            uint16_t      reg = Modbus::REGISTER_BLOCK_SIZE * DeviceValueTAG::TAG_DEVICE_DATA + 4; // selflowtemp
+            uint16_t reg = Modbus::REGISTER_BLOCK_SIZE * DeviceValueTAG::TAG_DEVICE_DATA + 4; // selflowtemp
             ModbusMessage request({boiler_dev->device_type(), 0x06, static_cast<unsigned char>(reg >> 8), static_cast<unsigned char>(reg & 0xff), 0, 1, 2, 0, 45});
-            auto          response = EMSESP::modbus_->handleWrite(request);
+            auto response = EMSESP::modbus_->handleWrite(request);
 
             if (response.getError() == SUCCESS) {
                 shell.print("selflowtemp MODBUS response:");
@@ -2076,8 +2076,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             shell.printfln("Testing modbus->handleWrite() for thermostat:");
 
             uint16_t      reg = Modbus::REGISTER_BLOCK_SIZE * DeviceValueTAG::TAG_HC1 + 41; // remotetemp
-            ModbusMessage request({thermostat_dev->device_type(), 0x06, static_cast<unsigned char>(reg >> 8), static_cast<unsigned char>(reg & 0xff), 0, 1, 2, 0, 45});
-            auto          response = EMSESP::modbus_->handleWrite(request);
+            ModbusMessage request(
+                {thermostat_dev->device_type(), 0x06, static_cast<unsigned char>(reg >> 8), static_cast<unsigned char>(reg & 0xff), 0, 1, 2, 0, 45});
+            auto response = EMSESP::modbus_->handleWrite(request);
 
             if (response.getError() == SUCCESS) {
                 shell.print("remotetemp MODBUS response:");

@@ -312,7 +312,7 @@ ModbusMessage Modbus::handleRead(const ModbusMessage & request) {
         return response;
     }
 
-    auto buf = std::vector<uint16_t>(num_words);
+    auto buf        = std::vector<uint16_t>(num_words);
     auto error_code = dev->get_modbus_value(tag, modbusInfo->short_name, buf);
     if (error_code) {
         LOG_ERROR("Unable to read raw device value %s for tag=%d - error_code = %d", modbusInfo->short_name, (int)tag, error_code);
@@ -505,13 +505,17 @@ int Modbus::getRegisterCount(const DeviceValue & dv) {
 
         case DeviceValue::CMD: {
             // calculate a sensible register size from min, max and numeric_operator
-            uint32_t num_values = std::max(dv.max, (uint32_t)abs(dv.min));
-            int num_registers = 0;
+            uint32_t num_values    = std::max(dv.max, (uint32_t)abs(dv.min));
+            int      num_registers = 0;
 
-            if (num_values <= (1L << 8)) num_registers = 1;
-            else if(num_values <= (1L << 16)) num_registers = 2;
-            else if(num_values <= (1L << 32)) num_registers = 4;
-            else LOG_ERROR("num_registers is too big to be encoded with modbus registers");
+            if (num_values <= (1L << 8))
+                num_registers = 1;
+            else if (num_values <= (1L << 16))
+                num_registers = 2;
+            else if (num_values <= (1L << 32))
+                num_registers = 4;
+            else
+                LOG_ERROR("num_registers is too big to be encoded with modbus registers");
 
             LOG_DEBUG("Value for CMD '%s' can take on %ld values and is encoded in %d registers", dv.short_name, num_values, num_registers);
 

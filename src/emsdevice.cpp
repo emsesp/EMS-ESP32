@@ -2091,7 +2091,7 @@ int EMSdevice::modbus_value_to_json(uint8_t tag, const std::string & shortname, 
         }
 
         uint32_t value = 0;
-        for(auto i = 0; i < modbus_data.size(); i++) {
+        for (auto i = 0; i < modbus_data.size(); i++) {
             value += (uint32_t)modbus_data[modbus_data.size() - i - 1] << (i * 8);
         }
 
