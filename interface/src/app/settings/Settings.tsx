@@ -20,7 +20,6 @@ import {
   List
 } from '@mui/material';
 
-import * as SystemApi from 'api/system';
 import { API } from 'api/app';
 
 import { dialogStyle } from 'CustomTheme';
