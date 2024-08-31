@@ -417,7 +417,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "upload") {
         // S3 has 16MB flash
-        EMSESP::system_.uploadFirmwareURL("https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_7_0-dev_31-ESP32S3-16MB+.bin"); // TODO remove
+        EMSESP::system_.uploadFirmwareURL("https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_7_0-dev_31-ESP32S3-16MB+.bin");
         ok = true;
     }
 #endif
@@ -958,8 +958,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         bool single;
 
-        // single = true;
-        single = false;
+        single = true;
+        // single = false;
 
         AsyncWebServerRequest request;
         JsonDocument          doc;
@@ -972,19 +972,33 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         if (single) {
             // run dedicated tests only
-            EMSESP::webCustomEntityService.test();  // custom entities
-            EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
-            EMSESP::temperaturesensor_.test();      // add temperature sensors
-            EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
+
+            // EMSESP::webCustomEntityService.test();  // custom entities
+            // EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
+            // EMSESP::temperaturesensor_.test();      // add temperature sensors
+            // EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
 
             // shell.invoke_command("call system fetch");
             // request.url("/api/system/fetch");
             // EMSESP::webAPIService.webAPIService(&request);
 
-            request.url("/api/thermostat");
-            EMSESP::webAPIService.webAPIService(&request);
-            request.url("/api/thermostat/hc1");
-            EMSESP::webAPIService.webAPIService(&request);
+            // request.url("/api/system/restart");
+            // EMSESP::webAPIService.webAPIService(&request);
+
+            // request.url("/api/system/format");
+            // EMSESP::webAPIService.webAPIService(&request);
+
+            request.method(HTTP_POST);
+            char data_api[] = "{\"device\":\"system\", \"cmd\":\"restart\",\"id\":-1}";
+            deserializeJson(doc, data_api);
+            json = doc.as<JsonVariant>();
+            request.url("/api");
+            EMSESP::webAPIService.webAPIService(&request, json);
+
+            // request.url("/api/thermostat");
+            // EMSESP::webAPIService.webAPIService(&request);
+            // request.url("/api/thermostat/hc1");
+            // EMSESP::webAPIService.webAPIService(&request);
 
         } else {
             EMSESP::webCustomEntityService.test();  // custom entities
