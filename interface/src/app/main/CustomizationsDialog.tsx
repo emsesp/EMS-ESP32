@@ -111,7 +111,7 @@ const CustomizationsDialog = ({
         <Box mt={1} mb={2}>
           <EntityMaskToggle onUpdate={updateDeviceEntity} de={editItem} />
         </Box>
-        <Grid container spacing={1}>
+        <Grid container spacing={2}>
           <Grid>
             <TextField
               name="cn"

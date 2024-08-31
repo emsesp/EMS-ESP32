@@ -79,7 +79,7 @@ const SensorsTemperatureDialog = ({
             {LL.ID_OF(LL.SENSOR(0))}: {editItem.id}
           </Typography>
         </Box>
-        <Grid container spacing={1}>
+        <Grid container spacing={2}>
           <Grid>
             <ValidatedTextField
               fieldErrors={fieldErrors}

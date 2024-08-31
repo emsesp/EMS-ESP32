@@ -100,7 +100,7 @@ const CustomEntitiesDialog = ({
         <Box display="flex" flexWrap="wrap" mb={1}>
           <Box flexWrap="nowrap" whiteSpace="nowrap" />
         </Box>
-        <Grid container spacing={1} rowSpacing={0}>
+        <Grid container spacing={2} rowSpacing={0}>
           <Grid size={12}>
             <ValidatedTextField
               fieldErrors={fieldErrors}

@@ -90,7 +90,7 @@ const MqttSettings = () => {
           }
           label={LL.ENABLE_MQTT()}
         />
-        <Grid container spacing={1} rowSpacing={0}>
+        <Grid container spacing={2} rowSpacing={0}>
           <Grid>
             <ValidatedTextField
               fieldErrors={fieldErrors}
@@ -255,7 +255,7 @@ const MqttSettings = () => {
           label={LL.MQTT_RESPONSE()}
         />
         {!data.ha_enabled && (
-          <Grid container spacing={1} rowSpacing={0}>
+          <Grid container spacing={2} rowSpacing={0}>
             <Grid>
               <BlockFormControlLabel
                 control={
@@ -285,7 +285,7 @@ const MqttSettings = () => {
           </Grid>
         )}
         {!data.publish_single && (
-          <Grid container spacing={1} rowSpacing={0}>
+          <Grid container spacing={2} rowSpacing={0}>
             <Grid>
               <BlockFormControlLabel
                 control={
@@ -299,7 +299,7 @@ const MqttSettings = () => {
               />
             </Grid>
             {data.ha_enabled && (
-              <Grid container spacing={1} rowSpacing={0}>
+              <Grid container spacing={2} rowSpacing={0}>
                 <Grid>
                   <TextField
                     name="discovery_type"
@@ -353,7 +353,7 @@ const MqttSettings = () => {
         <Typography sx={{ pt: 2 }} variant="h6" color="primary">
           {LL.MQTT_PUBLISH_INTERVALS()}&nbsp;(0=auto)
         </Typography>
-        <Grid container spacing={1} rowSpacing={0}>
+        <Grid container spacing={2} rowSpacing={0}>
           <Grid>
             <ValidatedTextField
               fieldErrors={fieldErrors}
