@@ -34,7 +34,6 @@ const RestartMonitor = () => {
     }
   })
     .onSuccess((event) => {
-      console.log(event.data.status); // TODO remove
       if (event.data.status === 'ready' || event.data.status === undefined) {
         document.location.href = '/';
       }
@@ -53,6 +52,7 @@ const RestartMonitor = () => {
             fontWeight={400}
             textAlign="center"
           >
+            {/* TODO: translate these */}
             {data?.status === 'uploading'
               ? LL.WAIT_FIRMWARE()
               : data?.status === 'restarting'
