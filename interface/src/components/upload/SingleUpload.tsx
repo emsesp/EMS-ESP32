@@ -32,7 +32,7 @@ function LinearProgressWithLabel(props: LinearProgressProps & { value: number })
   );
 }
 
-const SingleUpload = ({ callRestart }) => {
+const SingleUpload = ({ doRestart }) => {
   const [md5, setMd5] = useState<string>();
   const [file, setFile] = useState<File>();
   const { LL } = useI18nContext();
@@ -50,7 +50,7 @@ const SingleUpload = ({ callRestart }) => {
       toast.success(LL.UPLOAD() + ' MD5 ' + LL.SUCCESSFUL());
       setFile(undefined);
     } else {
-      callRestart();
+      doRestart();
     }
   });
 
