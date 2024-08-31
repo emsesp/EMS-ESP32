@@ -29,6 +29,7 @@ export interface HardwareStatus {
   model: string;
   has_loader: boolean;
   has_partition: boolean;
+  status: string;
 }
 
 export interface SystemStatus {
