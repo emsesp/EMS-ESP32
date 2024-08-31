@@ -393,6 +393,10 @@ void Mqtt::start() {
     }
 
     EMSESP::esp8266React.setWill(will_topic); // with qos 1, retain true
+
+#if defined(EMSESP_STANDALONE)
+    Mqtt::on_connect(); // simulate an MQTT connection
+#endif
 }
 
 void Mqtt::set_publish_time_boiler(uint16_t publish_time) {
