@@ -2027,13 +2027,13 @@ int EMSdevice::get_modbus_value(uint8_t tag, const std::string & shortname, std:
     return 0;
 }
 
-bool EMSdevice::modbus_value_to_json(uint8_t tag, const std::string & shortname, const std::vector<uint8_t> & modbus_data, JsonObject jsonValue) {
-    //Serial.printf("modbus_value_to_json(%d,%s,[%d bytes])\n", tag, shortname.c_str(), modbus_data.size());
+int EMSdevice::modbus_value_to_json(uint8_t tag, const std::string & shortname, const std::vector<uint8_t> & modbus_data, JsonObject jsonValue) {
+    // LOG_DEBUG("modbus_value_to_json(%d,%s,[%d bytes])\n", tag, shortname.c_str(), modbus_data.size());
 
     // find device value by shortname
     const auto & it = std::find_if(devicevalues_.begin(), devicevalues_.end(), [&](const DeviceValue & x) { return x.tag == tag && x.short_name == shortname; });
     if (it == devicevalues_.end()) {
-        return false;
+        return -1;
     }
 
     auto & dv = *it;
@@ -2042,7 +2042,7 @@ bool EMSdevice::modbus_value_to_json(uint8_t tag, const std::string & shortname,
     if (dv.type == DeviceValueType::BOOL) {
         // bools are 1 16 bit register
         if (modbus_data.size() != 2) {
-            return false;
+            return -2;
         }
         jsonValue["value"] = modbus_data[0] || modbus_data[1];
     }
@@ -2059,7 +2059,7 @@ bool EMSdevice::modbus_value_to_json(uint8_t tag, const std::string & shortname,
     else if (dv.type == DeviceValueType::ENUM) {
         // these data types are 1 16 bit register
         if (modbus_data.size() != 2) {
-            return false;
+            return -3;
         }
 
         jsonValue["value"] = (uint16_t)modbus_data[0] << 8 | (uint16_t)modbus_data[1];
@@ -2069,14 +2069,14 @@ bool EMSdevice::modbus_value_to_json(uint8_t tag, const std::string & shortname,
     else if (dv.type == DeviceValueType::INT8 || dv.type == DeviceValueType::UINT8 || dv.type == DeviceValueType::INT16 || dv.type == DeviceValueType::UINT16) {
         // these data types are 1 16 bit register
         if (modbus_data.size() != 2) {
-            return false;
+            return -4;
         }
 
         jsonValue["value"] = Helpers::numericoperator2scalefactor(dv.numeric_operator) * (float)((uint16_t)modbus_data[0] << 8 | (uint16_t)modbus_data[1]);
     } else if (dv.type == DeviceValueType::UINT24 || dv.type == DeviceValueType::UINT32 || dv.type == DeviceValueType::TIME) {
         // these data types are 2 16 bit register
         if (modbus_data.size() != 4) {
-            return false;
+            return -5;
         }
 
         jsonValue["value"] =
@@ -2084,11 +2084,25 @@ bool EMSdevice::modbus_value_to_json(uint8_t tag, const std::string & shortname,
             * (float)((uint32_t)modbus_data[0] << 24 | (uint32_t)modbus_data[1] << 16 | (uint32_t)modbus_data[2] << 8 | (uint32_t)modbus_data[3]);
     }
 
-    else {
-        return false;
+    // handle CMD
+    else if (dv.type == DeviceValueType::CMD) {
+        if (modbus_data.size() > 4) {
+            return -7;
+        }
+
+        uint32_t value = 0;
+        for(auto i = 0; i < modbus_data.size(); i++) {
+            value += (uint32_t)modbus_data[modbus_data.size() - i - 1] << (i * 8);
+        }
+
+        jsonValue["value"] = Helpers::numericoperator2scalefactor(dv.numeric_operator) * (float)value;
     }
 
-    return true;
+    else {
+        return -6;
+    }
+
+    return 0;
 }
 
 } // namespace emsesp

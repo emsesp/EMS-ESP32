@@ -313,16 +313,17 @@ ModbusMessage Modbus::handleRead(const ModbusMessage & request) {
     }
 
     auto buf = std::vector<uint16_t>(num_words);
-    if (dev->get_modbus_value(tag, modbusInfo->short_name, buf) == 0) {
-        response.add(request.getServerID());
-        response.add(request.getFunctionCode());
-        response.add((uint8_t)(num_words * 2));
-        for (auto & value : buf)
-            response.add(value);
-    } else {
-        LOG_ERROR("Unable to read raw device value %s for tag=%d", modbusInfo->short_name, (int)tag);
+    auto error_code = dev->get_modbus_value(tag, modbusInfo->short_name, buf);
+    if (error_code) {
+        LOG_ERROR("Unable to read raw device value %s for tag=%d - error_code = %d", modbusInfo->short_name, (int)tag, error_code);
         response.setError(request.getServerID(), request.getFunctionCode(), SERVER_DEVICE_FAILURE);
     }
+
+    response.add(request.getServerID());
+    response.add(request.getFunctionCode());
+    response.add((uint8_t)(num_words * 2));
+    for (auto & value : buf)
+        response.add(value);
 
     return response;
 }
@@ -368,6 +369,8 @@ ModbusMessage Modbus::handleWrite(const ModbusMessage & request) {
 
     auto register_offset = start_address - tag * REGISTER_BLOCK_SIZE;
 
+    LOG_DEBUG("Tag %d, offset %d", tag, register_offset);
+
     const auto & dev_it =
         std::find_if(EMSESP::emsdevices.begin(), EMSESP::emsdevices.end(), [&](const std::unique_ptr<EMSdevice> & x) { return x->device_type() == device_type; });
 
@@ -379,6 +382,8 @@ ModbusMessage Modbus::handleWrite(const ModbusMessage & request) {
     }
 
     const auto & dev = *dev_it;
+
+    LOG_DEBUG("found device '%s' of type %d", dev->name(), dev->device_type());
 
     // binary search in modbus infos
     auto key        = EntityModbusInfoKey(dev->device_type(), tag_type, register_offset);
@@ -397,6 +402,8 @@ ModbusMessage Modbus::handleWrite(const ModbusMessage & request) {
         return response;
     }
 
+    LOG_DEBUG("Writing to entity %s", modbusInfo->short_name);
+
     // only writing a single value at a time is supported for now
     if (num_words != modbusInfo->registerCount) {
         // number of registers requested does not match actual register count for entity
@@ -408,9 +415,10 @@ ModbusMessage Modbus::handleWrite(const ModbusMessage & request) {
     JsonDocument input_doc;
     JsonObject   input = input_doc.to<JsonObject>();
 
-    if (!dev->modbus_value_to_json(tag, modbusInfo->short_name, data, input)) {
+    auto error_code = dev->modbus_value_to_json(tag, modbusInfo->short_name, data, input);
+    if (error_code) {
         // error getting modbus value as json
-        LOG_ERROR("error getting modbus value as json");
+        LOG_ERROR("error getting modbus value as json, error code = %d", error_code);
         response.setError(request.getServerID(), request.getFunctionCode(), ILLEGAL_DATA_ADDRESS);
         return response;
     }
@@ -488,13 +496,27 @@ int Modbus::getRegisterCount(const DeviceValue & dv) {
         case DeviceValue::INT16:
         case DeviceValue::UINT16:
         case DeviceValue::ENUM: // 8 bit
-        case DeviceValue::CMD:
             return 1;
 
         case DeviceValue::UINT24:
         case DeviceValue::UINT32:
         case DeviceValue::TIME: // 32 bit
             return 2;
+
+        case DeviceValue::CMD: {
+            // calculate a sensible register size from min, max and numeric_operator
+            uint32_t num_values = std::max(dv.max, (uint32_t)abs(dv.min));
+            int num_registers = 0;
+
+            if (num_values <= (1L << 8)) num_registers = 1;
+            else if(num_values <= (1L << 16)) num_registers = 2;
+            else if(num_values <= (1L << 32)) num_registers = 4;
+            else LOG_ERROR("num_registers is too big to be encoded with modbus registers");
+
+            LOG_DEBUG("Value for CMD '%s' can take on %ld values and is encoded in %d registers", dv.short_name, num_values, num_registers);
+
+            return num_registers;
+        }
 
         case DeviceValue::STRING:
             break; // impossible to guess, needs to be hardcoded
