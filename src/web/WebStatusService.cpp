@@ -118,13 +118,11 @@ void WebStatusService::hardwareStatus(AsyncWebServerRequest * request) {
     root["fs_used"]          = FSused;
     root["fs_free"]          = EMSESP::system_.FStotal() - FSused;
     root["free_caps"]        = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024; // includes heap and psram
-
-    root["psram"] = EMSESP::system_.PSram();
+    root["psram"]            = (EMSESP::system_.PSram() > 0);                   // boolean
     if (EMSESP::system_.PSram()) {
         root["psram_size"] = EMSESP::system_.PSram();
         root["free_psram"] = ESP.getFreePsram() / 1024;
     }
-
     root["model"] = EMSESP::system_.getBBQKeesGatewayDetails();
 
     // check for a factory partition first
@@ -139,7 +137,7 @@ void WebStatusService::hardwareStatus(AsyncWebServerRequest * request) {
         root["has_partition"] = false;
     }
 
-    // Matches RestartMonitor.tsx
+    // Matches status codes in RestartMonitor.tsx
     if (EMSESP::system_.restart_pending()) {
         root["status"] = "restarting";
         EMSESP::system_.restart_requested(true); // tell emsesp loop to start restart
