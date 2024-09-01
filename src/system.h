@@ -76,8 +76,8 @@ class System {
 
     void store_nvs_values();
     void system_restart(const char * partition = nullptr);
-    void upload_status(bool in_progress);
-    bool upload_status();
+    void upload_isrunning(bool in_progress);
+    bool upload_isrunning();
     void show_mem(const char * note);
     void reload_settings();
     void syslog_init();
@@ -340,7 +340,7 @@ class System {
     uint8_t  healthcheck_       = HEALTHCHECK_NO_NETWORK | HEALTHCHECK_NO_BUS; // start with all flags set, no wifi and no ems bus connection
     uint32_t last_system_check_ = 0;
 
-    bool upload_status_      = false; // true if we're in the middle of a OTA firmware upload
+    bool upload_isrunning_   = false; // true if we're in the middle of a OTA firmware upload
     bool ethernet_connected_ = false;
     bool has_ipv6_           = false;
 

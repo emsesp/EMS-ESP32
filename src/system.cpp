@@ -575,20 +575,20 @@ void System::led_init(bool refresh) {
 }
 
 // returns true if OTA is uploading
-bool System::upload_status() {
+bool System::upload_isrunning() {
 #if defined(EMSESP_STANDALONE)
     return false;
 #else
-    return upload_status_ || Update.isRunning();
+    return upload_isrunning_ || Update.isRunning();
 #endif
 }
 
-void System::upload_status(bool in_progress) {
+void System::upload_isrunning(bool in_progress) {
     // if we've just started an upload
-    if (!upload_status_ && in_progress) {
+    if (!upload_isrunning_ && in_progress) {
         EMSuart::stop();
     }
-    upload_status_ = in_progress;
+    upload_isrunning_ = in_progress;
 }
 
 // checks system health and handles LED flashing wizardry
@@ -1863,29 +1863,30 @@ bool System::uploadFirmwareURL(const char * url) {
 
     static String saved_url;
 
-    // if the URL is not empty, save it for later
+    // if the URL is not empty, store the URL for the 2nd pass
     if (url && strlen(url) > 0) {
         saved_url = url;
-        EMSESP::system_.upload_status(true); // tell EMS-ESP we're ready to start the uploading process
+        EMSESP::system_.upload_isrunning(true); // tell EMS-ESP we're ready to start the uploading process
         return true;
     }
 
     // make sure we have a valid URL
     if (saved_url.isEmpty()) {
-        return false;
+        return false; // error
     }
 
     // Configure temporary client
     HTTPClient http;
-    http.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS); // important for GitHub 302's
-    http.useHTTP10(true);
+    http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS); // important for GitHub 302's
+    http.setTimeout(8000);
+    http.useHTTP10(true); // use HTTP/1.0 for update since the update handler not support any transfer Encoding
     http.begin(saved_url);
 
-    // start a connection
+    // start a connection, returns -1 if fails
     int httpCode = http.GET();
     if (httpCode != HTTP_CODE_OK) {
-        LOG_ERROR("Firmware upload failed - HTTP code %u", httpCode);
-        return false;
+        LOG_ERROR("Firmware upload failed - HTTP code %d", httpCode);
+        return false; // error
     }
 
     // check we have enough space for the upload in the ota partition
@@ -1893,7 +1894,7 @@ bool System::uploadFirmwareURL(const char * url) {
     LOG_INFO("Firmware uploading (file: %s, size: %d bytes). Please wait...", saved_url.c_str(), firmware_size);
     if (!Update.begin(firmware_size)) {
         LOG_ERROR("Firmware upload failed - no space");
-        return false;
+        return false; // error
     }
 
     // flush log buffers so latest messages are shown
@@ -1903,17 +1904,17 @@ bool System::uploadFirmwareURL(const char * url) {
     WiFiClient * stream = http.getStreamPtr();
     if (Update.writeStream(*stream) != firmware_size) {
         LOG_ERROR("Firmware upload failed - size differences");
-        return false;
+        return false; // error
     }
 
     if (!Update.end(true)) {
         LOG_ERROR("Firmware upload failed - general error");
-        return false;
+        return false; // error
     }
 
     http.end();
 
-    EMSESP::system_.upload_status(false);
+    EMSESP::system_.upload_isrunning(false);
     saved_url.clear(); // prevent from downloading again
 
     LOG_INFO("Firmware uploaded successfully. Restarting...");

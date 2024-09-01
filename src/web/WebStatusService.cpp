@@ -144,7 +144,7 @@ void WebStatusService::hardwareStatus(AsyncWebServerRequest * request) {
         root["status"] = "restarting";
         EMSESP::system_.restart_requested(true); // tell emsesp loop to start restart
     } else {
-        root["status"] = EMSESP::system_.upload_status() ? "uploading" : "ready";
+        root["status"] = EMSESP::system_.upload_isrunning() ? "uploading" : "ready";
     }
 
 #endif

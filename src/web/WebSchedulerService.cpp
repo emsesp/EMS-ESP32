@@ -529,7 +529,7 @@ void WebSchedulerService::loop() {
 void WebSchedulerService::scheduler_task(void * pvParameters) {
     while (1) {
         delay(10); // no need to hurry
-        if (!EMSESP::system_.upload_status()) {
+        if (!EMSESP::system_.upload_isrunning()) {
             EMSESP::webSchedulerService.loop();
         }
     }
