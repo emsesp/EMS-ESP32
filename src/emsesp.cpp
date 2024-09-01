@@ -1653,28 +1653,33 @@ void EMSESP::start() {
 
 // main loop calling all services
 void EMSESP::loop() {
-    esp8266React.loop(); // web services
-    system_.loop();      // does LED and checks system health, and syslog service
+    esp8266React.loop();       // web services
+    system_.loop();            // does LED and checks system health, and syslog service
+    bool upload_status = true; // ready for any OTA uploads
 
     // if we're doing an OTA upload, skip everything except from console refresh
-    if (!system_.upload_status()) {
+    if (!system_.upload_isrunning()) {
         // service loops
-        webLogService.loop();      // log in Web UI
-        rxservice_.loop();         // process any incoming Rx telegrams
-        shower_.loop();            // check for shower on/off
-        temperaturesensor_.loop(); // read sensor temperatures
-        analogsensor_.loop();      // read analog sensor values
-        publish_all_loop();        // with HA messages in parts to avoid flooding the mqtt queue
-        mqtt_.loop();              // sends out anything in the MQTT queue
-        webModulesService.loop();  // loop through the external library modules
-        if (system_.PSram() == 0) {
-            webSchedulerService.loop(); // run non-async if there is no PSRAM available
+        webLogService.loop();       // log in Web UI
+        rxservice_.loop();          // process any incoming Rx telegrams
+        shower_.loop();             // check for shower on/off
+        temperaturesensor_.loop();  // read sensor temperatures
+        analogsensor_.loop();       // read analog sensor values
+        publish_all_loop();         // with HA messages in parts to avoid flooding the mqtt queue
+        mqtt_.loop();               // sends out anything in the MQTT queue
+        webModulesService.loop();   // loop through the external library modules
+        if (system_.PSram() == 0) { // run non-async if there is no PSRAM available
+            webSchedulerService.loop();
         }
 
-        // force a query on the EMS devices to fetch latest data at a set interval (1 min)
-        scheduled_fetch_values();
-    } else if (!system_.uploadFirmwareURL()) { // start an upload from a URL. This is blocking.
-        system_.upload_status(false);          // abort the upload
+        scheduled_fetch_values(); // force a query on the EMS devices to fetch latest data at a set interval (1 min)
+
+    } else if (upload_status) {
+        // start an upload from a URL, if it exists. This is blocking.
+        if (!system_.uploadFirmwareURL()) {
+            upload_status = false; // abort all other attempts, until reset (after a restart normally)
+            system_.upload_isrunning(false);
+        }
     }
 
     uuid::loop();
