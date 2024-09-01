@@ -142,6 +142,7 @@ const DownloadUpload = () => {
     if (!latestVersion || !latestDevVersion) {
       return '';
     }
+    console.log('getBinURL', useDevVersion, latestDevVersion, latestVersion);
     const filename =
       'EMS-ESP-' +
       (useDevVersion ? latestDevVersion : latestVersion).replaceAll('.', '_') +
@@ -270,7 +271,7 @@ const DownloadUpload = () => {
     );
   };
 
-  // useDev = true to force using the dev version
+  // useDevVersion = true to force using the dev version
   const showFirmwareDialog = (useDevVersion: boolean) => {
     if (useDevVersion || data.emsesp_version.includes('dev')) {
       setUseDev(true);
@@ -415,11 +416,13 @@ const DownloadUpload = () => {
                   : LL.INSTALL('v' + latestVersion)}
               </Button>
             ) : (
-              <Typography ml={2} variant="button">
-                <Link target="_blank" href={getBinURL(useDev)} color="primary">
-                  {LL.DOWNLOAD(1)}
+              <>
+                &nbsp;&nbsp;
+                <Link target="_blank" href={getBinURL(isDev)} color="primary">
+                  {LL.DOWNLOAD(1)}&nbsp;v
+                  {isDev ? latestDevVersion : latestVersion}
                 </Link>
-              </Typography>
+              </>
             )}
           </Typography>
 
