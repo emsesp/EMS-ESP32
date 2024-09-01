@@ -271,36 +271,37 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                           });
 
 
-    commands->add_command(ShellContext::MAIN,
-                          CommandFlags::ADMIN,
-                          string_vector{F_(set), F_(board_profile)},
-                          string_vector{F_(name_mandatory), F_(nvs_optional)},
-                          [](Shell & shell, const std::vector<std::string> & arguments) {
-                              std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
-                              std::string         board_profile = Helpers::toUpper(arguments.front());
-                              if (!to_app(shell).system_.load_board_profile(data, board_profile)) {
-                                  shell.println("Invalid board profile (S32, E32, E32V2, MH-ET, NODEMCU, OLIMEX, OLIMEXPOE, C3MINI, S2MINI, S3MINI, CUSTOM)");
-                                  return;
-                              }
-                              if (arguments.size() == 2 && Helpers::toLower(arguments.back()) == "nvs") {
-                                  to_app(shell).nvs_.putString("boot", board_profile.c_str());
-                              }
-                              to_app(shell).webSettingsService.update([&](WebSettings & settings) {
-                                  settings.board_profile  = board_profile.c_str();
-                                  settings.led_gpio       = data[0];
-                                  settings.dallas_gpio    = data[1];
-                                  settings.rx_gpio        = data[2];
-                                  settings.tx_gpio        = data[3];
-                                  settings.pbutton_gpio   = data[4];
-                                  settings.phy_type       = data[5];
-                                  settings.eth_power      = data[6]; // can be -1
-                                  settings.eth_phy_addr   = data[7];
-                                  settings.eth_clock_mode = data[8];
-                                  return StateUpdateResult::CHANGED;
-                              });
-                              shell.printfln("Loaded board profile %s", board_profile.c_str());
-                              to_app(shell).system_.network_init(true);
-                          });
+    commands->add_command(
+        ShellContext::MAIN,
+        CommandFlags::ADMIN,
+        string_vector{F_(set), F_(board_profile)},
+        string_vector{F_(name_mandatory), F_(nvs_optional)},
+        [](Shell & shell, const std::vector<std::string> & arguments) {
+            std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
+            std::string         board_profile = Helpers::toUpper(arguments.front());
+            if (!to_app(shell).system_.load_board_profile(data, board_profile)) {
+                shell.println("Invalid board profile (S32, E32, E32V2, MH-ET, NODEMCU, LOLIN, OLIMEX, OLIMEXPOE, C3MINI, S2MINI, S3MINI, S32S3, CUSTOM)");
+                return;
+            }
+            if (arguments.size() == 2 && Helpers::toLower(arguments.back()) == "nvs") {
+                to_app(shell).nvs_.putString("boot", board_profile.c_str());
+            }
+            to_app(shell).webSettingsService.update([&](WebSettings & settings) {
+                settings.board_profile  = board_profile.c_str();
+                settings.led_gpio       = data[0];
+                settings.dallas_gpio    = data[1];
+                settings.rx_gpio        = data[2];
+                settings.tx_gpio        = data[3];
+                settings.pbutton_gpio   = data[4];
+                settings.phy_type       = data[5];
+                settings.eth_power      = data[6]; // can be -1
+                settings.eth_phy_addr   = data[7];
+                settings.eth_clock_mode = data[8];
+                return StateUpdateResult::CHANGED;
+            });
+            shell.printfln("Loaded board profile %s", board_profile.c_str());
+            to_app(shell).system_.network_init(true);
+        });
 
     commands->add_command(
         ShellContext::MAIN,
