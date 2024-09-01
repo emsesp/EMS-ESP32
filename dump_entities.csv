@@ -20,8 +20,6 @@ CS6800i/WLW176i,boiler,8,pumpmodmin,boiler pump min power,uint8 (>=0<=100),%,tru
 CS6800i/WLW176i,boiler,8,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 CS6800i/WLW176i,boiler,8,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 CS6800i/WLW176i,boiler,8,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-CS6800i/WLW176i,boiler,8,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-CS6800i/WLW176i,boiler,8,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 CS6800i/WLW176i,boiler,8,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 CS6800i/WLW176i,boiler,8,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 CS6800i/WLW176i,boiler,8,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -42,10 +40,12 @@ CS6800i/WLW176i,boiler,8,emergencytemp,emergency temperature,uint8 (>=15<=70),C,
 CS6800i/WLW176i,boiler,8,nrgtotal,total energy,uint24 (>=0<=167772),kWh,false,sensor.boiler_total_energy,sensor.boiler_nrgtotal,5,0,1/100,80,2
 CS6800i/WLW176i,boiler,8,nrg,energy,uint24 (>=0<=167772),kWh,false,sensor.boiler_dhw_energy,sensor.boiler_dhw_nrg,5,9,1/100,0,2
 CS6800i/WLW176i,boiler,8,nrgheat,energy heating,uint24 (>=0<=167772),kWh,false,sensor.boiler_energy_heating,sensor.boiler_nrgheat,5,0,1/100,82,2
+CS6800i/WLW176i,boiler,8,nrgcool,energy cooling,uint24 (>=0<=167772),kWh,false,sensor.boiler_energy_cooling,sensor.boiler_nrgcool,5,0,1/100,-1,2
 CS6800i/WLW176i,boiler,8,metertotal,meter total,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_total,sensor.boiler_metertotal,5,0,1/100,84,2
 CS6800i/WLW176i,boiler,8,metercomp,meter compressor,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_compressor,sensor.boiler_metercomp,5,0,1/100,86,2
 CS6800i/WLW176i,boiler,8,metereheat,meter e-heater,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_e-heater,sensor.boiler_metereheat,5,0,1/100,88,2
 CS6800i/WLW176i,boiler,8,meterheat,meter heating,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_heating,sensor.boiler_meterheat,5,0,1/100,90,2
+CS6800i/WLW176i,boiler,8,metercool,meter cooling,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_cooling,sensor.boiler_metercool,5,0,1/100,-1,2
 CS6800i/WLW176i,boiler,8,meter,meter,uint24 (>=0<=167772),kWh,false,sensor.boiler_dhw_meter,sensor.boiler_dhw_meter,5,9,1/100,2,2
 CS6800i/WLW176i,boiler,8,uptimetotal,heatpump total uptime,time (>=0<=279620),minutes,false,sensor.boiler_heatpump_total_uptime,sensor.boiler_uptimetotal,5,0,1/60,92,2
 CS6800i/WLW176i,boiler,8,uptimecontrol,total operating time heat,time (>=0<=279620),minutes,false,sensor.boiler_total_operating_time_heat,sensor.boiler_uptimecontrol,5,0,1/60,94,2
@@ -192,7 +192,6 @@ CS6800i/WLW176i,boiler,8,recharging,recharging,boolean, ,false,binary_sensor.boi
 CS6800i/WLW176i,boiler,8,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 CS6800i/WLW176i,boiler,8,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 CS6800i/WLW176i,boiler,8,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-CS6800i/WLW176i,boiler,8,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 CS6800i/WLW176i,boiler,8,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 CS6800i/WLW176i,boiler,8,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 CS6800i/WLW176i,boiler,8,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -240,8 +239,6 @@ C1200W,boiler,12,pumpmodmin,boiler pump min power,uint8 (>=0<=100),%,true,number
 C1200W,boiler,12,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 C1200W,boiler,12,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 C1200W,boiler,12,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-C1200W,boiler,12,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-C1200W,boiler,12,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 C1200W,boiler,12,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 C1200W,boiler,12,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 C1200W,boiler,12,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -300,7 +297,6 @@ C1200W,boiler,12,recharging,recharging,boolean, ,false,binary_sensor.boiler_dhw_
 C1200W,boiler,12,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 C1200W,boiler,12,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 C1200W,boiler,12,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-C1200W,boiler,12,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 C1200W,boiler,12,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 C1200W,boiler,12,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 C1200W,boiler,12,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -352,8 +348,6 @@ BK13/BK15/Smartline/GB1x2,boiler,64,pumpmodmin,boiler pump min power,uint8 (>=0<
 BK13/BK15/Smartline/GB1x2,boiler,64,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 BK13/BK15/Smartline/GB1x2,boiler,64,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 BK13/BK15/Smartline/GB1x2,boiler,64,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-BK13/BK15/Smartline/GB1x2,boiler,64,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-BK13/BK15/Smartline/GB1x2,boiler,64,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 BK13/BK15/Smartline/GB1x2,boiler,64,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 BK13/BK15/Smartline/GB1x2,boiler,64,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 BK13/BK15/Smartline/GB1x2,boiler,64,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -412,7 +406,6 @@ BK13/BK15/Smartline/GB1x2,boiler,64,recharging,recharging,boolean, ,false,binary
 BK13/BK15/Smartline/GB1x2,boiler,64,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 BK13/BK15/Smartline/GB1x2,boiler,64,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 BK13/BK15/Smartline/GB1x2,boiler,64,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-BK13/BK15/Smartline/GB1x2,boiler,64,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 BK13/BK15/Smartline/GB1x2,boiler,64,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 BK13/BK15/Smartline/GB1x2,boiler,64,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 BK13/BK15/Smartline/GB1x2,boiler,64,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -464,8 +457,6 @@ GB125/GB135/MC10,boiler,72,pumpmodmin,boiler pump min power,uint8 (>=0<=100),%,t
 GB125/GB135/MC10,boiler,72,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 GB125/GB135/MC10,boiler,72,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 GB125/GB135/MC10,boiler,72,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-GB125/GB135/MC10,boiler,72,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-GB125/GB135/MC10,boiler,72,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 GB125/GB135/MC10,boiler,72,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 GB125/GB135/MC10,boiler,72,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 GB125/GB135/MC10,boiler,72,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -524,7 +515,6 @@ GB125/GB135/MC10,boiler,72,recharging,recharging,boolean, ,false,binary_sensor.b
 GB125/GB135/MC10,boiler,72,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 GB125/GB135/MC10,boiler,72,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 GB125/GB135/MC10,boiler,72,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-GB125/GB135/MC10,boiler,72,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 GB125/GB135/MC10,boiler,72,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 GB125/GB135/MC10,boiler,72,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 GB125/GB135/MC10,boiler,72,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -576,8 +566,6 @@ Cascade CM10,boiler,81,pumpmodmin,boiler pump min power,uint8 (>=0<=100),%,true,
 Cascade CM10,boiler,81,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 Cascade CM10,boiler,81,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 Cascade CM10,boiler,81,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-Cascade CM10,boiler,81,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-Cascade CM10,boiler,81,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 Cascade CM10,boiler,81,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 Cascade CM10,boiler,81,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 Cascade CM10,boiler,81,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -636,7 +624,6 @@ Cascade CM10,boiler,81,recharging,recharging,boolean, ,false,binary_sensor.boile
 Cascade CM10,boiler,81,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 Cascade CM10,boiler,81,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 Cascade CM10,boiler,81,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-Cascade CM10,boiler,81,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 Cascade CM10,boiler,81,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 Cascade CM10,boiler,81,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 Cascade CM10,boiler,81,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -688,8 +675,6 @@ Logamax Plus GB022,boiler,84,pumpmodmin,boiler pump min power,uint8 (>=0<=100),%
 Logamax Plus GB022,boiler,84,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 Logamax Plus GB022,boiler,84,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 Logamax Plus GB022,boiler,84,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-Logamax Plus GB022,boiler,84,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-Logamax Plus GB022,boiler,84,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 Logamax Plus GB022,boiler,84,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 Logamax Plus GB022,boiler,84,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 Logamax Plus GB022,boiler,84,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -748,7 +733,6 @@ Logamax Plus GB022,boiler,84,recharging,recharging,boolean, ,false,binary_sensor
 Logamax Plus GB022,boiler,84,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 Logamax Plus GB022,boiler,84,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 Logamax Plus GB022,boiler,84,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-Logamax Plus GB022,boiler,84,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 Logamax Plus GB022,boiler,84,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 Logamax Plus GB022,boiler,84,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 Logamax Plus GB022,boiler,84,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -800,8 +784,6 @@ Condens 2500/Logamax/Logomatic/Cerapur Top/Greenstar/Generic HT3,boiler,95,pumpm
 Condens 2500/Logamax/Logomatic/Cerapur Top/Greenstar/Generic HT3,boiler,95,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 Condens 2500/Logamax/Logomatic/Cerapur Top/Greenstar/Generic HT3,boiler,95,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 Condens 2500/Logamax/Logomatic/Cerapur Top/Greenstar/Generic HT3,boiler,95,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-Condens 2500/Logamax/Logomatic/Cerapur Top/Greenstar/Generic HT3,boiler,95,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-Condens 2500/Logamax/Logomatic/Cerapur Top/Greenstar/Generic HT3,boiler,95,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 Condens 2500/Logamax/Logomatic/Cerapur Top/Greenstar/Generic HT3,boiler,95,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 Condens 2500/Logamax/Logomatic/Cerapur Top/Greenstar/Generic HT3,boiler,95,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 Condens 2500/Logamax/Logomatic/Cerapur Top/Greenstar/Generic HT3,boiler,95,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -860,7 +842,6 @@ Condens 2500/Logamax/Logomatic/Cerapur Top/Greenstar/Generic HT3,boiler,95,recha
 Condens 2500/Logamax/Logomatic/Cerapur Top/Greenstar/Generic HT3,boiler,95,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 Condens 2500/Logamax/Logomatic/Cerapur Top/Greenstar/Generic HT3,boiler,95,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 Condens 2500/Logamax/Logomatic/Cerapur Top/Greenstar/Generic HT3,boiler,95,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-Condens 2500/Logamax/Logomatic/Cerapur Top/Greenstar/Generic HT3,boiler,95,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 Condens 2500/Logamax/Logomatic/Cerapur Top/Greenstar/Generic HT3,boiler,95,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 Condens 2500/Logamax/Logomatic/Cerapur Top/Greenstar/Generic HT3,boiler,95,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 Condens 2500/Logamax/Logomatic/Cerapur Top/Greenstar/Generic HT3,boiler,95,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -912,8 +893,6 @@ Topline/GB162,boiler,115,pumpmodmin,boiler pump min power,uint8 (>=0<=100),%,tru
 Topline/GB162,boiler,115,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 Topline/GB162,boiler,115,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 Topline/GB162,boiler,115,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-Topline/GB162,boiler,115,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-Topline/GB162,boiler,115,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 Topline/GB162,boiler,115,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 Topline/GB162,boiler,115,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 Topline/GB162,boiler,115,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -972,7 +951,6 @@ Topline/GB162,boiler,115,recharging,recharging,boolean, ,false,binary_sensor.boi
 Topline/GB162,boiler,115,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 Topline/GB162,boiler,115,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 Topline/GB162,boiler,115,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-Topline/GB162,boiler,115,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 Topline/GB162,boiler,115,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 Topline/GB162,boiler,115,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 Topline/GB162,boiler,115,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -1024,8 +1002,6 @@ Cascade MCM10,boiler,121,pumpmodmin,boiler pump min power,uint8 (>=0<=100),%,tru
 Cascade MCM10,boiler,121,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 Cascade MCM10,boiler,121,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 Cascade MCM10,boiler,121,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-Cascade MCM10,boiler,121,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-Cascade MCM10,boiler,121,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 Cascade MCM10,boiler,121,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 Cascade MCM10,boiler,121,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 Cascade MCM10,boiler,121,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -1084,7 +1060,6 @@ Cascade MCM10,boiler,121,recharging,recharging,boolean, ,false,binary_sensor.boi
 Cascade MCM10,boiler,121,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 Cascade MCM10,boiler,121,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 Cascade MCM10,boiler,121,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-Cascade MCM10,boiler,121,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 Cascade MCM10,boiler,121,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 Cascade MCM10,boiler,121,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 Cascade MCM10,boiler,121,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -1136,8 +1111,6 @@ Proline,boiler,122,pumpmodmin,boiler pump min power,uint8 (>=0<=100),%,true,numb
 Proline,boiler,122,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 Proline,boiler,122,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 Proline,boiler,122,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-Proline,boiler,122,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-Proline,boiler,122,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 Proline,boiler,122,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 Proline,boiler,122,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 Proline,boiler,122,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -1196,7 +1169,6 @@ Proline,boiler,122,recharging,recharging,boolean, ,false,binary_sensor.boiler_dh
 Proline,boiler,122,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 Proline,boiler,122,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 Proline,boiler,122,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-Proline,boiler,122,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 Proline,boiler,122,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 Proline,boiler,122,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 Proline,boiler,122,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -1248,8 +1220,6 @@ GBx72/Trendline/Cerapur/Greenstar Si,boiler,123,pumpmodmin,boiler pump min power
 GBx72/Trendline/Cerapur/Greenstar Si,boiler,123,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 GBx72/Trendline/Cerapur/Greenstar Si,boiler,123,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 GBx72/Trendline/Cerapur/Greenstar Si,boiler,123,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-GBx72/Trendline/Cerapur/Greenstar Si,boiler,123,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-GBx72/Trendline/Cerapur/Greenstar Si,boiler,123,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 GBx72/Trendline/Cerapur/Greenstar Si,boiler,123,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 GBx72/Trendline/Cerapur/Greenstar Si,boiler,123,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 GBx72/Trendline/Cerapur/Greenstar Si,boiler,123,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -1308,7 +1278,6 @@ GBx72/Trendline/Cerapur/Greenstar Si,boiler,123,recharging,recharging,boolean, ,
 GBx72/Trendline/Cerapur/Greenstar Si,boiler,123,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 GBx72/Trendline/Cerapur/Greenstar Si,boiler,123,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 GBx72/Trendline/Cerapur/Greenstar Si,boiler,123,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-GBx72/Trendline/Cerapur/Greenstar Si,boiler,123,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 GBx72/Trendline/Cerapur/Greenstar Si,boiler,123,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 GBx72/Trendline/Cerapur/Greenstar Si,boiler,123,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 GBx72/Trendline/Cerapur/Greenstar Si,boiler,123,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -1360,8 +1329,6 @@ GB212,boiler,131,pumpmodmin,boiler pump min power,uint8 (>=0<=100),%,true,number
 GB212,boiler,131,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 GB212,boiler,131,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 GB212,boiler,131,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-GB212,boiler,131,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-GB212,boiler,131,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 GB212,boiler,131,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 GB212,boiler,131,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 GB212,boiler,131,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -1420,7 +1387,6 @@ GB212,boiler,131,recharging,recharging,boolean, ,false,binary_sensor.boiler_dhw_
 GB212,boiler,131,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 GB212,boiler,131,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 GB212,boiler,131,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-GB212,boiler,131,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 GB212,boiler,131,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 GB212,boiler,131,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 GB212,boiler,131,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -1472,8 +1438,6 @@ GC7000F,boiler,132,pumpmodmin,boiler pump min power,uint8 (>=0<=100),%,true,numb
 GC7000F,boiler,132,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 GC7000F,boiler,132,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 GC7000F,boiler,132,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-GC7000F,boiler,132,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-GC7000F,boiler,132,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 GC7000F,boiler,132,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 GC7000F,boiler,132,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 GC7000F,boiler,132,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -1532,7 +1496,6 @@ GC7000F,boiler,132,recharging,recharging,boolean, ,false,binary_sensor.boiler_dh
 GC7000F,boiler,132,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 GC7000F,boiler,132,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 GC7000F,boiler,132,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-GC7000F,boiler,132,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 GC7000F,boiler,132,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 GC7000F,boiler,132,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 GC7000F,boiler,132,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -1584,8 +1547,6 @@ Logano GB125/KB195i/Logamatic MC110,boiler,133,pumpmodmin,boiler pump min power,
 Logano GB125/KB195i/Logamatic MC110,boiler,133,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 Logano GB125/KB195i/Logamatic MC110,boiler,133,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 Logano GB125/KB195i/Logamatic MC110,boiler,133,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-Logano GB125/KB195i/Logamatic MC110,boiler,133,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-Logano GB125/KB195i/Logamatic MC110,boiler,133,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 Logano GB125/KB195i/Logamatic MC110,boiler,133,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 Logano GB125/KB195i/Logamatic MC110,boiler,133,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 Logano GB125/KB195i/Logamatic MC110,boiler,133,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -1644,7 +1605,6 @@ Logano GB125/KB195i/Logamatic MC110,boiler,133,recharging,recharging,boolean, ,f
 Logano GB125/KB195i/Logamatic MC110,boiler,133,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 Logano GB125/KB195i/Logamatic MC110,boiler,133,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 Logano GB125/KB195i/Logamatic MC110,boiler,133,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-Logano GB125/KB195i/Logamatic MC110,boiler,133,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 Logano GB125/KB195i/Logamatic MC110,boiler,133,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 Logano GB125/KB195i/Logamatic MC110,boiler,133,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 Logano GB125/KB195i/Logamatic MC110,boiler,133,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -1696,8 +1656,6 @@ Greenstar 30Ri Compact,boiler,154,pumpmodmin,boiler pump min power,uint8 (>=0<=1
 Greenstar 30Ri Compact,boiler,154,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 Greenstar 30Ri Compact,boiler,154,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 Greenstar 30Ri Compact,boiler,154,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-Greenstar 30Ri Compact,boiler,154,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-Greenstar 30Ri Compact,boiler,154,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 Greenstar 30Ri Compact,boiler,154,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 Greenstar 30Ri Compact,boiler,154,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 Greenstar 30Ri Compact,boiler,154,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -1756,7 +1714,6 @@ Greenstar 30Ri Compact,boiler,154,recharging,recharging,boolean, ,false,binary_s
 Greenstar 30Ri Compact,boiler,154,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 Greenstar 30Ri Compact,boiler,154,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 Greenstar 30Ri Compact,boiler,154,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-Greenstar 30Ri Compact,boiler,154,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 Greenstar 30Ri Compact,boiler,154,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 Greenstar 30Ri Compact,boiler,154,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 Greenstar 30Ri Compact,boiler,154,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -1808,8 +1765,6 @@ Cerapur Aero,boiler,167,pumpmodmin,boiler pump min power,uint8 (>=0<=100),%,true
 Cerapur Aero,boiler,167,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 Cerapur Aero,boiler,167,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 Cerapur Aero,boiler,167,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-Cerapur Aero,boiler,167,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-Cerapur Aero,boiler,167,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 Cerapur Aero,boiler,167,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 Cerapur Aero,boiler,167,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 Cerapur Aero,boiler,167,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -1868,7 +1823,6 @@ Cerapur Aero,boiler,167,recharging,recharging,boolean, ,false,binary_sensor.boil
 Cerapur Aero,boiler,167,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 Cerapur Aero,boiler,167,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 Cerapur Aero,boiler,167,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-Cerapur Aero,boiler,167,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 Cerapur Aero,boiler,167,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 Cerapur Aero,boiler,167,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 Cerapur Aero,boiler,167,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -1920,8 +1874,6 @@ Hybrid Heatpump,boiler,168,pumpmodmin,boiler pump min power,uint8 (>=0<=100),%,t
 Hybrid Heatpump,boiler,168,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 Hybrid Heatpump,boiler,168,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 Hybrid Heatpump,boiler,168,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-Hybrid Heatpump,boiler,168,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-Hybrid Heatpump,boiler,168,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 Hybrid Heatpump,boiler,168,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 Hybrid Heatpump,boiler,168,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 Hybrid Heatpump,boiler,168,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -1980,7 +1932,6 @@ Hybrid Heatpump,boiler,168,recharging,recharging,boolean, ,false,binary_sensor.b
 Hybrid Heatpump,boiler,168,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 Hybrid Heatpump,boiler,168,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 Hybrid Heatpump,boiler,168,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-Hybrid Heatpump,boiler,168,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 Hybrid Heatpump,boiler,168,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 Hybrid Heatpump,boiler,168,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 Hybrid Heatpump,boiler,168,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -2032,8 +1983,6 @@ Logano GB212,boiler,170,pumpmodmin,boiler pump min power,uint8 (>=0<=100),%,true
 Logano GB212,boiler,170,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 Logano GB212,boiler,170,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 Logano GB212,boiler,170,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-Logano GB212,boiler,170,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-Logano GB212,boiler,170,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 Logano GB212,boiler,170,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 Logano GB212,boiler,170,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 Logano GB212,boiler,170,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -2092,7 +2041,6 @@ Logano GB212,boiler,170,recharging,recharging,boolean, ,false,binary_sensor.boil
 Logano GB212,boiler,170,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 Logano GB212,boiler,170,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 Logano GB212,boiler,170,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-Logano GB212,boiler,170,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 Logano GB212,boiler,170,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 Logano GB212,boiler,170,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 Logano GB212,boiler,170,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -2122,8 +2070,6 @@ Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,bo
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -2144,10 +2090,12 @@ Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,bo
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,nrgtotal,total energy,uint24 (>=0<=167772),kWh,false,sensor.boiler_total_energy,sensor.boiler_nrgtotal,5,0,1/100,80,2
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,nrg,energy,uint24 (>=0<=167772),kWh,false,sensor.boiler_dhw_energy,sensor.boiler_dhw_nrg,5,9,1/100,0,2
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,nrgheat,energy heating,uint24 (>=0<=167772),kWh,false,sensor.boiler_energy_heating,sensor.boiler_nrgheat,5,0,1/100,82,2
+Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,nrgcool,energy cooling,uint24 (>=0<=167772),kWh,false,sensor.boiler_energy_cooling,sensor.boiler_nrgcool,5,0,1/100,-1,2
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,metertotal,meter total,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_total,sensor.boiler_metertotal,5,0,1/100,84,2
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,metercomp,meter compressor,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_compressor,sensor.boiler_metercomp,5,0,1/100,86,2
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,metereheat,meter e-heater,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_e-heater,sensor.boiler_metereheat,5,0,1/100,88,2
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,meterheat,meter heating,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_heating,sensor.boiler_meterheat,5,0,1/100,90,2
+Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,metercool,meter cooling,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_cooling,sensor.boiler_metercool,5,0,1/100,-1,2
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,meter,meter,uint24 (>=0<=167772),kWh,false,sensor.boiler_dhw_meter,sensor.boiler_dhw_meter,5,9,1/100,2,2
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,uptimetotal,heatpump total uptime,time (>=0<=279620),minutes,false,sensor.boiler_heatpump_total_uptime,sensor.boiler_uptimetotal,5,0,1/60,92,2
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,uptimecontrol,total operating time heat,time (>=0<=279620),minutes,false,sensor.boiler_total_operating_time_heat,sensor.boiler_uptimecontrol,5,0,1/60,94,2
@@ -2294,7 +2242,6 @@ Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,bo
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -2320,8 +2267,6 @@ Geo 5xx,boiler,173,pumpmodmin,boiler pump min power,uint8 (>=0<=100),%,true,numb
 Geo 5xx,boiler,173,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 Geo 5xx,boiler,173,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 Geo 5xx,boiler,173,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-Geo 5xx,boiler,173,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-Geo 5xx,boiler,173,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 Geo 5xx,boiler,173,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 Geo 5xx,boiler,173,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 Geo 5xx,boiler,173,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -2342,10 +2287,12 @@ Geo 5xx,boiler,173,emergencytemp,emergency temperature,uint8 (>=15<=70),C,true,n
 Geo 5xx,boiler,173,nrgtotal,total energy,uint24 (>=0<=167772),kWh,false,sensor.boiler_total_energy,sensor.boiler_nrgtotal,5,0,1/100,80,2
 Geo 5xx,boiler,173,nrg,energy,uint24 (>=0<=167772),kWh,false,sensor.boiler_dhw_energy,sensor.boiler_dhw_nrg,5,9,1/100,0,2
 Geo 5xx,boiler,173,nrgheat,energy heating,uint24 (>=0<=167772),kWh,false,sensor.boiler_energy_heating,sensor.boiler_nrgheat,5,0,1/100,82,2
+Geo 5xx,boiler,173,nrgcool,energy cooling,uint24 (>=0<=167772),kWh,false,sensor.boiler_energy_cooling,sensor.boiler_nrgcool,5,0,1/100,-1,2
 Geo 5xx,boiler,173,metertotal,meter total,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_total,sensor.boiler_metertotal,5,0,1/100,84,2
 Geo 5xx,boiler,173,metercomp,meter compressor,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_compressor,sensor.boiler_metercomp,5,0,1/100,86,2
 Geo 5xx,boiler,173,metereheat,meter e-heater,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_e-heater,sensor.boiler_metereheat,5,0,1/100,88,2
 Geo 5xx,boiler,173,meterheat,meter heating,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_heating,sensor.boiler_meterheat,5,0,1/100,90,2
+Geo 5xx,boiler,173,metercool,meter cooling,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_cooling,sensor.boiler_metercool,5,0,1/100,-1,2
 Geo 5xx,boiler,173,meter,meter,uint24 (>=0<=167772),kWh,false,sensor.boiler_dhw_meter,sensor.boiler_dhw_meter,5,9,1/100,2,2
 Geo 5xx,boiler,173,uptimetotal,heatpump total uptime,time (>=0<=279620),minutes,false,sensor.boiler_heatpump_total_uptime,sensor.boiler_uptimetotal,5,0,1/60,92,2
 Geo 5xx,boiler,173,uptimecontrol,total operating time heat,time (>=0<=279620),minutes,false,sensor.boiler_total_operating_time_heat,sensor.boiler_uptimecontrol,5,0,1/60,94,2
@@ -2492,7 +2439,6 @@ Geo 5xx,boiler,173,recharging,recharging,boolean, ,false,binary_sensor.boiler_dh
 Geo 5xx,boiler,173,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 Geo 5xx,boiler,173,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 Geo 5xx,boiler,173,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-Geo 5xx,boiler,173,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 Geo 5xx,boiler,173,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 Geo 5xx,boiler,173,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 Geo 5xx,boiler,173,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -2540,8 +2486,6 @@ Condens 5000i/Greenstar 8000/GC9800IW/GB192i.2,boiler,195,pumpmodmin,boiler pump
 Condens 5000i/Greenstar 8000/GC9800IW/GB192i.2,boiler,195,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 Condens 5000i/Greenstar 8000/GC9800IW/GB192i.2,boiler,195,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 Condens 5000i/Greenstar 8000/GC9800IW/GB192i.2,boiler,195,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-Condens 5000i/Greenstar 8000/GC9800IW/GB192i.2,boiler,195,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-Condens 5000i/Greenstar 8000/GC9800IW/GB192i.2,boiler,195,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 Condens 5000i/Greenstar 8000/GC9800IW/GB192i.2,boiler,195,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 Condens 5000i/Greenstar 8000/GC9800IW/GB192i.2,boiler,195,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 Condens 5000i/Greenstar 8000/GC9800IW/GB192i.2,boiler,195,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -2600,7 +2544,6 @@ Condens 5000i/Greenstar 8000/GC9800IW/GB192i.2,boiler,195,recharging,recharging,
 Condens 5000i/Greenstar 8000/GC9800IW/GB192i.2,boiler,195,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 Condens 5000i/Greenstar 8000/GC9800IW/GB192i.2,boiler,195,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 Condens 5000i/Greenstar 8000/GC9800IW/GB192i.2,boiler,195,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-Condens 5000i/Greenstar 8000/GC9800IW/GB192i.2,boiler,195,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 Condens 5000i/Greenstar 8000/GC9800IW/GB192i.2,boiler,195,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 Condens 5000i/Greenstar 8000/GC9800IW/GB192i.2,boiler,195,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 Condens 5000i/Greenstar 8000/GC9800IW/GB192i.2,boiler,195,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -2652,8 +2595,6 @@ Logamax U122/Cerapur,boiler,203,pumpmodmin,boiler pump min power,uint8 (>=0<=100
 Logamax U122/Cerapur,boiler,203,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 Logamax U122/Cerapur,boiler,203,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 Logamax U122/Cerapur,boiler,203,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-Logamax U122/Cerapur,boiler,203,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-Logamax U122/Cerapur,boiler,203,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 Logamax U122/Cerapur,boiler,203,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 Logamax U122/Cerapur,boiler,203,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 Logamax U122/Cerapur,boiler,203,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -2712,7 +2653,6 @@ Logamax U122/Cerapur,boiler,203,recharging,recharging,boolean, ,false,binary_sen
 Logamax U122/Cerapur,boiler,203,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 Logamax U122/Cerapur,boiler,203,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 Logamax U122/Cerapur,boiler,203,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-Logamax U122/Cerapur,boiler,203,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 Logamax U122/Cerapur,boiler,203,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 Logamax U122/Cerapur,boiler,203,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 Logamax U122/Cerapur,boiler,203,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -2764,8 +2704,6 @@ Ecomline Excellent,boiler,206,pumpmodmin,boiler pump min power,uint8 (>=0<=100),
 Ecomline Excellent,boiler,206,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 Ecomline Excellent,boiler,206,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 Ecomline Excellent,boiler,206,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-Ecomline Excellent,boiler,206,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-Ecomline Excellent,boiler,206,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 Ecomline Excellent,boiler,206,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 Ecomline Excellent,boiler,206,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 Ecomline Excellent,boiler,206,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -2824,7 +2762,6 @@ Ecomline Excellent,boiler,206,recharging,recharging,boolean, ,false,binary_senso
 Ecomline Excellent,boiler,206,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 Ecomline Excellent,boiler,206,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 Ecomline Excellent,boiler,206,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-Ecomline Excellent,boiler,206,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 Ecomline Excellent,boiler,206,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 Ecomline Excellent,boiler,206,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 Ecomline Excellent,boiler,206,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -2876,8 +2813,6 @@ Logamax Plus/GB192/Condens GC9000/Greenstar ErP,boiler,208,pumpmodmin,boiler pum
 Logamax Plus/GB192/Condens GC9000/Greenstar ErP,boiler,208,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 Logamax Plus/GB192/Condens GC9000/Greenstar ErP,boiler,208,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 Logamax Plus/GB192/Condens GC9000/Greenstar ErP,boiler,208,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-Logamax Plus/GB192/Condens GC9000/Greenstar ErP,boiler,208,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-Logamax Plus/GB192/Condens GC9000/Greenstar ErP,boiler,208,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 Logamax Plus/GB192/Condens GC9000/Greenstar ErP,boiler,208,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 Logamax Plus/GB192/Condens GC9000/Greenstar ErP,boiler,208,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 Logamax Plus/GB192/Condens GC9000/Greenstar ErP,boiler,208,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -2936,7 +2871,6 @@ Logamax Plus/GB192/Condens GC9000/Greenstar ErP,boiler,208,recharging,recharging
 Logamax Plus/GB192/Condens GC9000/Greenstar ErP,boiler,208,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 Logamax Plus/GB192/Condens GC9000/Greenstar ErP,boiler,208,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 Logamax Plus/GB192/Condens GC9000/Greenstar ErP,boiler,208,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-Logamax Plus/GB192/Condens GC9000/Greenstar ErP,boiler,208,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 Logamax Plus/GB192/Condens GC9000/Greenstar ErP,boiler,208,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 Logamax Plus/GB192/Condens GC9000/Greenstar ErP,boiler,208,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 Logamax Plus/GB192/Condens GC9000/Greenstar ErP,boiler,208,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -2988,8 +2922,6 @@ Cascade MC400,boiler,210,pumpmodmin,boiler pump min power,uint8 (>=0<=100),%,tru
 Cascade MC400,boiler,210,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 Cascade MC400,boiler,210,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 Cascade MC400,boiler,210,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-Cascade MC400,boiler,210,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-Cascade MC400,boiler,210,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 Cascade MC400,boiler,210,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 Cascade MC400,boiler,210,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 Cascade MC400,boiler,210,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -3048,7 +2980,6 @@ Cascade MC400,boiler,210,recharging,recharging,boolean, ,false,binary_sensor.boi
 Cascade MC400,boiler,210,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 Cascade MC400,boiler,210,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 Cascade MC400,boiler,210,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-Cascade MC400,boiler,210,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 Cascade MC400,boiler,210,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 Cascade MC400,boiler,210,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 Cascade MC400,boiler,210,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -3100,8 +3031,6 @@ EasyControl Adapter,boiler,211,pumpmodmin,boiler pump min power,uint8 (>=0<=100)
 EasyControl Adapter,boiler,211,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 EasyControl Adapter,boiler,211,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 EasyControl Adapter,boiler,211,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-EasyControl Adapter,boiler,211,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-EasyControl Adapter,boiler,211,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 EasyControl Adapter,boiler,211,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 EasyControl Adapter,boiler,211,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 EasyControl Adapter,boiler,211,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -3160,7 +3089,6 @@ EasyControl Adapter,boiler,211,recharging,recharging,boolean, ,false,binary_sens
 EasyControl Adapter,boiler,211,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 EasyControl Adapter,boiler,211,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 EasyControl Adapter,boiler,211,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-EasyControl Adapter,boiler,211,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 EasyControl Adapter,boiler,211,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 EasyControl Adapter,boiler,211,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 EasyControl Adapter,boiler,211,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -3197,8 +3125,6 @@ Greenstar HIU/Logamax kompakt WS170,boiler,219,pumpmodmin,boiler pump min power,
 Greenstar HIU/Logamax kompakt WS170,boiler,219,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 Greenstar HIU/Logamax kompakt WS170,boiler,219,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 Greenstar HIU/Logamax kompakt WS170,boiler,219,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-Greenstar HIU/Logamax kompakt WS170,boiler,219,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-Greenstar HIU/Logamax kompakt WS170,boiler,219,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 Greenstar HIU/Logamax kompakt WS170,boiler,219,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 Greenstar HIU/Logamax kompakt WS170,boiler,219,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 Greenstar HIU/Logamax kompakt WS170,boiler,219,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -3257,7 +3183,6 @@ Greenstar HIU/Logamax kompakt WS170,boiler,219,recharging,recharging,boolean, ,f
 Greenstar HIU/Logamax kompakt WS170,boiler,219,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 Greenstar HIU/Logamax kompakt WS170,boiler,219,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 Greenstar HIU/Logamax kompakt WS170,boiler,219,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-Greenstar HIU/Logamax kompakt WS170,boiler,219,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 Greenstar HIU/Logamax kompakt WS170,boiler,219,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 Greenstar HIU/Logamax kompakt WS170,boiler,219,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 Greenstar HIU/Logamax kompakt WS170,boiler,219,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -3305,8 +3230,6 @@ Logamax Plus GB122/Condense 2300,boiler,234,pumpmodmin,boiler pump min power,uin
 Logamax Plus GB122/Condense 2300,boiler,234,pumpmode,boiler pump mode,enum [proportional\|deltaP-1\|deltaP-2\|deltaP-3\|deltaP-4], ,true,select.boiler_boiler_pump_mode,select.boiler_pumpmode,5,0,1,18,1
 Logamax Plus GB122/Condense 2300,boiler,234,pumpcharacter,boiler pump characteristic,enum [proportional\|150mbar\|200mbar\|250mbar\|300mbar\|350mbar\|400mbar], ,true,select.boiler_boiler_pump_characteristic,select.boiler_pumpcharacter,5,0,1,19,1
 Logamax Plus GB122/Condense 2300,boiler,234,pumpdelay,pump delay,uint8 (>=0<=60),minutes,true,number.boiler_pump_delay,number.boiler_pumpdelay,5,0,1,20,1
-Logamax Plus GB122/Condense 2300,boiler,234,setflowtemp,set flow temperature,uint8 (>=0<=254),C,false,sensor.boiler_set_flow_temperature,sensor.boiler_setflowtemp,5,0,1,21,1
-Logamax Plus GB122/Condense 2300,boiler,234,setburnpow,burner set power,uint8 (>=0<=100),%,false,sensor.boiler_burner_set_power,sensor.boiler_setburnpow,5,0,1,22,1
 Logamax Plus GB122/Condense 2300,boiler,234,selburnpow,burner selected max power,uint8 (>=0<=254),%,true,number.boiler_burner_selected_max_power,number.boiler_selburnpow,5,0,1,23,1
 Logamax Plus GB122/Condense 2300,boiler,234,curburnpow,burner current power,uint8 (>=0<=100),%,false,sensor.boiler_burner_current_power,sensor.boiler_curburnpow,5,0,1,24,1
 Logamax Plus GB122/Condense 2300,boiler,234,burnstarts,burner starts,uint24 (>=0<=16777213), ,false,sensor.boiler_burner_starts,sensor.boiler_burnstarts,5,0,1,25,2
@@ -3365,7 +3288,6 @@ Logamax Plus GB122/Condense 2300,boiler,234,recharging,recharging,boolean, ,fals
 Logamax Plus GB122/Condense 2300,boiler,234,tempok,temperature ok,boolean, ,false,binary_sensor.boiler_dhw_temperature_ok,binary_sensor.boiler_dhw_tempok,5,9,1,60,1
 Logamax Plus GB122/Condense 2300,boiler,234,active,active,boolean, ,false,binary_sensor.boiler_dhw_active,binary_sensor.boiler_dhw_active,5,9,1,61,1
 Logamax Plus GB122/Condense 2300,boiler,234,3wayvalve,3-way valve active,boolean, ,false,binary_sensor.boiler_dhw_3-way_valve_active,binary_sensor.boiler_dhw_3wayvalve,5,9,1,62,1
-Logamax Plus GB122/Condense 2300,boiler,234,setpumppower,set pump power,uint8 (>=0<=100),%,false,sensor.boiler_dhw_set_pump_power,sensor.boiler_dhw_setpumppower,5,9,1,63,1
 Logamax Plus GB122/Condense 2300,boiler,234,mixertemp,mixer temperature,uint16 (>=0<=3199),C,false,sensor.boiler_dhw_mixer_temperature,sensor.boiler_dhw_mixertemp,5,9,1/10,64,1
 Logamax Plus GB122/Condense 2300,boiler,234,cylmiddletemp,cylinder middle temperature (TS3),uint16 (>=0<=3199),C,false,sensor.boiler_dhw_cylinder_middle_temperature_(TS3),sensor.boiler_dhw_cylmiddletemp,5,9,1/10,65,1
 Logamax Plus GB122/Condense 2300,boiler,234,starts,starts,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts,sensor.boiler_dhw_starts,5,9,1,66,2
@@ -3446,14 +3368,18 @@ UI800/BC400,thermostat,4,hpmode,HP Mode,enum [heating\|cooling\|heating&cooling]
 UI800/BC400,thermostat,4,dewoffset,dew point offset,uint8 (>=2<=10),K,true,number.thermostat_hc1_dew_point_offset,number.thermostat_hc1_dewoffset,6,1,1,37,1
 UI800/BC400,thermostat,4,roomtempdiff,room temp difference,uint8 (>=0<=254),K,true,number.thermostat_hc1_room_temp_difference,number.thermostat_hc1_roomtempdiff,6,1,1,38,1
 UI800/BC400,thermostat,4,hpminflowtemp,HP min. flow temp.,uint8 (>=0<=254),C,true,number.thermostat_hc1_HP_min._flow_temp.,number.thermostat_hc1_hpminflowtemp,6,1,1,39,1
-UI800/BC400,thermostat,4,control,control device,enum [off\|-\|RC100\|RC100H\|-\|RC120RF\|RC220\|single], ,true,select.thermostat_hc1_control_device,select.thermostat_hc1_control,6,1,1,40,1
+UI800/BC400,thermostat,4,control,control device,enum [off\|-\|RC100\|RC100H\|-\|RC120RF\|RC220/RT800\|single], ,true,select.thermostat_hc1_control_device,select.thermostat_hc1_control,6,1,1,40,1
 UI800/BC400,thermostat,4,remotetemp,room temperature from remote,cmd [] (>=-1<=101),C,true,sensor.thermostat_hc1_room_temperature_from_remote,sensor.thermostat_hc1_remotetemp,6,1,1/10,41,1
-UI800/BC400,thermostat,4,remotehum,room humidity from remote,uint8 (>=-1<=101),%,true,number.thermostat_hc1_room_humidity_from_remote,number.thermostat_hc1_remotehum,6,1,1,42,1
+UI800/BC400,thermostat,4,remotehum,room humidity from remote,cmd [] (>=-1<=101),%,true,sensor.thermostat_hc1_room_humidity_from_remote,sensor.thermostat_hc1_remotehum,6,1,1,42,1
 UI800/BC400,thermostat,4,heatondelay,heat-on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_heat-on_delay,number.thermostat_hc1_heatondelay,6,1,1,43,1
 UI800/BC400,thermostat,4,heatoffdelay,heat-off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_heat-off_delay,number.thermostat_hc1_heatoffdelay,6,1,1,44,1
 UI800/BC400,thermostat,4,instantstart,instant start,uint8 (>=1<=10),K,true,number.thermostat_hc1_instant_start,number.thermostat_hc1_instantstart,6,1,1,45,1
 UI800/BC400,thermostat,4,boost,boost mode,boolean, ,true,switch.thermostat_hc1_boost_mode,switch.thermostat_hc1_boost,6,1,1,46,1
 UI800/BC400,thermostat,4,boosttime,boost time,uint8 (>=0<=254),hours,true,number.thermostat_hc1_boost_time,number.thermostat_hc1_boosttime,6,1,1,47,1
+UI800/BC400,thermostat,4,coolstart,cooling starttemp,uint8 (>=20<=35),C,true,number.thermostat_hc1_cooling_starttemp,number.thermostat_hc1_coolstart,6,1,1,-1,1
+UI800/BC400,thermostat,4,coolondelay,cooling on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_on_delay,number.thermostat_hc1_coolondelay,6,1,1,-1,1
+UI800/BC400,thermostat,4,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,-1,1
+UI800/BC400,thermostat,4,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,-1,1
 UI800/BC400,thermostat,4,mode,mode,enum [off\|eco+\|eco\|comfort\|auto], ,true,select.thermostat_dhw_mode,select.thermostat_dhw_mode,6,9,1,0,1
 UI800/BC400,thermostat,4,settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
 UI800/BC400,thermostat,4,settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
@@ -3813,12 +3739,16 @@ RC200/CW100/CR120,thermostat,157,roomtempdiff,room temp difference,uint8 (>=0<=2
 RC200/CW100/CR120,thermostat,157,hpminflowtemp,HP min. flow temp.,uint8 (>=0<=254),C,true,number.thermostat_hc1_HP_min._flow_temp.,number.thermostat_hc1_hpminflowtemp,6,1,1,39,1
 RC200/CW100/CR120,thermostat,157,control,control device,enum [RC310\|RC200\|RC100\|RC100H\|TC100], ,true,select.thermostat_hc1_control_device,select.thermostat_hc1_control,6,1,1,40,1
 RC200/CW100/CR120,thermostat,157,remotetemp,room temperature from remote,cmd [] (>=-1<=101),C,true,sensor.thermostat_hc1_room_temperature_from_remote,sensor.thermostat_hc1_remotetemp,6,1,1/10,41,1
-RC200/CW100/CR120,thermostat,157,remotehum,room humidity from remote,uint8 (>=-1<=101),%,true,number.thermostat_hc1_room_humidity_from_remote,number.thermostat_hc1_remotehum,6,1,1,42,1
+RC200/CW100/CR120,thermostat,157,remotehum,room humidity from remote,cmd [] (>=-1<=101),%,true,sensor.thermostat_hc1_room_humidity_from_remote,sensor.thermostat_hc1_remotehum,6,1,1,42,1
 RC200/CW100/CR120,thermostat,157,heatondelay,heat-on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_heat-on_delay,number.thermostat_hc1_heatondelay,6,1,1,43,1
 RC200/CW100/CR120,thermostat,157,heatoffdelay,heat-off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_heat-off_delay,number.thermostat_hc1_heatoffdelay,6,1,1,44,1
 RC200/CW100/CR120,thermostat,157,instantstart,instant start,uint8 (>=1<=10),K,true,number.thermostat_hc1_instant_start,number.thermostat_hc1_instantstart,6,1,1,45,1
 RC200/CW100/CR120,thermostat,157,boost,boost mode,boolean, ,true,switch.thermostat_hc1_boost_mode,switch.thermostat_hc1_boost,6,1,1,46,1
 RC200/CW100/CR120,thermostat,157,boosttime,boost time,uint8 (>=0<=254),hours,true,number.thermostat_hc1_boost_time,number.thermostat_hc1_boosttime,6,1,1,47,1
+RC200/CW100/CR120,thermostat,157,coolstart,cooling starttemp,uint8 (>=20<=35),C,true,number.thermostat_hc1_cooling_starttemp,number.thermostat_hc1_coolstart,6,1,1,-1,1
+RC200/CW100/CR120,thermostat,157,coolondelay,cooling on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_on_delay,number.thermostat_hc1_coolondelay,6,1,1,-1,1
+RC200/CW100/CR120,thermostat,157,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,-1,1
+RC200/CW100/CR120,thermostat,157,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,-1,1
 RC200/CW100/CR120,thermostat,157,mode,mode,enum [off\|normal\|comfort\|auto\|own prog], ,true,select.thermostat_dhw_mode,select.thermostat_dhw_mode,6,9,1,0,1
 RC200/CW100/CR120,thermostat,157,settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
 RC200/CW100/CR120,thermostat,157,settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
@@ -3893,12 +3823,16 @@ RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,roomtempdif
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,hpminflowtemp,HP min. flow temp.,uint8 (>=0<=254),C,true,number.thermostat_hc1_HP_min._flow_temp.,number.thermostat_hc1_hpminflowtemp,6,1,1,39,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,control,control device,enum [RC310\|RC200\|RC100\|RC100H\|TC100], ,true,select.thermostat_hc1_control_device,select.thermostat_hc1_control,6,1,1,40,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,remotetemp,room temperature from remote,cmd [] (>=-1<=101),C,true,sensor.thermostat_hc1_room_temperature_from_remote,sensor.thermostat_hc1_remotetemp,6,1,1/10,41,1
-RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,remotehum,room humidity from remote,uint8 (>=-1<=101),%,true,number.thermostat_hc1_room_humidity_from_remote,number.thermostat_hc1_remotehum,6,1,1,42,1
+RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,remotehum,room humidity from remote,cmd [] (>=-1<=101),%,true,sensor.thermostat_hc1_room_humidity_from_remote,sensor.thermostat_hc1_remotehum,6,1,1,42,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,heatondelay,heat-on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_heat-on_delay,number.thermostat_hc1_heatondelay,6,1,1,43,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,heatoffdelay,heat-off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_heat-off_delay,number.thermostat_hc1_heatoffdelay,6,1,1,44,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,instantstart,instant start,uint8 (>=1<=10),K,true,number.thermostat_hc1_instant_start,number.thermostat_hc1_instantstart,6,1,1,45,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,boost,boost mode,boolean, ,true,switch.thermostat_hc1_boost_mode,switch.thermostat_hc1_boost,6,1,1,46,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,boosttime,boost time,uint8 (>=0<=254),hours,true,number.thermostat_hc1_boost_time,number.thermostat_hc1_boosttime,6,1,1,47,1
+RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,coolstart,cooling starttemp,uint8 (>=20<=35),C,true,number.thermostat_hc1_cooling_starttemp,number.thermostat_hc1_coolstart,6,1,1,-1,1
+RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,coolondelay,cooling on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_on_delay,number.thermostat_hc1_coolondelay,6,1,1,-1,1
+RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,-1,1
+RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,-1,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,mode,mode,enum [off\|normal\|comfort\|auto\|own prog], ,true,select.thermostat_dhw_mode,select.thermostat_dhw_mode,6,9,1,0,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
@@ -3973,12 +3907,16 @@ RC100/Moduline 1000/1010,thermostat,165,roomtempdiff,room temp difference,uint8 
 RC100/Moduline 1000/1010,thermostat,165,hpminflowtemp,HP min. flow temp.,uint8 (>=0<=254),C,true,number.thermostat_hc1_HP_min._flow_temp.,number.thermostat_hc1_hpminflowtemp,6,1,1,39,1
 RC100/Moduline 1000/1010,thermostat,165,control,control device,enum [RC310\|RC200\|RC100\|RC100H\|TC100], ,true,select.thermostat_hc1_control_device,select.thermostat_hc1_control,6,1,1,40,1
 RC100/Moduline 1000/1010,thermostat,165,remotetemp,room temperature from remote,cmd [] (>=-1<=101),C,true,sensor.thermostat_hc1_room_temperature_from_remote,sensor.thermostat_hc1_remotetemp,6,1,1/10,41,1
-RC100/Moduline 1000/1010,thermostat,165,remotehum,room humidity from remote,uint8 (>=-1<=101),%,true,number.thermostat_hc1_room_humidity_from_remote,number.thermostat_hc1_remotehum,6,1,1,42,1
+RC100/Moduline 1000/1010,thermostat,165,remotehum,room humidity from remote,cmd [] (>=-1<=101),%,true,sensor.thermostat_hc1_room_humidity_from_remote,sensor.thermostat_hc1_remotehum,6,1,1,42,1
 RC100/Moduline 1000/1010,thermostat,165,heatondelay,heat-on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_heat-on_delay,number.thermostat_hc1_heatondelay,6,1,1,43,1
 RC100/Moduline 1000/1010,thermostat,165,heatoffdelay,heat-off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_heat-off_delay,number.thermostat_hc1_heatoffdelay,6,1,1,44,1
 RC100/Moduline 1000/1010,thermostat,165,instantstart,instant start,uint8 (>=1<=10),K,true,number.thermostat_hc1_instant_start,number.thermostat_hc1_instantstart,6,1,1,45,1
 RC100/Moduline 1000/1010,thermostat,165,boost,boost mode,boolean, ,true,switch.thermostat_hc1_boost_mode,switch.thermostat_hc1_boost,6,1,1,46,1
 RC100/Moduline 1000/1010,thermostat,165,boosttime,boost time,uint8 (>=0<=254),hours,true,number.thermostat_hc1_boost_time,number.thermostat_hc1_boosttime,6,1,1,47,1
+RC100/Moduline 1000/1010,thermostat,165,coolstart,cooling starttemp,uint8 (>=20<=35),C,true,number.thermostat_hc1_cooling_starttemp,number.thermostat_hc1_coolstart,6,1,1,-1,1
+RC100/Moduline 1000/1010,thermostat,165,coolondelay,cooling on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_on_delay,number.thermostat_hc1_coolondelay,6,1,1,-1,1
+RC100/Moduline 1000/1010,thermostat,165,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,-1,1
+RC100/Moduline 1000/1010,thermostat,165,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,-1,1
 RC100/Moduline 1000/1010,thermostat,165,mode,mode,enum [off\|normal\|comfort\|auto\|own prog], ,true,select.thermostat_dhw_mode,select.thermostat_dhw_mode,6,9,1,0,1
 RC100/Moduline 1000/1010,thermostat,165,settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
 RC100/Moduline 1000/1010,thermostat,165,settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
@@ -4054,12 +3992,16 @@ Rego 2000/3000,thermostat,172,roomtempdiff,room temp difference,uint8 (>=0<=254)
 Rego 2000/3000,thermostat,172,hpminflowtemp,HP min. flow temp.,uint8 (>=0<=254),C,true,number.thermostat_hc1_HP_min._flow_temp.,number.thermostat_hc1_hpminflowtemp,6,1,1,39,1
 Rego 2000/3000,thermostat,172,control,control device,enum [RC310\|RC200\|RC100\|RC100H\|TC100], ,true,select.thermostat_hc1_control_device,select.thermostat_hc1_control,6,1,1,40,1
 Rego 2000/3000,thermostat,172,remotetemp,room temperature from remote,cmd [] (>=-1<=101),C,true,sensor.thermostat_hc1_room_temperature_from_remote,sensor.thermostat_hc1_remotetemp,6,1,1/10,41,1
-Rego 2000/3000,thermostat,172,remotehum,room humidity from remote,uint8 (>=-1<=101),%,true,number.thermostat_hc1_room_humidity_from_remote,number.thermostat_hc1_remotehum,6,1,1,42,1
+Rego 2000/3000,thermostat,172,remotehum,room humidity from remote,cmd [] (>=-1<=101),%,true,sensor.thermostat_hc1_room_humidity_from_remote,sensor.thermostat_hc1_remotehum,6,1,1,42,1
 Rego 2000/3000,thermostat,172,heatondelay,heat-on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_heat-on_delay,number.thermostat_hc1_heatondelay,6,1,1,43,1
 Rego 2000/3000,thermostat,172,heatoffdelay,heat-off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_heat-off_delay,number.thermostat_hc1_heatoffdelay,6,1,1,44,1
 Rego 2000/3000,thermostat,172,instantstart,instant start,uint8 (>=1<=10),K,true,number.thermostat_hc1_instant_start,number.thermostat_hc1_instantstart,6,1,1,45,1
 Rego 2000/3000,thermostat,172,boost,boost mode,boolean, ,true,switch.thermostat_hc1_boost_mode,switch.thermostat_hc1_boost,6,1,1,46,1
 Rego 2000/3000,thermostat,172,boosttime,boost time,uint8 (>=0<=254),hours,true,number.thermostat_hc1_boost_time,number.thermostat_hc1_boosttime,6,1,1,47,1
+Rego 2000/3000,thermostat,172,coolstart,cooling starttemp,uint8 (>=20<=35),C,true,number.thermostat_hc1_cooling_starttemp,number.thermostat_hc1_coolstart,6,1,1,-1,1
+Rego 2000/3000,thermostat,172,coolondelay,cooling on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_on_delay,number.thermostat_hc1_coolondelay,6,1,1,-1,1
+Rego 2000/3000,thermostat,172,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,-1,1
+Rego 2000/3000,thermostat,172,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,-1,1
 Rego 2000/3000,thermostat,172,mode,mode,enum [normal\|comfort\|eco+], ,true,select.thermostat_dhw_mode,select.thermostat_dhw_mode,6,9,1,0,1
 Rego 2000/3000,thermostat,172,settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
 Rego 2000/3000,thermostat,172,settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
@@ -4159,14 +4101,18 @@ Rego 3000/UI800/WSW196i/BC400,thermostat,253,hpmode,HP Mode,enum [heating\|cooli
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,dewoffset,dew point offset,uint8 (>=2<=10),K,true,number.thermostat_hc1_dew_point_offset,number.thermostat_hc1_dewoffset,6,1,1,37,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,roomtempdiff,room temp difference,uint8 (>=0<=254),K,true,number.thermostat_hc1_room_temp_difference,number.thermostat_hc1_roomtempdiff,6,1,1,38,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,hpminflowtemp,HP min. flow temp.,uint8 (>=0<=254),C,true,number.thermostat_hc1_HP_min._flow_temp.,number.thermostat_hc1_hpminflowtemp,6,1,1,39,1
-Rego 3000/UI800/WSW196i/BC400,thermostat,253,control,control device,enum [off\|-\|RC100\|RC100H\|-\|RC120RF\|RC220\|single], ,true,select.thermostat_hc1_control_device,select.thermostat_hc1_control,6,1,1,40,1
+Rego 3000/UI800/WSW196i/BC400,thermostat,253,control,control device,enum [off\|-\|RC100\|RC100H\|-\|RC120RF\|RC220/RT800\|single], ,true,select.thermostat_hc1_control_device,select.thermostat_hc1_control,6,1,1,40,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,remotetemp,room temperature from remote,cmd [] (>=-1<=101),C,true,sensor.thermostat_hc1_room_temperature_from_remote,sensor.thermostat_hc1_remotetemp,6,1,1/10,41,1
-Rego 3000/UI800/WSW196i/BC400,thermostat,253,remotehum,room humidity from remote,uint8 (>=-1<=101),%,true,number.thermostat_hc1_room_humidity_from_remote,number.thermostat_hc1_remotehum,6,1,1,42,1
+Rego 3000/UI800/WSW196i/BC400,thermostat,253,remotehum,room humidity from remote,cmd [] (>=-1<=101),%,true,sensor.thermostat_hc1_room_humidity_from_remote,sensor.thermostat_hc1_remotehum,6,1,1,42,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,heatondelay,heat-on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_heat-on_delay,number.thermostat_hc1_heatondelay,6,1,1,43,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,heatoffdelay,heat-off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_heat-off_delay,number.thermostat_hc1_heatoffdelay,6,1,1,44,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,instantstart,instant start,uint8 (>=1<=10),K,true,number.thermostat_hc1_instant_start,number.thermostat_hc1_instantstart,6,1,1,45,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,boost,boost mode,boolean, ,true,switch.thermostat_hc1_boost_mode,switch.thermostat_hc1_boost,6,1,1,46,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,boosttime,boost time,uint8 (>=0<=254),hours,true,number.thermostat_hc1_boost_time,number.thermostat_hc1_boosttime,6,1,1,47,1
+Rego 3000/UI800/WSW196i/BC400,thermostat,253,coolstart,cooling starttemp,uint8 (>=20<=35),C,true,number.thermostat_hc1_cooling_starttemp,number.thermostat_hc1_coolstart,6,1,1,-1,1
+Rego 3000/UI800/WSW196i/BC400,thermostat,253,coolondelay,cooling on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_on_delay,number.thermostat_hc1_coolondelay,6,1,1,-1,1
+Rego 3000/UI800/WSW196i/BC400,thermostat,253,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,-1,1
+Rego 3000/UI800/WSW196i/BC400,thermostat,253,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,-1,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,mode,mode,enum [off\|eco+\|eco\|comfort\|auto], ,true,select.thermostat_dhw_mode,select.thermostat_dhw_mode,6,9,1,0,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
@@ -4727,12 +4673,12 @@ FW120,thermostat,192,roominflfactor,room influence factor,uint8 (>=0<=100),%,tru
 FW120,thermostat,192,heatingtype,heating type,enum [off\|heatingcurve\|radiator\|convector\|floor], ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,6,1,1,19,1
 FW120,thermostat,192,controlmode,control mode,enum [off\|unmixed\|unmixed IPM\|mixed IPM], ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,6,1,1,24,1
 FW120,thermostat,192,charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
-RT800,thermostat,3,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
-RT800,thermostat,3,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
-RT800,thermostat,3,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
-RT800,thermostat,3,seltemp,selected room temperature,int16 (>=0<=30),C,true,number.thermostat_hc1_selected_room_temperature,number.thermostat_hc1_seltemp,6,1,1/2,0,1
-RT800,thermostat,3,currtemp,current room temperature,int16 (>=-3199<=3199),C,false,sensor.thermostat_hc1_current_room_temperature,sensor.thermostat_hc1_currtemp,6,1,1/10,1,1
-RT800,thermostat,3,haclimate,mqtt discovery current room temperature,enum [selTemp\|roomTemp] (>=5<=30), ,false,sensor.thermostat_hc1_mqtt_discovery_current_room_temperature,sensor.thermostat_hc1_haclimate,6,1,1,2,1
+RT800/RC220,thermostat,3,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
+RT800/RC220,thermostat,3,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
+RT800/RC220,thermostat,3,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
+RT800/RC220,thermostat,3,seltemp,selected room temperature,int16 (>=0<=30),C,true,number.thermostat_hc1_selected_room_temperature,number.thermostat_hc1_seltemp,6,1,1/2,0,1
+RT800/RC220,thermostat,3,currtemp,current room temperature,int16 (>=-3199<=3199),C,false,sensor.thermostat_hc1_current_room_temperature,sensor.thermostat_hc1_currtemp,6,1,1/10,1,1
+RT800/RC220,thermostat,3,haclimate,mqtt discovery current room temperature,enum [selTemp\|roomTemp] (>=5<=30), ,false,sensor.thermostat_hc1_mqtt_discovery_current_room_temperature,sensor.thermostat_hc1_haclimate,6,1,1,2,1
 RC100H,thermostat,200,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 RC100H,thermostat,200,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 RC100H,thermostat,200,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
