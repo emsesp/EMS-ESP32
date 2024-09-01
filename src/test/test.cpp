@@ -417,7 +417,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "upload") {
         // S3 has 16MB flash
-        EMSESP::system_.uploadFirmwareURL("https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_7_0-dev_31-ESP32S3-16MB+.bin");
+        // EMSESP::system_.uploadFirmwareURL("https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_7_0-dev_32-ESP32S3-16MB+.bin");
+
+        // Test for 4MB Tasmota builds
+        EMSESP::system_.uploadFirmwareURL("https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_7_0-dev_32-ESP32-16MB.bin");
         ok = true;
     }
 #endif
