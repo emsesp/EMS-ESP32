@@ -339,6 +339,8 @@ const de: Translation = {
   UPGRADE_AVAILABLE: 'Es ist ein Firmware-Upgrade verfügbar!',
   LATEST_VERSION: 'Sie verwenden die neueste Version.',
   PLEASE_WAIT: 'Bitte warten',
+  RESTARTING_PRE: 'Initializing', // TODO translate
+  RESTARTING_POST: 'Reloading' // TODO translate
 };
 
 export default de;

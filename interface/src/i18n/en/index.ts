@@ -339,6 +339,8 @@ const en: Translation = {
   UPGRADE_AVAILABLE: 'There is a firmware upgrade available!',
   LATEST_VERSION: 'You are using the latest version.',
   PLEASE_WAIT: 'Please wait',
+  RESTARTING_PRE: 'Initializing',
+  RESTARTING_POST: 'Reloading'
 };
 
 export default en;

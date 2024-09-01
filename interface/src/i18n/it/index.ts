@@ -339,6 +339,8 @@ const it: Translation = {
   UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
   LATEST_VERSION: 'You are using the latest version.', // TODO translate
   PLEASE_WAIT: 'Please wait', // TODO translate
+  RESTARTING_PRE: 'Initializing', // TODO translate
+  RESTARTING_POST: 'Reloading' // TODO translate
 };
 
 export default it;

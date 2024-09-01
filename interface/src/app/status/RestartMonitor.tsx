@@ -52,14 +52,13 @@ const RestartMonitor = () => {
             fontWeight={400}
             textAlign="center"
           >
-            {/* TODO: translate these */}
             {data?.status === 'uploading'
               ? LL.WAIT_FIRMWARE()
               : data?.status === 'restarting'
                 ? LL.APPLICATION_RESTARTING()
                 : data?.status === 'ready'
-                  ? 'Reloading'
-                  : 'Preparing'}
+                  ? LL.RESTARTING_PRE()
+                  : LL.RESTARTING_POST()}
           </Typography>
           <Typography mt={2} variant="h6" fontWeight={400} textAlign="center">
             {LL.PLEASE_WAIT()}&hellip;
