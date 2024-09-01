@@ -1653,9 +1653,9 @@ void EMSESP::start() {
 
 // main loop calling all services
 void EMSESP::loop() {
-    esp8266React.loop();       // web services
-    system_.loop();            // does LED and checks system health, and syslog service
-    bool upload_status = true; // ready for any OTA uploads
+    esp8266React.loop();              // web services
+    system_.loop();                   // does LED and checks system health, and syslog service
+    static bool upload_status = true; // ready for any OTA uploads
 
     // if we're doing an OTA upload, skip everything except from console refresh
     if (!system_.upload_isrunning()) {
