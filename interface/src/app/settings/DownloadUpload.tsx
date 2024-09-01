@@ -139,6 +139,9 @@ const DownloadUpload = () => {
     'https://github.com/emsesp/EMS-ESP32/blob/dev/CHANGELOG_LATEST.md';
 
   const getBinURL = (useDevVersion: boolean) => {
+    if (!latestVersion || !latestDevVersion) {
+      return '';
+    }
     const filename =
       'EMS-ESP-' +
       (useDevVersion ? latestDevVersion : latestVersion).replaceAll('.', '_') +
@@ -209,10 +212,14 @@ const DownloadUpload = () => {
 
   useLayoutTitle(LL.DOWNLOAD_UPLOAD());
 
+  const internet_live =
+    latestDevVersion !== undefined && latestVersion !== undefined;
+
   const renderUploadDialog = () => {
-    if (latestDevVersion === undefined || latestVersion === undefined) {
+    if (!internet_live) {
       return null;
     }
+
     return (
       <Dialog
         sx={dialogStyle}
@@ -395,7 +402,7 @@ const DownloadUpload = () => {
             <InfoOutlinedIcon color="secondary" sx={{ verticalAlign: 'middle' }} />
             &nbsp;&nbsp;
             {upgradeAvailable ? LL.UPGRADE_AVAILABLE() : LL.LATEST_VERSION()}
-            {upgradeAvailable && (
+            {upgradeAvailable && internet_live && data.psram ? (
               <Button
                 sx={{ ml: 2, textTransform: 'none' }}
                 size="small"
@@ -407,6 +414,12 @@ const DownloadUpload = () => {
                   ? LL.INSTALL('v' + latestDevVersion)
                   : LL.INSTALL('v' + latestVersion)}
               </Button>
+            ) : (
+              <Typography ml={2} variant="button">
+                <Link target="_blank" href={getBinURL(useDev)} color="primary">
+                  {LL.DOWNLOAD(1)}
+                </Link>
+              </Typography>
             )}
           </Typography>
 

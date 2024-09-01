@@ -389,7 +389,8 @@ let hardware_status = {
   fs_used: 24,
   fs_free: 2024,
   free_caps: 8376,
-  psram: 8189,
+  // psram: false,
+  psram: true,
   psram_size: 8189,
   free_psram: 8166,
   has_loader: true,
@@ -4541,7 +4542,7 @@ router
   // check upgrade
   .post(EMSESP_CHECK_UPGRADE_ENDPOINT, async (request: any) => {
     const content = await request.json();
-    console.log('check upgrade', content.version);
+    console.log('check upgrade from ', content.version);
     const data = {
       upgradeable: true
       // upgradeable: false
