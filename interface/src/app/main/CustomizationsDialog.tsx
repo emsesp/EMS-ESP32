@@ -17,7 +17,7 @@ import Grid from '@mui/material/Grid2';
 
 import { dialogStyle } from 'CustomTheme';
 import { useI18nContext } from 'i18n/i18n-react';
-import { updateValue } from 'utils';
+import { numberValue, updateValue } from 'utils';
 
 import EntityMaskToggle from './EntityMaskToggle';
 import { DeviceEntityMask } from './types';
@@ -127,8 +127,8 @@ const CustomizationsDialog = ({
                 <TextField
                   name="mi"
                   label={LL.MIN()}
-                  value={editItem.mi}
-                  sx={{ width: '8ch' }}
+                  value={numberValue(editItem.mi)}
+                  sx={{ width: '11ch' }}
                   type="number"
                   onChange={updateFormValue}
                 />
@@ -137,8 +137,8 @@ const CustomizationsDialog = ({
                 <TextField
                   name="ma"
                   label={LL.MAX()}
-                  value={editItem.ma}
-                  sx={{ width: '8ch' }}
+                  value={numberValue(editItem.ma)}
+                  sx={{ width: '11ch' }}
                   type="number"
                   onChange={updateFormValue}
                 />

@@ -203,7 +203,7 @@ const CustomEntitiesDialog = ({
                   margin="normal"
                   sx={{ width: '11ch' }}
                   type="number"
-                  value={editItem.offset}
+                  value={numberValue(editItem.offset)}
                   onChange={updateFormValue}
                 />
               </Grid>
@@ -288,21 +288,16 @@ const CustomEntitiesDialog = ({
               {editItem.value_type === DeviceValueType.STRING &&
                 editItem.device_id !== '0' && (
                   <Grid>
-                    <TextField
+                    <ValidatedTextField
+                      fieldErrors={fieldErrors}
                       name="factor"
                       label="Bytes"
-                      value={editItem.factor}
+                      value={numberValue(editItem.factor)}
+                      sx={{ width: '11ch' }}
                       variant="outlined"
                       onChange={updateFormValue}
                       margin="normal"
                       type="number"
-                      slotProps={{
-                        htmlInput: {
-                          min: '1',
-                          max: String(256 - editItem.offset),
-                          step: '1'
-                        }
-                      }}
                     />
                   </Grid>
                 )}
