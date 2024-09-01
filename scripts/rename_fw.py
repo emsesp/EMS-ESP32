@@ -54,8 +54,11 @@ def bin_copy(source, target, env):
         
     print("*********************************************")
     print("EMS-ESP version: " + app_version)
-    print("Has PSRAM: "+str(psram))
-    print("mcu: "+str(mcu))
+    
+    # show psram as Yes or No
+    psram_status = "Yes" if psram else "No"
+    print("Has PSRAM: " + psram_status)
+    print("MCU: "+str(mcu))
     print("Flash Mem: " + flash_mem)
 
     # convert . to _ so Windows doesn't complain
@@ -84,17 +87,19 @@ def bin_copy(source, target, env):
         if os.path.isfile(f):
             os.remove(f)
 
-    print("Renaming file to "+bin_file)
+    print("Filename: "+bin_file)
 
     # copy firmware.bin to firmware/<variant>.bin
     shutil.copy(str(target[0]), bin_file)
 
     with open(bin_file,"rb") as f:
         result = hashlib.md5(f.read())
-        print("Calculating MD5: "+result.hexdigest())
+        print("MD5: "+result.hexdigest())
         file1 = open(md5_file, 'w')
         file1.write(result.hexdigest())
         file1.close()
+        
+    print("*********************************************")
 
 env.AddPostAction("$BUILD_DIR/${PROGNAME}.bin", [bin_copy])
 env.AddPostAction("$BUILD_DIR/${PROGNAME}.md5", [bin_copy])
