@@ -134,7 +134,7 @@ const NetworkSettings = () => {
 
     const doRestart = async () => {
       setRestarting(true);
-      await sendAPI({ device: 'system', cmd: 'restart', id: -1 }).catch(
+      await sendAPI({ device: 'system', cmd: 'restart', id: 0 }).catch(
         (error: Error) => {
           toast.error(error.message);
         }

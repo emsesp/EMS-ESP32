@@ -1754,15 +1754,16 @@ bool System::command_format(const char * value, const int8_t id) {
     return true;
 }
 
-// restart command - perform a hard reset
+// restart command - perform a hard reset (system reboot)
 bool System::command_restart(const char * value, const int8_t id) {
-    if (id != 0) {
+    if (id == 0) {
         // if it has an id then it's a web call and we need to queue the restart
+        // default id is -1 when calling /api/system/restart directly for example
         LOG_INFO("Preparing to restart system");
         EMSESP::system_.restart_pending(true);
         return true;
     }
-    LOG_INFO("Restarting system");
+    LOG_INFO("Restarting system immediately");
     EMSESP::system_.restart_requested(true); // will be handled by the main loop
     return true;
 }

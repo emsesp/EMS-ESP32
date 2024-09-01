@@ -68,7 +68,7 @@ def on_upload(source, target, env):
         "password": password
     }
 
-    response = requests.post(signon_url, json=username_password, headers=signon_headers, auth=None)
+    response = requests.post(signon_url, json=username_password, headers=signon_headers)
         
     if response.status_code != 200:
         print_fail("Authentication failed (code " + str(response.status_code) + ")")
@@ -116,7 +116,7 @@ def on_upload(source, target, env):
 
         upload_url = f"{emsesp_url}/rest/uploadFile"
 
-        response = requests.post(upload_url, data=monitor, headers=post_headers, auth=None)
+        response = requests.post(upload_url, data=monitor, headers=post_headers)
         
         bar.close()
         time.sleep(0.1)
@@ -126,7 +126,22 @@ def on_upload(source, target, env):
         if response.status_code != 200:
             print_fail("Upload failed (code " + response.status.code + ").")
         else:
-            print_success("Upload successful.")
+            print_success("Upload successful. Rebooting device.")
+            restart_headers = {
+                'Host': host_ip,
+                'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/118.0',
+                'Accept': '*/*',
+                'Accept-Language': 'de,en-US;q=0.7,en;q=0.3',
+                'Accept-Encoding': 'gzip, deflate',
+                'Referer': f'{emsesp_url}',
+                'Content-Type': 'application/json',
+                'Connection': 'keep-alive',
+                'Authorization': 'Bearer ' + f'{access_token}'
+            }
+            restart_url = f"{emsesp_url}/api/system/restart"
+            response = requests.get(restart_url, headers=restart_headers)
+            if response.status_code != 200:
+                print_fail("Restart failed (code " + str(response.status_code) + ")")
 
         print()
 

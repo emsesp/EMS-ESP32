@@ -1673,8 +1673,8 @@ void EMSESP::loop() {
 
         // force a query on the EMS devices to fetch latest data at a set interval (1 min)
         scheduled_fetch_values();
-    } else {
-        emsesp::EMSESP::system_.uploadFirmwareURL(); // start an upload from a URL. This is blocking.
+    } else if (!system_.uploadFirmwareURL()) { // start an upload from a URL. This is blocking.
+        system_.upload_status(false);          // abort the upload
     }
 
     uuid::loop();

@@ -124,7 +124,7 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
         request->_tempFile.close(); // close the file handle as the upload is now done
         AsyncWebServerResponse * response = request->beginResponse(200);
         request->send(response);
-        emsesp::EMSESP::system_.restart_pending(true); // will be handled by the main loop
+        emsesp::EMSESP::system_.restart_pending(true); // will be handled by the main loop. We use pending for the Web's RestartMonitor
         return;
     }
 
@@ -133,7 +133,7 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
     if (_is_firmware && !request->_tempObject) {
         AsyncWebServerResponse * response = request->beginResponse(200);
         request->send(response);
-        emsesp::EMSESP::system_.restart_pending(true); // will be handled by the main loop
+        emsesp::EMSESP::system_.restart_pending(true); // will be handled by the main loop. We use pending for the Web's RestartMonitor
         return;
     }
 
