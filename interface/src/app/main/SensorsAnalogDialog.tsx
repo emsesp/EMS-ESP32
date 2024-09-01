@@ -10,12 +10,12 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
   InputAdornment,
   MenuItem,
   TextField,
   Typography
 } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 
 import { dialogStyle } from 'CustomTheme';
 import type Schema from 'async-validator';
@@ -86,11 +86,12 @@ const SensorsAnalogDialog = ({
       </DialogTitle>
       <DialogContent dividers>
         <Grid container spacing={2}>
-          <Grid item xs={4}>
+          <Grid>
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="g"
               label="GPIO"
+              sx={{ width: '11ch' }}
               value={numberValue(editItem.g)}
               type="number"
               variant="outlined"
@@ -98,13 +99,13 @@ const SensorsAnalogDialog = ({
             />
           </Grid>
           {creating && (
-            <Grid item>
+            <Grid>
               <Box color="warning.main" mt={2}>
                 <Typography variant="body2">{LL.WARN_GPIO()}</Typography>
               </Box>
             </Grid>
           )}
-          <Grid item xs={12}>
+          <Grid>
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="n"
@@ -115,7 +116,7 @@ const SensorsAnalogDialog = ({
               onChange={updateFormValue}
             />
           </Grid>
-          <Grid item xs={8}>
+          <Grid>
             <TextField
               name="t"
               label={LL.TYPE(0)}
@@ -132,12 +133,12 @@ const SensorsAnalogDialog = ({
             </TextField>
           </Grid>
           {editItem.t >= AnalogType.COUNTER && editItem.t <= AnalogType.RATE && (
-            <Grid item xs={4}>
+            <Grid>
               <TextField
                 name="u"
                 label={LL.UNIT()}
                 value={editItem.u}
-                fullWidth
+                sx={{ width: '15ch' }}
                 select
                 onChange={updateFormValue}
               >
@@ -150,64 +151,72 @@ const SensorsAnalogDialog = ({
             </Grid>
           )}
           {editItem.t === AnalogType.ADC && (
-            <Grid item xs={4}>
+            <Grid>
               <TextField
                 name="o"
                 label={LL.OFFSET()}
                 value={numberValue(editItem.o)}
-                fullWidth
                 type="number"
+                sx={{ width: '11ch' }}
                 variant="outlined"
                 onChange={updateFormValue}
-                inputProps={{ min: '0', max: '3300', step: '1' }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">mV</InputAdornment>
-                  )
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">mV</InputAdornment>
+                    )
+                  },
+                  htmlInput: { min: '0', max: '3300', step: '1' }
                 }}
               />
             </Grid>
           )}
           {editItem.t === AnalogType.COUNTER && (
-            <Grid item xs={4}>
+            <Grid>
               <TextField
                 name="o"
                 label={LL.STARTVALUE()}
                 value={numberValue(editItem.o)}
-                fullWidth
                 type="number"
+                sx={{ width: '11ch' }}
                 variant="outlined"
                 onChange={updateFormValue}
-                inputProps={{ step: '0.001' }}
+                slotProps={{
+                  htmlInput: { step: '0.001' }
+                }}
               />
             </Grid>
           )}
           {editItem.t >= AnalogType.COUNTER && editItem.t <= AnalogType.RATE && (
-            <Grid item xs={4}>
+            <Grid>
               <TextField
                 name="f"
                 label={LL.FACTOR()}
                 value={numberValue(editItem.f)}
-                fullWidth
+                sx={{ width: '11ch' }}
                 type="number"
                 variant="outlined"
                 onChange={updateFormValue}
-                inputProps={{ step: '0.001' }}
+                slotProps={{
+                  htmlInput: { step: '0.001' }
+                }}
               />
             </Grid>
           )}
           {editItem.t === AnalogType.DIGITAL_OUT &&
             (editItem.g === 25 || editItem.g === 26) && (
-              <Grid item xs={4}>
+              <Grid>
                 <TextField
                   name="o"
                   label={LL.VALUE(0)}
                   value={numberValue(editItem.o)}
-                  fullWidth
+                  sx={{ width: '11ch' }}
                   type="number"
                   variant="outlined"
                   onChange={updateFormValue}
-                  inputProps={{ min: '0', max: '255', step: '1' }}
+                  slotProps={{
+                    htmlInput: { min: '0', max: '255', step: '1' }
+                  }}
                 />
               </Grid>
             )}
@@ -215,12 +224,11 @@ const SensorsAnalogDialog = ({
             editItem.g !== 25 &&
             editItem.g !== 26 && (
               <>
-                <Grid item xs={4}>
+                <Grid>
                   <TextField
                     name="o"
                     label={LL.VALUE(0)}
                     value={numberValue(editItem.o)}
-                    fullWidth
                     select
                     variant="outlined"
                     onChange={updateFormValue}
@@ -229,12 +237,12 @@ const SensorsAnalogDialog = ({
                     <MenuItem value={1}>{LL.ON()}</MenuItem>
                   </TextField>
                 </Grid>
-                <Grid item xs={4}>
+                <Grid>
                   <TextField
                     name="f"
                     label={LL.POLARITY()}
                     value={editItem.f}
-                    fullWidth
+                    sx={{ width: '15ch' }}
                     select
                     onChange={updateFormValue}
                   >
@@ -242,12 +250,12 @@ const SensorsAnalogDialog = ({
                     <MenuItem value={-1}>{LL.ACTIVELOW()}</MenuItem>
                   </TextField>
                 </Grid>
-                <Grid item xs={4}>
+                <Grid>
                   <TextField
                     name="u"
                     label={LL.STARTVALUE()}
+                    sx={{ width: '15ch' }}
                     value={editItem.u}
-                    fullWidth
                     select
                     onChange={updateFormValue}
                   >
@@ -266,37 +274,41 @@ const SensorsAnalogDialog = ({
             editItem.t === AnalogType.PWM_1 ||
             editItem.t === AnalogType.PWM_2) && (
             <>
-              <Grid item xs={4}>
+              <Grid>
                 <TextField
                   name="f"
                   label={LL.FREQ()}
                   value={numberValue(editItem.f)}
-                  fullWidth
                   type="number"
                   variant="outlined"
+                  sx={{ width: '11ch' }}
                   onChange={updateFormValue}
-                  inputProps={{ min: '1', max: '5000', step: '1' }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">Hz</InputAdornment>
-                    )
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">Hz</InputAdornment>
+                      )
+                    },
+                    htmlInput: { min: '1', max: '5000', step: '1' }
                   }}
                 />
               </Grid>
-              <Grid item xs={4}>
+              <Grid>
                 <TextField
                   name="o"
                   label={LL.DUTY_CYCLE()}
                   value={numberValue(editItem.o)}
-                  fullWidth
                   type="number"
+                  sx={{ width: '11ch' }}
                   variant="outlined"
                   onChange={updateFormValue}
-                  inputProps={{ min: '0', max: '100', step: '0.1' }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">%</InputAdornment>
-                    )
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">%</InputAdornment>
+                      )
+                    },
+                    htmlInput: { min: '0', max: '100', step: '0.1' }
                   }}
                 />
               </Grid>

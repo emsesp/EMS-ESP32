@@ -381,6 +381,10 @@ export const entityItemValidation = (entity: EntityItem[], entityItem: EntityIte
     offset: [
       { required: true, message: 'Offset is required' },
       { type: 'number', min: 0, max: 255, message: 'Must be between 0 and 255' }
+    ],
+    factor: [
+      { required: true, message: 'Bytes is required' },
+      { type: 'number', min: 1, max: 255, message: 'Must be between 1 and 255' }
     ]
   });
 

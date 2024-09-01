@@ -11,7 +11,7 @@ const fr: Translation = {
   PASSWORD: 'Mot de passe',
   SU_PASSWORD: 'Mot de passe su',
   SETTINGS_OF: 'Paramètres {0}',
-  HELP_OF: 'Aide {0}',
+  HELP: 'Aide',
   LOGGED_IN: 'Connecté en tant que {name}',
   PLEASE_SIGNIN: 'Veuillez vous connecter pour continuer',
   UPLOAD_SUCCESSFUL: 'Upload terminée',
@@ -161,7 +161,7 @@ const fr: Translation = {
   HELP_INFORMATION_5: 'EMS-ESP est un projet libre et open-source. Merci de soutenir son développement futur en lui donnant une étoile sur GitHub !',
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
-  INSTALL: 'Installer',
+  INSTALL: 'Installer {0}',
   ABORTED: 'annulé',
   FAILED: 'échoué',
   SUCCESSFUL: 'réussi',
@@ -169,16 +169,13 @@ const fr: Translation = {
   LOG_OF: '{0} Log',
   STATUS_OF: 'Statut {0}',
   DOWNLOAD_UPLOAD: 'Download/Upload', // TODO translate
-  VERSION_ON: 'You are currently on', // TODO translate
   CLOSE: 'Fermer',
   USE: 'Utiliser',
   FACTORY_RESET: 'Réinitialisation',
   SYSTEM_FACTORY_TEXT: "L'appareil a été réinitialisé et va maintenant redémarrer",
   SYSTEM_FACTORY_TEXT_DIALOG: "Êtes-vous sûr de vouloir réinitialiser l'appareil à ses paramètres d'usine ?",
-  THE_LATEST: 'La dernière',
-  OFFICIAL: 'officielle',
-  DEVELOPMENT: 'développement',
-  RELEASE_IS: 'release est', // TODO translate
+  STABLE: 'Stable', // TODO translate
+  DEVELOPMENT: 'Développement',
   RELEASE_NOTES: 'notes de version',
   EMS_ESP_VER: 'Version EMS-ESP',
   UPTIME: 'Durée de fonctionnement du système',
@@ -335,7 +332,15 @@ const fr: Translation = {
   UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
   SERVICES: 'Services', // TODO translate
   ALLVALUES: 'All Values', // TODO translate
-  SPECIAL_FUNCTIONS: 'Special Functions' // TODO translate
+  SPECIAL_FUNCTIONS: 'Special Functions',
+  WAIT_FIRMWARE: 'Firmware is uploading and installing', // TODO translate
+  INSTALL_VERSION: 'This will install vesion {0}. Are you sure?', // TODO translate
+  SWITCH_DEV: 'switch to the development version', // TODO translate
+  UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
+  LATEST_VERSION: 'You are using the latest version.', // TODO translate // TODO translate
+  PLEASE_WAIT: 'Please wait', // TODO translate
+  RESTARTING_PRE: 'Initializing', // TODO translate
+  RESTARTING_POST: 'Reloading' // TODO translate
 };
 
 export default fr;

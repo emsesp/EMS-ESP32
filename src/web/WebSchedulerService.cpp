@@ -25,6 +25,9 @@ namespace emsesp {
 WebSchedulerService::WebSchedulerService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(WebScheduler::read, WebScheduler::update, this, server, EMSESP_SCHEDULER_SERVICE_PATH, securityManager, AuthenticationPredicates::IS_AUTHENTICATED)
     , _fsPersistence(WebScheduler::read, WebScheduler::update, this, fs, EMSESP_SCHEDULER_FILE) {
+    server->on(EMSESP_GET_SCHEDULE_PATH,
+               HTTP_GET,
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { getSchedule(request); }, AuthenticationPredicates::IS_ADMIN));
 }
 
 // load the settings when the service starts
@@ -526,7 +529,7 @@ void WebSchedulerService::loop() {
 void WebSchedulerService::scheduler_task(void * pvParameters) {
     while (1) {
         delay(10); // no need to hurry
-        if (!EMSESP::system_.upload_status()) {
+        if (!EMSESP::system_.upload_isrunning()) {
             EMSESP::webSchedulerService.loop();
         }
     }
@@ -609,5 +612,18 @@ void WebSchedulerService::test() {
     command("test11", test_cmd.c_str(), "");
 }
 #endif
+
+// return schedule entries in a json object
+void WebSchedulerService::getSchedule(AsyncWebServerRequest * request) {
+    auto *     response = new AsyncJsonResponse(false);
+    JsonObject root     = response->getRoot();
+
+    root["type"] = "schedule";
+
+    System::extractSettings(EMSESP_SCHEDULER_FILE, "Schedule", root);
+
+    response->setLength();
+    request->send(response);
+}
 
 } // namespace emsesp

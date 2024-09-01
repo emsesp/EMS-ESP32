@@ -9,11 +9,11 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
   InputAdornment,
   TextField,
   Typography
 } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 
 import { dialogStyle } from 'CustomTheme';
 import type Schema from 'async-validator';
@@ -79,30 +79,33 @@ const SensorsTemperatureDialog = ({
             {LL.ID_OF(LL.SENSOR(0))}: {editItem.id}
           </Typography>
         </Box>
-        <Grid container spacing={1}>
-          <Grid item>
+        <Grid container spacing={2}>
+          <Grid>
             <ValidatedTextField
               fieldErrors={fieldErrors}
               name="n"
               label={LL.NAME(0)}
               value={editItem.n}
-              // autoFocus
               sx={{ width: '30ch' }}
               onChange={updateFormValue}
             />
           </Grid>
-          <Grid item>
+          <Grid>
             <TextField
               name="o"
               label={LL.OFFSET()}
               value={numberValue(editItem.o)}
-              sx={{ width: '12ch' }}
+              sx={{ width: '11ch' }}
               type="number"
               variant="outlined"
               onChange={updateFormValue}
-              inputProps={{ min: '-5', max: '5', step: '0.1' }}
-              InputProps={{
-                startAdornment: <InputAdornment position="start">°C</InputAdornment>
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">°C</InputAdornment>
+                  )
+                },
+                htmlInput: { min: '-5', max: '5', step: '0.1' }
               }}
             />
           </Grid>

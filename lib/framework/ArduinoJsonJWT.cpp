@@ -66,10 +66,7 @@ void ArduinoJsonJWT::parseJWT(String jwt, JsonDocument & jsonDocument) {
 }
 
 /*
- * ESP32 uses mbedtls, ESP2866 uses bearssl.
- *
- * Both come with decent HMAC implementations supporting sha256, as well as others.
- *
+ * ESP32 uses mbedtls, with decent HMAC implementations supporting sha256, as well as others.
  * No need to pull in additional crypto libraries - lets use what we already have.
  */
 String ArduinoJsonJWT::sign(String & payload) {

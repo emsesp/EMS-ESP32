@@ -41,6 +41,8 @@
 
 using uuid::console::Shell;
 
+#define EMSESP_FS_CONFIG_DIRECTORY "/config"
+
 namespace emsesp {
 
 enum PHY_type : uint8_t { PHY_TYPE_NONE = 0, PHY_TYPE_LAN8720, PHY_TYPE_TLK110 };
@@ -55,12 +57,14 @@ class System {
     static bool command_publish(const char * value, const int8_t id);
     static bool command_fetch(const char * value, const int8_t id);
     static bool command_restart(const char * value, const int8_t id);
-    static bool command_syslog_level(const char * value, const int8_t id);
+    static bool command_format(const char * value, const int8_t id);
+    // static bool command_syslog_level(const char * value, const int8_t id);
     static bool command_watch(const char * value, const int8_t id);
     static bool command_message(const char * value, const int8_t id);
     static bool command_info(const char * value, const int8_t id, JsonObject output);
     static bool command_response(const char * value, const int8_t id, JsonObject output);
     static bool command_allvalues(const char * value, const int8_t id, JsonObject output);
+
     static bool get_value_info(JsonObject root, const char * cmd);
     static void get_value_json(JsonObject output, const std::string & circuit, const std::string & name, JsonVariant val);
 
@@ -72,9 +76,8 @@ class System {
 
     void store_nvs_values();
     void system_restart(const char * partition = nullptr);
-    void format(uuid::console::Shell & shell);
-    void upload_status(bool in_progress);
-    bool upload_status();
+    void upload_isrunning(bool in_progress);
+    bool upload_isrunning();
     void show_mem(const char * note);
     void reload_settings();
     void syslog_init();
@@ -116,9 +119,15 @@ class System {
     static void restart_requested(bool restart_requested) {
         restart_requested_ = restart_requested;
     }
-
     static bool restart_requested() {
         return restart_requested_;
+    }
+
+    static void restart_pending(bool restart_pending) {
+        restart_pending_ = restart_pending;
+    }
+    static bool restart_pending() {
+        return restart_pending_;
     }
 
     bool telnet_enabled() {
@@ -291,6 +300,7 @@ class System {
   private:
     static uuid::log::Logger logger_;
     static bool              restart_requested_;
+    static bool              restart_pending_;     // used in 2-stage process to call restart from Web API
     static bool              test_set_all_active_; // force all entities in a device to have a value
     static uint32_t          max_alloc_mem_;
     static uint32_t          heap_mem_;
@@ -330,7 +340,7 @@ class System {
     uint8_t  healthcheck_       = HEALTHCHECK_NO_NETWORK | HEALTHCHECK_NO_BUS; // start with all flags set, no wifi and no ems bus connection
     uint32_t last_system_check_ = 0;
 
-    bool upload_status_      = false; // true if we're in the middle of a OTA firmware upload
+    bool upload_isrunning_   = false; // true if we're in the middle of a OTA firmware upload
     bool ethernet_connected_ = false;
     bool has_ipv6_           = false;
 

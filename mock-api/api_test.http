@@ -4,7 +4,7 @@
 # The response will be shown in the right panel
 
 @host = http://ems-esp.local
-@host_dev = http://10.10.10.173
+@host_dev = http://10.10.10.175
 @host_standalone = http://localhost:3080
 @host_standalone2 = http://localhost:3082
 
@@ -77,10 +77,17 @@ GET {{host}}/api/boiler/commands
 # Test on dev
 #
 
+###
+
 GET {{host_dev}}/api/system/info
 
 # Run a test. EMS-ESP must be compiled with -DEMSESP_TEST
 # Use this to load up a dummy thermostat and boiler with data
+
+###
+
+GET {{host_dev}}/api/system/restart
+Authorization: Bearer {{token}}
 
 ###
 
@@ -150,7 +157,7 @@ Content-Type: application/json
 # https://developers.home-assistant.io/docs/api/rest/#post-apiservicesdomainservice
 POST {{host_standalone}}/api
 
-# HA
+# HA tests
 
 @ha = http://192.168.1.42:8123
 @ha_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIwMzMyZjU1MjhlZmM0NGIyOTgyMjIxNThiODU1NDkyNSIsImlhdCI6MTcyMTMwNDg2NSwiZXhwIjoyMDM2NjY0ODY1fQ.Q-Y7E_i7clH3ff4Ma-OMmhZfbN7aMi_CahKwmoar

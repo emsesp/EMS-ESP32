@@ -24,43 +24,30 @@
 
 namespace emsesp {
 
-// /rest/hardwareStatus
 WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * securityManager) {
-    server->on(HARDWARE_STATUS_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { hardwareStatus(request); });
-    server->on(SYSTEM_STATUS_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { systemStatus(request); });
+    // GET
+    server->on(EMSESP_HARDWARE_STATUS_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { hardwareStatus(request); });
+    server->on(EMSESP_SYSTEM_STATUS_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { systemStatus(request); });
+    // POST
+    server->on(EMSESP_CHECK_UPGRADE_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { checkUpgrade(request, json); });
 }
 
+// /rest/systemStatus
 void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
-    // This is a litle trick for the OTA upload. We don't want the React RestartService to think we're finished
-    // with the upload so we fake it and pretent the /rest/systemStatus is not available. That way the spinner keeps spinning.
-    if (EMSESP::system_.upload_status()) {
-        return; // ignore endpoint
-    }
-
     EMSESP::system_.refreshHeapMem(); // refresh free heap and max alloc heap
 
     auto *     response = new AsyncJsonResponse(false);
     JsonObject root     = response->getRoot();
 
-#ifdef EMSESP_DEBUG
-    root["emsesp_version"] = std::string(EMSESP_APP_VERSION) + " (DEBUG)";
-#else
-#ifdef EMSESP_TEST
-    root["emsesp_version"] = std::string(EMSESP_APP_VERSION) + " (TEST)";
-#else
     root["emsesp_version"] = EMSESP_APP_VERSION;
-#endif
-#endif
-
-    root["esp_platform"] = EMSESP_PLATFORM;      // from default_settings.h: ESP32, ESP32C3, ESP32S2, ESP32S3
-    root["status"]       = EMSESP::bus_status(); // 0, 1 or 2
-    root["bus_uptime"]   = EMSbus::bus_uptime();
-    root["num_devices"]  = EMSESP::count_devices();
-    root["num_sensors"]  = EMSESP::temperaturesensor_.no_sensors();
-    root["num_analogs"]  = EMSESP::analogsensor_.no_sensors();
-    root["free_heap"]    = EMSESP::system_.getHeapMem();
-    root["uptime"]       = uuid::get_uptime_sec();
-    root["mqtt_status"]  = EMSESP::mqtt_.connected();
+    root["status"]         = EMSESP::bus_status(); // 0, 1 or 2
+    root["bus_uptime"]     = EMSbus::bus_uptime();
+    root["num_devices"]    = EMSESP::count_devices();
+    root["num_sensors"]    = EMSESP::temperaturesensor_.no_sensors();
+    root["num_analogs"]    = EMSESP::analogsensor_.no_sensors();
+    root["free_heap"]      = EMSESP::system_.getHeapMem();
+    root["uptime"]         = uuid::get_uptime_sec();
+    root["mqtt_status"]    = EMSESP::mqtt_.connected();
 
 #ifndef EMSESP_STANDALONE
     root["ntp_status"] = [] {
@@ -87,38 +74,30 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
 #endif
     }
 
-#ifndef EMSESP_STANDALONE
-    const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
-    root["has_loader"]                = partition != NULL && partition != esp_ota_get_running_partition();
-    partition                         = esp_ota_get_next_update_partition(nullptr);
-    if (partition) {
-        uint64_t buffer;
-        esp_partition_read(partition, 0, &buffer, 8);
-        root["has_partition"] = (buffer != 0xFFFFFFFFFFFFFFFF);
-    } else {
-        root["has_partition"] = false;
-    }
-#endif
-
     response->setLength();
     request->send(response);
 }
 
+// /rest/hardwareStatus
+// This is also used for polling
 void WebStatusService::hardwareStatus(AsyncWebServerRequest * request) {
     EMSESP::system_.refreshHeapMem(); // refresh free heap and max alloc heap
 
     auto *     response = new AsyncJsonResponse(false);
     JsonObject root     = response->getRoot();
 
-#ifdef EMSESP_DEBUG
-    root["emsesp_version"] = std::string(EMSESP_APP_VERSION) + " (DEBUG)";
-#else
-#ifdef EMSESP_TEST
-    root["emsesp_version"] = std::string(EMSESP_APP_VERSION) + " (TEST)";
-#else
     root["emsesp_version"] = EMSESP_APP_VERSION;
+
+#ifdef EMSESP_DEBUG
+#ifdef EMSESP_TEST
+    root["build_flags"] = "DEBUG,TEST";
+#else
+    root["build_flags"] = "DEBUG";
 #endif
+#elif defined(EMSESP_TEST)
+    root["build_flags"] = "TEST";
 #endif
+
     root["esp_platform"] = EMSESP_PLATFORM;
 
 #ifndef EMSESP_STANDALONE
@@ -139,16 +118,53 @@ void WebStatusService::hardwareStatus(AsyncWebServerRequest * request) {
     root["fs_used"]          = FSused;
     root["fs_free"]          = EMSESP::system_.FStotal() - FSused;
     root["free_caps"]        = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024; // includes heap and psram
-
-    root["psram"] = EMSESP::system_.PSram();
+    root["psram"]            = (EMSESP::system_.PSram() > 0);                   // boolean
     if (EMSESP::system_.PSram()) {
         root["psram_size"] = EMSESP::system_.PSram();
         root["free_psram"] = ESP.getFreePsram() / 1024;
     }
-
     root["model"] = EMSESP::system_.getBBQKeesGatewayDetails();
 
+    // check for a factory partition first
+    const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
+    root["has_loader"]                = partition != NULL && partition != esp_ota_get_running_partition();
+    partition                         = esp_ota_get_next_update_partition(nullptr);
+    if (partition) {
+        uint64_t buffer;
+        esp_partition_read(partition, 0, &buffer, 8);
+        root["has_partition"] = (buffer != 0xFFFFFFFFFFFFFFFF);
+    } else {
+        root["has_partition"] = false;
+    }
+
+    // Matches status codes in RestartMonitor.tsx
+    if (EMSESP::system_.restart_pending()) {
+        root["status"] = "restarting";
+        EMSESP::system_.restart_requested(true); // tell emsesp loop to start restart
+    } else {
+        root["status"] = EMSESP::system_.upload_isrunning() ? "uploading" : "ready";
+    }
+
 #endif
+
+    response->setLength();
+    request->send(response);
+}
+
+// returns trues if there is an upgrade available
+void WebStatusService::checkUpgrade(AsyncWebServerRequest * request, JsonVariant json) {
+    auto *     response = new AsyncJsonResponse();
+    JsonObject root     = response->getRoot();
+
+    version::Semver200_version settings_version(EMSESP_APP_VERSION);
+    std::string                latest_version = json["version"] | EMSESP_APP_VERSION;
+    version::Semver200_version this_version(latest_version);
+
+#ifdef EMSESP_DEBUG
+    emsesp::EMSESP::logger().debug("Checking for upgrade: %s > %s", EMSESP_APP_VERSION, latest_version.c_str());
+#endif
+
+    root["upgradeable"] = (this_version > settings_version);
 
     response->setLength();
     request->send(response);

@@ -4,6 +4,7 @@ import type { NetworkConnectionStatus } from './network';
 
 export interface HardwareStatus {
   emsesp_version: string;
+  build_flags: string;
   esp_platform: string;
   max_alloc_heap: number;
   cpu_type: string;
@@ -26,11 +27,13 @@ export interface HardwareStatus {
   free_psram?: number;
   free_caps: number;
   model: string;
+  has_loader: boolean;
+  has_partition: boolean;
+  status: string;
 }
 
 export interface SystemStatus {
   emsesp_version: string;
-  esp_platform: string;
   status: busConnectionStatus;
   uptime: number;
   bus_uptime: number;
@@ -43,8 +46,6 @@ export interface SystemStatus {
   ap_status: boolean;
   network_status: NetworkConnectionStatus;
   wifi_rssi: number;
-  has_loader: boolean;
-  has_partition: boolean;
 }
 
 export enum LogLevel {

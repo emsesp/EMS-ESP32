@@ -30,6 +30,7 @@ const headers = {
 
 // GLOBAL VARIABLES
 let countWifiScanPoll = 0; // wifi network scan
+let countHardwarePoll = 0; // for during an upload
 
 function updateMask(entity: any, de: any, dd: any) {
   const current_mask = parseInt(entity.slice(0, 2), 16);
@@ -331,6 +332,7 @@ let mqtt_settings = {
   publish_time_other: 10,
   publish_time_sensor: 10,
   publish_time_heartbeat: 60,
+  publish_time_water: 60,
   mqtt_qos: 0,
   rootCA: '',
   mqtt_retain: false,
@@ -358,18 +360,19 @@ const ACTIVITY_ENDPOINT = REST_ENDPOINT_ROOT + 'activity';
 // SETTINGS
 const HARDWARE_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'hardwareStatus';
 const SECURITY_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'securitySettings';
-const RESTART_ENDPOINT = REST_ENDPOINT_ROOT + 'restart';
-const RESTART_PARTITION_ENDPOINT = REST_ENDPOINT_ROOT + 'partition';
-const FACTORY_RESET_ENDPOINT = REST_ENDPOINT_ROOT + 'factoryReset';
 
 // SYSTEM SIGNIN
 const VERIFY_AUTHORIZATION_ENDPOINT = REST_ENDPOINT_ROOT + 'verifyAuthorization';
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn';
 const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken';
 
-const hardware_status = {
-  emsesp_version: '3.7-demo',
+const VERSION = '3.7.0-dev.0';
+// const VERSION = '3.6.4';
+
+let hardware_status = {
+  emsesp_version: VERSION,
   esp_platform: 'ESP32S3',
+  build_flags: 'DEMO',
   cpu_type: 'ESP32-S3',
   cpu_rev: 0,
   cpu_cores: 2,
@@ -386,17 +389,18 @@ const hardware_status = {
   fs_used: 24,
   fs_free: 2024,
   free_caps: 8376,
-  psram: 8189,
+  // psram: false,
+  psram: true,
   psram_size: 8189,
   free_psram: 8166,
   has_loader: true,
   // model: ''
-  model: 'BBQKees Electronics EMS Gateway E32 V2 (E32 V2.0 P3/2024011)'
+  model: 'BBQKees Electronics EMS Gateway E32 V2 (E32 V2.0 P3/2024011)',
+  status: 'downloading'
 };
 
 const system_status = {
-  emsesp_version: '3.7-demo',
-  esp_platform: 'ESP32',
+  emsesp_version: VERSION,
   status: 0,
   // status: 2,
   uptime: 77186,
@@ -452,6 +456,7 @@ const EMSESP_DEVICEDATA_ENDPOINT2 = REST_ENDPOINT_ROOT + 'deviceData/:id?';
 const EMSESP_DEVICEENTITIES_ENDPOINT1 = REST_ENDPOINT_ROOT + 'deviceEntities';
 const EMSESP_DEVICEENTITIES_ENDPOINT2 = REST_ENDPOINT_ROOT + 'deviceEntities/:id?';
 
+const EMSESP_CHECK_UPGRADE_ENDPOINT = REST_ENDPOINT_ROOT + 'checkUpgrade';
 const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile';
 const EMSESP_WRITE_DEVICEVALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceValue';
 const EMSESP_WRITE_DEVICENAME_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceName';
@@ -4207,7 +4212,21 @@ router
 router
   .get(SYSTEM_STATUS_ENDPOINT, () => system_status)
   .get(ACTIVITY_ENDPOINT, () => activity)
-  .get(HARDWARE_STATUS_ENDPOINT, () => hardware_status)
+  .get(HARDWARE_STATUS_ENDPOINT, () => {
+    if (countHardwarePoll === 0) {
+      console.log('Reseting hardware count...');
+    }
+
+    if (countHardwarePoll >= 2) {
+      countHardwarePoll = 0;
+      hardware_status.status = 'ready';
+    }
+
+    console.log('Hardware count ' + countHardwarePoll + ' of 2');
+    countHardwarePoll++;
+
+    return hardware_status;
+  })
   .get(SECURITY_SETTINGS_ENDPOINT, () => security_settings)
   .post(SECURITY_SETTINGS_ENDPOINT, async (request: any) => {
     security_settings = await request.json();
@@ -4215,15 +4234,6 @@ router
     return status(200);
   })
   .get(VERIFY_AUTHORIZATION_ENDPOINT, () => verify_authentication)
-  .post(RESTART_ENDPOINT, () => {
-    console.log('restarting...');
-    return status(200);
-  })
-  .post(RESTART_PARTITION_ENDPOINT, () => {
-    console.log('restarting...');
-    return status(200);
-  })
-  .post(FACTORY_RESET_ENDPOINT, () => status(200))
   .post(SIGN_IN_ENDPOINT, () => signin)
   .get(GENERATE_TOKEN_ENDPOINT, () => generate_token);
 
@@ -4529,6 +4539,17 @@ router
     return status(200);
   })
 
+  // check upgrade
+  .post(EMSESP_CHECK_UPGRADE_ENDPOINT, async (request: any) => {
+    const content = await request.json();
+    console.log('check upgrade from ', content.version);
+    const data = {
+      upgradeable: true
+      // upgradeable: false
+    };
+    return data;
+  })
+
   // Settings - board profile
   .post(EMSESP_BOARDPROFILE_ENDPOINT, async (request: any) => {
     const content = await request.json();
@@ -4679,12 +4700,32 @@ router
   .get(EMSESP_SYSTEM_INFO_ENDPOINT, () => emsesp_info)
   .post(API_ENDPOINT_ROOT, async (request: any) => {
     const data = await request.json();
+    // check if the json data has key called cmd
+    let cmd = '';
+    if (data.hasOwnProperty('cmd')) {
+      cmd = data.cmd;
+    } else if (data.hasOwnProperty('entity')) {
+      cmd = data.entity;
+    } else {
+      return status(400); // bad request
+    }
+
     if (data.device === 'system') {
-      if (data.entity === 'info') {
+      if (cmd === 'info') {
         return emsesp_info;
       }
-      if (data.entity === 'allvalues') {
+      if (cmd === 'allvalues') {
         return emsesp_allvalues;
+      }
+      if (cmd === 'format') {
+        console.log('formatting...');
+        return status(200);
+      }
+      if (cmd === 'restart') {
+        console.log('restarting...');
+        hardware_status.status = 'restarting';
+        countHardwarePoll = 0;
+        return status(200);
       }
     }
     return status(404); // not found

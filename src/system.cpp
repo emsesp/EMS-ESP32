@@ -78,6 +78,7 @@ uuid::log::Logger System::logger_{F_(system), uuid::log::Facility::KERN};
 // init statics
 PButton  System::myPButton_;
 bool     System::restart_requested_   = false;
+bool     System::restart_pending_     = false;
 bool     System::test_set_all_active_ = false;
 uint32_t System::max_alloc_mem_;
 uint32_t System::heap_mem_;
@@ -288,40 +289,53 @@ void System::store_nvs_values() {
 }
 
 // restart EMS-ESP
+// app0 or app1
+// on 16MB we have the additional boot and factory partitions
 void System::system_restart(const char * partitionname) {
 #ifndef EMSESP_STANDALONE
+    // see if we are forcing a partition to use
     if (partitionname != nullptr) {
+        // Factory partition - label will be "factory"
         const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, NULL);
         if (partition && strcmp(partition->label, partitionname) == 0) {
             esp_ota_set_boot_partition(partition);
-        } else if (strcmp(esp_ota_get_running_partition()->label, partitionname) != 0) {
-            partition = esp_ota_get_next_update_partition(NULL);
-            if (!partition) {
-                LOG_ERROR("Partition '%s' not found", partitionname);
-                return;
-            }
-            if (strcmp(partition->label, partitionname) != 0 && strcmp(partitionname, "boot") != 0) {
-                partition = esp_ota_get_next_update_partition(partition);
-                if (!partition || strcmp(partition->label, partitionname)) {
+        } else
+            // try and find the parition by name
+            if (strcmp(esp_ota_get_running_partition()->label, partitionname) != 0) {
+                partition = esp_ota_get_next_update_partition(nullptr);
+                if (!partition) {
                     LOG_ERROR("Partition '%s' not found", partitionname);
                     return;
                 }
+                if (strcmp(partition->label, partitionname) != 0 && strcmp(partitionname, "boot") != 0) {
+                    partition = esp_ota_get_next_update_partition(partition);
+                    if (!partition || strcmp(partition->label, partitionname)) {
+                        LOG_ERROR("Partition '%s' not found", partitionname);
+                        return;
+                    }
+                }
+                // check if partition is empty
+                uint64_t buffer;
+                esp_partition_read(partition, 0, &buffer, 8);
+                if (buffer == 0xFFFFFFFFFFFFFFFF) {
+                    LOG_ERROR("Partition '%s' is empty, not bootable", partition->label);
+                    return;
+                }
+                // set the boot partition
+                esp_ota_set_boot_partition(partition);
             }
-            uint64_t buffer;
-            esp_partition_read(partition, 0, &buffer, 8);
-            if (buffer == 0xFFFFFFFFFFFFFFFF) { // partition empty
-                LOG_ERROR("Partition '%s' is empty, not bootable", partition->label);
-                return;
-            }
-            esp_ota_set_boot_partition(partition);
-        }
         LOG_INFO("Restarting EMS-ESP from %s partition", partitionname);
     } else {
         LOG_INFO("Restarting EMS-ESP...");
     }
-    store_nvs_values();
-    Shell::loop_all();
-    delay(1000); // wait a second
+
+    // make sure it's only executed once
+    restart_requested(false);
+    restart_pending(false);
+
+    store_nvs_values(); // save any NVS values
+    Shell::loop_all();  // flush log to output
+    delay(1000);        // wait 1 second
     ESP.restart();
 #endif
 }
@@ -334,19 +348,6 @@ void System::wifi_reconnect() {
     delay(1000);                                                            // wait a second
     EMSESP::webSettingsService.save();                                      // save local settings
     EMSESP::esp8266React.getNetworkSettingsService()->callUpdateHandlers(); // in case we've changed ssid or password
-}
-
-// format the FS. Wipes everything.
-void System::format(uuid::console::Shell & shell) {
-    auto msg = ("Formatting file system. This will reset all settings to their defaults");
-    shell.logger().warning(msg);
-    EMSuart::stop();
-
-#ifndef EMSESP_STANDALONE
-    LittleFS.format();
-#endif
-
-    System::system_restart();
 }
 
 void System::syslog_init() {
@@ -528,12 +529,9 @@ void System::button_OnLongPress(PButton & b) {
     EMSESP::system_.system_restart("boot");
 }
 
-// button indefinite press
+// button indefinite press - do nothing for now
 void System::button_OnVLongPress(PButton & b) {
-    LOG_NOTICE("Button pressed - very long press - factory reset");
-#ifndef EMSESP_STANDALONE
-    EMSESP::esp8266React.factoryReset();
-#endif
+    LOG_NOTICE("Button pressed - very long press");
 }
 
 // push button
@@ -577,32 +575,33 @@ void System::led_init(bool refresh) {
 }
 
 // returns true if OTA is uploading
-bool System::upload_status() {
+bool System::upload_isrunning() {
 #if defined(EMSESP_STANDALONE)
     return false;
 #else
-    return upload_status_ || Update.isRunning();
+    return upload_isrunning_ || Update.isRunning();
 #endif
 }
 
-void System::upload_status(bool in_progress) {
+void System::upload_isrunning(bool in_progress) {
     // if we've just started an upload
-    if (!upload_status_ && in_progress) {
+    if (!upload_isrunning_ && in_progress) {
         EMSuart::stop();
     }
-    upload_status_ = in_progress;
+    upload_isrunning_ = in_progress;
 }
 
 // checks system health and handles LED flashing wizardry
 void System::loop() {
     // check if we're supposed to do a reset/restart
     if (restart_requested()) {
-        this->system_restart();
+        system_restart();
     }
 
 #ifndef EMSESP_STANDALONE
     myPButton_.check(); // check button press
 
+    // syslog
     if (syslog_enabled_) {
         syslog_.loop();
     }
@@ -849,9 +848,8 @@ void System::system_check() {
 void System::commands_init() {
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send, FL_(send_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, FL_(fetch_cmd), CommandFlag::ADMIN_ONLY);
-
-    // restart, watch, message (and test) are also exposed as Console commands
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), System::command_restart, FL_(restart_cmd), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(format), System::command_format, FL_(format_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), System::command_watch, FL_(watch_cmd));
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(message), System::command_message, FL_(message_cmd));
 #if defined(EMSESP_TEST)
@@ -1737,13 +1735,36 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
     return true;
 }
 
-// restart command - perform a hard reset
-bool System::command_restart(const char * value, const int8_t id) {
-    if (value != nullptr && value[0] != '\0') {
-        EMSESP::system_.system_restart(value);
-    } else {
-        EMSESP::system_.system_restart();
+// format command - factory reset, removing all config files
+bool System::command_format(const char * value, const int8_t id) {
+    LOG_INFO("Removing all config files");
+#ifndef EMSESP_STANDALONE
+    // TODO To replaced with fs.rmdir(FS_CONFIG_DIRECTORY) now we're using IDF 4.2+
+    File root = LittleFS.open(EMSESP_FS_CONFIG_DIRECTORY);
+    File file;
+    while ((file = root.openNextFile())) {
+        String path = file.path();
+        file.close();
+        LittleFS.remove(path);
     }
+#endif
+
+    EMSESP::system_.restart_requested(true); // will be handled by the main loop
+
+    return true;
+}
+
+// restart command - perform a hard reset (system reboot)
+bool System::command_restart(const char * value, const int8_t id) {
+    if (id == 0) {
+        // if it has an id then it's a web call and we need to queue the restart
+        // default id is -1 when calling /api/system/restart directly for example
+        LOG_INFO("Preparing to restart system");
+        EMSESP::system_.restart_pending(true);
+        return true;
+    }
+    LOG_INFO("Restarting system immediately");
+    EMSESP::system_.restart_requested(true); // will be handled by the main loop
     return true;
 }
 
@@ -1842,30 +1863,30 @@ bool System::uploadFirmwareURL(const char * url) {
 
     static String saved_url;
 
-    // if the URL is not empty, save it for later
+    // if the URL is not empty, store the URL for the 2nd pass
     if (url && strlen(url) > 0) {
         saved_url = url;
-        EMSESP::system_.upload_status(true); // tell EMS-ESP we're ready to start the uploading process
+        EMSESP::system_.upload_isrunning(true); // tell EMS-ESP we're ready to start the uploading process
         return true;
     }
 
     // make sure we have a valid URL
     if (saved_url.isEmpty()) {
-        LOG_ERROR("Firmware upload failed - no URL");
-        return false;
+        return false; // error
     }
 
     // Configure temporary client
     HTTPClient http;
-    http.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS); // important for GitHub 302's
-    http.useHTTP10(true);
+    http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS); // important for GitHub 302's
+    http.setTimeout(8000);
+    http.useHTTP10(true); // use HTTP/1.0 for update since the update handler not support any transfer Encoding
     http.begin(saved_url);
 
-    // start a connection
+    // start a connection, returns -1 if fails
     int httpCode = http.GET();
     if (httpCode != HTTP_CODE_OK) {
-        LOG_ERROR("Firmware upload failed - HTTP code %u", httpCode);
-        return false;
+        LOG_ERROR("Firmware upload failed - HTTP code %d", httpCode);
+        return false; // error
     }
 
     // check we have enough space for the upload in the ota partition
@@ -1873,32 +1894,32 @@ bool System::uploadFirmwareURL(const char * url) {
     LOG_INFO("Firmware uploading (file: %s, size: %d bytes). Please wait...", saved_url.c_str(), firmware_size);
     if (!Update.begin(firmware_size)) {
         LOG_ERROR("Firmware upload failed - no space");
-        return false;
+        return false; // error
     }
 
-    // flush buffers so latest log messages are shown
+    // flush log buffers so latest messages are shown
     Shell::loop_all();
 
     // get tcp stream and send it to Updater
     WiFiClient * stream = http.getStreamPtr();
     if (Update.writeStream(*stream) != firmware_size) {
         LOG_ERROR("Firmware upload failed - size differences");
-        return false;
+        return false; // error
     }
 
     if (!Update.end(true)) {
         LOG_ERROR("Firmware upload failed - general error");
-        return false;
+        return false; // error
     }
 
     http.end();
 
-    EMSESP::system_.upload_status(false);
+    EMSESP::system_.upload_isrunning(false);
     saved_url.clear(); // prevent from downloading again
 
     LOG_INFO("Firmware uploaded successfully. Restarting...");
 
-    restart_requested(true);
+    restart_pending(true);
 
 #endif
 

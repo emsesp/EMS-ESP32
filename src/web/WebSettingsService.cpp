@@ -29,6 +29,10 @@ WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, Securit
                HTTP_GET,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { board_profile(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
     addUpdateHandler([this] { onUpdate(); }, false);
+
+    server->on(EMSESP_GET_SETTINGS_PATH,
+               HTTP_GET,
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { getSettings(request); }, AuthenticationPredicates::IS_ADMIN));
 }
 
 void WebSettings::read(WebSettings & settings, JsonObject root) {
@@ -152,7 +156,8 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
             } else {
                 EMSESP::nvs_.putString("boot", "S32");
             }
-            ESP.restart();
+            // ESP.restart();
+            EMSESP::system_.restart_requested(true);
 #elif CONFIG_IDF_TARGET_ESP32C3
             settings.board_profile = "C3MINI";
 #elif CONFIG_IDF_TARGET_ESP32S2
@@ -422,6 +427,27 @@ void WebSettingsService::board_profile(AsyncWebServerRequest * request) {
     }
 
     AsyncWebServerResponse * response = request->beginResponse(200);
+    request->send(response);
+}
+
+// returns json with all system settings
+void WebSettingsService::getSettings(AsyncWebServerRequest * request) {
+    auto *     response = new AsyncJsonResponse(false);
+    JsonObject root     = response->getRoot();
+
+    root["type"] = "settings";
+
+    JsonObject node = root["System"].to<JsonObject>();
+    node["version"] = EMSESP_APP_VERSION;
+
+    System::extractSettings(NETWORK_SETTINGS_FILE, "Network", root);
+    System::extractSettings(AP_SETTINGS_FILE, "AP", root);
+    System::extractSettings(MQTT_SETTINGS_FILE, "MQTT", root);
+    System::extractSettings(NTP_SETTINGS_FILE, "NTP", root);
+    System::extractSettings(SECURITY_SETTINGS_FILE, "Security", root);
+    System::extractSettings(EMSESP_SETTINGS_FILE, "Settings", root);
+
+    response->setLength();
     request->send(response);
 }
 

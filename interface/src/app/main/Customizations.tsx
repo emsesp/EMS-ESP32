@@ -16,7 +16,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
   InputAdornment,
   Link,
   MenuItem,
@@ -25,8 +24,7 @@ import {
   ToggleButtonGroup,
   Typography
 } from '@mui/material';
-
-import { restart } from 'api/system';
+import Grid from '@mui/material/Grid2';
 
 import {
   Body,
@@ -51,6 +49,7 @@ import {
 import { useI18nContext } from 'i18n/i18n-react';
 
 import {
+  API,
   readDeviceEntities,
   readDevices,
   resetCustomizations,
@@ -61,7 +60,7 @@ import SettingsCustomizationsDialog from './CustomizationsDialog';
 import EntityMaskToggle from './EntityMaskToggle';
 import OptionIcon from './OptionIcon';
 import { DeviceEntityMask } from './types';
-import type { DeviceEntity, DeviceShort } from './types';
+import type { APIcall, DeviceEntity, DeviceShort } from './types';
 
 export const APIURL = window.location.origin + '/api/';
 
@@ -84,6 +83,10 @@ const Customizations = () => {
 
   // fetch devices first
   const { data: devices, send: fetchDevices } = useRequest(readDevices);
+
+  const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
+    immediate: false
+  });
 
   const [selectedDevice, setSelectedDevice] = useState<number>(
     Number(useLocation().state) || -1
@@ -132,9 +135,14 @@ const Customizations = () => {
     );
   };
 
-  const { send: sendRestart } = useRequest(restart(), {
-    immediate: false
-  });
+  const doRestart = async () => {
+    setRestarting(true);
+    await sendAPI({ device: 'system', cmd: 'restart', id: 0 }).catch(
+      (error: Error) => {
+        toast.error(error.message);
+      }
+    );
+  };
 
   const entities_theme = useTheme({
     Table: `
@@ -246,13 +254,6 @@ const Customizations = () => {
       }
     }
   }, [devices, selectedDevice]);
-
-  const doRestart = async () => {
-    await sendRestart().catch((error: Error) => {
-      toast.error(error.message);
-    });
-    setRestarting(true);
-  };
 
   function formatValue(value: unknown) {
     if (typeof value === 'number') {
@@ -509,12 +510,12 @@ const Customizations = () => {
           container
           mb={1}
           mt={0}
-          spacing={1}
+          spacing={2}
           direction="row"
           justifyContent="flex-start"
           alignItems="center"
         >
-          <Grid item xs={2}>
+          <Grid>
             <TextField
               size="small"
               variant="outlined"
@@ -522,16 +523,18 @@ const Customizations = () => {
               onChange={(event) => {
                 setSearch(event.target.value);
               }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon color="primary" sx={{ fontSize: 16 }} />
-                  </InputAdornment>
-                )
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon color="primary" sx={{ fontSize: 16 }} />
+                    </InputAdornment>
+                  )
+                }
               }}
             />
           </Grid>
-          <Grid item>
+          <Grid>
             <ToggleButtonGroup
               size="small"
               color="secondary"
@@ -557,7 +560,7 @@ const Customizations = () => {
               </ToggleButton>
             </ToggleButtonGroup>
           </Grid>
-          <Grid item>
+          <Grid>
             <Button
               size="small"
               sx={{ fontSize: 10 }}
@@ -570,7 +573,7 @@ const Customizations = () => {
               <OptionIcon type="web_exclude" isSet={false} />
             </Button>
           </Grid>
-          <Grid item>
+          <Grid>
             <Button
               size="small"
               sx={{ fontSize: 10 }}
@@ -583,7 +586,7 @@ const Customizations = () => {
               <OptionIcon type="web_exclude" isSet={true} />
             </Button>
           </Grid>
-          <Grid item>
+          <Grid>
             <Typography variant="subtitle2" color="primary">
               {LL.SHOWING()}&nbsp;{shown_data.length}/{deviceEntities.length}
               &nbsp;{LL.ENTITIES(deviceEntities.length)}

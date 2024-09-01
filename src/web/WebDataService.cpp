@@ -22,25 +22,25 @@ namespace emsesp {
 
 WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securityManager) {
     // write endpoints
-    server->on(WRITE_DEVICE_VALUE_SERVICE_PATH,
+    server->on(EMSESP_WRITE_DEVICE_VALUE_SERVICE_PATH,
                securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_device_value(request, json); },
                                              AuthenticationPredicates::IS_ADMIN));
-    server->on(WRITE_TEMPERATURE_SENSOR_SERVICE_PATH,
+    server->on(EMSESP_WRITE_TEMPERATURE_SENSOR_SERVICE_PATH,
                securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_temperature_sensor(request, json); },
                                              AuthenticationPredicates::IS_ADMIN));
-    server->on(WRITE_ANALOG_SENSOR_SERVICE_PATH,
+    server->on(EMSESP_WRITE_ANALOG_SENSOR_SERVICE_PATH,
                securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_analog_sensor(request, json); },
                                              AuthenticationPredicates::IS_ADMIN));
     // GET's
-    server->on(DEVICE_DATA_SERVICE_PATH,
+    server->on(EMSESP_DEVICE_DATA_SERVICE_PATH,
                HTTP_GET,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { device_data(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
 
-    server->on(CORE_DATA_SERVICE_PATH,
+    server->on(EMSESP_CORE_DATA_SERVICE_PATH,
                HTTP_GET,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { core_data(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
 
-    server->on(SENSOR_DATA_SERVICE_PATH,
+    server->on(EMSESP_SENSOR_DATA_SERVICE_PATH,
                HTTP_GET,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { sensor_data(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
 }
@@ -341,7 +341,7 @@ void WebDataService::write_analog_sensor(AsyncWebServerRequest * request, JsonVa
         ok                  = EMSESP::analogsensor_.update(gpio, name, offset, factor, uom, type, deleted);
     }
 
-    AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 400); // bad request
+    AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 400); // ok or bad request
     request->send(response);
 }
 

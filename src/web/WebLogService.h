@@ -19,9 +19,9 @@
 #ifndef WebLogService_h
 #define WebLogService_h
 
-#define EVENT_SOURCE_LOG_PATH "/es/log"
-#define FETCH_LOG_PATH "/rest/fetchLog"
-#define LOG_SETTINGS_PATH "/rest/logSettings"
+#define EMSESP_EVENT_SOURCE_LOG_PATH "/es/log"
+#define EMSESP_FETCH_LOG_PATH "/rest/fetchLog"
+#define EMSESP_LOG_SETTINGS_PATH "/rest/logSettings"
 
 namespace emsesp {
 

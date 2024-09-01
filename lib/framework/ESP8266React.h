@@ -4,13 +4,11 @@
 #include "APSettingsService.h"
 #include "APStatus.h"
 #include "AuthenticationService.h"
-#include "FactoryResetService.h"
 #include "MqttSettingsService.h"
 #include "MqttStatus.h"
 #include "NTPSettingsService.h"
 #include "NTPStatus.h"
 #include "UploadFileService.h"
-#include "RestartService.h"
 #include "SecuritySettingsService.h"
 #include "WiFiScanner.h"
 #include "NetworkSettingsService.h"
@@ -68,12 +66,6 @@ class ESP8266React {
         return _apSettingsService.getAPNetworkStatus() == APNetworkStatus::ACTIVE;
     }
 
-#ifndef EMSESP_STANDALONE
-    void factoryReset() {
-        _factoryResetService.factoryReset();
-    }
-#endif
-
   private:
     SecuritySettingsService _securitySettingsService;
     NetworkSettingsService  _networkSettingsService;
@@ -87,8 +79,6 @@ class ESP8266React {
     MqttSettingsService     _mqttSettingsService;
     MqttStatus              _mqttStatus;
     AuthenticationService   _authenticationService;
-    RestartService          _restartService;
-    FactoryResetService     _factoryResetService;
 };
 
 #endif

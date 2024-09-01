@@ -11,7 +11,7 @@ const sk: Translation = {
   PASSWORD: 'Heslo',
   SU_PASSWORD: 'su heslo',
   SETTINGS_OF: '{0} Nastavenia',
-  HELP_OF: '{0} Pomoc',
+  HELP: 'Pomoc',
   LOGGED_IN: 'Prihlásený ako {name}',
   PLEASE_SIGNIN: 'Ak chcete pokračovať, prihláste sa',
   UPLOAD_SUCCESSFUL: 'Nahratie úspešné',
@@ -161,7 +161,7 @@ const sk: Translation = {
   HELP_INFORMATION_5: 'EMS-ESP je bezplatný a open source projekt. Podporte jeho budúci vývoj tým, že mu dáte hviezdičku na GitHub!',
   UPLOAD: 'Nahrať',
   DOWNLOAD: '{{S|s|s}}tiahnuť',
-  INSTALL: 'Inštalovať',
+  INSTALL: 'Inštalovať {0}',
   ABORTED: 'zrušené',
   FAILED: 'chybné',
   SUCCESSFUL: 'úspešné',
@@ -169,16 +169,13 @@ const sk: Translation = {
   LOG_OF: '{0} Log',
   STATUS_OF: '{0} Stav',
   DOWNLOAD_UPLOAD: 'Stiahnuť/Nahrať',
-  VERSION_ON: 'Momentálne nainštalovaná verzia: ',
   CLOSE: 'Zatvoriť',
   USE: 'Použiť',
   FACTORY_RESET: 'Továrenské nastavenia',
   SYSTEM_FACTORY_TEXT: 'Zariadenie bolo obnovené z výroby a teraz sa reštartuje',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Naozaj chcete resetovať EMS-ESP na predvolené výrobné nastavenia?',
-  THE_LATEST: 'Posledná',
-  OFFICIAL: 'officiálna',
-  DEVELOPMENT: 'vývojárska',
-  RELEASE_IS: 'verzia je',
+  STABLE: 'Stable', // TODO translate
+  DEVELOPMENT: 'Vývojárska',
   RELEASE_NOTES: 'poznámky k verzii',
   EMS_ESP_VER: 'EMS-ESP verzia',
   UPTIME: 'Beh systému',
@@ -335,7 +332,15 @@ const sk: Translation = {
   UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
   SERVICES: 'Services', // TODO translate
   ALLVALUES: 'All Values', // TODO translate
-  SPECIAL_FUNCTIONS: 'Special Functions' // TODO translate
+  SPECIAL_FUNCTIONS: 'Special Functions', // TODO translate
+  WAIT_FIRMWARE: 'Firmware is uploading and installing', // TODO translate
+  INSTALL_VERSION: 'This will install vesion {0}. Are you sure?', // TODO translate
+  SWITCH_DEV: 'switch to the development version', // TODO translate
+  UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
+  LATEST_VERSION: 'You are using the latest version.', // TODO translate
+  PLEASE_WAIT: 'Please wait', // TODO translate
+  RESTARTING_PRE: 'Initializing', // TODO translate
+  RESTARTING_POST: 'Reloading' // TODO translate
 };
 
 export default sk;

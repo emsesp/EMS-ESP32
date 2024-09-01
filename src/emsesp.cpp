@@ -1569,7 +1569,7 @@ void EMSESP::start() {
 // do a quick scan of the filesystem to see if we have a /config folder
 // so we know if this is a new install or not
 #ifndef EMSESP_STANDALONE
-    File root             = LittleFS.open("/config");
+    File root             = LittleFS.open(EMSESP_FS_CONFIG_DIRECTORY);
     bool factory_settings = !root;
     if (!root) {
         LOG_INFO("No config found, assuming factory settings");
@@ -1589,9 +1589,9 @@ void EMSESP::start() {
     LOG_DEBUG("NVS device information: %s", system_.getBBQKeesGatewayDetails().c_str());
 
 #ifndef EMSESP_STANDALONE
-    LOG_INFO("Starting EMS-ESP version %s from %s partition", EMSESP_APP_VERSION, esp_ota_get_running_partition()->label); // welcome message
+    LOG_INFO("Booting EMS-ESP version %s from %s partition", EMSESP_APP_VERSION, esp_ota_get_running_partition()->label); // welcome message
 #else
-    LOG_INFO("Starting EMS-ESP version %s", EMSESP_APP_VERSION); // welcome message
+    LOG_INFO("Booting EMS-ESP version %s", EMSESP_APP_VERSION); // welcome message
 #endif
     LOG_DEBUG("System is running in Debug mode");
     LOG_INFO("Last system reset reason Core0: %s, Core1: %s", system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
@@ -1610,6 +1610,12 @@ void EMSESP::start() {
         system_.system_restart();
     };
 
+    // Load our library of known devices into stack mem. Names are stored in Flash memory
+    device_library_ = {
+#include "device_library.h"
+    };
+    LOG_INFO("Loaded EMS device library (%d)", device_library_.size());
+
     system_.reload_settings(); // ... and store some of the settings locally
 
     webCustomizationService.begin(); // load the customizations
@@ -1627,57 +1633,53 @@ void EMSESP::start() {
 #endif
     }
 
+    // start services
     if (system_.modbus_enabled()) {
         modbus_ = new Modbus;
         modbus_->start(1, system_.modbus_port(), system_.modbus_max_clients(), system_.modbus_timeout());
     }
-
     mqtt_.start();              // mqtt init
     system_.start();            // starts commands, led, adc, button, network (sets hostname), syslog & uart
     shower_.start();            // initialize shower timer and shower alert
     temperaturesensor_.start(); // Temperature external sensors
     analogsensor_.start();      // Analog external sensors
-    webLogService.start();      // apply settings to weblog service
 
+    // start web services
+    webLogService.start();     // apply settings to weblog service
     webModulesService.begin(); // setup the external library modules
-
-    // Load our library of known devices into stack mem. Names are stored in Flash memory
-    device_library_ = {
-#include "device_library.h"
-    };
-    LOG_INFO("Loaded EMS device library (%d records)", device_library_.size());
-
-#if defined(EMSESP_STANDALONE)
-    Mqtt::on_connect(); // simulate an MQTT connection
-#endif
-
-    webServer.begin(); // start the web server
+    webServer.begin();         // start the web server
+    LOG_INFO("Starting Web Server");
 }
 
 // main loop calling all services
 void EMSESP::loop() {
-    esp8266React.loop(); // web services
-    system_.loop();      // does LED and checks system health, and syslog service
+    esp8266React.loop();              // web services
+    system_.loop();                   // does LED and checks system health, and syslog service
+    static bool upload_status = true; // ready for any OTA uploads
 
     // if we're doing an OTA upload, skip everything except from console refresh
-    if (!system_.upload_status()) {
+    if (!system_.upload_isrunning()) {
         // service loops
-        webLogService.loop();      // log in Web UI
-        rxservice_.loop();         // process any incoming Rx telegrams
-        shower_.loop();            // check for shower on/off
-        temperaturesensor_.loop(); // read sensor temperatures
-        analogsensor_.loop();      // read analog sensor values
-        publish_all_loop();        // with HA messages in parts to avoid flooding the mqtt queue
-        mqtt_.loop();              // sends out anything in the MQTT queue
-        webModulesService.loop();  // loop through the external library modules
-        if (system_.PSram() == 0) {
-            webSchedulerService.loop(); // run non-async if there is no PSRAM available
+        webLogService.loop();       // log in Web UI
+        rxservice_.loop();          // process any incoming Rx telegrams
+        shower_.loop();             // check for shower on/off
+        temperaturesensor_.loop();  // read sensor temperatures
+        analogsensor_.loop();       // read analog sensor values
+        publish_all_loop();         // with HA messages in parts to avoid flooding the mqtt queue
+        mqtt_.loop();               // sends out anything in the MQTT queue
+        webModulesService.loop();   // loop through the external library modules
+        if (system_.PSram() == 0) { // run non-async if there is no PSRAM available
+            webSchedulerService.loop();
         }
 
-        // force a query on the EMS devices to fetch latest data at a set interval (1 min)
-        scheduled_fetch_values();
-    } else {
-        emsesp::EMSESP::system_.uploadFirmwareURL(); // start an upload from a URL. This is blocking.
+        scheduled_fetch_values(); // force a query on the EMS devices to fetch latest data at a set interval (1 min)
+
+    } else if (upload_status) {
+        // start an upload from a URL, if it exists. This is blocking.
+        if (!system_.uploadFirmwareURL()) {
+            upload_status = false; // abort all other attempts, until reset (after a restart normally)
+            system_.upload_isrunning(false);
+        }
     }
 
     uuid::loop();

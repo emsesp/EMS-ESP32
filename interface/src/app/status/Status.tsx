@@ -30,10 +30,11 @@ import {
 } from '@mui/material';
 
 import * as SystemApi from 'api/system';
+import { API } from 'api/app';
 
 import { dialogStyle } from 'CustomTheme';
 import { useAutoRequest, useRequest } from 'alova/client';
-import { busConnectionStatus } from 'app/main/types';
+import { type APIcall, busConnectionStatus } from 'app/main/types';
 import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import ListMenuItem from 'components/layout/ListMenuItem';
 import { AuthenticatedContext } from 'contexts/authentication';
@@ -52,23 +53,11 @@ const SystemStatus = () => {
   const { me } = useContext(AuthenticatedContext);
 
   const [confirmRestart, setConfirmRestart] = useState<boolean>(false);
-  const [processing, setProcessing] = useState<boolean>(false);
   const [restarting, setRestarting] = useState<boolean>();
 
-  const { send: restartCommand } = useRequest(SystemApi.restart(), {
+  const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
     immediate: false
   });
-
-  const { send: partitionCommand } = useRequest(SystemApi.partition(), {
-    immediate: false
-  });
-
-  const { send: factoryPartitionCommand } = useRequest(
-    SystemApi.factoryPartition(),
-    {
-      immediate: false
-    }
-  );
 
   const {
     data: data,
@@ -76,7 +65,12 @@ const SystemStatus = () => {
     error
   } = useAutoRequest(SystemApi.readSystemStatus, {
     initialData: [],
-    pollingTime: 5000
+    pollingTime: 5000,
+    async middleware(_, next) {
+      if (!restarting) {
+        await next();
+      }
+    }
   });
 
   const theme = useTheme();
@@ -207,49 +201,14 @@ const SystemStatus = () => {
   const activeHighlight = (value: boolean) =>
     value ? theme.palette.success.main : theme.palette.info.main;
 
-  const restart = async () => {
-    setProcessing(true);
-    await restartCommand()
-      .then(() => {
-        setRestarting(true);
-      })
-      .catch((error: Error) => {
+  const doRestart = async () => {
+    setConfirmRestart(false);
+    setRestarting(true);
+    await sendAPI({ device: 'system', cmd: 'restart', id: 0 }).catch(
+      (error: Error) => {
         toast.error(error.message);
-      })
-      .finally(() => {
-        setConfirmRestart(false);
-        setProcessing(false);
-      });
-  };
-
-  const partition = async () => {
-    setProcessing(true);
-    await partitionCommand()
-      .then(() => {
-        setRestarting(true);
-      })
-      .catch((error: Error) => {
-        toast.error(error.message);
-      })
-      .finally(() => {
-        setConfirmRestart(false);
-        setProcessing(false);
-      });
-  };
-
-  const factoryPartition = async () => {
-    setProcessing(true);
-    await factoryPartitionCommand()
-      .then(() => {
-        setRestarting(true);
-      })
-      .catch((error: Error) => {
-        toast.error(error.message);
-      })
-      .finally(() => {
-        setConfirmRestart(false);
-        setProcessing(false);
-      });
+      }
+    );
   };
 
   const renderRestartDialog = () => (
@@ -265,38 +224,14 @@ const SystemStatus = () => {
           startIcon={<CancelIcon />}
           variant="outlined"
           onClick={() => setConfirmRestart(false)}
-          disabled={processing}
           color="secondary"
         >
           {LL.CANCEL()}
         </Button>
-        {data.has_loader && (
-          <Button
-            startIcon={<PowerSettingsNewIcon />}
-            variant="outlined"
-            onClick={factoryPartition}
-            disabled={processing}
-            color="warning"
-          >
-            EMS-ESP Boot
-          </Button>
-        )}
-        {data.has_partition && (
-          <Button
-            startIcon={<PowerSettingsNewIcon />}
-            variant="outlined"
-            onClick={partition}
-            disabled={processing}
-            color="warning"
-          >
-            Partition
-          </Button>
-        )}
         <Button
           startIcon={<PowerSettingsNewIcon />}
           variant="outlined"
-          onClick={restart}
-          disabled={processing}
+          onClick={doRestart}
           color="error"
         >
           {LL.RESTART()}

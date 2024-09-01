@@ -21,12 +21,12 @@
 namespace emsesp {
 
 WebLogService::WebLogService(AsyncWebServer * server, SecurityManager * securityManager)
-    : events_(EVENT_SOURCE_LOG_PATH) {
+    : events_(EMSESP_EVENT_SOURCE_LOG_PATH) {
     // get & set settings
-    server->on(LOG_SETTINGS_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { getSetValues(request, json); });
+    server->on(EMSESP_LOG_SETTINGS_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { getSetValues(request, json); });
 
     // for bring back the whole log - is a command, hence a POST
-    server->on(FETCH_LOG_PATH, HTTP_POST, [this](AsyncWebServerRequest * request) { fetchLog(request); });
+    server->on(EMSESP_FETCH_LOG_PATH, HTTP_POST, [this](AsyncWebServerRequest * request) { fetchLog(request); });
 
     // events_.setFilter(securityManager->filterRequest(AuthenticationPredicates::IS_ADMIN));
     server->addHandler(&events_);

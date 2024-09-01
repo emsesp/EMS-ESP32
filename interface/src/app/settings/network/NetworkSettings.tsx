@@ -15,7 +15,6 @@ import {
   List,
   ListItem,
   ListItemAvatar,
-  ListItemSecondaryAction,
   ListItemText,
   MenuItem,
   TextField,
@@ -23,9 +22,10 @@ import {
 } from '@mui/material';
 
 import * as NetworkApi from 'api/network';
-import * as SystemApi from 'api/system';
+import { API } from 'api/app';
 
 import { updateState, useRequest } from 'alova/client';
+import type { APIcall } from 'app/main/types';
 import type { ValidateFieldsError } from 'async-validator';
 import {
   BlockFormControlLabel,
@@ -72,7 +72,7 @@ const NetworkSettings = () => {
     update: NetworkApi.updateNetworkSettings
   });
 
-  const { send: restartCommand } = useRequest(SystemApi.restart(), {
+  const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
     immediate: false
   });
 
@@ -132,11 +132,13 @@ const NetworkSettings = () => {
       await loadData();
     };
 
-    const restart = async () => {
-      await restartCommand().catch((error: Error) => {
-        toast.error(error.message);
-      });
+    const doRestart = async () => {
       setRestarting(true);
+      await sendAPI({ device: 'system', cmd: 'restart', id: 0 }).catch(
+        (error: Error) => {
+          toast.error(error.message);
+        }
+      );
     };
 
     return (
@@ -163,11 +165,9 @@ const NetworkSettings = () => {
                   selectedNetwork.bssid
                 }
               />
-              <ListItemSecondaryAction>
-                <IconButton onClick={setCancel}>
-                  <DeleteIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
+              <IconButton onClick={setCancel}>
+                <DeleteIcon />
+              </IconButton>
             </ListItem>
           </List>
         ) : (
@@ -361,7 +361,7 @@ const NetworkSettings = () => {
               startIcon={<PowerSettingsNewIcon />}
               variant="contained"
               color="error"
-              onClick={restart}
+              onClick={doRestart}
             >
               {LL.RESTART()}
             </Button>
@@ -375,7 +375,7 @@ const NetworkSettings = () => {
                 startIcon={<CancelIcon />}
                 disabled={saving}
                 variant="outlined"
-                color="primary"
+                color="secondary"
                 type="submit"
                 onClick={loadData}
               >

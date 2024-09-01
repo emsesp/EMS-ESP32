@@ -1,4 +1,9 @@
-export const numberValue = (value: number) => (isNaN(value) ? '' : value.toString());
+export const numberValue = (value?: number) => {
+  if (value !== undefined) {
+    return isNaN(value) ? '' : value.toString();
+  }
+  return '';
+};
 
 export const extractEventValue = (event: React.ChangeEvent<HTMLInputElement>) => {
   switch (event.target.type) {

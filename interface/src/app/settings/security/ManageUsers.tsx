@@ -227,7 +227,7 @@ const ManageUsers = () => {
                   startIcon={<CancelIcon />}
                   disabled={saving}
                   variant="outlined"
-                  color="primary"
+                  color="secondary"
                   type="submit"
                   onClick={onCancelSubmit}
                 >

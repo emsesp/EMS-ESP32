@@ -8,7 +8,7 @@ export const ACCESS_TOKEN = 'access_token';
 
 export const alovaInstance = createAlova({
   statesHook: ReactHook,
-  timeout: 3000, // 3 seconds before throwing a timeout error
+  // timeout: 3000, // 3 seconds before throwing a timeout error, default is 0 = none
   cacheFor: null, // disable cache
   // cacheFor: {
   //   GET: {

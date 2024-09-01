@@ -30,7 +30,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
   IconButton,
   List,
   ListItem,
@@ -41,6 +40,7 @@ import {
   styled,
   tooltipClasses
 } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 
 import { useRowSelect } from '@table-library/react-table-library/select';
 import { SortToggleType, useSort } from '@table-library/react-table-library/sort';
@@ -556,7 +556,7 @@ const Devices = () => {
               </Header>
               <Body>
                 {tableList.length === 0 && (
-                  <CircularProgress sx={{ margin: 1 }} size={24} />
+                  <CircularProgress sx={{ margin: 1 }} size={18} />
                 )}
                 {tableList.map((device: Device) => (
                   <Row key={device.id} item={device}>
@@ -677,7 +677,7 @@ const Devices = () => {
                 </IconButton>
               </ButtonTooltip>
             </Typography>
-            <Grid item zeroMinWidth justifyContent="flex-end">
+            <Grid justifyContent="flex-end">
               <ButtonTooltip title={LL.CANCEL()}>
                 <IconButton onClick={resetDeviceSelect}>
                   <HighlightOffIcon color="primary" sx={{ fontSize: 18 }} />

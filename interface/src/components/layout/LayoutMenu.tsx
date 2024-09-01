@@ -138,23 +138,22 @@ const LayoutMenu = () => {
           disabled={!me.admin}
           to="/settings"
         />
-        <LayoutMenuItem icon={LiveHelpIcon} label={LL.HELP_OF('')} to={`/help`} />
+        <LayoutMenuItem icon={LiveHelpIcon} label={LL.HELP()} to={`/help`} />
       </List>
       <Divider />
       <List>
         <ListItem disablePadding onClick={handleClick}>
           <ListItemButton>
-            <ListItemIcon>
+            <ListItemIcon sx={{ color: '#9e9e9e' }}>
               <AccountCircleIcon />
             </ListItemIcon>
-            <ListItemText>{me.username}</ListItemText>
+            <ListItemText sx={{ color: '#2196f3' }}>{me.username}</ListItemText>
           </ListItemButton>
         </ListItem>
       </List>
 
       <Popover
         id={id}
-        // sx={{ mb: 10 }}
         open={open}
         anchorEl={anchorEl}
         onClose={handleClose}
@@ -186,19 +185,17 @@ const LayoutMenu = () => {
           </Button>
           <List>
             <ListItem disablePadding>
-              <Avatar sx={{ bgcolor: '#b1395f', color: 'white' }}>
+              <Avatar sx={{ bgcolor: '#9e9e9e', color: 'white' }}>
                 <PersonIcon />
               </Avatar>
               <ListItemText
-                sx={{ pl: 2 }}
+                sx={{ pl: 2, color: '#2196f3' }}
                 primary={me.username}
                 secondary={'(' + (me.admin ? LL.ADMINISTRATOR() : LL.GUEST()) + ')'}
               />
             </ListItem>
           </List>
-          {/* <Box p={2}> */}
           <LanguageSelector />
-          {/* </Box> */}
         </Box>
       </Popover>
     </>

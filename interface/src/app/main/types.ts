@@ -272,8 +272,8 @@ export interface BoardProfile {
 
 export interface APIcall {
   device: string;
-  entity: string;
-  id: unknown;
+  cmd: string;
+  id: number;
 }
 export interface WriteAnalogSensor {
   id: number;
@@ -420,12 +420,11 @@ export const enum DeviceValueType {
   TIME, // same as UINT24
   UINT32,
   ENUM,
-  STRING,
+  STRING, // RAW
   CMD
 }
 
 export const DeviceValueTypeNames = [
-  //
   'BOOL',
   'INT8',
   'UINT8',

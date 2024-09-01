@@ -16,10 +16,9 @@
 ; my_build_flags = -DEMSESP_DEBUG -DEMSESP_TEST -DEMSESP_PINGTEST
 
 [platformio]
-; default_envs = s_4M
 ; default_envs = s_16M_P ; BBQKees E32V2
-; default_envs = s3_16M ; BBQKees S3
-; default_envs = c3_mini_4M
+; default_envs = s3_16M_P ; BBQKees S3
+default_envs = s_4M ; BBQKees S32
 ; default_envs = native
 ; default_envs = debug
 
@@ -27,11 +26,10 @@
 ; upload settings
 ; for USB
 ; upload_protocol = esptool
-; upload_port = /dev/ttyUSB*
+upload_port = /dev/ttyUSB*
 ; for OTA add scripts/upload.py to extra_scripts
 upload_protocol = custom
-; custom_emsesp_ip = 10.10.10.175
-custom_emsesp_ip = 192.168.1.23
+custom_emsesp_ip = 10.10.10.175
 ; custom_emsesp_ip = ems-esp.local
 custom_username = admin
 custom_password = admin
@@ -45,24 +43,24 @@ extra_scripts =
 ;   pre:scripts/refresh_module_library_native.py
   post:scripts/run_native.py
 
-[env:s3_16M]
-extra_scripts =
-  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
-  scripts/rename_fw.py
-  scripts/upload.py
-
 [env:s_16M_P]
 extra_scripts =
   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
   scripts/upload.py
 
-[env:c3_mini_4M]
+[env:s3_16M_P]
+extra_scripts =
+  ; pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+  scripts/rename_fw.py
+  scripts/upload.py
+
+[env:s_4M]
 extra_scripts =
   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
   scripts/upload.py
-
+  
 ; pio run -e debug
 ; or from Visual Studio Code do PIO -> Project Tasks -> debug -> General -> Upload and Monitor
 ; options for debugging are: EMSESP_DEBUG EMSESP_UART_DEBUG EMSESP_DEBUG_SENSOR

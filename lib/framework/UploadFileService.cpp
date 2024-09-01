@@ -16,7 +16,7 @@ UploadFileService::UploadFileService(AsyncWebServer * server, SecurityManager * 
     : _securityManager(securityManager)
     , _is_firmware(false)
     , _md5() {
-    // end-points
+    // upload a file via a form
     server->on(
         UPLOAD_FILE_PATH,
         HTTP_POST,
@@ -25,6 +25,7 @@ UploadFileService::UploadFileService(AsyncWebServer * server, SecurityManager * 
             handleUpload(request, filename, index, data, len, final);
         });
 
+    // upload from a URL
     server->on(UPLOAD_URL_PATH,
                securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { uploadURL(request, json); },
                                              AuthenticationPredicates::IS_AUTHENTICATED));
@@ -121,20 +122,18 @@ void UploadFileService::uploadComplete(AsyncWebServerRequest * request) {
     // did we just complete uploading a json file?
     if (request->_tempFile) {
         request->_tempFile.close(); // close the file handle as the upload is now done
-        emsesp::EMSESP::system_.store_nvs_values();
-        request->onDisconnect(RestartService::restartNow);
         AsyncWebServerResponse * response = request->beginResponse(200);
         request->send(response);
+        emsesp::EMSESP::system_.restart_pending(true); // will be handled by the main loop. We use pending for the Web's RestartMonitor
         return;
     }
 
     // check if it was a firmware upgrade
     // if no error, send the success response as a JSON
     if (_is_firmware && !request->_tempObject) {
-        emsesp::EMSESP::system_.store_nvs_values();
-        request->onDisconnect(RestartService::restartNow);
         AsyncWebServerResponse * response = request->beginResponse(200);
         request->send(response);
+        emsesp::EMSESP::system_.restart_pending(true); // will be handled by the main loop. We use pending for the Web's RestartMonitor
         return;
     }
 

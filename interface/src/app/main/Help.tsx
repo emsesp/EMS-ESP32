@@ -26,9 +26,9 @@ import type { APIcall } from './types';
 
 const Help = () => {
   const { LL } = useI18nContext();
-  useLayoutTitle(LL.HELP_OF(''));
+  useLayoutTitle(LL.HELP());
 
-  const { send: getAPI } = useRequest((data: APIcall) => API(data), {
+  const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
     immediate: false
   }).onSuccess((event) => {
     const anchor = document.createElement('a');
@@ -45,8 +45,8 @@ const Help = () => {
     toast.info(LL.DOWNLOAD_SUCCESSFUL());
   });
 
-  const callAPI = async (device: string, entity: string) => {
-    await getAPI({ device, entity, id: 0 }).catch((error: Error) => {
+  const callAPI = async (device: string, cmd: string) => {
+    await sendAPI({ device, cmd, id: 0 }).catch((error: Error) => {
       toast.error(error.message);
     });
   };
@@ -113,7 +113,7 @@ const Help = () => {
           color="primary"
           onClick={() => callAPI('system', 'allvalues')}
         >
-          {LL.ALLVALUES(0)}
+          {LL.ALLVALUES()}
         </Button>
 
         <Box border={1} p={1} mt={4}>

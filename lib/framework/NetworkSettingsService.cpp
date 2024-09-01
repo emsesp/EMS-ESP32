@@ -182,7 +182,7 @@ void NetworkSettingsService::setWiFiPowerOnRSSI() {
 
 #ifdef EMSESP_DEBUG
     uint8_t set_power = min_tx_pwr / 10; // this is the recommended power setting to use
-    emsesp::EMSESP::logger().debug("Recommended set WiFi Tx Power (set_power %d, new power %d, rssi %d, threshold %d)", set_power, p, rssi, threshold);
+    emsesp::EMSESP::logger().debug("Recommended WiFi Tx Power (set_power %d, new power %d, rssi %d, threshold %d)", set_power, p, rssi, threshold);
 #endif
 
     if (!WiFi.setTxPower(p)) {
@@ -369,12 +369,12 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) 
     case ARDUINO_EVENT_ETH_GOT_IP6:
 #if !TASMOTA_SDK && ESP_IDF_VERSION_MAJOR < 5
         if (emsesp::EMSESP::system_.ethernet_connected()) {
-            emsesp::EMSESP::logger().info("LocalIPv6 (ETH)=%s", ETH.localIPv6().toString().c_str());
+            emsesp::EMSESP::logger().info("Local IPv6=%s", ETH.localIPv6().toString().c_str());
         } else {
-            emsesp::EMSESP::logger().info("LocalIPv6 (WiFI)=%s", WiFi.localIPv6().toString().c_str());
+            emsesp::EMSESP::logger().info("Local IPv6=%s", WiFi.localIPv6().toString().c_str());
         }
 #else
-        emsesp::EMSESP::logger().info("IPv6=%s", IPAddress(IPv6, (uint8_t *)info.got_ip6.ip6_info.ip.addr, 0).toString().c_str());
+        emsesp::EMSESP::logger().info("Local IPv6=%s", IPAddress(IPv6, (uint8_t *)info.got_ip6.ip6_info.ip.addr, 0).toString().c_str());
 #endif
         emsesp::EMSESP::system_.has_ipv6(true);
         break;

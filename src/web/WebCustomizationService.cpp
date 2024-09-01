@@ -25,24 +25,25 @@ bool WebCustomization::_start = true;
 WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _fsPersistence(WebCustomization::read, WebCustomization::update, this, fs, EMSESP_CUSTOMIZATION_FILE) {
     // GET
-    server->on(DEVICE_ENTITIES_PATH,
+    server->on(EMSESP_DEVICE_ENTITIES_PATH,
                HTTP_GET,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { device_entities(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
-
-    server->on(DEVICES_SERVICE_PATH,
+    server->on(EMSESP_DEVICES_SERVICE_PATH,
                HTTP_GET,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { devices(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
+    server->on(EMSESP_GET_CUSTOMIZATIONS_PATH,
+               HTTP_GET,
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { getCustomizations(request); }, AuthenticationPredicates::IS_ADMIN));
+
 
     // POST
-    server->on(RESET_CUSTOMIZATION_SERVICE_PATH,
+    server->on(EMSESP_RESET_CUSTOMIZATION_SERVICE_PATH,
                HTTP_POST,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { reset_customization(request); }, AuthenticationPredicates::IS_ADMIN));
-
-    server->on(WRITE_DEVICE_NAME_PATH,
+    server->on(EMSESP_WRITE_DEVICE_NAME_PATH,
                securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { writeDeviceName(request, json); },
                                              AuthenticationPredicates::IS_AUTHENTICATED));
-
-    server->on(CUSTOMIZATION_ENTITIES_PATH,
+    server->on(EMSESP_CUSTOMIZATION_ENTITIES_PATH,
                securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { customization_entities(request, json); },
                                              AuthenticationPredicates::IS_AUTHENTICATED));
 }
@@ -155,7 +156,7 @@ void WebCustomizationService::reset_customization(AsyncWebServerRequest * reques
     if (LittleFS.remove(EMSESP_CUSTOMIZATION_FILE)) {
         AsyncWebServerResponse * response = request->beginResponse(205); // restart needed
         request->send(response);
-        EMSESP::system_.restart_requested(true);
+        EMSESP::system_.restart_pending(true);
         return;
     }
 
@@ -423,5 +424,18 @@ void WebCustomizationService::test() {
     EMSESP::analogsensor_.reload(); // this is needed to active the analog sensors
 }
 #endif
+
+// return all customizations in a json object
+void WebCustomizationService::getCustomizations(AsyncWebServerRequest * request) {
+    auto *     response = new AsyncJsonResponse(false);
+    JsonObject root     = response->getRoot();
+
+    root["type"] = "customizations";
+
+    System::extractSettings(EMSESP_CUSTOMIZATION_FILE, "Customizations", root);
+
+    response->setLength();
+    request->send(response);
+}
 
 } // namespace emsesp

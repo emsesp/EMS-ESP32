@@ -32,7 +32,7 @@ function LinearProgressWithLabel(props: LinearProgressProps & { value: number })
   );
 }
 
-const SingleUpload = ({ setRestartNeeded }) => {
+const SingleUpload = ({ doRestart }) => {
   const [md5, setMd5] = useState<string>();
   const [file, setFile] = useState<File>();
   const { LL } = useI18nContext();
@@ -44,19 +44,18 @@ const SingleUpload = ({ setRestartNeeded }) => {
     abort: cancelUpload
   } = useRequest(SystemApi.uploadFile, {
     immediate: false
-  }).onSuccess(({ data }) => {
+  }).onComplete(({ data }) => {
     if (data) {
       setMd5(data.md5 as string);
       toast.success(LL.UPLOAD() + ' MD5 ' + LL.SUCCESSFUL());
       setFile(undefined);
     } else {
-      setRestartNeeded(true);
+      doRestart();
     }
   });
 
   useEffect(async () => {
     if (file) {
-      console.log('going to upload file ', file.name);
       await sendUpload(file).catch((error: Error) => {
         if (error.message === 'The user aborted a request') {
           toast.warning(LL.UPLOAD() + ' ' + LL.ABORTED());
@@ -73,7 +72,7 @@ const SingleUpload = ({ setRestartNeeded }) => {
     <>
       {isUploading ? (
         <>
-          <Box width="100%" p={2}>
+          <Box width="100%" pl={2} pr={2}>
             <LinearProgressWithLabel
               value={
                 progress.total === 0 || progress.loaded === 0
@@ -86,10 +85,10 @@ const SingleUpload = ({ setRestartNeeded }) => {
           </Box>
 
           <Button
-            sx={{ ml: 2 }}
+            sx={{ ml: 2, mt: 2 }}
             startIcon={<CancelIcon />}
             variant="outlined"
-            color="error"
+            color="secondary"
             onClick={cancelUpload}
           >
             {LL.CANCEL()}

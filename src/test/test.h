@@ -59,7 +59,7 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "scheduler"
 // #define EMSESP_DEBUG_DEFAULT "heat_exchange"
 // #define EMSESP_DEBUG_DEFAULT "ls"
-#define EMSESP_DEBUG_DEFAULT "upload"
+// #define EMSESP_DEBUG_DEFAULT "upload"
 
 #ifndef EMSESP_DEBUG_DEFAULT
 #define EMSESP_DEBUG_DEFAULT "general"
