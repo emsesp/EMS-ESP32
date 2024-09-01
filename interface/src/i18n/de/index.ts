@@ -333,14 +333,14 @@ const de: Translation = {
   SERVICES: 'Dienste',
   ALLVALUES: 'Alle Werte',
   SPECIAL_FUNCTIONS: 'Sonderfunktionen',
-  WAIT_FIRMWARE: 'Firmware is uploading and installing', // TODO translate
+  WAIT_FIRMWARE: 'Die Firmware wird hochgeladen und installiert',
   INSTALL_VERSION: 'Dadurch wird die Version installiert {0}. Sind Sie sicher?',
   SWITCH_DEV: 'Wechseln Sie zur Entwicklungsversion',
   UPGRADE_AVAILABLE: 'Es ist ein Firmware-Upgrade verfügbar!',
   LATEST_VERSION: 'Sie verwenden die neueste Version.',
   PLEASE_WAIT: 'Bitte warten',
-  RESTARTING_PRE: 'Initializing', // TODO translate
-  RESTARTING_POST: 'Reloading' // TODO translate
+  RESTARTING_PRE: 'Initialisierung',
+  RESTARTING_POST: 'Neuladen'
 };
 
 export default de;
