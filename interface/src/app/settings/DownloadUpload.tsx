@@ -403,27 +403,29 @@ const DownloadUpload = () => {
             <InfoOutlinedIcon color="secondary" sx={{ verticalAlign: 'middle' }} />
             &nbsp;&nbsp;
             {upgradeAvailable ? LL.UPGRADE_AVAILABLE() : LL.LATEST_VERSION()}
-            {upgradeAvailable && internet_live && data.psram ? (
-              <Button
-                sx={{ ml: 2, textTransform: 'none' }}
-                size="small"
-                variant="outlined"
-                color="primary"
-                onClick={() => showFirmwareDialog(false)}
-              >
-                {isDev
-                  ? LL.INSTALL('v' + latestDevVersion)
-                  : LL.INSTALL('v' + latestVersion)}
-              </Button>
-            ) : (
-              <>
-                &nbsp;&nbsp;
-                <Link target="_blank" href={getBinURL(isDev)} color="primary">
-                  {LL.DOWNLOAD(1)}&nbsp;v
-                  {isDev ? latestDevVersion : latestVersion}
-                </Link>
-              </>
-            )}
+            {upgradeAvailable &&
+              internet_live &&
+              (data.psram ? (
+                <Button
+                  sx={{ ml: 2, textTransform: 'none' }}
+                  size="small"
+                  variant="outlined"
+                  color="primary"
+                  onClick={() => showFirmwareDialog(false)}
+                >
+                  {isDev
+                    ? LL.INSTALL('v' + latestDevVersion)
+                    : LL.INSTALL('v' + latestVersion)}
+                </Button>
+              ) : (
+                <>
+                  &nbsp;&nbsp;
+                  <Link target="_blank" href={getBinURL(isDev)} color="primary">
+                    {LL.DOWNLOAD(1)}&nbsp;v
+                    {isDev ? latestDevVersion : latestVersion}
+                  </Link>
+                </>
+              ))}
           </Typography>
 
           {renderUploadDialog()}
