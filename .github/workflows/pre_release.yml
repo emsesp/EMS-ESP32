@@ -43,7 +43,7 @@ jobs:
           platformio run
       - name: Create GitHub Release
         id: 'automatic_releases'
-        uses: 'marvinpinto/action-automatic-releases@latest'
+        uses: "emsesp/GH-Automatic-Releases@latest"
         with:
           repo_token: '${{ secrets.GITHUB_TOKEN }}'
           title: Development Build v${{steps.build_info.outputs.VERSION}}
