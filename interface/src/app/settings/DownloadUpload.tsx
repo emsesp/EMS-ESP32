@@ -84,7 +84,7 @@ const DownloadUpload = () => {
   }).onSuccess((event) => {
     saveFile(
       event.data,
-      String(event.args[0].device) + '_' + String(event.args[0].entity) + '.txt'
+      String(event.args[0].device) + '_' + String(event.args[0].cmd) + '.txt'
     );
   });
 
