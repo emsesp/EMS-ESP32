@@ -337,7 +337,7 @@ const en: Translation = {
   INSTALL_VERSION: 'This will install vesion {0}. Are you sure?',
   SWITCH_DEV: 'switch to the development version',
   UPGRADE_AVAILABLE: 'There is a firmware upgrade available!',
-  LATEST_VERSION: 'You are using the latest version.',
+  LATEST_VERSION: 'You are using the latest firmware version.',
   PLEASE_WAIT: 'Please wait',
   RESTARTING_PRE: 'Initializing',
   RESTARTING_POST: 'Reloading'

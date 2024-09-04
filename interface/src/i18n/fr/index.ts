@@ -337,7 +337,7 @@ const fr: Translation = {
   INSTALL_VERSION: 'This will install vesion {0}. Are you sure?', // TODO translate
   SWITCH_DEV: 'switch to the development version', // TODO translate
   UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
-  LATEST_VERSION: 'You are using the latest version.', // TODO translate // TODO translate
+  LATEST_VERSION: 'You are using the latest firmware version.', // TODO translate // TODO translate
   PLEASE_WAIT: 'Please wait', // TODO translate
   RESTARTING_PRE: 'Initializing', // TODO translate
   RESTARTING_POST: 'Reloading' // TODO translate
