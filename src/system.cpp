@@ -1226,6 +1226,12 @@ bool System::check_upgrade(bool factory_settings) {
             });
         }
 
+        // force WiFi sleep to off (was default on < 3.7.0-dev-33)
+        EMSESP::esp8266React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
+            networkSettings.nosleep = true;
+            return StateUpdateResult::CHANGED;
+        });
+
         // Network Settings Wifi tx_power is now using the value * 4.
         EMSESP::esp8266React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
             if (networkSettings.tx_power == 20) {

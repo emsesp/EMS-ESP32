@@ -130,8 +130,8 @@ void NetworkSettingsService::setWiFiPowerOnRSSI() {
     // 802.11ac - wifi5
     // 802.11ax - wifi6
 
-    int max_tx_pwr = MAX_TX_PWR_DBM_n;        // assume wifi4
-    int threshold  = WIFI_SENSITIVITY_n + 70; // Margin in dBm * 10 on top of threshold
+    int max_tx_pwr = MAX_TX_PWR_DBM_n;         // assume wifi4
+    int threshold  = WIFI_SENSITIVITY_n + 120; // Margin in dBm * 10 on top of threshold
 
     // Assume AP sends with max set by ETSI standard.
     // 2.4 GHz: 100 mWatt (20 dBm)
@@ -421,10 +421,11 @@ StateUpdateResult NetworkSettings::update(JsonObject root, NetworkSettings & set
     settings.staticIPConfig = root["static_ip_config"] | false;
     settings.bandwidth20    = root["bandwidth20"] | false;
     settings.tx_power       = static_cast<uint8_t>(root["tx_power"] | 0);
-    settings.nosleep        = root["nosleep"] | false;
+    settings.nosleep        = root["nosleep"] | true;
     settings.enableMDNS     = root["enableMDNS"] | true;
     settings.enableCORS     = root["enableCORS"] | false;
     settings.CORSOrigin     = root["CORSOrigin"] | "*";
+
     // extended settings
     JsonUtils::readIP(root, "local_ip", settings.localIP);
     JsonUtils::readIP(root, "gateway_ip", settings.gatewayIP);

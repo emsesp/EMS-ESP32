@@ -383,7 +383,7 @@ ModbusMessage Modbus::handleWrite(const ModbusMessage & request) {
 
     const auto & dev = *dev_it;
 
-    LOG_DEBUG("found device '%s' of type %d", dev->name(), dev->device_type());
+    LOG_DEBUG("found device '%s' of type %d", dev->name().c_str(), dev->device_type());
 
     // binary search in modbus infos
     auto key        = EntityModbusInfoKey(dev->device_type(), tag_type, register_offset);
@@ -512,7 +512,7 @@ int Modbus::getRegisterCount(const DeviceValue & dv) {
                 num_registers = 1;
             else if (num_values <= (1L << 16))
                 num_registers = 2;
-            else if (num_values <= (1L << 32))
+            else if (num_values <= (1L << 32)) // TODO: fix, this will always be true for compilers with 32 bit longs
                 num_registers = 4;
             else
                 LOG_ERROR("num_registers is too big to be encoded with modbus registers");
