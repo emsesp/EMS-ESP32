@@ -994,6 +994,9 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.printfln(" Version: %s", EMSESP_APP_VERSION);
     shell.printfln(" Platform: %s", EMSESP_PLATFORM);
     shell.printfln(" NVS device information: %s", getBBQKeesGatewayDetails().c_str());
+#ifndef EMSESP_STANDALONE
+    shell.printfln(" Boot partition: %s", esp_ota_get_boot_partition()->label);
+#endif
     shell.printfln(" Language: %s", locale().c_str());
     shell.printfln(" Board profile: %s", board_profile().c_str());
     shell.printfln(" Uptime: %s", uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3).c_str());

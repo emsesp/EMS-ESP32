@@ -79,7 +79,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
 }
 
 // /rest/hardwareStatus
-// This is also used for polling
+// This is also used for polling during the RestartMonitor to see if EMS-ESP is alive
 void WebStatusService::hardwareStatus(AsyncWebServerRequest * request) {
     EMSESP::system_.refreshHeapMem(); // refresh free heap and max alloc heap
 
