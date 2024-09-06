@@ -4482,8 +4482,15 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               MAKE_CF_CB(set_tempautotemp),
                               -1,
                               30);
-        register_device_value(tag, &hc->remoteseltemp, DeviceValueType::INT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(remoteseltemp), DeviceValueUOM::DEGREES);
-        // a command is only accepted from the remote device, not from ems-esp.
+        register_device_value(tag,
+                              &hc->remoteseltemp,
+                              DeviceValueType::INT8,
+                              DeviceValueNumOp::DV_NUMOP_DIV2,
+                              FL_(remoteseltemp),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_remoteseltemp),
+                              -1,
+                              30);
         register_device_value(tag, &hc->fastHeatup, DeviceValueType::UINT8, FL_(fastheatup), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_fastheatup));
         register_device_value(tag,
                               &hc->switchonoptimization,
