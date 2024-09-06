@@ -67,17 +67,17 @@ MAKE_WORD_TRANSLATION(setiovalue_cmd, "set io value", "Setze Wertevorgabe", "ins
 MAKE_WORD_TRANSLATION(changeloglevel_cmd, "change log level", "Ändere Sysloglevel", "aanpassen log niveau", "", "zmień poziom log-u", "endre loggnivå", "", "Kayıt seviyesini değiştir", "cambia livello registrazione", "") // TODO translate
 MAKE_WORD_TRANSLATION(fetch_cmd, "refresh all EMS values", "Lese alle EMS-Werte neu", "Verversen alle EMS waardes", "", "odśwież wszystkie wartości EMS", "oppfrisk alle EMS verdier", "", "Bütün EMS değerlerini yenile", "aggiornare tutti i valori EMS", "obnoviť všetky hodnoty EMS") // TODO translate
 MAKE_WORD_TRANSLATION(restart_cmd, "restart EMS-ESP", "Neustart", "opnieuw opstarten", "", "uruchom ponownie EMS-ESP", "restart EMS-ESP", "redémarrer EMS-ESP", "EMS-ESPyi yeniden başlat", "riavvia EMS-ESP", "reštart EMS-ESP") // TODO translate
-MAKE_WORD_TRANSLATION(format_cmd, "factory reset EMS-ESP", "", "", "", "", "", "", "", "", "") // TODO translate
-MAKE_WORD_TRANSLATION(watch_cmd, "watch incoming telegrams", "Watch auf eingehende Telegramme", "inkomende telegrammen bekijken", "", "obserwuj przyczodzące telegramy", "se innkommende telegrammer", "", "Gelen telegramları", "guardare i telegrammi in arrivo", "sledovať prichádzajúce telegramy") // TODO translate
+MAKE_WORD_TRANSLATION(format_cmd, "factory reset EMS-ESP", "EMS-ESP auf Werkseinstellungen zurücksetzen", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_WORD_TRANSLATION(watch_cmd, "watch incoming telegrams", "Beobachte eingehende Telegramme", "inkomende telegrammen bekijken", "", "obserwuj przyczodzące telegramy", "se innkommende telegrammer", "", "Gelen telegramları", "guardare i telegrammi in arrivo", "sledovať prichádzajúce telegramy") // TODO translate
 MAKE_WORD_TRANSLATION(publish_cmd, "publish all to MQTT", "Publiziere MQTT", "publiceer alles naar MQTT", "", "opublikuj wszystko na MQTT", "Publiser alt til MQTT", "", "Hepsini MQTTye gönder", "pubblica tutto su MQTT", "zverejniť všetko na MQTT") // TODO translate
 MAKE_WORD_TRANSLATION(system_info_cmd, "show system info", "Zeige System-Status", "toon systeemstatus", "", "pokaż status systemu", "vis system status", "", "Sistem Durumunu Göster", "visualizza stati di sistema", "zobraziť stav systému") // TODO translate
 MAKE_WORD_TRANSLATION(schedule_cmd, "enable schedule item", "Aktiviere Zeitplan", "activeer tijdschema item", "", "aktywuj wybrany harmonogram", "", "", "program öğesini etkinleştir", "abilitare l'elemento programmato", "povoliť položku plánu") // TODO translate
 MAKE_WORD_TRANSLATION(entity_cmd, "set custom value on ems", "Sende eigene Entitäten zu EMS", "verstuur custom waarde naar EMS", "", "wyślij własną wartość na EMS", "", "", "emp üzerinde özel değer ayarla", "imposta valori personalizzati su EMS", "nastaviť vlastnú hodnotu na ems") // TODO translate
 MAKE_WORD_TRANSLATION(commands_response, "get response", "Hole Antwort", "Verzoek om antwoord", "", "uzyskaj odpowiedź", "", "", "gelen cevap", "", "získať odpoveď") // TODO translate
-MAKE_WORD_TRANSLATION(coldshot_cmd, "send a cold shot of water", "", "", "", "uruchom tryśnięcie zimnej wody", "", "", "soğuk su gönder", "", "pošlite studenú dávku vody") // TODO translate
-MAKE_WORD_TRANSLATION(allvalues_cmd, "output all values in system", "", "", "", "wyświetl wszystkie wartości", "", "", "", "", "vypísať všetky hodnoty") // TODO translate
-MAKE_WORD_TRANSLATION(message_cmd, "send a message", "", "", "", "", "", "", "", "", "") // TODO translate
-MAKE_WORD_TRANSLATION(values_cmd, "list all values", "", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_WORD_TRANSLATION(coldshot_cmd, "send a cold shot of water", "Schicke einen kalten Schuss Wasser", "", "", "uruchom tryśnięcie zimnej wody", "", "", "soğuk su gönder", "", "pošlite studenú dávku vody") // TODO translate
+MAKE_WORD_TRANSLATION(allvalues_cmd, "output all values in system", "Alle Werte im System ausgeben", "", "", "wyświetl wszystkie wartości", "", "", "", "", "vypísať všetky hodnoty") // TODO translate
+MAKE_WORD_TRANSLATION(message_cmd, "send a message", "Eine Nachricht senden", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_WORD_TRANSLATION(values_cmd, "list all values", "Liste alle Werte auf", "", "", "", "", "", "", "", "") // TODO translate
 
 // tags
 MAKE_WORD_TRANSLATION(tag_hc1, "hc1", "HK1", "hc1", "VK1", "OG1", "hc1", "hc1", "ID1", "hc1", "hc1")
@@ -191,7 +191,7 @@ MAKE_WORD_TRANSLATION(layeredbuffer, "layered buffer", "Schichtspeicher", "gelaa
 MAKE_WORD_TRANSLATION(maintenance, "maintenance", "Wartung", "onderhoud", "Underhåll", "przegląd", "vedlikehold", "maintenance", "bakım", "servizio", "údržba")
 MAKE_WORD_TRANSLATION(heating, "heating", "Heizen", "verwarmen", "Uppvärmning", "ogrzewanie", "oppvarming", "chauffage", "ısıtma", "riscaldamento", "kúrenie")
 MAKE_WORD_TRANSLATION(cooling, "cooling", "Kühlen", "koelen", "Kyler", "chłodzenie", "kjøling", "refroidissement", "soğuma", "raffreddamento", "chladenie")
-MAKE_WORD_TRANSLATION(heatandcool, "heating&cooling", "Heizen&Kühlen", "verwarmen&koelen", "Uppvärmning&Kyler", "ogrzewanie i chłodzenie", "", "", "ısıtma&soğutma", "", "kúrenie a chladenie") // TODO translate
+MAKE_WORD_TRANSLATION(heatandcool, "heating & cooling", "Heizen & Kühlen", "verwarmen & koelen", "Uppvärmning & Kyler", "ogrzewanie i chłodzenie", "", "", "ısıtma & soğutma", "", "kúrenie a chladenie") // TODO translate
 MAKE_WORD_TRANSLATION(disinfecting, "disinfecting", "Desinfizieren", "desinfecteren", "Desinficerar", "dezynfekcja termiczna", "desinfisering", "désinfection", "dezenfeksiyon", "disinfezione", "dezinfekcia")
 MAKE_WORD_TRANSLATION(no_heat, "no heat", "keine Wärme", "geen warmte", "Ingen värme", "brak ciepła", "ingen varme", "pas de chauffage", "ısınma yok", "nessun calore", "žiadne teplo")
 MAKE_WORD_TRANSLATION(heatrequest, "heat request", "Wärmeanforderung", "verwarmingsverzoek", "Värmeförfrågan", "zapotrzebowanie na ciepło", "varmeforespørsel", "demande de chauffage", "ısınma ihtiyacı", "richiesta calore", "požiadavka na teplo")
@@ -397,7 +397,7 @@ MAKE_TRANSLATION(auxElecHeatNrgConsWw, "auxelecheatnrgcons", "aux elec. heater e
 MAKE_TRANSLATION(auxElecHeatNrgConsPool, "auxelecheatnrgconspool", "aux elec. heater energy consumption pool", "Energieverbrauch el. Zusatzheizung Pool", "Energieverbruik electrisch verwarmingselement voor zwembadbedrijf", "Energiförbrukning Eltillskott Pool", "energia pobrana przez grzałki na podgrzewanie basenu", "energiforbruk el. tilleggsvarme basseng", "consommation énergie electrique auxiliaire chauffage piscine", "ilave elektrikli ısıtıcı havuz toplam enerji tüketimi", "consumo di energia riscaldamento elettrico ausiliario piscina", "bazén spotreby energie pomocného elektrického ohrievača")
 
 MAKE_TRANSLATION(hpCompOn, "hpcompon", "hp compressor", "WP Kompressor", "WP compressor", "VP Kompressor", "sprężarka pompy ciepła", "vp kompressor", "compresseur pompe à chaleur", "hp ısı pompası", "compressore pompa calore", "hp kompresor")
-MAKE_TRANSLATION(coolingOn, "coolingon", "cooling", "Kühlen", "koelbedrijf", "Kyla", "chłodzenie włączone", "kjøling", "refroidissement", "soğutma", "", "chladenie") // TODO translate
+MAKE_TRANSLATION(coolingOn, "coolingon", "cooling on", "Kühlung an", "koelbedrijf", "Kyla", "chłodzenie włączone", "kjøling", "refroidissement", "soğutma", "", "chladenie") // TODO translate
 // MAKE_TRANSLATION(hpHeatingOn, "hpheatingon", "hp heating", "WP Heizen", "WP verwarmingsbedrijf", "VP Uppvärmning", "pompa ciepła, ogrzewanie", "vp oppvarmning", "", "hp ısınıyor", "riscaldamento pompa calore", "vykurovanie hp") // TODO translate
 // MAKE_TRANSLATION(hpCoolingOn, "hpcoolingon", "hp cooling", "WP Kühlen", "WP koelbedrijf", "VP Kyla", "pompa ciepła, chłodzenie", "vp kjøling", "", "hp soğuyor", "raffreddamento pompa calore", "chladenie hp") // TODO translate
 // MAKE_TRANSLATION(hpWwOn, "hpdhwon", "hp", "WP", "WP", "VP", "pompa ciepła", "vp", "pompe à chaleur", "hp", "pompa calore", "hp")
@@ -486,7 +486,7 @@ MAKE_TRANSLATION(wwAltOpPrioWw, "altopprio", "prioritise dhw during heating", "b
 MAKE_TRANSLATION(hpEA0, "hpea0", "condensate reservoir heating (EA0)", "Heizung Kondensatwanne (EA0)", "", "", "ogrzewanie zbiornika kondensatu (EA0)", "", "", "", "", "ohrievanie zásobníka kondenzátu (EA0)") // TODO translate
 MAKE_TRANSLATION(boost, "boost", "boost mode", "Boost", "", "", "tryb wzmocnienia (boost)", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(boosttime, "boosttime", "boost time", "Boost Dauer", "", "", "czas trwania wzmocnienia", "", "", "", "", "") // TODO translate
-MAKE_TRANSLATION(hpPumpMode, "hppumpmode", "primary heatpump mode", "Modus Hauptpumpe", "", "", "tryb pracy głównej pompy ciepła", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(hpPumpMode, "hppumpmode", "primary heatpump mode", "primärer Wärmepumpenmodus", "", "", "tryb pracy głównej pompy ciepła", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(instantstart, "instantstart", "instant start", "Sofortstart", "", "", "natychmiastowy start", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(heatondelay, "heatondelay", "heat-on delay", "Einschaltverzögerung Heizen", "", "", "opóźnienie włączania ogrzewania", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(heatoffdelay, "heatoffdelay", "heat-off delay", "Ausschaltverzögerung Heizen", "", "", "opóźnienie włączania ogrzewania", "", "", "", "", "") // TODO translate
@@ -566,8 +566,8 @@ MAKE_TRANSLATION(meterEHeat, "metereheat", "meter e-heater", "Messung E-Heizer",
 MAKE_TRANSLATION(meterHeat, "meterheat", "meter heating", "Messung Heizen", "", "", "licznik ogrzewania", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(meterCool, "metercool", "meter cooling", "Messung Kühlen", "", "", "", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(meterWw, "meter", "meter", "Messung", "", "", "licznik", "", "", "", "", "") // TODO translate
-MAKE_TRANSLATION(gasMeterHeat, "gasmeterheat", "gas meter heating", "Gas Messung Heizen", "", "", "licznik gazu na ogrzewanie", "", "", "", "", "") // TODO translate
-MAKE_TRANSLATION(gasMeterWw, "gasmeter", "gas meter", "Gas Messung", "", "", "licznik gazu", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(gasMeterHeat, "gasmeterheat", "gas meter heating", "Gaszähler Heizen", "", "", "licznik gazu na ogrzewanie", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(gasMeterWw, "gasmeter", "gas meter", "Gaszähler", "", "", "licznik gazu", "", "", "", "", "") // TODO translate
 
 // HIU
 MAKE_TRANSLATION(netFlowTemp, "netflowtemp", "heat network flow temp", "System Vorlauftemperatur", "Netto aanvoertemperatuur", "", "temp. zasilania sieci cieplnej", "", "", "ısıtma şebekesi akış derecesi", "temperatura di mandata della rete di riscaldamento", "teplota prívodu tepelnej siete") // TODO translate
@@ -627,7 +627,7 @@ MAKE_TRANSLATION(switchtime2, "switchtime2", "own2 program switchtime", "Program
 MAKE_TRANSLATION(wwswitchtime, "switchtime", "program switchtime", "Programm Schaltzeit", "Warm water programma schakeltijd", "Varmvattenprogram Bytestid", "program czasowy", "byttetid varmtvannsprogram", "heure commutation programme", "sıcak kullanıom suyu program değiştirme süresi", "Tempo di commutazione del programma", "čas prepnutia programu")
 MAKE_TRANSLATION(wwcircswitchtime, "circswitchtime", "circulation program switchtime", "Zirculationsprogramm Schaltzeit", "Schakeltijd circulatieprogramma", "Cirkulationsprogram Bytestid", "program cyrkulacji", "byttetid sirkulasjonsprogram", "heure commutation programme circulation", "sirkülasyon program değiştirme süresi", "ora commutazione programma circolazione", "čas prepnutia cirkulačného programu")
 MAKE_TRANSLATION(dateTime, "datetime", "date/time", "Datum/Zeit", "Datum/Tijd", "Datum/Tid", "data i godzina", "dato/tid", "date/heure", "zaman/saat", "Data/Ora", "dátum/čas")
-MAKE_TRANSLATION(errorCode, "errorcode", "error code", "Fehlernummer", "Foutmeldingscode", "Felkod", "kod błędu", "feikode", "code erreur", "hata kodu", "codice errore", "error kód")
+MAKE_TRANSLATION(errorCode, "errorcode", "error code", "Fehlercode", "Foutmeldingscode", "Felkod", "kod błędu", "feikode", "code erreur", "hata kodu", "codice errore", "error kód")
 MAKE_TRANSLATION(ibaMainDisplay, "display", "display", "Anzeige", "Display", "Display", "wyświetlacz", "skjerm", "affichage", "ekran", "Display", "display")
 MAKE_TRANSLATION(ibaLanguage, "language", "language", "Sprache", "Taal", "Sprak", "język", "språk", "langue", "dil", "Lingua", "jazyk")
 MAKE_TRANSLATION(ibaClockOffset, "clockoffset", "clock offset", "Uhrkorrektur", "Klokcorrectie", "Tidskorrigering", "korekta zegara", "tidskorrigering", "offset horloge", "saat farkı", "correzione orario", "korekcia času")
@@ -737,7 +737,7 @@ MAKE_TRANSLATION(hpmode, "hpmode", "HP Mode", "WP Modus", "Modus warmtepomp", ""
 MAKE_TRANSLATION(dewoffset, "dewoffset", "dew point offset", "Taupunkt Differenz", "Offset dauwpunt", "", "przesunięcie punktu rosy", "", "", "çiğ noktası göreli", "differenza del punto di rugiada", "posun rosného bodu") // TODO translate
 MAKE_TRANSLATION(roomtempdiff, "roomtempdiff", "room temp difference", "Raumtemperatur Differenz", "Verschiltemperatuur kamertemp", "", "różnica temp. pomieszczenia", "", "", "oda sıcaklığı farkı", "differenza temperatura ambiente", "rozdiel izbovej teploty") // TODO translate
 MAKE_TRANSLATION(hpminflowtemp, "hpminflowtemp", "HP min. flow temp.", "WP minimale Vorlauftemperatur", "Minimale aanvoertemperatuur WP", "", "pompa ciepła, min. temperatura przepływu", "", "", "yüksek güç minimum akış sıcaklığı", "temperatura minima di mandata", "VT min. teplota prietoku.") // TODO translate
-MAKE_TRANSLATION(hpcooling, "cooling", "cooling", "Kühlen", "Koelen", "Kyler", "chłodzenie", "kjøling", "refroidissement", "soğuma", "raffreddamento", "chladenie")
+MAKE_TRANSLATION(hpcooling, "hpcooling", "hp cooling", "WP Kühlen", "WP koelbedrijf", "VP Kyla", "pompa ciepła, chłodzenie", "vp kjøling", "refroidissement", "hp soğuyor", "raffreddamento pompa calore", "chladenie hp")
 MAKE_TRANSLATION(coolstart, "coolstart", "cooling starttemp", "Kühlbetrieb ab") // TODO translate
 MAKE_TRANSLATION(coolondelay, "coolondelay", "cooling on delay", "Einschaltverzögerung Kühlen") // TODO translate
 MAKE_TRANSLATION(cooloffdelay, "cooloffdelay", "cooling off delay", "Ausschaltverzögerung Kühlen") // TODO translate
@@ -834,8 +834,8 @@ MAKE_TRANSLATION(heatMetering, "heatmetering", "heatmetering", "Wärmemessung", 
 MAKE_TRANSLATION(solarIsEnabled, "solarenabled", "solarmodule enabled", "Solarmodul aktiviert", "Solarmodule geactiveerd", "Solmodul Aktiverad", "system solarny", "solmodul aktivert", "module solaire activé", "güneş modu etkinleştirildi", "modulo solare attivato", "solárny modul povolený")
 
 // telegram 0x035A
-MAKE_TRANSLATION(solarPumpMode, "solarpumpmode", "pump mode", "Solar Pumpen Einst.", "Modus zonneboilerpomp", "Sol Pumpläge", "tryb pracy pompy", "solpumpemodus", "mode pompe solaire", "pompa modu", "modalità pompa solare", "režim čerpadla")
-MAKE_TRANSLATION(solarPumpKick, "pumpkick", "pump kick", "Röhrenkollektorfunktion", "Modus buizencollector", "Sol Kollektorfunktion", "wspomaganie startu pompy", "solkllektorfunksjon", "démarrage boost pompe solaire", "pompa zorunlu çalıştırma", "avvio forzato pompa", "kopnutie pumpy")
+MAKE_TRANSLATION(solarPumpMode, "solarpumpmode", "solar pump mode", "Solarpumpen-Einst.", "Modus zonneboilerpomp", "Sol Pumpläge", "tryb pracy pompy", "solpumpemodus", "mode pompe solaire", "pompa modu", "modalità pompa solare", "režim čerpadla")
+MAKE_TRANSLATION(solarPumpKick, "solarpumpkick", "solar pump kick", "Röhrenkollektorfunktion", "Modus buizencollector", "Sol Kollektorfunktion", "wspomaganie startu pompy", "solkllektorfunksjon", "démarrage boost pompe solaire", "pompa zorunlu çalıştırma", "avvio forzato pompa", "kopnutie pumpy")
 MAKE_TRANSLATION(plainWaterMode, "plainwatermode", "plain water mode", "Südeuropafunktion", "Modus Zuid-Europa", "Sydeuropa-funktion", "tylko woda (dla Europy Południowej)", "vanlig vannmodus", "mode eau ordinaire", "sadece su modu", "modalità acqua normale", "režim čistej vody")
 MAKE_TRANSLATION(doubleMatchFlow, "doublematchflow", "doublematchflow", "Double Match Flow", "Double Match Flow", "Dubbelmatchning Flöde", "przepływ podwójnie dopasowany", "dobbelmatch flow", "double match flow", "doublematch akışı", "carico ottimizzato dell'accumulatore ad effetto termosifone", "Tok dvojitej zhody")
 MAKE_TRANSLATION(solarPump2Mode, "pump2mode", "pump 2 mode", "Pumpe 2 Modus", "Modus pomp 2", "Pump 2 Läge", "tryb pracy pompy 2", "pump 2 modus", "mode pompe 2", "pompa 2 modu", "modalità pompa 2", "režim čerpadla 2")
