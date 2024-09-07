@@ -109,7 +109,7 @@ void WebStatusService::hardwareStatus(AsyncWebServerRequest * request) {
     root["free_heap"]        = EMSESP::system_.getHeapMem();
     root["arduino_version"]  = ARDUINO_VERSION;
     root["sdk_version"]      = ESP.getSdkVersion();
-    root["partition"]        = esp_ota_get_running_partition()->label;
+    root["partition"]        = esp_ota_get_running_partition()->label; // active partition
     root["flash_chip_size"]  = ESP.getFlashChipSize() / 1024;
     root["flash_chip_speed"] = ESP.getFlashChipSpeed();
     root["app_used"]         = EMSESP::system_.appUsed();

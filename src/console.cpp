@@ -79,13 +79,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
                           string_vector{F_(show), F_(system)},
-                          [=](Shell & shell, const std::vector<std::string> & arguments) {
-                              shell.println();
-                              shell.printfln("%s%sEMS-ESP version %s%s", COLOR_BRIGHT_GREEN, COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_RESET);
-                              shell.println();
-                              to_app(shell).system_.show_system(shell);
-                              shell.println();
-                          });
+                          [=](Shell & shell, const std::vector<std::string> & arguments) { to_app(shell).system_.show_system(shell); });
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::ADMIN,
