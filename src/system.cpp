@@ -994,9 +994,9 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.println();
     shell.println("System:");
     shell.printfln(" Version: %s", EMSESP_APP_VERSION);
+#ifndef EMSESP_STANDALONE
     shell.printfln(" Platform: %s (%s)", EMSESP_PLATFORM, ESP.getChipModel());
     shell.printfln(" Model: %s", getBBQKeesGatewayDetails().c_str());
-#ifndef EMSESP_STANDALONE
     shell.printfln(" Partition Boot/Running: %s/%s", esp_ota_get_boot_partition()->label, esp_ota_get_running_partition()->label);
 #endif
     shell.printfln(" Language: %s", locale().c_str());
@@ -1437,12 +1437,14 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
                                    + esp_ota_get_running_partition()->label; // will sycle app0/app0 - app1/app1 after OTA. boot/factory is on first install.
 #endif
     node["resetReason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
-    node["psram"]       = (EMSESP::system_.PSram() > 0); // boolean
+#ifndef EMSESP_STANDALONE
+    node["psram"] = (EMSESP::system_.PSram() > 0); // boolean
     if (EMSESP::system_.PSram()) {
         node["psramSize"] = EMSESP::system_.PSram();
         node["freePsram"] = ESP.getFreePsram() / 1024;
     }
     node["model"] = EMSESP::system_.getBBQKeesGatewayDetails();
+#endif
 
     // Network Status
     node = output["network"].to<JsonObject>();
