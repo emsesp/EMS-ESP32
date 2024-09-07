@@ -79,7 +79,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
 }
 
 // /rest/hardwareStatus
-// This is also used for polling
+// This is also used for polling during the RestartMonitor to see if EMS-ESP is alive
 void WebStatusService::hardwareStatus(AsyncWebServerRequest * request) {
     EMSESP::system_.refreshHeapMem(); // refresh free heap and max alloc heap
 
@@ -109,7 +109,7 @@ void WebStatusService::hardwareStatus(AsyncWebServerRequest * request) {
     root["free_heap"]        = EMSESP::system_.getHeapMem();
     root["arduino_version"]  = ARDUINO_VERSION;
     root["sdk_version"]      = ESP.getSdkVersion();
-    root["partition"]        = esp_ota_get_running_partition()->label;
+    root["partition"]        = esp_ota_get_running_partition()->label; // active partition
     root["flash_chip_size"]  = ESP.getFlashChipSize() / 1024;
     root["flash_chip_speed"] = ESP.getFlashChipSpeed();
     root["app_used"]         = EMSESP::system_.appUsed();

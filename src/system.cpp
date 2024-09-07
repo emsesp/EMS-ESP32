@@ -300,7 +300,7 @@ void System::system_restart(const char * partitionname) {
         if (partition && strcmp(partition->label, partitionname) == 0) {
             esp_ota_set_boot_partition(partition);
         } else
-            // try and find the parition by name
+            // try and find the partition by name
             if (strcmp(esp_ota_get_running_partition()->label, partitionname) != 0) {
                 partition = esp_ota_get_next_update_partition(nullptr);
                 if (!partition) {
@@ -525,8 +525,8 @@ void System::button_OnDblClick(PButton & b) {
 
 // button long press
 void System::button_OnLongPress(PButton & b) {
-    LOG_NOTICE("Button pressed - long press - restart other partition");
-    EMSESP::system_.system_restart("boot");
+    LOG_NOTICE("Button pressed - long press - restart from factory/boot partition");
+    EMSESP::system_.system_restart("boot"); // this is default when first installed. it may contain the bootloader code.
 }
 
 // button indefinite press - do nothing for now
@@ -987,13 +987,18 @@ void System::show_users(uuid::console::Shell & shell) {
     shell.println();
 }
 
+// shell command 'show system'
 void System::show_system(uuid::console::Shell & shell) {
     refreshHeapMem(); // refresh free heap and max alloc heap
 
+    shell.println();
     shell.println("System:");
     shell.printfln(" Version: %s", EMSESP_APP_VERSION);
-    shell.printfln(" Platform: %s", EMSESP_PLATFORM);
-    shell.printfln(" NVS device information: %s", getBBQKeesGatewayDetails().c_str());
+    shell.printfln(" Platform: %s (%s)", EMSESP_PLATFORM, ESP.getChipModel());
+    shell.printfln(" Model: %s", getBBQKeesGatewayDetails().c_str());
+#ifndef EMSESP_STANDALONE
+    shell.printfln(" Partition Boot/Running: %s/%s", esp_ota_get_boot_partition()->label, esp_ota_get_running_partition()->label);
+#endif
     shell.printfln(" Language: %s", locale().c_str());
     shell.printfln(" Board profile: %s", board_profile().c_str());
     shell.printfln(" Uptime: %s", uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3).c_str());
@@ -1010,8 +1015,11 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.printfln(" App used/free: %lu KB / %lu KB", appUsed(), appFree());
     uint32_t FSused = LittleFS.usedBytes() / 1024;
     shell.printfln(" FS used/free: %lu KB / %lu KB", FSused, FStotal() - FSused);
-    shell.println();
+    if (PSram()) {
+        shell.printfln(" PSRAM size/free: %lu KB / %lu KB", PSram(), ESP.getFreePsram() / 1024);
+    }
 
+    shell.println();
     shell.println("Network:");
 
     // show ethernet mac address if we have an eth controller present
@@ -1112,6 +1120,8 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.printfln(F_(mark_interval_fmt), syslog_mark_interval_);
         shell.printfln(" Queued: %d", syslog_.queued());
     }
+
+    shell.println();
 
 #endif
 }
@@ -1414,17 +1424,25 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["uptime"]    = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     node["uptimeSec"] = uuid::get_uptime_sec();
 #ifndef EMSESP_STANDALONE
-    node["platform"]  = EMSESP_PLATFORM;
-    node["arduino"]   = ARDUINO_VERSION;
-    node["sdk"]       = ESP.getSdkVersion();
-    node["freeMem"]   = getHeapMem();
-    node["maxAlloc"]  = getMaxAllocMem();
-    node["freeCaps"]  = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024; // includes heap and psram
-    node["usedApp"]   = EMSESP::system_.appUsed();                       // kilobytes
-    node["freeApp"]   = EMSESP::system_.appFree();                       // kilobytes
-    node["partition"] = esp_ota_get_running_partition()->label;
+    node["platform"]             = EMSESP_PLATFORM;
+    node["cpuType"]              = ESP.getChipModel();
+    node["arduino"]              = ARDUINO_VERSION;
+    node["sdk"]                  = ESP.getSdkVersion();
+    node["freeMem"]              = getHeapMem();
+    node["maxAlloc"]             = getMaxAllocMem();
+    node["freeCaps"]             = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024; // includes heap and psram
+    node["usedApp"]              = EMSESP::system_.appUsed();                       // kilobytes
+    node["freeApp"]              = EMSESP::system_.appFree();                       // kilobytes
+    node["partitionBootRunning"] = std::string(esp_ota_get_boot_partition()->label) + "/"
+                                   + esp_ota_get_running_partition()->label; // will sycle app0/app0 - app1/app1 after OTA. boot/factory is on first install.
 #endif
     node["resetReason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
+    node["psram"]       = (EMSESP::system_.PSram() > 0); // boolean
+    if (EMSESP::system_.PSram()) {
+        node["psramSize"] = EMSESP::system_.PSram();
+        node["freePsram"] = ESP.getFreePsram() / 1024;
+    }
+    node["model"] = EMSESP::system_.getBBQKeesGatewayDetails();
 
     // Network Status
     node = output["network"].to<JsonObject>();
@@ -1635,7 +1653,8 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
 #else
         node["webLogBuffer"] = EMSESP::webLogService.num_log_messages();
 #endif
-        node["modbusEnabled"] = settings.modbus_enabled;
+        node["modbusEnabled"]   = settings.modbus_enabled;
+        node["forceHeatingOff"] = settings.boiler_heatingoff;
     });
 
     // Devices - show EMS devices if we have any

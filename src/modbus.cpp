@@ -512,7 +512,7 @@ int Modbus::getRegisterCount(const DeviceValue & dv) {
                 num_registers = 1;
             else if (num_values <= (1L << 16))
                 num_registers = 2;
-            else if (num_values <= (1L << 32)) // TODO: fix, this will always be true for compilers with 32 bit longs
+            else if (num_values <= (1L << 32))
                 num_registers = 4;
             else
                 LOG_ERROR("num_registers is too big to be encoded with modbus registers");

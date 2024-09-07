@@ -1614,7 +1614,7 @@ void EMSESP::start() {
     device_library_ = {
 #include "device_library.h"
     };
-    LOG_INFO("Loaded EMS device library (%d)", device_library_.size());
+    LOG_INFO("Loaded EMS device library (%d entries)", device_library_.size());
 
     system_.reload_settings(); // ... and store some of the settings locally
 
