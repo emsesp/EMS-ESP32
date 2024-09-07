@@ -1,13 +1,14 @@
 
 # Modified from https://github.com/ayushsharma82/ElegantOTA
 #
-# Requires Python (sudo apt install python3-pip)
-#  `python3 -m venv venv` to create the virtual environment
-#  `source ./venv/bin/activate` to enter it
-#  `pip install -r requirements.txt` to install the libraries
+# Requires Python (sudo apt install python3-pip) and then create a virtual environment:
+#  cd scripts
+#  python3 -m venv venv
+#  source ./venv/bin/activate
+#  pip install -r requirements.txt
 #
 # Run using for example:
-#   python3 upload_cli.py -i 10.10.10.173 -f ../build/firmware/EMS-ESP-3_7_0-dev_8-ESP32_4M.bin
+#  python3 upload_cli.py -i 10.10.10.175 -f ../build/firmware/EMS-ESP-3_7_0-dev_34-ESP32S3-16MB+.bin
 
 import argparse
 import requests
@@ -104,7 +105,22 @@ def upload(file, ip, username, password):
         if response.status_code != 200:
             print_fail("Upload failed (code " + response.status.code + ").")
         else:
-            print_success("Upload successful.")
+            print_success("Upload successful. Rebooting device.")
+            restart_headers = {
+                'Host': host_ip,
+                'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/118.0',
+                'Accept': '*/*',
+                'Accept-Language': 'de,en-US;q=0.7,en;q=0.3',
+                'Accept-Encoding': 'gzip, deflate',
+                'Referer': f'{emsesp_url}',
+                'Content-Type': 'application/json',
+                'Connection': 'keep-alive',
+                'Authorization': 'Bearer ' + f'{access_token}'
+            }
+            restart_url = f"{emsesp_url}/api/system/restart"
+            response = requests.get(restart_url, headers=restart_headers)
+            if response.status_code != 200:
+                print_fail("Restart failed (code " + str(response.status_code) + ")")
 
         print()
 
