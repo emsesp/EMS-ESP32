@@ -361,8 +361,14 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     EMSESP::system_.bool_dashboard(settings.bool_dashboard);
 
     settings.weblog_level   = root["weblog_level"] | EMSESP_DEFAULT_WEBLOG_LEVEL;
-    settings.weblog_buffer  = root["weblog_buffer"] | EMSESP_DEFAULT_WEBLOG_BUFFER;
     settings.weblog_compact = root["weblog_compact"] | EMSESP_DEFAULT_WEBLOG_COMPACT;
+
+    // if no psram limit weblog buffer to 25 messages
+    if (EMSESP::system_.PSram() > 0) {
+        settings.weblog_buffer = root["weblog_buffer"] | EMSESP_DEFAULT_WEBLOG_BUFFER;
+    } else {
+        settings.weblog_buffer = root["weblog_buffer"] | 25;
+    }
 
     // save the settings
     if (get_flags() == WebSettings::ChangeFlags::RESTART) {

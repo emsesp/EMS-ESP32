@@ -75,12 +75,15 @@ size_t WebLogService::maximum_log_messages() const {
 
 void WebLogService::maximum_log_messages(size_t count) {
     maximum_log_messages_ = std::max((size_t)1, count);
+
     if (limit_log_messages_ > maximum_log_messages_) {
         limit_log_messages_ = maximum_log_messages_;
     }
+
     while (log_messages_.size() > maximum_log_messages_) {
         log_messages_.pop_front();
     }
+
     EMSESP::webSettingsService.update([&](WebSettings & settings) {
         settings.weblog_buffer = count;
         return StateUpdateResult::CHANGED;
@@ -200,7 +203,7 @@ void WebLogService::fetchLog(AsyncWebServerRequest * request) {
     request->send(200);
 }
 
-// sets the values like level after a POST
+// sets the values after a POST
 void WebLogService::getSetValues(AsyncWebServerRequest * request, JsonVariant json) {
     if ((request->method() == HTTP_GET) || (!json.is<JsonObject>())) {
         // GET - return the values
@@ -209,12 +212,13 @@ void WebLogService::getSetValues(AsyncWebServerRequest * request, JsonVariant js
         root["level"]        = log_level();
         root["max_messages"] = maximum_log_messages();
         root["compact"]      = compact();
+        root["psram"]        = (EMSESP::system_.PSram() > 0);
+
         response->setLength();
         request->send(response);
         return;
     }
 
-    // POST - write the settings
     auto && body = json.as<JsonObject>();
 
     uuid::log::Level level = body["level"];
