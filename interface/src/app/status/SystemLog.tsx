@@ -6,8 +6,12 @@ import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Checkbox, MenuItem, TextField, styled } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 
-import * as SystemApi from 'api/system';
-import { fetchLogES } from 'api/system';
+import {
+  fetchLog,
+  fetchLogES,
+  readLogSettings,
+  updateLogSettings
+} from 'api/system';
 
 import { useRequest, useSSE } from 'alova/client';
 import {
@@ -77,8 +81,8 @@ const SystemLog = () => {
     saveData,
     errorMessage
   } = useRest<LogSettings>({
-    read: SystemApi.readLogSettings,
-    update: SystemApi.updateLogSettings
+    read: readLogSettings,
+    update: updateLogSettings
   });
 
   const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
@@ -112,7 +116,7 @@ const SystemLog = () => {
   });
 
   // called on page load to reset pointer and fetch all log entries
-  useRequest(SystemApi.fetchLog());
+  useRequest(fetchLog());
 
   const paddedLevelLabel = (level: LogLevel) => {
     const label = levelLabel(level);
@@ -188,23 +192,25 @@ const SystemLog = () => {
               <MenuItem value={9}>ALL</MenuItem>
             </TextField>
           </Grid>
-          <Grid size={2}>
-            <TextField
-              name="max_messages"
-              label={LL.BUFFER_SIZE()}
-              value={data.max_messages}
-              fullWidth
-              variant="outlined"
-              onChange={updateFormValue}
-              margin="normal"
-              select
-            >
-              <MenuItem value={25}>25</MenuItem>
-              <MenuItem value={50}>50</MenuItem>
-              <MenuItem value={75}>75</MenuItem>
-              <MenuItem value={100}>100</MenuItem>
-            </TextField>
-          </Grid>
+          {data.psram && (
+            <Grid size={2}>
+              <TextField
+                name="max_messages"
+                label={LL.BUFFER_SIZE()}
+                value={data.max_messages}
+                fullWidth
+                variant="outlined"
+                onChange={updateFormValue}
+                margin="normal"
+                select
+              >
+                <MenuItem value={25}>25</MenuItem>
+                <MenuItem value={50}>50</MenuItem>
+                <MenuItem value={75}>75</MenuItem>
+                <MenuItem value={100}>100</MenuItem>
+              </TextField>
+            </Grid>
+          )}
           <Grid>
             <BlockFormControlLabel
               control={
