@@ -22,20 +22,18 @@ import type { LogEntry, LogSettings } from 'types';
 import { LogLevel } from 'types';
 import { updateValueDirty, useRest } from 'utils';
 
-const ButtonTextColors = {
+const TextColors = {
   [LogLevel.ERROR]: '#ff0000', // red
-  [LogLevel.WARNING]: '#ffcc00', // yellow
+  [LogLevel.WARNING]: '#ff0000', // red
   [LogLevel.NOTICE]: '#ffffff', // white
-  [LogLevel.INFO]: '#ffffff', // yellow
+  [LogLevel.INFO]: '#ffcc00', // yellow
   [LogLevel.DEBUG]: '#00ffff', // cyan
   [LogLevel.TRACE]: '#00ffff' // cyan
 };
 
-const LogEntryLine = styled('div')(
+const LogEntryLine = styled('span')(
   ({ details: { level } }: { details: { level: LogLevel } }) => ({
-    color: ButtonTextColors[level],
-    font: '14px monospace',
-    whiteSpace: 'nowrap'
+    color: TextColors[level]
   })
 );
 
@@ -251,14 +249,17 @@ const SystemLog = () => {
           }}
         >
           {logEntries.map((e) => (
-            <LogEntryLine details={{ level: e.l }} key={e.i}>
+            <div style={{ font: '14px monospace', whiteSpace: 'nowrap' }}>
               <span>{e.t}</span>
               <span>{paddedLevelLabel(e.l)}&nbsp;</span>
               <span>{paddedIDLabel(e.i)} </span>
               <span>{paddedNameLabel(e.n)} </span>
-              <span>{e.m}</span>
-            </LogEntryLine>
+              <LogEntryLine details={{ level: e.l }} key={e.i}>
+                {e.m}
+              </LogEntryLine>
+            </div>
           ))}
+
           <div ref={ref} />
         </Box>
       </>
