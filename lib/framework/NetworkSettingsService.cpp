@@ -369,9 +369,9 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) 
     case ARDUINO_EVENT_ETH_GOT_IP6:
 #if !TASMOTA_SDK && ESP_IDF_VERSION_MAJOR < 5
         if (emsesp::EMSESP::system_.ethernet_connected()) {
-            emsesp::EMSESP::logger().info("Local IPv6=%s", ETH.localIPv6().toString().c_str());
+            emsesp::EMSESP::logger().info("Local IPv6 (Eth) =%s", ETH.localIPv6().toString().c_str());
         } else {
-            emsesp::EMSESP::logger().info("Local IPv6=%s", WiFi.localIPv6().toString().c_str());
+            emsesp::EMSESP::logger().info("Local IPv6 (WiFi)=%s", WiFi.localIPv6().toString().c_str());
         }
 #else
         emsesp::EMSESP::logger().info("Local IPv6=%s", IPAddress(IPv6, (uint8_t *)info.got_ip6.ip6_info.ip.addr, 0).toString().c_str());
