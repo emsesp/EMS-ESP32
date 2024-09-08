@@ -1191,7 +1191,7 @@ bool System::check_upgrade(bool factory_settings) {
     version::Semver200_version settings_version(settingsVersion);
 
     if (!missing_version) {
-        LOG_DEBUG("Checking version upgrade (settings file is v%d.%d.%d-%s)",
+        LOG_DEBUG("Checking for version upgrades (settings file has v%d.%d.%d-%s)",
                   settings_version.major(),
                   settings_version.minor(),
                   settings_version.patch(),
@@ -1213,19 +1213,20 @@ bool System::check_upgrade(bool factory_settings) {
 
         // if we're coming from 3.4.4 or 3.5.0b14 which had no version stored then we need to apply new settings
         if (missing_version) {
-            LOG_INFO("Upgrade: Setting MQTT Entity ID format to older v3.4 format");
+            LOG_INFO("Upgrade: Setting MQTT Entity ID format to older v3.4 format (0)");
             EMSESP::esp8266React.getMqttSettingsService()->update([&](MqttSettings & mqttSettings) {
                 mqttSettings.entity_format = Mqtt::entityFormat::SINGLE_LONG; // use old Entity ID format from v3.4
                 return StateUpdateResult::CHANGED;
             });
         } else if (settings_version.major() == 3 && settings_version.minor() <= 6) {
-            LOG_INFO("Upgrade: Setting MQTT Entity ID format to v3.6 format");
             EMSESP::esp8266React.getMqttSettingsService()->update([&](MqttSettings & mqttSettings) {
                 if (mqttSettings.entity_format == 1) {
                     mqttSettings.entity_format = Mqtt::entityFormat::SINGLE_OLD; // use old Entity ID format from v3.6
+                    LOG_INFO("Upgrade: Setting MQTT Entity ID format to v3.6 format (3)");
                     return StateUpdateResult::CHANGED;
                 } else if (mqttSettings.entity_format == 2) {
                     mqttSettings.entity_format = Mqtt::entityFormat::MULTI_OLD; // use old Entity ID format from v3.6
+                    LOG_INFO("Upgrade: Setting MQTT Entity ID format to v3.6 format (4)");
                     return StateUpdateResult::CHANGED;
                 }
                 return StateUpdateResult::UNCHANGED;
@@ -1751,8 +1752,7 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
                 (int8_t)EMSESP::system_.eth_phy_addr_,
                 (int8_t)EMSESP::system_.eth_clock_mode_};
     } else {
-        // unknown, return false
-        return false;
+        return false; // unknown, return false
     }
 
     return true;
