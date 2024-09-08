@@ -28,15 +28,16 @@ WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, Securit
     server->on(EMSESP_BOARD_PROFILE_SERVICE_PATH,
                HTTP_GET,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { board_profile(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
-    addUpdateHandler([this] { onUpdate(); }, false);
-
     server->on(EMSESP_GET_SETTINGS_PATH,
                HTTP_GET,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { getSettings(request); }, AuthenticationPredicates::IS_ADMIN));
+    addUpdateHandler([this] { onUpdate(); }, false);
 }
 
 void WebSettings::read(WebSettings & settings, JsonObject root) {
     root["version"]               = settings.version;
+    root["board_profile"]         = settings.board_profile;
+    root["platform"]              = EMSESP_PLATFORM;
     root["locale"]                = settings.locale;
     root["tx_mode"]               = settings.tx_mode;
     root["ems_bus_id"]            = settings.ems_bus_id;
@@ -67,7 +68,6 @@ void WebSettings::read(WebSettings & settings, JsonObject root) {
     root["analog_enabled"]        = settings.analog_enabled;
     root["pbutton_gpio"]          = settings.pbutton_gpio;
     root["solar_maxflow"]         = settings.solar_maxflow;
-    root["board_profile"]         = settings.board_profile;
     root["fahrenheit"]            = settings.fahrenheit;
     root["bool_format"]           = settings.bool_format;
     root["bool_dashboard"]        = settings.bool_dashboard;
@@ -79,7 +79,6 @@ void WebSettings::read(WebSettings & settings, JsonObject root) {
     root["eth_power"]             = settings.eth_power;
     root["eth_phy_addr"]          = settings.eth_phy_addr;
     root["eth_clock_mode"]        = settings.eth_clock_mode;
-    root["platform"]              = EMSESP_PLATFORM;
     root["modbus_enabled"]        = settings.modbus_enabled;
     root["modbus_port"]           = settings.modbus_port;
     root["modbus_max_clients"]    = settings.modbus_max_clients;
@@ -88,17 +87,8 @@ void WebSettings::read(WebSettings & settings, JsonObject root) {
 
 // call on initialization and also when settings are updated via web or console
 StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
-    // load the version of the settings
-    // will be picked up in System::check_upgrade()
+    // load the version from the settings config. This can be blank and later used in System::check_upgrade()
     settings.version = root["version"] | EMSESP_DEFAULT_VERSION;
-
-    // load default GPIO configuration based on board profile
-    std::vector<int8_t> data; //  // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
-    settings.board_profile = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE;
-    // for -D compile setting store it in NVS
-    if ((String)EMSESP_DEFAULT_BOARD_PROFILE != "default" && EMSESP::nvs_.getString("boot") == "") {
-        EMSESP::nvs_.putString("boot", (const char *)EMSESP_DEFAULT_BOARD_PROFILE);
-    }
 
 #ifndef EMSESP_STANDALONE
     bool psram = ESP.getPsramSize() > 0; // System::PSram() is initialized later
@@ -106,72 +96,96 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     bool psram = false;
 #endif
 
-    if (System::load_board_profile(data, settings.board_profile.c_str())) {
-        if (settings.board_profile == "CUSTOM") { //read pins, fallback to S32
-            data = {(int8_t)(root["led_gpio"] | 2),
-                    (int8_t)(root["dallas_gpio"] | 18),
-                    (int8_t)(root["rx_gpio"] | 23),
-                    (int8_t)(root["tx_gpio"] | 5),
-                    (int8_t)(root["pbutton_gpio"] | 0),
-                    (int8_t)(root["phy_type"] | PHY_type::PHY_TYPE_NONE),
-                    (int8_t)(root["eth_power"] | 0),
-                    (int8_t)(root["eth_phy_addr"] | 0),
-                    (int8_t)(root["eth_clock_mode"] | 0)};
-        }
-        // check valid pins in this board profile
-        if (!System::is_valid_gpio(data[0], psram) || !System::is_valid_gpio(data[1], psram) || !System::is_valid_gpio(data[2], psram)
-            || !System::is_valid_gpio(data[3], psram) || !System::is_valid_gpio(data[4], psram) || !System::is_valid_gpio(data[6], psram)) {
-            settings.board_profile = ""; // reset to factory default
-        }
-    } else {
-        settings.board_profile = ""; // reset to factory default
+#ifdef EMSESP_DEBUG
+    EMSESP::logger().debug("NVS boot value is %s, board profile is %s, EMSESP_DEFAULT_BOARD_PROFILE is %s",
+                           EMSESP::nvs_.getString("boot"),
+                           root["board_profile"].as<String>().c_str(),
+                           EMSESP_DEFAULT_BOARD_PROFILE);
+#endif
+
+    // get the current board profile saved in the settings file
+    settings.board_profile   = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE; // this is set at compile time in platformio.ini, other it's "default"
+    String old_board_profile = settings.board_profile;
+
+    // The optional NVS boot value has priority and overrides any board_profile setting. Note, we never set the NVS boot value in the code - this is done on initial pre-loading
+    // Note: The board profile is dynamically changed for the session, but the value in the settings file on the FS remains untouched
+    String nvs_boot = EMSESP::nvs_.getString("boot");
+    if (!nvs_boot.isEmpty()) {
+        settings.board_profile = nvs_boot;
     }
-    if (settings.board_profile == "") {
-        // unknown, check for NVS or scan for ethernet, use default E32/E32V2/S32
-        settings.board_profile = EMSESP::nvs_.getString("boot");
-        if (!System::load_board_profile(data, settings.board_profile.c_str())) {
-#if defined(EMSESP_STANDALONE)
-            settings.board_profile = "S32";
-#elif CONFIG_IDF_TARGET_ESP32
-            if (settings.board_profile == "" && !psram) { // empty: new test for E32
-#if ESP_ARDUINO_VERSION_MAJOR < 3
-                if (ETH.begin(1, 16, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_IN)) {
-#else
-                if (ETH.begin(ETH_PHY_LAN8720, 1, 23, 18, 16, ETH_CLOCK_GPIO0_IN)) {
-#endif
-                    EMSESP::nvs_.putString("boot", "E32");
-                } else {
-                    EMSESP::nvs_.putString("boot", "Test");
-                }
-            } else if (settings.board_profile == "Test" || psram) { // test E32V2
-#if ESP_ARDUINO_VERSION_MAJOR < 3
-                if (ETH.begin(0, 15, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_OUT)) {
-#else
-                if (ETH.begin(ETH_PHY_LAN8720, 0, 23, 18, 15, ETH_CLOCK_GPIO0_OUT)) {
-#endif
-                    EMSESP::nvs_.putString("boot", "E32V2");
-                } else {
-                    EMSESP::nvs_.putString("boot", "S32");
-                }
-            } else {
-                EMSESP::nvs_.putString("boot", "S32");
+
+    // load the board profile from the settings, if it's not "default"
+    std::vector<int8_t> data; //  // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
+    if (settings.board_profile != "default") {
+        if (System::load_board_profile(data, settings.board_profile.c_str())) {
+            if (settings.board_profile == "CUSTOM") { // read pins, fallback to S32 values
+                data = {(int8_t)(root["led_gpio"] | 2),
+                        (int8_t)(root["dallas_gpio"] | 18),
+                        (int8_t)(root["rx_gpio"] | 23),
+                        (int8_t)(root["tx_gpio"] | 5),
+                        (int8_t)(root["pbutton_gpio"] | 0),
+                        (int8_t)(root["phy_type"] | PHY_type::PHY_TYPE_NONE),
+                        (int8_t)(root["eth_power"] | 0),
+                        (int8_t)(root["eth_phy_addr"] | 0),
+                        (int8_t)(root["eth_clock_mode"] | 0)};
             }
-            // ESP.restart();
-            EMSESP::system_.restart_requested(true);
-#elif CONFIG_IDF_TARGET_ESP32C3
-            settings.board_profile = "C3MINI";
-#elif CONFIG_IDF_TARGET_ESP32S2
-            settings.board_profile = "S2MINI";
-#elif CONFIG_IDF_TARGET_ESP32S3
-            settings.board_profile = "S32S3"; // BBQKees Gateway S3
-#else
-            settings.board_profile = "S32";
-#endif
-            System::load_board_profile(data, settings.board_profile.c_str());
+            // check valid pins in this board profile
+            if (!System::is_valid_gpio(data[0], psram) || !System::is_valid_gpio(data[1], psram) || !System::is_valid_gpio(data[2], psram)
+                || !System::is_valid_gpio(data[3], psram) || !System::is_valid_gpio(data[4], psram) || !System::is_valid_gpio(data[6], psram)) {
+                settings.board_profile = "default"; // reset to factory default
+            }
+        } else {
+            settings.board_profile = "default"; // can't find profile, use "default"
         }
-        EMSESP::logger().info("No board profile found. Re-setting to %s", settings.board_profile.c_str());
+    }
+
+    // still don't have a valid board profile. Let's see if we can determine one
+    if (settings.board_profile == "default") {
+#ifdef EMSESP_DEBUG
+        EMSESP::logger().debug("Trying to detect board and set board profile...");
+#endif
+
+#if defined(EMSESP_STANDALONE)
+        settings.board_profile = "S32";
+#elif CONFIG_IDF_TARGET_ESP32
+        // check for no PSRAM, could be a E32 or S32
+        if (!psram) {
+#if ESP_ARDUINO_VERSION_MAJOR < 3
+            if (ETH.begin(1, 16, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_IN)) {
+#else
+            if (ETH.begin(ETH_PHY_LAN8720, 1, 23, 18, 16, ETH_CLOCK_GPIO0_IN)) {
+#endif
+                settings.board_profile = "E32";
+            }
+        } else {
+// check for PSRAM, could be a E32V2 or S3
+#if ESP_ARDUINO_VERSION_MAJOR < 3
+            if (ETH.begin(0, 15, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_OUT)) {
+#else
+            if (ETH.begin(ETH_PHY_LAN8720, 0, 23, 18, 15, ETH_CLOCK_GPIO0_OUT)) {
+#endif
+                settings.board_profile = "E32V2";
+            }
+        }
+#elif CONFIG_IDF_TARGET_ESP32C3
+        settings.board_profile = "C3MINI";
+#elif CONFIG_IDF_TARGET_ESP32S2
+        settings.board_profile = "S2MINI";
+#elif CONFIG_IDF_TARGET_ESP32S3
+        settings.board_profile = "S32S3"; // BBQKees Gateway S3
+#else
+        settings.` = "S32"; // defaulting to an S32
+#endif
+
+        // apply the new board profile setting
+        System::load_board_profile(data, settings.board_profile.c_str());
+        EMSESP::logger().warning("No Board profile setup - using %s", settings.board_profile.c_str());
     } else {
-        EMSESP::logger().info("Loading board profile %s", settings.board_profile.c_str());
+        if (old_board_profile != settings.board_profile) {
+            EMSESP::logger().info("Applying new Board profile %s (was %s)", settings.board_profile.c_str(), old_board_profile.c_str());
+        } else {
+            EMSESP::logger().info("Board profile is %s", settings.board_profile.c_str());
+        }
     }
 
     int prev;
@@ -233,7 +247,7 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     }
 #endif
 
-    // temperaturesensor
+    // temperature sensor
     prev                     = settings.dallas_parasite;
     settings.dallas_parasite = root["dallas_parasite"] | EMSESP_DEFAULT_DALLAS_PARASITE;
     check_flag(prev, settings.dallas_parasite, ChangeFlags::SENSOR);
@@ -347,9 +361,10 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     settings.weblog_compact = root["weblog_compact"] | EMSESP_DEFAULT_WEBLOG_COMPACT;
 
     // save the settings
-    if (flags_ == WebSettings::ChangeFlags::RESTART) {
+    if (get_flags() == WebSettings::ChangeFlags::RESTART) {
         return StateUpdateResult::CHANGED_RESTART; // tell WebUI that a restart is needed
     }
+
     return StateUpdateResult::CHANGED;
 }
 
@@ -377,11 +392,11 @@ void WebSettingsService::onUpdate() {
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::BUTTON)) {
-        EMSESP::system_.button_init(true); // reload settings
+        EMSESP::system_.button_init(true);
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::LED)) {
-        EMSESP::system_.led_init(true); // reload settings
+        EMSESP::system_.led_init(true);
     }
 
     if (WebSettings::has_flags(WebSettings::ChangeFlags::MQTT)) {
@@ -393,6 +408,7 @@ void WebSettingsService::onUpdate() {
 
 void WebSettingsService::begin() {
     _fsPersistence.readFromFS();
+
     WebSettings::reset_flags();
 }
 
