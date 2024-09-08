@@ -103,7 +103,7 @@ export default () => {
           let count = 0;
           const interval = setInterval(() => {
             let message = 'message #' + count;
-            if (count % 6 == 1) {
+            if (count % 6 === 1) {
               message +=
                 ' with a long message that will be wrapped, to see if it stays one a single line';
             }
