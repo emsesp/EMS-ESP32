@@ -107,11 +107,15 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     settings.board_profile   = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE; // this is set at compile time in platformio.ini, other it's "default"
     String old_board_profile = settings.board_profile;
 
-    // The optional NVS boot value has priority and overrides any board_profile setting. Note, we never set the NVS boot value in the code - this is done on initial pre-loading
-    // Note: The board profile is dynamically changed for the session, but the value in the settings file on the FS remains untouched
-    String nvs_boot = EMSESP::nvs_.getString("boot");
-    if (!nvs_boot.isEmpty()) {
-        settings.board_profile = nvs_boot;
+    // The optional NVS boot value has priority and overrides any board_profile setting.
+    // We only do this for BBQKees boards
+    // Note 1: we never set the NVS boot value in the code - this is done on initial pre-loading
+    // Note 2: The board profile is dynamically changed for the session, but the value in the settings file on the FS remains untouched
+    if (!EMSESP::system_.getBBQKeesGatewayDetails().isEmpty()) {
+        String nvs_boot = EMSESP::nvs_.getString("boot");
+        if (!nvs_boot.isEmpty()) {
+            settings.board_profile = nvs_boot;
+        }
     }
 
     // load the board profile from the settings, if it's not "default"
