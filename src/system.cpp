@@ -466,8 +466,8 @@ bool System::is_valid_gpio(uint8_t pin, bool has_psram) {
         return false; // bad pin
     }
 
-    // extra check for pins 21 and 22 (I2C) when ethernet is enabled
-    if ((EMSESP::system_.ethernet_connected()) && (pin >= 21 && pin <= 22)) {
+    // extra check for pins 21 and 22 (I2C) when ethernet is onboard
+    if ((EMSESP::system_.ethernet_connected() || EMSESP::system_.phy_type_ != PHY_type::PHY_TYPE_NONE) && (pin >= 21 && pin <= 22)) {
         return false; // bad pin
     }
     return true;
@@ -1022,11 +1022,6 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.println();
     shell.println("Network:");
 
-    // show ethernet mac address if we have an eth controller present
-    if (eth_present_) {
-        shell.printfln(" Ethernet MAC address: %s", ETH.macAddress().c_str());
-    }
-
     switch (WiFi.status()) {
     case WL_IDLE_STATUS:
         shell.printfln(" Status: Idle");
@@ -1086,7 +1081,7 @@ void System::show_system(uuid::console::Shell & shell) {
     // show Ethernet if connected
     if (ethernet_connected_) {
         shell.println();
-        shell.printfln(" Status: Ethernet connected");
+        shell.printfln(" Ethernet Status: connected");
         shell.printfln(" Ethernet MAC address: %s", ETH.macAddress().c_str());
         shell.printfln(" Hostname: %s", ETH.getHostname());
         shell.printfln(" IPv4 address: %s/%s", uuid::printable_to_string(ETH.localIP()).c_str(), uuid::printable_to_string(ETH.subnetMask()).c_str());
@@ -1300,7 +1295,7 @@ bool System::saveSettings(const char * filename, const char * section, JsonObjec
     if (section_json) {
         File section_file = LittleFS.open(filename, "w");
         if (section_file) {
-            LOG_INFO("Applying new %s", section);
+            LOG_INFO("Applying new uploaded %s data", section);
             serializeJson(section_json, section_file);
             section_file.close();
             return true; // reboot required
