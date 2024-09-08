@@ -1561,18 +1561,18 @@ void EMSESP::start() {
 // start the file system
 #ifndef EMSESP_STANDALONE
     if (!LittleFS.begin(true)) {
-        LOG_INFO("LittleFS Mount Failed. Using default settings.");
+        LOG_ERROR("LittleFS Mount Failed");
         return;
     }
 #endif
 
-// do a quick scan of the filesystem to see if we have a /config folder
-// so we know if this is a new install or not
+// do a quick scan of the filesystem to see if we a settings file in the /config folder
+// so we know if this is a new factory install or not
 #ifndef EMSESP_STANDALONE
-    File root             = LittleFS.open(EMSESP_FS_CONFIG_DIRECTORY);
+    File root             = LittleFS.open(EMSESP_SETTINGS_FILE);
     bool factory_settings = !root;
     if (!root) {
-        LOG_INFO("No config found, assuming factory settings");
+        LOG_WARNING("No settings found on filesystem. Using factory settings.");
     }
     root.close();
 #else
@@ -1582,11 +1582,6 @@ void EMSESP::start() {
     webLogService.begin(); // start web log service. now we can start capturing logs to the web log
 
     esp8266React.begin(); // loads core system services settings (network, mqtt, ap, ntp etc)
-
-    if (!nvs_.begin("ems-esp", false, "nvs1")) { // try bigger nvs partition on 16M flash first
-        nvs_.begin("ems-esp", false, "nvs");     // fallback to small nvs
-    }
-    LOG_DEBUG("NVS device information: %s", system_.getBBQKeesGatewayDetails().c_str());
 
 #ifndef EMSESP_STANDALONE
     LOG_INFO("Booting EMS-ESP version %s from %s partition", EMSESP_APP_VERSION, esp_ota_get_running_partition()->label); // welcome message
@@ -1601,6 +1596,11 @@ void EMSESP::start() {
         LOG_WARNING("System needs a restart to apply new settings. Please wait.");
         system_.system_restart();
     };
+
+    if (!nvs_.begin("ems-esp", false, "nvs1")) { // try bigger nvs partition on 16M flash first
+        nvs_.begin("ems-esp", false, "nvs");     // fallback to small nvs
+    }
+    LOG_DEBUG("NVS device information: %s", system_.getBBQKeesGatewayDetails().c_str());
 
     webSettingsService.begin(); // load EMS-ESP Application settings...
 
