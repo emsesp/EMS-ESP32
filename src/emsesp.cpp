@@ -1544,8 +1544,8 @@ void EMSESP::start() {
 
     serial_console_.begin(SERIAL_CONSOLE_BAUD_RATE);
 
-// always start a serial console if we're running standalone, except if we're running unit tests
-#if defined(EMSESP_STANDALONE)
+    // always start a serial console if we're running standalone, except if we're running unit tests
+#if defined(EMSESP_STANDALONE) || defined(EMSESP_DEBUG)
 #ifndef EMSESP_UNITY
     start_serial_console();
 #endif
@@ -1586,11 +1586,13 @@ void EMSESP::start() {
     LOG_DEBUG("System is running in Debug mode");
     LOG_INFO("Last system reset reason Core0: %s, Core1: %s", system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
 
-    // see if we're restoring a settings file
+// see if we're restoring a settings file
+#ifndef EMSESP_STANDALONE
     if (system_.check_restore()) {
-        LOG_WARNING("System needs a restart to apply new settings. Please wait.");
+        LOG_WARNING("EMS-ESP will restart to apply new settings. Please wait.");
         system_.system_restart();
     };
+#endif
 
     if (!nvs_.begin("ems-esp", false, "nvs1")) { // try bigger nvs partition on 16M flash first
         nvs_.begin("ems-esp", false, "nvs");     // fallback to small nvs
