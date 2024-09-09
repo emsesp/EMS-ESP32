@@ -540,6 +540,7 @@ void System::button_init(bool refresh) {
         reload_settings();
     }
 
+#ifndef EMSESP_STANDALONE
     if (!is_valid_gpio(pbutton_gpio_)) {
         LOG_WARNING("Invalid button GPIO. Check config.");
         myPButton_.init(255, HIGH); // disable
@@ -555,6 +556,7 @@ void System::button_init(bool refresh) {
     myPButton_.onDblClick(BUTTON_DblClickDelay, button_OnDblClick);
     myPButton_.onLongPress(BUTTON_LongPressDelay, button_OnLongPress);
     myPButton_.onVLongPress(BUTTON_VLongPressDelay, button_OnVLongPress);
+#endif
 }
 
 // set the LED to on or off when in normal operating mode
@@ -1255,7 +1257,7 @@ bool System::check_upgrade(bool factory_settings) {
 
             // force WiFi sleep to off (was default on < 3.7.0-dev-33)
             networkSettings.nosleep = true;
-            LOG_INFO("Upgrade: Disbaling WiFi nosleep");
+            LOG_INFO("Upgrade: Disabling WiFi nosleep");
 
             return StateUpdateResult::CHANGED;
         });
