@@ -1208,8 +1208,20 @@ bool System::check_upgrade(bool factory_settings) {
 
     // compare versions
     if (this_version > settings_version) {
-        // need upgrade
-        LOG_NOTICE("Upgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
+        // we need to do an upgrade
+        if (missing_version) {
+            LOG_NOTICE("Upgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
+        } else {
+            LOG_NOTICE("Upgrading from version %d.%d.%d-%s to %d.%d.%d-%s",
+                       settings_version.major(),
+                       settings_version.minor(),
+                       settings_version.patch(),
+                       settings_version.prerelease().c_str(),
+                       this_version.major(),
+                       this_version.minor(),
+                       this_version.patch(),
+                       this_version.prerelease().c_str());
+        }
 
         // if we're coming from 3.4.4 or 3.5.0b14 which had no version stored then we need to apply new settings
         if (missing_version) {
@@ -1263,7 +1275,7 @@ bool System::check_upgrade(bool factory_settings) {
             settings.version = EMSESP_APP_VERSION;
             return StateUpdateResult::CHANGED;
         });
-        LOG_INFO("Upgrade: Setting version to %s", EMSESP_APP_VERSION);
+        // LOG_INFO("Upgrade: Setting version to %s", EMSESP_APP_VERSION);
         return true; // need reboot
     }
 
