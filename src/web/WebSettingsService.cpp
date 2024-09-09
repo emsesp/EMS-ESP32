@@ -96,10 +96,12 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     bool psram = false;
 #endif
 
+
+
 #ifdef EMSESP_DEBUG
     EMSESP::logger().debug("NVS boot value is %s, board profile is %s, EMSESP_DEFAULT_BOARD_PROFILE is %s",
-                           EMSESP::nvs_.getString("boot"),
-                           root["board_profile"].as<String>().c_str(),
+                           EMSESP::nvs_.getString("boot").c_str(),
+                           root["board_profile"].as<const char *>(),
                            EMSESP_DEFAULT_BOARD_PROFILE);
 #endif
 
@@ -188,7 +190,7 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
         if (old_board_profile != settings.board_profile) {
             EMSESP::logger().info("Applying new Board profile %s (was %s)", settings.board_profile.c_str(), old_board_profile.c_str());
         } else {
-            EMSESP::logger().info("Board profile is %s", settings.board_profile.c_str());
+            EMSESP::logger().info("Board profile set to %s", settings.board_profile.c_str());
         }
     }
 
