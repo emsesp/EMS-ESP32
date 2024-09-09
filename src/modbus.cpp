@@ -1,6 +1,5 @@
 /**
- * TODO:
- * - verwendete libs in readme hinzufügen
+ * TODO: verwendete libs in readme hinzufügen
  */
 #include "modbus.h"
 #include "modbus_entity_parameters.hpp"
