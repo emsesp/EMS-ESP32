@@ -160,6 +160,8 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
             if (ETH.begin(ETH_PHY_LAN8720, 1, 23, 18, 16, ETH_CLOCK_GPIO0_IN)) {
 #endif
                 settings.board_profile = "E32";
+            } else {
+                settings.board_profile = "S32";
             }
         } else {
 // check for PSRAM, could be a E32V2 or S3
@@ -169,16 +171,18 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
             if (ETH.begin(ETH_PHY_LAN8720, 0, 23, 18, 15, ETH_CLOCK_GPIO0_OUT)) {
 #endif
                 settings.board_profile = "E32V2";
+            } else {
+                settings.board_profile = "S3";
             }
         }
+
+        // override if we know the target from the build config
 #elif CONFIG_IDF_TARGET_ESP32C3
         settings.board_profile = "C3MINI";
 #elif CONFIG_IDF_TARGET_ESP32S2
         settings.board_profile = "S2MINI";
 #elif CONFIG_IDF_TARGET_ESP32S3
         settings.board_profile = "S32S3"; // BBQKees Gateway S3
-#else
-        settings.` = "S32"; // defaulting to an S32
 #endif
 
         // apply the new board profile setting
