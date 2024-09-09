@@ -1567,7 +1567,6 @@ void EMSESP::start() {
     }
 #endif
 
-
 // do a quick scan of the filesystem to see if we a settings file in the /config folder
 // so we know if this is a new factory install or not
 #ifndef EMSESP_STANDALONE
