@@ -340,7 +340,7 @@ const en: Translation = {
   LATEST_VERSION: 'You are using the latest firmware version.',
   PLEASE_WAIT: 'Please wait',
   RESTARTING_PRE: 'Initializing',
-  RESTARTING_POST: 'Reloading'
+  RESTARTING_POST: 'Preparing'
 };
 
 export default en;

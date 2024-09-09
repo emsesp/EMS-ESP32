@@ -340,7 +340,7 @@ const de: Translation = {
   LATEST_VERSION: 'Sie verwenden die neueste Firmware-Version.',
   PLEASE_WAIT: 'Bitte warten',
   RESTARTING_PRE: 'Initialisierung',
-  RESTARTING_POST: 'Neuladen'
+  RESTARTING_POST: 'Preparing' // TODO translate
 };
 
 export default de;
