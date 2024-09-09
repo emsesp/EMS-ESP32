@@ -35,7 +35,8 @@
 - RC310 cooling parameters [#1857](https://github.com/emsesp/EMS-ESP32/issues/1857)
 - command `api/device/entities` [#1897](https://github.com/emsesp/EMS-ESP32/issues/1897)
 - switchprogmode [#1903]<https://github.com/emsesp/EMS-ESP32/discussions/1903>
-- Autodetect and download firmware upgrades
+- Autodetect and download firmware upgrades via the WebUI
+- command 'log show' that lists out the log buffer, showing last messages.
 
 ## Fixed
 
