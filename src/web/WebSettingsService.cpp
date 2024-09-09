@@ -96,8 +96,6 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     bool psram = false;
 #endif
 
-
-
 #ifdef EMSESP_DEBUG
     EMSESP::logger().debug("NVS boot value is %s, board profile is %s, EMSESP_DEFAULT_BOARD_PROFILE is %s",
                            EMSESP::nvs_.getString("boot").c_str(),
