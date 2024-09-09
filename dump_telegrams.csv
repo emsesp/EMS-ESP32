@@ -105,10 +105,10 @@ telegram_type_id,name,is_fetched,is_cmd
 0x02A0,RC300Curves, ,cmd
 0x02A1,RC300Curves, ,cmd
 0x02A2,RC300Curves, ,cmd
-0x02A5,CRFMonitor, ,cmd
+0x02A5,RC300Monitor, ,cmd
 0x02A6,RC300Monitor, ,cmd
 0x02A7,RC300Monitor, ,cmd
-0x02A8,RC300Monitor, ,cmd
+0x02A8,CRFMonitor, ,cmd
 0x02A9,RC300Monitor, ,cmd
 0x02AA,RC300Monitor, ,cmd
 0x02AB,RC300Monitor, ,cmd
@@ -129,7 +129,7 @@ telegram_type_id,name,is_fetched,is_cmd
 0x02BE,RC300Set, ,cmd
 0x02BF,RC300Set, ,cmd
 0x02C0,RC300Set, ,cmd
-0x02CC,RC300Set2, ,cmd
+0x02CC,HPPressure,fetched,cmd
 0x02CD,MMPLUSConfigMessage,fetched,cmd
 0x02CE,RC300Set2, ,cmd
 0x02D0,RC300Set2, ,cmd
