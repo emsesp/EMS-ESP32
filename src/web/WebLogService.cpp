@@ -18,6 +18,8 @@
 
 #include "emsesp.h"
 
+using ::uuid::console::Shell;
+
 namespace emsesp {
 
 WebLogService::WebLogService(AsyncWebServer * server, SecurityManager * securityManager)
@@ -133,6 +135,43 @@ void WebLogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
             }
         }
     });
+}
+
+// dumps out the contents of log buffer to shell console
+void WebLogService::show(Shell & shell) {
+    if (log_messages_.empty())
+        return;
+
+    shell.println();
+    shell.println("Last Log:");
+    shell.println();
+
+    for (const auto & message : log_messages_) {
+        log_message_id_tail_ = message.id_;
+        // Serial.printf("%s", message.content_->text.c_str());
+        // Serial.println();
+
+        shell.print(uuid::log::format_timestamp_ms(message.content_->uptime_ms, 3));
+        shell.printf(" %c %lu: [%s] ", uuid::log::format_level_char(message.content_->level), message.id_, message.content_->name);
+
+        if ((message.content_->level == uuid::log::Level::ERR) || (message.content_->level == uuid::log::Level::WARNING)) {
+            shell.print(COLOR_RED);
+            shell.println(message.content_->text);
+            shell.print(COLOR_RESET);
+        } else if (message.content_->level == uuid::log::Level::INFO) {
+            shell.print(COLOR_YELLOW);
+            shell.println(message.content_->text);
+            shell.print(COLOR_RESET);
+        } else if (message.content_->level == uuid::log::Level::DEBUG) {
+            shell.print(COLOR_CYAN);
+            shell.println(message.content_->text);
+            shell.print(COLOR_RESET);
+        } else {
+            shell.println(message.content_->text);
+        }
+    }
+
+    shell.println();
 }
 
 void WebLogService::loop() {
