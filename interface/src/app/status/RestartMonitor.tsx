@@ -59,9 +59,10 @@ const RestartMonitor = () => {
                 : data?.status === 'ready'
                   ? LL.RESTARTING_PRE()
                   : LL.RESTARTING_POST()}
+            &hellip;
           </Typography>
           <Typography mt={2} variant="h6" fontWeight={400} textAlign="center">
-            {LL.PLEASE_WAIT()}&hellip;
+            {LL.PLEASE_WAIT()}
           </Typography>
 
           {errorMessage ? (
