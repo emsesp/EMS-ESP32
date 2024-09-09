@@ -211,7 +211,7 @@ void Shower::set_shower_state(bool state, bool force) {
         ha_configdone_ = Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
         //
-        // shower duaration
+        // shower duration
         //
         doc.clear();
 
