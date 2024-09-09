@@ -1341,7 +1341,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     fetch_device_values(device_id); // go and fetch its device entity data
 
     // Print to LOG showing we've added a new device
-    LOG_INFO("Recognized new %s with deviceID 0x%02X", EMSdevice::device_type_2_device_name(device_type), device_id);
+    LOG_INFO("Dectected EMS device: %s (0x%02X)", EMSdevice::device_type_2_device_name(device_type), device_id);
 
     // register the MQTT subscribe topic for this device
     // except for connect, controller and gateway
@@ -1541,6 +1541,7 @@ void EMSESP::start() {
 #ifndef EMSESP_STANDALONE
     system_.PSram(ESP.getPsramSize());
 #endif
+
 // don't need shell if running unit tests
 #ifndef EMSESP_UNITY
     // Serial console's shell
@@ -1565,6 +1566,7 @@ void EMSESP::start() {
         return;
     }
 #endif
+
 
 // do a quick scan of the filesystem to see if we a settings file in the /config folder
 // so we know if this is a new factory install or not
