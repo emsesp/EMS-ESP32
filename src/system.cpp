@@ -1245,21 +1245,31 @@ bool System::check_upgrade(bool factory_settings) {
             });
         }
 
-        // force WiFi sleep to off (was default on < 3.7.0-dev-33)
+        // changes to Network
         EMSESP::esp8266React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
-            networkSettings.nosleep = true;
-            return StateUpdateResult::CHANGED;
-        });
-
-        // Network Settings Wifi tx_power is now using the value * 4.
-        EMSESP::esp8266React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
+            // Network Settings Wifi tx_power is now using the value * 4.
             if (networkSettings.tx_power == 20) {
                 networkSettings.tx_power = WIFI_POWER_19_5dBm; // use 19.5 as we don't have 20 anymore
                 LOG_INFO("Upgrade: Setting WiFi TX Power to Auto");
+            }
+
+            // force WiFi sleep to off (was default on < 3.7.0-dev-33)
+            networkSettings.nosleep = true;
+            LOG_INFO("Upgrade: Disbaling WiFi nosleep");
+
+            return StateUpdateResult::CHANGED;
+        });
+
+        // changes to application settings
+        EMSESP::webSettingsService.update([&](WebSettings & settings) {
+            // force web buffer to 25 for those boards without psram
+            if (EMSESP::system_.PSram() == 0) {
+                settings.weblog_buffer = 25;
                 return StateUpdateResult::CHANGED;
             }
             return StateUpdateResult::UNCHANGED;
         });
+
 
     } else if (this_version < settings_version) {
         // need downgrade
@@ -1446,7 +1456,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
 #endif
     node["resetReason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 #ifndef EMSESP_STANDALONE
-    node["psram"] = (EMSESP::system_.PSram() > 0); // boolean
+    node["psram"] = (EMSESP::system_.PSram() > 0); // make boolean
     if (EMSESP::system_.PSram()) {
         node["psramSize"] = EMSESP::system_.PSram();
         node["freePsram"] = ESP.getFreePsram() / 1024;
