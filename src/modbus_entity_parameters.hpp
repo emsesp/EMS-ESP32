@@ -37,8 +37,6 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(pumpMode), 18, 1), // pumpmode
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(pumpCharacter), 19, 1), // pumpcharacter
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(pumpDelay), 20, 1), // pumpdelay
-    // REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(setFlowTemp), 21, 1), // setflowtemp
-    // REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(setBurnPow), 22, 1), // setburnpow
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(selBurnPow), 23, 1), // selburnpow
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(curBurnPow), 24, 1), // curburnpow
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(burnStarts), 25, 2), // burnstarts
@@ -183,6 +181,8 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(keepWarmTemp), 261, 1), // keepwarmtemp
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(setReturnTemp), 262, 1), // setreturntemp
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(heatingOn), 263, 1), // heating
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(nrgCool), 264, 2), // nrgcool
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DEVICE_DATA, FL_(meterCool), 266, 2), // metercool
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(nrgWw), 0, 2), // nrg
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(meterWw), 2, 2), // meter
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(upTimeCompWw), 4, 2), // uptimecomp
@@ -239,7 +239,6 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwTempOK), 60, 1), // tempok
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwActive), 61, 1), // active
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(ww3wayValve), 62, 1), // 3wayvalve
-    // REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwSetPumpPower), 63, 1), // setpumppower
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwMixerTemp), 64, 1), // mixertemp
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(cylMiddleTemp), 65, 1), // cylmiddletemp
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwStarts), 66, 2), // starts
@@ -313,7 +312,7 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(noreducetemp), 31, 1), // noreducetemp
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(reducetemp), 32, 1), // reducetemp
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(wwprio), 33, 1), // dhwprio
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(hpcooling), 34, 1), // cooling
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(hpcooling), 34, 1), // hpcooling
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(coolingOn), 35, 1), // coolingon
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(hpmode), 36, 1), // hpmode
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(dewoffset), 37, 1), // dewoffset
@@ -344,7 +343,6 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(daylowtemp), 100, 1), // daytemp2
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(daymidtemp), 101, 1), // daytemp3
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(dayhightemp), 102, 1), // daytemp4
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(wwswitchtime), 103, 8), // switchtime
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(vacations1), 111, 11), // vacations1
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(vacations2), 122, 11), // vacations2
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(vacations3), 133, 11), // vacations3
@@ -357,6 +355,11 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(heattemp), 190, 1), // heattemp
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(roomsensor), 191, 1), // roomsensor
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(heatup), 192, 1), // heatup
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(coolstart), 193, 1), // coolstart
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(coolondelay), 194, 1), // coolondelay
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(cooloffdelay), 195, 1), // cooloffdelay
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(switchProgMode), 196, 1), // switchprogmode
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(switchtime), 197, 8), // switchtime
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(mode), 0, 1), // mode
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(wwSetTemp), 1, 1), // settemp
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(wwSetTempLow), 2, 1), // settemplow
@@ -374,7 +377,7 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(wwDisinfectHour), 14, 1), // disinfecthour
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(wwMaxTemp), 15, 1), // maxtemp
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(wwOneTimeKey), 16, 1), // onetimekey
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(wwswitchtime), 17, 8), // switchtime
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(wwswitchtime), 17, 8), // switchtimeWW
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(wwcircswitchtime), 25, 8), // circswitchtime
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(holidays), 33, 13), // holidays
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(vacations), 46, 13), // vacations
@@ -433,7 +436,7 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(heatMetering), 42, 1), // heatmetering
     REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(activated), 43, 1), // activated
     REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(solarPumpMode), 44, 1), // solarpumpmode
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(solarPumpKick), 45, 1), // pumpkick
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(solarPumpKick), 45, 1), // solarpumpkick
     REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(plainWaterMode), 46, 1), // plainwatermode
     REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(doubleMatchFlow), 47, 1), // doublematchflow
     REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(pump2MinMod), 48, 1), // pump2minmod
