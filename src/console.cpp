@@ -68,7 +68,7 @@ static std::vector<std::string> log_level_autocomplete(Shell & shell, const std:
 }
 
 static void setup_commands(std::shared_ptr<Commands> & commands) {
-    // log, exit, help
+    // exit, help, log
     commands->add_command(ShellContext::MAIN, CommandFlags::USER, {F_(exit)}, EMSESPShell::main_exit_function);
     commands->add_command(ShellContext::MAIN, CommandFlags::USER, {F_(help)}, EMSESPShell::main_help_function);
     commands->add_command(ShellContext::MAIN, CommandFlags::USER, {F_(log)}, {F_(log_level_optional)}, console_log_level, log_level_autocomplete);
@@ -690,7 +690,11 @@ void EMSESPShell::end_of_transmission() {
 
 void EMSESPShell::main_help_function(Shell & shell, const std::vector<std::string> & arguments) {
     shell.println();
+#ifndef EMSESP_DEBUG
     shell.printfln("%s%sEMS-ESP version %s%s", COLOR_BRIGHT_GREEN, COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_RESET);
+#else
+    shell.printfln("%s%sEMS-ESP version %s%s (DEBUG)", COLOR_BRIGHT_GREEN, COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_RESET);
+#endif
     shell.println();
     shell.print_all_available_commands();
 }
@@ -699,7 +703,7 @@ void EMSESPShell::main_exit_function(Shell & shell, const std::vector<std::strin
     shell.stop();
 }
 
-//  **** EMSESPConsole *****
+//  **** EMSESPConsole Class *****
 
 #ifndef EMSESP_STANDALONE
 std::vector<bool> EMSESPConsole::ptys_;
