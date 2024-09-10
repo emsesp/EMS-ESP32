@@ -217,6 +217,10 @@ class System {
         has_ipv6_ = b;
     }
 
+    bool has_ipv6() {
+        return has_ipv6_;
+    }
+
     void ntp_connected(bool b);
     bool ntp_connected();
 
