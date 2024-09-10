@@ -999,7 +999,7 @@ void System::show_system(uuid::console::Shell & shell) {
 #ifndef EMSESP_STANDALONE
     shell.printfln(" Platform: %s (%s)", EMSESP_PLATFORM, ESP.getChipModel());
     shell.printfln(" Model: %s", getBBQKeesGatewayDetails().c_str());
-    shell.printfln(" Partition Boot/Running: %s/%s", esp_ota_get_boot_partition()->label, esp_ota_get_running_partition()->label);
+    shell.printfln(" Partition boot/running: %s/%s", esp_ota_get_boot_partition()->label, esp_ota_get_running_partition()->label);
 #endif
     shell.printfln(" Language: %s", locale().c_str());
     shell.printfln(" Board profile: %s", board_profile().c_str());
@@ -1776,9 +1776,11 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
                 (int8_t)EMSESP::system_.eth_phy_addr_,
                 (int8_t)EMSESP::system_.eth_clock_mode_};
     } else {
+        LOG_DEBUG("Couldn't identify board profile %s", board_profile.c_str());
         return false; // unknown, return false
     }
 
+    // LOG_DEBUG("Found data for board profile %s", board_profile.c_str());
     return true;
 }
 
