@@ -155,7 +155,7 @@ bool ModbusClientTCPasync::addToQueue(int32_t token, ModbusMessage request, bool
             HEXDUMP_V("Enqueue", request.data(), request.size());
             RequestEntry * re = new RequestEntry(token, request, syncReq);
             if (!re)
-                return false; // TODO: proper error returning in case allocation fails
+                return false; // TODO proper error returning in case allocation fails
             // inject proper transactionID
             re->head.transactionID = messageCount++;
             re->head.len           = request.size();
