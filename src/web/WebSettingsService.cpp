@@ -97,7 +97,7 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
 #endif
 
 #ifdef EMSESP_DEBUG
-    EMSESP::logger().debug("NVS boot value = [%s] board profile = [%s] EMSESP_DEFAULT_BOARD_PROFILE = [%s]",
+    EMSESP::logger().debug("NVS boot value=[%s], board profile=[%s], EMSESP_DEFAULT_BOARD_PROFILE=[%s]",
                            EMSESP::nvs_.getString("boot").c_str(),
                            root["board_profile"] | "",
                            EMSESP_DEFAULT_BOARD_PROFILE);
@@ -114,6 +114,9 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     if (!EMSESP::system_.getBBQKeesGatewayDetails().isEmpty()) {
         String nvs_boot = EMSESP::nvs_.getString("boot");
         if (!nvs_boot.isEmpty()) {
+#ifdef EMSESP_DEBUG
+            EMSESP::logger().debug("Overriding board profile with NVS boot value %s");
+#endif
             settings.board_profile = nvs_boot;
         }
     }
@@ -187,15 +190,13 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
 
         // apply the new board profile setting
         System::load_board_profile(data, settings.board_profile.c_str());
-        EMSESP::logger().warning("No Board profile setup - using %s", settings.board_profile.c_str());
+    }
+
+    if (old_board_profile != settings.board_profile) {
+        // see if need to override the set board profile (e.g. forced by NVS boot string)
+        EMSESP::logger().info("Setting new Board profile %s (was %s)", settings.board_profile.c_str(), old_board_profile.c_str());
     } else {
-        // board profile is a valid one and data has been loaded
-        if (old_board_profile != settings.board_profile) {
-            // see if need to override the set board profile (e.g. forced by NVS boot string)
-            EMSESP::logger().info("Applying new Board profile %s (was %s)", settings.board_profile.c_str(), old_board_profile.c_str());
-        } else {
-            EMSESP::logger().info("Board profile set to %s", settings.board_profile.c_str());
-        }
+        EMSESP::logger().info("Board profile set to %s", settings.board_profile.c_str());
     }
 
     int prev;
