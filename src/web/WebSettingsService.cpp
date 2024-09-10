@@ -162,24 +162,24 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
 #else
             if (ETH.begin(ETH_PHY_LAN8720, 1, 23, 18, 16, ETH_CLOCK_GPIO0_IN)) {
 #endif
-                settings.board_profile = "E32";
+                settings.board_profile = "E32"; // Ethernet without PSRAM
             } else {
-                settings.board_profile = "S32";
+                settings.board_profile = "S32"; // ESP32 standard WiFi without PSRAM
             }
         } else {
-// check for PSRAM, could be a E32V2 or S3
+// check for boards with PSRAM, could be a E32V2 otherwise default back to the S32
 #if ESP_ARDUINO_VERSION_MAJOR < 3
             if (ETH.begin(0, 15, 23, 18, ETH_PHY_LAN8720, ETH_CLOCK_GPIO0_OUT)) {
 #else
             if (ETH.begin(ETH_PHY_LAN8720, 0, 23, 18, 15, ETH_CLOCK_GPIO0_OUT)) {
 #endif
-                settings.board_profile = "E32V2";
+                settings.board_profile = "E32V2"; // Ethernet and PSRAM
             } else {
-                settings.board_profile = "S3";
+                settings.board_profile = "S32"; // ESP32 standard WiFi with PSRAM
             }
         }
 
-        // override if we know the target from the build config
+        // override if we know the target from the build config like C3, S2, S3 etc..
 #elif CONFIG_IDF_TARGET_ESP32C3
         settings.board_profile = "C3MINI";
 #elif CONFIG_IDF_TARGET_ESP32S2
