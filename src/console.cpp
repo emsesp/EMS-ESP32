@@ -51,12 +51,6 @@ static inline EMSESP & to_app(Shell & shell) {
 
 static void console_log_level(Shell & shell, const std::vector<std::string> & arguments) {
     if (!arguments.empty()) {
-        // special command called show which dumps out the contents of the web log buffer
-        if (arguments[0] == "show") {
-            EMSESP::webLogService.show(shell);
-            return;
-        }
-
         uuid::log::Level level;
 
         if (uuid::log::parse_level_lowercase(arguments[0], level)) {
@@ -96,6 +90,10 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                           CommandFlags::USER,
                           string_vector{F_(show), F_(devices)},
                           [](Shell & shell, const std::vector<std::string> & arguments) { to_app(shell).show_devices(shell); });
+
+    commands->add_command(ShellContext::MAIN, CommandFlags::USER, string_vector{F_(show), F_(log)}, [](Shell & shell, const std::vector<std::string> & arguments) {
+        to_app(shell).webLogService.show(shell);
+    });
 
 
     commands->add_command(ShellContext::MAIN, CommandFlags::USER, string_vector{F_(show), F_(ems)}, [](Shell & shell, const std::vector<std::string> & arguments) {
