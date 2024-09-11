@@ -84,7 +84,7 @@ export default () => {
                 })
               );
             } else {
-              res.statusCode = 400;
+              res.statusCode = 406;
               console.log('Invalid file extension!');
             }
           }
