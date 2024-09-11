@@ -157,7 +157,7 @@ const de: Translation = {
   HELP_INFORMATION_1: 'EMS-ESP Konfigurationsanweisungen und mehr finden Sie im Online-Wiki',
   HELP_INFORMATION_2: 'Für einen Live-Community-Chat besuchen Sie unseren Discord-Server',
   HELP_INFORMATION_3: 'Um neue Funktionen anzufragen oder Fehler zu melden, eröffnen Sie ein Issue auf GitHub',
-  HELP_INFORMATION_4: 'Bitte laden Sie die System-Details und hängen Sie sie an das Support-Issue an. ',
+  HELP_INFORMATION_4: 'Bitte laden Sie die Systemdetails und hängen Sie sie an das Support-Issue an',
   HELP_INFORMATION_5: 'EMS-ESP ist ein freies Open-Source Projekt. Bitte unterstützen Sie die zukünftige Entwicklung mit einem "Star" auf GitHub!',
   UPLOAD: 'Hochladen',
   DOWNLOAD: '{{H|h|h}}erunterladen',
@@ -177,7 +177,7 @@ const de: Translation = {
   STABLE: 'Stabil',
   DEVELOPMENT: 'Entwicklung',
   RELEASE_NOTES: 'Versionshinweise',
-  EMS_ESP_VER: 'Firmware Version', // TODO translate
+  EMS_ESP_VER: 'Firmware-Version',
   UPTIME: 'Systembetriebszeit',
   FREE_MEMORY: 'Freier RAM Speicher',
   PSRAM: 'PSRAM (Größe / Frei)',
@@ -186,8 +186,8 @@ const de: Translation = {
   FILESYSTEM: 'Dateisystem (Genutzt / Frei)',
   BUFFER_SIZE: 'max. Puffergröße',
   COMPACT: 'Kompakte Darstellung',
-  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
-  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
+  DOWNLOAD_SETTINGS_TEXT: 'Erstellen Sie eine Sicherung Ihrer Konfiguration und Einstellungen',
+  UPLOAD_TEXT: 'Laden Sie eine neue Firmware-Datei (.bin) oder eine Sicherungsdatei (.json) hoch',
   UPLOAD_DROP_TEXT: 'Klicken Sie hier, oder ziehen Sie eine Datei hierher',
   ERROR: 'Unerwarteter Fehler, bitte versuchen Sie es erneut',
   TIME_SET: 'Zeit gesetzt',
@@ -241,7 +241,7 @@ const de: Translation = {
   LOCAL_TIME: 'Lokalzeit',
   UTC_TIME: 'UTC Zeit',
   ENABLE_NTP: 'Aktiviere NTP',
-  NTP_SERVER: 'NTP Server',
+  NTP_SERVER: 'NTP-Server',
   TIME_ZONE: 'Zeitzone',
   ACCESS_POINT: 'Zugangspunkt',
   AP_PROVIDE: 'Aktiviere Zugangspunkt',
@@ -335,7 +335,7 @@ const de: Translation = {
   INSTALL_VERSION: 'Dadurch wird die Version installiert {0}. Sind Sie sicher?',
   SWITCH_DEV: 'Wechseln Sie zur Entwicklungsversion',
   UPGRADE_AVAILABLE: 'Es ist ein Firmware-Upgrade verfügbar!',
-  LATEST_VERSION: 'Sie verwenden die neueste Firmware-Version.',
+  LATEST_VERSION: 'Sie verwenden die neueste Firmware-Version',
   PLEASE_WAIT: 'Bitte warten',
   RESTARTING_PRE: 'Initialisierung',
   RESTARTING_POST: 'Vorbereitung'
