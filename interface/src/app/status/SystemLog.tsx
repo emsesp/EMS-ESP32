@@ -87,6 +87,7 @@ const SystemLog = () => {
 
   const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
   const [lastIndex, setLastIndex] = useState<number>(0);
+  const [autoscroll, setAutoscroll] = useState(true);
 
   const updateFormValue = updateValueDirty(
     origData,
@@ -112,7 +113,7 @@ const SystemLog = () => {
   });
 
   onError(() => {
-    toast.error('No connection to Log server');
+    toast.error('No connection to Log service');
   });
 
   // called on page load to reset pointer and fetch all log entries
@@ -157,7 +158,7 @@ const SystemLog = () => {
   // handle scrolling
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (logEntries.length) {
+    if (logEntries.length && autoscroll) {
       ref.current?.scrollIntoView({
         behavior: 'smooth',
         block: 'end'
@@ -173,12 +174,12 @@ const SystemLog = () => {
     return (
       <>
         <Grid container spacing={2} alignItems="center">
-          <Grid size={2}>
+          <Grid>
             <TextField
               name="level"
               label={LL.LOG_LEVEL()}
               value={data.level}
-              fullWidth
+              sx={{ width: '15ch' }}
               variant="outlined"
               onChange={updateFormValue}
               margin="normal"
@@ -193,12 +194,12 @@ const SystemLog = () => {
             </TextField>
           </Grid>
           {data.psram && (
-            <Grid size={2}>
+            <Grid>
               <TextField
                 name="max_messages"
                 label={LL.BUFFER_SIZE()}
                 value={data.max_messages}
-                fullWidth
+                sx={{ width: '15ch' }}
                 variant="outlined"
                 onChange={updateFormValue}
                 margin="normal"
@@ -221,6 +222,16 @@ const SystemLog = () => {
                 />
               }
               label={LL.COMPACT()}
+            />
+            <BlockFormControlLabel
+              control={
+                <Checkbox
+                  checked={autoscroll}
+                  onChange={() => setAutoscroll(!autoscroll)}
+                  name="autoscroll"
+                />
+              }
+              label="Auto scroll"
             />
           </Grid>
           <Button
