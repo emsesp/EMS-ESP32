@@ -177,7 +177,7 @@ const de: Translation = {
   STABLE: 'Stabil',
   DEVELOPMENT: 'Entwicklung',
   RELEASE_NOTES: 'Versionshinweise',
-  EMS_ESP_VER: 'Firmware Version', // TODO translate
+  EMS_ESP_VER: 'Firmware-Version',
   UPTIME: 'Systembetriebszeit',
   FREE_MEMORY: 'Freier RAM Speicher',
   PSRAM: 'PSRAM (Größe / Frei)',
@@ -186,8 +186,8 @@ const de: Translation = {
   FILESYSTEM: 'Dateisystem (Genutzt / Frei)',
   BUFFER_SIZE: 'max. Puffergröße',
   COMPACT: 'Kompakte Darstellung',
-  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
-  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
+  DOWNLOAD_SETTINGS_TEXT: 'Erstellen Sie eine Sicherung Ihrer Konfiguration und Einstellungen',
+  UPLOAD_TEXT: 'Laden Sie eine neue Firmware-Datei (.bin) oder eine Sicherungsdatei (.json) hoch',
   UPLOAD_DROP_TEXT: 'Klicken Sie hier, oder ziehen Sie eine Datei hierher',
   ERROR: 'Unerwarteter Fehler, bitte versuchen Sie es erneut',
   TIME_SET: 'Zeit gesetzt',
