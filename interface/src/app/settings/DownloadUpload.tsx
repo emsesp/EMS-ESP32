@@ -15,6 +15,7 @@ import {
   Link,
   Typography
 } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 
 import * as SystemApi from 'api/system';
 import {
@@ -291,34 +292,11 @@ const DownloadUpload = () => {
         <Typography sx={{ pb: 2 }} variant="h6" color="primary">
           {LL.DOWNLOAD(0)}
         </Typography>
-        <Box color="warning.main">
-          <Typography mb={1} variant="body2">
-            {LL.HELP_INFORMATION_4()}
-          </Typography>
-          <Button
-            sx={{ ml: 2 }}
-            startIcon={<DownloadIcon />}
-            variant="outlined"
-            color="primary"
-            onClick={() => callAPIandSave('system', 'info')}
-          >
-            {LL.SUPPORT_INFORMATION(0)}
-          </Button>
-          <Button
-            sx={{ ml: 2 }}
-            startIcon={<DownloadIcon />}
-            variant="outlined"
-            color="primary"
-            onClick={() => callAPIandSave('system', 'allvalues')}
-          >
-            {LL.ALLVALUES()}
-          </Button>
-        </Box>
 
-        <Box color="warning.main">
-          <Typography mt={2} mb={1} variant="body2">
-            {LL.DOWNLOAD_SETTINGS_TEXT()}
-          </Typography>
+        <Typography mb={1} variant="body2" color="warning">
+          {LL.DOWNLOAD_SETTINGS_TEXT()}
+        </Typography>
+        <Grid container spacing={1}>
           <Button
             sx={{ ml: 2 }}
             startIcon={<DownloadIcon />}
@@ -326,14 +304,9 @@ const DownloadUpload = () => {
             color="primary"
             onClick={downloadSettings}
           >
-            {LL.SETTINGS_OF('')}
+            {LL.DOWNLOAD(1)}&nbsp;{LL.SETTINGS_OF(LL.APPLICATION())}
           </Button>
-        </Box>
 
-        <Box color="warning.main">
-          <Typography mt={2} mb={1} variant="body2">
-            {LL.DOWNLOAD_CUSTOMIZATION_TEXT()}
-          </Typography>
           <Button
             sx={{ ml: 2 }}
             startIcon={<DownloadIcon />}
@@ -341,7 +314,7 @@ const DownloadUpload = () => {
             color="primary"
             onClick={downloadCustomizations}
           >
-            {LL.CUSTOMIZATIONS()}
+            {LL.DOWNLOAD(1)}&nbsp;{LL.CUSTOMIZATIONS()}
           </Button>
           <Button
             sx={{ ml: 2 }}
@@ -350,13 +323,8 @@ const DownloadUpload = () => {
             color="primary"
             onClick={downloadEntities}
           >
-            {LL.CUSTOM_ENTITIES(0)}
+            {LL.DOWNLOAD(1)}&nbsp;{LL.CUSTOM_ENTITIES(0)}
           </Button>
-          <Box color="warning.main">
-            <Typography mt={2} mb={1} variant="body2">
-              {LL.DOWNLOAD_SCHEDULE_TEXT()}
-            </Typography>
-          </Box>
           <Button
             sx={{ ml: 2 }}
             startIcon={<DownloadIcon />}
@@ -364,15 +332,24 @@ const DownloadUpload = () => {
             color="primary"
             onClick={downloadSchedule}
           >
-            {LL.SCHEDULE(0)}
+            {LL.DOWNLOAD(1)}&nbsp;{LL.SCHEDULE(0)}
           </Button>
+        </Grid>
+
+        <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
+          {LL.UPLOAD()}
+        </Typography>
+
+        <Box color="warning.main" sx={{ pb: 2 }}>
+          <Typography variant="body2">{LL.UPLOAD_TEXT()}</Typography>
         </Box>
 
-        <Box color="warning.main">
-          <Typography mt={2} variant="body2">
-            {LL.EMS_ESP_VER()}
-          </Typography>
-        </Box>
+        <SingleUpload doRestart={doRestart} />
+
+        <Typography sx={{ pt: 2 }} variant="h6" color="primary">
+          {LL.EMS_ESP_VER()}
+        </Typography>
+
         <Box p={2} mt={2} border="1px solid grey" borderRadius={2}>
           <Typography>
             <b>{LL.VERSION() + ':'}</b>&nbsp;{data.emsesp_version}
@@ -430,16 +407,6 @@ const DownloadUpload = () => {
 
           {renderUploadDialog()}
         </Box>
-
-        <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
-          {LL.UPLOAD()}
-        </Typography>
-
-        <Box color="warning.main" sx={{ pb: 2 }}>
-          <Typography variant="body2">{LL.UPLOAD_TEXT()}</Typography>
-        </Box>
-
-        <SingleUpload doRestart={doRestart} />
       </>
     );
   };

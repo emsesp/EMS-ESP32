@@ -177,7 +177,7 @@ const de: Translation = {
   STABLE: 'Stabil',
   DEVELOPMENT: 'Entwicklung',
   RELEASE_NOTES: 'Versionshinweise',
-  EMS_ESP_VER: 'EMS-ESP Version',
+  EMS_ESP_VER: 'Firmware Version', // TODO translate
   UPTIME: 'Systembetriebszeit',
   FREE_MEMORY: 'Freier RAM Speicher',
   PSRAM: 'PSRAM (Größe / Frei)',
@@ -186,10 +186,8 @@ const de: Translation = {
   FILESYSTEM: 'Dateisystem (Genutzt / Frei)',
   BUFFER_SIZE: 'max. Puffergröße',
   COMPACT: 'Kompakte Darstellung',
-  DOWNLOAD_CUSTOMIZATION_TEXT: 'Herunterladen der individuellen Entitätsanpassungen',
-  DOWNLOAD_SCHEDULE_TEXT: 'Herunterladen geplanter Befehle',
-  DOWNLOAD_SETTINGS_TEXT: 'Herunterladen der Anwendungseinstellungen. Vorsicht beim Teilen der Einstellungen, da sie Passwörter und andere sensible Daten enthalten',
-  UPLOAD_TEXT: 'Hochladen von neuer Firmware (.bin), Geräte- oder Entitätseinstellungen (.json), zur optionalen Validitätsprüfung zuerst die (.md5) Datei hochladen',
+  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
+  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
   UPLOAD_DROP_TEXT: 'Klicken Sie hier, oder ziehen Sie eine Datei hierher',
   ERROR: 'Unerwarteter Fehler, bitte versuchen Sie es erneut',
   TIME_SET: 'Zeit gesetzt',

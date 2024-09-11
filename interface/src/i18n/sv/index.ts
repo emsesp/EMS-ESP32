@@ -177,7 +177,7 @@ const sv: Translation = {
   STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Utveckling',
   RELEASE_NOTES: 'release-logg',
-  EMS_ESP_VER: 'EMS-ESP Version',
+  EMS_ESP_VER: 'Firmware Version', // TODO translate
   UPTIME: 'Systemets Upptid',
   FREE_MEMORY: 'Ledigt Memory',
   PSRAM: 'PSRAM (Storlek / Ledigt)',
@@ -186,10 +186,8 @@ const sv: Translation = {
   FILESYSTEM: 'Filsystem (Använt / Ledigt)',
   BUFFER_SIZE: 'Max Bufferstorlek',
   COMPACT: 'Komprimera',
-  DOWNLOAD_CUSTOMIZATION_TEXT: 'Ladda ner entitetsanpassningar',
-  DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
-  DOWNLOAD_SETTINGS_TEXT: 'Ladda ner applikationsinställningar. Var försiktig om du delar dina iställlningar då de innehåller lösenord och annan känslig systeminformation',
-  UPLOAD_TEXT: 'Ladda upp ett nytt firmware (.bin), inställningar eller anpassningar (.json) nedan',
+  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
+  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
   UPLOAD_DROP_TEXT: 'Släpp fil eller klicka här',
   ERROR: 'Okänt Fel, var god försök igen',
   TIME_SET: 'Ställ in tid',
@@ -334,7 +332,7 @@ const sv: Translation = {
   ALLVALUES: 'All Values', // TODO translate
   SPECIAL_FUNCTIONS: 'Special Functions', // TODO translate
   WAIT_FIRMWARE: 'Firmware is uploading and installing', // TODO translate
-  INSTALL_VERSION: 'This will install vesion {0}. Are you sure?', // TODO translate
+  INSTALL_VERSION: 'This will install version {0}. Are you sure?', // TODO translate
   SWITCH_DEV: 'switch to the development version', // TODO translate
   UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
   LATEST_VERSION: 'You are using the latest firmware version.', // TODO translate

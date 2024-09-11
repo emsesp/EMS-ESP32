@@ -177,7 +177,7 @@ const pl: BaseTranslation = {
   STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Testowe',
   RELEASE_NOTES: 'lista zmian',
-  EMS_ESP_VER: 'Wersja EMS-ESP',
+  EMS_ESP_VER: 'Wersja Firmware',
   UPTIME: 'Czas działania systemu',
   FREE_MEMORY: 'Wolne Memory', // TODO translate
   PSRAM: 'PSRAM (rozmiar / wolne)',
@@ -186,10 +186,8 @@ const pl: BaseTranslation = {
   FILESYSTEM: 'System plików (wykorzystane / wolne)',
   BUFFER_SIZE: 'Maksymalna pojemność bufora (ilość wpisów)',
   COMPACT: 'Kompaktowy',
-  DOWNLOAD_CUSTOMIZATION_TEXT: 'Pobierz personalizacje.',
-  DOWNLOAD_SCHEDULE_TEXT: 'Pobierz harmonogram zdarzeń.',
-  DOWNLOAD_SETTINGS_TEXT: 'Pobierz ustawienia aplikacji. Uwaga! Plik z ustawieniami zawiera hasła oraz inne wrażliwe informacje systemowe! Nie udostepniaj go pochopnie!',
-  UPLOAD_TEXT: 'Wyślij firmware (.bin), ustawienia lub personalizacje (.json). Opcjonalnie, wyślij wcześniej plik walidacji z sumą kontrolną (.md5).',
+  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
+  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
   UPLOAD_DROP_TEXT: 'Przeciągnij tutaj plik lub kliknij',
   ERROR: 'Nieoczekiwany błąd, spróbuj ponownie!',
   TIME_SET: 'Zegar został ustawiony.',
@@ -334,7 +332,7 @@ const pl: BaseTranslation = {
   ALLVALUES: 'All Values', // TODO translate
   SPECIAL_FUNCTIONS: 'Special Functions', // TODO translate
   WAIT_FIRMWARE: 'Firmware is uploading and installing', // TODO translate
-  INSTALL_VERSION: 'This will install vesion {0}. Are you sure?', // TODO translate
+  INSTALL_VERSION: 'This will install version {0}. Are you sure?', // TODO translate
   SWITCH_DEV: 'switch to the development version', // TODO translate
   UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
   LATEST_VERSION: 'You are using the latest firmware version.', // TODO translate

@@ -177,19 +177,17 @@ const sk: Translation = {
   STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Vývojárska',
   RELEASE_NOTES: 'poznámky k verzii',
-  EMS_ESP_VER: 'EMS-ESP verzia',
+  EMS_ESP_VER: 'Firmware verzia',
   UPTIME: 'Beh systému',
-  FREE_MEMORY: 'Voľné Memory', // TODO translate
+  FREE_MEMORY: 'Voľné Memory',
   PSRAM: 'PSRAM (Veľkosť / Voľné)',
   FLASH: 'Flash chip (Veľkosť , Rýchlosť)',
   APPSIZE: 'Applikácia (Oddiel: Použité / Voľné)',
   FILESYSTEM: 'Súborový systém (Použité / Voľné)',
   BUFFER_SIZE: 'Buffer-max.veľkosť',
   COMPACT: 'Kompaktné',
-  DOWNLOAD_CUSTOMIZATION_TEXT: 'Stiahnutie prispôsobení entity',
-  DOWNLOAD_SCHEDULE_TEXT: 'Stiahnutie plánovača udalostí',
-  DOWNLOAD_SETTINGS_TEXT: 'Stiahnite si nastavenia aplikácie. Pri zdieľaní nastavení buďte opatrní, pretože tento súbor obsahuje heslá a iné citlivé systémové informácie.',
-  UPLOAD_TEXT: 'Najskôr nahrajte nový súbor firmvéru (.bin), nastavenia alebo prispôsobenia (.json), pre voliteľné overenie nahrajte súbor (.md5)',
+  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
+  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
   UPLOAD_DROP_TEXT: 'Potiahnúť a pripnúť súbor alebo kliknúť sem',
   ERROR: 'Neočakávaná chyba, prosím skúste to znova',
   TIME_SET: 'Nastavený čas',
@@ -334,7 +332,7 @@ const sk: Translation = {
   ALLVALUES: 'All Values', // TODO translate
   SPECIAL_FUNCTIONS: 'Special Functions', // TODO translate
   WAIT_FIRMWARE: 'Firmware is uploading and installing', // TODO translate
-  INSTALL_VERSION: 'This will install vesion {0}. Are you sure?', // TODO translate
+  INSTALL_VERSION: 'This will install version {0}. Are you sure?', // TODO translate
   SWITCH_DEV: 'switch to the development version', // TODO translate
   UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
   LATEST_VERSION: 'You are using the latest firmware version.', // TODO translate

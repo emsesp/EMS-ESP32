@@ -177,19 +177,17 @@ const tr: Translation = {
   STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Geliştirme',
   RELEASE_NOTES: 'yayınlanma notları',
-  EMS_ESP_VER: 'EMS-ESP Sürümü',
+  EMS_ESP_VER: 'Firmware Sürümü',
   UPTIME: 'Sistem Çalışma Süresi',
-  FREE_MEMORY: 'Yığın Memory', // TODO translate
+  FREE_MEMORY: 'Yığın Memory',
   PSRAM: 'PSRAM (Boyut / Boş)',
   FLASH: 'Flash Çipi (Boyut , Hız)',
   APPSIZE: 'Uygulama (Bölme: Kullanılmış / Boş)',
   FILESYSTEM: 'Dosya Sistemi (Kullanılmış / Boş)',
   BUFFER_SIZE: 'En fazla bellek boyutu',
   COMPACT: 'Sıkışık',
-  DOWNLOAD_CUSTOMIZATION_TEXT: 'Varlık özelleştirmelerini indir',
-  DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
-  DOWNLOAD_SETTINGS_TEXT: 'Uygulama ayarlarını indir. Bu dosya hassas sistem bilgileri ve şifrelerinizi içerdiğinden ayarlarınızı paylaşırken dikkatli olun',
-  UPLOAD_TEXT: 'Yeni bir bellenim(.bin) dosyası yükleyin, ayarlar ve özelleştirmeler(.json) dosyası aşağıda, sçenekli denetim yüklemesi(.md5) için önce',
+  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
+  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
   UPLOAD_DROP_TEXT: 'Buraya tıklayın yada dosyayı sürükleyip bırakın',
   ERROR: 'Beklenemedik hata, lütfen tekrar deneyin.',
   TIME_SET: 'Zaman ayarı',
@@ -334,7 +332,7 @@ const tr: Translation = {
   ALLVALUES: 'All Values', // TODO translate
   SPECIAL_FUNCTIONS: 'Special Functions', // TODO translate
   WAIT_FIRMWARE: 'Firmware is uploading and installing', // TODO translate
-  INSTALL_VERSION: 'This will install vesion {0}. Are you sure?', // TODO translate
+  INSTALL_VERSION: 'This will install version {0}. Are you sure?', // TODO translate
   SWITCH_DEV: 'switch to the development version', // TODO translate
   UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
   LATEST_VERSION: 'You are using the latest firmware version.', // TODO translate
