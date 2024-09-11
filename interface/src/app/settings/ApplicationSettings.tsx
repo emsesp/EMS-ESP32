@@ -613,10 +613,10 @@ const ApplicationSettings = () => {
               name="tx_mode"
               label={LL.TX_MODE()}
               value={data.tx_mode}
-              fullWidth
               variant="outlined"
               onChange={updateFormValue}
               margin="normal"
+              sx={{ width: '15ch' }}
               select
             >
               <MenuItem value={1}>EMS</MenuItem>
