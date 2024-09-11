@@ -3,7 +3,7 @@
 // Compile with -DEMSESP_UNITY_CREATE to generate the test functions
 // and copy the output and paste below.
 //
-// TODO: convert output to JSON and compare, showing differences
+// TODO convert output to JSON and compare, showing differences
 //
 // You can also manually compare the differences using https://www.diffchecker.com/text-compare/
 //

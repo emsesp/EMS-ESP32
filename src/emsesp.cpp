@@ -1341,7 +1341,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     fetch_device_values(device_id); // go and fetch its device entity data
 
     // Print to LOG showing we've added a new device
-    LOG_INFO("Recognized new %s with deviceID 0x%02X", EMSdevice::device_type_2_device_name(device_type), device_id);
+    LOG_INFO("Detected EMS device: %s (0x%02X)", EMSdevice::device_type_2_device_name(device_type), device_id);
 
     // register the MQTT subscribe topic for this device
     // except for connect, controller and gateway
@@ -1541,68 +1541,69 @@ void EMSESP::start() {
 #ifndef EMSESP_STANDALONE
     system_.PSram(ESP.getPsramSize());
 #endif
-// don't need shell if running unit tests
-#ifndef EMSESP_UNITY
-    // Serial console's shell
+
     serial_console_.begin(SERIAL_CONSOLE_BAUD_RATE);
-    shell_ = std::make_shared<EMSESPConsole>(*this, serial_console_, true);
-    shell_->maximum_log_messages(100);
-    shell_->start();
-#if defined(EMSESP_DEBUG)
-    shell_->log_level(uuid::log::Level::DEBUG);
-#else
-    shell_->log_level(uuid::log::Level::TRACE);
-#endif
-#if defined(EMSESP_STANDALONE)
-    shell_->add_flags(CommandFlags::ADMIN); // always start in su/admin mode when running tests
+
+    // always start a serial console if we're running standalone, except if we're running unit tests
+#if defined(EMSESP_STANDALONE) || defined(EMSESP_DEBUG)
+#ifndef EMSESP_UNITY
+    start_serial_console();
 #endif
 #endif
 
 // start the file system
 #ifndef EMSESP_STANDALONE
     if (!LittleFS.begin(true)) {
-        LOG_INFO("LittleFS Mount Failed. Using default settings.");
+        LOG_ERROR("LittleFS Mount Failed");
         return;
     }
 #endif
 
-// do a quick scan of the filesystem to see if we have a /config folder
-// so we know if this is a new install or not
+// do a quick scan of the filesystem to see if we a settings file in the /config folder
+// so we know if this is a new factory install or not
 #ifndef EMSESP_STANDALONE
-    File root             = LittleFS.open(EMSESP_FS_CONFIG_DIRECTORY);
+    File root             = LittleFS.open(EMSESP_SETTINGS_FILE);
     bool factory_settings = !root;
     if (!root) {
-        LOG_INFO("No config found, assuming factory settings");
+        LOG_WARNING("No settings found on filesystem. Using factory settings.");
     }
     root.close();
 #else
     bool factory_settings = false;
 #endif
 
-    webLogService.begin(); // start web log service. now we can start capturing logs to the web log
+    // start web log service. now we can start capturing logs to the web log
+    webLogService.begin();
 
-    esp8266React.begin(); // loads core system services settings (network, mqtt, ap, ntp etc)
-
-    if (!nvs_.begin("ems-esp", false, "nvs1")) { // try bigger nvs partition on 16M flash first
-        nvs_.begin("ems-esp", false, "nvs");     // fallback to small nvs
-    }
-    LOG_DEBUG("NVS device information: %s", system_.getBBQKeesGatewayDetails().c_str());
+    // loads core system services settings (network, mqtt, ap, ntp etc)
+    esp8266React.begin();
 
 #ifndef EMSESP_STANDALONE
-    LOG_INFO("Booting EMS-ESP version %s from %s partition", EMSESP_APP_VERSION, esp_ota_get_running_partition()->label); // welcome message
+    LOG_INFO("Booting EMS-ESP version %s from %s/%s partition",
+             EMSESP_APP_VERSION,
+             esp_ota_get_boot_partition()->label,
+             esp_ota_get_running_partition()->label); // welcome message
 #else
     LOG_INFO("Booting EMS-ESP version %s", EMSESP_APP_VERSION); // welcome message
 #endif
     LOG_DEBUG("System is running in Debug mode");
     LOG_INFO("Last system reset reason Core0: %s, Core1: %s", system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
 
-    // see if we're restoring a settings file
+// see if we're restoring a settings file
+#ifndef EMSESP_STANDALONE
     if (system_.check_restore()) {
-        LOG_WARNING("System needs a restart to apply new settings. Please wait.");
+        LOG_WARNING("EMS-ESP will restart to apply new settings. Please wait.");
         system_.system_restart();
     };
+#endif
 
-    webSettingsService.begin(); // load EMS-ESP Application settings...
+    if (!nvs_.begin("ems-esp", false, "nvs1")) { // try bigger nvs partition on 16M flash first
+        nvs_.begin("ems-esp", false, "nvs");     // fallback to small nvs
+    }
+
+    LOG_DEBUG("NVS device information: %s", system_.getBBQKeesGatewayDetails().isEmpty() ? "not set" : system_.getBBQKeesGatewayDetails().c_str());
+
+    webSettingsService.begin(); // load EMS-ESP Application settings
 
     // do any system upgrades
     if (system_.check_upgrade(factory_settings)) {
@@ -1653,11 +1654,11 @@ void EMSESP::start() {
 
 // main loop calling all services
 void EMSESP::loop() {
-    esp8266React.loop();              // web services
-    system_.loop();                   // does LED and checks system health, and syslog service
-    static bool upload_status = true; // ready for any OTA uploads
+    esp8266React.loop(); // web services
+    system_.loop();      // does LED and checks system health, and syslog service
 
     // if we're doing an OTA upload, skip everything except from console refresh
+    static bool upload_status = true; // ready for any OTA uploads
     if (!system_.upload_isrunning()) {
         // service loops
         webLogService.loop();       // log in Web UI
@@ -1688,13 +1689,54 @@ void EMSESP::loop() {
     if (system_.telnet_enabled()) {
         telnet_.loop();
     }
-#else
-    if (!shell_->running()) {
-        ::exit(0);
-    }
 #endif
 
     Shell::loop_all();
+
+    static bool show_prompt = true;
+
+    // user has to ctrl-c to create a serial console stream, exit command will close it
+    // this is to save around 2kb of heap memory
+    if (shell_) {
+        if (!shell_->running()) {
+            shell_.reset();
+#ifdef EMSESP_STANDALONE
+            ::exit(0); // kill session
+#endif
+            shell_prompt();
+        }
+    } else {
+        if (show_prompt) {
+            shell_prompt();
+            show_prompt = false; // only show it once
+        }
+        int c = serial_console_.read();
+        if (c != -1) {
+            show_prompt = true;
+        }
+        if (c == '\x03' || c == '\x0C') {
+            start_serial_console();
+        }
+    }
+}
+
+void EMSESP::start_serial_console() {
+    shell_ = std::make_shared<EMSESPConsole>(*this, serial_console_, true);
+    shell_->maximum_log_messages(100);
+    shell_->add_flags(CommandFlags::ADMIN); // always start in su/admin mode when running tests
+    shell_->start();
+#if defined(EMSESP_DEBUG)
+    shell_->log_level(uuid::log::Level::DEBUG);
+#else
+    shell_->log_level(uuid::log::Level::TRACE);
+#endif
+}
+
+void EMSESP::shell_prompt() {
+#ifndef EMSESP_STANDALONE
+    serial_console_.println();
+    serial_console_.println("Press CTRL-C to activate this serial console");
+#endif
 }
 
 } // namespace emsesp

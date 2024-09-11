@@ -177,7 +177,7 @@ const fr: Translation = {
   STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Développement',
   RELEASE_NOTES: 'notes de version',
-  EMS_ESP_VER: 'Version EMS-ESP',
+  EMS_ESP_VER: 'Firmware Version', // TODO translate
   UPTIME: 'Durée de fonctionnement du système',
   FREE_MEMORY: 'Libre Memory',
   PSRAM: 'PSRAM (Taille / Libre)',
@@ -186,10 +186,8 @@ const fr: Translation = {
   FILESYSTEM: 'File System (Utilisée / Libre)',
   BUFFER_SIZE: 'Max taille du buffer',
   COMPACT: 'Compact',
-  DOWNLOAD_CUSTOMIZATION_TEXT: "Télécharger les personnalisations d'entités",
-  DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
-  DOWNLOAD_SETTINGS_TEXT: "Téléchargez les paramètres de l'application. Soyez prudent lorsque vous partagez vos paramètres car ce fichier contient des mots de passe et d'autres informations système sensibles.",
-  UPLOAD_TEXT: "Téléchargez un nouveau fichier de firmware (.bin), un fichier de paramètres ou de personnalisations (.json) ci-dessous, pour une validation optionnelle téléchargez d'abord un fichier (.md5)",
+  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
+  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
   UPLOAD_DROP_TEXT: 'Déposer le fichier ou cliquer ici',
   ERROR: 'Erreur inattendue, veuillez réessayer',
   TIME_SET: 'Time set',
@@ -334,13 +332,13 @@ const fr: Translation = {
   ALLVALUES: 'All Values', // TODO translate
   SPECIAL_FUNCTIONS: 'Special Functions',
   WAIT_FIRMWARE: 'Firmware is uploading and installing', // TODO translate
-  INSTALL_VERSION: 'This will install vesion {0}. Are you sure?', // TODO translate
+  INSTALL_VERSION: 'This will install version {0}. Are you sure?', // TODO translate
   SWITCH_DEV: 'switch to the development version', // TODO translate
   UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
   LATEST_VERSION: 'You are using the latest firmware version.', // TODO translate // TODO translate
   PLEASE_WAIT: 'Please wait', // TODO translate
   RESTARTING_PRE: 'Initializing', // TODO translate
-  RESTARTING_POST: 'Reloading' // TODO translate
+  RESTARTING_POST: 'Preparing' // TODO translate
 };
 
 export default fr;

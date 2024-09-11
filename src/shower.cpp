@@ -106,18 +106,19 @@ void Shower::loop() {
 
                         // duration in seconds
                         doc["duration"] = duration_; // seconds
-                        time_t now      = time(nullptr);
-                        // if NTP enabled, publish timestamp
-                        if (now > 1576800000) { // year 2020
-                            // doc["timestamp_s"] = now; // if needed, in seconds
-                            tm * tm_ = localtime(&now);
-                            char dt[25];
-                            strftime(dt, sizeof(dt), "%FT%T%z", tm_);
-                            doc["timestamp"] = dt;
-                            LOG_INFO("shower finished %s (duration %lu s)", dt, duration_);
-                        } else {
-                            LOG_INFO("shower finished (duration %lu s)", duration_);
-                        }
+                        // time_t now      = time(nullptr);
+                        // // if NTP enabled, publish timestamp
+                        // if (now > 1576800000) { // year 2020
+                        //     // doc["timestamp_s"] = now; // if needed, in seconds
+                        //     tm * tm_ = localtime(&now);
+                        //     char dt[25];
+                        //     strftime(dt, sizeof(dt), "%FT%T%z", tm_);
+                        //     doc["timestamp"] = dt;
+                        //     LOG_INFO("Shower finished %s (duration %lus)", dt, duration_);
+                        // } else {
+                        //     LOG_INFO("Shower finished (duration %lus)", duration_);
+                        // }
+                        LOG_INFO("Shower finished (duration %lus)", duration_);
                         Mqtt::queue_publish("shower_data", doc.as<JsonObject>());
                     }
                 }
@@ -210,7 +211,7 @@ void Shower::set_shower_state(bool state, bool force) {
         ha_configdone_ = Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
         //
-        // shower duaration
+        // shower duration
         //
         doc.clear();
 

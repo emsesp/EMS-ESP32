@@ -466,8 +466,8 @@ bool System::is_valid_gpio(uint8_t pin, bool has_psram) {
         return false; // bad pin
     }
 
-    // extra check for pins 21 and 22 (I2C) when ethernet is enabled
-    if ((EMSESP::system_.ethernet_connected()) && (pin >= 21 && pin <= 22)) {
+    // extra check for pins 21 and 22 (I2C) when ethernet is onboard
+    if ((EMSESP::system_.ethernet_connected() || EMSESP::system_.phy_type_ != PHY_type::PHY_TYPE_NONE) && (pin >= 21 && pin <= 22)) {
         return false; // bad pin
     }
     return true;
@@ -540,6 +540,7 @@ void System::button_init(bool refresh) {
         reload_settings();
     }
 
+#ifndef EMSESP_STANDALONE
     if (!is_valid_gpio(pbutton_gpio_)) {
         LOG_WARNING("Invalid button GPIO. Check config.");
         myPButton_.init(255, HIGH); // disable
@@ -555,6 +556,7 @@ void System::button_init(bool refresh) {
     myPButton_.onDblClick(BUTTON_DblClickDelay, button_OnDblClick);
     myPButton_.onLongPress(BUTTON_LongPressDelay, button_OnLongPress);
     myPButton_.onVLongPress(BUTTON_VLongPressDelay, button_OnVLongPress);
+#endif
 }
 
 // set the LED to on or off when in normal operating mode
@@ -997,7 +999,7 @@ void System::show_system(uuid::console::Shell & shell) {
 #ifndef EMSESP_STANDALONE
     shell.printfln(" Platform: %s (%s)", EMSESP_PLATFORM, ESP.getChipModel());
     shell.printfln(" Model: %s", getBBQKeesGatewayDetails().c_str());
-    shell.printfln(" Partition Boot/Running: %s/%s", esp_ota_get_boot_partition()->label, esp_ota_get_running_partition()->label);
+    shell.printfln(" Partition boot/running: %s/%s", esp_ota_get_boot_partition()->label, esp_ota_get_running_partition()->label);
 #endif
     shell.printfln(" Language: %s", locale().c_str());
     shell.printfln(" Board profile: %s", board_profile().c_str());
@@ -1021,11 +1023,6 @@ void System::show_system(uuid::console::Shell & shell) {
 
     shell.println();
     shell.println("Network:");
-
-    // show ethernet mac address if we have an eth controller present
-    if (eth_present_) {
-        shell.printfln(" Ethernet MAC address: %s", ETH.macAddress().c_str());
-    }
 
     switch (WiFi.status()) {
     case WL_IDLE_STATUS:
@@ -1086,7 +1083,7 @@ void System::show_system(uuid::console::Shell & shell) {
     // show Ethernet if connected
     if (ethernet_connected_) {
         shell.println();
-        shell.printfln(" Status: Ethernet connected");
+        shell.printfln(" Ethernet Status: connected");
         shell.printfln(" Ethernet MAC address: %s", ETH.macAddress().c_str());
         shell.printfln(" Hostname: %s", ETH.getHostname());
         shell.printfln(" IPv4 address: %s/%s", uuid::printable_to_string(ETH.localIP()).c_str(), uuid::printable_to_string(ETH.subnetMask()).c_str());
@@ -1196,7 +1193,7 @@ bool System::check_upgrade(bool factory_settings) {
     version::Semver200_version settings_version(settingsVersion);
 
     if (!missing_version) {
-        LOG_DEBUG("Checking version upgrade (settings file is v%d.%d.%d-%s)",
+        LOG_DEBUG("Checking for version upgrades (settings file has v%d.%d.%d-%s)",
                   settings_version.major(),
                   settings_version.minor(),
                   settings_version.patch(),
@@ -1213,45 +1210,68 @@ bool System::check_upgrade(bool factory_settings) {
 
     // compare versions
     if (this_version > settings_version) {
-        // need upgrade
-        LOG_NOTICE("Upgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
+        // we need to do an upgrade
+        if (missing_version) {
+            LOG_NOTICE("Upgrading to version %d.%d.%d-%s", this_version.major(), this_version.minor(), this_version.patch(), this_version.prerelease().c_str());
+        } else {
+            LOG_NOTICE("Upgrading from version %d.%d.%d-%s to %d.%d.%d-%s",
+                       settings_version.major(),
+                       settings_version.minor(),
+                       settings_version.patch(),
+                       settings_version.prerelease().c_str(),
+                       this_version.major(),
+                       this_version.minor(),
+                       this_version.patch(),
+                       this_version.prerelease().c_str());
+        }
 
         // if we're coming from 3.4.4 or 3.5.0b14 which had no version stored then we need to apply new settings
         if (missing_version) {
-            LOG_INFO("Upgrade: Setting MQTT Entity ID format to older v3.4 format");
+            LOG_INFO("Upgrade: Setting MQTT Entity ID format to older v3.4 format (0)");
             EMSESP::esp8266React.getMqttSettingsService()->update([&](MqttSettings & mqttSettings) {
                 mqttSettings.entity_format = Mqtt::entityFormat::SINGLE_LONG; // use old Entity ID format from v3.4
                 return StateUpdateResult::CHANGED;
             });
         } else if (settings_version.major() == 3 && settings_version.minor() <= 6) {
-            LOG_INFO("Upgrade: Setting MQTT Entity ID format to v3.6 format");
             EMSESP::esp8266React.getMqttSettingsService()->update([&](MqttSettings & mqttSettings) {
                 if (mqttSettings.entity_format == 1) {
                     mqttSettings.entity_format = Mqtt::entityFormat::SINGLE_OLD; // use old Entity ID format from v3.6
+                    LOG_INFO("Upgrade: Setting MQTT Entity ID format to v3.6 format (3)");
                     return StateUpdateResult::CHANGED;
                 } else if (mqttSettings.entity_format == 2) {
                     mqttSettings.entity_format = Mqtt::entityFormat::MULTI_OLD; // use old Entity ID format from v3.6
+                    LOG_INFO("Upgrade: Setting MQTT Entity ID format to v3.6 format (4)");
                     return StateUpdateResult::CHANGED;
                 }
                 return StateUpdateResult::UNCHANGED;
             });
         }
 
-        // force WiFi sleep to off (was default on < 3.7.0-dev-33)
+        // changes to Network
         EMSESP::esp8266React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
-            networkSettings.nosleep = true;
-            return StateUpdateResult::CHANGED;
-        });
-
-        // Network Settings Wifi tx_power is now using the value * 4.
-        EMSESP::esp8266React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
+            // Network Settings Wifi tx_power is now using the value * 4.
             if (networkSettings.tx_power == 20) {
                 networkSettings.tx_power = WIFI_POWER_19_5dBm; // use 19.5 as we don't have 20 anymore
                 LOG_INFO("Upgrade: Setting WiFi TX Power to Auto");
+            }
+
+            // force WiFi sleep to off (was default on < 3.7.0-dev-33)
+            networkSettings.nosleep = true;
+            LOG_INFO("Upgrade: Disabling WiFi nosleep");
+
+            return StateUpdateResult::CHANGED;
+        });
+
+        // changes to application settings
+        EMSESP::webSettingsService.update([&](WebSettings & settings) {
+            // force web buffer to 25 for those boards without psram
+            if (EMSESP::system_.PSram() == 0) {
+                settings.weblog_buffer = 25;
                 return StateUpdateResult::CHANGED;
             }
             return StateUpdateResult::UNCHANGED;
         });
+
 
     } else if (this_version < settings_version) {
         // need downgrade
@@ -1267,7 +1287,7 @@ bool System::check_upgrade(bool factory_settings) {
             settings.version = EMSESP_APP_VERSION;
             return StateUpdateResult::CHANGED;
         });
-        LOG_INFO("Upgrade: Setting version to %s", EMSESP_APP_VERSION);
+        // LOG_INFO("Upgrade: Setting version to %s", EMSESP_APP_VERSION);
         return true; // need reboot
     }
 
@@ -1300,7 +1320,7 @@ bool System::saveSettings(const char * filename, const char * section, JsonObjec
     if (section_json) {
         File section_file = LittleFS.open(filename, "w");
         if (section_file) {
-            LOG_INFO("Applying new %s", section);
+            LOG_INFO("Applying new uploaded %s data", section);
             serializeJson(section_json, section_file);
             section_file.close();
             return true; // reboot required
@@ -1438,7 +1458,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
 #endif
     node["resetReason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 #ifndef EMSESP_STANDALONE
-    node["psram"] = (EMSESP::system_.PSram() > 0); // boolean
+    node["psram"] = (EMSESP::system_.PSram() > 0); // make boolean
     if (EMSESP::system_.PSram()) {
         node["psramSize"] = EMSESP::system_.PSram();
         node["freePsram"] = ESP.getFreePsram() / 1024;
@@ -1756,10 +1776,11 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
                 (int8_t)EMSESP::system_.eth_phy_addr_,
                 (int8_t)EMSESP::system_.eth_clock_mode_};
     } else {
-        // unknown, return false
-        return false;
+        LOG_DEBUG("Couldn't identify board profile %s", board_profile.c_str());
+        return false; // unknown, return false
     }
 
+    // LOG_DEBUG("Found data for board profile %s", board_profile.c_str());
     return true;
 }
 

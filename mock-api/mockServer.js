@@ -1,3 +1,6 @@
+// used to simulate
+//  - file uploads
+//  - EventSource (SSE) for log messages
 import formidable from 'formidable';
 
 function pad(number) {
@@ -81,7 +84,7 @@ export default () => {
                 })
               );
             } else {
-              res.statusCode = 400;
+              res.statusCode = 406;
               console.log('Invalid file extension!');
             }
           }
@@ -99,15 +102,21 @@ export default () => {
 
           let count = 0;
           const interval = setInterval(() => {
+            let message = 'message #' + count;
+            if (count % 6 === 1) {
+              message +=
+                ' with a long message that will be wrapped, to see if it stays one a single line';
+            }
             const data = {
               t: new Date().toISOString(),
               l: 3 + (count % 6),
               i: count,
               n: 'system',
-              m: 'message #' + count++
+              m: message
             };
+            count++;
             res.write(`data: ${JSON.stringify(data)}\n\n`);
-          }, 1000);
+          }, 800);
 
           // if client closes connection
           res.on('close', () => {

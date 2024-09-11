@@ -252,6 +252,9 @@ class EMSESP {
     static void        publish_response(std::shared_ptr<const Telegram> telegram);
     static void        publish_all_loop();
 
+    void shell_prompt();
+    void start_serial_console();
+
     static constexpr uint32_t EMS_FETCH_FREQUENCY = 60000; // check every minute
     static constexpr uint8_t  EMS_WAIT_KM_TIMEOUT = 60;    // wait one minute
 

@@ -40,12 +40,12 @@ CS6800i/WLW176i,boiler,8,emergencytemp,emergency temperature,uint8 (>=15<=70),C,
 CS6800i/WLW176i,boiler,8,nrgtotal,total energy,uint24 (>=0<=167772),kWh,false,sensor.boiler_total_energy,sensor.boiler_nrgtotal,5,0,1/100,80,2
 CS6800i/WLW176i,boiler,8,nrg,energy,uint24 (>=0<=167772),kWh,false,sensor.boiler_dhw_energy,sensor.boiler_dhw_nrg,5,9,1/100,0,2
 CS6800i/WLW176i,boiler,8,nrgheat,energy heating,uint24 (>=0<=167772),kWh,false,sensor.boiler_energy_heating,sensor.boiler_nrgheat,5,0,1/100,82,2
-CS6800i/WLW176i,boiler,8,nrgcool,energy cooling,uint24 (>=0<=167772),kWh,false,sensor.boiler_energy_cooling,sensor.boiler_nrgcool,5,0,1/100,-1,2
+CS6800i/WLW176i,boiler,8,nrgcool,energy cooling,uint24 (>=0<=167772),kWh,false,sensor.boiler_energy_cooling,sensor.boiler_nrgcool,5,0,1/100,264,2
 CS6800i/WLW176i,boiler,8,metertotal,meter total,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_total,sensor.boiler_metertotal,5,0,1/100,84,2
 CS6800i/WLW176i,boiler,8,metercomp,meter compressor,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_compressor,sensor.boiler_metercomp,5,0,1/100,86,2
 CS6800i/WLW176i,boiler,8,metereheat,meter e-heater,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_e-heater,sensor.boiler_metereheat,5,0,1/100,88,2
 CS6800i/WLW176i,boiler,8,meterheat,meter heating,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_heating,sensor.boiler_meterheat,5,0,1/100,90,2
-CS6800i/WLW176i,boiler,8,metercool,meter cooling,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_cooling,sensor.boiler_metercool,5,0,1/100,-1,2
+CS6800i/WLW176i,boiler,8,metercool,meter cooling,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_cooling,sensor.boiler_metercool,5,0,1/100,266,2
 CS6800i/WLW176i,boiler,8,meter,meter,uint24 (>=0<=167772),kWh,false,sensor.boiler_dhw_meter,sensor.boiler_dhw_meter,5,9,1/100,2,2
 CS6800i/WLW176i,boiler,8,uptimetotal,heatpump total uptime,time (>=0<=279620),minutes,false,sensor.boiler_heatpump_total_uptime,sensor.boiler_uptimetotal,5,0,1/60,92,2
 CS6800i/WLW176i,boiler,8,uptimecontrol,total operating time heat,time (>=0<=279620),minutes,false,sensor.boiler_total_operating_time_heat,sensor.boiler_uptimecontrol,5,0,1/60,94,2
@@ -2090,12 +2090,12 @@ Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,bo
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,nrgtotal,total energy,uint24 (>=0<=167772),kWh,false,sensor.boiler_total_energy,sensor.boiler_nrgtotal,5,0,1/100,80,2
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,nrg,energy,uint24 (>=0<=167772),kWh,false,sensor.boiler_dhw_energy,sensor.boiler_dhw_nrg,5,9,1/100,0,2
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,nrgheat,energy heating,uint24 (>=0<=167772),kWh,false,sensor.boiler_energy_heating,sensor.boiler_nrgheat,5,0,1/100,82,2
-Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,nrgcool,energy cooling,uint24 (>=0<=167772),kWh,false,sensor.boiler_energy_cooling,sensor.boiler_nrgcool,5,0,1/100,-1,2
+Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,nrgcool,energy cooling,uint24 (>=0<=167772),kWh,false,sensor.boiler_energy_cooling,sensor.boiler_nrgcool,5,0,1/100,264,2
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,metertotal,meter total,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_total,sensor.boiler_metertotal,5,0,1/100,84,2
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,metercomp,meter compressor,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_compressor,sensor.boiler_metercomp,5,0,1/100,86,2
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,metereheat,meter e-heater,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_e-heater,sensor.boiler_metereheat,5,0,1/100,88,2
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,meterheat,meter heating,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_heating,sensor.boiler_meterheat,5,0,1/100,90,2
-Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,metercool,meter cooling,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_cooling,sensor.boiler_metercool,5,0,1/100,-1,2
+Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,metercool,meter cooling,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_cooling,sensor.boiler_metercool,5,0,1/100,266,2
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,meter,meter,uint24 (>=0<=167772),kWh,false,sensor.boiler_dhw_meter,sensor.boiler_dhw_meter,5,9,1/100,2,2
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,uptimetotal,heatpump total uptime,time (>=0<=279620),minutes,false,sensor.boiler_heatpump_total_uptime,sensor.boiler_uptimetotal,5,0,1/60,92,2
 Enviline/Compress 6000AW/Hybrid 3000-7000iAW/SupraEco/Geo 5xx/WLW196i/WSW196i,boiler,172,uptimecontrol,total operating time heat,time (>=0<=279620),minutes,false,sensor.boiler_total_operating_time_heat,sensor.boiler_uptimecontrol,5,0,1/60,94,2
@@ -2287,12 +2287,12 @@ Geo 5xx,boiler,173,emergencytemp,emergency temperature,uint8 (>=15<=70),C,true,n
 Geo 5xx,boiler,173,nrgtotal,total energy,uint24 (>=0<=167772),kWh,false,sensor.boiler_total_energy,sensor.boiler_nrgtotal,5,0,1/100,80,2
 Geo 5xx,boiler,173,nrg,energy,uint24 (>=0<=167772),kWh,false,sensor.boiler_dhw_energy,sensor.boiler_dhw_nrg,5,9,1/100,0,2
 Geo 5xx,boiler,173,nrgheat,energy heating,uint24 (>=0<=167772),kWh,false,sensor.boiler_energy_heating,sensor.boiler_nrgheat,5,0,1/100,82,2
-Geo 5xx,boiler,173,nrgcool,energy cooling,uint24 (>=0<=167772),kWh,false,sensor.boiler_energy_cooling,sensor.boiler_nrgcool,5,0,1/100,-1,2
+Geo 5xx,boiler,173,nrgcool,energy cooling,uint24 (>=0<=167772),kWh,false,sensor.boiler_energy_cooling,sensor.boiler_nrgcool,5,0,1/100,264,2
 Geo 5xx,boiler,173,metertotal,meter total,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_total,sensor.boiler_metertotal,5,0,1/100,84,2
 Geo 5xx,boiler,173,metercomp,meter compressor,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_compressor,sensor.boiler_metercomp,5,0,1/100,86,2
 Geo 5xx,boiler,173,metereheat,meter e-heater,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_e-heater,sensor.boiler_metereheat,5,0,1/100,88,2
 Geo 5xx,boiler,173,meterheat,meter heating,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_heating,sensor.boiler_meterheat,5,0,1/100,90,2
-Geo 5xx,boiler,173,metercool,meter cooling,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_cooling,sensor.boiler_metercool,5,0,1/100,-1,2
+Geo 5xx,boiler,173,metercool,meter cooling,uint24 (>=0<=167772),kWh,false,sensor.boiler_meter_cooling,sensor.boiler_metercool,5,0,1/100,266,2
 Geo 5xx,boiler,173,meter,meter,uint24 (>=0<=167772),kWh,false,sensor.boiler_dhw_meter,sensor.boiler_dhw_meter,5,9,1/100,2,2
 Geo 5xx,boiler,173,uptimetotal,heatpump total uptime,time (>=0<=279620),minutes,false,sensor.boiler_heatpump_total_uptime,sensor.boiler_uptimetotal,5,0,1/60,92,2
 Geo 5xx,boiler,173,uptimecontrol,total operating time heat,time (>=0<=279620),minutes,false,sensor.boiler_total_operating_time_heat,sensor.boiler_uptimecontrol,5,0,1/60,94,2
@@ -3355,16 +3355,16 @@ UI800/BC400,thermostat,4,hpoperatingstate,heatpump operating state,enum [heating
 UI800/BC400,thermostat,4,controlmode,control mode,enum [weather compensated\|outside basepoint\|n/a\|room\|power\|constant], ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,6,1,1,24,1
 UI800/BC400,thermostat,4,program,program,enum [prog 1\|prog 2], ,true,select.thermostat_hc1_program,select.thermostat_hc1_program,6,1,1,25,1
 UI800/BC400,thermostat,4,tempautotemp,temporary set temperature automode,int8 (>=-1<=30),C,true,number.thermostat_hc1_temporary_set_temperature_automode,number.thermostat_hc1_tempautotemp,6,1,1/2,26,1
-UI800/BC400,thermostat,4,remoteseltemp,temporary set temperature from remote,int8 (>=-63<=63),C,false,sensor.thermostat_hc1_temporary_set_temperature_from_remote,sensor.thermostat_hc1_remoteseltemp,6,1,1/2,27,1
+UI800/BC400,thermostat,4,remoteseltemp,temporary set temperature from remote,int8 (>=-1<=30),C,true,number.thermostat_hc1_temporary_set_temperature_from_remote,number.thermostat_hc1_remoteseltemp,6,1,1/2,27,1
 UI800/BC400,thermostat,4,fastheatup,fast heatup,uint8 (>=0<=100),%,true,number.thermostat_hc1_fast_heatup,number.thermostat_hc1_fastheatup,6,1,1,28,1
 UI800/BC400,thermostat,4,switchonoptimization,switch-on optimization,boolean, ,true,switch.thermostat_hc1_switch-on_optimization,switch.thermostat_hc1_switchonoptimization,6,1,1,29,1
 UI800/BC400,thermostat,4,reducemode,reduce mode,enum [outdoor\|room\|reduce], ,true,select.thermostat_hc1_reduce_mode,select.thermostat_hc1_reducemode,6,1,1,30,1
 UI800/BC400,thermostat,4,noreducetemp,no reduce below temperature,int8 (>=-126<=126),C,true,number.thermostat_hc1_no_reduce_below_temperature,number.thermostat_hc1_noreducetemp,6,1,1,31,1
 UI800/BC400,thermostat,4,reducetemp,off/reduce switch temperature,int8 (>=-126<=126),C,true,number.thermostat_hc1_off/reduce_switch_temperature,number.thermostat_hc1_reducetemp,6,1,1,32,1
 UI800/BC400,thermostat,4,dhwprio,dhw priority,boolean, ,true,switch.thermostat_hc1_dhw_priority,switch.thermostat_hc1_dhwprio,6,1,1,33,1
-UI800/BC400,thermostat,4,cooling,cooling,boolean, ,true,switch.thermostat_hc1_cooling,switch.thermostat_hc1_cooling,6,1,1,34,1
-UI800/BC400,thermostat,4,coolingon,cooling,boolean, ,false,binary_sensor.thermostat_hc1_cooling,binary_sensor.thermostat_hc1_coolingon,6,1,1,35,1
-UI800/BC400,thermostat,4,hpmode,HP Mode,enum [heating\|cooling\|heating&cooling], ,true,select.thermostat_hc1_HP_Mode,select.thermostat_hc1_hpmode,6,1,1,36,1
+UI800/BC400,thermostat,4,hpcooling,hp cooling,boolean, ,true,switch.thermostat_hc1_hp_cooling,switch.thermostat_hc1_hpcooling,6,1,1,34,1
+UI800/BC400,thermostat,4,coolingon,cooling on,boolean, ,false,binary_sensor.thermostat_hc1_cooling_on,binary_sensor.thermostat_hc1_coolingon,6,1,1,35,1
+UI800/BC400,thermostat,4,hpmode,HP Mode,enum [heating\|cooling\|heating & cooling], ,true,select.thermostat_hc1_HP_Mode,select.thermostat_hc1_hpmode,6,1,1,36,1
 UI800/BC400,thermostat,4,dewoffset,dew point offset,uint8 (>=2<=10),K,true,number.thermostat_hc1_dew_point_offset,number.thermostat_hc1_dewoffset,6,1,1,37,1
 UI800/BC400,thermostat,4,roomtempdiff,room temp difference,uint8 (>=0<=254),K,true,number.thermostat_hc1_room_temp_difference,number.thermostat_hc1_roomtempdiff,6,1,1,38,1
 UI800/BC400,thermostat,4,hpminflowtemp,HP min. flow temp.,uint8 (>=0<=254),C,true,number.thermostat_hc1_HP_min._flow_temp.,number.thermostat_hc1_hpminflowtemp,6,1,1,39,1
@@ -3376,10 +3376,10 @@ UI800/BC400,thermostat,4,heatoffdelay,heat-off delay,uint8 (>=1<=48),hours,true,
 UI800/BC400,thermostat,4,instantstart,instant start,uint8 (>=1<=10),K,true,number.thermostat_hc1_instant_start,number.thermostat_hc1_instantstart,6,1,1,45,1
 UI800/BC400,thermostat,4,boost,boost mode,boolean, ,true,switch.thermostat_hc1_boost_mode,switch.thermostat_hc1_boost,6,1,1,46,1
 UI800/BC400,thermostat,4,boosttime,boost time,uint8 (>=0<=254),hours,true,number.thermostat_hc1_boost_time,number.thermostat_hc1_boosttime,6,1,1,47,1
-UI800/BC400,thermostat,4,coolstart,cooling starttemp,uint8 (>=20<=35),C,true,number.thermostat_hc1_cooling_starttemp,number.thermostat_hc1_coolstart,6,1,1,-1,1
-UI800/BC400,thermostat,4,coolondelay,cooling on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_on_delay,number.thermostat_hc1_coolondelay,6,1,1,-1,1
-UI800/BC400,thermostat,4,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,-1,1
-UI800/BC400,thermostat,4,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,-1,1
+UI800/BC400,thermostat,4,coolstart,cooling starttemp,uint8 (>=20<=35),C,true,number.thermostat_hc1_cooling_starttemp,number.thermostat_hc1_coolstart,6,1,1,193,1
+UI800/BC400,thermostat,4,coolondelay,cooling on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_on_delay,number.thermostat_hc1_coolondelay,6,1,1,194,1
+UI800/BC400,thermostat,4,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,195,1
+UI800/BC400,thermostat,4,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,196,1
 UI800/BC400,thermostat,4,mode,mode,enum [off\|eco+\|eco\|comfort\|auto], ,true,select.thermostat_dhw_mode,select.thermostat_dhw_mode,6,9,1,0,1
 UI800/BC400,thermostat,4,settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
 UI800/BC400,thermostat,4,settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
@@ -3471,7 +3471,7 @@ RC30,thermostat,67,disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|s
 RC30,thermostat,67,disinfecthour,disinfection hour,uint8 (>=0<=23), ,true,number.thermostat_dhw_disinfection_hour,number.thermostat_dhw_disinfecthour,6,9,1,14,1
 RC30,thermostat,67,maxtemp,maximum temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_maximum_temperature,number.thermostat_dhw_maxtemp,6,9,1,15,1
 RC30,thermostat,67,onetimekey,one time key function,boolean, ,true,switch.thermostat_dhw_one_time_key_function,switch.thermostat_dhw_onetimekey,6,9,1,16,1
-RC30,thermostat,67,switchtime,program switchtime,string, ,true,sensor.thermostat_dhw_program_switchtime,sensor.thermostat_dhw_switchtime,6,9,1,17,8
+RC30,thermostat,67,switchtimeWW,program switchtime warm water,string, ,true,sensor.thermostat_dhw_program_switchtime_warm_water,sensor.thermostat_dhw_switchtimeWW,6,9,1,17,8
 RC30,thermostat,67,circswitchtime,circulation program switchtime,string, ,true,sensor.thermostat_dhw_circulation_program_switchtime,sensor.thermostat_dhw_circswitchtime,6,9,1,25,8
 RC30,thermostat,67,holidays,holiday dates,string, ,true,sensor.thermostat_dhw_holiday_dates,sensor.thermostat_dhw_holidays,6,9,1,33,13
 RC30,thermostat,67,vacations,vacation dates,string, ,true,sensor.thermostat_dhw_vacation_dates,sensor.thermostat_dhw_vacations,6,9,1,46,13
@@ -3488,7 +3488,7 @@ RC20/Moduline 300,thermostat,77,daytemp2,day temperature T2,uint8 (>=0<=127),C,t
 RC20/Moduline 300,thermostat,77,daytemp3,day temperature T3,uint8 (>=0<=127),C,true,number.thermostat_hc1_day_temperature_T3,number.thermostat_hc1_daytemp3,6,1,1/2,101,1
 RC20/Moduline 300,thermostat,77,daytemp4,day temperature T4,uint8 (>=0<=127),C,true,number.thermostat_hc1_day_temperature_T4,number.thermostat_hc1_daytemp4,6,1,1/2,102,1
 RC20/Moduline 300,thermostat,77,nighttemp,night temperature T1,uint8 (>=0<=127),C,true,number.thermostat_hc1_night_temperature_T1,number.thermostat_hc1_nighttemp,6,1,1/2,49,1
-RC20/Moduline 300,thermostat,77,switchtime,program switchtime,string, ,true,sensor.thermostat_hc1_program_switchtime,sensor.thermostat_hc1_switchtime,6,1,1,103,8
+RC20/Moduline 300,thermostat,77,switchtime,program switchtime,string, ,true,sensor.thermostat_hc1_program_switchtime,sensor.thermostat_hc1_switchtime,6,1,1,197,8
 Moduline 400,thermostat,78,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 Moduline 400,thermostat,78,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 Moduline 400,thermostat,78,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
@@ -3617,7 +3617,7 @@ RC35,thermostat,86,disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|s
 RC35,thermostat,86,disinfecthour,disinfection hour,uint8 (>=0<=23), ,true,number.thermostat_dhw_disinfection_hour,number.thermostat_dhw_disinfecthour,6,9,1,14,1
 RC35,thermostat,86,maxtemp,maximum temperature,uint8 (>=60<=80),C,true,number.thermostat_dhw_maximum_temperature,number.thermostat_dhw_maxtemp,6,9,1,15,1
 RC35,thermostat,86,onetimekey,one time key function,boolean, ,true,switch.thermostat_dhw_one_time_key_function,switch.thermostat_dhw_onetimekey,6,9,1,16,1
-RC35,thermostat,86,switchtime,program switchtime,string, ,true,sensor.thermostat_dhw_program_switchtime,sensor.thermostat_dhw_switchtime,6,9,1,17,8
+RC35,thermostat,86,switchtimeWW,program switchtime warm water,string, ,true,sensor.thermostat_dhw_program_switchtime_warm_water,sensor.thermostat_dhw_switchtimeWW,6,9,1,17,8
 RC35,thermostat,86,circswitchtime,circulation program switchtime,string, ,true,sensor.thermostat_dhw_circulation_program_switchtime,sensor.thermostat_dhw_circswitchtime,6,9,1,25,8
 RC35,thermostat,86,holidays,holiday dates,string, ,true,sensor.thermostat_dhw_holiday_dates,sensor.thermostat_dhw_holidays,6,9,1,33,13
 RC35,thermostat,86,vacations,vacation dates,string, ,true,sensor.thermostat_dhw_vacation_dates,sensor.thermostat_dhw_vacations,6,9,1,46,13
@@ -3652,7 +3652,7 @@ RC20RF,thermostat,93,daytemp2,day temperature T2,uint8 (>=0<=127),C,true,number.
 RC20RF,thermostat,93,daytemp3,day temperature T3,uint8 (>=0<=127),C,true,number.thermostat_hc1_day_temperature_T3,number.thermostat_hc1_daytemp3,6,1,1/2,101,1
 RC20RF,thermostat,93,daytemp4,day temperature T4,uint8 (>=0<=127),C,true,number.thermostat_hc1_day_temperature_T4,number.thermostat_hc1_daytemp4,6,1,1/2,102,1
 RC20RF,thermostat,93,nighttemp,night temperature T1,uint8 (>=0<=127),C,true,number.thermostat_hc1_night_temperature_T1,number.thermostat_hc1_nighttemp,6,1,1/2,49,1
-RC20RF,thermostat,93,switchtime,program switchtime,string, ,true,sensor.thermostat_hc1_program_switchtime,sensor.thermostat_hc1_switchtime,6,1,1,103,8
+RC20RF,thermostat,93,switchtime,program switchtime,string, ,true,sensor.thermostat_hc1_program_switchtime,sensor.thermostat_hc1_switchtime,6,1,1,197,8
 RFM20 Remote,thermostat,94,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 RFM20 Remote,thermostat,94,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 RFM20 Remote,thermostat,94,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
@@ -3724,16 +3724,16 @@ RC200/CW100/CR120,thermostat,157,hpoperatingstate,heatpump operating state,enum 
 RC200/CW100/CR120,thermostat,157,controlmode,control mode,enum [optimized\|simple\|n/a\|room\|power], ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,6,1,1,24,1
 RC200/CW100/CR120,thermostat,157,program,program,enum [prog 1\|prog 2], ,true,select.thermostat_hc1_program,select.thermostat_hc1_program,6,1,1,25,1
 RC200/CW100/CR120,thermostat,157,tempautotemp,temporary set temperature automode,int8 (>=-1<=30),C,true,number.thermostat_hc1_temporary_set_temperature_automode,number.thermostat_hc1_tempautotemp,6,1,1/2,26,1
-RC200/CW100/CR120,thermostat,157,remoteseltemp,temporary set temperature from remote,int8 (>=-63<=63),C,false,sensor.thermostat_hc1_temporary_set_temperature_from_remote,sensor.thermostat_hc1_remoteseltemp,6,1,1/2,27,1
+RC200/CW100/CR120,thermostat,157,remoteseltemp,temporary set temperature from remote,int8 (>=-1<=30),C,true,number.thermostat_hc1_temporary_set_temperature_from_remote,number.thermostat_hc1_remoteseltemp,6,1,1/2,27,1
 RC200/CW100/CR120,thermostat,157,fastheatup,fast heatup,uint8 (>=0<=100),%,true,number.thermostat_hc1_fast_heatup,number.thermostat_hc1_fastheatup,6,1,1,28,1
 RC200/CW100/CR120,thermostat,157,switchonoptimization,switch-on optimization,boolean, ,true,switch.thermostat_hc1_switch-on_optimization,switch.thermostat_hc1_switchonoptimization,6,1,1,29,1
 RC200/CW100/CR120,thermostat,157,reducemode,reduce mode,enum [outdoor\|room\|reduce], ,true,select.thermostat_hc1_reduce_mode,select.thermostat_hc1_reducemode,6,1,1,30,1
 RC200/CW100/CR120,thermostat,157,noreducetemp,no reduce below temperature,int8 (>=-126<=126),C,true,number.thermostat_hc1_no_reduce_below_temperature,number.thermostat_hc1_noreducetemp,6,1,1,31,1
 RC200/CW100/CR120,thermostat,157,reducetemp,off/reduce switch temperature,int8 (>=-126<=126),C,true,number.thermostat_hc1_off/reduce_switch_temperature,number.thermostat_hc1_reducetemp,6,1,1,32,1
 RC200/CW100/CR120,thermostat,157,dhwprio,dhw priority,boolean, ,true,switch.thermostat_hc1_dhw_priority,switch.thermostat_hc1_dhwprio,6,1,1,33,1
-RC200/CW100/CR120,thermostat,157,cooling,cooling,boolean, ,true,switch.thermostat_hc1_cooling,switch.thermostat_hc1_cooling,6,1,1,34,1
-RC200/CW100/CR120,thermostat,157,coolingon,cooling,boolean, ,false,binary_sensor.thermostat_hc1_cooling,binary_sensor.thermostat_hc1_coolingon,6,1,1,35,1
-RC200/CW100/CR120,thermostat,157,hpmode,HP Mode,enum [heating\|cooling\|heating&cooling], ,true,select.thermostat_hc1_HP_Mode,select.thermostat_hc1_hpmode,6,1,1,36,1
+RC200/CW100/CR120,thermostat,157,hpcooling,hp cooling,boolean, ,true,switch.thermostat_hc1_hp_cooling,switch.thermostat_hc1_hpcooling,6,1,1,34,1
+RC200/CW100/CR120,thermostat,157,coolingon,cooling on,boolean, ,false,binary_sensor.thermostat_hc1_cooling_on,binary_sensor.thermostat_hc1_coolingon,6,1,1,35,1
+RC200/CW100/CR120,thermostat,157,hpmode,HP Mode,enum [heating\|cooling\|heating & cooling], ,true,select.thermostat_hc1_HP_Mode,select.thermostat_hc1_hpmode,6,1,1,36,1
 RC200/CW100/CR120,thermostat,157,dewoffset,dew point offset,uint8 (>=2<=10),K,true,number.thermostat_hc1_dew_point_offset,number.thermostat_hc1_dewoffset,6,1,1,37,1
 RC200/CW100/CR120,thermostat,157,roomtempdiff,room temp difference,uint8 (>=0<=254),K,true,number.thermostat_hc1_room_temp_difference,number.thermostat_hc1_roomtempdiff,6,1,1,38,1
 RC200/CW100/CR120,thermostat,157,hpminflowtemp,HP min. flow temp.,uint8 (>=0<=254),C,true,number.thermostat_hc1_HP_min._flow_temp.,number.thermostat_hc1_hpminflowtemp,6,1,1,39,1
@@ -3745,10 +3745,10 @@ RC200/CW100/CR120,thermostat,157,heatoffdelay,heat-off delay,uint8 (>=1<=48),hou
 RC200/CW100/CR120,thermostat,157,instantstart,instant start,uint8 (>=1<=10),K,true,number.thermostat_hc1_instant_start,number.thermostat_hc1_instantstart,6,1,1,45,1
 RC200/CW100/CR120,thermostat,157,boost,boost mode,boolean, ,true,switch.thermostat_hc1_boost_mode,switch.thermostat_hc1_boost,6,1,1,46,1
 RC200/CW100/CR120,thermostat,157,boosttime,boost time,uint8 (>=0<=254),hours,true,number.thermostat_hc1_boost_time,number.thermostat_hc1_boosttime,6,1,1,47,1
-RC200/CW100/CR120,thermostat,157,coolstart,cooling starttemp,uint8 (>=20<=35),C,true,number.thermostat_hc1_cooling_starttemp,number.thermostat_hc1_coolstart,6,1,1,-1,1
-RC200/CW100/CR120,thermostat,157,coolondelay,cooling on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_on_delay,number.thermostat_hc1_coolondelay,6,1,1,-1,1
-RC200/CW100/CR120,thermostat,157,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,-1,1
-RC200/CW100/CR120,thermostat,157,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,-1,1
+RC200/CW100/CR120,thermostat,157,coolstart,cooling starttemp,uint8 (>=20<=35),C,true,number.thermostat_hc1_cooling_starttemp,number.thermostat_hc1_coolstart,6,1,1,193,1
+RC200/CW100/CR120,thermostat,157,coolondelay,cooling on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_on_delay,number.thermostat_hc1_coolondelay,6,1,1,194,1
+RC200/CW100/CR120,thermostat,157,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,195,1
+RC200/CW100/CR120,thermostat,157,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,196,1
 RC200/CW100/CR120,thermostat,157,mode,mode,enum [off\|normal\|comfort\|auto\|own prog], ,true,select.thermostat_dhw_mode,select.thermostat_dhw_mode,6,9,1,0,1
 RC200/CW100/CR120,thermostat,157,settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
 RC200/CW100/CR120,thermostat,157,settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
@@ -3808,16 +3808,16 @@ RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,hpoperating
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,controlmode,control mode,enum [weather compensated\|outside basepoint\|n/a\|room\|power\|constant], ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,6,1,1,24,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,program,program,enum [prog 1\|prog 2], ,true,select.thermostat_hc1_program,select.thermostat_hc1_program,6,1,1,25,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,tempautotemp,temporary set temperature automode,int8 (>=-1<=30),C,true,number.thermostat_hc1_temporary_set_temperature_automode,number.thermostat_hc1_tempautotemp,6,1,1/2,26,1
-RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,remoteseltemp,temporary set temperature from remote,int8 (>=-63<=63),C,false,sensor.thermostat_hc1_temporary_set_temperature_from_remote,sensor.thermostat_hc1_remoteseltemp,6,1,1/2,27,1
+RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,remoteseltemp,temporary set temperature from remote,int8 (>=-1<=30),C,true,number.thermostat_hc1_temporary_set_temperature_from_remote,number.thermostat_hc1_remoteseltemp,6,1,1/2,27,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,fastheatup,fast heatup,uint8 (>=0<=100),%,true,number.thermostat_hc1_fast_heatup,number.thermostat_hc1_fastheatup,6,1,1,28,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,switchonoptimization,switch-on optimization,boolean, ,true,switch.thermostat_hc1_switch-on_optimization,switch.thermostat_hc1_switchonoptimization,6,1,1,29,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,reducemode,reduce mode,enum [outdoor\|room\|reduce], ,true,select.thermostat_hc1_reduce_mode,select.thermostat_hc1_reducemode,6,1,1,30,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,noreducetemp,no reduce below temperature,int8 (>=-126<=126),C,true,number.thermostat_hc1_no_reduce_below_temperature,number.thermostat_hc1_noreducetemp,6,1,1,31,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,reducetemp,off/reduce switch temperature,int8 (>=-126<=126),C,true,number.thermostat_hc1_off/reduce_switch_temperature,number.thermostat_hc1_reducetemp,6,1,1,32,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,dhwprio,dhw priority,boolean, ,true,switch.thermostat_hc1_dhw_priority,switch.thermostat_hc1_dhwprio,6,1,1,33,1
-RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,cooling,cooling,boolean, ,true,switch.thermostat_hc1_cooling,switch.thermostat_hc1_cooling,6,1,1,34,1
-RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,coolingon,cooling,boolean, ,false,binary_sensor.thermostat_hc1_cooling,binary_sensor.thermostat_hc1_coolingon,6,1,1,35,1
-RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,hpmode,HP Mode,enum [heating\|cooling\|heating&cooling], ,true,select.thermostat_hc1_HP_Mode,select.thermostat_hc1_hpmode,6,1,1,36,1
+RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,hpcooling,hp cooling,boolean, ,true,switch.thermostat_hc1_hp_cooling,switch.thermostat_hc1_hpcooling,6,1,1,34,1
+RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,coolingon,cooling on,boolean, ,false,binary_sensor.thermostat_hc1_cooling_on,binary_sensor.thermostat_hc1_coolingon,6,1,1,35,1
+RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,hpmode,HP Mode,enum [heating\|cooling\|heating & cooling], ,true,select.thermostat_hc1_HP_Mode,select.thermostat_hc1_hpmode,6,1,1,36,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,dewoffset,dew point offset,uint8 (>=2<=10),K,true,number.thermostat_hc1_dew_point_offset,number.thermostat_hc1_dewoffset,6,1,1,37,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,roomtempdiff,room temp difference,uint8 (>=0<=254),K,true,number.thermostat_hc1_room_temp_difference,number.thermostat_hc1_roomtempdiff,6,1,1,38,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,hpminflowtemp,HP min. flow temp.,uint8 (>=0<=254),C,true,number.thermostat_hc1_HP_min._flow_temp.,number.thermostat_hc1_hpminflowtemp,6,1,1,39,1
@@ -3829,10 +3829,10 @@ RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,heatoffdela
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,instantstart,instant start,uint8 (>=1<=10),K,true,number.thermostat_hc1_instant_start,number.thermostat_hc1_instantstart,6,1,1,45,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,boost,boost mode,boolean, ,true,switch.thermostat_hc1_boost_mode,switch.thermostat_hc1_boost,6,1,1,46,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,boosttime,boost time,uint8 (>=0<=254),hours,true,number.thermostat_hc1_boost_time,number.thermostat_hc1_boosttime,6,1,1,47,1
-RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,coolstart,cooling starttemp,uint8 (>=20<=35),C,true,number.thermostat_hc1_cooling_starttemp,number.thermostat_hc1_coolstart,6,1,1,-1,1
-RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,coolondelay,cooling on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_on_delay,number.thermostat_hc1_coolondelay,6,1,1,-1,1
-RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,-1,1
-RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,-1,1
+RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,coolstart,cooling starttemp,uint8 (>=20<=35),C,true,number.thermostat_hc1_cooling_starttemp,number.thermostat_hc1_coolstart,6,1,1,193,1
+RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,coolondelay,cooling on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_on_delay,number.thermostat_hc1_coolondelay,6,1,1,194,1
+RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,195,1
+RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,196,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,mode,mode,enum [off\|normal\|comfort\|auto\|own prog], ,true,select.thermostat_dhw_mode,select.thermostat_dhw_mode,6,9,1,0,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
 RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410,thermostat,158,settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
@@ -3892,16 +3892,16 @@ RC100/Moduline 1000/1010,thermostat,165,hpoperatingstate,heatpump operating stat
 RC100/Moduline 1000/1010,thermostat,165,controlmode,control mode,enum [optimized\|simple\|n/a\|room\|power], ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,6,1,1,24,1
 RC100/Moduline 1000/1010,thermostat,165,program,program,enum [prog 1\|prog 2], ,true,select.thermostat_hc1_program,select.thermostat_hc1_program,6,1,1,25,1
 RC100/Moduline 1000/1010,thermostat,165,tempautotemp,temporary set temperature automode,int8 (>=-1<=30),C,true,number.thermostat_hc1_temporary_set_temperature_automode,number.thermostat_hc1_tempautotemp,6,1,1/2,26,1
-RC100/Moduline 1000/1010,thermostat,165,remoteseltemp,temporary set temperature from remote,int8 (>=-63<=63),C,false,sensor.thermostat_hc1_temporary_set_temperature_from_remote,sensor.thermostat_hc1_remoteseltemp,6,1,1/2,27,1
+RC100/Moduline 1000/1010,thermostat,165,remoteseltemp,temporary set temperature from remote,int8 (>=-1<=30),C,true,number.thermostat_hc1_temporary_set_temperature_from_remote,number.thermostat_hc1_remoteseltemp,6,1,1/2,27,1
 RC100/Moduline 1000/1010,thermostat,165,fastheatup,fast heatup,uint8 (>=0<=100),%,true,number.thermostat_hc1_fast_heatup,number.thermostat_hc1_fastheatup,6,1,1,28,1
 RC100/Moduline 1000/1010,thermostat,165,switchonoptimization,switch-on optimization,boolean, ,true,switch.thermostat_hc1_switch-on_optimization,switch.thermostat_hc1_switchonoptimization,6,1,1,29,1
 RC100/Moduline 1000/1010,thermostat,165,reducemode,reduce mode,enum [outdoor\|room\|reduce], ,true,select.thermostat_hc1_reduce_mode,select.thermostat_hc1_reducemode,6,1,1,30,1
 RC100/Moduline 1000/1010,thermostat,165,noreducetemp,no reduce below temperature,int8 (>=-126<=126),C,true,number.thermostat_hc1_no_reduce_below_temperature,number.thermostat_hc1_noreducetemp,6,1,1,31,1
 RC100/Moduline 1000/1010,thermostat,165,reducetemp,off/reduce switch temperature,int8 (>=-126<=126),C,true,number.thermostat_hc1_off/reduce_switch_temperature,number.thermostat_hc1_reducetemp,6,1,1,32,1
 RC100/Moduline 1000/1010,thermostat,165,dhwprio,dhw priority,boolean, ,true,switch.thermostat_hc1_dhw_priority,switch.thermostat_hc1_dhwprio,6,1,1,33,1
-RC100/Moduline 1000/1010,thermostat,165,cooling,cooling,boolean, ,true,switch.thermostat_hc1_cooling,switch.thermostat_hc1_cooling,6,1,1,34,1
-RC100/Moduline 1000/1010,thermostat,165,coolingon,cooling,boolean, ,false,binary_sensor.thermostat_hc1_cooling,binary_sensor.thermostat_hc1_coolingon,6,1,1,35,1
-RC100/Moduline 1000/1010,thermostat,165,hpmode,HP Mode,enum [heating\|cooling\|heating&cooling], ,true,select.thermostat_hc1_HP_Mode,select.thermostat_hc1_hpmode,6,1,1,36,1
+RC100/Moduline 1000/1010,thermostat,165,hpcooling,hp cooling,boolean, ,true,switch.thermostat_hc1_hp_cooling,switch.thermostat_hc1_hpcooling,6,1,1,34,1
+RC100/Moduline 1000/1010,thermostat,165,coolingon,cooling on,boolean, ,false,binary_sensor.thermostat_hc1_cooling_on,binary_sensor.thermostat_hc1_coolingon,6,1,1,35,1
+RC100/Moduline 1000/1010,thermostat,165,hpmode,HP Mode,enum [heating\|cooling\|heating & cooling], ,true,select.thermostat_hc1_HP_Mode,select.thermostat_hc1_hpmode,6,1,1,36,1
 RC100/Moduline 1000/1010,thermostat,165,dewoffset,dew point offset,uint8 (>=2<=10),K,true,number.thermostat_hc1_dew_point_offset,number.thermostat_hc1_dewoffset,6,1,1,37,1
 RC100/Moduline 1000/1010,thermostat,165,roomtempdiff,room temp difference,uint8 (>=0<=254),K,true,number.thermostat_hc1_room_temp_difference,number.thermostat_hc1_roomtempdiff,6,1,1,38,1
 RC100/Moduline 1000/1010,thermostat,165,hpminflowtemp,HP min. flow temp.,uint8 (>=0<=254),C,true,number.thermostat_hc1_HP_min._flow_temp.,number.thermostat_hc1_hpminflowtemp,6,1,1,39,1
@@ -3913,10 +3913,10 @@ RC100/Moduline 1000/1010,thermostat,165,heatoffdelay,heat-off delay,uint8 (>=1<=
 RC100/Moduline 1000/1010,thermostat,165,instantstart,instant start,uint8 (>=1<=10),K,true,number.thermostat_hc1_instant_start,number.thermostat_hc1_instantstart,6,1,1,45,1
 RC100/Moduline 1000/1010,thermostat,165,boost,boost mode,boolean, ,true,switch.thermostat_hc1_boost_mode,switch.thermostat_hc1_boost,6,1,1,46,1
 RC100/Moduline 1000/1010,thermostat,165,boosttime,boost time,uint8 (>=0<=254),hours,true,number.thermostat_hc1_boost_time,number.thermostat_hc1_boosttime,6,1,1,47,1
-RC100/Moduline 1000/1010,thermostat,165,coolstart,cooling starttemp,uint8 (>=20<=35),C,true,number.thermostat_hc1_cooling_starttemp,number.thermostat_hc1_coolstart,6,1,1,-1,1
-RC100/Moduline 1000/1010,thermostat,165,coolondelay,cooling on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_on_delay,number.thermostat_hc1_coolondelay,6,1,1,-1,1
-RC100/Moduline 1000/1010,thermostat,165,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,-1,1
-RC100/Moduline 1000/1010,thermostat,165,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,-1,1
+RC100/Moduline 1000/1010,thermostat,165,coolstart,cooling starttemp,uint8 (>=20<=35),C,true,number.thermostat_hc1_cooling_starttemp,number.thermostat_hc1_coolstart,6,1,1,193,1
+RC100/Moduline 1000/1010,thermostat,165,coolondelay,cooling on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_on_delay,number.thermostat_hc1_coolondelay,6,1,1,194,1
+RC100/Moduline 1000/1010,thermostat,165,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,195,1
+RC100/Moduline 1000/1010,thermostat,165,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,196,1
 RC100/Moduline 1000/1010,thermostat,165,mode,mode,enum [off\|normal\|comfort\|auto\|own prog], ,true,select.thermostat_dhw_mode,select.thermostat_dhw_mode,6,9,1,0,1
 RC100/Moduline 1000/1010,thermostat,165,settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
 RC100/Moduline 1000/1010,thermostat,165,settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
@@ -3977,16 +3977,16 @@ Rego 2000/3000,thermostat,172,hpoperatingstate,heatpump operating state,enum [he
 Rego 2000/3000,thermostat,172,controlmode,control mode,enum [weather compensated\|outside basepoint\|n/a\|room\|power\|constant], ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,6,1,1,24,1
 Rego 2000/3000,thermostat,172,program,program,enum [prog 1\|prog 2], ,true,select.thermostat_hc1_program,select.thermostat_hc1_program,6,1,1,25,1
 Rego 2000/3000,thermostat,172,tempautotemp,temporary set temperature automode,int8 (>=-1<=30),C,true,number.thermostat_hc1_temporary_set_temperature_automode,number.thermostat_hc1_tempautotemp,6,1,1/2,26,1
-Rego 2000/3000,thermostat,172,remoteseltemp,temporary set temperature from remote,int8 (>=-63<=63),C,false,sensor.thermostat_hc1_temporary_set_temperature_from_remote,sensor.thermostat_hc1_remoteseltemp,6,1,1/2,27,1
+Rego 2000/3000,thermostat,172,remoteseltemp,temporary set temperature from remote,int8 (>=-1<=30),C,true,number.thermostat_hc1_temporary_set_temperature_from_remote,number.thermostat_hc1_remoteseltemp,6,1,1/2,27,1
 Rego 2000/3000,thermostat,172,fastheatup,fast heatup,uint8 (>=0<=100),%,true,number.thermostat_hc1_fast_heatup,number.thermostat_hc1_fastheatup,6,1,1,28,1
 Rego 2000/3000,thermostat,172,switchonoptimization,switch-on optimization,boolean, ,true,switch.thermostat_hc1_switch-on_optimization,switch.thermostat_hc1_switchonoptimization,6,1,1,29,1
 Rego 2000/3000,thermostat,172,reducemode,reduce mode,enum [outdoor\|room\|reduce], ,true,select.thermostat_hc1_reduce_mode,select.thermostat_hc1_reducemode,6,1,1,30,1
 Rego 2000/3000,thermostat,172,noreducetemp,no reduce below temperature,int8 (>=-126<=126),C,true,number.thermostat_hc1_no_reduce_below_temperature,number.thermostat_hc1_noreducetemp,6,1,1,31,1
 Rego 2000/3000,thermostat,172,reducetemp,off/reduce switch temperature,int8 (>=-126<=126),C,true,number.thermostat_hc1_off/reduce_switch_temperature,number.thermostat_hc1_reducetemp,6,1,1,32,1
 Rego 2000/3000,thermostat,172,dhwprio,dhw priority,boolean, ,true,switch.thermostat_hc1_dhw_priority,switch.thermostat_hc1_dhwprio,6,1,1,33,1
-Rego 2000/3000,thermostat,172,cooling,cooling,boolean, ,true,switch.thermostat_hc1_cooling,switch.thermostat_hc1_cooling,6,1,1,34,1
-Rego 2000/3000,thermostat,172,coolingon,cooling,boolean, ,false,binary_sensor.thermostat_hc1_cooling,binary_sensor.thermostat_hc1_coolingon,6,1,1,35,1
-Rego 2000/3000,thermostat,172,hpmode,HP Mode,enum [heating\|cooling\|heating&cooling], ,true,select.thermostat_hc1_HP_Mode,select.thermostat_hc1_hpmode,6,1,1,36,1
+Rego 2000/3000,thermostat,172,hpcooling,hp cooling,boolean, ,true,switch.thermostat_hc1_hp_cooling,switch.thermostat_hc1_hpcooling,6,1,1,34,1
+Rego 2000/3000,thermostat,172,coolingon,cooling on,boolean, ,false,binary_sensor.thermostat_hc1_cooling_on,binary_sensor.thermostat_hc1_coolingon,6,1,1,35,1
+Rego 2000/3000,thermostat,172,hpmode,HP Mode,enum [heating\|cooling\|heating & cooling], ,true,select.thermostat_hc1_HP_Mode,select.thermostat_hc1_hpmode,6,1,1,36,1
 Rego 2000/3000,thermostat,172,dewoffset,dew point offset,uint8 (>=2<=10),K,true,number.thermostat_hc1_dew_point_offset,number.thermostat_hc1_dewoffset,6,1,1,37,1
 Rego 2000/3000,thermostat,172,roomtempdiff,room temp difference,uint8 (>=0<=254),K,true,number.thermostat_hc1_room_temp_difference,number.thermostat_hc1_roomtempdiff,6,1,1,38,1
 Rego 2000/3000,thermostat,172,hpminflowtemp,HP min. flow temp.,uint8 (>=0<=254),C,true,number.thermostat_hc1_HP_min._flow_temp.,number.thermostat_hc1_hpminflowtemp,6,1,1,39,1
@@ -3998,10 +3998,10 @@ Rego 2000/3000,thermostat,172,heatoffdelay,heat-off delay,uint8 (>=1<=48),hours,
 Rego 2000/3000,thermostat,172,instantstart,instant start,uint8 (>=1<=10),K,true,number.thermostat_hc1_instant_start,number.thermostat_hc1_instantstart,6,1,1,45,1
 Rego 2000/3000,thermostat,172,boost,boost mode,boolean, ,true,switch.thermostat_hc1_boost_mode,switch.thermostat_hc1_boost,6,1,1,46,1
 Rego 2000/3000,thermostat,172,boosttime,boost time,uint8 (>=0<=254),hours,true,number.thermostat_hc1_boost_time,number.thermostat_hc1_boosttime,6,1,1,47,1
-Rego 2000/3000,thermostat,172,coolstart,cooling starttemp,uint8 (>=20<=35),C,true,number.thermostat_hc1_cooling_starttemp,number.thermostat_hc1_coolstart,6,1,1,-1,1
-Rego 2000/3000,thermostat,172,coolondelay,cooling on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_on_delay,number.thermostat_hc1_coolondelay,6,1,1,-1,1
-Rego 2000/3000,thermostat,172,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,-1,1
-Rego 2000/3000,thermostat,172,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,-1,1
+Rego 2000/3000,thermostat,172,coolstart,cooling starttemp,uint8 (>=20<=35),C,true,number.thermostat_hc1_cooling_starttemp,number.thermostat_hc1_coolstart,6,1,1,193,1
+Rego 2000/3000,thermostat,172,coolondelay,cooling on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_on_delay,number.thermostat_hc1_coolondelay,6,1,1,194,1
+Rego 2000/3000,thermostat,172,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,195,1
+Rego 2000/3000,thermostat,172,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,196,1
 Rego 2000/3000,thermostat,172,mode,mode,enum [normal\|comfort\|eco+], ,true,select.thermostat_dhw_mode,select.thermostat_dhw_mode,6,9,1,0,1
 Rego 2000/3000,thermostat,172,settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
 Rego 2000/3000,thermostat,172,settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
@@ -4088,16 +4088,16 @@ Rego 3000/UI800/WSW196i/BC400,thermostat,253,hpoperatingstate,heatpump operating
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,controlmode,control mode,enum [weather compensated\|outside basepoint\|n/a\|room\|power\|constant], ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,6,1,1,24,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,program,program,enum [prog 1\|prog 2], ,true,select.thermostat_hc1_program,select.thermostat_hc1_program,6,1,1,25,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,tempautotemp,temporary set temperature automode,int8 (>=-1<=30),C,true,number.thermostat_hc1_temporary_set_temperature_automode,number.thermostat_hc1_tempautotemp,6,1,1/2,26,1
-Rego 3000/UI800/WSW196i/BC400,thermostat,253,remoteseltemp,temporary set temperature from remote,int8 (>=-63<=63),C,false,sensor.thermostat_hc1_temporary_set_temperature_from_remote,sensor.thermostat_hc1_remoteseltemp,6,1,1/2,27,1
+Rego 3000/UI800/WSW196i/BC400,thermostat,253,remoteseltemp,temporary set temperature from remote,int8 (>=-1<=30),C,true,number.thermostat_hc1_temporary_set_temperature_from_remote,number.thermostat_hc1_remoteseltemp,6,1,1/2,27,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,fastheatup,fast heatup,uint8 (>=0<=100),%,true,number.thermostat_hc1_fast_heatup,number.thermostat_hc1_fastheatup,6,1,1,28,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,switchonoptimization,switch-on optimization,boolean, ,true,switch.thermostat_hc1_switch-on_optimization,switch.thermostat_hc1_switchonoptimization,6,1,1,29,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,reducemode,reduce mode,enum [outdoor\|room\|reduce], ,true,select.thermostat_hc1_reduce_mode,select.thermostat_hc1_reducemode,6,1,1,30,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,noreducetemp,no reduce below temperature,int8 (>=-126<=126),C,true,number.thermostat_hc1_no_reduce_below_temperature,number.thermostat_hc1_noreducetemp,6,1,1,31,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,reducetemp,off/reduce switch temperature,int8 (>=-126<=126),C,true,number.thermostat_hc1_off/reduce_switch_temperature,number.thermostat_hc1_reducetemp,6,1,1,32,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,dhwprio,dhw priority,boolean, ,true,switch.thermostat_hc1_dhw_priority,switch.thermostat_hc1_dhwprio,6,1,1,33,1
-Rego 3000/UI800/WSW196i/BC400,thermostat,253,cooling,cooling,boolean, ,true,switch.thermostat_hc1_cooling,switch.thermostat_hc1_cooling,6,1,1,34,1
-Rego 3000/UI800/WSW196i/BC400,thermostat,253,coolingon,cooling,boolean, ,false,binary_sensor.thermostat_hc1_cooling,binary_sensor.thermostat_hc1_coolingon,6,1,1,35,1
-Rego 3000/UI800/WSW196i/BC400,thermostat,253,hpmode,HP Mode,enum [heating\|cooling\|heating&cooling], ,true,select.thermostat_hc1_HP_Mode,select.thermostat_hc1_hpmode,6,1,1,36,1
+Rego 3000/UI800/WSW196i/BC400,thermostat,253,hpcooling,hp cooling,boolean, ,true,switch.thermostat_hc1_hp_cooling,switch.thermostat_hc1_hpcooling,6,1,1,34,1
+Rego 3000/UI800/WSW196i/BC400,thermostat,253,coolingon,cooling on,boolean, ,false,binary_sensor.thermostat_hc1_cooling_on,binary_sensor.thermostat_hc1_coolingon,6,1,1,35,1
+Rego 3000/UI800/WSW196i/BC400,thermostat,253,hpmode,HP Mode,enum [heating\|cooling\|heating & cooling], ,true,select.thermostat_hc1_HP_Mode,select.thermostat_hc1_hpmode,6,1,1,36,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,dewoffset,dew point offset,uint8 (>=2<=10),K,true,number.thermostat_hc1_dew_point_offset,number.thermostat_hc1_dewoffset,6,1,1,37,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,roomtempdiff,room temp difference,uint8 (>=0<=254),K,true,number.thermostat_hc1_room_temp_difference,number.thermostat_hc1_roomtempdiff,6,1,1,38,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,hpminflowtemp,HP min. flow temp.,uint8 (>=0<=254),C,true,number.thermostat_hc1_HP_min._flow_temp.,number.thermostat_hc1_hpminflowtemp,6,1,1,39,1
@@ -4109,10 +4109,10 @@ Rego 3000/UI800/WSW196i/BC400,thermostat,253,heatoffdelay,heat-off delay,uint8 (
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,instantstart,instant start,uint8 (>=1<=10),K,true,number.thermostat_hc1_instant_start,number.thermostat_hc1_instantstart,6,1,1,45,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,boost,boost mode,boolean, ,true,switch.thermostat_hc1_boost_mode,switch.thermostat_hc1_boost,6,1,1,46,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,boosttime,boost time,uint8 (>=0<=254),hours,true,number.thermostat_hc1_boost_time,number.thermostat_hc1_boosttime,6,1,1,47,1
-Rego 3000/UI800/WSW196i/BC400,thermostat,253,coolstart,cooling starttemp,uint8 (>=20<=35),C,true,number.thermostat_hc1_cooling_starttemp,number.thermostat_hc1_coolstart,6,1,1,-1,1
-Rego 3000/UI800/WSW196i/BC400,thermostat,253,coolondelay,cooling on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_on_delay,number.thermostat_hc1_coolondelay,6,1,1,-1,1
-Rego 3000/UI800/WSW196i/BC400,thermostat,253,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,-1,1
-Rego 3000/UI800/WSW196i/BC400,thermostat,253,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,-1,1
+Rego 3000/UI800/WSW196i/BC400,thermostat,253,coolstart,cooling starttemp,uint8 (>=20<=35),C,true,number.thermostat_hc1_cooling_starttemp,number.thermostat_hc1_coolstart,6,1,1,193,1
+Rego 3000/UI800/WSW196i/BC400,thermostat,253,coolondelay,cooling on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_on_delay,number.thermostat_hc1_coolondelay,6,1,1,194,1
+Rego 3000/UI800/WSW196i/BC400,thermostat,253,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,195,1
+Rego 3000/UI800/WSW196i/BC400,thermostat,253,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,196,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,mode,mode,enum [off\|eco+\|eco\|comfort\|auto], ,true,select.thermostat_dhw_mode,select.thermostat_dhw_mode,6,9,1,0,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
 Rego 3000/UI800/WSW196i/BC400,thermostat,253,settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
@@ -4204,7 +4204,7 @@ ES73,thermostat,76,disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|s
 ES73,thermostat,76,disinfecthour,disinfection hour,uint8 (>=0<=23), ,true,number.thermostat_dhw_disinfection_hour,number.thermostat_dhw_disinfecthour,6,9,1,14,1
 ES73,thermostat,76,maxtemp,maximum temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_maximum_temperature,number.thermostat_dhw_maxtemp,6,9,1,15,1
 ES73,thermostat,76,onetimekey,one time key function,boolean, ,true,switch.thermostat_dhw_one_time_key_function,switch.thermostat_dhw_onetimekey,6,9,1,16,1
-ES73,thermostat,76,switchtime,program switchtime,string, ,true,sensor.thermostat_dhw_program_switchtime,sensor.thermostat_dhw_switchtime,6,9,1,17,8
+ES73,thermostat,76,switchtimeWW,program switchtime warm water,string, ,true,sensor.thermostat_dhw_program_switchtime_warm_water,sensor.thermostat_dhw_switchtimeWW,6,9,1,17,8
 ES73,thermostat,76,circswitchtime,circulation program switchtime,string, ,true,sensor.thermostat_dhw_circulation_program_switchtime,sensor.thermostat_dhw_circswitchtime,6,9,1,25,8
 ES73,thermostat,76,holidays,holiday dates,string, ,true,sensor.thermostat_dhw_holiday_dates,sensor.thermostat_dhw_holidays,6,9,1,33,13
 ES73,thermostat,76,vacations,vacation dates,string, ,true,sensor.thermostat_dhw_vacation_dates,sensor.thermostat_dhw_vacations,6,9,1,46,13
@@ -4284,7 +4284,7 @@ ES79,thermostat,156,disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|
 ES79,thermostat,156,disinfecthour,disinfection hour,uint8 (>=0<=23), ,true,number.thermostat_dhw_disinfection_hour,number.thermostat_dhw_disinfecthour,6,9,1,14,1
 ES79,thermostat,156,maxtemp,maximum temperature,uint8 (>=60<=80),C,true,number.thermostat_dhw_maximum_temperature,number.thermostat_dhw_maxtemp,6,9,1,15,1
 ES79,thermostat,156,onetimekey,one time key function,boolean, ,true,switch.thermostat_dhw_one_time_key_function,switch.thermostat_dhw_onetimekey,6,9,1,16,1
-ES79,thermostat,156,switchtime,program switchtime,string, ,true,sensor.thermostat_dhw_program_switchtime,sensor.thermostat_dhw_switchtime,6,9,1,17,8
+ES79,thermostat,156,switchtimeWW,program switchtime warm water,string, ,true,sensor.thermostat_dhw_program_switchtime_warm_water,sensor.thermostat_dhw_switchtimeWW,6,9,1,17,8
 ES79,thermostat,156,circswitchtime,circulation program switchtime,string, ,true,sensor.thermostat_dhw_circulation_program_switchtime,sensor.thermostat_dhw_circswitchtime,6,9,1,25,8
 ES79,thermostat,156,holidays,holiday dates,string, ,true,sensor.thermostat_dhw_holiday_dates,sensor.thermostat_dhw_holidays,6,9,1,33,13
 ES79,thermostat,156,vacations,vacation dates,string, ,true,sensor.thermostat_dhw_vacation_dates,sensor.thermostat_dhw_vacations,6,9,1,46,13
@@ -4808,8 +4808,8 @@ SM50,solar,162,externalcyl,external cylinder,boolean, ,true,switch.solar_externa
 SM50,solar,162,thermaldisinfect,thermal disinfection,boolean, ,true,switch.solar_thermal_disinfection,switch.solar_thermaldisinfect,8,0,1,41,1
 SM50,solar,162,heatmetering,heatmetering,boolean, ,true,switch.solar_heatmetering,switch.solar_heatmetering,8,0,1,42,1
 SM50,solar,162,activated,activated,boolean, ,true,switch.solar_activated,switch.solar_activated,8,0,1,43,1
-SM50,solar,162,solarpumpmode,pump mode,enum [constant\|pwm\|analog], ,true,select.solar_pump_mode,select.solar_solarpumpmode,8,0,1,44,1
-SM50,solar,162,pumpkick,pump kick,boolean, ,true,switch.solar_pump_kick,switch.solar_pumpkick,8,0,1,45,1
+SM50,solar,162,solarpumpmode,solar pump mode,enum [constant\|pwm\|analog], ,true,select.solar_solar_pump_mode,select.solar_solarpumpmode,8,0,1,44,1
+SM50,solar,162,solarpumpkick,solar pump kick,boolean, ,true,switch.solar_solar_pump_kick,switch.solar_solarpumpkick,8,0,1,45,1
 SM50,solar,162,plainwatermode,plain water mode,boolean, ,true,switch.solar_plain_water_mode,switch.solar_plainwatermode,8,0,1,46,1
 SM50,solar,162,doublematchflow,doublematchflow,boolean, ,true,switch.solar_doublematchflow,switch.solar_doublematchflow,8,0,1,47,1
 SM50,solar,162,pump2minmod,minimum pump 2 modulation,uint8 (>=0<=100),%,true,number.solar_minimum_pump_2_modulation,number.solar_pump2minmod,8,0,1,48,1
@@ -4862,8 +4862,8 @@ SM100/MS100,solar,163,externalcyl,external cylinder,boolean, ,true,switch.solar_
 SM100/MS100,solar,163,thermaldisinfect,thermal disinfection,boolean, ,true,switch.solar_thermal_disinfection,switch.solar_thermaldisinfect,8,0,1,41,1
 SM100/MS100,solar,163,heatmetering,heatmetering,boolean, ,true,switch.solar_heatmetering,switch.solar_heatmetering,8,0,1,42,1
 SM100/MS100,solar,163,activated,activated,boolean, ,true,switch.solar_activated,switch.solar_activated,8,0,1,43,1
-SM100/MS100,solar,163,solarpumpmode,pump mode,enum [constant\|pwm\|analog], ,true,select.solar_pump_mode,select.solar_solarpumpmode,8,0,1,44,1
-SM100/MS100,solar,163,pumpkick,pump kick,boolean, ,true,switch.solar_pump_kick,switch.solar_pumpkick,8,0,1,45,1
+SM100/MS100,solar,163,solarpumpmode,solar pump mode,enum [constant\|pwm\|analog], ,true,select.solar_solar_pump_mode,select.solar_solarpumpmode,8,0,1,44,1
+SM100/MS100,solar,163,solarpumpkick,solar pump kick,boolean, ,true,switch.solar_solar_pump_kick,switch.solar_solarpumpkick,8,0,1,45,1
 SM100/MS100,solar,163,plainwatermode,plain water mode,boolean, ,true,switch.solar_plain_water_mode,switch.solar_plainwatermode,8,0,1,46,1
 SM100/MS100,solar,163,doublematchflow,doublematchflow,boolean, ,true,switch.solar_doublematchflow,switch.solar_doublematchflow,8,0,1,47,1
 SM100/MS100,solar,163,pump2minmod,minimum pump 2 modulation,uint8 (>=0<=100),%,true,number.solar_minimum_pump_2_modulation,number.solar_pump2minmod,8,0,1,48,1
@@ -4916,8 +4916,8 @@ SM200/MS200,solar,164,externalcyl,external cylinder,boolean, ,true,switch.solar_
 SM200/MS200,solar,164,thermaldisinfect,thermal disinfection,boolean, ,true,switch.solar_thermal_disinfection,switch.solar_thermaldisinfect,8,0,1,41,1
 SM200/MS200,solar,164,heatmetering,heatmetering,boolean, ,true,switch.solar_heatmetering,switch.solar_heatmetering,8,0,1,42,1
 SM200/MS200,solar,164,activated,activated,boolean, ,true,switch.solar_activated,switch.solar_activated,8,0,1,43,1
-SM200/MS200,solar,164,solarpumpmode,pump mode,enum [constant\|pwm\|analog], ,true,select.solar_pump_mode,select.solar_solarpumpmode,8,0,1,44,1
-SM200/MS200,solar,164,pumpkick,pump kick,boolean, ,true,switch.solar_pump_kick,switch.solar_pumpkick,8,0,1,45,1
+SM200/MS200,solar,164,solarpumpmode,solar pump mode,enum [constant\|pwm\|analog], ,true,select.solar_solar_pump_mode,select.solar_solarpumpmode,8,0,1,44,1
+SM200/MS200,solar,164,solarpumpkick,solar pump kick,boolean, ,true,switch.solar_solar_pump_kick,switch.solar_solarpumpkick,8,0,1,45,1
 SM200/MS200,solar,164,plainwatermode,plain water mode,boolean, ,true,switch.solar_plain_water_mode,switch.solar_plainwatermode,8,0,1,46,1
 SM200/MS200,solar,164,doublematchflow,doublematchflow,boolean, ,true,switch.solar_doublematchflow,switch.solar_doublematchflow,8,0,1,47,1
 SM200/MS200,solar,164,pump2minmod,minimum pump 2 modulation,uint8 (>=0<=100),%,true,number.solar_minimum_pump_2_modulation,number.solar_pump2minmod,8,0,1,48,1

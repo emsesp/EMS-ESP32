@@ -177,7 +177,7 @@ const no: Translation = {
   STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Development',
   RELEASE_NOTES: 'release notes',
-  EMS_ESP_VER: 'EMS-ESP Version',
+  EMS_ESP_VER: 'Firmware Version', // TODO translate
   UPTIME: 'System Oppetid',
   FREE_MEMORY: 'Ledig Memory',
   PSRAM: 'PSRAM (Størrelse / Ledig)',
@@ -186,10 +186,8 @@ const no: Translation = {
   FILESYSTEM: 'File System (Brukt / Ledig)',
   BUFFER_SIZE: 'Max Buffer Størrelse',
   COMPACT: 'Komprimere',
-  DOWNLOAD_CUSTOMIZATION_TEXT: 'Last ned objektstilpasninger',
-  DOWNLOAD_SCHEDULE_TEXT: 'Last ned planlagte oppgaver',
-  DOWNLOAD_SETTINGS_TEXT: 'Last ned applikasjonskonfigurasjon. Vær varsom med å dele fila da den inneholder passord og annen sensitiv system informasjon',
-  UPLOAD_TEXT: 'Last opp en ny firmware (.bin) fil, innstillinger eller tilpassninger (.json) fil nedenfor',
+  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
+  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
   UPLOAD_DROP_TEXT: 'Slipp fil eller klikk her',
   ERROR: 'Ukjent feil, prøv igjen',
   TIME_SET: 'Still in tid',
@@ -334,13 +332,13 @@ const no: Translation = {
   ALLVALUES: 'All Values', // TODO translate
   SPECIAL_FUNCTIONS: 'Special Functions', // TODO translate
   WAIT_FIRMWARE: 'Firmware is uploading and installing', // TODO translate
-  INSTALL_VERSION: 'This will install vesion {0}. Are you sure?', // TODO translate
+  INSTALL_VERSION: 'This will install version {0}. Are you sure?', // TODO translate
   SWITCH_DEV: 'switch to the development version', // TODO translate
   UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
   LATEST_VERSION: 'You are using the latest firmware version.', // TODO translate
   PLEASE_WAIT: 'Please wait', // TODO translate
   RESTARTING_PRE: 'Initializing', // TODO translate
-  RESTARTING_POST: 'Reloading' // TODO translate
+  RESTARTING_POST: 'Preparing' // TODO translate
 };
 
 export default no;

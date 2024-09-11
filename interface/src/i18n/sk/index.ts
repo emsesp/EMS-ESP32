@@ -177,19 +177,17 @@ const sk: Translation = {
   STABLE: 'Stabilná', // TODO translate
   DEVELOPMENT: 'Vývojárska',
   RELEASE_NOTES: 'poznámky k verzii',
-  EMS_ESP_VER: 'EMS-ESP verzia',
+  EMS_ESP_VER: 'Firmware verzia',
   UPTIME: 'Beh systému',
-  FREE_MEMORY: 'Voľná pamäť', // TODO translate
+  FREE_MEMORY: 'Voľné Memory',
   PSRAM: 'PSRAM (Veľkosť / Voľné)',
   FLASH: 'Flash chip (Veľkosť , Rýchlosť)',
   APPSIZE: 'Applikácia (Oddiel: Použité / Voľné)',
   FILESYSTEM: 'Súborový systém (Použité / Voľné)',
   BUFFER_SIZE: 'Buffer-max.veľkosť',
   COMPACT: 'Kompaktné',
-  DOWNLOAD_CUSTOMIZATION_TEXT: 'Stiahnutie prispôsobení entity',
-  DOWNLOAD_SCHEDULE_TEXT: 'Stiahnutie plánovača udalostí',
-  DOWNLOAD_SETTINGS_TEXT: 'Stiahnite si nastavenia aplikácie. Pri zdieľaní nastavení buďte opatrní, pretože tento súbor obsahuje heslá a iné citlivé systémové informácie.',
-  UPLOAD_TEXT: 'Najskôr nahrajte nový súbor firmvéru (.bin), nastavenia alebo prispôsobenia (.json), pre voliteľné overenie nahrajte súbor (.md5)',
+  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
+  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
   UPLOAD_DROP_TEXT: 'Potiahnúť a pripnúť súbor alebo kliknúť sem',
   ERROR: 'Neočakávaná chyba, prosím skúste to znova',
   TIME_SET: 'Nastavený čas',

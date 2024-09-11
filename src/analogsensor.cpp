@@ -29,6 +29,7 @@ void AnalogSensor::start() {
     if (!analog_enabled_) {
         return;
     }
+
     analogSetAttenuation(ADC_2_5db); // for all channels 1.5V
 
     LOG_INFO("Starting Analog Sensor service");
@@ -135,9 +136,9 @@ void AnalogSensor::reload(bool get_nvs) {
 
         // first check if the GPIO is valid. If not, force set it to disabled
         if (!System::is_valid_gpio(sensor.gpio())) {
-            LOG_WARNING("Bad GPIO %d for Sensor %s", sensor.gpio(), sensor.name().c_str());
+            LOG_WARNING("Bad GPIO %d for Sensor %s. Disabling.", sensor.gpio(), sensor.name().c_str());
             sensor.set_type(AnalogType::NOTUSED);
-            continue;
+            continue; // skip this loop pass
         }
 
         if (sensor.type() == AnalogType::ADC) {
@@ -260,6 +261,7 @@ void AnalogSensor::measure() {
                     sensor.sum_    = (sensor.sum_ * 511) / 512 + a;
                     sensor.analog_ = sensor.sum_ / 512;
                 }
+
                 // detect change with little hysteresis on raw mV value
                 if (sensor.last_reading_ + 1 < sensor.analog_ || sensor.last_reading_ > sensor.analog_ + 1) {
                     sensor.set_value(((int32_t)sensor.analog_ - sensor.offset()) * sensor.factor());
@@ -300,6 +302,7 @@ void AnalogSensor::measure() {
                     sensor.last_polltime_ = sensor.polltime_;
                 }
             }
+
             // see if there is a change and increment # reads
             if (old_value != sensor.value()) {
                 sensorreads_++;
@@ -308,6 +311,7 @@ void AnalogSensor::measure() {
             }
         }
     }
+
     // store counter-values only every hour to reduce flash wear
     static uint8_t lastSaveHour = 0;
     time_t         now          = time(nullptr);

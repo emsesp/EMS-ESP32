@@ -70,4 +70,5 @@ export interface LogSettings {
   level: number;
   max_messages: number;
   compact: boolean;
+  psram: boolean;
 }

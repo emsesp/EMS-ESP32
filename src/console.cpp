@@ -68,7 +68,7 @@ static std::vector<std::string> log_level_autocomplete(Shell & shell, const std:
 }
 
 static void setup_commands(std::shared_ptr<Commands> & commands) {
-    // log, exit, help
+    // exit, help, log
     commands->add_command(ShellContext::MAIN, CommandFlags::USER, {F_(exit)}, EMSESPShell::main_exit_function);
     commands->add_command(ShellContext::MAIN, CommandFlags::USER, {F_(help)}, EMSESPShell::main_help_function);
     commands->add_command(ShellContext::MAIN, CommandFlags::USER, {F_(log)}, {F_(log_level_optional)}, console_log_level, log_level_autocomplete);
@@ -90,6 +90,10 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                           CommandFlags::USER,
                           string_vector{F_(show), F_(devices)},
                           [](Shell & shell, const std::vector<std::string> & arguments) { to_app(shell).show_devices(shell); });
+
+    commands->add_command(ShellContext::MAIN, CommandFlags::USER, string_vector{F_(show), F_(log)}, [](Shell & shell, const std::vector<std::string> & arguments) {
+        to_app(shell).webLogService.show(shell);
+    });
 
 
     commands->add_command(ShellContext::MAIN, CommandFlags::USER, string_vector{F_(show), F_(ems)}, [](Shell & shell, const std::vector<std::string> & arguments) {
@@ -269,7 +273,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
         ShellContext::MAIN,
         CommandFlags::ADMIN,
         string_vector{F_(set), F_(board_profile)},
-        string_vector{F_(name_mandatory), F_(nvs_optional)},
+        string_vector{F_(name_mandatory)},
         [](Shell & shell, const std::vector<std::string> & arguments) {
             std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
             std::string         board_profile = Helpers::toUpper(arguments.front());
@@ -277,9 +281,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                 shell.println("Invalid board profile (S32, E32, E32V2, MH-ET, NODEMCU, LOLIN, OLIMEX, OLIMEXPOE, C3MINI, S2MINI, S3MINI, S32S3, CUSTOM)");
                 return;
             }
-            if (arguments.size() == 2 && Helpers::toLower(arguments.back()) == "nvs") {
-                to_app(shell).nvs_.putString("boot", board_profile.c_str());
-            }
+
             to_app(shell).webSettingsService.update([&](WebSettings & settings) {
                 settings.board_profile  = board_profile.c_str();
                 settings.led_gpio       = data[0];
@@ -686,7 +688,11 @@ void EMSESPShell::end_of_transmission() {
 
 void EMSESPShell::main_help_function(Shell & shell, const std::vector<std::string> & arguments) {
     shell.println();
+#ifndef EMSESP_DEBUG
     shell.printfln("%s%sEMS-ESP version %s%s", COLOR_BRIGHT_GREEN, COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_RESET);
+#else
+    shell.printfln("%s%sEMS-ESP version %s%s (DEBUG)", COLOR_BRIGHT_GREEN, COLOR_BOLD_ON, EMSESP_APP_VERSION, COLOR_RESET);
+#endif
     shell.println();
     shell.print_all_available_commands();
 }
@@ -695,7 +701,7 @@ void EMSESPShell::main_exit_function(Shell & shell, const std::vector<std::strin
     shell.stop();
 }
 
-//  **** EMSESPConsole *****
+//  **** EMSESPConsole Class *****
 
 #ifndef EMSESP_STANDALONE
 std::vector<bool> EMSESPConsole::ptys_;

@@ -35,12 +35,17 @@
 - RC310 cooling parameters [#1857](https://github.com/emsesp/EMS-ESP32/issues/1857)
 - command `api/device/entities` [#1897](https://github.com/emsesp/EMS-ESP32/issues/1897)
 - switchprogmode [#1903]<https://github.com/emsesp/EMS-ESP32/discussions/1903>
-- Autodetect and download firmware upgrades
+- Autodetect and download firmware upgrades via the WebUI
+- command 'show log' that lists out the current weblog buffer, showing last messages.
+- default web log buffer to 25 lines for ESP32s with no PSRAM
+- Try and determine correct board profile if none is set
 
 ## Fixed
 
 - remote thermostat emulation for RC200 on Rego2000/3000 thermostats [#1691](https://github.com/emsesp/EMS-ESP32/discussions/1691)
 - log shows data for F7/F9 requests
+- Detection of LittleFS for factory setting wasn't working
+- Check for bad GPIOs with Ethernet before the ethernet is initialized
 
 ## Changed
 
@@ -58,4 +63,5 @@
 - Change key-names in JSON to be compliant and consistent [#1860](https://github.com/emsesp/EMS-ESP32/issues/1860)
 - Updates to webUI [#1920](https://github.com/emsesp/EMS-ESP32/issues/1920)
 - Correct firmware naming #1933 [#1933](https://github.com/emsesp/EMS-ESP32/issues/1933)
-  
+- Don't start Serial console if not connected to a Serial port. Will initiate manually after a CTRL-C  
+- WebLog UI matches color schema of the terminal console correctly

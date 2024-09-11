@@ -44,7 +44,7 @@ const SingleUpload = ({ doRestart }) => {
     abort: cancelUpload
   } = useRequest(SystemApi.uploadFile, {
     immediate: false
-  }).onComplete(({ data }) => {
+  }).onSuccess(({ data }) => {
     if (data) {
       setMd5(data.md5 as string);
       toast.success(LL.UPLOAD() + ' MD5 ' + LL.SUCCESSFUL());
@@ -59,10 +59,8 @@ const SingleUpload = ({ doRestart }) => {
       await sendUpload(file).catch((error: Error) => {
         if (error.message === 'The user aborted a request') {
           toast.warning(LL.UPLOAD() + ' ' + LL.ABORTED());
-        } else if (error.message === 'Network Error') {
-          toast.warning('Invalid file extension or incompatible bin file');
         } else {
-          toast.error(error.message);
+          toast.warning('Invalid file extension or incompatible bin file');
         }
       });
     }

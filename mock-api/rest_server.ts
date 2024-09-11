@@ -124,7 +124,8 @@ const LOG_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'logSettings';
 let log_settings = {
   level: 6,
   max_messages: 50,
-  compact: true
+  compact: true,
+  psram: true
 };
 
 const FETCH_LOG_ENDPOINT = REST_ENDPOINT_ROOT + 'fetchLog';

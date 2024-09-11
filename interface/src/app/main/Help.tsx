@@ -102,7 +102,7 @@ const Help = () => {
             color="primary"
             onClick={() => callAPI('system', 'info')}
           >
-            {LL.SUPPORT_INFORMATION(0)}
+            {LL.DOWNLOAD(1)}&nbsp;{LL.SUPPORT_INFORMATION(0)}
           </Button>
         </Box>
 
@@ -113,24 +113,24 @@ const Help = () => {
           color="primary"
           onClick={() => callAPI('system', 'allvalues')}
         >
-          {LL.ALLVALUES()}
+          {LL.DOWNLOAD(1)}&nbsp;{LL.ALLVALUES()}
         </Button>
 
-        <Box border={1} p={1} mt={4}>
-          <Typography align="center" variant="subtitle1" color="orange">
-            <b>{LL.HELP_INFORMATION_5()}</b>
+        <Box sx={{ p: 2, mt: 4, border: '1px dashed orange' }}>
+          <Typography align="center" variant="subtitle1">
+            {LL.HELP_INFORMATION_5()}
           </Typography>
-          <Typography align="center">
+          <Typography align="center" mt={1}>
             <Link
               target="_blank"
               href="https://github.com/emsesp/EMS-ESP32"
               color="primary"
             >
-              {'github.com/emsesp/EMS-ESP32'}
+              {'https://github.com/emsesp/EMS-ESP32'}
             </Link>
           </Typography>
-          <Typography color="white" variant="subtitle2" align="center">
-            @proddy @MichaelDvP
+          <Typography color="white" variant="subtitle1" align="center">
+            &copy;&nbsp;emsesp.org
           </Typography>
         </Box>
       </SectionContent>

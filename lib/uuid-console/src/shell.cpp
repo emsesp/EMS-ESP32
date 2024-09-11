@@ -85,11 +85,7 @@ void Shell::stop() {
 
         blocking_data->stop_ = true;
     } else {
-#if defined(EMSESP_STANDALONE)
         if (running()) {
-#else
-        if (running() && !has_flags(CommandFlags::LOCAL)) { // do not close local shell
-#endif
             stopped_ = true;
             stopped();
         }

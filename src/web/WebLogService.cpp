@@ -18,6 +18,8 @@
 
 #include "emsesp.h"
 
+using ::uuid::console::Shell;
+
 namespace emsesp {
 
 WebLogService::WebLogService(AsyncWebServer * server, SecurityManager * securityManager)
@@ -75,12 +77,15 @@ size_t WebLogService::maximum_log_messages() const {
 
 void WebLogService::maximum_log_messages(size_t count) {
     maximum_log_messages_ = std::max((size_t)1, count);
+
     if (limit_log_messages_ > maximum_log_messages_) {
         limit_log_messages_ = maximum_log_messages_;
     }
+
     while (log_messages_.size() > maximum_log_messages_) {
         log_messages_.pop_front();
     }
+
     EMSESP::webSettingsService.update([&](WebSettings & settings) {
         settings.weblog_buffer = count;
         return StateUpdateResult::CHANGED;
@@ -130,6 +135,42 @@ void WebLogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
             }
         }
     });
+}
+
+// dumps out the contents of log buffer to shell console
+void WebLogService::show(Shell & shell) {
+    if (log_messages_.empty()) {
+        return;
+    }
+
+    shell.println();
+    shell.printfln("Last Log (filtered by WebLog's level %s & buffer %d):", format_level_uppercase(log_level()), maximum_log_messages());
+    shell.println();
+
+    for (const auto & message : log_messages_) {
+        log_message_id_tail_ = message.id_;
+
+        shell.print(uuid::log::format_timestamp_ms(message.content_->uptime_ms, 3));
+        shell.printf(" %c %lu: [%s] ", uuid::log::format_level_char(message.content_->level), message.id_, message.content_->name);
+
+        if ((message.content_->level == uuid::log::Level::ERR) || (message.content_->level == uuid::log::Level::WARNING)) {
+            shell.print(COLOR_RED);
+            shell.println(message.content_->text);
+            shell.print(COLOR_RESET);
+        } else if (message.content_->level == uuid::log::Level::INFO) {
+            shell.print(COLOR_YELLOW);
+            shell.println(message.content_->text);
+            shell.print(COLOR_RESET);
+        } else if (message.content_->level == uuid::log::Level::DEBUG) {
+            shell.print(COLOR_CYAN);
+            shell.println(message.content_->text);
+            shell.print(COLOR_RESET);
+        } else {
+            shell.println(message.content_->text);
+        }
+    }
+
+    shell.println();
 }
 
 void WebLogService::loop() {
@@ -200,7 +241,7 @@ void WebLogService::fetchLog(AsyncWebServerRequest * request) {
     request->send(200);
 }
 
-// sets the values like level after a POST
+// sets the values after a POST
 void WebLogService::getSetValues(AsyncWebServerRequest * request, JsonVariant json) {
     if ((request->method() == HTTP_GET) || (!json.is<JsonObject>())) {
         // GET - return the values
@@ -209,12 +250,13 @@ void WebLogService::getSetValues(AsyncWebServerRequest * request, JsonVariant js
         root["level"]        = log_level();
         root["max_messages"] = maximum_log_messages();
         root["compact"]      = compact();
+        root["psram"]        = (EMSESP::system_.PSram() > 0);
+
         response->setLength();
         request->send(response);
         return;
     }
 
-    // POST - write the settings
     auto && body = json.as<JsonObject>();
 
     uuid::log::Level level = body["level"];

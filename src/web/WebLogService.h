@@ -23,6 +23,8 @@
 #define EMSESP_FETCH_LOG_PATH "/rest/fetchLog"
 #define EMSESP_LOG_SETTINGS_PATH "/rest/logSettings"
 
+using ::uuid::console::Shell;
+
 namespace emsesp {
 
 class WebLogService : public uuid::log::Handler {
@@ -42,6 +44,7 @@ class WebLogService : public uuid::log::Handler {
     bool             compact() const;
     void             compact(bool compact);
     void             loop();
+    void             show(Shell & shell);
 
     virtual void operator<<(std::shared_ptr<uuid::log::Message> message);
 

@@ -6,8 +6,12 @@ import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Checkbox, MenuItem, TextField, styled } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 
-import * as SystemApi from 'api/system';
-import { fetchLogES } from 'api/system';
+import {
+  fetchLog,
+  fetchLogES,
+  readLogSettings,
+  updateLogSettings
+} from 'api/system';
 
 import { useRequest, useSSE } from 'alova/client';
 import {
@@ -22,20 +26,18 @@ import type { LogEntry, LogSettings } from 'types';
 import { LogLevel } from 'types';
 import { updateValueDirty, useRest } from 'utils';
 
-const ButtonTextColors = {
+const TextColors = {
   [LogLevel.ERROR]: '#ff0000', // red
-  [LogLevel.WARNING]: '#ffcc00', // yellow
+  [LogLevel.WARNING]: '#ff0000', // red
   [LogLevel.NOTICE]: '#ffffff', // white
-  [LogLevel.INFO]: '#ffffff', // yellow
+  [LogLevel.INFO]: '#ffcc00', // yellow
   [LogLevel.DEBUG]: '#00ffff', // cyan
   [LogLevel.TRACE]: '#00ffff' // cyan
 };
 
-const LogEntryLine = styled('div')(
+const LogEntryLine = styled('span')(
   ({ details: { level } }: { details: { level: LogLevel } }) => ({
-    color: ButtonTextColors[level],
-    font: '14px monospace',
-    whiteSpace: 'nowrap'
+    color: TextColors[level]
   })
 );
 
@@ -79,8 +81,8 @@ const SystemLog = () => {
     saveData,
     errorMessage
   } = useRest<LogSettings>({
-    read: SystemApi.readLogSettings,
-    update: SystemApi.updateLogSettings
+    read: readLogSettings,
+    update: updateLogSettings
   });
 
   const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
@@ -114,7 +116,7 @@ const SystemLog = () => {
   });
 
   // called on page load to reset pointer and fetch all log entries
-  useRequest(SystemApi.fetchLog());
+  useRequest(fetchLog());
 
   const paddedLevelLabel = (level: LogLevel) => {
     const label = levelLabel(level);
@@ -190,23 +192,25 @@ const SystemLog = () => {
               <MenuItem value={9}>ALL</MenuItem>
             </TextField>
           </Grid>
-          <Grid size={2}>
-            <TextField
-              name="max_messages"
-              label={LL.BUFFER_SIZE()}
-              value={data.max_messages}
-              fullWidth
-              variant="outlined"
-              onChange={updateFormValue}
-              margin="normal"
-              select
-            >
-              <MenuItem value={25}>25</MenuItem>
-              <MenuItem value={50}>50</MenuItem>
-              <MenuItem value={75}>75</MenuItem>
-              <MenuItem value={100}>100</MenuItem>
-            </TextField>
-          </Grid>
+          {data.psram && (
+            <Grid size={2}>
+              <TextField
+                name="max_messages"
+                label={LL.BUFFER_SIZE()}
+                value={data.max_messages}
+                fullWidth
+                variant="outlined"
+                onChange={updateFormValue}
+                margin="normal"
+                select
+              >
+                <MenuItem value={25}>25</MenuItem>
+                <MenuItem value={50}>50</MenuItem>
+                <MenuItem value={75}>75</MenuItem>
+                <MenuItem value={100}>100</MenuItem>
+              </TextField>
+            </Grid>
+          )}
           <Grid>
             <BlockFormControlLabel
               control={
@@ -251,14 +255,17 @@ const SystemLog = () => {
           }}
         >
           {logEntries.map((e) => (
-            <LogEntryLine details={{ level: e.l }} key={e.i}>
+            <div style={{ font: '14px monospace', whiteSpace: 'nowrap' }}>
               <span>{e.t}</span>
               <span>{paddedLevelLabel(e.l)}&nbsp;</span>
               <span>{paddedIDLabel(e.i)} </span>
               <span>{paddedNameLabel(e.n)} </span>
-              <span>{e.m}</span>
-            </LogEntryLine>
+              <LogEntryLine details={{ level: e.l }} key={e.i}>
+                {e.m}
+              </LogEntryLine>
+            </div>
           ))}
+
           <div ref={ref} />
         </Box>
       </>

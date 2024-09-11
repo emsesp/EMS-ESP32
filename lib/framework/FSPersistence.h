@@ -42,7 +42,7 @@ class FSPersistence {
 // hard-coded emergency defaults are now applied.
 #ifdef EMSESP_DEBUG
         Serial.println();
-        Serial.printf("Applying defaults to %s ", _filePath);
+        Serial.printf("Applying defaults to %s", _filePath);
         Serial.println();
 #endif
         applyDefaults();
