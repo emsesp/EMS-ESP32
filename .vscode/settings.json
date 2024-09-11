@@ -89,7 +89,6 @@
       "**/ArduinoJson/**"
     ],
     "cSpell.enableFiletypes": [
-      "!typescript",
       "ini",
       "makefile"
     ],
