@@ -71,7 +71,7 @@ const sk: Translation = {
   TX_ISSUES: 'Problémy s Tx – skontrolujte Tx režim',
   DISCONNECTED: 'Odpojené',
   EMS_SCAN: 'Naozaj chcete spustiť úplnú kontrolu zariadenia zbernice EMS?',
-  DATA_TRAFFIC: 'Data Traffic', // TODO Translate
+  DATA_TRAFFIC: 'Dátová prevádzka', // TODO Translate
   EMS_DEVICE: 'EMS zariadenie',
   SUCCESS: 'ÚSPEŠNÉ',
   FAIL: 'ZLÝHANIE',
@@ -91,7 +91,7 @@ const sk: Translation = {
   NUM_SECONDS: '{num} sek{{únd|unda|undy|undy|únd|únd}}',
   NUM_HOURS: '{num} hod{{ín|ina|iny|iny|ín|ín}}',
   NUM_MINUTES: '{num} minú{{t|ta|ty|ty|t|t}}',
-  APPLICATION: 'Aplikácie',
+  APPLICATION: 'Aplikácia',
   CUSTOMIZATIONS: 'Prispôsobenia',
   APPLICATION_RESTARTING: 'EMS-ESP sa reštartuje',
   BOARD_PROFILE: 'Profil dosky',
@@ -174,12 +174,12 @@ const sk: Translation = {
   FACTORY_RESET: 'Továrenské nastavenia',
   SYSTEM_FACTORY_TEXT: 'Zariadenie bolo obnovené z výroby a teraz sa reštartuje',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Naozaj chcete resetovať EMS-ESP na predvolené výrobné nastavenia?',
-  STABLE: 'Stable', // TODO translate
+  STABLE: 'Stabilná', // TODO translate
   DEVELOPMENT: 'Vývojárska',
   RELEASE_NOTES: 'poznámky k verzii',
   EMS_ESP_VER: 'EMS-ESP verzia',
   UPTIME: 'Beh systému',
-  FREE_MEMORY: 'Voľné Memory', // TODO translate
+  FREE_MEMORY: 'Voľná pamäť', // TODO translate
   PSRAM: 'PSRAM (Veľkosť / Voľné)',
   FLASH: 'Flash chip (Veľkosť , Rýchlosť)',
   APPSIZE: 'Applikácia (Oddiel: Použité / Voľné)',
@@ -212,7 +212,7 @@ const sk: Translation = {
   BASE_TOPIC: 'Base',
   OPTIONAL: 'voliteľné',
   FORMATTING: 'Formátovanie',
-  MQTT_FORMAT: 'Formát témy/záťaže',
+  MQTT_FORMAT: 'Formát téma/obsah',
   MQTT_NEST_1: 'Vnorené do jednej témy',
   MQTT_NEST_2: 'Ako jednotlivé témy',
   MQTT_RESPONSE: 'Publikovanie výstupu príkazu do témy `response`',
@@ -225,8 +225,8 @@ const sk: Translation = {
   MQTT_INT_BOILER: 'Kotly a tepelné čerpadlá',
   MQTT_INT_THERMOSTATS: 'Termostaty',
   MQTT_INT_SOLAR: 'Solárne moduly',
-  MQTT_INT_MIXER: 'Zmiešavacie moduley',
-  MQTT_INT_WATER: 'Voda moduley',
+  MQTT_INT_MIXER: 'Zmiešavacie moduly',
+  MQTT_INT_WATER: 'Voda moduly',
   MQTT_QUEUE: 'Fronta MQTT',
   DEFAULT: 'Predvolené',
   MQTT_ENTITY_FORMAT: 'ID formát entity',
@@ -258,9 +258,9 @@ const sk: Translation = {
   NETWORK_SCAN: 'Scan WiFi siete',
   IDLE: 'Nečinné',
   LOST: 'Stratené',
-  SCANNING: 'Scanovanie',
-  SCAN_AGAIN: 'Scanovať znova',
-  NETWORK_SCANNER: 'Sieťový scanner',
+  SCANNING: 'Skenovanie',
+  SCAN_AGAIN: 'Skenovať znova',
+  NETWORK_SCANNER: 'Sieťový skener',
   NETWORK_NO_WIFI: 'WiFi siete nenájdené',
   NETWORK_BLANK_SSID: 'nechajte prázdne, ak chcete zakázať WiFi a povoliť ETH',
   NETWORK_BLANK_BSSID: 'ponechajte prázdne, ak chcete používať iba SSID',
@@ -293,9 +293,9 @@ const sk: Translation = {
   SCHEDULE: 'Plánovač',
   TIME: 'Čas',
   TIMER: 'Časovač',
-  ONCHANGE: 'Na zmenu', // TODO translate
+  ONCHANGE: 'Pri zmene', // TODO translate
   CONDITION: 'Podmienka', // TODO translate
-  IMMEDIATE: 'Okamžitá', // TODO translate
+  IMMEDIATE: 'Okamžite', // TODO translate
   SCHEDULE_UPDATED: 'Plánovanie aktualizované',
   SCHEDULE_TIMER_1: 'pri spustení',
   SCHEDULE_TIMER_2: 'každú minútu',
@@ -317,30 +317,30 @@ const sk: Translation = {
   ALWAYS: 'Vždy',
   ACTIVITY: 'Aktivita',
   CONFIGURE: 'Konfiguracia {0}',
-  SYSTEM_MEMORY: 'System Memory', // TODO translate
-  APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
-  SECURITY_1: 'Add or remove users', // TODO translate
-  DOWNLOAD_UPLOAD_1: 'Download and Upload Settings and Firmware', // TODO translate
-  MODULES: 'Module', // TODO translate
+  SYSTEM_MEMORY: 'Systémová pamäť', // TODO translate
+  APPLICATION_SETTINGS_1: 'Zmeniť nastavenia aplikácie EMS-ESP', // TODO translate
+  SECURITY_1: 'Pridať, alebo odstrániť použivateľov', // TODO translate
+  DOWNLOAD_UPLOAD_1: 'Stiahnúť a nahrať nastavenia a firmware', // TODO translate
+  MODULES: 'Moduly', // TODO translate
   MODULES_1: 'Aktivujte alebo deaktivujte externé moduly', // TODO translate
-  MODULES_UPDATED: 'Modules updated', // TODO translate
-  MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
-  MODULES_NONE: 'No external modules detected', // TODO translate
-  RENAME: 'Rename', // TODO translate 
+  MODULES_UPDATED: 'Aktualizované moduly', // TODO translate
+  MODULES_DESCRIPTION: 'Kliknutím na modul aktivujete alebo deaktivujete moduly knižnice EMS-ESP', // TODO translate
+  MODULES_NONE: 'Neboli zistené žiadne externé moduly', // TODO translate
+  RENAME: 'Premenovať', // TODO translate 
   ENABLE_MODBUS: 'Povoliť Modbus',
-  VIEW_LOG: 'View log to diagnose issues', // TODO translate
-  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
-  SERVICES: 'Services', // TODO translate
-  ALLVALUES: 'All Values', // TODO translate
-  SPECIAL_FUNCTIONS: 'Special Functions', // TODO translate
-  WAIT_FIRMWARE: 'Firmware is uploading and installing', // TODO translate
-  INSTALL_VERSION: 'This will install vesion {0}. Are you sure?', // TODO translate
-  SWITCH_DEV: 'switch to the development version', // TODO translate
-  UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
-  LATEST_VERSION: 'You are using the latest firmware version.', // TODO translate
-  PLEASE_WAIT: 'Please wait', // TODO translate
-  RESTARTING_PRE: 'Initializing', // TODO translate
-  RESTARTING_POST: 'Reloading' // TODO translate
+  VIEW_LOG: 'Zobrazte log na diagnostiku problémov', // TODO translate
+  UPLOAD_DRAG: 'presuňte sem súbor alebo ho kliknutím vyberte', // TODO translate
+  SERVICES: 'Služby', // TODO translate
+  ALLVALUES: 'Všetky hodnoty', // TODO translate
+  SPECIAL_FUNCTIONS: 'Špeciálne funkcie', // TODO translate
+  WAIT_FIRMWARE: 'Firmvér sa nahráva a inštaluje', // TODO translate
+  INSTALL_VERSION: 'Týmto sa nainštaluje verzia {0}. Si si istý?', // TODO translate
+  SWITCH_DEV: 'prejsť na vývojovú verziu', // TODO translate
+  UPGRADE_AVAILABLE: 'K dispozícii je aktualizácia firmvéru!', // TODO translate
+  LATEST_VERSION: 'Používate poslednú verziu firmvéru.', // TODO translate
+  PLEASE_WAIT: 'Čakajte prosím', // TODO translate
+  RESTARTING_PRE: 'Prebieha inicializácia', // TODO translate
+  RESTARTING_POST: 'Opätovné načítanie' // TODO translate
 };
 
 export default sk;
