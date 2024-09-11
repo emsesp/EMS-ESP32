@@ -294,7 +294,7 @@ const char * Command::get_attribute(const char * cmd) {
     return nullptr;
 }
 
-bool Command::set_attirbute(JsonObject output, const char * cmd, const char * attribute) {
+bool Command::set_attribute(JsonObject output, const char * cmd, const char * attribute) {
     if (attribute == nullptr) {
         return true;
     }

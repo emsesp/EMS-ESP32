@@ -315,7 +315,7 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
     for (const auto & entity : *customEntityItems_) {
         if (Helpers::toLower(entity.name) == cmd) {
             get_value_json(output, entity);
-            return Command::set_attirbute(output, cmd, attribute_s);
+            return Command::set_attribute(output, cmd, attribute_s);
         }
     }
     return false; // not found

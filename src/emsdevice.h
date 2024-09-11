@@ -354,7 +354,7 @@ class EMSdevice {
         ANALOGSENSOR,      // for internal analog sensors
         SCHEDULER,         // for internal schedule
         CUSTOM,            // for user defined entities
-        BOILER,            // frome here on enum the ems-devices
+        BOILER,            // from here on enum the ems-devices
         THERMOSTAT,
         MIXER,
         SOLAR,

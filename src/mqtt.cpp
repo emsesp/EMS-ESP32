@@ -747,7 +747,7 @@ bool Mqtt::queue_ha(const char * topic, const JsonObjectConst payload) {
 bool Mqtt::publish_ha_sensor_config(DeviceValue & dv, const char * model, const char * brand, const bool remove, const bool create_device_config) {
     JsonDocument dev_json;
 
-    // always create the ids (discovery indentifiers)
+    // always create the ids (discovery identifiers)
     // with the name always
     // and the manufacturer and model if we're creating the device config for the first entity
     JsonArray ids = dev_json["ids"].to<JsonArray>();

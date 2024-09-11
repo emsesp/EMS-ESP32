@@ -1435,7 +1435,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
 
     // System
     node = output["system"].to<JsonObject>();
-// prevent false negataive in Unity tests everytime the version changes
+// prevent false negative in Unity tests every time the version changes
 #if defined(EMSESP_UNITY)
     node["version"] = "dev";
 #else

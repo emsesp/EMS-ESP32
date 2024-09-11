@@ -373,7 +373,7 @@ char * Helpers::render_value(char * result, const uint32_t value, const int8_t f
     return result;
 }
 
-// creates string of hex values from an arrray of bytes
+// creates string of hex values from an array of bytes
 std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
     if (length == 0) {
         return "<empty>";

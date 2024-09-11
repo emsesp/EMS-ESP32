@@ -203,7 +203,7 @@ void Roomctrl::version(uint8_t addr, uint8_t dst, uint8_t hc) {
     if (type_[hc] == RC20) {
         data[5] = 2; // version 2.01
         data[6] = 1;
-        data[7] = EMSbus::calculate_crc(data, 7); // apppend CRC
+        data[7] = EMSbus::calculate_crc(data, 7); // append CRC
         EMSuart::transmit(data, 8);
         return;
     } else if (type_[hc] == FB10) {
@@ -216,7 +216,7 @@ void Roomctrl::version(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[11] = 0;
         data[12] = 0;
         data[13] = 0;
-        data[14] = EMSbus::calculate_crc(data, 14); // apppend CRC
+        data[14] = EMSbus::calculate_crc(data, 14); // append CRC
         EMSuart::transmit(data, 15);
         return;
     } else if (type_[hc] == RC200) {
@@ -229,7 +229,7 @@ void Roomctrl::version(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[11] = 0;
         data[12] = 0;
         data[13] = 0;
-        data[14] = EMSbus::calculate_crc(data, 14); // apppend CRC
+        data[14] = EMSbus::calculate_crc(data, 14); // append CRC
         EMSuart::transmit(data, 15);
         return;
     } else if (type_[hc] == RC100H) {
@@ -237,7 +237,7 @@ void Roomctrl::version(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[6] = 4;
         data[7] = 0;
         data[8] = 0xFF;
-        data[9] = EMSbus::calculate_crc(data, 9); // apppend CRC
+        data[9] = EMSbus::calculate_crc(data, 9); // append CRC
         EMSuart::transmit(data, 10);
         return;
     } else if (type_[hc] == RC100) {
@@ -245,13 +245,13 @@ void Roomctrl::version(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[6] = 3;
         data[7] = 0;
         data[8] = 0xFF;
-        data[9] = EMSbus::calculate_crc(data, 9); // apppend CRC
+        data[9] = EMSbus::calculate_crc(data, 9); // append CRC
         EMSuart::transmit(data, 10);
         return;
     } else if (type_[hc] == RT800) {
         data[5] = 21; // version 21.03
         data[6] = 3;
-        data[7] = EMSbus::calculate_crc(data, 7); // apppend CRC
+        data[7] = EMSbus::calculate_crc(data, 7); // append CRC
         EMSuart::transmit(data, 8);
         return;
     }
@@ -266,7 +266,7 @@ void Roomctrl::unknown(uint8_t addr, uint8_t dst, uint8_t type, uint8_t offset) 
     data[1] = dst & 0x7F;
     data[2] = type;
     data[3] = offset;
-    data[4] = EMSbus::calculate_crc(data, 4); // apppend CRC
+    data[4] = EMSbus::calculate_crc(data, 4); // append CRC
     EMSuart::transmit(data, 5);
 }
 
@@ -278,7 +278,7 @@ void Roomctrl::unknown(uint8_t addr, uint8_t dst, uint8_t offset, uint8_t typeh,
     data[3] = offset;
     data[4] = typeh;
     data[5] = typel;
-    data[6] = EMSbus::calculate_crc(data, 6); // apppend CRC
+    data[6] = EMSbus::calculate_crc(data, 6); // append CRC
     EMSuart::transmit(data, 7);
 }
 
@@ -295,7 +295,7 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[4] = (uint8_t)(remotetemp_[hc] >> 8);
         data[5] = (uint8_t)(remotetemp_[hc] & 0xFF);
         data[6] = 0;
-        data[7] = EMSbus::calculate_crc(data, 7); // apppend CRC
+        data[7] = EMSbus::calculate_crc(data, 7); // append CRC
         EMSuart::transmit(data, 8);
     } else if (type_[hc] == FB10) { // Junkers FB10, telegram 0x0123
         data[2] = 0xFF;
@@ -304,7 +304,7 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[5] = 0x23; //  fixed for all hc
         data[6] = (uint8_t)(remotetemp_[hc] >> 8);
         data[7] = (uint8_t)(remotetemp_[hc] & 0xFF);
-        data[8] = EMSbus::calculate_crc(data, 8); // apppend CRC
+        data[8] = EMSbus::calculate_crc(data, 8); // append CRC
         EMSuart::transmit(data, 9);
     } else if (type_[hc] == RC200) { // RC200, telegram 42B, ff
         data[2]     = 0xFF;
@@ -317,7 +317,7 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[8]     = (uint8_t)(t1 >> 8);
         data[9]     = (uint8_t)(t1 & 0xFF);
         data[10]    = 1;                               // not sure what this is and if we need it, maybe mode?
-        data[11]    = EMSbus::calculate_crc(data, 11); // apppend CRC
+        data[11]    = EMSbus::calculate_crc(data, 11); // append CRC
         EMSuart::transmit(data, 12);
     } else if (type_[hc] == RC100H || type_[hc] == RC100) { // RC100H, telegram 42B, ff
         data[2] = 0xFF;
@@ -326,7 +326,7 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[5] = 0x2B + hc;
         data[6] = (uint8_t)(remotetemp_[hc] >> 8);
         data[7] = (uint8_t)(remotetemp_[hc] & 0xFF);
-        data[8] = EMSbus::calculate_crc(data, 8); // apppend CRC
+        data[8] = EMSbus::calculate_crc(data, 8); // append CRC
         EMSuart::transmit(data, 9);
     } else if (type_[hc] == SENSOR) { // wireless sensor, broadcast id 435
         data[2] = 0xFF;
@@ -335,7 +335,7 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[5] = 0x35 + hc;
         data[6] = (uint8_t)(remotetemp_[hc] >> 8);
         data[7] = (uint8_t)(remotetemp_[hc] & 0xFF);
-        data[8] = EMSbus::calculate_crc(data, 8); // apppend CRC
+        data[8] = EMSbus::calculate_crc(data, 8); // append CRC
         EMSuart::transmit(data, 9);
     } else if (type_[hc] == RT800) { // RC200, telegram 42B, ff
         data[2]     = 0xFF;
@@ -349,7 +349,7 @@ void Roomctrl::temperature(uint8_t addr, uint8_t dst, uint8_t hc) {
         data[9]     = (uint8_t)(t1 & 0xFF);
         data[10]    = 1;                               // not sure what this is and if we need it, maybe mode?
         data[11]    = 9;                               // not sure what this is and if we need it, maybe mode?
-        data[12]    = EMSbus::calculate_crc(data, 12); // apppend CRC
+        data[12]    = EMSbus::calculate_crc(data, 12); // append CRC
         EMSuart::transmit(data, 13);
     }
 }
@@ -368,7 +368,7 @@ void Roomctrl::humidity(uint8_t addr, uint8_t dst, uint8_t hc) {
     data[7]      = remotehum_[hc];
     data[8]      = (uint8_t)(dew << 8);
     data[9]      = (uint8_t)(dew & 0xFF);
-    data[10]     = EMSbus::calculate_crc(data, 10); // apppend CRC
+    data[10]     = EMSbus::calculate_crc(data, 10); // append CRC
     EMSuart::transmit(data, 11);
 }
 
@@ -411,7 +411,7 @@ void Roomctrl::replyF7(uint8_t addr, uint8_t dst, uint8_t offset, uint8_t typehh
         data[7] = 0;
         data[8] = 0;
     }
-    data[9] = EMSbus::calculate_crc(data, 9); // apppend CRC
+    data[9] = EMSbus::calculate_crc(data, 9); // append CRC
     EMSuart::transmit(data, 10);
 }
 

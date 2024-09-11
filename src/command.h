@@ -136,7 +136,7 @@ class Command {
 
     static const char * parse_command_string(const char * command, int8_t & id);
     static const char * get_attribute(const char * cmd);
-    static bool         set_attirbute(JsonObject output, const char * cmd, const char * attirbute);
+    static bool         set_attribute(JsonObject output, const char * cmd, const char * attribute);
 
     static const char * return_code_string(const uint8_t return_code);
 

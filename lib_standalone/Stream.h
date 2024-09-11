@@ -26,7 +26,7 @@
 #include "Print.h"
 #include "WString.h"
 
-// compatability macros for testing
+// compatibility macros for testing
 /*
  #define   getInt()            parseInt()
  #define   getInt(skipChar)    parseInt(skipchar)
@@ -91,7 +91,7 @@ class Stream : public Print {
     // initial characters that are not digits (or the minus sign) are skipped
     // integer is terminated by the first character that is not a digit.
 
-    float parseFloat();                                    // float version of parseInt
+    float parseFloat(); // float version of parseInt
 
     virtual size_t readBytes(char * buffer, size_t length) // read chars from stream into buffer
     {

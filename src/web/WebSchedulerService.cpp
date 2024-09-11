@@ -172,7 +172,7 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
     for (const ScheduleItem & scheduleItem : *scheduleItems_) {
         if (Helpers::toLower(scheduleItem.name) == cmd) {
             get_value_json(output, scheduleItem);
-            return Command::set_attirbute(output, cmd, attribute_s);
+            return Command::set_attribute(output, cmd, attribute_s);
         }
     }
 

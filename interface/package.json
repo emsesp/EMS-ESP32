@@ -24,8 +24,8 @@
     "@alova/adapter-xhr": "2.0.7",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
-    "@mui/icons-material": "^6.0.2",
-    "@mui/material": "^6.0.2",
+    "@mui/icons-material": "^6.1.0",
+    "@mui/material": "^6.1.0",
     "@table-library/react-table-library": "4.1.7",
     "alova": "3.0.16",
     "async-validator": "^4.2.5",
@@ -64,5 +64,5 @@
     "vite-plugin-imagemin": "^0.6.1",
     "vite-tsconfig-paths": "^5.0.1"
   },
-  "packageManager": "yarn@4.4.0"
+  "packageManager": "yarn@4.4.1"
 }
