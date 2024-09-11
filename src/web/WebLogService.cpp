@@ -183,11 +183,13 @@ void WebLogService::loop() {
         return;
     }
 
-    // put a small delay in
+    /*
+    // put a small delay in - https://github.com/emsesp/EMS-ESP32/issues/1652
     if (uuid::get_uptime_ms() - last_transmit_ < REFRESH_SYNC) {
         return;
     }
     last_transmit_ = uuid::get_uptime_ms();
+    */
 
     // flush
     for (const auto & message : log_messages_) {
