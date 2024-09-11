@@ -71,7 +71,7 @@ const sk: Translation = {
   TX_ISSUES: 'Problémy s Tx – skontrolujte Tx režim',
   DISCONNECTED: 'Odpojené',
   EMS_SCAN: 'Naozaj chcete spustiť úplnú kontrolu zariadenia zbernice EMS?',
-  DATA_TRAFFIC: 'Dátová prevádzka', // TODO Translate
+  DATA_TRAFFIC: 'Dátová prevádzka',
   EMS_DEVICE: 'EMS zariadenie',
   SUCCESS: 'ÚSPEŠNÉ',
   FAIL: 'ZLÝHANIE',
@@ -174,7 +174,7 @@ const sk: Translation = {
   FACTORY_RESET: 'Továrenské nastavenia',
   SYSTEM_FACTORY_TEXT: 'Zariadenie bolo obnovené z výroby a teraz sa reštartuje',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Naozaj chcete resetovať EMS-ESP na predvolené výrobné nastavenia?',
-  STABLE: 'Stabilná', // TODO translate
+  STABLE: 'Stabilná',
   DEVELOPMENT: 'Vývojárska',
   RELEASE_NOTES: 'poznámky k verzii',
   EMS_ESP_VER: 'Firmware verzia',
@@ -291,9 +291,9 @@ const sk: Translation = {
   SCHEDULE: 'Plánovač',
   TIME: 'Čas',
   TIMER: 'Časovač',
-  ONCHANGE: 'Pri zmene', // TODO translate
-  CONDITION: 'Podmienka', // TODO translate
-  IMMEDIATE: 'Okamžite', // TODO translate
+  ONCHANGE: 'Pri zmene',
+  CONDITION: 'Podmienka',
+  IMMEDIATE: 'Okamžite',
   SCHEDULE_UPDATED: 'Plánovanie aktualizované',
   SCHEDULE_TIMER_1: 'pri spustení',
   SCHEDULE_TIMER_2: 'každú minútu',
@@ -315,30 +315,30 @@ const sk: Translation = {
   ALWAYS: 'Vždy',
   ACTIVITY: 'Aktivita',
   CONFIGURE: 'Konfiguracia {0}',
-  SYSTEM_MEMORY: 'Systémová pamäť', // TODO translate
-  APPLICATION_SETTINGS_1: 'Zmeniť nastavenia aplikácie EMS-ESP', // TODO translate
-  SECURITY_1: 'Pridať, alebo odstrániť použivateľov', // TODO translate
-  DOWNLOAD_UPLOAD_1: 'Stiahnúť a nahrať nastavenia a firmware', // TODO translate
-  MODULES: 'Moduly', // TODO translate
-  MODULES_1: 'Aktivujte alebo deaktivujte externé moduly', // TODO translate
-  MODULES_UPDATED: 'Aktualizované moduly', // TODO translate
-  MODULES_DESCRIPTION: 'Kliknutím na modul aktivujete alebo deaktivujete moduly knižnice EMS-ESP', // TODO translate
-  MODULES_NONE: 'Neboli zistené žiadne externé moduly', // TODO translate
-  RENAME: 'Premenovať', // TODO translate 
+  SYSTEM_MEMORY: 'Systémová pamäť',
+  APPLICATION_SETTINGS_1: 'Zmeniť nastavenia aplikácie EMS-ESP',
+  SECURITY_1: 'Pridať, alebo odstrániť použivateľov',
+  DOWNLOAD_UPLOAD_1: 'Stiahnúť a nahrať nastavenia a firmware',
+  MODULES: 'Moduly',
+  MODULES_1: 'Aktivujte alebo deaktivujte externé moduly',
+  MODULES_UPDATED: 'Aktualizované moduly',
+  MODULES_DESCRIPTION: 'Kliknutím na modul aktivujete alebo deaktivujete moduly knižnice EMS-ESP',
+  MODULES_NONE: 'Neboli zistené žiadne externé moduly',
+  RENAME: 'Premenovať', 
   ENABLE_MODBUS: 'Povoliť Modbus',
-  VIEW_LOG: 'Zobrazte log na diagnostiku problémov', // TODO translate
-  UPLOAD_DRAG: 'presuňte sem súbor alebo ho kliknutím vyberte', // TODO translate
-  SERVICES: 'Služby', // TODO translate
-  ALLVALUES: 'Všetky hodnoty', // TODO translate
-  SPECIAL_FUNCTIONS: 'Špeciálne funkcie', // TODO translate
-  WAIT_FIRMWARE: 'Firmvér sa nahráva a inštaluje', // TODO translate
-  INSTALL_VERSION: 'Týmto sa nainštaluje verzia {0}. Si si istý?', // TODO translate
-  SWITCH_DEV: 'prejsť na vývojovú verziu', // TODO translate
-  UPGRADE_AVAILABLE: 'K dispozícii je aktualizácia firmvéru!', // TODO translate
-  LATEST_VERSION: 'Používate poslednú verziu firmvéru.', // TODO translate
-  PLEASE_WAIT: 'Čakajte prosím', // TODO translate
-  RESTARTING_PRE: 'Prebieha inicializácia', // TODO translate
-  RESTARTING_POST: 'Opätovné načítanie' // TODO translate
+  VIEW_LOG: 'Zobrazte log na diagnostiku problémov',
+  UPLOAD_DRAG: 'presuňte sem súbor alebo ho kliknutím vyberte',
+  SERVICES: 'Služby',
+  ALLVALUES: 'Všetky hodnoty',
+  SPECIAL_FUNCTIONS: 'Špeciálne funkcie',
+  WAIT_FIRMWARE: 'Firmvér sa nahráva a inštaluje',
+  INSTALL_VERSION: 'Týmto sa nainštaluje verzia {0}. Si si istý?',
+  SWITCH_DEV: 'prejsť na vývojovú verziu',
+  UPGRADE_AVAILABLE: 'K dispozícii je aktualizácia firmvéru!',
+  LATEST_VERSION: 'Používate poslednú verziu firmvéru.',
+  PLEASE_WAIT: 'Čakajte prosím',
+  RESTARTING_PRE: 'Prebieha inicializácia',
+  RESTARTING_POST: 'Príprava'
 };
 
 export default sk;
