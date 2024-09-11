@@ -273,7 +273,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
         ShellContext::MAIN,
         CommandFlags::ADMIN,
         string_vector{F_(set), F_(board_profile)},
-        string_vector{F_(name_mandatory), F_(nvs_optional)},
+        string_vector{F_(name_mandatory)},
         [](Shell & shell, const std::vector<std::string> & arguments) {
             std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
             std::string         board_profile = Helpers::toUpper(arguments.front());
@@ -281,9 +281,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                 shell.println("Invalid board profile (S32, E32, E32V2, MH-ET, NODEMCU, LOLIN, OLIMEX, OLIMEXPOE, C3MINI, S2MINI, S3MINI, S32S3, CUSTOM)");
                 return;
             }
-            if (arguments.size() == 2 && Helpers::toLower(arguments.back()) == "nvs") {
-                to_app(shell).nvs_.putString("boot", board_profile.c_str());
-            }
+
             to_app(shell).webSettingsService.update([&](WebSettings & settings) {
                 settings.board_profile  = board_profile.c_str();
                 settings.led_gpio       = data[0];
