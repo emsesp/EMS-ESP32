@@ -23,9 +23,13 @@
 - Easy first-time configuration via a web Captive Portal
 - Support for more than [120+ EMS devices](https://emsesp.org/All-Devices/) (boilers, thermostats, solar modules, mixer modules, heat pumps, gateways, switches, heat sources)
 
+## **Installing**
+
+Go to [install.emsesp.org](https://install.emsesp.org) or look at the documentation link below on the different ways to install EMS-ESP.
+
 ## **Documentation**
 
-For the complete documentation on how to install, configure and get support visit the [EMS-ESP Wiki](https://emsesp.org).
+For the complete documentation on how to install, configure and get support visit the [documentation at emsesp.org](https://emsesp.org).
 
 ## **Support**
 
@@ -35,7 +39,7 @@ If you like **EMS-ESP**, please give it a star, or fork it and contribute or off
 
 ## **Demo**
 
-For a live demo of the Web UI click [here](https://demo.emsesp.org) and log in with any username/password.
+For a live demo of the Web UI click [demo.emsesp.org](https://demo.emsesp.org) and log in with any username/password, and change the language to English.
 
 ## **Contributors ✨**
 
@@ -67,6 +71,6 @@ This program is licensed under GPL-3.0
 
 ![Console](media/console0.png)
 
-### In Home Assistant
+### Home Assistant
 
 ![Home Assistant](media/ha_lovelace.png)
