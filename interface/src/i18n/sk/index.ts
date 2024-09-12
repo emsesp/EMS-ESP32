@@ -338,7 +338,8 @@ const sk: Translation = {
   LATEST_VERSION: 'Používate poslednú verziu firmvéru.',
   PLEASE_WAIT: 'Čakajte prosím',
   RESTARTING_PRE: 'Prebieha inicializácia',
-  RESTARTING_POST: 'Príprava'
+  RESTARTING_POST: 'Príprava',
+  AUTO_SCROLL: 'Auto Scroll' // TODO translate
 };
 
 export default sk;

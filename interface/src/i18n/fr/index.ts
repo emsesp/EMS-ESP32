@@ -338,7 +338,8 @@ const fr: Translation = {
   LATEST_VERSION: 'You are using the latest firmware version.', // TODO translate // TODO translate
   PLEASE_WAIT: 'Please wait', // TODO translate
   RESTARTING_PRE: 'Initializing', // TODO translate
-  RESTARTING_POST: 'Preparing' // TODO translate
+  RESTARTING_POST: 'Preparing', // TODO translate
+  AUTO_SCROLL: 'Auto Scroll' // TODO translate
 };
 
 export default fr;
