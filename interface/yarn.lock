@@ -1302,6 +1302,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/formidable@npm:^3":
+  version: 3.4.5
+  resolution: "@types/formidable@npm:3.4.5"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/733dc59d4d12152ba5fb70751184812345ff08691864dd9b1b7626b9d40045a306021b9721495cafb56cd375da54fecaaebdada98fc390b7406ebb81efe0bfbe
+  languageName: node
+  linkType: hard
+
 "@types/glob@npm:^7.1.1":
   version: 7.2.0
   resolution: "@types/glob@npm:7.2.0"
@@ -1629,6 +1638,7 @@ __metadata:
     "@preact/preset-vite": "npm:^2.9.0"
     "@table-library/react-table-library": "npm:4.1.7"
     "@trivago/prettier-plugin-sort-imports": "npm:^4.3.0"
+    "@types/formidable": "npm:^3"
     "@types/node": "npm:^22.5.4"
     "@types/react": "npm:^18.3.5"
     "@types/react-dom": "npm:^18.3.0"
@@ -1638,6 +1648,7 @@ __metadata:
     concurrently: "npm:^9.0.1"
     eslint: "npm:^9.10.0"
     eslint-config-prettier: "npm:^9.1.0"
+    formidable: "npm:^3.5.1"
     jwt-decode: "npm:^4.0.0"
     mime-types: "npm:^2.1.35"
     preact: "npm:^10.23.2"
@@ -1811,6 +1822,13 @@ __metadata:
   version: 2.1.0
   resolution: "array-union@npm:2.1.0"
   checksum: 10c0/429897e68110374f39b771ec47a7161fc6a8fc33e196857c0a396dc75df0b5f65e4d046674db764330b6bb66b39ef48dd7c53b6a2ee75cfb0681e0c1a7033962
+  languageName: node
+  linkType: hard
+
+"asap@npm:^2.0.0":
+  version: 2.0.6
+  resolution: "asap@npm:2.0.6"
+  checksum: 10c0/c6d5e39fe1f15e4b87677460bd66b66050cd14c772269cee6688824c1410a08ab20254bb6784f9afb75af9144a9f9a7692d49547f4d19d715aeb7c0318f3136d
   languageName: node
   linkType: hard
 
@@ -2535,6 +2553,16 @@ __metadata:
   version: 2.0.0
   resolution: "define-lazy-prop@npm:2.0.0"
   checksum: 10c0/db6c63864a9d3b7dc9def55d52764968a5af296de87c1b2cc71d8be8142e445208071953649e0386a8cc37cfcf9a2067a47207f1eb9ff250c2a269658fdae422
+  languageName: node
+  linkType: hard
+
+"dezalgo@npm:^1.0.4":
+  version: 1.0.4
+  resolution: "dezalgo@npm:1.0.4"
+  dependencies:
+    asap: "npm:^2.0.0"
+    wrappy: "npm:1"
+  checksum: 10c0/8a870ed42eade9a397e6141fe5c025148a59ed52f1f28b1db5de216b4d57f0af7a257070c3af7ce3d5508c1ce9dd5009028a76f4b2cc9370dc56551d2355fad8
   languageName: node
   linkType: hard
 
@@ -3537,6 +3565,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"formidable@npm:^3.5.1":
+  version: 3.5.1
+  resolution: "formidable@npm:3.5.1"
+  dependencies:
+    dezalgo: "npm:^1.0.4"
+    hexoid: "npm:^1.0.0"
+    once: "npm:^1.4.0"
+  checksum: 10c0/c02fa1a027876dd9fc5abde16e9c537bec41bc652b362d0b3fd26daaae0615b9a472129c29b328a130d11f543f676acd1b13e6f28f3adc1b088cdaea9fb9e054
+  languageName: node
+  linkType: hard
+
 "from2@npm:^2.1.1":
   version: 2.3.0
   resolution: "from2@npm:2.3.0"
@@ -3915,6 +3954,13 @@ __metadata:
   bin:
     he: bin/he
   checksum: 10c0/a27d478befe3c8192f006cdd0639a66798979dfa6e2125c6ac582a19a5ebfec62ad83e8382e6036170d873f46e4536a7e795bf8b95bf7c247f4cc0825ccc8c17
+  languageName: node
+  linkType: hard
+
+"hexoid@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "hexoid@npm:1.0.0"
+  checksum: 10c0/9c45e8ba676b9eb88455631ebceec4c829a8374a583410dc735472ab9808bf11339fcd074633c3fa30e420901b894d8a92ffd5e2e21eddd41149546e05a91f69
   languageName: node
   linkType: hard
 
