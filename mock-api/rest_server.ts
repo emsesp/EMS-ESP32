@@ -127,54 +127,7 @@ let log_settings = {
   compact: true,
   psram: true
 };
-
 const FETCH_LOG_ENDPOINT = REST_ENDPOINT_ROOT + 'fetchLog';
-const fetch_log = {
-  events: [
-    {
-      t: '000+00:00:00.001',
-      l: 3,
-      i: 1,
-      n: 'system',
-      m: 'this is message 3'
-    },
-    {
-      t: '000+00:00:00.002',
-      l: 4,
-      i: 2,
-      n: 'ntp',
-      m: 'this is message 4'
-    },
-    {
-      t: '000+00:00:00.002',
-      l: 5,
-      i: 3,
-      n: 'mqtt',
-      m: 'this is message 5'
-    },
-    {
-      t: '000+00:00:00.002',
-      l: 6,
-      i: 444,
-      n: 'command',
-      m: 'this is message 6'
-    },
-    {
-      t: '000+00:00:00.002',
-      l: 7,
-      i: 5555,
-      n: 'emsesp',
-      m: 'this is message 7'
-    },
-    {
-      t: '000+00:00:00.002',
-      l: 8,
-      i: 666666,
-      n: 'thermostat',
-      m: 'this is message 8'
-    }
-  ]
-};
 
 // NTP
 const NTP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'ntpStatus';
