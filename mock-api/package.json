@@ -2,7 +2,7 @@
   "name": "mock-api",
   "version": "3.7.0",
   "description": "mock api for EMS-ESP",
-  "author": "proddy",
+  "author": "proddy, emsesp.org",
   "license": "MIT",
   "scripts": {
     "mock-rest": "bun --watch rest_server.ts",
@@ -11,11 +11,9 @@
   "dependencies": {
     "@msgpack/msgpack": "^2.8.0",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-    "eslint": "^9.10.0",
-    "eslint-config-prettier": "^9.1.0",
     "formidable": "^3.5.1",
     "itty-router": "^5.0.18",
     "prettier": "^3.3.3"
   },
-  "packageManager": "yarn@4.4.0"
+  "packageManager": "yarn@4.4.1"
 }
