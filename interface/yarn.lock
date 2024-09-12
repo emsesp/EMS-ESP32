@@ -1045,12 +1045,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@preact/compat@npm:^17.1.2":
-  version: 17.1.2
-  resolution: "@preact/compat@npm:17.1.2"
+"@preact/compat@npm:^18.3.1":
+  version: 18.3.1
+  resolution: "@preact/compat@npm:18.3.1"
   peerDependencies:
     preact: "*"
-  checksum: 10c0/b4fb246d8996222c3d090901e88fb376a014164ad81f3985786389e7559acbd81f72c829ad3ff6fcbf58346950c9f48eafd7fe993cc43ca3cd0574e90101c7e1
+  checksum: 10c0/7997c4b761098c9ff6ca3850362784982a4e0b3fee847eda7c1f2e5e8211cc55a1fa1ed4e91711ac8c197a1096335b0f019fa8eeb86a9ed738c0bf6e7647ceb2
   languageName: node
   linkType: hard
 
@@ -1634,7 +1634,7 @@ __metadata:
     "@eslint/js": "npm:^9.10.0"
     "@mui/icons-material": "npm:^6.1.0"
     "@mui/material": "npm:^6.1.0"
-    "@preact/compat": "npm:^17.1.2"
+    "@preact/compat": "npm:^18.3.1"
     "@preact/preset-vite": "npm:^2.9.0"
     "@table-library/react-table-library": "npm:4.1.7"
     "@trivago/prettier-plugin-sort-imports": "npm:^4.3.0"

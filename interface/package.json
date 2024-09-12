@@ -43,7 +43,7 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@eslint/js": "^9.10.0",
-    "@preact/compat": "^17.1.2",
+    "@preact/compat": "^18.3.1",
     "@preact/preset-vite": "^2.9.0",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/formidable": "^3",
