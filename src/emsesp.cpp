@@ -815,9 +815,9 @@ bool EMSESP::return_not_found(JsonObject output, const char * msg, const char * 
 // search for recognized device_ids : Me, All, otherwise print hex value
 std::string EMSESP::device_tostring(const uint8_t device_id) {
     if ((device_id & 0x7F) == EMSbus::ems_bus_id()) {
-        return "Me";
+        return "me";
     } else if (device_id == 0x00) {
-        return "All";
+        return "all";
     } else {
         char buffer[5];
         return Helpers::hextoa(buffer, device_id);

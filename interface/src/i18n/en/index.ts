@@ -177,7 +177,7 @@ const en: Translation = {
   STABLE: 'Stable',
   DEVELOPMENT: 'Development',
   RELEASE_NOTES: 'release notes',
-  EMS_ESP_VER: 'Firmware Version', // TODO translate
+  EMS_ESP_VER: 'Firmware Version',
   UPTIME: 'System Uptime',
   FREE_MEMORY: 'Free Memory',
   PSRAM: 'PSRAM (Size / Free)',
@@ -186,7 +186,7 @@ const en: Translation = {
   FILESYSTEM: 'File System (Used / Free)',
   BUFFER_SIZE: 'Max Buffer Size',
   COMPACT: 'Compact',
-  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
+  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings',
   UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)',
   UPLOAD_DROP_TEXT: 'Drop file or click here',
   ERROR: 'Unexpected Error, please try again',
@@ -338,7 +338,8 @@ const en: Translation = {
   LATEST_VERSION: 'You are using the latest firmware version.',
   PLEASE_WAIT: 'Please wait',
   RESTARTING_PRE: 'Initializing',
-  RESTARTING_POST: 'Preparing'
+  RESTARTING_POST: 'Preparing',
+  AUTO_SCROLL: 'Auto Scroll'
 };
 
 export default en;

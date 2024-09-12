@@ -27,9 +27,6 @@ WebLogService::WebLogService(AsyncWebServer * server, SecurityManager * security
     // get & set settings
     server->on(EMSESP_LOG_SETTINGS_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { getSetValues(request, json); });
 
-    // for bring back the whole log - is a command, hence a POST
-    server->on(EMSESP_FETCH_LOG_PATH, HTTP_POST, [this](AsyncWebServerRequest * request) { fetchLog(request); });
-
     // events_.setFilter(securityManager->filterRequest(AuthenticationPredicates::IS_ADMIN));
     server->addHandler(&events_);
 }
@@ -183,11 +180,13 @@ void WebLogService::loop() {
         return;
     }
 
-    // put a small delay in
+    /*
+    // put a small delay in - https://github.com/emsesp/EMS-ESP32/issues/1652
     if (uuid::get_uptime_ms() - last_transmit_ < REFRESH_SYNC) {
         return;
     }
     last_transmit_ = uuid::get_uptime_ms();
+    */
 
     // flush
     for (const auto & message : log_messages_) {
@@ -234,13 +233,6 @@ void WebLogService::transmit(const QueuedLogMessage & message) {
     delete[] buffer;
 }
 
-// send the complete log buffer to the API, not filtering on log level
-// done by resetting the pointer
-void WebLogService::fetchLog(AsyncWebServerRequest * request) {
-    log_message_id_tail_ = 0;
-    request->send(200);
-}
-
 // sets the values after a POST
 void WebLogService::getSetValues(AsyncWebServerRequest * request, JsonVariant json) {
     if ((request->method() == HTTP_GET) || (!json.is<JsonObject>())) {
@@ -254,9 +246,14 @@ void WebLogService::getSetValues(AsyncWebServerRequest * request, JsonVariant js
 
         response->setLength();
         request->send(response);
+
+        // reset the tail pointer so complete log is sent
+        log_message_id_tail_ = 0;
+
         return;
     }
 
+    // POST - set the values
     auto && body = json.as<JsonObject>();
 
     uuid::log::Level level = body["level"];

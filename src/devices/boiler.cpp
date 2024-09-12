@@ -2673,7 +2673,7 @@ bool Boiler::set_ww_circulation_pump(const char * value, const int8_t id) {
 }
 
 // Set the mode of circulation, 1x3min, ... 6x3min, continuous
-// if 0-off, switching is not possibe, if 1-7 switching to off is not possible
+// if 0-off, switching is not possible, if 1-7 switching to off is not possible
 bool Boiler::set_ww_circulation_mode(const char * value, const int8_t id) {
     uint8_t v;
     if (!Helpers::value2enum(value, v, FL_(enum_freq))) {

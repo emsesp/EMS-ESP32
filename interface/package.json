@@ -1,9 +1,9 @@
 {
   "name": "EMS-ESP",
-  "version": "3.7",
-  "description": "Build the EMS-ESP WebUI",
+  "version": "3.7.0",
+  "description": "EMS-ESP WebUI",
   "homepage": "https://emsesp.org",
-  "author": "proddy",
+  "author": "proddy, emsesp.org",
   "license": "MIT",
   "private": true,
   "type": "module",
@@ -24,8 +24,8 @@
     "@alova/adapter-xhr": "2.0.7",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
-    "@mui/icons-material": "^6.0.2",
-    "@mui/material": "^6.0.2",
+    "@mui/icons-material": "^6.1.0",
+    "@mui/material": "^6.1.0",
     "@table-library/react-table-library": "4.1.7",
     "alova": "3.0.16",
     "async-validator": "^4.2.5",
@@ -43,16 +43,15 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@eslint/js": "^9.10.0",
-    "@preact/compat": "^17.1.2",
+    "@preact/compat": "^18.3.1",
     "@preact/preset-vite": "^2.9.0",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-    "@types/babel__core": "^7",
     "@types/formidable": "^3",
     "@types/node": "^22.5.4",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
     "@types/react-router-dom": "^5.3.3",
-    "concurrently": "^9.0.0",
+    "concurrently": "^9.0.1",
     "eslint": "^9.10.0",
     "eslint-config-prettier": "^9.1.0",
     "formidable": "^3.5.1",
@@ -64,5 +63,5 @@
     "vite-plugin-imagemin": "^0.6.1",
     "vite-tsconfig-paths": "^5.0.1"
   },
-  "packageManager": "yarn@4.4.0"
+  "packageManager": "yarn@4.4.1"
 }

@@ -55,7 +55,7 @@ class Thermostat : public EMSdevice {
         uint8_t summertemp;
         int8_t  nofrosttemp; // signed -20°C to +10°C
         uint8_t designtemp;  // heating curve design temp at MinExtTemp
-        int8_t  offsettemp;  // heating curve offest temp at roomtemp signed!
+        int8_t  offsettemp;  // heating curve offset temp at roomtemp signed!
         uint8_t manualtemp;
         uint8_t summersetmode;
         uint8_t hpoperatingmode;

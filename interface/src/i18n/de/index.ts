@@ -338,7 +338,8 @@ const de: Translation = {
   LATEST_VERSION: 'Sie verwenden die neueste Firmware-Version.',
   PLEASE_WAIT: 'Bitte warten',
   RESTARTING_PRE: 'Initialisierung',
-  RESTARTING_POST: 'Vorbereitung'
+  RESTARTING_POST: 'Vorbereitung',
+  AUTO_SCROLL: 'Automatisches Scrollen'
 };
 
 export default de;

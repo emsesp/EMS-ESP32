@@ -143,7 +143,6 @@ const DownloadUpload = () => {
     if (!latestVersion || !latestDevVersion) {
       return '';
     }
-    console.log('getBinURL', useDevVersion, latestDevVersion, latestVersion);
     const filename =
       'EMS-ESP-' +
       (useDevVersion ? latestDevVersion : latestVersion).replaceAll('.', '_') +

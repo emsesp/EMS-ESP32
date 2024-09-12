@@ -128,54 +128,6 @@ let log_settings = {
   psram: true
 };
 
-const FETCH_LOG_ENDPOINT = REST_ENDPOINT_ROOT + 'fetchLog';
-const fetch_log = {
-  events: [
-    {
-      t: '000+00:00:00.001',
-      l: 3,
-      i: 1,
-      n: 'system',
-      m: 'this is message 3'
-    },
-    {
-      t: '000+00:00:00.002',
-      l: 4,
-      i: 2,
-      n: 'ntp',
-      m: 'this is message 4'
-    },
-    {
-      t: '000+00:00:00.002',
-      l: 5,
-      i: 3,
-      n: 'mqtt',
-      m: 'this is message 5'
-    },
-    {
-      t: '000+00:00:00.002',
-      l: 6,
-      i: 444,
-      n: 'command',
-      m: 'this is message 6'
-    },
-    {
-      t: '000+00:00:00.002',
-      l: 7,
-      i: 5555,
-      n: 'emsesp',
-      m: 'this is message 7'
-    },
-    {
-      t: '000+00:00:00.002',
-      l: 8,
-      i: 666666,
-      n: 'thermostat',
-      m: 'this is message 8'
-    }
-  ]
-};
-
 // NTP
 const NTP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'ntpStatus';
 const NTP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'ntpSettings';
@@ -4144,9 +4096,6 @@ const emsesp_deviceentities_none = [
 
 // LOG
 router
-  .post(FETCH_LOG_ENDPOINT, () => {
-    return status(200);
-  })
   .get(LOG_SETTINGS_ENDPOINT, () => log_settings)
   .post(LOG_SETTINGS_ENDPOINT, async (request: any) => {
     log_settings = await request.json();
@@ -4215,7 +4164,7 @@ router
   .get(ACTIVITY_ENDPOINT, () => activity)
   .get(HARDWARE_STATUS_ENDPOINT, () => {
     if (countHardwarePoll === 0) {
-      console.log('Reseting hardware count...');
+      console.log('Resetting hardware count...');
     }
 
     if (countHardwarePoll >= 2) {
@@ -4332,7 +4281,7 @@ router
     let sorted_devices = [...emsesp_coredata.devices].sort((a, b) => a.t - b.t);
     // append emsesp_coredata to sorted_devices so Custom is always at the end of the list
     sorted_devices.push(emsesp_coredata_custom);
-    // sorted_devices = []; // uncomment if simulating no decvices...
+    // sorted_devices = []; // uncomment if simulating no devices...
     return { connected: true, devices: sorted_devices };
   })
   .get(EMSESP_SENSOR_DATA_ENDPOINT, () => {

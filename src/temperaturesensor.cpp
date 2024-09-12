@@ -372,7 +372,7 @@ bool TemperatureSensor::get_value_info(JsonObject output, const char * cmd, cons
         // match custom name or sensor ID
         if (cmd == Helpers::toLower(sensor.name()) || cmd == Helpers::toLower(sensor.id())) {
             get_value_json(output, sensor);
-            return Command::set_attirbute(output, cmd, attribute_s);
+            return Command::set_attribute(output, cmd, attribute_s);
         }
     }
 
@@ -491,7 +491,7 @@ void TemperatureSensor::publish_values(const bool force) {
                 if (Mqtt::discovery_type() == Mqtt::discoveryType::HOMEASSISTANT) {
                     config["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else -55}}";
                 } else {
-                    config["val_tpl"] = (std::string) "{{" + val_obj + "}}"; // ommit value conditional Jinja2 template code
+                    config["val_tpl"] = (std::string) "{{" + val_obj + "}}"; // omit value conditional Jinja2 template code
                 }
 
                 char uniq_s[70];

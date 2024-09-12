@@ -15,7 +15,6 @@ export const readLogSettings = () =>
   alovaInstance.Get<LogSettings>(`/rest/logSettings`);
 export const updateLogSettings = (data: LogSettings) =>
   alovaInstance.Post('/rest/logSettings', data);
-export const fetchLog = () => alovaInstance.Post('/rest/fetchLog');
 export const fetchLogES = () => alovaInstance.Get('/es/log');
 
 // Get versions from github

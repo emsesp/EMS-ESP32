@@ -657,7 +657,7 @@ bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int
         // match custom name or sensor GPIO
         if (cmd == Helpers::toLower(sensor.name()) || Helpers::atoint(cmd) == sensor.gpio()) {
             get_value_json(output, sensor);
-            return Command::set_attirbute(output, cmd, attribute_s);
+            return Command::set_attribute(output, cmd, attribute_s);
         }
     }
 

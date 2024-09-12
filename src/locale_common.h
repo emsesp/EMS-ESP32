@@ -354,7 +354,7 @@ MAKE_ENUM(enum_dayOfWeek, FL_(day_mo), FL_(day_tu), FL_(day_we), FL_(day_th), FL
 MAKE_ENUM(enum_progMode2, FL_(own_1), FL_(family), FL_(morning), FL_(evening), FL_(am), FL_(pm), FL_(midday), FL_(singles), FL_(seniors), FL_(new), FL_(own_2))
 MAKE_ENUM(enum_progMode3, FL_(family), FL_(morning), FL_(evening), FL_(am), FL_(pm), FL_(midday), FL_(singles), FL_(seniors))
 MAKE_ENUM(enum_hybridStrategy, FL_(co2_optimized), FL_(cost_optimized), FL_(outside_temp_switched), FL_(co2_cost_mix))
-MAKE_ENUM(enum_hybridStrategy1, FL_(cost_optimized), FL_(co2_optimized), FL_(outside_temp_alt), FL_(outside_temp_par), FL_(hp_prefered), FL_(boiler_only))
+MAKE_ENUM(enum_hybridStrategy1, FL_(cost_optimized), FL_(co2_optimized), FL_(outside_temp_alt), FL_(outside_temp_par), FL_(hp_preferred), FL_(boiler_only))
 MAKE_ENUM(enum_lowNoiseMode, FL_(off), FL_(reduced_output), FL_(switchoff), FL_(perm))
 
 // heat pump

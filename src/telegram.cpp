@@ -428,7 +428,7 @@ void TxService::send_telegram(const uint8_t * data, const uint8_t length) {
     for (uint8_t i = 0; i < length; i++) {
         telegram_raw[i] = data[i];
     }
-    telegram_raw[length] = calculate_crc(telegram_raw, length); // apppend CRC
+    telegram_raw[length] = calculate_crc(telegram_raw, length); // append CRC
 
     tx_state(Telegram::Operation::NONE); // no post validation needed
 
@@ -656,7 +656,7 @@ uint16_t TxService::read_next_tx(const uint8_t offset, const uint8_t length) {
 
     // check telegram, length, offset and overflow
     // some telegrams only reply with one byte less, but have higher offsets (boiler 0x10)
-    // some reply with higher offset than requestes and have not_set values intermediate (boiler 0xEA)
+    // some reply with higher offset than requests and have not_set values intermediate (boiler 0xEA)
 
     // We have th last byte received
     if (offset + old_length >= telegram_last_->offset + telegram_last_->message_data[0]) {

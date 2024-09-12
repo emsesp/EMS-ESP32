@@ -6,12 +6,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Checkbox, MenuItem, TextField, styled } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 
-import {
-  fetchLog,
-  fetchLogES,
-  readLogSettings,
-  updateLogSettings
-} from 'api/system';
+import { fetchLogES, readLogSettings, updateLogSettings } from 'api/system';
 
 import { useRequest, useSSE } from 'alova/client';
 import {
@@ -86,7 +81,7 @@ const SystemLog = () => {
   });
 
   const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
-  const [lastIndex, setLastIndex] = useState<number>(0);
+  const [autoscroll, setAutoscroll] = useState(true);
 
   const updateFormValue = updateValueDirty(
     origData,
@@ -95,28 +90,18 @@ const SystemLog = () => {
     updateDataValue
   );
 
-  // eslint-disable-next-line @typescript-eslint/unbound-method
-  const { onMessage, onError } = useSSE(fetchLogES, {
-    // withCredentials: true,
+  useSSE(fetchLogES, {
     immediate: true,
     interceptByGlobalResponded: false
-  });
-
-  onMessage((message: { id: number; data: string }) => {
-    const rawData = message.data;
-    const logentry = JSON.parse(rawData) as LogEntry;
-    if (logentry.i > lastIndex) {
-      setLastIndex(logentry.i);
+  })
+    .onMessage((message: { id: number; data: string }) => {
+      const rawData = message.data;
+      const logentry = JSON.parse(rawData) as LogEntry;
       setLogEntries((log) => [...log, logentry]);
-    }
-  });
-
-  onError(() => {
-    toast.error('No connection to Log server');
-  });
-
-  // called on page load to reset pointer and fetch all log entries
-  useRequest(fetchLog());
+    })
+    .onError(() => {
+      toast.error('No connection to Log service');
+    });
 
   const paddedLevelLabel = (level: LogLevel) => {
     const label = levelLabel(level);
@@ -157,7 +142,7 @@ const SystemLog = () => {
   // handle scrolling
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (logEntries.length) {
+    if (logEntries.length && autoscroll) {
       ref.current?.scrollIntoView({
         behavior: 'smooth',
         block: 'end'
@@ -173,12 +158,12 @@ const SystemLog = () => {
     return (
       <>
         <Grid container spacing={2} alignItems="center">
-          <Grid size={2}>
+          <Grid>
             <TextField
               name="level"
               label={LL.LOG_LEVEL()}
               value={data.level}
-              fullWidth
+              sx={{ width: '15ch' }}
               variant="outlined"
               onChange={updateFormValue}
               margin="normal"
@@ -193,12 +178,12 @@ const SystemLog = () => {
             </TextField>
           </Grid>
           {data.psram && (
-            <Grid size={2}>
+            <Grid>
               <TextField
                 name="max_messages"
                 label={LL.BUFFER_SIZE()}
                 value={data.max_messages}
-                fullWidth
+                sx={{ width: '15ch' }}
                 variant="outlined"
                 onChange={updateFormValue}
                 margin="normal"
@@ -221,6 +206,16 @@ const SystemLog = () => {
                 />
               }
               label={LL.COMPACT()}
+            />
+            <BlockFormControlLabel
+              control={
+                <Checkbox
+                  checked={autoscroll}
+                  onChange={() => setAutoscroll(!autoscroll)}
+                  name="autoscroll"
+                />
+              }
+              label={LL.AUTO_SCROLL()}
             />
           </Grid>
           <Button

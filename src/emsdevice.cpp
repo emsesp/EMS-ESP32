@@ -1462,7 +1462,7 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
         if (cmd == Helpers::toLower(dv.short_name) && (tag <= 0 || tag == dv.tag)) {
             get_value_json(output, dv);
             // if we're filtering on an attribute, go find it
-            return Command::set_attirbute(output, cmd, attribute_s);
+            return Command::set_attribute(output, cmd, attribute_s);
         }
     }
     return false; // not found, but don't return a message error yet
@@ -1664,7 +1664,7 @@ bool EMSdevice::generate_values(JsonObject output, const int8_t tag_filter, cons
                 if (have_tag) {
                     snprintf(name, sizeof(name), "%s %s (%s)", tag_to_string(dv.tag), fullname.c_str(), dv.short_name); // prefix tag
                     // TAG https://github.com/emsesp/EMS-ESP32/issues/1338
-                    // snprintf(name, sizeof(name), "%s %s (%s)", fullname.c_str(), tag_to_string(dv.tag), dv.short_name); // sufix tag
+                    // snprintf(name, sizeof(name), "%s %s (%s)", fullname.c_str(), tag_to_string(dv.tag), dv.short_name); // suffix tag
                 } else {
                     snprintf(name, sizeof(name), "%s (%s)", fullname.c_str(), dv.short_name);
                 }

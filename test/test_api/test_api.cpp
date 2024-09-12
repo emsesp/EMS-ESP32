@@ -129,7 +129,7 @@ void uart_telegram(const char * rx_data) {
     EMSESP::incoming_telegram(data, count + 2);
 }
 
-// add an EMS device and regiser it
+// add an EMS device and register it
 void add_device(uint8_t device_id, uint8_t product_id) {
     uart_telegram({device_id, 0x0B, EMSdevice::EMS_TYPE_VERSION, 0, product_id, 1, 0});
 }

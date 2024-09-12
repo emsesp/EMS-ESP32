@@ -307,8 +307,8 @@ class Boiler : public EMSdevice {
     uint8_t  wwValve_;
 
     // special
-    double  nrgHeatF_; // double calcutate for nrgHeat
-    double  nrgWwF_;   // double calcutate for nrgWw
+    double  nrgHeatF_; // double calculate for nrgHeat
+    double  nrgWwF_;   // double calculate for nrgWw
     uint8_t nomPower_;
 
     /*

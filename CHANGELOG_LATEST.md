@@ -39,6 +39,7 @@
 - command 'show log' that lists out the current weblog buffer, showing last messages.
 - default web log buffer to 25 lines for ESP32s with no PSRAM
 - Try and determine correct board profile if none is set
+- Auto Scroll in WebLog UI - reduced delay so incoming logs are faster
 
 ## Fixed
 

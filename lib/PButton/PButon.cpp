@@ -189,7 +189,7 @@ bool PButton::check(void) {
         cb_onVLongPress(*this);
     }
 
-    // if any action has been prefromed we can stop waiting, and become idle
+    // if any action has been preformed we can stop waiting, and become idle
     if (resultEvent >= 1 && resultEvent <= 4) {
         buttonBusy_ = false;
     }

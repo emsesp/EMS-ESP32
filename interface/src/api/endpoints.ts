@@ -22,7 +22,7 @@ export const alovaInstance = createAlova({
       method.config.headers.Authorization =
         'Bearer ' + localStorage.getItem(ACCESS_TOKEN);
     }
-    // for simualting vrey slow networks
+    // for simulating vrey slow networks
     // return new Promise((resolve) => {
     //   const random = 3000 + Math.random() * 2000;
     //   setTimeout(resolve, Math.floor(random));

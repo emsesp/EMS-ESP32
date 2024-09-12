@@ -21,16 +21,19 @@
 #define ASYNCEVENTSOURCE_H_
 
 #include <Arduino.h>
-#ifdef ESP32
+#include <Arduino.h>
+#if defined(ESP32) || defined(LIBRETINY)
 #include <AsyncTCP.h>
-#ifndef SSE_MAX_QUEUED_MESSAGES
-#define SSE_MAX_QUEUED_MESSAGES 32
-#endif
 #else
 #include <ESPAsyncTCP.h>
-#ifndef SSE_MAX_QUEUED_MESSAGES
-#define SSE_MAX_QUEUED_MESSAGES 8
 #endif
+
+#if defined(ESP32)
+#include <mutex>
+#endif // ESP32
+
+#ifndef SSE_MAX_QUEUED_MESSAGES
+#define SSE_MAX_QUEUED_MESSAGES 32
 #endif
 
 #include <ESPAsyncWebServer.h>
@@ -44,7 +47,7 @@
 #endif
 #endif
 
-#ifdef ESP32
+#if defined(ESP32) || defined(LIBRETINY)
 #define DEFAULT_MAX_SSE_CLIENTS 8
 #else
 #define DEFAULT_MAX_SSE_CLIENTS 4
@@ -54,7 +57,6 @@ class AsyncEventSource;
 class AsyncEventSourceResponse;
 class AsyncEventSourceClient;
 typedef std::function<void(AsyncEventSourceClient *client)> ArEventHandlerFunction;
-typedef std::function<bool(AsyncWebServerRequest *request)> ArAuthorizeConnectHandler;
 
 class AsyncEventSourceMessage {
   private:
@@ -66,7 +68,8 @@ class AsyncEventSourceMessage {
   public:
     AsyncEventSourceMessage(const char * data, size_t len);
     ~AsyncEventSourceMessage();
-    size_t ack(size_t len, uint32_t time __attribute__((unused)));
+    size_t ack(size_t len);
+    size_t write_buffer(AsyncClient *client);
     size_t send(AsyncClient *client);
     bool finished(){ return _acked == _len; }
     bool sent() { return _sent == _len; }
@@ -77,9 +80,12 @@ class AsyncEventSourceClient {
     AsyncClient *_client;
     AsyncEventSource *_server;
     uint32_t _lastId;
+#if defined(ESP32)
+    std::mutex _messageQueue_mutex;
+#else
+    bool _messageQueue_processing{false};
+#endif // ESP32
     LinkedList<AsyncEventSourceMessage *> _messageQueue;
-    // ArFi 2020-08-27 for protecting/serializing _messageQueue
-    AsyncPlainLock _lockmq;
     void _queueMessage(AsyncEventSourceMessage *dataMessage);
     void _runQueue();
 
@@ -94,7 +100,7 @@ class AsyncEventSourceClient {
     void send(const char *message, const char *event=NULL, uint32_t id=0, uint32_t reconnect=0);
     bool connected() const { return (_client != NULL) && _client->connected(); }
     uint32_t lastId() const { return _lastId; }
-    size_t  packetsWaiting() const;
+    size_t  packetsWaiting() const { return _messageQueue.length(); }
 
     //system callbacks (do not call)
     void _onAck(size_t len, uint32_t time);
@@ -107,11 +113,7 @@ class AsyncEventSource: public AsyncWebHandler {
   private:
     String _url;
     LinkedList<AsyncEventSourceClient *> _clients;
-    // Same as for individual messages, protect mutations of _clients list
-    // since simultaneous access from different tasks is possible
-    AsyncWebLock _client_queue_lock;
     ArEventHandlerFunction _connectcb;
-	  ArAuthorizeConnectHandler _authorizeConnectHandler;
   public:
     AsyncEventSource(const String& url);
     ~AsyncEventSource();
@@ -119,10 +121,8 @@ class AsyncEventSource: public AsyncWebHandler {
     const char * url() const { return _url.c_str(); }
     void close();
     void onConnect(ArEventHandlerFunction cb);
-    void authorizeConnect(ArAuthorizeConnectHandler cb);
     void send(const char *message, const char *event=NULL, uint32_t id=0, uint32_t reconnect=0);
-    // number of clients connected
-    size_t count() const;
+    size_t count() const; //number clinets connected
     size_t  avgPacketsWaiting() const;
 
     //system callbacks (do not call)

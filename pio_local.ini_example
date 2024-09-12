@@ -17,22 +17,33 @@
 
 [platformio]
 ; default_envs = s_16M_P ; BBQKees E32V2
-; default_envs = s3_16M_P ; BBQKees S3
-default_envs = s_4M ; BBQKees S32
+default_envs = s3_16M_P ; BBQKees S3
+; default_envs = s_4M ; BBQKees S32
 ; default_envs = native
 ; default_envs = debug
 
 [env]
-; upload settings
-; for USB
-; upload_protocol = esptool
-upload_port = /dev/ttyUSB*
-; for OTA add scripts/upload.py to extra_scripts
-upload_protocol = custom
-custom_emsesp_ip = 10.10.10.175
-; custom_emsesp_ip = ems-esp.local
+; set the username and password for the admin account (default both admin)
 custom_username = admin
 custom_password = admin
+
+; ** upload settings **
+; for direct USB set:
+;  upload_protocol = esptool
+;  upload_port = /dev/ttyUSB*
+;
+; for direct via URL (OTA) set:
+;  upload_protocol = custom
+;  custom_emsesp_ip = <ip address> or ems-esp.local
+;  custom_password = admin
+
+; upload_protocol = esptool
+; upload_port = /dev/ttyUSB*
+
+; upload_protocol = custom
+; custom_emsesp_ip = 10.10.10.175
+
+; ** modules **
 ; example below is using a locally built version of EMS-ESP-Modules. You can also test with:
 ;    rm -rf .pio/libdeps/native/EMS-ESP-Modules; pio run -e native -t clean; pio run -e native -t exec
 ; lib_deps =
@@ -57,7 +68,7 @@ extra_scripts =
 
 [env:s_4M]
 extra_scripts =
-  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+  ; pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
   scripts/upload.py
   
