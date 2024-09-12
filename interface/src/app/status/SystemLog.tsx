@@ -86,7 +86,6 @@ const SystemLog = () => {
   });
 
   const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
-  const [lastIndex, setLastIndex] = useState<number>(0);
   const [autoscroll, setAutoscroll] = useState(true);
 
   const updateFormValue = updateValueDirty(
@@ -96,23 +95,14 @@ const SystemLog = () => {
     updateDataValue
   );
 
-  // eslint-disable-next-line @typescript-eslint/unbound-method
-  const { onMessage, onError } = useSSE(fetchLogES, {
-    // withCredentials: true,
+  useSSE(fetchLogES, {
     immediate: true,
     interceptByGlobalResponded: false
-  });
-
-  onMessage((message: { id: number; data: string }) => {
+  }).onMessage((message: { id: number; data: string }) => {
     const rawData = message.data;
     const logentry = JSON.parse(rawData) as LogEntry;
-    if (logentry.i > lastIndex) {
-      setLastIndex(logentry.i);
       setLogEntries((log) => [...log, logentry]);
-    }
-  });
-
-  onError(() => {
+  }).onError(() => {
     toast.error('No connection to Log service');
   });
 
@@ -231,7 +221,7 @@ const SystemLog = () => {
                   name="autoscroll"
                 />
               }
-              label="Auto scroll"
+              label={LL.AUTO_SCROLL()}
             />
           </Grid>
           <Button
