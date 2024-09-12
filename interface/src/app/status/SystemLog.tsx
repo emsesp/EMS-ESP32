@@ -6,12 +6,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Checkbox, MenuItem, TextField, styled } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 
-import {
-  fetchLog,
-  fetchLogES,
-  readLogSettings,
-  updateLogSettings
-} from 'api/system';
+import { fetchLogES, readLogSettings, updateLogSettings } from 'api/system';
 
 import { useRequest, useSSE } from 'alova/client';
 import {
@@ -98,16 +93,15 @@ const SystemLog = () => {
   useSSE(fetchLogES, {
     immediate: true,
     interceptByGlobalResponded: false
-  }).onMessage((message: { id: number; data: string }) => {
-    const rawData = message.data;
-    const logentry = JSON.parse(rawData) as LogEntry;
+  })
+    .onMessage((message: { id: number; data: string }) => {
+      const rawData = message.data;
+      const logentry = JSON.parse(rawData) as LogEntry;
       setLogEntries((log) => [...log, logentry]);
-  }).onError(() => {
-    toast.error('No connection to Log service');
-  });
-
-  // called on page load to reset pointer and fetch all log entries
-  useRequest(fetchLog());
+    })
+    .onError(() => {
+      toast.error('No connection to Log service');
+    });
 
   const paddedLevelLabel = (level: LogLevel) => {
     const label = levelLabel(level);

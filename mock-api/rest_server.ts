@@ -127,7 +127,6 @@ let log_settings = {
   compact: true,
   psram: true
 };
-const FETCH_LOG_ENDPOINT = REST_ENDPOINT_ROOT + 'fetchLog';
 
 // NTP
 const NTP_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'ntpStatus';
@@ -4097,9 +4096,6 @@ const emsesp_deviceentities_none = [
 
 // LOG
 router
-  .post(FETCH_LOG_ENDPOINT, () => {
-    return status(200);
-  })
   .get(LOG_SETTINGS_ENDPOINT, () => log_settings)
   .post(LOG_SETTINGS_ENDPOINT, async (request: any) => {
     log_settings = await request.json();

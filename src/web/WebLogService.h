@@ -20,7 +20,6 @@
 #define WebLogService_h
 
 #define EMSESP_EVENT_SOURCE_LOG_PATH "/es/log"
-#define EMSESP_FETCH_LOG_PATH "/rest/fetchLog"
 #define EMSESP_LOG_SETTINGS_PATH "/rest/logSettings"
 
 using ::uuid::console::Shell;
@@ -62,7 +61,6 @@ class WebLogService : public uuid::log::Handler {
     };
 
     void transmit(const QueuedLogMessage & message);
-    void fetchLog(AsyncWebServerRequest * request);
     void getSetValues(AsyncWebServerRequest * request, JsonVariant json);
 
     char * messagetime(char * out, const uint64_t t, const size_t bufsize);
