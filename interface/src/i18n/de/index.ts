@@ -339,7 +339,7 @@ const de: Translation = {
   PLEASE_WAIT: 'Bitte warten',
   RESTARTING_PRE: 'Initialisierung',
   RESTARTING_POST: 'Vorbereitung',
-  AUTO_SCROLL: 'Auto Scroll' // TODO translate
+  AUTO_SCROLL: 'Automatisches Scrollen'
 };
 
 export default de;
