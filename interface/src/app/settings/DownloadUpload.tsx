@@ -18,13 +18,7 @@ import {
 import Grid from '@mui/material/Grid2';
 
 import * as SystemApi from 'api/system';
-import {
-  API,
-  getCustomizations,
-  getEntities,
-  getSchedule,
-  getSettings
-} from 'api/app';
+import { API, exportData } from 'api/app';
 import {
   checkUpgrade,
   getDevVersion,
@@ -52,48 +46,26 @@ const DownloadUpload = () => {
   const [useDev, setUseDev] = useState<boolean>(false);
   const [upgradeAvailable, setUpgradeAvailable] = useState<boolean>(false);
 
-  const { send: sendSettings } = useRequest(getSettings(), {
+  const { send: sendExportData } = useRequest((type: string) => exportData(type), {
     immediate: false
-  }).onSuccess((event) => {
-    saveFile(event.data, 'settings.json');
-  });
-
-  const { send: sendCustomizations } = useRequest(getCustomizations(), {
-    immediate: false
-  }).onSuccess((event) => {
-    saveFile(event.data, 'customizations.json');
-  });
-
-  const { send: sendEntities } = useRequest(getEntities(), {
-    immediate: false
-  }).onSuccess((event) => {
-    saveFile(event.data, 'custom_entities.json');
-  });
-
-  const { send: sendSchedule } = useRequest(getSchedule(), {
-    immediate: false
-  }).onSuccess((event) => {
-    saveFile(event.data, 'schedule.json');
-  });
+  })
+    .onSuccess((event) => {
+      saveFile(event.data, event.args[0]);
+      toast.info(LL.DOWNLOAD_SUCCESSFUL());
+    })
+    .onError((error) => {
+      toast.error(error.message);
+    });
 
   const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
     immediate: false
-  });
-
-  const { send: sendAPIandSave } = useRequest((data: APIcall) => API(data), {
-    immediate: false
-  }).onSuccess((event) => {
-    saveFile(
-      event.data,
-      String(event.args[0].device) + '_' + String(event.args[0].cmd) + '.txt'
-    );
   });
 
   const {
     data: data,
     send: loadData,
     error
-  } = useRequest(SystemApi.readHardwareStatus);
+  } = useRequest(SystemApi.readSystemStatus);
 
   const { send: sendUploadURL } = useRequest(
     (data: { url: string }) => uploadURL(data),
@@ -123,6 +95,8 @@ const DownloadUpload = () => {
     // immediate: false,
     // initialData: '3.6.5'
   });
+
+  // called immediately to get the latest version, on page load, then check for upgrade
   const { data: latestDevVersion } = useRequest(getDevVersion, {
     // uncomment next 2 lines for testing, uses https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_7_0-dev_31-ESP32-16MB+.bin
     // immediate: false,
@@ -175,40 +149,9 @@ const DownloadUpload = () => {
         type: 'text/plain'
       })
     );
-    anchor.download = 'emsesp_' + filename;
+    anchor.download = 'emsesp_' + filename + '.json';
     anchor.click();
     URL.revokeObjectURL(anchor.href);
-    toast.info(LL.DOWNLOAD_SUCCESSFUL());
-  };
-
-  const downloadSettings = async () => {
-    await sendSettings().catch((error: Error) => {
-      toast.error(error.message);
-    });
-  };
-
-  const downloadCustomizations = async () => {
-    await sendCustomizations().catch((error: Error) => {
-      toast.error(error.message);
-    });
-  };
-
-  const downloadEntities = async () => {
-    await sendEntities().catch((error: Error) => {
-      toast.error(error.message);
-    });
-  };
-
-  const downloadSchedule = async () => {
-    await sendSchedule().catch((error: Error) => {
-      toast.error(error.message);
-    });
-  };
-
-  const callAPIandSave = async (device: string, cmd: string) => {
-    await sendAPIandSave({ device, cmd, id: 0 }).catch((error: Error) => {
-      toast.error(error.message);
-    });
   };
 
   useLayoutTitle(LL.DOWNLOAD_UPLOAD());
@@ -301,7 +244,7 @@ const DownloadUpload = () => {
             startIcon={<DownloadIcon />}
             variant="outlined"
             color="primary"
-            onClick={downloadSettings}
+            onClick={() => sendExportData('settings')}
           >
             {LL.DOWNLOAD(1)}&nbsp;{LL.SETTINGS_OF(LL.APPLICATION())}
           </Button>
@@ -311,7 +254,7 @@ const DownloadUpload = () => {
             startIcon={<DownloadIcon />}
             variant="outlined"
             color="primary"
-            onClick={downloadCustomizations}
+            onClick={() => sendExportData('customizations')}
           >
             {LL.DOWNLOAD(1)}&nbsp;{LL.CUSTOMIZATIONS()}
           </Button>
@@ -320,7 +263,7 @@ const DownloadUpload = () => {
             startIcon={<DownloadIcon />}
             variant="outlined"
             color="primary"
-            onClick={downloadEntities}
+            onClick={() => sendExportData('entities')}
           >
             {LL.DOWNLOAD(1)}&nbsp;{LL.CUSTOM_ENTITIES(0)}
           </Button>
@@ -329,7 +272,7 @@ const DownloadUpload = () => {
             startIcon={<DownloadIcon />}
             variant="outlined"
             color="primary"
-            onClick={downloadSchedule}
+            onClick={() => sendExportData('schedule')}
           >
             {LL.DOWNLOAD(1)}&nbsp;{LL.SCHEDULE(0)}
           </Button>

@@ -25,7 +25,6 @@
 
 #define EMSESP_SETTINGS_SERVICE_PATH "/rest/settings"
 #define EMSESP_BOARD_PROFILE_SERVICE_PATH "/rest/boardProfile"
-#define EMSESP_GET_SETTINGS_PATH "/rest/getSettings"
 
 namespace emsesp {
 
@@ -136,7 +135,6 @@ class WebSettingsService : public StatefulService<WebSettings> {
     FSPersistence<WebSettings> _fsPersistence;
 
     void board_profile(AsyncWebServerRequest * request);
-    void getSettings(AsyncWebServerRequest * request);
 
     void onUpdate();
 };

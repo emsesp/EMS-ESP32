@@ -307,11 +307,10 @@ const mqtt_status = {
 };
 
 // STATUS
-const SYSTEM_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'systemStatus';
 const ACTIVITY_ENDPOINT = REST_ENDPOINT_ROOT + 'activity';
 
 // SETTINGS
-const HARDWARE_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'hardwareStatus';
+const SYSTEM_STATUS_ENDPOINT = REST_ENDPOINT_ROOT + 'systemStatus';
 const SECURITY_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'securitySettings';
 
 // SYSTEM SIGNIN
@@ -322,8 +321,23 @@ const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken';
 const VERSION = '3.7.0-dev.0';
 // const VERSION = '3.6.4';
 
-let hardware_status = {
+let system_status = {
   emsesp_version: VERSION,
+  bus_status: 0,
+  // status: 2,
+  uptime: 77186,
+  bus_uptime: 77121,
+  num_devices: 2,
+  num_sensors: 1,
+  num_analogs: 1,
+  free_heap: 143,
+  ntp_status: 2,
+  mqtt_status: true,
+  ap_status: false,
+  network_status: 3, // wifi connected
+  // network_status: 10, // ethernet connected
+  // network_status: 6, // wifi disconnected
+  wifi_rssi: -41,
   esp_platform: 'ESP32S3',
   build_flags: 'DEMO',
   cpu_type: 'ESP32-S3',
@@ -331,7 +345,6 @@ let hardware_status = {
   cpu_cores: 2,
   cpu_freq_mhz: 240,
   max_alloc_heap: 191,
-  free_heap: 211,
   arduino_version: 'ESP32 Arduino v2.0.17',
   sdk_version: 'v4.4.7-dirty',
   partition: 'app0',
@@ -347,28 +360,9 @@ let hardware_status = {
   psram_size: 8189,
   free_psram: 8166,
   has_loader: true,
-  // model: ''
-  model: 'BBQKees Electronics EMS Gateway E32 V2 (E32 V2.0 P3/2024011)',
+  model: '',
+  // model: 'BBQKees Electronics EMS Gateway E32 V2 (E32 V2.0 P3/2024011)',
   status: 'downloading'
-};
-
-const system_status = {
-  emsesp_version: VERSION,
-  status: 0,
-  // status: 2,
-  uptime: 77186,
-  bus_uptime: 77121,
-  num_devices: 2,
-  num_sensors: 1,
-  num_analogs: 1,
-  free_heap: 143,
-  ntp_status: 2,
-  mqtt_status: true,
-  ap_status: false,
-  network_status: 3, // wifi connected
-  // network_status: 10, // ethernet connected
-  // network_status: 6, // wifi disconnected
-  wifi_rssi: -41
 };
 
 let security_settings = {
@@ -402,7 +396,6 @@ const generate_token = { token: '1234' };
 const EMSESP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'settings';
 const EMSESP_CORE_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'coreData';
 const EMSESP_SENSOR_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'sensorData';
-const EMSESP_DEVICES_ENDPOINT = REST_ENDPOINT_ROOT + 'devices';
 
 const EMSESP_DEVICEDATA_ENDPOINT1 = REST_ENDPOINT_ROOT + 'deviceData';
 const EMSESP_DEVICEDATA_ENDPOINT2 = REST_ENDPOINT_ROOT + 'deviceData/:id?';
@@ -423,13 +416,9 @@ const EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT =
 const EMSESP_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
 const EMSESP_CUSTOMENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customEntities';
 const EMSESP_MODULES_ENDPOINT = REST_ENDPOINT_ROOT + 'modules';
+const EMSESP_EXPORT_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'exportData';
 
 // these are used in the API calls only
-const EMSESP_GET_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'getSettings';
-const EMSESP_GET_CUSTOMIZATIONS_ENDPOINT = REST_ENDPOINT_ROOT + 'getCustomizations';
-const EMSESP_GET_ENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'getEntities';
-const EMSESP_GET_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'getSchedule';
-
 const EMSESP_SYSTEM_INFO_ENDPOINT = API_ENDPOINT_ROOT + 'system/info';
 
 const emsesp_info = {
@@ -634,74 +623,6 @@ let settings = {
   modbus_timeout: 10000
 };
 
-const emsesp_devices = {
-  devices: [
-    {
-      i: 2,
-      s: 'RC20',
-      t: 5,
-      tn: 'Thermostat',
-      url: 'thermostat'
-    },
-    {
-      i: 3,
-      s: 'Buderus GB125',
-      t: 5,
-      tn: 'Boiler',
-      url: 'boiler'
-    },
-    {
-      i: 4,
-      s: 'Moduline 1000',
-      t: 5,
-      tn: 'Thermostat',
-      url: 'thermostat'
-    },
-    {
-      i: 5,
-      s: 'MM10',
-      t: 7,
-      tn: 'Mixer Module',
-      url: 'mixer'
-    },
-    {
-      i: 6,
-      s: 'SM10',
-      t: 8,
-      tn: 'Solar Module',
-      url: 'solar'
-    },
-    {
-      i: 7,
-      s: 'Trendline HRC30/Generic Heatronic 3',
-      t: 4,
-      tn: 'Boiler',
-      url: 'boiler'
-    },
-    {
-      i: 8,
-      s: 'Bosch Compress 7000i AW Heat Pump',
-      t: 5,
-      tn: 'Boiler/HP',
-      url: 'boiler'
-    },
-    {
-      i: 9,
-      s: 'RC100H',
-      t: 6,
-      tn: 'Thermostat',
-      url: 'thermostat'
-    },
-    {
-      i: 10,
-      s: 'RC310',
-      t: 6,
-      tn: 'Thermostat',
-      url: 'thermostat'
-    }
-  ]
-};
-
 const emsesp_coredata = {
   connected: true,
   // connected: false,
@@ -716,7 +637,8 @@ const emsesp_coredata = {
       d: 8,
       p: 123,
       v: '06.01',
-      e: 69
+      e: 69,
+      url: 'boiler'
     },
     {
       id: 3,
@@ -727,7 +649,8 @@ const emsesp_coredata = {
       d: 8,
       p: 123,
       v: '06.01',
-      e: 73
+      e: 73,
+      url: 'boiler'
     },
     {
       id: 1,
@@ -738,7 +661,8 @@ const emsesp_coredata = {
       d: 24,
       p: 86,
       v: '04.01',
-      e: 57
+      e: 57,
+      url: 'thermostat'
     },
     {
       id: 2,
@@ -749,7 +673,8 @@ const emsesp_coredata = {
       d: 23,
       p: 77,
       v: '03.03',
-      e: 6
+      e: 6,
+      url: 'thermostat'
     },
     {
       id: 4,
@@ -760,7 +685,8 @@ const emsesp_coredata = {
       d: 16,
       p: 165,
       v: '04.01',
-      e: 3
+      e: 3,
+      url: 'thermostat'
     },
     {
       id: 5,
@@ -782,7 +708,8 @@ const emsesp_coredata = {
       d: 48,
       p: 73,
       v: '01.02',
-      e: 22
+      e: 22,
+      url: 'solar'
     },
     {
       id: 8,
@@ -793,7 +720,8 @@ const emsesp_coredata = {
       d: 8,
       p: 172,
       v: '01.20',
-      e: 152
+      e: 152,
+      url: 'boiler'
     },
     {
       id: 9,
@@ -804,7 +732,8 @@ const emsesp_coredata = {
       d: 56,
       p: 200,
       v: '40.07',
-      e: 4
+      e: 4,
+      url: 'thermostat'
     },
     {
       id: 10,
@@ -815,7 +744,8 @@ const emsesp_coredata = {
       d: 16,
       p: 158,
       v: '73.03',
-      e: 63
+      e: 63,
+      url: 'thermostat'
     }
   ]
 };
@@ -3871,9 +3801,25 @@ let emsesp_modules = {
 };
 
 // CUSTOMIZATION
-const emsesp_deviceentities_1 = [
-  { v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }
+const dummy_deviceentities = [
+  {
+    v: 'unknown',
+    n: 'no entities for this device',
+    id: 'unknown',
+    m: 0,
+    w: false
+  }
 ];
+
+// no data for these
+const emsesp_deviceentities_1 = dummy_deviceentities;
+const emsesp_deviceentities_3 = dummy_deviceentities;
+const emsesp_deviceentities_5 = dummy_deviceentities;
+const emsesp_deviceentities_6 = dummy_deviceentities;
+const emsesp_deviceentities_8 = dummy_deviceentities;
+const emsesp_deviceentities_9 = dummy_deviceentities;
+const emsesp_deviceentities_10 = dummy_deviceentities;
+const emsesp_deviceentities_none = dummy_deviceentities;
 
 const emsesp_deviceentities_2 = [
   {
@@ -3916,10 +3862,6 @@ const emsesp_deviceentities_2 = [
   }
 ];
 
-const emsesp_deviceentities_3 = [
-  { v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }
-];
-
 const emsesp_deviceentities_4 = [
   {
     v: 16,
@@ -3942,13 +3884,6 @@ const emsesp_deviceentities_4 = [
     m: 2,
     w: true
   }
-];
-const emsesp_deviceentities_5 = [
-  { v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }
-];
-
-const emsesp_deviceentities_6 = [
-  { v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }
 ];
 
 const emsesp_deviceentities_7 = [
@@ -4076,22 +4011,6 @@ const emsesp_deviceentities_7 = [
   { v: 102151, n: 'dhw active time', id: 'dhw/workm', m: 0, w: false }
 ];
 
-const emsesp_deviceentities_8 = [
-  { v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }
-];
-
-const emsesp_deviceentities_9 = [
-  { v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }
-];
-
-const emsesp_deviceentities_10 = [
-  { v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }
-];
-
-const emsesp_deviceentities_none = [
-  { v: 'dummy value', n: 'dummy name', id: 'dummy', m: 0, w: false }
-];
-
 // END DATA
 
 // LOG
@@ -4160,22 +4079,21 @@ router
 
 // SYSTEM and SETTINGS
 router
-  .get(SYSTEM_STATUS_ENDPOINT, () => system_status)
   .get(ACTIVITY_ENDPOINT, () => activity)
-  .get(HARDWARE_STATUS_ENDPOINT, () => {
+  .get(SYSTEM_STATUS_ENDPOINT, () => {
     if (countHardwarePoll === 0) {
       console.log('Resetting hardware count...');
     }
 
     if (countHardwarePoll >= 2) {
       countHardwarePoll = 0;
-      hardware_status.status = 'ready';
+      system_status.status = 'ready';
     }
 
     console.log('Hardware count ' + countHardwarePoll + ' of 2');
     countHardwarePoll++;
 
-    return hardware_status;
+    return system_status;
   })
   .get(SECURITY_SETTINGS_ENDPOINT, () => security_settings)
   .post(SECURITY_SETTINGS_ENDPOINT, async (request: any) => {
@@ -4288,11 +4206,6 @@ router
     // random change the zolder temperature 0-100
     emsesp_sensordata.ts[2].t = Math.floor(Math.random() * 100);
     return emsesp_sensordata;
-  })
-  .get(EMSESP_DEVICES_ENDPOINT, () => {
-    // sort by type
-    const sorted_devices = emsesp_devices.devices.sort((a, b) => a.t - b.t);
-    return { devices: sorted_devices };
   })
   .get(EMSESP_DEVICEDATA_ENDPOINT1, (request) =>
     request.query.id ? deviceData(Number(request.query.id)) : status(404)
@@ -4501,11 +4414,11 @@ router
   })
 
   // Settings - board profile
-  .post(EMSESP_BOARDPROFILE_ENDPOINT, async (request: any) => {
-    const content = await request.json();
-    const board_profile = content.code;
+  .get(EMSESP_BOARDPROFILE_ENDPOINT, (request) => {
+    const board_profile = request.query.boardProfile;
 
     const data = {
+      board_profile: settings.board_profile,
       led_gpio: settings.led_gpio,
       dallas_gpio: settings.dallas_gpio,
       rx_gpio: settings.rx_gpio,
@@ -4629,15 +4542,32 @@ router
       data.eth_clock_mode = 0;
     }
 
-    console.log('board profile saved', data);
+    data.board_profile =
+      typeof board_profile === 'string' ? board_profile : settings.board_profile;
+
+    console.log('board profile for ' + board_profile + ' fetched: ', data);
     return data;
   })
 
   // Download Settings
-  .get(EMSESP_GET_SETTINGS_ENDPOINT, () => emsesp_info)
-  .get(EMSESP_GET_CUSTOMIZATIONS_ENDPOINT, () => emsesp_deviceentities_1)
-  .get(EMSESP_GET_ENTITIES_ENDPOINT, () => emsesp_customentities)
-  .get(EMSESP_GET_SCHEDULE_ENDPOINT, () => emsesp_schedule)
+  .get(EMSESP_EXPORT_DATA_ENDPOINT, (request) => {
+    const type = request.query.type;
+    console.log('exporting ' + type + ' data');
+    switch (type) {
+      case 'settings':
+        return emsesp_info;
+      case 'customizations':
+        return emsesp_deviceentities_2; // fixed for one device
+      case 'entities':
+        return emsesp_customentities;
+      case 'schedule':
+        return emsesp_schedule;
+      case 'modules':
+        return emsesp_modules;
+      default:
+        return status(404);
+    }
+  })
 
   // upload URL
   .post('/rest/uploadURL', () => {
@@ -4673,7 +4603,7 @@ router
       }
       if (cmd === 'restart') {
         console.log('restarting...');
-        hardware_status.status = 'restarting';
+        system_status.status = 'restarting';
         countHardwarePoll = 0;
         return status(200);
       }

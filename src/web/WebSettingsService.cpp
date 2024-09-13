@@ -28,9 +28,6 @@ WebSettingsService::WebSettingsService(AsyncWebServer * server, FS * fs, Securit
     server->on(EMSESP_BOARD_PROFILE_SERVICE_PATH,
                HTTP_GET,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { board_profile(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
-    server->on(EMSESP_GET_SETTINGS_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { getSettings(request); }, AuthenticationPredicates::IS_ADMIN));
     addUpdateHandler([this] { onUpdate(); }, false);
 }
 
@@ -460,27 +457,6 @@ void WebSettingsService::board_profile(AsyncWebServerRequest * request) {
     }
 
     AsyncWebServerResponse * response = request->beginResponse(200);
-    request->send(response);
-}
-
-// returns json with all system settings
-void WebSettingsService::getSettings(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false);
-    JsonObject root     = response->getRoot();
-
-    root["type"] = "settings";
-
-    JsonObject node = root["System"].to<JsonObject>();
-    node["version"] = EMSESP_APP_VERSION;
-
-    System::extractSettings(NETWORK_SETTINGS_FILE, "Network", root);
-    System::extractSettings(AP_SETTINGS_FILE, "AP", root);
-    System::extractSettings(MQTT_SETTINGS_FILE, "MQTT", root);
-    System::extractSettings(NTP_SETTINGS_FILE, "NTP", root);
-    System::extractSettings(SECURITY_SETTINGS_FILE, "Security", root);
-    System::extractSettings(EMSESP_SETTINGS_FILE, "Settings", root);
-
-    response->setLength();
     request->send(response);
 }
 

@@ -22,9 +22,7 @@
 #define EMSESP_CUSTOMIZATION_FILE "/config/emsespCustomization.json"
 
 // GET
-#define EMSESP_DEVICES_SERVICE_PATH "/rest/devices"
 #define EMSESP_DEVICE_ENTITIES_PATH "/rest/deviceEntities"
-#define EMSESP_GET_CUSTOMIZATIONS_PATH "/rest/getCustomizations"
 
 // POST
 #define EMSESP_CUSTOMIZATION_ENTITIES_PATH "/rest/customizationEntities"
@@ -98,9 +96,7 @@ class WebCustomizationService : public StatefulService<WebCustomization> {
     FSPersistence<WebCustomization> _fsPersistence;
 
     // GET
-    void devices(AsyncWebServerRequest * request);
     void device_entities(AsyncWebServerRequest * request);
-    void getCustomizations(AsyncWebServerRequest * request);
 
     // POST
     void customization_entities(AsyncWebServerRequest * request, JsonVariant json);

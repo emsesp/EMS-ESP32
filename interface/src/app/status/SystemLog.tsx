@@ -8,7 +8,7 @@ import Grid from '@mui/material/Grid2';
 
 import { fetchLogES, readLogSettings, updateLogSettings } from 'api/system';
 
-import { useRequest, useSSE } from 'alova/client';
+import { useSSE } from 'alova/client';
 import {
   BlockFormControlLabel,
   BlockNavigation,

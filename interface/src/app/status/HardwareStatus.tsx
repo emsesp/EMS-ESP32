@@ -36,7 +36,7 @@ const HardwareStatus = () => {
     data: data,
     send: loadData,
     error
-  } = useAutoRequest(SystemApi.readHardwareStatus, { pollingTime: 2000 });
+  } = useAutoRequest(SystemApi.readSystemStatus, { pollingTime: 2000 });
 
   const content = () => {
     if (!data) {

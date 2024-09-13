@@ -8,7 +8,7 @@ import {
   Typography
 } from '@mui/material';
 
-import { readHardwareStatus } from 'api/system';
+import { readSystemStatus } from 'api/system';
 
 import { dialogStyle } from 'CustomTheme';
 import { useAutoRequest } from 'alova/client';
@@ -22,7 +22,7 @@ const RestartMonitor = () => {
 
   let count = 0;
 
-  const { data } = useAutoRequest(readHardwareStatus, {
+  const { data } = useAutoRequest(readSystemStatus, {
     pollingTime: 1000,
     force: true,
     initialData: { status: 'Getting ready...' },
@@ -38,7 +38,7 @@ const RestartMonitor = () => {
         document.location.href = '/';
       }
     })
-    .onError((error, _method) => {
+    .onError((error) => {
       setErrorMessage(error.message);
     });
 

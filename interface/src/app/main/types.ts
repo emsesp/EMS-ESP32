@@ -71,6 +71,7 @@ export interface Device {
   p: number; // productid
   v: string; // version
   e: number; // entities
+  url?: string; // lowercase type name used in API URL
 }
 
 export interface TemperatureSensor {
@@ -111,20 +112,6 @@ export interface SensorData {
 export interface CoreData {
   connected: boolean;
   devices: Device[];
-}
-
-export interface DeviceShort {
-  i: number; // id
-  d?: number; // deviceid
-  p?: number; // productid
-  s: string; // shortname
-  t?: number; // device type id
-  tn?: string; // device type internal name (translated)
-  url?: string; // lowercase type name used in API URL
-}
-
-export interface Devices {
-  devices: DeviceShort[];
 }
 
 export interface DeviceValue {

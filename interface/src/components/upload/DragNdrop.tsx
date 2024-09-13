@@ -16,7 +16,7 @@ const DragNdrop = ({ onFileSelected }) => {
   const { LL } = useI18nContext();
 
   const checkFileExtension = (file: File) => {
-    const validExtensions = ['.json', '.txt', '.csv', '.bin', '.md5'];
+    const validExtensions = ['.json', '.bin', '.md5'];
     const fileName = file.name;
     const fileExtension = fileName.substring(fileName.lastIndexOf('.'));
     if (validExtensions.includes(fileExtension)) {
