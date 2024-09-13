@@ -28,13 +28,6 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
     server->on(EMSESP_DEVICE_ENTITIES_PATH,
                HTTP_GET,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { device_entities(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
-    server->on(EMSESP_DEVICES_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { devices(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
-    server->on(EMSESP_GET_CUSTOMIZATIONS_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { getCustomizations(request); }, AuthenticationPredicates::IS_ADMIN));
-
 
     // POST
     server->on(EMSESP_RESET_CUSTOMIZATION_SERVICE_PATH,
@@ -164,29 +157,6 @@ void WebCustomizationService::reset_customization(AsyncWebServerRequest * reques
     AsyncWebServerResponse * response = request->beginResponse(400); // bad request
     request->send(response);
 #endif
-}
-
-// send back a list of devices used in the customization web page
-void WebCustomizationService::devices(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false);
-    JsonObject root     = response->getRoot();
-
-    // list is already sorted by device type
-    // controller is ignored since it doesn't have any associated entities
-    JsonArray devices = root["devices"].to<JsonArray>();
-    for (const auto & emsdevice : EMSESP::emsdevices) {
-        if (emsdevice->has_entities()) {
-            JsonObject obj = devices.add<JsonObject>();
-            obj["i"]       = emsdevice->unique_id();                                         // its unique id
-            obj["s"]       = emsdevice->name();                                              // custom name
-            obj["t"]       = emsdevice->device_type();                                       // internal device type ID
-            obj["tn"]      = std::string(emsdevice->device_type_2_device_name_translated()); // translated device type name
-            obj["url"]     = emsdevice->device_type_name();                                  // non-translated, lower-case, used for API URL
-        }
-    }
-
-    response->setLength();
-    request->send(response);
 }
 
 // send back list of device entities
@@ -424,18 +394,5 @@ void WebCustomizationService::test() {
     EMSESP::analogsensor_.reload(); // this is needed to active the analog sensors
 }
 #endif
-
-// return all customizations in a json object
-void WebCustomizationService::getCustomizations(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse(false);
-    JsonObject root     = response->getRoot();
-
-    root["type"] = "customizations";
-
-    System::extractSettings(EMSESP_CUSTOMIZATION_FILE, "Customizations", root);
-
-    response->setLength();
-    request->send(response);
-}
 
 } // namespace emsesp

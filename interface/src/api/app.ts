@@ -6,7 +6,6 @@ import type {
   CoreData,
   DeviceData,
   DeviceEntity,
-  Devices,
   Entities,
   EntityItem,
   ModuleItem,
@@ -53,11 +52,9 @@ export const readActivity = () => alovaInstance.Get<Activity>('/rest/activity');
 // API
 export const API = (apiCall: APIcall) => alovaInstance.Post('/api', apiCall);
 
-// UploadFileForm
-export const getSettings = () => alovaInstance.Get('/rest/getSettings');
-export const getCustomizations = () => alovaInstance.Get('/rest/getCustomizations');
-export const getEntities = () => alovaInstance.Get<Entities>('/rest/getEntities');
-export const getSchedule = () => alovaInstance.Get('/rest/getSchedule');
+// DownloadUpload
+export const exportData = (type: string) =>
+  alovaInstance.Get('/rest/exportData', { params: { type } });
 
 // SettingsCustomization
 export const readDeviceEntities = (id: number) =>
@@ -75,7 +72,6 @@ export const readDeviceEntities = (id: number) =>
       }));
     }
   });
-export const readDevices = () => alovaInstance.Get<Devices>('/rest/devices');
 export const resetCustomizations = () =>
   alovaInstance.Post('/rest/resetCustomizations');
 export const writeCustomizationEntities = (data: {

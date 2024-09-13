@@ -2,8 +2,19 @@ import type { busConnectionStatus } from 'app/main/types';
 
 import type { NetworkConnectionStatus } from './network';
 
-export interface HardwareStatus {
+export interface SystemStatus {
   emsesp_version: string;
+  bus_status: busConnectionStatus;
+  uptime: number;
+  bus_uptime: number;
+  num_devices: number;
+  num_sensors: number;
+  num_analogs: number;
+  ntp_status: number;
+  mqtt_status: boolean;
+  ap_status: boolean;
+  network_status: NetworkConnectionStatus;
+  wifi_rssi: number;
   build_flags: string;
   esp_platform: string;
   max_alloc_heap: number;
@@ -30,22 +41,6 @@ export interface HardwareStatus {
   has_loader: boolean;
   has_partition: boolean;
   status: string;
-}
-
-export interface SystemStatus {
-  emsesp_version: string;
-  status: busConnectionStatus;
-  uptime: number;
-  bus_uptime: number;
-  num_devices: number;
-  num_sensors: number;
-  num_analogs: number;
-  free_heap: number;
-  ntp_status: number;
-  mqtt_status: boolean;
-  ap_status: boolean;
-  network_status: NetworkConnectionStatus;
-  wifi_rssi: number;
 }
 
 export enum LogLevel {

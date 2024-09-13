@@ -1128,8 +1128,6 @@ bool System::check_restore() {
     bool reboot_required = false;
 
 #ifndef EMSESP_STANDALONE
-    // see if we have a temp file, if so try and read it
-    // TODO find a nicer way to see if a file exists without reporting an error, like using lfs_stat. exists() uses open so same problem.
     File new_file = LittleFS.open(TEMP_FILENAME_PATH);
     if (new_file) {
         JsonDocument         jsonDocument;

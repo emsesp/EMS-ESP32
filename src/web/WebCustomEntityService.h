@@ -22,7 +22,6 @@
 
 #define EMSESP_CUSTOMENTITY_FILE "/config/emsespEntity.json"
 #define EMSESP_CUSTOMENTITY_SERVICE_PATH "/rest/customEntities" // GET and POST
-#define EMSESP_GET_ENTITIES_PATH "/rest/getEntities"
 
 namespace emsesp {
 

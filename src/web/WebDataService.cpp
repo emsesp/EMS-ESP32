@@ -66,6 +66,7 @@ void WebDataService::core_data(AsyncWebServerRequest * request) {
             obj["p"]       = emsdevice->product_id();                           // productid
             obj["v"]       = emsdevice->version();                              // version
             obj["e"]       = emsdevice->count_entities();                       // number of entities
+            obj["url"]     = emsdevice->device_type_name();                     // non-translated, lower-case, used for API URL in customization page
         }
     }
 

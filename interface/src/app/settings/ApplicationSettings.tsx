@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 
-import { readHardwareStatus } from 'api/system';
+import { readSystemStatus } from 'api/system';
 
 import { useRequest } from 'alova/client';
 import RestartMonitor from 'app/status/RestartMonitor';
@@ -49,7 +49,7 @@ export function boardProfileSelectItems() {
 }
 
 const ApplicationSettings = () => {
-  const { data: hardwareData } = useRequest(readHardwareStatus);
+  const { data: hardwareData } = useRequest(readSystemStatus);
 
   const {
     loadData,

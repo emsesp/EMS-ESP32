@@ -26,13 +26,16 @@ namespace emsesp {
 
 WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * securityManager) {
     // GET
-    server->on(EMSESP_HARDWARE_STATUS_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { hardwareStatus(request); });
     server->on(EMSESP_SYSTEM_STATUS_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { systemStatus(request); });
+    server->on(EMSESP_EXPORT_DATA_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { exportData(request); });
+
     // POST
     server->on(EMSESP_CHECK_UPGRADE_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { checkUpgrade(request, json); });
 }
 
 // /rest/systemStatus
+// This contains both system & hardware Status to avoid having multiple costly endpoints
+// This is also used for polling during the RestartMonitor to see if EMS-ESP is alive
 void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     EMSESP::system_.refreshHeapMem(); // refresh free heap and max alloc heap
 
@@ -40,7 +43,12 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     JsonObject root     = response->getRoot();
 
     root["emsesp_version"] = EMSESP_APP_VERSION;
-    root["status"]         = EMSESP::bus_status(); // 0, 1 or 2
+
+    //
+    // System Status
+    //
+    root["emsesp_version"] = EMSESP_APP_VERSION;
+    root["bus_status"]     = EMSESP::bus_status(); // 0, 1 or 2
     root["bus_uptime"]     = EMSbus::bus_uptime();
     root["num_devices"]    = EMSESP::count_devices();
     root["num_sensors"]    = EMSESP::temperaturesensor_.no_sensors();
@@ -74,20 +82,6 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
 #endif
     }
 
-    response->setLength();
-    request->send(response);
-}
-
-// /rest/hardwareStatus
-// This is also used for polling during the RestartMonitor to see if EMS-ESP is alive
-void WebStatusService::hardwareStatus(AsyncWebServerRequest * request) {
-    EMSESP::system_.refreshHeapMem(); // refresh free heap and max alloc heap
-
-    auto *     response = new AsyncJsonResponse(false);
-    JsonObject root     = response->getRoot();
-
-    root["emsesp_version"] = EMSESP_APP_VERSION;
-
 #ifdef EMSESP_DEBUG
 #ifdef EMSESP_TEST
     root["build_flags"] = "DEBUG,TEST";
@@ -98,15 +92,16 @@ void WebStatusService::hardwareStatus(AsyncWebServerRequest * request) {
     root["build_flags"] = "TEST";
 #endif
 
+    //
+    // Hardware Status
+    //
     root["esp_platform"] = EMSESP_PLATFORM;
-
 #ifndef EMSESP_STANDALONE
     root["cpu_type"]         = ESP.getChipModel();
     root["cpu_rev"]          = ESP.getChipRevision();
     root["cpu_cores"]        = ESP.getChipCores();
     root["cpu_freq_mhz"]     = ESP.getCpuFreqMHz();
     root["max_alloc_heap"]   = EMSESP::system_.getMaxAllocMem();
-    root["free_heap"]        = EMSESP::system_.getHeapMem();
     root["arduino_version"]  = ARDUINO_VERSION;
     root["sdk_version"]      = ESP.getSdkVersion();
     root["partition"]        = esp_ota_get_running_partition()->label; // active partition
@@ -166,6 +161,38 @@ void WebStatusService::checkUpgrade(AsyncWebServerRequest * request, JsonVariant
 
     root["upgradeable"] = (this_version > settings_version);
 
+    response->setLength();
+    request->send(response);
+}
+
+// returns data for a specific feature/settings as a json object
+void WebStatusService::exportData(AsyncWebServerRequest * request) {
+    auto *     response = new AsyncJsonResponse();
+    JsonObject root     = response->getRoot();
+
+    String type = request->getParam("type")->value();
+
+    if (type == "settings") {
+        JsonObject node = root["System"].to<JsonObject>();
+        node["version"] = EMSESP_APP_VERSION;
+        System::extractSettings(NETWORK_SETTINGS_FILE, "Network", root);
+        System::extractSettings(AP_SETTINGS_FILE, "AP", root);
+        System::extractSettings(MQTT_SETTINGS_FILE, "MQTT", root);
+        System::extractSettings(NTP_SETTINGS_FILE, "NTP", root);
+        System::extractSettings(SECURITY_SETTINGS_FILE, "Security", root);
+        System::extractSettings(EMSESP_SETTINGS_FILE, "Settings", root);
+    } else if (type == "schedule") {
+        System::extractSettings(EMSESP_SCHEDULER_FILE, "Schedule", root);
+    } else if (type == "customizations") {
+        System::extractSettings(EMSESP_CUSTOMIZATION_FILE, "Customizations", root);
+    } else if (type == "entities") {
+        System::extractSettings(EMSESP_CUSTOMENTITY_FILE, "Entities", root);
+    } else {
+        request->send(400);
+        return;
+    }
+
+    root["type"] = type;
     response->setLength();
     request->send(response);
 }
