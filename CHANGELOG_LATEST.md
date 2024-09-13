@@ -35,11 +35,11 @@
 - RC310 cooling parameters [#1857](https://github.com/emsesp/EMS-ESP32/issues/1857)
 - command `api/device/entities` [#1897](https://github.com/emsesp/EMS-ESP32/issues/1897)
 - switchprogmode [#1903]<https://github.com/emsesp/EMS-ESP32/discussions/1903>
-- Autodetect and download firmware upgrades via the WebUI
+- autodetect and download firmware upgrades via the WebUI
 - command 'show log' that lists out the current weblog buffer, showing last messages.
 - default web log buffer to 25 lines for ESP32s with no PSRAM
 - Try and determine correct board profile if none is set
-- Auto Scroll in WebLog UI - reduced delay so incoming logs are faster
+- auto Scroll in WebLog UI - reduced delay so incoming logs are faster
 
 ## Fixed
 
