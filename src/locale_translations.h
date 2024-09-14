@@ -667,7 +667,7 @@ MAKE_TRANSLATION(wwDailyHeatTime, "dailyheattime", "daily heating time", "tägli
 // thermostat hc
 MAKE_TRANSLATION(selRoomTemp, "seltemp", "selected room temperature", "gewählte Raumtemperatur", "Streeftemperatuur kamer", "Vald Rumstemperatur", "zadana temperatura w pomieszczeniu", "valgt rumstemperatur", "température ambiante sélectionnée", "seçili oda sıcaklığı", "temperatura ambiente selezionata", "zvolená izbová teplota")
 MAKE_TRANSLATION(roomTemp, "currtemp", "current room temperature", "aktuelle Raumtemperatur", "Huidige kamertemperatuur", "Aktuell Rumstemperatur", "temperatura w pomieszczeniu", "gjeldende romstemperatur", "température ambiante actuelle", "güncel oda sıcaklığı", "temperatura ambiente attuale", "aktuálna izbová teplota")
-MAKE_TRANSLATION(mode, "mode", "operating mode", "Betriebsmodus", "Modus", "Läge", "sposób sterowania", "modus", "mode", "mod", "modalità", "režim")
+MAKE_TRANSLATION(mode, "mode", "operating mode", "Betriebsart", "Modus", "Läge", "sposób sterowania", "modus", "mode", "mod", "modalità", "režim")
 MAKE_TRANSLATION(modetype, "modetype", "mode type", "Modustyp", "Type modus", "Typ av läge", "aktualny tryb pracy", "modusrype", "type mode", "mod tipi", "tipo di modalita", "typ režimu")
 MAKE_TRANSLATION(fastheatup, "fastheatup", "fast heatup", "schnelles Aufheizen", "Snel opwarmen", "Snabb Uppvärmning", "szybkie nagrzewanie", "rask oppvarming", "chauffage rapide", "hızlı ısıtma", "riscaldamento rapido", "rýchle zahriatie")
 MAKE_TRANSLATION(heatup, "heatup", "heatup", "Aufheizen", "opwarmen", "Uppvärmning", "nagrzewanie", "oppvarming", "chauffage", "hızlı", "riscaldamento", "rýchle zahriatie")
