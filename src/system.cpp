@@ -337,6 +337,12 @@ void System::system_restart(const char * partitionname) {
     Shell::loop_all();  // flush log to output
     delay(1000);        // wait 1 second
     ESP.restart();
+#else
+    if (partitionname != nullptr) {
+        LOG_INFO("Restarting EMS-ESP from %s partition", partitionname);
+    } else {
+        LOG_INFO("Restarting EMS-ESP...");
+    }
 #endif
 }
 
@@ -999,7 +1005,7 @@ void System::show_system(uuid::console::Shell & shell) {
 #ifndef EMSESP_STANDALONE
     shell.printfln(" Platform: %s (%s)", EMSESP_PLATFORM, ESP.getChipModel());
     shell.printfln(" Model: %s", getBBQKeesGatewayDetails().c_str());
-    shell.printfln(" Partition boot/running: %s/%s", esp_ota_get_boot_partition()->label, esp_ota_get_running_partition()->label);
+    shell.printfln(" Partition: %s", esp_ota_get_running_partition()->label);
 #endif
     shell.printfln(" Language: %s", locale().c_str());
     shell.printfln(" Board profile: %s", board_profile().c_str());
@@ -1442,17 +1448,16 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["uptime"]    = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     node["uptimeSec"] = uuid::get_uptime_sec();
 #ifndef EMSESP_STANDALONE
-    node["platform"]             = EMSESP_PLATFORM;
-    node["cpuType"]              = ESP.getChipModel();
-    node["arduino"]              = ARDUINO_VERSION;
-    node["sdk"]                  = ESP.getSdkVersion();
-    node["freeMem"]              = getHeapMem();
-    node["maxAlloc"]             = getMaxAllocMem();
-    node["freeCaps"]             = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024; // includes heap and psram
-    node["usedApp"]              = EMSESP::system_.appUsed();                       // kilobytes
-    node["freeApp"]              = EMSESP::system_.appFree();                       // kilobytes
-    node["partitionBootRunning"] = std::string(esp_ota_get_boot_partition()->label) + "/"
-                                   + esp_ota_get_running_partition()->label; // will sycle app0/app0 - app1/app1 after OTA. boot/factory is on first install.
+    node["platform"]  = EMSESP_PLATFORM;
+    node["cpuType"]   = ESP.getChipModel();
+    node["arduino"]   = ARDUINO_VERSION;
+    node["sdk"]       = ESP.getSdkVersion();
+    node["freeMem"]   = getHeapMem();
+    node["maxAlloc"]  = getMaxAllocMem();
+    node["freeCaps"]  = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024; // includes heap and psram
+    node["usedApp"]   = EMSESP::system_.appUsed();                       // kilobytes
+    node["freeApp"]   = EMSESP::system_.appFree();                       // kilobytes
+    node["partition"] = esp_ota_get_running_partition()->label;          // active partition
 #endif
     node["resetReason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 #ifndef EMSESP_STANDALONE
