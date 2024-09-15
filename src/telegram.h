@@ -132,19 +132,6 @@ class Telegram {
         // check for out of bounds, if so don't modify the value
         auto msg_size = (index - this->offset + num_bytes - 1);
 
-#ifdef EMSESP_DEBUG
-// Serial.print(" index: ");
-// Serial.print(index);
-// Serial.print(" offset: ");
-// Serial.print(offset);
-// Serial.print(" index: ");
-// Serial.print(" message_length: ");
-// Serial.print(this->message_length);
-// Serial.print(" msg_size: ");
-// Serial.print(msg_size);
-// Serial.println();
-#endif
-
         if ((index < this->offset) || (msg_size >= this->message_length) || (msg_size > EMS_MAX_TELEGRAM_MESSAGE_LENGTH)) {
             return false;
         }
@@ -443,13 +430,8 @@ class TxService : public EMSbus {
         return tx_telegrams_.empty();
     }
 
-#if defined(EMSESP_DEBUG)
-    static constexpr uint8_t MAXIMUM_TX_RETRIES = 0; // when compiled with EMSESP_DEBUG don't retry
-#else
-    static constexpr uint8_t MAXIMUM_TX_RETRIES = 3;
-#endif
-
-    static constexpr uint32_t POST_SEND_DELAY = 2000;
+    static constexpr uint8_t  MAXIMUM_TX_RETRIES = 3;
+    static constexpr uint32_t POST_SEND_DELAY    = 2000;
 
   private:
     std::deque<QueuedTxTelegram> tx_telegrams_; // the Tx queue

@@ -133,11 +133,7 @@ MqttClient * MqttSettingsService::getMqttClient() {
 
 void MqttSettingsService::onMqttConnect(bool sessionPresent) {
     (void)sessionPresent;
-    // _disconnectedAt = 0;
     emsesp::EMSESP::mqtt_.on_connect();
-#ifdef EMSESP_DEBUG
-    emsesp::EMSESP::logger().debug("Connected to MQTT, %s", (sessionPresent) ? ("with persistent session") : ("without persistent session"));
-#endif
 }
 
 void MqttSettingsService::onMqttDisconnect(espMqttClientTypes::DisconnectReason reason) {
@@ -190,7 +186,7 @@ bool MqttSettingsService::configureMqtt() {
         _reconfigureMqtt = false;
 #ifndef TASMOTA_SDK
         if (_state.enableTLS) {
-#if EMSESP_DEBUG
+#if defined(EMSESP_DEBUG)
             emsesp::EMSESP::logger().debug("Start secure MQTT with rootCA");
 #endif
             static_cast<espMqttClientSecure *>(_mqttClient)->setServer(_state.host.c_str(), _state.port);
