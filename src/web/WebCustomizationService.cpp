@@ -75,7 +75,7 @@ void WebCustomization::read(WebCustomization & customizations, JsonObject root) 
 
         // entries are in the form <XX><shortname>[optional customname] e.g "08heatingactive|heating is on"
         JsonArray masked_entityJson = entityJson["entity_ids"].to<JsonArray>();
-        for (std::string entity_id : entityCustomization.entity_ids) {
+        for (const std::string & entity_id : entityCustomization.entity_ids) {
             masked_entityJson.add(entity_id);
         }
     }
@@ -277,7 +277,7 @@ void WebCustomizationService::customization_entities(AsyncWebServerRequest * req
                     read([&](WebCustomization & settings) {
                         for (EntityCustomization entityCustomization : settings.entityCustomizations) {
                             if (entityCustomization.device_id == device_id) {
-                                for (std::string entity_id : entityCustomization.entity_ids) {
+                                for (const std::string & entity_id : entityCustomization.entity_ids) {
                                     uint8_t     mask = Helpers::hextoint(entity_id.substr(0, 2).c_str());
                                     std::string name = DeviceValue::get_name(entity_id);
                                     if (mask & 0x80) {
