@@ -76,6 +76,9 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
     //
     // Show commands
     //
+    commands->add_command(ShellContext::MAIN, CommandFlags::USER, {F_(show)}, [=](Shell & shell, const std::vector<std::string> & arguments) {
+        to_app(shell).system_.show_system(shell);
+    });
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
                           string_vector{F_(show), F_(system)},
@@ -125,7 +128,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
     // create commands test
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
-                          string_vector{"test"},
+                          {"test"},
                           string_vector{F_(name_optional), F_(data_optional), F_(id_optional)},
                           [=](Shell & shell, const std::vector<std::string> & arguments) {
                               if (arguments.empty()) {
@@ -138,12 +141,12 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                   Test::run_test(shell, arguments[0].c_str(), arguments[1].c_str(), arguments[2].c_str());
                               }
                           });
-    commands->add_command(ShellContext::MAIN, CommandFlags::USER, string_vector{"t"}, [=](Shell & shell, const std::vector<std::string> & arguments) {
+    commands->add_command(ShellContext::MAIN, CommandFlags::USER, {"t"}, [=](Shell & shell, const std::vector<std::string> & arguments) {
         Test::run_test(shell, "default");
     });
 #endif
 
-    commands->add_command(ShellContext::MAIN, CommandFlags::USER, string_vector{F_(su)}, [=](Shell & shell, const std::vector<std::string> & arguments) {
+    commands->add_command(ShellContext::MAIN, CommandFlags::USER, {F_(su)}, [=](Shell & shell, const std::vector<std::string> & arguments) {
         auto become_admin = [](Shell & shell) {
             shell.logger().log(LogLevel::NOTICE, LogFacility::AUTH, F("Admin session opened on console %s"), to_shell(shell).console_name().c_str());
             shell.add_flags(CommandFlags::ADMIN);
@@ -176,7 +179,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
         }
     });
 
-    commands->add_command(ShellContext::MAIN, CommandFlags::ADMIN, string_vector{F_(passwd)}, [](Shell & shell, const std::vector<std::string> & arguments) {
+    commands->add_command(ShellContext::MAIN, CommandFlags::ADMIN, {F_(passwd)}, [](Shell & shell, const std::vector<std::string> & arguments) {
         shell.enter_password(F_(new_password_prompt1), [](Shell & shell, bool completed, const std::string & password1) {
             if (completed) {
                 shell.enter_password(F_(new_password_prompt2), [password1](Shell & shell, bool completed, const std::string & password2) {
@@ -198,8 +201,8 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::ADMIN,
-                          string_vector{F_(restart)},
-                          string_vector{F_(partitionname_optional)},
+                          {F_(restart)},
+                          {F_(partitionname_optional)},
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               if (arguments.size()) {
                                   to_app(shell).system_.system_restart(arguments.front().c_str());
@@ -244,7 +247,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::ADMIN,
                           string_vector{F_(set), F_(hostname)},
-                          string_vector{F_(name_mandatory)},
+                          {F_(name_mandatory)},
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               shell.println("The network connection will be reset...");
                               Shell::loop_all();
@@ -258,7 +261,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::ADMIN,
                           string_vector{F_(set), F_(wifi), F_(ssid)},
-                          string_vector{F_(name_mandatory)},
+                          {F_(name_mandatory)},
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               to_app(shell).esp8266React.getNetworkSettingsService()->updateWithoutPropagation([&](NetworkSettings & networkSettings) {
                                   networkSettings.ssid = arguments.front().c_str();
@@ -273,7 +276,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
         ShellContext::MAIN,
         CommandFlags::ADMIN,
         string_vector{F_(set), F_(board_profile)},
-        string_vector{F_(name_mandatory)},
+        {F_(name_mandatory)},
         [](Shell & shell, const std::vector<std::string> & arguments) {
             std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
             std::string         board_profile = Helpers::toUpper(arguments.front());
@@ -303,7 +306,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
         ShellContext::MAIN,
         CommandFlags::ADMIN,
         string_vector{F_(set), F_(bus_id)},
-        string_vector{F_(deviceid_mandatory)},
+        {F_(deviceid_mandatory)},
         [](Shell & shell, const std::vector<std::string> & arguments) {
             uint8_t device_id = Helpers::hextoint(arguments.front().c_str());
             if ((device_id == 0x0B) || (device_id == 0x0D) || (device_id == 0x0A) || (device_id == 0x0F) || (device_id == 0x12)) {
@@ -323,7 +326,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::ADMIN,
                           string_vector{F_(set), F_(tx_mode)},
-                          string_vector{F_(n_mandatory)},
+                          {F_(n_mandatory)},
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               uint8_t tx_mode = std::strtol(arguments[0].c_str(), nullptr, 10);
                               // save the tx_mode
@@ -371,30 +374,25 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
     // EMS device commands
     //
 
-    commands->add_command(ShellContext::MAIN,
-                          CommandFlags::ADMIN,
-                          string_vector{F_(scan)},
-                          string_vector{F_(deep_optional)},
-                          [](Shell & shell, const std::vector<std::string> & arguments) {
-                              if (arguments.size() == 0) {
-                                  to_app(shell).scan_devices();
-                              } else {
-                                  shell.printfln("Performing a deep scan...");
-                                  to_app(shell).clear_all_devices();
-                                  // device IDs taken from device_library.h
-                                  // send the read command with Version command
-                                  const std::vector<uint8_t> Device_Ids = {0x02, 0x08, 0x09, 0x10, 0x11, 0x12, 0x15, 0x17, 0x18, 0x19, 0x1A,
-                                                                           0x1B, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29,
-                                                                           0x2A, 0x30, 0x38, 0x40, 0x41, 0x48, 0x50, 0x51, 0x60};
-                                  for (const uint8_t device_id : Device_Ids) {
-                                      to_app(shell).send_read_request(EMSdevice::EMS_TYPE_VERSION, device_id);
-                                  }
-                              }
-                          });
+    commands->add_command(ShellContext::MAIN, CommandFlags::ADMIN, {F_(scan)}, {F_(deep_optional)}, [](Shell & shell, const std::vector<std::string> & arguments) {
+        if (arguments.size() == 0) {
+            to_app(shell).scan_devices();
+        } else {
+            shell.printfln("Performing a deep scan...");
+            to_app(shell).clear_all_devices();
+            // device IDs taken from device_library.h
+            // send the read command with Version command
+            const std::vector<uint8_t> Device_Ids = {0x02, 0x08, 0x09, 0x10, 0x11, 0x12, 0x15, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x20, 0x21, 0x22, 0x23,
+                                                     0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x30, 0x38, 0x40, 0x41, 0x48, 0x50, 0x51, 0x60};
+            for (const uint8_t device_id : Device_Ids) {
+                to_app(shell).send_read_request(EMSdevice::EMS_TYPE_VERSION, device_id);
+            }
+        }
+    });
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
-                          string_vector{F_(read)},
+                          {F_(read)},
                           string_vector{F_(deviceid_mandatory), F_(typeid_mandatory), F_(offset_optional), F_(length_optional)},
                           [=](Shell & shell, const std::vector<std::string> & arguments) {
                               uint8_t device_id = Helpers::hextoint(arguments.front().c_str());
@@ -420,7 +418,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
-                          string_vector{F_(watch)},
+                          {F_(watch)},
                           string_vector{F_(watch_format_optional), F_(watchid_optional)},
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               uint16_t watch_id = WATCH_ID_NONE;
@@ -490,7 +488,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
     commands->add_command(
         ShellContext::MAIN,
         CommandFlags::ADMIN,
-        string_vector{F_(call)},
+        {F_(call)},
         string_vector{F_(device_type_optional), F_(cmd_optional), F_(data_optional), F_(id_optional)},
         [&](Shell & shell, const std::vector<std::string> & arguments) {
             if (arguments.empty()) {
