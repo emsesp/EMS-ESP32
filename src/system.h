@@ -201,7 +201,7 @@ class System {
         return hostname_;
     }
 
-    void hostname(std::string hostname) {
+    void hostname(const std::string hostname) {
         hostname_ = hostname;
     }
 

@@ -369,7 +369,7 @@ std::string DeviceValue::get_fullname() const {
     return customname;
 }
 
-std::string DeviceValue::get_name(std::string & entity) {
+std::string DeviceValue::get_name(const std::string & entity) {
     auto pos = entity.find('|');
     if (pos != std::string::npos) {
         return entity.substr(2, pos - 2);

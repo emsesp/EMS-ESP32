@@ -152,7 +152,7 @@ void WebStatusService::checkUpgrade(AsyncWebServerRequest * request, JsonVariant
     JsonObject root     = response->getRoot();
 
     version::Semver200_version settings_version(EMSESP_APP_VERSION);
-    std::string                latest_version = json["version"] | EMSESP_APP_VERSION;
+    const std::string          latest_version = json["version"] | EMSESP_APP_VERSION;
     version::Semver200_version this_version(latest_version);
 
 #ifdef EMSESP_DEBUG
@@ -170,7 +170,8 @@ void WebStatusService::exportData(AsyncWebServerRequest * request) {
     auto *     response = new AsyncJsonResponse();
     JsonObject root     = response->getRoot();
 
-    String type = request->getParam("type")->value();
+    String type  = request->getParam("type")->value();
+    root["type"] = type;
 
     if (type == "settings") {
         JsonObject node = root["System"].to<JsonObject>();
@@ -192,7 +193,6 @@ void WebStatusService::exportData(AsyncWebServerRequest * request) {
         return;
     }
 
-    root["type"] = type;
     response->setLength();
     request->send(response);
 }
