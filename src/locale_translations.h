@@ -493,6 +493,10 @@ MAKE_TRANSLATION(heatoffdelay, "heatoffdelay", "heat-off delay", "Heizausschaltv
 MAKE_TRANSLATION(hpSetDiffPress, "hpsetdiffpress", "set differental pressure", "Pumpensolldruck", "", "", "różnica ciśnień", "", "", "", "", "nastaviť diferenčný tlak") // TODO translate
 MAKE_TRANSLATION(hpFan, "fan", "fan", "Lüfter", "", "", "wentylator", "", "", "", "", "ventilátor") // TODO translate
 MAKE_TRANSLATION(hpShutdown, "shutdown", "shutdown", "Abschalten", "", "", "wyłączenie", "", "", "", "", "vypnutie") // TODO translate
+MAKE_TRANSLATION(pc0Flow, "pc0flow", "Flow PC0", "Durchfluss PC0", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(pc1Flow, "pc1flow", "Flow PC1", "Durchfluss PC1", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(pc1On, "pc1on", "PC1", "PC1", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(pc1Rate, "pc1rate", "PC1 rate", "PC1 Rate", "", "", "", "", "", "", "", "") // TODO translate
 
 // hybrid heatpump
 MAKE_TRANSLATION(hybridStrategy, "hybridstrategy", "hybrid control strategy", "Hybrid-Steuerungsstrategie", "Hybride strategie", "Hybrid kontrollstrategi", "strategia sterowania hybrydowego", "hybrid kontrollstrategi", "stratégie contrôle hybride", "hibrit kontrol stratejisi", "strategia comtrollo ibrido", "hybridná stratégia riadenia")
@@ -568,6 +572,8 @@ MAKE_TRANSLATION(meterCool, "metercool", "meter cooling", "Messung: Kühlen", ""
 MAKE_TRANSLATION(meterWw, "meter", "meter", "Messung", "", "", "licznik", "", "", "", "", "počítadlo") // TODO translate
 MAKE_TRANSLATION(gasMeterHeat, "gasmeterheat", "gas meter heating", "Gaszähler: Heizen", "", "", "licznik gazu na ogrzewanie", "", "", "", "", "počítadlo plynu kúrenia") // TODO translate
 MAKE_TRANSLATION(gasMeterWw, "gasmeter", "gas meter", "Gaszähler", "", "", "licznik gazu", "", "", "", "", "počítadlo plynu") // TODO translate
+MAKE_TRANSLATION(hpCurrPower, "hpcurrpower", "compressor current power", "akt. Kompressorleistung", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(hpPowerLimit, "hppowerlimit", "power limit", "Leistungsgrenze", "", "", "", "", "", "", "", "") // TODO translate
 
 // HIU
 MAKE_TRANSLATION(netFlowTemp, "netflowtemp", "heat network flow temp", "Systemvorlauftemperatur", "Netto aanvoertemperatuur", "", "temp. zasilania sieci cieplnej", "", "", "ısıtma şebekesi akış derecesi", "temperatura di mandata della rete di riscaldamento", "teplota prívodu tepelnej siete") // TODO translate

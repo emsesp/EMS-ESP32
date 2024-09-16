@@ -182,7 +182,8 @@ export enum DeviceValueUOM {
   KMIN,
   K,
   VOLTS,
-  MBAR
+  MBAR,
+  LH
 }
 
 export const DeviceValueUOM_s = [
@@ -210,7 +211,8 @@ export const DeviceValueUOM_s = [
   'K*min',
   'K',
   'V',
-  'mbar'
+  'mbar',
+  'l/h'
 ];
 
 export enum AnalogType {

@@ -287,16 +287,22 @@ class Boiler : public EMSdevice {
     uint8_t wwEcoStopTemp_;
     uint8_t wwEcoPlusStopTemp_;
 
-    uint8_t vp_cooling_;
-    uint8_t heatCable_;
-    uint8_t VC0valve_;
-    uint8_t primePump_;
-    uint8_t primePumpMod_;
-    uint8_t hp3wayValve_;
-    uint8_t hp4wayValve_;
-    uint8_t elHeatStep1_;
-    uint8_t elHeatStep2_;
-    uint8_t elHeatStep3_;
+    uint8_t  vp_cooling_;
+    uint8_t  heatCable_;
+    uint8_t  VC0valve_;
+    uint8_t  primePump_;
+    uint8_t  primePumpMod_;
+    uint8_t  hp3wayValve_;
+    uint8_t  hp4wayValve_;
+    uint8_t  elHeatStep1_;
+    uint8_t  elHeatStep2_;
+    uint8_t  elHeatStep3_;
+    uint16_t hpPowerLimit_;
+    uint16_t hpCurrPower_;
+    int16_t  pc0Flow_;
+    int16_t  pc1Flow_;
+    uint8_t  pc1Rate_;
+    uint8_t  pc1On_;
 
     // HIU
     // uint16_t cwFlowRate_;  // cold water flow rate *10
@@ -364,6 +370,7 @@ class Boiler : public EMSdevice {
     void process_HpAdditionalHeater(std::shared_ptr<const Telegram> telegram);
     void process_HpValve(std::shared_ptr<const Telegram> telegram);
     void process_HpPumps(std::shared_ptr<const Telegram> telegram);
+    void process_HpPump2(std::shared_ptr<const Telegram> telegram);
     void process_HpDhwSettings(std::shared_ptr<const Telegram> telegram);
     void process_HpSettings2(std::shared_ptr<const Telegram> telegram);
     void process_HpSettings3(std::shared_ptr<const Telegram> telegram);
@@ -371,6 +378,8 @@ class Boiler : public EMSdevice {
     void process_HpMeters(std::shared_ptr<const Telegram> telegram);
     void process_WeatherComp(std::shared_ptr<const Telegram> telegram);
     void process_HpFan(std::shared_ptr<const Telegram> telegram);
+    void process_HpPower2(std::shared_ptr<const Telegram> telegram);
+    void process_HpPowerLimit(std::shared_ptr<const Telegram> telegram);
 
     void process_Meters(std::shared_ptr<const Telegram> telegram);
     void process_Energy(std::shared_ptr<const Telegram> telegram);
@@ -468,6 +477,7 @@ class Boiler : public EMSdevice {
     bool set_hpPumpMode(const char * value, const int8_t id);
     bool set_hpMaxPower(const char * value, const int8_t id);
     bool set_hpDiffPress(const char * value, const int8_t id);
+    bool set_hpPowerLimit(const char * value, const int8_t id);
 
     bool        set_auxLimit(const char * value, const int8_t id);
     inline bool set_auxMaxLimit(const char * value, const int8_t id) {

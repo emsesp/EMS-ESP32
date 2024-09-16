@@ -1186,6 +1186,7 @@ void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, con
         doc["ic"] = F_(iconkb);
         break;
     case DeviceValueUOM::LMIN:
+    case DeviceValueUOM::LH:
         doc["ic"]  = F_(iconlmin);
         doc[sc_ha] = F_(measurement);
         break;

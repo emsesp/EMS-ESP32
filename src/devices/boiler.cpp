@@ -89,6 +89,9 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_telegram_type(0x4AF, "HPMeters", true, MAKE_PF_CB(process_HpMeters));
         register_telegram_type(0x2CC, "HPPressure", true, MAKE_PF_CB(process_HpPressure));
         register_telegram_type(0x4A5, "HPFan", true, MAKE_PF_CB(process_HpFan));
+        register_telegram_type(0x4AA, "HPPower2", true, MAKE_PF_CB(process_HpPower2));
+        register_telegram_type(0x4A7, "HPPowerLimit", true, MAKE_PF_CB(process_HpPowerLimit));
+        register_telegram_type(0x2D6, "HPPump2", true, MAKE_PF_CB(process_HpPump2));
     }
 
     // some gas boilers, see #1701
@@ -827,6 +830,18 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(hpShutdown),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_shutdown));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpCurrPower_, DeviceValueType::UINT16, FL_(hpCurrPower), DeviceValueUOM::W);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &hpPowerLimit_,
+                              DeviceValueType::UINT16,
+                              FL_(hpPowerLimit),
+                              DeviceValueUOM::W,
+                              MAKE_CF_CB(set_hpPowerLimit));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pc0Flow_, DeviceValueType::INT16, FL_(pc0Flow), DeviceValueUOM::LH);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pc1Flow_, DeviceValueType::INT16, FL_(pc1Flow), DeviceValueUOM::LH);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pc1On_, DeviceValueType::BOOL, FL_(pc1On), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &pc1Rate_, DeviceValueType::UINT8, FL_(pc1Rate), DeviceValueUOM::PERCENT);
+
         // heatpump DHW settings
         register_device_value(DeviceValueTAG::TAG_DHW1,
                               &wwAlternatingOper_,
@@ -1382,6 +1397,8 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
     if (Helpers::hasValue(exhaustTemp1_)) {
         has_update(exhaustTemp_, exhaustTemp1_);
     }
+    has_update(telegram, pc0Flow_, 36); // see https://github.com/emsesp/EMS-ESP32/issues/2001
+
     // read 3 char service code / installation status as appears on the display
     if ((telegram->message_length > 3) && (telegram->offset == 0)) {
         char serviceCode[4] = {0};
@@ -1919,6 +1936,7 @@ void Boiler::process_HpSilentMode(std::shared_ptr<const Telegram> telegram) {
 void Boiler::process_HpValve(std::shared_ptr<const Telegram> telegram) {
     // has_bitupdate(telegram, auxHeaterStatus_, 0, 2);
     has_update(telegram, auxHeatMixValve_, 7);
+    has_update(telegram, pc1Rate_, 13); // percent
 }
 
 // Boiler(0x08) -B-> All(0x00), ?(0x048B), data: 00 00 0A 1E 4E 00 1E 01 2C 00 01 64 55 05 12 50 50 50 00 00 1E 01 2C 00
@@ -1927,6 +1945,12 @@ void Boiler::process_HpPumps(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, tempDiffHeat_, 4); // is * 10
     has_update(telegram, tempDiffCool_, 3); // is * 10
     has_update(telegram, hpPumpMode_, 18);
+}
+
+// 0x02D6, https://github.com/emsesp/EMS-ESP32/issues/2001
+void Boiler::process_HpPump2(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, pc1On_, 0);
+    has_update(telegram, pc1Flow_, 9);
 }
 
 // Boiler(0x08) -> All(0x00), ?(0x0491), data: 03 01 00 00 00 02 64 00 00 14 01 2C 00 0A 00 1E 00 1E 00 00 1E 0A 1E 05 05
@@ -2004,6 +2028,16 @@ void Boiler::process_HpPressure(std::shared_ptr<const Telegram> telegram) {
 // boiler(0x08) -W-> Me(0x0B), ?(0x04A5), data: 00 00 3C 1D 09 0A 0A 01 00 28 0A 00 01 00 00
 void Boiler::process_HpFan(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, fan_, 9);
+}
+
+// 0x4AA
+void Boiler::process_HpPower2(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, hpCurrPower_, 0);
+}
+
+// 0x4A7
+void Boiler::process_HpPowerLimit(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, hpPowerLimit_, 0);
 }
 
 // Boiler(0x08) -B-> All(0x00), ?(0x2E), data: 00 00 1C CE 00 00 05 E8 00 00 00 18 00 00 00 02
@@ -2439,9 +2473,16 @@ bool Boiler::set_max_pump(const char * value, const int8_t id) {
 
 bool Boiler::set_pumpMode(const char * value, const int8_t id) {
     uint8_t v;
-    if (Helpers::value2enum(value, v, FL_(enum_pumpMode))) {
-        write_command(EMS_TYPE_UBAParameters, 11, v, EMS_TYPE_UBAParameters);
-        return true;
+    if (is_received(EMS_TYPE_UBAParametersPlus)) {
+        if (Helpers::value2enum(value, v, FL_(enum_pumpCharacter))) {
+            write_command(EMS_TYPE_UBAParametersPlus, 15, v, EMS_TYPE_UBAParametersPlus);
+            return true;
+        }
+    } else {
+        if (Helpers::value2enum(value, v, FL_(enum_pumpMode))) {
+            write_command(EMS_TYPE_UBAParameters, 11, v, EMS_TYPE_UBAParameters);
+            return true;
+        }
     }
     return false;
 }
@@ -3067,6 +3108,16 @@ bool Boiler::set_hpDiffPress(const char * value, const int8_t id) {
     int v;
     if (Helpers::value2number(value, v)) {
         write_command(0x2CC, 9, (uint8_t)(v / 50), 0x2CC);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_hpPowerLimit(const char * value, const int8_t id) {
+    int v;
+    if (Helpers::value2number(value, v)) {
+        uint8_t data[2] = {(uint8_t)(v >> 8), (uint8_t)v};
+        write_command(0x4A7, 0, data, 2, 0x4A7);
         return true;
     }
     return false;
