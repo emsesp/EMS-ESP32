@@ -14,43 +14,47 @@
 
 **EMS-ESP** is an open-source firmware for the Espressif ESP32 microcontroller that communicates with **EMS** (Energy Management System) based equipment from manufacturers like Bosch, Buderus, Nefit, Junkers, Worcester and Sieger. It requires a small gateway circuit to interface with the EMS bus which can be purchased from <https://bbqkees-electronics.nl> or custom built.
 
-## **Features**
+## **Key Features**
 
-- A multi-user, multi-language secure web interface to change settings and monitor incoming data
-- A console, accessible via Serial and Telnet for more advanced monitoring
-- Native support for Home Assistant, Domoticz and openHAB via [MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/)
-- Can run standalone as an independent WiFi Access Point or join an existing WiFi network
-- Easy first-time configuration via a web Captive Portal
-- Support for more than [120+ EMS devices](https://emsesp.org/All-Devices/) (boilers, thermostats, solar modules, mixer modules, heat pumps, gateways, switches, heat sources)
+- A multi-user, multi-language web interface to change settings and monitor incoming data
+- An advanced console, accessible via Serial/USB or Telnet for more operations and monitoring
+- Native integration with Home Assistant, Domoticz, openHAB and Modbus
+- Easy setup and install with automatic updates
+- Supporting over 120 different EMS compatible devices from thermostats, boilers, heat pumps, mixing units, solar modules from brands as Bosch, Buderus, Nefit, Junkers, Worcester and Sieger
+- Simulate remote thermostats
+- Localized to 10 languages, and customizable to change names to your preference
+- Extendable via adding external modules or adding your own custom entities directly within the WebUI
+- A powerful scheduler to automate tasks and trigger events based data changes
+- A Notification service to alert you of important events
 
 ## **Installing**
 
-Go to [install.emsesp.org](https://install.emsesp.org) or look at the documentation link below on the different ways to install EMS-ESP.
+For a quick install of the latest stable release go to [https://install.emsesp.org](https://install.emsesp.org). For other methods of installing and upgrading, and switching to the development version go to the section in the [documentation](https://emsesp.org).
 
-## **Documentation**
+## **Documentation and Wiki**
 
-For the complete documentation on how to install, configure and get support visit the [documentation at emsesp.org](https://emsesp.org).
+Visit [emsesp.org](https://emsesp.org) for details on how to install and configure EMS-ESP.
 
-## **Support**
+## **Getting Support**
 
 To chat with the community reach out on our [Discord Server](https://discord.gg/3J3GgnzpyT).
 
-If you like **EMS-ESP**, please give it a star, or fork it and contribute or offer a small donation!
+If you like **EMS-ESP**, please give it a ✨ on GitHub, or even better fork it and contribute. You can also offer a small donation. This is an open-source project maintained by volunteers, and your support is greatly appreciated.
 
-## **Demo**
+## **Live Demo**
 
-For a live demo of the Web UI click [demo.emsesp.org](https://demo.emsesp.org) and log in with any username/password, and change the language to English.
+For a live demo go to [demo.emsesp.org](https://demo.emsesp.org). Pick a language from the sign on page and log in with any username or password. Note not all features are operational as it's based on static data.
 
-## **Contributors ✨**
+## **Contributors**
 
-EMS-ESP is a project owned and maintained by [proddy](https://github.com/proddy) and [MichaelDvP](https://github.com/MichaelDvP).
+EMS-ESP is a project created by [proddy](https://github.com/proddy) and owned and maintained by both [proddy](https://github.com/proddy) and [MichaelDvP](https://github.com/MichaelDvP) with support from [BBQKees Electronics](https://bbqkees-electronics.nl).
 
 ## **Libraries used**
 
-- [esp8266-react](https://github.com/rjwats/esp8266-react) by @rjwats for the framework that provides the core of the Web UI
-- [uuid-\*](https://github.com/nomis/mcu-uuid-console) from @nomis. The console, syslog, telnet and logging are based off these open source libraries
-- [ArduinoJson](https://github.com/bblanchon/ArduinoJson) for all the JSON
-- [espMqttClient](https://github.com/bertmelis/espMqttClient) for the MQTT client, with custom modifications from @MichaelDvP and @proddy
+- [esp8266-react](https://github.com/rjwats/esp8266-react) by @rjwats for the core framework that provides the Web UI, which has been heavily modified
+- [uuid-\*](https://github.com/nomis/mcu-uuid-console) from @nomis. The console, syslog, telnet and logging are based off these awesome open source libraries
+- [ArduinoJson](https://github.com/bblanchon/ArduinoJson) for all the JSON processing
+- [espMqttClient](https://github.com/bertmelis/espMqttClient) for the MQTT client
 - ESPAsyncWebServer and AsyncTCP for the Web server and TCP backends, with custom modifications for performance
 
 ## **License**

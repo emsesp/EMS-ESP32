@@ -1,12 +1,8 @@
-import type { HardwareStatus, LogSettings, SystemStatus } from 'types';
+import type { LogSettings, SystemStatus } from 'types';
 
 import { alovaInstance, alovaInstanceGH } from './endpoints';
 
-// hardwareStatus - also used to ping in Restart monitor for pinging
-export const readHardwareStatus = () =>
-  alovaInstance.Get<HardwareStatus>('/rest/hardwareStatus');
-
-// SystemStatus
+// systemStatus - also used to ping in Restart monitor for pinging
 export const readSystemStatus = () =>
   alovaInstance.Get<SystemStatus>('/rest/systemStatus');
 

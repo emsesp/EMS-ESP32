@@ -34,17 +34,24 @@ except ImportError:
     from termcolor import cprint
 
 def print_success(x): return cprint(x, 'green')
-def print_fail(x): return cprint(x, 'red')
+def print_fail(x): return cprint('Error: '+x, 'red')
 
 def on_upload(source, target, env):
 
+    # make sure we have set the upload_protocol to custom
+    if env.get('UPLOAD_PROTOCOL') != 'custom':
+        print_fail("Please set upload_protocol = custom in your pio_local.ini file when using upload.py")
+        return
+    
     # first check authentication
     try:
         username = env.GetProjectOption('custom_username')
         password = env.GetProjectOption('custom_password')
+        emsesp_ip = env.GetProjectOption('custom_emsesp_ip')
     except:
-        print('No authentication settings specified. Please, add these to your pio_local.ini file: \n\ncustom_username=username\ncustom_password=password\n')
+        print_fail('Missing settings. Add these to your pio_local.ini file: \n\ncustom_username=username\ncustom_password=password\ncustom_emsesp_ip=ems-esp.local\n')
         return
+    
 
     emsesp_url = "http://" + env.GetProjectOption('custom_emsesp_ip')
     parsed_url = urlparse(emsesp_url)
@@ -71,10 +78,10 @@ def on_upload(source, target, env):
     response = requests.post(signon_url, json=username_password, headers=signon_headers)
         
     if response.status_code != 200:
-        print_fail("Authentication failed (code " + str(response.status_code) + ")")
+        print_fail("Authentication with EMS-ESP failed (code " + str(response.status_code) + ")")
         return
 
-    print_success("Authentication successful")
+    print_success("Authentication with EMS-ESP successful")
     access_token = response.json().get('access_token')
 
     # start the upload

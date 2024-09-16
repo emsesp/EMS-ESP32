@@ -464,7 +464,7 @@ GPOC
 Greenstar
 Grokhotkov
 haclimate
-hardwarestatus
+systemstatus
 Harwerth
 headersize
 headertemp
@@ -1345,3 +1345,4 @@ zulufttemp
 zyxwvutsrqponmlkjihgfedcba
 Omea
 Bolv
+hardwarestatus

@@ -50,8 +50,8 @@ import { useI18nContext } from 'i18n/i18n-react';
 
 import {
   API,
+  readCoreData,
   readDeviceEntities,
-  readDevices,
   resetCustomizations,
   writeCustomizationEntities,
   writeDeviceName
@@ -60,7 +60,7 @@ import SettingsCustomizationsDialog from './CustomizationsDialog';
 import EntityMaskToggle from './EntityMaskToggle';
 import OptionIcon from './OptionIcon';
 import { DeviceEntityMask } from './types';
-import type { APIcall, DeviceEntity, DeviceShort } from './types';
+import type { APIcall, Device, DeviceEntity } from './types';
 
 export const APIURL = window.location.origin + '/api/';
 
@@ -81,8 +81,8 @@ const Customizations = () => {
 
   useLayoutTitle(LL.CUSTOMIZATIONS());
 
-  // fetch devices first
-  const { data: devices, send: fetchDevices } = useRequest(readDevices);
+  // fetch devices first from coreData
+  const { data: devices, send: fetchCoreData } = useRequest(readCoreData);
 
   const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
     immediate: false
@@ -242,13 +242,13 @@ const Customizations = () => {
   useEffect(() => {
     if (devices && selectedDevice !== -1) {
       void sendDeviceEntities(selectedDevice);
-      const id = devices.devices.findIndex((d) => d.i === selectedDevice);
-      if (id === -1) {
+      const index = devices.devices.findIndex((d) => d.id === selectedDevice);
+      if (index === -1) {
         setSelectedDevice(-1);
         setSelectedDeviceTypeNameURL('');
       } else {
-        setSelectedDeviceTypeNameURL(devices.devices[id].url || '');
-        setSelectedDeviceName(devices.devices[id].s);
+        setSelectedDeviceTypeNameURL(devices.devices[index].url || '');
+        setSelectedDeviceName(devices.devices[index].n);
         setNumChanges(0);
         setRestartNeeded(false);
       }
@@ -414,7 +414,7 @@ const Customizations = () => {
       })
       .finally(async () => {
         setRename(false);
-        await fetchDevices();
+        await fetchCoreData();
       });
   };
 
@@ -449,9 +449,9 @@ const Customizations = () => {
             <MenuItem disabled key={-1} value={-1}>
               {LL.SELECT_DEVICE()}...
             </MenuItem>
-            {devices.devices.map((device: DeviceShort) => (
-              <MenuItem key={device.i} value={device.i}>
-                {device.s}&nbsp;({device.tn})
+            {devices.devices.map((device: Device) => (
+              <MenuItem key={device.id} value={device.id}>
+                {device.n}&nbsp;({device.tn})
               </MenuItem>
             ))}
           </TextField>

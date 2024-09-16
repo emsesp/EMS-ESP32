@@ -29,8 +29,8 @@ import {
   useTheme
 } from '@mui/material';
 
-import * as SystemApi from 'api/system';
 import { API } from 'api/app';
+import { readSystemStatus } from 'api/system';
 
 import { dialogStyle } from 'CustomTheme';
 import { useAutoRequest, useRequest } from 'alova/client';
@@ -63,7 +63,7 @@ const SystemStatus = () => {
     data: data,
     send: loadData,
     error
-  } = useAutoRequest(SystemApi.readSystemStatus, {
+  } = useAutoRequest(readSystemStatus, {
     initialData: [],
     pollingTime: 5000,
     async middleware(_, next) {
@@ -101,7 +101,7 @@ const SystemStatus = () => {
 
   const busStatus = () => {
     if (data) {
-      switch (data.status) {
+      switch (data.bus_status) {
         case busConnectionStatus.BUS_STATUS_CONNECTED:
           return (
             'EMS ' +
@@ -120,7 +120,7 @@ const SystemStatus = () => {
   };
 
   const busStatusHighlight = () => {
-    switch (data.status) {
+    switch (data.bus_status) {
       case busConnectionStatus.BUS_STATUS_TX_ERRORS:
         return theme.palette.warning.main;
       case busConnectionStatus.BUS_STATUS_CONNECTED:

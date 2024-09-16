@@ -578,7 +578,7 @@ void EMSdevice::add_device_value(int8_t                tag,              // to b
                     snprintf(entity, sizeof(entity), "%s/%s", tag_to_mqtt(tag), short_name);
                 }
 
-                for (std::string entity_id : entityCustomization.entity_ids) {
+                for (const std::string & entity_id : entityCustomization.entity_ids) {
                     // if there is an appended custom name, strip it to get the true entity name
                     // and extract the new custom name
                     auto        custom_name_pos = entity_id.find('|');
@@ -1112,7 +1112,7 @@ void EMSdevice::generate_values_web_customization(JsonArray output) {
     EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
         for (EntityCustomization entityCustomization : settings.entityCustomizations) {
             if (entityCustomization.device_id == device_id()) {
-                for (std::string entity_id : entityCustomization.entity_ids) {
+                for (const std::string & entity_id : entityCustomization.entity_ids) {
                     uint8_t mask = Helpers::hextoint(entity_id.substr(0, 2).c_str());
                     if (mask & 0x80) {
                         JsonObject obj = output.add<JsonObject>();
