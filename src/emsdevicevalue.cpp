@@ -110,7 +110,7 @@ const char * DeviceValue::DeviceValueUOM_s[] = {
     F_(uom_blank), // 0
     F_(uom_degrees), F_(uom_degrees), F_(uom_percent), F_(uom_lmin), F_(uom_kwh),     F_(uom_wh),   FL_(hours)[0],      FL_(minutes)[0], F_(uom_ua),
     F_(uom_bar),     F_(uom_kw),      F_(uom_w),       F_(uom_kb),   FL_(seconds)[0], F_(uom_dbm),  F_(uom_fahrenheit), F_(uom_mv),      F_(uom_sqm),
-    F_(uom_m3),      F_(uom_l),       F_(uom_kmin),    F_(uom_k),    F_(uom_volts),   F_(uom_mbar), F_(uom_blank)
+    F_(uom_m3),      F_(uom_l),       F_(uom_kmin),    F_(uom_k),    F_(uom_volts),   F_(uom_mbar), F_(uom_lh),         F_(uom_blank)
 
 };
 

@@ -2702,7 +2702,7 @@ bool Thermostat::set_roominfl_factor(const char * value, const int8_t id) {
         return false;
     }
     if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
-        write_command(set_typeids[hc->hc()], 6, (uint8_t)val);
+        write_command(set_typeids[hc->hc()], 6, (uint8_t)((val + 5) / 10));
 
     } else {
         write_command(summer_typeids[hc->hc()], 1, (uint8_t)(val * 10));
@@ -4809,7 +4809,13 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         register_device_value(tag, &hc->designtemp, DeviceValueType::UINT8, FL_(designtemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_designtemp), 30, 90);
         register_device_value(
             tag, &hc->roominfluence, DeviceValueType::ENUM, FL_(enum_roominfluence), FL_(roominfluence), DeviceValueUOM::NONE, MAKE_CF_CB(set_roominfl_mode));
-        register_device_value(tag, &hc->roominfl_factor, DeviceValueType::UINT8, FL_(roominfl_factor), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_roominfl_factor));
+        register_device_value(tag,
+                              &hc->roominfl_factor,
+                              DeviceValueType::UINT8,
+                              DeviceValueNumOp::DV_NUMOP_MUL10,
+                              FL_(roominfl_factor),
+                              DeviceValueUOM::PERCENT,
+                              MAKE_CF_CB(set_roominfl_factor));
         register_device_value(
             tag, &hc->heatingtype, DeviceValueType::ENUM, FL_(enum_heatingtype1), FL_(heatingtype), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatingtype));
         register_device_value(
