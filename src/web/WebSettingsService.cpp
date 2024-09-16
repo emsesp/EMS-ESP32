@@ -93,7 +93,7 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     bool psram = false;
 #endif
 
-#ifdef EMSESP_DEBUG
+#if defined(EMSESP_DEBUG)
     EMSESP::logger().debug("NVS boot value=[%s], board profile=[%s], EMSESP_DEFAULT_BOARD_PROFILE=[%s]",
                            EMSESP::nvs_.getString("boot").c_str(),
                            root["board_profile"] | "",
@@ -111,7 +111,7 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     if (!EMSESP::system_.getBBQKeesGatewayDetails().isEmpty()) {
         String nvs_boot = EMSESP::nvs_.getString("boot");
         if (!nvs_boot.isEmpty()) {
-#ifdef EMSESP_DEBUG
+#if defined(EMSESP_DEBUG)
             EMSESP::logger().debug("Overriding board profile with NVS boot value %s");
 #endif
             settings.board_profile = nvs_boot;
@@ -145,7 +145,7 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
 
     // still don't have a valid board profile. Let's see if we can determine one
     if (settings.board_profile == "default") {
-#ifdef EMSESP_DEBUG
+#if defined(EMSESP_DEBUG)
         EMSESP::logger().debug("Trying to detect board and set board profile...");
 #endif
 

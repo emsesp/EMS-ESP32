@@ -82,7 +82,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
 #endif
     }
 
-#ifdef EMSESP_DEBUG
+#if defined(EMSESP_DEBUG)
 #ifdef EMSESP_TEST
     root["build_flags"] = "DEBUG,TEST";
 #else
@@ -155,7 +155,7 @@ void WebStatusService::checkUpgrade(AsyncWebServerRequest * request, JsonVariant
     const std::string          latest_version = json["version"] | EMSESP_APP_VERSION;
     version::Semver200_version this_version(latest_version);
 
-#ifdef EMSESP_DEBUG
+#if defined(EMSESP_DEBUG)
     emsesp::EMSESP::logger().debug("Checking for upgrade: %s > %s", EMSESP_APP_VERSION, latest_version.c_str());
 #endif
 

@@ -29,17 +29,19 @@
 
 ## **Installing**
 
-For a quick install of the latest stable release go to [https://install.emsesp.org](https://install.emsesp.org). For other methods of installing and upgrading, and switching to the development version go to the section in the [documentation](https://emsesp.org).
+For a quick install of the latest stable release go to [https://install.emsesp.org](https://install.emsesp.org). For other methods of installing and upgrading, and switching over to the development version go to [this section](https://emsesp.org/Getting-Started/#first-time-install) in the documentation.
 
-## **Documentation and Wiki**
+If you're upgrading a BBQKees Electronics EMS Gateway and unsure which firmware to use, please refer to the [this overview](https://emsesp.org/Getting-Started/#bbqkees-electronics-ems-gateway).
 
-Visit [emsesp.org](https://emsesp.org) for details on how to install and configure EMS-ESP.
+## **Documentation**
+
+Visit [emsesp.org](https://emsesp.org) for more details on how to install and configure EMS-ESP. There is also a collection of Frequently Asked Questions and Troubleshooting tips with example customizations from the community.
 
 ## **Getting Support**
 
 To chat with the community reach out on our [Discord Server](https://discord.gg/3J3GgnzpyT).
 
-If you like **EMS-ESP**, please give it a ✨ on GitHub, or even better fork it and contribute. You can also offer a small donation. This is an open-source project maintained by volunteers, and your support is greatly appreciated.
+If you find an issue or have a request, see [here](https://emsesp.org/Support/) on how to submit a bug report or feature request.
 
 ## **Live Demo**
 
@@ -48,6 +50,10 @@ For a live demo go to [demo.emsesp.org](https://demo.emsesp.org). Pick a languag
 ## **Contributors**
 
 EMS-ESP is a project created by [proddy](https://github.com/proddy) and owned and maintained by both [proddy](https://github.com/proddy) and [MichaelDvP](https://github.com/MichaelDvP) with support from [BBQKees Electronics](https://bbqkees-electronics.nl).
+
+You can contact us using [this form](https://emsesp.org/Contact/).
+
+If you like **EMS-ESP**, please give it a ✨ on GitHub, or even better fork it and contribute. You can also offer a small donation. This is an open-source project maintained by volunteers, and your support is greatly appreciated.
 
 ## **Libraries used**
 

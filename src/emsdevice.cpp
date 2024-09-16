@@ -1682,8 +1682,8 @@ bool EMSdevice::generate_values(JsonObject output, const int8_t tag_filter, cons
 
             // do not overwrite
             if (json.containsKey(name)) {
-#ifdef EMSESP_DEBUG
-                EMSESP::logger().debug("double json key: %s", name);
+#if defined(EMSESP_DEBUG)
+                EMSESP::logger().debug("warning: double json key: %s", name);
 #endif
                 continue;
             }

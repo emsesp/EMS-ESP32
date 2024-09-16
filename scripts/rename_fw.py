@@ -20,6 +20,8 @@ def bin_copy(source, target, env):
 
     app_version = bag.get('app_version')
     
+    # print(env.Dump())
+
     # get the chip type, in uppercase
     mcu = env.get('BOARD_MCU').upper()
     # alternatively take platform from the pio target
@@ -39,11 +41,6 @@ def bin_copy(source, target, env):
     # if doesn't have an M at the end 
     if parts[index].endswith("M"):
         flash_mem = parts[index] + "B"
-    
-    # print(env.Dump())
-    
-    # my_flags = env.ParseFlags(env['BUILD_FLAGS'])
-    # defines = {k: v for (k, v) in my_flags.get("CPPDEFINES")}
     
     # find if BOARD_HAS_PSRAM is in the cppdefines
     cppdefines = env.get("CPPDEFINES")
@@ -99,6 +96,28 @@ def bin_copy(source, target, env):
         file1.write(result.hexdigest())
         file1.close()
         
+    # make a copy using the old 3.6.x filename format for backwards compatibility with the WebUI version check, e.g.
+    #  EMS-ESP-3_6_5-ESP32_S3.bin (16MB) with target ci_s3_16M_P
+    #  EMS-ESP-3_6_5-ESP32.bin (4MB) with target ci_s_4M
+    extra_variant = ""
+    if env.get('PIOENV') == "ci_s3_16M_P":
+        extra_variant = "EMS-ESP-" + app_version.replace(".", "_") + "-ESP32_S3"
+    elif env.get('PIOENV') == "ci_s_4M":
+        extra_variant = "EMS-ESP-" + app_version.replace(".", "_") + "-ESP32"
+      
+    if extra_variant:        
+        extra_bin_file = "{}firmware{}{}.bin".format(OUTPUT_DIR, os.path.sep, extra_variant)
+        if os.path.isfile(extra_bin_file):
+            os.remove(extra_bin_file)
+            
+        extra_md5_file = "{}firmware{}{}.md5".format(OUTPUT_DIR, os.path.sep, extra_variant)
+        if os.path.isfile(extra_md5_file):
+            os.remove(extra_md5_file)   
+        
+        shutil.copy(bin_file, extra_bin_file)
+        shutil.copy(md5_file, extra_md5_file)
+        print("Filename copy for 3.6.x: "+extra_bin_file)
+    
     print("*********************************************")
 
 env.AddPostAction("$BUILD_DIR/${PROGNAME}.bin", [bin_copy])
