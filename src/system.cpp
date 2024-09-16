@@ -788,6 +788,13 @@ void System::network_init(bool refresh) {
     //  ETH_CLOCK_GPIO17_OUT = 3  RMII clock output from GPIO17, for 50hz inverted clock
     auto clock_mode = (eth_clock_mode_t)eth_clock_mode_;
 
+    // reset power and add a delay as ETH doesn't not always start up correctly after a warm boot
+    // TODO check
+    pinMode(eth_power_, OUTPUT);
+    digitalWrite(eth_power_, LOW);
+    delay(1000);
+    digitalWrite(eth_power_, HIGH);
+
 #if ESP_IDF_VERSION_MAJOR < 5
     eth_present_ = ETH.begin(phy_addr, power, mdc, mdio, type, clock_mode);
 #else

@@ -8,6 +8,7 @@ NetworkSettingsService::NetworkSettingsService(AsyncWebServer * server, FS * fs,
     , _lastConnectionAttempt(0)
     , _stopping(false) {
     addUpdateHandler([this] { reconfigureWiFiConnection(); }, false);
+    // Eth is also bound to the WifiGeneric event handler
     WiFi.onEvent([this](WiFiEvent_t event, WiFiEventInfo_t info) { WiFiEvent(event, info); });
 }
 
@@ -327,7 +328,7 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) 
         break;
 
     case ARDUINO_EVENT_ETH_GOT_IP:
-        // prevent double calls
+        // prevent double calls to mDNS
         if (!emsesp::EMSESP::system_.ethernet_connected()) {
             emsesp::EMSESP::logger().info("Ethernet connected (IP=%s, speed %d Mbps)", ETH.localIP().toString().c_str(), ETH.linkSpeed());
             emsesp::EMSESP::system_.ethernet_connected(true);
@@ -336,7 +337,9 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) 
         break;
 
     case ARDUINO_EVENT_ETH_DISCONNECTED:
-        emsesp::EMSESP::logger().warning("Ethernet disconnected");
+        emsesp::EMSESP::logger().warning("Ethernet disconnected. Reason: %s (%d)",
+                                         disconnectReason(info.wifi_sta_disconnected.reason),
+                                         info.wifi_sta_disconnected.reason);
         emsesp::EMSESP::system_.ethernet_connected(false);
         emsesp::EMSESP::system_.has_ipv6(false);
         break;
@@ -363,27 +366,25 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) 
 #endif
         break;
 
-        // IPv6 specific
+        // IPv6 specific - WiFi
     case ARDUINO_EVENT_WIFI_STA_GOT_IP6:
 #if !TASMOTA_SDK && ESP_IDF_VERSION_MAJOR < 5
         emsesp::EMSESP::logger().info("Local IPv6 (WiFi)=%s", WiFi.localIPv6().toString().c_str());
 #else
-        emsesp::EMSESP::logger().info("Local IPv6=%s", IPAddress(IPv6, (uint8_t *)info.got_ip6.ip6_info.ip.addr, 0).toString().c_str());
+        emsesp::EMSESP::logger().info("IPv6 (WiFi)=%s", IPAddress(IPv6, (uint8_t *)info.got_ip6.ip6_info.ip.addr, 0).toString().c_str());
 #endif
         emsesp::EMSESP::system_.has_ipv6(true);
         break;
 
-        // IPv6 specific
+        // IPv6 specific - Eth
         // This a bug in arduino where this is triggered twice, so we prevent it
     case ARDUINO_EVENT_ETH_GOT_IP6:
-        if (!emsesp::EMSESP::system_.has_ipv6()) {
 #if !TASMOTA_SDK && ESP_IDF_VERSION_MAJOR < 5
-            emsesp::EMSESP::logger().info("Local IPv6 (Eth)=%s", ETH.localIPv6().toString().c_str());
+        emsesp::EMSESP::logger().info("Local IPv6 (Eth)=%s", ETH.localIPv6().toString().c_str());
 #else
-            emsesp::EMSESP::logger().info("Local IPv6=%s", IPAddress(IPv6, (uint8_t *)info.got_ip6.ip6_info.ip.addr, 0).toString().c_str());
+        emsesp::EMSESP::logger().info("IPv6 (Eth)=%s", IPAddress(IPv6, (uint8_t *)info.got_ip6.ip6_info.ip.addr, 0).toString().c_str());
 #endif
-            emsesp::EMSESP::system_.has_ipv6(true);
-        }
+        emsesp::EMSESP::system_.has_ipv6(true);
         break;
 
     default:
