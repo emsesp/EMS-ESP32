@@ -377,14 +377,21 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) 
         break;
 
         // IPv6 specific - Eth
-    case ARDUINO_EVENT_ETH_GOT_IP6:
+    case ARDUINO_EVENT_ETH_GOT_IP6: {
 #if !TASMOTA_SDK && ESP_IDF_VERSION_MAJOR < 5
-        emsesp::EMSESP::logger().info("Local IPv6 (Eth)=%s", ETH.localIPv6().toString().c_str());
+        auto ip6 = IPv6Address((uint8_t *)info.got_ip6.ip6_info.ip.addr).toString();
 #else
-        emsesp::EMSESP::logger().info("IPv6 (Eth)=%s", IPAddress(IPv6, (uint8_t *)info.got_ip6.ip6_info.ip.addr, 0).toString().c_str());
+        auto ip6 = IPAddress(IPv6, (uint8_t *)info.got_ip6.ip6_info.ip.addr, 0).toString();
 #endif
+        if (ip6.startsWith("fe80")) {
+            emsesp::EMSESP::logger().info("IPv6 local: %s", ip6.c_str());
+        } else if (ip6.startsWith("fd") || ip6.startsWith("fc")) {
+            emsesp::EMSESP::logger().info("IPv6 ULA: %s", ip6.c_str());
+        } else {
+            emsesp::EMSESP::logger().info("IPv6 global: %s", ip6.c_str());
+        }
         emsesp::EMSESP::system_.has_ipv6(true);
-        break;
+    } break;
 
     default:
         break;

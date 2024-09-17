@@ -471,12 +471,10 @@ class EMSdevice {
         uint16_t     type_id_;
         const char * name_;
         bool         fetch_;
-        bool         cmd_;
-        TelegramFunctionDump(uint16_t type_id, const char * name, bool fetch, bool cmd)
+        TelegramFunctionDump(uint16_t type_id, const char * name, bool fetch)
             : type_id_(type_id)
             , name_(name)
-            , fetch_(fetch)
-            , cmd_(cmd) {
+            , fetch_(fetch) {
         }
     };
     void dump_telegram_info(std::vector<TelegramFunctionDump> & telegram_functions_dump);

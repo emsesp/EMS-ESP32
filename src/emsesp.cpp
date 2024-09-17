@@ -429,8 +429,6 @@ void EMSESP::dump_all_telegrams(uuid::console::Shell & shell) {
         Serial.print(tf.name_);
         Serial.print(',');
         Serial.print(tf.fetch_ ? "fetched" : " ");
-        Serial.print(',');
-        Serial.print(tf.cmd_ ? "cmd" : " ");
         Serial.println();
     }
 

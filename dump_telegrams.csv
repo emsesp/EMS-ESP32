@@ -1,209 +1,212 @@
 telegram_type_id,name,is_fetched,is_cmd
-0x04,UBAFactory,fetched,cmd
-0x06,RCTime, ,cmd
-0x0A,EasyMonitor,fetched,cmd
-0x10,UBAErrorMessage1, ,cmd
-0x11,UBAErrorMessage2, ,cmd
-0x12,RCErrorMessage, ,cmd
-0x13,RCErrorMessage2, ,cmd
-0x14,UBATotalUptime,fetched,cmd
-0x15,UBAMaintenanceData, ,cmd
-0x16,UBAParameters,fetched,cmd
-0x18,UBAMonitorFast, ,cmd
-0x19,UBAMonitorSlow, ,cmd
-0x1A,UBASetPoints, ,cmd
-0x1C,UBAMaintenanceStatus, ,cmd
-0x1E,WM10TempMessage, ,cmd
-0x23,JunkersSetMixer,fetched,cmd
-0x26,UBASettingsWW,fetched,cmd
-0x28,WeatherComp,fetched,cmd
-0x2A,MC110Status, ,cmd
-0x2E,Meters, ,cmd
-0x33,UBAParameterWW,fetched,cmd
-0x34,UBAMonitorWW, ,cmd
-0x35,UBAFlags, ,cmd
-0x37,WWSettings,fetched,cmd
-0x38,WWTimer,fetched,cmd
-0x39,WWCircTimer,fetched,cmd
-0x3A,RC30WWSettings,fetched,cmd
-0x3B,Energy, ,cmd
-0x3D,RC35Set, ,cmd
-0x3E,RC35Monitor, ,cmd
-0x3F,RC35Timer, ,cmd
-0x40,RC30Temp, ,cmd
-0x41,RC30Monitor, ,cmd
-0x42,RC35Timer2, ,cmd
-0x47,RC35Set, ,cmd
-0x48,RC35Monitor, ,cmd
-0x49,RC35Timer, ,cmd
-0x4C,RC35Timer2, ,cmd
-0x51,RC35Set, ,cmd
-0x52,RC35Monitor, ,cmd
-0x53,RC35Timer, ,cmd
-0x56,RC35Timer2, ,cmd
-0x5B,RC35Set, ,cmd
-0x5C,RC35Monitor, ,cmd
-0x5D,RC35Timer, ,cmd
-0x60,RC35Timer2, ,cmd
-0x96,SM10Config,fetched,cmd
-0x97,SM10Monitor, ,cmd
-0x9C,WM10MonitorMessage, ,cmd
-0x9D,WM10SetMessage, ,cmd
-0xA2,RCError, ,cmd
-0xA3,RCOutdoorTemp, ,cmd
-0xA5,IBASettings,fetched,cmd
-0xA7,RC30Set, ,cmd
-0xA9,RC30Vacation,fetched,cmd
-0xAA,MMConfigMessage,fetched,cmd
-0xAB,MMStatusMessage, ,cmd
-0xAC,MMSetMessage, ,cmd
-0xAF,RC20Remote, ,cmd
-0xB0,RC10Set, ,cmd
-0xB1,RC10Monitor, ,cmd
-0xBB,HybridSettings,fetched,cmd
-0xBF,ErrorMessage, ,cmd
-0xC2,UBAErrorMessage3, ,cmd
-0xD1,UBAOutdoorTemp, ,cmd
-0xE3,UBAMonitorSlowPlus2, ,cmd
-0xE4,UBAMonitorFastPlus, ,cmd
-0xE5,UBAMonitorSlowPlus, ,cmd
-0xE6,UBAParametersPlus,fetched,cmd
-0xE9,UBAMonitorWWPlus, ,cmd
-0xEA,UBAParameterWWPlus,fetched,cmd
-0x0101,ISM1Set,fetched,cmd
-0x0103,ISM1StatusMessage,fetched,cmd
-0x0104,ISM2StatusMessage, ,cmd
-0x010C,IPMStatusMessage, ,cmd
-0x011E,IPMTempMessage, ,cmd
-0x0165,JunkersSet, ,cmd
-0x0166,JunkersSet, ,cmd
-0x0167,JunkersSet, ,cmd
-0x0168,JunkersSet, ,cmd
-0x016F,JunkersMonitor, ,cmd
-0x0170,JunkersMonitor, ,cmd
-0x0171,JunkersMonitor, ,cmd
-0x0172,JunkersMonitor, ,cmd
-0x0179,JunkersSet, ,cmd
-0x017A,JunkersSet, ,cmd
-0x017B,JunkersSet, ,cmd
-0x017C,JunkersSet, ,cmd
-0x01D3,JunkersDhw,fetched,cmd
-0x023A,RC300OutdoorTemp,fetched,cmd
-0x023E,PVSettings,fetched,cmd
-0x0240,RC300Settings,fetched,cmd
-0x0267,RC300Floordry, ,cmd
-0x0269,RC300Holiday1,fetched,cmd
-0x0291,HPMode,fetched,cmd
-0x0292,HPMode,fetched,cmd
-0x0293,HPMode,fetched,cmd
-0x0294,HPMode,fetched,cmd
-0x029B,RC300Curves, ,cmd
-0x029C,RC300Curves, ,cmd
-0x029D,RC300Curves, ,cmd
-0x029E,RC300Curves, ,cmd
-0x029F,RC300Curves, ,cmd
-0x02A0,RC300Curves, ,cmd
-0x02A1,RC300Curves, ,cmd
-0x02A2,RC300Curves, ,cmd
-0x02A5,RC300Monitor, ,cmd
-0x02A6,RC300Monitor, ,cmd
-0x02A7,RC300Monitor, ,cmd
-0x02A8,CRFMonitor, ,cmd
-0x02A9,RC300Monitor, ,cmd
-0x02AA,RC300Monitor, ,cmd
-0x02AB,RC300Monitor, ,cmd
-0x02AC,RC300Monitor, ,cmd
-0x02AF,RC300Summer, ,cmd
-0x02B0,RC300Summer, ,cmd
-0x02B1,RC300Summer, ,cmd
-0x02B2,RC300Summer, ,cmd
-0x02B3,RC300Summer, ,cmd
-0x02B4,RC300Summer, ,cmd
-0x02B5,RC300Summer, ,cmd
-0x02B6,RC300Summer, ,cmd
-0x02B9,RC300Set, ,cmd
-0x02BA,RC300Set, ,cmd
-0x02BB,RC300Set, ,cmd
-0x02BC,RC300Set, ,cmd
-0x02BD,RC300Set, ,cmd
-0x02BE,RC300Set, ,cmd
-0x02BF,RC300Set, ,cmd
-0x02C0,RC300Set, ,cmd
-0x02CC,HPPressure,fetched,cmd
-0x02CD,MMPLUSConfigMessage,fetched,cmd
-0x02CE,RC300Set2, ,cmd
-0x02D0,RC300Set2, ,cmd
-0x02D2,RC300Set2, ,cmd
-0x02D5,MMPLUSConfigMessage,fetched,cmd
-0x02D7,MMPLUSStatusMessage, ,cmd
-0x02DF,MMPLUSStatusMessage, ,cmd
-0x02F5,RC300WWmode,fetched,cmd
-0x02F6,RC300WW2mode,fetched,cmd
-0x031B,RC300WWtemp,fetched,cmd
-0x031D,RC300WWmode2, ,cmd
-0x031E,RC300WWmode2, ,cmd
-0x0358,SM100SystemConfig,fetched,cmd
-0x035A,SM100CircuitConfig,fetched,cmd
-0x035C,SM100HeatAssist,fetched,cmd
-0x035D,SM100Circuit2Config,fetched,cmd
-0x035F,SM100Config1,fetched,cmd
-0x0361,SM100Differential,fetched,cmd
-0x0362,SM100Monitor, ,cmd
-0x0363,SM100Monitor2, ,cmd
-0x0364,SM100Status, ,cmd
-0x0366,SM100Config, ,cmd
-0x036A,SM100Status2, ,cmd
-0x0380,SM100CollectorConfig,fetched,cmd
-0x038E,SM100Energy,fetched,cmd
-0x0391,SM100Time,fetched,cmd
-0x0467,HPSet, ,cmd
-0x0468,HPSet, ,cmd
-0x0469,HPSet, ,cmd
-0x046A,HPSet, ,cmd
-0x0471,RC300Summer2, ,cmd
-0x0472,RC300Summer2, ,cmd
-0x0473,RC300Summer2, ,cmd
-0x0474,RC300Summer2, ,cmd
-0x0475,RC300Summer2, ,cmd
-0x0476,RC300Summer2, ,cmd
-0x0477,RC300Summer2, ,cmd
-0x0478,RC300Summer2, ,cmd
-0x047B,HP2, ,cmd
-0x0484,HPSilentMode,fetched,cmd
-0x0485,HpCooling,fetched,cmd
-0x0486,HpInConfig,fetched,cmd
-0x0488,HPValve,fetched,cmd
-0x048A,HpPool,fetched,cmd
-0x048B,HPPumps,fetched,cmd
-0x048D,HpPower,fetched,cmd
-0x048F,HpTemperatures, ,cmd
-0x0491,HPAdditionalHeater,fetched,cmd
-0x0492,HpHeaterConfig,fetched,cmd
-0x0494,UBAEnergySupplied, ,cmd
-0x0495,UBAInformation, ,cmd
-0x0499,HPDhwSettings,fetched,cmd
-0x049C,HPSettings2,fetched,cmd
-0x049D,HPSettings3,fetched,cmd
-0x04A2,HpInput,fetched,cmd
-0x04A5,HPFan,fetched,cmd
-0x04AE,HPEnergy,fetched,cmd
-0x04AF,HPMeters,fetched,cmd
-0x056B,VentilationMode,fetched,cmd
-0x0583,VentilationMonitor, ,cmd
-0x0585,Blowerspeed, ,cmd
-0x0587,Bypass, ,cmd
-0x05BA,HpPoolStatus,fetched,cmd
-0x05D9,Airquality, ,cmd
-0x0772,HIUSettings, ,cmd
-0x0779,HIUMonitor, ,cmd
-0x0935,EM100SetMessage,fetched,cmd
-0x0936,EM100OutMessage, ,cmd
-0x0937,EM100TempMessage, ,cmd
-0x0938,EM100InputMessage, ,cmd
-0x0939,EM100MonitorMessage, ,cmd
-0x093A,EM100ConfigMessage, ,cmd
-0x0998,HPSettings,fetched,cmd
-0x0999,HPFunctionTest,fetched,cmd
-0x099B,HPFlowTemp, ,cmd
-0x099C,HPComp, ,cmd
-0x09A0,HPTemperature, ,cmd
+0x04,UBAFactory,fetched
+0x06,RCTime, 
+0x0A,EasyMonitor,fetched
+0x10,UBAErrorMessage1, 
+0x11,UBAErrorMessage2, 
+0x12,RCErrorMessage, 
+0x13,RCErrorMessage2, 
+0x14,UBATotalUptime,fetched
+0x15,UBAMaintenanceData, 
+0x16,UBAParameters,fetched
+0x18,UBAMonitorFast, 
+0x19,UBAMonitorSlow, 
+0x1A,UBASetPoints, 
+0x1C,UBAMaintenanceStatus, 
+0x1E,WM10TempMessage, 
+0x23,JunkersSetMixer,fetched
+0x26,UBASettingsWW,fetched
+0x28,WeatherComp,fetched
+0x2A,MC110Status, 
+0x2E,Meters, 
+0x33,UBAParameterWW,fetched
+0x34,UBAMonitorWW, 
+0x35,UBAFlags, 
+0x37,WWSettings,fetched
+0x38,WWTimer,fetched
+0x39,WWCircTimer,fetched
+0x3A,RC30WWSettings,fetched
+0x3B,Energy, 
+0x3D,RC35Set, 
+0x3E,RC35Monitor, 
+0x3F,RC35Timer, 
+0x40,RC30Temp, 
+0x41,RC30Monitor, 
+0x42,RC35Timer2, 
+0x47,RC35Set, 
+0x48,RC35Monitor, 
+0x49,RC35Timer, 
+0x4C,RC35Timer2, 
+0x51,RC35Set, 
+0x52,RC35Monitor, 
+0x53,RC35Timer, 
+0x56,RC35Timer2, 
+0x5B,RC35Set, 
+0x5C,RC35Monitor, 
+0x5D,RC35Timer, 
+0x60,RC35Timer2, 
+0x96,SM10Config,fetched
+0x97,SM10Monitor, 
+0x9C,WM10MonitorMessage, 
+0x9D,WM10SetMessage, 
+0xA2,RCError, 
+0xA3,RCOutdoorTemp, 
+0xA5,IBASettings,fetched
+0xA7,RC30Set, 
+0xA9,RC30Vacation,fetched
+0xAA,MMConfigMessage,fetched
+0xAB,MMStatusMessage, 
+0xAC,MMSetMessage, 
+0xAF,RC20Remote, 
+0xB0,RC10Set, 
+0xB1,RC10Monitor, 
+0xBB,HybridSettings,fetched
+0xBF,ErrorMessage, 
+0xC2,UBAErrorMessage3, 
+0xD1,UBAOutdoorTemp, 
+0xE3,UBAMonitorSlowPlus2, 
+0xE4,UBAMonitorFastPlus, 
+0xE5,UBAMonitorSlowPlus, 
+0xE6,UBAParametersPlus,fetched
+0xE9,UBAMonitorWWPlus, 
+0xEA,UBAParameterWWPlus,fetched
+0x0101,ISM1Set,fetched
+0x0103,ISM1StatusMessage,fetched
+0x0104,ISM2StatusMessage, 
+0x010C,IPMStatusMessage, 
+0x011E,IPMTempMessage, 
+0x0165,JunkersSet, 
+0x0166,JunkersSet, 
+0x0167,JunkersSet, 
+0x0168,JunkersSet, 
+0x016F,JunkersMonitor, 
+0x0170,JunkersMonitor, 
+0x0171,JunkersMonitor, 
+0x0172,JunkersMonitor, 
+0x0179,JunkersSet, 
+0x017A,JunkersSet, 
+0x017B,JunkersSet, 
+0x017C,JunkersSet, 
+0x01D3,JunkersDhw,fetched
+0x023A,RC300OutdoorTemp,fetched
+0x023E,PVSettings,fetched
+0x0240,RC300Settings,fetched
+0x0267,RC300Floordry, 
+0x0269,RC300Holiday1,fetched
+0x0291,HPMode,fetched
+0x0292,HPMode,fetched
+0x0293,HPMode,fetched
+0x0294,HPMode,fetched
+0x029B,RC300Curves, 
+0x029C,RC300Curves, 
+0x029D,RC300Curves, 
+0x029E,RC300Curves, 
+0x029F,RC300Curves, 
+0x02A0,RC300Curves, 
+0x02A1,RC300Curves, 
+0x02A2,RC300Curves, 
+0x02A5,RC300Monitor, 
+0x02A6,RC300Monitor, 
+0x02A7,RC300Monitor, 
+0x02A8,RC300Monitor, 
+0x02A9,RC300Monitor, 
+0x02AA,RC300Monitor, 
+0x02AB,RC300Monitor, 
+0x02AC,RC300Monitor, 
+0x02AF,RC300Summer, 
+0x02B0,RC300Summer, 
+0x02B1,RC300Summer, 
+0x02B2,RC300Summer, 
+0x02B3,RC300Summer, 
+0x02B4,RC300Summer, 
+0x02B5,RC300Summer, 
+0x02B6,RC300Summer, 
+0x02B9,RC300Set, 
+0x02BA,RC300Set, 
+0x02BB,RC300Set, 
+0x02BC,RC300Set, 
+0x02BD,RC300Set, 
+0x02BE,RC300Set, 
+0x02BF,RC300Set, 
+0x02C0,RC300Set, 
+0x02CC,RC300Set2, 
+0x02CD,MMPLUSConfigMessage,fetched
+0x02CE,RC300Set2, 
+0x02D0,RC300Set2, 
+0x02D2,RC300Set2, 
+0x02D5,MMPLUSConfigMessage,fetched
+0x02D6,HPPump2,fetched
+0x02D7,MMPLUSStatusMessage, 
+0x02DF,MMPLUSStatusMessage, 
+0x02F5,RC300WWmode,fetched
+0x02F6,RC300WW2mode,fetched
+0x031B,RC300WWtemp,fetched
+0x031D,RC300WWmode2, 
+0x031E,RC300WWmode2, 
+0x0358,SM100SystemConfig,fetched
+0x035A,SM100CircuitConfig,fetched
+0x035C,SM100HeatAssist,fetched
+0x035D,SM100Circuit2Config,fetched
+0x035F,SM100Config1,fetched
+0x0361,SM100Differential,fetched
+0x0362,SM100Monitor, 
+0x0363,SM100Monitor2, 
+0x0364,SM100Status, 
+0x0366,SM100Config, 
+0x036A,SM100Status2, 
+0x0380,SM100CollectorConfig,fetched
+0x038E,SM100Energy,fetched
+0x0391,SM100Time,fetched
+0x0467,HPSet, 
+0x0468,HPSet, 
+0x0469,HPSet, 
+0x046A,HPSet, 
+0x0471,RC300Summer2, 
+0x0472,RC300Summer2, 
+0x0473,RC300Summer2, 
+0x0474,RC300Summer2, 
+0x0475,RC300Summer2, 
+0x0476,RC300Summer2, 
+0x0477,RC300Summer2, 
+0x0478,RC300Summer2, 
+0x047B,HP2, 
+0x0484,HPSilentMode,fetched
+0x0485,HpCooling,fetched
+0x0486,HpInConfig,fetched
+0x0488,HPValve,fetched
+0x048A,HpPool,fetched
+0x048B,HPPumps,fetched
+0x048D,HpPower,fetched
+0x048F,HpTemperatures, 
+0x0491,HPAdditionalHeater,fetched
+0x0492,HpHeaterConfig,fetched
+0x0494,UBAEnergySupplied, 
+0x0495,UBAInformation, 
+0x0499,HPDhwSettings,fetched
+0x049C,HPSettings2,fetched
+0x049D,HPSettings3,fetched
+0x04A2,HpInput,fetched
+0x04A5,HPFan,fetched
+0x04A7,HPPowerLimit,fetched
+0x04AA,HPPower2,fetched
+0x04AE,HPEnergy,fetched
+0x04AF,HPMeters,fetched
+0x056B,VentilationMode,fetched
+0x0583,VentilationMonitor, 
+0x0585,Blowerspeed, 
+0x0587,Bypass, 
+0x05BA,HpPoolStatus,fetched
+0x05D9,Airquality, 
+0x0772,HIUSettings, 
+0x0779,HIUMonitor, 
+0x0935,EM100SetMessage,fetched
+0x0936,EM100OutMessage, 
+0x0937,EM100TempMessage, 
+0x0938,EM100InputMessage, 
+0x0939,EM100MonitorMessage, 
+0x093A,EM100ConfigMessage, 
+0x0998,HPSettings,fetched
+0x0999,HPFunctionTest,fetched
+0x099B,HPFlowTemp, 
+0x099C,HPComp, 
+0x09A0,HPTemperature, 
