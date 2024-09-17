@@ -385,7 +385,7 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) 
 #endif
         if (ip6.startsWith("fe80")) {
             emsesp::EMSESP::logger().info("IPv6 local: %s", ip6.c_str());
-        } else if (ip6.startsWith("fd")) {
+        } else if (ip6.startsWith("fd") || ip6.startsWith("fc")) {
             emsesp::EMSESP::logger().info("IPv6 ULA: %s", ip6.c_str());
         } else {
             emsesp::EMSESP::logger().info("IPv6 global: %s", ip6.c_str());
