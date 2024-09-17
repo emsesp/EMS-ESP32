@@ -97,8 +97,12 @@ def bin_copy(source, target, env):
         file1.close()
         
     # make a copy using the old 3.6.x filename format for backwards compatibility with the WebUI version check, e.g.
-    #  EMS-ESP-3_6_5-ESP32_S3.bin (16MB) with target ci_s3_16M_P
-    #  EMS-ESP-3_6_5-ESP32.bin (4MB) with target ci_s_4M
+    #  create a EMS-ESP-<version>-ESP32_S3.bin if target is ci_s3_16M_P (16MB, PSRAM)
+    #  create a EMS-ESP-<version>-ESP32.bin    if target is ci_s_4M (4MB, no PSRAM)
+    #
+    # Note: there is a chance newer E32V2s (which use the 16MB partition table and PSRAM) are running a custom build
+    # of the 3.6.5 firmware as 3.6.5 was released before production of the gateway board. Updating via the WebUI will break the system and require a manual update.
+    #
     extra_variant = ""
     if env.get('PIOENV') == "ci_s3_16M_P":
         extra_variant = "EMS-ESP-" + app_version.replace(".", "_") + "-ESP32_S3"
