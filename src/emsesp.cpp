@@ -1692,14 +1692,13 @@ void EMSESP::loop() {
     static bool show_prompt = true;
 
     // user has to ctrl-c to create a serial console stream, exit command will close it
-    // this is to save around 2kb of heap memory
+    // this saves around 2kb of heap memory
     if (shell_) {
         if (!shell_->running()) {
             shell_.reset();
 #ifdef EMSESP_STANDALONE
             ::exit(0); // kill session
 #endif
-            shell_prompt();
         }
     } else {
         if (show_prompt) {
