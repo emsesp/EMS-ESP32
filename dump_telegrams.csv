@@ -1,4 +1,4 @@
-telegram_type_id,name,is_fetched,is_cmd
+telegram_type_id,name,is_fetched
 0x04,UBAFactory,fetched
 0x06,RCTime, 
 0x0A,EasyMonitor,fetched

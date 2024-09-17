@@ -378,7 +378,7 @@ void EMSESP::dump_all_telegrams(uuid::console::Shell & shell) {
 
     Serial.println("---- CSV START ----"); // marker use by py script
     // add header for CSV
-    Serial.println("telegram_type_id,name,is_fetched,is_cmd");
+    Serial.println("telegram_type_id,name,is_fetched");
 
     for (const auto & device_class : EMSFactory::device_handlers()) {
         // go through each device type so they are sorted
