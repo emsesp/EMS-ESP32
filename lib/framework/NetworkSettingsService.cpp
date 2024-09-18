@@ -366,29 +366,21 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) 
 #endif
         break;
 
-        // IPv6 specific - WiFi
+        // IPv6 specific - WiFi/Eth
     case ARDUINO_EVENT_WIFI_STA_GOT_IP6:
-#if !TASMOTA_SDK && ESP_IDF_VERSION_MAJOR < 5
-        emsesp::EMSESP::logger().info("Local IPv6 (WiFi)=%s", WiFi.localIPv6().toString().c_str());
-#else
-        emsesp::EMSESP::logger().info("IPv6 (WiFi)=%s", IPAddress(IPv6, (uint8_t *)info.got_ip6.ip6_info.ip.addr, 0).toString().c_str());
-#endif
-        emsesp::EMSESP::system_.has_ipv6(true);
-        break;
-
-        // IPv6 specific - Eth
     case ARDUINO_EVENT_ETH_GOT_IP6: {
 #if !TASMOTA_SDK && ESP_IDF_VERSION_MAJOR < 5
         auto ip6 = IPv6Address((uint8_t *)info.got_ip6.ip6_info.ip.addr).toString();
 #else
         auto ip6 = IPAddress(IPv6, (uint8_t *)info.got_ip6.ip6_info.ip.addr, 0).toString();
 #endif
+        const char * link = event == ARDUINO_EVENT_ETH_GOT_IP6 ? "Eth" : "WiFi";
         if (ip6.startsWith("fe80")) {
-            emsesp::EMSESP::logger().info("IPv6 local: %s", ip6.c_str());
+            emsesp::EMSESP::logger().info("IPv6 (%s) local: %s", link, ip6.c_str());
         } else if (ip6.startsWith("fd") || ip6.startsWith("fc")) {
-            emsesp::EMSESP::logger().info("IPv6 ULA: %s", ip6.c_str());
+            emsesp::EMSESP::logger().info("IPv6 (%s) ULA: %s", link, ip6.c_str());
         } else {
-            emsesp::EMSESP::logger().info("IPv6 global: %s", ip6.c_str());
+            emsesp::EMSESP::logger().info("IPv6 (%s) global: %s", link, ip6.c_str());
         }
         emsesp::EMSESP::system_.has_ipv6(true);
     } break;
