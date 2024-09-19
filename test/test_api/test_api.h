@@ -158,7 +158,7 @@ void test_19() {
     auto expected_response =
         "[{\"system\":{\"version\":\"dev\",\"uptime\":\"000+00:00:00.000\",\"uptimeSec\":0,\"resetReason\":\"Unknown / "
         "Unknown\"},\"network\":{\"network\":\"WiFi\",\"hostname\":\"ems-esp\",\"RSSI\":-23,\"TxPowerSetting\":0,\"staticIP\":false,\"lowBandwidth\":false,"
-        "\"disableSleep\":false,\"enableMDNS\":true,\"enableCORS\":false},\"ntp\":{},\"mqtt\":{\"MQTTStatus\":\"disconnected\",\"MQTTPublishes\":0,"
+        "\"disableSleep\":true,\"enableMDNS\":true,\"enableCORS\":false},\"ntp\":{},\"mqtt\":{\"MQTTStatus\":\"disconnected\",\"MQTTPublishes\":0,"
         "\"MQTTQueued\":0,\"MQTTPublishFails\":0,\"MQTTConnects\":1,\"enabled\":true,\"clientID\":\"ems-esp\",\"keepAlive\":60,\"cleanSession\":false,"
         "\"entityFormat\":1,\"base\":\"ems-esp\",\"discoveryPrefix\":\"homeassistant\",\"discoveryType\":0,\"nestedFormat\":1,\"haEnabled\":true,\"mqttQos\":0,"
         "\"mqttRetain\":false,\"publishTimeHeartbeat\":60,\"publishTimeBoiler\":10,\"publishTimeThermostat\":10,\"publishTimeSolar\":10,\"publishTimeMixer\":"
@@ -169,7 +169,7 @@ void test_19() {
         "\"busRxLineQuality\":100,\"busTxLineQuality\":100},\"settings\":{\"boardProfile\":\"S32\",\"locale\":\"en\",\"txMode\":8,\"emsBusID\":11,"
         "\"showerTimer\":false,\"showerMinDuration\":180,\"showerAlert\":false,\"hideLed\":false,\"noTokenApi\":false,\"readonlyMode\":false,\"fahrenheit\":"
         "false,\"dallasParasite\":false,\"boolFormat\":1,\"boolDashboard\":1,\"enumFormat\":1,\"analogEnabled\":true,\"telnetEnabled\":true,"
-        "\"maxWebLogBuffer\":50,\"webLogBuffer\":0,\"modbusEnabled\":false},\"devices\":[{\"type\":\"boiler\",\"name\":\"Custom "
+        "\"maxWebLogBuffer\":25,\"webLogBuffer\":0,\"modbusEnabled\":false,\"forceHeatingOff\":false},\"devices\":[{\"type\":\"boiler\",\"name\":\"Custom "
         "Name!!\",\"deviceID\":\"0x08\",\"productID\":123,\"brand\":\"\",\"version\":\"01.00\",\"entities\":37,\"handlersReceived\":\"0x18\","
         "\"handlersFetched\":\"0x14 0x33\",\"handlersPending\":\"0xBF 0x10 0x11 0xC2 0x15 0x1C 0x19 0x1A 0x35 0x34 0x2A 0xD1 0xE3 0xE4 0xE5 0xE9 0x2E "
         "0x3B\"},{\"type\":\"thermostat\",\"name\":\"FW120\",\"deviceID\":\"0x10\",\"productID\":192,\"brand\":\"\",\"version\":\"01.00\",\"entities\":15,"
@@ -181,7 +181,7 @@ void test_20() {
     auto expected_response =
         "[{\"system\":{\"version\":\"dev\",\"uptime\":\"000+00:00:00.000\",\"uptimeSec\":0,\"resetReason\":\"Unknown / "
         "Unknown\"},\"network\":{\"network\":\"WiFi\",\"hostname\":\"ems-esp\",\"RSSI\":-23,\"TxPowerSetting\":0,\"staticIP\":false,\"lowBandwidth\":false,"
-        "\"disableSleep\":false,\"enableMDNS\":true,\"enableCORS\":false},\"ntp\":{},\"mqtt\":{\"MQTTStatus\":\"disconnected\",\"MQTTPublishes\":0,"
+        "\"disableSleep\":true,\"enableMDNS\":true,\"enableCORS\":false},\"ntp\":{},\"mqtt\":{\"MQTTStatus\":\"disconnected\",\"MQTTPublishes\":0,"
         "\"MQTTQueued\":0,\"MQTTPublishFails\":0,\"MQTTConnects\":1,\"enabled\":true,\"clientID\":\"ems-esp\",\"keepAlive\":60,\"cleanSession\":false,"
         "\"entityFormat\":1,\"base\":\"ems-esp\",\"discoveryPrefix\":\"homeassistant\",\"discoveryType\":0,\"nestedFormat\":1,\"haEnabled\":true,\"mqttQos\":0,"
         "\"mqttRetain\":false,\"publishTimeHeartbeat\":60,\"publishTimeBoiler\":10,\"publishTimeThermostat\":10,\"publishTimeSolar\":10,\"publishTimeMixer\":"
@@ -192,7 +192,7 @@ void test_20() {
         "\"busRxLineQuality\":100,\"busTxLineQuality\":100},\"settings\":{\"boardProfile\":\"S32\",\"locale\":\"en\",\"txMode\":8,\"emsBusID\":11,"
         "\"showerTimer\":false,\"showerMinDuration\":180,\"showerAlert\":false,\"hideLed\":false,\"noTokenApi\":false,\"readonlyMode\":false,\"fahrenheit\":"
         "false,\"dallasParasite\":false,\"boolFormat\":1,\"boolDashboard\":1,\"enumFormat\":1,\"analogEnabled\":true,\"telnetEnabled\":true,"
-        "\"maxWebLogBuffer\":50,\"webLogBuffer\":0,\"modbusEnabled\":false},\"devices\":[{\"type\":\"boiler\",\"name\":\"Custom "
+        "\"maxWebLogBuffer\":25,\"webLogBuffer\":0,\"modbusEnabled\":false,\"forceHeatingOff\":false},\"devices\":[{\"type\":\"boiler\",\"name\":\"Custom "
         "Name!!\",\"deviceID\":\"0x08\",\"productID\":123,\"brand\":\"\",\"version\":\"01.00\",\"entities\":37,\"handlersReceived\":\"0x18\","
         "\"handlersFetched\":\"0x14 0x33\",\"handlersPending\":\"0xBF 0x10 0x11 0xC2 0x15 0x1C 0x19 0x1A 0x35 0x34 0x2A 0xD1 0xE3 0xE4 0xE5 0xE9 0x2E "
         "0x3B\"},{\"type\":\"thermostat\",\"name\":\"FW120\",\"deviceID\":\"0x10\",\"productID\":192,\"brand\":\"\",\"version\":\"01.00\",\"entities\":15,"
@@ -213,7 +213,7 @@ void test_22() {
 
 void test_23() {
     auto expected_response = "[{\"network\":\"WiFi\",\"hostname\":\"ems-esp\",\"RSSI\":\"-23\",\"TxPowerSetting\":\"0\",\"staticIP\":\"false\","
-                             "\"lowBandwidth\":\"false\",\"disableSleep\":\"false\",\"enableMDNS\":\"true\",\"enableCORS\":\"false\"}]";
+                             "\"lowBandwidth\":\"false\",\"disableSleep\":\"true\",\"enableMDNS\":\"true\",\"enableCORS\":\"false\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("api/system/network/values"));
 }
 
