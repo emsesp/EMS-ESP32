@@ -298,8 +298,9 @@ bool Command::set_attribute(JsonObject output, const char * cmd, const char * at
     if (attribute == nullptr) {
         return true;
     }
-    if (output[attribute].is<std::string>()) {
-        std::string data = output[attribute];
+
+    if (output[attribute].is<JsonVariantConst>()) {
+        std::string data = output[attribute].as<std::string>();
         output.clear();
         output["api_data"] = data; // always as a string
         return true;
