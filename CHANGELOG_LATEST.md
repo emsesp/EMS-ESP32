@@ -4,10 +4,12 @@
 
 ## **IMPORTANT! BREAKING CHANGES with 3.6.5**
 
-- new device WATER shows dhw entities from MM100 and SM100 in dhw setting
-- renamed WWC to DHW, always create DHW nests/topics, remove ww prefix from mqtt names [#1634](https://github.com/emsesp/EMS-ESP32/issues/1634). To preserve current value of dhw energy (nrgww), follow ([#1938]<https://github.com/emsesp/EMS-ESP32/issues/1938>)
-- change temperaturesensor id to underscore
-- system/info API command has it's JSON keys and names changed to camelCase
+- "ww" and "wwc" has been renamed to "dhw". It is nested JSON object in both the MQTT and API outputs. The old prefix has also been removed from MQTT topics ([#1634](https://github.com/emsesp/EMS-ESP32/issues/1634)). This will impact historical data in home automation systems like Home Assistant and IOBroker. To preserve the current value of dhw energy (was previously nrgww) refer to this issue [#1938](https://github.com/emsesp/EMS-ESP32/issues/1938).
+- dhw entities from the MM100/SM100 have been moved under a new Device called 'water'.
+- The automatically generated temperature sensor ID has replaced hyphons (`-`) with underscores (`_`) to be comaptible with Home Assistant.
+- `api/system/info` has it's JSON key names changed to camelCase syntax.
+
+For more details go to [www.emsesp.org](https://www.emsesp.org/).
 
 ## Added
 
@@ -66,3 +68,4 @@
 - Correct firmware naming #1933 [#1933](https://github.com/emsesp/EMS-ESP32/issues/1933)
 - Don't start Serial console if not connected to a Serial port. Will initiate manually after a CTRL-C  
 - WebLog UI matches color schema of the terminal console correctly
+- Updated Web libraries, ArduinoJson
