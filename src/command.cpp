@@ -55,7 +55,7 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     const char * device_s = nullptr;
     if (!num_paths) {
         // we must look for the device in the JSON body
-        if (input.containsKey("device")) {
+        if (input["device"].is<const char *>()) {
             device_s = input["device"];
         }
     } else {
@@ -89,9 +89,9 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         command_p = command;
     } else {
         // take it from the JSON
-        if (input.containsKey("entity")) {
+        if (input["entity"].is<const char *>()) {
             command_p = input["entity"];
-        } else if (input.containsKey("cmd")) {
+        } else if (input["cmd"].is<const char *>()) {
             command_p = input["cmd"];
         }
     }
@@ -111,20 +111,20 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
         }
     }
 
-    // if we don't have an id/hc/dhw try and get it from the JSON input
+    // if we don't have an id/hc/dhw try and get it from the JSON input. It must be a number.
     // it's allowed to have no id, and then keep the default to -1
     if (id_n == -1) {
-        if (input.containsKey("hc")) {
+        if (input["hc"].is<int>()) {
             id_n = input["hc"];
-        } else if (input.containsKey("dhw")) {
+        } else if (input["dhw"].is<int>()) {
             id_n = input["dhw"];
             id_n += DeviceValueTAG::TAG_DHW1 - DeviceValueTAG::TAG_HC1; // dhw1 has id 9
-        } else if (input.containsKey("id")) {
+        } else if (input["id"].is<int>()) {
             id_n = input["id"];
-        } else if (input.containsKey("ahs")) {
+        } else if (input["ahs"].is<int>()) {
             id_n = input["ahs"];
             id_n += DeviceValueTAG::TAG_AHS1 - DeviceValueTAG::TAG_HC1; // ahs1 has id 19
-        } else if (input.containsKey("hs")) {
+        } else if (input["hs"].is<int>()) {
             id_n = input["hs"];
             id_n += DeviceValueTAG::TAG_HS1 - DeviceValueTAG::TAG_HC1; // hs1 has id 20
         }
@@ -132,9 +132,9 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
 
     // the value must always come from the input JSON. It's allowed to be empty.
     JsonVariant data;
-    if (input.containsKey("data")) {
+    if (input["data"].is<JsonVariantConst>()) {
         data = input["data"];
-    } else if (input.containsKey("value")) {
+    } else if (input["value"].is<JsonVariantConst>()) {
         data = input["value"];
     }
 
@@ -298,8 +298,8 @@ bool Command::set_attribute(JsonObject output, const char * cmd, const char * at
     if (attribute == nullptr) {
         return true;
     }
-    if (output.containsKey(attribute)) {
-        std::string data = output[attribute].as<std::string>();
+    if (output[attribute].is<std::string>()) {
+        std::string data = output[attribute];
         output.clear();
         output["api_data"] = data; // always as a string
         return true;

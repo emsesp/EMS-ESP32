@@ -271,7 +271,7 @@ void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) {
     // if the payload doesn't not contain the key 'value' or 'data', treat the whole payload as the 'value'
     if (len != 0) {
         DeserializationError error = deserializeJson(input_doc, (const char *)message);
-        if ((!input_doc.containsKey("value") && !input_doc.containsKey("data")) || error) {
+        if (((!input_doc["value"].is<JsonVariantConst>()) && (!input_doc["data"].is<JsonVariantConst>())) || error) {
             input_doc.clear();
             input_doc["value"] = (const char *)message; // always a string
         }

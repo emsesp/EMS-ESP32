@@ -126,20 +126,20 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
 
             webCustomEntity.customEntityItems.push_back(entityItem); // add to list
 
-            if (webCustomEntity.customEntityItems.back().writeable && !webCustomEntity.customEntityItems.back().name.empty()) {
+            if (entityItem.writeable && !entityItem.name.empty()) {
                 Command::add(
                     EMSdevice::DeviceType::CUSTOM,
-                    webCustomEntity.customEntityItems.back().name.c_str(),
-                    [webCustomEntity](const char * value, const int8_t id) {
-                        return EMSESP::webCustomEntityService.command_setvalue(value, id, webCustomEntity.customEntityItems.back().name.c_str());
+                    entityItem.name.c_str(),
+                    [entityItem](const char * value, const int8_t id) {
+                        return EMSESP::webCustomEntityService.command_setvalue(value, id, entityItem.name.c_str());
                     },
                     FL_(entity_cmd),
                     CommandFlag::ADMIN_ONLY);
             }
-            if (webCustomEntity.customEntityItems.back().ram && doc.containsKey(webCustomEntity.customEntityItems.back().name)
-                && doc[webCustomEntity.customEntityItems.back().name] != webCustomEntity.customEntityItems.back().value) {
+
+            if (entityItem.ram && doc[entityItem.name].is<JsonVariantConst>() && doc[entityItem.name] != entityItem.value) {
                 char cmd[COMMAND_MAX_LENGTH];
-                snprintf(cmd, sizeof(cmd), "%s/%s", F_(custom), webCustomEntity.customEntityItems.back().name.c_str());
+                snprintf(cmd, sizeof(cmd), "%s/%s", F_(custom), entityItem.name.c_str());
                 EMSESP::webSchedulerService.onChange(cmd);
             }
         }
@@ -462,7 +462,10 @@ uint8_t WebCustomEntityService::count_entities() {
     uint8_t      count  = 0;
     for (const CustomEntityItem & entity : *customEntityItems_) {
         render_value(output, entity);
-        count += (output.containsKey(entity.name) || entity.writeable) ? 1 : 0;
+        // TODO check JsonVariant
+        if (output[entity.name].is<JsonVariantConst>() || entity.writeable) {
+            count++;
+        }
     }
 
     return count;
@@ -479,15 +482,18 @@ uint8_t WebCustomEntityService::has_commands() {
 
 // send to dashboard, msgpack don't like serialized, use number
 void WebCustomEntityService::generate_value_web(JsonObject output) {
-    // output["label"] = (std::string) "Custom Entities";
     JsonArray data  = output["data"].to<JsonArray>();
     uint8_t   index = 0;
+
     for (const CustomEntityItem & entity : *customEntityItems_) {
-        JsonObject obj = data.add<JsonObject>(); // create the object, we know there is a value
-        obj["id"]      = "00" + entity.name;
-        obj["u"]       = entity.uom;
+        bool       include = false;
+        JsonObject obj     = data.add<JsonObject>(); // create the object, we know there is a value
+        obj["id"]          = "00" + entity.name;
+        obj["u"]           = entity.uom;
+
         if (entity.writeable) {
             obj["c"] = entity.name;
+            include  = true;
             if (entity.value_type != DeviceValueType::BOOL && entity.value_type != DeviceValueType::STRING) {
                 char s[10];
                 obj["s"] = Helpers::render_value(s, entity.factor, 1);
@@ -497,7 +503,9 @@ void WebCustomEntityService::generate_value_web(JsonObject output) {
         switch (entity.value_type) {
         case DeviceValueType::BOOL: {
             char s[12];
-            obj["v"]    = Helpers::render_boolean(s, (uint8_t)entity.value, true);
+            obj["v"] = Helpers::render_boolean(s, (uint8_t)entity.value, true);
+            include  = true;
+
             JsonArray l = obj["l"].to<JsonArray>();
             l.add(Helpers::render_boolean(s, false, true));
             l.add(Helpers::render_boolean(s, true, true));
@@ -506,21 +514,25 @@ void WebCustomEntityService::generate_value_web(JsonObject output) {
         case DeviceValueType::INT8:
             if ((int8_t)entity.value != EMS_VALUE_INT8_NOTSET) {
                 obj["v"] = Helpers::transformNumFloat(entity.factor * (int8_t)entity.value, 0);
+                include  = true;
             }
             break;
         case DeviceValueType::UINT8:
             if ((uint8_t)entity.value != EMS_VALUE_UINT8_NOTSET) {
                 obj["v"] = Helpers::transformNumFloat(entity.factor * (uint8_t)entity.value, 0);
+                include  = true;
             }
             break;
         case DeviceValueType::INT16:
             if ((int16_t)entity.value != EMS_VALUE_INT16_NOTSET) {
                 obj["v"] = Helpers::transformNumFloat(entity.factor * (int16_t)entity.value, 0);
+                include  = true;
             }
             break;
         case DeviceValueType::UINT16:
             if ((uint16_t)entity.value != EMS_VALUE_UINT16_NOTSET) {
                 obj["v"] = Helpers::transformNumFloat(entity.factor * (uint16_t)entity.value, 0);
+                include  = true;
             }
             break;
         case DeviceValueType::UINT24:
@@ -528,11 +540,13 @@ void WebCustomEntityService::generate_value_web(JsonObject output) {
         case DeviceValueType::UINT32:
             if (entity.value != EMS_VALUE_UINT24_NOTSET) {
                 obj["v"] = Helpers::transformNumFloat(entity.factor * entity.value, 0);
+                include  = true;
             }
             break;
         case DeviceValueType::STRING:
             if (entity.data.length() > 0) {
                 obj["v"] = entity.data;
+                include  = true;
             }
             break;
         default:
@@ -540,10 +554,10 @@ void WebCustomEntityService::generate_value_web(JsonObject output) {
         }
 
         // show only entities with value or command
-        if (!obj.containsKey("v") && !obj.containsKey("c")) {
-            data.remove(index);
-        } else {
+        if (include) {
             index++;
+        } else {
+            data.remove(index);
         }
     }
 }

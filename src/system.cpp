@@ -789,7 +789,6 @@ void System::network_init(bool refresh) {
     auto clock_mode = (eth_clock_mode_t)eth_clock_mode_;
 
     // reset power and add a delay as ETH doesn't not always start up correctly after a warm boot
-    // TODO still experimental
     if (eth_power_ != -1) {
         pinMode(eth_power_, OUTPUT);
         digitalWrite(eth_power_, LOW);
