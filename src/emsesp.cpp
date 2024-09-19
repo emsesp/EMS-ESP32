@@ -1709,7 +1709,8 @@ void EMSESP::loop() {
         if (c != -1) {
             show_prompt = true;
         }
-        if (c == '\x03' || c == '\x0C') {
+        // https://daleswanson.org/ascii.htm#:~:text=0
+        if (c == '\x03') {
             start_serial_console();
         }
     }
