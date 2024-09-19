@@ -3250,11 +3250,11 @@ bool Thermostat::set_switchtime(const char * value, const uint16_t type_id, char
         if (error) {
             return false;
         }
-        if (!doc.containsKey("no")) {
+        if (!doc["no"].is<int>()) {
             return false;
         }
-        no = doc["no"].as<int>();
-        if (!doc.containsKey("day") || !doc.containsKey("mode") || !doc.containsKey("time")) {
+        no = doc["no"];
+        if (!doc["day"].is<const char *>() || !doc["mode"].is<const char *>() || !doc["time"].is<const char *>()) {
             EMSESP::wait_validate(type_id);
             read_command(type_id, 2 * no, 2);
             return true;

@@ -245,7 +245,7 @@ void WebSchedulerService::publish(const bool force) {
     JsonDocument doc;
     bool         ha_created = ha_registered_;
     for (const ScheduleItem & scheduleItem : *scheduleItems_) {
-        if (!scheduleItem.name.empty() && !doc.containsKey(scheduleItem.name)) {
+        if (!scheduleItem.name.empty() && !doc[scheduleItem.name].is<const char *>()) {
             if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
                 doc[scheduleItem.name] = scheduleItem.active;
             } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
