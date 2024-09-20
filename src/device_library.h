@@ -30,7 +30,7 @@
 { 72, DeviceType::BOILER, "GB125/GB135/MC10", DeviceFlags::EMS_DEVICE_FLAG_EMS},
 { 81, DeviceType::BOILER, "Cascade CM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 84, DeviceType::BOILER, "Logamax Plus GB022", DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{ 95, DeviceType::BOILER, "Condens 2500/Logamax/Logomatic/Cerapur Top/Greenstar/Generic HT3", DeviceFlags::EMS_DEVICE_FLAG_HT3},
+{ 95, DeviceType::BOILER, "Condens 2500/5000W/Logamax/Logomatic/Cerapur Top/Greenstar/Generic HT3", DeviceFlags::EMS_DEVICE_FLAG_HT3},
 {115, DeviceType::BOILER, "Topline/GB162", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {121, DeviceType::BOILER, "Cascade MCM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {122, DeviceType::BOILER, "Proline", DeviceFlags::EMS_DEVICE_FLAG_NONE},
@@ -93,9 +93,9 @@
 { 93, DeviceType::THERMOSTAT, "RC20RF", DeviceFlags::EMS_DEVICE_FLAG_RC20}, // 0x19
 { 94, DeviceType::THERMOSTAT, "RFM20 Remote", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x18
 {151, DeviceType::THERMOSTAT, "RC25", DeviceFlags::EMS_DEVICE_FLAG_RC25}, // 0x17
-{157, DeviceType::THERMOSTAT, "RC200/CW100/CR120", DeviceFlags::EMS_DEVICE_FLAG_RC100}, // 0x18,, CR120 v22 is FLAG_BC400
+{157, DeviceType::THERMOSTAT, "RC200/CW100/CR120/CR50", DeviceFlags::EMS_DEVICE_FLAG_RC100}, // 0x18,, CR120 v22 is FLAG_BC400
 {158, DeviceType::THERMOSTAT, "RC300/RC310/Moduline 3000/1010H/CW400/Sense II/HPC410", DeviceFlags::EMS_DEVICE_FLAG_RC300}, // 0x10
-{165, DeviceType::THERMOSTAT, "RC100/Moduline 1000/1010", DeviceFlags::EMS_DEVICE_FLAG_RC100}, // 0x18, 0x38
+{165, DeviceType::THERMOSTAT, "RC100/CR10/Moduline 1000/1010", DeviceFlags::EMS_DEVICE_FLAG_RC100}, // 0x18, 0x38
 {172, DeviceType::THERMOSTAT, "Rego 2000/3000", DeviceFlags::EMS_DEVICE_FLAG_R3000}, // 0x10
 {215, DeviceType::THERMOSTAT, "Comfort RF", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
 {216, DeviceType::THERMOSTAT, "CRF200S", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
