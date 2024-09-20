@@ -268,10 +268,16 @@ const Customizations = () => {
 
   const formatName = (de: DeviceEntity, withShortname: boolean) =>
     (de.n && de.n[0] === '!'
-      ? LL.COMMAND(1) + ': ' + de.n.slice(1)
+      ? de.t
+        ? LL.COMMAND(1) + ': ' + de.t + ' ' + de.n.slice(1)
+        : LL.COMMAND(1) + ': ' + de.n.slice(1)
       : de.cn && de.cn !== ''
-        ? de.cn
-        : de.n) + (withShortname ? ' ' + de.id : '');
+        ? de.t
+          ? de.t + ' ' + de.cn
+          : de.cn
+        : de.t
+          ? de.t + ' ' + de.n
+          : de.n) + (withShortname ? ' ' + de.id : '');
 
   const getMaskNumber = (newMask: string[]) => {
     let new_mask = 0;
@@ -449,11 +455,14 @@ const Customizations = () => {
             <MenuItem disabled key={-1} value={-1}>
               {LL.SELECT_DEVICE()}...
             </MenuItem>
-            {devices.devices.map((device: Device) => (
-              <MenuItem key={device.id} value={device.id}>
-                {device.n}&nbsp;({device.tn})
-              </MenuItem>
-            ))}
+            {devices.devices.map(
+              (device: Device) =>
+                device.id < 90 && (
+                  <MenuItem key={device.id} value={device.id}>
+                    {device.n}&nbsp;({device.tn})
+                  </MenuItem>
+                )
+            )}
           </TextField>
         )}
         {selectedDevice !== -1 &&
