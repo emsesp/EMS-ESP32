@@ -6,7 +6,7 @@
 
 - "ww" and "wwc" has been renamed to "dhw". It is nested JSON object in both the MQTT and API outputs. The old prefix has also been removed from MQTT topics ([#1634](https://github.com/emsesp/EMS-ESP32/issues/1634)). This will impact historical data in home automation systems like Home Assistant and IOBroker. To preserve the current value of dhw energy (was previously nrgww) refer to this issue [#1938](https://github.com/emsesp/EMS-ESP32/issues/1938).
 - dhw entities from the MM100/SM100 have been moved under a new Device called 'water'.
-- The automatically generated temperature sensor ID has replaced hyphons (`-`) with underscores (`_`) to be comaptible with Home Assistant.
+- The automatically generated temperature sensor ID has replaced dashes (`-`) with underscores (`_`) to be compatible with Home Assistant.
 - `api/system/info` has it's JSON key names changed to camelCase syntax.
 
 For more details go to [www.emsesp.org](https://www.emsesp.org/).
