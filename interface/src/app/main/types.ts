@@ -134,6 +134,7 @@ export interface DeviceEntity {
   v?: unknown; // value, in any format, optional
   n?: string; // fullname, optional
   cn?: string; // custom fullname, optional
+  t?: string; // tag for name
   m: DeviceEntityMask; // mask
   w: boolean; // writeable
   mi?: number; // min value

@@ -553,7 +553,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
             if (return_code == CommandRet::OK) {
                 if (json.size()) {
                     if (json["api_data"].is<std::string>()) {
-                        String data = json["api_data"];
+                        std::string data = json["api_data"];
                         shell.println(data.c_str());
                         return;
                     }

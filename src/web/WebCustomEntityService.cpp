@@ -129,9 +129,9 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
             if (entityItem.writeable && !entityItem.name.empty()) {
                 Command::add(
                     EMSdevice::DeviceType::CUSTOM,
-                    entityItem.name.c_str(),
-                    [entityItem](const char * value, const int8_t id) {
-                        return EMSESP::webCustomEntityService.command_setvalue(value, id, entityItem.name.c_str());
+                    webCustomEntity.customEntityItems.back().name.c_str(),
+                    [webCustomEntity](const char * value, const int8_t id) {
+                        return EMSESP::webCustomEntityService.command_setvalue(value, id, webCustomEntity.customEntityItems.back().name.c_str());
                     },
                     FL_(entity_cmd),
                     CommandFlag::ADMIN_ONLY);

@@ -561,11 +561,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
         }
     }
 
-    // non EMS devices always have an info, commands and values
-    bool show_info = (device_type == EMSdevice::DeviceType::TEMPERATURESENSOR || device_type == EMSdevice::DeviceType::ANALOGSENSOR
-                      || device_type == EMSdevice::DeviceType::SCHEDULER || device_type == EMSdevice::DeviceType::CUSTOM);
-
-    if (!verbose && show_info) {
+    if (!verbose) {
         sorted_cmds.push_back(F_(info));
         sorted_cmds.push_back(F_(commands));
         sorted_cmds.push_back(F_(values));
@@ -587,14 +583,12 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
     shell.printfln("\n%s%s %s:%s", COLOR_BOLD_ON, COLOR_YELLOW, EMSdevice::device_type_2_device_name(device_type), COLOR_RESET);
 
     // we hard code 'info' and 'commands' commands so print them first
-    if (show_info) {
-        shell.printf("  info:\t\t\t\t%slist all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
-        shell.println(COLOR_RESET);
-        shell.printf("  commands:\t\t\t%slist all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
-        shell.println(COLOR_RESET);
-        shell.printf("  values:\t\t\t%slist all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
-        shell.println(COLOR_RESET);
-    }
+    shell.printf("  info \t\t\t\t%slist all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
+    shell.println(COLOR_RESET);
+    shell.printf("  commands \t\t\t%slist all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
+    shell.println(COLOR_RESET);
+    shell.printf("  values \t\t\t%slist all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
+    shell.println(COLOR_RESET);
 
     for (const auto & cl : sorted_cmds) {
         // find and print the description

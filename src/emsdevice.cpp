@@ -1080,7 +1080,8 @@ void EMSdevice::generate_values_web_customization(JsonArray output) {
         auto fullname = Helpers::translated_word(dv.fullname);
         if (dv.type != DeviceValueType::CMD) {
             if (fullname) {
-                obj["n"] = dv.has_tag() ? std::string(tag_to_string(dv.tag)) + " " + fullname : fullname; // prefix tag
+                // obj["n"] = dv.has_tag() ? std::string(tag_to_string(dv.tag)) + " " + fullname : fullname; // prefix tag
+                obj["n"] = fullname;
 
                 // TAG https://github.com/emsesp/EMS-ESP32/issues/1338
                 // obj["n"] = (dv.has_tag()) ? fullname + " " + tag_to_string(dv.tag) : fullname; // suffix tag
@@ -1094,7 +1095,9 @@ void EMSdevice::generate_values_web_customization(JsonArray output) {
         } else {
             obj["n"] = "!" + std::string(fullname); // prefix commands with a !
         }
-
+        if (dv.has_tag()) {
+            obj["t"] = tag_to_string(dv.tag);
+        }
         obj["m"] = dv.state >> 4; // send back the mask state. We're only interested in the high nibble
         obj["w"] = dv.has_cmd;    // if writable
 
@@ -1681,7 +1684,7 @@ bool EMSdevice::generate_values(JsonObject output, const int8_t tag_filter, cons
             }
 
             // do not overwrite
-            if (json[name].is<const char *>()) {
+            if (json[name].is<JsonVariantConst>()) {
 #if defined(EMSESP_DEBUG)
                 EMSESP::logger().debug("warning: double json key: %s", name);
 #endif
