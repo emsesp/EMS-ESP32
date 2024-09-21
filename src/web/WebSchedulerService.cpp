@@ -40,7 +40,7 @@ void WebSchedulerService::begin() {
     Mqtt::subscribe(EMSdevice::DeviceType::SCHEDULER, topic, nullptr); // use empty function callback
 #ifndef EMSESP_STANDALONE
     if (EMSESP::system_.PSram()) {
-        xTaskCreate((TaskFunction_t)scheduler_task, "scheduler_task", 4096, NULL, 1, NULL);
+        xTaskCreate((TaskFunction_t)scheduler_task, "scheduler_task", 5120, NULL, 1, NULL);
     }
 #endif
 }
