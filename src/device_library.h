@@ -181,7 +181,7 @@
 
 // Gateways - 0x48
 {189, DeviceType::GATEWAY, "KM200/MB LAN 2", DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{252, DeviceType::GATEWAY, "MX300", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{252, DeviceType::GATEWAY, "K30RF/MX300", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Generic - 0x40 or other with no product-id and no version
 {0, DeviceType::GENERIC, "unknown", DeviceFlags::EMS_DEVICE_FLAG_NONE}
