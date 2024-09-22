@@ -24,7 +24,7 @@
  */
 
 // Boilers - 0x08
-{  8, DeviceType::BOILER, "CS6800i/WLW176i", DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
+{  8, DeviceType::BOILER, "CS5800i/CS6800i/WLW176i", DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
 { 12, DeviceType::BOILER, "C1200W", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 64, DeviceType::BOILER, "BK13/BK15/Smartline/GB1x2", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 72, DeviceType::BOILER, "GB125/GB135/MC10", DeviceFlags::EMS_DEVICE_FLAG_EMS},
@@ -181,7 +181,7 @@
 
 // Gateways - 0x48
 {189, DeviceType::GATEWAY, "KM200/MB LAN 2", DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{252, DeviceType::GATEWAY, "MX300", DeviceFlags::EMS_DEVICE_FLAG_NONE},
+{252, DeviceType::GATEWAY, "K30RF/MX300", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Generic - 0x40 or other with no product-id and no version
 {0, DeviceType::GENERIC, "unknown", DeviceFlags::EMS_DEVICE_FLAG_NONE}
