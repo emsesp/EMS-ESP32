@@ -148,10 +148,10 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
                 const char * device_p     = device_s;
                 const char * data_p       = nullptr;
                 strlcpy(device_s, d, device_end - d + 1);
-                data_p              = device_end + 1;
-                int8_t  id_d        = -1;
-                uint8_t device_type = EMSdevice::device_name_2_device_type(device_p);
-                if (device_type >= EMSdevice::DeviceType::BOILER) {
+                data_p               = device_end + 1;
+                int8_t  id_d         = -1;
+                uint8_t device_type1 = EMSdevice::device_name_2_device_type(device_p);
+                if (device_type1 >= EMSdevice::DeviceType::BOILER) {
                     data_p = parse_command_string(data_p, id_d);
                 }
                 if (data_p == nullptr) {
@@ -161,17 +161,17 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
                 char data_s[COMMAND_MAX_LENGTH];
                 strlcpy(data_s, Helpers::toLower(data_p).c_str(), 30);
                 if (strstr(data_s, "/value") == nullptr) {
-                    strcat(data_s, "/value");
+                    strlcat(data_s, "/value", sizeof(data_s) - 6);
                 }
 
-                if (Command::call(device_type, data_s, "", true, id_d, output) != CommandRet::OK) {
+                if (Command::call(device_type1, data_s, "", true, id_d, output) != CommandRet::OK) {
                     return CommandRet::INVALID;
                 }
 
-                const char * api_data = output["api_data"];
-                if (api_data) {
+                if (output["api_data"].is<std::string>()) {
+                    std::string api_data = output["api_data"];
                     output.clear();
-                    return Command::call(device_type, command_p, api_data, is_admin, id_n, output);
+                    return Command::call(device_type, command_p, api_data.c_str(), is_admin, id_n, output);
                 }
 
                 return CommandRet::INVALID;
