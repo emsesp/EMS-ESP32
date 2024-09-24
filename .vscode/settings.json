@@ -92,5 +92,9 @@
       "ini",
       "makefile"
     ],
-    "typescript.preferences.preferTypeOnlyAutoImports": true
+    "typescript.preferences.preferTypeOnlyAutoImports": true,
+    "sonarlint.connectedMode.project": {
+      "connectionId": "emsesp",
+      "projectKey": "emsesp_EMS-ESP32"
+    }
   }
