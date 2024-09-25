@@ -106,7 +106,7 @@ class TemperatureSensor {
         return (!sensors_.empty());
     }
 
-    size_t no_sensors() {
+    size_t count_entities() {
         return sensors_.size();
     }
 

@@ -320,9 +320,10 @@ bool WebCustomEntityService::get_value_info(JsonObject output, const char * cmd)
 
 // build the json for specific entity
 void WebCustomEntityService::get_value_json(JsonObject output, const CustomEntityItem & entity) {
-    output["name"]    = entity.name;
-    output["storage"] = entity.ram ? "ram" : "ems";
-    output["type"]    = entity.value_type == DeviceValueType::BOOL ? "boolean" : entity.value_type == DeviceValueType::STRING ? "string" : F_(number);
+    output["name"]     = entity.name;
+    output["fullname"] = entity.name;
+    output["storage"]  = entity.ram ? "ram" : "ems";
+    output["type"]     = entity.value_type == DeviceValueType::BOOL ? "boolean" : entity.value_type == DeviceValueType::STRING ? "string" : F_(number);
     if (entity.uom > 0) {
         output["uom"] = EMSdevice::uom_to_string(entity.uom);
     }
@@ -466,15 +467,6 @@ uint8_t WebCustomEntityService::count_entities() {
         if (output[entity.name].is<JsonVariantConst>() || entity.writeable) {
             count++;
         }
-    }
-
-    return count;
-}
-
-uint8_t WebCustomEntityService::has_commands() {
-    uint8_t count = 0;
-    for (const CustomEntityItem & entity : *customEntityItems_) {
-        count += entity.writeable ? 1 : 0;
     }
 
     return count;

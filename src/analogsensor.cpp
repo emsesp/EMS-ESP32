@@ -665,11 +665,15 @@ bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int
 }
 
 void AnalogSensor::get_value_json(JsonObject output, const Sensor & sensor) {
+    output["name"]      = sensor.name();
+    output["fullname"]  = sensor.name();
     output["gpio"]      = sensor.gpio();
     output["type"]      = F_(number);
     output["analog"]    = FL_(list_sensortype)[sensor.type()];
     output["value"]     = sensor.value();
+    output["readable"]  = true;
     output["writeable"] = sensor.type() == AnalogType::COUNTER || (sensor.type() >= AnalogType::DIGITAL_OUT && sensor.type() <= AnalogType::PWM_2);
+    output["visible"]   = true;
     if (sensor.type() == AnalogType::COUNTER) {
         output["min"]         = 0;
         output["max"]         = 4000000;

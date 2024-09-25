@@ -178,8 +178,9 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
 
 // build the json for specific entity
 void WebSchedulerService::get_value_json(JsonObject output, const ScheduleItem & scheduleItem) {
-    output["name"] = scheduleItem.name;
-    output["type"] = "boolean";
+    output["name"]     = scheduleItem.name;
+    output["fullname"] = scheduleItem.name;
+    output["type"]     = "boolean";
     if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
         output["value"] = scheduleItem.active;
     } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
@@ -299,18 +300,15 @@ void WebSchedulerService::publish(const bool force) {
     }
 }
 
-bool WebSchedulerService::has_commands() {
-    if (scheduleItems_->size() == 0) {
-        return false;
-    }
-
+// count number of entries, default: only named items
+uint8_t WebSchedulerService::count_entities(bool cmd_only) {
+    uint8_t count = 0;
     for (const ScheduleItem & scheduleItem : *scheduleItems_) {
-        if (!scheduleItem.name.empty()) {
-            return true;
+        if (!scheduleItem.name.empty() || !cmd_only) {
+            count++;
         }
     }
-
-    return false;
+    return count;
 }
 
 #include "shuntingYard.hpp"

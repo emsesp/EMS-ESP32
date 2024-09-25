@@ -380,8 +380,9 @@ bool TemperatureSensor::get_value_info(JsonObject output, const char * cmd, cons
 }
 
 void TemperatureSensor::get_value_json(JsonObject output, const Sensor & sensor) {
-    output["id"]   = sensor.id();
-    output["name"] = sensor.name();
+    output["id"]       = sensor.id();
+    output["name"]     = sensor.name();
+    output["fullname"] = sensor.name();
     if (Helpers::hasValue(sensor.temperature_c)) {
         char val[10];
         output["value"] = serialized(Helpers::render_value(val, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
@@ -389,7 +390,9 @@ void TemperatureSensor::get_value_json(JsonObject output, const Sensor & sensor)
 
     output["type"]      = F_(number);
     output["uom"]       = EMSdevice::uom_to_string(DeviceValueUOM::DEGREES);
+    output["readable"]  = true;
     output["writeable"] = false;
+    output["visible"]   = true;
 }
 
 
