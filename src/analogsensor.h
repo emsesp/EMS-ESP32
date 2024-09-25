@@ -153,7 +153,7 @@ class AnalogSensor {
         return (!sensors_.empty());
     }
 
-    size_t no_sensors() const {
+    size_t count_entities() const {
         return sensors_.size();
     }
 

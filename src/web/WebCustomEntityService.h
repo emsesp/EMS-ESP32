@@ -67,7 +67,6 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
     void generate_value_web(JsonObject output);
 
     uint8_t count_entities();
-    uint8_t has_commands();
     void    ha_reset() {
         ha_registered_ = false;
     }

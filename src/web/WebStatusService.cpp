@@ -51,8 +51,8 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     root["bus_status"]     = EMSESP::bus_status(); // 0, 1 or 2
     root["bus_uptime"]     = EMSbus::bus_uptime();
     root["num_devices"]    = EMSESP::count_devices();
-    root["num_sensors"]    = EMSESP::temperaturesensor_.no_sensors();
-    root["num_analogs"]    = EMSESP::analogsensor_.no_sensors();
+    root["num_sensors"]    = EMSESP::temperaturesensor_.count_entities();
+    root["num_analogs"]    = EMSESP::analogsensor_.count_entities();
     root["free_heap"]      = EMSESP::system_.getHeapMem();
     root["uptime"]         = uuid::get_uptime_sec();
     root["mqtt_status"]    = EMSESP::mqtt_.connected();

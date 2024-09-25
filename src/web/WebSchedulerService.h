@@ -65,14 +65,14 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
     void loop();
     void publish_single(const char * name, const bool state);
     void publish(const bool force = false);
-    bool has_commands();
     bool command_setvalue(const char * value, const int8_t id, const char * name);
     bool get_value_info(JsonObject output, const char * cmd);
     void get_value_json(JsonObject output, const ScheduleItem & scheduleItem);
     void ha_reset() {
         ha_registered_ = false;
     }
-    bool onChange(const char * cmd);
+    uint8_t count_entities(bool cmd_only = false);
+    bool    onChange(const char * cmd);
 
 #if defined(EMSESP_TEST)
     void test();
