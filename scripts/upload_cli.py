@@ -19,8 +19,10 @@ from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
 from tqdm import tqdm
 from termcolor import cprint
 
+
 def print_success(x): return cprint(x, 'green')
 def print_fail(x): return cprint(x, 'red')
+
 
 def upload(file, ip, username, password):
 
@@ -32,7 +34,7 @@ def upload(file, ip, username, password):
     emsesp_url = "http://" + f'{ip}'
     parsed_url = urlparse(emsesp_url)
     host_ip = parsed_url.netloc
-    
+
     signon_url = f"{emsesp_url}/rest/signIn"
 
     signon_headers = {
@@ -51,10 +53,12 @@ def upload(file, ip, username, password):
         "password": password
     }
 
-    response = requests.post(signon_url, json=username_password, headers=signon_headers, auth=None)
-        
+    response = requests.post(
+        signon_url, json=username_password, headers=signon_headers, auth=None)
+
     if response.status_code != 200:
-        print_fail("Authentication failed (code " + str(response.status_code) + ")")
+        print_fail("Authentication failed (code " +
+                   str(response.status_code) + ")")
         return
 
     print_success("Authentication successful")
@@ -63,7 +67,7 @@ def upload(file, ip, username, password):
     # start the upload
     with open(file, 'rb') as firmware:
         md5 = hashlib.md5(firmware.read()).hexdigest()
-       
+
         firmware.seek(0)
 
         encoder = MultipartEncoder(fields={
@@ -79,7 +83,8 @@ def upload(file, ip, username, password):
                    unit_divisor=1024
                    )
 
-        monitor = MultipartEncoderMonitor(encoder, lambda monitor: bar.update(monitor.bytes_read - bar.n))
+        monitor = MultipartEncoderMonitor(
+            encoder, lambda monitor: bar.update(monitor.bytes_read - bar.n))
 
         post_headers = {
             'Host': host_ip,
@@ -97,8 +102,9 @@ def upload(file, ip, username, password):
 
         upload_url = f"{emsesp_url}/rest/uploadFile"
 
-        response = requests.post(upload_url, data=monitor, headers=post_headers, auth=None)
-        
+        response = requests.post(
+            upload_url, data=monitor, headers=post_headers, auth=None)
+
         bar.close()
         time.sleep(0.1)
 
@@ -120,16 +126,21 @@ def upload(file, ip, username, password):
             restart_url = f"{emsesp_url}/api/system/restart"
             response = requests.get(restart_url, headers=restart_headers)
             if response.status_code != 200:
-                print_fail("Restart failed (code " + str(response.status_code) + ")")
+                print_fail("Restart failed (code " +
+                           str(response.status_code) + ")")
 
         print()
 
+
 # main
 parser = argparse.ArgumentParser(description="EMS-ESP Firmware Upload")
-parser.add_argument("-f", "--file", metavar="FILE", required=True, type=str, help="firmware file")
-parser.add_argument("-i", "--ip", metavar="IP", type=str, default="ems-esp.local", help="IP address of EMS-ESP")
-parser.add_argument("-u", "--username", metavar="USERNAME", type=str, default="admin", help="admin user")
-parser.add_argument("-p", "--password", metavar="PASSWORD", type=str, default="admin", help="admin password")
+parser.add_argument("-f", "--file", metavar="FILE",
+                    required=True, type=str, help="firmware file")
+parser.add_argument("-i", "--ip", metavar="IP", type=str,
+                    default="ems-esp.local", help="IP address of EMS-ESP")
+parser.add_argument("-u", "--username", metavar="USERNAME",
+                    type=str, default="admin", help="admin user")
+parser.add_argument("-p", "--password", metavar="PASSWORD",
+                    type=str, default="admin", help="admin password")
 args = parser.parse_args()
 upload(**vars(args))
-

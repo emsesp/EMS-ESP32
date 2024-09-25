@@ -192,10 +192,12 @@ for entity in entities:
 
     # set size for string entities
     if entity["modbus count"] == "0" and entity_dev_name in string_sizes:
-        entity["modbus count"] = -(-string_sizes[entity_dev_name] // 2)  # divide and round up
+        entity["modbus count"] = - \
+            (-string_sizes[entity_dev_name] // 2)  # divide and round up
 
     if int(entity["modbus count"]) <= 0:
-        raise Exception('Entity "' + entity_shortname + '" does not have a size - string sizes need to be added manually to update_modbus_registers.py')
+        raise Exception('Entity "' + entity_shortname +
+                        '" does not have a size - string sizes need to be added manually to update_modbus_registers.py')
 
     #    if entity["modbus count"] == "0":
     #        print("ignoring " + entity_dev_name + " - it has a register length of zero")
@@ -254,7 +256,8 @@ for device_type_name in device_type_names:
                 for entity_name, modbus_info in sorted(entities.items(), key=lambda x: int(x[1]["modbus offset"])):
                     params = {
                         'devtype': "dt::" + device_type_name,
-                        "tagtype": tag_to_tagtype[int(tag)],  # re.sub(r"[0-9]+", "*", tag),
+                        # re.sub(r"[0-9]+", "*", tag),
+                        "tagtype": tag_to_tagtype[int(tag)],
                         "shortname": 'FL_(' + listNames[entity_name] + ")",
                         "entity_name": entity_name,
                         'registeroffset': modbus_info["modbus offset"],

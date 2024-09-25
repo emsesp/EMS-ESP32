@@ -10,4 +10,4 @@ with fileinput.input() as f_input:
         elif line.startswith('---- CSV END ----'):
             inRecordingMode = False
         else:
-            print(line, end="") 
+            print(line, end="")

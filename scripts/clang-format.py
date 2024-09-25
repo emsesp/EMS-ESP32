@@ -3,6 +3,7 @@
 # copied from esphome
 # run from Linux using ./scripts/clang-forrmat.py
 
+from helpers import get_output, src_files, filter_changed
 import argparse
 import multiprocessing
 import os
@@ -14,7 +15,7 @@ import threading
 import click
 
 sys.path.append(os.path.dirname(__file__))
-from helpers import get_output, src_files, filter_changed
+
 
 def run_format(args, queue, lock, failed_files):
     """Takes filenames out of queue and runs clang-format on them."""
@@ -27,11 +28,13 @@ def run_format(args, queue, lock, failed_files):
             invocation.extend(['--dry-run', '-Werror'])
         invocation.append(path)
 
-        proc = subprocess.run(invocation, capture_output=True, encoding='utf-8')
+        proc = subprocess.run(
+            invocation, capture_output=True, encoding='utf-8')
         if proc.returncode != 0:
             with lock:
                 print()
-                print("\033[0;32m************* File \033[1;32m{}\033[0m".format(path))
+                print(
+                    "\033[0;32m************* File \033[1;32m{}\033[0m".format(path))
                 print(proc.stdout)
                 print(proc.stderr)
                 print()
@@ -41,6 +44,7 @@ def run_format(args, queue, lock, failed_files):
 
 def progress_bar_show(value):
     return value if value is not None else ''
+
 
 def main():
     parser = argparse.ArgumentParser()

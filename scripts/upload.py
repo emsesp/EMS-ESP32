@@ -10,7 +10,7 @@
 #  custom_emsesp_ip = ems-esp.local
 #  custom_username = admin
 #  custom_password = admin
-# 
+#
 # and
 #  extra_scripts = scripts/upload.py
 #
@@ -33,16 +33,19 @@ except ImportError:
     from tqdm import tqdm
     from termcolor import cprint
 
+
 def print_success(x): return cprint(x, 'green')
 def print_fail(x): return cprint('Error: '+x, 'red')
+
 
 def on_upload(source, target, env):
 
     # make sure we have set the upload_protocol to custom
     if env.get('UPLOAD_PROTOCOL') != 'custom':
-        print_fail("Please set upload_protocol = custom in your pio_local.ini file when using upload.py")
+        print_fail(
+            "Please set upload_protocol = custom in your pio_local.ini file when using upload.py")
         return
-    
+
     # first check authentication
     try:
         username = env.GetProjectOption('custom_username')
@@ -51,12 +54,11 @@ def on_upload(source, target, env):
     except:
         print_fail('Missing settings. Add these to your pio_local.ini file: \n\ncustom_username=username\ncustom_password=password\ncustom_emsesp_ip=ems-esp.local\n')
         return
-    
 
     emsesp_url = "http://" + env.GetProjectOption('custom_emsesp_ip')
     parsed_url = urlparse(emsesp_url)
     host_ip = parsed_url.netloc
-    
+
     signon_url = f"{emsesp_url}/rest/signIn"
 
     signon_headers = {
@@ -75,10 +77,12 @@ def on_upload(source, target, env):
         "password": password
     }
 
-    response = requests.post(signon_url, json=username_password, headers=signon_headers)
-        
+    response = requests.post(
+        signon_url, json=username_password, headers=signon_headers)
+
     if response.status_code != 200:
-        print_fail("Authentication with EMS-ESP failed (code " + str(response.status_code) + ")")
+        print_fail("Authentication with EMS-ESP failed (code " +
+                   str(response.status_code) + ")")
         return
 
     print_success("Authentication with EMS-ESP successful")
@@ -89,7 +93,7 @@ def on_upload(source, target, env):
 
     with open(firmware_path, 'rb') as firmware:
         md5 = hashlib.md5(firmware.read()).hexdigest()
-       
+
         firmware.seek(0)
 
         encoder = MultipartEncoder(fields={
@@ -105,7 +109,8 @@ def on_upload(source, target, env):
                    unit_divisor=1024
                    )
 
-        monitor = MultipartEncoderMonitor(encoder, lambda monitor: bar.update(monitor.bytes_read - bar.n))
+        monitor = MultipartEncoderMonitor(
+            encoder, lambda monitor: bar.update(monitor.bytes_read - bar.n))
 
         post_headers = {
             'Host': host_ip,
@@ -123,13 +128,14 @@ def on_upload(source, target, env):
 
         upload_url = f"{emsesp_url}/rest/uploadFile"
 
-        response = requests.post(upload_url, data=monitor, headers=post_headers)
-        
+        response = requests.post(
+            upload_url, data=monitor, headers=post_headers)
+
         bar.close()
         time.sleep(0.1)
-        
+
         print()
-        
+
         if response.status_code != 200:
             print_fail("Upload failed (code " + response.status.code + ").")
         else:
@@ -148,8 +154,10 @@ def on_upload(source, target, env):
             restart_url = f"{emsesp_url}/api/system/restart"
             response = requests.get(restart_url, headers=restart_headers)
             if response.status_code != 200:
-                print_fail("Restart failed (code " + str(response.status_code) + ")")
+                print_fail("Restart failed (code " +
+                           str(response.status_code) + ")")
 
         print()
+
 
 env.Replace(UPLOADCMD=on_upload)
