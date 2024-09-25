@@ -26,6 +26,7 @@ const it: Translation = {
   ENTITIES: 'entità',
   REFRESH: 'Ricaricare',
   EXPORT: 'Esporta',
+  FAVORITES: "Preferiti", // TODO Translate
   DEVICE_DETAILS: 'Dettagli dispositivo',
   ID_OF: '{0} ID',
   DEVICE: 'Dispositivo',

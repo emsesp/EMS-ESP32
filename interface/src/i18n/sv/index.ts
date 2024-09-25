@@ -26,6 +26,7 @@ const sv: Translation = {
   ENTITIES: 'entiteter',
   REFRESH: 'Uppdatera',
   EXPORT: 'Exportera',
+  FAVORITES: "Favoriter", // TODO translate
   DEVICE_DETAILS: 'Enhetsdetaljer',
   ID_OF: '{0}-ID',
   DEVICE: 'Enhets',

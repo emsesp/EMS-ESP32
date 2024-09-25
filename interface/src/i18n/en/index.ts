@@ -26,6 +26,7 @@ const en: Translation = {
   ENTITIES: 'entities',
   REFRESH: 'Refresh',
   EXPORT: 'Export',
+  FAVORITES: "Favorites",
   DEVICE_DETAILS: 'Device Details',
   ID_OF: '{0} ID',
   DEVICE: 'Device',
