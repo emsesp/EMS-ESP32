@@ -5,6 +5,7 @@ Import("env")
 
 OUTPUT_DIR = "build{}".format(os.path.sep)
 
+
 def move_file(source, target, env):
 
     # get the build info
@@ -53,8 +54,9 @@ def move_file(source, target, env):
     print("Renaming file to "+bin_file)
 
     shutil.copy(str(target[0]), bin_file)
-    
+
     print("Executing file")
     os.system(bin_file)
+
 
 env.AddPostAction("$BUILD_DIR/${PROGNAME}", [move_file])

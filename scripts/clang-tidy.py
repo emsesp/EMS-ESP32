@@ -3,6 +3,8 @@
 # copied from esphome
 # run from Linux using ./scripts/clang-forrmat.py
 
+from helpers import shlex_quote, get_output, \
+    build_all_include, temp_header_file, filter_changed, load_idedata, src_files
 import argparse
 import multiprocessing
 import os
@@ -16,8 +18,7 @@ import click
 import pexpect
 
 sys.path.append(os.path.dirname(__file__))
-from helpers import shlex_quote, get_output, \
-    build_all_include, temp_header_file, filter_changed, load_idedata, src_files
+
 
 def clang_options(idedata):
     cmd = [
@@ -46,6 +47,7 @@ def clang_options(idedata):
 
     return cmd
 
+
 def run_tidy(args, options, tmpdir, queue, lock, failed_files):
     while True:
         path = queue.get()
@@ -73,19 +75,23 @@ def run_tidy(args, options, tmpdir, queue, lock, failed_files):
         if rc != 0:
             with lock:
                 print()
-                print("\033[0;32m************* File \033[1;32m{}\033[0m".format(path))
+                print(
+                    "\033[0;32m************* File \033[1;32m{}\033[0m".format(path))
                 print(output)
                 print()
                 failed_files.append(path)
         queue.task_done()
 
+
 def progress_bar_show(value):
     if value is None:
         return ''
 
+
 def split_list(a, n):
     k, m = divmod(len(a), n)
     return [a[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n)]
+
 
 def main():
     parser = argparse.ArgumentParser()

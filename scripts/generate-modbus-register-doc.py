@@ -59,6 +59,7 @@ with fileinput.input() as f_input:
             entity[headers[i]] = val
         entities.append(entity)
 
+
 def device_name_key(e): return e["device name"]
 
 

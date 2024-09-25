@@ -1437,12 +1437,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^22.6.1":
+"@types/node@npm:*":
   version: 22.6.1
   resolution: "@types/node@npm:22.6.1"
   dependencies:
     undici-types: "npm:~6.19.2"
   checksum: 10c0/79fdb14f268070eb21d25f3e81811b73c10dfcc65a638a6546fd97aa3e7dfe473f31a547fd21c43b8559a435b6ab26057066a47b5453bd1b1cdffe14430ac399
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^22.7.0":
+  version: 22.7.0
+  resolution: "@types/node@npm:22.7.0"
+  dependencies:
+    undici-types: "npm:~6.19.2"
+  checksum: 10c0/127b1ac3eebe8c2b09e3d2de277ee906710c4908b4573cde23b9c7cec1cb1aaf1af8bdabbccdac08d005f820b770e7447b22c8eb56ca63344f4d2e26bcdc29fb
   languageName: node
   linkType: hard
 
@@ -1499,13 +1508,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:^18.3.8":
+"@types/react@npm:*":
   version: 18.3.8
   resolution: "@types/react@npm:18.3.8"
   dependencies:
     "@types/prop-types": "npm:*"
     csstype: "npm:^3.0.2"
   checksum: 10c0/367312c9fe276639ecb142265e090a4dd04bb39f8d718cbab546de3f1ddcfddeff415e1147d0fc40f734badaa7420b7b109d511bd4304b2c4c9c36164612fdf8
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:^18.3.9":
+  version: 18.3.9
+  resolution: "@types/react@npm:18.3.9"
+  dependencies:
+    "@types/prop-types": "npm:*"
+    csstype: "npm:^3.0.2"
+  checksum: 10c0/a92b8e061d0c833e096254782c56a802316593f4a907fb834b557cabe848a0829b9eb6056404ea239eb4d5ec5ac7b7724309761516c0a7a277916fa04dd4f805
   languageName: node
   linkType: hard
 
@@ -1659,8 +1678,8 @@ __metadata:
     "@table-library/react-table-library": "npm:4.1.7"
     "@trivago/prettier-plugin-sort-imports": "npm:^4.3.0"
     "@types/formidable": "npm:^3"
-    "@types/node": "npm:^22.6.1"
-    "@types/react": "npm:^18.3.8"
+    "@types/node": "npm:^22.7.0"
+    "@types/react": "npm:^18.3.9"
     "@types/react-dom": "npm:^18.3.0"
     "@types/react-router-dom": "npm:^5.3.3"
     alova: "npm:3.0.16"
@@ -1671,7 +1690,7 @@ __metadata:
     formidable: "npm:^3.5.1"
     jwt-decode: "npm:^4.0.0"
     mime-types: "npm:^2.1.35"
-    preact: "npm:^10.24.0"
+    preact: "npm:^10.24.1"
     prettier: "npm:^3.3.3"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
@@ -1683,7 +1702,7 @@ __metadata:
     typesafe-i18n: "npm:^5.26.2"
     typescript: "npm:^5.6.2"
     typescript-eslint: "npm:8.7.0"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.8"
     vite-plugin-imagemin: "npm:^0.6.1"
     vite-tsconfig-paths: "npm:^5.0.1"
   languageName: unknown
@@ -5591,10 +5610,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"preact@npm:^10.24.0":
-  version: 10.24.0
-  resolution: "preact@npm:10.24.0"
-  checksum: 10c0/09d490d2326c511e205a96f81db0adf05f1b42dbe2a39be6fc494662c7476575494e96140252f351a0e3b3d15aee5b079bf963865bb01287f69c45c6755ed22e
+"preact@npm:^10.24.1":
+  version: 10.24.1
+  resolution: "preact@npm:10.24.1"
+  checksum: 10c0/f9bc8b2f88d340f1b8f854208889244059c46916449b8f8f2174fcacbc0904c445c5870896fb0cfeaf442eeade975857e8e03f0785135c41d63cd32d9414c9c6
   languageName: node
   linkType: hard
 
@@ -6983,9 +7002,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^5.4.7":
-  version: 5.4.7
-  resolution: "vite@npm:5.4.7"
+"vite@npm:^5.4.8":
+  version: 5.4.8
+  resolution: "vite@npm:5.4.8"
   dependencies:
     esbuild: "npm:^0.21.3"
     fsevents: "npm:~2.3.3"
@@ -7022,7 +7041,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10c0/0ca7ca60f71c61f3855bbabf7e33909bec32933b35914d4d281813c728183e78e7ce5be05735a7671df3a994613d3881f520a32a80715faa92effb28deee9320
+  checksum: 10c0/af70af6d6316a3af71f44ebe3ab343bd66450d4157af73af3b32239e1b6ec43ff6f651d7cc4193b21ed3bff2e9356a3de9e96aee53857f39922e4a2d9fad75a1
   languageName: node
   linkType: hard
 
