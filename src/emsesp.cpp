@@ -1731,7 +1731,8 @@ void EMSESP::start_serial_console() {
 void EMSESP::shell_prompt() {
 #ifndef EMSESP_STANDALONE
     serial_console_.println();
-    serial_console_.println("Press CTRL-C to activate this serial console");
+    serial_console_.printf("EMS-ESP %s: press CTRL-C to activate this serial console", EMSESP_APP_VERSION);
+    serial_console_.println();
 #endif
 }
 
