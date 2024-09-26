@@ -26,6 +26,7 @@ const pl: BaseTranslation = {
   ENTITIES: 'encj{{i|a|e|e|i}}',
   REFRESH: 'Odśwież',
   EXPORT: 'Eksportuj',
+  FAVORITES: "Ulubione", // TODO Translate
   DEVICE_DETAILS: 'Szczegóły urządzenia',
   ID_OF: 'ID {0}',
   DEVICE: 'urządzenia',

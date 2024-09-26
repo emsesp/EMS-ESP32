@@ -26,6 +26,7 @@ const fr: Translation = {
   ENTITIES: 'entités',
   REFRESH: 'Rafraîchir',
   EXPORT: 'Exporter',
+  FAVORITES: "Favoris", // TODO translate
   DEVICE_DETAILS: "Détails de l'appareil",
   ID_OF: 'ID {0}',
   DEVICE: 'Appareil',

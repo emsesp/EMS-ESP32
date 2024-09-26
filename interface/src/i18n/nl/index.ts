@@ -26,6 +26,7 @@ const nl: Translation = {
   ENTITIES: 'entiteiten',
   REFRESH: 'Ververs',
   EXPORT: 'Export',
+  FAVORITES: "Favorieten", // TODO Translate
   DEVICE_DETAILS: 'Device Gegevens',
   ID_OF: '{0} ID',
   DEVICE: 'Apparaat',

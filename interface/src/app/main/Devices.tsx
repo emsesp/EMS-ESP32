@@ -667,7 +667,7 @@ const Devices = () => {
                   <DownloadIcon color="primary" sx={{ fontSize: 18 }} />
                 </IconButton>
               </ButtonTooltip>
-              <ButtonTooltip title="Favorites">
+              <ButtonTooltip title={LL.FAVORITES()}>
                 <IconButton onClick={() => setOnlyFav(!onlyFav)}>
                   {onlyFav ? (
                     <StarIcon color="primary" sx={{ fontSize: 18 }} />

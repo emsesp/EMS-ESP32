@@ -26,6 +26,7 @@ const de: Translation = {
   ENTITIES: 'Entitäten',
   REFRESH: 'Aktualisieren',
   EXPORT: 'Exportieren',
+  FAVORITES: "Favoriten",
   DEVICE_DETAILS: 'Gerätedetails',
   ID_OF: '{0}-ID',
   DEVICE: 'Geräte',

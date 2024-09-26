@@ -26,6 +26,7 @@ const tr: Translation = {
   ENTITIES: 'varlıklar',
   REFRESH: 'Yenile',
   EXPORT: 'Dışarı al',
+  FAVORITES: "Favoriler", // TODO translate
   DEVICE_DETAILS: 'Cihaz Ayrıntıları',
   ID_OF: 'Kimlik {0}',
   DEVICE: 'Cihaz',

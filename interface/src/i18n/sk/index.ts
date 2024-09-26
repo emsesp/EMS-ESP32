@@ -26,6 +26,7 @@ const sk: Translation = {
   ENTITIES: 'entity',
   REFRESH: 'Obnoviť',
   EXPORT: 'Export',
+  FAVORITES: "Obľúbené", // TODO translate
   DEVICE_DETAILS: 'Detaily zariadenia',
   ID_OF: '{0} ID',
   DEVICE: 'Zariadenie',
