@@ -159,7 +159,7 @@ const nl: Translation = {
   HELP_INFORMATION_2: 'Voor de live community ga naar de Discord server',
   HELP_INFORMATION_3: 'Om een nieuwe feature te vragen of een bug te rapporteren',
   HELP_INFORMATION_4: 'Zorg dat je ook je systeem details zijn toevoeged voor een sneller antwoord',
-  HELP_INFORMATION_5: 'EMS-ESP is een gratis en open source project. Steun ons met een Star op GitHub!',
+  HELP_INFORMATION_5: 'For help and questions please contact your installer.', // TODO translate
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
   INSTALL: 'Installeren {0}',
