@@ -57,7 +57,7 @@
     "formidable": "^3.5.1",
     "prettier": "^3.3.3",
     "rollup-plugin-visualizer": "^5.12.0",
-    "terser": "^5.33.0",
+    "terser": "^5.34.0",
     "typescript-eslint": "8.7.0",
     "vite": "^5.4.8",
     "vite-plugin-imagemin": "^0.6.1",
