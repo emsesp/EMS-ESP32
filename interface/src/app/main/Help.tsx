@@ -155,7 +155,7 @@ const Help = () => {
 
         <Typography color="white" variant="subtitle1" align="center" mt={1}>
           &copy;&nbsp;
-          <Link target="_blank" href="https://ems-esp.org" color="primary">
+          <Link target="_blank" href="https://emsesp.org" color="primary">
             {'emsesp.org'}
           </Link>
         </Typography>
