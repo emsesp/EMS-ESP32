@@ -141,7 +141,7 @@ void WebLogService::show(Shell & shell) {
     }
 
     shell.println();
-    shell.printfln("Last Log (filtered by WebLog's level %s & buffer %d):", format_level_uppercase(log_level()), maximum_log_messages());
+    shell.printfln("Recent Log (level %s, max %d messages):", format_level_uppercase(log_level()), maximum_log_messages());
     shell.println();
 
     for (const auto & message : log_messages_) {

@@ -159,7 +159,7 @@ const de: Translation = {
   HELP_INFORMATION_2: 'Für einen Live-Community-Chat besuchen Sie unseren Discord-Server.',
   HELP_INFORMATION_3: 'Um neue Funktionen anzufragen oder Fehler zu melden, eröffnen Sie ein Issue auf GitHub.',
   HELP_INFORMATION_4: 'Bitte laden Sie die Systemdetails und hängen Sie sie an das Support-Issue an.',
-  HELP_INFORMATION_5: 'EMS-ESP ist ein freies Open-Source Projekt. Bitte unterstützen Sie die zukünftige Entwicklung mit einem Stern "star" auf GitHub!',
+  HELP_INFORMATION_5: 'For help and questions please contact your installer.', // TODO translate
   UPLOAD: 'Hochladen',
   DOWNLOAD: '{{H|h|h}}erunterladen',
   INSTALL: 'Installieren {0}',
