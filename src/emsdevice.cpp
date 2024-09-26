@@ -1460,12 +1460,15 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
     }
 
     // search device value with this tag
-    const char * attribute_s = Command::get_attribute(cmd);
+    // make a copy of cmd and split attribute (leave cmd untouched for other devices)
+    char cmd_s[COMMAND_MAX_LENGTH];
+    strlcpy(cmd_s, cmd, sizeof(cmd_s));
+    const char * attribute_s = Command::get_attribute(cmd_s);
     for (auto & dv : devicevalues_) {
-        if (cmd == Helpers::toLower(dv.short_name) && (tag <= 0 || tag == dv.tag)) {
+        if (cmd_s == Helpers::toLower(dv.short_name) && (tag <= 0 || tag == dv.tag)) {
             get_value_json(output, dv);
             // if we're filtering on an attribute, go find it
-            return Command::set_attribute(output, cmd, attribute_s);
+            return Command::set_attribute(output, cmd_s, attribute_s);
         }
     }
     return false; // not found, but don't return a message error yet
