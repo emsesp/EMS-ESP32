@@ -121,7 +121,7 @@ const de: Translation = {
   ENABLE_SHOWER_TIMER: 'Duschtimer aktivieren',
   ENABLE_SHOWER_ALERT: 'Duschalarm aktivieren',
   TRIGGER_TIME: 'Auslösezeit',
-  COLD_SHOT_DURATION: 'Kaltschussdauer',
+  COLD_SHOT_DURATION: 'Kaltwasserzugabe',
   FORMATTING_OPTIONS: 'Formatierungsoptionen',
   BOOLEAN_FORMAT_DASHBOARD: 'Boolsches Format für Web',
   BOOLEAN_FORMAT_API: 'Boolesches Format API/MQTT',
@@ -159,7 +159,7 @@ const de: Translation = {
   HELP_INFORMATION_2: 'Für einen Live-Community-Chat besuchen Sie unseren Discord-Server.',
   HELP_INFORMATION_3: 'Um neue Funktionen anzufragen oder Fehler zu melden, eröffnen Sie ein Issue auf GitHub.',
   HELP_INFORMATION_4: 'Bitte laden Sie die Systemdetails und hängen Sie sie an das Support-Issue an.',
-  HELP_INFORMATION_5: 'For help and questions please contact your installer.', // TODO translate
+  HELP_INFORMATION_5: 'Für Hilfe und Fragen wenden Sie sich bitte an Ihren Installateur.',
   UPLOAD: 'Hochladen',
   DOWNLOAD: '{{H|h|h}}erunterladen',
   INSTALL: 'Installieren {0}',
