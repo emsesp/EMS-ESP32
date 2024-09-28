@@ -75,7 +75,7 @@ MAKE_WORD_TRANSLATION(schedule_cmd, "enable schedule item", "Aktiviere Zeitplane
 MAKE_WORD_TRANSLATION(entity_cmd, "set custom value on ems", "Sende eigene Entitäten zu EMS", "verstuur custom waarde naar EMS", "", "wyślij własną wartość na EMS", "", "", "emp üzerinde özel değer ayarla", "imposta valori personalizzati su EMS", "nastaviť vlastnú hodnotu na ems") // TODO translate
 MAKE_WORD_TRANSLATION(commands_response, "get response", "Hole Antwort", "Verzoek om antwoord", "", "uzyskaj odpowiedź", "", "", "gelen cevap", "", "získať odpoveď") // TODO translate
 MAKE_WORD_TRANSLATION(coldshot_cmd, "send a cold shot of water", "Zugabe einer Menge kalten Wassers", "", "", "uruchom tryśnięcie zimnej wody", "", "", "soğuk su gönder", "", "pošlite studenú dávku vody") // TODO translate
-MAKE_WORD_TRANSLATION(allvalues_cmd, "output all values in system", "Alle Werte im System ausgeben", "", "", "wyświetl wszystkie wartości", "", "", "", "", "vypísať všetky hodnoty") // TODO translate
+MAKE_WORD_TRANSLATION(allvalues_cmd, "output all values in system", "Alle Werte im System ausgeben", "", "", "wyświetl wszystkie wartości", "", "", "", "", "vypísať všetky hodnoty") // TODO remove
 MAKE_WORD_TRANSLATION(message_cmd, "send a message", "Eine Nachricht senden", "", "", "", "", "", "", "", "poslať správu") // TODO translate
 MAKE_WORD_TRANSLATION(values_cmd, "list all values", "Liste alle Werte auf", "", "", "", "", "", "", "", "vypísať všetky hodnoty") // TODO translate
 

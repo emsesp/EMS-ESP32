@@ -27,10 +27,9 @@ namespace emsesp {
 WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * securityManager) {
     // GET
     server->on(EMSESP_SYSTEM_STATUS_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { systemStatus(request); });
-    server->on(EMSESP_EXPORT_DATA_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { exportData(request); });
 
-    // POST
-    server->on(EMSESP_CHECK_UPGRADE_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { checkUpgrade(request, json); });
+    // generic action - POST
+    server->on(EMSESP_ACTION_SERVICE_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { action(request, json); });
 }
 
 // /rest/systemStatus
@@ -146,13 +145,42 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     request->send(response);
 }
 
-// returns trues if there is an upgrade available
-void WebStatusService::checkUpgrade(AsyncWebServerRequest * request, JsonVariant json) {
+// generic action handler - as a POST
+void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json) {
     auto *     response = new AsyncJsonResponse();
     JsonObject root     = response->getRoot();
 
+    // get action and optional param
+    std::string action = json["action"];
+    std::string param  = json["param"]; // is optional
+
+    // TODO remove
+    Serial.printf("Action: %s\n", action.c_str());
+    Serial.printf("Param: %s\n", param.c_str());
+
+    bool ok = true;
+    if (action == "checkUpgrade") {
+        ok = checkUpgrade(root, param);
+    } else if (action == "export") {
+        ok = exportData(root, param);
+    } else if (action == "customSupport") {
+        ok = customSupport(root);
+    }
+
+    // send response
+    if (!ok) {
+        request->send(400);
+        return;
+    }
+
+    response->setLength();
+    request->send(response);
+}
+
+
+// returns true if there is an upgrade available
+bool WebStatusService::checkUpgrade(JsonObject root, std::string & latest_version) {
     version::Semver200_version settings_version(EMSESP_APP_VERSION);
-    const std::string          latest_version = json["version"] | EMSESP_APP_VERSION;
     version::Semver200_version this_version(latest_version);
 
 #if defined(EMSESP_DEBUG)
@@ -161,16 +189,11 @@ void WebStatusService::checkUpgrade(AsyncWebServerRequest * request, JsonVariant
 
     root["upgradeable"] = (this_version > settings_version);
 
-    response->setLength();
-    request->send(response);
+    return true;
 }
 
 // returns data for a specific feature/settings as a json object
-void WebStatusService::exportData(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse();
-    JsonObject root     = response->getRoot();
-
-    String type  = request->getParam("type")->value();
+bool WebStatusService::exportData(JsonObject root, std::string & type) {
     root["type"] = type;
 
     if (type == "settings") {
@@ -189,12 +212,15 @@ void WebStatusService::exportData(AsyncWebServerRequest * request) {
     } else if (type == "entities") {
         System::extractSettings(EMSESP_CUSTOMENTITY_FILE, "Entities", root);
     } else {
-        request->send(400);
-        return;
+        return false;
     }
+    return true;
+}
 
-    response->setLength();
-    request->send(response);
+// custom support
+bool WebStatusService::customSupport(JsonObject root) {
+    root["custom_support"] = true;
+    return true;
 }
 
 } // namespace emsesp

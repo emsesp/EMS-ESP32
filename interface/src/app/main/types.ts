@@ -265,6 +265,12 @@ export interface APIcall {
   cmd: string;
   id: number;
 }
+
+export interface Action {
+  action: string;
+  param?: string; // optional
+}
+
 export interface WriteAnalogSensor {
   id: number;
   gpio: number;

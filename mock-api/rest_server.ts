@@ -117,6 +117,55 @@ function updateMask(entity: any, de: any, dd: any) {
   }
 }
 
+// called by Action endpoint
+function export_data(type: string) {
+  console.log('exporting ' + type + '...');
+  switch (type) {
+    case 'settings':
+      return emsesp_info;
+    case 'customizations':
+      return emsesp_deviceentities_2; // fixed for one device
+    case 'entities':
+      return emsesp_customentities;
+    case 'schedule':
+      return emsesp_schedule;
+    case 'modules':
+      return emsesp_modules;
+    case 'allvalues':
+      return emsesp_allvalues;
+    default:
+      return status(404);
+  }
+}
+
+// called by Action endpoint
+function custom_support() {
+  return {
+    html: [
+      'This product is installed and managed by:',
+      '',
+      '<b>Bosch Installer Example</b>',
+      'Nefit Road 12',
+      '1234 AB Amsterdam',
+      'Phone: +31 123 456 789',
+      'email: support@boschinstaller.nl',
+      '',
+      "For help and questions please <a target='_blank' href='https://emsesp.org'>contact</a> your installer."
+    ],
+    img_url: 'https://emsesp.org/_media/images/designer.png'
+  };
+}
+
+// called by Action endpoint
+function check_upgrade(version: string) {
+  console.log('check upgrade from version', version);
+  const data = {
+    upgradeable: true
+    // upgradeable: false
+  };
+  return data;
+}
+
 // START DATA
 
 // LOG
@@ -402,7 +451,6 @@ const EMSESP_DEVICEDATA_ENDPOINT2 = REST_ENDPOINT_ROOT + 'deviceData/:id?';
 const EMSESP_DEVICEENTITIES_ENDPOINT1 = REST_ENDPOINT_ROOT + 'deviceEntities';
 const EMSESP_DEVICEENTITIES_ENDPOINT2 = REST_ENDPOINT_ROOT + 'deviceEntities/:id?';
 
-const EMSESP_CHECK_UPGRADE_ENDPOINT = REST_ENDPOINT_ROOT + 'checkUpgrade';
 const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile';
 const EMSESP_WRITE_DEVICEVALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceValue';
 const EMSESP_WRITE_DEVICENAME_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceName';
@@ -416,7 +464,8 @@ const EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT =
 const EMSESP_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
 const EMSESP_CUSTOMENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customEntities';
 const EMSESP_MODULES_ENDPOINT = REST_ENDPOINT_ROOT + 'modules';
-const EMSESP_EXPORT_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'exportData';
+
+const EMSESP_ACTION_ENDPOINT = REST_ENDPOINT_ROOT + 'action';
 
 // these are used in the API calls only
 const EMSESP_SYSTEM_INFO_ENDPOINT = API_ENDPOINT_ROOT + 'system/info';
@@ -4081,16 +4130,10 @@ router
 router
   .get(ACTIVITY_ENDPOINT, () => activity)
   .get(SYSTEM_STATUS_ENDPOINT, () => {
-    if (countHardwarePoll === 0) {
-      console.log('Resetting hardware count...');
-    }
-
     if (countHardwarePoll >= 2) {
       countHardwarePoll = 0;
       system_status.status = 'ready';
     }
-
-    console.log('Hardware count ' + countHardwarePoll + ' of 2');
     countHardwarePoll++;
 
     return system_status;
@@ -4402,17 +4445,6 @@ router
     return status(200);
   })
 
-  // check upgrade
-  .post(EMSESP_CHECK_UPGRADE_ENDPOINT, async (request: any) => {
-    const content = await request.json();
-    console.log('check upgrade from ', content.version);
-    const data = {
-      upgradeable: true
-      // upgradeable: false
-    };
-    return data;
-  })
-
   // Settings - board profile
   .get(EMSESP_BOARDPROFILE_ENDPOINT, (request) => {
     const board_profile = request.query.boardProfile;
@@ -4549,30 +4581,30 @@ router
     return data;
   })
 
-  // Download Settings
-  .get(EMSESP_EXPORT_DATA_ENDPOINT, (request) => {
-    const type = request.query.type;
-    console.log('exporting ' + type + ' data');
-    switch (type) {
-      case 'settings':
-        return emsesp_info;
-      case 'customizations':
-        return emsesp_deviceentities_2; // fixed for one device
-      case 'entities':
-        return emsesp_customentities;
-      case 'schedule':
-        return emsesp_schedule;
-      case 'modules':
-        return emsesp_modules;
-      default:
-        return status(404);
-    }
-  })
-
   // upload URL
   .post('/rest/uploadURL', () => {
     console.log('upload File from URL');
     return status(200);
+  })
+
+  // generic action for all /rest/... endpoints
+  // takes an action and param in JSON
+  .post(EMSESP_ACTION_ENDPOINT, async (request: any) => {
+    const content = await request.json();
+    if (content.hasOwnProperty('action')) {
+      const action = content.action;
+      if (action === 'export') {
+        // export data
+        return export_data(content.param);
+      } else if (action === 'customSupport') {
+        // send custom support
+        return custom_support();
+      } else if (action === 'checkUpgrade') {
+        // check upgrade
+        return check_upgrade(content.param);
+      }
+    }
+    return status(404); // cmd not found
   })
 
   // API which are usually POST for security
@@ -4593,9 +4625,6 @@ router
     if (data.device === 'system') {
       if (cmd === 'info') {
         return emsesp_info;
-      }
-      if (cmd === 'allvalues') {
-        return emsesp_allvalues;
       }
       if (cmd === 'format') {
         console.log('formatting...');

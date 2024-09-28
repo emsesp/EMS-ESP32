@@ -113,6 +113,7 @@ bool System::command_response(const char * value, const int8_t id, JsonObject ou
 
 // output all the devices and the values
 // not system info
+// TODO remove?
 bool System::command_allvalues(const char * value, const int8_t id, JsonObject output) {
     JsonDocument doc;
     JsonObject   device_output;
@@ -874,7 +875,7 @@ void System::commands_init() {
 
     // these commands will return data in JSON format
     Command::add(EMSdevice::DeviceType::SYSTEM, F("response"), System::command_response, FL_(commands_response));
-    Command::add(EMSdevice::DeviceType::SYSTEM, F("allvalues"), System::command_allvalues, FL_(allvalues_cmd));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F("allvalues"), System::command_allvalues, FL_(allvalues_cmd)); // TODO remove
 
     // MQTT subscribe "ems-esp/system/#"
     Mqtt::subscribe(EMSdevice::DeviceType::SYSTEM, "system/#", nullptr); // use empty function callback
@@ -1139,7 +1140,7 @@ void System::show_system(uuid::console::Shell & shell) {
 
 // see if there is a restore of an older settings file that needs to be applied
 bool System::check_restore() {
-    bool reboot_required = false;
+    bool reboot_required = false; // true if we need to reboot
 
 #ifndef EMSESP_STANDALONE
     File new_file = LittleFS.open(TEMP_FILENAME_PATH);
@@ -1167,11 +1168,20 @@ bool System::check_restore() {
             } else if (settings_type == "entities") {
                 // it's a entity file, just replace it and there's no need to reboot
                 saveSettings(EMSESP_CUSTOMENTITY_FILE, "Entities", input);
+            } else if (settings_type == "custom_support") {
+                // it's a custom support file - save it to /config
+                new_file.close();
+                if (LittleFS.rename(TEMP_FILENAME_PATH, EMSESP_CUSTOMSUPPORT_FILE)) {
+                    LOG_INFO("Custom support information loaded");
+                    return false; // no need to reboot
+                } else {
+                    LOG_ERROR("Failed to save custom support file");
+                }
             } else {
                 LOG_ERROR("Unrecognized file uploaded");
             }
         } else {
-            LOG_ERROR("Unrecognized file uploaded, not json. Will be removed.");
+            LOG_ERROR("Unrecognized file uploaded, not json.");
         }
 
         // close (just in case) and remove the temp file

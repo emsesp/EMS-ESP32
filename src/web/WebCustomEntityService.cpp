@@ -463,7 +463,6 @@ uint8_t WebCustomEntityService::count_entities() {
     uint8_t      count  = 0;
     for (const CustomEntityItem & entity : *customEntityItems_) {
         render_value(output, entity);
-        // TODO check JsonVariant
         if (output[entity.name].is<JsonVariantConst>() || entity.writeable) {
             count++;
         }

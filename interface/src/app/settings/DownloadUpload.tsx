@@ -18,7 +18,7 @@ import {
 import Grid from '@mui/material/Grid2';
 
 import * as SystemApi from 'api/system';
-import { API, exportData } from 'api/app';
+import { API, callAction } from 'api/app';
 import {
   checkUpgrade,
   getDevVersion,
@@ -37,6 +37,7 @@ import {
   useLayoutTitle
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
+import { saveFile } from 'utils/file';
 
 const DownloadUpload = () => {
   const { LL } = useI18nContext();
@@ -46,11 +47,23 @@ const DownloadUpload = () => {
   const [useDev, setUseDev] = useState<boolean>(false);
   const [upgradeAvailable, setUpgradeAvailable] = useState<boolean>(false);
 
-  const { send: sendExportData } = useRequest((type: string) => exportData(type), {
-    immediate: false
-  })
+  const { send: sendCheckUpgrade } = useRequest(
+    (version: string) => callAction({ action: 'checkUpgrade', param: version }),
+    {
+      immediate: false
+    }
+  ).onSuccess((event) => {
+    setUpgradeAvailable((event.data as { upgradeable: boolean }).upgradeable);
+  });
+
+  const { send: sendExportData } = useRequest(
+    (type: string) => callAction({ action: 'export', param: type }),
+    {
+      immediate: false
+    }
+  )
     .onSuccess((event) => {
-      saveFile(event.data, event.args[0]);
+      saveFile(event.data, event.args[0], '.json');
       toast.info(LL.DOWNLOAD_SUCCESSFUL());
     })
     .onError((error) => {
@@ -83,12 +96,6 @@ const DownloadUpload = () => {
     );
   };
 
-  const { send: sendCheckUpgrade } = useRequest(checkUpgrade, {
-    immediate: false
-  }).onSuccess((event) => {
-    setUpgradeAvailable(event.data.upgradeable);
-  });
-
   // called immediately to get the latest version, on page load
   const { data: latestVersion } = useRequest(getStableVersion, {
     // uncomment next 2 lines for testing, uses https://github.com/emsesp/EMS-ESP32/releases/download/v3.6.5/EMS-ESP-3_6_5-ESP32-16MB+.bin
@@ -102,7 +109,7 @@ const DownloadUpload = () => {
     // immediate: false,
     // initialData: '3.7.0-dev.32'
   }).onSuccess((event) => {
-    void sendCheckUpgrade({ version: event.data });
+    void sendCheckUpgrade(event.data);
   });
 
   const STABLE_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/';
@@ -140,18 +147,6 @@ const DownloadUpload = () => {
       toast.error(error.message);
     });
     setRestarting(true);
-  };
-
-  const saveFile = (json: unknown, filename: string) => {
-    const anchor = document.createElement('a');
-    anchor.href = URL.createObjectURL(
-      new Blob([JSON.stringify(json, null, 2)], {
-        type: 'text/plain'
-      })
-    );
-    anchor.download = 'emsesp_' + filename + '.json';
-    anchor.click();
-    URL.revokeObjectURL(anchor.href);
   };
 
   useLayoutTitle(LL.DOWNLOAD_UPLOAD());
