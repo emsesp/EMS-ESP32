@@ -1,3 +1,4 @@
+import { useContext } from 'react';
 import { toast } from 'react-toastify';
 
 import CommentIcon from '@mui/icons-material/CommentTwoTone';
@@ -8,17 +9,22 @@ import {
   Avatar,
   Box,
   Button,
+  Divider,
   Link,
   List,
   ListItem,
   ListItemAvatar,
   ListItemButton,
   ListItemText,
-  Typography
+  Paper,
+  Stack,
+  Typography,
+  styled
 } from '@mui/material';
 
 import { useRequest } from 'alova/client';
 import { SectionContent, useLayoutTitle } from 'components';
+import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import { API } from '../../api/app';
@@ -27,6 +33,8 @@ import type { APIcall } from './types';
 const Help = () => {
   const { LL } = useI18nContext();
   useLayoutTitle(LL.HELP());
+
+  const { me } = useContext(AuthenticatedContext);
 
   const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
     immediate: false
@@ -54,43 +62,70 @@ const Help = () => {
   return (
     <>
       <SectionContent>
-        <List sx={{ borderRadius: 3, border: '2px solid grey' }}>
-          <ListItem>
-            <ListItemButton component="a" href="https://emsesp.org">
-              <ListItemAvatar>
-                <Avatar sx={{ bgcolor: '#72caf9' }}>
-                  <MenuBookIcon />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText primary={LL.HELP_INFORMATION_1()} />
-            </ListItemButton>
-          </ListItem>
+        {me.admin ? (
+          <List sx={{ borderRadius: 3, border: '2px solid grey' }}>
+            <ListItem>
+              <ListItemButton component="a" href="https://emsesp.org">
+                <ListItemAvatar>
+                  <Avatar sx={{ bgcolor: '#72caf9' }}>
+                    <MenuBookIcon />
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText primary={LL.HELP_INFORMATION_1()} />
+              </ListItemButton>
+            </ListItem>
 
-          <ListItem>
-            <ListItemButton component="a" href="https://discord.gg/3J3GgnzpyT">
-              <ListItemAvatar>
-                <Avatar sx={{ bgcolor: '#72caf9' }}>
-                  <CommentIcon />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText primary={LL.HELP_INFORMATION_2()} />
-            </ListItemButton>
-          </ListItem>
+            <ListItem>
+              <ListItemButton component="a" href="https://discord.gg/3J3GgnzpyT">
+                <ListItemAvatar>
+                  <Avatar sx={{ bgcolor: '#72caf9' }}>
+                    <CommentIcon />
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText primary={LL.HELP_INFORMATION_2()} />
+              </ListItemButton>
+            </ListItem>
 
-          <ListItem>
-            <ListItemButton
-              component="a"
-              href="https://github.com/emsesp/EMS-ESP32/issues/new/choose"
-            >
-              <ListItemAvatar>
-                <Avatar sx={{ bgcolor: '#72caf9' }}>
-                  <GitHubIcon />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText primary={LL.HELP_INFORMATION_3()} />
-            </ListItemButton>
-          </ListItem>
-        </List>
+            <ListItem>
+              <ListItemButton
+                component="a"
+                href="https://github.com/emsesp/EMS-ESP32/issues/new/choose"
+              >
+                <ListItemAvatar>
+                  <Avatar sx={{ bgcolor: '#72caf9' }}>
+                    <GitHubIcon />
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText primary={LL.HELP_INFORMATION_3()} />
+              </ListItemButton>
+            </ListItem>
+          </List>
+        ) : (
+          <Stack
+            spacing={1}
+            padding={1}
+            direction="row"
+            divider={<Divider orientation="vertical" flexItem />}
+            sx={{
+              borderRadius: 3,
+              border: '2px solid grey',
+              justifyContent: 'space-around',
+              alignItems: 'center'
+            }}
+          >
+            <Typography border="red" variant="subtitle1">
+              {LL.HELP_INFORMATION_5()}
+            </Typography>
+            <Box
+              padding={1}
+              component="img"
+              sx={{
+                maxHeight: { xs: 100, md: 250 }
+              }}
+              src="https://emsesp.org/_media/images/installer.jpeg"
+            />
+          </Stack>
+        )}
 
         <Box p={2} color="warning.main">
           <Typography mb={1} variant="body2">
@@ -116,23 +151,14 @@ const Help = () => {
           {LL.DOWNLOAD(1)}&nbsp;{LL.ALLVALUES()}
         </Button>
 
-        <Box sx={{ p: 2, mt: 4, border: '1px dashed orange' }}>
-          <Typography align="center" variant="subtitle1">
-            {LL.HELP_INFORMATION_5()}
-          </Typography>
-          <Typography align="center" mt={1}>
-            <Link
-              target="_blank"
-              href="https://github.com/emsesp/EMS-ESP32"
-              color="primary"
-            >
-              {'https://github.com/emsesp/EMS-ESP32'}
-            </Link>
-          </Typography>
-          <Typography color="white" variant="subtitle1" align="center">
-            &copy;&nbsp;emsesp.org
-          </Typography>
-        </Box>
+        <Divider sx={{ mt: 4 }} />
+
+        <Typography color="white" variant="subtitle1" align="center" mt={1}>
+          &copy;&nbsp;
+          <Link target="_blank" href="https://emsesp.org" color="primary">
+            {'emsesp.org'}
+          </Link>
+        </Typography>
       </SectionContent>
     </>
   );

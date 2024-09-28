@@ -69,3 +69,4 @@ For more details go to [www.emsesp.org](https://www.emsesp.org/).
 - Don't start Serial console if not connected to a Serial port. Will initiate manually after a CTRL-C  
 - WebLog UI matches color schema of the terminal console correctly
 - Updated Web libraries, ArduinoJson
+- Help page doesn't show detailed tech info if the user is not 'admin' role [#2054](https://github.com/emsesp/EMS-ESP32/issues/2054)

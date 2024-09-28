@@ -309,7 +309,7 @@ const Customizations = () => {
 
   const filter_entity = (de: DeviceEntity) =>
     (de.m & selectedFilters || !selectedFilters) &&
-    formatName(de, true).includes(search.toLocaleLowerCase());
+    formatName(de, true).includes(search);
 
   const maskDisabled = (set: boolean) => {
     setDeviceEntities(
