@@ -1130,7 +1130,7 @@ bool System::check_restore() {
             } else if (settings_type == "entities") {
                 // it's a entity file, just replace it and there's no need to reboot
                 saveSettings(EMSESP_CUSTOMENTITY_FILE, "Entities", input);
-            } else if (settings_type == "custom_support") {
+            } else if (settings_type == "customSupport") {
                 // it's a custom support file - save it to /config
                 new_file.close();
                 if (LittleFS.rename(TEMP_FILENAME_PATH, EMSESP_CUSTOMSUPPORT_FILE)) {
