@@ -184,7 +184,6 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
     request->send(response);
 }
 
-
 // returns true if there is an upgrade available
 bool WebStatusService::checkUpgrade(JsonObject root, std::string & latest_version) {
     version::Semver200_version settings_version(EMSESP_APP_VERSION);
@@ -256,7 +255,23 @@ bool WebStatusService::exportData(JsonObject root, std::string & type) {
 
 // custom support
 bool WebStatusService::customSupport(JsonObject root) {
-    root["custom_support"] = true;
+#ifndef EMSESP_STANDALONE
+    // check if we have custom support file uploaded
+    File file = LittleFS.open(EMSESP_CUSTOMSUPPORT_FILE, "r");
+    if (!file) {
+        // there is no custom file, return empty object
+        return true;
+    }
+
+    // read the contents of the file into the root output json object
+    DeserializationError error = deserializeJson(root, file);
+    if (error) {
+        emsesp::EMSESP::logger().err("Failed to read custom support file");
+        return false;
+    }
+
+    file.close();
+#endif
     return true;
 }
 
