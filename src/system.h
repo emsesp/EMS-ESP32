@@ -65,7 +65,6 @@ class System {
     static bool command_message(const char * value, const int8_t id);
     static bool command_info(const char * value, const int8_t id, JsonObject output);
     static bool command_response(const char * value, const int8_t id, JsonObject output);
-    static bool command_allvalues(const char * value, const int8_t id, JsonObject output); // TODO fix
 
     static bool get_value_info(JsonObject root, const char * cmd);
     static void get_value_json(JsonObject output, const std::string & circuit, const std::string & name, JsonVariant val);

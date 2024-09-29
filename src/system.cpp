@@ -111,45 +111,6 @@ bool System::command_response(const char * value, const int8_t id, JsonObject ou
     return true;
 }
 
-// output all the devices and the values
-// not system info
-// TODO remove?
-bool System::command_allvalues(const char * value, const int8_t id, JsonObject output) {
-    JsonDocument doc;
-    JsonObject   device_output;
-    // default to values
-    if (value == nullptr || strlen(value) == 0) {
-        value = F_(values);
-    }
-
-    // System Entities
-    // device_output = output["System"].to<JsonObject>();
-    // get_value_info(device_output, value);
-
-    // EMS-Device Entities
-    for (const auto & emsdevice : EMSESP::emsdevices) {
-        std::string title = emsdevice->device_type_2_device_name_translated() + std::string(" ") + emsdevice->to_string();
-        device_output     = output[title].to<JsonObject>();
-        emsdevice->get_value_info(device_output, value, DeviceValueTAG::TAG_NONE);
-    }
-
-    // Custom Entities
-    device_output = output["Custom Entities"].to<JsonObject>();
-    EMSESP::webCustomEntityService.get_value_info(device_output, value);
-
-    // Scheduler
-    device_output = output["Scheduler"].to<JsonObject>();
-    EMSESP::webSchedulerService.get_value_info(device_output, value);
-
-    // Sensors
-    device_output = output["Analog Sensors"].to<JsonObject>();
-    EMSESP::analogsensor_.get_value_info(device_output, value);
-    device_output = output["Temperature Sensors"].to<JsonObject>();
-    EMSESP::temperaturesensor_.get_value_info(device_output, value);
-
-    return true;
-}
-
 // fetch device values
 bool System::command_fetch(const char * value, const int8_t id) {
     std::string value_s;
@@ -339,6 +300,8 @@ void System::system_restart(const char * partitionname) {
     delay(1000);        // wait 1 second
     ESP.restart();
 #else
+    restart_requested(false);
+    restart_pending(false);
     if (partitionname != nullptr) {
         LOG_INFO("Restarting EMS-ESP from %s partition", partitionname);
     } else {
@@ -875,7 +838,6 @@ void System::commands_init() {
 
     // these commands will return data in JSON format
     Command::add(EMSdevice::DeviceType::SYSTEM, F("response"), System::command_response, FL_(commands_response));
-    Command::add(EMSdevice::DeviceType::SYSTEM, F("allvalues"), System::command_allvalues, FL_(allvalues_cmd)); // TODO remove
 
     // MQTT subscribe "ems-esp/system/#"
     Mqtt::subscribe(EMSdevice::DeviceType::SYSTEM, "system/#", nullptr); // use empty function callback

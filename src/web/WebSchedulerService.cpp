@@ -584,7 +584,7 @@ void WebSchedulerService::test() {
     test_value = "(custom/seltemp)";
     command("test5", test_cmd.c_str(), compute(test_value).c_str());
 
-    // this will fail unless test("boiler") is loaded
+    // note: this will fail unless test("boiler") is loaded before hand
     test_value = "(boiler/outdoortemp)";
     command("test6", test_cmd.c_str(), compute(test_value).c_str());
 

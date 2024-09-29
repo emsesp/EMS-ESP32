@@ -154,10 +154,6 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
     std::string action = json["action"];
     std::string param  = json["param"]; // is optional
 
-    // TODO remove
-    Serial.printf("Action: %s\n", action.c_str());
-    Serial.printf("Param: %s\n", param.c_str());
-
     bool ok = true;
     if (action == "checkUpgrade") {
         ok = checkUpgrade(root, param);
@@ -166,6 +162,17 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
     } else if (action == "customSupport") {
         ok = customSupport(root);
     }
+
+#if defined(EMSESP_UNITY)
+    // store the result so we can test with Unity later
+    storeResponse(output);
+#endif
+#if defined(EMSESP_STANDALONE) && !defined(EMSESP_UNITY)
+    Serial.printf("%sweb output: %s[%s]", COLOR_WHITE, COLOR_BRIGHT_CYAN, request->url().c_str());
+    Serial.printf(" %s(%d)%s ", ok ? COLOR_BRIGHT_GREEN : COLOR_BRIGHT_RED, ok ? 200 : 400, COLOR_YELLOW);
+    serializeJson(root, Serial);
+    Serial.println(COLOR_RESET);
+#endif
 
     // send response
     if (!ok) {
@@ -192,6 +199,34 @@ bool WebStatusService::checkUpgrade(JsonObject root, std::string & latest_versio
     return true;
 }
 
+// output all the devices and the values
+void WebStatusService::allvalues(JsonObject output) {
+    JsonDocument doc;
+    JsonObject   device_output;
+    auto         value = F_(values);
+
+    // EMS-Device Entities
+    for (const auto & emsdevice : EMSESP::emsdevices) {
+        std::string title = emsdevice->device_type_2_device_name_translated() + std::string(" ") + emsdevice->to_string();
+        device_output     = output[title].to<JsonObject>();
+        emsdevice->get_value_info(device_output, value, DeviceValueTAG::TAG_NONE);
+    }
+
+    // Custom Entities
+    device_output = output["Custom Entities"].to<JsonObject>();
+    EMSESP::webCustomEntityService.get_value_info(device_output, value);
+
+    // Scheduler
+    device_output = output["Scheduler"].to<JsonObject>();
+    EMSESP::webSchedulerService.get_value_info(device_output, value);
+
+    // Sensors
+    device_output = output["Analog Sensors"].to<JsonObject>();
+    EMSESP::analogsensor_.get_value_info(device_output, value);
+    device_output = output["Temperature Sensors"].to<JsonObject>();
+    EMSESP::temperaturesensor_.get_value_info(device_output, value);
+}
+
 // returns data for a specific feature/settings as a json object
 bool WebStatusService::exportData(JsonObject root, std::string & type) {
     root["type"] = type;
@@ -211,6 +246,8 @@ bool WebStatusService::exportData(JsonObject root, std::string & type) {
         System::extractSettings(EMSESP_CUSTOMIZATION_FILE, "Customizations", root);
     } else if (type == "entities") {
         System::extractSettings(EMSESP_CUSTOMENTITY_FILE, "Entities", root);
+    } else if (type == "allvalues") {
+        allvalues(root);
     } else {
         return false;
     }
