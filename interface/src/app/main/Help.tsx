@@ -38,14 +38,17 @@ const Help = () => {
   const [customSupportIMG, setCustomSupportIMG] = useState<string | null>(null);
   const [customSupportHTML, setCustomSupportHTML] = useState<string | null>(null);
 
-  useRequest(() => callAction({ action: 'customSupport' })).onSuccess(
-    (event: { data: { img_url: string; html: string[] } }) => {
-      if (event.data) {
-        setCustomSupportIMG(event.data.img_url);
-        setCustomSupportHTML(event.data.html.join('<br/>'));
+  useRequest(() => callAction({ action: 'customSupport' })).onSuccess((event) => {
+    if (event && event.data && Object.keys(event.data).length !== 0) {
+      const data = event.data.Support;
+      if (data.img_url) {
+        setCustomSupportIMG(data.img_url);
+      }
+      if (data.html) {
+        setCustomSupportHTML(data.html.join('<br/>'));
       }
     }
-  );
+  });
 
   const { send: sendExportAllValues } = useRequest(
     () => callAction({ action: 'export', param: 'allvalues' }),
@@ -97,7 +100,7 @@ const Help = () => {
           <Box
             component="img"
             sx={{
-              maxHeight: 250
+              maxHeight: { xs: 100, md: 250 }
             }}
             src={
               customSupportIMG

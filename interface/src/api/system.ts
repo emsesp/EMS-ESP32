@@ -13,7 +13,7 @@ export const updateLogSettings = (data: LogSettings) =>
   alovaInstance.Post('/rest/logSettings', data);
 export const fetchLogES = () => alovaInstance.Get('/es/log');
 
-// Get versions from github
+// Get versions from GitHub
 export const getStableVersion = () =>
   alovaInstanceGH.Get('latest', {
     transform(response: { data: { name: string } }) {
@@ -34,9 +34,3 @@ export const uploadFile = (file: File) => {
     timeout: 60000 // override timeout for uploading firmware - 1 minute
   });
 };
-
-export const uploadURL = (data: { url: string }) =>
-  alovaInstance.Post('/rest/uploadURL', data);
-
-export const checkUpgrade = (data: { version: string }) =>
-  alovaInstance.Post('/rest/checkUpgrade', data);

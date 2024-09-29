@@ -19,12 +19,7 @@ import Grid from '@mui/material/Grid2';
 
 import * as SystemApi from 'api/system';
 import { API, callAction } from 'api/app';
-import {
-  checkUpgrade,
-  getDevVersion,
-  getStableVersion,
-  uploadURL
-} from 'api/system';
+import { getDevVersion, getStableVersion } from 'api/system';
 
 import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova/client';
@@ -81,7 +76,7 @@ const DownloadUpload = () => {
   } = useRequest(SystemApi.readSystemStatus);
 
   const { send: sendUploadURL } = useRequest(
-    (data: { url: string }) => uploadURL(data),
+    (url: string) => callAction({ action: 'uploadURL', param: url }),
     {
       immediate: false
     }
@@ -143,7 +138,7 @@ const DownloadUpload = () => {
   };
 
   const installFirmwareURL = async (url: string) => {
-    await sendUploadURL({ url: url }).catch((error: Error) => {
+    await sendUploadURL(url).catch((error: Error) => {
       toast.error(error.message);
     });
     setRestarting(true);

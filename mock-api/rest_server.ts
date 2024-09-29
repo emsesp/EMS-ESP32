@@ -140,19 +140,24 @@ function export_data(type: string) {
 
 // called by Action endpoint
 function custom_support() {
+  // return {};
   return {
-    html: [
-      'This product is installed and managed by:',
-      '',
-      '<b>Bosch Installer Example</b>',
-      'Nefit Road 12',
-      '1234 AB Amsterdam',
-      'Phone: +31 123 456 789',
-      'email: support@boschinstaller.nl',
-      '',
-      "For help and questions please <a target='_blank' href='https://emsesp.org'>contact</a> your installer."
-    ],
-    img_url: 'https://emsesp.org/_media/images/designer.png'
+    type: 'custom_support',
+    Support: {
+      html: [
+        'This product is installed and managed by:',
+        '',
+        '<b>Bosch Installer Example</b>',
+        '',
+        'Nefit Road 12',
+        '1234 AB Amsterdam',
+        'Phone: +31 123 456 789',
+        'email: support@boschinstaller.nl',
+        '',
+        "For help and questions please <a target='_blank' href='https://emsesp.org'>contact</a> your installer."
+      ],
+      img_url: 'https://emsesp.org/_media/images/designer.png'
+    }
   };
 }
 
@@ -4581,12 +4586,6 @@ router
     return data;
   })
 
-  // upload URL
-  .post('/rest/uploadURL', () => {
-    console.log('upload File from URL');
-    return status(200);
-  })
-
   // generic action for all /rest/... endpoints
   // takes an action and param in JSON
   .post(EMSESP_ACTION_ENDPOINT, async (request: any) => {
@@ -4602,6 +4601,10 @@ router
       } else if (action === 'checkUpgrade') {
         // check upgrade
         return check_upgrade(content.param);
+      } else if (action === 'uploadURL') {
+        // upload URL
+        console.log('upload File from URL', content.param);
+        return status(200);
       }
     }
     return status(404); // cmd not found

@@ -24,11 +24,12 @@
 
 namespace emsesp {
 
-WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * securityManager) {
+WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * securityManager)
+    : _securityManager(securityManager) {
     // GET
     server->on(EMSESP_SYSTEM_STATUS_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { systemStatus(request); });
 
-    // generic action - POST
+    // POST - generic action handler
     server->on(EMSESP_ACTION_SERVICE_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { action(request, json); });
 }
 
@@ -150,9 +151,13 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
     auto *     response = new AsyncJsonResponse();
     JsonObject root     = response->getRoot();
 
-    // get action and optional param
+    // get action and any optional param
     std::string action = json["action"];
     std::string param  = json["param"]; // is optional
+
+    // check if we're authenticated for admin tasks, some actions are only for admins
+    Authentication authentication = _securityManager->authenticateRequest(request);
+    bool           is_admin       = AuthenticationPredicates::IS_ADMIN(authentication);
 
     bool ok = true;
     if (action == "checkUpgrade") {
@@ -161,6 +166,8 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
         ok = exportData(root, param);
     } else if (action == "customSupport") {
         ok = customSupport(root);
+    } else if (action == "uploadURL" && is_admin) {
+        ok = uploadURL(param.c_str());
     }
 
 #if defined(EMSESP_UNITY)
@@ -184,6 +191,7 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
     request->send(response);
 }
 
+// action = checkUpgrade
 // returns true if there is an upgrade available
 bool WebStatusService::checkUpgrade(JsonObject root, std::string & latest_version) {
     version::Semver200_version settings_version(EMSESP_APP_VERSION);
@@ -198,6 +206,7 @@ bool WebStatusService::checkUpgrade(JsonObject root, std::string & latest_versio
     return true;
 }
 
+// action = allvalues
 // output all the devices and the values
 void WebStatusService::allvalues(JsonObject output) {
     JsonDocument doc;
@@ -226,6 +235,7 @@ void WebStatusService::allvalues(JsonObject output) {
     EMSESP::temperaturesensor_.get_value_info(device_output, value);
 }
 
+// action = export
 // returns data for a specific feature/settings as a json object
 bool WebStatusService::exportData(JsonObject root, std::string & type) {
     root["type"] = type;
@@ -253,7 +263,8 @@ bool WebStatusService::exportData(JsonObject root, std::string & type) {
     return true;
 }
 
-// custom support
+// action = customSupport
+// reads any upload customSupport.json file and sends to to Help page to be shown as Guest
 bool WebStatusService::customSupport(JsonObject root) {
 #ifndef EMSESP_STANDALONE
     // check if we have custom support file uploaded
@@ -272,6 +283,14 @@ bool WebStatusService::customSupport(JsonObject root) {
 
     file.close();
 #endif
+    return true;
+}
+
+// action = uploadURL
+// uploads a firmware file from a URL
+bool WebStatusService::uploadURL(const char * url) {
+    // this will keep a copy of the URL, but won't initiate the download yet
+    emsesp::EMSESP::system_.uploadFirmwareURL(url);
     return true;
 }
 

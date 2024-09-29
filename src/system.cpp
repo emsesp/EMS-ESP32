@@ -1134,7 +1134,7 @@ bool System::check_restore() {
                 // it's a custom support file - save it to /config
                 new_file.close();
                 if (LittleFS.rename(TEMP_FILENAME_PATH, EMSESP_CUSTOMSUPPORT_FILE)) {
-                    LOG_INFO("Custom support information loaded");
+                    LOG_DEBUG("Custom support information found");
                     return false; // no need to reboot
                 } else {
                     LOG_ERROR("Failed to save custom support file");

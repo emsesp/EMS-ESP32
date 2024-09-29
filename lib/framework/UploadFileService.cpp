@@ -24,11 +24,6 @@ UploadFileService::UploadFileService(AsyncWebServer * server, SecurityManager * 
         [this](AsyncWebServerRequest * request, const String & filename, size_t index, uint8_t * data, size_t len, bool final) {
             handleUpload(request, filename, index, data, len, final);
         });
-
-    // upload from a URL
-    server->on(UPLOAD_URL_PATH,
-               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { uploadURL(request, json); },
-                                             AuthenticationPredicates::IS_AUTHENTICATED));
 }
 
 void UploadFileService::handleUpload(AsyncWebServerRequest * request, const String & filename, size_t index, uint8_t * data, size_t len, bool final) {
@@ -170,16 +165,4 @@ void UploadFileService::handleError(AsyncWebServerRequest * request, int code) {
 void UploadFileService::handleEarlyDisconnect() {
     _is_firmware = false;
     Update.abort();
-}
-
-// upload firmware from a URL, like GitHub Release assets, Cloudflare R2 or Amazon S3
-void UploadFileService::uploadURL(AsyncWebServerRequest * request, JsonVariant json) {
-    if (json.is<JsonObject>()) {
-        // this will keep a copy of the URL, but won't initiate the download yet
-        emsesp::EMSESP::system_.uploadFirmwareURL(json["url"].as<const char *>());
-
-        // end the connection
-        AsyncWebServerResponse * response = request->beginResponse(200);
-        request->send(response);
-    }
 }

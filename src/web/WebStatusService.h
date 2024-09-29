@@ -12,7 +12,7 @@ class WebStatusService {
   public:
     WebStatusService(AsyncWebServer * server, SecurityManager * securityManager);
 
-// make all functions public so we can test in the debug and standalone mode
+// make action function public so we can test in the debug and standalone mode
 #ifndef EMSESP_STANDALONE
   protected:
 #endif
@@ -20,9 +20,14 @@ class WebStatusService {
     void action(AsyncWebServerRequest * request, JsonVariant json);
 
   private:
+    SecurityManager * _securityManager;
+
+    // actions
     bool checkUpgrade(JsonObject root, std::string & latest_version);
     bool exportData(JsonObject root, std::string & type);
     bool customSupport(JsonObject root);
+    bool uploadURL(const char * url);
+
     void allvalues(JsonObject output);
 };
 
