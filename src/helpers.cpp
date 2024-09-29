@@ -460,31 +460,12 @@ int Helpers::atoint(const char * value) {
 float Helpers::transformNumFloat(float value, const int8_t numeric_operator, const uint8_t fahrenheit) {
     float val;
 
-    switch (numeric_operator) {
-    case DeviceValueNumOp::DV_NUMOP_DIV2:
-        val = (value * 100 / 2 + 0.5);
-        break;
-    case DeviceValueNumOp::DV_NUMOP_DIV10:
-        val = (value * 10 + 0.5);
-        break;
-    case DeviceValueNumOp::DV_NUMOP_DIV60:
-        val = (value * 10 / 6 + 0.5);
-        break;
-    case DeviceValueNumOp::DV_NUMOP_DIV100:
-        val = (value + 0.5);
-        break;
-    case DeviceValueNumOp::DV_NUMOP_MUL5:
-        val = value * 100 * 5;
-        break;
-    case DeviceValueNumOp::DV_NUMOP_MUL10:
-        val = value * 100 * 10;
-        break;
-    case DeviceValueNumOp::DV_NUMOP_MUL15:
-        val = value * 100 * 15;
-        break;
-    default:
-        val = (value * 100 + 0.5); // no ops
-        break;
+    if (numeric_operator == 0) { // DV_NUMOP_NONE
+        val = value * 100 + 0.5;
+    } else if (numeric_operator > 0) { // DV_NUMOP_DIVxx
+        val = value * 100 / numeric_operator + 0.5;
+    } else { // DV_NUMOP_MULxx
+        val = value * -100 * numeric_operator;
     }
 
     if (value < 0) { // negative rounding

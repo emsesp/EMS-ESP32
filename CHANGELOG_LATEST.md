@@ -49,6 +49,8 @@ For more details go to [www.emsesp.org](https://www.emsesp.org/).
 - log shows data for F7/F9 requests
 - Detection of LittleFS for factory setting wasn't working
 - Check for bad GPIOs with Ethernet before the ethernet is initialized
+- Show values with factor 50 on webUI [#2064](https://github.com/emsesp/EMS-ESP32/issues/2064)
+- Rendering of values between -1 and 0
 
 ## Changed
 
@@ -70,3 +72,6 @@ For more details go to [www.emsesp.org](https://www.emsesp.org/).
 - WebLog UI matches color schema of the terminal console correctly
 - Updated Web libraries, ArduinoJson
 - Help page doesn't show detailed tech info if the user is not 'admin' role [#2054](https://github.com/emsesp/EMS-ESP32/issues/2054)
+- Show ems-esp internal devices in device list of system/info
+- Scheduler and mqtt run async on systems with psram
+- Show IPv6 address type (local/global/ula) in log
