@@ -994,8 +994,11 @@ void System::show_system(uuid::console::Shell & shell) {
     shell.printfln(" App used/free: %lu KB / %lu KB", appUsed(), appFree());
     uint32_t FSused = LittleFS.usedBytes() / 1024;
     shell.printfln(" FS used/free: %lu KB / %lu KB", FSused, FStotal() - FSused);
+    shell.printfln(" Flash size: %lu KB", ESP.getFlashChipSize() / 1024);
     if (PSram()) {
         shell.printfln(" PSRAM size/free: %lu KB / %lu KB", PSram(), ESP.getFreePsram() / 1024);
+    } else {
+        shell.printfln(" PSRAM: not available");
     }
 
     shell.println();
