@@ -209,9 +209,8 @@ bool WebStatusService::checkUpgrade(JsonObject root, std::string & latest_versio
 // action = allvalues
 // output all the devices and the values
 void WebStatusService::allvalues(JsonObject output) {
-    JsonDocument doc;
-    JsonObject   device_output;
-    auto         value = F_(values);
+    JsonObject device_output;
+    auto       value = F_(values);
 
     // EMS-Device Entities
     for (const auto & emsdevice : EMSESP::emsdevices) {
@@ -256,6 +255,7 @@ bool WebStatusService::exportData(JsonObject root, std::string & type) {
     } else if (type == "entities") {
         System::extractSettings(EMSESP_CUSTOMENTITY_FILE, "Entities", root);
     } else if (type == "allvalues") {
+        root.clear(); // don't need the "type" key
         allvalues(root);
     } else {
         return false;
