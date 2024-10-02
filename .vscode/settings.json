@@ -93,9 +93,5 @@
       "makefile"
     ],
     "typescript.preferences.preferTypeOnlyAutoImports": true,
-    "sonarlint.connectedMode.project": {
-      "connectionId": "emsesp",
-      "projectKey": "emsesp_EMS-ESP32"
-    },
     "sonarlint.pathToCompileCommands": "${workspaceFolder}/compile_commands.json"
   }

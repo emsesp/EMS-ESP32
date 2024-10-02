@@ -150,6 +150,56 @@ const Sensors = () => {
     }
   ]);
 
+  const RenderTemperatureSensors = () => (
+    <Table
+      data={{ nodes: sensorData.ts }}
+      theme={temperature_theme}
+      sort={temperature_sort}
+      layout={{ custom: true }}
+    >
+      {(tableList: TemperatureSensor[]) => (
+        <>
+          <Header>
+            <HeaderRow>
+              <HeaderCell resize>
+                <Button
+                  fullWidth
+                  style={{ fontSize: '14px', justifyContent: 'flex-start' }}
+                  endIcon={getSortIcon(temperature_sort.state, 'NAME')}
+                  onClick={() =>
+                    temperature_sort.fns.onToggleSort({ sortKey: 'NAME' })
+                  }
+                >
+                  {LL.NAME(0)}
+                </Button>
+              </HeaderCell>
+              <HeaderCell stiff>
+                <Button
+                  fullWidth
+                  style={{ fontSize: '14px', justifyContent: 'flex-end' }}
+                  endIcon={getSortIcon(temperature_sort.state, 'VALUE')}
+                  onClick={() =>
+                    temperature_sort.fns.onToggleSort({ sortKey: 'VALUE' })
+                  }
+                >
+                  {LL.VALUE(0)}
+                </Button>
+              </HeaderCell>
+            </HeaderRow>
+          </Header>
+          <Body>
+            {tableList.map((ts: TemperatureSensor) => (
+              <Row key={ts.id} item={ts} onClick={() => updateTemperatureSensor(ts)}>
+                <Cell>{ts.n}</Cell>
+                <Cell>{formatValue(ts.t, ts.u)}</Cell>
+              </Row>
+            ))}
+          </Body>
+        </>
+      )}
+    </Table>
+  );
+
   const getSortIcon = (state: State, sortKey: unknown) => {
     if (state.sortKey === sortKey && state.reverse) {
       return <KeyboardArrowDownOutlinedIcon />;
@@ -331,56 +381,6 @@ const Sensors = () => {
         void fetchSensorData();
       });
   };
-
-  const RenderTemperatureSensors = () => (
-    <Table
-      data={{ nodes: sensorData.ts }}
-      theme={temperature_theme}
-      sort={temperature_sort}
-      layout={{ custom: true }}
-    >
-      {(tableList: TemperatureSensor[]) => (
-        <>
-          <Header>
-            <HeaderRow>
-              <HeaderCell resize>
-                <Button
-                  fullWidth
-                  style={{ fontSize: '14px', justifyContent: 'flex-start' }}
-                  endIcon={getSortIcon(temperature_sort.state, 'NAME')}
-                  onClick={() =>
-                    temperature_sort.fns.onToggleSort({ sortKey: 'NAME' })
-                  }
-                >
-                  {LL.NAME(0)}
-                </Button>
-              </HeaderCell>
-              <HeaderCell stiff>
-                <Button
-                  fullWidth
-                  style={{ fontSize: '14px', justifyContent: 'flex-end' }}
-                  endIcon={getSortIcon(temperature_sort.state, 'VALUE')}
-                  onClick={() =>
-                    temperature_sort.fns.onToggleSort({ sortKey: 'VALUE' })
-                  }
-                >
-                  {LL.VALUE(0)}
-                </Button>
-              </HeaderCell>
-            </HeaderRow>
-          </Header>
-          <Body>
-            {tableList.map((ts: TemperatureSensor) => (
-              <Row key={ts.id} item={ts} onClick={() => updateTemperatureSensor(ts)}>
-                <Cell>{ts.n}</Cell>
-                <Cell>{formatValue(ts.t, ts.u)}</Cell>
-              </Row>
-            ))}
-          </Body>
-        </>
-      )}
-    </Table>
-  );
 
   const RenderAnalogSensors = () => (
     <Table

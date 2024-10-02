@@ -4,7 +4,7 @@
 import formidable from 'formidable';
 
 function pad(number) {
-  var r = String(number);
+  let r = String(number);
   if (r.length === 1) {
     r = '0' + r;
   }

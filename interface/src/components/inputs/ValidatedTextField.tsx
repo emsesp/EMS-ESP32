@@ -19,7 +19,7 @@ const ValidatedTextField: FC<ValidatedTextFieldProps> = ({
   const errors = fieldErrors && fieldErrors[rest.name];
   const renderErrors = () =>
     errors &&
-    errors.map((e, i) => <FormHelperText key={i}>{e.message}</FormHelperText>);
+    errors.map((e) => <FormHelperText key={e.message}>{e.message}</FormHelperText>);
   return (
     <>
       <TextField error={!!errors} {...rest} />

@@ -292,9 +292,7 @@ const SchedulerDialog = ({
                         ? LL.TIMER(1)
                         : LL.TIME(1)
                     }
-                    value={
-                      editItem.time == '' ? (editItem.time = '00:00') : editItem.time
-                    }
+                    value={editItem.time === '' ? '00:00' : editItem.time}
                     margin="normal"
                     onChange={updateFormValue}
                   />
@@ -318,9 +316,7 @@ const SchedulerDialog = ({
                   }
                   multiline
                   fullWidth
-                  value={
-                    editItem.time == '00:00' ? (editItem.time = '') : editItem.time
-                  }
+                  value={editItem.time === '00:00'}
                   margin="normal"
                   onChange={updateFormValue}
                 />

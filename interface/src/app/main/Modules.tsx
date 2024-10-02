@@ -29,7 +29,7 @@ import { useI18nContext } from 'i18n/i18n-react';
 
 import { readModules, writeModules } from '../../api/app';
 import ModulesDialog from './ModulesDialog';
-import type { ModuleItem, Modules } from './types';
+import type { ModuleItem } from './types';
 
 const Modules = () => {
   const { LL } = useI18nContext();
@@ -38,6 +38,8 @@ const Modules = () => {
 
   const [selectedModuleItem, setSelectedModuleItem] = useState<ModuleItem>();
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+
+  useLayoutTitle(LL.MODULES());
 
   const {
     data: modules,
@@ -154,8 +156,6 @@ const Modules = () => {
     if (!modules) {
       return <FormLoader onRetry={fetchModules} errorMessage={error?.message} />;
     }
-
-    useLayoutTitle(LL.MODULES());
 
     if (modules.length === 0) {
       return (

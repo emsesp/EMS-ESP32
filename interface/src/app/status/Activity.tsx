@@ -18,7 +18,7 @@ import type { Stat } from '../main/types';
 
 const SystemActivity = () => {
   const {
-    data: data,
+    data,
     send: loadData,
     error
   } = useAutoRequest(readActivity, { pollingTime: 2000 });

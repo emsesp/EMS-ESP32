@@ -82,7 +82,7 @@ const IPs = (status: NetworkStatusType) => {
 
 const NetworkStatus = () => {
   const {
-    data: data,
+    data,
     send: loadData,
     error
   } = useAutoRequest(NetworkApi.readNetworkStatus, { pollingTime: 5000 });
