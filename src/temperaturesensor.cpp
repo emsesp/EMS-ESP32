@@ -53,7 +53,7 @@ void TemperatureSensor::start() {
 // load settings
 void TemperatureSensor::reload() {
     // load the service settings
-    EMSESP::webSettingsService.read([&](WebSettings & settings) {
+    EMSESP::webSettingsService.read([&](WebSettings const & settings) {
         dallas_gpio_ = settings.dallas_gpio;
         parasite_    = settings.dallas_parasite;
     });
@@ -274,7 +274,7 @@ int16_t TemperatureSensor::get_temperature_c(const uint8_t addr[]) {
         case 11:
             raw_value &= ~0x1;
             break;
-        case 12:
+        default: // 12
             break;
         }
     }
@@ -302,7 +302,7 @@ bool TemperatureSensor::update(const std::string & id, const std::string & name,
             sensor.set_offset(offset);
 
             // store the new name and offset in our configuration
-            EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
+            EMSESP::webCustomizationService.update([&id, &name, &offset, &sensor](WebCustomization & settings) {
                 // look it up to see if it exists
                 bool found = false;
                 for (auto & SensorCustomization : settings.sensorCustomizations) {
@@ -315,10 +315,10 @@ bool TemperatureSensor::update(const std::string & id, const std::string & name,
                     }
                 }
                 if (!found) {
-                    SensorCustomization newSensor = SensorCustomization();
-                    newSensor.id                  = id;
-                    newSensor.name                = name;
-                    newSensor.offset              = offset;
+                    auto newSensor   = SensorCustomization();
+                    newSensor.id     = id;
+                    newSensor.name   = name;
+                    newSensor.offset = offset;
                     settings.sensorCustomizations.push_back(newSensor);
                     LOG_DEBUG("Adding new customization for sensor ID %s", id.c_str());
                 }
@@ -401,9 +401,9 @@ void TemperatureSensor::publish_sensor(const Sensor & sensor) {
     if (Mqtt::enabled() && Mqtt::publish_single()) {
         char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];
         if (Mqtt::publish_single2cmd()) {
-            snprintf(topic, sizeof(topic), "%s/%s", (F_(temperaturesensor)), sensor.name().c_str());
+            snprintf(topic, sizeof(topic), "%s/%s", F_(temperaturesensor), sensor.name().c_str());
         } else {
-            snprintf(topic, sizeof(topic), "%s%s/%s", (F_(temperaturesensor)), "_data", sensor.name().c_str());
+            snprintf(topic, sizeof(topic), "%s%s/%s", F_(temperaturesensor), "_data", sensor.name().c_str());
         }
         char payload[10];
         Mqtt::queue_publish(topic, Helpers::render_value(payload, sensor.temperature_c, 10, EMSESP::system_.fahrenheit() ? 2 : 0));
@@ -513,7 +513,7 @@ void TemperatureSensor::publish_values(const bool force) {
 
                 // see if we need to create the [devs] discovery section, as this needs only to be done once for all sensors
                 bool is_ha_device_created = false;
-                for (auto & sensor : sensors_) {
+                for (const auto & sensor : sensors_) {
                     if (sensor.ha_registered) {
                         is_ha_device_created = true;
                         break;
@@ -570,8 +570,8 @@ std::string TemperatureSensor::Sensor::name() const {
 // look up in customization service for a specific sensor
 // and set the name and offset from that entry if it exists
 bool TemperatureSensor::Sensor::apply_customization() {
-    EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
-        auto sensors = settings.sensorCustomizations;
+    EMSESP::webCustomizationService.read([&](const WebCustomization & settings) {
+        auto const & sensors = settings.sensorCustomizations;
         if (!sensors.empty()) {
             for (const auto & sensor : sensors) {
                 if (id_ == sensor.id) {

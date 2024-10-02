@@ -76,54 +76,47 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
     //
     // Show commands
     //
-    commands->add_command(ShellContext::MAIN, CommandFlags::USER, {F_(show)}, [=](Shell & shell, const std::vector<std::string> & arguments) {
-        to_app(shell).system_.show_system(shell);
-    });
-    commands->add_command(ShellContext::MAIN,
-                          CommandFlags::USER,
-                          string_vector{F_(show), F_(system)},
-                          [=](Shell & shell, const std::vector<std::string> & arguments) { to_app(shell).system_.show_system(shell); });
+    commands->add_command(
+        ShellContext::MAIN,
+        CommandFlags::USER,
+        {F_(show)},
+        {F_(show_commands)},
+        [=](Shell & shell, const std::vector<std::string> & arguments) {
+            if (arguments.empty()) {
+                to_app(shell).system_.show_system(shell);
+                return;
+            }
 
-    commands->add_command(ShellContext::MAIN,
-                          CommandFlags::ADMIN,
-                          string_vector{F_(show), F_(users)},
-                          [](Shell & shell, const std::vector<std::string> & arguments) { to_app(shell).system_.show_users(shell); });
-
-    commands->add_command(ShellContext::MAIN,
-                          CommandFlags::USER,
-                          string_vector{F_(show), F_(devices)},
-                          [](Shell & shell, const std::vector<std::string> & arguments) { to_app(shell).show_devices(shell); });
-
-    commands->add_command(ShellContext::MAIN, CommandFlags::USER, string_vector{F_(show), F_(log)}, [](Shell & shell, const std::vector<std::string> & arguments) {
-        to_app(shell).webLogService.show(shell);
-    });
-
-
-    commands->add_command(ShellContext::MAIN, CommandFlags::USER, string_vector{F_(show), F_(ems)}, [](Shell & shell, const std::vector<std::string> & arguments) {
-        to_app(shell).show_ems(shell);
-    });
-
-    commands->add_command(ShellContext::MAIN, CommandFlags::USER, string_vector{F_(show), F_(values)}, [](Shell & shell, const std::vector<std::string> & arguments) {
-        to_app(shell).show_device_values(shell);
-        to_app(shell).show_sensor_values(shell);
-    });
-
-    commands->add_command(ShellContext::MAIN,
-                          CommandFlags::USER,
-                          string_vector{F_(show), F_(mqtt)},
-                          [](Shell & shell, const std::vector<std::string> & arguments) { Mqtt::show_mqtt(shell); });
-
-
-    commands->add_command(ShellContext::MAIN,
-                          CommandFlags::USER,
-                          string_vector{F_(show), F_(commands)},
-                          [](Shell & shell, const std::vector<std::string> & arguments) { Command::show_all(shell); });
+            auto command = arguments.front();
+            if (command == F_(commands)) {
+                Command::show_all(shell);
+            } else if (command == F_(system)) {
+                to_app(shell).system_.show_system(shell);
+            } else if (command == F_(users) && (shell.has_flags(CommandFlags::ADMIN))) {
+                to_app(shell).system_.show_users(shell); // admin only
+            } else if (command == F_(devices)) {
+                to_app(shell).show_devices(shell);
+            } else if (command == F_(log)) {
+                to_app(shell).webLogService.show(shell);
+            } else if (command == F_(ems)) {
+                to_app(shell).show_ems(shell);
+            } else if (command == F_(values)) {
+                to_app(shell).show_device_values(shell);
+                to_app(shell).show_sensor_values(shell);
+            } else if (command == F_(mqtt)) {
+                Mqtt::show_mqtt(shell);
+            } else {
+                shell.printfln("Unknown show command");
+            }
+        },
+        [](Shell & shell, const std::vector<std::string> & current_arguments, const std::string & next_argument) -> std::vector<std::string> {
+            return std::vector<std::string>{"system", "users", "devices", "log", "ems", "values", "mqtt", "commands"};
+        });
 
 
     //
     // System commands
     //
-
 #if defined(EMSESP_TEST)
     // create commands test
     commands->add_command(ShellContext::MAIN,

@@ -2,6 +2,7 @@ import { alovaInstance } from 'api/endpoints';
 
 import type {
   APIcall,
+  Action,
   Activity,
   CoreData,
   DeviceData,
@@ -52,9 +53,9 @@ export const readActivity = () => alovaInstance.Get<Activity>('/rest/activity');
 // API
 export const API = (apiCall: APIcall) => alovaInstance.Post('/api', apiCall);
 
-// DownloadUpload
-export const exportData = (type: string) =>
-  alovaInstance.Get('/rest/exportData', { params: { type } });
+// Generic action
+export const callAction = (action: Action) =>
+  alovaInstance.Post('/rest/action', action);
 
 // SettingsCustomization
 export const readDeviceEntities = (id: number) =>
@@ -118,7 +119,7 @@ export const writeModules = (data: {
   license: string;
 }) => alovaInstance.Post('/rest/modules', data);
 
-// SettingsEntities
+// CustomEntities
 export const readCustomEntities = () =>
   alovaInstance.Get<EntityItem[]>('/rest/customEntities', {
     transform(data) {

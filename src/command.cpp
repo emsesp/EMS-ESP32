@@ -420,7 +420,7 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
     } else {
         if (single_command) {
             // log as DEBUG (TRACE) regardless if compiled with EMSESP_DEBUG
-            logger_.debug(("%sCalled command %s"), ro.c_str(), info_s);
+            logger_.debug("%sCalled command %s", ro.c_str(), info_s);
         } else {
             if (id > 0) {
                 LOG_INFO(("%sCalled command %s with value %s and id %d on device 0x%02X"), ro.c_str(), info_s, value, id, device_id);
@@ -499,7 +499,7 @@ void Command::erase_command(const uint8_t device_type, const char * cmd, uint8_t
         return;
     }
     auto it = cmdfunctions_.begin();
-    for (auto & cf : cmdfunctions_) {
+    for (auto const & cf : cmdfunctions_) {
         if (Helpers::toLower(cmd) == Helpers::toLower(cf.cmd_) && (cf.device_type_ == device_type) && ((flag & 0x3F) == (cf.flags_ & 0x3F))) {
             cmdfunctions_.erase(it);
             return;
@@ -561,16 +561,13 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
         }
     }
 
-    if (!verbose) {
-        sorted_cmds.push_back(F_(info));
-        sorted_cmds.push_back(F_(commands));
-        sorted_cmds.push_back(F_(values));
-    }
-
     sorted_cmds.sort(); // sort them
 
     // if not in verbose mode, just print them on a single line and exit
     if (!verbose) {
+        sorted_cmds.emplace_front(F_(info));
+        sorted_cmds.emplace_front(F_(commands));
+        sorted_cmds.emplace_front(F_(values));
         for (const auto & cl : sorted_cmds) {
             shell.print(cl);
             shell.print(" ");
@@ -581,14 +578,6 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
 
     // verbose mode
     shell.printfln("\n%s%s %s:%s", COLOR_BOLD_ON, COLOR_YELLOW, EMSdevice::device_type_2_device_name(device_type), COLOR_RESET);
-
-    // we hard code 'info' and 'commands' commands so print them first
-    shell.printf("  info \t\t\t\t%slist all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
-    shell.println(COLOR_RESET);
-    shell.printf("  commands \t\t\t%slist all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
-    shell.println(COLOR_RESET);
-    shell.printf("  values \t\t\t%slist all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
-    shell.println(COLOR_RESET);
 
     for (const auto & cl : sorted_cmds) {
         // find and print the description
@@ -682,6 +671,13 @@ void Command::show_devices(uuid::console::Shell & shell) {
 // calls show with verbose mode set
 void Command::show_all(uuid::console::Shell & shell) {
     shell.printfln("Showing all available commands (%s*%s=authentication not required):", COLOR_BRIGHT_GREEN, COLOR_RESET);
+    shell.println("Each device has these additional default commands:");
+    shell.printf("  info \t\t\t\t%slist all values with description%s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
+    shell.println(COLOR_RESET);
+    shell.printf("  commands \t\t\t%slist all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
+    shell.println(COLOR_RESET);
+    shell.printf("  values \t\t\t%slist all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
+    shell.println(COLOR_RESET);
 
     // show system ones first
     show(shell, EMSdevice::DeviceType::SYSTEM, true);

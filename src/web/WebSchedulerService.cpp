@@ -134,7 +134,7 @@ bool WebSchedulerService::command_setvalue(const char * value, const int8_t id, 
 
 // process json output for info/commands and value_info
 bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
-    if (scheduleItems_->size() == 0) {
+    if (scheduleItems_->empty()) {
         return true;
     }
 
@@ -233,7 +233,7 @@ void WebSchedulerService::publish(const bool force) {
         return;
     }
 
-    if (scheduleItems_->size() == 0) {
+    if (scheduleItems_->empty()) {
         return;
     }
 
@@ -449,7 +449,7 @@ void WebSchedulerService::loop() {
     static uint32_t last_uptime_sec = 0;
 
     // get list of scheduler events and exit if it's empty
-    if (scheduleItems_->size() == 0) {
+    if (scheduleItems_->empty()) {
         return;
     }
 
@@ -584,7 +584,7 @@ void WebSchedulerService::test() {
     test_value = "(custom/seltemp)";
     command("test5", test_cmd.c_str(), compute(test_value).c_str());
 
-    // this will fail unless test("boiler") is loaded
+    // note: this will fail unless test("boiler") is loaded before hand
     test_value = "(boiler/outdoortemp)";
     command("test6", test_cmd.c_str(), compute(test_value).c_str());
 

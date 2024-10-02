@@ -327,7 +327,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         // shell.invoke_command("show devices");
         // shell.invoke_command("show values");
-        // shell.invoke_command("call system allvalues");
         // shell.invoke_command("call system publish");
         // shell.invoke_command("show mqtt");
         ok = true;
@@ -792,7 +791,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         shell.invoke_command("call temperaturesensor");
         shell.invoke_command("show values");
-        shell.invoke_command("call system allvalues");
         shell.invoke_command("call temperaturesensor info");
         shell.invoke_command("call temperaturesensor values");
 
@@ -842,7 +840,6 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
         shell.invoke_command("call analogsensor");
         shell.invoke_command("show values");
-        shell.invoke_command("call system allvalues");
         shell.invoke_command("call analogsensor info");
         shell.invoke_command("call analogsensor values");
 
@@ -992,11 +989,26 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             // EMSESP::webAPIService.webAPIService(&request);
 
             request.method(HTTP_POST);
-            char data_api[] = "{\"device\":\"system\", \"cmd\":\"restart\",\"id\":-1}";
-            deserializeJson(doc, data_api);
-            json = doc.as<JsonVariant>();
+
+            char data1[] = "{\"device\":\"system\", \"cmd\":\"restart\",\"id\":-1}";
+            deserializeJson(doc, data1);
             request.url("/api");
-            EMSESP::webAPIService.webAPIService(&request, json);
+            EMSESP::webAPIService.webAPIService(&request, doc.as<JsonVariant>());
+
+            char data2[] = "{\"action\":\"customSupport\", \"param\":\"hello\"}";
+            deserializeJson(doc, data2);
+            request.url("/rest/action");
+            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+
+            char data3[] = "{\"action\":\"export\", \"param\":\"schedule\"}";
+            deserializeJson(doc, data3);
+            request.url("/rest/action");
+            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+
+            char data4[] = "{\"action\":\"export\", \"param\":\"allvalues\"}";
+            deserializeJson(doc, data4);
+            request.url("/rest/action");
+            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
             // request.url("/api/thermostat");
             // EMSESP::webAPIService.webAPIService(&request);

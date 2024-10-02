@@ -12,6 +12,7 @@ import './dragNdrop.css';
 
 const DragNdrop = ({ onFileSelected }) => {
   const [file, setFile] = useState<File>();
+  const [dragged, setDragged] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const { LL } = useI18nContext();
 
@@ -45,6 +46,7 @@ const DragNdrop = ({ onFileSelected }) => {
   const handleRemoveFile = (event) => {
     event.stopPropagation();
     setFile(undefined);
+    setDragged(false);
   };
 
   const handleUploadClick = (event) => {
@@ -56,11 +58,17 @@ const DragNdrop = ({ onFileSelected }) => {
     inputRef.current?.click();
   };
 
+  const handleDragOver = (event) => {
+    event.preventDefault(); // prevent file from being opened
+    setDragged(true);
+  };
+
   return (
     <div
-      className={`document-uploader ${file ? 'upload-box active' : 'upload-box'}`}
+      className={`document-uploader ${file || dragged ? 'active' : ''}`}
       onDrop={handleDrop}
-      onDragOver={(event) => event.preventDefault()}
+      onDragOver={handleDragOver}
+      onDragLeave={() => setDragged(false)}
       onClick={handleBrowseClick}
     >
       <div className="upload-info">

@@ -297,7 +297,7 @@ uint8_t EMSdevice::decode_brand(uint8_t value) {
 }
 
 // returns string of a human friendly description of the EMS device
-const std::string EMSdevice::to_string() {
+std::string EMSdevice::to_string() {
     // for devices that haven't been lookup yet, don't show all details
     if (product_id_ == 0) {
         return std::string(name()) + " (DeviceID:" + Helpers::hextoa(device_id_) + ")";
@@ -313,7 +313,7 @@ const std::string EMSdevice::to_string() {
 
 // returns out brand + device name
 // translated
-const std::string EMSdevice::to_string_short() {
+std::string EMSdevice::to_string_short() {
     if (brand_ == Brand::NO_BRAND) {
         return std::string(device_type_2_device_name_translated()) + ": " + name();
     }
@@ -553,11 +553,11 @@ void EMSdevice::add_device_value(int8_t                tag,              // to b
         }
     }
 
-    uint8_t     state           = DeviceValueState::DV_DEFAULT; // determine state
-    std::string custom_fullname = std::string("");              // custom fullname
-    auto        short_name      = name[0];                      // entity name
-    bool        has_cmd         = (f != nullptr);               // is it a command?
-    bool        ignore          = false;                        // ignore this entity?
+    uint8_t state           = DeviceValueState::DV_DEFAULT; // determine state
+    auto    custom_fullname = std::string("");              // custom fullname
+    auto    short_name      = name[0];                      // entity name
+    bool    has_cmd         = (f != nullptr);               // is it a command?
+    bool    ignore          = false;                        // ignore this entity?
 
     // get fullname, getting translation if it exists
     const char * const * fullname;
@@ -1025,7 +1025,7 @@ void EMSdevice::generate_values_web(JsonObject output) {
 // this is used only for WebCustomizationService::device_entities()
 void EMSdevice::generate_values_web_customization(JsonArray output) {
     for (auto & dv : devicevalues_) {
-        // also show commands and entities that have an empty full name
+        // also show commands and entities that have an empty fullname
         JsonObject obj        = output.add<JsonObject>();
         uint8_t    fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 

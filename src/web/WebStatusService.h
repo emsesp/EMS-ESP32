@@ -2,8 +2,7 @@
 #define WebStatusService_h
 
 #define EMSESP_SYSTEM_STATUS_SERVICE_PATH "/rest/systemStatus"
-#define EMSESP_CHECK_UPGRADE_PATH "/rest/checkUpgrade"
-#define EMSESP_EXPORT_DATA_SERVICE_PATH "/rest/exportData"
+#define EMSESP_ACTION_SERVICE_PATH "/rest/action"
 
 #include <semver200.h> // for version checking
 
@@ -13,10 +12,23 @@ class WebStatusService {
   public:
     WebStatusService(AsyncWebServer * server, SecurityManager * securityManager);
 
-  private:
+// make action function public so we can test in the debug and standalone mode
+#ifndef EMSESP_STANDALONE
+  protected:
+#endif
     void systemStatus(AsyncWebServerRequest * request);
-    void checkUpgrade(AsyncWebServerRequest * request, JsonVariant json);
-    void exportData(AsyncWebServerRequest * request);
+    void action(AsyncWebServerRequest * request, JsonVariant json);
+
+  private:
+    SecurityManager * _securityManager;
+
+    // actions
+    bool checkUpgrade(JsonObject root, std::string & latest_version);
+    bool exportData(JsonObject root, std::string & type);
+    bool customSupport(JsonObject root);
+    bool uploadURL(const char * url);
+
+    void allvalues(JsonObject output);
 };
 
 } // namespace emsesp

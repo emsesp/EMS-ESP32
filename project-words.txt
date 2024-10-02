@@ -1346,3 +1346,6 @@ zyxwvutsrqponmlkjihgfedcba
 Omea
 Bolv
 hardwarestatus
+hpcurrpower
+hppowerlimit
+CUSTOMSUPPORT

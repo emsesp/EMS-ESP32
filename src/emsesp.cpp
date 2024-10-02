@@ -208,7 +208,7 @@ void EMSESP::uart_init() {
     uint8_t tx_mode = 0;
     uint8_t rx_gpio = 0;
     uint8_t tx_gpio = 0;
-    EMSESP::webSettingsService.read([&](WebSettings & settings) {
+    EMSESP::webSettingsService.read([&](WebSettings const & settings) {
         tx_mode = settings.tx_mode;
         rx_gpio = settings.rx_gpio;
         tx_gpio = settings.tx_gpio;
@@ -279,7 +279,7 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
 
     if (bus_status() != BUS_STATUS_OFFLINE) {
         shell.printfln("EMS Bus info:");
-        EMSESP::webSettingsService.read([&](WebSettings & settings) { shell.printfln("  Tx mode: %d", settings.tx_mode); });
+        EMSESP::webSettingsService.read([&](WebSettings const & settings) { shell.printfln("  Tx mode: %d", settings.tx_mode); });
         shell.printfln("  Bus protocol: %s", EMSbus::is_ht3() ? "HT3" : "Buderus");
         shell.printfln("  #recognized EMS devices: %d", EMSESP::emsdevices.size());
         shell.printfln("  #telegrams received: %d", rxservice_.telegram_count());
@@ -1317,7 +1317,7 @@ bool EMSESP::add_device(const uint8_t device_id, const uint8_t product_id, const
     emsdevices.push_back(EMSFactory::add(device_type, device_id, product_id, version, default_name, flags, brand));
 
     // see if we have a custom device name in our Customizations list, and if so set it
-    webCustomizationService.read([&](WebCustomization & settings) {
+    webCustomizationService.read([&](WebCustomization const & settings) {
         for (EntityCustomization e : settings.entityCustomizations) {
             if ((e.device_id == device_id) && (e.product_id == product_id)) {
                 LOG_DEBUG("Have customizations for %s with deviceID 0x%02X productID %d", e.custom_name.c_str(), device_id, product_id);

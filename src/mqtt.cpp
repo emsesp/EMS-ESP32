@@ -1115,11 +1115,12 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
 
         // special case to handle booleans
         // applies to both Binary Sensor (read only) and a Switch (for a command)
-        // has no unit of measure or icon
+        // has no unit of measure or icon, and must be true/false (not on/off or 1/0)
         if (type == DeviceValueType::BOOL) {
             add_ha_bool(doc);
-            Helpers::render_boolean(sample_val, false);
+            strlcpy(sample_val, "false", sizeof(sample_val)); // default is "false"
         }
+
         doc["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else " + sample_val + "}}";
 
         // add the dev json object to the end, not for commands

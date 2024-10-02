@@ -40,8 +40,9 @@ For more details go to [www.emsesp.org](https://www.emsesp.org/).
 - autodetect and download firmware upgrades via the WebUI
 - command 'show log' that lists out the current weblog buffer, showing last messages.
 - default web log buffer to 25 lines for ESP32s with no PSRAM
-- Try and determine correct board profile if none is set
+- try and determine correct board profile if none is set during boot
 - auto Scroll in WebLog UI - reduced delay so incoming logs are faster
+- uploading custom support info for Guest users [#2054]<https://github.com/emsesp/EMS-ESP32/issues/2054>
 
 ## Fixed
 
@@ -72,6 +73,7 @@ For more details go to [www.emsesp.org](https://www.emsesp.org/).
 - WebLog UI matches color schema of the terminal console correctly
 - Updated Web libraries, ArduinoJson
 - Help page doesn't show detailed tech info if the user is not 'admin' role [#2054](https://github.com/emsesp/EMS-ESP32/issues/2054)
+- removed system command `allvalues` and moved to an action called `export`
 - Show ems-esp internal devices in device list of system/info
 - Scheduler and mqtt run async on systems with psram
 - Show IPv6 address type (local/global/ula) in log

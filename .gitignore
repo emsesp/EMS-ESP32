@@ -68,3 +68,6 @@ venv/
 
 # cspell
 words-found-verbose.txt
+
+# sonarlint
+compile_commands.json

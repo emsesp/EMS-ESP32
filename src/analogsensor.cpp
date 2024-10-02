@@ -102,9 +102,6 @@ void AnalogSensor::reload(bool get_nvs) {
                 }
             }
             if (!found) {
-                // if (!System::is_valid_gpio(sensor.gpio)) {
-                //     continue;
-                // }
                 sensors_.emplace_back(sensor.gpio, sensor.name, sensor.offset, sensor.factor, sensor.uom, sensor.type);
                 sensors_.back().ha_registered = false; // this will trigger recreate of the HA config
                 if (sensor.type == AnalogType::COUNTER || sensor.type >= AnalogType::DIGITAL_OUT) {
@@ -610,7 +607,7 @@ void AnalogSensor::publish_values(const bool force) {
 
                 // see if we need to create the [devs] discovery section, as this needs only to be done once for all sensors
                 bool is_ha_device_created = false;
-                for (auto & sensor : sensors_) {
+                for (auto const & sensor : sensors_) {
                     if (sensor.ha_registered) {
                         is_ha_device_created = true;
                         break;

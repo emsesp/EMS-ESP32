@@ -14,9 +14,7 @@
 #include <utility>
 
 #if defined(EMSESP_STANDALONE)
-
-#include <modbus_test.h>
-
+#include <../test/test_modbus/modbus_test.h>
 #endif
 
 #ifndef EMSESP_STANDALONE

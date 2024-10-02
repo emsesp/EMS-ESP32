@@ -24,13 +24,13 @@
 
 namespace emsesp {
 
-WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * securityManager) {
+WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * securityManager)
+    : _securityManager(securityManager) {
     // GET
     server->on(EMSESP_SYSTEM_STATUS_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { systemStatus(request); });
-    server->on(EMSESP_EXPORT_DATA_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { exportData(request); });
 
-    // POST
-    server->on(EMSESP_CHECK_UPGRADE_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { checkUpgrade(request, json); });
+    // POST - generic action handler
+    server->on(EMSESP_ACTION_SERVICE_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { action(request, json); });
 }
 
 // /rest/systemStatus
@@ -146,13 +146,55 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     request->send(response);
 }
 
-// returns trues if there is an upgrade available
-void WebStatusService::checkUpgrade(AsyncWebServerRequest * request, JsonVariant json) {
+// generic action handler - as a POST
+void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json) {
     auto *     response = new AsyncJsonResponse();
     JsonObject root     = response->getRoot();
 
+    // get action and any optional param
+    std::string action = json["action"];
+    std::string param  = json["param"]; // is optional
+
+    // check if we're authenticated for admin tasks, some actions are only for admins
+    Authentication authentication = _securityManager->authenticateRequest(request);
+    bool           is_admin       = AuthenticationPredicates::IS_ADMIN(authentication);
+
+    bool ok = true;
+    if (action == "checkUpgrade") {
+        ok = checkUpgrade(root, param);
+    } else if (action == "export") {
+        ok = exportData(root, param);
+    } else if (action == "customSupport") {
+        ok = customSupport(root);
+    } else if (action == "uploadURL" && is_admin) {
+        ok = uploadURL(param.c_str());
+    }
+
+#if defined(EMSESP_UNITY)
+    // store the result so we can test with Unity later
+    storeResponse(output);
+#endif
+#if defined(EMSESP_STANDALONE) && !defined(EMSESP_UNITY)
+    Serial.printf("%sweb output: %s[%s]", COLOR_WHITE, COLOR_BRIGHT_CYAN, request->url().c_str());
+    Serial.printf(" %s(%d)%s ", ok ? COLOR_BRIGHT_GREEN : COLOR_BRIGHT_RED, ok ? 200 : 400, COLOR_YELLOW);
+    serializeJson(root, Serial);
+    Serial.println(COLOR_RESET);
+#endif
+
+    // send response
+    if (!ok) {
+        request->send(400);
+        return;
+    }
+
+    response->setLength();
+    request->send(response);
+}
+
+// action = checkUpgrade
+// returns true if there is an upgrade available
+bool WebStatusService::checkUpgrade(JsonObject root, std::string & latest_version) {
     version::Semver200_version settings_version(EMSESP_APP_VERSION);
-    const std::string          latest_version = json["version"] | EMSESP_APP_VERSION;
     version::Semver200_version this_version(latest_version);
 
 #if defined(EMSESP_DEBUG)
@@ -161,16 +203,40 @@ void WebStatusService::checkUpgrade(AsyncWebServerRequest * request, JsonVariant
 
     root["upgradeable"] = (this_version > settings_version);
 
-    response->setLength();
-    request->send(response);
+    return true;
 }
 
-// returns data for a specific feature/settings as a json object
-void WebStatusService::exportData(AsyncWebServerRequest * request) {
-    auto *     response = new AsyncJsonResponse();
-    JsonObject root     = response->getRoot();
+// action = allvalues
+// output all the devices and the values
+void WebStatusService::allvalues(JsonObject output) {
+    JsonObject device_output;
+    auto       value = F_(values);
 
-    String type  = request->getParam("type")->value();
+    // EMS-Device Entities
+    for (const auto & emsdevice : EMSESP::emsdevices) {
+        std::string title = emsdevice->device_type_2_device_name_translated() + std::string(" ") + emsdevice->to_string();
+        device_output     = output[title].to<JsonObject>();
+        emsdevice->get_value_info(device_output, value, DeviceValueTAG::TAG_NONE);
+    }
+
+    // Custom Entities
+    device_output = output["Custom Entities"].to<JsonObject>();
+    EMSESP::webCustomEntityService.get_value_info(device_output, value);
+
+    // Scheduler
+    device_output = output["Scheduler"].to<JsonObject>();
+    EMSESP::webSchedulerService.get_value_info(device_output, value);
+
+    // Sensors
+    device_output = output["Analog Sensors"].to<JsonObject>();
+    EMSESP::analogsensor_.get_value_info(device_output, value);
+    device_output = output["Temperature Sensors"].to<JsonObject>();
+    EMSESP::temperaturesensor_.get_value_info(device_output, value);
+}
+
+// action = export
+// returns data for a specific feature/settings as a json object
+bool WebStatusService::exportData(JsonObject root, std::string & type) {
     root["type"] = type;
 
     if (type == "settings") {
@@ -188,13 +254,44 @@ void WebStatusService::exportData(AsyncWebServerRequest * request) {
         System::extractSettings(EMSESP_CUSTOMIZATION_FILE, "Customizations", root);
     } else if (type == "entities") {
         System::extractSettings(EMSESP_CUSTOMENTITY_FILE, "Entities", root);
+    } else if (type == "allvalues") {
+        root.clear(); // don't need the "type" key
+        allvalues(root);
     } else {
-        request->send(400);
-        return;
+        return false;
+    }
+    return true;
+}
+
+// action = customSupport
+// reads any upload customSupport.json file and sends to to Help page to be shown as Guest
+bool WebStatusService::customSupport(JsonObject root) {
+#ifndef EMSESP_STANDALONE
+    // check if we have custom support file uploaded
+    File file = LittleFS.open(EMSESP_CUSTOMSUPPORT_FILE, "r");
+    if (!file) {
+        // there is no custom file, return empty object
+        return true;
     }
 
-    response->setLength();
-    request->send(response);
+    // read the contents of the file into the root output json object
+    DeserializationError error = deserializeJson(root, file);
+    if (error) {
+        emsesp::EMSESP::logger().err("Failed to read custom support file");
+        return false;
+    }
+
+    file.close();
+#endif
+    return true;
+}
+
+// action = uploadURL
+// uploads a firmware file from a URL
+bool WebStatusService::uploadURL(const char * url) {
+    // this will keep a copy of the URL, but won't initiate the download yet
+    emsesp::EMSESP::system_.uploadFirmwareURL(url);
+    return true;
 }
 
 } // namespace emsesp

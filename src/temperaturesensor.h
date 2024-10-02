@@ -90,23 +90,23 @@ class TemperatureSensor {
         return sensors_;
     }
 
-    uint32_t reads() {
+    uint32_t reads() const {
         return sensorreads_;
     }
 
-    uint32_t fails() {
+    uint32_t fails() const {
         return sensorfails_;
     }
 
-    bool sensor_enabled() {
+    bool sensor_enabled() const {
         return (dallas_gpio_ != 0);
     }
 
-    bool have_sensors() {
+    bool have_sensors() const {
         return (!sensors_.empty());
     }
 
-    size_t count_entities() {
+    size_t count_entities() const {
         return sensors_.size();
     }
 

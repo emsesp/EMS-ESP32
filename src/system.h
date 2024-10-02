@@ -43,6 +43,8 @@ using uuid::console::Shell;
 
 #define EMSESP_FS_CONFIG_DIRECTORY "/config"
 
+#define EMSESP_CUSTOMSUPPORT_FILE "/config/customSupport.json"
+
 namespace emsesp {
 
 enum PHY_type : uint8_t { PHY_TYPE_NONE = 0, PHY_TYPE_LAN8720, PHY_TYPE_TLK110 };
@@ -58,12 +60,10 @@ class System {
     static bool command_fetch(const char * value, const int8_t id);
     static bool command_restart(const char * value, const int8_t id);
     static bool command_format(const char * value, const int8_t id);
-    // static bool command_syslog_level(const char * value, const int8_t id);
     static bool command_watch(const char * value, const int8_t id);
     static bool command_message(const char * value, const int8_t id);
     static bool command_info(const char * value, const int8_t id, JsonObject output);
     static bool command_response(const char * value, const int8_t id, JsonObject output);
-    static bool command_allvalues(const char * value, const int8_t id, JsonObject output);
 
     static bool get_value_info(JsonObject root, const char * cmd);
     static void get_value_json(JsonObject output, const std::string & circuit, const std::string & name, JsonVariant val);
@@ -162,10 +162,12 @@ class System {
         readonly_mode_ = readonly_mode;
     }
 
+    // Boolean Format API/MQTT
     uint8_t bool_format() {
         return bool_format_;
     }
 
+    // Boolean Format Web
     uint8_t bool_dashboard() {
         return bool_dashboard_;
     }

@@ -25,7 +25,7 @@ uuid::log::Logger Shower::logger_{F_(shower), uuid::log::Facility::CONSOLE};
 static bool force_coldshot = false;
 
 void Shower::start() {
-    EMSESP::webSettingsService.read([&](WebSettings & settings) {
+    EMSESP::webSettingsService.read([&](WebSettings const & settings) {
         shower_timer_          = settings.shower_timer;
         shower_alert_          = settings.shower_alert;
         shower_alert_trigger_  = settings.shower_alert_trigger * 60; // convert from minutes to seconds
@@ -61,7 +61,6 @@ void Shower::loop() {
         return;
     }
 
-    // uint32_t time_now = uuid::get_uptime(); // in ms
     auto time_now = uuid::get_uptime_sec(); // in sec
 
     // if already in cold mode, ignore all this logic until we're out of the cold blast
