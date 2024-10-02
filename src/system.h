@@ -162,10 +162,12 @@ class System {
         readonly_mode_ = readonly_mode;
     }
 
+    // Boolean Format API/MQTT
     uint8_t bool_format() {
         return bool_format_;
     }
 
+    // Boolean Format Web
     uint8_t bool_dashboard() {
         return bool_dashboard_;
     }
