@@ -316,7 +316,7 @@ const SchedulerDialog = ({
                   }
                   multiline
                   fullWidth
-                  value={editItem.time === '00:00'}
+                  value={editItem.time === '00:00' ? '' : editItem.time}
                   margin="normal"
                   onChange={updateFormValue}
                 />
