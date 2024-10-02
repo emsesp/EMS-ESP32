@@ -41,6 +41,7 @@ const LayoutAppBar = ({ title, onToggleDrawer }: LayoutAppBarProps) => {
 
         {show_back && (
           <IconButton
+            sx={{ mr: 1 }}
             color="inherit"
             edge="start"
             onClick={() => navigate(pathnames[0])}
