@@ -95,7 +95,8 @@ void Mqtt::subscribe(const uint8_t device_type, const std::string & topic, mqtt_
 
     // register in our libary with the callback function.
     // We store the original topic string without base
-    mqtt_subfunctions_.emplace_back(device_type, std::move(topic), std::move(cb));
+    // TODO check if ok to remove the std::move(topic)
+    mqtt_subfunctions_.emplace_back(device_type, topic, cb);
 
     if (!enabled() || !connected()) {
         return;
@@ -135,7 +136,7 @@ void Mqtt::loop() {
     uint32_t currentMillis = uuid::get_uptime();
 
     // send heartbeat
-    if ((currentMillis - last_publish_heartbeat_ > publish_time_heartbeat_)) {
+    if (currentMillis - last_publish_heartbeat_ > publish_time_heartbeat_) {
         last_publish_heartbeat_ = currentMillis;
         EMSESP::system_.send_heartbeat(); // send heartbeat
     }
@@ -265,7 +266,8 @@ void Mqtt::on_message(const char * topic, const uint8_t * payload, size_t len) {
 
     JsonDocument input_doc;
     JsonDocument output_doc;
-    JsonObject   input, output;
+    JsonObject   input;
+    JsonObject   output;
 
     // convert payload into a json doc
     // if the payload doesn't not contain the key 'value' or 'data', treat the whole payload as the 'value'
@@ -524,8 +526,6 @@ void Mqtt::on_connect() {
 
     // publish to the last will topic (see Mqtt::start() function) to say we're alive
     queue_publish_retain("status", "online", false); // with retain off
-
-    // mqtt_publish_fails_ = 0; // reset fail count to 0
 }
 
 // Home Assistant Discovery - the main master Device called EMS-ESP
