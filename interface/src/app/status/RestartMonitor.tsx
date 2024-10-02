@@ -45,7 +45,7 @@ const RestartMonitor = () => {
   return (
     <Dialog fullWidth={true} sx={dialogStyle} open={true}>
       <DialogContent dividers>
-        <Box m={2} py={2} display="flex" alignItems="center" flexDirection="column">
+        <Box m={0} py={0} display="flex" alignItems="center" flexDirection="column">
           <Typography
             color="secondary"
             variant="h6"
@@ -69,7 +69,7 @@ const RestartMonitor = () => {
             <MessageBox my={2} level="error" message={errorMessage} />
           ) : (
             <Box py={2}>
-              <CircularProgress size={48} />
+              <CircularProgress size={32} />
             </Box>
           )}
         </Box>
