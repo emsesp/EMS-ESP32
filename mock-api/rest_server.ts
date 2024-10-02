@@ -457,6 +457,8 @@ const EMSESP_DEVICEDATA_ENDPOINT2 = REST_ENDPOINT_ROOT + 'deviceData/:id?';
 const EMSESP_DEVICEENTITIES_ENDPOINT1 = REST_ENDPOINT_ROOT + 'deviceEntities';
 const EMSESP_DEVICEENTITIES_ENDPOINT2 = REST_ENDPOINT_ROOT + 'deviceEntities/:id?';
 
+const EMSESP_DASHBOARD_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'dashboardData';
+
 const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile';
 const EMSESP_WRITE_DEVICEVALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceValue';
 const EMSESP_WRITE_DEVICENAME_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceName';
@@ -800,6 +802,26 @@ const emsesp_coredata = {
       p: 158,
       v: '73.03',
       e: 63,
+      url: 'thermostat'
+    }
+  ]
+};
+
+const emsesp_coredata2 = {
+  connected: true,
+  // connected: false,
+  // devices: []
+  devices: [
+    {
+      id: 4,
+      t: 6,
+      tn: 'Thermostat',
+      b: 'Nefit',
+      n: 'Moduline 1000',
+      d: 16,
+      p: 165,
+      v: '04.01',
+      e: 3,
       url: 'thermostat'
     }
   ]
@@ -4231,6 +4253,39 @@ function deviceEntities(id: number) {
   return new Response(encoder.encode(emsesp_deviceentities_none), { headers });
 }
 
+// prepare dashboard data
+function getDashboardEntityData(id: number) {
+  let device_data = {};
+  if (id == 1) device_data = emsesp_devicedata_1;
+  else if (id == 2) device_data = emsesp_devicedata_2;
+  else if (id == 3) device_data = emsesp_devicedata_3;
+  else if (id == 4) device_data = emsesp_devicedata_4;
+  else if (id == 5) device_data = emsesp_devicedata_5;
+  else if (id == 6) device_data = emsesp_devicedata_6;
+  else if (id == 7) device_data = emsesp_devicedata_7;
+  else if (id == 8) device_data = emsesp_devicedata_8;
+  else if (id == 9) device_data = emsesp_devicedata_9;
+  else if (id == 10) device_data = emsesp_devicedata_10;
+  else if (id == 99) device_data = emsesp_devicedata_99;
+
+  // filter device_data, just want id, v, u
+  // and only favorite items (bit 8 set), only for non-Custom Entities
+  // and replace id by striping off the 2-char mask
+  let new_data = (device_data as any).data
+    .map(({ id, c, m, x, s, h, l, ...rest }) => ({
+      ...rest,
+      id2: id
+    }))
+    .filter((item) => id === 99 || parseInt(item.id2.slice(0, 2), 16) & 0x08)
+    .map((item) => ({
+      n: item.id2.slice(2), // name
+      v: item.v, // value
+      u: item.u // uom
+    }));
+
+  return new_data;
+}
+
 // Router starts here...
 router
   // EMS-ESP Settings
@@ -4242,7 +4297,7 @@ router
     // return status(205); // restart needed
   })
 
-  // Device Dashboard Data
+  // Device Data
   .get(EMSESP_CORE_DATA_ENDPOINT, () => {
     // sort by type, like its done in the C++ code
     let sorted_devices = [...emsesp_coredata.devices].sort((a, b) => a.t - b.t);
@@ -4268,6 +4323,71 @@ router
   .get(EMSESP_DEVICEENTITIES_ENDPOINT2, ({ params }) =>
     params.id ? deviceEntities(Number(params.id)) : status(404)
   )
+  .get(EMSESP_DASHBOARD_DATA_ENDPOINT, () => {
+    // builds a JSON with id, t = typeID, tn = typeName, n=Name, data = [{n, v, u}]
+    let dashboard_data = [];
+    let dashboard_object = {};
+
+    // pick EMS devices from coredata
+    for (const element of emsesp_coredata.devices) {
+      const id = element.id;
+
+      dashboard_object = {
+        id: id,
+        t: element.t,
+        tn: element.tn,
+        n: element.n,
+        data: getDashboardEntityData(id)
+      };
+
+      dashboard_data.push(dashboard_object); // add to dashboard_data
+    }
+
+    // add the custom entity data
+    dashboard_object = {
+      id: 99,
+      t: 99,
+      tn: 'custom',
+      n: 'Custom Entities',
+      data: getDashboardEntityData(99)
+    };
+    dashboard_data.push(dashboard_object); // add to dashboard_data
+
+    // add temperature sensor data
+    let sensor_data = {};
+    sensor_data = emsesp_sensordata.ts.map((item) => ({
+      n: item.n ? item.n : item.id, // name may not be set
+      v: item.t ? item.t : undefined, // can have no value
+      u: item.u
+    }));
+    dashboard_object = {
+      id: 98,
+      t: 98,
+      tn: 'ts',
+      n: 'Temperature Sensors',
+      data: sensor_data
+    };
+    dashboard_data.push(dashboard_object); // add to dashboard_data
+
+    // add analog sensor data
+    sensor_data = emsesp_sensordata.as.map((item) => ({
+      n: item.n,
+      v: item.v,
+      u: item.u
+    }));
+    dashboard_object = {
+      id: 97,
+      t: 97,
+      tn: 'as',
+      n: 'Analog Sensors',
+      data: sensor_data
+    };
+    dashboard_data.push(dashboard_object); // add to dashboard_data
+
+    console.log('dashboard_data: ', dashboard_data);
+
+    return new Response(encoder.encode(dashboard_data), { headers }); // msgpack it
+  })
 
   // Customizations
   .post(EMSESP_CUSTOMIZATION_ENTITIES_ENDPOINT, async (request: any) => {
