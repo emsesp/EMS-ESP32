@@ -42,7 +42,6 @@ class EMSdevice {
         , flags_(flags)
         , brand_(brand) {
         strlcpy(version_, version, sizeof(version_));
-        custom_name_ = ""; // init custom name to blank
     }
 
     // static functions, used outside the class like in console.cpp, command.cpp, emsesp.cpp, mqtt.cpp
@@ -113,7 +112,7 @@ class EMSdevice {
     }
 
     // set custom device name
-    inline void custom_name(std::string & custom_name) {
+    inline void custom_name(std::string const & custom_name) {
         custom_name_ = custom_name;
     }
     std::string name(); // returns either default or custom name if defined
@@ -205,17 +204,16 @@ class EMSdevice {
     int get_modbus_value(uint8_t tag, const std::string & shortname, std::vector<uint16_t> & result);
     int modbus_value_to_json(uint8_t tag, const std::string & shortname, const std::vector<uint8_t> & modbus_data, JsonObject jsonValue);
 
-    const char *      brand_to_char();
-    const std::string to_string();
-    const std::string to_string_short();
+    const char * brand_to_char();
+    std::string  to_string();
+    std::string  to_string_short();
 
     enum Handlers : uint8_t { ALL, RECEIVED, FETCHED, PENDING, IGNORED };
 
     void   show_telegram_handlers(uuid::console::Shell & shell) const;
     char * show_telegram_handlers(char * result, const size_t len, const uint8_t handlers);
     void   show_mqtt_handlers(uuid::console::Shell & shell) const;
-    // void   list_device_entries(JsonObject output) const;
-    void add_handlers_ignored(const uint16_t handler);
+    void   add_handlers_ignored(const uint16_t handler);
 
     void set_climate_minmax(int8_t tag, int16_t min, uint32_t max);
     void setCustomizationEntity(const std::string & entity_id);
@@ -456,15 +454,13 @@ class EMSdevice {
     uint8_t count_entities();
     bool    has_entities() const;
 
-    /*
-    void reserve_device_values(uint8_t elements) {
-        devicevalues_.reserve(elements);
-    }
+    // void reserve_device_values(uint8_t elements) {
+    //     devicevalues_.reserve(elements);
+    // }
 
-    void reserve_telegram_functions(uint8_t elements) {
-        telegram_functions_.reserve(elements);
-    }
-    */
+    // void reserve_telegram_functions(uint8_t elements) {
+    //     telegram_functions_.reserve(elements);
+    // }
 
 #if defined(EMSESP_STANDALONE)
     struct TelegramFunctionDump {
@@ -487,10 +483,10 @@ class EMSdevice {
     uint8_t      device_id_   = 0;
     uint8_t      product_id_  = 0;
     char         version_[6];
-    const char * default_name_; // the fixed name the EMS model taken from the device library
-    std::string  custom_name_;  // custom name
-    uint8_t      flags_ = 0;
-    uint8_t      brand_ = Brand::NO_BRAND;
+    const char * default_name_;     // the fixed name the EMS model taken from the device library
+    std::string  custom_name_ = ""; // custom name
+    uint8_t      flags_       = 0;
+    uint8_t      brand_       = Brand::NO_BRAND;
 
     bool ha_config_done_ = false;
     bool has_update_     = false;

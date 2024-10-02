@@ -420,7 +420,7 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
     } else {
         if (single_command) {
             // log as DEBUG (TRACE) regardless if compiled with EMSESP_DEBUG
-            logger_.debug(("%sCalled command %s"), ro.c_str(), info_s);
+            logger_.debug("%sCalled command %s", ro.c_str(), info_s);
         } else {
             if (id > 0) {
                 LOG_INFO(("%sCalled command %s with value %s and id %d on device 0x%02X"), ro.c_str(), info_s, value, id, device_id);
@@ -499,7 +499,7 @@ void Command::erase_command(const uint8_t device_type, const char * cmd, uint8_t
         return;
     }
     auto it = cmdfunctions_.begin();
-    for (auto & cf : cmdfunctions_) {
+    for (auto const & cf : cmdfunctions_) {
         if (Helpers::toLower(cmd) == Helpers::toLower(cf.cmd_) && (cf.device_type_ == device_type) && ((flag & 0x3F) == (cf.flags_ & 0x3F))) {
             cmdfunctions_.erase(it);
             return;
@@ -565,9 +565,9 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
 
     // if not in verbose mode, just print them on a single line and exit
     if (!verbose) {
-        sorted_cmds.push_front(F_(info));
-        sorted_cmds.push_front(F_(commands));
-        sorted_cmds.push_front(F_(values));
+        sorted_cmds.emplace_front(F_(info));
+        sorted_cmds.emplace_front(F_(commands));
+        sorted_cmds.emplace_front(F_(values));
         for (const auto & cl : sorted_cmds) {
             shell.print(cl);
             shell.print(" ");

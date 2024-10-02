@@ -58,7 +58,7 @@ void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
 void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     // check if the user has admin privileges (token is included and authorized)
     bool is_admin = false;
-    EMSESP::webSettingsService.read([&](WebSettings & settings) {
+    EMSESP::webSettingsService.read([&](WebSettings const & settings) {
         Authentication authentication = _securityManager->authenticateRequest(request);
         is_admin                      = settings.notoken_api || AuthenticationPredicates::IS_ADMIN(authentication);
     });
@@ -94,7 +94,7 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     emsesp::EMSESP::system_.refreshHeapMem();
 
     // output json buffer
-    AsyncJsonResponse * response = new AsyncJsonResponse(false);
+    auto response = new AsyncJsonResponse(false);
 
     // add more mem if needed - won't be needed in ArduinoJson 7
     // while (!response->getSize()) {

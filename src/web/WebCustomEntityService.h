@@ -55,14 +55,14 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
     WebCustomEntityService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
 
     void begin();
-    void publish_single(const CustomEntityItem & entity);
+    void publish_single(CustomEntityItem & entity);
     void publish(const bool force = false);
     bool command_setvalue(const char * value, const int8_t id, const char * name);
     bool get_value_info(JsonObject output, const char * cmd);
-    void get_value_json(JsonObject output, const CustomEntityItem & entity);
+    void get_value_json(JsonObject output, CustomEntityItem & entity);
     bool get_value(std::shared_ptr<const Telegram> telegram);
     void fetch();
-    void render_value(JsonObject output, CustomEntityItem entity, const bool useVal = false, const bool web = false, const bool add_uom = false);
+    void render_value(JsonObject output, CustomEntityItem & entity, const bool useVal = false, const bool web = false, const bool add_uom = false);
     void show_values(JsonObject output);
     void generate_value_web(JsonObject output);
 

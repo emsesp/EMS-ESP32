@@ -118,13 +118,13 @@ bool System::command_fetch(const char * value, const int8_t id) {
         if (value_s == "all") {
             LOG_INFO("Requesting data from EMS devices");
             EMSESP::fetch_device_values();
-        } else if (value_s == (F_(boiler))) {
+        } else if (value_s == F_(boiler)) {
             EMSESP::fetch_device_values_type(EMSdevice::DeviceType::BOILER);
-        } else if (value_s == (F_(thermostat))) {
+        } else if (value_s == F_(thermostat)) {
             EMSESP::fetch_device_values_type(EMSdevice::DeviceType::THERMOSTAT);
-        } else if (value_s == (F_(solar))) {
+        } else if (value_s == F_(solar)) {
             EMSESP::fetch_device_values_type(EMSdevice::DeviceType::SOLAR);
-        } else if (value_s == (F_(mixer))) {
+        } else if (value_s == F_(mixer)) {
             EMSESP::fetch_device_values_type(EMSdevice::DeviceType::MIXER);
         }
     } else {
@@ -338,9 +338,6 @@ void System::syslog_init() {
         syslog_.mark_interval(syslog_mark_interval_);
         syslog_.destination(syslog_host_.c_str(), syslog_port_);
         syslog_.hostname(hostname().c_str());
-
-        // removed in 3.6.0
-        // Command::add(EMSdevice::DeviceType::SYSTEM, F_(syslog), System::command_syslog_level, FL_(changeloglevel_cmd), CommandFlag::ADMIN_ONLY);
 
     } else if (syslog_.started()) {
         // in case service is still running, this flushes the queue
@@ -1053,7 +1050,7 @@ void System::show_system(uuid::console::Shell & shell) {
         shell.printfln(" WiFi Network: Disconnected");
         break;
 
-    case WL_NO_SHIELD:
+    // case WL_NO_SHIELD:
     default:
         shell.printfln(" WiFi MAC address: %s", WiFi.macAddress().c_str());
         shell.printfln(" WiFi Network: not connected");
@@ -1087,7 +1084,7 @@ void System::show_system(uuid::console::Shell & shell) {
     } else {
         shell.printfln(" Syslog: %s", syslog_.started() ? "started" : "stopped");
         shell.print(" ");
-        shell.printfln(F_(host_fmt), !syslog_host_.isEmpty() ? syslog_host_.c_str() : (F_(unset)));
+        shell.printfln(F_(host_fmt), !syslog_host_.isEmpty() ? syslog_host_.c_str() : F_(unset));
         shell.printfln(" IP: %s", uuid::printable_to_string(syslog_.ip()).c_str());
         shell.print(" ");
         shell.printfln(F_(port_fmt), syslog_port_);
@@ -1167,7 +1164,7 @@ bool System::check_upgrade(bool factory_settings) {
 
     if (!factory_settings) {
         // fetch current version from settings file
-        EMSESP::webSettingsService.read([&](WebSettings & settings) { settingsVersion = settings.version.c_str(); });
+        EMSESP::webSettingsService.read([&](WebSettings const & settings) { settingsVersion = settings.version.c_str(); });
 
         // see if we're missing a version, will be < 3.5.0b13 from Dec 23 2022
         missing_version = (settingsVersion.empty() || (settingsVersion.length() < 5));
@@ -1338,14 +1335,11 @@ bool System::get_value_info(JsonObject output, const char * cmd) {
     if (!strcmp(cmd, F_(entities))) {
         for (JsonPair p : root) {
             if (p.value().is<JsonObject>()) {
-                // String prefix = p.key().c_str();
                 for (JsonPair p1 : p.value().as<JsonObject>()) {
                     JsonObject entity = output[std::string(p.key().c_str()) + "." + p1.key().c_str()].to<JsonObject>();
                     get_value_json(entity, p.key().c_str(), p1.key().c_str(), p1.value());
                 }
-            } // else { // we don't have pairs in json root object
-            //    get_value_json(entity, "", p.key().c_str(), p.value());
-            // }
+            }
         }
         return true;
     }
@@ -1498,7 +1492,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         }
     });
 #ifndef EMSESP_STANDALONE
-    EMSESP::esp8266React.getAPSettingsService()->read([&](APSettings & settings) {
+    EMSESP::esp8266React.getAPSettingsService()->read([&](const APSettings & settings) {
         const char * pM[]       = {"always", "disconnected", "never"};
         node["APProvisionMode"] = pM[settings.provisionMode];
         node["APSecurity"]      = settings.password.length() ? "wpa2" : "open";
@@ -1510,11 +1504,10 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node = output["ntp"].to<JsonObject>();
 #ifndef EMSESP_STANDALONE
     node["NTPStatus"] = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
-    EMSESP::esp8266React.getNTPSettingsService()->read([&](NTPSettings & settings) {
+    EMSESP::esp8266React.getNTPSettingsService()->read([&](const NTPSettings & settings) {
         node["enabled"] = settings.enabled;
         node["server"]  = settings.server;
         node["tzLabel"] = settings.tzLabel;
-        // node["tz format"] = settings.tzFormat;
     });
 #endif
 
@@ -1527,7 +1520,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         node["MQTTPublishFails"] = Mqtt::publish_fails();
         node["MQTTConnects"]     = Mqtt::connect_count();
     }
-    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & settings) {
+    EMSESP::esp8266React.getMqttSettingsService()->read([&](const MqttSettings & settings) {
         node["enabled"]               = settings.enabled;
         node["clientID"]              = settings.clientId;
         node["keepAlive"]             = settings.keepAlive;
@@ -1606,7 +1599,6 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         node["busStatus"] = "unknown";
         break;
     }
-    // if (EMSESP::bus_status() != EMSESP::BUS_STATUS_OFFLINE) {
     node["busProtocol"]            = EMSbus::is_ht3() ? "HT3" : "Buderus";
     node["busTelegramsReceived"]   = EMSESP::rxservice_.telegram_count();
     node["busReads"]               = EMSESP::txservice_.telegram_read_count();
@@ -1616,11 +1608,10 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["busWritesFailed"]        = EMSESP::txservice_.telegram_write_fail_count();
     node["busRxLineQuality"]       = EMSESP::rxservice_.quality();
     node["busTxLineQuality"]       = (EMSESP::txservice_.read_quality() + EMSESP::txservice_.read_quality()) / 2;
-    // }
 
     // Settings
     node = output["settings"].to<JsonObject>();
-    EMSESP::webSettingsService.read([&](WebSettings & settings) {
+    EMSESP::webSettingsService.read([&](const WebSettings & settings) {
         node["boardProfile"]      = settings.board_profile;
         node["locale"]            = settings.locale;
         node["txMode"]            = settings.tx_mode;
@@ -1707,7 +1698,6 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         obj["name"]     = F_(temperaturesensor);
         obj["entities"] = EMSESP::temperaturesensor_.count_entities();
     }
-    // if (EMSESP::analog_enabled()) {
     if (EMSESP::analogsensor_.count_entities()) {
         JsonObject obj  = devices.add<JsonObject>();
         obj["type"]     = F_(analogsensor);
@@ -1870,7 +1860,7 @@ std::string System::reset_reason(uint8_t cpu) const {
         break;
     }
 #endif
-    return ("Unknown");
+    return "Unknown";
 }
 #pragma GCC diagnostic pop
 

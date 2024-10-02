@@ -798,10 +798,6 @@ uint16_t Helpers::string2minutes(const std::string & str) {
                 if (tmp > 60) {
                     return 0;
                 }
-                // Serial.print("*");
-                // Serial.print(tmp);
-                // Serial.println("*");
-
                 res += tmp;
             }
             // Or we got an extra colon
