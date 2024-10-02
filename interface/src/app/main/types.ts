@@ -296,7 +296,7 @@ export interface ScheduleItem {
   active: boolean;
   deleted?: boolean;
   flags: number;
-  time: string;
+  time: string; // also used for Condition and On Change
   cmd: string;
   value: string;
   name: string; // is optional
