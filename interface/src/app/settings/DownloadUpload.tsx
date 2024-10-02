@@ -69,11 +69,7 @@ const DownloadUpload = () => {
     immediate: false
   });
 
-  const {
-    data: data,
-    send: loadData,
-    error
-  } = useRequest(SystemApi.readSystemStatus);
+  const { data, send: loadData, error } = useRequest(SystemApi.readSystemStatus);
 
   const { send: sendUploadURL } = useRequest(
     (url: string) => callAction({ action: 'uploadURL', param: url }),
