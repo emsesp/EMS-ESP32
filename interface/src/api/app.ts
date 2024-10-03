@@ -5,6 +5,7 @@ import type {
   Action,
   Activity,
   CoreData,
+  DashboardData,
   DeviceData,
   DeviceEntity,
   Entities,
@@ -19,7 +20,13 @@ import type {
   WriteTemperatureSensor
 } from '../app/main/types';
 
-// DashboardDevices
+// Dashboard
+export const readDashboard = () =>
+  alovaInstance.Get<DashboardData>('/rest/dashboardData', {
+    responseType: 'arraybuffer' // uses msgpack
+  });
+
+// Devices
 export const readCoreData = () => alovaInstance.Get<CoreData>(`/rest/coreData`);
 export const readDeviceData = (id: number) =>
   alovaInstance.Get<DeviceData>('/rest/deviceData', {

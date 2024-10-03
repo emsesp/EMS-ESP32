@@ -114,6 +114,18 @@ export interface CoreData {
   devices: Device[];
 }
 
+export interface DashboardItem {
+  id: number; // unique index
+  n: string; // name
+  v?: unknown; // value
+  u: number; // uom
+  nodes?: DashboardItem[]; // nodes
+}
+
+export interface DashboardData {
+  data: DashboardItem[];
+}
+
 export interface DeviceValue {
   id: string; // index, contains mask+name
   v: unknown; // value, Number or String
@@ -125,6 +137,7 @@ export interface DeviceValue {
   m?: number; // min, optional
   x?: number; // max, optional
 }
+
 export interface DeviceData {
   data: DeviceValue[];
 }

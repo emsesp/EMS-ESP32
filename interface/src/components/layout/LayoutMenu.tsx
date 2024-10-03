@@ -11,6 +11,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import SensorsIcon from '@mui/icons-material/Sensors';
 import SettingsIcon from '@mui/icons-material/Settings';
+import StarIcon from '@mui/icons-material/Star';
 import {
   Avatar,
   Box,
@@ -51,6 +52,7 @@ const LayoutMenu = () => {
   return (
     <>
       <List component="nav">
+        <LayoutMenuItem icon={StarIcon} label="Dashboard" to={`/dashboard`} />
         <LayoutMenuItem icon={CategoryIcon} label={LL.DEVICES()} to={`/devices`} />
         <LayoutMenuItem icon={SensorsIcon} label={LL.SENSORS()} to={`/sensors`} />
         <Divider />

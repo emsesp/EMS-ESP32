@@ -4277,7 +4277,8 @@ function getDashboardEntityData(id: number) {
       id2: id
     }))
     .filter((item) => id === 99 || parseInt(item.id2.slice(0, 2), 16) & 0x08)
-    .map((item) => ({
+    .map((item, index) => ({
+      id: id * 100 + index, // unique id
       n: item.id2.slice(2), // name
       v: item.v, // value
       u: item.u // uom
@@ -4324,7 +4325,6 @@ router
     params.id ? deviceEntities(Number(params.id)) : status(404)
   )
   .get(EMSESP_DASHBOARD_DATA_ENDPOINT, () => {
-    // builds a JSON with id, t = typeID, tn = typeName, n=Name, data = [{n, v, u}]
     let dashboard_data = [];
     let dashboard_object = {};
 
@@ -4334,57 +4334,63 @@ router
 
       dashboard_object = {
         id: id,
-        t: element.t,
-        tn: element.tn,
         n: element.n,
-        data: getDashboardEntityData(id)
+        nodes: getDashboardEntityData(id)
       };
 
-      dashboard_data.push(dashboard_object); // add to dashboard_data
+      // only add to dashboard  if we have values
+      if (dashboard_object.nodes.length > 0) {
+        dashboard_data.push(dashboard_object);
+      }
     }
 
     // add the custom entity data
     dashboard_object = {
       id: 99,
-      t: 99,
-      tn: 'custom',
       n: 'Custom Entities',
-      data: getDashboardEntityData(99)
+      nodes: getDashboardEntityData(99)
     };
-    dashboard_data.push(dashboard_object); // add to dashboard_data
+    // only add to dashboard  if we have values
+    if (dashboard_object.nodes.length > 0) {
+      dashboard_data.push(dashboard_object);
+    }
 
     // add temperature sensor data
     let sensor_data = {};
-    sensor_data = emsesp_sensordata.ts.map((item) => ({
+    sensor_data = emsesp_sensordata.ts.map((item, index) => ({
+      id: 980 + index,
       n: item.n ? item.n : item.id, // name may not be set
       v: item.t ? item.t : undefined, // can have no value
       u: item.u
     }));
     dashboard_object = {
       id: 98,
-      t: 98,
-      tn: 'ts',
       n: 'Temperature Sensors',
-      data: sensor_data
+      nodes: sensor_data
     };
-    dashboard_data.push(dashboard_object); // add to dashboard_data
+    // only add to dashboard  if we have values
+    if (dashboard_object.nodes.length > 0) {
+      dashboard_data.push(dashboard_object);
+    }
 
     // add analog sensor data
-    sensor_data = emsesp_sensordata.as.map((item) => ({
+    sensor_data = emsesp_sensordata.as.map((item, index) => ({
+      id: 970 + index,
       n: item.n,
       v: item.v,
       u: item.u
     }));
     dashboard_object = {
       id: 97,
-      t: 97,
-      tn: 'as',
       n: 'Analog Sensors',
-      data: sensor_data
+      nodes: sensor_data
     };
-    dashboard_data.push(dashboard_object); // add to dashboard_data
+    // only add to dashboard  if we have values
+    if (dashboard_object.nodes.length > 0) {
+      dashboard_data.push(dashboard_object);
+    }
 
-    console.log('dashboard_data: ', dashboard_data);
+    // console.log('dashboard_data: ', dashboard_data);
 
     return new Response(encoder.encode(dashboard_data), { headers }); // msgpack it
   })
