@@ -4327,71 +4327,78 @@ router
   .get(EMSESP_DASHBOARD_DATA_ENDPOINT, () => {
     let dashboard_data = [];
     let dashboard_object = {};
+    let fake = false;
+    // let fake = true;
 
-    // pick EMS devices from coredata
-    for (const element of emsesp_coredata.devices) {
-      const id = element.id;
+    if (!fake) {
+      // pick EMS devices from coredata
+      for (const element of emsesp_coredata.devices) {
+        const id = element.id;
+
+        dashboard_object = {
+          id: id,
+          n: element.n,
+          nodes: getDashboardEntityData(id)
+        };
+
+        // only add to dashboard  if we have values
+        if (dashboard_object.nodes.length > 0) {
+          dashboard_data.push(dashboard_object);
+        }
+      }
+
+      // add the custom entity data
+      dashboard_object = {
+        id: 99,
+        n: 'Custom Entities',
+        nodes: getDashboardEntityData(99)
+      };
+      // only add to dashboard  if we have values
+      if (dashboard_object.nodes.length > 0) {
+        dashboard_data.push(dashboard_object);
+      }
+
+      // add temperature sensor data
+      let sensor_data = {};
+      sensor_data = emsesp_sensordata.ts.map((item, index) => ({
+        id: 980 + index,
+        n: item.n ? item.n : item.id, // name may not be set
+        v: item.t ? item.t : undefined, // can have no value
+        u: item.u
+      }));
+      dashboard_object = {
+        id: 98,
+        n: 'Temperature Sensors',
+        nodes: sensor_data
+      };
+      // only add to dashboard  if we have values
+      if (dashboard_object.nodes.length > 0) {
+        dashboard_data.push(dashboard_object);
+      }
+
+      // add analog sensor data
+      // remove disabled sensors (t = 0)
+      sensor_data = emsesp_sensordata.as.filter((item) => item.t !== 0);
+
+      sensor_data = sensor_data.map((item, index) => ({
+        id: 970 + index,
+        n: item.n,
+        v: item.v,
+        u: item.u
+      }));
 
       dashboard_object = {
-        id: id,
-        n: element.n,
-        nodes: getDashboardEntityData(id)
+        id: 97,
+        n: 'Analog Sensors',
+        nodes: sensor_data
       };
-
       // only add to dashboard  if we have values
       if (dashboard_object.nodes.length > 0) {
         dashboard_data.push(dashboard_object);
       }
     }
 
-    // add the custom entity data
-    dashboard_object = {
-      id: 99,
-      n: 'Custom Entities',
-      nodes: getDashboardEntityData(99)
-    };
-    // only add to dashboard  if we have values
-    if (dashboard_object.nodes.length > 0) {
-      dashboard_data.push(dashboard_object);
-    }
-
-    // add temperature sensor data
-    let sensor_data = {};
-    sensor_data = emsesp_sensordata.ts.map((item, index) => ({
-      id: 980 + index,
-      n: item.n ? item.n : item.id, // name may not be set
-      v: item.t ? item.t : undefined, // can have no value
-      u: item.u
-    }));
-    dashboard_object = {
-      id: 98,
-      n: 'Temperature Sensors',
-      nodes: sensor_data
-    };
-    // only add to dashboard  if we have values
-    if (dashboard_object.nodes.length > 0) {
-      dashboard_data.push(dashboard_object);
-    }
-
-    // add analog sensor data
-    sensor_data = emsesp_sensordata.as.map((item, index) => ({
-      id: 970 + index,
-      n: item.n,
-      v: item.v,
-      u: item.u
-    }));
-    dashboard_object = {
-      id: 97,
-      n: 'Analog Sensors',
-      nodes: sensor_data
-    };
-    // only add to dashboard  if we have values
-    if (dashboard_object.nodes.length > 0) {
-      dashboard_data.push(dashboard_object);
-    }
-
     // console.log('dashboard_data: ', dashboard_data);
-
     return new Response(encoder.encode(dashboard_data), { headers }); // msgpack it
   })
 

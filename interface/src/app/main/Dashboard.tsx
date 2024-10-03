@@ -6,15 +6,7 @@ import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 import { Box, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 
-import {
-  Body,
-  Cell,
-  Header,
-  HeaderCell,
-  HeaderRow,
-  Row,
-  Table
-} from '@table-library/react-table-library/table';
+import { Body, Cell, Row, Table } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
 import { CellTree, useTree } from '@table-library/react-table-library/tree';
 import { useAutoRequest } from 'alova/client';
@@ -52,19 +44,10 @@ const Dashboard = () => {
         height: 32px;
       }
     `,
-    HeaderRow: `
-      text-transform: uppercase;
-      background-color: black;
-      color: #90CAF9;
-      .th {
-        border-bottom: 1px solid #565656;
-        height: 36px;
-      }
-    `,
     Row: `
       background-color: #1e1e1e;
-      position: relative;
-      cursor: pointer;
+      // position: relative;
+      // cursor: pointer;
       .td {
         height: 24px;
       }
@@ -107,9 +90,10 @@ const Dashboard = () => {
     if (di.id < 100) {
       if (di.nodes?.length) {
         return (
-          <div style={{ color: '#2196f3' }}>
-            {di.n} ({di.nodes?.length})
-          </div>
+          <span>
+            <span style={{ color: '#2196f3' }}>{di.n}</span>
+            <span style={{ color: 'lightblue' }}>&nbsp;({di.nodes?.length})</span>
+          </span>
         );
       }
       return <div style={{ color: '#2196f3' }}>{di.n}</div>;
@@ -133,13 +117,22 @@ const Dashboard = () => {
       return <FormLoader onRetry={fetchDashboard} errorMessage={error?.message} />;
     }
 
+    if (data.length === 0) {
+      return (
+        <Typography variant="body2" color="warning">
+          {/* TODO translate */}
+          No entities found.
+        </Typography>
+      );
+    }
+
     return (
       <>
-        <Box mb={2} color="warning.main">
-          <Typography variant="body2">
-            Use Customizations to mark your favorite EMS entities
-          </Typography>
-        </Box>
+        <Typography mb={2} variant="body2" color="warning">
+          The dashboard shows all EMS entities that are marked as favorite, and the
+          sensors.
+        </Typography>
+
         <ToggleButtonGroup
           color="primary"
           size="small"
@@ -154,20 +147,24 @@ const Dashboard = () => {
             <UnfoldLessIcon fontSize="small" />
           </ToggleButton>
         </ToggleButtonGroup>
-        <Table
-          data={{ nodes: data }}
-          theme={dashboard_theme}
-          layout={{ custom: true }}
-          tree={tree}
+
+        <Box
+          mt={2}
+          padding={1}
+          justifyContent="center"
+          flexDirection="column"
+          sx={{
+            borderRadius: 2,
+            border: '1px solid grey'
+          }}
         >
-          {(tableList: DashboardItem[]) => (
-            <>
-              <Header>
-                <HeaderRow>
-                  <HeaderCell resize>Name</HeaderCell>
-                  <HeaderCell>Value</HeaderCell>
-                </HeaderRow>
-              </Header>
+          <Table
+            data={{ nodes: data }}
+            theme={dashboard_theme}
+            layout={{ custom: true }}
+            tree={tree}
+          >
+            {(tableList: DashboardItem[]) => (
               <Body>
                 {tableList.map((di: DashboardItem) => (
                   <Row key={di.id} item={di} disabled={di.nodes?.length === 0}>
@@ -180,9 +177,9 @@ const Dashboard = () => {
                   </Row>
                 ))}
               </Body>
-            </>
-          )}
-        </Table>
+            )}
+          </Table>
+        </Box>
       </>
     );
   };
