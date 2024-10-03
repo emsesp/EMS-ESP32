@@ -943,20 +943,18 @@ void EMSESP::process_UBADevices(std::shared_ptr<const Telegram> telegram) {
     // for each byte, check the bits and determine the device_id
     for (uint8_t data_byte = 0; data_byte < telegram->message_length; data_byte++) {
         uint8_t next_byte = telegram->message_data[data_byte];
-
-        if (next_byte) {
-            for (uint8_t bit = 0; bit < 8; bit++) {
-                if (next_byte & 0x01) {
-                    uint8_t device_id = ((data_byte + 1) * 8) + bit;
-                    // if we haven't already detected this device, request it's version details, unless its us (EMS-ESP)
-                    // when the version info is received, it will automagically add the device
-                    if ((device_id != EMSbus::ems_bus_id()) && !(EMSESP::device_exists(device_id))) {
-                        LOG_DEBUG("New EMS device detected with ID 0x%02X. Requesting version information.", device_id);
-                        send_read_request(EMSdevice::EMS_TYPE_VERSION, device_id);
-                    }
+        for (uint8_t bit = 0; bit < 8; bit++) {
+            uint8_t device_id = ((data_byte + 1) * 8) + bit;
+            EMSESP::device_active(device_id, next_byte & 0x01);
+            if (next_byte & 0x01) {
+                // if we haven't already detected this device, request it's version details, unless its us (EMS-ESP)
+                // when the version info is received, it will automagically add the device
+                if ((device_id != EMSbus::ems_bus_id()) && !(EMSESP::device_exists(device_id))) {
+                    LOG_DEBUG("New EMS device detected with ID 0x%02X. Requesting version information.", device_id);
+                    send_read_request(EMSdevice::EMS_TYPE_VERSION, device_id);
                 }
-                next_byte = next_byte >> 1; // advance 1 bit
             }
+            next_byte = next_byte >> 1; // advance 1 bit
         }
     }
 }
@@ -1139,6 +1137,15 @@ bool EMSESP::device_exists(const uint8_t device_id) {
     }
 
     return false; // not found
+}
+
+void EMSESP::device_active(const uint8_t device_id, const bool active) {
+    for (auto & emsdevice : emsdevices) {
+        if (emsdevice && emsdevice->is_device_id(device_id)) {
+            emsdevice->active(active);
+            return;
+        }
+    }
 }
 
 // for each associated EMS device go and get its system information
