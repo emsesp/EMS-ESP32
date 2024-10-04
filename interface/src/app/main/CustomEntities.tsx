@@ -62,7 +62,7 @@ const CustomEntities = () => {
     return () => {
       clearInterval(timer);
     };
-  });
+  }, []);
 
   const { send: writeEntities } = useRequest(
     (data: Entities) => writeCustomEntities(data),

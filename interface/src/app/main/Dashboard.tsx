@@ -18,7 +18,7 @@ import {
 import { Body, Cell, Row, Table } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
 import { CellTree, useTree } from '@table-library/react-table-library/tree';
-import { useAutoRequest, useRequest } from 'alova/client';
+import { useRequest } from 'alova/client';
 import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
@@ -42,10 +42,10 @@ const Dashboard = () => {
   const {
     data,
     send: fetchDashboard,
-    error
-  } = useAutoRequest(readDashboard, {
-    initialData: [],
-    pollingTime: 1500
+    error,
+    loading
+  } = useRequest(readDashboard, {
+    initialData: []
   });
 
   const { loading: submitting, send: sendDeviceValue } = useRequest(
@@ -62,6 +62,8 @@ const Dashboard = () => {
     setDeviceValueDialogOpen(false);
     void sendDeviceData(selectedDevice);
   };
+
+  // TODO get this working next
   const deviceValueDialogSave = async (devicevalue: DeviceValue) => {
     const id = Number(device_select.state.id);
     await sendDeviceValue({ id, c: devicevalue.c ?? '', v: devicevalue.v })
@@ -103,31 +105,46 @@ const Dashboard = () => {
   const tree = useTree(
     { nodes: data },
     {
+      onChange: null
+    },
+    {
       treeIcon: {
         margin: '4px',
         iconDefault: null,
         iconRight: <ChevronRightIcon color="primary" />,
         iconDown: <ExpandMoreIcon color="primary" />
       },
-      indentation: 28
+      indentation: 50
     }
   );
 
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (deviceValueDialogOpen) {
+        return;
+      }
+      fetchDashboard();
+    }, 2000);
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
+
   // auto expand on first load
   useEffect(() => {
-    if (data.length && firstLoad && !tree.state.ids.length) {
+    if (firstLoad && data.length && !tree.state.ids.length) {
       tree.fns.onToggleAll({});
       setFirstLoad(false);
     }
-  });
+  }, [data]);
 
   const showName = (di: DashboardItem) => {
     if (di.id < 100) {
-      // if its a device row
+      // if its a device and has entities
       if (di.nodes?.length) {
         return (
           <>
-            <span style="font-size: 14px;">
+            <span style="font-size: 14px">
               <DeviceIcon type_id={di.t} />
               &nbsp;&nbsp;{di.n}
             </span>
@@ -136,7 +153,7 @@ const Dashboard = () => {
         );
       }
     }
-    return <div style={{ color: '#d3d3d3' }}>{di.n}</div>;
+    return <span style="color:lightgrey">{di.n}</span>;
   };
 
   const showDeviceValue = (di: DashboardItem) => {
@@ -168,14 +185,14 @@ const Dashboard = () => {
       return <FormLoader onRetry={fetchDashboard} errorMessage={error?.message} />;
     }
 
-    if (data.length === 0) {
-      return (
-        <Typography variant="body2" color="warning">
-          {/* TODO translate */}
-          No entities found.
-        </Typography>
-      );
-    }
+    // if (data.length === 0) {
+    //   return (
+    //     <Typography variant="body2" color="warning">
+    //       {/* TODO translate */}
+    //       No entities found.
+    //     </Typography>
+    //   );
+    // }
 
     return (
       <>
@@ -217,42 +234,49 @@ const Dashboard = () => {
               style: { verticalAlign: 'middle' }
             }}
           >
-            <Table
-              data={{ nodes: data }}
-              theme={dashboard_theme}
-              layout={{ custom: true }}
-              tree={tree}
-            >
-              {(tableList: DashboardItem[]) => (
-                <Body>
-                  {tableList.map((di: DashboardItem) => (
-                    <Row key={di.id} item={di} disabled={di.nodes?.length === 0}>
-                      {di.nodes?.length === 0 ? (
-                        <Cell>{showName(di)}</Cell>
-                      ) : (
-                        <CellTree item={di}>{showName(di)}</CellTree>
-                      )}
-                      <Cell pinRight>
-                        <div style={{ color: '#d3d3d3' }}>
-                          {formatValue(LL, di.v, di.u)}
-                        </div>
-                      </Cell>
-
-                      <Cell stiff>
-                        {me.admin && di.c && (
-                          <IconButton
-                            size="small"
-                            onClick={() => showDeviceValue(di)}
-                          >
-                            <EditIcon color="primary" sx={{ fontSize: 16 }} />
-                          </IconButton>
+            {!loading && data.length === 0 ? (
+              <Typography variant="body2" color="warning">
+                {/* TODO translate */}
+                No entities found.
+              </Typography>
+            ) : (
+              <Table
+                data={{ nodes: data }}
+                theme={dashboard_theme}
+                layout={{ custom: true }}
+                tree={tree}
+              >
+                {(tableList: DashboardItem[]) => (
+                  <Body>
+                    {tableList.map((di: DashboardItem) => (
+                      <Row key={di.id} item={di}>
+                        {di.id > 99 ? (
+                          <Cell>{showName(di)}</Cell>
+                        ) : (
+                          <CellTree item={di}>{showName(di)}</CellTree>
                         )}
-                      </Cell>
-                    </Row>
-                  ))}
-                </Body>
-              )}
-            </Table>
+                        <Cell pinRight>
+                          <span style={{ color: 'lightgrey' }}>
+                            {formatValue(LL, di.v, di.u)}
+                          </span>
+                        </Cell>
+
+                        <Cell stiff>
+                          {me.admin && di.c && (
+                            <IconButton
+                              size="small"
+                              onClick={() => showDeviceValue(di)}
+                            >
+                              <EditIcon color="primary" sx={{ fontSize: 16 }} />
+                            </IconButton>
+                          )}
+                        </Cell>
+                      </Row>
+                    ))}
+                  </Body>
+                )}
+              </Table>
+            )}
           </IconContext.Provider>
         </Box>
       </>

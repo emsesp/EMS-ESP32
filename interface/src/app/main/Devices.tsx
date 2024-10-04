@@ -428,7 +428,7 @@ const Devices = () => {
     return () => {
       clearInterval(timer);
     };
-  });
+  }, []);
 
   const deviceValueDialogSave = async (devicevalue: DeviceValue) => {
     const id = Number(device_select.state.id);
