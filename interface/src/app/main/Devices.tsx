@@ -170,7 +170,7 @@ const Devices = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: 40px repeat(1, minmax(0, 1fr)) 130px;
+        --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) 130px;
       `,
       BaseRow: `
         .td {
@@ -527,57 +527,57 @@ const Devices = () => {
   };
 
   const renderCoreData = () => (
-    <IconContext.Provider
-      value={{
-        color: 'lightblue',
-        size: '18',
-        style: { verticalAlign: 'middle' }
-      }}
-    >
-      {!coreData.connected && (
-        <MessageBox my={2} level="error" message={LL.EMS_BUS_WARNING()} />
-      )}
+    <>
+      <IconContext.Provider
+        value={{
+          color: 'lightblue',
+          size: '18',
+          style: { verticalAlign: 'middle' }
+        }}
+      >
+        {!coreData.connected && (
+          <MessageBox my={2} level="error" message={LL.EMS_BUS_WARNING()} />
+        )}
 
-      {coreData.connected && (
-        <Table
-          data={{ nodes: coreData.devices }}
-          select={device_select}
-          theme={device_theme}
-          layout={{ custom: true }}
-        >
-          {(tableList: Device[]) => (
-            <>
-              <Header>
-                <HeaderRow>
-                  <HeaderCell stiff />
-                  <HeaderCell resize>{LL.DESCRIPTION()}</HeaderCell>
-                  <HeaderCell stiff>{LL.TYPE(0)}</HeaderCell>
-                </HeaderRow>
-              </Header>
-              <Body>
-                {tableList.length === 0 && (
-                  <CircularProgress sx={{ margin: 1 }} size={18} />
-                )}
-                {tableList.map((device: Device) => (
-                  <Row key={device.id} item={device}>
-                    <Cell stiff>
-                      <DeviceIcon type_id={device.t} />
-                    </Cell>
-                    <Cell>
-                      {device.n}
-                      <span style={{ color: 'lightblue' }}>
-                        &nbsp;&nbsp;({device.e})
-                      </span>
-                    </Cell>
-                    <Cell stiff>{device.tn}</Cell>
-                  </Row>
-                ))}
-              </Body>
-            </>
-          )}
-        </Table>
-      )}
-    </IconContext.Provider>
+        {coreData.connected && (
+          <Table
+            data={{ nodes: coreData.devices }}
+            select={device_select}
+            theme={device_theme}
+            layout={{ custom: true }}
+          >
+            {(tableList: Device[]) => (
+              <>
+                <Header>
+                  <HeaderRow>
+                    <HeaderCell resize>{LL.DESCRIPTION()}</HeaderCell>
+                    <HeaderCell stiff>{LL.TYPE(0)}</HeaderCell>
+                  </HeaderRow>
+                </Header>
+                <Body>
+                  {tableList.length === 0 && (
+                    <CircularProgress sx={{ margin: 1 }} size={18} />
+                  )}
+                  {tableList.map((device: Device) => (
+                    <Row key={device.id} item={device}>
+                      <Cell>
+                        <DeviceIcon type_id={device.t} />
+                        &nbsp;&nbsp;
+                        {device.n}
+                        <span style={{ color: 'lightblue' }}>
+                          &nbsp;&nbsp;({device.e})
+                        </span>
+                      </Cell>
+                      <Cell stiff>{device.tn}</Cell>
+                    </Row>
+                  ))}
+                </Body>
+              </>
+            )}
+          </Table>
+        )}
+      </IconContext.Provider>
+    </>
   );
 
   const deviceValueDialogClose = () => {
@@ -733,7 +733,7 @@ const Devices = () => {
                             size="small"
                             onClick={() => showDeviceValue(dv)}
                           >
-                            {dv.v === '' && dv.c ? (
+                            {dv.v === '' ? (
                               <PlayArrowIcon color="primary" sx={{ fontSize: 16 }} />
                             ) : (
                               <EditIcon color="primary" sx={{ fontSize: 16 }} />

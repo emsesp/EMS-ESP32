@@ -32,6 +32,32 @@ const headers = {
 let countWifiScanPoll = 0; // wifi network scan
 let countHardwarePoll = 0; // for during an upload
 
+// DeviceTypes
+const enum DeviceType {
+  SYSTEM = 0,
+  TEMPERATURESENSOR,
+  ANALOGSENSOR,
+  SCHEDULER,
+  CUSTOM,
+  BOILER,
+  THERMOSTAT,
+  MIXER,
+  SOLAR,
+  HEATPUMP,
+  GATEWAY,
+  SWITCH,
+  CONTROLLER,
+  CONNECT,
+  ALERT,
+  EXTENSION,
+  GENERIC,
+  HEATSOURCE,
+  VENTILATION,
+  WATER,
+  POOL,
+  UNKNOWN
+}
+
 function updateMask(entity: any, de: any, dd: any) {
   const current_mask = parseInt(entity.slice(0, 2), 16);
 
@@ -1708,7 +1734,7 @@ const emsesp_devicedata_3 = {
     {
       v: 'hot',
       u: 0,
-      id: '00dhw comfort',
+      id: '08dhw comfort',
       c: 'dhw/comfort',
       l: ['hot', 'eco', 'intelligent']
     },
@@ -4268,11 +4294,11 @@ function getDashboardEntityData(id: number) {
   else if (id == 10) device_data = emsesp_devicedata_10;
   else if (id == 99) device_data = emsesp_devicedata_99;
 
-  // filter device_data, just want id, v, u
+  // filter device_data
   // and only favorite items (bit 8 set), only for non-Custom Entities
   // and replace id by striping off the 2-char mask
   let new_data = (device_data as any).data
-    .map(({ id, c, m, x, s, h, l, ...rest }) => ({
+    .map(({ id, m, x, s, ...rest }) => ({
       ...rest,
       id2: id
     }))
@@ -4281,8 +4307,13 @@ function getDashboardEntityData(id: number) {
       id: id * 100 + index, // unique id
       n: item.id2.slice(2), // name
       v: item.v, // value
-      u: item.u // uom
+      u: item.u, // uom
+      c: item.c, // command
+      l: item.l, // list
+      h: item.h // help
     }));
+
+  // TODO only and command if not marked as READONLY
 
   return new_data;
 }
@@ -4325,10 +4356,12 @@ router
     params.id ? deviceEntities(Number(params.id)) : status(404)
   )
   .get(EMSESP_DASHBOARD_DATA_ENDPOINT, () => {
-    let dashboard_data = [];
-    let dashboard_object = {};
+    let dashboard_data: { id?: number; n?: string; t?: number; nodes?: any[] }[] =
+      [];
+    let dashboard_object: { id?: number; n?: string; t?: number; nodes?: any[] } =
+      {};
     let fake = false;
-    // let fake = true;
+    // let fake = true; // fakes no data
 
     if (!fake) {
       // pick EMS devices from coredata
@@ -4338,11 +4371,12 @@ router
         dashboard_object = {
           id: id,
           n: element.n,
+          t: element.t,
           nodes: getDashboardEntityData(id)
         };
 
-        // only add to dashboard  if we have values
-        if (dashboard_object.nodes.length > 0) {
+        // only add to dashboard if we have values
+        if ((dashboard_object.nodes ?? []).length > 0) {
           dashboard_data.push(dashboard_object);
         }
       }
@@ -4351,15 +4385,16 @@ router
       dashboard_object = {
         id: 99,
         n: 'Custom Entities',
+        t: 4, // DeviceType::CUSTOM
         nodes: getDashboardEntityData(99)
       };
-      // only add to dashboard  if we have values
-      if (dashboard_object.nodes.length > 0) {
+      // only add to dashboard if we have values
+      if ((dashboard_object.nodes ?? []).length > 0) {
         dashboard_data.push(dashboard_object);
       }
 
-      // add temperature sensor data
-      let sensor_data = {};
+      // add temperature sensor data. no command c
+      let sensor_data: any[] = [];
       sensor_data = emsesp_sensordata.ts.map((item, index) => ({
         id: 980 + index,
         n: item.n ? item.n : item.id, // name may not be set
@@ -4369,17 +4404,17 @@ router
       dashboard_object = {
         id: 98,
         n: 'Temperature Sensors',
+        t: 1, // DeviceType::TEMPERATURESENSOR
         nodes: sensor_data
       };
-      // only add to dashboard  if we have values
-      if (dashboard_object.nodes.length > 0) {
+      // only add to dashboard if we have values
+      if ((dashboard_object.nodes ?? []).length > 0) {
         dashboard_data.push(dashboard_object);
       }
 
-      // add analog sensor data
-      // remove disabled sensors (t = 0)
+      // add analog sensor data. no command c
+      // remove disabled sensors first (t = 0)
       sensor_data = emsesp_sensordata.as.filter((item) => item.t !== 0);
-
       sensor_data = sensor_data.map((item, index) => ({
         id: 970 + index,
         n: item.n,
@@ -4390,10 +4425,11 @@ router
       dashboard_object = {
         id: 97,
         n: 'Analog Sensors',
+        t: 2, // DeviceType::ANALOGSENSOR
         nodes: sensor_data
       };
-      // only add to dashboard  if we have values
-      if (dashboard_object.nodes.length > 0) {
+      // only add to dashboard if we have values
+      if ((dashboard_object.nodes ?? []).length > 0) {
         dashboard_data.push(dashboard_object);
       }
     }

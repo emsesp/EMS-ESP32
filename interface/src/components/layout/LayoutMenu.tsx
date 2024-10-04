@@ -144,8 +144,8 @@ const LayoutMenu = () => {
       </List>
       <Divider />
       <List>
-        <ListItem disablePadding onClick={handleClick}>
-          <ListItemButton>
+        <ListItem disablePadding>
+          <ListItemButton component="button" onClick={handleClick}>
             <ListItemIcon sx={{ color: '#9e9e9e' }}>
               <AccountCircleIcon />
             </ListItemIcon>
