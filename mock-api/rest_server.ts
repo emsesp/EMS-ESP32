@@ -4351,7 +4351,7 @@ router
 
     let fake = false;
 
-    fake = true; // for testing
+    // fake = true; // for testing
 
     if (!fake) {
       // pick EMS devices from coredata
