@@ -24,7 +24,7 @@
  */
 
 // Boilers - 0x08
-{  8, DeviceType::BOILER, "CS5800i/CS6800i/WLW176i", DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
+{  8, DeviceType::BOILER, "CS5800i/CS6800i/WLW1x6i", DeviceFlags::EMS_DEVICE_FLAG_HEATPUMP},
 { 12, DeviceType::BOILER, "C1200W", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 64, DeviceType::BOILER, "BK13/BK15/Smartline/GB1x2", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 72, DeviceType::BOILER, "GB125/GB135/MC10", DeviceFlags::EMS_DEVICE_FLAG_EMS},
@@ -100,7 +100,7 @@
 {215, DeviceType::THERMOSTAT, "Comfort RF", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
 {216, DeviceType::THERMOSTAT, "CRF200S", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
 {246, DeviceType::THERMOSTAT, "Comfort+2RF", DeviceFlags::EMS_DEVICE_FLAG_CRF | DeviceFlags::EMS_DEVICE_FLAG_NO_WRITE}, // 0x18
-{253, DeviceType::THERMOSTAT, "Rego 3000/UI800/WSW196i/BC400", DeviceFlags::EMS_DEVICE_FLAG_BC400}, // 0x10
+{253, DeviceType::THERMOSTAT, "Rego 3000/UI800/WSW16i/BC400", DeviceFlags::EMS_DEVICE_FLAG_BC400}, // 0x10
 
 // Thermostat - Sieger - 0x10 / 0x17
 { 66, DeviceType::THERMOSTAT, "ES72/RC20", DeviceFlags::EMS_DEVICE_FLAG_RC20_N}, // 0x17 or remote
