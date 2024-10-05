@@ -116,14 +116,10 @@ export interface CoreData {
 
 export interface DashboardItem {
   id: number; // unique index
-  n: string; // name
-  v?: unknown; // value, optional
-  u: number; // uom
-  t: number; // type from DeviceType
-  c?: string; // command, optional
-  l?: string[]; // list, optional
-  h?: string; // help text, optional
-  nodes?: DashboardItem[]; // nodes, optional
+  t?: number; // type from DeviceType
+  n?: string; // name
+  dv?: DeviceValue;
+  nodes?: DashboardItem[]; // children nodes, optional
 }
 
 export interface DashboardData {

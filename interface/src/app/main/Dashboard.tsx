@@ -22,22 +22,28 @@ import { useRequest } from 'alova/client';
 import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
+import { useInterval } from 'utils';
 
 import { readDashboard, writeDeviceValue } from '../../api/app';
 import DeviceIcon from './DeviceIcon';
 import DashboardDevicesDialog from './DevicesDialog';
 import { formatValue } from './deviceValue';
-import { type DashboardItem, type DeviceValue } from './types';
+import { type DashboardItem, DeviceEntityMask, type DeviceValue } from './types';
 import { deviceValueItemValidation } from './validators';
 
 const Dashboard = () => {
   const { LL } = useI18nContext();
   const { me } = useContext(AuthenticatedContext);
 
-  useLayoutTitle('Dashboard'); // TODO translate
+  useLayoutTitle(LL.DASHBOARD());
 
   const [firstLoad, setFirstLoad] = useState<boolean>(true);
   const [showAll, setShowAll] = useState<boolean>(true);
+
+  const [deviceValueDialogOpen, setDeviceValueDialogOpen] = useState<boolean>(false);
+
+  const [selectedDashboardItem, setSelectedDashboardItem] =
+    useState<DashboardItem>();
 
   const {
     data,
@@ -55,17 +61,11 @@ const Dashboard = () => {
     }
   );
 
-  const [deviceValueDialogOpen, setDeviceValueDialogOpen] = useState(false);
-  const [selectedDeviceValue, setSelectedDeviceValue] = useState<DeviceValue>();
-
-  const deviceValueDialogClose = () => {
-    setDeviceValueDialogOpen(false);
-    void sendDeviceData(selectedDevice);
-  };
-
-  // TODO get this working next
   const deviceValueDialogSave = async (devicevalue: DeviceValue) => {
-    const id = Number(device_select.state.id);
+    if (!selectedDashboardItem) {
+      return;
+    }
+    const id = selectedDashboardItem.parentNode.id; // this is the parent ID
     await sendDeviceValue({ id, c: devicevalue.c ?? '', v: devicevalue.v })
       .then(() => {
         toast.success(LL.WRITE_CMD_SENT());
@@ -73,10 +73,9 @@ const Dashboard = () => {
       .catch((error: Error) => {
         toast.error(error.message);
       })
-      .finally(async () => {
+      .finally(() => {
         setDeviceValueDialogOpen(false);
-        await sendDeviceData(id);
-        setSelectedDeviceValue(undefined);
+        setSelectedDashboardItem(undefined);
       });
   };
 
@@ -105,7 +104,7 @@ const Dashboard = () => {
   const tree = useTree(
     { nodes: data },
     {
-      onChange: null
+      onChange: null // not used but needed
     },
     {
       treeIcon: {
@@ -118,25 +117,19 @@ const Dashboard = () => {
     }
   );
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      if (deviceValueDialogOpen) {
-        return;
-      }
-      fetchDashboard();
-    }, 2000);
-    return () => {
-      clearInterval(timer);
-    };
-  }, []);
+  useInterval(() => {
+    if (!deviceValueDialogOpen) {
+      void fetchDashboard();
+    }
+  }, 3000);
 
   // auto expand on first load
   useEffect(() => {
-    if (firstLoad && data.length && !tree.state.ids.length) {
+    if (firstLoad && Array.isArray(data) && data.length && !tree.state.ids.length) {
       tree.fns.onToggleAll({});
       setFirstLoad(false);
     }
-  }, [data]);
+  }, [loading]);
 
   const showName = (di: DashboardItem) => {
     if (di.id < 100) {
@@ -145,7 +138,7 @@ const Dashboard = () => {
         return (
           <>
             <span style="font-size: 14px">
-              <DeviceIcon type_id={di.t} />
+              <DeviceIcon type_id={di.t ?? 0} />
               &nbsp;&nbsp;{di.n}
             </span>
             <span style={{ color: 'lightblue' }}>&nbsp;({di.nodes?.length})</span>
@@ -153,20 +146,14 @@ const Dashboard = () => {
         );
       }
     }
-    return <span style="color:lightgrey">{di.n}</span>;
+    return <span style="color:lightgrey">{di.dv ? di.dv.id.slice(2) : ''}</span>;
   };
 
-  const showDeviceValue = (di: DashboardItem) => {
-    // convert di to dv
-    // TODO should we not just use dv?
-    const dv: DeviceValue = {
-      id: '  ' + di.n,
-      v: di.v,
-      u: di.u,
-      c: di.c,
-      l: di.l
-    };
-    setSelectedDeviceValue(dv);
+  const hasMask = (id: string, mask: number) =>
+    (parseInt(id.slice(0, 2), 16) & mask) === mask;
+
+  const editDashboardValue = (di: DashboardItem) => {
+    setSelectedDashboardItem(di);
     setDeviceValueDialogOpen(true);
   };
 
@@ -185,21 +172,10 @@ const Dashboard = () => {
       return <FormLoader onRetry={fetchDashboard} errorMessage={error?.message} />;
     }
 
-    // if (data.length === 0) {
-    //   return (
-    //     <Typography variant="body2" color="warning">
-    //       {/* TODO translate */}
-    //       No entities found.
-    //     </Typography>
-    //   );
-    // }
-
     return (
       <>
-        <Typography mb={2} variant="body2" color="warning">
-          {/* TODO translate */}
-          The dashboard shows all EMS entities that are marked as favorite, and the
-          sensors.
+        <Typography mb={2} variant="body1" color="warning">
+          {LL.DASHBOARD_1()}
         </Typography>
 
         <ToggleButtonGroup
@@ -235,9 +211,8 @@ const Dashboard = () => {
             }}
           >
             {!loading && data.length === 0 ? (
-              <Typography variant="body2" color="warning">
-                {/* TODO translate */}
-                No entities found.
+              <Typography variant="subtitle2" color="warning">
+                {LL.NO_DATA()}
               </Typography>
             ) : (
               <Table
@@ -257,19 +232,21 @@ const Dashboard = () => {
                         )}
                         <Cell pinRight>
                           <span style={{ color: 'lightgrey' }}>
-                            {formatValue(LL, di.v, di.u)}
+                            {di.dv && formatValue(LL, di.dv.v, di.dv.u)}
                           </span>
                         </Cell>
 
                         <Cell stiff>
-                          {me.admin && di.c && (
-                            <IconButton
-                              size="small"
-                              onClick={() => showDeviceValue(di)}
-                            >
-                              <EditIcon color="primary" sx={{ fontSize: 16 }} />
-                            </IconButton>
-                          )}
+                          {me.admin &&
+                            di.dv?.c &&
+                            !hasMask(di.dv.id, DeviceEntityMask.DV_READONLY) && (
+                              <IconButton
+                                size="small"
+                                onClick={() => editDashboardValue(di)}
+                              >
+                                <EditIcon color="primary" sx={{ fontSize: 16 }} />
+                              </IconButton>
+                            )}
                         </Cell>
                       </Row>
                     ))}
@@ -286,14 +263,14 @@ const Dashboard = () => {
   return (
     <SectionContent>
       {renderContent()}
-      {selectedDeviceValue && (
+      {selectedDashboardItem && selectedDashboardItem.dv && (
         <DashboardDevicesDialog
           open={deviceValueDialogOpen}
-          onClose={deviceValueDialogClose}
+          onClose={() => setDeviceValueDialogOpen(false)}
           onSave={deviceValueDialogSave}
-          selectedItem={selectedDeviceValue}
+          selectedItem={selectedDashboardItem.dv}
           writeable={true}
-          validator={deviceValueItemValidation(selectedDeviceValue)}
+          validator={deviceValueItemValidation(selectedDashboardItem.dv)}
           progress={submitting}
         />
       )}

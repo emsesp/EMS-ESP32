@@ -340,7 +340,10 @@ const sk: Translation = {
   PLEASE_WAIT: 'Čakajte prosím',
   RESTARTING_PRE: 'Prebieha inicializácia',
   RESTARTING_POST: 'Príprava',
-  AUTO_SCROLL: 'Auto Scroll' // TODO translate
+  AUTO_SCROLL: 'Auto Scroll', // TODO translate
+  DASHBOARD: 'Dashboard', // TODO translate
+  NO_DATA: 'No data available', // TODO translate
+  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorites using the Customizations module.' // TODO translate
 };
 
 export default sk;

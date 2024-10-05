@@ -4294,31 +4294,19 @@ function getDashboardEntityData(id: number) {
   else if (id == 10) device_data = emsesp_devicedata_10;
   else if (id == 99) device_data = emsesp_devicedata_99;
 
-  // filter device_data
-  // and only favorite items (bit 8 set), only for non-Custom Entities
-  // and replace id by striping off the 2-char mask
+  // filter device_data on
+  //  - only add favorite (mask has bit 8 set) except for Custom Entities (type 99)
   let new_data = (device_data as any).data
-    .map(({ id, m, x, s, ...rest }) => ({
-      ...rest,
-      id2: id
-    }))
-    .filter((item) => id === 99 || parseInt(item.id2.slice(0, 2), 16) & 0x08)
+    .filter((item) => id === 99 || parseInt(item.id.slice(0, 2), 16) & 0x08)
     .map((item, index) => ({
-      id: id * 100 + index, // unique id
-      n: item.id2.slice(2), // name
-      v: item.v, // value
-      u: item.u, // uom
-      c: item.c, // command
-      l: item.l, // list
-      h: item.h // help
+      id: id * 100 + index, // mandatory unique id for table
+      dv: item // devicevalue
     }));
-
-  // TODO only and command if not marked as READONLY
 
   return new_data;
 }
 
-// Router starts here...
+// Router routing starts here...
 router
   // EMS-ESP Settings
   .get(EMSESP_SETTINGS_ENDPOINT, () => settings)
@@ -4360,8 +4348,10 @@ router
       [];
     let dashboard_object: { id?: number; n?: string; t?: number; nodes?: any[] } =
       {};
+
     let fake = false;
-    // let fake = true; // fakes no data
+
+    fake = true; // for testing
 
     if (!fake) {
       // pick EMS devices from coredata
@@ -4397,9 +4387,11 @@ router
       let sensor_data: any[] = [];
       sensor_data = emsesp_sensordata.ts.map((item, index) => ({
         id: 980 + index,
-        n: item.n ? item.n : item.id, // name may not be set
-        v: item.t ? item.t : undefined, // can have no value
-        u: item.u
+        dv: {
+          id: '  ' + item.n,
+          v: item.t, // value is called t in ts (temperature)
+          u: item.u
+        }
       }));
       dashboard_object = {
         id: 98,
@@ -4417,9 +4409,11 @@ router
       sensor_data = emsesp_sensordata.as.filter((item) => item.t !== 0);
       sensor_data = sensor_data.map((item, index) => ({
         id: 970 + index,
-        n: item.n,
-        v: item.v,
-        u: item.u
+        dv: {
+          id: '  ' + item.n,
+          v: item.v,
+          u: item.u
+        }
       }));
 
       dashboard_object = {
@@ -4432,9 +4426,24 @@ router
       if ((dashboard_object.nodes ?? []).length > 0) {
         dashboard_data.push(dashboard_object);
       }
+    } else {
+      // for testing
+      // single object
+      // const element = emsesp_coredata.devices[3]; // pick the 4th device
+      // const id = element.id;
+      // dashboard_object = {
+      //   id: id,
+      //   n: element.n,
+      //   t: element.t,
+      //   nodes: getDashboardEntityData(id)
+      // };
+      // if ((dashboard_object.nodes ?? []).length > 0) {
+      // dashboard_data.push(dashboard_object);
+      // }
     }
 
     // console.log('dashboard_data: ', dashboard_data);
+    // return dashboard_data; // if not using msgpack
     return new Response(encoder.encode(dashboard_data), { headers }); // msgpack it
   })
 
@@ -4570,7 +4579,9 @@ router
     }
 
     // await delay(1000); // wait to show spinner
-    console.log('device value saved', content);
+    console.log(
+      'Device Value updated. command:' + command + ' value:' + value + ' id:' + id
+    );
     return status(200);
   })
 

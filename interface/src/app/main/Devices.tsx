@@ -60,6 +60,7 @@ import { useRequest } from 'alova/client';
 import { MessageBox, SectionContent, useLayoutTitle } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
+import { useInterval } from 'utils';
 
 import { readCoreData, readDeviceData, writeDeviceValue } from '../../api/app';
 import DeviceIcon from './DeviceIcon';
@@ -77,7 +78,7 @@ const Devices = () => {
   const [selectedDeviceValue, setSelectedDeviceValue] = useState<DeviceValue>();
   const [onlyFav, setOnlyFav] = useState(false);
   const [deviceValueDialogOpen, setDeviceValueDialogOpen] = useState(false);
-  const [showDeviceInfo, setShowDeviceInfo] = useState<boolean>(false);
+  const [showDeviceInfo, setShowDeviceInfo] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState<number>();
 
   const navigate = useNavigate();
@@ -418,17 +419,11 @@ const Devices = () => {
     downloadBlob(new Blob([csvData], { type: 'text/csv;charset:utf-8' }));
   };
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      if (deviceValueDialogOpen) {
-        return;
-      }
+  useInterval(() => {
+    if (!deviceValueDialogOpen) {
       selectedDevice ? void sendDeviceData(selectedDevice) : void sendCoreData();
-    }, 2000);
-    return () => {
-      clearInterval(timer);
-    };
-  }, []);
+    }
+  }, 3000);
 
   const deviceValueDialogSave = async (devicevalue: DeviceValue) => {
     const id = Number(device_select.state.id);

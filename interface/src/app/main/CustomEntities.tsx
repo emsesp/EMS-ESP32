@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -27,6 +27,7 @@ import {
   useLayoutTitle
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
+import { useInterval } from 'utils';
 
 import { readCustomEntities, writeCustomEntities } from '../../api/app';
 import SettingsCustomEntitiesDialog from './CustomEntitiesDialog';
@@ -52,17 +53,11 @@ const CustomEntities = () => {
     initialData: []
   });
 
-  useEffect(() => {
-    const timer = setInterval(async () => {
-      if (dialogOpen || numChanges > 0) {
-        return;
-      }
-      await fetchEntities();
-    }, 2000);
-    return () => {
-      clearInterval(timer);
-    };
-  }, []);
+  useInterval(() => {
+    if (!dialogOpen && !numChanges) {
+      void fetchEntities();
+    }
+  }, 3000);
 
   const { send: writeEntities } = useRequest(
     (data: Entities) => writeCustomEntities(data),
@@ -295,7 +290,7 @@ const CustomEntities = () => {
     <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       <Box mb={2} color="warning.main">
-        <Typography variant="body2">{LL.ENTITIES_HELP_1()}</Typography>
+        <Typography variant="body1">{LL.ENTITIES_HELP_1()}</Typography>
       </Box>
 
       {renderEntity()}

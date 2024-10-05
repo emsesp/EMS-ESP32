@@ -427,7 +427,7 @@ const Customizations = () => {
   const renderDeviceList = () => (
     <>
       <Box mb={1} color="warning.main">
-        <Typography variant="body2">{LL.CUSTOMIZATIONS_HELP_1()}.</Typography>
+        <Typography variant="body1">{LL.CUSTOMIZATIONS_HELP_1()}.</Typography>
       </Box>
       <Box display="flex" flexWrap="wrap" alignItems="center" gap={2}>
         {rename ? (

@@ -340,7 +340,10 @@ const de: Translation = {
   PLEASE_WAIT: 'Bitte warten',
   RESTARTING_PRE: 'Initialisierung',
   RESTARTING_POST: 'Vorbereitung',
-  AUTO_SCROLL: 'Automatisches Scrollen'
+  AUTO_SCROLL: 'Automatisches Scrollen',
+  DASHBOARD: 'Dashboard', // TODO translate
+  NO_DATA: 'No data available', // TODO translate
+  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorites using the Customizations module.' // TODO translate
 };
 
 export default de;

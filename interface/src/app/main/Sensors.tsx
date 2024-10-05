@@ -68,7 +68,7 @@ const Sensors = () => {
         analog_enabled: false,
         platform: 'ESP32'
       },
-      pollingTime: 2000
+      pollingTime: 3000
     }
   );
 
