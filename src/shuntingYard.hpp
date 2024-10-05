@@ -68,7 +68,6 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                 ++p;
             }
             const auto s = std::string(b, p);
-            // TODO check works with emplace_back
             tokens.emplace_back(Token::Type::String, s, -3);
             if (*p == '\0') {
                 --p;
@@ -79,7 +78,6 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                 ++p;
             }
             const auto s = std::string(b, p);
-            // TODO check works with emplace_back
             tokens.emplace_back(Token::Type::String, s, -2);
             --p;
         } else if (*p == '"') {
@@ -209,7 +207,6 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                 break;
             }
             const auto s = std::string(1, c);
-            // TODO check works with emplace_back
             tokens.emplace_back(token, s, precedence, rightAssociative);
         }
     }
@@ -223,7 +220,6 @@ std::deque<Token> shuntingYard(const std::deque<Token> & tokens) {
     std::vector<Token> stack;
 
     // While there are tokens to be read:
-    // TODO check still works with const reference
     for (auto const & token : tokens) {
         // Read a token
         switch (token.type) {

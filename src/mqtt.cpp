@@ -95,7 +95,7 @@ void Mqtt::subscribe(const uint8_t device_type, const std::string & topic, mqtt_
 
     // register in our libary with the callback function.
     // We store the original topic string without base
-    // TODO check if ok to remove the std::move(topic)
+    // removed std::move(topic) in 3.7.0-dev.43
     mqtt_subfunctions_.emplace_back(device_type, topic, cb);
 
     if (!enabled() || !connected()) {
