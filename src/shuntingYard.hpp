@@ -8,19 +8,12 @@
 //  https://ideone.com/VocUTq
 //
 // License:
-//  If you use this code in binary / compiled / un-commented (removing all text comments) form,
-//  you can use it under CC0 license.
-//
-//  But if you use this code as source code / readable text, since main content of this code is
-//  their notes, I recommend you to indicate notices which conform CC-BY-SA.  For example,
-//
-//  --- ---
-//  YOUR-CONTENT uses the following materials.
+//  This code uses the following materials.
 //  (1) Wikipedia article [Shunting-yard algorithm](https://en.wikipedia.org/wiki/Shunting-yard_algorithm),
 //  which is released under the [Creative Commons Attribution-Share-Alike License 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
 //  (2) [Implementation notes for unary operators in Shunting-Yard algorithm](https://stackoverflow.com/a/5240912) by Austin Taylor
 //  which is released under the [Creative Commons Attribution-Share-Alike License 2.5](https://creativecommons.org/licenses/by-sa/2.5/).
-//  --- ---
+//
 // copy from https://gist.github.com/t-mat/b9f681b7591cdae712f6
 // modified MDvP, 06.2024
 //
@@ -75,7 +68,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                 ++p;
             }
             const auto s = std::string(b, p);
-            tokens.push_back(Token{Token::Type::String, s, -3});
+            tokens.emplace_back(Token::Type::String, s, -3);
             if (*p == '\0') {
                 --p;
             }
@@ -85,7 +78,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                 ++p;
             }
             const auto s = std::string(b, p);
-            tokens.push_back(Token{Token::Type::String, s, -2});
+            tokens.emplace_back(Token::Type::String, s, -2);
             --p;
         } else if (*p == '"') {
             ++p;
@@ -94,7 +87,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                 ++p;
             }
             const auto s = std::string(b, p);
-            tokens.push_back(Token{Token::Type::String, s, -3});
+            tokens.emplace_back(Token::Type::String, s, -3);
             if (*p == '\0') {
                 --p;
             }
@@ -105,7 +98,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                 ++p;
             }
             const auto s = std::string(b, p);
-            tokens.push_back(Token{Token::Type::String, s, -3});
+            tokens.emplace_back(Token::Type::String, s, -3);
             if (*p == '\0') {
                 --p;
             }
@@ -115,7 +108,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                 ++p;
             }
             const auto s = std::string(b, p);
-            tokens.push_back(Token{Token::Type::Number, s, -4});
+            tokens.emplace_back(Token::Type::Number, s, -4);
             --p;
         } else {
             Token::Type token            = Token::Type::Operator;
@@ -214,7 +207,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                 break;
             }
             const auto s = std::string(1, c);
-            tokens.push_back(Token{token, s, precedence, rightAssociative});
+            tokens.emplace_back(token, s, precedence, rightAssociative);
         }
     }
 
@@ -227,7 +220,7 @@ std::deque<Token> shuntingYard(const std::deque<Token> & tokens) {
     std::vector<Token> stack;
 
     // While there are tokens to be read:
-    for (auto token : tokens) {
+    for (auto const & token : tokens) {
         // Read a token
         switch (token.type) {
         case Token::Type::Number:
@@ -302,7 +295,6 @@ std::deque<Token> shuntingYard(const std::deque<Token> & tokens) {
         case Token::Type::Unknown:
         default:
             return {};
-            break;
         }
     }
 
@@ -355,7 +347,8 @@ std::string commands(std::string & expr, bool quotes = true) {
             if (strstr(cmd, "/value") == nullptr) {
                 strlcat(cmd, "/value", sizeof(cmd) - 6);
             }
-            JsonDocument doc_out, doc_in;
+            JsonDocument doc_out;
+            JsonDocument doc_in;
             JsonObject   output = doc_out.to<JsonObject>();
             JsonObject   input  = doc_in.to<JsonObject>();
             std::string  cmd_s  = "api/" + std::string(cmd);
@@ -589,7 +582,6 @@ std::string calculate(const std::string & expr) {
         result += s;
     }
     return result;
-    // return stack.back();
 }
 
 // check for multiple instances of <cond> ? <expr1> : <expr2>

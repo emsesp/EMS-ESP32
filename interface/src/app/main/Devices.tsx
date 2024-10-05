@@ -310,7 +310,7 @@ const Devices = () => {
   }, [escFunction]);
 
   const customize = () => {
-    if (selectedDevice == 99) {
+    if (selectedDevice === 99) {
       navigate('/customentities');
     } else {
       navigate('/customizations', { state: selectedDevice });

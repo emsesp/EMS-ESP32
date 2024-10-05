@@ -285,7 +285,8 @@ class RxService : public EMSbus {
         const std::shared_ptr<const Telegram> telegram_;
 
         ~QueuedRxTelegram() = default;
-        QueuedRxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram)
+        // removed && from telegram in 3.7.0-dev.43
+        QueuedRxTelegram(uint16_t id, std::shared_ptr<Telegram> telegram)
             : id_(id)
             , telegram_(std::move(telegram)) {
         }
@@ -414,7 +415,8 @@ class TxService : public EMSbus {
         const uint16_t                        validateid_;
 
         ~QueuedTxTelegram() = default;
-        QueuedTxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram, bool retry, uint16_t validateid)
+        // replaced && im std::shared_ptr<Telegram> telegram in 3.7.0-dev.43
+        QueuedTxTelegram(uint16_t id, std::shared_ptr<Telegram> telegram, bool retry, uint16_t validateid)
             : id_(id)
             , telegram_(std::move(telegram))
             , retry_(retry)

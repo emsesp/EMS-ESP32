@@ -255,7 +255,7 @@ bool WebStatusService::exportData(JsonObject root, std::string & type) {
     } else if (type == "entities") {
         System::extractSettings(EMSESP_CUSTOMENTITY_FILE, "Entities", root);
     } else if (type == "allvalues") {
-        root.clear(); // don't need the "type" key
+        root.clear(); // don't need the "type" key added to the output
         allvalues(root);
     } else {
         return false;

@@ -60,7 +60,7 @@ const SystemStatus = () => {
   });
 
   const {
-    data: data,
+    data,
     send: loadData,
     error
   } = useAutoRequest(readSystemStatus, {

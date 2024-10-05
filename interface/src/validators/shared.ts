@@ -7,17 +7,13 @@ export const validate = <T extends object>(
   options?: ValidateOption
 ): Promise<T> =>
   new Promise((resolve, reject) => {
-    void validator.validate(
-      source,
-      options ? options : {},
-      (errors, fieldErrors) => {
-        if (errors) {
-          reject(fieldErrors as Error);
-        } else {
-          resolve(source as T);
-        }
+    void validator.validate(source, options || {}, (errors, fieldErrors) => {
+      if (errors) {
+        reject(fieldErrors as Error);
+      } else {
+        resolve(source as T);
       }
-    );
+    });
   });
 
 //  updated to support both IPv4 and IPv6

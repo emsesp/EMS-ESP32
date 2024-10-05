@@ -37,7 +37,7 @@ import { formatDateTime, formatLocalDateTime } from 'utils';
 
 const NTPStatus = () => {
   const {
-    data: data,
+    data,
     send: loadData,
     error
   } = useAutoRequest(NTPApi.readNTPStatus, { pollingTime: 5000 });

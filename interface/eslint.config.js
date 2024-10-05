@@ -16,7 +16,7 @@ export default tseslint.config(
     }
   },
   {
-    ignores: ['dist/*', '*.js', '**/*.cjs', '**/unpack.ts', 'i18n*.*']
+    ignores: ['dist/*', 'build/*', '*.js', '**/*.cjs', '**/unpack.ts', 'i18n*.*']
   },
   {
     rules: {

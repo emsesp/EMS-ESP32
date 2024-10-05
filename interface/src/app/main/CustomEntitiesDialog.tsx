@@ -277,7 +277,7 @@ const CustomEntitiesDialog = ({
                         select
                       >
                         {DeviceValueUOM_s.map((val, i) => (
-                          <MenuItem key={i} value={i}>
+                          <MenuItem key={val} value={i}>
                             {val}
                           </MenuItem>
                         ))}

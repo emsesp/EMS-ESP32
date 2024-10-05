@@ -126,7 +126,7 @@ const SensorsAnalogDialog = ({
               onChange={updateFormValue}
             >
               {AnalogTypeNames.map((val, i) => (
-                <MenuItem key={i} value={i}>
+                <MenuItem key={val} value={i}>
                   {val}
                 </MenuItem>
               ))}
@@ -143,7 +143,7 @@ const SensorsAnalogDialog = ({
                 onChange={updateFormValue}
               >
                 {DeviceValueUOM_s.map((val, i) => (
-                  <MenuItem key={i} value={i}>
+                  <MenuItem key={val} value={i}>
                     {val}
                   </MenuItem>
                 ))}

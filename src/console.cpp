@@ -39,10 +39,6 @@ static inline EMSESPShell & to_shell(Shell & shell) {
     return static_cast<EMSESPShell &>(shell);
 }
 
-static inline EMSESP & to_app(Shell & shell) {
-    return to_shell(shell).emsesp_;
-}
-
 #define NO_ARGUMENTS                                                                                                                                           \
     std::vector<std::string> {                                                                                                                                 \
     }
@@ -67,7 +63,7 @@ static std::vector<std::string> log_level_autocomplete(Shell & shell, const std:
     return uuid::log::levels_lowercase();
 }
 
-static void setup_commands(std::shared_ptr<Commands> & commands) {
+static void setup_commands(std::shared_ptr<Commands> const & commands) {
     // exit, help, log
     commands->add_command(ShellContext::MAIN, CommandFlags::USER, {F_(exit)}, EMSESPShell::main_exit_function);
     commands->add_command(ShellContext::MAIN, CommandFlags::USER, {F_(help)}, EMSESPShell::main_help_function);
@@ -81,35 +77,35 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
         CommandFlags::USER,
         {F_(show)},
         {F_(show_commands)},
-        [=](Shell & shell, const std::vector<std::string> & arguments) {
+        [](Shell & shell, const std::vector<std::string> & arguments) {
             if (arguments.empty()) {
-                to_app(shell).system_.show_system(shell);
+                EMSESP::system_.show_system(shell);
                 return;
             }
 
-            auto command = arguments.front();
+            auto const & command = arguments.front();
             if (command == F_(commands)) {
                 Command::show_all(shell);
             } else if (command == F_(system)) {
-                to_app(shell).system_.show_system(shell);
+                EMSESP::system_.show_system(shell);
             } else if (command == F_(users) && (shell.has_flags(CommandFlags::ADMIN))) {
-                to_app(shell).system_.show_users(shell); // admin only
+                EMSESP::system_.show_users(shell); // admin only
             } else if (command == F_(devices)) {
-                to_app(shell).show_devices(shell);
+                EMSESP::show_devices(shell);
             } else if (command == F_(log)) {
-                to_app(shell).webLogService.show(shell);
+                EMSESP::webLogService.show(shell);
             } else if (command == F_(ems)) {
-                to_app(shell).show_ems(shell);
+                EMSESP::show_ems(shell);
             } else if (command == F_(values)) {
-                to_app(shell).show_device_values(shell);
-                to_app(shell).show_sensor_values(shell);
+                EMSESP::show_device_values(shell);
+                EMSESP::show_sensor_values(shell);
             } else if (command == F_(mqtt)) {
                 Mqtt::show_mqtt(shell);
             } else {
                 shell.printfln("Unknown show command");
             }
         },
-        [](Shell & shell, const std::vector<std::string> & current_arguments, const std::string & next_argument) -> std::vector<std::string> {
+        [](Shell const & shell, const std::vector<std::string> & current_arguments, const std::string & next_argument) -> std::vector<std::string> {
             return std::vector<std::string>{"system", "users", "devices", "log", "ems", "values", "mqtt", "commands"};
         });
 
@@ -154,7 +150,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                 if (completed) {
                     uint64_t now = uuid::get_uptime_ms();
 
-                    to_app(shell).esp8266React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
+                    EMSESP::esp8266React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
                         if (!password.empty() && (securitySettings.jwtSecret.equals(password.c_str()))) {
                             become_admin(shell);
                         } else {
@@ -178,7 +174,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                 shell.enter_password(F_(new_password_prompt2), [password1](Shell & shell, bool completed, const std::string & password2) {
                     if (completed) {
                         if (password1 == password2) {
-                            to_app(shell).esp8266React.getSecuritySettingsService()->update([&](SecuritySettings & securitySettings) {
+                            EMSESP::esp8266React.getSecuritySettingsService()->update([&](SecuritySettings & securitySettings) {
                                 securitySettings.jwtSecret = password2.c_str();
                                 return StateUpdateResult::CHANGED;
                             });
@@ -198,16 +194,16 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                           {F_(partitionname_optional)},
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               if (arguments.size()) {
-                                  to_app(shell).system_.system_restart(arguments.front().c_str());
+                                  EMSESP::system_.system_restart(arguments.front().c_str());
                               } else {
-                                  to_app(shell).system_.system_restart();
+                                  EMSESP::system_.system_restart();
                               }
                           });
 
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::ADMIN,
                           string_vector{F_(wifi), F_(reconnect)},
-                          [](Shell & shell, const std::vector<std::string> & arguments) { to_app(shell).system_.wifi_reconnect(); });
+                          [](Shell & shell, const std::vector<std::string> & arguments) { EMSESP::system_.wifi_reconnect(); });
 
     //
     // SET commands
@@ -221,13 +217,13 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                       shell.enter_password(F_(new_password_prompt2), [password1](Shell & shell, bool completed, const std::string & password2) {
                                           if (completed) {
                                               if (password1 == password2) {
-                                                  to_app(shell).esp8266React.getNetworkSettingsService()->updateWithoutPropagation(
+                                                  EMSESP::esp8266React.getNetworkSettingsService()->updateWithoutPropagation(
                                                       [&](NetworkSettings & networkSettings) {
                                                           networkSettings.password = password2.c_str();
                                                           return StateUpdateResult::CHANGED;
                                                       });
                                                   shell.println("WiFi password updated. Reconnecting...");
-                                                  to_app(shell).system_.wifi_reconnect();
+                                                  EMSESP::system_.wifi_reconnect();
                                               } else {
                                                   shell.println("Passwords do not match");
                                               }
@@ -245,7 +241,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                               shell.println("The network connection will be reset...");
                               Shell::loop_all();
                               delay(1000); // wait a second
-                              to_app(shell).esp8266React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
+                              EMSESP::esp8266React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
                                   networkSettings.hostname = arguments.front().c_str();
                                   return StateUpdateResult::CHANGED;
                               });
@@ -256,12 +252,12 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                           string_vector{F_(set), F_(wifi), F_(ssid)},
                           {F_(name_mandatory)},
                           [](Shell & shell, const std::vector<std::string> & arguments) {
-                              to_app(shell).esp8266React.getNetworkSettingsService()->updateWithoutPropagation([&](NetworkSettings & networkSettings) {
+                              EMSESP::esp8266React.getNetworkSettingsService()->updateWithoutPropagation([&](NetworkSettings & networkSettings) {
                                   networkSettings.ssid = arguments.front().c_str();
                                   return StateUpdateResult::CHANGED;
                               });
                               shell.println("WiFi ssid updated. Reconnecting...");
-                              to_app(shell).system_.wifi_reconnect();
+                              EMSESP::system_.wifi_reconnect();
                           });
 
 
@@ -273,12 +269,12 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
         [](Shell & shell, const std::vector<std::string> & arguments) {
             std::vector<int8_t> data; // led, dallas, rx, tx, button, phy_type, eth_power, eth_phy_addr, eth_clock_mode
             std::string         board_profile = Helpers::toUpper(arguments.front());
-            if (!to_app(shell).system_.load_board_profile(data, board_profile)) {
+            if (!EMSESP::system_.load_board_profile(data, board_profile)) {
                 shell.println("Invalid board profile (S32, E32, E32V2, MH-ET, NODEMCU, LOLIN, OLIMEX, OLIMEXPOE, C3MINI, S2MINI, S3MINI, S32S3, CUSTOM)");
                 return;
             }
 
-            to_app(shell).webSettingsService.update([&](WebSettings & settings) {
+            EMSESP::webSettingsService.update([&](WebSettings & settings) {
                 settings.board_profile  = board_profile.c_str();
                 settings.led_gpio       = data[0];
                 settings.dallas_gpio    = data[1];
@@ -292,7 +288,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                 return StateUpdateResult::CHANGED;
             });
             shell.printfln("Loaded board profile %s", board_profile.c_str());
-            to_app(shell).system_.network_init(true);
+            EMSESP::system_.network_init(true);
         });
 
     commands->add_command(
@@ -303,7 +299,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
         [](Shell & shell, const std::vector<std::string> & arguments) {
             uint8_t device_id = Helpers::hextoint(arguments.front().c_str());
             if ((device_id == 0x0B) || (device_id == 0x0D) || (device_id == 0x0A) || (device_id == 0x0F) || (device_id == 0x12)) {
-                to_app(shell).webSettingsService.update([&](WebSettings & settings) {
+                EMSESP::webSettingsService.update([&](WebSettings & settings) {
                     settings.ems_bus_id = device_id;
                     shell.printfln(F_(bus_id_fmt), settings.ems_bus_id);
                     return StateUpdateResult::CHANGED;
@@ -323,12 +319,12 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               uint8_t tx_mode = std::strtol(arguments[0].c_str(), nullptr, 10);
                               // save the tx_mode
-                              to_app(shell).webSettingsService.update([&](WebSettings & settings) {
+                              EMSESP::webSettingsService.update([&](WebSettings & settings) {
                                   settings.tx_mode = tx_mode;
                                   shell.printfln(F_(tx_mode_fmt), settings.tx_mode);
                                   return StateUpdateResult::CHANGED;
                               });
-                              to_app(shell).uart_init();
+                              EMSESP::uart_init();
                           });
 
     commands->add_command(ShellContext::MAIN,
@@ -339,17 +335,17 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                               if (arguments.back() == "enable" || arguments.back() == "disable") {
                                   bool enable = arguments.back() == "enable";
                                   if (arguments.front() == "mqtt") {
-                                      to_app(shell).esp8266React.getMqttSettingsService()->update([&](MqttSettings & Settings) {
+                                      EMSESP::esp8266React.getMqttSettingsService()->update([&](MqttSettings & Settings) {
                                           Settings.enabled = enable;
                                           return StateUpdateResult::CHANGED;
                                       });
                                   } else if (arguments.front() == "ntp") {
-                                      to_app(shell).esp8266React.getNTPSettingsService()->update([&](NTPSettings & Settings) {
+                                      EMSESP::esp8266React.getNTPSettingsService()->update([&](NTPSettings & Settings) {
                                           Settings.enabled = enable;
                                           return StateUpdateResult::CHANGED;
                                       });
                                   } else if (arguments.front() == "ap") {
-                                      to_app(shell).esp8266React.getAPSettingsService()->update([&](APSettings & Settings) {
+                                      EMSESP::esp8266React.getAPSettingsService()->update([&](APSettings & Settings) {
                                           Settings.provisionMode = enable ? 0 : 2;
                                           return StateUpdateResult::CHANGED;
                                       });
@@ -368,17 +364,17 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
     //
 
     commands->add_command(ShellContext::MAIN, CommandFlags::ADMIN, {F_(scan)}, {F_(deep_optional)}, [](Shell & shell, const std::vector<std::string> & arguments) {
-        if (arguments.size() == 0) {
-            to_app(shell).scan_devices();
+        if (arguments.empty()) {
+            EMSESP::scan_devices();
         } else {
             shell.printfln("Performing a deep scan...");
-            to_app(shell).clear_all_devices();
+            EMSESP::clear_all_devices();
             // device IDs taken from device_library.h
             // send the read command with Version command
             const std::vector<uint8_t> Device_Ids = {0x02, 0x08, 0x09, 0x10, 0x11, 0x12, 0x15, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x20, 0x21, 0x22, 0x23,
                                                      0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x30, 0x38, 0x40, 0x41, 0x48, 0x50, 0x51, 0x60};
             for (const uint8_t device_id : Device_Ids) {
-                to_app(shell).send_read_request(EMSdevice::EMS_TYPE_VERSION, device_id);
+                EMSESP::send_read_request(EMSdevice::EMS_TYPE_VERSION, device_id);
             }
         }
     });
@@ -390,7 +386,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                           [=](Shell & shell, const std::vector<std::string> & arguments) {
                               uint8_t device_id = Helpers::hextoint(arguments.front().c_str());
 
-                              if (!to_app(shell).valid_device(device_id)) {
+                              if (!EMSESP::valid_device(device_id)) {
                                   shell.printfln("Invalid deviceID");
                                   return;
                               }
@@ -399,14 +395,14 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                               if (arguments.size() == 4) {
                                   uint16_t offset = Helpers::hextoint(arguments[2].c_str());
                                   uint8_t  length = Helpers::hextoint(arguments.back().c_str());
-                                  to_app(shell).send_read_request(type_id, device_id, offset, length, true);
+                                  EMSESP::send_read_request(type_id, device_id, offset, length, true);
                               } else if (arguments.size() == 3) {
                                   uint16_t offset = Helpers::hextoint(arguments.back().c_str());
-                                  to_app(shell).send_read_request(type_id, device_id, offset, 0, true);
+                                  EMSESP::send_read_request(type_id, device_id, offset, 0, true);
                               } else {
-                                  to_app(shell).send_read_request(type_id, device_id, 0, 0, true);
+                                  EMSESP::send_read_request(type_id, device_id, 0, 0, true);
                               }
-                              to_app(shell).set_read_id(type_id);
+                              EMSESP::set_read_id(type_id);
                           });
 
     commands->add_command(ShellContext::MAIN,
@@ -419,22 +415,21 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                               // only use english commands, not the translations
                               if (!arguments.empty()) {
                                   // get raw/pretty
-                                  if (arguments[0] == (F_(raw))) {
-                                      to_app(shell).watch(to_app(shell).WATCH_RAW); // raw
+                                  if (arguments[0] == F_(raw)) {
+                                      EMSESP::watch(EMSESP::WATCH_RAW); // raw
                                   } else if (arguments[0] == (FL_(on)[0])) {
-                                      to_app(shell).watch(to_app(shell).WATCH_ON); // on
+                                      EMSESP::watch(EMSESP::WATCH_ON); // on
                                   } else if (arguments[0] == (FL_(off)[0])) {
-                                      to_app(shell).watch(to_app(shell).WATCH_OFF); // off
+                                      EMSESP::watch(EMSESP::WATCH_OFF); // off
                                   } else if (arguments[0] == (FL_(unknown)[0])) {
-                                      to_app(shell).watch(to_app(shell).WATCH_UNKNOWN); // unknown
+                                      EMSESP::watch(EMSESP::WATCH_UNKNOWN); // unknown
                                       watch_id = WATCH_ID_NONE;
                                   } else {
                                       watch_id = Helpers::hextoint(arguments[0].c_str());
-                                      if (watch_id > 0
-                                          && ((to_app(shell).watch() == to_app(shell).WATCH_OFF) || (to_app(shell).watch() == to_app(shell).WATCH_UNKNOWN))) {
-                                          to_app(shell).watch(to_app(shell).WATCH_ON); // on
+                                      if (watch_id > 0 && ((EMSESP::watch() == EMSESP::WATCH_OFF) || (EMSESP::watch() == EMSESP::WATCH_UNKNOWN))) {
+                                          EMSESP::watch(EMSESP::WATCH_ON); // on
                                       } else if (watch_id == 0) {
-                                          to_app(shell).watch(to_app(shell).WATCH_OFF); // off
+                                          EMSESP::watch(EMSESP::WATCH_OFF); // off
                                           return;
                                       }
                                   }
@@ -444,14 +439,14 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                       watch_id = Helpers::hextoint(arguments[1].c_str());
                                   }
 
-                                  to_app(shell).watch_id(watch_id);
+                                  EMSESP::watch_id(watch_id);
                               } else {
                                   shell.printfln("Invalid: use watch raw|on|off|unknown|id [id]");
                                   return;
                               }
 
-                              uint8_t watch = to_app(shell).watch();
-                              if (watch == to_app(shell).WATCH_OFF) {
+                              uint8_t watch = EMSESP::watch();
+                              if (watch == EMSESP::WATCH_OFF) {
                                   shell.printfln("Watching telegrams is off");
                                   return;
                               }
@@ -462,15 +457,15 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
                                   shell.printfln("Setting log level to Notice");
                               }
 
-                              if (watch == to_app(shell).WATCH_ON) {
+                              if (watch == EMSESP::WATCH_ON) {
                                   shell.printfln("Watching incoming telegrams, displayed in decoded format");
-                              } else if (watch == to_app(shell).WATCH_RAW) {
+                              } else if (watch == EMSESP::WATCH_RAW) {
                                   shell.printfln("Watching incoming telegrams, displayed as raw bytes"); // WATCH_RAW
                               } else {
                                   shell.printfln("Watching unknown telegrams"); // WATCH_UNKNOWN
                               }
 
-                              watch_id = to_app(shell).watch_id();
+                              watch_id = EMSESP::watch_id();
                               if (watch_id > 0x80) {
                                   shell.printfln("Filtering only telegrams that match a telegram type of 0x%02X", watch_id);
                               } else if (watch_id != WATCH_ID_NONE) {
@@ -571,7 +566,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
             }
         },
         [](Shell & shell, const std::vector<std::string> & current_arguments, const std::string & next_argument) -> std::vector<std::string> {
-            if (current_arguments.size() == 0) {
+            if (current_arguments.empty()) {
                 std::vector<std::string> devices_list;
                 devices_list.emplace_back(EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::SYSTEM));
                 devices_list.emplace_back(EMSdevice::device_type_2_device_name(EMSdevice::DeviceType::TEMPERATURESENSOR));
@@ -600,7 +595,7 @@ static void setup_commands(std::shared_ptr<Commands> & commands) {
 }
 
 std::shared_ptr<Commands> EMSESPShell::commands_ = [] {
-    std::shared_ptr<Commands> commands = std::make_shared<Commands>();
+    auto commands = std::make_shared<Commands>();
     setup_commands(commands);
     return commands;
 }();
