@@ -256,7 +256,7 @@ class Mqtt {
         const std::string   topic_;            // short topic name
         mqtt_sub_function_p mqtt_subfunction_; // can be empty
 
-        // TODO see if remove &&topic to &topic is ok, so we don't need the std:move
+        // replaced &&topic with &topic in 3.7.0-dev.43, so we prevent the std:move later
         MQTTSubFunction(uint8_t device_type, const std::string & topic, mqtt_sub_function_p mqtt_subfunction)
             : device_type_(device_type)
             , topic_(topic)
