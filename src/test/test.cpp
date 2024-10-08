@@ -973,47 +973,55 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         if (single) {
             // run dedicated tests only
 
-            // EMSESP::webCustomEntityService.test();  // custom entities
-            // EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
-            // EMSESP::temperaturesensor_.test();      // add temperature sensors
+            EMSESP::webCustomEntityService.test();  // custom entities
+            EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
+            EMSESP::temperaturesensor_.test();      // add temperature sensors
+
             // EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
 
+            // request.url("/rest/deviceEntities");
+            // EMSESP::webCustomizationService.device_entities(&request);
+
+            request.url("/rest/dashboardData");
+            EMSESP::webDataService.dashboard_data(&request);
+
+            // COMMANDS
             // shell.invoke_command("call system fetch");
             // request.url("/api/system/fetch");
             // EMSESP::webAPIService.webAPIService(&request);
-
             // request.url("/api/system/restart");
             // EMSESP::webAPIService.webAPIService(&request);
-
             // request.url("/api/system/format");
             // EMSESP::webAPIService.webAPIService(&request);
-
-            request.method(HTTP_POST);
-
-            char data1[] = "{\"device\":\"system\", \"cmd\":\"restart\",\"id\":-1}";
-            deserializeJson(doc, data1);
-            request.url("/api");
-            EMSESP::webAPIService.webAPIService(&request, doc.as<JsonVariant>());
-
-            char data2[] = "{\"action\":\"customSupport\", \"param\":\"hello\"}";
-            deserializeJson(doc, data2);
-            request.url("/rest/action");
-            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
-
-            char data3[] = "{\"action\":\"export\", \"param\":\"schedule\"}";
-            deserializeJson(doc, data3);
-            request.url("/rest/action");
-            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
-
-            char data4[] = "{\"action\":\"export\", \"param\":\"allvalues\"}";
-            deserializeJson(doc, data4);
-            request.url("/rest/action");
-            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
             // request.url("/api/thermostat");
             // EMSESP::webAPIService.webAPIService(&request);
             // request.url("/api/thermostat/hc1");
             // EMSESP::webAPIService.webAPIService(&request);
+
+            // POST COMMANDS
+            // request.method(HTTP_POST);
+
+            // char data1[] = "{\"device\":\"system\", \"cmd\":\"restart\",\"id\":-1}";
+            // deserializeJson(doc, data1);
+            // request.url("/api");
+            // EMSESP::webAPIService.webAPIService(&request, doc.as<JsonVariant>());
+
+            // char data2[] = "{\"action\":\"customSupport\", \"param\":\"hello\"}";
+            // deserializeJson(doc, data2);
+            // request.url("/rest/action");
+            // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+
+            // char data3[] = "{\"action\":\"export\", \"param\":\"schedule\"}";
+            // deserializeJson(doc, data3);
+            // request.url("/rest/action");
+            // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+
+            // char data4[] = "{\"action\":\"export\", \"param\":\"allvalues\"}";
+            // deserializeJson(doc, data4);
+            // request.url("/rest/action");
+            // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+
 
         } else {
             EMSESP::webCustomEntityService.test();  // custom entities
