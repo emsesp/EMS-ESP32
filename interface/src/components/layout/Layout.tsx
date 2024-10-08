@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { FC } from 'react';
 import { useLocation } from 'react-router-dom';
 
@@ -24,9 +24,11 @@ const Layout: FC<RequiredChildrenProps> = ({ children }) => {
 
   useEffect(() => setMobileOpen(false), [pathname]);
 
+  // cache the object to prevent unnecessary re-renders
+  const obj = useMemo(() => ({ title, setTitle }), [title]);
+
   return (
-    // TODO wrap title/setTitle in a useMemo()
-    <LayoutContext.Provider value={{ title, setTitle }}>
+    <LayoutContext.Provider value={obj}>
       <LayoutAppBar title={title} onToggleDrawer={handleDrawerToggle} />
       <LayoutDrawer mobileOpen={mobileOpen} onClose={handleDrawerToggle} />
       <Box component="main" sx={{ marginLeft: { md: `${DRAWER_WIDTH}px` } }}>
