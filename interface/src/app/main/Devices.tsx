@@ -96,7 +96,7 @@ const Devices = () => {
     (id: number) => readDeviceData(id),
     {
       initialData: {
-        data: []
+        nodes: []
       },
       immediate: false
     }
@@ -252,7 +252,7 @@ const Devices = () => {
   };
 
   const dv_sort = useSort(
-    { nodes: deviceData.data },
+    { nodes: deviceData.nodes },
     {},
     {
       sortIcon: {
@@ -384,8 +384,8 @@ const Devices = () => {
     ];
 
     const data = onlyFav
-      ? deviceData.data.filter((dv) => hasMask(dv.id, DeviceEntityMask.DV_FAVORITE))
-      : deviceData.data;
+      ? deviceData.nodes.filter((dv) => hasMask(dv.id, DeviceEntityMask.DV_FAVORITE))
+      : deviceData.nodes;
 
     const csvData = data.reduce(
       (csvString: string, rowItem: DeviceValue) =>
@@ -606,8 +606,8 @@ const Devices = () => {
     );
 
     const shown_data = onlyFav
-      ? deviceData.data.filter((dv) => hasMask(dv.id, DeviceEntityMask.DV_FAVORITE))
-      : deviceData.data;
+      ? deviceData.nodes.filter((dv) => hasMask(dv.id, DeviceEntityMask.DV_FAVORITE))
+      : deviceData.nodes;
 
     const deviceIndex = coreData.devices.findIndex(
       (d) => d.id === device_select.state.id
