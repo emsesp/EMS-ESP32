@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FC } from 'react';
 import { redirect } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -67,17 +67,15 @@ const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
     void refresh();
   }, [refresh]);
 
+  // cache object to prevent re-renders
+  const obj = useMemo(
+    () => ({ signIn, signOut, me, refresh }),
+    [signIn, signOut, me, refresh]
+  );
+
   if (initialized) {
     return (
-      // TODO useMemo?
-      <AuthenticationContext.Provider
-        value={{
-          signIn,
-          signOut,
-          me,
-          refresh
-        }}
-      >
+      <AuthenticationContext.Provider value={obj}>
         {children}
       </AuthenticationContext.Provider>
     );
