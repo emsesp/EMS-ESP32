@@ -117,13 +117,13 @@ export interface CoreData {
 export interface DashboardItem {
   id: number; // unique index
   t?: number; // type from DeviceType
-  n?: string; // name
-  dv?: DeviceValue;
+  n?: string; // name, optional
+  dv?: DeviceValue; // device value, optional
   nodes?: DashboardItem[]; // children nodes, optional
 }
 
 export interface DashboardData {
-  data: DashboardItem[];
+  nodes: DashboardItem[];
 }
 
 export interface DeviceValue {
@@ -139,7 +139,7 @@ export interface DeviceValue {
 }
 
 export interface DeviceData {
-  data: DeviceValue[];
+  nodes: DeviceValue[];
 }
 
 export interface DeviceEntity {

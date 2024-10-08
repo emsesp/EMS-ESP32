@@ -43,9 +43,13 @@ WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securi
     server->on(EMSESP_SENSOR_DATA_SERVICE_PATH,
                HTTP_GET,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { sensor_data(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
+
+    server->on(EMSESP_DASHBOARD_DATA_SERVICE_PATH,
+               HTTP_GET,
+               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { dashboard_data(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
 }
 
-// this is used in the dashboard and contains all ems device information
+// this is used in the Devices page and contains all EMS device information
 // /coreData endpoint
 void WebDataService::core_data(AsyncWebServerRequest * request) {
     auto *     response = new AsyncJsonResponse(false);
@@ -150,6 +154,7 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
 }
 
 // The unique_id is the unique record ID from the Web table to identify which device to load
+// endpoint /rest/deviceData?id=n
 // Compresses the JSON using MsgPack https://msgpack.org/index.html
 void WebDataService::device_data(AsyncWebServerRequest * request) {
     uint8_t id;
@@ -345,5 +350,54 @@ void WebDataService::write_analog_sensor(AsyncWebServerRequest * request, JsonVa
     AsyncWebServerResponse * response = request->beginResponse(ok ? 200 : 400); // ok or bad request
     request->send(response);
 }
+
+// this is used in the dashboard and contains all ems device information
+// /dashboardData endpoint
+void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
+    auto * response = new AsyncJsonResponse(true, true); // its an Array and also msgpack'd
+
+#if defined(EMSESP_STANDALONE)
+    JsonDocument doc;
+    JsonArray    root = doc.to<JsonArray>();
+#else
+    JsonArray root = response->getRoot();
+#endif
+
+    for (const auto & emsdevice : EMSESP::emsdevices) {
+        if (emsdevice->count_entities_fav()) {
+            JsonObject obj = root.add<JsonObject>();
+            obj["id"]      = emsdevice->unique_id();   // it's unique id
+            obj["n"]       = emsdevice->name();        // custom name
+            obj["t"]       = emsdevice->device_type(); // device type number
+            emsdevice->generate_values_web(obj, true); // is_dashboard = true
+        }
+    }
+
+    // add custom entities, if we have any
+    if (EMSESP::webCustomEntityService.count_entities()) {
+        JsonObject obj = root.add<JsonObject>();
+        obj["id"]      = 99;                                                // it's unique id
+        obj["n"]       = Helpers::translated_word(FL_(custom_device_name)); // custom name
+        obj["t"]       = EMSdevice::DeviceType::CUSTOM;                     // device type number
+        EMSESP::webCustomEntityService.generate_value_web(obj, true);
+    }
+
+    // add temperature sensors
+
+    // add analog sensors
+
+    // show scheduler, with name, on/off - and pencil edit
+
+#if defined(EMSESP_TEST) && defined(EMSESP_STANDALONE)
+    Serial.println();
+    Serial.print("ALL dashboard_data: ");
+    serializeJsonPretty(root, Serial);
+    Serial.println();
+#endif
+
+    response->setLength();
+    request->send(response);
+}
+
 
 } // namespace emsesp

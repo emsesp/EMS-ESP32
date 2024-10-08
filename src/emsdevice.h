@@ -230,7 +230,7 @@ class EMSdevice {
 
     enum OUTPUT_TARGET : uint8_t { API_VERBOSE, API_SHORTNAMES, MQTT, CONSOLE };
     bool generate_values(JsonObject output, const int8_t tag_filter, const bool nested, const uint8_t output_target);
-    void generate_values_web(JsonObject output);
+    void generate_values_web(JsonObject output, const bool is_dashboard = false);
     void generate_values_web_customization(JsonArray output);
 
     void add_device_value(int8_t                tag,
@@ -452,6 +452,7 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_CR120       = 16; // mostly like RC300, but some changes
 
     uint8_t count_entities();
+    uint8_t count_entities_fav();
     bool    has_entities() const;
 
     // void reserve_device_values(uint8_t elements) {
@@ -509,9 +510,12 @@ class EMSdevice {
 
     std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
 
-    std::vector<DeviceValue> devicevalues_; // all the device values
-
     std::vector<uint16_t> handlers_ignored_;
+
+#if defined(EMSESP_STANDALONE) || defined(EMSESP_TEST)
+  public: // so we can call it from WebCustomizationService::test()
+#endif
+    std::vector<DeviceValue> devicevalues_; // all the device values
 };
 
 } // namespace emsesp

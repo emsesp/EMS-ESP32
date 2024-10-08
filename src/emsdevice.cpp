@@ -33,7 +33,16 @@ uint8_t EMSdevice::count_entities() {
     return count;
 }
 
-// see if there are entities, excluding any commands
+// count favorites, used in Dashboard
+uint8_t EMSdevice::count_entities_fav() {
+    uint8_t count = 0;
+    for (const auto & dv : devicevalues_) {
+        count += dv.has_state(DeviceValueState::DV_FAVORITE);
+    }
+    return count;
+}
+
+// see if there are customized entities, excluding any commands
 bool EMSdevice::has_entities() const {
     for (const auto & dv : devicevalues_) {
         if (dv.type != DeviceValueType::CMD) {
@@ -513,6 +522,7 @@ void EMSdevice::register_telegram_type(const uint16_t telegram_type_id, const ch
 }
 
 // add to device value library, also know now as a "device entity"
+// this function will also apply any customizations to the entity
 void EMSdevice::add_device_value(int8_t                tag,              // to be used to group mqtt together, either as separate topics as a nested object
                                  void *                value_p,          // pointer to the value from the .h file
                                  uint8_t               type,             // one of DeviceValueType
@@ -900,24 +910,39 @@ bool EMSdevice::export_values(uint8_t device_type, JsonObject output, const int8
 }
 
 // prepare array of device values used for the WebUI
+// this is used for the Dashboard and also the Devices page
 // this is loosely based of the function generate_values used for the MQTT and Console
 // except additional data is stored in the JSON document needed for the Web UI like the UOM and command
 // v=value, u=uom, n=name, c=cmd, h=help string, s=step, m=min, x=max
-void EMSdevice::generate_values_web(JsonObject output) {
+// see types.ts::DeviceValue for the structure
+void EMSdevice::generate_values_web(JsonObject output, const bool is_dashboard) {
     // output["label"] = to_string_short();
     // output["label"] = name_;
-    JsonArray data = output["data"].to<JsonArray>();
+
+    JsonArray nodes = output["nodes"].to<JsonArray>();
+    uint8_t   count = 0;
 
     for (auto & dv : devicevalues_) {
         auto fullname = dv.get_fullname();
 
         // check conditions:
         //  1. fullname cannot be empty
-        //  2. it must have a valid value, if it is not a command like 'reset'
-        //  3. show favorites first
-        if (!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && !fullname.empty() && (dv.hasValue() || (dv.type == DeviceValueType::CMD))) {
-            JsonObject obj        = data.add<JsonObject>(); // create the object, we know there is a value
-            uint8_t    fahrenheit = 0;
+        //  2. it must have a valid value, unless its a command like 'reset'
+        //  3. if is_dashboard then only show favs
+        bool matching_states = (is_dashboard) ? dv.has_state(DeviceValueState::DV_FAVORITE) : !dv.has_state(DeviceValueState::DV_WEB_EXCLUDE);
+
+        if (matching_states && !fullname.empty() && (dv.hasValue() || (dv.type == DeviceValueType::CMD))) {
+            JsonObject root_obj = nodes.add<JsonObject>(); // create the object, we know there is a value
+
+            JsonObject obj;
+            if (is_dashboard) {
+                root_obj["id"] = (unique_id() * 100) + count++; // make unique
+                obj            = root_obj["dv"].to<JsonObject>();
+            } else {
+                obj = root_obj;
+            }
+
+            uint8_t fahrenheit = 0;
 
             // handle Booleans (true, false), output as strings according to the user settings
             if (dv.type == DeviceValueType::BOOL) {
@@ -1021,11 +1046,11 @@ void EMSdevice::generate_values_web(JsonObject output) {
     }
 }
 
-// as generate_values_web() but stripped down to only show all entities and their state
-// this is used only for WebCustomizationService::device_entities() (rest/deviceEntities?id=n)
+// as generate_values_web() but with extra data for WebCustomizationService::device_entities() (rest/deviceEntities?id=n)
+// also show commands and entities that have an empty fullname
+// see types.ts::DeviceEntity for the structure
 void EMSdevice::generate_values_web_customization(JsonArray output) {
     for (auto & dv : devicevalues_) {
-        // also show commands and entities that have an empty fullname
         JsonObject obj        = output.add<JsonObject>();
         uint8_t    fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (dv.uom == DeviceValueUOM::DEGREES) ? 2 : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
 
@@ -1066,7 +1091,8 @@ void EMSdevice::generate_values_web_customization(JsonArray output) {
             }
         }
 
-        // id holds the shortname and must always have a value for the WebUI table to work
+        // create the id
+        // it holds the shortname and must always have a unique value for the WebUI table to work
         if (dv.tag >= DeviceValueTAG::TAG_HC1) {
             char id_s[50];
             snprintf(id_s, sizeof(id_s), "%s/%s", tag_to_mqtt(dv.tag), dv.short_name);
@@ -1082,7 +1108,6 @@ void EMSdevice::generate_values_web_customization(JsonArray output) {
             if (fullname) {
                 // obj["n"] = dv.has_tag() ? std::string(tag_to_string(dv.tag)) + " " + fullname : fullname; // prefix tag
                 obj["n"] = fullname;
-
                 // TAG https://github.com/emsesp/EMS-ESP32/issues/1338
                 // obj["n"] = (dv.has_tag()) ? fullname + " " + tag_to_string(dv.tag) : fullname; // suffix tag
             }
@@ -1098,8 +1123,15 @@ void EMSdevice::generate_values_web_customization(JsonArray output) {
         if (dv.has_tag()) {
             obj["t"] = tag_to_string(dv.tag);
         }
-        obj["m"] = dv.state >> 4; // send back the mask state. We're only interested in the high nibble
-        obj["w"] = dv.has_cmd;    // if writable
+
+        // the mask state. We're only interested in the high nibble which contains the flags, so shift right
+        // 0x80 = 128 = DV_FAVORITE
+        // 0x40 = 64  = DV_READONLY
+        // 0x20 = 32  = DV_API_MQTT_EXCLUDE
+        // 0x10 = 16  = DV_WEB_EXCLUDE
+        obj["m"] = dv.state >> 4;
+
+        obj["w"] = dv.has_cmd; // if writable
 
         if (dv.has_cmd && (obj["v"].is<float>() || obj["v"].is<int>())) {
             // set the min and max values if there are any and if entity has a value
@@ -1112,16 +1144,20 @@ void EMSdevice::generate_values_web_customization(JsonArray output) {
         }
     }
 
+    // apply and blacklisted/removed entities
+    // this is when the mask has it's high bit (0x80) set
+    // https://github.com/emsesp/EMS-ESP32/issues/891
     EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
         for (EntityCustomization entityCustomization : settings.entityCustomizations) {
             if (entityCustomization.device_id == device_id()) {
+                // entity_ids is a list of all entities with the mask prefixed in the string
                 for (const std::string & entity_id : entityCustomization.entity_ids) {
                     uint8_t mask = Helpers::hextoint(entity_id.substr(0, 2).c_str());
                     if (mask & 0x80) {
                         JsonObject obj = output.add<JsonObject>();
-                        obj["id"]      = DeviceValue::get_name(entity_id);
-                        obj["m"]       = mask;
-                        obj["w"]       = false;
+                        obj["id"]      = DeviceValue::get_name(entity_id); // set the name, it could be custom following a '|'
+                        obj["m"]       = mask;                             // update the mask
+                        obj["w"]       = false;                            // not writeable as it won't be shown
                     }
                 }
                 break;

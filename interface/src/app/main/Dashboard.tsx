@@ -225,6 +225,7 @@ const Dashboard = () => {
                   <Body>
                     {tableList.map((di: DashboardItem) => (
                       <Row key={di.id} item={di}>
+                        {/* TODO add a comment about the number 99 */}
                         {di.id > 99 ? (
                           <Cell>{showName(di)}</Cell>
                         ) : (
