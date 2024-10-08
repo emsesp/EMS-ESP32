@@ -134,8 +134,8 @@ void AnalogSensor::reload(bool get_nvs) {
         // first check if the GPIO is valid. If not, force set it to disabled
         if (!System::is_valid_gpio(sensor.gpio())) {
             LOG_WARNING("Bad GPIO %d for Sensor %s. Disabling.", sensor.gpio(), sensor.name().c_str());
-            sensor.set_type(AnalogType::NOTUSED);
-            continue; // skip this loop pass
+            sensor.set_type(AnalogType::NOTUSED); // set disabled
+            continue;                             // skip this loop pass
         }
 
         if (sensor.type() == AnalogType::ADC) {
@@ -402,7 +402,9 @@ bool AnalogSensor::update(uint8_t gpio, std::string & name, double offset, doubl
     // reloads the sensors in the customizations file into the sensors list
     reload();
 
-    return true;
+    // return false if it's an invalid GPIO, an error will show in WebUI
+    // and reported as an error in the log
+    return System::is_valid_gpio(gpio);
 }
 
 // check to see if values have been updated
