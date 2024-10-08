@@ -195,9 +195,9 @@ const DevicesDialog = ({
             </Button>
             <Button
               startIcon={<WarningIcon color="warning" />}
-              variant="contained"
+              variant="outlined"
               onClick={save}
-              color="info"
+              color="primary"
             >
               {selectedItem.v === '' && selectedItem.c ? LL.EXECUTE() : LL.UPDATE()}
             </Button>
