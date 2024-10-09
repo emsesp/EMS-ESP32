@@ -210,7 +210,7 @@ void AnalogSensor::reload(bool get_nvs) {
                         sensor.set_offset(EMSESP::nvs_.getChar(sensor.name().c_str()));
                     }
                 }
-                digitalWrite(sensor.gpio(), sensor.offset() * sensor.factor() > 0 ? 1 : 0);
+                digitalWrite(sensor.gpio(), (sensor.offset() == 0) ^ (sensor.factor() != 0));
                 sensor.set_value(sensor.offset());
             }
             publish_sensor(sensor);
@@ -756,7 +756,7 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                     sensor.set_offset(v);
                     sensor.set_value(v);
                     pinMode(sensor.gpio(), OUTPUT);
-                    digitalWrite(sensor.gpio(), sensor.offset() * sensor.factor() > 0 ? 1 : 0);
+                    digitalWrite(sensor.gpio(), (sensor.offset() == 0) ^ (sensor.factor() != 0));
                     if (sensor.uom() == 0 && EMSESP::nvs_.getChar(sensor.name().c_str()) != (int8_t)sensor.offset()) {
                         EMSESP::nvs_.putChar(sensor.name().c_str(), (int8_t)sensor.offset());
                     }
