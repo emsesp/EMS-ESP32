@@ -849,7 +849,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         EMSESP::webAPIService.webAPIService(&request);
         request.url("/api/analogsensor/info");
         EMSESP::webAPIService.webAPIService(&request);
-        request.url("/api/analogsensor/test_analog1");
+        request.url("/api/analogsensor/test_analogsensor1");
         request.url("/api/analogsensor/36");
         EMSESP::webAPIService.webAPIService(&request);
 
@@ -976,8 +976,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             EMSESP::webCustomEntityService.test();  // custom entities
             EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
             EMSESP::temperaturesensor_.test();      // add temperature sensors
-
-            // EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
+            EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
 
             // request.url("/rest/deviceEntities");
             // EMSESP::webCustomizationService.device_entities(&request);
@@ -1100,11 +1099,11 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             EMSESP::webAPIService.webAPIService(&request);
             request.url("/api/temperaturesensor/info");
             EMSESP::webAPIService.webAPIService(&request);
-            request.url("/api/temperaturesensor/test_sensor2");
+            request.url("/api/temperaturesensor/test_tempsensor2");
             EMSESP::webAPIService.webAPIService(&request);
             request.url("/api/temperaturesensor/0B_0C0D_0E0F_1011");
             EMSESP::webAPIService.webAPIService(&request);
-            request.url("/api/temperaturesensor/test_sensor2/value");
+            request.url("/api/temperaturesensor/test_tempsensor2/value");
             EMSESP::webAPIService.webAPIService(&request);
 
             // analogsensor
@@ -1112,9 +1111,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             EMSESP::webAPIService.webAPIService(&request);
             request.url("/api/analogsensor/info");
             EMSESP::webAPIService.webAPIService(&request);
-            request.url("/api/analogsensor/test_analog1");
+            request.url("/api/analogsensor/test_analogsensor1");
             EMSESP::webAPIService.webAPIService(&request);
-            request.url("/api/analogsensor/test_analog1/offset");
+            request.url("/api/analogsensor/test_analogsensor1/offset");
             EMSESP::webAPIService.webAPIService(&request);
 
             // system calls with POST
@@ -1191,11 +1190,11 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             EMSESP::webAPIService.webAPIService(&request);
             request.url("/api/temperaturesensor/0B_0C0D_0E0F_XXXX");
             EMSESP::webAPIService.webAPIService(&request);
-            request.url("/api/temperaturesensor/test_sensor2/bad");
+            request.url("/api/temperaturesensor/test_tempsensor2/bad");
             EMSESP::webAPIService.webAPIService(&request);
 
             // analogsensor
-            request.url("/api/analogsensor/test_analog1/bad");
+            request.url("/api/analogsensor/test_analogsensor1/bad");
             EMSESP::webAPIService.webAPIService(&request);
             request.url("/api/analogsensor/test_analog10");
             EMSESP::webAPIService.webAPIService(&request);
