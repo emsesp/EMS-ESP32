@@ -29,7 +29,7 @@ import { validate } from 'validators';
 import { DeviceValueUOM, DeviceValueUOM_s } from './types';
 import type { DeviceValue } from './types';
 
-interface DashboardDevicesDialogProps {
+interface DevicesDialogProps {
   open: boolean;
   onClose: () => void;
   onSave: (as: DeviceValue) => void;
@@ -47,7 +47,7 @@ const DevicesDialog = ({
   writeable,
   validator,
   progress
-}: DashboardDevicesDialogProps) => {
+}: DevicesDialogProps) => {
   const { LL } = useI18nContext();
   const [editItem, setEditItem] = useState<DeviceValue>(selectedItem);
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
@@ -75,7 +75,10 @@ const DevicesDialog = ({
     }
   };
 
-  const setUom = (uom: DeviceValueUOM) => {
+  const setUom = (uom?: DeviceValueUOM) => {
+    if (uom === undefined) {
+      return;
+    }
     switch (uom) {
       case DeviceValueUOM.HOURS:
         return LL.HOURS();
