@@ -343,7 +343,7 @@ const en: Translation = {
   AUTO_SCROLL: 'Auto Scroll',
   DASHBOARD: 'Dashboard',
   NO_DATA: 'No data available',
-  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorites using the Customizations module.',
+  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module.',
 };
 
 export default en;

@@ -343,7 +343,7 @@ const pl: BaseTranslation = {
   AUTO_SCROLL: 'Auto Scroll', // TODO translate
   DASHBOARD: 'Dashboard', // TODO translate
   NO_DATA: 'No data available', // TODO translate
-  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorites using the Customizations module.' // TODO translate
+  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module.' // TODO translate
 };
 
 export default pl;
