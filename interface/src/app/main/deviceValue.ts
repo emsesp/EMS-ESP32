@@ -27,12 +27,16 @@ const formatDurationMin = (LL: TranslationFunctions, duration_min: number) => {
 
 export function formatValue(
   LL: TranslationFunctions,
-  value: unknown,
-  uom: DeviceValueUOM
+  value?: unknown,
+  uom?: DeviceValueUOM
 ) {
-  if (typeof value !== 'number') {
-    return (value === undefined ? '' : value) as string;
+  if (typeof value !== 'number' || uom === undefined || value === undefined) {
+    if (value === undefined || typeof value === 'boolean') {
+      return '';
+    }
+    return value as string;
   }
+
   switch (uom) {
     case DeviceValueUOM.HOURS:
       return value ? formatDurationMin(LL, value * 60) : LL.NUM_HOURS({ num: 0 });
