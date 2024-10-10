@@ -58,6 +58,13 @@ const enum DeviceType {
   UNKNOWN
 }
 
+const enum DeviceTypeUniqueID {
+  SCHEDULER_UID = 96,
+  ANALOGSENSOR_UID = 97,
+  TEMPERATURESENSOR_UID = 98,
+  CUSTOM_UID = 99 // always 99
+}
+
 function updateMask(entity: any, de: any, dd: any) {
   const current_mask = parseInt(entity.slice(0, 2), 16);
 
@@ -828,26 +835,6 @@ const emsesp_coredata = {
       p: 158,
       v: '73.03',
       e: 63,
-      url: 'thermostat'
-    }
-  ]
-};
-
-const emsesp_coredata2 = {
-  connected: true,
-  // connected: false,
-  // devices: []
-  devices: [
-    {
-      id: 4,
-      t: 6,
-      tn: 'Thermostat',
-      b: 'Nefit',
-      n: 'Moduline 1000',
-      d: 16,
-      p: 165,
-      v: '04.01',
-      e: 3,
       url: 'thermostat'
     }
   ]
@@ -3869,7 +3856,7 @@ let emsesp_schedule = {
       time: '',
       cmd: 'system/message',
       value: '"hello world"',
-      name: 'immediate'
+      name: '' // empty
     }
   ]
 };
@@ -4373,9 +4360,8 @@ router
 
       // add the custom entity data
       dashboard_object = {
-        id: 99, // unique ID for custom entities
-        n: 'Custom Entities', // this is translated in the C++ code
-        t: 4, // DeviceType::CUSTOM
+        id: DeviceTypeUniqueID.CUSTOM_UID, // unique ID for custom entities
+        t: DeviceType.CUSTOM,
         nodes: getDashboardEntityData(99)
       };
       // only add to dashboard if we have values
@@ -4386,17 +4372,16 @@ router
       // add temperature sensor data. no command c
       let sensor_data: any[] = [];
       sensor_data = emsesp_sensordata.ts.map((item, index) => ({
-        id: 980 + index,
+        id: DeviceTypeUniqueID.TEMPERATURESENSOR_UID * 100 + index,
         dv: {
-          id: '  ' + item.n,
+          id: item.n,
           v: item.t, // value is called t in ts (temperature)
           u: item.u
         }
       }));
       dashboard_object = {
-        id: 98,
-        n: 'Temperature Sensors',
-        t: 1, // DeviceType::TEMPERATURESENSOR
+        id: DeviceTypeUniqueID.TEMPERATURESENSOR_UID,
+        t: DeviceType.TEMPERATURESENSOR,
         nodes: sensor_data
       };
       // only add to dashboard if we have values
@@ -4408,24 +4393,45 @@ router
       // remove disabled sensors first (t = 0)
       sensor_data = emsesp_sensordata.as.filter((item) => item.t !== 0);
       sensor_data = sensor_data.map((item, index) => ({
-        id: 970 + index,
+        id: DeviceTypeUniqueID.ANALOGSENSOR_UID * 100 + index,
         dv: {
-          id: '  ' + item.n,
+          id: item.n,
           v: item.v,
           u: item.u
         }
       }));
 
       dashboard_object = {
-        id: 97,
-        n: 'Analog Sensors',
-        t: 2, // DeviceType::ANALOGSENSOR
+        id: DeviceTypeUniqueID.ANALOGSENSOR_UID,
+        t: DeviceType.ANALOGSENSOR,
         nodes: sensor_data
       };
       // only add to dashboard if we have values
       if ((dashboard_object.nodes ?? []).length > 0) {
         dashboard_data.push(dashboard_object);
       }
+
+      // add the scheduler data
+      // filter emsesp_schedule with only if it has a name
+      let scheduler_data = emsesp_schedule.schedule.filter((item) => item.name);
+      let scheduler_data2 = scheduler_data.map((item, index) => ({
+        id: DeviceTypeUniqueID.SCHEDULER_UID * 100 + index,
+        dv: {
+          id: item.name,
+          v: item.active
+          // u: item.u // don't need uom
+        }
+      }));
+      dashboard_object = {
+        id: DeviceTypeUniqueID.SCHEDULER_UID,
+        t: DeviceType.SCHEDULER,
+        nodes: scheduler_data2
+      };
+      // only add to dashboard if we have values
+      if ((dashboard_object.nodes ?? []).length > 0) {
+        dashboard_data.push(dashboard_object);
+      }
+      //
     } else {
       // for testing
       // single object
@@ -4442,6 +4448,8 @@ router
       }
       console.log('dashboard_data: ', dashboard_data);
     }
+
+    // console.log('dashboard_data: ', dashboard_data);
 
     // return dashboard_data; // if not using msgpack
     return new Response(encoder.encode(dashboard_data), { headers }); // msgpack it
@@ -4490,6 +4498,24 @@ router
   // Scheduler
   .post(EMSESP_SCHEDULE_ENDPOINT, async (request: any) => {
     const content = await request.json();
+    // check if we're changing active from the Dashboard
+    if (content.schedule.id === 0) {
+      console.log(
+        "Toggle schedule '" +
+          content.schedule.name +
+          "' to " +
+          content.schedule.active
+      );
+      // find the schedule in emsesp_schedule via the name and toggle the active
+      const objIndex = emsesp_schedule.schedule.findIndex(
+        (obj) => obj.name === content.schedule.name
+      );
+      if (objIndex !== -1) {
+        emsesp_schedule.schedule[objIndex].active = content.schedule.active;
+      }
+
+      return status(200);
+    }
     emsesp_schedule = content;
     console.log('schedule saved', emsesp_schedule);
     return status(200);
