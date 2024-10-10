@@ -162,7 +162,7 @@ const DevicesDialog = ({
                 value={editItem.v}
                 disabled={!writeable}
                 sx={{ width: '30ch' }}
-                multiline={editItem.u ? false : true}
+                multiline={!editItem.u}
                 onChange={updateFormValue}
               />
             )}

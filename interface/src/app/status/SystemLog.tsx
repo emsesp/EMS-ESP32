@@ -250,7 +250,7 @@ const SystemLog = () => {
           }}
         >
           {logEntries.map((e) => (
-            <div style={{ font: '14px monospace', whiteSpace: 'nowrap' }}>
+            <div key={e.i} style={{ font: '14px monospace', whiteSpace: 'nowrap' }}>
               <span>{e.t}</span>
               <span>{paddedLevelLabel(e.l)}&nbsp;</span>
               <span>{paddedIDLabel(e.i)} </span>

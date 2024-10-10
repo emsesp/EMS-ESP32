@@ -25,6 +25,7 @@ const Layout: FC<RequiredChildrenProps> = ({ children }) => {
   useEffect(() => setMobileOpen(false), [pathname]);
 
   return (
+    // TODO wrap title/setTitle in a useMemo()
     <LayoutContext.Provider value={{ title, setTitle }}>
       <LayoutAppBar title={title} onToggleDrawer={handleDrawerToggle} />
       <LayoutDrawer mobileOpen={mobileOpen} onClose={handleDrawerToggle} />

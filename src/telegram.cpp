@@ -243,7 +243,7 @@ void RxService::add_empty(const uint8_t src, const uint8_t dest, const uint16_t 
 // send out request to EMS bus for all devices
 void TxService::start() {
     // grab the bus ID and tx_mode
-    EMSESP::webSettingsService.read([&](WebSettings & settings) {
+    EMSESP::webSettingsService.read([&](WebSettings const & settings) {
         ems_bus_id(settings.ems_bus_id);
         tx_mode(settings.tx_mode);
     });
@@ -418,30 +418,6 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
     tx_state(telegram->operation); // tx now in a wait state
 }
 
-/*
-// send an array of bytes as a telegram
-// we need to calculate the CRC and append it before sending
-// this function is fire-and-forget. there are no checks or post-send validations
-void TxService::send_telegram(const uint8_t * data, const uint8_t length) {
-    uint8_t telegram_raw[EMS_MAX_TELEGRAM_LENGTH];
-
-    for (uint8_t i = 0; i < length; i++) {
-        telegram_raw[i] = data[i];
-    }
-    telegram_raw[length] = calculate_crc(telegram_raw, length); // append CRC
-
-    tx_state(Telegram::Operation::NONE); // no post validation needed
-
-    // send the telegram to the UART Tx
-    uint16_t status = EMSuart::transmit(telegram_raw, length);
-
-    if (status == EMS_TX_STATUS_ERR) {
-        LOG_ERROR("Failed to transmit Tx via UART.");
-        increment_telegram_fail_count(); // another Tx fail
-    }
-}
-*/
-
 void TxService::add(const uint8_t  operation,
                     const uint8_t  dest,
                     const uint16_t type_id,
@@ -547,10 +523,8 @@ void TxService::add(uint8_t operation, const uint8_t * data, const uint8_t lengt
     LOG_DEBUG("New Tx [#%d] telegram, length %d", tx_telegram_id_, message_length);
 
     if (front && (operation != Telegram::Operation::TX_RAW || EMSESP::response_id() == 0)) {
-        // tx_telegrams_.push_front(qtxt); // add to front of queue
         tx_telegrams_.emplace_front(tx_telegram_id_++, std::move(telegram), false, validate_id); // add to front of queue
     } else {
-        // tx_telegrams_.push_back(qtxt); // add to back of queue
         tx_telegrams_.emplace_back(tx_telegram_id_++, std::move(telegram), false, validate_id); // add to back of queue
     }
     if (validate_id != 0) {

@@ -35,7 +35,7 @@ export const apStatusHighlight = ({ status }: APStatusType, theme: Theme) => {
 
 const APStatus = () => {
   const {
-    data: data,
+    data,
     send: loadData,
     error
   } = useAutoRequest(APApi.readAPStatus, { pollingTime: 5000 });

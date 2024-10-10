@@ -206,15 +206,15 @@ export const DeviceValueUOM_s = [
 export enum AnalogType {
   REMOVED = -1,
   NOTUSED = 0,
-  DIGITAL_IN,
-  COUNTER,
-  ADC,
-  TIMER,
-  RATE,
-  DIGITAL_OUT,
-  PWM_0,
-  PWM_1,
-  PWM_2
+  DIGITAL_IN = 1,
+  COUNTER = 2,
+  ADC = 3,
+  TIMER = 4,
+  RATE = 5,
+  DIGITAL_OUT = 6,
+  PWM_0 = 7,
+  PWM_1 = 8,
+  PWM_2 = 9
 }
 
 export const AnalogTypeNames = [
@@ -296,7 +296,7 @@ export interface ScheduleItem {
   active: boolean;
   deleted?: boolean;
   flags: number;
-  time: string;
+  time: string; // also used for Condition and On Change
   cmd: string;
   value: string;
   name: string; // is optional

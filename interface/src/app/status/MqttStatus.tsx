@@ -55,7 +55,7 @@ export const mqttQueueHighlight = (
 
 const MqttStatus = () => {
   const {
-    data: data,
+    data,
     send: loadData,
     error
   } = useAutoRequest(MqttApi.readMqttStatus, { pollingTime: 5000 });

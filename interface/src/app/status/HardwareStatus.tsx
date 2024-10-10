@@ -33,7 +33,7 @@ const HardwareStatus = () => {
   useLayoutTitle(LL.STATUS_OF(LL.HARDWARE()));
 
   const {
-    data: data,
+    data,
     send: loadData,
     error
   } = useAutoRequest(SystemApi.readSystemStatus, { pollingTime: 2000 });
@@ -50,6 +50,7 @@ const HardwareStatus = () => {
             {data.model ? (
               <Avatar sx={{ bgcolor: '#003289', color: 'white' }}>
                 <img
+                  alt="BBQKees"
                   src={BBQKeesIcon}
                   style={{ width: 16, verticalAlign: 'middle' }}
                 />
@@ -93,7 +94,7 @@ const HardwareStatus = () => {
               ' (rev.' +
               data.cpu_rev +
               ', ' +
-              (data.cpu_cores == 1 ? 'single-core)' : 'dual-core)') +
+              (data.cpu_cores === 1 ? 'single-core)' : 'dual-core)') +
               ' @ ' +
               data.cpu_freq_mhz +
               ' Mhz'

@@ -69,6 +69,7 @@ const Authentication: FC<RequiredChildrenProps> = ({ children }) => {
 
   if (initialized) {
     return (
+      // TODO useMemo?
       <AuthenticationContext.Provider
         value={{
           signIn,

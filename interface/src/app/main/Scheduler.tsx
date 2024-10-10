@@ -43,6 +43,8 @@ const Scheduler = () => {
   const [creating, setCreating] = useState<boolean>(false);
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
 
+  useLayoutTitle(LL.SCHEDULER());
+
   const {
     data: schedule,
     send: fetchSchedule,
@@ -242,8 +244,6 @@ const Scheduler = () => {
         </Typography>
       </Box>
     );
-
-    useLayoutTitle(LL.SCHEDULER());
 
     return (
       <Table
