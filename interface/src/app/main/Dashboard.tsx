@@ -3,6 +3,7 @@ import { IconContext } from 'react-icons/lib';
 import { toast } from 'react-toastify';
 
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import CircleIcon from '@mui/icons-material/Circle';
 import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
@@ -12,8 +13,10 @@ import {
   IconButton,
   ToggleButton,
   ToggleButtonGroup,
+  Tooltip,
   Typography
 } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 
 import { Body, Cell, Row, Table } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
@@ -24,11 +27,17 @@ import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import { useInterval } from 'utils';
 
-import { readDashboard, writeDeviceValue } from '../../api/app';
+import { readDashboard, writeDeviceValue, writeSchedule } from '../../api/app';
 import DeviceIcon from './DeviceIcon';
-import DashboardDevicesDialog from './DevicesDialog';
+import DevicesDialog from './DevicesDialog';
 import { formatValue } from './deviceValue';
-import { type DashboardItem, DeviceEntityMask, type DeviceValue } from './types';
+import {
+  type DashboardItem,
+  DeviceEntityMask,
+  DeviceType,
+  type DeviceValue,
+  type Schedule
+} from './types';
 import { deviceValueItemValidation } from './validators';
 
 const Dashboard = () => {
@@ -53,6 +62,13 @@ const Dashboard = () => {
   } = useRequest(readDashboard, {
     initialData: []
   });
+
+  const { send: updateSchedule } = useRequest(
+    (data: Schedule) => writeSchedule(data),
+    {
+      immediate: false
+    }
+  );
 
   const { loading: submitting, send: sendDeviceValue } = useRequest(
     (data: { id: number; c: string; v: unknown }) => writeDeviceValue(data),
@@ -104,14 +120,24 @@ const Dashboard = () => {
   const tree = useTree(
     { nodes: data },
     {
-      onChange: null // not used but needed
+      onChange: undefined // not used but needed
     },
     {
       treeIcon: {
         margin: '4px',
         iconDefault: null,
-        iconRight: <ChevronRightIcon color="primary" />,
-        iconDown: <ExpandMoreIcon color="primary" />
+        iconRight: (
+          <ChevronRightIcon
+            sx={{ fontSize: 16, verticalAlign: 'middle' }}
+            color="info"
+          />
+        ),
+        iconDown: (
+          <ExpandMoreIcon
+            sx={{ fontSize: 16, verticalAlign: 'middle' }}
+            color="info"
+          />
+        )
       },
       indentation: 50
     }
@@ -131,26 +157,77 @@ const Dashboard = () => {
     }
   }, [loading]);
 
+  const showType = (n?: string, t?: number) => {
+    // if we have a name show it
+    if (n) {
+      return n;
+    }
+    if (t) {
+      // otherwise pick translation based on type
+      switch (t) {
+        case DeviceType.CUSTOM:
+          return LL.CUSTOM_ENTITIES(0);
+        case DeviceType.ANALOGSENSOR:
+          return LL.ANALOG_SENSOR(0);
+        case DeviceType.TEMPERATURESENSOR:
+          return LL.TEMP_SENSOR();
+        case DeviceType.SCHEDULER:
+          return LL.SCHEDULER();
+        default:
+          break;
+      }
+    }
+    return '';
+  };
+
   const showName = (di: DashboardItem) => {
     if (di.id < 100) {
-      // if its a device and has entities
+      // if its a device (parent node) and has entities
       if (di.nodes?.length) {
         return (
           <>
             <span style="font-size: 14px">
               <DeviceIcon type_id={di.t ?? 0} />
-              &nbsp;&nbsp;{di.n}
+              &nbsp;&nbsp;{showType(di.n, di.t)}
             </span>
             <span style={{ color: 'lightblue' }}>&nbsp;({di.nodes?.length})</span>
           </>
         );
       }
     }
-    return <span style="color:lightgrey">{di.dv ? di.dv.id.slice(2) : ''}</span>;
+    if (di.dv) {
+      return (
+        // ids for scheduler, and sensors are between 9600 and 9900
+        <span style="color:lightgrey">
+          {di.id >= 9600 && di.id < 9900 ? di.dv.id : di.dv.id.slice(2)}
+        </span>
+      );
+    }
   };
 
   const hasMask = (id: string, mask: number) =>
     (parseInt(id.slice(0, 2), 16) & mask) === mask;
+
+  const toggleSchedule = async (di: DashboardItem) => {
+    // create a dummy record, the id=0 picks it up
+    await updateSchedule({
+      schedule: {
+        id: 0, // special number for only changing the active flag
+        active: !di.dv?.v,
+        flags: 0, // unused
+        time: '', // unused
+        cmd: '', // unused
+        value: '', // unused
+        name: di.dv?.id ?? ''
+      }
+    })
+      .catch((error: Error) => {
+        toast.error(error.message);
+      })
+      .finally(async () => {
+        await fetchDashboard();
+      });
+  };
 
   const editDashboardValue = (di: DashboardItem) => {
     setSelectedDashboardItem(di);
@@ -174,32 +251,37 @@ const Dashboard = () => {
 
     return (
       <>
-        <Typography mb={2} variant="body1" color="warning">
-          {LL.DASHBOARD_1()}
-        </Typography>
+        <Grid container spacing={0} justifyContent="flex-start">
+          <Grid size={11}>
+            <Typography mb={2} variant="body1" color="warning">
+              {LL.DASHBOARD_1()}
+            </Typography>
+          </Grid>
 
-        <ToggleButtonGroup
-          color="primary"
-          size="small"
-          value={showAll}
-          exclusive
-          onChange={handleShowAll}
-        >
-          <ToggleButton value={true}>
-            <UnfoldMoreIcon fontSize="small" />
-          </ToggleButton>
-          <ToggleButton value={false}>
-            <UnfoldLessIcon fontSize="small" />
-          </ToggleButton>
-        </ToggleButtonGroup>
+          <Grid size={1} alignItems="end">
+            <ToggleButtonGroup
+              color="primary"
+              size="small"
+              value={showAll}
+              exclusive
+              onChange={handleShowAll}
+            >
+              <ToggleButton value={true}>
+                <UnfoldMoreIcon sx={{ fontSize: 14 }} />
+              </ToggleButton>
+              <ToggleButton value={false}>
+                <UnfoldLessIcon sx={{ fontSize: 14 }} />
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Grid>
+        </Grid>
 
         <Box
-          mt={2}
           padding={1}
           justifyContent="center"
           flexDirection="column"
           sx={{
-            borderRadius: 2,
+            borderRadius: 1,
             border: '1px solid grey'
           }}
         >
@@ -225,30 +307,65 @@ const Dashboard = () => {
                   <Body>
                     {tableList.map((di: DashboardItem) => (
                       <Row key={di.id} item={di}>
-                        {/* TODO add a comment about the number 99 */}
                         {di.id > 99 ? (
-                          <Cell>{showName(di)}</Cell>
-                        ) : (
-                          <CellTree item={di}>{showName(di)}</CellTree>
-                        )}
-                        <Cell pinRight>
-                          <span style={{ color: 'lightgrey' }}>
-                            {di.dv && formatValue(LL, di.dv.v, di.dv.u)}
-                          </span>
-                        </Cell>
-
-                        <Cell stiff>
-                          {me.admin &&
-                            di.dv?.c &&
-                            !hasMask(di.dv.id, DeviceEntityMask.DV_READONLY) && (
-                              <IconButton
-                                size="small"
-                                onClick={() => editDashboardValue(di)}
+                          <>
+                            <Cell>{showName(di)}</Cell>
+                            <Cell>
+                              <Tooltip
+                                placement="left"
+                                title={
+                                  di.dv ? formatValue(LL, di.dv.v, di.dv.u) : ''
+                                }
+                                arrow
                               >
-                                <EditIcon color="primary" sx={{ fontSize: 16 }} />
-                              </IconButton>
-                            )}
-                        </Cell>
+                                <span style={{ color: 'lightgrey' }}>
+                                  {di.dv ? formatValue(LL, di.dv.v, di.dv.u) : ''}
+                                </span>
+                              </Tooltip>
+                            </Cell>
+
+                            <Cell stiff pinRight>
+                              {me.admin && di.id < 9700 && di.id >= 9600 ? (
+                                <IconButton
+                                  size="small"
+                                  onClick={() => toggleSchedule(di)}
+                                >
+                                  {di.dv?.v ? (
+                                    <CircleIcon
+                                      color="success"
+                                      sx={{ fontSize: 16, verticalAlign: 'middle' }}
+                                    />
+                                  ) : (
+                                    <CircleIcon
+                                      color="error"
+                                      sx={{ fontSize: 16, verticalAlign: 'middle' }}
+                                    />
+                                  )}
+                                </IconButton>
+                              ) : (
+                                me.admin &&
+                                di.dv?.c &&
+                                !hasMask(di.dv.id, DeviceEntityMask.DV_READONLY) && (
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => editDashboardValue(di)}
+                                  >
+                                    <EditIcon
+                                      color="primary"
+                                      sx={{ fontSize: 16 }}
+                                    />
+                                  </IconButton>
+                                )
+                              )}
+                            </Cell>
+                          </>
+                        ) : (
+                          <>
+                            <CellTree item={di}>{showName(di)}</CellTree>
+                            <Cell />
+                            <Cell />
+                          </>
+                        )}
                       </Row>
                     ))}
                   </Body>
@@ -265,7 +382,7 @@ const Dashboard = () => {
     <SectionContent>
       {renderContent()}
       {selectedDashboardItem && selectedDashboardItem.dv && (
-        <DashboardDevicesDialog
+        <DevicesDialog
           open={deviceValueDialogOpen}
           onClose={() => setDeviceValueDialogOpen(false)}
           onSave={deviceValueDialogSave}
