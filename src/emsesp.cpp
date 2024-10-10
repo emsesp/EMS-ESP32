@@ -1691,7 +1691,7 @@ void EMSESP::loop() {
 
     static bool show_prompt = true;
 
-    // user has to CTRL-S to create a serial console stream, exit command will close it
+    // user has to CTRL-D to create a serial console stream, exit command will close it
     // this saves around 2kb of heap memory
     if (shell_) {
         if (!shell_->running()) {
@@ -1708,9 +1708,11 @@ void EMSESP::loop() {
         int c = serial_console_.read();
         if (c != -1) {
             show_prompt = true;
+            Serial.println(c);
         }
         // https://daleswanson.org/ascii.htm#:~:text=0
-        if (c == '\x13') {
+        // CTRL-D to open
+        if (c == '\x04') {
             start_serial_console();
         }
     }
@@ -1731,7 +1733,7 @@ void EMSESP::start_serial_console() {
 void EMSESP::shell_prompt() {
 #ifndef EMSESP_STANDALONE
     serial_console_.println();
-    serial_console_.printf("EMS-ESP %s: press CTRL-S to activate this serial console", EMSESP_APP_VERSION);
+    serial_console_.printf("EMS-ESP %s: press CTRL-D to activate this serial console", EMSESP_APP_VERSION);
     serial_console_.println();
 #endif
 }
