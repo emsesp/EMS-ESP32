@@ -359,15 +359,15 @@ void create_tests() {
     // temperaturesensor
     capture("/api/temperaturesensor");
     capture("/api/temperaturesensor/info");
-    capture("/api/temperaturesensor/test_sensor2");
+    capture("/api/temperaturesensor/test_tempsensor2");
     capture("/api/temperaturesensor/0B_0C0D_0E0F_1011");
-    capture("/api/temperaturesensor/test_sensor2/value");
+    capture("/api/temperaturesensor/test_tempsensor2/value");
 
     // analogsensor
     capture("/api/analogsensor");
     capture("/api/analogsensor/info");
-    capture("/api/analogsensor/test_analog1");
-    capture("/api/analogsensor/test_analog1/offset");
+    capture("/api/analogsensor/test_analogsensor1");
+    capture("/api/analogsensor/test_analogsensor1/offset");
 
     // these tests should all fail...
     capture("/api/boiler2");
@@ -391,10 +391,10 @@ void create_tests() {
     // temperaturesensor
     capture("/api/temperaturesensor/test_sensor20");
     capture("/api/temperaturesensor/0B_0C0D_0E0F_XXXX");
-    capture("/api/temperaturesensor/test_sensor2/bad");
+    capture("/api/temperaturesensor/test_tempsensor2/bad");
 
     // analogsensor
-    capture("/api/analogsensor/test_analog1/bad");
+    capture("/api/analogsensor/test_analogsensor1/bad");
     capture("/api/analogsensor/test_analog10");
     capture("/api/analogsensor/test_analog10/bad2");
 
