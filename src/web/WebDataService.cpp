@@ -376,22 +376,85 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
     // add custom entities, if we have any
     if (EMSESP::webCustomEntityService.count_entities()) {
         JsonObject obj = root.add<JsonObject>();
-        obj["id"]      = 99;                                                // it's unique id
-        obj["n"]       = Helpers::translated_word(FL_(custom_device_name)); // custom name
-        obj["t"]       = EMSdevice::DeviceType::CUSTOM;                     // device type number
+        obj["id"]      = EMSdevice::DeviceTypeUniqueID::CUSTOM_UID; // it's unique id
+        obj["t"]       = EMSdevice::DeviceType::CUSTOM;             // device type number
         EMSESP::webCustomEntityService.generate_value_web(obj, true);
     }
 
     // add temperature sensors
+    if (EMSESP::temperaturesensor_.have_sensors()) {
+        JsonObject obj  = root.add<JsonObject>();
+        obj["id"]       = EMSdevice::DeviceTypeUniqueID::TEMPERATURESENSOR_UID; // it's unique id
+        obj["t"]        = EMSdevice::DeviceType::TEMPERATURESENSOR;             // device type number
+        JsonArray nodes = obj["nodes"].to<JsonArray>();
+        uint8_t   count = 0;
+        for (const auto & sensor : EMSESP::temperaturesensor_.sensors()) {
+            JsonObject node = nodes.add<JsonObject>();
+            node["id"]      = (EMSdevice::DeviceTypeUniqueID::TEMPERATURESENSOR_UID * 100) + count++;
+
+            JsonObject dv = node["dv"].to<JsonObject>();
+            dv["id"]      = sensor.name();
+            if (EMSESP::system_.fahrenheit()) {
+                if (Helpers::hasValue(sensor.temperature_c)) {
+                    dv["v"] = (float)sensor.temperature_c * 0.18 + 32;
+                }
+                dv["u"] = DeviceValueUOM::FAHRENHEIT;
+            } else {
+                if (Helpers::hasValue(sensor.temperature_c)) {
+                    dv["v"] = (float)sensor.temperature_c / 10;
+                }
+                dv["u"] = DeviceValueUOM::DEGREES;
+            }
+        }
+    }
 
     // add analog sensors
+    if (EMSESP::analog_enabled() && EMSESP::analogsensor_.have_sensors()) {
+        JsonObject obj  = root.add<JsonObject>();
+        obj["id"]       = EMSdevice::DeviceTypeUniqueID::ANALOGSENSOR_UID; // it's unique id
+        obj["t"]        = EMSdevice::DeviceType::ANALOGSENSOR;             // device type number
+        JsonArray nodes = obj["nodes"].to<JsonArray>();
+        uint8_t   count = 0;
+        for (const auto & sensor : EMSESP::analogsensor_.sensors()) {
+            if (sensor.type() != AnalogSensor::AnalogType::NOTUSED) {
+                JsonObject node = nodes.add<JsonObject>();
+                node["id"]      = (EMSdevice::DeviceTypeUniqueID::ANALOGSENSOR_UID * 100) + count++;
 
-    // show scheduler, with name, on/off - and pencil edit
+                JsonObject dv = node["dv"].to<JsonObject>();
+                dv["id"]      = sensor.name();
+                dv["v"]       = Helpers::transformNumFloat(sensor.value(), 0); // is optional and is a float
+                dv["u"]       = sensor.uom();
+            }
+        }
+    }
+
+    // show scheduler, with name, on/off
+    if (EMSESP::webSchedulerService.count_entities()) {
+        JsonObject obj  = root.add<JsonObject>();
+        obj["id"]       = EMSdevice::DeviceTypeUniqueID::SCHEDULER_UID; // it's unique id
+        obj["t"]        = EMSdevice::DeviceType::SCHEDULER;             // device type number
+        JsonArray nodes = obj["nodes"].to<JsonArray>();
+        uint8_t   count = 0;
+
+        EMSESP::webSchedulerService.read([&](const WebScheduler & webScheduler) {
+            for (const ScheduleItem & scheduleItem : webScheduler.scheduleItems) {
+                // only add if we have a name - we don't need a u (UOM) for this
+                if (!scheduleItem.name.empty()) {
+                    JsonObject node = nodes.add<JsonObject>();
+                    node["id"]      = (EMSdevice::DeviceTypeUniqueID::SCHEDULER_UID * 100) + count++;
+
+                    JsonObject dv = node["dv"].to<JsonObject>();
+                    dv["id"]      = scheduleItem.name;
+                    dv["v"]       = scheduleItem.flags != SCHEDULEFLAG_SCHEDULE_IMMEDIATE ? scheduleItem.active : false; // value is active
+                }
+            }
+        });
+    }
 
 #if defined(EMSESP_TEST) && defined(EMSESP_STANDALONE)
     Serial.println();
-    Serial.print("ALL dashboard_data: ");
-    serializeJsonPretty(root, Serial);
+    Serial.print("All dashboard_data: ");
+    serializeJson(root, Serial);
     Serial.println();
 #endif
 
