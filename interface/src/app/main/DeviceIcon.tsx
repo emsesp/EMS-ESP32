@@ -3,6 +3,7 @@ import { CgSmartHomeBoiler } from 'react-icons/cg';
 import { FaSolarPanel } from 'react-icons/fa';
 import { GiHeatHaze, GiTap } from 'react-icons/gi';
 import { MdPlaylistAdd } from 'react-icons/md';
+import { MdMoreTime } from 'react-icons/md';
 import {
   MdOutlineDevices,
   MdOutlinePool,
@@ -38,7 +39,7 @@ const deviceIconLookup: {
   [DeviceType.CUSTOM]: MdPlaylistAdd,
   [DeviceType.UNKNOWN]: undefined,
   [DeviceType.SYSTEM]: undefined,
-  [DeviceType.SCHEDULER]: undefined,
+  [DeviceType.SCHEDULER]: MdMoreTime,
   [DeviceType.GENERIC]: undefined,
   [DeviceType.VENTILATION]: undefined
 };
