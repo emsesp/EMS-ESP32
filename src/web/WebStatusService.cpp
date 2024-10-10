@@ -119,6 +119,9 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
         root["free_psram"] = ESP.getFreePsram() / 1024;
     }
     root["model"] = EMSESP::system_.getBBQKeesGatewayDetails();
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
+    root["temperature"] = EMSESP::system_.temperature();
+#endif
 
     // check for a factory partition first
     const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);

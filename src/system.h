@@ -39,6 +39,14 @@
 #include <uuid/log.h>
 #include <PButton.h>
 
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
+#if ESP_IDF_VERSION_MAJOR < 5
+#include "driver/temp_sensor.h"
+#else
+#include "driver/temperature_sensor.h"
+#endif
+#endif
+
 using uuid::console::Shell;
 
 #define EMSESP_FS_CONFIG_DIRECTORY "/config"
@@ -303,6 +311,12 @@ class System {
         test_set_all_active_ = n;
     }
 
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
+    float temperature() {
+        return temperature_;
+    }
+#endif
+
   private:
     static uuid::log::Logger logger_;
     static bool              restart_requested_;
@@ -395,6 +409,13 @@ class System {
     uint32_t psram_;
     uint32_t appused_;
     uint32_t appfree_;
+
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
+#if ESP_IDF_VERSION_MAJOR >= 5
+    temperature_sensor_handle_t temperature_handle_ = NULL;
+#endif
+    float temperature_ = 0;
+#endif
 };
 
 } // namespace emsesp
