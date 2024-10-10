@@ -54,7 +54,6 @@ const LayoutMenu = () => {
       <List component="nav">
         <LayoutMenuItem icon={StarIcon} label="Dashboard" to={`/dashboard`} />
         <LayoutMenuItem icon={CategoryIcon} label={LL.DEVICES()} to={`/devices`} />
-        <LayoutMenuItem icon={SensorsIcon} label={LL.SENSORS()} to={`/sensors`} />
         <Divider />
 
         <Box
@@ -79,19 +78,19 @@ const LayoutMenu = () => {
                 mb: '2px',
                 color: 'lightblue'
               }}
-              secondary={
-                LL.CUSTOMIZATIONS() +
-                ', ' +
-                LL.SCHEDULER() +
-                ', ' +
-                LL.CUSTOM_ENTITIES(0) +
-                '...'
-              }
-              secondaryTypographyProps={{
-                noWrap: true,
-                fontSize: 12,
-                color: menuOpen ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0.5)'
-              }}
+              // secondary={
+              //   LL.CUSTOMIZATIONS() +
+              //   ', ' +
+              //   LL.SCHEDULER() +
+              //   ', ' +
+              //   LL.CUSTOM_ENTITIES(0) +
+              //   '...'
+              // }
+              // secondaryTypographyProps={{
+              //   noWrap: true,
+              //   fontSize: 12,
+              //   color: menuOpen ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0.5)'
+              // }}
               sx={{ my: 0 }}
             />
             <KeyboardArrowDown
@@ -105,6 +104,12 @@ const LayoutMenu = () => {
           </ListItemButton>
           {menuOpen && (
             <>
+              <LayoutMenuItem
+                icon={SensorsIcon}
+                label={LL.SENSORS()}
+                to={`/sensors`}
+              />
+
               <LayoutMenuItem
                 icon={ConstructionIcon}
                 label={LL.CUSTOMIZATIONS()}
