@@ -231,7 +231,7 @@ class Thermostat : public EMSdevice {
     }
 
     inline uint8_t id2dhw(const int8_t id) const {
-        return id - DeviceValueTAG::TAG_DHW1;
+        return id - DeviceValueTAG::TAG_DHW1 + 1;
     }
 
     // each thermostat has a list of heating controller type IDs for reading and writing
