@@ -5,7 +5,7 @@ import type {
   Action,
   Activity,
   CoreData,
-  DashboardData,
+  DashboardItem,
   DeviceData,
   DeviceEntity,
   Entities,
@@ -22,7 +22,7 @@ import type {
 
 // Dashboard
 export const readDashboard = () =>
-  alovaInstance.Get<DashboardData>('/rest/dashboardData', {
+  alovaInstance.Get<DashboardItem[]>('/rest/dashboardData', {
     responseType: 'arraybuffer' // uses msgpack
   });
 
