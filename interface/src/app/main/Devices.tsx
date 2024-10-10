@@ -64,7 +64,7 @@ import { useInterval } from 'utils';
 
 import { readCoreData, readDeviceData, writeDeviceValue } from '../../api/app';
 import DeviceIcon from './DeviceIcon';
-import DashboardDevicesDialog from './DevicesDialog';
+import DevicesDialog from './DevicesDialog';
 import { formatValue } from './deviceValue';
 import { DeviceEntityMask, DeviceType, DeviceValueUOM_s } from './types';
 import type { Device, DeviceValue } from './types';
@@ -752,7 +752,7 @@ const Devices = () => {
       {renderDeviceData()}
       {renderDeviceDetails()}
       {selectedDeviceValue && (
-        <DashboardDevicesDialog
+        <DevicesDialog
           open={deviceValueDialogOpen}
           onClose={deviceValueDialogClose}
           onSave={deviceValueDialogSave}
