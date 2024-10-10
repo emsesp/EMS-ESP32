@@ -254,6 +254,7 @@ class Boiler : public EMSdevice {
     uint8_t maxHeatHeat_;
     uint8_t maxHeatDhw_;
     uint8_t hpMaxPower_;
+    uint8_t pvMaxComp_;
 
     uint8_t  pvCooling_;
     uint8_t  manDefrost_;
@@ -476,6 +477,7 @@ class Boiler : public EMSdevice {
     bool set_hpCircPumpWw(const char * value, const int8_t id);
     bool set_hpPumpMode(const char * value, const int8_t id);
     bool set_hpMaxPower(const char * value, const int8_t id);
+    bool set_pvMaxComp(const char * value, const int8_t id);
     bool set_hpDiffPress(const char * value, const int8_t id);
     bool set_hpPowerLimit(const char * value, const int8_t id);
 

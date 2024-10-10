@@ -547,6 +547,13 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueUOM::PERCENT,
                               MAKE_CF_CB(set_hpMaxPower));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &pvMaxComp_,
+                              DeviceValueType::UINT8,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(pvMaxComp),
+                              DeviceValueUOM::KW,
+                              MAKE_CF_CB(set_pvMaxComp));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &hpSetDiffPress_,
                               DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_MUL50,
@@ -1929,6 +1936,7 @@ void Boiler::process_HpSilentMode(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hpMaxPower_, 31);
     has_update(telegram, silentFrom_, 52); // in steps of 15 min
     has_update(telegram, silentTo_, 53);   // in steps of 15 min
+    has_update(telegram, pvMaxComp_, 54);  // #2062
     has_update(telegram, hpshutdown_, 58); // 1 powers off
 }
 
@@ -3099,6 +3107,15 @@ bool Boiler::set_hpMaxPower(const char * value, const int8_t id) {
     int v;
     if (Helpers::value2number(value, v)) {
         write_command(0x484, 31, v, 0x484);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_pvMaxComp(const char * value, const int8_t id) {
+    float v;
+    if (Helpers::value2float(value, v)) {
+        write_command(0x484, 54, (uint8_t)(v * 10), 0x484);
         return true;
     }
     return false;
