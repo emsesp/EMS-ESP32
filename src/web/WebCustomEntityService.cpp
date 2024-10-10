@@ -483,8 +483,7 @@ void WebCustomEntityService::generate_value_web(JsonObject output, const bool is
 
         JsonObject obj;
         if (is_dashboard) {
-            // TODO make #define for 99
-            root_obj["id"] = (99 * 100) + index; // make unique
+            root_obj["id"] = (EMSdevice::DeviceTypeUniqueID::CUSTOM_UID * 100) + index; // make unique
             obj            = root_obj["dv"].to<JsonObject>();
         } else {
             obj = root_obj;
