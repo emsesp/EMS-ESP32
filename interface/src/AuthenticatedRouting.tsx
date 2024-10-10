@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 
 import CustomEntities from 'app/main/CustomEntities';
 import Customizations from 'app/main/Customizations';
+import Dashboard from 'app/main/Dashboard';
 import Devices from 'app/main/Devices';
 import Help from 'app/main/Help';
 import Modules from 'app/main/Modules';
@@ -32,6 +33,7 @@ const AuthenticatedRouting = () => {
   return (
     <Layout>
       <Routes>
+        <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="/devices/*" element={<Devices />} />
         <Route path="/sensors/*" element={<Sensors />} />
         <Route path="/status/*" element={<Status />} />

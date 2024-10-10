@@ -65,7 +65,7 @@ const SystemStatus = () => {
     error
   } = useAutoRequest(readSystemStatus, {
     initialData: [],
-    pollingTime: 5000,
+    pollingTime: 3000,
     async middleware(_, next) {
       if (!restarting) {
         await next();

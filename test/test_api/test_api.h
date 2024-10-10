@@ -234,49 +234,51 @@ void test_26() {
 }
 
 void test_27() {
-    auto expected_response = "[{\"test_sensor1\":12.3,\"test_sensor2\":45.6}]";
+    auto expected_response = "[{\"test_tempsensor1\":12.3,\"test_tempsensor2\":45.6}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/temperaturesensor"));
 }
 
 void test_28() {
-    auto expected_response = "[{\"test_sensor1\":12.3,\"test_sensor2\":45.6}]";
+    auto expected_response = "[{\"test_tempsensor1\":12.3,\"test_tempsensor2\":45.6}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/temperaturesensor/info"));
 }
 
 void test_29() {
-    auto expected_response = "[{\"id\":\"0B_0C0D_0E0F_1011\",\"name\":\"test_sensor2\",\"value\":45.6,\"type\":\"number\",\"uom\":\"°C\",\"writeable\":false}]";
-    TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/temperaturesensor/test_sensor2"));
+    auto expected_response =
+        "[{\"id\":\"0B_0C0D_0E0F_1011\",\"name\":\"test_tempsensor2\",\"value\":45.6,\"type\":\"number\",\"uom\":\"°C\",\"writeable\":false}]";
+    TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/temperaturesensor/test_tempsensor2"));
 }
 
 void test_30() {
-    auto expected_response = "[{\"id\":\"0B_0C0D_0E0F_1011\",\"name\":\"test_sensor2\",\"value\":45.6,\"type\":\"number\",\"uom\":\"°C\",\"writeable\":false}]";
+    auto expected_response =
+        "[{\"id\":\"0B_0C0D_0E0F_1011\",\"name\":\"test_tempsensor2\",\"value\":45.6,\"type\":\"number\",\"uom\":\"°C\",\"writeable\":false}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/temperaturesensor/0B_0C0D_0E0F_1011"));
 }
 
 void test_31() {
     auto expected_response = "[{\"api_data\":\"45.6\"}]";
-    TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/temperaturesensor/test_sensor2/value"));
+    TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/temperaturesensor/test_tempsensor2/value"));
 }
 
 void test_32() {
-    auto expected_response = "[{\"test_analog1\":0,\"test_analog2\":1}]";
+    auto expected_response = "[{\"test_analogsensor1\":0,\"test_analogsensor2\":1}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/analogsensor"));
 }
 
 void test_33() {
-    auto expected_response = "[{\"test_analog1\":0,\"test_analog2\":1}]";
+    auto expected_response = "[{\"test_analogsensor1\":0,\"test_analogsensor2\":1}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/analogsensor/info"));
 }
 
 void test_34() {
     auto expected_response =
         "[{\"gpio\":36,\"type\":\"number\",\"analog\":\"adc\",\"value\":0,\"writeable\":false,\"offset\":0,\"factor\":0.1,\"uom\":\"mV\"}]";
-    TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/analogsensor/test_analog1"));
+    TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/analogsensor/test_analogsensor1"));
 }
 
 void test_35() {
     auto expected_response = "[{\"api_data\":\"0\"}]";
-    TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/analogsensor/test_analog1/offset"));
+    TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/analogsensor/test_analogsensor1/offset"));
 }
 
 void test_36() {
@@ -345,13 +347,13 @@ void test_48() {
 }
 
 void test_49() {
-    auto expected_response = "[{\"message\":\"no bad in test_sensor2\"}]";
-    TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/temperaturesensor/test_sensor2/bad"));
+    auto expected_response = "[{\"message\":\"no bad in test_tempsensor2\"}]";
+    TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/temperaturesensor/test_tempsensor2/bad"));
 }
 
 void test_50() {
-    auto expected_response = "[{\"message\":\"no bad in test_analog1\"}]";
-    TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/analogsensor/test_analog1/bad"));
+    auto expected_response = "[{\"message\":\"no bad in test_analogsensor1\"}]";
+    TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/analogsensor/test_analogsensor1/bad"));
 }
 
 void test_51() {

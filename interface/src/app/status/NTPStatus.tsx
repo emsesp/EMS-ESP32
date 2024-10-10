@@ -40,7 +40,7 @@ const NTPStatus = () => {
     data,
     send: loadData,
     error
-  } = useAutoRequest(NTPApi.readNTPStatus, { pollingTime: 5000 });
+  } = useAutoRequest(NTPApi.readNTPStatus, { pollingTime: 3000 });
 
   const [localTime, setLocalTime] = useState<string>('');
   const [settingTime, setSettingTime] = useState<boolean>(false);

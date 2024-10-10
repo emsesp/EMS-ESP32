@@ -322,7 +322,7 @@ const SensorsAnalogDialog = ({
             <Button
               startIcon={<RemoveIcon />}
               variant="outlined"
-              color="error"
+              color="warning"
               onClick={remove}
             >
               {LL.REMOVE()}
@@ -339,9 +339,9 @@ const SensorsAnalogDialog = ({
         </Button>
         <Button
           startIcon={<WarningIcon color="warning" />}
-          variant="contained"
+          variant="outlined"
           onClick={save}
-          color="info"
+          color="primary"
         >
           {creating ? LL.ADD(0) : LL.UPDATE()}
         </Button>

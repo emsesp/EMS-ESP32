@@ -21,7 +21,7 @@ const SystemActivity = () => {
     data,
     send: loadData,
     error
-  } = useAutoRequest(readActivity, { pollingTime: 2000 });
+  } = useAutoRequest(readActivity, { pollingTime: 3000 });
 
   const { LL } = useI18nContext();
 

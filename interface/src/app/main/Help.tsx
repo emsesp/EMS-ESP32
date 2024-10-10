@@ -24,7 +24,7 @@ import { useRequest } from 'alova/client';
 import { SectionContent, useLayoutTitle } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
-import { saveFile } from 'utils/file';
+import { saveFile } from 'utils';
 
 import { API, callAction } from '../../api/app';
 import type { APIcall } from './types';
@@ -147,7 +147,7 @@ const Help = () => {
       )}
 
       <Box p={2} color="warning.main">
-        <Typography mb={1} variant="body2">
+        <Typography mb={1} variant="body1">
           {LL.HELP_INFORMATION_4()}
         </Typography>
         <Button

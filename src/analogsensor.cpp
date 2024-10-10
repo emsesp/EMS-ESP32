@@ -134,8 +134,8 @@ void AnalogSensor::reload(bool get_nvs) {
         // first check if the GPIO is valid. If not, force set it to disabled
         if (!System::is_valid_gpio(sensor.gpio())) {
             LOG_WARNING("Bad GPIO %d for Sensor %s. Disabling.", sensor.gpio(), sensor.name().c_str());
-            sensor.set_type(AnalogType::NOTUSED);
-            continue; // skip this loop pass
+            sensor.set_type(AnalogType::NOTUSED); // set disabled
+            continue;                             // skip this loop pass
         }
 
         if (sensor.type() == AnalogType::ADC) {
@@ -210,7 +210,7 @@ void AnalogSensor::reload(bool get_nvs) {
                         sensor.set_offset(EMSESP::nvs_.getChar(sensor.name().c_str()));
                     }
                 }
-                digitalWrite(sensor.gpio(), sensor.offset() * sensor.factor() > 0 ? 1 : 0);
+                digitalWrite(sensor.gpio(), (sensor.offset() == 0) ^ (sensor.factor() != 0));
                 sensor.set_value(sensor.offset());
             }
             publish_sensor(sensor);
@@ -402,7 +402,9 @@ bool AnalogSensor::update(uint8_t gpio, std::string & name, double offset, doubl
     // reloads the sensors in the customizations file into the sensors list
     reload();
 
-    return true;
+    // return false if it's an invalid GPIO, an error will show in WebUI
+    // and reported as an error in the log
+    return System::is_valid_gpio(gpio);
 }
 
 // check to see if values have been updated
@@ -754,7 +756,7 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                     sensor.set_offset(v);
                     sensor.set_value(v);
                     pinMode(sensor.gpio(), OUTPUT);
-                    digitalWrite(sensor.gpio(), sensor.offset() * sensor.factor() > 0 ? 1 : 0);
+                    digitalWrite(sensor.gpio(), (sensor.offset() == 0) ^ (sensor.factor() != 0));
                     if (sensor.uom() == 0 && EMSESP::nvs_.getChar(sensor.name().c_str()) != (int8_t)sensor.offset()) {
                         EMSESP::nvs_.putChar(sensor.name().c_str(), (int8_t)sensor.offset());
                     }

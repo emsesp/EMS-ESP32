@@ -28,7 +28,7 @@ const RestartMonitor = () => {
     initialData: { status: 'Getting ready...' },
     async middleware(_, next) {
       if (count++ >= 1) {
-        // skip first request (1 seconds) to allow AsyncWS to send its response
+        // skip first request (1 second) to allow AsyncWS to send its response
         await next();
       }
     }

@@ -369,6 +369,7 @@ std::string DeviceValue::get_fullname() const {
     return customname;
 }
 
+// returns any custom name defined in the entity_id
 std::string DeviceValue::get_name(const std::string & entity) {
     auto pos = entity.find('|');
     if (pos != std::string::npos) {

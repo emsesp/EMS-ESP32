@@ -71,3 +71,4 @@ words-found-verbose.txt
 
 # sonarlint
 compile_commands.json
+package.json

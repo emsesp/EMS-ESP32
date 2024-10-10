@@ -64,7 +64,7 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
     void fetch();
     void render_value(JsonObject output, CustomEntityItem & entity, const bool useVal = false, const bool web = false, const bool add_uom = false);
     void show_values(JsonObject output);
-    void generate_value_web(JsonObject output);
+    void generate_value_web(JsonObject output, const bool is_dashboard = false);
 
     uint8_t count_entities();
     void    ha_reset() {
