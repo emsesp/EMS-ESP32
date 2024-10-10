@@ -360,13 +360,13 @@ void WebCustomizationService::test() {
         webCustomization.sensorCustomizations.clear();
         auto sensor   = SensorCustomization();
         sensor.id     = "01_0203_0405_0607";
-        sensor.name   = "test_sensor1";
+        sensor.name   = "test_tempsensor1";
         sensor.offset = 0;
         webCustomization.sensorCustomizations.push_back(sensor);
 
         auto sensor2   = SensorCustomization();
         sensor2.id     = "0B_0C0D_0E0F_1011";
-        sensor2.name   = "test_sensor2";
+        sensor2.name   = "test_tempsensor2";
         sensor2.offset = 4;
         webCustomization.sensorCustomizations.push_back(sensor2);
 
@@ -375,7 +375,7 @@ void WebCustomizationService::test() {
         webCustomization.analogCustomizations.clear();
         auto analog   = AnalogCustomization();
         analog.gpio   = 36;
-        analog.name   = "test_analog1";
+        analog.name   = "test_analogsensor1";
         analog.offset = 0;
         analog.factor = 0.1;
         analog.uom    = 17;
@@ -384,7 +384,7 @@ void WebCustomizationService::test() {
 
         analog        = AnalogCustomization();
         analog.gpio   = 37;
-        analog.name   = "test_analog2";
+        analog.name   = "test_analogsensor2";
         analog.offset = 0;
         analog.factor = 1;
         analog.uom    = 0;
