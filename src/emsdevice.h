@@ -346,6 +346,15 @@ class EMSdevice {
         IVT           // 13
     };
 
+    // Unique Identifiers for each Device type, used in Dashboard table
+    // 100 and above is reserved for DeviceType
+    enum DeviceTypeUniqueID : uint8_t {
+        SCHEDULER_UID         = 96,
+        ANALOGSENSOR_UID      = 97,
+        TEMPERATURESENSOR_UID = 98,
+        CUSTOM_UID            = 99 // always 99
+    };
+
     enum DeviceType : uint8_t {
         SYSTEM = 0,        // this is us (EMS-ESP)
         TEMPERATURESENSOR, // for internal temperature sensors
