@@ -1195,8 +1195,8 @@ void Thermostat::process_RC300WWtemp(std::shared_ptr<const Telegram> telegram) {
 // RC300WWmode(0x2F6), data: 02 FF 04 00 00 00 08 05 00 08 04 00 00 00 00 00 00 00 00 00 01
 void Thermostat::process_RC300WWmode(std::shared_ptr<const Telegram> telegram) {
     uint8_t circuit = 0;
-    telegram->read_value(circuit, 0);
-    auto dhw = dhw_circuit(telegram->type_id - 0x2F5, circuit, circuit != 0);
+    telegram->read_value(circuit, 0); // 00-no circuit, 01-boiler, 02-mixer
+    auto dhw = dhw_circuit(telegram->type_id - 0x2F5, 255, circuit != 0);
     if (dhw == nullptr) {
         return;
     }
