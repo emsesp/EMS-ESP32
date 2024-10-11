@@ -3,7 +3,6 @@ import { IconContext } from 'react-icons/lib';
 import { toast } from 'react-toastify';
 
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import CircleIcon from '@mui/icons-material/Circle';
 import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
@@ -27,7 +26,7 @@ import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import { useInterval } from 'utils';
 
-import { readDashboard, writeDeviceValue, writeSchedule } from '../../api/app';
+import { readDashboard, writeDeviceValue } from '../../api/app';
 import DeviceIcon from './DeviceIcon';
 import DevicesDialog from './DevicesDialog';
 import { formatValue } from './deviceValue';
@@ -35,8 +34,7 @@ import {
   type DashboardItem,
   DeviceEntityMask,
   DeviceType,
-  type DeviceValue,
-  type Schedule
+  type DeviceValue
 } from './types';
 import { deviceValueItemValidation } from './validators';
 
@@ -62,13 +60,6 @@ const Dashboard = () => {
   } = useRequest(readDashboard, {
     initialData: []
   });
-
-  const { send: updateSchedule } = useRequest(
-    (data: Schedule) => writeSchedule(data),
-    {
-      immediate: false
-    }
-  );
 
   const { loading: submitting, send: sendDeviceValue } = useRequest(
     (data: { id: number; c: string; v: unknown }) => writeDeviceValue(data),
@@ -114,6 +105,11 @@ const Dashboard = () => {
         border-top: 1px solid #177ac9;
         border-bottom: 1px solid #177ac9;
       }
+    `,
+    BaseCell: `
+    &:nth-of-type(2) {
+      text-align: right;
+    }
     `
   });
 
@@ -196,38 +192,12 @@ const Dashboard = () => {
       }
     }
     if (di.dv) {
-      return (
-        // ids for scheduler, and sensors are between 9600 and 9900
-        <span style="color:lightgrey">
-          {di.id >= 9600 && di.id < 9900 ? di.dv.id : di.dv.id.slice(2)}
-        </span>
-      );
+      return <span style="color:lightgrey">{di.dv.id.slice(2)}</span>;
     }
   };
 
   const hasMask = (id: string, mask: number) =>
     (parseInt(id.slice(0, 2), 16) & mask) === mask;
-
-  const toggleSchedule = async (di: DashboardItem) => {
-    // create a dummy record, the id=0 picks it up
-    await updateSchedule({
-      schedule: {
-        id: 0, // special number for only changing the active flag
-        active: !di.dv?.v,
-        flags: 0, // unused
-        time: '', // unused
-        cmd: '', // unused
-        value: '', // unused
-        name: di.dv?.id ?? ''
-      }
-    })
-      .catch((error: Error) => {
-        toast.error(error.message);
-      })
-      .finally(async () => {
-        await fetchDashboard();
-      });
-  };
 
   const editDashboardValue = (di: DashboardItem) => {
     setSelectedDashboardItem(di);
@@ -325,25 +295,7 @@ const Dashboard = () => {
                             </Cell>
 
                             <Cell stiff pinRight>
-                              {me.admin && di.id < 9700 && di.id >= 9600 ? (
-                                <IconButton
-                                  size="small"
-                                  onClick={() => toggleSchedule(di)}
-                                >
-                                  {di.dv?.v ? (
-                                    <CircleIcon
-                                      color="success"
-                                      sx={{ fontSize: 16, verticalAlign: 'middle' }}
-                                    />
-                                  ) : (
-                                    <CircleIcon
-                                      color="error"
-                                      sx={{ fontSize: 16, verticalAlign: 'middle' }}
-                                    />
-                                  )}
-                                </IconButton>
-                              ) : (
-                                me.admin &&
+                              {me.admin &&
                                 di.dv?.c &&
                                 !hasMask(di.dv.id, DeviceEntityMask.DV_READONLY) && (
                                   <IconButton
@@ -355,8 +307,7 @@ const Dashboard = () => {
                                       sx={{ fontSize: 16 }}
                                     />
                                   </IconButton>
-                                )
-                              )}
+                                )}
                             </Cell>
                           </>
                         ) : (

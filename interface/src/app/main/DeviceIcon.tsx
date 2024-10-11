@@ -10,7 +10,8 @@ import {
   MdOutlineSensors,
   MdThermostatAuto
 } from 'react-icons/md';
-import { TiFlowSwitch } from 'react-icons/ti';
+import { PiFan, PiGauge } from 'react-icons/pi';
+import { TiFlowSwitch, TiThermometer } from 'react-icons/ti';
 import { VscVmConnect } from 'react-icons/vsc';
 
 import type { SvgIconProps } from '@mui/material';
@@ -20,8 +21,8 @@ import { DeviceType } from './types';
 const deviceIconLookup: {
   [key in DeviceType]: React.ComponentType<SvgIconProps> | undefined;
 } = {
-  [DeviceType.TEMPERATURESENSOR]: MdOutlineSensors,
-  [DeviceType.ANALOGSENSOR]: MdOutlineSensors,
+  [DeviceType.TEMPERATURESENSOR]: TiThermometer,
+  [DeviceType.ANALOGSENSOR]: PiGauge,
   [DeviceType.BOILER]: CgSmartHomeBoiler,
   [DeviceType.HEATSOURCE]: CgSmartHomeBoiler,
   [DeviceType.THERMOSTAT]: MdThermostatAuto,
@@ -37,11 +38,11 @@ const deviceIconLookup: {
   [DeviceType.WATER]: GiTap,
   [DeviceType.POOL]: MdOutlinePool,
   [DeviceType.CUSTOM]: MdPlaylistAdd,
-  [DeviceType.UNKNOWN]: undefined,
+  [DeviceType.UNKNOWN]: MdOutlineSensors,
   [DeviceType.SYSTEM]: undefined,
   [DeviceType.SCHEDULER]: MdMoreTime,
-  [DeviceType.GENERIC]: undefined,
-  [DeviceType.VENTILATION]: undefined
+  [DeviceType.GENERIC]: MdOutlineSensors,
+  [DeviceType.VENTILATION]: PiFan
 };
 
 const DeviceIcon = ({ type_id }: { type_id: DeviceType }) => {

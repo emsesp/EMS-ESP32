@@ -65,29 +65,6 @@ void WebScheduler::read(WebScheduler & webScheduler, JsonObject root) {
 // call on initialization and also when the Schedule web page is saved
 // this loads the data into the internal class
 StateUpdateResult WebScheduler::update(JsonObject root, WebScheduler & webScheduler) {
-    // check if we're only toggling it on/off via the Dashboard
-    // if it is a single schedule object and id is 0
-    if (root["schedule"].is<JsonObject>()) {
-        JsonObject si = root["schedule"];
-        if (si["id"] == 0) {
-            // find the item, matching the name
-            for (ScheduleItem & scheduleItem : webScheduler.scheduleItems) {
-                std::string name = si["name"].as<std::string>();
-                if (scheduleItem.name == name) {
-                    scheduleItem.active = si["active"];
-                    EMSESP::webSchedulerService.publish(true);
-                    return StateUpdateResult::CHANGED;
-                }
-            }
-            return StateUpdateResult::UNCHANGED;
-        }
-    }
-
-    // otherwise we're updating and saving the whole list again
-    if (!root["schedule"].is<JsonArray>()) {
-        return StateUpdateResult::ERROR; // invalid format
-    }
-
     // reset the list
     Command::erase_device_commands(EMSdevice::DeviceType::SCHEDULER);
     webScheduler.scheduleItems.clear();
