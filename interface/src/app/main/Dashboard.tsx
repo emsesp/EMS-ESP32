@@ -88,26 +88,32 @@ const Dashboard = () => {
 
   const dashboard_theme = useTheme({
     Table: `
-      --data-table-library_grid-template-columns: minmax(80px, auto) 120px 40px;
+      --data-table-library_grid-template-columns: minmax(80px, auto) 120px 32px;
     `,
     BaseRow: `
       font-size: 14px;
       .td {
-        height: 32px;
+        height: 28px;
       }
     `,
     Row: `
+      cursor: pointer;
       background-color: #1e1e1e;
       .td {
-        height: 22px;
+        // border-top: 1px solid #0000;
+        // border-bottom: 1px solid #0000;
       }
       &:hover .td {
-        border-top: 1px solid #177ac9;
-        border-bottom: 1px solid #177ac9;
+        background-color: #177ac9;
+        // border-top: 1px solid #177ac9;
+        // border-bottom: 1px solid #177ac9;
       }
     `,
     BaseCell: `
     &:nth-of-type(2) {
+      text-align: right;
+    }
+    &:nth-of-type(3) {
       text-align: right;
     }
     `
@@ -164,9 +170,9 @@ const Dashboard = () => {
         case DeviceType.CUSTOM:
           return LL.CUSTOM_ENTITIES(0);
         case DeviceType.ANALOGSENSOR:
-          return LL.ANALOG_SENSOR(0);
+          return LL.ANALOG_SENSORS();
         case DeviceType.TEMPERATURESENSOR:
-          return LL.TEMP_SENSOR();
+          return LL.TEMP_SENSORS();
         case DeviceType.SCHEDULER:
           return LL.SCHEDULER();
         default:
@@ -294,7 +300,7 @@ const Dashboard = () => {
                               </Tooltip>
                             </Cell>
 
-                            <Cell stiff pinRight>
+                            <Cell>
                               {me.admin &&
                                 di.dv?.c &&
                                 !hasMask(di.dv.id, DeviceEntityMask.DV_READONLY) && (
