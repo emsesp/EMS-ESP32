@@ -341,9 +341,9 @@ const de: Translation = {
   RESTARTING_PRE: 'Initialisierung',
   RESTARTING_POST: 'Vorbereitung',
   AUTO_SCROLL: 'Automatisches Scrollen',
-  DASHBOARD: 'Dashboard', // TODO translate
-  NO_DATA: 'No data available', // TODO translate
-  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module.' // TODO translate
+  DASHBOARD: 'Dashboard',
+  NO_DATA: 'Keine Daten verfügbar',
+  DASHBOARD_1: 'Passen Sie Ihr Dashboard an, indem Sie EMS-Entitäten mithilfe des Moduls „Anpassungen“ als Favorit markieren.'
 };
 
 export default de;
