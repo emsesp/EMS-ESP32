@@ -4351,7 +4351,6 @@ router
           t: element.t,
           nodes: getDashboardEntityData(id)
         };
-
         // only add to dashboard if we have values
         if ((dashboard_object.nodes ?? []).length > 0) {
           dashboard_data.push(dashboard_object);
@@ -4374,7 +4373,7 @@ router
       sensor_data = emsesp_sensordata.ts.map((item, index) => ({
         id: DeviceTypeUniqueID.TEMPERATURESENSOR_UID * 100 + index,
         dv: {
-          id: item.n,
+          id: '00' + item.n,
           v: item.t, // value is called t in ts (temperature)
           u: item.u
         }
@@ -4395,12 +4394,11 @@ router
       sensor_data = sensor_data.map((item, index) => ({
         id: DeviceTypeUniqueID.ANALOGSENSOR_UID * 100 + index,
         dv: {
-          id: item.n,
+          id: '00' + item.n,
           v: item.v,
           u: item.u
         }
       }));
-
       dashboard_object = {
         id: DeviceTypeUniqueID.ANALOGSENSOR_UID,
         t: DeviceType.ANALOGSENSOR,
@@ -4417,9 +4415,10 @@ router
       let scheduler_data2 = scheduler_data.map((item, index) => ({
         id: DeviceTypeUniqueID.SCHEDULER_UID * 100 + index,
         dv: {
-          id: item.name,
-          v: item.active
-          // u: item.u // don't need uom
+          id: '00' + item.name,
+          v: item.active ? 'on' : 'off',
+          c: item.name,
+          l: ['off', 'on']
         }
       }));
       dashboard_object = {
@@ -4431,22 +4430,39 @@ router
       if ((dashboard_object.nodes ?? []).length > 0) {
         dashboard_data.push(dashboard_object);
       }
-      //
     } else {
-      // for testing
-      // single object
-      const element = emsesp_coredata.devices[3]; // pick the 4th device
-      const id = element.id;
+      // for testing only
+
+      // add the custom entity data
       dashboard_object = {
-        id: id,
-        n: element.n,
-        t: element.t,
-        nodes: getDashboardEntityData(id)
+        id: DeviceTypeUniqueID.CUSTOM_UID, // unique ID for custom entities
+        t: DeviceType.CUSTOM,
+        nodes: getDashboardEntityData(99)
       };
+      // only add to dashboard if we have values
       if ((dashboard_object.nodes ?? []).length > 0) {
         dashboard_data.push(dashboard_object);
       }
-      console.log('dashboard_data: ', dashboard_data);
+
+      let scheduler_data = emsesp_schedule.schedule.filter((item) => item.name);
+      let scheduler_data2 = scheduler_data.map((item, index) => ({
+        id: DeviceTypeUniqueID.SCHEDULER_UID * 100 + index,
+        dv: {
+          id: '00' + item.name,
+          v: item.active ? 'on' : 'off',
+          c: item.name,
+          l: ['off', 'on']
+        }
+      }));
+      dashboard_object = {
+        id: DeviceTypeUniqueID.SCHEDULER_UID,
+        t: DeviceType.SCHEDULER,
+        nodes: scheduler_data2
+      };
+      // only add to dashboard if we have values
+      if ((dashboard_object.nodes ?? []).length > 0) {
+        dashboard_data.push(dashboard_object);
+      }
     }
 
     // console.log('dashboard_data: ', dashboard_data);
@@ -4498,24 +4514,6 @@ router
   // Scheduler
   .post(EMSESP_SCHEDULE_ENDPOINT, async (request: any) => {
     const content = await request.json();
-    // check if we're changing active from the Dashboard
-    if (content.schedule.id === 0) {
-      console.log(
-        "Toggle schedule '" +
-          content.schedule.name +
-          "' to " +
-          content.schedule.active
-      );
-      // find the schedule in emsesp_schedule via the name and toggle the active
-      const objIndex = emsesp_schedule.schedule.findIndex(
-        (obj) => obj.name === content.schedule.name
-      );
-      if (objIndex !== -1) {
-        emsesp_schedule.schedule[objIndex].active = content.schedule.active;
-      }
-
-      return status(200);
-    }
     emsesp_schedule = content;
     console.log('schedule saved', emsesp_schedule);
     return status(200);
@@ -4556,6 +4554,10 @@ router
     const command = content.c;
     const value = content.v;
     const id = content.id;
+
+    console.log(
+      'write device value, id: ' + id + ' command: ' + command + ' value: ' + value
+    );
 
     var objIndex;
     if (id === 1) {
@@ -4598,16 +4600,27 @@ router
       objIndex = emsesp_devicedata_10.nodes.findIndex((obj) => obj.c == command);
       emsesp_devicedata_10.nodes[objIndex].v = value;
     }
-    if (id === 99) {
+    if (id === DeviceTypeUniqueID.CUSTOM_UID) {
       // custom entities
       objIndex = emsesp_devicedata_99.nodes.findIndex((obj) => obj.c == command);
       emsesp_devicedata_99.nodes[objIndex].v = value;
     }
+    if (id === DeviceTypeUniqueID.SCHEDULER_UID) {
+      // toggle scheduler
+      // find the schedule in emsesp_schedule via the name and toggle the active
+      const objIndex = emsesp_schedule.schedule.findIndex(
+        (obj) => obj.name === command
+      );
+      if (objIndex !== -1) {
+        emsesp_schedule.schedule[objIndex].active = value;
+        console.log("Toggle schedule '" + command + "' to " + value);
+      }
+    }
 
     // await delay(1000); // wait to show spinner
-    console.log(
-      'Device Value updated. command:' + command + ' value:' + value + ' id:' + id
-    );
+    // console.log(
+    //   'Device Value updated. command:' + command + ' value:' + value + ' id:' + id
+    // );
     return status(200);
   })
 
