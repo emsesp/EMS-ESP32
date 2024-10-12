@@ -4434,15 +4434,15 @@ router
       // for testing only
 
       // add the custom entity data
-      dashboard_object = {
-        id: DeviceTypeUniqueID.CUSTOM_UID, // unique ID for custom entities
-        t: DeviceType.CUSTOM,
-        nodes: getDashboardEntityData(99)
-      };
-      // only add to dashboard if we have values
-      if ((dashboard_object.nodes ?? []).length > 0) {
-        dashboard_data.push(dashboard_object);
-      }
+      // dashboard_object = {
+      //   id: DeviceTypeUniqueID.CUSTOM_UID, // unique ID for custom entities
+      //   t: DeviceType.CUSTOM,
+      //   nodes: getDashboardEntityData(99)
+      // };
+      // // only add to dashboard if we have values
+      // if ((dashboard_object.nodes ?? []).length > 0) {
+      //   dashboard_data.push(dashboard_object);
+      // }
 
       let scheduler_data = emsesp_schedule.schedule.filter((item) => item.name);
       let scheduler_data2 = scheduler_data.map((item, index) => ({
