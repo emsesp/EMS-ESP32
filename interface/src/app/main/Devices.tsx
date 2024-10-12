@@ -153,6 +153,7 @@ const Devices = () => {
       // position: relative;
       .td {
         padding: 8px;
+        // TODO remove
         // border-top: 1px solid #565656;
         // border-bottom: 1px solid #565656;
       }
@@ -160,6 +161,7 @@ const Devices = () => {
         background-color: #177ac9;
         font-weight: normal;
       }
+      // TODO remove
       // &:hover .td {
       //   background-color: #177ac9;
       //   border-top: 1px solid #177ac9;
@@ -230,6 +232,7 @@ const Devices = () => {
         },
         &:hover .td {
         background-color: #177ac9;
+        // TODO remove
         // border-top: 1px solid #177ac9;
         // border-bottom: 1px solid #177ac9;
       }
