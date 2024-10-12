@@ -103,6 +103,10 @@ const Dashboard = () => {
         // border-top: 1px solid #0000;
         // border-bottom: 1px solid #0000;
       }
+      &.tr.tr-body.row-select.row-select-single-selected {
+        background-color: #177ac9;
+        font-weight: normal;
+      }  
       &:hover .td {
         background-color: #177ac9;
         // border-top: 1px solid #177ac9;
@@ -206,8 +210,10 @@ const Dashboard = () => {
     (parseInt(id.slice(0, 2), 16) & mask) === mask;
 
   const editDashboardValue = (di: DashboardItem) => {
-    setSelectedDashboardItem(di);
-    setDeviceValueDialogOpen(true);
+    if (me.admin && di.dv?.c) {
+      setSelectedDashboardItem(di);
+      setDeviceValueDialogOpen(true);
+    }
   };
 
   const handleShowAll = (
@@ -282,7 +288,11 @@ const Dashboard = () => {
                 {(tableList: DashboardItem[]) => (
                   <Body>
                     {tableList.map((di: DashboardItem) => (
-                      <Row key={di.id} item={di}>
+                      <Row
+                        key={di.id}
+                        item={di}
+                        onClick={() => editDashboardValue(di)}
+                      >
                         {di.id > 99 ? (
                           <>
                             <Cell>{showName(di)}</Cell>
