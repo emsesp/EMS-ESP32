@@ -408,7 +408,7 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
         JsonArray nodes = obj["nodes"].to<JsonArray>();
         uint8_t   count = 0;
         for (const auto & sensor : EMSESP::analogsensor_.sensors()) {
-            if (sensor.type() != AnalogSensor::AnalogType::NOTUSED) {
+            if (sensor.type() != AnalogSensor::AnalogType::NOTUSED) { // ignore disabled
                 JsonObject node = nodes.add<JsonObject>();
                 node["id"]      = (EMSdevice::DeviceTypeUniqueID::ANALOGSENSOR_UID * 100) + count++;
 
