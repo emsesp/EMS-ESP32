@@ -391,6 +391,15 @@ void WebCustomizationService::test() {
         analog.type   = 1;
         webCustomization.analogCustomizations.push_back(analog);
 
+        analog        = AnalogCustomization();
+        analog.gpio   = 38;
+        analog.name   = "test_analogsensor3";
+        analog.offset = 0;
+        analog.factor = 1;
+        analog.uom    = 0;
+        analog.type   = 0; // disabled, not-used
+        webCustomization.analogCustomizations.push_back(analog);
+
         // EMS entities, mark some as favorites
         webCustomization.entityCustomizations.clear();
         auto emsEntity        = EntityCustomization();
