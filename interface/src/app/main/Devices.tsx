@@ -148,22 +148,23 @@ const Devices = () => {
       }
     `,
     Row: `
-      background-color: #1E1E1E;
-      position: relative;
       cursor: pointer;
+      background-color: #1E1E1E;
+      // position: relative;
       .td {
         padding: 8px;
-        border-top: 1px solid #565656;
-        border-bottom: 1px solid #565656;
+        // border-top: 1px solid #565656;
+        // border-bottom: 1px solid #565656;
       }
       &.tr.tr-body.row-select.row-select-single-selected {
-        background-color: #3d4752;
+        background-color: #177ac9;
         font-weight: normal;
       }
-      &:hover .td {
-        border-top: 1px solid #177ac9;
-        border-bottom: 1px solid #177ac9;
-      }
+      // &:hover .td {
+      //   background-color: #177ac9;
+      //   border-top: 1px solid #177ac9;
+      //   border-bottom: 1px solid #177ac9;
+      // }
     `
   });
 
@@ -174,14 +175,18 @@ const Devices = () => {
         --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) 130px;
       `,
       BaseRow: `
-        .td {
-          height: 42px;
-        }
+        // .td {
+        //   height: 42px;
+        // }
       `,
       HeaderRow: `
         .th {
           padding: 8px;
           height: 36px;
+      `,
+      Row: `
+        &:hover .td {
+        background-color: #177ac9;
       `
     }
   ]);
@@ -222,7 +227,12 @@ const Devices = () => {
       Row: `
         &:nth-of-type(odd) .td {
           background-color: #303030;
-        }
+        },
+        &:hover .td {
+        background-color: #177ac9;
+        // border-top: 1px solid #177ac9;
+        // border-bottom: 1px solid #177ac9;
+      }
       `
     }
   ]);
