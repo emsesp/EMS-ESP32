@@ -422,11 +422,11 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
                     l.add(Helpers::render_boolean(s, true, true));
                 } else {
                     dv["v"] = Helpers::transformNumFloat(sensor.value(), 0);
+                    dv["u"] = sensor.uom();
                 }
                 if (sensor.type() == AnalogSensor::AnalogType::COUNTER || sensor.type() >= AnalogSensor::AnalogType::DIGITAL_OUT) {
                     dv["c"] = sensor.name();
                 }
-                dv["u"] = sensor.uom();
             }
         }
     }
