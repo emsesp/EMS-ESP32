@@ -100,13 +100,16 @@ const Dashboard = () => {
       cursor: pointer;
       background-color: #1e1e1e;
       .td {
+        // TODO remove
         // border-top: 1px solid #0000;
         // border-bottom: 1px solid #0000;
       }
-      &.tr.tr-body.row-select.row-select-single-selected {
-        background-color: #177ac9;
-        font-weight: normal;
-      }  
+      // TODO remove
+      // &.tr.tr-body.row-select.row-select-single-selected {
+      //   background-color: #177ac9;
+      //   font-weight: normal;
+      //   color: red;
+      // }  
       &:hover .td {
         background-color: #177ac9;
         // border-top: 1px solid #177ac9;
@@ -114,12 +117,12 @@ const Dashboard = () => {
       }
     `,
     BaseCell: `
-    &:nth-of-type(2) {
-      text-align: right;
-    }
-    &:nth-of-type(3) {
-      text-align: right;
-    }
+      &:nth-of-type(2) {
+        text-align: right;
+      }
+      &:nth-of-type(3) {
+        text-align: right;
+      }
     `
   });
 
@@ -145,7 +148,7 @@ const Dashboard = () => {
           />
         )
       },
-      indentation: 50
+      indentation: 45
     }
   );
 
@@ -299,13 +302,11 @@ const Dashboard = () => {
                             <Cell>
                               <Tooltip
                                 placement="left"
-                                title={
-                                  di.dv ? formatValue(LL, di.dv.v, di.dv.u) : ''
-                                }
+                                title={formatValue(LL, di.dv?.v, di.dv?.u)}
                                 arrow
                               >
                                 <span style={{ color: 'lightgrey' }}>
-                                  {di.dv ? formatValue(LL, di.dv.v, di.dv.u) : ''}
+                                  {formatValue(LL, di.dv?.v, di.dv?.u)}
                                 </span>
                               </Tooltip>
                             </Cell>
