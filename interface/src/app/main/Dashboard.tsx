@@ -24,7 +24,7 @@ import { useRequest } from 'alova/client';
 import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
-import { useInterval } from 'utils';
+import { useInterval, usePersistState } from 'utils';
 
 import { readDashboard, writeDeviceValue } from '../../api/app';
 import DeviceIcon from './DeviceIcon';
@@ -44,11 +44,10 @@ const Dashboard = () => {
 
   useLayoutTitle(LL.DASHBOARD());
 
-  const [firstLoad, setFirstLoad] = useState<boolean>(true);
-  const [showAll, setShowAll] = useState<boolean>(true);
+  const [showAll, setShowAll] = usePersistState(true, 'showAll');
 
   const [deviceValueDialogOpen, setDeviceValueDialogOpen] = useState<boolean>(false);
-
+  const [parentNodes, setParentNodes] = useState<number>(0);
   const [selectedDashboardItem, setSelectedDashboardItem] =
     useState<DashboardItem>();
 
@@ -59,6 +58,10 @@ const Dashboard = () => {
     loading
   } = useRequest(readDashboard, {
     initialData: []
+  }).onSuccess((event) => {
+    if (event.data.length > parentNodes) {
+      setParentNodes(event.data.length); // count number of parents/devices
+    }
   });
 
   const { loading: submitting, send: sendDeviceValue } = useRequest(
@@ -145,13 +148,11 @@ const Dashboard = () => {
     }
   }, 3000);
 
-  // auto expand on first load
   useEffect(() => {
-    if (firstLoad && Array.isArray(data) && data.length && !tree.state.ids.length) {
-      tree.fns.onToggleAll({});
-      setFirstLoad(false);
-    }
-  }, [loading]);
+    showAll
+      ? tree.fns.onAddAll(data.map((item: DashboardItem) => item.id)) // expand tree
+      : tree.fns.onRemoveAll(); // collapse tree
+  }, [parentNodes]);
 
   const showType = (n?: string, t?: number) => {
     // if we have a name show it
