@@ -32,6 +32,39 @@ const headers = {
 let countWifiScanPoll = 0; // wifi network scan
 let countHardwarePoll = 0; // for during an upload
 
+// DeviceTypes
+const enum DeviceType {
+  SYSTEM = 0,
+  TEMPERATURESENSOR,
+  ANALOGSENSOR,
+  SCHEDULER,
+  CUSTOM,
+  BOILER,
+  THERMOSTAT,
+  MIXER,
+  SOLAR,
+  HEATPUMP,
+  GATEWAY,
+  SWITCH,
+  CONTROLLER,
+  CONNECT,
+  ALERT,
+  EXTENSION,
+  GENERIC,
+  HEATSOURCE,
+  VENTILATION,
+  WATER,
+  POOL,
+  UNKNOWN
+}
+
+const enum DeviceTypeUniqueID {
+  SCHEDULER_UID = 96,
+  ANALOGSENSOR_UID = 97,
+  TEMPERATURESENSOR_UID = 98,
+  CUSTOM_UID = 99 // always 99
+}
+
 function updateMask(entity: any, de: any, dd: any) {
   const current_mask = parseInt(entity.slice(0, 2), 16);
 
@@ -54,22 +87,22 @@ function updateMask(entity: any, de: any, dd: any) {
     }
 
     // find in dd, either looking for fullname or custom name
-    // console.log('looking for ' + fullname + ' in ' + dd.data);
-    const dd_objIndex = dd.data.findIndex(
+    // console.log('looking for ' + fullname + ' in ' + dd.nodes);
+    const dd_objIndex = dd.nodes.findIndex(
       (obj: any) => obj.id.slice(2) === fullname
     );
     if (dd_objIndex !== -1) {
       let changed = new Boolean(false);
 
       // see if the mask has changed
-      const old_mask = parseInt(dd.data[dd_objIndex].id.slice(0, 2), 16);
+      const old_mask = parseInt(dd.nodes[dd_objIndex].id.slice(0, 2), 16);
       if (old_mask !== current_mask) {
         changed = true;
         console.log('mask has changed to ' + current_mask.toString(16));
       }
 
       // see if the custom name has changed
-      const old_custom_name = dd.data[dd_objIndex].cn;
+      const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
           old_custom_name +
@@ -87,8 +120,8 @@ function updateMask(entity: any, de: any, dd: any) {
 
       // see if min or max has changed
       // get current min/max values if they exist
-      const current_min = dd.data[dd_objIndex].min;
-      const current_max = dd.data[dd_objIndex].max;
+      const current_min = dd.nodes[dd_objIndex].min;
+      const current_max = dd.nodes[dd_objIndex].max;
       let new_min = current_min;
       let new_max = current_max;
       if (has_min_max) {
@@ -109,9 +142,9 @@ function updateMask(entity: any, de: any, dd: any) {
         if (new_max) {
           de[de_objIndex].ma = new_max;
         }
-        dd.data[dd_objIndex].id =
+        dd.nodes[dd_objIndex].id =
           current_mask.toString(16).padStart(2, '0') + new_fullname;
-        dd.data[dd_objIndex].cn = new_fullname;
+        dd.nodes[dd_objIndex].cn = new_fullname;
       }
     }
   }
@@ -456,6 +489,8 @@ const EMSESP_DEVICEDATA_ENDPOINT1 = REST_ENDPOINT_ROOT + 'deviceData';
 const EMSESP_DEVICEDATA_ENDPOINT2 = REST_ENDPOINT_ROOT + 'deviceData/:id?';
 const EMSESP_DEVICEENTITIES_ENDPOINT1 = REST_ENDPOINT_ROOT + 'deviceEntities';
 const EMSESP_DEVICEENTITIES_ENDPOINT2 = REST_ENDPOINT_ROOT + 'deviceEntities/:id?';
+
+const EMSESP_DASHBOARD_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'dashboardData';
 
 const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile';
 const EMSESP_WRITE_DEVICEVALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceValue';
@@ -858,7 +893,7 @@ const activity = {
 // 99 - Custom
 
 const emsesp_devicedata_1 = {
-  data: [
+  nodes: [
     {
       v: '22(816) 01.05.2023 13:07 (1 min)',
       u: 0,
@@ -1302,7 +1337,7 @@ const emsesp_devicedata_1 = {
 };
 
 const emsesp_devicedata_2 = {
-  data: [
+  nodes: [
     {
       v: '(0)',
       u: 0,
@@ -1316,7 +1351,7 @@ const emsesp_devicedata_2 = {
     {
       v: 18.2,
       u: 1,
-      id: '00Chosen Room Temperature',
+      id: '08Chosen Room Temperature',
       c: 'hc1/seltemp',
       m: 5,
       x: 52,
@@ -1325,7 +1360,7 @@ const emsesp_devicedata_2 = {
     {
       v: 22.6,
       u: 1,
-      id: '00hc1 current room temperature'
+      id: '08hc1 current room temperature'
     },
     {
       v: 'auto',
@@ -1345,7 +1380,7 @@ const emsesp_devicedata_2 = {
 };
 
 const emsesp_devicedata_3 = {
-  data: [
+  nodes: [
     {
       v: '',
       u: 0,
@@ -1686,7 +1721,7 @@ const emsesp_devicedata_3 = {
     {
       v: 'hot',
       u: 0,
-      id: '00dhw comfort',
+      id: '08dhw comfort',
       c: 'dhw/comfort',
       l: ['hot', 'eco', 'intelligent']
     },
@@ -1841,7 +1876,7 @@ const emsesp_devicedata_3 = {
 };
 
 const emsesp_devicedata_4 = {
-  data: [
+  nodes: [
     {
       v: 16,
       u: 1,
@@ -1857,7 +1892,7 @@ const emsesp_devicedata_4 = {
     {
       v: 'off',
       u: 0,
-      id: '02hc2 mode',
+      id: '03hc2 mode',
       c: 'hc2/mode',
       l: ['off', 'on', 'auto']
     }
@@ -1865,7 +1900,7 @@ const emsesp_devicedata_4 = {
 };
 
 const emsesp_devicedata_5 = {
-  data: [
+  nodes: [
     {
       v: 30,
       u: 1,
@@ -1912,7 +1947,7 @@ const emsesp_devicedata_5 = {
 };
 
 const emsesp_devicedata_6 = {
-  data: [
+  nodes: [
     {
       v: 43.9,
       u: 1,
@@ -2061,7 +2096,7 @@ const emsesp_devicedata_6 = {
 };
 
 const emsesp_devicedata_7 = {
-  data: [
+  nodes: [
     { v: '', u: 0, id: '08reset', c: 'reset', l: ['-', 'maintenance', 'error'] },
     { v: 'off', u: 0, id: '08heating active' },
     { v: 'off', u: 0, id: '04tapwater active' },
@@ -2204,7 +2239,7 @@ const emsesp_devicedata_7 = {
 };
 
 const emsesp_devicedata_8 = {
-  data: [
+  nodes: [
     {
       v: '',
       u: 0,
@@ -2244,22 +2279,22 @@ const emsesp_devicedata_8 = {
       id: '00heating pump modulation'
     },
     {
-      v: 30.299999237060547,
+      v: 30.29,
       u: 1,
       id: '00outside temperature'
     },
     {
-      v: 18.700000762939453,
+      v: 18.7,
       u: 1,
       id: '00current flow temperature'
     },
     {
-      v: 21.399999618530273,
+      v: 21.39,
       u: 1,
       id: '00return temperature'
     },
     {
-      v: 18.700000762939453,
+      v: 18.7,
       u: 1,
       id: '00low loss header'
     },
@@ -2544,7 +2579,7 @@ const emsesp_devicedata_8 = {
       id: '00brine out/condenser'
     },
     {
-      v: 21.399999618530273,
+      v: 21.39,
       u: 1,
       id: '00heat carrier return (TC0)'
     },
@@ -2559,12 +2594,12 @@ const emsesp_devicedata_8 = {
       id: '00condenser temperature (TC3)'
     },
     {
-      v: 51.599998474121094,
+      v: 51.59,
       u: 1,
       id: '00compressor temperature (TR1)'
     },
     {
-      v: 14.600000381469727,
+      v: 14.6,
       u: 1,
       id: '00refrigerant temperature liquid side (condenser output) (TR3)'
     },
@@ -2574,32 +2609,32 @@ const emsesp_devicedata_8 = {
       id: '00evaporator inlet temperature (TR4)'
     },
     {
-      v: 20.200000762939453,
+      v: 20.2,
       u: 1,
       id: '00compressor inlet temperature (TR5)'
     },
     {
-      v: 54.599998474121094,
+      v: 54.59,
       u: 1,
       id: '00compressor outlet temperature (TR6)'
     },
     {
-      v: 29.600000381469727,
+      v: 29.6,
       u: 1,
       id: '00air inlet temperature (TL2)'
     },
     {
-      v: 13.899999618530273,
+      v: 13.89,
       u: 1,
       id: '00low pressure side temperature (PL1)'
     },
     {
-      v: 37.79999923706055,
+      v: 37.79,
       u: 1,
       id: '00high pressure side temperature (PH1)'
     },
     {
-      v: 25.600000381469727,
+      v: 25.6,
       u: 1,
       id: '00drain pan temp (TA4)'
     },
@@ -2743,7 +2778,7 @@ const emsesp_devicedata_8 = {
       s: '0.1'
     },
     {
-      v: 0.10000000149011612,
+      v: 0.1,
       u: 22,
       id: '00aux heater limit start',
       c: 'auxlimitstart',
@@ -3109,7 +3144,7 @@ const emsesp_devicedata_8 = {
       l: ['off', 'on']
     },
     {
-      v: 58.70000076293945,
+      v: 58.7,
       u: 1,
       id: '00dhw current intern temperature'
     },
@@ -3178,7 +3213,7 @@ const emsesp_devicedata_8 = {
 };
 
 const emsesp_devicedata_9 = {
-  data: [
+  nodes: [
     {
       v: 24,
       u: 1,
@@ -3207,7 +3242,7 @@ const emsesp_devicedata_9 = {
 };
 
 const emsesp_devicedata_10 = {
-  data: [
+  nodes: [
     {
       v: '26.06.2024 14:49',
       u: 0,
@@ -3696,7 +3731,7 @@ const emsesp_devicedata_10 = {
 };
 
 const emsesp_devicedata_99 = {
-  data: [
+  nodes: [
     {
       v: 5,
       u: 1,
@@ -3821,7 +3856,7 @@ let emsesp_schedule = {
       time: '',
       cmd: 'system/message',
       value: '"hello world"',
-      name: 'immediate'
+      name: '' // empty
     }
   ]
 };
@@ -3896,7 +3931,7 @@ const emsesp_deviceentities_2 = [
     v: 18.2,
     n: 'Chosen Room Temperature',
     id: 'hc1/seltemp',
-    m: 0,
+    m: 8,
     mi: 5,
     ma: 52,
     w: true
@@ -3905,7 +3940,7 @@ const emsesp_deviceentities_2 = [
     v: 22.6,
     n: 'hc1 current room temperature',
     id: 'hc1/curtemp',
-    m: 0,
+    m: 8,
     w: false
   },
   {
@@ -3936,7 +3971,7 @@ const emsesp_deviceentities_4 = [
     v: 'off',
     n: 'hc2 mode',
     id: 'hc2/mode',
-    m: 2,
+    m: 3,
     w: true
   }
 ];
@@ -4182,7 +4217,7 @@ function deviceData(id: number) {
   }
   if (id == 8) {
     // test changing the selected flow temp on a Bosch Compress 7000i AW Heat Pump (Boiler/HP)
-    emsesp_devicedata_8.data[4].v = Math.floor(Math.random() * 100);
+    emsesp_devicedata_8.nodes[4].v = Math.floor(Math.random() * 100);
     return new Response(encoder.encode(emsesp_devicedata_8), { headers });
   }
   if (id == 9) {
@@ -4231,7 +4266,34 @@ function deviceEntities(id: number) {
   return new Response(encoder.encode(emsesp_deviceentities_none), { headers });
 }
 
-// Router starts here...
+// prepare dashboard data
+function getDashboardEntityData(id: number) {
+  let device_data = {};
+  if (id == 1) device_data = emsesp_devicedata_1;
+  else if (id == 2) device_data = emsesp_devicedata_2;
+  else if (id == 3) device_data = emsesp_devicedata_3;
+  else if (id == 4) device_data = emsesp_devicedata_4;
+  else if (id == 5) device_data = emsesp_devicedata_5;
+  else if (id == 6) device_data = emsesp_devicedata_6;
+  else if (id == 7) device_data = emsesp_devicedata_7;
+  else if (id == 8) device_data = emsesp_devicedata_8;
+  else if (id == 9) device_data = emsesp_devicedata_9;
+  else if (id == 10) device_data = emsesp_devicedata_10;
+  else if (id == 99) device_data = emsesp_devicedata_99;
+
+  // filter device_data on
+  //  - only add favorite (mask has bit 8 set) except for Custom Entities (type 99)
+  let new_data = (device_data as any).nodes
+    .filter((item) => id === 99 || parseInt(item.id.slice(0, 2), 16) & 0x08)
+    .map((item, index) => ({
+      id: id * 100 + index, // mandatory unique id for table
+      dv: item // devicevalue
+    }));
+
+  return new_data;
+}
+
+// Router routing starts here...
 router
   // EMS-ESP Settings
   .get(EMSESP_SETTINGS_ENDPOINT, () => settings)
@@ -4242,7 +4304,7 @@ router
     // return status(205); // restart needed
   })
 
-  // Device Dashboard Data
+  // Device Data
   .get(EMSESP_CORE_DATA_ENDPOINT, () => {
     // sort by type, like its done in the C++ code
     let sorted_devices = [...emsesp_coredata.devices].sort((a, b) => a.t - b.t);
@@ -4268,6 +4330,146 @@ router
   .get(EMSESP_DEVICEENTITIES_ENDPOINT2, ({ params }) =>
     params.id ? deviceEntities(Number(params.id)) : status(404)
   )
+  .get(EMSESP_DASHBOARD_DATA_ENDPOINT, () => {
+    let dashboard_data: { id?: number; n?: string; t?: number; nodes?: any[] }[] =
+      [];
+    let dashboard_object: { id?: number; n?: string; t?: number; nodes?: any[] } =
+      {};
+
+    let fake = false;
+
+    // fake = true; // for testing
+
+    if (!fake) {
+      // pick EMS devices from coredata
+      for (const element of emsesp_coredata.devices) {
+        const id = element.id;
+
+        dashboard_object = {
+          id: id,
+          n: element.n,
+          t: element.t,
+          nodes: getDashboardEntityData(id)
+        };
+        // only add to dashboard if we have values
+        if ((dashboard_object.nodes ?? []).length > 0) {
+          dashboard_data.push(dashboard_object);
+        }
+      }
+
+      // add the custom entity data
+      dashboard_object = {
+        id: DeviceTypeUniqueID.CUSTOM_UID, // unique ID for custom entities
+        t: DeviceType.CUSTOM,
+        nodes: getDashboardEntityData(99)
+      };
+      // only add to dashboard if we have values
+      if ((dashboard_object.nodes ?? []).length > 0) {
+        dashboard_data.push(dashboard_object);
+      }
+
+      // add temperature sensor data. no command c
+      let sensor_data: any[] = [];
+      sensor_data = emsesp_sensordata.ts.map((item, index) => ({
+        id: DeviceTypeUniqueID.TEMPERATURESENSOR_UID * 100 + index,
+        dv: {
+          id: '00' + item.n,
+          v: item.t, // value is called t in ts (temperature)
+          u: item.u
+        }
+      }));
+      dashboard_object = {
+        id: DeviceTypeUniqueID.TEMPERATURESENSOR_UID,
+        t: DeviceType.TEMPERATURESENSOR,
+        nodes: sensor_data
+      };
+      // only add to dashboard if we have values
+      if ((dashboard_object.nodes ?? []).length > 0) {
+        dashboard_data.push(dashboard_object);
+      }
+
+      // add analog sensor data. no command c
+      // remove disabled sensors first (t = 0)
+      sensor_data = emsesp_sensordata.as.filter((item) => item.t !== 0);
+      sensor_data = sensor_data.map((item, index) => ({
+        id: DeviceTypeUniqueID.ANALOGSENSOR_UID * 100 + index,
+        dv: {
+          id: '00' + item.n,
+          v: item.v,
+          u: item.u
+        }
+      }));
+      dashboard_object = {
+        id: DeviceTypeUniqueID.ANALOGSENSOR_UID,
+        t: DeviceType.ANALOGSENSOR,
+        nodes: sensor_data
+      };
+      // only add to dashboard if we have values
+      if ((dashboard_object.nodes ?? []).length > 0) {
+        dashboard_data.push(dashboard_object);
+      }
+
+      // add the scheduler data
+      // filter emsesp_schedule with only if it has a name
+      let scheduler_data = emsesp_schedule.schedule.filter((item) => item.name);
+      let scheduler_data2 = scheduler_data.map((item, index) => ({
+        id: DeviceTypeUniqueID.SCHEDULER_UID * 100 + index,
+        dv: {
+          id: '00' + item.name,
+          v: item.active ? 'on' : 'off',
+          c: item.name,
+          l: ['off', 'on']
+        }
+      }));
+      dashboard_object = {
+        id: DeviceTypeUniqueID.SCHEDULER_UID,
+        t: DeviceType.SCHEDULER,
+        nodes: scheduler_data2
+      };
+      // only add to dashboard if we have values
+      if ((dashboard_object.nodes ?? []).length > 0) {
+        dashboard_data.push(dashboard_object);
+      }
+    } else {
+      // for testing only
+
+      // add the custom entity data
+      // dashboard_object = {
+      //   id: DeviceTypeUniqueID.CUSTOM_UID, // unique ID for custom entities
+      //   t: DeviceType.CUSTOM,
+      //   nodes: getDashboardEntityData(99)
+      // };
+      // // only add to dashboard if we have values
+      // if ((dashboard_object.nodes ?? []).length > 0) {
+      //   dashboard_data.push(dashboard_object);
+      // }
+
+      let scheduler_data = emsesp_schedule.schedule.filter((item) => item.name);
+      let scheduler_data2 = scheduler_data.map((item, index) => ({
+        id: DeviceTypeUniqueID.SCHEDULER_UID * 100 + index,
+        dv: {
+          id: '00' + item.name,
+          v: item.active ? 'on' : 'off',
+          c: item.name,
+          l: ['off', 'on']
+        }
+      }));
+      dashboard_object = {
+        id: DeviceTypeUniqueID.SCHEDULER_UID,
+        t: DeviceType.SCHEDULER,
+        nodes: scheduler_data2
+      };
+      // only add to dashboard if we have values
+      if ((dashboard_object.nodes ?? []).length > 0) {
+        dashboard_data.push(dashboard_object);
+      }
+    }
+
+    // console.log('dashboard_data: ', dashboard_data);
+
+    // return dashboard_data; // if not using msgpack
+    return new Response(encoder.encode(dashboard_data), { headers }); // msgpack it
+  })
 
   // Customizations
   .post(EMSESP_CUSTOMIZATION_ENTITIES_ENDPOINT, async (request: any) => {
@@ -4346,62 +4548,79 @@ router
   })
   .get(EMSESP_CUSTOMENTITIES_ENDPOINT, () => emsesp_customentities)
 
-  // Device Dashboard
+  // Devices page
   .post(EMSESP_WRITE_DEVICEVALUE_ENDPOINT, async (request: any) => {
     const content = await request.json();
     const command = content.c;
     const value = content.v;
     const id = content.id;
 
+    console.log(
+      'write device value, id: ' + id + ' command: ' + command + ' value: ' + value
+    );
+
     var objIndex;
     if (id === 1) {
-      objIndex = emsesp_devicedata_1.data.findIndex((obj) => obj.c == command);
-      emsesp_devicedata_1.data[objIndex].v = value;
+      objIndex = emsesp_devicedata_1.nodes.findIndex((obj) => obj.c == command);
+      emsesp_devicedata_1.nodes[objIndex].v = value;
     }
     if (id === 2) {
-      objIndex = emsesp_devicedata_2.data.findIndex((obj) => obj.c == command);
-      emsesp_devicedata_2.data[objIndex].v = value;
+      objIndex = emsesp_devicedata_2.nodes.findIndex((obj) => obj.c == command);
+      emsesp_devicedata_2.nodes[objIndex].v = value;
     }
     if (id === 3) {
-      objIndex = emsesp_devicedata_3.data.findIndex((obj) => obj.c == command);
-      emsesp_devicedata_3.data[objIndex].v = value;
+      objIndex = emsesp_devicedata_3.nodes.findIndex((obj) => obj.c == command);
+      emsesp_devicedata_3.nodes[objIndex].v = value;
     }
     if (id === 4) {
-      objIndex = emsesp_devicedata_4.data.findIndex((obj) => obj.c == command);
-      emsesp_devicedata_4.data[objIndex].v = value;
+      objIndex = emsesp_devicedata_4.nodes.findIndex((obj) => obj.c == command);
+      emsesp_devicedata_4.nodes[objIndex].v = value;
     }
     if (id === 5) {
-      objIndex = emsesp_devicedata_5.data.findIndex((obj) => obj.c == command);
-      emsesp_devicedata_5.data[objIndex].v = value;
+      objIndex = emsesp_devicedata_5.nodes.findIndex((obj) => obj.c == command);
+      emsesp_devicedata_5.nodes[objIndex].v = value;
     }
     if (id === 6) {
-      objIndex = emsesp_devicedata_6.data.findIndex((obj) => obj.c == command);
-      emsesp_devicedata_6.data[objIndex].v = value;
+      objIndex = emsesp_devicedata_6.nodes.findIndex((obj) => obj.c == command);
+      emsesp_devicedata_6.nodes[objIndex].v = value;
     }
     if (id === 7) {
-      objIndex = emsesp_devicedata_7.data.findIndex((obj) => obj.c == command);
-      emsesp_devicedata_7.data[objIndex].v = value;
+      objIndex = emsesp_devicedata_7.nodes.findIndex((obj) => obj.c == command);
+      emsesp_devicedata_7.nodes[objIndex].v = value;
     }
     if (id === 8) {
-      objIndex = emsesp_devicedata_8.data.findIndex((obj) => obj.c == command);
-      emsesp_devicedata_8.data[objIndex].v = value;
+      objIndex = emsesp_devicedata_8.nodes.findIndex((obj) => obj.c == command);
+      emsesp_devicedata_8.nodes[objIndex].v = value;
     }
     if (id === 9) {
-      objIndex = emsesp_devicedata_9.data.findIndex((obj) => obj.c == command);
-      emsesp_devicedata_9.data[objIndex].v = value;
+      objIndex = emsesp_devicedata_9.nodes.findIndex((obj) => obj.c == command);
+      emsesp_devicedata_9.nodes[objIndex].v = value;
     }
     if (id === 10) {
-      objIndex = emsesp_devicedata_10.data.findIndex((obj) => obj.c == command);
-      emsesp_devicedata_10.data[objIndex].v = value;
+      objIndex = emsesp_devicedata_10.nodes.findIndex((obj) => obj.c == command);
+      emsesp_devicedata_10.nodes[objIndex].v = value;
     }
-    if (id === 99) {
+    if (id === DeviceTypeUniqueID.CUSTOM_UID) {
       // custom entities
-      objIndex = emsesp_devicedata_99.data.findIndex((obj) => obj.c == command);
-      emsesp_devicedata_99.data[objIndex].v = value;
+      objIndex = emsesp_devicedata_99.nodes.findIndex((obj) => obj.c == command);
+      emsesp_devicedata_99.nodes[objIndex].v = value;
+    }
+    if (id === DeviceTypeUniqueID.SCHEDULER_UID) {
+      // toggle scheduler
+      // find the schedule in emsesp_schedule via the name and toggle the active
+      const objIndex = emsesp_schedule.schedule.findIndex(
+        (obj) => obj.name === command
+      );
+      if (objIndex !== -1) {
+        emsesp_schedule.schedule[objIndex].active = value;
+        console.log("Toggle schedule '" + command + "' to " + value);
+      }
     }
 
     // await delay(1000); // wait to show spinner
-    console.log('device value saved', content);
+    // console.log(
+    //   'Device Value updated. command:' + command + ' value:' + value + ' id:' + id
+    // );
     return status(200);
   })
 

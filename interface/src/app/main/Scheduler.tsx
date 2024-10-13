@@ -318,7 +318,7 @@ const Scheduler = () => {
     <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       <Box mb={2} color="warning.main">
-        <Typography variant="body2">{LL.SCHEDULER_HELP_1()}</Typography>
+        <Typography variant="body1">{LL.SCHEDULER_HELP_1()}</Typography>
       </Box>
       {renderSchedule()}
 

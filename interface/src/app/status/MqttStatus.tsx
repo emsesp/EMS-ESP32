@@ -58,7 +58,7 @@ const MqttStatus = () => {
     data,
     send: loadData,
     error
-  } = useAutoRequest(MqttApi.readMqttStatus, { pollingTime: 5000 });
+  } = useAutoRequest(MqttApi.readMqttStatus, { pollingTime: 3000 });
 
   const { LL } = useI18nContext();
   useLayoutTitle(LL.STATUS_OF('MQTT'));

@@ -38,7 +38,7 @@ const APStatus = () => {
     data,
     send: loadData,
     error
-  } = useAutoRequest(APApi.readAPStatus, { pollingTime: 5000 });
+  } = useAutoRequest(APApi.readAPStatus, { pollingTime: 3000 });
 
   const { LL } = useI18nContext();
   useLayoutTitle(LL.STATUS_OF(LL.ACCESS_POINT(0)));

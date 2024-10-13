@@ -162,8 +162,15 @@ void WebCustomizationService::reset_customization(AsyncWebServerRequest * reques
 // send back list of device entities
 void WebCustomizationService::device_entities(AsyncWebServerRequest * request) {
     uint8_t id;
+
+    // for testing we hardcode the id to 1 - the boiler
+#if defined(EMSESP_STANDALONE) && defined(EMSESP_TEST)
+    if (1) {
+        id = 1;
+#else
     if (request->hasParam(F_(id))) {
         id = Helpers::atoint(request->getParam(F_(id))->value().c_str()); // get id from url
+#endif
 
         auto * response = new AsyncJsonResponse(true, true); // array and msgpack
 
@@ -178,7 +185,12 @@ void WebCustomizationService::device_entities(AsyncWebServerRequest * request) {
 #ifndef EMSESP_STANDALONE
                 JsonArray output = response->getRoot();
                 emsdevice->generate_values_web_customization(output);
+#else
+                JsonDocument doc;
+                JsonArray    output = doc.to<JsonArray>();
+                emsdevice->generate_values_web_customization(output);
 #endif
+
 #if defined(EMSESP_DEBUG)
                 size_t length = response->setLength();
                 EMSESP::logger().debug("Customizations buffer used: %d", length);
@@ -348,13 +360,13 @@ void WebCustomizationService::test() {
         webCustomization.sensorCustomizations.clear();
         auto sensor   = SensorCustomization();
         sensor.id     = "01_0203_0405_0607";
-        sensor.name   = "test_sensor1";
+        sensor.name   = "test_tempsensor1";
         sensor.offset = 0;
         webCustomization.sensorCustomizations.push_back(sensor);
 
         auto sensor2   = SensorCustomization();
         sensor2.id     = "0B_0C0D_0E0F_1011";
-        sensor2.name   = "test_sensor2";
+        sensor2.name   = "test_tempsensor2";
         sensor2.offset = 4;
         webCustomization.sensorCustomizations.push_back(sensor2);
 
@@ -363,7 +375,7 @@ void WebCustomizationService::test() {
         webCustomization.analogCustomizations.clear();
         auto analog   = AnalogCustomization();
         analog.gpio   = 36;
-        analog.name   = "test_analog1";
+        analog.name   = "test_analogsensor1";
         analog.offset = 0;
         analog.factor = 0.1;
         analog.uom    = 17;
@@ -372,21 +384,59 @@ void WebCustomizationService::test() {
 
         analog        = AnalogCustomization();
         analog.gpio   = 37;
-        analog.name   = "test_analog2";
+        analog.name   = "test_analogsensor2";
         analog.offset = 0;
         analog.factor = 1;
         analog.uom    = 0;
         analog.type   = 1;
         webCustomization.analogCustomizations.push_back(analog);
 
-        // EMS entities
+        analog        = AnalogCustomization();
+        analog.gpio   = 38;
+        analog.name   = "test_analogsensor3";
+        analog.offset = 0;
+        analog.factor = 1;
+        analog.uom    = 0;
+        analog.type   = 0; // disabled, not-used
+        webCustomization.analogCustomizations.push_back(analog);
+
+        // EMS entities, mark some as favorites
         webCustomization.entityCustomizations.clear();
         auto emsEntity        = EntityCustomization();
         emsEntity.product_id  = 123;
         emsEntity.device_id   = 8;
-        emsEntity.custom_name = "Custom Name!!";
+        emsEntity.custom_name = "My Custom Boiler";
         emsEntity.entity_ids.push_back("08heatingactive|is my heating on?");
+        emsEntity.entity_ids.push_back("08tapwateractive");
+        emsEntity.entity_ids.push_back("08selflowtemp|<90");
         webCustomization.entityCustomizations.push_back(emsEntity);
+
+        // since custom device name is loaded at discovery, we need to force it here
+        for (const auto & emsdevice : EMSESP::emsdevices) {
+            if (emsdevice->is_device_id(emsEntity.device_id)) {
+                emsdevice->custom_name(emsEntity.custom_name);
+                break;
+            }
+        }
+
+        // ...and the same with the custom masks and names for entity values. It's done in EMSdevice::add_device_value()
+        // so we need to force it here
+        for (const auto & emsdevice : EMSESP::emsdevices) {
+            if (emsdevice->is_device_id(emsEntity.device_id)) {
+                // find the device value and set the mask and custom name to match the above fake data
+                for (auto & dv : emsdevice->devicevalues_) {
+                    if (strcmp(dv.short_name, "heatingactive") == 0) {
+                        dv.state           = DeviceValueState::DV_FAVORITE; // set as favorite
+                        dv.custom_fullname = "is my heating on?";
+                    } else if (strcmp(dv.short_name, "tapwateractive") == 0) {
+                        dv.state = DeviceValueState::DV_FAVORITE; // set as favorite
+                    } else if (strcmp(dv.short_name, "selflowtemp") == 0) {
+                        dv.state = DeviceValueState::DV_FAVORITE; // set as favorite
+                    }
+                }
+                break;
+            }
+        }
 
         return StateUpdateResult::CHANGED; // persist the changes
     });

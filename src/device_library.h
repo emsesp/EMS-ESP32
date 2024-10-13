@@ -30,7 +30,7 @@
 { 72, DeviceType::BOILER, "Logano GB1*5, Logamatic MC10", DeviceFlags::EMS_DEVICE_FLAG_EMS},
 { 81, DeviceType::BOILER, "Cascade CM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 { 84, DeviceType::BOILER, "Logamax Plus GB022", DeviceFlags::EMS_DEVICE_FLAG_NONE},
-{ 95, DeviceType::BOILER, "Condens 2500/5000W, Logamax/Logomatic, Cerapur Top, Greenstar, Generic HT3", DeviceFlags::EMS_DEVICE_FLAG_HT3},
+{ 95, DeviceType::BOILER, "Condens, Logamax/Logomatic, Cerapur Top, Greenstar, Generic HT3", DeviceFlags::EMS_DEVICE_FLAG_HT3},
 {115, DeviceType::BOILER, "Topline, GB162", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {121, DeviceType::BOILER, "Cascade MCM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {122, DeviceType::BOILER, "Proline", DeviceFlags::EMS_DEVICE_FLAG_NONE},

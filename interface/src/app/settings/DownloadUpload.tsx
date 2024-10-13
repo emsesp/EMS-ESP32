@@ -32,7 +32,7 @@ import {
   useLayoutTitle
 } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
-import { saveFile } from 'utils/file';
+import { saveFile } from 'utils';
 
 const DownloadUpload = () => {
   const { LL } = useI18nContext();
@@ -221,7 +221,7 @@ const DownloadUpload = () => {
           {LL.DOWNLOAD(0)}
         </Typography>
 
-        <Typography mb={1} variant="body2" color="warning">
+        <Typography mb={1} variant="body1" color="warning">
           {LL.DOWNLOAD_SETTINGS_TEXT()}
         </Typography>
         <Grid container spacing={1}>
@@ -269,7 +269,7 @@ const DownloadUpload = () => {
         </Typography>
 
         <Box color="warning.main" sx={{ pb: 2 }}>
-          <Typography variant="body2">{LL.UPLOAD_TEXT()}</Typography>
+          <Typography variant="body1">{LL.UPLOAD_TEXT()}</Typography>
         </Box>
 
         <SingleUpload doRestart={doRestart} />

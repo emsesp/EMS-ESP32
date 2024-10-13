@@ -340,7 +340,10 @@ const de: Translation = {
   PLEASE_WAIT: 'Bitte warten',
   RESTARTING_PRE: 'Initialisierung',
   RESTARTING_POST: 'Vorbereitung',
-  AUTO_SCROLL: 'Automatisches Scrollen'
+  AUTO_SCROLL: 'Automatisches Scrollen',
+  DASHBOARD: 'Dashboard',
+  NO_DATA: 'Keine Daten verfügbar',
+  DASHBOARD_1: 'Passen Sie Ihr Dashboard an, indem Sie EMS-Entitäten mithilfe des Moduls „Anpassungen“ als Favorit markieren.'
 };
 
 export default de;

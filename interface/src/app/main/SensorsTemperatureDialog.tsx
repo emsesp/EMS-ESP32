@@ -122,9 +122,9 @@ const SensorsTemperatureDialog = ({
         </Button>
         <Button
           startIcon={<WarningIcon color="warning" />}
-          variant="contained"
+          variant="outlined"
           onClick={save}
-          color="info"
+          color="primary"
         >
           {LL.UPDATE()}
         </Button>

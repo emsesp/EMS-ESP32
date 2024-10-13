@@ -23,6 +23,7 @@
 #define EMSESP_CORE_DATA_SERVICE_PATH "/rest/coreData"
 #define EMSESP_DEVICE_DATA_SERVICE_PATH "/rest/deviceData"
 #define EMSESP_SENSOR_DATA_SERVICE_PATH "/rest/sensorData"
+#define EMSESP_DASHBOARD_DATA_SERVICE_PATH "/rest/dashboardData"
 
 // POST
 #define EMSESP_WRITE_DEVICE_VALUE_SERVICE_PATH "/rest/writeDeviceValue"
@@ -44,6 +45,7 @@ class WebDataService {
     void core_data(AsyncWebServerRequest * request);
     void sensor_data(AsyncWebServerRequest * request);
     void device_data(AsyncWebServerRequest * request);
+    void dashboard_data(AsyncWebServerRequest * request);
 
     // POST
     void write_device_value(AsyncWebServerRequest * request, JsonVariant json);
