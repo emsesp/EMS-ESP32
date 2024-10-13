@@ -153,8 +153,8 @@ class AnalogSensor {
         return (!sensors_.empty());
     }
 
-    size_t count_entities(bool count_disabled = false) const {
-        if (count_disabled) {
+    size_t count_entities(bool include_disabled = true) const {
+        if (!include_disabled) {
             // count number of items in sensors_ where type is not set to disabled
             return std::count_if(sensors_.begin(), sensors_.end(), [](const Sensor & sensor) { return sensor.type() != AnalogSensor::AnalogType::NOTUSED; });
         }
