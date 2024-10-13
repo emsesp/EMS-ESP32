@@ -125,15 +125,10 @@ const CustomEntities = () => {
       position: relative;
       cursor: pointer;
       .td {
-        border-top: 1px solid #565656;
         border-bottom: 1px solid #565656;
       }
       &:hover .td {
-        border-top: 1px solid #177ac9;
-        border-bottom: 1px solid #177ac9;
-      }
-      &:nth-of-type(odd) .td {
-        background-color: #303030;
+        background-color: #177ac9;
       }
     `
   });

@@ -116,19 +116,10 @@ const Sensors = () => {
       cursor: pointer;
       .td {
         padding: 8px;
-        border-top: 1px solid #565656;
         border-bottom: 1px solid #565656;
       }
-      &.tr.tr-body.row-select.row-select-single-selected {
-        background-color: #3d4752;
-        font-weight: normal;
-      }
       &:hover .td {
-        border-top: 1px solid #177ac9;
-        border-bottom: 1px solid #177ac9;
-      }
-      &:nth-of-type(odd) .td {
-        background-color: #303030;
+        background-color: #177ac9;
       }
     `,
     Cell: `
