@@ -59,7 +59,7 @@ const Dashboard = () => {
   } = useRequest(readDashboard, {
     initialData: []
   }).onSuccess((event) => {
-    if (event.data.length > parentNodes) {
+    if (event.data.length !== parentNodes) {
       setParentNodes(event.data.length); // count number of parents/devices
     }
   });
