@@ -99,21 +99,8 @@ const Dashboard = () => {
     Row: `
       cursor: pointer;
       background-color: #1e1e1e;
-      .td {
-        // TODO remove
-        // border-top: 1px solid #0000;
-        // border-bottom: 1px solid #0000;
-      }
-      // TODO remove
-      // &.tr.tr-body.row-select.row-select-single-selected {
-      //   background-color: #177ac9;
-      //   font-weight: normal;
-      //   color: red;
-      // }  
       &:hover .td {
         background-color: #177ac9;
-        // border-top: 1px solid #177ac9;
-        // border-bottom: 1px solid #177ac9;
       }
     `,
     BaseCell: `
@@ -236,30 +223,38 @@ const Dashboard = () => {
 
     return (
       <>
-        <Grid container spacing={0} justifyContent="flex-start">
-          <Grid size={11}>
-            <Typography mb={2} variant="body1" color="warning">
-              {LL.DASHBOARD_1()}
-            </Typography>
-          </Grid>
+        <Box
+          sx={{
+            backgroundColor: 'black',
+            pt: 1,
+            pl: 2
+          }}
+        >
+          <Grid container spacing={0} justifyContent="flex-start">
+            <Grid size={11}>
+              <Typography mb={2} variant="body1" color="warning">
+                {LL.DASHBOARD_1()}
+              </Typography>
+            </Grid>
 
-          <Grid size={1} alignItems="end">
-            <ToggleButtonGroup
-              color="primary"
-              size="small"
-              value={showAll}
-              exclusive
-              onChange={handleShowAll}
-            >
-              <ToggleButton value={true}>
-                <UnfoldMoreIcon sx={{ fontSize: 14 }} />
-              </ToggleButton>
-              <ToggleButton value={false}>
-                <UnfoldLessIcon sx={{ fontSize: 14 }} />
-              </ToggleButton>
-            </ToggleButtonGroup>
+            <Grid size={1} alignItems="end">
+              <ToggleButtonGroup
+                color="primary"
+                size="small"
+                value={showAll}
+                exclusive
+                onChange={handleShowAll}
+              >
+                <ToggleButton value={true}>
+                  <UnfoldMoreIcon sx={{ fontSize: 14 }} />
+                </ToggleButton>
+                <ToggleButton value={false}>
+                  <UnfoldLessIcon sx={{ fontSize: 14 }} />
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Grid>
           </Grid>
-        </Grid>
+        </Box>
 
         <Box
           padding={1}
