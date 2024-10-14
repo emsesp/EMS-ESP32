@@ -147,7 +147,7 @@ const fr: Translation = {
   CUSTOMIZATIONS_HELP_2: 'marquer comme favori',
   CUSTOMIZATIONS_HELP_3: "désactiver l'action d'écriture",
   CUSTOMIZATIONS_HELP_4: "exclure de MQTT et de l'API",
-  CUSTOMIZATIONS_HELP_5: 'cacher du Tableau de bord',
+  CUSTOMIZATIONS_HELP_5: 'cacher des appareils', // TODO translate
   CUSTOMIZATIONS_HELP_6: 'remove from memory', // TODO translate
   SELECT_DEVICE: 'Sélectionnez un appareil',
   SET_ALL: 'tout régler',

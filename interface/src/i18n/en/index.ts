@@ -147,7 +147,7 @@ const en: Translation = {
   CUSTOMIZATIONS_HELP_2: 'mark as favorite',
   CUSTOMIZATIONS_HELP_3: 'disable write action',
   CUSTOMIZATIONS_HELP_4: 'exclude from MQTT and API',
-  CUSTOMIZATIONS_HELP_5: 'hide from Dashboard',
+  CUSTOMIZATIONS_HELP_5: 'hide from Devices',
   CUSTOMIZATIONS_HELP_6: 'remove from memory',
   SELECT_DEVICE: 'Select a device',
   SET_ALL: 'set all',

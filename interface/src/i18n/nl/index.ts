@@ -147,7 +147,7 @@ const nl: Translation = {
   CUSTOMIZATIONS_HELP_2: 'Markeer as favoriet',
   CUSTOMIZATIONS_HELP_3: 'Zet schrijfacties uit',
   CUSTOMIZATIONS_HELP_4: 'Uitsluiten van MQTT en API',
-  CUSTOMIZATIONS_HELP_5: 'verberg van het Dashboard',
+  CUSTOMIZATIONS_HELP_5: 'verbergen voor apparaten', // TODO translate
   CUSTOMIZATIONS_HELP_6: 'verwijderen van memory',
   SELECT_DEVICE: 'Selecteer een apparaat',
   SET_ALL: 'Alles aanzetten',

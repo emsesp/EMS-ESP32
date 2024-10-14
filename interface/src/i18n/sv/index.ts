@@ -147,7 +147,7 @@ const sv: Translation = {
   CUSTOMIZATIONS_HELP_2: 'Favorit',
   CUSTOMIZATIONS_HELP_3: 'Inaktivera skrivningar',
   CUSTOMIZATIONS_HELP_4: 'Exkludera från MQTT & API',
-  CUSTOMIZATIONS_HELP_5: 'Göm från Kontrollpanel',
+  CUSTOMIZATIONS_HELP_5: 'dölj från enheter', // TODO translate
   CUSTOMIZATIONS_HELP_6: 'remove from memory', // TODO translate
   SELECT_DEVICE: 'Välj en enhet',
   SET_ALL: 'ställ in alla',

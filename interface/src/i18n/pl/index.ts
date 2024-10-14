@@ -147,7 +147,7 @@ const pl: BaseTranslation = {
   CUSTOMIZATIONS_HELP_2: 'oznacz jako ulubioną',
   CUSTOMIZATIONS_HELP_3: 'zablokuj akcje zapisu',
   CUSTOMIZATIONS_HELP_4: 'wyklucz z MQTT i API',
-  CUSTOMIZATIONS_HELP_5: 'ukryj na pulpicie',
+  CUSTOMIZATIONS_HELP_5: 'ukryć przed urządzeniami', // TODO translate
   CUSTOMIZATIONS_HELP_6: 'usuń z pamięci',
   SELECT_DEVICE: 'wybierz urządzenie',
   SET_ALL: 'Ustaw wszystko jako',
