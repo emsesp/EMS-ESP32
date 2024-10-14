@@ -432,7 +432,7 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
     }
 
     // show scheduler, with name, on/off
-    if (EMSESP::webSchedulerService.count_entities()) {
+    if (EMSESP::webSchedulerService.count_entities(true)) {
         JsonObject obj  = root.add<JsonObject>();
         obj["id"]       = EMSdevice::DeviceTypeUniqueID::SCHEDULER_UID; // it's unique id
         obj["t"]        = EMSdevice::DeviceType::SCHEDULER;             // device type number
