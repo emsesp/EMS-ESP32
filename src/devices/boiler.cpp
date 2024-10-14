@@ -287,6 +287,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(
         DeviceValueTAG::TAG_DEVICE_DATA, &pumpDelay_, DeviceValueType::UINT8, FL_(pumpDelay), DeviceValueUOM::MINUTES, MAKE_CF_CB(set_pump_delay), 0, 60);
     register_device_value(
+        DeviceValueTAG::TAG_DEVICE_DATA, &pumpOnTemp_, DeviceValueType::UINT8, FL_(pumpOnTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_pumpOnTemp), 0, 60);
+    register_device_value(
         DeviceValueTAG::TAG_DEVICE_DATA, &selBurnPow_, DeviceValueType::UINT8, FL_(selBurnPow), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_burn_power), 0, 254);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &curBurnPow_, DeviceValueType::UINT8, FL_(curBurnPow), DeviceValueUOM::PERCENT);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &burnStarts_, DeviceValueType::UINT24, FL_(burnStarts), DeviceValueUOM::NONE);
@@ -1303,6 +1305,7 @@ void Boiler::process_UBAParameters(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, pumpMode_, 11);
     has_update(telegram, boil2HystOff_, 12);
     has_update(telegram, boil2HystOn_, 13);
+    has_update(telegram, pumpOnTemp_, 23); // https://github.com/emsesp/EMS-ESP32/issues/2088
 }
 
 /*
@@ -2565,6 +2568,17 @@ bool Boiler::set_pump_delay(const char * value, const int8_t id) {
     }
 
     return false;
+}
+
+// set pump logic temperature
+bool Boiler::set_pumpOnTemp(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2temperature(value, v)) {
+        return false;
+    }
+
+    write_command(EMS_TYPE_UBAParameters, 23, v, EMS_TYPE_UBAParameters);
+    return true;
 }
 
 // note some boilers do not have this setting, than it's done by thermostat
