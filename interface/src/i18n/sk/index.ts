@@ -147,7 +147,7 @@ const sk: Translation = {
   CUSTOMIZATIONS_HELP_2: 'označiť ako obľúbené',
   CUSTOMIZATIONS_HELP_3: 'zakázať akciu zápisu',
   CUSTOMIZATIONS_HELP_4: 'vylúčiť z MQTT a API',
-  CUSTOMIZATIONS_HELP_5: 'skryť z panela',
+  CUSTOMIZATIONS_HELP_5: 'skryť zo Zariadení', // TODO translate
   CUSTOMIZATIONS_HELP_6: 'odstrániť z pamäte',
   SELECT_DEVICE: 'Zvoliť zariadenie',
   SET_ALL: 'nastaviť všetko',

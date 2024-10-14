@@ -147,7 +147,7 @@ const it: Translation = {
   CUSTOMIZATIONS_HELP_2: 'seleziona come preferito',
   CUSTOMIZATIONS_HELP_3: 'disabilita azione scrittura',
   CUSTOMIZATIONS_HELP_4: 'esculdi da MQTT e API',
-  CUSTOMIZATIONS_HELP_5: 'nascondi dal Pannello di controllo',
+  CUSTOMIZATIONS_HELP_5: 'nascondi dai dispositivi', // TODO translate
   CUSTOMIZATIONS_HELP_6: 'rimuovi dalla memoria',
   SELECT_DEVICE: 'Seleziona un dispositivo',
   SET_ALL: 'imposta tutto',

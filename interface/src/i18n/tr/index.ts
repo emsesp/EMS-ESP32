@@ -147,7 +147,7 @@ const tr: Translation = {
   CUSTOMIZATIONS_HELP_2: 'favori olarak işaretle',
   CUSTOMIZATIONS_HELP_3: 'yazma işlemini devre dışı bırak',
   CUSTOMIZATIONS_HELP_4: 'MQTT ve APInin dışında bırak',
-  CUSTOMIZATIONS_HELP_5: 'Gösterde panelinden gizle',
+  CUSTOMIZATIONS_HELP_5: 'Cihazlardan gizle', // TODO translate
   CUSTOMIZATIONS_HELP_6: 'remove from memory',
   SELECT_DEVICE: 'Bir cihaz seç',
   SET_ALL: 'hepsini ayarla',

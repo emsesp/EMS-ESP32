@@ -147,7 +147,7 @@ const no: Translation = {
   CUSTOMIZATIONS_HELP_2: 'merk som favoritt',
   CUSTOMIZATIONS_HELP_3: 'inaktiviser skriving',
   CUSTOMIZATIONS_HELP_4: 'ekskludere fra MQTT og API',
-  CUSTOMIZATIONS_HELP_5: 'gjemme fra Dashboard',
+  CUSTOMIZATIONS_HELP_5: 'skjul fra enheter', // TODO translate
   CUSTOMIZATIONS_HELP_6: 'fjern fra minnet',
   SELECT_DEVICE: 'Velg en enhet',
   SET_ALL: 'sett alle',
