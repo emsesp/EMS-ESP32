@@ -139,6 +139,10 @@ GET {{host_standalone}}/api/system/info
 
 ###
 
+GET {{host_standalone}}/rest/dashboardData
+
+###
+
 POST {{host_standalone2}}/rest/uploadFile
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 

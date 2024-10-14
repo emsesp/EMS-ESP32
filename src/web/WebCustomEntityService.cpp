@@ -473,15 +473,24 @@ uint8_t WebCustomEntityService::count_entities() {
 }
 
 // send to dashboard, msgpack don't like serialized, use number
-void WebCustomEntityService::generate_value_web(JsonObject output) {
-    JsonArray data  = output["data"].to<JsonArray>();
+void WebCustomEntityService::generate_value_web(JsonObject output, const bool is_dashboard) {
+    JsonArray nodes = output["nodes"].to<JsonArray>();
     uint8_t   index = 0;
 
     for (const CustomEntityItem & entity : *customEntityItems_) {
-        bool       include = false;
-        JsonObject obj     = data.add<JsonObject>(); // create the object, we know there is a value
-        obj["id"]          = "00" + entity.name;
-        obj["u"]           = entity.uom;
+        bool       include  = false;
+        JsonObject root_obj = nodes.add<JsonObject>(); // create the object, we know there is a value
+
+        JsonObject obj;
+        if (is_dashboard) {
+            root_obj["id"] = (EMSdevice::DeviceTypeUniqueID::CUSTOM_UID * 100) + index; // make unique
+            obj            = root_obj["dv"].to<JsonObject>();
+        } else {
+            obj = root_obj;
+        }
+
+        obj["id"] = "00" + entity.name;
+        obj["u"]  = entity.uom;
 
         if (entity.writeable) {
             obj["c"] = entity.name;
@@ -549,7 +558,7 @@ void WebCustomEntityService::generate_value_web(JsonObject output) {
         if (include) {
             index++;
         } else {
-            data.remove(index);
+            nodes.remove(index);
         }
     }
 }

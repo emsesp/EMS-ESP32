@@ -60,10 +60,11 @@ import { useRequest } from 'alova/client';
 import { MessageBox, SectionContent, useLayoutTitle } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
+import { useInterval } from 'utils';
 
 import { readCoreData, readDeviceData, writeDeviceValue } from '../../api/app';
 import DeviceIcon from './DeviceIcon';
-import DashboardDevicesDialog from './DevicesDialog';
+import DevicesDialog from './DevicesDialog';
 import { formatValue } from './deviceValue';
 import { DeviceEntityMask, DeviceType, DeviceValueUOM_s } from './types';
 import type { Device, DeviceValue } from './types';
@@ -77,7 +78,7 @@ const Devices = () => {
   const [selectedDeviceValue, setSelectedDeviceValue] = useState<DeviceValue>();
   const [onlyFav, setOnlyFav] = useState(false);
   const [deviceValueDialogOpen, setDeviceValueDialogOpen] = useState(false);
-  const [showDeviceInfo, setShowDeviceInfo] = useState<boolean>(false);
+  const [showDeviceInfo, setShowDeviceInfo] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState<number>();
 
   const navigate = useNavigate();
@@ -95,7 +96,7 @@ const Devices = () => {
     (id: number) => readDeviceData(id),
     {
       initialData: {
-        data: []
+        nodes: []
       },
       immediate: false
     }
@@ -147,21 +148,14 @@ const Devices = () => {
       }
     `,
     Row: `
-      background-color: #1E1E1E;
-      position: relative;
       cursor: pointer;
+      background-color: #1E1E1E;
       .td {
         padding: 8px;
-        border-top: 1px solid #565656;
-        border-bottom: 1px solid #565656;
       }
       &.tr.tr-body.row-select.row-select-single-selected {
-        background-color: #3d4752;
+        background-color: #177ac9;
         font-weight: normal;
-      }
-      &:hover .td {
-        border-top: 1px solid #177ac9;
-        border-bottom: 1px solid #177ac9;
       }
     `
   });
@@ -170,17 +164,21 @@ const Devices = () => {
     common_theme,
     {
       Table: `
-        --data-table-library_grid-template-columns: 40px repeat(1, minmax(0, 1fr)) 130px;
+        --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) 130px;
       `,
       BaseRow: `
-        .td {
-          height: 42px;
-        }
+        // .td {
+        //   height: 42px;
+        // }
       `,
       HeaderRow: `
         .th {
           padding: 8px;
           height: 36px;
+      `,
+      Row: `
+        &:hover .td {
+        background-color: #177ac9;
       `
     }
   ]);
@@ -221,7 +219,10 @@ const Devices = () => {
       Row: `
         &:nth-of-type(odd) .td {
           background-color: #303030;
-        }
+        },
+        &:hover .td {
+        background-color: #177ac9;
+      }
       `
     }
   ]);
@@ -251,7 +252,7 @@ const Devices = () => {
   };
 
   const dv_sort = useSort(
-    { nodes: deviceData.data },
+    { nodes: deviceData.nodes },
     {},
     {
       sortIcon: {
@@ -383,8 +384,8 @@ const Devices = () => {
     ];
 
     const data = onlyFav
-      ? deviceData.data.filter((dv) => hasMask(dv.id, DeviceEntityMask.DV_FAVORITE))
-      : deviceData.data;
+      ? deviceData.nodes.filter((dv) => hasMask(dv.id, DeviceEntityMask.DV_FAVORITE))
+      : deviceData.nodes;
 
     const csvData = data.reduce(
       (csvString: string, rowItem: DeviceValue) =>
@@ -418,17 +419,11 @@ const Devices = () => {
     downloadBlob(new Blob([csvData], { type: 'text/csv;charset:utf-8' }));
   };
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      if (deviceValueDialogOpen) {
-        return;
-      }
+  useInterval(() => {
+    if (!deviceValueDialogOpen) {
       selectedDevice ? void sendDeviceData(selectedDevice) : void sendCoreData();
-    }, 2000);
-    return () => {
-      clearInterval(timer);
-    };
-  });
+    }
+  }, 3000);
 
   const deviceValueDialogSave = async (devicevalue: DeviceValue) => {
     const id = Number(device_select.state.id);
@@ -527,57 +522,57 @@ const Devices = () => {
   };
 
   const renderCoreData = () => (
-    <IconContext.Provider
-      value={{
-        color: 'lightblue',
-        size: '18',
-        style: { verticalAlign: 'middle' }
-      }}
-    >
-      {!coreData.connected && (
-        <MessageBox my={2} level="error" message={LL.EMS_BUS_WARNING()} />
-      )}
+    <>
+      <IconContext.Provider
+        value={{
+          color: 'lightblue',
+          size: '18',
+          style: { verticalAlign: 'middle' }
+        }}
+      >
+        {!coreData.connected && (
+          <MessageBox my={2} level="error" message={LL.EMS_BUS_WARNING()} />
+        )}
 
-      {coreData.connected && (
-        <Table
-          data={{ nodes: coreData.devices }}
-          select={device_select}
-          theme={device_theme}
-          layout={{ custom: true }}
-        >
-          {(tableList: Device[]) => (
-            <>
-              <Header>
-                <HeaderRow>
-                  <HeaderCell stiff />
-                  <HeaderCell resize>{LL.DESCRIPTION()}</HeaderCell>
-                  <HeaderCell stiff>{LL.TYPE(0)}</HeaderCell>
-                </HeaderRow>
-              </Header>
-              <Body>
-                {tableList.length === 0 && (
-                  <CircularProgress sx={{ margin: 1 }} size={18} />
-                )}
-                {tableList.map((device: Device) => (
-                  <Row key={device.id} item={device}>
-                    <Cell stiff>
-                      <DeviceIcon type_id={device.t} />
-                    </Cell>
-                    <Cell>
-                      {device.n}
-                      <span style={{ color: 'lightblue' }}>
-                        &nbsp;&nbsp;({device.e})
-                      </span>
-                    </Cell>
-                    <Cell stiff>{device.tn}</Cell>
-                  </Row>
-                ))}
-              </Body>
-            </>
-          )}
-        </Table>
-      )}
-    </IconContext.Provider>
+        {coreData.connected && (
+          <Table
+            data={{ nodes: coreData.devices }}
+            select={device_select}
+            theme={device_theme}
+            layout={{ custom: true }}
+          >
+            {(tableList: Device[]) => (
+              <>
+                <Header>
+                  <HeaderRow>
+                    <HeaderCell resize>{LL.DESCRIPTION()}</HeaderCell>
+                    <HeaderCell stiff>{LL.TYPE(0)}</HeaderCell>
+                  </HeaderRow>
+                </Header>
+                <Body>
+                  {tableList.length === 0 && (
+                    <CircularProgress sx={{ margin: 1 }} size={18} />
+                  )}
+                  {tableList.map((device: Device) => (
+                    <Row key={device.id} item={device}>
+                      <Cell>
+                        <DeviceIcon type_id={device.t} />
+                        &nbsp;&nbsp;
+                        {device.n}
+                        <span style={{ color: 'lightblue' }}>
+                          &nbsp;&nbsp;({device.e})
+                        </span>
+                      </Cell>
+                      <Cell stiff>{device.tn}</Cell>
+                    </Row>
+                  ))}
+                </Body>
+              </>
+            )}
+          </Table>
+        )}
+      </IconContext.Provider>
+    </>
   );
 
   const deviceValueDialogClose = () => {
@@ -611,8 +606,8 @@ const Devices = () => {
     );
 
     const shown_data = onlyFav
-      ? deviceData.data.filter((dv) => hasMask(dv.id, DeviceEntityMask.DV_FAVORITE))
-      : deviceData.data;
+      ? deviceData.nodes.filter((dv) => hasMask(dv.id, DeviceEntityMask.DV_FAVORITE))
+      : deviceData.nodes;
 
     const deviceIndex = coreData.devices.findIndex(
       (d) => d.id === device_select.state.id
@@ -733,7 +728,7 @@ const Devices = () => {
                             size="small"
                             onClick={() => showDeviceValue(dv)}
                           >
-                            {dv.v === '' && dv.c ? (
+                            {dv.v === '' ? (
                               <PlayArrowIcon color="primary" sx={{ fontSize: 16 }} />
                             ) : (
                               <EditIcon color="primary" sx={{ fontSize: 16 }} />
@@ -757,7 +752,7 @@ const Devices = () => {
       {renderDeviceData()}
       {renderDeviceDetails()}
       {selectedDeviceValue && (
-        <DashboardDevicesDialog
+        <DevicesDialog
           open={deviceValueDialogOpen}
           onClose={deviceValueDialogClose}
           onSave={deviceValueDialogSave}

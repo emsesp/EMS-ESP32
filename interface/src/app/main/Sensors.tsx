@@ -19,10 +19,11 @@ import {
 } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';
 import type { State } from '@table-library/react-table-library/types/common';
-import { useAutoRequest, useRequest } from 'alova/client';
+import { useRequest } from 'alova/client';
 import { SectionContent, useLayoutTitle } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
+import { useInterval } from 'utils';
 
 import {
   readSensorData,
@@ -59,7 +60,7 @@ const Sensors = () => {
   const [analogDialogOpen, setAnalogDialogOpen] = useState<boolean>(false);
   const [creating, setCreating] = useState<boolean>(false);
 
-  const { data: sensorData, send: fetchSensorData } = useAutoRequest(
+  const { data: sensorData, send: fetchSensorData } = useRequest(
     () => readSensorData(),
     {
       initialData: {
@@ -67,8 +68,7 @@ const Sensors = () => {
         as: [],
         analog_enabled: false,
         platform: 'ESP32'
-      },
-      pollingTime: 2000
+      }
     }
   );
 
@@ -85,6 +85,12 @@ const Sensors = () => {
       immediate: false
     }
   );
+
+  useInterval(() => {
+    if (!temperatureDialogOpen && !analogDialogOpen) {
+      void fetchSensorData();
+    }
+  }, 3000);
 
   const common_theme = useTheme({
     BaseRow: `
@@ -110,19 +116,10 @@ const Sensors = () => {
       cursor: pointer;
       .td {
         padding: 8px;
-        border-top: 1px solid #565656;
         border-bottom: 1px solid #565656;
       }
-      &.tr.tr-body.row-select.row-select-single-selected {
-        background-color: #3d4752;
-        font-weight: normal;
-      }
       &:hover .td {
-        border-top: 1px solid #177ac9;
-        border-bottom: 1px solid #177ac9;
-      }
-      &:nth-of-type(odd) .td {
-        background-color: #303030;
+        background-color: #177ac9;
       }
     `,
     Cell: `

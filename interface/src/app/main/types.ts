@@ -114,10 +114,18 @@ export interface CoreData {
   devices: Device[];
 }
 
+export interface DashboardItem {
+  id: number; // unique index
+  t?: number; // type from DeviceType
+  n?: string; // name, optional
+  dv?: DeviceValue; // device value, optional
+  nodes?: DashboardItem[]; // children nodes, optional
+}
+
 export interface DeviceValue {
   id: string; // index, contains mask+name
-  v: unknown; // value, Number or String
-  u: number; // uom
+  v?: unknown; // value, Number, String or Boolean - can be undefined
+  u?: number; // uom, optional
   c?: string; // command, optional
   l?: string[]; // list, optional
   h?: string; // help text, optional
@@ -125,8 +133,9 @@ export interface DeviceValue {
   m?: number; // min, optional
   x?: number; // max, optional
 }
+
 export interface DeviceData {
-  data: DeviceValue[];
+  nodes: DeviceValue[];
 }
 
 export interface DeviceEntity {
@@ -299,7 +308,7 @@ export interface ScheduleItem {
   time: string; // also used for Condition and On Change
   cmd: string;
   value: string;
-  name: string; // is optional
+  name: string; // can be empty
   o_id?: number;
   o_active?: boolean;
   o_deleted?: boolean;
@@ -382,10 +391,10 @@ export interface Entities {
 // matches emsdevice.h DeviceType
 export const enum DeviceType {
   SYSTEM = 0,
-  TEMPERATURESENSOR,
-  ANALOGSENSOR,
-  SCHEDULER,
-  CUSTOM,
+  TEMPERATURESENSOR = 1,
+  ANALOGSENSOR = 2,
+  SCHEDULER = 3,
+  CUSTOM = 4,
   BOILER,
   THERMOSTAT,
   MIXER,

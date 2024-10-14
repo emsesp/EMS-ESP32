@@ -130,7 +130,7 @@ class DeviceValue {
         DV_WEB_EXCLUDE      = (1 << 4), // 16 - not shown on web
         DV_API_MQTT_EXCLUDE = (1 << 5), // 32 - not shown on mqtt, API
         DV_READONLY         = (1 << 6), // 64 - read only
-        DV_FAVORITE         = (1 << 7)  // 128 - sort to front
+        DV_FAVORITE         = (1 << 7)  // 128 - marked as a favorite
     };
 
     // numeric operators
@@ -154,7 +154,6 @@ class DeviceValue {
     const char * const ** options;        // options as a flash char array
     const char * const *  options_single; // options are not translated
     int8_t                numeric_operator;
-    uint8_t               options_size;    // number of options in the char array, calculated
     const char * const    short_name;      // used in MQTT and API
     const char * const *  fullname;        // used in Web and Console, is translated
     std::string           custom_fullname; // optional, from customization
@@ -164,21 +163,24 @@ class DeviceValue {
     uint32_t              max;             // max range
     uint8_t               state;           // DeviceValueState::*
 
-    DeviceValue(uint8_t               device_type,
-                int8_t                tag,
-                void *                value_p,
-                uint8_t               type,
-                const char * const ** options,
-                const char * const *  options_single,
+    uint8_t options_size; // number of options in the char array, calculated at class initialization
+
+    DeviceValue(uint8_t               device_type,    // EMSdevice::DeviceType
+                int8_t                tag,            // DeviceValueTAG::*
+                void *                value_p,        // pointer to variable of any type
+                uint8_t               type,           // DeviceValueType::*
+                const char * const ** options,        // options as a flash char array
+                const char * const *  options_single, // options are not translated
                 int8_t                numeric_operator,
-                const char * const    short_name,
-                const char * const *  fullname,
-                std::string &         custom_fullname,
-                uint8_t               uom,
-                bool                  has_cmd,
-                int16_t               min,
-                uint32_t              max,
-                uint8_t               state);
+                const char * const    short_name,      // used in MQTT and API
+                const char * const *  fullname,        // used in Web and Console, is translated
+                std::string &         custom_fullname, // optional, from customization
+                uint8_t               uom,             // DeviceValueUOM::*
+                bool                  has_cmd,         // true if there is a Console/MQTT command which matches the short_name
+                int16_t               min,             // min range
+                uint32_t              max,             // max range
+                uint8_t               state            // DeviceValueState::* (also known as the mask)
+    );
 
     bool hasValue() const;
     bool has_tag() const;

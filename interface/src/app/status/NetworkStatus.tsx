@@ -85,7 +85,7 @@ const NetworkStatus = () => {
     data,
     send: loadData,
     error
-  } = useAutoRequest(NetworkApi.readNetworkStatus, { pollingTime: 5000 });
+  } = useAutoRequest(NetworkApi.readNetworkStatus, { pollingTime: 3000 });
 
   const { LL } = useI18nContext();
   useLayoutTitle(LL.STATUS_OF(LL.NETWORK(1)));

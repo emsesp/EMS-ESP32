@@ -190,10 +190,7 @@ const Customizations = () => {
       }
       &:hover .td {
         border-top: 1px solid #177ac9;
-        border-bottom: 1px solid #177ac9;
-      }
-      &:nth-of-type(odd) .td {
-        background-color: #303030;
+        background-color: #177ac9;
       }
     `,
     Cell: `
@@ -427,7 +424,7 @@ const Customizations = () => {
   const renderDeviceList = () => (
     <>
       <Box mb={1} color="warning.main">
-        <Typography variant="body2">{LL.CUSTOMIZATIONS_HELP_1()}.</Typography>
+        <Typography variant="body1">{LL.CUSTOMIZATIONS_HELP_1()}.</Typography>
       </Box>
       <Box display="flex" flexWrap="wrap" alignItems="center" gap={2}>
         {rename ? (
