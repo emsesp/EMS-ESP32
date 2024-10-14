@@ -159,7 +159,7 @@ const sk: Translation = {
   HELP_INFORMATION_2: 'Pre živý komunitný chat sa pripojte na náš Discord server',
   HELP_INFORMATION_3: 'Ak chcete požiadať o funkciu alebo nahlásiť chybu',
   HELP_INFORMATION_4: 'nezabudnite si stiahnuť a pripojiť informácie o vašom systéme, aby ste mohli rýchlejšie reagovať pri nahlasovaní problému',
-  HELP_INFORMATION_5: 'For help and questions please contact your installer.', // TODO translate
+  HELP_INFORMATION_5: 'Pre pomoc a otázky, kontaktujte svojho inštalatéra.',
   UPLOAD: 'Nahrať',
   DOWNLOAD: '{{S|s|s}}tiahnuť',
   INSTALL: 'Inštalovať {0}',
@@ -187,8 +187,8 @@ const sk: Translation = {
   FILESYSTEM: 'Súborový systém (Použité / Voľné)',
   BUFFER_SIZE: 'Buffer-max.veľkosť',
   COMPACT: 'Kompaktné',
-  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
-  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
+  DOWNLOAD_SETTINGS_TEXT: 'Vytvorte zálohu svojej konfigurácie a nastavení',
+  UPLOAD_TEXT: 'Nahrajte nový súbor firmvéru (.bin) alebo súbor zálohy (.json)',
   UPLOAD_DROP_TEXT: 'Potiahnúť a pripnúť súbor alebo kliknúť sem',
   ERROR: 'Neočakávaná chyba, prosím skúste to znova',
   TIME_SET: 'Nastavený čas',
@@ -340,10 +340,10 @@ const sk: Translation = {
   PLEASE_WAIT: 'Čakajte prosím',
   RESTARTING_PRE: 'Prebieha inicializácia',
   RESTARTING_POST: 'Príprava',
-  AUTO_SCROLL: 'Auto Scroll', // TODO translate
-  DASHBOARD: 'Dashboard', // TODO translate
-  NO_DATA: 'No data available', // TODO translate
-  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module.' // TODO translate
+  AUTO_SCROLL: 'Automatické rolovanie',
+  DASHBOARD: 'Panel',
+  NO_DATA: 'Nie sú k dispozícii žiadne údaje',
+  DASHBOARD_1: 'Prispôsobte si svoj informačný panel tak, že označíte entity EMS ako Obľúbené pomocou modulu Prispôsobenia.'
 };
 
 export default sk;
