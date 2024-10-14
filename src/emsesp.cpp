@@ -56,8 +56,8 @@ WebLogService      EMSESP::webLogService      = WebLogService(&webServer, EMSESP
 using DeviceFlags = EMSdevice;
 using DeviceType  = EMSdevice::DeviceType;
 
-std::vector<std::unique_ptr<EMSdevice>> EMSESP::emsdevices;      // array of all the detected EMS devices
-std::vector<EMSESP::Device_record>      EMSESP::device_library_; // library of all our known EMS devices, in heap
+std::deque<std::unique_ptr<EMSdevice>> EMSESP::emsdevices;      // array of all the detected EMS devices
+std::vector<EMSESP::Device_record>     EMSESP::device_library_; // library of all our known EMS devices, in heap
 
 uuid::log::Logger EMSESP::logger_{F_(emsesp), uuid::log::Facility::KERN};
 uuid::log::Logger EMSESP::logger() {

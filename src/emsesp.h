@@ -220,7 +220,7 @@ class EMSESP {
 
     static bool return_not_found(JsonObject output, const char * msg, const char * cmd);
 
-    static std::vector<std::unique_ptr<EMSdevice>> emsdevices;
+    static std::deque<std::unique_ptr<EMSdevice>> emsdevices;
 
     // services
     static Mqtt              mqtt_;
