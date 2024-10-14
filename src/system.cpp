@@ -458,6 +458,21 @@ void System::start() {
     appused_ = ESP.getSketchSize() / 1024;
     appfree_ = esp_ota_get_running_partition()->size / 1024 - appused_;
     refreshHeapMem(); // refresh free heap and max alloc heap
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
+#if ESP_IDF_VERSION_MAJOR < 5
+    temp_sensor_config_t temp_sensor = TSENS_CONFIG_DEFAULT();
+    temp_sensor_get_config(&temp_sensor);
+    temp_sensor.dac_offset = TSENS_DAC_DEFAULT; // DEFAULT: range:-10℃ ~  80℃, error < 1℃.
+    temp_sensor_set_config(temp_sensor);
+    temp_sensor_start();
+    temp_sensor_read_celsius(&temperature_);
+#else
+    temperature_sensor_config_t temp_sensor_config = TEMPERATURE_SENSOR_CONFIG_DEFAULT(-10, 80);
+    temperature_sensor_install(&temp_sensor_config, &temperature_handle_);
+    temperature_sensor_enable(temperature_handle_);
+    temperature_sensor_get_celsius(temperature_handle_, &temperature_);
+#endif
+#endif
 #endif
 
     EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
@@ -692,6 +707,9 @@ void System::heartbeat_json(JsonObject output) {
 #ifndef EMSESP_STANDALONE
     output["freemem"]   = getHeapMem();
     output["max_alloc"] = getMaxAllocMem();
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
+    output["temperature"] = temperature_;
+#endif
 #endif
 
 #ifndef EMSESP_STANDALONE
@@ -769,6 +787,16 @@ void System::network_init(bool refresh) {
 void System::system_check() {
     if (!last_system_check_ || ((uint32_t)(uuid::get_uptime() - last_system_check_) >= SYSTEM_CHECK_FREQUENCY)) {
         last_system_check_ = uuid::get_uptime();
+
+#ifndef EMSESP_STANDALONE
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
+#if ESP_IDF_VERSION_MAJOR < 5
+    temp_sensor_read_celsius(&temperature_);
+#else
+    temperature_sensor_get_celsius(temperature_handle_, &temperature_);
+#endif
+#endif
+#endif
 
 #ifdef EMSESP_PINGTEST
         static uint64_t ping_count = 0;
@@ -987,6 +1015,9 @@ void System::show_system(uuid::console::Shell & shell) {
 
     shell.printfln(" SDK version: %s", ESP.getSdkVersion());
     shell.printfln(" CPU frequency: %lu MHz", ESP.getCpuFreqMHz());
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
+    shell.printfln(" CPU temperature: %d °C", (int)temperature());
+#endif
     shell.printfln(" Free heap/Max alloc: %lu KB / %lu KB", getHeapMem(), getMaxAllocMem());
     shell.printfln(" App used/free: %lu KB / %lu KB", appUsed(), appFree());
     uint32_t FSused = LittleFS.usedBytes() / 1024;
@@ -1444,6 +1475,10 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         node["freePsram"] = ESP.getFreePsram() / 1024;
     }
     node["model"] = EMSESP::system_.getBBQKeesGatewayDetails();
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
+    node["temperature"] = EMSESP::system_.temperature();
+#endif
+
 #endif
 
     // Network Status

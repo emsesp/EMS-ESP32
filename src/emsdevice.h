@@ -111,6 +111,10 @@ class EMSdevice {
         return brand_;
     }
 
+    inline void active(bool active) {
+        active_ = active;
+    }
+
     // set custom device name
     inline void custom_name(std::string const & custom_name) {
         custom_name_ = custom_name;
@@ -497,6 +501,7 @@ class EMSdevice {
     std::string  custom_name_ = ""; // custom name
     uint8_t      flags_       = 0;
     uint8_t      brand_       = Brand::NO_BRAND;
+    bool         active_      = true;
 
     bool ha_config_done_ = false;
     bool has_update_     = false;

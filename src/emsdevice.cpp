@@ -332,6 +332,9 @@ std::string EMSdevice::to_string_short() {
 
 // for each telegram that has the fetch value set (true) do a read request
 void EMSdevice::fetch_values() {
+    if (!active_) {
+        return;
+    }
 #if defined(EMSESP_DEBUG)
     EMSESP::logger().debug("Fetching values for deviceID 0x%02X", device_id());
 #endif

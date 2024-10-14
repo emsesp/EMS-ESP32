@@ -41,6 +41,7 @@ export interface SystemStatus {
   has_loader: boolean;
   has_partition: boolean;
   status: string;
+  temperature?: number;
 }
 
 export enum LogLevel {

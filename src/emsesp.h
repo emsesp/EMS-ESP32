@@ -125,6 +125,7 @@ class EMSESP {
     static void send_write_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid);
 
     static bool device_exists(const uint8_t device_id);
+    static void device_active(const uint8_t device_id, const bool active);
     static bool cmd_is_readonly(const uint8_t device_type, const uint8_t device_id, const char * cmd, const int8_t id);
 
     static uint8_t device_id_from_cmd(const uint8_t device_type, const char * cmd, const int8_t id);
@@ -219,7 +220,7 @@ class EMSESP {
 
     static bool return_not_found(JsonObject output, const char * msg, const char * cmd);
 
-    static std::vector<std::unique_ptr<EMSdevice>> emsdevices;
+    static std::deque<std::unique_ptr<EMSdevice>> emsdevices;
 
     // services
     static Mqtt              mqtt_;

@@ -525,7 +525,7 @@ void Mqtt::on_connect() {
     resubscribe();
 
     // publish to the last will topic (see Mqtt::start() function) to say we're alive
-    queue_publish_retain("status", "online", false); // with retain off
+    queue_publish_retain("status", "online", true); // retain: https://github.com/emsesp/EMS-ESP32/discussions/2086
 }
 
 // Home Assistant Discovery - the main master Device called EMS-ESP

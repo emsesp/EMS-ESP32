@@ -131,6 +131,7 @@ class Boiler : public EMSdevice {
     uint8_t  pumpMode_;         // pump setting proportional/deltaP
     uint8_t  pumpCharacter_;    // pump setting proportional/deltaP
     uint8_t  pumpDelay_;
+    uint8_t  pumpOnTemp_;
     uint8_t  burnMinPeriod_;
     uint8_t  burnMinPower_;
     uint8_t  burnMaxPower_;
@@ -254,6 +255,7 @@ class Boiler : public EMSdevice {
     uint8_t maxHeatHeat_;
     uint8_t maxHeatDhw_;
     uint8_t hpMaxPower_;
+    uint8_t pvMaxComp_;
 
     uint8_t  pvCooling_;
     uint8_t  manDefrost_;
@@ -419,6 +421,7 @@ class Boiler : public EMSdevice {
     bool        set_max_pump(const char * value, const int8_t id);
     bool        set_pumpMode(const char * value, const int8_t id);
     bool        set_pumpCharacter(const char * value, const int8_t id);
+    bool        set_pumpOnTemp(const char * value, const int8_t id);
     bool        set_hyst_on(const char * value, const int8_t id);
     bool        set_hyst_off(const char * value, const int8_t id);
     inline bool set_hyst2_on(const char * value, const int8_t id) {
@@ -476,6 +479,7 @@ class Boiler : public EMSdevice {
     bool set_hpCircPumpWw(const char * value, const int8_t id);
     bool set_hpPumpMode(const char * value, const int8_t id);
     bool set_hpMaxPower(const char * value, const int8_t id);
+    bool set_pvMaxComp(const char * value, const int8_t id);
     bool set_hpDiffPress(const char * value, const int8_t id);
     bool set_hpPowerLimit(const char * value, const int8_t id);
 

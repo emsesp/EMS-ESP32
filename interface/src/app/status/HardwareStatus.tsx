@@ -97,7 +97,8 @@ const HardwareStatus = () => {
               (data.cpu_cores === 1 ? 'single-core)' : 'dual-core)') +
               ' @ ' +
               data.cpu_freq_mhz +
-              ' Mhz'
+              ' Mhz' +
+              (data.temperature ? ', T: ' + data.temperature + ' °C' : '')
             }
           />
         </ListItem>

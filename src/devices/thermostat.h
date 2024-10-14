@@ -173,9 +173,8 @@ class Thermostat : public EMSdevice {
 
     class DhwCircuit {
       public:
-        DhwCircuit(const uint8_t offset, const uint8_t dhw_num)
-            : offset_(offset)
-            , dhw_num_(dhw_num) {
+        DhwCircuit(const uint8_t offset)
+            : dhw_num_(offset) {
         }
         ~DhwCircuit() = default;
         uint8_t wwExtra_;
@@ -201,16 +200,16 @@ class Thermostat : public EMSdevice {
         char    wwHoliday_[22];
         char    wwVacation_[22];
 
-        uint8_t dhw() const {
-            return dhw_num_ - 1;
+        uint8_t id() const { // returns TAG(id)
+            return DeviceValueTAG::TAG_DHW1 + dhw_num_;
         }
-        uint8_t offset() const {
-            return offset_;
+
+        uint8_t offset() const { // returns telegram offset
+            return dhw_num_;
         }
 
       private:
-        uint8_t offset_;  // telegram offset to base telegram
-        uint8_t dhw_num_; // dhw circuit number 1..10
+        uint8_t dhw_num_; // dhw circuit number 0..10
     };
 
   private:
@@ -230,7 +229,7 @@ class Thermostat : public EMSdevice {
                 || (model() == EMSdevice::EMS_DEVICE_FLAG_CR120));
     }
 
-    inline uint8_t id2dhw(const int8_t id) const {
+    inline uint8_t id2dhw(const int8_t id) const { // returns telegram offset for TAG(id)
         return id - DeviceValueTAG::TAG_DHW1;
     }
 
@@ -394,7 +393,7 @@ class Thermostat : public EMSdevice {
 
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(std::shared_ptr<const Telegram> telegram);
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(const int8_t id);
-    std::shared_ptr<Thermostat::DhwCircuit>     dhw_circuit(const uint8_t offset = 0, const uint8_t dhw_num = 255, const bool create = false);
+    std::shared_ptr<Thermostat::DhwCircuit>     dhw_circuit(const uint8_t offset, const bool create = false);
 
     void register_device_values_hc(std::shared_ptr<Thermostat::HeatingCircuit> hc);
     void register_device_values_dhw(std::shared_ptr<Thermostat::DhwCircuit> dhw);

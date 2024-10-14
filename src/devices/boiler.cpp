@@ -287,6 +287,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
     register_device_value(
         DeviceValueTAG::TAG_DEVICE_DATA, &pumpDelay_, DeviceValueType::UINT8, FL_(pumpDelay), DeviceValueUOM::MINUTES, MAKE_CF_CB(set_pump_delay), 0, 60);
     register_device_value(
+        DeviceValueTAG::TAG_DEVICE_DATA, &pumpOnTemp_, DeviceValueType::UINT8, FL_(pumpOnTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_pumpOnTemp), 0, 60);
+    register_device_value(
         DeviceValueTAG::TAG_DEVICE_DATA, &selBurnPow_, DeviceValueType::UINT8, FL_(selBurnPow), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_burn_power), 0, 254);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &curBurnPow_, DeviceValueType::UINT8, FL_(curBurnPow), DeviceValueUOM::PERCENT);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &burnStarts_, DeviceValueType::UINT24, FL_(burnStarts), DeviceValueUOM::NONE);
@@ -546,6 +548,13 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(hpMaxPower),
                               DeviceValueUOM::PERCENT,
                               MAKE_CF_CB(set_hpMaxPower));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &pvMaxComp_,
+                              DeviceValueType::UINT8,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(pvMaxComp),
+                              DeviceValueUOM::KW,
+                              MAKE_CF_CB(set_pvMaxComp));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &hpSetDiffPress_,
                               DeviceValueType::UINT8,
@@ -1296,6 +1305,7 @@ void Boiler::process_UBAParameters(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, pumpMode_, 11);
     has_update(telegram, boil2HystOff_, 12);
     has_update(telegram, boil2HystOn_, 13);
+    has_update(telegram, pumpOnTemp_, 23); // https://github.com/emsesp/EMS-ESP32/issues/2088
 }
 
 /*
@@ -1929,6 +1939,7 @@ void Boiler::process_HpSilentMode(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hpMaxPower_, 31);
     has_update(telegram, silentFrom_, 52); // in steps of 15 min
     has_update(telegram, silentTo_, 53);   // in steps of 15 min
+    has_update(telegram, pvMaxComp_, 54);  // #2062
     has_update(telegram, hpshutdown_, 58); // 1 powers off
 }
 
@@ -2559,6 +2570,17 @@ bool Boiler::set_pump_delay(const char * value, const int8_t id) {
     return false;
 }
 
+// set pump logic temperature
+bool Boiler::set_pumpOnTemp(const char * value, const int8_t id) {
+    int v;
+    if (!Helpers::value2temperature(value, v)) {
+        return false;
+    }
+
+    write_command(EMS_TYPE_UBAParameters, 23, v, EMS_TYPE_UBAParameters);
+    return true;
+}
+
 // note some boilers do not have this setting, than it's done by thermostat
 // on a RC35 it's by EMSESP::send_write_request(0x37, 0x10, 2, &set, 1, 0); (set is 1,2,3) 1=hot, 2=eco, 3=intelligent
 // on a RC310 it's 1=high, 2=eco
@@ -3099,6 +3121,15 @@ bool Boiler::set_hpMaxPower(const char * value, const int8_t id) {
     int v;
     if (Helpers::value2number(value, v)) {
         write_command(0x484, 31, v, 0x484);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_pvMaxComp(const char * value, const int8_t id) {
+    float v;
+    if (Helpers::value2float(value, v)) {
+        write_command(0x484, 54, (uint8_t)(v * 10), 0x484);
         return true;
     }
     return false;
