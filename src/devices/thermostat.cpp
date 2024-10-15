@@ -2405,7 +2405,7 @@ bool Thermostat::set_wwDisinfectDay(const char * value, const int8_t id) {
 }
 
 bool Thermostat::set_wwDisinfectHour(const char * value, const int8_t id) {
-    auto dhw = dhw_circuit( id2dhw(id));
+    auto dhw = dhw_circuit(id2dhw(id));
     if (dhw == nullptr) {
         return false;
     }

@@ -2,6 +2,7 @@ import { type ChangeEventHandler, useContext } from 'react';
 
 import { MenuItem, TextField } from '@mui/material';
 
+import CZflag from 'i18n/CZ.svg';
 import DEflag from 'i18n/DE.svg';
 import FRflag from 'i18n/FR.svg';
 import GBflag from 'i18n/GB.svg';
@@ -37,6 +38,10 @@ const LanguageSelector = () => {
       size="small"
       select
     >
+      <MenuItem key="cz" value="cz">
+        <img src={CZflag} style={{ width: 16, verticalAlign: 'middle' }} />
+        &nbsp;CZ
+      </MenuItem>
       <MenuItem key="de" value="de">
         <img src={DEflag} style={{ width: 16, verticalAlign: 'middle' }} />
         &nbsp;DE
