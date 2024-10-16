@@ -37,7 +37,7 @@ uint8_t EMSdevice::count_entities() {
 uint8_t EMSdevice::count_entities_fav() {
     uint8_t count = 0;
     for (const auto & dv : devicevalues_) {
-        count += dv.has_state(DeviceValueState::DV_FAVORITE);
+        count += dv.has_state(DeviceValueState::DV_FAVORITE) && dv.hasValue();
     }
     return count;
 }

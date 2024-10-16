@@ -355,6 +355,7 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
     JsonArray root = response->getRoot();
 #endif
 
+    // first do all the recognized devices
     for (const auto & emsdevice : EMSESP::emsdevices) {
         if (emsdevice->count_entities_fav()) {
             JsonObject obj = root.add<JsonObject>();
