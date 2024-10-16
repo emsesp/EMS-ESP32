@@ -47,6 +47,7 @@ For more details go to [www.emsesp.org](https://www.emsesp.org/).
 - entity for low-temperature boilers pump start temp (pumpOnTemp) #2088 [#2088](https://github.com/emsesp/EMS-ESP32/issues/2088)
 - internal ESP32 temperature sensor on the S3 [#2077](https://github.com/emsesp/EMS-ESP32/issues/2077)
 - MQTT status topic (used in connect and last will) set to Retain [#2086](https://github.com/emsesp/EMS-ESP32/discussions/2086)
+- Czech language [2096](https://github.com/emsesp/EMS-ESP32/issues/2096)
 
 ## Fixed
 
