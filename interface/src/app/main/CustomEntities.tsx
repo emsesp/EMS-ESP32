@@ -285,7 +285,7 @@ const CustomEntities = () => {
     <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       <Box mb={2} color="warning.main">
-        <Typography variant="body1">{LL.ENTITIES_HELP_1()}</Typography>
+        <Typography variant="body1">{LL.ENTITIES_HELP_1()}.</Typography>
       </Box>
 
       {renderEntity()}
