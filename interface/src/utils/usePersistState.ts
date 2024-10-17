@@ -9,7 +9,7 @@ export const usePersistState = <T>(
     const local_storage_value_str = localStorage.getItem('state:' + id);
     // If there is a value stored in localStorage, use that
     if (local_storage_value_str) {
-      return JSON.parse(local_storage_value_str);
+      return JSON.parse(local_storage_value_str) as T;
     }
     // Otherwise use initial_value that was passed to the function
     return initial_value;
