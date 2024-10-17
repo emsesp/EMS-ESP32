@@ -791,9 +791,9 @@ void System::system_check() {
 #ifndef EMSESP_STANDALONE
 #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
 #if ESP_IDF_VERSION_MAJOR < 5
-    temp_sensor_read_celsius(&temperature_);
+        temp_sensor_read_celsius(&temperature_);
 #else
-    temperature_sensor_get_celsius(temperature_handle_, &temperature_);
+        temperature_sensor_get_celsius(temperature_handle_, &temperature_);
 #endif
 #endif
 #endif

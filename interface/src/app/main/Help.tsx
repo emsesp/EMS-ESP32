@@ -37,6 +37,7 @@ const Help = () => {
 
   const [customSupportIMG, setCustomSupportIMG] = useState<string | null>(null);
   const [customSupportHTML, setCustomSupportHTML] = useState<string | null>(null);
+  const [notFound, setNotFound] = useState<boolean>(false);
 
   useRequest(() => callAction({ action: 'customSupport' })).onSuccess((event) => {
     if (event && event.data && Object.keys(event.data).length !== 0) {
@@ -102,7 +103,12 @@ const Help = () => {
           sx={{
             maxHeight: { xs: 100, md: 250 }
           }}
-          src={customSupportIMG || 'https://emsesp.org/_media/images/installer.jpeg'}
+          onError={(e) => setNotFound(true)}
+          src={
+            notFound
+              ? ''
+              : customSupportIMG || 'https://emsesp.org/_media/images/installer.jpeg'
+          }
         />
       </Stack>
 
