@@ -1,6 +1,5 @@
 import fileinput
 import csv
-import sys
 from itertools import groupby
 
 # static data
