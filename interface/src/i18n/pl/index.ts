@@ -143,7 +143,7 @@ const pl: BaseTranslation = {
   CUSTOMIZATIONS_RESTART: 'Wszystkie personalizacje zostały usunięte. Restartuję...',
   CUSTOMIZATIONS_FULL: 'Wybrano za dużo obiektów. Wprowadzaj zmiany w mniejszych partiach.',
   CUSTOMIZATIONS_SAVED: 'Personalizacje zostały zapisane.',
-  CUSTOMIZATIONS_HELP_1: 'Wybierz urządzenie EMS, a następnie dostosuj opcje lub kliknij na nazwie encji by tę nazwę zmienić.',
+  CUSTOMIZATIONS_HELP_1: 'Wybierz urządzenie EMS, a następnie dostosuj opcje lub kliknij na nazwie encji by tę nazwę zmienić', //.
   CUSTOMIZATIONS_HELP_2: 'oznacz jako ulubioną',
   CUSTOMIZATIONS_HELP_3: 'zablokuj akcje zapisu',
   CUSTOMIZATIONS_HELP_4: 'wyklucz z MQTT i API',
@@ -158,7 +158,7 @@ const pl: BaseTranslation = {
   HELP_INFORMATION_1: 'Skorzystaj z wiki w internecie aby uzyskać instrukcje dotyczące konfiguracji EMS-ESP.',
   HELP_INFORMATION_2: 'Dołącz do naszego serwera Discord by komunikować się na żywo ze społecznością.',
   HELP_INFORMATION_3: 'Zaproponuj nową funkcjonalność lub zgłoś problem.',
-  HELP_INFORMATION_4: 'Zgłaszając problem, nie zapomnij pobrać i dołączyć informacji o swoim systemie!',
+  HELP_INFORMATION_4: 'Zgłaszając problem, nie zapomnij pobrać i dołączyć informacji o swoim systemie', //.
   HELP_INFORMATION_5: 'For help and questions please contact your installer.', // TODO translate
   UPLOAD: 'Wysyłanie',
   DOWNLOAD: '{{P|p||P}}obier{{anie|z||z}}',
@@ -187,8 +187,8 @@ const pl: BaseTranslation = {
   FILESYSTEM: 'System plików (wykorzystane / wolne)',
   BUFFER_SIZE: 'Maksymalna pojemność bufora (ilość wpisów)',
   COMPACT: 'Kompaktowy',
-  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings.', // TODO translate
-  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json).', // TODO translate
+  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', //. // TODO translate
+  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', //. // TODO translate
   UPLOAD_DROP_TEXT: 'Przeciągnij tutaj plik lub kliknij',
   ERROR: 'Nieoczekiwany błąd, spróbuj ponownie!',
   TIME_SET: 'Zegar został ustawiony.',
@@ -300,7 +300,7 @@ const pl: BaseTranslation = {
   SCHEDULE_TIMER_2: 'co minutę',
   SCHEDULE_TIMER_3: 'co godzinę',
   CUSTOM_ENTITIES: '{{N|n|}}iestandardowe{{|j|}} encj{{e|i|}}',
-  ENTITIES_HELP_1: 'Zdefiniuj niestandardowe encje dla magistrali EMS.',
+  ENTITIES_HELP_1: 'Zdefiniuj niestandardowe encje dla magistrali EMS', //.
   ENTITIES_UPDATED: 'Niestandardowe encje zostały uaktualnione.',
   WRITEABLE: 'Zapisywalna',
   SHOWING: 'Wyświetlane',
@@ -323,7 +323,7 @@ const pl: BaseTranslation = {
   MODULES: 'Module', // TODO translate
   MODULES_1: 'Aktywuj lub dezaktywuj moduły zewnętrzne', // TODO translate
   MODULES_UPDATED: 'Modules updated', // TODO translate
-  MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules.', // TODO translate
+  MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', //. // TODO translate
   MODULES_NONE: 'No external modules detected', // TODO translate
   RENAME: 'Rename', // TODO translate 
   ENABLE_MODBUS: 'Aktywuj Modbus',

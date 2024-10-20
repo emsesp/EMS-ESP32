@@ -143,7 +143,7 @@ const sv: Translation = {
   CUSTOMIZATIONS_RESTART: 'Alla anpassningr har raderats. Startar om...',
   CUSTOMIZATIONS_FULL: 'Antal valda enheter för högt. Vänligen spara i mindre antal åt gången.',
   CUSTOMIZATIONS_SAVED: 'Anpassningar sparade',
-  CUSTOMIZATIONS_HELP_1: 'Välj en enhet och anpassa underenheter med hjälp av alternativen.',
+  CUSTOMIZATIONS_HELP_1: 'Välj en enhet och anpassa underenheter med hjälp av alternativen', //.
   CUSTOMIZATIONS_HELP_2: 'Favorit',
   CUSTOMIZATIONS_HELP_3: 'Inaktivera skrivningar',
   CUSTOMIZATIONS_HELP_4: 'Exkludera från MQTT & API',
@@ -158,7 +158,7 @@ const sv: Translation = {
   HELP_INFORMATION_1: 'Besök Wikin för instruktioner för hur du kan konfigurera EMS-ESP.',
   HELP_INFORMATION_2: 'För community-support besök vår Discord-server.',
   HELP_INFORMATION_3: 'Önska en ny funktion eller rapportera en bugg.',
-  HELP_INFORMATION_4: 'Bifoga din systeminformation för snabbare hantering när du rapporterar ett problem.',
+  HELP_INFORMATION_4: 'Bifoga din systeminformation för snabbare hantering när du rapporterar ett problem', //.
   HELP_INFORMATION_5: 'For help and questions please contact your installer.', // TODO translate
   UPLOAD: 'Uppladdning',
   DOWNLOAD: '{{N|n|n}}edladdning',
@@ -187,8 +187,8 @@ const sv: Translation = {
   FILESYSTEM: 'Filsystem (Använt / Ledigt)',
   BUFFER_SIZE: 'Max Bufferstorlek',
   COMPACT: 'Komprimera',
-  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings.', // TODO translate
-  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json).', // TODO translate
+  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', //. // TODO translate
+  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', //. // TODO translate
   UPLOAD_DROP_TEXT: 'Släpp fil eller klicka här',
   ERROR: 'Okänt Fel, var god försök igen',
   TIME_SET: 'Ställ in tid',
@@ -300,7 +300,7 @@ const sv: Translation = {
   SCHEDULE_TIMER_2: 'every minute', // TODO translate
   SCHEDULE_TIMER_3: 'every hour', // TODO translate
   CUSTOM_ENTITIES: 'Custom Entities', // TODO translate
-  ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus.', // TODO translate
+  ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus', //. // TODO translate
   ENTITIES_UPDATED: 'Entities Updated', // TODO translate
   WRITEABLE: 'Writeable', // TODO translate
   SHOWING: 'Showing', // TODO translate
@@ -323,7 +323,7 @@ const sv: Translation = {
   MODULES: 'Module', // TODO translate
   MODULES_1: 'Aktivera eller avaktivera externa moduler', // TODO translate
   MODULES_UPDATED: 'Modules updated', // TODO translate
-  MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules.', // TODO translate
+  MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', //. // TODO translate
   MODULES_NONE: 'No external modules detected', // TODO translate
   RENAME: 'Rename', // TODO translate
   ENABLE_MODBUS: 'Aktivera Modbus',

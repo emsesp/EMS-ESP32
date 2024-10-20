@@ -143,7 +143,7 @@ const sk: Translation = {
   CUSTOMIZATIONS_RESTART: 'Ste si istí, že chcete reštartovať EMS-ESP?',
   CUSTOMIZATIONS_FULL: 'Vybrané subjekty prekročili limit. Prosím, ukladajte v dávkach',
   CUSTOMIZATIONS_SAVED: 'Uložené prispôsobenia',
-  CUSTOMIZATIONS_HELP_1: 'Vyberte zariadenie a prispôsobte možnosti entít alebo kliknutím premenujte.',
+  CUSTOMIZATIONS_HELP_1: 'Vyberte zariadenie a prispôsobte možnosti entít alebo kliknutím premenujte', //.
   CUSTOMIZATIONS_HELP_2: 'označiť ako obľúbené',
   CUSTOMIZATIONS_HELP_3: 'zakázať akciu zápisu',
   CUSTOMIZATIONS_HELP_4: 'vylúčiť z MQTT a API',
@@ -158,7 +158,7 @@ const sk: Translation = {
   HELP_INFORMATION_1:  'Navštívte online wiki, kde nájdete pokyny na konfiguráciu EMS-ESP.',
   HELP_INFORMATION_2: 'Pre živý komunitný chat sa pripojte na náš Discord server.',
   HELP_INFORMATION_3: 'Ak chcete požiadať o funkciu alebo nahlásiť chybu.',
-  HELP_INFORMATION_4: 'nezabudnite si stiahnuť a pripojiť informácie o vašom systéme, aby ste mohli rýchlejšie reagovať pri nahlasovaní problému.',
+  HELP_INFORMATION_4: 'nezabudnite si stiahnuť a pripojiť informácie o vašom systéme, aby ste mohli rýchlejšie reagovať pri nahlasovaní problému', //.
   HELP_INFORMATION_5: 'Pre pomoc a otázky, kontaktujte svojho inštalatéra.',
   UPLOAD: 'Nahrať',
   DOWNLOAD: '{{S|s|s}}tiahnuť',
@@ -187,8 +187,8 @@ const sk: Translation = {
   FILESYSTEM: 'Súborový systém (Použité / Voľné)',
   BUFFER_SIZE: 'Buffer-max.veľkosť',
   COMPACT: 'Kompaktné',
-  DOWNLOAD_SETTINGS_TEXT: 'Vytvorte zálohu svojej konfigurácie a nastavení.',
-  UPLOAD_TEXT: 'Nahrajte nový súbor firmvéru (.bin) alebo súbor zálohy (.json).',
+  DOWNLOAD_SETTINGS_TEXT: 'Vytvorte zálohu svojej konfigurácie a nastavení', //.
+  UPLOAD_TEXT: 'Nahrajte nový súbor firmvéru (.bin) alebo súbor zálohy (.json)', //.
   UPLOAD_DROP_TEXT: 'Potiahnúť a pripnúť súbor alebo kliknúť sem',
   ERROR: 'Neočakávaná chyba, prosím skúste to znova',
   TIME_SET: 'Nastavený čas',
@@ -300,7 +300,7 @@ const sk: Translation = {
   SCHEDULE_TIMER_2: 'každú minútu',
   SCHEDULE_TIMER_3: 'každú hodinu',
   CUSTOM_ENTITIES: 'Vlastné entity',
-  ENTITIES_HELP_1: 'Získavanie vlastných entít zo zbernice EMS.',
+  ENTITIES_HELP_1: 'Získavanie vlastných entít zo zbernice EMS', //.
   ENTITIES_UPDATED: 'Aktualizované entity',
   WRITEABLE: 'Zapísateľný',
   SHOWING: 'Zobrazenie',
@@ -323,7 +323,7 @@ const sk: Translation = {
   MODULES: 'Moduly',
   MODULES_1: 'Aktivujte alebo deaktivujte externé moduly',
   MODULES_UPDATED: 'Aktualizované moduly',
-  MODULES_DESCRIPTION: 'Kliknutím na modul aktivujete alebo deaktivujete moduly knižnice EMS-ESP.',
+  MODULES_DESCRIPTION: 'Kliknutím na modul aktivujete alebo deaktivujete moduly knižnice EMS-ESP', //.
   MODULES_NONE: 'Neboli zistené žiadne externé moduly',
   RENAME: 'Premenovať', 
   ENABLE_MODBUS: 'Povoliť Modbus',
