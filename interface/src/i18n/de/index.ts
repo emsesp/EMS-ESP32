@@ -115,7 +115,7 @@ const de: Translation = {
   READONLY: 'Nur-Lese-Modus aktivieren (blockiert alle ausgehenden EMS Tx-Schreibbefehle)',
   UNDERCLOCK_CPU: 'CPU-Geschwindigkeit untertakten',
   REMOTE_TIMEOUT: 'Timeout',
-  REMOTE_TIMEOUT_EN: 'Deaktiviere Remote bei fehlender Temperatur',
+  REMOTE_TIMEOUT_EN: 'Deaktiviere Remote bei fehlender Raumtemperatur',
   HEATINGOFF: 'Heizen ausschalten beim EMS-ESP Start',
   MIN_DURATION: 'Dauer bis die Dusche erkannt wrid',
   ENABLE_SHOWER_TIMER: 'Duschtimer aktivieren',
