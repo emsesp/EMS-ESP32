@@ -272,28 +272,30 @@ const SystemLog = () => {
             )}
           </Grid>
 
-          <Grid>
-            {readOpen && (
-              <TextField
-                value={readValue}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  if (value !== '' && !ALPHA_NUMERIC_DASH_REGEX.test(value)) {
-                    return;
-                  }
-                  setReadValue(value);
-                }}
-                focused={true}
-                label="Send Read command"
-                variant="outlined"
-                helperText="<deviceID> <type ID> [offset] [length]"
-                size="small"
-              />
-            )}
-            <IconButton onClick={sendReadCommand}>
-              <PlayArrowIcon color="primary" />
-            </IconButton>
-          </Grid>
+          {data.developer_mode && (
+            <Grid>
+              {readOpen && (
+                <TextField
+                  value={readValue}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    if (value !== '' && !ALPHA_NUMERIC_DASH_REGEX.test(value)) {
+                      return;
+                    }
+                    setReadValue(value);
+                  }}
+                  focused={true}
+                  label="Send Read command"
+                  variant="outlined"
+                  helperText="<deviceID> <type ID> [offset] [length]"
+                  size="small"
+                />
+              )}
+              <IconButton onClick={sendReadCommand}>
+                <PlayArrowIcon color="primary" />
+              </IconButton>
+            </Grid>
+          )}
         </Grid>
         <Box
           sx={{
