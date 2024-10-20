@@ -274,7 +274,7 @@ const Dashboard = () => {
             }}
           >
             {!loading && data.length === 0 ? (
-              <Typography variant="subtitle2" color="warning">
+              <Typography variant="subtitle2" color="secondary">
                 {LL.NO_DATA()}
               </Typography>
             ) : (
