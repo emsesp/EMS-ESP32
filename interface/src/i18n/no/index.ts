@@ -143,7 +143,7 @@ const no: Translation = {
   CUSTOMIZATIONS_RESTART: 'Alle tilpasninger har blitt slettet. Restarter...',
   CUSTOMIZATIONS_FULL: 'Antall valgte objekter for høyt. Largre i mindre antall om gangen',
   CUSTOMIZATIONS_SAVED: 'Tilpasninger lagret',
-  CUSTOMIZATIONS_HELP_1: 'Velg en enhet og tilpass underenheter med hjelp av alternativer eller velg å gi nytt navn',
+  CUSTOMIZATIONS_HELP_1: 'Velg en enhet og tilpass underenheter med hjelp av alternativer eller velg å gi nytt navn.',
   CUSTOMIZATIONS_HELP_2: 'merk som favoritt',
   CUSTOMIZATIONS_HELP_3: 'inaktiviser skriving',
   CUSTOMIZATIONS_HELP_4: 'ekskludere fra MQTT og API',
@@ -155,10 +155,10 @@ const no: Translation = {
   NAME: 'Navn',
   CUSTOMIZATIONS_RESET: 'Er du sikker på att du vil fjerne tilpassninger inkludert innstillinger for Temperatur og Analoge sensorer?',
   SUPPORT_INFORMATION: 'Supportinformasjon',
-  HELP_INFORMATION_1: 'Besøk wiki for instruksjoner for å konfigurere EMS-ESP',
-  HELP_INFORMATION_2: 'For community-support besøk vår Discord-server',
-  HELP_INFORMATION_3: 'For å be om en ny funksjon eller melde feil',
-  HELP_INFORMATION_4: 'Husk å laste ned og legg ved din systeminformasjon for en raskere respons når du rapporterer et problem',
+  HELP_INFORMATION_1: 'Besøk wiki for instruksjoner for å konfigurere EMS-ESP.',
+  HELP_INFORMATION_2: 'For community-support besøk vår Discord-server.',
+  HELP_INFORMATION_3: 'For å be om en ny funksjon eller melde feil.',
+  HELP_INFORMATION_4: 'Husk å laste ned og legg ved din systeminformasjon for en raskere respons når du rapporterer et problem.',
   HELP_INFORMATION_5: 'For help and questions please contact your installer.', // TODO translate
   UPLOAD: 'Opplasning',
   DOWNLOAD: '{{N|n|n}}edlasting',
@@ -187,8 +187,8 @@ const no: Translation = {
   FILESYSTEM: 'File System (Brukt / Ledig)',
   BUFFER_SIZE: 'Max Buffer Størrelse',
   COMPACT: 'Komprimere',
-  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
-  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
+  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings.', // TODO translate
+  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json).', // TODO translate
   UPLOAD_DROP_TEXT: 'Slipp fil eller klikk her',
   ERROR: 'Ukjent feil, prøv igjen',
   TIME_SET: 'Still in tid',
@@ -300,7 +300,7 @@ const no: Translation = {
   SCHEDULE_TIMER_2: 'hvert minutt',
   SCHEDULE_TIMER_3: 'hver time',
   CUSTOM_ENTITIES: 'Custom Entities', // TODO translate
-  ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus', // TODO translate
+  ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus.', // TODO translate
   ENTITIES_UPDATED: 'Entities Updated', // TODO translate
   WRITEABLE: 'Writeable', // TODO translate
   SHOWING: 'Showing', // TODO translate
@@ -323,7 +323,7 @@ const no: Translation = {
   MODULES: 'Module', // TODO translate
   MODULES_1: 'Aktiver eller deaktiver eksterne moduler', // TODO translate
   MODULES_UPDATED: 'Modules updated', // TODO translate
-  MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
+  MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules.', // TODO translate
   MODULES_NONE: 'No external modules detected', // TODO translate
   RENAME: 'Rename', // TODO translate 
   ENABLE_MODBUS: 'Aktiver Modbus',

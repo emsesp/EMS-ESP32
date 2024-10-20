@@ -175,7 +175,7 @@ const Modules = () => {
     return (
       <>
         <Box mb={2} color="warning.main">
-          <Typography variant="body1">{LL.MODULES_DESCRIPTION()}.</Typography>
+          <Typography variant="body1">{LL.MODULES_DESCRIPTION()}</Typography>
         </Box>
         <Table
           data={{ nodes: modules }}

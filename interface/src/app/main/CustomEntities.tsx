@@ -184,12 +184,12 @@ const CustomEntities = () => {
     void updateState(readCustomEntities(), (data: EntityItem[]) => {
       const new_data = creating
         ? [
-            ...data.filter((ei) => creating || ei.o_id !== updatedItem.o_id),
-            updatedItem
-          ]
+          ...data.filter((ei) => creating || ei.o_id !== updatedItem.o_id),
+          updatedItem
+        ]
         : data.map((ei) =>
-            ei.id === updatedItem.id ? { ...ei, ...updatedItem } : ei
-          );
+          ei.id === updatedItem.id ? { ...ei, ...updatedItem } : ei
+        );
       setNumChanges(new_data.filter((ei) => hasEntityChanged(ei)).length);
       return new_data;
     });
@@ -219,7 +219,7 @@ const CustomEntities = () => {
       ? ''
       : typeof value === 'number'
         ? new Intl.NumberFormat().format(value) +
-          (uom === 0 ? '' : ' ' + DeviceValueUOM_s[uom])
+        (uom === 0 ? '' : ' ' + DeviceValueUOM_s[uom])
         : (value as string);
   }
 
@@ -285,7 +285,7 @@ const CustomEntities = () => {
     <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
       <Box mb={2} color="warning.main">
-        <Typography variant="body1">{LL.ENTITIES_HELP_1()}.</Typography>
+        <Typography variant="body1">{LL.ENTITIES_HELP_1()}</Typography>
       </Box>
 
       {renderEntity()}

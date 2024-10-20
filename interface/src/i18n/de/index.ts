@@ -300,7 +300,7 @@ const de: Translation = {
   SCHEDULE_TIMER_2: 'jede Minute',
   SCHEDULE_TIMER_3: 'jede Stunde',
   CUSTOM_ENTITIES: 'Individuelle Entitäten',
-  ENTITIES_HELP_1: 'Definition eigener EMS-Werte oder dynamischer Variablen',
+  ENTITIES_HELP_1: 'Definition eigener EMS-Werte oder dynamischer Variablen.',
   ENTITIES_UPDATED: 'Entitäten gespeichert',
   WRITEABLE: 'Schreibbar',
   SHOWING: 'Anzeigen von',

@@ -182,7 +182,7 @@ MAKE_WORD_TRANSLATION(eco, "eco", "Eco", "Eco", "Eko", "eko", "øko", "éco", "e
 MAKE_WORD_TRANSLATION(ecoplus, "eco+", "Eco+", "Eco+", "Eko+", "eko+", "øko+", "éco+", "eko+", "Eco+")
 MAKE_WORD_TRANSLATION(intelligent, "intelligent", "Intelligent", "intelligent", "Intelligent", "inteligentny", "intelligent", "intelligent", "akıllı", "intelligente", "inteligentný")
 MAKE_WORD_TRANSLATION(flow, "flow", "Durchfluss", "volumestroom", "Flöde", "przepływ", "strømme", "débit", "akım", "flusso", "tok")
-MAKE_WORD_TRANSLATION(manual, "manual", "Manuell", "handmatig", "Manuell", "ręczny", "manuell", "manuel", "manuel", "manuale", "manuálny")
+MAKE_WORD_TRANSLATION(manual, "manual", "manuell", "handmatig", "Manuell", "ręczny", "manuell", "manuel", "manuel", "manuale", "manuálny")
 MAKE_WORD_TRANSLATION(buffer, "buffer", "Speicher", "buffer", "Buffert", "bufor", "buffer", "buffer", "tampon", "Buffer", "zásobník")
 MAKE_WORD_TRANSLATION(bufferedflow, "buffered flow", "Durchlaufspeicher", "doorstroombuffer", "Buffertflöde", "przepływ buforowany", "bufret strømning", "", "tampon akım", "memoria flusso", "zásobníkový prietok") // TODO translate
 MAKE_WORD_TRANSLATION(layeredbuffer, "layered buffer", "Schichtspeicher", "gelaagde buffer", "Lagrad buffert", "bufor warstwowy", "lagdelt buffer", "", "katmanlı akım", "strato memoria", "vrstvený zásobník") // TODO translate

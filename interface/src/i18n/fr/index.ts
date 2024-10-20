@@ -143,7 +143,7 @@ const fr: Translation = {
   CUSTOMIZATIONS_RESTART: 'Toutes les personnalisations ont été supprimées. Redémarrage...',
   CUSTOMIZATIONS_FULL: 'Les entités sélectionnées ont dépassé la limite. Veuillez sauvegarder par lots',
   CUSTOMIZATIONS_SAVED: 'Personnalisations enregistrées',
-  CUSTOMIZATIONS_HELP_1: 'Sélectionnez un appareil et personnalisez les options des entités ou cliquez pour renommer',
+  CUSTOMIZATIONS_HELP_1: 'Sélectionnez un appareil et personnalisez les options des entités ou cliquez pour renommer.',
   CUSTOMIZATIONS_HELP_2: 'marquer comme favori',
   CUSTOMIZATIONS_HELP_3: "désactiver l'action d'écriture",
   CUSTOMIZATIONS_HELP_4: "exclure de MQTT et de l'API",
@@ -156,9 +156,9 @@ const fr: Translation = {
   CUSTOMIZATIONS_RESET: 'Êtes-vous sûr de vouloir supprimer toutes les personnalisations, y compris les paramètres personnalisés des capteurs de température et analogiques ?',
   SUPPORT_INFORMATION: 'Information de support',
   HELP_INFORMATION_1: 'Visitez le wiki en ligne pour obtenir des instructions sur la façon de configurer EMS-ESP.',
-  HELP_INFORMATION_2: 'Pour une discussion en direct avec la communauté, rejoignez notre serveur Discord',
-  HELP_INFORMATION_3: 'Pour demander une fonctionnalité ou signaler un problème',
-  HELP_INFORMATION_4: "N'oubliez pas de télécharger et de joindre les informations relatives à votre système pour obtenir une réponse plus rapide lorsque vous signalez un problème",
+  HELP_INFORMATION_2: 'Pour une discussion en direct avec la communauté, rejoignez notre serveur Discord.',
+  HELP_INFORMATION_3: 'Pour demander une fonctionnalité ou signaler un problème.',
+  HELP_INFORMATION_4: "N'oubliez pas de télécharger et de joindre les informations relatives à votre système pour obtenir une réponse plus rapide lorsque vous signalez un problème.",
   HELP_INFORMATION_5: 'For help and questions please contact your installer.', // TODO translate
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
@@ -187,8 +187,8 @@ const fr: Translation = {
   FILESYSTEM: 'File System (Utilisée / Libre)',
   BUFFER_SIZE: 'Max taille du buffer',
   COMPACT: 'Compact',
-  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
-  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
+  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings.', // TODO translate
+  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json).', // TODO translate
   UPLOAD_DROP_TEXT: 'Déposer le fichier ou cliquer ici',
   ERROR: 'Erreur inattendue, veuillez réessayer',
   TIME_SET: 'Time set',
@@ -300,7 +300,7 @@ const fr: Translation = {
   SCHEDULE_TIMER_2: 'every minute', // TODO translate
   SCHEDULE_TIMER_3: 'every hour', // TODO translate
   CUSTOM_ENTITIES: 'Custom Entities', // TODO translate
-  ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus', // TODO translate
+  ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus.', // TODO translate
   ENTITIES_UPDATED: 'Entities Updated', // TODO translate
   WRITEABLE: 'Writeable', // TODO translate
   SHOWING: 'Showing', // TODO translate
@@ -323,7 +323,7 @@ const fr: Translation = {
   MODULES: 'Module', // TODO translate
   MODULES_1: 'Activer ou désactiver les modules externes', // TODO translate
   MODULES_UPDATED: 'Modules updated', // TODO translate
-  MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
+  MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules.', // TODO translate
   MODULES_NONE: 'No external modules detected', // TODO translate
   RENAME: 'Rename', // TODO translate
   ENABLE_MODBUS: 'Activer Modbus',

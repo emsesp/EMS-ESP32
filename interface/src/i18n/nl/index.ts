@@ -143,7 +143,7 @@ const nl: Translation = {
   CUSTOMIZATIONS_RESTART: 'Alle custom profielen worden verwijderd. Herstarten...',
   CUSTOMIZATIONS_FULL: 'Te veel entiteiten geselecteerd. Sla op in delen aub',
   CUSTOMIZATIONS_SAVED: 'Custom aanpassingen opgeslagen',
-  CUSTOMIZATIONS_HELP_1: 'Selecteer een apparaat en pas de entiteiten aan door middel van de opties',
+  CUSTOMIZATIONS_HELP_1: 'Selecteer een apparaat en pas de entiteiten aan door middel van de opties.',
   CUSTOMIZATIONS_HELP_2: 'Markeer as favoriet',
   CUSTOMIZATIONS_HELP_3: 'Zet schrijfacties uit',
   CUSTOMIZATIONS_HELP_4: 'Uitsluiten van MQTT en API',
@@ -155,10 +155,10 @@ const nl: Translation = {
   NAME: 'Naam',
   CUSTOMIZATIONS_RESET: 'Weet je zeker dat je alle custom aanpassingen wilt verwijderen inclusief de custom instellingen voor analoge temperatuursensoren?',
   SUPPORT_INFORMATION: 'Support Informatie',
-  HELP_INFORMATION_1: 'Bezoek de online wiki om instructies te vinden om EMS-ESP te configureren',
-  HELP_INFORMATION_2: 'Voor de live community ga naar de Discord server',
-  HELP_INFORMATION_3: 'Om een nieuwe feature te vragen of een bug te rapporteren',
-  HELP_INFORMATION_4: 'Zorg dat je ook je systeem details zijn toevoeged voor een sneller antwoord',
+  HELP_INFORMATION_1: 'Bezoek de online wiki om instructies te vinden om EMS-ESP te configureren.',
+  HELP_INFORMATION_2: 'Voor de live community ga naar de Discord server.',
+  HELP_INFORMATION_3: 'Om een nieuwe feature te vragen of een bug te rapporteren.',
+  HELP_INFORMATION_4: 'Zorg dat je ook je systeem details zijn toevoeged voor een sneller antwoord.',
   HELP_INFORMATION_5: 'For help and questions please contact your installer.', // TODO translate
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
@@ -187,8 +187,8 @@ const nl: Translation = {
   FILESYSTEM: 'File System (Used / Free)',
   BUFFER_SIZE: 'Max Buffer Size',
   COMPACT: 'Compact',
-  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
-  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
+  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings.', // TODO translate
+  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json).', // TODO translate
   UPLOAD_DROP_TEXT: 'Sleep bestand hierheen of klik hier',
   ERROR: 'Onverwachte fout, probeer opnieuw',
   TIME_SET: 'Tijd ingesteld',
@@ -300,7 +300,7 @@ const nl: Translation = {
   SCHEDULE_TIMER_2: 'elke minuut',
   SCHEDULE_TIMER_3: 'elke huur',
   CUSTOM_ENTITIES: 'Eigen entiteiten',
-  ENTITIES_HELP_1: 'Eigen entiteiten ophalen uit de EMS-bus',
+  ENTITIES_HELP_1: 'Eigen entiteiten ophalen uit de EMS-bus.',
   ENTITIES_UPDATED: 'Entiteiten bijgewerkt',
   WRITEABLE: 'Beschrijfbare',
   SHOWING: 'Tonen',
@@ -323,7 +323,7 @@ const nl: Translation = {
   MODULES: 'Module',
   MODULES_1: 'Externe modules activeren of deactiveren', // TODO translate
   MODULES_UPDATED: 'Modules geüpdatet', 
-  MODULES_DESCRIPTION: 'Klik op de module om EMS-ESP library modules te activeren of te deactiveren',
+  MODULES_DESCRIPTION: 'Klik op de module om EMS-ESP library modules te activeren of te deactiveren.',
   MODULES_NONE: 'Geen externe modules gedetecteerd',
   RENAME: 'Hernoemen',
   ENABLE_MODBUS: 'Activeer Modbus',

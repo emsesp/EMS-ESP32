@@ -154,7 +154,7 @@ const Help = () => {
 
       <Box p={2} color="warning.main">
         <Typography mb={1} variant="body1">
-          {LL.HELP_INFORMATION_4()}.
+          {LL.HELP_INFORMATION_4()}
         </Typography>
         <Button
           startIcon={<DownloadIcon />}

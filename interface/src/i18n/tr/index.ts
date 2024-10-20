@@ -143,7 +143,7 @@ const tr: Translation = {
   CUSTOMIZATIONS_RESTART: 'Bütün özelleştirmeler kaldırıldı. Yeniden başlatılıyor...',
   CUSTOMIZATIONS_FULL: 'Seçilen varlıklar sınırı aşmaktadır. Lütfen parçalar halinde kaydedin',
   CUSTOMIZATIONS_SAVED: 'Özelleştirmeler kaydedildi',
-  CUSTOMIZATIONS_HELP_1: 'Bir cihaz seçip varlıkların seçeneklerini özelleştirin veya yeniden adlandırmak için tıklayın',
+  CUSTOMIZATIONS_HELP_1: 'Bir cihaz seçip varlıkların seçeneklerini özelleştirin veya yeniden adlandırmak için tıklayın.',
   CUSTOMIZATIONS_HELP_2: 'favori olarak işaretle',
   CUSTOMIZATIONS_HELP_3: 'yazma işlemini devre dışı bırak',
   CUSTOMIZATIONS_HELP_4: 'MQTT ve APInin dışında bırak',
@@ -155,10 +155,10 @@ const tr: Translation = {
   NAME: 'İsim',
   CUSTOMIZATIONS_RESET: 'Sıcaklık ve Analog Sensörlerin özelleştirilmiş seçenekleri dahil bütün özelleştirmeleri kaldırmak istediğinizden emin misiniz?',
   SUPPORT_INFORMATION: 'Destek Bilgileri',
-  HELP_INFORMATION_1: 'EMS-ESPnin nasıl ayarlanacağı ile ilgili bilgileri edinmek için çevrimiçi WIKI sayfasını ziyaret edin',
-  HELP_INFORMATION_2: 'Canlı topluluk sohbeti için Discord sunucumuza katılın',
-  HELP_INFORMATION_3: 'Yeni bir özellik talep etmek yada hata bildirmek için',
-  HELP_INFORMATION_4: 'Bir sorun bildirirken daha hızlı bir dönüş için sistem bilginizi indirip eklemeyi unutmayın',
+  HELP_INFORMATION_1: 'EMS-ESPnin nasıl ayarlanacağı ile ilgili bilgileri edinmek için çevrimiçi WIKI sayfasını ziyaret edin.',
+  HELP_INFORMATION_2: 'Canlı topluluk sohbeti için Discord sunucumuza katılın.',
+  HELP_INFORMATION_3: 'Yeni bir özellik talep etmek yada hata bildirmek için.',
+  HELP_INFORMATION_4: 'Bir sorun bildirirken daha hızlı bir dönüş için sistem bilginizi indirip eklemeyi unutmayın.',
   HELP_INFORMATION_5: 'For help and questions please contact your installer.', // TODO translate
   UPLOAD: 'Yükleme',
   DOWNLOAD: '{{İ|i|i}}İndirme',
@@ -187,8 +187,8 @@ const tr: Translation = {
   FILESYSTEM: 'Dosya Sistemi (Kullanılmış / Boş)',
   BUFFER_SIZE: 'En fazla bellek boyutu',
   COMPACT: 'Sıkışık',
-  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
-  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
+  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings.', // TODO translate
+  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json).', // TODO translate
   UPLOAD_DROP_TEXT: 'Buraya tıklayın yada dosyayı sürükleyip bırakın',
   ERROR: 'Beklenemedik hata, lütfen tekrar deneyin.',
   TIME_SET: 'Zaman ayarı',
@@ -300,7 +300,7 @@ const tr: Translation = {
   SCHEDULE_TIMER_2: 'every minute', // TODO translate
   SCHEDULE_TIMER_3: 'every hour', // TODO translate
   CUSTOM_ENTITIES: 'Custom Entities', // TODO translate
-  ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus', // TODO translate
+  ENTITIES_HELP_1: 'Fetch custom entities from the EMS bus.', // TODO translate
   ENTITIES_UPDATED: 'Entities Updated', // TODO translate
   WRITEABLE: 'Writeable', // TODO translate
   SHOWING: 'Showing', // TODO translate
@@ -323,7 +323,7 @@ const tr: Translation = {
   MODULES: 'Module', // TODO translate
   MODULES_1: 'Harici modülleri etkinleştirin veya devre dışı bırakın', // TODO translate
   MODULES_UPDATED: 'Modules updated', // TODO translate
-  MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
+  MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules.', // TODO translate
   MODULES_NONE: 'No external modules detected', // TODO translate
   RENAME: 'Rename', // TODO translate 
   ENABLE_MODBUS: 'Enable Modbus', // TODO translate

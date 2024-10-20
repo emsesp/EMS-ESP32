@@ -222,7 +222,7 @@ const DownloadUpload = () => {
         </Typography>
 
         <Typography mb={1} variant="body1" color="warning">
-          {LL.DOWNLOAD_SETTINGS_TEXT()}.
+          {LL.DOWNLOAD_SETTINGS_TEXT()}
         </Typography>
         <Grid container spacing={1}>
           <Button
@@ -269,7 +269,7 @@ const DownloadUpload = () => {
         </Typography>
 
         <Box color="warning.main" sx={{ pb: 2 }}>
-          <Typography variant="body1">{LL.UPLOAD_TEXT()}.</Typography>
+          <Typography variant="body1">{LL.UPLOAD_TEXT()}</Typography>
         </Box>
 
         <SingleUpload doRestart={doRestart} />

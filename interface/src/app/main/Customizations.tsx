@@ -316,13 +316,13 @@ const Customizations = () => {
             ...de,
             m: set
               ? de.m |
-                (DeviceEntityMask.DV_API_MQTT_EXCLUDE |
-                  DeviceEntityMask.DV_WEB_EXCLUDE)
+              (DeviceEntityMask.DV_API_MQTT_EXCLUDE |
+                DeviceEntityMask.DV_WEB_EXCLUDE)
               : de.m &
-                ~(
-                  DeviceEntityMask.DV_API_MQTT_EXCLUDE |
-                  DeviceEntityMask.DV_WEB_EXCLUDE
-                )
+              ~(
+                DeviceEntityMask.DV_API_MQTT_EXCLUDE |
+                DeviceEntityMask.DV_WEB_EXCLUDE
+              )
           };
         } else {
           return de;
@@ -424,7 +424,7 @@ const Customizations = () => {
   const renderDeviceList = () => (
     <>
       <Box mb={1} color="warning.main">
-        <Typography variant="body1">{LL.CUSTOMIZATIONS_HELP_1()}.</Typography>
+        <Typography variant="body1">{LL.CUSTOMIZATIONS_HELP_1()}</Typography>
       </Box>
       <Box display="flex" flexWrap="wrap" alignItems="center" gap={2}>
         {rename ? (
