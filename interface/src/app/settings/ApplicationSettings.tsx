@@ -689,6 +689,16 @@ const ApplicationSettings = () => {
         <BlockFormControlLabel
           control={
             <Checkbox
+              checked={data.developer_mode}
+              onChange={updateFormValue}
+              name="developer_mode"
+            />
+          }
+          label={LL.DEVELOPER_MODE()}
+        />
+        <BlockFormControlLabel
+          control={
+            <Checkbox
               checked={data.boiler_heatingoff}
               onChange={updateFormValue}
               name="boiler_heatingoff"
@@ -696,7 +706,6 @@ const ApplicationSettings = () => {
           }
           label={LL.HEATINGOFF()}
         />
-
         <BlockFormControlLabel
           control={
             <Checkbox
