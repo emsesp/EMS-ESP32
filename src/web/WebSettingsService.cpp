@@ -80,6 +80,7 @@ void WebSettings::read(WebSettings & settings, JsonObject root) {
     root["modbus_port"]           = settings.modbus_port;
     root["modbus_max_clients"]    = settings.modbus_max_clients;
     root["modbus_timeout"]        = settings.modbus_timeout;
+    root["developer_mode"]        = settings.developer_mode;
 }
 
 // call on initialization and also when settings are updated via web or console
@@ -358,8 +359,11 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     settings.fahrenheit = root["fahrenheit"];
     EMSESP::system_.fahrenheit(settings.fahrenheit);
 
-    settings.readonly_mode = root["readonly_mode"];
+    settings.readonly_mode = root["readonly_mode"] | false;
     EMSESP::system_.readonly_mode(settings.readonly_mode);
+
+    settings.developer_mode = root["developer_mode"] | false;
+    EMSESP::system_.developer_mode(settings.developer_mode);
 
     settings.bool_dashboard = root["bool_dashboard"] | EMSESP_DEFAULT_BOOL_FORMAT;
     EMSESP::system_.bool_dashboard(settings.bool_dashboard);

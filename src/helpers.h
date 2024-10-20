@@ -19,8 +19,9 @@
 #ifndef EMSESP_HELPERS_H
 #define EMSESP_HELPERS_H
 
-#include "telegram.h" // for EMS_VALUE_* settings
+#include <sstream>
 
+#include "telegram.h" // for EMS_VALUE_* settings
 #include "common.h"
 
 namespace emsesp {
@@ -81,6 +82,8 @@ class Helpers {
     static uint8_t count_items(const char * const * list);
 
     static const char * translated_word(const char * const * strings, const bool force_en = false);
+
+    static void splitArguments(const char * data, std::vector<std::string> & arguments);
 
 #ifdef EMSESP_STANDALONE
     static char * ultostr(char * ptr, uint32_t value, const uint8_t base);

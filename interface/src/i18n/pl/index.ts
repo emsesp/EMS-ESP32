@@ -115,7 +115,7 @@ const pl: BaseTranslation = {
   READONLY: 'Tryb pracy "tylko do odczytu" (blokuje wszystkie komendy zapisu na magistralę EMS)',
   UNDERCLOCK_CPU: 'Obniż taktowanie CPU',
   REMOTE_TIMEOUT: 'Remote timeout',
-  REMOTE_TIMEOUT_EN: 'Disable remote control on missing roomtemperature',
+  REMOTE_TIMEOUT_EN: 'Disable remote control on missing room temperature', // TODO translate
   HEATINGOFF: 'Uruchom kocioł z wymuszonym wyłączonym grzaniem',
   MIN_DURATION: 'Wait time',
   ENABLE_SHOWER_TIMER: 'Aktywuj minutnik prysznica',
@@ -343,7 +343,8 @@ const pl: BaseTranslation = {
   AUTO_SCROLL: 'Auto Scroll', // TODO translate
   DASHBOARD: 'Dashboard', // TODO translate
   NO_DATA: 'No data available', // TODO translate
-  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module.' // TODO translate
+  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module.', // TODO translate
+  DEVELOPER_MODE: 'Developer Mode' // TODO translate
 };
 
 export default pl;

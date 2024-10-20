@@ -63,6 +63,7 @@ class System {
     void loop();
 
     // commands
+    static bool command_read(const char * value, const int8_t id);
     static bool command_send(const char * value, const int8_t id);
     static bool command_publish(const char * value, const int8_t id);
     static bool command_fetch(const char * value, const int8_t id);
@@ -124,6 +125,8 @@ class System {
     static bool is_valid_gpio(uint8_t pin, bool has_psram = false);
     static bool load_board_profile(std::vector<int8_t> & data, const std::string & board_profile);
 
+    static bool readCommand(const char * data);
+
     static void restart_requested(bool restart_requested) {
         restart_requested_ = restart_requested;
     }
@@ -168,6 +171,14 @@ class System {
 
     void readonly_mode(bool readonly_mode) {
         readonly_mode_ = readonly_mode;
+    }
+
+    bool developer_mode() {
+        return developer_mode_;
+    }
+
+    void developer_mode(bool developer_mode) {
+        developer_mode_ = developer_mode;
     }
 
     // Boolean Format API/MQTT
@@ -398,6 +409,7 @@ class System {
     uint16_t    modbus_port_;
     uint8_t     modbus_max_clients_;
     uint32_t    modbus_timeout_;
+    bool        developer_mode_;
 
     // ethernet
     uint8_t phy_type_;

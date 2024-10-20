@@ -2,13 +2,24 @@ import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import WarningIcon from '@mui/icons-material/Warning';
-import { Box, Button, Checkbox, MenuItem, TextField, styled } from '@mui/material';
+import {
+  Box,
+  Button,
+  Checkbox,
+  IconButton,
+  MenuItem,
+  TextField,
+  styled
+} from '@mui/material';
 import Grid from '@mui/material/Grid2';
 
+import { API } from 'api/app';
 import { fetchLogES, readLogSettings, updateLogSettings } from 'api/system';
 
-import { useSSE } from 'alova/client';
+import { useRequest, useSSE } from 'alova/client';
+import type { APIcall } from 'app/main/types';
 import {
   BlockFormControlLabel,
   BlockNavigation,
@@ -80,8 +91,19 @@ const SystemLog = () => {
     update: updateLogSettings
   });
 
+  const { send } = useRequest(
+    (data: string) => API({ device: 'system', cmd: 'read', id: 0, value: data }),
+    {
+      immediate: false
+    }
+  );
+
+  const [readValue, setReadValue] = useState('');
+  const [readOpen, setReadOpen] = useState(false);
   const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
   const [autoscroll, setAutoscroll] = useState(true);
+
+  const ALPHA_NUMERIC_DASH_REGEX = /^[a-fA-F0-9 ]+$/;
 
   const updateFormValue = updateValueDirty(
     origData,
@@ -150,6 +172,17 @@ const SystemLog = () => {
     }
   }, [logEntries.length]);
 
+  const sendReadCommand = () => {
+    if (readValue === '') {
+      setReadOpen(!readOpen);
+      return;
+    }
+    void send(readValue);
+    console.log('send read command', readValue); // TODO remove
+    setReadOpen(false);
+    setReadValue('');
+  };
+
   const content = () => {
     if (!data) {
       return <FormLoader onRetry={loadData} errorMessage={errorMessage} />;
@@ -163,7 +196,7 @@ const SystemLog = () => {
               name="level"
               label={LL.LOG_LEVEL()}
               value={data.level}
-              sx={{ width: '15ch' }}
+              sx={{ width: '10ch' }}
               variant="outlined"
               onChange={updateFormValue}
               margin="normal"
@@ -218,24 +251,49 @@ const SystemLog = () => {
               label={LL.AUTO_SCROLL()}
             />
           </Grid>
-          <Button
-            startIcon={<DownloadIcon />}
-            variant="outlined"
-            color="secondary"
-            onClick={onDownload}
-          >
-            {LL.EXPORT()}
-          </Button>
-          {dirtyFlags && dirtyFlags.length !== 0 && (
+          <Grid>
             <Button
-              startIcon={<WarningIcon color="warning" />}
-              variant="contained"
-              color="info"
-              onClick={saveSettings}
+              startIcon={<DownloadIcon />}
+              variant="outlined"
+              color="secondary"
+              onClick={onDownload}
             >
-              {LL.APPLY_CHANGES(dirtyFlags.length)}
+              {LL.EXPORT()}
             </Button>
-          )}
+            {dirtyFlags && dirtyFlags.length !== 0 && (
+              <Button
+                startIcon={<WarningIcon color="warning" />}
+                variant="contained"
+                color="info"
+                onClick={saveSettings}
+              >
+                {LL.APPLY_CHANGES(dirtyFlags.length)}
+              </Button>
+            )}
+          </Grid>
+
+          <Grid>
+            {readOpen && (
+              <TextField
+                value={readValue}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  if (value !== '' && !ALPHA_NUMERIC_DASH_REGEX.test(value)) {
+                    return;
+                  }
+                  setReadValue(value);
+                }}
+                focused={true}
+                label="Send Read command"
+                variant="outlined"
+                helperText="<deviceID> <type ID> [offset] [length]"
+                size="small"
+              />
+            )}
+            <IconButton onClick={sendReadCommand}>
+              <PlayArrowIcon color="primary" />
+            </IconButton>
+          </Grid>
         </Grid>
         <Box
           sx={{

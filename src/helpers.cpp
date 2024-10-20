@@ -834,4 +834,14 @@ float Helpers::numericoperator2scalefactor(int8_t numeric_operator) {
         return -numeric_operator;
 }
 
+// convert the data into a vector of strings
+void Helpers::splitArguments(const char * data, std::vector<std::string> & arguments) {
+    std::stringstream ss(data);
+    std::string       item;
+
+    while (std::getline(ss, item, ' ')) {
+        arguments.push_back(item);
+    }
+}
+
 } // namespace emsesp

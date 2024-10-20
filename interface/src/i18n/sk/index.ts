@@ -115,7 +115,7 @@ const sk: Translation = {
   READONLY: 'Povoliť režim len na čítanie (blokuje všetky odchádzajúce príkazy EMS Tx Write)',
   UNDERCLOCK_CPU: 'Podtaktovanie rýchlosti procesora',
   REMOTE_TIMEOUT: 'Remote timeout',
-  REMOTE_TIMEOUT_EN: 'Disable remote on missing roomtemperature',
+  REMOTE_TIMEOUT_EN: 'Disable remote on missing room temperature', // TODO translate
   HEATINGOFF: 'Spustiť kotol s vynúteným vykurovaním',
   MIN_DURATION: 'Wait time',
   ENABLE_SHOWER_TIMER: 'Povoliť časovač sprchovania',
@@ -343,7 +343,8 @@ const sk: Translation = {
   AUTO_SCROLL: 'Automatické rolovanie',
   DASHBOARD: 'Panel',
   NO_DATA: 'Nie sú k dispozícii žiadne údaje',
-  DASHBOARD_1: 'Prispôsobte si svoj informačný panel tak, že označíte entity EMS ako Obľúbené pomocou modulu Prispôsobenia.'
+  DASHBOARD_1: 'Prispôsobte si svoj informačný panel tak, že označíte entity EMS ako Obľúbené pomocou modulu Prispôsobenia.',
+  DEVELOPER_MODE: 'Developer Mode' // TODO translate
 };
 
 export default sk;
