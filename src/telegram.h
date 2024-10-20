@@ -50,7 +50,7 @@ static constexpr int8_t   EMS_VALUE_INT8_NOTSET   = 0x7F;       // for signed 8-
 static constexpr uint16_t EMS_VALUE_UINT16_NOTSET = 0x7D00;     // 32000: for 2-byte unsigned shorts
 static constexpr int16_t  EMS_VALUE_INT16_NOTSET  = 0x7D00;     // 32000: for 2-byte signed shorts
 static constexpr uint32_t EMS_VALUE_UINT24_NOTSET = 0x00FFFFFF; // for 3-byte longs
-static constexpr uint32_t EMS_VALUE_UINT32_NOTSET = 0xFFFFFFFF; // for 4-byte longs
+static constexpr uint32_t EMS_VALUE_UINT32_NOTSET = 0xFFFFFF00; // for 4-byte longs
 
 static constexpr uint8_t EMS_MAX_TELEGRAM_LENGTH         = 32; // max length of a complete EMS telegram
 static constexpr uint8_t EMS_MAX_TELEGRAM_MESSAGE_LENGTH = 27; // max length of message block, assuming EMS1.0
