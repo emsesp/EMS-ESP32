@@ -237,7 +237,7 @@ const Dashboard = () => {
           <Grid container spacing={0} justifyContent="flex-start">
             <Grid size={11}>
               <Typography mb={2} variant="body1" color="warning">
-                {LL.DASHBOARD_1()}
+                {LL.DASHBOARD_1()}.
               </Typography>
             </Grid>
 
