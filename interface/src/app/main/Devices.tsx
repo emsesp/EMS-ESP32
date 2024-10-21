@@ -263,7 +263,7 @@ const Devices = () => {
           ),
 
         VALUE: (array) =>
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
           array.sort((a, b) => a.v.toString().localeCompare(b.v.toString()))
       }
     }
@@ -357,7 +357,9 @@ const Devices = () => {
       },
       {
         accessor: (dv: DeviceValue) =>
-          DeviceValueUOM_s[dv.u].replace(/[^a-zA-Z0-9]/g, ''),
+          dv.u !== undefined && DeviceValueUOM_s[dv.u]
+            ? DeviceValueUOM_s[dv.u].replace(/[^a-zA-Z0-9]/g, '')
+            : '',
         name: 'UoM'
       },
       {
