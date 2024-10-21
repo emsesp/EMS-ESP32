@@ -2019,14 +2019,11 @@ bool System::uploadFirmwareURL(const char * url) {
 bool System::readCommand(const char * data) {
     // extract <deviceID> <type ID> [offset] [length] from string
     char * p;
-    char   value[10] = {0}; // null just in case
+    char   value[6];
 
-    // make a copy so we can iterate
-    char data_args[EMS_MAX_TELEGRAM_LENGTH];
-    for (uint8_t i = 0; i < strlen(data); i++) {
-        data_args[i] = data[i];
-    }
-    data_args[strlen(data)] = '\0'; // make sure its terminated
+    // make a copy so we can iterate, max 15 chars (XX XXXX XX XX)
+    char data_args[15];
+    strlcpy(data_args, data, sizeof(data_args));
 
     uint8_t  device_id = 0; // is in hex
     uint16_t type_id   = 0; // is in hex
