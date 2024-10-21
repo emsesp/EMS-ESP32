@@ -102,6 +102,9 @@ const Dashboard = () => {
     Row: `
       cursor: pointer;
       background-color: #1e1e1e;
+      &:nth-of-type(odd) .td {
+          background-color: #303030;
+      },
       &:hover .td {
         background-color: #177ac9;
       }
