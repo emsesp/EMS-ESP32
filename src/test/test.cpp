@@ -1027,6 +1027,12 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             request.url("/api");
             EMSESP::webAPIService.webAPIService(&request, json);
 
+            char data7[] = "{\"device\":\"system\", \"cmd\":\"read\",\"value\":\"08 221\"}";
+            deserializeJson(doc, data7);
+            json = doc.as<JsonVariant>();
+            request.url("/api");
+            EMSESP::webAPIService.webAPIService(&request, json);
+
             shell.invoke_command("call system read \"8 2 27 1\"");
 
 

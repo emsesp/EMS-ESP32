@@ -2015,34 +2015,52 @@ bool System::uploadFirmwareURL(const char * url) {
     return true; // OK
 }
 
-// read command, e.g. read <deviceID> <type ID> [offset] [length] from console
-// or a call system read <deviceID> <type ID> [offset] [length] from the API
+// read command, e.g. read <deviceID> <type ID> [offset] [length] from console or API
 bool System::readCommand(const char * data) {
-    // convert the data into a vector of strings
-    std::vector<std::string> arguments = {};
-    Helpers::splitArguments(data, arguments);
+    // extract <deviceID> <type ID> [offset] [length] from string
+    char * p;
+    char   value[10] = {0}; // null just in case
 
-    auto num_args = arguments.size();
+    // make a copy so we can iterate
+    char data_args[EMS_MAX_TELEGRAM_LENGTH];
+    for (uint8_t i = 0; i < strlen(data); i++) {
+        data_args[i] = data[i];
+    }
+    data_args[strlen(data)] = '\0'; // make sure its terminated
 
-    if (num_args > 4 || num_args == 0) {
-        return false;
+    uint8_t  device_id = 0; // is in hex
+    uint16_t type_id   = 0; // is in hex
+    uint8_t  length    = 0;
+    uint8_t  offset    = 0;
+
+    // first check deviceID
+    if ((p = strtok(data_args, " ,"))) {               // delimiter comma or space
+        strlcpy(value, p, 10);                         // get string
+        device_id = (uint8_t)Helpers::hextoint(value); // convert hex to int
+        if (!EMSESP::valid_device(device_id)) {
+            LOG_ERROR("Invalid device ID (%d) for read command", device_id);
+            return false; // invalid device
+        }
     }
 
-    uint8_t device_id = Helpers::hextoint(arguments[0].c_str());
-    if (!EMSESP::valid_device(device_id)) {
-        LOG_ERROR("Invalid device ID for read command");
-        return false; // invalid device
+    // iterate until end
+    uint8_t num_args = 0;
+    while (p != 0) {
+        if ((p = strtok(nullptr, " ,"))) { // delimiter comma or space
+            strlcpy(value, p, 10);         // get string
+            if (num_args == 0) {
+                type_id = (uint16_t)Helpers::hextoint(value); // convert hex to int
+            } else if (num_args == 1) {
+                offset = Helpers::atoint(value); // decimal
+            } else if (num_args == 2) {
+                length = Helpers::atoint(value); // decimal
+            }
+            num_args++;
+        }
     }
 
-    uint16_t type_id = Helpers::hextoint(arguments[1].c_str());
-    uint8_t  length  = 0;
-    uint16_t offset  = 0;
-
-    if (num_args == 4) {
-        offset = Helpers::hextoint(arguments[2].c_str());
-        length = Helpers::hextoint(arguments[3].c_str());
-    } else if (num_args == 3) {
-        offset = Helpers::hextoint(arguments.back().c_str());
+    if (num_args == 0) {
+        return false; // invalid number of arguments
     }
 
     EMSESP::send_read_request(type_id, device_id, offset, length, true);

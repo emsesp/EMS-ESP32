@@ -99,7 +99,7 @@ char * Helpers::ultostr(char * ptr, uint32_t value, const uint8_t base) {
 #endif
 
 /**
- * fast atoi returning a std::string
+ * fast itoa returning a std::string
  * http://www.strudel.org.uk/itoa/
  * 
  */
@@ -122,8 +122,9 @@ std::string Helpers::itoa(int16_t value) {
 }
 
 /*
- * fast itoa and optimized for ESP32
+ * fast itoa
  * written by Lukás Chmela, Released under GPLv3. http://www.strudel.org.uk/itoa/ version 0.4
+ * optimized for ESP32
  */
 char * Helpers::itoa(int32_t value, char * result, const uint8_t base) {
     // check that the base if valid
@@ -832,16 +833,6 @@ float Helpers::numericoperator2scalefactor(int8_t numeric_operator) {
         return 1.0f / numeric_operator;
     else
         return -numeric_operator;
-}
-
-// convert the data into a vector of strings
-void Helpers::splitArguments(const char * data, std::vector<std::string> & arguments) {
-    std::stringstream ss(data);
-    std::string       item;
-
-    while (std::getline(ss, item, ' ')) {
-        arguments.push_back(item);
-    }
 }
 
 } // namespace emsesp
