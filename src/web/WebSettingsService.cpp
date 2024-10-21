@@ -359,10 +359,10 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     settings.fahrenheit = root["fahrenheit"];
     EMSESP::system_.fahrenheit(settings.fahrenheit);
 
-    settings.readonly_mode = root["readonly_mode"] | false;
+    settings.readonly_mode = root["readonly_mode"];
     EMSESP::system_.readonly_mode(settings.readonly_mode);
 
-    settings.developer_mode = root["developer_mode"] | false;
+    settings.developer_mode = root["developer_mode"];
     EMSESP::system_.developer_mode(settings.developer_mode);
 
     settings.bool_dashboard = root["bool_dashboard"] | EMSESP_DEFAULT_BOOL_FORMAT;
