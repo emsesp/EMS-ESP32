@@ -274,7 +274,7 @@ export interface APIcall {
   device: string;
   cmd: string;
   id: number;
-  value?: string; // optional
+  data?: string; // optional
 }
 
 export interface Action {
