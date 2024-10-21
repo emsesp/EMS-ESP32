@@ -91,7 +91,7 @@ const SystemLog = () => {
   });
 
   const { send } = useRequest(
-    (data: string) => API({ device: 'system', cmd: 'read', id: 0, value: data }),
+    (data: string) => API({ device: 'system', cmd: 'read', id: 0, data: data }),
     {
       immediate: false
     }
@@ -176,10 +176,12 @@ const SystemLog = () => {
       setReadOpen(!readOpen);
       return;
     }
-    void send(readValue);
-    console.log('send read command', readValue); // TODO remove
-    setReadOpen(false);
-    setReadValue('');
+
+    if (readValue.split(' ').filter((word) => word !== '').length > 1) {
+      void send(readValue);
+      setReadOpen(false);
+      setReadValue('');
+    }
   };
 
   const content = () => {
@@ -271,31 +273,50 @@ const SystemLog = () => {
             )}
           </Grid>
 
-          {data.developer_mode && (
-            <Grid>
-              {readOpen && (
-                <TextField
-                  value={readValue}
-                  onChange={(event) => {
-                    const value = event.target.value;
-                    if (value !== '' && !ALPHA_NUMERIC_DASH_REGEX.test(value)) {
-                      return;
-                    }
-                    setReadValue(value);
-                  }}
-                  focused={true}
-                  label="Send Read command"
-                  variant="outlined"
-                  helperText="<deviceID> <type ID> [offset] [length]"
-                  size="small"
-                />
-              )}
-              <IconButton onClick={sendReadCommand}>
-                <PlayArrowIcon color="primary" />
+          {readOpen ? (
+            <Box
+              component="form"
+              sx={{ display: 'flex', alignItems: 'flex-end' }}
+              onSubmit={(e) => {
+                e.preventDefault();
+                sendReadCommand();
+              }}
+            >
+              <IconButton
+                disableRipple
+                onClick={() => {
+                  setReadOpen(false);
+                  setReadValue('');
+                }}
+              >
+                <PlayArrowIcon color="primary" sx={{ my: 2.5 }} />
               </IconButton>
-            </Grid>
+              <TextField
+                value={readValue}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value !== '' && !ALPHA_NUMERIC_DASH_REGEX.test(value)) {
+                    return;
+                  }
+                  setReadValue(value);
+                }}
+                focused={true}
+                size="small"
+                label="Send Read command" // doesn't need translating - developer only
+                helperText="<deviceID> <typeID> [offset] [len]"
+              />
+            </Box>
+          ) : (
+            <>
+              {data.developer_mode && (
+                <IconButton onClick={sendReadCommand}>
+                  <PlayArrowIcon color="primary" />
+                </IconButton>
+              )}
+            </>
           )}
         </Grid>
+
         <Box
           sx={{
             backgroundColor: 'black',
