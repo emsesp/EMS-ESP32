@@ -19,7 +19,6 @@ import { API } from 'api/app';
 import { fetchLogES, readLogSettings, updateLogSettings } from 'api/system';
 
 import { useRequest, useSSE } from 'alova/client';
-import type { APIcall } from 'app/main/types';
 import {
   BlockFormControlLabel,
   BlockNavigation,
