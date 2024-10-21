@@ -219,7 +219,7 @@ const Sensors = () => {
       sortToggleType: SortToggleType.AlternateWithReset,
       sortFns: {
         GPIO: (array) => array.sort((a, b) => a.g - b.g),
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         NAME: (array) => array.sort((a, b) => a.n.localeCompare(b.n)),
         TYPE: (array) => array.sort((a, b) => a.t - b.t),
         VALUE: (array) => array.sort((a, b) => a.v - b.v)
@@ -238,7 +238,7 @@ const Sensors = () => {
       },
       sortToggleType: SortToggleType.AlternateWithReset,
       sortFns: {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         NAME: (array) => array.sort((a, b) => a.n.localeCompare(b.n)),
         VALUE: (array) => array.sort((a, b) => a.t - b.t)
       }

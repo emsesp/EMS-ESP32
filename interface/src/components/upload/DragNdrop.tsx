@@ -39,7 +39,7 @@ const DragNdrop = ({ onFileSelected }) => {
     event.preventDefault();
     const droppedFiles = event.dataTransfer.files;
     if (droppedFiles.length > 0) {
-      checkFileExtension(droppedFiles[0]);
+      checkFileExtension(droppedFiles[0] as File);
     }
   };
 

@@ -103,7 +103,7 @@ const Help = () => {
           sx={{
             maxHeight: { xs: 100, md: 250 }
           }}
-          onError={(e) => setNotFound(true)}
+          onError={() => setNotFound(true)}
           src={
             notFound
               ? ''

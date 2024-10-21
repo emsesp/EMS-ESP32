@@ -379,30 +379,25 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
         }
     });
 
+    // read <deviceID> <type ID> [offset] [length]
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::USER,
                           {F_(read)},
                           string_vector{F_(deviceid_mandatory), F_(typeid_mandatory), F_(offset_optional), F_(length_optional)},
                           [=](Shell & shell, const std::vector<std::string> & arguments) {
-                              uint8_t device_id = Helpers::hextoint(arguments.front().c_str());
+                              // loop through arguments and add to data as text, separated by a space
+                              std::string data;
+                              for (const auto & arg : arguments) {
+                                  if (!data.empty()) {
+                                      data += " ";
+                                  }
+                                  data += arg;
+                              }
 
-                              if (!EMSESP::valid_device(device_id)) {
+                              if (!System::readCommand(data.c_str())) {
                                   shell.printfln("Invalid deviceID");
                                   return;
                               }
-
-                              uint16_t type_id = Helpers::hextoint(arguments[1].c_str());
-                              if (arguments.size() == 4) {
-                                  uint16_t offset = Helpers::hextoint(arguments[2].c_str());
-                                  uint8_t  length = Helpers::hextoint(arguments.back().c_str());
-                                  EMSESP::send_read_request(type_id, device_id, offset, length, true);
-                              } else if (arguments.size() == 3) {
-                                  uint16_t offset = Helpers::hextoint(arguments.back().c_str());
-                                  EMSESP::send_read_request(type_id, device_id, offset, 0, true);
-                              } else {
-                                  EMSESP::send_read_request(type_id, device_id, 0, 0, true);
-                              }
-                              EMSESP::set_read_id(type_id);
                           });
 
     commands->add_command(ShellContext::MAIN,

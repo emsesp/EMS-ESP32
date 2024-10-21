@@ -237,12 +237,13 @@ void WebLogService::transmit(const QueuedLogMessage & message) {
 void WebLogService::getSetValues(AsyncWebServerRequest * request, JsonVariant json) {
     if ((request->method() == HTTP_GET) || (!json.is<JsonObject>())) {
         // GET - return the values
-        auto *     response  = new AsyncJsonResponse(false);
-        JsonObject root      = response->getRoot();
-        root["level"]        = log_level();
-        root["max_messages"] = maximum_log_messages();
-        root["compact"]      = compact();
-        root["psram"]        = (EMSESP::system_.PSram() > 0);
+        auto *     response    = new AsyncJsonResponse(false);
+        JsonObject root        = response->getRoot();
+        root["level"]          = log_level();
+        root["max_messages"]   = maximum_log_messages();
+        root["compact"]        = compact();
+        root["psram"]          = (EMSESP::system_.PSram() > 0);
+        root["developer_mode"] = EMSESP::system_.developer_mode();
 
         response->setLength();
         request->send(response);

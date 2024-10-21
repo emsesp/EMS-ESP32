@@ -424,12 +424,12 @@ StateUpdateResult NetworkSettings::update(JsonObject root, NetworkSettings & set
     settings.bssid          = root["bssid"] | "";
     settings.password       = root["password"] | FACTORY_WIFI_PASSWORD;
     settings.hostname       = root["hostname"] | FACTORY_WIFI_HOSTNAME;
-    settings.staticIPConfig = root["static_ip_config"] | false;
-    settings.bandwidth20    = root["bandwidth20"] | false;
+    settings.staticIPConfig = root["static_ip_config"];
+    settings.bandwidth20    = root["bandwidth20"];
     settings.tx_power       = static_cast<uint8_t>(root["tx_power"] | 0);
     settings.nosleep        = root["nosleep"] | true;
     settings.enableMDNS     = root["enableMDNS"] | true;
-    settings.enableCORS     = root["enableCORS"] | false;
+    settings.enableCORS     = root["enableCORS"];
     settings.CORSOrigin     = root["CORSOrigin"] | "*";
 
     // extended settings

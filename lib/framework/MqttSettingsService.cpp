@@ -253,7 +253,7 @@ StateUpdateResult MqttSettings::update(JsonObject root, MqttSettings & settings)
     bool         changed     = false;
 
 #ifndef TASMOTA_SDK
-    newSettings.enableTLS = root["enableTLS"] | false;
+    newSettings.enableTLS = root["enableTLS"];
     newSettings.rootCA    = root["rootCA"] | "";
 #else
     newSettings.enableTLS = false;

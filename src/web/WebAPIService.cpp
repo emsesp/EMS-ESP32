@@ -28,8 +28,9 @@ WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * security
     server->on(EMSESP_API_SERVICE_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { webAPIService(request, json); });
 }
 
-// POST|GET /{device}
-// POST|GET /{device}/{entity}
+// POST|GET api/
+// POST|GET api/{device}
+// POST|GET api/{device}/{entity}
 void WebAPIService::webAPIService(AsyncWebServerRequest * request, JsonVariant json) {
     JsonObject input;
     // if no body then treat it as a secure GET
