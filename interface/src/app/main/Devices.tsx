@@ -166,11 +166,6 @@ const Devices = () => {
       Table: `
         --data-table-library_grid-template-columns: repeat(1, minmax(0, 1fr)) 130px;
       `,
-      BaseRow: `
-        // .td {
-        //   height: 42px;
-        // }
-      `,
       HeaderRow: `
         .th {
           padding: 8px;
