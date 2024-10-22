@@ -197,12 +197,20 @@ function custom_support() {
 
 // called by Action endpoint
 function check_upgrade(version: string) {
-  console.log('check upgrade from version', version);
-  const data = {
-    emsesp_version: VERSION,
-    upgradeable: true
-    // upgradeable: false,
-  };
+  let data = {};
+  if (version) {
+    console.log('check upgrade from version', version);
+    data = {
+      emsesp_version: VERSION,
+      upgradeable: true
+      // upgradeable: false,
+    };
+  } else {
+    console.log('requesting ems-esp version');
+    data = {
+      emsesp_version: VERSION
+    };
+  }
   return data;
 }
 
@@ -4822,6 +4830,10 @@ router
         return custom_support();
       } else if (action === 'checkUpgrade') {
         // check upgrade
+        // check if content has a param
+        if (!content.param) {
+          return check_upgrade('');
+        }
         return check_upgrade(content.param);
       } else if (action === 'uploadURL') {
         // upload URL
