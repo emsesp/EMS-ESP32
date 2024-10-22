@@ -159,7 +159,7 @@ const en: Translation = {
   HELP_INFORMATION_2: 'For live community chat join our Discord server',
   HELP_INFORMATION_3: 'To request a feature or report a bug',
   HELP_INFORMATION_4: 'Download and attach your support information for a faster response when reporting an issue',
-  HELP_INFORMATION_5: 'For help and questions please contact your installer.',
+  HELP_INFORMATION_5: 'For help and questions please contact your installer',
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
   INSTALL: 'Install {0}',
@@ -286,7 +286,7 @@ const en: Translation = {
   STAY: 'Stay',
   LEAVE: 'Leave',
   SCHEDULER: 'Scheduler',
-  SCHEDULER_HELP_1: 'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT.',
+  SCHEDULER_HELP_1: 'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT',
   SCHEDULER_HELP_2: 'Use 00:00 to trigger once on start-up',
   SCHEDULE: 'Schedule',
   TIME: 'Time',
@@ -342,7 +342,7 @@ const en: Translation = {
   AUTO_SCROLL: 'Auto Scroll',
   DASHBOARD: 'Dashboard',
   NO_DATA: 'No data available',
-  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module.',
+  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module',
   DEVELOPER_MODE: 'Developer Mode'
 };
 

@@ -40,7 +40,7 @@ const Settings = () => {
     immediate: false
   });
 
-  // get installed version
+  // call checkUpgrade with no param to fetch EMS-ESP version
   const { data } = useRequest(() => callAction({ action: 'checkUpgrade' }), {
     initialData: { emsesp_version: '...' }
   });

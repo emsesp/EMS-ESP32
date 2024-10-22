@@ -26,7 +26,7 @@ const nl: Translation = {
   ENTITIES: 'entiteiten',
   REFRESH: 'Ververs',
   EXPORT: 'Export',
-  FAVORITES: "Favorieten", // TODO Translate
+  FAVORITES: "Favorieten",
   DEVICE_DETAILS: 'Device Gegevens',
   ID_OF: '{0} ID',
   DEVICE: 'Apparaat',
@@ -147,7 +147,7 @@ const nl: Translation = {
   CUSTOMIZATIONS_HELP_2: 'Markeer as favoriet',
   CUSTOMIZATIONS_HELP_3: 'Zet schrijfacties uit',
   CUSTOMIZATIONS_HELP_4: 'Uitsluiten van MQTT en API',
-  CUSTOMIZATIONS_HELP_5: 'verbergen voor apparaten', // TODO translate
+  CUSTOMIZATIONS_HELP_5: 'verbergen voor apparaten',
   CUSTOMIZATIONS_HELP_6: 'verwijderen van memory',
   SELECT_DEVICE: 'Selecteer een apparaat',
   SET_ALL: 'Alles aanzetten',
@@ -159,7 +159,7 @@ const nl: Translation = {
   HELP_INFORMATION_2: 'Voor de live community ga naar de Discord server',
   HELP_INFORMATION_3: 'Om een nieuwe feature te vragen of een bug te rapporteren',
   HELP_INFORMATION_4: 'Zorg dat je ook je systeem details zijn toevoeged voor een sneller antwoord',
-  HELP_INFORMATION_5: 'For help and questions please contact your installer.', // TODO translate
+  HELP_INFORMATION_5: 'For help and questions please contact your installer', // TODO translate
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
   INSTALL: 'Installeren {0}',
@@ -286,14 +286,14 @@ const nl: Translation = {
   STAY: 'Blijven',
   LEAVE: 'Verlaten',
   SCHEDULER: 'Scheduler',
-  SCHEDULER_HELP_1: 'Automatiseer opdrachten door hieronder geplande gebeurtenissen toe te voegen. Stel een unieke naam in om activering via API/MQTT in/uit te schakelen.',
+  SCHEDULER_HELP_1: 'Automatiseer opdrachten door hieronder geplande gebeurtenissen toe te voegen. Stel een unieke naam in om activering via API/MQTT in/uit te schakelen',
   SCHEDULER_HELP_2: 'Gebruik 00:00 om eenmaal te activeren bij het opstarten',
   SCHEDULE: 'Schedule',
   TIME: 'Tijd',
   TIMER: 'Timer',
-  ONCHANGE: 'Op verandering', // TODO translate
-  CONDITION: 'Voorwaarde', // TODO translate
-  IMMEDIATE: 'Onmiddellijk', // TODO translate
+  ONCHANGE: 'Op verandering',
+  CONDITION: 'Voorwaarde',
+  IMMEDIATE: 'Onmiddellijk',
   SCHEDULE_UPDATED: 'Schema bijgewerkt',
   SCHEDULE_TIMER_1: 'bij het opstarten',
   SCHEDULE_TIMER_2: 'elke minuut',
@@ -342,7 +342,7 @@ const nl: Translation = {
   AUTO_SCROLL: 'Auto Scroll', // TODO translate
   DASHBOARD: 'Dashboard', // TODO translate
   NO_DATA: 'No data available', // TODO translate
-  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module.', // TODO translate
+  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module', // TODO translate
   DEVELOPER_MODE: 'Developer Mode' // TODO translate
 };
 

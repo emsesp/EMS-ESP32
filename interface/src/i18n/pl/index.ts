@@ -26,7 +26,7 @@ const pl: BaseTranslation = {
   ENTITIES: 'encj{{i|a|e|e|i}}',
   REFRESH: 'Odśwież',
   EXPORT: 'Eksportuj',
-  FAVORITES: "Ulubione", // TODO Translate
+  FAVORITES: "Ulubione",
   DEVICE_DETAILS: 'Szczegóły urządzenia',
   ID_OF: 'ID {0}',
   DEVICE: 'urządzenia',
@@ -147,7 +147,7 @@ const pl: BaseTranslation = {
   CUSTOMIZATIONS_HELP_2: 'oznacz jako ulubioną',
   CUSTOMIZATIONS_HELP_3: 'zablokuj akcje zapisu',
   CUSTOMIZATIONS_HELP_4: 'wyklucz z MQTT i API',
-  CUSTOMIZATIONS_HELP_5: 'ukryć przed urządzeniami', // TODO translate
+  CUSTOMIZATIONS_HELP_5: 'ukryć przed urządzeniami',
   CUSTOMIZATIONS_HELP_6: 'usuń z pamięci',
   SELECT_DEVICE: 'wybierz urządzenie',
   SET_ALL: 'Ustaw wszystko jako',
@@ -155,11 +155,11 @@ const pl: BaseTranslation = {
   NAME: '{{Nazwa|nazwa|}}',
   CUSTOMIZATIONS_RESET: 'Na pewno chcesz usunąć wszystkie personalizacje łącznie z ustawieniami dla czujników temperatury 1-Wire® i urządzeń podłączonych do EMS-ESP?',
   SUPPORT_INFORMATION: '{{I|i|}}nformacj{{e|i|}} o systemie',
-  HELP_INFORMATION_1: 'Skorzystaj z wiki w internecie aby uzyskać instrukcje dotyczące konfiguracji EMS-ESP.',
-  HELP_INFORMATION_2: 'Dołącz do naszego serwera Discord by komunikować się na żywo ze społecznością.',
-  HELP_INFORMATION_3: 'Zaproponuj nową funkcjonalność lub zgłoś problem.',
+  HELP_INFORMATION_1: 'Skorzystaj z wiki w internecie aby uzyskać instrukcje dotyczące konfiguracji EMS-ESP',
+  HELP_INFORMATION_2: 'Dołącz do naszego serwera Discord by komunikować się na żywo ze społecznością',
+  HELP_INFORMATION_3: 'Zaproponuj nową funkcjonalność lub zgłoś problem',
   HELP_INFORMATION_4: 'Zgłaszając problem, nie zapomnij pobrać i dołączyć informacji o swoim systemie!',
-  HELP_INFORMATION_5: 'For help and questions please contact your installer.', // TODO translate
+  HELP_INFORMATION_5: 'For help and questions please contact your installer', // TODO translate
   UPLOAD: 'Wysyłanie',
   DOWNLOAD: '{{P|p||P}}obier{{anie|z||z}}',
   INSTALL: 'Zainstalować {0}',
@@ -179,7 +179,7 @@ const pl: BaseTranslation = {
   DEVELOPMENT: 'Testowe',
   EMS_ESP_VER: 'Wersja Firmware',
   UPTIME: 'Czas działania systemu',
-  FREE_MEMORY: 'Wolne Memory', // TODO translate
+  FREE_MEMORY: 'Wolne Memory',
   PSRAM: 'PSRAM (rozmiar / wolne)',
   FLASH: 'FLASH (rozmiar , taktowanie)',
   APPSIZE: 'Aplikacja (partycja: wykorzystane / wolne)',
@@ -286,14 +286,14 @@ const pl: BaseTranslation = {
   STAY: 'Pozostań',
   LEAVE: 'Opuść',
   SCHEDULER: 'Harmonogram',
-  SCHEDULER_HELP_1: 'Zautomatyzuj wykonywanie komend, dodając poniżej harmonogram zdarzeń. Nadaj mu unikalną nazwę, aby móc go aktywować/dezaktywować przez API/MQTT.',
+  SCHEDULER_HELP_1: 'Zautomatyzuj wykonywanie komend, dodając poniżej harmonogram zdarzeń. Nadaj mu unikalną nazwę, aby móc go aktywować/dezaktywować przez API/MQTT',
   SCHEDULER_HELP_2: 'Wpisz 00:00 aby wykonywać jednorazowo przy starcie.',
   SCHEDULE: '{{H|h|}}armonogram{{|u|}}',
   TIME: '{{Czas|Godzina|}}',
   TIMER: '{{m|M|}}inutnik',
-  ONCHANGE: 'O zmianie', // TODO translate
-  CONDITION: 'Stan', // TODO translate
-  IMMEDIATE: 'Natychmiastowy', // TODO translate
+  ONCHANGE: 'O zmianie',
+  CONDITION: 'Stan',
+  IMMEDIATE: 'Natychmiastowy',
   SCHEDULE_UPDATED: 'Harmonogram został uaktualniony.',
   SCHEDULE_TIMER_1: 'przy starcie',
   SCHEDULE_TIMER_2: 'co minutę',
@@ -320,7 +320,7 @@ const pl: BaseTranslation = {
   SECURITY_1: 'Dodawanie i usuwanie użytkowników',
   DOWNLOAD_UPLOAD_1: 'Pobieranie/wysyłanie ustawień i firmware',
   MODULES: 'Module', // TODO translate
-  MODULES_1: 'Aktywuj lub dezaktywuj moduły zewnętrzne', // TODO translate
+  MODULES_1: 'Aktywuj lub dezaktywuj moduły zewnętrzne',
   MODULES_UPDATED: 'Modules updated', // TODO translate
   MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
   MODULES_NONE: 'No external modules detected', // TODO translate
@@ -342,7 +342,7 @@ const pl: BaseTranslation = {
   AUTO_SCROLL: 'Auto Scroll', // TODO translate
   DASHBOARD: 'Dashboard', // TODO translate
   NO_DATA: 'No data available', // TODO translate
-  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module.', // TODO translate
+  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module', // TODO translate
   DEVELOPER_MODE: 'Developer Mode' // TODO translate
 };
 

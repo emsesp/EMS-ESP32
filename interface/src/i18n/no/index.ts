@@ -26,7 +26,7 @@ const no: Translation = {
   ENTITIES: 'Ojekter',
   REFRESH: 'Oppdater',
   EXPORT: 'Eksport',
-  FAVORITES: "Favoritter", // TODO translate
+  FAVORITES: "Favoritter",
   DEVICE_DETAILS: 'Enhetsdetaljer',
   ID_OF: '{0}-ID',
   DEVICE: 'Enhets',
@@ -147,7 +147,7 @@ const no: Translation = {
   CUSTOMIZATIONS_HELP_2: 'merk som favoritt',
   CUSTOMIZATIONS_HELP_3: 'inaktiviser skriving',
   CUSTOMIZATIONS_HELP_4: 'ekskludere fra MQTT og API',
-  CUSTOMIZATIONS_HELP_5: 'skjul fra enheter', // TODO translate
+  CUSTOMIZATIONS_HELP_5: 'skjul fra enheter',
   CUSTOMIZATIONS_HELP_6: 'fjern fra minnet',
   SELECT_DEVICE: 'Velg en enhet',
   SET_ALL: 'sett alle',
@@ -159,7 +159,7 @@ const no: Translation = {
   HELP_INFORMATION_2: 'For community-support besøk vår Discord-server',
   HELP_INFORMATION_3: 'For å be om en ny funksjon eller melde feil',
   HELP_INFORMATION_4: 'Husk å laste ned og legg ved din systeminformasjon for en raskere respons når du rapporterer et problem',
-  HELP_INFORMATION_5: 'For help and questions please contact your installer.', // TODO translate
+  HELP_INFORMATION_5: 'For help and questions please contact your installer', // TODO translate
   UPLOAD: 'Opplasning',
   DOWNLOAD: '{{N|n|n}}edlasting',
   INSTALL: 'Installer {0}',
@@ -260,7 +260,7 @@ const no: Translation = {
   SCAN_AGAIN: 'Søk igjen',
   NETWORK_SCANNER: 'Nettverk Scanner',
   NETWORK_NO_WIFI: 'Ingen trådløse nett funnet',
-  NETWORK_BLANK_SSID: 'la feltet være blankt for å deaktivisere trådløst nettverk', // TODO translate
+  NETWORK_BLANK_SSID: 'la feltet være blankt for å deaktivisere trådløst nettverk',
   NETWORK_BLANK_BSSID: 'leave blank to use only SSID', // TODO translate
   TX_POWER: 'Tx Effekt',
   HOSTNAME: 'Hostname',
@@ -286,14 +286,14 @@ const no: Translation = {
   STAY: 'Bli her',
   LEAVE: 'Forlat',
   SCHEDULER: 'Planlegger',
-  SCHEDULER_HELP_1: 'Automatiser kommandoer ved å legge til skedulerte hendelser nedenfor. Sett et unikt navn for å slå på/av aktivering via API/MQTT.',
+  SCHEDULER_HELP_1: 'Automatiser kommandoer ved å legge til skedulerte hendelser nedenfor. Sett et unikt navn for å slå på/av aktivering via API/MQTT',
   SCHEDULER_HELP_2: 'Bruk 00:00 for å kjøre en gang ved oppstart',
   SCHEDULE: 'Planlegg',
   TIME: 'Tid',
   TIMER: 'Timer',
-  ONCHANGE: 'På endring', // TODO translate
-  CONDITION: 'Betingelse', // TODO translate
-  IMMEDIATE: 'Umiddelbar', // TODO translate
+  ONCHANGE: 'På endring',
+  CONDITION: 'Betingelse',
+  IMMEDIATE: 'Umiddelbar',
   SCHEDULE_UPDATED: 'Planlegger er oppdatert',
   SCHEDULE_TIMER_1: 'ved oppstart',
   SCHEDULE_TIMER_2: 'hvert minutt',
@@ -320,7 +320,7 @@ const no: Translation = {
   SECURITY_1: 'Add or remove users', // TODO translate
   DOWNLOAD_UPLOAD_1: 'Download and Upload Settings and Firmware', // TODO translate
   MODULES: 'Module', // TODO translate
-  MODULES_1: 'Aktiver eller deaktiver eksterne moduler', // TODO translate
+  MODULES_1: 'Aktiver eller deaktiver eksterne moduler',
   MODULES_UPDATED: 'Modules updated', // TODO translate
   MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
   MODULES_NONE: 'No external modules detected', // TODO translate
@@ -342,7 +342,7 @@ const no: Translation = {
   AUTO_SCROLL: 'Auto Scroll', // TODO translate
   DASHBOARD: 'Dashboard', // TODO translate
   NO_DATA: 'No data available', // TODO translate
-  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module.', // TODO translate
+  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module', // TODO translate
   DEVELOPER_MODE: 'Developer Mode' // TODO translate
 };
 

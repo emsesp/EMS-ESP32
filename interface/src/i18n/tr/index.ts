@@ -26,7 +26,7 @@ const tr: Translation = {
   ENTITIES: 'varlıklar',
   REFRESH: 'Yenile',
   EXPORT: 'Dışarı al',
-  FAVORITES: "Favoriler", // TODO translate
+  FAVORITES: "Favoriler",
   DEVICE_DETAILS: 'Cihaz Ayrıntıları',
   ID_OF: 'Kimlik {0}',
   DEVICE: 'Cihaz',
@@ -147,7 +147,7 @@ const tr: Translation = {
   CUSTOMIZATIONS_HELP_2: 'favori olarak işaretle',
   CUSTOMIZATIONS_HELP_3: 'yazma işlemini devre dışı bırak',
   CUSTOMIZATIONS_HELP_4: 'MQTT ve APInin dışında bırak',
-  CUSTOMIZATIONS_HELP_5: 'Cihazlardan gizle', // TODO translate
+  CUSTOMIZATIONS_HELP_5: 'Cihazlardan gizle',
   CUSTOMIZATIONS_HELP_6: 'remove from memory',
   SELECT_DEVICE: 'Bir cihaz seç',
   SET_ALL: 'hepsini ayarla',
@@ -159,7 +159,7 @@ const tr: Translation = {
   HELP_INFORMATION_2: 'Canlı topluluk sohbeti için Discord sunucumuza katılın',
   HELP_INFORMATION_3: 'Yeni bir özellik talep etmek yada hata bildirmek için',
   HELP_INFORMATION_4: 'Bir sorun bildirirken daha hızlı bir dönüş için sistem bilginizi indirip eklemeyi unutmayın',
-  HELP_INFORMATION_5: 'For help and questions please contact your installer.', // TODO translate
+  HELP_INFORMATION_5: 'For help and questions please contact your installer', // TODO translate
   UPLOAD: 'Yükleme',
   DOWNLOAD: '{{İ|i|i}}İndirme',
   INSTALL: 'Düzenlemek {0}',
@@ -260,7 +260,7 @@ const tr: Translation = {
   SCAN_AGAIN: 'Tekrar tara',
   NETWORK_SCANNER: 'Ağ Tarayıcısı',
   NETWORK_NO_WIFI: 'Hiçbir Kablosuz Ağ bulunamadı',
-  NETWORK_BLANK_SSID: 'Kablosuz ağı devre dışı bırakmak için boş bırakın', // TODO translate
+  NETWORK_BLANK_SSID: 'Kablosuz ağı devre dışı bırakmak için boş bırakın',
   NETWORK_BLANK_BSSID: 'leave blank to use only SSID', // TODO translate
   TX_POWER: 'Aktarım gücü',
   HOSTNAME: 'Ana Makine Adı',
@@ -286,12 +286,12 @@ const tr: Translation = {
   STAY: 'Stay', // TODO translate
   LEAVE: 'Leave', // TODO translate
   SCHEDULER: 'Scheduler', // TODO translate
-  SCHEDULER_HELP_1: 'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT.', // TODO translate
+  SCHEDULER_HELP_1: 'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT', // TODO translate
   SCHEDULER_HELP_2: 'Use 00:00 to trigger once on start-up', // TODO translate
   SCHEDULE: 'Schedule', // TODO translate
   TIME: 'Time', // TODO translate
   TIMER: 'Timer', // TODO translate
-  ONCHANGE: 'Değişimde', // TODO translate
+  ONCHANGE: 'Değişimde',
   CONDITION: 'Durum', // TODO translate
   IMMEDIATE: 'hemen', // TODO translate
   SCHEDULE_UPDATED: 'Schedule updated', // TODO translate
@@ -320,7 +320,7 @@ const tr: Translation = {
   SECURITY_1: 'Add or remove users', // TODO translate
   DOWNLOAD_UPLOAD_1: 'Download and Upload Settings and Firmware', // TODO translate
   MODULES: 'Module', // TODO translate
-  MODULES_1: 'Harici modülleri etkinleştirin veya devre dışı bırakın', // TODO translate
+  MODULES_1: 'Harici modülleri etkinleştirin veya devre dışı bırakın',
   MODULES_UPDATED: 'Modules updated', // TODO translate
   MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
   MODULES_NONE: 'No external modules detected', // TODO translate
@@ -342,7 +342,7 @@ const tr: Translation = {
   AUTO_SCROLL: 'Auto Scroll', // TODO translate
   DASHBOARD: 'Dashboard', // TODO translate
   NO_DATA: 'No data available', // TODO translate
-  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module.', // TODO translate
+  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module', // TODO translate
   DEVELOPER_MODE: 'Developer Mode' // TODO translate
 };
 
