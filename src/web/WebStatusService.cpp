@@ -173,10 +173,6 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
         ok = uploadURL(param.c_str());
     }
 
-#if defined(EMSESP_UNITY)
-    // store the result so we can test with Unity later
-    storeResponse(output);
-#endif
 #if defined(EMSESP_STANDALONE) && !defined(EMSESP_UNITY)
     Serial.printf("%sweb output: %s[%s]", COLOR_WHITE, COLOR_BRIGHT_CYAN, request->url().c_str());
     Serial.printf(" %s(%d)%s ", ok ? COLOR_BRIGHT_GREEN : COLOR_BRIGHT_RED, ok ? 200 : 400, COLOR_YELLOW);
@@ -204,7 +200,8 @@ bool WebStatusService::checkUpgrade(JsonObject root, std::string & latest_versio
     emsesp::EMSESP::logger().debug("Checking for upgrade: %s > %s", EMSESP_APP_VERSION, latest_version.c_str());
 #endif
 
-    root["upgradeable"] = (this_version > settings_version);
+    root["upgradeable"]    = (this_version > settings_version);
+    root["emsesp_version"] = EMSESP_APP_VERSION;
 
     return true;
 }

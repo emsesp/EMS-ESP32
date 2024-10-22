@@ -15,6 +15,7 @@ import DownloadUpload from 'app/settings/DownloadUpload';
 import MqttSettings from 'app/settings/MqttSettings';
 import NTPSettings from 'app/settings/NTPSettings';
 import Settings from 'app/settings/Settings';
+import Version from 'app/settings/Version';
 import Network from 'app/settings/network/Network';
 import Security from 'app/settings/security/Security';
 import APStatus from 'app/status/APStatus';
@@ -51,6 +52,7 @@ const AuthenticatedRouting = () => {
         {me.admin && (
           <>
             <Route path="/settings" element={<Settings />} />
+            <Route path="/settings/version" element={<Version />} />
             <Route path="/settings/application" element={<ApplicationSettings />} />
             <Route path="/settings/mqtt" element={<MqttSettings />} />
             <Route path="/settings/ntp" element={<NTPSettings />} />

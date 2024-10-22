@@ -115,7 +115,7 @@ const tr: Translation = {
   READONLY: 'Salt okunur modu devreye al (bütün giden EMS Tx Yazma komutlarını engeller)',
   UNDERCLOCK_CPU: 'İşlemci hızını düşür',
   REMOTE_TIMEOUT: 'Remote timeout',
-  REMOTE_TIMEOUT_EN: 'Disable remote on missing roomtemperature',
+  REMOTE_TIMEOUT_EN: 'Disable remote on missing room temperature', // TODO translate
   HEATINGOFF: 'Start boiler with forced heating off', // TODO translate
   MIN_DURATION: 'Wait time',
   ENABLE_SHOWER_TIMER: 'Duş Sayacını Devreye Al',
@@ -177,7 +177,6 @@ const tr: Translation = {
   SYSTEM_FACTORY_TEXT_DIALOG: 'Cihazı fabrika ayarlarına döndürmek istediğinize emin misiniz?',
   STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Geliştirme',
-  RELEASE_NOTES: 'yayınlanma notları',
   EMS_ESP_VER: 'Firmware Sürümü',
   UPTIME: 'Sistem Çalışma Süresi',
   FREE_MEMORY: 'Yığın Memory',
@@ -343,7 +342,8 @@ const tr: Translation = {
   AUTO_SCROLL: 'Auto Scroll', // TODO translate
   DASHBOARD: 'Dashboard', // TODO translate
   NO_DATA: 'No data available', // TODO translate
-  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module.' // TODO translate
+  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module.', // TODO translate
+  DEVELOPER_MODE: 'Developer Mode' // TODO translate
 };
 
 export default tr;

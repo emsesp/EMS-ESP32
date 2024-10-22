@@ -115,7 +115,7 @@ const sv: Translation = {
   READONLY: 'Aktivera read-only (blockerar alla utgående skrivkommandon mot EMS-bussen)',
   UNDERCLOCK_CPU: 'Nedklocka Processorhastighet',
   REMOTE_TIMEOUT: 'Remote timeout',
-  REMOTE_TIMEOUT_EN: 'Disable remote on missing roomtemperature',
+  REMOTE_TIMEOUT_EN: 'Disable remote on missing room temperature', // TODO translate
   HEATINGOFF: 'Start boiler with forced heating off', // TODO translate
   MIN_DURATION: 'Wait time',
   ENABLE_SHOWER_TIMER: 'Aktivera Dusch-timer',
@@ -177,7 +177,6 @@ const sv: Translation = {
   SYSTEM_FACTORY_TEXT_DIALOG: 'Är du säker att du vill fabriksåterställa enheten?',
   STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Utveckling',
-  RELEASE_NOTES: 'release-logg',
   EMS_ESP_VER: 'Firmware Version', // TODO translate
   UPTIME: 'Systemets Upptid',
   FREE_MEMORY: 'Ledigt Memory',
@@ -343,7 +342,8 @@ const sv: Translation = {
   AUTO_SCROLL: 'Auto Scroll', // TODO translate
   DASHBOARD: 'Dashboard', // TODO translate
   NO_DATA: 'No data available', // TODO translate
-  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module.' // TODO translate
+  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module.', // TODO translate
+  DEVELOPER_MODE: 'Developer Mode' // TODO translate
 };
 
 export default sv;

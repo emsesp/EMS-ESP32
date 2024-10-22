@@ -115,7 +115,7 @@ const en: Translation = {
   READONLY: 'Enable read-only mode (blocks all outgoing EMS Tx Write commands)',
   UNDERCLOCK_CPU: 'Underclock CPU speed',
   REMOTE_TIMEOUT: 'Remote timeout',
-  REMOTE_TIMEOUT_EN: 'Disable remote on missing roomtemperature',
+  REMOTE_TIMEOUT_EN: 'Disable remote on missing room temperature',
   HEATINGOFF: 'Start boiler with forced heating off',
   MIN_DURATION: 'Wait time',
   ENABLE_SHOWER_TIMER: 'Enable Shower Timer',
@@ -177,7 +177,6 @@ const en: Translation = {
   SYSTEM_FACTORY_TEXT_DIALOG: 'Are you sure you want to reset EMS-ESP to its factory defaults?',
   STABLE: 'Stable',
   DEVELOPMENT: 'Development',
-  RELEASE_NOTES: 'release notes',
   EMS_ESP_VER: 'Firmware Version',
   UPTIME: 'System Uptime',
   FREE_MEMORY: 'Free Memory',
@@ -344,6 +343,7 @@ const en: Translation = {
   DASHBOARD: 'Dashboard',
   NO_DATA: 'No data available',
   DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module.',
+  DEVELOPER_MODE: 'Developer Mode'
 };
 
 export default en;

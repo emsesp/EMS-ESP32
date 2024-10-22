@@ -177,7 +177,6 @@ const cz: Translation = {
   SYSTEM_FACTORY_TEXT_DIALOG: 'Opravdu chcete resetovat EMS-ESP do továrního nastavení?',
   STABLE: 'Stabilní',
   DEVELOPMENT: 'Vývojová verze',
-  RELEASE_NOTES: 'poznámky k vydání',
   EMS_ESP_VER: 'Verze firmwaru',
   UPTIME: 'Doba provozu systému',
   FREE_MEMORY: 'Volná paměť',
@@ -344,6 +343,7 @@ const cz: Translation = {
   DASHBOARD: 'Dashboard',
   NO_DATA: 'Žádná data nejsou k dispozici',
   DASHBOARD_1: 'Přizpůsobte si dashboard označením EMS entit jako Oblíbené pomocí modulu Přizpůsobení.',
+  DEVELOPER_MODE: 'Developer Mode' // TODO translate
 };
 
 export default cz;

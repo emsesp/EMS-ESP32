@@ -177,7 +177,6 @@ const de: Translation = {
   SYSTEM_FACTORY_TEXT_DIALOG: 'Sind Sie sicher, alle Einstellungen auf Werkseinstellung zu setzen?',
   STABLE: 'Stabil',
   DEVELOPMENT: 'Entwicklung',
-  RELEASE_NOTES: 'Versionshinweise',
   EMS_ESP_VER: 'Firmware-Version',
   UPTIME: 'Systembetriebszeit',
   FREE_MEMORY: 'Freier RAM Speicher',
@@ -343,7 +342,8 @@ const de: Translation = {
   AUTO_SCROLL: 'Automatisches Scrollen',
   DASHBOARD: 'Dashboard',
   NO_DATA: 'Keine Daten verfügbar',
-  DASHBOARD_1: 'Passen Sie Ihr Dashboard an, indem Sie EMS-Entitäten mithilfe des Moduls „Anpassungen“ als Favorit markieren.'
+  DASHBOARD_1: 'Passen Sie Ihr Dashboard an, indem Sie EMS-Entitäten mithilfe des Moduls „Anpassungen“ als Favorit markieren.',
+  DEVELOPER_MODE: 'Entwicklermodus'
 };
 
 export default de;

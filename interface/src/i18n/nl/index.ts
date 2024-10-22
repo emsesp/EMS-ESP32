@@ -115,7 +115,7 @@ const nl: Translation = {
   READONLY: 'Activeer read-only modus (blokkeert alle outgaande EMS Tx schrijf commandos)',
   UNDERCLOCK_CPU: 'Underclock CPU snelheid',
   REMOTE_TIMEOUT: 'Remote timeout',
-  REMOTE_TIMEOUT_EN: 'Disable remote on missing roomtemperature',
+  REMOTE_TIMEOUT_EN: 'Disable remote on missing room temperature', // TODO translate
   HEATINGOFF: 'Start ketel met geforceerde verwarming uit',
   MIN_DURATION: 'Wait time',
   ENABLE_SHOWER_TIMER: 'Activeer Douche Timer (tijdmeting)',
@@ -177,7 +177,6 @@ const nl: Translation = {
   SYSTEM_FACTORY_TEXT_DIALOG: 'Weet je zeker dat je een reset naar fabrieksinstellingen uit wilt voeren?',
   STABLE: 'Stable',
   DEVELOPMENT: 'Development',
-  RELEASE_NOTES: 'release notes',
   EMS_ESP_VER: 'Firmware Versie',
   UPTIME: 'Systeem Uptime',
   FREE_MEMORY: 'Free Memory',
@@ -343,7 +342,8 @@ const nl: Translation = {
   AUTO_SCROLL: 'Auto Scroll', // TODO translate
   DASHBOARD: 'Dashboard', // TODO translate
   NO_DATA: 'No data available', // TODO translate
-  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module.' // TODO translate
+  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module.', // TODO translate
+  DEVELOPER_MODE: 'Developer Mode' // TODO translate
 };
 
 export default nl;

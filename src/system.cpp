@@ -409,7 +409,8 @@ void System::reload_settings() {
         eth_phy_addr_   = settings.eth_phy_addr;
         eth_clock_mode_ = settings.eth_clock_mode;
 
-        locale_ = settings.locale;
+        locale_         = settings.locale;
+        developer_mode_ = settings.developer_mode;
     });
 }
 
@@ -851,6 +852,7 @@ void System::system_check() {
 // commands - takes static function pointers
 // can be called via Console using 'call system <cmd>'
 void System::commands_init() {
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(read), System::command_read, FL_(read_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(send), System::command_send, FL_(send_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(fetch), System::command_fetch, FL_(fetch_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(restart), System::command_restart, FL_(restart_cmd), CommandFlag::ADMIN_ONLY);
@@ -1689,6 +1691,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
 #endif
         node["modbusEnabled"]   = settings.modbus_enabled;
         node["forceHeatingOff"] = settings.boiler_heatingoff;
+        node["developerMode"]   = settings.developer_mode;
     });
 
     // Devices - show EMS devices if we have any
@@ -2010,6 +2013,62 @@ bool System::uploadFirmwareURL(const char * url) {
 #endif
 
     return true; // OK
+}
+
+// read command, e.g. read <deviceID> <type ID> [offset] [length] from console or API
+bool System::readCommand(const char * data) {
+    // extract <deviceID> <type ID> [offset] [length] from string
+    char * p;
+    char   value[6];
+
+    // make a copy so we can iterate, max 15 chars (XX XXXX XX XX)
+    char data_args[15];
+    strlcpy(data_args, data, sizeof(data_args));
+
+    uint8_t  device_id = 0; // is in hex
+    uint16_t type_id   = 0; // is in hex
+    uint8_t  length    = 0;
+    uint8_t  offset    = 0;
+
+    // first check deviceID
+    if ((p = strtok(data_args, " ,"))) {               // delimiter comma or space
+        strlcpy(value, p, 10);                         // get string
+        device_id = (uint8_t)Helpers::hextoint(value); // convert hex to int
+        if (!EMSESP::valid_device(device_id)) {
+            LOG_ERROR("Invalid device ID (%d) for read command", device_id);
+            return false; // invalid device
+        }
+    }
+
+    // iterate until end
+    uint8_t num_args = 0;
+    while (p != 0) {
+        if ((p = strtok(nullptr, " ,"))) { // delimiter comma or space
+            strlcpy(value, p, 10);         // get string
+            if (num_args == 0) {
+                type_id = (uint16_t)Helpers::hextoint(value); // convert hex to int
+            } else if (num_args == 1) {
+                offset = Helpers::atoint(value); // decimal
+            } else if (num_args == 2) {
+                length = Helpers::atoint(value); // decimal
+            }
+            num_args++;
+        }
+    }
+
+    if (num_args == 0) {
+        return false; // invalid number of arguments
+    }
+
+    EMSESP::send_read_request(type_id, device_id, offset, length, true);
+    EMSESP::set_read_id(type_id);
+
+    return true;
+}
+
+// system read command
+bool System::command_read(const char * value, const int8_t id) {
+    return readCommand(value);
 }
 
 } // namespace emsesp

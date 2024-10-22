@@ -116,7 +116,7 @@ export default () => {
             };
             count++;
             res.write(`data: ${JSON.stringify(data)}\n\n`);
-          }, 500);
+          }, 1000);
 
           // if client closes connection
           res.on('close', () => {
