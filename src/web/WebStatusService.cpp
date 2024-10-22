@@ -154,19 +154,31 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
     auto *     response = new AsyncJsonResponse();
     JsonObject root     = response->getRoot();
 
-    // get action and any optional param
-    std::string action = json["action"];
-    std::string param  = json["param"]; // is optional
+    // param is optional - https://arduinojson.org/news/2024/09/18/arduinojson-7-2/
+    std::string param;
+    bool        has_param      = false;
+    JsonVariant param_optional = json["param"];
+    if (json["param"].is<const char *>()) {
+        param     = param_optional.as<std::string>();
+        has_param = true;
+    } else {
+        has_param = false;
+    }
 
     // check if we're authenticated for admin tasks, some actions are only for admins
     Authentication authentication = _securityManager->authenticateRequest(request);
     bool           is_admin       = AuthenticationPredicates::IS_ADMIN(authentication);
 
-    bool ok = true;
+    // call action command
+    bool        ok     = false;
+    std::string action = json["action"];
+
     if (action == "checkUpgrade") {
-        ok = checkUpgrade(root, param);
+        ok = checkUpgrade(root, param); // param could be empty, if so only send back version
     } else if (action == "export") {
-        ok = exportData(root, param);
+        if (has_param) {
+            ok = exportData(root, param);
+        }
     } else if (action == "customSupport") {
         ok = customSupport(root);
     } else if (action == "uploadURL" && is_admin) {
@@ -191,19 +203,21 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
 }
 
 // action = checkUpgrade
-// returns true if there is an upgrade available
 bool WebStatusService::checkUpgrade(JsonObject root, std::string & latest_version) {
-    version::Semver200_version settings_version(EMSESP_APP_VERSION);
-    version::Semver200_version this_version(latest_version);
-
-#if defined(EMSESP_DEBUG)
-    emsesp::EMSESP::logger().debug("Checking for upgrade: %s > %s", EMSESP_APP_VERSION, latest_version.c_str());
-#endif
-
-    root["upgradeable"]    = (this_version > settings_version);
     root["emsesp_version"] = EMSESP_APP_VERSION;
 
-    return true;
+    if (!latest_version.empty()) {
+#if defined(EMSESP_DEBUG)
+        emsesp::EMSESP::logger().debug("Checking for upgrade: %s > %s", EMSESP_APP_VERSION, latest_version.c_str());
+#endif
+
+        version::Semver200_version settings_version(EMSESP_APP_VERSION);
+        version::Semver200_version this_version(latest_version);
+
+        root["upgradeable"] = (this_version > settings_version);
+    }
+
+    return true; // always ok
 }
 
 // action = allvalues
@@ -258,8 +272,9 @@ bool WebStatusService::exportData(JsonObject root, std::string & type) {
         root.clear(); // don't need the "type" key added to the output
         allvalues(root);
     } else {
-        return false;
+        return false; // error
     }
+
     return true;
 }
 
