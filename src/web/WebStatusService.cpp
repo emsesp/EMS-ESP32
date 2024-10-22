@@ -200,7 +200,8 @@ bool WebStatusService::checkUpgrade(JsonObject root, std::string & latest_versio
     emsesp::EMSESP::logger().debug("Checking for upgrade: %s > %s", EMSESP_APP_VERSION, latest_version.c_str());
 #endif
 
-    root["upgradeable"] = (this_version > settings_version);
+    root["upgradeable"]    = (this_version > settings_version);
+    root["emsesp_version"] = EMSESP_APP_VERSION;
 
     return true;
 }

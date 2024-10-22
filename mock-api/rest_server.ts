@@ -199,8 +199,9 @@ function custom_support() {
 function check_upgrade(version: string) {
   console.log('check upgrade from version', version);
   const data = {
+    emsesp_version: VERSION,
     upgradeable: true
-    // upgradeable: false
+    // upgradeable: false,
   };
   return data;
 }
@@ -564,7 +565,7 @@ const EMSESP_SYSTEM_INFO_ENDPOINT = API_ENDPOINT_ROOT + 'system/info';
 
 const emsesp_info = {
   System: {
-    version: '3.7-demo',
+    version: VERSION,
     uptime: '001+06:40:34.018',
     'uptime (seconds)': 110434,
     freemem: 131,
