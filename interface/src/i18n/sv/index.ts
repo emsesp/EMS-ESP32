@@ -177,7 +177,6 @@ const sv: Translation = {
   SYSTEM_FACTORY_TEXT_DIALOG: 'Är du säker att du vill fabriksåterställa enheten?',
   STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Utveckling',
-  RELEASE_NOTES: 'release-logg',
   EMS_ESP_VER: 'Firmware Version', // TODO translate
   UPTIME: 'Systemets Upptid',
   FREE_MEMORY: 'Ledigt Memory',

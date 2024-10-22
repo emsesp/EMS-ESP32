@@ -177,7 +177,6 @@ const it: Translation = {
   SYSTEM_FACTORY_TEXT_DIALOG: 'Sei sicuro di voler ripristinare il dispositivo alle impostazioni di fabbrica??',
   STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Sviluppo',
-  RELEASE_NOTES: 'note rilascio',
   EMS_ESP_VER: 'Versione Firmware',
   UPTIME: 'Tempo di attività del sistema',
   FREE_MEMORY: 'Free Memory',

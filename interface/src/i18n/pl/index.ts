@@ -177,7 +177,6 @@ const pl: BaseTranslation = {
   SYSTEM_FACTORY_TEXT_DIALOG: 'Na pewno chcesz przywrócić ustawienia fabryczne interfejsu EMS-ESP? ',
   STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Testowe',
-  RELEASE_NOTES: 'lista zmian',
   EMS_ESP_VER: 'Wersja Firmware',
   UPTIME: 'Czas działania systemu',
   FREE_MEMORY: 'Wolne Memory', // TODO translate

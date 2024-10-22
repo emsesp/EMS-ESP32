@@ -177,7 +177,6 @@ const en: Translation = {
   SYSTEM_FACTORY_TEXT_DIALOG: 'Are you sure you want to reset EMS-ESP to its factory defaults?',
   STABLE: 'Stable',
   DEVELOPMENT: 'Development',
-  RELEASE_NOTES: 'release notes',
   EMS_ESP_VER: 'Firmware Version',
   UPTIME: 'System Uptime',
   FREE_MEMORY: 'Free Memory',

@@ -177,7 +177,6 @@ const fr: Translation = {
   SYSTEM_FACTORY_TEXT_DIALOG: "Êtes-vous sûr de vouloir réinitialiser l'appareil à ses paramètres d'usine ?",
   STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Développement',
-  RELEASE_NOTES: 'notes de version',
   EMS_ESP_VER: 'Firmware Version', // TODO translate
   UPTIME: 'Durée de fonctionnement du système',
   FREE_MEMORY: 'Libre Memory',

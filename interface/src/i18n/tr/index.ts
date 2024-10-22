@@ -177,7 +177,6 @@ const tr: Translation = {
   SYSTEM_FACTORY_TEXT_DIALOG: 'Cihazı fabrika ayarlarına döndürmek istediğinize emin misiniz?',
   STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Geliştirme',
-  RELEASE_NOTES: 'yayınlanma notları',
   EMS_ESP_VER: 'Firmware Sürümü',
   UPTIME: 'Sistem Çalışma Süresi',
   FREE_MEMORY: 'Yığın Memory',
