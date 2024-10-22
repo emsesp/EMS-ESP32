@@ -342,7 +342,7 @@ const cz: Translation = {
   AUTO_SCROLL: 'Automatické rolování',
   DASHBOARD: 'Dashboard',
   NO_DATA: 'Žádná data nejsou k dispozici',
-  DASHBOARD_1: 'Přizpůsobte si dashboard označením EMS entit jako Oblíbené pomocí modulu Přizpůsobení.',
+  DASHBOARD_1: 'Přizpůsobte si dashboard označením EMS entit jako Oblíbené pomocí modulu Přizpůsobení',
   DEVELOPER_MODE: 'Developer Mode' // TODO translate
 };
 

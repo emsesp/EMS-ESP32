@@ -174,7 +174,7 @@ const pl: BaseTranslation = {
   USE: 'Aby zaktualizować firmware skorzystaj z funkcji',
   FACTORY_RESET: 'Ustawienia fabryczne',
   SYSTEM_FACTORY_TEXT: 'Interfejs EMS-ESP został przywrócony do ustawień fabrycznych i zostanie teraz ponownie uruchomiony.',
-  SYSTEM_FACTORY_TEXT_DIALOG: 'Na pewno chcesz przywrócić ustawienia fabryczne interfejsu EMS-ESP? ',
+  SYSTEM_FACTORY_TEXT_DIALOG: 'Na pewno chcesz przywrócić ustawienia fabryczne interfejsu EMS-ESP?',
   STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Testowe',
   EMS_ESP_VER: 'Wersja Firmware',
@@ -299,7 +299,7 @@ const pl: BaseTranslation = {
   SCHEDULE_TIMER_2: 'co minutę',
   SCHEDULE_TIMER_3: 'co godzinę',
   CUSTOM_ENTITIES: '{{N|n|}}iestandardowe{{|j|}} encj{{e|i|}}',
-  ENTITIES_HELP_1: 'Zdefiniuj niestandardowe encje dla magistrali EMS.',
+  ENTITIES_HELP_1: 'Zdefiniuj niestandardowe encje dla magistrali EMS',
   ENTITIES_UPDATED: 'Niestandardowe encje zostały uaktualnione.',
   WRITEABLE: 'Zapisywalna',
   SHOWING: 'Wyświetlane',

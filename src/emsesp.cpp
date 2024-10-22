@@ -881,6 +881,9 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     if (type_name.empty()) {
         // check for global/common types like Version & UBADevices
         switch (telegram->type_id) {
+        case EMSdevice::EMS_TYPE_NAME:
+            type_name = "DeviceName";
+            break;
         case EMSdevice::EMS_TYPE_VERSION:
             type_name = "Version";
             break;
@@ -959,6 +962,27 @@ void EMSESP::process_UBADevices(std::shared_ptr<const Telegram> telegram) {
     }
 }
 
+// read deviceName from telegram 0x01 offset 27 and set it to custom name
+void EMSESP::process_deviceName(std::shared_ptr<const Telegram> telegram) {
+    // exit if only part of name fields
+    if (telegram->offset > 27 || (telegram->offset + telegram->message_length) < 29) {
+        return;
+    }
+    char    name[16];
+    uint8_t len = telegram->offset + telegram->message_length - 27;
+    strlcpy(name, (const char *)&telegram->message_data[27 - telegram->offset], len < 16 ? len : 16);
+    if (strlen(name)) {
+        webCustomizationService.read([&](WebCustomization const & settings) {
+            for (EntityCustomization e : settings.entityCustomizations) {
+                if ((e.device_id == telegram->src) && e.custom_name.empty()) {
+                    e.custom_name = name;
+                    break;
+                }
+            }
+        });
+    }
+}
+
 // process the Version telegram (type 0x02), which is a common type
 // e.g. 09 0B 02 00 PP V1 V2
 void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
@@ -1000,6 +1024,8 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
 
     // add it - will be overwritten if device already exists
     (void)add_device(device_id, product_id, version, brand);
+    // request the deviceName from telegram 0x01
+    send_read_request(EMSdevice::EMS_TYPE_NAME, device_id, 27);
 }
 
 // find the device object that matches the deviceID and see if it has a matching telegram type handler
@@ -1049,6 +1075,9 @@ bool EMSESP::process_telegram(std::shared_ptr<const Telegram> telegram) {
     // check for common types, like the Version(0x02)
     if (telegram->type_id == EMSdevice::EMS_TYPE_VERSION) {
         process_version(telegram);
+        return true;
+    } else if (telegram->type_id == EMSdevice::EMS_TYPE_NAME) {
+        process_deviceName(telegram);
         return true;
     } else if (telegram->type_id == EMSdevice::EMS_TYPE_UBADevices) {
         // do not flood tx-queue with version requests while waiting for km200
@@ -1444,7 +1473,8 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
                 // not for response to raw send commands without read_id set
                 if ((response_id_ == 0 || read_id_ > 0) && (txservice_.read_next_tx(data[3], length) == read_id_)) {
                     read_next_ = true;
-                    txservice_.send();
+                    txservice_.send(); // read next part withing same poll or:
+                    // txservice_.send_poll(); // close the bus, next request in new poll
                 } else {
                     read_next_ = false;
                     txservice_.send_poll(); // close the bus

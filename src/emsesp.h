@@ -249,6 +249,7 @@ class EMSESP {
   private:
     static std::string device_tostring(const uint8_t device_id);
     static void        process_UBADevices(std::shared_ptr<const Telegram> telegram);
+    static void        process_deviceName(std::shared_ptr<const Telegram> telegram);
     static void        process_version(std::shared_ptr<const Telegram> telegram);
     static void        publish_response(std::shared_ptr<const Telegram> telegram);
     static void        publish_all_loop();
