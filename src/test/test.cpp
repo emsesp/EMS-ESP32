@@ -1006,35 +1006,39 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             // request.url("/api");
             // EMSESP::webAPIService.webAPIService(&request, doc.as<JsonVariant>());
 
-            // char data2[] = "{\"action\":\"customSupport\", \"param\":\"hello\"}";
-            // deserializeJson(doc, data2);
-            // request.url("/rest/action");
-            // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+            char data2[] = "{\"action\":\"customSupport\", \"param\":\"hello\"}";
+            deserializeJson(doc, data2);
+            request.url("/rest/action");
+            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
-            // char data3[] = "{\"action\":\"export\", \"param\":\"schedule\"}";
-            // deserializeJson(doc, data3);
-            // request.url("/rest/action");
-            // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+            char data3[] = "{\"action\":\"export\", \"param\":\"schedule\"}";
+            deserializeJson(doc, data3);
+            request.url("/rest/action");
+            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
-            // char data4[] = "{\"action\":\"export\", \"param\":\"allvalues\"}";
-            // deserializeJson(doc, data4);
-            // request.url("/rest/action");
-            // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+            char data4[] = "{\"action\":\"export\", \"param\":\"allvalues\"}";
+            deserializeJson(doc, data4);
+            request.url("/rest/action");
+            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
-            char data6[] = "{\"device\":\"system\", \"cmd\":\"read\",\"value\":\"8 2 27 1\"}";
-            deserializeJson(doc, data6);
-            json = doc.as<JsonVariant>();
-            request.url("/api");
-            EMSESP::webAPIService.webAPIService(&request, json);
+            char data5[] = "{\"action\":\"checkUpgrade\", \"param\":\"3.7.0-dev.99\"}";
+            deserializeJson(doc, data5);
+            request.url("/rest/action");
+            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
-            char data7[] = "{\"device\":\"system\", \"cmd\":\"read\",\"value\":\"10 234\"}";
-            deserializeJson(doc, data7);
-            json = doc.as<JsonVariant>();
-            request.url("/api");
-            EMSESP::webAPIService.webAPIService(&request, json);
+            // char data6[] = "{\"device\":\"system\", \"cmd\":\"read\",\"value\":\"8 2 27 1\"}";
+            // deserializeJson(doc, data6);
+            // json = doc.as<JsonVariant>();
+            // request.url("/api");
+            // EMSESP::webAPIService.webAPIService(&request, json);
 
-            shell.invoke_command("call system read \"8 2 27 1\"");
+            // char data7[] = "{\"device\":\"system\", \"cmd\":\"read\",\"value\":\"10 234\"}";
+            // deserializeJson(doc, data7);
+            // json = doc.as<JsonVariant>();
+            // request.url("/api");
+            // EMSESP::webAPIService.webAPIService(&request, json);
 
+            // shell.invoke_command("call system read \"8 2 27 1\"");
 
         } else {
             EMSESP::webCustomEntityService.test();  // custom entities
