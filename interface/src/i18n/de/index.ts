@@ -115,7 +115,7 @@ const de: Translation = {
   READONLY: 'Nur-Lese-Modus aktivieren (blockiert alle ausgehenden EMS Tx-Schreibbefehle)',
   UNDERCLOCK_CPU: 'CPU-Geschwindigkeit untertakten',
   REMOTE_TIMEOUT: 'Timeout',
-  REMOTE_TIMEOUT_EN: 'Deaktiviere Remote bei fehlender Temperatur',
+  REMOTE_TIMEOUT_EN: 'Deaktiviere Remote bei fehlender Raumtemperatur',
   HEATINGOFF: 'Heizen ausschalten beim EMS-ESP Start',
   MIN_DURATION: 'Dauer bis die Dusche erkannt wrid',
   ENABLE_SHOWER_TIMER: 'Duschtimer aktivieren',
@@ -143,7 +143,7 @@ const de: Translation = {
   CUSTOMIZATIONS_RESTART: 'Alle Anpassungen wurden entfernt. Neustart...',
   CUSTOMIZATIONS_FULL: 'Ausgewählte Entitäten haben das Limit überschritten. Bitte stapelweise speichern!',
   CUSTOMIZATIONS_SAVED: 'Anpassungen gespeichert',
-  CUSTOMIZATIONS_HELP_1: 'Wählen Sie ein Gerät aus und passen Sie die Entitäten mithilfe der Optionen an.',
+  CUSTOMIZATIONS_HELP_1: 'Wählen Sie ein Gerät aus und passen Sie die Entitäten mithilfe der Optionen an', //. code
   CUSTOMIZATIONS_HELP_2: 'Als Favorit markieren',
   CUSTOMIZATIONS_HELP_3: 'Schreibaktion deaktivieren',
   CUSTOMIZATIONS_HELP_4: 'Von MQTT und API ausschließen',
@@ -158,7 +158,7 @@ const de: Translation = {
   HELP_INFORMATION_1: 'EMS-ESP Konfigurationsanweisungen und mehr finden Sie im Online-Wiki.',
   HELP_INFORMATION_2: 'Für einen Live-Community-Chat besuchen Sie unseren Discord-Server.',
   HELP_INFORMATION_3: 'Um neue Funktionen anzufragen oder Fehler zu melden, eröffnen Sie ein Issue auf GitHub.',
-  HELP_INFORMATION_4: 'Bitte laden Sie die Systemdetails und hängen Sie sie an das Support-Issue an.',
+  HELP_INFORMATION_4: 'Bitte laden Sie die Systemdetails und hängen Sie sie an das Support-Issue an', //. code
   HELP_INFORMATION_5: 'Für Hilfe und Fragen wenden Sie sich bitte an Ihren Installateur.',
   UPLOAD: 'Hochladen',
   DOWNLOAD: '{{H|h|h}}erunterladen',
@@ -186,8 +186,8 @@ const de: Translation = {
   FILESYSTEM: 'Dateisystem (Genutzt / Frei)',
   BUFFER_SIZE: 'Max. Puffergröße',
   COMPACT: 'Kompakte Darstellung',
-  DOWNLOAD_SETTINGS_TEXT: 'Erstellen Sie eine Sicherung Ihrer Konfigurationen und Einstellungen.',
-  UPLOAD_TEXT: 'Laden Sie eine neue Firmware-Datei (.bin) oder eine Sicherungsdatei (.json) hoch.',
+  DOWNLOAD_SETTINGS_TEXT: 'Erstellen Sie eine Sicherung Ihrer Konfigurationen und Einstellungen', //. code
+  UPLOAD_TEXT: 'Laden Sie eine neue Firmware-Datei (.bin) oder eine Sicherungsdatei (.json) hoch', //. code
   UPLOAD_DROP_TEXT: 'Klicken Sie hier, oder ziehen Sie eine Datei hierher.',
   ERROR: 'Unerwarteter Fehler, bitte versuchen Sie es erneut.',
   TIME_SET: 'Zeit gesetzt',
@@ -299,7 +299,7 @@ const de: Translation = {
   SCHEDULE_TIMER_2: 'jede Minute',
   SCHEDULE_TIMER_3: 'jede Stunde',
   CUSTOM_ENTITIES: 'Individuelle Entitäten',
-  ENTITIES_HELP_1: 'Definition eigener EMS-Werte oder dynamischer Variablen',
+  ENTITIES_HELP_1: 'Definition eigener EMS-Werte oder dynamischer Variablen', //. code
   ENTITIES_UPDATED: 'Entitäten gespeichert',
   WRITEABLE: 'Schreibbar',
   SHOWING: 'Anzeigen von',
@@ -322,7 +322,7 @@ const de: Translation = {
   MODULES: 'Module',
   MODULES_1: 'Externe Module aktivieren oder deaktivieren',
   MODULES_UPDATED: 'Module aktualisiert',
-  MODULES_DESCRIPTION: 'Klicken Sie auf das Modul, um EMS-ESP-Bibliotheksmodule zu aktivieren oder zu deaktivieren.',
+  MODULES_DESCRIPTION: 'Klicken Sie auf das Modul, um EMS-ESP-Bibliotheksmodule zu aktivieren oder zu deaktivieren', //. code
   MODULES_NONE: 'Keine externen Module erkannt',
   RENAME: 'Umbenennen',
   ENABLE_MODBUS: 'Modbus aktivieren',
@@ -342,7 +342,7 @@ const de: Translation = {
   AUTO_SCROLL: 'Automatisches Scrollen',
   DASHBOARD: 'Dashboard',
   NO_DATA: 'Keine Daten verfügbar',
-  DASHBOARD_1: 'Passen Sie Ihr Dashboard an, indem Sie EMS-Entitäten mithilfe des Moduls „Anpassungen“ als Favorit markieren.',
+  DASHBOARD_1: 'Passen Sie Ihr Dashboard an, indem Sie EMS-Entitäten mithilfe des Moduls „Anpassungen“ als Favorit markieren', //. code
   DEVELOPER_MODE: 'Entwicklermodus'
 };
 
