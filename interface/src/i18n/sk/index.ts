@@ -342,7 +342,7 @@ const sk: Translation = {
   AUTO_SCROLL: 'Automatické rolovanie',
   DASHBOARD: 'Panel',
   NO_DATA: 'Nie sú k dispozícii žiadne údaje',
-  DASHBOARD_1: 'Prispôsobte si svoj informačný panel tak, že označíte entity EMS ako Obľúbené pomocou modulu Prispôsobenia.',
+  DASHBOARD_1: 'Prispôsobte si svoj informačný panel tak, že označíte entity EMS ako Obľúbené pomocou modulu Prispôsobenia',
   DEVELOPER_MODE: 'Developer Mode' // TODO translate
 };
 

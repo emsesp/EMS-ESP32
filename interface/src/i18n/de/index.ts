@@ -143,7 +143,7 @@ const de: Translation = {
   CUSTOMIZATIONS_RESTART: 'Alle Anpassungen wurden entfernt. Neustart...',
   CUSTOMIZATIONS_FULL: 'Ausgewählte Entitäten haben das Limit überschritten. Bitte stapelweise speichern!',
   CUSTOMIZATIONS_SAVED: 'Anpassungen gespeichert',
-  CUSTOMIZATIONS_HELP_1: 'Wählen Sie ein Gerät aus und passen Sie die Entitäten mithilfe der Optionen an.',
+  CUSTOMIZATIONS_HELP_1: 'Wählen Sie ein Gerät aus und passen Sie die Entitäten mithilfe der Optionen an',
   CUSTOMIZATIONS_HELP_2: 'Als Favorit markieren',
   CUSTOMIZATIONS_HELP_3: 'Schreibaktion deaktivieren',
   CUSTOMIZATIONS_HELP_4: 'Von MQTT und API ausschließen',
@@ -186,8 +186,8 @@ const de: Translation = {
   FILESYSTEM: 'Dateisystem (Genutzt / Frei)',
   BUFFER_SIZE: 'Max. Puffergröße',
   COMPACT: 'Kompakte Darstellung',
-  DOWNLOAD_SETTINGS_TEXT: 'Erstellen Sie eine Sicherung Ihrer Konfigurationen und Einstellungen.',
-  UPLOAD_TEXT: 'Laden Sie eine neue Firmware-Datei (.bin) oder eine Sicherungsdatei (.json) hoch.',
+  DOWNLOAD_SETTINGS_TEXT: 'Erstellen Sie eine Sicherung Ihrer Konfigurationen und Einstellungen',
+  UPLOAD_TEXT: 'Laden Sie eine neue Firmware-Datei (.bin) oder eine Sicherungsdatei (.json) hoch',
   UPLOAD_DROP_TEXT: 'Klicken Sie hier, oder ziehen Sie eine Datei hierher.',
   ERROR: 'Unerwarteter Fehler, bitte versuchen Sie es erneut.',
   TIME_SET: 'Zeit gesetzt',
@@ -322,7 +322,7 @@ const de: Translation = {
   MODULES: 'Module',
   MODULES_1: 'Externe Module aktivieren oder deaktivieren',
   MODULES_UPDATED: 'Module aktualisiert',
-  MODULES_DESCRIPTION: 'Klicken Sie auf das Modul, um EMS-ESP-Bibliotheksmodule zu aktivieren oder zu deaktivieren.',
+  MODULES_DESCRIPTION: 'Klicken Sie auf das Modul, um EMS-ESP-Bibliotheksmodule zu aktivieren oder zu deaktivieren',
   MODULES_NONE: 'Keine externen Module erkannt',
   RENAME: 'Umbenennen',
   ENABLE_MODBUS: 'Modbus aktivieren',
@@ -342,7 +342,7 @@ const de: Translation = {
   AUTO_SCROLL: 'Automatisches Scrollen',
   DASHBOARD: 'Dashboard',
   NO_DATA: 'Keine Daten verfügbar',
-  DASHBOARD_1: 'Passen Sie Ihr Dashboard an, indem Sie EMS-Entitäten mithilfe des Moduls „Anpassungen“ als Favorit markieren.',
+  DASHBOARD_1: 'Passen Sie Ihr Dashboard an, indem Sie EMS-Entitäten mithilfe des Moduls „Anpassungen“ als Favorit markieren',
   DEVELOPER_MODE: 'Entwicklermodus'
 };
 
