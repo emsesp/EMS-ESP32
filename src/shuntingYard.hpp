@@ -72,6 +72,27 @@ std::deque<Token> exprToTokens(const std::string & expr) {
             if (*p == '\0') {
                 --p;
             }
+        } else if (strncmp(p, "int", 3) == 0) {
+            p += 2;
+            tokens.emplace_back(Token::Type::Unary, "i", 5);
+        } else if (strncmp(p, "round", 5) == 0) {
+            p += 4;
+            tokens.emplace_back(Token::Type::Unary, "r", 5);
+        } else if (strncmp(p, "abs", 3) == 0) {
+            p += 2;
+            tokens.emplace_back(Token::Type::Unary, "a", 5);
+        } else if (strncmp(p, "log", 3) == 0) {
+            p += 2;
+            tokens.emplace_back(Token::Type::Unary, "l", 5);
+        } else if (strncmp(p, "exp", 3) == 0) {
+            p += 2;
+            tokens.emplace_back(Token::Type::Unary, "e", 5);
+        } else if (strncmp(p, "sqrt", 4) == 0) {
+            p += 3;
+            tokens.emplace_back(Token::Type::Unary, "s", 5);
+        } else if (strncmp(p, "pow", 3) == 0) {
+            p += 2;
+            tokens.emplace_back(Token::Type::Unary, "p", 5);
         } else if (*p >= 'a' && *p <= 'z') {
             const auto * b = p;
             while ((*p >= 'a' && *p <= 'z') || (*p == '_')) {
@@ -447,6 +468,27 @@ std::string calculate(const std::string & expr) {
                     return "";
                 }
                 stack.push_back(to_logic(rhs) == 0 ? "1" : "0");
+                break;
+            case 'i':
+                stack.push_back(to_string(std::stoi(rhs)));
+                break;
+            case 'r':
+                stack.push_back(to_string(std::round(std::stod(rhs))));
+                break;
+            case 'a':
+                stack.push_back(to_string(std::abs(std::stod(rhs))));
+                break;
+            case 'e':
+                stack.push_back(to_string(std::exp(std::stod(rhs))));
+                break;
+            case 'l':
+                stack.push_back(to_string(std::log(std::stod(rhs))));
+                break;
+            case 's':
+                stack.push_back(to_string(std::sqrt(std::stod(rhs))));
+                break;
+            case 'p':
+                stack.push_back(to_string(std::pow(std::stod(rhs), 2)));
                 break;
             }
         } break;

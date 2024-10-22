@@ -343,9 +343,10 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
             message_p       = 6;
         } else {
             // READ
-            telegram_raw[4] = telegram->message_data[0];    // #bytes to return, which we assume is the only byte in the message block
-            telegram_raw[5] = (telegram->type_id >> 8) - 1; // type, 1st byte, high-byte, subtract 0x100
-            telegram_raw[6] = telegram->type_id & 0xFF;     // type, 2nd byte, low-byte
+            telegram_raw[4] =
+                telegram->message_data[0] > 25 ? 25 : telegram->message_data[0]; // #bytes to return, which we assume is the only byte in the message block
+            telegram_raw[5] = (telegram->type_id >> 8) - 1;                      // type, 1st byte, high-byte, subtract 0x100
+            telegram_raw[6] = telegram->type_id & 0xFF;                          // type, 2nd byte, low-byte
             message_p       = 7;
             copy_data       = false; // there are no more data values after the type_id when reading on EMS+
         }
@@ -354,6 +355,11 @@ void TxService::send_telegram(const QueuedTxTelegram & tx_telegram) {
         telegram_raw[2] = telegram->type_id;
         telegram_raw[3] = telegram->offset;
         message_p       = 4;
+        if (telegram->operation == Telegram::Operation::TX_READ) {
+            telegram_raw[4] = telegram->message_data[0] > 27 ? 27 : telegram->message_data[0];
+            message_p       = 5;
+            copy_data       = false; // there are no more data value
+        }
     }
 
     if (copy_data) {
