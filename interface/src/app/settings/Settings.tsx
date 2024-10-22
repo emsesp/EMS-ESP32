@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import BuildIcon from '@mui/icons-material/Build';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import ImportExportIcon from '@mui/icons-material/ImportExport';
@@ -20,7 +21,7 @@ import {
   List
 } from '@mui/material';
 
-import { API } from 'api/app';
+import { API, callAction } from 'api/app';
 
 import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova/client';
@@ -37,6 +38,11 @@ const Settings = () => {
 
   const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
     immediate: false
+  });
+
+  // get installed version
+  const { data } = useRequest(() => callAction({ action: 'checkUpgrade' }), {
+    initialData: { emsesp_version: '...' }
   });
 
   const doFormat = async () => {
@@ -78,9 +84,17 @@ const Settings = () => {
     <>
       <List sx={{ borderRadius: 3, border: '2px solid grey' }}>
         <ListMenuItem
+          icon={BuildIcon}
+          bgcolor="#72caf9"
+          label={LL.EMS_ESP_VER()}
+          text={data.emsesp_version}
+          to="version"
+        />
+
+        <ListMenuItem
           icon={TuneIcon}
           bgcolor="#134ba2"
-          label={LL.SETTINGS_OF(LL.APPLICATION())}
+          label={LL.APPLICATION()}
           text={LL.APPLICATION_SETTINGS_1()}
           to="application"
         />
@@ -88,7 +102,7 @@ const Settings = () => {
         <ListMenuItem
           icon={SettingsEthernetIcon}
           bgcolor="#40828f"
-          label={LL.SETTINGS_OF(LL.NETWORK(0))}
+          label={LL.NETWORK(0)}
           text={LL.CONFIGURE(LL.SETTINGS_OF(LL.NETWORK(1)))}
           to="network"
         />
@@ -96,7 +110,7 @@ const Settings = () => {
         <ListMenuItem
           icon={SettingsInputAntennaIcon}
           bgcolor="#5f9a5f"
-          label={LL.SETTINGS_OF(LL.ACCESS_POINT(0))}
+          label={LL.ACCESS_POINT(0)}
           text={LL.CONFIGURE(LL.ACCESS_POINT(1))}
           to="ap"
         />
@@ -104,7 +118,7 @@ const Settings = () => {
         <ListMenuItem
           icon={AccessTimeIcon}
           bgcolor="#c5572c"
-          label={LL.SETTINGS_OF('NTP')}
+          label="NTP"
           text={LL.CONFIGURE(LL.LOCAL_TIME(1))}
           to="ntp"
         />
@@ -112,14 +126,14 @@ const Settings = () => {
         <ListMenuItem
           icon={DeviceHubIcon}
           bgcolor="#68374d"
-          label={LL.SETTINGS_OF('MQTT')}
+          label="MQTT"
           text={LL.CONFIGURE('MQTT')}
           to="mqtt"
         />
 
         <ListMenuItem
           icon={LockIcon}
-          label={LL.SETTINGS_OF(LL.SECURITY(0))}
+          label={LL.SECURITY(0)}
           text={LL.SECURITY_1()}
           to="security"
         />

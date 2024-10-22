@@ -1,9 +1,7 @@
 import { useContext, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import BuildIcon from '@mui/icons-material/Build';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
@@ -13,7 +11,6 @@ import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import RouterIcon from '@mui/icons-material/Router';
 import SettingsInputAntennaIcon from '@mui/icons-material/SettingsInputAntenna';
 import TimerIcon from '@mui/icons-material/Timer';
-import UpgradeIcon from '@mui/icons-material/Upgrade';
 import WifiIcon from '@mui/icons-material/Wifi';
 import {
   Avatar,
@@ -45,8 +42,6 @@ import RestartMonitor from './RestartMonitor';
 
 const SystemStatus = () => {
   const { LL } = useI18nContext();
-
-  const navigate = useNavigate();
 
   useLayoutTitle(LL.STATUS_OF(''));
 
@@ -250,28 +245,6 @@ const SystemStatus = () => {
         <List sx={{ borderRadius: 3, border: '2px solid grey' }}>
           <ListItem>
             <ListItemAvatar>
-              <Avatar sx={{ bgcolor: '#134ba2', color: 'white' }}>
-                <BuildIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText
-              primary={LL.EMS_ESP_VER()}
-              secondary={'' + data.emsesp_version}
-            />
-            {me.admin && (
-              <Button
-                startIcon={<UpgradeIcon />}
-                variant="outlined"
-                color="primary"
-                onClick={() => navigate('/settings/upload')}
-              >
-                {LL.UPDATE()}
-              </Button>
-            )}
-          </ListItem>
-
-          <ListItem>
-            <ListItemAvatar>
               <Avatar sx={{ bgcolor: '#c5572c', color: 'white' }}>
                 <TimerIcon />
               </Avatar>
@@ -294,20 +267,20 @@ const SystemStatus = () => {
 
           <ListMenuItem
             disabled={!me.admin}
+            icon={MemoryIcon}
+            bgcolor="#68374d"
+            label={LL.HARDWARE()}
+            text={formatNumber(data.free_heap) + ' KB' + ' ' + LL.FREE_MEMORY()}
+            to="/status/hardwarestatus"
+          />
+
+          <ListMenuItem
+            disabled={!me.admin}
             icon={DirectionsBusIcon}
             bgcolor={busStatusHighlight()}
             label={LL.DATA_TRAFFIC()}
             text={busStatus()}
             to="/status/activity"
-          />
-
-          <ListMenuItem
-            disabled={!me.admin}
-            icon={MemoryIcon}
-            bgcolor="#68374d"
-            label={LL.STATUS_OF(LL.HARDWARE())}
-            text={formatNumber(data.free_heap) + ' KB' + ' ' + LL.FREE_MEMORY()}
-            to="/status/hardwarestatus"
           />
 
           <ListMenuItem
@@ -318,7 +291,7 @@ const SystemStatus = () => {
                 : RouterIcon
             }
             bgcolor={networkStatusHighlight()}
-            label={LL.STATUS_OF(LL.NETWORK(1))}
+            label={LL.NETWORK(1)}
             text={networkStatus()}
             to="/status/network"
           />
@@ -327,7 +300,7 @@ const SystemStatus = () => {
             disabled={!me.admin}
             icon={DeviceHubIcon}
             bgcolor={activeHighlight(data.mqtt_status)}
-            label={LL.STATUS_OF('MQTT')}
+            label="MQTT"
             text={data.mqtt_status ? LL.ACTIVE() : LL.INACTIVE(0)}
             to="/status/mqtt"
           />
@@ -336,7 +309,7 @@ const SystemStatus = () => {
             disabled={!me.admin}
             icon={AccessTimeIcon}
             bgcolor={ntpStatusHighlight()}
-            label={LL.STATUS_OF('NTP')}
+            label="NTP"
             text={ntpStatus()}
             to="/status/ntp"
           />
@@ -345,7 +318,7 @@ const SystemStatus = () => {
             disabled={!me.admin}
             icon={SettingsInputAntennaIcon}
             bgcolor={activeHighlight(data.ap_status)}
-            label={LL.STATUS_OF(LL.ACCESS_POINT(0))}
+            label={LL.ACCESS_POINT(0)}
             text={data.ap_status ? LL.ACTIVE() : LL.INACTIVE(0)}
             to="/status/ap"
           />
