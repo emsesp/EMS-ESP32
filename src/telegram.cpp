@@ -638,7 +638,7 @@ uint16_t TxService::read_next_tx(const uint8_t offset, const uint8_t length) {
     // some telegrams only reply with one byte less, but have higher offsets (boiler 0x10)
     // some reply with higher offset than requests and have not_set values intermediate (boiler 0xEA)
 
-    // We have th last byte received
+    // We have the last byte received
     if (offset + old_length >= telegram_last_->offset + telegram_last_->message_data[0]) {
         return 0;
     }

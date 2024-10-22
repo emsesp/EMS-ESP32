@@ -102,6 +102,9 @@ const Dashboard = () => {
     Row: `
       cursor: pointer;
       background-color: #1e1e1e;
+      &:nth-of-type(odd) .td {
+          background-color: #303030;
+      },
       &:hover .td {
         background-color: #177ac9;
       }
@@ -234,7 +237,7 @@ const Dashboard = () => {
           <Grid container spacing={0} justifyContent="flex-start">
             <Grid size={11}>
               <Typography mb={2} variant="body1" color="warning">
-                {LL.DASHBOARD_1()}
+                {LL.DASHBOARD_1()}.
               </Typography>
             </Grid>
 
@@ -274,7 +277,7 @@ const Dashboard = () => {
             }}
           >
             {!loading && data.length === 0 ? (
-              <Typography variant="subtitle2" color="warning">
+              <Typography variant="subtitle2" color="secondary">
                 {LL.NO_DATA()}
               </Typography>
             ) : (

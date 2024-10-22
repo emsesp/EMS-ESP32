@@ -26,7 +26,7 @@ const it: Translation = {
   ENTITIES: 'entità',
   REFRESH: 'Ricaricare',
   EXPORT: 'Esporta',
-  FAVORITES: "Preferiti", // TODO Translate
+  FAVORITES: "Preferiti",
   DEVICE_DETAILS: 'Dettagli dispositivo',
   ID_OF: '{0} ID',
   DEVICE: 'Dispositivo',
@@ -115,7 +115,7 @@ const it: Translation = {
   READONLY: 'Abilita modalità sola-lettura (blocca tutti i comandi di scrittura EMS Tx in uscita)',
   UNDERCLOCK_CPU: 'Abbassa velocità della CPU',
   REMOTE_TIMEOUT: 'Remote timeout',
-  REMOTE_TIMEOUT_EN: 'Disable remote on missing roomtemperature',
+  REMOTE_TIMEOUT_EN: 'Disable remote on missing room temperature', // TODO translate
   HEATINGOFF: 'Avviamento caldaia con riscaldamento forzato spento',
   MIN_DURATION: 'Wait time',
   ENABLE_SHOWER_TIMER: 'Abilita timer doccia',
@@ -147,7 +147,7 @@ const it: Translation = {
   CUSTOMIZATIONS_HELP_2: 'seleziona come preferito',
   CUSTOMIZATIONS_HELP_3: 'disabilita azione scrittura',
   CUSTOMIZATIONS_HELP_4: 'esculdi da MQTT e API',
-  CUSTOMIZATIONS_HELP_5: 'nascondi dai dispositivi', // TODO translate
+  CUSTOMIZATIONS_HELP_5: 'nascondi dai dispositivi',
   CUSTOMIZATIONS_HELP_6: 'rimuovi dalla memoria',
   SELECT_DEVICE: 'Seleziona un dispositivo',
   SET_ALL: 'imposta tutto',
@@ -159,7 +159,7 @@ const it: Translation = {
   HELP_INFORMATION_2: 'Per la chat della community dal vivo unisciti al nostro server Discord',
   HELP_INFORMATION_3: 'Per richiedere una funzionalità o segnalare un errore',
   HELP_INFORMATION_4: 'Ricordati di scaricare e allegare le informazioni del tuo sistema per una risposta più rapida quando segnali un problema',
-  HELP_INFORMATION_5: 'For help and questions please contact your installer.', // TODO translate
+  HELP_INFORMATION_5: 'For help and questions please contact your installer', // TODO translate
   UPLOAD: 'Carica',
   DOWNLOAD: 'Scarica',
   INSTALL: 'Installare {0}',
@@ -177,7 +177,6 @@ const it: Translation = {
   SYSTEM_FACTORY_TEXT_DIALOG: 'Sei sicuro di voler ripristinare il dispositivo alle impostazioni di fabbrica??',
   STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Sviluppo',
-  RELEASE_NOTES: 'note rilascio',
   EMS_ESP_VER: 'Versione Firmware',
   UPTIME: 'Tempo di attività del sistema',
   FREE_MEMORY: 'Free Memory',
@@ -287,20 +286,20 @@ const it: Translation = {
   STAY: 'Stai',
   LEAVE: 'Esci',
   SCHEDULER: 'Programma eventi',
-  SCHEDULER_HELP_1: "Automatizza i comandi aggiungendo gli eventi programmati di seguito. Imposta un nome univoco per abilitare/disabilitare l'attivazione tramite API/MQTT.",
+  SCHEDULER_HELP_1: "Automatizza i comandi aggiungendo gli eventi programmati di seguito. Imposta un nome univoco per abilitare/disabilitare l'attivazione tramite API/MQTT",
   SCHEDULER_HELP_2: "per attivare una volta all'avvio",
   SCHEDULE: 'Programma',
   TIME: 'Ora',
   TIMER: 'Orologio',
-  ONCHANGE: 'Sul cambiamento', // TODO translate
-  CONDITION: 'Condizione', // TODO translate
-  IMMEDIATE: 'Immediata', // TODO translate
+  ONCHANGE: 'Sul cambiamento',
+  CONDITION: 'Condizione',
+  IMMEDIATE: 'Immediata',
   SCHEDULE_UPDATED: 'Calendario aggiornato',
   SCHEDULE_TIMER_1: 'All avvio',
   SCHEDULE_TIMER_2: 'Ogni minuto',
   SCHEDULE_TIMER_3: 'Ogni ora',
   CUSTOM_ENTITIES: 'Entità personalizzate',
-  ENTITIES_HELP_1: 'Recupera entità personalizzate dal BUS EMS', // TODO translate
+  ENTITIES_HELP_1: 'Recupera entità personalizzate dal BUS EMS',
   ENTITIES_UPDATED: 'Entità aggiornate',
   WRITEABLE: 'Scrivibile',
   SHOWING: 'Visualizza',
@@ -343,7 +342,8 @@ const it: Translation = {
   AUTO_SCROLL: 'Auto Scroll', // TODO translate
   DASHBOARD: 'Dashboard', // TODO translate
   NO_DATA: 'No data available', // TODO translate
-  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module.' // TODO translate
+  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module', // TODO translate
+  DEVELOPER_MODE: 'Developer Mode' // TODO translate
 };
 
 export default it;

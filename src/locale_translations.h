@@ -63,6 +63,7 @@ MAKE_WORD_TRANSLATION(info_cmd, "list all values (verbose)", "Liste aller Werte"
 MAKE_WORD_TRANSLATION(commands_cmd, "list all commands", "Liste aller Kommandos", "lijst van alle commando's", "", "wyświetl wszystkie komendy", "Viser alle kommandoer", "", "Tüm komutları listele", "elencaa tutti i comandi", "zobraziť všetky príkazy") // TODO translate
 MAKE_WORD_TRANSLATION(entities_cmd, "list all entities", "Liste aller Entitäten", "lijst van alle entiteiten", "", "wyświetl wszsytkie encje", "Viser alle enheter", "", "Tüm varlıkları listele", "elenca tutte le entità", "zobraziť všetky entity") // TODO translate
 MAKE_WORD_TRANSLATION(send_cmd, "send a telegram", "Sende EMS-Telegramm", "stuur een telegram", "", "wyślij telegram", "send et telegram", "", "Bir telegram gönder", "invia un telegramma", "poslať telegram") // TODO translate
+MAKE_WORD_TRANSLATION(read_cmd, "send read request", "", "", "", "", "", "", "", "", "") // TODO translate
 MAKE_WORD_TRANSLATION(setiovalue_cmd, "set I/O value", "Setze Werte E/A", "instellen standaardwaarde", "", "ustaw wartość", "sett en io verdi", "", "Giriş/Çıkış değerlerini ayarla", "imposta valore io", "nastaviť hodnotu io") // TODO translate
 MAKE_WORD_TRANSLATION(changeloglevel_cmd, "change log level", "Ändere Protokollebene", "aanpassen log niveau", "", "zmień poziom log-u", "endre loggnivå", "", "Kayıt seviyesini değiştir", "cambia livello registrazione", "zmeniť úroveň protokolu") // TODO translate
 MAKE_WORD_TRANSLATION(fetch_cmd, "refresh all EMS values", "Aktualisiere alle EMS-Werte", "Verversen alle EMS waardes", "", "odśwież wszystkie wartości EMS", "oppfrisk alle EMS verdier", "", "Bütün EMS değerlerini yenile", "aggiornare tutti i valori EMS", "obnoviť všetky hodnoty EMS") // TODO translate
@@ -182,7 +183,7 @@ MAKE_WORD_TRANSLATION(eco, "eco", "Eco", "Eco", "Eko", "eko", "øko", "éco", "e
 MAKE_WORD_TRANSLATION(ecoplus, "eco+", "Eco+", "Eco+", "Eko+", "eko+", "øko+", "éco+", "eko+", "Eco+")
 MAKE_WORD_TRANSLATION(intelligent, "intelligent", "Intelligent", "intelligent", "Intelligent", "inteligentny", "intelligent", "intelligent", "akıllı", "intelligente", "inteligentný")
 MAKE_WORD_TRANSLATION(flow, "flow", "Durchfluss", "volumestroom", "Flöde", "przepływ", "strømme", "débit", "akım", "flusso", "tok")
-MAKE_WORD_TRANSLATION(manual, "manual", "Manuell", "handmatig", "Manuell", "ręczny", "manuell", "manuel", "manuel", "manuale", "manuálny")
+MAKE_WORD_TRANSLATION(manual, "manual", "manuell", "handmatig", "Manuell", "ręczny", "manuell", "manuel", "manuel", "manuale", "manuálny")
 MAKE_WORD_TRANSLATION(buffer, "buffer", "Speicher", "buffer", "Buffert", "bufor", "buffer", "buffer", "tampon", "Buffer", "zásobník")
 MAKE_WORD_TRANSLATION(bufferedflow, "buffered flow", "Durchlaufspeicher", "doorstroombuffer", "Buffertflöde", "przepływ buforowany", "bufret strømning", "", "tampon akım", "memoria flusso", "zásobníkový prietok") // TODO translate
 MAKE_WORD_TRANSLATION(layeredbuffer, "layered buffer", "Schichtspeicher", "gelaagde buffer", "Lagrad buffert", "bufor warstwowy", "lagdelt buffer", "", "katmanlı akım", "strato memoria", "vrstvený zásobník") // TODO translate

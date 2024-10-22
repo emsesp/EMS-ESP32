@@ -197,15 +197,76 @@ function custom_support() {
 
 // called by Action endpoint
 function check_upgrade(version: string) {
-  console.log('check upgrade from version', version);
-  const data = {
-    upgradeable: true
-    // upgradeable: false
-  };
+  let data = {};
+  if (version) {
+    console.log('check upgrade from version', version);
+    data = {
+      emsesp_version: VERSION,
+      upgradeable: true
+      // upgradeable: false,
+    };
+  } else {
+    console.log('requesting ems-esp version');
+    data = {
+      emsesp_version: VERSION
+    };
+  }
   return data;
 }
 
 // START DATA
+
+// EMS-ESP Application Settings
+let settings = {
+  locale: 'en',
+  tx_mode: 1,
+  ems_bus_id: 11,
+  syslog_enabled: false,
+  syslog_level: 3,
+  trace_raw: false,
+  syslog_mark_interval: 0,
+  syslog_host: '192.168.1.8',
+  syslog_port: 514,
+  boiler_heatingoff: false,
+  remote_timeout: 24,
+  remote_timeout_en: false,
+  shower_timer: true,
+  shower_alert: false,
+  shower_alert_coldshot: 10,
+  shower_alert_trigger: 7,
+  shower_min_duration: 180,
+  rx_gpio: 4,
+  tx_gpio: 5,
+  dallas_gpio: 14,
+  dallas_parasite: false,
+  led_gpio: 2,
+  hide_led: true,
+  low_clock: false,
+  telnet_enabled: true,
+  notoken_api: false,
+  readonly_mode: false,
+  analog_enabled: true,
+  pbutton_gpio: 34,
+  solar_maxflow: 30,
+  board_profile: 'E32V2',
+  fahrenheit: false,
+  bool_format: 1,
+  bool_dashboard: 1,
+  enum_format: 1,
+  weblog_level: 6,
+  weblog_buffer: 50,
+  weblog_compact: true,
+  phy_type: 1,
+  eth_power: 15,
+  eth_phy_addr: 0,
+  eth_clock_mode: 1,
+  platform: 'ESP32',
+  modbus_enabled: false,
+  modbus_port: 502,
+  modbus_max_clients: 10,
+  modbus_timeout: 10000,
+  developer_mode: true
+};
 
 // LOG
 const LOG_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'logSettings';
@@ -213,7 +274,8 @@ let log_settings = {
   level: 6,
   max_messages: 50,
   compact: true,
-  psram: true
+  psram: true,
+  developer_mode: settings.developer_mode
 };
 
 // NTP
@@ -478,9 +540,6 @@ const signin = admin_signin;
 
 const generate_token = { token: '1234' };
 
-//
-// EMS-ESP Project specific
-//
 const EMSESP_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'settings';
 const EMSESP_CORE_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'coreData';
 const EMSESP_SENSOR_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'sensorData';
@@ -493,6 +552,7 @@ const EMSESP_DEVICEENTITIES_ENDPOINT2 = REST_ENDPOINT_ROOT + 'deviceEntities/:id
 const EMSESP_DASHBOARD_DATA_ENDPOINT = REST_ENDPOINT_ROOT + 'dashboardData';
 
 const EMSESP_BOARDPROFILE_ENDPOINT = REST_ENDPOINT_ROOT + 'boardProfile';
+
 const EMSESP_WRITE_DEVICEVALUE_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceValue';
 const EMSESP_WRITE_DEVICENAME_ENDPOINT = REST_ENDPOINT_ROOT + 'writeDeviceName';
 const EMSESP_WRITE_TEMPSENSOR_ENDPOINT =
@@ -502,10 +562,10 @@ const EMSESP_CUSTOMIZATION_ENTITIES_ENDPOINT =
   REST_ENDPOINT_ROOT + 'customizationEntities';
 const EMSESP_RESET_CUSTOMIZATIONS_ENDPOINT =
   REST_ENDPOINT_ROOT + 'resetCustomizations';
+
 const EMSESP_SCHEDULE_ENDPOINT = REST_ENDPOINT_ROOT + 'schedule';
 const EMSESP_CUSTOMENTITIES_ENDPOINT = REST_ENDPOINT_ROOT + 'customEntities';
 const EMSESP_MODULES_ENDPOINT = REST_ENDPOINT_ROOT + 'modules';
-
 const EMSESP_ACTION_ENDPOINT = REST_ENDPOINT_ROOT + 'action';
 
 // these are used in the API calls only
@@ -513,7 +573,7 @@ const EMSESP_SYSTEM_INFO_ENDPOINT = API_ENDPOINT_ROOT + 'system/info';
 
 const emsesp_info = {
   System: {
-    version: '3.7-demo',
+    version: VERSION,
     uptime: '001+06:40:34.018',
     'uptime (seconds)': 110434,
     freemem: 131,
@@ -661,56 +721,6 @@ const emsesp_allvalues = {
   'Temperature Sensors': {
     zolder: 18.3
   }
-};
-
-let settings = {
-  locale: 'en',
-  tx_mode: 1,
-  ems_bus_id: 11,
-  syslog_enabled: false,
-  syslog_level: 3,
-  trace_raw: false,
-  syslog_mark_interval: 0,
-  syslog_host: '192.168.1.8',
-  syslog_port: 514,
-  boiler_heatingoff: false,
-  remote_timeout: 24,
-  remote_timeout_en: false,
-  shower_timer: true,
-  shower_alert: false,
-  shower_alert_coldshot: 10,
-  shower_alert_trigger: 7,
-  shower_min_duration: 180,
-  rx_gpio: 4,
-  tx_gpio: 5,
-  dallas_gpio: 14,
-  dallas_parasite: false,
-  led_gpio: 2,
-  hide_led: true,
-  low_clock: false,
-  telnet_enabled: true,
-  notoken_api: false,
-  readonly_mode: false,
-  analog_enabled: true,
-  pbutton_gpio: 34,
-  solar_maxflow: 30,
-  board_profile: 'E32V2',
-  fahrenheit: false,
-  bool_format: 1,
-  bool_dashboard: 1,
-  enum_format: 1,
-  weblog_level: 6,
-  weblog_buffer: 50,
-  weblog_compact: true,
-  phy_type: 1,
-  eth_power: 15,
-  eth_phy_addr: 0,
-  eth_clock_mode: 1,
-  platform: 'ESP32',
-  modbus_enabled: false,
-  modbus_port: 502,
-  modbus_max_clients: 10,
-  modbus_timeout: 10000
 };
 
 const emsesp_coredata = {
@@ -4820,6 +4830,10 @@ router
         return custom_support();
       } else if (action === 'checkUpgrade') {
         // check upgrade
+        // check if content has a param
+        if (!content.param) {
+          return check_upgrade('');
+        }
         return check_upgrade(content.param);
       } else if (action === 'uploadURL') {
         // upload URL
@@ -4848,15 +4862,16 @@ router
     if (data.device === 'system') {
       if (cmd === 'info') {
         return emsesp_info;
-      }
-      if (cmd === 'format') {
+      } else if (cmd === 'format') {
         console.log('formatting...');
         return status(200);
-      }
-      if (cmd === 'restart') {
+      } else if (cmd === 'restart') {
         console.log('restarting...');
         system_status.status = 'restarting';
         countHardwarePoll = 0;
+        return status(200);
+      } else if (cmd === 'read') {
+        console.log('send read command:', data.data);
         return status(200);
       }
     }

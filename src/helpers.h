@@ -20,7 +20,6 @@
 #define EMSESP_HELPERS_H
 
 #include "telegram.h" // for EMS_VALUE_* settings
-
 #include "common.h"
 
 namespace emsesp {

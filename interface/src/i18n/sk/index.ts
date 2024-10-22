@@ -26,7 +26,7 @@ const sk: Translation = {
   ENTITIES: 'entity',
   REFRESH: 'Obnoviť',
   EXPORT: 'Export',
-  FAVORITES: "Obľúbené", // TODO translate
+  FAVORITES: "Obľúbené",
   DEVICE_DETAILS: 'Detaily zariadenia',
   ID_OF: '{0} ID',
   DEVICE: 'Zariadenie',
@@ -115,7 +115,7 @@ const sk: Translation = {
   READONLY: 'Povoliť režim len na čítanie (blokuje všetky odchádzajúce príkazy EMS Tx Write)',
   UNDERCLOCK_CPU: 'Podtaktovanie rýchlosti procesora',
   REMOTE_TIMEOUT: 'Remote timeout',
-  REMOTE_TIMEOUT_EN: 'Disable remote on missing roomtemperature',
+  REMOTE_TIMEOUT_EN: 'Disable remote on missing room temperature', // TODO translate
   HEATINGOFF: 'Spustiť kotol s vynúteným vykurovaním',
   MIN_DURATION: 'Wait time',
   ENABLE_SHOWER_TIMER: 'Povoliť časovač sprchovania',
@@ -147,7 +147,7 @@ const sk: Translation = {
   CUSTOMIZATIONS_HELP_2: 'označiť ako obľúbené',
   CUSTOMIZATIONS_HELP_3: 'zakázať akciu zápisu',
   CUSTOMIZATIONS_HELP_4: 'vylúčiť z MQTT a API',
-  CUSTOMIZATIONS_HELP_5: 'skryť zo Zariadení', // TODO translate
+  CUSTOMIZATIONS_HELP_5: 'skryť zo Zariadení',
   CUSTOMIZATIONS_HELP_6: 'odstrániť z pamäte',
   SELECT_DEVICE: 'Zvoliť zariadenie',
   SET_ALL: 'nastaviť všetko',
@@ -159,7 +159,7 @@ const sk: Translation = {
   HELP_INFORMATION_2: 'Pre živý komunitný chat sa pripojte na náš Discord server',
   HELP_INFORMATION_3: 'Ak chcete požiadať o funkciu alebo nahlásiť chybu',
   HELP_INFORMATION_4: 'nezabudnite si stiahnuť a pripojiť informácie o vašom systéme, aby ste mohli rýchlejšie reagovať pri nahlasovaní problému',
-  HELP_INFORMATION_5: 'Pre pomoc a otázky, kontaktujte svojho inštalatéra.',
+  HELP_INFORMATION_5: 'Pre pomoc a otázky, kontaktujte svojho inštalatéra',
   UPLOAD: 'Nahrať',
   DOWNLOAD: '{{S|s|s}}tiahnuť',
   INSTALL: 'Inštalovať {0}',
@@ -177,7 +177,6 @@ const sk: Translation = {
   SYSTEM_FACTORY_TEXT_DIALOG: 'Naozaj chcete resetovať EMS-ESP na predvolené výrobné nastavenia?',
   STABLE: 'Stabilná',
   DEVELOPMENT: 'Vývojárska',
-  RELEASE_NOTES: 'poznámky k verzii',
   EMS_ESP_VER: 'Firmware verzia',
   UPTIME: 'Beh systému',
   FREE_MEMORY: 'Voľné Memory',
@@ -287,7 +286,7 @@ const sk: Translation = {
   STAY: 'Zostať',
   LEAVE: 'Opustiť',
   SCHEDULER: 'Plánovač',
-  SCHEDULER_HELP_1: 'Automatizujte príkazy pridaním naplánovaných udalostí nižšie. Nastavte jedinečné meno na aktiváciu/deaktiváciu cez API/MQTT.',
+  SCHEDULER_HELP_1: 'Automatizujte príkazy pridaním naplánovaných udalostí nižšie. Nastavte jedinečné meno na aktiváciu/deaktiváciu cez API/MQTT',
   SCHEDULER_HELP_2: 'Použite 00:00 na jednorazové spustenie pri štarte',
   SCHEDULE: 'Plánovač',
   TIME: 'Čas',
@@ -343,7 +342,8 @@ const sk: Translation = {
   AUTO_SCROLL: 'Automatické rolovanie',
   DASHBOARD: 'Panel',
   NO_DATA: 'Nie sú k dispozícii žiadne údaje',
-  DASHBOARD_1: 'Prispôsobte si svoj informačný panel tak, že označíte entity EMS ako Obľúbené pomocou modulu Prispôsobenia.'
+  DASHBOARD_1: 'Prispôsobte si svoj informačný panel tak, že označíte entity EMS ako Obľúbené pomocou modulu Prispôsobenia.',
+  DEVELOPER_MODE: 'Developer Mode' // TODO translate
 };
 
 export default sk;

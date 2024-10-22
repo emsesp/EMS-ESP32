@@ -3,7 +3,8 @@
 # Open this file in VSC, modify the token, go to the API call and click on 'Send Request' (or Ctrl+Alt+R)
 # The response will be shown in the right panel
 
-@host = http://ems-esp.local
+# @host = http://ems-esp.local
+@host = http://192.168.1.206
 @host_dev = http://10.10.10.175
 @host_standalone = http://localhost:3080
 @host_standalone2 = http://localhost:3082

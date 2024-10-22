@@ -115,7 +115,7 @@ const de: Translation = {
   READONLY: 'Nur-Lese-Modus aktivieren (blockiert alle ausgehenden EMS Tx-Schreibbefehle)',
   UNDERCLOCK_CPU: 'CPU-Geschwindigkeit untertakten',
   REMOTE_TIMEOUT: 'Timeout',
-  REMOTE_TIMEOUT_EN: 'Deaktiviere Remote bei fehlender Temperatur',
+  REMOTE_TIMEOUT_EN: 'Deaktiviere Remote bei fehlender Raumtemperatur',
   HEATINGOFF: 'Heizen ausschalten beim EMS-ESP Start',
   MIN_DURATION: 'Dauer bis die Dusche erkannt wrid',
   ENABLE_SHOWER_TIMER: 'Duschtimer aktivieren',
@@ -155,11 +155,11 @@ const de: Translation = {
   NAME: 'Name',
   CUSTOMIZATIONS_RESET: 'Möchten Sie wirklich alle Anpassungen entfernen, einschließlich der benutzerdefinierten Einstellungen der Temperatur- und Analogsensoren?',
   SUPPORT_INFORMATION: 'Unterstützende Informationen',
-  HELP_INFORMATION_1: 'EMS-ESP Konfigurationsanweisungen und mehr finden Sie im Online-Wiki.',
-  HELP_INFORMATION_2: 'Für einen Live-Community-Chat besuchen Sie unseren Discord-Server.',
-  HELP_INFORMATION_3: 'Um neue Funktionen anzufragen oder Fehler zu melden, eröffnen Sie ein Issue auf GitHub.',
-  HELP_INFORMATION_4: 'Bitte laden Sie die Systemdetails und hängen Sie sie an das Support-Issue an.',
-  HELP_INFORMATION_5: 'Für Hilfe und Fragen wenden Sie sich bitte an Ihren Installateur.',
+  HELP_INFORMATION_1: 'EMS-ESP Konfigurationsanweisungen und mehr finden Sie im Online-Wiki',
+  HELP_INFORMATION_2: 'Für einen Live-Community-Chat besuchen Sie unseren Discord-Server',
+  HELP_INFORMATION_3: 'Um neue Funktionen anzufragen oder Fehler zu melden, eröffnen Sie ein Issue auf GitHub',
+  HELP_INFORMATION_4: 'Bitte laden Sie die Systemdetails und hängen Sie sie an das Support-Issue an',
+  HELP_INFORMATION_5: 'Für Hilfe und Fragen wenden Sie sich bitte an Ihren Installateur',
   UPLOAD: 'Hochladen',
   DOWNLOAD: '{{H|h|h}}erunterladen',
   INSTALL: 'Installieren {0}',
@@ -177,7 +177,6 @@ const de: Translation = {
   SYSTEM_FACTORY_TEXT_DIALOG: 'Sind Sie sicher, alle Einstellungen auf Werkseinstellung zu setzen?',
   STABLE: 'Stabil',
   DEVELOPMENT: 'Entwicklung',
-  RELEASE_NOTES: 'Versionshinweise',
   EMS_ESP_VER: 'Firmware-Version',
   UPTIME: 'Systembetriebszeit',
   FREE_MEMORY: 'Freier RAM Speicher',
@@ -287,7 +286,7 @@ const de: Translation = {
   STAY: 'Bleiben',
   LEAVE: 'Verlassen',
   SCHEDULER: 'Planer',
-  SCHEDULER_HELP_1: 'Fügen Sie eigene geplante Befehle zur Automatisierung hinzu. Vergeben Sie einen Entitätsnamen, um die Aktivierung über API/Mqtt zu steuern.',
+  SCHEDULER_HELP_1: 'Fügen Sie eigene geplante Befehle zur Automatisierung hinzu. Vergeben Sie einen Entitätsnamen, um die Aktivierung über API/Mqtt zu steuern',
   SCHEDULER_HELP_2: '00:00 aktiviert einmalige Ausführung beim Start.',
   SCHEDULE: 'Zeitplan',
   TIME: 'Zeit',
@@ -343,7 +342,8 @@ const de: Translation = {
   AUTO_SCROLL: 'Automatisches Scrollen',
   DASHBOARD: 'Dashboard',
   NO_DATA: 'Keine Daten verfügbar',
-  DASHBOARD_1: 'Passen Sie Ihr Dashboard an, indem Sie EMS-Entitäten mithilfe des Moduls „Anpassungen“ als Favorit markieren.'
+  DASHBOARD_1: 'Passen Sie Ihr Dashboard an, indem Sie EMS-Entitäten mithilfe des Moduls „Anpassungen“ als Favorit markieren.',
+  DEVELOPER_MODE: 'Entwicklermodus'
 };
 
 export default de;

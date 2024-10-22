@@ -159,7 +159,7 @@ const cz: Translation = {
   HELP_INFORMATION_2: 'Pro živý chat se komunitou se připojte k našemu serveru Discord',
   HELP_INFORMATION_3: 'Chcete-li požádat o funkci nebo nahlásit chybu',
   HELP_INFORMATION_4: 'Stáhněte a připojte informace o podpoře pro rychlejší odezvu při hlášení problému',
-  HELP_INFORMATION_5: 'Pro pomoc a dotazy kontaktujte svého instalatéra.',
+  HELP_INFORMATION_5: 'Pro pomoc a dotazy kontaktujte svého instalatéra',
   UPLOAD: 'Nahrát',
   DOWNLOAD: '{{S|s|s}}táhnout',
   INSTALL: 'Instalovat {0}',
@@ -177,7 +177,6 @@ const cz: Translation = {
   SYSTEM_FACTORY_TEXT_DIALOG: 'Opravdu chcete resetovat EMS-ESP do továrního nastavení?',
   STABLE: 'Stabilní',
   DEVELOPMENT: 'Vývojová verze',
-  RELEASE_NOTES: 'poznámky k vydání',
   EMS_ESP_VER: 'Verze firmwaru',
   UPTIME: 'Doba provozu systému',
   FREE_MEMORY: 'Volná paměť',
@@ -287,7 +286,7 @@ const cz: Translation = {
   STAY: 'Zůstat',
   LEAVE: 'Odejít',
   SCHEDULER: 'Plánovač',
-  SCHEDULER_HELP_1: 'Automatizujte příkazy přidáním naplánovaných událostí níže. Nastavte jedinečný název pro povolení/zakázání aktivace přes API/MQTT.',
+  SCHEDULER_HELP_1: 'Automatizujte příkazy přidáním naplánovaných událostí níže. Nastavte jedinečný název pro povolení/zakázání aktivace přes API/MQTT',
   SCHEDULER_HELP_2: 'Použijte 00:00 pro spuštění při startu',
   SCHEDULE: 'Harmonogram',
   TIME: 'Čas',
@@ -344,6 +343,7 @@ const cz: Translation = {
   DASHBOARD: 'Dashboard',
   NO_DATA: 'Žádná data nejsou k dispozici',
   DASHBOARD_1: 'Přizpůsobte si dashboard označením EMS entit jako Oblíbené pomocí modulu Přizpůsobení.',
+  DEVELOPER_MODE: 'Developer Mode' // TODO translate
 };
 
 export default cz;

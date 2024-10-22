@@ -42,6 +42,7 @@ export interface Settings {
   modbus_port: number;
   modbus_max_clients: number;
   modbus_timeout: number;
+  developer_mode: boolean;
 }
 
 export enum busConnectionStatus {
@@ -273,6 +274,7 @@ export interface APIcall {
   device: string;
   cmd: string;
   id: number;
+  data?: string; // optional
 }
 
 export interface Action {
