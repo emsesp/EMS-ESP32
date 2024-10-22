@@ -2019,7 +2019,7 @@ bool System::uploadFirmwareURL(const char * url) {
 bool System::readCommand(const char * data) {
     // extract <deviceID> <type ID> [offset] [length] from string
     char * p;
-    char   value[6];
+    char   value[11];
 
     // make a copy so we can iterate, max 15 chars (XX XXXX XX XX)
     char data_args[15];
