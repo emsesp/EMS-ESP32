@@ -1353,3 +1353,5 @@ favs
 Logatherm
 TSENS
 pumpontemp
+Česky
+pioarduino
