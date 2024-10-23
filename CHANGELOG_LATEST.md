@@ -49,6 +49,8 @@ For more details go to [www.emsesp.org](https://www.emsesp.org/).
 - MQTT status topic (used in connect and last will) set to Retain [#2086](https://github.com/emsesp/EMS-ESP32/discussions/2086)
 - Czech language [2096](https://github.com/emsesp/EMS-ESP32/issues/2096)
 - Developer Mode and send EMS Read Commands from WebUI [#2116](https://github.com/emsesp/EMS-ESP32/issues/2116)
+- Scheduler functions [#2115](https://github.com/emsesp/EMS-ESP32/issues/2115)
+- Set device custom name from telegram 0x01 [#2073](https://github.com/emsesp/EMS-ESP32/issues/2073)
 
 ## Fixed
 
@@ -58,6 +60,7 @@ For more details go to [www.emsesp.org](https://www.emsesp.org/).
 - Check for bad GPIOs with Ethernet before the ethernet is initialized
 - Show values with factor 50 on webUI [#2064](https://github.com/emsesp/EMS-ESP32/issues/2064)
 - Rendering of values between -1 and 0
+- Value for 32bit times not-set [#2109](https://github.com/emsesp/EMS-ESP32/issues/2109)
 
 ## Changed
 
