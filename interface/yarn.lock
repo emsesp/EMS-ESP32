@@ -5,21 +5,21 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
-"@alova/adapter-xhr@npm:2.0.8":
-  version: 2.0.8
-  resolution: "@alova/adapter-xhr@npm:2.0.8"
+"@alova/adapter-xhr@npm:2.0.9":
+  version: 2.0.9
+  resolution: "@alova/adapter-xhr@npm:2.0.9"
   dependencies:
-    "@alova/shared": "npm:^1.0.6"
+    "@alova/shared": "npm:^1.0.7"
   peerDependencies:
     alova: ^3.0.20
-  checksum: 10c0/84b2f8f33733af3ed9418e7eb4d6195115b318717afc588147514d474632eaa703f72f753f18198d1a90da0a688c60a29345aabe0f93941c4ef089b7ac636204
+  checksum: 10c0/7c2460fdfed308b099fb08d3020877b4d4175f56fd7c38d1008325a3e1a32cab21bcb4a54f808f88b416ef267310ef65beb9826a8b2b0c035f974e18a75dcfe3
   languageName: node
   linkType: hard
 
-"@alova/shared@npm:^1.0.6":
-  version: 1.0.6
-  resolution: "@alova/shared@npm:1.0.6"
-  checksum: 10c0/7779bef946a6c9cca9a6369a9fa664be9fe929b0132a94fe60836b787844f884aef1eb69a1f8850003b92169d7495b772b59e40d8de138019386f32cdc689aad
+"@alova/shared@npm:^1.0.7":
+  version: 1.0.7
+  resolution: "@alova/shared@npm:1.0.7"
+  checksum: 10c0/1ca9a897000492f394ec63fccf2bfbf3a291b9306999e41c52fbfc84962bd9d1e4632943e13428c1bd11eee7cf62b49a7fc151060b3ccf874fecc37cdb0dd02c
   languageName: node
   linkType: hard
 
@@ -1662,12 +1662,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^22.7.8":
-  version: 22.7.8
-  resolution: "@types/node@npm:22.7.8"
+"@types/node@npm:^22.7.9":
+  version: 22.7.9
+  resolution: "@types/node@npm:22.7.9"
   dependencies:
     undici-types: "npm:~6.19.2"
-  checksum: 10c0/3d3b3a2ec5a57ca4fd37b34dce415620993ca5f87cea2c728ffe73aa31446dbfe19c53171c478447bd7d78011ef4845a46ab2f0dc38e699cc75b3d100a60c690
+  checksum: 10c0/2d1917702b9d9ede8e4d8151cd8b1af8bc147d543486474ffbe0742e38764ea73105939e6a767addf7a4c39e842e16eae762bff90617d7b7f9ee3fbbb2d23bfa
   languageName: node
   linkType: hard
 
@@ -1734,13 +1734,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:^18.3.11":
-  version: 18.3.11
-  resolution: "@types/react@npm:18.3.11"
+"@types/react@npm:^18.3.12":
+  version: 18.3.12
+  resolution: "@types/react@npm:18.3.12"
   dependencies:
     "@types/prop-types": "npm:*"
     csstype: "npm:^3.0.2"
-  checksum: 10c0/ce80512246ca5bda69db85b9f4f1835189334acfb6b2c4f3eda8cabff1ff1a3ea9ce4f3b895bdbc18c94140aa45592331aa3fdeb557f525c1b048de7ce84fc0e
+  checksum: 10c0/8bae8d9a41619804561574792e29112b413044eb0d53746dde2b9720c1f9a59f71c895bbd7987cd8ce9500b00786e53bc032dced38cddf42910458e145675290
   languageName: node
   linkType: hard
 
@@ -1882,7 +1882,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "EMS-ESP@workspace:."
   dependencies:
-    "@alova/adapter-xhr": "npm:2.0.8"
+    "@alova/adapter-xhr": "npm:2.0.9"
     "@babel/core": "npm:^7.25.9"
     "@emotion/react": "npm:^11.13.3"
     "@emotion/styled": "npm:^11.13.0"
@@ -1894,11 +1894,11 @@ __metadata:
     "@table-library/react-table-library": "npm:4.1.7"
     "@trivago/prettier-plugin-sort-imports": "npm:^4.3.0"
     "@types/formidable": "npm:^3"
-    "@types/node": "npm:^22.7.8"
-    "@types/react": "npm:^18.3.11"
+    "@types/node": "npm:^22.7.9"
+    "@types/react": "npm:^18.3.12"
     "@types/react-dom": "npm:^18.3.1"
     "@types/react-router-dom": "npm:^5.3.3"
-    alova: "npm:3.1.0"
+    alova: "npm:3.1.1"
     async-validator: "npm:^4.2.5"
     concurrently: "npm:^9.0.1"
     eslint: "npm:^9.13.0"
@@ -1918,7 +1918,7 @@ __metadata:
     typesafe-i18n: "npm:^5.26.2"
     typescript: "npm:^5.6.3"
     typescript-eslint: "npm:8.11.0"
-    vite: "npm:^5.4.9"
+    vite: "npm:^5.4.10"
     vite-plugin-imagemin: "npm:^0.6.1"
     vite-tsconfig-paths: "npm:^5.0.1"
   languageName: unknown
@@ -1980,13 +1980,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"alova@npm:3.1.0":
-  version: 3.1.0
-  resolution: "alova@npm:3.1.0"
+"alova@npm:3.1.1":
+  version: 3.1.1
+  resolution: "alova@npm:3.1.1"
   dependencies:
-    "@alova/shared": "npm:^1.0.6"
+    "@alova/shared": "npm:^1.0.7"
     rate-limiter-flexible: "npm:^5.0.3"
-  checksum: 10c0/4f073e37fae112dff2c8b168d37220fa4c9475305d7689869c1338a91d1368f2b941c1131bc46214ddebfa72489b6c449b246e2b4ff484d1ff1486dd7172f694
+  checksum: 10c0/e9efe2193a730ccf48f73fb06c6bda278f9307aed2d77054d5337a631d48567d016251c5d6a9308818b08d66c2e9ba48f5f8f5f219a6199eaa67014bef353ac7
   languageName: node
   linkType: hard
 
@@ -7218,9 +7218,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^5.4.9":
-  version: 5.4.9
-  resolution: "vite@npm:5.4.9"
+"vite@npm:^5.4.10":
+  version: 5.4.10
+  resolution: "vite@npm:5.4.10"
   dependencies:
     esbuild: "npm:^0.21.3"
     fsevents: "npm:~2.3.3"
@@ -7257,7 +7257,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10c0/e9c59f2c639047e37c79bbbb151c7a55a3dc27932957cf4cf0447ee0bdcc1ddfd9b1fb3ba0465371c01ba3616d62561327855794c2d652213c3a10a32e6d369d
+  checksum: 10c0/4ef4807d2fd166a920de244dbcec791ba8a903b017a7d8e9f9b4ac40d23f8152c1100610583d08f542b47ca617a0505cfc5f8407377d610599d58296996691ed
   languageName: node
   linkType: hard
 

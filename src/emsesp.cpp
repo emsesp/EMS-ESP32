@@ -1745,7 +1745,6 @@ void EMSESP::loop() {
         int c = serial_console_.read();
         if (c != -1) {
             show_prompt = true;
-            Serial.println(c);
         }
         // https://daleswanson.org/ascii.htm#:~:text=0
         // CTRL-D to open

@@ -204,7 +204,7 @@ void Shower::set_shower_state(bool state, bool force) {
 
         Mqtt::add_ha_bool(doc);
 
-        Mqtt::add_ha_sections_to_doc("shower", stat_t, doc, true); // create first dev & ids
+        Mqtt::add_ha_sections_to_doc("shower", stat_t, doc, true); // create first dev & ids, no conditions
 
         snprintf(topic, sizeof(topic), "binary_sensor/%s/shower_active/config", Mqtt::basename().c_str());
         ha_configdone_ = Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
