@@ -1416,11 +1416,13 @@ void Mqtt::add_ha_sections_to_doc(const char *   name,
         const char * tpl_draft = "{{'online' if %s else 'offline'}}";
 
         // condition 1
-        avty_json.clear();
-        avty_json["t"] = state;
-        snprintf(tpl, sizeof(tpl), tpl_draft, cond1 == nullptr ? "value is defined" : cond1);
-        avty_json["val_tpl"] = tpl;
-        avty.add(avty_json); // returns 0 if no mem
+        if (cond1 != nullptr) {
+            avty_json.clear();
+            avty_json["t"] = state;
+            snprintf(tpl, sizeof(tpl), tpl_draft, cond1);
+            avty_json["val_tpl"] = tpl;
+            avty.add(avty_json); // returns 0 if no mem
+        }
 
         // condition 2
         if (cond2 != nullptr) {
