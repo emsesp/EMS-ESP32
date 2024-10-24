@@ -1349,3 +1349,9 @@ hardwarestatus
 hpcurrpower
 hppowerlimit
 CUSTOMSUPPORT
+favs
+Logatherm
+TSENS
+pumpontemp
+Česky
+pioarduino
