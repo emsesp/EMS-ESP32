@@ -407,6 +407,8 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_ID_RFBASE         = 0x50;
     static constexpr uint8_t EMS_DEVICE_ID_ROOMTHERMOSTAT = 0x17; // TADO using this with no version reply #174
     static constexpr uint8_t EMS_DEVICE_ID_TADO_OLD       = 0x19; // older TADO using this with no version reply, #1031
+    static constexpr uint8_t EMS_DEVICE_ID_MIXER1         = 0x20; // e.g MH210 module as mixer
+    static constexpr uint8_t EMS_DEVICE_ID_MIXER8         = 0x27;
     static constexpr uint8_t EMS_DEVICE_ID_DHW1           = 0x28; // MM100 module as water station
     static constexpr uint8_t EMS_DEVICE_ID_DHW2           = 0x29; // MM100 module as water station
     static constexpr uint8_t EMS_DEVICE_ID_DHW8           = 0x2F; // last DHW module id?
