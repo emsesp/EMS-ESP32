@@ -72,7 +72,7 @@ const no: Translation = {
   TX_ISSUES: 'Tx problemer - prøv en annen Tx Modus',
   DISCONNECTED: 'Frakoblet',
   EMS_SCAN: 'Er du sikker på du vil starte full søking av EMS bussen?',
-  DATA_TRAFFIC: 'Data Traffic', // TODO Translate
+  DATA_TRAFFIC: 'Data Traffic', // TODO translate
   EMS_DEVICE: 'EMS Enhet',
   SUCCESS: 'VELLYKKET',
   FAIL: 'MISLYKKET',

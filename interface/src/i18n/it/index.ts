@@ -72,7 +72,7 @@ const it: Translation = {
   TX_ISSUES: 'Problema di Tx - prova una modalità differente',
   DISCONNECTED: 'Disconnesso',
   EMS_SCAN: 'Sei sicuro di voler iniziare una scansione completa del bus EMS ?',
-  DATA_TRAFFIC: 'Data Traffic', // TODO Translate
+  DATA_TRAFFIC: 'Data Traffic', // TODO translate
   EMS_DEVICE: 'Dispositivo EMS ',
   SUCCESS: 'SUCCESSO',
   FAIL: 'FALLITO',
