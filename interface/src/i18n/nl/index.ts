@@ -72,7 +72,7 @@ const nl: Translation = {
   TX_ISSUES: 'Tx bus probleem. Probeer een andere Tx verzendmodus',
   DISCONNECTED: 'Niet verbonden',
   EMS_SCAN: 'Weet je zeker dat je een volledige EMS bus scan uit wilt voeren?',
-  DATA_TRAFFIC: 'Data Traffic', // TODO Translate
+  DATA_TRAFFIC: 'Data Traffic', // TODO translate
   EMS_DEVICE: 'EMS Apparaat',
   SUCCESS: 'SUCCESS',
   FAIL: 'MISLUKT',

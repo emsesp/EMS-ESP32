@@ -72,7 +72,7 @@ const pl: BaseTranslation = {
   TX_ISSUES: 'problem z zapisem na magistralę EMS, spróbuj wybrać inny "Tryb transmisji (Tx)"',
   DISCONNECTED: 'brak połączenia',
   EMS_SCAN: 'Czy na pewno wykonać pełne skanowanie magistrali EMS?',
-  DATA_TRAFFIC: 'Data Traffic', // TODO Translate
+  DATA_TRAFFIC: 'Data Traffic', // TODO translate
   EMS_DEVICE: 'Urządzenie EMS',
   SUCCESS: 'Udane',
   FAIL: 'Nieudane',

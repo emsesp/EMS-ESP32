@@ -72,7 +72,7 @@ const tr: Translation = {
   TX_ISSUES: 'Tx sorunu - başka bir Tx Modu deneyin',
   DISCONNECTED: 'Bağlantı kesildi',
   EMS_SCAN: 'EMS Hattında tam bir cihaz taraması başlatmak istediğinizden emin misiniz?',
-  DATA_TRAFFIC: 'Data Traffic', // TODO Translate
+  DATA_TRAFFIC: 'Data Traffic', // TODO translate
   EMS_DEVICE: 'EMS Cihazı',
   SUCCESS: 'BAŞARILI',
   FAIL: 'HATA',

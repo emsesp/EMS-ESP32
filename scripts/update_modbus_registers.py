@@ -47,6 +47,7 @@ string_sizes = {
     "thermostat/switchtime1": 16,
     "thermostat/switchtime2": 16,
     "thermostat/switchtime": 16,
+    "thermostat/switchtimeww": 21,
     "controller/datetime": 25
 }
 
@@ -164,6 +165,7 @@ with fileinput.input() as f_input:
     for row in entities_reader:
         entity = {}
         for i, val in enumerate(row):
+            # print(headers[i] + ": " + val)
             entity[headers[i]] = val
         entities.append(entity)
 
@@ -196,8 +198,8 @@ for entity in entities:
             (-string_sizes[entity_dev_name] // 2)  # divide and round up
 
     if int(entity["modbus count"]) <= 0:
-        raise Exception('Entity "' + entity_shortname +
-                        '" does not have a size - string sizes need to be added manually to update_modbus_registers.py')
+        raise Exception('Entity "' + entity_dev_name + ' (' + entity_shortname + ')' +
+                        '" does not have a size - string sizes need to be added manually to update_modbus_registers.py/string_sizes')
 
     #    if entity["modbus count"] == "0":
     #        print("ignoring " + entity_dev_name + " - it has a register length of zero")

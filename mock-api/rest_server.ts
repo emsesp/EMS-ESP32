@@ -468,7 +468,7 @@ const VERIFY_AUTHORIZATION_ENDPOINT = REST_ENDPOINT_ROOT + 'verifyAuthorization'
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn';
 const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken';
 
-const VERSION = '3.7.0-dev.0';
+const VERSION = '3.7.0';
 // const VERSION = '3.6.4';
 
 let system_status = {

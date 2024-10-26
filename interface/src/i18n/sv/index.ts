@@ -72,7 +72,7 @@ const sv: Translation = {
   TX_ISSUES: 'Sändfel - Prova ett annat TX-läge',
   DISCONNECTED: 'Nedkopplad',
   EMS_SCAN: 'Är du säker att du vill initiera en full genomsökning av EMS-bussen?',
-  DATA_TRAFFIC: 'Data Traffic', // TODO Translate
+  DATA_TRAFFIC: 'Data Traffic', // TODO translate
   EMS_DEVICE: 'EMS Enhet',
   SUCCESS: 'Lyckades',
   FAIL: 'Misslyckades',
