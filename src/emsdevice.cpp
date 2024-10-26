@@ -1274,7 +1274,9 @@ void EMSdevice::getCustomizationEntities(std::vector<std::string> & entity_ids) 
 void EMSdevice::dump_value_info() {
     for (auto & dv : devicevalues_) {
         if (dv.fullname != nullptr) {
+            Serial.print('\"');
             Serial.print(default_name());
+            Serial.print('\"');
             Serial.print(',');
             Serial.print(device_type_name());
             Serial.print(',');
