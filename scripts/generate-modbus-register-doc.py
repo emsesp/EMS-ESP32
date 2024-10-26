@@ -2,6 +2,10 @@ import fileinput
 import csv
 from itertools import groupby
 
+#
+# This is used to build the contents of the `Modbus-Entity-Registers.md` file used in the emsesp.org documentation.
+#
+
 # static data
 
 tag_to_tagtype = {
