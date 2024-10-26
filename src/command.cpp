@@ -670,8 +670,8 @@ void Command::show_devices(uuid::console::Shell & shell) {
 // 'show commands' : output list of all commands to console
 // calls show with verbose mode set
 void Command::show_all(uuid::console::Shell & shell) {
-    shell.printfln("Showing all available commands (%s*%s=authentication not required):", COLOR_BRIGHT_GREEN, COLOR_RESET);
-    shell.println("Each device has these additional default commands:");
+    shell.printfln("Showing all available commands (%s*%s=authentication not required).", COLOR_BRIGHT_GREEN, COLOR_RESET);
+    shell.println("Note, each listed device includes these additional commands:");
     shell.printf("  info \t\t\t\t%slist all values with description%s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
     shell.println(COLOR_RESET);
     shell.printf("  commands \t\t\t%slist all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
