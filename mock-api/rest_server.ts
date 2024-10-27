@@ -202,8 +202,8 @@ function check_upgrade(version: string) {
     console.log('check upgrade from version', version);
     data = {
       emsesp_version: VERSION,
-      upgradeable: true
-      // upgradeable: false,
+      // upgradeable: true
+      upgradeable: false
     };
   } else {
     console.log('requesting ems-esp version');

@@ -464,14 +464,7 @@ const Customizations = () => {
         )}
         {selectedDevice !== -1 &&
           (rename ? (
-            <ButtonRow>
-              <Button
-                startIcon={<SaveIcon />}
-                variant="contained"
-                onClick={() => renameDevice()}
-              >
-                {LL.UPDATE()}
-              </Button>
+            <>
               <Button
                 startIcon={<CancelIcon />}
                 variant="outlined"
@@ -480,7 +473,14 @@ const Customizations = () => {
               >
                 {LL.CANCEL()}
               </Button>
-            </ButtonRow>
+              <Button
+                startIcon={<SaveIcon />}
+                variant="outlined"
+                onClick={() => renameDevice()}
+              >
+                {LL.RENAME()}
+              </Button>
+            </>
           ) : (
             <Button
               startIcon={<EditIcon />}
@@ -716,16 +716,18 @@ const Customizations = () => {
               </ButtonRow>
             )}
           </Box>
-          <ButtonRow mt={1}>
-            <Button
-              startIcon={<SettingsBackupRestoreIcon />}
-              variant="outlined"
-              color="error"
-              onClick={() => setConfirmReset(true)}
-            >
-              {LL.RESET(0)}
-            </Button>
-          </ButtonRow>
+          {!rename && (
+            <ButtonRow mt={1}>
+              <Button
+                startIcon={<SettingsBackupRestoreIcon />}
+                variant="outlined"
+                color="error"
+                onClick={() => setConfirmReset(true)}
+              >
+                {LL.RESET(0)}
+              </Button>
+            </ButtonRow>
+          )}
         </Box>
       )}
       {renderResetDialog()}
