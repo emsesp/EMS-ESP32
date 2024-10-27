@@ -11,9 +11,11 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   Link,
   Typography
 } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 
 import * as SystemApi from 'api/system';
 import { callAction } from 'api/app';
@@ -182,43 +184,55 @@ const Version = () => {
 
     return (
       <>
-        <Typography variant="h6" color="primary">
-          Firmware Version Check
-        </Typography>
-
-        <Box p={2} mt={2} border="1px solid grey" borderRadius={2}>
-          <Typography>
-            <b>{LL.VERSION() + ':'}</b>&nbsp;{data.emsesp_version}
-            {data.build_flags && (
-              <Typography variant="caption">
-                &nbsp; &#40;{data.build_flags}&#41;
+        <Box p={2} border="1px solid grey" borderRadius={2}>
+          <Grid container spacing={3}>
+            <Grid mb={1}>
+              <Typography mb={1} fontWeight={'fontWeightBold'}>
+                {LL.VERSION()}
               </Typography>
-            )}
-          </Typography>
-          <Typography>
-            <b>Platform:</b>&nbsp;{getPlatform()}
-          </Typography>
+              <Typography mb={1} fontWeight={'fontWeightBold'}>
+                Platform
+              </Typography>
+              <Typography mb={1} fontWeight={'fontWeightBold'}>
+                Release
+              </Typography>
+            </Grid>
+            <Grid>
+              <Typography mb={1}>
+                {data.emsesp_version}
+                {data.build_flags && (
+                  <Typography variant="caption">
+                    &nbsp; &#40;{data.build_flags}&#41;
+                  </Typography>
+                )}
+              </Typography>
+              <Typography mb={1}>{getPlatform()}</Typography>
+              <Typography>
+                {isDev ? LL.DEVELOPMENT() : LL.STABLE()}&nbsp;
+                <Link
+                  target="_blank"
+                  href={useDev ? DEV_RELNOTES_URL : STABLE_RELNOTES_URL}
+                  color="primary"
+                >
+                  (changelog)
+                </Link>
+              </Typography>
+            </Grid>
+          </Grid>
 
-          <Typography>
-            <b>Release:</b>&nbsp;
-            <Link
-              target="_blank"
-              href={useDev ? DEV_RELNOTES_URL : STABLE_RELNOTES_URL}
+          <Divider />
+
+          {!isDev && (
+            <Button
+              sx={{ mt: 2 }}
+              variant="outlined"
               color="primary"
+              size="small"
+              onClick={() => showFirmwareDialog(true)}
             >
-              {isDev ? LL.DEVELOPMENT() : LL.STABLE()}
-            </Link>
-            {!isDev && (
-              <Button
-                sx={{ ml: 2 }}
-                variant="outlined"
-                color="primary"
-                onClick={() => showFirmwareDialog(true)}
-              >
-                {LL.SWITCH_DEV()}
-              </Button>
-            )}
-          </Typography>
+              {LL.SWITCH_DEV()}
+            </Button>
+          )}
 
           <Typography mt={2} color="warning">
             <InfoOutlinedIcon color="warning" sx={{ verticalAlign: 'middle' }} />
@@ -231,6 +245,7 @@ const Version = () => {
                   sx={{ ml: 2, textTransform: 'none' }}
                   variant="outlined"
                   color="primary"
+                  size="small"
                   onClick={() => showFirmwareDialog(false)}
                 >
                   {isDev
