@@ -166,7 +166,7 @@ void Roomctrl::check(uint8_t addr, const uint8_t * data, const uint8_t length) {
     // empty message back if temperature not set or unknown message type
     if (data[2] == EMSdevice::EMS_TYPE_VERSION) {
         version(addr, data[0], hc);
-    } else if (length == 6) {
+    } else if (length == 6) { // ems query
         unknown(addr, data[0], data[2], data[3]);
     } else if (length == 8) {
         unknown(addr, data[0], data[3], data[5], data[6]);
@@ -178,8 +178,6 @@ void Roomctrl::check(uint8_t addr, const uint8_t * data, const uint8_t length) {
         temperature(addr, data[0], hc);
     } else if (length == 8 && data[2] == 0xFF && data[3] == 0 && data[5] == 3 && data[6] == 0x7B + hc && remotehum_[hc] != EMS_VALUE_UINT8_NOTSET) { // EMS+ humidity
         humidity(addr, data[0], hc);
-    } else if (length == 6) { // ems query
-        unknown(addr, data[0], data[2], data[3]);
     } else if (length == 8 && data[2] == 0xFF) { // ems+ query
         unknown(addr, data[0], data[3], data[5], data[6]);
     } else if (data[2] == 0xF7) { // ems+ query with 3 bytes type src dst 7F offset len=FF FF HIGH LOW
