@@ -322,8 +322,7 @@ bool WebSchedulerService::command(const char * name, const std::string & command
     JsonDocument doc;
     if (deserializeJson(doc, cmd) == DeserializationError::Ok) {
         HTTPClient  http;
-        int         httpResult = 0;
-        std::string url        = doc["url"] | "";
+        std::string url = doc["url"] | "";
         // for a GET with parameters replace commands with values
         // don't search the complete url, it may contain a devicename in path
         auto q = url.find_first_of('?');
@@ -342,6 +341,7 @@ bool WebSchedulerService::command(const char * name, const std::string & command
             std::string method = doc["method"] | "GET";       // default GET
 
             // if there is data, force a POST
+            int httpResult = 0;
             if (value.length() || method == "post") { // we have all lowercase
                 if (value.find_first_of('{') != std::string::npos) {
                     http.addHeader("Content-Type", "application/json"); // auto-set to JSON
