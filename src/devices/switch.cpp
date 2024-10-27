@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,11 +32,11 @@ Switch::Switch(uint8_t device_type, uint8_t device_id, uint8_t product_id, const
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &activated_, DeviceValueType::BOOL, FL_(activated), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &flowTempHc_,
-                          DeviceValueType::USHORT,
+                          DeviceValueType::UINT16,
                           DeviceValueNumOp::DV_NUMOP_DIV10,
                           FL_(flowTempHc),
                           DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &status_, DeviceValueType::INT, FL_(status), DeviceValueUOM::NONE);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &status_, DeviceValueType::INT8, FL_(status), DeviceValueUOM::NONE);
 }
 
 // message 0x9D switch on/off

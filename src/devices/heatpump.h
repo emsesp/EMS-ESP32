@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,6 +74,7 @@ class Heatpump : public EMSdevice {
     uint32_t meterComp_;
     uint32_t meterEHeat_;
     uint32_t meterHeat_;
+    uint32_t meterWw_;
 
 
     void process_HPMonitor1(std::shared_ptr<const Telegram> telegram);

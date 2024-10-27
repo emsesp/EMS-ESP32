@@ -1,6 +1,5 @@
-import { CircularProgress, Box, Typography } from '@mui/material';
+import { Box, CircularProgress, Typography } from '@mui/material';
 import type { Theme } from '@mui/material';
-import type { FC } from 'react';
 
 import { useI18nContext } from 'i18n/i18n-react';
 
@@ -8,11 +7,18 @@ interface LoadingSpinnerProps {
   height?: number | string;
 }
 
-const LoadingSpinner: FC<LoadingSpinnerProps> = ({ height = '100%' }) => {
+const LoadingSpinner = ({ height = '100%' }: LoadingSpinnerProps) => {
   const { LL } = useI18nContext();
 
   return (
-    <Box display="flex" alignItems="center" justifyContent="center" flexDirection="column" padding={2} height={height}>
+    <Box
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      flexDirection="column"
+      padding={2}
+      height={height}
+    >
       <CircularProgress
         sx={(theme: Theme) => ({
           margin: theme.spacing(4),

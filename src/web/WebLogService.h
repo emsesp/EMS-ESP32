@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,16 +19,17 @@
 #ifndef WebLogService_h
 #define WebLogService_h
 
-#define EVENT_SOURCE_LOG_PATH "/es/log"
-#define FETCH_LOG_PATH "/rest/fetchLog"
-#define LOG_SETTINGS_PATH "/rest/logSettings"
+#define EMSESP_EVENT_SOURCE_LOG_PATH "/es/log"
+#define EMSESP_LOG_SETTINGS_PATH "/rest/logSettings"
+
+using ::uuid::console::Shell;
 
 namespace emsesp {
 
 class WebLogService : public uuid::log::Handler {
   public:
-    static constexpr size_t MAX_LOG_MESSAGES = 50;
-    static constexpr size_t REFRESH_SYNC     = 30;
+    static constexpr size_t MAX_LOG_MESSAGES = 25;
+    // static constexpr size_t REFRESH_SYNC     = 30;
 
     WebLogService(AsyncWebServer * server, SecurityManager * securityManager);
 
@@ -42,6 +43,7 @@ class WebLogService : public uuid::log::Handler {
     bool             compact() const;
     void             compact(bool compact);
     void             loop();
+    void             show(Shell & shell);
 
     virtual void operator<<(std::shared_ptr<uuid::log::Message> message);
 
@@ -59,12 +61,10 @@ class WebLogService : public uuid::log::Handler {
     };
 
     void transmit(const QueuedLogMessage & message);
-    void fetchLog(AsyncWebServerRequest * request);
     void getSetValues(AsyncWebServerRequest * request, JsonVariant json);
 
     char * messagetime(char * out, const uint64_t t, const size_t bufsize);
 
-    uint64_t                     last_transmit_        = 0;                // Last transmit time
     size_t                       maximum_log_messages_ = MAX_LOG_MESSAGES; // Maximum number of log messages to buffer before they are output
     size_t                       limit_log_messages_   = 1;                // dynamic limit
     unsigned long                log_message_id_       = 0;                // The next identifier to use for queued log messages

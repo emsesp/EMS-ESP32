@@ -1,6 +1,4 @@
 import type { Translation } from '../i18n-types';
-/* prettier-ignore */
-/* eslint-disable */
 
 const nl: Translation = {
   LANGUAGE: 'Taal',
@@ -12,9 +10,8 @@ const nl: Translation = {
   USERNAME: 'Gebruikersnaam',
   PASSWORD: 'Wachtwoord',
   SU_PASSWORD: 'su Wachtwoord',
-  DASHBOARD: 'Dashboard',
   SETTINGS_OF: '{0} Instellingen',
-  HELP_OF: '{0} Help',
+  HELP: 'Help',
   LOGGED_IN: 'Ingelogd als {name}',
   PLEASE_SIGNIN: 'Log in om verder te gaan',
   UPLOAD_SUCCESSFUL: 'Upload successvol',
@@ -26,9 +23,10 @@ const nl: Translation = {
   ONOFF: 'aan/uit',
   TYPE: 'Type',
   DESCRIPTION: 'Beschrijving',
-  ENTITIES: 'Entiteiten',
+  ENTITIES: 'entiteiten',
   REFRESH: 'Ververs',
   EXPORT: 'Export',
+  FAVORITES: "Favorieten",
   DEVICE_DETAILS: 'Device Gegevens',
   ID_OF: '{0} ID',
   DEVICE: 'Apparaat',
@@ -36,9 +34,7 @@ const nl: Translation = {
   VERSION: 'Versie',
   BRAND: 'Merk',
   ENTITY_NAME: 'Entiteit',
-  VALUE: '{{Waarde|waarde}}',
-  SENSOR_DATA: 'Sensor data',
-  DEVICE_DATA: 'Apparaat data',
+  VALUE: '{{waarde|Waarde}}',
   DEVICES: 'Apparaten',
   SENSORS: 'Sensoren',
   RUN_COMMAND: 'Call commando',
@@ -76,14 +72,11 @@ const nl: Translation = {
   TX_ISSUES: 'Tx bus probleem. Probeer een andere Tx verzendmodus',
   DISCONNECTED: 'Niet verbonden',
   EMS_SCAN: 'Weet je zeker dat je een volledige EMS bus scan uit wilt voeren?',
-  EMS_BUS_STATUS: 'EMS busstatus',
-  ACTIVE_DEVICES: 'Actieve Apparaten & Sensoren',
+  DATA_TRAFFIC: 'Data Traffic', // TODO translate
   EMS_DEVICE: 'EMS Apparaat',
   SUCCESS: 'SUCCESS',
   FAIL: 'MISLUKT',
   QUALITY: 'QUALITEIT',
-  SCAN_DEVICES: 'Scannen naar nieuwe apparaten',
-  EMS_BUS_STATUS_TITLE: 'EMS Bus & Activiteitenstatus',
   SCAN: 'Scan',
   STATUS_NAMES: [
     'EMS Telegrammen ontvangen (Rx)',
@@ -95,25 +88,20 @@ const nl: Translation = {
     'API calls',
     'Syslog berichten'
   ],
-  NUM_DEVICES: '{num} Apparaat{{en}}',
-  NUM_TEMP_SENSORS: '{num} Temperatuursensor{{en}}',
-  NUM_ANALOG_SENSORS: '{num} Analoge sensor{{en}}',
   NUM_DAYS: '{num} dag{{en}}',
   NUM_SECONDS: '{num} second{{en}}',
   NUM_HOURS: '{num} {{uur|uren}}',
   NUM_MINUTES: '{num} {{minuut|minuten}}',
-  APPLICATION_SETTINGS: 'Applicatieinstellingen',
-  CUSTOMIZATIONS: 'Custom aanpassingen',
+  APPLICATION: 'Applicatie',
+  CUSTOMIZATIONS: 'Aanpassingen van entiteiten',
   APPLICATION_RESTARTING: 'EMS-ESP herstarten',
-  INTERFACE_BOARD_PROFILE: 'Interface Apparaatprofiel',
-  BOARD_PROFILE_TEXT: 'Selecteer een vooraf ingesteld apparaat profiel uit de lijst of kies Eigen om zelf uw hardware te configureren',
   BOARD_PROFILE: 'Apparaatprofiel',
   CUSTOM: 'Custom',
   GPIO_OF: '{0} GPIO',
   BUTTON: 'Toets',
   TEMPERATURE: 'Temperatuur',
   PHY_TYPE: 'Eth PHY Type',
-  TX_MODE: 'Tx Mode',
+  TX_MODE: 'EMS Tx Mode',
   HARDWARE: 'Hardware',
   EMS_BUS: '{{BUS|EMS BUS}}',
   DISABLED: 'Uitgeschakeld',
@@ -126,17 +114,20 @@ const nl: Translation = {
   BYPASS_TOKEN: 'API Access Token authenticatie uitschakelen',
   READONLY: 'Activeer read-only modus (blokkeert alle outgaande EMS Tx schrijf commandos)',
   UNDERCLOCK_CPU: 'Underclock CPU snelheid',
-  HEATINGOFF: 'Start boiler with forced heating off', // TODO translate
+  REMOTE_TIMEOUT: 'Remote timeout',
+  REMOTE_TIMEOUT_EN: 'Disable remote on missing room temperature', // TODO translate
+  HEATINGOFF: 'Start ketel met geforceerde verwarming uit',
+  MIN_DURATION: 'Wait time',
   ENABLE_SHOWER_TIMER: 'Activeer Douche Timer (tijdmeting)',
   ENABLE_SHOWER_ALERT: 'Activeer Douchemelding',
   TRIGGER_TIME: 'Trigger tijd',
   COLD_SHOT_DURATION: 'Tijd Shot koud water',
   FORMATTING_OPTIONS: 'Formatteringsopties',
-  BOOLEAN_FORMAT_DASHBOARD: 'Boolean formaat dashboard',
+  BOOLEAN_FORMAT_DASHBOARD: 'Boolean formaat web',
   BOOLEAN_FORMAT_API: 'Boolean formaat API/MQTT',
   ENUM_FORMAT: 'Enum formaat API/MQTT',
   INDEX: 'Index',
-  ENABLE_PARASITE: 'Activeer parasitaire modus',
+  ENABLE_PARASITE: 'Activeer 1-wire parasitaire modus',
   LOGGING: 'Logging',
   LOG_HEX: 'Log EMS telegrammen in hexadecimaal',
   ENABLE_SYSLOG: 'Activeer Syslog',
@@ -156,58 +147,47 @@ const nl: Translation = {
   CUSTOMIZATIONS_HELP_2: 'Markeer as favoriet',
   CUSTOMIZATIONS_HELP_3: 'Zet schrijfacties uit',
   CUSTOMIZATIONS_HELP_4: 'Uitsluiten van MQTT en API',
-  CUSTOMIZATIONS_HELP_5: 'verberg van het Dashboard',
+  CUSTOMIZATIONS_HELP_5: 'verbergen voor apparaten',
   CUSTOMIZATIONS_HELP_6: 'verwijderen van memory',
   SELECT_DEVICE: 'Selecteer een apparaat',
   SET_ALL: 'Alles aanzetten',
   OPTIONS: 'Opties',
   NAME: 'Naam',
   CUSTOMIZATIONS_RESET: 'Weet je zeker dat je alle custom aanpassingen wilt verwijderen inclusief de custom instellingen voor analoge temperatuursensoren?',
-  DEVICE_ENTITIES: 'Apparaat Entiteiten',
   SUPPORT_INFORMATION: 'Support Informatie',
-  CLICK_HERE: 'Klik Hier',
   HELP_INFORMATION_1: 'Bezoek de online wiki om instructies te vinden om EMS-ESP te configureren',
   HELP_INFORMATION_2: 'Voor de live community ga naar de Discord server',
   HELP_INFORMATION_3: 'Om een nieuwe feature te vragen of een bug te rapporteren',
   HELP_INFORMATION_4: 'Zorg dat je ook je systeem details zijn toevoeged voor een sneller antwoord',
-  HELP_INFORMATION_5: 'EMS-ESP is een gratis en open source project. Steun ons met een Star op Github!',
+  HELP_INFORMATION_5: 'For help and questions please contact your installer', // TODO translate
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
+  INSTALL: 'Installeren {0}',
   ABORTED: 'afgebroken',
   FAILED: 'mislukt',
   SUCCESSFUL: 'successvol',
   SYSTEM: 'Systeem',
   LOG_OF: '{0} Log',
   STATUS_OF: '{0} Status',
-  UPLOAD_DOWNLOAD: 'Upload/Download',
-  VERSION_ON: 'U bevindt zich momenteel op versie',
-  SYSTEM_APPLY_FIRMWARE: 'om de nieuwe firmware te activeren',
+  DOWNLOAD_UPLOAD: 'Download/Upload',
   CLOSE: 'Sluiten',
   USE: 'Gebruik',
   FACTORY_RESET: 'Fabrieksinstellingen',
   SYSTEM_FACTORY_TEXT: 'Gateway is gereset en start nu weer op met fabrieksinstellingen',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Weet je zeker dat je een reset naar fabrieksinstellingen uit wilt voeren?',
-  VERSION_CHECK: 'Versie Check',
-  THE_LATEST: 'De laatste',
-  OFFICIAL: 'official',
-  DEVELOPMENT: 'development',
-  RELEASE_IS: 'release is',
-  RELEASE_NOTES: 'release notes',
-  EMS_ESP_VER: 'EMS-ESP Versie',
+  STABLE: 'Stable',
+  DEVELOPMENT: 'Development',
+  EMS_ESP_VER: 'Firmware Versie',
   UPTIME: 'Systeem Uptime',
-  HEAP: 'Heap (Free / Max Alloc)',
+  FREE_MEMORY: 'Free Memory',
   PSRAM: 'PSRAM (Size / Free)',
-  FLASH: 'Flash Chip (Size / Speed)',
+  FLASH: 'Flash Chip (Size , Speed)',
   APPSIZE: 'Application (Partition: Used / Free)',
   FILESYSTEM: 'File System (Used / Free)',
   BUFFER_SIZE: 'Max Buffer Size',
   COMPACT: 'Compact',
-  ENABLE_OTA: 'Acitveer OTA Updates',
-  DOWNLOAD_CUSTOMIZATION_TEXT: 'Download alle custom instellingen',
-  DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events',
-  DOWNLOAD_SETTINGS_TEXT: 'Download de applicatie settings. Wees voorzichting met het delen van dit bestand want het bevat o.a. de wachtwoorden in plain text',
-  UPLOAD_TEXT: 'Upload een nieuwe firmware (.bin) file, instellingen of custom instellingen (.json) bestand hieronder',
-  UPLOADING: 'Uploading',
+  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
+  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
   UPLOAD_DROP_TEXT: 'Sleep bestand hierheen of klik hier',
   ERROR: 'Onverwachte fout, probeer opnieuw',
   TIME_SET: 'Tijd ingesteld',
@@ -244,6 +224,7 @@ const nl: Translation = {
   MQTT_INT_THERMOSTATS: 'Thermostaten',
   MQTT_INT_SOLAR: 'Solar Modules',
   MQTT_INT_MIXER: 'Mixer Modules',
+  MQTT_INT_WATER: 'Water Modules',
   MQTT_QUEUE: 'MQTT Queue',
   DEFAULT: 'Default',
   MQTT_ENTITY_FORMAT: 'Entity ID formaat',
@@ -280,7 +261,7 @@ const nl: Translation = {
   NETWORK_SCANNER: 'Netwerk Scanner',
   NETWORK_NO_WIFI: 'Geen WiFi networken gevonden',
   NETWORK_BLANK_SSID: 'laat leeg om WiFi uit te schakelen',
-  NETWORK_BLANK_BSSID: 'leave blank to use only SSID', // TODO translate
+  NETWORK_BLANK_BSSID: 'laat leeg om alleen SSID te bebruiken',
   TX_POWER: 'Tx Vermogen',
   HOSTNAME: 'Hostname',
   NETWORK_DISABLE_SLEEP: 'WiFi Sleep Mode uitzetten',
@@ -288,13 +269,12 @@ const nl: Translation = {
   NETWORK_USE_DNS: 'Activeer mDNS Service',
   NETWORK_ENABLE_CORS: 'Activeer CORS',
   NETWORK_CORS_ORIGIN: 'CORS origin',
-  NETWORK_ENABLE_IPV6: 'Activeer IPv6 support',
   NETWORK_FIXED_IP: 'Gebruik vast IP addres',
   NETWORK_GATEWAY: 'Gateway',
   NETWORK_SUBNET: 'Subnetmasker',
   NETWORK_DNS: 'DNS Servers',
   ADDRESS_OF: '{0} Address',
-  ADMIN: 'Admin',
+  ADMINISTRATOR: 'Administrator', 
   GUEST: 'Gast',
   NEW: 'Nieuwe',
   NEW_NAME_OF: 'Hernoem {0}',
@@ -306,30 +286,64 @@ const nl: Translation = {
   STAY: 'Blijven',
   LEAVE: 'Verlaten',
   SCHEDULER: 'Scheduler',
-  SCHEDULER_HELP_1: 'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT.',
+  SCHEDULER_HELP_1: 'Automatiseer opdrachten door hieronder geplande gebeurtenissen toe te voegen. Stel een unieke naam in om activering via API/MQTT in/uit te schakelen',
   SCHEDULER_HELP_2: 'Gebruik 00:00 om eenmaal te activeren bij het opstarten',
   SCHEDULE: 'Schedule',
   TIME: 'Tijd',
   TIMER: 'Timer',
+  ONCHANGE: 'Op verandering',
+  CONDITION: 'Voorwaarde',
+  IMMEDIATE: 'Onmiddellijk',
   SCHEDULE_UPDATED: 'Schema bijgewerkt',
   SCHEDULE_TIMER_1: 'bij het opstarten',
   SCHEDULE_TIMER_2: 'elke minuut',
   SCHEDULE_TIMER_3: 'elke huur',
-  CUSTOM_ENTITIES: 'Aangepaste Entiteiten',
-  ENTITIES_HELP_1: 'Aangepaste entiteiten ophalen uit de EMS-bus', // TODO translate
+  CUSTOM_ENTITIES: 'Eigen entiteiten',
+  ENTITIES_HELP_1: 'Eigen entiteiten ophalen uit de EMS-bus',
   ENTITIES_UPDATED: 'Entiteiten bijgewerkt',
   WRITEABLE: 'Beschrijfbare',
   SHOWING: 'Tonen',
   SEARCH: 'Zoek',
-  CERT: 'TLS rootcertificaat (laat leeg om TLS-insecure)', // TODO translate
+  CERT: 'TLS rootcertificaat (laat leeg om TLS-insecure)',
   ENABLE_TLS: 'Activeer TLS',
-  ON: 'On', // TODO translate
-  OFF: 'Off', // TODO translate
-  POLARITY: 'Polarity', // TODO translate
-  ACTIVEHIGH: 'Active High', // TODO translate
-  ACTIVELOW: 'Active Low', // TODO translate
-  UNCHANGED: 'Unchanged', // TODO translate
-  ALWAYS: 'Always' // TODO translate
+  ON: 'Aan',
+  OFF: 'Uit',
+  POLARITY: 'Polariteit',
+  ACTIVEHIGH: 'Actiev Hoog',
+  ACTIVELOW: 'Actiev Laag',
+  UNCHANGED: 'Ongewijzigd',
+  ALWAYS: 'Altijd',
+  ACTIVITY: 'Activiteit',
+  CONFIGURE: '{0} Configureren',
+  SYSTEM_MEMORY: 'System Geheugen',
+  APPLICATION_SETTINGS_1: 'Applicatie-instellingen wijzigen',
+  SECURITY_1: 'Gebruikers toevoegen of verwijderen',
+  DOWNLOAD_UPLOAD_1: 'Download en upload instellingen en firmware',
+  MODULES: 'Module',
+  MODULES_1: 'Externe modules activeren of deactiveren', // TODO translate
+  MODULES_UPDATED: 'Modules geüpdatet', 
+  MODULES_DESCRIPTION: 'Klik op de module om EMS-ESP library modules te activeren of te deactiveren',
+  MODULES_NONE: 'Geen externe modules gedetecteerd',
+  RENAME: 'Hernoemen',
+  ENABLE_MODBUS: 'Activeer Modbus',
+  VIEW_LOG: 'View log to diagnose issues', // TODO translate
+  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
+  SERVICES: 'Services', // TODO translate
+  ALLVALUES: 'All Values', // TODO translate
+  SPECIAL_FUNCTIONS: 'Special Functions', // TODO translate
+  WAIT_FIRMWARE: 'Firmware is uploading and installing', // TODO translate
+  INSTALL_VERSION: 'This will install version {0}. Are you sure?', // TODO translate
+  SWITCH_DEV: 'switch to the development version', // TODO translate
+  UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
+  LATEST_VERSION: 'You are using the latest firmware version.', // TODO translate
+  PLEASE_WAIT: 'Please wait', // TODO translate
+  RESTARTING_PRE: 'Initializing', // TODO translate
+  RESTARTING_POST: 'Preparing', // TODO translate
+  AUTO_SCROLL: 'Auto Scroll', // TODO translate
+  DASHBOARD: 'Dashboard', // TODO translate
+  NO_DATA: 'No data available', // TODO translate
+  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module', // TODO translate
+  DEVELOPER_MODE: 'Developer Mode' // TODO translate
 };
 
 export default nl;

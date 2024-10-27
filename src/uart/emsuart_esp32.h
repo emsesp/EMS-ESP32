@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,7 +67,8 @@ class EMSuart {
     static uint16_t transmit(const uint8_t * buf, const uint8_t len);
 
   private:
-    static void uart_event_task(void * pvParameters);
+    static void IRAM_ATTR uart_gen_break(uint32_t length_us);
+    static void           uart_event_task(void * pvParameters);
 };
 
 } // namespace emsesp

@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -114,35 +114,6 @@ class Solar : public EMSdevice {
     uint16_t collector2Area_; // Area of collector field 2
     uint8_t  collector2Type_; // Type of collector field 2, 01=flat, 02=vacuum
 
-    // SM100wwTemperature - 0x07D6
-    uint16_t wwTemp_1_;
-    uint16_t wwTemp_3_;
-    uint16_t wwTemp_4_;
-    uint16_t wwTemp_5_;
-    uint16_t wwTemp_7_;
-
-    // SM100wwStatus - 0x07AA
-    uint8_t wwPump_;
-
-    // SM100wwParam - 0x07A6
-    uint8_t wwMaxTemp_;
-    uint8_t wwSelTemp_;
-    uint8_t wwRedTemp_;
-    uint8_t wwDailyTemp_;
-    uint8_t wwDisinfectionTemp_;
-
-    // SM100wwKeepWarm - 0x07AE
-    uint8_t wwKeepWarm_;
-
-    // SM100wwCirc - 0x07A5
-    uint8_t wwCirc_;
-    uint8_t wwCircMode_;
-
-    // SM100wwStatus2 - 0x07E0
-    uint8_t wwFlow_;
-    uint8_t wwPumpMod_;
-    uint8_t wwStatus2_;
-
     // SM10Config - 0x96
     uint8_t wwMinTemp_;
     uint8_t maxFlow_;    // set this to calculate power
@@ -177,14 +148,6 @@ class Solar : public EMSdevice {
 
     void process_SM100HeatAssist(std::shared_ptr<const Telegram> telegram);
     void process_SM100Differential(std::shared_ptr<const Telegram> telegram);
-
-    void process_SM100wwTemperature(std::shared_ptr<const Telegram> telegram);
-    void process_SM100wwStatus(std::shared_ptr<const Telegram> telegram);
-    void process_SM100wwStatus2(std::shared_ptr<const Telegram> telegram);
-    void process_SM100wwCommand(std::shared_ptr<const Telegram> telegram);
-    void process_SM100wwCirc(std::shared_ptr<const Telegram> telegram);
-    void process_SM100wwParam(std::shared_ptr<const Telegram> telegram);
-    void process_SM100wwKeepWarm(std::shared_ptr<const Telegram> telegram);
 
     void process_ISM1StatusMessage(std::shared_ptr<const Telegram> telegram);
     void process_ISM1Set(std::shared_ptr<const Telegram> telegram);
@@ -225,15 +188,6 @@ class Solar : public EMSdevice {
     bool set_cylPriority(const char * value, const int8_t id);
     bool set_heatAssist(const char * value, const int8_t id);
     bool set_diffControl(const char * value, const int8_t id);
-
-    bool set_wwSelTemp(const char * value, const int8_t id);
-    bool set_wwMaxTemp(const char * value, const int8_t id);
-    bool set_wwRedTemp(const char * value, const int8_t id);
-    bool set_wwCirc(const char * value, const int8_t id);
-    bool set_wwCircMode(const char * value, const int8_t id);
-    bool set_wwKeepWarm(const char * value, const int8_t id);
-    bool set_wwDisinfectionTemp(const char * value, const int8_t id);
-    bool set_wwDailyTemp(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

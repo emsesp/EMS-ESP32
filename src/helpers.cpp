@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -99,7 +99,7 @@ char * Helpers::ultostr(char * ptr, uint32_t value, const uint8_t base) {
 #endif
 
 /**
- * fast atoi returning a std::string
+ * fast itoa returning a std::string
  * http://www.strudel.org.uk/itoa/
  * 
  */
@@ -122,8 +122,9 @@ std::string Helpers::itoa(int16_t value) {
 }
 
 /*
- * fast itoa and optimized for ESP32
+ * fast itoa
  * written by Lukás Chmela, Released under GPLv3. http://www.strudel.org.uk/itoa/ version 0.4
+ * optimized for ESP32
  */
 char * Helpers::itoa(int32_t value, char * result, const uint8_t base) {
     // check that the base if valid
@@ -255,6 +256,10 @@ char * Helpers::render_value(char * result, const double value, const int8_t for
     double v     = value < 0 ? value - 1.0 / (2 * p[format]) : value + 1.0 / (2 * p[format]);
     auto   whole = (int32_t)v;
 
+    if (whole == 0 && v < 0) {
+        result[0] = '-';
+        result++;
+    }
     itoa(whole, result, 10);
 
     while (*result != '\0') {
@@ -373,13 +378,15 @@ char * Helpers::render_value(char * result, const uint32_t value, const int8_t f
     return result;
 }
 
-// creates string of hex values from an arrray of bytes
+// creates string of hex values from an array of bytes
 std::string Helpers::data_to_hex(const uint8_t * data, const uint8_t length) {
     if (length == 0) {
         return "<empty>";
     }
 
-    char   str[160] = {0};
+    char str[length * 3];
+    memset(str, 0, sizeof(str));
+
     char   buffer[4];
     char * p = &str[0];
     for (uint8_t i = 0; i < length; i++) {
@@ -411,6 +418,8 @@ uint32_t Helpers::hextoint(const char * hex) {
         // get current character then increment
         char byte = *hex++;
         // transform hex character to the 4bit equivalent number, using the ascii table indexes
+        if (byte == ' ')
+            byte = *hex++; // skip spaces
         if (byte >= '0' && byte <= '9')
             byte = byte - '0';
         else if (byte >= 'a' && byte <= 'f')
@@ -452,31 +461,12 @@ int Helpers::atoint(const char * value) {
 float Helpers::transformNumFloat(float value, const int8_t numeric_operator, const uint8_t fahrenheit) {
     float val;
 
-    switch (numeric_operator) {
-    case DeviceValueNumOp::DV_NUMOP_DIV2:
-        val = ((value / 2) * 100 + 0.5);
-        break;
-    case DeviceValueNumOp::DV_NUMOP_DIV10:
-        val = ((value / 10) * 100 + 0.5);
-        break;
-    case DeviceValueNumOp::DV_NUMOP_DIV60:
-        val = ((value / 60) * 100 + 0.5);
-        break;
-    case DeviceValueNumOp::DV_NUMOP_DIV100:
-        val = ((value / 100) * 100 + 0.5);
-        break;
-    case DeviceValueNumOp::DV_NUMOP_MUL5:
-        val = value * 100 * 5;
-        break;
-    case DeviceValueNumOp::DV_NUMOP_MUL10:
-        val = value * 100 * 10;
-        break;
-    case DeviceValueNumOp::DV_NUMOP_MUL15:
-        val = value * 100 * 15;
-        break;
-    default:
-        val = (value * 100 + 0.5); // no ops
-        break;
+    if (numeric_operator == 0) { // DV_NUMOP_NONE
+        val = value * 100 + 0.5;
+    } else if (numeric_operator > 0) { // DV_NUMOP_DIVxx
+        val = value * 100 / numeric_operator + 0.5;
+    } else { // DV_NUMOP_MULxx
+        val = value * -100 * numeric_operator;
     }
 
     if (value < 0) { // negative rounding
@@ -500,11 +490,11 @@ bool Helpers::hasValue(const uint8_t & value, const uint8_t isBool) {
     if (isBool == EMS_VALUE_BOOL) {
         return (value != EMS_VALUE_BOOL_NOTSET);
     }
-    return (value != EMS_VALUE_UINT_NOTSET);
+    return (value != EMS_VALUE_UINT8_NOTSET);
 }
 
 bool Helpers::hasValue(const int8_t & value) {
-    return (value != EMS_VALUE_INT_NOTSET);
+    return (value != EMS_VALUE_INT8_NOTSET);
 }
 
 bool Helpers::hasValue(const char * value) {
@@ -517,15 +507,15 @@ bool Helpers::hasValue(const char * value) {
 
 // for short these are typically 0x8300, 0x7D00 and sometimes 0x8000
 bool Helpers::hasValue(const int16_t & value) {
-    return (abs(value) < EMS_VALUE_USHORT_NOTSET);
+    return (abs(value) < EMS_VALUE_UINT16_NOTSET);
 }
 
 bool Helpers::hasValue(const uint16_t & value) {
-    return (value < EMS_VALUE_USHORT_NOTSET);
+    return (value < EMS_VALUE_UINT16_NOTSET);
 }
 
 bool Helpers::hasValue(const uint32_t & value) {
-    return (value != EMS_VALUE_ULONG_NOTSET && value != EMS_VALUE_ULLONG_NOTSET);
+    return (value != EMS_VALUE_UINT24_NOTSET && value != EMS_VALUE_UINT32_NOTSET);
 }
 
 // checks if we can convert a char string to an int value
@@ -633,6 +623,7 @@ bool Helpers::value2enum(const char * value, uint8_t & value_ui, const char * co
             return true;
         }
     }
+    value_ui = 0;
 
     return false;
 }
@@ -808,10 +799,6 @@ uint16_t Helpers::string2minutes(const std::string & str) {
                 if (tmp > 60) {
                     return 0;
                 }
-                Serial.print("*");
-                Serial.print(tmp);
-                Serial.println("*");
-
                 res += tmp;
             }
             // Or we got an extra colon
@@ -832,9 +819,20 @@ uint16_t Helpers::string2minutes(const std::string & str) {
 
     if (state == 1 && tmp < 60) {
         return res + tmp;
+    } else if (state == 0) { // without : it's only minutes
+        return tmp;
     } else {
         return 0; // Or if we were not, something is wrong in the given string
     }
+}
+
+float Helpers::numericoperator2scalefactor(int8_t numeric_operator) {
+    if (numeric_operator == 0)
+        return 1.0f;
+    else if (numeric_operator > 0)
+        return 1.0f / numeric_operator;
+    else
+        return -numeric_operator;
 }
 
 } // namespace emsesp

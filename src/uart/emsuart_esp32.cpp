@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,11 +52,8 @@ void EMSuart::uart_event_task(void * pvParameters) {
             } else if (event.type == UART_BREAK) {
                 if (length == 2 || (length >= 6 && length <= EMS_MAXBUFFERSIZE)) {
                     uart_read_bytes(EMSUART_NUM, telegram, length, portMAX_DELAY);
-                    // if (telegram[0] && !telegram[length - 1]) {
                     EMSESP::incoming_telegram(telegram, (uint8_t)(length - 1));
-                    // }
-                } else {
-                    // flush buffer up to break
+                } else { // flush buffer up to break
                     uint8_t buf[length];
                     uart_read_bytes(EMSUART_NUM, buf, length, portMAX_DELAY);
                 }
@@ -76,12 +73,13 @@ void EMSuart::uart_event_task(void * pvParameters) {
 void EMSuart::start(const uint8_t tx_mode, const uint8_t rx_gpio, const uint8_t tx_gpio) {
     if (tx_mode_ == 0xFF) {
         uart_config_t uart_config = {
-            .baud_rate  = EMSUART_BAUD,
-            .data_bits  = UART_DATA_8_BITS,
-            .parity     = UART_PARITY_DISABLE,
-            .stop_bits  = UART_STOP_BITS_1,
-            .flow_ctrl  = UART_HW_FLOWCTRL_DISABLE,
-            .source_clk = UART_SCLK_APB,
+            .baud_rate           = EMSUART_BAUD,
+            .data_bits           = UART_DATA_8_BITS,
+            .parity              = UART_PARITY_DISABLE,
+            .stop_bits           = UART_STOP_BITS_1,
+            .flow_ctrl           = UART_HW_FLOWCTRL_DISABLE,
+            .rx_flow_ctrl_thresh = 0, // not used - https://docs.espressif.com/projects/esp-idf/en/v3.3.6/api-reference/peripherals/uart.html
+            .source_clk          = UART_SCLK_APB,
         };
 #if defined(EMSUART_RX_INVERT)
         inverse_mask |= UART_SIGNAL_RXD_INV;
@@ -114,6 +112,18 @@ void EMSuart::stop() {
 };
 
 /*
+ * generate <BRK> by inverting tx
+ */
+void IRAM_ATTR EMSuart::uart_gen_break(uint32_t length_us) {
+    portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
+    portENTER_CRITICAL(&mux);
+    uart_set_line_inverse(EMSUART_NUM, UART_SIGNAL_TXD_INV ^ inverse_mask);
+    delayMicroseconds(length_us);
+    uart_set_line_inverse(EMSUART_NUM, inverse_mask);
+    portEXIT_CRITICAL(&mux);
+}
+
+/*
  * Sends a 1-byte poll, ending with a <BRK>
  */
 void EMSuart::send_poll(const uint8_t data) {
@@ -144,9 +154,7 @@ uint16_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
             uart_write_bytes(EMSUART_NUM, &buf[i], 1);
             delayMicroseconds(EMSUART_TX_WAIT_PLUS);
         }
-        uart_set_line_inverse(EMSUART_NUM, UART_SIGNAL_TXD_INV ^ inverse_mask);
-        delayMicroseconds(EMSUART_TX_BRK_PLUS);
-        uart_set_line_inverse(EMSUART_NUM, inverse_mask);
+        uart_gen_break(EMSUART_TX_BRK_PLUS);
         return EMS_TX_STATUS_OK;
     }
 
@@ -155,9 +163,7 @@ uint16_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
             uart_write_bytes(EMSUART_NUM, &buf[i], 1);
             delayMicroseconds(EMSUART_TX_WAIT_HT3);
         }
-        uart_set_line_inverse(EMSUART_NUM, UART_SIGNAL_TXD_INV ^ inverse_mask);
-        delayMicroseconds(EMSUART_TX_BRK_HT3);
-        uart_set_line_inverse(EMSUART_NUM, inverse_mask);
+        uart_gen_break(EMSUART_TX_BRK_HT3);
         return EMS_TX_STATUS_OK;
     }
 
@@ -172,9 +178,7 @@ uint16_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
             uart_get_buffered_data_len(EMSUART_NUM, &rx1);
         } while ((rx1 == rx0) && (--timeoutcnt));
     }
-    uart_set_line_inverse(EMSUART_NUM, UART_SIGNAL_TXD_INV ^ inverse_mask);
-    delayMicroseconds(EMSUART_TX_BRK_EMS);
-    uart_set_line_inverse(EMSUART_NUM, inverse_mask);
+    uart_gen_break(EMSUART_TX_BRK_EMS);
     return EMS_TX_STATUS_OK;
 }
 

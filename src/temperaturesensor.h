@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ class TemperatureSensor {
         bool apply_customization();
 
         // initial values
-        int16_t temperature_c = EMS_VALUE_SHORT_NOTSET;
+        int16_t temperature_c = EMS_VALUE_INT16_NOTSET; // value is *10
         bool    read          = false;
         bool    ha_registered = false;
 
@@ -90,23 +90,23 @@ class TemperatureSensor {
         return sensors_;
     }
 
-    uint32_t reads() {
+    uint32_t reads() const {
         return sensorreads_;
     }
 
-    uint32_t fails() {
+    uint32_t fails() const {
         return sensorfails_;
     }
 
-    bool sensor_enabled() {
+    bool sensor_enabled() const {
         return (dallas_gpio_ != 0);
     }
 
-    bool have_sensors() {
+    bool have_sensors() const {
         return (!sensors_.empty());
     }
 
-    size_t no_sensors() {
+    size_t count_entities() const {
         return sensors_.size();
     }
 
@@ -151,8 +151,8 @@ class TemperatureSensor {
     bool     temperature_convert_complete();
     int16_t  get_temperature_c(const uint8_t addr[]);
     uint64_t get_id(const uint8_t addr[]);
+    void     get_value_json(JsonObject output, const Sensor & sensor);
     void     remove_ha_topic(const std::string & id);
-    void     addSensorJson(JsonObject output, const Sensor & sensor);
 
     std::vector<Sensor> sensors_; // our list of active sensors
 

@@ -1,7 +1,7 @@
 
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,12 +33,13 @@ class DeviceValue {
   public:
     enum DeviceValueType : uint8_t {
         BOOL,
-        INT,
-        UINT,
-        SHORT,
-        USHORT,
-        ULONG,
+        INT8,
+        UINT8,
+        INT16,
+        UINT16,
+        UINT24,
         TIME, // same as ULONG (32 bits)
+        UINT32,
         ENUM,
         STRING,
         CMD // special for commands only
@@ -72,16 +73,14 @@ class DeviceValue {
         K,           // 22 - K
         VOLTS,       // 23 - V
         MBAR,        // 24 - mbar
-        CONNECTIVITY // 25 - used in HA
+        LH,          // 25 - l/h
+        CONNECTIVITY // 26 - used in HA
     };
 
     // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
-    enum DeviceValueTAG : uint8_t {
-        TAG_NONE = 0, // wild card
-        TAG_HEARTBEAT,
-        TAG_BOILER_DATA_WW,
-        TAG_DEVICE_DATA,
-        TAG_DEVICE_DATA_WW,
+    enum DeviceValueTAG : int8_t {
+        TAG_NONE        = -1, // wild card
+        TAG_DEVICE_DATA = 0,
         TAG_HC1,
         TAG_HC2,
         TAG_HC3,
@@ -90,16 +89,16 @@ class DeviceValue {
         TAG_HC6,
         TAG_HC7,
         TAG_HC8,
-        TAG_WWC1,
-        TAG_WWC2,
-        TAG_WWC3,
-        TAG_WWC4,
-        TAG_WWC5,
-        TAG_WWC6,
-        TAG_WWC7,
-        TAG_WWC8,
-        TAG_WWC9,
-        TAG_WWC10,
+        TAG_DHW1,
+        TAG_DHW2,
+        TAG_DHW3,
+        TAG_DHW4,
+        TAG_DHW5,
+        TAG_DHW6,
+        TAG_DHW7,
+        TAG_DHW8,
+        TAG_DHW9,
+        TAG_DHW10,
         TAG_AHS1,
         TAG_HS1,
         TAG_HS2,
@@ -131,7 +130,7 @@ class DeviceValue {
         DV_WEB_EXCLUDE      = (1 << 4), // 16 - not shown on web
         DV_API_MQTT_EXCLUDE = (1 << 5), // 32 - not shown on mqtt, API
         DV_READONLY         = (1 << 6), // 64 - read only
-        DV_FAVORITE         = (1 << 7)  // 128 - sort to front
+        DV_FAVORITE         = (1 << 7)  // 128 - marked as a favorite
     };
 
     // numeric operators
@@ -149,13 +148,12 @@ class DeviceValue {
     };
 
     uint8_t               device_type;    // EMSdevice::DeviceType
-    uint8_t               tag;            // DeviceValueTAG::*
+    int8_t                tag;            // DeviceValueTAG::*
     void *                value_p;        // pointer to variable of any type
     uint8_t               type;           // DeviceValueType::*
     const char * const ** options;        // options as a flash char array
     const char * const *  options_single; // options are not translated
     int8_t                numeric_operator;
-    uint8_t               options_size;    // number of options in the char array, calculated
     const char * const    short_name;      // used in MQTT and API
     const char * const *  fullname;        // used in Web and Console, is translated
     std::string           custom_fullname; // optional, from customization
@@ -165,21 +163,24 @@ class DeviceValue {
     uint32_t              max;             // max range
     uint8_t               state;           // DeviceValueState::*
 
-    DeviceValue(uint8_t               device_type,
-                uint8_t               tag,
-                void *                value_p,
-                uint8_t               type,
-                const char * const ** options,
-                const char * const *  options_single,
+    uint8_t options_size; // number of options in the char array, calculated at class initialization
+
+    DeviceValue(uint8_t               device_type,    // EMSdevice::DeviceType
+                int8_t                tag,            // DeviceValueTAG::*
+                void *                value_p,        // pointer to variable of any type
+                uint8_t               type,           // DeviceValueType::*
+                const char * const ** options,        // options as a flash char array
+                const char * const *  options_single, // options are not translated
                 int8_t                numeric_operator,
-                const char * const    short_name,
-                const char * const *  fullname,
-                std::string &         custom_fullname,
-                uint8_t               uom,
-                bool                  has_cmd,
-                int16_t               min,
-                uint32_t              max,
-                uint8_t               state);
+                const char * const    short_name,      // used in MQTT and API
+                const char * const *  fullname,        // used in Web and Console, is translated
+                std::string &         custom_fullname, // optional, from customization
+                uint8_t               uom,             // DeviceValueUOM::*
+                bool                  has_cmd,         // true if there is a Console/MQTT command which matches the short_name
+                int16_t               min,             // min range
+                uint32_t              max,             // max range
+                uint8_t               state            // DeviceValueState::* (also known as the mask)
+    );
 
     bool hasValue() const;
     bool has_tag() const;
@@ -190,7 +191,7 @@ class DeviceValue {
     bool               get_custom_max(uint32_t & val);
     std::string        get_custom_fullname() const;
     std::string        get_fullname() const;
-    static std::string get_name(std::string & entity);
+    static std::string get_name(const std::string & entity);
 
     // dv state flags
     void add_state(uint8_t s) {

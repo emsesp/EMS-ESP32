@@ -20,7 +20,6 @@
 #define NETWORK_SETTINGS_FILE "/config/networkSettings.json"
 #define NTP_SETTINGS_FILE "/config/ntpSettings.json"
 #define EMSESP_SETTINGS_FILE "/config/emsespSettings.json"
-#define OTA_SETTINGS_FILE "/config/otaSettings.json"
 
 class DummySettings {
   public:
@@ -68,16 +67,16 @@ class DummySettings {
     bool    staticIPConfig = false;
     String  dnsIP1         = "";
     String  dnsIP2         = "";
-    bool    enableIPv6     = false;
     bool    enableMDNS     = true;
     bool    enableCORS     = false;
     String  CORSOrigin     = "*";
     uint8_t tx_power       = 0;
 
-    uint8_t provisionMode = 0;
+    uint8_t  provisionMode      = 0;
+    uint32_t publish_time_water = 0;
 
-    static void read(DummySettings & settings, JsonObject root){};
-    static void read(DummySettings & settings){};
+    static void read(DummySettings & settings, JsonObject root) {};
+    static void read(DummySettings & settings) {};
 
     static StateUpdateResult update(JsonObject root, DummySettings & settings) {
         return StateUpdateResult::CHANGED;
@@ -86,7 +85,7 @@ class DummySettings {
 
 class DummySettingsService : public StatefulService<DummySettings> {
   public:
-    DummySettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager){};
+    DummySettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager) {};
 
     void begin();
     void loop();
@@ -96,20 +95,18 @@ class DummySettingsService : public StatefulService<DummySettings> {
 #define SecuritySettings DummySettings
 #define MqttSettings DummySettings
 #define NTPSettings DummySettings
-#define OTASettings DummySettings
 #define APSettings DummySettings
-
 
 class ESP8266React {
   public:
     ESP8266React(AsyncWebServer * server, FS * fs)
         : _settings(server, fs, nullptr)
-        , _securitySettingsService(server, fs){};
+        , _securitySettingsService(server, fs) {};
 
     void begin() {
         _mqttClient = new espMqttClient();
     };
-    void loop(){};
+    void loop() {};
 
     SecurityManager * getSecurityManager() {
         return &_securitySettingsService;
@@ -141,10 +138,6 @@ class ESP8266React {
     }
 
     StatefulService<DummySettings> * getNTPSettingsService() {
-        return &_settings;
-    }
-
-    StatefulService<DummySettings> * getOTASettingsService() {
         return &_settings;
     }
 

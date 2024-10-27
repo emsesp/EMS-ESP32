@@ -13,79 +13,83 @@ the LICENSE file.
 namespace espMqttClientInternals {
 
 ClientPosix::ClientPosix()
-: _sockfd(-1)
-, _host() {
-  // empty
+    : _sockfd(-1)
+    , _host() {
+    // empty
 }
 
 ClientPosix::~ClientPosix() {
-  ClientPosix::stop();
+    ClientPosix::stop();
 }
 
 bool ClientPosix::connect(IPAddress ip, uint16_t port) {
-  if (connected()) stop();
+    if (connected())
+        stop();
 
-  _sockfd = ::socket(AF_INET, SOCK_STREAM, 0);
-  if (_sockfd < 0) {
-    emc_log_e("Error %d opening socket", errno);
-  }
+    _sockfd = ::socket(AF_INET, SOCK_STREAM, 0);
+    if (_sockfd < 0) {
+        emc_log_e("Error %d opening socket", errno);
+    }
 
-  int flag = 1;
-  if (setsockopt(_sockfd, IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(int)) < 0) {
-    emc_log_e("Error %d disabling nagle", errno);
-  }
+    int flag = 1;
+    if (setsockopt(_sockfd, IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(int)) < 0) {
+        emc_log_e("Error %d disabling nagle", errno);
+    }
 
-  memset(&_host, 0, sizeof(_host));
-  _host.sin_family = AF_INET;
-  _host.sin_addr.s_addr = htonl(uint32_t(ip));
-  _host.sin_port = htons(port); // modified by proddy for EMS-ESP compiling standalone
+    memset(&_host, 0, sizeof(_host));
+    _host.sin_family      = AF_INET;
+    _host.sin_addr.s_addr = htonl(uint32_t(ip));
+#ifndef __APPLE__
+    _host.sin_port = ::htons(port);
+#endif
 
-  int ret = ::connect(_sockfd, reinterpret_cast<sockaddr*>(&_host), sizeof(_host));
-  if (ret < 0) {
-    emc_log_e("Error connecting: %d - (%d) %s", ret, errno, strerror(errno));
+    int ret = ::connect(_sockfd, reinterpret_cast<sockaddr *>(&_host), sizeof(_host));
+
+    if (ret < 0) {
+        emc_log_e("Error connecting: %d - (%d) %s", ret, errno, strerror(errno));
+        return false;
+    }
+
+    emc_log_i("Connected");
+    return true;
+}
+
+bool ClientPosix::connect(const char * host, uint16_t port) {
+    // tbi
+    (void)host;
+    (void)port;
     return false;
-  }
-
-  emc_log_i("Connected");
-  return true;
 }
 
-bool ClientPosix::connect(const char* host, uint16_t port) {
-  // tbi
-  (void) host;
-  (void) port;
-  return false;
+size_t ClientPosix::write(const uint8_t * buf, size_t size) {
+    return ::send(_sockfd, buf, size, 0);
 }
 
-size_t ClientPosix::write(const uint8_t* buf, size_t size) {
-  return ::send(_sockfd, buf, size, 0);
-}
-
-int ClientPosix::read(uint8_t* buf, size_t size) {
-  int ret = ::recv(_sockfd, buf, size, MSG_DONTWAIT);
-  /*
+int ClientPosix::read(uint8_t * buf, size_t size) {
+    int ret = ::recv(_sockfd, buf, size, MSG_DONTWAIT);
+    /*
   if (ret < 0) {
     emc_log_e("Error reading: %s", strerror(errno));
   }
   */
-  return ret;
+    return ret;
 }
 
 void ClientPosix::stop() {
-  if (_sockfd >= 0) {
-    ::close(_sockfd);
-    _sockfd = -1;
-  }
+    if (_sockfd >= 0) {
+        ::close(_sockfd);
+        _sockfd = -1;
+    }
 }
 
 bool ClientPosix::connected() {
-  return _sockfd >= 0;
+    return _sockfd >= 0;
 }
 
 bool ClientPosix::disconnected() {
-  return _sockfd < 0;
+    return _sockfd < 0;
 }
 
-}  // namespace espMqttClientInternals
+} // namespace espMqttClientInternals
 
 #endif

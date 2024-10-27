@@ -38,7 +38,8 @@ try {
 export class Unpackr {
   constructor(options) {
     if (options) {
-      if (options.useRecords === false && options.mapsAsObjects === undefined) options.mapsAsObjects = true;
+      if (options.useRecords === false && options.mapsAsObjects === undefined)
+        options.mapsAsObjects = true;
       if (options.sequential && options.trusted !== false) {
         options.trusted = true;
         if (!options.structures && options.useRecords != false) {
@@ -46,7 +47,8 @@ export class Unpackr {
           if (!options.maxSharedStructures) options.maxSharedStructures = 0;
         }
       }
-      if (options.structures) options.structures.sharedLength = options.structures.length;
+      if (options.structures)
+        options.structures.sharedLength = options.structures.length;
       else if (options.getStructures) {
         (options.structures = []).uninitialized = true; // this is what we use to denote an uninitialized structures
         options.structures.sharedLength = 0;
@@ -63,11 +65,14 @@ export class Unpackr {
       // re-entrant execution, save the state and restore it after we do this unpack
       return saveState(() => {
         clearSource();
-        return this ? this.unpack(source, options) : Unpackr.prototype.unpack.call(defaultOptions, source, options);
+        return this
+          ? this.unpack(source, options)
+          : Unpackr.prototype.unpack.call(defaultOptions, source, options);
       });
     }
     if (!source.buffer && source.constructor === ArrayBuffer)
-      source = typeof Buffer !== 'undefined' ? Buffer.from(source) : new Uint8Array(source);
+      source =
+        typeof Buffer !== 'undefined' ? Buffer.from(source) : new Uint8Array(source);
     if (typeof options === 'object') {
       srcEnd = options.end || source.length;
       position = options.start || 0;
@@ -86,14 +91,21 @@ export class Unpackr {
     // new ones
     try {
       dataView =
-        source.dataView || (source.dataView = new DataView(source.buffer, source.byteOffset, source.byteLength));
+        source.dataView ||
+        (source.dataView = new DataView(
+          source.buffer,
+          source.byteOffset,
+          source.byteLength
+        ));
     } catch (error) {
       // if it doesn't have a buffer, maybe it is the wrong type of object
       src = null;
       if (source instanceof Uint8Array) throw error;
       throw new Error(
         'Source must be a Uint8Array or Buffer but was a ' +
-          (source && typeof source == 'object' ? source.constructor.name : typeof source)
+          (source && typeof source == 'object'
+            ? source.constructor.name
+            : typeof source)
       );
     }
     if (this instanceof Unpackr) {
@@ -117,7 +129,9 @@ export class Unpackr {
     try {
       sequentialMode = true;
       const size = source.length;
-      const value = this ? this.unpack(source, size) : defaultUnpackr.unpack(source, size);
+      const value = this
+        ? this.unpack(source, size)
+        : defaultUnpackr.unpack(source, size);
       if (forEach) {
         if (forEach(value) === false) return;
         while (position < size) {
@@ -145,9 +159,11 @@ export class Unpackr {
   }
 
   _mergeStructures(loadedStructures, existingStructures) {
-    if (onLoadedStructures) loadedStructures = onLoadedStructures.call(this, loadedStructures);
+    if (onLoadedStructures)
+      loadedStructures = onLoadedStructures.call(this, loadedStructures);
     loadedStructures = loadedStructures || [];
-    if (Object.isFrozen(loadedStructures)) loadedStructures = loadedStructures.map((structure) => structure.slice(0));
+    if (Object.isFrozen(loadedStructures))
+      loadedStructures = loadedStructures.map((structure) => structure.slice(0));
     for (let i = 0, l = loadedStructures.length; i < l; i++) {
       const structure = loadedStructures[i];
       if (structure) {
@@ -162,7 +178,8 @@ export class Unpackr {
         const existing = existingStructures[id];
         if (existing) {
           if (structure)
-            (loadedStructures.restoreStructures || (loadedStructures.restoreStructures = []))[id] = structure;
+            (loadedStructures.restoreStructures ||
+              (loadedStructures.restoreStructures = []))[id] = structure;
           loadedStructures[id] = existing;
         }
       }
@@ -181,10 +198,16 @@ export function checkedRead(options: any) {
   try {
     if (!currentUnpackr.trusted && !sequentialMode) {
       const sharedLength = currentStructures.sharedLength || 0;
-      if (sharedLength < currentStructures.length) currentStructures.length = sharedLength;
+      if (sharedLength < currentStructures.length)
+        currentStructures.length = sharedLength;
     }
     let result;
-    if (currentUnpackr.randomAccessStructure && src[position] < 0x40 && src[position] >= 0x20 && readStruct) {
+    if (
+      currentUnpackr.randomAccessStructure &&
+      src[position] < 0x40 &&
+      src[position] >= 0x20 &&
+      readStruct
+    ) {
       result = readStruct(src, position, srcEnd, currentUnpackr);
       src = null; // dispose of this so that recursive unpack calls don't save state
       if (!(options && options.lazy) && result) result = result.toJSON();
@@ -198,7 +221,8 @@ export function checkedRead(options: any) {
 
     if (position == srcEnd) {
       // finished reading this source, cleanup references
-      if (currentStructures && currentStructures.restoreStructures) restoreStructures();
+      if (currentStructures && currentStructures.restoreStructures)
+        restoreStructures();
       currentStructures = null;
       src = null;
       if (referenceMap) referenceMap = null;
@@ -208,10 +232,9 @@ export function checkedRead(options: any) {
     } else if (!sequentialMode) {
       let jsonView;
       try {
-        jsonView = JSON.stringify(result, (_, value) => (typeof value === 'bigint' ? `${value}n` : value)).slice(
-          0,
-          100
-        );
+        jsonView = JSON.stringify(result, (_, value) =>
+          typeof value === 'bigint' ? `${value}n` : value
+        ).slice(0, 100);
       } catch (error) {
         jsonView = '(JSON view not available ' + error + ')';
       }
@@ -220,9 +243,14 @@ export function checkedRead(options: any) {
     // else more to read, but we are reading sequentially, so don't clear source yet
     return result;
   } catch (error) {
-    if (currentStructures && currentStructures.restoreStructures) restoreStructures();
+    if (currentStructures && currentStructures.restoreStructures)
+      restoreStructures();
     clearSource();
-    if (error instanceof RangeError || error.message.startsWith('Unexpected end of buffer') || position > srcEnd) {
+    if (
+      error instanceof RangeError ||
+      error.message.startsWith('Unexpected end of buffer') ||
+      position > srcEnd
+    ) {
       error.incomplete = true;
     }
     throw error;
@@ -243,7 +271,8 @@ export function read() {
       if (token < 0x40) return token;
       else {
         const structure =
-          currentStructures[token & 0x3f] || (currentUnpackr.getStructures && loadStructures()[token & 0x3f]);
+          currentStructures[token & 0x3f] ||
+          (currentUnpackr.getStructures && loadStructures()[token & 0x3f]);
         if (structure) {
           if (!structure.read) {
             structure.read = createStructureReader(structure, token & 0x3f);
@@ -282,7 +311,10 @@ export function read() {
     // fixstr
     const length = token - 0xa0;
     if (srcStringEnd >= position) {
-      return srcString.slice(position - srcStringStart, (position += length) - srcStringStart);
+      return srcString.slice(
+        position - srcStringStart,
+        (position += length) - srcStringStart
+      );
     }
     if (srcStringEnd == 0 && srcEnd < 140) {
       // for small blocks, avoiding the overhead of the extract call is helpful
@@ -298,8 +330,16 @@ export function read() {
       case 0xc1:
         if (bundledStrings) {
           value = read(); // followed by the length of the string in characters (not bytes!)
-          if (value > 0) return bundledStrings[1].slice(bundledStrings.position1, (bundledStrings.position1 += value));
-          else return bundledStrings[0].slice(bundledStrings.position0, (bundledStrings.position0 -= value));
+          if (value > 0)
+            return bundledStrings[1].slice(
+              bundledStrings.position1,
+              (bundledStrings.position1 += value)
+            );
+          else
+            return bundledStrings[0].slice(
+              bundledStrings.position0,
+              (bundledStrings.position0 -= value)
+            );
         }
         return C1; // "never-used", return special object to denote that
       case 0xc2:
@@ -338,7 +378,8 @@ export function read() {
         value = dataView.getFloat32(position);
         if (currentUnpackr.useFloat32 > 2) {
           // this does rounding of numbers that were encoded in 32-bit float to nearest significant decimal digit that could be preserved
-          const multiplier = mult10[((src[position] & 0x7f) << 1) | (src[position + 1] >> 7)];
+          const multiplier =
+            mult10[((src[position] & 0x7f) << 1) | (src[position + 1] >> 7)];
           position += 4;
           return ((multiplier * value + (value > 0 ? 0.5 : -0.5)) >> 0) / multiplier;
         }
@@ -391,7 +432,8 @@ export function read() {
           value = dataView.getBigInt64(position).toString();
         } else if (currentUnpackr.int64AsType === 'auto') {
           value = dataView.getBigInt64(position);
-          if (value >= BigInt(-2) << BigInt(52) && value <= BigInt(2) << BigInt(52)) value = Number(value);
+          if (value >= BigInt(-2) << BigInt(52) && value <= BigInt(2) << BigInt(52))
+            value = Number(value);
         } else value = dataView.getBigInt64(position);
         position += 8;
         return value;
@@ -433,7 +475,10 @@ export function read() {
         // str 8
         value = src[position++];
         if (srcStringEnd >= position) {
-          return srcString.slice(position - srcStringStart, (position += value) - srcStringStart);
+          return srcString.slice(
+            position - srcStringStart,
+            (position += value) - srcStringStart
+          );
         }
         return readString8(value);
       case 0xda:
@@ -441,7 +486,10 @@ export function read() {
         value = dataView.getUint16(position);
         position += 2;
         if (srcStringEnd >= position) {
-          return srcString.slice(position - srcStringStart, (position += value) - srcStringStart);
+          return srcString.slice(
+            position - srcStringStart,
+            (position += value) - srcStringStart
+          );
         }
         return readString16(value);
       case 0xdb:
@@ -449,7 +497,10 @@ export function read() {
         value = dataView.getUint32(position);
         position += 4;
         if (srcStringEnd >= position) {
-          return srcString.slice(position - srcStringStart, (position += value) - srcStringStart);
+          return srcString.slice(
+            position - srcStringStart,
+            (position += value) - srcStringStart
+          );
         }
         return readString32(value);
       case 0xdc:
@@ -504,7 +555,8 @@ function createStructureReader(structure, firstId) {
             .join(',') +
           '})}'
       )(read));
-      if (structure.highByte === 0) structure.read = createSecondByteReader(firstId, structure.read);
+      if (structure.highByte === 0)
+        structure.read = createSecondByteReader(firstId, structure.read);
       return readObject(); // second byte is already read, if there is one so immediately read object
     }
     const object = {};
@@ -527,7 +579,8 @@ const createSecondByteReader = (firstId, read0) =>
   function () {
     const highByte = src[position++];
     if (highByte === 0) return read0();
-    const id = firstId < 32 ? -(firstId + (highByte << 5)) : firstId + (highByte << 5);
+    const id =
+      firstId < 32 ? -(firstId + (highByte << 5)) : firstId + (highByte << 5);
     const structure = currentStructures[id] || loadStructures()[id];
     if (!structure) {
       throw new Error('Record id is not defined for ' + id);
@@ -542,7 +595,10 @@ export function loadStructures() {
     src = null;
     return currentUnpackr.getStructures();
   });
-  return (currentStructures = currentUnpackr._mergeStructures(loadedStructures, currentStructures));
+  return (currentStructures = currentUnpackr._mergeStructures(
+    loadedStructures,
+    currentStructures
+  ));
 }
 
 var readFixedString = readStringJS;
@@ -563,7 +619,11 @@ export function setExtractor(extractStrings) {
       if (string == null) {
         if (bundledStrings) return readStringJS(length);
         const byteOffset = src.byteOffset;
-        const extraction = extractStrings(position - headerLength + byteOffset, srcEnd + byteOffset, src.buffer);
+        const extraction = extractStrings(
+          position - headerLength + byteOffset,
+          srcEnd + byteOffset,
+          src.buffer
+        );
         if (typeof extraction == 'string') {
           string = extraction;
           strings = EMPTY_ARRAY;
@@ -593,7 +653,8 @@ function readStringJS(length) {
   if (length < 16) {
     if ((result = shortStringInJS(length))) return result;
   }
-  if (length > 64 && decoder) return decoder.decode(src.subarray(position, (position += length)));
+  if (length > 64 && decoder)
+    return decoder.decode(src.subarray(position, (position += length)));
   const end = position + length;
   const units = [];
   result = '';
@@ -616,7 +677,8 @@ function readStringJS(length) {
       const byte2 = src[position++] & 0x3f;
       const byte3 = src[position++] & 0x3f;
       const byte4 = src[position++] & 0x3f;
-      let unit = ((byte1 & 0x07) << 0x12) | (byte2 << 0x0c) | (byte3 << 0x06) | byte4;
+      let unit =
+        ((byte1 & 0x07) << 0x12) | (byte2 << 0x0c) | (byte3 << 0x06) | byte4;
       if (unit > 0xffff) {
         unit -= 0x10000;
         units.push(((unit >>> 10) & 0x3ff) | 0xd800);
@@ -810,7 +872,8 @@ function shortStringInJS(length) {
             position -= 14;
             return;
           }
-          if (length < 15) return fromCharCode(a, b, c, d, e, f, g, h, i, j, k, l, m, n);
+          if (length < 15)
+            return fromCharCode(a, b, c, d, e, f, g, h, i, j, k, l, m, n);
           const o = src[position++];
           if ((o & 0x80) > 0) {
             position -= 15;
@@ -862,14 +925,17 @@ function readExt(length) {
   const type = src[position++];
   if (currentExtensions[type]) {
     let end;
-    return currentExtensions[type](src.subarray(position, (end = position += length)), (readPosition) => {
-      position = readPosition;
-      try {
-        return read();
-      } finally {
-        position = end;
+    return currentExtensions[type](
+      src.subarray(position, (end = position += length)),
+      (readPosition) => {
+        position = readPosition;
+        try {
+          return read();
+        } finally {
+          position = end;
+        }
       }
-    });
+    );
   } else throw new Error('Unknown extension type ' + type);
 }
 
@@ -881,14 +947,20 @@ function readKey() {
     length = length - 0xa0;
     if (srcStringEnd >= position)
       // if it has been extracted, must use it (and faster anyway)
-      return srcString.slice(position - srcStringStart, (position += length) - srcStringStart);
+      return srcString.slice(
+        position - srcStringStart,
+        (position += length) - srcStringStart
+      );
     else if (!(srcStringEnd == 0 && srcEnd < 180)) return readFixedString(length);
   } else {
     // not cacheable, go back and do a standard read
     position--;
     return read().toString();
   }
-  const key = ((length << 5) ^ (length > 1 ? dataView.getUint16(position) : length > 0 ? src[position] : 0)) & 0xfff;
+  const key =
+    ((length << 5) ^
+      (length > 1 ? dataView.getUint16(position) : length > 0 ? src[position] : 0)) &
+    0xfff;
   let entry = keyCache[key];
   let checkPosition = position;
   let end = position + length - 3;
@@ -947,7 +1019,8 @@ const recordDefinition = (id, highByte) => {
   }
   const existingStructure = currentStructures[id];
   if (existingStructure && existingStructure.isShared) {
-    (currentStructures.restoreStructures || (currentStructures.restoreStructures = []))[id] = existingStructure;
+    (currentStructures.restoreStructures ||
+      (currentStructures.restoreStructures = []))[id] = existingStructure;
   }
   currentStructures[id] = structure;
   structure.read = createStructureReader(structure, firstByte);
@@ -1009,7 +1082,8 @@ export const typedArrays = [
 currentExtensions[0x74] = (data) => {
   const typeCode = data[0];
   const typedArrayName = typedArrays[typeCode];
-  if (!typedArrayName) throw new Error('Could not find typed array for code ' + typeCode);
+  if (!typedArrayName)
+    throw new Error('Could not find typed array for code ' + typeCode);
   // we have to always slice/copy here to get a new ArrayBuffer that is word/byte aligned
   return new glbl[typedArrayName](Uint8Array.prototype.slice.call(data, 1).buffer);
 };
@@ -1033,11 +1107,20 @@ currentExtensions[0x62] = (data) => {
 
 currentExtensions[0xff] = (data) => {
   // 32-bit date extension
-  if (data.length == 4) return new Date((data[0] * 0x1000000 + (data[1] << 16) + (data[2] << 8) + data[3]) * 1000);
+  if (data.length == 4)
+    return new Date(
+      (data[0] * 0x1000000 + (data[1] << 16) + (data[2] << 8) + data[3]) * 1000
+    );
   else if (data.length == 8)
     return new Date(
-      ((data[0] << 22) + (data[1] << 14) + (data[2] << 6) + (data[3] >> 2)) / 1000000 +
-        ((data[3] & 0x3) * 0x100000000 + data[4] * 0x1000000 + (data[5] << 16) + (data[6] << 8) + data[7]) * 1000
+      ((data[0] << 22) + (data[1] << 14) + (data[2] << 6) + (data[3] >> 2)) /
+        1000000 +
+        ((data[3] & 0x3) * 0x100000000 +
+          data[4] * 0x1000000 +
+          (data[5] << 16) +
+          (data[6] << 8) +
+          data[7]) *
+          1000
     );
   else if (data.length == 12)
     return new Date(
@@ -1070,7 +1153,10 @@ function saveState(callback) {
 
   const savedSrc = new Uint8Array(src.slice(0, srcEnd)); // we copy the data in case it changes while external data is processed
   const savedStructures = currentStructures;
-  const savedStructuresContents = currentStructures.slice(0, currentStructures.length);
+  const savedStructuresContents = currentStructures.slice(
+    0,
+    currentStructures.length
+  );
   const savedPackr = currentUnpackr;
   const savedSequentialMode = sequentialMode;
   const value = callback();
@@ -1122,7 +1208,10 @@ const u8Array = new Uint8Array(f32Array.buffer, 0, 4);
 export function roundFloat32(float32Number) {
   f32Array[0] = float32Number;
   const multiplier = mult10[((u8Array[3] & 0x7f) << 1) | (u8Array[2] >> 7)];
-  return ((multiplier * float32Number + (float32Number > 0 ? 0.5 : -0.5)) >> 0) / multiplier;
+  return (
+    ((multiplier * float32Number + (float32Number > 0 ? 0.5 : -0.5)) >> 0) /
+    multiplier
+  );
 }
 export function setReadStruct(updatedReadStruct, loadedStructs, saveState) {
   readStruct = updatedReadStruct;

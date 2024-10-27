@@ -8,6 +8,7 @@ NetworkSettingsService::NetworkSettingsService(AsyncWebServer * server, FS * fs,
     , _lastConnectionAttempt(0)
     , _stopping(false) {
     addUpdateHandler([this] { reconfigureWiFiConnection(); }, false);
+    // Eth is also bound to the WifiGeneric event handler
     WiFi.onEvent([this](WiFiEvent_t event, WiFiEventInfo_t info) { WiFiEvent(event, info); });
 }
 
@@ -65,13 +66,18 @@ void NetworkSettingsService::loop() {
 void NetworkSettingsService::manageSTA() {
     // Abort if already connected, or if we have no SSID
     if (WiFi.isConnected() || _state.ssid.length() == 0) {
+#if ESP_IDF_VERSION_MAJOR >= 5
+        if (_state.ssid.length() == 0) {
+            ETH.enableIPv6(true);
+        }
+#endif
         return;
     }
 
     // Connect or reconnect as required
     if ((WiFi.getMode() & WIFI_STA) == 0) {
-#ifdef TASMOTA_SDK
-        WiFi.enableIPv6(_state.enableIPv6);
+#if ESP_IDF_VERSION_MAJOR >= 5
+        WiFi.enableIPv6(true);
 #endif
         if (_state.staticIPConfig) {
             WiFi.config(_state.localIP, _state.gatewayIP, _state.subnetMask, _state.dnsIP1, _state.dnsIP2); // configure for static IP
@@ -125,8 +131,8 @@ void NetworkSettingsService::setWiFiPowerOnRSSI() {
     // 802.11ac - wifi5
     // 802.11ax - wifi6
 
-    int max_tx_pwr = MAX_TX_PWR_DBM_n;        // assume wifi4
-    int threshold  = WIFI_SENSITIVITY_n + 70; // Margin in dBm * 10 on top of threshold
+    int max_tx_pwr = MAX_TX_PWR_DBM_n;         // assume wifi4
+    int threshold  = WIFI_SENSITIVITY_n + 120; // Margin in dBm * 10 on top of threshold
 
     // Assume AP sends with max set by ETSI standard.
     // 2.4 GHz: 100 mWatt (20 dBm)
@@ -141,8 +147,6 @@ void NetworkSettingsService::setWiFiPowerOnRSSI() {
     if (min_tx_pwr > max_tx_pwr) {
         min_tx_pwr = max_tx_pwr;
     }
-
-    uint8_t set_power = min_tx_pwr / 10; // this is the recommended power setting to use
 
     // from WiFIGeneric.h use:
     //  WIFI_POWER_19_5dBm = 78,// 19.5dBm
@@ -177,11 +181,8 @@ void NetworkSettingsService::setWiFiPowerOnRSSI() {
     else if (min_tx_pwr > 20)
         p = WIFI_POWER_5dBm;
 
-#ifdef EMSESP_DEBUG
-    emsesp::EMSESP::logger().debug("Recommended set WiFi Tx Power (set_power %d, new power %d, rssi %d, threshold %d)", set_power, p, rssi, threshold);
-#else
-    char result[10];
-    emsesp::EMSESP::logger().info("Setting WiFi Tx Power to %s dBm", emsesp::Helpers::render_value(result, ((double)(p) / 4), 1));
+#if defined(EMSESP_DEBUG)
+        // emsesp::EMSESP::logger().debug("Recommended WiFi Tx Power (set_power %d, new power %d, rssi %d, threshold %d)", min_tx_pwr / 10, p, rssi, threshold);
 #endif
 
     if (!WiFi.setTxPower(p)) {
@@ -311,7 +312,7 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) 
 
     case ARDUINO_EVENT_WIFI_STA_GOT_IP:
         char result[10];
-        emsesp::EMSESP::logger().info("WiFi connected (IP=%s, hostname=%s, TxPower=%s dBm)",
+        emsesp::EMSESP::logger().info("WiFi connected (Local IP=%s, hostname=%s, TxPower=%s dBm)",
                                       WiFi.localIP().toString().c_str(),
                                       WiFi.getHostname(),
                                       emsesp::Helpers::render_value(result, ((double)(WiFi.getTxPower()) / 4), 1));
@@ -327,16 +328,18 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) 
         break;
 
     case ARDUINO_EVENT_ETH_GOT_IP:
-        // prevent double calls
+        // prevent double calls to mDNS
         if (!emsesp::EMSESP::system_.ethernet_connected()) {
-            emsesp::EMSESP::logger().info("Ethernet connected (IP=%s, speed %d Mbps)", ETH.localIP().toString().c_str(), ETH.linkSpeed());
+            emsesp::EMSESP::logger().info("Ethernet connected (Local IP=%s, speed %d Mbps)", ETH.localIP().toString().c_str(), ETH.linkSpeed());
             emsesp::EMSESP::system_.ethernet_connected(true);
             mDNS_start();
         }
         break;
 
     case ARDUINO_EVENT_ETH_DISCONNECTED:
-        emsesp::EMSESP::logger().warning("Ethernet disconnected");
+        emsesp::EMSESP::logger().warning("Ethernet disconnected. Reason: %s (%d)",
+                                         disconnectReason(info.wifi_sta_disconnected.reason),
+                                         info.wifi_sta_disconnected.reason);
         emsesp::EMSESP::system_.ethernet_connected(false);
         emsesp::EMSESP::system_.has_ipv6(false);
         break;
@@ -352,25 +355,35 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) 
         if (_state.tx_power == 0) {
             setWiFiPowerOnRSSI();
         }
-        if (_state.enableIPv6) {
-            WiFi.enableIpV6();
-        }
+#if ESP_IDF_VERSION_MAJOR < 5
+        WiFi.enableIpV6(); // force ipv6
+#endif
         break;
 
     case ARDUINO_EVENT_ETH_CONNECTED:
-        if (_state.enableIPv6) {
-            ETH.enableIpV6();
-        }
+#if ESP_IDF_VERSION_MAJOR < 5
+        ETH.enableIpV6(); // force ipv6
+#endif
         break;
 
-        // IPv6 specific
+        // IPv6 specific - WiFi/Eth
     case ARDUINO_EVENT_WIFI_STA_GOT_IP6:
-    case ARDUINO_EVENT_ETH_GOT_IP6:
-        if (emsesp::EMSESP::system_.ethernet_connected()) {
-            emsesp::EMSESP::logger().info("Ethernet connected (IPv6=%s, speed %d Mbps)", ETH.localIPv6().toString().c_str(), ETH.linkSpeed());
+    case ARDUINO_EVENT_ETH_GOT_IP6: {
+#if !TASMOTA_SDK && ESP_IDF_VERSION_MAJOR < 5
+        auto ip6 = IPv6Address((uint8_t *)info.got_ip6.ip6_info.ip.addr).toString();
+#else
+        auto ip6 = IPAddress(IPv6, (uint8_t *)info.got_ip6.ip6_info.ip.addr, 0).toString();
+#endif
+        const char * link = event == ARDUINO_EVENT_ETH_GOT_IP6 ? "Eth" : "WiFi";
+        if (ip6.startsWith("fe80")) {
+            emsesp::EMSESP::logger().info("IPv6 (%s) local: %s", link, ip6.c_str());
+        } else if (ip6.startsWith("fd") || ip6.startsWith("fc")) {
+            emsesp::EMSESP::logger().info("IPv6 (%s) ULA: %s", link, ip6.c_str());
+        } else {
+            emsesp::EMSESP::logger().info("IPv6 (%s) global: %s", link, ip6.c_str());
         }
         emsesp::EMSESP::system_.has_ipv6(true);
-        break;
+    } break;
 
     default:
         break;
@@ -391,9 +404,6 @@ void NetworkSettings::read(NetworkSettings & settings, JsonObject root) {
     root["enableCORS"]       = settings.enableCORS;
     root["CORSOrigin"]       = settings.CORSOrigin;
     root["tx_power"]         = settings.tx_power;
-#ifndef TASMOTA_SDK
-    root["enableIPv6"] = settings.enableIPv6;
-#endif
 
     // extended settings
     JsonUtils::writeIP(root, "local_ip", settings.localIP);
@@ -414,18 +424,14 @@ StateUpdateResult NetworkSettings::update(JsonObject root, NetworkSettings & set
     settings.bssid          = root["bssid"] | "";
     settings.password       = root["password"] | FACTORY_WIFI_PASSWORD;
     settings.hostname       = root["hostname"] | FACTORY_WIFI_HOSTNAME;
-    settings.staticIPConfig = root["static_ip_config"] | false;
-    settings.bandwidth20    = root["bandwidth20"] | false;
+    settings.staticIPConfig = root["static_ip_config"];
+    settings.bandwidth20    = root["bandwidth20"];
     settings.tx_power       = static_cast<uint8_t>(root["tx_power"] | 0);
-    settings.nosleep        = root["nosleep"] | false;
+    settings.nosleep        = root["nosleep"] | true;
     settings.enableMDNS     = root["enableMDNS"] | true;
-    settings.enableCORS     = root["enableCORS"] | false;
+    settings.enableCORS     = root["enableCORS"];
     settings.CORSOrigin     = root["CORSOrigin"] | "*";
-#ifdef TASMOTA_SDK
-    settings.enableIPv6 = true;
-#else
-    settings.enableIPv6 = root["enableIPv6"] | false;
-#endif
+
     // extended settings
     JsonUtils::readIP(root, "local_ip", settings.localIP);
     JsonUtils::readIP(root, "gateway_ip", settings.gatewayIP);

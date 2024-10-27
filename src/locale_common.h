@@ -1,7 +1,7 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
- * 
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -52,6 +52,7 @@ MAKE_WORD(ems)
 MAKE_WORD(devices)
 MAKE_WORD(shower)
 MAKE_WORD(mqtt)
+MAKE_WORD(modbus)
 MAKE_WORD(emsesp)
 MAKE_WORD(connected)
 MAKE_WORD(disconnected)
@@ -66,13 +67,14 @@ MAKE_WORD(publish)
 MAKE_WORD(board_profile)
 MAKE_WORD(setvalue)
 MAKE_WORD(service)
+MAKE_WORD(message)
 
 // for commands
 MAKE_WORD(call)
 MAKE_WORD(cmd)
 MAKE_WORD(id)
 MAKE_WORD(hc)
-MAKE_WORD(wwc)
+MAKE_WORD(dhw)
 MAKE_WORD(device)
 MAKE_WORD(data)
 MAKE_WORD(command)
@@ -103,6 +105,8 @@ MAKE_WORD(heatsource)
 MAKE_WORD(scheduler)
 MAKE_WORD(custom)
 MAKE_WORD(ventilation)
+MAKE_WORD(water)
+MAKE_WORD(pool)
 
 // brands
 MAKE_WORD_CUSTOM(bosch, "Bosch")
@@ -141,16 +145,16 @@ MAKE_WORD_CUSTOM(asterisks, "********")
 MAKE_WORD_CUSTOM(n_mandatory, "<n>")
 MAKE_WORD_CUSTOM(sensorid_optional, "[sensor ID]")
 MAKE_WORD_CUSTOM(id_optional, "[id|hc]")
-MAKE_WORD_CUSTOM(partitionname_optional, "[partitionsname]")
+MAKE_WORD_CUSTOM(partitionname_optional, "[partitionname]")
 MAKE_WORD_CUSTOM(data_optional, "[data]")
-MAKE_WORD_CUSTOM(nvs_optional, "[nvs]")
 MAKE_WORD_CUSTOM(offset_optional, "[offset]")
 MAKE_WORD_CUSTOM(length_optional, "[length]")
 MAKE_WORD_CUSTOM(typeid_mandatory, "<type ID>")
-MAKE_WORD_CUSTOM(deviceid_mandatory, "<device ID>")
+MAKE_WORD_CUSTOM(deviceid_mandatory, "<deviceID>")
 MAKE_WORD_CUSTOM(device_type_optional, "[device]")
 MAKE_WORD_CUSTOM(invalid_log_level, "Invalid log level")
 MAKE_WORD_CUSTOM(log_level_optional, "[level]")
+MAKE_WORD_CUSTOM(show_commands, "[system | users | devices | log | ems | values | mqtt | commands")
 MAKE_WORD_CUSTOM(name_mandatory, "<name>")
 MAKE_WORD_CUSTOM(name_optional, "[name]")
 MAKE_WORD_CUSTOM(new_password_prompt1, "Enter new password: ")
@@ -158,7 +162,7 @@ MAKE_WORD_CUSTOM(new_password_prompt2, "Retype new password: ")
 MAKE_WORD_CUSTOM(password_prompt, "Password: ")
 MAKE_WORD_CUSTOM(unset, "<unset>")
 MAKE_WORD_CUSTOM(enable_mandatory, "<enable | disable>")
-MAKE_WORD_CUSTOM(service_mandatory, "<ota | ap | mqtt | ntp>")
+MAKE_WORD_CUSTOM(service_mandatory, "<ap | mqtt | ntp>")
 
 // more common names that don't need translations
 MAKE_NOTRANSLATION(1x3min, "1x3min")
@@ -177,6 +181,9 @@ MAKE_NOTRANSLATION(rc200, "RC200")
 MAKE_NOTRANSLATION(rc100, "RC100")
 MAKE_NOTRANSLATION(rc100h, "RC100H")
 MAKE_NOTRANSLATION(tc100, "TC100")
+MAKE_NOTRANSLATION(rc120rf, "RC120RF")
+MAKE_NOTRANSLATION(rc220, "RC220/RT800")
+MAKE_NOTRANSLATION(single, "single")
 MAKE_NOTRANSLATION(dash, "-")
 MAKE_NOTRANSLATION(BLANK, "")
 MAKE_NOTRANSLATION(pwm, "pwm")
@@ -252,13 +259,12 @@ MAKE_WORD_CUSTOM(uom_kmin, "K*min")
 MAKE_WORD_CUSTOM(uom_k, "K")
 MAKE_WORD_CUSTOM(uom_volts, "V")
 MAKE_WORD_CUSTOM(uom_mbar, "mbar")
+MAKE_WORD_CUSTOM(uom_lh, "l/h")
 
 // MQTT topics and prefixes
 MAKE_WORD_CUSTOM(heating_active, "heating_active")
 MAKE_WORD_CUSTOM(tapwater_active, "tapwater_active")
 MAKE_WORD_CUSTOM(response, "response")
-MAKE_WORD_CUSTOM(tag_boiler_data_ww_mqtt, "ww")
-MAKE_WORD_CUSTOM(tag_device_data_ww_mqtt, "")
 
 // syslog
 MAKE_ENUM_FIXED(list_syslog_level, "off", "emerg", "alert", "crit", "error", "warn", "notice", "info", "debug", "trace", "all")
@@ -266,7 +272,7 @@ MAKE_ENUM_FIXED(list_syslog_level, "off", "emerg", "alert", "crit", "error", "wa
 // sensors
 MAKE_ENUM_FIXED(counter, "counter")
 MAKE_ENUM_FIXED(digital_out, "digital_out")
-MAKE_ENUM_FIXED(list_sensortype, "none", "digital in", "counter", "adc", "timer", "rate", "digital out", "pwm 0", "pwm 1", "pwm 2")
+MAKE_ENUM_FIXED(list_sensortype, "disabled", "digital in", "counter", "adc", "timer", "rate", "digital out", "pwm 0", "pwm 1", "pwm 2")
 
 // watch
 MAKE_ENUM_FIXED(list_watch, "off", "on", "raw", "unknown")
@@ -285,9 +291,10 @@ MAKE_ENUM(enum_comfort, FL_(hot), FL_(eco), FL_(intelligent))
 MAKE_ENUM(enum_comfort1, FL_(high_comfort), FL_(eco))
 MAKE_ENUM(enum_comfort2, FL_(eco), FL_(high_comfort))
 MAKE_ENUM(enum_flow, FL_(off), FL_(flow), FL_(bufferedflow), FL_(buffer), FL_(layeredbuffer))
-MAKE_ENUM(enum_reset, FL_(dash), FL_(maintenance), FL_(error))
+MAKE_ENUM(enum_reset, FL_(dash), FL_(maintenance), FL_(error), FL_(history), FL_(message))
 MAKE_ENUM(enum_maxHeat, FL_(0kW), FL_(2kW), FL_(3kW), FL_(4kW), FL_(6kW), FL_(9kW))
 MAKE_ENUM(enum_pumpMode, FL_(proportional), FL_(deltaP1), FL_(deltaP2), FL_(deltaP3), FL_(deltaP4))
+MAKE_ENUM(enum_pumpCharacter, FL_(proportional), FL_(pressure1), FL_(pressure2), FL_(pressure3), FL_(pressure4), FL_(pressure5), FL_(pressure6))
 MAKE_ENUM(enum_hpPumpMode, FL_(auto), FL_(continuous))
 
 // thermostat lists
@@ -297,19 +304,24 @@ MAKE_ENUM(enum_ibaLanguage_RC30, FL_(german), FL_(dutch))
 MAKE_ENUM(enum_floordrystatus, FL_(off), FL_(start), FL_(heat), FL_(hold), FL_(cool), FL_(end))
 MAKE_ENUM(enum_ibaBuildingType, FL_(light), FL_(medium), FL_(heavy))
 MAKE_ENUM(enum_PID, FL_(fast), FL_(medium), FL_(slow))
-MAKE_ENUM(enum_wwMode, FL_(off), FL_(normal), FL_(comfort), FL_(auto), FL_(own_prog), FL_(eco))
+MAKE_ENUM(enum_heatup, FL_(slow), FL_(medium), FL_(fast))
+MAKE_ENUM(enum_wwMode, FL_(off), FL_(normal), FL_(comfort), FL_(auto), FL_(own_prog))
 MAKE_ENUM(enum_wwCircMode, FL_(off), FL_(on), FL_(auto), FL_(own_prog))
 MAKE_ENUM(enum_wwMode2, FL_(off), FL_(on), FL_(auto))
 MAKE_ENUM(enum_wwMode3, FL_(on), FL_(off), FL_(auto))
+MAKE_ENUM(enum_wwMode4, FL_(off), FL_(ecoplus), FL_(eco), FL_(comfort), FL_(auto))
+MAKE_ENUM(enum_wwMode5, FL_(normal), FL_(comfort), FL_(ecoplus)) // Rego3000
+MAKE_ENUM(enum_wwMode6, FL_(off), FL_(comfort), FL_(auto)) // CR120
 MAKE_ENUM(enum_heatingtype, FL_(off), FL_(radiator), FL_(convector), FL_(floor))
+MAKE_ENUM(enum_heatingtype1, FL_(off), FL_(curve), FL_(radiator), FL_(convector), FL_(floor))
 MAKE_ENUM(enum_summermode, FL_(summer), FL_(auto), FL_(winter))
 MAKE_ENUM(enum_hpoperatingmode, FL_(off), FL_(auto), FL_(heating), FL_(cooling))
 MAKE_ENUM(enum_summer, FL_(winter), FL_(summer))
 MAKE_ENUM(enum_operatingstate, FL_(heating), FL_(off), FL_(cooling))
 MAKE_ENUM(enum_hpmode, FL_(heating), FL_(cooling), FL_(heatandcool))
 
-MAKE_ENUM(enum_mode, FL_(off), FL_(manual), FL_(auto))              // RC100, RC300, RC310
-MAKE_ENUM(enum_mode2, FL_(off), FL_(manual), FL_(auto))             // RC20, RC30
+MAKE_ENUM(enum_mode, FL_(manual), FL_(auto))                        // RC100, RC300, RC310
+MAKE_ENUM(enum_mode2, FL_(off), FL_(manual), FL_(auto))             // RC20, RC30, BC400
 MAKE_ENUM(enum_mode3, FL_(night), FL_(day), FL_(auto))              // RC35, RC30_N, RC25, RC20_N
 MAKE_ENUM(enum_mode4, FL_(nofrost), FL_(eco), FL_(heat), FL_(auto)) // JUNKERS
 MAKE_ENUM(enum_mode5, FL_(auto), FL_(off))                          // CRF
@@ -329,18 +341,22 @@ MAKE_ENUM(enum_nofrostmode1, FL_(room), FL_(outdoor), FL_(room_outdoor))
 MAKE_ENUM(enum_controlmode, FL_(optimized), FL_(simple), FL_(na), FL_(room), FL_(power))
 MAKE_ENUM(enum_controlmode1, FL_(weather_compensated), FL_(outside_basepoint), FL_(na), FL_(room), FL_(power), FL_(constant)) // RC310 1-4
 MAKE_ENUM(enum_controlmode2, FL_(outdoor), FL_(room))
+MAKE_ENUM(enum_controlmode3, FL_(off), FL_(unmixed), FL_(unmixedIPM), FL_(mixed))
 MAKE_ENUM(enum_control, FL_(off), FL_(rc20), FL_(rc3x))
 MAKE_ENUM(enum_j_control, FL_(off), FL_(fb10), FL_(fb100))
 MAKE_ENUM(enum_roomsensor, FL_(extern), FL_(intern), FL_(auto))
+MAKE_ENUM(enum_roominfluence, FL_(off), FL_(intern), FL_(extern), FL_(auto))
 MAKE_ENUM(enum_control1, FL_(rc310), FL_(rc200), FL_(rc100), FL_(rc100h), FL_(tc100))
+MAKE_ENUM(enum_control2, FL_(off), FL_(dash), FL_(rc100), FL_(rc100h), FL_(dash), FL_(rc120rf), FL_(rc220), FL_(single)) // BC400
 
 MAKE_ENUM(enum_switchmode, FL_(off), FL_(eco), FL_(comfort), FL_(heat))
+MAKE_ENUM(enum_switchProgMode, FL_(level), FL_(absolute))
 
 MAKE_ENUM(enum_dayOfWeek, FL_(day_mo), FL_(day_tu), FL_(day_we), FL_(day_th), FL_(day_fr), FL_(day_sa), FL_(day_su), FL_(all))
 MAKE_ENUM(enum_progMode2, FL_(own_1), FL_(family), FL_(morning), FL_(evening), FL_(am), FL_(pm), FL_(midday), FL_(singles), FL_(seniors), FL_(new), FL_(own_2))
 MAKE_ENUM(enum_progMode3, FL_(family), FL_(morning), FL_(evening), FL_(am), FL_(pm), FL_(midday), FL_(singles), FL_(seniors))
 MAKE_ENUM(enum_hybridStrategy, FL_(co2_optimized), FL_(cost_optimized), FL_(outside_temp_switched), FL_(co2_cost_mix))
-MAKE_ENUM(enum_hybridStrategy1, FL_(cost_optimized), FL_(co2_optimized), FL_(outside_temp_alt), FL_(outside_temp_par), FL_(hp_prefered), FL_(boiler_only))
+MAKE_ENUM(enum_hybridStrategy1, FL_(cost_optimized), FL_(co2_optimized), FL_(outside_temp_alt), FL_(outside_temp_par), FL_(hp_preferred), FL_(boiler_only))
 MAKE_ENUM(enum_lowNoiseMode, FL_(off), FL_(reduced_output), FL_(switchoff), FL_(perm))
 
 // heat pump
@@ -367,6 +383,9 @@ MAKE_ENUM(enum_blockTerm, FL_(n_o), FL_(n_c))
 
 // Ventilation
 MAKE_ENUM(enum_ventMode, FL_(auto), FL_(off), FL_(L1), FL_(L2), FL_(L3), FL_(L4), FL_(demand), FL_(sleep), FL_(intense), FL_(bypass), FL_(partymode), FL_(fireplace))
+
+// water
+MAKE_ENUM(enum_errorDisp, FL_(off), FL_(normal), FL_(inverted))
 
 #pragma GCC diagnostic pop
 

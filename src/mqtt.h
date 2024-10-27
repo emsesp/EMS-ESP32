@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,8 +35,12 @@ using mqtt_sub_function_p = std::function<bool(const char * message)>;
 
 class Mqtt {
   public:
-    enum discoveryType : uint8_t { HOMEASSISTANT, DOMOTICZ, DOMOTICZ_LATEST };
-    enum entityFormat : uint8_t { SINGLE_LONG, SINGLE_SHORT, MULTI_SHORT };
+    enum discoveryType : uint8_t { HOMEASSISTANT = 0, DOMOTICZ, DOMOTICZ_LATEST };
+
+    // SINGLE_SHORT (1) and MULTI_SHORT (2) are the latest. Default is SINGLE_SHORT.
+    // SINGLE_LONG (0) is v3.4 only
+    // SINGLE_OLD (3) and MULTI_OLD (4) are for backwards compatibility with the older v3.6 style. https://github.com/emsesp/EMS-ESP32/issues/1714
+    enum entityFormat : uint8_t { SINGLE_LONG = 0, SINGLE_SHORT, MULTI_SHORT, SINGLE_OLD, MULTI_OLD };
 
     void loop();
     void start();
@@ -47,6 +51,7 @@ class Mqtt {
     void set_publish_time_thermostat(uint16_t publish_time);
     void set_publish_time_solar(uint16_t publish_time);
     void set_publish_time_mixer(uint16_t publish_time);
+    void set_publish_time_water(uint16_t publish_time);
     void set_publish_time_other(uint16_t publish_time);
     void set_publish_time_sensor(uint16_t publish_time);
     void set_publish_time_heartbeat(uint16_t publish_time);
@@ -78,7 +83,7 @@ class Mqtt {
 
     static bool publish_ha_sensor_config(DeviceValue & dv, const char * model, const char * brand, const bool remove, const bool create_device_config = false);
     static bool publish_ha_sensor_config(uint8_t               type,
-                                         uint8_t               tag,
+                                         int8_t                tag,
                                          const char * const    fullname,
                                          const char * const    en_name,
                                          const uint8_t         device_type,
@@ -94,7 +99,7 @@ class Mqtt {
                                          const JsonObjectConst dev_json);
 
     static bool publish_system_ha_sensor_config(uint8_t type, const char * name, const char * entity, const uint8_t uom);
-    static bool publish_ha_climate_config(const uint8_t tag, const bool has_roomtemp, const bool remove = false, const int16_t min = 5, const uint32_t max = 30);
+    static bool publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, const bool remove = false, const int16_t min = 5, const uint32_t max = 30);
 
     static void show_topic_handlers(uuid::console::Shell & shell, const uint8_t device_type);
     static void show_mqtt(uuid::console::Shell & shell);
@@ -135,10 +140,6 @@ class Mqtt {
             return std::string{};
         }
         return discovery_prefix_ + "/";
-    }
-
-    static void base(const char * base) {
-        mqtt_base_ = base;
     }
 
     static uint32_t publish_count() {
@@ -211,6 +212,10 @@ class Mqtt {
         return lastresponse_;
     }
 
+    static void clear_response() {
+        lastresponse_.clear();
+    }
+
     void set_qos(uint8_t mqtt_qos) const {
         mqtt_qos_ = mqtt_qos;
     }
@@ -219,7 +224,7 @@ class Mqtt {
         mqtt_retain_ = mqtt_retain;
     }
 
-    static std::string tag_to_topic(uint8_t device_type, uint8_t tag);
+    static std::string tag_to_topic(uint8_t device_type, int8_t tag);
 
     static void add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, const char * entity = nullptr);
 
@@ -230,6 +235,7 @@ class Mqtt {
                                        const char *   cond1    = nullptr,
                                        const char *   cond2    = nullptr,
                                        const char *   negcond  = nullptr);
+    static void add_ha_bool(JsonDocument & config);
 
   private:
     static uuid::log::Logger logger_;
@@ -250,7 +256,8 @@ class Mqtt {
         const std::string   topic_;            // short topic name
         mqtt_sub_function_p mqtt_subfunction_; // can be empty
 
-        MQTTSubFunction(uint8_t device_type, const std::string && topic, mqtt_sub_function_p mqtt_subfunction)
+        // replaced &&topic with &topic in 3.7.0-dev.43, so we prevent the std:move later
+        MQTTSubFunction(uint8_t device_type, const std::string & topic, mqtt_sub_function_p mqtt_subfunction)
             : device_type_(device_type)
             , topic_(topic)
             , mqtt_subfunction_(mqtt_subfunction) {
@@ -259,11 +266,11 @@ class Mqtt {
 
     static std::vector<MQTTSubFunction> mqtt_subfunctions_; // list of mqtt subscribe callbacks for all devices
 
-    // uint32_t last_mqtt_poll_          = 0;
     uint32_t last_publish_boiler_     = 0;
     uint32_t last_publish_thermostat_ = 0;
     uint32_t last_publish_solar_      = 0;
     uint32_t last_publish_mixer_      = 0;
+    uint32_t last_publish_water_      = 0;
     uint32_t last_publish_other_      = 0;
     uint32_t last_publish_sensor_     = 0;
     uint32_t last_publish_heartbeat_  = 0;
@@ -290,6 +297,7 @@ class Mqtt {
     static uint32_t    publish_time_thermostat_;
     static uint32_t    publish_time_solar_;
     static uint32_t    publish_time_mixer_;
+    static uint32_t    publish_time_water_;
     static uint32_t    publish_time_other_;
     static uint32_t    publish_time_sensor_;
     static uint32_t    publish_time_heartbeat_;

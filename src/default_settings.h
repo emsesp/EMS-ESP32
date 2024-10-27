@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,6 +65,14 @@
 #define EMSESP_DEFAULT_BOILER_HEATINGOFF false
 #endif
 
+#ifndef EMSESP_DEFAULT_REMOTE_TIMEOUT
+#define EMSESP_DEFAULT_REMOTE_TIMEOUT 24
+#endif
+
+#ifndef EMSESP_DEFAULT_REMOTE_TIMEOUT_EN
+#define EMSESP_DEFAULT_REMOTE_TIMEOUT_EN false
+#endif
+
 #ifndef EMSESP_DEFAULT_SHOWER_TIMER
 #define EMSESP_DEFAULT_SHOWER_TIMER false
 #endif
@@ -75,6 +83,10 @@
 
 #ifndef EMSESP_DEFAULT_SHOWER_ALERT_TRIGGER
 #define EMSESP_DEFAULT_SHOWER_ALERT_TRIGGER 7
+#endif
+
+#ifndef EMSESP_DEFAULT_SHOWER_MIN_DURATION
+#define EMSESP_DEFAULT_SHOWER_MIN_DURATION 180
 #endif
 
 #ifndef EMSESP_DEFAULT_SHOWER_ALERT_COLDSHOT
@@ -107,6 +119,22 @@
 
 #ifndef EMSESP_DEFAULT_TELNET_ENABLED
 #define EMSESP_DEFAULT_TELNET_ENABLED true
+#endif
+
+#ifndef EMSESP_DEFAULT_MODBUS_ENABLED
+#define EMSESP_DEFAULT_MODBUS_ENABLED false
+#endif
+
+#ifndef EMSESP_DEFAULT_MODBUS_PORT
+#define EMSESP_DEFAULT_MODBUS_PORT 502
+#endif
+
+#ifndef EMSESP_DEFAULT_MODBUS_MAX_CLIENTS
+#define EMSESP_DEFAULT_MODBUS_MAX_CLIENTS 10
+#endif
+
+#ifndef EMSESP_DEFAULT_MODBUS_TIMEOUT
+#define EMSESP_DEFAULT_MODBUS_TIMEOUT 10000
 #endif
 
 #ifndef EMSESP_DEFAULT_BOARD_PROFILE
@@ -159,6 +187,11 @@
 
 #ifndef EMSESP_DEFAULT_PUBLISH_TIME
 #define EMSESP_DEFAULT_PUBLISH_TIME 10
+#endif
+
+// default for scheduler etc
+#ifndef EMSESP_DEFAULT_PUBLISH_TIME_OTHER
+#define EMSESP_DEFAULT_PUBLISH_TIME_OTHER 60
 #endif
 
 #ifndef EMSESP_DEFAULT_PUBLISH_HEARTBEAT
@@ -218,7 +251,7 @@
 #endif
 
 #ifndef EMSESP_DEFAULT_ENTITY_FORMAT
-#define EMSESP_DEFAULT_ENTITY_FORMAT 1 // in MQTT discovery, use shortnames and not multiple (prefixed with base)
+#define EMSESP_DEFAULT_ENTITY_FORMAT 1 // in MQTT discovery, single instance, shortname (EntityFormat::SINGLE_SHORT)
 #endif
 
 // matches Web UI settings
@@ -241,13 +274,13 @@ enum {
 };
 
 #if CONFIG_IDF_TARGET_ESP32C3
-#define EMSESP_PLATFORM "ESP32-C3";
+#define EMSESP_PLATFORM "ESP32C3"
 #elif CONFIG_IDF_TARGET_ESP32S2
-#define EMSESP_PLATFORM "ESP32-S2";
+#define EMSESP_PLATFORM "ESP32S2"
 #elif CONFIG_IDF_TARGET_ESP32S3
-#define EMSESP_PLATFORM "ESP32-S3";
+#define EMSESP_PLATFORM "ESP32S3"
 #elif CONFIG_IDF_TARGET_ESP32 || EMSESP_STANDALONE
-#define EMSESP_PLATFORM "ESP32";
+#define EMSESP_PLATFORM "ESP32"
 #else
 #error Target CONFIG_IDF_TARGET is not supported
 #endif

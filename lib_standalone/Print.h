@@ -86,7 +86,12 @@ class Print {
         return print(str);
     }
     size_t println() {
+        // added for EMS-ESP
+#if defined(_WIN32)
+        return print("\n");
+#else
         return print("\r\n");
+#endif
     }
     size_t println(const char * data) {
         return print(data) + println();
@@ -106,7 +111,7 @@ class Print {
     size_t println(unsigned long value) {
         return print(std::to_string(value).c_str()) + println();
     }
-    virtual void flush(){};
+    virtual void flush() {};
 
   private:
     int err_{0};

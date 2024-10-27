@@ -55,6 +55,8 @@
 #include <mutex>
 #endif
 
+enum CommandFlags : uint8_t { USER = 0, ADMIN = (1 << 0), LOCAL = (1 << 1) };
+
 namespace uuid {
 
 /**

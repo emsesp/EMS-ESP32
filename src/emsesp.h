@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,9 @@
 #include <Preferences.h>
 
 #include "ESP8266React.h"
+
 #include "web/WebStatusService.h"
+#include "web/WebActivityService.h"
 #include "web/WebDataService.h"
 #include "web/WebSettingsService.h"
 #include "web/WebCustomizationService.h"
@@ -47,12 +49,14 @@
 #include "web/WebAPIService.h"
 #include "web/WebLogService.h"
 #include "web/WebCustomEntityService.h"
+#include "web/WebModulesService.h"
 
 #include "emsdevicevalue.h"
 #include "emsdevice.h"
 #include "emsfactory.h"
 #include "telegram.h"
 #include "mqtt.h"
+#include "modbus.h"
 #include "system.h"
 #include "temperaturesensor.h"
 #include "analogsensor.h"
@@ -62,6 +66,10 @@
 #include "roomcontrol.h"
 #include "command.h"
 #include "version.h"
+
+// Load external modules
+class Module {}; // forward declaration
+#include <ModuleLibrary.h>
 
 #define WATCH_ID_NONE 0 // no watch id set
 
@@ -117,6 +125,7 @@ class EMSESP {
     static void send_write_request(const uint16_t type_id, const uint8_t dest, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid);
 
     static bool device_exists(const uint8_t device_id);
+    static void device_active(const uint8_t device_id, const bool active);
     static bool cmd_is_readonly(const uint8_t device_type, const uint8_t device_id, const char * cmd, const int8_t id);
 
     static uint8_t device_id_from_cmd(const uint8_t device_type, const char * cmd, const int8_t id);
@@ -129,6 +138,7 @@ class EMSESP {
     static void show_device_values(uuid::console::Shell & shell);
     static void show_sensor_values(uuid::console::Shell & shell);
     static void dump_all_values(uuid::console::Shell & shell);
+    static void dump_all_telegrams(uuid::console::Shell & shell);
 
     static void show_devices(uuid::console::Shell & shell);
     static void show_ems(uuid::console::Shell & shell);
@@ -169,6 +179,10 @@ class EMSESP {
         response_id_ = id;
     }
 
+    static uint16_t response_id() {
+        return response_id_;
+    }
+
     static bool wait_validate() {
         return (wait_validate_ != 0);
     }
@@ -204,10 +218,13 @@ class EMSESP {
     static void scan_devices();
     static void clear_all_devices();
 
-    static std::vector<std::unique_ptr<EMSdevice>> emsdevices;
+    static bool return_not_found(JsonObject output, const char * msg, const char * cmd);
+
+    static std::deque<std::unique_ptr<EMSdevice>> emsdevices;
 
     // services
     static Mqtt              mqtt_;
+    static Modbus *          modbus_;
     static System            system_;
     static TemperatureSensor temperaturesensor_;
     static AnalogSensor      analogsensor_;
@@ -220,21 +237,25 @@ class EMSESP {
     static ESP8266React            esp8266React;
     static WebSettingsService      webSettingsService;
     static WebStatusService        webStatusService;
+    static WebActivityService      webActivityService;
     static WebDataService          webDataService;
     static WebAPIService           webAPIService;
     static WebLogService           webLogService;
     static WebCustomizationService webCustomizationService;
     static WebSchedulerService     webSchedulerService;
     static WebCustomEntityService  webCustomEntityService;
+    static WebModulesService       webModulesService;
 
   private:
     static std::string device_tostring(const uint8_t device_id);
     static void        process_UBADevices(std::shared_ptr<const Telegram> telegram);
+    static void        process_deviceName(std::shared_ptr<const Telegram> telegram);
     static void        process_version(std::shared_ptr<const Telegram> telegram);
     static void        publish_response(std::shared_ptr<const Telegram> telegram);
     static void        publish_all_loop();
-    static bool        command_commands(uint8_t device_type, JsonObject output, const int8_t id);
-    static bool        command_entities(uint8_t device_type, JsonObject output, const int8_t id);
+
+    void shell_prompt();
+    void start_serial_console();
 
     static constexpr uint32_t EMS_FETCH_FREQUENCY = 60000; // check every minute
     static constexpr uint8_t  EMS_WAIT_KM_TIMEOUT = 60;    // wait one minute
@@ -242,7 +263,7 @@ class EMSESP {
     struct Device_record {
         uint8_t               product_id;
         EMSdevice::DeviceType device_type;
-        const char *          name;
+        const char *          default_name;
         uint8_t               flags;
     };
     static std::vector<Device_record> device_library_;
@@ -271,7 +292,6 @@ class EMSESP {
 #endif
 
   protected:
-    //  EMSESP();
     static uuid::log::Logger logger_;
 };
 

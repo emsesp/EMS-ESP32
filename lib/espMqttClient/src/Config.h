@@ -8,12 +8,8 @@ the LICENSE file.
 
 #pragma once
 
-#ifndef TASMOTA_SDK
-#define EMC_CLIENT_SECURE
-#endif
-
 #ifndef EMC_TX_TIMEOUT
-#define EMC_TX_TIMEOUT 2000
+#define EMC_TX_TIMEOUT 10000
 #endif
 
 #ifndef EMC_RX_BUFFER_SIZE
@@ -63,4 +59,21 @@ the LICENSE file.
 
 #ifndef EMC_USE_WATCHDOG
 #define EMC_USE_WATCHDOG 0
+#endif
+
+#ifndef EMC_USE_MEMPOOL
+#define EMC_USE_MEMPOOL 0
+#endif
+
+#if EMC_USE_MEMPOOL
+  #ifndef EMC_NUM_POOL_ELEMENTS
+    #define EMC_NUM_POOL_ELEMENTS 32
+  #endif
+  #ifndef EMC_SIZE_POOL_ELEMENTS
+    #define EMC_SIZE_POOL_ELEMENTS 128
+  #endif
+#endif
+
+#ifndef  TASMOTA_SDK
+#define EMC_CLIENT_SECURE
 #endif

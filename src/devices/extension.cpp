@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,11 @@ REGISTER_FACTORY(Extension, EMSdevice::DeviceType::EXTENSION);
 
 Extension::Extension(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
+    if (device_id == 0x16) {
+        // no entities for T1RF outdoor sensor, values are coming from RFbase 0x50 (connect)
+        return;
+    }
+    // Extension module EM100 device_id 0x12
     register_telegram_type(0x935, "EM100SetMessage", true, MAKE_PF_CB(process_EM100SetMessage));
     register_telegram_type(0x936, "EM100OutMessage", false, MAKE_PF_CB(process_EM100OutMessage));
     register_telegram_type(0x937, "EM100TempMessage", false, MAKE_PF_CB(process_EM100TempMessage));
@@ -33,31 +38,31 @@ Extension::Extension(uint8_t device_type, uint8_t device_id, uint8_t product_id,
 
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &headerTemp_,
-                          DeviceValueType::SHORT,
+                          DeviceValueType::INT16,
                           DeviceValueNumOp::DV_NUMOP_DIV10,
                           FL_(flowTempVf),
                           DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &input_, DeviceValueType::UINT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(input), DeviceValueUOM::VOLTS);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &outPower_, DeviceValueType::UINT, FL_(outPower), DeviceValueUOM::PERCENT);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setPower_, DeviceValueType::UINT, FL_(setPower), DeviceValueUOM::PERCENT);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setPoint_, DeviceValueType::UINT, FL_(setPoint), DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &input_, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(input), DeviceValueUOM::VOLTS);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &outPower_, DeviceValueType::UINT8, FL_(outPower), DeviceValueUOM::PERCENT);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setPower_, DeviceValueType::UINT8, FL_(setPower), DeviceValueUOM::PERCENT);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setPoint_, DeviceValueType::UINT8, FL_(setPoint), DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &minV_,
-                          DeviceValueType::UINT,
+                          DeviceValueType::UINT8,
                           DeviceValueNumOp::DV_NUMOP_DIV10,
                           FL_(minV),
                           DeviceValueUOM::VOLTS,
                           MAKE_CF_CB(set_minV));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &maxV_,
-                          DeviceValueType::UINT,
+                          DeviceValueType::UINT8,
                           DeviceValueNumOp::DV_NUMOP_DIV10,
                           FL_(maxV),
                           DeviceValueUOM::VOLTS,
                           MAKE_CF_CB(set_maxV));
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &minT_, DeviceValueType::UINT, FL_(minT), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_minT));
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &maxT_, DeviceValueType::UINT, FL_(maxT), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_maxT));
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &dip_, DeviceValueType::UINT, FL_(mode), DeviceValueUOM::NONE);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &minT_, DeviceValueType::UINT8, FL_(minT), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_minT));
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &maxT_, DeviceValueType::UINT8, FL_(maxT), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_maxT));
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &dip_, DeviceValueType::UINT8, FL_(mode), DeviceValueUOM::NONE);
     // register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &errorState_, DeviceValueType::BOOL, FL_(error), DeviceValueUOM::NONE);
 }
 

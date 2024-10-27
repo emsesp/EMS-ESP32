@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,11 +36,8 @@ class Shower {
   private:
     static uuid::log::Logger logger_;
 
-    static constexpr uint32_t SHOWER_PAUSE_TIME   = 15000;  // in ms. 15 seconds, max time if water is switched off & on during a shower
-    static constexpr uint32_t SHOWER_MIN_DURATION = 120000; // in ms. 2 minutes, before recognizing its a shower
-    // static constexpr uint32_t SHOWER_MIN_DURATION = 5000; // for testing in ms. 5 seconds
-
-    static constexpr uint32_t SHOWER_OFFSET_TIME = 5000; // in ms. 5 seconds grace time, to calibrate actual time under the shower
+    static constexpr uint32_t SHOWER_PAUSE_TIME  = 15; // 15 seconds, max time if water is switched off & on during a shower
+    static constexpr uint32_t SHOWER_OFFSET_TIME = 5;  // 5 seconds grace time, to calibrate actual time under the shower
 
     void shower_alert_start();
     void shower_alert_stop();
@@ -49,14 +46,17 @@ class Shower {
     bool     shower_alert_;          // true if we want the alert of cold water
     uint32_t shower_alert_trigger_;  // default 7 minutes, before trigger a shot of cold water
     uint32_t shower_alert_coldshot_; // default 10 seconds for cold water before turning back hot water
+    uint32_t shower_min_duration_;   // default 3 minutes (180 seconds), before recognizing its a shower
+    uint32_t next_alert_;
     bool     ha_configdone_ = false; // for HA MQTT Discovery
     bool     shower_state_;
-    uint32_t timer_start_; // ms
-    uint32_t timer_pause_; // ms
-    uint32_t duration_;    // ms
+
+    uint32_t timer_start_; // sec
+    uint32_t timer_pause_; // sec
+    uint32_t duration_;    // sec
 
     // cold shot
-    uint32_t alert_timer_start_; // ms
+    uint32_t alert_timer_start_; // sec
     bool     doing_cold_shot_;   // true if we've just sent a jolt of cold water
 };
 

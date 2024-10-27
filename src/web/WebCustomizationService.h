@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,12 +22,12 @@
 #define EMSESP_CUSTOMIZATION_FILE "/config/emsespCustomization.json"
 
 // GET
-#define DEVICES_SERVICE_PATH "/rest/devices"
-#define DEVICE_ENTITIES_PATH "/rest/deviceEntities"
+#define EMSESP_DEVICE_ENTITIES_PATH "/rest/deviceEntities"
 
 // POST
-#define CUSTOMIZATION_ENTITIES_PATH "/rest/customizationEntities"
-#define RESET_CUSTOMIZATION_SERVICE_PATH "/rest/resetCustomizations"
+#define EMSESP_CUSTOMIZATION_ENTITIES_PATH "/rest/customizationEntities"
+#define EMSESP_RESET_CUSTOMIZATION_SERVICE_PATH "/rest/resetCustomizations"
+#define EMSESP_WRITE_DEVICE_NAME_PATH "/rest/writeDeviceName"
 
 namespace emsesp {
 
@@ -60,9 +60,10 @@ class AnalogCustomization {
 // we use product_id and device_id to make the device unique
 class EntityCustomization {
   public:
-    uint8_t                  product_id; // device's product id
-    uint8_t                  device_id;  // device's device id
-    std::vector<std::string> entity_ids; // array of entity ids with masks and optional custom fullname
+    uint8_t                  product_id;  // device's product id
+    uint8_t                  device_id;   // device's device id
+    std::string              custom_name; // custom device name
+    std::vector<std::string> entity_ids;  // array of entity ids with masks and optional custom fullname
 };
 
 class WebCustomization {
@@ -95,11 +96,11 @@ class WebCustomizationService : public StatefulService<WebCustomization> {
     FSPersistence<WebCustomization> _fsPersistence;
 
     // GET
-    void devices(AsyncWebServerRequest * request);
     void device_entities(AsyncWebServerRequest * request);
 
     // POST
     void customization_entities(AsyncWebServerRequest * request, JsonVariant json);
+    void writeDeviceName(AsyncWebServerRequest * request, JsonVariant json);
     void reset_customization(AsyncWebServerRequest * request); // command
 };
 

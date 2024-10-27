@@ -138,7 +138,7 @@ void TelnetService::loop() {
         }
     }
 
-    WiFiClient client = server_.available();
+    WiFiClient client = server_.accept();
     if (client) {
         if (connections_.size() >= maximum_connections_) {
 #if UUID_TELNET_HAVE_WIFICLIENT_REMOTE

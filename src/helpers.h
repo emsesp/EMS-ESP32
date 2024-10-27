@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
 #define EMSESP_HELPERS_H
 
 #include "telegram.h" // for EMS_VALUE_* settings
-
 #include "common.h"
 
 namespace emsesp {
@@ -50,6 +49,7 @@ class Helpers {
     static bool        check_abs(const int32_t i);
     static uint32_t    abs(const int32_t i);
     static uint16_t    string2minutes(const std::string & str);
+    static float       numericoperator2scalefactor(int8_t numeric_operator);
 
     static float transformNumFloat(float value, const int8_t numeric_operator, const uint8_t fahrenheit = 0);
 

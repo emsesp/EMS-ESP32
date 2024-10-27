@@ -1,6 +1,4 @@
 import type { Translation } from '../i18n-types';
-/* prettier-ignore */
-/* eslint-disable */
 
 const it: Translation = {
   LANGUAGE: 'Lingua',
@@ -12,9 +10,8 @@ const it: Translation = {
   USERNAME: 'Nome Utente',
   PASSWORD: 'Password',
   SU_PASSWORD: 'su Password',
-  DASHBOARD: 'Pannello di Controllo',
   SETTINGS_OF: 'Impostazioni {0}',
-  HELP_OF: '{0} Aiuto',
+  HELP: 'Aiuto',
   LOGGED_IN: 'Registrato come {name}',
   PLEASE_SIGNIN: 'Prego registrarsi per continuare',
   UPLOAD_SUCCESSFUL: 'Caricamento finito',
@@ -26,9 +23,10 @@ const it: Translation = {
   ONOFF: 'on/off',
   TYPE: 'Tipo',
   DESCRIPTION: 'Descrizione',
-  ENTITIES: 'Entità',
+  ENTITIES: 'entità',
   REFRESH: 'Ricaricare',
   EXPORT: 'Esporta',
+  FAVORITES: "Preferiti",
   DEVICE_DETAILS: 'Dettagli dispositivo',
   ID_OF: '{0} ID',
   DEVICE: 'Dispositivo',
@@ -36,9 +34,7 @@ const it: Translation = {
   VERSION: 'Versione',
   BRAND: 'Marca',
   ENTITY_NAME: 'Nome Entità',
-  VALUE: '{{Valore|valore}}',
-  DEVICE_DATA: 'Device Data',
-  SENSOR_DATA: 'Sensor Data',
+  VALUE: '{{valore|Valore}}',
   DEVICES: 'Dispositivi',
   SENSORS: 'Sensori',
   RUN_COMMAND: 'Esegui',
@@ -51,7 +47,6 @@ const it: Translation = {
   REMOVE: 'Elimina',
   PROBLEM_UPDATING: 'Problema aggiornamento',
   PROBLEM_LOADING: 'Problema caricamento',
-  ACCESS_DENIED: 'Accesso Negato',
   ANALOG_SENSOR: 'Sensore Analogico',
   ANALOG_SENSORS: 'Sensori Analogici',
   SETTINGS: 'Settings',
@@ -71,21 +66,17 @@ const it: Translation = {
   TEMP_SENSOR: 'Sensore Temperatura',
   TEMP_SENSORS: 'Sensori Temperatura',
   WRITE_CMD_SENT: 'Scrittura comando inviata',
-  WRITE_CMD_FAILED: 'Scittura comando fallita',
   EMS_BUS_WARNING: 'EMS bus disconnesso. Se questo avvertimento persiste dopo alcuni secondi prego verificare impostazioni scheda',
   EMS_BUS_SCANNING: 'Scansione dispositivi EMS ...',
   CONNECTED: 'Connesso',
   TX_ISSUES: 'Problema di Tx - prova una modalità differente',
   DISCONNECTED: 'Disconnesso',
   EMS_SCAN: 'Sei sicuro di voler iniziare una scansione completa del bus EMS ?',
-  EMS_BUS_STATUS: 'Stato Bus EMS',
-  ACTIVE_DEVICES: 'Dispositivi & sensori attivi',
+  DATA_TRAFFIC: 'Data Traffic', // TODO translate
   EMS_DEVICE: 'Dispositivo EMS ',
   SUCCESS: 'SUCCESSO',
   FAIL: 'FALLITO',
   QUALITY: 'QUALITÂ',
-  SCAN_DEVICES: 'Scansione per nuovi dispositivi',
-  EMS_BUS_STATUS_TITLE: 'Bus EMS & Stato Attività',
   SCAN: 'Scansione',
   STATUS_NAMES: [
     'Telegrammi EMS Ricevuti (Rx)',
@@ -97,18 +88,13 @@ const it: Translation = {
     'Chiamate API',
     'Messaggi Syslog'
   ],
-  NUM_DEVICES: '{num} Dispositivi {{s}}',
-  NUM_TEMP_SENSORS: '{num} Sensori Temperatura {{s}}',
-  NUM_ANALOG_SENSORS: '{num} Sensori Analogici {{s}}',
   NUM_DAYS: '{num} giorni {{s}}',
   NUM_SECONDS: '{num} secondi {{s}}',
   NUM_HOURS: '{num} ore {{s}}',
   NUM_MINUTES: '{num} minuti {{s}}',
-  APPLICATION_SETTINGS: 'Impostazione Applicazione',
+  APPLICATION: 'Applicazione',
   CUSTOMIZATIONS: 'Personalizzazione',
   APPLICATION_RESTARTING: 'EMS-ESP sta riavviando',
-  INTERFACE_BOARD_PROFILE: 'Profilo scheda di interfaccia',
-  BOARD_PROFILE_TEXT: 'Selezionare un profilo di interfaccia pre-configurato dalla lista sottostante o scegliere un profilo personalizzato per configurare le impostazioni del tuo hardware',
   BOARD_PROFILE: 'Profilo Scheda',
   CUSTOM: 'Personalizzazione',
   GPIO_OF: 'GPIO {0}',
@@ -116,7 +102,7 @@ const it: Translation = {
   TEMPERATURE: 'Temperatura',
   PHY_TYPE: 'Eth PHY Type',
   DISABLED: 'disattivato',
-  TX_MODE: 'Modo Tx ',
+  TX_MODE: 'EMS Modo Tx ',
   HARDWARE: 'Hardware',
   EMS_BUS: '{{BUS|EMS BUS}}',
   GENERAL_OPTIONS: 'Opzioni Generali',
@@ -128,7 +114,10 @@ const it: Translation = {
   BYPASS_TOKEN: 'Ignora autorizzazione del token di accesso sulle chiamate API',
   READONLY: 'Abilita modalità sola-lettura (blocca tutti i comandi di scrittura EMS Tx in uscita)',
   UNDERCLOCK_CPU: 'Abbassa velocità della CPU',
+  REMOTE_TIMEOUT: 'Remote timeout',
+  REMOTE_TIMEOUT_EN: 'Disable remote on missing room temperature', // TODO translate
   HEATINGOFF: 'Avviamento caldaia con riscaldamento forzato spento',
+  MIN_DURATION: 'Wait time',
   ENABLE_SHOWER_TIMER: 'Abilita timer doccia',
   ENABLE_SHOWER_ALERT: 'Abilita avviso doccia',
   TRIGGER_TIME: 'Tempo di avvio',
@@ -138,7 +127,7 @@ const it: Translation = {
   BOOLEAN_FORMAT_API: 'Formato booleano API/MQTT',
   ENUM_FORMAT: 'Enum Format API/MQTT',
   INDEX: 'Indice',
-  ENABLE_PARASITE: 'Abilita potenza parassita',
+  ENABLE_PARASITE: 'Abilita potenza 1-wire parassita',
   LOGGING: 'Registrazione',
   LOG_HEX: 'Registra telegrammi EMS in esadecimale',
   ENABLE_SYSLOG: 'Abilita Syslog',
@@ -158,58 +147,47 @@ const it: Translation = {
   CUSTOMIZATIONS_HELP_2: 'seleziona come preferito',
   CUSTOMIZATIONS_HELP_3: 'disabilita azione scrittura',
   CUSTOMIZATIONS_HELP_4: 'esculdi da MQTT e API',
-  CUSTOMIZATIONS_HELP_5: 'nascondi dal Pannello di controllo',
+  CUSTOMIZATIONS_HELP_5: 'nascondi dai dispositivi',
   CUSTOMIZATIONS_HELP_6: 'rimuovi dalla memoria',
   SELECT_DEVICE: 'Seleziona un dispositivo',
   SET_ALL: 'imposta tutto',
   OPTIONS: 'Opzioni',
   NAME: 'Nome',
   CUSTOMIZATIONS_RESET: 'Sei sicuro di voler rimuovere tutte le personalizzazioni incluse le impostazioni personalizzate dei sensori di temperatura e analogici?',
-  DEVICE_ENTITIES: 'Entità Dispositivo',
   SUPPORT_INFORMATION: 'Informazioni di Supporto',
-  CLICK_HERE: 'Clicca qui',
   HELP_INFORMATION_1: 'Visita il wiki online per ottenere istruzioni su come configurare EMS-ESP',
   HELP_INFORMATION_2: 'Per la chat della community dal vivo unisciti al nostro server Discord',
   HELP_INFORMATION_3: 'Per richiedere una funzionalità o segnalare un errore',
   HELP_INFORMATION_4: 'Ricordati di scaricare e allegare le informazioni del tuo sistema per una risposta più rapida quando segnali un problema',
-  HELP_INFORMATION_5: 'EMS-ESP è un progetto gratuito e open-source. Supporta il suo sviluppo futuro assegnandogli una stella su Github!',
+  HELP_INFORMATION_5: 'For help and questions please contact your installer', // TODO translate
   UPLOAD: 'Carica',
   DOWNLOAD: 'Scarica',
+  INSTALL: 'Installare {0}',
   ABORTED: 'Annullato',
   FAILED: 'Fallito',
   SUCCESSFUL: 'Riuscito',
   SYSTEM: 'Sistema',
   LOG_OF: 'Registro {0}',
   STATUS_OF: 'Stato {0}',
-  UPLOAD_DOWNLOAD: 'Caricamento/Scaricamento',
-  VERSION_ON: 'Attualmente stai eseguendo la versione',
-  SYSTEM_APPLY_FIRMWARE: 'per applicare il nuovo firmware',
+  DOWNLOAD_UPLOAD: 'Scaricamento/Caricamento',
   CLOSE: 'Chiudere',
   USE: 'Usa',
   FACTORY_RESET: 'Impostazioni di fabbrica',
   SYSTEM_FACTORY_TEXT: 'Il dispositivo è stato ripristinato alle impostazioni di fabbrica e ora verrà riavviato',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Sei sicuro di voler ripristinare il dispositivo alle impostazioni di fabbrica??',
-  VERSION_CHECK: 'Verifica Versione',
-  THE_LATEST: 'Ultima',
-  OFFICIAL: 'ufficiale',
-  DEVELOPMENT: 'sviluppo',
-  RELEASE_IS: 'rilascio é',
-  RELEASE_NOTES: 'note rilascio',
-  EMS_ESP_VER: 'Versione EMS-ESP',
+  STABLE: 'Stable', // TODO translate
+  DEVELOPMENT: 'Sviluppo',
+  EMS_ESP_VER: 'Versione Firmware',
   UPTIME: 'Tempo di attività del sistema',
-  HEAP: 'Heap (Free / Max Alloc)',
+  FREE_MEMORY: 'Free Memory',
   PSRAM: 'PSRAM (Size / Free)',
-  FLASH: 'Flash Chip (Size / Speed)',
+  FLASH: 'Flash Chip (Size , Speed)',
   APPSIZE: 'Applicazione (Partizione: Usata / Libera)',
   FILESYSTEM: 'Memoria Sistema (Usata / Libera)',
   BUFFER_SIZE: 'Max Buffer Size',
   COMPACT: 'Compact',
-  ENABLE_OTA: 'Abilita aggiornamenti OTA',
-  DOWNLOAD_CUSTOMIZATION_TEXT: 'Scarica personalizzazioni entità',
-  DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events',
-  DOWNLOAD_SETTINGS_TEXT: 'Scarica le impostazioni dell applicazione. Fai attenzione quando condividi le tue impostazioni poiché questo file contiene password e altre informazioni di sistema riservate',
-  UPLOAD_TEXT: 'Carica un nuovo file firmware (.bin) , file delle impostazioni o delle personalizzazioni (.json) di seguito, per un opzione di convalida scaricare dapprima un file "*.MD5" ',
-  UPLOADING: 'Caricamento',
+  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
+  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
   UPLOAD_DROP_TEXT: 'Trascina il file o clicca qui',
   ERROR: 'Errore Inaspettato, prego tenta ancora',
   TIME_SET: 'Imposta Ora',
@@ -246,6 +224,7 @@ const it: Translation = {
   MQTT_INT_THERMOSTATS: 'Termostati',
   MQTT_INT_SOLAR: 'Moduli solari',
   MQTT_INT_MIXER: 'Moduli Mixer',
+  MQTT_INT_WATER: 'Moduli Acqua',
   MQTT_QUEUE: 'Coda MQTT',
   DEFAULT: 'Predefinito',
   MQTT_ENTITY_FORMAT: 'Formato ID entità',
@@ -290,13 +269,12 @@ const it: Translation = {
   NETWORK_USE_DNS: 'Abilita servizio mDNS',
   NETWORK_ENABLE_CORS: 'Abilita CORS',
   NETWORK_CORS_ORIGIN: 'origine CORS',
-  NETWORK_ENABLE_IPV6: 'Abilita supporto IPv6',
   NETWORK_FIXED_IP: 'Usa indirizzo IP fisso',
   NETWORK_GATEWAY: 'Gateway',
   NETWORK_SUBNET: 'Maschera Sottorete',
   NETWORK_DNS: 'Server DNS',
   ADDRESS_OF: 'Indirizzo {0}',
-  ADMIN: 'Amministratore',
+  ADMINISTRATOR: 'Amministratore',
   GUEST: 'Ospite',
   NEW: 'Nuovo',
   NEW_NAME_OF: 'Nuovo nome {0}',
@@ -308,17 +286,20 @@ const it: Translation = {
   STAY: 'Stai',
   LEAVE: 'Esci',
   SCHEDULER: 'Programma eventi',
-  SCHEDULER_HELP_1: "Automatizza i comandi aggiungendo gli eventi programmati di seguito. Imposta un nome univoco per abilitare/disabilitare l'attivazione tramite API/MQTT.",
+  SCHEDULER_HELP_1: "Automatizza i comandi aggiungendo gli eventi programmati di seguito. Imposta un nome univoco per abilitare/disabilitare l'attivazione tramite API/MQTT",
   SCHEDULER_HELP_2: "per attivare una volta all'avvio",
   SCHEDULE: 'Programma',
   TIME: 'Ora',
   TIMER: 'Orologio',
+  ONCHANGE: 'Sul cambiamento',
+  CONDITION: 'Condizione',
+  IMMEDIATE: 'Immediata',
   SCHEDULE_UPDATED: 'Calendario aggiornato',
   SCHEDULE_TIMER_1: 'All avvio',
   SCHEDULE_TIMER_2: 'Ogni minuto',
   SCHEDULE_TIMER_3: 'Ogni ora',
   CUSTOM_ENTITIES: 'Entità personalizzate',
-  ENTITIES_HELP_1: 'Recupera entità personalizzate dal BUS EMS', // TODO translate
+  ENTITIES_HELP_1: 'Recupera entità personalizzate dal BUS EMS',
   ENTITIES_UPDATED: 'Entità aggiornate',
   WRITEABLE: 'Scrivibile',
   SHOWING: 'Visualizza',
@@ -331,7 +312,38 @@ const it: Translation = {
   ACTIVEHIGH: 'Active High', // TODO translate
   ACTIVELOW: 'Active Low', // TODO translate
   UNCHANGED: 'Unchanged', // TODO translate
-  ALWAYS: 'Always' // TODO translate
+  ALWAYS: 'Always', // TODO translate
+  ACTIVITY: 'Activity', // TODO translate
+  CONFIGURE: 'Configure {0}', // TODO translate
+  SYSTEM_MEMORY: 'System Memory', // TODO translate
+  APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
+  SECURITY_1: 'Add or remove users', // TODO translate
+  DOWNLOAD_UPLOAD_1: 'Download and Upload Settings and Firmware', // TODO translate
+  MODULES: 'Module', // TODO translate
+  MODULES_1: 'Attiva o disattiva i moduli esterni', // TODO translate
+  MODULES_UPDATED: 'Modules updated', // TODO translate
+  MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
+  MODULES_NONE: 'No external modules detected', // TODO translate
+  RENAME: 'Rename', // TODO translate  
+  ENABLE_MODBUS: 'Abilita Modbus',
+  VIEW_LOG: 'View log to diagnose issues', // TODO translate
+  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
+  SERVICES: 'Services', // TODO translate
+  ALLVALUES: 'All Values', // TODO translate
+  SPECIAL_FUNCTIONS: 'Special Functions', // TODO translate
+  WAIT_FIRMWARE: 'Firmware is uploading and installing', // TODO translate
+  INSTALL_VERSION: 'This will install version {0}. Are you sure?', // TODO translate
+  SWITCH_DEV: 'switch to the development version', // TODO translate
+  UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
+  LATEST_VERSION: 'You are using the latest firmware version.', // TODO translate
+  PLEASE_WAIT: 'Please wait', // TODO translate
+  RESTARTING_PRE: 'Initializing', // TODO translate
+  RESTARTING_POST: 'Preparing', // TODO translate
+  AUTO_SCROLL: 'Auto Scroll', // TODO translate
+  DASHBOARD: 'Dashboard', // TODO translate
+  NO_DATA: 'No data available', // TODO translate
+  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module', // TODO translate
+  DEVELOPER_MODE: 'Developer Mode' // TODO translate
 };
 
 export default it;

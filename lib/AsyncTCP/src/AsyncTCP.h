@@ -23,16 +23,18 @@
 #define ASYNCTCP_H_
 
 #include "IPAddress.h"
+#if ESP_IDF_VERSION_MAJOR < 5
 #include "IPv6Address.h"
+#endif
 #include <functional>
+#include "lwip/ip_addr.h"
+#include "lwip/ip6_addr.h"
 
 #ifndef LIBRETINY
 #include "sdkconfig.h"
 extern "C" {
 #include "freertos/semphr.h"
 #include "lwip/pbuf.h"
-#include "lwip/ip_addr.h"
-#include "lwip/ip6_addr.h"
 }
 #else
 extern "C" {
@@ -46,20 +48,21 @@ extern "C" {
 //If core is not defined, then we are running in Arduino or PIO
 #ifndef CONFIG_ASYNC_TCP_RUNNING_CORE
 #define CONFIG_ASYNC_TCP_RUNNING_CORE -1 //any available core
-#define CONFIG_ASYNC_TCP_USE_WDT 0       //if enabled, adds between 33us and 200us per event
+// Note default was 1 and previously set to 0 for EMS-ESP
+#define CONFIG_ASYNC_TCP_USE_WDT 1 //if enabled, adds between 33us and 200us per event
 #endif
 
 #ifndef CONFIG_ASYNC_TCP_TASK_PRIORITY
 #define CONFIG_ASYNC_TCP_TASK_PRIORITY 5
 #endif
 
-// stack usage measured: ESP32: ~2.3K, ESP32S3: ~3.5k
+// EMS-ESP: stack usage measured: ESP32: ~2.3K, ESP32S3: ~3.5k
 #ifndef CONFIG_ASYNC_TCP_STACK_SIZE
 #define CONFIG_ASYNC_TCP_STACK_SIZE 5120
 #endif
 
 
-// maybe enlarge queue to 64 or 128 see https://github.com/emsesp/EMS-ESP32/issues/177
+// EMS-ESP: maybe enlarge queue to 64 or 128 see https://github.com/emsesp/EMS-ESP32/issues/177
 #ifndef CONFIG_ASYNC_TCP_QUEUE
 #define CONFIG_ASYNC_TCP_QUEUE 32
 #endif
@@ -93,8 +96,10 @@ class AsyncClient {
     bool operator!=(const AsyncClient & other) {
         return !(*this == other);
     }
-    bool   connect(IPAddress ip, uint16_t port);
-    bool   connect(IPv6Address ip, uint16_t port);
+    bool connect(IPAddress ip, uint16_t port);
+#if ESP_IDF_VERSION_MAJOR < 5
+    bool connect(IPv6Address ip, uint16_t port);
+#endif
     bool   connect(const char * host, uint16_t port);
     void   close(bool now = false);
     void   stop();
@@ -128,20 +133,27 @@ class AsyncClient {
     void setNoDelay(bool nodelay);
     bool getNoDelay();
 
-    uint32_t   getRemoteAddress();
+    uint32_t getRemoteAddress();
+    uint16_t getRemotePort();
+    uint32_t getLocalAddress();
+    uint16_t getLocalPort();
+#if LWIP_IPV6
     ip6_addr_t getRemoteAddress6();
-    uint16_t   getRemotePort();
-    uint32_t   getLocalAddress();
     ip6_addr_t getLocalAddress6();
-    uint16_t   getLocalPort();
+#if ESP_IDF_VERSION_MAJOR < 5
+    IPv6Address remoteIP6();
+    IPv6Address localIP6();
+#else
+    IPAddress remoteIP6();
+    IPAddress localIP6();
+#endif
+#endif
 
     //compatibility
-    IPAddress   remoteIP();
-    IPv6Address remoteIP6();
-    uint16_t    remotePort();
-    IPAddress   localIP();
-    IPv6Address localIP6();
-    uint16_t    localPort();
+    IPAddress remoteIP();
+    uint16_t  remotePort();
+    IPAddress localIP();
+    uint16_t  localPort();
 
     void onConnect(AcConnectHandler cb, void * arg = 0);    //on successful connect
     void onDisconnect(AcConnectHandler cb, void * arg = 0); //disconnected
@@ -227,7 +239,9 @@ class AsyncClient {
 class AsyncServer {
   public:
     AsyncServer(IPAddress addr, uint16_t port);
+#if ESP_IDF_VERSION_MAJOR < 5
     AsyncServer(IPv6Address addr, uint16_t port);
+#endif
     AsyncServer(uint16_t port);
     ~AsyncServer();
     void    onClient(AcConnectHandler cb, void * arg);
@@ -242,11 +256,13 @@ class AsyncServer {
     static int8_t _s_accepted(void * arg, AsyncClient * client);
 
   protected:
-    uint16_t         _port;
-    bool             _bind4 = false;
-    bool             _bind6 = false;
-    IPAddress        _addr;
-    IPv6Address      _addr6;
+    uint16_t  _port;
+    bool      _bind4 = false;
+    bool      _bind6 = false;
+    IPAddress _addr;
+#if ESP_IDF_VERSION_MAJOR < 5
+    IPv6Address _addr6;
+#endif
     bool             _noDelay;
     tcp_pcb *        _pcb;
     AcConnectHandler _connect_cb;

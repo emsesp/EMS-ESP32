@@ -1,9 +1,7 @@
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { Box, Button, CircularProgress, Typography } from '@mui/material';
-import type { FC } from 'react';
 
 import { MessageBox } from 'components';
-
 import { useI18nContext } from 'i18n/i18n-react';
 
 interface FormLoaderProps {
@@ -12,14 +10,23 @@ interface FormLoaderProps {
   onRetry?: () => void;
 }
 
-const FormLoader: FC<FormLoaderProps> = ({ errorMessage, onRetry, message = 'Loading…' }) => {
+const FormLoader = ({
+  errorMessage,
+  onRetry,
+  message = 'Loading…'
+}: FormLoaderProps) => {
   const { LL } = useI18nContext();
 
   if (errorMessage) {
     return (
       <MessageBox my={2} level="error" message={errorMessage}>
         {onRetry && (
-          <Button startIcon={<RefreshIcon />} variant="contained" color="error" onClick={onRetry}>
+          <Button
+            startIcon={<RefreshIcon />}
+            variant="contained"
+            color="error"
+            onClick={onRetry}
+          >
             {LL.RETRY()}
           </Button>
         )}

@@ -1,0 +1,33 @@
+.document-uploader {
+  border: 2px dashed #4282fe;
+  background-color: #2e3339;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &.active {
+    border-color: #6dc24b;
+  }
+
+  .upload-info {
+    display: flex;
+    align-items: center;
+  }
+
+  .file-info {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    p {
+      font-size: 14px;
+      color: #6dc24b;
+    }
+  }
+}

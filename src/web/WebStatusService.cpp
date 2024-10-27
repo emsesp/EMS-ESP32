@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,91 +18,295 @@
 
 #include "emsesp.h"
 
+#ifndef EMSESP_STANDALONE
+#include <esp_ota_ops.h>
+#endif
+
 namespace emsesp {
 
-WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * securityManager) {
-    server->on(EMSESP_STATUS_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { webStatusService(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
+WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * securityManager)
+    : _securityManager(securityManager) {
+    // GET
+    server->on(EMSESP_SYSTEM_STATUS_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { systemStatus(request); });
+
+    // POST - generic action handler
+    server->on(EMSESP_ACTION_SERVICE_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { action(request, json); });
 }
 
-void WebStatusService::webStatusService(AsyncWebServerRequest * request) {
+// /rest/systemStatus
+// This contains both system & hardware Status to avoid having multiple costly endpoints
+// This is also used for polling during the RestartMonitor to see if EMS-ESP is alive
+void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
+    EMSESP::system_.refreshHeapMem(); // refresh free heap and max alloc heap
+
     auto *     response = new AsyncJsonResponse(false);
     JsonObject root     = response->getRoot();
 
-    root["status"]      = EMSESP::bus_status(); // 0, 1 or 2
-    root["tx_mode"]     = EMSESP::txservice_.tx_mode();
-    root["uptime"]      = EMSbus::bus_uptime();
-    root["num_devices"] = EMSESP::count_devices(); // excluding Controller
-    root["num_sensors"] = EMSESP::temperaturesensor_.no_sensors();
-    root["num_analogs"] = EMSESP::analogsensor_.no_sensors();
+    root["emsesp_version"] = EMSESP_APP_VERSION;
 
-    JsonArray  statsJson = root["stats"].to<JsonArray>();
-    JsonObject statJson;
-
-    statJson       = statsJson.add<JsonObject>();
-    statJson["id"] = 0;
-    statJson["s"]  = EMSESP::rxservice_.telegram_count();
-    statJson["f"]  = EMSESP::rxservice_.telegram_error_count();
-    statJson["q"]  = EMSESP::rxservice_.quality();
-
-    statJson       = statsJson.add<JsonObject>();
-    statJson["id"] = 1;
-    statJson["s"]  = EMSESP::txservice_.telegram_read_count();
-    statJson["f"]  = EMSESP::txservice_.telegram_read_fail_count();
-    statJson["q"]  = EMSESP::txservice_.read_quality();
-
-    statJson       = statsJson.add<JsonObject>();
-    statJson["id"] = 2;
-    statJson["s"]  = EMSESP::txservice_.telegram_write_count();
-    statJson["f"]  = EMSESP::txservice_.telegram_write_fail_count();
-    statJson["q"]  = EMSESP::txservice_.write_quality();
-
-    if (EMSESP::sensor_enabled()) {
-        statJson       = statsJson.add<JsonObject>();
-        statJson["id"] = 3;
-        statJson["s"]  = EMSESP::temperaturesensor_.reads() - EMSESP::temperaturesensor_.fails();
-        statJson["f"]  = EMSESP::temperaturesensor_.fails();
-        statJson["q"] =
-            EMSESP::temperaturesensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::temperaturesensor_.fails()) / EMSESP::temperaturesensor_.reads());
-    }
-    if (EMSESP::analog_enabled()) {
-        statJson       = statsJson.add<JsonObject>();
-        statJson["id"] = 4;
-        statJson["s"]  = EMSESP::analogsensor_.reads() - EMSESP::analogsensor_.fails();
-        statJson["f"]  = EMSESP::analogsensor_.fails();
-        statJson["q"]  = EMSESP::analogsensor_.reads() == 0 ? 100 : 100 - (uint8_t)((100 * EMSESP::analogsensor_.fails()) / EMSESP::analogsensor_.reads());
-    }
-    if (Mqtt::enabled()) {
-        statJson       = statsJson.add<JsonObject>();
-        statJson["id"] = 5;
-        statJson["s"]  = Mqtt::publish_count() - Mqtt::publish_fails();
-        statJson["f"]  = Mqtt::publish_fails();
-        statJson["q"]  = Mqtt::publish_count() == 0 ? 100 : 100 - (uint8_t)((100 * Mqtt::publish_fails()) / Mqtt::publish_count());
-    }
-
-    statJson       = statsJson.add<JsonObject>();
-    statJson["id"] = 6;
-    statJson["s"]  = WebAPIService::api_count(); // + WebAPIService::api_fails();
-    statJson["f"]  = WebAPIService::api_fails();
-    statJson["q"]  = (WebAPIService::api_count() + WebAPIService::api_fails()) == 0
-                         ? 100
-                         : 100 - (uint8_t)((100 * WebAPIService::api_fails()) / (WebAPIService::api_count() + WebAPIService::api_fails()));
+    //
+    // System Status
+    //
+    root["emsesp_version"] = EMSESP_APP_VERSION;
+    root["bus_status"]     = EMSESP::bus_status(); // 0, 1 or 2
+    root["bus_uptime"]     = EMSbus::bus_uptime();
+    root["num_devices"]    = EMSESP::count_devices();
+    root["num_sensors"]    = EMSESP::temperaturesensor_.count_entities();
+    root["num_analogs"]    = EMSESP::analogsensor_.count_entities();
+    root["free_heap"]      = EMSESP::system_.getHeapMem();
+    root["uptime"]         = uuid::get_uptime_sec();
+    root["mqtt_status"]    = EMSESP::mqtt_.connected();
 
 #ifndef EMSESP_STANDALONE
-    if (EMSESP::system_.syslog_enabled()) {
-        statJson       = statsJson.add<JsonObject>();
-        statJson["id"] = 7;
-        statJson["s"]  = EMSESP::system_.syslog_count();
-        statJson["f"]  = EMSESP::system_.syslog_fails();
-        statJson["q"]  = (EMSESP::system_.syslog_count() + EMSESP::system_.syslog_fails()) == 0
-                             ? 100
-                             : 100 - (uint8_t)((100 * EMSESP::system_.syslog_fails()) / (EMSESP::system_.syslog_count() + EMSESP::system_.syslog_fails()));
+    root["ntp_status"] = [] {
+        if (esp_sntp_enabled()) {
+            if (emsesp::EMSESP::system_.ntp_connected()) {
+                return 2;
+            } else {
+                return 1;
+            }
+        }
+        return 0;
+    }();
+#endif
+
+    root["ap_status"] = EMSESP::esp8266React.apStatus();
+
+    if (emsesp::EMSESP::system_.ethernet_connected()) {
+        root["network_status"] = 10; // custom code #10 - ETHERNET_STATUS_CONNECTED
+        root["wifi_rssi"]      = 0;
+    } else {
+        root["network_status"] = static_cast<uint8_t>(WiFi.status());
+#ifndef EMSESP_STANDALONE
+        root["wifi_rssi"] = WiFi.RSSI();
+#endif
     }
+
+#if defined(EMSESP_DEBUG)
+#ifdef EMSESP_TEST
+    root["build_flags"] = "DEBUG,TEST";
+#else
+    root["build_flags"] = "DEBUG";
+#endif
+#elif defined(EMSESP_TEST)
+    root["build_flags"] = "TEST";
+#endif
+
+    //
+    // Hardware Status
+    //
+    root["esp_platform"] = EMSESP_PLATFORM;
+#ifndef EMSESP_STANDALONE
+    root["cpu_type"]         = ESP.getChipModel();
+    root["cpu_rev"]          = ESP.getChipRevision();
+    root["cpu_cores"]        = ESP.getChipCores();
+    root["cpu_freq_mhz"]     = ESP.getCpuFreqMHz();
+    root["max_alloc_heap"]   = EMSESP::system_.getMaxAllocMem();
+    root["arduino_version"]  = ARDUINO_VERSION;
+    root["sdk_version"]      = ESP.getSdkVersion();
+    root["partition"]        = esp_ota_get_running_partition()->label; // active partition
+    root["flash_chip_size"]  = ESP.getFlashChipSize() / 1024;
+    root["flash_chip_speed"] = ESP.getFlashChipSpeed();
+    root["app_used"]         = EMSESP::system_.appUsed();
+    root["app_free"]         = EMSESP::system_.appFree();
+    uint32_t FSused          = LittleFS.usedBytes() / 1024;
+    root["fs_used"]          = FSused;
+    root["fs_free"]          = EMSESP::system_.FStotal() - FSused;
+    root["free_caps"]        = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024; // includes heap and psram
+    root["psram"]            = (EMSESP::system_.PSram() > 0);                   // boolean
+    if (EMSESP::system_.PSram()) {
+        root["psram_size"] = EMSESP::system_.PSram();
+        root["free_psram"] = ESP.getFreePsram() / 1024;
+    }
+    root["model"] = EMSESP::system_.getBBQKeesGatewayDetails();
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
+    root["temperature"] = EMSESP::system_.temperature();
+#endif
+
+    // check for a factory partition first
+    const esp_partition_t * partition = esp_partition_find_first(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_APP_FACTORY, nullptr);
+    root["has_loader"]                = partition != NULL && partition != esp_ota_get_running_partition();
+    partition                         = esp_ota_get_next_update_partition(nullptr);
+    if (partition) {
+        uint64_t buffer;
+        esp_partition_read(partition, 0, &buffer, 8);
+        root["has_partition"] = (buffer != 0xFFFFFFFFFFFFFFFF);
+    } else {
+        root["has_partition"] = false;
+    }
+
+    // Matches status codes in RestartMonitor.tsx
+    if (EMSESP::system_.restart_pending()) {
+        root["status"] = "restarting";
+        EMSESP::system_.restart_requested(true); // tell emsesp loop to start restart
+    } else {
+        root["status"] = EMSESP::system_.upload_isrunning() ? "uploading" : "ready";
+    }
+
 #endif
 
     response->setLength();
     request->send(response);
+}
+
+// generic action handler - as a POST
+void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json) {
+    auto *     response = new AsyncJsonResponse();
+    JsonObject root     = response->getRoot();
+
+    // param is optional - https://arduinojson.org/news/2024/09/18/arduinojson-7-2/
+    std::string param;
+    bool        has_param      = false;
+    JsonVariant param_optional = json["param"];
+    if (json["param"].is<const char *>()) {
+        param     = param_optional.as<std::string>();
+        has_param = true;
+    } else {
+        has_param = false;
+    }
+
+    // check if we're authenticated for admin tasks, some actions are only for admins
+    Authentication authentication = _securityManager->authenticateRequest(request);
+    bool           is_admin       = AuthenticationPredicates::IS_ADMIN(authentication);
+
+    // call action command
+    bool        ok     = false;
+    std::string action = json["action"];
+
+    if (action == "checkUpgrade") {
+        ok = checkUpgrade(root, param); // param could be empty, if so only send back version
+    } else if (action == "export") {
+        if (has_param) {
+            ok = exportData(root, param);
+        }
+    } else if (action == "customSupport") {
+        ok = customSupport(root);
+    } else if (action == "uploadURL" && is_admin) {
+        ok = uploadURL(param.c_str());
+    }
+
+#if defined(EMSESP_STANDALONE) && !defined(EMSESP_UNITY)
+    Serial.printf("%sweb output: %s[%s]", COLOR_WHITE, COLOR_BRIGHT_CYAN, request->url().c_str());
+    Serial.printf(" %s(%d)%s ", ok ? COLOR_BRIGHT_GREEN : COLOR_BRIGHT_RED, ok ? 200 : 400, COLOR_YELLOW);
+    serializeJson(root, Serial);
+    Serial.println(COLOR_RESET);
+#endif
+
+    // send response
+    if (!ok) {
+        request->send(400);
+        return;
+    }
+
+    response->setLength();
+    request->send(response);
+}
+
+// action = checkUpgrade
+bool WebStatusService::checkUpgrade(JsonObject root, std::string & latest_version) {
+    root["emsesp_version"] = EMSESP_APP_VERSION;
+
+    if (!latest_version.empty()) {
+#if defined(EMSESP_DEBUG)
+        emsesp::EMSESP::logger().debug("Checking for upgrade: %s > %s", EMSESP_APP_VERSION, latest_version.c_str());
+#endif
+
+        version::Semver200_version settings_version(EMSESP_APP_VERSION);
+        version::Semver200_version this_version(latest_version);
+
+        root["upgradeable"] = (this_version > settings_version);
+    }
+
+    return true; // always ok
+}
+
+// action = allvalues
+// output all the devices and the values
+void WebStatusService::allvalues(JsonObject output) {
+    JsonObject device_output;
+    auto       value = F_(values);
+
+    // EMS-Device Entities
+    for (const auto & emsdevice : EMSESP::emsdevices) {
+        std::string title = emsdevice->device_type_2_device_name_translated() + std::string(" ") + emsdevice->to_string();
+        device_output     = output[title].to<JsonObject>();
+        emsdevice->get_value_info(device_output, value, DeviceValueTAG::TAG_NONE);
+    }
+
+    // Custom Entities
+    device_output = output["Custom Entities"].to<JsonObject>();
+    EMSESP::webCustomEntityService.get_value_info(device_output, value);
+
+    // Scheduler
+    device_output = output["Scheduler"].to<JsonObject>();
+    EMSESP::webSchedulerService.get_value_info(device_output, value);
+
+    // Sensors
+    device_output = output["Analog Sensors"].to<JsonObject>();
+    EMSESP::analogsensor_.get_value_info(device_output, value);
+    device_output = output["Temperature Sensors"].to<JsonObject>();
+    EMSESP::temperaturesensor_.get_value_info(device_output, value);
+}
+
+// action = export
+// returns data for a specific feature/settings as a json object
+bool WebStatusService::exportData(JsonObject root, std::string & type) {
+    root["type"] = type;
+
+    if (type == "settings") {
+        JsonObject node = root["System"].to<JsonObject>();
+        node["version"] = EMSESP_APP_VERSION;
+        System::extractSettings(NETWORK_SETTINGS_FILE, "Network", root);
+        System::extractSettings(AP_SETTINGS_FILE, "AP", root);
+        System::extractSettings(MQTT_SETTINGS_FILE, "MQTT", root);
+        System::extractSettings(NTP_SETTINGS_FILE, "NTP", root);
+        System::extractSettings(SECURITY_SETTINGS_FILE, "Security", root);
+        System::extractSettings(EMSESP_SETTINGS_FILE, "Settings", root);
+    } else if (type == "schedule") {
+        System::extractSettings(EMSESP_SCHEDULER_FILE, "Schedule", root);
+    } else if (type == "customizations") {
+        System::extractSettings(EMSESP_CUSTOMIZATION_FILE, "Customizations", root);
+    } else if (type == "entities") {
+        System::extractSettings(EMSESP_CUSTOMENTITY_FILE, "Entities", root);
+    } else if (type == "allvalues") {
+        root.clear(); // don't need the "type" key added to the output
+        allvalues(root);
+    } else {
+        return false; // error
+    }
+
+    return true;
+}
+
+// action = customSupport
+// reads any upload customSupport.json file and sends to to Help page to be shown as Guest
+bool WebStatusService::customSupport(JsonObject root) {
+#ifndef EMSESP_STANDALONE
+    // check if we have custom support file uploaded
+    File file = LittleFS.open(EMSESP_CUSTOMSUPPORT_FILE, "r");
+    if (!file) {
+        // there is no custom file, return empty object
+        return true;
+    }
+
+    // read the contents of the file into the root output json object
+    DeserializationError error = deserializeJson(root, file);
+    if (error) {
+        emsesp::EMSESP::logger().err("Failed to read custom support file");
+        return false;
+    }
+
+    file.close();
+#endif
+    return true;
+}
+
+// action = uploadURL
+// uploads a firmware file from a URL
+bool WebStatusService::uploadURL(const char * url) {
+    // this will keep a copy of the URL, but won't initiate the download yet
+    emsesp::EMSESP::system_.uploadFirmwareURL(url);
+    return true;
 }
 
 } // namespace emsesp

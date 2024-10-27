@@ -75,6 +75,11 @@ void APSettingsService::manageAP() {
 }
 
 void APSettingsService::startAP() {
+#if ESP_IDF_VERSION_MAJOR < 5
+    WiFi.softAPenableIpV6(); // force IPV6, same as for WiFi - fixes https://github.com/emsesp/EMS-ESP32/issues/1922
+#else
+    WiFi.softAPenableIPv6(); // force IPV6, same as for WiFi - fixes https://github.com/emsesp/EMS-ESP32/issues/1922
+#endif
     WiFi.softAPConfig(_state.localIP, _state.gatewayIP, _state.subnetMask);
     esp_wifi_set_bandwidth(static_cast<wifi_interface_t>(ESP_IF_WIFI_AP), WIFI_BW_HT20);
     WiFi.softAP(_state.ssid.c_str(), _state.password.c_str(), _state.channel, _state.ssidHidden, _state.maxClients);
@@ -148,9 +153,9 @@ StateUpdateResult APSettings::update(JsonObject root, APSettings & settings) {
     newSettings.ssidHidden = root["ssid_hidden"] | FACTORY_AP_SSID_HIDDEN;
     newSettings.maxClients = static_cast<uint8_t>(root["max_clients"] | FACTORY_AP_MAX_CLIENTS);
 
-    JsonUtils::readIP(root, "local_ip", newSettings.localIP, FACTORY_AP_LOCAL_IP);
-    JsonUtils::readIP(root, "gateway_ip", newSettings.gatewayIP, FACTORY_AP_GATEWAY_IP);
-    JsonUtils::readIP(root, "subnet_mask", newSettings.subnetMask, FACTORY_AP_SUBNET_MASK);
+    JsonUtils::readIP(root, "local_ip", newSettings.localIP, String(FACTORY_AP_LOCAL_IP));
+    JsonUtils::readIP(root, "gateway_ip", newSettings.gatewayIP, String(FACTORY_AP_GATEWAY_IP));
+    JsonUtils::readIP(root, "subnet_mask", newSettings.subnetMask, String(FACTORY_AP_SUBNET_MASK));
 
     if (newSettings == settings) {
         return StateUpdateResult::UNCHANGED;

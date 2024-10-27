@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,19 @@
 #include <uuid/log.h>
 #include <PButton.h>
 
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
+#if ESP_IDF_VERSION_MAJOR < 5
+#include "driver/temp_sensor.h"
+#else
+#include "driver/temperature_sensor.h"
+#endif
+#endif
+
 using uuid::console::Shell;
+
+#define EMSESP_FS_CONFIG_DIRECTORY "/config"
+
+#define EMSESP_CUSTOMSUPPORT_FILE "/config/customSupport.json"
 
 namespace emsesp {
 
@@ -51,16 +63,19 @@ class System {
     void loop();
 
     // commands
+    static bool command_read(const char * value, const int8_t id);
     static bool command_send(const char * value, const int8_t id);
     static bool command_publish(const char * value, const int8_t id);
     static bool command_fetch(const char * value, const int8_t id);
     static bool command_restart(const char * value, const int8_t id);
-    static bool command_syslog_level(const char * value, const int8_t id);
+    static bool command_format(const char * value, const int8_t id);
     static bool command_watch(const char * value, const int8_t id);
+    static bool command_message(const char * value, const int8_t id);
     static bool command_info(const char * value, const int8_t id, JsonObject output);
-    static bool command_commands(const char * value, const int8_t id, JsonObject output);
     static bool command_response(const char * value, const int8_t id, JsonObject output);
-    static bool command_allvalues(const char * value, const int8_t id, JsonObject output);
+
+    static bool get_value_info(JsonObject root, const char * cmd);
+    static void get_value_json(JsonObject output, const std::string & circuit, const std::string & name, JsonVariant val);
 
 #if defined(EMSESP_TEST)
     static bool command_test(const char * value, const int8_t id);
@@ -70,9 +85,8 @@ class System {
 
     void store_nvs_values();
     void system_restart(const char * partition = nullptr);
-    void format(uuid::console::Shell & shell);
-    void upload_status(bool in_progress);
-    bool upload_status();
+    void upload_isrunning(bool in_progress);
+    bool upload_isrunning();
     void show_mem(const char * note);
     void reload_settings();
     void syslog_init();
@@ -96,6 +110,10 @@ class System {
     }
 #endif
 
+    String getBBQKeesGatewayDetails();
+
+    static bool uploadFirmwareURL(const char * url = nullptr);
+
     void led_init(bool refresh);
     void network_init(bool refresh);
     void button_init(bool refresh);
@@ -104,19 +122,43 @@ class System {
     static void extractSettings(const char * filename, const char * section, JsonObject output);
     static bool saveSettings(const char * filename, const char * section, JsonObject input);
 
-    static bool is_valid_gpio(uint8_t pin);
+    static bool is_valid_gpio(uint8_t pin, bool has_psram = false);
     static bool load_board_profile(std::vector<int8_t> & data, const std::string & board_profile);
+
+    static bool readCommand(const char * data);
 
     static void restart_requested(bool restart_requested) {
         restart_requested_ = restart_requested;
     }
-
     static bool restart_requested() {
         return restart_requested_;
     }
 
+    static void restart_pending(bool restart_pending) {
+        restart_pending_ = restart_pending;
+    }
+    static bool restart_pending() {
+        return restart_pending_;
+    }
+
     bool telnet_enabled() {
         return telnet_enabled_;
+    }
+
+    bool modbus_enabled() {
+        return modbus_enabled_;
+    }
+
+    uint16_t modbus_port() {
+        return modbus_port_;
+    }
+
+    uint8_t modbus_max_clients() {
+        return modbus_max_clients_;
+    }
+
+    uint32_t modbus_timeout() {
+        return modbus_timeout_;
     }
 
     bool analog_enabled() {
@@ -131,10 +173,20 @@ class System {
         readonly_mode_ = readonly_mode;
     }
 
+    bool developer_mode() {
+        return developer_mode_;
+    }
+
+    void developer_mode(bool developer_mode) {
+        developer_mode_ = developer_mode;
+    }
+
+    // Boolean Format API/MQTT
     uint8_t bool_format() {
         return bool_format_;
     }
 
+    // Boolean Format Web
     uint8_t bool_dashboard() {
         return bool_dashboard_;
     }
@@ -170,7 +222,7 @@ class System {
         return hostname_;
     }
 
-    void hostname(std::string hostname) {
+    void hostname(const std::string hostname) {
         hostname_ = hostname;
     }
 
@@ -184,6 +236,10 @@ class System {
 
     void has_ipv6(bool b) {
         has_ipv6_ = b;
+    }
+
+    bool has_ipv6() {
+        return has_ipv6_;
     }
 
     void ntp_connected(bool b);
@@ -226,6 +282,10 @@ class System {
     uint32_t FStotal() {
         return fstotal_;
     }
+
+    void PSram(uint32_t psram) {
+        psram_ = psram / 1024;
+    }
     uint32_t PSram() {
         return psram_;
     }
@@ -262,9 +322,16 @@ class System {
         test_set_all_active_ = n;
     }
 
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
+    float temperature() {
+        return temperature_;
+    }
+#endif
+
   private:
     static uuid::log::Logger logger_;
     static bool              restart_requested_;
+    static bool              restart_pending_;     // used in 2-stage process to call restart from Web API
     static bool              test_set_all_active_; // force all entities in a device to have a value
     static uint32_t          max_alloc_mem_;
     static uint32_t          heap_mem_;
@@ -281,7 +348,11 @@ class System {
     static constexpr uint32_t BUTTON_VLongPressDelay = 9000; // Hold period for a very long press event (in ms)
 
     // healthcheck
-    static constexpr uint32_t SYSTEM_CHECK_FREQUENCY          = 5000; // do a system check every 5 seconds
+#ifdef EMSESP_PINGTEST
+    static constexpr uint32_t SYSTEM_CHECK_FREQUENCY = 500; // do a system check every 1/2 second
+#else
+    static constexpr uint32_t SYSTEM_CHECK_FREQUENCY = 5000; // do a system check every 5 seconds
+#endif
     static constexpr uint32_t HEALTHCHECK_LED_LONG_DUARATION  = 1500;
     static constexpr uint32_t HEALTHCHECK_LED_FLASH_DUARATION = 150;
     static constexpr uint8_t  HEALTHCHECK_NO_BUS              = (1 << 0); // 1
@@ -300,7 +371,7 @@ class System {
     uint8_t  healthcheck_       = HEALTHCHECK_NO_NETWORK | HEALTHCHECK_NO_BUS; // start with all flags set, no wifi and no ems bus connection
     uint32_t last_system_check_ = 0;
 
-    bool upload_status_      = false; // true if we're in the middle of a OTA firmware upload
+    bool upload_isrunning_   = false; // true if we're in the middle of a OTA firmware upload
     bool ethernet_connected_ = false;
     bool has_ipv6_           = false;
 
@@ -334,6 +405,11 @@ class System {
     uint8_t     enum_format_;
     bool        readonly_mode_;
     String      version_;
+    bool        modbus_enabled_;
+    uint16_t    modbus_port_;
+    uint8_t     modbus_max_clients_;
+    uint32_t    modbus_timeout_;
+    bool        developer_mode_;
 
     // ethernet
     uint8_t phy_type_;
@@ -345,6 +421,13 @@ class System {
     uint32_t psram_;
     uint32_t appused_;
     uint32_t appfree_;
+
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
+#if ESP_IDF_VERSION_MAJOR >= 5
+    temperature_sensor_handle_t temperature_handle_ = NULL;
+#endif
+    float temperature_ = 0;
+#endif
 };
 
 } // namespace emsesp

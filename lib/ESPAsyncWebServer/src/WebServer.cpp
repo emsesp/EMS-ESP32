@@ -175,7 +175,7 @@ AsyncCallbackWebHandler & AsyncWebServer::on(const char * uri, ArRequestHandlerF
     return *handler;
 }
 
-// added by proddy
+// added by proddy for EMS-ESP
 void AsyncWebServer::on(const char * uri, ArJsonRequestHandlerFunction onRequest) {
     auto * handler = new AsyncCallbackJsonWebHandler(uri, onRequest);
     addHandler(handler);

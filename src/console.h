@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,8 +31,6 @@
 #endif
 
 namespace emsesp {
-
-enum CommandFlags : uint8_t { USER = 0, ADMIN = (1 << 0), LOCAL = (1 << 1) };
 
 enum ShellContext : uint8_t { MAIN = 0, SYSTEM, END };
 

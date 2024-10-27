@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #include "../default_settings.h"
 
 #define EMSESP_SETTINGS_FILE "/config/emsespSettings.json"
+
 #define EMSESP_SETTINGS_SERVICE_PATH "/rest/settings"
 #define EMSESP_BOARD_PROFILE_SERVICE_PATH "/rest/boardProfile"
 
@@ -34,10 +35,13 @@ class WebSettings {
     uint8_t  tx_mode;
     uint8_t  ems_bus_id;
     bool     boiler_heatingoff;
+    uint8_t  remote_timeout;
+    bool     remote_timeout_enabled;
     bool     shower_timer;
     bool     shower_alert;
-    uint8_t  shower_alert_trigger;
-    uint8_t  shower_alert_coldshot;
+    uint8_t  shower_alert_trigger;  // minutes
+    uint8_t  shower_alert_coldshot; // seconds
+    uint32_t shower_min_duration;   // seconds
     bool     syslog_enabled;
     int8_t   syslog_level; // uuid::log::Level
     uint32_t syslog_mark_interval;
@@ -61,15 +65,24 @@ class WebSettings {
     uint8_t  bool_format;
     uint8_t  bool_dashboard;
     uint8_t  enum_format;
-    int8_t   weblog_level;
-    uint8_t  weblog_buffer;
-    bool     weblog_compact;
-    bool     fahrenheit;
+
+    int8_t  weblog_level;
+    uint8_t weblog_buffer;
+    bool    weblog_compact;
+
+    bool fahrenheit;
+
+    bool     modbus_enabled;
+    uint16_t modbus_port;
+    uint8_t  modbus_max_clients;
+    uint32_t modbus_timeout;
 
     uint8_t phy_type;
     int8_t  eth_power; // -1 means disabled
     uint8_t eth_phy_addr;
     uint8_t eth_clock_mode;
+
+    bool developer_mode; // developer mode
 
     static void              read(WebSettings & settings, JsonObject root);
     static StateUpdateResult update(JsonObject root, WebSettings & settings);

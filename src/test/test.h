@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,22 +41,25 @@ namespace emsesp {
 // #define EMSESP_DEBUG_DEFAULT "310"
 // #define EMSESP_DEBUG_DEFAULT "render"
 // #define EMSESP_DEBUG_DEFAULT "api"
+// #define EMSESP_DEBUG_DEFAULT "api3"
 // #define EMSESP_DEBUG_DEFAULT "crash"
 // #define EMSESP_DEBUG_DEFAULT "dv"
 // #define EMSESP_DEBUG_DEFAULT "lastcode"
 // #define EMSESP_DEBUG_DEFAULT "2thermostats"
 // #define EMSESP_DEBUG_DEFAULT "temperature"
 // #define EMSESP_DEBUG_DEFAULT "analog"
-// #define EMSESP_DEBUG_DEFAULT "api_values"
 // #define EMSESP_DEBUG_DEFAULT "mqtt_post"
 // #define EMSESP_DEBUG_DEFAULT "api_wwmode"
 // #define EMSESP_DEBUG_DEFAULT "customization"
 // #define EMSESP_DEBUG_DEFAULT "entity_dump"
+// #define EMSESP_DEBUG_DEFAULT "telegram_dump"
 // #define EMSESP_DEBUG_DEFAULT "memory"
 // #define EMSESP_DEBUG_DEFAULT "coldshot"
 // #define EMSESP_DEBUG_DEFAULT "custom"
 // #define EMSESP_DEBUG_DEFAULT "scheduler"
 // #define EMSESP_DEBUG_DEFAULT "heat_exchange"
+// #define EMSESP_DEBUG_DEFAULT "ls"
+// #define EMSESP_DEBUG_DEFAULT "upload"
 
 #ifndef EMSESP_DEBUG_DEFAULT
 #define EMSESP_DEBUG_DEFAULT "general"

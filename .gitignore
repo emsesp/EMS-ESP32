@@ -1,5 +1,8 @@
 # vscode
-.vscode/*
+.vscode/c_cpp_properties.json
+.vscode/extensions.json
+.vscode/launch.json
+.vscode/settings.json
 
 # c++ compiling
 .clang_complete
@@ -27,21 +30,16 @@ stats.html
 *.sln
 *.sw?
 .pnp.*
-.yarn/*
+*/.yarn/*
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
 yarn.lock
-interface/analyse.html
+analyse.html
 interface/vite.config.ts.timestamp*
-
-# scripts
-test.sh
-scripts/run.sh
-scripts/__pycache__
-scripts/stackdmp.txt
+*.local
 
 # i18n generated files
 interface/src/i18n/i18n-react.tsx
@@ -50,11 +48,27 @@ interface/src/i18n/i18n-util.ts
 interface/src/i18n/i18n-util.sync.ts
 interface/src/i18n/i18n-util.async.ts
 
+# scripts
+test.sh
+scripts/run.sh
+scripts/__pycache__
+scripts/stackdmp.txt
+
 # sonar
 .scannerwork/
 sonar/
 bw-output/
 
-# testing
+# standalone executable for testing
 emsesp
+interface/tsconfig.tsbuildinfo
 
+# python virtual environment
+venv/
+
+# cspell
+words-found-verbose.txt
+
+# sonarlint
+compile_commands.json
+package.json

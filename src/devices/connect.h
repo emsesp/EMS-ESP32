@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,10 @@ namespace emsesp {
 class Connect : public EMSdevice {
   public:
     Connect(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand);
+
+  private:
+    void    process_OutdoorTemp(std::shared_ptr<const Telegram> telegram);
+    int16_t outdoorTemp_;
 };
 
 } // namespace emsesp

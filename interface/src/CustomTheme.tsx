@@ -1,6 +1,11 @@
-import { CssBaseline } from '@mui/material';
-import { createTheme, responsiveFontSizes, ThemeProvider } from '@mui/material/styles';
 import type { FC } from 'react';
+
+import { CssBaseline } from '@mui/material';
+import {
+  ThemeProvider,
+  createTheme,
+  responsiveFontSizes
+} from '@mui/material/styles';
 
 import type { RequiredChildrenProps } from 'utils';
 
@@ -10,8 +15,7 @@ export const dialogStyle = {
     borderColor: '#565656',
     borderStyle: 'solid',
     borderWidth: '1px'
-  },
-  backdropFilter: 'blur(1px)'
+  }
 };
 
 const theme = responsiveFontSizes(

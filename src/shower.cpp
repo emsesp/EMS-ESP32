@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,11 +25,12 @@ uuid::log::Logger Shower::logger_{F_(shower), uuid::log::Facility::CONSOLE};
 static bool force_coldshot = false;
 
 void Shower::start() {
-    EMSESP::webSettingsService.read([&](WebSettings & settings) {
+    EMSESP::webSettingsService.read([&](WebSettings const & settings) {
         shower_timer_          = settings.shower_timer;
         shower_alert_          = settings.shower_alert;
-        shower_alert_trigger_  = settings.shower_alert_trigger * 60000; // convert from minutes
-        shower_alert_coldshot_ = settings.shower_alert_coldshot * 1000; // convert from seconds
+        shower_alert_trigger_  = settings.shower_alert_trigger * 60; // convert from minutes to seconds
+        shower_alert_coldshot_ = settings.shower_alert_coldshot;     // in seconds
+        shower_min_duration_   = settings.shower_min_duration;       // in seconds
     });
 
     Command::add(
@@ -60,7 +61,7 @@ void Shower::loop() {
         return;
     }
 
-    uint32_t time_now = uuid::get_uptime();
+    auto time_now = uuid::get_uptime_sec(); // in sec
 
     // if already in cold mode, ignore all this logic until we're out of the cold blast
     if (!doing_cold_shot_) {
@@ -74,15 +75,16 @@ void Shower::loop() {
                 doing_cold_shot_ = false;
                 duration_        = 0;
                 shower_state_    = false;
+                next_alert_      = shower_alert_trigger_;
             } else {
                 // hot water has been  on for a while
                 // first check to see if hot water has been on long enough to be recognized as a Shower/Bath
-                if (!shower_state_ && (time_now - timer_start_) > SHOWER_MIN_DURATION) {
+                if (!shower_state_ && (time_now - timer_start_) > shower_min_duration_) {
                     set_shower_state(true);
                     LOG_DEBUG("hot water still running, starting shower timer");
                 }
                 // check if the shower has been on too long
-                else if ((shower_alert_ && ((time_now - timer_start_) > shower_alert_trigger_)) || force_coldshot) {
+                else if ((shower_alert_ && ((time_now - timer_start_) > next_alert_)) || force_coldshot) {
                     shower_alert_start();
                 }
             }
@@ -97,24 +99,25 @@ void Shower::loop() {
                 // it is over the wait period, so assume that the shower has finished and calculate the total time and publish
                 // because its unsigned long, can't have negative so check if length is less than OFFSET_TIME
                 if ((timer_pause_ - timer_start_) > SHOWER_OFFSET_TIME) {
-                    duration_ = (timer_pause_ - timer_start_ - SHOWER_OFFSET_TIME);
-                    if (duration_ > SHOWER_MIN_DURATION) {
+                    duration_ = (timer_pause_ - timer_start_ - SHOWER_OFFSET_TIME); // duration in seconds
+                    if (duration_ > shower_min_duration_) {
                         JsonDocument doc;
 
                         // duration in seconds
-                        doc["duration"] = (duration_ / 1000UL); // seconds
-                        time_t now      = time(nullptr);
-                        // if NTP enabled, publish timestamp
-                        if (now > 1576800000) { // year 2020
-                            // doc["timestamp_s"] = now; // if needed, in seconds
-                            tm * tm_ = localtime(&now);
-                            char dt[25];
-                            strftime(dt, sizeof(dt), "%FT%T%z", tm_);
-                            doc["timestamp"] = dt;
-                            LOG_INFO("shower finished (duration %s)", dt);
-                        } else {
-                            LOG_INFO("shower finished (duration %lu s)", duration_ / 1000UL);
-                        }
+                        doc["duration"] = duration_; // seconds
+                        // time_t now      = time(nullptr);
+                        // // if NTP enabled, publish timestamp
+                        // if (now > 1576800000) { // year 2020
+                        //     // doc["timestamp_s"] = now; // if needed, in seconds
+                        //     tm * tm_ = localtime(&now);
+                        //     char dt[25];
+                        //     strftime(dt, sizeof(dt), "%FT%T%z", tm_);
+                        //     doc["timestamp"] = dt;
+                        //     LOG_INFO("Shower finished %s (duration %lus)", dt, duration_);
+                        // } else {
+                        //     LOG_INFO("Shower finished (duration %lus)", duration_);
+                        // }
+                        LOG_INFO("Shower finished (duration %lus)", duration_);
                         Mqtt::queue_publish("shower_data", doc.as<JsonObject>());
                     }
                 }
@@ -141,19 +144,20 @@ void Shower::loop() {
 // turn off hot water to send a shot of cold
 void Shower::shower_alert_start() {
     LOG_DEBUG("Shower Alert started");
-    (void)Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "false");
+    (void)Command::call(EMSdevice::DeviceType::BOILER, "tapactivated", "false", 9);
     doing_cold_shot_   = true;
     force_coldshot     = false;
-    alert_timer_start_ = uuid::get_uptime(); // timer starts now
+    alert_timer_start_ = uuid::get_uptime_sec(); // timer starts now
 }
 
 // turn back on the hot water for the shower
 void Shower::shower_alert_stop() {
     if (doing_cold_shot_) {
         LOG_DEBUG("Shower Alert stopped");
-        (void)Command::call(EMSdevice::DeviceType::BOILER, "wwtapactivated", "true");
+        (void)Command::call(EMSdevice::DeviceType::BOILER, "tapactivated", "true", 9);
         doing_cold_shot_ = false;
         force_coldshot   = false;
+        next_alert_ += shower_alert_trigger_;
     }
 }
 
@@ -198,25 +202,15 @@ void Shower::set_shower_state(bool state, bool force) {
         snprintf(stat_t, sizeof(stat_t), "%s/shower_active", Mqtt::base().c_str());
         doc["stat_t"] = stat_t;
 
-        if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-            doc["pl_on"]  = "true";
-            doc["pl_off"] = "false";
-        } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-            doc["pl_on"]  = 1;
-            doc["pl_off"] = 0;
-        } else {
-            char result[12];
-            doc["pl_on"]  = Helpers::render_boolean(result, true);
-            doc["pl_off"] = Helpers::render_boolean(result, false);
-        }
+        Mqtt::add_ha_bool(doc);
 
-        Mqtt::add_ha_sections_to_doc("shower", stat_t, doc, true); // create first dev & ids
+        Mqtt::add_ha_sections_to_doc("shower", stat_t, doc, true); // create first dev & ids, no conditions
 
         snprintf(topic, sizeof(topic), "binary_sensor/%s/shower_active/config", Mqtt::basename().c_str());
         ha_configdone_ = Mqtt::queue_ha(topic, doc.as<JsonObject>()); // publish the config payload with retain flag
 
         //
-        // shower duaration
+        // shower duration
         //
         doc.clear();
 

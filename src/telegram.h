@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,38 +32,45 @@
 
 #include "helpers.h"
 
+#if defined(EMSESP_STANDALONE)
+#define MAX_RX_TELEGRAMS 100 // size of Rx queue
+#define MAX_TX_TELEGRAMS 200 // size of Tx queue
+#else
 #define MAX_RX_TELEGRAMS 10  // size of Rx queue
 #define MAX_TX_TELEGRAMS 100 // size of Tx queue
+#endif
 
 // default values for null values
 static constexpr uint8_t  EMS_VALUE_BOOL          = 0xFF;       // used to mark that something is a boolean
 static constexpr uint8_t  EMS_VALUE_BOOL_OFF      = 0x00;       // boolean false
 static constexpr uint8_t  EMS_VALUE_BOOL_ON       = 0x01;       // boolean true. True can be 0x01 or 0xFF sometimes
 static constexpr uint8_t  EMS_VALUE_BOOL_NOTSET   = 0xFE;       // random number for booleans, that's not 0, 1 or FF
-static constexpr uint8_t  EMS_VALUE_UINT_NOTSET   = 0xFF;       // for 8-bit unsigned ints/bytes
-static constexpr int8_t   EMS_VALUE_INT_NOTSET    = 0x7F;       // for signed 8-bit ints/bytes
-static constexpr uint16_t EMS_VALUE_USHORT_NOTSET = 0x7D00;     // 32000: for 2-byte unsigned shorts
-static constexpr int16_t  EMS_VALUE_SHORT_NOTSET  = 0x7D00;     // 32000: for 2-byte signed shorts
-static constexpr uint32_t EMS_VALUE_ULONG_NOTSET  = 0x00FFFFFF; // for 3-byte longs
-static constexpr uint32_t EMS_VALUE_ULLONG_NOTSET = 0xFFFFFFFF; // for 4-byte longs
+static constexpr uint8_t  EMS_VALUE_UINT8_NOTSET  = 0xFF;       // for 8-bit unsigned ints/bytes
+static constexpr int8_t   EMS_VALUE_INT8_NOTSET   = 0x7F;       // for signed 8-bit ints/bytes
+static constexpr uint16_t EMS_VALUE_UINT16_NOTSET = 0x7D00;     // 32000: for 2-byte unsigned shorts
+static constexpr int16_t  EMS_VALUE_INT16_NOTSET  = 0x7D00;     // 32000: for 2-byte signed shorts
+static constexpr uint32_t EMS_VALUE_UINT24_NOTSET = 0x00FFFFFF; // for 3-byte longs
+static constexpr uint32_t EMS_VALUE_UINT32_NOTSET = 0xFFFFFF00; // for 4-byte longs
 
 static constexpr uint8_t EMS_MAX_TELEGRAM_LENGTH         = 32; // max length of a complete EMS telegram
 static constexpr uint8_t EMS_MAX_TELEGRAM_MESSAGE_LENGTH = 27; // max length of message block, assuming EMS1.0
 
-#define EMS_VALUE_DEFAULT_INT EMS_VALUE_INT_NOTSET
-#define EMS_VALUE_DEFAULT_UINT EMS_VALUE_UINT_NOTSET
-#define EMS_VALUE_DEFAULT_SHORT EMS_VALUE_SHORT_NOTSET
-#define EMS_VALUE_DEFAULT_USHORT EMS_VALUE_USHORT_NOTSET
-#define EMS_VALUE_DEFAULT_ULONG EMS_VALUE_ULONG_NOTSET
+#define EMS_VALUE_DEFAULT_INT8 EMS_VALUE_INT8_NOTSET
+#define EMS_VALUE_DEFAULT_UINT8 EMS_VALUE_UINT8_NOTSET
+#define EMS_VALUE_DEFAULT_INT16 EMS_VALUE_INT16_NOTSET
+#define EMS_VALUE_DEFAULT_UINT16 EMS_VALUE_UINT16_NOTSET
+#define EMS_VALUE_DEFAULT_UINT24 EMS_VALUE_UINT24_NOTSET
+#define EMS_VALUE_DEFAULT_UIN32 EMS_VALUE_UINT32_NOTSET
 #define EMS_VALUE_DEFAULT_BOOL EMS_VALUE_BOOL_NOTSET
-#define EMS_VALUE_DEFAULT_ENUM EMS_VALUE_UINT_NOTSET
+#define EMS_VALUE_DEFAULT_ENUM EMS_VALUE_UINT8_NOTSET
 
 // used when System::test_set_all_active() is set
-#define EMS_VALUE_DEFAULT_INT_DUMMY 11
-#define EMS_VALUE_DEFAULT_UINT_DUMMY -12
-#define EMS_VALUE_DEFAULT_SHORT_DUMMY -1234
-#define EMS_VALUE_DEFAULT_USHORT_DUMMY 1235
-#define EMS_VALUE_DEFAULT_ULONG_DUMMY 12456
+#define EMS_VALUE_DEFAULT_INT8_DUMMY 11
+#define EMS_VALUE_DEFAULT_UINT8_DUMMY -12
+#define EMS_VALUE_DEFAULT_INT16_DUMMY -1234
+#define EMS_VALUE_DEFAULT_UINT16_DUMMY 1235
+#define EMS_VALUE_DEFAULT_UINT24_DUMMY 12456
+#define EMS_VALUE_DEFAULT_UINT32_DUMMY 124567
 #define EMS_VALUE_DEFAULT_BOOL_DUMMY 1
 #define EMS_VALUE_DEFAULT_ENUM_DUMMY 1
 
@@ -124,19 +131,6 @@ class Telegram {
         uint8_t num_bytes = (!s) ? sizeof(Value) : s;
         // check for out of bounds, if so don't modify the value
         auto msg_size = (index - this->offset + num_bytes - 1);
-
-#ifdef EMSESP_DEBUG
-// Serial.print(" index: ");
-// Serial.print(index);
-// Serial.print(" offset: ");
-// Serial.print(offset);
-// Serial.print(" index: ");
-// Serial.print(" message_length: ");
-// Serial.print(this->message_length);
-// Serial.print(" msg_size: ");
-// Serial.print(msg_size);
-// Serial.println();
-#endif
 
         if ((index < this->offset) || (msg_size >= this->message_length) || (msg_size > EMS_MAX_TELEGRAM_MESSAGE_LENGTH)) {
             return false;
@@ -204,15 +198,16 @@ class EMSbus {
 
     // checks every 30 seconds if the EMS bus is still alive
     static bool bus_connected() {
-#ifndef EMSESP_STANDALONE
+#if defined(EMSESP_STANDALONE) || defined(EMSESP_TEST)
+        return true;
+#else
         if ((uuid::get_uptime() - last_bus_activity_) > EMS_BUS_TIMEOUT) {
             bus_connected_ = false;
         }
         return bus_connected_;
-#else
-        return true;
 #endif
     }
+
 
     // sets the flag for EMS bus connected
     static void last_bus_activity(uint32_t timestamp) {
@@ -222,8 +217,7 @@ class EMSbus {
         }
 
         last_bus_activity_ = timestamp;
-
-        bus_connected_ = true;
+        bus_connected_     = true;
     }
 
     // return bus uptime in seconds
@@ -291,7 +285,8 @@ class RxService : public EMSbus {
         const std::shared_ptr<const Telegram> telegram_;
 
         ~QueuedRxTelegram() = default;
-        QueuedRxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram)
+        // removed && from telegram in 3.7.0-dev.43
+        QueuedRxTelegram(uint16_t id, std::shared_ptr<Telegram> telegram)
             : id_(id)
             , telegram_(std::move(telegram)) {
         }
@@ -420,7 +415,8 @@ class TxService : public EMSbus {
         const uint16_t                        validateid_;
 
         ~QueuedTxTelegram() = default;
-        QueuedTxTelegram(uint16_t id, std::shared_ptr<Telegram> && telegram, bool retry, uint16_t validateid)
+        // replaced && im std::shared_ptr<Telegram> telegram in 3.7.0-dev.43
+        QueuedTxTelegram(uint16_t id, std::shared_ptr<Telegram> telegram, bool retry, uint16_t validateid)
             : id_(id)
             , telegram_(std::move(telegram))
             , retry_(retry)
@@ -436,13 +432,8 @@ class TxService : public EMSbus {
         return tx_telegrams_.empty();
     }
 
-#if defined(EMSESP_DEBUG)
-    static constexpr uint8_t MAXIMUM_TX_RETRIES = 0; // when compiled with EMSESP_DEBUG don't retry
-#else
-    static constexpr uint8_t MAXIMUM_TX_RETRIES = 3;
-#endif
-
-    static constexpr uint32_t POST_SEND_DELAY = 2000;
+    static constexpr uint8_t  MAXIMUM_TX_RETRIES = 3;
+    static constexpr uint32_t POST_SEND_DELAY    = 2000;
 
   private:
     std::deque<QueuedTxTelegram> tx_telegrams_; // the Tx queue

@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ class Thermostat : public EMSdevice {
         uint8_t tempautotemp;
         int8_t  remoteseltemp;
         uint8_t mode;
-        uint8_t mode_new = EMS_VALUE_UINT_NOTSET; // not initialized by register_value
+        uint8_t mode_new;
         uint8_t modetype;
         uint8_t summermode;
         uint8_t holidaymode;
@@ -55,7 +55,7 @@ class Thermostat : public EMSdevice {
         uint8_t summertemp;
         int8_t  nofrosttemp; // signed -20°C to +10°C
         uint8_t designtemp;  // heating curve design temp at MinExtTemp
-        int8_t  offsettemp;  // heating curve offest temp at roomtemp signed!
+        int8_t  offsettemp;  // heating curve offset temp at roomtemp signed!
         uint8_t manualtemp;
         uint8_t summersetmode;
         uint8_t hpoperatingmode;
@@ -79,13 +79,14 @@ class Thermostat : public EMSdevice {
         uint8_t vacreducemode;
         uint8_t wwprio;
         uint8_t fastHeatup;
-        char    holiday[26];
-        char    vacation[26];
+        char    holiday[22];
+        char    vacation[22];
         char    switchtime1[16];
         char    switchtime2[16];
         uint8_t climate;
         uint8_t switchonoptimization;
         uint8_t statusbyte; // from RC300monitor
+        uint8_t switchProgMode;
         // RC 10
         uint8_t  reducehours;   // night reduce duration
         uint16_t reduceminutes; // remaining minutes to night->day
@@ -98,6 +99,9 @@ class Thermostat : public EMSdevice {
         uint8_t hpmode;
         uint8_t cooling;
         uint8_t coolingon;
+        uint8_t coolstart;    // starttemperature 20-35°C
+        uint8_t coolondelay;  // 1-48 hours
+        uint8_t cooloffdelay; // 1-48 hours
         // RC300
         uint8_t heatoffdelay; // 1-48h
         uint8_t heatondelay;  // 1-48h
@@ -109,6 +113,7 @@ class Thermostat : public EMSdevice {
             return hc_num_;
         }
 
+        // returns heating circuit number 0..9
         uint8_t hc() const {
             return hc_num_ - 1;
         }
@@ -151,6 +156,7 @@ class Thermostat : public EMSdevice {
             DAYLOW,
             DAYMID,
             REMOTESELTEMP,
+            COOLSTART,
             UNKNOWN
 
         };
@@ -165,15 +171,66 @@ class Thermostat : public EMSdevice {
         uint8_t model_;  // the model type
     };
 
+    class DhwCircuit {
+      public:
+        DhwCircuit(const uint8_t offset)
+            : dhw_num_(offset) {
+        }
+        ~DhwCircuit() = default;
+        uint8_t wwExtra_;
+        uint8_t wwMode_;
+        uint8_t wwCircPump_;
+        uint8_t wwCircMode_;
+        uint8_t wwSetTemp_;
+        uint8_t wwSetTempLow_;
+        uint8_t wwCharge_;
+        uint8_t wwChargeDuration_;
+        uint8_t wwDisinfecting_;
+        uint8_t wwDisinfectDay_;
+        uint8_t wwDisinfectHour_;
+        uint8_t wwMaxTemp_;
+        uint8_t wwOneTimeKey_;
+        uint8_t wwProgMode_;
+        uint8_t wwCircProg_;
+        char    wwSwitchTime_[20];
+        char    wwCircSwitchTime_[20];
+        uint8_t wwDailyHeating_;
+        uint8_t wwDailyHeatTime_;
+        uint8_t wwWhenModeOff_;
+        char    wwHoliday_[22];
+        char    wwVacation_[22];
+
+        uint8_t id() const { // returns TAG(id)
+            return DeviceValueTAG::TAG_DHW1 + dhw_num_;
+        }
+
+        uint8_t offset() const { // returns telegram offset
+            return dhw_num_;
+        }
+
+      private:
+        uint8_t dhw_num_; // dhw circuit number 0..10
+    };
+
   private:
     static uuid::log::Logger logger_;
 
     void register_device_values();
     void register_device_values(uint8_t hc_num);
 
-    // specific thermostat characteristics, stripping the top 4 bits
+    // specific thermostat characteristics, stripping the top 2 bits
     inline uint8_t model() const {
-        return (flags() & 0x0F);
+        return (flags() & 0x3F);
+    }
+
+    // check to see if the thermostat is a hybrid of the R300
+    inline bool isRC300() const {
+        return ((model() == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) || (model() == EMSdevice::EMS_DEVICE_FLAG_BC400)
+                || (model() == EMSdevice::EMS_DEVICE_FLAG_CR120));
+    }
+
+    inline uint8_t id2dhw(const int8_t id) const { // returns telegram offset for TAG(id)
+        return id - DeviceValueTAG::TAG_DHW1;
     }
 
     // each thermostat has a list of heating controller type IDs for reading and writing
@@ -190,7 +247,7 @@ class Thermostat : public EMSdevice {
 
     // standard for all thermostats
     char     status_[20];    // online or offline
-    char     dateTime_[25];  // date and time stamp
+    char     dateTime_[30];  // date and time stamp
     char     errorCode_[15]; // code from 0xA2 as string i.e. "A22(816)"
     uint16_t errorNumber_;   // used internally to build error code
     char     lastCode_[50];  // error log
@@ -220,29 +277,7 @@ class Thermostat : public EMSdevice {
     uint8_t humidity_;
     uint8_t battery_;
 
-    uint8_t wwExtra1_; // wwExtra active for wwSystem 1
-    uint8_t wwExtra2_;
-    uint8_t wwMode_;
-    uint8_t wwCircPump_;
-    uint8_t wwCircMode_;
-    uint8_t wwSetTemp_;
-    uint8_t wwSetTempLow_;
-    uint8_t wwCharge_;
-    uint8_t wwChargeDuration_;
-    uint8_t wwDisinfecting_;
-    uint8_t wwDisinfectDay_;
-    uint8_t wwDisinfectHour_;
-    uint8_t wwMaxTemp_;
-    uint8_t wwOneTimeKey_;
-    uint8_t wwProgMode_;
-    uint8_t wwCircProg_;
-    char    wwSwitchTime_[16];
-    char    wwCircSwitchTime_[16];
-    uint8_t wwDailyHeating_;
-    uint8_t wwDailyHeatTime_;
-    uint8_t wwWhenModeOff_;
-    char    wwHoliday_[26];
-    char    wwVacation_[26];
+    char vacation[8][22]; // RC30, R3000 only, only one hc
 
     // HybridHP
     uint8_t hybridStrategy_;  // co2 = 1, cost = 2, temperature = 3, mix = 4
@@ -259,6 +294,7 @@ class Thermostat : public EMSdevice {
     uint8_t pvLowerCool_;
 
     std::vector<std::shared_ptr<HeatingCircuit>> heating_circuits_; // each thermostat can have multiple heating circuits
+    std::vector<std::shared_ptr<DhwCircuit>>     dhw_circuits_;     // each thermostat can have multiple dhw circuits
 
     // Generic Types
     static constexpr uint16_t EMS_TYPE_RCTime        = 0x06; // time
@@ -274,7 +310,7 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_OFFSET_RC20Set_mode               = 23; // position of thermostat mode
     static constexpr uint8_t EMS_OFFSET_RC20Set_temp_off           = 24; // position of thermostat setpoint mode:off
     static constexpr uint8_t EMS_OFFSET_RC20Set_temp_auto          = 28; // position of thermostat setpoint temperature
-    static constexpr uint8_t EMS_OFFSET_RC20Set_temp_manual        = 29; // position of thermostat setpoint temperature
+    static constexpr uint8_t EMS_OFFSET_RC20Set_temp_manual        = 29; // position of thermostat setpoint manual
 
     static constexpr uint8_t EMS_OFFSET_RC20_2_Set_mode       = 3; // ES72 - see https://github.com/emsesp/EMS-ESP/issues/334
     static constexpr uint8_t EMS_OFFSET_RC20_2_Set_temp_night = 1; // ES72
@@ -346,7 +382,7 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_OFFSET_JunkersSetMessage2_eco_temp      = 6;
     static constexpr uint8_t EMS_OFFSET_JunkersSetMessage2_heat_temp     = 7;
 
-    static constexpr uint8_t AUTO_HEATING_CIRCUIT = 0;
+    static constexpr int8_t AUTO_HEATING_CIRCUIT = -1; // id
 
     // Installation settings
     static constexpr uint8_t EMS_TYPE_IBASettings    = 0xA5; // installation settings
@@ -356,9 +392,11 @@ class Thermostat : public EMSdevice {
     static constexpr uint8_t EMS_TYPE_time           = 0x06; // time
 
     std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(std::shared_ptr<const Telegram> telegram);
-    std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(const uint8_t hc_num);
+    std::shared_ptr<Thermostat::HeatingCircuit> heating_circuit(const int8_t id);
+    std::shared_ptr<Thermostat::DhwCircuit>     dhw_circuit(const uint8_t offset, const bool create = false);
 
     void register_device_values_hc(std::shared_ptr<Thermostat::HeatingCircuit> hc);
+    void register_device_values_dhw(std::shared_ptr<Thermostat::DhwCircuit> dhw);
 
     void add_ha_climate(std::shared_ptr<HeatingCircuit> hc) const;
 
@@ -372,6 +410,7 @@ class Thermostat : public EMSdevice {
     void process_RC35Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC35Set(std::shared_ptr<const Telegram> telegram);
     void process_RC35Timer(std::shared_ptr<const Telegram> telegram);
+    void process_RC30Vacation(std::shared_ptr<const Telegram> telegram);
     void process_RC30Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC30Set(std::shared_ptr<const Telegram> telegram);
     void process_RC30Temp(std::shared_ptr<const Telegram> telegram);
@@ -398,6 +437,7 @@ class Thermostat : public EMSdevice {
     void process_RC300OutdoorTemp(std::shared_ptr<const Telegram> telegram);
     void process_RC300Settings(std::shared_ptr<const Telegram> telegram);
     void process_RC300Floordry(std::shared_ptr<const Telegram> telegram);
+    void process_RC300Holiday(std::shared_ptr<const Telegram> telegram);
     void process_RC300Curve(std::shared_ptr<const Telegram> telegram);
     void process_JunkersMonitor(std::shared_ptr<const Telegram> telegram);
     void process_JunkersSet(std::shared_ptr<const Telegram> telegram);
@@ -416,10 +456,10 @@ class Thermostat : public EMSdevice {
     void process_HPMode(std::shared_ptr<const Telegram> telegram);
 
     // internal helper functions
-    bool set_mode_n(const uint8_t mode, const uint8_t hc_num);
+    bool set_mode_n(const uint8_t mode, const int8_t id);
 
     bool set_temperature_value(const char * value, const int8_t id, const uint8_t mode, bool relative = false);
-    bool set_temperature(const float temperature, const uint8_t mode, const uint8_t hc_num);
+    bool set_temperature(const float temperature, const uint8_t mode, const int8_t id);
     bool set_switchtime(const char * value, const uint16_t type_id, char * out, size_t len);
 
     // set functions - these use the id/hc
@@ -431,12 +471,15 @@ class Thermostat : public EMSdevice {
     }
     bool set_pause(const char * value, const int8_t id);
     bool set_party(const char * value, const int8_t id);
+    bool set_holidaymode(const char * value, const int8_t id);
+    bool set_heatup(const char * value, const int8_t id);
     bool set_summermode(const char * value, const int8_t id);
     bool set_vacreducemode(const char * value, const int8_t id);
     bool set_nofrostmode(const char * value, const int8_t id);
     bool set_remotetemp(const char * value, const int8_t id);
     bool set_remotehum(const char * value, const int8_t id);
     bool set_roominfl_factor(const char * value, const int8_t id);
+    bool set_roominfl_mode(const char * value, const int8_t id);
     bool set_reducemode(const char * value, const int8_t id);
     bool set_switchtime1(const char * value, const int8_t id);
     bool set_switchtime2(const char * value, const int8_t id);
@@ -523,6 +566,9 @@ class Thermostat : public EMSdevice {
     inline bool set_remoteseltemp(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::REMOTESELTEMP);
     }
+    inline bool set_coolstart(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::COOLSTART);
+    }
 
     // set functions - these don't use the id/hc, the parameters are ignored
     bool        set_wwmode(const char * value, const int8_t id);
@@ -543,13 +589,35 @@ class Thermostat : public EMSdevice {
     bool        set_wwDailyHeating(const char * value, const int8_t id);
     bool        set_wwDailyHeatTime(const char * value, const int8_t id);
     bool        set_wwwhenmodeoff(const char * value, const int8_t id);
+    bool        set_R3000Holiday(const char * value, const int8_t id);
     inline bool set_wwVacation(const char * value, const int8_t id) {
-        return set_holiday(value, DeviceValueTAG::TAG_WWC1, true);
+        return set_holiday(value, DeviceValueTAG::TAG_DHW1, true);
     }
     inline bool set_wwHoliday(const char * value, const int8_t id) {
-        return set_holiday(value, DeviceValueTAG::TAG_WWC1);
+        return set_holiday(value, DeviceValueTAG::TAG_DHW1);
     }
-
+    bool        set_RC30Vacation(const char * value, const int8_t id);
+    inline bool set_RC30Vacation1(const char * value, const int8_t id) {
+        return set_RC30Vacation(value, 1);
+    }
+    inline bool set_RC30Vacation2(const char * value, const int8_t id) {
+        return set_RC30Vacation(value, 2);
+    }
+    inline bool set_RC30Vacation3(const char * value, const int8_t id) {
+        return set_RC30Vacation(value, 3);
+    }
+    inline bool set_RC30Vacation4(const char * value, const int8_t id) {
+        return set_RC30Vacation(value, 4);
+    }
+    inline bool set_RC30Vacation5(const char * value, const int8_t id) {
+        return set_RC30Vacation(value, 5);
+    }
+    inline bool set_RC30Vacation6(const char * value, const int8_t id) {
+        return set_RC30Vacation(value, 6);
+    }
+    inline bool set_RC30Vacation7(const char * value, const int8_t id) {
+        return set_RC30Vacation(value, 7);
+    }
     bool set_datetime(const char * value, const int8_t id);
     bool set_minexttemp(const char * value, const int8_t id);
     bool set_clockoffset(const char * value, const int8_t id);
@@ -585,6 +653,9 @@ class Thermostat : public EMSdevice {
     bool set_hpminflowtemp(const char * value, const int8_t id);
     bool set_hpmode(const char * value, const int8_t id);
     bool set_cooling(const char * value, const int8_t id);
+    bool set_coolondelay(const char * value, const int8_t id);
+    bool set_cooloffdelay(const char * value, const int8_t id);
+    bool set_switchProgMode(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

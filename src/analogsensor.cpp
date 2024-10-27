@@ -24,11 +24,12 @@ namespace emsesp {
 uuid::log::Logger AnalogSensor::logger_{F_(analogsensor), uuid::log::Facility::DAEMON};
 
 void AnalogSensor::start() {
-    reload(); // fetch the list of sensors from our customization service
+    reload(true); // fetch the list of sensors from our customization service
 
     if (!analog_enabled_) {
         return;
     }
+
     analogSetAttenuation(ADC_2_5db); // for all channels 1.5V
 
     LOG_INFO("Starting Analog Sensor service");
@@ -47,7 +48,7 @@ void AnalogSensor::start() {
 }
 
 // load settings from the customization file, sorts them and initializes the GPIOs
-void AnalogSensor::reload() {
+void AnalogSensor::reload(bool get_nvs) {
     EMSESP::webSettingsService.read([&](WebSettings & settings) { analog_enabled_ = settings.analog_enabled; });
 
 #if defined(EMSESP_STANDALONE)
@@ -57,10 +58,12 @@ void AnalogSensor::reload() {
         remove_ha_topic(sensor.type(), sensor.gpio());
         sensor.ha_registered = false;
     }
+
     if (!analog_enabled_) {
         sensors_.clear();
         return;
     }
+
     // load the list of analog sensors from the customization service
     // and store them locally and then activate them
     EMSESP::webCustomizationService.read([&](WebCustomization & settings) {
@@ -68,7 +71,7 @@ void AnalogSensor::reload() {
         for (auto & sensor_ : sensors_) {
             // update existing sensors
             bool found = false;
-            for (const auto & sensor : settings.analogCustomizations) { //search customlist
+            for (const auto & sensor : settings.analogCustomizations) { // search customlist
                 if (sensor_.gpio() == sensor.gpio) {
                     // for output sensors set value to new start-value
                     if ((sensor.type == AnalogType::COUNTER || sensor.type >= AnalogType::DIGITAL_OUT)
@@ -127,6 +130,14 @@ void AnalogSensor::reload() {
     // activate each sensor
     for (auto & sensor : sensors_) {
         sensor.ha_registered = false; // force HA configs to be re-created
+
+        // first check if the GPIO is valid. If not, force set it to disabled
+        if (!System::is_valid_gpio(sensor.gpio())) {
+            LOG_WARNING("Bad GPIO %d for Sensor %s. Disabling.", sensor.gpio(), sensor.name().c_str());
+            sensor.set_type(AnalogType::NOTUSED); // set disabled
+            continue;                             // skip this loop pass
+        }
+
         if (sensor.type() == AnalogType::ADC) {
             LOG_DEBUG("ADC Sensor on GPIO %02d", sensor.gpio());
             // analogSetPinAttenuation does not work with analogReadMilliVolts
@@ -192,7 +203,14 @@ void AnalogSensor::reload() {
             } else
 #endif
             {
-                digitalWrite(sensor.gpio(), sensor.offset() * sensor.factor() > 0 ? 1 : 0);
+                if (sensor.uom() == 0) { // set state from NVS
+                    if (!get_nvs || EMSESP::nvs_.getChar(sensor.name().c_str(), -1) == -1) {
+                        EMSESP::nvs_.putChar(sensor.name().c_str(), (int8_t)sensor.offset());
+                    } else {
+                        sensor.set_offset(EMSESP::nvs_.getChar(sensor.name().c_str()));
+                    }
+                }
+                digitalWrite(sensor.gpio(), (sensor.offset() == 0) ^ (sensor.factor() > 0));
                 sensor.set_value(sensor.offset());
             }
             publish_sensor(sensor);
@@ -240,6 +258,7 @@ void AnalogSensor::measure() {
                     sensor.sum_    = (sensor.sum_ * 511) / 512 + a;
                     sensor.analog_ = sensor.sum_ / 512;
                 }
+
                 // detect change with little hysteresis on raw mV value
                 if (sensor.last_reading_ + 1 < sensor.analog_ || sensor.last_reading_ > sensor.analog_ + 1) {
                     sensor.set_value(((int32_t)sensor.analog_ - sensor.offset()) * sensor.factor());
@@ -251,6 +270,7 @@ void AnalogSensor::measure() {
             }
         }
     }
+
     // poll digital io every time with debounce
     // go through the list of digital sensors
     for (auto & sensor : sensors_) {
@@ -279,6 +299,7 @@ void AnalogSensor::measure() {
                     sensor.last_polltime_ = sensor.polltime_;
                 }
             }
+
             // see if there is a change and increment # reads
             if (old_value != sensor.value()) {
                 sensorreads_++;
@@ -287,6 +308,7 @@ void AnalogSensor::measure() {
             }
         }
     }
+
     // store counter-values only every hour to reduce flash wear
     static uint8_t lastSaveHour = 0;
     time_t         now          = time(nullptr);
@@ -318,13 +340,18 @@ void AnalogSensor::loop() {
 
 // update analog information name and offset
 // a type value of -1 is used to delete the sensor
-bool AnalogSensor::update(uint8_t gpio, const std::string & name, double offset, double factor, uint8_t uom, int8_t type, bool deleted) {
+bool AnalogSensor::update(uint8_t gpio, std::string & name, double offset, double factor, uint8_t uom, int8_t type, bool deleted) {
     // first see if we can find the sensor in our customization list
     bool found_sensor = false;
     EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
         for (auto & AnalogCustomization : settings.analogCustomizations) {
             if (AnalogCustomization.type == AnalogType::COUNTER || AnalogCustomization.type >= AnalogType::DIGITAL_OUT) {
                 Command::erase_command(EMSdevice::DeviceType::ANALOGSENSOR, AnalogCustomization.name.c_str());
+            }
+            if (name.empty()) {
+                char n[20];
+                snprintf(n, sizeof(n), "%s_%02d", FL_(AnalogTypeName)[type], gpio);
+                name = n;
             }
             if (AnalogCustomization.gpio == gpio) {
                 found_sensor = true; // found the record
@@ -375,7 +402,9 @@ bool AnalogSensor::update(uint8_t gpio, const std::string & name, double offset,
     // reloads the sensors in the customizations file into the sensors list
     reload();
 
-    return true;
+    // return false if it's an invalid GPIO, an error will show in WebUI
+    // and reported as an error in the log
+    return System::is_valid_gpio(gpio);
 }
 
 // check to see if values have been updated
@@ -399,6 +428,9 @@ void AnalogSensor::publish_sensor(const Sensor & sensor) const {
         char payload[10];
         Mqtt::queue_publish(topic, Helpers::render_value(payload, sensor.value(), 2)); // always publish as doubles
     }
+    char cmd[COMMAND_MAX_LENGTH];
+    snprintf(cmd, sizeof(cmd), "%s/%s", F_(analogsensor), sensor.name().c_str());
+    EMSESP::webSchedulerService.onChange(cmd);
 }
 
 // send empty config topic to remove the entry from HA
@@ -543,17 +575,7 @@ void AnalogSensor::publish_values(const bool force) {
                     snprintf(topic, sizeof(topic), "switch/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
                     snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), F_(analogsensor), sensor.name().c_str());
                     config["cmd_t"] = command_topic;
-                    if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                        config["pl_on"]  = true;
-                        config["pl_off"] = false;
-                    } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-                        config["pl_on"]  = 1;
-                        config["pl_off"] = 0;
-                    } else {
-                        char result[12];
-                        config["pl_on"]  = Helpers::render_boolean(result, true);
-                        config["pl_off"] = Helpers::render_boolean(result, false);
-                    }
+                    Mqtt::add_ha_bool(config);
                 } else if (sensor.type() == AnalogType::DIGITAL_OUT) { // DAC
                     snprintf(topic, sizeof(topic), "number/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
                     snprintf(command_topic, sizeof(command_topic), "%s/%s/%s", Mqtt::base().c_str(), F_(analogsensor), sensor.name().c_str());
@@ -579,17 +601,7 @@ void AnalogSensor::publish_values(const bool force) {
                     // config["step"]  = sensor.factor();
                 } else if (sensor.type() == AnalogType::DIGITAL_IN) {
                     snprintf(topic, sizeof(topic), "binary_sensor/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
-                    if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-                        config["pl_on"]  = true;
-                        config["pl_off"] = false;
-                    } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-                        config["pl_on"]  = 1;
-                        config["pl_off"] = 0;
-                    } else {
-                        char result[12];
-                        config["pl_on"]  = Helpers::render_boolean(result, true);
-                        config["pl_off"] = Helpers::render_boolean(result, false);
-                    }
+                    Mqtt::add_ha_bool(config);
                 } else {
                     snprintf(topic, sizeof(topic), "sensor/%s/%s_%02d/config", Mqtt::basename().c_str(), F_(analogsensor), sensor.gpio());
                     config["stat_cla"] = "measurement";
@@ -597,7 +609,7 @@ void AnalogSensor::publish_values(const bool force) {
 
                 // see if we need to create the [devs] discovery section, as this needs only to be done once for all sensors
                 bool is_ha_device_created = false;
-                for (auto & sensor : sensors_) {
+                for (auto const & sensor : sensors_) {
                     if (sensor.ha_registered) {
                         is_ha_device_created = true;
                         break;
@@ -619,87 +631,48 @@ void AnalogSensor::publish_values(const bool force) {
 // called from emsesp.cpp for commands
 // searches sensor by name
 bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int8_t id) {
-    // check of it a 'commmands' command
-    if (Helpers::toLower(cmd) == F_(commands)) {
-        return Command::list(EMSdevice::DeviceType::ANALOGSENSOR, output);
-    }
-
     if (sensors_.empty()) {
         return true; // no sensors, return true
     }
 
-    uint8_t show_all = 0;
-    if (Helpers::hasValue(cmd)) {
-        show_all = (strncmp(cmd, F_(info), 4) == 0) ? 1 : (strncmp(cmd, F_(values), 6) == 0) ? 2 : 0;
+    if (!strcmp(cmd, F_(info)) || !strcmp(cmd, F_(values))) {
+        for (const auto & sensor : sensors_) {
+            output[sensor.name()] = sensor.value();
+        }
+        return true;
     }
 
-    // see if we're showing all sensors
-    if (show_all) {
+    if (!strcmp(cmd, F_(entities))) {
         for (const auto & sensor : sensors_) {
-            if (show_all == 1) {
-                // info
-                JsonObject dataSensor = output[sensor.name()].to<JsonObject>();
-                addSensorJson(dataSensor, sensor);
-            } else {
-                // values, shortname version. Also used in 'system allvalues'
-                output[sensor.name()] = sensor.value();
-            }
+            get_value_json(output[sensor.name()].to<JsonObject>(), sensor);
         }
         return true;
     }
 
     // this is for a specific sensor
-    // make a copy of the string command for parsing, and lowercase it
-    char   sensor_name[COMMAND_MAX_LENGTH] = {'\0'};
-    char * attribute_s                     = nullptr;
-    strlcpy(sensor_name, Helpers::toLower(cmd).c_str(), sizeof(sensor_name));
-
-    // check specific attribute to fetch instead of the complete record
-    char * breakp = strchr(sensor_name, '/');
-    if (breakp) {
-        *breakp     = '\0';
-        attribute_s = breakp + 1;
-    }
+    const char * attribute_s = Command::get_attribute(cmd);
 
     for (const auto & sensor : sensors_) {
-        if (sensor_name == Helpers::toLower(sensor.name()) || Helpers::atoint(sensor_name) == sensor.gpio()) {
-            // add the details
-            addSensorJson(output, sensor);
-
-            /*
-            // if someone wants gpio numbers
-            char gpio_str[9];
-            snprintf(gpio_str, sizeof(gpio_str), "gpio_%02d", sensor.gpio());
-            output[gpio_str] = sensor.value();
-            */
-
-            // if we're filtering on an attribute, go find it
-            if (attribute_s) {
-                if (output.containsKey(attribute_s)) {
-                    String data = output[attribute_s].as<String>();
-                    output.clear();
-                    output["api_data"] = data;
-                    return true;
-                } else {
-                    char error[100];
-                    snprintf(error, sizeof(error), "cannot find attribute %s in entity %s", attribute_s, sensor_name);
-                    output.clear();
-                    output["message"] = error;
-                    return false;
-                }
-            }
-            return true; // found a match, exit
+        // match custom name or sensor GPIO
+        if (cmd == Helpers::toLower(sensor.name()) || Helpers::atoint(cmd) == sensor.gpio()) {
+            get_value_json(output, sensor);
+            return Command::set_attribute(output, cmd, attribute_s);
         }
     }
+
     return false; // not found
 }
 
-void AnalogSensor::addSensorJson(JsonObject output, const Sensor & sensor) {
+void AnalogSensor::get_value_json(JsonObject output, const Sensor & sensor) {
+    output["name"]      = sensor.name();
+    output["fullname"]  = sensor.name();
     output["gpio"]      = sensor.gpio();
     output["type"]      = F_(number);
     output["analog"]    = FL_(list_sensortype)[sensor.type()];
     output["value"]     = sensor.value();
+    output["readable"]  = true;
     output["writeable"] = sensor.type() == AnalogType::COUNTER || (sensor.type() >= AnalogType::DIGITAL_OUT && sensor.type() <= AnalogType::PWM_2);
+    output["visible"]   = true;
     if (sensor.type() == AnalogType::COUNTER) {
         output["min"]         = 0;
         output["max"]         = 4000000;
@@ -718,8 +691,10 @@ void AnalogSensor::addSensorJson(JsonObject output, const Sensor & sensor) {
         output["max"]       = 100;
         output["uom"]       = EMSdevice::uom_to_string(sensor.uom());
     } else if (sensor.type() == AnalogType::DIGITAL_OUT) {
-        output["min"] = 0;
-        output["max"] = sensor.gpio() == 25 || sensor.gpio() == 26 ? 255 : 1;
+        output["min"]   = 0;
+        output["max"]   = sensor.gpio() == 25 || sensor.gpio() == 26 ? 255 : 1;
+        char state[][2] = {"?", "0", "1"};
+        output["start"] = state[sensor.uom()];
     }
 }
 
@@ -732,16 +707,6 @@ AnalogSensor::Sensor::Sensor(const uint8_t gpio, const std::string & name, const
     , uom_(uom)
     , type_(type) {
     value_ = 0; // init value to 0 always
-}
-
-// returns name of the analog sensor or creates one if its empty
-std::string AnalogSensor::Sensor::name() const {
-    if (name_.empty()) {
-        char name[50];
-        snprintf(name, sizeof(name), "Analog Sensor GPIO %02d", gpio_);
-        return name;
-    }
-    return name_;
 }
 
 // set the dig_out/counter/DAC/PWM value, id is gpio-no
@@ -785,15 +750,16 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                     sensor.set_value(v);
                     pinMode(sensor.gpio(), OUTPUT);
                     dacWrite(sensor.gpio(), sensor.offset());
-                    publish_sensor(sensor);
-                    return true;
                 } else
 #endif
                     if (v == 0 || v == 1) {
                     sensor.set_offset(v);
                     sensor.set_value(v);
                     pinMode(sensor.gpio(), OUTPUT);
-                    digitalWrite(sensor.gpio(), sensor.offset() * sensor.factor() > 0 ? 1 : 0);
+                    digitalWrite(sensor.gpio(), (sensor.offset() == 0) ^ (sensor.factor() > 0));
+                    if (sensor.uom() == 0 && EMSESP::nvs_.getChar(sensor.name().c_str()) != (int8_t)sensor.offset()) {
+                        EMSESP::nvs_.putChar(sensor.name().c_str(), (int8_t)sensor.offset());
+                    }
                 }
             } else if (sensor.type() >= AnalogType::PWM_0 && sensor.type() <= AnalogType::PWM_2) {
                 if (val > 100) {
@@ -813,18 +779,6 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                 return false;
             }
             if (oldoffset != sensor.offset()) {
-                EMSESP::webCustomizationService.update([&](WebCustomization & settings) {
-                    for (auto & AnalogCustomization : settings.analogCustomizations) {
-                        if (AnalogCustomization.gpio == sensor.gpio() && AnalogCustomization.type == sensor.type()) {
-                            AnalogCustomization.offset = sensor.offset();
-                        }
-                    }
-                    if (sensor.type() == AnalogType::COUNTER || (sensor.type() == AnalogType::DIGITAL_OUT && sensor.uom() > 0)) {
-                        return StateUpdateResult::UNCHANGED; // temporary change
-                    } else {
-                        return StateUpdateResult::CHANGED; // persist the change
-                    }
-                });
                 publish_sensor(sensor);
                 changed_ = true;
             }

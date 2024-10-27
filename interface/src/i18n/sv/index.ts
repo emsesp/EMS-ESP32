@@ -1,6 +1,4 @@
 import type { Translation } from '../i18n-types';
-/* prettier-ignore */
-/* eslint-disable */
 
 const sv: Translation = {
   LANGUAGE: 'Språk',
@@ -12,9 +10,8 @@ const sv: Translation = {
   USERNAME: 'Användarnamn',
   PASSWORD: 'Lösenord',
   SU_PASSWORD: 'su Lösenord',
-  DASHBOARD: 'Kontrollpanel',
   SETTINGS_OF: '{0} Inställningar',
-  HELP_OF: '{0} Hjälp',
+  HELP: 'Hjälp',
   LOGGED_IN: 'Inloggad som {name}',
   PLEASE_SIGNIN: 'Vänligen logga in för att fortsätta',
   UPLOAD_SUCCESSFUL: 'Uppladdning lyckades',
@@ -26,9 +23,10 @@ const sv: Translation = {
   ONOFF: 'på/av',
   TYPE: 'Typ',
   DESCRIPTION: 'Beskrivning',
-  ENTITIES: 'Entiteter',
+  ENTITIES: 'entiteter',
   REFRESH: 'Uppdatera',
   EXPORT: 'Exportera',
+  FAVORITES: "Favoriter",
   DEVICE_DETAILS: 'Enhetsdetaljer',
   ID_OF: '{0}-ID',
   DEVICE: 'Enhets',
@@ -36,9 +34,7 @@ const sv: Translation = {
   VERSION: 'Version',
   BRAND: 'Fabrikat',
   ENTITY_NAME: 'Entitetsnamn',
-  VALUE: '{{Värde|värde}}',
-  DEVICE_DATA: 'Enhets data',
-  SENSOR_DATA: 'Sensor data',
+  VALUE: '{{värde|Värde}}',
   DEVICES: 'Enheter',
   SENSORS: 'Sensorer',
   RUN_COMMAND: 'Kör Kommando',
@@ -76,14 +72,11 @@ const sv: Translation = {
   TX_ISSUES: 'Sändfel - Prova ett annat TX-läge',
   DISCONNECTED: 'Nedkopplad',
   EMS_SCAN: 'Är du säker att du vill initiera en full genomsökning av EMS-bussen?',
-  EMS_BUS_STATUS: 'Status',
-  ACTIVE_DEVICES: 'Aktiva Enheter',
+  DATA_TRAFFIC: 'Data Traffic', // TODO translate
   EMS_DEVICE: 'EMS Enhet',
   SUCCESS: 'Lyckades',
   FAIL: 'Misslyckades',
   QUALITY: 'Kvalitet',
-  SCAN_DEVICES: 'Sök efter nya enheter',
-  EMS_BUS_STATUS_TITLE: 'EMS-buss & aktivitetsstatus',
   SCAN: 'Sök',
   STATUS_NAMES: [
     'EMS-telegram (Rx)',
@@ -95,18 +88,13 @@ const sv: Translation = {
     'API-anrop',
     'Syslog-meddelanden'
   ],
-  NUM_DEVICES: '{num} Enhet{{er}}',
-  NUM_TEMP_SENSORS: '{num} Temperatur-sensor{{er}}',
-  NUM_ANALOG_SENSORS: '{num} Analoga Sensor{{er}}',
   NUM_DAYS: '{num} dag{{ar}}',
   NUM_SECONDS: '{num} sekund{{er}}',
   NUM_HOURS: '{num} timmar',
   NUM_MINUTES: '{num} minut{{er}}',
-  APPLICATION_SETTINGS: 'Inställningar',
+  APPLICATION: 'Apliká',
   CUSTOMIZATIONS: 'Anpassningr',
   APPLICATION_RESTARTING: 'EMS-ESP startar om',
-  INTERFACE_BOARD_PROFILE: 'Interface Hårdvaruprofil',
-  BOARD_PROFILE_TEXT: 'Välj en förkonfigurerad hårdvaruprofil från listan nedan eller välj Anpassad för att konfigurera dina egna hårdvaruinställningar',
   BOARD_PROFILE: 'Hårdvarutyp',
   CUSTOM: 'Anpassa',
   GPIO_OF: '{0} GPIO',
@@ -114,7 +102,7 @@ const sv: Translation = {
   TEMPERATURE: 'Temperatur',
   PHY_TYPE: 'Eth PHY-typ',
   DISABLED: 'inaktiverad',
-  TX_MODE: 'Tx-läge',
+  TX_MODE: 'EMS Tx-läge',
   HARDWARE: 'Hårdvara',
   EMS_BUS: '{{BUSS|EMS-BUSS}}',
   GENERAL_OPTIONS: 'Allmänna Inställningar',
@@ -126,7 +114,10 @@ const sv: Translation = {
   BYPASS_TOKEN: 'Inaktivera Token-autensiering för API-anrop',
   READONLY: 'Aktivera read-only (blockerar alla utgående skrivkommandon mot EMS-bussen)',
   UNDERCLOCK_CPU: 'Nedklocka Processorhastighet',
+  REMOTE_TIMEOUT: 'Remote timeout',
+  REMOTE_TIMEOUT_EN: 'Disable remote on missing room temperature', // TODO translate
   HEATINGOFF: 'Start boiler with forced heating off', // TODO translate
+  MIN_DURATION: 'Wait time',
   ENABLE_SHOWER_TIMER: 'Aktivera Dusch-timer',
   ENABLE_SHOWER_ALERT: 'Aktivera Dusch-varning',
   TRIGGER_TIME: 'Aktiveringstid',
@@ -136,7 +127,7 @@ const sv: Translation = {
   BOOLEAN_FORMAT_API: 'Bool-format API/MQTT',
   ENUM_FORMAT: 'Enum-format API/MQTT',
   INDEX: 'Index',
-  ENABLE_PARASITE: 'Aktivera parasitström',
+  ENABLE_PARASITE: 'Aktivera 1-wire parasitström',
   LOGGING: 'Loggning',
   LOG_HEX: 'Logga EMS-telegram i hexadecimal',
   ENABLE_SYSLOG: 'Aktivera Syslog',
@@ -156,58 +147,47 @@ const sv: Translation = {
   CUSTOMIZATIONS_HELP_2: 'Favorit',
   CUSTOMIZATIONS_HELP_3: 'Inaktivera skrivningar',
   CUSTOMIZATIONS_HELP_4: 'Exkludera från MQTT & API',
-  CUSTOMIZATIONS_HELP_5: 'Göm från Kontrollpanel',
-  CUSTOMIZATIONS_HELP_6: 'remove from memory', // TODO translate
+  CUSTOMIZATIONS_HELP_5: 'dölj från enheter',
+  CUSTOMIZATIONS_HELP_6: 'remove from memory',
   SELECT_DEVICE: 'Välj en enhet',
   SET_ALL: 'ställ in alla',
   OPTIONS: 'Alternativ',
   NAME: 'Namn',
   CUSTOMIZATIONS_RESET: 'Är du säker på att du vill ta bort alla anpassningar inklusive inställningar för Temperatur och Analoga sensorer?',
-  DEVICE_ENTITIES: 'Enhets-entiteter',
   SUPPORT_INFORMATION: 'Supportinformation',
-  CLICK_HERE: 'Klicka Här',
   HELP_INFORMATION_1: 'Besök Wikin för instruktioner för hur du kan konfigurera EMS-ESP',
   HELP_INFORMATION_2: 'För community-support besök vår Discord-server',
   HELP_INFORMATION_3: 'Önska en ny funktion eller rapportera en bugg',
   HELP_INFORMATION_4: 'Bifoga din systeminformation för snabbare hantering när du rapporterar ett problem',
-  HELP_INFORMATION_5: 'EMS-ESP är gratis och är öppen källkod. Bidra till utvecklingen genom att ge oss en stjärna på GitHub!',
+  HELP_INFORMATION_5: 'For help and questions please contact your installer', // TODO translate
   UPLOAD: 'Uppladdning',
   DOWNLOAD: '{{N|n|n}}edladdning',
+  INSTALL: 'Installera {0}',
   ABORTED: 'Avbruten',
   FAILED: 'Misslyckades',
   SUCCESSFUL: 'Lyckades',
   SYSTEM: 'System',
   LOG_OF: '{0} Logg',
   STATUS_OF: '{0} Status',
-  UPLOAD_DOWNLOAD: 'Upp/Nedladdning',
-  VERSION_ON: 'You are currently on', // TODO translate
-  SYSTEM_APPLY_FIRMWARE: 'för att aktivera ny firmware',
+  DOWNLOAD_UPLOAD: 'Nedladdning/Upp',
   CLOSE: 'Stäng',
   USE: 'Använd',
   FACTORY_RESET: 'Fabriksåterställning',
   SYSTEM_FACTORY_TEXT: 'Enheten har blivit fabriksåterställd och startar nu om',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Är du säker att du vill fabriksåterställa enheten?',
-  VERSION_CHECK: 'Senaste versioner',
-  THE_LATEST: 'Den senaste',
-  OFFICIAL: 'officiell',
-  DEVELOPMENT: 'utveckling',
-  RELEASE_IS: 'release är', // TODO translate
-  RELEASE_NOTES: 'release-logg',
-  EMS_ESP_VER: 'EMS-ESP Version',
+  STABLE: 'Stable', // TODO translate
+  DEVELOPMENT: 'Utveckling',
+  EMS_ESP_VER: 'Firmware Version', // TODO translate
   UPTIME: 'Systemets Upptid',
-  HEAP: 'Heap (Ledigt / Max allokerat)',
+  FREE_MEMORY: 'Ledigt Memory',
   PSRAM: 'PSRAM (Storlek / Ledigt)',
-  FLASH: 'Flashminne (Storlek / Hastighet)',
+  FLASH: 'Flashminne (Storlek , Hastighet)',
   APPSIZE: 'Applikationer (Partition: Använt / Ledigt)',
   FILESYSTEM: 'Filsystem (Använt / Ledigt)',
   BUFFER_SIZE: 'Max Bufferstorlek',
   COMPACT: 'Komprimera',
-  ENABLE_OTA: 'Aktivera OTA-uppdateringar',
-  DOWNLOAD_CUSTOMIZATION_TEXT: 'Ladda ner entitetsanpassningar',
-  DOWNLOAD_SCHEDULE_TEXT: 'Download Scheduler Events', // TODO translate
-  DOWNLOAD_SETTINGS_TEXT: 'Ladda ner applikationsinställningar. Var försiktig om du delar dina iställlningar då de innehåller lösenord och annan känslig systeminformation',
-  UPLOAD_TEXT: 'Ladda upp ett nytt firmware (.bin), inställningar eller anpassningar (.json) nedan',
-  UPLOADING: 'Laddar upp',
+  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
+  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
   UPLOAD_DROP_TEXT: 'Släpp fil eller klicka här',
   ERROR: 'Okänt Fel, var god försök igen',
   TIME_SET: 'Ställ in tid',
@@ -244,6 +224,7 @@ const sv: Translation = {
   MQTT_INT_THERMOSTATS: 'Termostater',
   MQTT_INT_SOLAR: 'Solpaneler',
   MQTT_INT_MIXER: 'Blandningsventiler',
+  MQTT_INT_WATER: 'Water Modules', // TODO translate
   MQTT_QUEUE: 'MQTT-kö',
   DEFAULT: 'Standard',
   MQTT_ENTITY_FORMAT: 'Entitets-ID format',
@@ -279,7 +260,7 @@ const sv: Translation = {
   SCAN_AGAIN: 'Sök igen',
   NETWORK_SCANNER: 'Hittade nätverk',
   NETWORK_NO_WIFI: 'Inga WiFi-nätverk hittades',
-  NETWORK_BLANK_SSID: 'lämna blankt för att inaktivera WiFi', // and enable ETH // TODO translate
+  NETWORK_BLANK_SSID: 'lämna blankt för att inaktivera WiFi',
   NETWORK_BLANK_BSSID: 'leave blank to use only SSID', // TODO translate
   TX_POWER: 'Tx Effekt',
   HOSTNAME: 'Värdnamn',
@@ -288,13 +269,12 @@ const sv: Translation = {
   NETWORK_USE_DNS: 'Aktivera mDNS-tjänsten',
   NETWORK_ENABLE_CORS: 'Aktivera CORS',
   NETWORK_CORS_ORIGIN: 'CORS origin',
-  NETWORK_ENABLE_IPV6: 'Aktivera IPv6-support',
   NETWORK_FIXED_IP: 'Använd statiskt IP',
   NETWORK_GATEWAY: 'Gateway',
   NETWORK_SUBNET: 'Subnätmask',
   NETWORK_DNS: 'DNS-Server',
   ADDRESS_OF: '{0} Adress',
-  ADMIN: 'Admin',
+  ADMINISTRATOR: 'Administrator',
   GUEST: 'Gäst',
   NEW: 'Ny',
   NEW_NAME_OF: 'Byt namn {0}',
@@ -306,11 +286,14 @@ const sv: Translation = {
   STAY: 'Stay', // TODO translate
   LEAVE: 'Leave', // TODO translate
   SCHEDULER: 'Scheduler', // TODO translate
-  SCHEDULER_HELP_1: 'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT.', // TODO translate
+  SCHEDULER_HELP_1: 'Automate commands by adding scheduled events below. Set a unique Name to enable/disable activation via API/MQTT', // TODO translate
   SCHEDULER_HELP_2: 'Use 00:00 to trigger once on start-up', // TODO translate
   SCHEDULE: 'Schedule', // TODO translate
   TIME: 'Time', // TODO translate
   TIMER: 'Timer', // TODO translate
+  ONCHANGE: 'På förändring',
+  CONDITION: 'Skick',
+  IMMEDIATE: 'Omedelbar',
   SCHEDULE_UPDATED: 'Schedule updated', // TODO translate
   SCHEDULE_TIMER_1: 'on startup', // TODO translate
   SCHEDULE_TIMER_2: 'every minute', // TODO translate
@@ -329,7 +312,38 @@ const sv: Translation = {
   ACTIVEHIGH: 'Active High', // TODO translate
   ACTIVELOW: 'Active Low', // TODO translate
   UNCHANGED: 'Unchanged', // TODO translate
-  ALWAYS: 'Always' // TODO translate
+  ALWAYS: 'Always', // TODO translate
+  ACTIVITY: 'Activity', // TODO translate
+  CONFIGURE: 'Configure {0}', // TODO translate
+  SYSTEM_MEMORY: 'System Memory', // TODO translate
+  APPLICATION_SETTINGS_1: 'Modify EMS-ESP Application Settings', // TODO translate
+  SECURITY_1: 'Add or remove users', // TODO translate
+  DOWNLOAD_UPLOAD_1: 'Download and Upload Settings and Firmware', // TODO translate
+  MODULES: 'Module', // TODO translate
+  MODULES_1: 'Aktivera eller avaktivera externa moduler',
+  MODULES_UPDATED: 'Modules updated', // TODO translate
+  MODULES_DESCRIPTION: 'Click on the Module to activate or de-activate EMS-ESP library modules', // TODO translate
+  MODULES_NONE: 'No external modules detected', // TODO translate
+  RENAME: 'Rename', // TODO translate
+  ENABLE_MODBUS: 'Aktivera Modbus',
+  VIEW_LOG: 'View log to diagnose issues', // TODO translate
+  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
+  SERVICES: 'Services', // TODO translate
+  ALLVALUES: 'All Values', // TODO translate
+  SPECIAL_FUNCTIONS: 'Special Functions', // TODO translate
+  WAIT_FIRMWARE: 'Firmware is uploading and installing', // TODO translate
+  INSTALL_VERSION: 'This will install version {0}. Are you sure?', // TODO translate
+  SWITCH_DEV: 'switch to the development version', // TODO translate
+  UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
+  LATEST_VERSION: 'You are using the latest firmware version.', // TODO translate
+  PLEASE_WAIT: 'Please wait', // TODO translate
+  RESTARTING_PRE: 'Initializing', // TODO translate
+  RESTARTING_POST: 'Preparing', // TODO translate
+  AUTO_SCROLL: 'Auto Scroll', // TODO translate
+  DASHBOARD: 'Dashboard', // TODO translate
+  NO_DATA: 'No data available', // TODO translate
+  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module', // TODO translate
+  DEVELOPER_MODE: 'Developer Mode' // TODO translate
 };
 
 export default sv;

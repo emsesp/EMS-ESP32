@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,8 +29,8 @@ Alert::Alert(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
     // see https://github.com/emsesp/EMS-ESP32/issues/575
     register_telegram_type(0x1A, "UBASetPoints", false, MAKE_PF_CB(process_UBASetPoints));
 
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setFlowTemp_, DeviceValueType::UINT, FL_(setFlowTemp), DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setBurnPow_, DeviceValueType::UINT, FL_(setBurnPow), DeviceValueUOM::PERCENT);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setFlowTemp_, DeviceValueType::UINT8, FL_(setFlowTemp), DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &setBurnPow_, DeviceValueType::UINT8, FL_(setBurnPow), DeviceValueUOM::PERCENT);
 }
 // UBASetPoint 0x1A
 void Alert::process_UBASetPoints(std::shared_ptr<const Telegram> telegram) {

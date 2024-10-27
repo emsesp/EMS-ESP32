@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,12 +39,12 @@ class CustomEntityItem {
     uint32_t    value;
     std::string data;
     uint8_t     ram;
+    uint8_t *   raw;
 };
 
 class WebCustomEntity {
   public:
-    std::vector<CustomEntityItem> customEntityItems;
-    // std::list<CustomEntityItem> customEntityItems;
+    std::list<CustomEntityItem> customEntityItems;
 
     static void              read(WebCustomEntity & webEntity, JsonObject root);
     static StateUpdateResult update(JsonObject root, WebCustomEntity & webEntity);
@@ -55,18 +55,18 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
     WebCustomEntityService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
 
     void begin();
-    void publish_single(const CustomEntityItem & entity);
+    void publish_single(CustomEntityItem & entity);
     void publish(const bool force = false);
-    bool command_setvalue(const char * value, const std::string name);
+    bool command_setvalue(const char * value, const int8_t id, const char * name);
     bool get_value_info(JsonObject output, const char * cmd);
+    void get_value_json(JsonObject output, CustomEntityItem & entity);
     bool get_value(std::shared_ptr<const Telegram> telegram);
     void fetch();
-    void render_value(JsonObject output, CustomEntityItem entity, const bool useVal = false, const bool web = false, const bool add_uom = false);
+    void render_value(JsonObject output, CustomEntityItem & entity, const bool useVal = false, const bool web = false, const bool add_uom = false);
     void show_values(JsonObject output);
-    void generate_value_web(JsonObject output);
+    void generate_value_web(JsonObject output, const bool is_dashboard = false);
 
     uint8_t count_entities();
-    uint8_t has_commands();
     void    ha_reset() {
         ha_registered_ = false;
     }
@@ -79,8 +79,9 @@ class WebCustomEntityService : public StatefulService<WebCustomEntity> {
     HttpEndpoint<WebCustomEntity>  _httpEndpoint;
     FSPersistence<WebCustomEntity> _fsPersistence;
 
-    std::vector<CustomEntityItem> * customEntityItems; // pointer to the list of entity items
-    // std::list<CustomEntityItem> * customEntityItems; // pointer to the list of entity items
+    void getEntities(AsyncWebServerRequest * request);
+
+    std::list<CustomEntityItem> * customEntityItems_; // pointer to the list of entity items
 
     bool ha_registered_ = false;
 };

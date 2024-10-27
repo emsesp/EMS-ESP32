@@ -1,6 +1,6 @@
 #include "ESP8266React.h"
 
-#include "WWWData.h"
+#include "WWWData.h" // include auto-generated static web resources
 
 ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
     : _securitySettingsService(server, fs)
@@ -11,14 +11,10 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
     , _apStatus(server, &_securitySettingsService, &_apSettingsService)
     , _ntpSettingsService(server, fs, &_securitySettingsService)
     , _ntpStatus(server, &_securitySettingsService)
-    , _otaSettingsService(server, fs, &_securitySettingsService)
     , _uploadFileService(server, &_securitySettingsService)
     , _mqttSettingsService(server, fs, &_securitySettingsService)
     , _mqttStatus(server, &_mqttSettingsService, &_securitySettingsService)
-    , _authenticationService(server, &_securitySettingsService)
-    , _restartService(server, &_securitySettingsService)
-    , _factoryResetService(server, fs, &_securitySettingsService)
-    , _systemStatus(server, &_securitySettingsService) {
+    , _authenticationService(server, &_securitySettingsService) {
     //
     // Serve static web resources
     //
@@ -41,6 +37,7 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
             response->addHeader("Content-Encoding", "gzip");
             // response->addHeader("Content-Encoding", "br"); // only works over HTTPS
             // response->addHeader("Cache-Control", "public, immutable, max-age=31536000");
+            response->addHeader("Cache-Control", "must-revalidate"); // ensure that a client will check the server for a change
             response->addHeader("Last-Modified", last_modified);
             response->addHeader("ETag", hash);
 
@@ -48,6 +45,7 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
         };
 
         server->on(uri, HTTP_GET, requestHandler);
+
         // Serving non matching get requests with "/index.html"
         // OPTIONS get a straight up 200 response
         if (strncmp(uri, "/index.html", 11) == 0) {
@@ -77,7 +75,6 @@ void ESP8266React::begin() {
     });
     _apSettingsService.begin();
     _ntpSettingsService.begin();
-    _otaSettingsService.begin();
     _mqttSettingsService.begin();
     _securitySettingsService.begin();
 }
@@ -85,6 +82,5 @@ void ESP8266React::begin() {
 void ESP8266React::loop() {
     _networkSettingsService.loop();
     _apSettingsService.loop();
-    _otaSettingsService.loop();
     _mqttSettingsService.loop();
 }

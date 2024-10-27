@@ -17,7 +17,11 @@ the LICENSE file.
 #include "../Helpers.h"
 #include "../Logging.h"
 #include "RemainingLength.h"
-#include "String.h"
+#include "StringUtil.h"
+
+#if EMC_USE_MEMPOOL
+  #include "MemoryPool/src/MemoryPool.h"
+#endif
 
 namespace espMqttClientInternals {
 
@@ -133,7 +137,7 @@ class Packet {
 
  private:
   // pass remainingLength = total size - header - remainingLengthLength!
-  bool _allocate(size_t remainingLength, bool check = true);
+  bool _allocate(size_t remainingLength, bool check);
 
   // fills header and returns index of next available byte in buffer
   size_t _fillPublishHeader(uint16_t packetId,
@@ -150,6 +154,10 @@ class Packet {
 
   size_t _chunkedAvailable(size_t index);
   const uint8_t* _chunkedData(size_t index) const;
+
+  #if EMC_USE_MEMPOOL
+  static MemoryPool::Variable<EMC_NUM_POOL_ELEMENTS, EMC_SIZE_POOL_ELEMENTS> _memPool;
+  #endif
 };
 
 }  // end namespace espMqttClientInternals

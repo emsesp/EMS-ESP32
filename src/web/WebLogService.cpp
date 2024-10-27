@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,17 +18,16 @@
 
 #include "emsesp.h"
 
+using ::uuid::console::Shell;
+
 namespace emsesp {
 
 WebLogService::WebLogService(AsyncWebServer * server, SecurityManager * securityManager)
-    : events_(EVENT_SOURCE_LOG_PATH) {
+    : events_(EMSESP_EVENT_SOURCE_LOG_PATH) {
     // get & set settings
-    server->on(LOG_SETTINGS_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { getSetValues(request, json); });
+    server->on(EMSESP_LOG_SETTINGS_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { getSetValues(request, json); });
 
-    // for bring back the whole log - is a command, hence a POST
-    server->on(FETCH_LOG_PATH, HTTP_POST, [this](AsyncWebServerRequest * request) { fetchLog(request); });
-
-    events_.setFilter(securityManager->filterRequest(AuthenticationPredicates::IS_ADMIN));
+    // events_.setFilter(securityManager->filterRequest(AuthenticationPredicates::IS_ADMIN));
     server->addHandler(&events_);
 }
 
@@ -75,12 +74,15 @@ size_t WebLogService::maximum_log_messages() const {
 
 void WebLogService::maximum_log_messages(size_t count) {
     maximum_log_messages_ = std::max((size_t)1, count);
+
     if (limit_log_messages_ > maximum_log_messages_) {
         limit_log_messages_ = maximum_log_messages_;
     }
+
     while (log_messages_.size() > maximum_log_messages_) {
         log_messages_.pop_front();
     }
+
     EMSESP::webSettingsService.update([&](WebSettings & settings) {
         settings.weblog_buffer = count;
         return StateUpdateResult::CHANGED;
@@ -132,6 +134,42 @@ void WebLogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
     });
 }
 
+// dumps out the contents of log buffer to shell console
+void WebLogService::show(Shell & shell) {
+    if (log_messages_.empty()) {
+        return;
+    }
+
+    shell.println();
+    shell.printfln("Recent Log (level %s, max %d messages):", format_level_uppercase(log_level()), maximum_log_messages());
+    shell.println();
+
+    for (const auto & message : log_messages_) {
+        log_message_id_tail_ = message.id_;
+
+        shell.print(uuid::log::format_timestamp_ms(message.content_->uptime_ms, 3));
+        shell.printf(" %c %lu: [%s] ", uuid::log::format_level_char(message.content_->level), message.id_, message.content_->name);
+
+        if ((message.content_->level == uuid::log::Level::ERR) || (message.content_->level == uuid::log::Level::WARNING)) {
+            shell.print(COLOR_RED);
+            shell.println(message.content_->text);
+            shell.print(COLOR_RESET);
+        } else if (message.content_->level == uuid::log::Level::INFO) {
+            shell.print(COLOR_YELLOW);
+            shell.println(message.content_->text);
+            shell.print(COLOR_RESET);
+        } else if (message.content_->level == uuid::log::Level::DEBUG) {
+            shell.print(COLOR_CYAN);
+            shell.println(message.content_->text);
+            shell.print(COLOR_RESET);
+        } else {
+            shell.println(message.content_->text);
+        }
+    }
+
+    shell.println();
+}
+
 void WebLogService::loop() {
     if (!events_.count() || log_messages_.empty()) {
         return;
@@ -142,11 +180,13 @@ void WebLogService::loop() {
         return;
     }
 
-    // put a small delay in
+    /*
+    // put a small delay in - https://github.com/emsesp/EMS-ESP32/issues/1652
     if (uuid::get_uptime_ms() - last_transmit_ < REFRESH_SYNC) {
         return;
     }
     last_transmit_ = uuid::get_uptime_ms();
+    */
 
     // flush
     for (const auto & message : log_messages_) {
@@ -193,28 +233,28 @@ void WebLogService::transmit(const QueuedLogMessage & message) {
     delete[] buffer;
 }
 
-// send the complete log buffer to the API, not filtering on log level
-// done by resetting the pointer
-void WebLogService::fetchLog(AsyncWebServerRequest * request) {
-    log_message_id_tail_ = 0;
-    request->send(200);
-}
-
-// sets the values like level after a POST
+// sets the values after a POST
 void WebLogService::getSetValues(AsyncWebServerRequest * request, JsonVariant json) {
     if ((request->method() == HTTP_GET) || (!json.is<JsonObject>())) {
         // GET - return the values
-        auto *     response  = new AsyncJsonResponse(false);
-        JsonObject root      = response->getRoot();
-        root["level"]        = log_level();
-        root["max_messages"] = maximum_log_messages();
-        root["compact"]      = compact();
+        auto *     response    = new AsyncJsonResponse(false);
+        JsonObject root        = response->getRoot();
+        root["level"]          = log_level();
+        root["max_messages"]   = maximum_log_messages();
+        root["compact"]        = compact();
+        root["psram"]          = (EMSESP::system_.PSram() > 0);
+        root["developer_mode"] = EMSESP::system_.developer_mode();
+
         response->setLength();
         request->send(response);
+
+        // reset the tail pointer so complete log is sent
+        log_message_id_tail_ = 0;
+
         return;
     }
 
-    // POST - write the settings
+    // POST - set the values
     auto && body = json.as<JsonObject>();
 
     uuid::log::Level level = body["level"];

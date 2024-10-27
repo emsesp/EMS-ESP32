@@ -10,75 +10,68 @@
 ;  -DEMSESP_TEST ; enable the tests. EN language only
 ;  -DEMSESP_DE_ONLY ; only DE translated entity names
 ;  -DEMSESP_EN_ONLY ; only EN translated entity names
+;  -DEMSESP_PINGTEST ; send log message every 1/2 second
 ; my_build_flags = -DEMSESP_TEST
 ; my_build_flags = -DEMSESP_DEBUG -DEMSESP_TEST
+; my_build_flags = -DEMSESP_DEBUG -DEMSESP_TEST -DEMSESP_PINGTEST
 
 [platformio]
-; default_envs = esp32_4M
-; default_envs = esp32_16M
-; default_envs = lolin_s3
-; default_envs = standalone
+; default_envs = s_16M_P ; BBQKees E32V2
+default_envs = s3_16M_P ; BBQKees S3
+; default_envs = s_4M ; BBQKees S32
+; default_envs = native
 ; default_envs = debug
-; default_envs = custom
 
-[env:esp32_4M]
-; if using OTA enter your details below
-;  upload_protocol = espota
-;  upload_flags =
-;    --port=8266
-;    --auth=ems-esp-neo
-;  upload_port = ems-esp.local
-; for USB, here are some examples:
+[env]
+; set the username and password for the admin account (default both admin)
+custom_username = admin
+custom_password = admin
+
+; ** upload settings **
+; for direct USB set:
+;  upload_protocol = esptool
+;  upload_port = /dev/ttyUSB*
+;
+; for direct via URL (OTA) set:
+;  upload_protocol = custom
+;  custom_emsesp_ip = <ip address> or ems-esp.local
+;  custom_password = admin
+
+; upload_protocol = esptool
 ; upload_port = /dev/ttyUSB*
-; upload_port = COM5
-extra_scripts =
-;   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
-  scripts/rename_fw.py
 
-[env:esp32_16M]
+; upload_protocol = custom
+; custom_emsesp_ip = 10.10.10.175
 
-[env:custom]
-; use for baisc ESP boards with 4MB flash
-; make sure -D TASMOTA_SDK is also enabled
-platform = https://github.com/tasmota/platform-espressif32/releases/download/2024.01.00/platform-espressif32.zip
-; use for S3 boards:
-; platform = espressif32
-framework = arduino
-board = esp32dev
-board_build.filesystem = littlefs
-board_build.f_cpu = 240000000L
-board_upload.flash_size = 4MB
-board_build.partitions = esp32_partition_4M.csv
-board_upload.use_1200bps_touch = false
-board_upload.wait_for_upload_port = true
-upload_port = /dev/ttyUSB0
+; ** modules **
+; example below is using a locally built version of EMS-ESP-Modules. You can also test with:
+;    rm -rf .pio/libdeps/native/EMS-ESP-Modules; pio run -e native -t clean; pio run -e native -t exec
+; lib_deps =
+;   file://../modules/EMS-ESP-Modules
+
+[env:native]
 extra_scripts = 
-	; pre:scripts/build_interface.py
-	scripts/rename_fw.py
-build_unflags = ${common.unbuild_flags}
-build_flags = 
-	${common.core_build_flags}
-	${factory_settings.build_flags}
-	${common.my_build_flags}
-	-D ONEWIRE_CRC16=0
-	-D NO_GLOBAL_ARDUINOOTA
-	-D ARDUINOJSON_ENABLE_STD_STRING=1
-	-D ARDUINOJSON_USE_DOUBLE=0
-	; -D ARDUINOTRACE_ENABLE=1
-	-D TASMOTA_SDK
-	; -D CORE_DEBUG_LEVEL=ARDUHAL_LOG_LEVEL_WARN
-	-D EMSESP_TEST
-	-D EMSESP_DEBUG
- 	-D CONFIG_ETH_ENABLED
-	-D CONFIG_ASYNC_TCP_STACK_SIZE=8192
-	'-DEMSESP_DEFAULT_BOARD_PROFILE="Test"'
+;   pre:scripts/refresh_module_library_native.py
+  post:scripts/run_native.py
 
-[env:lolin_s3]
-upload_port = /dev/ttyUSB0
+[env:s_16M_P]
 extra_scripts =
-;   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
+  scripts/upload.py
 
+[env:s3_16M_P]
+extra_scripts =
+  ; pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+  scripts/rename_fw.py
+  scripts/upload.py
+
+[env:s_4M]
+extra_scripts =
+  ; pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+  scripts/rename_fw.py
+  scripts/upload.py
+  
 ; pio run -e debug
 ; or from Visual Studio Code do PIO -> Project Tasks -> debug -> General -> Upload and Monitor
 ; options for debugging are: EMSESP_DEBUG EMSESP_UART_DEBUG EMSESP_DEBUG_SENSOR

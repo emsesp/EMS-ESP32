@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ namespace emsesp {
 
 // constructor
 DeviceValue::DeviceValue(uint8_t               device_type,
-                         uint8_t               tag,
+                         int8_t                tag,
                          void *                value_p,
                          uint8_t               type,
                          const char * const ** options,
@@ -110,99 +110,91 @@ const char * DeviceValue::DeviceValueUOM_s[] = {
     F_(uom_blank), // 0
     F_(uom_degrees), F_(uom_degrees), F_(uom_percent), F_(uom_lmin), F_(uom_kwh),     F_(uom_wh),   FL_(hours)[0],      FL_(minutes)[0], F_(uom_ua),
     F_(uom_bar),     F_(uom_kw),      F_(uom_w),       F_(uom_kb),   FL_(seconds)[0], F_(uom_dbm),  F_(uom_fahrenheit), F_(uom_mv),      F_(uom_sqm),
-    F_(uom_m3),      F_(uom_l),       F_(uom_kmin),    F_(uom_k),    F_(uom_volts),   F_(uom_mbar), F_(uom_blank)
+    F_(uom_m3),      F_(uom_l),       F_(uom_kmin),    F_(uom_k),    F_(uom_volts),   F_(uom_mbar), F_(uom_lh),         F_(uom_blank)
 
 };
 
 // mapping of TAGs, to match order in DeviceValueTAG enum in emsdevicevalue.h
 const char * const * DeviceValue::DeviceValueTAG_s[] = {
 
-    FL_(tag_none),           // ""
-    FL_(tag_heartbeat),      // ""
-    FL_(tag_boiler_data_ww), // "dhw"
-    FL_(tag_device_data),    // ""
-    FL_(tag_device_data_ww), // "dhw"
-    FL_(tag_hc1),            // "hc1"
-    FL_(tag_hc2),            // "hc2"
-    FL_(tag_hc3),            // "hc3"
-    FL_(tag_hc4),            // "hc4"
-    FL_(tag_hc5),            // "hc5"
-    FL_(tag_hc6),            // "hc6"
-    FL_(tag_hc7),            // "hc7"
-    FL_(tag_hc8),            // "hc8"
-    FL_(tag_wwc1),           // "wwc1"
-    FL_(tag_wwc2),           // "Wwc2"
-    FL_(tag_wwc3),           // "wwc3"
-    FL_(tag_wwc4),           // "wwc4"
-    FL_(tag_wwc5),           // "wwc5"
-    FL_(tag_wwc6),           // "wwc6"
-    FL_(tag_wwc7),           // "wwc7"
-    FL_(tag_wwc8),           // "wwc8"
-    FL_(tag_wwc9),           // "wwc9"
-    FL_(tag_wwc10),          // "wwc10"
-    FL_(tag_ahs1),           // "ahs1"
-    FL_(tag_hs1),            // "hs1"
-    FL_(tag_hs2),            // "hs2"
-    FL_(tag_hs3),            // "hs3"
-    FL_(tag_hs4),            // "hs4"
-    FL_(tag_hs5),            // "hs5"
-    FL_(tag_hs6),            // "hs6"
-    FL_(tag_hs7),            // "hs7"
-    FL_(tag_hs8),            // "hs8"
-    FL_(tag_hs9),            // "hs9"
-    FL_(tag_hs10),           // "hs10"
-    FL_(tag_hs11),           // "hs11"
-    FL_(tag_hs12),           // "hs12"
-    FL_(tag_hs13),           // "hs13"
-    FL_(tag_hs14),           // "hs14"
-    FL_(tag_hs15),           // "hs15"
-    FL_(tag_hs16)            // "hs16"
+    FL_(tag_device_data), // ""
+    FL_(tag_hc1),         // "hc1"
+    FL_(tag_hc2),         // "hc2"
+    FL_(tag_hc3),         // "hc3"
+    FL_(tag_hc4),         // "hc4"
+    FL_(tag_hc5),         // "hc5"
+    FL_(tag_hc6),         // "hc6"
+    FL_(tag_hc7),         // "hc7"
+    FL_(tag_hc8),         // "hc8"
+    FL_(tag_dhw1),        // "dhw"
+    FL_(tag_dhw2),        // "dhw2"
+    FL_(tag_dhw3),        // "dhw3"
+    FL_(tag_dhw4),        // "dhw4"
+    FL_(tag_dhw5),        // "dhw5"
+    FL_(tag_dhw6),        // "dhw6"
+    FL_(tag_dhw7),        // "dhw7"
+    FL_(tag_dhw8),        // "dhw8"
+    FL_(tag_dhw9),        // "dhw9"
+    FL_(tag_dhw10),       // "dhw10"
+    FL_(tag_ahs1),        // "ahs1"
+    FL_(tag_hs1),         // "hs1"
+    FL_(tag_hs2),         // "hs2"
+    FL_(tag_hs3),         // "hs3"
+    FL_(tag_hs4),         // "hs4"
+    FL_(tag_hs5),         // "hs5"
+    FL_(tag_hs6),         // "hs6"
+    FL_(tag_hs7),         // "hs7"
+    FL_(tag_hs8),         // "hs8"
+    FL_(tag_hs9),         // "hs9"
+    FL_(tag_hs10),        // "hs10"
+    FL_(tag_hs11),        // "hs11"
+    FL_(tag_hs12),        // "hs12"
+    FL_(tag_hs13),        // "hs13"
+    FL_(tag_hs14),        // "hs14"
+    FL_(tag_hs15),        // "hs15"
+    FL_(tag_hs16)         // "hs16"
 
 };
 
-// tags used in MQTT topic names. Macthes sequence from DeviceValueTAG_s
+// tags used in MQTT topic names. Matches sequence from DeviceValueTAG_s
 const char * const DeviceValue::DeviceValueTAG_mqtt[] = {
 
-    FL_(tag_none)[0],            // ""
-    F_(heartbeat),               // "heartbeat"
-    F_(tag_boiler_data_ww_mqtt), // "ww"
-    FL_(tag_device_data)[0],     // ""
-    F_(tag_device_data_ww_mqtt), // ""
-    FL_(tag_hc1)[0],             // "hc1"
-    FL_(tag_hc2)[0],             // "hc2"
-    FL_(tag_hc3)[0],             // "hc3"
-    FL_(tag_hc4)[0],             // "hc4"
-    FL_(tag_hc5)[0],             // "hc5"
-    FL_(tag_hc6)[0],             // "hc6"
-    FL_(tag_hc7)[0],             // "hc7"
-    FL_(tag_hc8)[0],             // "hc8"
-    FL_(tag_wwc1)[0],            // "wwc1"
-    FL_(tag_wwc2)[0],            // "Wwc2"
-    FL_(tag_wwc3)[0],            // "wwc3"
-    FL_(tag_wwc4)[0],            // "wwc4"
-    FL_(tag_wwc5)[0],            // "wwc5"
-    FL_(tag_wwc6)[0],            // "wwc6"
-    FL_(tag_wwc7)[0],            // "wwc7"
-    FL_(tag_wwc8)[0],            // "wwc8"
-    FL_(tag_wwc9)[0],            // "wwc9"
-    FL_(tag_wwc10)[0],           // "wwc10"
-    FL_(tag_ahs1)[0],            // "ahs1"
-    FL_(tag_hs1)[0],             // "hs1"
-    FL_(tag_hs2)[0],             // "hs2"
-    FL_(tag_hs3)[0],             // "hs3"
-    FL_(tag_hs4)[0],             // "hs4"
-    FL_(tag_hs5)[0],             // "hs5"
-    FL_(tag_hs6)[0],             // "hs6"
-    FL_(tag_hs7)[0],             // "hs7"
-    FL_(tag_hs8)[0],             // "hs8"
-    FL_(tag_hs9)[0],             // "hs9"
-    FL_(tag_hs10)[0],            // "hs10"
-    FL_(tag_hs11)[0],            // "hs11"
-    FL_(tag_hs12)[0],            // "hs12"
-    FL_(tag_hs13)[0],            // "hs13"
-    FL_(tag_hs14)[0],            // "hs14"
-    FL_(tag_hs15)[0],            // "hs15"
-    FL_(tag_hs16)[0]             // "hs16"
+    FL_(tag_device_data)[0], // ""
+    FL_(tag_hc1)[0],         // "hc1"
+    FL_(tag_hc2)[0],         // "hc2"
+    FL_(tag_hc3)[0],         // "hc3"
+    FL_(tag_hc4)[0],         // "hc4"
+    FL_(tag_hc5)[0],         // "hc5"
+    FL_(tag_hc6)[0],         // "hc6"
+    FL_(tag_hc7)[0],         // "hc7"
+    FL_(tag_hc8)[0],         // "hc8"
+    FL_(tag_dhw1)[0],        // "dhw"
+    FL_(tag_dhw2)[0],        // "dhw2"
+    FL_(tag_dhw3)[0],        // "dhw3"
+    FL_(tag_dhw4)[0],        // "dhw4"
+    FL_(tag_dhw5)[0],        // "dhw5"
+    FL_(tag_dhw6)[0],        // "dhw6"
+    FL_(tag_dhw7)[0],        // "dhw7"
+    FL_(tag_dhw8)[0],        // "dhw8"
+    FL_(tag_dhw9)[0],        // "dhw9"
+    FL_(tag_dhw10)[0],       // "dhw10"
+    FL_(tag_ahs1)[0],        // "ahs1"
+    FL_(tag_hs1)[0],         // "hs1"
+    FL_(tag_hs2)[0],         // "hs2"
+    FL_(tag_hs3)[0],         // "hs3"
+    FL_(tag_hs4)[0],         // "hs4"
+    FL_(tag_hs5)[0],         // "hs5"
+    FL_(tag_hs6)[0],         // "hs6"
+    FL_(tag_hs7)[0],         // "hs7"
+    FL_(tag_hs8)[0],         // "hs8"
+    FL_(tag_hs9)[0],         // "hs9"
+    FL_(tag_hs10)[0],        // "hs10"
+    FL_(tag_hs11)[0],        // "hs11"
+    FL_(tag_hs12)[0],        // "hs12"
+    FL_(tag_hs13)[0],        // "hs13"
+    FL_(tag_hs14)[0],        // "hs14"
+    FL_(tag_hs15)[0],        // "hs15"
+    FL_(tag_hs16)[0]         // "hs16"
 
 };
 
@@ -224,22 +216,21 @@ bool DeviceValue::hasValue() const {
     case DeviceValueType::ENUM:
         has_value = Helpers::hasValue(*(uint8_t *)(value_p));
         break;
-    case DeviceValueType::INT:
+    case DeviceValueType::INT8:
         has_value = Helpers::hasValue(*(int8_t *)(value_p));
         break;
-    case DeviceValueType::UINT:
+    case DeviceValueType::UINT8:
         has_value = Helpers::hasValue(*(uint8_t *)(value_p));
         break;
-    case DeviceValueType::SHORT:
+    case DeviceValueType::INT16:
         has_value = Helpers::hasValue(*(int16_t *)(value_p));
         break;
-    case DeviceValueType::USHORT:
+    case DeviceValueType::UINT16:
         has_value = Helpers::hasValue(*(uint16_t *)(value_p));
         break;
-    case DeviceValueType::ULONG:
-        has_value = Helpers::hasValue(*(uint32_t *)(value_p));
-        break;
+    case DeviceValueType::UINT24:
     case DeviceValueType::TIME:
+    case DeviceValueType::UINT32:
         has_value = Helpers::hasValue(*(uint32_t *)(value_p));
         break;
     case DeviceValueType::CMD:
@@ -276,45 +267,40 @@ bool DeviceValue::get_min_max(int16_t & dv_set_min, uint32_t & dv_set_max) {
     dv_set_min = 0;
     dv_set_max = 0;
 
-    if (type == DeviceValueType::USHORT) {
+    if (type == DeviceValueType::UINT16) {
         dv_set_min = Helpers::transformNumFloat(0, numeric_operator, fahrenheit);
-        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_USHORT_NOTSET - 1, numeric_operator, fahrenheit);
+        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_UINT16_NOTSET - 1, numeric_operator, fahrenheit);
         return true;
     }
 
-    if (type == DeviceValueType::SHORT) {
-        dv_set_min = Helpers::transformNumFloat(-EMS_VALUE_SHORT_NOTSET + 1, numeric_operator, fahrenheit);
-        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_SHORT_NOTSET - 1, numeric_operator, fahrenheit);
+    if (type == DeviceValueType::INT16) {
+        dv_set_min = Helpers::transformNumFloat(-EMS_VALUE_INT16_NOTSET + 1, numeric_operator, fahrenheit);
+        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_INT16_NOTSET - 1, numeric_operator, fahrenheit);
         return true;
     }
 
-    if (type == DeviceValueType::UINT) {
+    if (type == DeviceValueType::UINT8) {
         if (uom == DeviceValueUOM::PERCENT) {
             dv_set_max = 100;
         } else {
-            dv_set_max = Helpers::transformNumFloat(EMS_VALUE_UINT_NOTSET - 1, numeric_operator, fahrenheit);
+            dv_set_max = Helpers::transformNumFloat(EMS_VALUE_UINT8_NOTSET - 1, numeric_operator, fahrenheit);
         }
         return true;
     }
 
-    if (type == DeviceValueType::INT) {
+    if (type == DeviceValueType::INT8) {
         if (uom == DeviceValueUOM::PERCENT) {
             dv_set_min = -100;
             dv_set_max = 100;
         } else {
-            dv_set_min = Helpers::transformNumFloat(-EMS_VALUE_INT_NOTSET + 1, numeric_operator, fahrenheit);
-            dv_set_max = Helpers::transformNumFloat(EMS_VALUE_INT_NOTSET - 1, numeric_operator, fahrenheit);
+            dv_set_min = Helpers::transformNumFloat(-EMS_VALUE_INT8_NOTSET + 1, numeric_operator, fahrenheit);
+            dv_set_max = Helpers::transformNumFloat(EMS_VALUE_INT8_NOTSET - 1, numeric_operator, fahrenheit);
         }
         return true;
     }
 
-    if (type == DeviceValueType::ULONG) {
-        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_ULONG_NOTSET - 1, numeric_operator);
-        return true;
-    }
-
-    if (type == DeviceValueType::TIME) {
-        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_ULONG_NOTSET - 1, numeric_operator);
+    if (type == DeviceValueType::UINT24 || type == DeviceValueType::TIME || type == DeviceValueType::UINT32) {
+        dv_set_max = Helpers::transformNumFloat(EMS_VALUE_UINT24_NOTSET - 1, numeric_operator);
         return true;
     }
 
@@ -327,11 +313,11 @@ bool DeviceValue::get_custom_min(int16_t & val) {
     bool    has_min    = (min_pos != std::string::npos);
     uint8_t fahrenheit = !EMSESP::system_.fahrenheit() ? 0 : (uom == DeviceValueUOM::DEGREES) ? 2 : (uom == DeviceValueUOM::DEGREES_R) ? 1 : 0;
     if (has_min) {
-        int16_t v = Helpers::atoint(custom_fullname.substr(min_pos + 1).c_str());
+        int32_t v = Helpers::atoint(custom_fullname.substr(min_pos + 1).c_str());
         if (fahrenheit) {
             v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
         }
-        if (max > 0 && v > max) {
+        if (max > 0 && v > 0 && (uint32_t)v > max) {
             return false;
         }
         val = v;
@@ -349,7 +335,7 @@ bool DeviceValue::get_custom_max(uint32_t & val) {
         if (fahrenheit) {
             v = (v - (32 * (fahrenheit - 1))) / 1.8; // reset to °C
         }
-        if (v < 0 || v < min) {
+        if (v < 0 || v < (int32_t)min) {
             return false;
         }
         val = v;
@@ -383,7 +369,8 @@ std::string DeviceValue::get_fullname() const {
     return customname;
 }
 
-std::string DeviceValue::get_name(std::string & entity) {
+// returns any custom name defined in the entity_id
+std::string DeviceValue::get_name(const std::string & entity) {
     auto pos = entity.find('|');
     if (pos != std::string::npos) {
         return entity.substr(2, pos - 2);

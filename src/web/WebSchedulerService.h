@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,18 @@
 #define EMSESP_SCHEDULER_FILE "/config/emsespScheduler.json"
 #define EMSESP_SCHEDULER_SERVICE_PATH "/rest/schedule" // GET and POST
 
-#define SCHEDULEFLAG_SCHEDULE_TIMER 0x80 // 7th bit for Timer
-#define MAX_STARTUP_RETRIES 3            // retry the start-up commands x times
+// bit flags for the schedule items. Matches those in interface/src/app/main/SchedulerDialog.tsx
+// 0-127 (0->0x7F) is day schedule
+// 128/0x80 is timer
+// 129/0x81 is on change
+// 130/0x82 is on condition
+// 132/0x84 is immediate
+#define SCHEDULEFLAG_SCHEDULE_TIMER 0x80     // 7th bit for Timer
+#define SCHEDULEFLAG_SCHEDULE_ONCHANGE 0x81  // 7th+1st bit for OnChange
+#define SCHEDULEFLAG_SCHEDULE_CONDITION 0x82 // 7th+2nd bit for Condition
+#define SCHEDULEFLAG_SCHEDULE_IMMEDIATE 0x84 // 7th+3rd bit for Condition
+
+#define MAX_STARTUP_RETRIES 3 // retry the start-up commands x times
 
 namespace emsesp {
 
@@ -55,12 +65,14 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
     void loop();
     void publish_single(const char * name, const bool state);
     void publish(const bool force = false);
-    bool has_commands();
-    bool command_setvalue(const char * value, const std::string name);
+    bool command_setvalue(const char * value, const int8_t id, const char * name);
     bool get_value_info(JsonObject output, const char * cmd);
+    void get_value_json(JsonObject output, const ScheduleItem & scheduleItem);
     void ha_reset() {
         ha_registered_ = false;
     }
+    uint8_t count_entities(bool cmd_only = false);
+    bool    onChange(const char * cmd);
 
 #if defined(EMSESP_TEST)
     void test();
@@ -70,13 +82,17 @@ class WebSchedulerService : public StatefulService<WebScheduler> {
 #ifndef EMSESP_STANDALONE
   private:
 #endif
-    bool command(const char * cmd, const char * data);
+    static void scheduler_task(void * pvParameters);
+
+    bool command(const char * name, const std::string & cmd, const std::string & data);
+    void condition();
 
     HttpEndpoint<WebScheduler>  _httpEndpoint;
     FSPersistence<WebScheduler> _fsPersistence;
 
-    std::list<ScheduleItem> * scheduleItems_; // pointer to the list of schedule events
-    bool                      ha_registered_ = false;
+    std::list<ScheduleItem> *  scheduleItems_; // pointer to the list of schedule events
+    bool                       ha_registered_ = false;
+    std::deque<ScheduleItem *> cmd_changed_;
 };
 
 } // namespace emsesp

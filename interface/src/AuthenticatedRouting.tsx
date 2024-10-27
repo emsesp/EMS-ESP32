@@ -1,64 +1,76 @@
-import { Navigate, Routes, Route } from 'react-router-dom';
-import Dashboard from './project/Dashboard';
-import Help from './project/Help';
-import Settings from './project/Settings';
-import type { FC } from 'react';
+import { useContext } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
-import { Layout, RequireAdmin } from 'components';
-import AccessPoint from 'framework/ap/AccessPoint';
-import Mqtt from 'framework/mqtt/Mqtt';
-import NetworkConnection from 'framework/network/NetworkConnection';
-import NetworkTime from 'framework/ntp/NetworkTime';
-import Security from 'framework/security/Security';
-import System from 'framework/system/System';
+import CustomEntities from 'app/main/CustomEntities';
+import Customizations from 'app/main/Customizations';
+import Dashboard from 'app/main/Dashboard';
+import Devices from 'app/main/Devices';
+import Help from 'app/main/Help';
+import Modules from 'app/main/Modules';
+import Scheduler from 'app/main/Scheduler';
+import Sensors from 'app/main/Sensors';
+import APSettings from 'app/settings/APSettings';
+import ApplicationSettings from 'app/settings/ApplicationSettings';
+import DownloadUpload from 'app/settings/DownloadUpload';
+import MqttSettings from 'app/settings/MqttSettings';
+import NTPSettings from 'app/settings/NTPSettings';
+import Settings from 'app/settings/Settings';
+import Version from 'app/settings/Version';
+import Network from 'app/settings/network/Network';
+import Security from 'app/settings/security/Security';
+import APStatus from 'app/status/APStatus';
+import Activity from 'app/status/Activity';
+import HardwareStatus from 'app/status/HardwareStatus';
+import MqttStatus from 'app/status/MqttStatus';
+import NTPStatus from 'app/status/NTPStatus';
+import NetworkStatus from 'app/status/NetworkStatus';
+import Status from 'app/status/Status';
+import SystemLog from 'app/status/SystemLog';
+import { Layout } from 'components';
+import { AuthenticatedContext } from 'contexts/authentication';
 
-const AuthenticatedRouting: FC = () => (
-  // const location = useLocation();
-  // const navigate = useNavigate();
-  // const handleApiResponseError = useCallback(
-  //   (error: AxiosError) => {
-  //     if (error.response && error.response.status === 401) {
-  //       AuthenticationApi.storeLoginRedirect(location);
-  //       navigate('/unauthorized');
-  //     }
-  //     return Promise.reject(error);
-  //   },
-  //   [location, navigate]
-  // );
-  // useEffect(() => {
-  //   const axiosHandlerId = AXIOS.interceptors.response.use((response) => response, handleApiResponseError);
-  //   return () => AXIOS.interceptors.response.eject(axiosHandlerId);
-  // }, [handleApiResponseError]);
+const AuthenticatedRouting = () => {
+  const { me } = useContext(AuthenticatedContext);
+  return (
+    <Layout>
+      <Routes>
+        <Route path="/dashboard/*" element={<Dashboard />} />
+        <Route path="/devices/*" element={<Devices />} />
+        <Route path="/sensors/*" element={<Sensors />} />
+        <Route path="/status/*" element={<Status />} />
+        <Route path="/help/*" element={<Help />} />
+        <Route path="/*" element={<Navigate to="/" />} />
 
-  <Layout>
-    <Routes>
-      <Route path="/dashboard/*" element={<Dashboard />} />
-      <Route
-        path="/settings/*"
-        element={
-          <RequireAdmin>
-            <Settings />
-          </RequireAdmin>
-        }
-      />
-      <Route path="/help/*" element={<Help />} />
+        <Route path="/status/hardwarestatus/*" element={<HardwareStatus />} />
+        <Route path="/status/activity" element={<Activity />} />
+        <Route path="/status/log" element={<SystemLog />} />
+        <Route path="/status/mqtt" element={<MqttStatus />} />
+        <Route path="/status/ntp" element={<NTPStatus />} />
+        <Route path="/status/ap" element={<APStatus />} />
+        <Route path="/status/network" element={<NetworkStatus />} />
 
-      <Route path="/network/*" element={<NetworkConnection />} />
-      <Route path="/ap/*" element={<AccessPoint />} />
-      <Route path="/ntp/*" element={<NetworkTime />} />
-      <Route path="/mqtt/*" element={<Mqtt />} />
-      <Route
-        path="/security/*"
-        element={
-          <RequireAdmin>
-            <Security />
-          </RequireAdmin>
-        }
-      />
-      <Route path="/system/*" element={<System />} />
-      <Route path="/*" element={<Navigate to="/" />} />
-    </Routes>
-  </Layout>
-);
+        {me.admin && (
+          <>
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/settings/version" element={<Version />} />
+            <Route path="/settings/application" element={<ApplicationSettings />} />
+            <Route path="/settings/mqtt" element={<MqttSettings />} />
+            <Route path="/settings/ntp" element={<NTPSettings />} />
+            <Route path="/settings/ap" element={<APSettings />} />
+            <Route path="/settings/modules" element={<Modules />} />
+            <Route path="/settings/upload" element={<DownloadUpload />} />
+
+            <Route path="/settings/network/*" element={<Network />} />
+            <Route path="/settings/security/*" element={<Security />} />
+
+            <Route path="/customizations" element={<Customizations />} />
+            <Route path="/scheduler" element={<Scheduler />} />
+            <Route path="/customentities" element={<CustomEntities />} />
+          </>
+        )}
+      </Routes>
+    </Layout>
+  );
+};
 
 export default AuthenticatedRouting;

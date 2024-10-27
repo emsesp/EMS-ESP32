@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,9 +19,6 @@
 #ifdef EMSESP_STANDALONE
 
 #include "emsuart_standalone.h"
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 namespace emsesp {
 
@@ -86,7 +83,5 @@ char * EMSuart::hextoa(char * result, const uint8_t value) {
 }
 
 } // namespace emsesp
-
-#pragma GCC diagnostic pop
 
 #endif

@@ -11,8 +11,8 @@ class AsyncWebServer;
 class AsyncWebServerRequest;
 class AsyncWebServerResponse;
 class AsyncJsonResponse;
-class PrettyAsyncJsonResponse;
-class MsgpackAsyncJsonResponse;
+// class PrettyAsyncJsonResponse;
+// class MsgpackAsyncJsonResponse;
 class AsyncEventSource;
 
 class AsyncWebParameter {
@@ -76,9 +76,9 @@ class AsyncWebServerRequest {
   public:
     void * _tempObject;
 
-    AsyncWebServerRequest(AsyncWebServer *, AsyncClient *){};
-    AsyncWebServerRequest(){};
-    ~AsyncWebServerRequest(){};
+    AsyncWebServerRequest(AsyncWebServer *, AsyncClient *) {};
+    AsyncWebServerRequest() {};
+    ~AsyncWebServerRequest() {};
 
     AsyncClient * client() {
         return _client;
@@ -92,18 +92,20 @@ class AsyncWebServerRequest {
         _method = method_s;
     }
 
-    void addInterestingHeader(const String & name){};
+    void addInterestingHeader(const String & name) {};
 
     size_t args() const {
         return 0;
     }
 
-    void send(AsyncWebServerResponse * response){};
-    void send(AsyncJsonResponse * response){};
-    void send(PrettyAsyncJsonResponse * response){};
-    void send(MsgpackAsyncJsonResponse * response){};
-    void send(int code, const String & contentType = String(), const String & content = String()){};
-    void send(int code, const String & contentType, const __FlashStringHelper *){};
+    void send(AsyncWebServerResponse * response) {};
+
+    void send(AsyncJsonResponse * response) {};
+
+    // void send(PrettyAsyncJsonResponse * response) {};
+    // void send(MsgpackAsyncJsonResponse * response) {};
+    void send(int code, const String & contentType = String(), const String & content = String()) {};
+    void send(int code, const String & contentType, const __FlashStringHelper *) {};
 
     const String & url() const {
         return _url;
@@ -205,6 +207,17 @@ class AsyncWebHandler {
 };
 
 class AsyncWebServerResponse {
+  protected:
+    int    _code;
+    String _contentType;
+    size_t _contentLength;
+    bool   _sendContentLength;
+    bool   _chunked;
+    size_t _headLength;
+    size_t _sentLength;
+    size_t _ackedLength;
+    size_t _writtenLength;
+
   public:
     AsyncWebServerResponse();
     virtual ~AsyncWebServerResponse();
@@ -213,7 +226,7 @@ class AsyncWebServerResponse {
 typedef std::function<void(AsyncWebServerRequest * request)> ArRequestHandlerFunction;
 typedef std::function<void(AsyncWebServerRequest * request, const String & filename, size_t index, uint8_t * data, size_t len, bool final)> ArUploadHandlerFunction;
 typedef std::function<void(AsyncWebServerRequest * request, uint8_t * data, size_t len, size_t index, size_t total)> ArBodyHandlerFunction;
-typedef std::function<void(AsyncWebServerRequest * request, JsonVariant json)> ArJsonRequestHandlerFunction; // added by proddy
+typedef std::function<void(AsyncWebServerRequest * request, JsonVariant json)> ArJsonRequestHandlerFunction; // added by proddy for EMS-ESP
 
 class AsyncWebServer {
   protected:
@@ -221,32 +234,32 @@ class AsyncWebServer {
 
   public:
     AsyncWebServer(uint16_t port)
-        : _server(port){};
+        : _server(port) {};
 
-    ~AsyncWebServer(){};
+    ~AsyncWebServer() {};
 
-    void begin(){};
+    void begin() {};
     void end();
 
     AsyncWebHandler & addHandler(AsyncWebHandler * handler) {
         return *handler;
     }
 
-    void on(const char * uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest){};
-    void on(const char * uri, ArJsonRequestHandlerFunction onRequest){}; // added by proddy
+    void on(const char * uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest) {};
+    void on(const char * uri, ArJsonRequestHandlerFunction onRequest) {}; // added by proddy for EMS-ESP
 };
 
 
 class AsyncEventSource : public AsyncWebHandler {
   public:
-    AsyncEventSource(const String & url){};
-    ~AsyncEventSource(){};
+    AsyncEventSource(const String & url) {};
+    ~AsyncEventSource() {};
 
     size_t count() const {
         return 1;
     }
 
-    void send(const char * message, const char * event = NULL, uint32_t id = 0, uint32_t reconnect = 0){};
+    void send(const char * message, const char * event = NULL, uint32_t id = 0, uint32_t reconnect = 0) {};
 };
 
 

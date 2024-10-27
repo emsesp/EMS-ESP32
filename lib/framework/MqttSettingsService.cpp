@@ -41,8 +41,12 @@ void MqttSettingsService::startClient() {
     }
 #ifndef TASMOTA_SDK
     if (_state.enableTLS) {
-        isSecure    = true;
-        _mqttClient = new espMqttClientSecure(espMqttClientTypes::UseInternalTask::NO);
+        isSecure = true;
+        if (emsesp::EMSESP::system_.PSram() > 0) {
+            _mqttClient = new espMqttClientSecure(espMqttClientTypes::UseInternalTask::YES);
+        } else {
+            _mqttClient = new espMqttClientSecure(espMqttClientTypes::UseInternalTask::NO);
+        }
         if (_state.rootCA == "insecure") {
             static_cast<espMqttClientSecure *>(_mqttClient)->setInsecure();
         } else {
@@ -59,8 +63,12 @@ void MqttSettingsService::startClient() {
         return;
     }
 #endif
-    isSecure    = false;
-    _mqttClient = new espMqttClient(espMqttClientTypes::UseInternalTask::NO);
+    isSecure = false;
+    if (emsesp::EMSESP::system_.PSram() > 0) {
+        _mqttClient = new espMqttClient(espMqttClientTypes::UseInternalTask::YES);
+    } else {
+        _mqttClient = new espMqttClient(espMqttClientTypes::UseInternalTask::NO);
+    }
     static_cast<espMqttClient *>(_mqttClient)->onConnect([this](bool sessionPresent) { onMqttConnect(sessionPresent); });
     static_cast<espMqttClient *>(_mqttClient)->onDisconnect([this](espMqttClientTypes::DisconnectReason reason) { onMqttDisconnect(reason); });
     static_cast<espMqttClient *>(_mqttClient)
@@ -76,7 +84,9 @@ void MqttSettingsService::loop() {
         _disconnectedAt  = configureMqtt() ? 0 : uuid::get_uptime();
         _reconfigureMqtt = false;
     }
-    _mqttClient->loop();
+    if (emsesp::EMSESP::system_.PSram() == 0) {
+        _mqttClient->loop();
+    }
 }
 
 bool MqttSettingsService::isEnabled() {
@@ -123,11 +133,7 @@ MqttClient * MqttSettingsService::getMqttClient() {
 
 void MqttSettingsService::onMqttConnect(bool sessionPresent) {
     (void)sessionPresent;
-    // _disconnectedAt = 0;
     emsesp::EMSESP::mqtt_.on_connect();
-#ifdef EMSESP_DEBUG
-    emsesp::EMSESP::logger().debug("Connected to MQTT, %s", (sessionPresent) ? ("with persistent session") : ("without persistent session"));
-#endif
 }
 
 void MqttSettingsService::onMqttDisconnect(espMqttClientTypes::DisconnectReason reason) {
@@ -180,7 +186,7 @@ bool MqttSettingsService::configureMqtt() {
         _reconfigureMqtt = false;
 #ifndef TASMOTA_SDK
         if (_state.enableTLS) {
-#if EMSESP_DEBUG
+#if defined(EMSESP_DEBUG)
             emsesp::EMSESP::logger().debug("Start secure MQTT with rootCA");
 #endif
             static_cast<espMqttClientSecure *>(_mqttClient)->setServer(_state.host.c_str(), _state.port);
@@ -227,6 +233,7 @@ void MqttSettings::read(MqttSettings & settings, JsonObject root) {
     root["publish_time_thermostat"] = settings.publish_time_thermostat;
     root["publish_time_solar"]      = settings.publish_time_solar;
     root["publish_time_mixer"]      = settings.publish_time_mixer;
+    root["publish_time_water"]      = settings.publish_time_water;
     root["publish_time_other"]      = settings.publish_time_other;
     root["publish_time_sensor"]     = settings.publish_time_sensor;
     root["publish_time_heartbeat"]  = settings.publish_time_heartbeat;
@@ -246,7 +253,7 @@ StateUpdateResult MqttSettings::update(JsonObject root, MqttSettings & settings)
     bool         changed     = false;
 
 #ifndef TASMOTA_SDK
-    newSettings.enableTLS = root["enableTLS"] | false;
+    newSettings.enableTLS = root["enableTLS"];
     newSettings.rootCA    = root["rootCA"] | "";
 #else
     newSettings.enableTLS = false;
@@ -267,7 +274,8 @@ StateUpdateResult MqttSettings::update(JsonObject root, MqttSettings & settings)
     newSettings.publish_time_thermostat = static_cast<uint16_t>(root["publish_time_thermostat"] | EMSESP_DEFAULT_PUBLISH_TIME);
     newSettings.publish_time_solar      = static_cast<uint16_t>(root["publish_time_solar"] | EMSESP_DEFAULT_PUBLISH_TIME);
     newSettings.publish_time_mixer      = static_cast<uint16_t>(root["publish_time_mixer"] | EMSESP_DEFAULT_PUBLISH_TIME);
-    newSettings.publish_time_other      = static_cast<uint16_t>(root["publish_time_other"] | EMSESP_DEFAULT_PUBLISH_TIME);
+    newSettings.publish_time_water      = static_cast<uint16_t>(root["publish_time_water"] | EMSESP_DEFAULT_PUBLISH_TIME);
+    newSettings.publish_time_other      = static_cast<uint16_t>(root["publish_time_other"] | EMSESP_DEFAULT_PUBLISH_TIME_OTHER);
     newSettings.publish_time_sensor     = static_cast<uint16_t>(root["publish_time_sensor"] | EMSESP_DEFAULT_PUBLISH_TIME);
     newSettings.publish_time_heartbeat  = static_cast<uint16_t>(root["publish_time_heartbeat"] | EMSESP_DEFAULT_PUBLISH_HEARTBEAT);
 
@@ -352,6 +360,10 @@ StateUpdateResult MqttSettings::update(JsonObject root, MqttSettings & settings)
 
     if (newSettings.publish_time_mixer != settings.publish_time_mixer) {
         emsesp::EMSESP::mqtt_.set_publish_time_mixer(newSettings.publish_time_mixer);
+    }
+
+    if (newSettings.publish_time_water != settings.publish_time_water) {
+        emsesp::EMSESP::mqtt_.set_publish_time_water(newSettings.publish_time_water);
     }
 
     if (newSettings.publish_time_other != settings.publish_time_other) {

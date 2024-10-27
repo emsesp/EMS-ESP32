@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,11 +34,11 @@ class EMSdevice {
     using process_function_p = std::function<void(std::shared_ptr<const Telegram>)>;
 
     // device_type defines which derived class to use, e.g. BOILER, THERMOSTAT etc..
-    EMSdevice(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
+    EMSdevice(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * default_name, uint8_t flags, uint8_t brand)
         : device_type_(device_type)
         , device_id_(device_id)
         , product_id_(product_id)
-        , name_(name)
+        , default_name_(default_name)
         , flags_(flags)
         , brand_(brand) {
         strlcpy(version_, version, sizeof(version_));
@@ -47,9 +47,9 @@ class EMSdevice {
     // static functions, used outside the class like in console.cpp, command.cpp, emsesp.cpp, mqtt.cpp
     static const char * device_type_2_device_name(const uint8_t device_type);
     static uint8_t      device_name_2_device_type(const char * topic);
-    static const char * tag_to_string(uint8_t tag, const bool translate = true);
+    static const char * tag_to_string(int8_t tag, const bool translate = true);
     static const char * uom_to_string(uint8_t uom);
-    static const char * tag_to_mqtt(uint8_t tag);
+    static const char * tag_to_mqtt(int8_t tag);
     static uint8_t      decode_brand(uint8_t value);
     static bool         export_values(uint8_t device_type, JsonObject output, const int8_t id, const uint8_t output_target);
 
@@ -58,7 +58,7 @@ class EMSdevice {
     const char * device_type_name();                     // returns short non-translated device type name
     const char * device_type_2_device_name_translated(); // returns translated device type name
 
-    bool has_tags(const uint8_t tag) const;
+    bool has_tags(const int8_t tag) const;
     bool has_cmd(const char * cmd, const int8_t id) const;
 
     inline uint8_t device_id() const {
@@ -111,12 +111,22 @@ class EMSdevice {
         return brand_;
     }
 
-    inline void name(const char * name) {
-        name_ = name;
+    inline void active(bool active) {
+        active_ = active;
     }
 
-    inline const char * name() const {
-        return name_;
+    // set custom device name
+    inline void custom_name(std::string const & custom_name) {
+        custom_name_ = custom_name;
+    }
+    std::string name(); // returns either default or custom name if defined
+
+    // default name
+    inline void default_name(const char * default_name) {
+        default_name_ = default_name;
+    }
+    inline const char * default_name() const {
+        return default_name_;
     }
 
     inline uint8_t unique_id() const {
@@ -195,19 +205,21 @@ class EMSdevice {
         }
     }
 
-    const char *      brand_to_char();
-    const std::string to_string();
-    const std::string to_string_short();
+    int get_modbus_value(uint8_t tag, const std::string & shortname, std::vector<uint16_t> & result);
+    int modbus_value_to_json(uint8_t tag, const std::string & shortname, const std::vector<uint8_t> & modbus_data, JsonObject jsonValue);
+
+    const char * brand_to_char();
+    std::string  to_string();
+    std::string  to_string_short();
 
     enum Handlers : uint8_t { ALL, RECEIVED, FETCHED, PENDING, IGNORED };
 
     void   show_telegram_handlers(uuid::console::Shell & shell) const;
     char * show_telegram_handlers(char * result, const size_t len, const uint8_t handlers);
     void   show_mqtt_handlers(uuid::console::Shell & shell) const;
-    void   list_device_entries(JsonObject output) const;
     void   add_handlers_ignored(const uint16_t handler);
 
-    void set_climate_minmax(uint8_t tag, int16_t min, uint32_t max);
+    void set_climate_minmax(int8_t tag, int16_t min, uint32_t max);
     void setCustomizationEntity(const std::string & entity_id);
     void getCustomizationEntities(std::vector<std::string> & entity_ids);
 
@@ -217,14 +229,15 @@ class EMSdevice {
     std::string get_value_uom(const std::string & shortname) const;
 
     bool get_value_info(JsonObject root, const char * cmd, const int8_t id);
+    void get_value_json(JsonObject output, DeviceValue & dv);
     void get_dv_info(JsonObject json);
 
     enum OUTPUT_TARGET : uint8_t { API_VERBOSE, API_SHORTNAMES, MQTT, CONSOLE };
-    bool generate_values(JsonObject output, const uint8_t tag_filter, const bool nested, const uint8_t output_target);
-    void generate_values_web(JsonObject output);
+    bool generate_values(JsonObject output, const int8_t tag_filter, const bool nested, const uint8_t output_target);
+    void generate_values_web(JsonObject output, const bool is_dashboard = false);
     void generate_values_web_customization(JsonArray output);
 
-    void add_device_value(uint8_t               tag,
+    void add_device_value(int8_t                tag,
                           void *                value_p,
                           uint8_t               type,
                           const char * const ** options,
@@ -236,7 +249,7 @@ class EMSdevice {
                           int16_t               min,
                           uint32_t              max);
 
-    void register_device_value(uint8_t               tag,
+    void register_device_value(int8_t                tag,
                                void *                value_p,
                                uint8_t               type,
                                const char * const ** options,
@@ -247,11 +260,11 @@ class EMSdevice {
                                uint32_t              max);
 
     void
-    register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const ** options, const char * const * name, uint8_t uom, const cmd_function_p f);
+    register_device_value(int8_t tag, void * value_p, uint8_t type, const char * const ** options, const char * const * name, uint8_t uom, const cmd_function_p f);
 
-    void register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const ** options, const char * const * name, uint8_t uom);
+    void register_device_value(int8_t tag, void * value_p, uint8_t type, const char * const ** options, const char * const * name, uint8_t uom);
 
-    void register_device_value(uint8_t              tag,
+    void register_device_value(int8_t               tag,
                                void *               value_p,
                                uint8_t              type,
                                int8_t               numeric_operator,
@@ -259,7 +272,7 @@ class EMSdevice {
                                uint8_t              uom,
                                const cmd_function_p f = nullptr);
 
-    void register_device_value(uint8_t              tag,
+    void register_device_value(int8_t               tag,
                                void *               value_p,
                                uint8_t              type,
                                int8_t               numeric_operator,
@@ -270,7 +283,7 @@ class EMSdevice {
                                uint32_t             max);
 
     // single list of options
-    void register_device_value(uint8_t              tag,
+    void register_device_value(int8_t               tag,
                                void *               value_p,
                                uint8_t              type,
                                const char * const * options_single,
@@ -279,7 +292,7 @@ class EMSdevice {
                                const cmd_function_p f = nullptr);
 
     // single list of options, with no translations, with min and max
-    void register_device_value(uint8_t              tag,
+    void register_device_value(int8_t               tag,
                                void *               value_p,
                                uint8_t              type,
                                const char * const * options_single,
@@ -290,11 +303,10 @@ class EMSdevice {
                                uint32_t             max);
 
     // no options, optional function f
-    void register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const * name, uint8_t uom, const cmd_function_p f = nullptr);
+    void register_device_value(int8_t tag, void * value_p, uint8_t type, const char * const * name, uint8_t uom, const cmd_function_p f = nullptr);
 
     // no options, with min/max
-    void
-    register_device_value(uint8_t tag, void * value_p, uint8_t type, const char * const * name, uint8_t uom, const cmd_function_p f, int16_t min, uint32_t max);
+    void register_device_value(int8_t tag, void * value_p, uint8_t type, const char * const * name, uint8_t uom, const cmd_function_p f, int16_t min, uint32_t max);
 
     void write_command(const uint16_t type_id, const uint8_t offset, uint8_t * message_data, const uint8_t message_length, const uint16_t validate_typeid) const;
     void write_command(const uint16_t type_id, const uint8_t offset, const uint8_t value, const uint16_t validate_typeid) const;
@@ -338,12 +350,22 @@ class EMSdevice {
         IVT           // 13
     };
 
+    // Unique Identifiers for each Device type, used in Dashboard table
+    // 100 and above is reserved for DeviceType
+    enum DeviceTypeUniqueID : uint8_t {
+        SCHEDULER_UID         = 96,
+        ANALOGSENSOR_UID      = 97,
+        TEMPERATURESENSOR_UID = 98,
+        CUSTOM_UID            = 99 // always 99
+    };
+
     enum DeviceType : uint8_t {
         SYSTEM = 0,        // this is us (EMS-ESP)
         TEMPERATURESENSOR, // for internal temperature sensors
         ANALOGSENSOR,      // for internal analog sensors
-        SCHEDULER,
-        BOILER,
+        SCHEDULER,         // for internal schedule
+        CUSTOM,            // for user defined entities
+        BOILER,            // from here on enum the ems-devices
         THERMOSTAT,
         MIXER,
         SOLAR,
@@ -356,8 +378,9 @@ class EMSdevice {
         EXTENSION,
         GENERIC,
         HEATSOURCE,
-        CUSTOM,
         VENTILATION,
+        WATER,
+        POOL,
         UNKNOWN
     };
 
@@ -382,12 +405,22 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_ID_MODEM          = 0x48;
     static constexpr uint8_t EMS_DEVICE_ID_RFSENSOR       = 0x40; // RF sensor only sending, no reply
     static constexpr uint8_t EMS_DEVICE_ID_RFBASE         = 0x50;
-    static constexpr uint8_t EMS_DEVICE_ID_ROOMTHERMOSTAT = 0x17; // TADO using this with no version reply
-    static constexpr uint8_t EMS_DEVICE_ID_TADO_OLD       = 0x19; // TADO using this with no broadcast and version
+    static constexpr uint8_t EMS_DEVICE_ID_ROOMTHERMOSTAT = 0x17; // TADO using this with no version reply #174
+    static constexpr uint8_t EMS_DEVICE_ID_TADO_OLD       = 0x19; // older TADO using this with no version reply, #1031
+    static constexpr uint8_t EMS_DEVICE_ID_MIXER1         = 0x20; // e.g MH210 module as mixer
+    static constexpr uint8_t EMS_DEVICE_ID_MIXER8         = 0x27;
+    static constexpr uint8_t EMS_DEVICE_ID_DHW1           = 0x28; // MM100 module as water station
+    static constexpr uint8_t EMS_DEVICE_ID_DHW2           = 0x29; // MM100 module as water station
+    static constexpr uint8_t EMS_DEVICE_ID_DHW8           = 0x2F; // last DHW module id?
 
     // generic type IDs
-    static constexpr uint16_t EMS_TYPE_VERSION    = 0x02; // type ID for Version information. Generic across all EMS devices.
-    static constexpr uint16_t EMS_TYPE_UBADevices = 0x07; // EMS connected devices
+    static constexpr uint16_t EMS_TYPE_NAME        = 0x01; // device config for ems devices, name ascii on offset 27ff  for ems+
+    static constexpr uint16_t EMS_TYPE_VERSION     = 0x02; // type ID for Version information. Generic across all EMS devices.
+    static constexpr uint16_t EMS_TYPE_UBADevices  = 0x07; // EMS connected devices
+    static constexpr uint16_t EMS_TYPE_DEVICEERROR = 0xBE;
+    static constexpr uint16_t EMS_TYPE_SYSTEMERROR = 0xBF;
+    static constexpr uint16_t EMS_TYPE_MENUCONFIG  = 0xF7;
+    static constexpr uint16_t EMS_TYPE_VALUECONFIG = 0xF9;
 
     // device flags: The lower 4 bits hold the unique identifier, the upper 4 bits are used for specific flags
     static constexpr uint8_t EMS_DEVICE_FLAG_NONE = 0;
@@ -430,21 +463,34 @@ class EMSdevice {
     static constexpr uint8_t EMS_DEVICE_FLAG_JUNKERS     = 11;
     static constexpr uint8_t EMS_DEVICE_FLAG_CRF         = 12; // CRF200 only monitor
     static constexpr uint8_t EMS_DEVICE_FLAG_RC100H      = 13; // with humidity
+    static constexpr uint8_t EMS_DEVICE_FLAG_BC400       = 14; // mostly like RC300, but some changes
+    static constexpr uint8_t EMS_DEVICE_FLAG_R3000       = 15; // Rego3000, same as RC300 with different wwmodes
+    static constexpr uint8_t EMS_DEVICE_FLAG_CR120       = 16; // mostly like RC300, but some changes
 
     uint8_t count_entities();
+    uint8_t count_entities_fav();
     bool    has_entities() const;
 
-    /*
-    void reserve_device_values(uint8_t elements) {
-        devicevalues_.reserve(elements);
-    }
+    // void reserve_device_values(uint8_t elements) {
+    //     devicevalues_.reserve(elements);
+    // }
 
-    void reserve_telegram_functions(uint8_t elements) {
-        telegram_functions_.reserve(elements);
-    }
-    */
+    // void reserve_telegram_functions(uint8_t elements) {
+    //     telegram_functions_.reserve(elements);
+    // }
 
 #if defined(EMSESP_STANDALONE)
+    struct TelegramFunctionDump {
+        uint16_t     type_id_;
+        const char * name_;
+        bool         fetch_;
+        TelegramFunctionDump(uint16_t type_id, const char * name, bool fetch)
+            : type_id_(type_id)
+            , name_(name)
+            , fetch_(fetch) {
+        }
+    };
+    void dump_telegram_info(std::vector<TelegramFunctionDump> & telegram_functions_dump);
     void dump_value_info();
 #endif
 
@@ -454,9 +500,11 @@ class EMSdevice {
     uint8_t      device_id_   = 0;
     uint8_t      product_id_  = 0;
     char         version_[6];
-    const char * name_; // the long name for the EMS model
-    uint8_t      flags_ = 0;
-    uint8_t      brand_ = Brand::NO_BRAND;
+    const char * default_name_;     // the fixed name the EMS model taken from the device library
+    std::string  custom_name_ = ""; // custom name
+    uint8_t      flags_       = 0;
+    uint8_t      brand_       = Brand::NO_BRAND;
+    bool         active_      = true;
 
     bool ha_config_done_ = false;
     bool has_update_     = false;
@@ -479,9 +527,12 @@ class EMSdevice {
 
     std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
 
-    std::vector<DeviceValue> devicevalues_; // all the device values
-
     std::vector<uint16_t> handlers_ignored_;
+
+#if defined(EMSESP_STANDALONE) || defined(EMSESP_TEST)
+  public: // so we can call it from WebCustomizationService::test()
+#endif
+    std::vector<DeviceValue> devicevalues_; // all the device values
 };
 
 } // namespace emsesp

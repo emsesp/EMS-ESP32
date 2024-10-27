@@ -1,10 +1,11 @@
+import type { SecuritySettingsType, Token } from 'types';
+
 import { alovaInstance } from './endpoints';
 
-import type { SecuritySettings, Token } from 'types';
+export const readSecuritySettings = () =>
+  alovaInstance.Get<SecuritySettingsType>('/rest/securitySettings');
 
-export const readSecuritySettings = () => alovaInstance.Get<SecuritySettings>('/rest/securitySettings');
-
-export const updateSecuritySettings = (securitySettings: SecuritySettings) =>
+export const updateSecuritySettings = (securitySettings: SecuritySettingsType) =>
   alovaInstance.Post('/rest/securitySettings', securitySettings);
 
 export const generateToken = (username?: string) =>

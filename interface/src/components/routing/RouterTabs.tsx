@@ -1,6 +1,7 @@
-import { Tabs, useMediaQuery, useTheme } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
 import type { FC } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import { Tabs, useMediaQuery, useTheme } from '@mui/material';
 
 import type { RequiredChildrenProps } from 'utils';
 
@@ -14,12 +15,16 @@ const RouterTabs: FC<RouterTabsProps> = ({ value, children }) => {
   const theme = useTheme();
   const smallDown = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const handleTabChange = (_event: any, path: string) => {
+  const handleTabChange = (_event: unknown, path: string) => {
     navigate(path);
   };
 
   return (
-    <Tabs value={value} onChange={handleTabChange} variant={smallDown ? 'scrollable' : 'fullWidth'}>
+    <Tabs
+      value={value}
+      onChange={handleTabChange}
+      variant={smallDown ? 'scrollable' : 'fullWidth'}
+    >
       {children}
     </Tabs>
   );

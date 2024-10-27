@@ -1,0 +1,180 @@
+# testing EMS-ESP API
+# to be used with "REST Client" extension in Visual Studio Code (https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
+# Open this file in VSC, modify the token, go to the API call and click on 'Send Request' (or Ctrl+Alt+R)
+# The response will be shown in the right panel
+
+# @host = http://ems-esp.local
+@host = http://192.168.1.206
+@host_dev = http://10.10.10.175
+@host_standalone = http://localhost:3080
+@host_standalone2 = http://localhost:3082
+
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiYWRtaW4iOnRydWV9.2bHpWya2C7Q12WjNUBD6_7N3RCD7CMl-EGhyQVzFdDg
+
+GET {{host}}/api/system/info
+
+###
+
+GET {{host}}/api/thermostat/seltemp
+
+###
+
+POST {{host}}/api/thermostat/seltemp
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "value" : 21.0
+}
+
+###
+
+POST {{host}}/api/thermostat
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "entity" : "seltemp",
+    "value" : 21.0
+}
+
+###
+
+POST {{host}}/api
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "device" : "boiler",
+    "entity" : "dhw/tapactivated",
+    "value" : "on"
+}
+
+###
+
+GET {{host}}/api/system/restart
+Authorization: Bearer {{token}}
+
+###
+
+GET {{host}}/api/boiler/coldshot
+Authorization: Bearer {{token}}
+
+###
+
+GET {{host}}/api/temperaturesensor/info
+
+###
+
+GET {{host}}/rest/deviceData?id=3
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+
+GET {{host}}/api/boiler/commands
+
+#
+# Test on dev
+#
+
+###
+
+GET {{host_dev}}/api/system/info
+
+# Run a test. EMS-ESP must be compiled with -DEMSESP_TEST
+# Use this to load up a dummy thermostat and boiler with data
+
+###
+
+GET {{host_dev}}/api/system/restart
+Authorization: Bearer {{token}}
+
+###
+
+GET {{host_dev}}/api?device=system&cmd=test&data=general
+
+###
+
+GET {{host_dev}}/api/boiler/info
+
+###
+GET {{host_dev}}/api/boiler/values
+
+###
+
+GET {{host_dev}}/api/analogsensor/info
+
+###
+
+GET {{host_dev}}/api/boiler/coldshot
+Authorization: Bearer {{token}}
+
+###
+GET {{host_dev}}/api/system/commands
+
+###
+POST {{host_dev}}/api/thermostat/seltemp
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "value" : 21.0
+}
+
+###
+GET {{host_dev}}/api/thermostat/seltemp
+
+###
+POST {{host_dev}}/rest/signIn
+Content-Type: application/json
+
+{
+    "username" : "admin",
+    "password" : "admin"
+}
+
+#### STANDALONE ####
+
+GET {{host_standalone}}/api/system/info
+
+###
+
+GET {{host_standalone}}/rest/dashboardData
+
+###
+
+POST {{host_standalone2}}/rest/uploadFile
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="text"
+
+title
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="emsesp_settings.json"
+Content-Type: application/json
+
+< ./standalone_file_export/emsesp_settings.json
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+# test calling Home Assistant script
+# https://developers.home-assistant.io/docs/api/rest/#post-apiservicesdomainservice
+POST {{host_standalone}}/api
+
+# HA tests
+
+@ha = http://192.168.1.42:8123
+@ha_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIwMzMyZjU1MjhlZmM0NGIyOTgyMjIxNThiODU1NDkyNSIsImlhdCI6MTcyMTMwNDg2NSwiZXhwIjoyMDM2NjY0ODY1fQ.Q-Y7E_i7clH3ff4Ma-OMmhZfbN7aMi_CahKwmoar
+
+###
+
+GET {{ha}}/api/services
+Content-Type: application/json
+Authorization: Bearer {{ha_token}}
+
+###
+
+POST {{ha}}/api/services/script/test_notify 
+Content-Type: application/json
+Authorization: Bearer {{ha_token}}

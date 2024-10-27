@@ -1,33 +1,36 @@
-import { xhrRequestAdapter } from '@alova/adapter-xhr';
+import { type AlovaXHRResponse, xhrRequestAdapter } from '@alova/adapter-xhr';
 import { createAlova } from 'alova';
 import ReactHook from 'alova/react';
-import { unpack } from '../api/unpack';
+
+import { unpack } from './unpack';
 
 export const ACCESS_TOKEN = 'access_token';
 
-const host = window.location.host;
-export const WEB_SOCKET_ROOT = 'ws://' + host + '/ws/';
-export const EVENT_SOURCE_ROOT = 'http://' + host + '/es/';
-
 export const alovaInstance = createAlova({
   statesHook: ReactHook,
-  timeout: 3000, // 3 seconds but throwing a timeout error
-  localCache: null,
-  // localCache: {
+  // timeout: 3000, // 3 seconds before throwing a timeout error, default is 0 = none
+  cacheFor: null, // disable cache
+  // cacheFor: {
   //   GET: {
-  //     mode: 'placeholder', // see https://alova.js.org/learning/response-cache/#cache-replaceholder-mode
-  //     expire: 2000
+  //     mode: 'memory',
+  //     expire: 60 * 10 * 1000 // 60 seconds in cache
   //   }
   // },
   requestAdapter: xhrRequestAdapter(),
   beforeRequest(method) {
     if (localStorage.getItem(ACCESS_TOKEN)) {
-      method.config.headers.Authorization = 'Bearer ' + localStorage.getItem(ACCESS_TOKEN);
+      method.config.headers.Authorization =
+        'Bearer ' + localStorage.getItem(ACCESS_TOKEN);
     }
+    // for simulating vrey slow networks
+    // return new Promise((resolve) => {
+    //   const random = 3000 + Math.random() * 2000;
+    //   setTimeout(resolve, Math.floor(random));
+    // });
   },
 
   responded: {
-    onSuccess: async (response) => {
+    onSuccess: async (response: AlovaXHRResponse) => {
       // if (response.status === 202) {
       //   throw new Error('Wait'); // wifi scan in progress
       // } else
@@ -38,9 +41,9 @@ export const alovaInstance = createAlova({
       } else if (response.status >= 400) {
         throw new Error(response.statusText);
       }
-      const data = await response.data;
+      const data: ArrayBuffer = (await response.data) as ArrayBuffer;
       if (response.data instanceof ArrayBuffer) {
-        return unpack(data);
+        return unpack(data) as ArrayBuffer;
       }
       return data;
     }

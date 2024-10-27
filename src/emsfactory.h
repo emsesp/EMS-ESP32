@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,9 +55,9 @@ class EMSFactory {
     }
 
     // Construct derived class returning an unique ptr
-    static auto add(const uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand)
+    static auto add(const uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * default_name, uint8_t flags, uint8_t brand)
         -> std::unique_ptr<EMSdevice> {
-        return std::unique_ptr<EMSdevice>(EMSFactory::makeRaw(device_type, device_id, product_id, version, name, flags, brand));
+        return std::unique_ptr<EMSdevice>(EMSFactory::makeRaw(device_type, device_id, product_id, version, default_name, flags, brand));
     }
 
     virtual auto construct(uint8_t device_type, uint8_t device_id, uint8_t product_id, const char * version, const char * name, uint8_t flags, uint8_t brand) const

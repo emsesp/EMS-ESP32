@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,35 +37,35 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
     register_telegram_type(0x4AF, "HPMeters", true, MAKE_PF_CB(process_HpMeters));
 
     // device values
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &airHumidity_, DeviceValueType::UINT, FL_(airHumidity), DeviceValueUOM::PERCENT);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &dewTemperature_, DeviceValueType::UINT, FL_(dewTemperature), DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &airHumidity_, DeviceValueType::UINT8, FL_(airHumidity), DeviceValueUOM::PERCENT);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &dewTemperature_, DeviceValueType::UINT8, FL_(dewTemperature), DeviceValueUOM::DEGREES);
 
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &flowTemp_,
-                          DeviceValueType::SHORT,
+                          DeviceValueType::INT16,
                           DeviceValueNumOp::DV_NUMOP_DIV10,
                           FL_(curFlowTemp),
                           DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &retTemp_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(retTemp), DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &retTemp_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(retTemp), DeviceValueUOM::DEGREES);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &sysRetTemp_,
-                          DeviceValueType::SHORT,
+                          DeviceValueType::INT16,
                           DeviceValueNumOp::DV_NUMOP_DIV10,
                           FL_(sysRetTemp),
                           DeviceValueUOM::DEGREES);
 
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTa4_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTa4), DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTr1_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTr1), DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTr3_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTr3), DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTr4_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTr4), DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTr5_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTr5), DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTr6_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTr6), DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTl2_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTl2), DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpJr0_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpPl1), DeviceValueUOM::DEGREES);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpJr1_, DeviceValueType::SHORT, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpPh1), DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTa4_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTa4), DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTr1_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTr1), DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTr3_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTr3), DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTr4_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTr4), DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTr5_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTr5), DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTr6_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTr6), DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpTl2_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpTl2), DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpJr0_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpPl1), DeviceValueUOM::DEGREES);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpJr1_, DeviceValueType::INT16, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(hpPh1), DeviceValueUOM::DEGREES);
 
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatingPumpMod_, DeviceValueType::UINT, FL_(heatingPumpMod), DeviceValueUOM::PERCENT);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpCompSpd_, DeviceValueType::UINT, FL_(hpCompSpd), DeviceValueUOM::PERCENT);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatingPumpMod_, DeviceValueType::UINT8, FL_(heatingPumpMod), DeviceValueUOM::PERCENT);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hpCompSpd_, DeviceValueType::UINT8, FL_(hpCompSpd), DeviceValueUOM::PERCENT);
 
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &controlStrategy_,
@@ -82,9 +82,9 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
                           DeviceValueUOM::NONE,
                           MAKE_CF_CB(set_lowNoiseMode));
     register_device_value(
-        DeviceValueTAG::TAG_DEVICE_DATA, &lowNoiseStart_, DeviceValueType::UINT, FL_(lowNoiseStart), DeviceValueUOM::NONE, MAKE_CF_CB(set_lowNoiseStart), 0, 23);
+        DeviceValueTAG::TAG_DEVICE_DATA, &lowNoiseStart_, DeviceValueType::UINT8, FL_(lowNoiseStart), DeviceValueUOM::NONE, MAKE_CF_CB(set_lowNoiseStart), 0, 23);
     register_device_value(
-        DeviceValueTAG::TAG_DEVICE_DATA, &lowNoiseStop_, DeviceValueType::UINT, FL_(lowNoiseStop), DeviceValueUOM::NONE, MAKE_CF_CB(set_lowNoiseStop), 0, 23);
+        DeviceValueTAG::TAG_DEVICE_DATA, &lowNoiseStop_, DeviceValueType::UINT8, FL_(lowNoiseStop), DeviceValueUOM::NONE, MAKE_CF_CB(set_lowNoiseStop), 0, 23);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &hybridDHW_,
                           DeviceValueType::ENUM,
@@ -94,25 +94,25 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
                           MAKE_CF_CB(set_hybridDHW));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &energyPriceGas_,
-                          DeviceValueType::UINT,
+                          DeviceValueType::UINT8,
                           FL_(energyPriceGas),
                           DeviceValueUOM::NONE,
                           MAKE_CF_CB(set_energyPriceGas));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &energyPriceEl_,
-                          DeviceValueType::UINT,
+                          DeviceValueType::UINT8,
                           FL_(energyPriceEl),
                           DeviceValueUOM::NONE,
                           MAKE_CF_CB(set_energyPriceEl));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &energyPricePV_,
-                          DeviceValueType::UINT,
+                          DeviceValueType::UINT8,
                           FL_(energyPricePV),
                           DeviceValueUOM::NONE,
                           MAKE_CF_CB(set_energyPricePV));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &switchOverTemp_,
-                          DeviceValueType::INT,
+                          DeviceValueType::INT8,
                           FL_(switchOverTemp),
                           DeviceValueUOM::NONE,
                           MAKE_CF_CB(set_switchOverTemp));
@@ -125,7 +125,7 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
                           MAKE_CF_CB(set_airPurgeMode));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &heatPumpOutput_,
-                          DeviceValueType::UINT,
+                          DeviceValueType::UINT8,
                           FL_(heatPumpOutput),
                           DeviceValueUOM::PERCENT,
                           MAKE_CF_CB(set_heatPumpOutput));
@@ -137,7 +137,7 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
                           MAKE_CF_CB(set_coolingCircuit));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &compStartMod_,
-                          DeviceValueType::UINT,
+                          DeviceValueType::UINT8,
                           FL_(compStartMod),
                           DeviceValueUOM::PERCENT,
                           MAKE_CF_CB(set_compStartMod));
@@ -148,33 +148,34 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
                           DeviceValueUOM::NONE,
                           MAKE_CF_CB(set_heatDrainPan));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatCable_, DeviceValueType::BOOL, FL_(heatCable), DeviceValueUOM::NONE, MAKE_CF_CB(set_heatCable));
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgTotal_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgTotal), DeviceValueUOM::KWH);
-    register_device_value(DeviceValueTAG::TAG_BOILER_DATA_WW, &nrgWw_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgWw), DeviceValueUOM::KWH);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgHeat_, DeviceValueType::ULONG, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgHeat), DeviceValueUOM::KWH);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgTotal_, DeviceValueType::UINT24, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgTotal), DeviceValueUOM::KWH);
+    register_device_value(DeviceValueTAG::TAG_DHW1, &nrgWw_, DeviceValueType::UINT24, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgWw), DeviceValueUOM::KWH);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgHeat_, DeviceValueType::UINT24, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(nrgHeat), DeviceValueUOM::KWH);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &meterTotal_,
-                          DeviceValueType::ULONG,
+                          DeviceValueType::UINT24,
                           DeviceValueNumOp::DV_NUMOP_DIV100,
                           FL_(meterTotal),
                           DeviceValueUOM::KWH);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &meterComp_,
-                          DeviceValueType::ULONG,
+                          DeviceValueType::UINT24,
                           DeviceValueNumOp::DV_NUMOP_DIV100,
                           FL_(meterComp),
                           DeviceValueUOM::KWH);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &meterEHeat_,
-                          DeviceValueType::ULONG,
+                          DeviceValueType::UINT24,
                           DeviceValueNumOp::DV_NUMOP_DIV100,
                           FL_(meterEHeat),
                           DeviceValueUOM::KWH);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &meterHeat_,
-                          DeviceValueType::ULONG,
+                          DeviceValueType::UINT24,
                           DeviceValueNumOp::DV_NUMOP_DIV100,
                           FL_(meterHeat),
                           DeviceValueUOM::KWH);
+    register_device_value(DeviceValueTAG::TAG_DHW1, &meterWw_, DeviceValueType::UINT24, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(meterWw), DeviceValueUOM::KWH);
 }
 
 /*
@@ -186,9 +187,6 @@ void Heatpump::process_HPMonitor2(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, airHumidity_, 1);
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 /*
  * Type 0x42B- HeatPump Monitor 1
  * e.g. "38 10 FF 00 03 2B 00 D1 08 2A 01"
@@ -196,8 +194,6 @@ void Heatpump::process_HPMonitor2(std::shared_ptr<const Telegram> telegram) {
 void Heatpump::process_HPMonitor1(std::shared_ptr<const Telegram> telegram) {
     // still to implement
 }
-
-#pragma GCC diagnostic pop
 
 // 0x09A0
 // Heatpump(0x53) -> All(0x00), ?(0x09A0), data: 02 23 01 3E 01 39 00 5D 01 DE 01 38 00 40 00 5E 00 58 00 3F 01 34 00 02
@@ -271,6 +267,7 @@ void Heatpump::process_HpMeters(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, meterComp_, 4);
     has_update(telegram, meterEHeat_, 8);
     has_update(telegram, meterHeat_, 24);
+    has_update(telegram, meterWw_, 32);
 }
 
 /*

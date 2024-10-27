@@ -1,6 +1,6 @@
 /*
  * EMS-ESP - https://github.com/emsesp/EMS-ESP
- * Copyright 2020-2024  Paul Derbyshire
+ * Copyright 2020-2024  emsesp.org - proddy, MichaelDvP
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,9 @@
 
 namespace emsesp {
 
+// names, same order as AnalogType
+MAKE_ENUM_FIXED(AnalogTypeName, "disabled", "dig_in", "counter", "adc", "timer", "rate", "dig_out", "pwm0", "pwm1", "pwm2")
+
 class AnalogSensor {
   public:
     class Sensor {
@@ -38,7 +41,9 @@ class AnalogSensor {
             offset_ = offset;
         }
 
-        std::string name() const;
+        std::string name() const {
+            return name_;
+        }
 
         void set_name(const std::string & name) {
             name_ = name;
@@ -101,7 +106,7 @@ class AnalogSensor {
         double      factor_;
         uint8_t     uom_;
         double      value_; // double because of the factor is a double
-        int8_t      type_;
+        int8_t      type_;  // one of the AnalogType enum
     };
 
     AnalogSensor()  = default;
@@ -124,7 +129,7 @@ class AnalogSensor {
     void loop();
     void publish_sensor(const Sensor & sensor) const;
     void publish_values(const bool force);
-    void reload();
+    void reload(bool get_nvs = false);
     bool updated_values();
 
     // return back reference to the sensor list, used by other classes
@@ -148,11 +153,15 @@ class AnalogSensor {
         return (!sensors_.empty());
     }
 
-    size_t no_sensors() const {
+    size_t count_entities(bool include_disabled = true) const {
+        if (!include_disabled) {
+            // count number of items in sensors_ where type is not set to disabled
+            return std::count_if(sensors_.begin(), sensors_.end(), [](const Sensor & sensor) { return sensor.type() != AnalogSensor::AnalogType::NOTUSED; });
+        }
         return sensors_.size();
     }
 
-    bool update(uint8_t gpio, const std::string & name, double offset, double factor, uint8_t uom, int8_t type, bool deleted = false);
+    bool update(uint8_t gpio, std::string & name, double offset, double factor, uint8_t uom, int8_t type, bool deleted = false);
     bool get_value_info(JsonObject output, const char * cmd, const int8_t id = -1);
     void store_counters();
 
@@ -166,6 +175,7 @@ class AnalogSensor {
     bool command_setvalue(const char * value, const int8_t gpio);
     void measure();
     void addSensorJson(JsonObject output, const Sensor & sensor);
+    void get_value_json(JsonObject output, const Sensor & sensor);
 
     std::vector<Sensor> sensors_; // our list of sensors
 

@@ -4,16 +4,12 @@
 #include "APSettingsService.h"
 #include "APStatus.h"
 #include "AuthenticationService.h"
-#include "FactoryResetService.h"
 #include "MqttSettingsService.h"
 #include "MqttStatus.h"
 #include "NTPSettingsService.h"
 #include "NTPStatus.h"
-#include "OTASettingsService.h"
 #include "UploadFileService.h"
-#include "RestartService.h"
 #include "SecuritySettingsService.h"
-#include "SystemStatus.h"
 #include "WiFiScanner.h"
 #include "NetworkSettingsService.h"
 #include "NetworkStatus.h"
@@ -49,10 +45,6 @@ class ESP8266React {
         return &_ntpSettingsService;
     }
 
-    StatefulService<OTASettings> * getOTASettingsService() {
-        return &_otaSettingsService;
-    }
-
     StatefulService<MqttSettings> * getMqttSettingsService() {
         return &_mqttSettingsService;
     }
@@ -61,15 +53,18 @@ class ESP8266React {
         return _mqttSettingsService.getMqttClient();
     }
 
+    //
+    // special functions needed outside scope
+    //
+
     void setWill(const char * will_topic) {
         _mqttSettingsService.setWill(will_topic);
     }
 
-#ifndef EMSESP_STANDALONE
-    void factoryReset() {
-        _factoryResetService.factoryReset();
+    // true if AP is active
+    bool apStatus() {
+        return _apSettingsService.getAPNetworkStatus() == APNetworkStatus::ACTIVE;
     }
-#endif
 
   private:
     SecuritySettingsService _securitySettingsService;
@@ -80,14 +75,10 @@ class ESP8266React {
     APStatus                _apStatus;
     NTPSettingsService      _ntpSettingsService;
     NTPStatus               _ntpStatus;
-    OTASettingsService      _otaSettingsService;
     UploadFileService       _uploadFileService;
     MqttSettingsService     _mqttSettingsService;
     MqttStatus              _mqttStatus;
     AuthenticationService   _authenticationService;
-    RestartService          _restartService;
-    FactoryResetService     _factoryResetService;
-    SystemStatus            _systemStatus;
 };
 
 #endif

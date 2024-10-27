@@ -1,5 +1,21 @@
+import type { busConnectionStatus } from 'app/main/types';
+
+import type { NetworkConnectionStatus } from './network';
+
 export interface SystemStatus {
   emsesp_version: string;
+  bus_status: busConnectionStatus;
+  uptime: number;
+  bus_uptime: number;
+  num_devices: number;
+  num_sensors: number;
+  num_analogs: number;
+  ntp_status: number;
+  mqtt_status: boolean;
+  ap_status: boolean;
+  network_status: NetworkConnectionStatus;
+  wifi_rssi: number;
+  build_flags: string;
   esp_platform: string;
   max_alloc_heap: number;
   cpu_type: string;
@@ -16,17 +32,16 @@ export interface SystemStatus {
   app_free: number;
   fs_used: number;
   fs_free: number;
-  uptime: string;
   free_mem: number;
+  psram: boolean;
   psram_size?: number;
   free_psram?: number;
+  free_caps: number;
+  model: string;
   has_loader: boolean;
-}
-
-export interface OTASettings {
-  enabled: boolean;
-  port: number;
-  password: string;
+  has_partition: boolean;
+  status: string;
+  temperature?: number;
 }
 
 export enum LogLevel {
@@ -50,5 +65,7 @@ export interface LogEntry {
 export interface LogSettings {
   level: number;
   max_messages: number;
-  compact: false;
+  compact: boolean;
+  psram: boolean;
+  developer_mode: boolean;
 }
