@@ -166,9 +166,9 @@ void Roomctrl::check(uint8_t addr, const uint8_t * data, const uint8_t length) {
     // empty message back if temperature not set or unknown message type
     if (data[2] == EMSdevice::EMS_TYPE_VERSION) {
         version(addr, data[0], hc);
-    } else if (length == 6 && remotetemp_[hc] == EMS_VALUE_INT16_NOTSET) {
+    } else if (length == 6) {
         unknown(addr, data[0], data[2], data[3]);
-    } else if (length == 8 && remotetemp_[hc] == EMS_VALUE_INT16_NOTSET) {
+    } else if (length == 8) {
         unknown(addr, data[0], data[3], data[5], data[6]);
     } else if (data[2] == 0xAF && data[3] == 0) {
         temperature(addr, data[0], hc);
