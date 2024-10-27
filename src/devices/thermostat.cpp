@@ -1561,8 +1561,12 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
         return; // not supported
     }
 
+    static uint8_t setTimeRetry = 0;
     if ((telegram->message_data[7] & 0x0C) && has_command(&dateTime_)) { // date and time not valid
-        set_datetime("ntp", -1);                                         // set from NTP
+        if (setTimeRetry < 3) {
+            set_datetime("ntp", -1); // set from NTP
+            setTimeRetry++;
+        }
         return;
     }
 
@@ -1590,8 +1594,13 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
     if (!ivtclock && !junkersclock && tset_ && EMSESP::system_.ntp_connected() && !EMSESP::system_.readonly_mode() && has_command(&dateTime_)) {
         double difference = difftime(now, ttime);
         if (difference > 15 || difference < -15) {
-            set_datetime("ntp", -1); // set from NTP
-            LOG_INFO("thermostat time correction from ntp");
+            if (setTimeRetry < 3) {
+                set_datetime("ntp", -1); // set from NTP
+                LOG_INFO("thermostat time correction from ntp");
+                setTimeRetry++;
+            }
+        } else {
+            setTimeRetry = 0;
         }
     }
 #ifndef EMSESP_STANDALONE
