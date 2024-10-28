@@ -37,20 +37,24 @@ EOL
 make clean
 make ARGS=-DEMSESP_STANDALONE
 
-# dump_entities.csv
-rm -f dump_entities.csv
-echo "test entity_dump" | ./emsesp | python3 ./scripts/strip_csv.py >dump_entities.csv
-ls -al dump_entities.csv
-
-# dump_telegrams.csv
-rm -f dump_telegrams.csv
-echo "test telegram_dump" | ./emsesp | python3 ./scripts/strip_csv.py >dump_telegrams.csv
-ls -al dump_telegrams.csv
-
-# generate ./src/modbus_entity_parameters.hpp
+# Generate Modbus entity parameters
+# One to build the modbus_entity_parameters.hpp header file
+# And then run entity_dump test again to create the dump_entities.csv file with the correct modbus counts
 rm -f ./src/modbus_entity_parameters.hpp
-cat dump_entities.csv | python3 ./scripts/update_modbus_registers.py >./src/modbus_entity_parameters.hpp
+echo "test entity_dump" | ./emsesp | python3 ./scripts/strip_csv.py | python3 ./scripts/update_modbus_registers.py >./src/modbus_entity_parameters.hpp
 ls -al ./src/modbus_entity_parameters.hpp
 
-# generate doc - Modbus-Entity-Registers.md used in the emsesp.org documentation.
-cat dump_entities.csv | python3 ./scripts/generate-modbus-register-doc.py >./docs/Modbus-Entity-Registers.md
+# dump_entities.csv
+make ARGS=-DEMSESP_STANDALONE
+rm -f ./docs/dump_entities.csv
+echo "test entity_dump" | ./emsesp | python3 ./scripts/strip_csv.py >./docs/dump_entities.csv
+ls -al ./docs/dump_entities.csv
+
+# dump_telegrams.csv
+rm -f ./docs/dump_telegrams.csv
+echo "test telegram_dump" | ./emsesp | python3 ./scripts/strip_csv.py >./docs/dump_telegrams.csv
+ls -al ./docs/dump_telegrams.csv
+
+# generate doc - Modbus-Entity-Registers.md used in the emsesp.org documentation
+rm -f ./docs/Modbus-Entity-Registers.md
+cat ./docs/dump_entities.csv | python3 ./scripts/generate-modbus-register-doc.py >./docs/Modbus-Entity-Registers.md
