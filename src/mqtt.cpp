@@ -934,7 +934,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     char config_topic[70];
     snprintf(config_topic, sizeof(config_topic), "%s/%s_%s/config", mqtt_basename_.c_str(), device_name, entity_with_tag);
 
-    bool readonly_sensors = true;
+    bool add_ha_classes = true; // default we'll add the "unit_of_meas", "stat_cla" and "dev_cla" attributes
 
     // create the topic
     // depending on the type and whether the device entity is writable (a command)
@@ -953,7 +953,6 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             // older Domoticz does not support number, use sensor
             if (discovery_type() == discoveryType::HOMEASSISTANT || discovery_type() == discoveryType::DOMOTICZ_LATEST) {
                 snprintf(topic, sizeof(topic), "number/%s", config_topic);
-                readonly_sensors = false;
             } else {
                 snprintf(topic, sizeof(topic), "sensor/%s", config_topic);
             }
@@ -961,11 +960,11 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         case DeviceValueType::BOOL:
             // switch - https://www.home-assistant.io/integrations/switch.mqtt
             snprintf(topic, sizeof(topic), "switch/%s", config_topic);
-            readonly_sensors = false;
+            add_ha_classes = false;
             break;
         case DeviceValueType::ENUM:
             snprintf(topic, sizeof(topic), "select/%s", config_topic);
-            readonly_sensors = false;
+            add_ha_classes = false;
             break;
         case DeviceValueType::CMD: // hardcoded commands are always ENUMS
             // select - https://www.home-assistant.io/integrations/select.mqtt
@@ -976,22 +975,19 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             } else {
                 snprintf(topic, sizeof(topic), "sensor/%s", config_topic);
             }
-            readonly_sensors = false;
+            add_ha_classes = false;
             break;
         case DeviceValueType::STRING:
             // text - https://www.home-assistant.io/integrations/text.mqtt
             snprintf(topic, sizeof(topic), "text/%s", config_topic); // e.g. set_datetime, set_holiday, set_wwswitchtime
-            readonly_sensors = false;
+            add_ha_classes = false;
             break;
         default:
             // plain old sensor, and make it read-only
             break;
         }
-    }
-
-    // For read-only sensors there are either sensor or binary_sensor
-    // for both we also set the device class and state class
-    if (readonly_sensors) {
+    } else {
+        // it is not a command and a read-only sensor. Use then either sensor or binary_sensor
         snprintf(topic, sizeof(topic), (type == DeviceValueType::BOOL) ? "binary_sensor/%s" : "sensor/%s", config_topic); // binary sensor (for booleans)
     }
 
@@ -1127,8 +1123,9 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         add_ha_sections_to_doc(nullptr, stat_t, doc, false, val_cond); // no name, since the "dev" has already been adde
     }
 
-    // Add the state class, device class and sometimes the icon. Used only for read-only sensors like Sensor and Binary Sensor
-    if (readonly_sensors) {
+    // Add the state class, device class and sometimes the icon.
+    // Used only for read-only sensors like Sensor and Binary Sensor but also Numbers
+    if (add_ha_classes) {
         // first set the catagory for System entities
         // https://github.com/emsesp/EMS-ESP32/discussions/1459#discussioncomment-7694873
         if (device_type == EMSdevice::DeviceType::SYSTEM) {

@@ -972,14 +972,13 @@ void EMSESP::process_deviceName(std::shared_ptr<const Telegram> telegram) {
     uint8_t len = telegram->offset + telegram->message_length - 27;
     strlcpy(name, (const char *)&telegram->message_data[27 - telegram->offset], len < 16 ? len : 16);
     if (strlen(name)) {
-        webCustomizationService.read([&](WebCustomization const & settings) {
-            for (EntityCustomization e : settings.entityCustomizations) {
-                if ((e.device_id == telegram->src) && e.custom_name.empty()) {
-                    e.custom_name = name;
-                    break;
-                }
+        LOG_DEBUG("Model name received for device 0x%02X: %s", telegram->src, name);
+        for (const auto & emsdevice : emsdevices) {
+            if (emsdevice->is_device_id(telegram->src)) {
+                emsdevice->model(name);
+                break;
             }
-        });
+        }
     }
 }
 
@@ -1204,8 +1203,8 @@ void EMSESP::show_devices(uuid::console::Shell & shell) {
     for (const auto & device_class : EMSFactory::device_handlers()) {
         for (const auto & emsdevice : emsdevices) {
             if (emsdevice && (emsdevice->device_type() == device_class.first)) {
-                shell.printf("%s: %s", emsdevice->device_type_name(), emsdevice->to_string().c_str());
-                shell.println();
+                // print header, with device type translated
+                shell.printfln("%s: %s (%d)", emsdevice->device_type_2_device_name_translated(), emsdevice->to_string().c_str(), emsdevice->count_entities());
                 emsdevice->show_telegram_handlers(shell);
 
 #if defined(EMSESP_DEBUG)
