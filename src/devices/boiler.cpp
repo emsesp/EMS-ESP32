@@ -556,6 +556,15 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueUOM::KW,
                               MAKE_CF_CB(set_pvMaxComp));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &powerReduction_,
+                              DeviceValueType::UINT8,
+                              DeviceValueNumOp::DV_NUMOP_MUL10,
+                              FL_(powerReduction),
+                              DeviceValueUOM::PERCENT,
+                              MAKE_CF_CB(set_powerReduction),
+                              30,
+                              60);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &hpSetDiffPress_,
                               DeviceValueType::UINT8,
                               DeviceValueNumOp::DV_NUMOP_MUL50,
@@ -1937,10 +1946,11 @@ void Boiler::process_HpSilentMode(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hpHystPool_, 33); // is / 5
     has_update(telegram, hpCircPumpWw_, 46);
     has_update(telegram, hpMaxPower_, 31);
-    has_update(telegram, silentFrom_, 52); // in steps of 15 min
-    has_update(telegram, silentTo_, 53);   // in steps of 15 min
-    has_update(telegram, pvMaxComp_, 54);  // #2062
-    has_update(telegram, hpshutdown_, 58); // 1 powers off
+    has_update(telegram, silentFrom_, 52);     // in steps of 15 min
+    has_update(telegram, silentTo_, 53);       // in steps of 15 min
+    has_update(telegram, pvMaxComp_, 54);      // #2062
+    has_update(telegram, hpshutdown_, 58);     // 1 powers off
+    has_update(telegram, powerReduction_, 64); // 3..6 -> is *10
 }
 
 // Boiler(0x08) -B-> All(0x00), ?(0x0488), data: 8E 00 00 00 00 00 01 03
@@ -3149,6 +3159,15 @@ bool Boiler::set_hpPowerLimit(const char * value, const int8_t id) {
     if (Helpers::value2number(value, v)) {
         uint8_t data[2] = {(uint8_t)(v >> 8), (uint8_t)v};
         write_command(0x4A7, 0, data, 2, 0x4A7);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_powerReduction(const char * value, const int8_t id) {
+    int v;
+    if (Helpers::value2number(value, v)) {
+        write_command(0x484, 64, v / 10, 0x484);
         return true;
     }
     return false;
