@@ -133,7 +133,7 @@ class Telegram {
         auto msg_size = (index - this->offset + num_bytes - 1);
 
         if ((index < this->offset) || (msg_size >= this->message_length) || (msg_size > EMS_MAX_TELEGRAM_MESSAGE_LENGTH)) {
-            return false;
+            return false; // TODO we should set value to a default value here
         }
 
         Value val = value;
