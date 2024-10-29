@@ -1982,9 +1982,14 @@ void EMSdevice::read_command(const uint16_t type_id, const uint8_t offset, const
 // returns either default or custom name
 std::string EMSdevice::name() {
     if (custom_name_.empty()) {
-        return default_name_;
+        // return default name prefixed with a model if exists
+        if (model().empty()) {
+            return default_name();
+        }
+        return model() + "/" + default_name();
     }
-    return custom_name_;
+
+    return custom_name();
 }
 
 // copy a raw value (i.e. without applying the numeric_operator) to the output buffer.
