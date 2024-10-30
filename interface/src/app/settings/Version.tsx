@@ -59,6 +59,10 @@ const Version = () => {
     // uncomment next 2 lines for testing, uses https://github.com/emsesp/EMS-ESP32/releases/download/v3.6.5/EMS-ESP-3_6_5-ESP32-16MB+.bin
     // immediate: false,
     // initialData: '3.6.5'
+  }).onSuccess((event) => {
+    if (!useDev) {
+      void sendCheckUpgrade(event.data);
+    }
   });
 
   // called immediately to get the latest version, on page load, then check for upgrade (works for both dev and stable)
@@ -67,7 +71,9 @@ const Version = () => {
     // immediate: false,
     // initialData: '3.7.0-dev.32'
   }).onSuccess((event) => {
-    void sendCheckUpgrade(event.data);
+    if (useDev) {
+      void sendCheckUpgrade(event.data);
+    }
   });
 
   const STABLE_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/';
@@ -211,7 +217,7 @@ const Version = () => {
                 {isDev ? LL.DEVELOPMENT() : LL.STABLE()}&nbsp;
                 <Link
                   target="_blank"
-                  href={useDev ? DEV_RELNOTES_URL : STABLE_RELNOTES_URL}
+                  href={isDev ? DEV_RELNOTES_URL : STABLE_RELNOTES_URL}
                   color="primary"
                 >
                   (changelog)
