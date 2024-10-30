@@ -13,7 +13,7 @@
 
 #define UPLOAD_FILE_PATH "/rest/uploadFile"
 
-#define TEMP_FILENAME_PATH "/tmp_upload" // for uploaded json files
+#define TEMP_FILENAME_PATH "/pre_load.json" // for uploaded json files, handled by System::check_restore()
 
 class UploadFileService {
   public:
