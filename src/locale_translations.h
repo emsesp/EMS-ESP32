@@ -576,6 +576,7 @@ MAKE_TRANSLATION(gasMeterHeat, "gasmeterheat", "gas meter heating", "Gaszähler 
 MAKE_TRANSLATION(gasMeterWw, "gasmeter", "gas meter", "Gaszähler", "", "", "licznik gazu", "", "", "", "", "počítadlo plynu", "počítadlo plynu") // TODO translate
 MAKE_TRANSLATION(hpCurrPower, "hpcurrpower", "compressor current power", "akt. Kompressorleistung", "", "", "", "", "", "", "", "", "aktuální výkon kompresoru") // TODO translate
 MAKE_TRANSLATION(hpPowerLimit, "hppowerlimit", "power limit", "Leistungsgrenze", "", "", "", "", "", "", "", "", "omezení výkonu") // TODO translate
+MAKE_TRANSLATION(powerReduction, "powerreduction", "power reduction", "Leistungsverringerung", "", "", "", "", "", "", "", "", "omezení výkonu") // TODO translate
 
 // HIU
 MAKE_TRANSLATION(netFlowTemp, "netflowtemp", "heat network flow temp", "Systemvorlauftemperatur", "Netto aanvoertemperatuur", "", "temp. zasilania sieci cieplnej", "", "", "ısıtma şebekesi akış derecesi", "temperatura di mandata della rete di riscaldamento", "teplota prívodu tepelnej siete", "teplota přívodu tepelné sítě") // TODO translate

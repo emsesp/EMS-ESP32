@@ -1561,22 +1561,34 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
         return; // not supported
     }
 
+    static uint8_t setTimeRetry = 0;
+    uint8_t        dst          = 0xFE;
+    bool           use_dst      = !telegram->read_value(dst, 9) || dst == 0xFF;
     if ((telegram->message_data[7] & 0x0C) && has_command(&dateTime_)) { // date and time not valid
-        set_datetime("ntp", -1);                                         // set from NTP
+        if (setTimeRetry < 3) {
+            if (!use_dst) {
+                set_datetime("ntp", 0); // set from NTP without dst
+            } else {
+                set_datetime("ntp", -1); // set from NTP
+            }
+            setTimeRetry++;
+        }
         return;
     }
 
     // check clock
-    time_t now    = time(nullptr);
-    tm *   tm_    = localtime(&now);
-    bool   tset_  = tm_->tm_year > 110;                       // year 2010 and up, time is valid
-    tm_->tm_year  = (telegram->message_data[0] & 0x7F) + 100; // IVT
-    tm_->tm_mon   = telegram->message_data[1] - 1;
-    tm_->tm_mday  = telegram->message_data[3];
-    tm_->tm_hour  = telegram->message_data[2];
-    tm_->tm_min   = telegram->message_data[4];
-    tm_->tm_sec   = telegram->message_data[5];
-    tm_->tm_isdst = telegram->message_data[7] & 0x01;
+    time_t now   = time(nullptr);
+    tm *   tm_   = localtime(&now);
+    bool   tset_ = tm_->tm_year > 110;                       // year 2010 and up, time is valid
+    tm_->tm_year = (telegram->message_data[0] & 0x7F) + 100; // IVT
+    tm_->tm_mon  = telegram->message_data[1] - 1;
+    tm_->tm_mday = telegram->message_data[3];
+    tm_->tm_hour = telegram->message_data[2];
+    tm_->tm_min  = telegram->message_data[4];
+    tm_->tm_sec  = telegram->message_data[5];
+    if (use_dst) {
+        tm_->tm_isdst = telegram->message_data[7] & 0x01;
+    }
 
     // render date to DD.MM.YYYY HH:MM and publish
     char newdatetime[sizeof(dateTime_)];
@@ -1590,8 +1602,17 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
     if (!ivtclock && !junkersclock && tset_ && EMSESP::system_.ntp_connected() && !EMSESP::system_.readonly_mode() && has_command(&dateTime_)) {
         double difference = difftime(now, ttime);
         if (difference > 15 || difference < -15) {
-            set_datetime("ntp", -1); // set from NTP
-            LOG_INFO("thermostat time correction from ntp");
+            if (setTimeRetry < 3) {
+                if (!use_dst) {
+                    set_datetime("ntp", 0); // set from NTP without dst
+                } else {
+                    set_datetime("ntp", -1); // set from NTP
+                }
+                LOG_INFO("thermostat time correction from ntp");
+                setTimeRetry++;
+            }
+        } else {
+            setTimeRetry = 0;
         }
     }
 #ifndef EMSESP_STANDALONE
@@ -2685,8 +2706,8 @@ bool Thermostat::set_datetime(const char * value, const int8_t id) {
         data[3] = tm_->tm_mday;
         data[4] = tm_->tm_min;
         data[5] = tm_->tm_sec;
-        data[6] = (tm_->tm_wday + 6) % 7; // Bosch counts from Mo, time from Su
-        data[7] = tm_->tm_isdst + 2;      // set DST and flag for ext. clock
+        data[6] = (tm_->tm_wday + 6) % 7;            // Bosch counts from Mo, time from Su
+        data[7] = (id == 0) ? 2 : tm_->tm_isdst + 2; // set DST and flag for ext. clock
         if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
             data[6]++; // Junkers use 1-7;
             data[7] = 0;
