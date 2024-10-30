@@ -34,9 +34,7 @@ It requires a small circuit to interface with the EMS bus which can be purchased
 
 ## **Installing**
 
-For a quick install of the latest stable release go to [https://install.emsesp.org](https://install.emsesp.org). For other methods of installing and upgrading, and switching over to the development version go to [this section](https://emsesp.org/Getting-Started/#first-time-install) in the documentation.
-
-If you're upgrading a BBQKees Electronics EMS Gateway and unsure which firmware to use, please refer to the [this overview](https://emsesp.org/Getting-Started/#bbqkees-electronics-ems-gateway).
+Head over to [download.emsesp.org](https://download.emsesp.org) for instructions on how to install EMS-ESP. There is also further details on which boards are supported in [this section](https://emsesp.org/Getting-Started/#first-time-install) of the documentation.
 
 ## **Documentation**
 
