@@ -1135,6 +1135,7 @@ void System::show_system(uuid::console::Shell & shell) {
 }
 
 // see if there is a restore of an older settings file that needs to be applied
+// note there can be only one file at a time
 bool System::check_restore() {
     bool reboot_required = false; // true if we need to reboot
 
