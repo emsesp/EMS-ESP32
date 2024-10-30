@@ -217,7 +217,7 @@ const Version = () => {
                 {isDev ? LL.DEVELOPMENT() : LL.STABLE()}&nbsp;
                 <Link
                   target="_blank"
-                  href={useDev ? DEV_RELNOTES_URL : STABLE_RELNOTES_URL}
+                  href={isDev ? DEV_RELNOTES_URL : STABLE_RELNOTES_URL}
                   color="primary"
                 >
                   (changelog)
