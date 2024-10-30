@@ -1605,10 +1605,11 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
             if (setTimeRetry < 3) {
                 if (!use_dst) {
                     set_datetime("ntp", 0); // set from NTP without dst
+                    LOG_INFO("thermostat time correction from ntp, ignoring dst");
                 } else {
                     set_datetime("ntp", -1); // set from NTP
+                    LOG_INFO("thermostat time correction from ntp");
                 }
-                LOG_INFO("thermostat time correction from ntp");
                 setTimeRetry++;
             }
         } else {
