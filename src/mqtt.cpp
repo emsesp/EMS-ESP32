@@ -983,7 +983,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             add_ha_classes = false;
             break;
         default:
-            // plain old sensor, and make it read-only
+            // plain old sensor
             break;
         }
     } else {
@@ -1117,10 +1117,19 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             strlcpy(sample_val, "false", sizeof(sample_val)); // default is "false"
         }
 
-        doc["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else " + sample_val + "}}";
+        // don't bother with value template conditions if using Domoticz which doesn't fully support MQTT Discovery
+        if (discovery_type() == discoveryType::HOMEASSISTANT) {
+            doc["val_tpl"] = (std::string) "{{" + val_obj + " if " + val_cond + " else " + sample_val + "}}";
 
-        // add the dev json object to the end, not for commands
-        add_ha_sections_to_doc(nullptr, stat_t, doc, false, val_cond); // no name, since the "dev" has already been adde
+            // adds availability, dev, ids to the config section to HA Discovery config
+            // except for commands
+            add_ha_sections_to_doc(nullptr, stat_t, doc, false, val_cond); // no name, since the "dev" has already been added
+        } else {
+            // Domoticz doesn't support value templates, so we just use the value directly
+            // Also omit the uom and other state classes
+            doc["val_tpl"] = (std::string) "{{" + val_obj + "}}";
+            add_ha_classes = false; // don't add the classes
+        }
     }
 
     // Add the state class, device class and sometimes the icon.
