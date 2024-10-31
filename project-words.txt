@@ -1355,3 +1355,12 @@ TSENS
 pumpontemp
 Česky
 pioarduino
+switchtimeww
+pvmaxcomp
+powerreduction
+starttemp
+heattransfer 
+poolshunt
+poolshuntstatus
+pooltemp 
+stoptime
