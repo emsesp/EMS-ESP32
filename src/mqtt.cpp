@@ -1128,7 +1128,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             // Domoticz doesn't support value templates, so we just use the value directly
             // Also omit the uom and other state classes
             doc["val_tpl"] = (std::string) "{{" + val_obj + "}}";
-            add_ha_classes = false; // don't add the classes
+            // add_ha_classes = false; // don't add the classes, categories of uom (dev_cla, stat_cla)
         }
     }
 
