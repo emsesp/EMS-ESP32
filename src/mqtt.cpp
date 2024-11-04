@@ -1102,7 +1102,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         char val_obj[100];
         char val_cond[200];
         if (is_nested() && tag >= DeviceValueTAG::TAG_HC1) {
-            snprintf(val_obj, sizeof(val_obj), "value_json.%s['%s']", EMSdevice::tag_to_mqtt(tag), entity);
+            snprintf(val_obj, sizeof(val_obj), "value_json['%s']['%s']", EMSdevice::tag_to_mqtt(tag), entity);
             snprintf(val_cond, sizeof(val_cond), "value_json.%s is defined and %s is defined", EMSdevice::tag_to_mqtt(tag), val_obj);
         } else {
             snprintf(val_obj, sizeof(val_obj), "value_json['%s']", entity);
@@ -1128,7 +1128,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             // Domoticz doesn't support value templates, so we just use the value directly
             // Also omit the uom and other state classes
             doc["val_tpl"] = (std::string) "{{" + val_obj + "}}";
-            add_ha_classes = false; // don't add the classes
+            // add_ha_classes = false; // don't add the classes, categories of uom (dev_cla, stat_cla)
         }
     }
 
@@ -1255,6 +1255,8 @@ void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, con
 }
 
 bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, const bool remove, const int16_t min, const uint32_t max) {
+    // TODO: check if Domoticz supports climate via MQTT discovery, otherwise exit this function if (discovery_type() != discoveryType::HOMEASSISTANT
+
     uint8_t hc_num = tag;
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];

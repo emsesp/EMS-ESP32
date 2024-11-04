@@ -3,8 +3,8 @@
 # This is mainly used to generate the .o files for SonarQube analysis
 #
 
-# NUMJOBS=${NUMJOBS:-" -j10 "}
-# MAKEFLAGS+="j "
+NUMJOBS=${NUMJOBS:-" -j10 "}
+MAKEFLAGS+="j "
 
 #----------------------------------------------------------------------
 # Project Structure

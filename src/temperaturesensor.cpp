@@ -482,7 +482,7 @@ void TemperatureSensor::publish_values(const bool force) {
                 char val_obj[70];
                 char val_cond[170];
                 if (Mqtt::is_nested()) {
-                    snprintf(val_obj, sizeof(val_obj), "value_json['%s'].temp", sensor.id().c_str());
+                    snprintf(val_obj, sizeof(val_obj), "value_json['%s'].temp", sensor.id().c_str()); // TODO change for Domoticz
                     snprintf(val_cond, sizeof(val_cond), "value_json['%s'] is defined and %s is defined", sensor.id().c_str(), val_obj);
                 } else {
                     snprintf(val_obj, sizeof(val_obj), "value_json['%s']", sensor.name().c_str());

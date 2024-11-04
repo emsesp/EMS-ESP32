@@ -58,3 +58,4 @@ ls -al ./docs/dump_telegrams.csv
 # generate doc - Modbus-Entity-Registers.md used in the emsesp.org documentation
 rm -f ./docs/Modbus-Entity-Registers.md
 cat ./docs/dump_entities.csv | python3 ./scripts/generate-modbus-register-doc.py >./docs/Modbus-Entity-Registers.md
+ls -al ./docs/Modbus-Entity-Registers.md

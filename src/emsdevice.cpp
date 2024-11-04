@@ -136,26 +136,10 @@ const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
         return F_(gateway);
     case DeviceType::SWITCH:
         return F_(switch);
-    case DeviceType::CONTROLLER:
-        return F_(controller);
-    case DeviceType::CONNECT:
-        return F_(connect);
-    case DeviceType::ALERT:
-        return F_(alert);
-    case DeviceType::EXTENSION:
-        return F_(extension);
-    case DeviceType::GENERIC:
-        return F_(generic);
-    case DeviceType::HEATSOURCE:
-        return F_(heatsource);
-    case DeviceType::VENTILATION:
-        return F_(ventilation);
-    case DeviceType::WATER:
-        return F_(water);
-    case DeviceType::POOL:
-        return F_(pool);
-    default:
-        return Helpers::translated_word(FL_(unknown), true);
+        case DeviceType::CONTROLLER : return F_(controller); case DeviceType::CONNECT : return F_(connect); case DeviceType::ALERT : return F_(alert);
+            case DeviceType::EXTENSION : return F_(extension); case DeviceType::GENERIC : return F_(generic);
+            case DeviceType::HEATSOURCE : return F_(heatsource); case DeviceType::VENTILATION : return F_(ventilation);
+            case DeviceType::WATER : return F_(water); case DeviceType::POOL : return F_(pool); default : return Helpers::translated_word(FL_(unknown), true);
     }
 }
 
@@ -234,46 +218,22 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
         return DeviceType::MIXER;
     }
     if (!strcmp(lowtopic, F_(switch))) {
-        return DeviceType::SWITCH;
-    }
-    if (!strcmp(lowtopic, F_(gateway))) {
-        return DeviceType::GATEWAY;
-    }
-    if (!strcmp(lowtopic, F_(alert))) {
+            return DeviceType::SWITCH;
+        }
+    if (!strcmp(lowtopic, F_(gateway))) { return DeviceType::GATEWAY; } if (!strcmp(lowtopic, F_(alert))) {
         return DeviceType::ALERT;
-    }
-    if (!strcmp(lowtopic, F_(extension))) {
-        return DeviceType::EXTENSION;
-    }
-    if (!strcmp(lowtopic, F_(heatsource))) {
+    } if (!strcmp(lowtopic, F_(extension))) { return DeviceType::EXTENSION; } if (!strcmp(lowtopic, F_(heatsource))) {
         return DeviceType::HEATSOURCE;
-    }
-    if (!strcmp(lowtopic, F_(ventilation))) {
-        return DeviceType::VENTILATION;
-    }
-    if (!strcmp(lowtopic, F_(water))) {
+    } if (!strcmp(lowtopic, F_(ventilation))) { return DeviceType::VENTILATION; } if (!strcmp(lowtopic, F_(water))) {
         return DeviceType::WATER;
-    }
-    if (!strcmp(lowtopic, F_(pool))) {
-        return DeviceType::POOL;
-    }
+    } if (!strcmp(lowtopic, F_(pool))) { return DeviceType::POOL; }
 
     // non EMS
-    if (!strcmp(lowtopic, F_(custom))) {
-        return DeviceType::CUSTOM;
-    }
-    if (!strcmp(lowtopic, F_(temperaturesensor))) {
+    if (!strcmp(lowtopic, F_(custom))) { return DeviceType::CUSTOM; } if (!strcmp(lowtopic, F_(temperaturesensor))) {
         return DeviceType::TEMPERATURESENSOR;
-    }
-    if (!strcmp(lowtopic, F_(analogsensor))) {
-        return DeviceType::ANALOGSENSOR;
-    }
-    if (!strcmp(lowtopic, F_(scheduler))) {
+    } if (!strcmp(lowtopic, F_(analogsensor))) { return DeviceType::ANALOGSENSOR; } if (!strcmp(lowtopic, F_(scheduler))) {
         return DeviceType::SCHEDULER;
-    }
-    if (!strcmp(lowtopic, F_(system))) {
-        return DeviceType::SYSTEM;
-    }
+    } if (!strcmp(lowtopic, F_(system))) { return DeviceType::SYSTEM; }
 
     return DeviceType::UNKNOWN;
 }
@@ -1845,9 +1805,9 @@ void EMSdevice::mqtt_ha_entity_config_create() {
     uint16_t count                = 0;
 
     // check the state of each of the device values
-    // create climate if roomtemp is visible
     // create the discovery topic if if hasn't already been created, not a command (like reset) and is active and visible
     for (auto & dv : devicevalues_) {
+        // create climate when we reach the haclimate entity
         if (!strcmp(dv.short_name, FL_(haclimate)[0]) && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE) && dv.has_state(DeviceValueState::DV_ACTIVE)) {
             if (*(int8_t *)(dv.value_p) == 1 && (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) || dv.has_state(DeviceValueState::DV_HA_CLIMATE_NO_RT))) {
                 if (Mqtt::publish_ha_climate_config(dv.tag, true, false, dv.min, dv.max)) { // roomTemp
