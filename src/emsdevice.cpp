@@ -135,11 +135,27 @@ const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
     case DeviceType::GATEWAY:
         return F_(gateway);
     case DeviceType::SWITCH:
-        return F_(switch);
-        case DeviceType::CONTROLLER : return F_(controller); case DeviceType::CONNECT : return F_(connect); case DeviceType::ALERT : return F_(alert);
-            case DeviceType::EXTENSION : return F_(extension); case DeviceType::GENERIC : return F_(generic);
-            case DeviceType::HEATSOURCE : return F_(heatsource); case DeviceType::VENTILATION : return F_(ventilation);
-            case DeviceType::WATER : return F_(water); case DeviceType::POOL : return F_(pool); default : return Helpers::translated_word(FL_(unknown), true);
+        return F_(switcher);
+    case DeviceType::CONTROLLER:
+        return F_(controller);
+    case DeviceType::CONNECT:
+        return F_(connect);
+    case DeviceType::ALERT:
+        return F_(alert);
+    case DeviceType::EXTENSION:
+        return F_(extension);
+    case DeviceType::GENERIC:
+        return F_(generic);
+    case DeviceType::HEATSOURCE:
+        return F_(heatsource);
+    case DeviceType::VENTILATION:
+        return F_(ventilation);
+    case DeviceType::WATER:
+        return F_(water);
+    case DeviceType::POOL:
+        return F_(pool);
+    default:
+        return Helpers::translated_word(FL_(unknown), true);
     }
 }
 
@@ -217,23 +233,47 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
     if (!strcmp(lowtopic, F_(mixer))) {
         return DeviceType::MIXER;
     }
-    if (!strcmp(lowtopic, F_(switch))) {
-            return DeviceType::SWITCH;
-        }
-    if (!strcmp(lowtopic, F_(gateway))) { return DeviceType::GATEWAY; } if (!strcmp(lowtopic, F_(alert))) {
+    if (!strcmp(lowtopic, F_(switcher))) {
+        return DeviceType::SWITCH;
+    }
+    if (!strcmp(lowtopic, F_(gateway))) {
+        return DeviceType::GATEWAY;
+    }
+    if (!strcmp(lowtopic, F_(alert))) {
         return DeviceType::ALERT;
-    } if (!strcmp(lowtopic, F_(extension))) { return DeviceType::EXTENSION; } if (!strcmp(lowtopic, F_(heatsource))) {
+    }
+    if (!strcmp(lowtopic, F_(extension))) {
+        return DeviceType::EXTENSION;
+    }
+    if (!strcmp(lowtopic, F_(heatsource))) {
         return DeviceType::HEATSOURCE;
-    } if (!strcmp(lowtopic, F_(ventilation))) { return DeviceType::VENTILATION; } if (!strcmp(lowtopic, F_(water))) {
+    }
+    if (!strcmp(lowtopic, F_(ventilation))) {
+        return DeviceType::VENTILATION;
+    }
+    if (!strcmp(lowtopic, F_(water))) {
         return DeviceType::WATER;
-    } if (!strcmp(lowtopic, F_(pool))) { return DeviceType::POOL; }
+    }
+    if (!strcmp(lowtopic, F_(pool))) {
+        return DeviceType::POOL;
+    }
 
     // non EMS
-    if (!strcmp(lowtopic, F_(custom))) { return DeviceType::CUSTOM; } if (!strcmp(lowtopic, F_(temperaturesensor))) {
+    if (!strcmp(lowtopic, F_(custom))) {
+        return DeviceType::CUSTOM;
+    }
+    if (!strcmp(lowtopic, F_(temperaturesensor))) {
         return DeviceType::TEMPERATURESENSOR;
-    } if (!strcmp(lowtopic, F_(analogsensor))) { return DeviceType::ANALOGSENSOR; } if (!strcmp(lowtopic, F_(scheduler))) {
+    }
+    if (!strcmp(lowtopic, F_(analogsensor))) {
+        return DeviceType::ANALOGSENSOR;
+    }
+    if (!strcmp(lowtopic, F_(scheduler))) {
         return DeviceType::SCHEDULER;
-    } if (!strcmp(lowtopic, F_(system))) { return DeviceType::SYSTEM; }
+    }
+    if (!strcmp(lowtopic, F_(system))) {
+        return DeviceType::SYSTEM;
+    }
 
     return DeviceType::UNKNOWN;
 }

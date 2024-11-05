@@ -88,7 +88,7 @@ MAKE_WORD(coldshot)
 // device types - lowercase, used in MQTT
 MAKE_WORD(boiler)
 MAKE_WORD(thermostat)
-MAKE_WORD(switch)
+MAKE_WORD_CUSTOM(switcher, "switch")
 MAKE_WORD(solar)
 MAKE_WORD(mixer)
 MAKE_WORD(gateway)
