@@ -196,6 +196,37 @@ bool System::command_syslog_level(const char * value, const int8_t id) {
     return false;
 }
 */
+// shower timer
+bool System::command_showertimer(const char * value, const int8_t id) {
+    bool b;
+    if (Helpers::value2bool(value, b)) {
+        EMSESP::webSettingsService.update([&](WebSettings & settings) {
+            if (settings.shower_timer != b) {
+                settings.shower_timer = b;
+                return StateUpdateResult::CHANGED;
+            }
+            return StateUpdateResult::UNCHANGED;
+        });
+        return true;
+    }
+    return false;
+}
+
+// shower alert
+bool System::command_showeralert(const char * value, const int8_t id) {
+    bool b;
+    if (Helpers::value2bool(value, b)) {
+        EMSESP::webSettingsService.update([&](WebSettings & settings) {
+            if (settings.shower_alert != b) {
+                settings.shower_alert = b;
+                return StateUpdateResult::CHANGED;
+            }
+            return StateUpdateResult::UNCHANGED;
+        });
+        return true;
+    }
+    return false;
+}
 
 // send message - to log and MQTT
 bool System::command_message(const char * value, const int8_t id) {
@@ -860,6 +891,8 @@ void System::commands_init() {
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(format), System::command_format, FL_(format_cmd), CommandFlag::ADMIN_ONLY);
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(watch), System::command_watch, FL_(watch_cmd));
     Command::add(EMSdevice::DeviceType::SYSTEM, F_(message), System::command_message, FL_(message_cmd));
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(showertimer), System::command_showertimer, FL_(showertimer_cmd), CommandFlag::ADMIN_ONLY);
+    Command::add(EMSdevice::DeviceType::SYSTEM, F_(showeralert), System::command_showeralert, FL_(showeralert_cmd), CommandFlag::ADMIN_ONLY);
 #if defined(EMSESP_TEST)
     Command::add(EMSdevice::DeviceType::SYSTEM, ("test"), System::command_test, FL_(test_cmd));
 #endif

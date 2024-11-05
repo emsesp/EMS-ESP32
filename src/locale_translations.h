@@ -79,6 +79,8 @@ MAKE_WORD_TRANSLATION(commands_response, "get response", "Hole Antwort", "Verzoe
 MAKE_WORD_TRANSLATION(coldshot_cmd, "send a cold shot of water", "Zugabe einer Menge kalten Wassers", "", "", "uruchom tryśnięcie zimnej wody", "", "", "soğuk su gönder", "", "pošlite studenú dávku vody", "poslat studenou vodu") // TODO translate
 MAKE_WORD_TRANSLATION(message_cmd, "send a message", "Eine Nachricht senden", "", "", "", "", "", "", "", "poslať správu", "odeslat zprávu") // TODO translate
 MAKE_WORD_TRANSLATION(values_cmd, "list all values", "Liste alle Werte auf", "", "", "", "", "", "", "", "vypísať všetky hodnoty", "vypsat všechny hodnoty") // TODO translate
+MAKE_WORD_TRANSLATION(showertimer_cmd, "enable shower timer", "aktiviere Duschzeitmessung", "", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_WORD_TRANSLATION(showeralert_cmd, "enable shower alert", "aktiviere Duschzeitwarnung", "", "", "", "", "", "", "", "", "") // TODO translate
 
 // tags
 MAKE_WORD_TRANSLATION(tag_hc1, "hc1", "HK1", "hc1", "VK1", "OG1", "hc1", "hc1", "ID1", "hc1", "hc1", "hc1")
