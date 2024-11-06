@@ -27,7 +27,7 @@
     "@mui/icons-material": "^6.1.6",
     "@mui/material": "^6.1.6",
     "@table-library/react-table-library": "4.1.7",
-    "alova": "3.2.1",
+    "alova": "3.2.2",
     "async-validator": "^4.2.5",
     "jwt-decode": "^4.0.0",
     "mime-types": "^2.1.35",

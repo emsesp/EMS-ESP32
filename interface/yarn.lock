@@ -1675,7 +1675,7 @@ __metadata:
     "@types/react": "npm:^18.3.12"
     "@types/react-dom": "npm:^18.3.1"
     "@types/react-router-dom": "npm:^5.3.3"
-    alova: "npm:3.2.1"
+    alova: "npm:3.2.2"
     async-validator: "npm:^4.2.5"
     concurrently: "npm:^9.1.0"
     eslint: "npm:^9.14.0"
@@ -1766,13 +1766,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"alova@npm:3.2.1":
-  version: 3.2.1
-  resolution: "alova@npm:3.2.1"
+"alova@npm:3.2.2":
+  version: 3.2.2
+  resolution: "alova@npm:3.2.2"
   dependencies:
     "@alova/shared": "npm:1.1.0"
     rate-limiter-flexible: "npm:^5.0.3"
-  checksum: 10c0/9b15b1894a505bd15bf8fa67352addd72ebddf0b0134b5f96ba6c806e25afdfb565e53931d4ac12900559b9b4778557277350ddc37b8ff87e72030d9d84feddc
+  checksum: 10c0/e01f827fd07e4e532b6d82fcd9e2ce6fe2866704f5e895085c7de63b00a9caaa2cf1dbf8537292d840a5f1903974f2e7296c16b0beda0bd375d1bdd68c17297e
   languageName: node
   linkType: hard
 
