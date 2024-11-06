@@ -185,7 +185,7 @@ const Dashboard = () => {
       // if its a device (parent node) and has entities
       if (di.nodes?.length) {
         return (
-          <span style="font-weight:bold; font-size: 14px">
+          <span style={{ fontWeight: 'bold', fontSize: '14px' }}>
             <DeviceIcon type_id={di.t ?? 0} />
             &nbsp;&nbsp;{showType(di.n, di.t)}
             <span style={{ color: 'lightblue' }}>&nbsp;({di.nodes?.length})</span>
@@ -248,10 +248,10 @@ const Dashboard = () => {
                 onChange={handleShowAll}
               >
                 <ToggleButton value={true}>
-                  <UnfoldMoreIcon sx={{ fontSize: 14 }} />
+                  <UnfoldMoreIcon sx={{ fontSize: 18 }} />
                 </ToggleButton>
                 <ToggleButton value={false}>
-                  <UnfoldLessIcon sx={{ fontSize: 14 }} />
+                  <UnfoldLessIcon sx={{ fontSize: 18 }} />
                 </ToggleButton>
               </ToggleButtonGroup>
             </Grid>
@@ -302,7 +302,7 @@ const Dashboard = () => {
                                 title={formatValue(LL, di.dv?.v, di.dv?.u)}
                                 arrow
                               >
-                                {formatValue(LL, di.dv?.v, di.dv?.u)}
+                                <span>{formatValue(LL, di.dv?.v, di.dv?.u)}</span>
                               </Tooltip>
                             </Cell>
 
@@ -310,10 +310,7 @@ const Dashboard = () => {
                               {me.admin &&
                                 di.dv?.c &&
                                 !hasMask(di.dv.id, DeviceEntityMask.DV_READONLY) && (
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => editDashboardValue(di)}
-                                  >
+                                  <IconButton onClick={() => editDashboardValue(di)}>
                                     <EditIcon
                                       color="primary"
                                       sx={{ fontSize: 16 }}

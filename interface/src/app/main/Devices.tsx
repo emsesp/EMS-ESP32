@@ -522,7 +522,7 @@ const Devices = () => {
       <IconContext.Provider
         value={{
           color: 'lightblue',
-          size: '18',
+          size: '16',
           style: { verticalAlign: 'middle' }
         }}
       >
@@ -573,7 +573,9 @@ const Devices = () => {
 
   const deviceValueDialogClose = () => {
     setDeviceValueDialogOpen(false);
-    void sendDeviceData(selectedDevice);
+    if (selectedDevice !== undefined) {
+      void sendDeviceData(selectedDevice);
+    }
   };
 
   const renderDeviceData = () => {
