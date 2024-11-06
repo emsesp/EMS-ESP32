@@ -4912,7 +4912,7 @@ void Thermostat::register_device_values_dhw(std::shared_ptr<Thermostat::DhwCircu
                               DeviceValueUOM::MINUTES,
                               MAKE_CF_CB(set_wwchargeduration));
         register_device_value(tag, &dhw->wwCharge_, DeviceValueType::BOOL, FL_(wwCharge), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwcharge));
-        register_device_value(tag, &dhw->wwExtra_, DeviceValueType::UINT8, FL_(wwExtra), DeviceValueUOM::DEGREES);
+        register_device_value(tag, &dhw->wwExtra_, DeviceValueType::UINT8, FL_(wwExtra), DeviceValueUOM::NONE);
         register_device_value(tag, &dhw->wwDisinfecting_, DeviceValueType::BOOL, FL_(wwDisinfecting), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwDisinfect));
         register_device_value(
             tag, &dhw->wwDisinfectDay_, DeviceValueType::ENUM, FL_(enum_dayOfWeek), FL_(wwDisinfectDay), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwDisinfectDay));
