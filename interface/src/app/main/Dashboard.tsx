@@ -107,7 +107,7 @@ const Dashboard = () => {
       },
       &:hover .td {
         background-color: #177ac9;
-      }
+      },
     `,
     BaseCell: `
       &:nth-of-type(2) {
@@ -185,18 +185,16 @@ const Dashboard = () => {
       // if its a device (parent node) and has entities
       if (di.nodes?.length) {
         return (
-          <>
-            <span style="font-size: 14px">
-              <DeviceIcon type_id={di.t ?? 0} />
-              &nbsp;&nbsp;{showType(di.n, di.t)}
-            </span>
+          <span style="font-weight:bold; font-size: 14px">
+            <DeviceIcon type_id={di.t ?? 0} />
+            &nbsp;&nbsp;{showType(di.n, di.t)}
             <span style={{ color: 'lightblue' }}>&nbsp;({di.nodes?.length})</span>
-          </>
+          </span>
         );
       }
     }
     if (di.dv) {
-      return <span style="color:lightgrey">{di.dv.id.slice(2)}</span>;
+      return <span>{di.dv.id.slice(2)}</span>;
     }
   };
 
@@ -304,9 +302,7 @@ const Dashboard = () => {
                                 title={formatValue(LL, di.dv?.v, di.dv?.u)}
                                 arrow
                               >
-                                <span style={{ color: 'lightgrey' }}>
-                                  {formatValue(LL, di.dv?.v, di.dv?.u)}
-                                </span>
+                                {formatValue(LL, di.dv?.v, di.dv?.u)}
                               </Tooltip>
                             </Cell>
 
