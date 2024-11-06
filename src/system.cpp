@@ -52,12 +52,17 @@
 
 namespace emsesp {
 
-// Languages supported. Note: the order is important and must match locale_translations.h
-#if defined(EMSESP_TEST) || defined(EMSESP_EN_ONLY)
-// in Debug mode use one language (en) to save flash memory needed for the tests
+// Languages supported. Note: the order is important
+// and must match locale_translations.h and common.h
+#if defined(EMSESP_TEST)
+// in Test mode use two languages (en & de) to save flash memory needed for the tests
+const char * const languages[] = {EMSESP_LOCALE_EN, EMSESP_LOCALE_DE};
+#elif defined(EMSESP_EN_ONLY)
+// EN only
 const char * const languages[] = {EMSESP_LOCALE_EN};
 #elif defined(EMSESP_DE_ONLY)
-const char * const languages[] = {EMSESP_LOCALE_DE};
+// EN + DE
+const char * const languages[] = {EMSESP_LOCALE_EN, EMSESP_LOCALE_DE};
 #else
 const char * const languages[] = {EMSESP_LOCALE_EN,
                                   EMSESP_LOCALE_DE,
@@ -92,7 +97,7 @@ uint8_t System::language_index() {
             return i;
         }
     }
-    return 0; // EN
+    return 0; // EN only
 }
 
 // send raw to ems
