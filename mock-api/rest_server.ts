@@ -22,10 +22,10 @@ const router = AutoRouter({
 const REST_ENDPOINT_ROOT = '/rest/';
 const API_ENDPOINT_ROOT = '/api/';
 
-// HTTP HEADERS
+// HTTP HEADERS for msgpack
 const headers = {
   'Access-Control-Allow-Origin': '*',
-  'Content-type': 'application/json'
+  'Content-type': 'application/msgpack'
 };
 
 // GLOBAL VARIABLES
