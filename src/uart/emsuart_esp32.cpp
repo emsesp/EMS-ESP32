@@ -31,6 +31,7 @@
 #include "emsesp.h"
 
 namespace emsesp {
+uint8_t EMSuart::last_tx_src_ = 0;
 
 static QueueHandle_t uart_queue;
 uint8_t              tx_mode_     = 0xFF;
@@ -143,6 +144,8 @@ uint16_t EMSuart::transmit(const uint8_t * buf, const uint8_t len) {
     if (tx_mode_ == 0) {
         return EMS_TX_STATUS_OK;
     }
+
+    last_tx_src_ = len < 4 ? 0 : buf[0];
 
     if (tx_mode_ == EMS_TXMODE_HW) { // hardware controlled mode
         uart_write_bytes_with_break(EMSUART_NUM, buf, len, 10);

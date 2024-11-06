@@ -984,6 +984,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             break;
         default:
             // plain old sensor
+            snprintf(topic, sizeof(topic), "sensor/%s", config_topic);
             break;
         }
     } else {
