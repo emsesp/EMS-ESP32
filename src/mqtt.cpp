@@ -1140,7 +1140,10 @@ void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, con
         } else if (uom == DeviceValueUOM::SECONDS) {
             doc[uom_ha] = "s";
         } else if (uom != DeviceValueUOM::NONE) {
-            doc[uom_ha] = EMSdevice::uom_to_string(uom); // default
+            // Domoticz use "" for a no-uom
+            if (discovery_type() == discoveryType::HOMEASSISTANT) {
+                doc[uom_ha] = EMSdevice::uom_to_string(uom); // default
+            } 
         }
     }
 
