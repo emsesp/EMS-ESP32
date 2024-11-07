@@ -937,7 +937,8 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     // create the topic
     // depending on the type and whether the device entity is writable (i.e. a command)
     // https://developers.home-assistant.io/docs/core/entity
-    char topic[MQTT_TOPIC_MAX_SIZE] = {0};
+    char topic[MQTT_TOPIC_MAX_SIZE];
+    topic[0] = '\0'; // nullify, making it empty
     if (has_cmd) {
         // if it's a command then we can use Number, Switch, Select or Text. Otherwise stick to Sensor
         switch (type) {
@@ -981,7 +982,7 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     }
 
     // if at this point we don't have a topic created yet, create a default sensor one. We always need a topic.
-    if (strlen(topic) == 0) {
+    if (!strnlen(topic, sizeof(topic))) {
         snprintf(topic, sizeof(topic), (type == DeviceValueType::BOOL) ? "binary_sensor/%s" : "sensor/%s", config_topic); // binary sensor (for booleans)
     }
 
