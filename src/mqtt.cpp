@@ -934,14 +934,12 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     char config_topic[70];
     snprintf(config_topic, sizeof(config_topic), "%s/%s_%s/config", mqtt_basename_.c_str(), device_name, entity_with_tag);
 
-    bool add_ha_classes = true; // default we'll add the "unit_of_meas", "stat_cla" and "dev_cla" attributes
-
     // create the topic
-    // depending on the type and whether the device entity is writable (a command)
+    // depending on the type and whether the device entity is writable (i.e. a command)
     // https://developers.home-assistant.io/docs/core/entity
-    char topic[MQTT_TOPIC_MAX_SIZE];
-    // if it's a command then we can use Number, Switch, Select or Text. Otherwise stick to Sensor
+    char topic[MQTT_TOPIC_MAX_SIZE] = {0};
     if (has_cmd) {
+        // if it's a command then we can use Number, Switch, Select or Text. Otherwise stick to Sensor
         switch (type) {
         case DeviceValueType::INT8:
         case DeviceValueType::UINT8:
@@ -950,45 +948,40 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
         case DeviceValueType::UINT24:
         case DeviceValueType::UINT32:
             // number - https://www.home-assistant.io/integrations/number.mqtt
-            // older Domoticz does not support number, use sensor
+            // older Domoticz does not support number, will default to Sensor
             if (discovery_type() == discoveryType::HOMEASSISTANT || discovery_type() == discoveryType::DOMOTICZ_LATEST) {
                 snprintf(topic, sizeof(topic), "number/%s", config_topic);
-            } else {
-                snprintf(topic, sizeof(topic), "sensor/%s", config_topic);
             }
             break;
         case DeviceValueType::BOOL:
             // switch - https://www.home-assistant.io/integrations/switch.mqtt
             snprintf(topic, sizeof(topic), "switch/%s", config_topic);
-            add_ha_classes = false;
             break;
         case DeviceValueType::ENUM:
-            snprintf(topic, sizeof(topic), "select/%s", config_topic);
-            add_ha_classes = false;
-            break;
-        case DeviceValueType::CMD: // hardcoded commands are always ENUMS
             // select - https://www.home-assistant.io/integrations/select.mqtt
+            snprintf(topic, sizeof(topic), "select/%s", config_topic);
+            break;
+        case DeviceValueType::CMD:
             if (uom == DeviceValueUOM::NONE) {
-                snprintf(topic, sizeof(topic), "select/%s", config_topic);
+                snprintf(topic, sizeof(topic), "select/%s", config_topic); // hardcoded commands are always ENUMS
             } else if (discovery_type() == discoveryType::HOMEASSISTANT || discovery_type() == discoveryType::DOMOTICZ_LATEST) {
                 snprintf(topic, sizeof(topic), "number/%s", config_topic);
-            } else {
-                snprintf(topic, sizeof(topic), "sensor/%s", config_topic);
             }
-            add_ha_classes = false;
             break;
         case DeviceValueType::STRING:
             // text - https://www.home-assistant.io/integrations/text.mqtt
-            snprintf(topic, sizeof(topic), "text/%s", config_topic); // e.g. set_datetime, set_holiday, set_wwswitchtime
-            add_ha_classes = false;
+            // Domoticz does not support text, will default to Sensor
+            if (discovery_type() == discoveryType::HOMEASSISTANT) {
+                snprintf(topic, sizeof(topic), "text/%s", config_topic); // e.g. set_datetime, set_holiday, set_wwswitchtime
+            }
             break;
         default:
-            // plain old sensor
-            snprintf(topic, sizeof(topic), "sensor/%s", config_topic);
             break;
         }
-    } else {
-        // it is not a command and a read-only sensor. Use then either sensor or binary_sensor
+    }
+
+    // if at this point we don't have a topic created yet, create a default sensor one. We always need a topic.
+    if (strlen(topic) == 0) {
         snprintf(topic, sizeof(topic), (type == DeviceValueType::BOOL) ? "binary_sensor/%s" : "sensor/%s", config_topic); // binary sensor (for booleans)
     }
 
@@ -1054,21 +1047,6 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             doc["max"] = dv_set_max;
             snprintf(sample_val, sizeof(sample_val), "%i", dv_set_min);
         }
-
-        // set icons
-        // since these don't have a device class we need to add the icon ourselves
-        switch (uom) {
-        case DeviceValueUOM::DEGREES:
-        case DeviceValueUOM::DEGREES_R:
-        case DeviceValueUOM::K:
-            doc["ic"] = F_(icondegrees);
-            break;
-        case DeviceValueUOM::PERCENT:
-            doc["ic"] = F_(iconpercent);
-            break;
-        default:
-            break;
-        }
     }
 
     // friendly name = <tag> <name>
@@ -1129,26 +1107,23 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
             // Domoticz doesn't support value templates, so we just use the value directly
             // Also omit the uom and other state classes
             doc["val_tpl"] = (std::string) "{{" + val_obj + "}}";
-            // add_ha_classes = false; // don't add the classes, categories of uom (dev_cla, stat_cla)
         }
     }
 
-    // Add the state class, device class and sometimes the icon.
-    // Used only for read-only sensors like Sensor and Binary Sensor but also Numbers
-    if (add_ha_classes) {
-        // first set the catagory for System entities
-        // https://github.com/emsesp/EMS-ESP32/discussions/1459#discussioncomment-7694873
-        if (device_type == EMSdevice::DeviceType::SYSTEM) {
-            doc["ent_cat"] = "diagnostic";
-        }
-        add_ha_uom(doc.as<JsonObject>(), type, uom, entity); // add the UoM, device and state class
+    // Add the state class, device class and an optional icon based on the uom
+    // first set the catagory for System entities
+    // https://github.com/emsesp/EMS-ESP32/discussions/1459#discussioncomment-7694873
+    if (device_type == EMSdevice::DeviceType::SYSTEM) {
+        doc["ent_cat"] = "diagnostic"; // instead of config
     }
+    add_ha_uom(doc.as<JsonObject>(), type, uom, entity);
 
     doc["dev"] = dev_json;
 
     return queue_ha(topic, doc.as<JsonObject>());
 }
 
+// Add the state class, device class and an optional icon based on the uom
 void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, const char * entity) {
     const char * dc_ha = "dev_cla";  // device class
     const char * sc_ha = "stat_cla"; // state class
@@ -1169,16 +1144,19 @@ void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, con
     }
 
     // set state and device class
+    // also icon, when there is no device class that sets one
     switch (uom) {
     case DeviceValueUOM::DEGREES:
     case DeviceValueUOM::DEGREES_R:
     case DeviceValueUOM::K:
         doc[sc_ha] = F_(measurement);
         doc[dc_ha] = "temperature";
+        doc["ic"]  = F_(icondegrees); // icon
         break;
     case DeviceValueUOM::PERCENT:
         doc[sc_ha] = F_(measurement);
         doc[dc_ha] = "power_factor";
+        doc["ic"]  = F_(iconpercent); // icon
         break;
     case DeviceValueUOM::SECONDS:
     case DeviceValueUOM::MINUTES:
@@ -1256,8 +1234,6 @@ void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, con
 }
 
 bool Mqtt::publish_ha_climate_config(const int8_t tag, const bool has_roomtemp, const bool remove, const int16_t min, const uint32_t max) {
-    // TODO: check if Domoticz supports climate via MQTT discovery, otherwise exit this function if (discovery_type() != discoveryType::HOMEASSISTANT
-
     uint8_t hc_num = tag;
 
     char topic[Mqtt::MQTT_TOPIC_MAX_SIZE];

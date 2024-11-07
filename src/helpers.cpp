@@ -603,6 +603,10 @@ bool Helpers::value2bool(const char * value, bool & value_b) {
         return true; // is a bool
     }
 
+#ifdef EMSESP_STANDALONE
+    emsesp::EMSESP::logger().debug("Error. value2bool: %s is not a boolean", value);
+#endif
+
     return false; // not a bool
 }
 
@@ -764,7 +768,7 @@ uint8_t Helpers::count_items(const char * const ** list) {
 // if force_en is true always take the EN non-translated word
 const char * Helpers::translated_word(const char * const * strings, const bool force_en) {
     uint8_t language_index = EMSESP::system_.language_index();
-    uint8_t index          = 0;
+    uint8_t index          = 0; // default en
 
     if (!strings) {
         return ""; // no translations
@@ -774,6 +778,7 @@ const char * Helpers::translated_word(const char * const * strings, const bool f
     if (!force_en && (Helpers::count_items(strings) >= language_index + 1 && strlen(strings[language_index]))) {
         index = language_index;
     }
+
     return strings[index];
 }
 

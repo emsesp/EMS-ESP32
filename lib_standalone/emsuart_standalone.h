@@ -36,6 +36,9 @@ class EMSuart {
     static void     restart();
     static void     send_poll(uint8_t data);
     static uint16_t transmit(uint8_t * buf, uint8_t len);
+    static uint8_t  last_tx_src() {
+        return 0;
+    }
 
   private:
     static char * hextoa(char * result, const uint8_t value);

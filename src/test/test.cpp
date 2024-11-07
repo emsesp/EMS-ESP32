@@ -307,7 +307,15 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         }
         shell.printfln("Testing Adding a device (product_id %d), with all values...", id2);
         test("add", id1, id2);
-        shell.invoke_command("show values");
+        shell.invoke_command("show devices");
+        ok = true;
+    }
+
+    // set the language
+    if (command == "locale") {
+        shell.printfln("Testing setting locale to %s", id1_s.c_str());
+        EMSESP::system_.locale(id1_s.c_str());
+        shell.invoke_command("show");
         ok = true;
     }
 

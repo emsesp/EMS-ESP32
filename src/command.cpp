@@ -379,17 +379,6 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
         return CommandRet::NOT_ALLOWED; // command not allowed
     }
 
-    // build up the log string for reporting back
-    // We send the log message as Warning so it appears in the log (debug is only enabled when compiling with DEBUG)
-    std::string ro          = EMSESP::system_.readonly_mode() ? "[readonly] " : "";
-    auto        description = Helpers::translated_word(cf->description_);
-    char        info_s[100];
-    if (strlen(description)) {
-        snprintf(info_s, sizeof(info_s), "%s/%s (%s)", dname, cmd, description);
-    } else {
-        snprintf(info_s, sizeof(info_s), "%s/%s", dname, cmd);
-    }
-
     // call the function based on command function type
     // commands return true or false only (bool)
     uint8_t return_code = CommandRet::OK;
@@ -406,7 +395,7 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
         }
     }
 
-    // report back. If not OK show output from error, otherwise return the HTTP code
+    // report back. If not OK show output from error, otherwise return the error code
     if (return_code != CommandRet::OK) {
         char error[100];
         if (single_command) {
@@ -418,6 +407,16 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
         output["message"] = error;
         LOG_WARNING(error);
     } else {
+        // build up the log string for reporting back
+        // We send the log message as Warning so it appears in the log (debug is only enabled when compiling with DEBUG)
+        std::string ro          = EMSESP::system_.readonly_mode() ? "[readonly] " : "";
+        auto        description = Helpers::translated_word(cf->description_);
+        char        info_s[100];
+        if (strlen(description)) {
+            snprintf(info_s, sizeof(info_s), "%s/%s (%s)", dname, cmd, description);
+        } else {
+            snprintf(info_s, sizeof(info_s), "%s/%s", dname, cmd);
+        }
         if (single_command) {
             // log as DEBUG (TRACE) regardless if compiled with EMSESP_DEBUG
             logger_.debug("%sCalled command %s", ro.c_str(), info_s);

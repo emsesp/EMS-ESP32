@@ -4779,7 +4779,7 @@
 | circmode | circulation pump mode | enum [off\|on\|auto\|own prog] |   | true | DHW | 3 | 1 | 1 | 
 | chargeduration | charge duration | uint8 (>=0<=3810) | minutes | true | DHW | 4 | 1 | 15 | 
 | charge | charge | boolean |   | true | DHW | 5 | 1 | 1 | 
-| extra | extra | uint8 (>=0<=254) | C | false | DHW | 6 | 1 | 1 | 
+| extra | extra | uint8 (>=0<=254) |   | false | DHW | 6 | 1 | 1 | 
 | disinfecting | disinfecting | boolean |   | true | DHW | 7 | 1 | 1 | 
 | disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 8 | 1 | 1 | 
 | disinfecttime | disinfection time | uint8 (>=0<=1431) | minutes | true | DHW | 9 | 1 | 15 | 
@@ -4895,7 +4895,7 @@
 | circmode | circulation pump mode | enum [off\|on\|auto\|own prog] |   | true | DHW | 3 | 1 | 1 | 
 | chargeduration | charge duration | uint8 (>=0<=3810) | minutes | true | DHW | 4 | 1 | 15 | 
 | charge | charge | boolean |   | true | DHW | 5 | 1 | 1 | 
-| extra | extra | uint8 (>=0<=254) | C | false | DHW | 6 | 1 | 1 | 
+| extra | extra | uint8 (>=0<=254) |   | false | DHW | 6 | 1 | 1 | 
 | disinfecting | disinfecting | boolean |   | true | DHW | 7 | 1 | 1 | 
 | disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 8 | 1 | 1 | 
 | disinfecttime | disinfection time | uint8 (>=0<=1431) | minutes | true | DHW | 9 | 1 | 15 | 
@@ -5023,7 +5023,7 @@
 | circmode | circulation pump mode | enum [off\|on\|auto\|own prog] |   | true | DHW | 3 | 1 | 1 | 
 | chargeduration | charge duration | uint8 (>=0<=3810) | minutes | true | DHW | 4 | 1 | 15 | 
 | charge | charge | boolean |   | true | DHW | 5 | 1 | 1 | 
-| extra | extra | uint8 (>=0<=254) | C | false | DHW | 6 | 1 | 1 | 
+| extra | extra | uint8 (>=0<=254) |   | false | DHW | 6 | 1 | 1 | 
 | disinfecting | disinfecting | boolean |   | true | DHW | 7 | 1 | 1 | 
 | disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 8 | 1 | 1 | 
 | disinfecttime | disinfection time | uint8 (>=0<=1431) | minutes | true | DHW | 9 | 1 | 15 | 
@@ -5267,7 +5267,7 @@
 | circmode | circulation pump mode | enum [off\|on\|auto\|own prog] |   | true | DHW | 3 | 1 | 1 | 
 | chargeduration | charge duration | uint8 (>=0<=3810) | minutes | true | DHW | 4 | 1 | 15 | 
 | charge | charge | boolean |   | true | DHW | 5 | 1 | 1 | 
-| extra | extra | uint8 (>=0<=254) | C | false | DHW | 6 | 1 | 1 | 
+| extra | extra | uint8 (>=0<=254) |   | false | DHW | 6 | 1 | 1 | 
 | disinfecting | disinfecting | boolean |   | true | DHW | 7 | 1 | 1 | 
 | disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 8 | 1 | 1 | 
 | disinfecttime | disinfection time | uint8 (>=0<=1431) | minutes | true | DHW | 9 | 1 | 15 | 
@@ -5355,7 +5355,7 @@
 | circmode | circulation pump mode | enum [off\|on\|auto\|own prog] |   | true | DHW | 3 | 1 | 1 | 
 | chargeduration | charge duration | uint8 (>=0<=3810) | minutes | true | DHW | 4 | 1 | 15 | 
 | charge | charge | boolean |   | true | DHW | 5 | 1 | 1 | 
-| extra | extra | uint8 (>=0<=254) | C | false | DHW | 6 | 1 | 1 | 
+| extra | extra | uint8 (>=0<=254) |   | false | DHW | 6 | 1 | 1 | 
 | disinfecting | disinfecting | boolean |   | true | DHW | 7 | 1 | 1 | 
 | disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 8 | 1 | 1 | 
 | disinfecttime | disinfection time | uint8 (>=0<=1431) | minutes | true | DHW | 9 | 1 | 15 | 
@@ -5453,7 +5453,7 @@
 | circmode | circulation pump mode | enum [off\|on\|auto\|own prog] |   | true | DHW | 3 | 1 | 1 | 
 | chargeduration | charge duration | uint8 (>=0<=3810) | minutes | true | DHW | 4 | 1 | 15 | 
 | charge | charge | boolean |   | true | DHW | 5 | 1 | 1 | 
-| extra | extra | uint8 (>=0<=254) | C | false | DHW | 6 | 1 | 1 | 
+| extra | extra | uint8 (>=0<=254) |   | false | DHW | 6 | 1 | 1 | 
 | disinfecting | disinfecting | boolean |   | true | DHW | 7 | 1 | 1 | 
 | disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 8 | 1 | 1 | 
 | disinfecttime | disinfection time | uint8 (>=0<=1431) | minutes | true | DHW | 9 | 1 | 15 | 
