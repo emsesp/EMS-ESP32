@@ -1287,7 +1287,7 @@ void EMSdevice::dump_devicevalue_info() {
             Serial.print(dv.short_name);
             Serial.print(',');
 
-            Serial.print(dv.fullname[0]); // TODO why german?
+            Serial.print(dv.fullname[0]);
             Serial.print(',');
 
             // per type
