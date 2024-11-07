@@ -332,7 +332,7 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
 // Dump all entities to Serial out
 // this is intended to run within the OS with lots of available memory!
 #if defined(EMSESP_STANDALONE)
-void EMSESP::dump_all_values(uuid::console::Shell & shell) {
+void EMSESP::dump_all_entities(uuid::console::Shell & shell) {
     Serial.println("---- CSV START ----"); // marker use by py script
     // add header for CSV
     Serial.println("device name,device type,product id,shortname,fullname,type [options...] \\| (min/max),uom,writeable,discovery entityid v3.4,discovery "
@@ -361,7 +361,7 @@ void EMSESP::dump_all_values(uuid::console::Shell & shell) {
                 // for testing the mixer use ... if (device.product_id == 69) {
                 emsdevices.push_back(
                     EMSFactory::add(device.device_type, device_id, device.product_id, "1.0", device.default_name, device.flags, EMSdevice::Brand::NO_BRAND));
-                emsdevices.back()->dump_value_info();
+                emsdevices.back()->dump_devicevalue_info();
             }
         }
     }

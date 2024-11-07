@@ -442,7 +442,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "entity_dump") {
         System::test_set_all_active(true);
-        EMSESP::dump_all_values(shell);
+        EMSESP::dump_all_entities(shell);
         ok = true;
     }
 

@@ -1271,7 +1271,7 @@ void EMSdevice::getCustomizationEntities(std::vector<std::string> & entity_ids) 
 // pipe symbols (|) are escaped so they can be converted to Markdown in the Wiki
 // format is: device name,device type,product id,shortname,fullname,type [options...] \\| (min/max),uom,writeable,discovery entityid v3.4, discovery entityid
 #if defined(EMSESP_STANDALONE)
-void EMSdevice::dump_value_info() {
+void EMSdevice::dump_devicevalue_info() {
     for (auto & dv : devicevalues_) {
         if (dv.fullname != nullptr) {
             Serial.print('\"');
@@ -1287,7 +1287,7 @@ void EMSdevice::dump_value_info() {
             Serial.print(dv.short_name);
             Serial.print(',');
 
-            Serial.print(dv.fullname[0]);
+            Serial.print(dv.fullname[0]); // TODO why german?
             Serial.print(',');
 
             // per type
@@ -1438,8 +1438,6 @@ void EMSdevice::dump_value_info() {
             Serial.print(",");
 
             // modbus specific infos
-
-
             Serial.print(device_type());
             Serial.print(',');
 
