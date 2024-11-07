@@ -910,14 +910,14 @@ std::string EMSESP::pretty_telegram(std::shared_ptr<const Telegram> telegram) {
     std::string str;
     str.reserve(200);
     if (telegram->operation == Telegram::Operation::RX_READ) {
-        str = src_name + "(" + Helpers::hextoa(src) + ") -R-> " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
+        str = src_name + "(" + Helpers::hextoa(src) + ") -> " + dest_name + "(" + Helpers::hextoa(dest) + "), R, " + type_name + "("
               + Helpers::hextoa(telegram->type_id) + "), length: " + Helpers::itoa(telegram->message_data[0])
               + ((telegram->message_length > 1) ? ", data: " + Helpers::data_to_hex(telegram->message_data + 1, telegram->message_length - 1) : "");
     } else if (telegram->dest == 0) {
-        str = src_name + "(" + Helpers::hextoa(src) + ") -B-> " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
+        str = src_name + "(" + Helpers::hextoa(src) + ") -> " + dest_name + "(" + Helpers::hextoa(dest) + "), B, " + type_name + "("
               + Helpers::hextoa(telegram->type_id) + "), data: " + telegram->to_string_message();
     } else {
-        str = src_name + "(" + Helpers::hextoa(src) + ") -W-> " + dest_name + "(" + Helpers::hextoa(dest) + "), " + type_name + "("
+        str = src_name + "(" + Helpers::hextoa(src) + ") -> " + dest_name + "(" + Helpers::hextoa(dest) + "), W, " + type_name + "("
               + Helpers::hextoa(telegram->type_id) + "), data: " + telegram->to_string_message();
     }
 
@@ -1016,13 +1016,14 @@ void EMSESP::process_version(std::shared_ptr<const Telegram> telegram) {
     // some devices store the protocol type (HT3, Buderus) in the last byte
     uint8_t brand;
     if (telegram->message_length >= 10) {
-        brand = EMSdevice::decode_brand(telegram->message_data[9]); // TODO should be offset + 9?
+        brand = EMSdevice::decode_brand(telegram->message_data[9]);
     } else {
         brand = EMSdevice::Brand::NO_BRAND; // unknown
     }
 
     // add it - will be overwritten if device already exists
     (void)add_device(device_id, product_id, version, brand);
+
     // request the deviceName from telegram 0x01
     send_read_request(EMSdevice::EMS_TYPE_NAME, device_id, 27);
 }

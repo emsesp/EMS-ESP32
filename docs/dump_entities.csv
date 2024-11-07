@@ -3438,7 +3438,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "UI800, BC400",thermostat,4,circmode,circulation pump mode,enum [off\|on\|auto\|own prog], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,3,1
 "UI800, BC400",thermostat,4,chargeduration,charge duration,uint8 (>=0<=3810),minutes,true,number.thermostat_dhw_charge_duration,number.thermostat_dhw_chargeduration,6,9,15,4,1
 "UI800, BC400",thermostat,4,charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
-"UI800, BC400",thermostat,4,extra,extra,uint8 (>=0<=254),C,false,sensor.thermostat_dhw_extra,sensor.thermostat_dhw_extra,6,9,1,6,1
+"UI800, BC400",thermostat,4,extra,extra,uint8 (>=0<=254), ,false,sensor.thermostat_dhw_extra,sensor.thermostat_dhw_extra,6,9,1,6,1
 "UI800, BC400",thermostat,4,disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,7,1
 "UI800, BC400",thermostat,4,disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,8,1
 "UI800, BC400",thermostat,4,disinfecttime,disinfection time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_disinfection_time,number.thermostat_dhw_disinfecttime,6,9,15,9,1
@@ -3807,7 +3807,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC200, CW100, CR120, CR50",thermostat,157,circmode,circulation pump mode,enum [off\|on\|auto\|own prog], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,3,1
 "RC200, CW100, CR120, CR50",thermostat,157,chargeduration,charge duration,uint8 (>=0<=3810),minutes,true,number.thermostat_dhw_charge_duration,number.thermostat_dhw_chargeduration,6,9,15,4,1
 "RC200, CW100, CR120, CR50",thermostat,157,charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
-"RC200, CW100, CR120, CR50",thermostat,157,extra,extra,uint8 (>=0<=254),C,false,sensor.thermostat_dhw_extra,sensor.thermostat_dhw_extra,6,9,1,6,1
+"RC200, CW100, CR120, CR50",thermostat,157,extra,extra,uint8 (>=0<=254), ,false,sensor.thermostat_dhw_extra,sensor.thermostat_dhw_extra,6,9,1,6,1
 "RC200, CW100, CR120, CR50",thermostat,157,disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,7,1
 "RC200, CW100, CR120, CR50",thermostat,157,disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,8,1
 "RC200, CW100, CR120, CR50",thermostat,157,disinfecttime,disinfection time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_disinfection_time,number.thermostat_dhw_disinfecttime,6,9,15,9,1
@@ -3891,7 +3891,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,circmode,circulation pump mode,enum [off\|on\|auto\|own prog], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,3,1
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,chargeduration,charge duration,uint8 (>=0<=3810),minutes,true,number.thermostat_dhw_charge_duration,number.thermostat_dhw_chargeduration,6,9,15,4,1
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
-"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,extra,extra,uint8 (>=0<=254),C,false,sensor.thermostat_dhw_extra,sensor.thermostat_dhw_extra,6,9,1,6,1
+"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,extra,extra,uint8 (>=0<=254), ,false,sensor.thermostat_dhw_extra,sensor.thermostat_dhw_extra,6,9,1,6,1
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,7,1
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,8,1
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,disinfecttime,disinfection time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_disinfection_time,number.thermostat_dhw_disinfecttime,6,9,15,9,1
@@ -3975,7 +3975,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC100, CR10, Moduline 1000/1010",thermostat,165,circmode,circulation pump mode,enum [off\|on\|auto\|own prog], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,3,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,chargeduration,charge duration,uint8 (>=0<=3810),minutes,true,number.thermostat_dhw_charge_duration,number.thermostat_dhw_chargeduration,6,9,15,4,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
-"RC100, CR10, Moduline 1000/1010",thermostat,165,extra,extra,uint8 (>=0<=254),C,false,sensor.thermostat_dhw_extra,sensor.thermostat_dhw_extra,6,9,1,6,1
+"RC100, CR10, Moduline 1000/1010",thermostat,165,extra,extra,uint8 (>=0<=254), ,false,sensor.thermostat_dhw_extra,sensor.thermostat_dhw_extra,6,9,1,6,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,7,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,8,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,disinfecttime,disinfection time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_disinfection_time,number.thermostat_dhw_disinfecttime,6,9,15,9,1
@@ -4060,7 +4060,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Rego 2000/3000",thermostat,172,circmode,circulation pump mode,enum [off\|on\|auto\|own prog], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,3,1
 "Rego 2000/3000",thermostat,172,chargeduration,charge duration,uint8 (>=0<=3810),minutes,true,number.thermostat_dhw_charge_duration,number.thermostat_dhw_chargeduration,6,9,15,4,1
 "Rego 2000/3000",thermostat,172,charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
-"Rego 2000/3000",thermostat,172,extra,extra,uint8 (>=0<=254),C,false,sensor.thermostat_dhw_extra,sensor.thermostat_dhw_extra,6,9,1,6,1
+"Rego 2000/3000",thermostat,172,extra,extra,uint8 (>=0<=254), ,false,sensor.thermostat_dhw_extra,sensor.thermostat_dhw_extra,6,9,1,6,1
 "Rego 2000/3000",thermostat,172,disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,7,1
 "Rego 2000/3000",thermostat,172,disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,8,1
 "Rego 2000/3000",thermostat,172,disinfecttime,disinfection time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_disinfection_time,number.thermostat_dhw_disinfecttime,6,9,15,9,1
@@ -4171,7 +4171,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,circmode,circulation pump mode,enum [off\|on\|auto\|own prog], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,3,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,chargeduration,charge duration,uint8 (>=0<=3810),minutes,true,number.thermostat_dhw_charge_duration,number.thermostat_dhw_chargeduration,6,9,15,4,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
-"Rego 3000, UI800, Logamatic BC400",thermostat,253,extra,extra,uint8 (>=0<=254),C,false,sensor.thermostat_dhw_extra,sensor.thermostat_dhw_extra,6,9,1,6,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,extra,extra,uint8 (>=0<=254), ,false,sensor.thermostat_dhw_extra,sensor.thermostat_dhw_extra,6,9,1,6,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,7,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,8,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,disinfecttime,disinfection time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_disinfection_time,number.thermostat_dhw_disinfecttime,6,9,15,9,1

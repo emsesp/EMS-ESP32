@@ -155,7 +155,6 @@ const Devices = () => {
       }
       &.tr.tr-body.row-select.row-select-single-selected {
         background-color: #177ac9;
-        font-weight: normal;
       }
     `
   });
@@ -169,11 +168,11 @@ const Devices = () => {
       HeaderRow: `
         .th {
           padding: 8px;
-          height: 36px;
       `,
       Row: `
+        font-weight: bold;
         &:hover .td {
-        background-color: #177ac9;
+          background-color: #177ac9;
       `
     }
   ]);
@@ -216,7 +215,7 @@ const Devices = () => {
           background-color: #303030;
         },
         &:hover .td {
-        background-color: #177ac9;
+          background-color: #177ac9;
       }
       `
     }
@@ -523,7 +522,7 @@ const Devices = () => {
       <IconContext.Provider
         value={{
           color: 'lightblue',
-          size: '18',
+          size: '16',
           style: { verticalAlign: 'middle' }
         }}
       >
@@ -574,7 +573,9 @@ const Devices = () => {
 
   const deviceValueDialogClose = () => {
     setDeviceValueDialogOpen(false);
-    void sendDeviceData(selectedDevice);
+    if (selectedDevice !== undefined) {
+      void sendDeviceData(selectedDevice);
+    }
   };
 
   const renderDeviceData = () => {

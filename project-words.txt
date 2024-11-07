@@ -1364,3 +1364,5 @@ poolshunt
 poolshuntstatus
 pooltemp 
 stoptime
+showertimer
+showeralert

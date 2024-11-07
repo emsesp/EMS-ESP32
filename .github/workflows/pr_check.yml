@@ -1,0 +1,37 @@
+name: 'pr_check'
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: dev
+    paths:
+     - '**.c'
+     - '**.cpp'
+     - '**.h'
+     - '**.hpp'
+     - '**.json'
+     - '**.py'
+     - '**.md'
+     - '.github/workflows/pr_check.yml'
+
+jobs:
+  pre-release:
+    name: 'Automatic pre-release build'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PlatformIO
+        run: |
+          pip install wheel
+          pip install -U platformio
+
+      - name: Build native
+        run: |
+          platformio run -e native
