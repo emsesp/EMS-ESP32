@@ -74,7 +74,8 @@ class DeviceValue {
         VOLTS,       // 23 - V
         MBAR,        // 24 - mbar
         LH,          // 25 - l/h
-        CONNECTIVITY // 26 - used in HA
+        CTKWH,       // 26 - ct/kWh
+        CONNECTIVITY // 27 - used in HA
     };
 
     // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
