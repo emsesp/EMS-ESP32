@@ -1828,6 +1828,10 @@ void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
     uint8_t         min           = telegram->message_data[8];
     uint16_t        duration      = telegram->message_data[9] * 256 + telegram->message_data[10];
     uint32_t        date          = (year - 2000) * 535680UL + month * 44640UL + day * 1440UL + hour * 60 + min + duration;
+    // check valid https://github.com/emsesp/EMS-ESP32/issues/2189
+    if (day == 0 || day > 31 || month == 0 || month > 12 || !std::isprint(code[0]) || !std::isprint(code[1])) {
+        return;
+    }
     // store only the newest code from telegrams 10 and 11
     if (date > lastCodeDate_ && lastCodeDate_) {
         lastCodeDate_ = date;
@@ -1855,6 +1859,9 @@ void Boiler::process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram) 
     code[2]                                 = telegram->message_data[7];
     code[3]                                 = 0;
     telegram->read_value(codeNo, 8);
+    if (!std::isprint(code[0]) || !std::isprint(code[1]) || !std::isprint(code[2])) {
+        return;
+    }
 
     // check for valid date, https://github.com/emsesp/EMS-ESP32/issues/204
     if (telegram->message_data[10] & 0x80) {
@@ -2970,19 +2977,19 @@ bool Boiler::set_silentMode(const char * value, const int8_t id) {
 }
 
 bool Boiler::set_silentFrom(const char * value, const int8_t id) {
-    int v;
-    if (!Helpers::value2number(value, v)) {
+    if (value == nullptr || value[0] < '0' || value[0] > '9') {
         return false;
     }
+    auto v = Helpers::string2minutes(value);
     write_command(0x484, 52, v / 15, 0x484);
     return true;
 }
 
 bool Boiler::set_silentTo(const char * value, const int8_t id) {
-    int v;
-    if (!Helpers::value2number(value, v)) {
+    if (value == nullptr || value[0] < '0' || value[0] > '9') {
         return false;
     }
+    auto v = Helpers::string2minutes(value);
     write_command(0x484, 53, v / 15, 0x484);
     return true;
 }
