@@ -20,7 +20,8 @@ export default defineConfig(({ command, mode }) => {
             changeOrigin: true,
             secure: false
           },
-          '/rest': 'http://localhost:3080'
+          '/rest': 'http://localhost:3080',
+          '/gh': 'http://localhost:3080' // mock for GitHub API
         }
       }
     };

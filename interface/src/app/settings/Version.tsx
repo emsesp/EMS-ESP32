@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -36,7 +36,7 @@ const Version = () => {
   const [upgradeAvailable, setUpgradeAvailable] = useState<boolean>(false);
 
   const { send: sendCheckUpgrade } = useRequest(
-    (version: string) => callAction({ action: 'checkUpgrade', param: version }),
+    (versions: string) => callAction({ action: 'checkUpgrade', param: versions }),
     {
       immediate: false
     }
@@ -54,27 +54,18 @@ const Version = () => {
     }
   );
 
-  // called immediately to get the latest version, on page load
-  const { data: latestVersion } = useRequest(getStableVersion, {
-    // uncomment next 2 lines for testing, uses https://github.com/emsesp/EMS-ESP32/releases/download/v3.6.5/EMS-ESP-3_6_5-ESP32-16MB+.bin
-    // immediate: false,
-    // initialData: '3.6.5'
-  }).onSuccess((event) => {
-    if (!useDev) {
-      void sendCheckUpgrade(event.data);
-    }
-  });
+  // called immediately to get the latest versions on page load
+  const { data: latestVersion } = useRequest(getStableVersion);
+  const { data: latestDevVersion } = useRequest(getDevVersion);
 
-  // called immediately to get the latest version, on page load, then check for upgrade (works for both dev and stable)
-  const { data: latestDevVersion } = useRequest(getDevVersion, {
-    // uncomment next 2 lines for testing, uses https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_7_0-dev_31-ESP32-16MB+.bin
-    // immediate: false,
-    // initialData: '3.7.0-dev.32'
-  }).onSuccess((event) => {
-    if (useDev) {
-      void sendCheckUpgrade(event.data);
+  useEffect(() => {
+    if (latestVersion && latestDevVersion) {
+    console.log("Latest versions, stable: " + latestVersion + " dev: " + latestDevVersion);
+    sendCheckUpgrade(latestDevVersion + "," + latestVersion).catch((error: Error) => {
+      console.error("Failed to check upgrade:", error);
+    });
     }
-  });
+  }, [latestVersion, latestDevVersion]);
 
   const STABLE_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/';
   const STABLE_RELNOTES_URL =

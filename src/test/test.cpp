@@ -1014,22 +1014,22 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             // request.url("/api");
             // EMSESP::webAPIService.webAPIService(&request, doc.as<JsonVariant>());
 
-            char data2[] = "{\"action\":\"customSupport\", \"param\":\"hello\"}";
-            deserializeJson(doc, data2);
-            request.url("/rest/action");
-            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+            // char data2[] = "{\"action\":\"customSupport\", \"param\":\"hello\"}";
+            // deserializeJson(doc, data2);
+            // request.url("/rest/action");
+            // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
-            char data3[] = "{\"action\":\"export\", \"param\":\"schedule\"}";
-            deserializeJson(doc, data3);
-            request.url("/rest/action");
-            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+            // char data3[] = "{\"action\":\"export\", \"param\":\"schedule\"}";
+            // deserializeJson(doc, data3);
+            // request.url("/rest/action");
+            // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
-            char data4[] = "{\"action\":\"export\", \"param\":\"allvalues\"}";
-            deserializeJson(doc, data4);
-            request.url("/rest/action");
-            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+            // char data4[] = "{\"action\":\"export\", \"param\":\"allvalues\"}";
+            // deserializeJson(doc, data4);
+            // request.url("/rest/action");
+            // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
-            char data5[] = "{\"action\":\"checkUpgrade\", \"param\":\"3.7.0-dev.99\"}";
+            char data5[] = "{\"action\":\"checkUpgrade\", \"param\":\"3.7.1-dev.99,3.7.0\"}";
             deserializeJson(doc, data5);
             request.url("/rest/action");
             EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());

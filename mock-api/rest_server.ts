@@ -21,12 +21,20 @@ const router = AutoRouter({
 
 const REST_ENDPOINT_ROOT = '/rest/';
 const API_ENDPOINT_ROOT = '/api/';
+const GH_ENDPOINT_ROOT = '/gh/'; // for mock GitHub API for version checking
 
 // HTTP HEADERS for msgpack
 const headers = {
   'Access-Control-Allow-Origin': '*',
   'Content-type': 'application/msgpack'
 };
+
+// Versions - all without the 'v'
+const THIS_VERSION = '3.7.0';
+// const THIS_VERSION = '3.6.4'; // for testing
+const LATEST_STABLE_VERSION = '3.7.0';
+const LATEST_DEV_VERSION = '3.7.1-dev.4';
+const VERSION_IS_UPGRADEABLE = true;
 
 // GLOBAL VARIABLES
 let countWifiScanPoll = 0; // wifi network scan
@@ -199,16 +207,18 @@ function custom_support() {
 function check_upgrade(version: string) {
   let data = {};
   if (version) {
-    console.log('check upgrade from version', version);
+    const dev_version = version.split(',')[0];
+    const stable_version = version.split(',')[1];
+    console.log("latest dev version: " + dev_version + ", latest stable version: " + stable_version);
+    console.log('Version upgrade check from version ' + THIS_VERSION + ', upgradable: ' + VERSION_IS_UPGRADEABLE);
     data = {
-      emsesp_version: VERSION,
-      // upgradeable: true
-      upgradeable: false
+      emsesp_version: THIS_VERSION,
+      upgradeable: VERSION_IS_UPGRADEABLE
     };
   } else {
-    console.log('requesting ems-esp version');
+    console.log('requesting ems-esp version ('+THIS_VERSION+')');
     data = {
-      emsesp_version: VERSION
+      emsesp_version: THIS_VERSION
     };
   }
   return data;
@@ -468,11 +478,8 @@ const VERIFY_AUTHORIZATION_ENDPOINT = REST_ENDPOINT_ROOT + 'verifyAuthorization'
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn';
 const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken';
 
-const VERSION = '3.7.0';
-// const VERSION = '3.6.4';
-
 let system_status = {
-  emsesp_version: VERSION,
+  emsesp_version: THIS_VERSION,
   bus_status: 0,
   // status: 2,
   uptime: 77186,
@@ -573,7 +580,7 @@ const EMSESP_SYSTEM_INFO_ENDPOINT = API_ENDPOINT_ROOT + 'system/info';
 
 const emsesp_info = {
   System: {
-    version: VERSION,
+    version: THIS_VERSION,
     uptime: '001+06:40:34.018',
     'uptime (seconds)': 110434,
     freemem: 131,
@@ -4876,6 +4883,18 @@ router
       }
     }
     return status(404); // not found
+  });
+
+// Mock GitHub API
+
+router
+  .get(GH_ENDPOINT_ROOT + '/tags/latest', () => {
+    console.log('returning latest development version: ' + LATEST_DEV_VERSION);
+    return { name: 'v'+LATEST_DEV_VERSION };
+  })
+  .get(GH_ENDPOINT_ROOT + '/latest', () => {
+    console.log('returning latest stable version: ' + LATEST_STABLE_VERSION);
+    return { name: 'v'+LATEST_STABLE_VERSION };
   });
 
 export default router;

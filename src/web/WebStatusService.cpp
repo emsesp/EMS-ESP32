@@ -203,18 +203,27 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
 }
 
 // action = checkUpgrade
-bool WebStatusService::checkUpgrade(JsonObject root, std::string & latest_version) {
-    root["emsesp_version"] = EMSESP_APP_VERSION;
+bool WebStatusService::checkUpgrade(JsonObject root, std::string & versions) {
+    root["emsesp_version"] = EMSESP_APP_VERSION; // always send back current version
 
-    if (!latest_version.empty()) {
+    // versions holds the latest development version and stable version in one string, comma separated
+    std::string latest_dev_version    = versions.substr(0, versions.find(','));
+    std::string latest_stable_version = versions.substr(versions.find(',') + 1);
+
+    if (!versions.empty()) {
+        version::Semver200_version this_version(EMSESP_APP_VERSION); // current version
+        bool                       using_dev_version = !this_version.prerelease().empty();
+        version::Semver200_version latest_version(using_dev_version ? latest_dev_version : latest_stable_version); // latest version
+
+        root["upgradeable"] = (latest_version > this_version);
+
 #if defined(EMSESP_DEBUG)
-        emsesp::EMSESP::logger().debug("Checking for upgrade: %s < %s", EMSESP_APP_VERSION, latest_version.c_str());
+        emsesp::EMSESP::logger().debug("Checking for version upgrade. This version=%s, latest dev=%s, latest stable=%s. Upgradeable=%s",
+                                       EMSESP_APP_VERSION,
+                                       latest_dev_version.c_str(),
+                                       latest_stable_version.c_str(),
+                                       root["upgradeable"].as<bool>() ? "true" : "false");
 #endif
-
-        version::Semver200_version settings_version(EMSESP_APP_VERSION);
-        version::Semver200_version this_version(latest_version);
-
-        root["upgradeable"] = (this_version > settings_version);
     }
 
     return true; // always ok
