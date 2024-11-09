@@ -204,29 +204,39 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
 
 // action = checkUpgrade
 bool WebStatusService::checkUpgrade(JsonObject root, std::string & versions) {
-    root["emsesp_version"] = EMSESP_APP_VERSION; // always send back current version
-
-    // versions holds the latest development version and stable version in one string, comma separated
-    std::string latest_dev_version    = versions.substr(0, versions.find(','));
-    std::string latest_stable_version = versions.substr(versions.find(',') + 1);
+    std::string current_version;
+#ifndef EMSESP_STANDALONE
+    current_version = EMSESP_APP_VERSION; // always send back current version
+#else
+    // for testing only
+    // current_version = "3.6.5";
+    current_version = "3.7.0-dev-7";
+#endif
 
     if (!versions.empty()) {
-        version::Semver200_version this_version(EMSESP_APP_VERSION); // current version
-        bool                       using_dev_version = !this_version.prerelease().empty();
+        // versions holds the latest development version and stable version in one string, comma separated
+        std::string latest_dev_version    = versions.substr(0, versions.find(','));
+        std::string latest_stable_version = versions.substr(versions.find(',') + 1);
+
+        version::Semver200_version this_version(current_version);
+        bool                       using_dev_version = !this_version.prerelease().find("dev");
         version::Semver200_version latest_version(using_dev_version ? latest_dev_version : latest_stable_version); // latest version
 
         root["upgradeable"] = (latest_version > this_version);
 
 #if defined(EMSESP_DEBUG)
-        emsesp::EMSESP::logger().debug("Checking for version upgrade. This version=%s, latest dev=%s, latest stable=%s. Upgradeable=%s",
-                                       EMSESP_APP_VERSION,
+        emsesp::EMSESP::logger().debug("Checking for version upgrade. This version=%s, latest dev=%s, latest stable=%s. Using %s releases. Upgradeable=%s",
+                                       current_version.c_str(),
                                        latest_dev_version.c_str(),
                                        latest_stable_version.c_str(),
+                                       using_dev_version ? "dev" : "stable",
                                        root["upgradeable"].as<bool>() ? "true" : "false");
 #endif
     }
 
-    return true; // always ok
+    root["emsesp_version"] = current_version;
+
+    return true;
 }
 
 // action = allvalues

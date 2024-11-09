@@ -1029,8 +1029,15 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             // request.url("/rest/action");
             // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
+            // should show dev version and be updatable
             char data5[] = "{\"action\":\"checkUpgrade\", \"param\":\"3.7.1-dev.99,3.7.0\"}";
             deserializeJson(doc, data5);
+            request.url("/rest/action");
+            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+
+            // should show dev version and not be updatable
+            char data6[] = "{\"action\":\"checkUpgrade\", \"param\":\"3.7.1-dev.4,3.7.0\"}";
+            deserializeJson(doc, data6);
             request.url("/rest/action");
             EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
