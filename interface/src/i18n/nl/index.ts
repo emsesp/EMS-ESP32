@@ -177,7 +177,6 @@ const nl: Translation = {
   SYSTEM_FACTORY_TEXT_DIALOG: 'Weet je zeker dat je een reset naar fabrieksinstellingen uit wilt voeren?',
   STABLE: 'Stable',
   DEVELOPMENT: 'Development',
-  EMS_ESP_VER: 'Firmware Versie',
   UPTIME: 'Systeem Uptime',
   FREE_MEMORY: 'Free Memory',
   PSRAM: 'PSRAM (Size / Free)',

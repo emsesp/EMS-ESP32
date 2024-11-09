@@ -177,7 +177,6 @@ const no: Translation = {
   SYSTEM_FACTORY_TEXT_DIALOG: 'Er du sikker på at du vil resette enheten til fabrikkinstillinger?',
   STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Development',
-  EMS_ESP_VER: 'Firmware Version', // TODO translate
   UPTIME: 'System Oppetid',
   FREE_MEMORY: 'Ledig Memory',
   PSRAM: 'PSRAM (Størrelse / Ledig)',

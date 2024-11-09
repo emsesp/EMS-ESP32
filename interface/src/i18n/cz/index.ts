@@ -177,7 +177,6 @@ const cz: Translation = {
   SYSTEM_FACTORY_TEXT_DIALOG: 'Opravdu chcete resetovat zařízení EMS-ESP do továrního nastavení?',
   STABLE: 'Stabilní',
   DEVELOPMENT: 'Vývojová verze',
-  EMS_ESP_VER: 'Verze firmwaru',
   UPTIME: 'Doba provozu systému',
   FREE_MEMORY: 'Volná paměť',
   PSRAM: 'PSRAM (Velikost / Volná)',

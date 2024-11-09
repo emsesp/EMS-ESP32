@@ -177,7 +177,6 @@ const de: Translation = {
   SYSTEM_FACTORY_TEXT_DIALOG: 'Sind Sie sicher, alle Einstellungen auf Werkseinstellung zu setzen?',
   STABLE: 'Stabil',
   DEVELOPMENT: 'Entwicklung',
-  EMS_ESP_VER: 'Firmware-Version',
   UPTIME: 'Systembetriebszeit',
   FREE_MEMORY: 'Freier RAM Speicher',
   PSRAM: 'PSRAM (Größe / Frei)',

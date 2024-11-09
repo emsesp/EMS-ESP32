@@ -30,11 +30,14 @@ const headers = {
 };
 
 // Versions - all without the 'v'
-const THIS_VERSION = '3.7.0';
-// const THIS_VERSION = '3.6.4'; // for testing
-const LATEST_STABLE_VERSION = '3.7.0';
-const LATEST_DEV_VERSION = '3.7.1-dev.4';
-const VERSION_IS_UPGRADEABLE = true;
+let THIS_VERSION = '3.7.0';
+let LATEST_STABLE_VERSION = '3.7.0';
+let LATEST_DEV_VERSION = '3.7.1-dev.4';
+let VERSION_IS_UPGRADEABLE = false;
+
+// for testing
+// THIS_VERSION = '3.6.5';
+// VERSION_IS_UPGRADEABLE = true;
 
 // GLOBAL VARIABLES
 let countWifiScanPoll = 0; // wifi network scan

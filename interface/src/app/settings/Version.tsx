@@ -60,10 +60,12 @@ const Version = () => {
 
   useEffect(() => {
     if (latestVersion && latestDevVersion) {
-    console.log("Latest versions, stable: " + latestVersion + " dev: " + latestDevVersion);
-    sendCheckUpgrade(latestDevVersion + "," + latestVersion).catch((error: Error) => {
-      console.error("Failed to check upgrade:", error);
-    });
+      // console.log("Latest versions, stable: " + latestVersion + " dev: " + latestDevVersion);
+      sendCheckUpgrade(latestDevVersion + ',' + latestVersion).catch(
+        (error: Error) => {
+          toast.error('Failed to check upgrade: ' + error.message);
+        }
+      );
     }
   }, [latestVersion, latestDevVersion]);
 
@@ -104,7 +106,7 @@ const Version = () => {
     setRestarting(true);
   };
 
-  useLayoutTitle(LL.EMS_ESP_VER());
+  useLayoutTitle('EMS-ESP Firmware');
 
   const internet_live =
     latestDevVersion !== undefined && latestVersion !== undefined;
@@ -191,8 +193,18 @@ const Version = () => {
                 Platform
               </Typography>
               <Typography mb={1} fontWeight={'fontWeightBold'}>
-                Release
+                Release Type
               </Typography>
+              {internet_live && (
+                <>
+                  <Typography mb={1} fontWeight={'fontWeightBold'}>
+                    Latest Stable Release
+                  </Typography>
+                  <Typography fontWeight={'fontWeightBold'}>
+                    Latest Development Release
+                  </Typography>
+                </>
+              )}
             </Grid>
             <Grid>
               <Typography mb={1}>
@@ -213,23 +225,30 @@ const Version = () => {
                 >
                   (changelog)
                 </Link>
+                {!isDev && internet_live && (
+                  <Button
+                    sx={{ ml: 2 }}
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                    onClick={() => showFirmwareDialog(true)}
+                  >
+                    {LL.SWITCH_DEV()}
+                  </Button>
+                )}
               </Typography>
+              {internet_live && (
+                <>
+                  <Typography mt={0.3}>{latestVersion}</Typography>
+                  <Typography mt={1} mb={1}>
+                    {latestDevVersion}
+                  </Typography>
+                </>
+              )}
             </Grid>
           </Grid>
 
           <Divider />
-
-          {!isDev && (
-            <Button
-              sx={{ mt: 2 }}
-              variant="outlined"
-              color="primary"
-              size="small"
-              onClick={() => showFirmwareDialog(true)}
-            >
-              {LL.SWITCH_DEV()}
-            </Button>
-          )}
 
           <Typography mt={2} color="warning">
             <InfoOutlinedIcon color="warning" sx={{ verticalAlign: 'middle' }} />
