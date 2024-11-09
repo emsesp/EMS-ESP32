@@ -214,7 +214,10 @@ bool WebStatusService::checkUpgrade(JsonObject root, std::string & latest_versio
         version::Semver200_version settings_version(EMSESP_APP_VERSION);
         version::Semver200_version this_version(latest_version);
 
-        root["upgradeable"] = (this_version > settings_version);
+        if ((this_version.prerelease().empty() && settings_version.prerelease().empty())
+            || (!this_version.prerelease().empty() && !settings_version.prerelease().empty())) {
+            root["upgradeable"] = (this_version > settings_version);
+        }
     }
 
     return true; // always ok

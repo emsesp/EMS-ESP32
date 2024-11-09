@@ -42,7 +42,9 @@ const Version = () => {
     }
   ).onSuccess((event) => {
     const data = event.data as { emsesp_version: string; upgradeable: boolean };
-    setUpgradeAvailable(data.upgradeable);
+    if (data.upgradeable != undefined) {
+      setUpgradeAvailable(data.upgradeable);
+    }
   });
 
   const { data, send: loadData, error } = useRequest(SystemApi.readSystemStatus);
@@ -60,9 +62,7 @@ const Version = () => {
     // immediate: false,
     // initialData: '3.6.5'
   }).onSuccess((event) => {
-    if (!useDev) {
-      void sendCheckUpgrade(event.data);
-    }
+    void sendCheckUpgrade(event.data);
   });
 
   // called immediately to get the latest version, on page load, then check for upgrade (works for both dev and stable)
@@ -71,9 +71,7 @@ const Version = () => {
     // immediate: false,
     // initialData: '3.7.0-dev.32'
   }).onSuccess((event) => {
-    if (useDev) {
-      void sendCheckUpgrade(event.data);
-    }
+    void sendCheckUpgrade(event.data);
   });
 
   const STABLE_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/';
