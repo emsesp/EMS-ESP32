@@ -203,24 +203,44 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
 }
 
 // action = checkUpgrade
-bool WebStatusService::checkUpgrade(JsonObject root, std::string & latest_version) {
-    root["emsesp_version"] = EMSESP_APP_VERSION;
-
-    if (!latest_version.empty()) {
-#if defined(EMSESP_DEBUG)
-        emsesp::EMSESP::logger().debug("Checking for upgrade: %s < %s", EMSESP_APP_VERSION, latest_version.c_str());
+// versions holds the latest development version and stable version in one string, comma separated
+bool WebStatusService::checkUpgrade(JsonObject root, std::string & versions) {
+    std::string current_version_s;
+#ifndef EMSESP_STANDALONE
+    current_version_s = EMSESP_APP_VERSION;
+#else
+    // for testing only - see api3 test in test.cpp
+    // current_version_s = "3.6.5";
+    current_version_s = "3.7.1-dev.8";
 #endif
 
-        version::Semver200_version settings_version(EMSESP_APP_VERSION);
-        version::Semver200_version this_version(latest_version);
+    if (!versions.empty()) {
+        version::Semver200_version current_version(current_version_s);
+        bool using_dev_version = !current_version.prerelease().find("dev"); // look for dev in the name to determine if we're using dev version
+        version::Semver200_version latest_version(using_dev_version ? versions.substr(0, versions.find(',')) : versions.substr(versions.find(',') + 1));
+        bool                       upgradeable = (latest_version > current_version);
 
-        if ((this_version.prerelease().empty() && settings_version.prerelease().empty())
-            || (!this_version.prerelease().empty() && !settings_version.prerelease().empty())) {
-            root["upgradeable"] = (this_version > settings_version);
-        }
+#if defined(EMSESP_DEBUG)
+        emsesp::EMSESP::logger()
+            .debug("Checking Version upgrade. Using %s release branch. current version=%d.%d.%d-%s, latest version=%d.%d.%d-%s (%s upgradeable)",
+                   (using_dev_version ? "dev" : "stable"),
+                   current_version.major(),
+                   current_version.minor(),
+                   current_version.patch(),
+                   current_version.prerelease().c_str(),
+                   latest_version.major(),
+                   latest_version.minor(),
+                   latest_version.patch(),
+                   latest_version.prerelease().c_str(),
+                   upgradeable ? "IS" : "NOT");
+#endif
+
+        root["upgradeable"] = upgradeable;
     }
 
-    return true; // always ok
+    root["emsesp_version"] = current_version_s; // always send back current version
+
+    return true;
 }
 
 // action = allvalues
