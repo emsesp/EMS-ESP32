@@ -483,7 +483,7 @@ class EMSdevice {
         }
     };
     void dump_telegram_info(std::vector<TelegramFunctionDump> & telegram_functions_dump);
-    void dump_value_info();
+    void dump_devicevalue_info();
 #endif
 
   private:
@@ -518,14 +518,13 @@ class EMSdevice {
         }
     };
 
-    std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
-
     std::vector<uint16_t> handlers_ignored_;
 
 #if defined(EMSESP_STANDALONE) || defined(EMSESP_TEST)
-  public: // so we can call it from WebCustomizationService::test()
+  public: // so we can call it from WebCustomizationService::test() and EMSESP::dump_all_entities()
 #endif
-    std::vector<DeviceValue> devicevalues_; // all the device values
+    std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
+    std::vector<DeviceValue>      devicevalues_;       // all the device values
 };
 
 } // namespace emsesp

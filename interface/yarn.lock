@@ -1697,7 +1697,7 @@ __metadata:
     typescript-eslint: "npm:8.13.0"
     vite: "npm:^5.4.10"
     vite-plugin-imagemin: "npm:^0.6.1"
-    vite-tsconfig-paths: "npm:^5.1.0"
+    vite-tsconfig-paths: "npm:^5.1.1"
   languageName: unknown
   linkType: soft
 
@@ -6954,9 +6954,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite-tsconfig-paths@npm:^5.1.0":
-  version: 5.1.0
-  resolution: "vite-tsconfig-paths@npm:5.1.0"
+"vite-tsconfig-paths@npm:^5.1.1":
+  version: 5.1.1
+  resolution: "vite-tsconfig-paths@npm:5.1.1"
   dependencies:
     debug: "npm:^4.1.1"
     globrex: "npm:^0.1.2"
@@ -6966,7 +6966,7 @@ __metadata:
   peerDependenciesMeta:
     vite:
       optional: true
-  checksum: 10c0/fff3fc7ada55aa4cfd6cad5c6006a8eaf74df0cc1ed5e9282c0c479012c57095d391379cb1742c394711cbb3ee591c66e27838779d8388297bdf033aa6e57719
+  checksum: 10c0/7d18e2f6daa057e21885bffd3dc751f2a8fe1f249a70e4ca35b944c505d1b59d6e7c3f2278afef5139aa4cabdcb307567d3d26f2009dcccff4281c485c89a231
   languageName: node
   linkType: hard
 

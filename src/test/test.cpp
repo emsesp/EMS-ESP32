@@ -442,7 +442,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "entity_dump") {
         System::test_set_all_active(true);
-        EMSESP::dump_all_values(shell);
+        EMSESP::dump_all_entities(shell);
         ok = true;
     }
 
@@ -1014,25 +1014,36 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             // request.url("/api");
             // EMSESP::webAPIService.webAPIService(&request, doc.as<JsonVariant>());
 
-            char data2[] = "{\"action\":\"customSupport\", \"param\":\"hello\"}";
-            deserializeJson(doc, data2);
+            // char data2[] = "{\"action\":\"customSupport\", \"param\":\"hello\"}";
+            // deserializeJson(doc, data2);
+            // request.url("/rest/action");
+            // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+
+            // char data3[] = "{\"action\":\"export\", \"param\":\"schedule\"}";
+            // deserializeJson(doc, data3);
+            // request.url("/rest/action");
+            // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+
+            // char data4[] = "{\"action\":\"export\", \"param\":\"allvalues\"}";
+            // deserializeJson(doc, data4);
+            // request.url("/rest/action");
+            // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+
+            // test version checks
+            // test with "current_version_s = "3.7.1-dev.8" in WebStatusService::checkUpgrade()
             request.url("/rest/action");
+            deserializeJson(doc, "{\"action\":\"checkUpgrade\", \"param\":\"3.7.1-dev.9,3.7.0\"}"); // is upgradable
+            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+            deserializeJson(doc, "{\"action\":\"checkUpgrade\", \"param\":\"3.7.1-dev.7,3.7.0\"}"); // is not upgradable
             EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
-            char data3[] = "{\"action\":\"export\", \"param\":\"schedule\"}";
-            deserializeJson(doc, data3);
-            request.url("/rest/action");
-            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+            // test with "current_version_s = "3.6.5" in WebStatusService::checkUpgrade()
+            // request.url("/rest/action");
+            // deserializeJson(doc, "{\"action\":\"checkUpgrade\", \"param\":\"3.7.1-dev.9,3.6.5\"}"); // is noy upgradable
+            // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+            // deserializeJson(doc, "{\"action\":\"checkUpgrade\", \"param\":\"3.7.1-dev.7,3.7.0\"}"); // is upgradable
+            // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
-            char data4[] = "{\"action\":\"export\", \"param\":\"allvalues\"}";
-            deserializeJson(doc, data4);
-            request.url("/rest/action");
-            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
-
-            char data5[] = "{\"action\":\"checkUpgrade\", \"param\":\"3.7.0-dev.99\"}";
-            deserializeJson(doc, data5);
-            request.url("/rest/action");
-            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
             // char data6[] = "{\"device\":\"system\", \"cmd\":\"read\",\"value\":\"8 2 27 1\"}";
             // deserializeJson(doc, data6);

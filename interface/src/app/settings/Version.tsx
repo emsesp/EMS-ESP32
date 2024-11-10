@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';
+import CheckIcon from '@mui/icons-material/Done';
+import DownloadIcon from '@mui/icons-material/GetApp';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import WarningIcon from '@mui/icons-material/Warning';
 import {
@@ -11,7 +13,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
   Link,
   Typography
 } from '@mui/material';
@@ -36,7 +37,7 @@ const Version = () => {
   const [upgradeAvailable, setUpgradeAvailable] = useState<boolean>(false);
 
   const { send: sendCheckUpgrade } = useRequest(
-    (version: string) => callAction({ action: 'checkUpgrade', param: version }),
+    (versions: string) => callAction({ action: 'checkUpgrade', param: versions }),
     {
       immediate: false
     }
@@ -54,27 +55,20 @@ const Version = () => {
     }
   );
 
-  // called immediately to get the latest version, on page load
-  const { data: latestVersion } = useRequest(getStableVersion, {
-    // uncomment next 2 lines for testing, uses https://github.com/emsesp/EMS-ESP32/releases/download/v3.6.5/EMS-ESP-3_6_5-ESP32-16MB+.bin
-    // immediate: false,
-    // initialData: '3.6.5'
-  }).onSuccess((event) => {
-    if (!useDev) {
-      void sendCheckUpgrade(event.data);
-    }
-  });
+  // called immediately to get the latest versions on page load
+  const { data: latestVersion } = useRequest(getStableVersion);
+  const { data: latestDevVersion } = useRequest(getDevVersion);
 
-  // called immediately to get the latest version, on page load, then check for upgrade (works for both dev and stable)
-  const { data: latestDevVersion } = useRequest(getDevVersion, {
-    // uncomment next 2 lines for testing, uses https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_7_0-dev_31-ESP32-16MB+.bin
-    // immediate: false,
-    // initialData: '3.7.0-dev.32'
-  }).onSuccess((event) => {
-    if (useDev) {
-      void sendCheckUpgrade(event.data);
+  useEffect(() => {
+    if (latestVersion && latestDevVersion) {
+      // console.log("Latest versions, stable: " + latestVersion + " dev: " + latestDevVersion);
+      sendCheckUpgrade(latestDevVersion + ',' + latestVersion).catch(
+        (error: Error) => {
+          toast.error('Failed to check upgrade: ' + error.message);
+        }
+      );
     }
-  });
+  }, [latestVersion, latestDevVersion]);
 
   const STABLE_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/';
   const STABLE_RELNOTES_URL =
@@ -113,10 +107,14 @@ const Version = () => {
     setRestarting(true);
   };
 
-  useLayoutTitle(LL.EMS_ESP_VER());
+  useLayoutTitle('EMS-ESP Firmware');
 
+  // see if we have internet access
   const internet_live =
     latestDevVersion !== undefined && latestVersion !== undefined;
+
+  // check for older boards where auto-upgrade is not supported
+  const download_only = data && !data.psram;
 
   const renderUploadDialog = () => {
     if (!internet_live) {
@@ -130,26 +128,15 @@ const Version = () => {
         onClose={() => setOpenDialog(false)}
       >
         <DialogTitle>
-          {LL.INSTALL('') +
-            ' ' +
-            (useDev ? LL.DEVELOPMENT() : LL.STABLE()) +
-            ' Firmware'}
+          {(download_only ? LL.DOWNLOAD(0) : LL.INSTALL('')) + ' ' + ' Firmware'}
         </DialogTitle>
         <DialogContent dividers>
           <Typography mb={2}>
-            {LL.INSTALL_VERSION(useDev ? latestDevVersion : latestVersion)}
+            {LL.INSTALL_VERSION(
+              download_only ? LL.DOWNLOAD(1) : LL.INSTALL(''),
+              useDev ? latestDevVersion : latestVersion
+            )}
           </Typography>
-          <Link
-            target="_blank"
-            href={useDev ? DEV_RELNOTES_URL : STABLE_RELNOTES_URL}
-            color="primary"
-          >
-            changelog
-          </Link>
-          &nbsp;|&nbsp;
-          <Link target="_blank" href={getBinURL(useDev)} color="primary">
-            {LL.DOWNLOAD(1)}
-          </Link>
         </DialogContent>
         <DialogActions>
           <Button
@@ -161,19 +148,30 @@ const Version = () => {
             {LL.CANCEL()}
           </Button>
           <Button
-            startIcon={<WarningIcon color="warning" />}
+            startIcon={<DownloadIcon />}
             variant="outlined"
-            onClick={() => installFirmwareURL(getBinURL(useDev))}
+            onClick={() => setOpenDialog(false)}
             color="primary"
           >
-            {LL.INSTALL('')}
+            <Link target="_blank" href={getBinURL(useDev)} color="primary">
+              {LL.DOWNLOAD(1)}
+            </Link>
           </Button>
+          {!download_only && (
+            <Button
+              startIcon={<WarningIcon color="warning" />}
+              variant="outlined"
+              onClick={() => installFirmwareURL(getBinURL(useDev))}
+              color="primary"
+            >
+              {LL.INSTALL('')}
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
     );
   };
 
-  // useDevVersion = true to force using the dev version
   const showFirmwareDialog = (useDevVersion: boolean) => {
     if (useDevVersion || data.emsesp_version.includes('dev')) {
       setUseDev(true);
@@ -191,19 +189,23 @@ const Version = () => {
     return (
       <>
         <Box p={2} border="1px solid grey" borderRadius={2}>
-          <Grid container spacing={3}>
+          <Typography sx={{ pb: 2 }} variant="h6" color="primary">
+            Firmware Version
+          </Typography>
+
+          <Grid container spacing={11}>
             <Grid mb={1}>
-              <Typography mb={1} fontWeight={'fontWeightBold'}>
+              <Typography mb={1} color="secondary">
                 {LL.VERSION()}
               </Typography>
-              <Typography mb={1} fontWeight={'fontWeightBold'}>
+              <Typography mb={1} color="secondary">
                 Platform
               </Typography>
-              <Typography mb={1} fontWeight={'fontWeightBold'}>
-                Release
+              <Typography mb={1} color="secondary">
+                Release Type
               </Typography>
             </Grid>
-            <Grid>
+            <Grid mb={1}>
               <Typography mb={1}>
                 {data.emsesp_version}
                 {data.build_flags && (
@@ -213,61 +215,100 @@ const Version = () => {
                 )}
               </Typography>
               <Typography mb={1}>{getPlatform()}</Typography>
-              <Typography>
-                {isDev ? LL.DEVELOPMENT() : LL.STABLE()}&nbsp;
-                <Link
-                  target="_blank"
-                  href={isDev ? DEV_RELNOTES_URL : STABLE_RELNOTES_URL}
-                  color="primary"
-                >
-                  (changelog)
-                </Link>
+              <Typography mb={1}>
+                {isDev ? LL.DEVELOPMENT() : LL.STABLE()}
+                {!isDev && internet_live && (
+                  <Typography variant="caption">
+                    <Button
+                      sx={{ ml: 2 }}
+                      variant="outlined"
+                      color="primary"
+                      size="small"
+                      onClick={() => showFirmwareDialog(true)}
+                    >
+                      {LL.SWITCH_DEV()}
+                    </Button>
+                  </Typography>
+                )}
               </Typography>
             </Grid>
           </Grid>
 
-          <Divider />
-
-          {!isDev && (
-            <Button
-              sx={{ mt: 2 }}
-              variant="outlined"
-              color="primary"
-              size="small"
-              onClick={() => showFirmwareDialog(true)}
-            >
-              {LL.SWITCH_DEV()}
-            </Button>
-          )}
-
-          <Typography mt={2} color="warning">
-            <InfoOutlinedIcon color="warning" sx={{ verticalAlign: 'middle' }} />
-            &nbsp;&nbsp;
-            {upgradeAvailable ? LL.UPGRADE_AVAILABLE() : LL.LATEST_VERSION()}
-            {upgradeAvailable &&
-              internet_live &&
-              (data.psram ? (
-                <Button
-                  sx={{ ml: 2, textTransform: 'none' }}
-                  variant="outlined"
-                  color="primary"
-                  size="small"
-                  onClick={() => showFirmwareDialog(false)}
-                >
-                  {isDev
-                    ? LL.INSTALL('v' + latestDevVersion)
-                    : LL.INSTALL('v' + latestVersion)}
-                </Button>
-              ) : (
-                <>
-                  &nbsp;&nbsp;
-                  <Link target="_blank" href={getBinURL(isDev)} color="primary">
-                    {LL.DOWNLOAD(1)}&nbsp;v
-                    {isDev ? latestDevVersion : latestVersion}
-                  </Link>
-                </>
-              ))}
+          <Typography sx={{ pb: 2 }} variant="h6" color="primary">
+            Latest Available Versions
           </Typography>
+
+          {internet_live ? (
+            <>
+              <Grid container spacing={4}>
+                <Grid mb={1}>
+                  <Typography mb={1} color="secondary">
+                    Stable Release
+                  </Typography>
+                  <Typography mb={1} color="secondary">
+                    Development Release
+                  </Typography>
+                </Grid>
+                <Grid mb={1}>
+                  <Typography mb={1}>
+                    {latestVersion}&nbsp;&nbsp;
+                    <Link target="_blank" href={STABLE_RELNOTES_URL} color="primary">
+                      (changelog)
+                    </Link>
+                    {!isDev && upgradeAvailable && (
+                      <Button
+                        sx={{ ml: 2 }}
+                        variant="outlined"
+                        color="warning"
+                        size="small"
+                        onClick={() => showFirmwareDialog(false)}
+                      >
+                        Upgrade&hellip;
+                      </Button>
+                    )}
+                  </Typography>
+                  <Typography mb={1}>
+                    {latestDevVersion}&nbsp;&nbsp;
+                    <Link target="_blank" href={DEV_RELNOTES_URL} color="primary">
+                      (changelog)
+                    </Link>
+                    {isDev && upgradeAvailable && (
+                      <Button
+                        sx={{ ml: 2 }}
+                        variant="outlined"
+                        color="warning"
+                        size="small"
+                        onClick={() => showFirmwareDialog(false)}
+                      >
+                        Upgrade&hellip;
+                      </Button>
+                    )}
+                  </Typography>
+                </Grid>
+              </Grid>
+              {upgradeAvailable ? (
+                <Typography color="warning">
+                  <InfoOutlinedIcon
+                    color="warning"
+                    sx={{ verticalAlign: 'middle', mr: 2 }}
+                  />
+                  {LL.UPGRADE_AVAILABLE()}
+                </Typography>
+              ) : (
+                <Typography color="success">
+                  <CheckIcon
+                    color="success"
+                    sx={{ verticalAlign: 'middle', mr: 2 }}
+                  />
+                  {LL.LATEST_VERSION()}
+                </Typography>
+              )}
+            </>
+          ) : (
+            <Typography mb={1} color="warning">
+              not online
+            </Typography>
+          )}
 
           {renderUploadDialog()}
         </Box>
