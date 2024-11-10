@@ -331,7 +331,7 @@ const en: Translation = {
   ALLVALUES: 'All Values',
   SPECIAL_FUNCTIONS: 'Special Functions',
   WAIT_FIRMWARE: 'Firmware is uploading and installing',
-  INSTALL_VERSION: 'This will install version {0}. Are you sure?',
+  INSTALL_VERSION: 'This will {0} version {1}. Are you sure?',
   SWITCH_DEV: 'switch to the development version',
   UPGRADE_AVAILABLE: 'There is a firmware upgrade available!',
   LATEST_VERSION: 'You are using the latest firmware version.',

@@ -331,7 +331,7 @@ const de: Translation = {
   ALLVALUES: 'Alle Werte',
   SPECIAL_FUNCTIONS: 'Sonderfunktionen',
   WAIT_FIRMWARE: 'Die Firmware wird hochgeladen und installiert.',
-  INSTALL_VERSION: 'Dadurch wird die Version installiert {0}. Sind Sie sicher?',
+  INSTALL_VERSION: 'Dadurch wird die Version {0} {1}. Sind Sie sicher?',
   SWITCH_DEV: 'Wechseln Sie zur Entwicklungsversion!',
   UPGRADE_AVAILABLE: 'Es ist ein Firmware-Upgrade verfügbar.',
   LATEST_VERSION: 'Sie verwenden die neueste Firmware-Version.',

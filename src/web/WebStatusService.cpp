@@ -203,38 +203,42 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
 }
 
 // action = checkUpgrade
+// versions holds the latest development version and stable version in one string, comma separated
 bool WebStatusService::checkUpgrade(JsonObject root, std::string & versions) {
-    std::string current_version;
+    std::string current_version_s;
 #ifndef EMSESP_STANDALONE
-    current_version = EMSESP_APP_VERSION; // always send back current version
+    current_version_s = EMSESP_APP_VERSION;
 #else
-    // for testing only
-    // current_version = "3.6.5";
-    current_version = "3.7.0-dev-7";
+    // for testing only - see api3 test in test.cpp
+    // current_version_s = "3.6.5";
+    current_version_s = "3.7.1-dev.8";
 #endif
 
     if (!versions.empty()) {
-        // versions holds the latest development version and stable version in one string, comma separated
-        std::string latest_dev_version    = versions.substr(0, versions.find(','));
-        std::string latest_stable_version = versions.substr(versions.find(',') + 1);
-
-        version::Semver200_version this_version(current_version);
-        bool                       using_dev_version = !this_version.prerelease().find("dev");
-        version::Semver200_version latest_version(using_dev_version ? latest_dev_version : latest_stable_version); // latest version
-
-        root["upgradeable"] = (latest_version > this_version);
+        version::Semver200_version current_version(current_version_s);
+        bool using_dev_version = !current_version.prerelease().find("dev"); // look for dev in the name to determine if we're using dev version
+        version::Semver200_version latest_version(using_dev_version ? versions.substr(0, versions.find(',')) : versions.substr(versions.find(',') + 1));
+        bool                       upgradeable = (latest_version > current_version);
 
 #if defined(EMSESP_DEBUG)
-        emsesp::EMSESP::logger().debug("Checking for version upgrade. This version=%s, latest dev=%s, latest stable=%s. Using %s releases. Upgradeable=%s",
-                                       current_version.c_str(),
-                                       latest_dev_version.c_str(),
-                                       latest_stable_version.c_str(),
-                                       using_dev_version ? "dev" : "stable",
-                                       root["upgradeable"].as<bool>() ? "true" : "false");
+        emsesp::EMSESP::logger()
+            .debug("Checking Version upgrade. Using %s release branch. current version=%d.%d.%d-%s, latest version=%d.%d.%d-%s (%s upgradeable)",
+                   (using_dev_version ? "dev" : "stable"),
+                   current_version.major(),
+                   current_version.minor(),
+                   current_version.patch(),
+                   current_version.prerelease().c_str(),
+                   latest_version.major(),
+                   latest_version.minor(),
+                   latest_version.patch(),
+                   latest_version.prerelease().c_str(),
+                   upgradeable ? "IS" : "NOT");
 #endif
+
+        root["upgradeable"] = upgradeable;
     }
 
-    root["emsesp_version"] = current_version;
+    root["emsesp_version"] = current_version_s; // always send back current version
 
     return true;
 }

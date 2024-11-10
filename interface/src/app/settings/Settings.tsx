@@ -87,7 +87,7 @@ const Settings = () => {
           icon={BuildIcon}
           bgcolor="#72caf9"
           label="EMS-ESP Firmware"
-          text={'v'+data.emsesp_version}
+          text={'v' + data.emsesp_version}
           to="version"
         />
 

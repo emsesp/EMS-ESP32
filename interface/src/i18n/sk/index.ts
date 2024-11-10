@@ -331,7 +331,7 @@ const sk: Translation = {
   ALLVALUES: 'Všetky hodnoty',
   SPECIAL_FUNCTIONS: 'Špeciálne funkcie',
   WAIT_FIRMWARE: 'Firmvér sa nahráva a inštaluje',
-  INSTALL_VERSION: 'Týmto sa nainštaluje verzia {0}. Si si istý?',
+  INSTALL_VERSION: 'Týmto sa {0} verzia {1}. Si si istý?',
   SWITCH_DEV: 'prejsť na vývojovú verziu',
   UPGRADE_AVAILABLE: 'K dispozícii je aktualizácia firmvéru!',
   LATEST_VERSION: 'Používate poslednú verziu firmvéru.',
