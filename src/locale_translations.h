@@ -64,7 +64,7 @@ MAKE_WORD_TRANSLATION(info_cmd, "list all values (verbose)", "Liste aller Werte"
 MAKE_WORD_TRANSLATION(commands_cmd, "list all commands", "Liste aller Kommandos", "lijst van alle commando's", "", "wyświetl wszystkie komendy", "Viser alle kommandoer", "", "Tüm komutları listele", "elencaa tutti i comandi", "zobraziť všetky príkazy", "vypsat všechny příkazy") // TODO translate
 MAKE_WORD_TRANSLATION(entities_cmd, "list all entities", "Liste aller Entitäten", "lijst van alle entiteiten", "", "wyświetl wszsytkie encje", "Viser alle enheter", "", "Tüm varlıkları listele", "elenca tutte le entità", "zobraziť všetky entity", "vypsat všechny entity") // TODO translate
 MAKE_WORD_TRANSLATION(send_cmd, "send a telegram", "Sende EMS-Telegramm", "stuur een telegram", "", "wyślij telegram", "send et telegram", "", "Bir telegram gönder", "invia un telegramma", "poslať telegram", "odeslat telegram") // TODO translate
-MAKE_WORD_TRANSLATION(read_cmd, "send read request", "", "", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_WORD_TRANSLATION(read_cmd, "send read request", "", "", "", "", "", "", "", "", "odoslať žiadosť o prečítanie", "") // TODO translate
 MAKE_WORD_TRANSLATION(setiovalue_cmd, "set I/O value", "Setze Werte E/A", "instellen standaardwaarde", "", "ustaw wartość", "sett en io verdi", "", "Giriş/Çıkış değerlerini ayarla", "imposta valore io", "nastaviť hodnotu io", "nastavit hodnotu I/O") // TODO translate
 MAKE_WORD_TRANSLATION(changeloglevel_cmd, "change log level", "Ändere Protokollebene", "aanpassen log niveau", "", "zmień poziom log-u", "endre loggnivå", "", "Kayıt seviyesini değiştir", "cambia livello registrazione", "zmeniť úroveň protokolu", "změnit úroveň protokolování") // TODO translate
 MAKE_WORD_TRANSLATION(fetch_cmd, "refresh all EMS values", "Aktualisiere alle EMS-Werte", "Verversen alle EMS waardes", "", "odśwież wszystkie wartości EMS", "oppfrisk alle EMS verdier", "", "Bütün EMS değerlerini yenile", "aggiornare tutti i valori EMS", "obnoviť všetky hodnoty EMS", "aktualizovat všechny EMS hodnoty") // TODO translate
@@ -79,8 +79,8 @@ MAKE_WORD_TRANSLATION(commands_response, "get response", "Hole Antwort", "Verzoe
 MAKE_WORD_TRANSLATION(coldshot_cmd, "send a cold shot of water", "Zugabe einer Menge kalten Wassers", "", "", "uruchom tryśnięcie zimnej wody", "", "", "soğuk su gönder", "", "pošlite studenú dávku vody", "poslat studenou vodu") // TODO translate
 MAKE_WORD_TRANSLATION(message_cmd, "send a message", "Eine Nachricht senden", "", "", "", "", "", "", "", "poslať správu", "odeslat zprávu") // TODO translate
 MAKE_WORD_TRANSLATION(values_cmd, "list all values", "Liste alle Werte auf", "", "", "", "", "", "", "", "vypísať všetky hodnoty", "vypsat všechny hodnoty") // TODO translate
-MAKE_WORD_TRANSLATION(showertimer_cmd, "enable shower timer", "aktiviere Duschzeitmessung", "", "", "", "", "", "", "", "", "") // TODO translate
-MAKE_WORD_TRANSLATION(showeralert_cmd, "enable shower alert", "aktiviere Duschzeitwarnung", "", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_WORD_TRANSLATION(showertimer_cmd, "enable shower timer", "aktiviere Duschzeitmessung", "", "", "", "", "", "", "", "povoliť časovač sprchovania", "") // TODO translate
+MAKE_WORD_TRANSLATION(showeralert_cmd, "enable shower alert", "aktiviere Duschzeitwarnung", "", "", "", "", "", "", "", "povoliť upozornenie na sprchu", "") // TODO translate
 
 // tags
 MAKE_WORD_TRANSLATION(tag_hc1, "hc1", "HK1", "hc1", "VK1", "OG1", "hc1", "hc1", "ID1", "hc1", "hc1", "hc1")
@@ -364,7 +364,7 @@ MAKE_TRANSLATION(emergencyOps, "emergencyops", "emergency operation", "Notbetrie
 MAKE_TRANSLATION(emergencyTemp, "emergencytemp", "emergency temperature", "Notfalltemperatur", "Noodtemperatuur", "Nöddrift temperatur", "temperatura w trybie awaryjnym", "nødtemperatur", "température d'urgence", "acil durum sıcaklığı", "temperatura di emergenza", "núdzová teplota", "nouzová teplota")
 MAKE_TRANSLATION(pumpMode, "pumpmode", "boiler pump mode", "Kesselpumpenmodus", "Ketelpomp modus", "", "tryb pracy pompy kotła", "pumpemodus", "", "pompa modu", "modalità pompa caldaia", "režim kotlového čerpadla", "režim čerpadla kotle") // TODO translate
 MAKE_TRANSLATION(pumpCharacter, "pumpcharacter", "boiler pump characteristic", "Charakteristik der Kesselpumpe", "karakteristiek ketelpomp", "pannpumpsegenskaper", "charakterystyka pompy kotłowej", "kjelepumpekarakteristikk", "caractéristique de la pompe de la chaudière", "gazan nasosy", "caratteristica della pompa della caldaia", "charakteristika kotlového čerpadla", "charakteristika čerpadla kotle") // TODO translate
-MAKE_TRANSLATION(pumpOnTemp, "pumpontemp", "pump logic temperature", "Pumpenlogiktemperatur", "", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(pumpOnTemp, "pumpontemp", "pump logic temperature", "Pumpenlogiktemperatur", "", "", "", "", "", "", "", "teplota logiky čerpadla", "") // TODO translate
 MAKE_TRANSLATION(headertemp, "headertemp", "low loss header", "Hydr. Weiche", "open verdeler", "", "sprzęgło hydrauliczne", "", "bouteille de déc. hydr.", "isı bloğu gidiş suyu sıc.", "comp. idr.", "nízkostratová hlavica", "") // TODO translate
 MAKE_TRANSLATION(heatblock, "heatblock", "heating block", "Wärmezelle", "Aanvoertemp. warmtecel", "", "blok grzewczy", "", "départ corps de chauffe", "Hid.denge kabı sıcaklığı", "mandata scamb. pr.", "vykurovací blok", "blok topení") // TODO translate
 
@@ -497,10 +497,10 @@ MAKE_TRANSLATION(heatoffdelay, "heatoffdelay", "heat-off delay", "Ausschaltverz�
 MAKE_TRANSLATION(hpSetDiffPress, "hpsetdiffpress", "set differential pressure", "Pumpensolldruck", "", "", "różnica ciśnień", "", "", "", "", "nastaviť diferenčný tlak", "nastavení rozdílového tlaku") // TODO translate
 MAKE_TRANSLATION(hpFan, "fan", "fan", "Lüfter", "", "", "wentylator", "", "", "", "", "ventilátor", "ventilátor") // TODO translate
 MAKE_TRANSLATION(hpShutdown, "shutdown", "shutdown", "Abschalten", "", "", "wyłączenie", "", "", "", "", "vypnutie", "vypnutí") // TODO translate
-MAKE_TRANSLATION(pc0Flow, "pc0flow", "Flow PC0", "Durchfluss PC0", "", "", "", "", "", "", "", "", "průtok PC0") // TODO translate
-MAKE_TRANSLATION(pc1Flow, "pc1flow", "Flow PC1", "Durchfluss PC1", "", "", "", "", "", "", "", "", "průtok PC1") // TODO translate
-MAKE_TRANSLATION(pc1On, "pc1on", "PC1", "PC1", "", "", "", "", "", "", "", "", "PC1") // TODO translate
-MAKE_TRANSLATION(pc1Rate, "pc1rate", "PC1 rate", "PC1 Rate", "", "", "", "", "", "", "", "", "míra PC1") // TODO translate
+MAKE_TRANSLATION(pc0Flow, "pc0flow", "Flow PC0", "Durchfluss PC0", "", "", "", "", "", "", "", "prietok PC0", "průtok PC0") // TODO translate
+MAKE_TRANSLATION(pc1Flow, "pc1flow", "Flow PC1", "Durchfluss PC1", "", "", "", "", "", "", "", "prietok PC1", "průtok PC1") // TODO translate
+MAKE_TRANSLATION(pc1On, "pc1on", "PC1", "PC1", "", "", "", "", "", "", "", "PC1", "PC1") // TODO translate
+MAKE_TRANSLATION(pc1Rate, "pc1rate", "PC1 rate", "PC1 Rate", "", "", "", "", "", "", "", "sadzba PC1", "míra PC1") // TODO translate
 
 // hybrid heatpump
 MAKE_TRANSLATION(hybridStrategy, "hybridstrategy", "hybrid control strategy", "Hybrid-Steuerungsstrategie", "Hybride strategie", "Hybrid kontrollstrategi", "strategia sterowania hybrydowego", "hybrid kontrollstrategi", "stratégie contrôle hybride", "hibrit kontrol stratejisi", "strategia comtrollo ibrido", "hybridná stratégia riadenia", "strategie hybridního řízení")
@@ -833,7 +833,7 @@ MAKE_TRANSLATION(wwKeepWarm, "keepwarm", "keep warm", "Warmhalten", "Warm houde"
 MAKE_TRANSLATION(wwStatus2, "status2", "status 2", "Status 2", "Status 2", "Status 2", "status 2", "status 2", "statut 2", "durum 2", "Status 2", "stav 2", "stav 2")
 MAKE_TRANSLATION(wwPumpMod, "pumpmod", "pump modulation", "Pumpenmodulation", "Pompmodulatie", "Pumpmodulering", "modulacja pompy", "pumpemodulering", "modulation de pompe", "pompa modülasyonu", "modulazione pompa", "modulácia čerpadla", "modulace čerpadla")
 MAKE_TRANSLATION(wwFlow, "flow", "flow rate", "Volumenstrom", "Doorstroomsnelheid", "Flöde", "przepływ", "strømningshastighet", "débit", "akış hızı", "portata flusso", "prietok", "průtok")
-// MAKE_TRANSLATION(wwRetValve, "retvalve", "return valve", "Rücklauf Ventil", "", "", "", "", "", "", "", "", "zpětný ventil")
+// MAKE_TRANSLATION(wwRetValve, "retvalve", "return valve", "Rücklauf Ventil", "", "", "", "", "", "", "", "spätný ventil", "zpětný ventil")
 
 // extra mixer dhw
 MAKE_TRANSLATION(wwRequiredTemp, "requiredtemp", "required temperature", "benötigte Temperatur", "Benodigde temperatuur", "Nödvändig Temperatur", "temperatura wymagana", "nødvendig temperatur", "température requise", "gerekli sıcaklık", "temperatura richiesta", "požadovaná teplota", "požadovaná teplota")
