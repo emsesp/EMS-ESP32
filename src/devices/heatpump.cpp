@@ -85,7 +85,7 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
         DeviceValueTAG::TAG_DEVICE_DATA, &lowNoiseStart_, DeviceValueType::UINT8, FL_(lowNoiseStart), DeviceValueUOM::HOURS, MAKE_CF_CB(set_lowNoiseStart), 0, 23);
     register_device_value(
         DeviceValueTAG::TAG_DEVICE_DATA, &lowNoiseStop_, DeviceValueType::UINT8, FL_(lowNoiseStop), DeviceValueUOM::HOURS, MAKE_CF_CB(set_lowNoiseStop), 0, 23);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+    register_device_value(DeviceValueTAG::TAG_DHW1,
                           &hybridDHW_,
                           DeviceValueType::ENUM,
                           FL_(enum_comfort2),
@@ -110,7 +110,7 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
                           FL_(energyPricePV),
                           DeviceValueUOM::CTKWH,
                           MAKE_CF_CB(set_energyPricePV));
-    register_device_value(DeviceValueTAG::TAG_DHW1,
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &switchOverTemp_,
                           DeviceValueType::INT8,
                           FL_(switchOverTemp),
