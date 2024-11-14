@@ -174,6 +174,7 @@ const no: Translation = {
   FACTORY_RESET: 'Sett tilbake til fabrikkinstilling',
   SYSTEM_FACTORY_TEXT: 'Enhet har blitt satt tilbake til fabrikkinstilling og vil restarte',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Er du sikker på at du vil resette enheten til fabrikkinstillinger?',
+  AVAILABLE_VERSION: 'Latest Available Versions', // TODO translate
   STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Development',
   UPTIME: 'System Oppetid',

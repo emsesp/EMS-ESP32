@@ -235,7 +235,7 @@ const Version = () => {
           </Grid>
 
           <Typography sx={{ pb: 2 }} variant="h6" color="primary">
-            Latest Available Versions
+            {LL.AVAILABLE_VERSION()}
           </Typography>
 
           {internet_live ? (

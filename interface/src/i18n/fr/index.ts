@@ -174,6 +174,7 @@ const fr: Translation = {
   FACTORY_RESET: 'Réinitialisation',
   SYSTEM_FACTORY_TEXT: "L'appareil a été réinitialisé et va maintenant redémarrer",
   SYSTEM_FACTORY_TEXT_DIALOG: "Êtes-vous sûr de vouloir réinitialiser l'appareil à ses paramètres d'usine ?",
+  AVAILABLE_VERSION: 'Latest Available Versions', // TODO translate
   STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Développement',
   UPTIME: 'Durée de fonctionnement du système',

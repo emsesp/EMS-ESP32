@@ -174,6 +174,7 @@ const nl: Translation = {
   FACTORY_RESET: 'Fabrieksinstellingen',
   SYSTEM_FACTORY_TEXT: 'Gateway is gereset en start nu weer op met fabrieksinstellingen',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Weet je zeker dat je een reset naar fabrieksinstellingen uit wilt voeren?',
+  AVAILABLE_VERSION: 'Latest Available Versions', // TODO translate
   STABLE: 'Stable',
   DEVELOPMENT: 'Development',
   UPTIME: 'Systeem Uptime',
