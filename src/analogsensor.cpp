@@ -138,14 +138,10 @@ void AnalogSensor::reload(bool get_nvs) {
             continue;                             // skip this loop pass
         }
 
-        if (sensor.type() == AnalogType::ADC) {
-            LOG_DEBUG("ADC Sensor on GPIO %02d", sensor.gpio());
-            // analogSetPinAttenuation does not work with analogReadMilliVolts
-            sensor.analog_       = 0; // initialize
-            sensor.last_reading_ = 0;
-        } else if (sensor.type() == AnalogType::COUNTER) {
-            LOG_DEBUG("I/O Counter on GPIO %02d", sensor.gpio());
-            pinMode(sensor.gpio(), INPUT_PULLUP);
+        if ((sensor.gpio() == 25 || sensor.gpio() == 26)
+            && (sensor.type() == AnalogType::COUNTER || sensor.type() == AnalogType::DIGITAL_IN || sensor.type() == AnalogType::RATE
+                || sensor.type() == AnalogType::TIMER)) {
+            // pullup is mapped to DAC, so set to 3.3V
 #if CONFIG_IDF_TARGET_ESP32
             if (sensor.gpio() == 25 || sensor.gpio() == 26) {
                 dacWrite(sensor.gpio(), 255);
@@ -155,6 +151,15 @@ void AnalogSensor::reload(bool get_nvs) {
                 dacWrite(sensor.gpio(), 255);
             }
 #endif
+        }
+        if (sensor.type() == AnalogType::ADC) {
+            LOG_DEBUG("ADC Sensor on GPIO %02d", sensor.gpio());
+            // analogSetPinAttenuation does not work with analogReadMilliVolts
+            sensor.analog_       = 0; // initialize
+            sensor.last_reading_ = 0;
+        } else if (sensor.type() == AnalogType::COUNTER) {
+            LOG_DEBUG("I/O Counter on GPIO %02d", sensor.gpio());
+            pinMode(sensor.gpio(), INPUT_PULLUP);
             sensor.polltime_ = 0;
             sensor.poll_     = digitalRead(sensor.gpio());
             if (double_t val = EMSESP::nvs_.getDouble(sensor.name().c_str(), 0)) {
