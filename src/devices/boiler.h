@@ -266,6 +266,7 @@ class Boiler : public EMSdevice {
     uint8_t  auxHeaterOnly_;
     uint8_t  auxHeaterOff_;
     uint8_t  auxHeaterStatus_;
+    uint8_t  auxHeaterLevel_;
     uint16_t auxHeaterDelay_;
     uint8_t  silentMode_;
     int8_t   minTempSilent_;

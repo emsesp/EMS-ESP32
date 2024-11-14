@@ -971,7 +971,12 @@ void EMSESP::process_deviceName(std::shared_ptr<const Telegram> telegram) {
     char    name[16];
     uint8_t len = telegram->offset + telegram->message_length - 27;
     strlcpy(name, (const char *)&telegram->message_data[27 - telegram->offset], len < 16 ? len : 16);
-    if (strlen(name)) {
+    char * c = name;
+    while (isprint(*c)) {
+        c++;
+    };
+    *c = '\0';
+    if (strlen(name) > 2) { // https://github.com/emsesp/EMS-ESP32/issues/2166#issuecomment-2454488657
         LOG_DEBUG("Model name received for device 0x%02X: %s", telegram->src, name);
         for (const auto & emsdevice : emsdevices) {
             if (emsdevice->is_device_id(telegram->src)) {
@@ -1462,6 +1467,11 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
             } else if (first_value == TxService::TX_WRITE_FAIL) {
                 LOG_ERROR("Last Tx write rejected by host");
                 txservice_.send_poll(); // close the bus
+                txservice_.reset_retry_count();
+                tx_successful = true; // no retries
+            } else {
+                txservice_.send_poll(); // close the bus
+                LOG_ERROR("Last Tx write host reply: 0x%02X", first_value);
             }
         } else if (tx_state == Telegram::Operation::TX_READ && length == 1) {
             EMSbus::tx_state(Telegram::Operation::TX_READ); // reset Tx wait state
@@ -1478,7 +1488,7 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
 
                 // if telegram is longer read next part with offset +25 for ems+ or +27 for ems1.0
                 // not for response to raw send commands without read_id set
-                if ((response_id_ == 0 || read_id_ > 0) && (txservice_.read_next_tx(data[3], length) == read_id_)) {
+                if ((response_id_ == 0 || read_id_ > 0) && (txservice_.read_next_tx(data[3], length) > 0)) {
                     read_next_ = true;
                     txservice_.send(); // read next part withing same poll or:
                     // txservice_.send_poll(); // close the bus, next request in new poll
@@ -1528,9 +1538,11 @@ void EMSESP::incoming_telegram(uint8_t * data, const uint8_t length) {
         // check for poll to us, if so send top message from Tx queue immediately and quit
         if (poll_id == txservice_.get_send_id()) {
             txservice_.send();
+        } else {
+            // send remote room temperature if active
+            Roomctrl::send(poll_id);
         }
-        // send remote room temperature if active
-        Roomctrl::send(poll_id);
+
         return;
     } else {
 #ifdef EMSESP_UART_DEBUG

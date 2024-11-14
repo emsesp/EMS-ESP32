@@ -684,7 +684,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(auxHeaterOff),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_additionalHeater));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &auxHeaterStatus_, DeviceValueType::UINT8, FL_(auxHeaterStatus), DeviceValueUOM::PERCENT);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &auxHeaterStatus_, DeviceValueType::BOOL, FL_(auxHeaterStatus), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &auxHeaterLevel_, DeviceValueType::UINT8, FL_(auxHeaterLevel), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &auxHeaterDelay_,
                               DeviceValueType::UINT16,
@@ -1434,7 +1435,7 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
 
     // at this point do a quick check to see if the hot water or heating is active
     uint8_t state = EMS_VALUE_UINT8_NOTSET;
-    if (telegram->read_value(state, 11) && model() != EMSdevice::EMS_DEVICE_FLAG_HIU) {
+    if (telegram->read_value(state, 11) && model() != EMSdevice::EMS_DEVICE_FLAG_HIU && model() != EMSdevice::EMS_DEVICE_FLAG_HEATPUMP) {
         boilerState_ = state & 0x01 ? 0x08 : 0;  // burnGas
         boilerState_ |= state & 0x02 ? 0x01 : 0; // heatingPump
         boilerState_ |= state & 0x04 ? 0x02 : 0; // 3-way-valve
@@ -1473,7 +1474,7 @@ void Boiler::process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram) {
  */
 void Boiler::process_UBAMonitorSlowPlus2(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, absBurnPow_, 13); // current burner absolute power (percent of rating plate power)
-    if (model() == EMSdevice::EMS_DEVICE_FLAG_HIU) {
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_HIU || model() == EMSdevice::EMS_DEVICE_FLAG_HEATPUMP) {
         uint8_t state = EMS_VALUE_UINT8_NOTSET;
         boilerState_  = 0;
         if (telegram->read_value(state, 2)) {
@@ -1661,7 +1662,7 @@ void Boiler::process_HpPower(std::shared_ptr<const Telegram> telegram) {
     has_bitupdate(telegram, hpEA0_, 3, 6);
     has_update(telegram, hpCircSpd_, 4);
     has_update(telegram, hpBrinePumpSpd_, 5);
-    has_update(telegram, auxHeaterStatus_, 6);
+    has_update(telegram, auxHeaterLevel_, 6);
     has_update(telegram, hpActivity_, 7);
     has_update(telegram, hpPower_, 11);
     has_update(telegram, hpCompSpd_, 17);
@@ -1828,6 +1829,10 @@ void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
     uint8_t         min           = telegram->message_data[8];
     uint16_t        duration      = telegram->message_data[9] * 256 + telegram->message_data[10];
     uint32_t        date          = (year - 2000) * 535680UL + month * 44640UL + day * 1440UL + hour * 60 + min + duration;
+    // check valid https://github.com/emsesp/EMS-ESP32/issues/2189
+    if (day == 0 || day > 31 || month == 0 || month > 12 || !std::isprint(code[0]) || !std::isprint(code[1])) {
+        return;
+    }
     // store only the newest code from telegrams 10 and 11
     if (date > lastCodeDate_ && lastCodeDate_) {
         lastCodeDate_ = date;
@@ -1855,6 +1860,9 @@ void Boiler::process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram) 
     code[2]                                 = telegram->message_data[7];
     code[3]                                 = 0;
     telegram->read_value(codeNo, 8);
+    if (!std::isprint(code[0]) || !std::isprint(code[1]) || !std::isprint(code[2])) {
+        return;
+    }
 
     // check for valid date, https://github.com/emsesp/EMS-ESP32/issues/204
     if (telegram->message_data[10] & 0x80) {
@@ -1955,7 +1963,7 @@ void Boiler::process_HpSilentMode(std::shared_ptr<const Telegram> telegram) {
 
 // Boiler(0x08) -B-> All(0x00), ?(0x0488), data: 8E 00 00 00 00 00 01 03
 void Boiler::process_HpValve(std::shared_ptr<const Telegram> telegram) {
-    // has_bitupdate(telegram, auxHeaterStatus_, 0, 2);
+    has_bitupdate(telegram, auxHeaterStatus_, 0, 2);
     has_update(telegram, auxHeatMixValve_, 7);
     has_update(telegram, pc1Rate_, 13); // percent
 }
@@ -2970,19 +2978,19 @@ bool Boiler::set_silentMode(const char * value, const int8_t id) {
 }
 
 bool Boiler::set_silentFrom(const char * value, const int8_t id) {
-    int v;
-    if (!Helpers::value2number(value, v)) {
+    if (value == nullptr || value[0] < '0' || value[0] > '9') {
         return false;
     }
+    auto v = Helpers::string2minutes(value);
     write_command(0x484, 52, v / 15, 0x484);
     return true;
 }
 
 bool Boiler::set_silentTo(const char * value, const int8_t id) {
-    int v;
-    if (!Helpers::value2number(value, v)) {
+    if (value == nullptr || value[0] < '0' || value[0] > '9') {
         return false;
     }
+    auto v = Helpers::string2minutes(value);
     write_command(0x484, 53, v / 15, 0x484);
     return true;
 }

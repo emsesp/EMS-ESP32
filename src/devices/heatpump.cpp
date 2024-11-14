@@ -82,10 +82,10 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
                           DeviceValueUOM::NONE,
                           MAKE_CF_CB(set_lowNoiseMode));
     register_device_value(
-        DeviceValueTAG::TAG_DEVICE_DATA, &lowNoiseStart_, DeviceValueType::UINT8, FL_(lowNoiseStart), DeviceValueUOM::NONE, MAKE_CF_CB(set_lowNoiseStart), 0, 23);
+        DeviceValueTAG::TAG_DEVICE_DATA, &lowNoiseStart_, DeviceValueType::UINT8, FL_(lowNoiseStart), DeviceValueUOM::HOURS, MAKE_CF_CB(set_lowNoiseStart), 0, 23);
     register_device_value(
-        DeviceValueTAG::TAG_DEVICE_DATA, &lowNoiseStop_, DeviceValueType::UINT8, FL_(lowNoiseStop), DeviceValueUOM::NONE, MAKE_CF_CB(set_lowNoiseStop), 0, 23);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+        DeviceValueTAG::TAG_DEVICE_DATA, &lowNoiseStop_, DeviceValueType::UINT8, FL_(lowNoiseStop), DeviceValueUOM::HOURS, MAKE_CF_CB(set_lowNoiseStop), 0, 23);
+    register_device_value(DeviceValueTAG::TAG_DHW1,
                           &hybridDHW_,
                           DeviceValueType::ENUM,
                           FL_(enum_comfort2),
@@ -96,25 +96,25 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
                           &energyPriceGas_,
                           DeviceValueType::UINT8,
                           FL_(energyPriceGas),
-                          DeviceValueUOM::NONE,
+                          DeviceValueUOM::CTKWH,
                           MAKE_CF_CB(set_energyPriceGas));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &energyPriceEl_,
                           DeviceValueType::UINT8,
                           FL_(energyPriceEl),
-                          DeviceValueUOM::NONE,
+                          DeviceValueUOM::CTKWH,
                           MAKE_CF_CB(set_energyPriceEl));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &energyPricePV_,
                           DeviceValueType::UINT8,
                           FL_(energyPricePV),
-                          DeviceValueUOM::NONE,
+                          DeviceValueUOM::CTKWH,
                           MAKE_CF_CB(set_energyPricePV));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &switchOverTemp_,
                           DeviceValueType::INT8,
                           FL_(switchOverTemp),
-                          DeviceValueUOM::NONE,
+                          DeviceValueUOM::DEGREES,
                           MAKE_CF_CB(set_switchOverTemp));
     // Function test
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
