@@ -159,7 +159,6 @@ const pl: BaseTranslation = {
   HELP_INFORMATION_2: 'Dołącz do naszego serwera Discord by komunikować się na żywo ze społecznością',
   HELP_INFORMATION_3: 'Zaproponuj nową funkcjonalność lub zgłoś problem',
   HELP_INFORMATION_4: 'Zgłaszając problem, nie zapomnij pobrać i dołączyć informacji o swoim systemie!',
-  HELP_INFORMATION_5: 'For help and questions please contact your installer', // TODO translate
   UPLOAD: 'Wysyłanie',
   DOWNLOAD: '{{P|p||P}}obier{{anie|z||z}}',
   INSTALL: 'Zainstalować {0}',

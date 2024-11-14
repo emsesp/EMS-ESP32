@@ -193,7 +193,7 @@ const Version = () => {
             Firmware Version
           </Typography>
 
-          <Grid container spacing={11}>
+          <Grid container spacing={4}>
             <Grid mb={1}>
               <Typography mb={1} color="secondary">
                 {LL.VERSION()}
@@ -243,10 +243,10 @@ const Version = () => {
               <Grid container spacing={4}>
                 <Grid mb={1}>
                   <Typography mb={1} color="secondary">
-                    Stable Release
+                    {LL.STABLE()}
                   </Typography>
                   <Typography mb={1} color="secondary">
-                    Development Release
+                    {LL.DEVELOPMENT()}
                   </Typography>
                 </Grid>
                 <Grid mb={1}>

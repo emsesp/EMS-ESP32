@@ -159,7 +159,6 @@ const en: Translation = {
   HELP_INFORMATION_2: 'For live community chat join our Discord server',
   HELP_INFORMATION_3: 'To request a feature or report a bug',
   HELP_INFORMATION_4: 'Download and attach your support information for a faster response when reporting an issue',
-  HELP_INFORMATION_5: 'For help and questions please contact your installer',
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
   INSTALL: 'Install {0}',
