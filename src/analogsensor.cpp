@@ -147,7 +147,7 @@ void AnalogSensor::reload(bool get_nvs) {
                 dacWrite(sensor.gpio(), 255);
             }
 #elif CONFIG_IDF_TARGET_ESP32S2
-            if (sensor.gpio() == 23 || sensor.gpio() == 24) {
+            if (sensor.gpio() == 17 || sensor.gpio() == 18) {
                 dacWrite(sensor.gpio(), 255);
             }
 #endif
@@ -197,7 +197,7 @@ void AnalogSensor::reload(bool get_nvs) {
                 sensor.set_value(sensor.offset());
             } else
 #elif CONFIG_IDF_TARGET_ESP32S2
-            if (sensor.gpio() == 23 || sensor.gpio() == 24) {
+            if (sensor.gpio() == 17 || sensor.gpio() == 18) {
                 if (sensor.offset() > 255) {
                     sensor.set_offset(255);
                 } else if (sensor.offset() < 0) {
@@ -750,7 +750,7 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                     dacWrite(sensor.gpio(), sensor.offset());
                 } else
 #elif CONFIG_IDF_TARGET_ESP32S2
-                if ((sensor.gpio() == 23 || sensor.gpio() == 24) && v <= 255) {
+                if ((sensor.gpio() == 17 || sensor.gpio() == 18) && v <= 255) {
                     sensor.set_offset(v);
                     sensor.set_value(v);
                     pinMode(sensor.gpio(), OUTPUT);
