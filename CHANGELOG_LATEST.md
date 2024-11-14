@@ -23,5 +23,6 @@ For more details go to [www.emsesp.org](https://www.emsesp.org/).
 - lastCode character check [#2189](https://github.com/emsesp/EMS-ESP32/issues/2189)
 - reading too many telegram parts
 - heatpump cost UOMs [#2188](https://github.com/emsesp/EMS-ESP32/issues/2188)
+- analog dac output and inputs on dac pins [#2201](https://github.com/emsesp/EMS-ESP32/discussions/2201)
 
 ## Changed
