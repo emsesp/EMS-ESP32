@@ -159,7 +159,6 @@ const sk: Translation = {
   HELP_INFORMATION_2: 'Pre živý komunitný chat sa pripojte na náš Discord server',
   HELP_INFORMATION_3: 'Ak chcete požiadať o funkciu alebo nahlásiť chybu',
   HELP_INFORMATION_4: 'nezabudnite si stiahnuť a pripojiť informácie o vašom systéme, aby ste mohli rýchlejšie reagovať pri nahlasovaní problému',
-  HELP_INFORMATION_5: 'Pre pomoc a otázky, kontaktujte svojho inštalatéra',
   UPLOAD: 'Nahrať',
   DOWNLOAD: '{{S|s|s}}tiahnuť',
   INSTALL: 'Inštalovať {0}',

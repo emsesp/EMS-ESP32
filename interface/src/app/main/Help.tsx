@@ -78,39 +78,38 @@ const Help = () => {
 
   return (
     <SectionContent>
-      <Stack
-        padding={1}
-        mb={2}
-        direction="row"
-        divider={<Divider orientation="vertical" flexItem />}
-        sx={{
-          borderRadius: 3,
-          border: '2px solid grey',
-          justifyContent: 'space-evenly',
-          alignItems: 'center'
-        }}
-      >
-        <Typography variant="subtitle1">
-          {customSupportHTML ? (
-            <div dangerouslySetInnerHTML={{ __html: customSupportHTML }} />
-          ) : (
-            LL.HELP_INFORMATION_5()
-          )}
-        </Typography>
-        <Box
-          component="img"
-          referrerPolicy="no-referrer"
+      {customSupportHTML && (
+        <Stack
+          padding={1}
+          mb={2}
+          direction="row"
+          divider={<Divider orientation="vertical" flexItem />}
           sx={{
-            maxHeight: { xs: 100, md: 250 }
+            borderRadius: 3,
+            border: '2px solid grey',
+            justifyContent: 'space-evenly',
+            alignItems: 'center'
           }}
-          onError={() => setNotFound(true)}
-          src={
-            notFound
-              ? ''
-              : customSupportIMG || 'https://emsesp.org/_media/images/installer.jpeg'
-          }
-        />
-      </Stack>
+        >
+          <Typography variant="subtitle1">
+            <div dangerouslySetInnerHTML={{ __html: customSupportHTML }} />
+          </Typography>
+          <Box
+            component="img"
+            referrerPolicy="no-referrer"
+            sx={{
+              maxHeight: { xs: 100, md: 250 }
+            }}
+            onError={() => setNotFound(true)}
+            src={
+              notFound
+                ? ''
+                : customSupportIMG ||
+                  'https://emsesp.org/_media/images/installer.jpeg'
+            }
+          />
+        </Stack>
+      )}
 
       {me.admin && (
         <List sx={{ borderRadius: 3, border: '2px solid grey' }}>

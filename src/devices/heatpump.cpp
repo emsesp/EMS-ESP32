@@ -81,17 +81,18 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
                           FL_(lowNoiseMode),
                           DeviceValueUOM::NONE,
                           MAKE_CF_CB(set_lowNoiseMode));
-    register_device_value(
-        DeviceValueTAG::TAG_DEVICE_DATA, &lowNoiseStart_, DeviceValueType::UINT8, FL_(lowNoiseStart), DeviceValueUOM::HOURS, MAKE_CF_CB(set_lowNoiseStart), 0, 23);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &lowNoiseStart_,
+                          DeviceValueType::UINT8,
+                          FL_(lowNoiseStart),
+                          DeviceValueUOM::HOURS,
+                          MAKE_CF_CB(set_lowNoiseStart),
+                          0,
+                          23);
     register_device_value(
         DeviceValueTAG::TAG_DEVICE_DATA, &lowNoiseStop_, DeviceValueType::UINT8, FL_(lowNoiseStop), DeviceValueUOM::HOURS, MAKE_CF_CB(set_lowNoiseStop), 0, 23);
-    register_device_value(DeviceValueTAG::TAG_DHW1,
-                          &hybridDHW_,
-                          DeviceValueType::ENUM,
-                          FL_(enum_comfort2),
-                          FL_(hybridDHW),
-                          DeviceValueUOM::NONE,
-                          MAKE_CF_CB(set_hybridDHW));
+    register_device_value(
+        DeviceValueTAG::TAG_DHW1, &hybridDHW_, DeviceValueType::ENUM, FL_(enum_comfort2), FL_(hybridDHW), DeviceValueUOM::NONE, MAKE_CF_CB(set_hybridDHW));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &energyPriceGas_,
                           DeviceValueType::UINT8,
