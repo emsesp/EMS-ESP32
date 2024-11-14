@@ -235,7 +235,7 @@ const Version = () => {
           </Grid>
 
           <Typography sx={{ pb: 2 }} variant="h6" color="primary">
-            Latest Available Versions
+            {LL.AVAILABLE_VERSION()}
           </Typography>
 
           {internet_live ? (
@@ -243,10 +243,10 @@ const Version = () => {
               <Grid container spacing={4}>
                 <Grid mb={1}>
                   <Typography mb={1} color="secondary">
-                    Stable Release
+                    {LL.STABLE()} Release
                   </Typography>
                   <Typography mb={1} color="secondary">
-                    Development Release
+                    {LL.DEVELOPMENT()} Release
                   </Typography>
                 </Grid>
                 <Grid mb={1}>

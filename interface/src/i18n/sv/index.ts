@@ -175,6 +175,7 @@ const sv: Translation = {
   FACTORY_RESET: 'Fabriksåterställning',
   SYSTEM_FACTORY_TEXT: 'Enheten har blivit fabriksåterställd och startar nu om',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Är du säker att du vill fabriksåterställa enheten?',
+  AVAILABLE_VERSION: 'Latest Available Versions', // TODO translate
   STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Utveckling',
   UPTIME: 'Systemets Upptid',
