@@ -1776,10 +1776,10 @@ void EMSESP::loop() {
 void EMSESP::start_serial_console() {
     shell_ = std::make_shared<EMSESPConsole>(*this, serial_console_, true);
     shell_->maximum_log_messages(100);
-    shell_->add_flags(CommandFlags::ADMIN); // always start in su/admin mode when running tests
     shell_->start();
 #if defined(EMSESP_DEBUG)
     shell_->log_level(uuid::log::Level::DEBUG);
+    shell_->add_flags(CommandFlags::ADMIN); // always start in su/admin mode when compiled with debug
 #else
     shell_->log_level(uuid::log::Level::TRACE);
 #endif
