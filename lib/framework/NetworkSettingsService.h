@@ -94,6 +94,10 @@ class NetworkSettingsService : public StatefulService<NetworkSettings> {
     void begin();
     void loop();
 
+    uint16_t getWifiConnects() const {
+        return connectcount_;
+    }
+
   private:
     HttpEndpoint<NetworkSettings>  _httpEndpoint;
     FSPersistence<NetworkSettings> _fsPersistence;
