@@ -87,7 +87,6 @@ class NetworkSettings {
     static StateUpdateResult update(JsonObject root, NetworkSettings & settings);
 };
 
-
 class NetworkSettingsService : public StatefulService<NetworkSettings> {
   public:
     NetworkSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager);
@@ -95,12 +94,18 @@ class NetworkSettingsService : public StatefulService<NetworkSettings> {
     void begin();
     void loop();
 
+    uint16_t getWifiConnects() const {
+        return connectcount_;
+    }
+
   private:
     HttpEndpoint<NetworkSettings>  _httpEndpoint;
     FSPersistence<NetworkSettings> _fsPersistence;
 
     unsigned long _lastConnectionAttempt;
     bool          _stopping;
+
+    uint16_t connectcount_ = 0; // number of wifi reconnects
 
     void         WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info);
     void         mDNS_start() const;

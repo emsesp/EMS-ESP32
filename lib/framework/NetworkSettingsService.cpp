@@ -304,10 +304,14 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) 
         break;
 
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
-        emsesp::EMSESP::logger().warning("WiFi disconnected. Reason: %s (%d)",
+        connectcount_++; // count the number of reconnects
+        emsesp::EMSESP::logger().warning("WiFi disconnected (#%d). Reason: %s (%d)",
+                                         connectcount_,
                                          disconnectReason(info.wifi_sta_disconnected.reason),
                                          info.wifi_sta_disconnected.reason); // IDF 4.0
         emsesp::EMSESP::system_.has_ipv6(false);
+
+
         break;
 
     case ARDUINO_EVENT_WIFI_STA_GOT_IP:

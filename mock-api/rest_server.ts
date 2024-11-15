@@ -368,7 +368,8 @@ const network_status = {
   gateway_ip: '10.10.10.1',
   dns_ip_1: '10.10.10.1',
   dns_ip_2: '0.0.0.0',
-  hostname: 'ems-esp'
+  hostname: 'ems-esp',
+  connect_count: 1
 };
 const list_networks = {
   networks: [
