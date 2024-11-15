@@ -593,6 +593,7 @@ void Mqtt::ha_status() {
     publish_system_ha_sensor_config(DeviceValueType::INT8, "Tx reads", "txreads", DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::INT8, "Tx writes", "txwrites", DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::INT8, "Tx fails", "txfails", DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::INT16, "WiFi reconnects", "wificonnects", DeviceValueUOM::NONE);
 
     // This comes from the info MQTT topic
     publish_system_ha_sensor_config(DeviceValueType::STRING, "Version", "version", DeviceValueUOM::NONE);
