@@ -174,6 +174,7 @@ const en: Translation = {
   FACTORY_RESET: 'Factory Reset',
   SYSTEM_FACTORY_TEXT: 'Device has been factory reset and will now restart',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Are you sure you want to reset EMS-ESP to its factory defaults?',
+  AVAILABLE_VERSION: 'Latest Available Versions',
   STABLE: 'Stable',
   DEVELOPMENT: 'Development',
   UPTIME: 'System Uptime',
