@@ -369,7 +369,7 @@ const network_status = {
   dns_ip_1: '10.10.10.1',
   dns_ip_2: '0.0.0.0',
   hostname: 'ems-esp',
-  connect_count: 1
+  reconnect_count: 1
 };
 const list_networks = {
   networks: [
@@ -4840,7 +4840,7 @@ router
       if (action === 'export') {
         // export data
         return export_data(content.param);
-      } else if (action === 'customSupport') {
+      } else if (action === 'getCustomSupport') {
         // send custom support
         return custom_support();
       } else if (action === 'checkUpgrade') {

@@ -103,11 +103,13 @@ const NetworkStatus = () => {
       case NetworkConnectionStatus.WIFI_STATUS_NO_SSID_AVAIL:
         return 'No SSID Available';
       case NetworkConnectionStatus.WIFI_STATUS_CONNECTED:
-        return LL.CONNECTED(0) + ' (WiFi) (' + data.connect_count + ')';
+        return LL.CONNECTED(0) + ' (WiFi) (' + data.reconnect_count + ')';
       case NetworkConnectionStatus.WIFI_STATUS_CONNECT_FAILED:
-        return LL.CONNECTED(1) + ' ' + LL.FAILED(0) + ' (' + data.connect_count + ')';
+        return (
+          LL.CONNECTED(1) + ' ' + LL.FAILED(0) + ' (' + data.reconnect_count + ')'
+        );
       case NetworkConnectionStatus.WIFI_STATUS_CONNECTION_LOST:
-        return LL.CONNECTED(1) + ' ' + LL.LOST() + ' (' + data.connect_count + ')';
+        return LL.CONNECTED(1) + ' ' + LL.LOST() + ' (' + data.reconnect_count + ')';
       case NetworkConnectionStatus.WIFI_STATUS_DISCONNECTED:
         return LL.DISCONNECTED();
       default:

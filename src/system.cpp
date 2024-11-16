@@ -716,7 +716,7 @@ void System::heartbeat_json(JsonObject output) {
         int8_t rssi            = WiFi.RSSI();
         output["rssi"]         = rssi;
         output["wifistrength"] = wifi_quality(rssi);
-        output["wificonnects"] = EMSESP::esp8266React.getWifiConnects();
+        output["wifireconnects"] = EMSESP::esp8266React.getWifiReconnects();
     }
 #endif
 }
@@ -1167,7 +1167,7 @@ bool System::check_restore() {
                 // it's a custom support file - save it to /config
                 new_file.close();
                 if (LittleFS.rename(TEMP_FILENAME_PATH, EMSESP_CUSTOMSUPPORT_FILE)) {
-                    LOG_DEBUG("Custom support information found");
+                    LOG_INFO("Custom support file stored");
                     return false; // no need to reboot
                 } else {
                     LOG_ERROR("Failed to save custom support file");
@@ -1500,7 +1500,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         node["network"]      = "WiFi";
         node["hostname"]     = WiFi.getHostname();
         node["RSSI"]         = WiFi.RSSI();
-        node["WIFIConnects"] = EMSESP::esp8266React.getWifiConnects();
+        node["WIFIReconnects"] = EMSESP::esp8266React.getWifiReconnects();
         // node["MAC"]             = WiFi.macAddress();
         // node["IPv4 address"]    = uuid::printable_to_string(WiFi.localIP()) + "/" + uuid::printable_to_string(WiFi.subnetMask());
         // node["IPv4 gateway"]    = uuid::printable_to_string(WiFi.gatewayIP());

@@ -66,8 +66,8 @@ class ESP8266React {
         return _apSettingsService.getAPNetworkStatus() == APNetworkStatus::ACTIVE;
     }
 
-    uint16_t getWifiConnects() {
-        return _networkSettingsService.getWifiConnects();
+    uint16_t getWifiReconnects() {
+        return _networkSettingsService.getWifiReconnects();
     }
 
   private:

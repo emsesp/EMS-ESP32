@@ -94,7 +94,7 @@ class NetworkSettingsService : public StatefulService<NetworkSettings> {
     void begin();
     void loop();
 
-    uint16_t getWifiConnects() const {
+    uint16_t getWifiReconnects() const {
         return connectcount_;
     }
 

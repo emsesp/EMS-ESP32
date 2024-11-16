@@ -304,7 +304,7 @@ void NetworkSettingsService::WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info) 
         break;
 
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
-        connectcount_++; // count the number of reconnects
+        connectcount_++; // count the number of WiFi reconnects
         emsesp::EMSESP::logger().warning("WiFi disconnected (#%d). Reason: %s (%d)",
                                          connectcount_,
                                          disconnectReason(info.wifi_sta_disconnected.reason),
