@@ -174,7 +174,7 @@ const cz: Translation = {
   FACTORY_RESET: 'Obnovení továrního nastavení',
   SYSTEM_FACTORY_TEXT: 'Zařízení bylo obnoveno do továrního nastavení a nyní se restartuje',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Opravdu chcete resetovat zařízení EMS-ESP do továrního nastavení?',
-  AVAILABLE_VERSION: 'Latest Available Versions', // TODO translate
+  AVAILABLE_VERSION: 'Nejnovější dostupné verze',
   STABLE: 'Stabilní',
   DEVELOPMENT: 'Vývojová verze',
   UPTIME: 'Doba provozu systému',
