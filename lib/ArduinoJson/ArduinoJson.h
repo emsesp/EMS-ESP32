@@ -239,11 +239,11 @@
 #define ARDUINOJSON_BIN2ALPHA_1111() P
 #define ARDUINOJSON_BIN2ALPHA_(A, B, C, D) ARDUINOJSON_BIN2ALPHA_##A##B##C##D()
 #define ARDUINOJSON_BIN2ALPHA(A, B, C, D) ARDUINOJSON_BIN2ALPHA_(A, B, C, D)
-#define ARDUINOJSON_VERSION "7.2.0"
+#define ARDUINOJSON_VERSION "7.2.1"
 #define ARDUINOJSON_VERSION_MAJOR 7
 #define ARDUINOJSON_VERSION_MINOR 2
-#define ARDUINOJSON_VERSION_REVISION 0
-#define ARDUINOJSON_VERSION_MACRO V720
+#define ARDUINOJSON_VERSION_REVISION 1
+#define ARDUINOJSON_VERSION_MACRO V721
 #ifndef ARDUINOJSON_VERSION_NAMESPACE
 #  define ARDUINOJSON_VERSION_NAMESPACE                               \
     ARDUINOJSON_CONCAT5(                                              \
@@ -323,15 +323,15 @@ template <int Bits>
 struct uint_;
 template <>
 struct uint_<8> {
-  typedef uint8_t type;
+  using type = uint8_t;
 };
 template <>
 struct uint_<16> {
-  typedef uint16_t type;
+  using type = uint16_t;
 };
 template <>
 struct uint_<32> {
-  typedef uint32_t type;
+  using type = uint32_t;
 };
 template <int Bits>
 using uint_t = typename uint_<Bits>::type;
@@ -417,11 +417,11 @@ class MemoryPool {
 };
 template <bool Condition, class TrueType, class FalseType>
 struct conditional {
-  typedef TrueType type;
+  using type = TrueType;
 };
 template <class TrueType, class FalseType>
 struct conditional<false, TrueType, FalseType> {
-  typedef FalseType type;
+  using type = FalseType;
 };
 template <bool Condition, class TrueType, class FalseType>
 using conditional_t =
@@ -430,7 +430,7 @@ template <bool Condition, typename T = void>
 struct enable_if {};
 template <typename T>
 struct enable_if<true, T> {
-  typedef T type;
+  using type = T;
 };
 template <bool Condition, typename T = void>
 using enable_if_t = typename enable_if<Condition, T>::type;
@@ -451,8 +451,10 @@ template <typename T, T v>
 struct integral_constant {
   static const T value = v;
 };
-typedef integral_constant<bool, true> true_type;
-typedef integral_constant<bool, false> false_type;
+template <bool B>
+using bool_constant = integral_constant<bool, B>;
+using true_type = bool_constant<true>;
+using false_type = bool_constant<false>;
 template <typename T>
 struct is_array : false_type {};
 template <typename T>
@@ -461,11 +463,11 @@ template <typename T, size_t N>
 struct is_array<T[N]> : true_type {};
 template <typename T>
 struct remove_reference {
-  typedef T type;
+  using type = T;
 };
 template <typename T>
 struct remove_reference<T&> {
-  typedef T type;
+  using type = T;
 };
 template <typename T>
 using remove_reference_t = typename remove_reference<T>::type;
@@ -509,7 +511,7 @@ struct is_convertible {
  protected:  // <- to avoid GCC's "all member functions in class are private"
   static int probe(To);
   static char probe(...);
-  static From& from_;
+  static const From& from_;
  public:
   static const bool value = sizeof(probe(from_)) == sizeof(int);
 };
@@ -527,19 +529,19 @@ template <typename T>
 struct is_same<T, T> : true_type {};
 template <typename T>
 struct remove_cv {
-  typedef T type;
+  using type = T;
 };
 template <typename T>
 struct remove_cv<const T> {
-  typedef T type;
+  using type = T;
 };
 template <typename T>
 struct remove_cv<volatile T> {
-  typedef T type;
+  using type = T;
 };
 template <typename T>
 struct remove_cv<const volatile T> {
-  typedef T type;
+  using type = T;
 };
 template <typename T>
 using remove_cv_t = typename remove_cv<T>::type;
@@ -592,7 +594,7 @@ struct is_unsigned : integral_constant<bool,
     is_same<remove_cv_t<T>, bool>::value> {};
 template <typename T>
 struct type_identity {
-  typedef T type;
+  using type = T;
 };
 template <typename T>
 struct make_unsigned;
@@ -622,11 +624,11 @@ template <typename T>
 using make_unsigned_t = typename make_unsigned<T>::type;
 template <typename T>
 struct remove_const {
-  typedef T type;
+  using type = T;
 };
 template <typename T>
 struct remove_const<const T> {
-  typedef T type;
+  using type = T;
 };
 template <typename T>
 using remove_const_t = typename remove_const<T>::type;
@@ -964,16 +966,6 @@ class ZeroTerminatedRamString {
   const char* data() const {
     return str_;
   }
-  friend int stringCompare(ZeroTerminatedRamString a,
-                           ZeroTerminatedRamString b) {
-    ARDUINOJSON_ASSERT(!a.isNull());
-    ARDUINOJSON_ASSERT(!b.isNull());
-    return ::strcmp(a.str_, b.str_);
-  }
-  friend bool stringEquals(ZeroTerminatedRamString a,
-                           ZeroTerminatedRamString b) {
-    return stringCompare(a, b) == 0;
-  }
   bool isLinked() const {
     return false;
   }
@@ -982,14 +974,14 @@ class ZeroTerminatedRamString {
 };
 template <typename TChar>
 struct StringAdapter<TChar*, enable_if_t<IsChar<TChar>::value>> {
-  typedef ZeroTerminatedRamString AdaptedString;
+  using AdaptedString = ZeroTerminatedRamString;
   static AdaptedString adapt(const TChar* p) {
     return AdaptedString(reinterpret_cast<const char*>(p));
   }
 };
 template <typename TChar, size_t N>
 struct StringAdapter<TChar[N], enable_if_t<IsChar<TChar>::value>> {
-  typedef ZeroTerminatedRamString AdaptedString;
+  using AdaptedString = ZeroTerminatedRamString;
   static AdaptedString adapt(const TChar* p) {
     return AdaptedString(reinterpret_cast<const char*>(p));
   }
@@ -1003,7 +995,7 @@ class StaticStringAdapter : public ZeroTerminatedRamString {
 };
 template <>
 struct StringAdapter<const char*, void> {
-  typedef StaticStringAdapter AdaptedString;
+  using AdaptedString = StaticStringAdapter;
   static AdaptedString adapt(const char* p) {
     return AdaptedString(p);
   }
@@ -1035,7 +1027,7 @@ class SizedRamString {
 };
 template <typename TChar>
 struct SizedStringAdapter<TChar*, enable_if_t<IsChar<TChar>::value>> {
-  typedef SizedRamString AdaptedString;
+  using AdaptedString = SizedRamString;
   static AdaptedString adapt(const TChar* p, size_t n) {
     return AdaptedString(reinterpret_cast<const char*>(p), n);
   }
@@ -1107,7 +1099,7 @@ class JsonStringAdapter : public SizedRamString {
 };
 template <>
 struct StringAdapter<JsonString> {
-  typedef JsonStringAdapter AdaptedString;
+  using AdaptedString = JsonStringAdapter;
   static AdaptedString adapt(const JsonString& s) {
     return AdaptedString(s);
   }
@@ -1150,7 +1142,7 @@ struct StringAdapter<
     T,
     enable_if_t<(string_traits<T>::has_cstr || string_traits<T>::has_data) &&
                 (string_traits<T>::has_length || string_traits<T>::has_size)>> {
-  typedef SizedRamString AdaptedString;
+  using AdaptedString = SizedRamString;
   static AdaptedString adapt(const T& s) {
     return AdaptedString(get_data(s), get_size(s));
   }
@@ -1350,14 +1342,14 @@ class FlashString {
 };
 template <>
 struct StringAdapter<const __FlashStringHelper*, void> {
-  typedef FlashString AdaptedString;
+  using AdaptedString = FlashString;
   static AdaptedString adapt(const __FlashStringHelper* s) {
     return AdaptedString(s, s ? strlen_P(reinterpret_cast<const char*>(s)) : 0);
   }
 };
 template <>
 struct SizedStringAdapter<const __FlashStringHelper*, void> {
-  typedef FlashString AdaptedString;
+  using AdaptedString = FlashString;
   static AdaptedString adapt(const __FlashStringHelper* s, size_t n) {
     return AdaptedString(s, n);
   }
@@ -1616,11 +1608,11 @@ template <typename T, size_t = sizeof(T)>
 struct FloatTraits {};
 template <typename T>
 struct FloatTraits<T, 8 /*64bits*/> {
-  typedef uint64_t mantissa_type;
+  using mantissa_type = uint64_t;
   static const short mantissa_bits = 52;
   static const mantissa_type mantissa_max =
       (mantissa_type(1) << mantissa_bits) - 1;
-  typedef int16_t exponent_type;
+  using exponent_type = int16_t;
   static const exponent_type exponent_max = 308;
   static pgm_ptr<T> positiveBinaryPowersOfTen() {
     ARDUINOJSON_DEFINE_PROGMEM_ARRAY(  //
@@ -1686,11 +1678,11 @@ struct FloatTraits<T, 8 /*64bits*/> {
 };
 template <typename T>
 struct FloatTraits<T, 4 /*32bits*/> {
-  typedef uint32_t mantissa_type;
+  using mantissa_type = uint32_t;
   static const short mantissa_bits = 23;
   static const mantissa_type mantissa_max =
       (mantissa_type(1) << mantissa_bits) - 1;
-  typedef int8_t exponent_type;
+  using exponent_type = int8_t;
   static const exponent_type exponent_max = 38;
   static pgm_ptr<T> positiveBinaryPowersOfTen() {
     ARDUINOJSON_DEFINE_PROGMEM_ARRAY(uint32_t, factors,
@@ -1777,9 +1769,9 @@ inline TFloat make_float(TFloat m, TExponent e) {
 ARDUINOJSON_END_PRIVATE_NAMESPACE
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 #if ARDUINOJSON_USE_DOUBLE
-typedef double JsonFloat;
+using JsonFloat = double;
 #else
-typedef float JsonFloat;
+using JsonFloat = float;
 #endif
 ARDUINOJSON_END_PUBLIC_NAMESPACE
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
@@ -1996,11 +1988,11 @@ class ArrayData : public CollectionData {
 ARDUINOJSON_END_PRIVATE_NAMESPACE
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 #if ARDUINOJSON_USE_LONG_LONG
-typedef int64_t JsonInteger;
-typedef uint64_t JsonUInt;
+using JsonInteger = int64_t;
+using JsonUInt = uint64_t;
 #else
-typedef long JsonInteger;
-typedef unsigned long JsonUInt;
+using JsonInteger = long;
+using JsonUInt = unsigned long;
 #endif
 ARDUINOJSON_END_PUBLIC_NAMESPACE
 #define ARDUINOJSON_ASSERT_INTEGER_TYPE_IS_SUPPORTED(T)                  \
@@ -2675,15 +2667,15 @@ template <typename T>
 struct VariantTo {};
 template <>
 struct VariantTo<JsonArray> {
-  typedef JsonArray type;
+  using type = JsonArray;
 };
 template <>
 struct VariantTo<JsonObject> {
-  typedef JsonObject type;
+  using type = JsonObject;
 };
 template <>
 struct VariantTo<JsonVariant> {
-  typedef JsonVariant type;
+  using type = JsonVariant;
 };
 class VariantAttorney {
  public:
@@ -3008,7 +3000,7 @@ class JsonVariantConst : public detail::VariantTag,
     if (key.template is<size_t>())
       return operator[](key.template as<size_t>());
     else
-      return operator[](key.template as<const char*>());
+      return operator[](key.template as<JsonString>());
   }
   template <typename TString>
   ARDUINOJSON_DEPRECATED("use var[key].is<T>() instead")
@@ -3155,7 +3147,7 @@ class VariantRefBase : public VariantTag {
     if (key.template is<size_t>())
       return operator[](key.template as<size_t>());
     else
-      return operator[](key.template as<const char*>());
+      return operator[](key.template as<JsonString>());
   }
   ARDUINOJSON_DEPRECATED("use add<JsonVariant>() instead")
   JsonVariant add() const;
@@ -3392,7 +3384,7 @@ class JsonArrayConst : public detail::VariantOperators<JsonArrayConst> {
   friend class JsonArray;
   friend class detail::VariantAttorney;
  public:
-  typedef JsonArrayConstIterator iterator;
+  using iterator = JsonArrayConstIterator;
   iterator begin() const {
     if (!data_)
       return iterator();
@@ -3468,7 +3460,7 @@ class JsonObject;
 class JsonArray : public detail::VariantOperators<JsonArray> {
   friend class detail::VariantAttorney;
  public:
-  typedef JsonArrayIterator iterator;
+  using iterator = JsonArrayIterator;
   JsonArray() : data_(0), resources_(0) {}
   JsonArray(detail::ArrayData* data, detail::ResourceManager* resources)
       : data_(data), resources_(resources) {}
@@ -3687,7 +3679,7 @@ class JsonObjectConst : public detail::VariantOperators<JsonObjectConst> {
   friend class JsonObject;
   friend class detail::VariantAttorney;
  public:
-  typedef JsonObjectConstIterator iterator;
+  using iterator = JsonObjectConstIterator;
   JsonObjectConst() : data_(0), resources_(0) {}
   JsonObjectConst(const detail::ObjectData* data,
                   const detail::ResourceManager* resources)
@@ -3751,8 +3743,8 @@ class JsonObjectConst : public detail::VariantOperators<JsonObjectConst> {
   template <typename TVariant>
   detail::enable_if_t<detail::IsVariant<TVariant>::value, JsonVariantConst>
   operator[](const TVariant& key) const {
-    if (key.template is<const char*>())
-      return operator[](key.template as<const char*>());
+    if (key.template is<JsonString>())
+      return operator[](key.template as<JsonString>());
     else
       return JsonVariantConst();
   }
@@ -3835,7 +3827,7 @@ class JsonArray;
 class JsonObject : public detail::VariantOperators<JsonObject> {
   friend class detail::VariantAttorney;
  public:
-  typedef JsonObjectIterator iterator;
+  using iterator = JsonObjectIterator;
   JsonObject() : data_(0), resources_(0) {}
   JsonObject(detail::ObjectData* data, detail::ResourceManager* resource)
       : data_(data), resources_(resource) {}
@@ -3897,10 +3889,10 @@ class JsonObject : public detail::VariantOperators<JsonObject> {
   }
   template <typename TVariant>
   detail::enable_if_t<detail::IsVariant<TVariant>::value,
-                      detail::MemberProxy<JsonObject, const char*>>
+                      detail::MemberProxy<JsonObject, JsonString>>
   operator[](const TVariant& key) const {
-    if (key.template is<const char*>())
-      return {*this, key.template as<const char*>()};
+    if (key.template is<JsonString>())
+      return {*this, key.template as<JsonString>()};
     else
       return {*this, nullptr};
   }
@@ -4059,6 +4051,10 @@ class JsonDocument : public detail::VariantOperators<const JsonDocument&> {
       const T& src) {
     return to<JsonVariant>().set(src);
   }
+  template <typename TChar>
+  bool set(TChar* src) {
+    return to<JsonVariant>().set(src);
+  }
   template <typename T>
   typename detail::VariantTo<T>::type to() {
     clear();
@@ -4117,8 +4113,8 @@ class JsonDocument : public detail::VariantOperators<const JsonDocument&> {
   template <typename TVariant>
   detail::enable_if_t<detail::IsVariant<TVariant>::value, JsonVariantConst>
   operator[](const TVariant& key) const {
-    if (key.template is<const char*>())
-      return operator[](key.template as<const char*>());
+    if (key.template is<JsonString>())
+      return operator[](key.template as<JsonString>());
     if (key.template is<size_t>())
       return operator[](key.template as<size_t>());
     return {};
@@ -4238,7 +4234,7 @@ ARDUINOJSON_END_PUBLIC_NAMESPACE
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 template <typename TResult>
 struct VariantDataVisitor {
-  typedef TResult result_type;
+  using result_type = TResult;
   template <typename T>
   TResult visit(const T&) {
     return TResult();
@@ -4246,7 +4242,7 @@ struct VariantDataVisitor {
 };
 template <typename TResult>
 struct JsonVariantVisitor {
-  typedef TResult result_type;
+  using result_type = TResult;
   template <typename T>
   TResult visit(const T&) {
     return TResult();
@@ -4822,7 +4818,7 @@ struct FloatParts {
 };
 template <typename TFloat>
 inline int16_t normalize(TFloat& value) {
-  typedef FloatTraits<TFloat> traits;
+  using traits = FloatTraits<TFloat>;
   int16_t powersOf10 = 0;
   int8_t index = sizeof(TFloat) == 8 ? 8 : 5;
   int bit = 1 << index;
@@ -4965,7 +4961,7 @@ class TextFormatter {
   }
   template <typename T>
   enable_if_t<is_signed<T>::value> writeInteger(T value) {
-    typedef make_unsigned_t<T> unsigned_type;
+    using unsigned_type = make_unsigned_t<T>;
     unsigned_type unsigned_value;
     if (value < 0) {
       writeRaw('-');
@@ -5703,7 +5699,7 @@ ARDUINOJSON_END_PUBLIC_NAMESPACE
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 class JsonVariantCopier {
  public:
-  typedef bool result_type;
+  using result_type = bool;
   JsonVariantCopier(JsonVariant dst) : dst_(dst) {}
   template <typename T>
   bool visit(T src) {
@@ -6325,13 +6321,10 @@ template <typename T, typename... Rest>
 struct first_or_void<T, Rest...> {
   using type = T;
 };
-template <class T, class = void>
-struct is_deserialize_destination : false_type {};
 template <class T>
-struct is_deserialize_destination<
-    T, enable_if_t<is_same<decltype(VariantAttorney::getResourceManager(
-                               detail::declval<T&>())),
-                           ResourceManager*>::value>> : true_type {};
+using is_deserialize_destination =
+    bool_constant<is_base_of<JsonDocument, remove_cv_t<T>>::value ||
+                  IsVariant<T>::value>;
 template <typename TDestination>
 inline void shrinkJsonDocument(TDestination&) {
 }
@@ -6571,9 +6564,9 @@ class Number {
 #endif
 };
 inline Number parseNumber(const char* s) {
-  typedef FloatTraits<JsonFloat> traits;
-  typedef largest_type<traits::mantissa_type, JsonUInt> mantissa_t;
-  typedef traits::exponent_type exponent_t;
+  using traits = FloatTraits<JsonFloat>;
+  using mantissa_t = largest_type<traits::mantissa_type, JsonUInt>;
+  using exponent_t = traits::exponent_type;
   ARDUINOJSON_ASSERT(s != 0);
   bool is_negative = false;
   switch (*s) {
@@ -7212,7 +7205,7 @@ ARDUINOJSON_END_PUBLIC_NAMESPACE
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 template <typename TWriter>
 class PrettyJsonSerializer : public JsonSerializer<TWriter> {
-  typedef JsonSerializer<TWriter> base;
+  using base = JsonSerializer<TWriter>;
  public:
   PrettyJsonSerializer(TWriter writer, const ResourceManager* resources)
       : base(writer, resources), nesting_(0) {}

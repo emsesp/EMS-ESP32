@@ -179,8 +179,8 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
         if (has_param) {
             ok = exportData(root, param);
         }
-    } else if (action == "customSupport") {
-        ok = customSupport(root);
+    } else if (action == "getCustomSupport") {
+        ok = getCustomSupport(root);
     } else if (action == "uploadURL" && is_admin) {
         ok = uploadURL(param.c_str());
     }
@@ -301,19 +301,28 @@ bool WebStatusService::exportData(JsonObject root, std::string & type) {
     return true;
 }
 
-// action = customSupport
+// action = getCustomSupport
 // reads any upload customSupport.json file and sends to to Help page to be shown as Guest
-bool WebStatusService::customSupport(JsonObject root) {
-#ifndef EMSESP_STANDALONE
+bool WebStatusService::getCustomSupport(JsonObject root) {
+    JsonDocument doc;
+
+#if defined(EMSESP_STANDALONE)
+    // dummy test data for "test api3"
+    deserializeJson(
+        doc, "{\"type\":\"customSupport\",\"Support\":{\"html\":[\"html code\",\"here\"], \"img_url\": \"https://docs.emsesp.org/_media/images/designer.png\"}");
+#else
     // check if we have custom support file uploaded
     File file = LittleFS.open(EMSESP_CUSTOMSUPPORT_FILE, "r");
     if (!file) {
         // there is no custom file, return empty object
+#if defined(EMSESP_DEBUG)
+        emsesp::EMSESP::logger().debug("No custom support file found");
+#endif
         return true;
     }
 
-    // read the contents of the file into the root output json object
-    DeserializationError error = deserializeJson(root, file);
+    // read the contents of the file into a json doc. We can't do this direct to object since 7.2.1
+    DeserializationError error = deserializeJson(doc, file);
     if (error) {
         emsesp::EMSESP::logger().err("Failed to read custom support file");
         return false;
@@ -321,6 +330,13 @@ bool WebStatusService::customSupport(JsonObject root) {
 
     file.close();
 #endif
+
+#if defined(EMSESP_DEBUG)
+    emsesp::EMSESP::logger().debug("Showing custom support page");
+#endif
+
+    root.set(doc.as<JsonObject>()); // add to web response root object
+
     return true;
 }
 

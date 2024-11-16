@@ -1366,3 +1366,5 @@ pooltemp
 stoptime
 showertimer
 showeralert
+CTKWH
+wifireconnects

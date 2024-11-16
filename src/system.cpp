@@ -683,15 +683,7 @@ void System::heartbeat_json(JsonObject output) {
 
     output["uptime"]     = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     output["uptime_sec"] = uuid::get_uptime_sec();
-    bool value_b         = ntp_connected();
-    if (EMSESP::system_.bool_format() == BOOL_FORMAT_TRUEFALSE) {
-        output["ntp_status"] = value_b;
-    } else if (EMSESP::system_.bool_format() == BOOL_FORMAT_10) {
-        output["ntp_status"] = value_b ? 1 : 0;
-    } else {
-        char s[12];
-        output["ntp_status"] = Helpers::render_boolean(s, value_b);
-    }
+
     output["rxreceived"] = EMSESP::rxservice_.telegram_count();
     output["rxfails"]    = EMSESP::rxservice_.telegram_error_count();
     output["txreads"]    = EMSESP::txservice_.telegram_read_count();
@@ -721,9 +713,10 @@ void System::heartbeat_json(JsonObject output) {
 
 #ifndef EMSESP_STANDALONE
     if (!ethernet_connected_) {
-        int8_t rssi            = WiFi.RSSI();
-        output["rssi"]         = rssi;
-        output["wifistrength"] = wifi_quality(rssi);
+        int8_t rssi              = WiFi.RSSI();
+        output["rssi"]           = rssi;
+        output["wifistrength"]   = wifi_quality(rssi);
+        output["wifireconnects"] = EMSESP::esp8266React.getWifiReconnects();
     }
 #endif
 }
@@ -1174,7 +1167,7 @@ bool System::check_restore() {
                 // it's a custom support file - save it to /config
                 new_file.close();
                 if (LittleFS.rename(TEMP_FILENAME_PATH, EMSESP_CUSTOMSUPPORT_FILE)) {
-                    LOG_DEBUG("Custom support information found");
+                    LOG_INFO("Custom support file stored");
                     return false; // no need to reboot
                 } else {
                     LOG_ERROR("Failed to save custom support file");
@@ -1504,9 +1497,10 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         //     node["IPv6 address"] = uuid::printable_to_string(ETH.localIPv6());
         // }
     } else if (WiFi.status() == WL_CONNECTED) {
-        node["network"]  = "WiFi";
-        node["hostname"] = WiFi.getHostname();
-        node["RSSI"]     = WiFi.RSSI();
+        node["network"]        = "WiFi";
+        node["hostname"]       = WiFi.getHostname();
+        node["RSSI"]           = WiFi.RSSI();
+        node["WIFIReconnects"] = EMSESP::esp8266React.getWifiReconnects();
         // node["MAC"]             = WiFi.macAddress();
         // node["IPv4 address"]    = uuid::printable_to_string(WiFi.localIP()) + "/" + uuid::printable_to_string(WiFi.subnetMask());
         // node["IPv4 gateway"]    = uuid::printable_to_string(WiFi.gatewayIP());
@@ -1535,6 +1529,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
             node["CORSOrigin"] = settings.CORSOrigin;
         }
     });
+
 #ifndef EMSESP_STANDALONE
     EMSESP::esp8266React.getAPSettingsService()->read([&](const APSettings & settings) {
         const char * pM[]       = {"always", "disconnected", "never"};

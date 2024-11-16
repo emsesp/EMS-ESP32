@@ -513,7 +513,7 @@ void Mqtt::on_connect() {
         // with disabled HA we subscribe and the broker sends all stored HA-emsesp-configs.
         // Around line 272 they are removed (search for "// remove HA topics if we don't use discover")
         // If HA is enabled the subscriptions are removed.
-        // As described in the doc (https://emsesp.github.io/docs/#/Troubleshooting?id=home-assistant):
+        // As described in the doc (https://docs.emsesp.org/Troubleshooting?id=home-assistant):
         // disable HA, wait 5 minutes (to allow the broker to send all), than reenable HA again.
         queue_subscribe_message(discovery_prefix_ + "/+/" + mqtt_basename_ + "/#");
     }
@@ -593,8 +593,9 @@ void Mqtt::ha_status() {
     publish_system_ha_sensor_config(DeviceValueType::INT8, "Tx reads", "txreads", DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::INT8, "Tx writes", "txwrites", DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::INT8, "Tx fails", "txfails", DeviceValueUOM::NONE);
+    publish_system_ha_sensor_config(DeviceValueType::INT16, "WiFi reconnects", "wifireconnects", DeviceValueUOM::NONE);
 
-    // This comes from the info MQTT topic
+    // This comes from the info MQTT topic - and handled in the publish_ha_sensor_config function
     publish_system_ha_sensor_config(DeviceValueType::STRING, "Version", "version", DeviceValueUOM::NONE);
 }
 

@@ -310,7 +310,10 @@ const Dashboard = () => {
                               {me.admin &&
                                 di.dv?.c &&
                                 !hasMask(di.dv.id, DeviceEntityMask.DV_READONLY) && (
-                                  <IconButton onClick={() => editDashboardValue(di)}>
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => editDashboardValue(di)}
+                                  >
                                     <EditIcon
                                       color="primary"
                                       sx={{ fontSize: 16 }}

@@ -39,7 +39,7 @@ const Help = () => {
   const [customSupportHTML, setCustomSupportHTML] = useState<string | null>(null);
   const [notFound, setNotFound] = useState<boolean>(false);
 
-  useRequest(() => callAction({ action: 'customSupport' })).onSuccess((event) => {
+  useRequest(() => callAction({ action: 'getCustomSupport' })).onSuccess((event) => {
     if (event && event.data && Object.keys(event.data).length !== 0) {
       const data = event.data.Support;
       if (data.img_url) {
