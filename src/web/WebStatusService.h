@@ -25,7 +25,7 @@ class WebStatusService {
     // actions
     bool checkUpgrade(JsonObject root, std::string & latest_version);
     bool exportData(JsonObject root, std::string & type);
-    bool customSupport(JsonObject root);
+    bool getCustomSupport(JsonObject root);
     bool uploadURL(const char * url);
 
     void allvalues(JsonObject output);
