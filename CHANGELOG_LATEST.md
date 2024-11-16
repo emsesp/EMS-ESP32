@@ -1,6 +1,6 @@
 # Changelog
 
-For more details go to [www.emsesp.org](https://www.emsesp.org/).
+For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 
 ## [3.7.1]
 
