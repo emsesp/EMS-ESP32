@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The automatically generated temperature sensor ID has replaced dashes (`-`) with underscores (`_`) to be compatible with Home Assistant.
 - `api/system/info` has it's JSON key names changed to camelCase syntax.
 
-For more details go to [www.emsesp.org](https://www.emsesp.org/).
+For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 
 ## Added
 

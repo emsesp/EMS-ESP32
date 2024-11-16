@@ -34,17 +34,17 @@ It requires a small circuit to interface with the EMS bus which can be purchased
 
 ## **Installing**
 
-Head over to [download.emsesp.org](https://download.emsesp.org) for instructions on how to install EMS-ESP. There is also further details on which boards are supported in [this section](https://emsesp.org/Getting-Started/#first-time-install) of the documentation.
+Head over to [download.emsesp.org](https://download.emsesp.org) for instructions on how to install EMS-ESP. There is also further details on which boards are supported in [this section](https://docs.emsesp.org/Getting-Started/#first-time-install) of the documentation.
 
 ## **Documentation**
 
-Visit [emsesp.org](https://emsesp.org) for more details on how to install and configure EMS-ESP. There is also a collection of Frequently Asked Questions and Troubleshooting tips with example customizations from the community.
+Visit [emsesp.org](https://docs.emsesp.org) for more details on how to install and configure EMS-ESP. There is also a collection of Frequently Asked Questions and Troubleshooting tips with example customizations from the community.
 
 ## **Getting Support**
 
 To chat with the community reach out on our [Discord Server](https://discord.gg/3J3GgnzpyT).
 
-If you find an issue or have a request, see [here](https://emsesp.org/Support/) on how to submit a bug report or feature request.
+If you find an issue or have a request, see [here](https://docs.emsesp.org/Support/) on how to submit a bug report or feature request.
 
 ## **Live Demo**
 

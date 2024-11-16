@@ -105,7 +105,7 @@ const Help = () => {
               notFound
                 ? ''
                 : customSupportIMG ||
-                  'https://emsesp.org/_media/images/installer.jpeg'
+                  'https://docs.emsesp.org/_media/images/installer.jpeg'
             }
           />
         </Stack>
@@ -114,7 +114,7 @@ const Help = () => {
       {me.admin && (
         <List sx={{ borderRadius: 3, border: '2px solid grey' }}>
           <ListItem>
-            <ListItemButton component="a" href="https://emsesp.org">
+            <ListItemButton component="a" href="https://docs.emsesp.org">
               <ListItemAvatar>
                 <Avatar sx={{ bgcolor: '#72caf9' }}>
                   <MenuBookIcon />
