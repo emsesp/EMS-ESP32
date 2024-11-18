@@ -623,7 +623,7 @@ MAKE_TRANSLATION(wwActive, "active", "active", "aktiv", "Actief", "Aktiv", "akty
 MAKE_TRANSLATION(ww3wayValve, "3wayvalve", "3-way valve active", "3-Wege-Ventil aktiv", "3-wegklep actief", "Trevägsventil aktiv", "zawór 3-drogowy aktywny", "aktiv trevisventil", "vanne 3 voies active", "3 yollu vana", "valvola 3-vie", "3-cestný ventil aktívny", "aktivní 3-cestný ventil")
 MAKE_TRANSLATION(wwMixerTemp, "mixertemp", "mixer temperature", "Mischertemperatur", "Mixertemperatuur", "Blandningsventil-tempertur", "temperatura mieszacza", "temperatur blandeventil", "température mélangeur", "karıştırıcı sıcaklığı", "temperatura miscelatore", "teplota mixéra", "teplota směšovače")
 MAKE_TRANSLATION(wwStarts, "starts", "starts", "Anzahl Starts", "Aantal starts", "Antal starter", "liczba załączeń", "antall starter", "démarrages", "başlıyor", "avvii", "Počet štartov", "Počet startů")
-MAKE_TRANSLATION(wwStarts2, "starts2", "control starts2", "Anzahl Starts Kreis 2 ", "Aantal starts circuit 2", "Antal starter Krets 2", "liczba załączeń 2", "antall starter krets 2", "démarrages contrôle 2", "devre 2 başlıyor", "avvii controllati 2", "Okruh 2 počet štartov", "Počet startů okruh 2")
+MAKE_TRANSLATION(wwStartsHp, "startshp", "starts hp", "Anzahl Starts WP", "", "", "", "", "", "", "", "", "") // TODO translate
 MAKE_TRANSLATION(wwWorkM, "workm", "active time", "aktive Zeit", "Actieve tijd", "Aktiv Tid", "czas aktywności", "driftstid", "temps actif", "aktif zaman", "tempo attivo", "aktívny čas", "aktivní čas")
 MAKE_TRANSLATION(wwHystOn, "hyston", "hysteresis on temperature", "Einschalttemperaturdifferenz", "Inschakeltemperatuurverschil", "Hysteres PÅ-temperatur", "histereza załączania", "innkoblingstemperaturforskjell", "hystérésis température allumage", "çalışma sıcaklığı farkı", "differenza di temperatura di accensione", "hysterézia teploty", "hystereze zapnutí")
 MAKE_TRANSLATION(wwHystOff, "hystoff", "hysteresis off temperature", "Ausschalttemperaturdifferenz", "Uitschakeltemperatuurverschil", "Hysteres AV-temperatur", "histereza wyłączania", "utkoblingstemperaturforskjell", "hystérésis température extinction", "kapatma sıcaklığı farkı", "differenza di temperatura di spegnimento", "teplota hysterézie", "hystereze vypnutí")
@@ -814,6 +814,10 @@ MAKE_TRANSLATION(m1WorkTime, "m1worktime", "differential control working time", 
 MAKE_TRANSLATION(energyLastHour, "energylasthour", "energy last hour", "Energie letzte Std", "Energie laatste uur", "Energi Senaste Timmen", "energia w ciągu ostatniej godziny", "energi siste time", "énergie dernière heure", "son saat enerji", "Eenergia ultima ora", "energia za poslednú hodinu", "energie za poslední hodinu")
 MAKE_TRANSLATION(energyTotal, "energytotal", "total energy", "Gesamtenergie", "Totale energie", "Total Energi", "energia całkowita", "total energi", "énergie totale", "toplam enerji", "energia totale", "celková energia", "celková energie")
 MAKE_TRANSLATION(energyToday, "energytoday", "total energy today", "Energie heute", "Energie vandaag", "Total Energi Idag", "energia całkowita dzisiaj", "total energi i dag", "énergie totale aujourd'hui", "bugün toplam enerji", "totale energia giornaliera", "celková energia dnes", "celková energie dnes")
+MAKE_TRANSLATION(cyl3BottomTemp, "cyl3bottomtemp", "third cylinder bottom temperature (TS11)") // TODO translate
+MAKE_TRANSLATION(cylTopTemp, "cyltoptemp", "cylinder top temperature (TS10)", "Speichertemperatur oben (TS10)") // TODO translate
+MAKE_TRANSLATION(transferPumpMod, "transferpumpmod", "transfer pump modulation", "Transferpumpenmodulation") // TODO translate
+MAKE_TRANSLATION(transferPump, "transferpump", "transfer pump", "Transferpumpe") // TODO translate
 
 // solar dhw
 MAKE_TRANSLATION(wwColdTemp, "coldtemp", "cold water", "Kaltwasser", "", "", "zimna woda", "", "", "", "", "studená voda", "studená voda") // TODO translate

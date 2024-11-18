@@ -85,7 +85,7 @@ class Boiler : public EMSdevice {
     uint8_t  wwMaxPower_;           // DHW maximum power
     uint8_t  wwMaxTemp_;            // DHW maximum temperature
     uint32_t wwStarts_;             // DHW starts
-    uint32_t wwStarts2_;            // DHW control starts
+    uint32_t wwStartsHp_;           // DHW starts Heatpump
     uint32_t wwWorkM_;              // DHW minutes
     int8_t   wwHystOn_;
     int8_t   wwHystOff_;

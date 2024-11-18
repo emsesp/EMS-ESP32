@@ -207,6 +207,18 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
                               FL_(cyl2BottomTemp),
                               DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &cylBottomTemp3_,
+                              DeviceValueType::INT16,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(cyl3BottomTemp),
+                              DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &cylTopTemp_,
+                              DeviceValueType::INT16,
+                              DeviceValueNumOp::DV_NUMOP_DIV10,
+                              FL_(cylTopTemp),
+                              DeviceValueUOM::DEGREES);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &heatExchangerTemp_,
                               DeviceValueType::INT16,
                               DeviceValueNumOp::DV_NUMOP_DIV10,
@@ -215,6 +227,9 @@ Solar::Solar(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &cylPumpMod_, DeviceValueType::UINT8, FL_(cylPumpMod), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &valveStatus_, DeviceValueType::BOOL, FL_(valveStatus), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &vs1Status_, DeviceValueType::BOOL, FL_(vs1Status), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &vs3Status_, DeviceValueType::BOOL, FL_(vs3Status), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &transferPump_, DeviceValueType::BOOL, FL_(transferPump), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &transferPumpMod_, DeviceValueType::UINT8, FL_(transferPumpMod), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &collectorMaxTemp_,
                               DeviceValueType::UINT8,
@@ -580,20 +595,22 @@ void Solar::process_SM100Monitor(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, cylBottomTemp2_, 16);    // is *10 - TS5: Temperature sensor 2 cylinder, bottom, or swimming pool
     has_update(telegram, heatExchangerTemp_, 20); // is *10 - TS6: Heat exchanger temperature sensor
 
-    has_update(telegram, collector2Temp_, 6); // is *10 - TS7: Temperature sensor for collector array 2
-    has_update(telegram, cylMiddleTemp_, 8);  // is *10 - TS14: cylinder middle temperature
-    has_update(telegram, retHeatAssist_, 10); // is *10 - TS15: return temperature heating assistance
+    has_update(telegram, collector2Temp_, 6);  // is *10 - TS7: Temperature sensor for collector array 2
+    has_update(telegram, cylMiddleTemp_, 8);   // is *10 - TS14: cylinder middle temperature
+    has_update(telegram, retHeatAssist_, 10);  // is *10 - TS15: return temperature heating assistance
+    has_update(telegram, cylBottomTemp3_, 24); // is *10 - TS5: Temperature sensor cylinder 3, bottom
 }
 
 // SM100Monitor2 - 0x0363 Heatcounter
 // e.g. B0 00 FF 00 02 63 80 00 80 00 00 00 80 00 80 00 80 00 00 80 00 5A
 // Solar(0x30) -> All(0x00), SM100Monitor2(0x363), data: 01 E1 01 6B 00 00 01 5D 02 8E 80 00 0F 80 00
 void Solar::process_SM100Monitor2(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram->read_value(heatCntFlowTemp_, 0)); // is *10
-    has_update(telegram->read_value(heatCntRetTemp_, 2));  // is *10
-    has_update(telegram->read_value(heatCnt_, 12));
-    has_update(telegram->read_value(swapRetTemp_, 6));  // is *10
-    has_update(telegram->read_value(swapFlowTemp_, 8)); // is *10
+    has_update(telegram, heatCntFlowTemp_, 0); // is *10
+    has_update(telegram, heatCntRetTemp_, 2);  // is *10
+    has_update(telegram, heatCnt_, 12);
+    has_update(telegram, swapRetTemp_, 6);  // is *10
+    has_update(telegram, swapFlowTemp_, 8); // is *10
+    has_update(telegram, cylTopTemp_, 10);  // is *10 - TS10: cylinder top temperature
 }
 
 // SM100Config - 0x0366
@@ -607,7 +624,7 @@ void Solar::process_SM100Config(std::shared_ptr<const Telegram> telegram) {
 // SM100Config1 - 0x035F
 // e.g. Solar(0x30) -> Me(0x0B), ?(0x35F), data: 00 00 41 01 1E 0A 0C 19 00 3C 19
 void Solar::process_SM100Config1(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram->read_value(cylPriority_, 3));
+    has_update(telegram, cylPriority_, 3);
 }
 
 /*
@@ -644,6 +661,8 @@ void Solar::process_SM100Status(std::shared_ptr<const Telegram> telegram) {
         solarpumpmod = solarPumpMinMod_ * 5; // set to minimum
     }
     has_update(solarPump2Mod_, solarpumpmod);
+
+    has_update(telegram, transferPumpMod_, 14);
 }
 
 /*
@@ -658,6 +677,7 @@ void Solar::process_SM100Status2(std::shared_ptr<const Telegram> telegram) {
     has_bitupdate(telegram, solarPump_, 10, 2);  // on if bit 2 set
     has_bitupdate(telegram, solarPump2_, 1, 2);  // on if bit 2 set
     has_bitupdate(telegram, m1Valve_, 7, 2);     // values 8/4 seen
+    has_bitupdate(telegram, transferPump_, 11, 2);   // #2212
 }
 
 /*
