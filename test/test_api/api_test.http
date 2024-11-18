@@ -82,17 +82,21 @@ GET {{host}}/api/boiler/commands
 
 GET {{host_dev}}/api/system/info
 
-# Run a test. EMS-ESP must be compiled with -DEMSESP_TEST
-# Use this to load up a dummy thermostat and boiler with data
-
 ###
 
 GET {{host_dev}}/api/system/restart
 Authorization: Bearer {{token}}
 
+# Run a test. EMS-ESP must be compiled with -DEMSESP_TEST
+# Use this to load up a dummy thermostat and boiler with data
+
 ###
 
 GET {{host_dev}}/api?device=system&cmd=test&data=general
+
+###
+
+GET {{host_dev}}/api/boiler/info
 
 ###
 
