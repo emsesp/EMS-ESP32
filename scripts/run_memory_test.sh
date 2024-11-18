@@ -12,7 +12,11 @@
 # -i ip address of the device. default ems-esp.local.
 # -w wait time in seconds between each test. default 10.
 # -c count, the number of tests to run. default 1.
+# -u url, custom URL to test against like "/api/boiler/info". optional.
 # -t bearer token for the Restart command. optional. default is admin/admin's token.
 # -h help
 
-python3 memory_test.py -s True -i 10.10.10.175 -w 5 -c 10
+python3 memory_test.py -s True -i 10.10.10.175 -w 5 -c 30 -u "/api/boiler/info" # V3
+# python3 memory_test.py -s True -i 10.10.10.175 -w 5 -c 30 -u "/api?device=boiler&cmd=info" # V2
+
+# python3 memory_test.py -i 10.10.10.175 -n memory

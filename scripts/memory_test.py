@@ -27,7 +27,7 @@ def ping_until_up(ip, text):
         time.sleep(1)
 
 
-def run_test(skip, ip, wait, name, count, token):
+def run_test(skip, ip, wait, name, count, url, token):
     BASE_URL = "http://" + str(ip)
 
     INFO_URL = BASE_URL + "/api/system/info"
@@ -50,6 +50,7 @@ def run_test(skip, ip, wait, name, count, token):
     print()
     end = timer()
 
+# set this to True if you want to use the test API
     using_test = False
 
     if not skip:
@@ -98,21 +99,24 @@ def run_test(skip, ip, wait, name, count, token):
     # run test count times
     for i in range(count):
 
-        if using_test:
-            # run test
-            print("(" + str(round(end - start, 1)) +
-                  ")\t5. Running test (count #" + str(i+1) + " of " + str(count)+") called '" + name + "'...", end="")
-            response = requests.get(
-                TEST_URL, headers=GET_HEADERS, verify=False)
-        else:
+        print("(" + str(round(end - start, 1)) +
+              ")\t5. Running test (count #" + str(i+1) + " of " + str(count)+")...", end="")
+
+        # check if name start with a /
+        if name[0] == "/":
             # use URL
             response = requests.get(
-                BASE_URL + "/api/boiler/info", headers=GET_HEADERS, verify=False)
+                BASE_URL + url, headers=GET_HEADERS, verify=False)
             print("Response: ", response.json())
+        else:
+            # run a named test
+            response = requests.get(
+                TEST_URL, headers=GET_HEADERS, verify=False)
 
         if (response.status_code != 200):
             print_fail("Test Failed!")
             return
+
         print_success("Test ran successfully")
         end = timer()
 
@@ -162,6 +166,8 @@ parser.add_argument("-n", "--name", metavar="NAME", type=str,
                     default="memory", help="Name of test to run")
 parser.add_argument("-c", "--count", metavar="COUNT", type=int,
                     default="1", help="number of times to run the test")
+parser.add_argument("-u", "--url", metavar="URL", type=str,
+                    help="custom URL")
 parser.add_argument("-t", "--token", metavar="TOKEN", type=str,
                     default="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiYWRtaW4iOnRydWV9.2bHpWya2C7Q12WjNUBD6_7N3RCD7CMl-EGhyQVzFdDg", help="Bearer Token")
 args = parser.parse_args()
