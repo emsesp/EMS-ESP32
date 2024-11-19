@@ -468,6 +468,7 @@ void Mqtt::on_disconnect(espMqttClientTypes::DisconnectReason reason) {
         return;
     }
     connecting_ = false;
+    connectcount_++; // count # reconnects
 
     if (reason == espMqttClientTypes::DisconnectReason::TCP_DISCONNECTED) {
         LOG_WARNING("MQTT disconnected: TCP");
@@ -499,7 +500,6 @@ void Mqtt::on_connect() {
     LOG_INFO("MQTT connected");
 
     connecting_ = true;
-    connectcount_++; // count # reconnects. not currently used.
     queuecount_ = mqttClient_->queueSize();
 
     load_settings(); // reload MQTT settings - in case they have changes
@@ -584,7 +584,6 @@ void Mqtt::ha_status() {
     publish_system_ha_sensor_config(DeviceValueType::STRING, "EMS Bus", "bus_status", DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::STRING, "Uptime", "uptime", DeviceValueUOM::NONE);
     publish_system_ha_sensor_config(DeviceValueType::INT8, "Uptime (sec)", "uptime_sec", DeviceValueUOM::SECONDS);
-    publish_system_ha_sensor_config(DeviceValueType::BOOL, "NTP status", "ntp_status", DeviceValueUOM::CONNECTIVITY);
     publish_system_ha_sensor_config(DeviceValueType::INT8, "Free memory", "freemem", DeviceValueUOM::KB);
     publish_system_ha_sensor_config(DeviceValueType::INT8, "Max Alloc", "max_alloc", DeviceValueUOM::KB);
     publish_system_ha_sensor_config(DeviceValueType::INT8, "MQTT fails", "mqttfails", DeviceValueUOM::NONE);

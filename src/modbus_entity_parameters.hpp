@@ -196,7 +196,7 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(nrgWw), 0, 2), // nrg
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(meterWw), 2, 2), // meter
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(upTimeCompWw), 4, 2), // uptimecomp
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwStarts2), 6, 2), // starts2
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwStartsHp), 6, 2), // startsHp
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(nrgConsCompWw), 8, 2), // nrgconscomp
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(auxElecHeatNrgConsWw), 10, 2), // auxelecheatnrgcons
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(nrgSuppWw), 12, 2), // nrgsupp

@@ -12,6 +12,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - Bosch CS6800i AW - Silent Mode + Electrical Power Reduction (HP) [#2147](https://github.com/emsesp/EMS-ESP32/issues/2147)
 - `/api/system/showeralert` and `/api/system/showertimer` [#2182](https://github.com/emsesp/EMS-ESP32/issues/2182)
 - MX400 [#2198](https://github.com/emsesp/EMS-ESP32/issues/2198)
+- SM200 values [#2212](https://github.com/emsesp/EMS-ESP32/discussions/2212)
 
 ## Fixed
 
@@ -24,5 +25,8 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - reading too many telegram parts
 - heatpump cost UOMs [#2188](https://github.com/emsesp/EMS-ESP32/issues/2188)
 - analog dac output and inputs on dac pins [#2201](https://github.com/emsesp/EMS-ESP32/discussions/2201)
+- api memory leak [#2216](https://github.com/emsesp/EMS-ESP32/issues/2216)
 
 ## Changed
+
+- name of wwstarts2 [#2217](https://github.com/emsesp/EMS-ESP32/discussions/2217)

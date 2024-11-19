@@ -70,9 +70,9 @@ const MqttStatus = () => {
       return LL.NOT_ENABLED();
     }
     if (connected) {
-      return LL.CONNECTED(0) + (connect_count > 1 ? ' (' + connect_count + ')' : '');
+      return LL.CONNECTED(0) + ' (' + connect_count + ')';
     }
-    return LL.DISCONNECTED() + (connect_count > 1 ? ' (' + connect_count + ')' : '');
+    return LL.DISCONNECTED() + ' (' + connect_count + ')';
   };
 
   const disconnectReason = ({ disconnect_reason }: MqttStatusType) => {

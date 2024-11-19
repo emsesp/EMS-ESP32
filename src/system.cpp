@@ -691,9 +691,9 @@ void System::heartbeat_json(JsonObject output) {
     output["txfails"]    = EMSESP::txservice_.telegram_read_fail_count() + EMSESP::txservice_.telegram_write_fail_count();
 
     if (Mqtt::enabled()) {
-        output["mqttcount"]    = Mqtt::publish_count();
-        output["mqttfails"]    = Mqtt::publish_fails();
-        output["mqttconnects"] = Mqtt::connect_count();
+        output["mqttcount"]      = Mqtt::publish_count();
+        output["mqttfails"]      = Mqtt::publish_fails();
+        output["mqttreconnects"] = Mqtt::connect_count();
     }
     output["apicalls"] = WebAPIService::api_count(); // + WebAPIService::api_fails();
     output["apifails"] = WebAPIService::api_fails();
@@ -1557,7 +1557,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         node["MQTTPublishes"]    = Mqtt::publish_count();
         node["MQTTQueued"]       = Mqtt::publish_queued();
         node["MQTTPublishFails"] = Mqtt::publish_fails();
-        node["MQTTConnects"]     = Mqtt::connect_count();
+        node["MQTTReconnects"]   = Mqtt::connect_count();
     }
     EMSESP::esp8266React.getMqttSettingsService()->read([&](const MqttSettings & settings) {
         node["enabled"]               = settings.enabled;

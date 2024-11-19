@@ -35,6 +35,7 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
     register_telegram_type(0x99C, "HPComp", false, MAKE_PF_CB(process_HPComp));
     register_telegram_type(0x4AE, "HPEnergy", true, MAKE_PF_CB(process_HpEnergy));
     register_telegram_type(0x4AF, "HPMeters", true, MAKE_PF_CB(process_HpMeters));
+    register_telegram_type(0x99A, "HPStarts", false, MAKE_PF_CB(process_HpStarts));
 
     // device values
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &airHumidity_, DeviceValueType::UINT8, FL_(airHumidity), DeviceValueUOM::PERCENT);
@@ -177,6 +178,8 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
                           FL_(meterHeat),
                           DeviceValueUOM::KWH);
     register_device_value(DeviceValueTAG::TAG_DHW1, &meterWw_, DeviceValueType::UINT24, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(meterWw), DeviceValueUOM::KWH);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatStartsHp_, DeviceValueType::UINT24, FL_(heatingStarts), DeviceValueUOM::NONE);
+    register_device_value(DeviceValueTAG::TAG_DHW1, &wwStartsHp_, DeviceValueType::UINT24, FL_(wwStartsHp), DeviceValueUOM::NONE);
 }
 
 /*
@@ -269,6 +272,12 @@ void Heatpump::process_HpMeters(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, meterEHeat_, 8);
     has_update(telegram, meterHeat_, 24);
     has_update(telegram, meterWw_, 32);
+}
+
+// Broadcast (0x099A), data: 05 00 00 00 00 00 00 37 00 00 1D 00 00 52 00 00 13 01 00 01 7C
+void Heatpump::process_HpStarts(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, heatStartsHp_, 14, 3);
+    has_update(telegram, wwStartsHp_, 11,3 );
 }
 
 /*
