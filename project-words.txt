@@ -1368,3 +1368,11 @@ showertimer
 showeralert
 CTKWH
 wifireconnects
+mqttreconnects
+wwstarts
+auxheaterlevel
+startshp
+cyltoptemp
+transferpump
+transferpumpmod
+startshp
