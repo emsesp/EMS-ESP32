@@ -57,7 +57,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "CS*800i, Logatherm WLW*",boiler,8,totalcompstarts,total compressor control starts,uint24 (>=0<=16777213), ,false,sensor.boiler_total_compressor_control_starts,sensor.boiler_totalcompstarts,5,0,1,105,2
 "CS*800i, Logatherm WLW*",boiler,8,heatingstarts,heating control starts,uint24 (>=0<=16777213), ,false,sensor.boiler_heating_control_starts,sensor.boiler_heatingstarts,5,0,1,107,2
 "CS*800i, Logatherm WLW*",boiler,8,coolingstarts,cooling control starts,uint24 (>=0<=16777213), ,false,sensor.boiler_cooling_control_starts,sensor.boiler_coolingstarts,5,0,1,109,2
-"CS*800i, Logatherm WLW*",boiler,8,starts2,control starts2,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_control_starts2,sensor.boiler_dhw_starts2,5,9,1,6,2
+"CS*800i, Logatherm WLW*",boiler,8,startshp,starts hp,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts_hp,sensor.boiler_dhw_startshp,5,9,1,6,2
 "CS*800i, Logatherm WLW*",boiler,8,poolstarts,pool control starts,uint24 (>=0<=16777213), ,false,sensor.boiler_pool_control_starts,sensor.boiler_poolstarts,5,0,1,111,2
 "CS*800i, Logatherm WLW*",boiler,8,nrgconstotal,total energy consumption,uint24 (>=0<=16777213),kWh,false,sensor.boiler_total_energy_consumption,sensor.boiler_nrgconstotal,5,0,1,113,2
 "CS*800i, Logatherm WLW*",boiler,8,nrgconscomptotal,total energy consumption compressor,uint24 (>=0<=16777213),kWh,false,sensor.boiler_total_energy_consumption_compressor,sensor.boiler_nrgconscomptotal,5,0,1,115,2
@@ -2134,7 +2134,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,totalcompstarts,total compressor control starts,uint24 (>=0<=16777213), ,false,sensor.boiler_total_compressor_control_starts,sensor.boiler_totalcompstarts,5,0,1,105,2
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,heatingstarts,heating control starts,uint24 (>=0<=16777213), ,false,sensor.boiler_heating_control_starts,sensor.boiler_heatingstarts,5,0,1,107,2
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,coolingstarts,cooling control starts,uint24 (>=0<=16777213), ,false,sensor.boiler_cooling_control_starts,sensor.boiler_coolingstarts,5,0,1,109,2
-"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,starts2,control starts2,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_control_starts2,sensor.boiler_dhw_starts2,5,9,1,6,2
+"Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,startshp,starts hp,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts_hp,sensor.boiler_dhw_startshp,5,9,1,6,2
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,poolstarts,pool control starts,uint24 (>=0<=16777213), ,false,sensor.boiler_pool_control_starts,sensor.boiler_poolstarts,5,0,1,111,2
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,nrgconstotal,total energy consumption,uint24 (>=0<=16777213),kWh,false,sensor.boiler_total_energy_consumption,sensor.boiler_nrgconstotal,5,0,1,113,2
 "Enviline, Compress 6000AW, Hybrid 3000-7000iAW, SupraEco/Geo 5xx, WLW196i/WSW196i",boiler,172,nrgconscomptotal,total energy consumption compressor,uint24 (>=0<=16777213),kWh,false,sensor.boiler_total_energy_consumption_compressor,sensor.boiler_nrgconscomptotal,5,0,1,115,2
@@ -2341,7 +2341,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Geo 5xx",boiler,173,totalcompstarts,total compressor control starts,uint24 (>=0<=16777213), ,false,sensor.boiler_total_compressor_control_starts,sensor.boiler_totalcompstarts,5,0,1,105,2
 "Geo 5xx",boiler,173,heatingstarts,heating control starts,uint24 (>=0<=16777213), ,false,sensor.boiler_heating_control_starts,sensor.boiler_heatingstarts,5,0,1,107,2
 "Geo 5xx",boiler,173,coolingstarts,cooling control starts,uint24 (>=0<=16777213), ,false,sensor.boiler_cooling_control_starts,sensor.boiler_coolingstarts,5,0,1,109,2
-"Geo 5xx",boiler,173,starts2,control starts2,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_control_starts2,sensor.boiler_dhw_starts2,5,9,1,6,2
+"Geo 5xx",boiler,173,startshp,starts hp,uint24 (>=0<=16777213), ,false,sensor.boiler_dhw_starts_hp,sensor.boiler_dhw_startshp,5,9,1,6,2
 "Geo 5xx",boiler,173,poolstarts,pool control starts,uint24 (>=0<=16777213), ,false,sensor.boiler_pool_control_starts,sensor.boiler_poolstarts,5,0,1,111,2
 "Geo 5xx",boiler,173,nrgconstotal,total energy consumption,uint24 (>=0<=16777213),kWh,false,sensor.boiler_total_energy_consumption,sensor.boiler_nrgconstotal,5,0,1,113,2
 "Geo 5xx",boiler,173,nrgconscomptotal,total energy consumption compressor,uint24 (>=0<=16777213),kWh,false,sensor.boiler_total_energy_consumption_compressor,sensor.boiler_nrgconscomptotal,5,0,1,115,2
@@ -4847,41 +4847,46 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "SM50",solar,162,solarpump2,pump 2 (PS4),boolean, ,false,binary_sensor.solar_pump_2_(PS4),binary_sensor.solar_solarpump2,8,0,1,22,1
 "SM50",solar,162,solarpump2mod,pump 2 modulation (PS4),uint8 (>=0<=100),%,false,sensor.solar_pump_2_modulation_(PS4),sensor.solar_solarpump2mod,8,0,1,23,1
 "SM50",solar,162,cyl2bottomtemp,second cylinder bottom temperature (TS5),int16 (>=-3199<=3199),C,false,sensor.solar_second_cylinder_bottom_temperature_(TS5),sensor.solar_cyl2bottomtemp,8,0,1/10,24,1
-"SM50",solar,162,heatexchangertemp,heat exchanger temperature (TS6),int16 (>=-3199<=3199),C,false,sensor.solar_heat_exchanger_temperature_(TS6),sensor.solar_heatexchangertemp,8,0,1/10,25,1
-"SM50",solar,162,cylpumpmod,cylinder pump modulation (PS5),uint8 (>=0<=100),%,false,sensor.solar_cylinder_pump_modulation_(PS5),sensor.solar_cylpumpmod,8,0,1,26,1
-"SM50",solar,162,valvestatus,valve status,boolean, ,false,binary_sensor.solar_valve_status,binary_sensor.solar_valvestatus,8,0,1,27,1
-"SM50",solar,162,vs1status,valve status VS1,boolean, ,false,binary_sensor.solar_valve_status_VS1,binary_sensor.solar_vs1status,8,0,1,28,1
-"SM50",solar,162,collectormaxtemp,maximum collector temperature,uint8 (>=0<=254),C,true,number.solar_maximum_collector_temperature,number.solar_collectormaxtemp,8,0,1,29,1
-"SM50",solar,162,collectormintemp,minimum collector temperature,uint8 (>=0<=254),C,true,number.solar_minimum_collector_temperature,number.solar_collectormintemp,8,0,1,30,1
+"SM50",solar,162,cyl3bottomtemp,third cylinder bottom temperature (TS11),int16 (>=-3199<=3199),C,false,sensor.solar_third_cylinder_bottom_temperature_(TS11),sensor.solar_cyl3bottomtemp,8,0,1/10,25,1
+"SM50",solar,162,cyltoptemp,cylinder top temperature (TS10),int16 (>=-3199<=3199),C,false,sensor.solar_cylinder_top_temperature_(TS10),sensor.solar_cyltoptemp,8,0,1/10,26,1
+"SM50",solar,162,heatexchangertemp,heat exchanger temperature (TS6),int16 (>=-3199<=3199),C,false,sensor.solar_heat_exchanger_temperature_(TS6),sensor.solar_heatexchangertemp,8,0,1/10,27,1
+"SM50",solar,162,cylpumpmod,cylinder pump modulation (PS5),uint8 (>=0<=100),%,false,sensor.solar_cylinder_pump_modulation_(PS5),sensor.solar_cylpumpmod,8,0,1,28,1
+"SM50",solar,162,valvestatus,valve status,boolean, ,false,binary_sensor.solar_valve_status,binary_sensor.solar_valvestatus,8,0,1,29,1
+"SM50",solar,162,vs1status,valve status VS1,boolean, ,false,binary_sensor.solar_valve_status_VS1,binary_sensor.solar_vs1status,8,0,1,30,1
+"SM50",solar,162,vs3status,valve status VS3,boolean, ,false,binary_sensor.solar_valve_status_VS3,binary_sensor.solar_vs3status,8,0,1,31,1
+"SM50",solar,162,transferpump,transfer pump,boolean, ,false,binary_sensor.solar_transfer_pump,binary_sensor.solar_transferpump,8,0,1,32,1
+"SM50",solar,162,transferpumpmod,transfer pump modulation,uint8 (>=0<=100),%,false,sensor.solar_transfer_pump_modulation,sensor.solar_transferpumpmod,8,0,1,33,1
+"SM50",solar,162,collectormaxtemp,maximum collector temperature,uint8 (>=0<=254),C,true,number.solar_maximum_collector_temperature,number.solar_collectormaxtemp,8,0,1,34,1
+"SM50",solar,162,collectormintemp,minimum collector temperature,uint8 (>=0<=254),C,true,number.solar_minimum_collector_temperature,number.solar_collectormintemp,8,0,1,35,1
 "SM50",solar,162,energylasthour,energy last hour,uint24 (>=0<=1677721),Wh,false,sensor.solar_energy_last_hour,sensor.solar_energylasthour,8,0,1/10,13,2
-"SM50",solar,162,energytoday,total energy today,uint24 (>=0<=16777213),Wh,false,sensor.solar_total_energy_today,sensor.solar_energytoday,8,0,1,31,2
-"SM50",solar,162,energytotal,total energy,uint24 (>=0<=1677721),kWh,false,sensor.solar_total_energy,sensor.solar_energytotal,8,0,1/10,33,2
-"SM50",solar,162,pump2worktime,pump 2 working time,time (>=0<=16777213),minutes,false,sensor.solar_pump_2_working_time,sensor.solar_pump2worktime,8,0,1,35,2
-"SM50",solar,162,m1worktime,differential control working time,time (>=0<=16777213),minutes,false,sensor.solar_differential_control_working_time,sensor.solar_m1worktime,8,0,1,37,2
-"SM50",solar,162,heattransfersystem,heattransfer system,boolean, ,true,switch.solar_heattransfer_system,switch.solar_heattransfersystem,8,0,1,39,1
-"SM50",solar,162,externalcyl,external cylinder,boolean, ,true,switch.solar_external_cylinder,switch.solar_externalcyl,8,0,1,40,1
-"SM50",solar,162,thermaldisinfect,thermal disinfection,boolean, ,true,switch.solar_thermal_disinfection,switch.solar_thermaldisinfect,8,0,1,41,1
-"SM50",solar,162,heatmetering,heatmetering,boolean, ,true,switch.solar_heatmetering,switch.solar_heatmetering,8,0,1,42,1
-"SM50",solar,162,activated,activated,boolean, ,true,switch.solar_activated,switch.solar_activated,8,0,1,43,1
-"SM50",solar,162,solarpumpmode,solar pump mode,enum [constant\|pwm\|analog], ,true,select.solar_solar_pump_mode,select.solar_solarpumpmode,8,0,1,44,1
-"SM50",solar,162,solarpumpkick,solar pump kick,boolean, ,true,switch.solar_solar_pump_kick,switch.solar_solarpumpkick,8,0,1,45,1
-"SM50",solar,162,plainwatermode,plain water mode,boolean, ,true,switch.solar_plain_water_mode,switch.solar_plainwatermode,8,0,1,46,1
-"SM50",solar,162,doublematchflow,doublematchflow,boolean, ,true,switch.solar_doublematchflow,switch.solar_doublematchflow,8,0,1,47,1
-"SM50",solar,162,pump2minmod,minimum pump 2 modulation,uint8 (>=0<=100),%,true,number.solar_minimum_pump_2_modulation,number.solar_pump2minmod,8,0,1,48,1
-"SM50",solar,162,turnondiff2,pump 2 turn on difference,uint8 (>=0<=25),C,true,number.solar_pump_2_turn_on_difference,number.solar_turnondiff2,8,0,1/10,49,1
-"SM50",solar,162,turnoffdiff2,pump 2 turn off difference,uint8 (>=0<=25),C,true,number.solar_pump_2_turn_off_difference,number.solar_turnoffdiff2,8,0,1/10,50,1
-"SM50",solar,162,pump2kick,pump kick 2,boolean, ,true,switch.solar_pump_kick_2,switch.solar_pump2kick,8,0,1,51,1
-"SM50",solar,162,climatezone,climate zone,uint8 (>=0<=254), ,true,number.solar_climate_zone,number.solar_climatezone,8,0,1,52,1
-"SM50",solar,162,collector1area,collector 1 area,uint16 (>=0<=3199),m²,true,number.solar_collector_1_area,number.solar_collector1area,8,0,1/10,53,1
-"SM50",solar,162,collector1type,collector 1 type,enum [flat\|vacuum], ,true,select.solar_collector_1_type,select.solar_collector1type,8,0,1,54,1
-"SM50",solar,162,collector2area,collector 2 area,uint16 (>=0<=3199),m²,true,number.solar_collector_2_area,number.solar_collector2area,8,0,1/10,55,1
-"SM50",solar,162,collector2type,collector 2 type,enum [flat\|vacuum], ,true,select.solar_collector_2_type,select.solar_collector2type,8,0,1,56,1
-"SM50",solar,162,cylpriority,cylinder priority,enum [cyl 1\|cyl 2], ,true,select.solar_cylinder_priority,select.solar_cylpriority,8,0,1,57,1
-"SM50",solar,162,heatcntflowtemp,heat counter flow temperature,uint16 (>=0<=3199),C,false,sensor.solar_heat_counter_flow_temperature,sensor.solar_heatcntflowtemp,8,0,1/10,58,1
-"SM50",solar,162,heatcntrettemp,heat counter return temperature,uint16 (>=0<=3199),C,false,sensor.solar_heat_counter_return_temperature,sensor.solar_heatcntrettemp,8,0,1/10,59,1
-"SM50",solar,162,heatcnt,heat counter impulses,uint8 (>=0<=254), ,false,sensor.solar_heat_counter_impulses,sensor.solar_heatcnt,8,0,1,60,1
-"SM50",solar,162,swapflowtemp,swap flow temperature (TS14),uint16 (>=0<=3199),C,false,sensor.solar_swap_flow_temperature_(TS14),sensor.solar_swapflowtemp,8,0,1/10,61,1
-"SM50",solar,162,swaprettemp,swap return temperature (TS15),uint16 (>=0<=3199),C,false,sensor.solar_swap_return_temperature_(TS15),sensor.solar_swaprettemp,8,0,1/10,62,1
+"SM50",solar,162,energytoday,total energy today,uint24 (>=0<=16777213),Wh,false,sensor.solar_total_energy_today,sensor.solar_energytoday,8,0,1,36,2
+"SM50",solar,162,energytotal,total energy,uint24 (>=0<=1677721),kWh,false,sensor.solar_total_energy,sensor.solar_energytotal,8,0,1/10,38,2
+"SM50",solar,162,pump2worktime,pump 2 working time,time (>=0<=16777213),minutes,false,sensor.solar_pump_2_working_time,sensor.solar_pump2worktime,8,0,1,40,2
+"SM50",solar,162,m1worktime,differential control working time,time (>=0<=16777213),minutes,false,sensor.solar_differential_control_working_time,sensor.solar_m1worktime,8,0,1,42,2
+"SM50",solar,162,heattransfersystem,heattransfer system,boolean, ,true,switch.solar_heattransfer_system,switch.solar_heattransfersystem,8,0,1,44,1
+"SM50",solar,162,externalcyl,external cylinder,boolean, ,true,switch.solar_external_cylinder,switch.solar_externalcyl,8,0,1,45,1
+"SM50",solar,162,thermaldisinfect,thermal disinfection,boolean, ,true,switch.solar_thermal_disinfection,switch.solar_thermaldisinfect,8,0,1,46,1
+"SM50",solar,162,heatmetering,heatmetering,boolean, ,true,switch.solar_heatmetering,switch.solar_heatmetering,8,0,1,47,1
+"SM50",solar,162,activated,activated,boolean, ,true,switch.solar_activated,switch.solar_activated,8,0,1,48,1
+"SM50",solar,162,solarpumpmode,solar pump mode,enum [constant\|pwm\|analog], ,true,select.solar_solar_pump_mode,select.solar_solarpumpmode,8,0,1,49,1
+"SM50",solar,162,solarpumpkick,solar pump kick,boolean, ,true,switch.solar_solar_pump_kick,switch.solar_solarpumpkick,8,0,1,50,1
+"SM50",solar,162,plainwatermode,plain water mode,boolean, ,true,switch.solar_plain_water_mode,switch.solar_plainwatermode,8,0,1,51,1
+"SM50",solar,162,doublematchflow,doublematchflow,boolean, ,true,switch.solar_doublematchflow,switch.solar_doublematchflow,8,0,1,52,1
+"SM50",solar,162,pump2minmod,minimum pump 2 modulation,uint8 (>=0<=100),%,true,number.solar_minimum_pump_2_modulation,number.solar_pump2minmod,8,0,1,53,1
+"SM50",solar,162,turnondiff2,pump 2 turn on difference,uint8 (>=0<=25),C,true,number.solar_pump_2_turn_on_difference,number.solar_turnondiff2,8,0,1/10,54,1
+"SM50",solar,162,turnoffdiff2,pump 2 turn off difference,uint8 (>=0<=25),C,true,number.solar_pump_2_turn_off_difference,number.solar_turnoffdiff2,8,0,1/10,55,1
+"SM50",solar,162,pump2kick,pump kick 2,boolean, ,true,switch.solar_pump_kick_2,switch.solar_pump2kick,8,0,1,56,1
+"SM50",solar,162,climatezone,climate zone,uint8 (>=0<=254), ,true,number.solar_climate_zone,number.solar_climatezone,8,0,1,57,1
+"SM50",solar,162,collector1area,collector 1 area,uint16 (>=0<=3199),m²,true,number.solar_collector_1_area,number.solar_collector1area,8,0,1/10,58,1
+"SM50",solar,162,collector1type,collector 1 type,enum [flat\|vacuum], ,true,select.solar_collector_1_type,select.solar_collector1type,8,0,1,59,1
+"SM50",solar,162,collector2area,collector 2 area,uint16 (>=0<=3199),m²,true,number.solar_collector_2_area,number.solar_collector2area,8,0,1/10,60,1
+"SM50",solar,162,collector2type,collector 2 type,enum [flat\|vacuum], ,true,select.solar_collector_2_type,select.solar_collector2type,8,0,1,61,1
+"SM50",solar,162,cylpriority,cylinder priority,enum [cyl 1\|cyl 2], ,true,select.solar_cylinder_priority,select.solar_cylpriority,8,0,1,62,1
+"SM50",solar,162,heatcntflowtemp,heat counter flow temperature,uint16 (>=0<=3199),C,false,sensor.solar_heat_counter_flow_temperature,sensor.solar_heatcntflowtemp,8,0,1/10,63,1
+"SM50",solar,162,heatcntrettemp,heat counter return temperature,uint16 (>=0<=3199),C,false,sensor.solar_heat_counter_return_temperature,sensor.solar_heatcntrettemp,8,0,1/10,64,1
+"SM50",solar,162,heatcnt,heat counter impulses,uint8 (>=0<=254), ,false,sensor.solar_heat_counter_impulses,sensor.solar_heatcnt,8,0,1,65,1
+"SM50",solar,162,swapflowtemp,swap flow temperature (TS14),uint16 (>=0<=3199),C,false,sensor.solar_swap_flow_temperature_(TS14),sensor.solar_swapflowtemp,8,0,1/10,66,1
+"SM50",solar,162,swaprettemp,swap return temperature (TS15),uint16 (>=0<=3199),C,false,sensor.solar_swap_return_temperature_(TS15),sensor.solar_swaprettemp,8,0,1/10,67,1
 "SM100, MS100",solar,163,collectortemp,collector temperature (TS1),int16 (>=-3199<=3199),C,false,sensor.solar_collector_temperature_(TS1),sensor.solar_collectortemp,8,0,1/10,0,1
 "SM100, MS100",solar,163,cylbottomtemp,cylinder bottom temperature (TS2),int16 (>=-3199<=3199),C,false,sensor.solar_cylinder_bottom_temperature_(TS2),sensor.solar_cylbottomtemp,8,0,1/10,1,1
 "SM100, MS100",solar,163,solarpump,pump (PS1),boolean, ,false,binary_sensor.solar_pump_(PS1),binary_sensor.solar_solarpump,8,0,1,2,1
@@ -4901,41 +4906,46 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "SM100, MS100",solar,163,solarpump2,pump 2 (PS4),boolean, ,false,binary_sensor.solar_pump_2_(PS4),binary_sensor.solar_solarpump2,8,0,1,22,1
 "SM100, MS100",solar,163,solarpump2mod,pump 2 modulation (PS4),uint8 (>=0<=100),%,false,sensor.solar_pump_2_modulation_(PS4),sensor.solar_solarpump2mod,8,0,1,23,1
 "SM100, MS100",solar,163,cyl2bottomtemp,second cylinder bottom temperature (TS5),int16 (>=-3199<=3199),C,false,sensor.solar_second_cylinder_bottom_temperature_(TS5),sensor.solar_cyl2bottomtemp,8,0,1/10,24,1
-"SM100, MS100",solar,163,heatexchangertemp,heat exchanger temperature (TS6),int16 (>=-3199<=3199),C,false,sensor.solar_heat_exchanger_temperature_(TS6),sensor.solar_heatexchangertemp,8,0,1/10,25,1
-"SM100, MS100",solar,163,cylpumpmod,cylinder pump modulation (PS5),uint8 (>=0<=100),%,false,sensor.solar_cylinder_pump_modulation_(PS5),sensor.solar_cylpumpmod,8,0,1,26,1
-"SM100, MS100",solar,163,valvestatus,valve status,boolean, ,false,binary_sensor.solar_valve_status,binary_sensor.solar_valvestatus,8,0,1,27,1
-"SM100, MS100",solar,163,vs1status,valve status VS1,boolean, ,false,binary_sensor.solar_valve_status_VS1,binary_sensor.solar_vs1status,8,0,1,28,1
-"SM100, MS100",solar,163,collectormaxtemp,maximum collector temperature,uint8 (>=0<=254),C,true,number.solar_maximum_collector_temperature,number.solar_collectormaxtemp,8,0,1,29,1
-"SM100, MS100",solar,163,collectormintemp,minimum collector temperature,uint8 (>=0<=254),C,true,number.solar_minimum_collector_temperature,number.solar_collectormintemp,8,0,1,30,1
+"SM100, MS100",solar,163,cyl3bottomtemp,third cylinder bottom temperature (TS11),int16 (>=-3199<=3199),C,false,sensor.solar_third_cylinder_bottom_temperature_(TS11),sensor.solar_cyl3bottomtemp,8,0,1/10,25,1
+"SM100, MS100",solar,163,cyltoptemp,cylinder top temperature (TS10),int16 (>=-3199<=3199),C,false,sensor.solar_cylinder_top_temperature_(TS10),sensor.solar_cyltoptemp,8,0,1/10,26,1
+"SM100, MS100",solar,163,heatexchangertemp,heat exchanger temperature (TS6),int16 (>=-3199<=3199),C,false,sensor.solar_heat_exchanger_temperature_(TS6),sensor.solar_heatexchangertemp,8,0,1/10,27,1
+"SM100, MS100",solar,163,cylpumpmod,cylinder pump modulation (PS5),uint8 (>=0<=100),%,false,sensor.solar_cylinder_pump_modulation_(PS5),sensor.solar_cylpumpmod,8,0,1,28,1
+"SM100, MS100",solar,163,valvestatus,valve status,boolean, ,false,binary_sensor.solar_valve_status,binary_sensor.solar_valvestatus,8,0,1,29,1
+"SM100, MS100",solar,163,vs1status,valve status VS1,boolean, ,false,binary_sensor.solar_valve_status_VS1,binary_sensor.solar_vs1status,8,0,1,30,1
+"SM100, MS100",solar,163,vs3status,valve status VS3,boolean, ,false,binary_sensor.solar_valve_status_VS3,binary_sensor.solar_vs3status,8,0,1,31,1
+"SM100, MS100",solar,163,transferpump,transfer pump,boolean, ,false,binary_sensor.solar_transfer_pump,binary_sensor.solar_transferpump,8,0,1,32,1
+"SM100, MS100",solar,163,transferpumpmod,transfer pump modulation,uint8 (>=0<=100),%,false,sensor.solar_transfer_pump_modulation,sensor.solar_transferpumpmod,8,0,1,33,1
+"SM100, MS100",solar,163,collectormaxtemp,maximum collector temperature,uint8 (>=0<=254),C,true,number.solar_maximum_collector_temperature,number.solar_collectormaxtemp,8,0,1,34,1
+"SM100, MS100",solar,163,collectormintemp,minimum collector temperature,uint8 (>=0<=254),C,true,number.solar_minimum_collector_temperature,number.solar_collectormintemp,8,0,1,35,1
 "SM100, MS100",solar,163,energylasthour,energy last hour,uint24 (>=0<=1677721),Wh,false,sensor.solar_energy_last_hour,sensor.solar_energylasthour,8,0,1/10,13,2
-"SM100, MS100",solar,163,energytoday,total energy today,uint24 (>=0<=16777213),Wh,false,sensor.solar_total_energy_today,sensor.solar_energytoday,8,0,1,31,2
-"SM100, MS100",solar,163,energytotal,total energy,uint24 (>=0<=1677721),kWh,false,sensor.solar_total_energy,sensor.solar_energytotal,8,0,1/10,33,2
-"SM100, MS100",solar,163,pump2worktime,pump 2 working time,time (>=0<=16777213),minutes,false,sensor.solar_pump_2_working_time,sensor.solar_pump2worktime,8,0,1,35,2
-"SM100, MS100",solar,163,m1worktime,differential control working time,time (>=0<=16777213),minutes,false,sensor.solar_differential_control_working_time,sensor.solar_m1worktime,8,0,1,37,2
-"SM100, MS100",solar,163,heattransfersystem,heattransfer system,boolean, ,true,switch.solar_heattransfer_system,switch.solar_heattransfersystem,8,0,1,39,1
-"SM100, MS100",solar,163,externalcyl,external cylinder,boolean, ,true,switch.solar_external_cylinder,switch.solar_externalcyl,8,0,1,40,1
-"SM100, MS100",solar,163,thermaldisinfect,thermal disinfection,boolean, ,true,switch.solar_thermal_disinfection,switch.solar_thermaldisinfect,8,0,1,41,1
-"SM100, MS100",solar,163,heatmetering,heatmetering,boolean, ,true,switch.solar_heatmetering,switch.solar_heatmetering,8,0,1,42,1
-"SM100, MS100",solar,163,activated,activated,boolean, ,true,switch.solar_activated,switch.solar_activated,8,0,1,43,1
-"SM100, MS100",solar,163,solarpumpmode,solar pump mode,enum [constant\|pwm\|analog], ,true,select.solar_solar_pump_mode,select.solar_solarpumpmode,8,0,1,44,1
-"SM100, MS100",solar,163,solarpumpkick,solar pump kick,boolean, ,true,switch.solar_solar_pump_kick,switch.solar_solarpumpkick,8,0,1,45,1
-"SM100, MS100",solar,163,plainwatermode,plain water mode,boolean, ,true,switch.solar_plain_water_mode,switch.solar_plainwatermode,8,0,1,46,1
-"SM100, MS100",solar,163,doublematchflow,doublematchflow,boolean, ,true,switch.solar_doublematchflow,switch.solar_doublematchflow,8,0,1,47,1
-"SM100, MS100",solar,163,pump2minmod,minimum pump 2 modulation,uint8 (>=0<=100),%,true,number.solar_minimum_pump_2_modulation,number.solar_pump2minmod,8,0,1,48,1
-"SM100, MS100",solar,163,turnondiff2,pump 2 turn on difference,uint8 (>=0<=25),C,true,number.solar_pump_2_turn_on_difference,number.solar_turnondiff2,8,0,1/10,49,1
-"SM100, MS100",solar,163,turnoffdiff2,pump 2 turn off difference,uint8 (>=0<=25),C,true,number.solar_pump_2_turn_off_difference,number.solar_turnoffdiff2,8,0,1/10,50,1
-"SM100, MS100",solar,163,pump2kick,pump kick 2,boolean, ,true,switch.solar_pump_kick_2,switch.solar_pump2kick,8,0,1,51,1
-"SM100, MS100",solar,163,climatezone,climate zone,uint8 (>=0<=254), ,true,number.solar_climate_zone,number.solar_climatezone,8,0,1,52,1
-"SM100, MS100",solar,163,collector1area,collector 1 area,uint16 (>=0<=3199),m²,true,number.solar_collector_1_area,number.solar_collector1area,8,0,1/10,53,1
-"SM100, MS100",solar,163,collector1type,collector 1 type,enum [flat\|vacuum], ,true,select.solar_collector_1_type,select.solar_collector1type,8,0,1,54,1
-"SM100, MS100",solar,163,collector2area,collector 2 area,uint16 (>=0<=3199),m²,true,number.solar_collector_2_area,number.solar_collector2area,8,0,1/10,55,1
-"SM100, MS100",solar,163,collector2type,collector 2 type,enum [flat\|vacuum], ,true,select.solar_collector_2_type,select.solar_collector2type,8,0,1,56,1
-"SM100, MS100",solar,163,cylpriority,cylinder priority,enum [cyl 1\|cyl 2], ,true,select.solar_cylinder_priority,select.solar_cylpriority,8,0,1,57,1
-"SM100, MS100",solar,163,heatcntflowtemp,heat counter flow temperature,uint16 (>=0<=3199),C,false,sensor.solar_heat_counter_flow_temperature,sensor.solar_heatcntflowtemp,8,0,1/10,58,1
-"SM100, MS100",solar,163,heatcntrettemp,heat counter return temperature,uint16 (>=0<=3199),C,false,sensor.solar_heat_counter_return_temperature,sensor.solar_heatcntrettemp,8,0,1/10,59,1
-"SM100, MS100",solar,163,heatcnt,heat counter impulses,uint8 (>=0<=254), ,false,sensor.solar_heat_counter_impulses,sensor.solar_heatcnt,8,0,1,60,1
-"SM100, MS100",solar,163,swapflowtemp,swap flow temperature (TS14),uint16 (>=0<=3199),C,false,sensor.solar_swap_flow_temperature_(TS14),sensor.solar_swapflowtemp,8,0,1/10,61,1
-"SM100, MS100",solar,163,swaprettemp,swap return temperature (TS15),uint16 (>=0<=3199),C,false,sensor.solar_swap_return_temperature_(TS15),sensor.solar_swaprettemp,8,0,1/10,62,1
+"SM100, MS100",solar,163,energytoday,total energy today,uint24 (>=0<=16777213),Wh,false,sensor.solar_total_energy_today,sensor.solar_energytoday,8,0,1,36,2
+"SM100, MS100",solar,163,energytotal,total energy,uint24 (>=0<=1677721),kWh,false,sensor.solar_total_energy,sensor.solar_energytotal,8,0,1/10,38,2
+"SM100, MS100",solar,163,pump2worktime,pump 2 working time,time (>=0<=16777213),minutes,false,sensor.solar_pump_2_working_time,sensor.solar_pump2worktime,8,0,1,40,2
+"SM100, MS100",solar,163,m1worktime,differential control working time,time (>=0<=16777213),minutes,false,sensor.solar_differential_control_working_time,sensor.solar_m1worktime,8,0,1,42,2
+"SM100, MS100",solar,163,heattransfersystem,heattransfer system,boolean, ,true,switch.solar_heattransfer_system,switch.solar_heattransfersystem,8,0,1,44,1
+"SM100, MS100",solar,163,externalcyl,external cylinder,boolean, ,true,switch.solar_external_cylinder,switch.solar_externalcyl,8,0,1,45,1
+"SM100, MS100",solar,163,thermaldisinfect,thermal disinfection,boolean, ,true,switch.solar_thermal_disinfection,switch.solar_thermaldisinfect,8,0,1,46,1
+"SM100, MS100",solar,163,heatmetering,heatmetering,boolean, ,true,switch.solar_heatmetering,switch.solar_heatmetering,8,0,1,47,1
+"SM100, MS100",solar,163,activated,activated,boolean, ,true,switch.solar_activated,switch.solar_activated,8,0,1,48,1
+"SM100, MS100",solar,163,solarpumpmode,solar pump mode,enum [constant\|pwm\|analog], ,true,select.solar_solar_pump_mode,select.solar_solarpumpmode,8,0,1,49,1
+"SM100, MS100",solar,163,solarpumpkick,solar pump kick,boolean, ,true,switch.solar_solar_pump_kick,switch.solar_solarpumpkick,8,0,1,50,1
+"SM100, MS100",solar,163,plainwatermode,plain water mode,boolean, ,true,switch.solar_plain_water_mode,switch.solar_plainwatermode,8,0,1,51,1
+"SM100, MS100",solar,163,doublematchflow,doublematchflow,boolean, ,true,switch.solar_doublematchflow,switch.solar_doublematchflow,8,0,1,52,1
+"SM100, MS100",solar,163,pump2minmod,minimum pump 2 modulation,uint8 (>=0<=100),%,true,number.solar_minimum_pump_2_modulation,number.solar_pump2minmod,8,0,1,53,1
+"SM100, MS100",solar,163,turnondiff2,pump 2 turn on difference,uint8 (>=0<=25),C,true,number.solar_pump_2_turn_on_difference,number.solar_turnondiff2,8,0,1/10,54,1
+"SM100, MS100",solar,163,turnoffdiff2,pump 2 turn off difference,uint8 (>=0<=25),C,true,number.solar_pump_2_turn_off_difference,number.solar_turnoffdiff2,8,0,1/10,55,1
+"SM100, MS100",solar,163,pump2kick,pump kick 2,boolean, ,true,switch.solar_pump_kick_2,switch.solar_pump2kick,8,0,1,56,1
+"SM100, MS100",solar,163,climatezone,climate zone,uint8 (>=0<=254), ,true,number.solar_climate_zone,number.solar_climatezone,8,0,1,57,1
+"SM100, MS100",solar,163,collector1area,collector 1 area,uint16 (>=0<=3199),m²,true,number.solar_collector_1_area,number.solar_collector1area,8,0,1/10,58,1
+"SM100, MS100",solar,163,collector1type,collector 1 type,enum [flat\|vacuum], ,true,select.solar_collector_1_type,select.solar_collector1type,8,0,1,59,1
+"SM100, MS100",solar,163,collector2area,collector 2 area,uint16 (>=0<=3199),m²,true,number.solar_collector_2_area,number.solar_collector2area,8,0,1/10,60,1
+"SM100, MS100",solar,163,collector2type,collector 2 type,enum [flat\|vacuum], ,true,select.solar_collector_2_type,select.solar_collector2type,8,0,1,61,1
+"SM100, MS100",solar,163,cylpriority,cylinder priority,enum [cyl 1\|cyl 2], ,true,select.solar_cylinder_priority,select.solar_cylpriority,8,0,1,62,1
+"SM100, MS100",solar,163,heatcntflowtemp,heat counter flow temperature,uint16 (>=0<=3199),C,false,sensor.solar_heat_counter_flow_temperature,sensor.solar_heatcntflowtemp,8,0,1/10,63,1
+"SM100, MS100",solar,163,heatcntrettemp,heat counter return temperature,uint16 (>=0<=3199),C,false,sensor.solar_heat_counter_return_temperature,sensor.solar_heatcntrettemp,8,0,1/10,64,1
+"SM100, MS100",solar,163,heatcnt,heat counter impulses,uint8 (>=0<=254), ,false,sensor.solar_heat_counter_impulses,sensor.solar_heatcnt,8,0,1,65,1
+"SM100, MS100",solar,163,swapflowtemp,swap flow temperature (TS14),uint16 (>=0<=3199),C,false,sensor.solar_swap_flow_temperature_(TS14),sensor.solar_swapflowtemp,8,0,1/10,66,1
+"SM100, MS100",solar,163,swaprettemp,swap return temperature (TS15),uint16 (>=0<=3199),C,false,sensor.solar_swap_return_temperature_(TS15),sensor.solar_swaprettemp,8,0,1/10,67,1
 "SM200, MS200",solar,164,collectortemp,collector temperature (TS1),int16 (>=-3199<=3199),C,false,sensor.solar_collector_temperature_(TS1),sensor.solar_collectortemp,8,0,1/10,0,1
 "SM200, MS200",solar,164,cylbottomtemp,cylinder bottom temperature (TS2),int16 (>=-3199<=3199),C,false,sensor.solar_cylinder_bottom_temperature_(TS2),sensor.solar_cylbottomtemp,8,0,1/10,1,1
 "SM200, MS200",solar,164,solarpump,pump (PS1),boolean, ,false,binary_sensor.solar_pump_(PS1),binary_sensor.solar_solarpump,8,0,1,2,1
@@ -4955,41 +4965,46 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "SM200, MS200",solar,164,solarpump2,pump 2 (PS4),boolean, ,false,binary_sensor.solar_pump_2_(PS4),binary_sensor.solar_solarpump2,8,0,1,22,1
 "SM200, MS200",solar,164,solarpump2mod,pump 2 modulation (PS4),uint8 (>=0<=100),%,false,sensor.solar_pump_2_modulation_(PS4),sensor.solar_solarpump2mod,8,0,1,23,1
 "SM200, MS200",solar,164,cyl2bottomtemp,second cylinder bottom temperature (TS5),int16 (>=-3199<=3199),C,false,sensor.solar_second_cylinder_bottom_temperature_(TS5),sensor.solar_cyl2bottomtemp,8,0,1/10,24,1
-"SM200, MS200",solar,164,heatexchangertemp,heat exchanger temperature (TS6),int16 (>=-3199<=3199),C,false,sensor.solar_heat_exchanger_temperature_(TS6),sensor.solar_heatexchangertemp,8,0,1/10,25,1
-"SM200, MS200",solar,164,cylpumpmod,cylinder pump modulation (PS5),uint8 (>=0<=100),%,false,sensor.solar_cylinder_pump_modulation_(PS5),sensor.solar_cylpumpmod,8,0,1,26,1
-"SM200, MS200",solar,164,valvestatus,valve status,boolean, ,false,binary_sensor.solar_valve_status,binary_sensor.solar_valvestatus,8,0,1,27,1
-"SM200, MS200",solar,164,vs1status,valve status VS1,boolean, ,false,binary_sensor.solar_valve_status_VS1,binary_sensor.solar_vs1status,8,0,1,28,1
-"SM200, MS200",solar,164,collectormaxtemp,maximum collector temperature,uint8 (>=0<=254),C,true,number.solar_maximum_collector_temperature,number.solar_collectormaxtemp,8,0,1,29,1
-"SM200, MS200",solar,164,collectormintemp,minimum collector temperature,uint8 (>=0<=254),C,true,number.solar_minimum_collector_temperature,number.solar_collectormintemp,8,0,1,30,1
+"SM200, MS200",solar,164,cyl3bottomtemp,third cylinder bottom temperature (TS11),int16 (>=-3199<=3199),C,false,sensor.solar_third_cylinder_bottom_temperature_(TS11),sensor.solar_cyl3bottomtemp,8,0,1/10,25,1
+"SM200, MS200",solar,164,cyltoptemp,cylinder top temperature (TS10),int16 (>=-3199<=3199),C,false,sensor.solar_cylinder_top_temperature_(TS10),sensor.solar_cyltoptemp,8,0,1/10,26,1
+"SM200, MS200",solar,164,heatexchangertemp,heat exchanger temperature (TS6),int16 (>=-3199<=3199),C,false,sensor.solar_heat_exchanger_temperature_(TS6),sensor.solar_heatexchangertemp,8,0,1/10,27,1
+"SM200, MS200",solar,164,cylpumpmod,cylinder pump modulation (PS5),uint8 (>=0<=100),%,false,sensor.solar_cylinder_pump_modulation_(PS5),sensor.solar_cylpumpmod,8,0,1,28,1
+"SM200, MS200",solar,164,valvestatus,valve status,boolean, ,false,binary_sensor.solar_valve_status,binary_sensor.solar_valvestatus,8,0,1,29,1
+"SM200, MS200",solar,164,vs1status,valve status VS1,boolean, ,false,binary_sensor.solar_valve_status_VS1,binary_sensor.solar_vs1status,8,0,1,30,1
+"SM200, MS200",solar,164,vs3status,valve status VS3,boolean, ,false,binary_sensor.solar_valve_status_VS3,binary_sensor.solar_vs3status,8,0,1,31,1
+"SM200, MS200",solar,164,transferpump,transfer pump,boolean, ,false,binary_sensor.solar_transfer_pump,binary_sensor.solar_transferpump,8,0,1,32,1
+"SM200, MS200",solar,164,transferpumpmod,transfer pump modulation,uint8 (>=0<=100),%,false,sensor.solar_transfer_pump_modulation,sensor.solar_transferpumpmod,8,0,1,33,1
+"SM200, MS200",solar,164,collectormaxtemp,maximum collector temperature,uint8 (>=0<=254),C,true,number.solar_maximum_collector_temperature,number.solar_collectormaxtemp,8,0,1,34,1
+"SM200, MS200",solar,164,collectormintemp,minimum collector temperature,uint8 (>=0<=254),C,true,number.solar_minimum_collector_temperature,number.solar_collectormintemp,8,0,1,35,1
 "SM200, MS200",solar,164,energylasthour,energy last hour,uint24 (>=0<=1677721),Wh,false,sensor.solar_energy_last_hour,sensor.solar_energylasthour,8,0,1/10,13,2
-"SM200, MS200",solar,164,energytoday,total energy today,uint24 (>=0<=16777213),Wh,false,sensor.solar_total_energy_today,sensor.solar_energytoday,8,0,1,31,2
-"SM200, MS200",solar,164,energytotal,total energy,uint24 (>=0<=1677721),kWh,false,sensor.solar_total_energy,sensor.solar_energytotal,8,0,1/10,33,2
-"SM200, MS200",solar,164,pump2worktime,pump 2 working time,time (>=0<=16777213),minutes,false,sensor.solar_pump_2_working_time,sensor.solar_pump2worktime,8,0,1,35,2
-"SM200, MS200",solar,164,m1worktime,differential control working time,time (>=0<=16777213),minutes,false,sensor.solar_differential_control_working_time,sensor.solar_m1worktime,8,0,1,37,2
-"SM200, MS200",solar,164,heattransfersystem,heattransfer system,boolean, ,true,switch.solar_heattransfer_system,switch.solar_heattransfersystem,8,0,1,39,1
-"SM200, MS200",solar,164,externalcyl,external cylinder,boolean, ,true,switch.solar_external_cylinder,switch.solar_externalcyl,8,0,1,40,1
-"SM200, MS200",solar,164,thermaldisinfect,thermal disinfection,boolean, ,true,switch.solar_thermal_disinfection,switch.solar_thermaldisinfect,8,0,1,41,1
-"SM200, MS200",solar,164,heatmetering,heatmetering,boolean, ,true,switch.solar_heatmetering,switch.solar_heatmetering,8,0,1,42,1
-"SM200, MS200",solar,164,activated,activated,boolean, ,true,switch.solar_activated,switch.solar_activated,8,0,1,43,1
-"SM200, MS200",solar,164,solarpumpmode,solar pump mode,enum [constant\|pwm\|analog], ,true,select.solar_solar_pump_mode,select.solar_solarpumpmode,8,0,1,44,1
-"SM200, MS200",solar,164,solarpumpkick,solar pump kick,boolean, ,true,switch.solar_solar_pump_kick,switch.solar_solarpumpkick,8,0,1,45,1
-"SM200, MS200",solar,164,plainwatermode,plain water mode,boolean, ,true,switch.solar_plain_water_mode,switch.solar_plainwatermode,8,0,1,46,1
-"SM200, MS200",solar,164,doublematchflow,doublematchflow,boolean, ,true,switch.solar_doublematchflow,switch.solar_doublematchflow,8,0,1,47,1
-"SM200, MS200",solar,164,pump2minmod,minimum pump 2 modulation,uint8 (>=0<=100),%,true,number.solar_minimum_pump_2_modulation,number.solar_pump2minmod,8,0,1,48,1
-"SM200, MS200",solar,164,turnondiff2,pump 2 turn on difference,uint8 (>=0<=25),C,true,number.solar_pump_2_turn_on_difference,number.solar_turnondiff2,8,0,1/10,49,1
-"SM200, MS200",solar,164,turnoffdiff2,pump 2 turn off difference,uint8 (>=0<=25),C,true,number.solar_pump_2_turn_off_difference,number.solar_turnoffdiff2,8,0,1/10,50,1
-"SM200, MS200",solar,164,pump2kick,pump kick 2,boolean, ,true,switch.solar_pump_kick_2,switch.solar_pump2kick,8,0,1,51,1
-"SM200, MS200",solar,164,climatezone,climate zone,uint8 (>=0<=254), ,true,number.solar_climate_zone,number.solar_climatezone,8,0,1,52,1
-"SM200, MS200",solar,164,collector1area,collector 1 area,uint16 (>=0<=3199),m²,true,number.solar_collector_1_area,number.solar_collector1area,8,0,1/10,53,1
-"SM200, MS200",solar,164,collector1type,collector 1 type,enum [flat\|vacuum], ,true,select.solar_collector_1_type,select.solar_collector1type,8,0,1,54,1
-"SM200, MS200",solar,164,collector2area,collector 2 area,uint16 (>=0<=3199),m²,true,number.solar_collector_2_area,number.solar_collector2area,8,0,1/10,55,1
-"SM200, MS200",solar,164,collector2type,collector 2 type,enum [flat\|vacuum], ,true,select.solar_collector_2_type,select.solar_collector2type,8,0,1,56,1
-"SM200, MS200",solar,164,cylpriority,cylinder priority,enum [cyl 1\|cyl 2], ,true,select.solar_cylinder_priority,select.solar_cylpriority,8,0,1,57,1
-"SM200, MS200",solar,164,heatcntflowtemp,heat counter flow temperature,uint16 (>=0<=3199),C,false,sensor.solar_heat_counter_flow_temperature,sensor.solar_heatcntflowtemp,8,0,1/10,58,1
-"SM200, MS200",solar,164,heatcntrettemp,heat counter return temperature,uint16 (>=0<=3199),C,false,sensor.solar_heat_counter_return_temperature,sensor.solar_heatcntrettemp,8,0,1/10,59,1
-"SM200, MS200",solar,164,heatcnt,heat counter impulses,uint8 (>=0<=254), ,false,sensor.solar_heat_counter_impulses,sensor.solar_heatcnt,8,0,1,60,1
-"SM200, MS200",solar,164,swapflowtemp,swap flow temperature (TS14),uint16 (>=0<=3199),C,false,sensor.solar_swap_flow_temperature_(TS14),sensor.solar_swapflowtemp,8,0,1/10,61,1
-"SM200, MS200",solar,164,swaprettemp,swap return temperature (TS15),uint16 (>=0<=3199),C,false,sensor.solar_swap_return_temperature_(TS15),sensor.solar_swaprettemp,8,0,1/10,62,1
+"SM200, MS200",solar,164,energytoday,total energy today,uint24 (>=0<=16777213),Wh,false,sensor.solar_total_energy_today,sensor.solar_energytoday,8,0,1,36,2
+"SM200, MS200",solar,164,energytotal,total energy,uint24 (>=0<=1677721),kWh,false,sensor.solar_total_energy,sensor.solar_energytotal,8,0,1/10,38,2
+"SM200, MS200",solar,164,pump2worktime,pump 2 working time,time (>=0<=16777213),minutes,false,sensor.solar_pump_2_working_time,sensor.solar_pump2worktime,8,0,1,40,2
+"SM200, MS200",solar,164,m1worktime,differential control working time,time (>=0<=16777213),minutes,false,sensor.solar_differential_control_working_time,sensor.solar_m1worktime,8,0,1,42,2
+"SM200, MS200",solar,164,heattransfersystem,heattransfer system,boolean, ,true,switch.solar_heattransfer_system,switch.solar_heattransfersystem,8,0,1,44,1
+"SM200, MS200",solar,164,externalcyl,external cylinder,boolean, ,true,switch.solar_external_cylinder,switch.solar_externalcyl,8,0,1,45,1
+"SM200, MS200",solar,164,thermaldisinfect,thermal disinfection,boolean, ,true,switch.solar_thermal_disinfection,switch.solar_thermaldisinfect,8,0,1,46,1
+"SM200, MS200",solar,164,heatmetering,heatmetering,boolean, ,true,switch.solar_heatmetering,switch.solar_heatmetering,8,0,1,47,1
+"SM200, MS200",solar,164,activated,activated,boolean, ,true,switch.solar_activated,switch.solar_activated,8,0,1,48,1
+"SM200, MS200",solar,164,solarpumpmode,solar pump mode,enum [constant\|pwm\|analog], ,true,select.solar_solar_pump_mode,select.solar_solarpumpmode,8,0,1,49,1
+"SM200, MS200",solar,164,solarpumpkick,solar pump kick,boolean, ,true,switch.solar_solar_pump_kick,switch.solar_solarpumpkick,8,0,1,50,1
+"SM200, MS200",solar,164,plainwatermode,plain water mode,boolean, ,true,switch.solar_plain_water_mode,switch.solar_plainwatermode,8,0,1,51,1
+"SM200, MS200",solar,164,doublematchflow,doublematchflow,boolean, ,true,switch.solar_doublematchflow,switch.solar_doublematchflow,8,0,1,52,1
+"SM200, MS200",solar,164,pump2minmod,minimum pump 2 modulation,uint8 (>=0<=100),%,true,number.solar_minimum_pump_2_modulation,number.solar_pump2minmod,8,0,1,53,1
+"SM200, MS200",solar,164,turnondiff2,pump 2 turn on difference,uint8 (>=0<=25),C,true,number.solar_pump_2_turn_on_difference,number.solar_turnondiff2,8,0,1/10,54,1
+"SM200, MS200",solar,164,turnoffdiff2,pump 2 turn off difference,uint8 (>=0<=25),C,true,number.solar_pump_2_turn_off_difference,number.solar_turnoffdiff2,8,0,1/10,55,1
+"SM200, MS200",solar,164,pump2kick,pump kick 2,boolean, ,true,switch.solar_pump_kick_2,switch.solar_pump2kick,8,0,1,56,1
+"SM200, MS200",solar,164,climatezone,climate zone,uint8 (>=0<=254), ,true,number.solar_climate_zone,number.solar_climatezone,8,0,1,57,1
+"SM200, MS200",solar,164,collector1area,collector 1 area,uint16 (>=0<=3199),m²,true,number.solar_collector_1_area,number.solar_collector1area,8,0,1/10,58,1
+"SM200, MS200",solar,164,collector1type,collector 1 type,enum [flat\|vacuum], ,true,select.solar_collector_1_type,select.solar_collector1type,8,0,1,59,1
+"SM200, MS200",solar,164,collector2area,collector 2 area,uint16 (>=0<=3199),m²,true,number.solar_collector_2_area,number.solar_collector2area,8,0,1/10,60,1
+"SM200, MS200",solar,164,collector2type,collector 2 type,enum [flat\|vacuum], ,true,select.solar_collector_2_type,select.solar_collector2type,8,0,1,61,1
+"SM200, MS200",solar,164,cylpriority,cylinder priority,enum [cyl 1\|cyl 2], ,true,select.solar_cylinder_priority,select.solar_cylpriority,8,0,1,62,1
+"SM200, MS200",solar,164,heatcntflowtemp,heat counter flow temperature,uint16 (>=0<=3199),C,false,sensor.solar_heat_counter_flow_temperature,sensor.solar_heatcntflowtemp,8,0,1/10,63,1
+"SM200, MS200",solar,164,heatcntrettemp,heat counter return temperature,uint16 (>=0<=3199),C,false,sensor.solar_heat_counter_return_temperature,sensor.solar_heatcntrettemp,8,0,1/10,64,1
+"SM200, MS200",solar,164,heatcnt,heat counter impulses,uint8 (>=0<=254), ,false,sensor.solar_heat_counter_impulses,sensor.solar_heatcnt,8,0,1,65,1
+"SM200, MS200",solar,164,swapflowtemp,swap flow temperature (TS14),uint16 (>=0<=3199),C,false,sensor.solar_swap_flow_temperature_(TS14),sensor.solar_swapflowtemp,8,0,1/10,66,1
+"SM200, MS200",solar,164,swaprettemp,swap return temperature (TS15),uint16 (>=0<=3199),C,false,sensor.solar_swap_return_temperature_(TS15),sensor.solar_swaprettemp,8,0,1/10,67,1
 "HP Module",heatpump,252,airhumidity,relative air humidity,uint8 (>=0<=100),%,false,sensor.heatpump_relative_air_humidity,sensor.heatpump_airhumidity,9,0,1,0,1
 "HP Module",heatpump,252,dewtemperature,dew point temperature,uint8 (>=0<=254),C,false,sensor.heatpump_dew_point_temperature,sensor.heatpump_dewtemperature,9,0,1,1,1
 "HP Module",heatpump,252,curflowtemp,current flow temperature,int16 (>=-3199<=3199),C,false,sensor.heatpump_current_flow_temperature,sensor.heatpump_curflowtemp,9,0,1/10,2,1
@@ -5029,6 +5044,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "HP Module",heatpump,252,metereheat,meter e-heater,uint24 (>=0<=167772),kWh,false,sensor.heatpump_meter_e-heater,sensor.heatpump_metereheat,9,0,1/100,38,2
 "HP Module",heatpump,252,meterheat,meter heating,uint24 (>=0<=167772),kWh,false,sensor.heatpump_meter_heating,sensor.heatpump_meterheat,9,0,1/100,40,2
 "HP Module",heatpump,252,meter,meter,uint24 (>=0<=167772),kWh,false,sensor.heatpump_dhw_meter,sensor.heatpump_dhw_meter,9,9,1/100,3,2
+"HP Module",heatpump,252,heatingstarts,heating control starts,uint24 (>=0<=16777213), ,false,sensor.heatpump_heating_control_starts,sensor.heatpump_heatingstarts,9,0,1,42,2
+"HP Module",heatpump,252,startshp,starts hp,uint24 (>=0<=16777213), ,false,sensor.heatpump_dhw_starts_hp,sensor.heatpump_dhw_startshp,9,9,1,5,2
 "Hybrid Manager HM200",heatpump,248,airhumidity,relative air humidity,uint8 (>=0<=100),%,false,sensor.heatpump_relative_air_humidity,sensor.heatpump_airhumidity,9,0,1,0,1
 "Hybrid Manager HM200",heatpump,248,dewtemperature,dew point temperature,uint8 (>=0<=254),C,false,sensor.heatpump_dew_point_temperature,sensor.heatpump_dewtemperature,9,0,1,1,1
 "Hybrid Manager HM200",heatpump,248,curflowtemp,current flow temperature,int16 (>=-3199<=3199),C,false,sensor.heatpump_current_flow_temperature,sensor.heatpump_curflowtemp,9,0,1/10,2,1
@@ -5068,6 +5085,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Hybrid Manager HM200",heatpump,248,metereheat,meter e-heater,uint24 (>=0<=167772),kWh,false,sensor.heatpump_meter_e-heater,sensor.heatpump_metereheat,9,0,1/100,38,2
 "Hybrid Manager HM200",heatpump,248,meterheat,meter heating,uint24 (>=0<=167772),kWh,false,sensor.heatpump_meter_heating,sensor.heatpump_meterheat,9,0,1/100,40,2
 "Hybrid Manager HM200",heatpump,248,meter,meter,uint24 (>=0<=167772),kWh,false,sensor.heatpump_dhw_meter,sensor.heatpump_dhw_meter,9,9,1/100,3,2
+"Hybrid Manager HM200",heatpump,248,heatingstarts,heating control starts,uint24 (>=0<=16777213), ,false,sensor.heatpump_heating_control_starts,sensor.heatpump_heatingstarts,9,0,1,42,2
+"Hybrid Manager HM200",heatpump,248,startshp,starts hp,uint24 (>=0<=16777213), ,false,sensor.heatpump_dhw_starts_hp,sensor.heatpump_dhw_startshp,9,9,1,5,2
 "WM10",switch,71,activated,activated,boolean, ,false,binary_sensor.switch_activated,binary_sensor.switch_activated,11,0,1,0,1
 "WM10",switch,71,flowtemphc,flow temperature (TC1),uint16 (>=0<=3199),C,false,sensor.switch_flow_temperature_(TC1),sensor.switch_flowtemphc,11,0,1/10,1,1
 "WM10",switch,71,status,status,int8 (>=-126<=126), ,false,sensor.switch_status,sensor.switch_status,11,0,1,2,1

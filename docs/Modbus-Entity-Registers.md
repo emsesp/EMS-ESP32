@@ -308,7 +308,7 @@
 | totalcompstarts | total compressor control starts | uint24 (>=0<=16777213) |   | false | DEVICE_DATA | 105 | 2 | 1 | 
 | heatingstarts | heating control starts | uint24 (>=0<=16777213) |   | false | DEVICE_DATA | 107 | 2 | 1 | 
 | coolingstarts | cooling control starts | uint24 (>=0<=16777213) |   | false | DEVICE_DATA | 109 | 2 | 1 | 
-| starts2 | control starts2 | uint24 (>=0<=16777213) |   | false | DHW | 6 | 2 | 1 | 
+| startshp | starts hp | uint24 (>=0<=16777213) |   | false | DHW | 6 | 2 | 1 | 
 | poolstarts | pool control starts | uint24 (>=0<=16777213) |   | false | DEVICE_DATA | 111 | 2 | 1 | 
 | nrgconstotal | total energy consumption | uint24 (>=0<=16777213) | kWh | false | DEVICE_DATA | 113 | 2 | 1 | 
 | nrgconscomptotal | total energy consumption compressor | uint24 (>=0<=16777213) | kWh | false | DEVICE_DATA | 115 | 2 | 1 | 
@@ -1431,7 +1431,7 @@
 | totalcompstarts | total compressor control starts | uint24 (>=0<=16777213) |   | false | DEVICE_DATA | 105 | 2 | 1 | 
 | heatingstarts | heating control starts | uint24 (>=0<=16777213) |   | false | DEVICE_DATA | 107 | 2 | 1 | 
 | coolingstarts | cooling control starts | uint24 (>=0<=16777213) |   | false | DEVICE_DATA | 109 | 2 | 1 | 
-| starts2 | control starts2 | uint24 (>=0<=16777213) |   | false | DHW | 6 | 2 | 1 | 
+| startshp | starts hp | uint24 (>=0<=16777213) |   | false | DHW | 6 | 2 | 1 | 
 | poolstarts | pool control starts | uint24 (>=0<=16777213) |   | false | DEVICE_DATA | 111 | 2 | 1 | 
 | nrgconstotal | total energy consumption | uint24 (>=0<=16777213) | kWh | false | DEVICE_DATA | 113 | 2 | 1 | 
 | nrgconscomptotal | total energy consumption compressor | uint24 (>=0<=16777213) | kWh | false | DEVICE_DATA | 115 | 2 | 1 | 
@@ -1984,7 +1984,7 @@
 | totalcompstarts | total compressor control starts | uint24 (>=0<=16777213) |   | false | DEVICE_DATA | 105 | 2 | 1 | 
 | heatingstarts | heating control starts | uint24 (>=0<=16777213) |   | false | DEVICE_DATA | 107 | 2 | 1 | 
 | coolingstarts | cooling control starts | uint24 (>=0<=16777213) |   | false | DEVICE_DATA | 109 | 2 | 1 | 
-| starts2 | control starts2 | uint24 (>=0<=16777213) |   | false | DHW | 6 | 2 | 1 | 
+| startshp | starts hp | uint24 (>=0<=16777213) |   | false | DHW | 6 | 2 | 1 | 
 | poolstarts | pool control starts | uint24 (>=0<=16777213) |   | false | DEVICE_DATA | 111 | 2 | 1 | 
 | nrgconstotal | total energy consumption | uint24 (>=0<=16777213) | kWh | false | DEVICE_DATA | 113 | 2 | 1 | 
 | nrgconscomptotal | total energy consumption compressor | uint24 (>=0<=16777213) | kWh | false | DEVICE_DATA | 115 | 2 | 1 | 
@@ -3561,6 +3561,8 @@
 | metereheat | meter e-heater | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 38 | 2 | 1/100 | 
 | meterheat | meter heating | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 40 | 2 | 1/100 | 
 | meter | meter | uint24 (>=0<=167772) | kWh | false | DHW | 3 | 2 | 1/100 | 
+| heatingstarts | heating control starts | uint24 (>=0<=16777213) |   | false | DEVICE_DATA | 42 | 2 | 1 | 
+| startshp | starts hp | uint24 (>=0<=16777213) |   | false | DHW | 5 | 2 | 1 | 
 
 ### Hybrid Manager HM200
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -3604,6 +3606,8 @@
 | metereheat | meter e-heater | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 38 | 2 | 1/100 | 
 | meterheat | meter heating | uint24 (>=0<=167772) | kWh | false | DEVICE_DATA | 40 | 2 | 1/100 | 
 | meter | meter | uint24 (>=0<=167772) | kWh | false | DHW | 3 | 2 | 1/100 | 
+| heatingstarts | heating control starts | uint24 (>=0<=16777213) |   | false | DEVICE_DATA | 42 | 2 | 1 | 
+| startshp | starts hp | uint24 (>=0<=16777213) |   | false | DHW | 5 | 2 | 1 | 
 
 ## Devices of type *mixer*
 ### IPM
@@ -3755,41 +3759,46 @@
 | solarpump2 | pump 2 (PS4) | boolean |   | false | DEVICE_DATA | 22 | 1 | 1 | 
 | solarpump2mod | pump 2 modulation (PS4) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 | 
 | cyl2bottomtemp | second cylinder bottom temperature (TS5) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 24 | 1 | 1/10 | 
-| heatexchangertemp | heat exchanger temperature (TS6) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 25 | 1 | 1/10 | 
-| cylpumpmod | cylinder pump modulation (PS5) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 26 | 1 | 1 | 
-| valvestatus | valve status | boolean |   | false | DEVICE_DATA | 27 | 1 | 1 | 
-| vs1status | valve status VS1 | boolean |   | false | DEVICE_DATA | 28 | 1 | 1 | 
-| collectormaxtemp | maximum collector temperature | uint8 (>=0<=254) | C | true | DEVICE_DATA | 29 | 1 | 1 | 
-| collectormintemp | minimum collector temperature | uint8 (>=0<=254) | C | true | DEVICE_DATA | 30 | 1 | 1 | 
+| cyl3bottomtemp | third cylinder bottom temperature (TS11) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 25 | 1 | 1/10 | 
+| cyltoptemp | cylinder top temperature (TS10) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 26 | 1 | 1/10 | 
+| heatexchangertemp | heat exchanger temperature (TS6) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 27 | 1 | 1/10 | 
+| cylpumpmod | cylinder pump modulation (PS5) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 28 | 1 | 1 | 
+| valvestatus | valve status | boolean |   | false | DEVICE_DATA | 29 | 1 | 1 | 
+| vs1status | valve status VS1 | boolean |   | false | DEVICE_DATA | 30 | 1 | 1 | 
+| vs3status | valve status VS3 | boolean |   | false | DEVICE_DATA | 31 | 1 | 1 | 
+| transferpump | transfer pump | boolean |   | false | DEVICE_DATA | 32 | 1 | 1 | 
+| transferpumpmod | transfer pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 33 | 1 | 1 | 
+| collectormaxtemp | maximum collector temperature | uint8 (>=0<=254) | C | true | DEVICE_DATA | 34 | 1 | 1 | 
+| collectormintemp | minimum collector temperature | uint8 (>=0<=254) | C | true | DEVICE_DATA | 35 | 1 | 1 | 
 | energylasthour | energy last hour | uint24 (>=0<=1677721) | Wh | false | DEVICE_DATA | 13 | 2 | 1/10 | 
-| energytoday | total energy today | uint24 (>=0<=16777213) | Wh | false | DEVICE_DATA | 31 | 2 | 1 | 
-| energytotal | total energy | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 33 | 2 | 1/10 | 
-| pump2worktime | pump 2 working time | time (>=0<=16777213) | minutes | false | DEVICE_DATA | 35 | 2 | 1 | 
-| m1worktime | differential control working time | time (>=0<=16777213) | minutes | false | DEVICE_DATA | 37 | 2 | 1 | 
-| heattransfersystem | heattransfer system | boolean |   | true | DEVICE_DATA | 39 | 1 | 1 | 
-| externalcyl | external cylinder | boolean |   | true | DEVICE_DATA | 40 | 1 | 1 | 
-| thermaldisinfect | thermal disinfection | boolean |   | true | DEVICE_DATA | 41 | 1 | 1 | 
-| heatmetering | heatmetering | boolean |   | true | DEVICE_DATA | 42 | 1 | 1 | 
-| activated | activated | boolean |   | true | DEVICE_DATA | 43 | 1 | 1 | 
-| solarpumpmode | solar pump mode | enum [constant\|pwm\|analog] |   | true | DEVICE_DATA | 44 | 1 | 1 | 
-| solarpumpkick | solar pump kick | boolean |   | true | DEVICE_DATA | 45 | 1 | 1 | 
-| plainwatermode | plain water mode | boolean |   | true | DEVICE_DATA | 46 | 1 | 1 | 
-| doublematchflow | doublematchflow | boolean |   | true | DEVICE_DATA | 47 | 1 | 1 | 
-| pump2minmod | minimum pump 2 modulation | uint8 (>=0<=100) | % | true | DEVICE_DATA | 48 | 1 | 1 | 
-| turnondiff2 | pump 2 turn on difference | uint8 (>=0<=25) | C | true | DEVICE_DATA | 49 | 1 | 1/10 | 
-| turnoffdiff2 | pump 2 turn off difference | uint8 (>=0<=25) | C | true | DEVICE_DATA | 50 | 1 | 1/10 | 
-| pump2kick | pump kick 2 | boolean |   | true | DEVICE_DATA | 51 | 1 | 1 | 
-| climatezone | climate zone | uint8 (>=0<=254) |   | true | DEVICE_DATA | 52 | 1 | 1 | 
-| collector1area | collector 1 area | uint16 (>=0<=3199) | m² | true | DEVICE_DATA | 53 | 1 | 1/10 | 
-| collector1type | collector 1 type | enum [flat\|vacuum] |   | true | DEVICE_DATA | 54 | 1 | 1 | 
-| collector2area | collector 2 area | uint16 (>=0<=3199) | m² | true | DEVICE_DATA | 55 | 1 | 1/10 | 
-| collector2type | collector 2 type | enum [flat\|vacuum] |   | true | DEVICE_DATA | 56 | 1 | 1 | 
-| cylpriority | cylinder priority | enum [cyl 1\|cyl 2] |   | true | DEVICE_DATA | 57 | 1 | 1 | 
-| heatcntflowtemp | heat counter flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 58 | 1 | 1/10 | 
-| heatcntrettemp | heat counter return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 59 | 1 | 1/10 | 
-| heatcnt | heat counter impulses | uint8 (>=0<=254) |   | false | DEVICE_DATA | 60 | 1 | 1 | 
-| swapflowtemp | swap flow temperature (TS14) | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 61 | 1 | 1/10 | 
-| swaprettemp | swap return temperature (TS15) | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 62 | 1 | 1/10 | 
+| energytoday | total energy today | uint24 (>=0<=16777213) | Wh | false | DEVICE_DATA | 36 | 2 | 1 | 
+| energytotal | total energy | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 38 | 2 | 1/10 | 
+| pump2worktime | pump 2 working time | time (>=0<=16777213) | minutes | false | DEVICE_DATA | 40 | 2 | 1 | 
+| m1worktime | differential control working time | time (>=0<=16777213) | minutes | false | DEVICE_DATA | 42 | 2 | 1 | 
+| heattransfersystem | heattransfer system | boolean |   | true | DEVICE_DATA | 44 | 1 | 1 | 
+| externalcyl | external cylinder | boolean |   | true | DEVICE_DATA | 45 | 1 | 1 | 
+| thermaldisinfect | thermal disinfection | boolean |   | true | DEVICE_DATA | 46 | 1 | 1 | 
+| heatmetering | heatmetering | boolean |   | true | DEVICE_DATA | 47 | 1 | 1 | 
+| activated | activated | boolean |   | true | DEVICE_DATA | 48 | 1 | 1 | 
+| solarpumpmode | solar pump mode | enum [constant\|pwm\|analog] |   | true | DEVICE_DATA | 49 | 1 | 1 | 
+| solarpumpkick | solar pump kick | boolean |   | true | DEVICE_DATA | 50 | 1 | 1 | 
+| plainwatermode | plain water mode | boolean |   | true | DEVICE_DATA | 51 | 1 | 1 | 
+| doublematchflow | doublematchflow | boolean |   | true | DEVICE_DATA | 52 | 1 | 1 | 
+| pump2minmod | minimum pump 2 modulation | uint8 (>=0<=100) | % | true | DEVICE_DATA | 53 | 1 | 1 | 
+| turnondiff2 | pump 2 turn on difference | uint8 (>=0<=25) | C | true | DEVICE_DATA | 54 | 1 | 1/10 | 
+| turnoffdiff2 | pump 2 turn off difference | uint8 (>=0<=25) | C | true | DEVICE_DATA | 55 | 1 | 1/10 | 
+| pump2kick | pump kick 2 | boolean |   | true | DEVICE_DATA | 56 | 1 | 1 | 
+| climatezone | climate zone | uint8 (>=0<=254) |   | true | DEVICE_DATA | 57 | 1 | 1 | 
+| collector1area | collector 1 area | uint16 (>=0<=3199) | m² | true | DEVICE_DATA | 58 | 1 | 1/10 | 
+| collector1type | collector 1 type | enum [flat\|vacuum] |   | true | DEVICE_DATA | 59 | 1 | 1 | 
+| collector2area | collector 2 area | uint16 (>=0<=3199) | m² | true | DEVICE_DATA | 60 | 1 | 1/10 | 
+| collector2type | collector 2 type | enum [flat\|vacuum] |   | true | DEVICE_DATA | 61 | 1 | 1 | 
+| cylpriority | cylinder priority | enum [cyl 1\|cyl 2] |   | true | DEVICE_DATA | 62 | 1 | 1 | 
+| heatcntflowtemp | heat counter flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 63 | 1 | 1/10 | 
+| heatcntrettemp | heat counter return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 64 | 1 | 1/10 | 
+| heatcnt | heat counter impulses | uint8 (>=0<=254) |   | false | DEVICE_DATA | 65 | 1 | 1 | 
+| swapflowtemp | swap flow temperature (TS14) | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 66 | 1 | 1/10 | 
+| swaprettemp | swap return temperature (TS15) | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 67 | 1 | 1/10 | 
 
 ### SM200, MS200
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -3813,41 +3822,46 @@
 | solarpump2 | pump 2 (PS4) | boolean |   | false | DEVICE_DATA | 22 | 1 | 1 | 
 | solarpump2mod | pump 2 modulation (PS4) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 | 
 | cyl2bottomtemp | second cylinder bottom temperature (TS5) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 24 | 1 | 1/10 | 
-| heatexchangertemp | heat exchanger temperature (TS6) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 25 | 1 | 1/10 | 
-| cylpumpmod | cylinder pump modulation (PS5) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 26 | 1 | 1 | 
-| valvestatus | valve status | boolean |   | false | DEVICE_DATA | 27 | 1 | 1 | 
-| vs1status | valve status VS1 | boolean |   | false | DEVICE_DATA | 28 | 1 | 1 | 
-| collectormaxtemp | maximum collector temperature | uint8 (>=0<=254) | C | true | DEVICE_DATA | 29 | 1 | 1 | 
-| collectormintemp | minimum collector temperature | uint8 (>=0<=254) | C | true | DEVICE_DATA | 30 | 1 | 1 | 
+| cyl3bottomtemp | third cylinder bottom temperature (TS11) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 25 | 1 | 1/10 | 
+| cyltoptemp | cylinder top temperature (TS10) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 26 | 1 | 1/10 | 
+| heatexchangertemp | heat exchanger temperature (TS6) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 27 | 1 | 1/10 | 
+| cylpumpmod | cylinder pump modulation (PS5) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 28 | 1 | 1 | 
+| valvestatus | valve status | boolean |   | false | DEVICE_DATA | 29 | 1 | 1 | 
+| vs1status | valve status VS1 | boolean |   | false | DEVICE_DATA | 30 | 1 | 1 | 
+| vs3status | valve status VS3 | boolean |   | false | DEVICE_DATA | 31 | 1 | 1 | 
+| transferpump | transfer pump | boolean |   | false | DEVICE_DATA | 32 | 1 | 1 | 
+| transferpumpmod | transfer pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 33 | 1 | 1 | 
+| collectormaxtemp | maximum collector temperature | uint8 (>=0<=254) | C | true | DEVICE_DATA | 34 | 1 | 1 | 
+| collectormintemp | minimum collector temperature | uint8 (>=0<=254) | C | true | DEVICE_DATA | 35 | 1 | 1 | 
 | energylasthour | energy last hour | uint24 (>=0<=1677721) | Wh | false | DEVICE_DATA | 13 | 2 | 1/10 | 
-| energytoday | total energy today | uint24 (>=0<=16777213) | Wh | false | DEVICE_DATA | 31 | 2 | 1 | 
-| energytotal | total energy | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 33 | 2 | 1/10 | 
-| pump2worktime | pump 2 working time | time (>=0<=16777213) | minutes | false | DEVICE_DATA | 35 | 2 | 1 | 
-| m1worktime | differential control working time | time (>=0<=16777213) | minutes | false | DEVICE_DATA | 37 | 2 | 1 | 
-| heattransfersystem | heattransfer system | boolean |   | true | DEVICE_DATA | 39 | 1 | 1 | 
-| externalcyl | external cylinder | boolean |   | true | DEVICE_DATA | 40 | 1 | 1 | 
-| thermaldisinfect | thermal disinfection | boolean |   | true | DEVICE_DATA | 41 | 1 | 1 | 
-| heatmetering | heatmetering | boolean |   | true | DEVICE_DATA | 42 | 1 | 1 | 
-| activated | activated | boolean |   | true | DEVICE_DATA | 43 | 1 | 1 | 
-| solarpumpmode | solar pump mode | enum [constant\|pwm\|analog] |   | true | DEVICE_DATA | 44 | 1 | 1 | 
-| solarpumpkick | solar pump kick | boolean |   | true | DEVICE_DATA | 45 | 1 | 1 | 
-| plainwatermode | plain water mode | boolean |   | true | DEVICE_DATA | 46 | 1 | 1 | 
-| doublematchflow | doublematchflow | boolean |   | true | DEVICE_DATA | 47 | 1 | 1 | 
-| pump2minmod | minimum pump 2 modulation | uint8 (>=0<=100) | % | true | DEVICE_DATA | 48 | 1 | 1 | 
-| turnondiff2 | pump 2 turn on difference | uint8 (>=0<=25) | C | true | DEVICE_DATA | 49 | 1 | 1/10 | 
-| turnoffdiff2 | pump 2 turn off difference | uint8 (>=0<=25) | C | true | DEVICE_DATA | 50 | 1 | 1/10 | 
-| pump2kick | pump kick 2 | boolean |   | true | DEVICE_DATA | 51 | 1 | 1 | 
-| climatezone | climate zone | uint8 (>=0<=254) |   | true | DEVICE_DATA | 52 | 1 | 1 | 
-| collector1area | collector 1 area | uint16 (>=0<=3199) | m² | true | DEVICE_DATA | 53 | 1 | 1/10 | 
-| collector1type | collector 1 type | enum [flat\|vacuum] |   | true | DEVICE_DATA | 54 | 1 | 1 | 
-| collector2area | collector 2 area | uint16 (>=0<=3199) | m² | true | DEVICE_DATA | 55 | 1 | 1/10 | 
-| collector2type | collector 2 type | enum [flat\|vacuum] |   | true | DEVICE_DATA | 56 | 1 | 1 | 
-| cylpriority | cylinder priority | enum [cyl 1\|cyl 2] |   | true | DEVICE_DATA | 57 | 1 | 1 | 
-| heatcntflowtemp | heat counter flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 58 | 1 | 1/10 | 
-| heatcntrettemp | heat counter return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 59 | 1 | 1/10 | 
-| heatcnt | heat counter impulses | uint8 (>=0<=254) |   | false | DEVICE_DATA | 60 | 1 | 1 | 
-| swapflowtemp | swap flow temperature (TS14) | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 61 | 1 | 1/10 | 
-| swaprettemp | swap return temperature (TS15) | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 62 | 1 | 1/10 | 
+| energytoday | total energy today | uint24 (>=0<=16777213) | Wh | false | DEVICE_DATA | 36 | 2 | 1 | 
+| energytotal | total energy | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 38 | 2 | 1/10 | 
+| pump2worktime | pump 2 working time | time (>=0<=16777213) | minutes | false | DEVICE_DATA | 40 | 2 | 1 | 
+| m1worktime | differential control working time | time (>=0<=16777213) | minutes | false | DEVICE_DATA | 42 | 2 | 1 | 
+| heattransfersystem | heattransfer system | boolean |   | true | DEVICE_DATA | 44 | 1 | 1 | 
+| externalcyl | external cylinder | boolean |   | true | DEVICE_DATA | 45 | 1 | 1 | 
+| thermaldisinfect | thermal disinfection | boolean |   | true | DEVICE_DATA | 46 | 1 | 1 | 
+| heatmetering | heatmetering | boolean |   | true | DEVICE_DATA | 47 | 1 | 1 | 
+| activated | activated | boolean |   | true | DEVICE_DATA | 48 | 1 | 1 | 
+| solarpumpmode | solar pump mode | enum [constant\|pwm\|analog] |   | true | DEVICE_DATA | 49 | 1 | 1 | 
+| solarpumpkick | solar pump kick | boolean |   | true | DEVICE_DATA | 50 | 1 | 1 | 
+| plainwatermode | plain water mode | boolean |   | true | DEVICE_DATA | 51 | 1 | 1 | 
+| doublematchflow | doublematchflow | boolean |   | true | DEVICE_DATA | 52 | 1 | 1 | 
+| pump2minmod | minimum pump 2 modulation | uint8 (>=0<=100) | % | true | DEVICE_DATA | 53 | 1 | 1 | 
+| turnondiff2 | pump 2 turn on difference | uint8 (>=0<=25) | C | true | DEVICE_DATA | 54 | 1 | 1/10 | 
+| turnoffdiff2 | pump 2 turn off difference | uint8 (>=0<=25) | C | true | DEVICE_DATA | 55 | 1 | 1/10 | 
+| pump2kick | pump kick 2 | boolean |   | true | DEVICE_DATA | 56 | 1 | 1 | 
+| climatezone | climate zone | uint8 (>=0<=254) |   | true | DEVICE_DATA | 57 | 1 | 1 | 
+| collector1area | collector 1 area | uint16 (>=0<=3199) | m² | true | DEVICE_DATA | 58 | 1 | 1/10 | 
+| collector1type | collector 1 type | enum [flat\|vacuum] |   | true | DEVICE_DATA | 59 | 1 | 1 | 
+| collector2area | collector 2 area | uint16 (>=0<=3199) | m² | true | DEVICE_DATA | 60 | 1 | 1/10 | 
+| collector2type | collector 2 type | enum [flat\|vacuum] |   | true | DEVICE_DATA | 61 | 1 | 1 | 
+| cylpriority | cylinder priority | enum [cyl 1\|cyl 2] |   | true | DEVICE_DATA | 62 | 1 | 1 | 
+| heatcntflowtemp | heat counter flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 63 | 1 | 1/10 | 
+| heatcntrettemp | heat counter return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 64 | 1 | 1/10 | 
+| heatcnt | heat counter impulses | uint8 (>=0<=254) |   | false | DEVICE_DATA | 65 | 1 | 1 | 
+| swapflowtemp | swap flow temperature (TS14) | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 66 | 1 | 1/10 | 
+| swaprettemp | swap return temperature (TS15) | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 67 | 1 | 1/10 | 
 
 ### SM50
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -3871,41 +3885,46 @@
 | solarpump2 | pump 2 (PS4) | boolean |   | false | DEVICE_DATA | 22 | 1 | 1 | 
 | solarpump2mod | pump 2 modulation (PS4) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 23 | 1 | 1 | 
 | cyl2bottomtemp | second cylinder bottom temperature (TS5) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 24 | 1 | 1/10 | 
-| heatexchangertemp | heat exchanger temperature (TS6) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 25 | 1 | 1/10 | 
-| cylpumpmod | cylinder pump modulation (PS5) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 26 | 1 | 1 | 
-| valvestatus | valve status | boolean |   | false | DEVICE_DATA | 27 | 1 | 1 | 
-| vs1status | valve status VS1 | boolean |   | false | DEVICE_DATA | 28 | 1 | 1 | 
-| collectormaxtemp | maximum collector temperature | uint8 (>=0<=254) | C | true | DEVICE_DATA | 29 | 1 | 1 | 
-| collectormintemp | minimum collector temperature | uint8 (>=0<=254) | C | true | DEVICE_DATA | 30 | 1 | 1 | 
+| cyl3bottomtemp | third cylinder bottom temperature (TS11) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 25 | 1 | 1/10 | 
+| cyltoptemp | cylinder top temperature (TS10) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 26 | 1 | 1/10 | 
+| heatexchangertemp | heat exchanger temperature (TS6) | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 27 | 1 | 1/10 | 
+| cylpumpmod | cylinder pump modulation (PS5) | uint8 (>=0<=100) | % | false | DEVICE_DATA | 28 | 1 | 1 | 
+| valvestatus | valve status | boolean |   | false | DEVICE_DATA | 29 | 1 | 1 | 
+| vs1status | valve status VS1 | boolean |   | false | DEVICE_DATA | 30 | 1 | 1 | 
+| vs3status | valve status VS3 | boolean |   | false | DEVICE_DATA | 31 | 1 | 1 | 
+| transferpump | transfer pump | boolean |   | false | DEVICE_DATA | 32 | 1 | 1 | 
+| transferpumpmod | transfer pump modulation | uint8 (>=0<=100) | % | false | DEVICE_DATA | 33 | 1 | 1 | 
+| collectormaxtemp | maximum collector temperature | uint8 (>=0<=254) | C | true | DEVICE_DATA | 34 | 1 | 1 | 
+| collectormintemp | minimum collector temperature | uint8 (>=0<=254) | C | true | DEVICE_DATA | 35 | 1 | 1 | 
 | energylasthour | energy last hour | uint24 (>=0<=1677721) | Wh | false | DEVICE_DATA | 13 | 2 | 1/10 | 
-| energytoday | total energy today | uint24 (>=0<=16777213) | Wh | false | DEVICE_DATA | 31 | 2 | 1 | 
-| energytotal | total energy | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 33 | 2 | 1/10 | 
-| pump2worktime | pump 2 working time | time (>=0<=16777213) | minutes | false | DEVICE_DATA | 35 | 2 | 1 | 
-| m1worktime | differential control working time | time (>=0<=16777213) | minutes | false | DEVICE_DATA | 37 | 2 | 1 | 
-| heattransfersystem | heattransfer system | boolean |   | true | DEVICE_DATA | 39 | 1 | 1 | 
-| externalcyl | external cylinder | boolean |   | true | DEVICE_DATA | 40 | 1 | 1 | 
-| thermaldisinfect | thermal disinfection | boolean |   | true | DEVICE_DATA | 41 | 1 | 1 | 
-| heatmetering | heatmetering | boolean |   | true | DEVICE_DATA | 42 | 1 | 1 | 
-| activated | activated | boolean |   | true | DEVICE_DATA | 43 | 1 | 1 | 
-| solarpumpmode | solar pump mode | enum [constant\|pwm\|analog] |   | true | DEVICE_DATA | 44 | 1 | 1 | 
-| solarpumpkick | solar pump kick | boolean |   | true | DEVICE_DATA | 45 | 1 | 1 | 
-| plainwatermode | plain water mode | boolean |   | true | DEVICE_DATA | 46 | 1 | 1 | 
-| doublematchflow | doublematchflow | boolean |   | true | DEVICE_DATA | 47 | 1 | 1 | 
-| pump2minmod | minimum pump 2 modulation | uint8 (>=0<=100) | % | true | DEVICE_DATA | 48 | 1 | 1 | 
-| turnondiff2 | pump 2 turn on difference | uint8 (>=0<=25) | C | true | DEVICE_DATA | 49 | 1 | 1/10 | 
-| turnoffdiff2 | pump 2 turn off difference | uint8 (>=0<=25) | C | true | DEVICE_DATA | 50 | 1 | 1/10 | 
-| pump2kick | pump kick 2 | boolean |   | true | DEVICE_DATA | 51 | 1 | 1 | 
-| climatezone | climate zone | uint8 (>=0<=254) |   | true | DEVICE_DATA | 52 | 1 | 1 | 
-| collector1area | collector 1 area | uint16 (>=0<=3199) | m² | true | DEVICE_DATA | 53 | 1 | 1/10 | 
-| collector1type | collector 1 type | enum [flat\|vacuum] |   | true | DEVICE_DATA | 54 | 1 | 1 | 
-| collector2area | collector 2 area | uint16 (>=0<=3199) | m² | true | DEVICE_DATA | 55 | 1 | 1/10 | 
-| collector2type | collector 2 type | enum [flat\|vacuum] |   | true | DEVICE_DATA | 56 | 1 | 1 | 
-| cylpriority | cylinder priority | enum [cyl 1\|cyl 2] |   | true | DEVICE_DATA | 57 | 1 | 1 | 
-| heatcntflowtemp | heat counter flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 58 | 1 | 1/10 | 
-| heatcntrettemp | heat counter return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 59 | 1 | 1/10 | 
-| heatcnt | heat counter impulses | uint8 (>=0<=254) |   | false | DEVICE_DATA | 60 | 1 | 1 | 
-| swapflowtemp | swap flow temperature (TS14) | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 61 | 1 | 1/10 | 
-| swaprettemp | swap return temperature (TS15) | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 62 | 1 | 1/10 | 
+| energytoday | total energy today | uint24 (>=0<=16777213) | Wh | false | DEVICE_DATA | 36 | 2 | 1 | 
+| energytotal | total energy | uint24 (>=0<=1677721) | kWh | false | DEVICE_DATA | 38 | 2 | 1/10 | 
+| pump2worktime | pump 2 working time | time (>=0<=16777213) | minutes | false | DEVICE_DATA | 40 | 2 | 1 | 
+| m1worktime | differential control working time | time (>=0<=16777213) | minutes | false | DEVICE_DATA | 42 | 2 | 1 | 
+| heattransfersystem | heattransfer system | boolean |   | true | DEVICE_DATA | 44 | 1 | 1 | 
+| externalcyl | external cylinder | boolean |   | true | DEVICE_DATA | 45 | 1 | 1 | 
+| thermaldisinfect | thermal disinfection | boolean |   | true | DEVICE_DATA | 46 | 1 | 1 | 
+| heatmetering | heatmetering | boolean |   | true | DEVICE_DATA | 47 | 1 | 1 | 
+| activated | activated | boolean |   | true | DEVICE_DATA | 48 | 1 | 1 | 
+| solarpumpmode | solar pump mode | enum [constant\|pwm\|analog] |   | true | DEVICE_DATA | 49 | 1 | 1 | 
+| solarpumpkick | solar pump kick | boolean |   | true | DEVICE_DATA | 50 | 1 | 1 | 
+| plainwatermode | plain water mode | boolean |   | true | DEVICE_DATA | 51 | 1 | 1 | 
+| doublematchflow | doublematchflow | boolean |   | true | DEVICE_DATA | 52 | 1 | 1 | 
+| pump2minmod | minimum pump 2 modulation | uint8 (>=0<=100) | % | true | DEVICE_DATA | 53 | 1 | 1 | 
+| turnondiff2 | pump 2 turn on difference | uint8 (>=0<=25) | C | true | DEVICE_DATA | 54 | 1 | 1/10 | 
+| turnoffdiff2 | pump 2 turn off difference | uint8 (>=0<=25) | C | true | DEVICE_DATA | 55 | 1 | 1/10 | 
+| pump2kick | pump kick 2 | boolean |   | true | DEVICE_DATA | 56 | 1 | 1 | 
+| climatezone | climate zone | uint8 (>=0<=254) |   | true | DEVICE_DATA | 57 | 1 | 1 | 
+| collector1area | collector 1 area | uint16 (>=0<=3199) | m² | true | DEVICE_DATA | 58 | 1 | 1/10 | 
+| collector1type | collector 1 type | enum [flat\|vacuum] |   | true | DEVICE_DATA | 59 | 1 | 1 | 
+| collector2area | collector 2 area | uint16 (>=0<=3199) | m² | true | DEVICE_DATA | 60 | 1 | 1/10 | 
+| collector2type | collector 2 type | enum [flat\|vacuum] |   | true | DEVICE_DATA | 61 | 1 | 1 | 
+| cylpriority | cylinder priority | enum [cyl 1\|cyl 2] |   | true | DEVICE_DATA | 62 | 1 | 1 | 
+| heatcntflowtemp | heat counter flow temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 63 | 1 | 1/10 | 
+| heatcntrettemp | heat counter return temperature | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 64 | 1 | 1/10 | 
+| heatcnt | heat counter impulses | uint8 (>=0<=254) |   | false | DEVICE_DATA | 65 | 1 | 1 | 
+| swapflowtemp | swap flow temperature (TS14) | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 66 | 1 | 1/10 | 
+| swaprettemp | swap return temperature (TS15) | uint16 (>=0<=3199) | C | false | DEVICE_DATA | 67 | 1 | 1/10 | 
 
 ## Devices of type *switch*
 ### WM10
