@@ -196,7 +196,7 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(nrgWw), 0, 2), // nrg
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(meterWw), 2, 2), // meter
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(upTimeCompWw), 4, 2), // uptimecomp
-    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwStartsHp), 6, 2), // startsHp
+    REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(wwStartsHp), 6, 2), // startshp
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(nrgConsCompWw), 8, 2), // nrgconscomp
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(auxElecHeatNrgConsWw), 10, 2), // auxelecheatnrgcons
     REGISTER_MAPPING(dt::BOILER, TAG_TYPE_DHW, FL_(nrgSuppWw), 12, 2), // nrgsupp
@@ -430,40 +430,45 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(solarPump2), 22, 1), // solarpump2
     REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(solarPump2Mod), 23, 1), // solarpump2mod
     REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(cyl2BottomTemp), 24, 1), // cyl2bottomtemp
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(heatExchangerTemp), 25, 1), // heatexchangertemp
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(cylPumpMod), 26, 1), // cylpumpmod
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(valveStatus), 27, 1), // valvestatus
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(vs1Status), 28, 1), // vs1status
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(collectorMaxTemp), 29, 1), // collectormaxtemp
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(collectorMinTemp), 30, 1), // collectormintemp
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(energyToday), 31, 2), // energytoday
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(energyTotal), 33, 2), // energytotal
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(pump2WorkTime), 35, 2), // pump2worktime
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(m1WorkTime), 37, 2), // m1worktime
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(heatTransferSystem), 39, 1), // heattransfersystem
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(externalCyl), 40, 1), // externalcyl
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(thermalDisinfect), 41, 1), // thermaldisinfect
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(heatMetering), 42, 1), // heatmetering
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(activated), 43, 1), // activated
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(solarPumpMode), 44, 1), // solarpumpmode
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(solarPumpKick), 45, 1), // solarpumpkick
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(plainWaterMode), 46, 1), // plainwatermode
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(doubleMatchFlow), 47, 1), // doublematchflow
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(pump2MinMod), 48, 1), // pump2minmod
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(solarPump2TurnonDiff), 49, 1), // turnondiff2
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(solarPump2TurnoffDiff), 50, 1), // turnoffdiff2
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(solarPump2Kick), 51, 1), // pump2kick
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(climateZone), 52, 1), // climatezone
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(collector1Area), 53, 1), // collector1area
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(collector1Type), 54, 1), // collector1type
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(collector2Area), 55, 1), // collector2area
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(collector2Type), 56, 1), // collector2type
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(cylPriority), 57, 1), // cylpriority
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(heatCntFlowTemp), 58, 1), // heatcntflowtemp
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(heatCntRetTemp), 59, 1), // heatcntrettemp
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(heatCnt), 60, 1), // heatcnt
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(swapFlowTemp), 61, 1), // swapflowtemp
-    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(swapRetTemp), 62, 1), // swaprettemp
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(cyl3BottomTemp), 25, 1), // cyl3bottomtemp
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(cylTopTemp), 26, 1), // cyltoptemp
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(heatExchangerTemp), 27, 1), // heatexchangertemp
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(cylPumpMod), 28, 1), // cylpumpmod
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(valveStatus), 29, 1), // valvestatus
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(vs1Status), 30, 1), // vs1status
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(vs3Status), 31, 1), // vs3status
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(transferPump), 32, 1), // transferpump
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(transferPumpMod), 33, 1), // transferpumpmod
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(collectorMaxTemp), 34, 1), // collectormaxtemp
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(collectorMinTemp), 35, 1), // collectormintemp
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(energyToday), 36, 2), // energytoday
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(energyTotal), 38, 2), // energytotal
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(pump2WorkTime), 40, 2), // pump2worktime
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(m1WorkTime), 42, 2), // m1worktime
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(heatTransferSystem), 44, 1), // heattransfersystem
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(externalCyl), 45, 1), // externalcyl
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(thermalDisinfect), 46, 1), // thermaldisinfect
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(heatMetering), 47, 1), // heatmetering
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(activated), 48, 1), // activated
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(solarPumpMode), 49, 1), // solarpumpmode
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(solarPumpKick), 50, 1), // solarpumpkick
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(plainWaterMode), 51, 1), // plainwatermode
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(doubleMatchFlow), 52, 1), // doublematchflow
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(pump2MinMod), 53, 1), // pump2minmod
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(solarPump2TurnonDiff), 54, 1), // turnondiff2
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(solarPump2TurnoffDiff), 55, 1), // turnoffdiff2
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(solarPump2Kick), 56, 1), // pump2kick
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(climateZone), 57, 1), // climatezone
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(collector1Area), 58, 1), // collector1area
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(collector1Type), 59, 1), // collector1type
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(collector2Area), 60, 1), // collector2area
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(collector2Type), 61, 1), // collector2type
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(cylPriority), 62, 1), // cylpriority
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(heatCntFlowTemp), 63, 1), // heatcntflowtemp
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(heatCntRetTemp), 64, 1), // heatcntrettemp
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(heatCnt), 65, 1), // heatcnt
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(swapFlowTemp), 66, 1), // swapflowtemp
+    REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(swapRetTemp), 67, 1), // swaprettemp
     REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DHW, FL_(wwMinTemp), 0, 1), // mintemp
     REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(airHumidity), 0, 1), // airhumidity
     REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(dewTemperature), 1, 1), // dewtemperature
@@ -501,9 +506,11 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(meterComp), 36, 2), // metercomp
     REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(meterEHeat), 38, 2), // metereheat
     REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(meterHeat), 40, 2), // meterheat
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(heatingStarts), 42, 2), // heatingstarts
     REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DHW, FL_(hybridDHW), 0, 1), // hybriddhw
     REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DHW, FL_(nrgWw), 1, 2), // nrg
     REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DHW, FL_(meterWw), 3, 2), // meter
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DHW, FL_(wwStartsHp), 5, 2), // startshp
     REGISTER_MAPPING(dt::SWITCH, TAG_TYPE_DEVICE_DATA, FL_(activated), 0, 1), // activated
     REGISTER_MAPPING(dt::SWITCH, TAG_TYPE_DEVICE_DATA, FL_(flowTempHc), 1, 1), // flowtemphc
     REGISTER_MAPPING(dt::SWITCH, TAG_TYPE_DEVICE_DATA, FL_(status), 2, 1), // status
