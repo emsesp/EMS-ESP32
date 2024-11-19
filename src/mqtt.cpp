@@ -468,6 +468,7 @@ void Mqtt::on_disconnect(espMqttClientTypes::DisconnectReason reason) {
         return;
     }
     connecting_ = false;
+    connectcount_++; // count # reconnects
 
     if (reason == espMqttClientTypes::DisconnectReason::TCP_DISCONNECTED) {
         LOG_WARNING("MQTT disconnected: TCP");
@@ -499,7 +500,6 @@ void Mqtt::on_connect() {
     LOG_INFO("MQTT connected");
 
     connecting_ = true;
-    connectcount_++; // count # reconnects. not currently used.
     queuecount_ = mqttClient_->queueSize();
 
     load_settings(); // reload MQTT settings - in case they have changes
