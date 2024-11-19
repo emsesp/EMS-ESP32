@@ -107,7 +107,7 @@ telegram_type_id,name,is_fetched
 0x02A2,RC300Curves, 
 0x02A5,RC300Monitor, 
 0x02A6,RC300Monitor, 
-0x02A7,RC300Monitor, 
+0x02A7,CRFMonitor, 
 0x02A8,RC300Monitor, 
 0x02A9,RC300Monitor, 
 0x02AA,RC300Monitor, 
@@ -207,6 +207,7 @@ telegram_type_id,name,is_fetched
 0x093A,EM100ConfigMessage, 
 0x0998,HPSettings,fetched
 0x0999,HPFunctionTest,fetched
+0x099A,HPStarts, 
 0x099B,HPFlowTemp, 
 0x099C,HPComp, 
 0x09A0,HPTemperature, 
