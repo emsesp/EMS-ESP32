@@ -50,7 +50,7 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
     }
 
     if (cmd == "general") {
-        EMSESP::logger().info("Testing general. Adding a Boiler and Thermostat");
+        EMSESP::logger().notice("Testing general. Adding a Boiler and Thermostat");
 
         // System::test_set_all_active(true); // uncomment if we want to show all entities and give them fake values
 
@@ -77,6 +77,7 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
         return true;
     }
 
+
 //
 // the tests take a lot of memory when built for the ESP32
 // so only including the full set in standalone, otherwise a limited selection of basic tests
@@ -84,7 +85,7 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
 #ifdef EMSESP_STANDALONE
 
     if (cmd == "heat_exchange") {
-        EMSESP::logger().info("Testing heating exchange...");
+        EMSESP::logger().notice("Testing heating exchange...");
 
         add_device(0x08, 219); // Greenstar HIU/Logamax kompakt WS170
 
@@ -96,7 +97,7 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
     }
 
     if (cmd == "2thermostats") {
-        EMSESP::logger().info("Testing with multiple thermostats...");
+        EMSESP::logger().notice("Testing with multiple thermostats...");
 
         add_device(0x08, 123); // GB072
         add_device(0x10, 158); // RC310
@@ -128,7 +129,7 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
     }
 
     if (cmd == "310") {
-        EMSESP::logger().info("Adding a GB072/RC310 combo...");
+        EMSESP::logger().notice("Adding a GB072/RC310 combo...");
 
         add_device(0x08, 123); // GB072
         add_device(0x10, 158); // RC310
@@ -155,7 +156,7 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
     }
 
     if (cmd == "gateway") {
-        EMSESP::logger().info("Adding a Gateway...");
+        EMSESP::logger().notice("Adding a Gateway...");
 
         // add 0x48 KM200, via a version command
         rx_telegram({0x48, 0x0B, 0x02, 0x00, 0xBD, 0x04, 0x06, 00, 00, 00, 00, 00, 00, 00});
@@ -175,7 +176,7 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
     }
 
     if (cmd == "mixer") {
-        EMSESP::logger().info("Adding a mixer...");
+        EMSESP::logger().notice("Adding a mixer...");
 
         // add controller
         add_device(0x09, 114);
@@ -197,7 +198,7 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
     }
 
     if (cmd == "boiler") {
-        EMSESP::logger().info("Adding boiler...");
+        EMSESP::logger().notice("Adding boiler...");
         add_device(0x08, 123); // Nefit Trendline
 
         // UBAuptime
@@ -214,7 +215,7 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
     }
 
     if (cmd == "thermostat") {
-        EMSESP::logger().info("Adding thermostat...");
+        EMSESP::logger().notice("Adding thermostat...");
 
         add_device(0x10, 192); // FW120
 
@@ -227,7 +228,7 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
     }
 
     if (cmd == "solar") {
-        EMSESP::logger().info("Adding solar...");
+        EMSESP::logger().notice("Adding solar...");
 
         add_device(0x30, 163); // SM100
 
@@ -246,7 +247,7 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
     }
 
     if (cmd == "heatpump") {
-        EMSESP::logger().info("Adding heatpump...");
+        EMSESP::logger().notice("Adding heatpump...");
 
         add_device(0x38, 200); // Enviline module
         add_device(0x10, 192); // FW120 thermostat
@@ -263,7 +264,7 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
     return false;
 }
 
-// These next tests are run from the Consol via the test command, so inherit the Shell
+// These next tests are run from the Console via the test command, so inherit the Shell
 void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const std::string & id1_s, const std::string & id2_s) {
     bool ok = false; // default tests fail
 
@@ -323,15 +324,14 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Testing adding a boiler, thermostat, all sensors, scheduler and custom entities...");
 
         // setup fake data
-        EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
+        // EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
 
         // add devices
         test("general");
 
-        EMSESP::webCustomEntityService.test();  // add custom entities
-        EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
-        EMSESP::temperaturesensor_.test();      // add temperature sensors
-        EMSESP::webSchedulerService.test();     // add scheduler items
+        // EMSESP::webCustomEntityService.test();  // add custom entities
+        // EMSESP::temperaturesensor_.test();      // add temperature sensors
+        // EMSESP::webSchedulerService.test();     // add scheduler items
 
         // shell.invoke_command("show devices");
         // shell.invoke_command("show values");
@@ -551,7 +551,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     if (command == "620") {
-        EMSESP::logger().info("Testing 620...");
+        EMSESP::logger().notice("Testing 620...");
 
         // Version Controller
         uart_telegram({0x09, 0x0B, 0x02, 0x00, 0x5F, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
@@ -2238,8 +2238,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 #endif
 
     if (!ok) {
-        shell.printfln("Unknown test command: %s", command.c_str());
-        EMSESP::logger().notice("Unknown test command: %s", command.c_str());
+        shell.printfln("Unknown test %s", command.c_str());
+        EMSESP::logger().notice("Unknown test %s", command.c_str());
     }
 }
 
