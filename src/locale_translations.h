@@ -577,9 +577,9 @@ MAKE_TRANSLATION(meterCool, "metercool", "meter cooling", "Messung Kühlen", "",
 MAKE_TRANSLATION(meterWw, "meter", "meter", "Messung", "", "", "licznik", "", "", "", "", "počítadlo", "počítadlo") // TODO translate
 MAKE_TRANSLATION(gasMeterHeat, "gasmeterheat", "gas meter heating", "Gaszähler Heizen", "", "", "licznik gazu na ogrzewanie", "", "", "", "", "počítadlo plynu kúrenia", "počítadlo plynu pro vytápění") // TODO translate
 MAKE_TRANSLATION(gasMeterWw, "gasmeter", "gas meter", "Gaszähler", "", "", "licznik gazu", "", "", "", "", "počítadlo plynu", "počítadlo plynu") // TODO translate
-MAKE_TRANSLATION(hpCurrPower, "hpcurrpower", "compressor current power", "akt. Kompressorleistung", "", "", "", "", "", "", "", "", "aktuální výkon kompresoru") // TODO translate
-MAKE_TRANSLATION(hpPowerLimit, "hppowerlimit", "power limit", "Leistungsgrenze", "", "", "", "", "", "", "", "", "omezení výkonu") // TODO translate
-MAKE_TRANSLATION(powerReduction, "powerreduction", "power reduction", "Leistungsverringerung", "", "", "", "", "", "", "", "", "omezení výkonu") // TODO translate
+MAKE_TRANSLATION(hpCurrPower, "hpcurrpower", "compressor current power", "akt. Kompressorleistung", "", "", "", "", "", "", "", "aktuálny výkon kompresoru", "aktuální výkon kompresoru") // TODO translate
+MAKE_TRANSLATION(hpPowerLimit, "hppowerlimit", "power limit", "Leistungsgrenze", "", "", "", "", "", "", "", "obmedzenie výkonu", "omezení výkonu") // TODO translate
+MAKE_TRANSLATION(powerReduction, "powerreduction", "power reduction", "Leistungsverringerung", "", "", "", "", "", "", "", "obmedzenie výkonu", "omezení výkonu") // TODO translate
 
 // HIU
 MAKE_TRANSLATION(netFlowTemp, "netflowtemp", "heat network flow temp", "Systemvorlauftemperatur", "Netto aanvoertemperatuur", "", "temp. zasilania sieci cieplnej", "", "", "ısıtma şebekesi akış derecesi", "temperatura di mandata della rete di riscaldamento", "teplota prívodu tepelnej siete", "teplota přívodu tepelné sítě") // TODO translate
@@ -623,7 +623,7 @@ MAKE_TRANSLATION(wwActive, "active", "active", "aktiv", "Actief", "Aktiv", "akty
 MAKE_TRANSLATION(ww3wayValve, "3wayvalve", "3-way valve active", "3-Wege-Ventil aktiv", "3-wegklep actief", "Trevägsventil aktiv", "zawór 3-drogowy aktywny", "aktiv trevisventil", "vanne 3 voies active", "3 yollu vana", "valvola 3-vie", "3-cestný ventil aktívny", "aktivní 3-cestný ventil")
 MAKE_TRANSLATION(wwMixerTemp, "mixertemp", "mixer temperature", "Mischertemperatur", "Mixertemperatuur", "Blandningsventil-tempertur", "temperatura mieszacza", "temperatur blandeventil", "température mélangeur", "karıştırıcı sıcaklığı", "temperatura miscelatore", "teplota mixéra", "teplota směšovače")
 MAKE_TRANSLATION(wwStarts, "starts", "starts", "Anzahl Starts", "Aantal starts", "Antal starter", "liczba załączeń", "antall starter", "démarrages", "başlıyor", "avvii", "Počet štartov", "Počet startů")
-MAKE_TRANSLATION(wwStartsHp, "startshp", "starts hp", "Anzahl Starts WP", "", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(wwStartsHp, "startshp", "starts hp", "Anzahl Starts WP", "", "", "", "", "", "", "", "Počet spustení hp", "") // TODO translate
 MAKE_TRANSLATION(wwWorkM, "workm", "active time", "aktive Zeit", "Actieve tijd", "Aktiv Tid", "czas aktywności", "driftstid", "temps actif", "aktif zaman", "tempo attivo", "aktívny čas", "aktivní čas")
 MAKE_TRANSLATION(wwHystOn, "hyston", "hysteresis on temperature", "Einschalttemperaturdifferenz", "Inschakeltemperatuurverschil", "Hysteres PÅ-temperatur", "histereza załączania", "innkoblingstemperaturforskjell", "hystérésis température allumage", "çalışma sıcaklığı farkı", "differenza di temperatura di accensione", "hysterézia teploty", "hystereze zapnutí")
 MAKE_TRANSLATION(wwHystOff, "hystoff", "hysteresis off temperature", "Ausschalttemperaturdifferenz", "Uitschakeltemperatuurverschil", "Hysteres AV-temperatur", "histereza wyłączania", "utkoblingstemperaturforskjell", "hystérésis température extinction", "kapatma sıcaklığı farkı", "differenza di temperatura di spegnimento", "teplota hysterézie", "hystereze vypnutí")
