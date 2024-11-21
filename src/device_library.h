@@ -187,4 +187,16 @@
 // Generic - 0x40 or other with no product-id and no version
 {0, DeviceType::GENERIC, "unknown", DeviceFlags::EMS_DEVICE_FLAG_NONE}
 
+#if defined(EMSESP_STANDALONE)
+,
+{100, DeviceType::WATER, "IPM", DeviceFlags::EMS_DEVICE_FLAG_IPM},
+{102, DeviceType::WATER, "IPM", DeviceFlags::EMS_DEVICE_FLAG_IPM},
+{160, DeviceType::WATER, "MM100", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
+{161, DeviceType::WATER, "MM200", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
+{163, DeviceType::WATER, "SM100, MS100", DeviceFlags::EMS_DEVICE_FLAG_SM100},
+{164, DeviceType::WATER, "SM200, MS200", DeviceFlags::EMS_DEVICE_FLAG_SM100},
+{248, DeviceType::MIXER, "HM210", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
+{157, DeviceType::THERMOSTAT, "RC120", DeviceFlags::EMS_DEVICE_FLAG_CR120}
+#endif
+
 // clang-format on

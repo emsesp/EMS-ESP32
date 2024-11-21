@@ -26,6 +26,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - heatpump cost UOMs [#2188](https://github.com/emsesp/EMS-ESP32/issues/2188)
 - analog dac output and inputs on dac pins [#2201](https://github.com/emsesp/EMS-ESP32/discussions/2201)
 - api memory leak [#2216](https://github.com/emsesp/EMS-ESP32/issues/2216)
+- modbus multiple mixers [#2229](https://github.com/emsesp/EMS-ESP32/issues/2229)
 
 ## Changed
 
