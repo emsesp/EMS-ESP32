@@ -1438,13 +1438,13 @@ void EMSdevice::dump_devicevalue_info() {
             Serial.print(",");
 
             // modbus specific infos
-            Serial.print(device_type());
+            Serial.print(device_type()); // modbus unit identifier
             Serial.print(',');
 
-            Serial.print(dv.tag);
+            Serial.print(dv.tag); // modbus block
             Serial.print(',');
 
-            // numeric operator -> scale factor
+            // numeric operator -> modbus scale factor
             if (dv.numeric_operator == 0)
                 Serial.print("1");
             else if (dv.numeric_operator > 0)
@@ -1453,10 +1453,10 @@ void EMSdevice::dump_devicevalue_info() {
                 Serial.print(-dv.numeric_operator);
             Serial.print(",");
 
-            Serial.printf("%d", EMSESP::modbus_->getRegisterOffset(dv));
+            Serial.printf("%d", EMSESP::modbus_->getRegisterOffset(dv)); // modbus offset
             Serial.print(",");
 
-            Serial.printf("%d", EMSESP::modbus_->getRegisterCount(dv));
+            Serial.printf("%d", EMSESP::modbus_->getRegisterCount(dv)); // modbus count
 
             // /modbus specific infos
 

@@ -353,6 +353,11 @@ void EMSESP::dump_all_entities(uuid::console::Shell & shell) {
                         device_id = 0x40; // dhw 1
                     }
                 }
+                
+                // For a Mixer, fix device_id to 0x20 to give us all the settings
+                if (device.device_type == DeviceType::MIXER) {
+                    device_id = 0x20; // hc
+                }
 
                 // add the device and print out all the entities
                 // for testing the mixer use ... if (device.product_id == 69) {
