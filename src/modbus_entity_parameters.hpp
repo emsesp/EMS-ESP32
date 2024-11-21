@@ -400,13 +400,6 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::MIXER, TAG_TYPE_HC, FL_(mixerSetTime), 5, 1), // valvesettime
     REGISTER_MAPPING(dt::MIXER, TAG_TYPE_HC, FL_(flowTempVf), 6, 1), // flowtempvf
     REGISTER_MAPPING(dt::MIXER, TAG_TYPE_HC, FL_(flowtempoffset), 7, 1), // flowtempoffset
-    REGISTER_MAPPING(dt::MIXER, TAG_TYPE_DHW, FL_(flowTempHc), 0, 1), // flowtemphc
-    REGISTER_MAPPING(dt::MIXER, TAG_TYPE_DHW, FL_(valveStatus), 1, 1), // valvestatus
-    REGISTER_MAPPING(dt::MIXER, TAG_TYPE_DHW, FL_(flowSetTemp), 2, 1), // flowsettemp
-    REGISTER_MAPPING(dt::MIXER, TAG_TYPE_DHW, FL_(wwPumpStatus), 3, 1), // pumpstatus
-    REGISTER_MAPPING(dt::MIXER, TAG_TYPE_DHW, FL_(activated), 4, 1), // activated
-    REGISTER_MAPPING(dt::MIXER, TAG_TYPE_DHW, FL_(mixerSetTime), 5, 1), // valvesettime
-    REGISTER_MAPPING(dt::MIXER, TAG_TYPE_DHW, FL_(flowtempoffset), 6, 1), // flowtempoffset
     REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(collectorTemp), 0, 1), // collectortemp
     REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(cylBottomTemp), 1, 1), // cylbottomtemp
     REGISTER_MAPPING(dt::SOLAR, TAG_TYPE_DEVICE_DATA, FL_(solarPump), 2, 1), // solarpump
@@ -536,6 +529,44 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::VENTILATION, TAG_TYPE_DEVICE_DATA, FL_(ventMode), 6, 1), // ventmode
     REGISTER_MAPPING(dt::VENTILATION, TAG_TYPE_DEVICE_DATA, FL_(airquality), 7, 1), // airquality
     REGISTER_MAPPING(dt::VENTILATION, TAG_TYPE_DEVICE_DATA, FL_(airHumidity), 8, 1), // airhumidity
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(selRoomTemp), 0, 1), // seltemp
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwTemp), 1, 1), // temp
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwCurTemp2), 2, 1), // curtemp2
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(hydrTemp), 3, 1), // hydrTemp
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwPump), 4, 1), // pump
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(flowtempoffset), 5, 1), // flowtempoffset
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwHystOn), 6, 1), // hyston
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwHystOff), 7, 1), // hystoff
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwDisinfectionTemp), 8, 1), // disinfectiontemp
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwCirc), 9, 1), // circ
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwCircMode), 10, 1), // circmode
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwTempStatus), 11, 1), // tempstatus
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwMaxTemp), 12, 1), // maxtemp
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwDiffTemp), 13, 1), // difftemp
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwRedTemp), 14, 1), // redtemp
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwRequiredTemp), 15, 1), // requiredtemp
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwTemp), 0, 1), // temp
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwStorageTemp1), 1, 1), // storagetemp1
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwColdTemp), 2, 1), // coldtemp
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwTemp5), 3, 1), // temp5
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(retTemp), 4, 1), // rettemp
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwPump), 5, 1), // pump
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwMaxTemp), 6, 1), // maxtemp
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(selRoomTemp), 7, 1), // seltemp
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwRedTemp), 8, 1), // redtemp
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwHotTemp), 9, 1), // hottemp
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwDailyTemp), 10, 1), // dailytemp
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwDisinfectionTemp), 11, 1), // disinfectiontemp
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwCirc), 12, 1), // circ
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwCircMode), 13, 1), // circmode
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwCircTc), 14, 1), // circtc
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwKeepWarm), 15, 1), // keepwarm
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwStatus2), 16, 1), // status2
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwPumpMod), 17, 1), // pumpmod
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwFlow), 18, 1), // flow
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(valveReturn), 19, 1), // valvereturn
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(deltaTRet), 20, 1), // deltatret
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(errorDisp), 21, 1), // errordisp
 };
 
 } // namespace emsesp

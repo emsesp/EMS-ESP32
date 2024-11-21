@@ -3610,6 +3610,17 @@
 | startshp | starts hp | uint24 (>=0<=16777213) |   | false | DHW | 5 | 2 | 1 | 
 
 ## Devices of type *mixer*
+### HM210
+| shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
+|-|-|-|-|-|-|-|-|-|
+| flowtemphc | flow temperature (TC1) | uint16 (>=0<=3199) | C | false | HC | 0 | 1 | 1/10 | 
+| valvestatus | mixing valve actuator (VC1) | uint8 (>=0<=100) | % | false | HC | 1 | 1 | 1 | 
+| flowsettemp | setpoint flow temperature | uint8 (>=0<=254) | C | true | HC | 2 | 1 | 1 | 
+| pumpstatus | pump status (PC1) | boolean |   | true | HC | 3 | 1 | 1 | 
+| activated | activated | boolean |   | true | HC | 4 | 1 | 1 | 
+| valvesettime | time to set valve | uint8 (>=10<=600) | seconds | true | HC | 5 | 1 | 10 | 
+| flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | K | true | HC | 7 | 1 | 1 | 
+
 ### IPM
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
@@ -3637,13 +3648,13 @@
 ### MM100
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
-| flowtemphc | flow temperature (TC1) | uint16 (>=0<=3199) | C | false | DHW | 0 | 1 | 1/10 | 
-| valvestatus | mixing valve actuator (VC1) | uint8 (>=0<=100) | % | false | DHW | 1 | 1 | 1 | 
-| flowsettemp | setpoint flow temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
-| pumpstatus | pump status (PC1) | boolean |   | true | DHW | 3 | 1 | 1 | 
-| activated | activated | boolean |   | true | DHW | 4 | 1 | 1 | 
-| valvesettime | time to set valve | uint8 (>=10<=600) | seconds | true | DHW | 5 | 1 | 10 | 
-| flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | K | true | DHW | 6 | 1 | 1 | 
+| flowtemphc | flow temperature (TC1) | uint16 (>=0<=3199) | C | false | HC | 0 | 1 | 1/10 | 
+| valvestatus | mixing valve actuator (VC1) | uint8 (>=0<=100) | % | false | HC | 1 | 1 | 1 | 
+| flowsettemp | setpoint flow temperature | uint8 (>=0<=254) | C | true | HC | 2 | 1 | 1 | 
+| pumpstatus | pump status (PC1) | boolean |   | true | HC | 3 | 1 | 1 | 
+| activated | activated | boolean |   | true | HC | 4 | 1 | 1 | 
+| valvesettime | time to set valve | uint8 (>=10<=600) | seconds | true | HC | 5 | 1 | 10 | 
+| flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | K | true | HC | 7 | 1 | 1 | 
 
 ### MM200
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -4818,6 +4829,94 @@
 | currtemp | current room temperature | int16 (>=-3199<=3199) | C | false | HC | 1 | 1 | 1/10 | 
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 
+### RC120
+| shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
+|-|-|-|-|-|-|-|-|-|
+| errorcode | error code | string |   | false | DEVICE_DATA | 0 | 8 | 1 | 
+| lastcode | last error code | string |   | false | DEVICE_DATA | 8 | 25 | 1 | 
+| datetime | date/time | string |   | true | DEVICE_DATA | 33 | 13 | 1 | 
+| intoffset | internal temperature offset | int8 (>=-12<=12) | C | true | DEVICE_DATA | 46 | 1 | 1/10 | 
+| floordry | floor drying | enum [off\|start\|heat\|hold\|cool\|end] |   | false | DEVICE_DATA | 47 | 1 | 1 | 
+| dampedoutdoortemp | damped outdoor temperature | int16 (>=-3199<=3199) | C | false | DEVICE_DATA | 48 | 1 | 1/10 | 
+| floordrytemp | floor drying temperature | uint8 (>=0<=254) | C | false | DEVICE_DATA | 49 | 1 | 1 | 
+| building | building type | enum [light\|medium\|heavy] |   | true | DEVICE_DATA | 50 | 1 | 1 | 
+| minexttemp | minimal external temperature | int8 (>=-126<=126) | C | true | DEVICE_DATA | 51 | 1 | 1 | 
+| damping | damping outdoor temperature | boolean |   | true | DEVICE_DATA | 52 | 1 | 1 | 
+| hybridstrategy | hybrid control strategy | enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix] |   | true | DEVICE_DATA | 53 | 1 | 1 | 
+| switchovertemp | outside switchover temperature | int8 (>=-20<=20) | C | true | DEVICE_DATA | 54 | 1 | 1 | 
+| energycostratio | energy cost ratio | uint8 (>=0<=20) |   | true | DEVICE_DATA | 55 | 1 | 1/10 | 
+| fossilefactor | fossile energy factor | uint8 (>=0<=5) |   | true | DEVICE_DATA | 56 | 1 | 1/10 | 
+| electricfactor | electric energy factor | uint8 (>=0<=5) |   | true | DEVICE_DATA | 57 | 1 | 1/10 | 
+| delayboiler | delay boiler support | uint8 (>=5<=120) | minutes | true | DEVICE_DATA | 58 | 1 | 1 | 
+| tempdiffboiler | temp diff boiler support | uint8 (>=1<=99) | C | true | DEVICE_DATA | 59 | 1 | 1 | 
+| pvenabledhw | enable raise dhw | boolean |   | true | DEVICE_DATA | 60 | 1 | 1 | 
+| pvraiseheat | raise heating with PV | int8 (>=0<=5) | K | true | DEVICE_DATA | 61 | 1 | 1 | 
+| pvlowercool | lower cooling with PV | int8 (>=-5<=0) | K | true | DEVICE_DATA | 62 | 1 | 1 | 
+| seltemp | selected room temperature | int16 (>=0<=30) | C | true | HC | 0 | 1 | 1/2 | 
+| currtemp | current room temperature | int16 (>=-3199<=3199) | C | false | HC | 1 | 1 | 1/10 | 
+| haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
+| mode | operating mode | enum [off\|manual\|auto] |   | true | HC | 3 | 1 | 1 | 
+| modetype | mode type | enum [eco\|comfort] |   | false | HC | 4 | 1 | 1 | 
+| ecotemp | eco temperature | uint8 (>=0<=127) | C | true | HC | 5 | 1 | 1/2 | 
+| manualtemp | manual temperature | uint8 (>=0<=127) | C | true | HC | 6 | 1 | 1/2 | 
+| comforttemp | comfort temperature | uint8 (>=0<=127) | C | true | HC | 7 | 1 | 1/2 | 
+| summertemp | summer temperature | uint8 (>=10<=30) | C | true | HC | 8 | 1 | 1 | 
+| designtemp | design temperature | uint8 (>=0<=254) | C | true | HC | 9 | 1 | 1 | 
+| offsettemp | offset temperature | int8 (>=-126<=126) | C | true | HC | 10 | 1 | 1 | 
+| minflowtemp | min flow temperature | uint8 (>=0<=254) | C | true | HC | 11 | 1 | 1 | 
+| maxflowtemp | max flow temperature | uint8 (>=0<=254) | C | true | HC | 12 | 1 | 1 | 
+| roominfluence | room influence | uint8 (>=0<=254) | C | true | HC | 13 | 1 | 1 | 
+| roominflfactor | room influence factor | uint8 (>=0<=25) |   | true | HC | 14 | 1 | 1/10 | 
+| curroominfl | current room influence | int16 (>=-3199<=3199) | C | false | HC | 15 | 1 | 1/10 | 
+| nofrostmode | nofrost mode | enum [room\|outdoor\|room outdoor] |   | true | HC | 16 | 1 | 1 | 
+| nofrosttemp | nofrost temperature | int8 (>=-126<=126) | C | true | HC | 17 | 1 | 1 | 
+| targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 | 
+| heatingtype | heating type | enum [off\|radiator\|convector\|floor] |   | true | HC | 19 | 1 | 1 | 
+| summersetmode | set summer mode | enum [summer\|auto\|winter] |   | true | HC | 20 | 1 | 1 | 
+| hpoperatingmode | heatpump operating mode | enum [off\|auto\|heating\|cooling] |   | true | HC | 21 | 1 | 1 | 
+| summermode | summer mode | enum [winter\|summer] |   | false | HC | 22 | 1 | 1 | 
+| hpoperatingstate | heatpump operating state | enum [heating\|off\|cooling] |   | false | HC | 23 | 1 | 1 | 
+| controlmode | control mode | enum [optimized\|simple\|n/a\|room\|power] |   | true | HC | 24 | 1 | 1 | 
+| program | program | enum [prog 1\|prog 2] |   | true | HC | 25 | 1 | 1 | 
+| tempautotemp | temporary set temperature automode | int8 (>=-1<=30) | C | true | HC | 26 | 1 | 1/2 | 
+| remoteseltemp | temporary set temperature from remote | int8 (>=-1<=30) | C | true | HC | 27 | 1 | 1/2 | 
+| fastheatup | fast heatup | uint8 (>=0<=100) | % | true | HC | 28 | 1 | 1 | 
+| switchonoptimization | switch-on optimization | boolean |   | true | HC | 29 | 1 | 1 | 
+| reducemode | reduce mode | enum [outdoor\|room\|reduce] |   | true | HC | 30 | 1 | 1 | 
+| noreducetemp | no reduce below temperature | int8 (>=-126<=126) | C | true | HC | 31 | 1 | 1 | 
+| reducetemp | off/reduce switch temperature | int8 (>=-126<=126) | C | true | HC | 32 | 1 | 1 | 
+| dhwprio | dhw priority | boolean |   | true | HC | 33 | 1 | 1 | 
+| hpcooling | hp cooling | boolean |   | true | HC | 34 | 1 | 1 | 
+| coolingon | cooling on | boolean |   | false | HC | 35 | 1 | 1 | 
+| hpmode | HP Mode | enum [heating\|cooling\|heating & cooling] |   | true | HC | 36 | 1 | 1 | 
+| dewoffset | dew point offset | uint8 (>=2<=10) | K | true | HC | 37 | 1 | 1 | 
+| roomtempdiff | room temp difference | uint8 (>=0<=254) | K | true | HC | 38 | 1 | 1 | 
+| hpminflowtemp | HP min. flow temp. | uint8 (>=0<=254) | C | true | HC | 39 | 1 | 1 | 
+| control | control device | enum [RC310\|RC200\|RC100\|RC100H\|TC100] |   | true | HC | 40 | 1 | 1 | 
+| remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 41 | 1 | 1/10 | 
+| remotehum | room humidity from remote | cmd [] (>=-1<=101) | % | true | HC | 42 | 1 | 1 | 
+| heatondelay | heat-on delay | uint8 (>=1<=48) | hours | true | HC | 43 | 1 | 1 | 
+| heatoffdelay | heat-off delay | uint8 (>=1<=48) | hours | true | HC | 44 | 1 | 1 | 
+| instantstart | instant start | uint8 (>=1<=10) | K | true | HC | 45 | 1 | 1 | 
+| boost | boost mode | boolean |   | true | HC | 46 | 1 | 1 | 
+| boosttime | boost time | uint8 (>=0<=254) | hours | true | HC | 47 | 1 | 1 | 
+| coolstart | cooling starttemp | uint8 (>=20<=35) | C | true | HC | 48 | 1 | 1 | 
+| coolondelay | cooling on delay | uint8 (>=1<=48) | hours | true | HC | 49 | 1 | 1 | 
+| cooloffdelay | cooling off delay | uint8 (>=1<=48) | hours | true | HC | 50 | 1 | 1 | 
+| switchprogmode | switch program mode | enum [level\|absolute] |   | true | HC | 51 | 1 | 1 | 
+| mode | operating mode | enum [off\|comfort\|auto] |   | true | DHW | 0 | 1 | 1 | 
+| settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 1 | 1 | 1 | 
+| settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
+| circmode | circulation pump mode | enum [off\|on\|auto\|own prog] |   | true | DHW | 3 | 1 | 1 | 
+| chargeduration | charge duration | uint8 (>=0<=3810) | minutes | true | DHW | 4 | 1 | 15 | 
+| charge | charge | boolean |   | true | DHW | 5 | 1 | 1 | 
+| extra | extra | boolean |   | false | DHW | 6 | 1 | 1 | 
+| disinfecting | disinfecting | boolean |   | true | DHW | 7 | 1 | 1 | 
+| disinfectday | disinfection day | enum [mo\|tu\|we\|th\|fr\|sa\|su\|all] |   | true | DHW | 8 | 1 | 1 | 
+| disinfecttime | disinfection time | uint8 (>=0<=1431) | minutes | true | DHW | 9 | 1 | 15 | 
+| dailyheating | daily heating | boolean |   | true | DHW | 10 | 1 | 1 | 
+| dailyheattime | daily heating time | uint8 (>=0<=1431) | minutes | true | DHW | 11 | 1 | 15 | 
+
 ### RC20, Moduline 300
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
 |-|-|-|-|-|-|-|-|-|
@@ -5495,4 +5594,111 @@
 | ventmode | ventilation mode | enum [auto\|off\|L1\|L2\|L3\|L4\|demand\|sleep\|intense\|bypass\|party\|fireplace] |   | true | DEVICE_DATA | 6 | 1 | 1 | 
 | airquality | air quality (voc) | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 7 | 1 | 1 | 
 | airhumidity | relative air humidity | uint8 (>=0<=100) | % | false | DEVICE_DATA | 8 | 1 | 1 | 
+
+## Devices of type *water*
+### IPM
+| shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
+|-|-|-|-|-|-|-|-|-|
+| seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 0 | 1 | 1 | 
+| temp | current temperature | uint16 (>=0<=3199) | C | false | DHW | 1 | 1 | 1/10 | 
+| curtemp2 | current extern temperature | uint16 (>=0<=3199) | C | false | DHW | 2 | 1 | 1/10 | 
+| hydrTemp | hydraulic header temperature | uint16 (>=0<=3199) | C | false | DHW | 3 | 1 | 1/10 | 
+| pump | pump | boolean |   | false | DHW | 4 | 1 | 1 | 
+| flowtempoffset | flow temperature offset | uint8 (>=0<=254) | C | true | DHW | 5 | 1 | 1 | 
+| hyston | hysteresis on temperature | int8 (>=-126<=126) | C | true | DHW | 6 | 1 | 1 | 
+| hystoff | hysteresis off temperature | int8 (>=-126<=126) | C | true | DHW | 7 | 1 | 1 | 
+| disinfectiontemp | disinfection temperature | uint8 (>=0<=254) | C | true | DHW | 8 | 1 | 1 | 
+| circ | circulation active | boolean |   | true | DHW | 9 | 1 | 1 | 
+| circmode | circulation pump mode | enum [off\|on\|auto\|own prog] |   | true | DHW | 10 | 1 | 1 | 
+| seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 0 | 1 | 1 | 
+| temp | current temperature | uint16 (>=0<=3199) | C | false | DHW | 1 | 1 | 1/10 | 
+| curtemp2 | current extern temperature | uint16 (>=0<=3199) | C | false | DHW | 2 | 1 | 1/10 | 
+| hydrTemp | hydraulic header temperature | uint16 (>=0<=3199) | C | false | DHW | 3 | 1 | 1/10 | 
+| pump | pump | boolean |   | false | DHW | 4 | 1 | 1 | 
+| flowtempoffset | flow temperature offset | uint8 (>=0<=254) | C | true | DHW | 5 | 1 | 1 | 
+| hyston | hysteresis on temperature | int8 (>=-126<=126) | C | true | DHW | 6 | 1 | 1 | 
+| hystoff | hysteresis off temperature | int8 (>=-126<=126) | C | true | DHW | 7 | 1 | 1 | 
+| disinfectiontemp | disinfection temperature | uint8 (>=0<=254) | C | true | DHW | 8 | 1 | 1 | 
+| circ | circulation active | boolean |   | true | DHW | 9 | 1 | 1 | 
+| circmode | circulation pump mode | enum [off\|on\|auto\|own prog] |   | true | DHW | 10 | 1 | 1 | 
+
+### MM100
+| shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
+|-|-|-|-|-|-|-|-|-|
+| temp | current temperature | uint16 (>=0<=3199) | C | false | DHW | 1 | 1 | 1/10 | 
+| tempstatus | temperature switch in assigned dhw (MC1) | int8 (>=-126<=126) |   | false | DHW | 11 | 1 | 1 | 
+| pump | pump | boolean |   | false | DHW | 4 | 1 | 1 | 
+| maxtemp | maximum temperature | uint8 (>=0<=254) | C | true | DHW | 12 | 1 | 1 | 
+| difftemp | start differential temperature | int8 (>=-126<=126) | C | true | DHW | 13 | 1 | 1 | 
+| disinfectiontemp | disinfection temperature | uint8 (>=0<=254) | C | true | DHW | 8 | 1 | 1 | 
+| redtemp | reduced temperature | uint8 (>=0<=254) | C | true | DHW | 14 | 1 | 1 | 
+| requiredtemp | required temperature | uint8 (>=0<=254) | C | true | DHW | 15 | 1 | 1 | 
+| circ | circulation active | boolean |   | true | DHW | 9 | 1 | 1 | 
+| circmode | circulation pump mode | enum [off\|on\|auto\|own prog] |   | true | DHW | 10 | 1 | 1 | 
+
+### MM200
+| shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
+|-|-|-|-|-|-|-|-|-|
+| temp | current temperature | uint16 (>=0<=3199) | C | false | DHW | 1 | 1 | 1/10 | 
+| tempstatus | temperature switch in assigned dhw (MC1) | int8 (>=-126<=126) |   | false | DHW | 11 | 1 | 1 | 
+| pump | pump | boolean |   | false | DHW | 4 | 1 | 1 | 
+| maxtemp | maximum temperature | uint8 (>=0<=254) | C | true | DHW | 12 | 1 | 1 | 
+| difftemp | start differential temperature | int8 (>=-126<=126) | C | true | DHW | 13 | 1 | 1 | 
+| disinfectiontemp | disinfection temperature | uint8 (>=0<=254) | C | true | DHW | 8 | 1 | 1 | 
+| redtemp | reduced temperature | uint8 (>=0<=254) | C | true | DHW | 14 | 1 | 1 | 
+| requiredtemp | required temperature | uint8 (>=0<=254) | C | true | DHW | 15 | 1 | 1 | 
+| circ | circulation active | boolean |   | true | DHW | 9 | 1 | 1 | 
+| circmode | circulation pump mode | enum [off\|on\|auto\|own prog] |   | true | DHW | 10 | 1 | 1 | 
+
+### SM100, MS100
+| shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
+|-|-|-|-|-|-|-|-|-|
+| temp | current temperature | uint16 (>=0<=3199) | C | false | DHW | 1 | 1 | 1/10 | 
+| storagetemp1 | storage intern temperature | uint16 (>=0<=3199) | C | false | DHW | 1 | 1 | 1/10 | 
+| coldtemp | cold water | uint16 (>=0<=3199) | C | false | DHW | 2 | 1 | 1/10 | 
+| temp5 | temperature 5 | uint16 (>=0<=3199) | C | false | DHW | 3 | 1 | 1/10 | 
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DHW | 4 | 1 | 1/10 | 
+| pump | pump | boolean |   | false | DHW | 4 | 1 | 1 | 
+| maxtemp | maximum temperature | uint8 (>=0<=254) | C | true | DHW | 12 | 1 | 1 | 
+| seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 0 | 1 | 1 | 
+| redtemp | reduced temperature | uint8 (>=0<=254) | C | true | DHW | 14 | 1 | 1 | 
+| hottemp | extra hot temperature | uint8 (>=0<=254) | C | true | DHW | 9 | 1 | 1 | 
+| dailytemp | daily temperature | uint8 (>=0<=254) | C | true | DHW | 10 | 1 | 1 | 
+| disinfectiontemp | disinfection temperature | uint8 (>=0<=254) | C | true | DHW | 8 | 1 | 1 | 
+| circ | circulation active | boolean |   | true | DHW | 9 | 1 | 1 | 
+| circmode | circulation pump mode | enum [off\|1x3min\|2x3min\|3x3min\|4x3min\|5x3min\|6x3min\|continuous] |   | true | DHW | 10 | 1 | 1 | 
+| circtc | circulation time controled | boolean |   | true | DHW | 14 | 1 | 1 | 
+| keepwarm | keep warm | boolean |   | true | DHW | 15 | 1 | 1 | 
+| status2 | status 2 | enum [\|\|\|no heat\|\|\|heat request\|\|disinfecting\|hold] |   | false | DHW | 16 | 1 | 1 | 
+| pumpmod | pump modulation | uint8 (>=0<=100) | % | false | DHW | 17 | 1 | 1 | 
+| flow | flow rate | uint16 (>=0<=3199) | l/min | false | DHW | 18 | 1 | 1/10 | 
+| valvereturn | return valve | uint8 (>=0<=100) | % | true | DHW | 19 | 1 | 1 | 
+| deltatret | temp. diff. return valve | uint8 (>=0<=254) | K | true | DHW | 20 | 1 | 1 | 
+| errordisp | error display | enum [off\|normal\|inverted] |   | true | DHW | 21 | 1 | 1 | 
+
+### SM200, MS200
+| shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
+|-|-|-|-|-|-|-|-|-|
+| temp | current temperature | uint16 (>=0<=3199) | C | false | DHW | 1 | 1 | 1/10 | 
+| storagetemp1 | storage intern temperature | uint16 (>=0<=3199) | C | false | DHW | 1 | 1 | 1/10 | 
+| coldtemp | cold water | uint16 (>=0<=3199) | C | false | DHW | 2 | 1 | 1/10 | 
+| temp5 | temperature 5 | uint16 (>=0<=3199) | C | false | DHW | 3 | 1 | 1/10 | 
+| rettemp | return temperature | uint16 (>=0<=3199) | C | false | DHW | 4 | 1 | 1/10 | 
+| pump | pump | boolean |   | false | DHW | 4 | 1 | 1 | 
+| maxtemp | maximum temperature | uint8 (>=0<=254) | C | true | DHW | 12 | 1 | 1 | 
+| seltemp | selected temperature | uint8 (>=0<=254) | C | true | DHW | 0 | 1 | 1 | 
+| redtemp | reduced temperature | uint8 (>=0<=254) | C | true | DHW | 14 | 1 | 1 | 
+| hottemp | extra hot temperature | uint8 (>=0<=254) | C | true | DHW | 9 | 1 | 1 | 
+| dailytemp | daily temperature | uint8 (>=0<=254) | C | true | DHW | 10 | 1 | 1 | 
+| disinfectiontemp | disinfection temperature | uint8 (>=0<=254) | C | true | DHW | 8 | 1 | 1 | 
+| circ | circulation active | boolean |   | true | DHW | 9 | 1 | 1 | 
+| circmode | circulation pump mode | enum [off\|1x3min\|2x3min\|3x3min\|4x3min\|5x3min\|6x3min\|continuous] |   | true | DHW | 10 | 1 | 1 | 
+| circtc | circulation time controled | boolean |   | true | DHW | 14 | 1 | 1 | 
+| keepwarm | keep warm | boolean |   | true | DHW | 15 | 1 | 1 | 
+| status2 | status 2 | enum [\|\|\|no heat\|\|\|heat request\|\|disinfecting\|hold] |   | false | DHW | 16 | 1 | 1 | 
+| pumpmod | pump modulation | uint8 (>=0<=100) | % | false | DHW | 17 | 1 | 1 | 
+| flow | flow rate | uint16 (>=0<=3199) | l/min | false | DHW | 18 | 1 | 1/10 | 
+| valvereturn | return valve | uint8 (>=0<=100) | % | true | DHW | 19 | 1 | 1 | 
+| deltatret | temp. diff. return valve | uint8 (>=0<=254) | K | true | DHW | 20 | 1 | 1 | 
+| errordisp | error display | enum [off\|normal\|inverted] |   | true | DHW | 21 | 1 | 1 | 
 
