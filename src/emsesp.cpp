@@ -343,17 +343,14 @@ void EMSESP::dump_all_entities(uuid::console::Shell & shell) {
         for (const auto & device : device_library_) {
             if (device_class.first == device.device_type) {
                 uint8_t device_id = 0;
-                // Mixer class looks at device_id to determine type and the tag
-                // so fixing to 0x28 which will give all the settings except flowSetTemp
-                if (device.device_type == DeviceType::MIXER) {
+                // Water class looks at device_id to determine type and the tag
+                if (device.device_type == DeviceType::WATER) {
                     if (device.flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
-                        if (device.product_id == 160) { // MM100
-                            device_id = 0x28;           // dhw
-                        } else {
-                            device_id = 0x20; // hc
-                        }
-                    } else {
-                        device_id = 0x20; // should cover all the other device types
+                        device_id = 0x28; // dhw 1/2
+                    } else if (device.flags == EMSdevice::EMS_DEVICE_FLAG_SM100) {
+                        device_id = 0x2A; // dhw 3
+                    } else if (device.flags == EMSdevice::EMS_DEVICE_FLAG_IPM) {
+                        device_id = 0x40; // dhw 1
                     }
                 }
 
@@ -385,17 +382,14 @@ void EMSESP::dump_all_telegrams(uuid::console::Shell & shell) {
         for (const auto & device : device_library_) {
             if (device_class.first == device.device_type) {
                 uint8_t device_id = 0;
-                // Mixer class looks at device_id to determine type and the tag
-                // so fixing to 0x28 which will give all the settings except flowSetTemp
-                if (device.device_type == DeviceType::MIXER) {
+                // Water class looks at device_id to determine type and the tag
+                if (device.device_type == DeviceType::WATER) {
                     if (device.flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
-                        if (device.product_id == 160) { // MM100
-                            device_id = 0x28;           // dhw
-                        } else {
-                            device_id = 0x20; // hc
-                        }
-                    } else {
-                        device_id = 0x20; // should cover all the other device types
+                        device_id = 0x28; // dhw 1/2
+                    } else if (device.flags == EMSdevice::EMS_DEVICE_FLAG_SM100) {
+                        device_id = 0x2A; // dhw 3
+                    } else if (device.flags == EMSdevice::EMS_DEVICE_FLAG_IPM) {
+                        device_id = 0x40; // dhw 1
                     }
                 }
 

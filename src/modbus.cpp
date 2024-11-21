@@ -275,20 +275,8 @@ ModbusMessage Modbus::handleRead(const ModbusMessage & request) {
 
     auto register_offset = start_address - tag * REGISTER_BLOCK_SIZE;
 
-    const auto & dev_it =
-        std::find_if(EMSESP::emsdevices.begin(), EMSESP::emsdevices.end(), [&](const std::unique_ptr<EMSdevice> & x) { return x->device_type() == device_type; });
-
-    if (dev_it == EMSESP::emsdevices.end()) {
-        // device not found => invalid server ID
-        LOG_ERROR("device with type %d not found => invalid server ID", device_type);
-        response.setError(request.getServerID(), request.getFunctionCode(), ILLEGAL_DATA_ADDRESS);
-        return response;
-    }
-
-    const auto & dev = *dev_it;
-
     // binary search in modbus infos
-    auto key = EntityModbusInfoKey(dev->device_type(), tag_type, register_offset);
+    auto key = EntityModbusInfoKey(device_type, tag_type, register_offset);
 
     const auto & modbusInfo = std::lower_bound(std::begin(modbus_register_mappings),
                                                std::end(modbus_register_mappings),
@@ -312,7 +300,15 @@ ModbusMessage Modbus::handleRead(const ModbusMessage & request) {
     }
 
     auto buf        = std::vector<uint16_t>(num_words);
-    auto error_code = dev->get_modbus_value(tag, modbusInfo->short_name, buf);
+    int  error_code = -1;
+    for (const auto & emsdevice : EMSESP::emsdevices) {
+        if (emsdevice->device_type() == device_type) {
+            error_code = emsdevice->get_modbus_value(tag, modbusInfo->short_name, buf);
+            if (!error_code) {
+                break;
+            }
+        }
+    }
     if (error_code) {
         LOG_ERROR("Unable to read raw device value %s for tag=%d - error_code = %d", modbusInfo->short_name, (int)tag, error_code);
         response.setError(request.getServerID(), request.getFunctionCode(), SERVER_DEVICE_FAILURE);
@@ -370,22 +366,9 @@ ModbusMessage Modbus::handleWrite(const ModbusMessage & request) {
 
     LOG_DEBUG("Tag %d, offset %d", tag, register_offset);
 
-    const auto & dev_it =
-        std::find_if(EMSESP::emsdevices.begin(), EMSESP::emsdevices.end(), [&](const std::unique_ptr<EMSdevice> & x) { return x->device_type() == device_type; });
-
-    if (dev_it == EMSESP::emsdevices.end()) {
-        // device not found => invalid server ID
-        LOG_ERROR("device_type (%d) not found => invalid server ID", device_type);
-        response.setError(request.getServerID(), request.getFunctionCode(), ILLEGAL_DATA_ADDRESS);
-        return response;
-    }
-
-    const auto & dev = *dev_it;
-
-    LOG_DEBUG("found device '%s' of type %d", dev->name().c_str(), dev->device_type());
 
     // binary search in modbus infos
-    auto key        = EntityModbusInfoKey(dev->device_type(), tag_type, register_offset);
+    auto key        = EntityModbusInfoKey(device_type, tag_type, register_offset);
     auto modbusInfo = std::lower_bound(std::begin(modbus_register_mappings),
                                        std::end(modbus_register_mappings),
                                        key,
@@ -412,9 +395,16 @@ ModbusMessage Modbus::handleWrite(const ModbusMessage & request) {
     }
 
     JsonDocument input_doc;
-    JsonObject   input = input_doc.to<JsonObject>();
-
-    auto error_code = dev->modbus_value_to_json(tag, modbusInfo->short_name, data, input);
+    JsonObject   input      = input_doc.to<JsonObject>();
+    int          error_code = -1;
+    for (const auto & emsdevice : EMSESP::emsdevices) {
+        if (emsdevice->device_type() == device_type) {
+            error_code = emsdevice->modbus_value_to_json(tag, modbusInfo->short_name, data, input);
+            if (!error_code) {
+                break;
+            }
+        }
+    }
     if (error_code) {
         // error getting modbus value as json
         LOG_ERROR("error getting modbus value as json, error code = %d", error_code);
@@ -424,9 +414,9 @@ ModbusMessage Modbus::handleWrite(const ModbusMessage & request) {
 
     std::string path;
     if (tag < DeviceValueTAG::TAG_HC1) {
-        path = std::string("ems-esp/") + std::string(EMSdevice::device_type_2_device_name(dev->device_type())) + "/" + modbusInfo->short_name;
+        path = std::string("ems-esp/") + std::string(EMSdevice::device_type_2_device_name(device_type)) + "/" + modbusInfo->short_name;
     } else {
-        path = std::string("ems-esp/") + std::string(EMSdevice::device_type_2_device_name(dev->device_type())) + "/" + EMSdevice::tag_to_mqtt(tag) + "/"
+        path = std::string("ems-esp/") + std::string(EMSdevice::device_type_2_device_name(device_type)) + "/" + EMSdevice::tag_to_mqtt(tag) + "/"
                + modbusInfo->short_name;
     }
 

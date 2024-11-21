@@ -1928,7 +1928,7 @@ const char * EMSdevice::telegram_type_name(std::shared_ptr<const Telegram> teleg
 bool EMSdevice::handle_telegram(std::shared_ptr<const Telegram> telegram) {
     for (auto & tf : telegram_functions_) {
         if (tf.telegram_type_id_ == telegram->type_id) {
-            // for telegram desitnation only read telegram
+            // for telegram destination only read telegram
             if (telegram->dest == device_id_ && telegram->message_length > 0) {
                 tf.process_function_(telegram);
                 return true;
@@ -1996,8 +1996,9 @@ int EMSdevice::get_modbus_value(uint8_t tag, const std::string & shortname, std:
     // find device value by shortname
     // TODO replace linear search which is inefficient
     const auto & it = std::find_if(devicevalues_.begin(), devicevalues_.end(), [&](const DeviceValue & x) { return x.tag == tag && x.short_name == shortname; });
-    if (it == devicevalues_.end())
+    if (it == devicevalues_.end() && (it->short_name != shortname || it->tag != tag)) {
         return -1;
+    }
 
     auto & dv = *it;
 
@@ -2082,7 +2083,7 @@ int EMSdevice::modbus_value_to_json(uint8_t tag, const std::string & shortname, 
 
     // find device value by shortname
     const auto & it = std::find_if(devicevalues_.begin(), devicevalues_.end(), [&](const DeviceValue & x) { return x.tag == tag && x.short_name == shortname; });
-    if (it == devicevalues_.end()) {
+    if (it == devicevalues_.end() && (it->short_name != shortname || it->tag != tag)) {
         return -1;
     }
 
