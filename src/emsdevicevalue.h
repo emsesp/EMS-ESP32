@@ -78,7 +78,7 @@ class DeviceValue {
         CONNECTIVITY // 27 - used in HA
     };
 
-    // TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
+    // TAG mapping - maps to DeviceValueTAG_s in emsdevicevalue.cpp
     enum DeviceValueTAG : int8_t {
         TAG_NONE        = -1, // wild card
         TAG_DEVICE_DATA = 0,
