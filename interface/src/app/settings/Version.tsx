@@ -153,7 +153,12 @@ const Version = () => {
             onClick={() => setOpenDialog(false)}
             color="primary"
           >
-            <Link underline="none" target="_blank" href={getBinURL(useDev)} color="primary">
+            <Link
+              underline="none"
+              target="_blank"
+              href={getBinURL(useDev)}
+              color="primary"
+            >
               {LL.DOWNLOAD(1)}
             </Link>
           </Button>
