@@ -1721,7 +1721,7 @@ __metadata:
     formidable: "npm:^3.5.2"
     jwt-decode: "npm:^4.0.0"
     mime-types: "npm:^2.1.35"
-    preact: "npm:^10.24.3"
+    preact: "npm:^10.25.0"
     prettier: "npm:^3.3.3"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
@@ -5635,10 +5635,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"preact@npm:^10.24.3":
-  version: 10.24.3
-  resolution: "preact@npm:10.24.3"
-  checksum: 10c0/c863df6d7be6a660480189762d8a8f2d4148733fc2bb9efbd9d2fd27315d2c7ede850a16077d716c91666c915c0349bd3c9699733e4f08457226a0519f408761
+"preact@npm:^10.25.0":
+  version: 10.25.0
+  resolution: "preact@npm:10.25.0"
+  checksum: 10c0/703e021e7a268aea929e9c896484608e18dd9f5aa62c71d3205fedf69269d9592e4cfe17adda78ca4cec1f5f0057a062300daeeb477333ba2005a4d9e3fbc970
   languageName: node
   linkType: hard
 
