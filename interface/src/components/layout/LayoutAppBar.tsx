@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -15,8 +15,7 @@ const LayoutAppBar = ({ title, onToggleDrawer }: LayoutAppBarProps) => {
   const pathnames = useLocation()
     .pathname.split('/')
     .filter((x) => x);
-  const show_back = pathnames.length > 1;
-
+  const back_path = pathnames.length > 1 ? '/' + pathnames[0] : undefined;
   const navigate = useNavigate();
 
   return (
@@ -39,12 +38,12 @@ const LayoutAppBar = ({ title, onToggleDrawer }: LayoutAppBarProps) => {
           <MenuIcon />
         </IconButton>
 
-        {show_back && (
+        {back_path && (
           <IconButton
             sx={{ mr: 1 }}
             color="inherit"
             edge="start"
-            onClick={() => navigate(pathnames[0])}
+            onClick={() => navigate(back_path)}
           >
             <ArrowBackIcon />
           </IconButton>

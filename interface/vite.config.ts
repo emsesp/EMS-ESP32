@@ -119,8 +119,6 @@ export default defineConfig(({ command, mode }) => {
             if (id.includes('node_modules')) {
               // creating a chunk to react routes deps. Reducing the vendor chunk size
               if (
-                id.includes('react-router-dom') ||
-                id.includes('@remix-run') ||
                 id.includes('react-router')
               ) {
                 return '@react-router';

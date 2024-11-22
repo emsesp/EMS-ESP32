@@ -1,5 +1,5 @@
 import { useContext, useEffect } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router';
 import { toast } from 'react-toastify';
 
 import AuthenticatedRouting from 'AuthenticatedRouting';
