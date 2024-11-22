@@ -9,7 +9,7 @@
 
 !!! note
 
-    This file has been auto-generated. Do not edit.
+    This file has been auto-generated. Do not modify.
 
 ## Devices of type *alert*
 ### EM10
