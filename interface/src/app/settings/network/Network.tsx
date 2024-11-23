@@ -24,7 +24,7 @@ const Network = () => {
   const selectNetwork = useCallback(
     (network: WiFiNetwork) => {
       setSelectedNetwork(network);
-      navigate('settings');
+      void navigate('/settings');
     },
     [navigate]
   );
