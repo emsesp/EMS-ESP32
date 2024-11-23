@@ -118,9 +118,7 @@ export default defineConfig(({ command, mode }) => {
           manualChunks(id: string) {
             if (id.includes('node_modules')) {
               // creating a chunk to react routes deps. Reducing the vendor chunk size
-              if (
-                id.includes('react-router')
-              ) {
+              if (id.includes('react-router')) {
                 return '@react-router';
               }
               return 'vendor';

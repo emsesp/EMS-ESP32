@@ -216,14 +216,24 @@ function check_upgrade(version: string) {
   if (version) {
     const dev_version = version.split(',')[0];
     const stable_version = version.split(',')[1];
-    console.log("latest dev version: " + dev_version + ", latest stable version: " + stable_version);
-    console.log('Version upgrade check from version ' + THIS_VERSION + ', upgradable: ' + VERSION_IS_UPGRADEABLE);
+    console.log(
+      'latest dev version: ' +
+        dev_version +
+        ', latest stable version: ' +
+        stable_version
+    );
+    console.log(
+      'Version upgrade check from version ' +
+        THIS_VERSION +
+        ', upgradable: ' +
+        VERSION_IS_UPGRADEABLE
+    );
     data = {
       emsesp_version: THIS_VERSION,
       upgradeable: VERSION_IS_UPGRADEABLE
     };
   } else {
-    console.log('requesting ems-esp version ('+THIS_VERSION+')');
+    console.log('requesting ems-esp version (' + THIS_VERSION + ')');
     data = {
       emsesp_version: THIS_VERSION
     };
@@ -4898,11 +4908,11 @@ router
 router
   .get(GH_ENDPOINT_ROOT + '/tags/latest', () => {
     console.log('returning latest development version: ' + LATEST_DEV_VERSION);
-    return { name: 'v'+LATEST_DEV_VERSION };
+    return { name: 'v' + LATEST_DEV_VERSION };
   })
   .get(GH_ENDPOINT_ROOT + '/latest', () => {
     console.log('returning latest stable version: ' + LATEST_STABLE_VERSION);
-    return { name: 'v'+LATEST_STABLE_VERSION };
+    return { name: 'v' + LATEST_STABLE_VERSION };
   });
 
 export default router;
