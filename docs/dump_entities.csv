@@ -4746,6 +4746,90 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "TR120RF, CR20RF",thermostat,249,seltemp,selected room temperature,int16 (>=0<=30),C,true,number.thermostat_hc1_selected_room_temperature,number.thermostat_hc1_seltemp,6,1,1/2,0,1
 "TR120RF, CR20RF",thermostat,249,currtemp,current room temperature,int16 (>=-3199<=3199),C,false,sensor.thermostat_hc1_current_room_temperature,sensor.thermostat_hc1_currtemp,6,1,1/10,1,1
 "TR120RF, CR20RF",thermostat,249,haclimate,mqtt discovery current room temperature,enum [selTemp\|roomTemp] (>=5<=30), ,false,sensor.thermostat_hc1_mqtt_discovery_current_room_temperature,sensor.thermostat_hc1_haclimate,6,1,1,2,1
+"RC120",thermostat,157,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
+"RC120",thermostat,157,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
+"RC120",thermostat,157,datetime,date/time,string, ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
+"RC120",thermostat,157,intoffset,internal temperature offset,int8 (>=-12<=12),C,true,number.thermostat_internal_temperature_offset,number.thermostat_intoffset,6,0,1/10,46,1
+"RC120",thermostat,157,floordry,floor drying,enum [off\|start\|heat\|hold\|cool\|end], ,false,sensor.thermostat_floor_drying,sensor.thermostat_floordry,6,0,1,47,1
+"RC120",thermostat,157,dampedoutdoortemp,damped outdoor temperature,int16 (>=-3199<=3199),C,false,sensor.thermostat_damped_outdoor_temperature,sensor.thermostat_dampedoutdoortemp,6,0,1/10,48,1
+"RC120",thermostat,157,floordrytemp,floor drying temperature,uint8 (>=0<=254),C,false,sensor.thermostat_floor_drying_temperature,sensor.thermostat_floordrytemp,6,0,1,49,1
+"RC120",thermostat,157,building,building type,enum [light\|medium\|heavy], ,true,select.thermostat_building_type,select.thermostat_building,6,0,1,50,1
+"RC120",thermostat,157,minexttemp,minimal external temperature,int8 (>=-126<=126),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,6,0,1,51,1
+"RC120",thermostat,157,damping,damping outdoor temperature,boolean, ,true,switch.thermostat_damping_outdoor_temperature,switch.thermostat_damping,6,0,1,52,1
+"RC120",thermostat,157,hybridstrategy,hybrid control strategy,enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix], ,true,select.thermostat_hybrid_control_strategy,select.thermostat_hybridstrategy,6,0,1,53,1
+"RC120",thermostat,157,switchovertemp,outside switchover temperature,int8 (>=-20<=20),C,true,number.thermostat_outside_switchover_temperature,number.thermostat_switchovertemp,6,0,1,54,1
+"RC120",thermostat,157,energycostratio,energy cost ratio,uint8 (>=0<=20), ,true,number.thermostat_energy_cost_ratio,number.thermostat_energycostratio,6,0,1/10,55,1
+"RC120",thermostat,157,fossilefactor,fossile energy factor,uint8 (>=0<=5), ,true,number.thermostat_fossile_energy_factor,number.thermostat_fossilefactor,6,0,1/10,56,1
+"RC120",thermostat,157,electricfactor,electric energy factor,uint8 (>=0<=5), ,true,number.thermostat_electric_energy_factor,number.thermostat_electricfactor,6,0,1/10,57,1
+"RC120",thermostat,157,delayboiler,delay boiler support,uint8 (>=5<=120),minutes,true,number.thermostat_delay_boiler_support,number.thermostat_delayboiler,6,0,1,58,1
+"RC120",thermostat,157,tempdiffboiler,temp diff boiler support,uint8 (>=1<=99),C,true,number.thermostat_temp_diff_boiler_support,number.thermostat_tempdiffboiler,6,0,1,59,1
+"RC120",thermostat,157,pvenabledhw,enable raise dhw,boolean, ,true,switch.thermostat_enable_raise_dhw,switch.thermostat_pvenabledhw,6,0,1,60,1
+"RC120",thermostat,157,pvraiseheat,raise heating with PV,int8 (>=0<=5),K,true,number.thermostat_raise_heating_with_PV,number.thermostat_pvraiseheat,6,0,1,61,1
+"RC120",thermostat,157,pvlowercool,lower cooling with PV,int8 (>=-5<=0),K,true,number.thermostat_lower_cooling_with_PV,number.thermostat_pvlowercool,6,0,1,62,1
+"RC120",thermostat,157,seltemp,selected room temperature,int16 (>=0<=30),C,true,number.thermostat_hc1_selected_room_temperature,number.thermostat_hc1_seltemp,6,1,1/2,0,1
+"RC120",thermostat,157,currtemp,current room temperature,int16 (>=-3199<=3199),C,false,sensor.thermostat_hc1_current_room_temperature,sensor.thermostat_hc1_currtemp,6,1,1/10,1,1
+"RC120",thermostat,157,haclimate,mqtt discovery current room temperature,enum [selTemp\|roomTemp] (>=5<=30), ,false,sensor.thermostat_hc1_mqtt_discovery_current_room_temperature,sensor.thermostat_hc1_haclimate,6,1,1,2,1
+"RC120",thermostat,157,mode,operating mode,enum [off\|manual\|auto], ,true,select.thermostat_hc1_operating_mode,select.thermostat_hc1_mode,6,1,1,3,1
+"RC120",thermostat,157,modetype,mode type,enum [eco\|comfort], ,false,sensor.thermostat_hc1_mode_type,sensor.thermostat_hc1_modetype,6,1,1,4,1
+"RC120",thermostat,157,ecotemp,eco temperature,uint8 (>=0<=127),C,true,number.thermostat_hc1_eco_temperature,number.thermostat_hc1_ecotemp,6,1,1/2,5,1
+"RC120",thermostat,157,manualtemp,manual temperature,uint8 (>=0<=127),C,true,number.thermostat_hc1_manual_temperature,number.thermostat_hc1_manualtemp,6,1,1/2,6,1
+"RC120",thermostat,157,comforttemp,comfort temperature,uint8 (>=0<=127),C,true,number.thermostat_hc1_comfort_temperature,number.thermostat_hc1_comforttemp,6,1,1/2,7,1
+"RC120",thermostat,157,summertemp,summer temperature,uint8 (>=10<=30),C,true,number.thermostat_hc1_summer_temperature,number.thermostat_hc1_summertemp,6,1,1,8,1
+"RC120",thermostat,157,designtemp,design temperature,uint8 (>=0<=254),C,true,number.thermostat_hc1_design_temperature,number.thermostat_hc1_designtemp,6,1,1,9,1
+"RC120",thermostat,157,offsettemp,offset temperature,int8 (>=-126<=126),C,true,number.thermostat_hc1_offset_temperature,number.thermostat_hc1_offsettemp,6,1,1,10,1
+"RC120",thermostat,157,minflowtemp,min flow temperature,uint8 (>=0<=254),C,true,number.thermostat_hc1_min_flow_temperature,number.thermostat_hc1_minflowtemp,6,1,1,11,1
+"RC120",thermostat,157,maxflowtemp,max flow temperature,uint8 (>=0<=254),C,true,number.thermostat_hc1_max_flow_temperature,number.thermostat_hc1_maxflowtemp,6,1,1,12,1
+"RC120",thermostat,157,roominfluence,room influence,uint8 (>=0<=254),C,true,number.thermostat_hc1_room_influence,number.thermostat_hc1_roominfluence,6,1,1,13,1
+"RC120",thermostat,157,roominflfactor,room influence factor,uint8 (>=0<=25), ,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,6,1,1/10,14,1
+"RC120",thermostat,157,curroominfl,current room influence,int16 (>=-3199<=3199),C,false,sensor.thermostat_hc1_current_room_influence,sensor.thermostat_hc1_curroominfl,6,1,1/10,15,1
+"RC120",thermostat,157,nofrostmode,nofrost mode,enum [room\|outdoor\|room outdoor], ,true,select.thermostat_hc1_nofrost_mode,select.thermostat_hc1_nofrostmode,6,1,1,16,1
+"RC120",thermostat,157,nofrosttemp,nofrost temperature,int8 (>=-126<=126),C,true,number.thermostat_hc1_nofrost_temperature,number.thermostat_hc1_nofrosttemp,6,1,1,17,1
+"RC120",thermostat,157,targetflowtemp,target flow temperature,uint8 (>=0<=254),C,false,sensor.thermostat_hc1_target_flow_temperature,sensor.thermostat_hc1_targetflowtemp,6,1,1,18,1
+"RC120",thermostat,157,heatingtype,heating type,enum [off\|radiator\|convector\|floor], ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,6,1,1,19,1
+"RC120",thermostat,157,summersetmode,set summer mode,enum [summer\|auto\|winter], ,true,select.thermostat_hc1_set_summer_mode,select.thermostat_hc1_summersetmode,6,1,1,20,1
+"RC120",thermostat,157,hpoperatingmode,heatpump operating mode,enum [off\|auto\|heating\|cooling], ,true,select.thermostat_hc1_heatpump_operating_mode,select.thermostat_hc1_hpoperatingmode,6,1,1,21,1
+"RC120",thermostat,157,summermode,summer mode,enum [winter\|summer], ,false,sensor.thermostat_hc1_summer_mode,sensor.thermostat_hc1_summermode,6,1,1,22,1
+"RC120",thermostat,157,hpoperatingstate,heatpump operating state,enum [heating\|off\|cooling], ,false,sensor.thermostat_hc1_heatpump_operating_state,sensor.thermostat_hc1_hpoperatingstate,6,1,1,23,1
+"RC120",thermostat,157,controlmode,control mode,enum [optimized\|simple\|n/a\|room\|power], ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,6,1,1,24,1
+"RC120",thermostat,157,program,program,enum [prog 1\|prog 2], ,true,select.thermostat_hc1_program,select.thermostat_hc1_program,6,1,1,25,1
+"RC120",thermostat,157,tempautotemp,temporary set temperature automode,int8 (>=-1<=30),C,true,number.thermostat_hc1_temporary_set_temperature_automode,number.thermostat_hc1_tempautotemp,6,1,1/2,26,1
+"RC120",thermostat,157,remoteseltemp,temporary set temperature from remote,int8 (>=-1<=30),C,true,number.thermostat_hc1_temporary_set_temperature_from_remote,number.thermostat_hc1_remoteseltemp,6,1,1/2,27,1
+"RC120",thermostat,157,fastheatup,fast heatup,uint8 (>=0<=100),%,true,number.thermostat_hc1_fast_heatup,number.thermostat_hc1_fastheatup,6,1,1,28,1
+"RC120",thermostat,157,switchonoptimization,switch-on optimization,boolean, ,true,switch.thermostat_hc1_switch-on_optimization,switch.thermostat_hc1_switchonoptimization,6,1,1,29,1
+"RC120",thermostat,157,reducemode,reduce mode,enum [outdoor\|room\|reduce], ,true,select.thermostat_hc1_reduce_mode,select.thermostat_hc1_reducemode,6,1,1,30,1
+"RC120",thermostat,157,noreducetemp,no reduce below temperature,int8 (>=-126<=126),C,true,number.thermostat_hc1_no_reduce_below_temperature,number.thermostat_hc1_noreducetemp,6,1,1,31,1
+"RC120",thermostat,157,reducetemp,off/reduce switch temperature,int8 (>=-126<=126),C,true,number.thermostat_hc1_off/reduce_switch_temperature,number.thermostat_hc1_reducetemp,6,1,1,32,1
+"RC120",thermostat,157,dhwprio,dhw priority,boolean, ,true,switch.thermostat_hc1_dhw_priority,switch.thermostat_hc1_dhwprio,6,1,1,33,1
+"RC120",thermostat,157,hpcooling,hp cooling,boolean, ,true,switch.thermostat_hc1_hp_cooling,switch.thermostat_hc1_hpcooling,6,1,1,34,1
+"RC120",thermostat,157,coolingon,cooling on,boolean, ,false,binary_sensor.thermostat_hc1_cooling_on,binary_sensor.thermostat_hc1_coolingon,6,1,1,35,1
+"RC120",thermostat,157,hpmode,HP Mode,enum [heating\|cooling\|heating & cooling], ,true,select.thermostat_hc1_HP_Mode,select.thermostat_hc1_hpmode,6,1,1,36,1
+"RC120",thermostat,157,dewoffset,dew point offset,uint8 (>=2<=10),K,true,number.thermostat_hc1_dew_point_offset,number.thermostat_hc1_dewoffset,6,1,1,37,1
+"RC120",thermostat,157,roomtempdiff,room temp difference,uint8 (>=0<=254),K,true,number.thermostat_hc1_room_temp_difference,number.thermostat_hc1_roomtempdiff,6,1,1,38,1
+"RC120",thermostat,157,hpminflowtemp,HP min. flow temp.,uint8 (>=0<=254),C,true,number.thermostat_hc1_HP_min._flow_temp.,number.thermostat_hc1_hpminflowtemp,6,1,1,39,1
+"RC120",thermostat,157,control,control device,enum [RC310\|RC200\|RC100\|RC100H\|TC100], ,true,select.thermostat_hc1_control_device,select.thermostat_hc1_control,6,1,1,40,1
+"RC120",thermostat,157,remotetemp,room temperature from remote,cmd [] (>=-1<=101),C,true,sensor.thermostat_hc1_room_temperature_from_remote,sensor.thermostat_hc1_remotetemp,6,1,1/10,41,1
+"RC120",thermostat,157,remotehum,room humidity from remote,cmd [] (>=-1<=101),%,true,sensor.thermostat_hc1_room_humidity_from_remote,sensor.thermostat_hc1_remotehum,6,1,1,42,1
+"RC120",thermostat,157,heatondelay,heat-on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_heat-on_delay,number.thermostat_hc1_heatondelay,6,1,1,43,1
+"RC120",thermostat,157,heatoffdelay,heat-off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_heat-off_delay,number.thermostat_hc1_heatoffdelay,6,1,1,44,1
+"RC120",thermostat,157,instantstart,instant start,uint8 (>=1<=10),K,true,number.thermostat_hc1_instant_start,number.thermostat_hc1_instantstart,6,1,1,45,1
+"RC120",thermostat,157,boost,boost mode,boolean, ,true,switch.thermostat_hc1_boost_mode,switch.thermostat_hc1_boost,6,1,1,46,1
+"RC120",thermostat,157,boosttime,boost time,uint8 (>=0<=254),hours,true,number.thermostat_hc1_boost_time,number.thermostat_hc1_boosttime,6,1,1,47,1
+"RC120",thermostat,157,coolstart,cooling starttemp,uint8 (>=20<=35),C,true,number.thermostat_hc1_cooling_starttemp,number.thermostat_hc1_coolstart,6,1,1,48,1
+"RC120",thermostat,157,coolondelay,cooling on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_on_delay,number.thermostat_hc1_coolondelay,6,1,1,49,1
+"RC120",thermostat,157,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,50,1
+"RC120",thermostat,157,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,51,1
+"RC120",thermostat,157,mode,operating mode,enum [off\|comfort\|auto], ,true,select.thermostat_dhw_operating_mode,select.thermostat_dhw_mode,6,9,1,0,1
+"RC120",thermostat,157,settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
+"RC120",thermostat,157,settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
+"RC120",thermostat,157,circmode,circulation pump mode,enum [off\|on\|auto\|own prog], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,3,1
+"RC120",thermostat,157,chargeduration,charge duration,uint8 (>=0<=3810),minutes,true,number.thermostat_dhw_charge_duration,number.thermostat_dhw_chargeduration,6,9,15,4,1
+"RC120",thermostat,157,charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
+"RC120",thermostat,157,extra,extra,boolean, ,false,binary_sensor.thermostat_dhw_extra,binary_sensor.thermostat_dhw_extra,6,9,1,6,1
+"RC120",thermostat,157,disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,7,1
+"RC120",thermostat,157,disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,8,1
+"RC120",thermostat,157,disinfecttime,disinfection time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_disinfection_time,number.thermostat_dhw_disinfecttime,6,9,15,9,1
+"RC120",thermostat,157,dailyheating,daily heating,boolean, ,true,switch.thermostat_dhw_daily_heating,switch.thermostat_dhw_dailyheating,6,9,1,10,1
+"RC120",thermostat,157,dailyheattime,daily heating time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_daily_heating_time,number.thermostat_dhw_dailyheattime,6,9,15,11,1
 "MM10",mixer,69,flowtemphc,flow temperature (TC1),uint16 (>=0<=3199),C,false,sensor.mixer_hc1_flow_temperature_(TC1),sensor.mixer_hc1_flowtemphc,7,1,1/10,0,1
 "MM10",mixer,69,valvestatus,mixing valve actuator (VC1),int8 (>=-100<=100),%,false,sensor.mixer_hc1_mixing_valve_actuator_(VC1),sensor.mixer_hc1_valvestatus,7,1,1,1,1
 "MM10",mixer,69,flowsettemp,setpoint flow temperature,uint8 (>=0<=254),C,true,number.mixer_hc1_setpoint_flow_temperature,number.mixer_hc1_flowsettemp,7,1,1,2,1
@@ -4769,13 +4853,13 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "MM50",mixer,159,activated,activated,boolean, ,true,switch.mixer_hc1_activated,switch.mixer_hc1_activated,7,1,1,4,1
 "MM50",mixer,159,valvesettime,time to set valve,uint8 (>=10<=600),seconds,true,number.mixer_hc1_time_to_set_valve,number.mixer_hc1_valvesettime,7,1,10,5,1
 "MM50",mixer,159,flowtempoffset,flow temperature offset for mixer,uint8 (>=0<=20),K,true,number.mixer_hc1_flow_temperature_offset_for_mixer,number.mixer_hc1_flowtempoffset,7,1,1,7,1
-"MM100",mixer,160,flowtemphc,flow temperature (TC1),uint16 (>=0<=3199),C,false,sensor.mixer_dhw_flow_temperature_(TC1),sensor.mixer_dhw_flowtemphc,7,9,1/10,0,1
-"MM100",mixer,160,valvestatus,mixing valve actuator (VC1),uint8 (>=0<=100),%,false,sensor.mixer_dhw_mixing_valve_actuator_(VC1),sensor.mixer_dhw_valvestatus,7,9,1,1,1
-"MM100",mixer,160,flowsettemp,setpoint flow temperature,uint8 (>=0<=254),C,true,number.mixer_dhw_setpoint_flow_temperature,number.mixer_dhw_flowsettemp,7,9,1,2,1
-"MM100",mixer,160,pumpstatus,pump status (PC1),boolean, ,true,switch.mixer_dhw_pump_status_(PC1),switch.mixer_dhw_pumpstatus,7,9,1,3,1
-"MM100",mixer,160,activated,activated,boolean, ,true,switch.mixer_dhw_activated,switch.mixer_dhw_activated,7,9,1,4,1
-"MM100",mixer,160,valvesettime,time to set valve,uint8 (>=10<=600),seconds,true,number.mixer_dhw_time_to_set_valve,number.mixer_dhw_valvesettime,7,9,10,5,1
-"MM100",mixer,160,flowtempoffset,flow temperature offset for mixer,uint8 (>=0<=20),K,true,number.mixer_dhw_flow_temperature_offset_for_mixer,number.mixer_dhw_flowtempoffset,7,9,1,6,1
+"MM100",mixer,160,flowtemphc,flow temperature (TC1),uint16 (>=0<=3199),C,false,sensor.mixer_hc1_flow_temperature_(TC1),sensor.mixer_hc1_flowtemphc,7,1,1/10,0,1
+"MM100",mixer,160,valvestatus,mixing valve actuator (VC1),uint8 (>=0<=100),%,false,sensor.mixer_hc1_mixing_valve_actuator_(VC1),sensor.mixer_hc1_valvestatus,7,1,1,1,1
+"MM100",mixer,160,flowsettemp,setpoint flow temperature,uint8 (>=0<=254),C,true,number.mixer_hc1_setpoint_flow_temperature,number.mixer_hc1_flowsettemp,7,1,1,2,1
+"MM100",mixer,160,pumpstatus,pump status (PC1),boolean, ,true,switch.mixer_hc1_pump_status_(PC1),switch.mixer_hc1_pumpstatus,7,1,1,3,1
+"MM100",mixer,160,activated,activated,boolean, ,true,switch.mixer_hc1_activated,switch.mixer_hc1_activated,7,1,1,4,1
+"MM100",mixer,160,valvesettime,time to set valve,uint8 (>=10<=600),seconds,true,number.mixer_hc1_time_to_set_valve,number.mixer_hc1_valvesettime,7,1,10,5,1
+"MM100",mixer,160,flowtempoffset,flow temperature offset for mixer,uint8 (>=0<=20),K,true,number.mixer_hc1_flow_temperature_offset_for_mixer,number.mixer_hc1_flowtempoffset,7,1,1,7,1
 "MM200",mixer,161,flowtemphc,flow temperature (TC1),uint16 (>=0<=3199),C,false,sensor.mixer_hc1_flow_temperature_(TC1),sensor.mixer_hc1_flowtemphc,7,1,1/10,0,1
 "MM200",mixer,161,valvestatus,mixing valve actuator (VC1),uint8 (>=0<=100),%,false,sensor.mixer_hc1_mixing_valve_actuator_(VC1),sensor.mixer_hc1_valvestatus,7,1,1,1,1
 "MM200",mixer,161,flowsettemp,setpoint flow temperature,uint8 (>=0<=254),C,true,number.mixer_hc1_setpoint_flow_temperature,number.mixer_hc1_flowsettemp,7,1,1,2,1
@@ -4790,6 +4874,13 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "MZ100",mixer,193,activated,activated,boolean, ,true,switch.mixer_hc1_activated,switch.mixer_hc1_activated,7,1,1,4,1
 "MZ100",mixer,193,valvesettime,time to set valve,uint8 (>=10<=600),seconds,true,number.mixer_hc1_time_to_set_valve,number.mixer_hc1_valvesettime,7,1,10,5,1
 "MZ100",mixer,193,flowtempoffset,flow temperature offset for mixer,uint8 (>=0<=20),K,true,number.mixer_hc1_flow_temperature_offset_for_mixer,number.mixer_hc1_flowtempoffset,7,1,1,7,1
+"HM210",mixer,248,flowtemphc,flow temperature (TC1),uint16 (>=0<=3199),C,false,sensor.mixer_hc1_flow_temperature_(TC1),sensor.mixer_hc1_flowtemphc,7,1,1/10,0,1
+"HM210",mixer,248,valvestatus,mixing valve actuator (VC1),uint8 (>=0<=100),%,false,sensor.mixer_hc1_mixing_valve_actuator_(VC1),sensor.mixer_hc1_valvestatus,7,1,1,1,1
+"HM210",mixer,248,flowsettemp,setpoint flow temperature,uint8 (>=0<=254),C,true,number.mixer_hc1_setpoint_flow_temperature,number.mixer_hc1_flowsettemp,7,1,1,2,1
+"HM210",mixer,248,pumpstatus,pump status (PC1),boolean, ,true,switch.mixer_hc1_pump_status_(PC1),switch.mixer_hc1_pumpstatus,7,1,1,3,1
+"HM210",mixer,248,activated,activated,boolean, ,true,switch.mixer_hc1_activated,switch.mixer_hc1_activated,7,1,1,4,1
+"HM210",mixer,248,valvesettime,time to set valve,uint8 (>=10<=600),seconds,true,number.mixer_hc1_time_to_set_valve,number.mixer_hc1_valvesettime,7,1,10,5,1
+"HM210",mixer,248,flowtempoffset,flow temperature offset for mixer,uint8 (>=0<=20),K,true,number.mixer_hc1_flow_temperature_offset_for_mixer,number.mixer_hc1_flowtempoffset,7,1,1,7,1
 "SM10",solar,73,collectortemp,collector temperature (TS1),int16 (>=-3199<=3199),C,false,sensor.solar_collector_temperature_(TS1),sensor.solar_collectortemp,8,0,1/10,0,1
 "SM10",solar,73,cylbottomtemp,cylinder bottom temperature (TS2),int16 (>=-3199<=3199),C,false,sensor.solar_cylinder_bottom_temperature_(TS2),sensor.solar_cylbottomtemp,8,0,1/10,1,1
 "SM10",solar,73,solarpump,pump (PS1),boolean, ,false,binary_sensor.solar_pump_(PS1),binary_sensor.solar_solarpump,8,0,1,2,1
@@ -5122,6 +5213,92 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Logavent HRV176",ventilation,231,ventmode,ventilation mode,enum [auto\|off\|L1\|L2\|L3\|L4\|demand\|sleep\|intense\|bypass\|party\|fireplace], ,true,select.ventilation_ventilation_mode,select.ventilation_ventmode,18,0,1,6,1
 "Logavent HRV176",ventilation,231,airquality,air quality (voc),uint16 (>=0<=31999), ,false,sensor.ventilation_air_quality_(voc),sensor.ventilation_airquality,18,0,1,7,1
 "Logavent HRV176",ventilation,231,airhumidity,relative air humidity,uint8 (>=0<=100),%,false,sensor.ventilation_relative_air_humidity,sensor.ventilation_airhumidity,18,0,1,8,1
+"IPM",water,100,seltemp,selected temperature,uint8 (>=0<=254),C,true,number.water_dhw_selected_temperature,number.water_dhw_seltemp,19,9,1,0,1
+"IPM",water,100,temp,current temperature,uint16 (>=0<=3199),C,false,sensor.water_dhw_current_temperature,sensor.water_dhw_temp,19,9,1/10,1,1
+"IPM",water,100,curtemp2,current extern temperature,uint16 (>=0<=3199),C,false,sensor.water_dhw_current_extern_temperature,sensor.water_dhw_curtemp2,19,9,1/10,2,1
+"IPM",water,100,hydrTemp,hydraulic header temperature,uint16 (>=0<=3199),C,false,sensor.water_dhw_hydraulic_header_temperature,sensor.water_dhw_hydrTemp,19,9,1/10,3,1
+"IPM",water,100,pump,pump,boolean, ,false,binary_sensor.water_dhw_pump,binary_sensor.water_dhw_pump,19,9,1,4,1
+"IPM",water,100,flowtempoffset,flow temperature offset,uint8 (>=0<=254),C,true,number.water_dhw_flow_temperature_offset,number.water_dhw_flowtempoffset,19,9,1,5,1
+"IPM",water,100,hyston,hysteresis on temperature,int8 (>=-126<=126),C,true,number.water_dhw_hysteresis_on_temperature,number.water_dhw_hyston,19,9,1,6,1
+"IPM",water,100,hystoff,hysteresis off temperature,int8 (>=-126<=126),C,true,number.water_dhw_hysteresis_off_temperature,number.water_dhw_hystoff,19,9,1,7,1
+"IPM",water,100,disinfectiontemp,disinfection temperature,uint8 (>=0<=254),C,true,number.water_dhw_disinfection_temperature,number.water_dhw_disinfectiontemp,19,9,1,8,1
+"IPM",water,100,circ,circulation active,boolean, ,true,switch.water_dhw_circulation_active,switch.water_dhw_circ,19,9,1,9,1
+"IPM",water,100,circmode,circulation pump mode,enum [off\|on\|auto\|own prog], ,true,select.water_dhw_circulation_pump_mode,select.water_dhw_circmode,19,9,1,10,1
+"IPM",water,102,seltemp,selected temperature,uint8 (>=0<=254),C,true,number.water_dhw_selected_temperature,number.water_dhw_seltemp,19,9,1,0,1
+"IPM",water,102,temp,current temperature,uint16 (>=0<=3199),C,false,sensor.water_dhw_current_temperature,sensor.water_dhw_temp,19,9,1/10,1,1
+"IPM",water,102,curtemp2,current extern temperature,uint16 (>=0<=3199),C,false,sensor.water_dhw_current_extern_temperature,sensor.water_dhw_curtemp2,19,9,1/10,2,1
+"IPM",water,102,hydrTemp,hydraulic header temperature,uint16 (>=0<=3199),C,false,sensor.water_dhw_hydraulic_header_temperature,sensor.water_dhw_hydrTemp,19,9,1/10,3,1
+"IPM",water,102,pump,pump,boolean, ,false,binary_sensor.water_dhw_pump,binary_sensor.water_dhw_pump,19,9,1,4,1
+"IPM",water,102,flowtempoffset,flow temperature offset,uint8 (>=0<=254),C,true,number.water_dhw_flow_temperature_offset,number.water_dhw_flowtempoffset,19,9,1,5,1
+"IPM",water,102,hyston,hysteresis on temperature,int8 (>=-126<=126),C,true,number.water_dhw_hysteresis_on_temperature,number.water_dhw_hyston,19,9,1,6,1
+"IPM",water,102,hystoff,hysteresis off temperature,int8 (>=-126<=126),C,true,number.water_dhw_hysteresis_off_temperature,number.water_dhw_hystoff,19,9,1,7,1
+"IPM",water,102,disinfectiontemp,disinfection temperature,uint8 (>=0<=254),C,true,number.water_dhw_disinfection_temperature,number.water_dhw_disinfectiontemp,19,9,1,8,1
+"IPM",water,102,circ,circulation active,boolean, ,true,switch.water_dhw_circulation_active,switch.water_dhw_circ,19,9,1,9,1
+"IPM",water,102,circmode,circulation pump mode,enum [off\|on\|auto\|own prog], ,true,select.water_dhw_circulation_pump_mode,select.water_dhw_circmode,19,9,1,10,1
+"MM100",water,160,temp,current temperature,uint16 (>=0<=3199),C,false,sensor.water_dhw_current_temperature,sensor.water_dhw_temp,19,9,1/10,1,1
+"MM100",water,160,tempstatus,temperature switch in assigned dhw (MC1),int8 (>=-126<=126), ,false,sensor.water_dhw_temperature_switch_in_assigned_dhw_(MC1),sensor.water_dhw_tempstatus,19,9,1,11,1
+"MM100",water,160,pump,pump,boolean, ,false,binary_sensor.water_dhw_pump,binary_sensor.water_dhw_pump,19,9,1,4,1
+"MM100",water,160,maxtemp,maximum temperature,uint8 (>=0<=254),C,true,number.water_dhw_maximum_temperature,number.water_dhw_maxtemp,19,9,1,12,1
+"MM100",water,160,difftemp,start differential temperature,int8 (>=-126<=126),C,true,number.water_dhw_start_differential_temperature,number.water_dhw_difftemp,19,9,1,13,1
+"MM100",water,160,disinfectiontemp,disinfection temperature,uint8 (>=0<=254),C,true,number.water_dhw_disinfection_temperature,number.water_dhw_disinfectiontemp,19,9,1,8,1
+"MM100",water,160,redtemp,reduced temperature,uint8 (>=0<=254),C,true,number.water_dhw_reduced_temperature,number.water_dhw_redtemp,19,9,1,14,1
+"MM100",water,160,requiredtemp,required temperature,uint8 (>=0<=254),C,true,number.water_dhw_required_temperature,number.water_dhw_requiredtemp,19,9,1,15,1
+"MM100",water,160,circ,circulation active,boolean, ,true,switch.water_dhw_circulation_active,switch.water_dhw_circ,19,9,1,9,1
+"MM100",water,160,circmode,circulation pump mode,enum [off\|on\|auto\|own prog], ,true,select.water_dhw_circulation_pump_mode,select.water_dhw_circmode,19,9,1,10,1
+"MM200",water,161,temp,current temperature,uint16 (>=0<=3199),C,false,sensor.water_dhw_current_temperature,sensor.water_dhw_temp,19,9,1/10,1,1
+"MM200",water,161,tempstatus,temperature switch in assigned dhw (MC1),int8 (>=-126<=126), ,false,sensor.water_dhw_temperature_switch_in_assigned_dhw_(MC1),sensor.water_dhw_tempstatus,19,9,1,11,1
+"MM200",water,161,pump,pump,boolean, ,false,binary_sensor.water_dhw_pump,binary_sensor.water_dhw_pump,19,9,1,4,1
+"MM200",water,161,maxtemp,maximum temperature,uint8 (>=0<=254),C,true,number.water_dhw_maximum_temperature,number.water_dhw_maxtemp,19,9,1,12,1
+"MM200",water,161,difftemp,start differential temperature,int8 (>=-126<=126),C,true,number.water_dhw_start_differential_temperature,number.water_dhw_difftemp,19,9,1,13,1
+"MM200",water,161,disinfectiontemp,disinfection temperature,uint8 (>=0<=254),C,true,number.water_dhw_disinfection_temperature,number.water_dhw_disinfectiontemp,19,9,1,8,1
+"MM200",water,161,redtemp,reduced temperature,uint8 (>=0<=254),C,true,number.water_dhw_reduced_temperature,number.water_dhw_redtemp,19,9,1,14,1
+"MM200",water,161,requiredtemp,required temperature,uint8 (>=0<=254),C,true,number.water_dhw_required_temperature,number.water_dhw_requiredtemp,19,9,1,15,1
+"MM200",water,161,circ,circulation active,boolean, ,true,switch.water_dhw_circulation_active,switch.water_dhw_circ,19,9,1,9,1
+"MM200",water,161,circmode,circulation pump mode,enum [off\|on\|auto\|own prog], ,true,select.water_dhw_circulation_pump_mode,select.water_dhw_circmode,19,9,1,10,1
+"SM100, MS100",water,163,temp,current temperature,uint16 (>=0<=3199),C,false,sensor.water_dhw3_current_temperature,sensor.water_dhw3_temp,19,11,1/10,1,1
+"SM100, MS100",water,163,storagetemp1,storage intern temperature,uint16 (>=0<=3199),C,false,sensor.water_dhw3_storage_intern_temperature,sensor.water_dhw3_storagetemp1,19,11,1/10,1,1
+"SM100, MS100",water,163,coldtemp,cold water,uint16 (>=0<=3199),C,false,sensor.water_dhw3_cold_water,sensor.water_dhw3_coldtemp,19,11,1/10,2,1
+"SM100, MS100",water,163,temp5,temperature 5,uint16 (>=0<=3199),C,false,sensor.water_dhw3_temperature_5,sensor.water_dhw3_temp5,19,11,1/10,3,1
+"SM100, MS100",water,163,rettemp,return temperature,uint16 (>=0<=3199),C,false,sensor.water_dhw3_return_temperature,sensor.water_dhw3_rettemp,19,11,1/10,4,1
+"SM100, MS100",water,163,pump,pump,boolean, ,false,binary_sensor.water_dhw3_pump,binary_sensor.water_dhw3_pump,19,11,1,4,1
+"SM100, MS100",water,163,maxtemp,maximum temperature,uint8 (>=0<=254),C,true,number.water_dhw3_maximum_temperature,number.water_dhw3_maxtemp,19,11,1,12,1
+"SM100, MS100",water,163,seltemp,selected temperature,uint8 (>=0<=254),C,true,number.water_dhw3_selected_temperature,number.water_dhw3_seltemp,19,11,1,0,1
+"SM100, MS100",water,163,redtemp,reduced temperature,uint8 (>=0<=254),C,true,number.water_dhw3_reduced_temperature,number.water_dhw3_redtemp,19,11,1,14,1
+"SM100, MS100",water,163,hottemp,extra hot temperature,uint8 (>=0<=254),C,true,number.water_dhw3_extra_hot_temperature,number.water_dhw3_hottemp,19,11,1,9,1
+"SM100, MS100",water,163,dailytemp,daily temperature,uint8 (>=0<=254),C,true,number.water_dhw3_daily_temperature,number.water_dhw3_dailytemp,19,11,1,10,1
+"SM100, MS100",water,163,disinfectiontemp,disinfection temperature,uint8 (>=0<=254),C,true,number.water_dhw3_disinfection_temperature,number.water_dhw3_disinfectiontemp,19,11,1,8,1
+"SM100, MS100",water,163,circ,circulation active,boolean, ,true,switch.water_dhw3_circulation_active,switch.water_dhw3_circ,19,11,1,9,1
+"SM100, MS100",water,163,circmode,circulation pump mode,enum [off\|1x3min\|2x3min\|3x3min\|4x3min\|5x3min\|6x3min\|continuous], ,true,select.water_dhw3_circulation_pump_mode,select.water_dhw3_circmode,19,11,1,10,1
+"SM100, MS100",water,163,circtc,circulation time controled,boolean, ,true,switch.water_dhw3_circulation_time_controled,switch.water_dhw3_circtc,19,11,1,14,1
+"SM100, MS100",water,163,keepwarm,keep warm,boolean, ,true,switch.water_dhw3_keep_warm,switch.water_dhw3_keepwarm,19,11,1,15,1
+"SM100, MS100",water,163,status2,status 2,enum [\|\|\|no heat\|\|\|heat request\|\|disinfecting\|hold], ,false,sensor.water_dhw3_status_2,sensor.water_dhw3_status2,19,11,1,16,1
+"SM100, MS100",water,163,pumpmod,pump modulation,uint8 (>=0<=100),%,false,sensor.water_dhw3_pump_modulation,sensor.water_dhw3_pumpmod,19,11,1,17,1
+"SM100, MS100",water,163,flow,flow rate,uint16 (>=0<=3199),l/min,false,sensor.water_dhw3_flow_rate,sensor.water_dhw3_flow,19,11,1/10,18,1
+"SM100, MS100",water,163,valvereturn,return valve,uint8 (>=0<=100),%,true,number.water_dhw3_return_valve,number.water_dhw3_valvereturn,19,11,1,19,1
+"SM100, MS100",water,163,deltatret,temp. diff. return valve,uint8 (>=0<=254),K,true,number.water_dhw3_temp._diff._return_valve,number.water_dhw3_deltatret,19,11,1,20,1
+"SM100, MS100",water,163,errordisp,error display,enum [off\|normal\|inverted], ,true,select.water_dhw3_error_display,select.water_dhw3_errordisp,19,11,1,21,1
+"SM200, MS200",water,164,temp,current temperature,uint16 (>=0<=3199),C,false,sensor.water_dhw3_current_temperature,sensor.water_dhw3_temp,19,11,1/10,1,1
+"SM200, MS200",water,164,storagetemp1,storage intern temperature,uint16 (>=0<=3199),C,false,sensor.water_dhw3_storage_intern_temperature,sensor.water_dhw3_storagetemp1,19,11,1/10,1,1
+"SM200, MS200",water,164,coldtemp,cold water,uint16 (>=0<=3199),C,false,sensor.water_dhw3_cold_water,sensor.water_dhw3_coldtemp,19,11,1/10,2,1
+"SM200, MS200",water,164,temp5,temperature 5,uint16 (>=0<=3199),C,false,sensor.water_dhw3_temperature_5,sensor.water_dhw3_temp5,19,11,1/10,3,1
+"SM200, MS200",water,164,rettemp,return temperature,uint16 (>=0<=3199),C,false,sensor.water_dhw3_return_temperature,sensor.water_dhw3_rettemp,19,11,1/10,4,1
+"SM200, MS200",water,164,pump,pump,boolean, ,false,binary_sensor.water_dhw3_pump,binary_sensor.water_dhw3_pump,19,11,1,4,1
+"SM200, MS200",water,164,maxtemp,maximum temperature,uint8 (>=0<=254),C,true,number.water_dhw3_maximum_temperature,number.water_dhw3_maxtemp,19,11,1,12,1
+"SM200, MS200",water,164,seltemp,selected temperature,uint8 (>=0<=254),C,true,number.water_dhw3_selected_temperature,number.water_dhw3_seltemp,19,11,1,0,1
+"SM200, MS200",water,164,redtemp,reduced temperature,uint8 (>=0<=254),C,true,number.water_dhw3_reduced_temperature,number.water_dhw3_redtemp,19,11,1,14,1
+"SM200, MS200",water,164,hottemp,extra hot temperature,uint8 (>=0<=254),C,true,number.water_dhw3_extra_hot_temperature,number.water_dhw3_hottemp,19,11,1,9,1
+"SM200, MS200",water,164,dailytemp,daily temperature,uint8 (>=0<=254),C,true,number.water_dhw3_daily_temperature,number.water_dhw3_dailytemp,19,11,1,10,1
+"SM200, MS200",water,164,disinfectiontemp,disinfection temperature,uint8 (>=0<=254),C,true,number.water_dhw3_disinfection_temperature,number.water_dhw3_disinfectiontemp,19,11,1,8,1
+"SM200, MS200",water,164,circ,circulation active,boolean, ,true,switch.water_dhw3_circulation_active,switch.water_dhw3_circ,19,11,1,9,1
+"SM200, MS200",water,164,circmode,circulation pump mode,enum [off\|1x3min\|2x3min\|3x3min\|4x3min\|5x3min\|6x3min\|continuous], ,true,select.water_dhw3_circulation_pump_mode,select.water_dhw3_circmode,19,11,1,10,1
+"SM200, MS200",water,164,circtc,circulation time controled,boolean, ,true,switch.water_dhw3_circulation_time_controled,switch.water_dhw3_circtc,19,11,1,14,1
+"SM200, MS200",water,164,keepwarm,keep warm,boolean, ,true,switch.water_dhw3_keep_warm,switch.water_dhw3_keepwarm,19,11,1,15,1
+"SM200, MS200",water,164,status2,status 2,enum [\|\|\|no heat\|\|\|heat request\|\|disinfecting\|hold], ,false,sensor.water_dhw3_status_2,sensor.water_dhw3_status2,19,11,1,16,1
+"SM200, MS200",water,164,pumpmod,pump modulation,uint8 (>=0<=100),%,false,sensor.water_dhw3_pump_modulation,sensor.water_dhw3_pumpmod,19,11,1,17,1
+"SM200, MS200",water,164,flow,flow rate,uint16 (>=0<=3199),l/min,false,sensor.water_dhw3_flow_rate,sensor.water_dhw3_flow,19,11,1/10,18,1
+"SM200, MS200",water,164,valvereturn,return valve,uint8 (>=0<=100),%,true,number.water_dhw3_return_valve,number.water_dhw3_valvereturn,19,11,1,19,1
+"SM200, MS200",water,164,deltatret,temp. diff. return valve,uint8 (>=0<=254),K,true,number.water_dhw3_temp._diff._return_valve,number.water_dhw3_deltatret,19,11,1,20,1
+"SM200, MS200",water,164,errordisp,error display,enum [off\|normal\|inverted], ,true,select.water_dhw3_error_display,select.water_dhw3_errordisp,19,11,1,21,1
 "MP100",pool,204,pooltemp,pool temperature,int16 (>=-3199<=3199),C,false,sensor.pool_pool_temperature,sensor.pool_pooltemp,20,0,1/10,-1,1
 "MP100",pool,204,poolshuntstatus,pool shunt status opening/closing,enum [stopped\|opening\|closing\|open\|close], ,false,sensor.pool_pool_shunt_status_opening/closing,sensor.pool_poolshuntstatus,20,0,1,-1,1
 "MP100",pool,204,poolshunt,pool shunt open/close (0% = pool / 100% = heat),uint8 (>=0<=100),%,false,sensor.pool_pool_shunt_open/close_(0%_=_pool_/_100%_=_heat),sensor.pool_poolshunt,20,0,1,-1,1

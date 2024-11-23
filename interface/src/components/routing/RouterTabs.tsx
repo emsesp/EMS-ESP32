@@ -16,7 +16,7 @@ const RouterTabs: FC<RouterTabsProps> = ({ value, children }) => {
   const smallDown = useMediaQuery(theme.breakpoints.down('sm'));
 
   const handleTabChange = (_event: unknown, path: string) => {
-    navigate(path);
+    void navigate(path);
   };
 
   return (

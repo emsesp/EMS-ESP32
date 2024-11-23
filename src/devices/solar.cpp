@@ -672,12 +672,12 @@ void Solar::process_SM100Status(std::shared_ptr<const Telegram> telegram) {
  * byte 10 = PS1 Solar circuit pump for collector array 1: test=b0001(1), on=b0100(4) and off=b0011(3)
  */
 void Solar::process_SM100Status2(std::shared_ptr<const Telegram> telegram) {
-    has_bitupdate(telegram, vs1Status_, 0, 2);   // on if bit 2 set
-    has_bitupdate(telegram, valveStatus_, 4, 2); // on if bit 2 set
-    has_bitupdate(telegram, solarPump_, 10, 2);  // on if bit 2 set
-    has_bitupdate(telegram, solarPump2_, 1, 2);  // on if bit 2 set
-    has_bitupdate(telegram, m1Valve_, 7, 2);     // values 8/4 seen
-    has_bitupdate(telegram, transferPump_, 11, 2);   // #2212
+    has_bitupdate(telegram, vs1Status_, 0, 2);     // on if bit 2 set
+    has_bitupdate(telegram, valveStatus_, 4, 2);   // on if bit 2 set
+    has_bitupdate(telegram, solarPump_, 10, 2);    // on if bit 2 set
+    has_bitupdate(telegram, solarPump2_, 1, 2);    // on if bit 2 set
+    has_bitupdate(telegram, m1Valve_, 7, 2);       // values 8/4 seen
+    has_bitupdate(telegram, transferPump_, 11, 2); // #2212
 }
 
 /*

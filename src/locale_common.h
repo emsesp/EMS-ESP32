@@ -231,7 +231,7 @@ MAKE_NOTRANSLATION(tpl_input4, "<inv>[<comp><aux><cool><heat><dhw><pv>]")
 MAKE_NOTRANSLATION(test_cmd, "run a test")
 #endif
 
-// TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
+// TAG mapping - maps to DeviceValueTAG_s in emsdevicevalue.cpp
 // use empty string if want to suppress showing tags
 // mqtt tags must not have spaces
 MAKE_NOTRANSLATION(tag_none, "")
