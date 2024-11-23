@@ -276,8 +276,8 @@ void Heatpump::process_HpMeters(std::shared_ptr<const Telegram> telegram) {
 
 // Broadcast (0x099A), data: 05 00 00 00 00 00 00 37 00 00 1D 00 00 52 00 00 13 01 00 01 7C
 void Heatpump::process_HpStarts(std::shared_ptr<const Telegram> telegram) {
-    has_update(telegram, heatStartsHp_, 14, 3);
-    has_update(telegram, wwStartsHp_, 11,3 );
+    has_update(telegram, heatStartsHp_, 11, 3);
+    has_update(telegram, wwStartsHp_, 14, 3);
 }
 
 /*
