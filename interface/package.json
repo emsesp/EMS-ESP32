@@ -38,7 +38,7 @@
     "react-router": "^7.0.1",
     "react-toastify": "^10.0.6",
     "typesafe-i18n": "^5.26.2",
-    "typescript": "^5.6.3"
+    "typescript": "^5.7.2"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
@@ -47,7 +47,7 @@
     "@preact/preset-vite": "^2.9.1",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/formidable": "^3",
-    "@types/node": "^22.9.1",
+    "@types/node": "^22.9.3",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "concurrently": "^9.1.0",
