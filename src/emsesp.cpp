@@ -348,9 +348,9 @@ void EMSESP::dump_all_entities(uuid::console::Shell & shell) {
                     if (device.flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
                         device_id = 0x28; // dhw 1/2
                     } else if (device.flags == EMSdevice::EMS_DEVICE_FLAG_SM100) {
-                        device_id = 0x2A; // dhw 3
+                        device_id = 0x28; // fix to dhw1, normally SM100 can only use dhw 3
                     } else if (device.flags == EMSdevice::EMS_DEVICE_FLAG_IPM) {
-                        device_id = 0x40; // dhw 1
+                        device_id = 0x40; // dhw 1, not needed
                     }
                 }
 
@@ -392,9 +392,9 @@ void EMSESP::dump_all_telegrams(uuid::console::Shell & shell) {
                     if (device.flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) {
                         device_id = 0x28; // dhw 1/2
                     } else if (device.flags == EMSdevice::EMS_DEVICE_FLAG_SM100) {
-                        device_id = 0x2A; // dhw 3
+                        device_id = 0x2A; // dhw 3 needed to calculate right telegram numbers
                     } else if (device.flags == EMSdevice::EMS_DEVICE_FLAG_IPM) {
-                        device_id = 0x40; // dhw 1
+                        device_id = 0x40; // dhw 1, not needed
                     }
                 }
 
