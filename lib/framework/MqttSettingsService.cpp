@@ -207,6 +207,17 @@ bool MqttSettingsService::configureMqtt() {
         static_cast<espMqttClient *>(_mqttClient)->setClientId(_state.clientId.c_str());
         static_cast<espMqttClient *>(_mqttClient)->setKeepAlive(_state.keepAlive);
         static_cast<espMqttClient *>(_mqttClient)->setCleanSession(_state.cleanSession);
+
+        // create last will topic with the base prefixed. It has to be static because the client destroys the reference
+        static char will_topic[FACTORY_MQTT_MAX_TOPIC_LENGTH];
+        if (_state.base.isEmpty()) {
+            snprintf(will_topic, sizeof(will_topic), "status");
+        } else {
+            snprintf(will_topic, sizeof(will_topic), "%s/status", _state.base.c_str());
+        }
+        setWill(will_topic);
+
+
         return _mqttClient->connect();
     }
 
