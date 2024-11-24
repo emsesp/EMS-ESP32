@@ -41,7 +41,7 @@ const APStatus = () => {
   } = useAutoRequest(APApi.readAPStatus, { pollingTime: 3000 });
 
   const { LL } = useI18nContext();
-  useLayoutTitle(LL.STATUS_OF(LL.ACCESS_POINT(0)));
+  useLayoutTitle(LL.ACCESS_POINT(0));
 
   const theme = useTheme();
 

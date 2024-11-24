@@ -61,7 +61,7 @@ const MqttStatus = () => {
   } = useAutoRequest(MqttApi.readMqttStatus, { pollingTime: 3000 });
 
   const { LL } = useI18nContext();
-  useLayoutTitle(LL.STATUS_OF('MQTT'));
+  useLayoutTitle('MQTT');
 
   const theme = useTheme();
 

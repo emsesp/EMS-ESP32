@@ -1,8 +1,11 @@
-import { useLocation, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import MenuIcon from '@mui/icons-material/Menu';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { AppBar, IconButton, Toolbar, Typography } from '@mui/material';
+
+import { useI18nContext } from 'i18n/i18n-react';
 
 export const DRAWER_WIDTH = 210;
 
@@ -12,11 +15,12 @@ interface LayoutAppBarProps {
 }
 
 const LayoutAppBar = ({ title, onToggleDrawer }: LayoutAppBarProps) => {
+  const { LL } = useI18nContext();
+  const navigate = useNavigate();
+
   const pathnames = useLocation()
     .pathname.split('/')
     .filter((x) => x);
-  const back_path = pathnames.length > 1 ? '/' + pathnames[0] : undefined;
-  const navigate = useNavigate();
 
   return (
     <AppBar
@@ -38,20 +42,33 @@ const LayoutAppBar = ({ title, onToggleDrawer }: LayoutAppBarProps) => {
           <MenuIcon />
         </IconButton>
 
-        {back_path && (
-          <IconButton
-            sx={{ mr: 1 }}
-            color="inherit"
-            edge="start"
-            onClick={() => navigate(back_path)}
-          >
-            <ArrowBackIcon />
-          </IconButton>
+        {pathnames.length > 1 && (
+          <>
+            <IconButton
+              sx={{ mr: 1, fontSize: 20, verticalAlign: 'middle' }}
+              color="primary"
+              edge="start"
+              onClick={() => navigate('/' + pathnames[0])}
+            >
+              <ArrowBackIcon />
+            </IconButton>
+
+            <Link
+              to={'/' + pathnames[0]}
+              style={{ textDecoration: 'none', color: 'white' }}
+            >
+              <Typography variant="h6">
+                {pathnames[0] === 'status' ? LL.STATUS_OF('') : LL.SETTINGS(0)}
+                <NavigateNextIcon
+                  sx={{ fontSize: 20, verticalAlign: 'middle' }}
+                  color="primary"
+                />
+              </Typography>
+            </Link>
+          </>
         )}
 
-        <Typography variant="h6" noWrap component="div">
-          {title}
-        </Typography>
+        <Typography variant="h6">{title}</Typography>
       </Toolbar>
     </AppBar>
   );

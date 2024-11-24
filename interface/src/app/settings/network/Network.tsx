@@ -13,7 +13,7 @@ import WiFiNetworkScanner from './WiFiNetworkScanner';
 
 const Network = () => {
   const { LL } = useI18nContext();
-  useLayoutTitle(LL.SETTINGS_OF(LL.NETWORK(0)));
+  useLayoutTitle(LL.NETWORK(0));
 
   const { routerTab } = useRouterTab();
 

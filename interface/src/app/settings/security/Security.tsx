@@ -10,7 +10,7 @@ import SecuritySettings from './SecuritySettings';
 
 const Security = () => {
   const { LL } = useI18nContext();
-  useLayoutTitle(LL.SETTINGS_OF(LL.SECURITY(0)));
+  useLayoutTitle(LL.SECURITY(0));
 
   const { routerTab } = useRouterTab();
 
