@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import type { FC } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router';
 
 import { fetchLoginRedirect } from 'components/routing/authentication';
 import { AuthenticationContext } from 'contexts/authentication';

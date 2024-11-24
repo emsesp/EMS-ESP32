@@ -1,4 +1,4 @@
-import type { Path } from 'react-router-dom';
+import type { Path } from 'react-router';
 
 import type * as H from 'history';
 import { jwtDecode } from 'jwt-decode';

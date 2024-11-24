@@ -46,7 +46,7 @@ const APSettings = () => {
 
   const { LL } = useI18nContext();
 
-  useLayoutTitle(LL.SETTINGS_OF(LL.ACCESS_POINT(0)));
+  useLayoutTitle(LL.ACCESS_POINT(0));
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 

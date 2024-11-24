@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router';
 
 import { ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import type { SvgIconProps } from '@mui/material';
