@@ -545,6 +545,20 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwDiffTemp), 13, 1), // difftemp
     REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwRedTemp), 14, 1), // redtemp
     REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwRequiredTemp), 15, 1), // requiredtemp
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwStorageTemp1), 16, 1), // storagetemp1
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwColdTemp), 17, 1), // coldtemp
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwTemp5), 18, 1), // temp5
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(retTemp), 19, 1), // rettemp
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwHotTemp), 20, 1), // hottemp
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwDailyTemp), 21, 1), // dailytemp
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwCircTc), 22, 1), // circtc
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwKeepWarm), 23, 1), // keepwarm
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwStatus2), 24, 1), // status2
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwPumpMod), 25, 1), // pumpmod
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwFlow), 26, 1), // flow
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(valveReturn), 27, 1), // valvereturn
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(deltaTRet), 28, 1), // deltatret
+    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(errorDisp), 29, 1), // errordisp
 };
 
 } // namespace emsesp
