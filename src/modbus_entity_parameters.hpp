@@ -545,28 +545,6 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwDiffTemp), 13, 1), // difftemp
     REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwRedTemp), 14, 1), // redtemp
     REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwRequiredTemp), 15, 1), // requiredtemp
-    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwTemp), 0, 1), // temp
-    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwStorageTemp1), 1, 1), // storagetemp1
-    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwColdTemp), 2, 1), // coldtemp
-    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwTemp5), 3, 1), // temp5
-    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(retTemp), 4, 1), // rettemp
-    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwPump), 5, 1), // pump
-    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwMaxTemp), 6, 1), // maxtemp
-    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(selRoomTemp), 7, 1), // seltemp
-    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwRedTemp), 8, 1), // redtemp
-    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwHotTemp), 9, 1), // hottemp
-    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwDailyTemp), 10, 1), // dailytemp
-    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwDisinfectionTemp), 11, 1), // disinfectiontemp
-    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwCirc), 12, 1), // circ
-    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwCircMode), 13, 1), // circmode
-    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwCircTc), 14, 1), // circtc
-    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwKeepWarm), 15, 1), // keepwarm
-    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwStatus2), 16, 1), // status2
-    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwPumpMod), 17, 1), // pumpmod
-    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwFlow), 18, 1), // flow
-    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(valveReturn), 19, 1), // valvereturn
-    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(deltaTRet), 20, 1), // deltatret
-    REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(errorDisp), 21, 1), // errordisp
 };
 
 } // namespace emsesp
