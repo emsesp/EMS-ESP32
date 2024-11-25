@@ -580,6 +580,12 @@ MAKE_TRANSLATION(gasMeterWw, "gasmeter", "gas meter", "Gaszähler", "", "", "lic
 MAKE_TRANSLATION(hpCurrPower, "hpcurrpower", "compressor current power", "akt. Kompressorleistung", "", "", "", "", "", "", "", "aktuálny výkon kompresoru", "aktuální výkon kompresoru") // TODO translate
 MAKE_TRANSLATION(hpPowerLimit, "hppowerlimit", "power limit", "Leistungsgrenze", "", "", "", "", "", "", "", "obmedzenie výkonu", "omezení výkonu") // TODO translate
 MAKE_TRANSLATION(powerReduction, "powerreduction", "power reduction", "Leistungsverringerung", "", "", "", "", "", "", "", "obmedzenie výkonu", "omezení výkonu") // TODO translate
+MAKE_TRANSLATION(fuelHeat, "fuelheat", "fuel consuption heating", "Verbrauch Heizen", "", "", "", "", "", "", "", "obmedzenie výkonu", "omezení výkonu") // TODO translate
+MAKE_TRANSLATION(fuelDhw, "fueldhw", "fuel consuption", "Verbrauch", "", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(elHeat, "elheat", "el. consuption heating", "el. Verbrauch Heizen", "", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(elDhw, "eldhw", "el consuption", "el. Verbrauch", "", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(elGenHeat, "elgenheat", "el. generation heating", "el. Erzeugung Heizen", "", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(elGenDhw, "elgendhw", "el generation", "el. Erzeugung", "", "", "", "", "", "", "", "", "") // TODO translate
 
 // HIU
 MAKE_TRANSLATION(netFlowTemp, "netflowtemp", "heat network flow temp", "Systemvorlauftemperatur", "Netto aanvoertemperatuur", "", "temp. zasilania sieci cieplnej", "", "", "ısıtma şebekesi akış derecesi", "temperatura di mandata della rete di riscaldamento", "teplota prívodu tepelnej siete", "teplota přívodu tepelné sítě") // TODO translate
