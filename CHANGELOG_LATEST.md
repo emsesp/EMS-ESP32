@@ -27,6 +27,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - analog dac output and inputs on dac pins [#2201](https://github.com/emsesp/EMS-ESP32/discussions/2201)
 - api memory leak [#2216](https://github.com/emsesp/EMS-ESP32/issues/2216)
 - modbus multiple mixers [#2229](https://github.com/emsesp/EMS-ESP32/issues/2229)
+- Last Will (LWT) not set on MQTT Connect [#2247](https://github.com/emsesp/EMS-ESP32/issues/2247)
 
 ## Changed
 

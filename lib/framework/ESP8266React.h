@@ -57,10 +57,6 @@ class ESP8266React {
     // special functions needed outside scope
     //
 
-    void setWill(const char * will_topic) {
-        _mqttSettingsService.setWill(will_topic);
-    }
-
     // true if AP is active
     bool apStatus() {
         return _apSettingsService.getAPNetworkStatus() == APNetworkStatus::ACTIVE;

@@ -101,7 +101,6 @@ class MqttSettingsService : public StatefulService<MqttSettings> {
     const char *                         getClientId();
     espMqttClientTypes::DisconnectReason getDisconnectReason();
     MqttClient *                         getMqttClient();
-    void                                 setWill(const char * topic);
 
   protected:
     void onConfigUpdated();

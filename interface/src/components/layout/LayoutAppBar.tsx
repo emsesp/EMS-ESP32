@@ -2,7 +2,6 @@ import { Link, useLocation, useNavigate } from 'react-router';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import MenuIcon from '@mui/icons-material/Menu';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { AppBar, IconButton, Toolbar, Typography } from '@mui/material';
 
 import { useI18nContext } from 'i18n/i18n-react';
@@ -59,10 +58,7 @@ const LayoutAppBar = ({ title, onToggleDrawer }: LayoutAppBarProps) => {
             >
               <Typography variant="h6">
                 {pathnames[0] === 'status' ? LL.STATUS_OF('') : LL.SETTINGS(0)}
-                <NavigateNextIcon
-                  sx={{ fontSize: 20, verticalAlign: 'middle' }}
-                  color="primary"
-                />
+                <span style={{ color: '#90caf9' }}>&nbsp;|&nbsp;</span>
               </Typography>
             </Link>
           </>
