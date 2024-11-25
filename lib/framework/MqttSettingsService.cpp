@@ -101,16 +101,6 @@ const char * MqttSettingsService::getClientId() {
     return _mqttClient->getClientId();
 }
 
-void MqttSettingsService::setWill(const char * topic) {
-#ifndef TASMOTA_SDK
-    if (_state.enableTLS) {
-        static_cast<espMqttClientSecure *>(_mqttClient)->setWill(topic, 1, true, "offline");
-        return;
-    }
-#endif
-    static_cast<espMqttClient *>(_mqttClient)->setWill(topic, 1, true, "offline");
-}
-
 void MqttSettingsService::onMqttMessage(const espMqttClientTypes::MessageProperties & properties,
                                         const char *                                  topic,
                                         const uint8_t *                               payload,
@@ -183,6 +173,14 @@ bool MqttSettingsService::configureMqtt() {
 
     // only connect if WiFi is connected and MQTT is enabled
     if (_state.enabled && emsesp::EMSESP::system_.network_connected() && !_state.host.isEmpty()) {
+        // create last will topic with the base prefixed. It has to be static because the client destroys the reference
+        static char will_topic[FACTORY_MQTT_MAX_TOPIC_LENGTH];
+        if (_state.base.isEmpty()) {
+            snprintf(will_topic, sizeof(will_topic), "status");
+        } else {
+            snprintf(will_topic, sizeof(will_topic), "%s/status", _state.base.c_str());
+        }
+
         _reconfigureMqtt = false;
 #ifndef TASMOTA_SDK
         if (_state.enableTLS) {
@@ -197,6 +195,7 @@ bool MqttSettingsService::configureMqtt() {
             static_cast<espMqttClientSecure *>(_mqttClient)->setClientId(_state.clientId.c_str());
             static_cast<espMqttClientSecure *>(_mqttClient)->setKeepAlive(_state.keepAlive);
             static_cast<espMqttClientSecure *>(_mqttClient)->setCleanSession(_state.cleanSession);
+            static_cast<espMqttClientSecure *>(_mqttClient)->setWill(will_topic, 1, true, "offline"); // QOS 1, retain
             return _mqttClient->connect();
         }
 #endif
@@ -207,17 +206,7 @@ bool MqttSettingsService::configureMqtt() {
         static_cast<espMqttClient *>(_mqttClient)->setClientId(_state.clientId.c_str());
         static_cast<espMqttClient *>(_mqttClient)->setKeepAlive(_state.keepAlive);
         static_cast<espMqttClient *>(_mqttClient)->setCleanSession(_state.cleanSession);
-
-        // create last will topic with the base prefixed. It has to be static because the client destroys the reference
-        static char will_topic[FACTORY_MQTT_MAX_TOPIC_LENGTH];
-        if (_state.base.isEmpty()) {
-            snprintf(will_topic, sizeof(will_topic), "status");
-        } else {
-            snprintf(will_topic, sizeof(will_topic), "%s/status", _state.base.c_str());
-        }
-        setWill(will_topic);
-
-
+        static_cast<espMqttClient *>(_mqttClient)->setWill(will_topic, 1, true, "offline"); // QOS 1, retain
         return _mqttClient->connect();
     }
 

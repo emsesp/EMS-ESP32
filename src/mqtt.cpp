@@ -514,16 +514,6 @@ void Mqtt::on_connect() {
     // re-subscribe to all custom registered MQTT topics
     resubscribe();
 
-    // create last will topic with the base prefixed. It has to be static because the client destroys the reference
-    static char will_topic[MQTT_TOPIC_MAX_SIZE];
-    if (!Mqtt::base().empty()) {
-        snprintf(will_topic, MQTT_TOPIC_MAX_SIZE, "%s/status", Mqtt::base().c_str());
-    } else {
-        snprintf(will_topic, MQTT_TOPIC_MAX_SIZE, "status");
-    }
-    // EMSESP::esp8266React.setWill(will_topic); // with qos 1, retain true
-
-
     // publish to the last will topic (see Mqtt::start() function) to say we're alive
     queue_publish_retain("status", "online", true); // retain: https://github.com/emsesp/EMS-ESP32/discussions/2086
 }
