@@ -58,7 +58,7 @@ const LayoutAppBar = ({ title, onToggleDrawer }: LayoutAppBarProps) => {
             >
               <Typography variant="h6">
                 {pathnames[0] === 'status' ? LL.STATUS_OF('') : LL.SETTINGS(0)}
-                <span style={{ color: '#90caf9' }}>&nbsp;|&nbsp;</span>
+                <span style={{ color: '#90caf9' }}>&nbsp;&nbsp;|&nbsp;&nbsp;</span>
               </Typography>
             </Link>
           </>

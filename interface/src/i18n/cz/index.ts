@@ -331,7 +331,7 @@ const cz: Translation = {
   ALLVALUES: 'Všechny hodnoty',
   SPECIAL_FUNCTIONS: 'Speciální funkce',
   WAIT_FIRMWARE: 'Firmware se nahrává a instaluje',
-  INSTALL_VERSION: 'Tímto se {0} verze {1}. Jste si jistí?',
+  INSTALL_VERSION: 'Tímto se instalovat verze {0}. Jste si jistí?',
   SWITCH_DEV: 'přepnout na vývojovou verzi',
   UPGRADE_AVAILABLE: 'Je k dispozici aktualizace firmwaru!',
   LATEST_VERSION: 'Používáte nejnovější verzi firmwaru.',
@@ -342,7 +342,8 @@ const cz: Translation = {
   DASHBOARD: 'Dashboard',
   NO_DATA: 'Žádná data nejsou k dispozici',
   DASHBOARD_1: 'Přizpůsobte si dashboard označením EMS entit jako Oblíbené pomocí modulu Přizpůsobení',
-  DEVELOPER_MODE: 'Režim vývojáře'
+  DEVELOPER_MODE: 'Režim vývojáře',
+  UPGRADE: 'Upgrade' // TODO translate
 };
 
 export default cz;
