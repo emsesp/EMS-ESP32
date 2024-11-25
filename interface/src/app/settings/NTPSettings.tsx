@@ -44,7 +44,7 @@ const NTPSettings = () => {
   });
 
   const { LL } = useI18nContext();
-  useLayoutTitle(LL.SETTINGS_OF('NTP'));
+  useLayoutTitle('NTP');
 
   const updateFormValue = updateValueDirty(
     origData,

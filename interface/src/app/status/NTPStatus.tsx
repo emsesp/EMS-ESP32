@@ -47,7 +47,7 @@ const NTPStatus = () => {
   const [processing, setProcessing] = useState<boolean>(false);
 
   const { LL } = useI18nContext();
-  useLayoutTitle(LL.STATUS_OF('NTP'));
+  useLayoutTitle('NTP');
 
   const { send: updateTime } = useRequest(
     (local_time: Time) => NTPApi.updateTime(local_time),

@@ -1,6 +1,6 @@
 import { useContext, useEffect } from 'react';
 import type { FC } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router';
 
 import { storeLoginRedirect } from 'components/routing/authentication';
 import type { AuthenticatedContextValue } from 'contexts/authentication/context';

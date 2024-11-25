@@ -48,7 +48,7 @@ const MqttSettings = () => {
   });
 
   const { LL } = useI18nContext();
-  useLayoutTitle(LL.SETTINGS_OF('MQTT'));
+  useLayoutTitle('MQTT');
 
   const [fieldErrors, setFieldErrors] = useState<ValidateFieldsError>();
 

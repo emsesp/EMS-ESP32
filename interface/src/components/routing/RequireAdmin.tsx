@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import type { FC } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router';
 
 import { AuthenticatedContext } from 'contexts/authentication';
 import type { RequiredChildrenProps } from 'utils';

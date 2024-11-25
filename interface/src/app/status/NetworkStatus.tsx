@@ -88,7 +88,7 @@ const NetworkStatus = () => {
   } = useAutoRequest(NetworkApi.readNetworkStatus, { pollingTime: 3000 });
 
   const { LL } = useI18nContext();
-  useLayoutTitle(LL.STATUS_OF(LL.NETWORK(1)));
+  useLayoutTitle(LL.NETWORK(1));
 
   const theme = useTheme();
 

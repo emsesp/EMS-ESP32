@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FC } from 'react';
-import { redirect } from 'react-router-dom';
+import { redirect } from 'react-router';
 import { toast } from 'react-toastify';
 
 import { ACCESS_TOKEN } from 'api/endpoints';

@@ -1376,3 +1376,17 @@ cyltoptemp
 transferpump
 transferpumpmod
 startshp
+tempstatus
+difftemp
+redtemp
+requiredtemp
+coldtemp
+redtemp
+hottemp
+dailytemp
+circtc
+keepwarm
+pumpmod
+valvereturn
+deltatret
+errordisp

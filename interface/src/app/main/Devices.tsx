@@ -6,7 +6,7 @@ import {
   useState
 } from 'react';
 import { IconContext } from 'react-icons';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
 
 import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
@@ -306,9 +306,9 @@ const Devices = () => {
 
   const customize = () => {
     if (selectedDevice === 99) {
-      navigate('/customentities');
+      void navigate('/customentities');
     } else {
-      navigate('/customizations', { state: selectedDevice });
+      void navigate('/customizations', { state: selectedDevice });
     }
   };
 
