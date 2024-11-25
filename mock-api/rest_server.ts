@@ -30,14 +30,14 @@ const headers = {
 };
 
 // Versions - all without the 'v'
-let THIS_VERSION = '3.7.1';
+let THIS_VERSION = '3.7.0';
 let LATEST_STABLE_VERSION = '3.7.0';
-let LATEST_DEV_VERSION = '3.7.1-dev.4';
+let LATEST_DEV_VERSION = '3.7.1-dev.1';
 let VERSION_IS_UPGRADEABLE = false;
 
 // for testing - scenario 1
-// THIS_VERSION = '3.7.1-dev.1';
-// VERSION_IS_UPGRADEABLE = true;
+THIS_VERSION = '3.7.1-dev.1';
+VERSION_IS_UPGRADEABLE = true;
 
 // for testing - scenario 2
 // THIS_VERSION = '3.6.5';

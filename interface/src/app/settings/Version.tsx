@@ -109,73 +109,49 @@ const Version = () => {
 
   useLayoutTitle('EMS-ESP Firmware');
 
-  // see if we have internet access
-  const internet_live =
-    latestDevVersion !== undefined && latestVersion !== undefined;
-
-  // check for older boards where auto-upgrade is not supported
-  const download_only = data && !data.psram;
-
-  const renderUploadDialog = () => {
-    if (!internet_live) {
-      return null;
-    }
-
-    return (
-      <Dialog
-        sx={dialogStyle}
-        open={openDialog}
-        onClose={() => setOpenDialog(false)}
-      >
-        <DialogTitle>
-          {(download_only ? LL.DOWNLOAD(0) : LL.INSTALL('')) + ' ' + ' Firmware'}
-        </DialogTitle>
-        <DialogContent dividers>
-          <Typography mb={2}>
-            {LL.INSTALL_VERSION(
-              download_only ? LL.DOWNLOAD(1) : LL.INSTALL(''),
-              useDev ? latestDevVersion : latestVersion
-            )}
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            startIcon={<CancelIcon />}
-            variant="outlined"
-            onClick={() => setOpenDialog(false)}
-            color="secondary"
-          >
-            {LL.CANCEL()}
-          </Button>
-          <Button
-            startIcon={<DownloadIcon />}
-            variant="outlined"
-            onClick={() => setOpenDialog(false)}
+  const renderUploadDialog = () => (
+    <Dialog sx={dialogStyle} open={openDialog} onClose={() => setOpenDialog(false)}>
+      <DialogTitle>{LL.INSTALL('') + ' ' + ' Firmware'}</DialogTitle>
+      <DialogContent dividers>
+        <Typography mb={2}>
+          {LL.INSTALL_VERSION(useDev ? latestDevVersion : latestVersion)}
+        </Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button
+          startIcon={<CancelIcon />}
+          variant="outlined"
+          onClick={() => setOpenDialog(false)}
+          color="secondary"
+        >
+          {LL.CANCEL()}
+        </Button>
+        <Button
+          startIcon={<DownloadIcon />}
+          variant="outlined"
+          onClick={() => setOpenDialog(false)}
+          color="primary"
+        >
+          <Link
+            underline="none"
+            target="_blank"
+            href={getBinURL(useDev)}
             color="primary"
           >
-            <Link
-              underline="none"
-              target="_blank"
-              href={getBinURL(useDev)}
-              color="primary"
-            >
-              {LL.DOWNLOAD(1)}
-            </Link>
-          </Button>
-          {!download_only && (
-            <Button
-              startIcon={<WarningIcon color="warning" />}
-              variant="outlined"
-              onClick={() => installFirmwareURL(getBinURL(useDev))}
-              color="primary"
-            >
-              {LL.INSTALL('')}
-            </Button>
-          )}
-        </DialogActions>
-      </Dialog>
-    );
-  };
+            {LL.DOWNLOAD(1)}
+          </Link>
+        </Button>
+        <Button
+          startIcon={<WarningIcon color="warning" />}
+          variant="outlined"
+          onClick={() => installFirmwareURL(getBinURL(useDev))}
+          color="primary"
+        >
+          {LL.INSTALL('')}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 
   const showFirmwareDialog = (useDevVersion: boolean) => {
     if (useDevVersion || data.emsesp_version.includes('dev')) {
@@ -190,6 +166,17 @@ const Version = () => {
     }
 
     const isDev = data.emsesp_version.includes('dev');
+    // const isDev = false; // for testing
+    // const isDev = true; // for testing
+
+    // check for older versions where auto-upgrade is not supported. These are bbqkees boards with no psram.
+    const canUpload = upgradeAvailable && data && data.psram;
+    // const canUpload = true as boolean; // for testing
+    // const canUpload = false as boolean; // for testing
+
+    // see if we have internet access
+    const internet_live =
+      latestDevVersion !== undefined && latestVersion !== undefined;
 
     return (
       <>
@@ -260,7 +247,7 @@ const Version = () => {
                     <Link target="_blank" href={STABLE_RELNOTES_URL} color="primary">
                       (changelog)
                     </Link>
-                    {!isDev && upgradeAvailable && (
+                    {!isDev && canUpload && (
                       <Button
                         sx={{ ml: 2 }}
                         variant="outlined"
@@ -268,7 +255,26 @@ const Version = () => {
                         size="small"
                         onClick={() => showFirmwareDialog(false)}
                       >
-                        Upgrade&hellip;
+                        {LL.UPGRADE()}&hellip;
+                      </Button>
+                    )}
+                    {!isDev && !canUpload && (
+                      <Button
+                        startIcon={<DownloadIcon />}
+                        variant="outlined"
+                        onClick={() => setOpenDialog(false)}
+                        color="warning"
+                        size="small"
+                        sx={{ ml: 2 }}
+                      >
+                        <Link
+                          underline="none"
+                          target="_blank"
+                          href={getBinURL(useDev)}
+                          color="warning"
+                        >
+                          {LL.DOWNLOAD(1)}
+                        </Link>
                       </Button>
                     )}
                   </Typography>
@@ -277,7 +283,7 @@ const Version = () => {
                     <Link target="_blank" href={DEV_RELNOTES_URL} color="primary">
                       (changelog)
                     </Link>
-                    {isDev && upgradeAvailable && (
+                    {isDev && canUpload && (
                       <Button
                         sx={{ ml: 2 }}
                         variant="outlined"
@@ -285,7 +291,26 @@ const Version = () => {
                         size="small"
                         onClick={() => showFirmwareDialog(false)}
                       >
-                        Upgrade&hellip;
+                        {LL.UPGRADE()}&hellip;
+                      </Button>
+                    )}
+                    {isDev && !canUpload && (
+                      <Button
+                        startIcon={<DownloadIcon />}
+                        variant="outlined"
+                        onClick={() => setOpenDialog(false)}
+                        color="warning"
+                        size="small"
+                        sx={{ ml: 2 }}
+                      >
+                        <Link
+                          underline="none"
+                          target="_blank"
+                          href={getBinURL(useDev)}
+                          color="warning"
+                        >
+                          {LL.DOWNLOAD(1)}
+                        </Link>
                       </Button>
                     )}
                   </Typography>

@@ -331,7 +331,7 @@ const de: Translation = {
   ALLVALUES: 'Alle Werte',
   SPECIAL_FUNCTIONS: 'Sonderfunktionen',
   WAIT_FIRMWARE: 'Die Firmware wird hochgeladen und installiert.',
-  INSTALL_VERSION: 'Dadurch wird die Version {1} heruntergeladen. Sind Sie sicher?',
+  INSTALL_VERSION: 'Dadurch wird die Version {0} heruntergeladen. Sind Sie sicher?',
   SWITCH_DEV: 'Wechseln Sie zur Entwicklungsversion!',
   UPGRADE_AVAILABLE: 'Es ist ein Firmware-Upgrade verfügbar.',
   LATEST_VERSION: 'Sie verwenden die neueste Firmware-Version.',
@@ -342,7 +342,8 @@ const de: Translation = {
   DASHBOARD: 'Dashboard',
   NO_DATA: 'Keine Daten verfügbar',
   DASHBOARD_1: 'Passen Sie Ihr Dashboard an, indem Sie EMS-Entitäten mithilfe des Moduls „Anpassungen“ als Favorit markieren',
-  DEVELOPER_MODE: 'Entwicklermodus'
+  DEVELOPER_MODE: 'Entwicklermodus',
+  UPGRADE: 'Upgrade' // TODO translate
 };
 
 export default de;
