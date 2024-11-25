@@ -500,10 +500,16 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(meterEHeat), 38, 2), // metereheat
     REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(meterHeat), 40, 2), // meterheat
     REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(heatingStarts), 42, 2), // heatingstarts
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(fuelHeat), 44, 2), // fuelheat
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(elHeat), 46, 2), // elheat
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DEVICE_DATA, FL_(elGenHeat), 48, 2), // elgenheat
     REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DHW, FL_(hybridDHW), 0, 1), // hybriddhw
     REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DHW, FL_(nrgWw), 1, 2), // nrg
     REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DHW, FL_(meterWw), 3, 2), // meter
     REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DHW, FL_(wwStartsHp), 5, 2), // startshp
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DHW, FL_(fuelDhw), 7, 2), // fueldhw
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DHW, FL_(elDhw), 9, 2), // eldhw
+    REGISTER_MAPPING(dt::HEATPUMP, TAG_TYPE_DHW, FL_(elGenDhw), 11, 2), // elgendhw
     REGISTER_MAPPING(dt::SWITCH, TAG_TYPE_DEVICE_DATA, FL_(activated), 0, 1), // activated
     REGISTER_MAPPING(dt::SWITCH, TAG_TYPE_DEVICE_DATA, FL_(flowTempHc), 1, 1), // flowtemphc
     REGISTER_MAPPING(dt::SWITCH, TAG_TYPE_DEVICE_DATA, FL_(status), 2, 1), // status
