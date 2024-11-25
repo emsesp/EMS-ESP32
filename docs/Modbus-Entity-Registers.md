@@ -3563,6 +3563,12 @@
 | meter | meter | uint24 (>=0<=167772) | kWh | false | DHW | 3 | 2 | 1/100 | 
 | heatingstarts | heating control starts | uint24 (>=0<=16777213) |   | false | DEVICE_DATA | 42 | 2 | 1 | 
 | startshp | starts hp | uint24 (>=0<=16777213) |   | false | DHW | 5 | 2 | 1 | 
+| fuelheat | fuel consuption heating | uint32 (>=0<=1677721) | kWh | false | DEVICE_DATA | 44 | 2 | 1/10 | 
+| fueldhw | fuel consuption | uint32 (>=0<=1677721) | kWh | false | DHW | 7 | 2 | 1/10 | 
+| elheat | el. consuption heating | uint32 (>=0<=1677721) | kWh | false | DEVICE_DATA | 46 | 2 | 1/10 | 
+| eldhw | el consuption | uint32 (>=0<=1677721) | kWh | false | DHW | 9 | 2 | 1/10 | 
+| elgenheat | el. generation heating | uint32 (>=0<=1677721) | kWh | false | DEVICE_DATA | 48 | 2 | 1/10 | 
+| elgendhw | el generation | uint32 (>=0<=1677721) | kWh | false | DHW | 11 | 2 | 1/10 | 
 
 ### Hybrid Manager HM200
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -3608,6 +3614,12 @@
 | meter | meter | uint24 (>=0<=167772) | kWh | false | DHW | 3 | 2 | 1/100 | 
 | heatingstarts | heating control starts | uint24 (>=0<=16777213) |   | false | DEVICE_DATA | 42 | 2 | 1 | 
 | startshp | starts hp | uint24 (>=0<=16777213) |   | false | DHW | 5 | 2 | 1 | 
+| fuelheat | fuel consuption heating | uint32 (>=0<=1677721) | kWh | false | DEVICE_DATA | 44 | 2 | 1/10 | 
+| fueldhw | fuel consuption | uint32 (>=0<=1677721) | kWh | false | DHW | 7 | 2 | 1/10 | 
+| elheat | el. consuption heating | uint32 (>=0<=1677721) | kWh | false | DEVICE_DATA | 46 | 2 | 1/10 | 
+| eldhw | el consuption | uint32 (>=0<=1677721) | kWh | false | DHW | 9 | 2 | 1/10 | 
+| elgenheat | el. generation heating | uint32 (>=0<=1677721) | kWh | false | DEVICE_DATA | 48 | 2 | 1/10 | 
+| elgendhw | el generation | uint32 (>=0<=1677721) | kWh | false | DHW | 11 | 2 | 1/10 | 
 
 ## Devices of type *mixer*
 ### HM210

@@ -5137,6 +5137,12 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "HP Module",heatpump,252,meter,meter,uint24 (>=0<=167772),kWh,false,sensor.heatpump_dhw_meter,sensor.heatpump_dhw_meter,9,9,1/100,3,2
 "HP Module",heatpump,252,heatingstarts,heating control starts,uint24 (>=0<=16777213), ,false,sensor.heatpump_heating_control_starts,sensor.heatpump_heatingstarts,9,0,1,42,2
 "HP Module",heatpump,252,startshp,starts hp,uint24 (>=0<=16777213), ,false,sensor.heatpump_dhw_starts_hp,sensor.heatpump_dhw_startshp,9,9,1,5,2
+"HP Module",heatpump,252,fuelheat,fuel consuption heating,uint32 (>=0<=1677721),kWh,false,sensor.heatpump_fuel_consuption_heating,sensor.heatpump_fuelheat,9,0,1/10,44,2
+"HP Module",heatpump,252,fueldhw,fuel consuption,uint32 (>=0<=1677721),kWh,false,sensor.heatpump_dhw_fuel_consuption,sensor.heatpump_dhw_fueldhw,9,9,1/10,7,2
+"HP Module",heatpump,252,elheat,el. consuption heating,uint32 (>=0<=1677721),kWh,false,sensor.heatpump_el._consuption_heating,sensor.heatpump_elheat,9,0,1/10,46,2
+"HP Module",heatpump,252,eldhw,el consuption,uint32 (>=0<=1677721),kWh,false,sensor.heatpump_dhw_el_consuption,sensor.heatpump_dhw_eldhw,9,9,1/10,9,2
+"HP Module",heatpump,252,elgenheat,el. generation heating,uint32 (>=0<=1677721),kWh,false,sensor.heatpump_el._generation_heating,sensor.heatpump_elgenheat,9,0,1/10,48,2
+"HP Module",heatpump,252,elgendhw,el generation,uint32 (>=0<=1677721),kWh,false,sensor.heatpump_dhw_el_generation,sensor.heatpump_dhw_elgendhw,9,9,1/10,11,2
 "Hybrid Manager HM200",heatpump,248,airhumidity,relative air humidity,uint8 (>=0<=100),%,false,sensor.heatpump_relative_air_humidity,sensor.heatpump_airhumidity,9,0,1,0,1
 "Hybrid Manager HM200",heatpump,248,dewtemperature,dew point temperature,uint8 (>=0<=254),C,false,sensor.heatpump_dew_point_temperature,sensor.heatpump_dewtemperature,9,0,1,1,1
 "Hybrid Manager HM200",heatpump,248,curflowtemp,current flow temperature,int16 (>=-3199<=3199),C,false,sensor.heatpump_current_flow_temperature,sensor.heatpump_curflowtemp,9,0,1/10,2,1
@@ -5178,6 +5184,12 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Hybrid Manager HM200",heatpump,248,meter,meter,uint24 (>=0<=167772),kWh,false,sensor.heatpump_dhw_meter,sensor.heatpump_dhw_meter,9,9,1/100,3,2
 "Hybrid Manager HM200",heatpump,248,heatingstarts,heating control starts,uint24 (>=0<=16777213), ,false,sensor.heatpump_heating_control_starts,sensor.heatpump_heatingstarts,9,0,1,42,2
 "Hybrid Manager HM200",heatpump,248,startshp,starts hp,uint24 (>=0<=16777213), ,false,sensor.heatpump_dhw_starts_hp,sensor.heatpump_dhw_startshp,9,9,1,5,2
+"Hybrid Manager HM200",heatpump,248,fuelheat,fuel consuption heating,uint32 (>=0<=1677721),kWh,false,sensor.heatpump_fuel_consuption_heating,sensor.heatpump_fuelheat,9,0,1/10,44,2
+"Hybrid Manager HM200",heatpump,248,fueldhw,fuel consuption,uint32 (>=0<=1677721),kWh,false,sensor.heatpump_dhw_fuel_consuption,sensor.heatpump_dhw_fueldhw,9,9,1/10,7,2
+"Hybrid Manager HM200",heatpump,248,elheat,el. consuption heating,uint32 (>=0<=1677721),kWh,false,sensor.heatpump_el._consuption_heating,sensor.heatpump_elheat,9,0,1/10,46,2
+"Hybrid Manager HM200",heatpump,248,eldhw,el consuption,uint32 (>=0<=1677721),kWh,false,sensor.heatpump_dhw_el_consuption,sensor.heatpump_dhw_eldhw,9,9,1/10,9,2
+"Hybrid Manager HM200",heatpump,248,elgenheat,el. generation heating,uint32 (>=0<=1677721),kWh,false,sensor.heatpump_el._generation_heating,sensor.heatpump_elgenheat,9,0,1/10,48,2
+"Hybrid Manager HM200",heatpump,248,elgendhw,el generation,uint32 (>=0<=1677721),kWh,false,sensor.heatpump_dhw_el_generation,sensor.heatpump_dhw_elgendhw,9,9,1/10,11,2
 "WM10",switch,71,activated,activated,boolean, ,false,binary_sensor.switch_activated,binary_sensor.switch_activated,11,0,1,0,1
 "WM10",switch,71,flowtemphc,flow temperature (TC1),uint16 (>=0<=3199),C,false,sensor.switch_flow_temperature_(TC1),sensor.switch_flowtemphc,11,0,1/10,1,1
 "WM10",switch,71,status,status,int8 (>=-126<=126), ,false,sensor.switch_status,sensor.switch_status,11,0,1,2,1
