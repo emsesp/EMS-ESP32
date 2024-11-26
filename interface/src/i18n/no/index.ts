@@ -161,7 +161,7 @@ const no: Translation = {
   HELP_INFORMATION_4: 'Husk å laste ned og legg ved din systeminformasjon for en raskere respons når du rapporterer et problem',
   UPLOAD: 'Opplasning',
   DOWNLOAD: '{{N|n|n}}edlasting',
-  INSTALL: 'Installer {0}',
+  INSTALL: 'Installer',
   ABORTED: 'avbrutt',
   FAILED: 'feilet',
   SUCCESSFUL: 'vellykket',

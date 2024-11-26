@@ -161,7 +161,7 @@ const pl: BaseTranslation = {
   HELP_INFORMATION_4: 'Zgłaszając problem, nie zapomnij pobrać i dołączyć informacji o swoim systemie!',
   UPLOAD: 'Wysyłanie',
   DOWNLOAD: '{{P|p||P}}obier{{anie|z||z}}',
-  INSTALL: 'Zainstalować {0}',
+  INSTALL: 'Zainstalować',
   ABORTED: 'zostało przerwane!',
   FAILED: 'nie powiodł{{o|a|}} się!',
   SUCCESSFUL: 'powiodło się.',

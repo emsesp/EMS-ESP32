@@ -161,7 +161,7 @@ const sk: Translation = {
   HELP_INFORMATION_4: 'nezabudnite si stiahnuť a pripojiť informácie o vašom systéme, aby ste mohli rýchlejšie reagovať pri nahlasovaní problému',
   UPLOAD: 'Nahrať',
   DOWNLOAD: '{{S|s|s}}tiahnuť',
-  INSTALL: 'Inštalovať {0}',
+  INSTALL: 'Inštalovať',
   ABORTED: 'zrušené',
   FAILED: 'chybné',
   SUCCESSFUL: 'úspešné',
