@@ -161,7 +161,7 @@ const en: Translation = {
   HELP_INFORMATION_4: 'Download and attach your support information for a faster response when reporting an issue',
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
-  INSTALL: 'Install {0}',
+  INSTALL: 'Install',
   ABORTED: 'aborted',
   FAILED: 'failed',
   SUCCESSFUL: 'successful',

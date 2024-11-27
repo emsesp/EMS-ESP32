@@ -38,7 +38,7 @@ void Modbus::start(uint8_t systemServerId, uint16_t port, uint8_t max_clients, u
         }
     }
     modbusServer_->start(port, max_clients, timeout);
-    LOG_INFO("Modbus server with ID %d started on port %d", systemServerId, port);
+    LOG_INFO("Starting Modbus service (ID %d, port %d)", systemServerId, port);
 #else
     if (!check_parameter_order()) {
         LOG_ERROR("Unable to enable Modbus - the parameter list order is corrupt. This is a firmware bug.");

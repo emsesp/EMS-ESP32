@@ -161,7 +161,7 @@ const nl: Translation = {
   HELP_INFORMATION_4: 'Zorg dat je ook je systeem details zijn toevoeged voor een sneller antwoord',
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
-  INSTALL: 'Installeren {0}',
+  INSTALL: 'Installeren',
   ABORTED: 'afgebroken',
   FAILED: 'mislukt',
   SUCCESSFUL: 'successvol',

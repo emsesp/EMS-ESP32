@@ -161,7 +161,7 @@ const fr: Translation = {
   HELP_INFORMATION_4: "N'oubliez pas de télécharger et de joindre les informations relatives à votre système pour obtenir une réponse plus rapide lorsque vous signalez un problème",
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
-  INSTALL: 'Installer {0}',
+  INSTALL: 'Installer',
   ABORTED: 'annulé',
   FAILED: 'échoué',
   SUCCESSFUL: 'réussi',

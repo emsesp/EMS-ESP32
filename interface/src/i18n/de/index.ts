@@ -161,7 +161,7 @@ const de: Translation = {
   HELP_INFORMATION_4: 'Bitte laden Sie die Systemdetails und hängen Sie sie an das Support-Issue an',
   UPLOAD: 'Hochladen',
   DOWNLOAD: '{{H|h|h}}erunterladen',
-  INSTALL: 'Installieren {0}',
+  INSTALL: 'Installieren',
   ABORTED: 'abgebrochen',
   FAILED: 'gescheitert',
   SUCCESSFUL: 'erfolgreich',
