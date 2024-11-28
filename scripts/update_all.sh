@@ -2,6 +2,7 @@
 
 # run from root
 # make sure ncu is installed globally (https://github.com/raineorshine/npm-check-updates)
+# as well as GNUMake (make) and python3
 
 cd interface
 ncu -u
@@ -17,3 +18,6 @@ yarn
 yarn format
 
 cd ..
+npx cspell "**" 
+
+sh ./scripts/generate_csv_and_headers.sh

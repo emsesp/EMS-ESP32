@@ -3,8 +3,25 @@
 # This is mainly used to generate the .o files for SonarQube analysis
 #
 
-NUMJOBS=${NUMJOBS:-" -j10 "}
-MAKEFLAGS+="j "
+_mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+I := $(patsubst %/,%,$(dir $(_mkfile_path)))
+
+ifneq ($(words $(MAKECMDGOALS)),1)
+.DEFAULT_GOAL = all
+%:
+	@$(MAKE) $@ --no-print-directory -rRf $(firstword $(MAKEFILE_LIST))
+else
+ifndef ECHO
+T := $(shell $(MAKE) $(MAKECMDGOALS) --no-print-directory \
+      -nrRf $(firstword $(MAKEFILE_LIST)) \
+      ECHO="COUNTTHIS" | grep -c "COUNTTHIS")
+N := x
+C = $(words $N)$(eval N := x $N)
+ECHO = python $(I)/echo_progress.py --stepno=$C --nsteps=$T
+endif
+
+JOBS ?= $(shell nproc)
+MAKEFLAGS += -j $(JOBS) -l $(JOBS)
 
 #----------------------------------------------------------------------
 # Project Structure
@@ -125,23 +142,27 @@ COMPILE.cpp = $(CXX) $(CXX_STANDARD) $(CXXFLAGS) $(DEPFLAGS) -c $< -o $@
 .SILENT: $(OUTPUT)
 
 all: $(OUTPUT)
+	@$(ECHO) All done
 
 $(OUTPUT): $(OBJS)
 	@mkdir -p $(@D)
+	@$(ECHO) Linking $@
 	$(LINK.o)
 	$(SYMBOLS.out)
-
+	
 $(BUILD)/%.o: %.c
 	@mkdir -p $(@D)
-	$(COMPILE.c)
+	@$(ECHO) Compiling $@
+	@$(COMPILE.c)
 
 $(BUILD)/%.o: %.cpp
 	@mkdir -p $(@D)
-	$(COMPILE.cpp)
+	@$(ECHO) Compiling $@
+	@$(COMPILE.cpp)
 
 $(BUILD)/%.o: %.s
 	@mkdir -p $(@D)
-	$(COMPILE.s)
+	@$(COMPILE.s)
 
 cppcheck: $(SOURCES)
 	$(CPPCHECK) $(CHECKFLAGS) $^
@@ -150,6 +171,7 @@ run: $(OUTPUT)
 	@$<
 
 .PHONY: clean
+
 clean:
 	@$(RM) -rf $(BUILD) $(OUTPUT)
 
@@ -158,3 +180,5 @@ help:
 	@echo $(OUTPUT)
 
 -include $(DEPS)
+
+endif
