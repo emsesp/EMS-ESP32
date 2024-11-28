@@ -1,6 +1,5 @@
 #
 # GNUMakefile for EMS-ESP
-# This is mainly used to generate the .o files for SonarQube analysis
 #
 
 _mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
@@ -20,6 +19,7 @@ C = $(words $N)$(eval N := x $N)
 ECHO = python $(I)/echo_progress.py --stepno=$C --nsteps=$T
 endif
 
+# number of parallel compiles
 JOBS ?= $(shell nproc)
 MAKEFLAGS += -j $(JOBS) -l $(JOBS)
 
