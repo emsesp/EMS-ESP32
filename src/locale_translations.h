@@ -79,6 +79,7 @@ MAKE_WORD_TRANSLATION(commands_response, "get response", "Hole Antwort", "Verzoe
 MAKE_WORD_TRANSLATION(coldshot_cmd, "send a cold shot of water", "Zugabe einer Menge kalten Wassers", "", "", "uruchom tryśnięcie zimnej wody", "", "", "soğuk su gönder", "", "pošlite studenú dávku vody", "poslat studenou vodu") // TODO translate
 MAKE_WORD_TRANSLATION(message_cmd, "send a message", "Eine Nachricht senden", "", "", "", "", "", "", "", "poslať správu", "odeslat zprávu") // TODO translate
 MAKE_WORD_TRANSLATION(values_cmd, "list all values", "Liste alle Werte auf", "", "", "", "", "", "", "", "vypísať všetky hodnoty", "vypsat všechny hodnoty") // TODO translate
+MAKE_WORD_TRANSLATION(system_cmd, "system setting", "System Einstellung", "", "", "", "", "", "", "", "vypísať všetky hodnoty", "vypsat všechny hodnoty") // TODO translate
 MAKE_WORD_TRANSLATION(showertimer_cmd, "enable shower timer", "aktiviere Duschzeitmessung", "", "", "", "", "", "", "", "povoliť časovač sprchovania", "") // TODO translate
 MAKE_WORD_TRANSLATION(showeralert_cmd, "enable shower alert", "aktiviere Duschzeitwarnung", "", "", "", "", "", "", "", "povoliť upozornenie na sprchu", "") // TODO translate
 
@@ -119,6 +120,11 @@ MAKE_WORD_TRANSLATION(tag_hs13, "hs13", "hs13", "hs13", "VK13", "ŹC13", "hs13",
 MAKE_WORD_TRANSLATION(tag_hs14, "hs14", "hs14", "hs14", "VK14", "ŹC14", "hs14", "hs14", "hs14", "hs14", "hs14", "hs14")
 MAKE_WORD_TRANSLATION(tag_hs15, "hs15", "hs15", "hs15", "VK15", "ŹC15", "hs15", "hs15", "hs15", "hs15", "hs15", "hs15")
 MAKE_WORD_TRANSLATION(tag_hs16, "hs16", "hs16", "hs16", "VK16", "ŹC16", "hs16", "hs16", "hs16", "hs16", "hs16", "hs16")
+
+MAKE_WORD_TRANSLATION(tag_hcx, "hc<n>", "HK<n>", "hc<n>", "VK<n>", "OG<n>", "hc<n>", "hc<n>", "ID<n>", "hc<n>", "hc<n>", "hc<n>")
+MAKE_WORD_TRANSLATION(tag_dhwx, "dhw[n]", "WWK[n]", "dhw[n]", "VVK[n]", "CWU[n]", "dhw[n]", "ecs[n]", "SKS[n]", "dhw[n]", "TÚV[n]", "TUV[n]")
+MAKE_WORD_TRANSLATION(tag_ahsx, "ahs<n>", "AHQ<n>", "ahs<n>", "ahs<n>", "AŹC<n>", "ahs<n>", "ahs<n>", "ahs<n>", "ahs<n>", "ahs<n>", "ahs<n>")
+MAKE_WORD_TRANSLATION(tag_hsx, "hs<n>", "HQ<n>", "hs<n>", "hs<n>", "ŹC<n>", "hs<n>", "hs<n>", "hs<n>", "hs<n>", "hs<n>", "hs<n>")
 
 // General
 MAKE_WORD_TRANSLATION(on, "on", "an", "aan", "på", "włączono", "på", "on", "açık", "on", "zap", "zap")

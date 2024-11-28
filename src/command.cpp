@@ -326,7 +326,7 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
         return CommandRet::NOT_FOUND;
     }
     char cmd[COMMAND_MAX_LENGTH];
-    strcpy(cmd, Helpers::toLower(command).c_str());
+    strlcpy(cmd, Helpers::toLower(command).c_str(), sizeof(cmd));
 
     auto dname = EMSdevice::device_type_2_device_name(device_type); // device name, not translated
 
@@ -340,6 +340,11 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
         }
         if (EMSESP::get_device_value_info(output, cmd, id, device_type)) { // entity = cmd
             LOG_DEBUG("Fetched device entity/attributes for %s/%s", dname, cmd);
+            return CommandRet::OK;
+        }
+    } else if (device_type == EMSdevice::DeviceType::SYSTEM && strchr(cmd, '/')) {
+        // check service commands, if not found continue with commandsfunctions
+        if (EMSESP::system_.command_service(cmd, value)) {
             return CommandRet::OK;
         }
     }
@@ -531,6 +536,17 @@ bool Command::list(const uint8_t device_type, JsonObject output) {
     output[F_(commands)] = Helpers::translated_word(FL_(commands_cmd));
     output[F_(entities)] = Helpers::translated_word(FL_(entities_cmd));
 
+    if (device_type == EMSdevice::DeviceType::SYSTEM) {
+        output["settings/showertimer"] = Helpers::translated_word(FL_(system_cmd));
+        output["settings/showeralert"] = Helpers::translated_word(FL_(system_cmd));
+        output["settings/hideled"] = Helpers::translated_word(FL_(system_cmd));
+        output["settings/txmode"] = Helpers::translated_word(FL_(system_cmd));
+        output["settings/analogenabled"] = Helpers::translated_word(FL_(system_cmd));
+        output["mqtt/enabled"] = Helpers::translated_word(FL_(system_cmd));
+        output["ntp/enabled"] = Helpers::translated_word(FL_(system_cmd));
+        output["ap/enabled"] = Helpers::translated_word(FL_(system_cmd));
+        output["syslog/enabled"] = Helpers::translated_word(FL_(system_cmd));
+    }
     // create a list of commands we have registered, and sort them
     std::list<std::string> sorted_cmds;
     for (const auto & cf : cmdfunctions_) {
@@ -559,7 +575,17 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
             sorted_cmds.push_back(tagged_cmd(cf.cmd_, cf.flags_));
         }
     }
-
+    if (device_type == EMSdevice::DeviceType::SYSTEM) {
+        sorted_cmds.emplace_back("settings/showertimer");
+        sorted_cmds.emplace_back("settings/showeralert");
+        sorted_cmds.emplace_back("settings/hideled");
+        sorted_cmds.emplace_back("settings/txmode");
+        sorted_cmds.emplace_back("settings/analogenabled");
+        sorted_cmds.emplace_back("mqtt/enabled");
+        sorted_cmds.emplace_back("ntp/enabled");
+        sorted_cmds.emplace_back("ap/enabled");
+        sorted_cmds.emplace_back("syslog/enabled");
+    }
     sorted_cmds.sort(); // sort them
 
     // if not in verbose mode, just print them on a single line and exit
@@ -567,6 +593,7 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
         sorted_cmds.emplace_front(F_(info));
         sorted_cmds.emplace_front(F_(commands));
         sorted_cmds.emplace_front(F_(values));
+        sorted_cmds.emplace_front(F_(entities));
         for (const auto & cl : sorted_cmds) {
             shell.print(cl);
             shell.print(" ");
@@ -590,6 +617,19 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
                     shell.print(' ');
                 }
                 shell.print(COLOR_BRIGHT_CYAN);
+                if (cf.has_flags(CommandFlag::CMD_FLAG_HC)) {
+                    shell.print(Helpers::translated_word(FL_(tag_hcx)));
+                    shell.print(' ');
+                } else if (cf.has_flags(CommandFlag::CMD_FLAG_DHW)) {
+                    shell.print(Helpers::translated_word(FL_(tag_dhwx)));
+                    shell.print(' ');
+                } else if (cf.has_flags(CommandFlag::CMD_FLAG_AHS)) {
+                    shell.print(Helpers::translated_word(FL_(tag_ahsx)));
+                    shell.print(' ');
+                } else if (cf.has_flags(CommandFlag::CMD_FLAG_HS)) {
+                    shell.print(Helpers::translated_word(FL_(tag_hsx)));
+                    shell.print(' ');
+                }
                 shell.print(Helpers::translated_word(cf.description_));
                 if (!cf.has_flags(CommandFlag::ADMIN_ONLY)) {
                     shell.print(' ');
@@ -676,6 +716,8 @@ void Command::show_all(uuid::console::Shell & shell) {
     shell.printf("  commands \t\t\t%slist all commands %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
     shell.println(COLOR_RESET);
     shell.printf("  values \t\t\t%slist all values %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
+    shell.println(COLOR_RESET);
+    shell.printf("  entities \t\t\t%slist all entities %s*", COLOR_BRIGHT_CYAN, COLOR_BRIGHT_GREEN);
     shell.println(COLOR_RESET);
 
     // show system ones first
