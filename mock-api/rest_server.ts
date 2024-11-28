@@ -29,19 +29,45 @@ const headers = {
   'Content-type': 'application/msgpack'
 };
 
-// Versions - all without the 'v'
+let VERSION_IS_UPGRADEABLE;
+
+// Versions
+// default - on latest stable, no upgrades
 let THIS_VERSION = '3.7.0';
 let LATEST_STABLE_VERSION = '3.7.0';
 let LATEST_DEV_VERSION = '3.7.1-dev.1';
-let VERSION_IS_UPGRADEABLE = false;
 
-// for testing - scenario 1
-THIS_VERSION = '3.7.1-dev.1';
-VERSION_IS_UPGRADEABLE = true;
+// scenarios for testing, overriding the default
+const version_test = 0;
 
-// for testing - scenario 2
-// THIS_VERSION = '3.6.5';
-// VERSION_IS_UPGRADEABLE = true;
+switch (version_test as number) {
+  case 0:
+  default:
+    // use default - on latest stable, no upgrades, but can switch
+    VERSION_IS_UPGRADEABLE = false;
+    break;
+  case 1:
+    // on latest dev, no update
+    THIS_VERSION = '3.7.1-dev.12';
+    LATEST_STABLE_VERSION = '3.7.0';
+    LATEST_DEV_VERSION = '3.7.1-dev.12';
+    VERSION_IS_UPGRADEABLE = false;
+    break;
+  case 2:
+    // upgrade stable to latest stable
+    THIS_VERSION = '3.6.5';
+    LATEST_STABLE_VERSION = '3.7.0';
+    LATEST_DEV_VERSION = '3.7.1-dev.12';
+    VERSION_IS_UPGRADEABLE = true;
+    break;
+  case 3:
+    // upgrade dev to latest dev
+    THIS_VERSION = '3.7.0-dev-1';
+    LATEST_STABLE_VERSION = '3.7.0';
+    LATEST_DEV_VERSION = '3.7.1-dev.12';
+    VERSION_IS_UPGRADEABLE = true;
+    break;
+}
 
 // GLOBAL VARIABLES
 let countWifiScanPoll = 0; // wifi network scan

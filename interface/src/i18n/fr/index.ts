@@ -161,7 +161,7 @@ const fr: Translation = {
   HELP_INFORMATION_4: "N'oubliez pas de télécharger et de joindre les informations relatives à votre système pour obtenir une réponse plus rapide lorsque vous signalez un problème",
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
-  INSTALL: 'Installer {0}',
+  INSTALL: 'Installer',
   ABORTED: 'annulé',
   FAILED: 'échoué',
   SUCCESSFUL: 'réussi',
@@ -186,7 +186,7 @@ const fr: Translation = {
   BUFFER_SIZE: 'Max taille du buffer',
   COMPACT: 'Compact',
   DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
-  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
+  UPLOAD_TEXT: 'Upload a new firmware file (.bin) or a backup file (.json)', // TODO translate
   UPLOAD_DROP_TEXT: 'Déposer le fichier ou cliquer ici',
   ERROR: 'Erreur inattendue, veuillez réessayer',
   TIME_SET: 'Time set',

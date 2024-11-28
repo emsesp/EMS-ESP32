@@ -30,11 +30,20 @@ import { useI18nContext } from 'i18n/i18n-react';
 
 const Version = () => {
   const { LL } = useI18nContext();
-
   const [restarting, setRestarting] = useState<boolean>(false);
-  const [openDialog, setOpenDialog] = useState<boolean>(false);
-  const [useDev, setUseDev] = useState<boolean>(false);
+  const [openInstallDialog, setOpenInstallDialog] = useState<boolean>(false);
+  const [usingDevVersion, setUsingDevVersion] = useState<boolean>(false);
   const [upgradeAvailable, setUpgradeAvailable] = useState<boolean>(false);
+  const [internetLive, setInternetLive] = useState<boolean>(false);
+  const [downloadOnly, setDownloadOnly] = useState<boolean>(false);
+
+  const STABLE_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/';
+  const STABLE_RELNOTES_URL =
+    'https://github.com/emsesp/EMS-ESP32/blob/main/CHANGELOG.md';
+
+  const DEV_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/latest/';
+  const DEV_RELNOTES_URL =
+    'https://github.com/emsesp/EMS-ESP32/blob/dev/CHANGELOG_LATEST.md';
 
   const { send: sendCheckUpgrade } = useRequest(
     (versions: string) => callAction({ action: 'checkUpgrade', param: versions }),
@@ -46,7 +55,15 @@ const Version = () => {
     setUpgradeAvailable(data.upgradeable);
   });
 
-  const { data, send: loadData, error } = useRequest(SystemApi.readSystemStatus);
+  const {
+    data: data,
+    send: loadData,
+    error
+  } = useRequest(SystemApi.readSystemStatus).onSuccess((event) => {
+    // older version of EMS-ESP didn't have the psram set, so we can't do an OTA upgrade
+    setDownloadOnly(event.data.psram === undefined);
+    setUsingDevVersion(event.data.emsesp_version.includes('dev'));
+  });
 
   const { send: sendUploadURL } = useRequest(
     (url: string) => callAction({ action: 'uploadURL', param: url }),
@@ -61,34 +78,27 @@ const Version = () => {
 
   useEffect(() => {
     if (latestVersion && latestDevVersion) {
-      // console.log("Latest versions, stable: " + latestVersion + " dev: " + latestDevVersion);
-      sendCheckUpgrade(latestDevVersion + ',' + latestVersion).catch(
-        (error: Error) => {
-          toast.error('Failed to check upgrade: ' + error.message);
-        }
-      );
+      sendCheckUpgrade(latestDevVersion + ',' + latestVersion)
+        .catch((error: Error) => {
+          toast.error('Failed to check for upgrades: ' + error.message);
+        })
+        .finally(() => {
+          setInternetLive(true);
+        });
     }
   }, [latestVersion, latestDevVersion]);
 
-  const STABLE_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/';
-  const STABLE_RELNOTES_URL =
-    'https://github.com/emsesp/EMS-ESP32/blob/main/CHANGELOG.md';
-
-  const DEV_URL = 'https://github.com/emsesp/EMS-ESP32/releases/download/latest/';
-  const DEV_RELNOTES_URL =
-    'https://github.com/emsesp/EMS-ESP32/blob/dev/CHANGELOG_LATEST.md';
-
-  const getBinURL = (useDevVersion: boolean) => {
+  const getBinURL = () => {
     if (!latestVersion || !latestDevVersion) {
       return '';
     }
     const filename =
       'EMS-ESP-' +
-      (useDevVersion ? latestDevVersion : latestVersion).replaceAll('.', '_') +
+      (usingDevVersion ? latestDevVersion : latestVersion).replaceAll('.', '_') +
       '-' +
       getPlatform() +
       '.bin';
-    return useDevVersion
+    return usingDevVersion
       ? DEV_URL + filename
       : STABLE_URL + 'v' + latestVersion + '/' + filename;
   };
@@ -109,19 +119,28 @@ const Version = () => {
 
   useLayoutTitle('EMS-ESP Firmware');
 
-  const renderUploadDialog = () => (
-    <Dialog sx={dialogStyle} open={openDialog} onClose={() => setOpenDialog(false)}>
-      <DialogTitle>{LL.INSTALL('') + ' ' + ' Firmware'}</DialogTitle>
+  const renderInstallDialog = () => (
+    <Dialog
+      sx={dialogStyle}
+      open={openInstallDialog}
+      onClose={() => closeInstallDialog()}
+    >
+      <DialogTitle>
+        {LL.INSTALL() +
+          ' ' +
+          (usingDevVersion ? LL.DEVELOPMENT() : LL.STABLE()) +
+          ' Firmware'}
+      </DialogTitle>
       <DialogContent dividers>
         <Typography mb={2}>
-          {LL.INSTALL_VERSION(useDev ? latestDevVersion : latestVersion)}
+          {LL.INSTALL_VERSION(usingDevVersion ? latestDevVersion : latestVersion)}
         </Typography>
       </DialogContent>
       <DialogActions>
         <Button
           startIcon={<CancelIcon />}
           variant="outlined"
-          onClick={() => setOpenDialog(false)}
+          onClick={() => closeInstallDialog()}
           color="secondary"
         >
           {LL.CANCEL()}
@@ -129,54 +148,79 @@ const Version = () => {
         <Button
           startIcon={<DownloadIcon />}
           variant="outlined"
-          onClick={() => setOpenDialog(false)}
+          onClick={() => closeInstallDialog()}
           color="primary"
         >
-          <Link
-            underline="none"
-            target="_blank"
-            href={getBinURL(useDev)}
-            color="primary"
-          >
+          <Link underline="none" target="_blank" href={getBinURL()} color="primary">
             {LL.DOWNLOAD(1)}
           </Link>
         </Button>
         <Button
           startIcon={<WarningIcon color="warning" />}
           variant="outlined"
-          onClick={() => installFirmwareURL(getBinURL(useDev))}
+          onClick={() => installFirmwareURL(getBinURL())}
           color="primary"
         >
-          {LL.INSTALL('')}
+          {LL.INSTALL()}
         </Button>
       </DialogActions>
     </Dialog>
   );
 
-  const showFirmwareDialog = (useDevVersion: boolean) => {
-    if (useDevVersion || data.emsesp_version.includes('dev')) {
-      setUseDev(true);
+  const showFirmwareDialog = (useDevVersion?: boolean) => {
+    setUsingDevVersion(useDevVersion || usingDevVersion);
+    setOpenInstallDialog(true);
+  };
+
+  const closeInstallDialog = () => {
+    setOpenInstallDialog(false);
+    setUsingDevVersion(data.emsesp_version.includes('dev'));
+  };
+
+  const switchToDev = () => {
+    setUsingDevVersion(true);
+    setUpgradeAvailable(true);
+  };
+
+  const showButtons = () => {
+    if (!upgradeAvailable) {
+      return;
     }
-    setOpenDialog(true);
+
+    if (downloadOnly) {
+      return (
+        <Button
+          startIcon={<DownloadIcon />}
+          variant="outlined"
+          onClick={() => setOpenInstallDialog(false)}
+          color="warning"
+          size="small"
+          sx={{ ml: 2 }}
+        >
+          <Link underline="none" target="_blank" href={getBinURL()} color="warning">
+            {LL.DOWNLOAD(1)}
+          </Link>
+        </Button>
+      );
+    }
+
+    return (
+      <Button
+        sx={{ ml: 2 }}
+        variant="outlined"
+        color="warning"
+        size="small"
+        onClick={() => showFirmwareDialog()}
+      >
+        {LL.UPGRADE()}&hellip;
+      </Button>
+    );
   };
 
   const content = () => {
     if (!data) {
       return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
     }
-
-    const isDev = data.emsesp_version.includes('dev');
-    // const isDev = false; // for testing
-    // const isDev = true; // for testing
-
-    // check for older versions where auto-upgrade is not supported. These are bbqkees boards with no psram.
-    const canUpload = upgradeAvailable && data && data.psram;
-    // const canUpload = true as boolean; // for testing
-    // const canUpload = false as boolean; // for testing
-
-    // see if we have internet access
-    const internet_live =
-      latestDevVersion !== undefined && latestVersion !== undefined;
 
     return (
       <>
@@ -208,20 +252,9 @@ const Version = () => {
               </Typography>
               <Typography mb={1}>{getPlatform()}</Typography>
               <Typography mb={1}>
-                {isDev ? LL.DEVELOPMENT() : LL.STABLE()}
-                {!isDev && internet_live && (
-                  <Typography variant="caption">
-                    <Button
-                      sx={{ ml: 2 }}
-                      variant="outlined"
-                      color="primary"
-                      size="small"
-                      onClick={() => showFirmwareDialog(true)}
-                    >
-                      {LL.SWITCH_DEV()}
-                    </Button>
-                  </Typography>
-                )}
+                {data.emsesp_version.includes('dev')
+                  ? LL.DEVELOPMENT()
+                  : LL.STABLE()}
               </Typography>
             </Grid>
           </Grid>
@@ -230,7 +263,7 @@ const Version = () => {
             {LL.AVAILABLE_VERSION()}
           </Typography>
 
-          {internet_live ? (
+          {internetLive ? (
             <>
               <Grid container spacing={4}>
                 <Grid mb={1}>
@@ -247,72 +280,14 @@ const Version = () => {
                     <Link target="_blank" href={STABLE_RELNOTES_URL} color="primary">
                       (changelog)
                     </Link>
-                    {!isDev && canUpload && (
-                      <Button
-                        sx={{ ml: 2 }}
-                        variant="outlined"
-                        color="warning"
-                        size="small"
-                        onClick={() => showFirmwareDialog(false)}
-                      >
-                        {LL.UPGRADE()}&hellip;
-                      </Button>
-                    )}
-                    {!isDev && !canUpload && (
-                      <Button
-                        startIcon={<DownloadIcon />}
-                        variant="outlined"
-                        onClick={() => setOpenDialog(false)}
-                        color="warning"
-                        size="small"
-                        sx={{ ml: 2 }}
-                      >
-                        <Link
-                          underline="none"
-                          target="_blank"
-                          href={getBinURL(useDev)}
-                          color="warning"
-                        >
-                          {LL.DOWNLOAD(1)}
-                        </Link>
-                      </Button>
-                    )}
+                    {!usingDevVersion && showButtons()}
                   </Typography>
                   <Typography mb={1}>
                     {latestDevVersion}&nbsp;&nbsp;
                     <Link target="_blank" href={DEV_RELNOTES_URL} color="primary">
                       (changelog)
                     </Link>
-                    {isDev && canUpload && (
-                      <Button
-                        sx={{ ml: 2 }}
-                        variant="outlined"
-                        color="warning"
-                        size="small"
-                        onClick={() => showFirmwareDialog(false)}
-                      >
-                        {LL.UPGRADE()}&hellip;
-                      </Button>
-                    )}
-                    {isDev && !canUpload && (
-                      <Button
-                        startIcon={<DownloadIcon />}
-                        variant="outlined"
-                        onClick={() => setOpenDialog(false)}
-                        color="warning"
-                        size="small"
-                        sx={{ ml: 2 }}
-                      >
-                        <Link
-                          underline="none"
-                          target="_blank"
-                          href={getBinURL(useDev)}
-                          color="warning"
-                        >
-                          {LL.DOWNLOAD(1)}
-                        </Link>
-                      </Button>
-                    )}
+                    {usingDevVersion && showButtons()}
                   </Typography>
                 </Grid>
               </Grid>
@@ -333,14 +308,29 @@ const Version = () => {
                   {LL.LATEST_VERSION()}
                 </Typography>
               )}
+
+              {!data.emsesp_version.includes('dev') && !usingDevVersion && (
+                <Typography variant="caption">
+                  <Button
+                    sx={{ mt: 2 }}
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                    onClick={() => switchToDev()}
+                  >
+                    {LL.SWITCH_DEV()}
+                  </Button>
+                </Typography>
+              )}
             </>
           ) : (
             <Typography mb={1} color="warning">
-              not online
+              <WarningIcon color="warning" sx={{ verticalAlign: 'middle', mr: 2 }} />
+              device cannot access internet
             </Typography>
           )}
 
-          {renderUploadDialog()}
+          {renderInstallDialog()}
         </Box>
       </>
     );

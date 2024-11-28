@@ -161,7 +161,7 @@ const cz: Translation = {
   HELP_INFORMATION_4: 'Stáhněte a připojte informace podpoře pro rychlejší odezvu při hlášení problému',
   UPLOAD: 'Nahrát',
   DOWNLOAD: '{{S|s|s}}táhnout',
-  INSTALL: 'Instalovat {0}',
+  INSTALL: 'Instalovat',
   ABORTED: 'přerušeno',
   FAILED: 'neúspěšné',
   SUCCESSFUL: 'úspěšné',
