@@ -1,5 +1,6 @@
 """
 Print makefile progress
+From https://stackoverflow.com/questions/451413/make-makefile-progress-indication
 """
 
 import argparse
