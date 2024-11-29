@@ -540,7 +540,6 @@ bool Command::list(const uint8_t device_type, JsonObject output) {
         output["settings/showertimer"] = Helpers::translated_word(FL_(system_cmd));
         output["settings/showeralert"] = Helpers::translated_word(FL_(system_cmd));
         output["settings/hideled"] = Helpers::translated_word(FL_(system_cmd));
-        output["settings/txmode"] = Helpers::translated_word(FL_(system_cmd));
         output["settings/analogenabled"] = Helpers::translated_word(FL_(system_cmd));
         output["mqtt/enabled"] = Helpers::translated_word(FL_(system_cmd));
         output["ntp/enabled"] = Helpers::translated_word(FL_(system_cmd));
@@ -579,7 +578,6 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
         sorted_cmds.emplace_back("settings/showertimer");
         sorted_cmds.emplace_back("settings/showeralert");
         sorted_cmds.emplace_back("settings/hideled");
-        sorted_cmds.emplace_back("settings/txmode");
         sorted_cmds.emplace_back("settings/analogenabled");
         sorted_cmds.emplace_back("mqtt/enabled");
         sorted_cmds.emplace_back("ntp/enabled");

@@ -1414,17 +1414,6 @@ bool System::command_service(const char * cmd, const char * value) {
             ok = true;
         }
     }
-    int n;
-    if (!ok && Helpers::value2number(value, n)) {
-        if (!strcmp(cmd, "settings/txmode") && n >= 0 && n <= 4) {
-            EMSESP::webSettingsService.update([&](WebSettings & settings) {
-                settings.tx_mode = n;
-                return StateUpdateResult::CHANGED;
-            });
-            EMSESP::uart_init();
-            ok = true;
-        }
-    }
 
     if (ok) {
         LOG_INFO("System command '%s' with value '%s'", cmd, value);
@@ -1514,7 +1503,7 @@ void System::get_value_json(JsonObject output, const std::string & circuit, cons
     }
     output["readable"] = true;
     output["writeable"] =
-        (name == "txmode" || name == "showertimer" || name == "showeralert" || name == "enabled" || name == "hideled" || name == "analogenabled");
+        (name == "showerTimer" || name == "showerAlert" || name == "enabled" || name == "hideLed" || name == "analogEnabled");
     output["visible"] = true;
     if (val.is<bool>()) {
         output["value"] = val.as<bool>();
