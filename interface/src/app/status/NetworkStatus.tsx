@@ -88,12 +88,14 @@ const NetworkStatus = () => {
   } = useAutoRequest(NetworkApi.readNetworkStatus, { pollingTime: 3000 });
 
   const { LL } = useI18nContext();
-  useLayoutTitle(LL.STATUS_OF(LL.NETWORK(1)));
+  useLayoutTitle(LL.NETWORK(1));
 
   const theme = useTheme();
 
   const networkStatus = ({ status }: NetworkStatusType) => {
     switch (status) {
+      case NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED:
+        return LL.CONNECTED(0) + ' (Ethernet)';
       case NetworkConnectionStatus.WIFI_STATUS_NO_SHIELD:
         return LL.INACTIVE(1);
       case NetworkConnectionStatus.WIFI_STATUS_IDLE:
@@ -101,13 +103,13 @@ const NetworkStatus = () => {
       case NetworkConnectionStatus.WIFI_STATUS_NO_SSID_AVAIL:
         return 'No SSID Available';
       case NetworkConnectionStatus.WIFI_STATUS_CONNECTED:
-        return LL.CONNECTED(0) + ' (WiFi)';
-      case NetworkConnectionStatus.ETHERNET_STATUS_CONNECTED:
-        return LL.CONNECTED(0) + ' (Ethernet)';
+        return LL.CONNECTED(0) + ' (WiFi) (' + data.reconnect_count + ')';
       case NetworkConnectionStatus.WIFI_STATUS_CONNECT_FAILED:
-        return LL.CONNECTED(1) + ' ' + LL.FAILED(0);
+        return (
+          LL.CONNECTED(1) + ' ' + LL.FAILED(0) + ' (' + data.reconnect_count + ')'
+        );
       case NetworkConnectionStatus.WIFI_STATUS_CONNECTION_LOST:
-        return LL.CONNECTED(1) + ' ' + LL.LOST();
+        return LL.CONNECTED(1) + ' ' + LL.LOST() + ' (' + data.reconnect_count + ')';
       case NetworkConnectionStatus.WIFI_STATUS_DISCONNECTED:
         return LL.DISCONNECTED();
       default:

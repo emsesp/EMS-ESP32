@@ -1,4 +1,4 @@
-import { useMatch, useResolvedPath } from 'react-router-dom';
+import { useMatch, useResolvedPath } from 'react-router';
 
 export const useRouterTab = () => {
   const routerTabPathMatch = useMatch(useResolvedPath(':tab').pathname);

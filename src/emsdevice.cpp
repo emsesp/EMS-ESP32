@@ -135,7 +135,7 @@ const char * EMSdevice::device_type_2_device_name(const uint8_t device_type) {
     case DeviceType::GATEWAY:
         return F_(gateway);
     case DeviceType::SWITCH:
-        return F_(switch);
+        return F_(switcher);
     case DeviceType::CONTROLLER:
         return F_(controller);
     case DeviceType::CONNECT:
@@ -233,7 +233,7 @@ uint8_t EMSdevice::device_name_2_device_type(const char * topic) {
     if (!strcmp(lowtopic, F_(mixer))) {
         return DeviceType::MIXER;
     }
-    if (!strcmp(lowtopic, F_(switch))) {
+    if (!strcmp(lowtopic, F_(switcher))) {
         return DeviceType::SWITCH;
     }
     if (!strcmp(lowtopic, F_(gateway))) {
@@ -1271,7 +1271,7 @@ void EMSdevice::getCustomizationEntities(std::vector<std::string> & entity_ids) 
 // pipe symbols (|) are escaped so they can be converted to Markdown in the Wiki
 // format is: device name,device type,product id,shortname,fullname,type [options...] \\| (min/max),uom,writeable,discovery entityid v3.4, discovery entityid
 #if defined(EMSESP_STANDALONE)
-void EMSdevice::dump_value_info() {
+void EMSdevice::dump_devicevalue_info() {
     for (auto & dv : devicevalues_) {
         if (dv.fullname != nullptr) {
             Serial.print('\"');
@@ -1438,15 +1438,13 @@ void EMSdevice::dump_value_info() {
             Serial.print(",");
 
             // modbus specific infos
-
-
-            Serial.print(device_type());
+            Serial.print(device_type()); // modbus unit identifier
             Serial.print(',');
 
-            Serial.print(dv.tag);
+            Serial.print(dv.tag); // modbus block
             Serial.print(',');
 
-            // numeric operator -> scale factor
+            // numeric operator -> modbus scale factor
             if (dv.numeric_operator == 0)
                 Serial.print("1");
             else if (dv.numeric_operator > 0)
@@ -1455,10 +1453,10 @@ void EMSdevice::dump_value_info() {
                 Serial.print(-dv.numeric_operator);
             Serial.print(",");
 
-            Serial.printf("%d", EMSESP::modbus_->getRegisterOffset(dv));
+            Serial.printf("%d", EMSESP::modbus_->getRegisterOffset(dv)); // modbus offset
             Serial.print(",");
 
-            Serial.printf("%d", EMSESP::modbus_->getRegisterCount(dv));
+            Serial.printf("%d", EMSESP::modbus_->getRegisterCount(dv)); // modbus count
 
             // /modbus specific infos
 
@@ -1845,9 +1843,9 @@ void EMSdevice::mqtt_ha_entity_config_create() {
     uint16_t count                = 0;
 
     // check the state of each of the device values
-    // create climate if roomtemp is visible
     // create the discovery topic if if hasn't already been created, not a command (like reset) and is active and visible
     for (auto & dv : devicevalues_) {
+        // create climate when we reach the haclimate entity
         if (!strcmp(dv.short_name, FL_(haclimate)[0]) && !dv.has_state(DeviceValueState::DV_API_MQTT_EXCLUDE) && dv.has_state(DeviceValueState::DV_ACTIVE)) {
             if (*(int8_t *)(dv.value_p) == 1 && (!dv.has_state(DeviceValueState::DV_HA_CONFIG_CREATED) || dv.has_state(DeviceValueState::DV_HA_CLIMATE_NO_RT))) {
                 if (Mqtt::publish_ha_climate_config(dv.tag, true, false, dv.min, dv.max)) { // roomTemp
@@ -1930,7 +1928,7 @@ const char * EMSdevice::telegram_type_name(std::shared_ptr<const Telegram> teleg
 bool EMSdevice::handle_telegram(std::shared_ptr<const Telegram> telegram) {
     for (auto & tf : telegram_functions_) {
         if (tf.telegram_type_id_ == telegram->type_id) {
-            // for telegram desitnation only read telegram
+            // for telegram destination only read telegram
             if (telegram->dest == device_id_ && telegram->message_length > 0) {
                 tf.process_function_(telegram);
                 return true;
@@ -1982,9 +1980,14 @@ void EMSdevice::read_command(const uint16_t type_id, const uint8_t offset, const
 // returns either default or custom name
 std::string EMSdevice::name() {
     if (custom_name_.empty()) {
-        return default_name_;
+        // return default name prefixed with a model if exists
+        if (model().empty()) {
+            return default_name();
+        }
+        return model() + "/" + default_name();
     }
-    return custom_name_;
+
+    return custom_name();
 }
 
 // copy a raw value (i.e. without applying the numeric_operator) to the output buffer.
@@ -1993,8 +1996,9 @@ int EMSdevice::get_modbus_value(uint8_t tag, const std::string & shortname, std:
     // find device value by shortname
     // TODO replace linear search which is inefficient
     const auto & it = std::find_if(devicevalues_.begin(), devicevalues_.end(), [&](const DeviceValue & x) { return x.tag == tag && x.short_name == shortname; });
-    if (it == devicevalues_.end())
+    if (it == devicevalues_.end() && (it->short_name != shortname || it->tag != tag)) {
         return -1;
+    }
 
     auto & dv = *it;
 
@@ -2079,7 +2083,7 @@ int EMSdevice::modbus_value_to_json(uint8_t tag, const std::string & shortname, 
 
     // find device value by shortname
     const auto & it = std::find_if(devicevalues_.begin(), devicevalues_.end(), [&](const DeviceValue & x) { return x.tag == tag && x.short_name == shortname; });
-    if (it == devicevalues_.end()) {
+    if (it == devicevalues_.end() && (it->short_name != shortname || it->tag != tag)) {
         return -1;
     }
 

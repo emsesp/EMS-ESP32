@@ -415,7 +415,16 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
 
                 JsonObject dv = node["dv"].to<JsonObject>();
                 dv["id"]      = "00" + sensor.name();
-                if (sensor.type() == AnalogSensor::AnalogType::DIGITAL_OUT || sensor.type() == AnalogSensor::AnalogType::DIGITAL_IN) {
+#if CONFIG_IDF_TARGET_ESP32
+                if (sensor.type() == AnalogSensor::AnalogType::DIGITAL_OUT && (sensor.gpio() == 25 || sensor.gpio() == 26)) {
+                    obj["v"] = Helpers::transformNumFloat(sensor.value(), 0);
+                } else
+#elif CONFIG_IDF_TARGET_ESP32S2
+                if (sensor.type() == AnalogSensor::AnalogType::DIGITAL_OUT && (sensor.gpio() == 17 || sensor.gpio() == 18)) {
+                    obj["v"] = Helpers::transformNumFloat(sensor.value(), 0);
+                } else
+#endif
+                    if (sensor.type() == AnalogSensor::AnalogType::DIGITAL_OUT || sensor.type() == AnalogSensor::AnalogType::DIGITAL_IN) {
                     char s[12];
                     dv["v"]     = Helpers::render_boolean(s, sensor.value() != 0, true);
                     JsonArray l = dv["l"].to<JsonArray>();

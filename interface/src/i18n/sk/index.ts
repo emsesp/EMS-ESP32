@@ -159,10 +159,9 @@ const sk: Translation = {
   HELP_INFORMATION_2: 'Pre živý komunitný chat sa pripojte na náš Discord server',
   HELP_INFORMATION_3: 'Ak chcete požiadať o funkciu alebo nahlásiť chybu',
   HELP_INFORMATION_4: 'nezabudnite si stiahnuť a pripojiť informácie o vašom systéme, aby ste mohli rýchlejšie reagovať pri nahlasovaní problému',
-  HELP_INFORMATION_5: 'Pre pomoc a otázky, kontaktujte svojho inštalatéra',
   UPLOAD: 'Nahrať',
   DOWNLOAD: '{{S|s|s}}tiahnuť',
-  INSTALL: 'Inštalovať {0}',
+  INSTALL: 'Inštalovať',
   ABORTED: 'zrušené',
   FAILED: 'chybné',
   SUCCESSFUL: 'úspešné',
@@ -175,9 +174,9 @@ const sk: Translation = {
   FACTORY_RESET: 'Továrenské nastavenia',
   SYSTEM_FACTORY_TEXT: 'Zariadenie bolo obnovené z výroby a teraz sa reštartuje',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Naozaj chcete resetovať EMS-ESP na predvolené výrobné nastavenia?',
+  AVAILABLE_VERSION: 'Latest Available Versions', // TODO translate
   STABLE: 'Stabilná',
   DEVELOPMENT: 'Vývojárska',
-  EMS_ESP_VER: 'Firmware verzia',
   UPTIME: 'Beh systému',
   FREE_MEMORY: 'Voľné Memory',
   PSRAM: 'PSRAM (Veľkosť / Voľné)',
@@ -332,7 +331,7 @@ const sk: Translation = {
   ALLVALUES: 'Všetky hodnoty',
   SPECIAL_FUNCTIONS: 'Špeciálne funkcie',
   WAIT_FIRMWARE: 'Firmvér sa nahráva a inštaluje',
-  INSTALL_VERSION: 'Týmto sa nainštaluje verzia {0}. Si si istý?',
+  INSTALL_VERSION: 'Týmto sa inštalovať verzia {0}. Si si istý?',
   SWITCH_DEV: 'prejsť na vývojovú verziu',
   UPGRADE_AVAILABLE: 'K dispozícii je aktualizácia firmvéru!',
   LATEST_VERSION: 'Používate poslednú verziu firmvéru.',
@@ -343,7 +342,8 @@ const sk: Translation = {
   DASHBOARD: 'Panel',
   NO_DATA: 'Nie sú k dispozícii žiadne údaje',
   DASHBOARD_1: 'Prispôsobte si svoj informačný panel tak, že označíte entity EMS ako Obľúbené pomocou modulu Prispôsobenia',
-  DEVELOPER_MODE: 'Developer Mode' // TODO translate
+  DEVELOPER_MODE: 'Developer Mode', // TODO translate
+  UPGRADE: 'Upgrade' // TODO translate
 };
 
 export default sk;

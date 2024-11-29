@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { useBlocker } from 'react-router-dom';
+import { useBlocker } from 'react-router';
 import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';

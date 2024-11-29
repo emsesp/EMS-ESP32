@@ -137,7 +137,7 @@
 // Mixer Modules - 0x20-0x27 for HC, 0x28-0x29 for WWC and 0x11 for the MP100
 { 69, DeviceType::MIXER, "MM10", DeviceFlags::EMS_DEVICE_FLAG_MM10},
 {100, DeviceType::MIXER, "IPM", DeviceFlags::EMS_DEVICE_FLAG_IPM},
-{102, DeviceType::MIXER, "IPM", DeviceFlags::EMS_DEVICE_FLAG_IPM},
+{102, DeviceType::MIXER, "IPM2", DeviceFlags::EMS_DEVICE_FLAG_IPM},
 {159, DeviceType::MIXER, "MM50", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
 {160, DeviceType::MIXER, "MM100", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
 {161, DeviceType::MIXER, "MM200", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
@@ -180,10 +180,23 @@
 { 74, DeviceType::ALERT, "EM10", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Gateways - 0x48
+{17, DeviceType::GATEWAY, "MX400", DeviceFlags::EMS_DEVICE_FLAG_NONE}, // 0x48 and 0x4B
 {189, DeviceType::GATEWAY, "KM200, MB LAN 2", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 {252, DeviceType::GATEWAY, "K30RF, MX300", DeviceFlags::EMS_DEVICE_FLAG_NONE},
 
 // Generic - 0x40 or other with no product-id and no version
 {0, DeviceType::GENERIC, "unknown", DeviceFlags::EMS_DEVICE_FLAG_NONE}
+
+#if defined(EMSESP_STANDALONE)
+,
+{100, DeviceType::WATER, "IPM", DeviceFlags::EMS_DEVICE_FLAG_IPM},
+{102, DeviceType::WATER, "IPM2", DeviceFlags::EMS_DEVICE_FLAG_IPM},
+{160, DeviceType::WATER, "MM100", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
+{161, DeviceType::WATER, "MM200", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
+{163, DeviceType::WATER, "SM100, MS100", DeviceFlags::EMS_DEVICE_FLAG_SM100},
+{164, DeviceType::WATER, "SM200, MS200", DeviceFlags::EMS_DEVICE_FLAG_SM100},
+{248, DeviceType::MIXER, "HM210", DeviceFlags::EMS_DEVICE_FLAG_MMPLUS},
+{157, DeviceType::THERMOSTAT, "RC120", DeviceFlags::EMS_DEVICE_FLAG_CR120}
+#endif
 
 // clang-format on

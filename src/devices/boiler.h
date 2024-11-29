@@ -85,7 +85,7 @@ class Boiler : public EMSdevice {
     uint8_t  wwMaxPower_;           // DHW maximum power
     uint8_t  wwMaxTemp_;            // DHW maximum temperature
     uint32_t wwStarts_;             // DHW starts
-    uint32_t wwStarts2_;            // DHW control starts
+    uint32_t wwStartsHp_;           // DHW starts Heatpump
     uint32_t wwWorkM_;              // DHW minutes
     int8_t   wwHystOn_;
     int8_t   wwHystOff_;
@@ -256,6 +256,7 @@ class Boiler : public EMSdevice {
     uint8_t maxHeatDhw_;
     uint8_t hpMaxPower_;
     uint8_t pvMaxComp_;
+    uint8_t powerReduction_;
 
     uint8_t  pvCooling_;
     uint8_t  manDefrost_;
@@ -265,6 +266,7 @@ class Boiler : public EMSdevice {
     uint8_t  auxHeaterOnly_;
     uint8_t  auxHeaterOff_;
     uint8_t  auxHeaterStatus_;
+    uint8_t  auxHeaterLevel_;
     uint16_t auxHeaterDelay_;
     uint8_t  silentMode_;
     int8_t   minTempSilent_;
@@ -332,7 +334,6 @@ class Boiler : public EMSdevice {
     uint8_t delayBoiler_;     // minutes
     uint8_t tempDiffBoiler_;  // relative temperature degrees
   */
-
     void process_UBAFactory(std::shared_ptr<const Telegram> telegram);
     void process_UBAParameterWW(std::shared_ptr<const Telegram> telegram);
     void process_UBAMonitorFast(std::shared_ptr<const Telegram> telegram);
@@ -482,6 +483,7 @@ class Boiler : public EMSdevice {
     bool set_pvMaxComp(const char * value, const int8_t id);
     bool set_hpDiffPress(const char * value, const int8_t id);
     bool set_hpPowerLimit(const char * value, const int8_t id);
+    bool set_powerReduction(const char * value, const int8_t id);
 
     bool        set_auxLimit(const char * value, const int8_t id);
     inline bool set_auxMaxLimit(const char * value, const int8_t id) {

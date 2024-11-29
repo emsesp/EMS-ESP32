@@ -44,7 +44,7 @@ const NTPSettings = () => {
   });
 
   const { LL } = useI18nContext();
-  useLayoutTitle(LL.SETTINGS_OF('NTP'));
+  useLayoutTitle('NTP');
 
   const updateFormValue = updateValueDirty(
     origData,
@@ -71,12 +71,12 @@ const NTPSettings = () => {
     };
 
     const changeTimeZone = (event: React.ChangeEvent<HTMLInputElement>) => {
-      updateFormValue(event);
       void updateState(readNTPSettings(), (settings: NTPSettingsType) => ({
         ...settings,
         tz_label: event.target.value,
         tz_format: TIME_ZONES[event.target.value]
       }));
+      updateFormValue(event);
     };
 
     return (

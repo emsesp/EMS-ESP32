@@ -179,8 +179,8 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
         if (has_param) {
             ok = exportData(root, param);
         }
-    } else if (action == "customSupport") {
-        ok = customSupport(root);
+    } else if (action == "getCustomSupport") {
+        ok = getCustomSupport(root);
     } else if (action == "uploadURL" && is_admin) {
         ok = uploadURL(param.c_str());
     }
@@ -203,21 +203,44 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
 }
 
 // action = checkUpgrade
-bool WebStatusService::checkUpgrade(JsonObject root, std::string & latest_version) {
-    root["emsesp_version"] = EMSESP_APP_VERSION;
-
-    if (!latest_version.empty()) {
-#if defined(EMSESP_DEBUG)
-        emsesp::EMSESP::logger().debug("Checking for upgrade: %s > %s", EMSESP_APP_VERSION, latest_version.c_str());
+// versions holds the latest development version and stable version in one string, comma separated
+bool WebStatusService::checkUpgrade(JsonObject root, std::string & versions) {
+    std::string current_version_s;
+#ifndef EMSESP_STANDALONE
+    current_version_s = EMSESP_APP_VERSION;
+#else
+    // for testing only - see api3 test in test.cpp
+    // current_version_s = "3.6.5";
+    current_version_s = "3.7.1-dev.8";
 #endif
 
-        version::Semver200_version settings_version(EMSESP_APP_VERSION);
-        version::Semver200_version this_version(latest_version);
+    if (!versions.empty()) {
+        version::Semver200_version current_version(current_version_s);
+        bool using_dev_version = !current_version.prerelease().find("dev"); // look for dev in the name to determine if we're using dev version
+        version::Semver200_version latest_version(using_dev_version ? versions.substr(0, versions.find(',')) : versions.substr(versions.find(',') + 1));
+        bool                       upgradeable = (latest_version > current_version);
 
-        root["upgradeable"] = (this_version > settings_version);
+#if defined(EMSESP_DEBUG)
+        emsesp::EMSESP::logger()
+            .debug("Checking Version upgrade. Using %s release branch. current version=%d.%d.%d-%s, latest version=%d.%d.%d-%s (%s upgradeable)",
+                   (using_dev_version ? "dev" : "stable"),
+                   current_version.major(),
+                   current_version.minor(),
+                   current_version.patch(),
+                   current_version.prerelease().c_str(),
+                   latest_version.major(),
+                   latest_version.minor(),
+                   latest_version.patch(),
+                   latest_version.prerelease().c_str(),
+                   upgradeable ? "IS" : "NOT");
+#endif
+
+        root["upgradeable"] = upgradeable;
     }
 
-    return true; // always ok
+    root["emsesp_version"] = current_version_s; // always send back current version
+
+    return true;
 }
 
 // action = allvalues
@@ -278,19 +301,28 @@ bool WebStatusService::exportData(JsonObject root, std::string & type) {
     return true;
 }
 
-// action = customSupport
+// action = getCustomSupport
 // reads any upload customSupport.json file and sends to to Help page to be shown as Guest
-bool WebStatusService::customSupport(JsonObject root) {
-#ifndef EMSESP_STANDALONE
+bool WebStatusService::getCustomSupport(JsonObject root) {
+    JsonDocument doc;
+
+#if defined(EMSESP_STANDALONE)
+    // dummy test data for "test api3"
+    deserializeJson(
+        doc, "{\"type\":\"customSupport\",\"Support\":{\"html\":[\"html code\",\"here\"], \"img_url\": \"https://docs.emsesp.org/_media/images/designer.png\"}");
+#else
     // check if we have custom support file uploaded
     File file = LittleFS.open(EMSESP_CUSTOMSUPPORT_FILE, "r");
     if (!file) {
         // there is no custom file, return empty object
+#if defined(EMSESP_DEBUG)
+        emsesp::EMSESP::logger().debug("No custom support file found");
+#endif
         return true;
     }
 
-    // read the contents of the file into the root output json object
-    DeserializationError error = deserializeJson(root, file);
+    // read the contents of the file into a json doc. We can't do this direct to object since 7.2.1
+    DeserializationError error = deserializeJson(doc, file);
     if (error) {
         emsesp::EMSESP::logger().err("Failed to read custom support file");
         return false;
@@ -298,6 +330,13 @@ bool WebStatusService::customSupport(JsonObject root) {
 
     file.close();
 #endif
+
+#if defined(EMSESP_DEBUG)
+    emsesp::EMSESP::logger().debug("Showing custom support page");
+#endif
+
+    root.set(doc.as<JsonObject>()); // add to web response root object
+
     return true;
 }
 

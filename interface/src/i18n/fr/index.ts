@@ -159,10 +159,9 @@ const fr: Translation = {
   HELP_INFORMATION_2: 'Pour une discussion en direct avec la communauté, rejoignez notre serveur Discord',
   HELP_INFORMATION_3: 'Pour demander une fonctionnalité ou signaler un problème',
   HELP_INFORMATION_4: "N'oubliez pas de télécharger et de joindre les informations relatives à votre système pour obtenir une réponse plus rapide lorsque vous signalez un problème",
-  HELP_INFORMATION_5: 'For help and questions please contact your installer', // TODO translate
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
-  INSTALL: 'Installer {0}',
+  INSTALL: 'Installer',
   ABORTED: 'annulé',
   FAILED: 'échoué',
   SUCCESSFUL: 'réussi',
@@ -175,9 +174,9 @@ const fr: Translation = {
   FACTORY_RESET: 'Réinitialisation',
   SYSTEM_FACTORY_TEXT: "L'appareil a été réinitialisé et va maintenant redémarrer",
   SYSTEM_FACTORY_TEXT_DIALOG: "Êtes-vous sûr de vouloir réinitialiser l'appareil à ses paramètres d'usine ?",
+  AVAILABLE_VERSION: 'Latest Available Versions', // TODO translate
   STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Développement',
-  EMS_ESP_VER: 'Firmware Version', // TODO translate
   UPTIME: 'Durée de fonctionnement du système',
   FREE_MEMORY: 'Libre Memory',
   PSRAM: 'PSRAM (Taille / Libre)',
@@ -187,7 +186,7 @@ const fr: Translation = {
   BUFFER_SIZE: 'Max taille du buffer',
   COMPACT: 'Compact',
   DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
-  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
+  UPLOAD_TEXT: 'Upload a new firmware file (.bin) or a backup file (.json)', // TODO translate
   UPLOAD_DROP_TEXT: 'Déposer le fichier ou cliquer ici',
   ERROR: 'Erreur inattendue, veuillez réessayer',
   TIME_SET: 'Time set',
@@ -343,7 +342,8 @@ const fr: Translation = {
   DASHBOARD: 'Dashboard', // TODO translate
   NO_DATA: 'No data available', // TODO translate
   DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module', // TODO translate
-  DEVELOPER_MODE: 'Developer Mode' // TODO translate
+  DEVELOPER_MODE: 'Developer Mode', // TODO translate
+  UPGRADE: 'Upgrade' // TODO translate
 };
 
 export default fr;

@@ -159,10 +159,9 @@ const pl: BaseTranslation = {
   HELP_INFORMATION_2: 'Dołącz do naszego serwera Discord by komunikować się na żywo ze społecznością',
   HELP_INFORMATION_3: 'Zaproponuj nową funkcjonalność lub zgłoś problem',
   HELP_INFORMATION_4: 'Zgłaszając problem, nie zapomnij pobrać i dołączyć informacji o swoim systemie!',
-  HELP_INFORMATION_5: 'For help and questions please contact your installer', // TODO translate
   UPLOAD: 'Wysyłanie',
   DOWNLOAD: '{{P|p||P}}obier{{anie|z||z}}',
-  INSTALL: 'Zainstalować {0}',
+  INSTALL: 'Zainstalować',
   ABORTED: 'zostało przerwane!',
   FAILED: 'nie powiodł{{o|a|}} się!',
   SUCCESSFUL: 'powiodło się.',
@@ -175,9 +174,9 @@ const pl: BaseTranslation = {
   FACTORY_RESET: 'Ustawienia fabryczne',
   SYSTEM_FACTORY_TEXT: 'Interfejs EMS-ESP został przywrócony do ustawień fabrycznych i zostanie teraz ponownie uruchomiony.',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Na pewno chcesz przywrócić ustawienia fabryczne interfejsu EMS-ESP?',
+  AVAILABLE_VERSION: 'Latest Available Versions', // TODO translate
   STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Testowe',
-  EMS_ESP_VER: 'Wersja Firmware',
   UPTIME: 'Czas działania systemu',
   FREE_MEMORY: 'Wolne Memory',
   PSRAM: 'PSRAM (rozmiar / wolne)',
@@ -187,7 +186,7 @@ const pl: BaseTranslation = {
   BUFFER_SIZE: 'Maksymalna pojemność bufora (ilość wpisów)',
   COMPACT: 'Kompaktowy',
   DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
-  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
+  UPLOAD_TEXT: 'Upload a new firmware file (.bin) or a backup file (.json)', // TODO translate
   UPLOAD_DROP_TEXT: 'Przeciągnij tutaj plik lub kliknij',
   ERROR: 'Nieoczekiwany błąd, spróbuj ponownie!',
   TIME_SET: 'Zegar został ustawiony.',
@@ -343,7 +342,8 @@ const pl: BaseTranslation = {
   DASHBOARD: 'Dashboard', // TODO translate
   NO_DATA: 'No data available', // TODO translate
   DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module', // TODO translate
-  DEVELOPER_MODE: 'Developer Mode' // TODO translate
+  DEVELOPER_MODE: 'Developer Mode', // TODO translate
+  UPGRADE: 'Upgrade' // TODO translate
 };
 
 export default pl;

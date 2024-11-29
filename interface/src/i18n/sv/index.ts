@@ -159,10 +159,9 @@ const sv: Translation = {
   HELP_INFORMATION_2: 'För community-support besök vår Discord-server',
   HELP_INFORMATION_3: 'Önska en ny funktion eller rapportera en bugg',
   HELP_INFORMATION_4: 'Bifoga din systeminformation för snabbare hantering när du rapporterar ett problem',
-  HELP_INFORMATION_5: 'For help and questions please contact your installer', // TODO translate
   UPLOAD: 'Uppladdning',
   DOWNLOAD: '{{N|n|n}}edladdning',
-  INSTALL: 'Installera {0}',
+  INSTALL: 'Installera',
   ABORTED: 'Avbruten',
   FAILED: 'Misslyckades',
   SUCCESSFUL: 'Lyckades',
@@ -175,9 +174,9 @@ const sv: Translation = {
   FACTORY_RESET: 'Fabriksåterställning',
   SYSTEM_FACTORY_TEXT: 'Enheten har blivit fabriksåterställd och startar nu om',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Är du säker att du vill fabriksåterställa enheten?',
+  AVAILABLE_VERSION: 'Latest Available Versions', // TODO translate
   STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Utveckling',
-  EMS_ESP_VER: 'Firmware Version', // TODO translate
   UPTIME: 'Systemets Upptid',
   FREE_MEMORY: 'Ledigt Memory',
   PSRAM: 'PSRAM (Storlek / Ledigt)',
@@ -187,7 +186,7 @@ const sv: Translation = {
   BUFFER_SIZE: 'Max Bufferstorlek',
   COMPACT: 'Komprimera',
   DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
-  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
+  UPLOAD_TEXT: 'Upload a new firmware file (.bin) or a backup file (.json)', // TODO translate
   UPLOAD_DROP_TEXT: 'Släpp fil eller klicka här',
   ERROR: 'Okänt Fel, var god försök igen',
   TIME_SET: 'Ställ in tid',
@@ -343,7 +342,8 @@ const sv: Translation = {
   DASHBOARD: 'Dashboard', // TODO translate
   NO_DATA: 'No data available', // TODO translate
   DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module', // TODO translate
-  DEVELOPER_MODE: 'Developer Mode' // TODO translate
+  DEVELOPER_MODE: 'Developer Mode', // TODO translate
+  UPGRADE: 'Upgrade' // TODO translate
 };
 
 export default sv;

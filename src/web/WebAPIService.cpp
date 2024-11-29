@@ -32,13 +32,12 @@ WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * security
 // POST|GET api/{device}
 // POST|GET api/{device}/{entity}
 void WebAPIService::webAPIService(AsyncWebServerRequest * request, JsonVariant json) {
-    JsonObject input;
+    JsonDocument input_doc; // has no body JSON so create dummy as empty input object
+    JsonObject   input;
     // if no body then treat it as a secure GET
     if ((request->method() == HTTP_GET) || (!json.is<JsonObject>())) {
         // HTTP GET
-        JsonDocument input_doc; // has no body JSON so create dummy as empty input object
         input = input_doc.to<JsonObject>();
-
     } else {
         // HTTP_POST
         input = json.as<JsonObject>(); // extract values from the json. these will be used as default values

@@ -53,28 +53,48 @@ class EMSdevice {
     static uint8_t      decode_brand(uint8_t value);
     static bool         export_values(uint8_t device_type, JsonObject output, const int8_t id, const uint8_t output_target);
 
-    // non static
+    // non static functions
 
     const char * device_type_name();                     // returns short non-translated device type name
     const char * device_type_2_device_name_translated(); // returns translated device type name
+    bool         has_tags(const int8_t tag) const;
+    bool         has_cmd(const char * cmd, const int8_t id) const;
+    const char * brand_to_char();
+    std::string  to_string();
+    std::string  to_string_short();
+    std::string  name(); // returns either default or custom name of a device (if defined)
 
-    bool has_tags(const int8_t tag) const;
-    bool has_cmd(const char * cmd, const int8_t id) const;
+    bool is_device_id(uint8_t device_id) const {
+        return ((device_id & 0x7F) == (device_id_ & 0x7F));
+    }
 
-    inline uint8_t device_id() const {
+    // Getters
+    uint8_t device_id() const {
         return device_id_;
     }
 
-    inline uint8_t product_id() const {
+    uint8_t product_id() const {
         return product_id_;
     }
 
-    void product_id(uint8_t product_id) {
-        product_id_ = product_id;
+    uint8_t device_type() const {
+        return device_type_; // see enum DeviceType below
     }
 
-    inline bool is_device_id(uint8_t device_id) const {
-        return ((device_id & 0x7F) == (device_id_ & 0x7F));
+    const char * version() const {
+        return version_;
+    }
+
+    uint8_t brand() const {
+        return brand_;
+    }
+
+    void active(bool active) {
+        active_ = active;
+    }
+
+    const char * default_name() const {
+        return default_name_;
     }
 
     // flags
@@ -91,66 +111,46 @@ class EMSdevice {
         return flags_;
     }
 
-    inline uint8_t device_type() const {
-        return device_type_; // see enum DeviceType below
-    }
-
-    inline void version(const char * version) {
-        strlcpy(version_, version, sizeof(version_));
-    }
-
-    inline const char * version() const {
-        return version_;
-    }
-
-    inline void brand(uint8_t brand) {
-        brand_ = brand;
-    }
-
-    inline uint8_t brand() const {
-        return brand_;
-    }
-
-    inline void active(bool active) {
-        active_ = active;
-    }
-
     // set custom device name
-    inline void custom_name(std::string const & custom_name) {
+    void custom_name(std::string const & custom_name) {
         custom_name_ = custom_name;
     }
-    std::string name(); // returns either default or custom name if defined
 
-    // default name
-    inline void default_name(const char * default_name) {
-        default_name_ = default_name;
+    std::string custom_name() const {
+        return custom_name_;
     }
-    inline const char * default_name() const {
-        return default_name_;
+
+    // set device model
+    void model(std::string const & model) {
+        model_ = model;
+    }
+
+    std::string model() const {
+        return model_;
     }
 
     inline uint8_t unique_id() const {
         return unique_id_;
     }
 
-    inline void unique_id(uint8_t unique_id) {
+    void unique_id(uint8_t unique_id) {
         unique_id_ = unique_id;
     }
 
-    inline bool has_update() const {
+    bool has_update() const {
         return has_update_;
     }
 
-    inline void has_update(bool flag) {
+    void has_update(bool flag) {
         has_update_ = flag;
     }
 
-    inline void has_update(void * value) {
+    void has_update(void * value) {
         has_update_ = true;
         publish_value(value);
     }
 
-    inline void has_update(char * value, const char * newvalue, size_t len) {
+    void has_update(char * value, const char * newvalue, size_t len) {
         if (strcmp(value, newvalue) != 0) {
             strlcpy(value, newvalue, len);
             has_update_ = true;
@@ -158,7 +158,7 @@ class EMSdevice {
         }
     }
 
-    inline void has_update(uint8_t & value, uint8_t newvalue) {
+    void has_update(uint8_t & value, uint8_t newvalue) {
         if (value != newvalue) {
             value       = newvalue;
             has_update_ = true;
@@ -166,7 +166,7 @@ class EMSdevice {
         }
     }
 
-    inline void has_update(uint16_t & value, uint16_t newvalue) {
+    void has_update(uint16_t & value, uint16_t newvalue) {
         if (value != newvalue) {
             value       = newvalue;
             has_update_ = true;
@@ -174,7 +174,7 @@ class EMSdevice {
         }
     }
 
-    inline void has_update(uint32_t & value, uint32_t newvalue) {
+    void has_update(uint32_t & value, uint32_t newvalue) {
         if (value != newvalue) {
             value       = newvalue;
             has_update_ = true;
@@ -182,7 +182,7 @@ class EMSdevice {
         }
     }
 
-    inline void has_enumupdate(std::shared_ptr<const Telegram> telegram, uint8_t & value, const uint8_t index, int8_t s = 0) {
+    void has_enumupdate(std::shared_ptr<const Telegram> telegram, uint8_t & value, const uint8_t index, int8_t s = 0) {
         if (telegram->read_enumvalue(value, index, s)) {
             has_update_ = true;
             publish_value((void *)&value);
@@ -190,7 +190,7 @@ class EMSdevice {
     }
 
     template <typename Value>
-    inline void has_update(std::shared_ptr<const Telegram> telegram, Value & value, const uint8_t index, uint8_t s = 0) {
+    void has_update(std::shared_ptr<const Telegram> telegram, Value & value, const uint8_t index, uint8_t s = 0) {
         if (telegram->read_value(value, index, s)) {
             has_update_ = true;
             publish_value((void *)&value);
@@ -198,22 +198,18 @@ class EMSdevice {
     }
 
     template <typename BitValue>
-    inline void has_bitupdate(std::shared_ptr<const Telegram> telegram, BitValue & value, const uint8_t index, uint8_t b) {
+    void has_bitupdate(std::shared_ptr<const Telegram> telegram, BitValue & value, const uint8_t index, uint8_t b) {
         if (telegram->read_bitvalue(value, index, b)) {
             has_update_ = true;
             publish_value((void *)&value);
         }
     }
 
+    // modbus
     int get_modbus_value(uint8_t tag, const std::string & shortname, std::vector<uint16_t> & result);
     int modbus_value_to_json(uint8_t tag, const std::string & shortname, const std::vector<uint8_t> & modbus_data, JsonObject jsonValue);
 
-    const char * brand_to_char();
-    std::string  to_string();
-    std::string  to_string_short();
-
     enum Handlers : uint8_t { ALL, RECEIVED, FETCHED, PENDING, IGNORED };
-
     void   show_telegram_handlers(uuid::console::Shell & shell) const;
     char * show_telegram_handlers(char * result, const size_t len, const uint8_t handlers);
     void   show_mqtt_handlers(uuid::console::Shell & shell) const;
@@ -227,10 +223,9 @@ class EMSdevice {
     bool handle_telegram(std::shared_ptr<const Telegram> telegram);
 
     std::string get_value_uom(const std::string & shortname) const;
-
-    bool get_value_info(JsonObject root, const char * cmd, const int8_t id);
-    void get_value_json(JsonObject output, DeviceValue & dv);
-    void get_dv_info(JsonObject json);
+    bool        get_value_info(JsonObject root, const char * cmd, const int8_t id);
+    void        get_value_json(JsonObject output, DeviceValue & dv);
+    void        get_dv_info(JsonObject json);
 
     enum OUTPUT_TARGET : uint8_t { API_VERBOSE, API_SHORTNAMES, MQTT, CONSOLE };
     bool generate_values(JsonObject output, const int8_t tag_filter, const bool nested, const uint8_t output_target);
@@ -314,23 +309,20 @@ class EMSdevice {
 
     void read_command(const uint16_t type_id, uint8_t offset = 0, uint8_t length = 0) const;
 
-    bool is_readable(const void * value_p) const;
-    bool is_readonly(const std::string & cmd, const int8_t id) const;
-    bool has_command(const void * value_p) const;
-    void set_minmax(const void * value_p, int16_t min, uint32_t max);
-    void publish_value(void * value_p) const;
-    void publish_all_values();
-
-    void mqtt_ha_entity_config_create();
-
+    bool         is_readable(const void * value_p) const;
+    bool         is_readonly(const std::string & cmd, const int8_t id) const;
+    bool         has_command(const void * value_p) const;
+    void         set_minmax(const void * value_p, int16_t min, uint32_t max);
+    void         publish_value(void * value_p) const;
+    void         publish_all_values();
+    void         mqtt_ha_entity_config_create();
     const char * telegram_type_name(std::shared_ptr<const Telegram> telegram);
-
-    void fetch_values();
-    void toggle_fetch(uint16_t telegram_id, bool toggle);
-    bool is_fetch(uint16_t telegram_id) const;
-    bool is_received(uint16_t telegram_id) const;
-    bool has_telegram_id(uint16_t id) const;
-    void ha_config_clear();
+    void         fetch_values();
+    void         toggle_fetch(uint16_t telegram_id, bool toggle);
+    bool         is_fetch(uint16_t telegram_id) const;
+    bool         is_received(uint16_t telegram_id) const;
+    bool         has_telegram_id(uint16_t id) const;
+    void         ha_config_clear();
 
     bool ha_config_done() const {
         return ha_config_done_;
@@ -491,7 +483,7 @@ class EMSdevice {
         }
     };
     void dump_telegram_info(std::vector<TelegramFunctionDump> & telegram_functions_dump);
-    void dump_value_info();
+    void dump_devicevalue_info();
 #endif
 
   private:
@@ -502,6 +494,7 @@ class EMSdevice {
     char         version_[6];
     const char * default_name_;     // the fixed name the EMS model taken from the device library
     std::string  custom_name_ = ""; // custom name
+    std::string  model_       = ""; // model, taken from the 0x01 telegram. see process_deviceName()
     uint8_t      flags_       = 0;
     uint8_t      brand_       = Brand::NO_BRAND;
     bool         active_      = true;
@@ -525,14 +518,13 @@ class EMSdevice {
         }
     };
 
-    std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
-
     std::vector<uint16_t> handlers_ignored_;
 
 #if defined(EMSESP_STANDALONE) || defined(EMSESP_TEST)
-  public: // so we can call it from WebCustomizationService::test()
+  public: // so we can call it from WebCustomizationService::test() and EMSESP::dump_all_entities()
 #endif
-    std::vector<DeviceValue> devicevalues_; // all the device values
+    std::vector<TelegramFunction> telegram_functions_; // each EMS device has its own set of registered telegram types
+    std::vector<DeviceValue>      devicevalues_;       // all the device values
 };
 
 } // namespace emsesp

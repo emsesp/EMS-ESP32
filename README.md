@@ -1,4 +1,30 @@
-# ![logo](media/EMS-ESP_logo_dark.png)
+<div align="center">
+  <p align="center">
+    <a href="#">
+      <img src="https://raw.githubusercontent.com/emsesp/EMS-ESP32/dev/media/favicon/android-chrome-512x512.png" height="100px" />
+    </a>
+  </p>
+</div>
+
+<h1 align="center">EMS-ESP</h1>
+
+<p align="center">
+  <a href="https://emsesp.org">
+    <img src="https://img.shields.io/badge/Website-0077b5?style=for-the-badge&logo=googlehome&logoColor=white" alt="Website" />
+  </a>
+  <a href="https://github.com/emsesp/EMS-ESP32/blob/dev/CONTRIBUTING.md">
+    <img src="https://img.shields.io/badge/Contribute-ff4785?style=for-the-badge&logo=git&logoColor=white" alt="Contribute" />
+  </a>
+  <a href="https://docs.emsesp.org">
+    <img src="https://img.shields.io/badge/Documentation-0077b5?style=for-the-badge&logo=googledocs&logoColor=white" alt="Guides" />
+  </a>
+  <a href="https://discord.gg/3J3GgnzpyT">
+    <img src="https://img.shields.io/badge/Discord-7289da?style=for-the-badge&logo=discord&logoColor=white" alt="Discord" />
+  </a>
+  <a href="https://github.com/emsesp/EMS-ESP32/blob/main/CHANGELOG.md">
+    <img src="https://img.shields.io/badge/Changelog-6c5ce7?style=for-the-badge&logo=git&logoColor=white" alt="Changelog" />
+  </a>
+</p>
 
 [![version](https://img.shields.io/github/release/emsesp/EMS-ESP32.svg?label=Latest%20Release)](https://github.com/emsesp/EMS-ESP32/blob/main/CHANGELOG.md)
 [![release-date](https://img.shields.io/github/release-date/emsesp/EMS-ESP32.svg?label=Released)](https://github.com/emsesp/EMS-ESP32/commits/main)
@@ -16,7 +42,7 @@
 
 It requires a small circuit to interface with the EMS bus which can be purchased from <https://bbqkees-electronics.nl> or custom built.
 
-## **Key Features**
+## 📦&nbsp; **Key Features**
 
 - Compatible with EMS, EMS+, EMS2, EMS Plus, Logamatic EMS, Junkers 2-wire, Heatronic 3 and 4
 - Supporting over 120 different EMS compatible devices such as thermostats, boilers, heat pumps, mixing units, solar modules, connect modules, ventilation units, switches and more
@@ -32,35 +58,31 @@ It requires a small circuit to interface with the EMS bus which can be purchased
 - A powerful Scheduler to automate tasks and trigger events based data changes
 - A Notification service to alert you of important events
 
-## **Installing**
+## 🚀&nbsp; **Installing**
 
-For a quick install of the latest stable release go to [https://install.emsesp.org](https://install.emsesp.org). For other methods of installing and upgrading, and switching over to the development version go to [this section](https://emsesp.org/Getting-Started/#first-time-install) in the documentation.
+Head over to [download.emsesp.org](https://download.emsesp.org) for instructions on how to install EMS-ESP. There is also further details on which boards are supported in [this section](https://docs.emsesp.org/Getting-Started/#first-time-install) of the documentation.
 
-If you're upgrading a BBQKees Electronics EMS Gateway and unsure which firmware to use, please refer to the [this overview](https://emsesp.org/Getting-Started/#bbqkees-electronics-ems-gateway).
+## 📋&nbsp; **Documentation**
 
-## **Documentation**
+Visit [emsesp.org](https://docs.emsesp.org) for more details on how to install and configure EMS-ESP. There is also a collection of Frequently Asked Questions and Troubleshooting tips with example customizations from the community.
 
-Visit [emsesp.org](https://emsesp.org) for more details on how to install and configure EMS-ESP. There is also a collection of Frequently Asked Questions and Troubleshooting tips with example customizations from the community.
-
-## **Getting Support**
+## 💬&nbsp; **Getting Support**
 
 To chat with the community reach out on our [Discord Server](https://discord.gg/3J3GgnzpyT).
 
-If you find an issue or have a request, see [here](https://emsesp.org/Support/) on how to submit a bug report or feature request.
+If you find an issue or have a request, see [here](https://docs.emsesp.org/Support/) on how to submit a bug report or feature request.
 
-## **Live Demo**
+## 🎥&nbsp; **Live Demo**
 
 For a live demo go to [demo.emsesp.org](https://demo.emsesp.org). Pick a language from the sign on page and log in with any username or password. Note not all features are operational as it's based on static data.
 
-## **Contributors**
+## 💖&nbsp; **Contributors**
 
 EMS-ESP is a project created by [proddy](https://github.com/proddy) and owned and maintained by both [proddy](https://github.com/proddy) and [MichaelDvP](https://github.com/MichaelDvP) with support from [BBQKees Electronics](https://bbqkees-electronics.nl).
 
-You can contact us using [this form](https://emsesp.org/Contact/).
-
 If you like **EMS-ESP**, please give it a ✨ on GitHub, or even better fork it and contribute. You can also offer a small donation. This is an open-source project maintained by volunteers, and your support is greatly appreciated.
 
-## **Libraries used**
+## 📢&nbsp; **Libraries used**
 
 - [esp8266-react](https://github.com/rjwats/esp8266-react) by @rjwats for the core framework that provides the Web UI, which has been heavily modified
 - [uuid-\*](https://github.com/nomis/mcu-uuid-console) from @nomis. The console, syslog, telnet and logging are based off these awesome open source libraries
@@ -68,7 +90,7 @@ If you like **EMS-ESP**, please give it a ✨ on GitHub, or even better fork it 
 - [espMqttClient](https://github.com/bertmelis/espMqttClient) for the MQTT client
 - ESPAsyncWebServer and AsyncTCP for the Web server and TCP backends, with custom modifications for performance
 
-## **License**
+## 📜&nbsp; **License**
 
 This program is licensed under GPL-3.0
 

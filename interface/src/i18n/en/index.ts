@@ -159,10 +159,9 @@ const en: Translation = {
   HELP_INFORMATION_2: 'For live community chat join our Discord server',
   HELP_INFORMATION_3: 'To request a feature or report a bug',
   HELP_INFORMATION_4: 'Download and attach your support information for a faster response when reporting an issue',
-  HELP_INFORMATION_5: 'For help and questions please contact your installer',
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
-  INSTALL: 'Install {0}',
+  INSTALL: 'Install',
   ABORTED: 'aborted',
   FAILED: 'failed',
   SUCCESSFUL: 'successful',
@@ -175,9 +174,9 @@ const en: Translation = {
   FACTORY_RESET: 'Factory Reset',
   SYSTEM_FACTORY_TEXT: 'Device has been factory reset and will now restart',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Are you sure you want to reset EMS-ESP to its factory defaults?',
+  AVAILABLE_VERSION: 'Latest Available Versions',
   STABLE: 'Stable',
   DEVELOPMENT: 'Development',
-  EMS_ESP_VER: 'Firmware Version',
   UPTIME: 'System Uptime',
   FREE_MEMORY: 'Free Memory',
   PSRAM: 'PSRAM (Size / Free)',
@@ -187,7 +186,7 @@ const en: Translation = {
   BUFFER_SIZE: 'Max Buffer Size',
   COMPACT: 'Compact',
   DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings',
-  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)',
+  UPLOAD_TEXT: 'Upload a new firmware file (.bin) or a backup file (.json)',
   UPLOAD_DROP_TEXT: 'Drop file or click here',
   ERROR: 'Unexpected Error, please try again',
   TIME_SET: 'Time set',
@@ -343,7 +342,8 @@ const en: Translation = {
   DASHBOARD: 'Dashboard',
   NO_DATA: 'No data available',
   DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module',
-  DEVELOPER_MODE: 'Developer Mode'
+  DEVELOPER_MODE: 'Developer Mode',
+  UPGRADE: 'Upgrade'
 };
 
 export default en;

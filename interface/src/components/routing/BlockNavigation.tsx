@@ -1,4 +1,4 @@
-import type { Blocker } from 'react-router-dom';
+import type { Blocker } from 'react-router';
 
 import {
   Button,

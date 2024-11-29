@@ -138,6 +138,20 @@ void AnalogSensor::reload(bool get_nvs) {
             continue;                             // skip this loop pass
         }
 
+        if ((sensor.gpio() == 25 || sensor.gpio() == 26)
+            && (sensor.type() == AnalogType::COUNTER || sensor.type() == AnalogType::DIGITAL_IN || sensor.type() == AnalogType::RATE
+                || sensor.type() == AnalogType::TIMER)) {
+            // pullup is mapped to DAC, so set to 3.3V
+#if CONFIG_IDF_TARGET_ESP32
+            if (sensor.gpio() == 25 || sensor.gpio() == 26) {
+                dacWrite(sensor.gpio(), 255);
+            }
+#elif CONFIG_IDF_TARGET_ESP32S2
+            if (sensor.gpio() == 17 || sensor.gpio() == 18) {
+                dacWrite(sensor.gpio(), 255);
+            }
+#endif
+        }
         if (sensor.type() == AnalogType::ADC) {
             LOG_DEBUG("ADC Sensor on GPIO %02d", sensor.gpio());
             // analogSetPinAttenuation does not work with analogReadMilliVolts
@@ -146,15 +160,6 @@ void AnalogSensor::reload(bool get_nvs) {
         } else if (sensor.type() == AnalogType::COUNTER) {
             LOG_DEBUG("I/O Counter on GPIO %02d", sensor.gpio());
             pinMode(sensor.gpio(), INPUT_PULLUP);
-#if CONFIG_IDF_TARGET_ESP32
-            if (sensor.gpio() == 25 || sensor.gpio() == 26) {
-                dacWrite(sensor.gpio(), 255);
-            }
-#elif CONFIG_IDF_TARGET_ESP32S2
-            if (sensor.gpio() == 23 || sensor.gpio() == 24) {
-                dacWrite(sensor.gpio(), 255);
-            }
-#endif
             sensor.polltime_ = 0;
             sensor.poll_     = digitalRead(sensor.gpio());
             if (double_t val = EMSESP::nvs_.getDouble(sensor.name().c_str(), 0)) {
@@ -192,7 +197,7 @@ void AnalogSensor::reload(bool get_nvs) {
                 sensor.set_value(sensor.offset());
             } else
 #elif CONFIG_IDF_TARGET_ESP32S2
-            if (sensor.gpio() == 23 || sensor.gpio() == 24) {
+            if (sensor.gpio() == 17 || sensor.gpio() == 18) {
                 if (sensor.offset() > 255) {
                     sensor.set_offset(255);
                 } else if (sensor.offset() < 0) {
@@ -533,7 +538,7 @@ void AnalogSensor::publish_values(const bool force) {
                 char val_obj[50];
                 char val_cond[95];
                 if (Mqtt::is_nested()) {
-                    snprintf(val_obj, sizeof(val_obj), "value_json['%02d'].value", sensor.gpio());
+                    snprintf(val_obj, sizeof(val_obj), "value_json['%02d']['value']", sensor.gpio());
                     snprintf(val_cond, sizeof(val_cond), "value_json['%02d'] is defined and %s is defined", sensor.gpio(), val_obj);
                 } else {
                     snprintf(val_obj, sizeof(val_obj), "value_json['%s']", sensor.name().c_str());
@@ -745,7 +750,7 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
                     dacWrite(sensor.gpio(), sensor.offset());
                 } else
 #elif CONFIG_IDF_TARGET_ESP32S2
-                if ((sensor.gpio() == 23 || sensor.gpio() == 24) && v <= 255) {
+                if ((sensor.gpio() == 17 || sensor.gpio() == 18) && v <= 255) {
                     sensor.set_offset(v);
                     sensor.set_value(v);
                     pinMode(sensor.gpio(), OUTPUT);

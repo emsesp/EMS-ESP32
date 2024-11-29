@@ -30,7 +30,7 @@ function formatNumber(num: number) {
 const HardwareStatus = () => {
   const { LL } = useI18nContext();
 
-  useLayoutTitle(LL.STATUS_OF(LL.HARDWARE()));
+  useLayoutTitle(LL.HARDWARE());
 
   const {
     data,

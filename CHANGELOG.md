@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.7.0] October 27 2024
+## [3.7.0] 27 October 2024
 
 ## **IMPORTANT! BREAKING CHANGES with 3.6.5**
 
@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The automatically generated temperature sensor ID has replaced dashes (`-`) with underscores (`_`) to be compatible with Home Assistant.
 - `api/system/info` has it's JSON key names changed to camelCase syntax.
 
-For more details go to [www.emsesp.org](https://www.emsesp.org/).
+For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 
 ## Added
 

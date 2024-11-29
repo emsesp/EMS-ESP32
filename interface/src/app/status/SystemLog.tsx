@@ -261,16 +261,6 @@ const SystemLog = () => {
             >
               {LL.EXPORT()}
             </Button>
-            {dirtyFlags && dirtyFlags.length !== 0 && (
-              <Button
-                startIcon={<WarningIcon color="warning" />}
-                variant="contained"
-                color="info"
-                onClick={saveSettings}
-              >
-                {LL.APPLY_CHANGES(dirtyFlags.length)}
-              </Button>
-            )}
           </Grid>
 
           {readOpen ? (
@@ -314,6 +304,19 @@ const SystemLog = () => {
                 </IconButton>
               )}
             </>
+          )}
+
+          {dirtyFlags && dirtyFlags.length !== 0 && (
+            <Grid>
+              <Button
+                startIcon={<WarningIcon color="warning" />}
+                variant="contained"
+                color="info"
+                onClick={saveSettings}
+              >
+                {LL.APPLY_CHANGES(dirtyFlags.length)}
+              </Button>
+            </Grid>
           )}
         </Grid>
 

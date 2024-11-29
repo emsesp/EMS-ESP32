@@ -159,7 +159,6 @@ const it: Translation = {
   HELP_INFORMATION_2: 'Per la chat della community dal vivo unisciti al nostro server Discord',
   HELP_INFORMATION_3: 'Per richiedere una funzionalità o segnalare un errore',
   HELP_INFORMATION_4: 'Ricordati di scaricare e allegare le informazioni del tuo sistema per una risposta più rapida quando segnali un problema',
-  HELP_INFORMATION_5: 'For help and questions please contact your installer', // TODO translate
   UPLOAD: 'Carica',
   DOWNLOAD: 'Scarica',
   INSTALL: 'Installare {0}',
@@ -175,9 +174,9 @@ const it: Translation = {
   FACTORY_RESET: 'Impostazioni di fabbrica',
   SYSTEM_FACTORY_TEXT: 'Il dispositivo è stato ripristinato alle impostazioni di fabbrica e ora verrà riavviato',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Sei sicuro di voler ripristinare il dispositivo alle impostazioni di fabbrica??',
+  AVAILABLE_VERSION: 'Latest Available Versions', // TODO translate
   STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Sviluppo',
-  EMS_ESP_VER: 'Versione Firmware',
   UPTIME: 'Tempo di attività del sistema',
   FREE_MEMORY: 'Free Memory',
   PSRAM: 'PSRAM (Size / Free)',
@@ -187,7 +186,7 @@ const it: Translation = {
   BUFFER_SIZE: 'Max Buffer Size',
   COMPACT: 'Compact',
   DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
-  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
+  UPLOAD_TEXT: 'Upload a new firmware file (.bin) or a backup file (.json)', // TODO translate
   UPLOAD_DROP_TEXT: 'Trascina il file o clicca qui',
   ERROR: 'Errore Inaspettato, prego tenta ancora',
   TIME_SET: 'Imposta Ora',
@@ -343,7 +342,8 @@ const it: Translation = {
   DASHBOARD: 'Dashboard', // TODO translate
   NO_DATA: 'No data available', // TODO translate
   DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module', // TODO translate
-  DEVELOPER_MODE: 'Developer Mode' // TODO translate
+  DEVELOPER_MODE: 'Developer Mode', // TODO translate
+  UPGRADE: 'Upgrade' // TODO translate
 };
 
 export default it;

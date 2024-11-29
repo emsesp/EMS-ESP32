@@ -1,4 +1,4 @@
-Version 7.2.0
+Version 7.2.1
 
 From https://github.com/bblanchon/ArduinoJson/releases
 

@@ -121,7 +121,7 @@ const ApplicationSettings = () => {
     });
   };
 
-  useLayoutTitle(LL.SETTINGS_OF(LL.APPLICATION()));
+  useLayoutTitle(LL.APPLICATION());
 
   const SecondsInputProps = {
     endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>

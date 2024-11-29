@@ -1,0 +1,18 @@
+{
+    "type": "customSupport",
+    "Support": {
+    "html": [
+      "This product is installed and managed by:",
+      "",
+      "<b>Bosch Installer Example</b>",
+      "",
+      "Nefit Road 12",
+      "1234 AB Amsterdam",
+      "Phone: +31 123 456 789",
+      "email: support@boschinstaller.nl",
+      "",
+      "For help and questions please <a target='_blank' href='https://emsesp.org'>contact</a> your installer."
+    ],
+      "img_url": "https://docs.emsesp.org/_media/images/designer.png"
+    }
+}

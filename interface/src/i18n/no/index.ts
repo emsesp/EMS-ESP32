@@ -159,10 +159,9 @@ const no: Translation = {
   HELP_INFORMATION_2: 'For community-support besøk vår Discord-server',
   HELP_INFORMATION_3: 'For å be om en ny funksjon eller melde feil',
   HELP_INFORMATION_4: 'Husk å laste ned og legg ved din systeminformasjon for en raskere respons når du rapporterer et problem',
-  HELP_INFORMATION_5: 'For help and questions please contact your installer', // TODO translate
   UPLOAD: 'Opplasning',
   DOWNLOAD: '{{N|n|n}}edlasting',
-  INSTALL: 'Installer {0}',
+  INSTALL: 'Installer',
   ABORTED: 'avbrutt',
   FAILED: 'feilet',
   SUCCESSFUL: 'vellykket',
@@ -175,9 +174,9 @@ const no: Translation = {
   FACTORY_RESET: 'Sett tilbake til fabrikkinstilling',
   SYSTEM_FACTORY_TEXT: 'Enhet har blitt satt tilbake til fabrikkinstilling og vil restarte',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Er du sikker på at du vil resette enheten til fabrikkinstillinger?',
+  AVAILABLE_VERSION: 'Latest Available Versions', // TODO translate
   STABLE: 'Stable', // TODO translate
   DEVELOPMENT: 'Development',
-  EMS_ESP_VER: 'Firmware Version', // TODO translate
   UPTIME: 'System Oppetid',
   FREE_MEMORY: 'Ledig Memory',
   PSRAM: 'PSRAM (Størrelse / Ledig)',
@@ -187,7 +186,7 @@ const no: Translation = {
   BUFFER_SIZE: 'Max Buffer Størrelse',
   COMPACT: 'Komprimere',
   DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
-  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
+  UPLOAD_TEXT: 'Upload a new firmware file (.bin) or a backup file (.json)', // TODO translate
   UPLOAD_DROP_TEXT: 'Slipp fil eller klikk her',
   ERROR: 'Ukjent feil, prøv igjen',
   TIME_SET: 'Still in tid',
@@ -343,7 +342,8 @@ const no: Translation = {
   DASHBOARD: 'Dashboard', // TODO translate
   NO_DATA: 'No data available', // TODO translate
   DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module', // TODO translate
-  DEVELOPER_MODE: 'Developer Mode' // TODO translate
+  DEVELOPER_MODE: 'Developer Mode', // TODO translate
+  UPGRADE: 'Upgrade' // TODO translate
 };
 
 export default no;

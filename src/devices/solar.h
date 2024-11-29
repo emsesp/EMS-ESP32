@@ -33,6 +33,8 @@ class Solar : public EMSdevice {
     int16_t collectorTemp_;     // TS1: Temperature sensor for collector array 1
     int16_t cylBottomTemp_;     // TS2: Temperature sensor 1 cylinder, bottom cyl (solar thermal system)
     int16_t cylBottomTemp2_;    // TS5: Temperature sensor 2 cylinder, bottom cyl, or swimming pool (solar thermal system)
+    int16_t cylBottomTemp3_;    // TS11: Temperature sensor 3. cylinder
+    int16_t cylTopTemp_;        // TS10: Temperature sensor 1 cylinder, Top
     int16_t heatExchangerTemp_; // TS6: Heat exchanger temperature sensor
     int16_t collector2Temp_;    // TS7: Temperature sensor for collector array 2
     int16_t cylMiddleTemp_;     // TS14: Cylinder middle temp
@@ -46,6 +48,9 @@ class Solar : public EMSdevice {
     uint8_t m1Valve_;           // M1:  heat assistance valve
     uint8_t m1Power_;           // M1:  heat assistance valve
     uint8_t vs1Status_;         // VS1: status
+    uint8_t vs3Status_;         // VS3: status
+    uint8_t transferPump_;
+    uint8_t transferPumpMod_;
 
     // 0x363 heat counter
     uint16_t heatCntFlowTemp_;

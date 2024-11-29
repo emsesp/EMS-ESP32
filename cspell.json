@@ -9,5 +9,25 @@
       }
     ],
     "dictionaries": ["project-words"],
-    "ignorePaths": ["node_modules", "compile_commands.json", "WWWData.h", "**/venv/**", "lib/eModbus", "lib/ESPAsyncWebServer", "lib/espMqttClient", "analyse.html", "dist", "**/*.csv", "locale_translations.h", "TZ.tsx", "**/*.txt","build/**", "**/i18n/**", "/project-words.txt"]
+    "ignorePaths": [
+    "node_modules", 
+    "compile_commands.json", 
+    "WWWData.h", "**/venv/**", 
+    "lib/eModbus", 
+    "lib/ESPAsyncWebServer", 
+    "lib/espMqttClient", 
+    "analyse.html", 
+    "dist", 
+    "**/*.csv", 
+    "**/*.md", 
+    "**/*.py", 
+    "locale_translations.h", 
+    "TZ.tsx", 
+    "**/*.txt",
+    "build/**", 
+    "**/i18n/**", 
+    "/project-words.txt",
+    "Makefile",
+    "src/modbus_entity_parameters.hpp"
+  ]
   }

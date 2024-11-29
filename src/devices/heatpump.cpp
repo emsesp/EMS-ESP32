@@ -35,6 +35,9 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
     register_telegram_type(0x99C, "HPComp", false, MAKE_PF_CB(process_HPComp));
     register_telegram_type(0x4AE, "HPEnergy", true, MAKE_PF_CB(process_HpEnergy));
     register_telegram_type(0x4AF, "HPMeters", true, MAKE_PF_CB(process_HpMeters));
+    register_telegram_type(0x99A, "HPStarts", false, MAKE_PF_CB(process_HpStarts));
+    register_telegram_type(0x12E, "HPEnergy1", false, MAKE_PF_CB(process_HpEnergy1));
+    register_telegram_type(0x13B, "HPEnergy2", false, MAKE_PF_CB(process_HpEnergy2));
 
     // device values
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &airHumidity_, DeviceValueType::UINT8, FL_(airHumidity), DeviceValueUOM::PERCENT);
@@ -81,40 +84,41 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
                           FL_(lowNoiseMode),
                           DeviceValueUOM::NONE,
                           MAKE_CF_CB(set_lowNoiseMode));
-    register_device_value(
-        DeviceValueTAG::TAG_DEVICE_DATA, &lowNoiseStart_, DeviceValueType::UINT8, FL_(lowNoiseStart), DeviceValueUOM::NONE, MAKE_CF_CB(set_lowNoiseStart), 0, 23);
-    register_device_value(
-        DeviceValueTAG::TAG_DEVICE_DATA, &lowNoiseStop_, DeviceValueType::UINT8, FL_(lowNoiseStop), DeviceValueUOM::NONE, MAKE_CF_CB(set_lowNoiseStop), 0, 23);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
-                          &hybridDHW_,
-                          DeviceValueType::ENUM,
-                          FL_(enum_comfort2),
-                          FL_(hybridDHW),
-                          DeviceValueUOM::NONE,
-                          MAKE_CF_CB(set_hybridDHW));
+                          &lowNoiseStart_,
+                          DeviceValueType::UINT8,
+                          FL_(lowNoiseStart),
+                          DeviceValueUOM::HOURS,
+                          MAKE_CF_CB(set_lowNoiseStart),
+                          0,
+                          23);
+    register_device_value(
+        DeviceValueTAG::TAG_DEVICE_DATA, &lowNoiseStop_, DeviceValueType::UINT8, FL_(lowNoiseStop), DeviceValueUOM::HOURS, MAKE_CF_CB(set_lowNoiseStop), 0, 23);
+    register_device_value(
+        DeviceValueTAG::TAG_DHW1, &hybridDHW_, DeviceValueType::ENUM, FL_(enum_comfort2), FL_(hybridDHW), DeviceValueUOM::NONE, MAKE_CF_CB(set_hybridDHW));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &energyPriceGas_,
                           DeviceValueType::UINT8,
                           FL_(energyPriceGas),
-                          DeviceValueUOM::NONE,
+                          DeviceValueUOM::CTKWH,
                           MAKE_CF_CB(set_energyPriceGas));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &energyPriceEl_,
                           DeviceValueType::UINT8,
                           FL_(energyPriceEl),
-                          DeviceValueUOM::NONE,
+                          DeviceValueUOM::CTKWH,
                           MAKE_CF_CB(set_energyPriceEl));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &energyPricePV_,
                           DeviceValueType::UINT8,
                           FL_(energyPricePV),
-                          DeviceValueUOM::NONE,
+                          DeviceValueUOM::CTKWH,
                           MAKE_CF_CB(set_energyPricePV));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &switchOverTemp_,
                           DeviceValueType::INT8,
                           FL_(switchOverTemp),
-                          DeviceValueUOM::NONE,
+                          DeviceValueUOM::DEGREES,
                           MAKE_CF_CB(set_switchOverTemp));
     // Function test
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
@@ -176,6 +180,20 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
                           FL_(meterHeat),
                           DeviceValueUOM::KWH);
     register_device_value(DeviceValueTAG::TAG_DHW1, &meterWw_, DeviceValueType::UINT24, DeviceValueNumOp::DV_NUMOP_DIV100, FL_(meterWw), DeviceValueUOM::KWH);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatStartsHp_, DeviceValueType::UINT24, FL_(heatingStarts), DeviceValueUOM::NONE);
+    register_device_value(DeviceValueTAG::TAG_DHW1, &wwStartsHp_, DeviceValueType::UINT24, FL_(wwStartsHp), DeviceValueUOM::NONE);
+
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &fuelHeat_, DeviceValueType::UINT32, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(fuelHeat), DeviceValueUOM::KWH);
+    register_device_value(DeviceValueTAG::TAG_DHW1, &elDhw_, DeviceValueType::UINT32, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(fuelDhw), DeviceValueUOM::KWH);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &fuelHeat_, DeviceValueType::UINT32, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(elHeat), DeviceValueUOM::KWH);
+    register_device_value(DeviceValueTAG::TAG_DHW1, &elDhw_, DeviceValueType::UINT32, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(elDhw), DeviceValueUOM::KWH);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                          &elGenHeat_,
+                          DeviceValueType::UINT32,
+                          DeviceValueNumOp::DV_NUMOP_DIV10,
+                          FL_(elGenHeat),
+                          DeviceValueUOM::KWH);
+    register_device_value(DeviceValueTAG::TAG_DHW1, &elGenDhw_, DeviceValueType::UINT32, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(elGenDhw), DeviceValueUOM::KWH);
 }
 
 /*
@@ -269,6 +287,27 @@ void Heatpump::process_HpMeters(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, meterHeat_, 24);
     has_update(telegram, meterWw_, 32);
 }
+
+// Broadcast (0x099A), data: 05 00 00 00 00 00 00 37 00 00 1D 00 00 52 00 00 13 01 00 01 7C
+void Heatpump::process_HpStarts(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, heatStartsHp_, 11, 3);
+    has_update(telegram, wwStartsHp_, 14, 3);
+}
+
+// 0x0112E energy consumption
+void Heatpump::process_HpEnergy1(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, fuelHeat_, 3);
+    has_update(telegram, fuelDhw_, 7);
+    has_update(telegram, elHeat_, 11);
+    has_update(telegram, elDhw_, 15);
+}
+
+// 0x013B energy generated
+void Heatpump::process_HpEnergy2(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, elGenHeat_, 3);
+    has_update(telegram, elGenDhw_, 7);
+}
+
 
 /*
  * Broadcast (0x099A), data: 05 00 00 00 00 00 00 37 00 00 1D 00 00 52 00 00 13 01 00 01 7C

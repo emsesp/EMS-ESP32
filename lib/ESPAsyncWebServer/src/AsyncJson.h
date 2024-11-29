@@ -7,7 +7,8 @@
 #include <ESPAsyncWebServer.h>
 #include <Print.h>
 
-constexpr const char * JSON_MIMETYPE = "application/json";
+constexpr const char * JSON_MIMETYPE    = "application/json";
+constexpr const char * MSGPACK_MIMETYPE = "application/msgpack";
 
 class ChunkPrint : public Print {
   private:
@@ -54,7 +55,7 @@ class AsyncJsonResponse : public AsyncAbstractResponse {
         : _isValid{false}
         , _isMsgPack{isMsgPack} {
         _code        = 200;
-        _contentType = JSON_MIMETYPE;
+        _contentType = (isMsgPack) ? MSGPACK_MIMETYPE : JSON_MIMETYPE;
         if (isArray)
             _root = _jsonBuffer.add<JsonArray>();
         else

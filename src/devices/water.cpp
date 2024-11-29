@@ -28,7 +28,7 @@ Water::Water(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
     : EMSdevice(device_type, device_id, product_id, version, name, flags, brand) {
     dhw_       = device_id - EMSdevice::EMS_DEVICE_ID_DHW1;
     int8_t tag = DeviceValueTAG::TAG_DHW1 + dhw_;
-    if (device_id == 0x2A) { // SM100, DHW3
+    if (flags == EMSdevice::EMS_DEVICE_FLAG_SM100) { // device_id 0x2A,  DHW3
         // telegram handlers
         register_telegram_type(0x07D6, "SM100wwTemperature", false, MAKE_PF_CB(process_SM100wwTemperature));
         register_telegram_type(0x07AA, "SM100wwStatus", false, MAKE_PF_CB(process_SM100wwStatus));
@@ -63,7 +63,7 @@ Water::Water(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         register_device_value(tag, &wwDeltaTRet_, DeviceValueType::UINT8, FL_(deltaTRet), DeviceValueUOM::K, MAKE_CF_CB(set_wwDeltaTRet));
         register_device_value(tag, &errorDisp_, DeviceValueType::ENUM, FL_(enum_errorDisp), FL_(errorDisp), DeviceValueUOM::NONE, MAKE_CF_CB(set_errorDisp));
 
-    } else if (device_id >= EMSdevice::EMS_DEVICE_ID_DHW1 && device_id <= EMSdevice::EMS_DEVICE_ID_DHW2) {
+    } else if (flags == EMSdevice::EMS_DEVICE_FLAG_MMPLUS) { // dhw1 and dhw 2
         register_telegram_type(0x331 + dhw_, "MMPLUSStatusMessage_WWC", false, MAKE_PF_CB(process_MMPLUSStatusMessage_WWC));
         register_telegram_type(0x313 + dhw_, "MMPLUSConfigMessage_WWC", true, MAKE_PF_CB(process_MMPLUSConfigMessage_WWC));
         // register_telegram_type(0x33B + type_offset, "MMPLUSSetMessage_WWC", true, MAKE_PF_CB(process_MMPLUSSetMessage_WWC));
@@ -78,7 +78,7 @@ Water::Water(uint8_t device_type, uint8_t device_id, uint8_t product_id, const c
         register_device_value(tag, &wwRequiredTemp_, DeviceValueType::UINT8, FL_(wwRequiredTemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_wwRequiredTemp));
         register_device_value(tag, &wwCirc_, DeviceValueType::BOOL, FL_(wwCirc), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCirc));
         register_device_value(tag, &wwCircMode_, DeviceValueType::ENUM, FL_(enum_wwCircMode), FL_(wwCircMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_wwCircMode));
-    } else if (device_id == 0x40) { // flags == EMSdevice::EMS_DEVICE_FLAG_IPM, special DHW pos 10
+    } else if (flags == EMSdevice::EMS_DEVICE_FLAG_IPM) {
         dhw_ = 0;
         tag  = DeviceValueTAG::TAG_DHW1;
         register_telegram_type(0x34, "UBAMonitorWW", false, MAKE_PF_CB(process_IPMMonitorWW));

@@ -52,13 +52,19 @@ using string_vector = std::vector<const char *>;
 #define F_(string_name) (__pstr__##string_name)
 #define FL_(list_name) (__pstr__L_##list_name)
 
-#if defined(EMSESP_TEST) || defined(EMSESP_EN_ONLY)
-// In testing just take one language (en) to save on Flash space
+// The language settings below must match system.cpp
+#if defined(EMSESP_TEST)
+// in Test mode use two languages (en & de) to save flash memory needed for the tests
+#define MAKE_WORD_TRANSLATION(list_name, en, de, ...)       static const char * const __pstr__L_##list_name[] = {en, de, nullptr};
+#define MAKE_TRANSLATION(list_name, shortname, en, de, ...) static const char * const __pstr__L_##list_name[] = {shortname, en, de, nullptr};
+#elif defined(EMSESP_EN_ONLY)
+// EN only
 #define MAKE_WORD_TRANSLATION(list_name, en, ...)       static const char * const __pstr__L_##list_name[] = {en, nullptr};
 #define MAKE_TRANSLATION(list_name, shortname, en, ...) static const char * const __pstr__L_##list_name[] = {shortname, en, nullptr};
 #elif defined(EMSESP_DE_ONLY)
-#define MAKE_WORD_TRANSLATION(list_name, en, de, ...)       static const char * const __pstr__L_##list_name[] = {de, nullptr};
-#define MAKE_TRANSLATION(list_name, shortname, en, de, ...) static const char * const __pstr__L_##list_name[] = {shortname, de, nullptr};
+// EN + DE
+#define MAKE_WORD_TRANSLATION(list_name, en, de, ...)       static const char * const __pstr__L_##list_name[] = {en, de, nullptr};
+#define MAKE_TRANSLATION(list_name, shortname, en, de, ...) static const char * const __pstr__L_##list_name[] = {shortname, en, de, nullptr};
 #else
 #define MAKE_WORD_TRANSLATION(list_name, ...) static const char * const __pstr__L_##list_name[] = {__VA_ARGS__, nullptr};
 #define MAKE_TRANSLATION(list_name, ...)      static const char * const __pstr__L_##list_name[] = {__VA_ARGS__, nullptr};

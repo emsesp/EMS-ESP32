@@ -20,7 +20,8 @@ export default defineConfig(({ command, mode }) => {
             changeOrigin: true,
             secure: false
           },
-          '/rest': 'http://localhost:3080'
+          '/rest': 'http://localhost:3080',
+          '/gh': 'http://localhost:3080' // mock for GitHub API
         }
       }
     };
@@ -117,11 +118,7 @@ export default defineConfig(({ command, mode }) => {
           manualChunks(id: string) {
             if (id.includes('node_modules')) {
               // creating a chunk to react routes deps. Reducing the vendor chunk size
-              if (
-                id.includes('react-router-dom') ||
-                id.includes('@remix-run') ||
-                id.includes('react-router')
-              ) {
+              if (id.includes('react-router')) {
                 return '@react-router';
               }
               return 'vendor';

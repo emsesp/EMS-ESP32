@@ -11,16 +11,17 @@
 ;  -DEMSESP_DE_ONLY ; only DE translated entity names
 ;  -DEMSESP_EN_ONLY ; only EN translated entity names
 ;  -DEMSESP_PINGTEST ; send log message every 1/2 second
-; my_build_flags = -DEMSESP_TEST
-; my_build_flags = -DEMSESP_DEBUG -DEMSESP_TEST
+; my_build_flags = -DEMSESP_TEST -DEMSESP_DEBUG
+; my_build_flags = -DEMSESP_DEBUG
 ; my_build_flags = -DEMSESP_DEBUG -DEMSESP_TEST -DEMSESP_PINGTEST
 
 [platformio]
-; default_envs = s_16M_P ; BBQKees E32V2
-default_envs = s3_16M_P ; BBQKees S3
+default_envs = s_16M_P ; BBQKees E32V2
+; default_envs = s3_16M_P ; BBQKees S3
 ; default_envs = s_4M ; BBQKees S32
 ; default_envs = native
 ; default_envs = debug
+; default_envs = s2_4M
 
 [env]
 ; set the username and password for the admin account (default both admin)
@@ -40,8 +41,12 @@ custom_password = admin
 ; upload_protocol = esptool
 ; upload_port = /dev/ttyUSB*
 
-; upload_protocol = custom
-; custom_emsesp_ip = 10.10.10.175
+upload_protocol = custom
+; custom_emsesp_ip = 10.10.10.175 ; S3
+custom_emsesp_ip = 192.168.1.225 ; E32V2
+
+; build_type = debug
+; monitor_filters = esp32_exception_decoder
 
 ; ** modules **
 ; example below is using a locally built version of EMS-ESP-Modules. You can also test with:
@@ -52,13 +57,14 @@ custom_password = admin
 [env:native]
 extra_scripts = 
 ;   pre:scripts/refresh_module_library_native.py
-  post:scripts/run_native.py
+  ; post:scripts/run_native.py
 
 [env:s_16M_P]
 extra_scripts =
   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
   scripts/upload.py
+; platform = https://github.com/pioarduino/platform-espressif32/releases/download/53.03.10-rc2/platform-espressif32.zip
 
 [env:s3_16M_P]
 extra_scripts =
@@ -70,7 +76,7 @@ extra_scripts =
 extra_scripts =
   ; pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
-  scripts/upload.py
+  ; scripts/upload.py
   
 ; pio run -e debug
 ; or from Visual Studio Code do PIO -> Project Tasks -> debug -> General -> Upload and Monitor

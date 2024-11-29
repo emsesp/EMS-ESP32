@@ -1,0 +1,85 @@
+{
+    "type": "settings",
+    "Network": {
+      "ssid": "my_wifi_ssid",
+      "bssid": "",
+      "password": "my_wifi_password",
+      "hostname": "ems-esp"
+    },
+    "AP": {
+      "provision_mode": 2,
+      "ssid": "ems-esp",
+      "password": "ems-esp-neo",
+      "channel": 1,
+      "ssid_hidden": false,
+      "max_clients": 4,
+      "local_ip": "192.168.4.1",
+      "gateway_ip": "192.168.4.1",
+      "subnet_mask": "255.255.255.0"
+    },
+    "MQTT": {
+      "enableTLS": false,
+      "rootCA": "",
+      "enabled": false,
+      "host": "127.0.0.1",
+      "port": 1883,
+      "base": "ems-esp",
+      "username": "username",
+      "password": "password",
+      "client_id": "ems-esp",
+      "entity_format": 1,
+      "publish_time_boiler": 10,
+      "publish_time_thermostat": 10,
+      "publish_time_solar": 10,
+      "publish_time_mixer": 10,
+      "publish_time_water": 10,
+      "publish_time_other": 60,
+      "publish_time_sensor": 10,
+      "publish_time_heartbeat": 60,
+      "mqtt_qos": 0,
+      "mqtt_retain": false,
+      "ha_enabled": false,
+      "nested_format": 1,
+      "discovery_prefix": "homeassistant",
+      "discovery_type": 0,
+      "publish_single": false,
+      "publish_single2cmd": false,
+      "send_response": false
+    },
+    "NTP": {
+      "enabled": true,
+      "server": "time.google.com",
+      "tz_label": "Europe/Amsterdam",
+      "tz_format": "CET-1CEST,M3.5.0,M10.5.0/3"
+    },
+    "Security": {
+      "jwt_secret": "ems-esp-neo",
+      "users": [
+        {
+          "username": "admin",
+          "password": "admin",
+          "admin": true
+        },
+        {
+          "username": "guest",
+          "password": "guest",
+          "admin": false
+        }
+      ]
+    },
+    "Settings": {
+      "board_profile": "S3",
+      "locale": "en",
+      "tx_mode": 1,
+      "ems_bus_id": 11,
+      "boiler_heatingoff": false,
+      "hide_led": true,
+      "telnet_enabled": true,
+      "notoken_api": false,
+      "analog_enabled": true,
+      "fahrenheit": false,
+      "bool_format": 1,
+      "bool_dashboard": 1,
+      "enum_format": 1
+    }
+  }

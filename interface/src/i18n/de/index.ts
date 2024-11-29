@@ -159,10 +159,9 @@ const de: Translation = {
   HELP_INFORMATION_2: 'Für einen Live-Community-Chat besuchen Sie unseren Discord-Server',
   HELP_INFORMATION_3: 'Um neue Funktionen anzufragen oder Fehler zu melden, eröffnen Sie ein Issue auf GitHub',
   HELP_INFORMATION_4: 'Bitte laden Sie die Systemdetails und hängen Sie sie an das Support-Issue an',
-  HELP_INFORMATION_5: 'Für Hilfe und Fragen wenden Sie sich bitte an Ihren Installateur',
   UPLOAD: 'Hochladen',
   DOWNLOAD: '{{H|h|h}}erunterladen',
-  INSTALL: 'Installieren {0}',
+  INSTALL: 'Installieren',
   ABORTED: 'abgebrochen',
   FAILED: 'gescheitert',
   SUCCESSFUL: 'erfolgreich',
@@ -175,9 +174,9 @@ const de: Translation = {
   FACTORY_RESET: 'Werkseinstellung',
   SYSTEM_FACTORY_TEXT: 'EMS-ESP wurde auf Werkseinstellung gesetzt und startet als Zugangspunkt neu.',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Sind Sie sicher, alle Einstellungen auf Werkseinstellung zu setzen?',
+  AVAILABLE_VERSION: 'Neuesten verfügbaren Versionen',
   STABLE: 'Stabil',
   DEVELOPMENT: 'Entwicklung',
-  EMS_ESP_VER: 'Firmware-Version',
   UPTIME: 'Systembetriebszeit',
   FREE_MEMORY: 'Freier RAM Speicher',
   PSRAM: 'PSRAM (Größe / Frei)',
@@ -332,7 +331,7 @@ const de: Translation = {
   ALLVALUES: 'Alle Werte',
   SPECIAL_FUNCTIONS: 'Sonderfunktionen',
   WAIT_FIRMWARE: 'Die Firmware wird hochgeladen und installiert.',
-  INSTALL_VERSION: 'Dadurch wird die Version installiert {0}. Sind Sie sicher?',
+  INSTALL_VERSION: 'Dadurch wird die Version {0} heruntergeladen. Sind Sie sicher?',
   SWITCH_DEV: 'Wechseln Sie zur Entwicklungsversion!',
   UPGRADE_AVAILABLE: 'Es ist ein Firmware-Upgrade verfügbar.',
   LATEST_VERSION: 'Sie verwenden die neueste Firmware-Version.',
@@ -343,7 +342,8 @@ const de: Translation = {
   DASHBOARD: 'Dashboard',
   NO_DATA: 'Keine Daten verfügbar',
   DASHBOARD_1: 'Passen Sie Ihr Dashboard an, indem Sie EMS-Entitäten mithilfe des Moduls „Anpassungen“ als Favorit markieren',
-  DEVELOPER_MODE: 'Entwicklermodus'
+  DEVELOPER_MODE: 'Entwicklermodus',
+  UPGRADE: 'Upgrade' // TODO translate
 };
 
 export default de;

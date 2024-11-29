@@ -86,8 +86,8 @@ const Settings = () => {
         <ListMenuItem
           icon={BuildIcon}
           bgcolor="#72caf9"
-          label={LL.EMS_ESP_VER()}
-          text={data.emsesp_version}
+          label="EMS-ESP Firmware"
+          text={'v' + data.emsesp_version}
           to="version"
         />
 

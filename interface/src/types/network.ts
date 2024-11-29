@@ -34,6 +34,7 @@ export interface NetworkStatusType {
   dns_ip_1: string;
   dns_ip_2: string;
   hostname: string;
+  reconnect_count: number;
 }
 
 export interface NetworkSettingsType {

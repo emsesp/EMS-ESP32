@@ -159,10 +159,9 @@ const nl: Translation = {
   HELP_INFORMATION_2: 'Voor de live community ga naar de Discord server',
   HELP_INFORMATION_3: 'Om een nieuwe feature te vragen of een bug te rapporteren',
   HELP_INFORMATION_4: 'Zorg dat je ook je systeem details zijn toevoeged voor een sneller antwoord',
-  HELP_INFORMATION_5: 'For help and questions please contact your installer', // TODO translate
   UPLOAD: 'Upload',
   DOWNLOAD: '{{D|d|d}}ownload',
-  INSTALL: 'Installeren {0}',
+  INSTALL: 'Installeren',
   ABORTED: 'afgebroken',
   FAILED: 'mislukt',
   SUCCESSFUL: 'successvol',
@@ -175,9 +174,9 @@ const nl: Translation = {
   FACTORY_RESET: 'Fabrieksinstellingen',
   SYSTEM_FACTORY_TEXT: 'Gateway is gereset en start nu weer op met fabrieksinstellingen',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Weet je zeker dat je een reset naar fabrieksinstellingen uit wilt voeren?',
+  AVAILABLE_VERSION: 'Latest Available Versions', // TODO translate
   STABLE: 'Stable',
   DEVELOPMENT: 'Development',
-  EMS_ESP_VER: 'Firmware Versie',
   UPTIME: 'Systeem Uptime',
   FREE_MEMORY: 'Free Memory',
   PSRAM: 'PSRAM (Size / Free)',
@@ -187,7 +186,7 @@ const nl: Translation = {
   BUFFER_SIZE: 'Max Buffer Size',
   COMPACT: 'Compact',
   DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
-  UPLOAD_TEXT: 'Upload a new firmware (.bin) file or a backup file (.json)', // TODO translate
+  UPLOAD_TEXT: 'Upload a new firmware file (.bin) or a backup file (.json)', // TODO translate
   UPLOAD_DROP_TEXT: 'Sleep bestand hierheen of klik hier',
   ERROR: 'Onverwachte fout, probeer opnieuw',
   TIME_SET: 'Tijd ingesteld',
@@ -343,7 +342,8 @@ const nl: Translation = {
   DASHBOARD: 'Dashboard', // TODO translate
   NO_DATA: 'No data available', // TODO translate
   DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module', // TODO translate
-  DEVELOPER_MODE: 'Developer Mode' // TODO translate
+  DEVELOPER_MODE: 'Developer Mode', // TODO translate
+  UPGRADE: 'Upgrade' // TODO translate
 };
 
 export default nl;

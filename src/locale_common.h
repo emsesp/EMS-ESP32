@@ -48,6 +48,8 @@ MAKE_WORD(send)
 MAKE_WORD(telegram)
 MAKE_WORD(bus_id)
 MAKE_WORD(tx_mode)
+MAKE_WORD(showertimer)
+MAKE_WORD(showeralert)
 MAKE_WORD(ems)
 MAKE_WORD(devices)
 MAKE_WORD(shower)
@@ -88,7 +90,7 @@ MAKE_WORD(coldshot)
 // device types - lowercase, used in MQTT
 MAKE_WORD(boiler)
 MAKE_WORD(thermostat)
-MAKE_WORD(switch)
+MAKE_WORD_CUSTOM(switcher, "switch")
 MAKE_WORD(solar)
 MAKE_WORD(mixer)
 MAKE_WORD(gateway)
@@ -229,7 +231,7 @@ MAKE_NOTRANSLATION(tpl_input4, "<inv>[<comp><aux><cool><heat><dhw><pv>]")
 MAKE_NOTRANSLATION(test_cmd, "run a test")
 #endif
 
-// TAG mapping - maps to DeviceValueTAG_s in emsdevice.cpp
+// TAG mapping - maps to DeviceValueTAG_s in emsdevicevalue.cpp
 // use empty string if want to suppress showing tags
 // mqtt tags must not have spaces
 MAKE_NOTRANSLATION(tag_none, "")
@@ -260,6 +262,7 @@ MAKE_WORD_CUSTOM(uom_k, "K")
 MAKE_WORD_CUSTOM(uom_volts, "V")
 MAKE_WORD_CUSTOM(uom_mbar, "mbar")
 MAKE_WORD_CUSTOM(uom_lh, "l/h")
+MAKE_WORD_CUSTOM(uom_ctkwh, "ct/kWh")
 
 // MQTT topics and prefixes
 MAKE_WORD_CUSTOM(heating_active, "heating_active")

@@ -65,10 +65,14 @@ class EMSuart {
     static void     send_poll(const uint8_t data);
     static void     stop();
     static uint16_t transmit(const uint8_t * buf, const uint8_t len);
+    static uint8_t  last_tx_src() {
+        return last_tx_src_;
+    }
 
   private:
     static void IRAM_ATTR uart_gen_break(uint32_t length_us);
     static void           uart_event_task(void * pvParameters);
+    static uint8_t        last_tx_src_;
 };
 
 } // namespace emsesp

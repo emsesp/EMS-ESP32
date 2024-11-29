@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router';
 
 import CustomEntities from 'app/main/CustomEntities';
 import Customizations from 'app/main/Customizations';

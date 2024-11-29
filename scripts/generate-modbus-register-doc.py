@@ -104,7 +104,7 @@ print("# Entity/Register Mapping")
 print()
 print("!!! note")
 print()
-print("    This file has been auto-generated. Do not edit.")
+print("    This file has been auto-generated. Do not modify.")
 print()
 
 for device_type, devices in grouped_by(entities, device_type_key):

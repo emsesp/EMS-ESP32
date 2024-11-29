@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 import { Tabs, useMediaQuery, useTheme } from '@mui/material';
 
@@ -16,7 +16,7 @@ const RouterTabs: FC<RouterTabsProps> = ({ value, children }) => {
   const smallDown = useMediaQuery(theme.breakpoints.down('sm'));
 
   const handleTabChange = (_event: unknown, path: string) => {
-    navigate(path);
+    void navigate(path);
   };
 
   return (

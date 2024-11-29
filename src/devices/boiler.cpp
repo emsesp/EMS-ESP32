@@ -520,7 +520,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &totalCompStarts_, DeviceValueType::UINT24, FL_(totalCompStarts), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatingStarts_, DeviceValueType::UINT24, FL_(heatingStarts), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &coolingStarts_, DeviceValueType::UINT24, FL_(coolingStarts), DeviceValueUOM::NONE);
-        register_device_value(DeviceValueTAG::TAG_DHW1, &wwStarts2_, DeviceValueType::UINT24, FL_(wwStarts2), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DHW1, &wwStartsHp_, DeviceValueType::UINT24, FL_(wwStartsHp), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &poolStarts_, DeviceValueType::UINT24, FL_(poolStarts), DeviceValueUOM::NONE);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgConsTotal_, DeviceValueType::UINT24, FL_(nrgConsTotal), DeviceValueUOM::KWH);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &nrgConsCompTotal_, DeviceValueType::UINT24, FL_(nrgConsCompTotal), DeviceValueUOM::KWH);
@@ -555,6 +555,15 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(pvMaxComp),
                               DeviceValueUOM::KW,
                               MAKE_CF_CB(set_pvMaxComp));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
+                              &powerReduction_,
+                              DeviceValueType::UINT8,
+                              DeviceValueNumOp::DV_NUMOP_MUL10,
+                              FL_(powerReduction),
+                              DeviceValueUOM::PERCENT,
+                              MAKE_CF_CB(set_powerReduction),
+                              30,
+                              60);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &hpSetDiffPress_,
                               DeviceValueType::UINT8,
@@ -675,7 +684,8 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               FL_(auxHeaterOff),
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_additionalHeater));
-        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &auxHeaterStatus_, DeviceValueType::UINT8, FL_(auxHeaterStatus), DeviceValueUOM::PERCENT);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &auxHeaterStatus_, DeviceValueType::BOOL, FL_(auxHeaterStatus), DeviceValueUOM::NONE);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &auxHeaterLevel_, DeviceValueType::UINT8, FL_(auxHeaterLevel), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &auxHeaterDelay_,
                               DeviceValueType::UINT16,
@@ -1425,7 +1435,7 @@ void Boiler::process_UBAMonitorFastPlus(std::shared_ptr<const Telegram> telegram
 
     // at this point do a quick check to see if the hot water or heating is active
     uint8_t state = EMS_VALUE_UINT8_NOTSET;
-    if (telegram->read_value(state, 11) && model() != EMSdevice::EMS_DEVICE_FLAG_HIU) {
+    if (telegram->read_value(state, 11) && model() != EMSdevice::EMS_DEVICE_FLAG_HIU && model() != EMSdevice::EMS_DEVICE_FLAG_HEATPUMP) {
         boilerState_ = state & 0x01 ? 0x08 : 0;  // burnGas
         boilerState_ |= state & 0x02 ? 0x01 : 0; // heatingPump
         boilerState_ |= state & 0x04 ? 0x02 : 0; // 3-way-valve
@@ -1464,7 +1474,7 @@ void Boiler::process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram) {
  */
 void Boiler::process_UBAMonitorSlowPlus2(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, absBurnPow_, 13); // current burner absolute power (percent of rating plate power)
-    if (model() == EMSdevice::EMS_DEVICE_FLAG_HIU) {
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_HIU || model() == EMSdevice::EMS_DEVICE_FLAG_HEATPUMP) {
         uint8_t state = EMS_VALUE_UINT8_NOTSET;
         boilerState_  = 0;
         if (telegram->read_value(state, 2)) {
@@ -1605,7 +1615,7 @@ void Boiler::process_UBAInformation(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, totalCompStarts_, 20);
     has_update(telegram, heatingStarts_, 28);
     has_update(telegram, coolingStarts_, 36);
-    has_update(telegram, wwStarts2_, 24);
+    has_update(telegram, wwStartsHp_, 24);
     has_update(telegram, poolStarts_, 32);
 
     has_update(telegram, nrgConsTotal_, 64);
@@ -1652,7 +1662,7 @@ void Boiler::process_HpPower(std::shared_ptr<const Telegram> telegram) {
     has_bitupdate(telegram, hpEA0_, 3, 6);
     has_update(telegram, hpCircSpd_, 4);
     has_update(telegram, hpBrinePumpSpd_, 5);
-    has_update(telegram, auxHeaterStatus_, 6);
+    has_update(telegram, auxHeaterLevel_, 6);
     has_update(telegram, hpActivity_, 7);
     has_update(telegram, hpPower_, 11);
     has_update(telegram, hpCompSpd_, 17);
@@ -1819,6 +1829,10 @@ void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
     uint8_t         min           = telegram->message_data[8];
     uint16_t        duration      = telegram->message_data[9] * 256 + telegram->message_data[10];
     uint32_t        date          = (year - 2000) * 535680UL + month * 44640UL + day * 1440UL + hour * 60 + min + duration;
+    // check valid https://github.com/emsesp/EMS-ESP32/issues/2189
+    if (day == 0 || day > 31 || month == 0 || month > 12 || !std::isprint(code[0]) || !std::isprint(code[1])) {
+        return;
+    }
     // store only the newest code from telegrams 10 and 11
     if (date > lastCodeDate_ && lastCodeDate_) {
         lastCodeDate_ = date;
@@ -1846,6 +1860,9 @@ void Boiler::process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram) 
     code[2]                                 = telegram->message_data[7];
     code[3]                                 = 0;
     telegram->read_value(codeNo, 8);
+    if (!std::isprint(code[0]) || !std::isprint(code[1]) || !std::isprint(code[2])) {
+        return;
+    }
 
     // check for valid date, https://github.com/emsesp/EMS-ESP32/issues/204
     if (telegram->message_data[10] & 0x80) {
@@ -1937,15 +1954,16 @@ void Boiler::process_HpSilentMode(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hpHystPool_, 33); // is / 5
     has_update(telegram, hpCircPumpWw_, 46);
     has_update(telegram, hpMaxPower_, 31);
-    has_update(telegram, silentFrom_, 52); // in steps of 15 min
-    has_update(telegram, silentTo_, 53);   // in steps of 15 min
-    has_update(telegram, pvMaxComp_, 54);  // #2062
-    has_update(telegram, hpshutdown_, 58); // 1 powers off
+    has_update(telegram, silentFrom_, 52);     // in steps of 15 min
+    has_update(telegram, silentTo_, 53);       // in steps of 15 min
+    has_update(telegram, pvMaxComp_, 54);      // #2062
+    has_update(telegram, hpshutdown_, 58);     // 1 powers off
+    has_update(telegram, powerReduction_, 64); // 3..6 -> is *10
 }
 
 // Boiler(0x08) -B-> All(0x00), ?(0x0488), data: 8E 00 00 00 00 00 01 03
 void Boiler::process_HpValve(std::shared_ptr<const Telegram> telegram) {
-    // has_bitupdate(telegram, auxHeaterStatus_, 0, 2);
+    has_bitupdate(telegram, auxHeaterStatus_, 0, 2);
     has_update(telegram, auxHeatMixValve_, 7);
     has_update(telegram, pc1Rate_, 13); // percent
 }
@@ -2960,19 +2978,19 @@ bool Boiler::set_silentMode(const char * value, const int8_t id) {
 }
 
 bool Boiler::set_silentFrom(const char * value, const int8_t id) {
-    int v;
-    if (!Helpers::value2number(value, v)) {
+    if (value == nullptr || value[0] < '0' || value[0] > '9') {
         return false;
     }
+    auto v = Helpers::string2minutes(value);
     write_command(0x484, 52, v / 15, 0x484);
     return true;
 }
 
 bool Boiler::set_silentTo(const char * value, const int8_t id) {
-    int v;
-    if (!Helpers::value2number(value, v)) {
+    if (value == nullptr || value[0] < '0' || value[0] > '9') {
         return false;
     }
+    auto v = Helpers::string2minutes(value);
     write_command(0x484, 53, v / 15, 0x484);
     return true;
 }
@@ -3149,6 +3167,15 @@ bool Boiler::set_hpPowerLimit(const char * value, const int8_t id) {
     if (Helpers::value2number(value, v)) {
         uint8_t data[2] = {(uint8_t)(v >> 8), (uint8_t)v};
         write_command(0x4A7, 0, data, 2, 0x4A7);
+        return true;
+    }
+    return false;
+}
+
+bool Boiler::set_powerReduction(const char * value, const int8_t id) {
+    int v;
+    if (Helpers::value2number(value, v)) {
+        write_command(0x484, 64, v / 10, 0x484);
         return true;
     }
     return false;
