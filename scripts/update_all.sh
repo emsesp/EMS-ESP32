@@ -5,6 +5,7 @@
 # as well as GNUMake (make) and python3
 
 cd interface
+rm -rf yarn.lock node_modules
 ncu -u
 yarn set version stable
 yarn
@@ -12,10 +13,15 @@ yarn format
 yarn lint
 
 cd ../mock-api
+rm -rf yarn.lock node_modules
 ncu -u
 yarn set version stable
 yarn
 yarn format
+
+cd ..
+cd interface
+yarn build; yarn webUI
 
 cd ..
 npx cspell "**" 
