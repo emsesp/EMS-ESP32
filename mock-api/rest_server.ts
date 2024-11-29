@@ -33,9 +33,9 @@ let VERSION_IS_UPGRADEABLE;
 
 // Versions
 // default - on latest stable, no upgrades
-let THIS_VERSION = '3.7.0';
-let LATEST_STABLE_VERSION = '3.7.0';
-let LATEST_DEV_VERSION = '3.7.1-dev.1';
+let THIS_VERSION = '3.7.1';
+let LATEST_STABLE_VERSION = '3.7.1';
+let LATEST_DEV_VERSION = '3.7.2-dev.1';
 
 // scenarios for testing, overriding the default
 const version_test = 0;
@@ -48,23 +48,23 @@ switch (version_test as number) {
     break;
   case 1:
     // on latest dev, no update
-    THIS_VERSION = '3.7.1-dev.12';
-    LATEST_STABLE_VERSION = '3.7.0';
-    LATEST_DEV_VERSION = '3.7.1-dev.12';
+    THIS_VERSION = '3.7.2-dev.12';
+    LATEST_STABLE_VERSION = '3.7.1';
+    LATEST_DEV_VERSION = '3.7.2-dev.12';
     VERSION_IS_UPGRADEABLE = false;
     break;
   case 2:
     // upgrade stable to latest stable
     THIS_VERSION = '3.6.5';
-    LATEST_STABLE_VERSION = '3.7.0';
-    LATEST_DEV_VERSION = '3.7.1-dev.12';
+    LATEST_STABLE_VERSION = '3.7.1';
+    LATEST_DEV_VERSION = '3.7.2-dev.12';
     VERSION_IS_UPGRADEABLE = true;
     break;
   case 3:
     // upgrade dev to latest dev
-    THIS_VERSION = '3.7.0-dev-1';
-    LATEST_STABLE_VERSION = '3.7.0';
-    LATEST_DEV_VERSION = '3.7.1-dev.12';
+    THIS_VERSION = '3.7.1-dev-1';
+    LATEST_STABLE_VERSION = '3.7.1';
+    LATEST_DEV_VERSION = '3.7.2-dev.12';
     VERSION_IS_UPGRADEABLE = true;
     break;
 }
