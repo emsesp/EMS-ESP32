@@ -42,8 +42,8 @@ const Network = () => {
       }}
     >
       <RouterTabs value={routerTab}>
-        <Tab value="settings" label={LL.SETTINGS_OF(LL.NETWORK(1))} />
-        <Tab value="scan" label={LL.NETWORK_SCAN()} />
+        <Tab value="/settings/network/settings" label={LL.SETTINGS_OF(LL.NETWORK(1))} />
+        <Tab value="/settings/network/scan" label={LL.NETWORK_SCAN()} />
       </RouterTabs>
       <Routes>
         <Route path="scan" element={<WiFiNetworkScanner />} />

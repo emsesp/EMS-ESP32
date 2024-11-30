@@ -17,8 +17,8 @@ const Security = () => {
   return (
     <>
       <RouterTabs value={routerTab}>
-        <Tab value="settings" label={LL.SETTINGS_OF(LL.SECURITY(1))} />
-        <Tab value="users" label={LL.MANAGE_USERS()} />
+        <Tab value="/settings/security/settings" label={LL.SETTINGS_OF(LL.SECURITY(1))} />
+        <Tab value="/settings/security/users" label={LL.MANAGE_USERS()} />
       </RouterTabs>
       <Routes>
         <Route path="users" element={<ManageUsers />} />
