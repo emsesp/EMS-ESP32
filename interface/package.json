@@ -21,13 +21,13 @@
     "lint": "eslint . --fix"
   },
   "dependencies": {
-    "@alova/adapter-xhr": "2.0.10",
+    "@alova/adapter-xhr": "2.0.11",
     "@emotion/react": "^11.13.5",
     "@emotion/styled": "^11.13.5",
     "@mui/icons-material": "^6.1.9",
     "@mui/material": "^6.1.9",
     "@table-library/react-table-library": "4.1.7",
-    "alova": "3.2.5",
+    "alova": "3.2.6",
     "async-validator": "^4.2.5",
     "jwt-decode": "^4.0.0",
     "mime-types": "^2.1.35",
@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
-    "@eslint/js": "^9.15.0",
+    "@eslint/js": "^9.16.0",
     "@preact/compat": "^18.3.1",
     "@preact/preset-vite": "^2.9.2",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
@@ -51,7 +51,7 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "concurrently": "^9.1.0",
-    "eslint": "^9.15.0",
+    "eslint": "^9.16.0",
     "eslint-config-prettier": "^9.1.0",
     "formidable": "^3.5.2",
     "prettier": "^3.4.1",
