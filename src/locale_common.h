@@ -317,6 +317,7 @@ MAKE_ENUM(enum_wwMode5, FL_(normal), FL_(comfort), FL_(ecoplus)) // Rego3000
 MAKE_ENUM(enum_wwMode6, FL_(off), FL_(comfort), FL_(auto)) // CR120
 MAKE_ENUM(enum_heatingtype, FL_(off), FL_(radiator), FL_(convector), FL_(floor))
 MAKE_ENUM(enum_heatingtype1, FL_(off), FL_(curve), FL_(radiator), FL_(convector), FL_(floor))
+MAKE_ENUM(enum_heatingtype2, FL_(off), FL_(radiator), FL_(convector), FL_(floor), FL_(roomflow), FL_(roomload))
 MAKE_ENUM(enum_summermode, FL_(summer), FL_(auto), FL_(winter))
 MAKE_ENUM(enum_hpoperatingmode, FL_(off), FL_(auto), FL_(heating), FL_(cooling))
 MAKE_ENUM(enum_summer, FL_(winter), FL_(summer))

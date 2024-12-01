@@ -216,6 +216,7 @@ class EMSdevice {
     void   add_handlers_ignored(const uint16_t handler);
 
     void set_climate_minmax(int8_t tag, int16_t min, uint32_t max);
+    void setValueEnum(const void * value_p, const char * const ** options);
     void setCustomizationEntity(const std::string & entity_id);
     void getCustomizationEntities(std::vector<std::string> & entity_ids);
 

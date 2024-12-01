@@ -1454,6 +1454,7 @@ void Thermostat::process_RC35Set(std::shared_ptr<const Telegram> telegram) {
         has_update(telegram, hc->designtemp, 17);  // is * 1
         has_update(telegram, hc->maxflowtemp, 15); // is * 1
     }
+    setValueEnum(&hc->heatingtype, hc->control == 1 ? FL_(enum_heatingtype2) : FL_(enum_heatingtype));
 }
 
 // type 0x3F (HC1), 0x49 (HC2), 0x53 (HC3), 0x5D (HC4) - timer setting
@@ -3208,14 +3209,18 @@ bool Thermostat::set_heatingtype(const char * value, const int8_t id) {
     }
 
     uint8_t set;
-    if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS && Helpers::value2enum(value, set, FL_(enum_heatingtype1))) {
-        write_command(set_typeids[hc->hc()], 0, set, set_typeids[hc->hc()]);
-        return true;
-    }
-    if (Helpers::value2enum(value, set, FL_(enum_heatingtype))) {
-        if ((model() == EMSdevice::EMS_DEVICE_FLAG_RC20_N) || (model() == EMSdevice::EMS_DEVICE_FLAG_RC25)) {
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
+        if (Helpers::value2enum(value, set, FL_(enum_heatingtype1))) {
             write_command(set_typeids[hc->hc()], 0, set, set_typeids[hc->hc()]);
-        } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC35 || model() == EMSdevice::EMS_DEVICE_FLAG_RC30_N) {
+            return true;
+        }
+    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC35 || model() == EMSdevice::EMS_DEVICE_FLAG_RC30_N) {
+        if (Helpers::value2enum(value, set, hc->control == 1 ? FL_(enum_heatingtype2) : FL_(enum_heatingtype))) {
+            write_command(set_typeids[hc->hc()], 0, set, set_typeids[hc->hc()]);
+            return true;
+        }
+    } else if (Helpers::value2enum(value, set, FL_(enum_heatingtype))) {
+        if ((model() == EMSdevice::EMS_DEVICE_FLAG_RC20_N) || (model() == EMSdevice::EMS_DEVICE_FLAG_RC25)) {
             write_command(set_typeids[hc->hc()], 0, set, set_typeids[hc->hc()]);
         } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC30) {
             write_command(curve_typeids[hc->hc()], 0, set, curve_typeids[hc->hc()]);

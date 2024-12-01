@@ -253,6 +253,8 @@ MAKE_WORD_TRANSLATION(curve, "heatingcurve", "Heizkurve", "", "", "krzywa grzani
 MAKE_WORD_TRANSLATION(radiator, "radiator", "Heizkörper", "radiator", "Radiator", "grzejniki", "radiator", "radiateur", "radyatör", "radiatore", "radiátor", "radiátor")
 MAKE_WORD_TRANSLATION(convector, "convector", "Konvektor", "convector", "Konvektor", "konwektory", "konvektor", "convecteur", "convector", "convettore", "konvektor", "konvektor")
 MAKE_WORD_TRANSLATION(floor, "floor", "Fussboden", "vloer", "Golv", "podłoga", "gulv", "sol", "yer", "pavimento", "podlaha", "podlaha")
+MAKE_WORD_TRANSLATION(roomflow, "roomflow", "Raum Fluß", "", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_WORD_TRANSLATION(roomload, "roomload", "Raum Bedarf", "", "", "", "", "", "", "", "", "") // TODO translate
 MAKE_WORD_TRANSLATION(summer, "summer", "Sommer", "zomer", "Sommar", "lato", "sommer", "été", "yaz", "estate", "leto", "léto")
 MAKE_WORD_TRANSLATION(winter, "winter", "Winter", "winter", "Vinter", "zima", "vinter", "hiver", "kış", "inverno", "zima", "zima")
 MAKE_WORD_TRANSLATION(outdoor, "outdoor", "Außen", "buiten", "Utomhus", "temp. zewnętrzna", "utendørs", "extérieur", "dış", "esterno", "vonku", "venkovní")
