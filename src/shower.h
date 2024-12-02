@@ -33,6 +33,14 @@ class Shower {
     // commands
     static bool command_coldshot(const char * value, const int8_t id);
 
+    void shower_timer(bool enable) {
+        shower_timer_ = enable;
+    }
+
+    void shower_alert(bool enable) {
+        shower_alert_ = enable;
+    }
+
   private:
     static uuid::log::Logger logger_;
 

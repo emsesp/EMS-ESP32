@@ -1347,6 +1347,80 @@ bool System::saveSettings(const char * filename, const char * section, JsonObjec
     return false; // not found
 }
 
+// set a entity of services 'network', 'settings', 'mqtt', etc.
+bool System::command_service(const char * cmd, const char * value) {
+    bool ok = false;
+    bool b;
+    if (Helpers::value2bool(value, b)) {
+        if (!strcmp(cmd, "settings/showertimer")) {
+            EMSESP::webSettingsService.update([&](WebSettings & settings) {
+                settings.shower_timer = b;
+                return StateUpdateResult::CHANGED;
+            });
+            EMSESP::shower_.shower_timer(b);
+            ok = true;
+        } else if (!strcmp(cmd, "settings/showeralert")) {
+            EMSESP::webSettingsService.update([&](WebSettings & settings) {
+                settings.shower_alert = b;
+                return StateUpdateResult::CHANGED;
+            });
+            EMSESP::shower_.shower_alert(b);
+            ok = true;
+        } else if (!strcmp(cmd, "settings/hideled")) {
+            EMSESP::webSettingsService.update([&](WebSettings & settings) {
+                settings.hide_led = b;
+                return StateUpdateResult::CHANGED;
+            });
+            EMSESP::system_.hide_led(b);
+            ok = true;
+        } else if (!strcmp(cmd, "settings/analogenabled")) {
+            EMSESP::webSettingsService.update([&](WebSettings & settings) {
+                settings.analog_enabled = b;
+                return StateUpdateResult::CHANGED;
+            });
+            EMSESP::system_.analog_enabled(b);
+            ok = true;
+        } else if (!strcmp(cmd, "mqtt/enabled")) {
+            EMSESP::esp8266React.getMqttSettingsService()->update([&](MqttSettings & Settings) {
+                Settings.enabled = b;
+                return StateUpdateResult::CHANGED;
+            });
+            ok = true;
+        } else if (!strcmp(cmd, "ap/enabled")) {
+            EMSESP::esp8266React.getAPSettingsService()->update([&](APSettings & Settings) {
+                Settings.provisionMode = b ? 0 : 2;
+                return StateUpdateResult::CHANGED;
+            });
+            ok = true;
+        } else if (!strcmp(cmd, "ntp/enabled")) {
+            EMSESP::esp8266React.getNTPSettingsService()->update([&](NTPSettings & Settings) {
+                Settings.enabled = b;
+                return StateUpdateResult::CHANGED;
+            });
+            ok = true;
+        } else if (!strcmp(cmd, "ap/enabled")) {
+            EMSESP::esp8266React.getAPSettingsService()->update([&](APSettings & Settings) {
+                Settings.provisionMode = b ? 0 : 2;
+                return StateUpdateResult::CHANGED;
+            });
+            ok = true;
+        } else if (!strcmp(cmd, "syslog/enabled")) {
+            EMSESP::webSettingsService.update([&](WebSettings & settings) {
+                settings.syslog_enabled = b;
+                return StateUpdateResult::CHANGED;
+            });
+            EMSESP::system_.syslog_enabled_ = b;
+            EMSESP::system_.syslog_init();
+            ok = true;
+        }
+    }
+
+    if (ok) {
+        LOG_INFO("System command '%s' with value '%s'", cmd, value);
+    }
+    return ok;
+}
+
 // return back a system value
 bool System::get_value_info(JsonObject output, const char * cmd) {
     if (cmd == nullptr || strlen(cmd) == 0) {
@@ -1428,8 +1502,9 @@ void System::get_value_json(JsonObject output, const std::string & circuit, cons
         output["circuit"] = circuit;
     }
     output["readable"] = true;
-    output["writable"] = false;
-    output["visible"]  = true;
+    output["writeable"] =
+        (name == "showerTimer" || name == "showerAlert" || name == "enabled" || name == "hideLed" || name == "analogEnabled");
+    output["visible"] = true;
     if (val.is<bool>()) {
         output["value"] = val.as<bool>();
         output["type"]  = "boolean";

@@ -51,48 +51,6 @@ void Shower::start() {
         FL_(coldshot_cmd),
         CommandFlag::ADMIN_ONLY);
 
-    Command::add(
-        EMSdevice::DeviceType::SYSTEM,
-        F_(showertimer),
-        [&](const char * value, const int8_t id, JsonObject output) {
-            bool b;
-            if (!Helpers::value2bool(value, b)) {
-                return false;
-            }
-            shower_timer_ = b;
-            EMSESP::webSettingsService.update([&](WebSettings & settings) {
-                if (settings.shower_timer != b) {
-                    settings.shower_timer = b;
-                    return StateUpdateResult::CHANGED;
-                }
-                return StateUpdateResult::UNCHANGED;
-            });
-            return true;
-        },
-        FL_(showertimer_cmd),
-        CommandFlag::ADMIN_ONLY);
-
-    Command::add(
-        EMSdevice::DeviceType::SYSTEM,
-        F_(showeralert),
-        [&](const char * value, const int8_t id, JsonObject output) {
-            bool b;
-            if (!Helpers::value2bool(value, b)) {
-                return false;
-            }
-            shower_alert_ = b;
-            EMSESP::webSettingsService.update([&](WebSettings & settings) {
-                if (settings.shower_alert != b) {
-                    settings.shower_alert = b;
-                    return StateUpdateResult::CHANGED;
-                }
-                return StateUpdateResult::UNCHANGED;
-            });
-            return true;
-        },
-        FL_(showeralert_cmd),
-        CommandFlag::ADMIN_ONLY);
-
     if (shower_timer_) {
         set_shower_state(false, true); // turns shower to off and creates HA topic if not already done
     }

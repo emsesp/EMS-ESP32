@@ -1182,6 +1182,19 @@ void EMSdevice::set_climate_minmax(int8_t tag, int16_t min, uint32_t max) {
     }
 }
 
+void EMSdevice::setValueEnum(const void * value_p, const char * const ** options) {
+    for (auto & dv : devicevalues_) {
+        if (dv.value_p == value_p) {
+            if (dv.options != options && Mqtt::ha_enabled()) {
+                dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
+            }
+            dv.options = options;
+            dv.options_size = Helpers::count_items(options);
+            break;
+        }
+    }
+}
+
 // set mask per device entity based on the id which is prefixed with the 2 char hex mask value
 // returns true if the entity has a mask set (not 0 the default)
 void EMSdevice::setCustomizationEntity(const std::string & entity_id) {
@@ -1984,7 +1997,7 @@ std::string EMSdevice::name() {
         if (model().empty()) {
             return default_name();
         }
-        return model() + "/" + default_name();
+        return model() + "/" + std::string(default_name());
     }
 
     return custom_name();

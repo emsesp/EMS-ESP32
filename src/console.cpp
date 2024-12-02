@@ -327,38 +327,6 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                               EMSESP::uart_init();
                           });
 
-    commands->add_command(ShellContext::MAIN,
-                          CommandFlags::ADMIN,
-                          string_vector{F_(set), F_(service)},
-                          string_vector{F_(service_mandatory), F_(enable_mandatory)},
-                          [](Shell & shell, const std::vector<std::string> & arguments) {
-                              if (arguments.back() == "enable" || arguments.back() == "disable") {
-                                  bool enable = arguments.back() == "enable";
-                                  if (arguments.front() == "mqtt") {
-                                      EMSESP::esp8266React.getMqttSettingsService()->update([&](MqttSettings & Settings) {
-                                          Settings.enabled = enable;
-                                          return StateUpdateResult::CHANGED;
-                                      });
-                                  } else if (arguments.front() == "ntp") {
-                                      EMSESP::esp8266React.getNTPSettingsService()->update([&](NTPSettings & Settings) {
-                                          Settings.enabled = enable;
-                                          return StateUpdateResult::CHANGED;
-                                      });
-                                  } else if (arguments.front() == "ap") {
-                                      EMSESP::esp8266React.getAPSettingsService()->update([&](APSettings & Settings) {
-                                          Settings.provisionMode = enable ? 0 : 2;
-                                          return StateUpdateResult::CHANGED;
-                                      });
-                                  } else {
-                                      shell.printfln("unknown service: %s", arguments.front().c_str());
-                                      return;
-                                  }
-                                  shell.printfln("service '%s' %sd", arguments.front().c_str(), arguments.back().c_str());
-                              } else {
-                                  shell.println("Must be `enable` or `disable`");
-                              }
-                          });
-
     //
     // EMS device commands
     //

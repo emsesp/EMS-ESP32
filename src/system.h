@@ -73,6 +73,7 @@ class System {
     static bool command_message(const char * value, const int8_t id);
     static bool command_info(const char * value, const int8_t id, JsonObject output);
     static bool command_response(const char * value, const int8_t id, JsonObject output);
+    static bool command_service(const char * cmd, const char * value);
 
     static bool get_value_info(JsonObject root, const char * cmd);
     static void get_value_json(JsonObject output, const std::string & circuit, const std::string & name, JsonVariant val);
@@ -163,6 +164,14 @@ class System {
 
     bool analog_enabled() {
         return analog_enabled_;
+    }
+
+    void analog_enabled(bool b) {
+        analog_enabled_ = b;
+    }
+
+    void hide_led(bool b) {
+        hide_led_ = b;
     }
 
     bool readonly_mode() {
