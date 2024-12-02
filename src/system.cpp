@@ -1398,12 +1398,6 @@ bool System::command_service(const char * cmd, const char * value) {
                 return StateUpdateResult::CHANGED;
             });
             ok = true;
-        } else if (!strcmp(cmd, "ap/enabled")) {
-            EMSESP::esp8266React.getAPSettingsService()->update([&](APSettings & Settings) {
-                Settings.provisionMode = b ? 0 : 2;
-                return StateUpdateResult::CHANGED;
-            });
-            ok = true;
         } else if (!strcmp(cmd, "syslog/enabled")) {
             EMSESP::webSettingsService.update([&](WebSettings & settings) {
                 settings.syslog_enabled = b;
@@ -1761,11 +1755,14 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         node["analogEnabled"]   = settings.analog_enabled;
         node["telnetEnabled"]   = settings.telnet_enabled;
         node["maxWebLogBuffer"] = settings.weblog_buffer;
+
+        /*
 #if defined(EMSESP_UNITY)
         node["webLogBuffer"] = 0;
 #else
         node["webLogBuffer"] = EMSESP::webLogService.num_log_messages();
 #endif
+*/
         node["modbusEnabled"]   = settings.modbus_enabled;
         node["forceHeatingOff"] = settings.boiler_heatingoff;
         node["developerMode"]   = settings.developer_mode;
