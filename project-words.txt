@@ -1390,3 +1390,10 @@ pumpmod
 valvereturn
 deltatret
 errordisp
+commandsfunctions
+hideled
+analogenabled
+dhwx
+ahsx
+roomflow
+roomload
