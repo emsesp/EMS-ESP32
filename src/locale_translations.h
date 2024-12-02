@@ -907,7 +907,7 @@ MAKE_TRANSLATION(outEx, "outexhaust", "outdoor exhaust air", "Fortlufttemp.", "u
 MAKE_TRANSLATION(inEx, "inexhaust", "indoor exhaust air", "Ablufttemp.", "uitlaattemperatuur binnen", "", "wywiew", "", "", "iç ortam egsoz", "aria di scarico interna", "vnútorný odpadový vzduch", "vnitřní odpadní vzduch") // TODO translate
 MAKE_TRANSLATION(ventMode, "ventmode", "ventilation mode", "Belüftungsmodus", "ventilatiemodus", "", "tryb wentylacji", "", "", "havalandırma modu", "modalità di ventilazione", "režim vetrania", "režim ventilace") // TODO translate
 MAKE_TRANSLATION(ventInSpeed, "ventinspeed", "in blower speed", "Zuluftdrehzahl", "toerental aanvoerventilator", "", "prędkość wentylatora nawiewu", "", "", "iç fan hızı", "velocità aria di alimentazione", "rýchlosť ventilátora", "rychlost vnitřního ventilátoru") // TODO translate
-MAKE_TRANSLATION(ventOutSpeed, "ventoutspeed", "out blower speed", "Abluftdrehzahl", "toerental afvoerventilator", "", "prędjkość wentylatora wywiewu", "", "", "dış fan hızı", "velocità aria di scarico", "rýchlosť výstupného ventilátora", "rychlost venkovního ventilátoru") // TODO translate
+MAKE_TRANSLATION(ventOutSpeed, "ventoutspeed", "out blower speed", "Abluftdrehzahl", "toerental afvoerventilator", "", "prędkość wentylatora wywiewu", "", "", "dış fan hızı", "velocità aria di scarico", "rýchlosť výstupného ventilátora", "rychlost venkovního ventilátoru") // TODO translate
 MAKE_TRANSLATION(airquality, "airquality", "air quality (voc)", "Luftqualität (VOC)", "luchtkwaliteit (VOC)", "", "jakość powietrza", "", "", "hava kalitesi(voc)", "qualità aria (VOC)", "kvalita vzduchu (voc)", "kvalita vzduchu (VOC)") // TODO translate
 
 // EM100
