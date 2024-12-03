@@ -214,7 +214,7 @@ bool WebCustomEntityService::command_setvalue(const char * value, const int8_t i
 // output of a single value
 // if add_uom is true it will add the UOM string to the value
 void WebCustomEntityService::render_value(JsonObject output, CustomEntityItem & entity, const bool useVal, const bool web, const bool add_uom) {
-    char        payload[12];
+    char        payload[20];
     std::string name = useVal ? "value" : entity.name;
     switch (entity.value_type) {
     case DeviceValueType::BOOL:
@@ -496,7 +496,7 @@ void WebCustomEntityService::generate_value_web(JsonObject output, const bool is
             obj["c"] = entity.name;
             include  = true;
             if (entity.value_type != DeviceValueType::BOOL && entity.value_type != DeviceValueType::STRING) {
-                char s[10];
+                char s[20];
                 obj["s"] = Helpers::render_value(s, entity.factor, 1);
             }
         }

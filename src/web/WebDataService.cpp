@@ -267,10 +267,10 @@ void WebDataService::write_device_value(AsyncWebServerRequest * request, JsonVar
         if (data.is<const char *>()) {
             return_code = Command::call(device_type, cmd, data.as<const char *>(), true, id, output);
         } else if (data.is<int>()) {
-            char s[10];
+            char s[20];
             return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<int32_t>(), 0), true, id, output);
         } else if (data.is<float>()) {
-            char s[10];
+            char s[20];
             return_code = Command::call(device_type, cmd, Helpers::render_value(s, data.as<float>(), 1), true, id, output);
         } else if (data.is<bool>()) {
             return_code = Command::call(device_type, cmd, data.as<bool>() ? "true" : "false", true, id, output);
