@@ -241,7 +241,7 @@ const ApplicationSettings = () => {
                 name="modbus_timeout"
                 label="Timeout"
                 slotProps={{
-                  input: MilliSecondsInputProps
+                  input: SecondsInputProps
                 }}
                 variant="outlined"
                 value={numberValue(data.modbus_timeout)}

@@ -11,6 +11,11 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 
 ## Fixed
 
+- long numbers of custom entities [#2267](https://github.com/emsesp/EMS-ESP32/issues/2267)
+- modbus command path to `api/` [#2276](https://github.com/emsesp/EMS-ESP32/issues/2276)
+
 ## Changed
 
 - show operation in pretty telegram between src and dst [#2263](https://github.com/emsesp/EMS-ESP32/discussions/2263)
+- update eModbus to 1.7.2 [#2254](https://github.com/emsesp/EMS-ESP32/issues/2254)
+- modbus timeout default to 300 sec, change setting from ms to sec [#2254](https://github.com/emsesp/EMS-ESP32/issues/2254)
