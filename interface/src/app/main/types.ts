@@ -368,7 +368,7 @@ export interface EntityItem {
   device_id: number | string;
   type_id: number | string;
   offset: number;
-  factor: number;
+  factor: number | string;
   uom: number;
   value_type: number;
   value?: unknown;
@@ -380,7 +380,7 @@ export interface EntityItem {
   o_device_id?: number | string;
   o_type_id?: number | string;
   o_offset?: number;
-  o_factor?: number;
+  o_factor?: number | string;
   o_uom?: number;
   o_value_type?: number;
   o_deleted?: boolean;

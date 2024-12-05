@@ -34,6 +34,7 @@ interface CustomEntitiesDialogProps {
   creating: boolean;
   onClose: () => void;
   onSave: (ei: EntityItem) => void;
+  onDup: (ei: EntityItem) => void;
   selectedItem: EntityItem;
   validator: Schema;
 }
@@ -43,6 +44,7 @@ const CustomEntitiesDialog = ({
   creating,
   onClose,
   onSave,
+  onDup,
   selectedItem,
   validator
 }: CustomEntitiesDialogProps) => {
@@ -91,6 +93,10 @@ const CustomEntitiesDialog = ({
     onSave(editItem);
   };
 
+  const dup = () => {
+    onDup(editItem);
+  };
+
   return (
     <Dialog sx={dialogStyle} open={open} onClose={handleClose}>
       <DialogTitle>
@@ -128,18 +134,36 @@ const CustomEntitiesDialog = ({
             </TextField>
           </Grid>
           {editItem.ram === 1 && (
-            <Grid>
-              <TextField
-                name="value"
-                label={LL.DEFAULT(0) + ' ' + LL.VALUE(0)}
-                type="string"
-                value={editItem.value as string}
-                variant="outlined"
-                onChange={updateFormValue}
-                fullWidth
-                margin="normal"
-              />
-            </Grid>
+            <>
+              <Grid>
+                <TextField
+                  name="value"
+                  label={LL.DEFAULT(0) + ' ' + LL.VALUE(0)}
+                  type="string"
+                  value={editItem.value as string}
+                  variant="outlined"
+                  onChange={updateFormValue}
+                  fullWidth
+                  margin="normal"
+                />
+              </Grid>
+              <Grid>
+                <TextField
+                  name="uom"
+                  label={LL.UNIT()}
+                  value={editItem.uom}
+                  margin="normal"
+                  onChange={updateFormValue}
+                  select
+                >
+                  {DeviceValueUOM_s.map((val, i) => (
+                    <MenuItem key={val} value={i}>
+                      {val}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+            </>
           )}
           {editItem.ram === 0 && (
             <>
@@ -255,7 +279,7 @@ const CustomEntitiesDialog = ({
                       <TextField
                         name="factor"
                         label={LL.FACTOR()}
-                        value={numberValue(editItem.factor)}
+                        value={numberValue(editItem.factor as number)}
                         variant="outlined"
                         onChange={updateFormValue}
                         sx={{ width: '11ch' }}
@@ -292,15 +316,41 @@ const CustomEntitiesDialog = ({
                       fieldErrors={fieldErrors}
                       name="factor"
                       label="Bytes"
-                      value={numberValue(editItem.factor)}
+                      value={numberValue(editItem.factor as number)}
                       sx={{ width: '11ch' }}
                       variant="outlined"
                       onChange={updateFormValue}
                       margin="normal"
                       type="number"
+                      slotProps={{
+                        htmlInput: { step: '1', min: '1', max: '255' }
+                      }}
                     />
                   </Grid>
                 )}
+              {editItem.value_type === DeviceValueType.BOOL && (
+                <Grid>
+                  <ValidatedTextField
+                    fieldErrors={fieldErrors}
+                    name="factor"
+                    label="Mask"
+                    value={editItem.factor as string}
+                    sx={{ width: '11ch' }}
+                    variant="outlined"
+                    onChange={updateFormValue}
+                    margin="normal"
+                    type="string"
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">0x</InputAdornment>
+                        )
+                      },
+                      htmlInput: { style: { textTransform: 'uppercase' } }
+                    }}
+                  />
+                </Grid>
+              )}
             </>
           )}
         </Grid>
@@ -315,6 +365,15 @@ const CustomEntitiesDialog = ({
               onClick={remove}
             >
               {LL.REMOVE()}
+            </Button>
+            <Button
+              sx={{ ml: 1 }}
+              startIcon={<AddIcon />}
+              variant="outlined"
+              color="primary"
+              onClick={dup}
+            >
+              {LL.DUPLICATE()}
             </Button>
           </Box>
         )}

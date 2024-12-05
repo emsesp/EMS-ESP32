@@ -343,6 +343,7 @@ const en: Translation = {
   NO_DATA: 'No data available',
   DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module',
   DEVELOPER_MODE: 'Developer Mode',
+  DUPLICATE: 'Duplicate',
   UPGRADE: 'Upgrade'
 };
 

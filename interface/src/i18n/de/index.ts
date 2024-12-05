@@ -343,7 +343,8 @@ const de: Translation = {
   NO_DATA: 'Keine Daten verfügbar',
   DASHBOARD_1: 'Passen Sie Ihr Dashboard an, indem Sie EMS-Entitäten mithilfe des Moduls „Anpassungen“ als Favorit markieren',
   DEVELOPER_MODE: 'Entwicklermodus',
-  UPGRADE: 'Upgrade' // TODO translate
+  DUPLICATE: 'Kopieren',
+  UPGRADE: 'Aktualisieren'
 };
 
 export default de;

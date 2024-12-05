@@ -56,7 +56,7 @@ void WebCustomEntity::read(WebCustomEntity & webEntity, JsonObject root) {
         ei["offset"]     = entityItem.offset;
         ei["factor"]     = entityItem.factor;
         ei["name"]       = entityItem.name;
-        ei["uom"]        = entityItem.uom;
+        ei["uom"]        = entityItem.value_type == DeviceValueType::BOOL ? 0 : entityItem.uom;
         ei["value_type"] = entityItem.value_type;
         ei["writeable"]  = entityItem.writeable;
         EMSESP::webCustomEntityService.render_value(ei, entityItem, true, true);
@@ -97,7 +97,6 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
             if (entityItem.ram == 1) {
                 entityItem.device_id  = 0;
                 entityItem.type_id    = 0;
-                entityItem.uom        = 0;
                 entityItem.value_type = DeviceValueType::STRING;
                 entityItem.writeable  = true;
             }
@@ -107,6 +106,7 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
                 entityItem.data = "";
             } else if (entityItem.value_type == DeviceValueType::BOOL) {
                 entityItem.value = EMS_VALUE_DEFAULT_BOOL;
+                entityItem.uom   = 0;
             } else if (entityItem.value_type == DeviceValueType::INT8) {
                 entityItem.value = EMS_VALUE_DEFAULT_INT8;
             } else if (entityItem.value_type == DeviceValueType::UINT8) {
@@ -180,7 +180,7 @@ bool WebCustomEntityService::command_setvalue(const char * value, const int8_t i
                 if (!Helpers::value2bool(value, v)) {
                     return false;
                 }
-                EMSESP::send_write_request(entityItem.type_id, entityItem.device_id, entityItem.offset, v ? 0xFF : 0, 0);
+                EMSESP::send_write_request(entityItem.type_id, entityItem.device_id, entityItem.offset, v ? (uint8_t)entityItem.factor : 0, 0);
             } else {
                 float f;
                 if (!Helpers::value2float(value, f)) {
@@ -266,7 +266,7 @@ void WebCustomEntityService::render_value(JsonObject output, CustomEntityItem & 
     default:
         // if no type treat it as a string
         if (entity.data.length() > 0) {
-            output[name] = entity.data;
+            output[name] = add_uom ? entity.data + ' ' + EMSdevice::uom_to_string(entity.uom) : entity.data;
         }
         break;
     }
@@ -490,7 +490,9 @@ void WebCustomEntityService::generate_value_web(JsonObject output, const bool is
         }
 
         obj["id"] = "00" + entity.name;
-        obj["u"]  = entity.uom;
+        if (entity.value_type != DeviceValueType::BOOL) {
+            obj["u"] = entity.uom;
+        }
 
         if (entity.writeable) {
             obj["c"] = entity.name;
@@ -629,6 +631,10 @@ bool WebCustomEntityService::get_value(std::shared_ptr<const Telegram> telegram)
             uint32_t value = 0;
             for (uint8_t i = 0; i < len[entity.value_type]; i++) {
                 value = (value << 8) + telegram->message_data[i + entity.offset - telegram->offset];
+            }
+            // mask bits for bool values
+            if (entity.value_type == DeviceValueType::BOOL && entity.factor > 0) {
+                value = (value & (uint8_t)entity.factor) ? 1 : 0;
             }
             if (value != entity.value) {
                 entity.value = value;

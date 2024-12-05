@@ -343,6 +343,7 @@ const sk: Translation = {
   NO_DATA: 'Nie sú k dispozícii žiadne údaje',
   DASHBOARD_1: 'Prispôsobte si svoj informačný panel tak, že označíte entity EMS ako Obľúbené pomocou modulu Prispôsobenia',
   DEVELOPER_MODE: 'Developer Mode', // TODO translate
+  DUPLICATE: 'Duplicate', // TODO translate
   UPGRADE: 'Upgrade' // TODO translate
 };
 
