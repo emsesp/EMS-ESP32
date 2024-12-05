@@ -174,6 +174,14 @@ class EMSdevice {
         }
     }
 
+    void has_update(int16_t & value, int16_t newvalue) {
+        if (value != newvalue) {
+            value       = newvalue;
+            has_update_ = true;
+            publish_value((void *)&value);
+        }
+    }
+
     void has_update(uint32_t & value, uint32_t newvalue) {
         if (value != newvalue) {
             value       = newvalue;
