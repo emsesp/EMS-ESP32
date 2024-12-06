@@ -256,11 +256,17 @@ char * Helpers::render_value(char * result, const double value, const int8_t for
     double v     = value < 0 ? value - 1.0 / (2 * p[format]) : value + 1.0 / (2 * p[format]);
     auto   whole = (long long)v;
 
-    if (whole == 0 && v < 0) {
+    if (whole <= 0 && v < 0) {
         result[0] = '-';
         result++;
+        whole = -whole;
+        v = -v;
     }
+#ifndef EMSESP_STANDALONE
     lltoa(whole, result, 10);
+#else
+    ultostr(result, whole, 10);
+#endif
 
     while (*result != '\0') {
         result++;

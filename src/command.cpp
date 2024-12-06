@@ -537,14 +537,14 @@ bool Command::list(const uint8_t device_type, JsonObject output) {
     output[F_(entities)] = Helpers::translated_word(FL_(entities_cmd));
 
     if (device_type == EMSdevice::DeviceType::SYSTEM) {
-        output["settings/showertimer"] = Helpers::translated_word(FL_(system_cmd));
-        output["settings/showeralert"] = Helpers::translated_word(FL_(system_cmd));
-        output["settings/hideled"] = Helpers::translated_word(FL_(system_cmd));
+        output["settings/showertimer"]   = Helpers::translated_word(FL_(system_cmd));
+        output["settings/showeralert"]   = Helpers::translated_word(FL_(system_cmd));
+        output["settings/hideled"]       = Helpers::translated_word(FL_(system_cmd));
         output["settings/analogenabled"] = Helpers::translated_word(FL_(system_cmd));
-        output["mqtt/enabled"] = Helpers::translated_word(FL_(system_cmd));
-        output["ntp/enabled"] = Helpers::translated_word(FL_(system_cmd));
-        output["ap/enabled"] = Helpers::translated_word(FL_(system_cmd));
-        output["syslog/enabled"] = Helpers::translated_word(FL_(system_cmd));
+        output["mqtt/enabled"]           = Helpers::translated_word(FL_(system_cmd));
+        output["ntp/enabled"]            = Helpers::translated_word(FL_(system_cmd));
+        output["ap/enabled"]             = Helpers::translated_word(FL_(system_cmd));
+        output["syslog/enabled"]         = Helpers::translated_word(FL_(system_cmd));
     }
     // create a list of commands we have registered, and sort them
     std::list<std::string> sorted_cmds;
@@ -670,11 +670,7 @@ bool Command::device_has_commands(const uint8_t device_type) {
 
     for (const auto & emsdevice : EMSESP::emsdevices) {
         if (emsdevice && (emsdevice->device_type() == device_type)) {
-            for (const auto & cf : cmdfunctions_) {
-                if (cf.device_type_ == device_type) {
-                    return true;
-                }
-            }
+            return true;
         }
     }
 
