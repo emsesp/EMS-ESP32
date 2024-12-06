@@ -133,6 +133,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         monitor_typeids = {0x0A};
         set_typeids     = {};
         register_telegram_type(monitor_typeids[0], "EasyMonitor", true, MAKE_PF_CB(process_EasyMonitor));
+        register_telegram_type(0x02A5, "EasyMonitor", false, MAKE_PF_CB(process_EasyMonitor));
 
         // CRF
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_CRF) {
@@ -840,13 +841,30 @@ void Thermostat::process_RC20Monitor(std::shared_ptr<const Telegram> telegram) {
 
 // type 0x0A - data from the Nefit Easy/TC100 thermostat (0x18) - 31 bytes long
 void Thermostat::process_EasyMonitor(std::shared_ptr<const Telegram> telegram) {
-    auto hc = heating_circuit(telegram);
+    monitor_typeids[0] = telegram->type_id;
+    auto hc            = heating_circuit(telegram);
     if (hc == nullptr) {
         return;
     }
 
-    has_update(telegram, hc->roomTemp, 8); // is * 100
-    has_update(telegram, hc->selTemp, 10); // is * 100
+    if (telegram->type_id == 0x0A) {
+        int16_t temp = hc->roomTemp;
+        if (telegram->read_value(temp, 8) && temp != 0) {
+            has_update(telegram, hc->roomTemp, 8); // is * 100
+            has_update(telegram, hc->selTemp, 10); // is * 100
+            toggle_fetch(0x0A, true);
+        }
+    } else if (telegram->type_id == 0x02A5) { // see #2277
+        int16_t temp = hc->roomTemp / 10;
+        if (telegram->read_value(temp, 0)) {     // is * 10
+            has_update(hc->roomTemp, temp * 10); // * 100
+            toggle_fetch(0x0A, false);
+        }
+        int16_t sel = hc->selTemp / 50;
+        if (telegram->read_value(sel, 6, 1)) { // is * 2
+            has_update(hc->selTemp, sel * 50); // * 100
+        }
+    }
 
     add_ha_climate(hc);
 }

@@ -254,13 +254,19 @@ char * Helpers::render_value(char * result, const double value, const int8_t for
 
     char * ret   = result;
     double v     = value < 0 ? value - 1.0 / (2 * p[format]) : value + 1.0 / (2 * p[format]);
-    auto   whole = (int32_t)v;
+    auto   whole = (long long)v;
 
-    if (whole == 0 && v < 0) {
+    if (whole <= 0 && v < 0) {
         result[0] = '-';
         result++;
+        whole = -whole;
+        v = -v;
     }
-    itoa(whole, result, 10);
+#ifndef EMSESP_STANDALONE
+    lltoa(whole, result, 10);
+#else
+    ultostr(result, whole, 10);
+#endif
 
     while (*result != '\0') {
         result++;
@@ -354,16 +360,16 @@ char * Helpers::render_value(char * result, const uint32_t value, const int8_t f
 
 #ifndef EMSESP_STANDALONE
     if (!format) {
-        strlcpy(result, ltoa(new_value, s, 10), sizeof(s)); // format is 0
+        strlcpy(result, lltoa(new_value, s, 10), sizeof(s)); // format is 0
     } else if (format > 0) {
-        strlcpy(result, ltoa(new_value / format, s, 10), sizeof(s));
+        strlcpy(result, lltoa(new_value / format, s, 10), sizeof(s));
         strlcat(result, ".", sizeof(s));
         strlcat(result, itoa(((new_value % format) * 10) / format, s, 10), sizeof(s));
         if (format == 100) {
             strlcat(result, itoa(new_value % 10, s, 10), sizeof(s));
         }
     } else {
-        strlcpy(result, ltoa(new_value * format * -1, s, 10), sizeof(s));
+        strlcpy(result, lltoa(new_value * format * -1, s, 10), sizeof(s));
     }
 #else
     if (!format) {
@@ -458,26 +464,22 @@ int Helpers::atoint(const char * value) {
 //  fahrenheit=0 - off, no conversion
 //  fahrenheit=1 - relative, 1.8t
 //  fahrenheit=2 - absolute, 1.8t + 32(fahrenheit-1)
-float Helpers::transformNumFloat(float value, const int8_t numeric_operator, const uint8_t fahrenheit) {
-    float val;
+double Helpers::transformNumFloat(double value, const int8_t numeric_operator, const uint8_t fahrenheit) {
+    double val;
 
     if (numeric_operator == 0) { // DV_NUMOP_NONE
-        val = value * 100 + 0.5;
+        val = value * 100;
     } else if (numeric_operator > 0) { // DV_NUMOP_DIVxx
-        val = value * 100 / numeric_operator + 0.5;
+        val = value * 100 / numeric_operator;
     } else { // DV_NUMOP_MULxx
         val = value * -100 * numeric_operator;
-    }
-
-    if (value < 0) { // negative rounding
-        val = val - 1;
     }
 
     if (fahrenheit) {
         val = val * 1.8 + 3200 * (fahrenheit - 1);
     }
 
-    return ((int32_t)val) / 100.0;
+    return (round(val)) / 100.0;
 }
 
 // abs of a signed 32-bit integer

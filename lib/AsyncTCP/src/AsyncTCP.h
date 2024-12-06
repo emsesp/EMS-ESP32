@@ -22,6 +22,12 @@
 #ifndef ASYNCTCP_H_
 #define ASYNCTCP_H_
 
+#define ASYNCTCP_VERSION "3.2.14"
+#define ASYNCTCP_VERSION_MAJOR 3
+#define ASYNCTCP_VERSION_MINOR 2
+#define ASYNCTCP_VERSION_REVISION 14
+#define ASYNCTCP_FORK_mathieucarbou
+
 #include "IPAddress.h"
 #if ESP_IDF_VERSION_MAJOR < 5
 #include "IPv6Address.h"
@@ -52,24 +58,26 @@ extern "C" {
 #define CONFIG_ASYNC_TCP_USE_WDT 1 //if enabled, adds between 33us and 200us per event
 #endif
 
-#ifndef CONFIG_ASYNC_TCP_TASK_PRIORITY
-#define CONFIG_ASYNC_TCP_TASK_PRIORITY 5
-#endif
-
 // EMS-ESP: stack usage measured: ESP32: ~2.3K, ESP32S3: ~3.5k
 #ifndef CONFIG_ASYNC_TCP_STACK_SIZE
-#define CONFIG_ASYNC_TCP_STACK_SIZE 5120
+#define CONFIG_ASYNC_TCP_STACK_SIZE 6144
 #endif
 
+#ifndef CONFIG_ASYNC_TCP_PRIORITY
+#define CONFIG_ASYNC_TCP_PRIORITY 5
+#endif
 
 // EMS-ESP: maybe enlarge queue to 64 or 128 see https://github.com/emsesp/EMS-ESP32/issues/177
-#ifndef CONFIG_ASYNC_TCP_QUEUE
-#define CONFIG_ASYNC_TCP_QUEUE 32
+#ifndef CONFIG_ASYNC_TCP_QUEUE_SIZE
+#define CONFIG_ASYNC_TCP_QUEUE_SIZE 32
+#endif
+
+#ifndef CONFIG_ASYNC_TCP_MAX_ACK_TIME
+#define CONFIG_ASYNC_TCP_MAX_ACK_TIME 5000
 #endif
 
 class AsyncClient;
 
-#define ASYNC_MAX_ACK_TIME 5000
 #define ASYNC_WRITE_FLAG_COPY 0x01 //will allocate new buffer to hold the data while sending (else will hold reference to the data given)
 #define ASYNC_WRITE_FLAG_MORE 0x02 //will not send PSH flag, meaning that there should be more data to be sent before the application should react.
 
@@ -96,9 +104,9 @@ class AsyncClient {
     bool operator!=(const AsyncClient & other) {
         return !(*this == other);
     }
-    bool connect(IPAddress ip, uint16_t port);
+    bool connect(const IPAddress & ip, uint16_t port);
 #if ESP_IDF_VERSION_MAJOR < 5
-    bool connect(IPv6Address ip, uint16_t port);
+    bool connect(const IPv6Address & ip, uint16_t port);
 #endif
     bool   connect(const char * host, uint16_t port);
     void   close(bool now = false);
@@ -132,6 +140,8 @@ class AsyncClient {
 
     void setNoDelay(bool nodelay);
     bool getNoDelay();
+
+    void setKeepAlive(uint32_t ms, uint8_t cnt);
 
     uint32_t getRemoteAddress();
     uint16_t getRemotePort();
@@ -180,7 +190,7 @@ class AsyncClient {
     static int8_t _s_lwip_fin(void * arg, struct tcp_pcb * tpcb, int8_t err);
     static void   _s_error(void * arg, int8_t err);
     static int8_t _s_sent(void * arg, struct tcp_pcb * tpcb, uint16_t len);
-    static int8_t _s_connected(void * arg, void * tpcb, int8_t err);
+    static int8_t _s_connected(void * arg, struct tcp_pcb * tpcb, int8_t err);
     static void   _s_dns_found(const char * name, struct ip_addr * ipaddr, void * arg);
 
     int8_t    _recv(tcp_pcb * pcb, pbuf * pb, int8_t err);
@@ -222,8 +232,8 @@ class AsyncClient {
 
     int8_t _close();
     void   _free_closed_slot();
-    void   _allocate_closed_slot();
-    int8_t _connected(void * pcb, int8_t err);
+    bool   _allocate_closed_slot();
+    int8_t _connected(tcp_pcb * pcb, int8_t err);
     void   _error(int8_t err);
     int8_t _poll(tcp_pcb * pcb);
     int8_t _sent(tcp_pcb * pcb, uint16_t len);

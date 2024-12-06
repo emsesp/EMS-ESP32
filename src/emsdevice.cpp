@@ -1547,7 +1547,7 @@ void EMSdevice::get_value_json(JsonObject json, DeviceValue & dv) {
         json["circuit"] = tag_to_mqtt(dv.tag);
     }
 
-    char val[10];
+    char val[20];
     switch (dv.type) {
     case DeviceValueType::ENUM: {
         if (*(uint8_t *)(dv.value_p) < dv.options_size) {
@@ -1785,7 +1785,7 @@ bool EMSdevice::generate_values(JsonObject output, const int8_t tag_filter, cons
                                      : (dv.uom == DeviceValueUOM::DEGREES)   ? 2
                                      : (dv.uom == DeviceValueUOM::DEGREES_R) ? 1
                                                                              : 0;
-                char    val[10]    = {'\0'};
+                char    val[20]    = {'\0'};
                 if (dv.type == DeviceValueType::INT8) {
                     json[name] = serialized(Helpers::render_value(val, *(int8_t *)(dv.value_p), dv.numeric_operator, fahrenheit));
                 } else if (dv.type == DeviceValueType::UINT8) {

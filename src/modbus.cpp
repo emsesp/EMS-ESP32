@@ -414,9 +414,9 @@ ModbusMessage Modbus::handleWrite(const ModbusMessage & request) {
 
     std::string path;
     if (tag < DeviceValueTAG::TAG_HC1) {
-        path = std::string("ems-esp/") + std::string(EMSdevice::device_type_2_device_name(device_type)) + "/" + modbusInfo->short_name;
+        path = std::string("api/") + std::string(EMSdevice::device_type_2_device_name(device_type)) + "/" + modbusInfo->short_name;
     } else {
-        path = std::string("ems-esp/") + std::string(EMSdevice::device_type_2_device_name(device_type)) + "/" + EMSdevice::tag_to_mqtt(tag) + "/"
+        path = std::string("api/") + std::string(EMSdevice::device_type_2_device_name(device_type)) + "/" + EMSdevice::tag_to_mqtt(tag) + "/"
                + modbusInfo->short_name;
     }
 
