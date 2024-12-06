@@ -16,6 +16,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 
 - long numbers of custom entities [#2267](https://github.com/emsesp/EMS-ESP32/issues/2267)
 - modbus command path to `api/` [#2276](https://github.com/emsesp/EMS-ESP32/issues/2276)
+- info command for devices without entity-commands [#2274](https://github.com/emsesp/EMS-ESP32/issues/2274)
 
 ## Changed
 
