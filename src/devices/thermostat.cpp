@@ -176,6 +176,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         register_telegram_type(0xBB, "HybridSettings", true, MAKE_PF_CB(process_HybridSettings));
         register_telegram_type(0x23E, "PVSettings", true, MAKE_PF_CB(process_PVSettings));
         register_telegram_type(0x269, "RC300Holiday1", true, MAKE_PF_CB(process_RC300Holiday));
+        register_telegram_type(0x16E, "Absent", true, MAKE_PF_CB(process_Absent));
 
         // JUNKERS/HT3
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_JUNKERS) {
@@ -1013,6 +1014,11 @@ void Thermostat::process_PVSettings(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, pvLowerCool_, 5);
 }
 
+// 0x16E Absent settings - hc or dhw or devcie_data? #1957
+void Thermostat::process_Absent(std::shared_ptr<const Telegram> telegram) {
+    has_update(telegram, absent_, 0);
+}
+
 void Thermostat::process_JunkersSetMixer(std::shared_ptr<const Telegram> telegram) {
     auto hc = heating_circuit(telegram);
     if (hc == nullptr) {
@@ -1126,6 +1132,7 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hc->noreducetemp, 12);
     has_update(telegram, hc->remoteseltemp, 17);         // see https://github.com/emsesp/EMS-ESP32/issues/590
     has_enumupdate(telegram, hc->switchProgMode, 19, 1); // 1-level, 2-absolute
+    has_update(telegram, hc->redThreshold, 20);
     has_update(telegram, hc->boost, 23);
     has_update(telegram, hc->boosttime, 24);
     has_update(telegram, hc->cooling, 28);
@@ -2700,6 +2707,29 @@ bool Thermostat::set_party(const char * value, const int8_t id) {
     return true;
 }
 
+bool Thermostat::set_absent(const char * value, const int8_t id) {
+    bool b;
+    if (Helpers::value2bool(value, b)) {
+        write_command(0x16E, 0, b ? 0xFF : 0, 0x16E);
+        return true;
+    }
+    return false;
+}
+
+bool Thermostat::set_redthreshold(const char * value, const int8_t id) {
+    auto hc = heating_circuit(id);
+    if (hc == nullptr) {
+        return false;
+    }
+    float t;
+    if (Helpers::value2temperature(value, t)) {
+        write_command(set_typeids[hc->hc()], 20, (int8_t)(t * 2), set_typeids[hc->hc()]);
+        return true;
+    }
+    return false;
+}
+
+
 // set date&time as string dd.mm.yyyy-hh:mm:ss-dw-dst or "NTP" for setting to internet-time
 // dw - day of week (0..6), dst- summertime (0/1)
 // id is ignored
@@ -4175,6 +4205,7 @@ void Thermostat::register_device_values() {
             DeviceValueTAG::TAG_DEVICE_DATA, &pvRaiseHeat_, DeviceValueType::INT8, FL_(pvRaiseHeat), DeviceValueUOM::K, MAKE_CF_CB(set_pvRaiseHeat), 0, 5);
         register_device_value(
             DeviceValueTAG::TAG_DEVICE_DATA, &pvLowerCool_, DeviceValueType::INT8, FL_(pvLowerCool), DeviceValueUOM::K, MAKE_CF_CB(set_pvLowerCool), -5, 0);
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &absent_, DeviceValueType::BOOL, FL_(absent), DeviceValueUOM::NONE, MAKE_CF_CB(set_absent));
         break;
     case EMSdevice::EMS_DEVICE_FLAG_RC10:
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
@@ -4612,6 +4643,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_switchProgMode));
 
+        register_device_value(tag, &hc->redThreshold, DeviceValueType::INT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(redthreshold), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_redthreshold));
         break;
     case EMSdevice::EMS_DEVICE_FLAG_CRF:
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode5), FL_(mode), DeviceValueUOM::NONE);
