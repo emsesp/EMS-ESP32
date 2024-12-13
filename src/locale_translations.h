@@ -676,6 +676,7 @@ MAKE_TRANSLATION(mixingvalves, "mixingvalves", "mixing valves", "Mischventile", 
 MAKE_TRANSLATION(pvEnableWw, "pvenabledhw", "enable raise dhw", "aktiviere WW-Anhebung", "Verhoging WW activeren", "", "podwyższenie c.w.u. z PV", "aktivere hevet temperatur bereder", "", "sıcak kullanım suyu yükseltmeyi etkinleştir", "abilitare aumento ACS", "povoliť zvýšenie TÚV", "povolit zvýšení TUV") // TODO translate
 MAKE_TRANSLATION(pvRaiseHeat, "pvraiseheat", "raise heating with PV", "Anhebung Heizen mit PV", "Verwarmen met PV activeren", "", "podwyższenie grzania z PV", "heve varmen med solpanel", "", "ısıtmayı G.E. İle yükselt", "Aumentare il riscaldamento con il solare", "zvýšiť kúrenie s FV", "zvýšení vytápění s FV") // TODO translate
 MAKE_TRANSLATION(pvLowerCool, "pvlowercool", "lower cooling with PV", "Absenkung Kühlen mit PV", "Verlagen koeling met PV activeren", "", "obniżenie chłodzenia z PV", "nedre kjøling solpanel", "", "soğutmayı G.E. İle düşür", "Riduzione del raffreddamento con il solare", "nižšie chladenie s PV", "snížení chlazení s FV") // TODO translate
+MAKE_TRANSLATION(hasSolar, "solar", "solar", "Solar", "", "", "", "", "", "", "", "", "") // TODO translate
 
 // thermostat dhw
 MAKE_TRANSLATION(wwMode, "mode", "operating mode", "Betriebsart", "Modus", "Läge", "tryb pracy", "modus", "mode", "mod", "modalità", "režim", "provozní režim")

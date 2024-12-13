@@ -172,7 +172,12 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
         register_telegram_type(0x31E, "RC300WWmode2", false, MAKE_PF_CB(process_RC300WWmode2));
         register_telegram_type(0x23A, "RC300OutdoorTemp", true, MAKE_PF_CB(process_RC300OutdoorTemp));
         register_telegram_type(0x267, "RC300Floordry", false, MAKE_PF_CB(process_RC300Floordry));
-        register_telegram_type(0x240, "RC300Settings", true, MAKE_PF_CB(process_RC300Settings));
+        if (model == EMSdevice::EMS_DEVICE_FLAG_RC100) {
+            register_telegram_type(0x241, "RC300Settings", true, MAKE_PF_CB(process_RC300Settings));
+        } else {
+            register_telegram_type(0x240, "RC300Settings", true, MAKE_PF_CB(process_RC300Settings));
+        }
+
         register_telegram_type(0xBB, "HybridSettings", true, MAKE_PF_CB(process_HybridSettings));
         register_telegram_type(0x23E, "PVSettings", true, MAKE_PF_CB(process_PVSettings));
         register_telegram_type(0x269, "RC300Holiday1", true, MAKE_PF_CB(process_RC300Holiday));
@@ -1279,13 +1284,14 @@ void Thermostat::process_RC300OutdoorTemp(std::shared_ptr<const Telegram> telegr
     has_update(telegram, dampedoutdoortemp2_, 0); // is *10
 }
 
-// 0x240 RC300 parameter
+// 0x240 RC300 parameter, 0x0241 for CW100, see https://github.com/emsesp/EMS-ESP32/issues/2290
 // RC300Settings(0x240), data: 26 00 03 00 00 00 00 00 FF 01 F6 06 FF 00 00 00 00 00 00 00 00 00 00
 void Thermostat::process_RC300Settings(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, ibaCalIntTemperature_, 7);
     has_update(telegram, ibaDamping_, 8);
     has_enumupdate(telegram, ibaBuildingType_, 9, 1); // 1=light, 2=medium, 3=heavy
     has_update(telegram, ibaMinExtTemperature_, 10);
+    has_update(telegram, hasSolar_, 13);
 }
 
 // 0x2CC - e.g. wwprio for  RC310 hcx parameter
@@ -1864,7 +1870,9 @@ bool Thermostat::set_minexttemp(const char * value, const int8_t id) {
 
     if ((model() == EMSdevice::EMS_DEVICE_FLAG_RC20_N) || (model() == EMSdevice::EMS_DEVICE_FLAG_RC25)) {
         write_command(0xAD, 14, mt, 0xAD);
-    } else if (isRC300() || (model() == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
+    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
+        write_command(0x241, 10, mt, 0x241);
+    } else if (isRC300()) {
         write_command(0x240, 10, mt, 0x240);
     } else {
         write_command(EMS_TYPE_IBASettings, 5, mt, EMS_TYPE_IBASettings);
@@ -1905,7 +1913,9 @@ bool Thermostat::set_calinttemp(const char * value, const int8_t id) {
         write_command(EMS_TYPE_RC30Settings, 1, t, EMS_TYPE_RC30Settings);
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100H) {
         write_command(0x273, 0, t, 0x273);
-    } else if (isRC300() || model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
+    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
+        write_command(0x241, 7, t, 0x241);
+    } else if (isRC300()) {
         write_command(0x240, 7, t, 0x240);
     } else {
         write_command(EMS_TYPE_IBASettings, 2, t, EMS_TYPE_IBASettings);
@@ -2013,7 +2023,9 @@ bool Thermostat::set_building(const char * value, const int8_t id) {
         return false;
     }
 
-    if (isRC300() || (model() == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
+        write_command(0x241, 9, bd + 1, 0x241);
+    } else if (isRC300()) {
         write_command(0x240, 9, bd + 1, 0x240);
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC30) {
         write_command(EMS_TYPE_RC30Settings, 4, bd, EMS_TYPE_RC30Settings);
@@ -2043,16 +2055,29 @@ bool Thermostat::set_heatingpid(const char * value, const int8_t id) {
 // 0xA5 and 0x0240- Set the damping settings
 bool Thermostat::set_damping(const char * value, const int8_t id) {
     bool dmp;
-    if (isRC300()) {
-        if (Helpers::value2bool(value, dmp)) {
+    if (Helpers::value2bool(value, dmp)) {
+        if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
+            write_command(0x241, 8, dmp ? 0xFF : 0, 0x241);
+        } else if (isRC300()) {
             write_command(0x240, 8, dmp ? 0xFF : 0, 0x240);
-            return true;
-        }
-    } else {
-        if (Helpers::value2bool(value, dmp)) {
+        } else {
             write_command(EMS_TYPE_IBASettings, 21, dmp ? 0xFF : 0, EMS_TYPE_IBASettings);
-            return true;
         }
+        return true;
+    }
+    return false;
+}
+
+// 0x0241- Set solar
+bool Thermostat::set_solar(const char * value, const int8_t id) {
+    bool b;
+    if (Helpers::value2bool(value, b)) {
+        if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
+            write_command(0x241, 13, b ? 0xFF : 0, 0x241);
+        } else {
+            write_command(0x240, 13, b ? 0xFF : 0, 0x240);
+        }
+        return true;
     }
     return false;
 }
@@ -4133,6 +4158,7 @@ void Thermostat::register_device_values() {
                               DeviceValueUOM::DEGREES,
                               MAKE_CF_CB(set_minexttemp));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &ibaDamping_, DeviceValueType::BOOL, FL_(damping), DeviceValueUOM::NONE, MAKE_CF_CB(set_damping));
+        register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hasSolar_, DeviceValueType::BOOL, FL_(hasSolar), DeviceValueUOM::NONE, MAKE_CF_CB(set_solar));
         if (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) {
             register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                                   &vacation[0],

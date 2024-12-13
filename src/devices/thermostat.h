@@ -280,6 +280,7 @@ class Thermostat : public EMSdevice {
 
     char vacation[8][22]; // RC30, R3000 only, only one hc
     uint8_t absent_;
+    uint8_t hasSolar_;
 
     // HybridHP
     uint8_t hybridStrategy_;  // co2 = 1, cost = 2, temperature = 3, mix = 4
@@ -628,6 +629,7 @@ class Thermostat : public EMSdevice {
     bool set_display(const char * value, const int8_t id);
     bool set_building(const char * value, const int8_t id);
     bool set_damping(const char * value, const int8_t id);
+    bool set_solar(const char * value, const int8_t id);
     bool set_language(const char * value, const int8_t id);
     bool set_heatingtype(const char * value, const int8_t id);
     bool set_reducehours(const char * value, const int8_t id);
