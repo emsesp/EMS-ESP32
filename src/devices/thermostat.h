@@ -87,6 +87,7 @@ class Thermostat : public EMSdevice {
         uint8_t switchonoptimization;
         uint8_t statusbyte; // from RC300monitor
         uint8_t switchProgMode;
+        int8_t  redThreshold;
         // RC 10
         uint8_t  reducehours;   // night reduce duration
         uint16_t reduceminutes; // remaining minutes to night->day
@@ -278,6 +279,8 @@ class Thermostat : public EMSdevice {
     uint8_t battery_;
 
     char vacation[8][22]; // RC30, R3000 only, only one hc
+    uint8_t absent_;
+    uint8_t hasSolar_;
 
     // HybridHP
     uint8_t hybridStrategy_;  // co2 = 1, cost = 2, temperature = 3, mix = 4
@@ -446,6 +449,7 @@ class Thermostat : public EMSdevice {
     void process_JunkersRemoteMonitor(std::shared_ptr<const Telegram> telegram);
     void process_HybridSettings(std::shared_ptr<const Telegram> telegram);
     void process_PVSettings(std::shared_ptr<const Telegram> telegram);
+    void process_Absent(std::shared_ptr<const Telegram> telegram);
     void process_JunkersSetMixer(std::shared_ptr<const Telegram> telegram);
     void process_JunkersWW(std::shared_ptr<const Telegram> telegram);
     void process_RemoteTemp(std::shared_ptr<const Telegram> telegram);
@@ -625,6 +629,7 @@ class Thermostat : public EMSdevice {
     bool set_display(const char * value, const int8_t id);
     bool set_building(const char * value, const int8_t id);
     bool set_damping(const char * value, const int8_t id);
+    bool set_solar(const char * value, const int8_t id);
     bool set_language(const char * value, const int8_t id);
     bool set_heatingtype(const char * value, const int8_t id);
     bool set_reducehours(const char * value, const int8_t id);
@@ -656,6 +661,8 @@ class Thermostat : public EMSdevice {
     bool set_coolondelay(const char * value, const int8_t id);
     bool set_cooloffdelay(const char * value, const int8_t id);
     bool set_switchProgMode(const char * value, const int8_t id);
+    bool set_absent(const char * value, const int8_t id);
+    bool set_redthreshold(const char * value, const int8_t id);
 };
 
 } // namespace emsesp

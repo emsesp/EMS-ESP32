@@ -11,12 +11,15 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - read 0x02A5 for thermostat CT200 [#2277](https://github.com/emsesp/EMS-ESP32/issues/2277)
 - Add "duplicate" option to Custom Entities [#2266](https://github.com/emsesp/EMS-ESP32/discussion/2266)
 - Mask bits for bool custom entities
+- thermostat `reduce threshold` [#2288](https://github.com/emsesp/EMS-ESP32/issues/2288)
+- thermostat `absent` [#1957](https://github.com/emsesp/EMS-ESP32/issues/1957)
 
 ## Fixed
 
 - long numbers of custom entities [#2267](https://github.com/emsesp/EMS-ESP32/issues/2267)
 - modbus command path to `api/` [#2276](https://github.com/emsesp/EMS-ESP32/issues/2276)
 - info command for devices without entity-commands [#2274](https://github.com/emsesp/EMS-ESP32/issues/2274)
+- CW100 settings telegram 0x241 [#2290](https://github.com/emsesp/EMS-ESP32/issues/2290)
 
 ## Changed
 
