@@ -126,9 +126,6 @@ const ApplicationSettings = () => {
   const SecondsInputProps = {
     endAdornment: <InputAdornment position="end">{LL.SECONDS()}</InputAdornment>
   };
-  const MilliSecondsInputProps = {
-    endAdornment: <InputAdornment position="end">ms</InputAdornment>
-  };
   const MinutesInputProps = {
     endAdornment: <InputAdornment position="end">{LL.MINUTES()}</InputAdornment>
   };
