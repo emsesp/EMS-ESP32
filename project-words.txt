@@ -1397,3 +1397,6 @@ dhwx
 ahsx
 roomflow
 roomload
+intvl
+Français
+lltoa
