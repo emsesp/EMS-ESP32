@@ -4938,7 +4938,7 @@ router
 
 export default {
   port: 3080,
-  fetch: router.fetch,
+  fetch: router.fetch
   // missing: () => error(404, 'Error, endpoint not found'),
   // finally: [logger]
 };
