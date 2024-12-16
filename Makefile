@@ -16,11 +16,19 @@ T := $(shell $(MAKE) $(MAKECMDGOALS) --no-print-directory \
       ECHO="COUNTTHIS" | grep -c "COUNTTHIS")
 N := x
 C = $(words $N)$(eval N := x $N)
-ECHO = python $(I)/echo_progress.py --stepno=$C --nsteps=$T
+ECHO = python3 $(I)/echo_progress.py --stepno=$C --nsteps=$T
 endif
 
 # number of parallel compiles
-JOBS ?= $(shell nproc)
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+    CFLAGS += -D LINUX
+	JOBS ?= $(shell nproc)
+endif
+ifeq ($(UNAME_S),Darwin)
+    CFLAGS += -D OSX
+	JOBS ?= $(shell sysctl -n hw.ncpu)
+endif
 MAKEFLAGS += -j $(JOBS) -l $(JOBS)
 
 #----------------------------------------------------------------------
