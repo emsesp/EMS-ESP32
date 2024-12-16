@@ -29,7 +29,7 @@ telegram_type_id,name,is_fetched
 0x3B,Energy, 
 0x3D,RC35Set, 
 0x3E,RC35Monitor, 
-0x3F,RC30Timer, 
+0x3F,RC35Timer, 
 0x40,RC30Temp, 
 0x41,RC30Monitor, 
 0x42,RC35Timer2, 
@@ -81,6 +81,7 @@ telegram_type_id,name,is_fetched
 0x0166,JunkersSet, 
 0x0167,JunkersSet, 
 0x0168,JunkersSet, 
+0x016E,Absent,fetched
 0x016F,JunkersMonitor, 
 0x0170,JunkersMonitor, 
 0x0171,JunkersMonitor, 
@@ -93,6 +94,7 @@ telegram_type_id,name,is_fetched
 0x023A,RC300OutdoorTemp,fetched
 0x023E,PVSettings,fetched
 0x0240,RC300Settings,fetched
+0x0241,RC300Settings,fetched
 0x0267,RC300Floordry, 
 0x0269,RC300Holiday1,fetched
 0x0291,HPMode,fetched
@@ -108,7 +110,7 @@ telegram_type_id,name,is_fetched
 0x02A1,RC300Curves, 
 0x02A2,RC300Curves, 
 0x02A5,RC300Monitor, 
-0x02A6,RC300Monitor, 
+0x02A6,CRFMonitor, 
 0x02A7,CRFMonitor, 
 0x02A8,RC300Monitor, 
 0x02A9,RC300Monitor, 
@@ -131,7 +133,7 @@ telegram_type_id,name,is_fetched
 0x02BE,RC300Set, 
 0x02BF,RC300Set, 
 0x02C0,RC300Set, 
-0x02CC,HPPressure,fetched
+0x02CC,RC300Set2, 
 0x02CD,MMPLUSConfigMessage,fetched
 0x02CE,RC300Set2, 
 0x02D0,RC300Set2, 

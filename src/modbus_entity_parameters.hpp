@@ -266,28 +266,30 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(ibaBuildingType), 50, 1), // building
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(ibaMinExtTemperature), 51, 1), // minexttemp
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(damping), 52, 1), // damping
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(hybridStrategy), 53, 1), // hybridstrategy
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(switchOverTemp), 54, 1), // switchovertemp
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(energyCostRatio), 55, 1), // energycostratio
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(fossileFactor), 56, 1), // fossilefactor
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(electricFactor), 57, 1), // electricfactor
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(delayBoiler), 58, 1), // delayboiler
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(tempDiffBoiler), 59, 1), // tempdiffboiler
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(pvEnableWw), 60, 1), // pvenabledhw
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(pvRaiseHeat), 61, 1), // pvraiseheat
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(pvLowerCool), 62, 1), // pvlowercool
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(ibaMainDisplay), 63, 1), // display
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(ibaLanguage), 64, 1), // language
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(ibaClockOffset), 65, 1), // clockoffset
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(tempsensor1), 66, 1), // inttemp1
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(tempsensor2), 67, 1), // inttemp2
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(autodst), 68, 1), // autodst
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(backlight), 69, 1), // backlight
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(brightness), 70, 1), // brightness
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(mixingvalves), 71, 1), // mixingvalves
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(heatingPID), 72, 1), // heatingpid
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(preheating), 73, 1), // preheating
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(vacations), 74, 13), // vacations
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(hasSolar), 53, 1), // solar
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(hybridStrategy), 54, 1), // hybridstrategy
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(switchOverTemp), 55, 1), // switchovertemp
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(energyCostRatio), 56, 1), // energycostratio
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(fossileFactor), 57, 1), // fossilefactor
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(electricFactor), 58, 1), // electricfactor
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(delayBoiler), 59, 1), // delayboiler
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(tempDiffBoiler), 60, 1), // tempdiffboiler
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(pvEnableWw), 61, 1), // pvenabledhw
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(pvRaiseHeat), 62, 1), // pvraiseheat
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(pvLowerCool), 63, 1), // pvlowercool
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(absent), 64, 1), // absent
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(ibaMainDisplay), 65, 1), // display
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(ibaLanguage), 66, 1), // language
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(ibaClockOffset), 67, 1), // clockoffset
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(tempsensor1), 68, 1), // inttemp1
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(tempsensor2), 69, 1), // inttemp2
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(autodst), 70, 1), // autodst
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(backlight), 71, 1), // backlight
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(brightness), 72, 1), // brightness
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(mixingvalves), 73, 1), // mixingvalves
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(heatingPID), 74, 1), // heatingpid
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(preheating), 75, 1), // preheating
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DEVICE_DATA, FL_(vacations), 76, 13), // vacations
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(selRoomTemp), 0, 1), // seltemp
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(roomTemp), 1, 1), // currtemp
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(haclimate), 2, 1), // haclimate
@@ -340,36 +342,37 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(coolondelay), 49, 1), // coolondelay
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(cooloffdelay), 50, 1), // cooloffdelay
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(switchProgMode), 51, 1), // switchprogmode
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(daytemp), 52, 1), // daytemp
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(nighttemp2), 53, 1), // nighttemp
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(holidaytemp), 54, 1), // holidaytemp
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(holidaymode), 55, 1), // holidaymode
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(flowtempoffset), 56, 1), // flowtempoffset
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(holidays), 57, 13), // holidays
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(vacations), 70, 13), // vacations
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(pause), 83, 1), // pause
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(party), 84, 1), // party
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(vacreducetemp), 85, 1), // vacreducetemp
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(vacreducemode), 86, 1), // vacreducemode
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(switchtime1), 87, 8), // switchtime1
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(switchtime2), 95, 8), // switchtime2
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(offtemp), 103, 1), // offtemp
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(daylowtemp), 104, 1), // daytemp2
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(daymidtemp), 105, 1), // daytemp3
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(dayhightemp), 106, 1), // daytemp4
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(switchtime), 107, 8), // switchtime
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(vacations1), 115, 11), // vacations1
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(vacations2), 126, 11), // vacations2
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(vacations3), 137, 11), // vacations3
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(vacations4), 148, 11), // vacations4
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(vacations5), 159, 11), // vacations5
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(vacations6), 170, 11), // vacations6
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(vacations7), 181, 11), // vacations7
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(reducehours), 192, 1), // reducehours
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(reduceminutes), 193, 1), // reduceminutes
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(heattemp), 194, 1), // heattemp
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(roomsensor), 195, 1), // roomsensor
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(heatup), 196, 1), // heatup
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(redthreshold), 52, 1), // redthreshold
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(daytemp), 53, 1), // daytemp
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(nighttemp2), 54, 1), // nighttemp
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(holidaytemp), 55, 1), // holidaytemp
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(holidaymode), 56, 1), // holidaymode
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(flowtempoffset), 57, 1), // flowtempoffset
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(holidays), 58, 13), // holidays
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(vacations), 71, 13), // vacations
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(pause), 84, 1), // pause
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(party), 85, 1), // party
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(vacreducetemp), 86, 1), // vacreducetemp
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(vacreducemode), 87, 1), // vacreducemode
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(switchtime1), 88, 8), // switchtime1
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(switchtime2), 96, 8), // switchtime2
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(offtemp), 104, 1), // offtemp
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(daylowtemp), 105, 1), // daytemp2
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(daymidtemp), 106, 1), // daytemp3
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(dayhightemp), 107, 1), // daytemp4
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(switchtime), 108, 8), // switchtime
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(vacations1), 116, 11), // vacations1
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(vacations2), 127, 11), // vacations2
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(vacations3), 138, 11), // vacations3
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(vacations4), 149, 11), // vacations4
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(vacations5), 160, 11), // vacations5
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(vacations6), 171, 11), // vacations6
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(vacations7), 182, 11), // vacations7
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(reducehours), 193, 1), // reducehours
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(reduceminutes), 194, 1), // reduceminutes
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(heattemp), 195, 1), // heattemp
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(roomsensor), 196, 1), // roomsensor
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(heatup), 197, 1), // heatup
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(mode), 0, 1), // mode
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(wwSetTemp), 1, 1), // settemp
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(wwSetTempLow), 2, 1), // settemplow
