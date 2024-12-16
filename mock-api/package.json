@@ -10,10 +10,10 @@
   },
   "dependencies": {
     "@msgpack/msgpack": "^2.8.0",
-    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.0",
     "formidable": "^3.5.2",
     "itty-router": "^5.0.18",
-    "prettier": "^3.4.1"
+    "prettier": "^3.4.2"
   },
   "packageManager": "yarn@4.5.3"
 }

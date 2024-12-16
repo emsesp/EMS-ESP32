@@ -1,23 +1,8 @@
 import { Encoder } from '@msgpack/msgpack';
-import { AutoRouter, type ResponseHandler, error, status } from 'itty-router';
+import { AutoRouter, status } from 'itty-router';
 
 const encoder = new Encoder();
-
-const logger: ResponseHandler = (response, request) => {
-  console.log(
-    response.status,
-    request.url,
-    request.method,
-    'at',
-    new Date().toLocaleString()
-  );
-};
-
-const router = AutoRouter({
-  port: 3080,
-  missing: () => error(404, 'Error, endpoint not found')
-  // finally: [logger]
-});
+const router = AutoRouter();
 
 const REST_ENDPOINT_ROOT = '/rest/';
 const API_ENDPOINT_ROOT = '/api/';
@@ -4941,7 +4926,22 @@ router
     return { name: 'v' + LATEST_STABLE_VERSION };
   });
 
-export default router;
+// const logger: ResponseHandler = (response, request) => {
+//   console.log(
+//     response.status,
+//     request.url,
+//     request.method,
+//     'at',
+//     new Date().toLocaleString()
+//   );
+// };
+
+export default {
+  port: 3080,
+  fetch: router.fetch,
+  // missing: () => error(404, 'Error, endpoint not found'),
+  // finally: [logger]
+};
 
 // use this with cloudflare workers instead
 // export default { ...router };
