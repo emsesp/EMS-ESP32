@@ -1019,7 +1019,7 @@ void Thermostat::process_PVSettings(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, pvLowerCool_, 5);
 }
 
-// 0x16E Absent settings - hc or dhw or devcie_data? #1957
+// 0x16E Absent settings - hc or dhw or device_data? #1957
 void Thermostat::process_Absent(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, absent_, 0);
 }
