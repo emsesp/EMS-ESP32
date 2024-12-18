@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Slide, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.min.css';
 
 import AppRouting from 'AppRouting';
 import CustomTheme from 'CustomTheme';
