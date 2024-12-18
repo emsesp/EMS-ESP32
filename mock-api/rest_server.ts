@@ -14,7 +14,7 @@ const headers = {
   'Content-type': 'application/msgpack'
 };
 
-let VERSION_IS_UPGRADEABLE;
+let VERSION_IS_UPGRADEABLE: boolean;
 
 // Versions
 // default - on latest stable, no upgrades
