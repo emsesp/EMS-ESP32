@@ -2063,7 +2063,7 @@ int EMSdevice::get_modbus_value(uint8_t tag, const std::string & shortname, std:
     else if (dv.type == DeviceValueType::INT8) {
         if (result.size() != 1)
             return -8;
-        result[0] = (uint16_t)(uint8_t)(*(int8_t *)(dv.value_p));
+        result[0] = (uint16_t)(int16_t)(*(int8_t *)(dv.value_p));
     } else if (dv.type == DeviceValueType::UINT8) {
         if (result.size() != 1)
             return -9;
