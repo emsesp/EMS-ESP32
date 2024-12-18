@@ -21,13 +21,13 @@
     "lint": "eslint . --fix"
   },
   "dependencies": {
-    "@alova/adapter-xhr": "2.0.11",
+    "@alova/adapter-xhr": "2.0.12",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
-    "@mui/icons-material": "^6.2.0",
-    "@mui/material": "^6.2.0",
+    "@mui/icons-material": "^6.2.1",
+    "@mui/material": "^6.2.1",
     "@table-library/react-table-library": "4.1.7",
-    "alova": "3.2.6",
+    "alova": "3.2.7",
     "async-validator": "^4.2.5",
     "jwt-decode": "^4.0.0",
     "mime-types": "^2.1.35",
@@ -36,7 +36,7 @@
     "react-dom": "^19.0.0",
     "react-icons": "^5.4.0",
     "react-router": "^7.0.2",
-    "react-toastify": "^10.0.6",
+    "react-toastify": "^11.0.0",
     "typesafe-i18n": "^5.26.2",
     "typescript": "^5.7.2"
   },
