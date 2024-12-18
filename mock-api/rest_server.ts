@@ -882,6 +882,18 @@ const emsesp_coredata = {
       v: '73.03',
       e: 63,
       url: 'thermostat'
+    },
+    {
+      id: 11,
+      tn: 'Ventilation',
+      t: 18,
+      b: '',
+      n: 'Vent4000CC',
+      d: 81,
+      p: 231,
+      v: '53.02',
+      e: 10,
+      url: 'ventilation'
     }
   ]
 };
@@ -936,6 +948,10 @@ const activity = {
 // 5 - MM10 mixer
 // 6 - SM10 solar
 // 7 - Nefit Trendline boiler
+// 8 - Bosch Compress 7000i AW Heat Pump
+// 9 - RC100H thermostat
+// 10 - Thermostat RC310
+// 11 - Ventilation
 // 99 - Custom
 
 const emsesp_devicedata_1 = {
@@ -3776,6 +3792,71 @@ const emsesp_devicedata_10 = {
   ]
 };
 
+const emsesp_devicedata_11 = {
+  nodes: [
+    {
+      v: 11,
+      u: 1,
+      id: '00outdoor fresh air'
+    },
+    {
+      v: 13.699999809265137,
+      u: 1,
+      id: '00indoor fresh air'
+    },
+    {
+      v: 11.399999618530273,
+      u: 1,
+      id: '00outdoor exhaust air'
+    },
+    {
+      v: 14.800000190734863,
+      u: 1,
+      id: '00indoor exhaust air'
+    },
+    {
+      v: 0,
+      u: 3,
+      id: '00in blower speed'
+    },
+    {
+      v: 0,
+      u: 3,
+      id: '00out blower speed'
+    },
+    {
+      v: 'auto',
+      u: 0,
+      id: '00ventilation mode',
+      c: 'ventmode',
+      l: [
+        'auto',
+        'off',
+        'L1',
+        'L2',
+        'L3',
+        'L4',
+        'demand',
+        'sleep',
+        'intense',
+        'bypass',
+        'party',
+        'fireplace'
+      ]
+    },
+    {
+      v: 1770,
+      u: 0,
+      id: '00air quality (voc)'
+    },
+    {
+      v: 53,
+      u: 3,
+      id: '00relative air humidity'
+    }
+  ]
+};
+
 const emsesp_devicedata_99 = {
   nodes: [
     {
@@ -3940,7 +4021,7 @@ let emsesp_modules = {
 const dummy_deviceentities = [
   {
     v: 'unknown',
-    n: 'no entities for this device',
+    n: 'sorry, no demo entities for this device!',
     id: 'unknown',
     m: 0,
     w: false
@@ -3955,6 +4036,7 @@ const emsesp_deviceentities_6 = dummy_deviceentities;
 const emsesp_deviceentities_8 = dummy_deviceentities;
 const emsesp_deviceentities_9 = dummy_deviceentities;
 const emsesp_deviceentities_10 = dummy_deviceentities;
+const emsesp_deviceentities_11 = dummy_deviceentities;
 const emsesp_deviceentities_none = dummy_deviceentities;
 
 const emsesp_deviceentities_2 = [
@@ -4272,6 +4354,9 @@ function deviceData(id: number) {
   if (id == 10) {
     return new Response(encoder.encode(emsesp_devicedata_10), { headers });
   }
+  if (id == 11) {
+    return new Response(encoder.encode(emsesp_devicedata_11), { headers });
+  }
   if (id == 99) {
     return new Response(encoder.encode(emsesp_devicedata_99), { headers });
   }
@@ -4325,6 +4410,7 @@ function getDashboardEntityData(id: number) {
   else if (id == 8) device_data = emsesp_devicedata_8;
   else if (id == 9) device_data = emsesp_devicedata_9;
   else if (id == 10) device_data = emsesp_devicedata_10;
+  else if (id == 11) device_data = emsesp_devicedata_11;
   else if (id == 99) device_data = emsesp_devicedata_99;
 
   // filter device_data on
@@ -4541,7 +4627,9 @@ router
       } else if (id === 9) {
         updateMask(entity, emsesp_deviceentities_9, emsesp_devicedata_9);
       } else if (id === 10) {
-        updateMask(entity, emsesp_deviceentities_9, emsesp_devicedata_10);
+        updateMask(entity, emsesp_deviceentities_10, emsesp_devicedata_10);
+      } else if (id === 11) {
+        updateMask(entity, emsesp_deviceentities_11, emsesp_devicedata_11);
       }
     }
     console.log('customization saved', content);
@@ -4645,6 +4733,10 @@ router
     if (id === 10) {
       objIndex = emsesp_devicedata_10.nodes.findIndex((obj) => obj.c == command);
       emsesp_devicedata_10.nodes[objIndex].v = value;
+    }
+    if (id === 10) {
+      objIndex = emsesp_devicedata_11.nodes.findIndex((obj) => obj.c == command);
+      emsesp_devicedata_11.nodes[objIndex].v = value;
     }
     if (id === DeviceTypeUniqueID.CUSTOM_UID) {
       // custom entities
