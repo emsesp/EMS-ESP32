@@ -1188,7 +1188,7 @@ void EMSdevice::setValueEnum(const void * value_p, const char * const ** options
             if (dv.options != options && Mqtt::ha_enabled()) {
                 dv.remove_state(DeviceValueState::DV_HA_CONFIG_CREATED);
             }
-            dv.options = options;
+            dv.options      = options;
             dv.options_size = Helpers::count_items(options);
             break;
         }
@@ -2063,7 +2063,7 @@ int EMSdevice::get_modbus_value(uint8_t tag, const std::string & shortname, std:
     else if (dv.type == DeviceValueType::INT8) {
         if (result.size() != 1)
             return -8;
-        result[0] = (uint16_t)(uint8_t)(*(int8_t *)(dv.value_p));
+        result[0] = (uint16_t)(int16_t)(*(int8_t *)(dv.value_p));
     } else if (dv.type == DeviceValueType::UINT8) {
         if (result.size() != 1)
             return -9;
@@ -2136,7 +2136,12 @@ int EMSdevice::modbus_value_to_json(uint8_t tag, const std::string & shortname, 
             return -4;
         }
 
-        jsonValue["value"] = Helpers::numericoperator2scalefactor(dv.numeric_operator) * (float)((uint16_t)modbus_data[0] << 8 | (uint16_t)modbus_data[1]);
+        if (dv.type == DeviceValueType::INT8 || dv.type == DeviceValueType::INT16) { // handle signed
+            jsonValue["value"] =
+                Helpers::numericoperator2scalefactor(dv.numeric_operator) * (float)(int16_t)((uint16_t)modbus_data[0] << 8 | (uint16_t)modbus_data[1]);
+        } else {
+            jsonValue["value"] = Helpers::numericoperator2scalefactor(dv.numeric_operator) * (float)((uint16_t)modbus_data[0] << 8 | (uint16_t)modbus_data[1]);
+        }
     } else if (dv.type == DeviceValueType::UINT24 || dv.type == DeviceValueType::UINT32 || dv.type == DeviceValueType::TIME) {
         // these data types are 2 16 bit register
         if (modbus_data.size() != 4) {

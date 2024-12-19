@@ -13,6 +13,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - Mask bits for bool custom entities
 - thermostat `reduce threshold` [#2288](https://github.com/emsesp/EMS-ESP32/issues/2288)
 - thermostat `absent` [#1957](https://github.com/emsesp/EMS-ESP32/issues/1957)
+- CR11 thermostat [#2295](https://github.com/emsesp/EMS-ESP32/issues/2295)
 
 ## Fixed
 
@@ -20,6 +21,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - modbus command path to `api/` [#2276](https://github.com/emsesp/EMS-ESP32/issues/2276)
 - info command for devices without entity-commands [#2274](https://github.com/emsesp/EMS-ESP32/issues/2274)
 - CW100 settings telegram 0x241 [#2290](https://github.com/emsesp/EMS-ESP32/issues/2290)
+- modbus signed 8bit values [#2294](https://github.com/emsesp/EMS-ESP32/issues/2294)
 
 ## Changed
 

@@ -310,8 +310,11 @@ ModbusMessage Modbus::handleRead(const ModbusMessage & request) {
         }
     }
     if (error_code) {
-        LOG_ERROR("Unable to read raw device value %s for tag=%d - error_code = %d", modbusInfo->short_name, (int)tag, error_code);
+        if (uuid::get_uptime_sec() > 60 || error_code < -2) { // suppress not found messages for the first minute
+            LOG_ERROR("Unable to read raw device value %s for tag=%d - error_code = %d", modbusInfo->short_name, (int)tag, error_code);
+        }
         response.setError(request.getServerID(), request.getFunctionCode(), SERVER_DEVICE_FAILURE);
+        return response;
     }
 
     response.add(request.getServerID());
