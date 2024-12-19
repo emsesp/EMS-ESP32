@@ -13,6 +13,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - Mask bits for bool custom entities
 - thermostat `reduce threshold` [#2288](https://github.com/emsesp/EMS-ESP32/issues/2288)
 - thermostat `absent` [#1957](https://github.com/emsesp/EMS-ESP32/issues/1957)
+- CR11 thermostat [#2295](https://github.com/emsesp/EMS-ESP32/issues/2295)
 
 ## Fixed
 

@@ -82,6 +82,7 @@
 
 // Thermostat - Buderus/Nefit/Bosch specific - 0x17 / 0x10 / 0x18 / 0x19-0x1B for hc2-4 / 0x38
 {  4, DeviceType::THERMOSTAT, "UI800, BC400", DeviceFlags::EMS_DEVICE_FLAG_BC400}, // 0x10
+{ 10, DeviceType::THERMOSTAT, "CR11", DeviceFlags::EMS_DEVICE_FLAG_RC100}, // 0x18
 { 65, DeviceType::THERMOSTAT, "RC10", DeviceFlags::EMS_DEVICE_FLAG_RC20_N},// 0x17
 { 67, DeviceType::THERMOSTAT, "RC30", DeviceFlags::EMS_DEVICE_FLAG_RC30_N},// 0x10 - based on RC35
 { 77, DeviceType::THERMOSTAT, "RC20, Moduline 300", DeviceFlags::EMS_DEVICE_FLAG_RC20},// 0x17
