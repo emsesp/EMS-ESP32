@@ -5,14 +5,14 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
-"@alova/adapter-xhr@npm:2.0.12":
-  version: 2.0.12
-  resolution: "@alova/adapter-xhr@npm:2.0.12"
+"@alova/adapter-xhr@npm:2.1.0":
+  version: 2.1.0
+  resolution: "@alova/adapter-xhr@npm:2.1.0"
   dependencies:
     "@alova/shared": "npm:1.1.2"
   peerDependencies:
     alova: ^3.0.20
-  checksum: 10c0/d5713945de00f4fb63b5ef477de5d5d53e5ca1dfa08d52e2e4e4d0ab1a88e336619606c1361e785cd896bd2fcb0e2d0d7762a8762f58187621c6224dc3999a54
+  checksum: 10c0/41cf62a5ed7fb654df8b201ce33c665950fde6b845b7c061a1b28132cfcc60b099ad20f807affb8dfbb4563439dc60b2c7c25126717137e1748cfa00436da01b
   languageName: node
   linkType: hard
 
@@ -1436,12 +1436,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:^19.0.1":
-  version: 19.0.1
-  resolution: "@types/react@npm:19.0.1"
+"@types/react@npm:^19.0.2":
+  version: 19.0.2
+  resolution: "@types/react@npm:19.0.2"
   dependencies:
     csstype: "npm:^3.0.2"
-  checksum: 10c0/25eb69114abb9a6d5fc4414ee584388275bbc9ac32976449cf58b95fe9880efe6b3f936c3842be9bed8c571546a9752e8d3e2095288381e9c809269f5f574f2e
+  checksum: 10c0/8992f39701fcf1bf893ef8f94a56196445667baf08fe4f6050a14e229a17aad3265ad3efc01595ff3b4d5d5c69da885f9aa4ff80f164a613018734efcff1eb8f
   languageName: node
   linkType: hard
 
@@ -1579,7 +1579,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "EMS-ESP@workspace:."
   dependencies:
-    "@alova/adapter-xhr": "npm:2.0.12"
+    "@alova/adapter-xhr": "npm:2.1.0"
     "@babel/core": "npm:^7.26.0"
     "@emotion/react": "npm:^11.14.0"
     "@emotion/styled": "npm:^11.14.0"
@@ -1592,7 +1592,7 @@ __metadata:
     "@trivago/prettier-plugin-sort-imports": "npm:^5.2.0"
     "@types/formidable": "npm:^3"
     "@types/node": "npm:^22.10.2"
-    "@types/react": "npm:^19.0.1"
+    "@types/react": "npm:^19.0.2"
     "@types/react-dom": "npm:^19.0.2"
     alova: "npm:3.2.7"
     async-validator: "npm:^4.2.5"
@@ -1608,7 +1608,7 @@ __metadata:
     react-dom: "npm:^19.0.0"
     react-icons: "npm:^5.4.0"
     react-router: "npm:^7.0.2"
-    react-toastify: "npm:^11.0.0"
+    react-toastify: "npm:^11.0.1"
     rollup-plugin-visualizer: "npm:^5.12.0"
     terser: "npm:^5.37.0"
     typesafe-i18n: "npm:^5.26.2"
@@ -5607,15 +5607,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-toastify@npm:^11.0.0":
-  version: 11.0.0
-  resolution: "react-toastify@npm:11.0.0"
+"react-toastify@npm:^11.0.1":
+  version: 11.0.1
+  resolution: "react-toastify@npm:11.0.1"
   dependencies:
     clsx: "npm:^2.1.1"
   peerDependencies:
     react: ^18 || ^19
     react-dom: ^18 || ^19
-  checksum: 10c0/0c0665a2b58e7545bf8ec0a2fe0e025b8d94e704b43f2831aace1fb128ec3b94a979eb7ca6f644ab376f32484eecef4042bf2ad3ea8e84c525c941501fb02113
+  checksum: 10c0/ead322440484e89b184d0db59842b65a606ddbd1f6695d8695698178c55782ca7ac1dded24cf1f6aa3c40853579370131dee3943785e0f9db97d15ea4d9c711e
   languageName: node
   linkType: hard
 
