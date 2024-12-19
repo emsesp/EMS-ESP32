@@ -1112,6 +1112,9 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     // set mode for CR120, BC400, https://github.com/emsesp/EMS-ESP32/discussions/1779
     has_update(telegram, hc->mode_new, 21);  // for BC400, CR120
     has_bitupdate(telegram, hc->mode, 0, 0); // RC300, RC100
+    if (hc->mode == EMS_VALUE_UINT8_NOTSET) {
+        has_update(hc->mode, 0); // set manual for CR11
+    }
     has_update(telegram, hc->daytemp, 2);    // is * 2
     has_update(telegram, hc->nighttemp, 4);  // is * 2
 
@@ -4643,16 +4646,18 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
         } else {
             register_device_value(tag, &hc->control, DeviceValueType::ENUM, FL_(enum_control1), FL_(control), DeviceValueUOM::NONE, MAKE_CF_CB(set_control));
         }
-        register_device_value(tag,
-                              &hc->remotetemp,
-                              DeviceValueType::CMD,
-                              DeviceValueNumOp::DV_NUMOP_DIV10,
-                              FL_(remotetemp),
-                              DeviceValueUOM::DEGREES,
-                              MAKE_CF_CB(set_remotetemp),
-                              -1,
-                              101);
-        register_device_value(tag, &hc->remotehum, DeviceValueType::CMD, FL_(remotehum), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_remotehum), -1, 101);
+        if (model != EMSdevice::EMS_DEVICE_FLAG_RC100 && model != EMSdevice::EMS_DEVICE_FLAG_CR120) {
+            register_device_value(tag,
+                                  &hc->remotetemp,
+                                  DeviceValueType::CMD,
+                                  DeviceValueNumOp::DV_NUMOP_DIV10,
+                                  FL_(remotetemp),
+                                  DeviceValueUOM::DEGREES,
+                                  MAKE_CF_CB(set_remotetemp),
+                                  -1,
+                                  101);
+            register_device_value(tag, &hc->remotehum, DeviceValueType::CMD, FL_(remotehum), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_remotehum), -1, 101);
+        }
         register_device_value(tag, &hc->heatondelay, DeviceValueType::UINT8, FL_(heatondelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_heatondelay), 1, 48);
         register_device_value(tag, &hc->heatoffdelay, DeviceValueType::UINT8, FL_(heatoffdelay), DeviceValueUOM::HOURS, MAKE_CF_CB(set_heatoffdelay), 1, 48);
         register_device_value(tag, &hc->instantstart, DeviceValueType::UINT8, FL_(instantstart), DeviceValueUOM::K, MAKE_CF_CB(set_instantstart), 1, 10);
@@ -4669,7 +4674,13 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               DeviceValueUOM::NONE,
                               MAKE_CF_CB(set_switchProgMode));
 
-        register_device_value(tag, &hc->redThreshold, DeviceValueType::INT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(redthreshold), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_redthreshold));
+        register_device_value(tag,
+                              &hc->redThreshold,
+                              DeviceValueType::INT8,
+                              DeviceValueNumOp::DV_NUMOP_DIV2,
+                              FL_(redthreshold),
+                              DeviceValueUOM::DEGREES,
+                              MAKE_CF_CB(set_redthreshold));
         break;
     case EMSdevice::EMS_DEVICE_FLAG_CRF:
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode5), FL_(mode), DeviceValueUOM::NONE);
