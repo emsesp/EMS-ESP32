@@ -1495,10 +1495,9 @@ void System::get_value_json(JsonObject output, const std::string & circuit, cons
     if (circuit.length()) {
         output["circuit"] = circuit;
     }
-    output["readable"] = true;
-    output["writeable"] =
-        (name == "showerTimer" || name == "showerAlert" || name == "enabled" || name == "hideLed" || name == "analogEnabled");
-    output["visible"] = true;
+    output["readable"]  = true;
+    output["writeable"] = (name == "showerTimer" || name == "showerAlert" || name == "enabled" || name == "hideLed" || name == "analogEnabled");
+    output["visible"]   = true;
     if (val.is<bool>()) {
         output["value"] = val.as<bool>();
         output["type"]  = "boolean";

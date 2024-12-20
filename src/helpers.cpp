@@ -260,7 +260,7 @@ char * Helpers::render_value(char * result, const double value, const int8_t for
         result[0] = '-';
         result++;
         whole = -whole;
-        v = -v;
+        v     = -v;
     }
 #ifndef EMSESP_STANDALONE
     lltoa(whole, result, 10);
