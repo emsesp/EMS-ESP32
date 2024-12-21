@@ -108,6 +108,7 @@ ArJsonRequestHandlerFunction SecuritySettingsService::wrapCallback(ArJsonRequest
 }
 
 void SecuritySettingsService::generateToken(AsyncWebServerRequest * request) {
+    // TODO fix
     AsyncWebParameter * usernameParam = request->getParam("username");
     for (const User & _user : _state.users) {
         if (_user.username == usernameParam->value()) {

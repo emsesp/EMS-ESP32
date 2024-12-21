@@ -58,16 +58,18 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     root["mqtt_status"]    = EMSESP::mqtt_.connected();
 
 #ifndef EMSESP_STANDALONE
-    root["ntp_status"] = [] {
-        if (esp_sntp_enabled()) {
-            if (emsesp::EMSESP::system_.ntp_connected()) {
-                return 2;
-            } else {
-                return 1;
-            }
-        }
-        return 0;
-    }();
+    uint8_t ntp_status = 0; // 0=disabled, 1=enabled, 2=connected
+    if (esp_sntp_enabled()) {
+        ntp_status = (emsesp::EMSESP::system_.ntp_connected()) ? 2 : 1;
+    }
+    root["ntp_status"] = ntp_status;
+    if (ntp_status == 2) {
+        // send back actual time if NTP enabled and active
+        time_t now = time(nullptr);
+        char   time_string[25];
+        strftime(time_string, sizeof(time_string), "%FT%T", localtime(&now));
+        root["ntp_time"] = time_string; // optional string
+    }
 #endif
 
     root["ap_status"] = EMSESP::esp8266React.apStatus();

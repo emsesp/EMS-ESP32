@@ -22,15 +22,26 @@ namespace emsesp {
 
 WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securityManager) {
     // write endpoints
-    server->on(EMSESP_WRITE_DEVICE_VALUE_SERVICE_PATH,
-               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_device_value(request, json); },
-                                             AuthenticationPredicates::IS_ADMIN));
-    server->on(EMSESP_WRITE_TEMPERATURE_SENSOR_SERVICE_PATH,
-               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_temperature_sensor(request, json); },
-                                             AuthenticationPredicates::IS_ADMIN));
-    server->on(EMSESP_WRITE_ANALOG_SENSOR_SERVICE_PATH,
-               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_analog_sensor(request, json); },
-                                             AuthenticationPredicates::IS_ADMIN));
+
+    AsyncCallbackJsonWebHandler * jsonHandler = new AsyncCallbackJsonWebHandler(EMSESP_WRITE_DEVICE_VALUE_SERVICE_PATH);
+    jsonHandler->onRequest([this](AsyncWebServerRequest * request, JsonVariant & input) { write_device_value(request, input); });
+    jsonHandler->setMethod(HTTP_POST);
+    server->addHandler(jsonHandler);
+
+
+
+    // TODO to fix
+
+    // server->on(EMSESP_WRITE_DEVICE_VALUE_SERVICE_PATH,
+    //            securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_device_value(request, json); },
+    //                                          AuthenticationPredicates::IS_ADMIN));
+
+    // server->on(EMSESP_WRITE_TEMPERATURE_SENSOR_SERVICE_PATH,
+    //            securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_temperature_sensor(request, json); },
+    //                                          AuthenticationPredicates::IS_ADMIN));
+    // server->on(EMSESP_WRITE_ANALOG_SENSOR_SERVICE_PATH,
+    //            securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_analog_sensor(request, json); },
+    //                                          AuthenticationPredicates::IS_ADMIN));
     // GET's
     server->on(EMSESP_DEVICE_DATA_SERVICE_PATH,
                HTTP_GET,

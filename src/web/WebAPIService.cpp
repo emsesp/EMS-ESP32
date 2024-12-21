@@ -25,24 +25,33 @@ uint16_t WebAPIService::api_fails_ = 0;
 
 WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager) {
-    server->on(EMSESP_API_SERVICE_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { webAPIService(request, json); });
-}
-
-// POST|GET api/
-// POST|GET api/{device}
-// POST|GET api/{device}/{entity}
-void WebAPIService::webAPIService(AsyncWebServerRequest * request, JsonVariant json) {
-    JsonDocument input_doc; // has no body JSON so create dummy as empty input object
-    JsonObject   input;
-    // if no body then treat it as a secure GET
-    if ((request->method() == HTTP_GET) || (!json.is<JsonObject>())) {
-        // HTTP GET
-        input = input_doc.to<JsonObject>();
-    } else {
-        // HTTP_POST
-        input = json.as<JsonObject>(); // extract values from the json. these will be used as default values
+#ifdef EMSESP_TEST
+    // for test.cpp and unit tests so we can invoke GETs to test the API
+    void WebAPIService::webAPIService(AsyncWebServerRequest * request) {
+        JsonDocument input_doc;
+        parse(request, input_doc.to<JsonObject>());
     }
-    parse(request, input);
+#endif
+    AsyncCallbackJsonWebHandler * jsonHandler = new AsyncCallbackJsonWebHandler(EMSESP_API_SERVICE_PATH);
+
+    // POST|GET api/
+    // POST|GET api/{device}
+    // POST|GET api/{device}/{entity}
+    jsonHandler->setMethod(HTTP_POST | HTTP_GET);
+    jsonHandler->onRequest([this](AsyncWebServerRequest * request, JsonVariant & input) {
+        // if no body then treat it as a secure GET
+        if ((request->method() == HTTP_GET) || (!input.is<JsonObject>())) {
+            // HTTP GET
+            JsonDocument input_doc; // has no body JSON so create dummy as empty input object
+            input = input_doc.to<JsonObject>();
+        } else {
+            // HTTP_POST
+            input = input.as<JsonObject>(); // extract values from the json. these will be used as default values
+        }
+
+        parse(request, input);
+    });
+    server->addHandler(jsonHandler);
 }
 
 #ifdef EMSESP_TEST
