@@ -14,11 +14,12 @@ import type { Theme } from '@mui/material';
 
 import * as APApi from 'api/ap';
 
-import { useAutoRequest } from 'alova/client';
+import { useRequest } from 'alova/client';
 import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { APStatusType } from 'types';
 import { APNetworkStatus } from 'types';
+import { useInterval } from 'utils';
 
 export const apStatusHighlight = ({ status }: APStatusType, theme: Theme) => {
   switch (status) {
@@ -34,11 +35,11 @@ export const apStatusHighlight = ({ status }: APStatusType, theme: Theme) => {
 };
 
 const APStatus = () => {
-  const {
-    data,
-    send: loadData,
-    error
-  } = useAutoRequest(APApi.readAPStatus, { pollingTime: 3000 });
+  const { data, send: loadData, error } = useRequest(APApi.readAPStatus);
+
+  useInterval(() => {
+    void loadData();
+  });
 
   const { LL } = useI18nContext();
   useLayoutTitle(LL.ACCESS_POINT(0));

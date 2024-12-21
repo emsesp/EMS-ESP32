@@ -57,7 +57,7 @@ const CustomEntities = () => {
     if (!dialogOpen && !numChanges) {
       void fetchEntities();
     }
-  }, 3000);
+  });
 
   const { send: writeEntities } = useRequest(
     (data: Entities) => writeCustomEntities(data),

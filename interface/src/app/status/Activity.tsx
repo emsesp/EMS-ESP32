@@ -8,20 +8,21 @@ import {
   Table
 } from '@table-library/react-table-library/table';
 import { useTheme as tableTheme } from '@table-library/react-table-library/theme';
-import { useAutoRequest } from 'alova/client';
+import { useRequest } from 'alova/client';
 import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { Translation } from 'i18n/i18n-types';
+import { useInterval } from 'utils';
 
 import { readActivity } from '../../api/app';
 import type { Stat } from '../main/types';
 
 const SystemActivity = () => {
-  const {
-    data,
-    send: loadData,
-    error
-  } = useAutoRequest(readActivity, { pollingTime: 3000 });
+  const { data, send: loadData, error } = useRequest(readActivity);
+
+  useInterval(() => {
+    void loadData();
+  });
 
   const { LL } = useI18nContext();
 

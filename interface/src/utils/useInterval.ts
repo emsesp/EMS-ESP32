@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react';
 
+const DEFAULT_DELAY = 3000;
+
 // adapted from https://www.joshwcomeau.com/snippets/react-hooks/use-interval/
-export const useInterval = (callback: () => void, delay: number) => {
+export const useInterval = (callback: () => void, delay: number = DEFAULT_DELAY) => {
   const intervalRef = useRef<number | null>(null);
   const savedCallback = useRef<() => void>(callback);
 
@@ -11,14 +13,12 @@ export const useInterval = (callback: () => void, delay: number) => {
 
   useEffect(() => {
     const tick = () => savedCallback.current();
-    if (typeof delay === 'number') {
-      intervalRef.current = window.setInterval(tick, delay);
-      return () => {
-        if (intervalRef.current !== null) {
-          window.clearInterval(intervalRef.current);
-        }
-      };
-    }
+    intervalRef.current = window.setInterval(tick, delay);
+    return () => {
+      if (intervalRef.current !== null) {
+        window.clearInterval(intervalRef.current);
+      }
+    };
   }, [delay]);
 
   return intervalRef;

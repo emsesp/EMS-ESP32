@@ -11,9 +11,10 @@ import {
 import { readSystemStatus } from 'api/system';
 
 import { dialogStyle } from 'CustomTheme';
-import { useAutoRequest } from 'alova/client';
+import { useRequest } from 'alova/client';
 import MessageBox from 'components/MessageBox';
 import { useI18nContext } from 'i18n/i18n-react';
+import { useInterval } from 'utils';
 
 const RestartMonitor = () => {
   const [errorMessage, setErrorMessage] = useState<string>();
@@ -22,8 +23,7 @@ const RestartMonitor = () => {
 
   let count = 0;
 
-  const { data } = useAutoRequest(readSystemStatus, {
-    pollingTime: 1000,
+  const { data, send } = useRequest(readSystemStatus, {
     force: true,
     initialData: { status: 'Getting ready...' },
     async middleware(_, next) {
@@ -41,6 +41,10 @@ const RestartMonitor = () => {
     .onError((error) => {
       setErrorMessage(error.message);
     });
+
+  useInterval(() => {
+    void send();
+  }, 1000); // check every second
 
   return (
     <Dialog fullWidth={true} sx={dialogStyle} open={true}>

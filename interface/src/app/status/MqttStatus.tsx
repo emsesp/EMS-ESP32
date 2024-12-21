@@ -15,11 +15,12 @@ import type { Theme } from '@mui/material';
 
 import * as MqttApi from 'api/mqtt';
 
-import { useAutoRequest } from 'alova/client';
+import { useRequest } from 'alova/client';
 import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { MqttStatusType } from 'types';
 import { MqttDisconnectReason } from 'types';
+import { useInterval } from 'utils';
 
 export const mqttStatusHighlight = (
   { enabled, connected }: MqttStatusType,
@@ -54,11 +55,11 @@ export const mqttQueueHighlight = (
 };
 
 const MqttStatus = () => {
-  const {
-    data,
-    send: loadData,
-    error
-  } = useAutoRequest(MqttApi.readMqttStatus, { pollingTime: 3000 });
+  const { data, send: loadData, error } = useRequest(MqttApi.readMqttStatus);
+
+  useInterval(() => {
+    void loadData();
+  });
 
   const { LL } = useI18nContext();
   useLayoutTitle('MQTT');

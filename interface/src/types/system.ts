@@ -11,6 +11,7 @@ export interface SystemStatus {
   num_sensors: number;
   num_analogs: number;
   ntp_status: number;
+  ntp_time?: string;
   mqtt_status: boolean;
   ap_status: boolean;
   network_status: NetworkConnectionStatus;

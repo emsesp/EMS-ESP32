@@ -419,7 +419,7 @@ const Devices = () => {
     if (!deviceValueDialogOpen) {
       selectedDevice ? void sendDeviceData(selectedDevice) : void sendCoreData();
     }
-  }, 3000);
+  });
 
   const deviceValueDialogSave = async (devicevalue: DeviceValue) => {
     const id = Number(device_select.state.id);

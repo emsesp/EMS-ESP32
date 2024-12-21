@@ -18,11 +18,12 @@ import type { Theme } from '@mui/material';
 
 import * as NetworkApi from 'api/network';
 
-import { useAutoRequest } from 'alova/client';
+import { useRequest } from 'alova/client';
 import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { NetworkStatusType } from 'types';
 import { NetworkConnectionStatus } from 'types';
+import { useInterval } from 'utils';
 
 const isConnected = ({ status }: NetworkStatusType) =>
   status === NetworkConnectionStatus.WIFI_STATUS_CONNECTED ||
@@ -81,11 +82,11 @@ const IPs = (status: NetworkStatusType) => {
 };
 
 const NetworkStatus = () => {
-  const {
-    data,
-    send: loadData,
-    error
-  } = useAutoRequest(NetworkApi.readNetworkStatus, { pollingTime: 3000 });
+  const { data, send: loadData, error } = useRequest(NetworkApi.readNetworkStatus);
+
+  useInterval(() => {
+    void loadData();
+  });
 
   const { LL } = useI18nContext();
   useLayoutTitle(LL.NETWORK(1));
