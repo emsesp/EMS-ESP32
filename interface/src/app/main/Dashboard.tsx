@@ -149,7 +149,7 @@ const Dashboard = () => {
     if (!deviceValueDialogOpen) {
       void fetchDashboard();
     }
-  }, 3000);
+  });
 
   useEffect(() => {
     showAll

@@ -17,9 +17,10 @@ import {
 
 import * as SystemApi from 'api/system';
 
-import { useAutoRequest } from 'alova/client';
+import { useRequest } from 'alova/client';
 import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
+import { useInterval } from 'utils';
 
 import BBQKeesIcon from './bbqkees.svg';
 
@@ -32,11 +33,11 @@ const HardwareStatus = () => {
 
   useLayoutTitle(LL.HARDWARE());
 
-  const {
-    data,
-    send: loadData,
-    error
-  } = useAutoRequest(SystemApi.readSystemStatus, { pollingTime: 3000 });
+  const { data, send: loadData, error } = useRequest(SystemApi.readSystemStatus);
+
+  useInterval(() => {
+    void loadData();
+  });
 
   const content = () => {
     if (!data) {
