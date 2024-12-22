@@ -3450,6 +3450,91 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "UI800, BC400",thermostat,4,disinfecttime,disinfection time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_disinfection_time,number.thermostat_dhw_disinfecttime,6,9,15,9,1
 "UI800, BC400",thermostat,4,dailyheating,daily heating,boolean, ,true,switch.thermostat_dhw_daily_heating,switch.thermostat_dhw_dailyheating,6,9,1,10,1
 "UI800, BC400",thermostat,4,dailyheattime,daily heating time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_daily_heating_time,number.thermostat_dhw_dailyheattime,6,9,15,11,1
+"CR11",thermostat,10,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
+"CR11",thermostat,10,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
+"CR11",thermostat,10,datetime,date/time,string, ,true,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
+"CR11",thermostat,10,intoffset,internal temperature offset,int8 (>=-12<=12),C,true,number.thermostat_internal_temperature_offset,number.thermostat_intoffset,6,0,1/10,46,1
+"CR11",thermostat,10,floordry,floor drying,enum [off\|start\|heat\|hold\|cool\|end], ,false,sensor.thermostat_floor_drying,sensor.thermostat_floordry,6,0,1,47,1
+"CR11",thermostat,10,dampedoutdoortemp,damped outdoor temperature,int16 (>=-3199<=3199),C,false,sensor.thermostat_damped_outdoor_temperature,sensor.thermostat_dampedoutdoortemp,6,0,1/10,48,1
+"CR11",thermostat,10,floordrytemp,floor drying temperature,uint8 (>=0<=254),C,false,sensor.thermostat_floor_drying_temperature,sensor.thermostat_floordrytemp,6,0,1,49,1
+"CR11",thermostat,10,building,building type,enum [light\|medium\|heavy], ,true,select.thermostat_building_type,select.thermostat_building,6,0,1,50,1
+"CR11",thermostat,10,minexttemp,minimal external temperature,int8 (>=-126<=126),C,true,number.thermostat_minimal_external_temperature,number.thermostat_minexttemp,6,0,1,51,1
+"CR11",thermostat,10,damping,damping outdoor temperature,boolean, ,true,switch.thermostat_damping_outdoor_temperature,switch.thermostat_damping,6,0,1,52,1
+"CR11",thermostat,10,solar,solar,boolean, ,true,switch.thermostat_solar,switch.thermostat_solar,6,0,1,53,1
+"CR11",thermostat,10,hybridstrategy,hybrid control strategy,enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix], ,true,select.thermostat_hybrid_control_strategy,select.thermostat_hybridstrategy,6,0,1,54,1
+"CR11",thermostat,10,switchovertemp,outside switchover temperature,int8 (>=-20<=20),C,true,number.thermostat_outside_switchover_temperature,number.thermostat_switchovertemp,6,0,1,55,1
+"CR11",thermostat,10,energycostratio,energy cost ratio,uint8 (>=0<=20), ,true,number.thermostat_energy_cost_ratio,number.thermostat_energycostratio,6,0,1/10,56,1
+"CR11",thermostat,10,fossilefactor,fossile energy factor,uint8 (>=0<=5), ,true,number.thermostat_fossile_energy_factor,number.thermostat_fossilefactor,6,0,1/10,57,1
+"CR11",thermostat,10,electricfactor,electric energy factor,uint8 (>=0<=5), ,true,number.thermostat_electric_energy_factor,number.thermostat_electricfactor,6,0,1/10,58,1
+"CR11",thermostat,10,delayboiler,delay boiler support,uint8 (>=5<=120),minutes,true,number.thermostat_delay_boiler_support,number.thermostat_delayboiler,6,0,1,59,1
+"CR11",thermostat,10,tempdiffboiler,temp diff boiler support,uint8 (>=1<=99),C,true,number.thermostat_temp_diff_boiler_support,number.thermostat_tempdiffboiler,6,0,1,60,1
+"CR11",thermostat,10,pvenabledhw,enable raise dhw,boolean, ,true,switch.thermostat_enable_raise_dhw,switch.thermostat_pvenabledhw,6,0,1,61,1
+"CR11",thermostat,10,pvraiseheat,raise heating with PV,int8 (>=0<=5),K,true,number.thermostat_raise_heating_with_PV,number.thermostat_pvraiseheat,6,0,1,62,1
+"CR11",thermostat,10,pvlowercool,lower cooling with PV,int8 (>=-5<=0),K,true,number.thermostat_lower_cooling_with_PV,number.thermostat_pvlowercool,6,0,1,63,1
+"CR11",thermostat,10,absent,absent,boolean, ,true,switch.thermostat_absent,switch.thermostat_absent,6,0,1,64,1
+"CR11",thermostat,10,seltemp,selected room temperature,int16 (>=0<=30),C,true,number.thermostat_hc1_selected_room_temperature,number.thermostat_hc1_seltemp,6,1,1/2,0,1
+"CR11",thermostat,10,currtemp,current room temperature,int16 (>=-3199<=3199),C,false,sensor.thermostat_hc1_current_room_temperature,sensor.thermostat_hc1_currtemp,6,1,1/10,1,1
+"CR11",thermostat,10,haclimate,mqtt discovery current room temperature,enum [selTemp\|roomTemp] (>=5<=30), ,false,sensor.thermostat_hc1_mqtt_discovery_current_room_temperature,sensor.thermostat_hc1_haclimate,6,1,1,2,1
+"CR11",thermostat,10,mode,operating mode,enum [manual\|auto], ,true,select.thermostat_hc1_operating_mode,select.thermostat_hc1_mode,6,1,1,3,1
+"CR11",thermostat,10,modetype,mode type,enum [eco\|comfort], ,false,sensor.thermostat_hc1_mode_type,sensor.thermostat_hc1_modetype,6,1,1,4,1
+"CR11",thermostat,10,ecotemp,eco temperature,uint8 (>=0<=127),C,true,number.thermostat_hc1_eco_temperature,number.thermostat_hc1_ecotemp,6,1,1/2,5,1
+"CR11",thermostat,10,manualtemp,manual temperature,uint8 (>=0<=127),C,true,number.thermostat_hc1_manual_temperature,number.thermostat_hc1_manualtemp,6,1,1/2,6,1
+"CR11",thermostat,10,comforttemp,comfort temperature,uint8 (>=0<=127),C,true,number.thermostat_hc1_comfort_temperature,number.thermostat_hc1_comforttemp,6,1,1/2,7,1
+"CR11",thermostat,10,summertemp,summer temperature,uint8 (>=10<=30),C,true,number.thermostat_hc1_summer_temperature,number.thermostat_hc1_summertemp,6,1,1,8,1
+"CR11",thermostat,10,designtemp,design temperature,uint8 (>=0<=254),C,true,number.thermostat_hc1_design_temperature,number.thermostat_hc1_designtemp,6,1,1,9,1
+"CR11",thermostat,10,offsettemp,offset temperature,int8 (>=-126<=126),C,true,number.thermostat_hc1_offset_temperature,number.thermostat_hc1_offsettemp,6,1,1,10,1
+"CR11",thermostat,10,minflowtemp,min flow temperature,uint8 (>=0<=254),C,true,number.thermostat_hc1_min_flow_temperature,number.thermostat_hc1_minflowtemp,6,1,1,11,1
+"CR11",thermostat,10,maxflowtemp,max flow temperature,uint8 (>=0<=254),C,true,number.thermostat_hc1_max_flow_temperature,number.thermostat_hc1_maxflowtemp,6,1,1,12,1
+"CR11",thermostat,10,roominfluence,room influence,uint8 (>=0<=254),C,true,number.thermostat_hc1_room_influence,number.thermostat_hc1_roominfluence,6,1,1,13,1
+"CR11",thermostat,10,roominflfactor,room influence factor,uint8 (>=0<=25), ,true,number.thermostat_hc1_room_influence_factor,number.thermostat_hc1_roominflfactor,6,1,1/10,14,1
+"CR11",thermostat,10,curroominfl,current room influence,int16 (>=-3199<=3199),C,false,sensor.thermostat_hc1_current_room_influence,sensor.thermostat_hc1_curroominfl,6,1,1/10,15,1
+"CR11",thermostat,10,nofrostmode,nofrost mode,enum [room\|outdoor\|room outdoor], ,true,select.thermostat_hc1_nofrost_mode,select.thermostat_hc1_nofrostmode,6,1,1,16,1
+"CR11",thermostat,10,nofrosttemp,nofrost temperature,int8 (>=-126<=126),C,true,number.thermostat_hc1_nofrost_temperature,number.thermostat_hc1_nofrosttemp,6,1,1,17,1
+"CR11",thermostat,10,targetflowtemp,target flow temperature,uint8 (>=0<=254),C,false,sensor.thermostat_hc1_target_flow_temperature,sensor.thermostat_hc1_targetflowtemp,6,1,1,18,1
+"CR11",thermostat,10,heatingtype,heating type,enum [off\|radiator\|convector\|floor], ,true,select.thermostat_hc1_heating_type,select.thermostat_hc1_heatingtype,6,1,1,19,1
+"CR11",thermostat,10,summersetmode,set summer mode,enum [summer\|auto\|winter], ,true,select.thermostat_hc1_set_summer_mode,select.thermostat_hc1_summersetmode,6,1,1,20,1
+"CR11",thermostat,10,hpoperatingmode,heatpump operating mode,enum [off\|auto\|heating\|cooling], ,true,select.thermostat_hc1_heatpump_operating_mode,select.thermostat_hc1_hpoperatingmode,6,1,1,21,1
+"CR11",thermostat,10,summermode,summer mode,enum [winter\|summer], ,false,sensor.thermostat_hc1_summer_mode,sensor.thermostat_hc1_summermode,6,1,1,22,1
+"CR11",thermostat,10,hpoperatingstate,heatpump operating state,enum [heating\|off\|cooling], ,false,sensor.thermostat_hc1_heatpump_operating_state,sensor.thermostat_hc1_hpoperatingstate,6,1,1,23,1
+"CR11",thermostat,10,controlmode,control mode,enum [optimized\|simple\|n/a\|room\|power], ,true,select.thermostat_hc1_control_mode,select.thermostat_hc1_controlmode,6,1,1,24,1
+"CR11",thermostat,10,program,program,enum [prog 1\|prog 2], ,true,select.thermostat_hc1_program,select.thermostat_hc1_program,6,1,1,25,1
+"CR11",thermostat,10,tempautotemp,temporary set temperature automode,int8 (>=-1<=30),C,true,number.thermostat_hc1_temporary_set_temperature_automode,number.thermostat_hc1_tempautotemp,6,1,1/2,26,1
+"CR11",thermostat,10,remoteseltemp,temporary set temperature from remote,int8 (>=-1<=30),C,true,number.thermostat_hc1_temporary_set_temperature_from_remote,number.thermostat_hc1_remoteseltemp,6,1,1/2,27,1
+"CR11",thermostat,10,fastheatup,fast heatup,uint8 (>=0<=100),%,true,number.thermostat_hc1_fast_heatup,number.thermostat_hc1_fastheatup,6,1,1,28,1
+"CR11",thermostat,10,switchonoptimization,switch-on optimization,boolean, ,true,switch.thermostat_hc1_switch-on_optimization,switch.thermostat_hc1_switchonoptimization,6,1,1,29,1
+"CR11",thermostat,10,reducemode,reduce mode,enum [outdoor\|room\|reduce], ,true,select.thermostat_hc1_reduce_mode,select.thermostat_hc1_reducemode,6,1,1,30,1
+"CR11",thermostat,10,noreducetemp,no reduce below temperature,int8 (>=-126<=126),C,true,number.thermostat_hc1_no_reduce_below_temperature,number.thermostat_hc1_noreducetemp,6,1,1,31,1
+"CR11",thermostat,10,reducetemp,off/reduce switch temperature,int8 (>=-126<=126),C,true,number.thermostat_hc1_off/reduce_switch_temperature,number.thermostat_hc1_reducetemp,6,1,1,32,1
+"CR11",thermostat,10,dhwprio,dhw priority,boolean, ,true,switch.thermostat_hc1_dhw_priority,switch.thermostat_hc1_dhwprio,6,1,1,33,1
+"CR11",thermostat,10,hpcooling,hp cooling,boolean, ,true,switch.thermostat_hc1_hp_cooling,switch.thermostat_hc1_hpcooling,6,1,1,34,1
+"CR11",thermostat,10,coolingon,cooling on,boolean, ,false,binary_sensor.thermostat_hc1_cooling_on,binary_sensor.thermostat_hc1_coolingon,6,1,1,35,1
+"CR11",thermostat,10,hpmode,HP Mode,enum [heating\|cooling\|heating & cooling], ,true,select.thermostat_hc1_HP_Mode,select.thermostat_hc1_hpmode,6,1,1,36,1
+"CR11",thermostat,10,dewoffset,dew point offset,uint8 (>=2<=10),K,true,number.thermostat_hc1_dew_point_offset,number.thermostat_hc1_dewoffset,6,1,1,37,1
+"CR11",thermostat,10,roomtempdiff,room temp difference,uint8 (>=0<=254),K,true,number.thermostat_hc1_room_temp_difference,number.thermostat_hc1_roomtempdiff,6,1,1,38,1
+"CR11",thermostat,10,hpminflowtemp,HP min. flow temp.,uint8 (>=0<=254),C,true,number.thermostat_hc1_HP_min._flow_temp.,number.thermostat_hc1_hpminflowtemp,6,1,1,39,1
+"CR11",thermostat,10,control,control device,enum [RC310\|RC200\|RC100\|RC100H\|TC100], ,true,select.thermostat_hc1_control_device,select.thermostat_hc1_control,6,1,1,40,1
+"CR11",thermostat,10,heatondelay,heat-on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_heat-on_delay,number.thermostat_hc1_heatondelay,6,1,1,43,1
+"CR11",thermostat,10,heatoffdelay,heat-off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_heat-off_delay,number.thermostat_hc1_heatoffdelay,6,1,1,44,1
+"CR11",thermostat,10,instantstart,instant start,uint8 (>=1<=10),K,true,number.thermostat_hc1_instant_start,number.thermostat_hc1_instantstart,6,1,1,45,1
+"CR11",thermostat,10,boost,boost mode,boolean, ,true,switch.thermostat_hc1_boost_mode,switch.thermostat_hc1_boost,6,1,1,46,1
+"CR11",thermostat,10,boosttime,boost time,uint8 (>=0<=254),hours,true,number.thermostat_hc1_boost_time,number.thermostat_hc1_boosttime,6,1,1,47,1
+"CR11",thermostat,10,coolstart,cooling starttemp,uint8 (>=20<=35),C,true,number.thermostat_hc1_cooling_starttemp,number.thermostat_hc1_coolstart,6,1,1,48,1
+"CR11",thermostat,10,coolondelay,cooling on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_on_delay,number.thermostat_hc1_coolondelay,6,1,1,49,1
+"CR11",thermostat,10,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,50,1
+"CR11",thermostat,10,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,51,1
+"CR11",thermostat,10,redthreshold,reduction threshold,int8 (>=-63<=63),C,true,number.thermostat_hc1_reduction_threshold,number.thermostat_hc1_redthreshold,6,1,1/2,52,1
+"CR11",thermostat,10,mode,operating mode,enum [off\|normal\|comfort\|auto\|own prog], ,true,select.thermostat_dhw_operating_mode,select.thermostat_dhw_mode,6,9,1,0,1
+"CR11",thermostat,10,settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
+"CR11",thermostat,10,settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
+"CR11",thermostat,10,circmode,circulation pump mode,enum [off\|on\|auto\|own prog], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,3,1
+"CR11",thermostat,10,chargeduration,charge duration,uint8 (>=0<=3810),minutes,true,number.thermostat_dhw_charge_duration,number.thermostat_dhw_chargeduration,6,9,15,4,1
+"CR11",thermostat,10,charge,charge,boolean, ,true,switch.thermostat_dhw_charge,switch.thermostat_dhw_charge,6,9,1,5,1
+"CR11",thermostat,10,extra,extra,boolean, ,false,binary_sensor.thermostat_dhw_extra,binary_sensor.thermostat_dhw_extra,6,9,1,6,1
+"CR11",thermostat,10,disinfecting,disinfecting,boolean, ,true,switch.thermostat_dhw_disinfecting,switch.thermostat_dhw_disinfecting,6,9,1,7,1
+"CR11",thermostat,10,disinfectday,disinfection day,enum [mo\|tu\|we\|th\|fr\|sa\|su\|all], ,true,select.thermostat_dhw_disinfection_day,select.thermostat_dhw_disinfectday,6,9,1,8,1
+"CR11",thermostat,10,disinfecttime,disinfection time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_disinfection_time,number.thermostat_dhw_disinfecttime,6,9,15,9,1
+"CR11",thermostat,10,dailyheating,daily heating,boolean, ,true,switch.thermostat_dhw_daily_heating,switch.thermostat_dhw_dailyheating,6,9,1,10,1
+"CR11",thermostat,10,dailyheattime,daily heating time,uint8 (>=0<=1431),minutes,true,number.thermostat_dhw_daily_heating_time,number.thermostat_dhw_dailyheattime,6,9,15,11,1
 "RC10",thermostat,65,errorcode,error code,string, ,false,sensor.thermostat_error_code,sensor.thermostat_errorcode,6,0,1,0,8
 "RC10",thermostat,65,lastcode,last error code,string, ,false,sensor.thermostat_last_error_code,sensor.thermostat_lastcode,6,0,1,8,25
 "RC10",thermostat,65,datetime,date/time,string, ,false,sensor.thermostat_date/time,sensor.thermostat_datetime,6,0,1,33,13
@@ -3798,8 +3883,6 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC200, CW100, CR120, CR50",thermostat,157,roomtempdiff,room temp difference,uint8 (>=0<=254),K,true,number.thermostat_hc1_room_temp_difference,number.thermostat_hc1_roomtempdiff,6,1,1,38,1
 "RC200, CW100, CR120, CR50",thermostat,157,hpminflowtemp,HP min. flow temp.,uint8 (>=0<=254),C,true,number.thermostat_hc1_HP_min._flow_temp.,number.thermostat_hc1_hpminflowtemp,6,1,1,39,1
 "RC200, CW100, CR120, CR50",thermostat,157,control,control device,enum [RC310\|RC200\|RC100\|RC100H\|TC100], ,true,select.thermostat_hc1_control_device,select.thermostat_hc1_control,6,1,1,40,1
-"RC200, CW100, CR120, CR50",thermostat,157,remotetemp,room temperature from remote,cmd [] (>=-1<=101),C,true,sensor.thermostat_hc1_room_temperature_from_remote,sensor.thermostat_hc1_remotetemp,6,1,1/10,41,1
-"RC200, CW100, CR120, CR50",thermostat,157,remotehum,room humidity from remote,cmd [] (>=-1<=101),%,true,sensor.thermostat_hc1_room_humidity_from_remote,sensor.thermostat_hc1_remotehum,6,1,1,42,1
 "RC200, CW100, CR120, CR50",thermostat,157,heatondelay,heat-on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_heat-on_delay,number.thermostat_hc1_heatondelay,6,1,1,43,1
 "RC200, CW100, CR120, CR50",thermostat,157,heatoffdelay,heat-off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_heat-off_delay,number.thermostat_hc1_heatoffdelay,6,1,1,44,1
 "RC200, CW100, CR120, CR50",thermostat,157,instantstart,instant start,uint8 (>=1<=10),K,true,number.thermostat_hc1_instant_start,number.thermostat_hc1_instantstart,6,1,1,45,1
@@ -3972,8 +4055,6 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC100, CR10, Moduline 1000/1010",thermostat,165,roomtempdiff,room temp difference,uint8 (>=0<=254),K,true,number.thermostat_hc1_room_temp_difference,number.thermostat_hc1_roomtempdiff,6,1,1,38,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,hpminflowtemp,HP min. flow temp.,uint8 (>=0<=254),C,true,number.thermostat_hc1_HP_min._flow_temp.,number.thermostat_hc1_hpminflowtemp,6,1,1,39,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,control,control device,enum [RC310\|RC200\|RC100\|RC100H\|TC100], ,true,select.thermostat_hc1_control_device,select.thermostat_hc1_control,6,1,1,40,1
-"RC100, CR10, Moduline 1000/1010",thermostat,165,remotetemp,room temperature from remote,cmd [] (>=-1<=101),C,true,sensor.thermostat_hc1_room_temperature_from_remote,sensor.thermostat_hc1_remotetemp,6,1,1/10,41,1
-"RC100, CR10, Moduline 1000/1010",thermostat,165,remotehum,room humidity from remote,cmd [] (>=-1<=101),%,true,sensor.thermostat_hc1_room_humidity_from_remote,sensor.thermostat_hc1_remotehum,6,1,1,42,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,heatondelay,heat-on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_heat-on_delay,number.thermostat_hc1_heatondelay,6,1,1,43,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,heatoffdelay,heat-off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_heat-off_delay,number.thermostat_hc1_heatoffdelay,6,1,1,44,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,instantstart,instant start,uint8 (>=1<=10),K,true,number.thermostat_hc1_instant_start,number.thermostat_hc1_instantstart,6,1,1,45,1
@@ -4827,8 +4908,6 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC120",thermostat,157,roomtempdiff,room temp difference,uint8 (>=0<=254),K,true,number.thermostat_hc1_room_temp_difference,number.thermostat_hc1_roomtempdiff,6,1,1,38,1
 "RC120",thermostat,157,hpminflowtemp,HP min. flow temp.,uint8 (>=0<=254),C,true,number.thermostat_hc1_HP_min._flow_temp.,number.thermostat_hc1_hpminflowtemp,6,1,1,39,1
 "RC120",thermostat,157,control,control device,enum [RC310\|RC200\|RC100\|RC100H\|TC100], ,true,select.thermostat_hc1_control_device,select.thermostat_hc1_control,6,1,1,40,1
-"RC120",thermostat,157,remotetemp,room temperature from remote,cmd [] (>=-1<=101),C,true,sensor.thermostat_hc1_room_temperature_from_remote,sensor.thermostat_hc1_remotetemp,6,1,1/10,41,1
-"RC120",thermostat,157,remotehum,room humidity from remote,cmd [] (>=-1<=101),%,true,sensor.thermostat_hc1_room_humidity_from_remote,sensor.thermostat_hc1_remotehum,6,1,1,42,1
 "RC120",thermostat,157,heatondelay,heat-on delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_heat-on_delay,number.thermostat_hc1_heatondelay,6,1,1,43,1
 "RC120",thermostat,157,heatoffdelay,heat-off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_heat-off_delay,number.thermostat_hc1_heatoffdelay,6,1,1,44,1
 "RC120",thermostat,157,instantstart,instant start,uint8 (>=1<=10),K,true,number.thermostat_hc1_instant_start,number.thermostat_hc1_instantstart,6,1,1,45,1

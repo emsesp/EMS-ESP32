@@ -518,6 +518,7 @@ let system_status = {
   num_analogs: 1,
   free_heap: 143,
   ntp_status: 2,
+  ntp_time: '2021-04-01T14:25:42Z',
   mqtt_status: true,
   ap_status: false,
   network_status: 3, // wifi connected
