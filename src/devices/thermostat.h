@@ -429,6 +429,7 @@ class Thermostat : public EMSdevice {
     void process_RC10Set(std::shared_ptr<const Telegram> telegram);
     void process_RC10Set_2(std::shared_ptr<const Telegram> telegram);
     void process_CRFMonitor(std::shared_ptr<const Telegram> telegram);
+    void process_CR11Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC300Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC300Set(std::shared_ptr<const Telegram> telegram);
     void process_RC300Set2(std::shared_ptr<const Telegram> telegram);
