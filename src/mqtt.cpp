@@ -335,7 +335,7 @@ void Mqtt::reset_mqtt() {
 
 // load the settings from service
 void Mqtt::load_settings() {
-    EMSESP::esp8266React.getMqttSettingsService()->read([&](MqttSettings & mqttSettings) {
+    EMSESP::esp32React.getMqttSettingsService()->read([&](MqttSettings & mqttSettings) {
         mqtt_base_          = mqttSettings.base.c_str(); // Convert String to std::string
         mqtt_qos_           = mqttSettings.mqtt_qos;
         mqtt_retain_        = mqttSettings.mqtt_retain;
@@ -368,7 +368,7 @@ void Mqtt::load_settings() {
 
 // start mqtt
 void Mqtt::start() {
-    mqttClient_ = EMSESP::esp8266React.getMqttClient();
+    mqttClient_ = EMSESP::esp32React.getMqttClient();
 
     load_settings(); // fetch MQTT settings
 

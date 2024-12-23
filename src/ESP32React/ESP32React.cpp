@@ -1,8 +1,8 @@
-#include "ESP8266React.h"
+#include "ESP32React.h"
 
 #include "WWWData.h" // include auto-generated static web resources
 
-ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
+ESP32React::ESP32React(AsyncWebServer * server, FS * fs)
     : _securitySettingsService(server, fs)
     , _networkSettingsService(server, fs, &_securitySettingsService)
     , _wifiScanner(server, &_securitySettingsService)
@@ -32,7 +32,7 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
                 return request->send(304);
             }
 
-            AsyncWebServerResponse * response = request->beginResponse_P(200, contentType, content, len);
+            AsyncWebServerResponse * response = request->beginResponse(200, contentType, content, len);
 
             response->addHeader("Content-Encoding", "gzip");
             // response->addHeader("Content-Encoding", "br"); // only works over HTTPS
@@ -62,7 +62,7 @@ ESP8266React::ESP8266React(AsyncWebServer * server, FS * fs)
     });
 }
 
-void ESP8266React::begin() {
+void ESP32React::begin() {
     _networkSettingsService.begin();
     _networkSettingsService.read([&](NetworkSettings & networkSettings) {
         DefaultHeaders & defaultHeaders = DefaultHeaders::Instance();
@@ -79,7 +79,7 @@ void ESP8266React::begin() {
     _securitySettingsService.begin();
 }
 
-void ESP8266React::loop() {
+void ESP32React::loop() {
     _networkSettingsService.loop();
     _apSettingsService.loop();
     _mqttSettingsService.loop();

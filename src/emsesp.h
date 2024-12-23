@@ -38,7 +38,7 @@
 #endif
 #include <Preferences.h>
 
-#include "ESP8266React.h"
+#include "ESP32React/ESP32React.h"
 
 #include "web/WebStatusService.h"
 #include "web/WebActivityService.h"
@@ -232,7 +232,7 @@ class EMSESP {
     static Preferences       nvs_;
 
     // web controllers
-    static ESP8266React            esp8266React;
+    static ESP32React            esp32React;
     static WebSettingsService      webSettingsService;
     static WebStatusService        webStatusService;
     static WebActivityService      webActivityService;

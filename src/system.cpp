@@ -318,12 +318,12 @@ void System::system_restart(const char * partitionname) {
 
 // saves all settings
 void System::wifi_reconnect() {
-    EMSESP::esp8266React.getNetworkSettingsService()->read(
+    EMSESP::esp32React.getNetworkSettingsService()->read(
         [](NetworkSettings & networkSettings) { LOG_INFO("WiFi reconnecting to SSID '%s'...", networkSettings.ssid.c_str()); });
     Shell::loop_all();
     delay(1000);                                                            // wait a second
     EMSESP::webSettingsService.save();                                      // save local settings
-    EMSESP::esp8266React.getNetworkSettingsService()->callUpdateHandlers(); // in case we've changed ssid or password
+    EMSESP::esp32React.getNetworkSettingsService()->callUpdateHandlers(); // in case we've changed ssid or password
 }
 
 void System::syslog_init() {
@@ -482,7 +482,7 @@ void System::start() {
 #endif
 #endif
 
-    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
+    EMSESP::esp32React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) {
         hostname(networkSettings.hostname.c_str()); // sets the hostname
     });
 
@@ -716,7 +716,7 @@ void System::heartbeat_json(JsonObject output) {
         int8_t rssi              = WiFi.RSSI();
         output["rssi"]           = rssi;
         output["wifistrength"]   = wifi_quality(rssi);
-        output["wifireconnects"] = EMSESP::esp8266React.getWifiReconnects();
+        output["wifireconnects"] = EMSESP::esp32React.getWifiReconnects();
     }
 #endif
 }
@@ -747,7 +747,7 @@ void System::network_init(bool refresh) {
 
 #if CONFIG_IDF_TARGET_ESP32
     bool disableEth;
-    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) { disableEth = settings.ssid.length() > 0; });
+    EMSESP::esp32React.getNetworkSettingsService()->read([&](NetworkSettings & settings) { disableEth = settings.ssid.length() > 0; });
 
     // no ethernet present or disabled
     if (phy_type_ == PHY_type::PHY_TYPE_NONE || disableEth) {
@@ -982,7 +982,7 @@ void System::show_users(uuid::console::Shell & shell) {
     shell.printfln("Users:");
 
 #ifndef EMSESP_STANDALONE
-    EMSESP::esp8266React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
+    EMSESP::esp32React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
         for (const User & user : securitySettings.users) {
             shell.printfln(" username: %s, password: %s, is_admin: %s", user.username.c_str(), user.password.c_str(), user.admin ? ("yes") : ("no"));
         }
@@ -1245,12 +1245,12 @@ bool System::check_upgrade(bool factory_settings) {
         // if we're coming from 3.4.4 or 3.5.0b14 which had no version stored then we need to apply new settings
         if (missing_version) {
             LOG_INFO("Upgrade: Setting MQTT Entity ID format to older v3.4 format (0)");
-            EMSESP::esp8266React.getMqttSettingsService()->update([&](MqttSettings & mqttSettings) {
+            EMSESP::esp32React.getMqttSettingsService()->update([&](MqttSettings & mqttSettings) {
                 mqttSettings.entity_format = Mqtt::entityFormat::SINGLE_LONG; // use old Entity ID format from v3.4
                 return StateUpdateResult::CHANGED;
             });
         } else if (settings_version.major() == 3 && settings_version.minor() <= 6) {
-            EMSESP::esp8266React.getMqttSettingsService()->update([&](MqttSettings & mqttSettings) {
+            EMSESP::esp32React.getMqttSettingsService()->update([&](MqttSettings & mqttSettings) {
                 if (mqttSettings.entity_format == 1) {
                     mqttSettings.entity_format = Mqtt::entityFormat::SINGLE_OLD; // use old Entity ID format from v3.6
                     LOG_INFO("Upgrade: Setting MQTT Entity ID format to v3.6 format (3)");
@@ -1265,7 +1265,7 @@ bool System::check_upgrade(bool factory_settings) {
         }
 
         // changes to Network
-        EMSESP::esp8266React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
+        EMSESP::esp32React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
             // Network Settings Wifi tx_power is now using the value * 4.
             if (networkSettings.tx_power == 20) {
                 networkSettings.tx_power = WIFI_POWER_19_5dBm; // use 19.5 as we don't have 20 anymore
@@ -1381,19 +1381,19 @@ bool System::command_service(const char * cmd, const char * value) {
             EMSESP::system_.analog_enabled(b);
             ok = true;
         } else if (!strcmp(cmd, "mqtt/enabled")) {
-            EMSESP::esp8266React.getMqttSettingsService()->update([&](MqttSettings & Settings) {
+            EMSESP::esp32React.getMqttSettingsService()->update([&](MqttSettings & Settings) {
                 Settings.enabled = b;
                 return StateUpdateResult::CHANGED;
             });
             ok = true;
         } else if (!strcmp(cmd, "ap/enabled")) {
-            EMSESP::esp8266React.getAPSettingsService()->update([&](APSettings & Settings) {
+            EMSESP::esp32React.getAPSettingsService()->update([&](APSettings & Settings) {
                 Settings.provisionMode = b ? 0 : 2;
                 return StateUpdateResult::CHANGED;
             });
             ok = true;
         } else if (!strcmp(cmd, "ntp/enabled")) {
-            EMSESP::esp8266React.getNTPSettingsService()->update([&](NTPSettings & Settings) {
+            EMSESP::esp32React.getNTPSettingsService()->update([&](NTPSettings & Settings) {
                 Settings.enabled = b;
                 return StateUpdateResult::CHANGED;
             });
@@ -1568,7 +1568,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         node["network"]        = "WiFi";
         node["hostname"]       = WiFi.getHostname();
         node["RSSI"]           = WiFi.RSSI();
-        node["WIFIReconnects"] = EMSESP::esp8266React.getWifiReconnects();
+        node["WIFIReconnects"] = EMSESP::esp32React.getWifiReconnects();
         // node["MAC"]             = WiFi.macAddress();
         // node["IPv4 address"]    = uuid::printable_to_string(WiFi.localIP()) + "/" + uuid::printable_to_string(WiFi.subnetMask());
         // node["IPv4 gateway"]    = uuid::printable_to_string(WiFi.gatewayIP());
@@ -1583,7 +1583,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["hostname"] = "ems-esp";
     node["RSSI"]     = -23;
 #endif
-    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
+    EMSESP::esp32React.getNetworkSettingsService()->read([&](NetworkSettings & settings) {
         if (WiFi.status() == WL_CONNECTED && !settings.bssid.isEmpty()) {
             node["BSSID"] = "set"; // we don't disclose the name
         }
@@ -1599,7 +1599,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     });
 
 #ifndef EMSESP_STANDALONE
-    EMSESP::esp8266React.getAPSettingsService()->read([&](const APSettings & settings) {
+    EMSESP::esp32React.getAPSettingsService()->read([&](const APSettings & settings) {
         const char * pM[]       = {"always", "disconnected", "never"};
         node["APProvisionMode"] = pM[settings.provisionMode];
         node["APSecurity"]      = settings.password.length() ? "wpa2" : "open";
@@ -1611,7 +1611,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node = output["ntp"].to<JsonObject>();
 #ifndef EMSESP_STANDALONE
     node["NTPStatus"] = EMSESP::system_.ntp_connected() ? "connected" : "disconnected";
-    EMSESP::esp8266React.getNTPSettingsService()->read([&](const NTPSettings & settings) {
+    EMSESP::esp32React.getNTPSettingsService()->read([&](const NTPSettings & settings) {
         node["enabled"] = settings.enabled;
         node["server"]  = settings.server;
         node["tzLabel"] = settings.tzLabel;
@@ -1627,7 +1627,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
         node["MQTTPublishFails"] = Mqtt::publish_fails();
         node["MQTTReconnects"]   = Mqtt::connect_count();
     }
-    EMSESP::esp8266React.getMqttSettingsService()->read([&](const MqttSettings & settings) {
+    EMSESP::esp32React.getMqttSettingsService()->read([&](const MqttSettings & settings) {
         node["enabled"]               = settings.enabled;
         node["clientID"]              = settings.clientId;
         node["keepAlive"]             = settings.keepAlive;

@@ -1,6 +1,6 @@
 #include "MqttStatus.h"
 
-#include "../../src/emsesp_stub.hpp"
+#include "../src/emsesp_stub.hpp"
 
 MqttStatus::MqttStatus(AsyncWebServer * server, MqttSettingsService * mqttSettingsService, SecurityManager * securityManager)
     : _mqttSettingsService(mqttSettingsService) {

@@ -1,5 +1,5 @@
-#ifndef ESP8266React_h
-#define ESP8266React_h
+#ifndef ESP32React_h
+#define ESP32React_h
 
 #include <list>
 
@@ -97,9 +97,9 @@ class DummySettingsService : public StatefulService<DummySettings> {
 #define NTPSettings DummySettings
 #define APSettings DummySettings
 
-class ESP8266React {
+class ESP32React {
   public:
-    ESP8266React(AsyncWebServer * server, FS * fs)
+    ESP32React(AsyncWebServer * server, FS * fs)
         : _settings(server, fs, nullptr)
         , _securitySettingsService(server, fs){};
 

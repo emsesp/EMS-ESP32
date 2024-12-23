@@ -30,7 +30,8 @@ WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * se
     server->on(EMSESP_SYSTEM_STATUS_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { systemStatus(request); });
 
     // POST - generic action handler
-    server->on(EMSESP_ACTION_SERVICE_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { action(request, json); });
+    // TODO fix
+    // server->on(EMSESP_ACTION_SERVICE_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { action(request, json); });
 }
 
 // /rest/systemStatus
@@ -72,7 +73,7 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     }
 #endif
 
-    root["ap_status"] = EMSESP::esp8266React.apStatus();
+    root["ap_status"] = EMSESP::esp32React.apStatus();
 
     if (emsesp::EMSESP::system_.ethernet_connected()) {
         root["network_status"] = 10; // custom code #10 - ETHERNET_STATUS_CONNECTED

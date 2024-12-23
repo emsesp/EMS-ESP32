@@ -28,9 +28,7 @@ WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securi
     jsonHandler->setMethod(HTTP_POST);
     server->addHandler(jsonHandler);
 
-
-
-    // TODO to fix
+    // TODO to fix rest
 
     // server->on(EMSESP_WRITE_DEVICE_VALUE_SERVICE_PATH,
     //            securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_device_value(request, json); },
@@ -46,6 +44,22 @@ WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securi
     server->on(EMSESP_DEVICE_DATA_SERVICE_PATH,
                HTTP_GET,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { device_data(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
+
+    // uses msgpack in send
+    //     AsyncCallbackMessagePackWebHandler* msgPackHandler = new AsyncCallbackMessagePackWebHandler(EMSESP_DEVICE_DATA_SERVICE_PATH);
+
+    //      msgPackHandler->onRequest([](AsyncWebServerRequest* request, JsonVariant& json) {
+    //     // JsonObject jsonObj = json.as<JsonObject>();
+    //     // ...
+
+    //     AsyncMessagePackResponse* response = new AsyncMessagePackResponse();
+    //     JsonObject root = response->getRoot().to<JsonObject>();
+    //     root["hello"] = "world";
+    //     response->setLength();
+    //     request->send(response);
+    //   });
+    //   server.addHandler(msgPackHandler);
+
 
     server->on(EMSESP_CORE_DATA_SERVICE_PATH,
                HTTP_GET,
@@ -172,7 +186,10 @@ void WebDataService::device_data(AsyncWebServerRequest * request) {
     if (request->hasParam(F_(id))) {
         id = Helpers::atoint(request->getParam(F_(id))->value().c_str()); // get id from url
 
-        auto * response = new AsyncJsonResponse(false, true); // use msgPack
+        // auto * response = new AsyncJsonResponse(false, true); // use msgPack
+
+        auto * response = new AsyncMessagePackResponse();
+
 
         // check size
         // while (!response) {
@@ -357,7 +374,8 @@ void WebDataService::write_analog_sensor(AsyncWebServerRequest * request, JsonVa
 // this is used in the dashboard and contains all ems device information
 // /dashboardData endpoint
 void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
-    auto * response = new AsyncJsonResponse(true, true); // its an Array and also msgpack'd
+    // auto * response = new AsyncJsonResponse(true, true); // its an Array and also msgpack'd
+    AsyncMessagePackResponse* response = new AsyncMessagePackResponse();
 
 #if defined(EMSESP_STANDALONE)
     JsonDocument doc;

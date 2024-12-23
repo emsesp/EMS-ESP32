@@ -1,5 +1,5 @@
-#ifndef ESP8266React_h
-#define ESP8266React_h
+#ifndef ESP32React_h
+#define ESP32React_h
 
 #include "APSettingsService.h"
 #include "APStatus.h"
@@ -15,12 +15,14 @@
 #include "NetworkStatus.h"
 
 #include <Arduino.h>
+#include <AsyncJson.h>
+#include <AsyncMessagePack.h>
 #include <AsyncTCP.h>
 #include <WiFi.h>
 
-class ESP8266React {
+class ESP32React {
   public:
-    ESP8266React(AsyncWebServer * server, FS * fs);
+    ESP32React(AsyncWebServer * server, FS * fs);
 
     void begin();
     void loop();

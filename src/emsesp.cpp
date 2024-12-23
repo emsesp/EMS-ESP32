@@ -32,26 +32,26 @@ AsyncWebServer webServer(80);
 
 #if defined(EMSESP_STANDALONE)
 FS                      dummyFS;
-ESP8266React            EMSESP::esp8266React(&webServer, &dummyFS);
-WebSettingsService      EMSESP::webSettingsService      = WebSettingsService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
-WebCustomizationService EMSESP::webCustomizationService = WebCustomizationService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
-WebSchedulerService     EMSESP::webSchedulerService     = WebSchedulerService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
-WebCustomEntityService  EMSESP::webCustomEntityService  = WebCustomEntityService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
-WebModulesService       EMSESP::webModulesService       = WebModulesService(&webServer, &dummyFS, EMSESP::esp8266React.getSecurityManager());
+ESP32React            EMSESP::esp32React(&webServer, &dummyFS);
+WebSettingsService      EMSESP::webSettingsService      = WebSettingsService(&webServer, &dummyFS, EMSESP::esp32React.getSecurityManager());
+WebCustomizationService EMSESP::webCustomizationService = WebCustomizationService(&webServer, &dummyFS, EMSESP::esp32React.getSecurityManager());
+WebSchedulerService     EMSESP::webSchedulerService     = WebSchedulerService(&webServer, &dummyFS, EMSESP::esp32React.getSecurityManager());
+WebCustomEntityService  EMSESP::webCustomEntityService  = WebCustomEntityService(&webServer, &dummyFS, EMSESP::esp32React.getSecurityManager());
+WebModulesService       EMSESP::webModulesService       = WebModulesService(&webServer, &dummyFS, EMSESP::esp32React.getSecurityManager());
 #else
-ESP8266React            EMSESP::esp8266React(&webServer, &LittleFS);
-WebSettingsService      EMSESP::webSettingsService      = WebSettingsService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
-WebCustomizationService EMSESP::webCustomizationService = WebCustomizationService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
-WebSchedulerService     EMSESP::webSchedulerService     = WebSchedulerService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
-WebCustomEntityService  EMSESP::webCustomEntityService  = WebCustomEntityService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
-WebModulesService       EMSESP::webModulesService       = WebModulesService(&webServer, &LittleFS, EMSESP::esp8266React.getSecurityManager());
+ESP32React            EMSESP::esp32React(&webServer, &LittleFS);
+WebSettingsService      EMSESP::webSettingsService      = WebSettingsService(&webServer, &LittleFS, EMSESP::esp32React.getSecurityManager());
+WebCustomizationService EMSESP::webCustomizationService = WebCustomizationService(&webServer, &LittleFS, EMSESP::esp32React.getSecurityManager());
+WebSchedulerService     EMSESP::webSchedulerService     = WebSchedulerService(&webServer, &LittleFS, EMSESP::esp32React.getSecurityManager());
+WebCustomEntityService  EMSESP::webCustomEntityService  = WebCustomEntityService(&webServer, &LittleFS, EMSESP::esp32React.getSecurityManager());
+WebModulesService       EMSESP::webModulesService       = WebModulesService(&webServer, &LittleFS, EMSESP::esp32React.getSecurityManager());
 #endif
 
-WebActivityService EMSESP::webActivityService = WebActivityService(&webServer, EMSESP::esp8266React.getSecurityManager());
-WebStatusService   EMSESP::webStatusService   = WebStatusService(&webServer, EMSESP::esp8266React.getSecurityManager());
-WebDataService     EMSESP::webDataService     = WebDataService(&webServer, EMSESP::esp8266React.getSecurityManager());
-WebAPIService      EMSESP::webAPIService      = WebAPIService(&webServer, EMSESP::esp8266React.getSecurityManager());
-WebLogService      EMSESP::webLogService      = WebLogService(&webServer, EMSESP::esp8266React.getSecurityManager());
+WebActivityService EMSESP::webActivityService = WebActivityService(&webServer, EMSESP::esp32React.getSecurityManager());
+WebStatusService   EMSESP::webStatusService   = WebStatusService(&webServer, EMSESP::esp32React.getSecurityManager());
+WebDataService     EMSESP::webDataService     = WebDataService(&webServer, EMSESP::esp32React.getSecurityManager());
+WebAPIService      EMSESP::webAPIService      = WebAPIService(&webServer, EMSESP::esp32React.getSecurityManager());
+WebLogService      EMSESP::webLogService      = WebLogService(&webServer, EMSESP::esp32React.getSecurityManager());
 
 using DeviceFlags = EMSdevice;
 using DeviceType  = EMSdevice::DeviceType;
@@ -1630,7 +1630,7 @@ void EMSESP::start() {
     webLogService.begin();
 
     // loads core system services settings (network, mqtt, ap, ntp etc)
-    esp8266React.begin();
+    esp32React.begin();
 
 #ifndef EMSESP_STANDALONE
     LOG_INFO("EMS-ESP version %s (%s partition)", EMSESP_APP_VERSION,
@@ -1706,7 +1706,7 @@ void EMSESP::start() {
 
 // main loop calling all services
 void EMSESP::loop() {
-    esp8266React.loop(); // web services
+    esp32React.loop(); // web services
     system_.loop();      // does LED and checks system health, and syslog service
 
     // if we're doing an OTA upload, skip everything except from console refresh

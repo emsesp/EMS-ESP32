@@ -1,6 +1,7 @@
 #include "NetworkStatus.h"
 
-#include "../../src/emsesp_stub.hpp"
+#include "../src/emsesp_stub.hpp"
+
 #ifdef TASMOTA_SDK
 #include "lwip/dns.h"
 #endif
@@ -65,7 +66,7 @@ void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {
         root["ssid"]            = WiFi.SSID();
         root["bssid"]           = WiFi.BSSIDstr();
         root["channel"]         = WiFi.channel();
-        root["reconnect_count"] = emsesp::EMSESP::esp8266React.getWifiReconnects();
+        root["reconnect_count"] = emsesp::EMSESP::esp32React.getWifiReconnects();
         root["subnet_mask"]     = WiFi.subnetMask().toString();
 
         if (WiFi.gatewayIP() != INADDR_NONE) {

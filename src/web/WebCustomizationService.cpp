@@ -33,12 +33,15 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
     server->on(EMSESP_RESET_CUSTOMIZATION_SERVICE_PATH,
                HTTP_POST,
                securityManager->wrapRequest([this](AsyncWebServerRequest * request) { reset_customization(request); }, AuthenticationPredicates::IS_ADMIN));
-    server->on(EMSESP_WRITE_DEVICE_NAME_PATH,
-               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { writeDeviceName(request, json); },
-                                             AuthenticationPredicates::IS_AUTHENTICATED));
-    server->on(EMSESP_CUSTOMIZATION_ENTITIES_PATH,
-               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { customization_entities(request, json); },
-                                             AuthenticationPredicates::IS_AUTHENTICATED));
+
+    // TODO fix rest
+    // server->on(EMSESP_WRITE_DEVICE_NAME_PATH,
+    //            securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { writeDeviceName(request, json); },
+    //                                          AuthenticationPredicates::IS_AUTHENTICATED));
+
+    // server->on(EMSESP_CUSTOMIZATION_ENTITIES_PATH,
+    //            securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { customization_entities(request, json); },
+    //                                          AuthenticationPredicates::IS_AUTHENTICATED));
 }
 
 // this creates the customization file, saving it to the FS
@@ -172,7 +175,8 @@ void WebCustomizationService::device_entities(AsyncWebServerRequest * request) {
         id = Helpers::atoint(request->getParam(F_(id))->value().c_str()); // get id from url
 #endif
 
-        auto * response = new AsyncJsonResponse(true, true); // array and msgpack
+        // auto * response = new AsyncJsonResponse(true, true); // array and msgpack
+        AsyncMessagePackResponse * response = new AsyncMessagePackResponse();
 
         // while (!response) {
         //     delete response;

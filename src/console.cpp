@@ -150,7 +150,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                 if (completed) {
                     uint64_t now = uuid::get_uptime_ms();
 
-                    EMSESP::esp8266React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
+                    EMSESP::esp32React.getSecuritySettingsService()->read([&](SecuritySettings & securitySettings) {
                         if (!password.empty() && (securitySettings.jwtSecret.equals(password.c_str()))) {
                             become_admin(shell);
                         } else {
@@ -174,7 +174,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                 shell.enter_password(F_(new_password_prompt2), [password1](Shell & shell, bool completed, const std::string & password2) {
                     if (completed) {
                         if (password1 == password2) {
-                            EMSESP::esp8266React.getSecuritySettingsService()->update([&](SecuritySettings & securitySettings) {
+                            EMSESP::esp32React.getSecuritySettingsService()->update([&](SecuritySettings & securitySettings) {
                                 securitySettings.jwtSecret = password2.c_str();
                                 return StateUpdateResult::CHANGED;
                             });
@@ -217,7 +217,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                                       shell.enter_password(F_(new_password_prompt2), [password1](Shell & shell, bool completed, const std::string & password2) {
                                           if (completed) {
                                               if (password1 == password2) {
-                                                  EMSESP::esp8266React.getNetworkSettingsService()->updateWithoutPropagation(
+                                                  EMSESP::esp32React.getNetworkSettingsService()->updateWithoutPropagation(
                                                       [&](NetworkSettings & networkSettings) {
                                                           networkSettings.password = password2.c_str();
                                                           return StateUpdateResult::CHANGED;
@@ -241,7 +241,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                               shell.println("The network connection will be reset...");
                               Shell::loop_all();
                               delay(1000); // wait a second
-                              EMSESP::esp8266React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
+                              EMSESP::esp32React.getNetworkSettingsService()->update([&](NetworkSettings & networkSettings) {
                                   networkSettings.hostname = arguments.front().c_str();
                                   return StateUpdateResult::CHANGED;
                               });
@@ -252,7 +252,7 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                           string_vector{F_(set), F_(wifi), F_(ssid)},
                           {F_(name_mandatory)},
                           [](Shell & shell, const std::vector<std::string> & arguments) {
-                              EMSESP::esp8266React.getNetworkSettingsService()->updateWithoutPropagation([&](NetworkSettings & networkSettings) {
+                              EMSESP::esp32React.getNetworkSettingsService()->updateWithoutPropagation([&](NetworkSettings & networkSettings) {
                                   networkSettings.ssid = arguments.front().c_str();
                                   return StateUpdateResult::CHANGED;
                               });
@@ -594,7 +594,7 @@ void EMSESPShell::display_banner() {
     println();
 
     // set console name
-    EMSESP::esp8266React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) { console_hostname_ = networkSettings.hostname.c_str(); });
+    EMSESP::esp32React.getNetworkSettingsService()->read([&](NetworkSettings & networkSettings) { console_hostname_ = networkSettings.hostname.c_str(); });
     if (console_hostname_.empty()) {
         console_hostname_ = "ems-esp";
     }

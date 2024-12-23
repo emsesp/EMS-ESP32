@@ -3,7 +3,9 @@
 AuthenticationService::AuthenticationService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager) {
     server->on(VERIFY_AUTHORIZATION_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { verifyAuthorization(request); });
-    server->on(SIGN_IN_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { signIn(request, json); });
+    
+    // TODO fix
+    // server->on(SIGN_IN_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { signIn(request, json); });
 }
 
 // Verifies that the request supplied a valid JWT.

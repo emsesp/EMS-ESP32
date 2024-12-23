@@ -16,7 +16,7 @@ void SecuritySettingsService::begin() {
 }
 
 Authentication SecuritySettingsService::authenticateRequest(AsyncWebServerRequest * request) {
-    AsyncWebHeader * authorizationHeader = request->getHeader(AUTHORIZATION_HEADER);
+    auto authorizationHeader = request->getHeader(AUTHORIZATION_HEADER);
     if (authorizationHeader) {
         String value = authorizationHeader->value();
         if (value.startsWith(AUTHORIZATION_HEADER_PREFIX)) {
@@ -24,8 +24,8 @@ Authentication SecuritySettingsService::authenticateRequest(AsyncWebServerReques
             return authenticateJWT(value);
         }
     } else if (request->hasParam(ACCESS_TOKEN_PARAMATER)) {
-        AsyncWebParameter * tokenParamater = request->getParam(ACCESS_TOKEN_PARAMATER);
-        String              value          = tokenParamater->value();
+        auto   tokenParamater = request->getParam(ACCESS_TOKEN_PARAMATER);
+        String value          = tokenParamater->value();
         return authenticateJWT(value);
     }
     return {};
@@ -108,8 +108,7 @@ ArJsonRequestHandlerFunction SecuritySettingsService::wrapCallback(ArJsonRequest
 }
 
 void SecuritySettingsService::generateToken(AsyncWebServerRequest * request) {
-    // TODO fix
-    AsyncWebParameter * usernameParam = request->getParam("username");
+    auto usernameParam = request->getParam("username");
     for (const User & _user : _state.users) {
         if (_user.username == usernameParam->value()) {
             auto *     response = new AsyncJsonResponse(false);

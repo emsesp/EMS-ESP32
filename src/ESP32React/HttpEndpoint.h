@@ -29,9 +29,13 @@ class HttpEndpoint {
         , _stateUpdater(stateUpdater)
         , _statefulService(statefulService) {
         // Create handler for both GET and POST endpoints
-        server->on(servicePath.c_str(),
-                   securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { handleRequest(request, json); },
-                                                 authenticationPredicate));
+
+        // TODO abstract out to helper
+        AsyncCallbackJsonWebHandler * jsonHandler = new AsyncCallbackJsonWebHandler(servicePath.c_str());
+        jsonHandler->onRequest(securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { handleRequest(request, json); },
+                                                             authenticationPredicate));
+        jsonHandler->setMethod(HTTP_ANY);
+        server->addHandler(jsonHandler);
     }
 
   protected:

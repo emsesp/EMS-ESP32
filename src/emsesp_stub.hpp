@@ -22,11 +22,11 @@
 #include "mqtt.h"
 #include "temperaturesensor.h"
 #include "version.h"
-#include "default_settings.h"
-#include "helpers.h"
-#include "ESP8266React.h"
+#include "ESP32React/ESP32React.h"
 
 #include <uuid/log.h>
+
+using uuid::log::Logger;
 
 // forward declarator
 // used to bind EMS-ESP functions to external frameworks
@@ -36,9 +36,8 @@ class EMSESP {
     static Mqtt              mqtt_;
     static System            system_;
     static TemperatureSensor temperaturesensor_;
-
-    static uuid::log::Logger logger();
-    static ESP8266React      esp8266React;
+    static Logger            logger();
+    static ESP32React        esp32React;
 };
 
 } // namespace emsesp

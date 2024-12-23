@@ -44,7 +44,7 @@ MAKEFLAGS += -j $(JOBS) -l $(JOBS)
 #TARGET    := $(notdir $(CURDIR))
 TARGET    := emsesp
 BUILD     := build
-SOURCES   := src src/* lib_standalone lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src src/devices lib/ArduinoJson/src lib/PButton lib/semver lib/espMqttClient/src lib/espMqttClient/src/*
+SOURCES   := src/* lib_standalone lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src src/devices lib/ArduinoJson/src lib/PButton lib/semver lib/espMqttClient/src lib/espMqttClient/src/*
 INCLUDES  := src lib_standalone lib/espMqttClient/src lib/espMqttClient/src/Transport lib/ArduinoJson/src lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src lib/uuid-telnet/src lib/uuid-syslog/src lib/semver lib/* src/devices
 LIBRARIES :=
 
