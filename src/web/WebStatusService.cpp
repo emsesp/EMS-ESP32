@@ -68,6 +68,12 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
         }
         return 0;
     }();
+    time_t now = time(nullptr);
+    if (now > 1500000000L) {
+        char t[25];
+        strftime(t, sizeof(t), "%FT%T", localtime(&now));
+        root["ntp_time"] = t;
+    }
 #endif
 
     root["ap_status"] = EMSESP::esp8266React.apStatus();
