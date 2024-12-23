@@ -3748,6 +3748,9 @@ bool Thermostat::set_temperature(const float temperature, const uint8_t mode, co
             break;
         }
 
+    } else if (model == EMSdevice::EMS_DEVICE_FLAG_CR11) {
+        offset = 10; // just seltemp write to manualtemp
+
     } else if (isRC300() || (model == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
         validate_typeid = set_typeids[hc->hc()];
         switch (mode) {
