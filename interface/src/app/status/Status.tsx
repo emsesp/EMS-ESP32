@@ -38,6 +38,7 @@ import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import { NTPSyncStatus, NetworkConnectionStatus } from 'types';
 import { useInterval } from 'utils';
+import { formatDateTime } from 'utils/time';
 
 import RestartMonitor from './RestartMonitor';
 
@@ -138,7 +139,7 @@ const SystemStatus = () => {
       case NTPSyncStatus.NTP_INACTIVE:
         return LL.INACTIVE(0);
       case NTPSyncStatus.NTP_ACTIVE:
-        return LL.ACTIVE();
+        return LL.ACTIVE() + (data.ntp_time !== undefined) ? ' (' + formatDateTime(data.ntp_time) + ')' : '';
       default:
         return LL.UNKNOWN();
     }
