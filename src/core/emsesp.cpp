@@ -32,14 +32,14 @@ AsyncWebServer webServer(80);
 
 #if defined(EMSESP_STANDALONE)
 FS                      dummyFS;
-ESP32React            EMSESP::esp32React(&webServer, &dummyFS);
+ESP32React              EMSESP::esp32React(&webServer, &dummyFS);
 WebSettingsService      EMSESP::webSettingsService      = WebSettingsService(&webServer, &dummyFS, EMSESP::esp32React.getSecurityManager());
 WebCustomizationService EMSESP::webCustomizationService = WebCustomizationService(&webServer, &dummyFS, EMSESP::esp32React.getSecurityManager());
 WebSchedulerService     EMSESP::webSchedulerService     = WebSchedulerService(&webServer, &dummyFS, EMSESP::esp32React.getSecurityManager());
 WebCustomEntityService  EMSESP::webCustomEntityService  = WebCustomEntityService(&webServer, &dummyFS, EMSESP::esp32React.getSecurityManager());
 WebModulesService       EMSESP::webModulesService       = WebModulesService(&webServer, &dummyFS, EMSESP::esp32React.getSecurityManager());
 #else
-ESP32React            EMSESP::esp32React(&webServer, &LittleFS);
+ESP32React              EMSESP::esp32React(&webServer, &LittleFS);
 WebSettingsService      EMSESP::webSettingsService      = WebSettingsService(&webServer, &LittleFS, EMSESP::esp32React.getSecurityManager());
 WebCustomizationService EMSESP::webCustomizationService = WebCustomizationService(&webServer, &LittleFS, EMSESP::esp32React.getSecurityManager());
 WebSchedulerService     EMSESP::webSchedulerService     = WebSchedulerService(&webServer, &LittleFS, EMSESP::esp32React.getSecurityManager());
@@ -1704,10 +1704,30 @@ void EMSESP::start() {
     LOG_INFO("Starting Web Server");
 }
 
+void EMSESP::start_serial_console() {
+    shell_ = std::make_shared<EMSESPConsole>(*this, serial_console_, true);
+    shell_->maximum_log_messages(100);
+    shell_->start();
+#if defined(EMSESP_DEBUG)
+    shell_->log_level(uuid::log::Level::DEBUG);
+    shell_->add_flags(CommandFlags::ADMIN); // always start in su/admin mode when compiled with debug
+#else
+    shell_->log_level(uuid::log::Level::TRACE);
+#endif
+}
+
+void EMSESP::shell_prompt() {
+#ifndef EMSESP_STANDALONE
+    serial_console_.println();
+    serial_console_.printf("EMS-ESP %s: press CTRL-D to activate this serial console", EMSESP_APP_VERSION);
+    serial_console_.println();
+#endif
+}
+
 // main loop calling all services
 void EMSESP::loop() {
     esp32React.loop(); // web services
-    system_.loop();      // does LED and checks system health, and syslog service
+    system_.loop();    // does LED and checks system health, and syslog service
 
     // if we're doing an OTA upload, skip everything except from console refresh
     static bool upload_status = true; // ready for any OTA uploads
@@ -1771,26 +1791,6 @@ void EMSESP::loop() {
             start_serial_console();
         }
     }
-}
-
-void EMSESP::start_serial_console() {
-    shell_ = std::make_shared<EMSESPConsole>(*this, serial_console_, true);
-    shell_->maximum_log_messages(100);
-    shell_->start();
-#if defined(EMSESP_DEBUG)
-    shell_->log_level(uuid::log::Level::DEBUG);
-    shell_->add_flags(CommandFlags::ADMIN); // always start in su/admin mode when compiled with debug
-#else
-    shell_->log_level(uuid::log::Level::TRACE);
-#endif
-}
-
-void EMSESP::shell_prompt() {
-#ifndef EMSESP_STANDALONE
-    serial_console_.println();
-    serial_console_.printf("EMS-ESP %s: press CTRL-D to activate this serial console", EMSESP_APP_VERSION);
-    serial_console_.println();
-#endif
 }
 
 } // namespace emsesp

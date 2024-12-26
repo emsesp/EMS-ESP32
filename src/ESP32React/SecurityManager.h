@@ -1,11 +1,11 @@
 #ifndef SecurityManager_h
 #define SecurityManager_h
 
-#include "Features.h"
 #include "ArduinoJsonJWT.h"
 
 #include <ESPAsyncWebServer.h>
 #include <AsyncJson.h>
+
 #include <list>
 
 #define ACCESS_TOKEN_PARAMATER "access_token"
@@ -64,35 +64,49 @@ class AuthenticationPredicates {
 
 class SecurityManager {
   public:
-    /*
-   * Authenticate, returning the user if found
-   */
+    // Authenticate, returning the user if found
     virtual Authentication authenticate(const String & username, const String & password) = 0;
 
-    /*
-   * Generate a JWT for the user provided
-   */
+    // Generate a JWT for the user provided
     virtual String generateJWT(const User * user) = 0;
 
-    /*
-   * Check the request header for the Authorization token
-   */
+    // Check the request header for the Authorization token
     virtual Authentication authenticateRequest(AsyncWebServerRequest * request) = 0;
 
-    /**
-   * Filter a request with the provided predicate, only returning true if the predicate matches.
-   */
+    // Filter a request with the provided predicate, only returning true if the predicate matches.
     virtual ArRequestFilterFunction filterRequest(AuthenticationPredicate predicate) = 0;
 
-    /**
-   * Wrap the provided request to provide validation against an AuthenticationPredicate.
-   */
+    // Wrap the provided request to provide validation against an AuthenticationPredicate.
     virtual ArRequestHandlerFunction wrapRequest(ArRequestHandlerFunction onRequest, AuthenticationPredicate predicate) = 0;
 
-    /**
-   * Wrap the provided json request callback to provide validation against an AuthenticationPredicate.
-   */
+    // Wrap the provided json request callback to provide validation against an AuthenticationPredicate.
     virtual ArJsonRequestHandlerFunction wrapCallback(ArJsonRequestHandlerFunction onRequest, AuthenticationPredicate predicate) = 0;
+
+    // Json endpoints - default POST
+    void addEndpoint(AsyncWebServer *             server,
+                     const String &               path,
+                     AuthenticationPredicate      predicate,
+                     ArJsonRequestHandlerFunction function,
+                     WebRequestMethodComposite    method = HTTP_POST) {
+        auto handler = new AsyncCallbackJsonWebHandler(path);
+        handler->onRequest(
+            wrapCallback([this, function](AsyncWebServerRequest * request, JsonVariant json) { function(request, json); }, AuthenticationPredicates::IS_ADMIN));
+        handler->setMethod(method);
+        server->addHandler(handler);
+    }
+
+    // non-Json endpoints - default GET
+    void addEndpoint(AsyncWebServer *          server,
+                     const String &            path,
+                     AuthenticationPredicate   predicate,
+                     ArRequestHandlerFunction  function,
+                     WebRequestMethodComposite method = HTTP_GET) {
+        auto * handler = new AsyncCallbackWebHandler();
+        handler->onRequest(wrapRequest([this, function](AsyncWebServerRequest * request) { function(request); }, predicate));
+        handler->setUri(path);
+        handler->setMethod(method);
+        server->addHandler(handler);
+    }
 };
 
 #endif

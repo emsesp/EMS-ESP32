@@ -1,15 +1,15 @@
 #include "NTPSettingsService.h"
 
-#include "../../src/emsesp_stub.hpp"
+#include <emsesp_stub.hpp>
 
 NTPSettingsService::NTPSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(NTPSettings::read, NTPSettings::update, this, server, NTP_SETTINGS_SERVICE_PATH, securityManager)
     , _fsPersistence(NTPSettings::read, NTPSettings::update, this, fs, NTP_SETTINGS_FILE)
     , _connected(false) {
-    // TODO fix
-    // server->on(TIME_PATH,
-    //            securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { configureTime(request, json); },
-    //                                          AuthenticationPredicates::IS_ADMIN));
+    // POST
+    securityManager->addEndpoint(server, TIME_PATH, AuthenticationPredicates::IS_ADMIN, [this](AsyncWebServerRequest * request, JsonVariant json) {
+        configureTime(request, json);
+    });
 
     WiFi.onEvent([this](WiFiEvent_t event, WiFiEventInfo_t info) { WiFiEvent(event); });
     addUpdateHandler([this] { configureNTP(); }, false);

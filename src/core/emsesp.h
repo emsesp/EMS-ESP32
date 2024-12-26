@@ -36,20 +36,25 @@
 #ifndef EMSESP_STANDALONE
 #include <uuid/telnet.h>
 #endif
+
+#ifndef EMSESP_STANDALONE
+#include "ESP32React/ESP32React.h"
+#else
+#include "../lib_standalone/ESP32React.h"
+#endif
+
 #include <Preferences.h>
 
-#include "ESP32React/ESP32React.h"
-
-#include "web/WebStatusService.h"
-#include "web/WebActivityService.h"
-#include "web/WebDataService.h"
-#include "web/WebSettingsService.h"
-#include "web/WebCustomizationService.h"
-#include "web/WebSchedulerService.h"
-#include "web/WebAPIService.h"
-#include "web/WebLogService.h"
-#include "web/WebCustomEntityService.h"
-#include "web/WebModulesService.h"
+#include "../web/WebStatusService.h"
+#include "../web/WebActivityService.h"
+#include "../web/WebDataService.h"
+#include "../web/WebSettingsService.h"
+#include "../web/WebCustomizationService.h"
+#include "../web/WebSchedulerService.h"
+#include "../web/WebAPIService.h"
+#include "../web/WebLogService.h"
+#include "../web/WebCustomEntityService.h"
+#include "../web/WebModulesService.h"
 
 #include "emsdevicevalue.h"
 #include "emsdevice.h"
@@ -65,7 +70,8 @@
 #include "shower.h"
 #include "roomcontrol.h"
 #include "command.h"
-#include "version.h"
+
+#include "../version.h"
 
 // Load external modules
 class Module {}; // forward declaration

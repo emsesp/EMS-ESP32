@@ -1,12 +1,12 @@
 #include "MqttStatus.h"
 
-#include "../src/emsesp_stub.hpp"
+#include <emsesp_stub.hpp>
 
 MqttStatus::MqttStatus(AsyncWebServer * server, MqttSettingsService * mqttSettingsService, SecurityManager * securityManager)
     : _mqttSettingsService(mqttSettingsService) {
-    server->on(MQTT_STATUS_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { mqttStatus(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
+    securityManager->addEndpoint(server, MQTT_STATUS_SERVICE_PATH, AuthenticationPredicates::IS_AUTHENTICATED, [this](AsyncWebServerRequest * request) {
+        mqttStatus(request);
+    });
 }
 
 void MqttStatus::mqttStatus(AsyncWebServerRequest * request) {

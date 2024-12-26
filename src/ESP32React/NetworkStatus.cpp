@@ -1,15 +1,15 @@
 #include "NetworkStatus.h"
 
-#include "../src/emsesp_stub.hpp"
+#include <emsesp_stub.hpp>
 
 #ifdef TASMOTA_SDK
 #include "lwip/dns.h"
 #endif
 
 NetworkStatus::NetworkStatus(AsyncWebServer * server, SecurityManager * securityManager) {
-    server->on(NETWORK_STATUS_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { networkStatus(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
+    securityManager->addEndpoint(server, NETWORK_STATUS_SERVICE_PATH, AuthenticationPredicates::IS_AUTHENTICATED, [this](AsyncWebServerRequest * request) {
+        networkStatus(request);
+    });
 }
 
 void NetworkStatus::networkStatus(AsyncWebServerRequest * request) {

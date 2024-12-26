@@ -24,11 +24,14 @@ namespace emsesp {
 
 WebLogService::WebLogService(AsyncWebServer * server, SecurityManager * securityManager)
     : events_(EMSESP_EVENT_SOURCE_LOG_PATH) {
-    // get & set settings
-    // TODO fix
-    // server->on(EMSESP_LOG_SETTINGS_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { getSetValues(request, json); });
+    // there is a GET and a POST for LogSettings endpoint, in one function
+    securityManager->addEndpoint(
+        server,
+        EMSESP_LOG_SETTINGS_PATH,
+        AuthenticationPredicates::IS_AUTHENTICATED,
+        [this](AsyncWebServerRequest * request, JsonVariant json) { getSetValues(request, json); },
+        HTTP_ANY);
 
-    // events_.setFilter(securityManager->filterRequest(AuthenticationPredicates::IS_ADMIN));
     server->addHandler(&events_);
 }
 

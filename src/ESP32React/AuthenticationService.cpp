@@ -2,10 +2,11 @@
 
 AuthenticationService::AuthenticationService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager) {
+    // none of these need authentication
     server->on(VERIFY_AUTHORIZATION_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { verifyAuthorization(request); });
-    
-    // TODO fix
-    // server->on(SIGN_IN_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { signIn(request, json); });
+    auto * handler = new AsyncCallbackJsonWebHandler(SIGN_IN_PATH);
+    handler->onRequest([this](AsyncWebServerRequest * request, JsonVariant json) { signIn(request, json); });
+    server->addHandler(handler);
 }
 
 // Verifies that the request supplied a valid JWT.

@@ -2,9 +2,9 @@
 
 APStatus::APStatus(AsyncWebServer * server, SecurityManager * securityManager, APSettingsService * apSettingsService)
     : _apSettingsService(apSettingsService) {
-    server->on(AP_STATUS_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { apStatus(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
+    securityManager->addEndpoint(server, AP_STATUS_SERVICE_PATH, AuthenticationPredicates::IS_AUTHENTICATED, [this](AsyncWebServerRequest * request) {
+        apStatus(request);
+    });
 }
 
 void APStatus::apStatus(AsyncWebServerRequest * request) {

@@ -26,7 +26,7 @@
 #include <semver200.h>
 
 #if defined(EMSESP_TEST)
-#include "test/test.h"
+#include "../test/test.h"
 #endif
 
 #ifndef EMSESP_STANDALONE

@@ -1,12 +1,13 @@
 #include "WiFiScanner.h"
 
 WiFiScanner::WiFiScanner(AsyncWebServer * server, SecurityManager * securityManager) {
-    server->on(SCAN_NETWORKS_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { scanNetworks(request); }, AuthenticationPredicates::IS_ADMIN));
-    server->on(LIST_NETWORKS_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { listNetworks(request); }, AuthenticationPredicates::IS_ADMIN));
+    securityManager->addEndpoint(server, SCAN_NETWORKS_SERVICE_PATH, AuthenticationPredicates::IS_ADMIN, [this](AsyncWebServerRequest * request) {
+        scanNetworks(request);
+    });
+
+    securityManager->addEndpoint(server, LIST_NETWORKS_SERVICE_PATH, AuthenticationPredicates::IS_ADMIN, [this](AsyncWebServerRequest * request) {
+        listNetworks(request);
+    });
 };
 
 void WiFiScanner::scanNetworks(AsyncWebServerRequest * request) {

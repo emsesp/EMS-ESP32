@@ -206,6 +206,28 @@ class AsyncWebHandler {
     }
 };
 
+class AsyncCallbackJsonWebHandler : public AsyncWebHandler {
+  protected:
+    String _uri;
+    WebRequestMethodComposite _method;
+    ArJsonRequestHandlerFunction _onRequest;
+    size_t _contentLength;
+    size_t _maxContentLength;
+
+  public:
+    AsyncCallbackJsonWebHandler(const String& uri, ArJsonRequestHandlerFunction onRequest = nullptr);
+
+    void setMethod(WebRequestMethodComposite method) { _method = method; }
+    void setMaxContentLength(int maxContentLength) { _maxContentLength = maxContentLength; }
+    void onRequest(ArJsonRequestHandlerFunction fn) { _onRequest = fn; }
+
+    bool canHandle(AsyncWebServerRequest* request) const override final;
+    void handleRequest(AsyncWebServerRequest* request) override final;
+    void handleUpload(__unused AsyncWebServerRequest* request, __unused const String& filename, __unused size_t index, __unused uint8_t* data, __unused size_t len, __unused bool final) override final {}
+    void handleBody(AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total) override final;
+    bool isRequestHandlerTrivial() const override final { return !_onRequest; }
+};
+
 class AsyncWebServerResponse {
   protected:
     int    _code;
@@ -226,7 +248,6 @@ class AsyncWebServerResponse {
 typedef std::function<void(AsyncWebServerRequest * request)> ArRequestHandlerFunction;
 typedef std::function<void(AsyncWebServerRequest * request, const String & filename, size_t index, uint8_t * data, size_t len, bool final)> ArUploadHandlerFunction;
 typedef std::function<void(AsyncWebServerRequest * request, uint8_t * data, size_t len, size_t index, size_t total)> ArBodyHandlerFunction;
-typedef std::function<void(AsyncWebServerRequest * request, JsonVariant json)> ArJsonRequestHandlerFunction; // added by proddy for EMS-ESP
 
 class AsyncWebServer {
   protected:
@@ -246,7 +267,6 @@ class AsyncWebServer {
     }
 
     void on(const char * uri, WebRequestMethodComposite method, ArRequestHandlerFunction onRequest) {};
-    void on(const char * uri, ArJsonRequestHandlerFunction onRequest) {}; // added by proddy for EMS-ESP
 };
 
 

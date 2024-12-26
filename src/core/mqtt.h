@@ -111,7 +111,7 @@ class Mqtt {
 #endif
 
     static bool connected() {
-        return mqttClient_->connected();
+        return mqttClient_ ? mqttClient_->connected() : false;
     }
 
     static MqttClient * client() {

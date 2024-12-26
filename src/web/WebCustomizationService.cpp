@@ -25,24 +25,29 @@ bool WebCustomization::_start = true;
 WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _fsPersistence(WebCustomization::read, WebCustomization::update, this, fs, EMSESP_CUSTOMIZATION_FILE) {
     // GET
-    server->on(EMSESP_DEVICE_ENTITIES_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { device_entities(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
+    securityManager->addEndpoint(server, EMSESP_DEVICE_ENTITIES_PATH, AuthenticationPredicates::IS_AUTHENTICATED, [this](AsyncWebServerRequest * request) {
+        device_entities(request);
+    });
 
     // POST
-    server->on(EMSESP_RESET_CUSTOMIZATION_SERVICE_PATH,
-               HTTP_POST,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { reset_customization(request); }, AuthenticationPredicates::IS_ADMIN));
+    securityManager->addEndpoint(
+        server,
+        EMSESP_RESET_CUSTOMIZATION_SERVICE_PATH,
+        AuthenticationPredicates::IS_ADMIN,
+        [this](AsyncWebServerRequest * request) { reset_customization(request); },
+        HTTP_POST); // force POST
 
-    // TODO fix rest
-    // server->on(EMSESP_WRITE_DEVICE_NAME_PATH,
-    //            securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { writeDeviceName(request, json); },
-    //                                          AuthenticationPredicates::IS_AUTHENTICATED));
+    securityManager->addEndpoint(server,
+                                 EMSESP_WRITE_DEVICE_NAME_PATH,
+                                 AuthenticationPredicates::IS_AUTHENTICATED,
+                                 [this](AsyncWebServerRequest * request, JsonVariant json) { writeDeviceName(request, json); });
 
-    // server->on(EMSESP_CUSTOMIZATION_ENTITIES_PATH,
-    //            securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { customization_entities(request, json); },
-    //                                          AuthenticationPredicates::IS_AUTHENTICATED));
+    securityManager->addEndpoint(server,
+                                 EMSESP_CUSTOMIZATION_ENTITIES_PATH,
+                                 AuthenticationPredicates::IS_AUTHENTICATED,
+                                 [this](AsyncWebServerRequest * request, JsonVariant json) { customization_entities(request, json); });
 }
+
 
 // this creates the customization file, saving it to the FS
 void WebCustomization::read(WebCustomization & customizations, JsonObject root) {
@@ -175,8 +180,7 @@ void WebCustomizationService::device_entities(AsyncWebServerRequest * request) {
         id = Helpers::atoint(request->getParam(F_(id))->value().c_str()); // get id from url
 #endif
 
-        // auto * response = new AsyncJsonResponse(true, true); // array and msgpack
-        AsyncMessagePackResponse * response = new AsyncMessagePackResponse();
+        auto * response = new AsyncMessagePackResponse(); // array and msgpack
 
         // while (!response) {
         //     delete response;

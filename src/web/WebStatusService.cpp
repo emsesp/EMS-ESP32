@@ -27,11 +27,17 @@ namespace emsesp {
 WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager) {
     // GET
-    server->on(EMSESP_SYSTEM_STATUS_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { systemStatus(request); });
+    securityManager->addEndpoint(server, EMSESP_SYSTEM_STATUS_SERVICE_PATH, AuthenticationPredicates::IS_AUTHENTICATED, [this](AsyncWebServerRequest * request) {
+        systemStatus(request);
+    });
 
-    // POST - generic action handler
-    // TODO fix
-    // server->on(EMSESP_ACTION_SERVICE_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { action(request, json); });
+    // POST - generic action handler, handles both GET and POST
+    securityManager->addEndpoint(
+        server,
+        EMSESP_ACTION_SERVICE_PATH,
+        AuthenticationPredicates::IS_AUTHENTICATED,
+        [this](AsyncWebServerRequest * request, JsonVariant json) { action(request, json); },
+        HTTP_ANY);
 }
 
 // /rest/systemStatus

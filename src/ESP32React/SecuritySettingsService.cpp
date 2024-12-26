@@ -5,6 +5,7 @@ SecuritySettingsService::SecuritySettingsService(AsyncWebServer * server, FS * f
     , _fsPersistence(SecuritySettings::read, SecuritySettings::update, this, fs, SECURITY_SETTINGS_FILE)
     , _jwtHandler(FACTORY_JWT_SECRET) {
     addUpdateHandler([this] { configureJWTHandler(); }, false);
+
     server->on(GENERATE_TOKEN_PATH,
                HTTP_GET,
                SecuritySettingsService::wrapRequest([this](AsyncWebServerRequest * request) { generateToken(request); }, AuthenticationPredicates::IS_ADMIN));

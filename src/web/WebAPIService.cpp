@@ -32,11 +32,11 @@ WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * security
         parse(request, input_doc.to<JsonObject>());
     }
 #endif
-    AsyncCallbackJsonWebHandler * jsonHandler = new AsyncCallbackJsonWebHandler(EMSESP_API_SERVICE_PATH);
 
     // POST|GET api/
     // POST|GET api/{device}
     // POST|GET api/{device}/{entity}
+    AsyncCallbackJsonWebHandler * jsonHandler = new AsyncCallbackJsonWebHandler(EMSESP_API_SERVICE_PATH);
     jsonHandler->setMethod(HTTP_POST | HTTP_GET);
     jsonHandler->onRequest([this](AsyncWebServerRequest * request, JsonVariant & input) {
         // if no body then treat it as a secure GET
@@ -48,7 +48,6 @@ WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * security
             // HTTP_POST
             input = input.as<JsonObject>(); // extract values from the json. these will be used as default values
         }
-
         parse(request, input);
     });
     server->addHandler(jsonHandler);

@@ -26,9 +26,6 @@ SOFTWARE.
 #include <map>
 #include "semver200.h"
 
-// TODO fix
-// #include "../../src/emsesp_stub.hpp" // for logging
-
 using namespace std;
 
 namespace version {
@@ -53,7 +50,6 @@ inline Transition mkx(const char c, Parser_state p, State_transition_hook pth) {
 }
 
 inline void Parse_error(const std::string & s) {
-    // TODO fix
     // emsesp::EMSESP::logger().err("parse error: %s", s.c_str());
 }
 

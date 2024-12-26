@@ -20,10 +20,9 @@
 #include "console.h"
 #include "console_stream.h"
 #include "emsesp.h"
-#include "version.h"
 
 #if defined(EMSESP_TEST)
-#include "test/test.h"
+#include "../test/test.h"
 #endif
 
 using ::uuid::console::Commands;

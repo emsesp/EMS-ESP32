@@ -1,5 +1,6 @@
 #include "MqttSettingsService.h"
-#include "../src/emsesp_stub.hpp"
+
+#include <emsesp_stub.hpp>
 
 MqttSettingsService::MqttSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(MqttSettings::read, MqttSettings::update, this, server, MQTT_SETTINGS_SERVICE_PATH, securityManager)

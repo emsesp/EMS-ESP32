@@ -1,6 +1,6 @@
 #include "NetworkSettingsService.h"
 
-#include "../src/emsesp_stub.hpp"
+#include <emsesp_stub.hpp>
 
 NetworkSettingsService::NetworkSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(NetworkSettings::read, NetworkSettings::update, this, server, NETWORK_SETTINGS_SERVICE_PATH, securityManager)
@@ -206,7 +206,7 @@ void NetworkSettingsService::mDNS_start() const {
         MDNS.addService("http", "tcp", 80);   // add our web server and rest API
         MDNS.addService("telnet", "tcp", 23); // add our telnet console
 
-        MDNS.addServiceTxt("http", "tcp", "version", EMSESP_APP_VERSION);
+        // MDNS.addServiceTxt("http", "tcp", "version", EMSESP_APP_VERSION);
         MDNS.addServiceTxt("http", "tcp", "address", address_s.c_str());
 
         emsesp::EMSESP::logger().info("Starting mDNS Responder service");

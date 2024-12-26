@@ -22,7 +22,7 @@ pio_local.ini
 build/
 dist/
 /data/www
-/lib/framework/WWWData.h
+/src/ESP32React/WWWData.h
 /interface/build
 node_modules
 /interface/.eslintcache

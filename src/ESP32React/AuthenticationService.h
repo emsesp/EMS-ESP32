@@ -1,7 +1,6 @@
 #ifndef AuthenticationService_H_
 #define AuthenticationService_H_
 
-#include "Features.h"
 #include "SecurityManager.h"
 
 #include <ESPAsyncWebServer.h>
@@ -18,6 +17,7 @@ class AuthenticationService {
 
     void signIn(AsyncWebServerRequest * request, JsonVariant json);
     void verifyAuthorization(AsyncWebServerRequest * request);
+
 };
 
 #endif

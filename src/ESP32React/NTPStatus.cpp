@@ -1,13 +1,13 @@
 #include "NTPStatus.h"
 
-#include "../src/emsesp_stub.hpp"
+#include <emsesp_stub.hpp>
 
 #include <array>
 
 NTPStatus::NTPStatus(AsyncWebServer * server, SecurityManager * securityManager) {
-    server->on(NTP_STATUS_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { ntpStatus(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
+    securityManager->addEndpoint(server, NTP_STATUS_SERVICE_PATH, AuthenticationPredicates::IS_AUTHENTICATED, [this](AsyncWebServerRequest * request) {
+        ntpStatus(request);
+    });
 }
 
 /*

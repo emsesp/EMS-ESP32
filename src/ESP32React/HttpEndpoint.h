@@ -8,7 +8,6 @@
 #include "StatefulService.h"
 
 #define HTTP_ENDPOINT_ORIGIN_ID "http"
-#define HTTPS_ENDPOINT_ORIGIN_ID "https"
 
 template <class T>
 class HttpEndpoint {
@@ -29,13 +28,9 @@ class HttpEndpoint {
         , _stateUpdater(stateUpdater)
         , _statefulService(statefulService) {
         // Create handler for both GET and POST endpoints
-
-        // TODO abstract out to helper
-        AsyncCallbackJsonWebHandler * jsonHandler = new AsyncCallbackJsonWebHandler(servicePath.c_str());
-        jsonHandler->onRequest(securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { handleRequest(request, json); },
-                                                             authenticationPredicate));
-        jsonHandler->setMethod(HTTP_ANY);
-        server->addHandler(jsonHandler);
+        securityManager->addEndpoint(server, servicePath, authenticationPredicate, [this](AsyncWebServerRequest * request, JsonVariant json) {
+            handleRequest(request, json);
+        }, HTTP_ANY); // ALL methods
     }
 
   protected:

@@ -98,11 +98,8 @@ char * Helpers::ultostr(char * ptr, uint32_t value, const uint8_t base) {
 }
 #endif
 
-/**
- * fast itoa returning a std::string
- * http://www.strudel.org.uk/itoa/
- * 
- */
+// fast itoa returning a std::string
+// http://www.strudel.org.uk/itoa/
 std::string Helpers::itoa(int16_t value) {
     std::string buf;
     buf.reserve(25); // Pre-allocate enough space.

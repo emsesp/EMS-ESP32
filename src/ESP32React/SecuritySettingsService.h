@@ -1,7 +1,6 @@
 #ifndef SecuritySettingsService_h
 #define SecuritySettingsService_h
 
-#include "Features.h"
 #include "SecurityManager.h"
 #include "HttpEndpoint.h"
 #include "FSPersistence.h"

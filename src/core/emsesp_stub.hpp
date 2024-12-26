@@ -21,7 +21,7 @@
 #include "system.h"
 #include "mqtt.h"
 #include "temperaturesensor.h"
-#include "version.h"
+// #include "../version.h"
 #include "ESP32React/ESP32React.h"
 
 #include <uuid/log.h>
