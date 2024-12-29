@@ -364,7 +364,7 @@ MAKE_ENUM(enum_hybridStrategy1, FL_(cost_optimized), FL_(co2_optimized), FL_(out
 MAKE_ENUM(enum_lowNoiseMode, FL_(off), FL_(reduced_output), FL_(switchoff), FL_(perm))
 
 // heat pump
-MAKE_ENUM(enum_hpactivity, FL_(none), FL_(heating), FL_(cooling), FL_(hot_water), FL_(pool), FL_(unknown), FL_(defrost))
+MAKE_ENUM(enum_hpactivity, FL_(off), FL_(heating), FL_(cooling), FL_(hot_water), FL_(pool), FL_(pool_heating), FL_(defrost), FL_(compressor_alarm)) // BV name COMPRESSOR_E21_STATUS
 MAKE_ENUM(enum_silentMode, FL_(off), FL_(auto), FL_(on))
 MAKE_ENUM(enum_4way, FL_(cool_defrost), FL_(heat_ww))
 
