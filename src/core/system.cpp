@@ -321,8 +321,8 @@ void System::wifi_reconnect() {
     EMSESP::esp32React.getNetworkSettingsService()->read(
         [](NetworkSettings & networkSettings) { LOG_INFO("WiFi reconnecting to SSID '%s'...", networkSettings.ssid.c_str()); });
     Shell::loop_all();
-    delay(1000);                                                            // wait a second
-    EMSESP::webSettingsService.save();                                      // save local settings
+    delay(1000);                                                          // wait a second
+    EMSESP::webSettingsService.save();                                    // save local settings
     EMSESP::esp32React.getNetworkSettingsService()->callUpdateHandlers(); // in case we've changed ssid or password
 }
 
@@ -486,7 +486,7 @@ void System::start() {
         hostname(networkSettings.hostname.c_str()); // sets the hostname
     });
 
-    commands_init();     // console & api commands
+    commands_init(); // console & api commands
     led_init(false);     // init LED
     button_init(false);  // the special button
     network_init(false); // network
