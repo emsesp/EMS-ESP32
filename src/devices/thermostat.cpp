@@ -1649,7 +1649,7 @@ void Thermostat::process_RCTime(std::shared_ptr<const Telegram> telegram) {
 
     // render date to DD.MM.YYYY HH:MM and publish
     char newdatetime[sizeof(dateTime_)];
-    strftime(newdatetime, sizeof(dateTime_), "%d.%m.%G %H:%M", tm_);
+    strftime(newdatetime, sizeof(dateTime_), "%d.%m.%Y %H:%M", tm_);
     has_update(dateTime_, newdatetime, sizeof(dateTime_));
 
     bool   ivtclock     = (telegram->message_data[0] & 0x80) == 0x80; // dont sync ivt-clock, #439
