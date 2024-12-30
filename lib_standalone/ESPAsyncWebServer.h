@@ -11,8 +11,6 @@ class AsyncWebServer;
 class AsyncWebServerRequest;
 class AsyncWebServerResponse;
 class AsyncJsonResponse;
-// class PrettyAsyncJsonResponse;
-// class MsgpackAsyncJsonResponse;
 class AsyncEventSource;
 
 class AsyncWebParameter {
@@ -102,8 +100,6 @@ class AsyncWebServerRequest {
 
     void send(AsyncJsonResponse * response) {};
 
-    // void send(PrettyAsyncJsonResponse * response) {};
-    // void send(MsgpackAsyncJsonResponse * response) {};
     void send(int code, const String & contentType = String(), const String & content = String()) {};
     void send(int code, const String & contentType, const __FlashStringHelper *) {};
 
@@ -204,28 +200,6 @@ class AsyncWebHandler {
     AsyncWebHandler & setFilter(ArRequestFilterFunction fn) {
         return *this;
     }
-};
-
-class AsyncCallbackJsonWebHandler : public AsyncWebHandler {
-  protected:
-    String _uri;
-    WebRequestMethodComposite _method;
-    ArJsonRequestHandlerFunction _onRequest;
-    size_t _contentLength;
-    size_t _maxContentLength;
-
-  public:
-    AsyncCallbackJsonWebHandler(const String& uri, ArJsonRequestHandlerFunction onRequest = nullptr);
-
-    void setMethod(WebRequestMethodComposite method) { _method = method; }
-    void setMaxContentLength(int maxContentLength) { _maxContentLength = maxContentLength; }
-    void onRequest(ArJsonRequestHandlerFunction fn) { _onRequest = fn; }
-
-    bool canHandle(AsyncWebServerRequest* request) const override final;
-    void handleRequest(AsyncWebServerRequest* request) override final;
-    void handleUpload(__unused AsyncWebServerRequest* request, __unused const String& filename, __unused size_t index, __unused uint8_t* data, __unused size_t len, __unused bool final) override final {}
-    void handleBody(AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total) override final;
-    bool isRequestHandlerTrivial() const override final { return !_onRequest; }
 };
 
 class AsyncWebServerResponse {

@@ -1660,18 +1660,14 @@ void EMSESP::start() {
     // do any system upgrades
     if (system_.check_upgrade(factory_settings)) {
         LOG_WARNING("System needs a restart to apply new settings. Please wait.");
-        system_.system_restart();  
+        system_.system_restart();
     };
-
-    // return; // TODO remove for debugging - works!
 
     // Load our library of known devices into stack mem. Names are stored in Flash memory
     device_library_ = {
 #include "device_library.h"
     };
     LOG_INFO("Loaded EMS device library (%d entries)", device_library_.size());
-
-    return; // TODO remove for debugging - crashes!
 
     system_.reload_settings(); // ... and store some of the settings locally
 
@@ -1682,31 +1678,31 @@ void EMSESP::start() {
     // start telnet service if it's enabled
     // default idle is 10 minutes, default write timeout is 0 (automatic)
     // note, this must be started after the network/wifi for ESP32 otherwise it'll crash
-    //     if (system_.telnet_enabled()) {
-    // #ifndef EMSESP_STANDALONE
-    //         telnet_.start();
-    //         telnet_.initial_idle_timeout(3600);  // in sec, one hour idle timeout
-    //         telnet_.default_write_timeout(1000); // in ms, socket timeout 1 second
-    // #endif
-    //     }
+    if (system_.telnet_enabled()) {
+#ifndef EMSESP_STANDALONE
+        telnet_.start();
+        telnet_.initial_idle_timeout(3600);  // in sec, one hour idle timeout
+        telnet_.default_write_timeout(1000); // in ms, socket timeout 1 second
+#endif
+    }
 
     // start services
-    // if (system_.modbus_enabled()) {
-    //     modbus_ = new Modbus;
-    //     modbus_->start(1, system_.modbus_port(), system_.modbus_max_clients(), system_.modbus_timeout() * 1000);
-    // }
+    if (system_.modbus_enabled()) {
+        modbus_ = new Modbus;
+        modbus_->start(1, system_.modbus_port(), system_.modbus_max_clients(), system_.modbus_timeout() * 1000);
+    }
 
-    // mqtt_.start();              // mqtt init
-    // system_.start();            // starts commands, led, adc, button, network (sets hostname), syslog & uart
-    // shower_.start();            // initialize shower timer and shower alert
-    // temperaturesensor_.start(); // Temperature external sensors
-    // analogsensor_.start();      // Analog external sensors
+    mqtt_.start();              // mqtt init
+    system_.start();            // starts commands, led, adc, button, network (sets hostname), syslog & uart
+    shower_.start();            // initialize shower timer and shower alert
+    temperaturesensor_.start(); // Temperature external sensors
+    analogsensor_.start();      // Analog external sensors
 
     // start web services
-    // webLogService.start();     // apply settings to weblog service
-    // webModulesService.begin(); // setup the external library modules
-    // webServer.begin();         // start the web server
-    // LOG_INFO("Starting Web Server");
+    webLogService.start();     // apply settings to weblog service
+    webModulesService.begin(); // setup the external library modules
+    webServer.begin();         // start the web server
+    LOG_INFO("Starting Web Server");
 }
 
 void EMSESP::start_serial_console() {
@@ -1731,8 +1727,6 @@ void EMSESP::shell_prompt() {
 
 // main loop calling all services
 void EMSESP::loop() {
-    return; // TODO remove for debugging
-
     esp32React.loop(); // web services
     system_.loop();    // does LED and checks system health, and syslog service
 

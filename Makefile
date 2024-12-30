@@ -40,26 +40,20 @@ MAKEFLAGS += -j $(JOBS) -l $(JOBS)
 # INCLUDES  is a list of directories containing header files
 # LIBRARIES is a list of directories containing libraries, this must be the top level containing include and lib
 #----------------------------------------------------------------------
-
-#TARGET    := $(notdir $(CURDIR))
 TARGET    := emsesp
 BUILD     := build
-SOURCES   := src/core src/devices src/web       lib_standalone lib/semver lib/espMqttClient/src lib/espMqttClient/src/*         lib/ArduinoJson/src lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src   lib/PButton 
-INCLUDES  := src/core src/devices src/web lib/* lib_standalone lib/semver lib/espMqttClient/src lib/espMqttClient/src/Transport lib/ArduinoJson/src lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src   lib/uuid-telnet/src lib/uuid-syslog/src
+SOURCES   := src/core src/devices src/web src/test       lib_standalone lib/semver lib/espMqttClient/src lib/espMqttClient/src/*         lib/ArduinoJson/src lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src   lib/PButton 
+INCLUDES  := src/core src/devices src/web src/test lib/* lib_standalone lib/semver lib/espMqttClient/src lib/espMqttClient/src/Transport lib/ArduinoJson/src lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src   lib/uuid-telnet/src lib/uuid-syslog/src
 LIBRARIES :=
 
 CPPCHECK = cppcheck
-# CHECKFLAGS = -q --force --std=c++17
-CHECKFLAGS = -q --force --std=c++11
+CHECKFLAGS = -q --force --std=c++17
 
 #----------------------------------------------------------------------
 # Languages Standard
 #----------------------------------------------------------------------
 C_STANDARD   := -std=c17
-CXX_STANDARD := -std=gnu++14
-
-# C_STANDARD   := -std=c11
-# CXX_STANDARD := -std=c++11
+CXX_STANDARD := -std=gnu++17
 
 #----------------------------------------------------------------------
 # Defined Symbols

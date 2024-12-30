@@ -67,8 +67,9 @@ words-found-verbose.txt
 # sonarlint
 compile_commands.json
 
-# pioarduino
+# pioarduino + hybrid
 managed_components
-sdkconfig.s3_16M_P
 dependencies.lock
 CMakeLists.txt
+sdkconfig.*
+.dummy/*
