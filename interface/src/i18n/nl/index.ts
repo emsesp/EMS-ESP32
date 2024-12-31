@@ -72,7 +72,7 @@ const nl: Translation = {
   TX_ISSUES: 'Tx bus probleem. Probeer een andere Tx verzendmodus',
   DISCONNECTED: 'Niet verbonden',
   EMS_SCAN: 'Weet je zeker dat je een volledige EMS bus scan uit wilt voeren?',
-  DATA_TRAFFIC: 'Data Traffic', // TODO translate
+  DATA_TRAFFIC: 'Dataverkeer',
   EMS_DEVICE: 'EMS Apparaat',
   SUCCESS: 'SUCCESS',
   FAIL: 'MISLUKT',
@@ -115,7 +115,7 @@ const nl: Translation = {
   READONLY: 'Activeer read-only modus (blokkeert alle outgaande EMS Tx schrijf commandos)',
   UNDERCLOCK_CPU: 'Underclock CPU snelheid',
   REMOTE_TIMEOUT: 'Remote timeout',
-  REMOTE_TIMEOUT_EN: 'Disable remote on missing room temperature', // TODO translate
+  REMOTE_TIMEOUT_EN: 'Schakel de afstandsbediening uit bij ontbrekende kamertemperatuur',
   HEATINGOFF: 'Start ketel met geforceerde verwarming uit',
   MIN_DURATION: 'Wait time',
   ENABLE_SHOWER_TIMER: 'Activeer Douche Timer (tijdmeting)',
@@ -174,7 +174,7 @@ const nl: Translation = {
   FACTORY_RESET: 'Fabrieksinstellingen',
   SYSTEM_FACTORY_TEXT: 'Gateway is gereset en start nu weer op met fabrieksinstellingen',
   SYSTEM_FACTORY_TEXT_DIALOG: 'Weet je zeker dat je een reset naar fabrieksinstellingen uit wilt voeren?',
-  AVAILABLE_VERSION: 'Latest Available Versions', // TODO translate
+  AVAILABLE_VERSION: 'Nieuwste beschikbare versies',
   STABLE: 'Stable',
   DEVELOPMENT: 'Development',
   UPTIME: 'Systeem Uptime',
@@ -185,8 +185,8 @@ const nl: Translation = {
   FILESYSTEM: 'File System (Used / Free)',
   BUFFER_SIZE: 'Max Buffer Size',
   COMPACT: 'Compact',
-  DOWNLOAD_SETTINGS_TEXT: 'Create a backup of your configuration and settings', // TODO translate
-  UPLOAD_TEXT: 'Upload a new firmware file (.bin) or a backup file (.json)', // TODO translate
+  DOWNLOAD_SETTINGS_TEXT: 'Maak een back-up van uw configuratie en instellingen',
+  UPLOAD_TEXT: 'Upload een nieuw firmwarebestand (.bin) of een back-upbestand (.json)',
   UPLOAD_DROP_TEXT: 'Sleep bestand hierheen of klik hier',
   ERROR: 'Onverwachte fout, probeer opnieuw',
   TIME_SET: 'Tijd ingesteld',
@@ -319,32 +319,32 @@ const nl: Translation = {
   SECURITY_1: 'Gebruikers toevoegen of verwijderen',
   DOWNLOAD_UPLOAD_1: 'Download en upload instellingen en firmware',
   MODULES: 'Module',
-  MODULES_1: 'Externe modules activeren of deactiveren', // TODO translate
+  MODULES_1: 'Externe modules activeren of deactiveren',
   MODULES_UPDATED: 'Modules geüpdatet', 
   MODULES_DESCRIPTION: 'Klik op de module om EMS-ESP library modules te activeren of te deactiveren',
   MODULES_NONE: 'Geen externe modules gedetecteerd',
   RENAME: 'Hernoemen',
   ENABLE_MODBUS: 'Activeer Modbus',
-  VIEW_LOG: 'View log to diagnose issues', // TODO translate
-  UPLOAD_DRAG: 'drag and drop a file here or click to select one', // TODO translate
-  SERVICES: 'Services', // TODO translate
-  ALLVALUES: 'All Values', // TODO translate
-  SPECIAL_FUNCTIONS: 'Special Functions', // TODO translate
-  WAIT_FIRMWARE: 'Firmware is uploading and installing', // TODO translate
-  INSTALL_VERSION: 'This will install version {0}. Are you sure?', // TODO translate
-  SWITCH_DEV: 'switch to the development version', // TODO translate
-  UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
-  LATEST_VERSION: 'You are using the latest firmware version.', // TODO translate
-  PLEASE_WAIT: 'Please wait', // TODO translate
-  RESTARTING_PRE: 'Initializing', // TODO translate
-  RESTARTING_POST: 'Preparing', // TODO translate
-  AUTO_SCROLL: 'Auto Scroll', // TODO translate
-  DASHBOARD: 'Dashboard', // TODO translate
-  NO_DATA: 'No data available', // TODO translate
-  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module', // TODO translate
-  DEVELOPER_MODE: 'Developer Mode', // TODO translate
-  DUPLICATE: 'Duplicate', // TODO translate
-  UPGRADE: 'Upgrade' // TODO translate
+  VIEW_LOG: 'Log weergeven om problemen te diagnosticeren',
+  UPLOAD_DRAG: 'sleep hier een bestand en zet het neer of klik om er een te selecteren',
+  SERVICES: 'Services',
+  ALLVALUES: 'All waarden',
+  SPECIAL_FUNCTIONS: 'Speciale functies',
+  WAIT_FIRMWARE: 'Firmware wordt geüpload en geïnstalleerd',
+  INSTALL_VERSION: 'Hiermee wordt versie {0} geïnstalleerd. Weet je het zeker?',
+  SWITCH_DEV: 'Overschakelen naar de ontwikkelingsversie',
+  UPGRADE_AVAILABLE: 'Er is een firmware-upgrade beschikbaar!',
+  LATEST_VERSION: 'U gebruikt de nieuwste firmwareversie.',
+  PLEASE_WAIT: 'Een ogenblik geduld',
+  RESTARTING_PRE: 'Initialiseren',
+  RESTARTING_POST: 'Voorbereiding',
+  AUTO_SCROLL: 'Automatisch Scrollen',
+  DASHBOARD: 'Dashboard',
+  NO_DATA: 'Geen data beschikbaar',
+  DASHBOARD_1: 'Pas uw dashboard aan door EMS-entiteiten als favoriet te markeren met behulp van de module Aanpassingen',
+  DEVELOPER_MODE: 'Ontwikkelaarsmodus',
+  DUPLICATE: 'Duplicaat',
+  UPGRADE: 'Upgraden'
 };
 
 export default nl;
