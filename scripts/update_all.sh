@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# run from root
+# run from root folder
 # make sure ncu is installed globally (https://github.com/raineorshine/npm-check-updates)
 # as well as GNUMake (make) and python3
 
