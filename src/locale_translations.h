@@ -220,6 +220,7 @@ MAKE_WORD_TRANSLATION(pressure6, "400mbar", "400mbar", "400mbar", "400mbar", "40
 MAKE_WORD_TRANSLATION(none, "none", "keine", "geen", "ingen", "brak", "ingen", "aucun", "hiçbiri", "nessuno", "žiadny", "žádné")
 MAKE_WORD_TRANSLATION(hot_water, "hot water", "Warmwasser", "warm water", "varmvatten", "c.w.u.", "varmtvann", "eau chaude", "sıcak su", "acqua calda", "horúca voda", "horká voda")
 MAKE_WORD_TRANSLATION(pool, "pool", "Pool", "zwembad", "pool", "basen", "basseng", "piscine", "havuz", "piscina", "bazén", "bazén")
+MAKE_WORD_TRANSLATION(pool_heating, "pool heating", "Pool beheizen", "", "", "", "", "", "", "", "", "")
 MAKE_WORD_TRANSLATION(outside_temp_alt, "outside temperature alt.", "Außentemp. alternativ", "alternatieve buitentemperatuur", "Alternativ utomhustemp.", "temp. zewn. alternat.", "alternativ utendørstemp.", "température extérieure alternative", "alternatif dış sıcaklık", "temperatura esterna alternativa", "vonkajšia teplota altern.", "venkovní teplota alt.")
 MAKE_WORD_TRANSLATION(outside_temp_par, "outside temperature parallel", "Außentemp. parallel", "buitentemperatuur parallel", "Parallell utomhustemp.", "temp. zewn. równoległa", "parallell utendørstemp.", "température extérieure parallèle", "paralel dış sıcaklık", "temperatura esterna parallela", "paralelne s vonkajšou teplotou", "paralelně s venkovní teplotou")
 MAKE_WORD_TRANSLATION(hp_preferred, "heatpump preferred", "Wärmepumpe bevorzugt", "voorkeur warmtepomp", "Värmepump föredraget", "preferowana pompa ciepła", "varmepumpe prioritert", "pompe à chaleur préférée", "tercih edilen pompa", "pompa di calore preferita", "preferované tepelné čerpadlo", "preferované tepelné čerpadlo")
@@ -229,6 +230,7 @@ MAKE_WORD_TRANSLATION(switchoff, "switch off hp", "WP ausschalten", "WP uitschak
 MAKE_WORD_TRANSLATION(perm, "perm. reduced", "perm. reduziert", "permanent gereduceerd", "Permanent reducerad", "stale zmniejszona wydajność", "permanent redusert", "réduction permanente", "sürekli azaltılmış", "riduzione permanente", "trvalo znížené", "trvale sníženo")
 MAKE_WORD_TRANSLATION(heat_ww, "heating & dhw", "Heizen & Warmwasser", "", "Uppvärmning & Varmvatten", "ogrzewanie i c.w.u.", "", "", "", "", "kúrenie a TÚV", "topení a TUV")
 MAKE_WORD_TRANSLATION(cool_defrost, "cooling & defrost", "Kühlen & Abtauen", "", "Kyla & Avfrostning", "chłodzenie i odladzanie", "", "", "", "", "chladenie a rozmrazovanie", "chlazení a odmrazování")
+MAKE_WORD_TRANSLATION(compressor_alarm, "compressor alarm", "Alarm Kompressor", "", "", "", "", "", "", "", "", "")
 
 // thermostat
 MAKE_WORD_TRANSLATION(seltemp, "selTemp", "Solltemperatur", "doeltemperatuur", "Börtemperatur", "temperatura zadana", "innstilt temperatur", "consigne température", "ayarlanmış sıcaklık", "temperatura di consegna", "zadaná teplota", "zvolená teplota")
