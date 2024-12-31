@@ -53,7 +53,6 @@ WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securi
     securityManager->addEndpoint(server, EMSESP_DASHBOARD_DATA_SERVICE_PATH, AuthenticationPredicates::IS_AUTHENTICATED, [this](AsyncWebServerRequest * request) {
         dashboard_data(request);
     });
-
 }
 
 // this is used in the Devices page and contains all EMS device information

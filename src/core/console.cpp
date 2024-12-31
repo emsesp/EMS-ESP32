@@ -216,11 +216,10 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
                                       shell.enter_password(F_(new_password_prompt2), [password1](Shell & shell, bool completed, const std::string & password2) {
                                           if (completed) {
                                               if (password1 == password2) {
-                                                  EMSESP::esp32React.getNetworkSettingsService()->updateWithoutPropagation(
-                                                      [&](NetworkSettings & networkSettings) {
-                                                          networkSettings.password = password2.c_str();
-                                                          return StateUpdateResult::CHANGED;
-                                                      });
+                                                  EMSESP::esp32React.getNetworkSettingsService()->updateWithoutPropagation([&](NetworkSettings & networkSettings) {
+                                                      networkSettings.password = password2.c_str();
+                                                      return StateUpdateResult::CHANGED;
+                                                  });
                                                   shell.println("WiFi password updated. Reconnecting...");
                                                   EMSESP::system_.wifi_reconnect();
                                               } else {

@@ -139,7 +139,9 @@ const SystemStatus = () => {
       case NTPSyncStatus.NTP_INACTIVE:
         return LL.INACTIVE(0);
       case NTPSyncStatus.NTP_ACTIVE:
-        return LL.ACTIVE() + ' (' + formatDateTime(data.ntp_time ?? '') + ')';
+        return LL.ACTIVE() + (data.ntp_time !== undefined)
+          ? ' (' + formatDateTime(data.ntp_time) + ')'
+          : '';
       default:
         return LL.UNKNOWN();
     }

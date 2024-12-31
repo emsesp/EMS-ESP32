@@ -1,8 +1,8 @@
-import { Navigate, Route, Routes } from 'react-router';
+import { Navigate, Route, Routes, matchRoutes, useLocation } from 'react-router';
 
 import { Tab } from '@mui/material';
 
-import { RouterTabs, useLayoutTitle, useRouterTab } from 'components';
+import { RouterTabs, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
 import ManageUsers from './ManageUsers';
@@ -12,7 +12,14 @@ const Security = () => {
   const { LL } = useI18nContext();
   useLayoutTitle(LL.SECURITY(0));
 
-  const { routerTab } = useRouterTab();
+  const matchedRoutes = matchRoutes(
+    [
+      { path: '/settings/security/settings', element: <ManageUsers />, dog: 'woof' },
+      { path: '/settings/security/users', element: <SecuritySettings /> }
+    ],
+    useLocation()
+  );
+  const routerTab = matchedRoutes?.[0].route.path || false;
 
   return (
     <>
@@ -26,7 +33,10 @@ const Security = () => {
       <Routes>
         <Route path="users" element={<ManageUsers />} />
         <Route path="settings" element={<SecuritySettings />} />
-        <Route path="*" element={<Navigate replace to="settings" />} />
+        <Route
+          path="*"
+          element={<Navigate replace to="/settings/security/settings" />}
+        />
       </Routes>
     </>
   );

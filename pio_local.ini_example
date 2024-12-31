@@ -11,17 +11,18 @@
 ;  -DEMSESP_DE_ONLY ; only DE translated entity names
 ;  -DEMSESP_EN_ONLY ; only EN translated entity names
 ;  -DEMSESP_PINGTEST ; send log message every 1/2 second
+
 ; my_build_flags = -DEMSESP_TEST -DEMSESP_DEBUG
-; my_build_flags = -DEMSESP_DEBUG
 ; my_build_flags = -DEMSESP_DEBUG -DEMSESP_TEST -DEMSESP_PINGTEST
+; my_build_flags = -DEMSESP_DEBUG -DCORE_DEBUG_LEVEL=5
 
 [platformio]
-default_envs = s_16M_P ; BBQKees E32V2
-; default_envs = s3_16M_P ; BBQKees S3
+; default_envs = s_16M_P ; BBQKees E32V2
+default_envs = s3_16M_P ; BBQKees S3
 ; default_envs = s_4M ; BBQKees S32
+; default_envs = s2_4M ; BBQKees S2
 ; default_envs = native
 ; default_envs = debug
-; default_envs = s2_4M
 
 [env]
 ; set the username and password for the admin account (default both admin)
@@ -31,7 +32,7 @@ custom_password = admin
 ; ** upload settings **
 ; for direct USB set:
 ;  upload_protocol = esptool
-;  upload_port = /dev/ttyUSB*
+;  upload_port = /dev/ttyUSB0 or /dev/ttyACM0
 ;
 ; for direct via URL (OTA) set:
 ;  upload_protocol = custom
@@ -39,14 +40,15 @@ custom_password = admin
 ;  custom_password = admin
 
 ; upload_protocol = esptool
-; upload_port = /dev/ttyUSB*
+upload_port = /dev/ttyACM0
+; upload_port = /dev/ttyUSB0
 
-upload_protocol = custom
+; upload_protocol = custom
 ; custom_emsesp_ip = 10.10.10.175 ; S3
 custom_emsesp_ip = 192.168.1.225 ; E32V2
 
+; uncomment to enable extra debug
 ; build_type = debug
-; monitor_filters = esp32_exception_decoder
 
 ; ** modules **
 ; example below is using a locally built version of EMS-ESP-Modules. You can also test with:
@@ -56,31 +58,31 @@ custom_emsesp_ip = 192.168.1.225 ; E32V2
 
 [env:native]
 extra_scripts = 
-;   pre:scripts/refresh_module_library_native.py
+  ; pre:scripts/refresh_module_library_native.py
   ; post:scripts/run_native.py
 
 [env:s_16M_P]
 extra_scripts =
   pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
-  scripts/upload.py
-; platform = https://github.com/pioarduino/platform-espressif32/releases/download/53.03.10-rc2/platform-espressif32.zip
+  ; scripts/upload.py
 
 [env:s3_16M_P]
 extra_scripts =
-  ; pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
-  scripts/upload.py
+  ; scripts/upload.py
 
 [env:s_4M]
 extra_scripts =
-  ; pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
   scripts/rename_fw.py
   ; scripts/upload.py
-  
+
+; ** debug settings **
+; to be used with esp-prog/JTAG hardware device like https://docs.espressif.com/projects/esp-dev-kits/en/latest/other/esp-prog/user_guide.html   
 ; pio run -e debug
-; or from Visual Studio Code do PIO -> Project Tasks -> debug -> General -> Upload and Monitor
-; options for debugging are: EMSESP_DEBUG EMSESP_UART_DEBUG EMSESP_DEBUG_SENSOR
+; add to build_flags these additional options: EMSESP_DEBUG EMSESP_UART_DEBUG EMSESP_DEBUG_SENSOR
 [env:debug]
 board = esp32dev
 framework = arduino

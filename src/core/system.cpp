@@ -486,7 +486,7 @@ void System::start() {
         hostname(networkSettings.hostname.c_str()); // sets the hostname
     });
 
-    commands_init(); // console & api commands
+    commands_init();     // console & api commands
     led_init(false);     // init LED
     button_init(false);  // the special button
     network_init(false); // network

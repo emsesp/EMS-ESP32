@@ -17,7 +17,6 @@ class AuthenticationService {
 
     void signIn(AsyncWebServerRequest * request, JsonVariant json);
     void verifyAuthorization(AsyncWebServerRequest * request);
-
 };
 
 #endif

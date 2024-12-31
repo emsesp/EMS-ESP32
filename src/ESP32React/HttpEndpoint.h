@@ -28,9 +28,8 @@ class HttpEndpoint {
         , _stateUpdater(stateUpdater)
         , _statefulService(statefulService) {
         // Create handler for both GET and POST endpoints
-        securityManager->addEndpoint(server, servicePath, authenticationPredicate, [this](AsyncWebServerRequest * request, JsonVariant json) {
-            handleRequest(request, json);
-        }, HTTP_ANY); // ALL methods
+        securityManager->addEndpoint(
+            server, servicePath, authenticationPredicate, [this](AsyncWebServerRequest * request, JsonVariant json) { handleRequest(request, json); }, HTTP_ANY); // ALL methods
     }
 
   protected:

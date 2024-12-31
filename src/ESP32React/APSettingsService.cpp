@@ -1,6 +1,6 @@
 #include "APSettingsService.h"
 
-#include <emsesp_stub.hpp> 
+#include <emsesp_stub.hpp>
 
 APSettingsService::APSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(APSettings::read, APSettings::update, this, server, AP_SETTINGS_SERVICE_PATH, securityManager)

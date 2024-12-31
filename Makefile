@@ -47,7 +47,7 @@ INCLUDES  := src/core src/devices src/web src/test lib/* lib_standalone lib/semv
 LIBRARIES :=
 
 CPPCHECK = cppcheck
-CHECKFLAGS = -q --force --std=c++17
+CHECKFLAGS = -q --force --std=gnu++17
 
 #----------------------------------------------------------------------
 # Languages Standard

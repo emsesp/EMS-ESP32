@@ -22,6 +22,9 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - info command for devices without entity-commands [#2274](https://github.com/emsesp/EMS-ESP32/issues/2274)
 - CW100 settings telegram 0x241 [#2290](https://github.com/emsesp/EMS-ESP32/issues/2290)
 - modbus signed 8bit values [#2294](https://github.com/emsesp/EMS-ESP32/issues/2294)
+- thermostat date [#2313](https://github.com/emsesp/EMS-ESP32/issues/2313)
+- Updated unknown compressor stati "enum_hpactivity" [#2311](https://github.com/emsesp/EMS-ESP32/pull/2311)
+- Underline Tab headers in WebUI
 
 ## Changed
 

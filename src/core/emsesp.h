@@ -238,7 +238,7 @@ class EMSESP {
     static Preferences       nvs_;
 
     // web controllers
-    static ESP32React            esp32React;
+    static ESP32React              esp32React;
     static WebSettingsService      webSettingsService;
     static WebStatusService        webStatusService;
     static WebActivityService      webActivityService;

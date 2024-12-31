@@ -34,7 +34,7 @@ typedef struct StateUpdateHandlerInfo {
     StateUpdateHandlerInfo(StateUpdateCallback cb, bool allowRemove)
         : _id(++currentUpdatedHandlerId)
         , _cb(std::move(cb))
-        , _allowRemove(allowRemove){};
+        , _allowRemove(allowRemove) {};
 } StateUpdateHandlerInfo_t;
 
 template <class T>

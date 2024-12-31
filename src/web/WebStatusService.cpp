@@ -73,9 +73,11 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     if (ntp_status == 2) {
         // send back actual time if NTP enabled and active
         time_t now = time(nullptr);
-        char   time_string[25];
-        strftime(time_string, sizeof(time_string), "%FT%T", localtime(&now));
-        root["ntp_time"] = time_string; // optional string
+        if (now > 1500000000L) {
+            char t[25];
+            strftime(t, sizeof(t), "%FT%T", localtime(&now));
+            root["ntp_time"] = t; // optional string
+        }
     }
 #endif
 

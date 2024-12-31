@@ -278,7 +278,7 @@ class Thermostat : public EMSdevice {
     uint8_t humidity_;
     uint8_t battery_;
 
-    char vacation[8][22]; // RC30, R3000 only, only one hc
+    char    vacation[8][22]; // RC30, R3000 only, only one hc
     uint8_t absent_;
     uint8_t hasSolar_;
 
@@ -429,6 +429,7 @@ class Thermostat : public EMSdevice {
     void process_RC10Set(std::shared_ptr<const Telegram> telegram);
     void process_RC10Set_2(std::shared_ptr<const Telegram> telegram);
     void process_CRFMonitor(std::shared_ptr<const Telegram> telegram);
+    void process_CR11Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC300Monitor(std::shared_ptr<const Telegram> telegram);
     void process_RC300Set(std::shared_ptr<const Telegram> telegram);
     void process_RC300Set2(std::shared_ptr<const Telegram> telegram);
