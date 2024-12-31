@@ -278,7 +278,7 @@ class Thermostat : public EMSdevice {
     uint8_t humidity_;
     uint8_t battery_;
 
-    char vacation[8][22]; // RC30, R3000 only, only one hc
+    char    vacation[8][22]; // RC30, R3000 only, only one hc
     uint8_t absent_;
     uint8_t hasSolar_;
 
