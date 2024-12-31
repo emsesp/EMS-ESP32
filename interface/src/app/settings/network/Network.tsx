@@ -24,10 +24,17 @@ const Network = () => {
 
   // this also works!
   // const routerTab = useMatch(`settings/network/:path/*`)?.pathname || false;
-  const matchedRoutes = matchRoutes( [
-    { path: '/settings/network/settings', element: <NetworkSettings />, dog: 'woof' },
-    { path: '/settings/network/scan', element: <WiFiNetworkScanner /> }
-  ], useLocation());
+  const matchedRoutes = matchRoutes(
+    [
+      {
+        path: '/settings/network/settings',
+        element: <NetworkSettings />,
+        dog: 'woof'
+      },
+      { path: '/settings/network/scan', element: <WiFiNetworkScanner /> }
+    ],
+    useLocation()
+  );
   const routerTab = matchedRoutes?.[0].route.path || false;
 
   const navigate = useNavigate();
@@ -55,7 +62,10 @@ const Network = () => {
       }}
     >
       <RouterTabs value={routerTab}>
-        <Tab value="/settings/network/settings" label={LL.SETTINGS_OF(LL.NETWORK(1))} />
+        <Tab
+          value="/settings/network/settings"
+          label={LL.SETTINGS_OF(LL.NETWORK(1))}
+        />
         <Tab value="/settings/network/scan" label={LL.NETWORK_SCAN()} />
       </RouterTabs>
       <Routes>
