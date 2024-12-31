@@ -1,10 +1,4 @@
-import {
-  Navigate,
-  Route,
-  Routes,
-  matchRoutes,
-  useLocation
-} from 'react-router';
+import { Navigate, Route, Routes, matchRoutes, useLocation } from 'react-router';
 
 import { Tab } from '@mui/material';
 
@@ -39,7 +33,10 @@ const Security = () => {
       <Routes>
         <Route path="users" element={<ManageUsers />} />
         <Route path="settings" element={<SecuritySettings />} />
-        <Route path="*" element={<Navigate replace to="/settings/security/settings" />} />
+        <Route
+          path="*"
+          element={<Navigate replace to="/settings/security/settings" />}
+        />
       </Routes>
     </>
   );
