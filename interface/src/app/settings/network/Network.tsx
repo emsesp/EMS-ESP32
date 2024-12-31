@@ -1,9 +1,16 @@
 import { useCallback, useState } from 'react';
-import { Navigate, Route, Routes, useNavigate } from 'react-router';
+import {
+  Navigate,
+  Route,
+  Routes,
+  matchRoutes,
+  useLocation,
+  useNavigate
+} from 'react-router';
 
 import { Tab } from '@mui/material';
 
-import { RouterTabs, useLayoutTitle, useRouterTab } from 'components';
+import { RouterTabs, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 import type { WiFiNetwork } from 'types';
 
@@ -15,7 +22,13 @@ const Network = () => {
   const { LL } = useI18nContext();
   useLayoutTitle(LL.NETWORK(0));
 
-  const { routerTab } = useRouterTab();
+  // this also works!
+  // const routerTab = useMatch(`settings/network/:path/*`)?.pathname || false;
+  const matchedRoutes = matchRoutes( [
+    { path: '/settings/network/settings', element: <NetworkSettings />, dog: 'woof' },
+    { path: '/settings/network/scan', element: <WiFiNetworkScanner /> }
+  ], useLocation());
+  const routerTab = matchedRoutes?.[0].route.path || false;
 
   const navigate = useNavigate();
 
@@ -24,7 +37,7 @@ const Network = () => {
   const selectNetwork = useCallback(
     (network: WiFiNetwork) => {
       setSelectedNetwork(network);
-      void navigate('/settings');
+      void navigate('/settings/network/settings');
     },
     [navigate]
   );
@@ -42,16 +55,16 @@ const Network = () => {
       }}
     >
       <RouterTabs value={routerTab}>
-        <Tab
-          value="/settings/network/settings"
-          label={LL.SETTINGS_OF(LL.NETWORK(1))}
-        />
+        <Tab value="/settings/network/settings" label={LL.SETTINGS_OF(LL.NETWORK(1))} />
         <Tab value="/settings/network/scan" label={LL.NETWORK_SCAN()} />
       </RouterTabs>
       <Routes>
         <Route path="scan" element={<WiFiNetworkScanner />} />
         <Route path="settings" element={<NetworkSettings />} />
-        <Route path="*" element={<Navigate replace to="settings" />} />
+        <Route
+          path="*"
+          element={<Navigate replace to="/settings/network/settings" />}
+        />
       </Routes>
     </WiFiConnectionContext.Provider>
   );
