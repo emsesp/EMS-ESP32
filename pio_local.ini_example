@@ -54,7 +54,10 @@ custom_emsesp_ip = 192.168.1.225 ; E32V2
 ; example below is using a locally built version of EMS-ESP-Modules. You can also test with:
 ;    rm -rf .pio/libdeps/native/EMS-ESP-Modules; pio run -e native -t clean; pio run -e native -t exec
 ; lib_deps =
-;   file://../modules/EMS-ESP-Modules
+;   file://../../modules/EMS-ESP-Modules
+;   bblanchon/ArduinoJson @ 7.3.0
+;   mathieucarbou/AsyncTCP @ 3.3.1
+;   mathieucarbou/ESPAsyncWebServer @ 3.4.5
 
 [env:native]
 extra_scripts = 
