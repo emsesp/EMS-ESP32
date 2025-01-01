@@ -102,7 +102,7 @@ CPPFLAGS  += -Os
 
 CFLAGS    += $(CPPFLAGS)
 CFLAGS    += -Wall -Wextra -Werror -Wswitch-enum
-CFLAGS    += -Wno-tautological-constant-out-of-range-compare -Wno-unused-parameter -Wno-inconsistent-missing-override -Wno-missing-braces -Wno-unused-lambda-capture -Wno-sign-compare
+CFLAGS    += -Wno-unused-parameter -Wno-missing-braces -Wno-sign-compare
 CXXFLAGS  += $(CFLAGS) -MMD
 
 #----------------------------------------------------------------------
