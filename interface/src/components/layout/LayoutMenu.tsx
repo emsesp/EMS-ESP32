@@ -73,11 +73,6 @@ const LayoutMenu = () => {
           >
             <ListItemText
               primary={LL.MODULES()}
-              primaryTypographyProps={{
-                fontWeight: '600',
-                mb: '2px',
-                color: 'lightblue'
-              }}
               // secondary={
               //   LL.CUSTOMIZATIONS() +
               //   ', ' +
@@ -92,6 +87,13 @@ const LayoutMenu = () => {
               //   color: menuOpen ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0.5)'
               // }}
               sx={{ my: 0 }}
+              slotProps={{
+                primary: {
+                  fontWeight: '600',
+                  mb: '2px',
+                  color: 'lightblue'
+                }
+              }}
             />
             <KeyboardArrowDown
               sx={{
@@ -132,7 +134,6 @@ const LayoutMenu = () => {
           )}
         </Box>
       </List>
-
       <List style={{ marginTop: `auto` }}>
         <LayoutMenuItem
           icon={AssessmentIcon}
@@ -158,7 +159,6 @@ const LayoutMenu = () => {
           </ListItemButton>
         </ListItem>
       </List>
-
       <Popover
         id={id}
         open={open}
