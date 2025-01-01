@@ -48,7 +48,6 @@ WebCustomizationService::WebCustomizationService(AsyncWebServer * server, FS * f
                                  [this](AsyncWebServerRequest * request, JsonVariant json) { customization_entities(request, json); });
 }
 
-
 // this creates the customization file, saving it to the FS
 void WebCustomization::read(WebCustomization & customizations, JsonObject root) {
     // Temperature Sensor customization
@@ -95,7 +94,8 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
     // Temperature Sensor customization
     customizations.sensorCustomizations.clear();
     if (root["ts"].is<JsonArray>()) {
-        for (const JsonObject sensorJson : root["ts"].as<JsonArray>()) {
+        auto sensorsJsons = root["ts"].as<JsonArray>();
+        for (const JsonObject sensorJson : sensorsJsons) {
             // create each of the sensor, overwriting any previous settings
             auto sensor   = SensorCustomization();
             sensor.id     = sensorJson["id"].as<std::string>();
@@ -112,7 +112,8 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
     // Analog Sensor customization
     customizations.analogCustomizations.clear();
     if (root["as"].is<JsonArray>()) {
-        for (const JsonObject analogJson : root["as"].as<JsonArray>()) {
+        auto analogJsons = root["as"].as<JsonArray>();
+        for (const JsonObject analogJson : analogJsons) {
             // create each of the sensor, overwriting any previous settings
             auto analog   = AnalogCustomization();
             analog.gpio   = analogJson["gpio"];
@@ -132,13 +133,15 @@ StateUpdateResult WebCustomization::update(JsonObject root, WebCustomization & c
     // load array of entities id's with masks, building up the object class
     customizations.entityCustomizations.clear();
     if (root["masked_entities"].is<JsonArray>()) {
-        for (const JsonObject masked_entities : root["masked_entities"].as<JsonArray>()) {
+        auto masked_entities = root["masked_entities"].as<JsonArray>();
+        for (const JsonObject masked_entity : masked_entities) {
             auto emsEntity        = EntityCustomization();
-            emsEntity.product_id  = masked_entities["product_id"];
-            emsEntity.device_id   = masked_entities["device_id"];
-            emsEntity.custom_name = masked_entities["custom_name"] | "";
+            emsEntity.product_id  = masked_entity["product_id"];
+            emsEntity.device_id   = masked_entity["device_id"];
+            emsEntity.custom_name = masked_entity["custom_name"] | "";
 
-            for (const JsonVariant masked_entity_id : masked_entities["entity_ids"].as<JsonArray>()) {
+            auto masked_entity_ids = masked_entity["entity_ids"].as<JsonArray>();
+            for (const JsonVariant masked_entity_id : masked_entity_ids) {
                 if (masked_entity_id.is<std::string>()) {
                     emsEntity.entity_ids.push_back(masked_entity_id.as<std::string>()); // add entity list
                 }
@@ -180,7 +183,7 @@ void WebCustomizationService::device_entities(AsyncWebServerRequest * request) {
         id = Helpers::atoint(request->getParam(F_(id))->value().c_str()); // get id from url
 #endif
 
-        auto * response = new AsyncMessagePackResponse(); // array and msgpack
+        auto * response = new AsyncMessagePackResponse(true); // array and msgpack
 
         // while (!response) {
         //     delete response;
