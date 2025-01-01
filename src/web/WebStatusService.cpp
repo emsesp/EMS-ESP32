@@ -222,7 +222,7 @@ bool WebStatusService::checkUpgrade(JsonObject root, std::string & versions) {
 #else
     // for testing only - see api3 test in test.cpp
     // current_version_s = "3.6.5";
-    current_version_s = "3.7.1-dev.8";
+    current_version_s = "3.7.2-dev.1";
 #endif
 
     if (!versions.empty()) {
