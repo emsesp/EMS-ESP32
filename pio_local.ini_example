@@ -15,6 +15,7 @@
 ; my_build_flags = -DEMSESP_TEST -DEMSESP_DEBUG
 ; my_build_flags = -DEMSESP_DEBUG -DEMSESP_TEST -DEMSESP_PINGTEST
 ; my_build_flags = -DEMSESP_DEBUG -DCORE_DEBUG_LEVEL=5
+my_build_flags = 
 
 [platformio]
 ; default_envs = s_16M_P ; BBQKees E32V2
@@ -25,33 +26,29 @@ default_envs = s3_16M_P ; BBQKees S3
 ; default_envs = debug
 
 [env]
-; set the username and password for the admin account (default both admin)
+
+; uncomment this section to enable extra debug
+; build_type = debug
+; monitor_filters = colorize, esp32_exception_decoder
+
+; set the username and password for the admin account (default password is admin)
 custom_username = admin
 custom_password = admin
 
 ; ** upload settings **
-; for direct USB set:
-;  upload_protocol = esptool
-;  upload_port = /dev/ttyUSB0 or /dev/ttyACM0
+; for direct USB, which is the default you can set an optional port for example:
+;  upload_port = /dev/ttyUSB0 or COM3
 ;
-; for direct via URL (OTA) set:
+; for direct via HTTP (OTA) set:
 ;  upload_protocol = custom
 ;  custom_emsesp_ip = <ip address> or ems-esp.local
-;  custom_password = admin
 
-; upload_protocol = esptool
-upload_port = /dev/ttyACM0
-; upload_port = /dev/ttyUSB0
-
-; upload_protocol = custom
-; custom_emsesp_ip = 10.10.10.175 ; S3
-custom_emsesp_ip = 192.168.1.225 ; E32V2
-
-; uncomment to enable extra debug
-; build_type = debug
+upload_protocol = custom
+custom_emsesp_ip = 10.10.10.93 ; S3
+; custom_emsesp_ip = 192.168.1.225 ; E32V2
 
 ; ** modules **
-; example below is using a locally built version of EMS-ESP-Modules. You can also test with:
+; example below is using a locally built library of EMS-ESP-Modules. You can also test with:
 ;    rm -rf .pio/libdeps/native/EMS-ESP-Modules; pio run -e native -t clean; pio run -e native -t exec
 ; lib_deps =
 ;   file://../../modules/EMS-ESP-Modules
@@ -65,22 +62,15 @@ extra_scripts =
   ; post:scripts/run_native.py
 
 [env:s_16M_P]
-extra_scripts =
-  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
-  scripts/rename_fw.py
-  ; scripts/upload.py
+; extra_scripts =
+;   ; pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+;   ; scripts/rename_fw.py
+;   ; scripts/upload.py
 
 [env:s3_16M_P]
 extra_scripts =
-  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
-  scripts/rename_fw.py
-  ; scripts/upload.py
-
-[env:s_4M]
-extra_scripts =
-  pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
-  scripts/rename_fw.py
-  ; scripts/upload.py
+  ; pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
+  scripts/upload.py
 
 ; ** debug settings **
 ; to be used with esp-prog/JTAG hardware device like https://docs.espressif.com/projects/esp-dev-kits/en/latest/other/esp-prog/user_guide.html   
@@ -90,7 +80,7 @@ extra_scripts =
 board = esp32dev
 framework = arduino
 platform = espressif32
-board_build.partitions = esp32_partition_debug.csv
+board_build.partitions = partitions/esp32_partition_debug.csv
 board_upload.flash_size = 4MB
 board_build.filesystem = littlefs
 upload_protocol = esptool
