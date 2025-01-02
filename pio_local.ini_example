@@ -20,16 +20,18 @@ my_build_flags =
 [platformio]
 ; default_envs = s_16M_P ; BBQKees E32V2
 default_envs = s3_16M_P ; BBQKees S3
-; default_envs = s_4M ; BBQKees S32
-; default_envs = s2_4M ; BBQKees S2
-; default_envs = native
-; default_envs = debug
 
 [env]
 
 ; uncomment this section to enable extra debug
 ; build_type = debug
 ; monitor_filters = colorize, esp32_exception_decoder
+
+; customize the scripts
+extra_scripts =
+  ; pre:scripts/build_interface.py ; builds the WebUI (unless NO_BUILD_WEBUI is set) - comment out if you don't want to build each time
+  ; scripts/rename_fw.py ; renames the firmware .bin file - comment out if not needed
+  scripts/upload.py ; optionally upload the firmware via OTA (must have upload_protocol = custom)
 
 ; set the username and password for the admin account (default password is admin)
 custom_username = admin
@@ -46,31 +48,6 @@ custom_password = admin
 upload_protocol = custom
 custom_emsesp_ip = 10.10.10.93 ; S3
 ; custom_emsesp_ip = 192.168.1.225 ; E32V2
-
-; ** modules **
-; example below is using a locally built library of EMS-ESP-Modules. You can also test with:
-;    rm -rf .pio/libdeps/native/EMS-ESP-Modules; pio run -e native -t clean; pio run -e native -t exec
-; lib_deps =
-;   file://../../modules/EMS-ESP-Modules
-;   bblanchon/ArduinoJson @ 7.3.0
-;   mathieucarbou/AsyncTCP @ 3.3.1
-;   mathieucarbou/ESPAsyncWebServer @ 3.4.5
-
-[env:native]
-extra_scripts = 
-  ; pre:scripts/refresh_module_library_native.py
-  ; post:scripts/run_native.py
-
-[env:s_16M_P]
-; extra_scripts =
-;   ; pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
-;   ; scripts/rename_fw.py
-;   ; scripts/upload.py
-
-[env:s3_16M_P]
-extra_scripts =
-  ; pre:scripts/build_interface.py ; comment out if you don't want to re-build the WebUI each time
-  scripts/upload.py
 
 ; ** debug settings **
 ; to be used with esp-prog/JTAG hardware device like https://docs.espressif.com/projects/esp-dev-kits/en/latest/other/esp-prog/user_guide.html   
