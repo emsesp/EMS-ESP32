@@ -72,3 +72,4 @@ dependencies.lock
 CMakeLists.txt
 sdkconfig.*
 .dummy/*
+logs/*
