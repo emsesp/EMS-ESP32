@@ -10,7 +10,7 @@ the LICENSE file.
 
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
 
-// added for EMS-ESP
+// Added for EMS-ESP
 #include "../Config.h"
 #if defined(EMC_CLIENT_SECURE)
 #include <WiFiClientSecure.h> // includes IPAddress
