@@ -28,6 +28,8 @@
     "**/i18n/**", 
     "/project-words.txt",
     "Makefile",
+    "**/*.ini",
+    "**/*.json",
     "src/modbus_entity_parameters.hpp"
   ]
   }
