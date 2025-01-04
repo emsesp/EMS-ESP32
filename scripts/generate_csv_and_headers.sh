@@ -4,7 +4,7 @@
 # Builds the dump_*.csv files, modbus headers and modbus documentation.
 # Run as `sh scripts/generate_csv_and_headers.sh` from the root of the repository.
 
-# creat a dummy modbus_entity_parameters.hpp so the first pass compiles
+# create a dummy modbus_entity_parameters.hpp so the first pass compiles
 cat >./src/modbus_entity_parameters.hpp <<EOL
 #include "modbus.h"
 #include "emsdevice.h"
