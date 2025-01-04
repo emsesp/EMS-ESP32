@@ -28,10 +28,10 @@ default_envs = s3_16M_P ; BBQKees S3
 ; monitor_filters = colorize, esp32_exception_decoder
 
 ; customize the scripts
-extra_scripts =
+; extra_scripts =
   ; pre:scripts/build_interface.py ; builds the WebUI (unless NO_BUILD_WEBUI is set) - comment out if you don't want to build each time
   ; scripts/rename_fw.py ; renames the firmware .bin file - comment out if not needed
-  scripts/upload.py ; optionally upload the firmware via OTA (must have upload_protocol = custom)
+  ; scripts/upload.py ; optionally upload the firmware via OTA (must have upload_protocol = custom)
 
 ; set the username and password for the admin account (default password is admin)
 custom_username = admin
