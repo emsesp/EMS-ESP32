@@ -21,9 +21,9 @@
 namespace emsesp {
 
 WebActivityService::WebActivityService(AsyncWebServer * server, SecurityManager * securityManager) {
-    server->on(EMSESP_ACTIVITY_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { webActivityService(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
+    securityManager->addEndpoint(server, EMSESP_ACTIVITY_SERVICE_PATH, AuthenticationPredicates::IS_AUTHENTICATED, [this](AsyncWebServerRequest * request) {
+        webActivityService(request);
+    });
 }
 
 void WebActivityService::webActivityService(AsyncWebServerRequest * request) {

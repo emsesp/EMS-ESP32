@@ -27,10 +27,17 @@ namespace emsesp {
 WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager) {
     // GET
-    server->on(EMSESP_SYSTEM_STATUS_SERVICE_PATH, HTTP_GET, [this](AsyncWebServerRequest * request) { systemStatus(request); });
+    securityManager->addEndpoint(server, EMSESP_SYSTEM_STATUS_SERVICE_PATH, AuthenticationPredicates::IS_AUTHENTICATED, [this](AsyncWebServerRequest * request) {
+        systemStatus(request);
+    });
 
-    // POST - generic action handler
-    server->on(EMSESP_ACTION_SERVICE_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { action(request, json); });
+    // POST - generic action handler, handles both GET and POST
+    securityManager->addEndpoint(
+        server,
+        EMSESP_ACTION_SERVICE_PATH,
+        AuthenticationPredicates::IS_AUTHENTICATED,
+        [this](AsyncWebServerRequest * request, JsonVariant json) { action(request, json); },
+        HTTP_ANY);
 }
 
 // /rest/systemStatus
@@ -58,25 +65,23 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     root["mqtt_status"]    = EMSESP::mqtt_.connected();
 
 #ifndef EMSESP_STANDALONE
-    root["ntp_status"] = [] {
-        if (esp_sntp_enabled()) {
-            if (emsesp::EMSESP::system_.ntp_connected()) {
-                return 2;
-            } else {
-                return 1;
-            }
+    uint8_t ntp_status = 0; // 0=disabled, 1=enabled, 2=connected
+    if (esp_sntp_enabled()) {
+        ntp_status = (emsesp::EMSESP::system_.ntp_connected()) ? 2 : 1;
+    }
+    root["ntp_status"] = ntp_status;
+    if (ntp_status == 2) {
+        // send back actual time if NTP enabled and active
+        time_t now = time(nullptr);
+        if (now > 1500000000L) {
+            char t[25];
+            strftime(t, sizeof(t), "%FT%T", localtime(&now));
+            root["ntp_time"] = t; // optional string
         }
-        return 0;
-    }();
-    time_t now = time(nullptr);
-    if (now > 1500000000L) {
-        char t[25];
-        strftime(t, sizeof(t), "%FT%T", localtime(&now));
-        root["ntp_time"] = t;
     }
 #endif
 
-    root["ap_status"] = EMSESP::esp8266React.apStatus();
+    root["ap_status"] = EMSESP::esp32React.apStatus();
 
     if (emsesp::EMSESP::system_.ethernet_connected()) {
         root["network_status"] = 10; // custom code #10 - ETHERNET_STATUS_CONNECTED
@@ -217,7 +222,7 @@ bool WebStatusService::checkUpgrade(JsonObject root, std::string & versions) {
 #else
     // for testing only - see api3 test in test.cpp
     // current_version_s = "3.6.5";
-    current_version_s = "3.7.1-dev.8";
+    current_version_s = "3.7.2-dev.1";
 #endif
 
     if (!versions.empty()) {

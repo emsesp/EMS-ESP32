@@ -25,7 +25,10 @@ uint16_t WebAPIService::api_fails_ = 0;
 
 WebAPIService::WebAPIService(AsyncWebServer * server, SecurityManager * securityManager)
     : _securityManager(securityManager) {
-    server->on(EMSESP_API_SERVICE_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { webAPIService(request, json); });
+    AsyncCallbackJsonWebHandler * jsonHandler = new AsyncCallbackJsonWebHandler(EMSESP_API_SERVICE_PATH);
+    jsonHandler->setMethod(HTTP_POST | HTTP_GET);
+    jsonHandler->onRequest([this](AsyncWebServerRequest * request, JsonVariant json) { webAPIService(request, json); });
+    server->addHandler(jsonHandler);
 }
 
 // POST|GET api/

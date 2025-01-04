@@ -1401,3 +1401,10 @@ intvl
 Français
 lltoa
 redthreshold
+JTAG
+fuelheat
+elheat
+elgenheat
+fueldhw
+eldhw
+elgendhw

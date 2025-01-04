@@ -51,13 +51,14 @@ void WebModulesService::loop() {
 // and also calls when the Modules web page is refreshed/loaded
 void WebModules::read(WebModules & webModules, JsonObject root) {
     JsonDocument doc_modules;
-    JsonObject   root_modules = doc_modules.to<JsonObject>();
+    auto   root_modules = doc_modules.to<JsonObject>();
     moduleLibrary.list(root_modules); // get list the external library modules, put in a json object
 
-    JsonArray modules = root["modules"].to<JsonArray>();
+    auto modules_new = root["modules"].to<JsonArray>();
+    auto modules = root_modules["modules"].as<JsonArray>();
     uint8_t   counter = 0;
-    for (const JsonObject module : root_modules["modules"].as<JsonArray>()) {
-        JsonObject mi = modules.add<JsonObject>();
+    for (const JsonObject module : modules) {
+        JsonObject mi = modules_new.add<JsonObject>();
         mi["id"]      = counter++; // id is only used to render the table and must be unique
         mi["key"]     = module["key"].as<std::string>();
         mi["name"]    = module["name"].as<std::string>();
@@ -76,7 +77,8 @@ void WebModules::read(WebModules & webModules, JsonObject root) {
 StateUpdateResult WebModules::update(JsonObject root, WebModules & webModules) {
     bool err = false;
     if (root["modules"].is<JsonArray>()) {
-        for (const JsonObject module : root["modules"].as<JsonArray>()) {
+        auto modules = root["modules"].as<JsonArray>();
+        for (const JsonObject module : modules) {
             auto key     = module["key"].as<const char *>();
             auto license = module["license"].as<const char *>();
             auto enable  = module["enabled"].as<bool>();

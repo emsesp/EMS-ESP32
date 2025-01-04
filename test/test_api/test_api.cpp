@@ -22,7 +22,7 @@
 
 #include <emsesp.h>
 #include "ESPAsyncWebServer.h"
-#include "ESP8266React.h"
+#include "ESP32React.h"
 #include "web/WebAPIService.h"
 
 using namespace emsesp;
@@ -32,7 +32,7 @@ void         run_tests();
 const char * call_url(const char * url);
 
 AsyncWebServer * webServer;
-ESP8266React *   esp8266React;
+ESP32React *   esp32React;
 WebAPIService *  webAPIService;
 EMSESP           application;
 FS               dummyFS;
@@ -406,8 +406,8 @@ void create_tests() {
 // Main entry point
 int main() {
     webServer     = new AsyncWebServer(80);
-    esp8266React  = new ESP8266React(webServer, &dummyFS);
-    webAPIService = new WebAPIService(webServer, esp8266React->getSecurityManager());
+    esp32React  = new ESP32React(webServer, &dummyFS);
+    webAPIService = new WebAPIService(webServer, esp32React->getSecurityManager());
 
     // Serial console for commands
     Serial.begin(115200);

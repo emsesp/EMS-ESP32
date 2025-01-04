@@ -19,6 +19,8 @@ import requests
 import hashlib
 from urllib.parse import urlparse
 import time
+import os
+
 Import("env")
 
 try:
@@ -159,5 +161,6 @@ def on_upload(source, target, env):
 
         print()
 
-
-env.Replace(UPLOADCMD=on_upload)
+if env.get('UPLOAD_PROTOCOL') == 'custom':
+    env.Replace(UPLOADCMD=on_upload)
+    

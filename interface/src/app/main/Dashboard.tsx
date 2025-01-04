@@ -3,6 +3,7 @@ import { IconContext } from 'react-icons/lib';
 import { toast } from 'react-toastify';
 
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ConstructionIcon from '@mui/icons-material/Construction';
 import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
@@ -235,7 +236,10 @@ const Dashboard = () => {
           <Grid container spacing={0} justifyContent="flex-start">
             <Grid size={11}>
               <Typography mb={2} variant="body1" color="warning">
-                {LL.DASHBOARD_1()}.
+                {LL.DASHBOARD_1()}&nbsp;
+                <ConstructionIcon
+                  sx={{ color: '#9e9e9e', fontSize: 20, verticalAlign: 'middle' }}
+                />
               </Typography>
             </Grid>
 

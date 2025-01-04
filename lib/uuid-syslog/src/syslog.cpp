@@ -18,8 +18,6 @@
 
 #include "uuid/syslog.h"
 
-#include "../../../src/emsesp.h"
-
 #ifndef UUID_SYSLOG_HAVE_GETTIMEOFDAY
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
 // time() does not return UTC on the ESP8266: https://github.com/esp8266/Arduino/issues/4637
@@ -233,8 +231,8 @@ SyslogService::QueuedLogMessage::QueuedLogMessage(unsigned long id, std::shared_
     : id_(id)
     , content_(std::move(content)) {
     // Added for EMS-ESP
-    // check for Ethernet too. This assumes the network has already started.
-    if (time_good_ || emsesp::EMSESP::system_.network_connected()) {
+    // if (time_good_ || emsesp::EMSESP::system_.network_connected()) {
+    if (time_good_) {
 #if UUID_SYSLOG_HAVE_GETTIMEOFDAY
         if (gettimeofday(&time_, nullptr) != 0) {
             time_.tv_sec = (time_t)-1;
@@ -364,9 +362,9 @@ bool SyslogService::can_transmit() {
     }
 #endif
 
-    if (!emsesp::EMSESP::system_.network_connected()) {
-        return false;
-    }
+    // if (!emsesp::EMSESP::system_.network_connected()) {
+    //     return false;
+    // }
 
     const uint64_t now           = uuid::get_uptime_ms();
     uint64_t       message_delay = UUID_SYSLOG_UDP_BASE_MESSAGE_DELAY;
