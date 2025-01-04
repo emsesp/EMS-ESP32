@@ -140,7 +140,7 @@ cpp_entry_template = Template(
 # read translations
 listNames = {}
 transre = re.compile(r'^MAKE_TRANSLATION\(([^,\s]+)\s*,\s*\"([^\"]+)\"')
-transf = open('./src/locale_translations.h', 'r')
+transf = open('./src/core/locale_translations.h', 'r')
 while True:
     line = transf.readline()
     if not line:

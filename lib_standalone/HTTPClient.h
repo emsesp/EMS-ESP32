@@ -5,9 +5,6 @@
 
 class HTTPClient {
   public:
-    // HTTPClient();
-    // ~HTTPClient();
-
     bool begin(String url) {
         return true;
     };

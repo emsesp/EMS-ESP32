@@ -50,6 +50,8 @@ jobs:
       - name: Build all PIO target environments from default_envs
         run: |
           platformio run
+        env:
+          NO_BUILD_WEBUI: true
 
       - name: Create GitHub Release
         id: 'automatic_releases'

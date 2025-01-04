@@ -71,7 +71,8 @@ StateUpdateResult WebScheduler::update(JsonObject root, WebScheduler & webSchedu
     EMSESP::webSchedulerService.ha_reset();
 
     // build up the list of schedule items
-    for (const JsonObject schedule : root["schedule"].as<JsonArray>()) {
+    auto scheduleItems = root["schedule"].as<JsonArray>();
+    for (const JsonObject schedule : scheduleItems) {
         // create each schedule item, overwriting any previous settings
         // ignore the id (as this is only used in the web for table rendering)
         auto si   = ScheduleItem();

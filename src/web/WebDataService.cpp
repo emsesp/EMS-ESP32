@@ -21,32 +21,38 @@
 namespace emsesp {
 
 WebDataService::WebDataService(AsyncWebServer * server, SecurityManager * securityManager) {
-    // write endpoints
-    server->on(EMSESP_WRITE_DEVICE_VALUE_SERVICE_PATH,
-               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_device_value(request, json); },
-                                             AuthenticationPredicates::IS_ADMIN));
-    server->on(EMSESP_WRITE_TEMPERATURE_SENSOR_SERVICE_PATH,
-               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_temperature_sensor(request, json); },
-                                             AuthenticationPredicates::IS_ADMIN));
-    server->on(EMSESP_WRITE_ANALOG_SENSOR_SERVICE_PATH,
-               securityManager->wrapCallback([this](AsyncWebServerRequest * request, JsonVariant json) { write_analog_sensor(request, json); },
-                                             AuthenticationPredicates::IS_ADMIN));
+    // write endpoints - POSTs
+    securityManager->addEndpoint(server,
+                                 EMSESP_WRITE_DEVICE_VALUE_SERVICE_PATH,
+                                 AuthenticationPredicates::IS_ADMIN,
+                                 [this](AsyncWebServerRequest * request, JsonVariant json) { write_device_value(request, json); });
+
+    securityManager->addEndpoint(server,
+                                 EMSESP_WRITE_TEMPERATURE_SENSOR_SERVICE_PATH,
+                                 AuthenticationPredicates::IS_ADMIN,
+                                 [this](AsyncWebServerRequest * request, JsonVariant json) { write_temperature_sensor(request, json); });
+
+    securityManager->addEndpoint(server,
+                                 EMSESP_WRITE_ANALOG_SENSOR_SERVICE_PATH,
+                                 AuthenticationPredicates::IS_ADMIN,
+                                 [this](AsyncWebServerRequest * request, JsonVariant json) { write_analog_sensor(request, json); });
+
     // GET's
-    server->on(EMSESP_DEVICE_DATA_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { device_data(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
+    securityManager->addEndpoint(server, EMSESP_DEVICE_DATA_SERVICE_PATH, AuthenticationPredicates::IS_AUTHENTICATED, [this](AsyncWebServerRequest * request) {
+        device_data(request);
+    });
 
-    server->on(EMSESP_CORE_DATA_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { core_data(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
+    securityManager->addEndpoint(server, EMSESP_CORE_DATA_SERVICE_PATH, AuthenticationPredicates::IS_AUTHENTICATED, [this](AsyncWebServerRequest * request) {
+        core_data(request);
+    });
 
-    server->on(EMSESP_SENSOR_DATA_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { sensor_data(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
+    securityManager->addEndpoint(server, EMSESP_SENSOR_DATA_SERVICE_PATH, AuthenticationPredicates::IS_AUTHENTICATED, [this](AsyncWebServerRequest * request) {
+        sensor_data(request);
+    });
 
-    server->on(EMSESP_DASHBOARD_DATA_SERVICE_PATH,
-               HTTP_GET,
-               securityManager->wrapRequest([this](AsyncWebServerRequest * request) { dashboard_data(request); }, AuthenticationPredicates::IS_AUTHENTICATED));
+    securityManager->addEndpoint(server, EMSESP_DASHBOARD_DATA_SERVICE_PATH, AuthenticationPredicates::IS_AUTHENTICATED, [this](AsyncWebServerRequest * request) {
+        dashboard_data(request);
+    });
 }
 
 // this is used in the Devices page and contains all EMS device information
@@ -161,7 +167,7 @@ void WebDataService::device_data(AsyncWebServerRequest * request) {
     if (request->hasParam(F_(id))) {
         id = Helpers::atoint(request->getParam(F_(id))->value().c_str()); // get id from url
 
-        auto * response = new AsyncJsonResponse(false, true); // use msgPack
+        auto * response = new AsyncMessagePackResponse();
 
         // check size
         // while (!response) {
@@ -346,7 +352,7 @@ void WebDataService::write_analog_sensor(AsyncWebServerRequest * request, JsonVa
 // this is used in the dashboard and contains all ems device information
 // /dashboardData endpoint
 void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
-    auto * response = new AsyncJsonResponse(true, true); // its an Array and also msgpack'd
+    auto * response = new AsyncMessagePackResponse(true);
 
 #if defined(EMSESP_STANDALONE)
     JsonDocument doc;

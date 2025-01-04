@@ -18,9 +18,9 @@ let VERSION_IS_UPGRADEABLE: boolean;
 
 // Versions
 // default - on latest stable, no upgrades
-let THIS_VERSION = '3.7.1';
-let LATEST_STABLE_VERSION = '3.7.1';
-let LATEST_DEV_VERSION = '3.7.2-dev.1';
+let THIS_VERSION = '3.7.2';
+let LATEST_STABLE_VERSION = '3.7.2';
+let LATEST_DEV_VERSION = '3.7.3-dev.1';
 
 // scenarios for testing, overriding the default
 const version_test = 0;

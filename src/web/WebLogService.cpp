@@ -24,10 +24,14 @@ namespace emsesp {
 
 WebLogService::WebLogService(AsyncWebServer * server, SecurityManager * securityManager)
     : events_(EMSESP_EVENT_SOURCE_LOG_PATH) {
-    // get & set settings
-    server->on(EMSESP_LOG_SETTINGS_PATH, [this](AsyncWebServerRequest * request, JsonVariant json) { getSetValues(request, json); });
+    // there is a GET and a POST for LogSettings endpoint, in one function
+    securityManager->addEndpoint(
+        server,
+        EMSESP_LOG_SETTINGS_PATH,
+        AuthenticationPredicates::IS_AUTHENTICATED,
+        [this](AsyncWebServerRequest * request, JsonVariant json) { getSetValues(request, json); },
+        HTTP_ANY);
 
-    // events_.setFilter(securityManager->filterRequest(AuthenticationPredicates::IS_ADMIN));
     server->addHandler(&events_);
 }
 
@@ -121,7 +125,7 @@ void WebLogService::operator<<(std::shared_ptr<uuid::log::Message> message) {
 
     log_messages_.emplace_back(++log_message_id_, std::move(message));
 
-    EMSESP::esp8266React.getNTPSettingsService()->read([&](NTPSettings & settings) {
+    EMSESP::esp32React.getNTPSettingsService()->read([&](NTPSettings & settings) {
         if (!settings.enabled || (time(nullptr) < 1500000000L)) {
             time_offset_ = 0;
         } else {

@@ -19,7 +19,7 @@
 #ifndef WebSettingsService_h
 #define WebSettingsService_h
 
-#include "../default_settings.h"
+#include "../core/default_settings.h"
 
 #define EMSESP_SETTINGS_FILE "/config/emsespSettings.json"
 

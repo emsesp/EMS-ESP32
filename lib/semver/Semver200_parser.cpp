@@ -26,13 +26,6 @@ SOFTWARE.
 #include <map>
 #include "semver200.h"
 
-#include "../../src/emsesp_stub.hpp" // for logging
-
-#ifdef _MSC_VER
-// disable symbol name too long warning
-#pragma warning(disable : 4503)
-#endif
-
 using namespace std;
 
 namespace version {
@@ -57,7 +50,7 @@ inline Transition mkx(const char c, Parser_state p, State_transition_hook pth) {
 }
 
 inline void Parse_error(const std::string & s) {
-    emsesp::EMSESP::logger().err("parse error: %s", s.c_str());
+    // emsesp::EMSESP::logger().err("parse error: %s", s.c_str());
 }
 
 /// Advance parser state machine by a single step.

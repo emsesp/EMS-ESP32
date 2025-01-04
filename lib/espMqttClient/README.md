@@ -12,6 +12,7 @@ with additional changes to support EMS-ESP such as compiling with Tasmota and no
 ```
  src/espMqttClient.cpp
  src/Transport/ClientSecureSync.h
+ src/Config.h
 ```
 
 # License

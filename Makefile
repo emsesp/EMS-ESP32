@@ -40,26 +40,20 @@ MAKEFLAGS += -j $(JOBS) -l $(JOBS)
 # INCLUDES  is a list of directories containing header files
 # LIBRARIES is a list of directories containing libraries, this must be the top level containing include and lib
 #----------------------------------------------------------------------
-
-#TARGET    := $(notdir $(CURDIR))
 TARGET    := emsesp
 BUILD     := build
-SOURCES   := src src/* lib_standalone lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src src/devices lib/ArduinoJson/src lib/PButton lib/semver lib/espMqttClient/src lib/espMqttClient/src/*
-INCLUDES  := src lib_standalone lib/espMqttClient/src lib/espMqttClient/src/Transport lib/ArduinoJson/src lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src lib/uuid-telnet/src lib/uuid-syslog/src lib/semver lib/* src/devices
+SOURCES   := src/core src/devices src/web src/test       lib_standalone lib/semver lib/espMqttClient/src lib/espMqttClient/src/*         lib/ArduinoJson/src lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src   lib/PButton 
+INCLUDES  := src/core src/devices src/web src/test lib/* lib_standalone lib/semver lib/espMqttClient/src lib/espMqttClient/src/Transport lib/ArduinoJson/src lib/uuid-common/src lib/uuid-console/src lib/uuid-log/src   lib/uuid-telnet/src lib/uuid-syslog/src
 LIBRARIES :=
 
 CPPCHECK = cppcheck
-# CHECKFLAGS = -q --force --std=c++17
-CHECKFLAGS = -q --force --std=c++11
+CHECKFLAGS = -q --force --std=gnu++17
 
 #----------------------------------------------------------------------
 # Languages Standard
 #----------------------------------------------------------------------
 C_STANDARD   := -std=c17
-CXX_STANDARD := -std=gnu++14
-
-# C_STANDARD   := -std=c11
-# CXX_STANDARD := -std=c++11
+CXX_STANDARD := -std=gnu++17
 
 #----------------------------------------------------------------------
 # Defined Symbols
@@ -68,7 +62,7 @@ DEFINES += -DARDUINOJSON_ENABLE -DARDUINOJSON_ENABLE_ARDUINO_STRING -DARDUINOJSO
 DEFINES += -DEMSESP_STANDALONE -DEMSESP_TEST -DEMSESP_DEBUG -DEMC_RX_BUFFER_SIZE=1500
 DEFINES += $(ARGS)
 
-DEFAULTS = -DEMSESP_DEFAULT_LOCALE=\"en\" -DEMSESP_DEFAULT_TX_MODE=8 -DEMSESP_DEFAULT_VERSION=\"3.7.1-dev\" -DEMSESP_DEFAULT_BOARD_PROFILE=\"S3\"
+DEFAULTS = -DEMSESP_DEFAULT_LOCALE=\"en\" -DEMSESP_DEFAULT_TX_MODE=8 -DEMSESP_DEFAULT_VERSION=\"3.7.2-dev\" -DEMSESP_DEFAULT_BOARD_PROFILE=\"S3\"
 
 #----------------------------------------------------------------------
 # Sources & Files
@@ -108,7 +102,7 @@ CPPFLAGS  += -Os
 
 CFLAGS    += $(CPPFLAGS)
 CFLAGS    += -Wall -Wextra -Werror -Wswitch-enum
-CFLAGS    += -Wno-tautological-constant-out-of-range-compare -Wno-unused-parameter -Wno-inconsistent-missing-override -Wno-missing-braces -Wno-unused-lambda-capture -Wno-sign-compare
+CFLAGS    += -Wno-unused-parameter -Wno-missing-braces -Wno-sign-compare
 CXXFLAGS  += $(CFLAGS) -MMD
 
 #----------------------------------------------------------------------

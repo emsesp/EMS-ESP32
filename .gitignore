@@ -12,17 +12,15 @@ cppcheck.out.xml
 # platformio
 .pio
 pio_local.ini
-*_old
 
 # OS specific
 .DS_Store
 *Thumbs.db
 
-# web specfic
+# web specific
 build/
 dist/
 /data/www
-/lib/framework/WWWData.h
 /interface/build
 node_modules
 /interface/.eslintcache
@@ -35,6 +33,7 @@ stats.html
 analyse.html
 interface/vite.config.ts.timestamp*
 *.local
+src/ESP32React/WWWData.h
 
 # i18n generated files
 interface/src/i18n/i18n-react.tsx
@@ -66,3 +65,12 @@ words-found-verbose.txt
 
 # sonarlint
 compile_commands.json
+
+# pioarduino + hybrid
+managed_components
+dependencies.lock
+CMakeLists.txt
+.dummy/*
+logs/*
+sdkconfig.*
+sdkconfig_tasmota_esp32
