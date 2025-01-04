@@ -70,6 +70,7 @@ compile_commands.json
 managed_components
 dependencies.lock
 CMakeLists.txt
-sdkconfig.*
 .dummy/*
 logs/*
+sdkconfig.*
+sdkconfig_tasmota_esp32
