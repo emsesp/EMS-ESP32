@@ -274,7 +274,7 @@ const Dashboard = () => {
           <IconContext.Provider
             value={{
               color: 'lightblue',
-              size: '16',
+              size: '18',
               style: { verticalAlign: 'middle' }
             }}
           >

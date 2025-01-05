@@ -10,9 +10,9 @@ import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
 
 import CommentsDisabledOutlinedIcon from '@mui/icons-material/CommentsDisabledOutlined';
+import ConstructionIcon from '@mui/icons-material/Construction';
 import EditIcon from '@mui/icons-material/Edit';
 import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
-import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import DownloadIcon from '@mui/icons-material/GetApp';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -522,7 +522,7 @@ const Devices = () => {
       <IconContext.Provider
         value={{
           color: 'lightblue',
-          size: '16',
+          size: '18',
           style: { verticalAlign: 'middle' }
         }}
       >
@@ -643,7 +643,7 @@ const Devices = () => {
                 coreData.devices[deviceIndex].e +
                 ' ' +
                 LL.ENTITIES(shown_data.length)}
-              <ButtonTooltip title="Info">
+              <ButtonTooltip title={LL.DEVICE_DETAILS()}>
                 <IconButton onClick={() => setShowDeviceInfo(true)}>
                   <InfoOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
                 </IconButton>
@@ -651,7 +651,7 @@ const Devices = () => {
               {me.admin && (
                 <ButtonTooltip title={LL.CUSTOMIZATIONS()}>
                   <IconButton onClick={customize}>
-                    <FormatListNumberedIcon color="primary" sx={{ fontSize: 18 }} />
+                    <ConstructionIcon color="primary" sx={{ fontSize: 18 }} />
                   </IconButton>
                 </ButtonTooltip>
               )}
@@ -671,7 +671,7 @@ const Devices = () => {
               </ButtonTooltip>
             </Typography>
             <Grid justifyContent="flex-end">
-              <ButtonTooltip title={LL.CANCEL()}>
+              <ButtonTooltip title={LL.CLOSE()}>
                 <IconButton onClick={resetDeviceSelect}>
                   <HighlightOffIcon color="primary" sx={{ fontSize: 18 }} />
                 </IconButton>
