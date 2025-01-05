@@ -183,10 +183,6 @@ const Version = () => {
   };
 
   const showButtons = () => {
-    if (!upgradeAvailable) {
-      return;
-    }
-
     if (downloadOnly) {
       return (
         <Button
@@ -212,7 +208,7 @@ const Version = () => {
         size="small"
         onClick={() => showFirmwareDialog()}
       >
-        {LL.UPGRADE()}&hellip;
+        {upgradeAvailable ? LL.UPGRADE() : 'Re-install'}&hellip;
       </Button>
     );
   };
@@ -225,24 +221,24 @@ const Version = () => {
     return (
       <>
         <Box p={2} border="1px solid grey" borderRadius={2}>
-          <Typography sx={{ pb: 2 }} variant="h6" color="primary">
+          <Typography mb={2} variant="h6" color="primary">
             Firmware Version
           </Typography>
 
-          <Grid container spacing={4}>
-            <Grid mb={1}>
-              <Typography mb={1} color="secondary">
-                {LL.VERSION()}
-              </Typography>
-              <Typography mb={1} color="secondary">
-                Platform
-              </Typography>
-              <Typography mb={1} color="secondary">
-                Release Type
-              </Typography>
+          <Grid
+            container
+            direction="row"
+            rowSpacing={1}
+            sx={{
+              justifyContent: 'flex-start',
+              alignItems: 'baseline'
+            }}
+          >
+            <Grid size={4}>
+              <Typography color="secondary">{LL.VERSION()}</Typography>
             </Grid>
-            <Grid mb={1}>
-              <Typography mb={1}>
+            <Grid size={8}>
+              <Typography>
                 {data.emsesp_version}
                 {data.build_flags && (
                   <Typography variant="caption">
@@ -250,8 +246,20 @@ const Version = () => {
                   </Typography>
                 )}
               </Typography>
-              <Typography mb={1}>{getPlatform()}</Typography>
-              <Typography mb={1}>
+            </Grid>
+
+            <Grid size={4}>
+              <Typography color="secondary">Platform</Typography>
+            </Grid>
+            <Grid size={8}>
+              <Typography>{getPlatform()}</Typography>
+            </Grid>
+
+            <Grid size={4}>
+              <Typography color="secondary">Release Type</Typography>
+            </Grid>
+            <Grid size={8}>
+              <Typography>
                 {data.emsesp_version.includes('dev')
                   ? LL.DEVELOPMENT()
                   : LL.STABLE()}
@@ -259,40 +267,48 @@ const Version = () => {
             </Grid>
           </Grid>
 
-          <Typography sx={{ pb: 2 }} variant="h6" color="primary">
+          <Typography mt={2} mb={2} variant="h6" color="primary">
             {LL.AVAILABLE_VERSION()}
           </Typography>
 
+          <Grid
+            container
+            direction="row"
+            rowSpacing={1}
+            sx={{
+              justifyContent: 'flex-start',
+              alignItems: 'baseline'
+            }}
+          >
+            <Grid size={4}>
+              <Typography color="secondary">{LL.STABLE()}</Typography>
+            </Grid>
+            <Grid size={4}>
+              <Typography>
+                <Link target="_blank" href={STABLE_RELNOTES_URL} color="primary">
+                  {latestVersion}
+                </Link>
+              </Typography>
+            </Grid>
+            <Grid size={4}>{!usingDevVersion && showButtons()}</Grid>
+
+            <Grid size={4}>
+              <Typography color="secondary">{LL.DEVELOPMENT()}</Typography>
+            </Grid>
+            <Grid size={4}>
+              <Typography>
+                <Link target="_blank" href={DEV_RELNOTES_URL} color="primary">
+                  {latestDevVersion}
+                </Link>
+              </Typography>
+            </Grid>
+            <Grid size={4}>{usingDevVersion && showButtons()}</Grid>
+          </Grid>
+
           {internetLive ? (
             <>
-              <Grid container spacing={4}>
-                <Grid mb={1}>
-                  <Typography mb={1} color="secondary">
-                    {LL.STABLE()}
-                  </Typography>
-                  <Typography mb={1} color="secondary">
-                    {LL.DEVELOPMENT()}
-                  </Typography>
-                </Grid>
-                <Grid mb={1}>
-                  <Typography mb={1}>
-                    {latestVersion}&nbsp;&nbsp;
-                    <Link target="_blank" href={STABLE_RELNOTES_URL} color="primary">
-                      (changelog)
-                    </Link>
-                    {!usingDevVersion && showButtons()}
-                  </Typography>
-                  <Typography mb={1}>
-                    {latestDevVersion}&nbsp;&nbsp;
-                    <Link target="_blank" href={DEV_RELNOTES_URL} color="primary">
-                      (changelog)
-                    </Link>
-                    {usingDevVersion && showButtons()}
-                  </Typography>
-                </Grid>
-              </Grid>
               {upgradeAvailable ? (
-                <Typography color="warning">
+                <Typography mt={2} color="warning">
                   <InfoOutlinedIcon
                     color="warning"
                     sx={{ verticalAlign: 'middle', mr: 2 }}
@@ -300,7 +316,7 @@ const Version = () => {
                   {LL.UPGRADE_AVAILABLE()}
                 </Typography>
               ) : (
-                <Typography color="success">
+                <Typography mt={2} color="success">
                   <CheckIcon
                     color="success"
                     sx={{ verticalAlign: 'middle', mr: 2 }}
@@ -326,7 +342,7 @@ const Version = () => {
           ) : (
             <Typography mb={1} color="warning">
               <WarningIcon color="warning" sx={{ verticalAlign: 'middle', mr: 2 }} />
-              device cannot access internet
+              no access to download site
             </Typography>
           )}
 
