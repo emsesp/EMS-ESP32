@@ -234,10 +234,10 @@ const Version = () => {
               alignItems: 'baseline'
             }}
           >
-            <Grid size={4}>
+            <Grid size={{ xs: 4, md: 2 }}>
               <Typography color="secondary">{LL.VERSION()}</Typography>
             </Grid>
-            <Grid size={8}>
+            <Grid size={{ xs: 8, md: 10 }}>
               <Typography>
                 {data.emsesp_version}
                 {data.build_flags && (
@@ -248,17 +248,17 @@ const Version = () => {
               </Typography>
             </Grid>
 
-            <Grid size={4}>
+            <Grid size={{ xs: 4, md: 2 }}>
               <Typography color="secondary">Platform</Typography>
             </Grid>
-            <Grid size={8}>
+            <Grid size={{ xs: 8, md: 10 }}>
               <Typography>{getPlatform()}</Typography>
             </Grid>
 
-            <Grid size={4}>
+            <Grid size={{ xs: 4, md: 2 }}>
               <Typography color="secondary">Release Type</Typography>
             </Grid>
-            <Grid size={8}>
+            <Grid size={{ xs: 8, md: 10 }}>
               <Typography>
                 {data.emsesp_version.includes('dev')
                   ? LL.DEVELOPMENT()
@@ -280,29 +280,29 @@ const Version = () => {
               alignItems: 'baseline'
             }}
           >
-            <Grid size={4}>
+            <Grid size={{ xs: 4, md: 2 }}>
               <Typography color="secondary">{LL.STABLE()}</Typography>
             </Grid>
-            <Grid size={4}>
+            <Grid size={{ xs: 8, md: 10 }}>
               <Typography>
                 <Link target="_blank" href={STABLE_RELNOTES_URL} color="primary">
                   {latestVersion}
                 </Link>
+                &nbsp;&nbsp;{!usingDevVersion && showButtons()}
               </Typography>
             </Grid>
-            <Grid size={4}>{!usingDevVersion && showButtons()}</Grid>
 
-            <Grid size={4}>
+            <Grid size={{ xs: 4, md: 2 }}>
               <Typography color="secondary">{LL.DEVELOPMENT()}</Typography>
             </Grid>
-            <Grid size={4}>
+            <Grid size={{ xs: 8, md: 10 }}>
               <Typography>
                 <Link target="_blank" href={DEV_RELNOTES_URL} color="primary">
                   {latestDevVersion}
                 </Link>
+                &nbsp;&nbsp;{usingDevVersion && showButtons()}
               </Typography>
             </Grid>
-            <Grid size={4}>{usingDevVersion && showButtons()}</Grid>
           </Grid>
 
           {internetLive ? (
