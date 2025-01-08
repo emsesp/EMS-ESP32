@@ -424,10 +424,12 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "upload") {
         // S3 has 16MB flash
-        // EMSESP::system_.uploadFirmwareURL("https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_7_0-dev_32-ESP32S3-16MB+.bin");
+        // EMSESP::system_.uploadFirmwareURL("https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_7_0-dev_32-ESP32S3-16MB+.bin"); // S3
 
         // Test for 4MB Tasmota builds
-        EMSESP::system_.uploadFirmwareURL("https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_7_0-dev_32-ESP32-16MB.bin");
+        // EMSESP::system_.uploadFirmwareURL("https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_7_2-dev_8-ESP32-4MB.bin"); // S32
+        EMSESP::system_.uploadFirmwareURL("https://github.com/emsesp/EMS-ESP32/releases/download/latest/EMS-ESP-3_7_2-dev_8-ESP32-16MB.bin"); // E32
+
         ok = true;
     }
 #endif
@@ -2369,7 +2371,7 @@ void Test::add_device(uint8_t device_id, uint8_t product_id) {
 #ifndef EMSESP_STANDALONE
 void Test::listDir(fs::FS & fs, const char * dirname, uint8_t levels) {
     Serial.println();
-    Serial.printf("Listing directory: %s\r\n", dirname);
+    Serial.printf("%s\r\n", dirname);
 
     File root = fs.open(dirname);
     if (!root) {
@@ -2384,12 +2386,11 @@ void Test::listDir(fs::FS & fs, const char * dirname, uint8_t levels) {
     File file = root.openNextFile();
     while (file) {
         if (file.isDirectory()) {
-            Serial.print(" DIR: ");
-            Serial.println(file.name());
+            Serial.print(file.name());
+            Serial.println("/");
             if (levels) {
                 // prefix a / to the name to make it a full path
                 listDir(fs, ("/" + String(file.name())).c_str(), levels - 1);
-                // listDir(fs, file.name(), levels - 1);
             }
             Serial.println();
         } else {
@@ -2401,7 +2402,6 @@ void Test::listDir(fs::FS & fs, const char * dirname, uint8_t levels) {
         }
         file = root.openNextFile();
     }
-    Serial.println();
 }
 #endif
 #endif
