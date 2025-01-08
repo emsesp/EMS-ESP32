@@ -2041,13 +2041,13 @@ bool System::uploadFirmwareURL(const char * url) {
     HTTPClient http;
     http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS); // important for GitHub 302's
     http.setTimeout(8000);
-    http.useHTTP10(true); // use HTTP/1.0 for update since the update handler not support any transfer Encoding
+    http.useHTTP10(true); // use HTTP/1.0 for update since the update handler does not support any transfer Encoding
     http.begin(saved_url);
 
     // start a connection, returns -1 if fails
     int httpCode = http.GET();
     if (httpCode != HTTP_CODE_OK) {
-        LOG_ERROR("Firmware upload failed - HTTP code %d", httpCode);
+        LOG_ERROR("Firmware upload failed. URL %s, HTTP code %d", saved_url.c_str(), httpCode);
         return false; // error
     }
 
