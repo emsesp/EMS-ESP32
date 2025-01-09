@@ -115,7 +115,7 @@ const SystemLog = () => {
     immediate: true,
     interceptByGlobalResponded: false
   })
-    .onMessage((message: { id: number; data: string }) => {
+    .onMessage((message: { data: string }) => {
       const rawData = message.data;
       const logentry = JSON.parse(rawData) as LogEntry;
       setLogEntries((log) => [...log, logentry]);
