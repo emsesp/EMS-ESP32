@@ -1112,6 +1112,7 @@ void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) 
     }
     has_update(telegram, hc->targetflowtemp, 4);
     has_update(telegram, hc->curroominfl, 27);
+    has_update(telegram, hc->currSolarInfl, 29);
     has_update(telegram, hc->coolingon, 32);
 
     add_ha_climate(hc);
@@ -1179,6 +1180,7 @@ void Thermostat::process_RC300Summer(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, hc->roominfluence, 0);
     has_update(telegram, hc->roominfl_factor, 1); // is * 10
     has_update(telegram, hc->offsettemp, 2);
+    has_update(telegram, hc->solarInfl, 3);
     if (!is_received(summer2_typeids[hc->hc()])) {
         has_update(telegram, hc->summertemp, 6);
         has_update(telegram, hc->summersetmode, 7);
@@ -2779,6 +2781,18 @@ bool Thermostat::set_redthreshold(const char * value, const int8_t id) {
     return false;
 }
 
+bool Thermostat::set_solarinfl(const char * value, const int8_t id) {
+    auto hc = heating_circuit(id);
+    if (hc == nullptr) {
+        return false;
+    }
+    float t;
+    if (Helpers::value2temperature(value, t)) {
+        write_command(summer_typeids[hc->hc()], 3, (int8_t)t, summer_typeids[hc->hc()]);
+        return true;
+    }
+    return false;
+}
 
 // set date&time as string dd.mm.yyyy-hh:mm:ss-dw-dst or "NTP" for setting to internet-time
 // dw - day of week (0..6), dst- summertime (0/1)
@@ -4710,6 +4724,8 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               MAKE_CF_CB(set_redthreshold),
                               12,
                               22);
+        register_device_value(tag, &hc->solarInfl, DeviceValueType::UINT8, FL_(solarinfl), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_solarinfl), -5, -1);
+        register_device_value(tag, &hc->currSolarInfl, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(currsolarinfl), DeviceValueUOM::DEGREES);
         break;
     case EMSdevice::EMS_DEVICE_FLAG_CRF:
         register_device_value(tag, &hc->mode, DeviceValueType::ENUM, FL_(enum_mode5), FL_(mode), DeviceValueUOM::NONE);
