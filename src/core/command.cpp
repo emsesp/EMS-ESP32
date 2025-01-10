@@ -31,13 +31,17 @@ std::vector<Command::CmdFunction> Command::cmdfunctions_;
 // the entry point will be either via the Web API (api/) or MQTT (<base>/)
 // returns a return code and json output
 uint8_t Command::process(const char * path, const bool is_admin, const JsonObject input, JsonObject output) {
+    // check for MQTT, if so strip the "<base>" from the path
+    if (!strncmp(path, Mqtt::base().c_str(), Mqtt::base().length())) {
+        path += Mqtt::base().length();
+    }
     SUrlParser p; // parse URL for the path names
     p.parse(path);
 
-    // check first if it's from API or MQTT, if so strip the "api/" or "<base>/" from the path
-    if (p.paths().size() && ((p.paths().front() == "api") || (p.paths().front() == Mqtt::base()))) {
+    // check if it's from API
+    if (p.paths().size() && ((p.paths().front() == "api"))) {
         p.paths().erase(p.paths().begin());
-    } else {
+    } else if (!p.paths().size()) {
         return json_message(CommandRet::ERROR, "invalid path", output, path); // error
     }
 
