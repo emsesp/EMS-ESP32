@@ -3438,6 +3438,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "UI800, BC400",thermostat,4,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,50,1
 "UI800, BC400",thermostat,4,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,51,1
 "UI800, BC400",thermostat,4,redthreshold,reduction threshold,int8 (>=12<=22),C,true,number.thermostat_hc1_reduction_threshold,number.thermostat_hc1_redthreshold,6,1,1/2,52,1
+"UI800, BC400",thermostat,4,solarinfl,solar influence,uint8 (>=-5<=4294967295),C,true,number.thermostat_hc1_solar_influence,number.thermostat_hc1_solarinfl,6,1,1,-1,1
+"UI800, BC400",thermostat,4,currsolarinfl,curent solar influence,uint8 (>=0<=25),C,false,sensor.thermostat_hc1_curent_solar_influence,sensor.thermostat_hc1_currsolarinfl,6,1,1/10,-1,1
 "UI800, BC400",thermostat,4,mode,operating mode,enum [off\|eco+\|eco\|comfort\|auto], ,true,select.thermostat_dhw_operating_mode,select.thermostat_dhw_mode,6,9,1,0,1
 "UI800, BC400",thermostat,4,settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
 "UI800, BC400",thermostat,4,settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
@@ -3816,6 +3818,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC200, CW100, CR120, CR50",thermostat,157,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,50,1
 "RC200, CW100, CR120, CR50",thermostat,157,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,51,1
 "RC200, CW100, CR120, CR50",thermostat,157,redthreshold,reduction threshold,int8 (>=12<=22),C,true,number.thermostat_hc1_reduction_threshold,number.thermostat_hc1_redthreshold,6,1,1/2,52,1
+"RC200, CW100, CR120, CR50",thermostat,157,solarinfl,solar influence,uint8 (>=-5<=4294967295),C,true,number.thermostat_hc1_solar_influence,number.thermostat_hc1_solarinfl,6,1,1,-1,1
+"RC200, CW100, CR120, CR50",thermostat,157,currsolarinfl,curent solar influence,uint8 (>=0<=25),C,false,sensor.thermostat_hc1_curent_solar_influence,sensor.thermostat_hc1_currsolarinfl,6,1,1/10,-1,1
 "RC200, CW100, CR120, CR50",thermostat,157,mode,operating mode,enum [off\|normal\|comfort\|auto\|own prog], ,true,select.thermostat_dhw_operating_mode,select.thermostat_dhw_mode,6,9,1,0,1
 "RC200, CW100, CR120, CR50",thermostat,157,settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
 "RC200, CW100, CR120, CR50",thermostat,157,settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
@@ -3903,6 +3907,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,50,1
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,51,1
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,redthreshold,reduction threshold,int8 (>=12<=22),C,true,number.thermostat_hc1_reduction_threshold,number.thermostat_hc1_redthreshold,6,1,1/2,52,1
+"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,solarinfl,solar influence,uint8 (>=-5<=4294967295),C,true,number.thermostat_hc1_solar_influence,number.thermostat_hc1_solarinfl,6,1,1,-1,1
+"RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,currsolarinfl,curent solar influence,uint8 (>=0<=25),C,false,sensor.thermostat_hc1_curent_solar_influence,sensor.thermostat_hc1_currsolarinfl,6,1,1/10,-1,1
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,mode,operating mode,enum [off\|normal\|comfort\|auto\|own prog], ,true,select.thermostat_dhw_operating_mode,select.thermostat_dhw_mode,6,9,1,0,1
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
 "RC3*0, Moduline 3000/1010H, CW400, Sense II, HPC410",thermostat,158,settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
@@ -3988,6 +3994,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC100, CR10, Moduline 1000/1010",thermostat,165,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,50,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,51,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,redthreshold,reduction threshold,int8 (>=12<=22),C,true,number.thermostat_hc1_reduction_threshold,number.thermostat_hc1_redthreshold,6,1,1/2,52,1
+"RC100, CR10, Moduline 1000/1010",thermostat,165,solarinfl,solar influence,uint8 (>=-5<=4294967295),C,true,number.thermostat_hc1_solar_influence,number.thermostat_hc1_solarinfl,6,1,1,-1,1
+"RC100, CR10, Moduline 1000/1010",thermostat,165,currsolarinfl,curent solar influence,uint8 (>=0<=25),C,false,sensor.thermostat_hc1_curent_solar_influence,sensor.thermostat_hc1_currsolarinfl,6,1,1/10,-1,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,mode,operating mode,enum [off\|normal\|comfort\|auto\|own prog], ,true,select.thermostat_dhw_operating_mode,select.thermostat_dhw_mode,6,9,1,0,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
@@ -4076,6 +4084,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Rego 2000/3000",thermostat,172,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,50,1
 "Rego 2000/3000",thermostat,172,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,51,1
 "Rego 2000/3000",thermostat,172,redthreshold,reduction threshold,int8 (>=12<=22),C,true,number.thermostat_hc1_reduction_threshold,number.thermostat_hc1_redthreshold,6,1,1/2,52,1
+"Rego 2000/3000",thermostat,172,solarinfl,solar influence,uint8 (>=-5<=4294967295),C,true,number.thermostat_hc1_solar_influence,number.thermostat_hc1_solarinfl,6,1,1,-1,1
+"Rego 2000/3000",thermostat,172,currsolarinfl,curent solar influence,uint8 (>=0<=25),C,false,sensor.thermostat_hc1_curent_solar_influence,sensor.thermostat_hc1_currsolarinfl,6,1,1/10,-1,1
 "Rego 2000/3000",thermostat,172,mode,operating mode,enum [normal\|comfort\|eco+], ,true,select.thermostat_dhw_operating_mode,select.thermostat_dhw_mode,6,9,1,0,1
 "Rego 2000/3000",thermostat,172,settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
 "Rego 2000/3000",thermostat,172,settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
@@ -4190,6 +4200,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,50,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,51,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,redthreshold,reduction threshold,int8 (>=12<=22),C,true,number.thermostat_hc1_reduction_threshold,number.thermostat_hc1_redthreshold,6,1,1/2,52,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,solarinfl,solar influence,uint8 (>=-5<=4294967295),C,true,number.thermostat_hc1_solar_influence,number.thermostat_hc1_solarinfl,6,1,1,-1,1
+"Rego 3000, UI800, Logamatic BC400",thermostat,253,currsolarinfl,curent solar influence,uint8 (>=0<=25),C,false,sensor.thermostat_hc1_curent_solar_influence,sensor.thermostat_hc1_currsolarinfl,6,1,1/10,-1,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,mode,operating mode,enum [off\|eco+\|eco\|comfort\|auto], ,true,select.thermostat_dhw_operating_mode,select.thermostat_dhw_mode,6,9,1,0,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
 "Rego 3000, UI800, Logamatic BC400",thermostat,253,settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
@@ -4841,6 +4853,8 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC120",thermostat,157,cooloffdelay,cooling off delay,uint8 (>=1<=48),hours,true,number.thermostat_hc1_cooling_off_delay,number.thermostat_hc1_cooloffdelay,6,1,1,50,1
 "RC120",thermostat,157,switchprogmode,switch program mode,enum [level\|absolute], ,true,select.thermostat_hc1_switch_program_mode,select.thermostat_hc1_switchprogmode,6,1,1,51,1
 "RC120",thermostat,157,redthreshold,reduction threshold,int8 (>=12<=22),C,true,number.thermostat_hc1_reduction_threshold,number.thermostat_hc1_redthreshold,6,1,1/2,52,1
+"RC120",thermostat,157,solarinfl,solar influence,uint8 (>=-5<=4294967295),C,true,number.thermostat_hc1_solar_influence,number.thermostat_hc1_solarinfl,6,1,1,-1,1
+"RC120",thermostat,157,currsolarinfl,curent solar influence,uint8 (>=0<=25),C,false,sensor.thermostat_hc1_curent_solar_influence,sensor.thermostat_hc1_currsolarinfl,6,1,1/10,-1,1
 "RC120",thermostat,157,mode,operating mode,enum [off\|comfort\|auto], ,true,select.thermostat_dhw_operating_mode,select.thermostat_dhw_mode,6,9,1,0,1
 "RC120",thermostat,157,settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
 "RC120",thermostat,157,settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
