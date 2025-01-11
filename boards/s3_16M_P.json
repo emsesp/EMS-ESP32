@@ -24,7 +24,7 @@
       "arduino",
       "espidf"
     ],
-    "name": "Espressif Generic ESP32-S3 16M Flash OPI PSRAM, 4608KB Code/OTA, 2MB FS",
+    "name": "Espressif ESP32-S3 16M Flash OPI PSRAM, 4608KB Code/OTA, 2MB FS",
     "upload": {
       "flash_size": "16MB",
       "maximum_ram_size": 327680,
