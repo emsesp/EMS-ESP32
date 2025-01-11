@@ -14,16 +14,63 @@ const headers = {
   'Content-type': 'application/msgpack'
 };
 
+let system_status = {
+  emsesp_version: 'XX.XX.XX', // defined later
+  bus_status: 0,
+  // status: 2,
+  uptime: 77186,
+  bus_uptime: 77121,
+  num_devices: 2,
+  num_sensors: 1,
+  num_analogs: 1,
+  free_heap: 143,
+  ntp_status: 2,
+  ntp_time: '2021-04-01T14:25:42Z',
+  mqtt_status: true,
+  ap_status: false,
+  network_status: 3, // wifi connected
+  // network_status: 10, // ethernet connected
+  // network_status: 6, // wifi disconnected
+  wifi_rssi: -41,
+  esp_platform: 'ESP32S3',
+  build_flags: 'DEMO',
+  cpu_type: 'ESP32-S3',
+  cpu_rev: 0,
+  cpu_cores: 2,
+  cpu_freq_mhz: 240,
+  max_alloc_heap: 191,
+  arduino_version: 'ESP32 Arduino v2.0.17',
+  sdk_version: 'v4.4.7',
+  partition: 'app0',
+  flash_chip_size: 16384,
+  flash_chip_speed: 80000000,
+  app_used: 2258,
+  app_free: 3438,
+  fs_used: 24,
+  fs_free: 2024,
+  free_caps: 8376,
+  psram: true,
+  psram_size: 8189,
+  free_psram: 8166,
+  has_loader: true,
+  model: '',
+  // model: 'BBQKees Electronics EMS Gateway E32 V2 (E32 V2.0 P3/2024011)',
+  status: 'downloading'
+};
+
 let VERSION_IS_UPGRADEABLE: boolean;
 
 // Versions
 // default - on latest stable, no upgrades
-let THIS_VERSION = '3.7.2';
-let LATEST_STABLE_VERSION = '3.7.2';
-let LATEST_DEV_VERSION = '3.7.3-dev.1';
+let THIS_VERSION = '3.7.1';
+let LATEST_STABLE_VERSION = '3.7.1';
+let LATEST_DEV_VERSION = '3.7.2-dev.9';
 
-// scenarios for testing, overriding the default
-const version_test = 0;
+// scenarios for testing versioning
+const version_test = 0; // on latest stable, no upgrades, but can switch
+// const version_test = 1; // on latest dev, no update
+// const version_test = 2; // upgrade stable to latest stable
+// const version_test = 3; // upgrade dev to latest dev
 
 switch (version_test as number) {
   case 0:
@@ -33,9 +80,9 @@ switch (version_test as number) {
     break;
   case 1:
     // on latest dev, no update
-    THIS_VERSION = '3.7.2-dev.12';
+    THIS_VERSION = '3.7.2-dev.9';
     LATEST_STABLE_VERSION = '3.7.1';
-    LATEST_DEV_VERSION = '3.7.2-dev.12';
+    LATEST_DEV_VERSION = '3.7.2-dev.9';
     VERSION_IS_UPGRADEABLE = false;
     break;
   case 2:
@@ -53,6 +100,39 @@ switch (version_test as number) {
     VERSION_IS_UPGRADEABLE = true;
     break;
 }
+
+// set the version
+system_status.emsesp_version = THIS_VERSION;
+
+const emulate_esp = "ESP32S3";
+// const emulate_esp = 'ESP32';
+
+switch (emulate_esp as string) {
+  // ESP32 4MB
+  case 'ESP32':
+    system_status.esp_platform = 'ESP32';
+    system_status.cpu_type = 'ESP32';
+    system_status.arduino_version = 'Tasmota Arduino v2.0.17';
+    system_status.sdk_version = 'v4.4.7';
+    system_status.psram = false;
+    system_status.psram_size = 0;
+    system_status.free_psram = 0;
+    break;
+
+  // ESP32S3
+  case 'ESP32S3':
+  default:
+    system_status.esp_platform = 'ESP32S3';
+    system_status.cpu_type = 'ESP32-S3';
+    system_status.arduino_version = 'ESP32 Arduino v2.0.18';
+    system_status.sdk_version = 'v4.4.7';
+    system_status.psram = true;
+    system_status.psram_size = 8189;
+    system_status.free_psram = 8166;
+    break;
+}
+
+// simulate different ESP32 chips
 
 // GLOBAL VARIABLES
 let countWifiScanPoll = 0; // wifi network scan
@@ -506,51 +586,6 @@ const SECURITY_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'securitySettings';
 const VERIFY_AUTHORIZATION_ENDPOINT = REST_ENDPOINT_ROOT + 'verifyAuthorization';
 const SIGN_IN_ENDPOINT = REST_ENDPOINT_ROOT + 'signIn';
 const GENERATE_TOKEN_ENDPOINT = REST_ENDPOINT_ROOT + 'generateToken';
-
-let system_status = {
-  emsesp_version: THIS_VERSION,
-  bus_status: 0,
-  // status: 2,
-  uptime: 77186,
-  bus_uptime: 77121,
-  num_devices: 2,
-  num_sensors: 1,
-  num_analogs: 1,
-  free_heap: 143,
-  ntp_status: 2,
-  ntp_time: '2021-04-01T14:25:42Z',
-  mqtt_status: true,
-  ap_status: false,
-  network_status: 3, // wifi connected
-  // network_status: 10, // ethernet connected
-  // network_status: 6, // wifi disconnected
-  wifi_rssi: -41,
-  esp_platform: 'ESP32S3',
-  build_flags: 'DEMO',
-  cpu_type: 'ESP32-S3',
-  cpu_rev: 0,
-  cpu_cores: 2,
-  cpu_freq_mhz: 240,
-  max_alloc_heap: 191,
-  arduino_version: 'ESP32 Arduino v2.0.17',
-  sdk_version: 'v4.4.7-dirty',
-  partition: 'app0',
-  flash_chip_size: 16384,
-  flash_chip_speed: 80000000,
-  app_used: 2258,
-  app_free: 3438,
-  fs_used: 24,
-  fs_free: 2024,
-  free_caps: 8376,
-  // psram: false,
-  psram: true,
-  psram_size: 8189,
-  free_psram: 8166,
-  has_loader: true,
-  model: '',
-  // model: 'BBQKees Electronics EMS Gateway E32 V2 (E32 V2.0 P3/2024011)',
-  status: 'downloading'
-};
 
 let security_settings = {
   jwt_secret: 'naughty!',
