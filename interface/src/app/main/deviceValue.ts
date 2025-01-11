@@ -36,7 +36,9 @@ export function formatValue(
     }
     return (
       (value as string) +
-      (value === '' || uom === undefined || uom === 0 ? '' : ' ' + DeviceValueUOM_s[uom])
+      (value === '' || uom === undefined || uom === 0
+        ? ''
+        : ' ' + DeviceValueUOM_s[uom])
     );
   }
 
