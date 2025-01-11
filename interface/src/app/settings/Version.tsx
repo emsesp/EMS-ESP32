@@ -60,8 +60,10 @@ const Version = () => {
     send: loadData,
     error
   } = useRequest(SystemApi.readSystemStatus).onSuccess((event) => {
-    // older version of EMS-ESP didn't have the psram set, so we can't do an OTA upgrade
-    setDownloadOnly(event.data.psram === undefined);
+    // older version of EMS-ESP on 4MB boards, can't use OTA because of SSL support in HttpClient
+    if (event.data.arduino_version.startsWith('Tasmota')) {
+      setDownloadOnly(true);
+    }
     setUsingDevVersion(event.data.emsesp_version.includes('dev'));
   });
 
@@ -252,7 +254,12 @@ const Version = () => {
               <Typography color="secondary">Platform</Typography>
             </Grid>
             <Grid size={{ xs: 8, md: 10 }}>
-              <Typography>{getPlatform()}</Typography>
+              <Typography>
+                {getPlatform()}
+                <Typography variant="caption">
+                  &nbsp; &#40;{data.psram ? '+PSRAM' : '-PSRAM'}&#41;
+                </Typography>
+              </Typography>
             </Grid>
 
             <Grid size={{ xs: 4, md: 2 }}>
