@@ -109,8 +109,8 @@ class Thermostat : public EMSdevice {
         uint8_t instantstart; // 1-10K
         uint8_t boost;
         uint8_t boosttime; // hours
-        int8_t currSolarInfl;
-        int8_t solarInfl;
+        int8_t  currSolarInfl;
+        int8_t  solarInfl;
 
         uint8_t hc_num() const {
             return hc_num_;

@@ -51,12 +51,12 @@ void WebModulesService::loop() {
 // and also calls when the Modules web page is refreshed/loaded
 void WebModules::read(WebModules & webModules, JsonObject root) {
     JsonDocument doc_modules;
-    auto   root_modules = doc_modules.to<JsonObject>();
+    auto         root_modules = doc_modules.to<JsonObject>();
     moduleLibrary.list(root_modules); // get list the external library modules, put in a json object
 
-    auto modules_new = root["modules"].to<JsonArray>();
-    auto modules = root_modules["modules"].as<JsonArray>();
-    uint8_t   counter = 0;
+    auto    modules_new = root["modules"].to<JsonArray>();
+    auto    modules     = root_modules["modules"].as<JsonArray>();
+    uint8_t counter     = 0;
     for (const JsonObject module : modules) {
         JsonObject mi = modules_new.add<JsonObject>();
         mi["id"]      = counter++; // id is only used to render the table and must be unique
