@@ -8,12 +8,12 @@ import {
   Box,
   Button,
   Checkbox,
+  Grid2 as Grid,
   IconButton,
   MenuItem,
   TextField,
   styled
 } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 
 import { API } from 'api/app';
 import { fetchLogES, readLogSettings, updateLogSettings } from 'api/system';

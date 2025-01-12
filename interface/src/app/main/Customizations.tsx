@@ -16,6 +16,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Grid2 as Grid,
   InputAdornment,
   Link,
   MenuItem,
@@ -24,7 +25,6 @@ import {
   ToggleButtonGroup,
   Typography
 } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 
 import {
   Body,

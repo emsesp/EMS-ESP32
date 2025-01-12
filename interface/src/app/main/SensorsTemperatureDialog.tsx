@@ -9,11 +9,11 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Grid2 as Grid,
   InputAdornment,
   TextField,
   Typography
 } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 
 import { dialogStyle } from 'CustomTheme';
 import type Schema from 'async-validator';

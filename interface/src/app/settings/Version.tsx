@@ -13,10 +13,10 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Grid2 as Grid,
   Link,
   Typography
 } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 
 import * as SystemApi from 'api/system';
 import { callAction } from 'api/app';
