@@ -30,6 +30,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Grid2 as Grid,
   IconButton,
   List,
   ListItem,
@@ -40,7 +41,6 @@ import {
   styled,
   tooltipClasses
 } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 
 import { useRowSelect } from '@table-library/react-table-library/select';
 import { SortToggleType, useSort } from '@table-library/react-table-library/sort';

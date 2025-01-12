@@ -4835,6 +4835,8 @@
 | cooloffdelay | cooling off delay | uint8 (>=1<=48) | hours | true | HC | 50 | 1 | 1 | 
 | switchprogmode | switch program mode | enum [level\|absolute] |   | true | HC | 51 | 1 | 1 | 
 | redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 52 | 1 | 1/2 | 
+| solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | -1 | 1 | 1 | 
+| currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | -1 | 1 | 1/10 | 
 | mode | operating mode | enum [off\|normal\|comfort\|auto\|own prog] |   | true | DHW | 0 | 1 | 1 | 
 | settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 1 | 1 | 1 | 
 | settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
@@ -4934,6 +4936,8 @@
 | cooloffdelay | cooling off delay | uint8 (>=1<=48) | hours | true | HC | 50 | 1 | 1 | 
 | switchprogmode | switch program mode | enum [level\|absolute] |   | true | HC | 51 | 1 | 1 | 
 | redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 52 | 1 | 1/2 | 
+| solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | -1 | 1 | 1 | 
+| currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | -1 | 1 | 1/10 | 
 | mode | operating mode | enum [off\|comfort\|auto] |   | true | DHW | 0 | 1 | 1 | 
 | settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 1 | 1 | 1 | 
 | settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
@@ -5041,6 +5045,8 @@
 | cooloffdelay | cooling off delay | uint8 (>=1<=48) | hours | true | HC | 50 | 1 | 1 | 
 | switchprogmode | switch program mode | enum [level\|absolute] |   | true | HC | 51 | 1 | 1 | 
 | redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 52 | 1 | 1/2 | 
+| solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | -1 | 1 | 1 | 
+| currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | -1 | 1 | 1/10 | 
 | mode | operating mode | enum [off\|normal\|comfort\|auto\|own prog] |   | true | DHW | 0 | 1 | 1 | 
 | settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 1 | 1 | 1 | 
 | settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
@@ -5172,6 +5178,8 @@
 | cooloffdelay | cooling off delay | uint8 (>=1<=48) | hours | true | HC | 50 | 1 | 1 | 
 | switchprogmode | switch program mode | enum [level\|absolute] |   | true | HC | 51 | 1 | 1 | 
 | redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 52 | 1 | 1/2 | 
+| solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | -1 | 1 | 1 | 
+| currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | -1 | 1 | 1/10 | 
 | mode | operating mode | enum [off\|normal\|comfort\|auto\|own prog] |   | true | DHW | 0 | 1 | 1 | 
 | settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 1 | 1 | 1 | 
 | settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
@@ -5419,6 +5427,8 @@
 | cooloffdelay | cooling off delay | uint8 (>=1<=48) | hours | true | HC | 50 | 1 | 1 | 
 | switchprogmode | switch program mode | enum [level\|absolute] |   | true | HC | 51 | 1 | 1 | 
 | redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 52 | 1 | 1/2 | 
+| solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | -1 | 1 | 1 | 
+| currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | -1 | 1 | 1/10 | 
 | mode | operating mode | enum [normal\|comfort\|eco+] |   | true | DHW | 0 | 1 | 1 | 
 | settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 1 | 1 | 1 | 
 | settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
@@ -5510,6 +5520,8 @@
 | cooloffdelay | cooling off delay | uint8 (>=1<=48) | hours | true | HC | 50 | 1 | 1 | 
 | switchprogmode | switch program mode | enum [level\|absolute] |   | true | HC | 51 | 1 | 1 | 
 | redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 52 | 1 | 1/2 | 
+| solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | -1 | 1 | 1 | 
+| currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | -1 | 1 | 1/10 | 
 | mode | operating mode | enum [off\|eco+\|eco\|comfort\|auto] |   | true | DHW | 0 | 1 | 1 | 
 | settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 1 | 1 | 1 | 
 | settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
@@ -5611,6 +5623,8 @@
 | cooloffdelay | cooling off delay | uint8 (>=1<=48) | hours | true | HC | 50 | 1 | 1 | 
 | switchprogmode | switch program mode | enum [level\|absolute] |   | true | HC | 51 | 1 | 1 | 
 | redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 52 | 1 | 1/2 | 
+| solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | -1 | 1 | 1 | 
+| currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | -1 | 1 | 1/10 | 
 | mode | operating mode | enum [off\|eco+\|eco\|comfort\|auto] |   | true | DHW | 0 | 1 | 1 | 
 | settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 1 | 1 | 1 | 
 | settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 

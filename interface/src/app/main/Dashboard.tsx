@@ -10,13 +10,13 @@ import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 import {
   Box,
+  Grid2 as Grid,
   IconButton,
   ToggleButton,
   ToggleButtonGroup,
   Tooltip,
   Typography
 } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 
 import { Body, Cell, Row, Table } from '@table-library/react-table-library/table';
 import { useTheme } from '@table-library/react-table-library/theme';

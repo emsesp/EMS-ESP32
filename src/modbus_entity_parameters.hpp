@@ -373,6 +373,8 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(heattemp), 195, 1), // heattemp
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(roomsensor), 196, 1), // roomsensor
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(heatup), 197, 1), // heatup
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(solarinfl), 198, 1), // solarinfl
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(currsolarinfl), 199, 1), // currsolarinfl
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(mode), 0, 1), // mode
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(wwSetTemp), 1, 1), // settemp
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_DHW, FL_(wwSetTempLow), 2, 1), // settemplow

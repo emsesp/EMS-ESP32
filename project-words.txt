@@ -1408,3 +1408,5 @@ elgenheat
 fueldhw
 eldhw
 elgendhw
+solarinfl
+currsolarinfl

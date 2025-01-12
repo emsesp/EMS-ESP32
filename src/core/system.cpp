@@ -320,8 +320,7 @@ void System::system_restart(const char * partitionname) {
 void System::wifi_reconnect() {
     EMSESP::esp32React.getNetworkSettingsService()->read(
         [](NetworkSettings & networkSettings) { LOG_INFO("WiFi reconnecting to SSID '%s'...", networkSettings.ssid.c_str()); });
-    Shell::loop_all();
-    delay(1000);                                                          // wait a second
+    delay(500);                                                           // wait
     EMSESP::webSettingsService.save();                                    // save local settings
     EMSESP::esp32React.getNetworkSettingsService()->callUpdateHandlers(); // in case we've changed ssid or password
 }
@@ -1517,7 +1516,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
 
     // System
     node = output["system"].to<JsonObject>();
-// prevent false negative in Unity tests every time the version changes
+// prevent false-negatives in Unity tests every time the version changes
 #if defined(EMSESP_UNITY)
     node["version"] = "dev";
 #else
@@ -1526,16 +1525,17 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
     node["uptime"]    = uuid::log::format_timestamp_ms(uuid::get_uptime_ms(), 3);
     node["uptimeSec"] = uuid::get_uptime_sec();
 #ifndef EMSESP_STANDALONE
-    node["platform"]  = EMSESP_PLATFORM;
-    node["cpuType"]   = ESP.getChipModel();
-    node["arduino"]   = ARDUINO_VERSION;
-    node["sdk"]       = ESP.getSdkVersion();
-    node["freeMem"]   = getHeapMem();
-    node["maxAlloc"]  = getMaxAllocMem();
-    node["freeCaps"]  = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024; // includes heap and psram
-    node["usedApp"]   = EMSESP::system_.appUsed();                       // kilobytes
-    node["freeApp"]   = EMSESP::system_.appFree();                       // kilobytes
-    node["partition"] = esp_ota_get_running_partition()->label;          // active partition
+    node["platform"]        = EMSESP_PLATFORM;
+    node["cpuType"]         = ESP.getChipModel();
+    node["arduino"]         = ARDUINO_VERSION;
+    node["sdk"]             = ESP.getSdkVersion();
+    node["freeMem"]         = getHeapMem();
+    node["maxAlloc"]        = getMaxAllocMem();
+    node["freeCaps"]        = heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024; // includes heap and psram
+    node["usedApp"]         = EMSESP::system_.appUsed();                       // kilobytes
+    node["freeApp"]         = EMSESP::system_.appFree();                       // kilobytes
+    node["partition"]       = esp_ota_get_running_partition()->label;          // active partition
+    node["flash_chip_size"] = ESP.getFlashChipSize() / 1024;                   // kilobytes
 #endif
     node["resetReason"] = EMSESP::system_.reset_reason(0) + " / " + EMSESP::system_.reset_reason(1);
 #ifndef EMSESP_STANDALONE

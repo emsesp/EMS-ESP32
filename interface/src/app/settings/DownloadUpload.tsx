@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { toast } from 'react-toastify';
 
 import DownloadIcon from '@mui/icons-material/GetApp';
-import { Box, Button, Typography } from '@mui/material';
-import Grid from '@mui/material/Grid2';
+import { Box, Button, Grid2 as Grid, Typography } from '@mui/material';
 
 import * as SystemApi from 'api/system';
 import { API, callAction } from 'api/app';
