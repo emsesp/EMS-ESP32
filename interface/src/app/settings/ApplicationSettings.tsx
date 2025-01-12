@@ -209,7 +209,7 @@ const ApplicationSettings = () => {
               {LL.ENABLE_MODBUS()}
               {!hardwareData.psram && (
                 <Typography variant="caption">
-                  &nbsp; &#40;PSRAM required&#41;
+                  &nbsp; &#40;{LL.IS_REQUIRED('PSRAM')}&#41;
                 </Typography>
               )}
             </Typography>
