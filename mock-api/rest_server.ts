@@ -14,6 +14,59 @@ const headers = {
   'Content-type': 'application/msgpack'
 };
 
+// EMS-ESP Application Settings
+let settings = {
+  locale: 'en',
+  tx_mode: 1,
+  ems_bus_id: 11,
+  syslog_enabled: false,
+  syslog_level: 3,
+  trace_raw: false,
+  syslog_mark_interval: 0,
+  syslog_host: '192.168.1.8',
+  syslog_port: 514,
+  boiler_heatingoff: false,
+  remote_timeout: 24,
+  remote_timeout_en: false,
+  shower_timer: true,
+  shower_alert: false,
+  shower_alert_coldshot: 10,
+  shower_alert_trigger: 7,
+  shower_min_duration: 180,
+  rx_gpio: 4,
+  tx_gpio: 5,
+  dallas_gpio: 14,
+  dallas_parasite: false,
+  led_gpio: 2,
+  hide_led: true,
+  low_clock: false,
+  telnet_enabled: true,
+  notoken_api: false,
+  readonly_mode: false,
+  analog_enabled: true,
+  pbutton_gpio: 34,
+  solar_maxflow: 30,
+  board_profile: 'E32V2',
+  fahrenheit: false,
+  bool_format: 1,
+  bool_dashboard: 1,
+  enum_format: 1,
+  weblog_level: 6,
+  weblog_buffer: 50,
+  weblog_compact: true,
+  phy_type: 1,
+  eth_power: 15,
+  eth_phy_addr: 0,
+  eth_clock_mode: 1,
+  platform: 'ESP32',
+  modbus_enabled: false,
+  modbus_port: 502,
+  modbus_max_clients: 10,
+  modbus_timeout: 10000,
+  developer_mode: true
+};
+
+// EMS-ESP System Settings
 let system_status = {
   emsesp_version: 'XX.XX.XX', // defined later
   bus_status: 0,
@@ -117,6 +170,8 @@ switch (emulate_esp as string) {
     system_status.psram = false;
     system_status.psram_size = 0;
     system_status.free_psram = 0;
+    settings.board_profile = 'E32V2';
+    settings.platform = 'ESP32';
     break;
 
   // ESP32S3
@@ -129,6 +184,8 @@ switch (emulate_esp as string) {
     system_status.psram = true;
     system_status.psram_size = 8189;
     system_status.free_psram = 8166;
+    settings.board_profile = 'S3';
+    settings.platform = 'ESP32S3';
     break;
 }
 
@@ -331,60 +388,6 @@ function check_upgrade(version: string) {
   }
   return data;
 }
-
-// START DATA
-
-// EMS-ESP Application Settings
-let settings = {
-  locale: 'en',
-  tx_mode: 1,
-  ems_bus_id: 11,
-  syslog_enabled: false,
-  syslog_level: 3,
-  trace_raw: false,
-  syslog_mark_interval: 0,
-  syslog_host: '192.168.1.8',
-  syslog_port: 514,
-  boiler_heatingoff: false,
-  remote_timeout: 24,
-  remote_timeout_en: false,
-  shower_timer: true,
-  shower_alert: false,
-  shower_alert_coldshot: 10,
-  shower_alert_trigger: 7,
-  shower_min_duration: 180,
-  rx_gpio: 4,
-  tx_gpio: 5,
-  dallas_gpio: 14,
-  dallas_parasite: false,
-  led_gpio: 2,
-  hide_led: true,
-  low_clock: false,
-  telnet_enabled: true,
-  notoken_api: false,
-  readonly_mode: false,
-  analog_enabled: true,
-  pbutton_gpio: 34,
-  solar_maxflow: 30,
-  board_profile: 'E32V2',
-  fahrenheit: false,
-  bool_format: 1,
-  bool_dashboard: 1,
-  enum_format: 1,
-  weblog_level: 6,
-  weblog_buffer: 50,
-  weblog_compact: true,
-  phy_type: 1,
-  eth_power: 15,
-  eth_phy_addr: 0,
-  eth_clock_mode: 1,
-  platform: 'ESP32',
-  modbus_enabled: false,
-  modbus_port: 502,
-  modbus_max_clients: 10,
-  modbus_timeout: 10000,
-  developer_mode: true
-};
 
 // LOG
 const LOG_SETTINGS_ENDPOINT = REST_ENDPOINT_ROOT + 'logSettings';
@@ -4264,8 +4267,6 @@ const emsesp_deviceentities_7 = [
   { v: 288768, n: 'dhw starts', id: 'dhw/starts', m: 0, w: false },
   { v: 102151, n: 'dhw active time', id: 'dhw/workm', m: 0, w: false }
 ];
-
-// END DATA
 
 // LOG
 router
