@@ -9,12 +9,12 @@ import {
   Button,
   Checkbox,
   Divider,
+  Grid2 as Grid,
   InputAdornment,
   MenuItem,
   TextField,
   Typography
 } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 
 import { readSystemStatus } from 'api/system';
 
@@ -204,7 +204,16 @@ const ApplicationSettings = () => {
               disabled={!hardwareData.psram}
             />
           }
-          label={LL.ENABLE_MODBUS()}
+          label={
+            <Typography color={!hardwareData.psram ? 'grey' : 'default'}>
+              {LL.ENABLE_MODBUS()}
+              {!hardwareData.psram && (
+                <Typography variant="caption">
+                  &nbsp; &#40;PSRAM required&#41;
+                </Typography>
+              )}
+            </Typography>
+          }
         />
         {data.modbus_enabled && (
           <Grid container spacing={2} rowSpacing={0}>
