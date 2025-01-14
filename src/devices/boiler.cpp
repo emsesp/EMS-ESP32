@@ -2750,6 +2750,11 @@ bool Boiler::set_ww_circulation_pump(const char * value, const int8_t id) {
         write_command(EMS_TYPE_UBAParameterWW, 6, v ? 0xFF : 0x00, EMS_TYPE_UBAParameterWW);
     }
 
+#ifdef EMSESP_TEST
+    // set wwCircPump_ , for test "api4" in test.cpp
+    wwCircPump_ = v ? EMS_VALUE_BOOL_ON : EMS_VALUE_BOOL_OFF;
+#endif
+
     return true;
 }
 
