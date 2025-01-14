@@ -264,7 +264,7 @@ const Dashboard = () => {
         </Box>
 
         {!loading && !hasFavEntities && (
-          <MessageBox my={1} level="info" message="">
+          <MessageBox my={1} level="info">
             <Typography>
               {LL.NO_DATA_1()}&nbsp;
               <Link to="/customizations" style={{ color: 'white' }}>
