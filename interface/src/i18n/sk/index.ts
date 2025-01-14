@@ -340,11 +340,13 @@ const sk: Translation = {
   RESTARTING_POST: 'Príprava',
   AUTO_SCROLL: 'Automatické rolovanie',
   DASHBOARD: 'Panel',
-  NO_DATA: 'Nie sú k dispozícii žiadne údaje',
   DASHBOARD_1: 'Prispôsobte si svoj informačný panel tak, že označíte entity EMS ako Obľúbené pomocou modulu Prispôsobenia',
   DEVELOPER_MODE: 'Režim vývojára',
   DUPLICATE: 'Duplicitné',
-  UPGRADE: 'Inovovať'
+  UPGRADE: 'Inovovať',
+  NO_DATA_1: 'No favourite EMS entities found. Use the', // TODO translate
+  NO_DATA_2: 'module to mark them.', // TODO translate
+  NO_DATA_3: 'To see all available entities go to' // TODO translate
 };
 
 export default sk;

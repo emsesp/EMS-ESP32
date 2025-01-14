@@ -340,11 +340,13 @@ const sv: Translation = {
   RESTARTING_POST: 'Förbereder',
   AUTO_SCROLL: 'Autoskrolla',
   DASHBOARD: 'Kontrollpanel',
-  NO_DATA: 'Ingen data tillgänglig',
   DASHBOARD_1: 'Anpassa din kontrollpanel genom att markera EMS enheter som Favorit i modulen Anpassningar',
   DEVELOPER_MODE: 'Utvecklarläge',
   DUPLICATE: 'Dublett',
-  UPGRADE: 'Uppgradera'
+  UPGRADE: 'Uppgradera',
+  NO_DATA_1: 'Inga EMS entiteter har markeras som Favorit. Använd',
+  NO_DATA_2: 'modulen Anpassningar för att markera dem.',
+  NO_DATA_3: 'För att se alla tillgängliga entiteter gå till'
 };
 
 export default sv;

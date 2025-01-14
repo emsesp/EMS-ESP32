@@ -340,11 +340,12 @@ const cz: Translation = {
   RESTARTING_POST: 'Příprava',
   AUTO_SCROLL: 'Automatické rolování',
   DASHBOARD: 'Dashboard',
-  NO_DATA: 'Žádná data nejsou k dispozici',
   DASHBOARD_1: 'Přizpůsobte si dashboard označením EMS entit jako Oblíbené pomocí modulu Přizpůsobení',
   DEVELOPER_MODE: 'Režim vývojáře',
   DUPLICATE: 'Duplicate', // TODO translate
-  UPGRADE: 'Upgrade' // TODO translate
+  NO_DATA_1: 'No favourite EMS entities found. Use the', // TODO translate
+  NO_DATA_2: 'module to mark them.', // TODO translate
+  NO_DATA_3: 'To see all available entities go to' // TODO translate
 };
 
 export default cz;

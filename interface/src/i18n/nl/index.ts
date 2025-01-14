@@ -340,11 +340,13 @@ const nl: Translation = {
   RESTARTING_POST: 'Voorbereiding',
   AUTO_SCROLL: 'Automatisch Scrollen',
   DASHBOARD: 'Dashboard',
-  NO_DATA: 'Geen data beschikbaar',
   DASHBOARD_1: 'Pas uw dashboard aan door EMS-entiteiten als favoriet te markeren met behulp van de module Aanpassingen',
   DEVELOPER_MODE: 'Ontwikkelaarsmodus',
   DUPLICATE: 'Duplicaat',
-  UPGRADE: 'Upgraden'
+  UPGRADE: 'Upgraden',
+  NO_DATA_1: 'Geen favorite EMS entiteiten gevonden. Gebruik de',
+  NO_DATA_2: 'module om ze te markeren.',
+  NO_DATA_3: 'Om alle beschikbare entiteiten te bekijken ga naar'
 };
 
 export default nl;

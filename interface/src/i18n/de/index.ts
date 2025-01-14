@@ -340,11 +340,13 @@ const de: Translation = {
   RESTARTING_POST: 'Vorbereitung',
   AUTO_SCROLL: 'Automatisches Scrollen',
   DASHBOARD: 'Dashboard',
-  NO_DATA: 'Keine Daten verfügbar',
   DASHBOARD_1: 'Passen Sie Ihr Dashboard an, indem Sie EMS-Entitäten mithilfe des Moduls „Anpassungen“ als Favorit markieren',
   DEVELOPER_MODE: 'Entwicklermodus',
   DUPLICATE: 'Kopieren',
-  UPGRADE: 'Aktualisieren'
+  UPGRADE: 'Aktualisieren',
+  NO_DATA_1: 'No favourite EMS entities found. Use the', // TODO translate
+  NO_DATA_2: 'module to mark them.', // TODO translate
+  NO_DATA_3: 'To see all available entities go to' // TODO translate
 };
 
 export default de;
