@@ -340,11 +340,13 @@ const de: Translation = {
   RESTARTING_POST: 'Vorbereitung',
   AUTO_SCROLL: 'Automatisches Scrollen',
   DASHBOARD: 'Dashboard',
-  NO_DATA: 'Keine Daten verfügbar',
-  DASHBOARD_1: 'Passen Sie Ihr Dashboard an, indem Sie EMS-Entitäten mithilfe des Moduls „Anpassungen“ als Favorit markieren',
   DEVELOPER_MODE: 'Entwicklermodus',
   DUPLICATE: 'Kopieren',
-  UPGRADE: 'Aktualisieren'
+  UPGRADE: 'Aktualisieren',
+  DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.', // TODO translate
+  NO_DATA_1: 'Keine favorisierten EMS-Entitäten gefunden! Verwenden Sie das Modul', 
+  NO_DATA_2: ', um sie zu markieren.',
+  NO_DATA_3: 'Um alle verfügbaren Entitäten anzuzeigen, gehen Sie zu'
 };
 
 export default de;

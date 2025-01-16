@@ -303,6 +303,7 @@ void System::system_restart(const char * partitionname) {
 
     store_nvs_values(); // save any NVS values
     Shell::loop_all();  // flush log to output
+    Mqtt::disconnect(); // gracefully disconnect MQTT, needed for QOS1
     delay(1000);        // wait 1 second
     ESP.restart();
 #else

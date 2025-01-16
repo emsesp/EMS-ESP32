@@ -340,11 +340,13 @@ const nl: Translation = {
   RESTARTING_POST: 'Voorbereiding',
   AUTO_SCROLL: 'Automatisch Scrollen',
   DASHBOARD: 'Dashboard',
-  NO_DATA: 'Geen data beschikbaar',
-  DASHBOARD_1: 'Pas uw dashboard aan door EMS-entiteiten als favoriet te markeren met behulp van de module Aanpassingen',
   DEVELOPER_MODE: 'Ontwikkelaarsmodus',
   DUPLICATE: 'Duplicaat',
-  UPGRADE: 'Upgraden'
+  UPGRADE: 'Upgraden',
+  DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.', // TODO translate
+  NO_DATA_1: 'No favourite EMS entities found. Use the', // TODO translate
+  NO_DATA_2: 'module to mark them.', // TODO translate
+  NO_DATA_3: 'To see all available entities go to' // TODO translate
 };
 
 export default nl;

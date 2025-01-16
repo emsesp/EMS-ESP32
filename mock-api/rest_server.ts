@@ -157,7 +157,7 @@ switch (version_test as number) {
 // set the version
 system_status.emsesp_version = THIS_VERSION;
 
-const emulate_esp = "ESP32S3";
+const emulate_esp = 'ESP32S3';
 // const emulate_esp = 'ESP32';
 
 switch (emulate_esp as string) {
@@ -4507,7 +4507,7 @@ router
 
     let fake = false;
 
-    // fake = true; // for testing
+    fake = true; // for testing, shows a subset of data
 
     if (!fake) {
       // pick EMS devices from coredata
@@ -4603,35 +4603,34 @@ router
       // for testing only
 
       // add the custom entity data
-      // dashboard_object = {
-      //   id: DeviceTypeUniqueID.CUSTOM_UID, // unique ID for custom entities
-      //   t: DeviceType.CUSTOM,
-      //   nodes: getDashboardEntityData(99)
-      // };
-      // // only add to dashboard if we have values
-      // if ((dashboard_object.nodes ?? []).length > 0) {
-      //   dashboard_data.push(dashboard_object);
-      // }
-
-      let scheduler_data = emsesp_schedule.schedule.filter((item) => item.name);
-      let scheduler_data2 = scheduler_data.map((item, index) => ({
-        id: DeviceTypeUniqueID.SCHEDULER_UID * 100 + index,
-        dv: {
-          id: '00' + item.name,
-          v: item.active ? 'on' : 'off',
-          c: item.name,
-          l: ['off', 'on']
-        }
-      }));
       dashboard_object = {
-        id: DeviceTypeUniqueID.SCHEDULER_UID,
-        t: DeviceType.SCHEDULER,
-        nodes: scheduler_data2
+        id: DeviceTypeUniqueID.CUSTOM_UID, // unique ID for custom entities
+        t: DeviceType.CUSTOM,
+        nodes: getDashboardEntityData(DeviceTypeUniqueID.CUSTOM_UID)
       };
-      // only add to dashboard if we have values
       if ((dashboard_object.nodes ?? []).length > 0) {
         dashboard_data.push(dashboard_object);
       }
+
+      // add the scheduler data
+      // let scheduler_data = emsesp_schedule.schedule.filter((item) => item.name);
+      // let scheduler_data2 = scheduler_data.map((item, index) => ({
+      //   id: DeviceTypeUniqueID.SCHEDULER_UID * 100 + index,
+      //   dv: {
+      //     id: '00' + item.name,
+      //     v: item.active ? 'on' : 'off',
+      //     c: item.name,
+      //     l: ['off', 'on']
+      //   }
+      // }));
+      // dashboard_object = {
+      //   id: DeviceTypeUniqueID.SCHEDULER_UID,
+      //   t: DeviceType.SCHEDULER,
+      //   nodes: scheduler_data2
+      // };
+      // if ((dashboard_object.nodes ?? []).length > 0) {
+      //   dashboard_data.push(dashboard_object);
+      // }
     }
 
     // console.log('dashboard_data: ', dashboard_data);

@@ -11,7 +11,7 @@ type MessageBoxLevel = 'warning' | 'success' | 'info' | 'error';
 
 export interface MessageBoxProps extends BoxProps {
   level: MessageBoxLevel;
-  message: string;
+  message?: string;
 }
 
 const LEVEL_ICONS: {
@@ -53,8 +53,8 @@ const MessageBox: FC<MessageBoxProps> = ({
       {...rest}
     >
       <Icon />
-      <Typography sx={{ ml: 2, flexGrow: 1 }} variant="body1">
-        {message}
+      <Typography sx={{ ml: 2 }} variant="body1">
+        {message ?? ''}
       </Typography>
       {children}
     </Box>

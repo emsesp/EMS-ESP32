@@ -340,11 +340,13 @@ const sv: Translation = {
   RESTARTING_POST: 'Förbereder',
   AUTO_SCROLL: 'Autoskrolla',
   DASHBOARD: 'Kontrollpanel',
-  NO_DATA: 'Ingen data tillgänglig',
-  DASHBOARD_1: 'Anpassa din kontrollpanel genom att markera EMS enheter som Favorit i modulen Anpassningar',
   DEVELOPER_MODE: 'Utvecklarläge',
   DUPLICATE: 'Dublett',
-  UPGRADE: 'Uppgradera'
+  UPGRADE: 'Uppgradera',
+  DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.', // TODO translate
+  NO_DATA_1: 'No favourite EMS entities found. Use the', // TODO translate
+  NO_DATA_2: 'module to mark them.', // TODO translate
+  NO_DATA_3: 'To see all available entities go to' // TODO translate
 };
 
 export default sv;

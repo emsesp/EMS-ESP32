@@ -1,9 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
 import { IconContext } from 'react-icons/lib';
+import { Link } from 'react-router';
 import { toast } from 'react-toastify';
 
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ConstructionIcon from '@mui/icons-material/Construction';
 import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
@@ -22,7 +22,7 @@ import { Body, Cell, Row, Table } from '@table-library/react-table-library/table
 import { useTheme } from '@table-library/react-table-library/theme';
 import { CellTree, useTree } from '@table-library/react-table-library/tree';
 import { useRequest } from 'alova/client';
-import { FormLoader, SectionContent, useLayoutTitle } from 'components';
+import { FormLoader, MessageBox, SectionContent, useLayoutTitle } from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import { useInterval, usePersistState } from 'utils';
@@ -224,6 +224,10 @@ const Dashboard = () => {
       return <FormLoader onRetry={fetchDashboard} errorMessage={error?.message} />;
     }
 
+    const hasFavEntities = data.filter(
+      (item: DashboardItem) => item.id <= 90
+    ).length;
+
     return (
       <>
         <Box
@@ -236,10 +240,7 @@ const Dashboard = () => {
           <Grid container spacing={0} justifyContent="flex-start">
             <Grid size={11}>
               <Typography mb={2} variant="body1" color="warning">
-                {LL.DASHBOARD_1()}&nbsp;
-                <ConstructionIcon
-                  sx={{ color: '#9e9e9e', fontSize: 20, verticalAlign: 'middle' }}
-                />
+                {LL.DASHBOARD_1()}
               </Typography>
             </Grid>
 
@@ -262,27 +263,40 @@ const Dashboard = () => {
           </Grid>
         </Box>
 
-        <Box
-          padding={1}
-          justifyContent="center"
-          flexDirection="column"
-          sx={{
-            borderRadius: 1,
-            border: '1px solid grey'
-          }}
-        >
-          <IconContext.Provider
-            value={{
-              color: 'lightblue',
-              size: '18',
-              style: { verticalAlign: 'middle' }
+        {!loading && !hasFavEntities && (
+          <MessageBox my={1} level="info">
+            <Typography>
+              {LL.NO_DATA_1()}&nbsp;
+              <Link to="/customizations" style={{ color: 'white' }}>
+                {LL.CUSTOMIZATIONS()}
+              </Link>
+              &nbsp;{LL.NO_DATA_2()}&nbsp;
+              {LL.NO_DATA_3()}&nbsp;
+              <Link to="/devices" style={{ color: 'white' }}>
+                {LL.DEVICES()}
+              </Link>
+              .
+            </Typography>
+          </MessageBox>
+        )}
+
+        {data.length > 0 && (
+          <Box
+            padding={1}
+            justifyContent="center"
+            flexDirection="column"
+            sx={{
+              borderRadius: 1,
+              border: '1px solid grey'
             }}
           >
-            {!loading && data.length === 0 ? (
-              <Typography variant="subtitle2" color="secondary">
-                {LL.NO_DATA()}
-              </Typography>
-            ) : (
+            <IconContext.Provider
+              value={{
+                color: 'lightblue',
+                size: '18',
+                style: { verticalAlign: 'middle' }
+              }}
+            >
               <Table
                 data={{ nodes: data }}
                 theme={dashboard_theme}
@@ -338,9 +352,9 @@ const Dashboard = () => {
                   </Body>
                 )}
               </Table>
-            )}
-          </IconContext.Provider>
-        </Box>
+            </IconContext.Provider>
+          </Box>
+        )}
       </>
     );
   };

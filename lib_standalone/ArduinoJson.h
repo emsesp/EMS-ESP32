@@ -2450,7 +2450,7 @@ class VariantData {
       return;
     var->removeMember(key, resources);
   }
-  void reset() {  // TODO: remove
+  void reset() {  
     type_ = VariantType::Null;
   }
   void setBoolean(bool value) {
@@ -4313,7 +4313,7 @@ template <typename T, typename Enable = void>
 struct Comparer;
 template <typename T>
 struct Comparer<T, enable_if_t<IsString<T>::value>> : ComparerBase {
-  T rhs;  // TODO: store adapted string?
+  T rhs;  
   explicit Comparer(T value) : rhs(value) {}
   CompareResult visit(JsonString lhs) {
     int i = stringCompare(adaptString(rhs), adaptString(lhs));
@@ -5377,7 +5377,7 @@ class StringBuilder {
       append(*s++);
   }
   void append(const char* s, size_t n) {
-    while (n-- > 0)  // TODO: memcpy
+    while (n-- > 0)  
       append(*s++);
   }
   void append(char c) {

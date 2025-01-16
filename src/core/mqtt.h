@@ -114,6 +114,12 @@ class Mqtt {
         return mqttClient_ ? mqttClient_->connected() : false;
     }
 
+    static void disconnect() {
+        if (mqttClient_) {
+            mqttClient_->disconnect();
+        };
+    }
+
     static MqttClient * client() {
         return mqttClient_;
     }

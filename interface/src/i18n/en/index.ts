@@ -340,11 +340,13 @@ const en: Translation = {
   RESTARTING_POST: 'Preparing',
   AUTO_SCROLL: 'Auto Scroll',
   DASHBOARD: 'Dashboard',
-  NO_DATA: 'No data available',
-  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module',
+  DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.',
   DEVELOPER_MODE: 'Developer Mode',
   DUPLICATE: 'Duplicate',
-  UPGRADE: 'Upgrade'
+  UPGRADE: 'Upgrade',
+  NO_DATA_1: 'No favourite EMS entities found! Use the',
+  NO_DATA_2: 'module to mark them.',
+  NO_DATA_3: 'To see all available entities go to'
 };
 
 export default en;

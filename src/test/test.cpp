@@ -960,6 +960,48 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         ok = true;
     }
 
+    if (command == "api4") {
+        shell.printfln("Testing API writing values...");
+        EMSESP::system_.bool_format(BOOL_FORMAT_ONOFF_STR);
+        // EMSESP::system_.bool_format(BOOL_FORMAT_ONOFF_STR_CAP);
+
+        // load devices
+        test("boiler");
+        test("thermostat");
+
+        ok = true;
+        AsyncWebServerRequest request;
+        JsonDocument          doc;
+        JsonVariant           json;
+        request.method(HTTP_POST);
+
+        shell.invoke_command("call boiler circpump/value"); // initial state is off
+
+        //  call boiler circpump on
+        char data1[] = "{\"device\":\"boiler\", \"cmd\":\"circpump\",\"value\":\"on\"}";
+        deserializeJson(doc, data1);
+        request.url("/api");
+        EMSESP::webAPIService.webAPIService(&request, doc.as<JsonVariant>());
+        shell.invoke_command("call boiler circpump/value");
+
+        // switch to german
+        EMSESP::system_.locale("de");
+
+        //  call boiler circpump off, but using value in DE
+        char data2[] = "{\"device\":\"boiler\", \"cmd\":\"circpump\",\"value\":\"aus\"}";
+        deserializeJson(doc, data2);
+        request.url("/api");
+        EMSESP::webAPIService.webAPIService(&request, doc.as<JsonVariant>());
+        shell.invoke_command("call boiler circpump/value");
+
+        //  call boiler circpump on, but using value in DE
+        char data3[] = "{\"device\":\"boiler\", \"cmd\":\"circpump\",\"value\":\"an\"}";
+        deserializeJson(doc, data3);
+        request.url("/api");
+        EMSESP::webAPIService.webAPIService(&request, doc.as<JsonVariant>());
+        shell.invoke_command("call boiler circpump/value");
+    }
+
     if (command == "api3") {
         shell.printfln("Testing API getting values from system");
         EMSESP::system_.bool_format(BOOL_FORMAT_TRUEFALSE); // BOOL_FORMAT_TRUEFALSE_STR
@@ -1016,10 +1058,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             // request.url("/api");
             // EMSESP::webAPIService.webAPIService(&request, doc.as<JsonVariant>());
 
-            char data2[] = "{\"action\":\"getCustomSupport\", \"param\":\"hello\"}";
-            deserializeJson(doc, data2);
-            request.url("/rest/action");
-            EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
+            // char data2[] = "{\"action\":\"getCustomSupport\", \"param\":\"hello\"}";
+            // deserializeJson(doc, data2);
+            // request.url("/rest/action");
+            // EMSESP::webStatusService.action(&request, doc.as<JsonVariant>());
 
             // char data3[] = "{\"action\":\"export\", \"param\":\"schedule\"}";
             // deserializeJson(doc, data3);
