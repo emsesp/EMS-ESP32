@@ -340,10 +340,10 @@ const tr: Translation = {
   RESTARTING_POST: 'Preparing', // TODO translate
   AUTO_SCROLL: 'Auto Scroll', // TODO translate
   DASHBOARD: 'Dashboard', // TODO translate
-  DASHBOARD_1: 'Customize your dashboard by marking EMS entities as Favorite using the Customizations module', // TODO translate
   DEVELOPER_MODE: 'Developer Mode', // TODO translate
   DUPLICATE: 'Duplicate', // TODO translate
   UPGRADE: 'Upgrade', // TODO translate
+  DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.', // TODO translate
   NO_DATA_1: 'No favourite EMS entities found. Use the', // TODO translate
   NO_DATA_2: 'module to mark them.', // TODO translate
   NO_DATA_3: 'To see all available entities go to' // TODO translate
