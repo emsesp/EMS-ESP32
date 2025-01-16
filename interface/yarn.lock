@@ -1403,21 +1403,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*":
-  version: 22.10.5
-  resolution: "@types/node@npm:22.10.5"
+"@types/node@npm:*, @types/node@npm:^22.10.7":
+  version: 22.10.7
+  resolution: "@types/node@npm:22.10.7"
   dependencies:
     undici-types: "npm:~6.20.0"
-  checksum: 10c0/6a0e7d1fe6a86ef6ee19c3c6af4c15542e61aea2f4cee655b6252efb356795f1f228bc8299921e82924e80ff8eca29b74d9dd0dd5cc1a90983f892f740b480df
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:^22.10.6":
-  version: 22.10.6
-  resolution: "@types/node@npm:22.10.6"
-  dependencies:
-    undici-types: "npm:~6.20.0"
-  checksum: 10c0/8b67affc211e5f9c74f7949cda04ca669721e50b83d71b8772a7bed7a4a3c41d663b3a794413f618e763ca6c5da8c234c25ffebcb0737983fc3e7415818ab9a7
+  checksum: 10c0/c941b4689dfc4044b64a5f601306cbcb0c7210be853ba378a5dd44137898c45accedd796ee002ad9407024cac7ecaf5049304951cb1d80ce3d7cebbbae56f20e
   languageName: node
   linkType: hard
 
@@ -1608,7 +1599,7 @@ __metadata:
     "@table-library/react-table-library": "npm:4.1.7"
     "@trivago/prettier-plugin-sort-imports": "npm:^5.2.1"
     "@types/formidable": "npm:^3"
-    "@types/node": "npm:^22.10.6"
+    "@types/node": "npm:^22.10.7"
     "@types/react": "npm:^19.0.7"
     "@types/react-dom": "npm:^19.0.3"
     alova: "npm:3.2.8"
@@ -1624,8 +1615,8 @@ __metadata:
     react: "npm:^19.0.0"
     react-dom: "npm:^19.0.0"
     react-icons: "npm:^5.4.0"
-    react-router: "npm:^7.1.1"
-    react-toastify: "npm:^11.0.2"
+    react-router: "npm:^7.1.2"
+    react-toastify: "npm:^11.0.3"
     rollup-plugin-visualizer: "npm:^5.14.0"
     terser: "npm:^5.37.0"
     typesafe-i18n: "npm:^5.26.2"
@@ -2628,9 +2619,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.5.73":
-  version: 1.5.80
-  resolution: "electron-to-chromium@npm:1.5.80"
-  checksum: 10c0/6aaf1891e1b05251efac6f4a63c0ddccf567f0f76506cf0cb284f11413762423fddd7786558066f74c3a95e2a533dad7a97bebe38779b46b7a799d8dd20cea53
+  version: 1.5.83
+  resolution: "electron-to-chromium@npm:1.5.83"
+  checksum: 10c0/12380962d057c4679add1047cdddb18b909904614272da0527e505a3859eaffde2022dd0688ce7f230582de96405c3d33b667680614475cdafd3f629caa2fee1
   languageName: node
   linkType: hard
 
@@ -4919,7 +4910,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nanoid@npm:^3.3.7":
+"nanoid@npm:^3.3.8":
   version: 3.3.8
   resolution: "nanoid@npm:3.3.8"
   bin:
@@ -5444,13 +5435,13 @@ __metadata:
   linkType: hard
 
 "postcss@npm:^8.4.49":
-  version: 8.4.49
-  resolution: "postcss@npm:8.4.49"
+  version: 8.5.1
+  resolution: "postcss@npm:8.5.1"
   dependencies:
-    nanoid: "npm:^3.3.7"
+    nanoid: "npm:^3.3.8"
     picocolors: "npm:^1.1.1"
     source-map-js: "npm:^1.2.1"
-  checksum: 10c0/f1b3f17aaf36d136f59ec373459f18129908235e65dbdc3aee5eef8eba0756106f52de5ec4682e29a2eab53eb25170e7e871b3e4b52a8f1de3d344a514306be3
+  checksum: 10c0/c4d90c59c98e8a0c102b77d3f4cac190f883b42d63dc60e2f3ed840f16197c0c8e25a4327d2e9a847b45a985612317dc0534178feeebd0a1cf3eb0eecf75cae4
   languageName: node
   linkType: hard
 
@@ -5576,9 +5567,9 @@ __metadata:
   linkType: hard
 
 "rate-limiter-flexible@npm:^5.0.3":
-  version: 5.0.4
-  resolution: "rate-limiter-flexible@npm:5.0.4"
-  checksum: 10c0/5047df2b8fbfa7cf5eefb4242cc78091a7866d79f20d34bbc473e0d8fdf2a7f5d8d0ac87c5c4cec365bb91252cf4d7b6b8cc2756112c292c8ef26e3648950711
+  version: 5.0.5
+  resolution: "rate-limiter-flexible@npm:5.0.5"
+  checksum: 10c0/ae7cba6a46a2133bfbd310d3f83c65b3b732deab84e0c79b4fda78cd1d6578f69111bb37f09401ea45334eb75b8e40637ab0a8a9fd3efbb0b54084d6cd3b4ead
   languageName: node
   linkType: hard
 
@@ -5616,9 +5607,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router@npm:^7.1.1":
-  version: 7.1.1
-  resolution: "react-router@npm:7.1.1"
+"react-router@npm:^7.1.2":
+  version: 7.1.2
+  resolution: "react-router@npm:7.1.2"
   dependencies:
     "@types/cookie": "npm:^0.6.0"
     cookie: "npm:^1.0.1"
@@ -5630,19 +5621,19 @@ __metadata:
   peerDependenciesMeta:
     react-dom:
       optional: true
-  checksum: 10c0/39f4859670f286eb2eac29e5830c1f730405701fca0808e5db853ec05e54e55a848c764e10ffd14a7b9b3b2154a0d6449656d7f208b9b3e4b2af780e07bf57a8
+  checksum: 10c0/f2ef57c8c95cfee0c0689cbcb9a28ebbc5a554831b9e8f9d0295f4c6ac0960a448e16b828dd75168b4e8da228068c99d88248be3418467d6a76ab4ea02bf0d71
   languageName: node
   linkType: hard
 
-"react-toastify@npm:^11.0.2":
-  version: 11.0.2
-  resolution: "react-toastify@npm:11.0.2"
+"react-toastify@npm:^11.0.3":
+  version: 11.0.3
+  resolution: "react-toastify@npm:11.0.3"
   dependencies:
     clsx: "npm:^2.1.1"
   peerDependencies:
     react: ^18 || ^19
     react-dom: ^18 || ^19
-  checksum: 10c0/e1ba01846782d47d0bf9cec7e2b4804f9af30e50a203786523f16db33691c1491f2382832e7ec4b69c583d3634ea0e3efb383da00ca9076bcf4bdd906a54a85f
+  checksum: 10c0/23b989c6080bc5bf0eb0c1f7ed17bd53d067d9beb33baf93c520119cd69cf75c9f2d1ee524dfe6c8a2a5d326029772b576de00e018b379d03a0e37630b83adea
   languageName: node
   linkType: hard
 
@@ -6228,9 +6219,9 @@ __metadata:
   linkType: hard
 
 "spdx-license-ids@npm:^3.0.0":
-  version: 3.0.20
-  resolution: "spdx-license-ids@npm:3.0.20"
-  checksum: 10c0/bdff7534fad6ef59be49becda1edc3fb7f5b3d6f296a715516ab9d972b8ad59af2c34b2003e01db8970d4c673d185ff696ba74c6b61d3bf327e2b3eac22c297c
+  version: 3.0.21
+  resolution: "spdx-license-ids@npm:3.0.21"
+  checksum: 10c0/ecb24c698d8496aa9efe23e0b1f751f8a7a89faedcdfcbfabae772b546c2db46ccde8f3bc447a238eb86bbcd4f73fea88720ef3b8394f7896381bec3d7736411
   languageName: node
   linkType: hard
 
