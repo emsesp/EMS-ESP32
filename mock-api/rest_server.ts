@@ -157,7 +157,7 @@ switch (version_test as number) {
 // set the version
 system_status.emsesp_version = THIS_VERSION;
 
-const emulate_esp = "ESP32S3";
+const emulate_esp = 'ESP32S3';
 // const emulate_esp = 'ESP32';
 
 switch (emulate_esp as string) {
@@ -268,10 +268,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-        old_custom_name +
-        ') with new (' +
-        new_custom_name +
-        ')'
+          old_custom_name +
+          ') with new (' +
+          new_custom_name +
+          ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -366,15 +366,15 @@ function check_upgrade(version: string) {
     const stable_version = version.split(',')[1];
     console.log(
       'latest dev version: ' +
-      dev_version +
-      ', latest stable version: ' +
-      stable_version
+        dev_version +
+        ', latest stable version: ' +
+        stable_version
     );
     console.log(
       'Version upgrade check from version ' +
-      THIS_VERSION +
-      ', upgradable: ' +
-      VERSION_IS_UPGRADEABLE
+        THIS_VERSION +
+        ', upgradable: ' +
+        VERSION_IS_UPGRADEABLE
     );
     data = {
       emsesp_version: THIS_VERSION,
@@ -4507,7 +4507,7 @@ router
 
     let fake = false;
 
-    // fake = true; // for testing, shows a subset of data
+    fake = true; // for testing, shows a subset of data
 
     if (!fake) {
       // pick EMS devices from coredata
