@@ -358,6 +358,10 @@ void EMSESP::dump_all_entities(uuid::console::Shell & shell) {
                 if (device.device_type == DeviceType::MIXER) {
                     device_id = 0x20; // hc
                 }
+                // For Heatsource set AM200
+                if (device.device_type == DeviceType::HEATSOURCE) {
+                    device_id = EMSdevice::EMS_DEVICE_ID_AHS1;
+                }
 
                 // add the device and print out all the entities
                 // for testing the mixer use ... if (device.product_id == 69) {
