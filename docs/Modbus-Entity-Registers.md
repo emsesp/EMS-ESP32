@@ -3621,6 +3621,43 @@
 | elgenheat | el. generation heating | uint32 (>=0<=1677721) | kWh | false | DEVICE_DATA | 48 | 2 | 1/10 | 
 | elgendhw | el generation | uint32 (>=0<=1677721) | kWh | false | DHW | 11 | 2 | 1/10 | 
 
+## Devices of type *heatsource*
+### AM200
+| shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
+|-|-|-|-|-|-|-|-|-|
+| sysflowtemp | system flow temperature | int16 (>=-3199<=3199) | C | false | AHS | 0 | 1 | 1/10 | 
+| sysrettemp | system return temperature | int16 (>=-3199<=3199) | C | false | AHS | 1 | 1 | 1/10 | 
+| altflowtemp | alternative hs flow temperature | int16 (>=-3199<=3199) | C | false | AHS | 2 | 1 | 1/10 | 
+| altrettemp | alternative hs return temperature | int16 (>=-3199<=3199) | C | false | AHS | 3 | 1 | 1/10 | 
+| cyltoptemp | cylinder top temperature | int16 (>=-3199<=3199) | C | false | AHS | 4 | 1 | 1/10 | 
+| cylcentertemp | cylinder center temperature | int16 (>=-3199<=3199) | C | false | AHS | 5 | 1 | 1/10 | 
+| cylbottomtemp | cylinder bottom temperature | int16 (>=-3199<=3199) | C | false | AHS | 6 | 1 | 1/10 | 
+| fluegastemp | flue gas temperature | int16 (>=-3199<=3199) | C | false | AHS | 7 | 1 | 1/10 | 
+| valvebuffer | buffer valve | uint8 (>=0<=100) | % | false | AHS | 8 | 1 | 1 | 
+| valvereturn | return valve | uint8 (>=0<=100) | % | false | AHS | 9 | 1 | 1 | 
+| apumpmod | alternative hs pump modulation | uint8 (>=0<=100) | % | false | AHS | 10 | 1 | 1 | 
+| vr2config | vr2 configuration | enum [off\|bypass] |   | true | AHS | 11 | 1 | 1 | 
+| ahsactivated | alternate heat source activation | boolean |   | true | AHS | 12 | 1 | 1 | 
+| apumpconfig | primary pump config | boolean |   | true | AHS | 13 | 1 | 1 | 
+| apumpsignal | output for pr1 pump | enum [off\|pwm\|pwm inverse] |   | true | AHS | 14 | 1 | 1 | 
+| apumpmin | min output pump pr1 | uint8 (>=12<=50) | % | true | AHS | 15 | 1 | 1 | 
+| temprise | ahs return temp rise | boolean |   | true | AHS | 16 | 1 | 1 | 
+| setreturntemp | set temp return | uint8 (>=40<=75) | C | true | AHS | 17 | 1 | 1 | 
+| mixruntime | mixer run time | uint16 (>=0<=600) | seconds | true | AHS | 18 | 1 | 1 | 
+| setflowtemp | set flow temperature | uint8 (>=40<=75) | C | true | AHS | 19 | 1 | 1 | 
+| bufbypass | buffer bypass config | enum [no\|mixer\|valve] |   | true | AHS | 20 | 1 | 1 | 
+| bufmixruntime | bypass mixer run time | uint16 (>=0<=600) | seconds | true | AHS | 21 | 1 | 1 | 
+| bufconfig | dhw buffer config | enum [off\|monovalent\|bivalent] |   | true | AHS | 22 | 1 | 1 | 
+| blockmode | config htg. blocking mode | enum [off\|auto\|blocking] |   | true | AHS | 23 | 1 | 1 | 
+| blockterm | config of block terminal | enum [n_o\|n_c] |   | true | AHS | 24 | 1 | 1 | 
+| blockhyst | hyst. for boiler block | int8 (>=0<=50) | C | true | AHS | 25 | 1 | 1 | 
+| releasewait | boiler release wait time | uint8 (>=0<=240) | minutes | true | AHS | 26 | 1 | 1 | 
+| burner | burner | boolean |   | false | AHS | 27 | 1 | 1 | 
+| apump | alternative hs pump | boolean |   | false | AHS | 28 | 1 | 1 | 
+| heatrequest | heat request | uint8 (>=0<=100) | % | false | AHS | 29 | 1 | 1 | 
+| blockremain | remaining blocktime | uint8 (>=0<=254) | minutes | false | AHS | 30 | 1 | 1 | 
+| blockremaindhw | remaining blocktime dhw | uint8 (>=0<=254) | minutes | false | AHS | 31 | 1 | 1 | 
+
 ## Devices of type *mixer*
 ### HM210
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -4025,8 +4062,8 @@
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [night\|day\|auto] |   | true | HC | 3 | 1 | 1 | 
 | modetype | mode type | enum [night\|day] |   | false | HC | 4 | 1 | 1 | 
-| daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 53 | 1 | 1/2 | 
-| nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 54 | 1 | 1/2 | 
+| daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 55 | 1 | 1/2 | 
+| nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 56 | 1 | 1/2 | 
 | program | program | enum [family\|morning\|evening\|am\|pm\|midday\|singles\|seniors] |   | true | HC | 25 | 1 | 1 | 
 | minflowtemp | min flow temperature | uint8 (>=0<=254) | C | true | HC | 11 | 1 | 1 | 
 | maxflowtemp | max flow temperature | uint8 (>=0<=254) | C | true | HC | 12 | 1 | 1 | 
@@ -4043,8 +4080,8 @@
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [night\|day\|auto] |   | true | HC | 3 | 1 | 1 | 
 | modetype | mode type | enum [night\|day] |   | false | HC | 4 | 1 | 1 | 
-| daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 53 | 1 | 1/2 | 
-| nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 54 | 1 | 1/2 | 
+| daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 55 | 1 | 1/2 | 
+| nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 56 | 1 | 1/2 | 
 | program | program | enum [family\|morning\|evening\|am\|pm\|midday\|singles\|seniors] |   | true | HC | 25 | 1 | 1 | 
 | minflowtemp | min flow temperature | uint8 (>=0<=254) | C | true | HC | 11 | 1 | 1 | 
 | maxflowtemp | max flow temperature | uint8 (>=0<=254) | C | true | HC | 12 | 1 | 1 | 
@@ -4074,40 +4111,40 @@
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [night\|day\|auto] |   | true | HC | 3 | 1 | 1 | 
 | modetype | mode type | enum [night\|day] |   | false | HC | 4 | 1 | 1 | 
-| daytemp | day temperature | uint8 (>=10<=30) | C | true | HC | 53 | 1 | 1/2 | 
-| nighttemp | night temperature | uint8 (>=10<=30) | C | true | HC | 54 | 1 | 1/2 | 
+| daytemp | day temperature | uint8 (>=10<=30) | C | true | HC | 55 | 1 | 1/2 | 
+| nighttemp | night temperature | uint8 (>=10<=30) | C | true | HC | 56 | 1 | 1/2 | 
 | designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 | 
 | offsettemp | offset temperature | int8 (>=-5<=5) | C | true | HC | 10 | 1 | 1/2 | 
-| holidaytemp | holiday temperature | uint8 (>=5<=30) | C | true | HC | 55 | 1 | 1/2 | 
+| holidaytemp | holiday temperature | uint8 (>=5<=30) | C | true | HC | 57 | 1 | 1/2 | 
 | targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 | 
 | summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1 | 
 | summermode | summer mode | enum [winter\|summer] |   | false | HC | 22 | 1 | 1 | 
-| holidaymode | holiday mode | boolean |   | false | HC | 56 | 1 | 1 | 
+| holidaymode | holiday mode | boolean |   | false | HC | 58 | 1 | 1 | 
 | nofrosttemp | nofrost temperature | int8 (>=-20<=10) | C | true | HC | 17 | 1 | 1 | 
 | nofrostmode | nofrost mode | enum [off\|outdoor\|room] |   | true | HC | 16 | 1 | 1 | 
 | roominfluence | room influence | uint8 (>=0<=10) | C | true | HC | 13 | 1 | 1 | 
 | minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 | 
 | maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 | 
-| flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | C | true | HC | 57 | 1 | 1 | 
+| flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | C | true | HC | 59 | 1 | 1 | 
 | heatingtype | heating type | enum [off\|radiator\|convector\|floor] |   | true | HC | 19 | 1 | 1 | 
 | reducemode | reduce mode | enum [nofrost\|reduce\|room\|outdoor] |   | true | HC | 30 | 1 | 1 | 
 | controlmode | control mode | enum [outdoor\|room] |   | true | HC | 24 | 1 | 1 | 
 | control | control device | enum [off\|RC20\|RC3x] |   | true | HC | 40 | 1 | 1 | 
-| holidays | holiday dates | string |   | true | HC | 58 | 13 | 1 | 
-| vacations | vacation dates | string |   | true | HC | 71 | 13 | 1 | 
+| holidays | holiday dates | string |   | true | HC | 60 | 13 | 1 | 
+| vacations | vacation dates | string |   | true | HC | 73 | 13 | 1 | 
 | program | program | enum [own 1\|family\|morning\|evening\|am\|pm\|midday\|singles\|seniors\|new\|own 2] |   | true | HC | 25 | 1 | 1 | 
-| pause | pause time | uint8 (>=0<=99) | hours | true | HC | 84 | 1 | 1 | 
-| party | party time | uint8 (>=0<=99) | hours | true | HC | 85 | 1 | 1 | 
+| pause | pause time | uint8 (>=0<=99) | hours | true | HC | 86 | 1 | 1 | 
+| party | party time | uint8 (>=0<=99) | hours | true | HC | 87 | 1 | 1 | 
 | tempautotemp | temporary set temperature automode | uint8 (>=0<=30) | C | true | HC | 26 | 1 | 1/2 | 
 | noreducetemp | no reduce below temperature | int8 (>=-31<=10) | C | true | HC | 31 | 1 | 1 | 
 | reducetemp | off/reduce switch temperature | int8 (>=-20<=10) | C | true | HC | 32 | 1 | 1 | 
-| vacreducetemp | vacations off/reduce switch temperature | int8 (>=-20<=10) | C | true | HC | 86 | 1 | 1 | 
-| vacreducemode | vacations reduce mode | enum [nofrost\|reduce\|room\|outdoor] |   | true | HC | 87 | 1 | 1 | 
+| vacreducetemp | vacations off/reduce switch temperature | int8 (>=-20<=10) | C | true | HC | 88 | 1 | 1 | 
+| vacreducemode | vacations reduce mode | enum [nofrost\|reduce\|room\|outdoor] |   | true | HC | 89 | 1 | 1 | 
 | remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 41 | 1 | 1/10 | 
 | dhwprio | dhw priority | boolean |   | true | HC | 33 | 1 | 1 | 
 | switchonoptimization | switch-on optimization | boolean |   | true | HC | 29 | 1 | 1 | 
-| switchtime1 | own1 program switchtime | string |   | true | HC | 88 | 8 | 1 | 
-| switchtime2 | own2 program switchtime | string |   | true | HC | 96 | 8 | 1 | 
+| switchtime1 | own1 program switchtime | string |   | true | HC | 90 | 8 | 1 | 
+| switchtime2 | own2 program switchtime | string |   | true | HC | 98 | 8 | 1 | 
 | mode | operating mode | enum [off\|on\|auto] |   | true | DHW | 0 | 1 | 1 | 
 | circmode | circulation pump mode | enum [off\|on\|auto] |   | true | DHW | 3 | 1 | 1 | 
 | progmode | program | enum [std prog\|own prog] |   | true | DHW | 12 | 1 | 1 | 
@@ -4140,40 +4177,40 @@
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [night\|day\|auto] |   | true | HC | 3 | 1 | 1 | 
 | modetype | mode type | enum [night\|day] |   | false | HC | 4 | 1 | 1 | 
-| daytemp | day temperature | uint8 (>=10<=30) | C | true | HC | 53 | 1 | 1/2 | 
-| nighttemp | night temperature | uint8 (>=10<=30) | C | true | HC | 54 | 1 | 1/2 | 
+| daytemp | day temperature | uint8 (>=10<=30) | C | true | HC | 55 | 1 | 1/2 | 
+| nighttemp | night temperature | uint8 (>=10<=30) | C | true | HC | 56 | 1 | 1/2 | 
 | designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 | 
 | offsettemp | offset temperature | int8 (>=-5<=5) | C | true | HC | 10 | 1 | 1/2 | 
-| holidaytemp | holiday temperature | uint8 (>=5<=30) | C | true | HC | 55 | 1 | 1/2 | 
+| holidaytemp | holiday temperature | uint8 (>=5<=30) | C | true | HC | 57 | 1 | 1/2 | 
 | targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 | 
 | summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1 | 
 | summermode | summer mode | enum [winter\|summer] |   | false | HC | 22 | 1 | 1 | 
-| holidaymode | holiday mode | boolean |   | false | HC | 56 | 1 | 1 | 
+| holidaymode | holiday mode | boolean |   | false | HC | 58 | 1 | 1 | 
 | nofrosttemp | nofrost temperature | int8 (>=-20<=10) | C | true | HC | 17 | 1 | 1 | 
 | nofrostmode | nofrost mode | enum [off\|outdoor\|room] |   | true | HC | 16 | 1 | 1 | 
 | roominfluence | room influence | uint8 (>=0<=10) | C | true | HC | 13 | 1 | 1 | 
 | minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 | 
 | maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 | 
-| flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | C | true | HC | 57 | 1 | 1 | 
+| flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | C | true | HC | 59 | 1 | 1 | 
 | heatingtype | heating type | enum [off\|radiator\|convector\|floor] |   | true | HC | 19 | 1 | 1 | 
 | reducemode | reduce mode | enum [nofrost\|reduce\|room\|outdoor] |   | true | HC | 30 | 1 | 1 | 
 | controlmode | control mode | enum [outdoor\|room] |   | true | HC | 24 | 1 | 1 | 
 | control | control device | enum [off\|RC20\|RC3x] |   | true | HC | 40 | 1 | 1 | 
-| holidays | holiday dates | string |   | true | HC | 58 | 13 | 1 | 
-| vacations | vacation dates | string |   | true | HC | 71 | 13 | 1 | 
+| holidays | holiday dates | string |   | true | HC | 60 | 13 | 1 | 
+| vacations | vacation dates | string |   | true | HC | 73 | 13 | 1 | 
 | program | program | enum [own 1\|family\|morning\|evening\|am\|pm\|midday\|singles\|seniors\|new\|own 2] |   | true | HC | 25 | 1 | 1 | 
-| pause | pause time | uint8 (>=0<=99) | hours | true | HC | 84 | 1 | 1 | 
-| party | party time | uint8 (>=0<=99) | hours | true | HC | 85 | 1 | 1 | 
+| pause | pause time | uint8 (>=0<=99) | hours | true | HC | 86 | 1 | 1 | 
+| party | party time | uint8 (>=0<=99) | hours | true | HC | 87 | 1 | 1 | 
 | tempautotemp | temporary set temperature automode | uint8 (>=0<=30) | C | true | HC | 26 | 1 | 1/2 | 
 | noreducetemp | no reduce below temperature | int8 (>=-31<=10) | C | true | HC | 31 | 1 | 1 | 
 | reducetemp | off/reduce switch temperature | int8 (>=-20<=10) | C | true | HC | 32 | 1 | 1 | 
-| vacreducetemp | vacations off/reduce switch temperature | int8 (>=-20<=10) | C | true | HC | 86 | 1 | 1 | 
-| vacreducemode | vacations reduce mode | enum [nofrost\|reduce\|room\|outdoor] |   | true | HC | 87 | 1 | 1 | 
+| vacreducetemp | vacations off/reduce switch temperature | int8 (>=-20<=10) | C | true | HC | 88 | 1 | 1 | 
+| vacreducemode | vacations reduce mode | enum [nofrost\|reduce\|room\|outdoor] |   | true | HC | 89 | 1 | 1 | 
 | remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 41 | 1 | 1/10 | 
 | dhwprio | dhw priority | boolean |   | true | HC | 33 | 1 | 1 | 
 | switchonoptimization | switch-on optimization | boolean |   | true | HC | 29 | 1 | 1 | 
-| switchtime1 | own1 program switchtime | string |   | true | HC | 88 | 8 | 1 | 
-| switchtime2 | own2 program switchtime | string |   | true | HC | 96 | 8 | 1 | 
+| switchtime1 | own1 program switchtime | string |   | true | HC | 90 | 8 | 1 | 
+| switchtime2 | own2 program switchtime | string |   | true | HC | 98 | 8 | 1 | 
 | mode | operating mode | enum [off\|on\|auto] |   | true | DHW | 0 | 1 | 1 | 
 | circmode | circulation pump mode | enum [off\|on\|auto] |   | true | DHW | 3 | 1 | 1 | 
 | progmode | program | enum [std prog\|own prog] |   | true | DHW | 12 | 1 | 1 | 
@@ -4216,7 +4253,7 @@
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 3 | 1 | 1 | 
 | modetype | mode type | enum [nofrost\|eco\|heat] |   | false | HC | 4 | 1 | 1 | 
-| heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 195 | 1 | 1/2 | 
+| heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 197 | 1 | 1/2 | 
 | ecotemp | eco temperature | uint8 (>=0<=127) | C | true | HC | 5 | 1 | 1/2 | 
 | nofrosttemp | nofrost temperature | int8 (>=-63<=63) | C | true | HC | 17 | 1 | 1/2 | 
 | control | control device | enum [off\|FB10\|FB100] |   | true | HC | 40 | 1 | 1 | 
@@ -4224,10 +4261,10 @@
 | remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 41 | 1 | 1/10 | 
 | targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 | 
 | summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1/2 | 
-| roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 196 | 1 | 1 | 
-| holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 56 | 1 | 1 | 
+| roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 198 | 1 | 1 | 
+| holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 58 | 1 | 1 | 
 | switchonoptimization | switch-on optimization | boolean |   | true | HC | 29 | 1 | 1 | 
-| heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 197 | 1 | 1 | 
+| heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 199 | 1 | 1 | 
 | minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 | 
 | maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 | 
 | designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 | 
@@ -4255,7 +4292,7 @@
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 3 | 1 | 1 | 
 | modetype | mode type | enum [nofrost\|eco\|heat] |   | false | HC | 4 | 1 | 1 | 
-| heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 195 | 1 | 1/2 | 
+| heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 197 | 1 | 1/2 | 
 | ecotemp | eco temperature | uint8 (>=0<=127) | C | true | HC | 5 | 1 | 1/2 | 
 | nofrosttemp | nofrost temperature | int8 (>=-63<=63) | C | true | HC | 17 | 1 | 1/2 | 
 | control | control device | enum [off\|FB10\|FB100] |   | true | HC | 40 | 1 | 1 | 
@@ -4263,10 +4300,10 @@
 | remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 41 | 1 | 1/10 | 
 | targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 | 
 | summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1/2 | 
-| roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 196 | 1 | 1 | 
-| holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 56 | 1 | 1 | 
+| roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 198 | 1 | 1 | 
+| holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 58 | 1 | 1 | 
 | switchonoptimization | switch-on optimization | boolean |   | true | HC | 29 | 1 | 1 | 
-| heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 197 | 1 | 1 | 
+| heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 199 | 1 | 1 | 
 | minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 | 
 | maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 | 
 | designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 | 
@@ -4294,7 +4331,7 @@
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 3 | 1 | 1 | 
 | modetype | mode type | enum [nofrost\|eco\|heat] |   | false | HC | 4 | 1 | 1 | 
-| heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 195 | 1 | 1/2 | 
+| heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 197 | 1 | 1/2 | 
 | ecotemp | eco temperature | uint8 (>=0<=127) | C | true | HC | 5 | 1 | 1/2 | 
 | nofrosttemp | nofrost temperature | int8 (>=-63<=63) | C | true | HC | 17 | 1 | 1/2 | 
 | control | control device | enum [off\|FB10\|FB100] |   | true | HC | 40 | 1 | 1 | 
@@ -4302,10 +4339,10 @@
 | remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 41 | 1 | 1/10 | 
 | targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 | 
 | summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1/2 | 
-| roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 196 | 1 | 1 | 
-| holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 56 | 1 | 1 | 
+| roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 198 | 1 | 1 | 
+| holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 58 | 1 | 1 | 
 | switchonoptimization | switch-on optimization | boolean |   | true | HC | 29 | 1 | 1 | 
-| heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 197 | 1 | 1 | 
+| heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 199 | 1 | 1 | 
 | minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 | 
 | maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 | 
 | designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 | 
@@ -4333,7 +4370,7 @@
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 3 | 1 | 1 | 
 | modetype | mode type | enum [nofrost\|eco\|heat] |   | false | HC | 4 | 1 | 1 | 
-| heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 195 | 1 | 1/2 | 
+| heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 197 | 1 | 1/2 | 
 | ecotemp | eco temperature | uint8 (>=0<=127) | C | true | HC | 5 | 1 | 1/2 | 
 | nofrosttemp | nofrost temperature | int8 (>=-63<=63) | C | true | HC | 17 | 1 | 1/2 | 
 | control | control device | enum [off\|FB10\|FB100] |   | true | HC | 40 | 1 | 1 | 
@@ -4341,10 +4378,10 @@
 | remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 41 | 1 | 1/10 | 
 | targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 | 
 | summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1/2 | 
-| roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 196 | 1 | 1 | 
-| holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 56 | 1 | 1 | 
+| roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 198 | 1 | 1 | 
+| holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 58 | 1 | 1 | 
 | switchonoptimization | switch-on optimization | boolean |   | true | HC | 29 | 1 | 1 | 
-| heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 197 | 1 | 1 | 
+| heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 199 | 1 | 1 | 
 | minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 | 
 | maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 | 
 | designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 | 
@@ -4372,7 +4409,7 @@
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 3 | 1 | 1 | 
 | modetype | mode type | enum [nofrost\|eco\|heat] |   | false | HC | 4 | 1 | 1 | 
-| heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 195 | 1 | 1/2 | 
+| heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 197 | 1 | 1/2 | 
 | ecotemp | eco temperature | uint8 (>=0<=127) | C | true | HC | 5 | 1 | 1/2 | 
 | nofrosttemp | nofrost temperature | int8 (>=-63<=63) | C | true | HC | 17 | 1 | 1/2 | 
 | control | control device | enum [off\|FB10\|FB100] |   | true | HC | 40 | 1 | 1 | 
@@ -4380,10 +4417,10 @@
 | remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 41 | 1 | 1/10 | 
 | targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 | 
 | summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1/2 | 
-| roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 196 | 1 | 1 | 
-| holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 56 | 1 | 1 | 
+| roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 198 | 1 | 1 | 
+| holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 58 | 1 | 1 | 
 | switchonoptimization | switch-on optimization | boolean |   | true | HC | 29 | 1 | 1 | 
-| heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 197 | 1 | 1 | 
+| heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 199 | 1 | 1 | 
 | minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 | 
 | maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 | 
 | designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 | 
@@ -4411,7 +4448,7 @@
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 3 | 1 | 1 | 
 | modetype | mode type | enum [nofrost\|eco\|heat] |   | false | HC | 4 | 1 | 1 | 
-| heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 195 | 1 | 1/2 | 
+| heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 197 | 1 | 1/2 | 
 | ecotemp | eco temperature | uint8 (>=0<=127) | C | true | HC | 5 | 1 | 1/2 | 
 | nofrosttemp | nofrost temperature | int8 (>=-63<=63) | C | true | HC | 17 | 1 | 1/2 | 
 | control | control device | enum [off\|FB10\|FB100] |   | true | HC | 40 | 1 | 1 | 
@@ -4419,10 +4456,10 @@
 | remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 41 | 1 | 1/10 | 
 | targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 | 
 | summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1/2 | 
-| roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 196 | 1 | 1 | 
-| holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 56 | 1 | 1 | 
+| roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 198 | 1 | 1 | 
+| holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 58 | 1 | 1 | 
 | switchonoptimization | switch-on optimization | boolean |   | true | HC | 29 | 1 | 1 | 
-| heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 197 | 1 | 1 | 
+| heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 199 | 1 | 1 | 
 | minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 | 
 | maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 | 
 | designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 | 
@@ -4450,7 +4487,7 @@
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 3 | 1 | 1 | 
 | modetype | mode type | enum [nofrost\|eco\|heat] |   | false | HC | 4 | 1 | 1 | 
-| heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 195 | 1 | 1/2 | 
+| heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 197 | 1 | 1/2 | 
 | ecotemp | eco temperature | uint8 (>=0<=127) | C | true | HC | 5 | 1 | 1/2 | 
 | nofrosttemp | nofrost temperature | int8 (>=-63<=63) | C | true | HC | 17 | 1 | 1/2 | 
 | control | control device | enum [off\|FB10\|FB100] |   | true | HC | 40 | 1 | 1 | 
@@ -4458,10 +4495,10 @@
 | remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 41 | 1 | 1/10 | 
 | targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 | 
 | summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1/2 | 
-| roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 196 | 1 | 1 | 
-| holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 56 | 1 | 1 | 
+| roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 198 | 1 | 1 | 
+| holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 58 | 1 | 1 | 
 | switchonoptimization | switch-on optimization | boolean |   | true | HC | 29 | 1 | 1 | 
-| heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 197 | 1 | 1 | 
+| heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 199 | 1 | 1 | 
 | minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 | 
 | maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 | 
 | designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 | 
@@ -4489,7 +4526,7 @@
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 3 | 1 | 1 | 
 | modetype | mode type | enum [nofrost\|eco\|heat] |   | false | HC | 4 | 1 | 1 | 
-| heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 195 | 1 | 1/2 | 
+| heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 197 | 1 | 1/2 | 
 | ecotemp | eco temperature | uint8 (>=0<=127) | C | true | HC | 5 | 1 | 1/2 | 
 | nofrosttemp | nofrost temperature | int8 (>=-63<=63) | C | true | HC | 17 | 1 | 1/2 | 
 | control | control device | enum [off\|FB10\|FB100] |   | true | HC | 40 | 1 | 1 | 
@@ -4497,10 +4534,10 @@
 | remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 41 | 1 | 1/10 | 
 | targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 | 
 | summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1/2 | 
-| roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 196 | 1 | 1 | 
-| holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 56 | 1 | 1 | 
+| roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 198 | 1 | 1 | 
+| holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 58 | 1 | 1 | 
 | switchonoptimization | switch-on optimization | boolean |   | true | HC | 29 | 1 | 1 | 
-| heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 197 | 1 | 1 | 
+| heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 199 | 1 | 1 | 
 | minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 | 
 | maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 | 
 | designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 | 
@@ -4528,7 +4565,7 @@
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 3 | 1 | 1 | 
 | modetype | mode type | enum [nofrost\|eco\|heat] |   | false | HC | 4 | 1 | 1 | 
-| heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 195 | 1 | 1/2 | 
+| heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 197 | 1 | 1/2 | 
 | ecotemp | eco temperature | uint8 (>=0<=127) | C | true | HC | 5 | 1 | 1/2 | 
 | nofrosttemp | nofrost temperature | int8 (>=-63<=63) | C | true | HC | 17 | 1 | 1/2 | 
 | control | control device | enum [off\|FB10\|FB100] |   | true | HC | 40 | 1 | 1 | 
@@ -4536,10 +4573,10 @@
 | remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 41 | 1 | 1/10 | 
 | targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 | 
 | summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1/2 | 
-| roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 196 | 1 | 1 | 
-| holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 56 | 1 | 1 | 
+| roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 198 | 1 | 1 | 
+| holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 58 | 1 | 1 | 
 | switchonoptimization | switch-on optimization | boolean |   | true | HC | 29 | 1 | 1 | 
-| heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 197 | 1 | 1 | 
+| heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 199 | 1 | 1 | 
 | minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 | 
 | maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 | 
 | designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 | 
@@ -4567,7 +4604,7 @@
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 3 | 1 | 1 | 
 | modetype | mode type | enum [nofrost\|eco\|heat] |   | false | HC | 4 | 1 | 1 | 
-| heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 195 | 1 | 1/2 | 
+| heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 197 | 1 | 1/2 | 
 | ecotemp | eco temperature | uint8 (>=0<=127) | C | true | HC | 5 | 1 | 1/2 | 
 | nofrosttemp | nofrost temperature | int8 (>=-63<=63) | C | true | HC | 17 | 1 | 1/2 | 
 | control | control device | enum [off\|FB10\|FB100] |   | true | HC | 40 | 1 | 1 | 
@@ -4575,10 +4612,10 @@
 | remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 41 | 1 | 1/10 | 
 | targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 | 
 | summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1/2 | 
-| roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 196 | 1 | 1 | 
-| holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 56 | 1 | 1 | 
+| roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 198 | 1 | 1 | 
+| holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 58 | 1 | 1 | 
 | switchonoptimization | switch-on optimization | boolean |   | true | HC | 29 | 1 | 1 | 
-| heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 197 | 1 | 1 | 
+| heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 199 | 1 | 1 | 
 | minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 | 
 | maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 | 
 | designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 | 
@@ -4606,7 +4643,7 @@
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 3 | 1 | 1 | 
 | modetype | mode type | enum [nofrost\|eco\|heat] |   | false | HC | 4 | 1 | 1 | 
-| heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 195 | 1 | 1/2 | 
+| heattemp | heat temperature | uint8 (>=0<=127) | C | true | HC | 197 | 1 | 1/2 | 
 | ecotemp | eco temperature | uint8 (>=0<=127) | C | true | HC | 5 | 1 | 1/2 | 
 | nofrosttemp | nofrost temperature | int8 (>=-63<=63) | C | true | HC | 17 | 1 | 1/2 | 
 | control | control device | enum [off\|FB10\|FB100] |   | true | HC | 40 | 1 | 1 | 
@@ -4614,10 +4651,10 @@
 | remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 41 | 1 | 1/10 | 
 | targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 | 
 | summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1/2 | 
-| roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 196 | 1 | 1 | 
-| holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 56 | 1 | 1 | 
+| roomsensor | room sensor | enum [extern\|intern\|auto] |   | true | HC | 198 | 1 | 1 | 
+| holidaymode | holiday mode | enum [nofrost\|eco\|heat\|auto] |   | true | HC | 58 | 1 | 1 | 
 | switchonoptimization | switch-on optimization | boolean |   | true | HC | 29 | 1 | 1 | 
-| heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 197 | 1 | 1 | 
+| heatup | heatup | enum [slow\|medium\|fast] |   | true | HC | 199 | 1 | 1 | 
 | minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 | 
 | maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 | 
 | designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 | 
@@ -4649,10 +4686,10 @@
 | currtemp | current room temperature | int16 (>=-3199<=3199) | C | false | HC | 1 | 1 | 1/10 | 
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [nofrost\|night\|day] |   | true | HC | 3 | 1 | 1 | 
-| daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 53 | 1 | 1/2 | 
-| nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 54 | 1 | 1/2 | 
-| reducehours | duration for nighttemp | uint8 (>=0<=254) | hours | true | HC | 193 | 1 | 1 | 
-| reduceminutes | remaining time for nightmode | uint16 (>=0<=31999) | minutes | false | HC | 194 | 1 | 1 | 
+| daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 55 | 1 | 1/2 | 
+| nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 56 | 1 | 1/2 | 
+| reducehours | duration for nighttemp | uint8 (>=0<=254) | hours | true | HC | 195 | 1 | 1 | 
+| reduceminutes | remaining time for nightmode | uint16 (>=0<=31999) | minutes | false | HC | 196 | 1 | 1 | 
 | mode | operating mode | enum [on\|off\|auto] |   | true | DHW | 0 | 1 | 1 | 
 
 ### Moduline 400
@@ -4675,26 +4712,26 @@
 | currtemp | current room temperature | int16 (>=-3199<=3199) | C | false | HC | 1 | 1 | 1/10 | 
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [off\|manual\|auto] |   | true | HC | 3 | 1 | 1 | 
-| pause | pause time | uint8 (>=0<=254) | hours | true | HC | 84 | 1 | 1 | 
-| party | party time | uint8 (>=0<=254) | hours | true | HC | 85 | 1 | 1 | 
-| vacations1 | vacation dates 1 | string |   | true | HC | 116 | 11 | 1 | 
-| vacations2 | vacation dates 2 | string |   | true | HC | 127 | 11 | 1 | 
-| vacations3 | vacation dates 3 | string |   | true | HC | 138 | 11 | 1 | 
-| vacations4 | vacation dates 4 | string |   | true | HC | 149 | 11 | 1 | 
-| vacations5 | vacation dates 5 | string |   | true | HC | 160 | 11 | 1 | 
-| vacations6 | vacation dates 6 | string |   | true | HC | 171 | 11 | 1 | 
-| vacations7 | vacation dates 7 | string |   | true | HC | 182 | 11 | 1 | 
+| pause | pause time | uint8 (>=0<=254) | hours | true | HC | 86 | 1 | 1 | 
+| party | party time | uint8 (>=0<=254) | hours | true | HC | 87 | 1 | 1 | 
+| vacations1 | vacation dates 1 | string |   | true | HC | 118 | 11 | 1 | 
+| vacations2 | vacation dates 2 | string |   | true | HC | 129 | 11 | 1 | 
+| vacations3 | vacation dates 3 | string |   | true | HC | 140 | 11 | 1 | 
+| vacations4 | vacation dates 4 | string |   | true | HC | 151 | 11 | 1 | 
+| vacations5 | vacation dates 5 | string |   | true | HC | 162 | 11 | 1 | 
+| vacations6 | vacation dates 6 | string |   | true | HC | 173 | 11 | 1 | 
+| vacations7 | vacation dates 7 | string |   | true | HC | 184 | 11 | 1 | 
 | program | program | enum [own 1\|family\|morning\|evening\|am\|pm\|midday\|singles\|seniors\|new\|own 2] |   | true | HC | 25 | 1 | 1 | 
-| switchtime1 | own1 program switchtime | string |   | true | HC | 88 | 8 | 1 | 
+| switchtime1 | own1 program switchtime | string |   | true | HC | 90 | 8 | 1 | 
 | heatingtype | heating type | enum [off\|radiator\|convector\|floor] |   | true | HC | 19 | 1 | 1 | 
 | controlmode | control mode | enum [outdoor\|room] |   | true | HC | 24 | 1 | 1 | 
-| holidaytemp | holiday temperature | uint8 (>=0<=127) | C | true | HC | 55 | 1 | 1/2 | 
-| nighttemp | night temperature T1 | uint8 (>=0<=127) | C | true | HC | 54 | 1 | 1/2 | 
-| daytemp2 | day temperature T2 | uint8 (>=0<=127) | C | true | HC | 105 | 1 | 1/2 | 
-| daytemp3 | day temperature T3 | uint8 (>=0<=127) | C | true | HC | 106 | 1 | 1/2 | 
-| daytemp4 | day temperature T4 | uint8 (>=0<=127) | C | true | HC | 107 | 1 | 1/2 | 
+| holidaytemp | holiday temperature | uint8 (>=0<=127) | C | true | HC | 57 | 1 | 1/2 | 
+| nighttemp | night temperature T1 | uint8 (>=0<=127) | C | true | HC | 56 | 1 | 1/2 | 
+| daytemp2 | day temperature T2 | uint8 (>=0<=127) | C | true | HC | 107 | 1 | 1/2 | 
+| daytemp3 | day temperature T3 | uint8 (>=0<=127) | C | true | HC | 108 | 1 | 1/2 | 
+| daytemp4 | day temperature T4 | uint8 (>=0<=127) | C | true | HC | 109 | 1 | 1/2 | 
 | manualtemp | manual temperature | uint8 (>=0<=127) | C | true | HC | 6 | 1 | 1/2 | 
-| offtemp | temperature when mode is off | uint8 (>=0<=127) | C | true | HC | 104 | 1 | 1/2 | 
+| offtemp | temperature when mode is off | uint8 (>=0<=127) | C | true | HC | 106 | 1 | 1/2 | 
 | mode | operating mode | enum [on\|off\|auto] |   | true | DHW | 0 | 1 | 1 | 
 | whenmodeoff | when thermostat mode off | boolean |   | true | DHW | 62 | 1 | 1 | 
 | disinfecting | disinfecting | boolean |   | true | DHW | 7 | 1 | 1 | 
@@ -4713,8 +4750,8 @@
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [night\|day\|auto] |   | true | HC | 3 | 1 | 1 | 
 | modetype | mode type | enum [night\|day] |   | false | HC | 4 | 1 | 1 | 
-| daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 53 | 1 | 1/2 | 
-| nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 54 | 1 | 1/2 | 
+| daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 55 | 1 | 1/2 | 
+| nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 56 | 1 | 1/2 | 
 | program | program | enum [family\|morning\|evening\|am\|pm\|midday\|singles\|seniors] |   | true | HC | 25 | 1 | 1 | 
 | minflowtemp | min flow temperature | uint8 (>=0<=254) | C | true | HC | 11 | 1 | 1 | 
 | maxflowtemp | max flow temperature | uint8 (>=0<=254) | C | true | HC | 12 | 1 | 1 | 
@@ -4735,10 +4772,10 @@
 | currtemp | current room temperature | int16 (>=-3199<=3199) | C | false | HC | 1 | 1 | 1/10 | 
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [nofrost\|night\|day] |   | true | HC | 3 | 1 | 1 | 
-| daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 53 | 1 | 1/2 | 
-| nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 54 | 1 | 1/2 | 
-| reducehours | duration for nighttemp | uint8 (>=0<=254) | hours | true | HC | 193 | 1 | 1 | 
-| reduceminutes | remaining time for nightmode | uint16 (>=0<=31999) | minutes | false | HC | 194 | 1 | 1 | 
+| daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 55 | 1 | 1/2 | 
+| nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 56 | 1 | 1/2 | 
+| reducehours | duration for nighttemp | uint8 (>=0<=254) | hours | true | HC | 195 | 1 | 1 | 
+| reduceminutes | remaining time for nightmode | uint16 (>=0<=31999) | minutes | false | HC | 196 | 1 | 1 | 
 | mode | operating mode | enum [on\|off\|auto] |   | true | DHW | 0 | 1 | 1 | 
 | errorcode | error code | string |   | false | DEVICE_DATA | 0 | 8 | 1 | 
 | lastcode | last error code | string |   | false | DEVICE_DATA | 8 | 25 | 1 | 
@@ -4749,8 +4786,8 @@
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [night\|day\|auto] |   | true | HC | 3 | 1 | 1 | 
 | modetype | mode type | enum [night\|day] |   | false | HC | 4 | 1 | 1 | 
-| daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 53 | 1 | 1/2 | 
-| nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 54 | 1 | 1/2 | 
+| daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 55 | 1 | 1/2 | 
+| nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 56 | 1 | 1/2 | 
 | program | program | enum [family\|morning\|evening\|am\|pm\|midday\|singles\|seniors] |   | true | HC | 25 | 1 | 1 | 
 | minflowtemp | min flow temperature | uint8 (>=0<=254) | C | true | HC | 11 | 1 | 1 | 
 | maxflowtemp | max flow temperature | uint8 (>=0<=254) | C | true | HC | 12 | 1 | 1 | 
@@ -4835,8 +4872,8 @@
 | cooloffdelay | cooling off delay | uint8 (>=1<=48) | hours | true | HC | 50 | 1 | 1 | 
 | switchprogmode | switch program mode | enum [level\|absolute] |   | true | HC | 51 | 1 | 1 | 
 | redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 52 | 1 | 1/2 | 
-| solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | -1 | 1 | 1 | 
-| currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | -1 | 1 | 1/10 | 
+| solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | 53 | 1 | 1 | 
+| currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | 54 | 1 | 1/10 | 
 | mode | operating mode | enum [off\|normal\|comfort\|auto\|own prog] |   | true | DHW | 0 | 1 | 1 | 
 | settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 1 | 1 | 1 | 
 | settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
@@ -4936,8 +4973,8 @@
 | cooloffdelay | cooling off delay | uint8 (>=1<=48) | hours | true | HC | 50 | 1 | 1 | 
 | switchprogmode | switch program mode | enum [level\|absolute] |   | true | HC | 51 | 1 | 1 | 
 | redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 52 | 1 | 1/2 | 
-| solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | -1 | 1 | 1 | 
-| currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | -1 | 1 | 1/10 | 
+| solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | 53 | 1 | 1 | 
+| currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | 54 | 1 | 1/10 | 
 | mode | operating mode | enum [off\|comfort\|auto] |   | true | DHW | 0 | 1 | 1 | 
 | settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 1 | 1 | 1 | 
 | settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
@@ -4962,12 +4999,12 @@
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [off\|manual\|auto] |   | true | HC | 3 | 1 | 1 | 
 | manualtemp | manual temperature | uint8 (>=0<=127) | C | true | HC | 6 | 1 | 1/2 | 
-| offtemp | temperature when mode is off | uint8 (>=0<=127) | C | true | HC | 104 | 1 | 1/2 | 
-| daytemp2 | day temperature T2 | uint8 (>=0<=127) | C | true | HC | 105 | 1 | 1/2 | 
-| daytemp3 | day temperature T3 | uint8 (>=0<=127) | C | true | HC | 106 | 1 | 1/2 | 
-| daytemp4 | day temperature T4 | uint8 (>=0<=127) | C | true | HC | 107 | 1 | 1/2 | 
-| nighttemp | night temperature T1 | uint8 (>=0<=127) | C | true | HC | 54 | 1 | 1/2 | 
-| switchtime | program switchtime | string |   | true | HC | 108 | 8 | 1 | 
+| offtemp | temperature when mode is off | uint8 (>=0<=127) | C | true | HC | 106 | 1 | 1/2 | 
+| daytemp2 | day temperature T2 | uint8 (>=0<=127) | C | true | HC | 107 | 1 | 1/2 | 
+| daytemp3 | day temperature T3 | uint8 (>=0<=127) | C | true | HC | 108 | 1 | 1/2 | 
+| daytemp4 | day temperature T4 | uint8 (>=0<=127) | C | true | HC | 109 | 1 | 1/2 | 
+| nighttemp | night temperature T1 | uint8 (>=0<=127) | C | true | HC | 56 | 1 | 1/2 | 
+| switchtime | program switchtime | string |   | true | HC | 110 | 8 | 1 | 
 
 ### RC200, CW100, CR120, CR50
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5045,8 +5082,8 @@
 | cooloffdelay | cooling off delay | uint8 (>=1<=48) | hours | true | HC | 50 | 1 | 1 | 
 | switchprogmode | switch program mode | enum [level\|absolute] |   | true | HC | 51 | 1 | 1 | 
 | redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 52 | 1 | 1/2 | 
-| solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | -1 | 1 | 1 | 
-| currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | -1 | 1 | 1/10 | 
+| solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | 53 | 1 | 1 | 
+| currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | 54 | 1 | 1/10 | 
 | mode | operating mode | enum [off\|normal\|comfort\|auto\|own prog] |   | true | DHW | 0 | 1 | 1 | 
 | settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 1 | 1 | 1 | 
 | settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
@@ -5071,12 +5108,12 @@
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [off\|manual\|auto] |   | true | HC | 3 | 1 | 1 | 
 | manualtemp | manual temperature | uint8 (>=0<=127) | C | true | HC | 6 | 1 | 1/2 | 
-| offtemp | temperature when mode is off | uint8 (>=0<=127) | C | true | HC | 104 | 1 | 1/2 | 
-| daytemp2 | day temperature T2 | uint8 (>=0<=127) | C | true | HC | 105 | 1 | 1/2 | 
-| daytemp3 | day temperature T3 | uint8 (>=0<=127) | C | true | HC | 106 | 1 | 1/2 | 
-| daytemp4 | day temperature T4 | uint8 (>=0<=127) | C | true | HC | 107 | 1 | 1/2 | 
-| nighttemp | night temperature T1 | uint8 (>=0<=127) | C | true | HC | 54 | 1 | 1/2 | 
-| switchtime | program switchtime | string |   | true | HC | 108 | 8 | 1 | 
+| offtemp | temperature when mode is off | uint8 (>=0<=127) | C | true | HC | 106 | 1 | 1/2 | 
+| daytemp2 | day temperature T2 | uint8 (>=0<=127) | C | true | HC | 107 | 1 | 1/2 | 
+| daytemp3 | day temperature T3 | uint8 (>=0<=127) | C | true | HC | 108 | 1 | 1/2 | 
+| daytemp4 | day temperature T4 | uint8 (>=0<=127) | C | true | HC | 109 | 1 | 1/2 | 
+| nighttemp | night temperature T1 | uint8 (>=0<=127) | C | true | HC | 56 | 1 | 1/2 | 
+| switchtime | program switchtime | string |   | true | HC | 110 | 8 | 1 | 
 
 ### RC25
 | shortname | fullname | type | uom | writeable | tag type | register offset | register count | scale factor |
@@ -5090,8 +5127,8 @@
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [night\|day\|auto] |   | true | HC | 3 | 1 | 1 | 
 | modetype | mode type | enum [night\|day] |   | false | HC | 4 | 1 | 1 | 
-| daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 53 | 1 | 1/2 | 
-| nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 54 | 1 | 1/2 | 
+| daytemp | day temperature | uint8 (>=0<=127) | C | true | HC | 55 | 1 | 1/2 | 
+| nighttemp | night temperature | uint8 (>=0<=127) | C | true | HC | 56 | 1 | 1/2 | 
 | program | program | enum [family\|morning\|evening\|am\|pm\|midday\|singles\|seniors] |   | true | HC | 25 | 1 | 1 | 
 | minflowtemp | min flow temperature | uint8 (>=0<=254) | C | true | HC | 11 | 1 | 1 | 
 | maxflowtemp | max flow temperature | uint8 (>=0<=254) | C | true | HC | 12 | 1 | 1 | 
@@ -5178,8 +5215,8 @@
 | cooloffdelay | cooling off delay | uint8 (>=1<=48) | hours | true | HC | 50 | 1 | 1 | 
 | switchprogmode | switch program mode | enum [level\|absolute] |   | true | HC | 51 | 1 | 1 | 
 | redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 52 | 1 | 1/2 | 
-| solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | -1 | 1 | 1 | 
-| currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | -1 | 1 | 1/10 | 
+| solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | 53 | 1 | 1 | 
+| currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | 54 | 1 | 1/10 | 
 | mode | operating mode | enum [off\|normal\|comfort\|auto\|own prog] |   | true | DHW | 0 | 1 | 1 | 
 | settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 1 | 1 | 1 | 
 | settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
@@ -5214,40 +5251,40 @@
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [night\|day\|auto] |   | true | HC | 3 | 1 | 1 | 
 | modetype | mode type | enum [night\|day] |   | false | HC | 4 | 1 | 1 | 
-| daytemp | day temperature | uint8 (>=10<=30) | C | true | HC | 53 | 1 | 1/2 | 
-| nighttemp | night temperature | uint8 (>=10<=30) | C | true | HC | 54 | 1 | 1/2 | 
+| daytemp | day temperature | uint8 (>=10<=30) | C | true | HC | 55 | 1 | 1/2 | 
+| nighttemp | night temperature | uint8 (>=10<=30) | C | true | HC | 56 | 1 | 1/2 | 
 | designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 | 
 | offsettemp | offset temperature | int8 (>=-5<=5) | C | true | HC | 10 | 1 | 1/2 | 
-| holidaytemp | holiday temperature | uint8 (>=5<=30) | C | true | HC | 55 | 1 | 1/2 | 
+| holidaytemp | holiday temperature | uint8 (>=5<=30) | C | true | HC | 57 | 1 | 1/2 | 
 | targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 | 
 | summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1 | 
 | summermode | summer mode | enum [winter\|summer] |   | false | HC | 22 | 1 | 1 | 
-| holidaymode | holiday mode | boolean |   | false | HC | 56 | 1 | 1 | 
+| holidaymode | holiday mode | boolean |   | false | HC | 58 | 1 | 1 | 
 | nofrosttemp | nofrost temperature | int8 (>=-20<=10) | C | true | HC | 17 | 1 | 1 | 
 | nofrostmode | nofrost mode | enum [off\|outdoor\|room] |   | true | HC | 16 | 1 | 1 | 
 | roominfluence | room influence | uint8 (>=0<=10) | C | true | HC | 13 | 1 | 1 | 
 | minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 | 
 | maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 | 
-| flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | C | true | HC | 57 | 1 | 1 | 
+| flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | C | true | HC | 59 | 1 | 1 | 
 | heatingtype | heating type | enum [off\|radiator\|convector\|floor] |   | true | HC | 19 | 1 | 1 | 
 | reducemode | reduce mode | enum [nofrost\|reduce\|room\|outdoor] |   | true | HC | 30 | 1 | 1 | 
 | controlmode | control mode | enum [outdoor\|room] |   | true | HC | 24 | 1 | 1 | 
 | control | control device | enum [off\|RC20\|RC3x] |   | true | HC | 40 | 1 | 1 | 
-| holidays | holiday dates | string |   | true | HC | 58 | 13 | 1 | 
-| vacations | vacation dates | string |   | true | HC | 71 | 13 | 1 | 
+| holidays | holiday dates | string |   | true | HC | 60 | 13 | 1 | 
+| vacations | vacation dates | string |   | true | HC | 73 | 13 | 1 | 
 | program | program | enum [own 1\|family\|morning\|evening\|am\|pm\|midday\|singles\|seniors\|new\|own 2] |   | true | HC | 25 | 1 | 1 | 
-| pause | pause time | uint8 (>=0<=99) | hours | true | HC | 84 | 1 | 1 | 
-| party | party time | uint8 (>=0<=99) | hours | true | HC | 85 | 1 | 1 | 
+| pause | pause time | uint8 (>=0<=99) | hours | true | HC | 86 | 1 | 1 | 
+| party | party time | uint8 (>=0<=99) | hours | true | HC | 87 | 1 | 1 | 
 | tempautotemp | temporary set temperature automode | uint8 (>=0<=30) | C | true | HC | 26 | 1 | 1/2 | 
 | noreducetemp | no reduce below temperature | int8 (>=-31<=10) | C | true | HC | 31 | 1 | 1 | 
 | reducetemp | off/reduce switch temperature | int8 (>=-20<=10) | C | true | HC | 32 | 1 | 1 | 
-| vacreducetemp | vacations off/reduce switch temperature | int8 (>=-20<=10) | C | true | HC | 86 | 1 | 1 | 
-| vacreducemode | vacations reduce mode | enum [nofrost\|reduce\|room\|outdoor] |   | true | HC | 87 | 1 | 1 | 
+| vacreducetemp | vacations off/reduce switch temperature | int8 (>=-20<=10) | C | true | HC | 88 | 1 | 1 | 
+| vacreducemode | vacations reduce mode | enum [nofrost\|reduce\|room\|outdoor] |   | true | HC | 89 | 1 | 1 | 
 | remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 41 | 1 | 1/10 | 
 | dhwprio | dhw priority | boolean |   | true | HC | 33 | 1 | 1 | 
 | switchonoptimization | switch-on optimization | boolean |   | true | HC | 29 | 1 | 1 | 
-| switchtime1 | own1 program switchtime | string |   | true | HC | 88 | 8 | 1 | 
-| switchtime2 | own2 program switchtime | string |   | true | HC | 96 | 8 | 1 | 
+| switchtime1 | own1 program switchtime | string |   | true | HC | 90 | 8 | 1 | 
+| switchtime2 | own2 program switchtime | string |   | true | HC | 98 | 8 | 1 | 
 | mode | operating mode | enum [off\|on\|auto] |   | true | DHW | 0 | 1 | 1 | 
 | circmode | circulation pump mode | enum [off\|on\|auto] |   | true | DHW | 3 | 1 | 1 | 
 | progmode | program | enum [std prog\|own prog] |   | true | DHW | 12 | 1 | 1 | 
@@ -5280,40 +5317,40 @@
 | haclimate | mqtt discovery current room temperature | enum [selTemp\|roomTemp] (>=5<=30) |   | false | HC | 2 | 1 | 1 | 
 | mode | operating mode | enum [night\|day\|auto] |   | true | HC | 3 | 1 | 1 | 
 | modetype | mode type | enum [night\|day] |   | false | HC | 4 | 1 | 1 | 
-| daytemp | day temperature | uint8 (>=10<=30) | C | true | HC | 53 | 1 | 1/2 | 
-| nighttemp | night temperature | uint8 (>=10<=30) | C | true | HC | 54 | 1 | 1/2 | 
+| daytemp | day temperature | uint8 (>=10<=30) | C | true | HC | 55 | 1 | 1/2 | 
+| nighttemp | night temperature | uint8 (>=10<=30) | C | true | HC | 56 | 1 | 1/2 | 
 | designtemp | design temperature | uint8 (>=30<=90) | C | true | HC | 9 | 1 | 1 | 
 | offsettemp | offset temperature | int8 (>=-5<=5) | C | true | HC | 10 | 1 | 1/2 | 
-| holidaytemp | holiday temperature | uint8 (>=5<=30) | C | true | HC | 55 | 1 | 1/2 | 
+| holidaytemp | holiday temperature | uint8 (>=5<=30) | C | true | HC | 57 | 1 | 1/2 | 
 | targetflowtemp | target flow temperature | uint8 (>=0<=254) | C | false | HC | 18 | 1 | 1 | 
 | summertemp | summer temperature | uint8 (>=9<=25) | C | true | HC | 8 | 1 | 1 | 
 | summermode | summer mode | enum [winter\|summer] |   | false | HC | 22 | 1 | 1 | 
-| holidaymode | holiday mode | boolean |   | false | HC | 56 | 1 | 1 | 
+| holidaymode | holiday mode | boolean |   | false | HC | 58 | 1 | 1 | 
 | nofrosttemp | nofrost temperature | int8 (>=-20<=10) | C | true | HC | 17 | 1 | 1 | 
 | nofrostmode | nofrost mode | enum [off\|outdoor\|room] |   | true | HC | 16 | 1 | 1 | 
 | roominfluence | room influence | uint8 (>=0<=10) | C | true | HC | 13 | 1 | 1 | 
 | minflowtemp | min flow temperature | uint8 (>=5<=70) | C | true | HC | 11 | 1 | 1 | 
 | maxflowtemp | max flow temperature | uint8 (>=30<=90) | C | true | HC | 12 | 1 | 1 | 
-| flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | C | true | HC | 57 | 1 | 1 | 
+| flowtempoffset | flow temperature offset for mixer | uint8 (>=0<=20) | C | true | HC | 59 | 1 | 1 | 
 | heatingtype | heating type | enum [off\|radiator\|convector\|floor] |   | true | HC | 19 | 1 | 1 | 
 | reducemode | reduce mode | enum [nofrost\|reduce\|room\|outdoor] |   | true | HC | 30 | 1 | 1 | 
 | controlmode | control mode | enum [outdoor\|room] |   | true | HC | 24 | 1 | 1 | 
 | control | control device | enum [off\|RC20\|RC3x] |   | true | HC | 40 | 1 | 1 | 
-| holidays | holiday dates | string |   | true | HC | 58 | 13 | 1 | 
-| vacations | vacation dates | string |   | true | HC | 71 | 13 | 1 | 
+| holidays | holiday dates | string |   | true | HC | 60 | 13 | 1 | 
+| vacations | vacation dates | string |   | true | HC | 73 | 13 | 1 | 
 | program | program | enum [own 1\|family\|morning\|evening\|am\|pm\|midday\|singles\|seniors\|new\|own 2] |   | true | HC | 25 | 1 | 1 | 
-| pause | pause time | uint8 (>=0<=99) | hours | true | HC | 84 | 1 | 1 | 
-| party | party time | uint8 (>=0<=99) | hours | true | HC | 85 | 1 | 1 | 
+| pause | pause time | uint8 (>=0<=99) | hours | true | HC | 86 | 1 | 1 | 
+| party | party time | uint8 (>=0<=99) | hours | true | HC | 87 | 1 | 1 | 
 | tempautotemp | temporary set temperature automode | uint8 (>=0<=30) | C | true | HC | 26 | 1 | 1/2 | 
 | noreducetemp | no reduce below temperature | int8 (>=-31<=10) | C | true | HC | 31 | 1 | 1 | 
 | reducetemp | off/reduce switch temperature | int8 (>=-20<=10) | C | true | HC | 32 | 1 | 1 | 
-| vacreducetemp | vacations off/reduce switch temperature | int8 (>=-20<=10) | C | true | HC | 86 | 1 | 1 | 
-| vacreducemode | vacations reduce mode | enum [nofrost\|reduce\|room\|outdoor] |   | true | HC | 87 | 1 | 1 | 
+| vacreducetemp | vacations off/reduce switch temperature | int8 (>=-20<=10) | C | true | HC | 88 | 1 | 1 | 
+| vacreducemode | vacations reduce mode | enum [nofrost\|reduce\|room\|outdoor] |   | true | HC | 89 | 1 | 1 | 
 | remotetemp | room temperature from remote | cmd [] (>=-1<=101) | C | true | HC | 41 | 1 | 1/10 | 
 | dhwprio | dhw priority | boolean |   | true | HC | 33 | 1 | 1 | 
 | switchonoptimization | switch-on optimization | boolean |   | true | HC | 29 | 1 | 1 | 
-| switchtime1 | own1 program switchtime | string |   | true | HC | 88 | 8 | 1 | 
-| switchtime2 | own2 program switchtime | string |   | true | HC | 96 | 8 | 1 | 
+| switchtime1 | own1 program switchtime | string |   | true | HC | 90 | 8 | 1 | 
+| switchtime2 | own2 program switchtime | string |   | true | HC | 98 | 8 | 1 | 
 | mode | operating mode | enum [off\|on\|auto] |   | true | DHW | 0 | 1 | 1 | 
 | circmode | circulation pump mode | enum [off\|on\|auto] |   | true | DHW | 3 | 1 | 1 | 
 | progmode | program | enum [std prog\|own prog] |   | true | DHW | 12 | 1 | 1 | 
@@ -5427,8 +5464,8 @@
 | cooloffdelay | cooling off delay | uint8 (>=1<=48) | hours | true | HC | 50 | 1 | 1 | 
 | switchprogmode | switch program mode | enum [level\|absolute] |   | true | HC | 51 | 1 | 1 | 
 | redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 52 | 1 | 1/2 | 
-| solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | -1 | 1 | 1 | 
-| currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | -1 | 1 | 1/10 | 
+| solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | 53 | 1 | 1 | 
+| currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | 54 | 1 | 1/10 | 
 | mode | operating mode | enum [normal\|comfort\|eco+] |   | true | DHW | 0 | 1 | 1 | 
 | settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 1 | 1 | 1 | 
 | settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
@@ -5520,8 +5557,8 @@
 | cooloffdelay | cooling off delay | uint8 (>=1<=48) | hours | true | HC | 50 | 1 | 1 | 
 | switchprogmode | switch program mode | enum [level\|absolute] |   | true | HC | 51 | 1 | 1 | 
 | redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 52 | 1 | 1/2 | 
-| solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | -1 | 1 | 1 | 
-| currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | -1 | 1 | 1/10 | 
+| solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | 53 | 1 | 1 | 
+| currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | 54 | 1 | 1/10 | 
 | mode | operating mode | enum [off\|eco+\|eco\|comfort\|auto] |   | true | DHW | 0 | 1 | 1 | 
 | settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 1 | 1 | 1 | 
 | settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
@@ -5623,8 +5660,8 @@
 | cooloffdelay | cooling off delay | uint8 (>=1<=48) | hours | true | HC | 50 | 1 | 1 | 
 | switchprogmode | switch program mode | enum [level\|absolute] |   | true | HC | 51 | 1 | 1 | 
 | redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 52 | 1 | 1/2 | 
-| solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | -1 | 1 | 1 | 
-| currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | -1 | 1 | 1/10 | 
+| solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | 53 | 1 | 1 | 
+| currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | 54 | 1 | 1/10 | 
 | mode | operating mode | enum [off\|eco+\|eco\|comfort\|auto] |   | true | DHW | 0 | 1 | 1 | 
 | settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 1 | 1 | 1 | 
 | settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
