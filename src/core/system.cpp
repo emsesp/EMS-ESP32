@@ -789,7 +789,10 @@ void System::system_check() {
         last_system_check_ = uuid::get_uptime();
 
 #ifndef EMSESP_STANDALONE
-#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
+#if defined(CONFIG_IDF_TARGET_ESP32)
+    uint8_t raw = temprature_sens_read();
+    temperature_ = (raw - 32) / 1.8f; // convert to Celsius
+#elif CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
 #if ESP_IDF_VERSION_MAJOR < 5
         temp_sensor_read_celsius(&temperature_);
 #else

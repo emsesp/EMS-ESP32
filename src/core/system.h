@@ -39,7 +39,12 @@
 #include <uuid/log.h>
 #include <PButton.h>
 
-#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
+#if defined(CONFIG_IDF_TARGET_ESP32)
+// there is no official API available on the original ESP32
+extern "C" {
+uint8_t temprature_sens_read();
+}
+#elif CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
 #if ESP_IDF_VERSION_MAJOR < 5
 #include "driver/temp_sensor.h"
 #else
@@ -331,7 +336,7 @@ class System {
         test_set_all_active_ = n;
     }
 
-#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32
     float temperature() {
         return temperature_;
     }
@@ -435,8 +440,8 @@ class System {
 #if ESP_IDF_VERSION_MAJOR >= 5
     temperature_sensor_handle_t temperature_handle_ = NULL;
 #endif
-    float temperature_ = 0;
 #endif
+    float temperature_ = 0;
 };
 
 } // namespace emsesp
