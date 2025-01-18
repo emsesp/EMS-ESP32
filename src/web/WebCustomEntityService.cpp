@@ -517,25 +517,25 @@ void WebCustomEntityService::generate_value_web(JsonObject output, const bool is
         }
         case DeviceValueType::INT8:
             if ((int8_t)entity.value != EMS_VALUE_INT8_NOTSET) {
-                obj["v"] = Helpers::transformNumFloat(entity.factor * (int8_t)entity.value, 0);
+                obj["v"] = Helpers::transformNumFloat(entity.factor * (int8_t)entity.value);
                 include  = true;
             }
             break;
         case DeviceValueType::UINT8:
             if ((uint8_t)entity.value != EMS_VALUE_UINT8_NOTSET) {
-                obj["v"] = Helpers::transformNumFloat(entity.factor * (uint8_t)entity.value, 0);
+                obj["v"] = Helpers::transformNumFloat(entity.factor * (uint8_t)entity.value);
                 include  = true;
             }
             break;
         case DeviceValueType::INT16:
             if ((int16_t)entity.value != EMS_VALUE_INT16_NOTSET) {
-                obj["v"] = Helpers::transformNumFloat(entity.factor * (int16_t)entity.value, 0);
+                obj["v"] = Helpers::transformNumFloat(entity.factor * (int16_t)entity.value);
                 include  = true;
             }
             break;
         case DeviceValueType::UINT16:
             if ((uint16_t)entity.value != EMS_VALUE_UINT16_NOTSET) {
-                obj["v"] = Helpers::transformNumFloat(entity.factor * (uint16_t)entity.value, 0);
+                obj["v"] = Helpers::transformNumFloat(entity.factor * (uint16_t)entity.value);
                 include  = true;
             }
             break;
@@ -543,7 +543,7 @@ void WebCustomEntityService::generate_value_web(JsonObject output, const bool is
         case DeviceValueType::TIME:
         case DeviceValueType::UINT32:
             if (entity.value != EMS_VALUE_UINT24_NOTSET) {
-                obj["v"] = Helpers::transformNumFloat(entity.factor * entity.value, 0);
+                obj["v"] = Helpers::transformNumFloat(entity.factor * entity.value);
                 include  = true;
             }
             break;

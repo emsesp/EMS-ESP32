@@ -130,8 +130,8 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
         root["free_psram"] = ESP.getFreePsram() / 1024;
     }
     root["model"] = EMSESP::system_.getBBQKeesGatewayDetails();
-#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
-    root["temperature"] = EMSESP::system_.temperature();
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32
+    root["temperature"] = Helpers::transformNumFloat(EMSESP::system_.temperature(), 0, EMSESP::system_.fahrenheit() ? 2 : 0); // only 2 decimal places
 #endif
 
     // check for a factory partition first

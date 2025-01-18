@@ -145,7 +145,7 @@ void WebDataService::sensor_data(AsyncWebServerRequest * request) {
             obj["t"]       = sensor.type();
 
             if (sensor.type() != AnalogSensor::AnalogType::NOTUSED) {
-                obj["v"] = Helpers::transformNumFloat(sensor.value(), 0); // is optional and is a float
+                obj["v"] = Helpers::transformNumFloat(sensor.value()); // is optional and is a float
             } else {
                 obj["v"] = 0; // must have a value for web sorting to work
             }
@@ -423,11 +423,11 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
                 dv["id"]      = "00" + sensor.name();
 #if CONFIG_IDF_TARGET_ESP32
                 if (sensor.type() == AnalogSensor::AnalogType::DIGITAL_OUT && (sensor.gpio() == 25 || sensor.gpio() == 26)) {
-                    obj["v"] = Helpers::transformNumFloat(sensor.value(), 0);
+                    obj["v"] = Helpers::transformNumFloat(sensor.value());
                 } else
 #elif CONFIG_IDF_TARGET_ESP32S2
                 if (sensor.type() == AnalogSensor::AnalogType::DIGITAL_OUT && (sensor.gpio() == 17 || sensor.gpio() == 18)) {
-                    obj["v"] = Helpers::transformNumFloat(sensor.value(), 0);
+                    obj["v"] = Helpers::transformNumFloat(sensor.value());
                 } else
 #endif
                     if (sensor.type() == AnalogSensor::AnalogType::DIGITAL_OUT || sensor.type() == AnalogSensor::AnalogType::DIGITAL_IN) {
@@ -437,7 +437,7 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
                     l.add(Helpers::render_boolean(s, false, true));
                     l.add(Helpers::render_boolean(s, true, true));
                 } else {
-                    dv["v"] = Helpers::transformNumFloat(sensor.value(), 0);
+                    dv["v"] = Helpers::transformNumFloat(sensor.value());
                     dv["u"] = sensor.uom();
                 }
                 if (sensor.type() == AnalogSensor::AnalogType::COUNTER || sensor.type() >= AnalogSensor::AnalogType::DIGITAL_OUT) {

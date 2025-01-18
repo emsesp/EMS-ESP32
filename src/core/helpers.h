@@ -51,7 +51,7 @@ class Helpers {
     static uint16_t    string2minutes(const std::string & str);
     static float       numericoperator2scalefactor(int8_t numeric_operator);
 
-    static double transformNumFloat(double value, const int8_t numeric_operator, const uint8_t fahrenheit = 0);
+    static double transformNumFloat(double value, const int8_t numeric_operator = 0, const uint8_t fahrenheit = 0);
 
     static std::string toLower(std::string const & s);
     static std::string toUpper(std::string const & s);
