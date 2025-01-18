@@ -100,7 +100,12 @@ const HardwareStatus = () => {
               data.cpu_freq_mhz +
               ' Mhz' +
               // bit of a hack : if the CPU temp is higher than 90 (=32 Fahrenheit if using Celsius), show F, otherwise C
-              (data.temperature ? ', T: ' + data.temperature + ' °' + (data.temperature > 90 ? 'F' : 'C') : '')
+              (data.temperature
+                ? ', T: ' +
+                  data.temperature +
+                  ' °' +
+                  (data.temperature > 90 ? 'F' : 'C')
+                : '')
             }
           />
         </ListItem>
