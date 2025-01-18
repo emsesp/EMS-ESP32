@@ -33,7 +33,7 @@ char * Helpers::hextoa(char * result, const uint8_t value) {
     return result;
 }
 
-// same as above but to a hex string
+// same as hextoa but uses to a hex std::string
 std::string Helpers::hextoa(const uint8_t value, bool prefix) {
     char buf[3];
     if (prefix) {
