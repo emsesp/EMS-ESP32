@@ -29,9 +29,6 @@
 
 #ifndef EMSESP_STANDALONE
 #include <esp_wifi.h>
-#if CONFIG_IDF_TARGET_ESP32
-// #include <esp_bt.h>
-#endif
 #include <ETH.h>
 #include <uuid/syslog.h>
 #endif
