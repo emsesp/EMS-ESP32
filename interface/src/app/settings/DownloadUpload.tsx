@@ -9,7 +9,7 @@ import { API, callAction } from 'api/app';
 
 import { useRequest } from 'alova/client';
 import type { APIcall } from 'app/main/types';
-import RestartMonitor from 'app/status/RestartMonitor';
+import SystemMonitor from 'app/status/SystemMonitor';
 import {
   FormLoader,
   SectionContent,
@@ -123,7 +123,7 @@ const DownloadUpload = () => {
   };
 
   return (
-    <SectionContent>{restarting ? <RestartMonitor /> : content()}</SectionContent>
+    <SectionContent>{restarting ? <SystemMonitor /> : content()}</SectionContent>
   );
 };
 

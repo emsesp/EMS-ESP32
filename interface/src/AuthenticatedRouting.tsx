@@ -58,7 +58,7 @@ const AuthenticatedRouting = () => {
             <Route path="/settings/ntp" element={<NTPSettings />} />
             <Route path="/settings/ap" element={<APSettings />} />
             <Route path="/settings/modules" element={<Modules />} />
-            <Route path="/settings/upload" element={<DownloadUpload />} />
+            <Route path="/settings/downloadUpload" element={<DownloadUpload />} />
 
             <Route path="/settings/network/*" element={<Network />} />
             <Route path="/settings/security/*" element={<Security />} />

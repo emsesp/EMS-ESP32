@@ -38,7 +38,7 @@ import {
 import { useTheme } from '@table-library/react-table-library/theme';
 import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova/client';
-import RestartMonitor from 'app/status/RestartMonitor';
+import SystemMonitor from 'app/status/SystemMonitor';
 import {
   BlockNavigation,
   ButtonRow,
@@ -737,7 +737,7 @@ const Customizations = () => {
   return (
     <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
-      {restarting ? <RestartMonitor /> : renderContent()}
+      {restarting ? <SystemMonitor /> : renderContent()}
       {selectedDeviceEntity && (
         <SettingsCustomizationsDialog
           open={dialogOpen}

@@ -160,7 +160,8 @@ void WebCustomizationService::reset_customization(AsyncWebServerRequest * reques
     if (LittleFS.remove(EMSESP_CUSTOMIZATION_FILE)) {
         AsyncWebServerResponse * response = request->beginResponse(205); // restart needed
         request->send(response);
-        EMSESP::system_.restart_pending(true);
+        emsesp::EMSESP::system_.systemStatus(
+            emsesp::SYSTEM_STATUS::SYSTEM_STATUS_PENDING_RESTART); // will be handled by the main loop. We use pending for the Web's SystemMonitor
         return;
     }
 

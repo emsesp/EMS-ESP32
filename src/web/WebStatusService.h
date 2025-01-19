@@ -27,7 +27,7 @@ class WebStatusService {
     bool exportData(JsonObject root, std::string & type);
     bool getCustomSupport(JsonObject root);
     bool uploadURL(const char * url);
-
+    bool setSystemStatus(const char * status);
     void allvalues(JsonObject output);
 };
 

@@ -70,7 +70,6 @@ let settings = {
 let system_status = {
   emsesp_version: 'XX.XX.XX', // defined later
   bus_status: 0,
-  // status: 2,
   uptime: 77186,
   bus_uptime: 77121,
   num_devices: 2,
@@ -108,7 +107,8 @@ let system_status = {
   has_loader: true,
   model: '',
   // model: 'BBQKees Electronics EMS Gateway E32 V2 (E32 V2.0 P3/2024011)',
-  status: 'downloading'
+  // status: 0,
+  status: 3
 };
 
 let VERSION_IS_UPGRADEABLE: boolean;
