@@ -33,7 +33,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/code-frame@npm:^7.0.0, @babel/code-frame@npm:^7.22.13, @babel/code-frame@npm:^7.25.9, @babel/code-frame@npm:^7.26.0, @babel/code-frame@npm:^7.26.2":
+"@babel/code-frame@npm:^7.0.0, @babel/code-frame@npm:^7.25.9, @babel/code-frame@npm:^7.26.0, @babel/code-frame@npm:^7.26.2":
   version: 7.26.2
   resolution: "@babel/code-frame@npm:7.26.2"
   dependencies:
@@ -766,7 +766,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jridgewell/sourcemap-codec@npm:^1.4.10, @jridgewell/sourcemap-codec@npm:^1.4.14, @jridgewell/sourcemap-codec@npm:^1.4.15":
+"@jridgewell/sourcemap-codec@npm:^1.4.10, @jridgewell/sourcemap-codec@npm:^1.4.14, @jridgewell/sourcemap-codec@npm:^1.5.0":
   version: 1.5.0
   resolution: "@jridgewell/sourcemap-codec@npm:1.5.0"
   checksum: 10c0/2eb864f276eb1096c3c11da3e9bb518f6d9fc0023c78344cdc037abadc725172c70314bdb360f2d4b7bffec7f5d657ce006816bc5d4ecb35e61b66132db00c18
@@ -1014,11 +1014,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@preact/preset-vite@npm:^2.9.4":
-  version: 2.9.4
-  resolution: "@preact/preset-vite@npm:2.9.4"
+"@preact/preset-vite@npm:^2.10.0":
+  version: 2.10.0
+  resolution: "@preact/preset-vite@npm:2.10.0"
   dependencies:
-    "@babel/code-frame": "npm:^7.22.13"
     "@babel/plugin-transform-react-jsx": "npm:^7.22.15"
     "@babel/plugin-transform-react-jsx-development": "npm:^7.22.5"
     "@prefresh/vite": "npm:^2.4.1"
@@ -1026,14 +1025,11 @@ __metadata:
     babel-plugin-transform-hook-names: "npm:^1.0.2"
     debug: "npm:^4.3.4"
     kolorist: "npm:^1.8.0"
-    magic-string: "npm:0.30.5"
-    node-html-parser: "npm:^6.1.10"
-    source-map: "npm:^0.7.4"
-    stack-trace: "npm:^1.0.0-pre2"
+    vite-prerender-plugin: "npm:^0.5.3"
   peerDependencies:
     "@babel/core": 7.x
     vite: 2.x || 3.x || 4.x || 5.x || 6.x
-  checksum: 10c0/a42aab866ef1ea4d2dac82be3a5b5c207c5e030d429cc5dbe88a259da0a52a1fd8f21f77d1ce2bef82a803b854f7653a579aed0aa7eca371108e5308ba43bc2f
+  checksum: 10c0/bb8ab0577fb3e91baab151b9682514a18d244efb97b5f26c3aed3878335603aa7f22696050e96c7eb7261456382f966b27594960a2251d5b5ee354796407023f
   languageName: node
   linkType: hard
 
@@ -1595,7 +1591,7 @@ __metadata:
     "@mui/icons-material": "npm:^6.4.0"
     "@mui/material": "npm:^6.4.0"
     "@preact/compat": "npm:^18.3.1"
-    "@preact/preset-vite": "npm:^2.9.4"
+    "@preact/preset-vite": "npm:^2.10.0"
     "@table-library/react-table-library": "npm:4.1.7"
     "@trivago/prettier-plugin-sort-imports": "npm:^5.2.1"
     "@types/formidable": "npm:^3"
@@ -1622,7 +1618,7 @@ __metadata:
     typesafe-i18n: "npm:^5.26.2"
     typescript: "npm:^5.7.3"
     typescript-eslint: "npm:8.20.0"
-    vite: "npm:^6.0.7"
+    vite: "npm:^6.0.9"
     vite-plugin-imagemin: "npm:^0.6.1"
     vite-tsconfig-paths: "npm:^5.1.4"
   languageName: unknown
@@ -4482,7 +4478,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"kolorist@npm:^1.8.0":
+"kolorist@npm:^1.6.0, kolorist@npm:^1.8.0":
   version: 1.8.0
   resolution: "kolorist@npm:1.8.0"
   checksum: 10c0/73075db44a692bf6c34a649f3b4b3aea4993b84f6b754cbf7a8577e7c7db44c0bad87752bd23b0ce533f49de2244ce2ce03b7b1b667a85ae170a94782cc50f9b
@@ -4634,12 +4630,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"magic-string@npm:0.30.5":
-  version: 0.30.5
-  resolution: "magic-string@npm:0.30.5"
+"magic-string@npm:^0.30.6":
+  version: 0.30.17
+  resolution: "magic-string@npm:0.30.17"
   dependencies:
-    "@jridgewell/sourcemap-codec": "npm:^1.4.15"
-  checksum: 10c0/38ac220ca7539e96da7ea2f38d85796bdf5c69b6bcae728c4bc2565084e6dc326b9174ee9770bea345cf6c9b3a24041b767167874fab5beca874d2356a9d1520
+    "@jridgewell/sourcemap-codec": "npm:^1.5.0"
+  checksum: 10c0/16826e415d04b88378f200fe022b53e638e3838b9e496edda6c0e086d7753a44a6ed187adc72d19f3623810589bf139af1a315541cd6a26ae0771a0193eaf7b8
   languageName: node
   linkType: hard
 
@@ -4960,7 +4956,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-html-parser@npm:^6.1.10":
+"node-html-parser@npm:^6.1.12":
   version: 6.1.13
   resolution: "node-html-parser@npm:6.1.13"
   dependencies:
@@ -6091,6 +6087,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"simple-code-frame@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "simple-code-frame@npm:1.3.0"
+  dependencies:
+    kolorist: "npm:^1.6.0"
+  checksum: 10c0/f74332d839689b30deddc079f52845c05e455160888c2076056dd070d0088b8e84a0f36b6d273d38a8698e738dc5f34bbe6ecdcc86146b9d4250c67374f975c5
+  languageName: node
+  linkType: hard
+
 "slash@npm:^3.0.0":
   version: 3.0.0
   resolution: "slash@npm:3.0.0"
@@ -6824,6 +6829,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"vite-prerender-plugin@npm:^0.5.3":
+  version: 0.5.3
+  resolution: "vite-prerender-plugin@npm:0.5.3"
+  dependencies:
+    magic-string: "npm:^0.30.6"
+    node-html-parser: "npm:^6.1.12"
+    simple-code-frame: "npm:^1.3.0"
+    source-map: "npm:^0.7.4"
+    stack-trace: "npm:^1.0.0-pre2"
+  checksum: 10c0/9a07b851c50e5ee463351fe6db93801d819ba822c8a4628e1bfa175e367730d1987fac4260f51b004cefed4ca459e8275ba2b3a9615186c3498f6683509207ae
+  languageName: node
+  linkType: hard
+
 "vite-tsconfig-paths@npm:^5.1.4":
   version: 5.1.4
   resolution: "vite-tsconfig-paths@npm:5.1.4"
@@ -6840,9 +6858,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^6.0.7":
-  version: 6.0.7
-  resolution: "vite@npm:6.0.7"
+"vite@npm:^6.0.9":
+  version: 6.0.9
+  resolution: "vite@npm:6.0.9"
   dependencies:
     esbuild: "npm:^0.24.2"
     fsevents: "npm:~2.3.3"
@@ -6888,7 +6906,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10c0/ae81047b4290a7206b9394a39a782d509e9610462e7946422ba22d5bc615b5a322c07e33d7bf9dd0b3312ec3f5c63353b725913d1519324bfdf539b4f1e03f52
+  checksum: 10c0/b36f0f51318d6c33184da31e280862f23ef89712884e088b864c9edf112d65f6cf6795f201916e370a4434575fd3e2868f07f3bd63c6bdd5c2ae2295fa7f6d8a
   languageName: node
   linkType: hard
 
