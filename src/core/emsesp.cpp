@@ -329,7 +329,7 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
     shell.println();
 }
 
-// Dump all entities to Serial out
+// Dump all entities to Serial out - used to create the dump_entities.csv file
 // this is intended to run within the OS with lots of available memory!
 #if defined(EMSESP_STANDALONE)
 void EMSESP::dump_all_entities(uuid::console::Shell & shell) {
@@ -367,7 +367,7 @@ void EMSESP::dump_all_entities(uuid::console::Shell & shell) {
                 // for testing the mixer use ... if (device.product_id == 69) {
                 emsdevices.push_back(
                     EMSFactory::add(device.device_type, device_id, device.product_id, "1.0", device.default_name, device.flags, EMSdevice::Brand::NO_BRAND));
-                emsdevices.back()->dump_devicevalue_info();
+                emsdevices.back()->dump_devicevalue_info(); // print out the entities
             }
         }
     }
