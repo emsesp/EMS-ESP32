@@ -329,7 +329,7 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
     shell.println();
 }
 
-// Dump all entities to Serial out
+// Dump all entities to Serial out - used to create the dump_entities.csv file
 // this is intended to run within the OS with lots of available memory!
 #if defined(EMSESP_STANDALONE)
 void EMSESP::dump_all_entities(uuid::console::Shell & shell) {
@@ -367,7 +367,7 @@ void EMSESP::dump_all_entities(uuid::console::Shell & shell) {
                 // for testing the mixer use ... if (device.product_id == 69) {
                 emsdevices.push_back(
                     EMSFactory::add(device.device_type, device_id, device.product_id, "1.0", device.default_name, device.flags, EMSdevice::Brand::NO_BRAND));
-                emsdevices.back()->dump_devicevalue_info();
+                emsdevices.back()->dump_devicevalue_info(); // print out the entities
             }
         }
     }
@@ -1734,29 +1734,34 @@ void EMSESP::loop() {
     esp32React.loop(); // web services
     system_.loop();    // does LED and checks system health, and syslog service
 
-    // if we're doing an OTA upload, skip everything except from console refresh
-    static bool upload_status = true; // ready for any OTA uploads
-    if (!system_.upload_isrunning()) {
+    // run the loop, unless we're in the middle of an OTA upload
+    if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_NORMAL) {
         // service loops
         webLogService.loop();       // log in Web UI
         rxservice_.loop();          // process any incoming Rx telegrams
         shower_.loop();             // check for shower on/off
         temperaturesensor_.loop();  // read sensor temperatures
         analogsensor_.loop();       // read analog sensor values
-        publish_all_loop();         // with HA messages in parts to avoid flooding the mqtt queue
+        publish_all_loop();         // with HA messages in parts to avoid flooding the MQTT queue
         mqtt_.loop();               // sends out anything in the MQTT queue
         webModulesService.loop();   // loop through the external library modules
         if (system_.PSram() == 0) { // run non-async if there is no PSRAM available
             webSchedulerService.loop();
         }
-
         scheduled_fetch_values(); // force a query on the EMS devices to fetch latest data at a set interval (1 min)
+    }
 
-    } else if (upload_status) {
-        // start an upload from a URL, if it exists. This is blocking.
-        if (!system_.uploadFirmwareURL()) {
-            upload_status = false; // abort all other attempts, until reset (after a restart normally)
-            system_.upload_isrunning(false);
+    if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_PENDING_UPLOAD) {
+        // start an upload from a URL, assuming if the URL exists from a previous pass.
+        // Note this function is synchronous and blocking.
+        if (system_.uploadFirmwareURL()) {
+            // firmware has been uploaded, set status to uploading
+            EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING);
+        } else {
+            // if it fails to pass, reset
+            Shell::loop_all(); // flush log buffers so latest error message are shown in console
+            system_.uploadFirmwareURL("reset");
+            EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
         }
     }
 

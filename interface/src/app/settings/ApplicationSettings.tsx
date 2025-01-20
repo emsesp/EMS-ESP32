@@ -19,7 +19,7 @@ import {
 import { readSystemStatus } from 'api/system';
 
 import { useRequest } from 'alova/client';
-import RestartMonitor from 'app/status/RestartMonitor';
+import SystemMonitor from 'app/status/SystemMonitor';
 import type { ValidateFieldsError } from 'async-validator';
 import {
   BlockFormControlLabel,
@@ -859,7 +859,7 @@ const ApplicationSettings = () => {
   return (
     <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
-      {restarting ? <RestartMonitor /> : content()}
+      {restarting ? <SystemMonitor /> : content()}
     </SectionContent>
   );
 };

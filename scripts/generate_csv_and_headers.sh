@@ -31,19 +31,16 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
 
 EOL
 
-# build emsesp for standalone
-make clean
-make -s ARGS=-DEMSESP_STANDALONE
-
 # Generate Modbus entity parameters
 # One to build the modbus_entity_parameters.hpp header file
 # And then run entity_dump test again to create the dump_entities.csv file with the correct modbus counts
+make clean
+make -s ARGS=-DEMSESP_MODBUS
 rm -f ./src/core/modbus_entity_parameters.hpp
 echo "test entity_dump" | ./emsesp | python3 ./scripts/strip_csv.py | python3 ./scripts/update_modbus_registers.py >./src/core/modbus_entity_parameters.hpp
 ls -al ./src/core/modbus_entity_parameters.hpp
 
 # dump_entities.csv
-make -s ARGS=-DEMSESP_STANDALONE
 rm -f ./docs/dump_entities.csv
 echo "test entity_dump" | ./emsesp | python3 ./scripts/strip_csv.py >./docs/dump_entities.csv
 ls -al ./docs/dump_entities.csv

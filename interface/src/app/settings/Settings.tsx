@@ -151,7 +151,7 @@ const Settings = () => {
           bgcolor="#5d89f7"
           label={LL.DOWNLOAD_UPLOAD()}
           text={LL.DOWNLOAD_UPLOAD_1()}
-          to="upload"
+          to="downloadUpload"
         />
       </List>
 

@@ -59,6 +59,15 @@ namespace emsesp {
 
 enum PHY_type : uint8_t { PHY_TYPE_NONE = 0, PHY_TYPE_LAN8720, PHY_TYPE_TLK110 };
 
+enum SYSTEM_STATUS : uint8_t {
+    SYSTEM_STATUS_NORMAL            = 0,
+    SYSTEM_STATUS_PENDING_UPLOAD    = 1,
+    SYSTEM_STATUS_UPLOADING         = 2,
+    SYSTEM_STATUS_ERROR_UPLOAD      = 3,
+    SYSTEM_STATUS_PENDING_RESTART   = 4,
+    SYSTEM_STATUS_RESTART_REQUESTED = 5
+};
+
 class System {
   public:
     void start();
@@ -88,8 +97,7 @@ class System {
 
     void store_nvs_values();
     void system_restart(const char * partition = nullptr);
-    void upload_isrunning(bool in_progress);
-    bool upload_isrunning();
+
     void show_mem(const char * note);
     void reload_settings();
     void syslog_init();
@@ -122,6 +130,9 @@ class System {
     void button_init(bool refresh);
     void commands_init();
 
+    void    systemStatus(uint8_t status_code);
+    uint8_t systemStatus();
+
     static void extractSettings(const char * filename, const char * section, JsonObject output);
     static bool saveSettings(const char * filename, const char * section, JsonObject input);
 
@@ -129,20 +140,6 @@ class System {
     static bool load_board_profile(std::vector<int8_t> & data, const std::string & board_profile);
 
     static bool readCommand(const char * data);
-
-    static void restart_requested(bool restart_requested) {
-        restart_requested_ = restart_requested;
-    }
-    static bool restart_requested() {
-        return restart_requested_;
-    }
-
-    static void restart_pending(bool restart_pending) {
-        restart_pending_ = restart_pending;
-    }
-    static bool restart_pending() {
-        return restart_pending_;
-    }
 
     bool telnet_enabled() {
         return telnet_enabled_;
@@ -341,11 +338,12 @@ class System {
 
   private:
     static uuid::log::Logger logger_;
-    static bool              restart_requested_;
-    static bool              restart_pending_;     // used in 2-stage process to call restart from Web API
-    static bool              test_set_all_active_; // force all entities in a device to have a value
-    static uint32_t          max_alloc_mem_;
-    static uint32_t          heap_mem_;
+
+    static bool     test_set_all_active_; // force all entities in a device to have a value
+    static uint32_t max_alloc_mem_;
+    static uint32_t heap_mem_;
+
+    uint8_t systemStatus_; // uses SYSTEM_STATUS enum
 
     // button
     static PButton            myPButton_; // PButton instance

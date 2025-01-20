@@ -83,8 +83,6 @@ uuid::log::Logger System::logger_{F_(system), uuid::log::Facility::KERN};
 
 // init statics
 PButton  System::myPButton_;
-bool     System::restart_requested_   = false;
-bool     System::restart_pending_     = false;
 bool     System::test_set_all_active_ = false;
 uint32_t System::max_alloc_mem_;
 uint32_t System::heap_mem_;
@@ -298,8 +296,7 @@ void System::system_restart(const char * partitionname) {
     }
 
     // make sure it's only executed once
-    restart_requested(false);
-    restart_pending(false);
+    EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_NORMAL);
 
     store_nvs_values(); // save any NVS values
     Shell::loop_all();  // flush log to output
@@ -307,8 +304,7 @@ void System::system_restart(const char * partitionname) {
     delay(1000);        // wait 1 second
     ESP.restart();
 #else
-    restart_requested(false);
-    restart_pending(false);
+    EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_NORMAL);
     if (partitionname != nullptr) {
         LOG_INFO("Restarting EMS-ESP from %s partition", partitionname);
     } else {
@@ -565,27 +561,10 @@ void System::led_init(bool refresh) {
     }
 }
 
-// returns true if OTA is uploading
-bool System::upload_isrunning() {
-#if defined(EMSESP_STANDALONE)
-    return false;
-#else
-    return upload_isrunning_ || Update.isRunning();
-#endif
-}
-
-void System::upload_isrunning(bool in_progress) {
-    // if we've just started an upload
-    if (!upload_isrunning_ && in_progress) {
-        EMSuart::stop();
-    }
-    upload_isrunning_ = in_progress;
-}
-
 // checks system health and handles LED flashing wizardry
 void System::loop() {
     // check if we're supposed to do a reset/restart
-    if (restart_requested()) {
+    if (systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED) {
         system_restart();
     }
 
@@ -706,7 +685,7 @@ void System::heartbeat_json(JsonObject output) {
 #ifndef EMSESP_STANDALONE
     output["freemem"]   = getHeapMem();
     output["max_alloc"] = getMaxAllocMem();
-#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32
     output["temperature"] = temperature_;
 #endif
 #endif
@@ -790,8 +769,8 @@ void System::system_check() {
 
 #ifndef EMSESP_STANDALONE
 #if defined(CONFIG_IDF_TARGET_ESP32)
-    uint8_t raw = temprature_sens_read();
-    temperature_ = (raw - 32) / 1.8f; // convert to Celsius
+        uint8_t raw  = temprature_sens_read();
+        temperature_ = (raw - 32) / 1.8f; // convert to Celsius
 #elif CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2
 #if ESP_IDF_VERSION_MAJOR < 5
         temp_sensor_read_celsius(&temperature_);
@@ -1901,7 +1880,7 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
     return true;
 }
 
-// format command - factory reset, removing all config files
+// format command - factory reset, removing all config fi`les
 bool System::command_format(const char * value, const int8_t id) {
     LOG_INFO("Removing all config files");
 #ifndef EMSESP_STANDALONE
@@ -1915,8 +1894,8 @@ bool System::command_format(const char * value, const int8_t id) {
     }
 #endif
 
-    EMSESP::system_.restart_requested(true); // will be handled by the main loop
-
+    // restart will be handled by the main loop
+    EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED);
     return true;
 }
 
@@ -1926,11 +1905,13 @@ bool System::command_restart(const char * value, const int8_t id) {
         // if it has an id then it's a web call and we need to queue the restart
         // default id is -1 when calling /api/system/restart directly for example
         LOG_INFO("Preparing to restart system");
-        EMSESP::system_.restart_pending(true);
+        EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_PENDING_RESTART);
         return true;
     }
+
     LOG_INFO("Restarting system immediately");
-    EMSESP::system_.restart_requested(true); // will be handled by the main loop
+    // restart will be handled by the main loop
+    EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED);
     return true;
 }
 
@@ -2022,24 +2003,37 @@ String System::getBBQKeesGatewayDetails() {
 
 // Stream from an URL and send straight to OTA uploader service.
 //
-// This function needs to be called twice, once with a url to persist it, and second with no arguments to start the upload
+// This function needs to be called twice, 1st pass once with a url to persist it, 2nd pass with no arguments to start the upload
 // This is to avoid timeouts in callback functions, like calling from a web hook.
 bool System::uploadFirmwareURL(const char * url) {
 #ifndef EMSESP_STANDALONE
 
     static String saved_url;
 
-    // if the URL is not empty, store the URL for the 2nd pass
+    // if the URL is not empty, store the URL for the 2nd pass and exit
     if (url && strlen(url) > 0) {
+        // if the passed URL is "reset" abort the current upload. This is called when an error happens during OTA
+        if (strncmp(url, "reset", 5) == 0) {
+            LOG_DEBUG("Firmware upload - resetting");
+            saved_url.clear();
+            EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_NORMAL);
+            return true;
+        }
+
+        // given a URL to download from, save it
         saved_url = url;
-        EMSESP::system_.upload_isrunning(true); // tell EMS-ESP we're ready to start the uploading process
+        EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_PENDING_UPLOAD); // we're ready to start the upload
         return true;
     }
 
-    // make sure we have a valid URL
+    // assumed we have a valid URL from the 1st pass
     if (saved_url.isEmpty()) {
+        LOG_ERROR("Firmware upload failed - invalid URL");
         return false; // error
     }
+
+    LOG_INFO("Firmware downloading from %s", saved_url.c_str());
+    Shell::loop_all(); // flush log buffers so latest messages are shown in console
 
     // Configure temporary client
     HTTPClient http;
@@ -2051,42 +2045,46 @@ bool System::uploadFirmwareURL(const char * url) {
     // start a connection, returns -1 if fails
     int httpCode = http.GET();
     if (httpCode != HTTP_CODE_OK) {
-        LOG_ERROR("Firmware upload failed. URL %s, HTTP code %d", saved_url.c_str(), httpCode);
+        LOG_ERROR("Firmware upload failed - HTTP code %d", httpCode);
+        http.end();
         return false; // error
     }
 
     // check we have enough space for the upload in the ota partition
     int firmware_size = http.getSize();
-    LOG_INFO("Firmware uploading (file: %s, size: %d bytes). Please wait...", saved_url.c_str(), firmware_size);
+    LOG_INFO("Firmware uploading (size: %d bytes). Please wait...", firmware_size);
     if (!Update.begin(firmware_size)) {
         LOG_ERROR("Firmware upload failed - no space");
+        http.end();
         return false; // error
     }
 
-    // flush log buffers so latest messages are shown
-    Shell::loop_all();
+
+    Shell::loop_all(); // flush log buffers so latest messages are shown in console
+
+    // TODO do we need to stop the UART with EMSuart::stop() ?
 
     // get tcp stream and send it to Updater
     WiFiClient * stream = http.getStreamPtr();
     if (Update.writeStream(*stream) != firmware_size) {
         LOG_ERROR("Firmware upload failed - size differences");
+        http.end();
+        EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
         return false; // error
     }
 
     if (!Update.end(true)) {
         LOG_ERROR("Firmware upload failed - general error");
+        http.end();
+        EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
         return false; // error
     }
 
+    // finished with upload
     http.end();
-
-    EMSESP::system_.upload_isrunning(false);
     saved_url.clear(); // prevent from downloading again
-
     LOG_INFO("Firmware uploaded successfully. Restarting...");
-
-    restart_pending(true);
-
+    EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED);
 #endif
 
     return true; // OK
@@ -2146,6 +2144,16 @@ bool System::readCommand(const char * data) {
 // system read command
 bool System::command_read(const char * value, const int8_t id) {
     return readCommand(value);
+}
+
+// set the system status code - SYSTEM_STATUS in system.h
+void System::systemStatus(uint8_t status_code) {
+    systemStatus_ = status_code;
+    LOG_DEBUG("Setting System status code %d", status_code);
+}
+
+uint8_t System::systemStatus() {
+    return systemStatus_;
 }
 
 } // namespace emsesp

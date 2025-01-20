@@ -43,7 +43,7 @@ import { updateValueDirty, useRest } from 'utils';
 import { validate } from 'validators';
 import { createNetworkSettingsValidator } from 'validators/network';
 
-import RestartMonitor from '../../status/RestartMonitor';
+import SystemMonitor from '../../status/SystemMonitor';
 import { WiFiConnectionContext } from './WiFiConnectionContext';
 import { isNetworkOpen, networkSecurityMode } from './WiFiNetworkSelector';
 
@@ -400,7 +400,7 @@ const NetworkSettings = () => {
   return (
     <SectionContent>
       {blocker ? <BlockNavigation blocker={blocker} /> : null}
-      {restarting ? <RestartMonitor /> : content()}
+      {restarting ? <SystemMonitor /> : content()}
     </SectionContent>
   );
 };

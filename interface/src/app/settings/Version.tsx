@@ -24,7 +24,7 @@ import { getDevVersion, getStableVersion } from 'api/system';
 
 import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova/client';
-import RestartMonitor from 'app/status/RestartMonitor';
+import SystemMonitor from 'app/status/SystemMonitor';
 import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
@@ -224,7 +224,7 @@ const Version = () => {
       <>
         <Box p={2} border="1px solid grey" borderRadius={2}>
           <Typography mb={2} variant="h6" color="primary">
-            Firmware Version
+            Firmware&nbsp;{LL.VERSION()}
           </Typography>
 
           <Grid
@@ -360,7 +360,7 @@ const Version = () => {
   };
 
   return (
-    <SectionContent>{restarting ? <RestartMonitor /> : content()}</SectionContent>
+    <SectionContent>{restarting ? <SystemMonitor /> : content()}</SectionContent>
   );
 };
 

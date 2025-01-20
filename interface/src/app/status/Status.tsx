@@ -40,7 +40,7 @@ import { NTPSyncStatus, NetworkConnectionStatus } from 'types';
 import { useInterval } from 'utils';
 import { formatDateTime } from 'utils/time';
 
-import RestartMonitor from './RestartMonitor';
+import SystemMonitor from './SystemMonitor';
 
 const SystemStatus = () => {
   const { LL } = useI18nContext();
@@ -349,7 +349,7 @@ const SystemStatus = () => {
   };
 
   return (
-    <SectionContent>{restarting ? <RestartMonitor /> : content()}</SectionContent>
+    <SectionContent>{restarting ? <SystemMonitor /> : content()}</SectionContent>
   );
 };
 

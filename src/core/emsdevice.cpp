@@ -1297,6 +1297,13 @@ void EMSdevice::dump_devicevalue_info() {
             Serial.print(product_id_);
             Serial.print(',');
 
+            // <tag>/<shortname> unless generating for modbus registers - used in scripts/generate_csv_and_headers.sh
+#ifndef EMSESP_MODBUS
+            if (dv.tag > DeviceValueTAG::TAG_DEVICE_DATA) {
+                Serial.print(tag_to_string(dv.tag));
+                Serial.print('.');
+            }
+#endif
             Serial.print(dv.short_name);
             Serial.print(',');
 

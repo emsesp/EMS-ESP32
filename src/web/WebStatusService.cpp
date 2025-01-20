@@ -42,7 +42,7 @@ WebStatusService::WebStatusService(AsyncWebServer * server, SecurityManager * se
 
 // /rest/systemStatus
 // This contains both system & hardware Status to avoid having multiple costly endpoints
-// This is also used for polling during the RestartMonitor to see if EMS-ESP is alive
+// This is also used for polling during the SystemMonitor to see if EMS-ESP is alive
 void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
     EMSESP::system_.refreshHeapMem(); // refresh free heap and max alloc heap
 
@@ -146,12 +146,11 @@ void WebStatusService::systemStatus(AsyncWebServerRequest * request) {
         root["has_partition"] = false;
     }
 
-    // Matches status codes in RestartMonitor.tsx
-    if (EMSESP::system_.restart_pending()) {
-        root["status"] = "restarting";
-        EMSESP::system_.restart_requested(true); // tell emsesp loop to start restart
-    } else {
-        root["status"] = EMSESP::system_.upload_isrunning() ? "uploading" : "ready";
+    // Also used in SystemMonitor.tsx
+    root["status"] = EMSESP::system_.systemStatus(); // send the status. See System.h for status codes
+    if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_PENDING_RESTART) {
+        // we're ready to do the actual restart ASAP
+        EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED);
     }
 
 #endif
@@ -194,6 +193,8 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
         ok = getCustomSupport(root);
     } else if (action == "uploadURL" && is_admin) {
         ok = uploadURL(param.c_str());
+    } else if (action == "systemStatus" && is_admin) {
+        ok = setSystemStatus(param.c_str());
     }
 
 #if defined(EMSESP_STANDALONE) && !defined(EMSESP_UNITY)
@@ -356,6 +357,13 @@ bool WebStatusService::getCustomSupport(JsonObject root) {
 bool WebStatusService::uploadURL(const char * url) {
     // this will keep a copy of the URL, but won't initiate the download yet
     emsesp::EMSESP::system_.uploadFirmwareURL(url);
+    return true;
+}
+
+// action = systemStatus
+// sets the system status
+bool WebStatusService::setSystemStatus(const char * status) {
+    emsesp::EMSESP::system_.systemStatus(Helpers::atoint(status));
     return true;
 }
 
