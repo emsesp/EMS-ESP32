@@ -1297,6 +1297,11 @@ void EMSdevice::dump_devicevalue_info() {
             Serial.print(product_id_);
             Serial.print(',');
 
+            // <tag>/<shortname>
+            if (dv.tag > DeviceValueTAG::TAG_DEVICE_DATA) {
+                Serial.print(tag_to_string(dv.tag));
+                Serial.print('.');
+            }
             Serial.print(dv.short_name);
             Serial.print(',');
 
