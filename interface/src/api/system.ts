@@ -2,7 +2,7 @@ import type { LogSettings, SystemStatus } from 'types';
 
 import { alovaInstance, alovaInstanceGH } from './endpoints';
 
-// systemStatus - also used to ping in Restart monitor for pinging
+// systemStatus - also used to ping in System Monitor for pinging
 export const readSystemStatus = () =>
   alovaInstance.Get<SystemStatus>('/rest/systemStatus');
 
