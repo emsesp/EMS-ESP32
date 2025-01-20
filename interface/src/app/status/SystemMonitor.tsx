@@ -63,9 +63,11 @@ const SystemMonitor = () => {
     void send();
   }, 1000); // check every second
 
-  const onCancel = () => {
+  const onCancel = async () => {
     setErrorMessage(undefined);
-    setSystemStatus(SystemStatusCodes.SYSTEM_STATUS_NORMAL as unknown as string);
+    await setSystemStatus(
+      SystemStatusCodes.SYSTEM_STATUS_NORMAL as unknown as string
+    );
     document.location.href = '/';
   };
 
@@ -81,7 +83,7 @@ const SystemMonitor = () => {
           >
             {data?.status === SystemStatusCodes.SYSTEM_STATUS_UPLOADING
               ? LL.WAIT_FIRMWARE()
-              : data?.status === SystemStatusCodes.SYSTEM_STATUS_RESTARTING
+              : data?.status === SystemStatusCodes.SYSTEM_STATUS_RESTART_REQUESTED
                 ? LL.APPLICATION_RESTARTING()
                 : data?.status === SystemStatusCodes.SYSTEM_STATUS_NORMAL
                   ? LL.RESTARTING_PRE()
