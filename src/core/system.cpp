@@ -304,8 +304,7 @@ void System::system_restart(const char * partitionname) {
     delay(1000);        // wait 1 second
     ESP.restart();
 #else
-    restart_requested(false);
-    restart_pending(false);
+    EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_NORMAL);
     if (partitionname != nullptr) {
         LOG_INFO("Restarting EMS-ESP from %s partition", partitionname);
     } else {
