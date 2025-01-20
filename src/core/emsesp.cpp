@@ -1736,7 +1736,6 @@ void EMSESP::loop() {
 
     // run the loop, unless we're in the middle of an OTA upload
     if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_NORMAL) {
-        // service loops
         webLogService.loop();       // log in Web UI
         rxservice_.loop();          // process any incoming Rx telegrams
         shower_.loop();             // check for shower on/off
@@ -1752,13 +1751,10 @@ void EMSESP::loop() {
     }
 
     if (EMSESP::system_.systemStatus() == SYSTEM_STATUS::SYSTEM_STATUS_PENDING_UPLOAD) {
-        // start an upload from a URL, assuming if the URL exists from a previous pass.
-        // Note this function is synchronous and blocking.
-        if (system_.uploadFirmwareURL()) {
-            // firmware has been uploaded, set status to uploading
-            EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING);
-        } else {
-            // if it fails to pass, reset
+        // start an upload from a URL, assuming the URL exists and set from a previous pass
+        // Note this next call is synchronous and blocking.
+        if (!system_.uploadFirmwareURL()) {
+            // upload failed, send a "reset" to return back to normal
             Shell::loop_all(); // flush log buffers so latest error message are shown in console
             system_.uploadFirmwareURL("reset");
             EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_ERROR_UPLOAD);
