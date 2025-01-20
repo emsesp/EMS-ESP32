@@ -2010,29 +2010,27 @@ bool System::uploadFirmwareURL(const char * url) {
 
     static String saved_url;
 
-    // if the URL is not empty, store the URL for the 2nd pass and exit
     if (url && strlen(url) > 0) {
         // if the passed URL is "reset" abort the current upload. This is called when an error happens during OTA
         if (strncmp(url, "reset", 5) == 0) {
             LOG_DEBUG("Firmware upload - resetting");
             saved_url.clear();
-            EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_NORMAL);
             return true;
         }
 
-        // given a URL to download from, save it
+        // given a URL to download from, save it ready for the 2nd pass
         saved_url = url;
+        LOG_INFO("Firmware location: %s", saved_url.c_str());
         EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_PENDING_UPLOAD); // we're ready to start the upload
         return true;
     }
 
-    // assumed we have a valid URL from the 1st pass
+    // check we have a valid URL from the 1st pass
     if (saved_url.isEmpty()) {
         LOG_ERROR("Firmware upload failed - invalid URL");
         return false; // error
     }
 
-    LOG_INFO("Firmware downloading from %s", saved_url.c_str());
     Shell::loop_all(); // flush log buffers so latest messages are shown in console
 
     // Configure temporary client
@@ -2059,9 +2057,10 @@ bool System::uploadFirmwareURL(const char * url) {
         return false; // error
     }
 
-
     Shell::loop_all(); // flush log buffers so latest messages are shown in console
 
+    // we're about to start the upload, set the status so the Web System Monitor spots it
+    EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING);
     // TODO do we need to stop the UART with EMSuart::stop() ?
 
     // get tcp stream and send it to Updater
