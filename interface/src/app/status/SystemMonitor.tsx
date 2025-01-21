@@ -1,14 +1,7 @@
 import { useState } from 'react';
 
 import CancelIcon from '@mui/icons-material/Cancel';
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogContent,
-  Typography
-} from '@mui/material';
+import { Box, Button, Dialog, DialogContent, Typography } from '@mui/material';
 
 import { callAction } from 'api/app';
 import { readSystemStatus } from 'api/system';
@@ -19,6 +12,8 @@ import MessageBox from 'components/MessageBox';
 import { useI18nContext } from 'i18n/i18n-react';
 import { SystemStatusCodes } from 'types';
 import { useInterval } from 'utils';
+
+import { LinearProgressWithLabel } from '../../components/upload/LinearProgressWithLabel';
 
 const SystemMonitor = () => {
   const [errorMessage, setErrorMessage] = useState<string>();
@@ -81,7 +76,7 @@ const SystemMonitor = () => {
             fontWeight={400}
             textAlign="center"
           >
-            {data?.status === SystemStatusCodes.SYSTEM_STATUS_UPLOADING
+            {data?.status >= SystemStatusCodes.SYSTEM_STATUS_UPLOADING
               ? LL.WAIT_FIRMWARE()
               : data?.status === SystemStatusCodes.SYSTEM_STATUS_RESTART_REQUESTED
                 ? LL.APPLICATION_RESTARTING()
@@ -110,9 +105,15 @@ const SystemMonitor = () => {
               <Typography mt={2} variant="h6" fontWeight={400} textAlign="center">
                 {LL.PLEASE_WAIT()}&hellip;
               </Typography>
-              <Box py={2}>
-                <CircularProgress size={32} />
-              </Box>
+              {data && data.status > SystemStatusCodes.SYSTEM_STATUS_UPLOADING && (
+                <Box width="100%" pl={2} pr={2} py={2}>
+                  <LinearProgressWithLabel
+                    value={Math.round(
+                      data?.status - SystemStatusCodes.SYSTEM_STATUS_UPLOADING
+                    )}
+                  />
+                </Box>
+              )}
             </>
           )}
         </Box>
