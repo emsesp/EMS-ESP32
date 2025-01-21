@@ -31,26 +31,30 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
 
 EOL
 
-# Generate Modbus entity parameters
-# One to build the modbus_entity_parameters.hpp header file
-# And then run entity_dump test again to create the dump_entities.csv file with the correct modbus counts
+# First generate Modbus entity parameters
+# build the modbus_entity_parameters.hpp header file
 make clean
 make -s ARGS=-DEMSESP_MODBUS
 rm -f ./src/core/modbus_entity_parameters.hpp
-echo "test entity_dump" | ./emsesp | python3 ./scripts/strip_csv.py | python3 ./scripts/update_modbus_registers.py >./src/core/modbus_entity_parameters.hpp
-ls -al ./src/core/modbus_entity_parameters.hpp
+echo "test entity_dump" | ./emsesp | python3 ./scripts/strip_csv.py >./docs/dump_entities.csv
 
-# dump_entities.csv
+cat ./docs/dump_entities.csv | python3 ./scripts/update_modbus_registers.py >./src/core/modbus_entity_parameters.hpp
+
+# generate Modbus doc - Modbus-Entity-Registers.md used in the emsesp.org documentation
+rm -f ./docs/Modbus-Entity-Registers.md
+cat ./docs/dump_entities.csv | python3 ./scripts/generate-modbus-register-doc.py >./docs/Modbus-Entity-Registers.md
+
+# regenerate dump_entities.csv but without the Modbus entity parameters
+make clean
+make -s ARGS=-DEMSESP_STANDALONE
 rm -f ./docs/dump_entities.csv
 echo "test entity_dump" | ./emsesp | python3 ./scripts/strip_csv.py >./docs/dump_entities.csv
-ls -al ./docs/dump_entities.csv
 
 # dump_telegrams.csv
 rm -f ./docs/dump_telegrams.csv
 echo "test telegram_dump" | ./emsesp | python3 ./scripts/strip_csv.py >./docs/dump_telegrams.csv
-ls -al ./docs/dump_telegrams.csv
 
-# generate doc - Modbus-Entity-Registers.md used in the emsesp.org documentation
-rm -f ./docs/Modbus-Entity-Registers.md
-cat ./docs/dump_entities.csv | python3 ./scripts/generate-modbus-register-doc.py >./docs/Modbus-Entity-Registers.md
+ls -al ./src/core/modbus_entity_parameters.hpp
 ls -al ./docs/Modbus-Entity-Registers.md
+ls -al ./docs/dump_entities.csv
+ls -al ./docs/dump_telegrams.csv

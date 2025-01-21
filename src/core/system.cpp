@@ -2061,7 +2061,12 @@ bool System::uploadFirmwareURL(const char * url) {
 
     // we're about to start the upload, set the status so the Web System Monitor spots it
     EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING);
-    // TODO do we need to stop the UART with EMSuart::stop() ?
+    // TODO do we need to stop the UART first with EMSuart::stop() ?
+
+    // set a callback so we can monitor progress in the WebUI
+    Update.onProgress([](size_t progress, size_t total) {
+        EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING+(progress * 100 / total));
+    });
 
     // get tcp stream and send it to Updater
     WiFiClient * stream = http.getStreamPtr();
