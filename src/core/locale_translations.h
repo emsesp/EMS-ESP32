@@ -762,10 +762,10 @@ MAKE_TRANSLATION(vacations5, "vacations5", "vacation dates 5", "Urlaubstage 5", 
 MAKE_TRANSLATION(vacations6, "vacations6", "vacation dates 6", "Urlaubstage 6", "Vakantiedagen 6", "Semesterdatum 6", "urlop 6", "feriedager 6", "dates vacances 6", "izin günleri 6", "date vacanze 6", "termíny dovolenky 6", "data prázdnin 6")
 MAKE_TRANSLATION(vacations7, "vacations7", "vacation dates 7", "Urlaubstage 7", "Vakantiedagen 7", "Semesterdatum 7", "urlop 7", "feriedager 7", "dates vacances 7", "izin günleri 7", "date vacanze 7", "termíny dovolenky 7", "data prázdnin 7")
 MAKE_TRANSLATION(vacations8, "vacations8", "vacation dates 8", "Urlaubstage 8", "Vakantiedagen 8", "Semesterdatum 8", "urlop 8", "feriedager 8", "dates vacances 8", "izin günleri 8", "date vacanze 8", "termíny dovolenky 8", "data prázdnin 8")
-MAKE_TRANSLATION(absent, "absent", "absent", "Abwesend", "", "Frånvarande", "", "", "", "", "", "chýnajúci", "") // TODO translate
+MAKE_TRANSLATION(absent, "absent", "absent", "Abwesend", "", "Frånvarande", "", "", "", "", "", "chýbajúci", "") // TODO translate
 MAKE_TRANSLATION(redthreshold, "redthreshold", "reduction threshold", "Absenkschwelle", "", "Tröskel för sänkning", "", "", "", "", "", "zníženie tresholdu", "") // TODO translate
-MAKE_TRANSLATION(solarinfl, "solarinfl", "solar influence", "Solareinfluß", "", "", "", "", "", "", "", "", "") // TODO translate
-MAKE_TRANSLATION(currsolarinfl, "currsolarinfl", "curent solar influence", "akt. Solareinfluß", "", "", "", "", "", "", "", "", "") // TODO translate
+MAKE_TRANSLATION(solarinfl, "solarinfl", "solar influence", "Solareinfluß", "", "", "", "", "", "", "", "slnečný vplyv", "") // TODO translate
+MAKE_TRANSLATION(currsolarinfl, "currsolarinfl", "curent solar influence", "akt. Solareinfluß", "", "", "", "", "", "", "", "aktuálny slnečný vplyv", "") // TODO translate
 
 MAKE_TRANSLATION(hpmode, "hpmode", "HP Mode", "WP-Modus", "Modus warmtepomp", "Värmepumpsläge", "tryb pracy pompy ciepła", "", "", "yüksek güç modu", "Modalità Termopompa", "Režim TČ", "režim tepelného čerpadla") // TODO translate
 MAKE_TRANSLATION(dewoffset, "dewoffset", "dew point offset", "Taupunktdifferenz", "Offset dauwpunt", "Daggpunktsförskjutning", "przesunięcie punktu rosy", "", "", "çiğ noktası göreli", "differenza del punto di rugiada", "posun rosného bodu", "offset rosného bodu") // TODO translate
