@@ -26,9 +26,6 @@ const LoadingSpinner = ({ height = '100%' }: LoadingSpinnerProps) => {
         })}
         size={100}
       />
-      <Typography variant="h4" color="textSecondary">
-        {LL.LOADING()}&hellip;
-      </Typography>
     </Box>
   );
 };

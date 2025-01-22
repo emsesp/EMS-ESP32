@@ -1,20 +1,15 @@
 import RefreshIcon from '@mui/icons-material/Refresh';
-import { Box, Button, CircularProgress, Typography } from '@mui/material';
+import { Box, Button, CircularProgress } from '@mui/material';
 
 import { MessageBox } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
 interface FormLoaderProps {
-  message?: string;
   errorMessage?: string;
   onRetry?: () => void;
 }
 
-const FormLoader = ({
-  errorMessage,
-  onRetry,
-  message = 'Loading…'
-}: FormLoaderProps) => {
+const FormLoader = ({ errorMessage, onRetry }: FormLoaderProps) => {
   const { LL } = useI18nContext();
 
   if (errorMessage) {
@@ -38,9 +33,6 @@ const FormLoader = ({
       <Box py={2}>
         <CircularProgress size={100} />
       </Box>
-      <Typography variant="h6" fontWeight={400} textAlign="center">
-        {message}
-      </Typography>
     </Box>
   );
 };
