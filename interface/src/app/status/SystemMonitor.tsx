@@ -56,7 +56,7 @@ const SystemMonitor = () => {
 
   useInterval(() => {
     void send();
-  }, 1000); // check every second
+  }, 1000); // check every 1 second
 
   const onCancel = async () => {
     setErrorMessage(undefined);
@@ -78,7 +78,7 @@ const SystemMonitor = () => {
           >
             {data?.status >= SystemStatusCodes.SYSTEM_STATUS_UPLOADING
               ? LL.WAIT_FIRMWARE()
-              : data?.status === SystemStatusCodes.SYSTEM_STATUS_RESTART_REQUESTED
+              : data?.status === SystemStatusCodes.SYSTEM_STATUS_PENDING_RESTART
                 ? LL.APPLICATION_RESTARTING()
                 : data?.status === SystemStatusCodes.SYSTEM_STATUS_NORMAL
                   ? LL.RESTARTING_PRE()
@@ -105,7 +105,7 @@ const SystemMonitor = () => {
               <Typography mt={2} variant="h6" fontWeight={400} textAlign="center">
                 {LL.PLEASE_WAIT()}&hellip;
               </Typography>
-              {data && data.status > SystemStatusCodes.SYSTEM_STATUS_UPLOADING && (
+              {data && data.status >= SystemStatusCodes.SYSTEM_STATUS_UPLOADING && (
                 <Box width="100%" pl={2} pr={2} py={2}>
                   <LinearProgressWithLabel
                     value={Math.round(
