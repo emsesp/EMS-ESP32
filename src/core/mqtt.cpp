@@ -1117,15 +1117,16 @@ bool Mqtt::publish_ha_sensor_config(uint8_t               type,        // EMSdev
     return queue_ha(topic, doc.as<JsonObject>());
 }
 
-// Add the state class, device class and an optional icon based on the uom
-void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, const char * entity) {
-    const char * dc_ha = "dev_cla";  // device class
-    const char * sc_ha = "stat_cla"; // state class
+// Add the uom, state class, device class and an optional icon based on the uom
+void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, const char * entity, bool is_discovery) {
+    // for HA discovery we use different namings
+    const char * dc_ha  = is_discovery ? "dev_cla" : "device_class"; // device class
+    const char * sc_ha  = is_discovery ? "stat_cla" : "state_class"; // state class
+    const char * uom_ha = is_discovery ? "unit_of_meas" : "uom";     // unit of measure
 
-    // set icon, except for booleans
-    // using HA specific codes from https://github.com/home-assistant/core/blob/dev/homeassistant/const.py
+    // set uom, unless boolean
+    // using HA uom specific codes from https://github.com/home-assistant/core/blob/dev/homeassistant/const.py
     if (type != DeviceValueType::BOOL) {
-        const char * uom_ha = "unit_of_meas"; // unit of measure
         if (uom == DeviceValueUOM::HOURS) {
             doc[uom_ha] = "h";
         } else if (uom == DeviceValueUOM::MINUTES) {
@@ -1133,7 +1134,7 @@ void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, con
         } else if (uom == DeviceValueUOM::SECONDS) {
             doc[uom_ha] = "s";
         } else if (uom != DeviceValueUOM::NONE) {
-            doc[uom_ha] = EMSdevice::uom_to_string(uom); // default
+            doc[uom_ha] = EMSdevice::uom_to_string(uom); // use default
         } else if (discovery_type() != discoveryType::HOMEASSISTANT) {
             // Domoticz use " " for a no-uom
             doc[uom_ha] = " ";
@@ -1148,12 +1149,16 @@ void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, con
     case DeviceValueUOM::K:
         doc[sc_ha] = F_(measurement);
         doc[dc_ha] = "temperature";
-        doc["ic"]  = F_(icondegrees); // icon
+        if (is_discovery)
+            doc["ic"] = F_(icondegrees); // icon // TODO check if still needed
+        // override uom if fahrenheit
+        doc[uom_ha] = EMSESP::system_.fahrenheit() ? DeviceValue::DeviceValueUOM_s[DeviceValueUOM::FAHRENHEIT] : DeviceValue::DeviceValueUOM_s[uom];
         break;
     case DeviceValueUOM::PERCENT:
         doc[sc_ha] = F_(measurement);
         doc[dc_ha] = "power_factor";
-        doc["ic"]  = F_(iconpercent); // icon
+        if (is_discovery)
+            doc["ic"] = F_(iconpercent); // icon // TODO check if still needed
         break;
     case DeviceValueUOM::SECONDS:
     case DeviceValueUOM::MINUTES:
@@ -1166,11 +1171,13 @@ void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, con
         doc[dc_ha] = "duration"; // https://github.com/emsesp/EMS-ESP32/issues/822
         break;
     case DeviceValueUOM::KB:
-        doc["ic"] = F_(iconkb);
+        if (is_discovery)
+            doc["ic"] = F_(iconkb);
         break;
     case DeviceValueUOM::LMIN:
     case DeviceValueUOM::LH:
-        doc["ic"]  = F_(iconlmin);
+        if (is_discovery)
+            doc["ic"] = F_(iconlmin);
         doc[sc_ha] = F_(measurement);
         break;
     case DeviceValueUOM::WH:
@@ -1189,7 +1196,8 @@ void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, con
         doc[dc_ha] = "energy";
         break;
     case DeviceValueUOM::UA:
-        doc["ic"]  = F_(iconua);
+        if (is_discovery)
+            doc["ic"] = F_(iconua);
         doc[sc_ha] = F_(measurement);
         break;
     case DeviceValueUOM::BAR:
@@ -1214,7 +1222,8 @@ void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, con
         if ((type != DeviceValueType::STRING)
             && (type == DeviceValueType::INT8 || type == DeviceValueType::UINT8 || type == DeviceValueType::INT16 || type == DeviceValueType::UINT16
                 || type == DeviceValueType::UINT24 || type == DeviceValueType::UINT32)) {
-            doc["ic"] = F_(iconnum); // set icon
+            if (is_discovery)
+                doc["ic"] = F_(iconnum); // set icon
             // determine if its a measurement or total increasing
             // most of the values are measurement. for example Tx Reads will increment but can be reset to 0 after a restart
             // all the starts are increasing, and they are ULONGs

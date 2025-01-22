@@ -325,9 +325,8 @@ void WebCustomEntityService::get_value_json(JsonObject output, CustomEntityItem 
     output["fullname"] = entity.name;
     output["storage"]  = entity.ram ? "ram" : "ems";
     output["type"]     = entity.value_type == DeviceValueType::BOOL ? "boolean" : entity.value_type == DeviceValueType::STRING ? "string" : F_(number);
-    if (entity.uom > 0) {
-        output["uom"] = EMSdevice::uom_to_string(entity.uom);
-    }
+    // add uom state class and device class
+    Mqtt::add_ha_uom(output, entity.value_type, entity.uom, nullptr, false);
     output["readable"]  = true;
     output["writeable"] = entity.writeable;
     output["visible"]   = true;
