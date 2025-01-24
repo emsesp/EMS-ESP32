@@ -59,6 +59,7 @@ void WebSettings::read(WebSettings & settings, JsonObject root) {
     root["dallas_parasite"]       = settings.dallas_parasite;
     root["led_gpio"]              = settings.led_gpio;
     root["hide_led"]              = settings.hide_led;
+    root["led_type"]              = settings.led_type;
     root["low_clock"]             = settings.low_clock;
     root["telnet_enabled"]        = settings.telnet_enabled;
     root["notoken_api"]           = settings.notoken_api;
@@ -103,6 +104,7 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
 #endif
 
     // get the current board profile saved in the settings file
+    String org_board_profile = settings.board_profile;
     settings.board_profile   = root["board_profile"] | EMSESP_DEFAULT_BOARD_PROFILE; // this is set at compile time in platformio.ini, other it's "default"
     String old_board_profile = settings.board_profile;
 
@@ -133,7 +135,12 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
                         (int8_t)(root["phy_type"] | PHY_type::PHY_TYPE_NONE),
                         (int8_t)(root["eth_power"] | 0),
                         (int8_t)(root["eth_phy_addr"] | 0),
-                        (int8_t)(root["eth_clock_mode"] | 0)};
+                        (int8_t)(root["eth_clock_mode"] | 0),
+#if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
+                        (int8_t)(root["led_type"] | 1)};
+#else
+                        (int8_t)(root["led_type"] | 0)};
+#endif
             }
             // check valid pins in this board profile
             if (!System::is_valid_gpio(data[0], psram) || !System::is_valid_gpio(data[1], psram) || !System::is_valid_gpio(data[2], psram)
@@ -180,11 +187,11 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
 
         // override if we know the target from the build config like C3, S2, S3 etc..
 #elif CONFIG_IDF_TARGET_ESP32C3
-        settings.board_profile = "C3MINI";
+            settings.board_profile = "C3MINI";
 #elif CONFIG_IDF_TARGET_ESP32S2
-        settings.board_profile = "S2MINI";
+            settings.board_profile = "S2MINI";
 #elif CONFIG_IDF_TARGET_ESP32S3
-        settings.board_profile = "S32S3"; // BBQKees Gateway S3
+            settings.board_profile = "S32S3"; // BBQKees Gateway S3
 #endif
 
         // apply the new board profile setting
@@ -194,8 +201,9 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     if (old_board_profile != settings.board_profile) {
         // see if need to override the set board profile (e.g. forced by NVS boot string)
         EMSESP::logger().info("Setting new Board profile %s (was %s)", settings.board_profile.c_str(), old_board_profile.c_str());
-    } else {
-        EMSESP::logger().info("Board profile set to %s", settings.board_profile.c_str());
+    } else if (org_board_profile != settings.board_profile) {
+        // EMSESP::logger().info("Board profile set to %s", settings.board_profile.c_str());
+        EMSESP::logger().info("Setting new Board profile %s (was %s)", settings.board_profile.c_str(), org_board_profile.c_str());
     }
 
     int prev;
@@ -229,6 +237,9 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     prev                    = settings.eth_clock_mode;
     settings.eth_clock_mode = data[8];
     check_flag(prev, settings.eth_clock_mode, ChangeFlags::RESTART);
+    prev              = settings.led_type;
+    settings.led_type = data[9];
+    check_flag(prev, settings.led_type, ChangeFlags::LED);
 
     // tx_mode, rx and tx pins
     prev             = settings.tx_mode;
@@ -304,6 +315,7 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
     settings.low_clock = root["low_clock"];
     check_flag(prev, settings.low_clock, ChangeFlags::RESTART);
 
+    // Modbus settings
     prev                    = settings.modbus_enabled;
     settings.modbus_enabled = root["modbus_enabled"] | EMSESP_DEFAULT_MODBUS_ENABLED;
     check_flag(prev, settings.modbus_enabled, ChangeFlags::RESTART);
@@ -455,6 +467,7 @@ void WebSettingsService::board_profile(AsyncWebServerRequest * request) {
         root["eth_power"]      = data[6];
         root["eth_phy_addr"]   = data[7];
         root["eth_clock_mode"] = data[8];
+        root["led_type"]       = data[9];
 
         response->setLength();
         request->send(response);

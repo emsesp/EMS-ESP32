@@ -54,6 +54,7 @@ class WebSettings {
     bool     dallas_parasite;
     uint8_t  led_gpio;
     bool     hide_led;
+    uint8_t  led_type;
     bool     low_clock;
     bool     telnet_enabled;
     bool     notoken_api;

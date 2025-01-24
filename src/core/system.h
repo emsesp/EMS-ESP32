@@ -394,6 +394,7 @@ class System {
     std::string hostname_;
     String      locale_;
     bool        hide_led_;
+    uint8_t     led_type_;
     uint8_t     led_gpio_;
     bool        analog_enabled_;
     bool        low_clock_;

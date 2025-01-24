@@ -381,6 +381,7 @@ void System::reload_settings() {
         analog_enabled_ = settings.analog_enabled;
         low_clock_      = settings.low_clock;
         hide_led_       = settings.hide_led;
+        led_type_       = settings.led_type;
         led_gpio_       = settings.led_gpio;
         board_profile_  = settings.board_profile;
         telnet_enabled_ = settings.telnet_enabled;
@@ -551,13 +552,13 @@ void System::led_init(bool refresh) {
     }
 
     if ((led_gpio_ != 0) && is_valid_gpio(led_gpio_)) {
-#if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
-        // rgb LED WS2812B, use Adafruit Neopixel
-        neopixelWrite(led_gpio_, 0, 0, 0);
-#else
-        pinMode(led_gpio_, OUTPUT);       // 0 means disabled
-        digitalWrite(led_gpio_, !LED_ON); // start with LED off
-#endif
+        if (led_type_) {
+            // rgb LED WS2812B, use Adafruit Neopixel
+            neopixelWrite(led_gpio_, 0, 0, 0);
+        } else {
+            pinMode(led_gpio_, OUTPUT);       // 0 means disabled
+            digitalWrite(led_gpio_, !LED_ON); // start with LED off
+        }
     }
 }
 
@@ -686,7 +687,7 @@ void System::heartbeat_json(JsonObject output) {
     output["freemem"]   = getHeapMem();
     output["max_alloc"] = getMaxAllocMem();
 #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32
-    output["temperature"] = temperature_;
+    output["temperature"] = (int)temperature_;
 #endif
 #endif
 
@@ -810,20 +811,12 @@ void System::system_check() {
             if (healthcheck_ == 0) {
                 // everything is healthy, show LED permanently on or off depending on setting
                 if (led_gpio_) {
-#if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
-                    neopixelWrite(led_gpio_, 0, hide_led_ ? 0 : 128, 0);
-#else
-                    digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
-#endif
+                    led_type_ ? neopixelWrite(led_gpio_, 0, hide_led_ ? 0 : 128, 0) : digitalWrite(led_gpio_, hide_led_ ? !LED_ON : LED_ON);
                 }
             } else {
                 // turn off LED so we're ready to the flashes
                 if (led_gpio_) {
-#if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
-                    neopixelWrite(led_gpio_, 0, 0, 0);
-#else
-                    digitalWrite(led_gpio_, !LED_ON);
-#endif
+                    led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
                 }
             }
         }
@@ -883,60 +876,51 @@ void System::led_monitor() {
             // reset the whole sequence
             led_long_timer_ = uuid::get_uptime();
             led_flash_step_ = 0;
-#if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
-            neopixelWrite(led_gpio_, 0, 0, 0);
-#else
-            digitalWrite(led_gpio_, !LED_ON); // LED off
-#endif
+            led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON); // LED off
         } else if (led_flash_step_ % 2) {
             // handle the step events (on odd numbers 3,5,7,etc). see if we need to turn on a LED
             //  1 flash is the EMS bus is not connected
             //  2 flashes if the network (wifi or ethernet) is not connected
             //  3 flashes is both the bus and the network are not connected. Then you know you're truly f*cked.
 
-#if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
-            if (led_flash_step_ == 3) {
-                if ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
+            if (led_type_) {
+                if (led_flash_step_ == 3) {
+                    if ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
+                        neopixelWrite(led_gpio_, 128, 0, 0); // red
+                    } else if ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS) {
+                        neopixelWrite(led_gpio_, 0, 0, 128); // blue
+                    }
+                }
+                if (led_flash_step_ == 5 && (healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
                     neopixelWrite(led_gpio_, 128, 0, 0); // red
-                } else if ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS) {
+                }
+                if ((led_flash_step_ == 7) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)
+                    && ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS)) {
                     neopixelWrite(led_gpio_, 0, 0, 128); // blue
                 }
-            }
-            if (led_flash_step_ == 5 && (healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) {
-                neopixelWrite(led_gpio_, 128, 0, 0); // red
-            }
-            if ((led_flash_step_ == 7) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)
-                && ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS)) {
-                neopixelWrite(led_gpio_, 0, 0, 128); // blue
-            }
-#else
+            } else {
+                if ((led_flash_step_ == 3)
+                    && (((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) || ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS))) {
+                    led_on_ = true;
+                }
 
-            if ((led_flash_step_ == 3)
-                && (((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK) || ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS))) {
-                led_on_ = true;
-            }
+                if ((led_flash_step_ == 5) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)) {
+                    led_on_ = true;
+                }
 
-            if ((led_flash_step_ == 5) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)) {
-                led_on_ = true;
-            }
+                if ((led_flash_step_ == 7) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)
+                    && ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS)) {
+                    led_on_ = true;
+                }
 
-            if ((led_flash_step_ == 7) && ((healthcheck_ & HEALTHCHECK_NO_NETWORK) == HEALTHCHECK_NO_NETWORK)
-                && ((healthcheck_ & HEALTHCHECK_NO_BUS) == HEALTHCHECK_NO_BUS)) {
-                led_on_ = true;
+                if (led_on_) {
+                    digitalWrite(led_gpio_, LED_ON); // LED off
+                }
             }
-
-            if (led_on_) {
-                digitalWrite(led_gpio_, LED_ON); // LED off
-            }
-#endif
         } else {
             // turn the led off after the flash, on even number count
             if (led_on_) {
-#if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
-                neopixelWrite(led_gpio_, 0, 0, 0);
-#else
-                digitalWrite(led_gpio_, !LED_ON); // LED off
-#endif
+                led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
                 led_on_ = false;
             }
         }
@@ -1725,6 +1709,7 @@ bool System::command_info(const char * value, const int8_t id, JsonObject output
             node["dallasGPIO"]  = settings.dallas_gpio;
             node["pbuttonGPIO"] = settings.pbutton_gpio;
             node["ledGPIO"]     = settings.led_gpio;
+            node["ledType"]     = settings.led_type;
         }
         node["hideLed"]         = settings.hide_led;
         node["noTokenApi"]      = settings.notoken_api;
@@ -1837,29 +1822,33 @@ bool System::command_test(const char * value, const int8_t id) {
 //  3 = RMII clock output from GPIO17, for 50hz inverted clock
 bool System::load_board_profile(std::vector<int8_t> & data, const std::string & board_profile) {
     if (board_profile == "S32") {
-        data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // BBQKees Gateway S32
+        data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // BBQKees Gateway S32
     } else if (board_profile == "E32") {
-        data = {2, 4, 5, 17, 33, PHY_type::PHY_TYPE_LAN8720, 16, 1, 0}; // BBQKees Gateway E32
+        data = {2, 4, 5, 17, 33, PHY_type::PHY_TYPE_LAN8720, 16, 1, 0, 0}; // BBQKees Gateway E32
     } else if (board_profile == "E32V2") {
-        data = {2, 14, 4, 5, 34, PHY_type::PHY_TYPE_LAN8720, 15, 0, 1}; // BBQKees Gateway E32 V2
+        data = {2, 14, 4, 5, 34, PHY_type::PHY_TYPE_LAN8720, 15, 0, 1, 0}; // BBQKees Gateway E32 V2
     } else if (board_profile == "MH-ET") {
-        data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // MH-ET Live D1 Mini
+        data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // MH-ET Live D1 Mini
     } else if (board_profile == "NODEMCU") {
-        data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // NodeMCU 32S
+        data = {2, 18, 23, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // NodeMCU 32S
     } else if (board_profile == "LOLIN") {
-        data = {2, 18, 17, 16, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // Lolin D32
+        data = {2, 18, 17, 16, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // Lolin D32
     } else if (board_profile == "OLIMEX") {
-        data = {0, 0, 36, 4, 34, PHY_type::PHY_TYPE_LAN8720, -1, 0, 0}; // Olimex ESP32-EVB (uses U1TXD/U1RXD/BUTTON, no LED or Temperature sensor)
+        data = {0, 0, 36, 4, 34, PHY_type::PHY_TYPE_LAN8720, -1, 0, 0, 0}; // Olimex ESP32-EVB (uses U1TXD/U1RXD/BUTTON, no LED or Temperature sensor)
     } else if (board_profile == "OLIMEXPOE") {
-        data = {0, 0, 36, 4, 34, PHY_type::PHY_TYPE_LAN8720, 12, 0, 3}; // Olimex ESP32-POE
+        data = {0, 0, 36, 4, 34, PHY_type::PHY_TYPE_LAN8720, 12, 0, 3, 0}; // Olimex ESP32-POE
     } else if (board_profile == "C3MINI") {
-        data = {7, 1, 4, 5, 9, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // Lolin C3 Mini
+#if defined(BOARD_C3_MINI_V1)
+        data = {7, 1, 4, 5, 9, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // Lolin C3 Mini V1
+#else
+        data = {7, 1, 4, 5, 9, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 1}; // Lolin C3 Mini with RGB Led
+#endif
     } else if (board_profile == "S2MINI") {
-        data = {15, 7, 11, 12, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // Lolin S2 Mini
+        data = {15, 7, 11, 12, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // Lolin S2 Mini
     } else if (board_profile == "S3MINI") {
-        data = {17, 18, 8, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // Liligo S3
+        data = {17, 18, 8, 5, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // Liligo S3
     } else if (board_profile == "S32S3") {
-        data = {2, 18, 5, 17, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0}; // BBQKees Gateway S3
+        data = {2, 18, 5, 17, 0, PHY_type::PHY_TYPE_NONE, 0, 0, 0, 0}; // BBQKees Gateway S3
     } else if (board_profile == "CUSTOM") {
         // send back current values
         data = {(int8_t)EMSESP::system_.led_gpio_,
@@ -1870,7 +1859,8 @@ bool System::load_board_profile(std::vector<int8_t> & data, const std::string & 
                 (int8_t)EMSESP::system_.phy_type_,
                 EMSESP::system_.eth_power_,
                 (int8_t)EMSESP::system_.eth_phy_addr_,
-                (int8_t)EMSESP::system_.eth_clock_mode_};
+                (int8_t)EMSESP::system_.eth_clock_mode_,
+                (int8_t)EMSESP::system_.led_type_};
     } else {
         LOG_DEBUG("Couldn't identify board profile %s", board_profile.c_str());
         return false; // unknown, return false
@@ -2064,9 +2054,7 @@ bool System::uploadFirmwareURL(const char * url) {
     // TODO do we need to stop the UART first with EMSuart::stop() ?
 
     // set a callback so we can monitor progress in the WebUI
-    Update.onProgress([](size_t progress, size_t total) {
-        EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING+(progress * 100 / total));
-    });
+    Update.onProgress([](size_t progress, size_t total) { EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_UPLOADING + (progress * 100 / total)); });
 
     // get tcp stream and send it to Updater
     WiFiClient * stream = http.getStreamPtr();
