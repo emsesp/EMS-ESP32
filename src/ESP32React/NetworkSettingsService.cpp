@@ -182,7 +182,7 @@ void NetworkSettingsService::setWiFiPowerOnRSSI() {
         p = WIFI_POWER_5dBm;
 
 #if defined(EMSESP_DEBUG)
-        // emsesp::EMSESP::logger().debug("Recommended WiFi Tx Power (set_power %d, new power %d, rssi %d, threshold %d)", min_tx_pwr / 10, p, rssi, threshold);
+    // emsesp::EMSESP::logger().debug("Recommended WiFi Tx Power (set_power %d, new power %d, rssi %d, threshold %d)", min_tx_pwr / 10, p, rssi, threshold);
 #endif
 
     if (!WiFi.setTxPower(p)) {
