@@ -101,6 +101,7 @@ const SystemLog = () => {
   const [readOpen, setReadOpen] = useState(false);
   const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
   const [autoscroll, setAutoscroll] = useState(true);
+  const [lastId, setLastId] = useState<number>(-1);
 
   const ALPHA_NUMERIC_DASH_REGEX = /^[a-fA-F0-9 ]+$/;
 
@@ -118,7 +119,10 @@ const SystemLog = () => {
     .onMessage((message: { data: string }) => {
       const rawData = message.data;
       const logentry = JSON.parse(rawData) as LogEntry;
-      setLogEntries((log) => [...log, logentry]);
+      if (lastId < logentry.i) {
+        setLogEntries((log) => [...log, logentry]);
+        setLastId(logentry.i);
+      }
     })
     .onError(() => {
       toast.error('No connection to Log service');

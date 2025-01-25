@@ -21,6 +21,7 @@ export interface Settings {
   dallas_gpio: number;
   dallas_parasite: boolean;
   led_gpio: number;
+  led_type: number;
   hide_led: boolean;
   low_clock: boolean;
   notoken_api: boolean;
@@ -262,6 +263,7 @@ export const BOARD_PROFILES: BoardProfiles = {
 export interface BoardProfile {
   board_profile: string;
   led_gpio: number;
+  led_type: number;
   dallas_gpio: number;
   rx_gpio: number;
   tx_gpio: number;
