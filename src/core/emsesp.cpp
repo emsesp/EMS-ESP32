@@ -766,11 +766,16 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
 bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8_t id, const uint8_t devicetype) {
     // check first for EMS devices
     bool found_device = false;
+
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice->device_type() == devicetype) {
             found_device = true;
+            // we may have multiple devices of the same type, so we need to check the id (e.g. id could be a hc number)
             if (emsdevice->get_value_info(root, cmd, id)) {
-                return true;
+                // if we have no values, keep going traversing the devices, it may be a thermostat with multiple hc's
+                if (root.size()) {
+                    return true;
+                }
             }
         }
     }
