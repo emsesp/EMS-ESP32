@@ -343,7 +343,7 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
             return Command::list(device_type, output);
         }
         if (EMSESP::get_device_value_info(output, cmd, id, device_type)) { // entity = cmd
-            LOG_DEBUG("Fetched device entity/attributes for %s/%s", dname, cmd);
+            LOG_DEBUG("Fetched device entity/attributes for %s/%s (id=%d)", dname, cmd, id);
             return CommandRet::OK;
         }
     } else if (device_type == EMSdevice::DeviceType::SYSTEM && strchr(cmd, '/')) {
