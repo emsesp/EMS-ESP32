@@ -552,19 +552,19 @@ const ApplicationSettings = () => {
               </Grid>
               {data.led_gpio !== 0 && (
                 <Grid>
-                <TextField
-                  name="led_type"
-                  label={'LED ' + LL.TYPE()}
-                  value={data.led_type}
-                  fullWidth
-                  variant="outlined"
-                  onChange={updateFormValue}
-                  margin="normal"
-                  select
-                >
-                  <MenuItem value={0}>LED</MenuItem>
-                  <MenuItem value={1}>RGB-LED</MenuItem>
-                </TextField>
+                  <TextField
+                    name="led_type"
+                    label={'LED ' + LL.TYPE()}
+                    value={data.led_type}
+                    fullWidth
+                    variant="outlined"
+                    onChange={updateFormValue}
+                    margin="normal"
+                    select
+                  >
+                    <MenuItem value={0}>LED</MenuItem>
+                    <MenuItem value={1}>RGB-LED</MenuItem>
+                  </TextField>
                 </Grid>
               )}
               <Grid>
