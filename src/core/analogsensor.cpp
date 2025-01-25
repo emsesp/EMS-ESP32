@@ -668,6 +668,7 @@ bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int
     return false; // not found
 }
 
+// note we don't add the device and state classes here, as we do in the custom entity service
 void AnalogSensor::get_value_json(JsonObject output, const Sensor & sensor) {
     output["name"]      = sensor.name();
     output["fullname"]  = sensor.name();

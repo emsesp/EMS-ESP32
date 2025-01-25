@@ -2076,7 +2076,7 @@ bool System::uploadFirmwareURL(const char * url) {
     http.end();
     saved_url.clear(); // prevent from downloading again
     LOG_INFO("Firmware uploaded successfully. Restarting...");
-    EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_RESTART_REQUESTED);
+    EMSESP::system_.systemStatus(SYSTEM_STATUS::SYSTEM_STATUS_PENDING_RESTART);
 #endif
 
     return true; // OK

@@ -379,6 +379,7 @@ bool TemperatureSensor::get_value_info(JsonObject output, const char * cmd, cons
     return false; // not found
 }
 
+// note we don't add the device and state classes here, as we do in the custom entity service
 void TemperatureSensor::get_value_json(JsonObject output, const Sensor & sensor) {
     output["id"]       = sensor.id();
     output["name"]     = sensor.name();
@@ -394,7 +395,6 @@ void TemperatureSensor::get_value_json(JsonObject output, const Sensor & sensor)
     output["writeable"] = false;
     output["visible"]   = true;
 }
-
 
 // publish a single sensor to MQTT
 void TemperatureSensor::publish_sensor(const Sensor & sensor) {

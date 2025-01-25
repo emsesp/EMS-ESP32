@@ -139,7 +139,7 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
 #if defined(ARDUINO_LOLIN_C3_MINI) && !defined(BOARD_C3_MINI_V1)
                         (int8_t)(root["led_type"] | 1)};
 #else
-                        (int8_t)(root["led_type"] | 0)};
+                        (int8_t)(root["led_type"] | 0)}; // 0 = LED, 1 = RGB-LED
 #endif
             }
             // check valid pins in this board profile

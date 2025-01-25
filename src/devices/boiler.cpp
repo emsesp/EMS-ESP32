@@ -112,7 +112,7 @@ Boiler::Boiler(uint8_t device_type, int8_t device_id, uint8_t product_id, const 
                               DeviceValueUOM::DEGREES);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &heatValve_, DeviceValueType::UINT8, FL_(heatValve), DeviceValueUOM::PERCENT);
         register_device_value(DeviceValueTAG::TAG_DHW1, &wwValve_, DeviceValueType::UINT8, FL_(wwValve), DeviceValueUOM::PERCENT);
-        register_device_value(DeviceValueTAG::TAG_DHW1, &wwCurFlow_, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwCurFlow), DeviceValueUOM::LMIN);
+        // register_device_value(DeviceValueTAG::TAG_DHW1, &wwCurFlow_, DeviceValueType::UINT8, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(wwCurFlow), DeviceValueUOM::LMIN);
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                               &keepWarmTemp_,
                               DeviceValueType::UINT8,
