@@ -343,10 +343,10 @@ const sk: Translation = {
   DEVELOPER_MODE: 'Režim vývojára',
   DUPLICATE: 'Duplicitné',
   UPGRADE: 'Inovovať',
-  DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.', // TODO translate
-  NO_DATA_1: 'No favourite EMS entities found. Use the', // TODO translate
-  NO_DATA_2: 'module to mark them.', // TODO translate
-  NO_DATA_3: 'To see all available entities go to' // TODO translate
+  DASHBOARD_1: 'Všetky entity EMS, ktoré sú aktívne a označené ako obľúbené, plus všetky vlastné entity, plány a údaje externých senzorov sú zobrazené nižšie.',
+  NO_DATA_1: 'Nenašli sa žiadne obľúbené entity EMS. Použite',
+  NO_DATA_2: 'modul na ich označenie.',
+  NO_DATA_3: 'Ak chcete zobraziť všetky dostupné entity, prejdite na'
 };
 
 export default sk;
