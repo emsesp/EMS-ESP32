@@ -1637,10 +1637,10 @@ void EMSESP::start() {
     esp32React.begin();
 
 #ifndef EMSESP_STANDALONE
-    LOG_INFO("EMS-ESP version %s (%s partition)", EMSESP_APP_VERSION,
-             esp_ota_get_running_partition()->label); // welcome message
+    LOG_INFO("EMS-ESP version %s", EMSESP_APP_VERSION);
+    LOG_DEBUG("Boot partition %s, Active partition %s", esp_ota_get_boot_partition()->label, esp_ota_get_running_partition()->label);
 #else
-    LOG_INFO("EMS-ESP version %s", EMSESP_APP_VERSION); // welcome message
+    LOG_INFO("EMS-ESP version %s", EMSESP_APP_VERSION);
 #endif
     LOG_DEBUG("System is running in Debug mode");
     LOG_INFO("Last system reset reason Core0: %s, Core1: %s", system_.reset_reason(0).c_str(), system_.reset_reason(1).c_str());
