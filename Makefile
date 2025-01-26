@@ -102,9 +102,8 @@ CPPFLAGS  += -flto=auto -fno-lto
 CPPFLAGS  += -Wall -Wextra -Werror
 CPPFLAGS  += -Wswitch-enum
 CPPFLAGS  += -Wno-unused-parameter
-# CPPFLAGS    += -Wno-missing-braces
-# CPPFLAGS    += -Wno-sign-compare
-# CPPFLAGS    += -Wno-tautological-constant-out-of-range-compare
+CPPFLAGS  += -Wno-missing-braces
+CPPFLAGS  += -Wno-tautological-constant-out-of-range-compare
 
 CFLAGS    += $(CPPFLAGS)
 CXXFLAGS  += $(CPPFLAGS)
