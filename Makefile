@@ -96,13 +96,17 @@ CXX := /usr/bin/g++
 # LDFLAGS   Linker Flags
 #----------------------------------------------------------------------
 CPPFLAGS  += $(DEFINES) $(DEFAULTS) $(INCLUDE)
-CPPFLAGS  += -ggdb
-CPPFLAGS  += -g3
-CPPFLAGS  += -Os
+CPPFLAGS  += -ggdb -g3 -O3
+CPPFLAGS  += -flto=auto -fno-lto
 
 CFLAGS    += $(CPPFLAGS)
 CFLAGS    += -Wall -Wextra -Werror -Wswitch-enum
-CFLAGS    += -Wno-unused-parameter -Wno-missing-braces -Wno-sign-compare -Wno-tautological-constant-out-of-range-compare
+CFLAGS    += -Wno-unused-parameter
+CFLAGS    += -Wno-missing-braces
+CFLAGS    += -Wno-sign-compare
+CFLAGS    += -Wno-tautological-constant-out-of-range-compare
+CFLAGS    += -Wno-stringop-overread
+
 CXXFLAGS  += $(CFLAGS) -MMD
 
 #----------------------------------------------------------------------
