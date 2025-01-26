@@ -220,7 +220,7 @@ const char * Command::return_code_string(const uint8_t return_code) {
     default:
         break;
     }
-    char s[4];
+    static char s[4];
     return Helpers::smallitoa(s, return_code);
 }
 
