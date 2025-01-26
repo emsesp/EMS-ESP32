@@ -1,6 +1,6 @@
 #include "NetworkSettingsService.h"
 
-#include <emsesp_stub.hpp>
+#include <emsesp.h>
 
 NetworkSettingsService::NetworkSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(NetworkSettings::read, NetworkSettings::update, this, server, NETWORK_SETTINGS_SERVICE_PATH, securityManager)

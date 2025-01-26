@@ -1,6 +1,6 @@
 #include "NTPSettingsService.h"
 
-#include <emsesp_stub.hpp>
+#include <emsesp.h>
 
 NTPSettingsService::NTPSettingsService(AsyncWebServer * server, FS * fs, SecurityManager * securityManager)
     : _httpEndpoint(NTPSettings::read, NTPSettings::update, this, server, NTP_SETTINGS_SERVICE_PATH, securityManager)

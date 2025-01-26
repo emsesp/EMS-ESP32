@@ -1,6 +1,6 @@
 #include "NetworkStatus.h"
 
-#include <emsesp_stub.hpp>
+#include <emsesp.h>
 
 #ifdef TASMOTA_SDK
 #include "lwip/dns.h"
