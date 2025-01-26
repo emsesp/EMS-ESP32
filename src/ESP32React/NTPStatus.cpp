@@ -1,6 +1,6 @@
 #include "NTPStatus.h"
 
-#include <emsesp_stub.hpp>
+#include <emsesp.h>
 
 #include <array>
 

@@ -99,9 +99,10 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
     if (cmd == "2thermostats") {
         EMSESP::logger().notice("Testing with multiple thermostats...");
 
-        add_device(0x08, 123); // GB072
+        add_device(0x08, 123); // GB072 boiler
+
         add_device(0x10, 158); // RC310
-        add_device(0x18, 157); // Bosch CR100
+        add_device(0x19, 157); // RC200
 
         // Boiler -> Me, UBAMonitorFast(0x18), telegram: 08 00 18 00 00 02 5A 73 3D 0A 10 65 40 02 1A 80 00 01 E1 01 76 0E 3D 48 00 C9 44 02 00 (#data=25)
         uart_telegram({0x08, 0x00, 0x18, 0x00, 0x00, 0x02, 0x5A, 0x73, 0x3D, 0x0A, 0x10, 0x65, 0x40, 0x02, 0x1A,
@@ -122,7 +123,7 @@ bool Test::test(const std::string & cmd, int8_t id1, int8_t id2) {
 
         // 2nd thermostat on HC2
         // Thermostat RC300Monitor(0x02A6)
-        uart_telegram({0x98, 0x00, 0xFF, 0x00, 0x01, 0xA6, 0x00, 0xCF, 0x21, 0x2E, 0x00, 0x00, 0x2E, 0x24,
+        uart_telegram({0x99, 0x00, 0xFF, 0x00, 0x01, 0xA6, 0x00, 0xCF, 0x21, 0x2E, 0x00, 0x00, 0x2E, 0x24,
                        0x03, 0x25, 0x03, 0x03, 0x01, 0x03, 0x25, 0x00, 0xC8, 0x00, 0x00, 0x11, 0x01, 0x03});
 
         return true;
@@ -616,9 +617,30 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
 
     if (command == "2thermostats") {
         shell.printfln("Testing multiple thermostats...");
+        // adds hc1=(0x10, 158) RC310 and hc2=(0x19, 157) RC200
         test("2thermostats");
-        // shell.invoke_command("show values");
+        shell.invoke_command("show values");
         // shell.invoke_command("show devices");
+
+        AsyncWebServerRequest request;
+        request.method(HTTP_GET);
+
+        request.url("/api/thermostat");
+        EMSESP::webAPIService.webAPIService(&request);
+        Serial.println();
+
+        request.url("/api/thermostat/hc1/entities");
+        EMSESP::webAPIService.webAPIService(&request);
+        Serial.println();
+
+
+        request.url("/api/thermostat/hc2/entities");
+        EMSESP::webAPIService.webAPIService(&request);
+        Serial.println();
+        
+        request.url("/api/thermostat/entities");
+        EMSESP::webAPIService.webAPIService(&request);
+
         ok = true;
     }
 

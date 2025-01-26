@@ -2254,7 +2254,6 @@
 | netflowtemp | heat network flow temp | uint16 (>=0<=3199) | C | false | DEVICE_DATA | -1 | 1 | 1/10 | 
 | heatvalve | heating valve | uint8 (>=0<=100) | % | false | DEVICE_DATA | -1 | 1 | 1 | 
 | dhwvalve | valve | uint8 (>=0<=100) | % | false | DHW | -1 | 1 | 1 | 
-| curflow | current tap water flow | uint8 (>=0<=25) | l/min | false | DHW | -1 | 1 | 1/10 | 
 | keepwarmtemp | keep warm temperature | uint8 (>=0<=254) | C | true | DEVICE_DATA | -1 | 1 | 1 | 
 | setreturntemp | set temp return | uint8 (>=0<=254) | C | true | DEVICE_DATA | -1 | 1 | 1 | 
 | heating | heating | boolean |   | false | DEVICE_DATA | -1 | 1 | 1 | 

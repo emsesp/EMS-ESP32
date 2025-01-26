@@ -99,8 +99,8 @@ class EMSESP {
   public:
     EMSESP();
     ~EMSESP() = default;
-    virtual void start();
-    virtual void loop();
+    void start();
+    void loop();
 
     static uuid::log::Logger logger();
 

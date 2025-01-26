@@ -28,6 +28,24 @@ static_assert(uuid::console::thread_safe, "uuid-console must be thread-safe");
 
 namespace emsesp {
 
+// Static member definitions
+std::deque<std::unique_ptr<EMSdevice>> EMSESP::emsdevices;
+std::vector<EMSESP::Device_record>     EMSESP::device_library_;
+uuid::log::Logger                      EMSESP::logger_{F_(emsesp), uuid::log::Facility::KERN};
+uint16_t                               EMSESP::watch_id_         = WATCH_ID_NONE;
+uint8_t                                EMSESP::watch_            = 0;
+uint16_t                               EMSESP::read_id_          = WATCH_ID_NONE;
+bool                                   EMSESP::read_next_        = false;
+uint16_t                               EMSESP::publish_id_       = 0;
+uint16_t                               EMSESP::response_id_      = 0;
+bool                                   EMSESP::tap_water_active_ = false;
+uint8_t                                EMSESP::publish_all_idx_  = 0;
+uint8_t                                EMSESP::unique_id_count_  = 0;
+bool                                   EMSESP::trace_raw_        = false;
+uint16_t                               EMSESP::wait_validate_    = 0;
+bool                                   EMSESP::wait_km_          = true;
+uint32_t                               EMSESP::last_fetch_       = 0;
+
 AsyncWebServer webServer(80);
 
 #if defined(EMSESP_STANDALONE)
@@ -56,10 +74,6 @@ WebLogService      EMSESP::webLogService      = WebLogService(&webServer, EMSESP
 using DeviceFlags = EMSdevice;
 using DeviceType  = EMSdevice::DeviceType;
 
-std::deque<std::unique_ptr<EMSdevice>> EMSESP::emsdevices;      // array of all the detected EMS devices
-std::vector<EMSESP::Device_record>     EMSESP::device_library_; // library of all our known EMS devices, in heap
-
-uuid::log::Logger EMSESP::logger_{F_(emsesp), uuid::log::Facility::KERN};
 uuid::log::Logger EMSESP::logger() {
     return logger_;
 }
@@ -78,21 +92,6 @@ TemperatureSensor EMSESP::temperaturesensor_; // Temperature sensors
 AnalogSensor      EMSESP::analogsensor_;      // Analog sensors
 Shower            EMSESP::shower_;            // Shower logic
 Preferences       EMSESP::nvs_;               // NV Storage
-
-// static/common variables
-uint16_t EMSESP::watch_id_         = WATCH_ID_NONE; // for when log is TRACE. 0 means no trace set
-uint8_t  EMSESP::watch_            = 0;             // trace off
-uint16_t EMSESP::read_id_          = WATCH_ID_NONE;
-bool     EMSESP::read_next_        = false;
-uint16_t EMSESP::publish_id_       = 0;
-uint16_t EMSESP::response_id_      = 0;
-bool     EMSESP::tap_water_active_ = false; // for when Boiler states we having running warm water. used in Shower()
-uint32_t EMSESP::last_fetch_       = 0;
-uint8_t  EMSESP::publish_all_idx_  = 0;
-uint8_t  EMSESP::unique_id_count_  = 0;
-bool     EMSESP::trace_raw_        = false;
-uint16_t EMSESP::wait_validate_    = 0;
-bool     EMSESP::wait_km_          = true;
 
 // for a specific EMS device go and request data values
 // or if device_id is 0 it will fetch from all our known and active devices
@@ -766,11 +765,16 @@ void EMSESP::publish_response(std::shared_ptr<const Telegram> telegram) {
 bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8_t id, const uint8_t devicetype) {
     // check first for EMS devices
     bool found_device = false;
+
     for (const auto & emsdevice : emsdevices) {
         if (emsdevice->device_type() == devicetype) {
             found_device = true;
+            // we may have multiple devices of the same type, so we need to check the id (e.g. id could be a hc number)
             if (emsdevice->get_value_info(root, cmd, id)) {
-                return true;
+                // if we have no values, keep going traversing the devices, it may be a thermostat with multiple hc's
+                if (root.size()) {
+                    return true;
+                }
             }
         }
     }

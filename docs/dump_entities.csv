@@ -3153,7 +3153,6 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Greenstar HIU, Logamax kompakt WS170",boiler,219,netflowtemp,heat network flow temp,uint16 (>=0<=3199),C,false,sensor.boiler_heat_network_flow_temp,sensor.boiler_netflowtemp,5,0,1/10,271,1
 "Greenstar HIU, Logamax kompakt WS170",boiler,219,heatvalve,heating valve,uint8 (>=0<=100),%,false,sensor.boiler_heating_valve,sensor.boiler_heatvalve,5,0,1,272,1
 "Greenstar HIU, Logamax kompakt WS170",boiler,219,dhw.dhwvalve,valve,uint8 (>=0<=100),%,false,sensor.boiler_dhw_valve,sensor.boiler_dhw_dhwvalve,5,9,1,73,1
-"Greenstar HIU, Logamax kompakt WS170",boiler,219,dhw.curflow,current tap water flow,uint8 (>=0<=25),l/min,false,sensor.boiler_dhw_current_tap_water_flow,sensor.boiler_dhw_curflow,5,9,1/10,52,1
 "Greenstar HIU, Logamax kompakt WS170",boiler,219,keepwarmtemp,keep warm temperature,uint8 (>=0<=254),C,true,number.boiler_keep_warm_temperature,number.boiler_keepwarmtemp,5,0,1,273,1
 "Greenstar HIU, Logamax kompakt WS170",boiler,219,setreturntemp,set temp return,uint8 (>=0<=254),C,true,number.boiler_set_temp_return,number.boiler_setreturntemp,5,0,1,274,1
 "Greenstar HIU, Logamax kompakt WS170",boiler,219,heating,heating,boolean, ,false,binary_sensor.boiler_heating,binary_sensor.boiler_heating,5,0,1,275,1
