@@ -637,6 +637,9 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         request.url("/api/thermostat/hc2/entities");
         EMSESP::webAPIService.webAPIService(&request);
         Serial.println();
+        
+        request.url("/api/thermostat/entities");
+        EMSESP::webAPIService.webAPIService(&request);
 
         ok = true;
     }
