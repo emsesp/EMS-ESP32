@@ -1211,7 +1211,9 @@ void Boiler::process_UBAFactory(std::shared_ptr<const Telegram> telegram) {
         return;
     }
     toggle_fetch(telegram->type_id, false); // only read once
-    uint8_t min, max, nomPower;
+    uint8_t min  = 0;
+    uint8_t max  = 0;
+    uint8_t nomPower = 0;
     telegram->read_value(nomPower, 4);
     telegram->read_value(min, 5);
     telegram->read_value(max, 6);
@@ -1777,7 +1779,9 @@ void Boiler::process_UBAOutdoorTemp(std::shared_ptr<const Telegram> telegram) {
 
 // UBASetPoint 0x1A
 void Boiler::process_UBASetPoints(std::shared_ptr<const Telegram> telegram) {
-    uint8_t setFlowTemp_, setBurnPow_, wwSetBurnPow_;
+    uint8_t setFlowTemp_ = 0;
+    uint8_t setBurnPow_  = 0;
+    uint8_t wwSetBurnPow_ = 0;
     telegram->read_value(setFlowTemp_, 0);
     telegram->read_value(setBurnPow_, 1);
     telegram->read_value(wwSetBurnPow_, 2);
@@ -2936,7 +2940,7 @@ bool Boiler::set_HpInLogic(const char * value, const int8_t id) {
         return true;
     }
     char option[] = {"xxxxxxxxxxxxxxx"};
-    strncpy(option, value, strlen(value)); // copy without termination
+    strncpy(option, value, strlen(option)); // copy without termination
     // inputs 1,2,3 <inv>[<evu1><evu2><evu3><comp><aux><cool><heat><dhw><pv><prot><pres><mod>]
     if (id < 4) {
         uint8_t index[] = {0, 3, 6, 9, 12, 15, 18, 21, 24, 39, 36, 30};
