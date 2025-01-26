@@ -2047,7 +2047,7 @@ int EMSdevice::get_modbus_value(uint8_t tag, const std::string & shortname, std:
             return -5;
         }
 
-        for (auto i = 0; i < register_length_s; i++) {
+        for (size_t i = 0; i < register_length_s; i++) {
             auto hi   = (uint8_t)value_s[2 * i];
             auto lo   = (uint8_t)(2 * i + 1 < length_s ? value_s[2 * i + 1] : 0);
             result[i] = ((uint16_t)hi << 8) | lo;
@@ -2165,7 +2165,7 @@ int EMSdevice::modbus_value_to_json(uint8_t tag, const std::string & shortname, 
         }
 
         uint32_t value = 0;
-        for (auto i = 0; i < modbus_data.size(); i++) {
+        for (size_t i = 0; i < modbus_data.size(); i++) {
             value += (uint32_t)modbus_data[modbus_data.size() - i - 1] << (i * 8);
         }
 

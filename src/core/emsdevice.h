@@ -151,7 +151,7 @@ class EMSdevice {
     }
 
     void has_update(char * value, const char * newvalue, size_t len) {
-        if (value && strcmp(value, newvalue) != 0) {
+        if (value && newvalue && strcmp(value, newvalue) != 0) {
             strlcpy(value, newvalue, len);
             has_update_ = true;
             publish_value(value);
