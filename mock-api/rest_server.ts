@@ -4500,14 +4500,14 @@ router
     params.id ? deviceEntities(Number(params.id)) : status(404)
   )
   .get(EMSESP_DASHBOARD_DATA_ENDPOINT, () => {
-    let dashboard_data: { id?: number; n?: string; t?: number; nodes?: any[] }[] =
+    let dashboard_nodes: { id?: number; n?: string; t?: number; nodes?: any[] }[] =
       [];
     let dashboard_object: { id?: number; n?: string; t?: number; nodes?: any[] } =
       {};
 
     let fake = false;
 
-    fake = true; // for testing, shows a subset of data
+    // fake = true; // for testing, shows a subset of data
 
     if (!fake) {
       // pick EMS devices from coredata
@@ -4522,7 +4522,7 @@ router
         };
         // only add to dashboard if we have values
         if ((dashboard_object.nodes ?? []).length > 0) {
-          dashboard_data.push(dashboard_object);
+          dashboard_nodes.push(dashboard_object);
         }
       }
 
@@ -4534,7 +4534,7 @@ router
       };
       // only add to dashboard if we have values
       if ((dashboard_object.nodes ?? []).length > 0) {
-        dashboard_data.push(dashboard_object);
+        dashboard_nodes.push(dashboard_object);
       }
 
       // add temperature sensor data. no command c
@@ -4554,7 +4554,7 @@ router
       };
       // only add to dashboard if we have values
       if ((dashboard_object.nodes ?? []).length > 0) {
-        dashboard_data.push(dashboard_object);
+        dashboard_nodes.push(dashboard_object);
       }
 
       // add analog sensor data. no command c
@@ -4575,7 +4575,7 @@ router
       };
       // only add to dashboard if we have values
       if ((dashboard_object.nodes ?? []).length > 0) {
-        dashboard_data.push(dashboard_object);
+        dashboard_nodes.push(dashboard_object);
       }
 
       // add the scheduler data
@@ -4597,7 +4597,7 @@ router
       };
       // only add to dashboard if we have values
       if ((dashboard_object.nodes ?? []).length > 0) {
-        dashboard_data.push(dashboard_object);
+        dashboard_nodes.push(dashboard_object);
       }
     } else {
       // for testing only
@@ -4609,7 +4609,7 @@ router
         nodes: getDashboardEntityData(DeviceTypeUniqueID.CUSTOM_UID)
       };
       if ((dashboard_object.nodes ?? []).length > 0) {
-        dashboard_data.push(dashboard_object);
+        dashboard_nodes.push(dashboard_object);
       }
 
       // add the scheduler data
@@ -4633,10 +4633,15 @@ router
       // }
     }
 
-    // console.log('dashboard_data: ', dashboard_data);
+    const dashboardData = {
+      // connect: false,
+      connected: true,
+      nodes: dashboard_nodes
+    };
+    // console.log('dashboardData: ', dashboardData);
 
     // return dashboard_data; // if not using msgpack
-    return new Response(encoder.encode(dashboard_data), { headers }); // msgpack it
+    return new Response(encoder.encode(dashboardData), { headers }); // msgpack it
   })
 
   // Customizations

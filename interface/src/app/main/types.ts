@@ -124,6 +124,11 @@ export interface DashboardItem {
   nodes?: DashboardItem[]; // children nodes, optional
 }
 
+export interface DashboardData {
+  connected: boolean; // true if connected to EMS bus
+  nodes: DashboardItem[];
+}
+
 export interface DeviceValue {
   id: string; // index, contains mask+name
   v?: unknown; // value, Number, String or Boolean - can be undefined

@@ -6,11 +6,11 @@ import { toast } from 'react-toastify';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 import {
   Box,
-  Grid2 as Grid,
   IconButton,
   ToggleButton,
   ToggleButtonGroup,
@@ -58,10 +58,10 @@ const Dashboard = () => {
     error,
     loading
   } = useRequest(readDashboard, {
-    initialData: []
+    initialData: { connected: false, nodes: [] }
   }).onSuccess((event) => {
-    if (event.data.length !== parentNodes) {
-      setParentNodes(event.data.length); // count number of parents/devices
+    if (event.data.nodes.length !== parentNodes) {
+      setParentNodes(event.data.nodes.length); // count number of parents/devices
     }
   });
 
@@ -121,7 +121,7 @@ const Dashboard = () => {
   });
 
   const tree = useTree(
-    { nodes: data },
+    { nodes: data.nodes },
     {
       onChange: undefined // not used but needed
     },
@@ -154,7 +154,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     showAll
-      ? tree.fns.onAddAll(data.map((item: DashboardItem) => item.id)) // expand tree
+      ? tree.fns.onAddAll(data.nodes.map((item: DashboardItem) => item.id)) // expand tree
       : tree.fns.onRemoveAll(); // collapse tree
   }, [parentNodes]);
 
@@ -224,47 +224,22 @@ const Dashboard = () => {
       return <FormLoader onRetry={fetchDashboard} errorMessage={error?.message} />;
     }
 
-    const hasFavEntities = data.filter(
+    if (loading) {
+      return;
+    }
+
+    const hasFavEntities = data.nodes.filter(
       (item: DashboardItem) => item.id <= 90
     ).length;
 
     return (
       <>
-        <Box
-          sx={{
-            backgroundColor: 'black',
-            pt: 1,
-            pl: 2
-          }}
-        >
-          <Grid container spacing={0} justifyContent="flex-start">
-            <Grid size={11}>
-              <Typography mb={2} variant="body1" color="warning">
-                {LL.DASHBOARD_1()}
-              </Typography>
-            </Grid>
+        {!data.connected && (
+          <MessageBox mb={2} level="error" message={LL.EMS_BUS_WARNING()} />
+        )}
 
-            <Grid size={1} alignItems="end">
-              <ToggleButtonGroup
-                color="primary"
-                size="small"
-                value={showAll}
-                exclusive
-                onChange={handleShowAll}
-              >
-                <ToggleButton value={true}>
-                  <UnfoldMoreIcon sx={{ fontSize: 18 }} />
-                </ToggleButton>
-                <ToggleButton value={false}>
-                  <UnfoldLessIcon sx={{ fontSize: 18 }} />
-                </ToggleButton>
-              </ToggleButtonGroup>
-            </Grid>
-          </Grid>
-        </Box>
-
-        {!loading && !hasFavEntities && (
-          <MessageBox my={1} level="info">
+        {data.connected && !hasFavEntities && (
+          <MessageBox mb={2} level="warning">
             <Typography>
               {LL.NO_DATA_1()}&nbsp;
               <Link to="/customizations" style={{ color: 'white' }}>
@@ -280,80 +255,107 @@ const Dashboard = () => {
           </MessageBox>
         )}
 
-        {data.length > 0 && (
-          <Box
-            padding={1}
-            justifyContent="center"
-            flexDirection="column"
-            sx={{
-              borderRadius: 1,
-              border: '1px solid grey'
-            }}
-          >
-            <IconContext.Provider
-              value={{
-                color: 'lightblue',
-                size: '18',
-                style: { verticalAlign: 'middle' }
+        {data.nodes.length > 0 && (
+          <>
+            <ToggleButtonGroup
+              color="primary"
+              size="small"
+              value={showAll}
+              exclusive
+              onChange={handleShowAll}
+            >
+              <Tooltip placement="top" title={LL.ALLVALUES()} arrow>
+                <ToggleButton value={true}>
+                  <UnfoldMoreIcon sx={{ fontSize: 18 }} />
+                </ToggleButton>
+              </Tooltip>
+              <Tooltip placement="top" title={LL.COMPACT()} arrow>
+                <ToggleButton value={false}>
+                  <UnfoldLessIcon sx={{ fontSize: 18 }} />
+                </ToggleButton>
+              </Tooltip>
+            </ToggleButtonGroup>
+            <Tooltip placement="top" title={LL.DASHBOARD_1()} arrow>
+              <HelpOutlineIcon color="primary" sx={{ ml: 1, fontSize: 20 }} />
+            </Tooltip>
+
+            <Box
+              padding={1}
+              justifyContent="center"
+              flexDirection="column"
+              sx={{
+                borderRadius: 1,
+                border: '1px solid grey'
               }}
             >
-              <Table
-                data={{ nodes: data }}
-                theme={dashboard_theme}
-                layout={{ custom: true }}
-                tree={tree}
+              <IconContext.Provider
+                value={{
+                  color: 'lightblue',
+                  size: '18',
+                  style: { verticalAlign: 'middle' }
+                }}
               >
-                {(tableList: DashboardItem[]) => (
-                  <Body>
-                    {tableList.map((di: DashboardItem) => (
-                      <Row
-                        key={di.id}
-                        item={di}
-                        onClick={() => editDashboardValue(di)}
-                      >
-                        {di.id > 99 ? (
-                          <>
-                            <Cell>{showName(di)}</Cell>
-                            <Cell>
-                              <Tooltip
-                                placement="left"
-                                title={formatValue(LL, di.dv?.v, di.dv?.u)}
-                                arrow
-                              >
-                                <span>{formatValue(LL, di.dv?.v, di.dv?.u)}</span>
-                              </Tooltip>
-                            </Cell>
+                <Table
+                  data={{ nodes: data.nodes }}
+                  theme={dashboard_theme}
+                  layout={{ custom: true }}
+                  tree={tree}
+                >
+                  {(tableList: DashboardItem[]) => (
+                    <Body>
+                      {tableList.map((di: DashboardItem) => (
+                        <Row
+                          key={di.id}
+                          item={di}
+                          onClick={() => editDashboardValue(di)}
+                        >
+                          {di.id > 99 ? (
+                            <>
+                              <Cell>{showName(di)}</Cell>
+                              <Cell>
+                                <Tooltip
+                                  placement="left"
+                                  title={formatValue(LL, di.dv?.v, di.dv?.u)}
+                                  arrow
+                                >
+                                  <span>{formatValue(LL, di.dv?.v, di.dv?.u)}</span>
+                                </Tooltip>
+                              </Cell>
 
-                            <Cell>
-                              {me.admin &&
-                                di.dv?.c &&
-                                !hasMask(di.dv.id, DeviceEntityMask.DV_READONLY) && (
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => editDashboardValue(di)}
-                                  >
-                                    <EditIcon
-                                      color="primary"
-                                      sx={{ fontSize: 16 }}
-                                    />
-                                  </IconButton>
-                                )}
-                            </Cell>
-                          </>
-                        ) : (
-                          <>
-                            <CellTree item={di}>{showName(di)}</CellTree>
-                            <Cell />
-                            <Cell />
-                          </>
-                        )}
-                      </Row>
-                    ))}
-                  </Body>
-                )}
-              </Table>
-            </IconContext.Provider>
-          </Box>
+                              <Cell>
+                                {me.admin &&
+                                  di.dv?.c &&
+                                  !hasMask(
+                                    di.dv.id,
+                                    DeviceEntityMask.DV_READONLY
+                                  ) && (
+                                    <IconButton
+                                      size="small"
+                                      onClick={() => editDashboardValue(di)}
+                                    >
+                                      <EditIcon
+                                        color="primary"
+                                        sx={{ fontSize: 16 }}
+                                      />
+                                    </IconButton>
+                                  )}
+                              </Cell>
+                            </>
+                          ) : (
+                            <>
+                              <CellTree item={di}>{showName(di)}</CellTree>
+                              <Cell />
+                              <Cell />
+                            </>
+                          )}
+                        </Row>
+                      ))}
+                    </Body>
+                  )}
+                </Table>
+              </IconContext.Provider>
+            </Box>
+          </>
         )}
       </>
     );
