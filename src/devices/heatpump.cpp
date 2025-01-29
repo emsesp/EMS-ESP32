@@ -184,8 +184,8 @@ Heatpump::Heatpump(uint8_t device_type, uint8_t device_id, uint8_t product_id, c
     register_device_value(DeviceValueTAG::TAG_DHW1, &wwStartsHp_, DeviceValueType::UINT24, FL_(wwStartsHp), DeviceValueUOM::NONE);
 
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &fuelHeat_, DeviceValueType::UINT32, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(fuelHeat), DeviceValueUOM::KWH);
-    register_device_value(DeviceValueTAG::TAG_DHW1, &elDhw_, DeviceValueType::UINT32, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(fuelDhw), DeviceValueUOM::KWH);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &fuelHeat_, DeviceValueType::UINT32, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(elHeat), DeviceValueUOM::KWH);
+    register_device_value(DeviceValueTAG::TAG_DHW1, &fuelDhw_, DeviceValueType::UINT32, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(fuelDhw), DeviceValueUOM::KWH);
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &elHeat_, DeviceValueType::UINT32, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(elHeat), DeviceValueUOM::KWH);
     register_device_value(DeviceValueTAG::TAG_DHW1, &elDhw_, DeviceValueType::UINT32, DeviceValueNumOp::DV_NUMOP_DIV10, FL_(elDhw), DeviceValueUOM::KWH);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                           &elGenHeat_,

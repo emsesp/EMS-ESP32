@@ -145,6 +145,12 @@ void RxService::add(uint8_t * data, uint8_t length) {
         return;
     }
 
+    // ignore src==0, https://github.com/emsesp/EMS-ESP32/issues/2378
+    if (!(data[0] & 0x7F)) {
+        LOG_WARNING("Invalid source: %s", Helpers::data_to_hex(data, length).c_str()); // include CRC
+        return;
+    }
+
     // validate the CRC. if it fails then increment the number of corrupt/incomplete telegrams and only report to console/syslog
     uint8_t crc = calculate_crc(data, length - 1);
     if (data[length - 1] != crc) {
