@@ -14,7 +14,6 @@ import {
   IconButton,
   ToggleButton,
   ToggleButtonGroup,
-  Tooltip,
   Typography
 } from '@mui/material';
 
@@ -22,7 +21,13 @@ import { Body, Cell, Row, Table } from '@table-library/react-table-library/table
 import { useTheme } from '@table-library/react-table-library/theme';
 import { CellTree, useTree } from '@table-library/react-table-library/tree';
 import { useRequest } from 'alova/client';
-import { FormLoader, MessageBox, SectionContent, useLayoutTitle } from 'components';
+import {
+  ButtonTooltip,
+  FormLoader,
+  MessageBox,
+  SectionContent,
+  useLayoutTitle
+} from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import { useInterval, usePersistState } from 'utils';
@@ -55,8 +60,7 @@ const Dashboard = () => {
   const {
     data,
     send: fetchDashboard,
-    error,
-    loading
+    error
   } = useRequest(readDashboard, {
     initialData: { connected: false, nodes: [] }
   }).onSuccess((event) => {
@@ -224,10 +228,6 @@ const Dashboard = () => {
       return <FormLoader onRetry={fetchDashboard} errorMessage={error?.message} />;
     }
 
-    if (loading) {
-      return;
-    }
-
     const hasFavEntities = data.nodes.filter(
       (item: DashboardItem) => item.id <= 90
     ).length;
@@ -264,20 +264,20 @@ const Dashboard = () => {
               exclusive
               onChange={handleShowAll}
             >
-              <Tooltip placement="top" title={LL.ALLVALUES()} arrow>
+              <ButtonTooltip title={LL.ALLVALUES()} arrow>
                 <ToggleButton value={true}>
                   <UnfoldMoreIcon sx={{ fontSize: 18 }} />
                 </ToggleButton>
-              </Tooltip>
-              <Tooltip placement="top" title={LL.COMPACT()} arrow>
+              </ButtonTooltip>
+              <ButtonTooltip title={LL.COMPACT()} arrow>
                 <ToggleButton value={false}>
                   <UnfoldLessIcon sx={{ fontSize: 18 }} />
                 </ToggleButton>
-              </Tooltip>
+              </ButtonTooltip>
             </ToggleButtonGroup>
-            <Tooltip placement="top" title={LL.DASHBOARD_1()} arrow>
+            <ButtonTooltip title={LL.DASHBOARD_1()} arrow>
               <HelpOutlineIcon color="primary" sx={{ ml: 1, fontSize: 20 }} />
-            </Tooltip>
+            </ButtonTooltip>
 
             <Box
               padding={1}
@@ -313,13 +313,11 @@ const Dashboard = () => {
                             <>
                               <Cell>{showName(di)}</Cell>
                               <Cell>
-                                <Tooltip
-                                  placement="left"
+                                <ButtonTooltip
                                   title={formatValue(LL, di.dv?.v, di.dv?.u)}
-                                  arrow
                                 >
                                   <span>{formatValue(LL, di.dv?.v, di.dv?.u)}</span>
-                                </Tooltip>
+                                </ButtonTooltip>
                               </Cell>
 
                               <Cell>

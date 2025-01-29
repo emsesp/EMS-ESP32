@@ -35,11 +35,7 @@ import {
   List,
   ListItem,
   ListItemText,
-  Tooltip,
-  type TooltipProps,
-  Typography,
-  styled,
-  tooltipClasses
+  Typography
 } from '@mui/material';
 
 import { useRowSelect } from '@table-library/react-table-library/select';
@@ -57,7 +53,12 @@ import { useTheme } from '@table-library/react-table-library/theme';
 import type { Action, State } from '@table-library/react-table-library/types/common';
 import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova/client';
-import { MessageBox, SectionContent, useLayoutTitle } from 'components';
+import {
+  ButtonTooltip,
+  MessageBox,
+  SectionContent,
+  useLayoutTitle
+} from 'components';
 import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 import { useInterval } from 'utils';
@@ -220,20 +221,6 @@ const Devices = () => {
       `
     }
   ]);
-
-  const ButtonTooltip = styled(({ className, ...props }: TooltipProps) => (
-    <Tooltip {...props} arrow classes={{ popper: className }} />
-  ))(({ theme }) => ({
-    [`& .${tooltipClasses.arrow}`]: {
-      color: theme.palette.success.main
-    },
-    [`& .${tooltipClasses.tooltip}`]: {
-      backgroundColor: theme.palette.success.main,
-      color: 'rgba(0, 0, 0, 0.87)',
-      boxShadow: theme.shadows[1],
-      fontSize: 10
-    }
-  }));
 
   const getSortIcon = (state: State, sortKey: unknown) => {
     if (state.sortKey === sortKey && state.reverse) {
