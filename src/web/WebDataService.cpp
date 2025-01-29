@@ -352,19 +352,25 @@ void WebDataService::write_analog_sensor(AsyncWebServerRequest * request, JsonVa
 // this is used in the dashboard and contains all ems device information
 // /dashboardData endpoint
 void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
-    auto * response = new AsyncMessagePackResponse(true);
+    auto * response = new AsyncMessagePackResponse();
 
 #if defined(EMSESP_STANDALONE)
     JsonDocument doc;
-    JsonArray    root = doc.to<JsonArray>();
+    JsonObject   root = doc.to<JsonObject>();
 #else
-    JsonArray root = response->getRoot();
+    JsonObject root = response->getRoot();
 #endif
 
-    // first do all the recognized devices
+    // add state of EMS bus
+    root["connected"] = EMSESP::bus_status() != 2;
+
+    // add all the data
+    JsonArray nodes = root["nodes"].to<JsonArray>();
+
+    // first fetch all the recognized devices
     for (const auto & emsdevice : EMSESP::emsdevices) {
         if (emsdevice->count_entities_fav()) {
-            JsonObject obj = root.add<JsonObject>();
+            JsonObject obj = nodes.add<JsonObject>();
             obj["id"]      = emsdevice->unique_id();   // it's unique id
             obj["n"]       = emsdevice->name();        // custom name
             obj["t"]       = emsdevice->device_type(); // device type number
@@ -374,15 +380,15 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
 
     // add custom entities, if we have any
     if (EMSESP::webCustomEntityService.count_entities()) {
-        JsonObject obj = root.add<JsonObject>();
+        JsonObject obj = nodes.add<JsonObject>();
         obj["id"]      = EMSdevice::DeviceTypeUniqueID::CUSTOM_UID; // it's unique id
         obj["t"]       = EMSdevice::DeviceType::CUSTOM;             // device type number
         EMSESP::webCustomEntityService.generate_value_web(obj, true);
     }
 
-    // add temperature sensors
+    // add temperature sensors, if we have any
     if (EMSESP::temperaturesensor_.have_sensors()) {
-        JsonObject obj  = root.add<JsonObject>();
+        JsonObject obj  = nodes.add<JsonObject>();
         obj["id"]       = EMSdevice::DeviceTypeUniqueID::TEMPERATURESENSOR_UID; // it's unique id
         obj["t"]        = EMSdevice::DeviceType::TEMPERATURESENSOR;             // device type number
         JsonArray nodes = obj["nodes"].to<JsonArray>();
@@ -409,7 +415,7 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
 
     // add analog sensors, count excludes disabled entries
     if (EMSESP::analog_enabled() && EMSESP::analogsensor_.count_entities(false)) {
-        JsonObject obj  = root.add<JsonObject>();
+        JsonObject obj  = nodes.add<JsonObject>();
         obj["id"]       = EMSdevice::DeviceTypeUniqueID::ANALOGSENSOR_UID; // it's unique id
         obj["t"]        = EMSdevice::DeviceType::ANALOGSENSOR;             // device type number
         JsonArray nodes = obj["nodes"].to<JsonArray>();
@@ -449,7 +455,7 @@ void WebDataService::dashboard_data(AsyncWebServerRequest * request) {
 
     // show scheduler, with name, on/off
     if (EMSESP::webSchedulerService.count_entities(true)) {
-        JsonObject obj  = root.add<JsonObject>();
+        JsonObject obj  = nodes.add<JsonObject>();
         obj["id"]       = EMSdevice::DeviceTypeUniqueID::SCHEDULER_UID; // it's unique id
         obj["t"]        = EMSdevice::DeviceType::SCHEDULER;             // device type number
         JsonArray nodes = obj["nodes"].to<JsonArray>();

@@ -344,7 +344,7 @@ const cz: Translation = {
   DUPLICATE: 'Duplikát',
   UPGRADE: 'Upgrade',
   DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.', // TODO translate
-  NO_DATA_1: 'No favourite EMS entities found. Use the', // TODO translate
+  NO_DATA_1: 'No favourite EMS entities found yet. Use the', // TODO translate
   NO_DATA_2: 'module to mark them.', // TODO translate
   NO_DATA_3: 'To see all available entities go to' // TODO translate
 };
