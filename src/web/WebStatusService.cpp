@@ -204,12 +204,14 @@ void WebStatusService::action(AsyncWebServerRequest * request, JsonVariant json)
     Serial.println(COLOR_RESET);
 #endif
 
-    // send response
+    // check for error
     if (!ok) {
-        request->send(400);
+        emsesp::EMSESP::logger().err("Action '%s' failed", action.c_str());
+        request->send(400); // bad request
         return;
     }
 
+    // send response
     response->setLength();
     request->send(response);
 }
@@ -256,7 +258,7 @@ bool WebStatusService::checkUpgrade(JsonObject root, std::string & versions) {
 }
 
 // action = allvalues
-// output all the devices and the values
+// output all the devices and their values, including custom entities, scheduler and sensors
 void WebStatusService::allvalues(JsonObject output) {
     JsonObject device_output;
     auto       value = F_(values);

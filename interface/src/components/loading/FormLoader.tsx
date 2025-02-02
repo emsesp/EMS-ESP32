@@ -17,6 +17,7 @@ const FormLoader = ({ errorMessage, onRetry }: FormLoaderProps) => {
       <MessageBox my={2} level="error" message={errorMessage}>
         {onRetry && (
           <Button
+            sx={{ ml: 2 }}
             startIcon={<RefreshIcon />}
             variant="contained"
             color="error"

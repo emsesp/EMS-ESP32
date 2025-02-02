@@ -51,20 +51,6 @@ const Help = () => {
     }
   });
 
-  // const { send: sendExportAllValues } = useRequest(
-  //   () => callAction({ action: 'export', param: 'allvalues' }),
-  //   {
-  //     immediate: false
-  //   }
-  // )
-  //   .onSuccess((event) => {
-  //     saveFile(event.data, 'allvalues', '.txt');
-  //     toast.info(LL.DOWNLOAD_SUCCESSFUL());
-  //   })
-  //   .onError((error) => {
-  //     toast.error(error.message);
-  //   });
-
   const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
     immediate: false
   })
@@ -164,16 +150,6 @@ const Help = () => {
           {LL.SUPPORT_INFORMATION(0)}
         </Button>
       </Box>
-
-      {/* <Button
-        sx={{ ml: 2 }}
-        startIcon={<DownloadIcon />}
-        variant="outlined"
-        color="primary"
-        onClick={() => sendExportAllValues()}
-      >
-        {LL.DOWNLOAD(1)}&nbsp;{LL.ALLVALUES()}
-      </Button> */}
 
       <Divider sx={{ mt: 4 }} />
 

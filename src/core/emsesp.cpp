@@ -43,7 +43,7 @@ uint8_t                                EMSESP::publish_all_idx_  = 0;
 uint8_t                                EMSESP::unique_id_count_  = 0;
 bool                                   EMSESP::trace_raw_        = false;
 uint16_t                               EMSESP::wait_validate_    = 0;
-bool                                   EMSESP::wait_km_          = true;
+bool                                   EMSESP::wait_km_          = false;
 uint32_t                               EMSESP::last_fetch_       = 0;
 
 AsyncWebServer webServer(80);

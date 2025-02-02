@@ -108,6 +108,15 @@ const DownloadUpload = () => {
             {LL.SCHEDULE(0)}
           </Button>
         </Grid>
+        <Button
+          sx={{ ml: 2, mt: 2 }}
+          startIcon={<DownloadIcon />}
+          variant="outlined"
+          color="primary"
+          onClick={() => sendExportData('allvalues')}
+        >
+          {LL.ALLVALUES()}
+        </Button>
 
         <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
           {LL.UPLOAD()}
