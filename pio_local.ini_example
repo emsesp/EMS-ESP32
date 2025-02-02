@@ -50,6 +50,13 @@ custom_password = admin
 ; upload_protocol = custom
 ; custom_emsesp_ip = 10.10.10.93
 
+; example override for lib_deps and using locally built modules
+;lib_deps =
+;  bblanchon/ArduinoJson @ 7.3.0
+;  ESP32Async/AsyncTCP @ 3.3.2
+;  ESP32Async/ESPAsyncWebServer @ 3.6.2
+;  file://${PROJECT_DIR}/../modules/EMS-ESP-Modules
+
 ; ** debug settings **
 ; to be used with esp-prog/JTAG hardware device like https://docs.espressif.com/projects/esp-dev-kits/en/latest/other/esp-prog/user_guide.html   
 ; pio run -e debug
