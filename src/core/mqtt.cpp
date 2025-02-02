@@ -66,12 +66,12 @@ std::string Mqtt::lastresponse_ = "";
 // icons from https://materialdesignicons.com used with the UOMs (unit of measurements)
 MAKE_WORD(measurement)
 MAKE_WORD(total_increasing)
-MAKE_WORD_CUSTOM(icondegrees, "mdi:coolant-temperature") // DeviceValueUOM::DEGREES
-MAKE_WORD_CUSTOM(iconpercent, "mdi:percent-outline")     // DeviceValueUOM::PERCENT
-MAKE_WORD_CUSTOM(iconkb, "mdi:memory")                   // DeviceValueUOM::KB
-MAKE_WORD_CUSTOM(iconlmin, "mdi:water-boiler")           // DeviceValueUOM::LMIN
-MAKE_WORD_CUSTOM(iconua, "mdi:lightning-bolt-circle")    // DeviceValueUOM::UA
-MAKE_WORD_CUSTOM(iconnum, "mdi:counter")                 // DeviceValueUOM::NONE
+// MAKE_WORD_CUSTOM(icondegrees, "mdi:coolant-temperature") // DeviceValueUOM::DEGREES
+MAKE_WORD_CUSTOM(iconpercent, "mdi:percent-outline")  // DeviceValueUOM::PERCENT
+MAKE_WORD_CUSTOM(iconkb, "mdi:memory")                // DeviceValueUOM::KB
+MAKE_WORD_CUSTOM(iconlmin, "mdi:water-boiler")        // DeviceValueUOM::LMIN
+MAKE_WORD_CUSTOM(iconua, "mdi:lightning-bolt-circle") // DeviceValueUOM::UA
+MAKE_WORD_CUSTOM(iconnum, "mdi:counter")              // DeviceValueUOM::NONE
 
 uuid::log::Logger Mqtt::logger_{F_(mqtt), uuid::log::Facility::DAEMON};
 
@@ -1149,8 +1149,6 @@ void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, con
     case DeviceValueUOM::K:
         doc[sc_ha] = F_(measurement);
         doc[dc_ha] = "temperature";
-        if (is_discovery)
-            doc["ic"] = F_(icondegrees); // icon // TODO check if still needed
         // override uom if fahrenheit
         doc[uom_ha] = EMSESP::system_.fahrenheit() ? DeviceValue::DeviceValueUOM_s[DeviceValueUOM::FAHRENHEIT] : DeviceValue::DeviceValueUOM_s[uom];
         break;
@@ -1158,7 +1156,7 @@ void Mqtt::add_ha_uom(JsonObject doc, const uint8_t type, const uint8_t uom, con
         doc[sc_ha] = F_(measurement);
         doc[dc_ha] = "power_factor";
         if (is_discovery)
-            doc["ic"] = F_(iconpercent); // icon // TODO check if still needed
+            doc["ic"] = F_(iconpercent); // icon
         break;
     case DeviceValueUOM::SECONDS:
     case DeviceValueUOM::MINUTES:
