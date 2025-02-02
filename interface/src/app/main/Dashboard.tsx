@@ -62,7 +62,7 @@ const Dashboard = () => {
     send: fetchDashboard,
     error
   } = useRequest(readDashboard, {
-    initialData: { connected: false, nodes: [] }
+    initialData: { connected: true, nodes: [] }
   }).onSuccess((event) => {
     if (event.data.nodes.length !== parentNodes) {
       setParentNodes(event.data.nodes.length); // count number of parents/devices
@@ -238,7 +238,7 @@ const Dashboard = () => {
           <MessageBox mb={2} level="error" message={LL.EMS_BUS_WARNING()} />
         )}
 
-        {data.connected && !hasFavEntities && (
+        {data.connected && data.nodes.length > 0 && !hasFavEntities && (
           <MessageBox mb={2} level="warning">
             <Typography>
               {LL.NO_DATA_1()}&nbsp;
