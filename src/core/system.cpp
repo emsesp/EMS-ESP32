@@ -103,6 +103,7 @@ bool System::command_send(const char * value, const int8_t id) {
     return EMSESP::txservice_.send_raw(value); // ignore id
 }
 
+// returns last response from MQTT
 bool System::command_response(const char * value, const int8_t id, JsonObject output) {
     JsonDocument doc;
     if (DeserializationError::Ok == deserializeJson(doc, Mqtt::get_response())) {
@@ -1159,7 +1160,7 @@ bool System::check_restore() {
 // returns true if we need a reboot
 bool System::check_upgrade(bool factory_settings) {
     bool        missing_version = true;
-    std::string settingsVersion{EMSESP_APP_VERSION}; // default setting version
+    std::string settingsVersion;
 
     if (!factory_settings) {
         // fetch current version from settings file
@@ -1171,6 +1172,8 @@ bool System::check_upgrade(bool factory_settings) {
             LOG_WARNING("No version information found");
             settingsVersion = "3.5.0"; // this was the last stable version without version info
         }
+    } else {
+        settingsVersion = EMSESP_APP_VERSION; // use the current version
     }
 
     version::Semver200_version settings_version(settingsVersion);
@@ -2083,11 +2086,16 @@ bool System::uploadFirmwareURL(const char * url) {
 }
 
 // read command, e.g. read <deviceID> <type ID> [offset] [length] from console or API
+// from Console use quotes so: call system read "<deviceID> <type ID> [offset] [length]"
 bool System::readCommand(const char * data) {
+    if (!data) {
+        return false;
+    }
+
     // extract <deviceID> <type ID> [offset] [length] from string
     char * p;
     char   value[11];
-
+    
     // make a copy so we can iterate, max 15 chars (XX XXXX XX XX)
     char data_args[15];
     strlcpy(data_args, data, sizeof(data_args));
@@ -2102,7 +2110,7 @@ bool System::readCommand(const char * data) {
         strlcpy(value, p, 10);                         // get string
         device_id = (uint8_t)Helpers::hextoint(value); // convert hex to int
         if (!EMSESP::valid_device(device_id)) {
-            LOG_ERROR("Invalid device ID (%d) for read command", device_id);
+            LOG_ERROR("Invalid device ID (%d) in read command", device_id);
             return false; // invalid device
         }
     }
