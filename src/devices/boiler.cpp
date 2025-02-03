@@ -1211,8 +1211,8 @@ void Boiler::process_UBAFactory(std::shared_ptr<const Telegram> telegram) {
         return;
     }
     toggle_fetch(telegram->type_id, false); // only read once
-    uint8_t min  = 0;
-    uint8_t max  = 0;
+    uint8_t min      = 0;
+    uint8_t max      = 0;
     uint8_t nomPower = 0;
     telegram->read_value(nomPower, 4);
     telegram->read_value(min, 5);
@@ -1779,8 +1779,8 @@ void Boiler::process_UBAOutdoorTemp(std::shared_ptr<const Telegram> telegram) {
 
 // UBASetPoint 0x1A
 void Boiler::process_UBASetPoints(std::shared_ptr<const Telegram> telegram) {
-    uint8_t setFlowTemp_ = 0;
-    uint8_t setBurnPow_  = 0;
+    uint8_t setFlowTemp_  = 0;
+    uint8_t setBurnPow_   = 0;
     uint8_t wwSetBurnPow_ = 0;
     telegram->read_value(setFlowTemp_, 0);
     telegram->read_value(setBurnPow_, 1);

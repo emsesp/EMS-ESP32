@@ -586,7 +586,7 @@ void EMSdevice::add_device_value(int8_t                tag,              // to b
             if ((entityCustomization.product_id == product_id()) && (entityCustomization.device_id == device_id())) {
                 char entity[70];
                 if (tag < DeviceValueTAG::TAG_HC1) {
-                    strncpy(entity, short_name, sizeof(entity)-1);
+                    strncpy(entity, short_name, sizeof(entity) - 1);
                 } else {
                     snprintf(entity, sizeof(entity), "%s/%s", tag_to_mqtt(tag), short_name);
                 }
@@ -1201,7 +1201,7 @@ void EMSdevice::setCustomizationEntity(const std::string & entity_id) {
     for (auto & dv : devicevalues_) {
         char entity_name[70];
         if (dv.tag < DeviceValueTAG::TAG_HC1) {
-            strncpy(entity_name, dv.short_name, sizeof(entity_name)-1);
+            strncpy(entity_name, dv.short_name, sizeof(entity_name) - 1);
         } else {
             snprintf(entity_name, sizeof(entity_name), "%s/%s", tag_to_mqtt(dv.tag), dv.short_name);
         }
