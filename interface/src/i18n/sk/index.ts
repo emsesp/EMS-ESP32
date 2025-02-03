@@ -346,7 +346,11 @@ const sk: Translation = {
   DASHBOARD_1: 'Všetky entity EMS, ktoré sú aktívne a označené ako obľúbené, plus všetky vlastné entity, plány a údaje externých senzorov sú zobrazené nižšie.',
   NO_DATA_1: 'Nenašli sa žiadne obľúbené entity EMS. Použite',
   NO_DATA_2: 'modul na ich označenie.',
-  NO_DATA_3: 'Ak chcete zobraziť všetky dostupné entity, prejdite na'
+  NO_DATA_3: 'Ak chcete zobraziť všetky dostupné entity, prejdite na',
+  FIRMWARE_VERSION: 'Firmware Version', // TODO translate
+  PLATFORM: 'Platform', // TODO translate
+  RELEASE_TYPE: 'Release Type', // TODO translate
+  REINSTALL: 'Re-install' // TODO translate
 };
 
 export default sk;

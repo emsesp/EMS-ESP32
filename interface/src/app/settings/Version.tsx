@@ -210,7 +210,7 @@ const Version = () => {
         size="small"
         onClick={() => showFirmwareDialog()}
       >
-        {upgradeAvailable ? LL.UPGRADE() : 'Re-install'}&hellip;
+        {upgradeAvailable ? LL.UPGRADE() : LL.REINSTALL()}&hellip;
       </Button>
     );
   };
@@ -224,7 +224,7 @@ const Version = () => {
       <>
         <Box p={2} border="1px solid grey" borderRadius={2}>
           <Typography mb={2} variant="h6" color="primary">
-            Firmware&nbsp;{LL.VERSION()}
+            {LL.FIRMWARE_VERSION()}
           </Typography>
 
           <Grid
@@ -251,7 +251,7 @@ const Version = () => {
             </Grid>
 
             <Grid size={{ xs: 4, md: 2 }}>
-              <Typography color="secondary">Platform</Typography>
+              <Typography color="secondary">{LL.PLATFORM()}</Typography>
             </Grid>
             <Grid size={{ xs: 8, md: 10 }}>
               <Typography>
@@ -263,7 +263,7 @@ const Version = () => {
             </Grid>
 
             <Grid size={{ xs: 4, md: 2 }}>
-              <Typography color="secondary">Release Type</Typography>
+              <Typography color="secondary">{LL.RELEASE_TYPE()}</Typography>
             </Grid>
             <Grid size={{ xs: 8, md: 10 }}>
               <Typography>
