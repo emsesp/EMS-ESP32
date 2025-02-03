@@ -549,15 +549,20 @@ void System::button_init(bool refresh) {
 // set the LED to on or off when in normal operating mode
 void System::led_init(bool refresh) {
     if (refresh) {
+        // disabled old led port before setting new one
+        if ((led_gpio_ != 0) && is_valid_gpio(led_gpio_)) {
+            led_type_ ? neopixelWrite(led_gpio_, 0, 0, 0) : digitalWrite(led_gpio_, !LED_ON);
+            pinMode(led_gpio_, INPUT);
+        }
         reload_settings();
     }
 
-    if ((led_gpio_ != 0) && is_valid_gpio(led_gpio_)) {
+    if ((led_gpio_ != 0) && is_valid_gpio(led_gpio_)) { // 0 means disabled
         if (led_type_) {
-            // rgb LED WS2812B, use Adafruit Neopixel
+            // rgb LED WS2812B, use Neopixel
             neopixelWrite(led_gpio_, 0, 0, 0);
         } else {
-            pinMode(led_gpio_, OUTPUT);       // 0 means disabled
+            pinMode(led_gpio_, OUTPUT);
             digitalWrite(led_gpio_, !LED_ON); // start with LED off
         }
     }
@@ -2095,7 +2100,7 @@ bool System::readCommand(const char * data) {
     // extract <deviceID> <type ID> [offset] [length] from string
     char * p;
     char   value[11];
-    
+
     // make a copy so we can iterate, max 15 chars (XX XXXX XX XX)
     char data_args[15];
     strlcpy(data_args, data, sizeof(data_args));
