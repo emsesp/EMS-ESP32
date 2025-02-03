@@ -343,10 +343,14 @@ const nl: Translation = {
   DEVELOPER_MODE: 'Ontwikkelaarsmodus',
   DUPLICATE: 'Duplicaat',
   UPGRADE: 'Upgraden',
-  DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.', // TODO translate
-  NO_DATA_1: 'No favourite EMS entities found yet. Use the', // TODO translate
-  NO_DATA_2: 'module to mark them.', // TODO translate
-  NO_DATA_3: 'To see all available entities go to' // TODO translate
+  DASHBOARD_1: 'Alle EMS-entiteiten die actief zijn en als favoriet zijn gemarkeerd, plus alle aangepaste entiteiten en externe sensorgegevens worden hieronder weergegeven.',
+  NO_DATA_1: 'Er zijn nog geen favoriete EMS-entiteiten gevonden. Gebruik de',
+  NO_DATA_2: 'module om ze te markeren.',
+  NO_DATA_3: 'Om alle beschikbare entiteiten te zien, ga naar',
+  FIRMWARE_VERSION: 'Firmware Versie',
+  PLATFORM: 'Platform',
+  RELEASE_TYPE: 'Release Typ',
+  REINSTALL: 'Opnieuw Installeren'
 };
 
 export default nl;

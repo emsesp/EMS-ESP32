@@ -346,7 +346,11 @@ const en: Translation = {
   UPGRADE: 'Upgrade',
   NO_DATA_1: 'No favourite EMS entities found yet. Use the',
   NO_DATA_2: 'module to mark them.',
-  NO_DATA_3: 'To see all available entities go to'
+  NO_DATA_3: 'To see all available entities go to',
+  FIRMWARE_VERSION: 'Firmware Version',
+  PLATFORM: 'Platform',
+  RELEASE_TYPE: 'Release Type',
+  REINSTALL: 'Re-install'
 };
 
 export default en;
