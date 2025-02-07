@@ -347,10 +347,10 @@ const sk: Translation = {
   NO_DATA_1: 'Nenašli sa žiadne obľúbené entity EMS. Použite',
   NO_DATA_2: 'modul na ich označenie.',
   NO_DATA_3: 'Ak chcete zobraziť všetky dostupné entity, prejdite na',
-  FIRMWARE_VERSION: 'Firmware Version', // TODO translate
-  PLATFORM: 'Platform', // TODO translate
-  RELEASE_TYPE: 'Release Type', // TODO translate
-  REINSTALL: 'Re-install' // TODO translate
+  FIRMWARE_VERSION: 'Verzia firmware',
+  PLATFORM: 'Platforma',
+  RELEASE_TYPE: 'Typ vydania',
+  REINSTALL: 'Preinštalovať'
 };
 
 export default sk;
