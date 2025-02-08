@@ -347,7 +347,7 @@ const it: Translation = {
   NO_DATA_1: 'No favourite EMS entities found yet. Use the', // TODO translate
   NO_DATA_2: 'module to mark them.', // TODO translate
   NO_DATA_3: 'To see all available entities go to', // TODO translate
-  FIRMWARE_VERSION: 'Firmware Version', // TODO translate
+  THIS_VERSION: 'This Version', // TODO translate
   PLATFORM: 'Platform', // TODO translate
   RELEASE_TYPE: 'Release Type', // TODO translate
   REINSTALL: 'Re-install' // TODO translate

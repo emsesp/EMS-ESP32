@@ -80,7 +80,7 @@ const Version = () => {
 
   useEffect(() => {
     if (latestVersion && latestDevVersion) {
-      sendCheckUpgrade(latestDevVersion + ',' + latestVersion)
+      sendCheckUpgrade(latestDevVersion.name + ',' + latestVersion.name)
         .catch((error: Error) => {
           toast.error('Failed to check for upgrades: ' + error.message);
         })
@@ -96,13 +96,16 @@ const Version = () => {
     }
     const filename =
       'EMS-ESP-' +
-      (usingDevVersion ? latestDevVersion : latestVersion).replaceAll('.', '_') +
+      (usingDevVersion ? latestDevVersion.name : latestVersion.name).replaceAll(
+        '.',
+        '_'
+      ) +
       '-' +
       getPlatform() +
       '.bin';
     return usingDevVersion
       ? DEV_URL + filename
-      : STABLE_URL + 'v' + latestVersion + '/' + filename;
+      : STABLE_URL + 'v' + latestVersion.name + '/' + filename;
   };
 
   const getPlatform = () => {
@@ -224,7 +227,7 @@ const Version = () => {
       <>
         <Box p={2} border="1px solid grey" borderRadius={2}>
           <Typography mb={2} variant="h6" color="primary">
-            {LL.FIRMWARE_VERSION()}
+            {LL.THIS_VERSION()}
           </Typography>
 
           <Grid
@@ -274,46 +277,58 @@ const Version = () => {
             </Grid>
           </Grid>
 
-          <Typography mt={2} mb={2} variant="h6" color="primary">
-            {LL.AVAILABLE_VERSION()}
-          </Typography>
-
-          <Grid
-            container
-            direction="row"
-            rowSpacing={1}
-            sx={{
-              justifyContent: 'flex-start',
-              alignItems: 'baseline'
-            }}
-          >
-            <Grid size={{ xs: 4, md: 2 }}>
-              <Typography color="secondary">{LL.STABLE()}</Typography>
-            </Grid>
-            <Grid size={{ xs: 8, md: 10 }}>
-              <Typography>
-                <Link target="_blank" href={STABLE_RELNOTES_URL} color="primary">
-                  {latestVersion}
-                </Link>
-                &nbsp;&nbsp;{!usingDevVersion && showButtons()}
-              </Typography>
-            </Grid>
-
-            <Grid size={{ xs: 4, md: 2 }}>
-              <Typography color="secondary">{LL.DEVELOPMENT()}</Typography>
-            </Grid>
-            <Grid size={{ xs: 8, md: 10 }}>
-              <Typography>
-                <Link target="_blank" href={DEV_RELNOTES_URL} color="primary">
-                  {latestDevVersion}
-                </Link>
-                &nbsp;&nbsp;{usingDevVersion && showButtons()}
-              </Typography>
-            </Grid>
-          </Grid>
-
           {internetLive ? (
             <>
+              <Typography mt={2} mb={2} variant="h6" color="primary">
+                {LL.AVAILABLE_VERSION()}
+              </Typography>
+
+              <Grid
+                container
+                direction="row"
+                rowSpacing={1}
+                sx={{
+                  justifyContent: 'flex-start',
+                  alignItems: 'baseline'
+                }}
+              >
+                <Grid size={{ xs: 4, md: 2 }}>
+                  <Typography color="secondary">{LL.STABLE()}</Typography>
+                </Grid>
+                <Grid size={{ xs: 8, md: 10 }}>
+                  <Typography>
+                    <Link target="_blank" href={STABLE_RELNOTES_URL} color="primary">
+                      {latestVersion.name}
+                    </Link>
+                    {latestVersion.published_at && (
+                      <Typography component="span" variant="caption">
+                        &nbsp;(
+                        {Math.floor((Date.now() - new Date(latestVersion.published_at).getTime()) / (1000 * 60 * 60 * 24))} days ago)
+                      </Typography>
+                    )}
+                    &nbsp;&nbsp;{!usingDevVersion && showButtons()}
+                  </Typography>
+                </Grid>
+
+                <Grid size={{ xs: 4, md: 2 }}>
+                  <Typography color="secondary">{LL.DEVELOPMENT()}</Typography>
+                </Grid>
+                <Grid size={{ xs: 8, md: 10 }}>
+                  <Typography>
+                    <Link target="_blank" href={DEV_RELNOTES_URL} color="primary">
+                      {latestDevVersion.name}
+                    </Link> 
+                    {latestDevVersion.published_at && (
+                      <Typography component="span" variant="caption">
+                        &nbsp;(
+                        {Math.floor((Date.now() - new Date(latestDevVersion.published_at).getTime()) / (1000 * 60 * 60 * 24))} days ago)
+                      </Typography>
+                    )}
+                    &nbsp;&nbsp;{usingDevVersion && showButtons()}
+                  </Typography>
+                </Grid>
+              </Grid>
+
               {upgradeAvailable ? (
                 <Typography mt={2} color="warning">
                   <InfoOutlinedIcon
@@ -352,7 +367,6 @@ const Version = () => {
               no access to download site
             </Typography>
           )}
-
           {renderInstallDialog()}
         </Box>
       </>

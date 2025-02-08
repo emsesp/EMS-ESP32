@@ -347,7 +347,7 @@ const de: Translation = {
   NO_DATA_1: 'Keine favorisierten EMS-Entitäten gefunden! Verwenden Sie das Modul', 
   NO_DATA_2: ', um sie zu markieren.',
   NO_DATA_3: 'Um alle verfügbaren Entitäten anzuzeigen, gehen Sie zu',
-  FIRMWARE_VERSION: 'Firmware Version',
+  THIS_VERSION: 'This Version',
   PLATFORM: 'Plattform',
   RELEASE_TYPE: 'Release Typ',
   REINSTALL: 'Neu installieren'
