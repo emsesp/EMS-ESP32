@@ -347,7 +347,7 @@ const nl: Translation = {
   NO_DATA_1: 'Er zijn nog geen favoriete EMS-entiteiten gevonden. Gebruik de',
   NO_DATA_2: 'module om ze te markeren.',
   NO_DATA_3: 'Om alle beschikbare entiteiten te zien, ga naar',
-  FIRMWARE_VERSION: 'Firmware Versie',
+  THIS_VERSION: 'Deze Versie',
   PLATFORM: 'Platform',
   RELEASE_TYPE: 'Release Typ',
   REINSTALL: 'Opnieuw Installeren'

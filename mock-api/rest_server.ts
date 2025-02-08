@@ -4338,7 +4338,7 @@ router
   .get(SYSTEM_STATUS_ENDPOINT, () => {
     if (countHardwarePoll >= 2) {
       countHardwarePoll = 0;
-      system_status.status = 'ready';
+      system_status.status = 0; // SYSTEM_STATUS_NORMAL
     }
     countHardwarePoll++;
 
@@ -5036,7 +5036,7 @@ router
         return status(200);
       } else if (cmd === 'restart') {
         console.log('restarting...');
-        system_status.status = 'restarting';
+        system_status.status = 5;
         countHardwarePoll = 0;
         return status(200);
       } else if (cmd === 'read') {
@@ -5051,12 +5051,14 @@ router
 
 router
   .get(GH_ENDPOINT_ROOT + '/tags/latest', () => {
-    console.log('returning latest development version: ' + LATEST_DEV_VERSION);
-    return { name: 'v' + LATEST_DEV_VERSION };
+    const data = { name: 'v' + LATEST_DEV_VERSION, published_at: new Date().toISOString() };
+    console.log('returning latest development version: ', data);
+    return data;
   })
   .get(GH_ENDPOINT_ROOT + '/latest', () => {
-    console.log('returning latest stable version: ' + LATEST_STABLE_VERSION);
-    return { name: 'v' + LATEST_STABLE_VERSION };
+    const data = { name: 'v' + LATEST_STABLE_VERSION, published_at: '2025-02-07T20:09:46Z' };
+    console.log('returning latest stable version: ', data);
+    return data;
   });
 
 // const logger: ResponseHandler = (response, request) => {
