@@ -19,17 +19,19 @@ C = $(words $N)$(eval N := x $N)
 ECHO = python3 $(I)/echo_progress.py --stepno=$C --nsteps=$T
 endif
 
-# number of parallel compiles
+# determine number of parallel compiles based on OS
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
-    CFLAGS += -D LINUX
+    EXTRA_CPPFLAGS = -D LINUX
 	JOBS ?= $(shell nproc)
 endif
 ifeq ($(UNAME_S),Darwin)
-    CFLAGS += -D OSX
+    EXTRA_CPPFLAGS = -D OSX -Wno-tautological-constant-out-of-range-compare
 	JOBS ?= $(shell sysctl -n hw.ncpu)
 endif
 MAKEFLAGS += -j $(JOBS) -l $(JOBS)
+
+# $(info Number of jobs: $(JOBS))
 
 #----------------------------------------------------------------------
 # Project Structure
@@ -103,7 +105,8 @@ CPPFLAGS  += -Wall -Wextra -Werror
 CPPFLAGS  += -Wswitch-enum
 CPPFLAGS  += -Wno-unused-parameter
 CPPFLAGS  += -Wno-missing-braces
-# CPPFLAGS  += -Wno-tautological-constant-out-of-range-compare
+
+CPPFLAGS  += $(EXTRA_CPPFLAGS)
 
 CFLAGS    += $(CPPFLAGS)
 CXXFLAGS  += $(CPPFLAGS)
