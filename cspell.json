@@ -30,6 +30,8 @@
     "Makefile",
     "**/*.ini",
     "**/*.json",
-    "src/core/modbus_entity_parameters.hpp"
+    "src/core/modbus_entity_parameters.hpp",
+    "sdkconfig.*",
+    "managed_components/**"
   ]
   }
