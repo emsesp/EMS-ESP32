@@ -114,16 +114,17 @@ let system_status = {
 let VERSION_IS_UPGRADEABLE: boolean;
 
 // Versions
-// default - on latest stable, no upgrades
+// default - on latest stable, no stable upgrades
 let THIS_VERSION = '3.7.1';
 let LATEST_STABLE_VERSION = '3.7.1';
 let LATEST_DEV_VERSION = '3.7.2-dev.9';
 
 // scenarios for testing versioning
-const version_test = 0; // on latest stable, no upgrades, but can switch
-// const version_test = 1; // on latest dev, no update
-// const version_test = 2; // upgrade stable to latest stable
-// const version_test = 3; // upgrade dev to latest dev
+let version_test = 0;
+version_test = 0; // on latest stable, no upgrades, but can switch
+// version_test = 1; // on latest dev, no update
+// version_test = 2; // on stable, upgrade stable to latest stable
+// version_test = 3; // on dev, upgrade dev to latest dev
 
 switch (version_test as number) {
   case 0:

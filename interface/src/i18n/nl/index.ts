@@ -332,9 +332,8 @@ const nl: Translation = {
   SPECIAL_FUNCTIONS: 'Speciale functies',
   WAIT_FIRMWARE: 'Firmware wordt geüpload en geïnstalleerd',
   INSTALL_VERSION: 'Hiermee wordt versie {0} geïnstalleerd. Weet je het zeker?',
-  SWITCH_DEV: 'Overschakelen naar de ontwikkelingsversie',
   UPGRADE_AVAILABLE: 'Er is een firmware-upgrade beschikbaar!',
-  LATEST_VERSION: 'U gebruikt de nieuwste firmwareversie.',
+  LATEST_VERSION: 'U gebruikt de nieuwste firmwareversie',
   PLEASE_WAIT: 'Een ogenblik geduld',
   RESTARTING_PRE: 'Initialiseren',
   RESTARTING_POST: 'Voorbereiding',
@@ -350,7 +349,9 @@ const nl: Translation = {
   THIS_VERSION: 'Deze Versie',
   PLATFORM: 'Platform',
   RELEASE_TYPE: 'Release Typ',
-  REINSTALL: 'Opnieuw Installeren'
+  REINSTALL: 'Opnieuw Installeren',
+  INTERNET_CONNECTION_REQUIRED: 'Internetverbinding vereist voor automatische versiecontrole en -upgrade',
+  DAYS_AGO: '{0} dag{{en}} geleden'
 };
 
 export default nl;

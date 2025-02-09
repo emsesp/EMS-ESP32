@@ -332,9 +332,8 @@ const cz: Translation = {
   SPECIAL_FUNCTIONS: 'Speciální funkce',
   WAIT_FIRMWARE: 'Firmware se nahrává a instaluje',
   INSTALL_VERSION: 'Tímto se instalovat verze {0}. Jste si jistí?',
-  SWITCH_DEV: 'přepnout na vývojovou verzi',
   UPGRADE_AVAILABLE: 'Je k dispozici aktualizace firmwaru!',
-  LATEST_VERSION: 'Používáte nejnovější verzi firmwaru.',
+  LATEST_VERSION: 'Používáte nejnovější verzi firmwaru',
   PLEASE_WAIT: 'Prosím čekejte',
   RESTARTING_PRE: 'Inicializace',
   RESTARTING_POST: 'Příprava',
@@ -350,7 +349,9 @@ const cz: Translation = {
   THIS_VERSION: 'This Version', // TODO translate
   PLATFORM: 'Platform', // TODO translate
   RELEASE_TYPE: 'Release Type', // TODO translate
-  REINSTALL: 'Re-install' // TODO translate
+  REINSTALL: 'Re-install', // TODO translate
+  INTERNET_CONNECTION_REQUIRED: 'Internet connection required for automatic version checking and upgrading',
+  DAYS_AGO: '{0} den{{y|ní|ní|ní|ní|ní}} zpátky'
 };
 
 export default cz;
