@@ -332,9 +332,8 @@ const de: Translation = {
   SPECIAL_FUNCTIONS: 'Sonderfunktionen',
   WAIT_FIRMWARE: 'Die Firmware wird hochgeladen und installiert.',
   INSTALL_VERSION: 'Dadurch wird die Version {0} heruntergeladen. Sind Sie sicher?',
-  SWITCH_DEV: 'Wechseln Sie zur Entwicklungsversion!',
   UPGRADE_AVAILABLE: 'Es ist ein Firmware-Upgrade verfügbar.',
-  LATEST_VERSION: 'Sie verwenden die neueste Firmware-Version.',
+  LATEST_VERSION: 'Sie verwenden die neueste Firmware-Version',
   PLEASE_WAIT: 'Bitte warten',
   RESTARTING_PRE: 'Initialisierung',
   RESTARTING_POST: 'Vorbereitung',
@@ -347,10 +346,12 @@ const de: Translation = {
   NO_DATA_1: 'Keine favorisierten EMS-Entitäten gefunden! Verwenden Sie das Modul', 
   NO_DATA_2: ', um sie zu markieren.',
   NO_DATA_3: 'Um alle verfügbaren Entitäten anzuzeigen, gehen Sie zu',
-  THIS_VERSION: 'This Version',
+  THIS_VERSION: 'Diese Version',
   PLATFORM: 'Plattform',
   RELEASE_TYPE: 'Release Typ',
-  REINSTALL: 'Neu installieren'
+  REINSTALL: 'Neu installieren',
+  INTERNET_CONNECTION_REQUIRED: 'Internetverbindung erforderlich für automatische Version-Überprüfung und -Aktualisierung',
+  DAYS_AGO: '{0} Tag{{e}} vorher'
 };
 
 export default de;

@@ -9,10 +9,12 @@ import WarningIcon from '@mui/icons-material/Warning';
 import {
   Box,
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControlLabel,
   Grid2 as Grid,
   Link,
   Typography
@@ -91,7 +93,7 @@ const Version = () => {
   }, [latestVersion, latestDevVersion]);
 
   const getBinURL = () => {
-    if (!latestVersion || !latestDevVersion) {
+    if (!internetLive) {
       return '';
     }
     const filename =
@@ -182,21 +184,16 @@ const Version = () => {
     setUsingDevVersion(data.emsesp_version.includes('dev'));
   };
 
-  const switchToDev = () => {
-    setUsingDevVersion(true);
-    setUpgradeAvailable(true);
-  };
-
-  const showButtons = () => {
+  const showButtons = (showDev?: boolean) => {
     if (downloadOnly) {
       return (
         <Button
+          sx={{ ml: 2 }}
           startIcon={<DownloadIcon />}
           variant="outlined"
           onClick={() => setOpenInstallDialog(false)}
           color="warning"
           size="small"
-          sx={{ ml: 2 }}
         >
           <Link underline="none" target="_blank" href={getBinURL()} color="warning">
             {LL.DOWNLOAD(1)}
@@ -213,7 +210,10 @@ const Version = () => {
         size="small"
         onClick={() => showFirmwareDialog()}
       >
-        {upgradeAvailable ? LL.UPGRADE() : LL.REINSTALL()}&hellip;
+        {upgradeAvailable || (!usingDevVersion && showDev)
+          ? LL.UPGRADE()
+          : LL.REINSTALL()}
+        &hellip;
       </Button>
     );
   };
@@ -222,6 +222,8 @@ const Version = () => {
     if (!data) {
       return <FormLoader onRetry={loadData} errorMessage={error?.message} />;
     }
+
+    const isDev = data.emsesp_version.includes('dev');
 
     return (
       <>
@@ -269,11 +271,36 @@ const Version = () => {
               <Typography color="secondary">{LL.RELEASE_TYPE()}</Typography>
             </Grid>
             <Grid size={{ xs: 8, md: 10 }}>
-              <Typography>
-                {data.emsesp_version.includes('dev')
-                  ? LL.DEVELOPMENT()
-                  : LL.STABLE()}
-              </Typography>
+              <FormControlLabel
+                disabled
+                control={
+                  <Checkbox
+                    sx={{
+                      '&.Mui-checked': {
+                        color: 'lightblue'
+                      }
+                    }}
+                  />
+                }
+                checked={!isDev}
+                label={LL.STABLE()}
+                sx={{ '& .MuiSvgIcon-root': { fontSize: 18 } }}
+              />
+              <FormControlLabel
+                disabled
+                control={
+                  <Checkbox
+                    sx={{
+                      '&.Mui-checked': {
+                        color: 'lightblue'
+                      }
+                    }}
+                  />
+                }
+                checked={isDev}
+                label={LL.DEVELOPMENT()}
+                sx={{ '& .MuiSvgIcon-root': { fontSize: 18 } }}
+              />
             </Grid>
           </Grid>
 
@@ -303,10 +330,17 @@ const Version = () => {
                     {latestVersion.published_at && (
                       <Typography component="span" variant="caption">
                         &nbsp;(
-                        {Math.floor((Date.now() - new Date(latestVersion.published_at).getTime()) / (1000 * 60 * 60 * 24))} days ago)
+                        {LL.DAYS_AGO(
+                          Math.floor(
+                            (Date.now() -
+                              new Date(latestVersion.published_at).getTime()) /
+                              (1000 * 60 * 60 * 24)
+                          )
+                        )}
+                        )
                       </Typography>
                     )}
-                    &nbsp;&nbsp;{!usingDevVersion && showButtons()}
+                    {!usingDevVersion && showButtons(false)}
                   </Typography>
                 </Grid>
 
@@ -317,14 +351,21 @@ const Version = () => {
                   <Typography>
                     <Link target="_blank" href={DEV_RELNOTES_URL} color="primary">
                       {latestDevVersion.name}
-                    </Link> 
+                    </Link>
                     {latestDevVersion.published_at && (
                       <Typography component="span" variant="caption">
                         &nbsp;(
-                        {Math.floor((Date.now() - new Date(latestDevVersion.published_at).getTime()) / (1000 * 60 * 60 * 24))} days ago)
+                        {LL.DAYS_AGO(
+                          Math.floor(
+                            (Date.now() -
+                              new Date(latestDevVersion.published_at).getTime()) /
+                              (1000 * 60 * 60 * 24)
+                          )
+                        )}
+                        )
                       </Typography>
                     )}
-                    &nbsp;&nbsp;{usingDevVersion && showButtons()}
+                    {showButtons(true)}
                   </Typography>
                 </Grid>
               </Grid>
@@ -346,25 +387,11 @@ const Version = () => {
                   {LL.LATEST_VERSION()}
                 </Typography>
               )}
-
-              {!data.emsesp_version.includes('dev') && !usingDevVersion && (
-                <Typography variant="caption">
-                  <Button
-                    sx={{ mt: 2 }}
-                    variant="outlined"
-                    color="primary"
-                    size="small"
-                    onClick={() => switchToDev()}
-                  >
-                    {LL.SWITCH_DEV()}
-                  </Button>
-                </Typography>
-              )}
             </>
           ) : (
-            <Typography mb={1} color="warning">
+            <Typography mt={2} color="warning">
               <WarningIcon color="warning" sx={{ verticalAlign: 'middle', mr: 2 }} />
-              no access to download site
+              {LL.INTERNET_CONNECTION_REQUIRED()}
             </Typography>
           )}
           {renderInstallDialog()}

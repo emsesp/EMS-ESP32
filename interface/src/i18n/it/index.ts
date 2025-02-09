@@ -332,9 +332,8 @@ const it: Translation = {
   SPECIAL_FUNCTIONS: 'Special Functions', // TODO translate
   WAIT_FIRMWARE: 'Firmware is uploading and installing', // TODO translate
   INSTALL_VERSION: 'This will install version {0}. Are you sure?', // TODO translate
-  SWITCH_DEV: 'switch to the development version', // TODO translate
   UPGRADE_AVAILABLE: 'There is a firmware upgrade available!', // TODO translate
-  LATEST_VERSION: 'You are using the latest firmware version.', // TODO translate
+  LATEST_VERSION: 'You are using the latest firmware version', // TODO translate
   PLEASE_WAIT: 'Please wait', // TODO translate
   RESTARTING_PRE: 'Initializing', // TODO translate
   RESTARTING_POST: 'Preparing', // TODO translate
@@ -350,7 +349,9 @@ const it: Translation = {
   THIS_VERSION: 'This Version', // TODO translate
   PLATFORM: 'Platform', // TODO translate
   RELEASE_TYPE: 'Release Type', // TODO translate
-  REINSTALL: 'Re-install' // TODO translate
+  REINSTALL: 'Re-install', // TODO translate
+  INTERNET_CONNECTION_REQUIRED: 'Internet connection required for automatic version checking and upgrading',
+  DAYS_AGO: '{0} giorni{{s}} fa'
 };
 
 export default it;

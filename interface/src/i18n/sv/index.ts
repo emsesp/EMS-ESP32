@@ -332,7 +332,6 @@ const sv: Translation = {
   SPECIAL_FUNCTIONS: 'Specialfunktioner',
   WAIT_FIRMWARE: 'Firmware laddas upp och installeras',
   INSTALL_VERSION: 'Det här kommer installera version {0}. Är du säker?',
-  SWITCH_DEV: 'byt till utvecklarversionen',
   UPGRADE_AVAILABLE: 'Det finns en tillgänglig firmwareupgradering!',
   LATEST_VERSION: 'Du använder den senaste firmwareversionen.',
   PLEASE_WAIT: 'Var god vänta',
@@ -350,7 +349,9 @@ const sv: Translation = {
   THIS_VERSION: 'This Version', // TODO translate
   PLATFORM: 'Platform', // TODO translate
   RELEASE_TYPE: 'Release Type', // TODO translate
-  REINSTALL: 'Re-install' // TODO translate
+  REINSTALL: 'Re-install', // TODO translate
+  INTERNET_CONNECTION_REQUIRED: 'Internetanslutning krävs för automatisk version kontroll och uppdatering',
+  DAYS_AGO: '{0} dag{{ar}} sedan'
 };
 
 export default sv;
