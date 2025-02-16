@@ -77,6 +77,7 @@ class Thermostat : public EMSdevice {
         int8_t  reducetemp;
         int8_t  vacreducetemp;
         uint8_t vacreducemode;
+        uint8_t vacationmode;
         uint8_t wwprio;
         uint8_t fastHeatup;
         char    holiday[22];

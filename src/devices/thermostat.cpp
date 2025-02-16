@@ -145,7 +145,7 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
 
     } else if (model == EMSdevice::EMS_DEVICE_FLAG_CR11) {
         monitor_typeids = {0x02A5};
-        set_typeids     = {0x2B9};
+        set_typeids     = {0x02B9};
         curve_typeids   = {0x029B};
         register_telegram_type(monitor_typeids[0], "RC300Monitor", true, MAKE_PF_CB(process_CR11Monitor));
         register_telegram_type(set_typeids[0], "RC300Set", false, MAKE_PF_CB(process_RC300Set));
@@ -188,7 +188,11 @@ Thermostat::Thermostat(uint8_t device_type, uint8_t device_id, uint8_t product_i
 
         register_telegram_type(0xBB, "HybridSettings", true, MAKE_PF_CB(process_HybridSettings));
         register_telegram_type(0x23E, "PVSettings", true, MAKE_PF_CB(process_PVSettings));
-        register_telegram_type(0x269, "RC300Holiday1", true, MAKE_PF_CB(process_RC300Holiday));
+        if (model == EMSdevice::EMS_DEVICE_FLAG_RC100) {
+            register_telegram_type(0x43F, "CRHolidays", true, MAKE_PF_CB(process_RC300Holiday));
+        } else {
+            register_telegram_type(0x269, "RC300Holiday", true, MAKE_PF_CB(process_RC300Holiday));
+        }
         register_telegram_type(0x16E, "Absent", true, MAKE_PF_CB(process_Absent));
 
         // JUNKERS/HT3
@@ -1114,6 +1118,7 @@ void Thermostat::process_RC300Monitor(std::shared_ptr<const Telegram> telegram) 
     has_update(telegram, hc->curroominfl, 27);
     has_update(telegram, hc->currSolarInfl, 29);
     has_update(telegram, hc->coolingon, 32);
+    has_update(telegram, hc->vacationmode, 18);
 
     add_ha_climate(hc);
 }
@@ -1341,7 +1346,7 @@ void Thermostat::process_RC300Floordry(std::shared_ptr<const Telegram> telegram)
 }
 
 // 0x269 - 0x26D  RC300 EMS+ holidaymodes 1 to 5
-// special case R3000 only date in 0x269
+// special case R3000 only date in 0x269, CR50 only 0x043F
 void Thermostat::process_RC300Holiday(std::shared_ptr<const Telegram> telegram) {
     if (telegram->offset || telegram->message_length < 6) {
         return;
@@ -2694,7 +2699,7 @@ bool Thermostat::set_RC30Vacation(const char * value, const int8_t id) {
 }
 
 // set R3000 holiday as string dd.mm.yyyy-dd.mm.yyyy
-// RC30 and rego 3000
+// RC30 and rego 3000 and CR50
 bool Thermostat::set_R3000Holiday(const char * value, const int8_t id) {
     if (strlen(value) != 21) {
         return false;
@@ -2711,7 +2716,11 @@ bool Thermostat::set_R3000Holiday(const char * value, const int8_t id) {
     if (!data[2] || data[2] > 31 || !data[1] || data[1] > 12 || !data[5] || data[5] > 31 || !data[4] || data[4] > 12) {
         return false;
     }
-    write_command(0x269, 0, data, 6, 0x269);
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) {
+        write_command(0x269, 0, data, 6, 0x269);
+    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
+        write_command(0x43F, 0, data, 6, 0x269);
+    }
     return true;
 }
 
@@ -4201,7 +4210,7 @@ void Thermostat::register_device_values() {
                               MAKE_CF_CB(set_minexttemp));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &ibaDamping_, DeviceValueType::BOOL, FL_(damping), DeviceValueUOM::NONE, MAKE_CF_CB(set_damping));
         register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &hasSolar_, DeviceValueType::BOOL, FL_(hasSolar), DeviceValueUOM::NONE, MAKE_CF_CB(set_solar));
-        if (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) {
+        if (model() == EMSdevice::EMS_DEVICE_FLAG_R3000 || model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
             register_device_value(DeviceValueTAG::TAG_DEVICE_DATA,
                                   &vacation[0],
                                   DeviceValueType::STRING,
@@ -4638,6 +4647,7 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               MAKE_CF_CB(set_summermode));
         register_device_value(tag, &hc->summermode, DeviceValueType::ENUM, FL_(enum_summer), FL_(summermode), DeviceValueUOM::NONE);
         register_device_value(tag, &hc->hpoperatingstate, DeviceValueType::ENUM, FL_(enum_operatingstate), FL_(hpoperatingstate), DeviceValueUOM::NONE);
+        register_device_value(tag, &hc->vacationmode, DeviceValueType::BOOL, FL_(vacationmode), DeviceValueUOM::NONE);
         if (model == EMSdevice::EMS_DEVICE_FLAG_RC100 || model == EMSdevice::EMS_DEVICE_FLAG_CR120) {
             register_device_value(
                 tag, &hc->controlmode, DeviceValueType::ENUM, FL_(enum_controlmode), FL_(controlmode), DeviceValueUOM::NONE, MAKE_CF_CB(set_controlmode));
