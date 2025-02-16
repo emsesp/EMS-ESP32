@@ -343,7 +343,7 @@ const en: Translation = {
   DEVELOPER_MODE: 'Developer Mode',
   DUPLICATE: 'Duplicate',
   UPGRADE: 'Upgrade',
-  NO_DATA_1: 'No favourite EMS entities found yet. Use the',
+  NO_DATA_1: 'No favorite EMS entities found yet. Use the',
   NO_DATA_2: 'module to mark them.',
   NO_DATA_3: 'To see all available entities go to',
   THIS_VERSION: 'This Version',
