@@ -140,7 +140,7 @@ const Version = () => {
       </DialogTitle>
       <DialogContent dividers>
         <Typography mb={2}>
-          {LL.INSTALL_VERSION(usingDevVersion ? latestDevVersion : latestVersion)}
+          {LL.INSTALL_VERSION(usingDevVersion ? latestDevVersion?.name : latestVersion?.name)}
         </Typography>
       </DialogContent>
       <DialogActions>
