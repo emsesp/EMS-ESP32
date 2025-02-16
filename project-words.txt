@@ -1412,3 +1412,4 @@ solarinfl
 currsolarinfl
 temprature
 bblanchon
+vacationmode
