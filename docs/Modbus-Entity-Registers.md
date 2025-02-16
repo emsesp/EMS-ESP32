@@ -4809,6 +4809,7 @@
 | minexttemp | minimal external temperature | int8 (>=-126<=126) | C | true | DEVICE_DATA | -1 | 1 | 1 | 
 | damping | damping outdoor temperature | boolean |   | true | DEVICE_DATA | -1 | 1 | 1 | 
 | solar | solar | boolean |   | true | DEVICE_DATA | -1 | 1 | 1 | 
+| vacations | vacation dates | string |   | true | DEVICE_DATA | -1 | 0 | 1 | 
 | hybridstrategy | hybrid control strategy | enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix] |   | true | DEVICE_DATA | -1 | 1 | 1 | 
 | switchovertemp | outside switchover temperature | int8 (>=-20<=20) | C | true | DEVICE_DATA | -1 | 1 | 1 | 
 | energycostratio | energy cost ratio | uint8 (>=0<=20) |   | true | DEVICE_DATA | -1 | 1 | 1/10 | 
@@ -4844,6 +4845,7 @@
 | hpoperatingmode | heatpump operating mode | enum [off\|auto\|heating\|cooling] |   | true | HC | -1 | 1 | 1 | 
 | summermode | summer mode | enum [winter\|summer] |   | false | HC | -1 | 1 | 1 | 
 | hpoperatingstate | heatpump operating state | enum [heating\|off\|cooling] |   | false | HC | -1 | 1 | 1 | 
+| vacationmode | vacation mode | boolean |   | false | HC | -1 | 1 | 1 | 
 | controlmode | control mode | enum [optimized\|simple\|n/a\|room\|power] |   | true | HC | -1 | 1 | 1 | 
 | program | program | enum [prog 1\|prog 2] |   | true | HC | -1 | 1 | 1 | 
 | tempautotemp | temporary set temperature automode | int8 (>=-1<=30) | C | true | HC | -1 | 1 | 1/2 | 
@@ -4928,6 +4930,7 @@
 | minexttemp | minimal external temperature | int8 (>=-126<=126) | C | true | DEVICE_DATA | -1 | 1 | 1 | 
 | damping | damping outdoor temperature | boolean |   | true | DEVICE_DATA | -1 | 1 | 1 | 
 | solar | solar | boolean |   | true | DEVICE_DATA | -1 | 1 | 1 | 
+| vacations | vacation dates | string |   | true | DEVICE_DATA | -1 | 0 | 1 | 
 | hybridstrategy | hybrid control strategy | enum [co2 optimized\|cost optimized\|outside temp switched\|co2 cost mix] |   | true | DEVICE_DATA | -1 | 1 | 1 | 
 | switchovertemp | outside switchover temperature | int8 (>=-20<=20) | C | true | DEVICE_DATA | -1 | 1 | 1 | 
 | energycostratio | energy cost ratio | uint8 (>=0<=20) |   | true | DEVICE_DATA | -1 | 1 | 1/10 | 
@@ -4963,6 +4966,7 @@
 | hpoperatingmode | heatpump operating mode | enum [off\|auto\|heating\|cooling] |   | true | HC | -1 | 1 | 1 | 
 | summermode | summer mode | enum [winter\|summer] |   | false | HC | -1 | 1 | 1 | 
 | hpoperatingstate | heatpump operating state | enum [heating\|off\|cooling] |   | false | HC | -1 | 1 | 1 | 
+| vacationmode | vacation mode | boolean |   | false | HC | -1 | 1 | 1 | 
 | controlmode | control mode | enum [optimized\|simple\|n/a\|room\|power] |   | true | HC | -1 | 1 | 1 | 
 | program | program | enum [prog 1\|prog 2] |   | true | HC | -1 | 1 | 1 | 
 | tempautotemp | temporary set temperature automode | int8 (>=-1<=30) | C | true | HC | -1 | 1 | 1/2 | 
@@ -5094,6 +5098,7 @@
 | hpoperatingmode | heatpump operating mode | enum [off\|auto\|heating\|cooling] |   | true | HC | -1 | 1 | 1 | 
 | summermode | summer mode | enum [winter\|summer] |   | false | HC | -1 | 1 | 1 | 
 | hpoperatingstate | heatpump operating state | enum [heating\|off\|cooling] |   | false | HC | -1 | 1 | 1 | 
+| vacationmode | vacation mode | boolean |   | false | HC | -1 | 1 | 1 | 
 | controlmode | control mode | enum [weather compensated\|outside basepoint\|n/a\|room\|power\|constant] |   | true | HC | -1 | 1 | 1 | 
 | program | program | enum [prog 1\|prog 2] |   | true | HC | -1 | 1 | 1 | 
 | tempautotemp | temporary set temperature automode | int8 (>=-1<=30) | C | true | HC | -1 | 1 | 1/2 | 
@@ -5343,6 +5348,7 @@
 | hpoperatingmode | heatpump operating mode | enum [off\|auto\|heating\|cooling] |   | true | HC | -1 | 1 | 1 | 
 | summermode | summer mode | enum [winter\|summer] |   | false | HC | -1 | 1 | 1 | 
 | hpoperatingstate | heatpump operating state | enum [heating\|off\|cooling] |   | false | HC | -1 | 1 | 1 | 
+| vacationmode | vacation mode | boolean |   | false | HC | -1 | 1 | 1 | 
 | controlmode | control mode | enum [weather compensated\|outside basepoint\|n/a\|room\|power\|constant] |   | true | HC | -1 | 1 | 1 | 
 | program | program | enum [prog 1\|prog 2] |   | true | HC | -1 | 1 | 1 | 
 | tempautotemp | temporary set temperature automode | int8 (>=-1<=30) | C | true | HC | -1 | 1 | 1/2 | 
@@ -5436,6 +5442,7 @@
 | hpoperatingmode | heatpump operating mode | enum [off\|auto\|heating\|cooling] |   | true | HC | -1 | 1 | 1 | 
 | summermode | summer mode | enum [winter\|summer] |   | false | HC | -1 | 1 | 1 | 
 | hpoperatingstate | heatpump operating state | enum [heating\|off\|cooling] |   | false | HC | -1 | 1 | 1 | 
+| vacationmode | vacation mode | boolean |   | false | HC | -1 | 1 | 1 | 
 | controlmode | control mode | enum [weather compensated\|outside basepoint\|n/a\|room\|power\|constant] |   | true | HC | -1 | 1 | 1 | 
 | program | program | enum [prog 1\|prog 2] |   | true | HC | -1 | 1 | 1 | 
 | tempautotemp | temporary set temperature automode | int8 (>=-1<=30) | C | true | HC | -1 | 1 | 1/2 | 
@@ -5539,6 +5546,7 @@
 | hpoperatingmode | heatpump operating mode | enum [off\|auto\|heating\|cooling] |   | true | HC | -1 | 1 | 1 | 
 | summermode | summer mode | enum [winter\|summer] |   | false | HC | -1 | 1 | 1 | 
 | hpoperatingstate | heatpump operating state | enum [heating\|off\|cooling] |   | false | HC | -1 | 1 | 1 | 
+| vacationmode | vacation mode | boolean |   | false | HC | -1 | 1 | 1 | 
 | controlmode | control mode | enum [weather compensated\|outside basepoint\|n/a\|room\|power\|constant] |   | true | HC | -1 | 1 | 1 | 
 | program | program | enum [prog 1\|prog 2] |   | true | HC | -1 | 1 | 1 | 
 | tempautotemp | temporary set temperature automode | int8 (>=-1<=30) | C | true | HC | -1 | 1 | 1/2 | 

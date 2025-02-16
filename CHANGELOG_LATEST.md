@@ -9,12 +9,13 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - change enum_heatingtype for remote control [#2268](https://github.com/emsesp/EMS-ESP32/issues/2268)
 - system service commands [#2182](https://github.com/emsesp/EMS-ESP32/issues/2182)
 - read 0x02A5 for thermostat CT200 [#2277](https://github.com/emsesp/EMS-ESP32/issues/2277)
-- Add "duplicate" option to Custom Entities [#2266](https://github.com/emsesp/EMS-ESP32/discussion/2266)
-- Mask bits for bool custom entities
+- add "duplicate" option to Custom Entities [#2266](https://github.com/emsesp/EMS-ESP32/discussion/2266)
+- mask bits for bool custom entities
 - thermostat `reduce threshold` [#2288](https://github.com/emsesp/EMS-ESP32/issues/2288)
 - thermostat `absent` [#1957](https://github.com/emsesp/EMS-ESP32/issues/1957)
 - CR11 thermostat [#2295](https://github.com/emsesp/EMS-ESP32/issues/2295)
 - Show ESP32's CPU temp in Hardware Status
+- vacation mode for the CR50 [#2403](https://github.com/emsesp/EMS-ESP32/issues/2403)
 
 ## Fixed
 
@@ -33,4 +34,5 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - update eModbus to 1.7.2 [#2254](https://github.com/emsesp/EMS-ESP32/issues/2254)
 - modbus timeout default to 300 sec, change setting from ms to sec [#2254](https://github.com/emsesp/EMS-ESP32/issues/2254)
 - update AsyncTCP and ESPAsyncWebServer to latest versions
-- update Arduino pio platform to 3.10.0 and optimize flash
+- update Arduino pio platform to 3.10.0 and optimized flash using build flags
+- Version checker in WebUI improved
