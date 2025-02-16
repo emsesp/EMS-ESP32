@@ -2719,7 +2719,7 @@ bool Thermostat::set_R3000Holiday(const char * value, const int8_t id) {
     if (model() == EMSdevice::EMS_DEVICE_FLAG_R3000) {
         write_command(0x269, 0, data, 6, 0x269);
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
-        write_command(0x43F, 0, data, 6, 0x269);
+        write_command(0x43F, 0, data, 6, 0x43F);
     }
     return true;
 }
