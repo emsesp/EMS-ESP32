@@ -5052,12 +5052,18 @@ router
 
 router
   .get(GH_ENDPOINT_ROOT + '/tags/latest', () => {
-    const data = { name: 'v' + LATEST_DEV_VERSION, published_at: new Date().toISOString() };
+    const data = {
+      name: 'v' + LATEST_DEV_VERSION,
+      published_at: new Date().toISOString()
+    };
     console.log('returning latest development version: ', data);
     return data;
   })
   .get(GH_ENDPOINT_ROOT + '/latest', () => {
-    const data = { name: 'v' + LATEST_STABLE_VERSION, published_at: '2025-02-07T20:09:46Z' };
+    const data = {
+      name: 'v' + LATEST_STABLE_VERSION,
+      published_at: '2025-02-07T20:09:46Z'
+    };
     console.log('returning latest stable version: ', data);
     return data;
   });
