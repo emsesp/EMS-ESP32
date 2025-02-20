@@ -1709,7 +1709,7 @@ void Boiler::process_HpPool(std::shared_ptr<const Telegram> telegram) {
 // Heatpump inputs - type 0x4A2
 // Boiler(0x08) -> All(0x00), ?(0x04A2), data: 02 01 01 00 01 00
 // Boiler(0x08) -W-> Me(0x0B), HpInput(0x04A2), data: 20 07 06 01 00 (from #802)
-// fix stetes 1/3 see https://github.com/emsesp/EMS-ESP32/issues/1388
+// fix states 1/3 see https://github.com/emsesp/EMS-ESP32/issues/1388
 void Boiler::process_HpInput(std::shared_ptr<const Telegram> telegram) {
     has_bitupdate(telegram, hp4wayValve_, 0, 7);
     // has_update(telegram, hpInput[0].state, 2);

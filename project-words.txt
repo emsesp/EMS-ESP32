@@ -1118,7 +1118,6 @@ STAIPASSIGNED
 starttemperature
 STARTVALUE
 statusbyte
-stetes
 stickbreaker
 Stickbreaker
 Stoffregen
