@@ -1278,7 +1278,7 @@ void Thermostat::process_RC300WWmode(std::shared_ptr<const Telegram> telegram) {
         telegram->read_value(wwmode, 2);
         const uint8_t modes1[] = {0, 0, 1, 0, 0, 2}; // 0=normal (1), 1=comfort(2), 2=eco+(5)
         has_update(dhw->wwMode_, wwmode < sizeof(modes1) ? modes1[wwmode] : EMS_VALUE_UINT8_NOTSET);
-    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_CR120) {
+    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_CR120 || model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
         const uint8_t modes[] = {1, 2, 4}; //// 0=normal (1), 1=comfort(2), 2=auto(4)
         uint8_t       wwmode  = dhw->wwMode_ < sizeof(modes) ? modes[dhw->wwMode_] : EMS_VALUE_UINT8_NOTSET;
         telegram->read_value(wwmode, 2);
@@ -2227,7 +2227,7 @@ bool Thermostat::set_wwmode(const char * value, const int8_t id) {
         }
         const uint8_t modes[] = {0, 5, 1, 2, 4};
         write_command(0x02F5 + dhw->offset(), 2, modes[set], 0x02F5 + dhw->offset());
-    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_CR120) {
+    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_CR120 || model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
         if (!Helpers::value2enum(value, set, FL_(enum_wwMode6))) { // normal, comfort, auto
             return false;
         }
@@ -2239,7 +2239,7 @@ bool Thermostat::set_wwmode(const char * value, const int8_t id) {
         }
         const uint8_t modes[] = {1, 2, 5};
         write_command(0x02F5 + dhw->offset(), 2, modes[set], 0x02F5 + dhw->offset());
-    } else if ((model() == EMSdevice::EMS_DEVICE_FLAG_RC300) || (model() == EMSdevice::EMS_DEVICE_FLAG_RC100)) {
+    } else if (model() == EMSdevice::EMS_DEVICE_FLAG_RC300) {
         if (!Helpers::value2enum(value, set, FL_(enum_wwMode))) {
             return false;
         }
