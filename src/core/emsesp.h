@@ -222,8 +222,6 @@ class EMSESP {
     static void scan_devices();
     static void clear_all_devices();
 
-    static bool return_not_found(JsonObject output, const char * msg, const char * cmd);
-
     static std::deque<std::unique_ptr<EMSdevice>> emsdevices;
 
     // services
