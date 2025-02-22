@@ -573,6 +573,7 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::VENTILATION, TAG_TYPE_DEVICE_DATA, FL_(ventMode), 6, 1), // ventmode
     REGISTER_MAPPING(dt::VENTILATION, TAG_TYPE_DEVICE_DATA, FL_(airquality), 7, 1), // airquality
     REGISTER_MAPPING(dt::VENTILATION, TAG_TYPE_DEVICE_DATA, FL_(airHumidity), 8, 1), // airhumidity
+    REGISTER_MAPPING(dt::VENTILATION, TAG_TYPE_DEVICE_DATA, FL_(airbypass), 9, 1), // bypass
     REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(selRoomTemp), 0, 1), // seltemp
     REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwTemp), 1, 1), // temp
     REGISTER_MAPPING(dt::WATER, TAG_TYPE_DHW, FL_(wwCurTemp2), 2, 1), // curtemp2
