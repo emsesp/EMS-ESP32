@@ -1412,3 +1412,4 @@ currsolarinfl
 temprature
 bblanchon
 vacationmode
+airbypass
