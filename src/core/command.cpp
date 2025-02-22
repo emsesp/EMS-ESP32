@@ -298,6 +298,8 @@ const char * Command::get_attribute(const char * cmd) {
     return nullptr;
 }
 
+// returns the attribute in the given JSON object as a key/value pair called api_data
+// or errors if the attribute is not found
 bool Command::set_attribute(JsonObject output, const char * cmd, const char * attribute) {
     if (attribute == nullptr) {
         return true;
@@ -309,7 +311,14 @@ bool Command::set_attribute(JsonObject output, const char * cmd, const char * at
         output["api_data"] = data; // always as a string
         return true;
     }
-    return EMSESP::return_not_found(output, attribute, cmd); // not found
+
+    // not found
+    output.clear();
+
+    char error[100];
+    snprintf(error, sizeof(error), "no %s in %s", attribute, cmd);
+    output["message"] = error;
+    return false;
 }
 
 // calls a command directly
@@ -431,7 +440,8 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
             logger_.debug("%sCalled command %s", ro.c_str(), info_s);
         } else {
             if (id > 0) {
-                LOG_INFO(("%sCalled command %s with value %s and id %d on device 0x%02X"), ro.c_str(), info_s, value, id, device_id);
+                (device_id) ? LOG_INFO(("%sCalled command %s with value %s and id %d on device 0x%02X"), ro.c_str(), info_s, value, id, device_id)
+                            : LOG_INFO(("%sCalled command %s with value %s and id %d"), ro.c_str(), info_s, value, id);
             } else {
                 LOG_INFO(("%sCalled command %s with value %s"), ro.c_str(), info_s, value);
             }
@@ -481,7 +491,7 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, const ui
 
     for (auto & cf : cmdfunctions_) {
         if (Helpers::toLower(cmd) == Helpers::toLower(cf.cmd_) && (cf.device_type_ == device_type) && (!device_id || cf.device_id_ == device_id)
-            && (flag == CommandFlag::CMD_FLAG_DEFAULT || (flag & 0x3F) == (cf.flags_ & 0x3F))) {
+            && (cf.device_type_ < EMSdevice::DeviceType::BOILER || flag == CommandFlag::CMD_FLAG_DEFAULT || (flag & 0x3F) == (cf.flags_ & 0x3F))) {
             return &cf;
         }
     }
@@ -639,9 +649,9 @@ void Command::show(uuid::console::Shell & shell, uint8_t device_type, bool verbo
                     shell.print('*');
                 }
                 shell.print(COLOR_RESET);
+                shell.println();
             }
         }
-        shell.println();
     }
 }
 

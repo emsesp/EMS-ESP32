@@ -5214,6 +5214,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "Logavent HRV176",ventilation,231,ventmode,ventilation mode,enum [auto\|off\|L1\|L2\|L3\|L4\|demand\|sleep\|intense\|bypass\|party\|fireplace], ,true,select.ventilation_ventilation_mode,select.ventilation_ventmode,18,0,1,6,1
 "Logavent HRV176",ventilation,231,airquality,air quality (voc),uint16 (>=0<=31999), ,false,sensor.ventilation_air_quality_(voc),sensor.ventilation_airquality,18,0,1,7,1
 "Logavent HRV176",ventilation,231,airhumidity,relative air humidity,uint8 (>=0<=100),%,false,sensor.ventilation_relative_air_humidity,sensor.ventilation_airhumidity,18,0,1,8,1
+"Logavent HRV176",ventilation,231,bypass,bypass,boolean, ,true,switch.ventilation_bypass,switch.ventilation_bypass,18,0,1,9,1
 "IPM",water,100,dhw.seltemp,selected temperature,uint8 (>=0<=254),C,true,number.water_dhw_selected_temperature,number.water_dhw_seltemp,19,9,1,0,1
 "IPM",water,100,dhw.temp,current temperature,uint16 (>=0<=3199),C,false,sensor.water_dhw_current_temperature,sensor.water_dhw_temp,19,9,1/10,1,1
 "IPM",water,100,dhw.curtemp2,current extern temperature,uint16 (>=0<=3199),C,false,sensor.water_dhw_current_extern_temperature,sensor.water_dhw_curtemp2,19,9,1/10,2,1

@@ -5604,6 +5604,7 @@
 | ventmode | ventilation mode | enum [auto\|off\|L1\|L2\|L3\|L4\|demand\|sleep\|intense\|bypass\|party\|fireplace] |   | true | DEVICE_DATA | 6 | 1 | 1 | 
 | airquality | air quality (voc) | uint16 (>=0<=31999) |   | false | DEVICE_DATA | 7 | 1 | 1 | 
 | airhumidity | relative air humidity | uint8 (>=0<=100) | % | false | DEVICE_DATA | 8 | 1 | 1 | 
+| bypass | bypass | boolean |   | true | DEVICE_DATA | 9 | 1 | 1 | 
 
 ## Devices of type *water*
 ### IPM

@@ -859,10 +859,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         shell.printfln("Testing adding Analog sensor");
         Mqtt::ha_enabled(true);
         // Mqtt::ha_enabled(false);
-
         Mqtt::nested_format(1);
         // Mqtt::nested_format(0);
-
         // Mqtt::send_response(false);
 
         // load some EMS data
@@ -884,6 +882,23 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
         request.url("/api/analogsensor/test_analogsensor1");
         request.url("/api/analogsensor/36");
         EMSESP::webAPIService.webAPIService(&request);
+
+        // test setting a value
+        request.method(HTTP_POST);
+        JsonDocument doc;
+
+        char data[] = "{\"value\":10,\"id\":33}";
+        deserializeJson(doc, data);
+        request.url("/api/analogsensor/setvalue");
+        EMSESP::webAPIService.webAPIService(&request, doc.as<JsonVariant>());
+        shell.invoke_command("call analogsensor test_analogsensor4");
+
+        char data2[] = "{\"value\":11}";
+        deserializeJson(doc, data2);
+        request.url("/api/analogsensor/test_analogsensor4");
+        EMSESP::webAPIService.webAPIService(&request, doc.as<JsonVariant>());
+
+        shell.invoke_command("call analogsensor test_analogsensor4");
 
         // test renaming it
         // bool update(uint8_t id, const std::string & name, int16_t offset, float factor, uint8_t uom, uint8_t type);
@@ -1070,6 +1085,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             // request.url("/api/thermostat");
             // EMSESP::webAPIService.webAPIService(&request);
             // request.url("/api/thermostat/hc1");
+            // EMSESP::webAPIService.webAPIService(&request);
+            // request.url("/api/boiler/comfort/value");
             // EMSESP::webAPIService.webAPIService(&request);
 
             // POST COMMANDS

@@ -22,7 +22,6 @@
 
 #include <emsesp.h>
 #include "ESPAsyncWebServer.h"
-#include "ESP32React.h"
 #include "web/WebAPIService.h"
 
 using namespace emsesp;
@@ -32,7 +31,7 @@ void         run_tests();
 const char * call_url(const char * url);
 
 AsyncWebServer * webServer;
-ESP32React *   esp32React;
+ESP32React *     esp32React;
 WebAPIService *  webAPIService;
 EMSESP           application;
 FS               dummyFS;
@@ -67,13 +66,13 @@ static TestStream stream;
 // load the tests
 // this is generated from this file when compiled with -DEMSESP_UNITY_CREATE
 // copy the output to the test_api.h file
-#include "test_api.h" // generated test functions
+#include "test_api.h"
 
-// Unity's setup call - is called before each test
+// Unity's setup call - is called before each test - empty for now
 void setUp() {
 }
 
-// Unity's teardown call - is called after each test
+// Unity's teardown call - is called after each test - empty for now
 void tearDown() {
 }
 
@@ -171,7 +170,6 @@ const char * call_url(const char * url) {
     request.method(HTTP_GET);
     request.url(url);
     webAPIService->webAPIService(&request);
-
     return webAPIService->getResponse();
 }
 
@@ -187,7 +185,6 @@ const char * call_url(const char * url, const char * data) {
     request.method(HTTP_POST);
     request.url(url);
     webAPIService->webAPIService(&request, json);
-
     return webAPIService->getResponse();
 }
 
@@ -268,11 +265,28 @@ void manual_test4() {
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/thermostat", data));
 }
 
+void manual_test5() {
+    auto expected_response = "[{}]"; // empty is good
+    char data[]            = "{\"value\":11}";
+
+    TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/analogsensor/test_analogsensor4", data));
+}
+
+void manual_test6() {
+    auto expected_response = "[{}]"; // empty is good
+    char data[]            = "{\"value\":10,\"id\":33}";
+
+    TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/analogsensor/setvalue", data));
+}
+
+
 void run_manual_tests() {
     RUN_TEST(manual_test1);
     RUN_TEST(manual_test2);
     RUN_TEST(manual_test3);
     RUN_TEST(manual_test4);
+    RUN_TEST(manual_test5);
+    RUN_TEST(manual_test6);
 }
 
 const char * run_console_command(const char * command) {
@@ -318,8 +332,10 @@ void run_console_tests() {
 
 // auto-generate the tests
 void create_tests() {
-    // These tests should all pass....
+    // These match the calls in test_api.h
+    // They are all READ calls, no POST or PUT. We use the manual tests for those.
 
+    // this first section should all pass
     capture("/api/boiler");
     capture("/api/boiler/commands");
     capture("/api/boiler/values");
@@ -406,7 +422,7 @@ void create_tests() {
 // Main entry point
 int main() {
     webServer     = new AsyncWebServer(80);
-    esp32React  = new ESP32React(webServer, &dummyFS);
+    esp32React    = new ESP32React(webServer, &dummyFS);
     webAPIService = new WebAPIService(webServer, esp32React->getSecurityManager());
 
     // Serial console for commands
