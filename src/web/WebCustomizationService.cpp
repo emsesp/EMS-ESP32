@@ -391,7 +391,7 @@ void WebCustomizationService::test() {
         analog.offset = 0;
         analog.factor = 0.1;
         analog.uom    = 17;
-        analog.type   = 3;
+        analog.type   = 3; // ADC
         webCustomization.analogCustomizations.push_back(analog);
 
         analog        = AnalogCustomization();
@@ -400,7 +400,7 @@ void WebCustomizationService::test() {
         analog.offset = 0;
         analog.factor = 1;
         analog.uom    = 0;
-        analog.type   = 1;
+        analog.type   = 1; // DIGITAL_IN
         webCustomization.analogCustomizations.push_back(analog);
 
         analog        = AnalogCustomization();
@@ -410,6 +410,15 @@ void WebCustomizationService::test() {
         analog.factor = 1;
         analog.uom    = 0;
         analog.type   = 0; // disabled, not-used
+        webCustomization.analogCustomizations.push_back(analog);
+
+        analog        = AnalogCustomization();
+        analog.gpio   = 33;
+        analog.name   = "test_analogsensor4";
+        analog.offset = 0;
+        analog.factor = 1;
+        analog.uom    = 0;
+        analog.type   = 2; // COUNTER
         webCustomization.analogCustomizations.push_back(analog);
 
         // EMS entities, mark some as favorites
