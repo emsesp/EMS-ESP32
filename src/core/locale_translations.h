@@ -917,6 +917,7 @@ MAKE_TRANSLATION(ventMode, "ventmode", "ventilation mode", "Belüftungsmodus", "
 MAKE_TRANSLATION(ventInSpeed, "ventinspeed", "in blower speed", "Zuluftdrehzahl", "toerental aanvoerventilator", "Tilluftflöde", "prędkość wentylatora nawiewu", "", "", "iç fan hızı", "velocità aria di alimentazione", "rýchlosť ventilátora", "rychlost vnitřního ventilátoru") // TODO translate
 MAKE_TRANSLATION(ventOutSpeed, "ventoutspeed", "out blower speed", "Abluftdrehzahl", "toerental afvoerventilator", "Frånluftflöde", "prędkość wentylatora wywiewu", "", "", "dış fan hızı", "velocità aria di scarico", "rýchlosť výstupného ventilátora", "rychlost venkovního ventilátoru") // TODO translate
 MAKE_TRANSLATION(airquality, "airquality", "air quality (voc)", "Luftqualität (VOC)", "luchtkwaliteit (VOC)", "Luftkvalitet (VOC)", "jakość powietrza", "", "", "hava kalitesi(voc)", "qualità aria (VOC)", "kvalita vzduchu (voc)", "kvalita vzduchu (VOC)") // TODO translate
+MAKE_TRANSLATION(airbypass, "bypass", "bypass", "Bypass", "Bypass", "Bypass", "obejścia", "bypass", "dérivation", "baypas", "Bypass", "obtokový", "bypassový")
 
 // EM100
 MAKE_TRANSLATION(minV, "minv", "min volt.", "min. Spannung", "", "min. spänning", "minimalne napięcie", "", "", "", "", "min. napätie", "minimální napětí") // TODO translate

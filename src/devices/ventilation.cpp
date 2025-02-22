@@ -47,7 +47,7 @@ Ventilation::Ventilation(uint8_t device_type, uint8_t device_id, uint8_t product
         DeviceValueTAG::TAG_DEVICE_DATA, &mode_, DeviceValueType::ENUM, FL_(enum_ventMode), FL_(ventMode), DeviceValueUOM::NONE, MAKE_CF_CB(set_ventMode));
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &voc_, DeviceValueType::UINT16, FL_(airquality), DeviceValueUOM::NONE);
     register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &humidity_, DeviceValueType::UINT8, FL_(airHumidity), DeviceValueUOM::PERCENT);
-    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &bypass_, DeviceValueType::BOOL, FL_(bypass), DeviceValueUOM::NONE, MAKE_CF_CB(set_bypass));
+    register_device_value(DeviceValueTAG::TAG_DEVICE_DATA, &bypass_, DeviceValueType::BOOL, FL_(airbypass), DeviceValueUOM::NONE, MAKE_CF_CB(set_bypass));
 }
 
 // message
