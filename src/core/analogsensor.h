@@ -113,16 +113,16 @@ class AnalogSensor {
     ~AnalogSensor() = default;
 
     enum AnalogType : int8_t {
-        NOTUSED, // 0 - disabled
-        DIGITAL_IN,
-        COUNTER,
-        ADC,
-        TIMER,
-        RATE,
-        DIGITAL_OUT,
-        PWM_0,
-        PWM_1,
-        PWM_2
+        NOTUSED     = 0, // 0 = disabled
+        DIGITAL_IN  = 1,
+        COUNTER     = 2,
+        ADC         = 3,
+        TIMER       = 4,
+        RATE        = 5,
+        DIGITAL_OUT = 6,
+        PWM_0       = 7,
+        PWM_1       = 8,
+        PWM_2       = 9
     };
 
     void start();

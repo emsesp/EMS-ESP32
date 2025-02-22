@@ -640,6 +640,7 @@ bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int
         return true; // no sensors, return true
     }
 
+    // return all values if its an info and values command
     if (!strcmp(cmd, F_(info)) || !strcmp(cmd, F_(values))) {
         for (const auto & sensor : sensors_) {
             output[sensor.name()] = sensor.value();
@@ -647,6 +648,7 @@ bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int
         return true;
     }
 
+    // show all entity details of the command is entities
     if (!strcmp(cmd, F_(entities))) {
         for (const auto & sensor : sensors_) {
             get_value_json(output[sensor.name()].to<JsonObject>(), sensor);
@@ -654,7 +656,7 @@ bool AnalogSensor::get_value_info(JsonObject output, const char * cmd, const int
         return true;
     }
 
-    // this is for a specific sensor
+    // this is for a specific sensor, return the value
     const char * attribute_s = Command::get_attribute(cmd);
 
     for (const auto & sensor : sensors_) {
@@ -725,6 +727,7 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
         }
         val = b ? 1 : 0;
     }
+
     for (auto & sensor : sensors_) {
         if (sensor.gpio() == gpio) {
             double oldoffset = sensor.offset();
@@ -791,6 +794,7 @@ bool AnalogSensor::command_setvalue(const char * value, const int8_t gpio) {
             return true;
         }
     }
+
     return false;
 }
 
