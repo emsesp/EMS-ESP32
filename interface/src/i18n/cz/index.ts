@@ -342,16 +342,16 @@ const cz: Translation = {
   DEVELOPER_MODE: 'Režim vývojáře',
   DUPLICATE: 'Duplikát',
   UPGRADE: 'Upgrade',
-  DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.', // TODO translate
-  NO_DATA_1: 'No favorite EMS entities found yet. Use the', // TODO translate
-  NO_DATA_2: 'module to mark them.', // TODO translate
-  NO_DATA_3: 'To see all available entities go to', // TODO translate
-  THIS_VERSION: 'This Version', // TODO translate
-  PLATFORM: 'Platform', // TODO translate
-  RELEASE_TYPE: 'Release Type', // TODO translate
-  REINSTALL: 'Re-install', // TODO translate
-  INTERNET_CONNECTION_REQUIRED: 'Internet connection required for automatic version checking and upgrading',
-  DAYS_AGO: '{0} den{{y|ní|ní|ní|ní|ní}} zpátky'
+  DASHBOARD_1: 'Všechny aktivní entity EMS jsou označené jako oblíbené. Všechny vlastní entity, harmonogramy a externí sensory jsou zobrazeny níže.',
+  NO_DATA_1: 'Nebyly nalezeny žádné oblíbené entity. Použijte',
+  NO_DATA_2: 'modul sloužící k jejich výběru.',
+  NO_DATA_3: 'Pro zobrazení všech dostupných entit navštivte',
+  THIS_VERSION: 'Tato verze',
+  PLATFORM: 'Platforma',
+  RELEASE_TYPE: 'Typ sestavení',
+  REINSTALL: 'Přeinstalovat',
+  INTERNET_CONNECTION_REQUIRED: 'Pro automatickou kontrolu a instalaci aktualizací je třeba internetové připojení',
+  DAYS_AGO: '{0} dn{{y|ní|ní|ní|ní|ní}} zpátky'
 };
 
 export default cz;
