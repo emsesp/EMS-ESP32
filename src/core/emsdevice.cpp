@@ -21,12 +21,13 @@
 
 namespace emsesp {
 
-// returns number of visible device values (entries) for this device
+// returns number of visible device values (entities) for this device, for the Devices page
 // this includes commands since they can also be entities and visible in the web UI
 uint8_t EMSdevice::count_entities() {
     uint8_t count = 0;
     for (const auto & dv : devicevalues_) {
-        if (!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && dv.hasValue()) {
+        // if (!dv.has_state(DeviceValueState::DV_WEB_EXCLUDE) && dv.hasValue()) {
+        if (dv.hasValue()) {
             count++;
         }
     }
