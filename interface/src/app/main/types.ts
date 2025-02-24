@@ -72,7 +72,7 @@ export interface Device {
   d: number; // deviceid
   p: number; // productid
   v: string; // version
-  e: number; // entities
+  e: number; // total number of entities
   url?: string; // lowercase type name used in API URL
 }
 
