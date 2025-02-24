@@ -593,7 +593,7 @@ const Customizations = () => {
             </Button>
           </Grid>
           <Grid>
-            <Typography variant="subtitle2" color="primary">
+            <Typography variant="subtitle2" color="grey">
               {LL.SHOWING()}&nbsp;{shown_data.length}/{deviceEntities.length}
               &nbsp;{LL.ENTITIES(deviceEntities.length)}
             </Typography>

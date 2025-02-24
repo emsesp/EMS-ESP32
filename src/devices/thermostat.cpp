@@ -1986,6 +1986,8 @@ bool Thermostat::set_brightness(const char * value, const int8_t id) {
     return true;
 }
 
+// thermostat/hc<x>/remotetemp
+// value of -1 to turn off
 bool Thermostat::set_remotetemp(const char * value, const int8_t id) {
     float f;
     if (!Helpers::value2temperature(value, f)) {
@@ -2147,11 +2149,15 @@ bool Thermostat::set_control(const char * value, const int8_t id) {
     }
 
     uint8_t ctrl;
+    // Junkers
+    // 1-FB10, 2-FB100
     if (model() == EMSdevice::EMS_DEVICE_FLAG_JUNKERS && !has_flags(EMSdevice::EMS_DEVICE_FLAG_JUNKERS_OLD)) {
         if (Helpers::value2enum(value, ctrl, FL_(enum_j_control))) {
             write_command(set_typeids[hc->hc()], 1, ctrl);
             return true;
         }
+        // BC400
+        // 1-RC100, 2-RC100H, 3-RC200
     } else if (model() == EMSdevice::EMS_DEVICE_FLAG_BC400) {
         if (Helpers::value2enum(value, ctrl, FL_(enum_control2))) {
             write_command(hpmode_typeids[hc->hc()], 3, ctrl);
@@ -2170,6 +2176,8 @@ bool Thermostat::set_control(const char * value, const int8_t id) {
             }
             return true;
         }
+        // RC100 or RC300
+        // 1-RC200, 2-RC100, 3-RC100H
     } else if (isRC300() || model() == EMSdevice::EMS_DEVICE_FLAG_RC100) {
         if (Helpers::value2enum(value, ctrl, FL_(enum_control1))) {
             write_command(hpmode_typeids[hc->hc()], 3, ctrl);
