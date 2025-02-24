@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Slide, ToastContainer } from 'react-toastify';
+import { ToastContainer, Zoom } from 'react-toastify';
 
 import AppRouting from 'AppRouting';
 import CustomTheme from 'CustomTheme';
@@ -43,17 +43,20 @@ const App = () => {
         <AppRouting />
         <ToastContainer
           position="bottom-left"
-          autoClose={2000}
+          autoClose={3000}
           hideProgressBar={false}
           newestOnTop={false}
-          closeOnClick={true}
+          closeOnClick
           rtl={false}
-          pauseOnFocusLoss={false}
+          pauseOnFocusLoss
           draggable={false}
           pauseOnHover={false}
-          transition={Slide}
+          transition={Zoom}
           closeButton={false}
-          theme="light"
+          theme="dark"
+          toastStyle={{
+            border: '1px solid #177ac9'
+          }}
         />
       </CustomTheme>
     </TypesafeI18n>
