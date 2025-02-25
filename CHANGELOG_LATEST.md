@@ -16,6 +16,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - CR11 thermostat [#2295](https://github.com/emsesp/EMS-ESP32/issues/2295)
 - Show ESP32's CPU temp in Hardware Status
 - vacation mode for the CR50 [#2403](https://github.com/emsesp/EMS-ESP32/issues/2403)
+- new Console command "set admin password" to set WebUI admin password
 
 ## Fixed
 
