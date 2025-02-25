@@ -209,6 +209,40 @@ static void setup_commands(std::shared_ptr<Commands> const & commands) {
     //
     commands->add_command(ShellContext::MAIN,
                           CommandFlags::ADMIN,
+                          string_vector{F_(set), F_(admin), F_(password)},
+                          [](Shell & shell, const std::vector<std::string> & arguments) {
+                              shell.enter_password(F_(new_password_prompt1), [](Shell & shell, bool completed, const std::string & password1) {
+                                  if (completed) {
+                                      shell.enter_password(F_(new_password_prompt2), [password1](Shell & shell, bool completed, const std::string & password2) {
+                                          if (completed) {
+                                              if (password1 == password2) {
+#ifndef EMSESP_STANDALONE
+                                                  EMSESP::esp32React.getSecuritySettingsService()->updateWithoutPropagation(
+                                                      [&](SecuritySettings & securitySettings) {
+                                                          // find the username 'admin' and update its password
+                                                          for (auto & user : securitySettings.users) {
+                                                              if (user.username == "admin") {
+                                                                  user.password = password2.c_str();
+                                                                  return StateUpdateResult::CHANGED;
+                                                              }
+                                                          }
+                                                          // otherwise add a new admin user
+                                                          securitySettings.users.emplace_back(F_(admin), password2.c_str(), true);
+                                                          return StateUpdateResult::CHANGED;
+                                                      });
+#endif
+                                                  shell.println("Admin user's password updated.");
+                                              } else {
+                                                  shell.println("Passwords do not match");
+                                              }
+                                          }
+                                      });
+                                  }
+                              });
+                          });
+
+    commands->add_command(ShellContext::MAIN,
+                          CommandFlags::ADMIN,
                           string_vector{F_(set), F_(wifi), F_(password)},
                           [](Shell & shell, const std::vector<std::string> & arguments) {
                               shell.enter_password(F_(new_password_prompt1), [](Shell & shell, bool completed, const std::string & password1) {
