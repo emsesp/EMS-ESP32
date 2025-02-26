@@ -100,7 +100,12 @@ const Help = () => {
       {me.admin && (
         <List sx={{ borderRadius: 3, border: '2px solid grey' }}>
           <ListItem>
-            <ListItemButton component="a" href="https://docs.emsesp.org">
+            <ListItemButton
+              component="a"
+              target="_blank"
+              rel="noreferrer"
+              href="https://docs.emsesp.org"
+            >
               <ListItemAvatar>
                 <Avatar sx={{ bgcolor: '#72caf9' }}>
                   <MenuBookIcon />
@@ -111,7 +116,12 @@ const Help = () => {
           </ListItem>
 
           <ListItem>
-            <ListItemButton component="a" href="https://discord.gg/3J3GgnzpyT">
+            <ListItemButton
+              component="a"
+              target="_blank"
+              rel="noreferrer"
+              href="https://discord.gg/3J3GgnzpyT"
+            >
               <ListItemAvatar>
                 <Avatar sx={{ bgcolor: '#72caf9' }}>
                   <CommentIcon />
@@ -124,6 +134,8 @@ const Help = () => {
           <ListItem>
             <ListItemButton
               component="a"
+              target="_blank"
+              rel="noreferrer"
               href="https://github.com/emsesp/EMS-ESP32/issues/new/choose"
             >
               <ListItemAvatar>
@@ -155,7 +167,12 @@ const Help = () => {
 
       <Typography color="white" variant="subtitle1" align="center" mt={1}>
         &copy;&nbsp;
-        <Link target="_blank" href="https://emsesp.org" color="primary">
+        <Link
+          target="_blank"
+          rel="noreferrer"
+          href="https://emsesp.org"
+          color="primary"
+        >
           {'emsesp.org'}
         </Link>
       </Typography>
