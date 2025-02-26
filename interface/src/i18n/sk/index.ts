@@ -346,12 +346,12 @@ const sk: Translation = {
   NO_DATA_1: 'Nenašli sa žiadne obľúbené entity EMS. Použite',
   NO_DATA_2: 'modul na ich označenie.',
   NO_DATA_3: 'Ak chcete zobraziť všetky dostupné entity, prejdite na',
-  THIS_VERSION: 'This Version', // TODO translate
+  THIS_VERSION: 'Táto verzia',
   PLATFORM: 'Platforma',
   RELEASE_TYPE: 'Typ vydania',
   REINSTALL: 'Preinštalovať',
   INTERNET_CONNECTION_REQUIRED: 'Internetové pripojenie je potrebné pre automatickú kontrolu a aktualizáciu',
-  DAYS_AGO: '{0} d{{ní|eň|ní|ní|ní|ní}} temu'
+  DAYS_AGO: 'pred {0} d{{ňami|eň|ní|ní|ní|ní}}'
 };
 
 export default sk;
