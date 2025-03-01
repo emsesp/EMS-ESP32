@@ -4875,7 +4875,7 @@
 | hc1.redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 53 | 1 | 1/2 | 
 | hc1.solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | 54 | 1 | 1 | 
 | hc1.currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | 55 | 1 | 1/10 | 
-| dhw.mode | operating mode | enum [off\|normal\|comfort\|auto\|own prog] |   | true | DHW | 0 | 1 | 1 | 
+| dhw.mode | operating mode | enum [off\|on\|auto] |   | true | DHW | 0 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 1 | 1 | 1 | 
 | dhw.settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
 | dhw.circmode | circulation pump mode | enum [off\|on\|auto\|own prog] |   | true | DHW | 3 | 1 | 1 | 
@@ -4996,7 +4996,7 @@
 | hc1.redthreshold | reduction threshold | int8 (>=12<=22) | C | true | HC | 53 | 1 | 1/2 | 
 | hc1.solarinfl | solar influence | uint8 (>=-5<=4294967295) | C | true | HC | 54 | 1 | 1 | 
 | hc1.currsolarinfl | curent solar influence | uint8 (>=0<=25) | C | false | HC | 55 | 1 | 1/10 | 
-| dhw.mode | operating mode | enum [off\|normal\|comfort\|auto\|own prog] |   | true | DHW | 0 | 1 | 1 | 
+| dhw.mode | operating mode | enum [off\|on\|auto] |   | true | DHW | 0 | 1 | 1 | 
 | dhw.settemp | set temperature | uint8 (>=0<=254) | C | true | DHW | 1 | 1 | 1 | 
 | dhw.settemplow | set low temperature | uint8 (>=0<=254) | C | true | DHW | 2 | 1 | 1 | 
 | dhw.circmode | circulation pump mode | enum [off\|on\|auto\|own prog] |   | true | DHW | 3 | 1 | 1 | 

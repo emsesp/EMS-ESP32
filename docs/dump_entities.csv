@@ -3822,7 +3822,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC200, CW100, CR120, CR50",thermostat,157,hc1.redthreshold,reduction threshold,int8 (>=12<=22),C,true,number.thermostat_hc1_reduction_threshold,number.thermostat_hc1_redthreshold,6,1,1/2,53,1
 "RC200, CW100, CR120, CR50",thermostat,157,hc1.solarinfl,solar influence,uint8 (>=-5<=4294967295),C,true,number.thermostat_hc1_solar_influence,number.thermostat_hc1_solarinfl,6,1,1,54,1
 "RC200, CW100, CR120, CR50",thermostat,157,hc1.currsolarinfl,curent solar influence,uint8 (>=0<=25),C,false,sensor.thermostat_hc1_curent_solar_influence,sensor.thermostat_hc1_currsolarinfl,6,1,1/10,55,1
-"RC200, CW100, CR120, CR50",thermostat,157,dhw.mode,operating mode,enum [off\|normal\|comfort\|auto\|own prog], ,true,select.thermostat_dhw_operating_mode,select.thermostat_dhw_mode,6,9,1,0,1
+"RC200, CW100, CR120, CR50",thermostat,157,dhw.mode,operating mode,enum [off\|on\|auto], ,true,select.thermostat_dhw_operating_mode,select.thermostat_dhw_mode,6,9,1,0,1
 "RC200, CW100, CR120, CR50",thermostat,157,dhw.settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
 "RC200, CW100, CR120, CR50",thermostat,157,dhw.settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
 "RC200, CW100, CR120, CR50",thermostat,157,dhw.circmode,circulation pump mode,enum [off\|on\|auto\|own prog], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,3,1
@@ -4001,7 +4001,7 @@ device name,device type,product id,shortname,fullname,type [options...] \| (min/
 "RC100, CR10, Moduline 1000/1010",thermostat,165,hc1.redthreshold,reduction threshold,int8 (>=12<=22),C,true,number.thermostat_hc1_reduction_threshold,number.thermostat_hc1_redthreshold,6,1,1/2,53,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,hc1.solarinfl,solar influence,uint8 (>=-5<=4294967295),C,true,number.thermostat_hc1_solar_influence,number.thermostat_hc1_solarinfl,6,1,1,54,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,hc1.currsolarinfl,curent solar influence,uint8 (>=0<=25),C,false,sensor.thermostat_hc1_curent_solar_influence,sensor.thermostat_hc1_currsolarinfl,6,1,1/10,55,1
-"RC100, CR10, Moduline 1000/1010",thermostat,165,dhw.mode,operating mode,enum [off\|normal\|comfort\|auto\|own prog], ,true,select.thermostat_dhw_operating_mode,select.thermostat_dhw_mode,6,9,1,0,1
+"RC100, CR10, Moduline 1000/1010",thermostat,165,dhw.mode,operating mode,enum [off\|on\|auto], ,true,select.thermostat_dhw_operating_mode,select.thermostat_dhw_mode,6,9,1,0,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,dhw.settemp,set temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_temperature,number.thermostat_dhw_settemp,6,9,1,1,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,dhw.settemplow,set low temperature,uint8 (>=0<=254),C,true,number.thermostat_dhw_set_low_temperature,number.thermostat_dhw_settemplow,6,9,1,2,1
 "RC100, CR10, Moduline 1000/1010",thermostat,165,dhw.circmode,circulation pump mode,enum [off\|on\|auto\|own prog], ,true,select.thermostat_dhw_circulation_pump_mode,select.thermostat_dhw_circmode,6,9,1,3,1
