@@ -105,7 +105,7 @@ export default () => {
             let message = 'message #' + count;
             if (count % 6 === 1) {
               message +=
-                ' with a long message that will be wrapped, to see if it stays one a single line';
+                ' that is a long message that will be wrapped, to test if it gets truncated';
             }
             const data = {
               t: new Date().toISOString(),

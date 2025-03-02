@@ -2115,7 +2115,7 @@ bool System::readCommand(const char * data) {
         strlcpy(value, p, 10);                         // get string
         device_id = (uint8_t)Helpers::hextoint(value); // convert hex to int
         if (!EMSESP::valid_device(device_id)) {
-            LOG_ERROR("Invalid device ID (%d) in read command", device_id);
+            LOG_ERROR("Invalid device ID (0x%02X) in read command", device_id);
             return false; // invalid device
         }
     }

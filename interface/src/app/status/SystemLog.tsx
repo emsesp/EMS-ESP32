@@ -201,7 +201,7 @@ const SystemLog = () => {
               name="level"
               label={LL.LOG_LEVEL()}
               value={data.level}
-              sx={{ width: '10ch' }}
+              sx={{ width: '14ch' }}
               variant="outlined"
               onChange={updateFormValue}
               margin="normal"
