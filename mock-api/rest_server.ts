@@ -269,10 +269,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-          old_custom_name +
-          ') with new (' +
-          new_custom_name +
-          ')'
+        old_custom_name +
+        ') with new (' +
+        new_custom_name +
+        ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -367,15 +367,15 @@ function check_upgrade(version: string) {
     const stable_version = version.split(',')[1];
     console.log(
       'latest dev version: ' +
-        dev_version +
-        ', latest stable version: ' +
-        stable_version
+      dev_version +
+      ', latest stable version: ' +
+      stable_version
     );
     console.log(
       'Version upgrade check from version ' +
-        THIS_VERSION +
-        ', upgradable: ' +
-        VERSION_IS_UPGRADEABLE
+      THIS_VERSION +
+      ', upgradable: ' +
+      VERSION_IS_UPGRADEABLE
     );
     data = {
       emsesp_version: THIS_VERSION,
@@ -5049,20 +5049,21 @@ router
   });
 
 // Mock GitHub API
+// https://api.github.com/repos/emsesp/EMS-ESP32/releases
 
 router
   .get(GH_ENDPOINT_ROOT + '/tags/latest', () => {
     const data = {
       name: 'v' + LATEST_DEV_VERSION,
-      published_at: new Date().toISOString()
+      published_at: new Date().toISOString() // use todays date
     };
-    console.log('returning latest development version: ', data);
+    console.log('returning latest development version (today): ', data);
     return data;
   })
   .get(GH_ENDPOINT_ROOT + '/latest', () => {
     const data = {
       name: 'v' + LATEST_STABLE_VERSION,
-      published_at: '2025-02-07T20:09:46Z'
+      published_at: '2025-03-01T13:29:13.999Z'
     };
     console.log('returning latest stable version: ', data);
     return data;
