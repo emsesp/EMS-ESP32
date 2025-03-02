@@ -193,17 +193,16 @@ StateUpdateResult WebSettings::update(JsonObject root, WebSettings & settings) {
 #elif CONFIG_IDF_TARGET_ESP32S3
             settings.board_profile = "S32S3"; // BBQKees Gateway S3
 #endif
-
         // apply the new board profile setting
         System::load_board_profile(data, settings.board_profile.c_str());
     }
 
-    if (old_board_profile != settings.board_profile) {
-        // see if need to override the set board profile (e.g. forced by NVS boot string)
-        EMSESP::logger().info("Setting new Board profile %s (was %s)", settings.board_profile.c_str(), old_board_profile.c_str());
-    } else if (org_board_profile != settings.board_profile) {
-        // EMSESP::logger().info("Board profile set to %s", settings.board_profile.c_str());
-        EMSESP::logger().info("Setting new Board profile %s (was %s)", settings.board_profile.c_str(), org_board_profile.c_str());
+    if (org_board_profile != settings.board_profile) {
+        if (org_board_profile.isEmpty()) {
+            EMSESP::logger().info("Setting board profile to %s", settings.board_profile.c_str());
+        } else {
+            EMSESP::logger().info("Setting board profile to %s (was %s)", settings.board_profile.c_str(), org_board_profile.c_str());
+        }
     }
 
     int prev;
