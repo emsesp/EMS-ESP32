@@ -31,7 +31,7 @@ import { FormLoader, SectionContent, useLayoutTitle } from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
 const Version = () => {
-  const { LL } = useI18nContext();
+  const { LL, locale } = useI18nContext();
   const [restarting, setRestarting] = useState<boolean>(false);
   const [openInstallDialog, setOpenInstallDialog] = useState<boolean>(false);
   const [usingDevVersion, setUsingDevVersion] = useState<boolean>(false);
@@ -91,6 +91,30 @@ const Version = () => {
         });
     }
   }, [latestVersion, latestDevVersion]);
+
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+  const DIVISIONS = [
+    { amount: 60, name: 'seconds' },
+    { amount: 60, name: 'minutes' },
+    { amount: 24, name: 'hours' },
+    { amount: 7, name: 'days' },
+    { amount: 4.34524, name: 'weeks' },
+    { amount: 12, name: 'months' },
+    { amount: Number.POSITIVE_INFINITY, name: 'years' }
+  ];
+  function formatTimeAgo(date) {
+    let duration = (date.getTime() - new Date().getTime()) / 1000;
+    for (let i = 0; i < DIVISIONS.length; i++) {
+      const division = DIVISIONS[i];
+      if (Math.abs(duration) < division.amount) {
+        return rtf.format(
+          Math.round(duration),
+          division.name as Intl.RelativeTimeFormatUnit
+        );
+      }
+      duration /= division.amount;
+    }
+  }
 
   const getBinURL = () => {
     if (!internetLive) {
@@ -274,7 +298,7 @@ const Version = () => {
             </Grid>
             <Grid size={{ xs: 8, md: 10 }}>
               <FormControlLabel
-                disabled
+                disabled={!isDev}
                 control={
                   <Checkbox
                     sx={{
@@ -284,12 +308,17 @@ const Version = () => {
                     }}
                   />
                 }
+                slotProps={{
+                  typography: {
+                    color: 'grey'
+                  }
+                }}
                 checked={!isDev}
                 label={LL.STABLE()}
-                sx={{ '& .MuiSvgIcon-root': { fontSize: 18 } }}
+                sx={{ '& .MuiSvgIcon-root': { fontSize: 16 } }}
               />
               <FormControlLabel
-                disabled
+                disabled={isDev}
                 control={
                   <Checkbox
                     sx={{
@@ -299,9 +328,14 @@ const Version = () => {
                     }}
                   />
                 }
+                slotProps={{
+                  typography: {
+                    color: 'grey'
+                  }
+                }}
                 checked={isDev}
                 label={LL.DEVELOPMENT()}
-                sx={{ '& .MuiSvgIcon-root': { fontSize: 18 } }}
+                sx={{ '& .MuiSvgIcon-root': { fontSize: 16 } }}
               />
             </Grid>
           </Grid>
@@ -332,14 +366,7 @@ const Version = () => {
                     {latestVersion.published_at && (
                       <Typography component="span" variant="caption">
                         &nbsp;(
-                        {LL.DAYS_AGO(
-                          Math.floor(
-                            (Date.now() -
-                              new Date(latestVersion.published_at).getTime()) /
-                              (1000 * 60 * 60 * 24)
-                          )
-                        )}
-                        )
+                        {formatTimeAgo(new Date(latestVersion.published_at))})
                       </Typography>
                     )}
                     {!usingDevVersion && showButtons(false)}
@@ -357,14 +384,7 @@ const Version = () => {
                     {latestDevVersion.published_at && (
                       <Typography component="span" variant="caption">
                         &nbsp;(
-                        {LL.DAYS_AGO(
-                          Math.floor(
-                            (Date.now() -
-                              new Date(latestDevVersion.published_at).getTime()) /
-                              (1000 * 60 * 60 * 24)
-                          )
-                        )}
-                        )
+                        {formatTimeAgo(new Date(latestDevVersion.published_at))})
                       </Typography>
                     )}
                     {showButtons(true)}
