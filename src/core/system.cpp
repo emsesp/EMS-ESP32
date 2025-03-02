@@ -2154,7 +2154,7 @@ bool System::command_read(const char * value, const int8_t id) {
 // set the system status code - SYSTEM_STATUS in system.h
 void System::systemStatus(uint8_t status_code) {
     systemStatus_ = status_code;
-    LOG_DEBUG("Setting System status code %d", status_code);
+    // LOG_DEBUG("Setting System status code %d", status_code);
 }
 
 uint8_t System::systemStatus() {
