@@ -288,8 +288,8 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     }
 
     // extract params
-    int8_t id1 = -1;
-    int8_t id2 = -1;
+    int16_t id1 = -1;
+    int16_t id2 = -1;
     if (!id1_s.empty()) {
         if (id1_s[0] == '0' && id1_s[1] == 'x') {
             id1 = Helpers::hextoint(id1_s.c_str());
@@ -307,7 +307,7 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             shell.printfln("Usage: test add <device_id> <product_id>");
             return;
         }
-        shell.printfln("Testing Adding a device (product_id %d), with all values...", id2);
+        shell.printfln("Testing adding a device (deviceID 0x%02X, product_id %d), with all values...", id1, id2);
         test("add", id1, id2);
         shell.invoke_command("show devices");
         ok = true;

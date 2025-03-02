@@ -276,6 +276,7 @@ const Devices = () => {
 
   const resetDeviceSelect = () => {
     device_select.fns.onRemoveAll();
+    setSearch('');
   };
 
   const escFunction = useCallback(
