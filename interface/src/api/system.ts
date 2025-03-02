@@ -14,8 +14,10 @@ export const updateLogSettings = (data: LogSettings) =>
 export const fetchLogES = () => alovaInstance.Get('/es/log');
 
 // Get versions from GitHub
+// cache for 10 minutes to stop getting the IP blocked by GitHub
 export const getStableVersion = () =>
   alovaInstanceGH.Get('latest', {
+    cacheFor: 60 * 10 * 1000,
     transform(response: { data: { name: string; published_at: string } }) {
       return {
         name: response.data.name.substring(1),
@@ -25,6 +27,7 @@ export const getStableVersion = () =>
   });
 export const getDevVersion = () =>
   alovaInstanceGH.Get('tags/latest', {
+    cacheFor: 60 * 10 * 1000,
     transform(response: { data: { name: string; published_at: string } }) {
       return {
         name: response.data.name.split(/\s+/).splice(-1)[0].substring(1),
