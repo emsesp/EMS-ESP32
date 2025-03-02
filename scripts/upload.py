@@ -161,6 +161,6 @@ def on_upload(source, target, env):
 
         print()
 
+
 if env.get('UPLOAD_PROTOCOL') == 'custom':
     env.Replace(UPLOADCMD=on_upload)
-    
