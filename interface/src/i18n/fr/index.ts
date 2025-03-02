@@ -351,7 +351,6 @@ const fr: Translation = {
   RELEASE_TYPE: 'Release Type', // TODO translate
   REINSTALL: 'Re-install', // TODO translate
   INTERNET_CONNECTION_REQUIRED: 'Internet connection required for automatic version checking and upgrading',
-  DAYS_AGO: '{0} jour{{s}} avant'
 };
 
 export default fr;

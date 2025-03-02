@@ -351,7 +351,6 @@ const cz: Translation = {
   RELEASE_TYPE: 'Typ sestavení',
   REINSTALL: 'Přeinstalovat',
   INTERNET_CONNECTION_REQUIRED: 'Pro automatickou kontrolu a instalaci aktualizací je třeba internetové připojení',
-  DAYS_AGO: '{0} dn{{y|í|í|í|í|í}} zpátky'
 };
 
 export default cz;

@@ -351,7 +351,6 @@ const nl: Translation = {
   RELEASE_TYPE: 'Release Typ',
   REINSTALL: 'Opnieuw Installeren',
   INTERNET_CONNECTION_REQUIRED: 'Internetverbinding vereist voor automatische versiecontrole en -upgrade',
-  DAYS_AGO: '{0} dag{{en}} geleden'
 };
 
 export default nl;

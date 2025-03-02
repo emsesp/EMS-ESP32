@@ -351,7 +351,6 @@ const en: Translation = {
   RELEASE_TYPE: 'Release Type',
   REINSTALL: 'Re-install',
   INTERNET_CONNECTION_REQUIRED: 'Internet connection required for automatic version checking and upgrading',
-  DAYS_AGO: '{0} day{{s}} ago'
 };
 
 export default en;

@@ -3,6 +3,7 @@ import os
 
 Import("env")
 
+
 def buildWeb():
     os.chdir("interface")
     print("Building web interface...")
@@ -18,6 +19,7 @@ def buildWeb():
         env.Execute("yarn webUI")
     finally:
         os.chdir("..")
+
 
 # Don't buuld webUI if called from GitHub Actions
 if "NO_BUILD_WEBUI" in os.environ:
