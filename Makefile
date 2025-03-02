@@ -16,7 +16,7 @@ T := $(shell $(MAKE) $(MAKECMDGOALS) --no-print-directory \
       ECHO="COUNTTHIS" | grep -c "COUNTTHIS")
 N := x
 C = $(words $N)$(eval N := x $N)
-ECHO = python3 $(I)/echo_progress.py --stepno=$C --nsteps=$T
+ECHO = python3 $(I)/scripts/echo_progress.py --stepno=$C --nsteps=$T
 endif
 
 # determine number of parallel compiles based on OS
@@ -151,7 +151,7 @@ COMPILE.cpp = $(CXX) $(CXX_STANDARD) $(CXXFLAGS) $(DEPFLAGS) -c $< -o $@
 .SILENT: $(OUTPUT)
 
 all: $(OUTPUT)
-	@$(ECHO) All done
+	@$(ECHO) Build complete.
 
 $(OUTPUT): $(OBJS)
 	@mkdir -p $(@D)
