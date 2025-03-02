@@ -351,7 +351,6 @@ const tr: Translation = {
   RELEASE_TYPE: 'Release Type', // TODO translate
   REINSTALL: 'Re-install', // TODO translate
   INTERNET_CONNECTION_REQUIRED: 'Internet connection required for automatic version checking and upgrading', // TODO translate
-  DAYS_AGO: '{0} gün{{ü|ü|ü|ü|ü|ü}} önce'
 };
 
 export default tr;

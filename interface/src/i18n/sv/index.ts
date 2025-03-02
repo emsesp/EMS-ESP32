@@ -351,7 +351,6 @@ const sv: Translation = {
   RELEASE_TYPE: 'Release Type', // TODO translate
   REINSTALL: 'Re-install', // TODO translate
   INTERNET_CONNECTION_REQUIRED: 'Internetanslutning krävs för automatisk version kontroll och uppdatering',
-  DAYS_AGO: '{0} dag{{ar}} sedan'
 };
 
 export default sv;

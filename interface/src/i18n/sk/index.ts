@@ -351,7 +351,6 @@ const sk: Translation = {
   RELEASE_TYPE: 'Typ vydania',
   REINSTALL: 'Preinštalovať',
   INTERNET_CONNECTION_REQUIRED: 'Internetové pripojenie je potrebné pre automatickú kontrolu a aktualizáciu',
-  DAYS_AGO: 'pred {0} d{{ňami|eň|ní|ní|ní|ní}}'
 };
 
 export default sk;
