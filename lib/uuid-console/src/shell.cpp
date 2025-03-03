@@ -113,6 +113,7 @@ void Shell::loop_one() {
         return;
     }
 
+
     switch (mode_) {
     case Mode::NORMAL:
         output_logs();
@@ -305,15 +306,15 @@ void Shell::loop_normal() {
         break;
     }
 
-    // common for all, display the complete line
-    // added for EMS-ESP
+#ifndef EMSESP_STANDALONE
+    // added for EMS-ESP. Display the complete line
     erase_current_line();
     prompt_displayed_ = false;
     display_prompt();
-
     if (cursor_) {
         printf("\033[%dD", cursor_);
     }
+#endif
 
     previous_ = c;
 
@@ -519,7 +520,11 @@ void Shell::maximum_command_line_length(size_t length) {
 void Shell::process_command() {
     // added for EMS-ESP
     if (line_buffer_.empty()) {
+#ifndef EMSESP_STANDALONE
         println();
+#else
+        display_prompt();
+#endif
         return;
     }
 
@@ -544,7 +549,9 @@ void Shell::process_command() {
 
         CommandLine command_line{line1};
 
+#ifndef EMSESP_STANDALONE
         println();
+#endif
         prompt_displayed_ = false;
 
         if (!command_line->empty()) {
@@ -564,8 +571,7 @@ void Shell::process_command() {
         display_prompt();
     }
 
-    // don't think we need this for EMS-ESP on ESP32
-    // ::yield();
+    ::yield();
 }
 
 void Shell::process_completion() {
@@ -581,7 +587,6 @@ void Shell::process_completion() {
 
             for (auto & help : completion.help) {
                 std::string help_line = help.to_string(maximum_command_line_length_);
-
                 println(help_line);
             }
         }

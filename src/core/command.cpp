@@ -387,7 +387,7 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
             output["message"] = err;
             LOG_WARNING("Command failed: %s", err.c_str());
         }
-        return CommandRet::ERROR;
+        return CommandRet::NOT_FOUND;
     }
 
     // before calling the command, check permissions and abort if not authorized
