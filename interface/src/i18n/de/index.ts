@@ -187,7 +187,7 @@ const de: Translation = {
   COMPACT: 'Kompakte Darstellung',
   DOWNLOAD_SETTINGS_TEXT: 'Erstellen Sie eine Sicherung Ihrer Konfigurationen und Einstellungen',
   UPLOAD_TEXT: 'Laden Sie eine neue Firmware-Datei (.bin) oder eine Sicherungsdatei (.json) hoch',
-  UPLOAD_DROP_TEXT: 'Drop a firmware .bin file or click here', // TODO translate
+  UPLOAD_DROP_TEXT: 'Legen Sie eine Firmware-Datei (.bin) ab oder klicken Sie hier',
   ERROR: 'Unerwarteter Fehler, bitte versuchen Sie es erneut.',
   TIME_SET: 'Zeit gesetzt',
   MANAGE_USERS: 'Nutzerverwaltung',
@@ -343,7 +343,7 @@ const de: Translation = {
   DUPLICATE: 'Kopieren',
   UPGRADE: 'Aktualisieren',
   DASHBOARD_1: 'Alle EMS-Entitäten, die aktiv und als Favorit markiert sind, sowie alle benutzerdefinierten Entitäten, Zeitpläne und externen Sensordaten werden unten angezeigt.',
-  NO_DATA_1: 'Keine favorisierten EMS-Entitäten gefunden! Verwenden Sie das Modul', 
+  NO_DATA_1: 'Keine favorisierten EMS-Entitäten gefunden! Verwenden Sie das Modul',
   NO_DATA_2: ', um sie zu markieren.',
   NO_DATA_3: 'Um alle verfügbaren Entitäten anzuzeigen, gehen Sie zu',
   THIS_VERSION: 'Diese Version',

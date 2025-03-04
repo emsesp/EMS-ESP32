@@ -442,7 +442,7 @@ const Version = () => {
               {LL.INTERNET_CONNECTION_REQUIRED()}
             </Typography>
           )}
-          {!me.admin && (
+          {me.admin && (
             <>
               {renderInstallDialog()}
               <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
