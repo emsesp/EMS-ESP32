@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -34,10 +34,13 @@ import {
   SingleUpload,
   useLayoutTitle
 } from 'components';
+import { AuthenticatedContext } from 'contexts/authentication';
 import { useI18nContext } from 'i18n/i18n-react';
 
 const Version = () => {
   const { LL, locale } = useI18nContext();
+  const { me } = useContext(AuthenticatedContext);
+
   const [restarting, setRestarting] = useState<boolean>(false);
   const [openInstallDialog, setOpenInstallDialog] = useState<boolean>(false);
   const [usingDevVersion, setUsingDevVersion] = useState<boolean>(false);
@@ -230,6 +233,10 @@ const Version = () => {
   };
 
   const showButtons = (showDev?: boolean) => {
+    if (!me.admin) {
+      return;
+    }
+
     if (downloadOnly) {
       return (
         <Button
@@ -435,11 +442,15 @@ const Version = () => {
               {LL.INTERNET_CONNECTION_REQUIRED()}
             </Typography>
           )}
-          {renderInstallDialog()}
-          <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
-            {LL.UPLOAD()}
-          </Typography>
-          <SingleUpload text={LL.UPLOAD_DROP_TEXT()} doRestart={doRestart} />
+          {!me.admin && (
+            <>
+              {renderInstallDialog()}
+              <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
+                {LL.UPLOAD()}
+              </Typography>
+              <SingleUpload text={LL.UPLOAD_DROP_TEXT()} doRestart={doRestart} />
+            </>
+          )}
         </Box>
       </>
     );

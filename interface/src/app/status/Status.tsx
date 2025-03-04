@@ -2,6 +2,7 @@ import { useContext, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import BuildIcon from '@mui/icons-material/Build';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DeviceHubIcon from '@mui/icons-material/DeviceHub';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
@@ -253,6 +254,14 @@ const SystemStatus = () => {
     return (
       <>
         <List sx={{ borderRadius: 3, border: '2px solid grey' }}>
+          <ListMenuItem
+            icon={BuildIcon}
+            bgcolor="#72caf9"
+            label="EMS-ESP Firmware"
+            text={'v' + data.emsesp_version}
+            to="version"
+          />
+
           <ListItem>
             <ListItemAvatar>
               <Avatar sx={{ bgcolor: '#c5572c', color: 'white' }}>
