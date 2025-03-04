@@ -21,13 +21,19 @@ import {
 } from '@mui/material';
 
 import * as SystemApi from 'api/system';
-import { callAction } from 'api/app';
+import { API, callAction } from 'api/app';
 import { getDevVersion, getStableVersion } from 'api/system';
 
 import { dialogStyle } from 'CustomTheme';
 import { useRequest } from 'alova/client';
+import type { APIcall } from 'app/main/types';
 import SystemMonitor from 'app/status/SystemMonitor';
-import { FormLoader, SectionContent, useLayoutTitle } from 'components';
+import {
+  FormLoader,
+  SectionContent,
+  SingleUpload,
+  useLayoutTitle
+} from 'components';
 import { useI18nContext } from 'i18n/i18n-react';
 
 const Version = () => {
@@ -115,6 +121,19 @@ const Version = () => {
       duration /= division.amount;
     }
   }
+
+  const { send: sendAPI } = useRequest((data: APIcall) => API(data), {
+    immediate: false
+  });
+
+  const doRestart = async () => {
+    setRestarting(true);
+    await sendAPI({ device: 'system', cmd: 'restart', id: 0 }).catch(
+      (error: Error) => {
+        toast.error(error.message);
+      }
+    );
+  };
 
   const getBinURL = () => {
     if (!internetLive) {
@@ -417,6 +436,10 @@ const Version = () => {
             </Typography>
           )}
           {renderInstallDialog()}
+          <Typography sx={{ pt: 2, pb: 2 }} variant="h6" color="primary">
+            {LL.UPLOAD()}
+          </Typography>
+          <SingleUpload text={LL.UPLOAD_DROP_TEXT()} doRestart={doRestart} />
         </Box>
       </>
     );

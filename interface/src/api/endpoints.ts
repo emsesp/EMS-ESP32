@@ -9,7 +9,7 @@ export const ACCESS_TOKEN = 'access_token';
 export const alovaInstance = createAlova({
   statesHook: ReactHook,
   // timeout: 3000, // 3 seconds before throwing a timeout error, default is 0 = none
-  // cacheFor: null, // disable cache
+  cacheFor: null, // disable cache
   // cacheFor: {
   //   GET: {
   //     mode: 'memory',
@@ -22,7 +22,7 @@ export const alovaInstance = createAlova({
       method.config.headers.Authorization =
         'Bearer ' + localStorage.getItem(ACCESS_TOKEN);
     }
-    // for simulating vrey slow networks
+    // for simulating very slow networks
     // return new Promise((resolve) => {
     //   const random = 3000 + Math.random() * 2000;
     //   setTimeout(resolve, Math.floor(random));
