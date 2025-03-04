@@ -1238,7 +1238,7 @@ void Thermostat::process_RC300Curve(std::shared_ptr<const Telegram> telegram) {
     has_enumupdate(telegram, hc->nofrostmode, 5, 1); // 1-room, 2-outdoor, 3- room & outdoor
     has_update(telegram, hc->nofrosttemp, 6);
 
-    if (hc->heatingtype < 3) {
+    if (hc->heatingtype < 2) {
         has_update(telegram, hc->maxflowtemp, 8);
     } else {
         has_update(telegram, hc->maxflowtemp, 7);
