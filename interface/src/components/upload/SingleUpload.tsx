@@ -12,7 +12,7 @@ import { useI18nContext } from 'i18n/i18n-react';
 import DragNdrop from './DragNdrop';
 import { LinearProgressWithLabel } from './LinearProgressWithLabel';
 
-const SingleUpload = ({ doRestart }) => {
+const SingleUpload = ({ text, doRestart }) => {
   const [md5, setMd5] = useState<string>();
   const [file, setFile] = useState<File>();
   const { LL } = useI18nContext();
@@ -73,7 +73,7 @@ const SingleUpload = ({ doRestart }) => {
           </Button>
         </>
       ) : (
-        <DragNdrop onFileSelected={setFile} />
+        <DragNdrop text={text} onFileSelected={setFile} />
       )}
 
       {md5 && (

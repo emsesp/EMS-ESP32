@@ -187,7 +187,7 @@ const nl: Translation = {
   COMPACT: 'Compact',
   DOWNLOAD_SETTINGS_TEXT: 'Maak een back-up van uw configuratie en instellingen',
   UPLOAD_TEXT: 'Upload een nieuw firmwarebestand (.bin) of een back-upbestand (.json)',
-  UPLOAD_DROP_TEXT: 'Sleep bestand hierheen of klik hier',
+  UPLOAD_DROP_TEXT: 'Sleep en firmware .bin bestand hierheen of klik hier',
   ERROR: 'Onverwachte fout, probeer opnieuw',
   TIME_SET: 'Tijd ingesteld',
   MANAGE_USERS: 'Beheer Gebruikers',

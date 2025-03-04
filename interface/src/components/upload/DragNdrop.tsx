@@ -10,7 +10,7 @@ import { useI18nContext } from 'i18n/i18n-react';
 
 import './dragNdrop.css';
 
-const DragNdrop = ({ onFileSelected }) => {
+const DragNdrop = ({ text, onFileSelected }) => {
   const [file, setFile] = useState<File>();
   const [dragged, setDragged] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -73,7 +73,7 @@ const DragNdrop = ({ onFileSelected }) => {
     >
       <div className="upload-info">
         <CloudUploadIcon sx={{ marginRight: 4 }} color="primary" fontSize="large" />
-        <p>{LL.UPLOAD_DRAG()}</p>
+        <p>{text}</p>
       </div>
 
       <input

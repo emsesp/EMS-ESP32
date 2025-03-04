@@ -126,7 +126,7 @@ const DownloadUpload = () => {
           <Typography variant="body1">{LL.UPLOAD_TEXT()}.</Typography>
         </Box>
 
-        <SingleUpload doRestart={doRestart} />
+        <SingleUpload text={LL.UPLOAD_DRAG()} doRestart={doRestart} />
       </>
     );
   };
