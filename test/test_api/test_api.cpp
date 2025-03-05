@@ -292,13 +292,16 @@ void run_manual_tests() {
 const char * run_console_command(const char * command) {
     output_buffer[0] = '\0'; // empty the temp buffer
     shell->invoke_command(command);
-    // remove everything before \r\n
+
+    // The buffer now contains a prompt, the command, the output and a \r\n
+    // remove the \r\n at the end
     char * p = strstr(output_buffer, "\r\n");
     if (p) {
-        p += 2; // skip the \r\n
+        *p = '\0';
     }
-    // remove the \r\n at the end
-    p[strlen(p) - 2] = '\0';
+
+    // Now go to just after the prompt and command
+    p = output_buffer + 7 + strlen(command);
 
     // Serial.println("Output:");
     // Serial.print(p);
