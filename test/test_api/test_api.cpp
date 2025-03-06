@@ -23,6 +23,8 @@
 #include <emsesp.h>
 #include "ESPAsyncWebServer.h"
 #include "web/WebAPIService.h"
+#include <HTTPClient.h>
+#include "core/shuntingYard.hpp"
 
 using namespace emsesp;
 
@@ -333,6 +335,55 @@ void run_console_tests() {
     RUN_TEST(console_test3);
 }
 
+// test shunting yard
+void shuntingYard_tests() {
+    std::string test_value, expected_result;
+
+    expected_result = "locale is en";
+    test_value = "\"locale is \"system/settings/locale";
+    TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
+
+    // test with negative value
+    expected_result = "rssi is -23";
+    test_value = "\"rssi is \"0+system/network/rssi";
+    TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
+
+    expected_result = "rssi is -23 dbm";
+    test_value = "\"rssi is \"(system/network/rssi)\" dBm\"";
+    TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
+
+    expected_result = "14";
+    test_value = "(custom/seltemp/value)";
+    TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
+
+    expected_result = "seltemp=14";
+    test_value = "\"seltemp=\"(custom/seltemp/value)";
+    TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
+
+    expected_result = "14";
+    test_value = "(custom/seltemp)";
+    TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
+
+    // note: the following will fail unless test("boiler") is loaded before hand
+
+    expected_result = "40";
+    test_value = "boiler/flowtempoffset";
+    TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
+
+    expected_result = "40";
+    test_value = "(boiler/flowtempoffset/value)";
+    TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
+
+    expected_result = "53.8";
+    test_value = "(boiler/storagetemp1/value)";
+    TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
+
+    // (14 - 40) * 2.8 + 5 = -67.8
+    expected_result = "-67.8";
+    test_value = "(custom/seltemp - boiler/flowtempoffset) * 2.8 + 5";
+    TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
+}
+
 // auto-generate the tests
 void create_tests() {
     // These match the calls in test_api.h
@@ -455,6 +506,7 @@ int main() {
     run_tests();         // execute the generated tests
     run_manual_tests();  // execute some other manual tests from this file
     run_console_tests(); // execute some console tests
+    RUN_TEST(shuntingYard_tests); // execute the shuntingYard tests
 
     return UNITY_END();
 }
