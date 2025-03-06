@@ -28,6 +28,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - thermostat date [#2313](https://github.com/emsesp/EMS-ESP32/issues/2313)
 - Updated unknown compressor stati "enum_hpactivity" [#2311](https://github.com/emsesp/EMS-ESP32/pull/2311)
 - Underline Tab headers in WebUI
+- console unit tests fixed due to changed shell output
 
 ## Changed
 
