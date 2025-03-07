@@ -626,6 +626,27 @@ std::string calculate(const std::string & expr) {
     return result;
 }
 
+void skipBrackets(const std::string & expr, size_t & pos, const int direction) {
+    int i = pos;
+    char open = '(', close = ')';
+    if (direction == -1) {
+        open = ')'; close = '(';
+    }
+    size_t depth = 1;
+    while ((i >= 0) && (i < expr.size()) && depth > 0) {
+        if (expr[i] == open) depth++;
+        if (expr[i] == close) depth--;
+        i += direction;
+    }
+    if (depth > 0) {
+        // We didn't find the close bracket so return the end of the string
+        pos = direction == 1 ? expr.size() : 0;
+    } else {
+        pos = i - direction * 2;
+    }
+    
+}
+
 // check for multiple instances of <cond> ? <expr1> : <expr2>
 std::string compute(const std::string & expr) {
     auto expr_new = emsesp::Helpers::toLower(expr);
@@ -681,31 +702,37 @@ std::string compute(const std::string & expr) {
         f = expr_new.find_first_of('{', e);
     }
 
-    // positions: q-questionmark, c-colon
-    auto q = expr_new.find_first_of('?');
-    while (q != std::string::npos) {
-        // find corresponding colon
-        auto c1 = expr_new.find_first_of(':', q + 1);
-        auto q1 = expr_new.find_first_of('?', q + 1);
-        while (q1 < c1 && q1 != std::string::npos && c1 != std::string::npos) {
-            q1 = expr_new.find_first_of('?', q1 + 1);
-            c1 = expr_new.find_first_of(':', c1 + 1);
-        }
-        if (c1 == std::string::npos) {
+    // <cond> ? <expr1> : <expr2>
+    // We don't allow nested conditionals in <cond> but we do in <expr1> or <expr2>
+    // Therefore if you nest a conditional, it's ? is always to the right of the parent one
+    // Therefore the rightmost ? never has nested conditionals
+    // We will also insist that a nested conditional is surrounded by brackets
+    // positions: s-start, q-questionmark, c-colon, e:end
+    size_t q;
+    while ((q = expr_new.find_last_of('?')) != std::string::npos) {
+        // find corresponding colon, remember we know there's no nested ones to worry about
+        size_t c = expr_new.find_first_of(':', q);
+        if (c == std::string::npos) {
             return ""; // error: missing colon
         }
-        std::string cond = calculate(expr_new.substr(0, q));
+        // Find the start of <cond>
+        size_t s = q - 1;
+        skipBrackets(expr, s, -1);
+        // Find the end of <expr2>
+        size_t e = c + 1;
+        skipBrackets(expr, e, +1);
+
+        std::string cond = calculate(expr_new.substr(s, q - s));
         if (cond.length() == 0) {
             return "";
         } else if (cond[0] == '1') {
-            expr_new.erase(c1);       // remove second expression after colon
-            expr_new.erase(0, q + 1); // remove condition before questionmark
+            expr_new.erase(c, e + 1 - c);     // remove second expression after colon
+            expr_new.erase(s, q + 1 - s); // remove condition before questionmark
         } else if (cond[0] == '0') {
-            expr_new.erase(0, c1 + 1); // remove condition and first expression
+            expr_new.erase(s, c + 1 - s); // remove condition and first expression
         } else {
             return ""; // error
         }
-        q = expr_new.find_first_of('?'); // search next instance
     }
 
     return calculate(expr_new);

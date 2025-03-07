@@ -80,38 +80,44 @@ void shuntingYard_test12() {
 
 void shuntingYard_test13() {
     std::string expected_result = "5";
-    std::string test_value = "1 < 2 ? (3 < 4 ? 5 : 6) : 7";
-    //TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
+    std::string test_value = "1<2?(3<4?5:6):7";
+    TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
 void shuntingYard_test14() {
-    std::string expected_result = "6";
-    std::string test_value = "1 < 2 ? (3 > 4 ? 5 : 6) : 7";
-    //TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
+    std::string expected_result = "7";
+    std::string test_value = "1>2?(3<4?5:6):7";
+    TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
 void shuntingYard_test15() {
-    std::string expected_result = "3";
-    std::string test_value = "1 < 2 ? 3 : (4 < 5 ? 6 : 7)";
+    std::string expected_result = "6";
+    std::string test_value = "1<2?(3>4?5:6):7";
     TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
 void shuntingYard_test16() {
-    std::string expected_result = "6";
-    std::string test_value = "1 > 2 ? 3 : (4 < 5 ? 6 : 7)";
-    //TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
+    std::string expected_result = "3";
+    std::string test_value = "1<2?3:(4<5?6:7)";
+    TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
 void shuntingYard_test17() {
-    std::string expected_result = "7";
-    std::string test_value = "1 > 2 ? 3 : (4 > 5 ? 6 : 7)";
-    //TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
+    std::string expected_result = "6";
+    std::string test_value = "1>2?3:(4<5?6:7)";
+    TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
 void shuntingYard_test18() {
+    std::string expected_result = "7";
+    std::string test_value = "1>2?3:(4>5?6:7)";
+    TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
+}
+
+void shuntingYard_test19() {
     std::string expected_result = "44";
-    std::string test_value = "(1 > 2 ? 3 : 4) + (10 > 20 ? 30 : 40)";
-    //TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
+    std::string test_value = "(1>2?3:4)+(10>20?30:40)";
+    TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
 void run_shuntingYard_tests() {
@@ -133,4 +139,5 @@ void run_shuntingYard_tests() {
     RUN_TEST(shuntingYard_test16);
     RUN_TEST(shuntingYard_test17);
     RUN_TEST(shuntingYard_test18);
+    RUN_TEST(shuntingYard_test19);
 }
