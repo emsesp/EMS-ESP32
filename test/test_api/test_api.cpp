@@ -453,9 +453,9 @@ int main() {
     //
     UNITY_BEGIN();
 
-    run_tests();         // execute the generated tests
-    run_manual_tests();  // execute some other manual tests from this file
-    run_console_tests(); // execute some console tests
+    run_tests();              // execute the generated tests
+    run_manual_tests();       // execute some other manual tests from this file
+    run_console_tests();      // execute some console tests
     run_shuntingYard_tests(); // execute the shuntingYard tests
 
     return UNITY_END();

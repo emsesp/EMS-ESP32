@@ -6,117 +6,117 @@
 
 void shuntingYard_test1() {
     std::string expected_result = "locale is en";
-    std::string test_value = "\"locale is \"system/settings/locale";
+    std::string test_value      = "\"locale is \"system/settings/locale";
     TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
 void shuntingYard_test2() {
     // test with negative value
     std::string expected_result = "rssi is -23";
-    std::string test_value = "\"rssi is \"0+system/network/rssi";
+    std::string test_value      = "\"rssi is \"0+system/network/rssi";
     TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
 void shuntingYard_test3() {
     std::string expected_result = "rssi is -23 dbm";
-    std::string test_value = "\"rssi is \"(system/network/rssi)\" dBm\"";
+    std::string test_value      = "\"rssi is \"(system/network/rssi)\" dBm\"";
     TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
 void shuntingYard_test4() {
     std::string expected_result = "14";
-    std::string test_value = "(custom/seltemp/value)";
+    std::string test_value      = "(custom/seltemp/value)";
     TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
 void shuntingYard_test5() {
     std::string expected_result = "seltemp=14";
-    std::string test_value = "\"seltemp=\"(custom/seltemp/value)";
+    std::string test_value      = "\"seltemp=\"(custom/seltemp/value)";
     TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
 void shuntingYard_test6() {
     std::string expected_result = "14";
-    std::string test_value = "(custom/seltemp)";
+    std::string test_value      = "(custom/seltemp)";
     TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
 void shuntingYard_test7() {
     std::string expected_result = "40";
-    std::string test_value = "boiler/flowtempoffset";
+    std::string test_value      = "boiler/flowtempoffset";
     TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
 void shuntingYard_test8() {
     std::string expected_result = "40";
-    std::string test_value = "(boiler/flowtempoffset/value)";
+    std::string test_value      = "(boiler/flowtempoffset/value)";
     TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
 void shuntingYard_test9() {
     std::string expected_result = "53.8";
-    std::string test_value = "(boiler/storagetemp1/value)";
+    std::string test_value      = "(boiler/storagetemp1/value)";
     TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
 void shuntingYard_test10() {
     // (14 - 40) * 2.8 + 5 = -67.8
     std::string expected_result = "-67.8";
-    std::string test_value = "(custom/seltemp - boiler/flowtempoffset) * 2.8 + 5";
+    std::string test_value      = "(custom/seltemp - boiler/flowtempoffset) * 2.8 + 5";
     TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
 void shuntingYard_test11() {
     std::string expected_result = "4";
-    std::string test_value = "1 > 2 ? 3 : 4";
+    std::string test_value      = "1 > 2 ? 3 : 4";
     TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
 void shuntingYard_test12() {
     std::string expected_result = "3";
-    std::string test_value = "1 < 2 ? 3 : 4";
+    std::string test_value      = "1 < 2 ? 3 : 4";
     TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
 void shuntingYard_test13() {
     std::string expected_result = "5";
-    std::string test_value = "1<2?(3<4?5:6):7";
+    std::string test_value      = "1<2?(3<4?5:6):7";
     TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
 void shuntingYard_test14() {
     std::string expected_result = "7";
-    std::string test_value = "1>2?(3<4?5:6):7";
+    std::string test_value      = "1>2?(3<4?5:6):7";
     TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
 void shuntingYard_test15() {
     std::string expected_result = "6";
-    std::string test_value = "1<2?(3>4?5:6):7";
+    std::string test_value      = "1<2?(3>4?5:6):7";
     TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
 void shuntingYard_test16() {
     std::string expected_result = "3";
-    std::string test_value = "1<2?3:(4<5?6:7)";
+    std::string test_value      = "1<2?3:(4<5?6:7)";
     TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
 void shuntingYard_test17() {
     std::string expected_result = "6";
-    std::string test_value = "1>2?3:(4<5?6:7)";
+    std::string test_value      = "1>2?3:(4<5?6:7)";
     TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
 void shuntingYard_test18() {
     std::string expected_result = "7";
-    std::string test_value = "1>2?3:(4>5?6:7)";
+    std::string test_value      = "1>2?3:(4>5?6:7)";
     TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
 void shuntingYard_test19() {
     std::string expected_result = "44";
-    std::string test_value = "(1>2?3:4)+(10>20?30:40)";
+    std::string test_value      = "(1>2?3:4)+(10>20?30:40)";
     TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 

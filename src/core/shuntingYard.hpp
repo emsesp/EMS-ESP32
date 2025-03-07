@@ -627,15 +627,18 @@ std::string calculate(const std::string & expr) {
 }
 
 void skipBrackets(const std::string & expr, size_t & pos, const int direction) {
-    int i = pos;
+    int  i    = pos;
     char open = '(', close = ')';
     if (direction == -1) {
-        open = ')'; close = '(';
+        open  = ')';
+        close = '(';
     }
     size_t depth = 1;
     while ((i >= 0) && (i < expr.size()) && depth > 0) {
-        if (expr[i] == open) depth++;
-        if (expr[i] == close) depth--;
+        if (expr[i] == open)
+            depth++;
+        if (expr[i] == close)
+            depth--;
         i += direction;
     }
     if (depth > 0) {
@@ -644,7 +647,6 @@ void skipBrackets(const std::string & expr, size_t & pos, const int direction) {
     } else {
         pos = i - direction * 2;
     }
-    
 }
 
 // check for multiple instances of <cond> ? <expr1> : <expr2>
@@ -726,7 +728,7 @@ std::string compute(const std::string & expr) {
         if (cond.length() == 0) {
             return "";
         } else if (cond[0] == '1') {
-            expr_new.erase(c, e + 1 - c);     // remove second expression after colon
+            expr_new.erase(c, e + 1 - c); // remove second expression after colon
             expr_new.erase(s, q + 1 - s); // remove condition before questionmark
         } else if (cond[0] == '0') {
             expr_new.erase(s, c + 1 - s); // remove condition and first expression
