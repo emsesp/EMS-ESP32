@@ -1482,7 +1482,7 @@ void Boiler::process_UBAMonitorSlow(std::shared_ptr<const Telegram> telegram) {
  */
 void Boiler::process_UBAMonitorSlowPlus2(std::shared_ptr<const Telegram> telegram) {
     has_update(telegram, absBurnPow_, 13); // current burner absolute power (percent of rating plate power)
-    if (model() == EMSdevice::EMS_DEVICE_FLAG_HIU || model() == EMSdevice::EMS_DEVICE_FLAG_HEATPUMP) {
+    if (model() == EMSdevice::EMS_DEVICE_FLAG_HIU) {
         uint8_t state = EMS_VALUE_UINT8_NOTSET;
         boilerState_  = 0;
         if (telegram->read_value(state, 2)) {
@@ -1492,6 +1492,7 @@ void Boiler::process_UBAMonitorSlowPlus2(std::shared_ptr<const Telegram> telegra
         if (telegram->read_value(state, 5)) {
             boilerState_ |= state == 1 ? 0x0A : 0; // dhw 0/1
         }
+        check_active(); // do a quick check to see if the hot water or heating is active
     }
 }
 
@@ -1688,6 +1689,8 @@ void Boiler::process_HpPower(std::shared_ptr<const Telegram> telegram) {
     // has_update(hpCoolingOn_, hpActivity_ == 2 ? 0xFF : 0);
     // has_update(hpWwOn_, hpActivity_ == 3 ? 0xFF : 0);
     // has_update(hpPoolOn_, hpActivity_ == 4 ? 0xFF : 0);
+    boilerState_ = hpActivity_ == 1 ? 0x09 : hpActivity_ == 3 ? 0x0A : 0;
+    check_active(); // do a quick check to see if the hot water or heating is active
 }
 
 // Heatpump temperatures - type 0x48F
@@ -1845,15 +1848,19 @@ void Boiler::process_UBAErrorMessage(std::shared_ptr<const Telegram> telegram) {
     uint32_t        date          = (year - 2000) * 535680UL + month * 44640UL + day * 1440UL + hour * 60 + min + duration;
     // check valid https://github.com/emsesp/EMS-ESP32/issues/2189
     if (day == 0 || day > 31 || month == 0 || month > 12 || !std::isprint(code[0]) || !std::isprint(code[1])) {
+        if (!lastCodeDate_) {
+            char newCode[sizeof(lastCode_)];
+            snprintf(newCode, sizeof(lastCode_), "%s(%d)", code, codeNo);
+            has_update(lastCode_, newCode, sizeof(lastCode_));
+        }
         return;
     }
     // store only the newest code from telegrams 10 and 11
-    if (date > lastCodeDate_ && lastCodeDate_) {
+    if (date > lastCodeDate_) {
         lastCodeDate_ = date;
-        snprintf(lastCode_, sizeof(lastCode_), "%s(%d) %02d.%02d.%d %02d:%02d (%d min)", code, codeNo, day, month, year, hour, min, duration);
-        has_update(lastCode_);
-    } else if (!lastCodeDate_) { // no publish for first read
-        lastCodeDate_ = 1;
+        char newCode[sizeof(lastCode_)];
+        snprintf(newCode, sizeof(lastCode_), "%s(%d) %02d.%02d.%d %02d:%02d (%d min)", code, codeNo, day, month, year, hour, min, duration);
+        has_update(lastCode_, newCode, sizeof(lastCode_));
     }
 }
 
@@ -1919,11 +1926,9 @@ void Boiler::process_UBAErrorMessage2(std::shared_ptr<const Telegram> telegram) 
         snprintf(&code[3], sizeof(code) - 3, "(%d) @uptime %lu - %lu min", codeNo, starttime, endtime);
         date = starttime;
     }
-    if (date > lastCodeDate_ && lastCodeDate_) {
+    if (date > lastCodeDate_) {
         lastCodeDate_ = date;
         has_update(lastCode_, code, sizeof(lastCode_));
-    } else if (!lastCodeDate_) {
-        lastCodeDate_ = 1;
     }
 }
 
