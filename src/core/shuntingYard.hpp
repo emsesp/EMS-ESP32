@@ -93,6 +93,9 @@ std::deque<Token> exprToTokens(const std::string & expr) {
         } else if (strncmp(p, "pow", 3) == 0) {
             p += 2;
             tokens.emplace_back(Token::Type::Unary, "p", 5);
+        } else if (strncmp(p, "hex", 3) == 0) {
+            p += 2;
+            tokens.emplace_back(Token::Type::Unary, "h", 5);
         } else if (*p >= 'a' && *p <= 'z') {
             const auto * b = p;
             while ((*p >= 'a' && *p <= 'z') || (*p == '_')) {
@@ -490,6 +493,9 @@ std::string calculate(const std::string & expr) {
             case 'p':
                 stack.push_back(to_string(std::pow(std::stod(rhs), 2)));
                 break;
+            case 'h':
+                stack.push_back(to_string(std::stoi(rhs, 0, 16)));
+                break;
             }
         } break;
         case Token::Type::Compare: {
@@ -694,14 +700,29 @@ std::string compute(const std::string & expr) {
         if (c1 == std::string::npos) {
             return ""; // error: missing colon
         }
-        std::string cond = calculate(expr_new.substr(0, q));
+        auto s  = q; // start search brackets
+        int  br = 0; // count brackets
+        while (s > 0 && (br || expr_new[s - 1] != '(')) {
+            s--;
+            br += (expr_new[s] == '(' ? -1 : expr_new[s] == ')' ? 1 : 0);
+        }
+        std::string cond = calculate(expr_new.substr(s, q - s));
         if (cond.length() == 0) {
             return "";
         } else if (cond[0] == '1') {
-            expr_new.erase(c1);       // remove second expression after colon
-            expr_new.erase(0, q + 1); // remove condition before questionmark
+            auto e = expr_new.length(); // end
+            if (s) {                    // there was a opening bracket, find the closing one
+                e  = c1;
+                br = 0;
+                while (e < expr_new.length() && (br || expr_new[e + 1] != ')')) {
+                    e++;
+                    br += (expr_new[e] == ')' ? -1 : expr_new[e] == '(' ? 1 : 0);
+                }
+            }
+            expr_new.erase(c1, e + 1 - c1); // remove second expression after colon
+            expr_new.erase(s, q + 1 - s);   // remove condition before questionmark
         } else if (cond[0] == '0') {
-            expr_new.erase(0, c1 + 1); // remove condition and first expression
+            expr_new.erase(s, c1 + 1 - s); // remove condition and first expression
         } else {
             return ""; // error
         }
