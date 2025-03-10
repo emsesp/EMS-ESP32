@@ -383,7 +383,7 @@ std::string commands(std::string & expr, bool quotes = true) {
                     data.insert(data.begin(), '"');
                     data.insert(data.end(), '"');
                 }
-                expr.replace(f, l, data);
+                expr.replace(f, l, emsesp::Helpers::toLower(data));
                 e = f + data.length();
             } else {
                 return expr = "";
