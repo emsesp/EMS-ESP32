@@ -120,6 +120,12 @@ void shuntingYard_test19() {
     TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
 
+void shuntingYard_test20() {
+    std::string expected_result = "8";
+    std::string test_value      = "1<2 ? 3>4 ? 5 : 6<7 ? 8 : 9 : 10";
+    TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
+}
+
 void run_shuntingYard_tests() {
     RUN_TEST(shuntingYard_test1);
     RUN_TEST(shuntingYard_test2);
@@ -140,4 +146,5 @@ void run_shuntingYard_tests() {
     RUN_TEST(shuntingYard_test17);
     RUN_TEST(shuntingYard_test18);
     RUN_TEST(shuntingYard_test19);
+    RUN_TEST(shuntingYard_test20);
 }
