@@ -39,7 +39,7 @@ class Thermostat : public EMSdevice {
         int16_t remotetemp; // for readback
         uint8_t remotehum;  // for readback
         uint8_t tempautotemp;
-        int8_t  remoteseltemp;
+        int8_t  cooltemp;
         uint8_t mode;
         uint8_t mode_new;
         uint8_t modetype;
@@ -159,7 +159,7 @@ class Thermostat : public EMSdevice {
             ON,
             DAYLOW,
             DAYMID,
-            REMOTESELTEMP,
+            COOLTEMP,
             COOLSTART,
             UNKNOWN
 
@@ -571,8 +571,8 @@ class Thermostat : public EMSdevice {
     inline bool set_roominfluence(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::ROOMINFLUENCE, true);
     }
-    inline bool set_remoteseltemp(const char * value, const int8_t id) {
-        return set_temperature_value(value, id, HeatingCircuit::Mode::REMOTESELTEMP);
+    inline bool set_cooltemp(const char * value, const int8_t id) {
+        return set_temperature_value(value, id, HeatingCircuit::Mode::COOLTEMP);
     }
     inline bool set_coolstart(const char * value, const int8_t id) {
         return set_temperature_value(value, id, HeatingCircuit::Mode::COOLSTART);

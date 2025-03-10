@@ -4849,7 +4849,7 @@
 | hc1.controlmode | control mode | enum [optimized\|simple\|n/a\|room\|power] |   | true | HC | 25 | 1 | 1 | 
 | hc1.program | program | enum [prog 1\|prog 2] |   | true | HC | 26 | 1 | 1 | 
 | hc1.tempautotemp | temporary set temperature automode | int8 (>=-1<=30) | C | true | HC | 27 | 1 | 1/2 | 
-| hc1.remoteseltemp | temporary set temperature from remote | int8 (>=-1<=30) | C | true | HC | 28 | 1 | 1/2 | 
+| hc1.cooltemp | cooling temperature | int8 (>=-1<=30) | C | true | HC | 28 | 1 | 1/2 | 
 | hc1.fastheatup | fast heatup | uint8 (>=0<=100) | % | true | HC | 29 | 1 | 1 | 
 | hc1.switchonoptimization | switch-on optimization | boolean |   | true | HC | 30 | 1 | 1 | 
 | hc1.reducemode | reduce mode | enum [outdoor\|room\|reduce] |   | true | HC | 31 | 1 | 1 | 

@@ -318,7 +318,7 @@ const std::initializer_list<Modbus::EntityModbusInfo> Modbus::modbus_register_ma
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(controlmode), 25, 1), // controlmode
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(program), 26, 1), // program
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(tempautotemp), 27, 1), // tempautotemp
-    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(remoteseltemp), 28, 1), // remoteseltemp
+    REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(cooltemp), 28, 1), // cooltemp
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(fastheatup), 29, 1), // fastheatup
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(switchonoptimization), 30, 1), // switchonoptimization
     REGISTER_MAPPING(dt::THERMOSTAT, TAG_TYPE_HC, FL_(reducemode), 31, 1), // reducemode
