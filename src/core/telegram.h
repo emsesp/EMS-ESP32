@@ -37,7 +37,7 @@
 #define MAX_TX_TELEGRAMS 200 // size of Tx queue
 #else
 #define MAX_RX_TELEGRAMS 10  // size of Rx queue
-#define MAX_TX_TELEGRAMS 100 // size of Tx queue
+#define MAX_TX_TELEGRAMS 160 // size of Tx queue
 #endif
 
 // default values for null values
