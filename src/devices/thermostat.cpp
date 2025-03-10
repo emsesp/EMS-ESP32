@@ -1166,7 +1166,7 @@ void Thermostat::process_RC300Set(std::shared_ptr<const Telegram> telegram) {
     has_enumupdate(telegram, hc->reducemode, 5, 1); // 1-outdoor temp threshold, 2-room temp threshold, 3-reduced mode
     has_update(telegram, hc->reducetemp, 9);
     has_update(telegram, hc->noreducetemp, 12);
-    has_update(telegram, hc->cooltemp, 17); // see https://github.com/emsesp/EMS-ESP32/issues/590 and 2456
+    has_update(telegram, hc->cooltemp, 17);              // see https://github.com/emsesp/EMS-ESP32/issues/590 and 2456
     has_enumupdate(telegram, hc->switchProgMode, 19, 1); // 1-level, 2-absolute
     has_update(telegram, hc->redThreshold, 20);
     has_update(telegram, hc->boost, 23);
@@ -4685,15 +4685,8 @@ void Thermostat::register_device_values_hc(std::shared_ptr<Thermostat::HeatingCi
                               MAKE_CF_CB(set_tempautotemp),
                               -1,
                               30);
-        register_device_value(tag,
-                              &hc->cooltemp,
-                              DeviceValueType::INT8,
-                              DeviceValueNumOp::DV_NUMOP_DIV2,
-                              FL_(cooltemp),
-                              DeviceValueUOM::DEGREES,
-                              MAKE_CF_CB(set_cooltemp),
-                              -1,
-                              30);
+        register_device_value(
+            tag, &hc->cooltemp, DeviceValueType::INT8, DeviceValueNumOp::DV_NUMOP_DIV2, FL_(cooltemp), DeviceValueUOM::DEGREES, MAKE_CF_CB(set_cooltemp), -1, 30);
         register_device_value(tag, &hc->fastHeatup, DeviceValueType::UINT8, FL_(fastheatup), DeviceValueUOM::PERCENT, MAKE_CF_CB(set_fastheatup));
         register_device_value(tag,
                               &hc->switchonoptimization,

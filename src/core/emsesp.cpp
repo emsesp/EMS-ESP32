@@ -332,6 +332,7 @@ void EMSESP::show_ems(uuid::console::Shell & shell) {
 // this is intended to run within the OS with lots of available memory!
 #if defined(EMSESP_STANDALONE)
 void EMSESP::dump_all_entities(uuid::console::Shell & shell) {
+    Serial.println();
     Serial.println("---- CSV START ----"); // marker use by py script
     // add header for CSV
     Serial.println("device name,device type,product id,shortname,fullname,type [options...] \\| (min/max),uom,writeable,discovery entityid v3.4,discovery "
@@ -381,6 +382,7 @@ void EMSESP::dump_all_entities(uuid::console::Shell & shell) {
 void EMSESP::dump_all_telegrams(uuid::console::Shell & shell) {
     std::vector<EMSdevice::TelegramFunctionDump> telegram_functions_dump;
 
+    Serial.println();
     Serial.println("---- CSV START ----"); // marker use by py script
     // add header for CSV
     Serial.println("telegram_type_id,name,is_fetched");

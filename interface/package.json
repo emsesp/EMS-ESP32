@@ -42,25 +42,25 @@
   },
   "devDependencies": {
     "@babel/core": "^7.26.9",
-    "@eslint/js": "^9.21.0",
+    "@eslint/js": "^9.22.0",
     "@preact/compat": "^18.3.1",
     "@preact/preset-vite": "^2.10.1",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/formidable": "^3",
-    "@types/node": "^22.13.9",
+    "@types/node": "^22.13.10",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "concurrently": "^9.1.2",
-    "eslint": "^9.21.0",
+    "eslint": "^9.22.0",
     "eslint-config-prettier": "^10.1.1",
     "formidable": "^3.5.2",
     "prettier": "^3.5.3",
     "rollup-plugin-visualizer": "^5.14.0",
     "terser": "^5.39.0",
-    "typescript-eslint": "8.26.0",
+    "typescript-eslint": "8.26.1",
     "vite": "^6.2.1",
     "vite-plugin-imagemin": "^0.6.1",
     "vite-tsconfig-paths": "^5.1.4"
   },
-  "packageManager": "yarn@4.6.0"
+  "packageManager": "yarn@4.7.0"
 }
