@@ -96,9 +96,9 @@ std::deque<Token> exprToTokens(const std::string & expr) {
         } else if (strncmp(p, "hex", 3) == 0) {
             p += 2;
             tokens.emplace_back(Token::Type::Unary, "h", 5);
-        } else if (*p >= 'a' && *p <= 'z') {
+        } else if ((*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z')) {
             const auto * b = p;
-            while ((*p >= 'a' && *p <= 'z') || (*p == '_')) {
+            while ((*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') || (*p == '_') || (*p > 127)) {
                 ++p;
             }
             const auto s = std::string(b, p);
@@ -349,12 +349,13 @@ bool isnum(const std::string & s) {
 
 // replace commands like "<device>/<hc>/<cmd>" with its value"
 std::string commands(std::string & expr, bool quotes = true) {
+    auto expr_new = emsesp::Helpers::toLower(expr);
     for (uint8_t device = 0; device < emsesp::EMSdevice::DeviceType::UNKNOWN; device++) {
         const char * d = emsesp::EMSdevice::device_type_2_device_name(device);
-        auto         f = expr.find(d);
+        auto         f = expr_new.find(d);
         while (f != std::string::npos) {
             // entity names are alphanumeric or _
-            auto e = expr.find_first_not_of("/._abcdefghijklmnopqrstuvwxyz0123456789", f);
+            auto e = expr_new.find_first_not_of("/._abcdefghijklmnopqrstuvwxyz0123456789", f);
             if (e == std::string::npos) {
                 e = expr.length();
             }
@@ -366,7 +367,7 @@ std::string commands(std::string & expr, bool quotes = true) {
             if (l >= sizeof(cmd) - 1) {
                 break;
             }
-            expr.copy(cmd, l, f);
+            expr_new.copy(cmd, l, f);
             cmd[l] = '\0';
             if (strstr(cmd, "/value") == nullptr) {
                 strlcat(cmd, "/value", sizeof(cmd) - 6);
@@ -383,12 +384,13 @@ std::string commands(std::string & expr, bool quotes = true) {
                     data.insert(data.begin(), '"');
                     data.insert(data.end(), '"');
                 }
-                expr.replace(f, l, emsesp::Helpers::toLower(data));
+                expr.replace(f, l, data);
                 e = f + data.length();
             } else {
                 return expr = "";
             }
-            f = expr.find(d, e);
+            expr_new = emsesp::Helpers::toLower(expr);
+            f        = expr_new.find(d, e);
         }
     }
     return expr;
@@ -396,10 +398,11 @@ std::string commands(std::string & expr, bool quotes = true) {
 
 // checks for logic value
 int to_logic(const std::string & s) {
-    if (s[0] == '1' || s == "on" || s == "ON" || s == "true") {
+    auto l = emsesp::Helpers::toLower(s);
+    if (s[0] == '1' || l == "on" || l == "true") {
         return 1;
     }
-    if (s[0] == '0' || s == "off" || s == "OFF" || s == "false") {
+    if (s[0] == '0' || l == "off" || l == "false") {
         return 0;
     }
     return -1;
@@ -419,7 +422,7 @@ std::string to_string(double d) {
 
 // RPN calculator
 std::string calculate(const std::string & expr) {
-    auto expr_new = emsesp::Helpers::toLower(expr);
+    std::string expr_new = expr;
     commands(expr_new);
 
     const auto tokens = exprToTokens(expr_new);
@@ -543,14 +546,16 @@ std::string calculate(const std::string & expr) {
                     stack.push_back((std::stod(lhs) == std::stod(rhs)) ? "1" : "0");
                     break;
                 }
-                stack.push_back((lhs == rhs) ? "1" : "0");
+                // compare strings lower case
+                stack.push_back((emsesp::Helpers::toLower(lhs) == emsesp::Helpers::toLower(rhs)) ? "1" : "0");
                 break;
             case '!':
                 if (isnum(rhs) && isnum(lhs)) {
                     stack.push_back((std::stod(lhs) != std::stod(rhs)) ? "1" : "0");
                     break;
                 }
-                stack.push_back((lhs != rhs) ? "1" : "0");
+                // compare strings lower case
+                stack.push_back((emsesp::Helpers::toLower(lhs) != emsesp::Helpers::toLower(rhs)) ? "1" : "0");
                 break;
             }
         } break;
@@ -634,7 +639,7 @@ std::string calculate(const std::string & expr) {
 
 // check for multiple instances of <cond> ? <expr1> : <expr2>
 std::string compute(const std::string & expr) {
-    auto expr_new = emsesp::Helpers::toLower(expr);
+    std::string expr_new = expr;
 
     // search json with url:
     auto f = expr_new.find_first_of('{');
@@ -653,17 +658,31 @@ std::string compute(const std::string & expr) {
         JsonDocument doc;
         if (DeserializationError::Ok == deserializeJson(doc, cmd)) {
             HTTPClient  http;
-            std::string url = doc["url"] | "";
+            std::string url, header_s, value_s, method_s, key_s;
+            // search keys lower case
+            for (JsonPair p : doc.as<JsonObject>()) {
+                if (emsesp::Helpers::toLower(p.key().c_str()) == "url") {
+                    url = p.value().as<std::string>();
+                } else if (emsesp::Helpers::toLower(p.key().c_str()) == "header") {
+                    header_s = p.key().c_str();
+                } else if (emsesp::Helpers::toLower(p.key().c_str()) == "value") {
+                    value_s = p.key().c_str();
+                } else if (emsesp::Helpers::toLower(p.key().c_str()) == "method") {
+                    method_s = p.key().c_str();
+                } else if (emsesp::Helpers::toLower(p.key().c_str()) == "key") {
+                    key_s = p.key().c_str();
+                }
+            }
             if (http.begin(url.c_str())) {
                 int httpResult = 0;
-                for (JsonPair p : doc["header"].as<JsonObject>()) {
+                for (JsonPair p : doc[header_s].as<JsonObject>()) {
                     http.addHeader(p.key().c_str(), p.value().as<std::string>().c_str());
                 }
-                std::string value  = doc["value"] | "";
-                std::string method = doc["method"] | "GET"; // default GET
+                std::string value  = doc[value_s] | "";
+                std::string method = doc[method_s] | "get";
 
                 // if there is data, force a POST
-                if (value.length() || method == "post") {
+                if (value.length() || emsesp::Helpers::toLower(method) == "post") {
                     if (value.find_first_of('{') != std::string::npos) {
                         http.addHeader("Content-Type", "application/json"); // auto-set to JSON
                     }
@@ -673,8 +692,9 @@ std::string compute(const std::string & expr) {
                 }
 
                 if (httpResult > 0) {
-                    std::string result = emsesp::Helpers::toLower(http.getString().c_str());
-                    std::string key    = doc["key"] | "";
+                    std::string result = http.getString().c_str();
+                    std::string key    = doc[key_s] | "";
+
                     doc.clear();
                     if (key.length() && DeserializationError::Ok == deserializeJson(doc, result)) {
                         result = doc[key.c_str()].as<std::string>();
