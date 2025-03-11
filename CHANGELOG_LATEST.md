@@ -17,6 +17,8 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - Show ESP32's CPU temp in Hardware Status
 - vacation mode for the CR50 [#2403](https://github.com/emsesp/EMS-ESP32/issues/2403)
 - new Console command "set admin password" to set WebUI admin password
+- support nested conditions in scheduler [#2451](https://github.com/emsesp/EMS-ESP32/issues/2451)
+- allow mixed case in scheduler expressions [#2457](https://github.com/emsesp/EMS-ESP32/issues/2457)
 
 ## Fixed
 
@@ -29,6 +31,7 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - Updated unknown compressor stati "enum_hpactivity" [#2311](https://github.com/emsesp/EMS-ESP32/pull/2311)
 - Underline Tab headers in WebUI
 - console unit tests fixed due to changed shell output
+- tx-queue overflow in some heatpump systems [#2455](https://github.com/emsesp/EMS-ESP32/issues/2455)
 
 ## Changed
 
@@ -38,3 +41,4 @@ For more details go to [docs.emsesp.org](https://docs.emsesp.org/).
 - update AsyncTCP and ESPAsyncWebServer to latest versions
 - update Arduino pio platform to 3.10.0 and optimized flash using build flags
 - Version checker in WebUI improved
+- rename `remoteseltemp` to `cooltemp` [#2456](https://github.com/emsesp/EMS-ESP32/issues/2456)
