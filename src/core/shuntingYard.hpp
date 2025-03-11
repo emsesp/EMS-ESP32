@@ -96,9 +96,9 @@ std::deque<Token> exprToTokens(const std::string & expr) {
         } else if (strncmp(p, "hex", 3) == 0) {
             p += 2;
             tokens.emplace_back(Token::Type::Unary, "h", 5);
-        } else if ((*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z')) {
+        } else if ((*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') || (*p == '_') || (*p & 0x80)) {
             const auto * b = p;
-            while ((*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') || (*p == '_') || (*p > 127)) {
+            while ((*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') || (*p == '_') || (*p & 0x80)) {
                 ++p;
             }
             const auto s = std::string(b, p);
