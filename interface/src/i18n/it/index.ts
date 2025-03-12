@@ -340,6 +340,8 @@ const it: Translation = {
   AUTO_SCROLL: 'Auto Scroll', // TODO translate
   DASHBOARD: 'Dashboard', // TODO translate
   DEVELOPER_MODE: 'Developer Mode', // TODO translate
+  BYTES: 'Bytes', // TODO translate
+  BITMASK: 'Bit Mask',// TODO translate
   DUPLICATE: 'Duplicate', // TODO translate
   UPGRADE: 'Upgrade', // TODO translate
   DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.', // TODO translate

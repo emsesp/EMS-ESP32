@@ -340,6 +340,8 @@ const de: Translation = {
   AUTO_SCROLL: 'Automatisches Scrollen',
   DASHBOARD: 'Dashboard',
   DEVELOPER_MODE: 'Entwicklermodus',
+  BYTES: 'Bytes',
+  BITMASK: 'Bit Maske',
   DUPLICATE: 'Kopieren',
   UPGRADE: 'Aktualisieren',
   DASHBOARD_1: 'Alle EMS-Entitäten, die aktiv und als Favorit markiert sind, sowie alle benutzerdefinierten Entitäten, Zeitpläne und externen Sensordaten werden unten angezeigt.',

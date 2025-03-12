@@ -340,6 +340,8 @@ const nl: Translation = {
   AUTO_SCROLL: 'Automatisch Scrollen',
   DASHBOARD: 'Dashboard',
   DEVELOPER_MODE: 'Ontwikkelaarsmodus',
+  BYTES: 'Bytes', // TODO translate
+  BITMASK: 'Bit Mask',// TODO translate
   DUPLICATE: 'Duplicaat',
   UPGRADE: 'Upgraden',
   DASHBOARD_1: 'Alle EMS-entiteiten die actief zijn en als favoriet zijn gemarkeerd, plus alle aangepaste entiteiten en externe sensorgegevens worden hieronder weergegeven.',

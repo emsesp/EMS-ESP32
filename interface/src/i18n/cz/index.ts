@@ -340,6 +340,8 @@ const cz: Translation = {
   AUTO_SCROLL: 'Automatické rolování',
   DASHBOARD: 'Dashboard',
   DEVELOPER_MODE: 'Režim vývojáře',
+  BYTES: 'Bytes', // TODO translate
+  BITMASK: 'Bit Mask',// TODO translate
   DUPLICATE: 'Duplikát',
   UPGRADE: 'Upgrade',
   DASHBOARD_1: 'Všechny aktivní entity EMS jsou označené jako oblíbené. Všechny vlastní entity, harmonogramy a externí sensory jsou zobrazeny níže.',

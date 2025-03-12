@@ -340,6 +340,8 @@ const sk: Translation = {
   AUTO_SCROLL: 'Automatické rolovanie',
   DASHBOARD: 'Panel',
   DEVELOPER_MODE: 'Režim vývojára',
+  BYTES: 'Bytes', // TODO translate
+  BITMASK: 'Bit Mask',// TODO translate
   DUPLICATE: 'Duplicitné',
   UPGRADE: 'Inovovať',
   DASHBOARD_1: 'Všetky entity EMS, ktoré sú aktívne a označené ako obľúbené, plus všetky vlastné entity, plány a údaje externých senzorov sú zobrazené nižšie.',
