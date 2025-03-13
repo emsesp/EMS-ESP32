@@ -132,10 +132,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@msgpack/msgpack@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "@msgpack/msgpack@npm:3.1.0"
-  checksum: 10c0/d31c299cc9f7620715eec77b12ec0cb4950943fd8b0c23275e37afe6ad30efe237e61333e8e340a0a433eca7a4595212fb905e70b4506ae5b866758e4291289b
+"@msgpack/msgpack@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "@msgpack/msgpack@npm:3.1.1"
+  checksum: 10c0/f7048d2145ee39e4979b4e6bb9d9723db031ea7b4f00d0ec96258fbff40b8af027783f391ee294e5385a5a91849a77d934ad08eb11d08253484eee8f8f0866ff
   languageName: node
   linkType: hard
 
@@ -260,7 +260,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "mock-api@workspace:."
   dependencies:
-    "@msgpack/msgpack": "npm:^3.1.0"
+    "@msgpack/msgpack": "npm:^3.1.1"
     "@trivago/prettier-plugin-sort-imports": "npm:^5.2.2"
     formidable: "npm:^3.5.2"
     itty-router: "npm:^5.0.18"
