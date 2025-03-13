@@ -1528,6 +1528,7 @@ bool EMSdevice::get_value_info(JsonObject output, const char * cmd, const int8_t
         if (cmd_s == Helpers::toLower(dv.short_name) && (tag <= 0 || tag == dv.tag)) {
             get_value_json(output, dv);
             // if we're filtering on an attribute, go find it
+            // if we can't find it, maybe it exists but doesn't not have a value assigned yet
             return Command::set_attribute(output, cmd_s, attribute_s);
         }
     }
