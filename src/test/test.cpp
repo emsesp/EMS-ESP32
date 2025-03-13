@@ -324,20 +324,15 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
     if (command == "general") {
         shell.printfln("Testing adding a boiler, thermostat, all sensors, scheduler and custom entities...");
 
-        // setup fake data
-        // EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
-
         // add devices
         test("general");
 
-        // EMSESP::webCustomEntityService.test();  // add custom entities
-        // EMSESP::temperaturesensor_.test();      // add temperature sensors
-        // EMSESP::webSchedulerService.test();     // add scheduler items
+        EMSESP::webCustomEntityService.test();  // custom entities
+        EMSESP::webCustomizationService.test(); // set customizations - this will overwrite any settings in the FS
+        EMSESP::temperaturesensor_.test();      // add temperature sensors
+        EMSESP::webSchedulerService.test();     // run scheduler tests, and conditions
 
-        // shell.invoke_command("show devices");
-        // shell.invoke_command("show values");
-        // shell.invoke_command("call system publish");
-        // shell.invoke_command("show mqtt");
+        shell.invoke_command("show values");
         ok = true;
     }
 
@@ -1087,6 +1082,10 @@ void Test::run_test(uuid::console::Shell & shell, const std::string & cmd, const
             // request.url("/api/thermostat/hc1");
             // EMSESP::webAPIService.webAPIService(&request);
             // request.url("/api/boiler/comfort/value");
+            // EMSESP::webAPIService.webAPIService(&request);
+
+            // this should fail but it doesn't
+            // request.url("/api/boiler/bad/value");
             // EMSESP::webAPIService.webAPIService(&request);
 
             // POST COMMANDS

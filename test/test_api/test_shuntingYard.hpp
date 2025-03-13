@@ -18,7 +18,7 @@ void shuntingYard_test2() {
 }
 
 void shuntingYard_test3() {
-    std::string expected_result = "rssi is -23 dbm";
+    std::string expected_result = "rssi is -23 dBm";
     std::string test_value      = "\"rssi is \"(system/network/rssi)\" dBm\"";
     TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }

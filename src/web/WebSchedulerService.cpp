@@ -165,6 +165,7 @@ bool WebSchedulerService::get_value_info(JsonObject output, const char * cmd) {
         }
         return true;
     }
+
     for (const ScheduleItem & scheduleItem : *scheduleItems_) {
         if (Helpers::toLower(scheduleItem.name) == cmd) {
             get_value_json(output, scheduleItem);
@@ -385,7 +386,6 @@ bool WebSchedulerService::command(const char * name, const std::string & command
     snprintf(command_str, sizeof(command_str), "/api/%s", cmd.c_str());
 
     uint8_t return_code = Command::process(command_str, true, input, output); // admin set
-
     if (return_code == CommandRet::OK) {
 #if defined(EMSESP_DEBUG)
         EMSESP::logger().debug("Schedule command '%s' with data '%s' was successful", cmd.c_str(), data.c_str());
@@ -596,10 +596,6 @@ void WebSchedulerService::test() {
     test_value = "(custom/seltemp)";
     command("test5", test_cmd.c_str(), compute(test_value).c_str());
 
-    // note: this will fail unless test("boiler") is loaded before hand
-    test_value = "(boiler/outdoortemp)";
-    command("test6", test_cmd.c_str(), compute(test_value).c_str());
-
     test_value = "boiler/flowtempoffset";
     command("test7", test_cmd.c_str(), compute(test_value).c_str());
 
@@ -613,10 +609,35 @@ void WebSchedulerService::test() {
     test_value = "(custom/seltemp - boiler/flowtempoffset) * 2.8 + 5";
     command("test10", test_cmd.c_str(), compute(test_value).c_str());
 
-    test_cmd = "{\"method\":\"POST\",\"url\":\"http://192.168.1.42:8123/api/services/script/test_notify2\", \"header\":{\"authorization\":\"Bearer "
-               "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhMmNlYWI5NDgzMmI0ODE2YWQ2NzU4MjkzZDE2YWMxZSIsImlhdCI6MTcyMTM5MTI0NCwiZXhwIjoyMDM2NzUxMjQ0fQ."
-               "S5sago1tEI6lNhrDCO0dM_WsVQHkD_laAjcks8tWAqo\"}}";
-    command("test11", test_cmd.c_str(), "");
+    // test case conversion
+    test_value = "(thermostat/hc1/modetype == \"comfort\")";
+    command("test11a", test_cmd.c_str(), compute(test_value).c_str()); // should be 1 true
+    test_value = "(thermostat/hc1/modetype == \"Comfort\")";
+    command("test11b", test_cmd.c_str(), compute(test_value).c_str()); // should be 1 true
+    test_value = "(thermostat/hc1/modetype == \"unknown\")";
+    command("test11c", test_cmd.c_str(), compute(test_value).c_str()); // should be 0 false
+
+    // can't find entity, should fail
+    test_value = "(boiler/storagetemp/value1)";
+    command("test12", test_cmd.c_str(), compute(test_value).c_str());
+
+    // can't find attribute, should fail
+    test_value = "(boiler/storagetemp1/value1)";
+    command("test13", test_cmd.c_str(), compute(test_value).c_str());
+
+    // check when entity has no value, should pass
+    test_value = "(boiler/storagetemp2/value)";
+    command("test14", test_cmd.c_str(), compute(test_value).c_str());
+
+    // should pass
+    test_value = "(boiler/storagetemp1/value)";
+    command("test15", test_cmd.c_str(), compute(test_value).c_str());
+
+    // test HTTP POST to call HA script
+    // test_cmd = "{\"method\":\"POST\",\"url\":\"http://192.168.1.42:8123/api/services/script/test_notify2\", \"header\":{\"authorization\":\"Bearer "
+    //            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhMmNlYWI5NDgzMmI0ODE2YWQ2NzU4MjkzZDE2YWMxZSIsImlhdCI6MTcyMTM5MTI0NCwiZXhwIjoyMDM2NzUxMjQ0fQ."
+    //            "S5sago1tEI6lNhrDCO0dM_WsVQHkD_laAjcks8tWAqo\"}}";
+    // command("test99", test_cmd.c_str(), "");
 }
 #endif
 
