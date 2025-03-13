@@ -105,6 +105,7 @@ StateUpdateResult WebCustomEntity::update(JsonObject root, WebCustomEntity & web
             if (entityItem.ram == 0 && entityItem.value_type == DeviceValueType::STRING) {
                 entityItem.raw  = new uint8_t[(size_t)entityItem.factor + 1];
                 entityItem.data = "";
+                entityItem.uom   = 0;
             } else if (entityItem.value_type == DeviceValueType::BOOL) {
                 entityItem.value = EMS_VALUE_DEFAULT_BOOL;
                 entityItem.uom   = 0;

@@ -340,6 +340,8 @@ const sv: Translation = {
   AUTO_SCROLL: 'Autoskrolla',
   DASHBOARD: 'Kontrollpanel',
   DEVELOPER_MODE: 'Utvecklarläge',
+  BYTES: 'Bytes', // TODO translate
+  BITMASK: 'Bit Mask',// TODO translate
   DUPLICATE: 'Dublett',
   UPGRADE: 'Uppgradera',
   DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.', // TODO translate

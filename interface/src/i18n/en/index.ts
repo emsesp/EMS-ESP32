@@ -341,6 +341,8 @@ const en: Translation = {
   DASHBOARD: 'Dashboard',
   DASHBOARD_1: 'All EMS entities that are active and marked as Favorite, plus all Custom Entities, Schedules and external Sensors data are displayed below.',
   DEVELOPER_MODE: 'Developer Mode',
+  BYTES: 'Bytes',
+  BITMASK: 'Bit Mask',
   DUPLICATE: 'Duplicate',
   UPGRADE: 'Upgrade',
   NO_DATA_1: 'No favorite EMS entities found yet. Use the',

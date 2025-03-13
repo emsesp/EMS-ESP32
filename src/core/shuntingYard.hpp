@@ -81,9 +81,12 @@ std::deque<Token> exprToTokens(const std::string & expr) {
         } else if (strncmp(p, "abs", 3) == 0) {
             p += 2;
             tokens.emplace_back(Token::Type::Unary, "a", 5);
+        } else if (strncmp(p, "ln", 2) == 0) {
+            p += 1;
+            tokens.emplace_back(Token::Type::Unary, "l", 5);
         } else if (strncmp(p, "log", 3) == 0) {
             p += 2;
-            tokens.emplace_back(Token::Type::Unary, "l", 5);
+            tokens.emplace_back(Token::Type::Unary, "g", 5);
         } else if (strncmp(p, "exp", 3) == 0) {
             p += 2;
             tokens.emplace_back(Token::Type::Unary, "e", 5);
@@ -93,6 +96,9 @@ std::deque<Token> exprToTokens(const std::string & expr) {
         } else if (strncmp(p, "pow", 3) == 0) {
             p += 2;
             tokens.emplace_back(Token::Type::Unary, "p", 5);
+        } else if (strncmp(p, "tohex", 5) == 0) {
+            p += 4;
+            tokens.emplace_back(Token::Type::Unary, "x", 5);
         } else if (strncmp(p, "hex", 3) == 0) {
             p += 2;
             tokens.emplace_back(Token::Type::Unary, "h", 5);
@@ -102,7 +108,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                 ++p;
             }
             const auto s = std::string(b, p);
-            tokens.emplace_back(Token::Type::String, s, -2);
+            tokens.emplace_back(Token::Type::String, s, -3);
             --p;
         } else if (*p == '"') {
             ++p;
@@ -132,7 +138,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                 ++p;
             }
             const auto s = std::string(b, p);
-            tokens.emplace_back(Token::Type::Number, s, -4);
+            tokens.emplace_back(Token::Type::Number, s, -2);
             --p;
         } else {
             Token::Type token            = Token::Type::Operator;
@@ -203,7 +209,7 @@ std::deque<Token> exprToTokens(const std::string & expr) {
                     precedence = 1;
                     token      = Token::Type::Compare;
                 } else {
-                    precedence = 1;
+                    precedence = 2;
                     token      = Token::Type::Unary;
                 }
                 break;
@@ -359,9 +365,6 @@ std::string commands(std::string & expr, bool quotes = true) {
             if (e == std::string::npos) {
                 e = expr.length();
             }
-            while (e > 0 && expr[e - 1] == ' ') { // remove blanks from end
-                e--;
-            }
             char   cmd[COMMAND_MAX_LENGTH];
             size_t l = e - f;
             if (l >= sizeof(cmd) - 1) {
@@ -420,6 +423,14 @@ std::string to_string(double d) {
     return s;
 }
 
+// number to hex string
+std::string to_hex(uint32_t i) {
+    char c[10];
+    snprintf(c, 10, "%02X", i);
+    std::string s = c;
+    return s;
+}
+
 // RPN calculator
 std::string calculate(const std::string & expr) {
     std::string expr_new = expr;
@@ -459,45 +470,56 @@ std::string calculate(const std::string & expr) {
             }
             const auto rhs = stack.back();
             stack.pop_back();
+            if (token.str[0] == '!') {
+                if (to_logic(rhs) < 0) {
+                }
+                if (to_logic(rhs) >= 0) {
+                    stack.push_back(to_logic(rhs) == 0 ? "1" : "0");
+                } else if (isnum(rhs)) {
+                    stack.push_back(std::stod(rhs) == 0 ? "1" : "0");
+                } else {
+                    emsesp::EMSESP::logger().warning("missing operator");
+                    return "";
+                }
+                break;
+            }
+            auto rhd = std::stod(rhs);
             switch (token.str[0]) {
             default:
                 return "";
                 break;
             case 'm': // Special operator name for unary '-'
-                if (!isnum(rhs)) {
-                    return "";
-                }
-                stack.push_back(to_string(-1 * std::stod(rhs)));
-                break;
-            case '!':
-                if (to_logic(rhs) < 0) {
-                    return "";
-                }
-                stack.push_back(to_logic(rhs) == 0 ? "1" : "0");
+                stack.push_back(to_string(-1 * rhd));
                 break;
             case 'i':
-                stack.push_back(to_string(std::stoi(rhs)));
+                stack.push_back(to_string(static_cast<int>(rhd)));
                 break;
             case 'r':
-                stack.push_back(to_string(std::round(std::stod(rhs))));
+                stack.push_back(to_string(std::round(rhd)));
                 break;
             case 'a':
-                stack.push_back(to_string(std::abs(std::stod(rhs))));
+                stack.push_back(to_string(std::abs(rhd)));
                 break;
             case 'e':
-                stack.push_back(to_string(std::exp(std::stod(rhs))));
+                stack.push_back(to_string(std::exp(rhd)));
                 break;
             case 'l':
-                stack.push_back(to_string(std::log(std::stod(rhs))));
+                stack.push_back(to_string(std::log(rhd)));
+                break;
+            case 'g':
+                stack.push_back(to_string(std::log10(rhd)));
                 break;
             case 's':
-                stack.push_back(to_string(std::sqrt(std::stod(rhs))));
+                stack.push_back(to_string(std::sqrt(rhd)));
                 break;
             case 'p':
-                stack.push_back(to_string(std::pow(std::stod(rhs), 2)));
+                stack.push_back(to_string(std::pow(rhd, 2)));
                 break;
             case 'h':
                 stack.push_back(to_string(std::stoi(rhs, 0, 16)));
+                break;
+            case 'x':
+                stack.push_back(to_hex(static_cast<int>(rhd)));
                 break;
             }
         } break;
@@ -585,38 +607,40 @@ std::string calculate(const std::string & expr) {
         } break;
         case Token::Type::Operator: {
             // binary operators
-            if (stack.empty() || !isnum(stack.back())) {
+            if (stack.size() < 2) {
                 return "";
             }
-            const auto rhs = std::stod(stack.back());
+            const auto rhs = stack.back();
             stack.pop_back();
-            if (stack.empty() || !isnum(stack.back())) {
-                return "";
+            const auto lhs = stack.back();
+            stack.pop_back();
+            if (token.str[0] == '+' && (!isnum(rhs) || !isnum(lhs))) {
+                stack.push_back(lhs + rhs);
+                break;
             }
-            const auto lhs = std::stod(stack.back());
-            stack.pop_back();
-
+            auto lhd = std::stod(lhs);
+            auto rhd = std::stod(rhs);
             switch (token.str[0]) {
             default:
                 return "";
                 break;
             case '^':
-                stack.push_back(to_string(pow(lhs, rhs)));
+                stack.push_back(to_string(pow(lhd, rhd)));
                 break;
             case '*':
-                stack.push_back(to_string(lhs * rhs));
+                stack.push_back(to_string(lhd * rhd));
                 break;
             case '/':
-                stack.push_back(to_string(lhs / rhs));
+                stack.push_back(to_string(lhd / rhd));
                 break;
             case '%':
-                stack.push_back(std::to_string(static_cast<int>(lhs) % static_cast<int>(rhs)));
+                stack.push_back(std::to_string(static_cast<int>(lhd) % static_cast<int>(rhd)));
                 break;
             case '+':
-                stack.push_back(to_string(lhs + rhs));
+                stack.push_back(to_string(lhd + rhd));
                 break;
             case '-':
-                stack.push_back(to_string(lhs - rhs));
+                stack.push_back(to_string(lhd - rhd));
                 break;
             }
         } break;
