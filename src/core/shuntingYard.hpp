@@ -346,7 +346,7 @@ std::deque<Token> shuntingYard(const std::deque<Token> & tokens) {
 
 // check if string is a number
 bool isnum(const std::string & s) {
-    if (s.find_first_not_of("0123456789.") == std::string::npos || (s[0] == '-' && s.find_first_not_of("0123456789.", 1) == std::string::npos)) {
+    if (!s.empty() && (s.find_first_not_of("0123456789.") == std::string::npos || (s[0] == '-' && s.find_first_not_of("0123456789.", 1) == std::string::npos))) {
         return true;
     }
     return false;
@@ -381,17 +381,13 @@ std::string commands(std::string & expr, bool quotes = true) {
             JsonObject   input  = doc_in.to<JsonObject>();
             std::string  cmd_s  = "api/" + std::string(cmd);
             emsesp::Command::process(cmd_s.c_str(), true, input, output);
-            if (output["api_data"].is<std::string>()) {
-                std::string data = output["api_data"];
-                if (!isnum(data) && quotes) {
-                    data.insert(data.begin(), '"');
-                    data.insert(data.end(), '"');
-                }
-                expr.replace(f, l, data);
-                e = f + data.length();
-            } else {
-                return expr = "";
+            std::string data = output["api_data"] | "";
+            if (!isnum(data) && quotes) {
+                data.insert(data.begin(), '"');
+                data.insert(data.end(), '"');
             }
+            expr.replace(f, l, data);
+            e        = f + data.length();
             expr_new = emsesp::Helpers::toLower(expr);
             f        = expr_new.find(d, e);
         }
@@ -401,6 +397,9 @@ std::string commands(std::string & expr, bool quotes = true) {
 
 // checks for logic value
 int to_logic(const std::string & s) {
+    if (s.empty()) {
+        return -1;
+    }
     auto l = emsesp::Helpers::toLower(s);
     if (s[0] == '1' || l == "on" || l == "true") {
         return 1;
