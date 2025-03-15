@@ -383,8 +383,8 @@ std::string commands(std::string & expr, bool quotes = true) {
 
             auto return_code = emsesp::Command::process(cmd_s.c_str(), true, input, output);
             // check for no value (entity is valid but has no value set)
-            if (return_code == emsesp::CommandRet::NO_VALUE) {
-                return expr = ""; // just ignore for now
+            if (return_code != emsesp::CommandRet::OK && return_code != emsesp::CommandRet::NO_VALUE) {
+                return expr = "";
             }
 
             if (output["api_data"].is<std::string>()) {
