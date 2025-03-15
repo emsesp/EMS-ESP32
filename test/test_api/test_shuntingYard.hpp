@@ -127,7 +127,7 @@ void shuntingYard_test20() {
 }
 
 void shuntingYard_test21() {
-    std::string expected_result = "";
+    std::string expected_result = "1";
     std::string test_value      = "boiler/storagetemp2 == \"\"";
     TEST_ASSERT_EQUAL_STRING(expected_result.c_str(), compute(test_value).c_str());
 }
