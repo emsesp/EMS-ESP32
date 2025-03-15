@@ -48,7 +48,8 @@ enum CommandRet : uint8_t {
     NOT_FOUND,   // 2
     ERROR,       // 3
     NOT_ALLOWED, // 4 - needs authentication
-    INVALID      // 5 - invalid (tag)
+    INVALID,     // 5 - invalid (tag)
+    NO_VALUE     // 6 - no value
 };
 
 using cmd_function_p      = std::function<bool(const char * data, const int8_t id)>;

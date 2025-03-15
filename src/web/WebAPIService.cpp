@@ -134,12 +134,13 @@ void WebAPIService::parse(AsyncWebServerRequest * request, JsonObject input) {
     }
 
     // send the json that came back from the command call
-    // sequence is FAIL, OK, NOT_FOUND, ERROR, NOT_ALLOWED, INVALID
+    // sequence matches CommandRet in command.h (FAIL, OK, NOT_FOUND, ERROR, NOT_ALLOWED, INVALID, NO_VALUE)
     // 400 (bad request)
     // 200 (OK)
     // 404 (not found)
     // 401 (unauthorized)
-    int ret_codes[6] = {400, 200, 404, 400, 401, 400};
+    // 400 (invalid)
+    int ret_codes[7] = {400, 200, 404, 400, 401, 400, 404};
     response->setCode(ret_codes[return_code]);
     response->setLength();
     response->setContentType("application/json; charset=utf-8");
