@@ -780,6 +780,7 @@ bool EMSESP::get_device_value_info(JsonObject root, const char * cmd, const int8
             }
         }
     }
+
     // if the EMS device was valid, but the cmd not found exit. it will be handled upstream.
     if (found_device) {
         return false;

@@ -380,7 +380,13 @@ std::string commands(std::string & expr, bool quotes = true) {
             JsonObject   output = doc_out.to<JsonObject>();
             JsonObject   input  = doc_in.to<JsonObject>();
             std::string  cmd_s  = "api/" + std::string(cmd);
-            emsesp::Command::process(cmd_s.c_str(), true, input, output);
+
+            auto return_code = emsesp::Command::process(cmd_s.c_str(), true, input, output);
+            // check for no value (entity is valid but has no value set)
+            if (return_code != emsesp::CommandRet::OK && return_code != emsesp::CommandRet::NO_VALUE) {
+                return expr = "";
+            }
+
             if (output["api_data"].is<std::string>()) {
                 std::string data = output["api_data"];
                 if (!isnum(data) && quotes) {

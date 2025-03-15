@@ -62,7 +62,10 @@ const CustomEntitiesDialog = ({
         ...selectedItem,
         device_id: selectedItem.device_id.toString(16).toUpperCase(),
         type_id: selectedItem.type_id.toString(16).toUpperCase(),
-        factor: selectedItem.value_type === DeviceValueType.BOOL ? selectedItem.factor.toString(16).toUpperCase() : selectedItem.factor
+        factor:
+          selectedItem.value_type === DeviceValueType.BOOL
+            ? selectedItem.factor.toString(16).toUpperCase()
+            : selectedItem.factor
       });
     }
   }, [open, selectedItem]);
@@ -83,7 +86,10 @@ const CustomEntitiesDialog = ({
       if (typeof editItem.type_id === 'string') {
         editItem.type_id = parseInt(editItem.type_id, 16);
       }
-      if (editItem.value_type === DeviceValueType.BOOL && typeof editItem.factor === 'string') {
+      if (
+        editItem.value_type === DeviceValueType.BOOL &&
+        typeof editItem.factor === 'string'
+      ) {
         editItem.factor = parseInt(editItem.factor, 16);
       }
       onSave(editItem);

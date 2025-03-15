@@ -184,7 +184,8 @@ uint8_t Command::process(const char * path, const bool is_admin, const JsonObjec
     }
 
     // call the command based on the type
-    uint8_t return_code = CommandRet::ERROR;
+    uint8_t return_code = CommandRet::OK;
+
     if (data.is<const char *>()) {
         return_code = Command::call(device_type, command_p, data.as<const char *>(), is_admin, id_n, output);
     } else if (data.is<int>()) {
@@ -312,11 +313,17 @@ bool Command::set_attribute(JsonObject output, const char * cmd, const char * at
         return true;
     }
 
-    // not found
     output.clear();
 
+    // attribute isn't found
+    // it could be a value command, but the value doesn't exist?
+    if (strcmp(attribute, "value") == 0) {
+        LOG_DEBUG("%s has no value set", cmd);
+        return false; // fail
+    }
+
     char error[100];
-    snprintf(error, sizeof(error), "no %s in %s", attribute, cmd);
+    snprintf(error, sizeof(error), "no attribute '%s' in %s", attribute, cmd);
     output["message"] = error;
     return false;
 }
@@ -356,7 +363,7 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
             return CommandRet::OK;
         }
     } else if (device_type == EMSdevice::DeviceType::SYSTEM && strchr(cmd, '/')) {
-        // check service commands, if not found continue with commandsfunctions
+        // check service commands, if not found continue with command functions
         if (EMSESP::system_.command_service(cmd, value)) {
             return CommandRet::OK;
         }
@@ -376,14 +383,23 @@ uint8_t Command::call(const uint8_t device_type, const char * command, const cha
         flag = CommandFlag::CMD_FLAG_AHS;
     }
 
-    // see if there is a command registered and it's valid
+    // see if there is a command registered for this EMS device
     auto cf = find_command(device_type, device_id, cmd, flag);
     if (!cf) {
         // if we don't already have a message set, set it to invalid command
         if (output["message"]) {
             LOG_WARNING("Command failed: %s", output["message"].as<const char *>());
+            return CommandRet::ERROR;
         } else {
-            std::string err   = "no " + std::string(cmd) + " in " + dname;
+            // not an error, no test if we're fetching a value, but the value is not set
+            auto attribute_s = Command::get_attribute(cmd);
+            if (attribute_s) {
+                if (strcmp(attribute_s, "value") == 0) {
+                    return CommandRet::NO_VALUE;
+                }
+            }
+
+            std::string err   = "no entity '" + std::string(cmd) + "' in " + dname;
             output["message"] = err;
             LOG_WARNING("Command failed: %s", err.c_str());
         }
@@ -496,7 +512,7 @@ Command::CmdFunction * Command::find_command(const uint8_t device_type, const ui
         }
     }
 
-    return nullptr; // command not found
+    return nullptr; // command not found, could be an attribute?
 }
 
 void Command::erase_device_commands(const uint8_t device_type) {

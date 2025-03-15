@@ -294,82 +294,82 @@ void test_36() {
 }
 
 void test_37() {
-    auto expected_response = "[{\"message\":\"no bad/value in boiler\"}]";
+    auto expected_response = "[{}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/boiler/bad/value"));
 }
 
 void test_38() {
-    auto expected_response = "[{\"message\":\"no valu in comfort\"}]";
+    auto expected_response = "[{\"message\":\"no attribute 'valu' in comfort\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/boiler/comfort/valu"));
 }
 
 void test_39() {
-    auto expected_response = "[{\"message\":\"no settings in system\"}]";
+    auto expected_response = "[{\"message\":\"no entity 'settings' in system\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/system/settings/locale2"));
 }
 
 void test_40() {
-    auto expected_response = "[{\"message\":\"no settings2 in system\"}]";
+    auto expected_response = "[{\"message\":\"no entity 'settings2' in system\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/system/settings2"));
 }
 
 void test_41() {
-    auto expected_response = "[{\"message\":\"no settings2 in system\"}]";
+    auto expected_response = "[{\"message\":\"no entity 'settings2' in system\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/system/settings2/locale2"));
 }
 
 void test_42() {
-    auto expected_response = "[{\"message\":\"no test_scheduler2 in scheduler\"}]";
+    auto expected_response = "[{\"message\":\"no entity 'test_scheduler2' in scheduler\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/scheduler/test_scheduler2"));
 }
 
 void test_43() {
-    auto expected_response = "[{\"message\":\"no val in test_scheduler\"}]";
+    auto expected_response = "[{\"message\":\"no attribute 'val' in test_scheduler\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/scheduler/test_scheduler/val"));
 }
 
 void test_44() {
-    auto expected_response = "[{\"message\":\"no test_scheduler2 in scheduler\"}]";
+    auto expected_response = "[{\"message\":\"no entity 'test_scheduler2' in scheduler\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/scheduler/test_scheduler2/val2"));
 }
 
 void test_45() {
-    auto expected_response = "[{\"message\":\"no seltemp2 in custom\"}]";
+    auto expected_response = "[{\"message\":\"no entity 'seltemp2' in custom\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/custom/seltemp2"));
 }
 
 void test_46() {
-    auto expected_response = "[{\"message\":\"no val in seltemp\"}]";
+    auto expected_response = "[{\"message\":\"no attribute 'val' in seltemp\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/custom/seltemp/val"));
 }
 
 void test_47() {
-    auto expected_response = "[{\"message\":\"no test_sensor20 in temperaturesensor\"}]";
+    auto expected_response = "[{\"message\":\"no entity 'test_sensor20' in temperaturesensor\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/temperaturesensor/test_sensor20"));
 }
 
 void test_48() {
-    auto expected_response = "[{\"message\":\"no 0b_0c0d_0e0f_xxxx in temperaturesensor\"}]";
+    auto expected_response = "[{\"message\":\"no entity '0b_0c0d_0e0f_xxxx' in temperaturesensor\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/temperaturesensor/0B_0C0D_0E0F_XXXX"));
 }
 
 void test_49() {
-    auto expected_response = "[{\"message\":\"no bad in test_tempsensor2\"}]";
+    auto expected_response = "[{\"message\":\"no attribute 'bad' in test_tempsensor2\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/temperaturesensor/test_tempsensor2/bad"));
 }
 
 void test_50() {
-    auto expected_response = "[{\"message\":\"no bad in test_analogsensor1\"}]";
+    auto expected_response = "[{\"message\":\"no attribute 'bad' in test_analogsensor1\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/analogsensor/test_analogsensor1/bad"));
 }
 
 void test_51() {
-    auto expected_response = "[{\"message\":\"no test_analog10 in analogsensor\"}]";
+    auto expected_response = "[{\"message\":\"no entity 'test_analog10' in analogsensor\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/analogsensor/test_analog10"));
 }
 
 void test_52() {
-    auto expected_response = "[{\"message\":\"no test_analog10 in analogsensor\"}]";
+    auto expected_response = "[{\"message\":\"no entity 'test_analog10' in analogsensor\"}]";
     TEST_ASSERT_EQUAL_STRING(expected_response, call_url("/api/analogsensor/test_analog10/bad2"));
 }
 
