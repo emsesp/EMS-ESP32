@@ -1413,3 +1413,4 @@ temprature
 bblanchon
 vacationmode
 airbypass
+Suprapur
