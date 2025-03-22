@@ -16,6 +16,6 @@ make clean
   -Dsonar.organization=proddy \
   -Dsonar.projectKey=proddy_EMS-ESP32 \
   -Dsonar.projectName=EMS-ESP32 \
-  -Dsonar.sources="./src, ./lib/framework" \
+  -Dsonar.sources="./src" \
   -Dsonar.cfamily.compile-commands=compile_commands.json \
   -Dsonar.host.url=https://sonarcloud.io
