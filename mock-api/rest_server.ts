@@ -115,9 +115,9 @@ let VERSION_IS_UPGRADEABLE: boolean;
 
 // Versions
 // default - on latest stable, no stable upgrades
-let THIS_VERSION = '3.7.1';
-let LATEST_STABLE_VERSION = '3.7.1';
-let LATEST_DEV_VERSION = '3.7.2-dev.9';
+let THIS_VERSION = '3.7.2';
+let LATEST_STABLE_VERSION = '3.7.2';
+let LATEST_DEV_VERSION = '3.7.3-dev.9';
 
 // scenarios for testing versioning
 let version_test = 0;
@@ -135,22 +135,22 @@ switch (version_test as number) {
   case 1:
     // on latest dev, no update
     THIS_VERSION = '3.7.2-dev.9';
-    LATEST_STABLE_VERSION = '3.7.1';
-    LATEST_DEV_VERSION = '3.7.2-dev.9';
+    LATEST_STABLE_VERSION = '3.7.2';
+    LATEST_DEV_VERSION = '3.7.3-dev.9';
     VERSION_IS_UPGRADEABLE = false;
     break;
   case 2:
     // upgrade stable to latest stable
     THIS_VERSION = '3.6.5';
-    LATEST_STABLE_VERSION = '3.7.1';
-    LATEST_DEV_VERSION = '3.7.2-dev.12';
+    LATEST_STABLE_VERSION = '3.7.2';
+    LATEST_DEV_VERSION = '3.7.3-dev.12';
     VERSION_IS_UPGRADEABLE = true;
     break;
   case 3:
     // upgrade dev to latest dev
-    THIS_VERSION = '3.7.1-dev-1';
-    LATEST_STABLE_VERSION = '3.7.1';
-    LATEST_DEV_VERSION = '3.7.2-dev.12';
+    THIS_VERSION = '3.7.2-dev-1';
+    LATEST_STABLE_VERSION = '3.7.2';
+    LATEST_DEV_VERSION = '3.7.3-dev.12';
     VERSION_IS_UPGRADEABLE = true;
     break;
 }
@@ -269,10 +269,10 @@ function updateMask(entity: any, de: any, dd: any) {
       const old_custom_name = dd.nodes[dd_objIndex].cn;
       console.log(
         'comparing names, old (' +
-          old_custom_name +
-          ') with new (' +
-          new_custom_name +
-          ')'
+        old_custom_name +
+        ') with new (' +
+        new_custom_name +
+        ')'
       );
       if (old_custom_name !== new_custom_name) {
         changed = true;
@@ -367,15 +367,15 @@ function check_upgrade(version: string) {
     const stable_version = version.split(',')[1];
     console.log(
       'latest dev version: ' +
-        dev_version +
-        ', latest stable version: ' +
-        stable_version
+      dev_version +
+      ', latest stable version: ' +
+      stable_version
     );
     console.log(
       'Version upgrade check from version ' +
-        THIS_VERSION +
-        ', upgradable: ' +
-        VERSION_IS_UPGRADEABLE
+      THIS_VERSION +
+      ', upgradable: ' +
+      VERSION_IS_UPGRADEABLE
     );
     data = {
       emsesp_version: THIS_VERSION,
